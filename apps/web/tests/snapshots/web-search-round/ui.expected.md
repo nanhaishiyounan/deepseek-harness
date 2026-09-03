@@ -3,11 +3,15 @@
     - button "Use web_search once with queries" [disabled]
   - img
   - text: Standard mode
+  - button "Knowledge base":
+    - img
+    - text: "?"
   - button "Session log":
     - text: Session log
     - img
   - tablist:
     - tab "Chat" [selected]
+    - tab "Knowledge base"
     - tab "Trajectory"
 - text: Use web_search once with queries ["DeepSeek Harness snapshot search","DeepSeek Harness multi-query search"]. Then reply exactly SEARCH_DONE and stop. {{clock}}
 - button "Copy":

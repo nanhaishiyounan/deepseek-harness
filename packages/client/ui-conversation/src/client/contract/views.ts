@@ -1,5 +1,11 @@
 /** Shared conversation view, selection, and store-state contracts. */
 
+/**
+ * The stable fallback view id: an absent or stale selection resolves to the
+ * chat view, and the blank-phase hero presents exactly this view's content.
+ */
+export const DEFAULT_VIEW_ID = 'chat'
+
 /** Tool call identity as carried on the wire (branded upstream in connection). */
 export type CallId = string
 

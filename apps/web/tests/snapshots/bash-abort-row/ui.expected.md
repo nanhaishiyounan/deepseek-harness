@@ -1,11 +1,15 @@
 - banner:
   - navigation "Session hierarchy":
     - 'button "Run two shell commands: wait" [disabled]'
+  - button "Knowledge base":
+    - img
+    - text: "?"
   - button "Session log":
     - text: Session log
     - img
   - tablist:
     - tab "Chat" [selected]
+    - tab "Knowledge base"
     - tab "Trajectory"
 - text: "Run two shell commands: wait for cancellation, then write skipped.txt. {{clock}}"
 - button "Copy":

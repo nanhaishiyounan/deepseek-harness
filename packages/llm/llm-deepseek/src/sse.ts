@@ -14,6 +14,10 @@
 import { EventSourceParserStream } from 'eventsource-parser/stream'
 import { LlmError } from '@deepseek-ai/dsh-llm'
 
+/* jscpd:ignore-start */
+// jscpd: intentional template symmetry — the vendor-adapter skeleton every
+// LLM adapter reproduces while evolving independently; extraction would
+// couple vendor timelines (Agent Note 2026-08-29-duplication-gate-intentional-symmetry).
 /** The terminal payload DeepSeek (and OpenAI) send after the last chunk. */
 export const DONE = '[DONE]'
 
@@ -36,5 +40,6 @@ export async function* parseSse(
     yield data
     if (data === DONE) return
   }
+  /* jscpd:ignore-end */
   throw new LlmError('SSE stream ended without [DONE]', 'STREAM_CLOSED')
 }

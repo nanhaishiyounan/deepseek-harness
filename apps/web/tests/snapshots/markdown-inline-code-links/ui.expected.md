@@ -1,11 +1,15 @@
 - banner:
   - navigation "Session hierarchy":
     - button "Inline code links" [disabled]
+  - button "Knowledge base":
+    - img
+    - text: "?"
   - button "Session log":
     - text: Session log
     - img
   - tablist:
     - tab "Chat" [selected]
+    - tab "Knowledge base"
     - tab "Trajectory"
 - text: Show the local preview URL. {{clock}}
 - button "Copy":

@@ -1,0 +1,7 @@
+{
+  "name": "dsh-example-kb-agent",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "description": "Metadata only; dependency resolution lives in examples/package.json (see examples/AGENTS.md)."
+}

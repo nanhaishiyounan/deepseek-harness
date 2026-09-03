@@ -145,7 +145,7 @@ export class JsonlSessionPersistence extends SessionPersistence implements Persi
   private coordinator: PersistenceCoordinator<JsonlTornMarker>
   private rootEncodingCheck: Promise<void> | undefined
 
-  constructor(ctx: Context, public config: Config) {
+  constructor(ctx: Context, /** Resolved plugin configuration. */ public config: Config) {
     super(ctx)
     // Resolve once so later process.cwd() changes cannot split one backend across roots.
     this.root = resolve(config.root)

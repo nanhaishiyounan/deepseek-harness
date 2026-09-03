@@ -42,6 +42,14 @@ const NO_MODEL_EXPERIENCE_SECTION: Readonly<Record<string, string>> = {
  * blocks. A package moves on or off this list with its context behavior.
  */
 const SENTENCE_MODEL_EXPERIENCE: Readonly<Record<string, SentenceContract>> = {
+  'packages/kb/kb': { kind: 'indirect', reason: 'The seam registers no prompt, schema, or tool of its own; the kb tool suite owns every model-facing projection.' },
+  'packages/kb/kb-sqlite': { kind: 'indirect', reason: 'The store registers no prompt, schema, or tool of its own; the kb tool suite owns every model-facing projection.' },
+  'packages/kb/kb-embed-minimax': { kind: 'indirect', reason: 'The embed provider registers no prompt, schema, or tool of its own; embeddings only change retrieval quality and the mode/embed_model fields the kb tools surface.' },
+  'packages/kb/kb-embed-dashscope': { kind: 'indirect', reason: 'The embed provider registers no prompt, schema, or tool of its own; embeddings only change retrieval quality and the mode/embed_model fields the kb tools surface.' },
+  'packages/kb/kb-embed-shared': { kind: 'indirect', reason: 'The shared transport library registers no plugin, prompt, schema, or tool of its own; the vendor embed providers own every model-facing effect.' },
+  'packages/kb/kb-graph': { kind: 'indirect', reason: 'The graph seam registers no prompt, schema, or tool of its own; the kb tool suite owns every model-facing projection of graph queries and writes.' },
+  'packages/kb/kb-graph-sqlite': { kind: 'indirect', reason: 'The graph store registers no prompt, schema, or tool of its own; the kb tool suite owns every model-facing projection of graph queries and writes.' },
+  'packages/client/ui-kb': { kind: 'none', reason: 'Browser-side UI plugin layer; registers nothing model-facing.' },
   'packages/attachment/attachment': { kind: 'indirect', reason: 'The storage seam delegates model request rendering to provider adapters.' },
   'packages/attachment/attachment-local': { kind: 'indirect', reason: 'The local backend delegates model request rendering to provider adapters.' },
   'packages/shell/shell': { kind: 'indirect', reason: 'The service interface delegates all model rendering to dsh-tool-bash.' },

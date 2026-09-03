@@ -98,6 +98,10 @@ export interface WireAssistantMessage {
   tool_calls?: WireToolCall[]
 }
 
+/* jscpd:ignore-start */
+// jscpd: intentional template symmetry — the vendor-adapter skeleton every
+// LLM adapter reproduces while evolving independently; extraction would
+// couple vendor timelines (Agent Note 2026-08-29-duplication-gate-intentional-symmetry).
 /** A completed tool call replayed on an assistant history message; `arguments` is the raw JSON string. */
 export interface WireToolCall {
   id: string
@@ -133,6 +137,7 @@ export interface WireDelta {
   role?: string
   /** Visible text. Null/empty on reasoning/tool-call chunks. */
   content?: string | null
+  /* jscpd:ignore-end */
   /**
    * Thinking-mode CoT. The FIRST chunk carries an empty string (must not
    * open a reasoning block); absent entirely in non-thinking mode.

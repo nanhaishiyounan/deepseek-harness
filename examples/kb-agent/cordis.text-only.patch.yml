@@ -1,0 +1,7 @@
+# Text-only degraded-mode overlay for the kb-agent demo: stack it AFTER
+# cordis.patch.yml so retrieval runs without any embed provider
+# (`mode: 'text'` in every kb_search result and `embed_available: false` in
+# kb_stats) while the MiniMax-M3 chat route keeps answering on the same key —
+# the real "embed pulled, chat alive" degradation, without touching the key.
+- id: kb-embed-minimax
+  disabled: true

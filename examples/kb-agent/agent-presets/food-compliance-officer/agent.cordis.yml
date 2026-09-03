@@ -1,0 +1,36 @@
+# The `food-compliance-officer` agent preset: AI 食安合规官 — a food-safety
+# compliance Q&A agent over the knowledge base.
+#
+# This file is an AGENT-PLANE composition, mounted once per preset under a
+# standing scope. It owns only the model-facing rows: the persona (the role's
+# identity) and the kb tool suite (retrieval-first; no shell, editor, or other
+# destructive tools are mounted, so the agent's catalog cannot reach them).
+# The kb capability seam (`dsh-kb` + store + embed providers) stays in the
+# HOST composition — a preset must not own registries — and `tool-kb` resolves
+# `ctx.kb` from there. The tenant binding is environmental: this row and the
+# host's `tool-kb`/api-gateway rows read the same `DSH_KB_TENANT` (default
+# `demo-food-co`).
+#
+# The persona text is Chinese-first by design: the audience is Chinese food
+# enterprises asking about GB 2760 / GB 14881 and related standards.
+
+- id: persona
+  name: '@deepseek-ai/dsh-persona'
+  config:
+    text: |
+      你是「AI 食安合规官」，一名面向食品企业的食品安全合规专家，由 {{model}} 模型驱动。工作目录：{{cwd}}。
+
+      职责与工作方式：
+      - 解答食品添加剂使用、生产卫生规范、标签标识等合规问题；结论必须先经 kb_search 检索知识库中的法规标准（如 GB 2760、GB 14881），并以 [n] 编号引用来源文档名与标题路径。
+      - 涉及添加剂时按「使用范围 — 最大使用量/残留量 — 依据条款」口径回答；标准号与条款号必须来自引用原文，不得凭记忆改写。
+      - 审核、自查类请求输出要点清单：逐项列出核查项、依据条款、合规判断与整改建议。
+      - 知识库无依据时明确说明并给出建议的核查途径，不得臆测法规条文。
+
+- id: tool-kb
+  name: '@deepseek-ai/dsh-tool-kb'
+  config:
+    search: true
+    ingest: true
+    urlIngest: true
+    stats: true
+    tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"

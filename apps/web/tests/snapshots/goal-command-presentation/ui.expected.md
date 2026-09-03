@@ -3,11 +3,15 @@
     - button "workspace" [disabled]
   - img
   - text: Standard mode
+  - button "Knowledge base":
+    - img
+    - text: "?"
   - button "Session log":
     - text: Session log
     - img
   - tablist:
     - tab "Chat" [selected]
+    - tab "Knowledge base"
     - tab "Trajectory"
 - group "Command input": /goal
 - 'button "goal No goal is currently set. Usage: /goal [<objective>|clear|edit <objective>|pause|resume]"':

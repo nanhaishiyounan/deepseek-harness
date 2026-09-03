@@ -3,11 +3,15 @@
     - button "/user-invoke-demo and confirm the fixtur" [disabled]
   - img
   - text: Standard mode
+  - button "Knowledge base":
+    - img
+    - text: "?"
   - button "Session log":
     - text: Session log
     - img
   - tablist:
     - tab "Chat" [selected]
+    - tab "Knowledge base"
     - tab "Trajectory"
 - text: /user-invoke-demo and confirm the fixture wiring {{clock}}
 - button "Copy":

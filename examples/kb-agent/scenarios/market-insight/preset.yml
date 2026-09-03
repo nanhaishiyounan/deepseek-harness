@@ -1,0 +1,4 @@
+probe: 电商渠道 GMV
+name: AI 营销洞察主管
+description: 市场洞察类场景预设：检索市场洞察类语料（doc_kind=report），按"品类规模—渠道结构—机会点"三段输出；引用采集日期；不外推知识…
+order: 20

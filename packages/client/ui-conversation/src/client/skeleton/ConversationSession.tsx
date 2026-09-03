@@ -6,7 +6,7 @@ import type { SessionId, SessionListState, SessionSummary } from '@deepseek-ai/d
 import type {
   ConversationSessionHeaderSlotProps, ConversationSessionSlotProps,
 } from '../contract/slots.ts'
-import type { ViewTab } from '../contract/views.ts'
+import { DEFAULT_VIEW_ID, type ViewTab } from '../contract/views.ts'
 import css from './ConversationRoot.module.css'
 
 /** Full props composed from the strict session body contract. */
@@ -20,8 +20,6 @@ interface Breadcrumb {
   readonly displayTitle: string
   readonly subagent: boolean
 }
-
-const DEFAULT_VIEW_ID = 'chat'
 
 /** Resolve by id and keep stale persisted selections on the stable Chat fallback. */
 function resolveActiveView(tabs: readonly ViewTab[], selectedId: string | null): ViewTab | undefined {
@@ -61,7 +59,8 @@ function equalBreadcrumbs(left: readonly Breadcrumb[], right: readonly Breadcrum
 /**
  * Renders Session header chrome above the resident conversation scrollport.
  * @param props - Strict Session store, view ledger, navigation, render, and locale shares.
- * @returns the hidden blank-session header or visible title and tabs.
+ * @returns the hidden blank-session header (no view ring deployed), or the
+ * visible title and tabs — blank sessions included once a ring exists.
  */
 export function ConversationSessionHeader({
   sessionId, useSession, useSessions, useStore, actions,
@@ -74,7 +73,12 @@ export function ConversationSessionHeader({
   const ancestry = useSessions(s => deriveAncestry(s, sessionId), equalBreadcrumbs)
   const composerPhase = useSession(s => s.composerPhase)
   const blank = useSession(s => s.blank)
-  const hideChrome = blank && composerPhase === 'blank'
+  // The blank-phase hero owns the column, so the header stays hidden — unless
+  // view tabs beyond the chat fallback exist: a deployed workbench ring must
+  // stay reachable before the first message, and its title row follows the
+  // tabs so header action entries (e.g. a workbench jump button) stay
+  // mounted too. Ring-less blank sessions keep the exact prior posture.
+  const hideChrome = blank && composerPhase === 'blank' && tabs.length <= 1
 
   return (
     <header
@@ -135,7 +139,7 @@ export function ConversationSessionHeader({
                 {ancestry.length === 0 && <span className={css.crumbCurrent}>{sessionId}</span>}
               </nav>
               <div className={css.headerActions}>
-                {renderSlot('conversation.session.header.actions', {})}
+                {renderSlot('conversation.session.header.actions', { setView: actions.setView })}
               </div>
             </div>
             <div className={css.headerUtilities}>
@@ -167,12 +171,13 @@ export function ConversationSessionHeader({
 /**
  * Renders the active Session view inside the resident scrollport and keeps
  * the input draft mirrored while blank Hero chrome is visible.
- * @param props - Strict Session input/store, view ledger, and render shares.
- * @returns the active view area, or null while the Session remains blank.
+ * @param props - Strict Session input/store, view ledger, render, and view-report shares.
+ * @returns the active view area, or null while the blank phase's chat view
+ * leaves the column to the hero.
  */
 export function ConversationSession({
   sessionId, useSession, useInput, inputActions, useStore, actions,
-  renderSlot, views, bindDraftMirror, releaseSessionImages,
+  renderSlot, views, bindDraftMirror, releaseSessionImages, reportActiveView,
 }: ConversationSessionProps) {
   useSyncExternalStore(views.subscribe, views.version)
   const tabs = views.list()
@@ -197,7 +202,20 @@ export function ConversationSession({
     releaseSessionImages(sessionId)
   }, [releaseSessionImages, sessionId])
 
-  if (blank && composerPhase === 'blank') return null
+  // Publish the resolved view to the resident root's hero decision; the
+  // cleanup withdraws it on unmount so a remounting body (session switch)
+  // cannot inherit the previous session's view.
+  useEffect(() => {
+    reportActiveView(active?.id)
+    return () => { reportActiveView(undefined) }
+  }, [active?.id, reportActiveView])
+
+  // The blank phase's chat view is the hero the root renders around the
+  // composer; any other view (a deployed workbench tab) owns the body
+  // directly, so the tab stays reachable before the first message.
+  const heroOwnsBody = blank && composerPhase === 'blank'
+    && (active?.id ?? DEFAULT_VIEW_ID) === DEFAULT_VIEW_ID
+  if (heroOwnsBody) return null
   return (
     <div className={css.viewArea}>
       {active !== undefined && renderSlot('conversation.view', {

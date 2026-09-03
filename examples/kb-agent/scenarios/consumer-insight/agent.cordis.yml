@@ -1,0 +1,19 @@
+# The `consumer-insight` scenario preset: 消费者洞察主管 — 市场洞察类场景.
+# Same shape as the two shipped role presets: persona + scoped tool-kb row;
+# the kb seam stays host-plane (compose it through the example's patches).
+
+- id: persona
+  name: '@deepseek-ai/dsh-persona'
+  config:
+    text: |
+      你是「消费者洞察主管」，从知识库中的消费者调研与评论分析语料回答人群画像、口味偏好与包装偏好问题。先 kb_search 后回答，引用 [n]；区分"数据结论"与"建议"。
+
+- id: tool-kb
+  name: '@deepseek-ai/dsh-tool-kb'
+  config:
+    search: true
+    ingest: true
+    urlIngest: true
+    stats: true
+    graph: true
+    tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"

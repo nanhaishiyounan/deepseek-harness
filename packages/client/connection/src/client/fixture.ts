@@ -3037,6 +3037,37 @@ function createFixtureWorld(options: FixtureOptions): FixtureWorld {
         return ok(request, {})
       },
     },
+    kb: {
+      // The fixture answers every kb method with the structured
+      // not-composed refusal: the browser fixture composes no knowledge
+      // base, and the panel's inline failure path is exactly this shape.
+      stats: request => err(request, {
+        code: 'kb-not-composed',
+        message: 'this deployment composes no knowledge base; add the dsh-kb seam and a store provider',
+        details: {},
+      }),
+      search: request => err(request, {
+        code: 'kb-not-composed',
+        message: 'this deployment composes no knowledge base; add the dsh-kb seam and a store provider',
+        details: {},
+      }),
+      ingest: request => err(request, {
+        code: 'kb-not-composed',
+        message: 'this deployment composes no knowledge base; add the dsh-kb seam and a store provider',
+        details: {},
+      }),
+      ingestUrl: request => err(request, {
+        code: 'kb-not-composed',
+        message: 'this deployment composes no knowledge base; add the dsh-kb seam and a store provider',
+        details: {},
+      }),
+      upload: request => err(request, {
+        code: 'kb-not-composed',
+        message: 'this deployment composes no knowledge base; add the dsh-kb seam and a store provider',
+        details: {},
+      }),
+    },
+
     llm: {
       providers: request => ok(request, {
         providers: [
@@ -3227,6 +3258,11 @@ export class FixtureApiClient extends AbstractApiClient {
       case 'llm.providers': return this.api.llm.providers(request)
       case 'llm.models': return this.api.llm.models(request)
       case 'llm.discoverModels': return this.api.llm.discoverModels(request, signal)
+      case 'kb.stats': return this.api.kb.stats(request)
+      case 'kb.search': return this.api.kb.search(request, signal)
+      case 'kb.ingest': return this.api.kb.ingest(request, signal)
+      case 'kb.ingestUrl': return this.api.kb.ingestUrl(request, signal)
+      case 'kb.upload': return this.api.kb.upload(request, signal)
     }
   }
 

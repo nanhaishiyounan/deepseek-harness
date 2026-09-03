@@ -70,7 +70,7 @@ function workspace(id = 'w1'): WorkspaceView {
 
 const workspaceState = (items: readonly WorkspaceView[]): WorkspaceListState => ({
   items, archivedSessionIds: [], state: 'idle', phase: 'ready', error: null,
-  baselinesReady: true, recentWorkspaceId: undefined,
+  baselinesReady: true, recentWorkspaceId: undefined, lastActionError: null,
 })
 
 function conversationSnapshot(overrides: Partial<ConversationSnapshot> = {}): ConversationSnapshot {
@@ -135,6 +135,9 @@ function mount(
   const useSession = bindSnapshotSelector(session)
   const chat = createChatStore().create()
   chat.actions.setDraft('ordinary draft')
+  // Root-level mirror of the body's resolved view (the resident hero gate);
+  // the body's reportActiveView writes it, mirroring the apply-layer wiring.
+  const activeView = createSnapshotStore<string | undefined>(undefined)
   const { wiring, sink } = fakeWiring()
   const useInput = bindSnapshotSelector(wiring.state)
   const inputActions = wiring.actions
@@ -142,6 +145,8 @@ function mount(
   const open = vi.fn()
   const slotCalls: string[] = []
   const lineageOwners: ConversationHeaderLineageOwnerProps[] = []
+  /** Owner shares handed to the header action entries, per render. */
+  const actionOwners: { setView?: (view: string) => void }[] = []
   const viewTabs = options.viewTabs ?? [
     { id: 'chat', label: 'Chat' },
     { id: 'trajectory', label: 'Trajectory' },
@@ -158,6 +163,9 @@ function mount(
     slotCalls.push(key)
     if (key === 'conversation.input.model' || key === 'conversation.input.plan') {
       seatOwners.push({ key, owner })
+    }
+    if (key === 'conversation.session.header.actions') {
+      actionOwners.push(owner)
     }
     if (key === 'conversation.hero.workspace') { pickerOwner = owner; return null }
     if (key === 'conversation.session.header.lineage') {
@@ -201,6 +209,7 @@ function mount(
           views={views}
           releaseSessionImages={vi.fn()}
           bindDraftMirror={write => wiring.bindMirror(write)}
+          reportActiveView={(view) => { activeView.set(view) }}
         />
       )
     }
@@ -240,7 +249,9 @@ function mount(
         />
       )
     }
-    return <div data-testid={`view-${opts?.only ?? key}`} />
+    // Unhandled seats render their fallback when one is offered, matching
+    // the registry's empty-seat behavior (the hero headline fallback).
+    return opts?.fallback ?? <div data-testid={`view-${opts?.only ?? key}`} />
   }) as ConversationRootProps['renderSlot']
   const renderSlotChain = ((_key, _owner, opts) => (
     options.overlayTakeover === true
@@ -262,6 +273,7 @@ function mount(
     useWorkspaces: bindSnapshotSelector(workspaces),
     useProjection: (() => undefined),
     useComposerBlock: select => select(options.composerBlock),
+    useActiveView: bindSnapshotSelector(activeView),
     useInput,
     inputActions,
     renderSlot,
@@ -272,19 +284,27 @@ function mount(
   const view = render(<ConversationRoot {...props} />)
   return {
     view, chat, sink, retargetWorkspace, session, slotCalls, lineageOwners, seatOwners, open,
+    activeView,
     pickerOwner: () => pickerOwner,
     rerender: () => { view.rerender(<ConversationRoot {...props} />) },
+    actionOwners,
   }
 }
 
 describe('Hero chrome', () => {
   it('renders the English preview badge through the hero locale seat', () => {
-    const renderSlot = vi.fn<HeroShellProps['renderSlot']>(() => null)
+    // An unoccupied headline seat renders the locale fallback, exactly like
+    // the registry does for an empty single slot.
+    const renderSlot = vi.fn<HeroShellProps['renderSlot']>(
+      (_key, _owner, opts) => opts?.fallback ?? null,
+    )
     const view = render(<HeroShell t={makeTranslate(en, commonEn)} renderSlot={renderSlot} />)
     expect(view.getByText('Into the Unknown')).toBeTruthy()
     expect(view.getByText('Preview')).toBeTruthy()
-    expect(renderSlot).toHaveBeenCalledOnce()
-    expect(renderSlot.mock.calls[0]?.[0]).toBe('conversation.hero.brand.mark')
+    expect(renderSlot.mock.calls.map(call => call[0])).toEqual([
+      'conversation.hero.brand.mark',
+      'conversation.hero.headline',
+    ])
     const brandMarkOwner = renderSlot.mock.calls[0]?.[1]
     if (brandMarkOwner === undefined || !('size' in brandMarkOwner) || !('className' in brandMarkOwner)) {
       throw new Error('hero brand-mark owner must provide size and className')
@@ -292,6 +312,21 @@ describe('Hero chrome', () => {
     expect(brandMarkOwner.size).toBe(34)
     expect(brandMarkOwner.className).toBeTypeOf('string')
     expect(renderSlot.mock.calls[0]?.[2]?.fallback).toBeTruthy()
+    // The headline fallback carries the locale headline, so an unoccupied
+    // seat keeps the shipped hero pixel-identical.
+    expect(renderSlot.mock.calls[1]?.[2]?.fallback).toBeTruthy()
+  })
+
+  it('replaces the headline text when the headline seat has an occupant', () => {
+    const renderSlot = vi.fn<HeroShellProps['renderSlot']>((key, _owner, opts) =>
+      key === 'conversation.hero.headline'
+        ? <span className="headlineText">食品产业知识库问答</span>
+        : opts?.fallback ?? null)
+    const view = render(<HeroShell t={makeTranslate(en, commonEn)} renderSlot={renderSlot} />)
+    expect(view.getByText('食品产业知识库问答')).toBeTruthy()
+    expect(view.queryByText('Into the Unknown')).toBeNull()
+    // The preview badge stays outside the replaced seat.
+    expect(view.getByText('Preview')).toBeTruthy()
   })
 })
 
@@ -386,6 +421,14 @@ describe('ConversationRoot resident composer', () => {
     expect(b.slotCalls).toContain('conversation.session.header.utilities')
   })
 
+  it('hands header action entries the store view switch as a best-effort owner prop', () => {
+    const b = mount(conversationSnapshot())
+    const owner = b.actionOwners.at(-1)
+    expect(owner?.setView).toEqual(expect.any(Function))
+    act(() => { owner?.setView?.('trajectory') })
+    expect(b.chat.store.getSnapshot().view).toBe('trajectory')
+  })
+
   it('sticky composer seat wraps the whole overlay chain, not only the fallback stack', () => {
     const b = mount(conversationSnapshot(), undefined, undefined, { overlayTakeover: true })
     const seat = b.view.container.querySelector('[data-composer-seat]')
@@ -402,6 +445,10 @@ describe('ConversationRoot resident composer', () => {
         { ...workspace('one'), sessionIds: [SID] },
         { ...workspace('second'), title: 'Selected Folder' },
       ],
+      undefined,
+      // Ring-less deployment: the chat tab alone, so the blank hero keeps the
+      // whole column (the header stays hidden — the additive shell contract).
+      { viewTabs: [{ id: 'chat', label: 'Chat' }] },
     )
     // Hero chrome present, view ring absent; scroll host already wraps the
     // resident composer so the blank → active flip does not remount it.
@@ -427,6 +474,38 @@ describe('ConversationRoot resident composer', () => {
     act(() => { owner.onPick(wid('second')) })
     expect(b.retargetWorkspace).toHaveBeenCalledWith(wid('second'))
     expect(b.view.getByText('Selected Folder')).toBeTruthy()
+  })
+
+  it('blank session with a view ring: header renders, a non-chat view takes the column, chat restores the hero', () => {
+    const b = mount(
+      conversationSnapshot({ composerPhase: 'blank', blank: true }),
+      undefined,
+      undefined,
+      { viewTabs: [{ id: 'chat', label: 'Chat' }, { id: 'kb', label: 'Knowledge' }] },
+    )
+    // The ring keeps the header mounted on the blank hero (its action row
+    // included — a workbench jump button stays clickable), while the chat
+    // view itself remains the hero's own content.
+    expect(b.view.container.querySelector('header')?.getAttribute('aria-hidden')).toBeNull()
+    expect(b.view.getByRole('tab', { name: 'Knowledge' })).toBeTruthy()
+    expect(b.view.container.querySelector('[data-phase]')?.getAttribute('data-phase')).toBe('hero')
+    expect(b.view.getByText('探索未至之境')).toBeTruthy()
+    expect(b.view.queryByTestId('view-kb')).toBeNull()
+
+    // Switching to the other view hands the column over: the body renders the
+    // view and the hero chrome plus centered posture step aside.
+    act(() => { b.chat.actions.setView('kb') })
+    b.rerender()
+    expect(b.view.getByTestId('view-kb')).toBeTruthy()
+    expect(b.view.container.querySelector('[data-phase]')?.getAttribute('data-phase')).toBe('active')
+    expect(b.view.queryByText('探索未至之境')).toBeNull()
+    expect(b.view.getByRole('tab', { name: 'Knowledge' }).getAttribute('aria-selected')).toBe('true')
+
+    // Back on chat the blank hero returns.
+    act(() => { b.chat.actions.setView('chat') })
+    b.rerender()
+    expect(b.view.container.querySelector('[data-phase]')?.getAttribute('data-phase')).toBe('hero')
+    expect(b.view.getByText('探索未至之境')).toBeTruthy()
   })
 
   it('settling phase: a summary that does not prove the session blank hides the composer while it opens', () => {

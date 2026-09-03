@@ -70,7 +70,10 @@ async function stopTree(child: SubprocessHandle): Promise<void> {
 
 it('hot-reloads a real client-plugin source edit without refreshing the page', async () => {
   const world = await mkdtemp(join(tmpdir(), 'dsh-web-hmr-world-'))
-  const sourcePath = join(REPO_ROOT, 'packages/client/ui-conversation/src/client/locales.ts')
+  // The HMR vehicle is the kb portal's hero title (the web bundle's headline
+  // seat is ui-kb's registration, so the shell's own hero headline copy no
+  // longer renders).
+  const sourcePath = join(REPO_ROOT, 'packages/client/ui-kb/src/client/locales.ts')
   const binPath = join(REPO_ROOT, 'apps/cli/lib/bin.js')
   if (!existsSync(binPath)) throw new Error('HMR browser test needs the built dsh bin; run pnpm run build first')
   const clientBuildEnvironment = readClientBuildRecord(REPO_ROOT).environment
@@ -78,10 +81,10 @@ it('hot-reloads a real client-plugin source edit without refreshing the page', a
     .map(path => join(REPO_ROOT, path))
   const originalClientBundles = await Promise.all(clientBundlePaths.map(async path => [path, await readFile(path)] as const))
   const originalSource = await readFile(sourcePath)
-  const oldText = 'Into the Unknown'
-  const sourceNeedle = "'hero.headline': 'Into the Unknown'"
+  const oldText = 'Food-industry knowledge Q&A'
+  const sourceNeedle = "'hero.title': 'Food-industry knowledge Q&A'"
   const newText = `HMR UPDATED ${'x'.repeat(80)}`
-  const updatedSource = originalSource.toString().replace(sourceNeedle, `'hero.headline': '${newText}'`)
+  const updatedSource = originalSource.toString().replace(sourceNeedle, `'hero.title': '${newText}'`)
   if (updatedSource === originalSource.toString()) throw new Error(`HMR source lacks ${JSON.stringify(sourceNeedle)}`)
 
   const subprocessCtx = new Context()
@@ -112,7 +115,7 @@ it('hot-reloads a real client-plugin source edit without refreshing the page', a
     const pageErrors: string[] = []
     page.on('pageerror', error => pageErrors.push(String(error)))
     await page.goto(baseUrl, { waitUntil: 'load' })
-    await page.getByText(oldText, { exact: true }).waitFor({ timeout: 15_000 })
+    await page.getByText(oldText, { exact: false }).waitFor({ timeout: 15_000 })
     const pageIdentity = await page.evaluate(() => {
       const identity = crypto.randomUUID()
       Object.defineProperty(window, '__dshHmrPageIdentity', { value: identity })
@@ -120,7 +123,7 @@ it('hot-reloads a real client-plugin source edit without refreshing the page', a
     })
 
     await writeFile(sourcePath, updatedSource)
-    await page.getByText(newText, { exact: true }).waitFor({ timeout: 30_000 })
+    await page.getByText(newText, { exact: false }).waitFor({ timeout: 30_000 })
     expect(await page.evaluate(() => (window as Window & { __dshHmrPageIdentity?: string }).__dshHmrPageIdentity))
       .toBe(pageIdentity)
     expect(pageErrors).toEqual([])

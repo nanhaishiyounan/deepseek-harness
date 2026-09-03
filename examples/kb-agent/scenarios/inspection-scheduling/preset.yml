@@ -1,0 +1,4 @@
+probe: 换产 CIP 计划达成率
+name: AI 巡检排产员
+description: 工艺类场景预设：检索排产巡检语料（doc_kind=report），按"排产规则—换产清洗—达成率考核"输出；引用工序编号；不外推知识库没有的节拍…
+order: 42

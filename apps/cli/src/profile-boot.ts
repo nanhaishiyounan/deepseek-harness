@@ -34,6 +34,30 @@ import { resolveDshHome } from '@deepseek-ai/dsh-home-paths'
 /** Shipped agent-preset root: beside this app's own config, in both source and built layouts. */
 const SHIPPED_PRESET_ROOT = fileURLToPath(new URL('../config/agent-presets/', import.meta.url))
 
+/** One scanned preset directory, as a composed `agent-presets` config carries it. */
+interface ConfiguredPresetRoot {
+  path: string
+  trust: string
+}
+
+/**
+ * The roster roots this launcher assembles from a composed `agent-presets`
+ * config: roots the config names explicitly ride FIRST (the roster's
+ * earlier-root-wins precedence), then the SHIPPED root — the one roster fact
+ * only this app can resolve, since it sits beside this app's own config in
+ * both the source and built layouts. A deployment's `--patch` can therefore
+ * carry its own preset directories at the same trust level as every other
+ * patch choice (a patch already inserts arbitrary plugins); the writable
+ * `$DSH_HOME/.agent-presets` root stays the roster plugin's own default, so a
+ * launcher that never reaches this composition still finds a person's presets.
+ * @param config - the composed `agent-presets` row config.
+ * @returns the root list for the assembled overlay.
+ */
+export function composePresetRoots(config: Record<string, unknown>): ConfiguredPresetRoot[] {
+  const configured = (Array.isArray(config.roots) ? config.roots : []) as ConfiguredPresetRoot[]
+  return [...configured, { path: SHIPPED_PRESET_ROOT, trust: 'system' }]
+}
+
 import { DSH_LAUNCH_ENVIRONMENT_KEY, type LaunchEnvironmentSnapshot } from '@deepseek-ai/dsh-launch-environment'
 import { provideCmdline } from '@deepseek-ai/dsh-cmdline'
 import { createProcessShutdown, type ProcessShutdown } from './process-shutdown.ts'
@@ -152,17 +176,11 @@ function composeProfile(
     if (typeof row.id === 'string') rows.set(row.id, row)
   }
   const composedOverlays = [...overlays]
-  // The SHIPPED root is the part of the roster only this app can resolve: it
-  // sits beside this app's own config, in both the source and built layouts.
-  // The writable root the roster appends is `dsh-agent-presets`' own, so a
-  // launcher that never reaches this patch still finds a person's presets.
   if (rows.has('agent-presets')) {
+    const composedConfig = (rows.get('agent-presets')?.config ?? {}) as Record<string, unknown>
     composedOverlays.push({
       id: 'agent-presets',
-      config: {
-        ...(rows.get('agent-presets')?.config ?? {}) as Record<string, unknown>,
-        roots: [{ path: SHIPPED_PRESET_ROOT, trust: 'system' }],
-      },
+      config: { ...composedConfig, roots: composePresetRoots(composedConfig) },
     })
   }
   const telemetryPatch = resolveTelemetryPatch(process.env.DSH_TELEMETRY_DISABLED, rows.has(TELEMETRY_ROW_ID))

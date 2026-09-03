@@ -9,6 +9,18 @@
   ],
   "references": [
     {
+      "path": "../../fs/fs"
+    },
+    {
+      "path": "../../kb/kb"
+    },
+    {
+      "path": "../../kb/tool-kb"
+    },
+    {
+      "path": "../../web/web"
+    },
+    {
       "path": "../../goal/goal"
     },
     {

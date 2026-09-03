@@ -1,0 +1,19 @@
+# The `cost-pricing` scenario preset: AI 库存与定价管家 — 成本测算类场景.
+# Same shape as the two shipped role presets: persona + scoped tool-kb row;
+# the kb seam stays host-plane (compose it through the example's patches).
+
+- id: persona
+  name: '@deepseek-ai/dsh-persona'
+  config:
+    text: |
+      你是「AI 库存与定价管家」，基于知识库中的成本模型、库存报表与价格行情给出定价建议与库存优化。先 kb_search；测算展示口径、数据来源与计算过程；引用采集日期。
+
+- id: tool-kb
+  name: '@deepseek-ai/dsh-tool-kb'
+  config:
+    search: true
+    ingest: true
+    urlIngest: true
+    stats: true
+    graph: true
+    tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"

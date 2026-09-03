@@ -151,7 +151,7 @@ function emptySessions() {
 function emptyWorkspaces() {
   const store = createSnapshotStore<WorkspaceListState>({
     items: [], archivedSessionIds: [], state: 'idle', phase: 'ready', error: null, baselinesReady: true,
-    recentWorkspaceId: undefined,
+    recentWorkspaceId: undefined, lastActionError: null,
   })
   return bindSnapshotSelector(store)
 }
@@ -293,6 +293,7 @@ function mount(slots: SlotRegistry, nodes: ConversationSnapshot['nodes'] = NODES
         useInput={useInput}
         inputActions={inputActions}
         bindDraftMirror={() => () => {}}
+        reportActiveView={() => {}}
       />
     </>,
   )

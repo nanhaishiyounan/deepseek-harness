@@ -11,6 +11,14 @@ import type { SessionsPort, SessionsPortList } from '../contract/sessions-port.t
 import type { IWorkspaces } from '../contract/workspaces.ts'
 import { WorkspaceManager, type WorkspaceListPhase } from './manager.ts'
 
+/** One transient New Session action failure, keyed for repeat presentation. */
+export interface WorkspaceActionError {
+  /** Monotonic sequence: a repeated failure re-keys the toast it drives. */
+  seq: number
+  /** Display-ready reason extracted from the rejection. */
+  text: string
+}
+
 /** Workspace list plus the two-baseline readiness and default-target projection. */
 export interface WorkspaceListState {
   items: readonly WorkspaceView[]
@@ -29,6 +37,13 @@ export interface WorkspaceListState {
   baselinesReady: boolean
   /** Most recently active Workspace, derived without changing `items` order. */
   recentWorkspaceId: WorkspaceId | undefined
+  /**
+   * Latest New Session action failure; null until the first failure. A
+   * projection cell, not list-load state: `startSession` writes it so shell
+   * surfaces can present the failure instead of swallowing it into console
+   * diagnostics.
+   */
+  lastActionError: WorkspaceActionError | null
 }
 
 /** Structured create failure for UI flows that distinguish Host business errors. */
@@ -57,6 +72,9 @@ export class WorkspaceRuntime implements IWorkspaces {
   private readonly connecting = new Map<WorkspaceId, Promise<SessionId>>()
   /** Guards the runtime-owned one-shot initial-selection subscription. */
   private initialSelectionStarted = false
+  /** Last action-error cell and its sequence; survives list projections. */
+  private lastActionError: WorkspaceActionError | null = null
+  private actionErrorSeq = 0
 
   /**
    * @param ctx - client root context.
@@ -67,7 +85,7 @@ export class WorkspaceRuntime implements IWorkspaces {
     this.manager = new WorkspaceManager(api)
     this.list = createSnapshotStore<WorkspaceListState>({
       items: [], archivedSessionIds: [], state: 'idle', phase: 'pending', error: null,
-      baselinesReady: false, recentWorkspaceId: undefined,
+      baselinesReady: false, recentWorkspaceId: undefined, lastActionError: null,
     })
     this.manager.subscribe(() => { this.project() })
     this.sessions.list.subscribe(() => { this.project() })
@@ -170,8 +188,9 @@ export class WorkspaceRuntime implements IWorkspaces {
    * then the current Session's Workspace, then the recent-Workspace
    * projection — connect its blank session and navigate there; with no
    * Workspace at all, clear the selection into the New Session view state.
-   * Connect failures are non-fatal (console diagnostics; the current view
-   * stays usable).
+   * Connect failures are non-fatal: the current view stays usable, the
+   * diagnostic reaches the console, and the failure surfaces on the list
+   * state's `lastActionError` for shell presentation.
    * @param workspaceId - explicit target Workspace for scoped actions.
    */
   startSession(workspaceId?: WorkspaceId): void {
@@ -187,7 +206,15 @@ export class WorkspaceRuntime implements IWorkspaces {
     }
     void this.connectWorkspace(target).then(
       (sessionId) => { this.sessions.open(sessionId) },
-      (reason: unknown) => { console.warn('new session failed:', reason) },
+      (reason: unknown) => {
+        console.warn('new session failed:', reason)
+        this.actionErrorSeq += 1
+        this.lastActionError = {
+          seq: this.actionErrorSeq,
+          text: reason instanceof Error ? reason.message : String(reason),
+        }
+        this.project()
+      },
     )
   }
 
@@ -350,6 +377,7 @@ export class WorkspaceRuntime implements IWorkspaces {
       error: workspace.error,
       baselinesReady,
       recentWorkspaceId: baselinesReady ? recentWorkspace(workspace.items, sessions.byId) : undefined,
+      lastActionError: this.lastActionError,
     })
   }
 }

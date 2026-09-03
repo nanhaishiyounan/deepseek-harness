@@ -8,6 +8,10 @@
 
 通过通用 MCP 客户端连接受支持第三方记忆服务器的可选 overlay。详见[记忆示例参考](mcp-memory/README.zh.md)。
 
+## kb-agent
+
+基于 kb 能力缝的食品产业知识库 agent：把文档连可选 MiniMax 向量入库到 SQLite，带编号引用检索，经 MiniMax-M3 作答 —— 包括对话仍可用的纯文本降级模式。在仓库根运行 `DSH_HOME=examples/kb-agent/.dsh pnpm dsh --profile headless --patch examples/kb-agent/cordis.patch.yml "<任务>"`；见 [kb-agent 示例参考](kb-agent/README.zh.md)。上手首选 [kb-agent/QUICKSTART.zh.md](kb-agent/QUICKSTART.zh.md)（中文实操指南）。
+
 ## headless-agent
 
 非交互式 agent（智能体）：接受一项任务并运行，然后以选定的机器可读或人类可读格式输出结果。详见[无头示例参考](headless-agent/README.zh.md)。

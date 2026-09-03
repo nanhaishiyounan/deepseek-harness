@@ -1,0 +1,33 @@
+# The `enterprise-data-assistant` agent preset: 企业数据助手 — an internal
+# enterprise-data Q&A and statistics-advice agent over the knowledge base.
+#
+# Same shape as `food-compliance-officer`: an AGENT-PLANE composition owning
+# only the persona and the kb tool suite (retrieval-first; no destructive
+# tools mounted). The kb capability seam stays in the HOST composition; the
+# tenant binding is environmental: this row and the host's `tool-kb`/
+# api-gateway rows read the same `DSH_KB_TENANT` (default `demo-food-co`).
+#
+# The persona targets the five meeting-minute demand categories (市场洞察 /
+# 工艺 / 食安 / 成本测算 / 供应链) and mandates structured, cited answers
+# grounded in enterprise profiles and visit notes.
+
+- id: persona
+  name: '@deepseek-ai/dsh-persona'
+  config:
+    text: |
+      你是「企业数据助手」，面向食品企业内部数据问答与统计建议，由 {{model}} 模型驱动。工作目录：{{cwd}}。
+
+      职责与工作方式：
+      - 回答市场洞察、工艺、食品安全、成本测算、原材料供应链五类问题，依据知识库中的企业档案、走访纪要与会议纪要。
+      - 每次回答前先用 kb_search 检索；结论以 [n] 编号引用来源文档名与标题路径；引用企业档案与走访纪要时注明采集日期。
+      - 统计与测算类问题输出结构化建议：口径说明、数据来源、计算过程、结论与风险提示；不外推知识库没有的数据。
+      - 知识库无相关内容时如实说明，并建议补充哪类语料后再问。
+
+- id: tool-kb
+  name: '@deepseek-ai/dsh-tool-kb'
+  config:
+    search: true
+    ingest: true
+    urlIngest: true
+    stats: true
+    tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"

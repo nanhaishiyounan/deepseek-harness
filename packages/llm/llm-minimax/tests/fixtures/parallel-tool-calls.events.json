@@ -1,0 +1,14 @@
+[
+  "{\"choices\":[{\"index\":0,\"delta\":{\"content\":\"<think>用户问了\\\"退税\"},\"finish_reason\":\"\"}]}",
+  "{\"choices\":[{\"index\":0,\"delta\":{\"content\":\" 报关单 申报\\\"这三个关键词，看起来是想了解出口退税中关于报关单申报的问题。我需要先用 kb_search 工具检索知识库中相关的资料。\"},\"finish_reason\":\"\"}]}",
+  "{\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\\n\\n让我先查询一下知识库的概况，然后搜索相关主题。</think>\\n\\n\"},\"finish_reason\":\"\"}]}",
+  "{\"choices\":[{\"index\":0,\"delta\":{\"tool_calls\":[{\"index\":0,\"id\":\"chatcmpl-tool-9f281cffe8b73ee6\",\"type\":\"function\",\"function\":{\"name\":\"kb_stats\",\"arguments\":\"{}\"}}]},\"finish_reason\":\"\"}]}",
+  "{\"choices\":[{\"index\":0,\"delta\":{\"tool_calls\":[{\"index\":1,\"id\":\"chatcmpl-tool-8e4832d39e59add9\",\"type\":\"function\",\"function\":{\"name\":\"kb_search\",\"arguments\":\"{\\\"query\\\":\\\"出口\"}}]},\"finish_reason\":\"\"}]}",
+  "{\"choices\":[{\"index\":0,\"delta\":{\"tool_calls\":[{\"index\":1,\"id\":\"\",\"type\":\"function\",\"function\":{\"name\":\"\",\"arguments\":\"退税 报关单 申报 要求\\\"\"}}]},\"finish_reason\":\"\"}]}",
+  "{\"choices\":[{\"index\":0,\"delta\":{\"tool_calls\":[{\"index\":1,\"id\":\"\",\"type\":\"function\",\"function\":{\"name\":\"\",\"arguments\":\",\\\"max_results\\\":8}\"}}]},\"finish_reason\":\"\"}]}",
+  "{\"choices\":[{\"index\":0,\"delta\":{\"tool_calls\":[{\"index\":2,\"id\":\"chatcmpl-tool-b044ae041c114f56\",\"type\":\"function\",\"function\":{\"name\":\"kb_search\",\"arguments\":\"{\"}}]},\"finish_reason\":\"\"}]}",
+  "{\"choices\":[{\"index\":0,\"delta\":{\"tool_calls\":[{\"index\":2,\"id\":\"\",\"type\":\"function\",\"function\":{\"name\":\"\",\"arguments\":\"\\\"query\\\":\\\"退税申报流程 报关单 数据\"}}]},\"finish_reason\":\"\"}]}",
+  "{\"choices\":[{\"index\":0,\"delta\":{\"tool_calls\":[{\"index\":2,\"id\":\"\",\"type\":\"function\",\"function\":{\"name\":\"\",\"arguments\":\"\\\",\\\"max_results\\\":8}\"}}]},\"finish_reason\":\"\"}]}",
+  "{\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\"},\"finish_reason\":\"tool_calls\"}]}",
+  "{\"choices\":[],\"usage\":{\"total_tokens\":2384,\"prompt_tokens\":2239,\"completion_tokens\":145,\"completion_tokens_details\":{\"reasoning_tokens\":0},\"prompt_tokens_details\":{\"cached_tokens\":0}}}"
+]

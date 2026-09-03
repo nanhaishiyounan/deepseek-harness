@@ -15,7 +15,16 @@ function fakeApi(overrides: Partial<{ muxFrames: MuxFrame[]; hostFrames: HostFra
       yield { rpcId: RpcId(`frame-${String(frames.indexOf(payload))}`), payload }
     }
   }
+  const kbRefuse = async (request: RpcRequest<unknown>): Promise<{ rpcId: typeof request.rpcId; result: { ok: false; error: { code: 'internal'; message: string; details: {} } } }> =>
+    ({ rpcId: request.rpcId, result: { ok: false, error: { code: 'internal', message: 'kb stub', details: {} } } })
   return {
+    kb: {
+      stats: kbRefuse,
+      search: kbRefuse,
+      ingest: kbRefuse,
+      ingestUrl: kbRefuse,
+      upload: kbRefuse,
+    },
     sessions: {
       async list(request) {
         if (overrides.crashOn === 'session.list') throw new Error('impl crashed')
@@ -428,6 +437,19 @@ describe('unary round trip (handler ⇄ client, no network)', () => {
     const c = client()
     const skills = await c.skills.list({ sessionId: 's' as never })
     expect(skills.result).toEqual({ ok: true, value: { skills: [{ name: 'commit-helper', description: 'Git commits', modelInvocable: true }] } })
+  })
+
+  it('round-trips every kb method through the wire form, upload included', async () => {
+    // The kb stub refuses every method; the round trip itself is the subject —
+    // the zod gate accepts the upload's canonical base64, and the refusal
+    // carries back through the value-schema-validated envelope.
+    const c = client()
+    expect((await c.kb.stats({})).result).toMatchObject({ ok: false, error: { code: 'internal', message: 'kb stub' } })
+    expect((await c.kb.search({ query: '酱油' })).result.ok).toBe(false)
+    expect((await c.kb.ingest({ path: 'workspace/data/a.md' })).result.ok).toBe(false)
+    expect((await c.kb.ingestUrl({ url: 'https://example.com/a' })).result.ok).toBe(false)
+    const uploaded = await c.kb.upload({ filename: 'a.md', data: 'IyB4' })
+    expect(uploaded.result).toMatchObject({ ok: false, error: { code: 'internal', message: 'kb stub' } })
   })
 
   it('lets host.pickDirectory finish after the 30-second default unary deadline', async () => {

@@ -8,6 +8,10 @@
  * @module dsh-llm-deepseek/translate
  */
 
+/* jscpd:ignore-start */
+// jscpd: intentional template symmetry — the vendor-adapter skeleton every
+// LLM adapter reproduces while evolving independently; extraction would
+// couple vendor timelines (Agent Note 2026-08-29-duplication-gate-intentional-symmetry).
 import { CallId, EMPTY_RESPONSE_CODE, LlmError } from '@deepseek-ai/dsh-llm'
 import type { ContentBlock, FinishReason, StreamChunk, TokenUsage } from '@deepseek-ai/dsh-llm'
 import { DONE } from './sse.ts'
@@ -91,6 +95,7 @@ export async function* translate(payloads: AsyncIterable<string>): AsyncGenerato
   const order: OpenBlock[] = []
   let pendingFinish: FinishReason | undefined
   let pendingUsage: TokenUsage | undefined
+  /* jscpd:ignore-end */
 
   function open(kind: OpenBlock['kind']): OpenBlock {
     const block: OpenBlock = { index: nextIndex++, kind, text: '' }

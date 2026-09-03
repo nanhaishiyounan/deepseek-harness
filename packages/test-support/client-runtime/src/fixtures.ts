@@ -84,6 +84,6 @@ export function workspaceListState(): WorkspaceListState {
     phase: 'ready',
     error: null,
     baselinesReady: true,
-    recentWorkspaceId: undefined,
+    recentWorkspaceId: undefined, lastActionError: null,
   }
 }

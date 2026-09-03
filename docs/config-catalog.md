@@ -801,6 +801,20 @@ Requires: `agentDefaultModel` · `agents` · `attachments` · `directoryPicker` 
 /** Gateway plugin configuration. */
 export interface Config {
   /**
+   * The tenant the kb workbench domain operates on — the deployment-side
+   * binding for stats/search/ingest, mirroring the `tool-kb` row's `tenant`.
+   * Required: a missing binding fails load instead of silently landing on a
+   * default tenant.
+   */
+  kbTenant: string
+  /**
+   * Whether the kb workbench's write methods (`kb.ingest`, `kb.ingestUrl`,
+   * `kb.upload`) answer. Absent means read-only: the gateway is
+   * unauthenticated, and `kb.ingest` reads whatever path it is handed, so
+   * writes need an explicit per-deployment opt-in.
+   */
+  kbWriteEnabled?: boolean
+  /**
    * Whether this deployment can hand paths to a native desktop opener —
    * the `hasDocument` capability the agent-preset roster reports. Absent,
    * the platform is asked (macOS/Windows/WSL yes; Linux only with a display
@@ -906,6 +920,146 @@ export interface Config {
 
 Source: [`packages/jobs/jobs-local/src/index.ts:31`](../packages/jobs/jobs-local/src/index.ts)
 
+<a id="deepseek-aidsh-kb"></a>
+
+## `@deepseek-ai/dsh-kb`
+
+```ts config-catalog
+/**
+ * Config for the kb seam. `storeProvider` / `embedProvider` pin which provider
+ * wins for each capability; both are optional (a single registered usable
+ * provider auto-selects).
+ */
+export interface KbRuntimeConfig {
+  /** Explicit store provider id. Omitted = auto-select when exactly one usable. */
+  readonly storeProvider?: string
+  /** Explicit embed provider id. Omitted = auto-select when exactly one usable. */
+  readonly embedProvider?: string
+  /** Maximum approximate tokens per chunk. Defaults to 512. */
+  readonly chunkMaxTokens?: number
+  /** Approximate overlap tokens between adjacent chunks. Defaults to 50. */
+  readonly chunkOverlapTokens?: number
+  /** RRF rank-damping constant. Defaults to 60. */
+  readonly rrfK?: number
+  /**
+   * Minimum fused RRF score for a hit to survive a search; hits scoring below
+   * it are dropped in both modes. RRF scores are rank-damped reciprocals: a
+   * hit one path alone ranked produces at most `1/(rrfK+1)`, a hit both paths
+   * rank produces at most `2/(rrfK+1)`, so a threshold above `1/(rrfK+1)`
+   * keeps only dual-path hits. Defaults to 0 — keep every hit.
+   */
+  readonly minRelevanceScore?: number
+  /** Vector-path candidates fetched per search. Defaults to 32. */
+  readonly vectorTopK?: number
+  /** Text-path candidates fetched per search. Defaults to 32. */
+  readonly textTopK?: number
+  /** Default result cap per search. Defaults to 8. */
+  readonly maxResults?: number
+}
+```
+
+Source: [`packages/kb/kb/src/index.ts:52`](../packages/kb/kb/src/index.ts)
+
+<a id="deepseek-aidsh-kb-embed-dashscope"></a>
+
+## `@deepseek-ai/dsh-kb-embed-dashscope`
+
+Requires: `kb`
+
+```ts config-catalog
+/** Plugin configuration. */
+export interface Config {
+  /** Credential reference resolved per request from the launch environment. */
+  apiKeyEnv?: string
+  /** OpenAI-compatible DashScope base URL. */
+  baseURL?: string
+  /** Embedding model id. */
+  model?: string
+  /** Vector dimensionality every result must match. */
+  dimensions?: number
+  /** Input texts per embeddings request (DashScope caps at 10). */
+  batchSize?: number
+  /** Per-request timeout in milliseconds. */
+  timeoutMs?: number
+  /** Retries for transient failures (HTTP 429/5xx and network errors). */
+  maxRetries?: number
+  /** Base delay of the exponential retry backoff in milliseconds; doubles per attempt. */
+  backoffBaseMs?: number
+  /** Cap on one backoff delay in milliseconds. */
+  backoffMaxMs?: number
+}
+```
+
+Source: [`packages/kb/kb-embed-dashscope/src/index.ts:52`](../packages/kb/kb-embed-dashscope/src/index.ts)
+
+<a id="deepseek-aidsh-kb-embed-minimax"></a>
+
+## `@deepseek-ai/dsh-kb-embed-minimax`
+
+Requires: `kb`
+
+```ts config-catalog
+/** Plugin configuration. */
+export interface Config {
+  /** Credential reference resolved per request from the launch environment. */
+  apiKeyEnv?: string
+  /** MiniMax endpoint base. */
+  baseURL?: string
+  /** Embedding model id. */
+  model?: string
+  /** Vector dimensionality every result must match. */
+  dimensions?: number
+  /** Input texts per embeddings request. */
+  batchSize?: number
+  /** Per-request timeout in milliseconds. */
+  timeoutMs?: number
+  /** Retries for transient failures (HTTP 429/5xx and network errors). */
+  maxRetries?: number
+  /** Base delay of the exponential retry backoff in milliseconds; doubles per attempt. */
+  backoffBaseMs?: number
+  /** Cap on one backoff delay in milliseconds. */
+  backoffMaxMs?: number
+}
+```
+
+Source: [`packages/kb/kb-embed-minimax/src/index.ts:59`](../packages/kb/kb-embed-minimax/src/index.ts)
+
+<a id="deepseek-aidsh-kb-graph-sqlite"></a>
+
+## `@deepseek-ai/dsh-kb-graph-sqlite`
+
+Requires: `kbGraph`
+
+```ts config-catalog
+/** Plugin configuration. */
+export interface Config {
+  /** SQLite database path (`:memory:` supported), resolved against the process cwd when relative. */
+  path: string
+  /** Maximum wait for another SQLite connection's lock; defaults to 5,000 ms. */
+  busyTimeoutMs?: number
+}
+```
+
+Source: [`packages/kb/kb-graph-sqlite/src/index.ts:29`](../packages/kb/kb-graph-sqlite/src/index.ts)
+
+<a id="deepseek-aidsh-kb-sqlite"></a>
+
+## `@deepseek-ai/dsh-kb-sqlite`
+
+Requires: `kb`
+
+```ts config-catalog
+/** Plugin configuration. */
+export interface Config {
+  /** SQLite database path (`:memory:` supported), resolved against the process cwd when relative. */
+  path: string
+  /** Maximum wait for another SQLite connection's lock; defaults to 5,000 ms. */
+  busyTimeoutMs?: number
+}
+```
+
+Source: [`packages/kb/kb-sqlite/src/index.ts:25`](../packages/kb/kb-sqlite/src/index.ts)
+
 <a id="deepseek-aidsh-llm-deepseek"></a>
 
 ## `@deepseek-ai/dsh-llm-deepseek`
@@ -988,6 +1142,56 @@ export interface DeepSeekCatalogModel {
 Depends on: [`ModelModality`](../packages/llm/llm/src/index.ts) · [`RetryPolicyConfig`](../packages/llm/llm/src/index.ts)
 
 Source: [`packages/llm/llm-deepseek/src/index.ts:106`](../packages/llm/llm-deepseek/src/index.ts)
+
+<a id="deepseek-aidsh-llm-minimax"></a>
+
+## `@deepseek-ai/dsh-llm-minimax`
+
+Requires: `llm`
+
+```ts config-catalog
+/**
+ * Plugin config, validated by the same-named schemastery schema and doubling
+ * as the `llm-minimax` settings-section shape. Every field is optional in
+ * yml: a missing API key resolves through {@link Config.apiKeyEnv} at each
+ * request (a request without any key fails with `MISSING_CREDENTIAL`, not at
+ * plugin load).
+ */
+export interface Config {
+  /** Credential reference (environment-variable name) resolved per request; defaults to `MINIMAX_API_KEY`. */
+  apiKeyEnv?: string
+  /** Endpoint base; falls back to $MINIMAX_BASE_URL from a trusted environment layer, then the public API. */
+  baseURL?: string
+  /** Default per-request output cap (default 32,768); a model's own cap and explicit request values win. */
+  maxTokens?: number
+  /** Positive context capacity used when the selected model has no exact value (default 200,000). */
+  defaultContextWindow?: number
+  /** Advisory models shown by discovery consumers; defaults to MiniMax-M3. */
+  models?: MiniMaxCatalogModel[]
+  /** Maximum provider idle time while one stream read is outstanding (default five minutes). */
+  streamIdleTimeoutMs?: number
+  /** Provider-owned model-request retry policy; omission uses normal mode with five retries. */
+  retryPolicy?: RetryPolicyConfig
+}
+
+/** One optional model entry advertised by the direct-fetch adapter. */
+export interface MiniMaxCatalogModel {
+  /** Wire model id accepted by the configured endpoint. */
+  id: string
+  /** Selector label; defaults to {@link id}. */
+  name?: string
+  /** Optional selector detail for deployments with similar model variants. */
+  description?: string
+  /** Known combined request/response context capacity; omitted when deployment metadata is unavailable. */
+  contextWindow?: number
+  /** Per-request output cap for this model; omission falls back to the profile's {@link MiniMaxConnectionOptions.maxTokens}. */
+  maxTokens?: number
+}
+```
+
+Depends on: [`RetryPolicyConfig`](../packages/llm/llm/src/index.ts)
+
+Source: [`packages/llm/llm-minimax/src/index.ts:74`](../packages/llm/llm-minimax/src/index.ts)
 
 <a id="deepseek-aidsh-llm-pi-ai"></a>
 
@@ -2650,6 +2854,57 @@ export type CompletionDelivery = 'quiet' | 'wakeup'
 
 Source: [`packages/jobs/tool-jobs/src/index.ts:32`](../packages/jobs/tool-jobs/src/index.ts)
 
+<a id="deepseek-aidsh-tool-kb"></a>
+
+## `@deepseek-ai/dsh-tool-kb`
+
+Requires: `tools` · `kb` · `fs` · `systemPrompt`
+
+```ts config-catalog
+/** Plugin config: which kb tools to register, per-tool budgets, the citation cap, and the bound tenant. */
+export interface Config {
+  /** Register `kb_search`. Defaults to true. */
+  search?: boolean
+  /** Register `kb_ingest`. Defaults to true. */
+  ingest?: boolean
+  /** Register `kb_ingest_url`. Defaults to true. */
+  urlIngest?: boolean
+  /** Register `kb_stats`. Defaults to true. */
+  stats?: boolean
+  /**
+   * Let `kb_ingest_url` fetch private/internal-network addresses (loopback,
+   * RFC1918, link-local, CGNAT, unique-local). Defaults to false — the SSRF
+   * gate; fixtures and intranet deployments opt in explicitly.
+   */
+  allowPrivateNetworks?: boolean
+  /** Upper bound on citations returned by one `kb_search` call. Defaults to 8. */
+  maxResults?: number
+  /**
+   * The tenant every kb tool operates on — the deployment-side tenant
+   * binding. The model never supplies a tenant; a `tenant` argument on any
+   * kb tool call is rejected. Required, so a composition without a binding
+   * fails config validation at load.
+   */
+  tenant: string
+  /** Cooperative timeout budget (ms) for `kb_search`. Defaults to 30000. */
+  searchTimeoutMs?: number
+  /** Cooperative timeout budget (ms) for `kb_ingest`. Defaults to 300000. */
+  ingestTimeoutMs?: number
+  /** Cooperative timeout budget (ms) for `kb_stats`. Defaults to 10000. */
+  statsTimeoutMs?: number
+  /** Cooperative timeout budget (ms) for `kb_ingest_url`. Defaults to 300000. */
+  urlIngestTimeoutMs?: number
+  /** Register `kb_graph_query`/`kb_graph_add` over the optional `ctx.kbGraph` seam. Defaults to true. */
+  graph?: boolean
+  /** Cooperative timeout budget (ms) for `kb_graph_query`. Defaults to 15000. */
+  graphQueryTimeoutMs?: number
+  /** Cooperative timeout budget (ms) for `kb_graph_add`. Defaults to 30000. */
+  graphAddTimeoutMs?: number
+}
+```
+
+Source: [`packages/kb/tool-kb/src/index.ts:65`](../packages/kb/tool-kb/src/index.ts)
+
 <a id="deepseek-aidsh-tool-lsp"></a>
 
 ## `@deepseek-ai/dsh-tool-lsp`
@@ -3241,6 +3496,7 @@ These load from a `cordis.yml` entry with no `config:` block; they declare no co
 - `@deepseek-ai/dsh-client-ui-goal` ([`packages/client/ui-goal/src/index.ts`](../packages/client/ui-goal/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-input-trigger` ([`packages/client/ui-input-trigger/src/index.ts`](../packages/client/ui-input-trigger/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-jobs` ([`packages/client/ui-jobs/src/index.ts`](../packages/client/ui-jobs/src/index.ts))
+- `@deepseek-ai/dsh-client-ui-kb` ([`packages/client/ui-kb/src/index.ts`](../packages/client/ui-kb/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-layout` ([`packages/client/ui-layout/src/index.ts`](../packages/client/ui-layout/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-message-feedback` ([`packages/client/ui-message-feedback/src/index.ts`](../packages/client/ui-message-feedback/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-model-selection` ([`packages/client/ui-model-selection/src/index.ts`](../packages/client/ui-model-selection/src/index.ts))
@@ -3273,6 +3529,7 @@ These load from a `cordis.yml` entry with no `config:` block; they declare no co
 - `@deepseek-ai/dsh-host-directory-picker-auto` — requires `webServer` · `loader` ([`packages/host/directory-picker-auto/src/index.ts`](../packages/host/directory-picker-auto/src/index.ts))
 - `@deepseek-ai/dsh-host-directory-picker-native` ([`packages/host/directory-picker-native/src/index.ts`](../packages/host/directory-picker-native/src/index.ts))
 - `@deepseek-ai/dsh-host-plugin-inventory` — requires `loader` ([`packages/host/plugin-inventory/src/index.ts`](../packages/host/plugin-inventory/src/index.ts))
+- `@deepseek-ai/dsh-kb-graph` ([`packages/kb/kb-graph/src/index.ts`](../packages/kb/kb-graph/src/index.ts))
 - `@deepseek-ai/dsh-llm` ([`packages/llm/llm/src/index.ts`](../packages/llm/llm/src/index.ts))
 - `@deepseek-ai/dsh-lsp` ([`packages/lsp/lsp/src/index.ts`](../packages/lsp/lsp/src/index.ts))
 - `@deepseek-ai/dsh-schedule` — requires `agents` · `sessions` · `tools` · `sessionPersistence` ([`packages/schedule/schedule/src/index.ts`](../packages/schedule/schedule/src/index.ts))
@@ -3333,6 +3590,7 @@ Imported as libraries by other packages; a `cordis.yml` cannot load them.
 - `@deepseek-ai/dsh-code-runtime-python` ([`packages/code-runtime/code-runtime-python/src/index.ts`](../packages/code-runtime/code-runtime-python/src/index.ts))
 - `@deepseek-ai/dsh-home-paths` ([`packages/util/home-paths/src/index.ts`](../packages/util/home-paths/src/index.ts))
 - `@deepseek-ai/dsh-hook-protocol` ([`packages/hooks/hook-protocol/src/index.ts`](../packages/hooks/hook-protocol/src/index.ts))
+- `@deepseek-ai/dsh-kb-embed-shared` ([`packages/kb/kb-embed-shared/src/index.ts`](../packages/kb/kb-embed-shared/src/index.ts))
 - `@deepseek-ai/dsh-launch-environment` ([`packages/util/launch-environment/src/index.ts`](../packages/util/launch-environment/src/index.ts))
 - `@deepseek-ai/dsh-llm-mock-server` ([`packages/test-support/llm-mock-server/src/index.ts`](../packages/test-support/llm-mock-server/src/index.ts))
 - `@deepseek-ai/dsh-loader-smoke` ([`packages/test-support/loader-smoke/src/index.ts`](../packages/test-support/loader-smoke/src/index.ts))

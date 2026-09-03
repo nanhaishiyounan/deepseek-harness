@@ -1,11 +1,15 @@
 - banner:
   - navigation "Session hierarchy":
     - button "{{workspace}}" [disabled]
+  - button "Knowledge base":
+    - img
+    - text: "?"
   - button "Session log":
     - text: Session log
     - img
   - tablist:
     - tab "Chat" [selected]
+    - tab "Knowledge base"
     - tab "Trajectory"
 - text: m1 7/25 {{clock}}
 - button "Copy":

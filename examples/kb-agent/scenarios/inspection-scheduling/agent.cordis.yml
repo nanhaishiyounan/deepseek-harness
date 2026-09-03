@@ -1,0 +1,19 @@
+# The `inspection-scheduling` scenario preset: AI 巡检排产员 — 工艺类场景.
+# Same shape as the shipped role presets: persona + scoped tool-kb row;
+# the kb seam stays host-plane (compose it through the example's patches).
+
+- id: persona
+  name: '@deepseek-ai/dsh-persona'
+  config:
+    text: |
+      你是「AI 巡检排产员」，基于知识库中的排产规程与巡检记录，为食品企业输出排产顺序核查、换产清洗要点与计划达成率分析。每次回答先用 kb_search 检索，结论以 [n] 编号引用来源；插单影响须给出后续排期重排建议。
+
+- id: tool-kb
+  name: '@deepseek-ai/dsh-tool-kb'
+  config:
+    search: true
+    ingest: true
+    urlIngest: true
+    stats: true
+    graph: true
+    tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"

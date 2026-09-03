@@ -31,6 +31,9 @@ import PlanModeController from '@deepseek-ai/dsh-plan-mode'
 import WebRuntime from '@deepseek-ai/dsh-web'
 import * as WebSearchExa from '@deepseek-ai/dsh-web-search-exa'
 import * as WebFetchLocal from '@deepseek-ai/dsh-web-fetch-http'
+import KbRuntime from '@deepseek-ai/dsh-kb'
+import * as KbSqlite from '@deepseek-ai/dsh-kb-sqlite'
+import * as ToolKb from '@deepseek-ai/dsh-tool-kb'
 import SubagentRuntime from '@deepseek-ai/dsh-subagent'
 import type { SubagentProvider, SubagentReportDelivery } from '@deepseek-ai/dsh-subagent'
 import * as ToolSubagentControl from '@deepseek-ai/dsh-tool-subagent-control'
@@ -186,6 +189,21 @@ export interface ToolPackage {
  * guard proves it is exhaustive against the on-disk glob.
  */
 const TOOL_PACKAGES: ToolPackage[] = [
+  {
+    pkg: '@deepseek-ai/dsh-tool-kb',
+    dir: 'tool-kb',
+    source: 'packages/kb/tool-kb/src/index.ts',
+    requires: ['ctx.tools', 'ctx.kb', 'ctx.fs', 'ctx.systemPrompt'],
+    writes: ['tool/call', 'tool/result'],
+    async mount(ctx) {
+      await ctx.plugin(KbRuntime)
+      await ctx.plugin(KbSqlite, { path: ':memory:' })
+      await ctx.plugin(LocalFileSystem)
+      await ctx.plugin(ToolKb, { tenant: 'catalog' })
+    },
+    note:
+      'kb_search, kb_ingest, kb_ingest_url, and kb_stats stay visible without a usable store and fail with a structured error at execution time; all four run under the deployment-bound tenant (the model never supplies one), retrieval results carry numbered citations, and the degraded text-only mode is observable in every search result.',
+  },
   {
     pkg: '@deepseek-ai/dsh-tool-ask-user',
     dir: 'tool-ask-user',

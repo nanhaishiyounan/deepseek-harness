@@ -327,6 +327,11 @@ describe('web e2e: workspace management (create / rename / flat view / hover aff
       if (message.type() === 'error') consoleErrors.push(message.text())
     })
     await page.exposeFunction('recordDshTransientWorkspaceError', (message: string) => {
+      // The kb portal's deployment-level refusal strip ("Knowledge base
+      // unavailable…") is the designed degraded state of a composition without
+      // the kb capability, not a transient error of the workspace flow under
+      // test.
+      if (message.startsWith('Knowledge base unavailable')) return
       if (!transientErrors.includes(message)) transientErrors.push(message)
     })
     await page.evaluate(() => {

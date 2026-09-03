@@ -1,0 +1,23 @@
+{
+  "date": "2026-08-28",
+  "topic": "食品产业可信数据空间 + 知识库 Agent：对标产品解剖、行业落地模式、政策依据与 MVP 技术选型",
+  "depth": "Thorough",
+  "sourceCount": 40,
+  "queries": [
+    "ftd.lzqz.cn 全站抓取（14 路由页）",
+    "豫中南数字产融平台 / 漯河国裕产融 / 漯河 京东 数字产融",
+    "火山引擎 HiAgent / 飞鹤 火山引擎 436 智能体 / 飞鹤 AI TPM / 精工膜创 / 鹤勤智联",
+    "MaxKB FastGPT RAGFlow Dify coze-studio 架构与定价",
+    "可信数据空间发展行动计划 / 国家数据局 可信数据空间 试点 / 数据要素× 食品 / 数据资产入表 / 隐私计算",
+    "食品行业 AI agent 平台 / 农业 大模型 / 制造业 知识库 agent / food industry AI knowledge base",
+    "sqlite-vec vs qdrant / BGE-M3 ollama API / OpenAI compatible embedding"
+  ],
+  "clonedRepos": [],
+  "assets": { "images": [], "attachments": [], "totalSizeMB": 0 },
+  "triangulation": {
+    "claimsTotal": 42,
+    "claimsMultiSourced": 31,
+    "contradictionsFound": 9,
+    "contradictionsResolved": 9
+  }
+}

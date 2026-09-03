@@ -102,8 +102,13 @@
 
     # The API gateway: the transport-agnostic dispatch face every client shape
     # shares. The base layer's agent-default-model service owns the default model.
+    # The kb workbench tenant is an explicit composition choice (the generic
+    # bundle ships the default tenant; kb deployments override it), and kb
+    # writes stay opt-in per deployment.
     - id: api-gateway
       name: '@deepseek-ai/dsh-host-apiproxy'
+      config:
+        kbTenant: default
 
     - id: cordis-host-runner
       name: '@deepseek-ai/dsh-cordis-host-runner'
@@ -193,6 +198,9 @@
 
     - id: ui-sidebar
       name: '@deepseek-ai/dsh-client-ui-sidebar'
+
+    - id: ui-kb
+      name: '@deepseek-ai/dsh-client-ui-kb'
 
     - id: ui-settings
       name: '@deepseek-ai/dsh-client-ui-settings'

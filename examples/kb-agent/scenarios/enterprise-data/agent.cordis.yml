@@ -1,0 +1,19 @@
+# The `enterprise-data` scenario preset: 企业数据助手 — 成本测算类场景.
+# Same shape as the shipped role presets: persona + scoped tool-kb row;
+# the kb seam stays host-plane (compose it through the example's patches).
+
+- id: persona
+  name: '@deepseek-ai/dsh-persona'
+  config:
+    text: |
+      你是「企业数据助手」，覆盖市场洞察、工艺、食安、成本测算、供应链五类数据问答，基于知识库中的企业数据档案与统计纪要输出结构化答案与对标建议。每次回答先用 kb_search 检索，结论以 [n] 编号引用来源；缺失口径说明后请用户提供数据。
+
+- id: tool-kb
+  name: '@deepseek-ai/dsh-tool-kb'
+  config:
+    search: true
+    ingest: true
+    urlIngest: true
+    stats: true
+    graph: true
+    tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"

@@ -36,3 +36,4 @@ node-compat CI 矩阵（Node 22.19 与 26）新增 `dsh-source-launch-smoke`（`
 - TypeScript 转换重新委托给 tsx/esbuild，逆转了前一篇 Agent Note「证明 Node 原生转换可用」的目标；在 vendor 源码使用不可擦除语法且 Node 不再提供 transform 模式的情况下，该目标不可达。
 - 源码启动中的运行时依赖声明强制不复存在；未声明的 workspace import 现在只能通过静态门禁或构建模式的解析失败暴露。
 - 运行时启动相比完整 tsx 默认形态快约 0.4s；ACP（Agent Client Protocol）保留 `--import tsx`，因为它的依赖图尚未就 CJS 钩子依赖性做审计，且其启动延迟不在交互路径上。
+- 源码启动在进程启动时解析整个 workspace 模块图，此后不再重载：`packages/**/src` 下的服务端改动只有重启正在运行的 `dsh web`/TUI 进程才会生效，而 web 客户端产物按请求从磁盘读取。修改网关或服务端插件源码后两个平面因此分叉——新客户端调用旧网关尚未包含的方法时，会从 `toFetchHandler` 的方法表拿到纯 404（2026-09-02 的 `kb.upload` 404：dev server 先于代码落盘启动，一直以旧方法表应答）。服务端改动后要重启长驻 dev server；仅重新构建对运行中的进程没有任何影响。

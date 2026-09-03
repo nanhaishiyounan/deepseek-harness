@@ -17,10 +17,29 @@
     - img
     - text: workspace
   - treeitem "New Session" [selected]
+- button "Knowledge-base documents":
+  - img
+  - text: Knowledge base ?
 - button "Settings":
   - img
   - text: Settings
-- text: Into the Unknown Preview
+- banner:
+  - navigation "Session hierarchy":
+    - button "workspace" [disabled]
+  - img
+  - text: Standard mode
+  - button "Knowledge base":
+    - img
+    - text: "?"
+  - button "Session log":
+    - text: Session log
+    - img
+  - tablist:
+    - tab "Chat" [selected]
+    - tab "Knowledge base"
+    - tab "Trajectory"
+- img
+- text: Food-industry knowledge Q&A Search your documents · cited answers across compliance, process, cost and supply Preview
 - button "Choose workspace":
   - img
   - text: workspace
@@ -29,7 +48,44 @@
   - img
   - text: Standard mode
   - img
-- textbox "Describe what you want to build"
+- alert:
+  - text: Knowledge base unavailable; contact your admin
+  - button "Retry"
+- group "What is the max sorbate level in soy sauce?":
+  - button "What is the max sorbate level in soy sauce?"
+  - button "What does GB 14881 say on pest control?"
+- region "Scenarios":
+  - text: Scenarios Market insight
+  - img
+  - button "AI Marketing Insight Lead Retrieves market corpus; outputs category size, channel mix, and opportunities with cited dates."
+  - button "Consumer Insight Lead Retrieves consumer-research corpus; outputs audience, preference, and unmet-need findings with sample sizes."
+  - text: Process
+  - img
+  - button "Smart Quality Control Lead Retrieves process and QC corpus; outputs standard parameters, limits, and exception handling with citations."
+  - button "AI Product R&D Assistant Retrieves recipe, ingredient, and competitor corpus; outputs directions, compliance checks, and cost estimates."
+  - text: Food safety
+  - img
+  - button "AI Food-safety Service Lead Retrieves regulation and system corpus; outputs clause basis, assessment, corrective actions, and verification."
+  - button "AI Food-safety Inspector Retrieves inspection-checklist corpus; outputs zone, check item, criteria, and evidence requirements."
+  - text: Cost
+  - img
+  - button "AI Inventory & Pricing Steward Retrieves cost, inventory, and market corpus; outputs basis, calculation, advice, and risks with price dates."
+  - text: Supply chain
+  - img
+  - button "Supplier Risk Assessor Retrieves supplier and delivery corpus; outputs performance, risks, rating, and mitigation actions."
+  - text: Export
+  - img
+  - button "AI Export-tax Steward Retrieves export-tax-refund corpus; outputs eligibility, documents, deadlines, and risk notes with citations."
+  - text: Equipment
+  - img
+  - button "AI Equipment Maintenance Lead Retrieves equipment-manual and work-order corpus; outputs symptoms, causes, checks, and safety notes."
+  - text: Data assets
+  - img
+  - button "Data-asset Accounting Advisor Retrieves data-asset policy corpus; outputs policy basis, capitalization conditions, cost pooling, and risks."
+- region "Recent searches":
+  - text: Recent searches
+  - paragraph: No searches yet — try a sample above
+- textbox "Ask a question or describe your task"
 - button "Commands":
   - img
 - tooltip "Commands"

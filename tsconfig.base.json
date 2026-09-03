@@ -148,7 +148,8 @@
         "./packages/util/*/src/invariant.ts",
         "./packages/mcp/*/src/invariant.ts",
         "./packages/identity/*/src/invariant.ts",
-        "./packages/test-support/*/src/invariant.ts"
+        "./packages/test-support/*/src/invariant.ts",
+        "./packages/kb/*/src/invariant.ts"
       ],
       // host/client package names prefix the group dir (dsh-client-<dir>), so
       // the generic dsh-*/invariant list above cannot map them; strip the
@@ -179,6 +180,7 @@
       "@deepseek-ai/dsh-host-frontend-static": ["./packages/host/frontend-static/src"],
       "@deepseek-ai/dsh-host-plugin-inventory": ["./packages/host/plugin-inventory/src"],
       "@deepseek-ai/dsh-host-plugin-inventory/types": ["./packages/host/plugin-inventory/src/types.ts"],
+      "@deepseek-ai/dsh-client-ui-kb": ["./packages/client/ui-kb/src"],
       "@deepseek-ai/dsh-client-ui-slots": ["./packages/client/ui-slots/src"],
       "@deepseek-ai/dsh-client-ui-attachment": ["./packages/client/ui-attachment/src"],
       "@deepseek-ai/dsh-client-ui-primitives": ["./packages/client/ui-primitives/src"],
@@ -284,6 +286,7 @@
         "./packages/mcp/*/src",
         "./packages/identity/*/src",
         "./packages/test-support/*/src",
+        "./packages/kb/*/src",
         "./packages/host/*/src",
         "./packages/client/*/src"
       ]

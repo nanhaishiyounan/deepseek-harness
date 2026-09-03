@@ -6,6 +6,9 @@
     - img
 - img
 - text: Minimal mode
+- button "Knowledge base":
+  - img
+  - text: "?"
 - button "Session log":
   - text: Session log
   - img

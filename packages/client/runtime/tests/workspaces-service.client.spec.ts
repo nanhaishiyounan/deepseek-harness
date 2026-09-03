@@ -442,6 +442,36 @@ describe('WorkspaceRuntime', () => {
     expect(clear).toHaveBeenCalledOnce()
   })
 
+  it('surfaces New Session connect failures on the list state action-error cell', async () => {
+    const ctx = new Context()
+    const api = new FakeApiClient()
+    const sessions = new SessionRuntime(ctx, api, fakeRemote())
+    const workspaces = new WorkspaceRuntime(ctx, api, sessions)
+    api.onWorkspaceList = () => Promise.resolve(ok({ items: [workspace('one')] as never[] }))
+    api.onList = () => Promise.resolve(ok({ items: [] as never[] }))
+    await Promise.all([workspaces.refresh(), sessions.refresh()])
+    await Promise.resolve()
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    vi.spyOn(workspaces, 'connectWorkspace')
+      .mockRejectedValueOnce(new Error('session create failed: agent-preset-not-found: nope'))
+      .mockRejectedValueOnce('plain string rejection')
+
+    expect(workspaces.list.getSnapshot().lastActionError).toBeNull()
+    workspaces.startSession(wid('one'))
+    await vi.waitFor(() => {
+      expect(workspaces.list.getSnapshot().lastActionError).toEqual({
+        seq: 1, text: 'session create failed: agent-preset-not-found: nope',
+      })
+    })
+    workspaces.startSession(wid('one'))
+    await vi.waitFor(() => {
+      expect(workspaces.list.getSnapshot().lastActionError).toEqual({
+        seq: 2, text: 'plain string rejection',
+      })
+    })
+    warn.mockRestore()
+  })
+
   it('archives a session, projects the set from the response, list, and frame, and clears only the current one', async () => {
     const ctx = new Context()
     const api = new FakeApiClient()

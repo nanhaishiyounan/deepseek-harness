@@ -68,8 +68,11 @@ describe('web e2e: startup auto-selection', () => {
   it('keeps the resident Hero and composer nodes when the first Workspace session appears', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-first-workspace-stable-tree'))
     await page.locator(`${ROOT_PHASE}[data-phase="hero"]`).waitFor({ timeout: 15_000 })
-    const headline = page.getByText('Into the Unknown', { exact: true })
-    const fishHitbox = headline.locator('xpath=preceding-sibling::span[1]')
+    // The web bundle's hero headline is the kb portal's seat (ui-kb), so the
+    // resident-node assertions anchor on its product title; the fish brand
+    // mark stays the shell's fallback beside it.
+    const headline = page.getByText('Food-industry knowledge Q&A')
+    const fishHitbox = page.locator('span[class*="fish"]')
     const fish = fishHitbox.locator('svg')
     expect(await fish.evaluate(node => getComputedStyle(node).color))
       .toBe(await headline.evaluate(node => getComputedStyle(node).color))
@@ -152,11 +155,11 @@ describe('web e2e: startup auto-selection', () => {
     // seat with `visibility:hidden`, which Playwright reports as not visible).
     await page.waitForSelector(ROOT_PHASE, { timeout: 15_000 })
     expect(await page.locator(ROOT_PHASE).first().getAttribute('data-phase')).toBe('hero')
-    expect(await page.getByText('Into the Unknown').isVisible()).toBe(true)
+    expect(await page.getByText('Food-industry knowledge Q&A').isVisible()).toBe(true)
     expect(await page.locator('textarea').first().isVisible()).toBe(true)
 
     releaseHistory()
-    await page.locator('textarea:enabled[placeholder="Describe what you want to build"]')
+    await page.locator('textarea:enabled[placeholder="Ask a question or describe your task"]')
       .waitFor({ timeout: 15_000 })
     acknowledgeReloadConnectionLoss(tripwire, warningsBefore)
 

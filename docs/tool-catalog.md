@@ -15,6 +15,7 @@ This table connects model-visible tool names to the plugin package and service s
 
 | Tool package | Model-visible names | Requires | Writes / affects | Shipped aliases | Deployment note |
 | --- | --- | --- | --- | --- | --- |
+| `@deepseek-ai/dsh-tool-kb` | `kb_graph_add`, `kb_graph_query`, `kb_ingest`, `kb_ingest_url`, `kb_search`, `kb_stats` | `ctx.tools`, `ctx.kb`, `ctx.fs`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | kb_search, kb_ingest, kb_ingest_url, and kb_stats stay visible without a usable store and fail with a structured error at execution time; all four run under the deployment-bound tenant (the model never supplies one), retrieval results carry numbered citations, and the degraded text-only mode is observable in every search result. |
 | `@deepseek-ai/dsh-tool-ask-user` | `ask_user_question` | `ctx.tools`, `ctx.userQuestions` | `tool/call`, `tool/result after a UI/provider answers the question` | - | ask_user_question pauses the tool call until the active UI provider returns a human answer. |
 | `@deepseek-ai/dsh-tools` | `run_code` | `ctx.tools`, `ctx.codeRuntime (execution time)`, `ctx.systemPrompt` | `tool/call`, `one tool/code-dispatch-start + tool/code-dispatch pair per bridged sub-call`, `tool/result` | - | Owned by the tool registry as a reserved transport outside filterable capability layers under `mode: code` / `mode: both` (see the Code Mode Agent Note). Under `code` it is the registry's only wire contribution; the other visible capabilities are declared in a generated SDK section in the loaded runtime's language, and a program calls them through bindings scheduled under the native concurrency contract (submission-ordered starts and policy; concurrency-safe bodies overlap up to `maxParallelSubCalls`) that re-enter the complete guarded tool pipeline and link each nested execution to this outer result. |
 | `@deepseek-ai/dsh-plan-mode` | `exit_plan_mode` | `ctx.tools`, `ctx.systemPrompt`, `ctx.userQuestions (execution time, opportunistic)` | `tool/call`, `plan/mode inactive on an approved review`, `tool/result` | - | exit_plan_mode stays in the model-facing schema while planning is inactive so transitions add no tool-catalog churn on top of the plan-policy change. Its execute path rejects calls outside plan mode; in plan mode it presents the plan over the user-questions seam (approve / keep planning with feedback), and approval logs plan mode inactive at the step boundary. |
@@ -41,6 +42,217 @@ This table connects model-visible tool names to the plugin package and service s
 | `@deepseek-ai/dsh-tool-todo` | `todo_write` | `ctx.tools`, `owning Agent session` | `tool/call`, `todo/write`, `tool/result` | - | todo_write is session-owned state; UIs render the latest todo/write event as a checklist. `allowParallelInProgress` is required with no default, so the catalog states its choice: `true`, whose description invites several `in_progress` items. A deployment choosing `false` receives the same tool with a description asking for exactly one active task. |
 | `@deepseek-ai/dsh-tool-workflow` | `workflow` | `ctx.tools`, `ctx.workflowEngine`, `ctx.systemPrompt`, `a calling Agent (exec.agent parents the script children)` | `tool/call`, `tool/result` | - | - |
 | `@deepseek-ai/dsh-tool-web` | `web_fetch`, `web_search` | `ctx.tools`, `ctx.web`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | web_search and web_fetch keep provider selection behind ctx.web so model-visible schemas stay stable across backend swaps. |
+
+<a id="deepseek-aidsh-tool-kb"></a>
+
+## `@deepseek-ai/dsh-tool-kb`
+
+### `kb_graph_add`
+
+Store entity-relation triples extracted from ingested documents into the knowledge graph (idempotent; up to 50 per call). Cite the source document in source_path so graph answers stay traceable.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "triples": {
+      "type": "array",
+      "description": "Triples to store. Entity types: company, product, ingredient, additive, standard, process, risk. Predicates: produces, uses, contains, complies_with, follows, flags, supplies.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "subject_type": {
+            "type": "string"
+          },
+          "subject_id": {
+            "type": "string"
+          },
+          "predicate": {
+            "type": "string"
+          },
+          "object_type": {
+            "type": "string"
+          },
+          "object_id": {
+            "type": "string"
+          },
+          "source_path": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "subject_type",
+          "subject_id",
+          "predicate",
+          "object_type",
+          "object_id"
+        ]
+      }
+    }
+  },
+  "required": [
+    "triples"
+  ]
+}
+```
+
+Source: [`packages/kb/tool-kb/src/index.ts`](../packages/kb/tool-kb/src/index.ts)
+
+### `kb_graph_query`
+
+Query the knowledge graph: neighbors of one entity, a two-hop path between two entities, or entities by id substring. Entity types: company, product, ingredient, additive, standard, process, risk. Predicates: produces, uses, contains, complies_with, follows, flags, supplies.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "action": {
+      "type": "string",
+      "description": "One of: neighbors, paths, search."
+    },
+    "entity_type": {
+      "type": "string",
+      "description": "Entity type (company, product, ingredient, additive, standard, process, risk); required for neighbors/paths, optional type filter for search."
+    },
+    "entity_id": {
+      "type": "string",
+      "description": "Entity id for neighbors/paths, or the substring filter for search."
+    },
+    "target_type": {
+      "type": "string",
+      "description": "Target entity type for paths."
+    },
+    "target_id": {
+      "type": "string",
+      "description": "Target entity id for paths."
+    },
+    "query": {
+      "type": "string",
+      "description": "Id substring for the search action."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Maximum entities for search (1–20)."
+    }
+  },
+  "required": [
+    "action"
+  ]
+}
+```
+
+Source: [`packages/kb/tool-kb/src/index.ts`](../packages/kb/tool-kb/src/index.ts)
+
+### `kb_ingest`
+
+Read one workspace document (.md, .txt, .pdf, or .docx), extract its text, chunk it, and store it in the knowledge base for later kb_search. Re-ingesting the same path replaces the prior document. Use it when the user asks to add a document to the knowledge base.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "path": {
+      "type": "string",
+      "description": "Workspace-relative path of the document to ingest; must end with .md, .txt, .pdf, or .docx."
+    },
+    "doc_kind": {
+      "type": "string",
+      "description": "Document kind: meeting, interview, report, regulation, profile, table, other. Defaults to other."
+    },
+    "title": {
+      "type": "string",
+      "description": "Optional human-readable document title shown in citations."
+    },
+    "collected_at": {
+      "type": "string",
+      "description": "Optional ISO-8601 collection date of the source document."
+    }
+  },
+  "required": [
+    "path"
+  ]
+}
+```
+
+Source: [`packages/kb/tool-kb/src/index.ts`](../packages/kb/tool-kb/src/index.ts)
+
+### `kb_ingest_url`
+
+Fetch one http(s) page, convert it to text, and store it in the knowledge base for later kb_search. The URL becomes the citation identity; re-ingesting the same URL replaces the prior document. Use it when the user asks to add a web page or online regulation to the knowledge base.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "url": {
+      "type": "string",
+      "description": "http(s) URL of the page to ingest."
+    },
+    "doc_kind": {
+      "type": "string",
+      "description": "Document kind: meeting, interview, report, regulation, profile, table, other. Defaults to other."
+    },
+    "title": {
+      "type": "string",
+      "description": "Optional human-readable document title shown in citations."
+    },
+    "collected_at": {
+      "type": "string",
+      "description": "Optional ISO-8601 collection date of the source page."
+    }
+  },
+  "required": [
+    "url"
+  ]
+}
+```
+
+Source: [`packages/kb/tool-kb/src/index.ts`](../packages/kb/tool-kb/src/index.ts)
+
+### `kb_search`
+
+Search the ingested knowledge base for passages answering a question. Returns up to 8 numbered citations with source document, heading path, and passage text. Use before answering questions about ingested documents; cite results as [n].
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "Natural-language query describing the passages to find."
+    },
+    "doc_kind": {
+      "type": "string",
+      "description": "Restrict hits to one document kind: meeting, interview, report, regulation, profile, table, other."
+    },
+    "max_results": {
+      "type": "number",
+      "description": "Maximum citations to return, 1–8."
+    }
+  },
+  "required": [
+    "query"
+  ]
+}
+```
+
+Source: [`packages/kb/tool-kb/src/index.ts`](../packages/kb/tool-kb/src/index.ts)
+
+### `kb_stats`
+
+Report knowledge-base coverage: document, chunk, and embedded-chunk counts plus the active retrieval mode. Use it to check what the knowledge base holds before searching.
+
+```json
+{
+  "type": "object",
+  "properties": {}
+}
+```
+
+Source: [`packages/kb/tool-kb/src/index.ts`](../packages/kb/tool-kb/src/index.ts)
+
+kb_search, kb_ingest, kb_ingest_url, and kb_stats stay visible without a usable store and fail with a structured error at execution time; all four run under the deployment-bound tenant (the model never supplies one), retrieval results carry numbered citations, and the degraded text-only mode is observable in every search result.
 
 <a id="deepseek-aidsh-tool-ask-user"></a>
 

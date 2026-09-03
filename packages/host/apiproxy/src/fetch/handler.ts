@@ -65,6 +65,10 @@ import {
 } from '../api/credentials.schema.ts'
 import { llmDiscoverModelsRequestSchema, llmModelsRequestSchema, llmProvidersRequestSchema } from '../api/llm.schema.ts'
 import {
+  kbIngestRequestSchema, kbIngestUrlRequestSchema, kbSearchRequestSchema, kbStatsRequestSchema,
+  kbUploadRequestSchema,
+} from '../api/kb.schema.ts'
+import {
   subagentHistoryRequestSchema,
   subagentInterruptRequestSchema,
   subagentListRequestSchema,
@@ -140,6 +144,11 @@ const UNARY_ROUTES: UnaryRoutes = {
   'llm.providers': { schema: llmProvidersRequestSchema, invoke: (api, r) => api.llm.providers(r) },
   'llm.models': { schema: llmModelsRequestSchema, invoke: (api, r) => api.llm.models(r) },
   'llm.discoverModels': { schema: llmDiscoverModelsRequestSchema, invoke: (api, r, signal) => api.llm.discoverModels(r, signal) },
+  'kb.stats': { schema: kbStatsRequestSchema, invoke: (api, r) => api.kb.stats(r) },
+  'kb.search': { schema: kbSearchRequestSchema, invoke: (api, r, signal) => api.kb.search(r, signal) },
+  'kb.ingest': { schema: kbIngestRequestSchema, invoke: (api, r, signal) => api.kb.ingest(r, signal) },
+  'kb.ingestUrl': { schema: kbIngestUrlRequestSchema, invoke: (api, r, signal) => api.kb.ingestUrl(r, signal) },
+  'kb.upload': { schema: kbUploadRequestSchema, invoke: (api, r, signal) => api.kb.upload(r, signal) },
 }
 
 /** Route lookup that narrows an arbitrary path segment to a map key (single cast point for the string→key refinement). */

@@ -8,6 +8,10 @@ Runnable demonstrations of the main DeepSeek Harness interfaces and extension po
 
 Optional overlays that connect supported third-party memory servers through the generic MCP client. See the [memory example reference](mcp-memory/README.md).
 
+## kb-agent
+
+A food-industry knowledge-base agent over the kb capability seam: ingest documents into SQLite with optional MiniMax embeddings, retrieve with numbered citations, and answer through MiniMax-M3 — including the text-only degraded mode with chat still live. Run `DSH_HOME=examples/kb-agent/.dsh pnpm dsh --profile headless --patch examples/kb-agent/cordis.patch.yml "<task>"` from the repository root; see the [kb-agent example reference](kb-agent/README.md). For a hands-on first run (Chinese), start with [kb-agent/QUICKSTART.zh.md](kb-agent/QUICKSTART.zh.md).
+
 ## headless-agent
 
 A non-interactive agent that accepts one task, runs it, and emits a selected machine-readable or human-readable output format. See the [headless example reference](headless-agent/README.md).

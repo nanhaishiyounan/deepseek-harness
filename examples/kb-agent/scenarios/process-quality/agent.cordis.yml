@@ -1,0 +1,19 @@
+# The `process-quality` scenario preset: 智能品控主管 — 工艺类场景.
+# Same shape as the two shipped role presets: persona + scoped tool-kb row;
+# the kb seam stays host-plane (compose it through the example's patches).
+
+- id: persona
+  name: '@deepseek-ai/dsh-persona'
+  config:
+    text: |
+      你是「智能品控主管」，基于知识库中的工艺规程与质检记录回答工序参数、异常处置与放行标准问题。先 kb_search；参数类结论必须引用规程原文条款号；超范围问题建议走偏差流程。
+
+- id: tool-kb
+  name: '@deepseek-ai/dsh-tool-kb'
+  config:
+    search: true
+    ingest: true
+    urlIngest: true
+    stats: true
+    graph: true
+    tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"

@@ -14,9 +14,19 @@ flowchart LR
   pkg_attachment_local["attachment-local"]
   pkg_host_runtime["host-runtime"]
   pkg_llm_pi_ai["llm-pi-ai"]
+  pkg_kb["kb"]
+  svc_kb["ctx.kb<br/>Knowledge-base retrieval seam"]
+  pkg_kb_sqlite["kb-sqlite"]
+  pkg_kb_embed_minimax["kb-embed-minimax"]
+  pkg_kb_embed_dashscope["kb-embed-dashscope"]
+  pkg_tool_kb["tool-kb"]
+  pkg_kb_graph["kb-graph"]
+  svc_kbGraph["ctx.kbGraph<br/>Knowledge-graph seam"]
+  pkg_kb_graph_sqlite["kb-graph-sqlite"]
   pkg_llm["llm"]
   svc_llm["ctx.llm<br/>LLM adapter registry"]
   pkg_llm_deepseek["llm-deepseek"]
+  pkg_llm_minimax["llm-minimax"]
   pkg_llm_replay["llm-replay"]
   pkg_agent_loop["agent-loop"]
   pkg_compaction_basic["compaction-basic"]
@@ -241,8 +251,15 @@ flowchart LR
   pkg_invariants --> svc_invariants
   pkg_jobs --> svc_jobs
   pkg_jobs_local --> svc_jobs
+  pkg_kb --> svc_kb
+  pkg_kb_embed_dashscope --> svc_kb
+  pkg_kb_embed_minimax --> svc_kb
+  pkg_kb_graph --> svc_kbGraph
+  pkg_kb_graph_sqlite --> svc_kbGraph
+  pkg_kb_sqlite --> svc_kb
   pkg_llm --> svc_llm
   pkg_llm_deepseek --> svc_llm
+  pkg_llm_minimax --> svc_llm
   pkg_llm_pi_ai --> svc_llm
   pkg_llm_replay --> svc_llm
   pkg_lsp --> svc_lsp
@@ -341,6 +358,8 @@ flowchart LR
   svc_jobs --> pkg_tool_jobs
   svc_jobs --> pkg_tool_subagent
   svc_jobs --> pkg_tool_terminal
+  svc_kb --> pkg_tool_kb
+  svc_kbGraph --> pkg_tool_kb
   svc_llm --> pkg_agent_loop
   svc_llm --> pkg_compaction_basic
   svc_lsp --> pkg_tool_lsp
@@ -428,7 +447,9 @@ flowchart LR
 | ctx 键 | 角色 | 所属包 | 实现 | 直接消费方 | 配套插件 | 说明 |
 | --- | --- | --- | --- | --- | --- | --- |
 | `ctx.attachments` | `seam` | [`attachment`](../packages/attachment/attachment) | [`attachment-local`](../packages/attachment/attachment-local) | `host-runtime`, [`llm-pi-ai`](../packages/llm/llm-pi-ai) | - | 宿主会在会话事件之前提交已接受的图片；提供方适配器将已授权的持久引用解析为提供方原生内容。 |
-| `ctx.llm` | `seam` | [`llm`](../packages/llm/llm) | [`llm-deepseek`](../packages/llm/llm-deepseek), [`llm-pi-ai`](../packages/llm/llm-pi-ai), [`llm-replay`](../packages/test-support/llm-replay) | [`agent-loop`](../packages/core/agent-loop), [`compaction-basic`](../packages/compaction/compaction-basic) | - | 适配器注册提供方实现；agent loop（智能体循环）与压缩功能调用提供方无关的流服务。 |
+| `ctx.kb` | `seam` | [`kb`](../packages/kb/kb) | [`kb-sqlite`](../packages/kb/kb-sqlite), [`kb-embed-minimax`](../packages/kb/kb-embed-minimax), [`kb-embed-dashscope`](../packages/kb/kb-embed-dashscope) | [`tool-kb`](../packages/kb/tool-kb) | - | Store 与 embed provider 注册实现；入库/检索编排融合全文与向量两路排名，无可用 embed provider 时降级为纯文本。 |
+| `ctx.kbGraph` | `seam` | [`kb-graph`](../packages/kb/kb-graph) | [`kb-graph-sqlite`](../packages/kb/kb-graph-sqlite) | [`tool-kb`](../packages/kb/tool-kb) | - | A sibling of the kb seam for entity-relation triples: the graph store registers implementations, and the kb tool suite queries neighbors/two-hop paths/entities under the tenant isolation model. |
+| `ctx.llm` | `seam` | [`llm`](../packages/llm/llm) | [`llm-deepseek`](../packages/llm/llm-deepseek), [`llm-minimax`](../packages/llm/llm-minimax), [`llm-pi-ai`](../packages/llm/llm-pi-ai), [`llm-replay`](../packages/test-support/llm-replay) | [`agent-loop`](../packages/core/agent-loop), [`compaction-basic`](../packages/compaction/compaction-basic) | - | 适配器注册提供方实现；agent loop（智能体循环）与压缩功能调用提供方无关的流服务。 |
 | `ctx.tokenMeter` | `core` | [`token-meter`](../packages/llm/token-meter) | - | [`compaction-basic`](../packages/compaction/compaction-basic) | - | 拥有按会话隔离的回放折叠区；压力消费方共享不可变且带修订版本的测量结果。 |
 | `ctx.toolResultPruner` | `core` | [`compaction-tool-result-pruner`](../packages/compaction/compaction-tool-result-pruner) | - | [`compaction-basic`](../packages/compaction/compaction-basic) | - | 在摘要压缩前，通过可回放的单节点表层替换来改写过大的当前工具结果。 |
 | `ctx.sessions` | `core` | [`session`](../packages/core/session) | - | [`agent-loop`](../packages/core/agent-loop), [`agent`](../packages/core/agent), [`session-persistence`](../packages/session/session-persistence), [`session-query`](../packages/session-query/session-query), [`session-query-sqlite`](../packages/session-query/session-query-sqlite), `subagent-inprocess`, [`invariants`](../packages/runtime-diagnostics/invariants), [`message-feedback`](../packages/feedback/message-feedback) | - | 拥有仅追加的 Session 实例，并发出持久的会话事件流。 |

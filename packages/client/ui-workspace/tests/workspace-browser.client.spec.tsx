@@ -40,7 +40,7 @@ const workspace = (id: string, sessionIds: string[], title = id): WorkspaceView 
 })
 const workspaceState = (items: readonly WorkspaceView[], archivedSessionIds: readonly SessionId[] = []): WorkspaceListState => ({
   items, archivedSessionIds, state: 'idle', phase: 'ready', error: null, baselinesReady: true,
-  recentWorkspaceId: items[0]?.workspaceId,
+  recentWorkspaceId: items[0]?.workspaceId, lastActionError: null,
 })
 function hook<T>(snapshot: T) {
   return function select<S>(selector: (state: T) => S): S { return selector(snapshot) }
@@ -96,6 +96,17 @@ function rerender(b: ReturnType<typeof mount>, overrides: Partial<WorkspaceBrows
 }
 
 describe('WorkspaceBrowser', () => {
+  it('presents a New Session failure from the list state as a transient alert toast', () => {
+    mount({
+      useWorkspaces: hook({
+        ...workspaceState([]),
+        lastActionError: { seq: 3, text: 'session create failed: agent-preset-not-found: nope' },
+      }),
+    })
+    expect(screen.getByRole('alert').textContent)
+      .toBe('新建会话失败：session create failed: agent-preset-not-found: nope')
+  })
+
   it('workspace hover card shows a POSIX home descendant as ~', () => {
     vi.useFakeTimers()
     try {

@@ -1,0 +1,4 @@
+probe: HS 归类 预裁定
+name: AI 报关物流官
+description: 出海类场景预设：检索报关物流操作语料（doc_kind=report），按"单证—归类—运输方式"输出；引用操作条款；不外推知识库没有的流程…
+order: 34

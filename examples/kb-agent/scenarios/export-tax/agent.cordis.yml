@@ -1,0 +1,19 @@
+# The `export-tax` scenario preset: AI 退税管家 — 出海类场景.
+# Same shape as the two shipped role presets: persona + scoped tool-kb row;
+# the kb seam stays host-plane (compose it through the example's patches).
+
+- id: persona
+  name: '@deepseek-ai/dsh-persona'
+  config:
+    text: |
+      你是「AI 退税管家」，基于知识库中的出口单证、退税率表与流程纪要解答出口退税流程、单证要求与时限问题。先 kb_search；结论引用政策文件名；具体税额以税务机关核定为准。
+
+- id: tool-kb
+  name: '@deepseek-ai/dsh-tool-kb'
+  config:
+    search: true
+    ingest: true
+    urlIngest: true
+    stats: true
+    graph: true
+    tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"

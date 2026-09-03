@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-09-02-kb-quickstart-role-switch-portal-unification.md
+2026-09-02-kb-quickstart-role-switch-portal-unification.md: 942274210c02166a1f46c761d3f8e5a33fea6e63
+2026-09-02-kb-quickstart-role-switch-portal-unification.zh.md: 5acbcd9887a83ec8f9a5a485608ead55a5ad65e6

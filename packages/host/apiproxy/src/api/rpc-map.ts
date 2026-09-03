@@ -10,6 +10,7 @@ import type { WorkspaceApi } from './workspace.ts'
 import type { AgentPresetsApi } from './agent-presets.ts'
 import type { SkillsApi } from './skills.ts'
 import type { GoalsApi } from './goals.ts'
+import type { KbApi } from './kb.ts'
 import type { SettingsApi } from './settings.ts'
 import type { CredentialsApi } from './credentials.ts'
 import type { LlmApi } from './llm.ts'
@@ -57,6 +58,11 @@ export interface RpcMethodMap {
   'agentPreset.copy': AgentPresetsApi['copy']
   'agentPreset.openDocument': AgentPresetsApi['openDocument']
   'agentPreset.remove': AgentPresetsApi['remove']
+  'kb.stats': KbApi['stats']
+  'kb.search': KbApi['search']
+  'kb.ingest': KbApi['ingest']
+  'kb.ingestUrl': KbApi['ingestUrl']
+  'kb.upload': KbApi['upload']
   'goal.create': GoalsApi['create']
   'goal.edit': GoalsApi['edit']
   'goal.pause': GoalsApi['pause']

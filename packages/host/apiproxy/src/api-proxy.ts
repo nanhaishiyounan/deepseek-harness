@@ -4,9 +4,9 @@
  */
 
 import { randomUUID } from 'node:crypto'
-import { mkdir, stat } from 'node:fs/promises'
+import { mkdir, stat, writeFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
-import { dirname } from 'node:path'
+import { dirname, join } from 'node:path'
 import { z as zod } from 'zod'
 import type { Context } from '@deepseek-ai/cordis'
 import { installModelSelection } from '@deepseek-ai/dsh-agent'
@@ -35,6 +35,16 @@ import {
   PresetNotWritableError, resolveSessionPreset, UnknownPresetError,
 } from '@deepseek-ai/dsh-agent-presets'
 import type { PresetBearingSession } from '@deepseek-ai/dsh-agent-presets'
+import { KB_DOC_KINDS } from '@deepseek-ai/dsh-kb'
+import type { KbDocKind, KbRuntime } from '@deepseek-ai/dsh-kb'
+import type { KbIngestView } from './api/kb.ts'
+// Type-only: resolves `ctx.get('kb')`/`ctx.get('fs')`/`ctx.get('web')` service types.
+import type {} from '@deepseek-ai/dsh-kb'
+import type {} from '@deepseek-ai/dsh-fs'
+import type {} from '@deepseek-ai/dsh-web'
+import {
+  assertPublicUrl, extractDocxText, extractPdfText, htmlToStructuredText, INGEST_EXTENSIONS,
+} from '@deepseek-ai/dsh-tool-kb'
 import type {} from '@deepseek-ai/dsh-tools'
 import type {
   ApiProxy, ConfigurableProviderView, CredentialView, GoalRef, HistoryEntry, HostFrame,
@@ -254,6 +264,100 @@ function paginate(
 }
 
 /** Wrap an ok result echoing the request's rpcId. */
+/** Upper bound on one workbench-ingested binary document's bytes (the tool suite's own limit). */
+const MAX_KB_INGEST_BYTES = 64 * 1024 * 1024
+
+/**
+ * Narrow one wire doc_kind for the kb workbench. `KbDocKind` is itself a
+ * string union, so the outcome is discriminated: the closed-union value on
+ * `ok`, the invalid original on refusal (the caller refuses with it as
+ * detail).
+ */
+/**
+ * Reduce an uploaded file name to one safe path segment: the last `/`- or
+ * `\`-separated component, free of control characters and the reserved
+ * dot names. Directory traversal in the raw name can only ever select its
+ * final segment; a name that reduces to nothing has no safe landing name.
+ * @param raw - the client-supplied file name.
+ * @returns the sanitized base name, or undefined when none survives.
+ */
+function sanitizeUploadFilename(raw: string): string | undefined {
+  const base = raw.trim().split(/[/\\]/).at(-1) ?? ''
+  if (base.length === 0 || base === '.' || base === '..') return undefined
+  if (/[\u0000-\u001f\u007f]/.test(base)) return undefined
+  return base
+}
+
+function parseKbWorkbenchDocKind(docKind: string): { ok: true; value: KbDocKind } | { ok: false; value: string } {
+  return (KB_DOC_KINDS as readonly string[]).includes(docKind)
+    ? { ok: true, value: docKind as KbDocKind }
+    : { ok: false, value: docKind }
+}
+
+/** The shared refusal every kb method answers with when no kb capability is composed. */
+function kbNotComposed(): RpcError {
+  return {
+    code: 'kb-not-composed',
+    message: 'this deployment composes no knowledge base; add the dsh-kb seam and a store provider',
+    details: {},
+  }
+}
+
+/** Project one seam ingest outcome onto the wire view. */
+function ingestView(result: { docId: number; chunks: number; embedded: boolean; embedModel?: string }): {
+  doc_id: number
+  chunks: number
+  embedded: boolean
+  embed_model?: string
+} {
+  return {
+    doc_id: result.docId,
+    chunks: result.chunks,
+    embedded: result.embedded,
+    ...result.embedModel === undefined ? {} : { embed_model: result.embedModel },
+  }
+}
+
+/* jscpd:ignore-start */
+// jscpd: intentional symmetry — the seam-hit → wire-row projection parallels
+// tool-kb's searchValueFromResult; the host and client planes own their wire
+// faces separately (sharing a type would drag the gateway into the client graph).
+/** Project one seam search hit onto the wire view (the citation row). */
+function hitView(hit: {
+  chunkId: number
+  docId: number
+  sourcePath: string
+  title?: string
+  docKind: string
+  collectedAt?: string
+  headingPath?: string
+  chunkIdx: number
+  content: string
+}): {
+  chunk_id: number
+  doc_id: number
+  source_path: string
+  title?: string
+  doc_kind: string
+  collected_at?: string
+  heading_path?: string
+  chunk_idx: number
+  content: string
+} {
+  return {
+    chunk_id: hit.chunkId,
+    doc_id: hit.docId,
+    source_path: hit.sourcePath,
+    ...hit.title === undefined ? {} : { title: hit.title },
+    doc_kind: hit.docKind,
+    ...hit.collectedAt === undefined ? {} : { collected_at: hit.collectedAt },
+    ...hit.headingPath === undefined ? {} : { heading_path: hit.headingPath },
+    chunk_idx: hit.chunkIdx,
+    content: hit.content,
+  }
+}
+/* jscpd:ignore-end */
+
 function ok<T>(request: RpcRequest<unknown>, value: T): RpcResponse<T> {
   return { rpcId: request.rpcId, result: { ok: true, value } }
 }
@@ -592,6 +696,21 @@ export interface ApiProxyDefaults {
   saveDefaultModelSelection?: (selection: ModelSelection) => Promise<void>
   /** Default project directory for new sessions whose create request carries no cwd. */
   cwd: string
+  /**
+   * The tenant the kb workbench domain operates on — the deployment-side
+   * binding for stats/search/ingest, mirroring the `tool-kb` row's `tenant`.
+   * The plugin schema requires it; every kb method also refuses loudly when
+   * a direct construction omits it, so a missing binding never silently
+   * lands on a default tenant.
+   */
+  kbTenant?: string
+  /**
+   * Whether the kb workbench's write methods (`kb.ingest`, `kb.ingestUrl`,
+   * `kb.upload`) answer. Absent means read-only: the gateway is
+   * unauthenticated, and `kb.ingest` reads whatever path it is handed, so
+   * writes need an explicit per-deployment opt-in.
+   */
+  kbWriteEnabled?: boolean
   /** Native open-with-default-application; injectable for carrier tests. */
   openPath?: (path: string, signal: AbortSignal) => Promise<void>
   /** Native text-editor handoff; injectable for settings-document tests. */
@@ -1045,6 +1164,70 @@ function changedWorkspaceView(workspaceId: string, value: unknown): WorkspaceVie
  * @returns the ApiProxy implementation.
  */
 export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiProxy {
+  /** The kb workbench's tenant binding; unbound constructions refuse loudly on every kb method. */
+  const kbTenant = (): string | undefined => defaults.kbTenant
+  /** The shared refusal every kb method answers with when no tenant is bound. */
+  const kbTenantUnbound = (): RpcError => ({
+    code: 'kb-tenant-unbound',
+    message: 'the api-gateway config kbTenant is not set; bind the deployment\'s kb tenant explicitly',
+    details: {},
+  })
+  /** The shared ingest-path gates: kb composed, writes opted in, tenant bound. */
+  const ingestGates = (): { kb: KbRuntime; tenant: string } | { refusal: RpcError } => {
+    const kb = ctx.get('kb')
+    if (kb === undefined) return { refusal: kbNotComposed() }
+    if (defaults.kbWriteEnabled !== true) return { refusal: kbWriteRefusal() }
+    const tenant = kbTenant()
+    if (tenant === undefined) return { refusal: kbTenantUnbound() }
+    return { kb, tenant }
+  }
+
+  /** Parse one ingest-path doc_kind, shaping the shared refusal for invalid values. */
+  const parseIngestDocKind = (docKind: string | undefined): { ok: true; value: KbDocKind } | { ok: false; refusal: RpcError } => {
+    const parsed = parseKbWorkbenchDocKind(docKind ?? 'other')
+    return parsed.ok ? parsed : {
+      ok: false,
+      refusal: {
+        code: 'kb-invalid-doc-kind',
+        message: `doc_kind must be one of ${KB_DOC_KINDS.join(', ')}`,
+        details: { docKind: parsed.value },
+      },
+    }
+  }
+  /** The shared refusal every kb write method answers with unless the deployment opted in. */
+  const kbWriteRefusal = (): RpcError => ({
+    code: 'kb-write-disabled',
+    message: 'the kb workbench is read-only; set the api-gateway config kbWriteEnabled: true to allow ingest',
+    details: {},
+  })
+  /**
+   * Store one workbench document through the seam and answer with the wire
+   * view. Shared by the file and URL ingest paths; the caller owns content
+   * production and the refusal details.
+   */
+  const storeKbDocument = async (
+    request: RpcRequest<unknown>,
+    kb: KbRuntime,
+    tenant: string,
+    input: {
+      sourcePath: string
+      kind: KbDocKind
+      title?: string | undefined
+      collectedAt?: string | undefined
+      content: string
+    },
+    signal: AbortSignal | undefined,
+  ): Promise<RpcResponse<KbIngestView>> => {
+    const result = await kb.ingest({
+      tenantId: tenant,
+      sourcePath: input.sourcePath,
+      docKind: input.kind,
+      ...input.title === undefined ? {} : { title: input.title },
+      ...input.collectedAt === undefined ? {} : { collectedAt: input.collectedAt },
+      content: input.content,
+    }, signal)
+    return ok(request, ingestView(result))
+  }
   const sessionExportCompressionLevel = defaults.sessionExportCompressionLevel
     ?? DEFAULT_SESSION_LOG_COMPRESSION_LEVEL
   const coldBlankProbeMaxBytes = defaults.coldBlankProbeMaxBytes
@@ -2908,6 +3091,217 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
 
       async openPath(request, signal) {
         return openPath(request, request.payload.path, signal)
+      },
+    },
+
+    kb: {
+      // The workbench surface over the OPTIONAL kb capability: a deployment
+      // that composes no knowledge base keeps a working gateway, and every
+      // method fails with the same structured refusal. The tenant is the
+      // deployment's own binding (defaults.kbTenant), never wire input.
+      async stats(request) {
+        const kb = ctx.get('kb')
+        if (kb === undefined) return err(request, kbNotComposed())
+        const tenant = kbTenant()
+        if (tenant === undefined) return err(request, kbTenantUnbound())
+        const [storeStats, usage] = await Promise.all([
+          kb.stats(tenant, undefined),
+          kb.usage(tenant),
+        ])
+        return ok(request, {
+          documents: storeStats.documents,
+          chunks: storeStats.chunks,
+          embedded_chunks: storeStats.embeddedChunks,
+          embed_available: storeStats.embedAvailable,
+          ...storeStats.embedModel === undefined ? {} : { embed_model: storeStats.embedModel },
+          usage: {
+            searches: usage.searches,
+            ingested_documents: usage.ingestedDocuments,
+            ingested_chunks: usage.ingestedChunks,
+            embed_texts: usage.embedTexts,
+            embed_tokens: usage.embedTokens,
+          },
+        })
+      },
+
+      async search(request, signal) {
+        const { query, doc_kind: docKind, max_results: maxResults } = request.payload
+        const kb = ctx.get('kb')
+        if (kb === undefined) return err(request, kbNotComposed())
+        const tenant = kbTenant()
+        if (tenant === undefined) return err(request, kbTenantUnbound())
+        let kind: KbDocKind | undefined
+        if (docKind !== undefined) {
+          const parsed = parseKbWorkbenchDocKind(docKind)
+          if (!parsed.ok) {
+            return err(request, {
+              code: 'kb-invalid-doc-kind',
+              message: `doc_kind must be one of ${KB_DOC_KINDS.join(', ')}`,
+              details: { docKind: parsed.value },
+            })
+          }
+          kind = parsed.value
+        }
+        const result = await kb.search({
+          query,
+          tenantId: tenant,
+          ...kind === undefined ? {} : { docKind: kind },
+          ...maxResults === undefined ? {} : { maxResults },
+        }, signal)
+        return ok(request, {
+          mode: result.mode,
+          ...result.embedModel === undefined ? {} : { embed_model: result.embedModel },
+          results: result.results.map(hitView),
+        })
+      },
+
+      async ingest(request, signal) {
+        const { path, doc_kind: docKind, title, collected_at: collectedAt } = request.payload
+        const gates = ingestGates()
+        if ('refusal' in gates) return err(request, gates.refusal)
+        const { kb, tenant } = gates
+        const fs = ctx.get('fs')
+        if (fs === undefined) {
+          return err(request, { code: 'kb-fs-unavailable', message: 'no filesystem service is composed', details: {} })
+        }
+        const trimmed = path.trim()
+        if (!INGEST_EXTENSIONS.some(extension => trimmed.toLowerCase().endsWith(extension))) {
+          return err(request, {
+            code: 'kb-invalid-path',
+            message: `path must end with one of ${INGEST_EXTENSIONS.join(', ')}`,
+            details: { path: trimmed },
+          })
+        }
+        const kindParse = parseIngestDocKind(docKind)
+        if (!kindParse.ok) return err(request, kindParse.refusal)
+        const kind = kindParse.value
+        try {
+          const target = await fs.resolve(trimmed, signal === undefined ? {} : { signal })
+          const lower = trimmed.toLowerCase()
+          const bytes = (): Promise<Uint8Array> => fs.readBytes(target, signal, MAX_KB_INGEST_BYTES)
+          const content = lower.endsWith('.md') || lower.endsWith('.txt')
+            ? await fs.readText(target, signal)
+            : lower.endsWith('.pdf')
+              ? await extractPdfText(await bytes())
+              : await extractDocxText(await bytes())
+          return await storeKbDocument(request, kb, tenant, { sourcePath: trimmed, kind, title, collectedAt, content }, signal)
+        } catch (error: unknown) {
+          return err(request, {
+            code: 'kb-ingest-failed',
+            message: error instanceof Error ? error.message : String(error),
+            details: { path: trimmed },
+          })
+        }
+      },
+
+      /**
+       * The browser upload channel: land one base64-encoded file under the
+       * host workspace's uploads directory, parse it exactly as the file
+       * ingest channel parses the same extensions, and store it under the
+       * uploads-relative source path so re-uploads replace their prior
+       * document (the seam's same-path semantics).
+       */
+      async upload(request, signal) {
+        const { filename, data, doc_kind: docKind, title, collected_at: collectedAt } = request.payload
+        const gates = ingestGates()
+        if ('refusal' in gates) return err(request, gates.refusal)
+        const { kb, tenant } = gates
+        const sanitized = sanitizeUploadFilename(filename)
+        if (sanitized === undefined) {
+          return err(request, {
+            code: 'kb-invalid-filename',
+            message: 'filename must reduce to one safe file name (no directory segments or reserved names)',
+            details: { filename },
+          })
+        }
+        if (!INGEST_EXTENSIONS.some(extension => sanitized.toLowerCase().endsWith(extension))) {
+          return err(request, {
+            code: 'kb-invalid-path',
+            message: `filename must end with one of ${INGEST_EXTENSIONS.join(', ')}`,
+            details: { path: sanitized },
+          })
+        }
+        const kindParse = parseIngestDocKind(docKind)
+        if (!kindParse.ok) return err(request, kindParse.refusal)
+        const kind = kindParse.value
+        const bytes = Buffer.from(data, 'base64')
+        if (bytes.byteLength > MAX_KB_INGEST_BYTES) {
+          return err(request, {
+            code: 'kb-upload-too-large',
+            message: `upload exceeds the workbench limit of ${MAX_KB_INGEST_BYTES} bytes`,
+            details: { filename: sanitized, maxBytes: MAX_KB_INGEST_BYTES },
+          })
+        }
+        const sourcePath = `workspace/data/uploads/${sanitized}`
+        try {
+          const landingDir = join(defaults.cwd, 'workspace/data/uploads')
+          await mkdir(landingDir, { recursive: true })
+          await writeFile(join(landingDir, sanitized), bytes)
+          const lower = sanitized.toLowerCase()
+          // Fatal UTF-8 decoding keeps the text channel aligned with the file
+          // ingest's readText: invalid encodings refuse instead of storing
+          // replacement characters.
+          const content = lower.endsWith('.md') || lower.endsWith('.txt')
+            ? new TextDecoder('utf-8', { fatal: true }).decode(bytes)
+            : lower.endsWith('.pdf')
+              ? await extractPdfText(bytes)
+              : await extractDocxText(bytes)
+          return await storeKbDocument(request, kb, tenant, { sourcePath, kind, title, collectedAt, content }, signal)
+        } catch (error: unknown) {
+          return err(request, {
+            code: 'kb-ingest-failed',
+            message: error instanceof Error ? error.message : String(error),
+            details: { path: sourcePath },
+          })
+        }
+      },
+
+      async ingestUrl(request, signal) {
+        const { url, doc_kind: docKind, title, collected_at: collectedAt } = request.payload
+        const gates = ingestGates()
+        if ('refusal' in gates) return err(request, gates.refusal)
+        const { kb, tenant } = gates
+        const web = ctx.get('web')
+        if (web === undefined) {
+          return err(request, { code: 'kb-web-unavailable', message: 'no web service is composed', details: {} })
+        }
+        const kindParse = parseIngestDocKind(docKind)
+        if (!kindParse.ok) return err(request, kindParse.refusal)
+        const kind = kindParse.value
+        let parsed: URL
+        try {
+          parsed = new URL(url)
+        } catch {
+          return err(request, { code: 'kb-invalid-url', message: `not a valid URL: ${url}`, details: { url } })
+        }
+        // The same SSRF gate as the kb_ingest_url tool: the workbench never
+        // becomes a private-network probing surface.
+        await assertPublicUrl(parsed, false)
+        try {
+          const fetched = await web.fetch({ url }, signal)
+          if (fetched.statusCode < 200 || fetched.statusCode >= 300) {
+            return err(request, {
+              code: 'kb-ingest-failed',
+              message: `the page returned HTTP ${fetched.statusCode}; refusing to store an error response`,
+              details: { url },
+            })
+          }
+          if (fetched.truncated) {
+            return err(request, {
+              code: 'kb-ingest-failed',
+              message: 'the fetched body was truncated by the provider; refusing to store a partial corpus',
+              details: { url },
+            })
+          }
+          const content = fetched.body.kind === 'html' ? htmlToStructuredText(fetched.body.content) : fetched.body.content
+          return await storeKbDocument(request, kb, tenant, { sourcePath: url, kind, title, collectedAt, content }, signal)
+        } catch (error: unknown) {
+          return err(request, {
+            code: 'kb-ingest-failed',
+            message: error instanceof Error ? error.message : String(error),
+            details: { url },
+          })
+        }
       },
     },
 

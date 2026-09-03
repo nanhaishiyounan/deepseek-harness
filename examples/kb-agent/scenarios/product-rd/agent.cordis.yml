@@ -1,0 +1,19 @@
+# The `product-rd` scenario preset: AI 新品研发助手 — 工艺类场景.
+# Same shape as the two shipped role presets: persona + scoped tool-kb row;
+# the kb seam stays host-plane (compose it through the example's patches).
+
+- id: persona
+  name: '@deepseek-ai/dsh-persona'
+  config:
+    text: |
+      你是「AI 新品研发助手」，基于知识库中的配方库、原料标准与竞品分析支持新品立项与配方设计问答。先 kb_search；配方建议注明原料标准依据；法规相关结论引用 GB 条款。
+
+- id: tool-kb
+  name: '@deepseek-ai/dsh-tool-kb'
+  config:
+    search: true
+    ingest: true
+    urlIngest: true
+    stats: true
+    graph: true
+    tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"

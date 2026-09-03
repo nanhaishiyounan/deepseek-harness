@@ -1,0 +1,523 @@
+/* The KB workbench view tab: search zone, hit cards, ingest wizard, document
+   list, and usage card. Colors ride the --dsw-alias-* / --dsw-specific-*
+   semantic tokens (docs/web-styling.md); spacing is this component's own 4px
+   grid. */
+
+.workbench {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 16px 16px 32px;
+  background: var(--dsw-alias-bg-base);
+}
+
+.zone {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--dsw-alias-border-l1);
+}
+
+.zone:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+
+.zoneHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.zoneTitle {
+  margin: 0;
+  font: var(--dsw-font-m-18);
+  color: var(--dsw-alias-label-primary);
+}
+
+.zoneNote {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: var(--dsw-font-xxs-12);
+  color: var(--dsw-alias-label-secondary);
+}
+
+/* Search zone */
+
+.searchRow {
+  display: flex;
+  gap: 8px;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  background: var(--dsw-specific-input-major);
+  color: var(--dsw-alias-label-primary);
+  font: var(--dsw-font-base-16);
+  transition: border-color var(--ds-transition-duration) var(--ds-ease-in-out);
+}
+
+.searchInput::placeholder {
+  color: var(--dsw-alias-markdown-placeholder);
+}
+
+.searchInput:focus-visible {
+  outline: none;
+  border-color: var(--dsw-alias-state-business-primary);
+}
+
+.samples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.summary {
+  margin: 0;
+  font: var(--dsw-font-xxs-12);
+  color: var(--dsw-alias-label-secondary);
+}
+
+.hits {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hitSkeleton {
+  height: 96px;
+  border-radius: 8px;
+  background: var(--dsw-alias-bg-skeleton);
+}
+
+.emptyResult {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-layer-1);
+  color: var(--dsw-alias-label-secondary);
+  font: var(--dsw-font-s-14);
+}
+
+/* Hit card */
+
+.hit {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-layer-1);
+  transition: border-color var(--ds-transition-duration-fast) var(--ds-ease-in-out);
+}
+
+.hit:hover {
+  border-color: var(--dsw-alias-border-l2);
+}
+
+.hitHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hitBadge {
+  flex: none;
+  min-width: 18px;
+  padding: 1px 4px;
+  border-radius: 6px;
+  text-align: center;
+  background: var(--dsw-alias-state-business-tertiary);
+  color: var(--dsw-alias-label-primary-bluish);
+  font: var(--dsw-font-xxxs-strong-11);
+}
+
+.hitSource {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: var(--dsw-font-xxs-12);
+  color: var(--dsw-alias-label-secondary);
+}
+
+.hitCarry {
+  flex: none;
+}
+
+.hitPassage,
+.hitPassageClamped {
+  margin: 0;
+  font: var(--dsw-font-s-14);
+  color: var(--dsw-alias-label-primary);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.hitPassageClamped {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.hitMark {
+  background: var(--dsw-alias-state-business-tertiary);
+  color: var(--dsw-alias-label-primary);
+}
+
+.hitToggle {
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font: var(--dsw-font-xxs-12);
+  color: var(--dsw-alias-state-business-primary);
+}
+
+/* Ingest wizard */
+
+.wizard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--dsw-alias-border-l1);
+}
+
+.tab {
+  padding: 6px 12px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: none;
+  cursor: pointer;
+  font: var(--dsw-font-xs-strong-13);
+  color: var(--dsw-alias-label-secondary);
+}
+
+.tabActive {
+  border-bottom-color: var(--dsw-alias-state-business-primary);
+  color: var(--dsw-alias-label-primary);
+}
+
+.wizardInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-layer-1);
+  color: var(--dsw-alias-label-primary);
+  font: var(--dsw-font-s-14);
+}
+
+.wizardInput:focus-visible {
+  outline: none;
+  border-color: var(--dsw-alias-state-business-primary);
+}
+
+.fileTab {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Upload tab (the wizard's default channel) */
+
+.uploadTab {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.uploadInput {
+  display: none;
+}
+
+.uploadPick {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px dashed var(--dsw-alias-border-l2);
+  cursor: pointer;
+  font: var(--dsw-font-s-14);
+  color: var(--dsw-alias-label-primary);
+  transition: border-color var(--ds-transition-duration) var(--ds-ease-in-out);
+}
+
+.uploadPick:hover {
+  border-color: var(--dsw-alias-state-business-primary);
+}
+
+.uploadRows {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.uploadRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: var(--dsw-alias-bg-layer-1);
+  font: var(--dsw-font-xs-13);
+}
+
+.uploadRowName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--dsw-alias-label-primary);
+}
+
+.uploadRowState {
+  color: var(--dsw-alias-label-secondary);
+}
+
+.uploadRowFailed {
+  color: var(--dsw-alias-state-error-primary);
+}
+
+.fileHint {
+  margin: 0;
+  font: var(--dsw-font-xxs-12);
+  color: var(--dsw-alias-label-secondary);
+}
+
+.fileLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font: var(--dsw-font-xxs-12);
+  color: var(--dsw-alias-label-secondary);
+}
+
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+}
+
+.crumb {
+  padding: 2px 6px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+  font: var(--dsw-font-xxs-12);
+  color: var(--dsw-alias-state-business-primary);
+}
+
+.crumb:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.folderList {
+  display: flex;
+  flex-direction: column;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 8px;
+  /* The sheet also paints an elevated toast (bg-layer-2), so the scrolling
+     folder list rebinds its thumb to the elevated rung. */
+  --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2);
+  --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2);
+}
+
+.folderRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border: none;
+  border-bottom: 1px solid var(--dsw-alias-border-l1);
+  background: none;
+  cursor: pointer;
+  text-align: start;
+  font: var(--dsw-font-s-14);
+  color: var(--dsw-alias-label-primary);
+}
+
+.folderRow:last-child {
+  border-bottom: none;
+}
+
+.folderRow:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.folderName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wizardError {
+  margin: 0;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: var(--dsw-alias-state-error-secondary);
+  color: var(--dsw-alias-state-error-primary);
+  font: var(--dsw-font-xs-13);
+}
+
+/* Document list */
+
+.docsEmpty {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px dashed var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-layer-1);
+  font: var(--dsw-font-s-14);
+  color: var(--dsw-alias-label-secondary);
+}
+
+.docsEmpty strong {
+  color: var(--dsw-alias-label-primary);
+}
+
+.docs {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.docRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 4px;
+  border-bottom: 1px solid var(--dsw-alias-border-l1);
+  font: var(--dsw-font-s-14);
+}
+
+.docName {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--dsw-alias-label-primary);
+}
+
+.docMeta {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font: var(--dsw-font-xxs-12);
+  color: var(--dsw-alias-label-secondary);
+}
+
+.docChunks {
+  white-space: nowrap;
+}
+
+.docReady {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--dsw-alias-state-success-tertiary);
+  color: var(--dsw-alias-label-secondary);
+}
+
+/* Usage card */
+
+.usage {
+  margin: 0;
+  display: flex;
+  gap: 32px;
+}
+
+.usageCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.usageCell dd {
+  margin: 0;
+  font: var(--dsw-font-xl-24);
+  font-variant-numeric: tabular-nums;
+  color: var(--dsw-alias-label-primary);
+}
+
+.usageCell dt {
+  font: var(--dsw-font-xxs-12);
+  color: var(--dsw-alias-label-secondary);
+}
+
+.usageSkeleton {
+  width: 320px;
+  height: 56px;
+  border-radius: 8px;
+  background: var(--dsw-alias-bg-skeleton);
+}
+
+/* Shared failure strip */
+
+.failure {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: var(--dsw-alias-state-error-secondary);
+  color: var(--dsw-alias-state-error-primary);
+  font: var(--dsw-font-xs-13);
+}
+
+@media (max-width: 768px) {
+  .searchRow {
+    flex-wrap: wrap;
+  }
+
+  .searchInput {
+    flex-basis: 100%;
+  }
+
+  .usage {
+    gap: 16px;
+  }
+}

@@ -40,6 +40,20 @@ declare module '@deepseek-ai/cordis' {
 /** Gateway plugin configuration. */
 export interface Config {
   /**
+   * The tenant the kb workbench domain operates on — the deployment-side
+   * binding for stats/search/ingest, mirroring the `tool-kb` row's `tenant`.
+   * Required: a missing binding fails load instead of silently landing on a
+   * default tenant.
+   */
+  kbTenant: string
+  /**
+   * Whether the kb workbench's write methods (`kb.ingest`, `kb.ingestUrl`,
+   * `kb.upload`) answer. Absent means read-only: the gateway is
+   * unauthenticated, and `kb.ingest` reads whatever path it is handed, so
+   * writes need an explicit per-deployment opt-in.
+   */
+  kbWriteEnabled?: boolean
+  /**
    * Whether this deployment can hand paths to a native desktop opener —
    * the `hasDocument` capability the agent-preset roster reports. Absent,
    * the platform is asked (macOS/Windows/WSL yes; Linux only with a display
@@ -77,6 +91,8 @@ export class ApiProxyService extends Service implements ApiProxy {
     sessionExportCompressionLevel: z.number().step(1).min(0).max(9)
       .default(DEFAULT_SESSION_LOG_COMPRESSION_LEVEL) as z<SessionLogCompressionLevel>,
     coldBlankProbeMaxBytes: z.natural().default(DEFAULT_COLD_BLANK_PROBE_MAX_BYTES),
+    kbTenant: z.string().required(),
+    kbWriteEnabled: z.boolean(),
   })
 
   readonly sessions: ApiProxy['sessions']
@@ -89,6 +105,7 @@ export class ApiProxyService extends Service implements ApiProxy {
   readonly settings: ApiProxy['settings']
   readonly credentials: ApiProxy['credentials']
   readonly llm: ApiProxy['llm']
+  readonly kb: ApiProxy['kb']
   readonly events: ApiProxy['events']
   readonly downloads: ApiProxy['downloads']
   readonly respond: ApiProxy['respond']
@@ -99,6 +116,8 @@ export class ApiProxyService extends Service implements ApiProxy {
       defaultModelSelection: () => ctx.agentDefaultModel.currentSelection(),
       saveDefaultModelSelection: selection => ctx.agentDefaultModel.saveSelection(selection),
       cwd: process.cwd(),
+      kbTenant: config.kbTenant,
+      ...config.kbWriteEnabled === undefined ? {} : { kbWriteEnabled: config.kbWriteEnabled },
       ...config.nativeOpen === undefined ? {} : { canOpenPath: () => config.nativeOpen as boolean },
       ...(config.sessionExportCompressionLevel === undefined
         ? {}
@@ -117,6 +136,7 @@ export class ApiProxyService extends Service implements ApiProxy {
     this.settings = api.settings
     this.credentials = api.credentials
     this.llm = api.llm
+    this.kb = api.kb
     this.events = api.events
     this.downloads = api.downloads
     // createApiProxy returns closures (no `this` capture), so the bind is

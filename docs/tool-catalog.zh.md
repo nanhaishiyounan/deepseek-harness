@@ -19,6 +19,7 @@
 
 | 工具包 | 模型可见名称 | 依赖 | 写入／影响 | 随产品发布的别名 | 部署说明 |
 | --- | --- | --- | --- | --- | --- |
+| `@deepseek-ai/dsh-tool-kb` | `kb_graph_add`, `kb_graph_query`, `kb_ingest`, `kb_ingest_url`, `kb_search`, `kb_stats` | `ctx.tools`、`ctx.kb`、`ctx.fs`、`ctx.systemPrompt` | `tool/call`、`tool/result` | - | kb_search、kb_ingest、kb_ingest_url 与 kb_stats 在无可用 store 时保持可见并在执行时以结构化错误失败；四者都在部署绑定租户下运行（模型从不提供租户），检索结果带编号引用，降级 text-only 模式在每次检索结果中可观测。 |
 | `@deepseek-ai/dsh-tool-ask-user` | `ask_user_question` | `ctx.tools`、`ctx.userQuestions` | `tool/call`、`tool/result after a UI/provider answers the question` | - | ask_user_question 会暂停工具调用，直到当前 UI 提供方返回人类答案。 |
 | `@deepseek-ai/dsh-tools` | `run_code` | `ctx.tools`、`ctx.codeRuntime (execution time)`、`ctx.systemPrompt` | `tool/call`、`one tool/code-dispatch-start + tool/code-dispatch pair per bridged sub-call`、`tool/result` | - | 在 `mode: code`／`mode: both` 下，它由工具注册表所有，作为可过滤能力层之外的保留传输机制（参见 Code Mode Agent Note）。在 `code` 下，它是注册表对协议格式（wire format）的唯一贡献；其他可见能力在使用已加载运行时语言生成的 SDK 章节中声明。程序通过 binding 调用这些能力，调用按照原生并发约定调度：启动顺序和策略遵循提交顺序，并发安全的函数体最多重叠执行 `maxParallelSubCalls` 个。调用会重新进入完整且受守卫保护的工具流水线，并将每个嵌套执行关联到此外层结果。 |
 | `@deepseek-ai/dsh-plan-mode` | `exit_plan_mode` | `ctx.tools`、`ctx.systemPrompt`、`ctx.userQuestions (execution time, opportunistic)` | `tool/call`、`plan/mode inactive on an approved review`、`tool/result` | - | 规划未激活时，exit_plan_mode 仍保留在面向模型的 schema 中，这样状态转换不会在规划策略变更之外额外造成工具目录变动。其执行路径会拒绝规划模式之外的调用；在规划模式下，它通过用户交互 seam 提交计划（批准／根据反馈继续规划），批准后会在步骤边界记录规划模式已停用。 |
@@ -45,6 +46,218 @@
 | `@deepseek-ai/dsh-tool-todo` | `todo_write` | `ctx.tools`、`owning Agent session` | `tool/call`、`todo/write`、`tool/result` | - | todo_write 是会话所有的状态；UI 将最新的 todo/write 事件渲染为检查清单。`allowParallelInProgress` 是没有默认值的必填项，因此本目录明确选择 `true`，对应描述允许同时存在多个 `in_progress` 项。选择 `false` 的部署会获得同一工具，但描述会要求只能有 1 个活动任务。 |
 | `@deepseek-ai/dsh-tool-workflow` | `workflow` | `ctx.tools`、`ctx.workflowEngine`、`ctx.systemPrompt`、`a calling Agent (exec.agent parents the script children)` | `tool/call`、`tool/result` | - | - |
 | `@deepseek-ai/dsh-tool-web` | `web_fetch`、`web_search` | `ctx.tools`、`ctx.web`、`ctx.systemPrompt` | `tool/call`、`tool/result` | - | web_search 和 web_fetch 将提供方选择置于 ctx.web 之后，使模型可见 schema 在更换后端时保持稳定。 |
+
+
+<a id="deepseek-aidsh-tool-kb"></a>
+
+## `@deepseek-ai/dsh-tool-kb`
+
+### `kb_graph_add`
+
+Store entity-relation triples extracted from ingested documents into the knowledge graph (idempotent; up to 50 per call). Cite the source document in source_path so graph answers stay traceable.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "triples": {
+      "type": "array",
+      "description": "Triples to store. Entity types: company, product, ingredient, additive, standard, process, risk. Predicates: produces, uses, contains, complies_with, follows, flags, supplies.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "subject_type": {
+            "type": "string"
+          },
+          "subject_id": {
+            "type": "string"
+          },
+          "predicate": {
+            "type": "string"
+          },
+          "object_type": {
+            "type": "string"
+          },
+          "object_id": {
+            "type": "string"
+          },
+          "source_path": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "subject_type",
+          "subject_id",
+          "predicate",
+          "object_type",
+          "object_id"
+        ]
+      }
+    }
+  },
+  "required": [
+    "triples"
+  ]
+}
+```
+
+Source: [`packages/kb/tool-kb/src/index.ts`](../packages/kb/tool-kb/src/index.ts)
+
+### `kb_graph_query`
+
+Query the knowledge graph: neighbors of one entity, a two-hop path between two entities, or entities by id substring. Entity types: company, product, ingredient, additive, standard, process, risk. Predicates: produces, uses, contains, complies_with, follows, flags, supplies.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "action": {
+      "type": "string",
+      "description": "One of: neighbors, paths, search."
+    },
+    "entity_type": {
+      "type": "string",
+      "description": "Entity type (company, product, ingredient, additive, standard, process, risk); required for neighbors/paths, optional type filter for search."
+    },
+    "entity_id": {
+      "type": "string",
+      "description": "Entity id for neighbors/paths, or the substring filter for search."
+    },
+    "target_type": {
+      "type": "string",
+      "description": "Target entity type for paths."
+    },
+    "target_id": {
+      "type": "string",
+      "description": "Target entity id for paths."
+    },
+    "query": {
+      "type": "string",
+      "description": "Id substring for the search action."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Maximum entities for search (1–20)."
+    }
+  },
+  "required": [
+    "action"
+  ]
+}
+```
+
+Source: [`packages/kb/tool-kb/src/index.ts`](../packages/kb/tool-kb/src/index.ts)
+
+### `kb_ingest`
+
+读取一个 workspace 文档（.md、.txt、.pdf 或 .docx），抽取文本、切片后存入知识库供之后的 kb_search 使用。同路径重入库替换原文档。用户要求把文档加入知识库时使用。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "path": {
+      "type": "string",
+      "description": "Workspace-relative path of the document to ingest; must end with .md, .txt, .pdf, or .docx."
+    },
+    "doc_kind": {
+      "type": "string",
+      "description": "Document kind: meeting, interview, report, regulation, profile, table, other. Defaults to other."
+    },
+    "title": {
+      "type": "string",
+      "description": "Optional human-readable document title shown in citations."
+    },
+    "collected_at": {
+      "type": "string",
+      "description": "Optional ISO-8601 collection date of the source document."
+    }
+  },
+  "required": [
+    "path"
+  ]
+}
+```
+
+Source: [`packages/kb/tool-kb/src/index.ts`](../packages/kb/tool-kb/src/index.ts)
+
+### `kb_ingest_url`
+
+抓取一个 http(s) 页面、转为文本后存入知识库供之后的 kb_search 使用。URL 成为引用身份；同 URL 重入库替换原文档。用户要求把网页或在线法规加入知识库时使用。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "url": {
+      "type": "string",
+      "description": "http(s) URL of the page to ingest."
+    },
+    "doc_kind": {
+      "type": "string",
+      "description": "Document kind: meeting, interview, report, regulation, profile, table, other. Defaults to other."
+    },
+    "title": {
+      "type": "string",
+      "description": "Optional human-readable document title shown in citations."
+    },
+    "collected_at": {
+      "type": "string",
+      "description": "Optional ISO-8601 collection date of the source page."
+    }
+  },
+  "required": [
+    "url"
+  ]
+}
+```
+
+Source: [`packages/kb/tool-kb/src/index.ts`](../packages/kb/tool-kb/src/index.ts)
+
+### `kb_search`
+
+检索已入库知识库中回答问题的段落。返回最多 8 条带来源文档、标题路径与段落文本的编号引用。回答已入库文档相关问题前使用；结果按 [n] 引用。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "Natural-language query describing the passages to find."
+    },
+    "doc_kind": {
+      "type": "string",
+      "description": "Restrict hits to one document kind: meeting, interview, report, regulation, profile, table, other."
+    },
+    "max_results": {
+      "type": "number",
+      "description": "Maximum citations to return, 1–8."
+    }
+  },
+  "required": [
+    "query"
+  ]
+}
+```
+
+Source: [`packages/kb/tool-kb/src/index.ts`](../packages/kb/tool-kb/src/index.ts)
+
+### `kb_stats`
+
+报告知识库覆盖情况：文档、切片与已嵌入切片计数及当前检索模式。检索前用它确认知识库内容。
+
+```json
+{
+  "type": "object",
+  "properties": {}
+}
+```
+
+Source: [`packages/kb/tool-kb/src/index.ts`](../packages/kb/tool-kb/src/index.ts)
+
+kb_search, kb_ingest, kb_ingest_url, and kb_stats stay visible without a usable store and fail with a structured error at execution time; all four run under the deployment-bound tenant (the model never supplies one), retrieval results carry numbered citations, and the degraded text-only mode is observable in every search result.
 
 <a id="deepseek-aidsh-tool-ask-user"></a>
 

@@ -13,7 +13,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import clsx from 'clsx'
 import {
   Button, IconCloseFill14, IconPersonalizationOutline16,
-  IconProjectAddOutline16, IconSearchOutline16, Menu, Modal, Tooltip,
+  IconProjectAddOutline16, IconSearchOutline16, IconWarningOutline16, Menu, Modal, Toast, Tooltip,
 } from '@deepseek-ai/dsh-client-ui-primitives'
 import type {
   SessionId, SessionListState, SessionSearchResultItem, WorkspaceId, WorkspaceView,
@@ -769,6 +769,16 @@ export function WorkspaceBrowser({
   const workspaces = useWorkspaces(state => state.items)
   const workspacePhase = useWorkspaces(state => state.phase)
   const archivedSessionIds = useWorkspaces(state => state.archivedSessionIds)
+  // New Session failures land on the list state's action-error cell (the shell
+  // button and this region's ＋ rows share the runtime action). The seq keys
+  // the Toast so a repeated failure restarts the hold-then-fade cycle.
+  const actionError = useWorkspaces(state => state.lastActionError)
+  const [actionToast, setActionToast] = useState<{ seq: number; text: string } | null>(null)
+  useEffect(() => {
+    if (actionError !== null) {
+      setActionToast({ seq: actionError.seq, text: t('session.new.failed', { message: actionError.text }) })
+    }
+  }, [actionError, t])
   // Live occupancy of this surface's directory-flow hole (the same source the
   // flow reads): a composition without a picking affordance can add nothing.
   const directoryFlowAvailable = useDirectoryFlow(occupied => occupied)
@@ -1293,6 +1303,14 @@ export function WorkspaceBrowser({
         {deleting && <div className={css.deleteStatus} role="status">{t('delete.pending')}</div>}
         {deleteError !== null && <div className={css.renameError} role="alert">{deleteError}</div>}
       </Modal>
+      {actionToast !== null && (
+        <Toast
+          key={actionToast.seq}
+          text={actionToast.text}
+          icon={<IconWarningOutline16 />}
+          onDone={() => { setActionToast(null) }}
+        />
+      )}
     </div>
   )
 }

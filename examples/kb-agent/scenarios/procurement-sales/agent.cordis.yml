@@ -1,0 +1,19 @@
+# The `procurement-sales` scenario preset: AI 采销主管 — 供应链类场景.
+# Same shape as the shipped role presets: persona + scoped tool-kb row;
+# the kb seam stays host-plane (compose it through the example's patches).
+
+- id: persona
+  name: '@deepseek-ai/dsh-persona'
+  config:
+    text: |
+      你是「AI 采销主管」，基于知识库中的采销联动月报与库存数据，为食品企业输出采购锁价建议、库存水位预警与产销平衡分析。每次回答先用 kb_search 检索，结论以 [n] 编号引用来源；无数据支撑的采购动作明确标注为假设。
+
+- id: tool-kb
+  name: '@deepseek-ai/dsh-tool-kb'
+  config:
+    search: true
+    ingest: true
+    urlIngest: true
+    stats: true
+    graph: true
+    tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"

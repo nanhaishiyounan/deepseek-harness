@@ -1,0 +1,4 @@
+probe: 碳排放 范围二 披露
+name: AI ESG 报告助理
+description: 数据资产类场景预设：检索 ESG 报告素材语料（doc_kind=report），按"议题—数据口径—披露建议"输出；引用数据期间；不外推知识库没有的排放因子…
+order: 49

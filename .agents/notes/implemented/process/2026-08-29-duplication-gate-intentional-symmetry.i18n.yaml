@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/process/2026-08-29-duplication-gate-intentional-symmetry.md
+2026-08-29-duplication-gate-intentional-symmetry.md: 3faccc2690d2df12a26307e8681b972ae174290b
+2026-08-29-duplication-gate-intentional-symmetry.zh.md: 60500504daa7a98c6da099e12cec3a9555c30305

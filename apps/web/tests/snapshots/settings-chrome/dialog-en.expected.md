@@ -10,6 +10,9 @@
     - button "Plugins":
       - img
       - text: Plugins
+    - button "Knowledge base":
+      - img
+      - text: Knowledge base
     - button "Agent presets":
       - img
       - text: Agent presets

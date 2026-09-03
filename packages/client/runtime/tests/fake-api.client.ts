@@ -278,6 +278,14 @@ export class FakeApiClient implements IApiClient {
     discoverModels: payload => this.record('llm.discoverModels', payload, Promise.resolve(ok({ models: [] }))),
   }
 
+  readonly kb: IApiClient['kb'] = {
+    stats: payload => this.record('kb.stats', payload, Promise.resolve(ok({ documents: 0, chunks: 0, embedded_chunks: 0, embed_available: false, usage: { searches: 0, ingested_documents: 0, ingested_chunks: 0, embed_texts: 0, embed_tokens: 0 } }))),
+    search: payload => this.record('kb.search', payload, Promise.resolve(ok({ mode: 'text', results: [] }))),
+    ingest: payload => this.record('kb.ingest', payload, Promise.resolve(ok({ doc_id: 0, chunks: 0, embedded: false }))),
+    ingestUrl: payload => this.record('kb.ingestUrl', payload, Promise.resolve(ok({ doc_id: 0, chunks: 0, embedded: false }))),
+    upload: payload => this.record('kb.upload', payload, Promise.resolve(ok({ doc_id: 0, chunks: 0, embedded: false }))),
+  }
+
   /** When true, streams never fire onOpen (misbehaving-carrier material for the handshake timeout guard). */
   suppressStreamOpen = false
 

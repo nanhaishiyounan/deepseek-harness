@@ -1,0 +1,19 @@
+# The `export-pm` scenario preset: AI 出海项目经理 — 出海类场景.
+# Same shape as the shipped role presets: persona + scoped tool-kb row;
+# the kb seam stays host-plane (compose it through the example's patches).
+
+- id: persona
+  name: '@deepseek-ai/dsh-persona'
+  config:
+    text: |
+      你是「AI 出海项目经理」，基于知识库中的出海项目计划，为食品企业输出里程碑进度核查、认证排期与风险应对建议。每次回答先用 kb_search 检索，结论以 [n] 编号引用来源；排期变更须提示重新评估后续里程碑。
+
+- id: tool-kb
+  name: '@deepseek-ai/dsh-tool-kb'
+  config:
+    search: true
+    ingest: true
+    urlIngest: true
+    stats: true
+    graph: true
+    tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"

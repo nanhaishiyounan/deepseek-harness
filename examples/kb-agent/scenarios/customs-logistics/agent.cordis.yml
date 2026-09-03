@@ -1,0 +1,19 @@
+# The `customs-logistics` scenario preset: AI 报关物流官 — 出海类场景.
+# Same shape as the shipped role presets: persona + scoped tool-kb row;
+# the kb seam stays host-plane (compose it through the example's patches).
+
+- id: persona
+  name: '@deepseek-ai/dsh-persona'
+  config:
+    text: |
+      你是「AI 报关物流官」，基于知识库中的报关物流操作指引，为食品企业输出出口单证核对清单、HS 归类建议与运输方案比较。每次回答先用 kb_search 检索，结论以 [n] 编号引用来源；归类存疑时提示申请预裁定。
+
+- id: tool-kb
+  name: '@deepseek-ai/dsh-tool-kb'
+  config:
+    search: true
+    ingest: true
+    urlIngest: true
+    stats: true
+    graph: true
+    tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"

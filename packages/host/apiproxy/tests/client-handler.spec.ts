@@ -33,7 +33,16 @@ function scriptedApi(overrides: {
   async function *empty<F>(): AsyncGenerator<RpcRequest<F>> { /* no frames */ }
   const err = <T>(r: RpcRequest<unknown>): Promise<RpcResponse<T>> =>
     Promise.resolve({ rpcId: r.rpcId, result: { ok: false, error: { code: 'internal' as const, message: 'stub', details: {} } } })
+  const kbRefuse = <T>(r: RpcRequest<unknown>): Promise<RpcResponse<T>> =>
+    Promise.resolve({ rpcId: r.rpcId, result: { ok: false, error: { code: 'kb-not-composed' as never, message: 'stub', details: {} } } })
   return {
+    kb: {
+      stats: kbRefuse,
+      search: kbRefuse,
+      ingest: kbRefuse,
+      ingestUrl: kbRefuse,
+      upload: kbRefuse,
+    },
     sessions: {
       list: r => ok(r, { items: [] }),
       search: r => ok(r, { items: [], hasMore: false }),

@@ -182,6 +182,14 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
      */
     'conversation.hero.brand.mark': { kind: 'single'; scope: 'root'; owner: HeroBrandMarkOwnerProps }
     /**
+     * The blank-session headline text. Declared by this package's
+     * `conversation` entry; the shell renders the locale headline as
+     * fallback, so an unoccupied seat keeps the shipped hero pixel-identical
+     * while a deployment (e.g. a product workbench) can replace the wording
+     * with its own value proposition.
+     */
+    'conversation.hero.headline': { kind: 'single'; scope: 'root' }
+    /**
      * The agent-preset chip beside the workspace picker on the new-session
      * screen. Root scope: no session exists yet, so the choice is staged for
      * the next one rather than applied to a current one.
@@ -312,8 +320,17 @@ export interface ConversationSessionOwnerProps {
   wrapActiveBody?: (view: ReactNode) => ReactNode
 }
 
-/** Header actions derive their state from the standard session/global kit. */
-export interface ConversationHeaderActionOwnerProps {}
+/**
+ * Header actions derive their state from the standard session/global kit.
+ * The optional view switch lets an action entry switch the session's active
+ * view tab (e.g. a workbench button jumping to its own tab); absent when the
+ * header renders without a view ring, so entries must treat it as
+ * best-effort.
+ */
+export interface ConversationHeaderActionOwnerProps {
+  /** Select a view tab by entry id ('chat' is the stable fallback id). */
+  setView?: ((view: string) => void) | undefined
+}
 
 /** Plain breadcrumb data handed to the optional lineage renderer. */
 export interface ConversationHeaderLineageOwnerProps {
@@ -479,9 +496,15 @@ export interface ConversationInjected {
   /**
    * Framework-bound sources. `composerBlock` is this session's block when a
    * plugin raised one; the reason is the blocker's own localized copy, which
-   * the root renders as the inert composer's placeholder.
+   * the root renders as the inert composer's placeholder. `activeView`
+   * mirrors the current session body's resolved view id (undefined while no
+   * body is mounted) so the resident root can drop its hero chrome while a
+   * non-chat view owns a still-blank session.
    */
-  hooks: { composerBlock: ObservableSnapshot<ComposerBlock | undefined> }
+  hooks: {
+    composerBlock: ObservableSnapshot<ComposerBlock | undefined>
+    activeView: ObservableSnapshot<string | undefined>
+  }
 }
 
 /** Business callbacks injected into the strict Session body seat. */
@@ -496,6 +519,11 @@ export interface ConversationSessionInjected {
   releaseSessionImages: (sessionId: SessionId) => void
   /** Bind the input machine's draft persistence mirror to the session store. */
   bindDraftMirror: (write: (text: string) => void) => () => void
+  /**
+   * Publish this body's resolved view id to the resident root's hero
+   * decision; `undefined` (also on unmount) keeps the hero eligible.
+   */
+  reportActiveView: (view: string | undefined) => void
 }
 
 /** Business callbacks injected into the strict session header seat. */
@@ -644,6 +672,7 @@ export type ConversationSlotProps =
     | 'conversation.input.dock' | 'conversation.composer.dock'
     | 'conversation.input.left' | 'conversation.input.right'
     | 'conversation.hero.brand.mark'
+    | 'conversation.hero.headline'
     | 'conversation.hero.workspace'
     | 'conversation.hero.agentPreset'
   >

@@ -434,6 +434,10 @@ async function validateDatabaseFileIfPresent(path: string): Promise<void> {
   }
 }
 
+/* jscpd:ignore-start */
+// jscpd: intentional symmetry — the isomorphic node:sqlite warning-filter
+// loader convention; the kb and session groups stay cross-dependency-free
+// (Agent Note 2026-08-29-duplication-gate-intentional-symmetry).
 let nodeSqlite: Promise<typeof import('node:sqlite')> | undefined
 
 /** Load Node SQLite once so concurrent stores share one warning-filter lifetime. */
@@ -468,3 +472,4 @@ async function importNodeSqlite(): Promise<typeof import('node:sqlite')> {
   }
   /* v8 ignore stop */
 }
+/* jscpd:ignore-end */

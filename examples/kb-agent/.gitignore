@@ -1,0 +1,36 @@
+workspace/kb.sqlite
+workspace/kb.sqlite-*
+workspace/kb.sqlite.v1-backup
+workspace/kb.sqlite.v1-backup-*
+.sessions/
+# The dsh profile state for the README entry command (DSH_HOME is pinned here
+# so sessions, credentials, and the auto-initialized headless profile stay
+# inside the example).
+.dsh/
+# workspace/data is committed corpus, not scratch: meetings/profiles/regulations
+# are the import-real-docs.sh kinds and cost/food-safety/market/process/supply
+# carry the eval gold documents (eval/questions.json) and the graph-smoke
+# inputs. Anything else under workspace/data/ is residue from an invalid
+# --kind or an ad-hoc experiment and is never committed — including
+# workspace/data/uploads/, where the gateway's kb.upload channel lands
+# browser-uploaded files.
+workspace/data/*
+!workspace/data/meetings/
+!workspace/data/profiles/
+!workspace/data/regulations/
+!workspace/data/cost/
+!workspace/data/food-safety/
+!workspace/data/market/
+!workspace/data/process/
+!workspace/data/supply/
+# eval/results-*.json are re-generable eval outputs (scripts/eval-retrieval.mts,
+# QUICKSTART 质量评测 section); questions.json stays committed.
+eval/results-*.json
+# eval/calibration-*.json are re-generable threshold-calibration outputs
+# (scripts/calibrate-relevance.mts); the durable numbers live in the
+# 2026-09-02-kb-relevance-threshold Agent Note.
+eval/calibration-*.json
+# scenarios-staged/ was residue from the scenarios snapshot staging into the
+# repo instead of the run's temp root; the staging now lives under mkdtemp,
+# and this rule is the backstop if a future edit regresses that landing spot.
+scenarios-staged/

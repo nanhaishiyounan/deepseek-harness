@@ -1,10 +1,10 @@
 /** Frame-wide dynamic Plugin inventory, approvals, versions, and lifecycle actions. */
 
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import {
   IconCheckOutline16, IconCloseOutline16, IconCordisPluginOutline14, IconPlayOutline16,
-  IconStopFill16, IconTrashOutline16, Tooltip, useDismissOnOutsidePointer,
+  IconStopFill16, IconTrashOutline16, Tooltip, useDismissOnOutsidePointer, useFixedPanelAnchor,
 } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client'
@@ -120,22 +120,9 @@ export function CordisPanel({
   const [actionErrors, setActionErrors] = useState<ReadonlyMap<CordisDynamicPluginId, string>>(new Map())
   const visibleRequests = useRef<Set<ApprovalRequestId>>(new Set())
   const rootRef = useRef<HTMLDivElement>(null)
-  const [anchor, setAnchor] = useState<{ left: number; bottom: number }>()
-
   // The panel is position: fixed (the sidebar clips overflow), so it hugs the
   // trigger through a measured offset instead of document flow.
-  useLayoutEffect(() => {
-    if (!open) return
-    const place = (): void => {
-      const rect = rootRef.current?.getBoundingClientRect()
-      if (rect !== undefined) {
-        setAnchor({ left: rect.left, bottom: window.innerHeight - rect.top + 8 })
-      }
-    }
-    place()
-    window.addEventListener('resize', place)
-    return () => { window.removeEventListener('resize', place) }
-  }, [open])
+  const anchor = useFixedPanelAnchor(rootRef, open)
 
   useDismissOnOutsidePointer(rootRef, open, setOpen)
 

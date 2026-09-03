@@ -1,0 +1,144 @@
+# kb-agent overlay over the shipped headless profile, applied with
+# `--patch` from the repository root (see README.md). It swaps the chat route
+# to MiniMax-M3 and mounts the knowledge-base seam: SQLite store, MiniMax
+# embeddings, and the kb tool rows — kb_search/kb_ingest/kb_ingest_url/kb_stats
+# plus kb_graph_query/kb_graph_add, which register by default and refuse calls
+# until a kb-graph provider joins the composition. llm-pi-ai is
+# disabled because its installed catalog already declares the "minimax"
+# configurable provider, which would collide with llm-minimax's own
+# declaration at load; the dedicated MiniMax adapter replaces that whole half.
+# The knowledge base and sessions live inside this example: run with
+# DSH_HOME=examples/kb-agent/.dsh so the auto-initialized profile and session
+# logs stay out of the user's home, and kb-sqlite's relative path lands in the
+# example workspace when invoked from the repository root.
+#
+# The base bundle's model-facing tool rows are disabled below — the same
+# pattern the web-app bundle uses — so every agent in this composition
+# (preset-mounted or the plain headless one) answers from the knowledge base
+# alone: retrieval-only, no shell, editor, filesystem, web, or delegation
+# tools. Session infrastructure (compaction, pruning, checkpoints, spill)
+# stays mounted.
+- id: llm-pi-ai
+  disabled: true
+
+- id: tool-bash
+  disabled: true
+
+- id: tool-pwsh
+  disabled: true
+
+- id: tool-jobs
+  disabled: true
+
+- id: tool-fs
+  disabled: true
+
+- id: tool-fs-search
+  disabled: true
+
+- id: tool-str-replace-editor
+  disabled: true
+
+- id: skill-filesystem
+  disabled: true
+
+- id: tool-skill
+  disabled: true
+
+- id: tool-goal
+  disabled: true
+
+- id: tool-ralph
+  disabled: true
+
+- id: tool-subagent-control
+  disabled: true
+
+- id: tool-subagent-list-agents
+  disabled: true
+
+- id: tool-subagent
+  disabled: true
+
+- id: tool-subagent-fork
+  disabled: true
+
+- id: workflow-worker-thread
+  disabled: true
+
+- id: tool-workflow
+  disabled: true
+
+- id: tool-todo
+  disabled: true
+
+- id: tool-web
+  disabled: true
+
+- id: agent-default-model
+  config:
+    provider: minimax
+    model: MiniMax-M3
+
+- id: system-prompt
+  config:
+    persona: |
+      You are kb-agent, a food-industry knowledge assistant powered by the
+      {{model}} model. Answer enterprise questions from the knowledge base
+      with kb_search and cite retrieved passages as [n] with the document
+      name and heading path. Say when the knowledge base has nothing
+      relevant instead of guessing.
+
+- insert:
+    - id: llm-minimax
+      name: '@deepseek-ai/dsh-llm-minimax'
+
+    - id: kb
+      name: '@deepseek-ai/dsh-kb'
+
+    - id: web-fetch-http
+      name: '@deepseek-ai/dsh-web-fetch-http'
+
+    - id: kb-sqlite
+      name: '@deepseek-ai/dsh-kb-sqlite'
+      config:
+        path: examples/kb-agent/workspace/kb.sqlite
+
+    - id: kb-embed-minimax
+      name: '@deepseek-ai/dsh-kb-embed-minimax'
+
+    - id: tool-kb
+      name: '@deepseek-ai/dsh-tool-kb'
+      config:
+        tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"
+
+# The web workbench rides the same tenant binding as the tools and the
+# presets (one env, one source of truth) and opts into kb writes: this
+# deployment is single-tenant behind disk-level access control. Patched, not
+# inserted: the web-app bundle already mounts the api-gateway row (the
+# headless profile has none, where this patch only warns).
+- id: api-gateway
+  config:
+    kbTenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"
+    kbWriteEnabled: true
+
+# The web workbench composes new sessions from the enterprise-data-assistant
+# role preset instead of the shipped `standard`. Patched, not inserted: the
+# web-app bundle already mounts the agent-presets row (the headless profile
+# has none, where this patch only warns — its one-shot agent never mounts a
+# preset). The example's role presets ride the roster as an explicit root —
+# the launcher appends configured roots ahead of the shipped one — so they
+# are reachable from any DSH_HOME without a copy step (the writable
+# $DSH_HOME/.agent-presets root stays for locally authored presets). The
+# scenario presets under scenarios/ are preset-directory-shaped (preset.yml +
+# agent.cordis.yml), so the same mechanism puts the thirty food-industry
+# scenarios on the roster the portal's scenario cards select. The paths are
+# cwd-relative like kb-sqlite's: launch from the repository root.
+- id: agent-presets
+  config:
+    default: enterprise-data-assistant
+    roots:
+      - path: examples/kb-agent/agent-presets
+        trust: user
+      - path: examples/kb-agent/scenarios
+        trust: user

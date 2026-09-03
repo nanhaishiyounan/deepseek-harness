@@ -10,6 +10,9 @@
     - button "插件":
       - img
       - text: 插件
+    - button "知识库":
+      - img
+      - text: 知识库
     - button "Agent 预设":
       - img
       - text: Agent 预设

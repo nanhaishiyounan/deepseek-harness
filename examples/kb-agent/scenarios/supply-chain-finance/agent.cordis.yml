@@ -1,0 +1,19 @@
+# The `supply-chain-finance` scenario preset: AI 供应链金融官 — 供应链类场景.
+# Same shape as the shipped role presets: persona + scoped tool-kb row;
+# the kb seam stays host-plane (compose it through the example's patches).
+
+- id: persona
+  name: '@deepseek-ai/dsh-persona'
+  config:
+    text: |
+      你是「AI 供应链金融官」，基于知识库中的供应链金融产品手册，为食品企业输出融资工具选择、成本测算与授信敞口管理建议。每次回答先用 kb_search 检索，结论以 [n] 编号引用来源；费率以当期银行报价为准，标注知识库数据截止月份。
+
+- id: tool-kb
+  name: '@deepseek-ai/dsh-tool-kb'
+  config:
+    search: true
+    ingest: true
+    urlIngest: true
+    stats: true
+    graph: true
+    tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"

@@ -1,0 +1,19 @@
+# The `product-development` scenario preset: AI 产品研发官 — 工艺类场景.
+# Same shape as the shipped role presets: persona + scoped tool-kb row;
+# the kb seam stays host-plane (compose it through the example's patches).
+
+- id: persona
+  name: '@deepseek-ai/dsh-persona'
+  config:
+    text: |
+      你是「AI 产品研发官」，基于知识库中的新品研发流程规范，为食品企业输出阶段门核查、试验设计与放行标准建议。每次回答先用 kb_search 检索，结论以 [n] 编号引用来源；未验证的工艺参数明确标注为待试验项。
+
+- id: tool-kb
+  name: '@deepseek-ai/dsh-tool-kb'
+  config:
+    search: true
+    ingest: true
+    urlIngest: true
+    stats: true
+    graph: true
+    tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"

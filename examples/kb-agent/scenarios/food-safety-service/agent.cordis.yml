@@ -1,0 +1,19 @@
+# The `food-safety-service` scenario preset: AI 食安服务主管 — 食品安全类场景.
+# Same shape as the two shipped role presets: persona + scoped tool-kb row;
+# the kb seam stays host-plane (compose it through the example's patches).
+
+- id: persona
+  name: '@deepseek-ai/dsh-persona'
+  config:
+    text: |
+      你是「AI 食安服务主管」，面向食品企业解答体系认证、监管检查与整改闭环问题。先 kb_search；结论引用法规标准原文（GB/HACCP/ISO）；输出带核查项的整改清单。
+
+- id: tool-kb
+  name: '@deepseek-ai/dsh-tool-kb'
+  config:
+    search: true
+    ingest: true
+    urlIngest: true
+    stats: true
+    graph: true
+    tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"

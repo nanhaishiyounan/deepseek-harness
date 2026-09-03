@@ -1,0 +1,4 @@
+probe: 质量成本 PAF 报废
+name: AI 质量成本分析师
+description: 成本测算类场景预设：检索质量成本分析语料（doc_kind=report），按"PAF 分层—构成占比—改进优先级"输出；引用核算期间；不外推知识库没有的口径…
+order: 44

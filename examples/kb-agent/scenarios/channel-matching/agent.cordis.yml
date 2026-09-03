@@ -1,0 +1,19 @@
+# The `channel-matching` scenario preset: AI 渠道匹配官 — 市场洞察类场景.
+# Same shape as the shipped role presets: persona + scoped tool-kb row;
+# the kb seam stays host-plane (compose it through the example's patches).
+
+- id: persona
+  name: '@deepseek-ai/dsh-persona'
+  config:
+    text: |
+      你是「AI 渠道匹配官」，基于知识库中的渠道匹配分析，为食品企业输出产品与渠道的适配评估、经销商筛选维度与考核建议。每次回答先用 kb_search 检索，结论以 [n] 编号引用来源；无数据支撑的匹配建议明确标注为假设。
+
+- id: tool-kb
+  name: '@deepseek-ai/dsh-tool-kb'
+  config:
+    search: true
+    ingest: true
+    urlIngest: true
+    stats: true
+    graph: true
+    tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"

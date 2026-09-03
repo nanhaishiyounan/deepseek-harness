@@ -92,6 +92,28 @@ export interface RpcErrorDetailsMap {
   'subagent-not-resumable': { childSessionId: SessionId }
   'subagent-unauthorized': { childSessionId: SessionId }
   'subagent-delivery-unavailable': { childSessionId: SessionId }
+  /** The kb workbench was used in a deployment that composes no knowledge base. */
+  'kb-not-composed': {}
+  /** A kb workbench call ran with no tenant bound on the api-gateway config. */
+  'kb-tenant-unbound': {}
+  /** A kb workbench write method ran in a deployment that did not opt into writes. */
+  'kb-write-disabled': {}
+  /** A kb workbench call named a doc_kind outside the closed KbDocKind union. */
+  'kb-invalid-doc-kind': { docKind: string }
+  /** A kb workbench ingest named a path without an accepted extension. */
+  'kb-invalid-path': { path: string }
+  /** A kb workbench upload's file name had no safe single path segment after sanitizing. */
+  'kb-invalid-filename': { filename: string }
+  /** A kb workbench upload's decoded bytes exceeded the workbench byte limit. */
+  'kb-upload-too-large': { filename: string; maxBytes: number }
+  /** A kb workbench URL ingest named something that is not a URL. */
+  'kb-invalid-url': { url: string }
+  /** A kb workbench file ingest found no filesystem service composed. */
+  'kb-fs-unavailable': {}
+  /** A kb workbench URL ingest found no web service composed. */
+  'kb-web-unavailable': {}
+  /** A kb workbench ingest failed (unreadable source, parser, or seam refusal); the message is the cause's text. */
+  'kb-ingest-failed': { path?: string; url?: string }
   'internal': {}
 }
 

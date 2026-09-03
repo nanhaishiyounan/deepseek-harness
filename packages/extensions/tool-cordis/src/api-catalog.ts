@@ -955,6 +955,98 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
     ],
   },
   {
+    key: 'kb',
+    summary: 'The knowledge-base service.',
+    description: 'The knowledge-base service. Registered as `ctx.kb` (one instance per context).\n\nStore selection (resolved at execution time, never order-dependent):\n\n- A configured id that is registered and `available()` → that store.\n- A configured id not registered → `KB_STORE_CONFIGURED_MISSING`.\n- A configured id registered but unavailable → `KB_STORE_CONFIGURED_UNAVAILABLE`.\n- No id configured, exactly one registered usable store → that store.\n- No id configured, multiple usable stores → `KB_STORE_AMBIGUOUS`.\n- No id configured, no usable store → `KB_STORE_UNAVAILABLE`.\n\nEmbed selection adds the degraded mode: an available provider participates in hybrid retrieval, while NO usable provider (never configured, or configured-but-unavailable, or registered-but-unavailable) degrades search to the text path with `mode: \'text\'`. Only a configured id that is not registered at all throws (`KB_EMBED_CONFIGURED_MISSING`) — that is a composition error, not a runtime condition.',
+    methods: [
+      {
+        signature: 'registerStoreProvider(store: KbStore): () => void',
+        description: 'Register a store provider. Throws KbError `KB_DUPLICATE_PROVIDER` if its id is already registered. Returns a disposer; disposed with the calling fiber.',
+        parameters: [{ name: 'store', description: 'the store; its `id` is the registry key.' }],
+        returns: 'the disposer that unregisters the store.',
+      },
+      {
+        signature: 'registerEmbedProvider(provider: EmbedProvider): () => void',
+        description: 'Register an embed provider. Throws KbError `KB_DUPLICATE_PROVIDER` if its id is already registered. Returns a disposer; disposed with the calling fiber.',
+        parameters: [{ name: 'provider', description: 'the embed provider; its `id` is the registry key.' }],
+        returns: 'the disposer that unregisters the provider.',
+      },
+      {
+        signature: 'async ingest(request: KbIngestRequest, signal?: AbortSignal): Promise<KbIngestResult>',
+        description: 'Chunk and store one document, embedding chunks when a usable embed provider exists. Re-ingesting the same `(tenantId, sourcePath)` replaces the prior document.',
+        parameters: [{ name: 'request', description: 'document identity plus full content.' }, { name: 'signal', description: 'cancellation signal forwarded to the embed provider and store.' }],
+        returns: 'the store\'s ingest outcome (doc id, chunk count, embedded flag).',
+      },
+      {
+        signature: 'async search(request: KbSearchRequest, signal?: AbortSignal): Promise<KbSearchResult>',
+        description: 'Run one hybrid retrieval: the text path always runs; the vector path adds a second ranking when a usable embed provider exists, and the two fuse through RRF. With no usable embed provider — or one that fails at runtime on the query — the result is the text ranking alone with `mode: \'text\'` (a runtime failure logs a warning; ingest keeps failing loud on the same fault so partial vectors never enter the store).',
+        parameters: [{ name: 'request', description: 'query, optional tenant/kind filters, optional result cap.' }, { name: 'signal', description: 'cancellation signal forwarded to both paths.' }],
+        returns: 'the fused (or text-only) hits with citation metadata; hits whose fused score falls below `minRelevanceScore` are dropped in both modes, so an unrelated query can resolve to zero results.',
+      },
+      {
+        signature: 'async usage(tenantId: string, signal?: AbortSignal): Promise<KbUsage>',
+        description: 'Read one tenant\'s cumulative usage counters through the resolved store.',
+        parameters: [{ name: 'tenantId', description: 'owning tenant.' }, { name: 'signal', description: 'cancellation signal.' }],
+        returns: 'the tenant\'s counters; all zeros when none were recorded.',
+      },
+      {
+        signature: 'async stats(tenantId?: string, signal?: AbortSignal): Promise<KbStats>',
+        description: 'Report store counts plus embed-route observability for `kb_stats`.',
+        parameters: [{ name: 'tenantId', description: 'tenant filter; `undefined` counts across tenants.' }, { name: 'signal', description: 'cancellation signal.' }],
+        returns: 'store counts plus embed availability and identity.',
+      },
+      {
+        signature: 'async deleteDocument(tenantId: string, sourcePath: string, signal?: AbortSignal): Promise<boolean>',
+        description: 'Delete one document by identity through the resolved store.',
+        parameters: [{ name: 'tenantId', description: 'owning tenant.' }, { name: 'sourcePath', description: 'stable source identity.' }, { name: 'signal', description: 'cancellation signal.' }],
+        returns: 'whether a document was deleted.',
+      },
+    ],
+  },
+  {
+    key: 'kbGraph',
+    summary: 'The knowledge-graph service.',
+    description: 'The knowledge-graph service. Registered as `ctx.kbGraph` (one instance per context).\n\nStore selection (resolved at execution time, never order-dependent):\n\n- Exactly one registered usable store → that store.\n- Multiple usable stores → `KB_GRAPH_STORE_AMBIGUOUS`.\n- No usable store → `KB_GRAPH_STORE_UNAVAILABLE`.',
+    methods: [
+      {
+        signature: 'registerStoreProvider(store: GraphStore): () => void',
+        description: 'Register a graph store provider. Throws KbGraphError `KB_GRAPH_DUPLICATE_PROVIDER` if its id is already registered. Returns a disposer; disposed with the calling fiber.',
+        parameters: [{ name: 'store', description: 'the store; its `id` is the registry key.' }],
+        returns: 'the disposer that unregisters the store.',
+      },
+      {
+        signature: 'async putTriples( tenantId: string, triples: readonly KbGraphTriple[], signal?: AbortSignal, ): Promise<number>',
+        description: 'Store triples idempotently under one tenant.',
+        parameters: [{ name: 'tenantId', description: 'owning tenant; the hard isolation key.' }, { name: 'triples', description: 'the triples to store.' }, { name: 'signal', description: 'cancellation signal forwarded to the store.' }],
+        returns: 'how many triples were newly inserted.',
+      },
+      {
+        signature: 'async neighbors(tenantId: string, entity: KbGraphEntity, signal?: AbortSignal): Promise<KbGraphStoredTriple[]>',
+        description: 'One-hop neighbors of one entity.',
+        parameters: [{ name: 'tenantId', description: 'owning tenant.' }, { name: 'entity', description: 'the entity to expand.' }, { name: 'signal', description: 'cancellation signal.' }],
+        returns: 'the touching triples.',
+      },
+      {
+        signature: 'async twoHopPaths(tenantId: string, entity: KbGraphEntity, target: KbGraphEntity, signal?: AbortSignal): Promise<KbGraphStoredTriple[]>',
+        description: 'Two-hop paths between two entities.',
+        parameters: [{ name: 'tenantId', description: 'owning tenant.' }, { name: 'entity', description: 'the path start.' }, { name: 'target', description: 'the path end.' }, { name: 'signal', description: 'cancellation signal.' }],
+        returns: 'the triples of every matching path, deduplicated.',
+      },
+      {
+        signature: 'async searchEntities( tenantId: string, query: string, type?: KbGraphEntityType, limit?: number, signal?: AbortSignal, ): Promise<KbGraphEntity[]>',
+        description: 'Search entities by id substring and optional type.',
+        parameters: [{ name: 'tenantId', description: 'owning tenant.' }, { name: 'query', description: 'case-insensitive substring of the entity id.' }, { name: 'type', description: 'optional entity-type restriction.' }, { name: 'limit', description: 'maximum entities to return; defaults to 10.' }, { name: 'signal', description: 'cancellation signal.' }],
+        returns: 'the matching entities.',
+      },
+      {
+        signature: 'async stats(tenantId?: string, signal?: AbortSignal): Promise<{ triples: number; entities: number }>',
+        description: 'Count stored triples and distinct entities.',
+        parameters: [{ name: 'tenantId', description: 'tenant filter; `undefined` counts across tenants.' }, { name: 'signal', description: 'cancellation signal.' }],
+        returns: 'the triple count and the distinct-entity count.',
+      },
+    ],
+  },
+  {
     key: 'llm',
     summary: 'The abstract `llm` service: an adapter registry plus a streaming model-call API, interceptable via the `llm/stream` waterfall.',
     description: 'The abstract `llm` service: an adapter registry plus a streaming model-call API, interceptable via the `llm/stream` waterfall.',
@@ -3330,6 +3422,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface EditGoalRequest {\n    readonly objective?: string;\n    readonly maxGoalRounds?: number;\n}',
   },
   {
+    name: 'EmbedProvider',
+    declaration: 'export interface EmbedProvider {\n    readonly id: string;\n    readonly modelId: string;\n    readonly dimensions: number;\n    available(): boolean;\n    embed(texts: readonly string[], signal?: AbortSignal): Promise<Float32Array[]>;\n}',
+  },
+  {
     name: 'EncodedImageAttachment',
     declaration: 'export interface EncodedImageAttachment {\n    mediaType: ImageMediaType;\n    data: string;\n    name?: string;\n}',
   },
@@ -3444,6 +3540,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'GrantRecord',
     declaration: 'export interface GrantRecord {\n    readonly kind: \'grant\';\n    readonly payload: unknown;\n}',
+  },
+  {
+    name: 'GraphStore',
+    declaration: 'export interface GraphStore {\n    readonly id: string;\n    available(): boolean;\n    putTriples(tenantId: string, triples: readonly KbGraphTriple[], signal?: AbortSignal): Promise<number>;\n    neighbors(tenantId: string, entity: KbGraphEntity, signal?: AbortSignal): Promise<KbGraphStoredTriple[]>;\n    twoHopPaths(tenantId: string, entity: KbGraphEntity, target: KbGraphEntity, signal?: AbortSignal): Promise<KbGraphStoredTriple[]>;\n    searchEntities(tenantId: string, query: string, type: KbGraphEntityType | undefined, k: number, signal?: AbortSignal): Promise<KbGraphEntity[]>;\n    stats(tenantId: string | undefined, signal?: AbortSignal): Promise<{\n        triples: number;\n        entities: number;\n    }>;\n    close(): void;\n}',
   },
   {
     name: 'ImageAttachmentLimits',
@@ -3572,6 +3672,90 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'JsonValue',
     declaration: 'export type JsonValue = null | boolean | number | string | JsonValue[] | {\n    [key: string]: JsonValue;\n};',
+  },
+  {
+    name: 'KbChunkInput',
+    declaration: 'export interface KbChunkInput {\n    readonly headingPath?: string;\n    readonly chunkIdx: number;\n    readonly content: string;\n    readonly embedding: Float32Array | null;\n    readonly embedModel?: string;\n}',
+  },
+  {
+    name: 'KbDocKind',
+    declaration: 'export type KbDocKind = \'meeting\' | \'interview\' | \'report\' | \'regulation\' | \'profile\' | \'table\' | \'other\';',
+  },
+  {
+    name: 'KbDocumentInput',
+    declaration: 'export interface KbDocumentInput {\n    readonly tenantId: string;\n    readonly sourcePath: string;\n    readonly title?: string;\n    readonly docKind: KbDocKind;\n    readonly collectedAt?: string;\n    readonly provenance?: KbProvenance;\n    readonly contentHash?: string;\n    readonly contentLength?: number;\n}',
+  },
+  {
+    name: 'KbGraphEntity',
+    declaration: 'export interface KbGraphEntity {\n    readonly type: KbGraphEntityType;\n    readonly id: string;\n}',
+  },
+  {
+    name: 'KbGraphEntityType',
+    declaration: 'export type KbGraphEntityType = \'company\' | \'product\' | \'ingredient\' | \'additive\' | \'standard\' | \'process\' | \'risk\';',
+  },
+  {
+    name: 'KbGraphPredicate',
+    declaration: 'export type KbGraphPredicate = \'produces\' | \'uses\' | \'contains\' | \'complies_with\' | \'follows\' | \'flags\' | \'supplies\';',
+  },
+  {
+    name: 'KbGraphStoredTriple',
+    declaration: 'export interface KbGraphStoredTriple extends KbGraphTriple {\n    readonly rowId: number;\n    readonly tenantId: string;\n}',
+  },
+  {
+    name: 'KbGraphTriple',
+    declaration: 'export interface KbGraphTriple {\n    readonly subject: KbGraphEntity;\n    readonly predicate: KbGraphPredicate;\n    readonly object: KbGraphEntity;\n    readonly sourcePath?: string;\n}',
+  },
+  {
+    name: 'KbIngestRequest',
+    declaration: 'export interface KbIngestRequest extends KbDocumentInput {\n    readonly content: string;\n}',
+  },
+  {
+    name: 'KbIngestResult',
+    declaration: 'export interface KbIngestResult {\n    readonly docId: number;\n    readonly chunks: number;\n    readonly embedded: boolean;\n    readonly embedModel?: string;\n}',
+  },
+  {
+    name: 'KbProvenance',
+    declaration: 'export interface KbProvenance {\n    readonly provider: string;\n    readonly scope?: KbScope;\n    readonly collectedSource?: string;\n}',
+  },
+  {
+    name: 'KbScope',
+    declaration: 'export type KbScope = \'search\' | \'derive\' | \'share\';',
+  },
+  {
+    name: 'KbSearchFilter',
+    declaration: 'export interface KbSearchFilter {\n    readonly docKind?: KbDocKind;\n}',
+  },
+  {
+    name: 'KbSearchHit',
+    declaration: 'export interface KbSearchHit {\n    readonly chunkId: number;\n    readonly docId: number;\n    readonly tenantId: string;\n    readonly sourcePath: string;\n    readonly title?: string;\n    readonly docKind: KbDocKind;\n    readonly collectedAt?: string;\n    readonly headingPath?: string;\n    readonly chunkIdx: number;\n    readonly content: string;\n    readonly provenance?: KbProvenance;\n}',
+  },
+  {
+    name: 'KbSearchRequest',
+    declaration: 'export interface KbSearchRequest {\n    readonly query: string;\n    readonly tenantId?: string;\n    readonly docKind?: KbDocKind;\n    readonly maxResults?: number;\n}',
+  },
+  {
+    name: 'KbSearchResult',
+    declaration: 'export interface KbSearchResult {\n    readonly mode: \'hybrid\' | \'text\';\n    readonly embedModel?: string;\n    readonly results: readonly KbSearchHit[];\n}',
+  },
+  {
+    name: 'KbStats',
+    declaration: 'export interface KbStats extends KbStoreStats {\n    readonly embedAvailable: boolean;\n    readonly embedModel?: string;\n}',
+  },
+  {
+    name: 'KbStore',
+    declaration: 'export interface KbStore {\n    readonly id: string;\n    available(): boolean;\n    putDocument(doc: KbDocumentInput, chunks: readonly KbChunkInput[], signal?: AbortSignal): Promise<KbIngestResult>;\n    deleteDocument(tenantId: string, sourcePath: string, signal?: AbortSignal): Promise<boolean>;\n    textSearch(query: string, tenantId: string | undefined, k: number, filter: KbSearchFilter | undefined, signal?: AbortSignal): Promise<KbSearchHit[]>;\n    vectorSearch(vector: Float32Array, tenantId: string | undefined, k: number, filter: KbSearchFilter | undefined, signal?: AbortSignal): Promise<KbSearchHit[]>;\n    stats(tenantId: string | undefined, signal?: AbortSignal): Promise<KbStoreStats>;\n    recordUsage(tenantId: string, delta: KbUsageDelta, signal?: AbortSignal): Promise<void>;\n    usage(tenantId: string, signal?: AbortSignal): Promise<KbUsage>;\n}',
+  },
+  {
+    name: 'KbStoreStats',
+    declaration: 'export interface KbStoreStats {\n    readonly documents: number;\n    readonly chunks: number;\n    readonly embeddedChunks: number;\n}',
+  },
+  {
+    name: 'KbUsage',
+    declaration: 'export interface KbUsage {\n    readonly searches: number;\n    readonly ingestedDocuments: number;\n    readonly ingestedChunks: number;\n    readonly embedTexts: number;\n    readonly embedTokens: number;\n}',
+  },
+  {
+    name: 'KbUsageDelta',
+    declaration: 'export interface KbUsageDelta {\n    readonly searches?: number;\n    readonly ingestedDocuments?: number;\n    readonly ingestedChunks?: number;\n    readonly embedTexts?: number;\n    readonly embedTokens?: number;\n}',
   },
   {
     name: 'KnobState',

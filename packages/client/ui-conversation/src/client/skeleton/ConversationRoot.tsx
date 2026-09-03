@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import clsx from 'clsx'
 import type { WorkspaceId } from '@deepseek-ai/dsh-client-runtime/client'
 import type { ConversationSlotProps, InputZone } from '../contract/slots.ts'
+import { DEFAULT_VIEW_ID } from '../contract/views.ts'
 import { HeroGlow, HeroShell, WorkspaceChip, workspaceLabel } from './EmptyHero.tsx'
 import css from './ConversationRoot.module.css'
 
@@ -14,7 +15,7 @@ export type ConversationRootProps = ConversationSlotProps
 
 export function ConversationRoot({
   sessionId, useSession, useSessions, useWorkspaces, useInput, useComposerBlock,
-  renderSlot, renderSlotChain, selectWorkspace, t,
+  useActiveView, renderSlot, renderSlotChain, selectWorkspace, t,
 }: ConversationRootProps) {
   const openState = useSession(s => s.openState)
   const composerPhase = useSession(s => s.composerPhase)
@@ -27,6 +28,13 @@ export function ConversationRoot({
   // A plugin this package cannot import (ui-model-selection) says this session cannot
   // send; its reason is already localized by whoever raised it.
   const composerBlock = useComposerBlock(block => block)
+  // The session body's resolved view: the hero presents the chat view of a
+  // blank session, so a non-chat view (e.g. a deployed workbench tab) hands
+  // the column to that view's own body + docked composer instead. Undefined
+  // (no body mounted yet) keeps the hero eligible — the pre-mount default
+  // cannot distinguish the two postures, and settling already covers the
+  // ambiguous window.
+  const activeView = useActiveView(view => view)
 
   const [pickerOpen, setPickerOpen] = useState(false)
   const [pendingWorkspaceId, setPendingWorkspaceId] = useState<WorkspaceId | undefined>()
@@ -77,7 +85,8 @@ export function ConversationRoot({
   const settling = sessionId !== undefined && composerPhase === 'blank' && openState === 'loading'
     && summaryBlank !== true
   const hero = sessionId === undefined
-    || (composerPhase === 'blank' && (openState === 'open' || summaryBlank === true))
+    || (composerPhase === 'blank' && (openState === 'open' || summaryBlank === true)
+      && (activeView === undefined || activeView === DEFAULT_VIEW_ID))
   const zone: InputZone | undefined =
     session === undefined || inputState === undefined ? undefined : { session, input: inputState }
 

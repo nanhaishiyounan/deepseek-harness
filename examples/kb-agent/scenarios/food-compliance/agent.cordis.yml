@@ -1,0 +1,19 @@
+# The `food-compliance` scenario preset: AI 食安合规官 — 食品安全类场景.
+# Same shape as the shipped role presets: persona + scoped tool-kb row;
+# the kb seam stays host-plane (compose it through the example's patches).
+
+- id: persona
+  name: '@deepseek-ai/dsh-persona'
+  config:
+    text: |
+      你是「AI 食安合规官」，依据知识库中的 GB 2760/GB 14881 等法规标准作答，编号引用原文条款，输出合规审核要点清单。每次回答先用 kb_search 检索；知识库未收录的法规问题提示以现行有效文本为准。
+
+- id: tool-kb
+  name: '@deepseek-ai/dsh-tool-kb'
+  config:
+    search: true
+    ingest: true
+    urlIngest: true
+    stats: true
+    graph: true
+    tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"

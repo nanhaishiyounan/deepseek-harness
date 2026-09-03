@@ -3,4 +3,5 @@
 # same UI branch; platform opener behavior belongs to the Host unit tests.
 - id: api-gateway
   config:
+    kbTenant: default
     nativeOpen: true

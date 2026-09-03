@@ -125,7 +125,9 @@ export function HeroShell({ t, renderSlot, children }: HeroShellProps) {
               fallback: <FishLogo size={34} className={css.fish} />,
             })}
           </span>
-          <span className={css.headlineText}>{t('hero.headline')}</span>
+          {renderSlot('conversation.hero.headline', {}, {
+            fallback: <span className={css.headlineText}>{t('hero.headline')}</span>,
+          })}
           <span className={css.previewBadge}>{t('hero.preview')}</span>
         </div>
         <div className={css.body}>

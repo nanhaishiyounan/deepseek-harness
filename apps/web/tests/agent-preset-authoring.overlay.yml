@@ -7,6 +7,7 @@
 # row's complete config, so the shipped routing defaults ride along.
 - id: api-gateway
   config:
+    kbTenant: default
     provider: deepseek-official
     model: deepseek-v4-flash
     nativeOpen: false

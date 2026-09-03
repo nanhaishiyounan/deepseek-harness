@@ -39,3 +39,10 @@ apps/web/dist/
 worktrees/
 .agents/worktrees/
 .typert-*/
+
+# Local verification screenshots and KB runtime workspace data
+screenshots/
+workspace/
+
+# Local agent state
+.roo/
