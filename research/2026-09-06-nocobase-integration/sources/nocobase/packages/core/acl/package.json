@@ -1,0 +1,22 @@
+{
+  "name": "@nocobase/acl",
+  "version": "2.2.7",
+  "description": "",
+  "license": "Apache-2.0",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "dependencies": {
+    "minimatch": "^5.1.1"
+  },
+  "peerDependencies": {
+    "@nocobase/database": "2.x",
+    "@nocobase/resourcer": "2.x",
+    "@nocobase/utils": "2.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nocobase/nocobase.git",
+    "directory": "packages/acl"
+  },
+  "gitHead": "d0b4efe4be55f8c79a98a331d99d9f8cf99021a1"
+}

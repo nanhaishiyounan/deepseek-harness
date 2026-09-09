@@ -130,31 +130,38 @@ export function parseIngestUrlArgs(args: KbIngestUrlArgs): KbIngestUrlInput {
 }
 
 /**
- * Resolve the URL's host and refuse when any resolved address is private.
- * DNS answers are checked as a set: one private address among many still
- * blocks the fetch. The check runs once per ingest; the fetch provider's
- * same-origin redirect policy keeps later hops on the same hostname.
+ * Resolve the URL's host, refuse when any resolved address is private, and
+ * return the admitted addresses for the fetch request's pin set: a provider
+ * that honors pins connects to one of them directly, so DNS cannot re-answer
+ * between this check and the connect (DNS rebinding). DNS answers are
+ * checked as a set — one private address among many still blocks the fetch —
+ * and pinning applies on the intranet opt-in path too. The check runs once
+ * per ingest; the fetch provider's same-origin redirect policy keeps later
+ * hops on the same hostname, so the pin set stays valid across redirects.
  * @param url - the parsed request URL.
  * @param allowPrivateNetworks - the composition's explicit opt-in (for
  *   fixtures and intranet deployments).
  * @throws when the host resolves (wholly or partly) into private space.
+ * @returns the admitted addresses to pin the fetch to. A name that does not
+ *   resolve here stays admitted with an empty set: the fetch provider's own
+ *   resolution is authoritative, and an unresolvable name cannot reach any
+ *   address. Only resolved private addresses block the fetch.
  */
-export async function assertPublicUrl(url: URL, allowPrivateNetworks: boolean): Promise<void> {
-  if (allowPrivateNetworks) return
+export async function resolveAdmittedAddresses(url: URL, allowPrivateNetworks: boolean): Promise<readonly string[]> {
   const hostname = url.hostname.replace(/^\[|\]$/gu, '')
-  // A name that does not resolve here stays admitted: the fetch provider's
-  // own resolution is authoritative, and an unresolvable name cannot reach
-  // any address. Only resolved private addresses block the fetch.
   const addresses = await lookup(hostname, { all: true }).then(
     resolved => resolved.map(entry => entry.address),
     () => [] as string[],
   )
-  for (const address of addresses) {
-    /* v8 ignore next -- the pass-through arm needs a resolvable public host; keyless tests resolve only loopback literals. */
-    if (isPrivateAddress(address)) {
-      throw new Error(
-        `kb_ingest_url: refusing to fetch the private or internal address ${address} for "${hostname}" (set allowPrivateNetworks to fetch intranet sources explicitly)`,
-      )
+  if (!allowPrivateNetworks) {
+    for (const address of addresses) {
+      /* v8 ignore next -- the pass-through arm needs a resolvable public host; keyless tests resolve only loopback literals. */
+      if (isPrivateAddress(address)) {
+        throw new Error(
+          `kb_ingest_url: refusing to fetch the private or internal address ${address} for "${hostname}" (set allowPrivateNetworks to fetch intranet sources explicitly)`,
+        )
+      }
     }
   }
+  return addresses
 }

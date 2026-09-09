@@ -1,0 +1,411 @@
+/**
+ * This file is part of the NocoBase (R) project.
+ * Copyright (c) 2020-2024 NocoBase Co., Ltd.
+ * Authors: NocoBase Team.
+ *
+ * This project is dual-licensed under AGPL-3.0 and NocoBase Commercial License.
+ * For more information, please refer to: https://www.nocobase.com/agreement.
+ */
+
+import { connect, mapProps, mapReadPretty, useField, useFieldSchema } from '@formily/react';
+import { DatePicker as AntdDatePicker, Space, Select } from 'antd';
+import dayjs from 'dayjs';
+import { last, first } from 'lodash';
+import type { Dayjs } from 'dayjs';
+import React, { useState, useEffect, useRef } from 'react';
+import { getPickerFormat, getDateTimeFormat } from '@nocobase/utils/client';
+import { useTranslation } from 'react-i18next';
+import { ReadPretty } from './ReadPretty';
+import { getDateRanges, mapDatePicker, mapRangePicker, inferPickerType, isMobile } from './util';
+import { useCompile } from '../../';
+import { useVariables, useLocalVariables, isVariable } from '../../../variables';
+import { autorun } from '@formily/reactive';
+interface IDatePickerProps {
+  utc?: boolean;
+}
+
+const stripTimeFromFormat = (format?: string) =>
+  format ? format.replace(/\s*[Hh]{1,2}:mm(?::ss)?(?:\.SSS)?(?:\s*[aA])?/g, '').trim() : format;
+
+/**
+ * 解析筛选日期组件的展示格式。
+ *
+ * 这里优先使用 schema 上显式配置的 dateFormat / format，
+ * 只有在当前 picker 没有自定义格式时才回退到默认 picker 格式。
+ *
+ * @param options 当前筛选日期组件的格式参数
+ * @returns 适用于当前 picker 的最终展示格式
+ * @example
+ * ```typescript
+ * resolveFilterPickerFormat({
+ *   targetPicker: 'date',
+ *   picker: 'date',
+ *   dateFormat: 'MM/DD/YY',
+ *   showTime: false,
+ * });
+ * ```
+ */
+export const resolveFilterPickerFormat = (options: {
+  targetPicker: string;
+  picker?: string;
+  format?: string;
+  dateFormat?: string;
+  showTime?: boolean;
+  timeFormat?: string;
+}) => {
+  const { targetPicker, picker = 'date', format, dateFormat, showTime, timeFormat } = options;
+  const explicitFormat = dateFormat || format;
+  const baseFormat = targetPicker === picker && explicitFormat ? explicitFormat : getPickerFormat(targetPicker);
+  const normalizedDateFormat = targetPicker === 'date' ? stripTimeFromFormat(baseFormat) : baseFormat;
+
+  return getDateTimeFormat(targetPicker, normalizedDateFormat, showTime, timeFormat);
+};
+
+const DatePickerContext = React.createContext<IDatePickerProps>({ utc: true });
+
+export const useDatePickerContext = () => React.useContext(DatePickerContext);
+export const DatePickerProvider = DatePickerContext.Provider;
+
+const InternalDatePicker = connect(AntdDatePicker, mapProps(mapDatePicker()), mapReadPretty(ReadPretty.DatePicker));
+
+const InternalRangePicker = connect(
+  AntdDatePicker.RangePicker,
+  mapProps(mapRangePicker()),
+  mapReadPretty(ReadPretty.DateRangePicker),
+);
+
+export const DatePicker = (props: any) => {
+  const { utc = true } = useDatePickerContext();
+  const value = Array.isArray(props.value) ? props.value[0] : props.value;
+  const { parseVariable } = useVariables() || {};
+  const localVariables = useLocalVariables();
+  const [disabledDate, setDisabledDate] = useState(null);
+  const [disabledTime, setDisabledTime] = useState(null);
+  const disposeRef = useRef(null);
+
+  useEffect(() => {
+    if (disposeRef.current) {
+      disposeRef.current();
+    }
+    disposeRef.current = autorun(() => {
+      limitDate();
+    });
+    return () => {
+      disposeRef.current();
+    };
+  }, [props._maxDate, props._minDate, localVariables, parseVariable]);
+
+  const limitDate = async () => {
+    // 直接将 UTC 时间字符串转换成 dayjs 对象（注意不转成本地时间）
+    let minDateTimePromise = props._minDate
+      ? Promise.resolve(dayjs(props._minDate)) // 保持 UTC 时间
+      : Promise.resolve(null);
+    let maxDateTimePromise = props._maxDate ? Promise.resolve(dayjs(props._maxDate)) : Promise.resolve(null);
+
+    if (isVariable(props._maxDate)) {
+      maxDateTimePromise = parseVariable(props._maxDate, localVariables).then((result) => {
+        return dayjs(Array.isArray(result.value) ? last(result.value) : result.value);
+      });
+    }
+    if (isVariable(props._minDate)) {
+      minDateTimePromise = parseVariable(props._minDate, localVariables).then((result) =>
+        dayjs(Array.isArray(result.value) ? first(result.value) : result.value),
+      );
+    }
+
+    const [minDateTime, maxDateTime] = await Promise.all([minDateTimePromise, maxDateTimePromise]);
+
+    const fullTimeArr = Array.from({ length: 60 }, (_, i) => i);
+
+    // disabledDate 只禁用日期，不要管时间部分
+    const disabledDate = (current: Dayjs) => {
+      if (!dayjs.isDayjs(current)) return false;
+
+      const min = minDateTime ? minDateTime.startOf('day') : null;
+      const max = maxDateTime ? maxDateTime.endOf('day') : null;
+
+      // 只比较年月日，不管时间
+      if (min && current.startOf('day').isBefore(min)) {
+        return true;
+      }
+      if (max && current.startOf('day').isAfter(max)) {
+        return true;
+      }
+      return false;
+    };
+
+    const disabledTime = (current) => {
+      if (!current || (!minDateTime && !maxDateTime)) {
+        return { disabledHours: () => [], disabledMinutes: () => [], disabledSeconds: () => [] };
+      }
+
+      // current 是本地时间，转成 UTC 时间
+      const currentUtc = current;
+      // 判断是不是 minDate 和 maxDate 的同一天（UTC）
+      const isCurrentMinDay = minDateTime && currentUtc.isSame(minDateTime, 'day');
+      const isCurrentMaxDay = maxDateTime && currentUtc.isSame(maxDateTime, 'day');
+
+      const disabledHours = () => {
+        const hours = [];
+        if (isCurrentMinDay) {
+          for (let h = 0; h < minDateTime.hour(); h++) {
+            hours.push(h);
+          }
+        }
+        if (isCurrentMaxDay) {
+          for (let h = maxDateTime.hour() + 1; h < 24; h++) {
+            hours.push(h);
+          }
+        }
+        return hours;
+      };
+
+      const disabledMinutes = (selectedHour) => {
+        if (isCurrentMinDay && selectedHour === minDateTime.hour()) {
+          return fullTimeArr.filter((m) => m < minDateTime.minute());
+        }
+        if (isCurrentMaxDay && selectedHour === maxDateTime.hour()) {
+          return fullTimeArr.filter((m) => m > maxDateTime.minute());
+        }
+        return [];
+      };
+
+      const disabledSeconds = (selectedHour, selectedMinute) => {
+        if (isCurrentMinDay && selectedHour === minDateTime.hour() && selectedMinute === minDateTime.minute()) {
+          return fullTimeArr.filter((s) => s < minDateTime.second());
+        }
+        if (isCurrentMaxDay && selectedHour === maxDateTime.hour() && selectedMinute === maxDateTime.minute()) {
+          return fullTimeArr.filter((s) => s > maxDateTime.second());
+        }
+        return [];
+      };
+
+      return {
+        disabledHours,
+        disabledMinutes,
+        disabledSeconds,
+      };
+    };
+
+    setDisabledDate(() => disabledDate);
+    setDisabledTime(() => disabledTime);
+  };
+
+  const newProps = {
+    utc,
+    ...props,
+    disabledDate,
+    disabledTime,
+    showTime: props.showTime ? { defaultValue: dayjs('00:00:00', 'HH:mm:ss') } : false,
+  };
+  return <InternalDatePicker {...newProps} value={value} />;
+};
+
+DatePicker.ReadPretty = ReadPretty.DatePicker;
+
+DatePicker.RangePicker = function RangePicker(props: any) {
+  const { value, picker = 'date', format, dateFormat, showTime, timeFormat } = props;
+  const { t } = useTranslation();
+  const fieldSchema = useFieldSchema();
+  const field: any = useField();
+  const { utc = true } = useDatePickerContext();
+  const rangesValue = getDateRanges();
+  const compile = useCompile();
+  const isFilterAction: any = !fieldSchema?.['x-filter-operator']; // 在筛选按钮中使用
+  const presets = [
+    { label: t('Today'), value: rangesValue.today },
+    { label: t('Last week'), value: rangesValue.lastWeek },
+    { label: t('This week'), value: rangesValue.thisWeek },
+    { label: t('Next week'), value: rangesValue.nextWeek },
+    { label: t('Last month'), value: rangesValue.lastMonth },
+    { label: t('This month'), value: rangesValue.thisMonth },
+    { label: t('Next month'), value: rangesValue.nextMonth },
+    { label: t('Last quarter'), value: rangesValue.lastQuarter },
+    { label: t('This quarter'), value: rangesValue.thisQuarter },
+    { label: t('Next quarter'), value: rangesValue.nextQuarter },
+    { label: t('Last year'), value: rangesValue.lastYear },
+    { label: t('This year'), value: rangesValue.thisYear },
+    { label: t('Next year'), value: rangesValue.nextYear },
+    { label: t('Last 7 days'), value: rangesValue.last7Days },
+    { label: t('Next 7 days'), value: rangesValue.next7Days },
+    { label: t('Last 30 days'), value: rangesValue.last30Days },
+    { label: t('Next 30 days'), value: rangesValue.next30Days },
+    { label: t('Last 90 days'), value: rangesValue.last90Days },
+    { label: t('Next 90 days'), value: rangesValue.next90Days },
+  ];
+
+  const targetPicker = value ? inferPickerType(value?.[0], picker) : picker;
+  const newProps: any = {
+    utc,
+    presets,
+    ...props,
+    format: resolveFilterPickerFormat({
+      targetPicker,
+      picker,
+      format,
+      dateFormat,
+      showTime,
+      timeFormat,
+    }),
+    picker: targetPicker,
+    showTime: showTime ? { defaultValue: [dayjs('00:00:00', 'HH:mm:ss'), dayjs('23:59:59', 'HH:mm:ss')] } : false,
+  };
+  if (isFilterAction) {
+    return (
+      <Space.Compact>
+        <Select
+          // @ts-ignore
+          role="button"
+          data-testid="select-picker"
+          style={{ width: '100px' }}
+          popupMatchSelectWidth={false}
+          defaultValue={targetPicker}
+          options={compile([
+            {
+              label: t('Date'),
+              value: 'date',
+            },
+
+            {
+              label: t('Month'),
+              value: 'month',
+            },
+            {
+              label: t('Quarter'),
+              value: 'quarter',
+            },
+            {
+              label: t('Year'),
+              value: 'year',
+            },
+          ])}
+          onChange={(value) => {
+            const nextDateFormat = getPickerFormat(value);
+            const nextFormat = getDateTimeFormat(value, nextDateFormat, showTime, timeFormat);
+            field?.setComponentProps({
+              picker: value,
+              dateFormat: nextDateFormat,
+              format: nextFormat,
+            });
+            if (fieldSchema) {
+              fieldSchema['x-component-props'] = {
+                ...props,
+                picker: value,
+                dateFormat: nextDateFormat,
+                format: nextFormat,
+              };
+            }
+            if (field) {
+              field.value = undefined;
+            }
+          }}
+        />
+        <InternalRangePicker {...newProps} value={value} />
+      </Space.Compact>
+    );
+  }
+  return <InternalRangePicker {...newProps} />;
+};
+
+function toLocalNaiveISOString(dateString: string, format): string {
+  if (dateString && dateString.endsWith('Z')) {
+    const date = dayjs(dateString);
+    return date.format(format);
+  }
+  return dateString;
+}
+
+//筛选区块的日期字段总是输出无时区
+DatePicker.FilterWithPicker = function FilterWithPicker(props: any) {
+  const { picker = 'date', format, dateFormat, showTime, timeFormat } = props;
+  const isMobileMedia = isMobile();
+  const { utc = true } = useDatePickerContext();
+  const value = Array.isArray(props.value) ? props.value[0] : props.value;
+  const fieldSchema = useFieldSchema();
+  const initPicker = value ? inferPickerType(value, picker) : picker;
+  const [targetPicker, setTargetPicker] = useState(initPicker);
+  const { t } = useTranslation();
+
+  useEffect(() => {
+    setTargetPicker(initPicker);
+  }, [initPicker]);
+
+  const newProps = {
+    utc,
+    inputReadOnly: isMobileMedia,
+    ...props,
+    underFilter: true,
+    showTime: showTime ? { defaultValue: dayjs('00:00:00', 'HH:mm:ss') } : false,
+    format: resolveFilterPickerFormat({
+      targetPicker,
+      picker,
+      format,
+      dateFormat,
+      showTime,
+      timeFormat,
+    }),
+    picker: targetPicker,
+    onChange: (val) => {
+      props.onChange(undefined);
+      setTimeout(() => {
+        props.onChange(val);
+      });
+    },
+  };
+  const field: any = useField();
+  return (
+    <Space.Compact style={{ width: '100%' }}>
+      <Select
+        // @ts-ignore
+        role="button"
+        data-testid="select-picker"
+        style={{ width: '100px' }}
+        popupMatchSelectWidth={false}
+        value={targetPicker}
+        options={[
+          {
+            label: t('Date'),
+            value: 'date',
+          },
+
+          {
+            label: t('Month'),
+            value: 'month',
+          },
+          {
+            label: t('Quarter'),
+            value: 'quarter',
+          },
+          {
+            label: t('Year'),
+            value: 'year',
+          },
+        ]}
+        onChange={(value) => {
+          setTargetPicker(value);
+          const nextDateFormat = getPickerFormat(value);
+          const nextFormat = getDateTimeFormat(value, nextDateFormat, showTime, timeFormat);
+          field?.setComponentProps({
+            picker: value,
+            dateFormat: nextDateFormat,
+            format: nextFormat,
+          });
+          if (fieldSchema?.['x-component-props']) {
+            fieldSchema['x-component-props'] = {
+              ...props,
+              picker: value,
+              dateFormat: nextDateFormat,
+              format: nextFormat,
+            };
+          }
+          if (field) {
+            field.value = null;
+          }
+        }}
+      />
+      <InternalDatePicker {...newProps} value={toLocalNaiveISOString(value, newProps.format)} />
+    </Space.Compact>
+  );
+};
+
+export default DatePicker;

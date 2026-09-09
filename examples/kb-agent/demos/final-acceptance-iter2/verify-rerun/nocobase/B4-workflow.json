@@ -1,0 +1,7 @@
+{
+  "scene": "B4-workflow",
+  "ts": "2026-09-08T17:11:00.864Z",
+  "url": "http://localhost:13000/admin/settings/workflow",
+  "workflowSection": "Routes\nSecurity\nSystem settings\nTheme editor\nUI templates\nVerification\nWorkflow\nAll\nFilter\nRefresh\nDelete\nAdd new\n\t\nTitle\n\t\nCategory\n\t\nTrigger type\n\t\nExecute mode\n\t\nEnabled\n\t\nExecuted\n\t\nActions\n\n\n1\n\t\n专家服务订单审批交付\n\t\tCollection event\t\nAsynchronously\n\t\n\t\n103\n\t\nConfigure\nEdit\nDuplicate\nDelete\n\n\n1\n20 / page",
+  "enabledSignal": true
+}

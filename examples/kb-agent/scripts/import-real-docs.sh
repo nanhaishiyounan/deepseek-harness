@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 # Copy real .md/.txt/.pdf/.docx documents into the kb-agent workspace for ingestion.
 # Files land under workspace/data/<kind>/ by argument order:
-#   scripts/import-real-docs.sh <file-or-dir>... --kind meetings|profiles|regulations
+#   scripts/import-real-docs.sh <file-or-dir>... --kind meetings|profiles|regulations|export-risk
 # The kind value names the corpus directory exactly (whitelisted; anything
 # else exits non-zero) and maps to the kb_ingest doc_kind: meetings→meeting,
-# profiles→profile, regulations→regulation. The workspace corpus is demo
-# material; never copy secrets, and desensitize visit notes before ingestion.
+# profiles→profile, regulations→regulation, export-risk→report (the
+# go-abroad risk-response corpus). The workspace corpus is demo material;
+# never copy secrets, and desensitize visit notes before ingestion.
 set -euo pipefail
 
-usage="usage: $0 <file-or-dir>... --kind meetings|profiles|regulations"
+usage="usage: $0 <file-or-dir>... --kind meetings|profiles|regulations|export-risk"
 
 here="$(cd "$(dirname "$0")/.." && pwd)"
 kind=""
@@ -27,8 +28,9 @@ case "$kind" in
   meetings) doc_kind="meeting" ;;
   profiles) doc_kind="profile" ;;
   regulations) doc_kind="regulation" ;;
+  export-risk) doc_kind="report" ;;
   *)
-    echo "unknown --kind \"$kind\"; expected meetings, profiles, or regulations" >&2
+    echo "unknown --kind \"$kind\"; expected meetings, profiles, regulations, or export-risk" >&2
     echo "$usage" >&2
     exit 1
     ;;

@@ -62,6 +62,8 @@ Workspace 列表与 Session 列表是相互独立的重连基线。`workspace.cr
 
 ## 载体层（`/client` + 根路径）
 
+`data` 域是统一上传面：`data.upload` 接收一个 base64 编码的浏览器文件及其文件名与声明的 mime 类型，经 `@deepseek-ai/dsh-lakehouse/data-router` 的共享判别器分类（扩展名白名单，无扩展名时回退声明 mime，再做魔数一致性校验——未知类型、空文件、魔数与扩展名矛盾各自以专属 `data-*` 错误码响亮拒绝），然后落入选定目的地。结构化内容（csv/xlsx/json 行数组）解析为能力缝的表格词汇并按列推断 SQL 类型，以文件名派生的表名载入湖仓（同名重传即替换；xlsx 经 exceljs 读取，惰性 import 使网关启动不为其付费）；文档类（md/txt/pdf/docx）复用 kb 上传管线并经 `ctx.kb.ingest` 入库。响应按目的地判别（`kb` → 入库文档摘要；`lakehouse` → 表名、行数与替换事实）。写入需部署显式开启 `dataUploadEnabled`（独立于 `kbWriteEnabled`）并共享 `kbTenant` 绑定；路由到湖仓而组合中无湖仓缝时以 `data-lakehouse-unavailable` 响亮失败。原始字节始终落盘于 `workspace/data/uploads/`，用于审计与同名身份。
+
 `AbstractApiClient` 持有全部协议不变量：签发 rpcId、包装／解包信封、Zod 解析、SSE 帧解码、一元请求超时，以及按微任务批处理的信封观测（`subscribeEnvelopes`）；平台子类只提供 `doFetch` 传输环节。`InProcessApiClient` 以 `toFetchHandler(api)` 为基础，仍是同构接点：它运行完整的协议序列化与校验路径而不经过网络，供需要该路径的调用方和载体测试使用。产品的 `dsh --profile headless` 是直连 core 的入口，不挂载本包。
 
 ## 模型体验

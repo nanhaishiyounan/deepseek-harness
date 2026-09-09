@@ -61,7 +61,20 @@ import {
   credentialsDescribeValueSchema, credentialsSetValueSchema, credentialsUnsetValueSchema,
 } from '../api/credentials.schema.ts'
 import { llmDiscoverModelsValueSchema, llmModelsValueSchema, llmProvidersValueSchema } from '../api/llm.schema.ts'
-import { kbIngestValueSchema, kbSearchValueSchema, kbStatsValueSchema } from '../api/kb.schema.ts'
+import { kbIngestValueSchema, kbSearchValueSchema, kbStatsValueSchema, kbUploadValueSchema } from '../api/kb.schema.ts'
+import {
+  nocobaseGetValueSchema, nocobaseListMetaValueSchema, nocobaseListValueSchema,
+} from '../api/nocobase.schema.ts'
+import { dataUploadValueSchema } from '../api/data.schema.ts'
+import { orderValueSchema, ordersListValueSchema } from '../api/orders.schema.ts'
+import { assetDetailValueSchema, assetsListValueSchema, assetsStatsValueSchema } from '../api/assets.schema.ts'
+import {
+  connectorsConnectionsValueSchema, connectorsListValueSchema, connectorsTransfersValueSchema,
+} from '../api/connectors.schema.ts'
+import {
+  kgExpandValueSchema, kgSchemaValueSchema, kgSearchValueSchema, kgStatsValueSchema,
+  kgSubgraphValueSchema,
+} from '../api/kg.schema.ts'
 import {
   subagentHistoryValueSchema,
   subagentInterruptValueSchema,
@@ -162,12 +175,43 @@ export interface IApiClient {
     models(payload: RequestPayload<'llm.models'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'llm.models'>>>
     discoverModels(payload: RequestPayload<'llm.discoverModels'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'llm.discoverModels'>>>
   }
+  data: {
+    upload(payload: RequestPayload<'data.upload'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'data.upload'>>>
+  }
+  orders: {
+    create(payload: RequestPayload<'orders.create'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'orders.create'>>>
+    get(payload: RequestPayload<'orders.get'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'orders.get'>>>
+    list(payload: RequestPayload<'orders.list'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'orders.list'>>>
+    fulfill(payload: RequestPayload<'orders.fulfill'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'orders.fulfill'>>>
+  }
+  assets: {
+    list(payload: RequestPayload<'assets.list'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'assets.list'>>>
+    detail(payload: RequestPayload<'assets.detail'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'assets.detail'>>>
+    stats(payload: RequestPayload<'assets.stats'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'assets.stats'>>>
+  }
+  connectors: {
+    list(payload: RequestPayload<'connectors.list'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'connectors.list'>>>
+    connections(payload: RequestPayload<'connectors.connections'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'connectors.connections'>>>
+    transfers(payload: RequestPayload<'connectors.transfers'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'connectors.transfers'>>>
+  }
+  kg: {
+    schema(payload: RequestPayload<'kg.schema'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kg.schema'>>>
+    search(payload: RequestPayload<'kg.search'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kg.search'>>>
+    subgraph(payload: RequestPayload<'kg.subgraph'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kg.subgraph'>>>
+    expand(payload: RequestPayload<'kg.expand'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kg.expand'>>>
+    stats(payload: RequestPayload<'kg.stats'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kg.stats'>>>
+  }
   kb: {
     stats(payload: RequestPayload<'kb.stats'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kb.stats'>>>
     search(payload: RequestPayload<'kb.search'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kb.search'>>>
     ingest(payload: RequestPayload<'kb.ingest'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kb.ingest'>>>
     ingestUrl(payload: RequestPayload<'kb.ingestUrl'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kb.ingestUrl'>>>
     upload(payload: RequestPayload<'kb.upload'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kb.upload'>>>
+  }
+  nocobase: {
+    listMeta(payload: RequestPayload<'nocobase.listMeta'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'nocobase.listMeta'>>>
+    list(payload: RequestPayload<'nocobase.list'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'nocobase.list'>>>
+    get(payload: RequestPayload<'nocobase.get'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'nocobase.get'>>>
   }
   /** client-response passthrough (rpcId is a backfill of the server-request's id — never minted here). */
   respond(message: ClientResponse, signal?: AbortSignal): Promise<RpcReceipt>
@@ -230,11 +274,30 @@ const UNARY_VALUE_SCHEMAS: { [K in keyof RpcMethodMap]: z.ZodType<Wire<ResponseV
   'llm.providers': llmProvidersValueSchema,
   'llm.models': llmModelsValueSchema,
   'llm.discoverModels': llmDiscoverModelsValueSchema,
+  'data.upload': dataUploadValueSchema,
+  'orders.create': orderValueSchema,
+  'orders.get': orderValueSchema,
+  'orders.list': ordersListValueSchema,
+  'orders.fulfill': orderValueSchema,
+  'assets.list': assetsListValueSchema,
+  'assets.detail': assetDetailValueSchema,
+  'assets.stats': assetsStatsValueSchema,
+  'connectors.list': connectorsListValueSchema,
+  'connectors.connections': connectorsConnectionsValueSchema,
+  'connectors.transfers': connectorsTransfersValueSchema,
+  'kg.schema': kgSchemaValueSchema,
+  'kg.search': kgSearchValueSchema,
+  'kg.subgraph': kgSubgraphValueSchema,
+  'kg.expand': kgExpandValueSchema,
+  'kg.stats': kgStatsValueSchema,
   'kb.stats': kbStatsValueSchema,
   'kb.search': kbSearchValueSchema,
   'kb.ingest': kbIngestValueSchema,
   'kb.ingestUrl': kbIngestValueSchema,
-  'kb.upload': kbIngestValueSchema,
+  'kb.upload': kbUploadValueSchema,
+  'nocobase.listMeta': nocobaseListMetaValueSchema,
+  'nocobase.list': nocobaseListValueSchema,
+  'nocobase.get': nocobaseGetValueSchema,
 }
 
 /** Default timeout for bounded unary calls (rpc-compare 2026-07-19: a hung host must not leave callers pending forever). */
@@ -513,12 +576,55 @@ export abstract class AbstractApiClient implements IApiClient {
     discoverModels: (payload, signal) => this.callUnary('llm.discoverModels', payload, signal),
   }
 
+  readonly data: IApiClient['data'] = {
+    upload: (payload, signal) => this.callUnary('data.upload', payload, signal, 'caller-signal-only'),
+  }
+
+  readonly orders: IApiClient['orders'] = {
+    create: (payload, signal) => this.callUnary('orders.create', payload, signal),
+    get: (payload, signal) => this.callUnary('orders.get', payload, signal),
+    list: (payload, signal) => this.callUnary('orders.list', payload, signal),
+    // Fulfillment runs the whole drafting pipeline; only the caller's signal bounds it.
+    fulfill: (payload, signal) => this.callUnary('orders.fulfill', payload, signal, 'caller-signal-only'),
+  }
+
+  readonly assets: IApiClient['assets'] = {
+    // Discovery fans out across providers; the caller's signal alone bounds it.
+    list: (payload, signal) => this.callUnary('assets.list', payload, signal, 'caller-signal-only'),
+    detail: (payload, signal) => this.callUnary('assets.detail', payload, signal, 'caller-signal-only'),
+    stats: (payload, signal) => this.callUnary('assets.stats', payload, signal, 'caller-signal-only'),
+  }
+
+  readonly connectors: IApiClient['connectors'] = {
+    list: (payload, signal) => this.callUnary('connectors.list', payload, signal, 'caller-signal-only'),
+    connections: (payload, signal) => this.callUnary('connectors.connections', payload, signal, 'caller-signal-only'),
+    transfers: (payload, signal) => this.callUnary('connectors.transfers', payload, signal, 'caller-signal-only'),
+  }
+
   readonly kb: IApiClient['kb'] = {
     stats: (payload, signal) => this.callUnary('kb.stats', payload, signal),
     search: (payload, signal) => this.callUnary('kb.search', payload, signal, 'caller-signal-only'),
     ingest: (payload, signal) => this.callUnary('kb.ingest', payload, signal, 'caller-signal-only'),
     ingestUrl: (payload, signal) => this.callUnary('kb.ingestUrl', payload, signal, 'caller-signal-only'),
     upload: (payload, signal) => this.callUnary('kb.upload', payload, signal, 'caller-signal-only'),
+  }
+
+  readonly kg: IApiClient['kg'] = {
+    // Graph reads follow the caller's signal alone: a wide k-hop walk must
+    // not die at the transport default.
+    schema: (payload, signal) => this.callUnary('kg.schema', payload, signal, 'caller-signal-only'),
+    search: (payload, signal) => this.callUnary('kg.search', payload, signal, 'caller-signal-only'),
+    subgraph: (payload, signal) => this.callUnary('kg.subgraph', payload, signal, 'caller-signal-only'),
+    expand: (payload, signal) => this.callUnary('kg.expand', payload, signal, 'caller-signal-only'),
+    stats: (payload, signal) => this.callUnary('kg.stats', payload, signal, 'caller-signal-only'),
+  }
+
+  readonly nocobase: IApiClient['nocobase'] = {
+    // Business reads run against the deployment's NocoBase; the caller's
+    // signal alone bounds them (a big page must not die at the transport default).
+    listMeta: (payload, signal) => this.callUnary('nocobase.listMeta', payload, signal, 'caller-signal-only'),
+    list: (payload, signal) => this.callUnary('nocobase.list', payload, signal, 'caller-signal-only'),
+    get: (payload, signal) => this.callUnary('nocobase.get', payload, signal, 'caller-signal-only'),
   }
 
   readonly events: IApiClient['events'] = {

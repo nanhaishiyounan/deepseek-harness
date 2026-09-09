@@ -1,0 +1,241 @@
+/* The connectors view tab: provider catalog, delivery tracking, timeline, and
+   the connect guidance. Colors ride the --dsw-alias-* / --dsw-specific-*
+   semantic tokens (docs/web-styling.md); spacing is this component's own 4px
+   grid. */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 16px 16px 32px;
+  background: var(--dsw-alias-bg-base);
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.heroTitle {
+  margin: 0;
+  font: var(--dsw-font-xl-24);
+  color: var(--dsw-alias-label-primary);
+}
+
+.heroTagline {
+  margin: 0;
+  font: var(--dsw-font-s-14);
+  color: var(--dsw-alias-label-secondary);
+}
+
+.zone {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--dsw-alias-border-l1);
+}
+
+.zone:first-of-type {
+  padding-top: 0;
+  border-top: none;
+}
+
+.zoneHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.zoneTitle {
+  margin: 0;
+  font: var(--dsw-font-m-18);
+  color: var(--dsw-alias-label-primary);
+}
+
+/* Provider catalog */
+
+.providerList,
+.connectionList,
+.timelineList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.providerRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 10px;
+  background: var(--dsw-alias-bg-module-platform);
+}
+
+.providerDot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--dsw-alias-state-success-primary);
+}
+
+.providerRow[data-available='false'] .providerDot {
+  background: var(--dsw-alias-state-warn-primary);
+}
+
+.providerName {
+  flex: 1;
+  min-width: 120px;
+  font: var(--dsw-font-s-strong-14);
+  color: var(--dsw-alias-label-primary);
+}
+
+.stateOk {
+  font: var(--dsw-font-xxs-12);
+  color: var(--dsw-alias-state-success-primary);
+}
+
+.stateWarn {
+  font: var(--dsw-font-xxs-12);
+  color: var(--dsw-alias-state-warn-primary);
+}
+
+.providerHint {
+  flex-basis: 100%;
+  font: var(--dsw-font-xxxs-11);
+  color: var(--dsw-alias-label-tertiary);
+}
+
+/* Delivery tracking */
+
+.connectionRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding: 10px 12px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 10px;
+  background: var(--dsw-alias-bg-module-platform);
+}
+
+.connectionName {
+  flex: 1;
+  min-width: 120px;
+  font: var(--dsw-font-s-strong-14);
+  color: var(--dsw-alias-label-primary);
+}
+
+.connectionMeta {
+  font: var(--dsw-font-xxs-12);
+  color: var(--dsw-alias-label-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.timelineTitle {
+  margin: 0;
+  font: var(--dsw-font-s-strong-14);
+  color: var(--dsw-alias-label-primary);
+}
+
+.timelineRow {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  padding: 6px 12px;
+  border-left: 2px solid var(--dsw-alias-border-l1);
+}
+
+.timelineDot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--dsw-alias-state-business-primary);
+  align-self: center;
+}
+
+.timelineMeta {
+  font: var(--dsw-font-xxs-12);
+  color: var(--dsw-alias-label-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.timelineDataset {
+  font: var(--dsw-font-xxs-12);
+  color: var(--dsw-alias-label-tertiary);
+  overflow-wrap: anywhere;
+}
+
+/* Connect guidance */
+
+.wizard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 16px;
+  border: 1px dashed var(--dsw-alias-border-l1);
+  border-radius: 12px;
+}
+
+/* Empty + error + loading states */
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 20px 16px;
+  border: 1px dashed var(--dsw-alias-border-l1);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.emptyTitle {
+  margin: 0;
+  font: var(--dsw-font-s-strong-14);
+  color: var(--dsw-alias-label-secondary);
+}
+
+.emptyHint {
+  margin: 0;
+  font: var(--dsw-font-xxs-12);
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.errorStrip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--dsw-alias-state-error-tertiary);
+  color: var(--dsw-alias-state-error-primary);
+  font: var(--dsw-font-xxs-12);
+}
+
+.rowSkeleton {
+  height: 44px;
+  border-radius: 10px;
+  background: var(--dsw-alias-bg-skeleton);
+  animation: var(--ds-skeleton-pulse);
+}

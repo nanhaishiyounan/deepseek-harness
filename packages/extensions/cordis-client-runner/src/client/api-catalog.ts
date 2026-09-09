@@ -309,7 +309,7 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
       },
       {
         signature: 'startSession(workspaceId?: WorkspaceId): void',
-        description: 'The New Session flow: connect the explicit, current-Session, or recent Workspace and open the resulting session; failures surface on the session list state.',
+        description: 'The New Session flow: connect the explicit, current-Session, or recent Workspace and open the resulting session; failures surface on the list state\'s `lastActionError` cell for shell presentation.',
         parameters: [{ name: 'workspaceId', description: 'explicit target; omitted inherits the current Session\'s Workspace before falling back to the recency projection.' }],
       },
       {

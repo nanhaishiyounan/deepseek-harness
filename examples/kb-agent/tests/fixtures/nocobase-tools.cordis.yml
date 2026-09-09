@@ -1,0 +1,16 @@
+# Test-only composition for the nocobase-tools keyless snapshot: the tool
+# runtime with the nb_* suite over an in-spec mock NocoBase server (base url
+# and token pinned through the environment). Nothing else mounts — the
+# snapshot locks the model-facing business-tool surface alone.
+
+- id: tools
+  name: '@deepseek-ai/dsh-tools'
+
+- id: system-prompt
+  name: '@deepseek-ai/dsh-system-prompt'
+
+- id: tool-nocobase
+  name: '@deepseek-ai/dsh-tool-nocobase'
+  config:
+    baseUrl: !!js "process.env.NB_TEST_NC_URL ?? ''"
+    apiKeyEnv: NB_TEST_NC_TOKEN

@@ -46,6 +46,6 @@ No direct invalidation; the named consumer owns any request-prefix changes.
 
 ## Known Limitations and Deferred Work
 
-- **SSRF / private-network protection is deferred** — no blocking of private, loopback, link-local, multicast, or otherwise non-public destinations, no DNS-resolve-then-validate, no per-hop re-validation (see [the web capability seam Agent Note](../../../.agents/notes/implemented/architecture/2026-06-24-web-capability-seam.md)). Until it lands, this provider is an SSRF primitive and **must not be enabled** in a deployment that can reach sensitive internal network targets.
+- **SSRF admission stays caller-owned** — unpinned requests resolve hostnames normally, so a deployment that can reach sensitive internal targets must gate them itself (see [the web capability seam Agent Note](../../../.agents/notes/implemented/architecture/2026-06-24-web-capability-seam.md)). A request's `pinnedAddresses` — the set a caller's gate already resolved and admitted — connect directly with the URL's own Host header and TLS SNI, closing the DNS-rebinding window between the check and the connect.
 - **Only textual content decodes** — html/xhtml and `text/*`-plus-JSON/XML families; a missing `Content-Type` or any binary type throws `WEB_UNSUPPORTED_CONTENT_TYPE`, and text-extractable PDF decoding is named deferred work.
 - **Charset comes only from the `Content-Type` header** (UTF-8 default) — an HTML `<meta charset>` declaration is ignored, and a declared-but-unrecognized charset label throws rather than falling back.

@@ -15,7 +15,10 @@ This table connects model-visible tool names to the plugin package and service s
 
 | Tool package | Model-visible names | Requires | Writes / affects | Shipped aliases | Deployment note |
 | --- | --- | --- | --- | --- | --- |
-| `@deepseek-ai/dsh-tool-kb` | `kb_graph_add`, `kb_graph_query`, `kb_ingest`, `kb_ingest_url`, `kb_search`, `kb_stats` | `ctx.tools`, `ctx.kb`, `ctx.fs`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | kb_search, kb_ingest, kb_ingest_url, and kb_stats stay visible without a usable store and fail with a structured error at execution time; all four run under the deployment-bound tenant (the model never supplies one), retrieval results carry numbered citations, and the degraded text-only mode is observable in every search result. |
+| `@deepseek-ai/dsh-tool-kb` | `kb_graph_add`, `kb_graph_query`, `kb_ingest`, `kb_ingest_url`, `kb_search`, `kb_stats`, `kg_schema`, `kg_subgraph` | `ctx.tools`, `ctx.kb`, `ctx.fs`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | kb_search, kb_ingest, kb_ingest_url, and kb_stats stay visible without a usable store and fail with a structured error at execution time; all four run under the deployment-bound tenant (the model never supplies one), retrieval results carry numbered citations, and the degraded text-only mode is observable in every search result. |
+| `@deepseek-ai/dsh-tool-lakehouse` | `lakehouse_query`, `lakehouse_tables` | `ctx.tools`, `ctx.lakehouse`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | lakehouse_tables and lakehouse_query stay visible without a usable engine and fail with a structured error at execution time (the catalog listing keeps answering); both run under the deployment-bound tenant (the model never supplies one), query results are capped rows with a truncation marker, and the rendered text carries the source-table attribution line. |
+| `@deepseek-ai/dsh-tool-connector` | `connector_discover`, `connector_fetch`, `connector_transfer`, `order_create`, `order_status` | `ctx.tools`, `ctx.connector`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | connector_discover, connector_fetch, and connector_transfer run under the deployment-bound tenant (the model never supplies one); discovery answers with a grouped listing carrying provider and dataset ids, previews are capped (8 rows / 400 characters), and transfers render the landing receipt with the catalog transfer-record id and the next-step guidance (lakehouse_query over the named table, or kb_search with citations). |
+| `@deepseek-ai/dsh-tool-nocobase` | `nb_collections`, `nb_create`, `nb_get`, `nb_list`, `nb_update` | `ctx.tools`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | nb_collections, nb_list, nb_get, nb_create, and nb_update speak to the deployment's NocoBase under a service account (the model never supplies a tenant); the filter vocabulary is closed (eq/in/gt/lt joined by one and/or), and the write tools carry the confirmed-change contract — the system-prompt guidance demands the presented preview / before→after diff and the user's explicit go-ahead before nb_create/nb_update run, and their receipts echo the landing id or the field-by-field diff. |
 | `@deepseek-ai/dsh-tool-ask-user` | `ask_user_question` | `ctx.tools`, `ctx.userQuestions` | `tool/call`, `tool/result after a UI/provider answers the question` | - | ask_user_question pauses the tool call until the active UI provider returns a human answer. |
 | `@deepseek-ai/dsh-tools` | `run_code` | `ctx.tools`, `ctx.codeRuntime (execution time)`, `ctx.systemPrompt` | `tool/call`, `one tool/code-dispatch-start + tool/code-dispatch pair per bridged sub-call`, `tool/result` | - | Owned by the tool registry as a reserved transport outside filterable capability layers under `mode: code` / `mode: both` (see the Code Mode Agent Note). Under `code` it is the registry's only wire contribution; the other visible capabilities are declared in a generated SDK section in the loaded runtime's language, and a program calls them through bindings scheduled under the native concurrency contract (submission-ordered starts and policy; concurrency-safe bodies overlap up to `maxParallelSubCalls`) that re-enter the complete guarded tool pipeline and link each nested execution to this outer result. |
 | `@deepseek-ai/dsh-plan-mode` | `exit_plan_mode` | `ctx.tools`, `ctx.systemPrompt`, `ctx.userQuestions (execution time, opportunistic)` | `tool/call`, `plan/mode inactive on an approved review`, `tool/result` | - | exit_plan_mode stays in the model-facing schema while planning is inactive so transitions add no tool-catalog churn on top of the plan-policy change. Its execute path rejects calls outside plan mode; in plan mode it presents the plan over the user-questions seam (approve / keep planning with feedback), and approval logs plan mode inactive at the step boundary. |
@@ -57,7 +60,7 @@ Store entity-relation triples extracted from ingested documents into the knowled
   "properties": {
     "triples": {
       "type": "array",
-      "description": "Triples to store. Entity types: company, product, ingredient, additive, standard, process, risk. Predicates: produces, uses, contains, complies_with, follows, flags, supplies.",
+      "description": "Triples to store. Entity types: Object, Process, Event, Role, Concept, Customer, Supplier, Product, ProductCategory, Order, OrderItem, Shipment, Carrier, Warehouse, StockLevel, Expert, ExpertService, Service, Deliverable, Dataset, Connector, Region, Address, Ingredient, company, product, ingredient, additive, standard, process, risk. Predicates: produces, uses, contains, complies_with, follows, flags, supplies, broader, related, places, located_in, fulfills, belongs_to, placed_by, includes, shipped_to, carries, departs_from, stores, offers, certified_for, derived_from, sourced_via.",
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -101,7 +104,7 @@ Source: [`packages/kb/tool-kb/src/index.ts`](../packages/kb/tool-kb/src/index.ts
 
 ### `kb_graph_query`
 
-Query the knowledge graph: neighbors of one entity, a two-hop path between two entities, or entities by id substring. Entity types: company, product, ingredient, additive, standard, process, risk. Predicates: produces, uses, contains, complies_with, follows, flags, supplies.
+Query the knowledge graph: neighbors of one entity, a two-hop path between two entities, or entities by id substring. Entity types: Object, Process, Event, Role, Concept, Customer, Supplier, Product, ProductCategory, Order, OrderItem, Shipment, Carrier, Warehouse, StockLevel, Expert, ExpertService, Service, Deliverable, Dataset, Connector, Region, Address, Ingredient, company, product, ingredient, additive, standard, process, risk. Predicates: produces, uses, contains, complies_with, follows, flags, supplies, broader, related, places, located_in, fulfills, belongs_to, placed_by, includes, shipped_to, carries, departs_from, stores, offers, certified_for, derived_from, sourced_via.
 
 ```json
 {
@@ -113,7 +116,7 @@ Query the knowledge graph: neighbors of one entity, a two-hop path between two e
     },
     "entity_type": {
       "type": "string",
-      "description": "Entity type (company, product, ingredient, additive, standard, process, risk); required for neighbors/paths, optional type filter for search."
+      "description": "Entity type (Object, Process, Event, Role, Concept, Customer, Supplier, Product, ProductCategory, Order, OrderItem, Shipment, Carrier, Warehouse, StockLevel, Expert, ExpertService, Service, Deliverable, Dataset, Connector, Region, Address, Ingredient, company, product, ingredient, additive, standard, process, risk); required for neighbors/paths, optional type filter for search."
     },
     "entity_id": {
       "type": "string",
@@ -252,7 +255,438 @@ Report knowledge-base coverage: document, chunk, and embedded-chunk counts plus 
 
 Source: [`packages/kb/tool-kb/src/index.ts`](../packages/kb/tool-kb/src/index.ts)
 
+### `kg_schema`
+
+Browse the knowledge-graph ontology: entity types (with labels, layers, natural keys, property keys) and relations (with their legal subject→object directions). Use it before kg_subgraph when unsure what the graph contains.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "layer": {
+      "type": "string",
+      "description": "Optional layer filter: top (五个顶层类) or domain (业务域类型). Omitted lists everything."
+    }
+  }
+}
+```
+
+Source: [`packages/kb/tool-kb/src/index.ts`](../packages/kb/tool-kb/src/index.ts)
+
+### `kg_subgraph`
+
+Read the k-hop neighborhood of named entities in the knowledge graph (default 2 hops, ≤200 nodes). Seeds resolve by entity name or alias; the answer lists each entity with its relations and the provenance sources. For "谁给谁供货 / 有哪些订单 / 合规关系" questions use this, not SQL.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "seeds": {
+      "type": "array",
+      "description": "Entity names or aliases to walk from (1–5), for example [\"张红喜\"].",
+      "items": {
+        "type": "string"
+      }
+    },
+    "hops": {
+      "type": "number",
+      "description": "Maximum walk depth, 0–2; default 2."
+    },
+    "max_nodes": {
+      "type": "number",
+      "description": "Node budget, 1–200; default 200."
+    },
+    "relation_types": {
+      "type": "array",
+      "description": "Optional relation-id filter (see kg_schema).",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "seeds"
+  ]
+}
+```
+
+Source: [`packages/kb/tool-kb/src/index.ts`](../packages/kb/tool-kb/src/index.ts)
+
 kb_search, kb_ingest, kb_ingest_url, and kb_stats stay visible without a usable store and fail with a structured error at execution time; all four run under the deployment-bound tenant (the model never supplies one), retrieval results carry numbered citations, and the degraded text-only mode is observable in every search result.
+
+<a id="deepseek-aidsh-tool-lakehouse"></a>
+
+## `@deepseek-ai/dsh-tool-lakehouse`
+
+### `lakehouse_query`
+
+Run one read SQL statement (SELECT) over the registered lakehouse tables. Returns the result columns, the row set, a truncation marker, and the source-table attribution. List tables with lakehouse_tables first.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "sql": {
+      "type": "string",
+      "description": "One single-statement read SQL query (SELECT ...)."
+    }
+  },
+  "required": [
+    "sql"
+  ]
+}
+```
+
+Source: [`packages/lakehouse/tool-lakehouse/src/index.ts`](../packages/lakehouse/tool-lakehouse/src/index.ts)
+
+### `lakehouse_tables`
+
+List the registered lakehouse tables with their column schemas (name and SQL type per column), row counts, and formats. Pass table to narrow to one table. Use before writing lakehouse_query SQL.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "table": {
+      "type": "string",
+      "description": "One table name to describe; omit to list every registered table."
+    }
+  }
+}
+```
+
+Source: [`packages/lakehouse/tool-lakehouse/src/index.ts`](../packages/lakehouse/tool-lakehouse/src/index.ts)
+
+lakehouse_tables and lakehouse_query stay visible without a usable engine and fail with a structured error at execution time (the catalog listing keeps answering); both run under the deployment-bound tenant (the model never supplies one), query results are capped rows with a truncation marker, and the rendered text carries the source-table attribution line.
+
+<a id="deepseek-aidsh-tool-connector"></a>
+
+## `@deepseek-ai/dsh-tool-connector`
+
+### `connector_discover`
+
+Search connector providers for datasets, expert profiles, and expert services. Expert results render as cards with affiliation, domain tags, and orderable services (deliverable + pricing). Each result carries its provider and dataset id for connector_fetch (preview) and connector_transfer (land into the kb or the lakehouse).
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "Free-text query matched against each provider's searchable fields (names, titles, domains, summaries)."
+    },
+    "kinds": {
+      "type": "array",
+      "description": "Restrict results to these dataset kinds (tabular, file, document, expert-profile, service).",
+      "items": {
+        "type": "string",
+        "enum": [
+          "tabular",
+          "file",
+          "document",
+          "expert-profile",
+          "service"
+        ]
+      }
+    }
+  }
+}
+```
+
+Source: [`packages/connector/tool-connector/src/index.ts`](../packages/connector/tool-connector/src/index.ts)
+
+### `connector_fetch`
+
+Preview one connector dataset: tabular rows, a document excerpt, a file receipt, or a service offering. Use the dataset id from connector_discover; add provider_id when several providers share the id.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "dataset_id": {
+      "type": "string",
+      "description": "The dataset id from connector_discover (for example `experts/1` or `customs-export.csv`)."
+    },
+    "provider_id": {
+      "type": "string",
+      "description": "The owning provider id, when several providers expose the same dataset id."
+    }
+  },
+  "required": [
+    "dataset_id"
+  ]
+}
+```
+
+Source: [`packages/connector/tool-connector/src/index.ts`](../packages/connector/tool-connector/src/index.ts)
+
+### `connector_transfer`
+
+Land one connector dataset in this deployment: tabular datasets and csv/xlsx/json files become lakehouse tables; documents and expert profiles ingest into the knowledge base. Returns the landing receipt (table or document, row counts, transfer record id).
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "dataset_id": {
+      "type": "string",
+      "description": "The dataset id from connector_discover."
+    },
+    "provider_id": {
+      "type": "string",
+      "description": "The owning provider id, when several providers expose the same dataset id."
+    },
+    "target": {
+      "type": "string",
+      "description": "Where the dataset lands: auto follows the content classification (default), kb and lakehouse pin it.",
+      "enum": [
+        "auto",
+        "kb",
+        "lakehouse"
+      ]
+    }
+  },
+  "required": [
+    "dataset_id"
+  ]
+}
+```
+
+Source: [`packages/connector/tool-connector/src/index.ts`](../packages/connector/tool-connector/src/index.ts)
+
+### `order_create`
+
+Place an expert-service order and generate its proposal PDF deliverable in one call. Returns the order number, the settled status (delivered or failed), and the PDF's workspace path the user can open. Use the service_id from a connector_discover expert card; confirm the priced service with the user first.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "service_id": {
+      "type": "string",
+      "description": "The ordered service's dataset id from connector_discover (for example expert_services/2)."
+    },
+    "brief": {
+      "type": "string",
+      "description": "The client's need in their own words; drives the deliverable's retrieval and drafting."
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Client display name for the deliverable's cover page, when the conversation knows it."
+    }
+  },
+  "required": [
+    "service_id",
+    "brief"
+  ]
+}
+```
+
+Source: [`packages/connector/tool-connector/src/index.ts`](../packages/connector/tool-connector/src/index.ts)
+
+### `order_status`
+
+Read one expert-service order by id, or list the recent orders when no id is given. Each row carries the status (pending/generating/delivered/failed) and, once delivered, the proposal PDF's workspace path.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "order_id": {
+      "type": "number",
+      "description": "The order id from order_create; omit to list the recent orders."
+    }
+  }
+}
+```
+
+Source: [`packages/connector/tool-connector/src/index.ts`](../packages/connector/tool-connector/src/index.ts)
+
+connector_discover, connector_fetch, and connector_transfer run under the deployment-bound tenant (the model never supplies one); discovery answers with a grouped listing carrying provider and dataset ids, previews are capped (8 rows / 400 characters), and transfers render the landing receipt with the catalog transfer-record id and the next-step guidance (lakehouse_query over the named table, or kb_search with citations).
+
+<a id="deepseek-aidsh-tool-nocobase"></a>
+
+## `@deepseek-ai/dsh-tool-nocobase`
+
+### `nb_collections`
+
+List the business system's collections (tables) with their fields — the schema needed to read or change business records. Hidden collections stay dropped unless include_hidden is true.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "include_hidden": {
+      "type": "boolean",
+      "description": "Include collections the backend marks hidden; defaults to false."
+    }
+  }
+}
+```
+
+Source: [`packages/connector/tool-nocobase/src/index.ts`](../packages/connector/tool-nocobase/src/index.ts)
+
+### `nb_create`
+
+Create one row in a business collection. Confirmed-change contract: present the full new row to the user and get their explicit go-ahead BEFORE calling. Returns the landing receipt with the assigned id and the stored row.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "collection": {
+      "type": "string",
+      "description": "Collection name from nb_collections."
+    },
+    "values": {
+      "type": "object",
+      "description": "The new row's fields (no id); the exact row the user confirmed.",
+      "additionalProperties": true
+    }
+  },
+  "required": [
+    "collection",
+    "values"
+  ]
+}
+```
+
+Source: [`packages/connector/tool-nocobase/src/index.ts`](../packages/connector/tool-nocobase/src/index.ts)
+
+### `nb_get`
+
+Read one business record by collection and row id. Returns the full row as stored.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "collection": {
+      "type": "string",
+      "description": "Collection name from nb_collections."
+    },
+    "id": {
+      "type": "number",
+      "description": "The row's primary-key id."
+    }
+  },
+  "required": [
+    "collection",
+    "id"
+  ]
+}
+```
+
+Source: [`packages/connector/tool-nocobase/src/index.ts`](../packages/connector/tool-nocobase/src/index.ts)
+
+### `nb_list`
+
+Query rows of one business collection with restricted filters (eq/in/gt/lt, and/or), sorting, field projection, and paging. Returns the page, the total count, and the rows.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "collection": {
+      "type": "string",
+      "description": "Collection name from nb_collections (for example orders)."
+    },
+    "filter": {
+      "type": "array",
+      "description": "Conditions: {field, op: eq|in|gt|lt, value}; scalars for eq/gt/lt, a non-empty array for in.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "op": {
+            "type": "string",
+            "enum": [
+              "eq",
+              "in",
+              "gt",
+              "lt"
+            ]
+          },
+          "value": {}
+        },
+        "required": [
+          "field",
+          "op",
+          "value"
+        ]
+      }
+    },
+    "match": {
+      "type": "string",
+      "description": "How conditions join: \"and\" (default) or \"or\"."
+    },
+    "page": {
+      "type": "number",
+      "description": "1-based page number; defaults to 1."
+    },
+    "page_size": {
+      "type": "number",
+      "description": "Rows per page, 1-100; defaults to 20."
+    },
+    "sort": {
+      "type": "array",
+      "description": "Sort keys; a leading `-` marks descending (for example [\"-updatedAt\"]).",
+      "items": {
+        "type": "string"
+      }
+    },
+    "fields": {
+      "type": "array",
+      "description": "Field projection; limits the returned columns.",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "collection"
+  ]
+}
+```
+
+Source: [`packages/connector/tool-nocobase/src/index.ts`](../packages/connector/tool-nocobase/src/index.ts)
+
+### `nb_update`
+
+Change fields of one business row by collection and id. Confirmed-change contract: nb_get the current row, present the before→after diff, and get the user's explicit go-ahead BEFORE calling. Returns the diff receipt and the stored row after the merge.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "collection": {
+      "type": "string",
+      "description": "Collection name from nb_collections."
+    },
+    "id": {
+      "type": "number",
+      "description": "The row's primary-key id."
+    },
+    "values": {
+      "type": "object",
+      "description": "The fields to change (no id); exactly the diff the user confirmed.",
+      "additionalProperties": true
+    }
+  },
+  "required": [
+    "collection",
+    "id",
+    "values"
+  ]
+}
+```
+
+Source: [`packages/connector/tool-nocobase/src/index.ts`](../packages/connector/tool-nocobase/src/index.ts)
+
+nb_collections, nb_list, nb_get, nb_create, and nb_update speak to the deployment's NocoBase under a service account (the model never supplies a tenant); the filter vocabulary is closed (eq/in/gt/lt joined by one and/or), and the write tools carry the confirmed-change contract — the system-prompt guidance demands the presented preview / before→after diff and the user's explicit go-ahead before nb_create/nb_update run, and their receipts echo the landing id or the field-by-field diff.
 
 <a id="deepseek-aidsh-tool-ask-user"></a>
 

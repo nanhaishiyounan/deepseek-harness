@@ -1,0 +1,58 @@
+# Test-only composition for the with-key expert-discovery e2e: the live model
+# stack (settings, credentials, llm-minimax, and the MiniMax embedder) over
+# the kb seam, plus the NocoBase connector provider pinned to the in-spec mock
+# server (the mock serves the same authoritative dataset.json the seed script
+# uses). Self-skips without MINIMAX_API_KEY.
+
+- id: settings
+  name: '@deepseek-ai/dsh-settings-file'
+
+- id: credentials
+  name: '@deepseek-ai/dsh-credentials-local'
+
+- id: llm
+  name: '@deepseek-ai/dsh-llm'
+
+- id: llm-minimax
+  name: '@deepseek-ai/dsh-llm-minimax'
+
+- id: kb
+  name: '@deepseek-ai/dsh-kb'
+
+- id: kb-sqlite
+  name: '@deepseek-ai/dsh-kb-sqlite'
+  config:
+    path: !!js "process.env.KB_TEST_DB ?? 'workspace/kb.sqlite'"
+
+- id: kb-embed-minimax
+  name: '@deepseek-ai/dsh-kb-embed-minimax'
+
+- id: fs-local
+  name: '@deepseek-ai/dsh-fs-local'
+  config:
+    cwd: !!js "process.env.KB_TEST_ROOT ?? process.cwd()"
+
+- id: tools
+  name: '@deepseek-ai/dsh-tools'
+
+- id: system-prompt
+  name: '@deepseek-ai/dsh-system-prompt'
+
+- id: tool-kb
+  name: '@deepseek-ai/dsh-tool-kb'
+  config:
+    tenant: demo-food-co
+
+- id: connector
+  name: '@deepseek-ai/dsh-connector'
+
+- id: connector-nocobase
+  name: '@deepseek-ai/dsh-connector-nocobase'
+  config:
+    baseUrl: !!js "process.env.ED_TEST_NC_URL ?? ''"
+    apiKeyEnv: ED_TEST_NC_TOKEN
+
+- id: tool-connector
+  name: '@deepseek-ai/dsh-tool-connector'
+  config:
+    tenant: demo-food-co

@@ -563,6 +563,68 @@ describe('kb workbench (text-only degraded mode, Chinese UI)', () => {
     await page.getByText(/上传通道验证|upload-note/u).first().waitFor({ timeout: 15_000 })
   }, 180_000)
 
+  it('re-uploads a same-name document through the browser and toasts the replacement', async () => {
+    onTestFailed(() => saveFailureShot(page, 'web-e2e-kb-replace'))
+    const twinPath = join(browseLink, 'replace-note.md')
+    await writeFile(twinPath, '# 替换验证 v1\n\n麦芽采购的供应商评审由品控部牵头。\n')
+    await page.getByRole('tab', { name: '知识库', exact: true }).click()
+    await page.getByPlaceholder('检索知识库，如：山梨酸 酱油 限量').waitFor({ timeout: 15_000 })
+    await page.getByRole('button', { name: '添加文档' }).first().click()
+    const dialog = page.getByRole('dialog', { name: '添加文档' })
+    await dialog.waitFor({ timeout: 15_000 })
+    await dialog.locator('input[type="file"]').setInputFiles([twinPath])
+    await expect.poll(
+      () => dialog.getByRole('listitem').filter({ hasText: /已入库 · \d+ 个片段/u }).count(),
+      { timeout: 30_000 },
+    ).toBe(1)
+    // Re-pick the same name with different bytes: the overwrite is the seam's
+    // same-path semantics, and the toast must now report the replacement
+    // fact instead of a plain ingest.
+    await writeFile(twinPath, '# 替换验证 v2\n\n麦芽采购的供应商评审改由采购部牵头。\n')
+    await dialog.locator('input[type="file"]').setInputFiles([twinPath])
+    await page.getByText(/已替换同名文档：replace-note\.md · \d+ 个片段/u).first().waitFor({ timeout: 30_000 })
+    await expect.poll(
+      () => dialog.getByRole('listitem').filter({ hasText: /已入库 · \d+ 个片段/u }).count(),
+      { timeout: 30_000 },
+    ).toBe(2)
+  }, 120_000)
+
+  it('uploads a 12 MiB markdown file through the browser picker without breaking the wire gate', async () => {
+    onTestFailed(() => saveFailureShot(page, 'web-e2e-kb-big-upload'))
+    // The whole-string canonical-base64 check used to exhaust the validation
+    // stack from ~3.5 MB; this case drives a multi-megabyte pick through the
+    // real browser → wire gate → decode → chunker → store path.
+    const filler = 'bulk upload channel stress line: sugar futures hedging ledger record. '
+    const probe = '琥珀麦芽烘焙曲线探针'
+    const header = `# 大文件上传验证\n\n${probe}\n\n`
+    // Assemble by counted line bytes, not by re-scanning a growing string.
+    const lineBytes = Buffer.byteLength(`${filler}0\n`, 'utf8')
+    const lineCount = Math.ceil((12 * 1024 * 1024 - Buffer.byteLength(header, 'utf8')) / lineBytes)
+    const parts: string[] = [header]
+    for (let n = 0; n < lineCount; n++) parts.push(`${filler}${n}\n`)
+    const body = parts.join('')
+    const bigPath = join(browseLink, 'big-upload.md')
+    await writeFile(bigPath, body)
+    await page.getByRole('tab', { name: '知识库', exact: true }).click()
+    await page.getByPlaceholder('检索知识库，如：山梨酸 酱油 限量').waitFor({ timeout: 15_000 })
+    await page.getByRole('button', { name: '添加文档' }).first().click()
+    const dialog = page.getByRole('dialog', { name: '添加文档' })
+    await dialog.waitFor({ timeout: 15_000 })
+    await dialog.locator('input[type="file"]').setInputFiles([bigPath])
+    await expect.poll(
+      () => dialog.getByRole('listitem').filter({ hasText: /已入库 · \d+ 个片段/u }).count(),
+      { timeout: 120_000 },
+    ).toBe(1)
+    await dialog.getByRole('button', { name: '取消' }).click()
+    await dialog.waitFor({ state: 'detached', timeout: 15_000 })
+    // The stored corpus answers its own probe term with a numbered citation.
+    const input = page.getByPlaceholder('检索知识库，如：山梨酸 酱油 限量')
+    await input.fill('琥珀麦芽')
+    await page.getByRole('button', { name: '检索', exact: true }).click()
+    await page.getByText('[1]').first().waitFor({ timeout: 15_000 })
+    await page.getByText(/big-upload/u).first().waitFor({ timeout: 15_000 })
+  }, 240_000)
+
   // [skip-multitab] Placeholder, intentionally not a runnable case: running
   // the same origin in two concurrent browser contexts would let both tabs'
   // workbench sessions write `dsh-kb-recent-searches` concurrently. The log

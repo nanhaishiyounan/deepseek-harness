@@ -1,0 +1,78 @@
+# Test-only composition for the kg-tools keyless snapshot: the full
+# knowledge-graph stack (seam, sqlite v2 store, kg-build pipeline, tool-kb's
+# kg_* rows) over an in-spec mock NocoBase server. The fake llm provider
+# (closed-set extraction determinism) is mounted directly by the spec, not by
+# a loader row: it has no workspace package, and a bare name here must resolve
+# from examples/package.json. Paths and endpoints pin through the environment.
+# The snapshot locks the model-facing kg tool surface and the pipeline's
+# deterministic report.
+
+- id: system-prompt
+  name: '@deepseek-ai/dsh-system-prompt'
+
+- id: tools
+  name: '@deepseek-ai/dsh-tools'
+
+- id: fs-local
+  name: '@deepseek-ai/dsh-fs-local'
+  config:
+    cwd: !!js "process.env.KG_TEST_ROOT ?? '.'"
+
+- id: kb
+  name: '@deepseek-ai/dsh-kb'
+  config:
+    storeProvider: kb-sqlite
+    embedProvider: kb-embed-minimax
+
+- id: kb-sqlite
+  name: '@deepseek-ai/dsh-kb-sqlite'
+  config:
+    path: !!js "process.env.KG_TEST_ROOT + '/kb.sqlite'"
+
+- id: tool-kb
+  name: '@deepseek-ai/dsh-tool-kb'
+  config:
+    tenant: demo-food-co
+
+- id: kb-graph
+  name: '@deepseek-ai/dsh-kb-graph'
+
+- id: kb-graph-sqlite
+  name: '@deepseek-ai/dsh-kb-graph-sqlite'
+  config:
+    path: !!js "process.env.KG_TEST_ROOT + '/kg-graph.sqlite'"
+
+- id: kg-build
+  name: '@deepseek-ai/dsh-kg-build'
+  config:
+    tenant: demo-food-co
+    nocobase:
+      baseUrl: !!js "process.env.KG_TEST_NC_URL ?? ''"
+      apiKeyEnv: KG_TEST_NC_TOKEN
+      collections:
+        - name: experts
+          anchor: Expert
+          titleField: name
+        - name: expert_services
+          anchor: ExpertService
+          titleField: name
+          fkLinks:
+            - field: expertId
+              target: experts
+              relation: expert_services.expert
+              style: plain-id
+        - name: orders
+          anchor: Order
+          titleField: orderNo
+          fkLinks:
+            - field: serviceId
+              target: expert_services
+              relation: ordered_service
+              style: collection-address
+    corpus:
+      root: !!js "process.env.KG_TEST_CORPUS ?? '.'"
+      extensions: ['.md']
+      maxDocuments: 5
+      maxChunksPerDocument: 2
+    lakehouse: false
+    connector: false

@@ -128,6 +128,11 @@ export interface KbSearchHit {
   readonly content: string
   /** Data-space provenance, when the ingest carried it. */
   readonly provenance?: KbProvenance
+  /**
+   * Fused RRF relevance score, attached by `search()` (stores rank; they do
+   * not score). One meaning in both modes — the threshold's score basis.
+   */
+  readonly score?: number
 }
 
 /** Store-level counts; the seam adds embed-availability facts for `kb_stats`. */

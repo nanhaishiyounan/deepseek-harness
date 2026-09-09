@@ -42,6 +42,7 @@
   "files": [
     "lib/index.js",
     "lib/invariant.js",
+    "resources/sql/**/*.sql",
     "lib/types/**/*.d.ts"
   ]
 }

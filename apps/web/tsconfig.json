@@ -101,6 +101,7 @@
     "tests/pwsh-terminal.e2e.ts",
     "tests/workflow-run.e2e.ts",
     "tests/kb-workbench.e2e.ts",
+    "tests/market-pages.e2e.ts",
     "tests/new-session-lifecycle.e2e.ts"
   ],
   "references": [

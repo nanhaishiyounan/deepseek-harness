@@ -1,0 +1,776 @@
+/**
+ * This file is part of the NocoBase (R) project.
+ * Copyright (c) 2020-2024 NocoBase Co., Ltd.
+ * Authors: NocoBase Team.
+ *
+ * This project is dual-licensed under AGPL-3.0 and NocoBase Commercial License.
+ * For more information, please refer to: https://www.nocobase.com/agreement.
+ */
+
+import { Action } from '@nocobase/resourcer';
+import { assign, parseFilter, Toposort, ToposortOptions } from '@nocobase/utils';
+import EventEmitter from 'events';
+import compose from 'koa-compose';
+import lodash from 'lodash';
+import { ACLAvailableAction, AvailableActionOptions } from './acl-available-action';
+import { ACLAvailableStrategy, AvailableStrategyOptions, predicate } from './acl-available-strategy';
+import { ACLRole, ResourceActionsOptions, RoleActionParams } from './acl-role';
+import { AllowManager, ConditionFunc } from './allow-manager';
+import { NoPermissionError } from './errors/no-permission-error';
+import FixedParamsManager, { Merger, GeneralMerger } from './fixed-params-manager';
+import SnippetManager, { SnippetOptions } from './snippet-manager';
+import { mergeAclActionParams, removeEmptyParams } from './utils';
+import Database from '@nocobase/database';
+
+export interface CanResult {
+  role: string;
+  resource: string;
+  action: string;
+  params?: any;
+}
+
+export interface DefineOptions {
+  role: string;
+  /**
+   * @internal
+   */
+  allowConfigure?: boolean;
+  strategy?: string | AvailableStrategyOptions;
+  actions?: ResourceActionsOptions;
+  /**
+   * @internal
+   */
+  routes?: any;
+  snippets?: string[];
+}
+
+export interface ListenerContext {
+  acl: ACL;
+  role: ACLRole;
+  path: string;
+  actionName: string;
+  resourceName: string;
+  params: RoleActionParams;
+}
+
+type Listener = (ctx: ListenerContext) => void;
+
+export type UserProvider = (args: { fields: string[] }) => Promise<any>;
+
+export interface ParseJsonTemplateOptions {
+  timezone?: string;
+  state?: any;
+  userProvider?: UserProvider;
+}
+
+interface CanArgs {
+  role?: string;
+  resource: string;
+  action: string;
+  rawResourceName?: string;
+  ctx?: any;
+  roles?: string[];
+}
+
+export interface ResolveActionParamsOptions {
+  resourceName: string;
+  actionName: string;
+  rawResourceName?: string;
+  params?: any;
+  useCurrentRepository?: boolean;
+}
+
+export interface ResolvedActionParams {
+  actionName: string;
+  resourceName: string;
+  rawResourceName: string;
+  can: CanResult | null;
+  rawParams: any;
+  parsedParams?: any;
+  mergedParams: any;
+}
+
+export class ACL extends EventEmitter {
+  /**
+   * @internal
+   */
+  public availableStrategy = new Map<string, ACLAvailableStrategy>();
+
+  /**
+   * @internal
+   */
+  public allowManager = new AllowManager(this);
+
+  /**
+   * @internal
+   */
+  public snippetManager = new SnippetManager();
+
+  /**
+   * @internal
+   */
+  roles = new Map<string, ACLRole>();
+
+  /**
+   * @internal
+   */
+  actionAlias = new Map<string, string>();
+
+  protected availableActions = new Map<string, ACLAvailableAction>();
+
+  protected fixedParamsManager = new FixedParamsManager();
+
+  protected middlewares: Toposort<any>;
+
+  protected strategyResources: Set<string> | null = null;
+
+  constructor() {
+    super();
+
+    this.middlewares = new Toposort<any>();
+
+    this.beforeGrantAction((ctx) => {
+      if (lodash.isPlainObject(ctx.params) && ctx.params.own) {
+        ctx.params = lodash.merge(ctx.params, predicate.own);
+      }
+    });
+
+    this.beforeGrantAction((ctx) => {
+      const actionName = this.resolveActionAlias(ctx.actionName);
+
+      if (lodash.isPlainObject(ctx.params)) {
+        if ((actionName === 'create' || actionName === 'update') && ctx.params.fields) {
+          ctx.params = {
+            ...lodash.omit(ctx.params, 'fields'),
+            whitelist: ctx.params.fields,
+          };
+        }
+      }
+    });
+
+    this.use(this.allowManager.aclMiddleware(), {
+      tag: 'allow-manager',
+      before: 'core',
+    });
+
+    this.addCoreMiddleware();
+  }
+
+  setStrategyResources(resources: Array<string> | null) {
+    this.strategyResources = new Set(resources);
+  }
+
+  getStrategyResources() {
+    return this.strategyResources ? [...this.strategyResources] : null;
+  }
+
+  appendStrategyResource(resource: string) {
+    if (!this.strategyResources) {
+      this.strategyResources = new Set();
+    }
+    this.strategyResources.add(resource);
+  }
+
+  removeStrategyResource(resource: string) {
+    this.strategyResources.delete(resource);
+  }
+
+  define(options: DefineOptions): ACLRole {
+    const roleName = options.role;
+    const role = new ACLRole(this, roleName);
+
+    if (options.strategy) {
+      role.strategy = options.strategy;
+    }
+
+    const actions = options.actions || {};
+
+    for (const [actionName, actionParams] of Object.entries(actions)) {
+      role.grantAction(actionName, actionParams);
+    }
+
+    this.roles.set(roleName, role);
+
+    return role;
+  }
+
+  getRole(name: string): ACLRole {
+    return this.roles.get(name);
+  }
+
+  getRoles(names: string[]): ACLRole[] {
+    return names.map((name) => this.getRole(name)).filter((x) => Boolean(x));
+  }
+
+  removeRole(name: string) {
+    return this.roles.delete(name);
+  }
+
+  setAvailableAction(name: string, options: AvailableActionOptions = {}) {
+    this.availableActions.set(name, new ACLAvailableAction(name, options));
+
+    if (options.aliases) {
+      const aliases = lodash.isArray(options.aliases) ? options.aliases : [options.aliases];
+      for (const alias of aliases) {
+        this.actionAlias.set(alias, name);
+      }
+    }
+  }
+
+  getAvailableAction(name: string) {
+    const actionName = this.actionAlias.get(name) || name;
+    return this.availableActions.get(actionName);
+  }
+
+  getAvailableActions() {
+    return this.availableActions;
+  }
+
+  setAvailableStrategy(name: string, options: AvailableStrategyOptions) {
+    this.availableStrategy.set(name, new ACLAvailableStrategy(this, options));
+  }
+
+  beforeGrantAction(listener?: Listener) {
+    this.addListener('beforeGrantAction', listener);
+  }
+
+  can(options: CanArgs): CanResult | null {
+    if (options.role) {
+      return lodash.cloneDeep(this.getCanByRole(options));
+    }
+    if (options.roles?.length) {
+      if (options.roles.includes('root')) {
+        options.roles = ['root'];
+      }
+      return lodash.cloneDeep(this.getCanByRoles(options));
+    }
+
+    return null;
+  }
+
+  private getCanByRoles(options: CanArgs) {
+    let canResult: CanResult | null = null;
+
+    for (const role of options.roles) {
+      const result = this.getCanByRole({
+        role,
+        ...options,
+      });
+      if (!canResult) {
+        canResult = result;
+        canResult && removeEmptyParams(canResult.params);
+      } else if (canResult && result) {
+        canResult.params = mergeAclActionParams(canResult.params, result.params);
+      }
+    }
+
+    return canResult;
+  }
+
+  private getCanByRole(options: CanArgs) {
+    const { role, resource, action, rawResourceName } = options;
+    const aclRole = this.roles.get(role);
+
+    if (!aclRole) {
+      return null;
+    }
+
+    if (role === 'root') {
+      return {
+        resource,
+        action,
+        role,
+      };
+    }
+
+    const actionPath = `${rawResourceName ? rawResourceName : resource}:${action}`;
+    const snippetAllowed = aclRole.snippetAllowed(actionPath);
+
+    const fixedParams = this.fixedParamsManager.getParams(rawResourceName ? rawResourceName : resource, action);
+
+    const mergeParams = (result: CanResult) => {
+      const params = result['params'] || {};
+
+      const mergedParams = assign(params, fixedParams);
+
+      if (Object.keys(mergedParams).length) {
+        result['params'] = mergedParams;
+      } else {
+        delete result['params'];
+      }
+
+      return result;
+    };
+
+    const aclResource = aclRole.getResource(resource);
+
+    if (aclResource) {
+      const actionParams = aclResource.getAction(action);
+
+      if (actionParams) {
+        // handle single action config
+        return mergeParams({
+          role,
+          resource,
+          action,
+          params: actionParams,
+        });
+      } else {
+        return null;
+      }
+    }
+
+    const roleStrategy = aclRole.getStrategy();
+
+    if (!roleStrategy && !snippetAllowed) {
+      return null;
+    }
+
+    let roleStrategyParams;
+
+    if (this.strategyResources === null || this.strategyResources.has(resource)) {
+      roleStrategyParams = roleStrategy?.allow(resource, this.resolveActionAlias(action));
+    }
+
+    if (!roleStrategyParams && snippetAllowed) {
+      roleStrategyParams = {};
+    }
+
+    if (roleStrategyParams) {
+      const result = { role, resource, action, params: {} };
+
+      if (lodash.isPlainObject(roleStrategyParams)) {
+        result['params'] = roleStrategyParams;
+      }
+
+      return mergeParams(result);
+    }
+
+    return null;
+  }
+
+  /**
+   * @internal
+   */
+  public resolveActionAlias(action: string) {
+    return this.actionAlias.get(action) ? this.actionAlias.get(action) : action;
+  }
+
+  use(fn: any, options?: ToposortOptions) {
+    this.middlewares.add(fn, {
+      group: 'prep',
+      ...options,
+    });
+  }
+
+  allow(resourceName: string, actionNames: string[] | string, condition?: string | ConditionFunc) {
+    return this.skip(resourceName, actionNames, condition);
+  }
+
+  /**
+   * @deprecated
+   */
+  skip(resourceName: string, actionNames: string[] | string, condition?: string | ConditionFunc) {
+    if (!condition) {
+      condition = 'public';
+    }
+
+    if (!Array.isArray(actionNames)) {
+      actionNames = [actionNames];
+    }
+
+    for (const actionName of actionNames) {
+      this.allowManager.allow(resourceName, actionName, condition);
+    }
+  }
+
+  middleware() {
+    const acl = this;
+
+    return async function ACLMiddleware(ctx, next) {
+      ctx.acl = acl;
+
+      const roleName = ctx.state.currentRole || 'anonymous';
+      const { resourceName: rawResourceName, actionName } = ctx.action;
+      const resourceName = resolveResourceName(ctx, rawResourceName, true);
+
+      ctx.can = (options: Omit<CanArgs, 'role'>) => {
+        const roles = ctx.state.currentRoles || [roleName];
+        const can = acl.can({ roles, ...options });
+        if (!can) {
+          return null;
+        }
+        return can;
+      };
+
+      ctx.permission = {
+        can: ctx.can({ resource: resourceName, action: actionName, rawResourceName }),
+        resourceName,
+        actionName,
+      };
+
+      return await compose(acl.middlewares.nodes)(ctx, next);
+    };
+  }
+
+  /**
+   * @internal
+   */
+  async getActionParams(ctx) {
+    const roleNames = getRoleNames(ctx);
+    const { resourceName: rawResourceName, actionName } = ctx.action;
+    const resourceName = resolveResourceName(ctx, rawResourceName, true);
+
+    ctx.can = (options: Omit<CanArgs, 'role'>) => {
+      const can = this.can({ roles: roleNames, ...options });
+      if (can) {
+        return lodash.cloneDeep(can);
+      }
+      return null;
+    };
+
+    ctx.permission = {
+      can: ctx.can({ resource: resourceName, action: actionName, rawResourceName }),
+      resourceName,
+      actionName,
+    };
+
+    await compose(this.middlewares.nodes)(ctx, async () => {});
+  }
+
+  async resolveActionParams(ctx, options: ResolveActionParamsOptions): Promise<ResolvedActionParams> {
+    const rawResourceName = options.rawResourceName || options.resourceName;
+    const resourceName = resolveResourceName(ctx, options.resourceName, options.useCurrentRepository === true);
+    const roleNames = getRoleNames(ctx);
+    const can = this.can({
+      roles: roleNames,
+      resource: resourceName,
+      action: options.actionName,
+      rawResourceName,
+    });
+
+    return this.resolvePermissionParams(ctx, {
+      actionName: options.actionName,
+      can,
+      params: options.params,
+      rawResourceName,
+      resourceName,
+      skip: false,
+    });
+  }
+
+  addGeneralFixedParams(merger: GeneralMerger) {
+    this.fixedParamsManager.addGeneralParams(merger);
+  }
+
+  addFixedParams(resource: string, action: string, merger: Merger) {
+    this.fixedParamsManager.addParams(resource, action, merger);
+  }
+
+  registerSnippet(snippet: SnippetOptions) {
+    this.snippetManager.register(snippet);
+  }
+
+  protected addCoreMiddleware() {
+    const acl = this;
+
+    this.middlewares.add(
+      async (ctx, next) => {
+        const resourcerAction: Action = ctx.action;
+        const { resourceName, actionName } = ctx.permission;
+        const permission = ctx.permission;
+
+        ctx.log?.debug && ctx.log.debug('ctx permission', permission);
+
+        if (['firstOrCreate', 'updateOrCreate'].includes(actionName)) {
+          permission.deferred = true;
+          await next();
+          return;
+        }
+
+        try {
+          const result = await acl.resolvePermissionParams(ctx, {
+            actionName,
+            can: permission.can,
+            params: resourcerAction.params,
+            rawResourceName: ctx.action.resourceName,
+            resourceName,
+            skip: permission.skip,
+          });
+
+          if (result.parsedParams && resourcerAction.mergeParams) {
+            ctx.permission.parsedParams = result.parsedParams;
+            ctx.log?.debug && ctx.log.debug('acl parsedParams', result.parsedParams);
+            ctx.permission.rawParams = result.rawParams;
+            resourcerAction.params = result.mergedParams;
+            ctx.permission.mergedParams = lodash.cloneDeep(resourcerAction.params);
+          }
+        } catch (e) {
+          if (e instanceof NoPermissionError) {
+            ctx.throw(403, 'No permissions');
+            return;
+          }
+
+          throw e;
+        }
+
+        await next();
+      },
+      {
+        tag: 'core',
+        group: 'core',
+      },
+    );
+  }
+
+  private async resolvePermissionParams(
+    ctx,
+    options: {
+      actionName: string;
+      can: CanResult | null;
+      params?: any;
+      rawResourceName: string;
+      resourceName: string;
+      skip?: boolean;
+    },
+  ): Promise<ResolvedActionParams> {
+    const { actionName, can, rawResourceName, resourceName } = options;
+    const rawParams = lodash.cloneDeep(options.params || {});
+
+    if ((!can || typeof can !== 'object') && !options.skip) {
+      throw new NoPermissionError('No permissions');
+    }
+
+    const params = can?.params || this.fixedParamsManager.getParams(resourceName, actionName);
+    ctx.log?.debug && ctx.log.debug('acl params', params);
+
+    if (!params) {
+      return {
+        actionName,
+        can,
+        mergedParams: rawParams,
+        rawParams,
+        rawResourceName,
+        resourceName,
+      };
+    }
+
+    const db = ctx.database ?? ctx.db;
+    const collection = db?.getCollection?.(resourceName);
+    checkFilterParams(collection, params?.filter);
+    const parsedFilter = await parseJsonTemplate(params.filter, {
+      state: ctx.state,
+      timezone: getTimezone(ctx),
+      userProvider: createUserProvider({
+        db: ctx.db,
+        currentUser: ctx.state?.currentUser,
+      }),
+    });
+    const parsedParams = params.filter ? { ...params, filter: parsedFilter ?? params.filter } : params;
+    const mergedParams = mergeActionParams(rawParams, parsedParams);
+
+    return {
+      actionName,
+      can,
+      mergedParams,
+      parsedParams,
+      rawParams,
+      rawResourceName,
+      resourceName,
+    };
+  }
+
+  protected isAvailableAction(actionName: string) {
+    return this.availableActions.has(this.resolveActionAlias(actionName));
+  }
+}
+
+function getRoleNames(ctx: any) {
+  if (ctx.state.currentRoles?.length) {
+    return ctx.state.currentRoles;
+  }
+  return [ctx.state.currentRole || 'anonymous'];
+}
+
+function resolveResourceName(ctx: any, rawResourceName: string, useCurrentRepository: boolean) {
+  const repository = resolveResourceRepository(ctx, rawResourceName, useCurrentRepository);
+  const collection = repository?.targetCollection || repository?.collection;
+
+  if (collection?.name) {
+    return collection.name;
+  }
+
+  return rawResourceName.includes('.') ? rawResourceName.split('.').pop() : rawResourceName;
+}
+
+function resolveResourceRepository(ctx: any, resourceName: string, useCurrentRepository: boolean) {
+  if (useCurrentRepository && ctx.getCurrentRepository) {
+    return ctx.getCurrentRepository();
+  }
+
+  const collectionManager = ctx.dataSource?.collectionManager;
+  if (collectionManager?.getRepository) {
+    try {
+      return collectionManager.getRepository(resourceName, ctx.action?.sourceId);
+    } catch (error) {
+      // Fall back to the legacy resource-name normalization below.
+    }
+  }
+
+  const db = ctx.database ?? ctx.db;
+  if (db?.getRepository) {
+    try {
+      return db.getRepository(resourceName, ctx.action?.sourceId);
+    } catch (error) {
+      // Fall back to the legacy resource-name normalization below.
+    }
+  }
+}
+
+function mergeActionParams(rawParams: any, parsedParams: any) {
+  const mergedParams = lodash.cloneDeep(rawParams || {});
+
+  if (parsedParams.appends && mergedParams.fields) {
+    for (const queryField of mergedParams.fields) {
+      if (parsedParams.appends.indexOf(queryField) !== -1) {
+        if (!mergedParams.appends) {
+          mergedParams.appends = [];
+        }
+        mergedParams.appends.push(queryField);
+        mergedParams.fields = mergedParams.fields.filter((f) => f !== queryField);
+      }
+    }
+  }
+
+  const isEmptyFields = mergedParams.fields && mergedParams.fields.length === 0;
+
+  assign(mergedParams, parsedParams, {
+    appends: (x, y) => {
+      if (!x) {
+        return [];
+      }
+      if (!y) {
+        return x;
+      }
+      return (x as any[]).filter((i) => y.includes(i.split('.').shift()));
+    },
+    blacklist: 'intersect',
+    except: 'union',
+    fields: 'intersect',
+    filter: 'andMerge',
+    sort: 'overwrite',
+    whitelist: 'intersect',
+  });
+
+  if (isEmptyFields) {
+    mergedParams.fields = [];
+  }
+
+  return mergedParams;
+}
+
+function getTimezone(ctx: any) {
+  return ctx?.request?.get?.('x-timezone') ?? ctx?.request?.header?.['x-timezone'] ?? ctx?.req?.headers?.['x-timezone'];
+}
+
+export function createUserProvider(options: {
+  db?: Database;
+  dataSourceManager?: any;
+  currentUser?: any;
+}): UserProvider {
+  const db = options.db ?? options.dataSourceManager?.dataSources?.get?.('main')?.collectionManager?.db;
+  const currentUser = options.currentUser;
+  return async ({ fields }) => {
+    if (!db) {
+      return;
+    }
+    if (!currentUser) {
+      return;
+    }
+    const userFields = fields.filter((f) => f && db.getFieldByPath('users.' + f));
+    if (!userFields.length) {
+      return;
+    }
+    const user = await db.getRepository('users').findOne({
+      filterByTk: currentUser.id,
+      fields: userFields,
+    });
+    return user;
+  };
+}
+
+function containsCreatedByIdFilter(input: any, seen = new Set<any>()): boolean {
+  if (!input) {
+    return false;
+  }
+
+  if (Array.isArray(input)) {
+    return input.some((item) => containsCreatedByIdFilter(item, seen));
+  }
+
+  if (!lodash.isPlainObject(input)) {
+    return false;
+  }
+
+  if (seen.has(input)) {
+    return false;
+  }
+  seen.add(input);
+
+  for (const [key, value] of Object.entries(input)) {
+    if (isCreatedByIdKey(key)) {
+      return true;
+    }
+
+    if (containsCreatedByIdFilter(value, seen)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function isCreatedByIdKey(key: string): boolean {
+  return key === 'createdById' || key.startsWith('createdById.') || key.startsWith('createdById$');
+}
+
+/**
+ * @internal
+ */
+export async function parseJsonTemplate(filter: any, options: ParseJsonTemplateOptions) {
+  if (!filter) {
+    return filter;
+  }
+
+  const timezone = options?.timezone;
+  const state = JSON.parse(JSON.stringify(options?.state || {}));
+  const parsedFilter = await parseFilter(filter, {
+    timezone,
+    now: new Date().toISOString(),
+    vars: {
+      ctx: {
+        state,
+      },
+      $user: options?.userProvider || (async () => undefined),
+      $nRole: () => state.currentRole,
+    },
+  });
+  return parsedFilter;
+}
+
+/**
+ * @internal
+ */
+export function checkFilterParams(collection, filter) {
+  if (!filter) {
+    return;
+  }
+
+  if (!containsCreatedByIdFilter(filter)) {
+    return;
+  }
+
+  if (!collection || !collection.getField('createdById')) {
+    throw new NoPermissionError('createdById field not found');
+  }
+}

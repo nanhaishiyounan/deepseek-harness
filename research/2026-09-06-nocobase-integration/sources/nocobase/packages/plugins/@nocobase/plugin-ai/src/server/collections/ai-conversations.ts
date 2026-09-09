@@ -1,0 +1,91 @@
+/**
+ * This file is part of the NocoBase (R) project.
+ * Copyright (c) 2020-2024 NocoBase Co., Ltd.
+ * Authors: NocoBase Team.
+ *
+ * This project is dual-licensed under AGPL-3.0 and NocoBase Commercial License.
+ * For more information, please refer to: https://www.nocobase.com/agreement.
+ */
+
+import { defineCollection } from '@nocobase/database';
+
+export default defineCollection({
+  migrationRules: ['schema-only'],
+  autoGenId: false,
+  name: 'aiConversations',
+  dataCategory: 'business',
+  fields: [
+    {
+      name: 'sessionId',
+      type: 'uuid',
+      primaryKey: true,
+    },
+    {
+      name: 'thread',
+      type: 'integer',
+      defaultValue: 0,
+      allowNull: false,
+    },
+    {
+      name: 'topicId',
+      type: 'string',
+    },
+    {
+      name: 'from',
+      type: 'string',
+      defaultValue: 'main-agent',
+      allowNull: false,
+    },
+    {
+      name: 'scope',
+      type: 'string',
+      index: true,
+    },
+    {
+      name: 'user',
+      type: 'belongsTo',
+      target: 'users',
+      targetKey: 'id',
+      foreignKey: 'userId',
+    },
+    {
+      name: 'aiEmployee',
+      type: 'belongsTo',
+      target: 'aiEmployees',
+      targetKey: 'username',
+      foreignKey: 'aiEmployeeUsername',
+    },
+    {
+      name: 'title',
+      type: 'string',
+    },
+    {
+      name: 'messages',
+      type: 'hasMany',
+      target: 'aiMessages',
+      sourceKey: 'sessionId',
+      foreignKey: 'sessionId',
+      onDelete: 'CASCADE',
+    },
+    {
+      name: 'options',
+      type: 'jsonb',
+    },
+    {
+      name: 'llmActiveState',
+      type: 'string', // idle,streaming,invoking,
+      defaultValue: 'idle',
+    },
+    {
+      name: 'category',
+      type: 'string', // chat, task
+      defaultValue: 'chat',
+    },
+    {
+      name: 'read',
+      type: 'boolean',
+      allowNull: false,
+      defaultValue: true,
+    },
+  ],
+});

@@ -1,0 +1,312 @@
+/**
+ * This file is part of the NocoBase (R) project.
+ * Copyright (c) 2020-2024 NocoBase Co., Ltd.
+ * Authors: NocoBase Team.
+ *
+ * This project is dual-licensed under AGPL-3.0 and NocoBase Commercial License.
+ * For more information, please refer to: https://www.nocobase.com/agreement.
+ */
+
+import { render, screen, sleep, userEvent, waitFor } from '@nocobase/test/client';
+import React from 'react';
+import App1 from '../demos/demo1';
+import App11 from '../demos/demo11';
+import App2 from '../demos/demo2';
+import App3 from '../demos/demo3';
+import App4 from '../demos/demo4';
+import App5 from '../demos/demo5';
+import App6 from '../demos/demo6';
+import App7 from '../demos/demo7';
+import App8 from '../demos/demo8';
+import App9 from '../demos/demo9';
+import dayjs from 'dayjs';
+import { resolveFilterPickerFormat } from '../DatePicker';
+
+dayjs.tz.setDefault('UTC');
+
+describe('DatePicker', () => {
+  it('basic', async () => {
+    const { container, getByText } = render(<App1 />);
+
+    await sleep();
+
+    const picker = container.querySelector('.ant-picker') as HTMLElement;
+    const input = container.querySelector('input') as HTMLElement;
+
+    await userEvent.click(picker);
+    await userEvent.type(input, '2023/05/01 00:00:00');
+    await userEvent.click(getByText('OK'));
+
+    await waitFor(() => {
+      expect(input).toHaveValue('2023/05/01 00:00:00');
+      // Read pretty
+      expect(screen.getByText('2023/05/01 00:00:00', { selector: '.ant-description-date-picker' })).toBeInTheDocument();
+
+      // TODO: 需要有个方法来固定测试环境的时区
+      // Value
+      expect(screen.getByText('2023-05-01T00:00:00.000Z')).toBeInTheDocument();
+    });
+  });
+
+  it('GMT', async () => {
+    const { container, getByText } = render(<App2 />);
+
+    await sleep();
+
+    const picker = container.querySelector('.ant-picker') as HTMLElement;
+    const input = container.querySelector('input') as HTMLElement;
+
+    await userEvent.click(picker);
+    // 清空默认值
+    await userEvent.clear(input);
+    await userEvent.type(input, '2023/05/01 00:00:00');
+    await userEvent.click(getByText('OK'));
+
+    expect(input).toHaveValue('2023/05/01 00:00:00');
+    // Read pretty
+    expect(screen.getByText('2023/05/01 00:00:00', { selector: '.ant-description-date-picker' })).toBeInTheDocument();
+    // Value
+    expect(screen.getByText('2023-05-01T00:00:00.000Z')).toBeInTheDocument();
+  });
+
+  it('non-UTC', async () => {
+    const { container } = render(<App3 />);
+
+    await sleep();
+
+    const picker = container.querySelector('.ant-picker') as HTMLElement;
+    const input = container.querySelector('input') as HTMLElement;
+
+    await userEvent.click(picker);
+    await userEvent.type(input, '2023/05/01');
+
+    let selected;
+    await waitFor(() => {
+      selected = document.querySelector('.ant-picker-cell-selected') as HTMLElement;
+      expect(selected).toBeInTheDocument();
+    });
+    await userEvent.click(selected);
+
+    expect(input).toHaveValue('2023/05/01');
+    // Read pretty
+    expect(screen.getByText('2023/05/01 00:00:00', { selector: '.ant-description-date-picker' })).toBeInTheDocument();
+    // Value
+    expect(screen.getByText('2023-05-01')).toBeInTheDocument();
+  });
+});
+
+describe('resolveFilterPickerFormat', () => {
+  it('应优先使用筛选字段配置的日期格式', () => {
+    expect(
+      resolveFilterPickerFormat({
+        targetPicker: 'date',
+        picker: 'date',
+        dateFormat: 'MM/DD/YY',
+        showTime: false,
+      }),
+    ).toBe('MM/DD/YY');
+  });
+
+  it('应避免在日期时间格式中重复拼接时间部分', () => {
+    expect(
+      resolveFilterPickerFormat({
+        targetPicker: 'date',
+        picker: 'date',
+        format: 'MM/DD/YY HH:mm:ss',
+        showTime: true,
+        timeFormat: 'HH:mm:ss',
+      }),
+    ).toBe('MM/DD/YY HH:mm:ss');
+  });
+
+  it('应在 12 小时制日期时间格式中避免重复拼接时间部分', () => {
+    expect(
+      resolveFilterPickerFormat({
+        targetPicker: 'date',
+        picker: 'date',
+        format: 'MM/DD/YY hh:mm:ss a',
+        showTime: true,
+        timeFormat: 'hh:mm:ss a',
+      }),
+    ).toBe('MM/DD/YY hh:mm:ss a');
+  });
+
+  it('切换 picker 时应回退到对应 picker 的默认格式', () => {
+    expect(
+      resolveFilterPickerFormat({
+        targetPicker: 'month',
+        picker: 'date',
+        dateFormat: 'MM/DD/YY',
+        showTime: false,
+      }),
+    ).toBe('YYYY-MM');
+  });
+});
+
+describe('RangePicker', () => {
+  it('GMT', async () => {
+    const { container, getByPlaceholderText } = render(<App4 />);
+
+    await sleep();
+
+    const picker = container.querySelector('.ant-picker') as HTMLElement;
+    const startInput = getByPlaceholderText('Start date');
+    const endInput = getByPlaceholderText('End date');
+
+    await userEvent.click(picker);
+    const startDate = await screen.findByTitle('2023-05-01');
+    await userEvent.click(startDate);
+    const endDate = await screen.findByTitle('2023-05-02');
+    await userEvent.click(endDate);
+
+    await waitFor(
+      () => {
+        expect(startInput).toHaveValue('2023-05-01');
+        expect(endInput).toHaveValue('2023-05-02');
+        // Read pretty（等到回填完成再断言，避免动画未收起导致的偶发失败）
+        expect(screen.getByText('2023-05-01~2023-05-02', { selector: '.ant-description-text' })).toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
+    // Value
+    expect(screen.getByText('2023-05-01T00:00:00.000Z ~ 2023-05-02T23:59:59.999Z')).toBeInTheDocument();
+  });
+
+  it('non-GMT', async () => {
+    const { container, getByPlaceholderText } = render(<App5 />);
+
+    await sleep();
+
+    const picker = container.querySelector('.ant-picker') as HTMLElement;
+    const startInput = getByPlaceholderText('Start date');
+    const endInput = getByPlaceholderText('End date');
+
+    await userEvent.click(picker);
+    await userEvent.click(document.querySelector('[title="2023-05-01"]') as HTMLElement);
+    await userEvent.click(document.querySelector('[title="2023-05-02"]') as HTMLElement);
+
+    await waitFor(() => {
+      expect(startInput).toHaveValue('2023-05-01');
+      expect(endInput).toHaveValue('2023-05-02');
+      // Read pretty
+      expect(screen.getByText('2023-05-01~2023-05-02', { selector: '.ant-description-text' })).toBeInTheDocument();
+
+      expect(screen.getByText(/2023-05-01t00:00:00\.000z ~ 2023-05-02t23:59:59\.999z/i)).toBeInTheDocument();
+    });
+  });
+
+  it('non-UTC', async () => {
+    const { container, getByPlaceholderText } = render(<App6 />);
+
+    await sleep();
+
+    const picker = container.querySelector('.ant-picker') as HTMLElement;
+    const startInput = getByPlaceholderText('Start date');
+    const endInput = getByPlaceholderText('End date');
+
+    await userEvent.click(picker);
+    await sleep();
+    await userEvent.click(document.querySelector('[title="2023-05-01"]') as HTMLElement);
+    await userEvent.click(document.querySelector('[title="2023-05-02"]') as HTMLElement);
+
+    await waitFor(() => expect(startInput).toHaveValue('2023-05-01'), { timeout: 3000 });
+    await waitFor(() => expect(endInput).toHaveValue('2023-05-02'), { timeout: 3000 });
+
+    // Read pretty
+    await waitFor(
+      () =>
+        expect(screen.getByText('2023-05-01~2023-05-02', { selector: '.ant-description-text' })).toBeInTheDocument(),
+      { timeout: 3000 },
+    );
+
+    // Value
+    await waitFor(() => expect(screen.getByText('2023-05-01 ~ 2023-05-02')).toBeInTheDocument(), { timeout: 3000 });
+  });
+
+  it('showTime=false,gmt=true,utc=true', async () => {
+    const { container } = render(<App7 />);
+
+    await sleep();
+
+    const picker = container.querySelector('.ant-picker') as HTMLElement;
+    const input = container.querySelector('input') as HTMLElement;
+
+    await userEvent.click(picker);
+    await userEvent.type(input, '2023/05/01');
+    await userEvent.click(document.querySelector('[title="2023-05-01"]') as HTMLElement);
+
+    await waitFor(() => {
+      expect(input).toHaveValue('2023/05/01');
+      // Read pretty
+      expect(screen.getByText('2023/05/01', { selector: '.ant-description-date-picker' })).toBeInTheDocument();
+
+      // Value
+      expect(screen.getByText('2023-05-01T00:00:00.000Z')).toBeInTheDocument();
+    });
+  });
+
+  it('showTime=false,gmt=false,utc=true', async () => {
+    const { container } = render(<App8 />);
+
+    await sleep();
+
+    const picker = container.querySelector('.ant-picker') as HTMLElement;
+    const input = container.querySelector('input') as HTMLElement;
+
+    await userEvent.click(picker);
+    await userEvent.type(input, '2023/05/01');
+    await userEvent.click(document.querySelector('[title="2023-05-01"]') as HTMLElement);
+
+    await waitFor(() => {
+      expect(input).toHaveValue('2023/05/01');
+      // Read pretty
+      expect(screen.getByText('2023/05/01', { selector: '.ant-description-date-picker' })).toBeInTheDocument();
+
+      // Value
+      // 当 gmt 为 false 时是按照客户端本地时区进行计算的，但是这里的测试环境是 UTC+8，所以会有 8 小时的误差
+      expect(screen.getByText('2023-05-01T00:00:00.000Z')).toBeInTheDocument();
+    });
+  });
+
+  it('showTime=false,gmt=true,utc=true & not input', async () => {
+    const currentDateString = new Date().toISOString().split('T')[0];
+    const { container } = render(<App9 />);
+
+    await sleep();
+
+    const picker = container.querySelector('.ant-picker') as HTMLElement;
+
+    await userEvent.click(picker);
+    const btn = document.querySelector(`[title="${currentDateString}"]`);
+    expect(btn).toBeInTheDocument();
+    await userEvent.click(btn as HTMLElement);
+
+    await waitFor(() => {
+      // Read pretty
+      expect(
+        screen.getByText(currentDateString.replace(/-/g, '/'), { selector: '.ant-description-date-picker' }),
+      ).toBeInTheDocument();
+    });
+  });
+
+  // fix T-1506
+  it('shortcut', async () => {
+    const { container } = render(<App11 />);
+
+    await sleep();
+
+    const picker = container.querySelector('.ant-picker') as HTMLElement;
+    const startInput = screen.getByPlaceholderText('Start date');
+    const endInput = screen.getByPlaceholderText('End date');
+
+    await userEvent.click(picker);
+
+    // shortcut: Today
+    await userEvent.click(screen.getByText(/today/i));
+    await sleep();
+
+    // 因为 Today 快捷键的值是动态生成的，所以这里没有断言具体的值
+    await waitFor(() => expect(startInput.getAttribute('value')).toBeTruthy());
+    await waitFor(() => expect(endInput.getAttribute('value')).toBeTruthy());
+  });
+});

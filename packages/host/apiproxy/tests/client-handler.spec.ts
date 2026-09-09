@@ -28,6 +28,7 @@ function scriptedApi(overrides: {
   settings?: Partial<ApiProxy['settings']>
   credentials?: Partial<ApiProxy['credentials']>
   llm?: Partial<ApiProxy['llm']>
+  data?: Partial<ApiProxy['data']>
   respond?: ApiProxy['respond']
 } = {}): ApiProxy {
   async function *empty<F>(): AsyncGenerator<RpcRequest<F>> { /* no frames */ }
@@ -36,12 +37,42 @@ function scriptedApi(overrides: {
   const kbRefuse = <T>(r: RpcRequest<unknown>): Promise<RpcResponse<T>> =>
     Promise.resolve({ rpcId: r.rpcId, result: { ok: false, error: { code: 'kb-not-composed' as never, message: 'stub', details: {} } } })
   return {
+    data: { upload: kbRefuse, ...overrides.data },
+    orders: {
+      create: err,
+      get: err,
+      list: err,
+      fulfill: err,
+      async download() { return new Response('stub', { status: 500 }) },
+    },
+    assets: {
+      list: err,
+      detail: err,
+      stats: err,
+    },
+    connectors: {
+      list: err,
+      connections: err,
+      transfers: err,
+    },
+    kg: {
+      schema: err,
+      search: err,
+      subgraph: err,
+      expand: err,
+      stats: err,
+    },
     kb: {
       stats: kbRefuse,
       search: kbRefuse,
       ingest: kbRefuse,
       ingestUrl: kbRefuse,
       upload: kbRefuse,
+    },
+    nocobase: {
+      listMeta: err,
+      list: err,
+      get: err,
     },
     sessions: {
       list: r => ok(r, { items: [] }),
@@ -442,6 +473,22 @@ describe('workspace domain round trip', () => {
     if (created.result.ok) expect(created.result.value.created).toBe(true)
     const archivedResponse = await c.workspace.archiveSession({ sessionId: 's-arch' as never })
     expect(archivedResponse.result).toEqual({ ok: true, value: { archivedSessionIds: ['s-arch'] } })
+  })
+
+  it('round-trips data.upload through the wire form on both destination branches', async () => {
+    const c = client(scriptedApi({
+      data: {
+        upload: async request => request.payload.filename === 'a.csv'
+          ? { rpcId: request.rpcId, result: { ok: true, value: { destination: 'lakehouse', replaced: false, table: 'a', rows: 2 } } }
+          : { rpcId: request.rpcId, result: { ok: true, value: { destination: 'kb', replaced: false, document: { doc_id: 1, chunks: 2, embedded: false } } } },
+      },
+    }))
+    const csv = await c.data.upload({ filename: 'a.csv', data: 'awi=' })
+    expect(csv.result).toEqual({ ok: true, value: { destination: 'lakehouse', replaced: false, table: 'a', rows: 2 } })
+    const doc = await c.data.upload({ filename: 'a.md', data: 'IyB4' })
+    expect(doc.result).toEqual({
+      ok: true, value: { destination: 'kb', replaced: false, document: { doc_id: 1, chunks: 2, embedded: false } },
+    })
   })
 
   it('rejects a pathless create payload at the handler schema', async () => {

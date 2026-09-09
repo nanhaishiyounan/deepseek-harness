@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-09-03-unified-data-upload-routing.md
+2026-09-03-unified-data-upload-routing.md: 854190369c2f15c8fcfcc2c6ac3c35d7efe002f3
+2026-09-03-unified-data-upload-routing.zh.md: d0603ee5ad28696fe995a9fc3e6ac2556e4f9dd5

@@ -4,7 +4,7 @@
  */
 
 import { randomUUID } from 'node:crypto'
-import { mkdir, stat, writeFile } from 'node:fs/promises'
+import { access, mkdir, readFile, stat, writeFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { z as zod } from 'zod'
@@ -43,8 +43,33 @@ import type {} from '@deepseek-ai/dsh-kb'
 import type {} from '@deepseek-ai/dsh-fs'
 import type {} from '@deepseek-ai/dsh-web'
 import {
-  assertPublicUrl, extractDocxText, extractPdfText, htmlToStructuredText, INGEST_EXTENSIONS,
+  extractDocxText, extractPdfText, htmlToStructuredText, INGEST_EXTENSIONS, resolveAdmittedAddresses,
 } from '@deepseek-ai/dsh-tool-kb'
+import { DataRouterError, resolveDataRoute } from '@deepseek-ai/dsh-lakehouse/data-router'
+import type { DataRoute } from '@deepseek-ai/dsh-lakehouse/data-router'
+// Type-only: resolves `ctx.get('lakehouse')` to the seam's runtime type.
+import type {} from '@deepseek-ai/dsh-lakehouse'
+import { parseCsvTabular, parseJsonTabular, parseXlsxTabular, tableNameFromFilename } from '@deepseek-ai/dsh-lakehouse/tabular'
+import type { XlsxWorkbookLike } from '@deepseek-ai/dsh-lakehouse/tabular'
+import type { DataUploadView } from './api/data.ts'
+import type { OrderView } from './api/orders.ts'
+import type { OrderRecord } from '@deepseek-ai/dsh-expert-orders'
+// Type-only: resolves `ctx.get('connector')` to the seam's runtime type.
+import type {} from '@deepseek-ai/dsh-connector'
+import type { ConnectorDatasetSummary } from '@deepseek-ai/dsh-connector'
+import type { LakehouseTransferEntry } from '@deepseek-ai/dsh-lakehouse'
+import type { AssetFeaturedView, AssetView } from './api/assets.ts'
+import type {
+  ConnectorConnectionView, ConnectorProviderWireView, ConnectorTransferWireView,
+} from './api/connectors.ts'
+import type { KgEdgeView, KgNodeHitView, KgNodeTypeView, KgRelationView, KgSubgraphNodeView } from './api/kg.ts'
+// Type-only: resolves `ctx.get('kbGraph')` to the seam's runtime type.
+import type {} from '@deepseek-ai/dsh-kb-graph'
+import type {
+  KbGraphRuntime, KgEdge, KgNodeHit, KgNodeType, KgNodeTypeId, KgRelation, KgSubgraph, KgSubgraphNode,
+} from '@deepseek-ai/dsh-kb-graph'
+import { compileNbFilter, NocoBaseClient, parseNbFilterCondition, unwrapNbTitle } from '@deepseek-ai/dsh-connector-nocobase'
+import type { NbFilterCondition, NocoBaseCollectionMeta, NocoBaseListResult } from '@deepseek-ai/dsh-connector-nocobase'
 import type {} from '@deepseek-ai/dsh-tools'
 import type {
   ApiProxy, ConfigurableProviderView, CredentialView, GoalRef, HistoryEntry, HostFrame,
@@ -303,6 +328,49 @@ function kbNotComposed(): RpcError {
   }
 }
 
+/** The shared refusal every nocobase method answers with when the deployment has not opted in. */
+function nocobaseNotComposed(): RpcError {
+  return {
+    code: 'nocobase-not-composed',
+    message: 'this deployment has not enabled the nocobase domain; set the api-gateway config nocobaseEnabled: true to expose business reads',
+    details: {},
+  }
+}
+
+/** The shared refusal every nocobase method answers with when the service-account credentials resolve to nothing. */
+function nocobaseUnavailable(): RpcError {
+  return {
+    code: 'nocobase-unavailable',
+    message: 'no NocoBase service account resolves: set nocobaseBaseUrl (or NOCOBASE_BASE_URL) and the NOCOBASE_API_KEY credential',
+    details: {},
+  }
+}
+
+/** Fold one NocoBase client failure onto the wire error vocabulary. */
+function nocobaseRequestError(error: unknown): RpcError {
+  return { code: 'nocobase-request-failed', message: error instanceof Error ? error.message : String(error), details: {} }
+}
+
+/**
+ * Resolve the deployment's NocoBase service account once per gateway: the
+ * credentials seam first, then the ambient environment. The resolved client
+ * is cached in the caller's closure; nothing resolves here when the domain
+ * is not enabled.
+ * @param ctx - the gateway's context (the credentials seam is optional).
+ * @param defaults - the gateway defaults carrying the optional overrides.
+ * @returns the shared REST client, or undefined when no account resolves.
+ */
+async function resolveNocobaseClient(ctx: Context, defaults: ApiProxyDefaults): Promise<NocoBaseClient | undefined> {
+  const baseUrl = defaults.nocobaseBaseUrl || process.env.NOCOBASE_BASE_URL
+  const apiKeyEnv = defaults.nocobaseApiKeyEnv ?? 'NOCOBASE_API_KEY'
+  const credentials = ctx.get('credentials')
+  const token = credentials !== undefined
+    ? (await credentials.resolve(credentialRef(apiKeyEnv)))?.value
+    : process.env[apiKeyEnv]
+  if (typeof baseUrl !== 'string' || baseUrl.length === 0 || typeof token !== 'string' || token.length === 0) return undefined
+  return new NocoBaseClient({ baseUrl, token })
+}
+
 /** Project one seam ingest outcome onto the wire view. */
 function ingestView(result: { docId: number; chunks: number; embedded: boolean; embedModel?: string }): {
   doc_id: number
@@ -333,6 +401,7 @@ function hitView(hit: {
   headingPath?: string
   chunkIdx: number
   content: string
+  score?: number
 }): {
   chunk_id: number
   doc_id: number
@@ -343,6 +412,7 @@ function hitView(hit: {
   heading_path?: string
   chunk_idx: number
   content: string
+  score?: number
 } {
   return {
     chunk_id: hit.chunkId,
@@ -354,6 +424,7 @@ function hitView(hit: {
     ...hit.headingPath === undefined ? {} : { heading_path: hit.headingPath },
     chunk_idx: hit.chunkIdx,
     content: hit.content,
+    ...hit.score === undefined ? {} : { score: hit.score },
   }
 }
 /* jscpd:ignore-end */
@@ -711,6 +782,63 @@ export interface ApiProxyDefaults {
    * writes need an explicit per-deployment opt-in.
    */
   kbWriteEnabled?: boolean
+  /**
+   * Whether the unified data-upload surface (`data.upload`) answers. Absent
+   * means refused: the gateway is unauthenticated and a unified upload writes
+   * into the kb or the lakehouse, so it needs an explicit per-deployment
+   * opt-in independent of `kbWriteEnabled`.
+   */
+  dataUploadEnabled?: boolean
+  /**
+   * Whether the orders domain's write methods (`orders.create`,
+   * `orders.fulfill`) answer. Absent means refused: an order is a real
+   * transaction against a priced expert service, so the unauthenticated
+   * gateway needs an explicit per-deployment opt-in; reads (get/list) and
+   * the deliverable download stay open.
+   */
+  ordersEnabled?: boolean
+  /**
+   * Whether the nocobase domain's read methods (`nocobase.listMeta`,
+   * `nocobase.list`, `nocobase.get`) answer. Absent means refused: business
+   * reads run against the deployment's NocoBase under a service account, so
+   * the unauthenticated gateway needs an explicit per-deployment opt-in.
+   */
+  nocobaseEnabled?: boolean
+  /**
+   * Whether the data-asset market domain (`assets.list/detail/stats`) answers.
+   * Absent means refused: market reads ride the connector seam's discovery,
+   * so the unauthenticated gateway needs an explicit per-deployment opt-in.
+   */
+  assetsEnabled?: boolean
+  /**
+   * Workspace-relative or absolute path of the market seed file (featured
+   * cards + board copy, the operations seat). Omitted means no featured rail;
+   * a configured path that cannot be read or parsed fails loud.
+   */
+  assetsSeedPath?: string
+  /**
+   * Whether the connector-page domain (`connectors.list/connections/transfers`)
+   * answers. Absent means refused, same stance as `assetsEnabled`.
+   */
+  connectorsEnabled?: boolean
+  /**
+   * Whether the graph-page domain (`kg.schema/search/subgraph/expand/stats`)
+   * answers. Absent means refused, same stance as `assetsEnabled`.
+   */
+  kgEnabled?: boolean
+  /**
+   * Tenant binding for every kg-domain read — the deployment's own graph
+   * tenant, never wire input (same stance as `kbTenant`).
+   */
+  kgTenant?: string
+  /**
+   * NocoBase server origin for the domain (for example
+   * `http://127.0.0.1:13000`). Omitted = the `NOCOBASE_BASE_URL`
+   * environment variable.
+   */
+  nocobaseBaseUrl?: string
+  /** Credential reference (environment-variable name) the API token resolves through; defaults to `NOCOBASE_API_KEY`. */
+  nocobaseApiKeyEnv?: string
   /** Native open-with-default-application; injectable for carrier tests. */
   openPath?: (path: string, signal: AbortSignal) => Promise<void>
   /** Native text-editor handoff; injectable for settings-document tests. */
@@ -1164,6 +1292,16 @@ function changedWorkspaceView(workspaceId: string, value: unknown): WorkspaceVie
  * @returns the ApiProxy implementation.
  */
 export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiProxy {
+  /** The nocobase domain's shared gate: enabled opt-in plus the lazily resolved (and cached) service-account client. */
+  let nocobaseClientCache: Promise<NocoBaseClient | undefined> | undefined
+  const nocobaseGates = (): Promise<{ client: NocoBaseClient } | { refusal: RpcError }> =>
+    (async () => {
+      if (defaults.nocobaseEnabled !== true) return { refusal: nocobaseNotComposed() }
+      nocobaseClientCache ??= resolveNocobaseClient(ctx, defaults)
+      const client = await nocobaseClientCache
+      if (client === undefined) return { refusal: nocobaseUnavailable() }
+      return { client }
+    })()
   /** The kb workbench's tenant binding; unbound constructions refuse loudly on every kb method. */
   const kbTenant = (): string | undefined => defaults.kbTenant
   /** The shared refusal every kb method answers with when no tenant is bound. */
@@ -1202,11 +1340,10 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
   })
   /**
    * Store one workbench document through the seam and answer with the wire
-   * view. Shared by the file and URL ingest paths; the caller owns content
-   * production and the refusal details.
+   * view. Shared by the file, upload, and URL ingest paths; the caller owns
+   * content production, the response envelope, and the refusal details.
    */
   const storeKbDocument = async (
-    request: RpcRequest<unknown>,
     kb: KbRuntime,
     tenant: string,
     input: {
@@ -1217,7 +1354,7 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
       content: string
     },
     signal: AbortSignal | undefined,
-  ): Promise<RpcResponse<KbIngestView>> => {
+  ): Promise<KbIngestView> => {
     const result = await kb.ingest({
       tenantId: tenant,
       sourcePath: input.sourcePath,
@@ -1226,7 +1363,270 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
       ...input.collectedAt === undefined ? {} : { collectedAt: input.collectedAt },
       content: input.content,
     }, signal)
-    return ok(request, ingestView(result))
+    return ingestView(result)
+  }
+  /** The shared refusal `data.upload` answers with unless the deployment opted in. */
+  const dataWriteRefusal = (): RpcError => ({
+    code: 'data-write-disabled',
+    message: 'the unified data upload is disabled; set the api-gateway config dataUploadEnabled: true to allow routing uploads',
+    details: {},
+  })
+  /** The shared refusal orders writes answer with when no orders capability is composed. */
+  const ordersNotComposed = (): RpcError => ({
+    code: 'orders-not-composed',
+    message: 'this deployment composes no orders capability; add the expert-orders seam'
+      + ' (and a NocoBase source of truth) to serve orders',
+    details: {},
+  })
+  /** The shared refusal orders writes answer with unless the deployment opted in. */
+  const ordersWriteRefusal = (): RpcError => ({
+    code: 'orders-write-disabled',
+    message: 'the orders surface is read-only; set the api-gateway config ordersEnabled: true to allow placing and fulfilling orders',
+    details: {},
+  })
+  /** Project one seam order record onto the wire view (snake_case mirror). */
+  const orderViewOf = (order: OrderRecord): OrderView => ({
+    id: order.id,
+    order_no: order.orderNo,
+    service_id: order.serviceId,
+    service_name: order.serviceName,
+    ...order.price === undefined ? {} : { price: order.price },
+    brief: order.brief,
+    ...order.clientName === undefined ? {} : { client_name: order.clientName },
+    ...order.expertName === undefined ? {} : { expert_name: order.expertName },
+    ...order.expertOrg === undefined ? {} : { expert_org: order.expertOrg },
+    status: order.status,
+    ...order.error === undefined ? {} : { error: order.error },
+    ...order.deliverablePath === undefined ? {} : { deliverable_path: order.deliverablePath },
+    ...order.deliverableUrl === undefined ? {} : { deliverable_url: order.deliverableUrl },
+    ...order.generatedAt === undefined ? {} : { generated_at: order.generatedAt },
+    ...order.note === undefined ? {} : { note: order.note },
+    created_at: order.createdAt,
+  })
+  /** Translate one orders-seam refusal onto the wire error. */
+  const ordersRejected = (error: unknown): RpcError => ({
+    code: 'orders-rejected',
+    message: error instanceof Error ? error.message : String(error),
+    details: {},
+  })
+  /** The shared refusal every assets method answers with unless the deployment opted in. */
+  const assetsNotComposed = (): RpcError => ({
+    code: 'assets-not-composed',
+    message: 'this deployment has not enabled the market domain; set the api-gateway config assetsEnabled: true to expose the data-asset market',
+    details: {},
+  })
+  /** The shared refusal every assets method answers with when no connector seam is composed. */
+  const assetsConnectorMissing = (): RpcError => ({
+    code: 'assets-connector-missing',
+    message: 'this deployment composes no connector capability; add the dsh-connector seam and at least one provider to serve the market',
+    details: {},
+  })
+  /** Translate one assets-path failure (provider, orders read, seed parse) onto the wire error. */
+  const assetsRejected = (error: unknown): RpcError => ({
+    code: 'assets-rejected',
+    message: error instanceof Error ? error.message : String(error),
+    details: {},
+  })
+  /** The shared refusal every connectors method answers with unless the deployment opted in. */
+  const connectorsNotComposed = (): RpcError => ({
+    code: 'connectors-not-composed',
+    message: 'this deployment has not enabled the connector-page domain; set the api-gateway config connectorsEnabled: true to expose the connector catalog',
+    details: {},
+  })
+  /** The shared refusal every connectors method answers with when no connector seam is composed. */
+  const connectorsConnectorMissing = (): RpcError => ({
+    code: 'connectors-connector-missing',
+    message: 'this deployment composes no connector capability; add the dsh-connector seam and at least one provider to serve the catalog',
+    details: {},
+  })
+  /** Translate one delivery-read failure onto the wire error. */
+  const connectorsTransfersRejected = (error: unknown): RpcError => ({
+    code: 'connectors-transfers-rejected',
+    message: error instanceof Error ? error.message : String(error),
+    details: {},
+  })
+  /** The graph page's shared gates: enabled opt-in, seam composed, tenant bound. */
+  const kgGates = (): { graph: KbGraphRuntime; tenant: string } | { refusal: RpcError } => {
+    if (defaults.kgEnabled !== true) {
+      return { refusal: { code: 'kg-not-composed', message: 'this deployment has not enabled the kg domain; set the api-gateway config kgEnabled: true to expose the graph page reads', details: {} } }
+    }
+    const graph = ctx.get('kbGraph')
+    if (graph === undefined) {
+      return { refusal: { code: 'kg-graph-missing', message: 'this deployment composes no knowledge-graph seam; add the dsh-kb-graph seam and a store provider to serve the graph page', details: {} } }
+    }
+    const tenant = defaults.kgTenant
+    if (tenant === undefined) {
+      return { refusal: { code: 'kg-tenant-unbound', message: 'the api-gateway config kgTenant is not set; bind the deployment\'s graph tenant explicitly', details: {} } }
+    }
+    return { graph, tenant }
+  }
+  /** Translate one graph-read failure onto the wire error. */
+  const kgReadFailed = (error: unknown): RpcError => ({
+    code: 'kg-read-failed',
+    message: error instanceof Error ? error.message : String(error),
+    details: {},
+  })
+  /** Project one registry node type onto the legend row. */
+  const kgNodeTypeViewOf = (type: KgNodeType): KgNodeTypeView => ({
+    id: String(type.id),
+    label: type.label,
+    layer: type.layer,
+    ...type.extends === undefined ? {} : { extends: String(type.extends) },
+    ...type.naturalKey === undefined ? {} : { natural_key: type.naturalKey },
+    prop_keys: type.props.map(prop => prop.key),
+    source: type.source,
+    status: type.status,
+  })
+  /** Project one registry relation onto the legend row. */
+  const kgRelationViewOf = (relation: KgRelation): KgRelationView => ({
+    id: String(relation.id),
+    label: relation.label,
+    constraints: relation.constraints.map(constraint => ({ domain: String(constraint.domain), range: String(constraint.range) })),
+    kind: relation.kind,
+    source: relation.source,
+  })
+  /** Project one search hit onto the wire row. */
+  const kgNodeHitViewOf = (hit: KgNodeHit): KgNodeHitView => ({
+    id: hit.id,
+    type: String(hit.type),
+    name: hit.name,
+    ...hit.naturalKey === undefined ? {} : { natural_key: hit.naturalKey },
+  })
+  /** Project one subgraph node onto the wire row. */
+  const kgSubgraphNodeViewOf = (node: KgSubgraphNode): KgSubgraphNodeView => ({
+    id: node.id,
+    type: String(node.type),
+    name: node.name,
+    ...node.naturalKey === undefined ? {} : { natural_key: node.naturalKey },
+    depth: node.depth,
+  })
+  /** Project one graph edge onto the wire row; a relation filter cuts here (tool-parity semantics). */
+  const kgEdgeViewOf = (edge: KgEdge, relationFilter?: ReadonlySet<string>): KgEdgeView | undefined =>
+    relationFilter !== undefined && !relationFilter.has(String(edge.relation))
+      ? undefined
+      : {
+        id: edge.id,
+        relation: String(edge.relation),
+        source: edge.srcId,
+        target: edge.dstId,
+        ...edge.fact === undefined ? {} : { fact: edge.fact },
+        asserted_by: edge.provenance.sourceSystem,
+      }
+  /** Project one whole subgraph onto the wire value (node cut + endpoint-consistent edge filter). */
+  const kgSubgraphViewsOf = (
+    subgraph: KgSubgraph,
+    relationFilter?: ReadonlySet<string>,
+  ): { nodes: readonly KgSubgraphNodeView[]; edges: readonly KgEdgeView[]; truncated: boolean } => {
+    const nodeIds = new Set(subgraph.nodes.map(node => node.id))
+    const edges: KgEdgeView[] = []
+    for (const edge of subgraph.edges) {
+      const view = kgEdgeViewOf(edge, relationFilter)
+      // An edge whose endpoints both survived the node cut keeps rendering
+      // semantics (dangling wires are impossible); the relation filter drops
+      // the rest at the projection layer, matching the kg_subgraph tool.
+      if (view !== undefined && nodeIds.has(edge.srcId) && nodeIds.has(edge.dstId)) edges.push(view)
+    }
+    return { nodes: subgraph.nodes.map(kgSubgraphNodeViewOf), edges, truncated: subgraph.truncated }
+  }
+  /** Project one connector dataset summary onto the market card view (the wire's snake_case mirror). */
+  const assetViewOf = (summary: ConnectorDatasetSummary): AssetView => ({
+    provider_id: summary.manifest.providerId,
+    dataset_id: summary.id,
+    title: summary.title,
+    kind: summary.kind,
+    ...summary.manifest.description === undefined ? {} : { description: summary.manifest.description },
+    ...summary.manifest.updatedAt === undefined ? {} : { updated_at: summary.manifest.updatedAt },
+    ...summary.service === undefined ? {} : {
+      service_name: summary.service.name,
+      ...summary.service.price === undefined ? {} : { price: summary.service.price },
+      ...summary.service.deliverable === undefined ? {} : { deliverable: summary.service.deliverable },
+      ...summary.service.summary === undefined ? {} : { summary: summary.service.summary },
+      service_id: summary.service.serviceId,
+    },
+    ...summary.expert === undefined ? {} : {
+      ...summary.expert.org === undefined ? {} : { expert_org: summary.expert.org },
+      domains: summary.expert.domains,
+    },
+  })
+  /** Project one seam provider view onto the wire row. */
+  const providerWireViewOf = (provider: { id: string; available: boolean; capabilities: readonly ('discover' | 'fetch' | 'transfer')[] }): ConnectorProviderWireView => ({
+    id: provider.id,
+    available: provider.available,
+    capabilities: provider.capabilities,
+  })
+  /** Aggregate the delivery trail per provider, newest activity first. */
+  const connectionViewsOf = (entries: readonly LakehouseTransferEntry[]): ConnectorConnectionView[] => {
+    const byProvider = new Map<string, { transfers: number; rows: number; last: string }>()
+    for (const entry of entries) {
+      const prior = byProvider.get(entry.source) ?? { transfers: 0, rows: 0, last: entry.transferredAt }
+      const last = prior.last < entry.transferredAt ? entry.transferredAt : prior.last
+      byProvider.set(entry.source, { transfers: prior.transfers + 1, rows: prior.rows + entry.rows, last })
+    }
+    return [...byProvider.entries()]
+      .sort((a, b) => (a[1].last < b[1].last ? 1 : -1))
+      .map(([providerId, agg]) => ({
+        provider_id: providerId,
+        transfers: agg.transfers,
+        rows: agg.rows,
+        last_transfer_at: agg.last,
+      }))
+  }
+  /** Project one lakehouse transfer entry onto the wire timeline row. */
+  const transferWireViewOf = (entry: LakehouseTransferEntry): ConnectorTransferWireView => ({
+    transfer_id: entry.transferId,
+    source: entry.source,
+    destination: entry.destination,
+    dataset_id: entry.datasetId,
+    rows: entry.rows,
+    transferred_at: entry.transferredAt,
+  })
+  /** Read the configured market seed file; absent config means no featured rail, a broken file fails loud. */
+  const readMarketSeed = async (): Promise<readonly AssetFeaturedView[]> => {
+    const path = defaults.assetsSeedPath
+    if (path === undefined) return []
+    const raw = await readFile(path, 'utf8')
+    const parsed = zod.object({
+      featured: zod.array(zod.object({
+        title: zod.string().min(1),
+        blurb: zod.string(),
+        tags: zod.array(zod.string()),
+      })),
+    }).parse(JSON.parse(raw))
+    return parsed.featured
+  }
+  /** The delivery trail through the optional lakehouse seam; no seam reads as no records (the catalog-only degradation). */
+  const transferEntries = async (limit: number, signal: AbortSignal | undefined): Promise<readonly LakehouseTransferEntry[]> => {
+    const lakehouse = ctx.get('lakehouse')
+    if (lakehouse === undefined) return []
+    return await lakehouse.listTransfers(limit, signal)
+  }
+  /** Map one router refusal reason onto its wire error code. */
+  const dataRouteErrorCode = (reason: 'unsupported-type' | 'type-mismatch' | 'empty-file'): 'data-unsupported-type' | 'data-type-mismatch' | 'data-empty-file' =>
+    reason === 'unsupported-type' ? 'data-unsupported-type' : reason === 'type-mismatch' ? 'data-type-mismatch' : 'data-empty-file'
+  /**
+   * Load one xlsx workbook through exceljs. The import stays inside the call
+   * so gateway startup never pays for the reader until an xlsx upload needs it.
+   */
+  const loadXlsxWorkbook = async (data: Buffer): Promise<XlsxWorkbookLike> => {
+    const { Workbook } = await import('exceljs')
+    const workbook = new Workbook()
+    // The parameter cast bridges exceljs's own Buffer declaration to Node's —
+    // the bytes are the same memory.
+    await workbook.xlsx.load(data as unknown as Parameters<typeof workbook.xlsx.load>[0])
+    return workbook
+  }
+  /**
+   * Decode one routed structured body into the seam's tabular vocabulary:
+   * csv/json as fatal-decoded UTF-8, xlsx through the exceljs reader.
+   */
+  const tabularOfRoute = (route: DataRoute, bytes: Buffer): Promise<ReturnType<typeof parseCsvTabular>> => {
+    if (route.destination === 'lakehouse' && route.format === 'csv') {
+      return Promise.resolve(parseCsvTabular(new TextDecoder('utf-8', { fatal: true }).decode(bytes)))
+    }
+    if (route.destination === 'lakehouse' && route.format === 'json') {
+      return Promise.resolve(parseJsonTabular(new TextDecoder('utf-8', { fatal: true }).decode(bytes)))
+    }
+    return parseXlsxTabular(bytes, loadXlsxWorkbook)
   }
   const sessionExportCompressionLevel = defaults.sessionExportCompressionLevel
     ?? DEFAULT_SESSION_LOG_COMPRESSION_LEVEL
@@ -3094,6 +3494,89 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
       },
     },
 
+    nocobase: {
+      // The business-system READ surface over the shared NocoBase REST client.
+      // Read-path first by design: writes to business records go through the
+      // agent's nb_create/nb_update tools with the in-conversation
+      // confirmation contract, never through this wire surface. A deployment
+      // that has not opted in through `nocobaseEnabled` keeps a working
+      // gateway, and every method fails with the same structured refusal.
+      async listMeta(request, signal) {
+        const gates = await nocobaseGates()
+        if ('refusal' in gates) return err(request, gates.refusal)
+        let meta: readonly NocoBaseCollectionMeta[]
+        try {
+          meta = await gates.client.listMeta(signal)
+        } catch (error: unknown) {
+          return err(request, nocobaseRequestError(error))
+        }
+        return ok(request, {
+          collections: meta.map(entry => ({
+            name: entry.name,
+            // Titles arrive as i18n templates for system collections; the wire
+            // has no translator, so unwrap to the display key.
+            ...entry.title === undefined ? {} : { title: unwrapNbTitle(entry.title) },
+            ...entry.hidden === undefined ? {} : { hidden: entry.hidden },
+            ...entry.filterTargetKey === undefined ? {} : { filter_target_key: entry.filterTargetKey },
+            fields: (entry.fields ?? []).map(field => ({
+              name: field.name,
+              type: field.type,
+              ...field.title === undefined ? {} : { title: unwrapNbTitle(field.title) },
+              ...field.target === undefined ? {} : { target: field.target },
+            })),
+          })),
+        })
+      },
+
+      async list(request, signal) {
+        const gates = await nocobaseGates()
+        if ('refusal' in gates) return err(request, gates.refusal)
+        const { collection, filter, match, page, page_size: pageSize, sort, fields } = request.payload
+        const conditions: NbFilterCondition[] = []
+        for (const raw of filter ?? []) {
+          const parsed = parseNbFilterCondition(raw)
+          if (!parsed.ok) {
+            return err(request, { code: 'nocobase-request-failed', message: `nocobase.list: ${parsed.error}`, details: {} })
+          }
+          conditions.push(parsed.value)
+        }
+        const filterTree = compileNbFilter(conditions, match ?? 'and')
+        let result: NocoBaseListResult<Record<string, unknown>>
+        try {
+          result = await gates.client.list<Record<string, unknown>>(collection, {
+            ...Object.keys(filterTree).length === 0 ? {} : { filter: filterTree },
+            page: page ?? 1,
+            pageSize: pageSize ?? 20,
+            ...sort === undefined ? {} : { sort },
+            ...fields === undefined ? {} : { fields },
+          }, signal)
+        } catch (error: unknown) {
+          return err(request, nocobaseRequestError(error))
+        }
+        return ok(request, { count: result.count, page: result.page, page_size: result.pageSize, rows: result.rows })
+      },
+
+      async get(request, signal) {
+        const gates = await nocobaseGates()
+        if ('refusal' in gates) return err(request, gates.refusal)
+        const { collection, id } = request.payload
+        let row: Record<string, unknown> | undefined
+        try {
+          row = await gates.client.get<Record<string, unknown>>(collection, id, undefined, signal)
+        } catch (error: unknown) {
+          return err(request, nocobaseRequestError(error))
+        }
+        if (row === undefined) {
+          return err(request, {
+            code: 'nocobase-row-missing',
+            message: `no row ${id} exists in ${collection}`,
+            details: { collection, id },
+          })
+        }
+        return ok(request, { collection, row })
+      },
+    },
+
     kb: {
       // The workbench surface over the OPTIONAL kb capability: a deployment
       // that composes no knowledge base keeps a working gateway, and every
@@ -3184,7 +3667,7 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
             : lower.endsWith('.pdf')
               ? await extractPdfText(await bytes())
               : await extractDocxText(await bytes())
-          return await storeKbDocument(request, kb, tenant, { sourcePath: trimmed, kind, title, collectedAt, content }, signal)
+          return ok(request, await storeKbDocument(kb, tenant, { sourcePath: trimmed, kind, title, collectedAt, content }, signal))
         } catch (error: unknown) {
           return err(request, {
             code: 'kb-ingest-failed',
@@ -3199,7 +3682,9 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
        * host workspace's uploads directory, parse it exactly as the file
        * ingest channel parses the same extensions, and store it under the
        * uploads-relative source path so re-uploads replace their prior
-       * document (the seam's same-path semantics).
+       * document (the seam's same-path semantics). The response's `replaced`
+       * reports that a same-name landing already existed — the single-tenant
+       * workbench's durable identity for this channel.
        */
       async upload(request, signal) {
         const { filename, data, doc_kind: docKind, title, collected_at: collectedAt } = request.payload
@@ -3235,8 +3720,13 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
         const sourcePath = `workspace/data/uploads/${sanitized}`
         try {
           const landingDir = join(defaults.cwd, 'workspace/data/uploads')
+          const landingPath = join(landingDir, sanitized)
           await mkdir(landingDir, { recursive: true })
-          await writeFile(join(landingDir, sanitized), bytes)
+          // Sample the landing target before this write replaces it. Only
+          // ENOENT (no prior landing) reaches the false arm; any other access
+          // error resurfaces immediately at the writeFile below.
+          const replaced = await access(landingPath).then(() => true, () => false)
+          await writeFile(landingPath, bytes)
           const lower = sanitized.toLowerCase()
           // Fatal UTF-8 decoding keeps the text channel aligned with the file
           // ingest's readText: invalid encodings refuse instead of storing
@@ -3246,7 +3736,7 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
             : lower.endsWith('.pdf')
               ? await extractPdfText(bytes)
               : await extractDocxText(bytes)
-          return await storeKbDocument(request, kb, tenant, { sourcePath, kind, title, collectedAt, content }, signal)
+          return ok(request, { ...await storeKbDocument(kb, tenant, { sourcePath, kind, title, collectedAt, content }, signal), replaced })
         } catch (error: unknown) {
           return err(request, {
             code: 'kb-ingest-failed',
@@ -3275,10 +3765,11 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
           return err(request, { code: 'kb-invalid-url', message: `not a valid URL: ${url}`, details: { url } })
         }
         // The same SSRF gate as the kb_ingest_url tool: the workbench never
-        // becomes a private-network probing surface.
-        await assertPublicUrl(parsed, false)
+        // becomes a private-network probing surface, and the admitted
+        // addresses pin the fetch so DNS cannot re-answer in between.
+        const pinnedAddresses = await resolveAdmittedAddresses(parsed, false)
         try {
-          const fetched = await web.fetch({ url }, signal)
+          const fetched = await web.fetch({ url, pinnedAddresses }, signal)
           if (fetched.statusCode < 200 || fetched.statusCode >= 300) {
             return err(request, {
               code: 'kb-ingest-failed',
@@ -3294,13 +3785,437 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
             })
           }
           const content = fetched.body.kind === 'html' ? htmlToStructuredText(fetched.body.content) : fetched.body.content
-          return await storeKbDocument(request, kb, tenant, { sourcePath: url, kind, title, collectedAt, content }, signal)
+          return ok(request, await storeKbDocument(kb, tenant, { sourcePath: url, kind, title, collectedAt, content }, signal))
         } catch (error: unknown) {
           return err(request, {
             code: 'kb-ingest-failed',
             message: error instanceof Error ? error.message : String(error),
             details: { url },
           })
+        }
+      },
+    },
+
+    /**
+     * The unified upload surface: classify one uploaded file through the
+     * shared data router (extension → declared mime → magic number) and land
+     * it in the routed destination. The lakehouse seam, like the kb seam, is
+     * deliberately optional — a routed-to-lakehouse upload in a deployment
+     * that composes none fails with `data-lakehouse-unavailable`. The tenant
+     * binding is the deployment's own shared `kbTenant`; the wire surface
+     * never carries a tenant.
+     */
+    data: {
+      async upload(request, signal): Promise<RpcResponse<DataUploadView>> {
+        const { filename, data, mime, doc_kind: docKind, title, collected_at: collectedAt } = request.payload
+        if (defaults.dataUploadEnabled !== true) return err(request, dataWriteRefusal())
+        const tenant = kbTenant()
+        if (tenant === undefined) return err(request, kbTenantUnbound())
+        const sanitized = sanitizeUploadFilename(filename)
+        if (sanitized === undefined) {
+          return err(request, {
+            code: 'kb-invalid-filename',
+            message: 'filename must reduce to one safe file name (no directory segments or reserved names)',
+            details: { filename },
+          })
+        }
+        const bytes = Buffer.from(data, 'base64')
+        if (bytes.byteLength > MAX_KB_INGEST_BYTES) {
+          return err(request, {
+            code: 'data-upload-too-large',
+            message: `upload exceeds the workbench limit of ${MAX_KB_INGEST_BYTES} bytes`,
+            details: { filename: sanitized, maxBytes: MAX_KB_INGEST_BYTES },
+          })
+        }
+        let route: DataRoute
+        try {
+          route = resolveDataRoute(sanitized, bytes, mime)
+        } catch (error: unknown) {
+          if (error instanceof DataRouterError) {
+            return err(request, {
+              code: dataRouteErrorCode(error.reason),
+              message: error.message,
+              details: { filename: sanitized },
+            })
+          }
+          throw error
+        }
+        const sourcePath = `workspace/data/uploads/${sanitized}`
+        try {
+          const landingDir = join(defaults.cwd, 'workspace/data/uploads')
+          const landingPath = join(landingDir, sanitized)
+          await mkdir(landingDir, { recursive: true })
+          if (route.destination === 'kb') {
+            const kb = ctx.get('kb')
+            if (kb === undefined) return err(request, kbNotComposed())
+            const kindParse = parseIngestDocKind(docKind)
+            if (!kindParse.ok) return err(request, kindParse.refusal)
+            const kind = kindParse.value
+            // Sample the landing target before this write replaces it. Only
+            // ENOENT (no prior landing) reaches the false arm; any other access
+            // error resurfaces immediately at the writeFile below.
+            const replaced = await access(landingPath).then(() => true, () => false)
+            await writeFile(landingPath, bytes)
+            // Fatal UTF-8 decoding keeps the text channel aligned with the file
+            // ingest's readText: invalid encodings refuse instead of storing
+            // replacement characters.
+            const content = route.extension === '.md' || route.extension === '.txt'
+              ? new TextDecoder('utf-8', { fatal: true }).decode(bytes)
+              : route.extension === '.pdf'
+                ? await extractPdfText(bytes)
+                : await extractDocxText(bytes)
+            return ok(request, {
+              destination: 'kb' as const,
+              replaced,
+              document: await storeKbDocument(kb, tenant, { sourcePath, kind, title, collectedAt, content }, signal),
+            })
+          }
+          const lakehouse = ctx.get('lakehouse')
+          if (lakehouse === undefined) {
+            return err(request, {
+              code: 'data-lakehouse-unavailable',
+              message: 'this deployment composes no lakehouse; add the dsh-lakehouse seam, a catalog store, and a query engine',
+              details: {},
+            })
+          }
+          // The original bytes land under the uploads directory for audit and
+          // same-name identity; the parquet copy under the data root is the
+          // queryable truth and the catalog owns the replacement fact.
+          await writeFile(landingPath, bytes)
+          const tabular = await tabularOfRoute(route, bytes)
+          const loaded = await lakehouse.load({
+            tenantId: tenant,
+            tableName: tableNameFromFilename(sanitized),
+            tabular,
+            provenance: { provider: 'workbench-upload', collectedSource: sourcePath },
+          }, signal)
+          return ok(request, {
+            destination: 'lakehouse' as const,
+            replaced: loaded.replaced,
+            table: loaded.table.tableName,
+            rows: loaded.table.rowCount,
+          })
+        } catch (error: unknown) {
+          return err(request, {
+            code: 'data-ingest-failed',
+            message: error instanceof Error ? error.message : String(error),
+            details: { path: sourcePath },
+          })
+        }
+      },
+    },
+
+    /**
+     * The expert-service order surface: thin forwarding onto the optional
+     * `ctx.orders` capability (the NocoBase-backed orders seam). Like the kb
+     * and lakehouse seams, orders is deliberately not in the gateway's inject
+     * list — a deployment that composes none keeps a working gateway, and
+     * every method answers the structured `orders-not-composed` refusal
+     * instead. Writes additionally refuse until `ordersEnabled` opts the
+     * deployment in; the deliverable download is a host-only GET route.
+     */
+    orders: {
+      async create(request, signal) {
+        const orders = ctx.get('orders')
+        if (orders === undefined) return err(request, ordersNotComposed())
+        if (defaults.ordersEnabled !== true) return err(request, ordersWriteRefusal())
+        const { service_id: serviceId, brief, client_name: clientName } = request.payload
+        try {
+          const created = await orders.create(
+            { serviceId, brief, ...clientName === undefined ? {} : { clientName } },
+            signal,
+          )
+          return ok(request, orderViewOf(created))
+        } catch (error: unknown) {
+          return err(request, ordersRejected(error))
+        }
+      },
+
+      async get(request, signal) {
+        const orders = ctx.get('orders')
+        if (orders === undefined) return err(request, ordersNotComposed())
+        const order = await orders.get(request.payload.order_id, signal)
+        if (order === undefined) {
+          return err(request, {
+            code: 'orders-rejected',
+            message: `no order ${request.payload.order_id} exists at the orders source of truth`,
+            details: {},
+          })
+        }
+        return ok(request, orderViewOf(order))
+      },
+
+      async list(request, signal) {
+        void request
+        const orders = ctx.get('orders')
+        if (orders === undefined) return err(request, ordersNotComposed())
+        try {
+          return ok(request, { orders: (await orders.list(signal)).map(orderViewOf) })
+        } catch (error: unknown) {
+          return err(request, ordersRejected(error))
+        }
+      },
+
+      async fulfill(request, signal) {
+        const orders = ctx.get('orders')
+        if (orders === undefined) return err(request, ordersNotComposed())
+        if (defaults.ordersEnabled !== true) return err(request, ordersWriteRefusal())
+        try {
+          return ok(request, orderViewOf(await orders.fulfill(request.payload.order_id, signal)))
+        } catch (error: unknown) {
+          return err(request, ordersRejected(error))
+        }
+      },
+
+      async download(request, signal) {
+        // Clean error path first: a missing seam answers 500 (the carrier's
+        // GET route has no error envelope), then the seam's own missing/
+        // undelivered/lost-file codes answer 404.
+        const orders = ctx.get('orders')
+        if (orders === undefined) return new Response('orders capability not composed', { status: 500 })
+        try {
+          const file = await orders.readDeliverable(request.orderId, signal)
+          const filename = file.path.split('/').pop() ?? 'deliverable.pdf'
+          // slice() re-bases the bytes on a plain ArrayBuffer, the BodyInit the DOM lib accepts.
+          return new Response(file.bytes.slice(), {
+            headers: {
+              'content-type': 'application/pdf',
+              'content-disposition': `attachment; filename="${filename}"`,
+            },
+          })
+        } catch (error: unknown) {
+          const code = (error as { code?: string }).code
+          if (code === 'ORDERS_ORDER_MISSING' || code === 'ORDERS_NOT_DELIVERED' || code === 'ORDERS_DELIVERABLE_MISSING') {
+            return new Response(error instanceof Error ? error.message : String(error), { status: 404 })
+          }
+          return new Response(`deliverable read failed: ${error instanceof Error ? error.message : String(error)}`, { status: 500 })
+        }
+      },
+    },
+
+    /**
+     * The data-asset market surface: read-only projections of the optional
+     * `ctx.connector` seam's discovery (dataset + expert-service cards),
+     * counters over discovery plus the optional orders seam, and the featured
+     * rail from the configured seed file. Ordering itself stays on the orders
+     * domain — the confirm card hands `orders.create` the service dataset id.
+     */
+    assets: {
+      async list(request, signal) {
+        if (defaults.assetsEnabled !== true) return err(request, assetsNotComposed())
+        const connector = ctx.get('connector')
+        if (connector === undefined) return err(request, assetsConnectorMissing())
+        try {
+          const { query } = request.payload
+          const summaries = await connector.discover(query === undefined ? {} : { query }, signal)
+          return ok(request, { assets: summaries.map(assetViewOf) })
+        } catch (error: unknown) {
+          return err(request, assetsRejected(error))
+        }
+      },
+
+      async detail(request, signal) {
+        if (defaults.assetsEnabled !== true) return err(request, assetsNotComposed())
+        const connector = ctx.get('connector')
+        if (connector === undefined) return err(request, assetsConnectorMissing())
+        try {
+          const { provider_id: providerId, dataset_id: datasetId } = request.payload
+          const summaries = await connector.discover({}, signal)
+          const found = summaries.find(summary => summary.manifest.providerId === providerId && summary.id === datasetId)
+          if (found === undefined) {
+            return err(request, {
+              code: 'assets-asset-missing',
+              message: `no dataset "${datasetId}" is declared by provider "${providerId}"`,
+              details: { providerId, datasetId },
+            })
+          }
+          return ok(request, assetViewOf(found))
+        } catch (error: unknown) {
+          return err(request, assetsRejected(error))
+        }
+      },
+
+      async stats(request, signal) {
+        if (defaults.assetsEnabled !== true) return err(request, assetsNotComposed())
+        const connector = ctx.get('connector')
+        if (connector === undefined) return err(request, assetsConnectorMissing())
+        try {
+          const [summaries, featured] = await Promise.all([
+            connector.discover({}, signal),
+            readMarketSeed(),
+          ])
+          const orders = ctx.get('orders')
+          let monthlyOrders = 0
+          if (orders !== undefined) {
+            const month = new Date().toISOString().slice(0, 7)
+            monthlyOrders = (await orders.list(signal))
+              .filter(order => order.createdAt.slice(0, 7) === month).length
+          }
+          return ok(request, {
+            products: summaries.length,
+            providers: connector.describeProviders().length,
+            monthly_orders: monthlyOrders,
+            featured,
+          })
+        } catch (error: unknown) {
+          return err(request, assetsRejected(error))
+        }
+      },
+    },
+
+    /**
+     * The connector page's read surface: the provider catalog (the seam's
+     * registry with live availability), per-provider delivery aggregates, and
+     * the raw delivery trail. Delivery reads ride the optional lakehouse
+     * seam's transfer records; a deployment without one answers empty (the
+     * catalog-only degradation, not a failure).
+     */
+    connectors: {
+      // oxlint-disable-next-line typescript/require-await -- async adapts the sync body to the seam's Promise-returning method type.
+      async list(request) {
+        void request
+        if (defaults.connectorsEnabled !== true) return err(request, connectorsNotComposed())
+        const connector = ctx.get('connector')
+        if (connector === undefined) return err(request, connectorsConnectorMissing())
+        return ok(request, { providers: connector.describeProviders().map(providerWireViewOf) })
+      },
+
+      async connections(request, signal) {
+        void request
+        if (defaults.connectorsEnabled !== true) return err(request, connectorsNotComposed())
+        const connector = ctx.get('connector')
+        if (connector === undefined) return err(request, connectorsConnectorMissing())
+        try {
+          return ok(request, { connections: connectionViewsOf(await transferEntries(500, signal)) })
+        } catch (error: unknown) {
+          return err(request, connectorsTransfersRejected(error))
+        }
+      },
+
+      async transfers(request, signal) {
+        void request
+        if (defaults.connectorsEnabled !== true) return err(request, connectorsNotComposed())
+        const connector = ctx.get('connector')
+        if (connector === undefined) return err(request, connectorsConnectorMissing())
+        try {
+          return ok(request, { transfers: (await transferEntries(50, signal)).map(transferWireViewOf) })
+        } catch (error: unknown) {
+          return err(request, connectorsTransfersRejected(error))
+        }
+      },
+    },
+
+    kg: {
+      // The graph page's READ surface over the optional knowledge-graph seam:
+      // the ontology registry for the legend, name→node seed resolution, the
+      // k-hop neighborhood walk, one-hop canvas expansion, and the counters.
+      // Graph writes belong to the kg-build pipeline alone.
+      // oxlint-disable-next-line typescript/require-await -- async adapts the sync body to the seam's Promise-returning method type.
+      async schema(request) {
+        const gates = kgGates()
+        if ('refusal' in gates) return err(request, gates.refusal)
+        return ok(request, {
+          node_types: gates.graph.listNodeTypes().map(kgNodeTypeViewOf),
+          relations: gates.graph.listRelations().map(kgRelationViewOf),
+        })
+      },
+
+      async search(request) {
+        const gates = kgGates()
+        if ('refusal' in gates) return err(request, gates.refusal)
+        const { query, type, k } = request.payload
+        let hits: readonly KgNodeHit[]
+        try {
+          // searchNodes takes no signal (an FTS substring probe); the store
+          // honors no cancellation contract there.
+          hits = await gates.graph.searchNodes(
+            gates.tenant,
+            query,
+            type as KgNodeTypeId | undefined,
+            k ?? 10,
+          )
+        } catch (error: unknown) {
+          return err(request, kgReadFailed(error))
+        }
+        return ok(request, { nodes: hits.map(kgNodeHitViewOf) })
+      },
+
+      async subgraph(request) {
+        const gates = kgGates()
+        if ('refusal' in gates) return err(request, gates.refusal)
+        const { seeds, hops, max_nodes: maxNodes, relation_types: relationTypes } = request.payload
+        const trimmed = [...new Set(seeds.map(seed => seed.trim()).filter(seed => seed.length > 0))].slice(0, 5)
+        if (trimmed.length === 0) {
+          return err(request, {
+            code: 'kg-seed-unresolved',
+            message: 'kg.subgraph: seeds must name at least one entity',
+            details: { seeds: [...seeds] },
+          })
+        }
+        const resolved: string[] = []
+        const missing: string[] = []
+        try {
+          // Neither searchNodes nor subgraph takes a signal (an FTS probe and
+          // a bounded CTE walk); the store honors no cancellation contract
+          // on either read.
+          for (const seed of trimmed) {
+            const [hit] = await gates.graph.searchNodes(gates.tenant, seed, undefined, 1)
+            if (hit === undefined) missing.push(seed)
+            else resolved.push(hit.id)
+          }
+          if (resolved.length === 0) {
+            return err(request, {
+              code: 'kg-seed-unresolved',
+              message: `kg.subgraph: no graph entity matches any seed (${trimmed.join(', ')})`,
+              details: { seeds: trimmed },
+            })
+          }
+          const subgraph = await gates.graph.subgraph(
+            gates.tenant,
+            resolved,
+            Math.min(Math.max(Math.floor(hops ?? 1), 0), 2),
+            { ...maxNodes === undefined ? {} : { maxNodes: Math.min(Math.max(Math.floor(maxNodes), 1), 2000) } },
+          )
+          return ok(request, {
+            ...kgSubgraphViewsOf(subgraph, relationTypes === undefined ? undefined : new Set(relationTypes.map(String))),
+            seeds_resolved: resolved,
+            ...missing.length === 0 ? {} : { unresolved: missing },
+          })
+        } catch (error: unknown) {
+          return err(request, kgReadFailed(error))
+        }
+      },
+
+      async expand(request) {
+        const gates = kgGates()
+        if ('refusal' in gates) return err(request, gates.refusal)
+        const { node_id: nodeId, limit } = request.payload
+        let subgraph: KgSubgraph
+        try {
+          subgraph = await gates.graph.expand(
+            gates.tenant,
+            nodeId,
+            ...limit === undefined ? [] : [Math.min(Math.max(Math.floor(limit), 1), 2000)],
+          )
+        } catch (error: unknown) {
+          return err(request, kgReadFailed(error))
+        }
+        return ok(request, kgSubgraphViewsOf(subgraph))
+      },
+
+      async stats(request, signal) {
+        const gates = kgGates()
+        if ('refusal' in gates) return err(request, gates.refusal)
+        try {
+          const [counts] = await Promise.all([gates.graph.stats(gates.tenant, signal)])
+          return ok(request, {
+            triples: counts.triples,
+            entities: counts.entities,
+            node_types: gates.graph.listNodeTypes().length,
+            relations: gates.graph.listRelations().length,
+          })
+        } catch (error: unknown) {
+          return err(request, kgReadFailed(error))
         }
       },
     },

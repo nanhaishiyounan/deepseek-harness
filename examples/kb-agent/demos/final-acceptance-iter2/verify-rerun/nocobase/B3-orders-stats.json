@@ -1,0 +1,63 @@
+{
+  "scene": "B3-orders-api",
+  "ts": "2026-09-08T17:10:38.454Z",
+  "apiStatus": 200,
+  "fetched": 94,
+  "recent30dByGeneratedAt": 50,
+  "statusDistAll": {
+    "delivered": 50,
+    "failed": 16,
+    "pending": 27,
+    "generating": 1
+  },
+  "statusDist30d": {
+    "delivered": 50
+  },
+  "generatedAtDates": {
+    "2026-09-05": 20,
+    "2026-09-06": 5,
+    "2026-09-07": 3,
+    "2026-09-08": 8,
+    "2026-09-09": 1,
+    "2026-09-03": 1,
+    "2026-09-02": 1,
+    "2026-09-01": 1,
+    "2026-08-31": 1,
+    "2026-08-30": 1,
+    "2026-08-28": 1,
+    "2026-08-27": 1,
+    "2026-08-26": 1,
+    "2026-08-25": 1,
+    "2026-08-24": 1,
+    "2026-08-22": 1,
+    "2026-08-21": 1,
+    "2026-08-13": 1
+  },
+  "newest5": [
+    {
+      "orderNo": "ORD-20260905-a81c",
+      "status": "delivered",
+      "generatedAt": "2026-09-05T09:50:04.949Z"
+    },
+    {
+      "orderNo": "ORD-20260905-4eda",
+      "status": "delivered",
+      "generatedAt": "2026-09-05T09:51:11.973Z"
+    },
+    {
+      "orderNo": "ORD-20260905-a7f7",
+      "status": "failed",
+      "generatedAt": null
+    },
+    {
+      "orderNo": "ORD-20260905-93b1",
+      "status": "pending",
+      "generatedAt": null
+    },
+    {
+      "orderNo": "ORD-20260905-661f",
+      "status": "pending",
+      "generatedAt": null
+    }
+  ]
+}

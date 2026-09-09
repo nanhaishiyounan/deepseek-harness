@@ -1,0 +1,89 @@
+/**
+ * This file is part of the NocoBase (R) project.
+ * Copyright (c) 2020-2024 NocoBase Co., Ltd.
+ * Authors: NocoBase Team.
+ *
+ * This project is dual-licensed under AGPL-3.0 and NocoBase Commercial License.
+ * For more information, please refer to: https://www.nocobase.com/agreement.
+ */
+
+import { Package } from '@lerna/package';
+import path from 'path';
+
+export const globExcludeFiles = [
+  '!src/**/__tests__',
+  '!src/**/__benchmarks__',
+  '!src/**/__test__',
+  '!src/**/__e2e__',
+  '!src/**/demos',
+  '!src/**/fixtures',
+  '!src/**/*.mdx',
+  '!src/**/*.md',
+  '!src/**/*.+(test|e2e|spec).+(js|jsx|ts|tsx)',
+];
+export const EsbuildSupportExts = [
+  '.ts',
+  '.tsx',
+  '.js',
+  '.jsx',
+  '.json',
+  '.css',
+  '.less',
+  '.sass',
+  '.scss',
+  '.styl',
+  '.txt',
+  '.data',
+];
+export const ROOT_PATH = path.join(__dirname, '../../../../');
+export const NODE_MODULES = path.join(ROOT_PATH, 'node_modules');
+export const PACKAGES_PATH = path.join(ROOT_PATH, 'packages');
+export const PLUGINS_DIR = ['plugins', 'samples', 'pro-plugins']
+  .concat((process.env.PLUGINS_DIRS || '').split(','))
+  .filter(Boolean)
+  .map((name) => path.join(PACKAGES_PATH, name));
+export const PRESETS_DIR = path.join(PACKAGES_PATH, 'presets');
+export const PLUGIN_COMMERCIAL = '@nocobase/plugin-commercial';
+export const PLUGIN_LICENSE = '@nocobase/plugin-license';
+export const getPluginPackages = (packages: Package[]) =>
+  packages
+    .filter((item) => PLUGINS_DIR.some((pluginDir) => item.location.startsWith(pluginDir)))
+    .sort((a, b) => {
+      const priority = {
+        [PLUGIN_LICENSE]: 0,
+        [PLUGIN_COMMERCIAL]: 1,
+      };
+      return (priority[a.name] ?? 99) - (priority[b.name] ?? 99);
+    });
+export const getPresetsPackages = (packages: Package[]) =>
+  packages.filter((item) => item.location.startsWith(PRESETS_DIR));
+export const CORE_APP = path.join(PACKAGES_PATH, 'core/app');
+export const CORE_CLIENT = path.join(PACKAGES_PATH, 'core/client');
+export const CORE_CLIENT_V2 = path.join(PACKAGES_PATH, 'core/client-v2');
+export const ESM_PACKAGES = ['@nocobase/test'];
+export const CJS_EXCLUDE_PACKAGES = [
+  path.join(PACKAGES_PATH, 'core/build'),
+  path.join(PACKAGES_PATH, 'core/cli-v1'),
+  path.join(PACKAGES_PATH, 'core/cli'),
+  CORE_CLIENT,
+  CORE_CLIENT_V2,
+];
+export const getCjsPackages = (packages: Package[]) =>
+  packages
+    .filter((item) => !PLUGINS_DIR.some((dir) => item.location.startsWith(dir)))
+    .filter((item) => !item.location.startsWith(PRESETS_DIR))
+    .filter((item) => !ESM_PACKAGES.includes(item.name))
+    .filter((item) => !CJS_EXCLUDE_PACKAGES.includes(item.location));
+
+// tar
+export const tarIncludesFiles = ['package.json', 'README.md', 'LICENSE', 'dist', '!node_modules'];
+
+function resolveStorageRoot(): string {
+  const raw = process.env.STORAGE_PATH;
+  if (raw) {
+    return path.isAbsolute(raw) ? raw : path.resolve(process.cwd(), raw);
+  }
+  return path.join(ROOT_PATH, 'storage');
+}
+
+export const TAR_OUTPUT_DIR = process.env.TAR_PATH || path.join(resolveStorageRoot(), 'tar');

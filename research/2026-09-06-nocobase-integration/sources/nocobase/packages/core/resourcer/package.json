@@ -1,0 +1,26 @@
+{
+  "name": "@nocobase/resourcer",
+  "version": "2.2.7",
+  "description": "",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@nocobase/utils": "2.2.7",
+    "deepmerge": "^4.2.2",
+    "koa": "^3.2.0",
+    "koa-compose": "^4.1.0",
+    "lodash": "^4.17.21",
+    "path-to-regexp": "^6.3.0",
+    "qs": "^6.9.4"
+  },
+  "devDependencies": {
+    "@types/koa": "^2.15.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nocobase/nocobase.git",
+    "directory": "packages/resourcer"
+  },
+  "gitHead": "d0b4efe4be55f8c79a98a331d99d9f8cf99021a1"
+}

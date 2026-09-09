@@ -103,8 +103,12 @@ export function parseCitations(text: string): readonly KbCitation[] {
   return citations
 }
 
-/** First physical line of a text (the collapsed error summary). */
-function firstLine(text: string): string {
+/**
+ * First physical line of a text (the collapsed error summary).
+ * @param text - the multi-line result text.
+ * @returns the text up to the first newline, or the whole text.
+ */
+export function firstLine(text: string): string {
   const newline = text.indexOf('\n')
   return newline === -1 ? text : text.slice(0, newline)
 }
@@ -128,8 +132,12 @@ export function resultTextOf(block: ToolCallBlock): string | null {
   return parts.join('\n') || null
 }
 
-/** The raw arguments object of a call (undefined on non-JSON streaming prefixes). */
-function argsOf(block: ToolCallBlock): Record<string, unknown> | undefined {
+/**
+ * The raw arguments object of a call (undefined on non-JSON streaming prefixes).
+ * @param block - the frozen call slice.
+ * @returns the parsed arguments, or undefined while the JSON is still streaming.
+ */
+export function argsOf(block: ToolCallBlock): Record<string, unknown> | undefined {
   const raw = ('kind' in block ? block.call?.argsRaw : block.argsRaw) ?? ''
   try {
     const parsed: unknown = JSON.parse(raw)
@@ -140,8 +148,12 @@ function argsOf(block: ToolCallBlock): Record<string, unknown> | undefined {
   return undefined
 }
 
-/** The settled state off the frozen slice. */
-function stateOf(block: ToolCallBlock): KbToolRowState {
+/**
+ * The settled state off the frozen slice.
+ * @param block - running call or settled result node.
+ * @returns the row lifecycle state.
+ */
+export function stateOf(block: ToolCallBlock): KbToolRowState {
   if (!('kind' in block)) return 'running'
   if (block.error?.code === 'interrupted') return 'stopped'
   return block.isError ? 'error' : 'ok'

@@ -542,6 +542,21 @@
       "source": "packages/kb/kb/src/types.ts"
     },
     {
+      "doc": "docs/subsystems/lakehouse.md",
+      "symbol": "TabularData",
+      "source": "packages/lakehouse/lakehouse/src/types.ts"
+    },
+    {
+      "doc": "docs/subsystems/lakehouse.md",
+      "symbol": "LakehouseTable",
+      "source": "packages/lakehouse/lakehouse/src/types.ts"
+    },
+    {
+      "doc": "docs/subsystems/lakehouse.md",
+      "symbol": "QueryProvider",
+      "source": "packages/lakehouse/lakehouse/src/types.ts"
+    },
+    {
       "doc": "docs/subsystems/llm-streaming.md",
       "symbol": "AdapterRegistrationHandle",
       "source": "packages/llm/llm/src/index.ts"

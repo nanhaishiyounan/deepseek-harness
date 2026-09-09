@@ -348,7 +348,7 @@ describe('ingest', () => {
 })
 
 describe('search', () => {
-  it('returns the text ranking alone in degraded mode', async () => {
+  it('returns the text ranking alone in degraded mode, each hit carrying its fused score', async () => {
     const { kb } = await runtime()
     const store = new RecordingStore()
     store.textHits = [hit(1), hit(2), hit(3)]
@@ -356,6 +356,9 @@ describe('search', () => {
     const result = await kb.search({ query: '白糖' })
     expect(result.mode).toBe('text')
     expect(result.results.map(h => h.chunkId)).toEqual([1, 2, 3])
+    // Single-path RRF scores: strictly decreasing down the ranking, with the
+    // top hit at 1/(rrfK+1) — the same basis the threshold filters on.
+    expect(result.results.map(h => h.score)).toEqual([1 / 61, 1 / 62, 1 / 63])
   })
 
   it('degrades to the text ranking when the embed provider fails at runtime', async () => {
@@ -387,7 +390,7 @@ describe('search', () => {
     expect(result.results.map(h => h.chunkId)).toEqual([1, 2])
   })
 
-  it('fuses text and vector rankings through RRF in hybrid mode', async () => {
+  it('fuses text and vector rankings through RRF in hybrid mode, summing each hit\'s two-path score', async () => {
     const { kb } = await runtime()
     const store = new RecordingStore()
     store.textHits = [hit(1), hit(2), hit(3)]
@@ -397,6 +400,11 @@ describe('search', () => {
     const result = await kb.search({ query: '白糖' })
     expect(result.mode).toBe('hybrid')
     expect(result.embedModel).toBe('fake:model-a')
+    // The dual-path hit (chunk 3: text rank 3, vector rank 1) leads with the
+    // summed score; the hit carries it.
+    const dual = result.results.find(h => h.chunkId === 3)
+    expect(dual?.score).toBeCloseTo(1 / (60 + 3) + 1 / (60 + 1), 10)
+    expect(result.results[0]?.chunkId).toBe(3)
     expect(result.results.map(h => h.chunkId)).toEqual([3, 1, 2, 4])
   })
 

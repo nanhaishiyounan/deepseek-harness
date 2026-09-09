@@ -1,0 +1,295 @@
+/**
+ * This file is part of the NocoBase (R) project.
+ * Copyright (c) 2020-2024 NocoBase Co., Ltd.
+ * Authors: NocoBase Team.
+ *
+ * This project is dual-licensed under AGPL-3.0 and NocoBase Commercial License.
+ * For more information, please refer to: https://www.nocobase.com/agreement.
+ */
+
+import { Context, Next } from '@nocobase/actions';
+import { parse, serverRequest } from '@nocobase/utils';
+
+import { appendArrayColumn } from '@nocobase/evaluators';
+import Application from '@nocobase/server';
+import axios from 'axios';
+import set from 'lodash/set';
+import CustomRequestPlugin from '../plugin';
+
+const UnsafePathSegments = new Set(['__proto__', 'prototype', 'constructor']);
+
+const hasUnsafePathSegment = (path: string) => {
+  return path
+    .split(/[.[\]]+/)
+    .filter(Boolean)
+    .some((segment) => UnsafePathSegments.has(segment));
+};
+
+const applyVarsToVariables = (variables: Record<string, any>, vars: unknown) => {
+  if (!vars || typeof vars !== 'object' || Array.isArray(vars)) {
+    return;
+  }
+  for (const [key, value] of Object.entries(vars as Record<string, any>)) {
+    if (!key || typeof key !== 'string' || hasUnsafePathSegment(key)) {
+      continue;
+    }
+    set(variables, key, value);
+  }
+};
+
+function toJSON(value) {
+  if (typeof value === 'string') {
+    try {
+      return JSON.parse(value);
+    } catch (error) {
+      return value;
+    }
+  }
+  return value;
+}
+
+const getHeaders = (headers: Record<string, any>) => {
+  return Object.keys(headers).reduce((hds, key) => {
+    if (key.toLocaleLowerCase().startsWith('x-')) {
+      hds[key] = headers[key];
+    }
+    return hds;
+  }, {});
+};
+
+const arrayToObject = (arr: { name: string; value: string }[]) => {
+  return arr.reduce((acc, cur) => {
+    acc[cur.name] = cur.value;
+    return acc;
+  }, {});
+};
+
+const omitNullAndUndefined = (obj: any) => {
+  return Object.keys(obj).reduce((acc, cur) => {
+    if (obj[cur] !== null && typeof obj[cur] !== 'undefined') {
+      acc[cur] = obj[cur];
+    }
+    return acc;
+  }, {});
+};
+
+const RuntimeTargetOptionKeys = new Set([
+  'url',
+  'baseURL',
+  'proxy',
+  'socketPath',
+  'transport',
+  'httpAgent',
+  'httpsAgent',
+]);
+
+const getForbiddenRuntimeTargetOptionKeys = (runtimeOptions: unknown) => {
+  if (!runtimeOptions || typeof runtimeOptions !== 'object' || Array.isArray(runtimeOptions)) {
+    return [];
+  }
+
+  return Object.keys(runtimeOptions).filter((key) => RuntimeTargetOptionKeys.has(key));
+};
+
+const CurrentUserVariableRegExp = /{{\s*(?:ctx\.)?(currentUser[^}]+)\s*}}/g;
+
+const getCurrentUserAppends = (str: string, user) => {
+  const matched = str.matchAll(CurrentUserVariableRegExp);
+  return Array.from(matched)
+    .map((item) => {
+      const keys = item?.[1].split('.') || [];
+      const appendKey = keys[1];
+      if (keys.length > 2 && !Reflect.has(user || {}, appendKey)) {
+        return appendKey;
+      }
+    })
+    .filter(Boolean);
+};
+
+export const getParsedValue = (value, variables) => {
+  const template = parse(value);
+  template.parameters.forEach(({ key }) => {
+    appendArrayColumn(variables, key);
+  });
+  return template(variables);
+};
+
+const getRequestBaseURL = (ctx: Context) => {
+  if (ctx.protocol && ctx.host) {
+    return `${ctx.protocol}://${ctx.host}`;
+  }
+
+  if (ctx.href) {
+    return new URL(ctx.href).origin;
+  }
+
+  return undefined;
+};
+
+export async function send(this: CustomRequestPlugin, ctx: Context, next: Next) {
+  const resourceName = ctx.action.resourceName;
+  const { filterByTk, values = {} } = ctx.action.params;
+  const {
+    currentRecord = {
+      id: 0,
+      appends: [],
+      data: {},
+    },
+    $nForm,
+    $nSelectedRecord,
+    vars,
+    options: runtimeOptions,
+  } = values;
+
+  // root role has all permissions
+  if (ctx.state.currentRole !== 'root') {
+    const schemaRoleRepo = ctx.db.getRepository('uiButtonSchemasRoles');
+    const customRequestRoleRepo = ctx.db.getRepository('customRequestsRoles');
+
+    const schemaRoles = await schemaRoleRepo.find({
+      filter: {
+        uid: filterByTk,
+      },
+    });
+
+    const customRequestRoles = await customRequestRoleRepo.find({
+      filter: {
+        customRequestKey: filterByTk,
+      },
+    });
+
+    const roleRows = [...schemaRoles, ...customRequestRoles];
+    if (roleRows.length) {
+      if (!roleRows.some((item) => ctx.state.currentRoles.includes(item.roleName))) {
+        return ctx.throw(
+          403,
+          ctx.t('You do not have permission to access this custom request', { ns: 'action-custom-request' }),
+        );
+      }
+    }
+  }
+  const repo = ctx.db.getRepository(resourceName);
+  const requestConfig = await repo.findOne({
+    filter: {
+      key: filterByTk,
+    },
+  });
+
+  if (!requestConfig) {
+    ctx.throw(404, 'request config not found');
+  }
+
+  const forbiddenRuntimeOptionKeys = getForbiddenRuntimeTargetOptionKeys(runtimeOptions);
+  if (forbiddenRuntimeOptionKeys.length) {
+    return ctx.throw(
+      400,
+      ctx.t('Runtime request options cannot override the request target', { ns: 'action-custom-request' }),
+    );
+  }
+
+  ctx.withoutDataWrapping = true;
+
+  const mergedOptions = {
+    ...(requestConfig.options || {}),
+    ...omitNullAndUndefined(runtimeOptions || {}),
+  };
+
+  const { dataSourceKey, collectionName, url, headers = [], params = [], data = {}, ...options } = mergedOptions;
+  if (!url) {
+    return ctx.throw(400, ctx.t('Please configure the request settings first', { ns: 'action-custom-request' }));
+  }
+  let currentRecordValues = {};
+  if (collectionName && typeof currentRecord.id !== 'undefined') {
+    const app = ctx.app as Application;
+    const dataSource = app.dataSourceManager.get(dataSourceKey || currentRecord.dataSourceKey || 'main');
+    const recordRepo = dataSource.collectionManager.getRepository(collectionName);
+    currentRecordValues =
+      (
+        await recordRepo.findOne({
+          filterByTk: currentRecord.id,
+          appends: currentRecord.appends,
+        })
+      )?.toJSON() || {};
+  }
+
+  let currentUser = ctx.auth.user;
+
+  const userAppends = getCurrentUserAppends(
+    JSON.stringify(url) + JSON.stringify(headers) + JSON.stringify(params) + JSON.stringify(data),
+    ctx.auth.user,
+  );
+  if (userAppends.length) {
+    currentUser =
+      (
+        await ctx.db.getRepository('users').findOne({
+          filterByTk: ctx.auth.user.id,
+          appends: userAppends,
+        })
+      )?.toJSON() || {};
+  }
+
+  const variables = {
+    currentRecord: {
+      ...currentRecordValues,
+      ...currentRecord.data,
+    },
+    currentUser,
+    currentTime: new Date().toISOString(),
+    $nToken: ctx.getBearerToken(),
+    $nForm,
+    $env: ctx.app.environment.getVariables(),
+    $nSelectedRecord,
+  };
+  applyVarsToVariables(variables, vars);
+
+  const axiosRequestConfig = {
+    baseURL: getRequestBaseURL(ctx),
+    ...options,
+    // safeRequest checks this url value (before baseURL combination) so that
+    // relative paths pointing to the same server are not subject to the whitelist.
+    url: getParsedValue(url, variables),
+    headers: {
+      Authorization: 'Bearer ' + ctx.getBearerToken(),
+      ...getHeaders(ctx.headers),
+      ...omitNullAndUndefined(getParsedValue(arrayToObject(headers), variables)),
+    },
+    params: getParsedValue(arrayToObject(params), variables),
+    data: getParsedValue(toJSON(data), variables),
+  };
+
+  const requestUrl = axios.getUri(axiosRequestConfig);
+  this.logger.info(`custom-request:send:${filterByTk} request url ${requestUrl}`);
+  this.logger.info(
+    `custom-request:send:${filterByTk} request config ${JSON.stringify({
+      ...axiosRequestConfig,
+      headers: {
+        ...axiosRequestConfig.headers,
+        Authorization: null,
+      },
+    })}`,
+  );
+
+  try {
+    const res = await serverRequest(axiosRequestConfig);
+    this.logger.info(`custom-request:send:${filterByTk} success`);
+    ctx.body = res.data;
+    if (res.headers['content-disposition']) {
+      ctx.set('Content-Disposition', res.headers['content-disposition']);
+    }
+  } catch (err) {
+    if (axios.isAxiosError(err)) {
+      ctx.status = err.response?.status || 500;
+      ctx.body = err.response?.data || { message: err.message };
+      this.logger.error(
+        `custom-request:send:${filterByTk} error. status: ${ctx.status}, body: ${
+          typeof ctx.body === 'string' ? ctx.body : JSON.stringify(ctx.body)
+        }`,
+      );
+    } else {
+      this.logger.error(`custom-request:send:${filterByTk} error. status: ${ctx.status}, message: ${err.message}`);
+      ctx.throw(500, err?.message);
+    }
+  }
+
+  return next();
+}

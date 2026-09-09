@@ -1,0 +1,6 @@
+{
+  "Validation error": "{{field}} validatiefout",
+  "notNull Violation": "{{field}} cannot be null",
+  "notNull violation": "{{field}} mag niet leeg zijn",
+  "unique violation": "{{field}} bestaat al"
+}

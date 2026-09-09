@@ -1,0 +1,18 @@
+{
+  "scene": "C4-orders-object",
+  "ts": "2026-09-08T17:02:02.314Z",
+  "visibleCards": 20,
+  "orderNos": [
+    "ORD-20260905-a81c",
+    "ORD-20260905-a81c",
+    "ORD-20260905-4eda",
+    "ORD-20260905-4eda",
+    "ORD-20260905-a7f7",
+    "ORD-20260905-a7f7",
+    "ORD-20260905-93b1",
+    "ORD-20260905-93b1",
+    "ORD-20260905-661f",
+    "ORD-20260905-661f"
+  ],
+  "snippet": "专家服务订单 · 记录\n表格视图\n新建（对话）\n\nORD-20260905-a81c\n\norderNo\nORD-20260905-a81c\nserviceId\nexpert_services/1\nserviceName\n中亚货运动线方案\n问此记录\n编辑（对话）\n\nORD-20260905-4eda\n\norderNo\nORD-20260905-4eda\nserviceId\nexpert_services/1\nserviceName\n中亚货运动线方案\n问此记录\n编辑（对话）\n\nORD-20260905-a7f7\n\norderNo\nORD-20260905-a7f7\nserviceId\nexpert_services/1\nserviceName\n中亚货运动线方案\n问此记录\n编辑（对话）\n\nORD-20260905-93b1\n\norderNo\nORD-20260905-93b1\nserviceId"
+}

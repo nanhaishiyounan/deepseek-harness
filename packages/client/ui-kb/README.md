@@ -2,7 +2,7 @@
 
 English | [中文](README.zh.md)
 
-The knowledge-base workbench surface plugin: the sidebar's first-class entry (document icon + document-count badge), the blank-session portal (product headline through the additive `conversation.hero.headline` seat, usage chips, sample questions, the scenario rail, and the recent-search rail over `conversation.input.dock`), the `kb` conversation view tab (cited retrieval with highlight and carry-to-chat, the ingest wizard over web links and browsed workspace folders, the session-local document list, and the usage card), the session-header switch button, the `kb_*` toolview rows (numbered source cards for `kb_search`, receipts for the ingest pair, and the usage counters for `kb_stats`, registered under `tool.call.toolview`), and the knowledge-base settings section (the usage card again, under `settings.section`). All data rides the connection's `api.kb` face (plus `agentPresets` for the portal scenarios and `host.listDirectory` for the wizard); a deployment without the kb capability shows the structured refusal inline.
+The knowledge-base workbench surface plugin: the sidebar's first-class entry (document icon + document-count badge), the blank-session portal (product headline through the additive `conversation.hero.headline` seat, usage chips, sample questions, the scenario rail, and the recent-search rail over `conversation.input.dock`), the `kb` conversation view tab (cited retrieval with highlight and carry-to-chat, the ingest wizard over browser uploads, web links, and browsed workspace folders, the session-local document list, and the usage card), the session-header switch button, the `kb_*` toolview rows (numbered source cards for `kb_search`, receipts for the ingest pair, and the usage counters for `kb_stats`, registered under `tool.call.toolview`), and the knowledge-base settings section (the usage card again, under `settings.section`). All data rides the connection's `api.kb` face (plus `agentPresets` for the portal scenarios and `host.listDirectory` for the wizard); a deployment without the kb capability shows the structured refusal inline.
 
 ## Model Experience
 
@@ -15,7 +15,7 @@ None: the surfaces render in the browser and never contribute to a model request
 ## Known Limitations and Deferred Work
 
 - The scenario catalog (`src/client/hero/scenarios.ts`) is a static display table kept in sync by hand with `examples/kb-agent/scenarios/<id>/preset.yml`; the roster itself comes from `agentPresets.list`.
-- `host.listDirectory` serves directories only, so the wizard's file tab browses folders visually while the file name stays typed; there is no upload API for local files.
-- The document list is session-local state (ingest receipts plus search sightings); a refresh falls back to the stats totals, and there is no delete or re-ingest entry (no API).
+- `host.listDirectory` serves directories only, so the wizard's file tab browses folders visually while the file name stays typed; local browser files ride the `kb.upload` channel instead, one progress row per picked file.
+- The document list is session-local state (ingest receipts plus search sightings); a refresh falls back to the stats totals, and there is no delete entry (no API). A same-name re-upload replaces the prior document — the row toast reports the replacement fact.
 - The subscription badge on the usage card is a static placeholder until a billing API exists.
 - The `kb_*` toolview rows parse the tools' model-facing result text (the citation list, the ingest sentence, the coverage sentence); a host that rewords those texts falls back to rendering them raw.

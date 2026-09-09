@@ -1,0 +1,479 @@
+/**
+ * This file is part of the NocoBase (R) project.
+ * Copyright (c) 2020-2024 NocoBase Co., Ltd.
+ * Authors: NocoBase Team.
+ *
+ * This project is dual-licensed under AGPL-3.0 and NocoBase Commercial License.
+ * For more information, please refer to: https://www.nocobase.com/agreement.
+ */
+
+import { Model, MultipleRelationRepository, Transaction } from '@nocobase/database';
+import { Plugin } from '@nocobase/server';
+import { tval } from '@nocobase/utils';
+import _ from 'lodash';
+import * as process from 'node:process';
+import { resolve } from 'path';
+import { listAppPortals } from './appPortals';
+import { getAntdLocale } from './antd';
+import { getCronLocale } from './cron';
+import { getCronstrueLocale } from './cronstrue';
+import { filterLocaleResources } from './localeResources';
+
+async function getLang(ctx) {
+  const SystemSetting = ctx.db.getRepository('systemSettings');
+  const systemSetting = await SystemSetting.findOne();
+  const enabledLanguages: string[] = systemSetting.get('enabledLanguages') || [];
+  const currentUser = ctx.state.currentUser;
+  let lang = enabledLanguages?.[0] || process.env.APP_LANG || 'en-US';
+  if (enabledLanguages.includes(currentUser?.appLang)) {
+    lang = currentUser?.appLang;
+  }
+  if (ctx.request.query.locale && enabledLanguages.includes(ctx.request.query.locale)) {
+    lang = ctx.request.query.locale;
+  }
+  return lang;
+}
+
+export class PluginClientServer extends Plugin {
+  async beforeLoad() {}
+
+  async install() {
+    // const uiSchemas = this.db.getRepository<any>('uiSchemas');
+    // await uiSchemas.insert({
+    //   type: 'void',
+    //   'x-uid': 'nocobase-admin-menu',
+    //   'x-component': 'Menu',
+    //   'x-designer': 'Menu.Designer',
+    //   'x-initializer': 'MenuItemInitializers',
+    //   'x-component-props': {
+    //     mode: 'mix',
+    //     theme: 'dark',
+    //     // defaultSelectedUid: 'u8',
+    //     onSelect: '{{ onSelect }}',
+    //     sideMenuRefScopeKey: 'sideMenuRef',
+    //   },
+    //   properties: {},
+    // });
+  }
+
+  async load() {
+    this.app.localeManager.setLocaleFn('antd', async (lang) => getAntdLocale(lang));
+    this.app.localeManager.setLocaleFn('cronstrue', async (lang) => getCronstrueLocale(lang));
+    this.app.localeManager.setLocaleFn('cron', async (lang) => getCronLocale(lang));
+    this.db.addMigrations({
+      namespace: 'client',
+      directory: resolve(__dirname, './migrations'),
+      context: {
+        plugin: this,
+      },
+    });
+    this.app.acl.allow('app', 'getLang');
+    this.app.acl.allow('app', 'getInfo');
+    this.app.acl.allow('app', 'getPortals', 'loggedIn');
+    this.app.acl.registerSnippet({
+      name: 'app',
+      actions: ['app:restart', 'app:refresh', 'app:clearCache', 'app:publishEvent'],
+    });
+    const dialect = this.app.db.sequelize.getDialect();
+
+    this.app.resourceManager.define({
+      name: 'app',
+      actions: {
+        async getInfo(ctx, next) {
+          const SystemSetting = ctx.db.getRepository('systemSettings');
+          const systemSetting = await SystemSetting.findOne();
+          const enabledLanguages: string[] = systemSetting?.get('enabledLanguages') || [];
+          const currentUser = ctx.state.currentUser;
+          let lang = enabledLanguages?.[0] || process.env.APP_LANG || 'en-US';
+          if (enabledLanguages.includes(currentUser?.appLang)) {
+            lang = currentUser?.appLang;
+          }
+
+          const info: any = {
+            database: {
+              dialect,
+            },
+            version: await ctx.app.version.get(),
+            lang,
+            name: ctx.app.name,
+            theme: currentUser?.systemSettings?.theme || systemSetting?.options?.theme || 'default',
+          };
+
+          if (process.env['EXPORT_LIMIT']) {
+            info.exportLimit = parseInt(process.env['EXPORT_LIMIT']);
+          }
+
+          if (process.env['EXPORT_AUTO_MODE_THRESHOLD']) {
+            info.exportAutoModeThreshold = parseInt(process.env['EXPORT_AUTO_MODE_THRESHOLD']);
+          }
+
+          if (process.env['EXPORT_ATTACHMENTS_AUTO_MODE_THRESHOLD']) {
+            info.exportAttachmentsAutoModeThreshold = parseInt(process.env['EXPORT_ATTACHMENTS_AUTO_MODE_THRESHOLD']);
+          }
+
+          ctx.body = info;
+          await next();
+        },
+        async getLang(ctx, next) {
+          const lang = await getLang(ctx);
+          const resources = filterLocaleResources(await ctx.app.localeManager.get(lang), ctx.request.query.ns);
+          ctx.body = {
+            lang,
+            ...resources,
+          };
+          await next();
+        },
+        getPortals: async (ctx, next) => {
+          ctx.body = await listAppPortals(ctx.app?.name);
+          await next();
+        },
+        async clearCache(ctx, next) {
+          await ctx.cache.reset();
+          await next();
+        },
+        async restart(ctx, next) {
+          ctx.app.runAsCLI(['restart'], { from: 'user' });
+          await next();
+        },
+        async refresh(ctx, next) {
+          ctx.app.runCommand('refresh');
+          await next();
+        },
+        async publishEvent(ctx, next) {
+          const { plugin, command, payload } = ctx.action?.params?.values ?? {};
+
+          if (!plugin || typeof plugin !== 'string') {
+            ctx.throw(400, 'Plugin is required');
+            return;
+          }
+
+          if (!command || typeof command !== 'string') {
+            ctx.throw(400, 'Command is required');
+            return;
+          }
+
+          const { id, username } = ctx.auth?.user ?? {};
+          const user = id ? { id, username } : undefined;
+
+          const eventName = `${command.replaceAll(':', '.')}.${plugin}`;
+          try {
+            await ctx.app.eventQueue.publish(eventName, {
+              plugin,
+              command,
+              user,
+              payload: payload ?? {},
+            });
+          } catch (err) {
+            ctx.app.logger.warn(`fail to publish event to [${eventName}]: ${(err as Error).message}`, payload);
+          }
+          await next();
+        },
+      },
+    });
+
+    this.app.auditManager.registerActions(['app:restart', 'app:refresh', 'app:clearCache', 'app:publishEvent']);
+
+    this.registerActionHandlers();
+    this.bindNewMenuToRoles();
+    this.setACL();
+    this.registerLocalizationSource();
+
+    this.app.db.on('desktopRoutes.afterUpdate', async (instance: Model, { transaction }) => {
+      if (instance.changed('enableTabs')) {
+        const repository = this.app.db.getRepository('desktopRoutes');
+        await repository.update({
+          filter: {
+            parentId: instance.id,
+          },
+          values: {
+            hidden: !instance.enableTabs,
+          },
+          transaction,
+        });
+      }
+    });
+  }
+
+  setACL() {
+    this.app.acl.registerSnippet({
+      name: `ui.desktopRoutes`,
+      actions: [
+        'desktopRoutes:create',
+        'desktopRoutes:update',
+        'desktopRoutes:move',
+        'desktopRoutes:destroy',
+        'desktopRoutes:updateOrCreate',
+      ],
+    });
+
+    this.app.acl.registerSnippet({
+      name: `pm.desktopRoutes`,
+      actions: ['roles.desktopRoutes:*'],
+    });
+
+    this.app.acl.allow('desktopRoutes', ['listAccessible', 'getAccessible'], 'loggedIn');
+  }
+
+  /**
+   * used to implement: roles with permission (allowNewMenu is true) can directly access the newly created menu
+   */
+  bindNewMenuToRoles() {
+    this.app.db.on('roles.beforeCreate', async (instance: Model) => {
+      instance.set(
+        'allowNewMenu',
+        instance.allowNewMenu === undefined ? ['admin', 'member'].includes(instance.name) : !!instance.allowNewMenu,
+      );
+    });
+
+    const collectDesktopRouteSchemaUids = async (instance: Model, transaction?: Transaction) => {
+      const routeRepo = this.db.getRepository('desktopRoutes');
+      const schemaUids = new Set<string>();
+      const pendingIds: Array<string | number> = [];
+      const rootId = instance.get('id');
+      const rootSchemaUid = instance.get('schemaUid');
+
+      if (rootSchemaUid) {
+        schemaUids.add(rootSchemaUid);
+      }
+      if (rootId) {
+        pendingIds.push(rootId);
+      }
+
+      while (pendingIds.length) {
+        const routes = await routeRepo.find({
+          fields: ['id', 'schemaUid'],
+          filter: {
+            parentId: {
+              $in: pendingIds.splice(0, pendingIds.length),
+            },
+          },
+          transaction,
+        });
+        for (const route of routes) {
+          const schemaUid = route.get('schemaUid');
+          const id = route.get('id');
+          if (schemaUid) {
+            schemaUids.add(schemaUid);
+          }
+          if (id) {
+            pendingIds.push(id);
+          }
+        }
+      }
+
+      return Array.from(schemaUids);
+    };
+
+    this.db.on('desktopRoutes.beforeDestroy', async (instance: Model, { transaction }) => {
+      const r = this.db.getRepository('flowModels') as any;
+      if (r?.remove) {
+        const schemaUids = await collectDesktopRouteSchemaUids(instance, transaction);
+        for (const schemaUid of schemaUids) {
+          await r.remove(schemaUid, { transaction });
+        }
+      }
+    });
+    this.db.on('desktopRoutes.afterCreate', async (instance: Model, { transaction }) => {
+      const r = this.db.getRepository('flowModels');
+      if (r) {
+        await r.create({
+          transaction,
+          values: {
+            uid: instance.get('schemaUid'),
+            name: instance.get('schemaUid'),
+            schema: {
+              use: 'RouteModel',
+            },
+          },
+        });
+      }
+      const addNewMenuRoles = await this.app.db.getRepository('roles').find({
+        filter: {
+          allowNewMenu: true,
+        },
+        transaction,
+      });
+
+      // @ts-ignore
+      await this.app.db.getRepository('desktopRoutes.roles', instance.id).add({
+        tk: addNewMenuRoles.map((role) => role.name),
+        transaction,
+      });
+    });
+
+    const processRoleDesktopRoutes = async (params: {
+      models: Model[];
+      action: 'create' | 'remove';
+      transaction: Transaction;
+    }) => {
+      const { models, action, transaction } = params;
+      if (!models.length) return;
+      const parentIds = models.map((x) => x.desktopRouteId);
+      const tabs: Model[] = await this.app.db.getRepository('desktopRoutes').find({
+        where: { parentId: parentIds, hidden: true },
+        transaction,
+      });
+      if (!tabs.length) return;
+      const repository = this.app.db.getRepository('rolesDesktopRoutes');
+      const roleName = models[0].get('roleName');
+      const tabIds = tabs.map((x) => x.get('id'));
+      const where = { desktopRouteId: tabIds, roleName };
+      if (action === 'create') {
+        const exists = await repository.find({ where, transaction });
+        const modelsByRouteId = _.keyBy(exists, (x) => x.get('desktopRouteId'));
+        const createModels = tabs
+          .map((x) => !modelsByRouteId[x.get('id')] && { desktopRouteId: x.get('id'), roleName })
+          .filter(Boolean);
+        for (const values of createModels) {
+          await repository.firstOrCreate({
+            values,
+            filterKeys: ['desktopRouteId', 'roleName'],
+            transaction,
+          });
+        }
+        return;
+      }
+
+      if (action === 'remove') {
+        return await repository.destroy({ filter: where, transaction });
+      }
+    };
+    this.app.db.on('rolesDesktopRoutes.afterBulkCreate', async (instances, options) => {
+      await processRoleDesktopRoutes({ models: instances, action: 'create', transaction: options.transaction });
+    });
+
+    this.app.db.on('rolesDesktopRoutes.afterBulkDestroy', async (options) => {
+      const models = await this.app.db.getRepository('rolesDesktopRoutes').find({
+        where: options.where,
+      });
+      await processRoleDesktopRoutes({ models: models, action: 'remove', transaction: options.transaction });
+    });
+  }
+
+  registerActionHandlers() {
+    this.app.resourceManager.registerActionHandler('desktopRoutes:listAccessible', async (ctx, next) => {
+      const desktopRoutesRepository = ctx.db.getRepository('desktopRoutes');
+      const rolesRepository = ctx.db.getRepository('roles');
+      const { filter } = ctx.action.params;
+
+      if (ctx.state.currentRoles.includes('root')) {
+        ctx.body = await desktopRoutesRepository.find({
+          tree: true,
+          sort: 'sort',
+          filter,
+        });
+        return await next();
+      }
+
+      const roles = await rolesRepository.find({
+        filterByTk: ctx.state.currentRoles,
+        appends: ['desktopRoutes'],
+      });
+
+      const desktopRoutesId = roles.flatMap((x) => x.get('desktopRoutes')).map((item) => item.id);
+
+      if (desktopRoutesId) {
+        const ids = (await Promise.all(desktopRoutesId)).flat();
+        const result = await desktopRoutesRepository.find({
+          tree: true,
+          sort: 'sort',
+          filter: {
+            ...filter,
+            id: ids,
+          },
+        });
+
+        ctx.body = result;
+      }
+
+      await next();
+    });
+
+    this.app.resourceManager.registerActionHandler('desktopRoutes:getAccessible', async (ctx, next) => {
+      const desktopRoutesRepository = ctx.db.getRepository('desktopRoutes');
+      const rolesRepository = ctx.db.getRepository('roles');
+      const { filter } = ctx.action.params;
+
+      if (ctx.state.currentRoles.includes('root')) {
+        ctx.body = await desktopRoutesRepository.findOne({
+          sort: 'sort',
+          ...ctx.action.params,
+        });
+        return await next();
+      }
+
+      const roles = await rolesRepository.find({
+        filterByTk: ctx.state.currentRoles,
+        appends: ['desktopRoutes'],
+      });
+
+      const desktopRoutesId = roles.flatMap((x) => x.get('desktopRoutes')).map((item) => item.id);
+
+      if (desktopRoutesId && desktopRoutesId.length > 0) {
+        const ids = (await Promise.all(desktopRoutesId)).flat();
+
+        // 将权限检查与用户提供的 filter 合并
+        const result = await desktopRoutesRepository.findOne({
+          filter: {
+            ...filter,
+            id: ids,
+          },
+          ...ctx.action.params,
+        });
+
+        ctx.body = result;
+      } else {
+        ctx.body = null;
+      }
+
+      await next();
+    });
+
+    this.app.resourceManager.registerActionHandler('roles.desktopRoutes:set', async (ctx, next) => {
+      let { values } = ctx.action.params;
+      if (values.length) {
+        const instances = await this.app.db.getRepository('desktopRoutes').find({
+          filter: {
+            $or: [{ id: { $in: values } }, { parentId: { $in: values } }],
+          },
+        });
+        values = instances.map((instance) => instance.get('id'));
+      }
+      const { resourceName, sourceId } = ctx.action;
+      const repository = this.app.db.getRepository<MultipleRelationRepository>(resourceName, sourceId);
+      await repository['set'](values);
+
+      ctx.status = 200;
+      await next();
+    });
+  }
+
+  registerLocalizationSource() {
+    this.app.localeManager.registerSource('desktop-routes', {
+      title: tval('Desktop routes'),
+      sync: async (ctx) => {
+        const desktopRoutes = await ctx.db.getRepository('desktopRoutes').find({
+          raw: true,
+        });
+        const resources = {};
+        desktopRoutes.forEach((route: { title?: string }) => {
+          if (route.title) {
+            resources[route.title] = '';
+          }
+        });
+        return {
+          'lm-desktop-routes': resources,
+        };
+      },
+      namespace: 'lm-desktop-routes',
+      collections: [
+        {
+          collection: 'desktopRoutes',
+          fields: ['title'],
+        },
+      ],
+    });
+  }
+}
+
+export default PluginClientServer;

@@ -13,3 +13,34 @@
   --ds-transition-duration-fast: 0.1s;
   --ds-transition-duration-slow: 0.3s;
 }
+
+/* Skeleton loading animations, phase-opposed so pulse and shimmer rows differ.
+   Tokens live only under no-preference: a var() reference to an unset custom
+   property invalidates the whole animation declaration, so reduced-motion
+   users get a static skeleton with no per-consumer media queries. */
+@keyframes ds-skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@keyframes ds-skeleton-shimmer {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root {
+    --ds-skeleton-pulse: ds-skeleton-pulse 1.2s ease-in-out infinite;
+    --ds-skeleton-shimmer: ds-skeleton-shimmer 1.2s ease-in-out infinite;
+  }
+}

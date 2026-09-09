@@ -29,6 +29,7 @@ const HIT: KbHitState = {
   heading_path: '三、调味品行业常见关注事项',
   doc_kind: 'regulation',
   content: '酱油中山梨酸钾最大使用量为 0.5 g/kg（以山梨酸计）。',
+  score: 0.031,
 }
 
 const HOME_LISTING: DirectoryListing = {
@@ -41,7 +42,7 @@ const HOME_LISTING: DirectoryListing = {
 
 function mount(state: KbClientState, overrides: {
   search?: (query: string) => Promise<KbSearchState>
-  uploadFile?: (file: File) => Promise<{ name: string; chunks: number }>
+  uploadFile?: (file: File) => Promise<{ name: string; chunks?: number; replaced?: boolean; destination?: 'kb' | 'lakehouse'; table?: string; rows?: number }>
   ingestFile?: (directory: string, fileName: string) => Promise<{ name: string; chunks: number }>
   ingestUrl?: (url: string) => Promise<{ name: string; chunks: number }>
   listDirectory?: (path?: string) => Promise<DirectoryListing>
@@ -290,7 +291,7 @@ describe('KbWorkbench upload tab', () => {
     fireEvent.click(screen.getByRole('button', { name: zh['docs.addDocument'] }))
     expect(screen.getByRole('tab', { name: zh['ingest.tabUpload'] })).toHaveProperty('ariaSelected', 'true')
     expect(fileInput()).toHaveProperty('multiple', true)
-    expect(fileInput()).toHaveProperty('accept', '.md,.txt,.pdf,.docx')
+    expect(fileInput()).toHaveProperty('accept', '.md,.txt,.pdf,.docx,.csv,.xlsx,.json')
     expect(screen.getByText(zh['ingest.uploadHint'])).toBeTruthy()
     // The URL and file inputs stay unmounted until their tabs are picked.
     expect(screen.queryByPlaceholderText(zh['ingest.urlPlaceholder'])).toBeNull()
@@ -345,6 +346,94 @@ describe('KbWorkbench upload tab', () => {
     await act(async () => { release!({ name: 'note.md', chunks: 4 }) })
     await waitFor(() => { expect(screen.getByText(zh['ingest.uploadRowDone'].replaceAll('{chunks}', '4'))).toBeTruthy() })
     expect(screen.queryByText(zh['ingest.uploadRowBusy'])).toBeNull()
+  })
+
+  it('keeps two same-name rows advancing on their own completions', async () => {
+    // One pick, two browser files sharing one name: matching by name would
+    // light every busy row with that name at once, so each row needs its own
+    // identity from pick through done.
+    const releases: Array<(value: { name: string; chunks: number }) => void> = []
+    const uploadFile = vi.fn(() => new Promise<{ name: string; chunks: number }>((resolve) => { releases.push(resolve) }))
+    mount({ stats: { status: 'ready', usage: READY_USAGE }, records: [] }, { uploadFile })
+    fireEvent.click(screen.getByRole('button', { name: zh['docs.addDocument'] }))
+    fireEvent.change(fileInput(), { target: { files: [new File(['x'], 'note.md'), new File(['y'], 'note.md')] } })
+    await waitFor(() => { expect(screen.getAllByText(zh['ingest.uploadRowBusy'])).toHaveLength(2) })
+    // The first completion lights exactly one row; its same-name twin stays busy.
+    await act(async () => { releases[0]!({ name: 'note.md', chunks: 4 }) })
+    await waitFor(() => { expect(screen.getByText(zh['ingest.uploadRowDone'].replaceAll('{chunks}', '4'))).toBeTruthy() })
+    expect(screen.getByText(zh['ingest.uploadRowBusy'])).toBeTruthy()
+    await act(async () => { releases[1]!({ name: 'note.md', chunks: 6 }) })
+    await waitFor(() => { expect(screen.getByText(zh['ingest.uploadRowDone'].replaceAll('{chunks}', '6'))).toBeTruthy() })
+    expect(screen.queryByText(zh['ingest.uploadRowBusy'])).toBeNull()
+  })
+
+  it('toasts the replacement fact when an upload replaced a prior same-name document', async () => {
+    const uploadFile = vi.fn(async (file: File) => ({ name: file.name, chunks: 4, replaced: true }))
+    mount({ stats: { status: 'ready', usage: READY_USAGE }, records: [] }, { uploadFile })
+    fireEvent.click(screen.getByRole('button', { name: zh['docs.addDocument'] }))
+    fireEvent.change(fileInput(), { target: { files: [new File(['x'], 'note.md')] } })
+    await waitFor(() => {
+      expect(screen.getByText(zh['ingest.doneReplaced'].replaceAll('{name}', 'note.md').replaceAll('{chunks}', '4'))).toBeTruthy()
+    })
+  })
+
+  it('reports a lakehouse landing with the table toast and the row-unit row', async () => {
+    const uploadFile = vi.fn(async (file: File) => ({
+      name: file.name, destination: 'lakehouse' as const, table: 'orders', rows: 8, replaced: false,
+    }))
+    mount({ stats: { status: 'ready', usage: READY_USAGE }, records: [] }, { uploadFile })
+    fireEvent.click(screen.getByRole('button', { name: zh['docs.addDocument'] }))
+    fireEvent.change(fileInput(), { target: { files: [new File(['r,n\n1,2'], 'orders.csv')] } })
+    await waitFor(() => {
+      expect(screen.getByText(zh['ingest.uploadRowDoneLake'].replaceAll('{table}', 'orders').replaceAll('{rows}', '8'))).toBeTruthy()
+      expect(screen.getByText(zh['ingest.doneLake'].replaceAll('{table}', 'orders').replaceAll('{rows}', '8'))).toBeTruthy()
+    })
+  })
+
+  it('toasts the plain kb ingest with the zero-passage fallback', async () => {
+    const uploadFile = vi.fn(async (file: File) => ({ name: file.name }))
+    mount({ stats: { status: 'ready', usage: READY_USAGE }, records: [] }, { uploadFile })
+    fireEvent.click(screen.getByRole('button', { name: zh['docs.addDocument'] }))
+    fireEvent.change(fileInput(), { target: { files: [new File(['x'], 'note.md')] } })
+    await waitFor(() => {
+      expect(screen.getByText(zh['ingest.done'].replaceAll('{name}', 'note.md').replaceAll('{chunks}', '0'))).toBeTruthy()
+    })
+  })
+
+  it('falls back to zero passages when a kb receipt carries no chunk count', async () => {
+    const uploadFile = vi.fn(async (file: File) => ({ name: file.name, replaced: true }))
+    mount({ stats: { status: 'ready', usage: READY_USAGE }, records: [] }, { uploadFile })
+    fireEvent.click(screen.getByRole('button', { name: zh['docs.addDocument'] }))
+    fireEvent.change(fileInput(), { target: { files: [new File(['x'], 'note.md')] } })
+    await waitFor(() => {
+      expect(screen.getByText(zh['ingest.doneReplaced'].replaceAll('{name}', 'note.md').replaceAll('{chunks}', '0'))).toBeTruthy()
+      expect(screen.getByText(zh['ingest.uploadRowDone'].replaceAll('{chunks}', '0'))).toBeTruthy()
+    })
+  })
+
+  it('toasts the lakehouse replacement fact and falls back when table or rows are absent', async () => {
+    const uploadFile = vi.fn(async (file: File) => ({
+      name: file.name, destination: 'lakehouse' as const, table: 'orders', rows: 3, replaced: true,
+    }))
+    mount({ stats: { status: 'ready', usage: READY_USAGE }, records: [] }, { uploadFile })
+    fireEvent.click(screen.getByRole('button', { name: zh['docs.addDocument'] }))
+    fireEvent.change(fileInput(), { target: { files: [new File(['x'], 'orders.csv')] } })
+    await waitFor(() => {
+      expect(screen.getByText(zh['ingest.doneLakeReplaced'].replaceAll('{table}', 'orders').replaceAll('{rows}', '3'))).toBeTruthy()
+    })
+  })
+
+  it('renders the lakehouse row with the file-name and zero-row fallbacks', async () => {
+    const uploadFile = vi.fn(async (file: File) => ({
+      name: file.name, destination: 'lakehouse' as const, replaced: false,
+    }))
+    mount({ stats: { status: 'ready', usage: READY_USAGE }, records: [] }, { uploadFile })
+    fireEvent.click(screen.getByRole('button', { name: zh['docs.addDocument'] }))
+    fireEvent.change(fileInput(), { target: { files: [new File(['x'], 'orders.csv')] } })
+    await waitFor(() => {
+      expect(screen.getByText(zh['ingest.uploadRowDoneLake'].replaceAll('{table}', 'orders.csv').replaceAll('{rows}', '0'))).toBeTruthy()
+      expect(screen.getByText(zh['ingest.doneLake'].replaceAll('{table}', 'orders.csv').replaceAll('{rows}', '0'))).toBeTruthy()
+    })
   })
 
   it('drops row updates from a batch the next open supersedes', async () => {
@@ -591,9 +680,9 @@ describe('KbWorkbench hit card and document list edges', () => {
     }
   })
 
-  it('renders a hit without a heading path and toggles its passage', async () => {
+  it('renders a hit without a heading path or score and toggles its passage', async () => {
     const one = vi.fn(async (): Promise<KbSearchState> => {
-      const { heading_path: _ignored, ...hit } = HIT
+      const { heading_path: _ignored, score: _score, ...hit } = HIT
       return { mode: 'text', results: [hit] }
     })
     mount({ stats: { status: 'ready', usage: READY_USAGE }, records: [] }, { search: one })

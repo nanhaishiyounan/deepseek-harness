@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-09-03-lakehouse-seam-duckdb-sqlite-catalog.md
+2026-09-03-lakehouse-seam-duckdb-sqlite-catalog.md: c639071bea1c2dced30f99b97b8f9e7568923742
+2026-09-03-lakehouse-seam-duckdb-sqlite-catalog.zh.md: edb7eb4c266cb05ba38191a8e6aa9cd2292896fa

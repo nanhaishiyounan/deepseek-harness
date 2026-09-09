@@ -56,6 +56,22 @@
   config:
     agents: []
 
+- id: lakehouse
+  name: '@deepseek-ai/dsh-lakehouse'
+  config:
+    dataRoot: !!js "process.env.LH_TEST_ROOT ?? 'workspace/lakehouse'"
+
+- id: lakehouse-sqlite-catalog
+  name: '@deepseek-ai/dsh-lakehouse-sqlite-catalog'
+  config:
+    path: !!js "process.env.LH_TEST_DB ?? ':memory:'"
+
+- id: lakehouse-duckdb
+  name: '@deepseek-ai/dsh-lakehouse-duckdb'
+
+- id: connector
+  name: '@deepseek-ai/dsh-connector'
+
 - id: tool-kb
   name: '@deepseek-ai/dsh-tool-kb'
   config:

@@ -124,7 +124,17 @@ export function KbWorkbench({
         ingestUrl={ingestUrl}
         listDirectory={listDirectory}
         onDone={(receipt) => {
-          show(t('ingest.done', { name: receipt.name, chunks: receipt.chunks }))
+          if (receipt.destination === 'lakehouse') {
+            const table = receipt.table ?? receipt.name
+            const rows = receipt.rows ?? 0
+            show(receipt.replaced === true
+              ? t('ingest.doneLakeReplaced', { table, rows })
+              : t('ingest.doneLake', { table, rows }))
+          } else {
+            show(receipt.replaced === true
+              ? t('ingest.doneReplaced', { name: receipt.name, chunks: receipt.chunks ?? 0 })
+              : t('ingest.done', { name: receipt.name, chunks: receipt.chunks ?? 0 }))
+          }
         }}
         onFailed={refresh}
       />

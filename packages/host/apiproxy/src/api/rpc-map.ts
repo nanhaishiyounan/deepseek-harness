@@ -11,6 +11,12 @@ import type { AgentPresetsApi } from './agent-presets.ts'
 import type { SkillsApi } from './skills.ts'
 import type { GoalsApi } from './goals.ts'
 import type { KbApi } from './kb.ts'
+import type { NocobaseApi } from './nocobase.ts'
+import type { DataApi } from './data.ts'
+import type { OrdersApi } from './orders.ts'
+import type { AssetsApi } from './assets.ts'
+import type { ConnectorsApi } from './connectors.ts'
+import type { KgApi } from './kg.ts'
 import type { SettingsApi } from './settings.ts'
 import type { CredentialsApi } from './credentials.ts'
 import type { LlmApi } from './llm.ts'
@@ -58,11 +64,30 @@ export interface RpcMethodMap {
   'agentPreset.copy': AgentPresetsApi['copy']
   'agentPreset.openDocument': AgentPresetsApi['openDocument']
   'agentPreset.remove': AgentPresetsApi['remove']
+  'data.upload': DataApi['upload']
+  'orders.create': OrdersApi['create']
+  'orders.get': OrdersApi['get']
+  'orders.list': OrdersApi['list']
+  'orders.fulfill': OrdersApi['fulfill']
+  'assets.list': AssetsApi['list']
+  'assets.detail': AssetsApi['detail']
+  'assets.stats': AssetsApi['stats']
+  'connectors.list': ConnectorsApi['list']
+  'connectors.connections': ConnectorsApi['connections']
+  'connectors.transfers': ConnectorsApi['transfers']
+  'kg.schema': KgApi['schema']
+  'kg.search': KgApi['search']
+  'kg.subgraph': KgApi['subgraph']
+  'kg.expand': KgApi['expand']
+  'kg.stats': KgApi['stats']
   'kb.stats': KbApi['stats']
   'kb.search': KbApi['search']
   'kb.ingest': KbApi['ingest']
   'kb.ingestUrl': KbApi['ingestUrl']
   'kb.upload': KbApi['upload']
+  'nocobase.listMeta': NocobaseApi['listMeta']
+  'nocobase.list': NocobaseApi['list']
+  'nocobase.get': NocobaseApi['get']
   'goal.create': GoalsApi['create']
   'goal.edit': GoalsApi['edit']
   'goal.pause': GoalsApi['pause']

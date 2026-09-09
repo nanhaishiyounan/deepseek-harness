@@ -16,6 +16,12 @@ import type { SettingsApi } from './settings.ts'
 import type { CredentialsApi } from './credentials.ts'
 import type { LlmApi } from './llm.ts'
 import type { KbApi } from './kb.ts'
+import type { NocobaseApi } from './nocobase.ts'
+import type { DataApi } from './data.ts'
+import type { OrdersApi } from './orders.ts'
+import type { AssetsApi } from './assets.ts'
+import type { ConnectorsApi } from './connectors.ts'
+import type { KgApi } from './kg.ts'
 import type { DownloadsApi } from './downloads.ts'
 import type { ClientResponse, RpcReceipt } from './rpc.ts'
 
@@ -33,6 +39,12 @@ export interface ApiProxy {
   credentials: CredentialsApi
   llm: LlmApi
   kb: KbApi
+  nocobase: NocobaseApi
+  data: DataApi
+  orders: OrdersApi
+  assets: AssetsApi
+  connectors: ConnectorsApi
+  kg: KgApi
   /** Host-only download surfaces (GET, no wire envelope); absent from IApiClient. */
   downloads: DownloadsApi
   /**
@@ -63,7 +75,24 @@ export type { GoalsApi, GoalId, GoalRef } from './goals.ts'
 export type { SettingsApi, SettingsNamespaceView, SettingsPathOpView, SettingsSecretView } from './settings.ts'
 export type { CredentialsApi, CredentialView } from './credentials.ts'
 export type { ConfigurableProviderView, DiscoveredModelView, LlmApi } from './llm.ts'
-export type { KbApi, KbHitView, KbIngestView, KbSearchView, KbStatsView } from './kb.ts'
+export type { KbApi, KbHitView, KbIngestView, KbSearchView, KbStatsView, KbUploadView } from './kb.ts'
+export type {
+  NocobaseApi, NocobaseCollectionMetaView, NocobaseFieldView, NocobaseFilterConditionView,
+  NocobaseRowPageView, NocobaseRowView,
+} from './nocobase.ts'
+export type { DataApi, DataKbUploadView, DataLakehouseUploadView, DataUploadView } from './data.ts'
+export type { OrderStatusView, OrderView, OrdersApi } from './orders.ts'
+export type {
+  AssetFeaturedView, AssetKindView, AssetView, AssetsApi, AssetsStatsView,
+} from './assets.ts'
+export type {
+  ConnectorCapabilityView, ConnectorConnectionView, ConnectorProviderWireView,
+  ConnectorTransferWireView, ConnectorsApi,
+} from './connectors.ts'
+export type {
+  KgApi, KgEdgeView, KgNodeHitView, KgNodeTypeView, KgRelationView,
+  KgSubgraphNodeView, KgSubgraphView,
+} from './kg.ts'
 export type { DownloadsApi } from './downloads.ts'
 export type { ApprovalResponsePayload } from './approvals.ts'
 

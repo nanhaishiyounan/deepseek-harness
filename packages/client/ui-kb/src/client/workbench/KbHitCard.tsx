@@ -43,6 +43,7 @@ export function KbHitCard({ index, hit, terms, onCarryToChat, t }: KbHitCardProp
           {label}
           {hit.heading_path === undefined ? '' : ` — ${hit.heading_path}`}
         </span>
+        {hit.score === undefined ? null : <span className={css.hitScore}>score {hit.score.toFixed(3)}</span>}
         <Button variant="ghost" size="sm" className={css.hitCarry} onClick={onCarryToChat}>
           {t('result.carryToChat')}
         </Button>

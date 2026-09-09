@@ -27,6 +27,10 @@ function payloadPath(file: string): string {
  * serve editor navigation during development, where a workspace consumer
  * resolves their source through the package link; a published map resolves
  * nothing, so no payload publishes one.
+ *
+ * A payload path inside a `nocobase/` directory is the NocoBase snapshot
+ * subtree (platform/nocobase, Apache-2.0 + supplementary terms): it never
+ * ships in a dsh package, keeping the published set license-clean.
  * @param file - manifest path or tarball member to classify.
  * @returns whether publishing this path is forbidden.
  */
@@ -34,6 +38,8 @@ export function isForbiddenPublicationFile(file: string): boolean {
   const normalized = payloadPath(file)
   return normalized === 'src'
     || normalized.startsWith('src/')
+    || normalized === 'nocobase'
+    || normalized.startsWith('nocobase/')
     || normalized.endsWith('.d.ts.map')
     || normalized.endsWith('.js.map')
 }
@@ -49,6 +55,9 @@ export function validateTarballPayload(files: readonly string[], context: string
     const normalized = payloadPath(file)
     if (normalized === 'src' || normalized.startsWith('src/')) {
       throw new Error(`${context} publishes source file ${file}`)
+    }
+    if (normalized === 'nocobase' || normalized.startsWith('nocobase/')) {
+      throw new Error(`${context} publishes NocoBase snapshot file ${file}`)
     }
     throw new Error(`${context} publishes source map ${file}`)
   }

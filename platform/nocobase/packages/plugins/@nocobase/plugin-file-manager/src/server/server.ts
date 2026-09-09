@@ -1,0 +1,552 @@
+/**
+ * This file is part of the NocoBase (R) project.
+ * Copyright (c) 2020-2024 NocoBase Co., Ltd.
+ * Authors: NocoBase Team.
+ *
+ * This project is dual-licensed under AGPL-3.0 and NocoBase Commercial License.
+ * For more information, please refer to: https://www.nocobase.com/agreement.
+ */
+
+import fs from 'fs';
+import { basename } from 'path';
+import match from 'mime-match';
+
+import type { Context } from '@nocobase/actions';
+import { Collection, Model, Transactionable } from '@nocobase/database';
+import { Application, Plugin } from '@nocobase/server';
+import { Registry } from '@nocobase/utils';
+import { Readable } from 'stream';
+import { STORAGE_TYPE_ALI_OSS, STORAGE_TYPE_LOCAL, STORAGE_TYPE_S3, STORAGE_TYPE_TX_COS } from '../constants';
+import initActions from './actions';
+import { createFileAccessMiddleware } from './file-access';
+import { AttachmentInterface } from './interfaces/attachment-interface';
+import { AttachmentModel, GetFileStreamOptions, GetFileURLOptions, StorageClassType, StorageModel } from './storages';
+import StorageTypeAliOss from './storages/ali-oss';
+import StorageTypeLocal, { validateLocalStorageConfig } from './storages/local';
+import StorageTypeS3 from './storages/s3';
+import StorageTypeTxCos from './storages/tx-cos';
+import {
+  encodeURL,
+  getFilePlainObject,
+  getFilePublicBasePath,
+  getFileAccessPathSegment,
+  getRecordCollectionName,
+  isPermanentFileAccessURL,
+  resolveStoragePath,
+} from './utils';
+import { registerRepairFilenamesCommand } from './commands/repair-filenames';
+import { getTemporaryFileAccessExpiresIn } from './temporary-access';
+
+export type * from './storages';
+
+const DEFAULT_STORAGE_TYPE = STORAGE_TYPE_LOCAL;
+const DEFAULT_APP_NAME = 'main';
+const DEFAULT_DATA_SOURCE_KEY = 'main';
+
+type AttachmentRecord = Model & AttachmentModel;
+
+type FileModelAttributes = AttachmentModel & {
+  local?: boolean;
+};
+
+class FileModel extends Model<FileModelAttributes> {
+  public toJSON<T extends FileModelAttributes>(): T {
+    const values = super.toJSON<T>();
+    const local = this.get('local');
+    // Keep `local` virtual so round-tripped file values never become a SQL column,
+    // while still exposing the computed storage flag required by the previewer.
+    if (typeof local === 'boolean') {
+      values.local = local;
+    }
+    return values;
+  }
+}
+
+class FileDeleteError extends Error {
+  data: Model;
+
+  constructor(message: string, data: Model) {
+    super(message);
+    this.name = 'FileDeleteError';
+    this.data = data;
+  }
+}
+
+export type FileRecordOptions = {
+  collectionName: string;
+  filePath: string;
+  storageName?: string;
+  subPath?: string;
+  values?: any;
+} & Transactionable;
+
+export type UploadFileOptions = {
+  filePath: string;
+  storageName?: string;
+  subPath?: string;
+  documentRoot?: string;
+};
+
+export type FileAccessAuthorizeParams = {
+  appName: string;
+  dataSourceKey: string;
+  collectionName: string;
+  id: string;
+  preview: boolean;
+};
+
+export type FileAccessAuthorizer = {
+  name: string;
+  authorize: (
+    ctx: Context,
+    params: FileAccessAuthorizeParams,
+  ) => Promise<boolean | null | undefined> | boolean | null | undefined;
+};
+
+type FileStreamResult = { stream: Readable; contentType?: string };
+
+type FileStreamDataSource = {
+  getFileStream(file: AttachmentModel, options?: GetFileStreamOptions): Promise<FileStreamResult>;
+};
+
+function supportsFileStream(dataSource: unknown): dataSource is FileStreamDataSource {
+  return Boolean(
+    dataSource &&
+      typeof dataSource === 'object' &&
+      typeof (dataSource as { getFileStream?: unknown }).getFileStream === 'function',
+  );
+}
+
+export class PluginFileManagerServer extends Plugin {
+  storageTypes = new Registry<StorageClassType>();
+  storagesCache = new Map<number | string, StorageModel>();
+  protected fileAccessAuthorizers = new Registry<FileAccessAuthorizer>();
+
+  static async staticImport() {
+    Application.addCommand(registerRepairFilenamesCommand);
+  }
+
+  afterDestroy = async (record: Model, options) => {
+    const { collection } = record.constructor as typeof Model;
+    if (collection?.options?.template !== 'file' && collection.name !== 'attachments') {
+      return;
+    }
+
+    if (!record.get('storageId')) {
+      return;
+    }
+
+    const storage = this.storagesCache.get(record.get('storageId'));
+    if (!storage) {
+      return;
+    }
+    if (storage?.paranoid) {
+      return;
+    }
+    const Type = this.storageTypes.get(storage.type);
+    if (!Type) {
+      return;
+    }
+    const storageConfig = new Type(storage);
+    const result = await storageConfig.delete([record as unknown as AttachmentModel]);
+    if (!result[0]) {
+      throw new FileDeleteError('Failed to delete file', record);
+    }
+  };
+
+  registerStorageType(type: string, Type: StorageClassType) {
+    this.storageTypes.register(type, Type);
+  }
+
+  registerFileAccessAuthorizer(authorizer: FileAccessAuthorizer) {
+    this.fileAccessAuthorizers.register(authorizer.name, authorizer);
+  }
+
+  async authorizeFileAccess(ctx: Context, params: FileAccessAuthorizeParams) {
+    for (const authorizer of this.fileAccessAuthorizers.getValues()) {
+      if (await authorizer.authorize(ctx, params)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  async createFileRecord(options: FileRecordOptions) {
+    const { values, storageName, subPath, collectionName, filePath, transaction } = options;
+    const collection = this.db.getCollection(collectionName);
+    if (!collection) {
+      throw new Error(`collection does not exist`);
+    }
+    const collectionRepository = this.db.getRepository(collectionName);
+    const name = storageName || collection.options.storage;
+    const data = await this.uploadFile({ storageName: name, subPath, filePath });
+    return await collectionRepository.create({ values: { ...data, ...values }, transaction });
+  }
+
+  parseStorage(instance) {
+    return this.app.environment.renderJsonTemplate(instance.toJSON());
+  }
+
+  async uploadFile(options: UploadFileOptions) {
+    const { storageName, subPath, filePath, documentRoot } = options;
+
+    if (!this.storagesCache.size) {
+      await this.loadStorages();
+    }
+    const storages = Array.from(this.storagesCache.values());
+    const cachedStorage = storages.find((item) => item.name === storageName) || storages.find((item) => item.default);
+
+    if (!cachedStorage) {
+      throw new Error('[file-manager] no linked or default storage provided');
+    }
+
+    const storage = {
+      ...cachedStorage,
+      options: { ...(cachedStorage.options || {}) },
+      path: resolveStoragePath(cachedStorage.path, subPath),
+    };
+
+    const fileStream = fs.createReadStream(filePath);
+
+    if (documentRoot) {
+      storage.options['documentRoot'] = documentRoot;
+    }
+
+    const StorageType = this.storageTypes.get(storage.type);
+    const storageInstance = new StorageType(storage);
+
+    if (!storageInstance) {
+      throw new Error(`[file-manager] storage type "${storage.type}" is not defined`);
+    }
+
+    const engine = storageInstance.make();
+
+    const file = {
+      originalname: basename(filePath),
+      path: filePath,
+      stream: fileStream,
+    } as any;
+
+    await new Promise((resolve, reject) => {
+      engine._handleFile({} as any, file, (error, info) => {
+        if (error) {
+          reject(error);
+        }
+        Object.assign(file, info);
+        resolve(info);
+      });
+    });
+
+    return storageInstance.getFileData(file, {});
+  }
+
+  async loadStorages(options?: { transaction: any }) {
+    const repository = this.db.getRepository('storages');
+    const storages = await repository.find({
+      transaction: options?.transaction,
+    });
+    this.storagesCache = new Map();
+    for (const storage of storages) {
+      this.storagesCache.set(storage.get('id'), this.parseStorage(storage));
+    }
+  }
+
+  async install() {
+    const defaultStorageType = this.storageTypes.get(DEFAULT_STORAGE_TYPE);
+
+    if (defaultStorageType) {
+      const Storage = this.db.getCollection('storages');
+      if (
+        await Storage.repository.findOne({
+          filter: {
+            name: defaultStorageType.defaults().name,
+          },
+        })
+      ) {
+        return;
+      }
+      await Storage.repository.create({
+        values: {
+          ...defaultStorageType.defaults(),
+          type: DEFAULT_STORAGE_TYPE,
+          default: true,
+        },
+      });
+    }
+  }
+
+  async handleSyncMessage(message) {
+    if (message.type === 'reloadStorages') {
+      await this.loadStorages();
+    }
+  }
+
+  async beforeLoad() {
+    getTemporaryFileAccessExpiresIn();
+    this.db.registerModels({ FileModel });
+    this.db.on('beforeDefineCollection', (options) => {
+      if (options.template === 'file') {
+        options.model = 'FileModel';
+      }
+    });
+    this.db.on('afterDefineCollection', (collection: Collection) => {
+      if (collection.options.template !== 'file') {
+        return;
+      }
+      collection.setField('local', {
+        type: 'virtual',
+        hidden: true,
+      });
+      const idField = collection.getField('id');
+      if (idField) {
+        idField.options.deletable = false;
+        idField.options.updatable = false;
+      }
+      const extnameField = collection.getField('extname');
+      if (extnameField) {
+        extnameField.options.updatable = false;
+      }
+      collection.model.afterCreate(async (model) => {
+        await this.setFileResponseURLs(model as AttachmentRecord, collection.name);
+      });
+      collection.model.beforeUpdate((model) => {
+        if (model.changed('extname')) {
+          model.set('extname', model.previous('extname'));
+          model.changed('extname', false);
+        }
+        if (!model.changed('url') || !model.changed('preview')) {
+          return;
+        }
+        model.set('url', model.previous('url'));
+        model.set('preview', model.previous('preview'));
+        model.changed('url', false);
+        model.changed('preview', false);
+      });
+    });
+    this.app.on('afterStart', async () => {
+      await this.loadStorages();
+    });
+  }
+
+  async load() {
+    this.db.on('afterDestroy', this.afterDestroy);
+
+    this.storageTypes.register(STORAGE_TYPE_LOCAL, StorageTypeLocal);
+    this.storageTypes.register(STORAGE_TYPE_ALI_OSS, StorageTypeAliOss);
+    this.storageTypes.register(STORAGE_TYPE_S3, StorageTypeS3);
+    this.storageTypes.register(STORAGE_TYPE_TX_COS, StorageTypeTxCos);
+
+    const Storage = this.db.getModel('storages');
+    Storage.beforeSave((m) => {
+      validateLocalStorageConfig(m.toJSON());
+    });
+    Storage.afterSave(async (m, { transaction }) => {
+      await this.loadStorages({ transaction });
+      this.sendSyncMessage({ type: 'reloadStorages' }, { transaction });
+    });
+    Storage.afterDestroy(async (m, { transaction }) => {
+      for (const collection of this.db.collections.values()) {
+        if (collection?.options?.template === 'file' && collection?.options?.storage === m.name) {
+          throw new Error(
+            this.t(
+              `The storage "${m.name}" is in use in collection "${collection.name}" and cannot be deleted.`,
+            ) as any,
+          );
+        }
+      }
+      await this.loadStorages({ transaction });
+      this.sendSyncMessage({ type: 'reloadStorages' }, { transaction });
+    });
+
+    this.db.on('afterDefineCollection', (collection: Collection) => {
+      const { template } = collection.options;
+      if (template === 'file') {
+        collection.setField('storageId', {
+          type: 'bigInt',
+          createOnly: true,
+          visible: true,
+          index: true,
+        });
+      }
+    });
+
+    this.app.acl.registerSnippet({
+      name: `pm.${this.name}.storages`,
+      actions: ['storages:*'],
+    });
+
+    initActions(this);
+
+    this.app.acl.allow('attachments', ['upload', 'create'], 'loggedIn');
+    this.app.acl.allow('storages', 'getBasicInfo', 'loggedIn');
+    this.app.acl.allow('storages', 'check', 'loggedIn');
+
+    this.app.acl.appendStrategyResource('attachments');
+
+    // this.app.resourcer.use(uploadMiddleware);
+    // this.app.resourcer.use(createAction);
+    // this.app.resourcer.registerActionHandler('upload', uploadAction);
+
+    const defaultStorageName = this.storageTypes.get(DEFAULT_STORAGE_TYPE).defaults().name;
+
+    this.app.acl.addFixedParams('storages', 'destroy', () => {
+      return {
+        filter: { 'name.$ne': defaultStorageName },
+      };
+    });
+
+    const ownMerger = () => {
+      return {
+        filter: {
+          createdById: '{{ctx.state.currentUser.id}}',
+        },
+      };
+    };
+
+    this.app.acl.addFixedParams('attachments', 'update', ownMerger);
+    this.app.acl.addFixedParams('attachments', 'create', ownMerger);
+    this.app.acl.addFixedParams('attachments', 'destroy', ownMerger);
+    this.app.resourcer.define({
+      name: 'attachments',
+      actions: {
+        list(ctx) {
+          ctx.throw(404);
+        },
+      },
+    });
+
+    this.app.db.interfaceManager.registerInterfaceType('attachment', AttachmentInterface);
+
+    this.app.use(createFileAccessMiddleware(this), { tag: 'fileAccess', before: 'dataSource', after: 'dataWrapping' });
+
+    this.db.on('afterFind', async (instances) => {
+      if (!instances) {
+        return;
+      }
+      const records = Array.isArray(instances) ? instances : [instances];
+      const name = records[0]?.constructor?.name;
+      if (name) {
+        const collection = this.db.getCollection(name);
+        if (collection?.name === 'attachments' || collection?.options?.template === 'file') {
+          for (const record of records) {
+            await this.setFileResponseURLs(record as AttachmentRecord, collection.name);
+          }
+        }
+      }
+    });
+  }
+
+  async setFileResponseURLs(record: AttachmentRecord, collectionName: string) {
+    const storage = this.storagesCache.get(record.get('storageId'));
+    const useOriginalUrl = Boolean(storage?.options?.useOriginalUrl);
+    const [url, previewUrl] = useOriginalUrl
+      ? await Promise.all([this.getFileURL(record), this.getFileURL(record, true)])
+      : [
+          this.getPermanentFileURL(record, false, { collectionName }),
+          this.getPermanentFileURL(record, true, { collectionName }),
+        ];
+    record.set('url', url);
+    record.set('preview', previewUrl);
+    record.dataValues.preview = previewUrl; // 强制添加preview，在附件字段时，通过set设置无效
+    if (storage?.type) {
+      record.set('local', storage.type === STORAGE_TYPE_LOCAL);
+    }
+  }
+
+  getPermanentFileURL(
+    file: AttachmentModel,
+    preview = false,
+    options: { dataSourceKey?: string; collectionName?: string } = {},
+  ) {
+    if (!file.storageId) {
+      return encodeURL(file.url);
+    }
+    const publicPath = getFilePublicBasePath();
+    const appName = this.app.name || DEFAULT_APP_NAME;
+    const dataSourceKey = options.dataSourceKey || DEFAULT_DATA_SOURCE_KEY;
+    const collectionName = options.collectionName || getRecordCollectionName(file);
+    const id = getFileAccessPathSegment(file.id, file.extname);
+    const url = `${publicPath}/files/${encodeURIComponent(String(appName))}/${encodeURIComponent(
+      String(dataSourceKey),
+    )}/${encodeURIComponent(String(collectionName))}/${id}`;
+    return preview ? `${url}?preview=1` : url;
+  }
+
+  async getFileURL(file: AttachmentModel, preview = false, options: GetFileURLOptions = {}) {
+    if (!file.storageId) {
+      return encodeURL(file.url);
+    }
+    const storageFile = getFilePlainObject(file);
+    if (isPermanentFileAccessURL(storageFile.url, storageFile, this.app.name || DEFAULT_APP_NAME)) {
+      storageFile.url = undefined;
+    }
+    const storage = this.storagesCache.get(file.storageId);
+    if (!storage) {
+      throw new Error('[file-manager] no linked or default storage provided');
+    }
+    const storageType = this.storageTypes.get(storage.type);
+    if (!storageType) {
+      throw new Error(`[file-manager] storage type "${storage.type}" is not defined`);
+    }
+    return new storageType(storage).getFileURL(
+      storageFile,
+      Boolean(
+        storageFile.mimetype && match(storageFile.mimetype, 'image/*') && preview && storage.options.thumbnailRule,
+      ),
+      options,
+    );
+  }
+
+  async isPublicAccessStorage(storageName) {
+    const storageRepository = this.db.getRepository('storages');
+    const storages = await storageRepository.findOne({
+      filter: { default: true },
+    });
+    let storage;
+    if (!storageName) {
+      storage = storages;
+    } else {
+      storage = await storageRepository.findOne({
+        filter: {
+          name: storageName,
+        },
+      });
+    }
+    storage = this.parseStorage(storage);
+    return Boolean(storage.options?.public || storage.options?.useOriginalUrl);
+  }
+  async getFileStream(
+    file: AttachmentModel,
+    options?: GetFileStreamOptions,
+  ): Promise<{ stream: Readable; contentType?: string }> {
+    const dataSourceKey = file.source?.dataSourceKey;
+    if (dataSourceKey && dataSourceKey !== 'main') {
+      const dataSource = this.app.dataSourceManager.get(dataSourceKey);
+      if (supportsFileStream(dataSource)) {
+        return dataSource.getFileStream(file, options);
+      }
+    }
+
+    if (!file.storageId) {
+      throw new Error('File storageId not found');
+    }
+    const storage = this.storagesCache.get(file.storageId);
+    if (!storage) {
+      throw new Error('[file-manager] no linked or default storage provided');
+    }
+
+    const StorageType = this.storageTypes.get(storage.type);
+    if (!StorageType) {
+      throw new Error(`[file-manager] storage type "${storage.type}" is not defined`);
+    }
+    const storageInstance = new StorageType(storage);
+
+    if (!storageInstance) {
+      throw new Error(`[file-manager] storage type "${storage.type}" is not defined`);
+    }
+
+    return storageInstance.getFileStream(file, options);
+  }
+}
+
+export default PluginFileManagerServer;

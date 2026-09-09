@@ -21,8 +21,19 @@ import css from './workbench.module.css'
 export interface IngestReceipt {
   /** Display name (file base name or the link's host). */
   readonly name: string
-  /** Stored passage count. */
-  readonly chunks: number
+  /** Stored passage count; absent on the lakehouse channel. */
+  readonly chunks?: number
+  /**
+   * The upload channel's replacement fact: true when this ingest replaced a
+   * prior same-name landing. Absent on the file and URL channels.
+   */
+  readonly replaced?: boolean
+  /** Where the unified upload landed; absent on the file and URL channels. */
+  readonly destination?: 'kb' | 'lakehouse'
+  /** The derived lakehouse table name (lakehouse channel only). */
+  readonly table?: string
+  /** Loaded row count (lakehouse channel only). */
+  readonly rows?: number
 }
 
 /** Props of the ingest wizard. */
@@ -67,9 +78,9 @@ export function classifyIngestFailure(message: string): IngestFailureKind {
 
 /** One uploaded file's row state, from pick through done or failure. */
 type UploadRow =
-  | { readonly name: string; readonly status: 'busy' }
-  | { readonly name: string; readonly status: 'done'; readonly chunks: number }
-  | { readonly name: string; readonly status: 'failed'; readonly failure: IngestFailureKind }
+  | { readonly id: number; readonly name: string; readonly status: 'busy' }
+  | { readonly id: number; readonly name: string; readonly status: 'done'; readonly receipt: IngestReceipt }
+  | { readonly id: number; readonly name: string; readonly status: 'failed'; readonly failure: IngestFailureKind }
 
 /**
  * Render the ingest wizard modal.
@@ -100,6 +111,9 @@ export function KbIngestDialog({
   // batch a reopen or later pick superseded (closed-dialog completions stay
   // silent instead of polluting the fresh rows).
   const uploadSeq = useRef(0)
+  // Row-identity counter: two files in one batch may share a name, so rows
+  // match their own completions by id, never by name.
+  const rowSeq = useRef(0)
 
   /** Load one level; any failure lands on the unavailable copy. */
   const browse = (path?: string): (void) => {
@@ -130,25 +144,25 @@ export function KbIngestDialog({
     // Snapshot before the first await: the input's change handler clears
     // `value` right after this call, and a FileList is live — iterating it
     // later would see zero entries.
-    const list = Array.from(files)
-    const batch: UploadRow[] = list.map(file => ({ name: file.name, status: 'busy' }))
+    const list = Array.from(files).map(file => ({ id: ++rowSeq.current, file }))
+    const batch: UploadRow[] = list.map(({ id, file }) => ({ id, name: file.name, status: 'busy' }))
     setRows(previous => [...previous, ...batch])
     void (async () => {
       let failures = 0
-      for (const file of list) {
+      for (const { id, file } of list) {
         try {
           const receipt = await uploadFile(file)
           if (seq !== uploadSeq.current) return
-          setRows(previous => previous.map(row => row.name === file.name && row.status === 'busy'
-            ? { name: receipt.name, status: 'done' as const, chunks: receipt.chunks }
+          setRows(previous => previous.map(row => row.id === id
+            ? { id, name: receipt.name, status: 'done' as const, receipt }
             : row))
           onDone(receipt)
         } catch (error: unknown) {
           if (seq !== uploadSeq.current) return
           failures += 1
           const message = error instanceof Error ? error.message : String(error)
-          setRows(previous => previous.map(row => row.name === file.name && row.status === 'busy'
-            ? { name: file.name, status: 'failed' as const, failure: classifyIngestFailure(message) }
+          setRows(previous => previous.map(row => row.id === id
+            ? { id, name: file.name, status: 'failed' as const, failure: classifyIngestFailure(message) }
             : row))
         }
       }
@@ -257,7 +271,7 @@ export function KbIngestDialog({
                   className={css.uploadInput}
                   type="file"
                   multiple
-                  accept=".md,.txt,.pdf,.docx"
+                  accept=".md,.txt,.pdf,.docx,.csv,.xlsx,.json"
                   onChange={(event) => {
                     pick(event.target.files)
                     // Reset so picking the same file again re-fires onChange.
@@ -269,13 +283,15 @@ export function KbIngestDialog({
               <p className={css.fileHint}>{t('ingest.uploadHint')}</p>
               {rows.length > 0 && (
                 <ul className={css.uploadRows} role="list">
-                  {rows.map((row, index) => (
-                    <li key={`${row.name}-${index}`} className={css.uploadRow}>
+                  {rows.map(row => (
+                    <li key={row.id} className={css.uploadRow}>
                       <span className={css.uploadRowName}>{row.name}</span>
                       {row.status === 'busy' && <span className={css.uploadRowState}>{t('ingest.uploadRowBusy')}</span>}
                       {row.status === 'done' && (
                         <span className={css.uploadRowState}>
-                          {t('ingest.uploadRowDone', { chunks: row.chunks })}
+                          {row.receipt.destination === 'lakehouse'
+                            ? t('ingest.uploadRowDoneLake', { table: row.receipt.table ?? row.receipt.name, rows: row.receipt.rows ?? 0 })
+                            : t('ingest.uploadRowDone', { chunks: row.receipt.chunks ?? 0 })}
                         </span>
                       )}
                       {row.status === 'failed' && (

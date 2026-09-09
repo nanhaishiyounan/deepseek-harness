@@ -31,6 +31,8 @@ interface Config {
 
 Each budget attaches to the tool as `ToolDefinition.timeoutMs` for `@deepseek-ai/dsh-tool-call-timeout-policy` to enforce. `kb_search` and `kb_stats` are concurrency-safe reads; `kb_ingest` and `kb_ingest_url` are not.
 
+The kg face adds `kg_schema` (ontology browsing) and `kg_subgraph` (k-hop subgraph reads serialized as entity-aggregated YAML — no free-form graph-query generation).
+
 ## Model Experience
 
 ### System prompt
@@ -126,6 +128,5 @@ Append-only; the error follows the reusable request prefix and does not invalida
 ## Known Limitations and Deferred Work
 
 - **PDF extraction is text-layer only** — unpdf reads the text layer; scanned image PDFs (no OCR) ingest as empty and fail the no-extractable-text check.
-- **DNS rebinding is not defeated** — the SSRF gate resolves the host once per ingest while the fetch provider resolves again; pinning the resolved IP through `ctx.web` would need a request-field change. See the ingest-channels Agent Note.
 - **Truncation is cap-reached, not total-aware** — the seam reports no total hit count, so `truncated` means the result reached its cap.
 - **`embed_tokens` counts zero** — the MiniMax native wire returns vectors only; counters meter embed texts until a provider reports token usage.

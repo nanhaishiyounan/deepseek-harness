@@ -1,0 +1,32 @@
+# Agent Note: Connector seam — the dataset packet, the five-step transfer, and one routing truth
+
+Status: implemented
+
+English | [中文](2026-09-04-connector-seam-and-transfer-protocol.zh.md)
+
+## Problem
+
+The food KB agent needs external and expert data sources as first-class material: expert profiles (张会长), business-backstage datasets (NocoBase), and local file drops must be discoverable by the model, previewable, and landable into the deployment's two data surfaces — the kb for documents and profiles, the lakehouse for tabular data. N1/N2 built those two landing seams and the shared upload router, but every external source would otherwise wire its own fetch/parse/store pipeline into tools, duplicating routing decisions and provenance handling per upstream.
+
+## Decision
+
+**One capability seam, three roles.** `packages/connector/connector` is the Service Definition (`ctx.connector`): a `ConnectorProvider` registry (registration is an effect; duplicates throw), discover fan-out, single-provider fetch resolution, and the transfer orchestration. Providers register themselves — `dsh-connector-file` (a drop-in directory) and `dsh-connector-nocobase` (REST + Bearer token) ship in N3 — and `dsh-tool-connector` is the sole Tool Consumer (`connector_discover` / `connector_fetch` / `connector_transfer`, deployment-bound tenant, generic cards). The seam owns no provider and no tool; ordering tools (`order_create`/`order_status`) belong to the N5 ordering batch and do not exist here.
+
+**The `ConnectorDataset` packet is a closed discriminated union keyed by `kind`** — `tabular` (parsed `TabularData` plus an optional provider-supplied sanitized `tableName` hint), `file` (raw bytes; routing deferred), `document`/`expert-profile` (kb-ingest-shaped text), `service` (a citation-shaped offering with no data payload). The `file` kind is the deviation from the plan's four-kind union, added because byte-level datasets are what a file connector actually serves and what the shared router needs; classification of every other kind is content-driven, so the provider sends bytes and the seam decides. Scope (`search`/`derive`/`share`) rides the manifest and transfers inherit it as provenance — isomorphic to the kb and lakehouse scope unions, so downstream authorization needs no translation.
+
+**The transfer is a five-step orchestration with overwrite-shaped landings: pull → classify → route → deliver → confirm.** Classification reuses `resolveDataRoute` from `@deepseek-ai/dsh-lakehouse/data-router` — connector transfers and workbench uploads route by one truth, and csv/xlsx/json parse through the parsers that moved from apiproxy into `@deepseek-ai/dsh-lakehouse/tabular` (one home for the `TabularData` vocabulary). Deliver goes through the destination seams (`ctx.kb.ingest` / `ctx.lakehouse.load`) with provenance `connector:<providerId>` and a namespaced source path. Confirm appends the catalog transfer record through a new `LakehouseRuntime.recordTransfer` passthrough — the audit trail lives in the lakehouse catalog regardless of destination, because N1 already gave that catalog a transfer table and both landing seams meter their own usage (`loadedTables` / `ingestedDocuments`); a dedicated connector counter store waits for its first consumer.
+
+**Failure semantics: loud per step, convergent under retry.** A landing whose confirm fails throws `CONNECTOR_CONFIRM_FAILED` naming what landed and stating that a retry converges — both landings are overwrite-shaped (`(tenantId, tableName)` and `(tenantId, sourcePath)` identities), so there is no half-product to compensate; that is the whole compensation story. Absent destination seams, router refusals (`CONNECTOR_ROUTE_<REASON>`), target pins that disagree with classification, non-UTF-8 text, and pdf/docx kb landings (extraction belongs to the gateway upload channel today) each carry a distinct machine-readable code.
+
+**Provider availability is load-time and credential-driven.** The NocoBase provider resolves baseUrl + token once at plugin load (credentials seam first, launch environment fallback); without both it still registers but reads `available() === false` — discovery skips it (degraded, not failed) and direct fetch fails loud. `available()` performs no I/O by contract, so a changed key needs a composition reload; that trade is documented rather than hidden behind a re-resolving cache.
+
+## Consequences
+
+The kb-agent example composes all four packages (patch overlay + the enterprise-data-assistant preset adds `tool-connector` with the connector-branch routing line in its persona); the file-set drop-in root is `examples/kb-agent/workspace/data/connector-files`. Three evidence lanes: the keyless `connector-flow` snapshot (mock NocoBase on real HTTP + file connector: discover → fetch → csv→lakehouse table aggregated by `lakehouse_query`, expert profile and visit note → kb retrieved by `kb_search`), the with-key e2e (real transfers + one real MiniMax-M3 answer restating the aggregate with the source table), and the `connector-transfer-demo.mts` script whose transcript includes the catalog transfer records read straight from sqlite. Tool output schemas flatten kind-specific previews with optional fields (the registry validates output values against `output.schema`, so a bare common-fields schema rejects union payloads). The mock NocoBase fixtures carry the 张会长 skeleton that N4 replaces with seeded real data; N4 also owns the enriched expert card, N5 the ordering tools, N6 the real-instance attachment paths — none of those surfaces exist here.
+
+## Alternatives considered
+
+- **Per-upstream tool pipelines** (each source ships its own fetch/ingest tool) — duplicates routing, provenance, and degraded-mode handling per upstream and gives the model a growing pile of single-source tools instead of three stable ones.
+- **Parsing in the provider** (file connectors emit `tabular`/`document` directly) — moves the routing decision into each provider and forks the parsing truth the upload channel already owns; `file` + seam-side classification keeps one router.
+- **A separate transfer-record store owned by the connector seam** — N1's catalog already has the table, the confirm trail is one join away from table metadata, and a second store would duplicate tenant scoping.
+- **Deferred/async transfers with a transfer-status API** — no current consumer waits; the tool's 120 s budget covers the realistic batch sizes, and the overwrite-shaped retry makes re-running a transfer the natural idempotent primitive.

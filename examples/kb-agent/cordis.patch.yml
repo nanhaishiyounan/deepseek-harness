@@ -84,10 +84,37 @@
   config:
     persona: |
       You are kb-agent, a food-industry knowledge assistant powered by the
-      {{model}} model. Answer enterprise questions from the knowledge base
-      with kb_search and cite retrieved passages as [n] with the document
-      name and heading path. Say when the knowledge base has nothing
-      relevant instead of guessing.
+      {{model}} model. Answer enterprise questions by routing to the right
+      data surface: business records (customers, orders, experts, business
+      tables) through nb_collections to learn the schema, then nb_list and
+      nb_get to read rows; document passages and prose facts through
+      kb_search with [n] citations (document name and heading path); numbers,
+      statistics, aggregates, and record lists through lakehouse_tables
+      first, then lakehouse_query SQL over the uploaded tables, naming the
+      source table in the answer; experts, external datasets, and serviceable
+      offerings through connector_discover (preview with connector_fetch,
+      land data with connector_transfer, then answer from the landing);
+      entity-relation questions (谁给谁供货、谁下过哪些订单、合规与关联
+      关系) through kg_schema first when unsure what the graph holds, then
+      kg_subgraph with the entity names as seeds, citing the graph relations
+      in the answer. Say when no surface has the data instead of guessing.
+
+      When the user wants an expert to produce a solution, walk the ordering
+      journey: connector_discover surfaces the expert card with orderable
+      services (deliverable + pricing) — restate the matching service and its
+      price and get the user's explicit go-ahead first. Then order_create
+      places the order and generates the proposal PDF in one call; hand the
+      returned order number and the PDF's workspace path to the user.
+      order_status reports progress or the recent orders later.
+
+      When the user wants to change business records, walk the confirmed
+      in-conversation change flow: nb_get the current row (or draft the new
+      one from nb_collections fields), present the full preview — for
+      updates, the field-by-field before→after diff — and get the user's
+      explicit go-ahead BEFORE calling nb_create or nb_update. Ask to fill
+      missing slots instead of inventing business values; change only the
+      fields the user named. Hand back the receipt (the landing id, or the
+      before→after diff) as the confirmation.
 
 - insert:
     - id: llm-minimax
@@ -95,6 +122,13 @@
 
     - id: kb
       name: '@deepseek-ai/dsh-kb'
+      config:
+        # Relevance threshold from the 2026-09-02 calibration (Agent Note):
+        # deep-rank pruning semantics — 0.015 keeps every top-5 single-path
+        # gold hit (their scores stay >= 1/66) while trimming fused ranks
+        # past ~60; the dual-path-confirmation alternative (0.017) would cut
+        # the 28% single-path recall and is deliberately not taken.
+        minRelevanceScore: 0.015
 
     - id: web-fetch-http
       name: '@deepseek-ai/dsh-web-fetch-http'
@@ -112,6 +146,133 @@
       config:
         tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"
 
+    # The knowledge-graph seam and its SQLite v2 store: the kg-build pipeline
+    # below writes the property graph here, and the kg_schema/kg_subgraph
+    # tool rows read it (they register with tool-kb and refuse at execution
+    # time until this store joins).
+    - id: kb-graph
+      name: '@deepseek-ai/dsh-kb-graph'
+
+    - id: kb-graph-sqlite
+      name: '@deepseek-ai/dsh-kb-graph-sqlite'
+      config:
+        path: examples/kb-agent/workspace/kg-graph.sqlite
+
+    # The KG build pipeline: the five seeded NocoBase business collections map
+    # deterministically (R01–R13 with explicit fk links — the seeded schema
+    # stores references as scalar columns, not declared relations), the
+    # lakehouse catalog and connector discovery land data-asset nodes, and the
+    # corpus documents run closed-set MiniMax extraction with alignment onto
+    # the canonical NocoBase rows. Manual runs only (scripts/kg-build.mts);
+    # credentials resolve from the same NOCOBASE_* chain as tool-nocobase.
+    - id: kg-build
+      name: '@deepseek-ai/dsh-kg-build'
+      config:
+        tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"
+        nocobase:
+          collections:
+            - name: experts
+              anchor: Expert
+              titleField: name
+            - name: expert_services
+              anchor: ExpertService
+              titleField: name
+              fkLinks:
+                - field: expertId
+                  target: experts
+                  relation: expert_services.expert
+                  style: plain-id
+            - name: datasets
+              anchor: Dataset
+              titleField: title
+            - name: customs_export
+              anchor: Dataset
+              titleField: region
+            - name: orders
+              anchor: Order
+              titleField: orderNo
+              fkLinks:
+                - field: serviceId
+                  target: expert_services
+                  relation: ordered_service
+                  style: collection-address
+        corpus:
+          root: examples/kb-agent/workspace/data
+          extensions: ['.md']
+          maxDocuments: 50
+          maxChunksPerDocument: 4
+
+    # The lakehouse seam: tables live as Parquet under the example workspace
+    # with a SQLite catalog, queried by the DuckDB engine. The tool rows give
+    # the model lakehouse_tables/lakehouse_query on the same tenant binding.
+    - id: lakehouse
+      name: '@deepseek-ai/dsh-lakehouse'
+      config:
+        dataRoot: examples/kb-agent/workspace/lakehouse
+
+    - id: lakehouse-sqlite-catalog
+      name: '@deepseek-ai/dsh-lakehouse-sqlite-catalog'
+      config:
+        path: examples/kb-agent/workspace/lakehouse-catalog.sqlite
+
+    - id: lakehouse-duckdb
+      name: '@deepseek-ai/dsh-lakehouse-duckdb'
+
+    - id: tool-lakehouse
+      name: '@deepseek-ai/dsh-tool-lakehouse'
+      config:
+        tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"
+
+    # The connector seam: the file-set provider exposes one drop-in directory
+    # as datasets (routed by the shared data router at transfer time), and the
+    # NocoBase provider speaks to a business backend over REST when
+    # NOCOBASE_BASE_URL/NOCOBASE_API_KEY resolve (absent credentials degrade
+    # it to unavailable — discovery keeps working through the other
+    # providers). The tool rows give the model connector_discover, _fetch,
+    # and _transfer on the same tenant binding as the kb and lakehouse tools.
+    - id: connector
+      name: '@deepseek-ai/dsh-connector'
+
+    - id: connector-file
+      name: '@deepseek-ai/dsh-connector-file'
+      config:
+        root: examples/kb-agent/workspace/data/connector-files
+
+    - id: connector-nocobase
+      name: '@deepseek-ai/dsh-connector-nocobase'
+
+    - id: tool-connector
+      name: '@deepseek-ai/dsh-tool-connector'
+      config:
+        tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"
+
+    # The NocoBase business tools: nb_collections/nb_list/nb_get read the
+    # business schema and rows, nb_create/nb_update land confirmed record
+    # changes (the persona drives the in-conversation preview → go-ahead →
+    # receipt flow; the tools themselves carry no UI confirmation state).
+    # Credentials resolve from NOCOBASE_BASE_URL/NOCOBASE_API_KEY the same
+    # way connector-nocobase's do; without them every tool fails with the
+    # structured no-credentials refusal instead of failing the composition.
+    - id: tool-nocobase
+      name: '@deepseek-ai/dsh-tool-nocobase'
+
+    # The order lifecycle over the same NocoBase source the connector reads:
+    # order_create places an expert-service order and runs the deliverable
+    # pipeline (kb-referenced MiniMax-M3 drafting, or the named template when
+    # no draft key resolves, expert-pdf typesetting, real PDF landing under
+    # workspace/deliverables) and order_status reports it.
+    - id: expert-orders
+      name: '@deepseek-ai/dsh-expert-orders'
+      config:
+        tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"
+        deliverablesDir: examples/kb-agent/workspace/deliverables
+        # The production composition drafts through the live MiniMax-M3
+        # stream: the 4096 seam default truncates the DraftSpec JSON
+        # mid-flight, so the budget rides the config (same 16384/120000 the
+        # demo and nocobase-track e2e compositions pin).
+        draftMaxTokens: 16384
+        draftTimeoutMs: 120000
+
 # The web workbench rides the same tenant binding as the tools and the
 # presets (one env, one source of truth) and opts into kb writes: this
 # deployment is single-tenant behind disk-level access control. Patched, not
@@ -121,6 +282,41 @@
   config:
     kbTenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"
     kbWriteEnabled: true
+    # The unified upload channel: workbench uploads route to the kb or the
+    # lakehouse through the shared data router.
+    dataUploadEnabled: true
+    # The expert-service order surface: placing and fulfilling orders from
+    # the workbench (single-tenant deployment behind disk-level access
+    # control, same stance as kbWriteEnabled).
+    ordersEnabled: true
+    # The business-read surface (nocobase.listMeta/list/get) for the coming
+    # business-management pages; reads only — record writes stay on the
+    # agent's nb_* tools with the in-conversation confirmation contract.
+    nocobaseEnabled: true
+    # The data-asset market surface (assets.list/detail/stats): connector
+    # discovery projects the catalog; orders.create backs the confirm card.
+    assetsEnabled: true
+    # Market operations seat: featured cards + board copy, data outside code.
+    assetsSeedPath: examples/kb-agent/workspace/data/market/seed.json
+    # The connector page (connectors.list/connections/transfers): provider
+    # catalog plus the delivery trail from the lakehouse catalog.
+    connectorsEnabled: true
+    # The graph page (kg.schema/search/subgraph/expand/stats): the ontology
+    # registry and the property-graph walks the kg-build pipeline wrote; same
+    # tenant binding as the kb and tool rows above.
+    kgEnabled: true
+    kgTenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"
+
+# The web workbench serves the business page's embed entry same-origin: the
+# /nocobase prefix proxies the live NocoBase with framing guards stripped.
+# Patched, not inserted: the web-app bundle already mounts the webserver row.
+# A patch's config replaces the row's whole config object (no key merge), so
+# host and port ride along with the bundle's own fallback expressions.
+- id: webserver
+  config:
+    host: !!js "ctx.webStartup.host ?? '127.0.0.1'"
+    port: !!js "ctx.webStartup.port ?? 3080"
+    nocobaseProxyOrigin: !!js "process.env.NOCOBASE_BASE_URL ?? 'http://127.0.0.1:13000'"
 
 # The web workbench composes new sessions from the enterprise-data-assistant
 # role preset instead of the shipped `standard`. Patched, not inserted: the

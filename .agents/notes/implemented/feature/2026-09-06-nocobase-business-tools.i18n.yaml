@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-09-06-nocobase-business-tools.md
+2026-09-06-nocobase-business-tools.md: 5f4ace3639d8a45f8cbe6e06d5ce64ecba18ef64
+2026-09-06-nocobase-business-tools.zh.md: c6c94e9ba41cf07728195735308d069763658138

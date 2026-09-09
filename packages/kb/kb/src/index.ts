@@ -390,8 +390,11 @@ export class KbRuntime extends Service {
       const hitById = new Map(textHits.map(storedHit => [storedHit.chunkId, storedHit]))
       const results = fuseRrf([...hitById.keys()], [], this.resolved.rrfK)
         .filter(entry => entry.score >= this.resolved.minRelevanceScore)
-        .map(entry => hitById.get(entry.id))
-        .filter((storedHit): storedHit is KbSearchHit => storedHit !== undefined)
+        .flatMap((entry): KbSearchHit[] => {
+          const storedHit = hitById.get(entry.id)
+          /* v8 ignore next -- the fused ids come from hitById itself, so a miss is unreachable; the guard totals the narrowing. */
+          return storedHit === undefined ? [] : [{ ...storedHit, score: entry.score }]
+        })
         .slice(0, cap)
       return { mode: 'text' as const, results }
     }
@@ -421,8 +424,11 @@ export class KbRuntime extends Service {
         }
         const results = fused
           .filter(entry => entry.score >= this.resolved.minRelevanceScore)
-          .map(entry => hitsById.get(entry.id))
-          .filter((hit): hit is KbSearchHit => hit !== undefined)
+          .flatMap((entry): KbSearchHit[] => {
+            const hit = hitsById.get(entry.id)
+            /* v8 ignore next -- the fused ids come from hitsById itself, so a miss is unreachable; the guard totals the narrowing. */
+            return hit === undefined ? [] : [{ ...hit, score: entry.score }]
+          })
           .slice(0, cap)
         if (request.tenantId !== undefined) {
           await this.meter(store, request.tenantId, {

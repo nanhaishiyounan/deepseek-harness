@@ -1,0 +1,90 @@
+/**
+ * This file is part of the NocoBase (R) project.
+ * Copyright (c) 2020-2024 NocoBase Co., Ltd.
+ * Authors: NocoBase Team.
+ *
+ * This project is dual-licensed under AGPL-3.0 and NocoBase Commercial License.
+ * For more information, please refer to: https://www.nocobase.com/agreement.
+ */
+
+import { Collection, Database, createMockDatabase } from '@nocobase/database';
+import dayjs from 'dayjs';
+import { DatetimeInterface } from '../../interfaces/datetime-interface';
+
+describe('Date time interface', () => {
+  let db: Database;
+  let testCollection: Collection;
+
+  beforeEach(async () => {
+    db = await createMockDatabase();
+    await db.clean({ drop: true });
+    testCollection = db.collection({
+      name: 'tests',
+      fields: [
+        {
+          name: 'date',
+          type: 'date',
+        },
+        {
+          name: 'dateOnly',
+          type: 'date',
+          uiSchema: {
+            ['x-component-props']: {
+              showTime: false,
+              gmt: false,
+            },
+          },
+        },
+        {
+          name: 'dateTime',
+          type: 'datetime',
+          uiSchema: {
+            ['x-component-props']: {
+              showTime: true,
+            },
+          },
+        },
+        {
+          name: 'dateTimeGmt',
+          type: 'date',
+          uiSchema: {
+            ['x-component-props']: {
+              showTime: true,
+              gmt: true,
+            },
+          },
+        },
+      ],
+    });
+  });
+
+  afterEach(async () => {
+    await db.close();
+  });
+
+  it('should to value', async () => {
+    const interfaceInstance = new DatetimeInterface();
+    expect(await interfaceInstance.toValue('')).toBe(null);
+
+    expect(await interfaceInstance.toValue('20231223')).toBe(dayjs('2023-12-23 00:00:00.000').toISOString());
+    expect(await interfaceInstance.toValue('20231223 08:01:01')).toBe(dayjs('2023-12-23 08:01:01.000').toISOString());
+    expect(await interfaceInstance.toValue('2023/12/23')).toBe(dayjs('2023-12-23 00:00:00.000').toISOString());
+    expect(await interfaceInstance.toValue('2023-12-23')).toBe(dayjs('2023-12-23 00:00:00.000').toISOString());
+    expect(await interfaceInstance.toValue(42510)).toBe('2016-05-20T00:00:00.000Z');
+    expect(await interfaceInstance.toValue('42510')).toBe('2016-05-20T00:00:00.000Z');
+    expect(await interfaceInstance.toValue('2016-05-20T00:00:00.000Z')).toBe('2016-05-20T00:00:00.000Z');
+  });
+
+  it('should honor request timezone when parsing date-only strings and excel serials', async () => {
+    const interfaceInstance = new DatetimeInterface();
+    const ctx = {
+      get(key: string) {
+        return key === 'X-Timezone' ? '+08:00' : undefined;
+      },
+    };
+
+    expect(await interfaceInstance.toValue('2025-05-12', ctx)).toBe('2025-05-11T16:00:00.000Z');
+    // TODO(refactor): Excel value parsing should not be placed in the datetime interface, and should be handled separately. This is a temporary test to ensure that the current implementation continues to work as expected.
+    expect(await interfaceInstance.toValue(45789, ctx)).toBe('2025-05-11T16:00:00.000Z');
+  });
+});

@@ -202,6 +202,42 @@
     - id: ui-kb
       name: '@deepseek-ai/dsh-client-ui-kb'
 
+    # Data-asset market surface: sidebar entry + the `market` conversation
+    # view tab (portal, catalog, detail, order confirm card). Data rides the
+    # gateway's assets/orders domains; deployments opt in through
+    # assetsEnabled.
+
+    # Connector page: sidebar entry + the `connectors` conversation view tab
+    # (provider catalog, delivery tracking, connect guidance). Data rides the
+    # gateway's connectors domain; deployments opt in through
+    # connectorsEnabled.
+
+    # Data-asset market surface: sidebar entry + the `market` conversation
+    # view tab (portal, catalog, detail, order confirm card). Data rides the
+    # gateway's assets/orders domains; deployments opt in through
+    # assetsEnabled.
+    - id: ui-assets
+      name: '@deepseek-ai/dsh-client-ui-assets'
+
+    # Connector page: sidebar entry + the `connectors` conversation view tab
+    # (provider catalog, delivery tracking, connect guidance). Data rides the
+    # gateway's connectors domain; deployments opt in through
+    # connectorsEnabled.
+    - id: ui-connectors
+      name: '@deepseek-ai/dsh-client-ui-connectors'
+
+    # Knowledge-graph page: sidebar entry + the `kg` conversation view tab
+    # (phrase-box walks, sigma canvas, type legend, details panel). Data
+    # rides the gateway's kg domain; deployments opt in through kgEnabled.
+    - id: ui-kg
+      name: '@deepseek-ai/dsh-client-ui-kg'
+
+    # Business-management page: sidebar entry + the `business` conversation
+    # view tab (collection switcher, entity card stream, table view, NocoBase
+    # embed entry). Data rides the gateway's nocobase domain (listMeta/list).
+    - id: ui-business
+      name: '@deepseek-ai/dsh-client-ui-business'
+
     - id: ui-settings
       name: '@deepseek-ai/dsh-client-ui-settings'
 

@@ -15,6 +15,7 @@ import { SqliteGraphStore } from '../src/store.ts'
 import * as Plugin from '../src/index.ts'
 import { KB_GRAPH_SQLITE_APPLICATION_ID, SCHEMA_VERSION } from '../src/schema.ts'
 import type { KbGraphTriple } from '@deepseek-ai/dsh-kb-graph'
+import { kgNodeTypeId, kgRelationId } from '@deepseek-ai/dsh-kb-graph'
 
 const directories: string[] = []
 
@@ -35,30 +36,30 @@ function freshStore(): SqliteGraphStore {
 }
 
 const hongfa: KbGraphTriple = {
-  subject: { type: 'company', id: '宏发食品' },
-  predicate: 'produces',
-  object: { type: 'product', id: '老抽酱油' },
+  subject: { type: kgNodeTypeId('company'), id: '宏发食品' },
+  predicate: kgRelationId('produces'),
+  object: { type: kgNodeTypeId('product'), id: '老抽酱油' },
   sourcePath: 'workspace/data/profiles/hongfa-food.md',
 }
 const hongfaComplies: KbGraphTriple = {
-  subject: { type: 'company', id: '宏发食品' },
-  predicate: 'complies_with',
-  object: { type: 'standard', id: 'GB 2760' },
+  subject: { type: kgNodeTypeId('company'), id: '宏发食品' },
+  predicate: kgRelationId('complies_with'),
+  object: { type: kgNodeTypeId('standard'), id: 'GB 2760' },
 }
 const rivalComplies: KbGraphTriple = {
-  subject: { type: 'company', id: '竞争对手' },
-  predicate: 'complies_with',
-  object: { type: 'standard', id: 'GB 2760' },
+  subject: { type: kgNodeTypeId('company'), id: '竞争对手' },
+  predicate: kgRelationId('complies_with'),
+  object: { type: kgNodeTypeId('standard'), id: 'GB 2760' },
 }
 const soyUsesAdditive: KbGraphTriple = {
-  subject: { type: 'product', id: '老抽酱油' },
-  predicate: 'contains',
-  object: { type: 'additive', id: '苯甲酸钠' },
+  subject: { type: kgNodeTypeId('product'), id: '老抽酱油' },
+  predicate: kgRelationId('contains'),
+  object: { type: kgNodeTypeId('additive'), id: '苯甲酸钠' },
 }
 const soyComplies: KbGraphTriple = {
-  subject: { type: 'product', id: '老抽酱油' },
-  predicate: 'complies_with',
-  object: { type: 'standard', id: 'GB 2760' },
+  subject: { type: kgNodeTypeId('product'), id: '老抽酱油' },
+  predicate: kgRelationId('complies_with'),
+  object: { type: kgNodeTypeId('standard'), id: 'GB 2760' },
 }
 
 describe('SqliteGraphStore', () => {
@@ -72,9 +73,9 @@ describe('SqliteGraphStore', () => {
   it('expands one-hop neighbors in both directions', async () => {
     const store = freshStore()
     await store.putTriples('t', [hongfa, soyUsesAdditive, soyComplies])
-    const fromCompany = await store.neighbors('t', { type: 'company', id: '宏发食品' })
+    const fromCompany = await store.neighbors('t', { type: kgNodeTypeId('company'), id: '宏发食品' })
     expect(fromCompany.map(triple => triple.predicate)).toEqual(['produces'])
-    const fromSoy = await store.neighbors('t', { type: 'product', id: '老抽酱油' })
+    const fromSoy = await store.neighbors('t', { type: kgNodeTypeId('product'), id: '老抽酱油' })
     expect(fromSoy.map(triple => triple.predicate).sort()).toEqual(['complies_with', 'contains', 'produces'])
     store.close()
   })
@@ -82,7 +83,7 @@ describe('SqliteGraphStore', () => {
   it('finds two-hop paths through a shared bridge entity', async () => {
     const store = freshStore()
     await store.putTriples('t', [hongfa, soyUsesAdditive, soyComplies])
-    const paths = await store.twoHopPaths('t', { type: 'company', id: '宏发食品' }, { type: 'additive', id: '苯甲酸钠' })
+    const paths = await store.twoHopPaths('t', { type: kgNodeTypeId('company'), id: '宏发食品' }, { type: kgNodeTypeId('additive'), id: '苯甲酸钠' })
     const predicates = paths.map(triple => triple.predicate).sort()
     expect(predicates).toEqual(['contains', 'produces'])
     store.close()
@@ -91,7 +92,7 @@ describe('SqliteGraphStore', () => {
   it('returns no path rows for unrelated entities', async () => {
     const store = freshStore()
     await store.putTriples('t', [hongfa])
-    const paths = await store.twoHopPaths('t', { type: 'company', id: '宏发食品' }, { type: 'standard', id: 'GB 14881' })
+    const paths = await store.twoHopPaths('t', { type: kgNodeTypeId('company'), id: '宏发食品' }, { type: kgNodeTypeId('standard'), id: 'GB 14881' })
     expect(paths).toEqual([])
     store.close()
   })
@@ -100,23 +101,23 @@ describe('SqliteGraphStore', () => {
     // Forward bridge: 宏发食品 —produces→ 老抽酱油 —contains→ 苯甲酸钠.
     const forward = freshStore()
     await forward.putTriples('t', [hongfa, soyUsesAdditive])
-    const forwardPaths = await forward.twoHopPaths('t', { type: 'company', id: '宏发食品' }, { type: 'additive', id: '苯甲酸钠' })
+    const forwardPaths = await forward.twoHopPaths('t', { type: kgNodeTypeId('company'), id: '宏发食品' }, { type: kgNodeTypeId('additive'), id: '苯甲酸钠' })
     expect(forwardPaths.map(triple => triple.predicate).sort()).toEqual(['contains', 'produces'])
     forward.close()
     // Reversed edges: 传统工艺 —follows→ 老抽酱油 and 苯甲酸钠 —flags→ 传统工艺.
     const processFollowsSoy: KbGraphTriple = {
-      subject: { type: 'process', id: '传统工艺' },
-      predicate: 'follows',
-      object: { type: 'product', id: '老抽酱油' },
+      subject: { type: kgNodeTypeId('process'), id: '传统工艺' },
+      predicate: kgRelationId('follows'),
+      object: { type: kgNodeTypeId('product'), id: '老抽酱油' },
     }
     const additiveFlagsProcess: KbGraphTriple = {
-      subject: { type: 'additive', id: '苯甲酸钠' },
-      predicate: 'flags',
-      object: { type: 'process', id: '传统工艺' },
+      subject: { type: kgNodeTypeId('additive'), id: '苯甲酸钠' },
+      predicate: kgRelationId('flags'),
+      object: { type: kgNodeTypeId('process'), id: '传统工艺' },
     }
     const reversed = freshStore()
     await reversed.putTriples('t', [processFollowsSoy, additiveFlagsProcess])
-    const reversedPaths = await reversed.twoHopPaths('t', { type: 'product', id: '老抽酱油' }, { type: 'additive', id: '苯甲酸钠' })
+    const reversedPaths = await reversed.twoHopPaths('t', { type: kgNodeTypeId('product'), id: '老抽酱油' }, { type: kgNodeTypeId('additive'), id: '苯甲酸钠' })
     expect(reversedPaths.map(triple => triple.predicate).sort()).toEqual(['flags', 'follows'])
     reversed.close()
   })
@@ -124,12 +125,12 @@ describe('SqliteGraphStore', () => {
   it('keeps spur edges off the path and still returns the direct edge', async () => {
     const store = freshStore()
     const spur: KbGraphTriple = {
-      subject: { type: 'company', id: '宏发食品' },
-      predicate: 'uses',
-      object: { type: 'process', id: '传统工艺' },
+      subject: { type: kgNodeTypeId('company'), id: '宏发食品' },
+      predicate: kgRelationId('uses'),
+      object: { type: kgNodeTypeId('process'), id: '传统工艺' },
     }
     await store.putTriples('t', [hongfaComplies, spur])
-    const paths = await store.twoHopPaths('t', { type: 'company', id: '宏发食品' }, { type: 'standard', id: 'GB 2760' })
+    const paths = await store.twoHopPaths('t', { type: kgNodeTypeId('company'), id: '宏发食品' }, { type: kgNodeTypeId('standard'), id: 'GB 2760' })
     expect(paths.map(triple => triple.predicate)).toEqual(['complies_with'])
     store.close()
   })
@@ -137,7 +138,7 @@ describe('SqliteGraphStore', () => {
   it('keeps fan-in edges without a shared bridge off the path', async () => {
     const store = freshStore()
     await store.putTriples('t', [hongfa, soyComplies, hongfaComplies, rivalComplies])
-    const paths = await store.twoHopPaths('t', { type: 'company', id: '宏发食品' }, { type: 'standard', id: 'GB 2760' })
+    const paths = await store.twoHopPaths('t', { type: kgNodeTypeId('company'), id: '宏发食品' }, { type: kgNodeTypeId('standard'), id: 'GB 2760' })
     expect(paths.map(triple => `${triple.subject.id}—${triple.predicate}→${triple.object.id}`).sort()).toEqual([
       '宏发食品—complies_with→GB 2760',
       '宏发食品—produces→老抽酱油',
@@ -149,17 +150,17 @@ describe('SqliteGraphStore', () => {
   it('does not count a target self-loop as the second hop', async () => {
     const store = freshStore()
     const direct: KbGraphTriple = {
-      subject: { type: 'company', id: '宏发食品' },
-      predicate: 'supplies',
-      object: { type: 'company', id: '竞争对手' },
+      subject: { type: kgNodeTypeId('company'), id: '宏发食品' },
+      predicate: kgRelationId('supplies'),
+      object: { type: kgNodeTypeId('company'), id: '竞争对手' },
     }
     const selfLoop: KbGraphTriple = {
-      subject: { type: 'company', id: '竞争对手' },
-      predicate: 'supplies',
-      object: { type: 'company', id: '竞争对手' },
+      subject: { type: kgNodeTypeId('company'), id: '竞争对手' },
+      predicate: kgRelationId('supplies'),
+      object: { type: kgNodeTypeId('company'), id: '竞争对手' },
     }
     await store.putTriples('t', [direct, selfLoop])
-    const paths = await store.twoHopPaths('t', { type: 'company', id: '宏发食品' }, { type: 'company', id: '竞争对手' })
+    const paths = await store.twoHopPaths('t', { type: kgNodeTypeId('company'), id: '宏发食品' }, { type: kgNodeTypeId('company'), id: '竞争对手' })
     expect(paths.map(triple => triple.predicate)).toEqual(['supplies'])
     store.close()
   })
@@ -167,9 +168,9 @@ describe('SqliteGraphStore', () => {
   it('returns the direct edge in either direction when no bridge exists', async () => {
     const store = freshStore()
     await store.putTriples('t', [hongfaComplies])
-    const forward = await store.twoHopPaths('t', { type: 'company', id: '宏发食品' }, { type: 'standard', id: 'GB 2760' })
+    const forward = await store.twoHopPaths('t', { type: kgNodeTypeId('company'), id: '宏发食品' }, { type: kgNodeTypeId('standard'), id: 'GB 2760' })
     expect(forward.map(triple => triple.predicate)).toEqual(['complies_with'])
-    const backward = await store.twoHopPaths('t', { type: 'standard', id: 'GB 2760' }, { type: 'company', id: '宏发食品' })
+    const backward = await store.twoHopPaths('t', { type: kgNodeTypeId('standard'), id: 'GB 2760' }, { type: kgNodeTypeId('company'), id: '宏发食品' })
     expect(backward.map(triple => triple.predicate)).toEqual(['complies_with'])
     store.close()
   })
@@ -177,9 +178,9 @@ describe('SqliteGraphStore', () => {
   it('searches entities by substring with an optional type filter', async () => {
     const store = freshStore()
     await store.putTriples('t', [hongfa, soyUsesAdditive])
-    const companies = await store.searchEntities('t', '宏发', 'company', 10)
-    expect(companies).toEqual([{ type: 'company', id: '宏发食品' }])
-    const wrongType = await store.searchEntities('t', '宏发', 'product', 10)
+    const companies = await store.searchEntities('t', '宏发', kgNodeTypeId('company'), 10)
+    expect(companies).toEqual([{ type: kgNodeTypeId('company'), id: '宏发食品' }])
+    const wrongType = await store.searchEntities('t', '宏发', kgNodeTypeId('product'), 10)
     expect(wrongType).toEqual([])
     store.close()
   })
@@ -187,7 +188,7 @@ describe('SqliteGraphStore', () => {
   it('isolates tenants on every query path', async () => {
     const store = freshStore()
     await store.putTriples('tenant-a', [hongfa])
-    const foreign = await store.neighbors('tenant-b', { type: 'company', id: '宏发食品' })
+    const foreign = await store.neighbors('tenant-b', { type: kgNodeTypeId('company'), id: '宏发食品' })
     expect(foreign).toEqual([])
     const search = await store.searchEntities('tenant-b', '宏发', undefined, 10)
     expect(search).toEqual([])
@@ -203,7 +204,7 @@ describe('SqliteGraphStore', () => {
     await store.putTriples('t', [hongfa])
     store.close()
     store.close()
-    await expect(store.neighbors('t', { type: 'company', id: '宏发食品' })).rejects.toThrow(/connection is closed/u)
+    await expect(store.neighbors('t', { type: kgNodeTypeId('company'), id: '宏发食品' })).rejects.toThrow(/connection is closed/u)
     await expect(store.stats('t')).rejects.toThrow(/connection is closed/u)
   })
 
@@ -225,7 +226,7 @@ describe('SqliteGraphStore', () => {
     await store.putTriples('t', [hongfa, soyUsesAdditive, soyComplies])
     // '老抽酱油' appears as object of produces and subject of contains/complies_with — one entity.
     const soy = await store.searchEntities('t', '酱油', undefined, 10)
-    expect(soy).toEqual([{ type: 'product', id: '老抽酱油' }])
+    expect(soy).toEqual([{ type: kgNodeTypeId('product'), id: '老抽酱油' }])
     // k caps the result mid-scan.
     const capped = await store.searchEntities('t', '', undefined, 1)
     expect(capped.length).toBe(1)

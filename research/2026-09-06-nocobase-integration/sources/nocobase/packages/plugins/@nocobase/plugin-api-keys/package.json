@@ -1,0 +1,41 @@
+{
+  "name": "@nocobase/plugin-api-keys",
+  "displayName": "Auth: API keys",
+  "displayName.ru-RU": "Аутентификация: API ключи",
+  "displayName.zh-CN": "认证：API 密钥",
+  "description": "Allows users to use API key to access application's HTTP API",
+  "description.ru-RU": "Позволяет пользователям использовать API ключ для доступа к HTTP API приложения",
+  "description.zh-CN": "允许用户使用 API 密钥访问应用的 HTTP API",
+  "version": "2.2.7",
+  "license": "Apache-2.0",
+  "main": "./dist/server/index.js",
+  "homepage": "https://docs.nocobase.com/handbook/api-keys",
+  "homepage.ru-RU": "https://docs-ru.nocobase.com/handbook/api-keys",
+  "homepage.zh-CN": "https://docs-cn.nocobase.com/handbook/api-keys",
+  "keywords": [
+    "Authentication"
+  ],
+  "devDependencies": {
+    "@formily/react": "2.x",
+    "@formily/shared": "2.x",
+    "ahooks": "^3.7.2",
+    "antd": "5.x",
+    "dayjs": "^1.11.8",
+    "i18next": "^22.4.9",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-i18next": "^11.15.1"
+  },
+  "peerDependencies": {
+    "@nocobase/actions": "2.x",
+    "@nocobase/client": "2.x",
+    "@nocobase/client-v2": "2.x",
+    "@nocobase/database": "2.x",
+    "@nocobase/flow-engine": "2.x",
+    "@nocobase/resourcer": "2.x",
+    "@nocobase/server": "2.x",
+    "@nocobase/test": "2.x",
+    "@nocobase/utils": "2.x"
+  },
+  "gitHead": "d0b4efe4be55f8c79a98a331d99d9f8cf99021a1"
+}

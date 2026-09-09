@@ -62,6 +62,7 @@ const DOC_KIND_BY_DIR: Record<string, KbDocKind> = {
   supply: 'report',
   cost: 'table',
   'food-safety': 'report',
+  'export-risk': 'report',
 }
 
 const ctx = new Context()

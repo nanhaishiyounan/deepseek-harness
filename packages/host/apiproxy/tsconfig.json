@@ -18,6 +18,15 @@
       "path": "../../kb/tool-kb"
     },
     {
+      "path": "../../lakehouse/lakehouse"
+    },
+    {
+      "path": "../../expert/expert-orders"
+    },
+    {
+      "path": "../../connector/connector-nocobase"
+    },
+    {
       "path": "../../web/web"
     },
     {

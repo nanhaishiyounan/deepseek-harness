@@ -1,0 +1,704 @@
+/**
+ * This file is part of the NocoBase (R) project.
+ * Copyright (c) 2020-2024 NocoBase Co., Ltd.
+ * Authors: NocoBase Team.
+ *
+ * This project is dual-licensed under AGPL-3.0 and NocoBase Commercial License.
+ * For more information, please refer to: https://www.nocobase.com/agreement.
+ */
+
+import {
+  Collection,
+  extractTypeFromDefinition,
+  fieldTypeMap,
+  Filter,
+  InheritedCollection,
+  JoiValidationError,
+  UniqueConstraintError,
+} from '@nocobase/database';
+import PluginErrorHandler from '@nocobase/plugin-error-handler';
+import { Plugin } from '@nocobase/server';
+import lodash from 'lodash';
+import path from 'path';
+import { CollectionRepository } from '.';
+import { FieldIsDependedOnByOtherError } from './errors/field-is-depended-on-by-other';
+import { FieldNameExistsError } from './errors/field-name-exists-error';
+import {
+  afterCreateForForeignKeyField,
+  beforeCreateForReverseField,
+  beforeDestroyForeignKey,
+  beforeInitOptions,
+} from './hooks';
+import { beforeCreateCheckFieldInMySQL } from './hooks/beforeCreateCheckFieldInMySQL';
+import { beforeCreateForValidateField, beforeUpdateForValidateField } from './hooks/beforeCreateForValidateField';
+import { beforeCreateForViewCollection } from './hooks/beforeCreateForViewCollection';
+import { beforeDestoryField } from './hooks/beforeDestoryField';
+import { CollectionModel, FieldModel } from './models';
+import collectionActions from './resourcers/collections';
+import viewResourcer from './resourcers/views';
+import mainDataSourceResource from './resourcers/main-data-source';
+import { registerDataSourceMainMcpPostProcessors } from './mcp-post-processors';
+import { ColumnsDescription } from 'sequelize';
+import { PRESET_FIELDS_INTERFACES } from './constants';
+import { Schema } from '@formily/json-schema';
+import _ from 'lodash';
+
+export class PluginDataSourceMainServer extends Plugin {
+  private loadFilter: Filter = {};
+
+  private db2cmCollections: string[] = [];
+
+  setLoadFilter(filter: Filter) {
+    this.loadFilter = filter;
+  }
+
+  async handleSyncMessage(message) {
+    const { type, collectionName } = message;
+
+    if (type === 'syncCollection') {
+      const collectionModel: CollectionModel = await this.app.db.getCollection('collections').repository.findOne({
+        filter: {
+          name: collectionName,
+        },
+      });
+
+      await collectionModel.load();
+    }
+
+    if (type === 'removeField') {
+      const { collectionName, fieldName } = message;
+      const collection = this.app.db.getCollection(collectionName);
+      if (!collection) {
+        return;
+      }
+
+      return collection.removeFieldFromDb(fieldName);
+    }
+
+    if (type === 'removeCollection') {
+      const { collectionName } = message;
+      const collection = this.app.db.getCollection(collectionName);
+      if (!collection) {
+        return;
+      }
+
+      collection.remove();
+    }
+  }
+
+  async beforeLoad() {
+    this.app.db.registerRepositories({
+      CollectionRepository,
+    });
+
+    this.app.db.registerModels({
+      CollectionModel,
+      FieldModel,
+    });
+
+    this.db.addMigrations({
+      namespace: 'data-source-main',
+      directory: path.resolve(__dirname, './migrations'),
+      context: {
+        plugin: this,
+      },
+    });
+
+    this.app.db.on('collections.beforeCreate', beforeCreateForViewCollection(this.db));
+
+    this.app.db.on('collections.beforeCreate', async (model: CollectionModel, options) => {
+      if (
+        this.app.db.getCollection(model.get('name')) &&
+        !['db2cm', 'dbsync'].includes(model.get('from')) &&
+        !model.get('isThrough')
+      ) {
+        throw new Error(`Collection named ${model.get('name')} already exists`);
+      }
+    });
+
+    this.app.db.on(
+      'collections.afterSaveWithAssociations',
+      async (model: CollectionModel, { context, transaction }) => {
+        if (context) {
+          await model.migrate({
+            transaction,
+          });
+
+          this.sendSyncMessage(
+            {
+              type: 'syncCollection',
+              collectionName: model.get('name'),
+            },
+            {
+              transaction,
+            },
+          );
+        }
+      },
+    );
+
+    this.app.db.on('collections.beforeDestroy', async (model: CollectionModel, options) => {
+      if (model.options.uiManageable) {
+        throw new Error('Cannot remove a UI manageable collection');
+      }
+      const removeOptions = {};
+      if (options.transaction) {
+        removeOptions['transaction'] = options.transaction;
+      }
+
+      const cascade = options.cascade || lodash.get(options, 'context.action.params.cascade', false);
+
+      if (cascade === true || cascade === 'true') {
+        removeOptions['cascade'] = true;
+      }
+
+      await model.remove(removeOptions);
+
+      this.sendSyncMessage(
+        {
+          type: 'removeCollection',
+          collectionName: model.get('name'),
+        },
+        {
+          transaction: options.transaction,
+        },
+      );
+    });
+
+    // 要在 beforeInitOptions 之前处理
+    this.app.db.on('fields.beforeCreate', beforeCreateCheckFieldInMySQL(this.app.db));
+
+    this.app.db.on('fields.beforeCreate', beforeCreateForReverseField(this.app.db));
+
+    this.app.db.on('fields.beforeCreate', async (model, options) => {
+      const collectionName = model.get('collectionName');
+      const collection = this.app.db.getCollection(collectionName);
+
+      if (!collection) {
+        return;
+      }
+
+      if (collection.isInherited() && (<InheritedCollection>collection).parentFields().has(model.get('name'))) {
+        model.set('overriding', true);
+      }
+    });
+
+    this.app.db.on('fields.beforeValidate', async (model) => {
+      if (model.get('name') && model.get('name').includes('.')) {
+        model.set('field', model.get('name'));
+        model.set('name', model.get('name').replace(/\./g, '_'));
+      }
+    });
+
+    this.app.db.on('fields.beforeCreate', async (model, options) => {
+      if (model.get('source')) return;
+      const type = model.get('type');
+      const fn = beforeInitOptions[type];
+      if (fn) {
+        await fn(model, { database: this.app.db });
+      }
+    });
+
+    this.app.db.on('fields.beforeCreate', beforeCreateForValidateField(this.app.db));
+
+    this.app.db.on('fields.afterCreate', async (model, { transaction }) => {
+      const Field = this.app.db.getCollection('fields');
+      const reverseKey = model.get('reverseKey');
+
+      if (!reverseKey) {
+        return;
+      }
+
+      const reverse = await Field.model.findByPk(reverseKey, { transaction });
+      await reverse.update({ reverseKey: model.get('key') }, { hooks: false, transaction });
+
+      // NOTE: add sync logic due to hooks is false
+      this.sendSyncMessage(
+        {
+          type: 'syncCollection',
+          collectionName: model.get('collectionName'),
+        },
+        {
+          transaction,
+        },
+      );
+    });
+
+    this.app.db.on('fields.beforeCreate', async (model: FieldModel, options) => {
+      const { transaction } = options;
+      // validate field name
+      const collectionName = model.get('collectionName');
+      const name = model.get('name');
+
+      if (!collectionName || !name) {
+        return;
+      }
+
+      const exists = await this.app.db.getRepository('fields').findOne({
+        filter: {
+          collectionName,
+          name,
+        },
+        transaction,
+      });
+
+      if (exists) {
+        throw new FieldNameExistsError(name, collectionName);
+      }
+    });
+
+    this.app.db.on('fields.beforeUpdate', beforeUpdateForValidateField(this.app.db));
+
+    this.app.db.on('fields.beforeUpdate', async (model, options) => {
+      const newValue = options.values;
+
+      if (
+        model.get('reverseKey') &&
+        lodash.get(newValue, 'reverseField') &&
+        !lodash.get(newValue, 'reverseField.key')
+      ) {
+        const field = await this.app.db
+          .getModel('fields')
+          .findByPk(model.get('reverseKey'), { transaction: options.transaction });
+        if (field) {
+          throw new Error('cant update field without a reverseField key');
+        }
+      }
+
+      // todo: 目前只支持一对多
+      if (model.get('sortable') && model.get('type') === 'hasMany') {
+        model.set('sortBy', model.get('foreignKey') + 'Sort');
+      }
+    });
+
+    this.app.db.on('fields.afterUpdate', async (model: FieldModel, { context, transaction }) => {
+      const prevOptions = model.previous('options');
+      const currentOptions = model.get('options');
+
+      if (context) {
+        const prev = prevOptions['unique'];
+        const next = currentOptions['unique'];
+
+        if (Boolean(prev) !== Boolean(next)) {
+          await model.syncUniqueIndex({ transaction });
+        }
+      }
+
+      const prevDefaultValue = prevOptions['defaultValue'];
+      const currentDefaultValue = currentOptions['defaultValue'];
+
+      if (prevDefaultValue != currentDefaultValue) {
+        await model.syncDefaultValue({ transaction, defaultValue: currentDefaultValue });
+      }
+
+      const prevOnDelete = prevOptions['onDelete'];
+      const currentOnDelete = currentOptions['onDelete'];
+
+      if (prevOnDelete != currentOnDelete) {
+        await model.syncReferenceCheckOption({ transaction });
+      }
+
+      if (model.get('type') === 'hasMany' && model.get('sortable') && model.get('sortBy')) {
+        await model.syncSortByField({ transaction });
+      }
+    });
+
+    const afterCreateForForeignKeyFieldHook = afterCreateForForeignKeyField(this.app.db);
+
+    this.app.db.on('fields.afterCreate', async (model: FieldModel, options) => {
+      const { context, transaction } = options;
+      if (context) {
+        await model.load({ transaction });
+        await afterCreateForForeignKeyFieldHook(model, options);
+      }
+    });
+
+    this.app.db.on('fields.afterUpdate', async (model: FieldModel, options) => {
+      const { context, transaction } = options;
+      if (context) {
+        await model.load({ transaction });
+      }
+    });
+
+    this.app.db.on('fields.afterSaveWithAssociations', async (model: FieldModel, options) => {
+      const { context, transaction } = options;
+      if (context) {
+        const collection = this.app.db.getCollection(model.get('collectionName'));
+        const syncOptions = {
+          transaction,
+          force: false,
+          alter: {
+            drop: false,
+          },
+        };
+
+        await collection.sync(syncOptions);
+
+        this.sendSyncMessage(
+          {
+            type: 'syncCollection',
+            collectionName: model.get('collectionName'),
+          },
+          {
+            transaction,
+          },
+        );
+      }
+    });
+
+    // before field remove
+    this.app.db.on('fields.beforeDestroy', beforeDestoryField(this.app.db));
+    this.app.db.on('fields.beforeDestroy', beforeDestroyForeignKey(this.app.db));
+
+    this.app.db.on('fields.beforeDestroy', async (model: FieldModel, options) => {
+      const lockKey = `${this.name}:fields.beforeDestroy:${model.get('collectionName')}`;
+      await this.app.lockManager.runExclusive(lockKey, async () => {
+        await model.remove(options);
+
+        this.sendSyncMessage(
+          {
+            type: 'removeField',
+            collectionName: model.get('collectionName'),
+            fieldName: model.get('name'),
+          },
+          {
+            transaction: options.transaction,
+          },
+        );
+      });
+    });
+
+    this.app.db.on('fields.afterDestroy', async (model: FieldModel, options) => {
+      const { transaction } = options;
+      const collectionName = model.get('collectionName');
+      const childCollections = this.db.inheritanceMap.getChildren(collectionName);
+
+      const childShouldRemoveField = Array.from(childCollections).filter((item) => {
+        const parents = Array.from(this.db.inheritanceMap.getParents(item))
+          .map((parent) => {
+            const collection = this.db.getCollection(parent);
+            const field = collection.getField(model.get('name'));
+            return field;
+          })
+          .filter(Boolean);
+
+        return parents.length == 0;
+      });
+
+      await this.db.getCollection('fields').repository.destroy({
+        filter: {
+          name: model.get('name'),
+          collectionName: {
+            $in: childShouldRemoveField,
+          },
+          options: {
+            overriding: true,
+          },
+        },
+        transaction,
+      });
+    });
+
+    const loadCollections = async () => {
+      this.log.debug('loading custom collections', { method: 'loadCollections' });
+      this.app.setMaintainingMessage('loading custom collections');
+      await this.app.db.getRepository<CollectionRepository>('collections').load({
+        filter: this.loadFilter,
+      });
+    };
+
+    this.app.on('beforeStart', loadCollections);
+
+    this.app.resourceManager.use(async function pushUISchemaWhenUpdateCollectionField(ctx, next) {
+      const { resourceName, actionName } = ctx.action;
+      if (resourceName === 'collections.fields' && actionName === 'update') {
+        const { updateAssociationValues = [] } = ctx.action.params;
+        updateAssociationValues.push('uiSchema');
+        ctx.action.mergeParams({
+          updateAssociationValues,
+        });
+      }
+      await next();
+    });
+    this.app.resourceManager.use(async function pushUISchemaWhenUpdateCollectionField(ctx, next) {
+      const { resourceName, actionName } = ctx.action;
+      if (resourceName === 'collections' && actionName === 'create') {
+        const { values } = ctx.action.params;
+        const keys = Object.keys(values);
+        const presetKeys = ['createdAt', 'createdBy', 'updatedAt', 'updatedBy'];
+        for (const presetKey of presetKeys) {
+          if (keys.includes(presetKey)) {
+            continue;
+          }
+          values[presetKey] = !!values.fields?.find((v) => v.name === presetKey);
+        }
+        ctx.action.mergeParams({
+          values,
+        });
+      }
+      await next();
+    });
+    this.app.acl.allow('collections', 'list', 'loggedIn');
+    this.app.acl.allow('collections', 'listMeta', 'loggedIn');
+    this.app.acl.allow('collectionCategories', 'list', 'loggedIn');
+
+    this.app.acl.registerSnippet({
+      name: `pm.data-source-manager.data-source-main`,
+      actions: ['collections:*', 'collections.fields:*', 'fields:*', 'collectionCategories:*', 'mainDataSource:*'],
+    });
+
+    this.app.acl.registerSnippet({
+      name: `pm.data-source-manager.collection-view `,
+      actions: ['dbViews:*'],
+    });
+
+    this.app.db.on('afterDefineCollection', async (collection) => {
+      if (collection?.options?.uiManageable) {
+        this.db2cmCollections.push(collection.name);
+      }
+    });
+
+    this.app.on('afterEnablePlugin', this.db2cm.bind(this));
+
+    this.app.on('afterInstall', this.db2cm.bind(this));
+
+    this.app.on('afterUpgrade', this.db2cm.bind(this));
+  }
+
+  private async db2cm() {
+    if (this.db2cmCollections.length) {
+      await this.app.db.getRepository<CollectionRepository>('collections').db2cmCollections(this.db2cmCollections);
+      this.log.info(`collections synced to collection manager: ${this.db2cmCollections.join(', ')}`);
+      this.db2cmCollections = [];
+    }
+  }
+
+  async load() {
+    this.db.getRepository<CollectionRepository>('collections').setApp(this.app);
+
+    this.registerErrorHandler();
+    registerDataSourceMainMcpPostProcessors(this.ai.mcpToolsManager);
+    this.app.auditManager.registerActions(['collections:apply', 'fields:apply']);
+
+    this.app.resourceManager.use(async function mergeReverseFieldWhenSaveCollectionField(ctx, next) {
+      if (ctx.action.resourceName === 'collections.fields' && ['create', 'update'].includes(ctx.action.actionName)) {
+        ctx.action.mergeParams({
+          updateAssociationValues: ['reverseField'],
+        });
+      }
+      await next();
+    });
+    this.app.resourceManager.define(viewResourcer);
+    this.app.resourceManager.registerActionHandlers(collectionActions);
+    this.app.resourceManager.define(mainDataSourceResource);
+
+    const handleFieldSource = ({
+      fields,
+      isRawValue,
+      rawFields,
+    }: {
+      fields: (FieldModel | Record<string, any>)[] | Record<string, FieldModel>;
+      isRawValue?: boolean;
+      rawFields?: ColumnsDescription;
+    }) => {
+      lodash.castArray(fields).forEach((field, index) => {
+        const source = isRawValue ? field.source : field.get('source');
+        if (!source) {
+          return;
+        }
+
+        const [collectionSource, fieldSource] = source.split('.');
+        const collectionField = this.app.db.getCollection(collectionSource)?.getField(fieldSource);
+
+        if (!collectionField) {
+          return;
+        }
+
+        const newOptions: any = {};
+
+        // 原始字段 options
+        lodash.merge(newOptions, lodash.omit(collectionField.options, 'name'));
+
+        const currentValues = isRawValue ? field : field.get();
+
+        lodash.mergeWith(newOptions, currentValues, (objValue, srcValue) => {
+          if (srcValue === null) {
+            return objValue;
+          }
+        });
+
+        if (isRawValue) {
+          fields[index] = {
+            ...field,
+            ...newOptions,
+          };
+        } else {
+          field.set('options', newOptions);
+        }
+        const fieldTypes = fieldTypeMap[this.db.options.dialect];
+        if (rawFields && fieldTypes) {
+          const rawField = rawFields[field.get('name')];
+          if (rawField && !PRESET_FIELDS_INTERFACES.includes(field.get('interface'))) {
+            const mappedType = extractTypeFromDefinition(rawField.type);
+            const possibleTypes = fieldTypes[mappedType];
+            field.set('possibleTypes', possibleTypes);
+          }
+        }
+      });
+    };
+
+    this.app.resourceManager.use(async function handleFieldSourceMiddleware(ctx, next) {
+      await next();
+
+      // handle collections:list
+      if (ctx.action.resourceName === 'collections' && ctx.action.actionName == 'listMeta') {
+        for (const collection of ctx.body) {
+          if (collection.view === true) {
+            const fields = collection.fields;
+            handleFieldSource({ fields, isRawValue: true });
+          }
+        }
+      }
+
+      //handle collections:fields:list
+      if (ctx.action.resourceName == 'collections.fields' && ctx.action.actionName == 'list') {
+        const collectionName = ctx.action.sourceId;
+        const collection: Collection = ctx.db.getCollection(collectionName);
+        let rawFields: ColumnsDescription = {};
+        if (collection) {
+          try {
+            rawFields = await ctx.app.db.queryInterface.sequelizeQueryInterface.describeTable(
+              collection.getTableNameWithSchema(),
+            );
+          } catch (err) {
+            // ignore
+          }
+        }
+        handleFieldSource({ fields: ctx.action.params?.paginate == 'false' ? ctx.body : ctx.body.rows, rawFields });
+      }
+
+      if (ctx.action.resourceName == 'collections.fields' && ctx.action.actionName == 'get') {
+        handleFieldSource({ fields: ctx.body });
+      }
+    });
+
+    this.app.db.extendCollection({
+      name: 'collectionCategory',
+      dumpRules: 'required',
+      origin: this.options.packageName,
+    });
+  }
+
+  registerErrorHandler() {
+    const errorHandlerPlugin = this.app.pm.get<PluginErrorHandler>('error-handler');
+    errorHandlerPlugin.errorHandler.register(
+      (err) => {
+        return err instanceof UniqueConstraintError;
+      },
+      (err, ctx) => {
+        return ctx.throw(400, ctx.t(`The value of ${Object.keys(err.fields)} field duplicated`));
+      },
+    );
+
+    errorHandlerPlugin.errorHandler.register(
+      (err) => err instanceof FieldIsDependedOnByOtherError,
+      (err, ctx) => {
+        ctx.status = 400;
+        ctx.body = {
+          errors: [
+            {
+              message: ctx.i18n.t('field-is-depended-on-by-other', {
+                fieldName: err.options.fieldName,
+                fieldCollectionName: err.options.fieldCollectionName,
+                dependedFieldName: err.options.dependedFieldName,
+                dependedFieldCollectionName: err.options.dependedFieldCollectionName,
+                dependedFieldAs: err.options.dependedFieldAs,
+                ns: 'data-source-main',
+              }),
+            },
+          ],
+        };
+      },
+    );
+
+    errorHandlerPlugin.errorHandler.register(
+      (err) => err instanceof FieldNameExistsError,
+      (err, ctx) => {
+        ctx.status = 400;
+
+        ctx.body = {
+          errors: [
+            {
+              message: ctx.i18n.t('field-name-exists', {
+                name: err.value,
+                collectionName: err.collectionName,
+                ns: 'data-source-main',
+              }),
+            },
+          ],
+        };
+      },
+    );
+
+    errorHandlerPlugin.errorHandler.register(
+      (err) => err instanceof JoiValidationError,
+      (err: JoiValidationError, ctx) => {
+        const t = ctx.i18n.t;
+        ctx.status = 400;
+        ctx.body = {
+          errors: err.details.map((detail) => {
+            const context = detail.context;
+            const label = context.label;
+            if (label) {
+              const [collectionName, fieldName] = label.split('.');
+              const collection = this.db.getCollection(collectionName);
+              if (collection) {
+                const collectionTitle = Schema.compile(collection.options.title, { t });
+                const field = collection.getField(fieldName);
+                const fieldOptions = Schema.compile(field?.options, { t });
+                const fieldTitle = _.get(fieldOptions, 'uiSchema.title', fieldName);
+                context.label = `${t(collectionTitle, {
+                  ns: ['lm-collections', 'client'],
+                })}: ${t(fieldTitle, {
+                  ns: ['lm-collections', 'client'],
+                })}`;
+              }
+            }
+            if (context.regex) {
+              context.regex = context.regex.source;
+            }
+            let message = ctx.i18n.t(detail.type, {
+              ...context,
+              ns: 'data-source-main',
+            });
+            if (message === detail.type) {
+              message = err.message.replace(`"${label}"`, context.label);
+            }
+            return {
+              message,
+            };
+          }),
+        };
+      },
+    );
+  }
+
+  async install() {
+    const dataSourcesCollection = this.app.db.getCollection('dataSources');
+
+    if (dataSourcesCollection) {
+      await dataSourcesCollection.repository.firstOrCreate({
+        filterKeys: ['key'],
+        values: {
+          key: 'main',
+          type: 'main',
+          displayName: '{{t("Main")}}',
+          fixed: true,
+          options: {},
+        },
+      });
+    }
+  }
+}
+
+export default PluginDataSourceMainServer;

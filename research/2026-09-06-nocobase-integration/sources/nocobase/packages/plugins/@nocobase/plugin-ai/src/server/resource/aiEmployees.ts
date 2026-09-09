@@ -1,0 +1,289 @@
+/**
+ * This file is part of the NocoBase (R) project.
+ * Copyright (c) 2020-2024 NocoBase Co., Ltd.
+ * Authors: NocoBase Team.
+ *
+ * This project is dual-licensed under AGPL-3.0 and NocoBase Commercial License.
+ * For more information, please refer to: https://www.nocobase.com/agreement.
+ */
+
+import actions, { Context, Next } from '@nocobase/actions';
+import { UniqueConstraintError } from '@nocobase/database';
+import * as templates from '../ai-employees/templates';
+import PluginAIServer from '../plugin';
+import type { AIEmployee } from '../../collections/ai-employees';
+import _ from 'lodash';
+import { EEFeatures } from '../manager/ai-feature-manager';
+import {
+  AI_EMPLOYEE_NICKNAME_INVALID,
+  AI_EMPLOYEE_USERNAME_CONFLICT,
+  AI_EMPLOYEE_USERNAME_INVALID,
+} from '../../common/error-codes';
+import {
+  isValidAIEmployeeNickname,
+  isValidAIEmployeeUsername,
+  normalizeAIEmployeeName,
+} from '../../common/ai-employee-validation';
+import { withDefaultKnowledgeBaseRetrievalStrategy } from '../ai-employees/ai-knowledge-base';
+const isUniqueConstraintError = (error: unknown) =>
+  error instanceof UniqueConstraintError ||
+  (typeof error === 'object' && error !== null && 'name' in error && error.name === 'SequelizeUniqueConstraintError');
+
+const throwUsernameConflict = (ctx: Context): never =>
+  ctx.throw(409, {
+    code: AI_EMPLOYEE_USERNAME_CONFLICT,
+    message: ctx.t('Username already exists'),
+  });
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  value !== null && typeof value === 'object' && !Array.isArray(value);
+
+const validateAndNormalizeProfileValues = (ctx: Context) => {
+  const values = ctx.action.params.values;
+  if (!isRecord(values)) {
+    return;
+  }
+
+  if ('username' in values) {
+    if (typeof values.username !== 'string' || !isValidAIEmployeeUsername(values.username)) {
+      ctx.throw(400, {
+        code: AI_EMPLOYEE_USERNAME_INVALID,
+        message: ctx.t('Use 1-64 letters, numbers, underscores, or hyphens.'),
+      });
+    }
+    values.username = normalizeAIEmployeeName(values.username);
+  }
+
+  if ('nickname' in values) {
+    if (typeof values.nickname !== 'string' || !isValidAIEmployeeNickname(values.nickname)) {
+      ctx.throw(400, {
+        code: AI_EMPLOYEE_NICKNAME_INVALID,
+        message: ctx.t("Use 1-64 letters, numbers, spaces, or . _ - ' ( ) & ·."),
+      });
+    }
+    values.nickname = normalizeAIEmployeeName(values.nickname);
+  }
+};
+
+const setDefaultKnowledgeBaseRetrievalStrategy = (ctx: Context) => {
+  const values = ctx.action.params.values;
+  if (isRecord(values)) {
+    values.knowledgeBase = withDefaultKnowledgeBaseRetrievalStrategy(values.knowledgeBase);
+  }
+};
+
+export const create = async (ctx: Context, next: Next) => {
+  validateAndNormalizeProfileValues(ctx);
+  setDefaultKnowledgeBaseRetrievalStrategy(ctx);
+  const username = ctx.action.params.values?.username;
+
+  if (typeof username === 'string') {
+    const existingEmployee = await ctx.db.getRepository('aiEmployees').findOne({
+      filter: { username },
+    });
+    if (existingEmployee) {
+      throwUsernameConflict(ctx);
+    }
+  }
+
+  try {
+    await actions.create(ctx, next);
+  } catch (error) {
+    if (isUniqueConstraintError(error)) {
+      throwUsernameConflict(ctx);
+    }
+    throw error;
+  }
+};
+
+export const update = async (ctx: Context, next: Next) => {
+  validateAndNormalizeProfileValues(ctx);
+  await actions.update(ctx, next);
+};
+
+export const list = async (ctx: Context, next: Next) => {
+  const { paginate } = ctx.action.params || {};
+  const plugin = ctx.app.pm.get('ai') as PluginAIServer;
+  const builtInManager = plugin.builtInManager;
+
+  const filter = ctx.action.params.filter || {};
+  ctx.action.mergeParams({
+    filter: {
+      ...filter,
+      deprecated: false,
+    },
+  });
+
+  await actions.list(ctx as Context, () => {});
+
+  let data;
+  if (paginate === 'false' || paginate === false) {
+    ctx.body = ctx.body.map((it) => it.toJSON());
+    data = ctx.body;
+  } else {
+    ctx.body.rows = ctx.body.rows.map((it) => it.toJSON());
+    data = ctx.body.rows;
+  }
+
+  const featureEnabled = plugin.features.isFeaturesEnabled(Object.values(EEFeatures));
+  if (featureEnabled) {
+    const knowledgeBaseKeys: string[] = _.uniq(
+      data.map((it) => it.knowledgeBase?.knowledgeBaseKeys ?? []).flatMap((it) => it),
+    );
+    const knowledgeBaseList = await plugin.features.knowledgeBase.getKnowledgeBase(knowledgeBaseKeys);
+    const existedKnowledgeBaseKeys = knowledgeBaseList?.map((it) => it.key) ?? [];
+    for (const row of data as AIEmployee[]) {
+      row.missingKnowledgeBaseKeys = [];
+      if (!row.knowledgeBase?.knowledgeBaseKeys?.length) {
+        continue;
+      }
+      for (const k of row.knowledgeBase.knowledgeBaseKeys) {
+        if (existedKnowledgeBaseKeys.includes(k)) {
+          continue;
+        }
+        row.missingKnowledgeBaseKeys.push(k);
+      }
+    }
+  }
+
+  data.forEach((row: AIEmployee) => {
+    if (row.builtIn) {
+      builtInManager.setupBuiltInInfo(ctx, row);
+    }
+  });
+
+  await next();
+};
+
+export const listByUser = async (ctx: Context, next: Next) => {
+  const plugin = ctx.app.pm.get('ai') as PluginAIServer;
+  const skills = await plugin.ai.skillsManager.listSkills({ scope: 'GENERAL' });
+  const tools = await plugin.ai.toolsManager.listTools({ scope: 'GENERAL' });
+  const user = ctx.auth.user;
+  const model = ctx.db.getModel('aiEmployees');
+  const sequelize = ctx.db.sequelize;
+  const roles = ctx.state.currentRoles;
+  const builtInManager = plugin.builtInManager;
+  let where: any = {
+    enabled: true,
+  };
+  if (!roles?.includes('root')) {
+    const aiEmployees = await ctx.db.getRepository('rolesAiEmployees').find({
+      filter: {
+        roleName: ctx.state.currentRoles,
+      },
+    });
+    if (!aiEmployees) {
+      ctx.body = [];
+      return next();
+    }
+    where = {
+      ...where,
+      username: aiEmployees.map((item: { aiEmployee: string }) => item.aiEmployee),
+    };
+  }
+  const rows = await model.findAll({
+    where,
+    include: [
+      {
+        model: ctx.db.getModel('usersAiEmployees'),
+        as: 'userConfigs',
+        required: false,
+        where: { userId: user.id },
+      },
+    ],
+    order: [
+      [
+        sequelize.literal(
+          `CASE WHEN ${sequelize
+            .getQueryInterface()
+            .quoteIdentifiers('userConfigs.sort')} IS NOT NULL THEN 0 ELSE 1 END`,
+        ),
+        'ASC',
+      ],
+      [sequelize.fn('COALESCE', sequelize.col('userConfigs.sort'), sequelize.col('aiEmployees.sort')), 'ASC'],
+    ],
+  });
+
+  rows.forEach((row) => {
+    if (row.builtIn) {
+      builtInManager.setupBuiltInInfo(ctx, row as unknown as AIEmployee);
+    }
+  });
+
+  ctx.body = rows.map((row) => {
+    const skillSettings: { skills: string[]; tools: { name: string; autoCall: boolean }[] } = row.skillSettings ?? {
+      skills: [],
+      tools: [],
+    };
+    if (!_.isArray(skillSettings.skills)) {
+      skillSettings.skills = [];
+    }
+    if (!_.isArray(skillSettings.tools)) {
+      skillSettings.tools = [];
+    }
+    for (const tool of tools) {
+      skillSettings.tools.push({
+        name: tool.definition.name,
+        autoCall: tool.defaultPermission === 'ALLOW',
+      });
+    }
+    for (const { name } of skills) {
+      skillSettings.skills.push(name);
+    }
+    return {
+      username: row.username,
+      nickname: row.nickname,
+      position: row.position,
+      avatar: row.avatar,
+      bio: row.bio,
+      greeting: row.greeting,
+      userConfig: {
+        prompt: row.userConfigs?.[0]?.prompt,
+      },
+      skillSettings,
+      chatSettings: row.chatSettings,
+      modelSettings: row.modelSettings,
+      builtIn: row.builtIn,
+      category: row.category,
+      deprecated: row.deprecated,
+    };
+  });
+  await next();
+};
+
+export const updateUserPrompt = async (ctx: Context, next: Next) => {
+  const { aiEmployee, prompt } = ctx.action.params.values || {};
+  if (!aiEmployee) {
+    ctx.throw(400);
+  }
+  const user = ctx.auth.user;
+  const repo = ctx.db.getRepository('usersAiEmployees');
+  const record = await repo.findOne({
+    filter: {
+      userId: user.id,
+      aiEmployee,
+    },
+  });
+  if (record) {
+    await record.update({
+      prompt,
+    });
+    return next();
+  }
+  await repo.create({
+    values: {
+      aiEmployee,
+      userId: user.id,
+      prompt,
+      sort: null,
+    },
+  });
+  await next();
+};
+
+export const getTemplates = async (ctx: Context, next: Next) => {
+  const locale = ctx.getCurrentLocale() || 'en-US';
+  ctx.body = Object.values(templates).map((template) => template[locale]);
+  await next();
+};

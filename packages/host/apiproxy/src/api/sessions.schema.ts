@@ -281,15 +281,17 @@ export const imageMediaTypeSchema = z.union([
 
 /** Prompt wire content is intentionally narrower than merge-extensible durable core content. */
 export const promptContentPartSchema = z.discriminatedUnion('type', [
-  z.object({ type: z.literal('text'), text: z.string() }),
-  z.object({ type: z.literal('image'), mediaType: imageMediaTypeSchema, data: z.string(), name: z.string().optional() }),
+  z.object({ type: z.literal('text'), text: z.string().min(1) }),
+  z.object({ type: z.literal('image'), mediaType: imageMediaTypeSchema, data: z.string().min(1), name: z.string().optional() }),
 ])
 
 /** session.prompt request payload, including optional browser-local request provenance. */
 export const sessionPromptRequestSchema = z.object({
   sessionId: sessionIdSchema,
   mode: z.union([z.literal('queue'), z.literal('steer')]),
-  content: z.array(promptContentPartSchema),
+  // min(1): an empty turn must fail validation here — accepting it would
+  // dispatch a real model call over no content.
+  content: z.array(promptContentPartSchema).min(1),
   clientTimeZone: z.string().optional(),
 }) as unknown as z.ZodType<RequestPayload<'session.prompt'>>
 

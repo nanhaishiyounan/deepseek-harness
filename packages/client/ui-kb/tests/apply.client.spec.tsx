@@ -23,7 +23,10 @@ async function bench() {
   const search = vi.fn(async () => ok({ mode: 'text', results: [] }))
   const ingest = vi.fn(async () => ok({ doc_id: 7, chunks: 5, embedded: false }))
   const ingestUrl = vi.fn(async () => ok({ doc_id: 8, chunks: 2, embedded: false }))
-  const upload = vi.fn(async (payload: { filename: string }) => ok({ doc_id: 9, chunks: 3, embedded: false, filename: payload.filename }))
+  const upload = vi.fn(async (payload: { filename: string; data: string; mime?: string }) =>
+    payload.filename.endsWith('.csv')
+      ? ok({ destination: 'lakehouse', replaced: false, table: 'orders', rows: 6 })
+      : ok({ destination: 'kb', replaced: true, document: { doc_id: 9, chunks: 3, embedded: false } }))
   const select = vi.fn(async () => ok({ sessionId: 's1', agentPreset: 'market-insight' }))
   const listDirectory = vi.fn(async () => ok({ path: '/srv', home: '/srv', crumbs: [], entries: [], truncated: false }))
   const describeHost = vi.fn(async () => ok({
@@ -32,6 +35,7 @@ async function bench() {
   ctx.provide('connection', {
     api: {
       kb: { stats, search, ingest, ingestUrl, upload },
+      data: { upload },
       agentPresets: { select },
       host: { listDirectory, describe: describeHost },
     },
@@ -110,9 +114,9 @@ describe('ui-kb apply', () => {
     expect(slots.entries('conversation.session.header.actions').map(entry => entry.options.id)).toContain('kb')
     // The headline seat is single-kind: the entry registers without an id.
     expect(slots.entries('conversation.hero.headline')).toHaveLength(1)
-    // The four knowledge-base tool names' keyed holes share one row component.
+    // The knowledge-base, connector, and order tool names' keyed holes share row components.
     expect(slots.entries('tool.call.toolview').map(entry => entry.options.key).sort())
-      .toEqual(['kb_ingest', 'kb_ingest_url', 'kb_search', 'kb_stats'])
+      .toEqual(['connector_discover', 'kb_ingest', 'kb_ingest_url', 'kb_search', 'kb_stats', 'order_create', 'order_status'])
     // The settings section carries a nav label resolved through zh.
     const sectionEntry = slots.entries('settings.section').find(entry => entry.options.id === 'kb')
     expect(sectionEntry?.options.label).toEqual(expect.any(Function))
@@ -204,11 +208,22 @@ describe('ui-kb apply', () => {
     await expect(viewFace.ingestUrl('https://example.com/report')).resolves.toEqual({
       name: 'example.com', chunks: 2,
     })
-    // The upload face encodes the browser file's bytes as base64 and records
-    // the uploads-path sighting beside the receipt.
+    // The upload face encodes the browser file's bytes as base64 with its
+    // declared mime type, records the uploads-path sighting beside the
+    // receipt, and carries the wire's replacement fact through to the
+    // wizard's toast.
     const file = new File(['# visit'], 'visit.md', { type: 'text/markdown' })
-    await expect(viewFace.uploadFile(file)).resolves.toEqual({ name: 'visit.md', chunks: 3 })
-    expect(upload).toHaveBeenCalledWith({ filename: 'visit.md', data: 'IyB2aXNpdA==' })
+    await expect(viewFace.uploadFile(file)).resolves.toEqual({ name: 'visit.md', chunks: 3, replaced: true, destination: 'kb' })
+    expect(upload).toHaveBeenCalledWith({ filename: 'visit.md', data: 'IyB2aXNpdA==', mime: 'text/markdown' })
+    // A structured body routes to the lakehouse and reports the table fact.
+    const csv = new File(['region\n中亚'], 'orders.csv', { type: 'text/csv' })
+    await expect(viewFace.uploadFile(csv)).resolves.toEqual({
+      name: 'orders.csv', destination: 'lakehouse', table: 'orders', rows: 6, replaced: false,
+    })
+    // A browser file with no declared mime type omits the wire's mime field.
+    const plain = new File(['a,b\n1,2'], 'plain.csv')
+    await expect(viewFace.uploadFile(plain)).resolves.toMatchObject({ destination: 'lakehouse', table: 'orders' })
+    expect(upload).toHaveBeenCalledWith(expect.objectContaining({ filename: 'plain.csv', data: 'YSxiCjEsMg==' }))
     viewFace.requestView('chat')
     // The mount mirror the hero portal reads: settle flips the shared boolean.
     const workbenchMirror = (slots.entries('conversation.input.dock')[0]?.inject as (sessionId: string) => {

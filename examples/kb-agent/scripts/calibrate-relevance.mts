@@ -43,6 +43,7 @@ const DOC_KIND_BY_DIR: Record<string, KbDocKind> = {
   supply: 'report',
   cost: 'table',
   'food-safety': 'report',
+  'export-risk': 'report',
 }
 
 /** Garbage / unrelated query probes: RRF-scored like real queries. */

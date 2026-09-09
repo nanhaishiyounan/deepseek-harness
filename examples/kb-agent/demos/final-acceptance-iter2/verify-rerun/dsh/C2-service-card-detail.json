@@ -1,0 +1,13 @@
+{
+  "scene": "C2-service-card-detail",
+  "ts": "2026-09-08T16:58:11.826Z",
+  "card": "海外仓风险应对咨询",
+  "type": "专家服务",
+  "price": "¥6,800/份",
+  "deliverable": "PDF 方案",
+  "buttons": [
+    "问数",
+    "引用并提问",
+    "下单"
+  ]
+}

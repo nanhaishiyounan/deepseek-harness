@@ -1,6 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { readFile } from 'node:fs/promises'
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http'
+import { createServer as createTlsServer } from 'node:tls'
 import { AddressInfo } from 'node:net'
+import { fileURLToPath } from 'node:url'
 import { Context } from '@deepseek-ai/cordis'
 import WebRuntime from '@deepseek-ai/dsh-web'
 import { HttpFetchProvider, LOCAL_FETCH_PROVIDER_ID } from '@deepseek-ai/dsh-web-fetch-http'
@@ -364,6 +367,108 @@ describe('HttpFetchProvider body cancellation on error paths', () => {
     await expect(provider().fetch({ url: 'http://127.0.0.1:9/' }))
       .rejects.toThrow(expect.objectContaining({ code: 'WEB_PROVIDER_ERROR' }))
     expect(cancelled()).toBe(true)
+  })
+})
+
+describe('pinned-address fetching', () => {
+  /** The pinned tests' stand-in hostname: `.test` never resolves anywhere, so only the pin can reach the server. */
+  const PINNED_HOST = 'rebind-candidate.test'
+
+  function port(): number {
+    return (server.address() as AddressInfo).port
+  }
+
+  it('connects to the pinned address while sending the URL host as the Host header', async () => {
+    let host: string | undefined
+    let cookies: string | undefined
+    handler = (req, res) => {
+      host = req.headers.host
+      cookies = req.headers.cookie
+      res.setHeader('set-cookie', ['a=1', 'b=2'])
+      res.writeHead(200, { 'content-type': 'text/plain' })
+      res.end('pinned-ok')
+    }
+    const result = await provider().fetch({ url: `http://${PINNED_HOST}:${port()}/doc`, pinnedAddresses: ['127.0.0.1'] })
+    expect(result.statusCode).toBe(200)
+    expect(result.body).toEqual({ kind: 'text', content: 'pinned-ok' })
+    expect(host).toBe(`${PINNED_HOST}:${port()}`)
+    // The request sent no cookie header; the multi-value response headers
+    // folded without breaking the pinned response wrap.
+    expect(cookies).toBeUndefined()
+  })
+
+  it('tries the remaining pinned addresses after one refuses the connection', async () => {
+    handler = (_req, res) => { res.writeHead(200, { 'content-type': 'text/plain' }); res.end('second-address-ok') }
+    // Nothing listens on the URL's port over IPv6 loopback, so the first pin
+    // refuses instantly; the list must fall through to the second admitted
+    // address instead of consulting DNS.
+    const result = await provider().fetch({ url: `http://${PINNED_HOST}:${port()}/doc`, pinnedAddresses: ['::1', '127.0.0.1'] })
+    expect(result.body).toEqual({ kind: 'text', content: 'second-address-ok' })
+  })
+
+  it('fails as a transport error when every pinned address refuses', async () => {
+    handler = (_req, res) => { res.writeHead(200, { 'content-type': 'text/plain' }); res.end('unreachable') }
+    await expect(provider().fetch({ url: `http://${PINNED_HOST}:${port()}/doc`, pinnedAddresses: ['::1'] }))
+      .rejects.toThrow(expect.objectContaining({ code: 'WEB_PROVIDER_ERROR' }))
+  })
+
+  it('follows a same-origin redirect while staying pinned', async () => {
+    handler = (req, res) => {
+      if (req.url === '/hop') {
+        res.writeHead(302, { location: '/final' })
+        res.end()
+        return
+      }
+      res.writeHead(200, { 'content-type': 'text/plain' })
+      res.end('after-hop')
+    }
+    const result = await provider().fetch({ url: `http://${PINNED_HOST}:${port()}/hop`, pinnedAddresses: ['127.0.0.1'] })
+    expect(result.body).toEqual({ kind: 'text', content: 'after-hop' })
+    expect(result.url).toBe(`http://${PINNED_HOST}:${port()}/final`)
+  })
+
+  it('answers a pinned bodyless 204, 205, and 304 through the same wrap', async () => {
+    // The null-body statuses carry no content-type, so the body read refuses
+    // them — but the wrap must construct rather than crash on a status the
+    // fetch Response constructor rejects a stream body for.
+    for (const status of [204, 205, 304]) {
+      handler = (_req, res) => { res.writeHead(status); res.end() }
+      await expect(provider().fetch({ url: `http://${PINNED_HOST}:${port()}/doc`, pinnedAddresses: ['127.0.0.1'] }))
+        .rejects.toThrow(expect.objectContaining({ code: 'WEB_UNSUPPORTED_CONTENT_TYPE' }))
+    }
+  })
+
+  it('stops retrying the remaining pins once the deadline aborts the fetch', async () => {
+    // Accept the request but never answer: the provider timeout aborts the
+    // in-flight attempt, and the retry loop must not move on to the next pin.
+    handler = () => { /* hold the socket open until the abort destroys it */ }
+    await expect(provider({ timeoutMs: 300 }).fetch({ url: `http://${PINNED_HOST}:${port()}/doc`, pinnedAddresses: ['127.0.0.1', '127.0.0.1'] }))
+      .rejects.toThrow(expect.objectContaining({ code: 'WEB_FETCH_TIMEOUT' }))
+  })
+
+  it('pins https requests with the URL hostname as the TLS SNI', async () => {
+    const [key, cert] = await Promise.all([
+      readFile(fileURLToPath(new URL('./fixtures/tls/key.pem', import.meta.url)), 'utf8'),
+      readFile(fileURLToPath(new URL('./fixtures/tls/cert.pem', import.meta.url)), 'utf8'),
+    ])
+    const sni: string[] = []
+    const tls = createTlsServer({ key, cert }, (socket) => { socket.end() })
+    tls.on('tlsClientError', (_error, socket) => {
+      if (typeof socket.servername === 'string') sni.push(socket.servername)
+    })
+    await new Promise<void>(resolve => tls.listen(0, '127.0.0.1', resolve))
+    try {
+      // The fixture is deliberately self-signed: verification must fail on
+      // the client, but only after the ClientHello reached the pinned
+      // address carrying the URL hostname as SNI. The server observes the
+      // reset asynchronously after the client rejection settles.
+      await expect(provider().fetch({ url: `https://localhost:${(tls.address() as AddressInfo).port}/x`, pinnedAddresses: ['127.0.0.1'] }))
+        .rejects.toThrow(expect.objectContaining({ code: 'WEB_PROVIDER_ERROR' }))
+      await vi.waitFor(() => { expect(sni.length).toBeGreaterThan(0) })
+      expect(sni).toContain('localhost')
+    } finally {
+      await new Promise<void>(resolve => tls.close(() => { resolve() }))
+    }
   })
 })
 

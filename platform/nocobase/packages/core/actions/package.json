@@ -1,0 +1,19 @@
+{
+  "name": "@nocobase/actions",
+  "version": "2.2.6",
+  "description": "",
+  "license": "Apache-2.0",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "dependencies": {
+    "@nocobase/cache": "2.2.6",
+    "@nocobase/database": "2.2.6",
+    "@nocobase/resourcer": "2.2.6"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nocobase/nocobase.git",
+    "directory": "packages/actions"
+  },
+  "gitHead": "d0b4efe4be55f8c79a98a331d99d9f8cf99021a1"
+}

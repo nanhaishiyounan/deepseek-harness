@@ -262,10 +262,21 @@ describe('sessions domain schemas', () => {
     })
     expect(prompt.mode).toBe('queue')
     expect(prompt.clientTimeZone).toBe('Asia/Shanghai')
-    expect(sessionPromptRequestSchema.parse({
-      sessionId: 's1', mode: 'queue', content: [],
-    }).clientTimeZone).toBeUndefined()
-    expect(() => sessionPromptRequestSchema.parse({ sessionId: 's1', mode: 'inject', content: [] })).toThrow()
+    // An empty turn, an empty text block, or empty image data refuses
+    // validation — each would dispatch a real model call over no content
+    // (the wire answers 400).
+    expect(() => sessionPromptRequestSchema.parse({ sessionId: 's1', mode: 'queue', content: [] })).toThrow()
+    expect(() => sessionPromptRequestSchema.parse({
+      sessionId: 's1', mode: 'queue', content: [{ type: 'text', text: '' }],
+    })).toThrow()
+    const imagePrompt = sessionPromptRequestSchema.parse({
+      sessionId: 's1', mode: 'queue', content: [{ type: 'image', mediaType: 'image/png', data: 'aGk=' }],
+    })
+    expect(imagePrompt.content[0]).toMatchObject({ type: 'image', data: 'aGk=' })
+    expect(() => sessionPromptRequestSchema.parse({
+      sessionId: 's1', mode: 'queue', content: [{ type: 'image', mediaType: 'image/png', data: '' }],
+    })).toThrow()
+    expect(() => sessionPromptRequestSchema.parse({ sessionId: 's1', mode: 'inject', content: [{ type: 'text', text: 'x' }] })).toThrow()
     expect(sessionPromptValueSchema.parse({ accepted: true }).accepted).toBe(true)
     // The command slot appears only when the prompt dispatched a slash command.
     const dispatched = sessionPromptValueSchema.parse({ accepted: true, command: { kind: 'success', text: 'Goal set' } })

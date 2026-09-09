@@ -63,6 +63,15 @@ export interface WebSearchSource {
  */
 export interface WebFetchRequest {
   readonly url: string
+  /**
+   * Addresses the caller's SSRF policy already resolved and admitted for this
+   * URL's host. A provider that honors them connects to one of these
+   * addresses directly — preserving the URL's own Host header and TLS SNI —
+   * so DNS cannot answer differently at fetch time than it did at the policy
+   * check (DNS rebinding). An empty or absent list pins nothing: the provider
+   * resolves the hostname itself.
+   */
+  readonly pinnedAddresses?: readonly string[]
 }
 
 /**

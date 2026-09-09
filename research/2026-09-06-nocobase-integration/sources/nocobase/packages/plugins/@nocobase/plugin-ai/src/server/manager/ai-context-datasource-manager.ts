@@ -1,0 +1,235 @@
+/**
+ * This file is part of the NocoBase (R) project.
+ * Copyright (c) 2020-2024 NocoBase Co., Ltd.
+ * Authors: NocoBase Team.
+ *
+ * This project is dual-licensed under AGPL-3.0 and NocoBase Commercial License.
+ * For more information, please refer to: https://www.nocobase.com/agreement.
+ */
+
+import { assign, QueryObject, transformFilter } from '@nocobase/utils';
+import { AIContextDatasource } from '../../collections/ai-context-datasource';
+import PluginAIServer from '../plugin';
+import { WorkContext, WorkContextResolveStrategy } from '../types';
+import { Context } from '@nocobase/actions';
+import { checkFilterParams, parseJsonTemplate } from '@nocobase/acl';
+import type { FieldOptions, ICollection, IRelationField } from '@nocobase/data-source-manager';
+
+function serializeQueryFieldValue(value: unknown): unknown {
+  if (value === null || value === undefined) {
+    return value;
+  }
+
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => serializeQueryFieldValue(item));
+  }
+
+  if (typeof value === 'object') {
+    if (typeof (value as any).toISOString === 'function') {
+      try {
+        return (value as any).toISOString();
+      } catch (error) {
+        // Fall through to the next serializer strategy.
+      }
+    }
+
+    if (typeof (value as any).toJSON === 'function') {
+      try {
+        const jsonValue = (value as any).toJSON();
+        if (jsonValue !== value) {
+          return serializeQueryFieldValue(jsonValue);
+        }
+      } catch (error) {
+        // Fall through to the original value.
+      }
+    }
+  }
+
+  return value;
+}
+
+function getRecordFieldValue(record: unknown, field: string): unknown {
+  return field.split('.').reduce((current, key) => {
+    if (current === null || current === undefined) {
+      return current;
+    }
+
+    if (typeof (current as { get?: unknown }).get === 'function') {
+      return (current as { get: (key: string) => unknown }).get(key);
+    }
+
+    return (current as Record<string, unknown>)[key];
+  }, record);
+}
+
+function getQueryFieldOptions(collection: ICollection, field: string): FieldOptions | undefined {
+  const parts = field.split('.');
+  let currentCollection: ICollection | undefined = collection;
+
+  for (const [index, part] of parts.entries()) {
+    const currentField = currentCollection?.getField(part);
+    if (!currentField) {
+      return;
+    }
+
+    if (index === parts.length - 1) {
+      return currentField.options;
+    }
+
+    if (!currentField.isRelationField()) {
+      return;
+    }
+
+    currentCollection = (currentField as IRelationField).targetCollection();
+  }
+}
+
+export class AIContextDatasourceManager {
+  constructor(protected plugin: PluginAIServer) {}
+  async preview(ctx: Context, options: PreviewOptions): Promise<QueryResult | null> {
+    return await this.innerQuery(ctx, { ...options, filter: options.filter ? transformFilter(options.filter) : null });
+  }
+
+  async query(ctx: Context, options: InnerQueryOptions): Promise<QueryResult | null> {
+    return await this.innerQuery(ctx, { ...options, filter: options.filter });
+  }
+
+  provideWorkContextResolveStrategy(): WorkContextResolveStrategy {
+    return async (ctx: Context, contextItem: WorkContext): Promise<string> => {
+      if (!contextItem.content) {
+        return '';
+      }
+      const query = contextItem.content as InnerQueryOptions;
+      const queryResult = await this.innerQuery(ctx, query);
+      return JSON.stringify(queryResult);
+    };
+  }
+
+  private async innerQuery(ctx: Context, options: InnerQueryOptions): Promise<QueryResult | null> {
+    const { datasource, collectionName } = options;
+    const resource = collectionName;
+    const action = 'list';
+    const ds = this.plugin.app.dataSourceManager.get(datasource);
+    if (!ds) {
+      this.plugin.log.warn(`Datasource ${datasource} not found`);
+      return {
+        options,
+        total: 0,
+        records: [],
+      };
+    }
+    const collection = ds.collectionManager.getCollection(collectionName);
+    if (!collection) {
+      this.plugin.log.warn(`Collection ${collectionName} not found`);
+      return {
+        options,
+        total: 0,
+        records: [],
+      };
+    }
+
+    if (!options?.fields?.length) {
+      options.fields = collection
+        .getFields()
+        .filter((x) => !x.isRelationField())
+        .map((x) => x.options.name);
+    }
+
+    const skip = await ds.acl.allowManager.isAllowed(resource, action, ctx);
+    if (!skip) {
+      const roles = ctx.state.currentRoles || ['anonymous'];
+      const can = ds.acl.can({ roles, resource, action, rawResourceName: resource });
+      if (!can || typeof can !== 'object') {
+        return {
+          options,
+          total: 0,
+          records: [],
+        };
+      }
+
+      checkFilterParams(collection, can.params?.filter);
+      const parsedParams = can.params ? await parseJsonTemplate(can.params, ctx) : {};
+
+      if (parsedParams.appends && options.fields) {
+        for (const queryField of options.fields) {
+          if (parsedParams.appends.indexOf(queryField) !== -1) {
+            // move field to appends
+            if (!options.appends) {
+              options.appends = [];
+            }
+            options.appends.push(queryField);
+            options.fields = options.fields.filter((f) => f !== queryField);
+          }
+        }
+      }
+
+      assign(options, parsedParams, {
+        filter: 'andMerge',
+        fields: 'intersect',
+        // appends: 'union',
+        except: 'union',
+        whitelist: 'intersect',
+        blacklist: 'intersect',
+        // sort: 'overwrite',
+        appends: (x, y) => {
+          if (!x) {
+            return [];
+          }
+          if (!y) {
+            return x;
+          }
+          return (x as any[]).filter((i) => y.includes(i.split('.').shift()));
+        },
+      });
+    }
+
+    const { fields, appends, filter, sort, offset, limit } = options;
+    const result = await collection.repository.find({ fields, appends, filter, sort, offset: offset ?? 0, limit });
+    const total = await collection.repository.count({ fields, filter });
+
+    const records = result.map((x) =>
+      fields.map((field) => {
+        const { name, type } = getQueryFieldOptions(collection, field) || {};
+        const value = serializeQueryFieldValue(getRecordFieldValue(x, field));
+        return {
+          name: field.includes('.') ? field : name || field,
+          type: type || 'unknown',
+          value,
+        };
+      }),
+    );
+
+    return {
+      options,
+      total: total as number,
+      records,
+    };
+  }
+}
+
+export type PreviewOptions = Pick<
+  AIContextDatasource,
+  'datasource' | 'collectionName' | 'fields' | 'appends' | 'filter' | 'sort' | 'limit'
+> & { offset?: number };
+
+export type QueryOptions = {
+  id: string;
+};
+
+export type QueryResult = {
+  options: InnerQueryOptions;
+  total: number;
+  records: {
+    name: string;
+    type: string;
+    value: unknown;
+  }[][];
+};
+
+type InnerQueryOptions = Omit<PreviewOptions, 'filter'> & {
+  filter: QueryObject;
+};

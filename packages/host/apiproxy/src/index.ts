@@ -40,6 +40,59 @@ declare module '@deepseek-ai/cordis' {
 /** Gateway plugin configuration. */
 export interface Config {
   /**
+   * Whether the unified data-upload surface (`data.upload`) answers.
+   * Absent means refused: the gateway is unauthenticated, and a unified
+   * upload writes into the kb or the lakehouse, so it needs an explicit
+   * per-deployment opt-in independent of `kbWriteEnabled`.
+   */
+  dataUploadEnabled?: boolean
+  /**
+   * Whether the orders domain's write methods (`orders.create`,
+   * `orders.fulfill`) answer. Absent means refused: an order is a real
+   * transaction against a priced expert service, so the unauthenticated
+   * gateway needs an explicit per-deployment opt-in; reads (get/list) and
+   * the deliverable download stay open.
+   */
+  ordersEnabled?: boolean
+  /**
+   * Whether the nocobase domain's read methods (`nocobase.listMeta`,
+   * `nocobase.list`, `nocobase.get`) answer. Absent means refused: business
+   * reads run against the deployment's NocoBase under a service account, so
+   * the unauthenticated gateway needs an explicit per-deployment opt-in.
+   */
+  nocobaseEnabled?: boolean
+  /**
+   * NocoBase server origin for the domain; omitted = the
+   * `NOCOBASE_BASE_URL` environment variable.
+   */
+  nocobaseBaseUrl?: string
+  /** Credential reference (environment-variable name) the API token resolves through; defaults to `NOCOBASE_API_KEY`. */
+  nocobaseApiKeyEnv?: string
+  /**
+   * Whether the data-asset market domain (`assets.list/detail/stats`) answers;
+   * absent means refused (the unauthenticated gateway opts in per deployment).
+   */
+  assetsEnabled?: boolean
+  /** Market seed file (featured cards + board copy); absent means no featured rail. */
+  assetsSeedPath?: string
+  /**
+   * Whether the connector-page domain (`connectors.list/connections/transfers`)
+   * answers; absent means refused, same stance as `assetsEnabled`.
+   */
+  connectorsEnabled?: boolean
+  /**
+   * Whether the graph-page domain (`kg.schema/search/subgraph/expand/stats`)
+   * answers; absent means refused, same stance as `assetsEnabled`.
+   */
+  kgEnabled?: boolean
+  /**
+   * The tenant the kg domain operates on — the deployment-side binding for
+   * every graph read, mirroring `kbTenant`'s stance (never wire input).
+   * Required when `kgEnabled` is true; a missing binding fails every kg
+   * method with `kg-tenant-unbound`.
+   */
+  kgTenant?: string
+  /**
    * The tenant the kb workbench domain operates on — the deployment-side
    * binding for stats/search/ingest, mirroring the `tool-kb` row's `tenant`.
    * Required: a missing binding fails load instead of silently landing on a
@@ -93,6 +146,16 @@ export class ApiProxyService extends Service implements ApiProxy {
     coldBlankProbeMaxBytes: z.natural().default(DEFAULT_COLD_BLANK_PROBE_MAX_BYTES),
     kbTenant: z.string().required(),
     kbWriteEnabled: z.boolean(),
+    dataUploadEnabled: z.boolean(),
+    ordersEnabled: z.boolean(),
+    nocobaseEnabled: z.boolean(),
+    nocobaseBaseUrl: z.string(),
+    nocobaseApiKeyEnv: z.string().role('credential-ref'),
+    assetsEnabled: z.boolean(),
+    assetsSeedPath: z.string(),
+    connectorsEnabled: z.boolean(),
+    kgEnabled: z.boolean(),
+    kgTenant: z.string(),
   })
 
   readonly sessions: ApiProxy['sessions']
@@ -105,6 +168,12 @@ export class ApiProxyService extends Service implements ApiProxy {
   readonly settings: ApiProxy['settings']
   readonly credentials: ApiProxy['credentials']
   readonly llm: ApiProxy['llm']
+  readonly data: ApiProxy['data']
+  readonly orders: ApiProxy['orders']
+  readonly nocobase: ApiProxy['nocobase']
+  readonly assets: ApiProxy['assets']
+  readonly connectors: ApiProxy['connectors']
+  readonly kg: ApiProxy['kg']
   readonly kb: ApiProxy['kb']
   readonly events: ApiProxy['events']
   readonly downloads: ApiProxy['downloads']
@@ -118,6 +187,16 @@ export class ApiProxyService extends Service implements ApiProxy {
       cwd: process.cwd(),
       kbTenant: config.kbTenant,
       ...config.kbWriteEnabled === undefined ? {} : { kbWriteEnabled: config.kbWriteEnabled },
+      ...config.dataUploadEnabled === undefined ? {} : { dataUploadEnabled: config.dataUploadEnabled },
+      ...config.ordersEnabled === undefined ? {} : { ordersEnabled: config.ordersEnabled },
+      ...config.nocobaseEnabled === undefined ? {} : { nocobaseEnabled: config.nocobaseEnabled },
+      ...config.nocobaseBaseUrl === undefined ? {} : { nocobaseBaseUrl: config.nocobaseBaseUrl },
+      ...config.nocobaseApiKeyEnv === undefined ? {} : { nocobaseApiKeyEnv: config.nocobaseApiKeyEnv },
+      ...config.assetsEnabled === undefined ? {} : { assetsEnabled: config.assetsEnabled },
+      ...config.assetsSeedPath === undefined ? {} : { assetsSeedPath: config.assetsSeedPath },
+      ...config.connectorsEnabled === undefined ? {} : { connectorsEnabled: config.connectorsEnabled },
+      ...config.kgEnabled === undefined ? {} : { kgEnabled: config.kgEnabled },
+      ...config.kgTenant === undefined ? {} : { kgTenant: config.kgTenant },
       ...config.nativeOpen === undefined ? {} : { canOpenPath: () => config.nativeOpen as boolean },
       ...(config.sessionExportCompressionLevel === undefined
         ? {}
@@ -136,6 +215,12 @@ export class ApiProxyService extends Service implements ApiProxy {
     this.settings = api.settings
     this.credentials = api.credentials
     this.llm = api.llm
+    this.data = api.data
+    this.orders = api.orders
+    this.nocobase = api.nocobase
+    this.assets = api.assets
+    this.connectors = api.connectors
+    this.kg = api.kg
     this.kb = api.kb
     this.events = api.events
     this.downloads = api.downloads

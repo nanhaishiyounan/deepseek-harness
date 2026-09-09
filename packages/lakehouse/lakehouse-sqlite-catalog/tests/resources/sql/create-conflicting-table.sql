@@ -1,0 +1,1 @@
+CREATE TABLE lakehouse_tables (id INTEGER PRIMARY KEY) STRICT;

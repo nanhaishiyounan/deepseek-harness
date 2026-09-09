@@ -24,6 +24,8 @@
     "website/.generated/**",
     "vendor/**", // Vendored source keeps upstream style and idioms.
     "native/**", // The imported landlock-run subtree has its own gates; see native/README.md.
+    "platform/**", // The NocoBase snapshot subtree has its own gates; see platform/nocobase/MANIFEST.md.
+    "research/**", // Upstream evidence copies under research/*/sources keep upstream style verbatim.
     "**/*.js",
     "**/*.mjs",
     "**/*.config.ts", // Tool and app configs are outside the repository TypeScript programs.

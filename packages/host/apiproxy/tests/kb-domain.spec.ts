@@ -17,6 +17,7 @@ import SessionStore from '@deepseek-ai/dsh-session'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import UserQuestionService from '@deepseek-ai/dsh-user-questions'
 import { createApiProxy } from '../src/api-proxy.ts'
+import { kbUploadRequestSchema } from '../src/api/kb.schema.ts'
 import type { RpcRequest } from '../src/api/rpc.ts'
 
 /** A kb seam stub recording the tenant each call lands on. */
@@ -52,6 +53,11 @@ async function harness(defaults: {
   kbWriteEnabled?: boolean
   ingestFailure?: Error
   cwd?: string
+  webFetch?: (request: { url: string; pinnedAddresses?: readonly string[] }) => Promise<{
+    statusCode: number
+    body: { kind: 'html' | 'text'; content: string }
+    truncated: boolean
+  }>
 }) {
   const stub = kbStub(
     defaults.ingestFailure === undefined ? {} : { ingestFailure: defaults.ingestFailure },
@@ -63,6 +69,13 @@ async function harness(defaults: {
   await ctx.plugin(AgentRegistry)
   ctx.provide('kb', stub.kb as never)
   ctx.provide('fs', { resolve: async (path: string) => path, readText: async () => '# 走访纪要' } as never)
+  if (defaults.webFetch !== undefined) {
+    const fetch = defaults.webFetch
+    ctx.provide('web', { fetch: async (request: { url: string; pinnedAddresses?: readonly string[] }) => ({
+      url: request.url,
+      ...await fetch(request),
+    }) } as never)
+  }
   const api = createApiProxy(ctx, {
     defaultModelSelection: () => ({ provider: 'p', model: 'm' }),
     saveDefaultModelSelection: async () => {},
@@ -140,6 +153,58 @@ describe('kb workbench deployment gates', () => {
   })
 })
 
+describe('kb URL ingest', () => {
+  it('pins the workbench URL fetch to the addresses the SSRF gate admitted', async () => {
+    const pins: (readonly string[] | undefined)[] = []
+    const { api, ingestArgs, ctx } = await harness({
+      kbTenant: 'demo-food-co',
+      kbWriteEnabled: true,
+      webFetch: async (request) => {
+        pins.push(request.pinnedAddresses)
+        return { statusCode: 200, body: { kind: 'text', content: 'pinned workbench page' }, truncated: false }
+      },
+    })
+    const ingested = await api.kb.ingestUrl(request('r', { url: 'http://8.8.8.8/docs' }))
+    expect(ingested.result.ok).toBe(true)
+    // The literal public host's admitted address rode the fetch request, so
+    // DNS cannot re-answer between the gate and the connect.
+    expect(pins).toEqual([['8.8.8.8']])
+    expect(ingestArgs.at(-1)).toMatchObject({ sourcePath: 'http://8.8.8.8/docs', content: 'pinned workbench page' })
+    await ctx.fiber.dispose()
+  })
+})
+
+describe('kb upload request schema', () => {
+  it('accepts a multi-megabyte canonical base64 body without exhausting the validation stack', () => {
+    // The wire gate must hold for the channel's normal payload size (the cap
+    // is 64 MiB); the previous whole-string regex threw "Maximum call stack
+    // size exceeded" from ~3.5 MB of input.
+    const data = Buffer.alloc(20 * 1024 * 1024, 97).toString('base64')
+    expect(kbUploadRequestSchema.safeParse({ filename: 'big.md', data }).success).toBe(true)
+  })
+
+  it('keeps refusing lenient base64 shapes Node would silently mis-decode', () => {
+    for (const data of [
+      'eA', // missing padding
+      'eA=', // one-character padding never exists in RFC-4648
+      'A===', // one alphabet byte plus three padding
+      'aGVsbG8', // unpadded tail
+      'aGVsbG8 ', // whitespace the Node decoder would drop
+      'aGVsbG8\n', // newline the Node decoder would drop
+      'aGVsbG8-', // URL-safe alphabet
+      'eXA=eA==', // a second quartet after the padded one
+    ]) {
+      expect(kbUploadRequestSchema.safeParse({ filename: 'a.md', data }).success, JSON.stringify(data)).toBe(false)
+    }
+  })
+
+  it('keeps accepting the canonical quartet forms including the empty body', () => {
+    for (const data of ['', 'eA==', 'eXA=', 'aGVsbG8=']) {
+      expect(kbUploadRequestSchema.safeParse({ filename: 'a.md', data }).success, JSON.stringify(data)).toBe(true)
+    }
+  })
+})
+
 describe('kb upload channel', () => {
   /** A writable harness over a fresh temp host cwd, so landings are observable. */
   async function uploadHarness() {
@@ -164,6 +229,21 @@ describe('kb upload channel', () => {
     })
     // The durable landing is byte-identical to what the browser sent.
     expect(readFileSync(join(cwd, 'workspace/data/uploads/visit-note.md'), 'utf8')).toBe('# 走访纪要\n宏达塑业准时率 96%。')
+    await ctx.fiber.dispose()
+  })
+
+  it('reports whether a same-name re-upload replaced the prior landing', async () => {
+    const { api, ctx } = await uploadHarness()
+    const first = await api.kb.upload(request('r', {
+      filename: 'note.md',
+      data: Buffer.from('# v1').toString('base64'),
+    }))
+    expect(first.result).toMatchObject({ ok: true, value: { replaced: false } })
+    const second = await api.kb.upload(request('r', {
+      filename: 'note.md',
+      data: Buffer.from('# v2').toString('base64'),
+    }))
+    expect(second.result).toMatchObject({ ok: true, value: { replaced: true } })
     await ctx.fiber.dispose()
   })
 

@@ -16,6 +16,10 @@ export type KbKey =
   | 'tool.ingestTitle'
   | 'tool.ingestUrlTitle'
   | 'tool.statsTitle'
+  | 'tool.discoverTitle'
+  | 'tool.datasetsUnit'
+  | 'tool.orderCreateTitle'
+  | 'tool.orderStatusTitle'
   | 'hero.title'
   | 'hero.tagline'
   | 'hero.sample1'
@@ -68,6 +72,7 @@ export type KbKey =
   | 'ingest.uploadHint'
   | 'ingest.uploadRowBusy'
   | 'ingest.uploadRowDone'
+  | 'ingest.uploadRowDoneLake'
   | 'ingest.uploadRowFailed'
   | 'ingest.uploadTooLarge'
   | 'ingest.urlPlaceholder'
@@ -78,6 +83,9 @@ export type KbKey =
   | 'ingest.action'
   | 'ingest.busy'
   | 'ingest.done'
+  | 'ingest.doneReplaced'
+  | 'ingest.doneLake'
+  | 'ingest.doneLakeReplaced'
   | 'ingest.close'
   | 'ingest.pathMissing'
   | 'ingest.urlUnreachable'
@@ -106,6 +114,10 @@ export const zh: Record<KbKey, string> = {
   'tool.ingestTitle': '文档入库',
   'tool.ingestUrlTitle': '网页入库',
   'tool.statsTitle': '知识库用量查询',
+  'tool.discoverTitle': '连接器数据集发现',
+  'tool.datasetsUnit': '{n} 个数据集',
+  'tool.orderCreateTitle': '专家服务下单',
+  'tool.orderStatusTitle': '订单状态查询',
   'hero.title': '食品产业知识库问答',
   'hero.tagline': '检索企业文档 · 带编号引用回答 · 覆盖合规/工艺/成本/供应链',
   'hero.sample1': '酱油中山梨酸钾的最大使用量？',
@@ -155,9 +167,10 @@ export const zh: Record<KbKey, string> = {
   'ingest.tabUrl': '网页链接',
   'ingest.tabFile': '服务器文件',
   'ingest.uploadPick': '选择文件（可多选）',
-  'ingest.uploadHint': '支持 md / txt / pdf / docx，单文件最大 64 MiB，入库后可随时检索',
+  'ingest.uploadHint': '支持 md / txt / pdf / docx 入知识库，csv / xlsx / json 入数据湖，单文件最大 64 MiB',
   'ingest.uploadRowBusy': '上传中…',
   'ingest.uploadRowDone': '已入库 · {chunks} 个片段',
+  'ingest.uploadRowDoneLake': '已入数据湖 · {table} · {rows} 行',
   'ingest.uploadRowFailed': '入库失败',
   'ingest.uploadTooLarge': '文件超过 64 MiB 上限',
   'ingest.urlPlaceholder': 'https://…',
@@ -168,6 +181,9 @@ export const zh: Record<KbKey, string> = {
   'ingest.action': '入库',
   'ingest.busy': '入库中…',
   'ingest.done': '已入库：{name} · {chunks} 个片段',
+  'ingest.doneReplaced': '已替换同名文档：{name} · {chunks} 个片段',
+  'ingest.doneLake': '已入数据湖：{table} · {rows} 行',
+  'ingest.doneLakeReplaced': '已替换同名数据表：{table} · {rows} 行',
   'ingest.close': '关闭',
   'ingest.pathMissing': '找不到这份文件，请重新选择',
   'ingest.urlUnreachable': '网页无法访问，请检查链接',
@@ -197,6 +213,10 @@ export const en: Record<KbKey, string> = {
   'tool.ingestTitle': 'Add document',
   'tool.ingestUrlTitle': 'Add web page',
   'tool.statsTitle': 'Knowledge-base usage',
+  'tool.discoverTitle': 'Connector discovery',
+  'tool.orderCreateTitle': 'Expert service order',
+  'tool.orderStatusTitle': 'Order status',
+  'tool.datasetsUnit': '{n} datasets',
   'hero.title': 'Food-industry knowledge Q&A',
   'hero.tagline': 'Search your documents · cited answers across compliance, process, cost and supply',
   'hero.sample1': 'What is the max sorbate level in soy sauce?',
@@ -246,9 +266,10 @@ export const en: Record<KbKey, string> = {
   'ingest.tabUrl': 'Web link',
   'ingest.tabFile': 'Server file',
   'ingest.uploadPick': 'Choose files (multiple allowed)',
-  'ingest.uploadHint': 'md / txt / pdf / docx, up to 64 MiB each; searchable right after ingest',
+  'ingest.uploadHint': 'md / txt / pdf / docx land in the knowledge base; csv / xlsx / json land in the lakehouse; up to 64 MiB each',
   'ingest.uploadRowBusy': 'Uploading…',
   'ingest.uploadRowDone': 'Ingested · {chunks} passages',
+  'ingest.uploadRowDoneLake': 'Loaded to lakehouse · {table} · {rows} rows',
   'ingest.uploadRowFailed': 'Ingest failed',
   'ingest.uploadTooLarge': 'File exceeds the 64 MiB limit',
   'ingest.urlPlaceholder': 'https://…',
@@ -259,6 +280,9 @@ export const en: Record<KbKey, string> = {
   'ingest.action': 'Add',
   'ingest.busy': 'Adding…',
   'ingest.done': 'Ingested: {name} · {chunks} passages',
+  'ingest.doneReplaced': 'Replaced the existing document: {name} · {chunks} passages',
+  'ingest.doneLake': 'Loaded to lakehouse: {table} · {rows} rows',
+  'ingest.doneLakeReplaced': 'Replaced the existing table: {table} · {rows} rows',
   'ingest.close': 'Close',
   'ingest.pathMissing': 'Cannot find that file; pick again',
   'ingest.urlUnreachable': 'That page is unreachable; check the link',

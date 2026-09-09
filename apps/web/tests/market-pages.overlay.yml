@@ -1,0 +1,13 @@
+# The market + connector pages scenario: the shipped web-app bundle keeps the
+# gateway's domain gates opt-in, so this overlay opts in for the in-process
+# stack the scenario mounts after boot — the assets market (seeded featured
+# rail from the example's own seed file), the orders write path behind the
+# confirm card, and the connector page's read surface. The seed path is
+# cwd-relative (the lane runs from the repository root).
+- id: api-gateway
+  config:
+    kbTenant: default
+    ordersEnabled: true
+    assetsEnabled: true
+    assetsSeedPath: examples/kb-agent/workspace/data/market/seed.json
+    connectorsEnabled: true

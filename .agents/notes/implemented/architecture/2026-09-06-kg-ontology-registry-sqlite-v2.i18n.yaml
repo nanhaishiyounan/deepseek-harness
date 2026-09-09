@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-09-06-kg-ontology-registry-sqlite-v2.md
+2026-09-06-kg-ontology-registry-sqlite-v2.md: ef6b7a82c89b36ff785ccab7d1d3e356826532ad
+2026-09-06-kg-ontology-registry-sqlite-v2.zh.md: ff2f803755c403f3d7238baae469b4cc3eda446c

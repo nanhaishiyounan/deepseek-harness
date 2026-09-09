@@ -1,0 +1,16 @@
+{
+  "scene": "C7-chat-query",
+  "ts": "2026-09-08T17:07:04.663Z",
+  "question": "中亚方向食品出海有哪些风险",
+  "preset": "AI 食安合规官",
+  "retrievals": [
+    "中亚 食品出口 风险 合规 · 7 条来源",
+    "哈萨克斯坦 食品 准入 标签 要求 · 7 条来源",
+    "中亚 海关 食品添加剂 限量 标准 · 8 条来源"
+  ],
+  "citations": "引用来源\n\n[1] workspace/data/export-compliance/2026-08-eac-certification-guide.md —适用法规组合\n[2] workspace/data/export-compliance/2026-08-eac-certification-guide.md — 时间与费用（示例区间）\n[3] workspace/data/export-compliance/2026-08-eac-certification-guide.md — 与俄罗斯国内要求叠加\n[4] workspace/data/export-compliance/2026-08-eac-certification-guide.md — 常见驳回原因\n[5] examples/kb-agent/workspace/data/regulations/gb2760-excerpt.md — GB 2760 要点摘录\n[6] examples/kb-agent/workspace/data/meetings/2026-08-20-supplier-visit-hongfa.md — 宏发食品走访纪要\n[7] workspace/data/quality/2026-08-pesticide-residue-control.md — 检测计划设计\n[8] workspace/data/cold-chain/2026-08-tir-road-export.md — 风险红线 / 操作链路\n[9] workspace/data/uploads/verify-upload-no",
+  "answerHeadings": [
+    "一、市场准入与法规风险",
+    "二、标签与包装合规风险"
+  ]
+}

@@ -1,105 +1,725 @@
 {
-  "description": "食品产业知识库 100 问评测集：覆盖市场洞察/工艺/食安/成本测算/供应链五类需求（对齐 2026-08-27 会议纪要）。每问标注期望命中文档 gold（workspace 相对路径）；gold 文档包含回答该问所需的事实。语料均为脱敏示例。",
+  "description": "食品产业知识库 120 问评测集（100 基础 + 20 出海风险）：覆盖市场洞察/工艺/食安/成本测算/供应链五类需求（对齐 2026-08-27 会议纪要）。每问标注期望命中文档 gold（workspace 相对路径）；gold 文档包含回答该问所需的事实。语料均为脱敏示例。",
   "questions": [
-    { "id": 1, "category": "市场洞察", "query": "2026 年上半年调味品行业零售规模是多少", "gold": "workspace/data/market/2026-08-market-insight-condiment.md" },
-    { "id": 2, "category": "市场洞察", "query": "复合调味料的同比增速是多少", "gold": "workspace/data/market/2026-08-market-insight-condiment.md" },
-    { "id": 3, "category": "市场洞察", "query": "味精品类近年走势如何", "gold": "workspace/data/market/2026-08-market-insight-condiment.md" },
-    { "id": 4, "category": "市场洞察", "query": "酱油高端化率提升到多少", "gold": "workspace/data/market/2026-08-market-insight-condiment.md" },
-    { "id": 5, "category": "市场洞察", "query": "调味品线上渠道占比是多少", "gold": "workspace/data/market/2026-08-market-insight-condiment.md" },
-    { "id": 6, "category": "市场洞察", "query": "即时零售买调味品的增速", "gold": "workspace/data/market/2026-08-market-insight-condiment.md" },
-    { "id": 7, "category": "市场洞察", "query": "原材料成本占调味品企业营业成本的比例", "gold": "workspace/data/market/2026-08-market-insight-condiment.md" },
-    { "id": 8, "category": "市场洞察", "query": "调味品行业头部品牌集中度 CR5", "gold": "workspace/data/market/2026-08-market-insight-condiment.md" },
-    { "id": 9, "category": "市场洞察", "query": "蚝油在华南市场的渗透情况", "gold": "workspace/data/market/2026-08-market-insight-condiment.md" },
-    { "id": 10, "category": "市场洞察", "query": "区域调味品品牌出海方向建议", "gold": "workspace/data/market/2026-08-market-insight-condiment.md" },
-    { "id": 11, "category": "市场洞察", "query": "中国休闲食品市场规模预计多少", "gold": "workspace/data/market/2026-08-market-insight-snack.md" },
-    { "id": 12, "category": "市场洞察", "query": "健康化零食细分增速", "gold": "workspace/data/market/2026-08-market-insight-snack.md" },
-    { "id": 13, "category": "市场洞察", "query": "Z 世代贡献多少休闲食品消费额", "gold": "workspace/data/market/2026-08-market-insight-snack.md" },
-    { "id": 14, "category": "市场洞察", "query": "魔芋制品低卡赛道增速", "gold": "workspace/data/market/2026-08-market-insight-snack.md" },
-    { "id": 15, "category": "市场洞察", "query": "短保烘焙保质期多少天", "gold": "workspace/data/market/2026-08-market-insight-snack.md" },
-    { "id": 16, "category": "市场洞察", "query": "零食量贩店门店数突破多少", "gold": "workspace/data/market/2026-08-market-insight-snack.md" },
-    { "id": 17, "category": "市场洞察", "query": "量贩渠道的账期与毛利要求", "gold": "workspace/data/market/2026-08-market-insight-snack.md" },
-    { "id": 18, "category": "市场洞察", "query": "辣味零食哪些口味搜索量翻倍", "gold": "workspace/data/market/2026-08-market-insight-snack.md" },
-    { "id": 19, "category": "市场洞察", "query": "银发族零食需求缺口", "gold": "workspace/data/market/2026-08-market-insight-snack.md" },
-    { "id": 20, "category": "市场洞察", "query": "传统商超渠道份额降到多少", "gold": "workspace/data/market/2026-08-market-insight-snack.md" },
-    { "id": 21, "category": "工艺", "query": "高盐稀态酱油发酵周期多久", "gold": "workspace/data/process/2026-08-process-soy-sauce.md" },
-    { "id": 22, "category": "工艺", "query": "制曲温度如何控制", "gold": "workspace/data/process/2026-08-process-soy-sauce.md" },
-    { "id": 23, "category": "工艺", "query": "成曲蛋白酶活力标准是多少", "gold": "workspace/data/process/2026-08-process-soy-sauce.md" },
-    { "id": 24, "category": "工艺", "query": "发酵盐水浓度与拌曲比", "gold": "workspace/data/process/2026-08-process-soy-sauce.md" },
-    { "id": 25, "category": "工艺", "query": "豆粕蒸煮压力参数", "gold": "workspace/data/process/2026-08-process-soy-sauce.md" },
-    { "id": 26, "category": "工艺", "query": "酱油板式换热器灭菌温度时间", "gold": "workspace/data/process/2026-08-process-soy-sauce.md" },
-    { "id": 27, "category": "工艺", "query": "酱醪压榨出油率目标", "gold": "workspace/data/process/2026-08-process-soy-sauce.md" },
-    { "id": 28, "category": "工艺", "query": "蛋白酶活力不足怎么处置", "gold": "workspace/data/process/2026-08-process-soy-sauce.md" },
-    { "id": 29, "category": "工艺", "query": "发酵产酸过快的原因与处置", "gold": "workspace/data/process/2026-08-process-soy-sauce.md" },
-    { "id": 30, "category": "工艺", "query": "发酵全氮含量要求", "gold": "workspace/data/process/2026-08-process-soy-sauce.md" },
-    { "id": 31, "category": "工艺", "query": "UHT 超高温灭菌参数", "gold": "workspace/data/process/2026-08-process-sterilization.md" },
-    { "id": 32, "category": "工艺", "query": "热灌装灌装温度多少", "gold": "workspace/data/process/2026-08-process-sterilization.md" },
-    { "id": 33, "category": "工艺", "query": "商业无菌保温试验要求", "gold": "workspace/data/process/2026-08-process-sterilization.md" },
-    { "id": 34, "category": "工艺", "query": "热灌装瓶颈空气残留要求", "gold": "workspace/data/process/2026-08-process-sterilization.md" },
-    { "id": 35, "category": "工艺", "query": "无菌灌装间洁净度等级", "gold": "workspace/data/process/2026-08-process-sterilization.md" },
-    { "id": 36, "category": "工艺", "query": "维生素 C 保留率 UHT 与热灌装对比", "gold": "workspace/data/process/2026-08-process-sterilization.md" },
-    { "id": 37, "category": "工艺", "query": "UHT 与热灌装产线投资对比", "gold": "workspace/data/process/2026-08-process-sterilization.md" },
-    { "id": 38, "category": "工艺", "query": "单瓶综合加工成本对比", "gold": "workspace/data/process/2026-08-process-sterilization.md" },
-    { "id": 39, "category": "工艺", "query": "低酸蛋白饮料应选什么灭菌工艺", "gold": "workspace/data/process/2026-08-process-sterilization.md" },
-    { "id": 40, "category": "工艺", "query": "UHT 处理后果汁褐变指数", "gold": "workspace/data/process/2026-08-process-sterilization.md" },
-    { "id": 41, "category": "食安", "query": "GB 2760 添加剂使用基本原则", "gold": "workspace/data/regulations/gb2760-excerpt.md" },
-    { "id": 42, "category": "食安", "query": "配料带入原则的要求", "gold": "workspace/data/regulations/gb2760-excerpt.md" },
-    { "id": 43, "category": "食安", "query": "防腐剂在酱油中的使用要求", "gold": "workspace/data/regulations/gb2760-excerpt.md" },
-    { "id": 44, "category": "食安", "query": "甜味剂限量查询注意什么", "gold": "workspace/data/regulations/gb2760-excerpt.md" },
-    { "id": 45, "category": "食安", "query": "复配添加剂如何核算带入量", "gold": "workspace/data/regulations/gb2760-excerpt.md" },
-    { "id": 46, "category": "食安", "query": "清洁作业区与非清洁作业区隔离要求", "gold": "workspace/data/regulations/gb14881-excerpt.md" },
-    { "id": 47, "category": "食安", "query": "原料验收的要求", "gold": "workspace/data/regulations/gb14881-excerpt.md" },
-    { "id": 48, "category": "食安", "query": "微生物监测常规必检项目", "gold": "workspace/data/regulations/gb14881-excerpt.md" },
-    { "id": 49, "category": "食安", "query": "生产检验记录保存期限", "gold": "workspace/data/regulations/gb14881-excerpt.md" },
-    { "id": 50, "category": "食安", "query": "交叉污染防控要求", "gold": "workspace/data/regulations/gb14881-excerpt.md" },
-    { "id": 51, "category": "食安", "query": "更衣室洗手消毒设施配置要求", "gold": "workspace/data/food-safety/2026-08-audit-checklist.md" },
-    { "id": 52, "category": "食安", "query": "飞虫监控灯安装高度", "gold": "workspace/data/food-safety/2026-08-audit-checklist.md" },
-    { "id": 53, "category": "食安", "query": "挡鼠板高度要求", "gold": "workspace/data/food-safety/2026-08-audit-checklist.md" },
-    { "id": 54, "category": "食安", "query": "CIP 清洗碱液浓度范围", "gold": "workspace/data/food-safety/2026-08-audit-checklist.md" },
-    { "id": 55, "category": "食安", "query": "食品接触面 ATP 限值", "gold": "workspace/data/food-safety/2026-08-audit-checklist.md" },
-    { "id": 56, "category": "食安", "query": "追溯演练频率与完成时限", "gold": "workspace/data/food-safety/2026-08-audit-checklist.md" },
-    { "id": 57, "category": "食安", "query": "食品设备润滑剂等级要求", "gold": "workspace/data/food-safety/2026-08-audit-checklist.md" },
-    { "id": 58, "category": "食安", "query": "直接接触食品人员健康证要求", "gold": "workspace/data/food-safety/2026-08-audit-checklist.md" },
-    { "id": 59, "category": "食安", "query": "内审常见不符合项第一名", "gold": "workspace/data/food-safety/2026-08-audit-checklist.md" },
-    { "id": 60, "category": "食安", "query": "实验室试剂管理要求", "gold": "workspace/data/food-safety/2026-08-audit-checklist.md" },
-    { "id": 61, "category": "成本测算", "query": "川式麻辣酱每吨原料成本合计", "gold": "workspace/data/cost/2026-08-cost-formula.md" },
-    { "id": 62, "category": "成本测算", "query": "花椒在配方中的配比与单价", "gold": "workspace/data/cost/2026-08-cost-formula.md" },
-    { "id": 63, "category": "成本测算", "query": "花椒占配方成本比例", "gold": "workspace/data/cost/2026-08-cost-formula.md" },
-    { "id": 64, "category": "成本测算", "query": "玻璃瓶包装折合每吨成本", "gold": "workspace/data/cost/2026-08-cost-formula.md" },
-    { "id": 65, "category": "成本测算", "query": "麻辣酱完全成本构成", "gold": "workspace/data/cost/2026-08-cost-formula.md" },
-    { "id": 66, "category": "成本测算", "query": "麻辣酱出厂价与毛利率", "gold": "workspace/data/cost/2026-08-cost-formula.md" },
-    { "id": 67, "category": "成本测算", "query": "花椒价格波动对毛利率的影响", "gold": "workspace/data/cost/2026-08-cost-formula.md" },
-    { "id": 68, "category": "成本测算", "query": "配方降本方向有哪些", "gold": "workspace/data/cost/2026-08-cost-formula.md" },
-    { "id": 69, "category": "成本测算", "query": "历史损耗率多少", "gold": "workspace/data/cost/2026-08-cost-formula.md" },
-    { "id": 70, "category": "成本测算", "query": "配方成本测算口径说明", "gold": "workspace/data/cost/2026-08-cost-formula.md" },
-    { "id": 71, "category": "成本测算", "query": "大豆油在麻辣酱配方中的用量", "gold": "workspace/data/cost/2026-08-cost-formula.md" },
-    { "id": 72, "category": "成本测算", "query": "麻辣酱出厂价多少", "gold": "workspace/data/cost/2026-08-cost-formula.md" },
-    { "id": 73, "category": "成本测算", "query": "宏发食品原材料占比多少", "gold": "workspace/data/profiles/hongfa-food.md" },
-    { "id": 74, "category": "成本测算", "query": "宏发食品三条产线年产能", "gold": "workspace/data/profiles/hongfa-food.md" },
-    { "id": 75, "category": "成本测算", "query": "宏发食品的体系认证", "gold": "workspace/data/profiles/hongfa-food.md" },
-    { "id": 76, "category": "成本测算", "query": "宏发食品认可的原材料成本口径", "gold": "workspace/data/profiles/hongfa-food.md" },
-    { "id": 77, "category": "成本测算", "query": "成本测算原材料口径会议决议", "gold": "workspace/data/meetings/2026-08-27-project-kickoff.md" },
-    { "id": 78, "category": "成本测算", "query": "能耗与人工分摊基数", "gold": "workspace/data/meetings/2026-08-27-project-kickoff.md" },
-    { "id": 79, "category": "成本测算", "query": "白糖到厂价较年初涨幅", "gold": "workspace/data/meetings/2026-08-20-supplier-visit-hongfa.md" },
-    { "id": 80, "category": "成本测算", "query": "预制菜配套调味料订单趋势", "gold": "workspace/data/meetings/2026-08-20-supplier-visit-hongfa.md" },
-    { "id": 81, "category": "供应链", "query": "白糖季度框架锁量策略", "gold": "workspace/data/supply/2026-08-supply-sugar.md" },
-    { "id": 82, "category": "供应链", "query": "甲糖贸交货准时率", "gold": "workspace/data/supply/2026-08-supply-sugar.md" },
-    { "id": 83, "category": "供应链", "query": "乙糖贸为什么列入观察名单", "gold": "workspace/data/supply/2026-08-supply-sugar.md" },
-    { "id": 84, "category": "供应链", "query": "进口原糖渠道启用条件", "gold": "workspace/data/supply/2026-08-supply-sugar.md" },
-    { "id": 85, "category": "供应链", "query": "豆粕库存周转天数", "gold": "workspace/data/supply/2026-08-supply-sugar.md" },
-    { "id": 86, "category": "供应链", "query": "白糖安全库存天数", "gold": "workspace/data/supply/2026-08-supply-sugar.md" },
-    { "id": 87, "category": "供应链", "query": "台风季运费风险", "gold": "workspace/data/supply/2026-08-supply-sugar.md" },
-    { "id": 88, "category": "供应链", "query": "白糖到厂运费多少", "gold": "workspace/data/supply/2026-08-supply-sugar.md" },
-    { "id": 89, "category": "供应链", "query": "四季度糖价决策", "gold": "workspace/data/supply/2026-08-supply-sugar.md" },
-    { "id": 90, "category": "供应链", "query": "玻璃瓶年度价格谈判目标", "gold": "workspace/data/supply/2026-08-supply-sugar.md" },
-    { "id": 91, "category": "供应链", "query": "宏达塑业瓶坯年产能", "gold": "workspace/data/supply/2026-08-supply-packaging.md" },
-    { "id": 92, "category": "供应链", "query": "瓶坯壁厚 CPK 多少", "gold": "workspace/data/supply/2026-08-supply-packaging.md" },
-    { "id": 93, "category": "供应链", "query": "轻量瓶坯报价多少", "gold": "workspace/data/supply/2026-08-supply-packaging.md" },
-    { "id": 94, "category": "供应链", "query": "金晟印铁产能利用率", "gold": "workspace/data/supply/2026-08-supply-packaging.md" },
-    { "id": 95, "category": "供应链", "query": "三片罐价格联动条款", "gold": "workspace/data/supply/2026-08-supply-packaging.md" },
-    { "id": 96, "category": "供应链", "query": "金属罐旺季提前多少天下单", "gold": "workspace/data/supply/2026-08-supply-packaging.md" },
-    { "id": 97, "category": "供应链", "query": "PET 与金属罐包材成本对比", "gold": "workspace/data/supply/2026-08-supply-packaging.md" },
-    { "id": 98, "category": "供应链", "query": "金晟印铁焊缝合格率", "gold": "workspace/data/supply/2026-08-supply-packaging.md" },
-    { "id": 99, "category": "供应链", "query": "食品接触材料合规标准系列", "gold": "workspace/data/supply/2026-08-supply-packaging.md" },
-    { "id": 100, "category": "供应链", "query": "包材供应商分级结论", "gold": "workspace/data/supply/2026-08-supply-packaging.md" }
+    {
+      "id": 1,
+      "category": "市场洞察",
+      "query": "2026 年上半年调味品行业零售规模是多少",
+      "gold": "workspace/data/market/2026-08-market-insight-condiment.md"
+    },
+    {
+      "id": 2,
+      "category": "市场洞察",
+      "query": "复合调味料的同比增速是多少",
+      "gold": "workspace/data/market/2026-08-market-insight-condiment.md"
+    },
+    {
+      "id": 3,
+      "category": "市场洞察",
+      "query": "味精品类近年走势如何",
+      "gold": "workspace/data/market/2026-08-market-insight-condiment.md"
+    },
+    {
+      "id": 4,
+      "category": "市场洞察",
+      "query": "酱油高端化率提升到多少",
+      "gold": "workspace/data/market/2026-08-market-insight-condiment.md"
+    },
+    {
+      "id": 5,
+      "category": "市场洞察",
+      "query": "调味品线上渠道占比是多少",
+      "gold": "workspace/data/market/2026-08-market-insight-condiment.md"
+    },
+    {
+      "id": 6,
+      "category": "市场洞察",
+      "query": "即时零售买调味品的增速",
+      "gold": "workspace/data/market/2026-08-market-insight-condiment.md"
+    },
+    {
+      "id": 7,
+      "category": "市场洞察",
+      "query": "原材料成本占调味品企业营业成本的比例",
+      "gold": "workspace/data/market/2026-08-market-insight-condiment.md"
+    },
+    {
+      "id": 8,
+      "category": "市场洞察",
+      "query": "调味品行业头部品牌集中度 CR5",
+      "gold": "workspace/data/market/2026-08-market-insight-condiment.md"
+    },
+    {
+      "id": 9,
+      "category": "市场洞察",
+      "query": "蚝油在华南市场的渗透情况",
+      "gold": "workspace/data/market/2026-08-market-insight-condiment.md"
+    },
+    {
+      "id": 10,
+      "category": "市场洞察",
+      "query": "区域调味品品牌出海方向建议",
+      "gold": "workspace/data/market/2026-08-market-insight-condiment.md"
+    },
+    {
+      "id": 11,
+      "category": "市场洞察",
+      "query": "中国休闲食品市场规模预计多少",
+      "gold": "workspace/data/market/2026-08-market-insight-snack.md"
+    },
+    {
+      "id": 12,
+      "category": "市场洞察",
+      "query": "健康化零食细分增速",
+      "gold": "workspace/data/market/2026-08-market-insight-snack.md"
+    },
+    {
+      "id": 13,
+      "category": "市场洞察",
+      "query": "Z 世代贡献多少休闲食品消费额",
+      "gold": "workspace/data/market/2026-08-market-insight-snack.md"
+    },
+    {
+      "id": 14,
+      "category": "市场洞察",
+      "query": "魔芋制品低卡赛道增速",
+      "gold": "workspace/data/market/2026-08-market-insight-snack.md"
+    },
+    {
+      "id": 15,
+      "category": "市场洞察",
+      "query": "短保烘焙保质期多少天",
+      "gold": "workspace/data/market/2026-08-market-insight-snack.md"
+    },
+    {
+      "id": 16,
+      "category": "市场洞察",
+      "query": "零食量贩店门店数突破多少",
+      "gold": "workspace/data/market/2026-08-market-insight-snack.md"
+    },
+    {
+      "id": 17,
+      "category": "市场洞察",
+      "query": "量贩渠道的账期与毛利要求",
+      "gold": "workspace/data/market/2026-08-market-insight-snack.md"
+    },
+    {
+      "id": 18,
+      "category": "市场洞察",
+      "query": "辣味零食哪些口味搜索量翻倍",
+      "gold": "workspace/data/market/2026-08-market-insight-snack.md"
+    },
+    {
+      "id": 19,
+      "category": "市场洞察",
+      "query": "银发族零食需求缺口",
+      "gold": "workspace/data/market/2026-08-market-insight-snack.md"
+    },
+    {
+      "id": 20,
+      "category": "市场洞察",
+      "query": "传统商超渠道份额降到多少",
+      "gold": "workspace/data/market/2026-08-market-insight-snack.md"
+    },
+    {
+      "id": 21,
+      "category": "工艺",
+      "query": "高盐稀态酱油发酵周期多久",
+      "gold": "workspace/data/process/2026-08-process-soy-sauce.md"
+    },
+    {
+      "id": 22,
+      "category": "工艺",
+      "query": "制曲温度如何控制",
+      "gold": "workspace/data/process/2026-08-process-soy-sauce.md"
+    },
+    {
+      "id": 23,
+      "category": "工艺",
+      "query": "成曲蛋白酶活力标准是多少",
+      "gold": "workspace/data/process/2026-08-process-soy-sauce.md"
+    },
+    {
+      "id": 24,
+      "category": "工艺",
+      "query": "发酵盐水浓度与拌曲比",
+      "gold": "workspace/data/process/2026-08-process-soy-sauce.md"
+    },
+    {
+      "id": 25,
+      "category": "工艺",
+      "query": "豆粕蒸煮压力参数",
+      "gold": "workspace/data/process/2026-08-process-soy-sauce.md"
+    },
+    {
+      "id": 26,
+      "category": "工艺",
+      "query": "酱油板式换热器灭菌温度时间",
+      "gold": "workspace/data/process/2026-08-process-soy-sauce.md"
+    },
+    {
+      "id": 27,
+      "category": "工艺",
+      "query": "酱醪压榨出油率目标",
+      "gold": "workspace/data/process/2026-08-process-soy-sauce.md"
+    },
+    {
+      "id": 28,
+      "category": "工艺",
+      "query": "蛋白酶活力不足怎么处置",
+      "gold": "workspace/data/process/2026-08-process-soy-sauce.md"
+    },
+    {
+      "id": 29,
+      "category": "工艺",
+      "query": "发酵产酸过快的原因与处置",
+      "gold": "workspace/data/process/2026-08-process-soy-sauce.md"
+    },
+    {
+      "id": 30,
+      "category": "工艺",
+      "query": "发酵全氮含量要求",
+      "gold": "workspace/data/process/2026-08-process-soy-sauce.md"
+    },
+    {
+      "id": 31,
+      "category": "工艺",
+      "query": "UHT 超高温灭菌参数",
+      "gold": "workspace/data/process/2026-08-process-sterilization.md"
+    },
+    {
+      "id": 32,
+      "category": "工艺",
+      "query": "热灌装灌装温度多少",
+      "gold": "workspace/data/process/2026-08-process-sterilization.md"
+    },
+    {
+      "id": 33,
+      "category": "工艺",
+      "query": "商业无菌保温试验要求",
+      "gold": "workspace/data/process/2026-08-process-sterilization.md"
+    },
+    {
+      "id": 34,
+      "category": "工艺",
+      "query": "热灌装瓶颈空气残留要求",
+      "gold": "workspace/data/process/2026-08-process-sterilization.md"
+    },
+    {
+      "id": 35,
+      "category": "工艺",
+      "query": "无菌灌装间洁净度等级",
+      "gold": "workspace/data/process/2026-08-process-sterilization.md"
+    },
+    {
+      "id": 36,
+      "category": "工艺",
+      "query": "维生素 C 保留率 UHT 与热灌装对比",
+      "gold": "workspace/data/process/2026-08-process-sterilization.md"
+    },
+    {
+      "id": 37,
+      "category": "工艺",
+      "query": "UHT 与热灌装产线投资对比",
+      "gold": "workspace/data/process/2026-08-process-sterilization.md"
+    },
+    {
+      "id": 38,
+      "category": "工艺",
+      "query": "单瓶综合加工成本对比",
+      "gold": "workspace/data/process/2026-08-process-sterilization.md"
+    },
+    {
+      "id": 39,
+      "category": "工艺",
+      "query": "低酸蛋白饮料应选什么灭菌工艺",
+      "gold": "workspace/data/process/2026-08-process-sterilization.md"
+    },
+    {
+      "id": 40,
+      "category": "工艺",
+      "query": "UHT 处理后果汁褐变指数",
+      "gold": "workspace/data/process/2026-08-process-sterilization.md"
+    },
+    {
+      "id": 41,
+      "category": "食安",
+      "query": "GB 2760 添加剂使用基本原则",
+      "gold": "workspace/data/regulations/gb2760-excerpt.md"
+    },
+    {
+      "id": 42,
+      "category": "食安",
+      "query": "配料带入原则的要求",
+      "gold": "workspace/data/regulations/gb2760-excerpt.md"
+    },
+    {
+      "id": 43,
+      "category": "食安",
+      "query": "防腐剂在酱油中的使用要求",
+      "gold": "workspace/data/regulations/gb2760-excerpt.md"
+    },
+    {
+      "id": 44,
+      "category": "食安",
+      "query": "甜味剂限量查询注意什么",
+      "gold": "workspace/data/regulations/gb2760-excerpt.md"
+    },
+    {
+      "id": 45,
+      "category": "食安",
+      "query": "复配添加剂如何核算带入量",
+      "gold": "workspace/data/regulations/gb2760-excerpt.md"
+    },
+    {
+      "id": 46,
+      "category": "食安",
+      "query": "清洁作业区与非清洁作业区隔离要求",
+      "gold": "workspace/data/regulations/gb14881-excerpt.md"
+    },
+    {
+      "id": 47,
+      "category": "食安",
+      "query": "原料验收的要求",
+      "gold": "workspace/data/regulations/gb14881-excerpt.md"
+    },
+    {
+      "id": 48,
+      "category": "食安",
+      "query": "微生物监测常规必检项目",
+      "gold": "workspace/data/regulations/gb14881-excerpt.md"
+    },
+    {
+      "id": 49,
+      "category": "食安",
+      "query": "生产检验记录保存期限",
+      "gold": "workspace/data/regulations/gb14881-excerpt.md"
+    },
+    {
+      "id": 50,
+      "category": "食安",
+      "query": "交叉污染防控要求",
+      "gold": "workspace/data/regulations/gb14881-excerpt.md"
+    },
+    {
+      "id": 51,
+      "category": "食安",
+      "query": "更衣室洗手消毒设施配置要求",
+      "gold": "workspace/data/food-safety/2026-08-audit-checklist.md"
+    },
+    {
+      "id": 52,
+      "category": "食安",
+      "query": "飞虫监控灯安装高度",
+      "gold": "workspace/data/food-safety/2026-08-audit-checklist.md"
+    },
+    {
+      "id": 53,
+      "category": "食安",
+      "query": "挡鼠板高度要求",
+      "gold": "workspace/data/food-safety/2026-08-audit-checklist.md"
+    },
+    {
+      "id": 54,
+      "category": "食安",
+      "query": "CIP 清洗碱液浓度范围",
+      "gold": "workspace/data/food-safety/2026-08-audit-checklist.md"
+    },
+    {
+      "id": 55,
+      "category": "食安",
+      "query": "食品接触面 ATP 限值",
+      "gold": "workspace/data/food-safety/2026-08-audit-checklist.md"
+    },
+    {
+      "id": 56,
+      "category": "食安",
+      "query": "追溯演练频率与完成时限",
+      "gold": "workspace/data/food-safety/2026-08-audit-checklist.md"
+    },
+    {
+      "id": 57,
+      "category": "食安",
+      "query": "食品设备润滑剂等级要求",
+      "gold": "workspace/data/food-safety/2026-08-audit-checklist.md"
+    },
+    {
+      "id": 58,
+      "category": "食安",
+      "query": "直接接触食品人员健康证要求",
+      "gold": "workspace/data/food-safety/2026-08-audit-checklist.md"
+    },
+    {
+      "id": 59,
+      "category": "食安",
+      "query": "内审常见不符合项第一名",
+      "gold": "workspace/data/food-safety/2026-08-audit-checklist.md"
+    },
+    {
+      "id": 60,
+      "category": "食安",
+      "query": "实验室试剂管理要求",
+      "gold": "workspace/data/food-safety/2026-08-audit-checklist.md"
+    },
+    {
+      "id": 61,
+      "category": "成本测算",
+      "query": "川式麻辣酱每吨原料成本合计",
+      "gold": "workspace/data/cost/2026-08-cost-formula.md"
+    },
+    {
+      "id": 62,
+      "category": "成本测算",
+      "query": "花椒在配方中的配比与单价",
+      "gold": "workspace/data/cost/2026-08-cost-formula.md"
+    },
+    {
+      "id": 63,
+      "category": "成本测算",
+      "query": "花椒占配方成本比例",
+      "gold": "workspace/data/cost/2026-08-cost-formula.md"
+    },
+    {
+      "id": 64,
+      "category": "成本测算",
+      "query": "玻璃瓶包装折合每吨成本",
+      "gold": "workspace/data/cost/2026-08-cost-formula.md"
+    },
+    {
+      "id": 65,
+      "category": "成本测算",
+      "query": "麻辣酱完全成本构成",
+      "gold": "workspace/data/cost/2026-08-cost-formula.md"
+    },
+    {
+      "id": 66,
+      "category": "成本测算",
+      "query": "麻辣酱出厂价与毛利率",
+      "gold": "workspace/data/cost/2026-08-cost-formula.md"
+    },
+    {
+      "id": 67,
+      "category": "成本测算",
+      "query": "花椒价格波动对毛利率的影响",
+      "gold": "workspace/data/cost/2026-08-cost-formula.md"
+    },
+    {
+      "id": 68,
+      "category": "成本测算",
+      "query": "配方降本方向有哪些",
+      "gold": "workspace/data/cost/2026-08-cost-formula.md"
+    },
+    {
+      "id": 69,
+      "category": "成本测算",
+      "query": "历史损耗率多少",
+      "gold": "workspace/data/cost/2026-08-cost-formula.md"
+    },
+    {
+      "id": 70,
+      "category": "成本测算",
+      "query": "配方成本测算口径说明",
+      "gold": "workspace/data/cost/2026-08-cost-formula.md"
+    },
+    {
+      "id": 71,
+      "category": "成本测算",
+      "query": "大豆油在麻辣酱配方中的用量",
+      "gold": "workspace/data/cost/2026-08-cost-formula.md"
+    },
+    {
+      "id": 72,
+      "category": "成本测算",
+      "query": "麻辣酱出厂价多少",
+      "gold": "workspace/data/cost/2026-08-cost-formula.md"
+    },
+    {
+      "id": 73,
+      "category": "成本测算",
+      "query": "宏发食品原材料占比多少",
+      "gold": "workspace/data/profiles/hongfa-food.md"
+    },
+    {
+      "id": 74,
+      "category": "成本测算",
+      "query": "宏发食品三条产线年产能",
+      "gold": "workspace/data/profiles/hongfa-food.md"
+    },
+    {
+      "id": 75,
+      "category": "成本测算",
+      "query": "宏发食品的体系认证",
+      "gold": "workspace/data/profiles/hongfa-food.md"
+    },
+    {
+      "id": 76,
+      "category": "成本测算",
+      "query": "宏发食品认可的原材料成本口径",
+      "gold": "workspace/data/profiles/hongfa-food.md"
+    },
+    {
+      "id": 77,
+      "category": "成本测算",
+      "query": "成本测算原材料口径会议决议",
+      "gold": "workspace/data/meetings/2026-08-27-project-kickoff.md"
+    },
+    {
+      "id": 78,
+      "category": "成本测算",
+      "query": "能耗与人工分摊基数",
+      "gold": "workspace/data/meetings/2026-08-27-project-kickoff.md"
+    },
+    {
+      "id": 79,
+      "category": "成本测算",
+      "query": "白糖到厂价较年初涨幅",
+      "gold": "workspace/data/meetings/2026-08-20-supplier-visit-hongfa.md"
+    },
+    {
+      "id": 80,
+      "category": "成本测算",
+      "query": "预制菜配套调味料订单趋势",
+      "gold": "workspace/data/meetings/2026-08-20-supplier-visit-hongfa.md"
+    },
+    {
+      "id": 81,
+      "category": "供应链",
+      "query": "白糖季度框架锁量策略",
+      "gold": "workspace/data/supply/2026-08-supply-sugar.md"
+    },
+    {
+      "id": 82,
+      "category": "供应链",
+      "query": "甲糖贸交货准时率",
+      "gold": "workspace/data/supply/2026-08-supply-sugar.md"
+    },
+    {
+      "id": 83,
+      "category": "供应链",
+      "query": "乙糖贸为什么列入观察名单",
+      "gold": "workspace/data/supply/2026-08-supply-sugar.md"
+    },
+    {
+      "id": 84,
+      "category": "供应链",
+      "query": "进口原糖渠道启用条件",
+      "gold": "workspace/data/supply/2026-08-supply-sugar.md"
+    },
+    {
+      "id": 85,
+      "category": "供应链",
+      "query": "豆粕库存周转天数",
+      "gold": "workspace/data/supply/2026-08-supply-sugar.md"
+    },
+    {
+      "id": 86,
+      "category": "供应链",
+      "query": "白糖安全库存天数",
+      "gold": "workspace/data/supply/2026-08-supply-sugar.md"
+    },
+    {
+      "id": 87,
+      "category": "供应链",
+      "query": "台风季运费风险",
+      "gold": "workspace/data/supply/2026-08-supply-sugar.md"
+    },
+    {
+      "id": 88,
+      "category": "供应链",
+      "query": "白糖到厂运费多少",
+      "gold": "workspace/data/supply/2026-08-supply-sugar.md"
+    },
+    {
+      "id": 89,
+      "category": "供应链",
+      "query": "四季度糖价决策",
+      "gold": "workspace/data/supply/2026-08-supply-sugar.md"
+    },
+    {
+      "id": 90,
+      "category": "供应链",
+      "query": "玻璃瓶年度价格谈判目标",
+      "gold": "workspace/data/supply/2026-08-supply-sugar.md"
+    },
+    {
+      "id": 91,
+      "category": "供应链",
+      "query": "宏达塑业瓶坯年产能",
+      "gold": "workspace/data/supply/2026-08-supply-packaging.md"
+    },
+    {
+      "id": 92,
+      "category": "供应链",
+      "query": "瓶坯壁厚 CPK 多少",
+      "gold": "workspace/data/supply/2026-08-supply-packaging.md"
+    },
+    {
+      "id": 93,
+      "category": "供应链",
+      "query": "轻量瓶坯报价多少",
+      "gold": "workspace/data/supply/2026-08-supply-packaging.md"
+    },
+    {
+      "id": 94,
+      "category": "供应链",
+      "query": "金晟印铁产能利用率",
+      "gold": "workspace/data/supply/2026-08-supply-packaging.md"
+    },
+    {
+      "id": 95,
+      "category": "供应链",
+      "query": "三片罐价格联动条款",
+      "gold": "workspace/data/supply/2026-08-supply-packaging.md"
+    },
+    {
+      "id": 96,
+      "category": "供应链",
+      "query": "金属罐旺季提前多少天下单",
+      "gold": "workspace/data/supply/2026-08-supply-packaging.md"
+    },
+    {
+      "id": 97,
+      "category": "供应链",
+      "query": "PET 与金属罐包材成本对比",
+      "gold": "workspace/data/supply/2026-08-supply-packaging.md"
+    },
+    {
+      "id": 98,
+      "category": "供应链",
+      "query": "金晟印铁焊缝合格率",
+      "gold": "workspace/data/supply/2026-08-supply-packaging.md"
+    },
+    {
+      "id": 99,
+      "category": "供应链",
+      "query": "食品接触材料合规标准系列",
+      "gold": "workspace/data/supply/2026-08-supply-packaging.md"
+    },
+    {
+      "id": 100,
+      "category": "供应链",
+      "query": "包材供应商分级结论",
+      "gold": "workspace/data/supply/2026-08-supply-packaging.md"
+    },
+    {
+      "id": 101,
+      "category": "出海风险",
+      "query": "俄罗斯的海外仓被炸受损后第一时间应该做什么",
+      "gold": "workspace/data/export-risk/2026-08-russia-warehouse-emergency.md"
+    },
+    {
+      "id": 102,
+      "category": "出海风险",
+      "query": "莫斯科主仓受损后库存转移到哪个备份仓",
+      "gold": "workspace/data/export-risk/2026-08-russia-warehouse-emergency.md"
+    },
+    {
+      "id": 103,
+      "category": "出海风险",
+      "query": "海外仓受损后客户订单交期如何重新承诺",
+      "gold": "workspace/data/export-risk/2026-08-russia-warehouse-emergency.md"
+    },
+    {
+      "id": 104,
+      "category": "出海风险",
+      "query": "仓库被炸后向保险公司报案需要哪些索赔单证",
+      "gold": "workspace/data/export-risk/2026-08-cargo-insurance-claims.md"
+    },
+    {
+      "id": 105,
+      "category": "出海风险",
+      "query": "战争险的费率水平大概是多少",
+      "gold": "workspace/data/export-risk/2026-08-cargo-insurance-claims.md"
+    },
+    {
+      "id": 106,
+      "category": "出海风险",
+      "query": "货运保险常见的拒赔原因有哪些",
+      "gold": "workspace/data/export-risk/2026-08-cargo-insurance-claims.md"
+    },
+    {
+      "id": 107,
+      "category": "出海风险",
+      "query": "食品出海的一主两备仓储网络怎么布局",
+      "gold": "workspace/data/export-risk/2026-08-backup-warehouse-network.md"
+    },
+    {
+      "id": 108,
+      "category": "出海风险",
+      "query": "单仓库存占区域周转需求的比例上限是多少",
+      "gold": "workspace/data/export-risk/2026-08-backup-warehouse-network.md"
+    },
+    {
+      "id": 109,
+      "category": "出海风险",
+      "query": "中亚方向选备份仓的四条标准是什么",
+      "gold": "workspace/data/export-risk/2026-08-backup-warehouse-network.md"
+    },
+    {
+      "id": 110,
+      "category": "出海风险",
+      "query": "阿拉山口口岸受阻后班列怎么改道",
+      "gold": "workspace/data/export-risk/2026-08-china-russia-rail-corridor.md"
+    },
+    {
+      "id": 111,
+      "category": "出海风险",
+      "query": "中俄班列到莫斯科全程需要多少天",
+      "gold": "workspace/data/export-risk/2026-08-china-russia-rail-corridor.md"
+    },
+    {
+      "id": 112,
+      "category": "出海风险",
+      "query": "班列食品冷藏箱舱位要提前多久订",
+      "gold": "workspace/data/export-risk/2026-08-china-russia-rail-corridor.md"
+    },
+    {
+      "id": 113,
+      "category": "出海风险",
+      "query": "TIR 证由哪个机构签发",
+      "gold": "workspace/data/export-risk/2026-08-tir-road-transport.md"
+    },
+    {
+      "id": 114,
+      "category": "出海风险",
+      "query": "公路运输从郑州到阿拉木图要几天",
+      "gold": "workspace/data/export-risk/2026-08-tir-road-transport.md"
+    },
+    {
+      "id": 115,
+      "category": "出海风险",
+      "query": "食品出口俄罗斯需要什么认证",
+      "gold": "workspace/data/export-risk/2026-08-central-asia-customs.md"
+    },
+    {
+      "id": 116,
+      "category": "出海风险",
+      "query": "俄罗斯的食品增值税税率是多少",
+      "gold": "workspace/data/export-risk/2026-08-central-asia-customs.md"
+    },
+    {
+      "id": 117,
+      "category": "出海风险",
+      "query": "对俄直发受阻有哪三条转口走廊",
+      "gold": "workspace/data/export-risk/2026-08-central-asia-transit.md"
+    },
+    {
+      "id": 118,
+      "category": "出海风险",
+      "query": "铁路直达改哈萨克走廊转口成本增加多少",
+      "gold": "workspace/data/export-risk/2026-08-central-asia-transit.md"
+    },
+    {
+      "id": 119,
+      "category": "出海风险",
+      "query": "海运改道时食品剩余货架期的惯例要求",
+      "gold": "workspace/data/export-risk/2026-08-ocean-rerouting.md"
+    },
+    {
+      "id": 120,
+      "category": "出海风险",
+      "query": "CMR 公约下运输迟延索赔要在多少天内提出",
+      "gold": "workspace/data/regulations/2026-08-cim-cmr-force-majeure-excerpt.md"
+    }
   ]
 }

@@ -24,14 +24,18 @@ export type KbStatsCache =
   | { readonly status: 'ready'; readonly usage: KbUsageSnapshot }
   | { readonly status: 'error'; readonly error: string }
 
-/** One session-local document record (an ingest receipt or a search sighting). */
+/** One session-local document record (an ingest receipt, a lakehouse landing, or a search sighting). */
 export interface KbDocumentRecord {
-  /** Display name (the hit-card source rule). */
+  /** Display name (the hit-card source rule; a table name for lakehouse landings). */
   readonly name: string
   /** Full relative source path (identity; also the hover title). */
   readonly path: string
-  /** Passage count when this record came from an ingest receipt. */
+  /** Passage count when this record came from a kb ingest receipt. */
   readonly chunks?: number
+  /** Where the upload landed; absent means the kb document channel. */
+  readonly destination?: 'kb' | 'lakehouse'
+  /** Row count when this record came from a lakehouse upload receipt. */
+  readonly rows?: number
   /** Epoch milliseconds of the first sighting this session. */
   readonly at: number
 }
@@ -57,8 +61,8 @@ export interface KbClientStore {
   setStats(usage: KbUsageSnapshot): void
   /** Record a failed stats load. */
   failStats(message: string): void
-  /** Record one ingest receipt (refreshes nothing else; apply also reloads stats). */
-  noteIngested(record: { name: string; path: string; chunks: number }): void
+  /** Record one ingest receipt from either upload destination (refreshes nothing else; apply also reloads stats). */
+  noteIngested(record: { name: string; path: string; chunks?: number; destination?: 'kb' | 'lakehouse'; rows?: number }): void
   /** Fold search hits into the records (existing paths only refresh recency). */
   noteSearched(paths: readonly string[], nameOf: (path: string) => string): void
 }
@@ -89,7 +93,11 @@ export function createKbClientStore(): KbClientStore {
     noteIngested(receipt): void {
       const existing = record(receipt.path)
       const next: KbDocumentRecord = {
-        name: receipt.name, path: receipt.path, chunks: receipt.chunks,
+        name: receipt.name,
+        path: receipt.path,
+        ...receipt.chunks === undefined ? {} : { chunks: receipt.chunks },
+        ...receipt.destination === undefined ? {} : { destination: receipt.destination },
+        ...receipt.rows === undefined ? {} : { rows: receipt.rows },
         at: existing?.at ?? Date.now(),
       }
       patch({ records: [next, ...store.getSnapshot().records.filter(item => item.path !== receipt.path)] })

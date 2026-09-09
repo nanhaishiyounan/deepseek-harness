@@ -149,6 +149,9 @@ const packageFileExtras: Readonly<Record<string, readonly string[]>> = {
   '@deepseek-ai/dsh-client-ui-primitives': ['lib/**/*.css'],
   '@deepseek-ai/dsh-client-web': ['lib/**/*.css'],
   '@deepseek-ai/dsh-client-ui-theme': ['lib/styles'],
+  // The typesetting library ships its bundled CJK face (SIL OFL 1.1, license
+  // beside it) as a package resource the runtime reads next to lib/.
+  '@deepseek-ai/dsh-expert-pdf': ['resources/fonts/NotoSansSC-Regular.otf', 'resources/fonts/LICENSE'],
   // The CPython side ships as source .py files, published as-is rather than built.
   '@deepseek-ai/dsh-code-runtime-python': ['py/**/*.py'],
   // The Python runtime uses a distinct closed-resolution bin; the public CLI

@@ -1,0 +1,18 @@
+{
+  "scene": "Phase4-exploration",
+  "ts": "2026-09-08T17:18:32.927Z",
+  "E1_lifecycle": {
+    "reload_kept_tab": "数据资产 tab survived reload",
+    "back_forward": "restored, content loaded, no errors"
+  },
+  "rapid_pagination": {
+    "clicks": 5,
+    "network_delta": 0,
+    "remaining": "还有 32 项",
+    "note": "front-end incremental render, no request storm"
+  },
+  "mobile_viewport_375x812": "market page renders single-column cards, no fatal breakage (demo-level OK)",
+  "console_after_reload": "1 a11y issue only (form field id/name), zero JS errors",
+  "websocket_issue": "ws://localhost:3080/nocobase/ws handshake failed 25+ retries while iframe mounted (before reload)",
+  "attachment_404": "/files/main/main/attachments/1.png 404 both direct :13000 and via iframe; /nocobase/files/... returns 200 (pre-existing data-side issue)"
+}

@@ -246,6 +246,71 @@ describe('client bundle activation', () => {
   })
 })
 
+describe('client bundle route surface', () => {
+  /** Run one GET through the registered /plugins route and report status + body. */
+  async function get(route: WebRoute, url: string): Promise<{ status: number; body: string }> {
+    let status = 0
+    let body = ''
+    const response = {
+      writeHead(nextStatus: number) {
+        status = nextStatus
+        return response
+      },
+      end(chunk?: Uint8Array) {
+        body = chunk === undefined ? '' : Buffer.from(chunk).toString('utf8')
+        return response
+      },
+    } as unknown as ServerResponse
+    await route.handler({ method: 'GET', url } as IncomingMessage, response)
+    return { status, body }
+  }
+
+  it('serves the registered client bundle itself', async () => {
+    const packageName = '@fixture/route'
+    const clientPath = writePackage(packageName)
+    mkdirSync(dirname(clientPath), { recursive: true })
+    writeFileSync(clientPath, 'module.exports = {}\n')
+    const { route } = constructWithRoute([packageName])
+
+    const served = await get(route, `/plugins/${packageName}/client.js`)
+
+    expect(served.status).toBe(200)
+    expect(served.body).toBe('module.exports = {}\n')
+  })
+
+  it('refuses a sibling chunk file under the package lib directory', async () => {
+    const packageName = '@fixture/route-chunk'
+    const clientPath = writePackage(packageName)
+    mkdirSync(dirname(clientPath), { recursive: true })
+    writeFileSync(clientPath, 'module.exports = {}\n')
+    writeFileSync(join(dirname(clientPath), 'rolldown-runtime-DEADBEAF.cjs'), 'module.exports = {}\n')
+    const { route } = constructWithRoute([packageName])
+
+    // A dsh.client bundle must be one client.js; a hashed chunk on disk next
+    // to it is a split bundle the browser module table cannot load anyway.
+    const refused = await get(route, `/plugins/${packageName}/rolldown-runtime-DEADBEAF.cjs`)
+
+    expect(refused.status).toBe(404)
+  })
+
+  it('refuses path traversal out of the registered ids', async () => {
+    const packageName = '@fixture/route-guard'
+    const clientPath = writePackage(packageName)
+    mkdirSync(dirname(clientPath), { recursive: true })
+    writeFileSync(clientPath, 'module.exports = {}\n')
+    const secretRoot = join(root!, 'secret')
+    mkdirSync(secretRoot, { recursive: true })
+    writeFileSync(join(secretRoot, 'client.js'), 'module.exports = "secret"\n')
+    const { route } = constructWithRoute([packageName])
+
+    // Dot segments fold at URL parse; percent-encoded ones reach the id lookup
+    // intact. Both must stay 404: the route answers registered ids only and
+    // never joins request segments onto the filesystem.
+    expect((await get(route, `/plugins/${packageName}/../../secret/client.js`)).status).toBe(404)
+    expect((await get(route, `/plugins/${packageName}/%2e%2e/%2e%2e/secret/client.js`)).status).toBe(404)
+  })
+})
+
 describe('shared module declarations', () => {
   it('accepts external requests and carries them onto the graph row', () => {
     const packageName = '@fixture/shared-declared'

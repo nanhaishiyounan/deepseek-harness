@@ -38,6 +38,13 @@ import AgentLoop from '@deepseek-ai/dsh-agent-loop'
 import AgentPresets from '@deepseek-ai/dsh-agent-presets'
 import * as Persona from '@deepseek-ai/dsh-persona'
 import * as ToolKb from '@deepseek-ai/dsh-tool-kb'
+import LakehouseRuntime from '@deepseek-ai/dsh-lakehouse'
+import * as LakehouseSqliteCatalog from '@deepseek-ai/dsh-lakehouse-sqlite-catalog'
+import * as LakehouseDuckDb from '@deepseek-ai/dsh-lakehouse-duckdb'
+import * as ToolLakehouse from '@deepseek-ai/dsh-tool-lakehouse'
+import ConnectorRuntime from '@deepseek-ai/dsh-connector'
+import * as ToolConnector from '@deepseek-ai/dsh-tool-connector'
+import * as ToolNocoBase from '@deepseek-ai/dsh-tool-nocobase'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const exampleRoot = join(here, '..')
@@ -73,6 +80,8 @@ afterEach(async () => {
   delete process.env.KB_TEST_ROOT
   delete process.env.KB_TEST_DB
   delete process.env.KB_TEST_EMBED_ENV
+  delete process.env.LH_TEST_ROOT
+  delete process.env.LH_TEST_DB
   delete process.env.KB_TEST_PRESET_ROOT
   await ctx?.fiber.dispose()
   ctx = undefined
@@ -108,6 +117,13 @@ async function boot(): Promise<Context> {
     ['@deepseek-ai/dsh-agent-presets', AgentPresets],
     ['@deepseek-ai/dsh-persona', Persona],
     ['@deepseek-ai/dsh-tool-kb', ToolKb],
+    ['@deepseek-ai/dsh-lakehouse', LakehouseRuntime],
+    ['@deepseek-ai/dsh-lakehouse-sqlite-catalog', LakehouseSqliteCatalog],
+    ['@deepseek-ai/dsh-lakehouse-duckdb', LakehouseDuckDb],
+    ['@deepseek-ai/dsh-tool-lakehouse', ToolLakehouse],
+    ['@deepseek-ai/dsh-connector', ConnectorRuntime],
+    ['@deepseek-ai/dsh-tool-connector', ToolConnector],
+    ['@deepseek-ai/dsh-tool-nocobase', ToolNocoBase],
   ])
   context.loader.internal = {
     version: 'v2',
@@ -188,7 +204,14 @@ describe('kb-agent role presets (keyless, text-only degraded mode)', () => {
 
       const names = toolNames(agent)
       out.push(`- tools: ${names.join(', ')}`)
-      expect(names).toEqual(['kb_graph_add', 'kb_graph_query', 'kb_ingest', 'kb_ingest_url', 'kb_search', 'kb_stats'])
+      // The compliance officer stays kb-only; the data assistant adds the
+      // lakehouse, connector, and NocoBase business suites (its persona
+      // routes all four surfaces).
+      const kbTools = ['kb_graph_add', 'kb_graph_query', 'kb_ingest', 'kb_ingest_url', 'kb_search', 'kb_stats', 'kg_schema', 'kg_subgraph']
+      const expectedTools = preset.id === 'enterprise-data-assistant'
+        ? [...kbTools, 'lakehouse_query', 'lakehouse_tables', 'connector_discover', 'connector_fetch', 'connector_transfer', 'order_create', 'order_status', 'nb_collections', 'nb_list', 'nb_get', 'nb_create', 'nb_update'].sort()
+        : kbTools
+      expect(names).toEqual(expectedTools)
 
       const assembly = await ctx!.systemPrompt.assemble(assembleContextFor(agent))
       const prompt = renderPrompt(assembly)

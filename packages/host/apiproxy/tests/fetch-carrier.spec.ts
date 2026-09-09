@@ -18,12 +18,42 @@ function fakeApi(overrides: Partial<{ muxFrames: MuxFrame[]; hostFrames: HostFra
   const kbRefuse = async (request: RpcRequest<unknown>): Promise<{ rpcId: typeof request.rpcId; result: { ok: false; error: { code: 'internal'; message: string; details: {} } } }> =>
     ({ rpcId: request.rpcId, result: { ok: false, error: { code: 'internal', message: 'kb stub', details: {} } } })
   return {
+    data: { upload: kbRefuse },
+    orders: {
+      create: kbRefuse,
+      get: kbRefuse,
+      list: kbRefuse,
+      fulfill: kbRefuse,
+      async download() { return new Response('stub', { status: 500 }) },
+    },
+    assets: {
+      list: kbRefuse,
+      detail: kbRefuse,
+      stats: kbRefuse,
+    },
+    connectors: {
+      list: kbRefuse,
+      connections: kbRefuse,
+      transfers: kbRefuse,
+    },
+    kg: {
+      schema: kbRefuse,
+      search: kbRefuse,
+      subgraph: kbRefuse,
+      expand: kbRefuse,
+      stats: kbRefuse,
+    },
     kb: {
       stats: kbRefuse,
       search: kbRefuse,
       ingest: kbRefuse,
       ingestUrl: kbRefuse,
       upload: kbRefuse,
+    },
+    nocobase: {
+      listMeta: kbRefuse,
+      list: kbRefuse,
+      get: kbRefuse,
     },
     sessions: {
       async list(request) {

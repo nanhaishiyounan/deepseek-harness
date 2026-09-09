@@ -1,0 +1,19 @@
+/**
+ * This file is part of the NocoBase (R) project.
+ * Copyright (c) 2020-2024 NocoBase Co., Ltd.
+ * Authors: NocoBase Team.
+ *
+ * This project is dual-licensed under AGPL-3.0 and NocoBase Commercial License.
+ * For more information, please refer to: https://www.nocobase.com/agreement.
+ */
+
+export { default } from './plugin';
+export { LLMProvider, LLMProviderOptions } from './llm-providers/provider';
+export { LLMProviderMeta } from './manager/ai-manager';
+export { ToolOptions } from './manager/tool-manager';
+export { DocumentLoader } from './document-loader';
+export { AIEmployee } from './ai-employees/ai-employee';
+export type { AIEmployeeOptions, ModelRef } from './ai-employees/ai-employee';
+export type { ParsedDocumentResult, ParseableFile, DocumentParseMeta } from './document-loader';
+export type * from './features';
+export type * from './types';

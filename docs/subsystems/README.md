@@ -28,6 +28,8 @@ One page per subsystem of the DeepSeek Harness: what it is, the data structures 
 | [approval.md](approval.md) | the one-shot user-approval seam: `ApprovalRequest`, `ApprovalOutcome`, per-session policy, audit events, and answerer contracts |
 | [attachment.md](attachment.md) | durable image identity and metadata, validation inputs, verified reads, and the `AttachmentStore` seam |
 | [kb.md](kb.md) | the knowledge-base seam: `KbStore`/`EmbedProvider` contracts, hybrid retrieval with RRF fusion, and the text-only degradation mode |
+| [lakehouse.md](lakehouse.md) | the lakehouse seam: `CatalogStore`/`QueryProvider` contracts, Parquet-backed load/query under tenant-scoped table exposure, and the no-engine fail-loud degradation |
+| [connector.md](connector.md) | the connector seam: `ConnectorProvider` registry, the unified dataset packet, and the five-step transfer that lands external datasets in the kb or the lakehouse through the shared data router |
 | [shell.md](shell.md) | the bash executor seam: `ShellExecRequest`/`Spec`, `ShellRunResult`, background `ShellProcess` handles |
 | [subprocess.md](subprocess.md) | the subprocess seam: fully-explicit `SubprocessSpawnSpec`, offset-based output readers, unclassified `SubprocessOutcome`, and the managed `DSH_*` environment vocabulary |
 | [terminal.md](terminal.md) | persistent terminal ids, backend/session contracts, send readiness, bounded reads, and owner-visible snapshots |

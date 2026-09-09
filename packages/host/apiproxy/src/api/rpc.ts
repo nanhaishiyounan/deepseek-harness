@@ -114,6 +114,58 @@ export interface RpcErrorDetailsMap {
   'kb-web-unavailable': {}
   /** A kb workbench ingest failed (unreadable source, parser, or seam refusal); the message is the cause's text. */
   'kb-ingest-failed': { path?: string; url?: string }
+  /** A nocobase-domain call ran in a deployment that did not opt in through `nocobaseEnabled`. */
+  'nocobase-not-composed': {}
+  /** A nocobase-domain call resolved no service-account credentials (base url or API key missing). */
+  'nocobase-unavailable': {}
+  /** A nocobase-domain call the backend refused (HTTP error, unknown collection); the message is the client's text. */
+  'nocobase-request-failed': {}
+  /** A nocobase.get named a row the backend does not have (the v2 wire answers `{data: null}`). */
+  'nocobase-row-missing': { collection: string; id: number }
+  /** An assets-domain call ran in a deployment that did not opt in through `assetsEnabled`. */
+  'assets-not-composed': {}
+  /** An assets-domain call found the deployment composing no connector capability. */
+  'assets-connector-missing': {}
+  /** An assets-domain call was refused by a provider or the seed file; the message is the cause's text. */
+  'assets-rejected': {}
+  /** An assets.detail named a dataset no provider declares. */
+  'assets-asset-missing': { providerId: string; datasetId: string }
+  /** A kg-domain call ran in a deployment that did not opt in through `kgEnabled`. */
+  'kg-not-composed': {}
+  /** A kg-domain call found the deployment composing no knowledge-graph seam. */
+  'kg-graph-missing': {}
+  /** A kg-domain call found no tenant binding (`kgTenant` unset). */
+  'kg-tenant-unbound': {}
+  /** A kg.subgraph seed list resolved to no node at all; the details carry the asked seeds. */
+  'kg-seed-unresolved': { seeds: string[] }
+  /** A kg-domain read failed at the graph store; the message is the cause's text. */
+  'kg-read-failed': {}
+  /** A connectors-domain call ran in a deployment that did not opt in through `connectorsEnabled`. */
+  'connectors-not-composed': {}
+  /** A connectors-domain call found the deployment composing no connector capability. */
+  'connectors-connector-missing': {}
+  /** A connectors-domain delivery read failed at the lakehouse seam; the message is the cause's text. */
+  'connectors-transfers-rejected': {}
+  /** An orders-domain call ran in a deployment that composes no orders capability (the expert-orders seam). */
+  'orders-not-composed': {}
+  /** An orders write (create/fulfill) ran in a deployment that did not opt in through `ordersEnabled`. */
+  'orders-write-disabled': {}
+  /** An orders call was refused by the seam (missing source, unknown order, illegal transition, pipeline failure). */
+  'orders-rejected': {}
+  /** A unified data upload ran in a deployment that did not opt into data writes (`dataUploadEnabled`). */
+  'data-write-disabled': {}
+  /** A unified data upload could not classify the file (no whitelisted extension or mime type). */
+  'data-unsupported-type': { filename: string }
+  /** A unified data upload's magic number contradicted its classified kind. */
+  'data-type-mismatch': { filename: string }
+  /** A unified data upload carried an empty body. */
+  'data-empty-file': { filename: string }
+  /** A unified data upload routed to the lakehouse in a deployment that composes none. */
+  'data-lakehouse-unavailable': {}
+  /** A unified data upload's decoded bytes exceeded the workbench byte limit. */
+  'data-upload-too-large': { filename: string; maxBytes: number }
+  /** A unified data upload failed (decode, parser, or seam refusal); the message is the cause's text. */
+  'data-ingest-failed': { path: string }
   'internal': {}
 }
 

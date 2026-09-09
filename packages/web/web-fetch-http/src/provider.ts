@@ -2,12 +2,19 @@
  * Safe HTTP(S) retrieval for `ctx.web`: validates URLs, follows only same-origin redirects,
  * enforces time and size limits, classifies and decodes text, and leaves presentation to
  * `@deepseek-ai/dsh-tool-web`. Requests carry no browser cookies or ambient credentials.
+ * A request's `pinnedAddresses` (from the caller's SSRF policy) connect directly, keeping
+ * the URL's Host header and TLS SNI, so DNS cannot re-answer between the policy check
+ * and the connect.
  *
- * Private-network and SSRF protection is not implemented; do not enable this provider where
- * it can reach sensitive internal targets.
+ * Admission policy itself is not implemented: the provider resolves hostnames normally
+ * for unpinned requests, so callers that need a private-network gate must run one and
+ * send its admitted addresses.
  * @module @deepseek-ai/dsh-web-fetch-http/provider
  */
 
+import { request as httpRequest } from 'node:http'
+import { request as httpsRequest } from 'node:https'
+import { Readable } from 'node:stream'
 import { WebError } from '@deepseek-ai/dsh-web'
 import type { WebFetchBody, WebFetchProvider, WebFetchRequest, WebFetchResult } from '@deepseek-ai/dsh-web'
 import { deadline, timeoutOf } from '@deepseek-ai/dsh-timeout'
@@ -29,6 +36,9 @@ export interface HttpFetchLimits {
   userAgent: string
 }
 
+/** The fixed `Accept` face every outbound request carries. */
+const ACCEPT_HEADER = 'text/html,application/xhtml+xml,text/*;q=0.9,application/json;q=0.8'
+
 /** Stable id this provider registers under. */
 export const LOCAL_FETCH_PROVIDER_ID = 'http'
 
@@ -49,16 +59,20 @@ export class HttpFetchProvider implements WebFetchProvider {
     // One signal stops both the request and body read. The deadline's TimeoutReason later
     // distinguishes this provider's timeout from caller or outer-deadline cancellation.
     using d = deadline(signal, this.limits.timeoutMs, 'WEB_FETCH_TIMEOUT')
-    return await this.followAndRead(request.url, d.signal)
+    return await this.followAndRead(request.url, d.signal, request.pinnedAddresses)
   }
 
   /** Follow same-origin redirects up to the hop cap, then read the final response. */
-  private async followAndRead(initialUrl: string, signal: AbortSignal): Promise<WebFetchResult> {
+  private async followAndRead(
+    initialUrl: string,
+    signal: AbortSignal,
+    pinnedAddresses: readonly string[] | undefined,
+  ): Promise<WebFetchResult> {
     let currentUrl = validateFetchUrl(initialUrl, this.limits.maxUrlLength)
     let redirectsFollowed = 0
 
     for (;;) {
-      const response = await this.requestOnce(currentUrl, signal)
+      const response = await this.requestOnce(currentUrl, signal, pinnedAddresses)
 
       if (isRedirectStatus(response.status)) {
         // Enforce the redirect budget before resolving or validating the next hop.
@@ -100,17 +114,78 @@ export class HttpFetchProvider implements WebFetchProvider {
     }
   }
 
-  private async requestOnce(url: URL, signal: AbortSignal): Promise<Response> {
-    try {
-      return await fetch(url, {
-        method: 'GET',
-        redirect: 'manual',
-        headers: { 'user-agent': this.limits.userAgent, 'accept': 'text/html,application/xhtml+xml,text/*;q=0.9,application/json;q=0.8' },
-        signal,
-      })
-    } catch (error: unknown) {
-      throw translateAbortOrNetwork(error, signal)
+  private async requestOnce(url: URL, signal: AbortSignal, pinnedAddresses: readonly string[] | undefined): Promise<Response> {
+    const pins = pinnedAddresses ?? []
+    if (pins.length === 0) {
+      try {
+        return await fetch(url, {
+          method: 'GET',
+          redirect: 'manual',
+          headers: { 'user-agent': this.limits.userAgent, 'accept': ACCEPT_HEADER },
+          signal,
+        })
+      } catch (error: unknown) {
+        throw translateAbortOrNetwork(error, signal)
+      }
     }
+    return await this.pinnedRequest(url, pins, signal)
+  }
+
+  /**
+   * Connect to the caller-admitted addresses directly, trying the next
+   * address when one refuses the connection. DNS is never consulted, so a
+   * re-answer between the caller's SSRF check and this connect cannot
+   * redirect the request to a host the check never saw.
+   */
+  private async pinnedRequest(url: URL, addresses: readonly string[], signal: AbortSignal): Promise<Response> {
+    let failure: unknown
+    for (const address of addresses) {
+      try {
+        return await this.connectPinned(url, address, signal)
+      } catch (error: unknown) {
+        failure = error
+        if (signal.aborted) break
+      }
+    }
+    throw translateAbortOrNetwork(failure, signal)
+  }
+
+  /**
+   * One pinned attempt: TCP to `address` while the Host header and TLS SNI
+   * keep the URL's own hostname (so virtual hosting and certificate
+   * verification stay truthful), wrapped into the same `Response` shape the
+   * fetch path produces.
+   */
+  private connectPinned(url: URL, address: string, signal: AbortSignal): Promise<Response> {
+    const secure = url.protocol === 'https:'
+    return new Promise<Response>((resolve, reject) => {
+      const send = secure ? httpsRequest : httpRequest
+      const request = send({
+        host: address,
+        /* v8 ignore next -- the default-port arms need a listener on privileged port 80/443; every pinned test binds an ephemeral port. */
+        port: url.port === '' ? (secure ? 443 : 80) : Number(url.port),
+        path: `${url.pathname}${url.search}`,
+        method: 'GET',
+        ...secure ? { servername: url.hostname } : {},
+        headers: { host: url.host, 'user-agent': this.limits.userAgent, 'accept': ACCEPT_HEADER },
+        signal,
+      }, (incoming) => {
+        const headers = new Headers()
+        for (const [name, value] of Object.entries(incoming.headers)) {
+          /* v8 ignore next -- Node omits absent headers instead of undefined-ing them; the index signature still allows undefined. */
+          if (value === undefined) continue
+          for (const item of Array.isArray(value) ? value : [value]) headers.append(name, item)
+        }
+        /* v8 ignore next -- a completed client response always carries statusCode; the property type stays optional. */
+        const status = incoming.statusCode ?? 200
+        // Null-body statuses reject a `Response` stream body outright; every
+        // other status streams so caps and decoding run on the live socket.
+        const bodyless = status === 204 || status === 205 || status === 304
+        resolve(new Response(bodyless ? null : Readable.toWeb(incoming) as unknown as ReadableStream<Uint8Array>, { status, headers }))
+      })
+      request.on('error', reject)
+      request.end()
+    })
   }
 
   /** Read, byte-cap, classify, and decode the final response body. */

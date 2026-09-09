@@ -2,10 +2,11 @@
 # enterprise-data Q&A and statistics-advice agent over the knowledge base.
 #
 # Same shape as `food-compliance-officer`: an AGENT-PLANE composition owning
-# only the persona and the kb tool suite (retrieval-first; no destructive
-# tools mounted). The kb capability seam stays in the HOST composition; the
-# tenant binding is environmental: this row and the host's `tool-kb`/
-# api-gateway rows read the same `DSH_KB_TENANT` (default `demo-food-co`).
+# only the persona and the kb/lakehouse/connector tool suites
+# (retrieval-first; no destructive tools mounted). The capability seams stay
+# in the HOST composition; the tenant binding is environmental: this row and
+# the host's `tool-kb`/api-gateway rows read the same `DSH_KB_TENANT`
+# (default `demo-food-co`).
 #
 # The persona targets the five meeting-minute demand categories (市场洞察 /
 # 工艺 / 食安 / 成本测算 / 供应链) and mandates structured, cited answers
@@ -19,9 +20,11 @@
 
       职责与工作方式：
       - 回答市场洞察、工艺、食品安全、成本测算、原材料供应链五类问题，依据知识库中的企业档案、走访纪要与会议纪要。
-      - 每次回答前先用 kb_search 检索；结论以 [n] 编号引用来源文档名与标题路径；引用企业档案与走访纪要时注明采集日期。
-      - 统计与测算类问题输出结构化建议：口径说明、数据来源、计算过程、结论与风险提示；不外推知识库没有的数据。
-      - 知识库无相关内容时如实说明，并建议补充哪类语料后再问。
+      - 按数据形态分流检索：业务记录（订单、专家、业务表）先用 nb_collections 了解结构，再用 nb_list/nb_get 读行；文档片段与事实性叙述用 kb_search，结论以 [n] 编号引用来源文档名与标题路径；数值、统计、汇总与清单类问题先查 lakehouse_tables，再用 lakehouse_query 写 SQL 查询上传的数据表，回答时注明数据来源表名；专家、外部数据集与可服务化商品用 connector_discover 发现（connector_fetch 预览，connector_transfer 落库后按落地位置用 lakehouse_query 或 kb_search 回答）。
+      - 用户要变更业务记录时走对话内确认流：先 nb_get 读当前行（或按 nb_collections 的字段拟新行），在对话里呈现完整预览——更新时逐字段给出改前→改后对比——获得用户明确同意后才调用 nb_create/nb_update；缺槽位先追问，不编造业务取值；只改用户点名的字段；把回执（落地 id 或改前→改后对比）交回用户作为确认。
+      - 引用企业档案与走访纪要时注明采集日期。
+      - 统计与测算类问题输出结构化建议：口径说明、数据来源、计算过程、结论与风险提示；不外推知识库与数据表没有的数据。
+      - 知识库与数据表均无相关内容时如实说明，并建议补充哪类语料或数据后再问。
 
 - id: tool-kb
   name: '@deepseek-ai/dsh-tool-kb'
@@ -31,3 +34,23 @@
     urlIngest: true
     stats: true
     tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"
+
+- id: tool-lakehouse
+  name: '@deepseek-ai/dsh-tool-lakehouse'
+  config:
+    tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"
+
+# The connector tool rows ride the same tenant binding as the kb and
+# lakehouse suites; the connector seam and its providers stay in the HOST
+# composition (cordis.patch.yml).
+- id: tool-connector
+  name: '@deepseek-ai/dsh-tool-connector'
+  config:
+    tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"
+
+# The NocoBase business tools: schema discovery, row reads, and the
+# confirmed-change writes (the persona drives the preview → go-ahead →
+# receipt flow). Credentials come from NOCOBASE_BASE_URL/NOCOBASE_API_KEY
+# in the host environment.
+- id: tool-nocobase
+  name: '@deepseek-ai/dsh-tool-nocobase'

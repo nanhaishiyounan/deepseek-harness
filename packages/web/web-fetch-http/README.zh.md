@@ -46,6 +46,6 @@
 
 ## 已知限制与暂缓事项
 
-- **SSRF／私有网络防护暂缓**：不会阻止私有、loopback、link-local、multicast 或其他非公开目标，也不进行 DNS 解析后验证或逐跳重新验证（见 [web 能力 seam Agent Note](../../../.agents/notes/implemented/architecture/2026-06-24-web-capability-seam.zh.md)）。在此功能落地前，该提供方是 SSRF 原语；能够访问敏感内部网络目标的部署**禁止启用它**。
+- **SSRF 准入仍归调用方** —— 未携带 pinnedAddresses 的请求照常解析主机名，能触达敏感内部目标的部署必须自设准入门（见 [web 能力 seam Agent Note](../../../.agents/notes/implemented/architecture/2026-06-24-web-capability-seam.zh.md)）。请求携带的 `pinnedAddresses`（调用方准入门已解析并准入的地址集）会保持 URL 自身的 Host 头与 TLS SNI 直连，封死「校验后 DNS 改答」的 DNS-rebinding 窗口。
 - **只解码文本内容**：包括 html/xhtml 与 `text/*` 加 JSON/XML 家族；缺少 `Content-Type` 或任何二进制类型都会抛出 `WEB_UNSUPPORTED_CONTENT_TYPE`，可提取文本的 PDF 解码属于明确的暂缓工作。
 - **charset 只来自 `Content-Type` 标头**（默认为 UTF-8）：HTML `<meta charset>` 声明会被忽略；声明但无法识别的 charset 标签会抛出异常，而非回退。

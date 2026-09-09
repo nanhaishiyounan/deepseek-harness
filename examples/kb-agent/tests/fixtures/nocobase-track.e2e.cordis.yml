@@ -1,0 +1,43 @@
+# Test-only composition for the with-NocoBase real-track e2e: the live
+# expert-dataset backend pinned to the real NocoBase instance
+# setup-nocobase.mts brings up (NOCOBASE_BASE_URL / NOCOBASE_API_KEY from the
+# root .env), plus the live MiniMax draft stack — llm-minimax composes
+# unconditionally; without MINIMAX_API_KEY the provider stays unavailable and
+# the orders seam falls back to the named template, keeping the NocoBase
+# track itself keyless-friendly. The deliverables land in the spec's tmp dir.
+
+- id: settings
+  name: '@deepseek-ai/dsh-settings-file'
+
+- id: credentials
+  name: '@deepseek-ai/dsh-credentials-local'
+
+- id: llm
+  name: '@deepseek-ai/dsh-llm'
+
+- id: llm-minimax
+  name: '@deepseek-ai/dsh-llm-minimax'
+
+- id: connector
+  name: '@deepseek-ai/dsh-connector'
+
+- id: connector-nocobase
+  name: '@deepseek-ai/dsh-connector-nocobase'
+  config:
+    baseUrl: !!js "process.env.NC_TRACK_URL ?? ''"
+    apiKeyEnv: NOCOBASE_API_KEY
+
+- id: expert-orders
+  name: '@deepseek-ai/dsh-expert-orders'
+  config:
+    baseUrl: !!js "process.env.NC_TRACK_URL ?? ''"
+    apiKeyEnv: NOCOBASE_API_KEY
+    draftApiKeyEnv: MINIMAX_API_KEY
+    draftProvider: minimax
+    draftModel: MiniMax-M3
+    # Live drafting over this brief runs long: 4096 (the seam default)
+    # truncates the DraftSpec JSON mid-flight ("max-tokens" finish).
+    draftMaxTokens: 16384
+    draftTimeoutMs: 120000
+    tenant: demo-food-co
+    deliverablesDir: !!js "process.env.NC_TRACK_DELIVERABLES ?? 'workspace/deliverables'"

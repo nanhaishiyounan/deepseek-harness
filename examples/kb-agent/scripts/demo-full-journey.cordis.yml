@@ -1,0 +1,119 @@
+# Demo composition for demo-full-journey.mts: the assembled product surface the
+# three customer motions exercise — kb seam with live MiniMax embeddings,
+# lakehouse seam (SQLite catalog + DuckDB), connector seam with the NocoBase
+# provider pinned to the real backend (DEMO_NC_URL / NOCOBASE_API_KEY), the
+# expert-orders lifecycle (same NocoBase source, MiniMax-M3 drafting when the
+# key resolves), and the agent/session rows the gateway's unified upload
+# channel needs. Paths land in the script's temp workspace through DEMO_* env
+# overrides; nothing touches the example's committed workspace.
+
+- id: settings
+  name: '@deepseek-ai/dsh-settings-file'
+
+- id: credentials
+  name: '@deepseek-ai/dsh-credentials-local'
+
+- id: llm
+  name: '@deepseek-ai/dsh-llm'
+
+- id: llm-minimax
+  name: '@deepseek-ai/dsh-llm-minimax'
+
+- id: kb
+  name: '@deepseek-ai/dsh-kb'
+
+- id: kb-sqlite
+  name: '@deepseek-ai/dsh-kb-sqlite'
+  config:
+    path: !!js "process.env.DEMO_KB_DB ?? 'workspace/kb.sqlite'"
+
+- id: kb-embed-minimax
+  name: '@deepseek-ai/dsh-kb-embed-minimax'
+
+- id: fs-local
+  name: '@deepseek-ai/dsh-fs-local'
+  config:
+    cwd: !!js "process.env.DEMO_CWD ?? process.cwd()"
+
+- id: tools
+  name: '@deepseek-ai/dsh-tools'
+
+- id: system-prompt
+  name: '@deepseek-ai/dsh-system-prompt'
+  config:
+    persona: ''
+
+- id: kb-graph
+  name: '@deepseek-ai/dsh-kb-graph'
+
+- id: kb-graph-sqlite
+  name: '@deepseek-ai/dsh-kb-graph-sqlite'
+  config:
+    path: !!js "process.env.DEMO_KG_DB ?? 'workspace/kg-graph.sqlite'"
+
+- id: tool-nocobase
+  name: '@deepseek-ai/dsh-tool-nocobase'
+  config:
+    baseUrl: !!js "process.env.DEMO_NC_URL ?? ''"
+    apiKeyEnv: NOCOBASE_API_KEY
+
+- id: tool-kb
+  name: '@deepseek-ai/dsh-tool-kb'
+  config:
+    tenant: demo-food-co
+
+- id: lakehouse
+  name: '@deepseek-ai/dsh-lakehouse'
+  config:
+    dataRoot: !!js "process.env.DEMO_LH_ROOT ?? 'workspace/lakehouse'"
+
+- id: lakehouse-sqlite-catalog
+  name: '@deepseek-ai/dsh-lakehouse-sqlite-catalog'
+  config:
+    path: !!js "process.env.DEMO_LH_DB ?? 'workspace/lakehouse-catalog.sqlite'"
+
+- id: lakehouse-duckdb
+  name: '@deepseek-ai/dsh-lakehouse-duckdb'
+
+- id: tool-lakehouse
+  name: '@deepseek-ai/dsh-tool-lakehouse'
+  config:
+    tenant: demo-food-co
+
+- id: connector
+  name: '@deepseek-ai/dsh-connector'
+
+- id: connector-nocobase
+  name: '@deepseek-ai/dsh-connector-nocobase'
+  config:
+    baseUrl: !!js "process.env.DEMO_NC_URL ?? ''"
+    apiKeyEnv: NOCOBASE_API_KEY
+
+- id: tool-connector
+  name: '@deepseek-ai/dsh-tool-connector'
+  config:
+    tenant: demo-food-co
+
+- id: expert-orders
+  name: '@deepseek-ai/dsh-expert-orders'
+  config:
+    baseUrl: !!js "process.env.DEMO_NC_URL ?? ''"
+    apiKeyEnv: NOCOBASE_API_KEY
+    draftApiKeyEnv: MINIMAX_API_KEY
+    draftProvider: minimax
+    draftModel: MiniMax-M3
+    # Live drafting over the order brief runs long: the 4096 seam default
+    # truncates the DraftSpec JSON mid-flight.
+    draftMaxTokens: 16384
+    draftTimeoutMs: 120000
+    tenant: demo-food-co
+    deliverablesDir: !!js "process.env.DEMO_DELIVERABLES ?? 'workspace/deliverables'"
+
+- id: agent
+  name: '@deepseek-ai/dsh-agent'
+
+- id: session
+  name: '@deepseek-ai/dsh-session'
+
+- id: user-questions
+  name: '@deepseek-ai/dsh-user-questions'

@@ -1,0 +1,42 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "lib/types"
+  },
+  "include": [
+    "src"
+  ],
+  "references": [
+    {
+      "path": "../../../vendor/cordis"
+    },
+    {
+      "path": "../../../vendor/schemastery"
+    },
+    {
+      "path": "../../connector/connector"
+    },
+    {
+      "path": "../../connector/connector-nocobase"
+    },
+    {
+      "path": "../kb-graph"
+    },
+    {
+      "path": "../../lakehouse/lakehouse"
+    },
+    {
+      "path": "../../llm/llm"
+    },
+    {
+      "path": "../../util/launch-environment"
+    },
+    {
+      "path": "../../credentials/credentials"
+    },
+    {
+      "path": "../../runtime-diagnostics/invariants"
+    }
+  ]
+}

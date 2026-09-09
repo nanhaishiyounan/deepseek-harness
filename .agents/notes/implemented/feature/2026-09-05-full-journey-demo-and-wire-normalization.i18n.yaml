@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-09-05-full-journey-demo-and-wire-normalization.md
+2026-09-05-full-journey-demo-and-wire-normalization.md: 50881db3fc3e617bbca502b7c80fe9f6140de0f1
+2026-09-05-full-journey-demo-and-wire-normalization.zh.md: c82351fde28d31f708d024e6391f46d06be69e7c

@@ -1,0 +1,78 @@
+# Test-only composition for the with-key connector-flow e2e: the keyless
+# connector loop plus the live model stack (settings, credentials,
+# llm-minimax, and the MiniMax embedder). Self-skips without
+# MINIMAX_API_KEY; the NocoBase provider stays credential-less (unavailable)
+# while the file-set provider supplies the real datasets.
+
+- id: settings
+  name: '@deepseek-ai/dsh-settings-file'
+
+- id: credentials
+  name: '@deepseek-ai/dsh-credentials-local'
+
+- id: llm
+  name: '@deepseek-ai/dsh-llm'
+
+- id: llm-minimax
+  name: '@deepseek-ai/dsh-llm-minimax'
+
+- id: kb
+  name: '@deepseek-ai/dsh-kb'
+
+- id: kb-sqlite
+  name: '@deepseek-ai/dsh-kb-sqlite'
+  config:
+    path: !!js "process.env.KB_TEST_DB ?? 'workspace/kb.sqlite'"
+
+- id: kb-embed-minimax
+  name: '@deepseek-ai/dsh-kb-embed-minimax'
+
+- id: fs-local
+  name: '@deepseek-ai/dsh-fs-local'
+  config:
+    cwd: !!js "process.env.KB_TEST_ROOT ?? process.cwd()"
+
+- id: tools
+  name: '@deepseek-ai/dsh-tools'
+
+- id: system-prompt
+  name: '@deepseek-ai/dsh-system-prompt'
+
+- id: tool-kb
+  name: '@deepseek-ai/dsh-tool-kb'
+  config:
+    tenant: demo-food-co
+
+- id: lakehouse
+  name: '@deepseek-ai/dsh-lakehouse'
+  config:
+    dataRoot: !!js "process.env.LH_TEST_ROOT ?? 'workspace/lakehouse'"
+
+- id: lakehouse-sqlite-catalog
+  name: '@deepseek-ai/dsh-lakehouse-sqlite-catalog'
+  config:
+    path: !!js "process.env.LH_TEST_DB ?? ':memory:'"
+
+- id: lakehouse-duckdb
+  name: '@deepseek-ai/dsh-lakehouse-duckdb'
+
+- id: tool-lakehouse
+  name: '@deepseek-ai/dsh-tool-lakehouse'
+  config:
+    tenant: demo-food-co
+
+- id: connector
+  name: '@deepseek-ai/dsh-connector'
+
+- id: connector-file
+  name: '@deepseek-ai/dsh-connector-file'
+  config:
+    root: !!js "process.env.CF_TEST_FILES ?? 'workspace/data/connector-files'"
+
+- id: connector-nocobase
+  name: '@deepseek-ai/dsh-connector-nocobase'
+
+- id: tool-connector
+  name: '@deepseek-ai/dsh-tool-connector'
+  config:
+    tenant: demo-food-co

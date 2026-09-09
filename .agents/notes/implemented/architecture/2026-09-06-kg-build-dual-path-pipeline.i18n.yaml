@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-09-06-kg-build-dual-path-pipeline.md
+2026-09-06-kg-build-dual-path-pipeline.md: e32e472c63557709344389311421dea5490fc356
+2026-09-06-kg-build-dual-path-pipeline.zh.md: 47d7165c271d85fc2acb96dedf178d92817a0486

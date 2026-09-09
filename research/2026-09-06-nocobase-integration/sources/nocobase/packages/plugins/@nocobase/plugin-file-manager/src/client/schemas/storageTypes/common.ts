@@ -1,0 +1,121 @@
+/**
+ * This file is part of the NocoBase (R) project.
+ * Copyright (c) 2020-2024 NocoBase Co., Ltd.
+ * Authors: NocoBase Team.
+ *
+ * This project is dual-licensed under AGPL-3.0 and NocoBase Commercial License.
+ * For more information, please refer to: https://www.nocobase.com/agreement.
+ */
+
+import { FILE_SIZE_LIMIT_DEFAULT } from '../../../constants';
+import { NAMESPACE } from '../../locale';
+
+export default {
+  title: {
+    'x-component': 'CollectionField',
+    'x-decorator': 'FormItem',
+  },
+  name: {
+    'x-component': 'CollectionField',
+    'x-decorator': 'FormItem',
+    'x-disabled': '{{ !createOnly }}',
+    required: true,
+    default: '{{ useNewId("s_") }}',
+    description:
+      '{{t("Randomly generated and can be modified. Support letters, numbers and underscores, must start with a letter.")}}',
+  },
+  baseUrl: {
+    'x-component': 'CollectionField',
+    'x-decorator': 'FormItem',
+    description: `{{t('Base URL for file access, could be your CDN base URL. For example: "https://cdn.nocobase.com".', { ns: "${NAMESPACE}" })}}`,
+  },
+  path: {
+    'x-component': 'CollectionField',
+    'x-decorator': 'FormItem',
+    description: `{{t('Relative path the file will be saved to. Left blank as root path. The leading and trailing slashes "/" will be ignored. For example: "user/avatar".', { ns: "${NAMESPACE}" })}}`,
+  },
+  rules: {
+    type: 'object',
+    'x-component': 'fieldset',
+    properties: {
+      size: {
+        type: 'number',
+        title: `{{t("File size limit", { ns: "${NAMESPACE}" })}}`,
+        description: `{{t("Minimum from 1 byte.", { ns: "${NAMESPACE}" })}}`,
+        'x-decorator': 'FormItem',
+        'x-component': 'FileSizeField',
+        required: true,
+        default: FILE_SIZE_LIMIT_DEFAULT,
+      },
+      mimetype: {
+        type: 'string',
+        title: `{{t("File type allowed (in MIME type format)", { ns: "${NAMESPACE}" })}}`,
+        description: `{{t('Multi-types separated with comma, for example: "image/*", "image/png", "image/*, application/pdf" etc.', { ns: "${NAMESPACE}" })}}`,
+        'x-decorator': 'FormItem',
+        'x-component': 'Input',
+        'x-component-props': {
+          placeholder: '*',
+        },
+      },
+    },
+  },
+  default: {
+    'x-component': 'CollectionField',
+    'x-decorator': 'FormItem',
+    'x-content': `{{t("Default storage", { ns: "${NAMESPACE}" })}}`,
+  },
+  paranoid: {
+    'x-component': 'CollectionField',
+    'x-decorator': 'FormItem',
+    'x-content': `{{t("Keep file in storage when destroy the file record", { ns: "${NAMESPACE}" })}}`,
+    description: `{{t("Files are only removed when their corresponding records in the file collection are deleted. If a record from another collection includes an associating field referencing the file collection, the file will not be deleted unless cascade deletion is enabled for that association.", { ns: "${NAMESPACE}" })}}`,
+  },
+  useOriginalUrl: {
+    type: 'boolean',
+    title: `{{t("File URL", { ns: "${NAMESPACE}" })}}`,
+    'x-decorator': 'FormItem',
+    'x-component': 'UseOriginalUrlRadio',
+    default: false,
+  },
+  public: {
+    type: 'boolean',
+    'x-display': 'hidden',
+    default: false,
+  },
+  renameMode: {
+    title: `{{t("Renaming", { ns: "${NAMESPACE}" })}}`,
+    description: `{{t("Renaming strategy to avoid filename conflicts when uploading files.", { ns: "${NAMESPACE}" })}}`,
+    type: 'string',
+    'x-decorator': 'FormItem',
+    'x-component': 'Radio.Group',
+    enum: [
+      { label: `{{t("Append random ID", { ns: "${NAMESPACE}" })}}`, value: 'appendRandomID' },
+      { label: `{{t("Random string", { ns: "${NAMESPACE}" })}}`, value: 'random' },
+      {
+        label: `{{t("Keep original filename (will be overwrite if filename is existed)", { ns: "${NAMESPACE}" })}}`,
+        value: 'none',
+      },
+    ],
+    default: 'appendRandomID',
+  },
+  settings: {
+    type: 'object',
+    title: `{{t("Advanced Settings", { ns: "${NAMESPACE}" })}}`,
+    'x-component': 'fieldset',
+    properties: {
+      requestOptions: {
+        type: 'object',
+        title: `{{t("Request options", { ns: "${NAMESPACE}" })}}`,
+        description: `{{t("Additional options for HTTP requests when fetching files from remote storage on server side, such as headers.", { ns: "${NAMESPACE}" })}}`,
+        'x-decorator': 'FormItem',
+        'x-component': 'Input.JSON',
+        'x-component-props': {
+          autoSize: {
+            minRows: 5,
+            // maxRows: 20,
+          },
+        },
+      },
+    },
+  },
+};

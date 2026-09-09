@@ -3037,6 +3037,31 @@ function createFixtureWorld(options: FixtureOptions): FixtureWorld {
         return ok(request, {})
       },
     },
+    data: {
+      upload: request => err(request, { code: 'data-write-disabled', message: 'the demo fixture refuses data writes', details: {} }),
+    },
+    nocobase: {
+      // The fixture answers every nocobase method with the structured
+      // not-composed refusal: the browser fixture enables no NocoBase
+      // domain, and the business surfaces' inline failure path is exactly
+      // this shape.
+      listMeta: request => err(request, {
+        code: 'nocobase-not-composed',
+        message: 'this deployment has not enabled the nocobase domain; set the api-gateway config nocobaseEnabled: true to expose business reads',
+        details: {},
+      }),
+      list: request => err(request, {
+        code: 'nocobase-not-composed',
+        message: 'this deployment has not enabled the nocobase domain; set the api-gateway config nocobaseEnabled: true to expose business reads',
+        details: {},
+      }),
+      get: request => err(request, {
+        code: 'nocobase-not-composed',
+        message: 'this deployment has not enabled the nocobase domain; set the api-gateway config nocobaseEnabled: true to expose business reads',
+        details: {},
+      }),
+    },
+
     kb: {
       // The fixture answers every kb method with the structured
       // not-composed refusal: the browser fixture composes no knowledge
@@ -3064,6 +3089,102 @@ function createFixtureWorld(options: FixtureOptions): FixtureWorld {
       upload: request => err(request, {
         code: 'kb-not-composed',
         message: 'this deployment composes no knowledge base; add the dsh-kb seam and a store provider',
+        details: {},
+      }),
+    },
+
+    orders: {
+      // Same refusal discipline as kb: the browser fixture composes no
+      // expert-orders seam, so every method answers the structured
+      // not-composed error the surfaces render.
+      create: request => err(request, {
+        code: 'orders-not-composed',
+        message: 'this deployment composes no orders capability; add the dsh-expert-orders seam and a NocoBase source of truth',
+        details: {},
+      }),
+      get: request => err(request, {
+        code: 'orders-not-composed',
+        message: 'this deployment composes no orders capability; add the dsh-expert-orders seam and a NocoBase source of truth',
+        details: {},
+      }),
+      list: request => err(request, {
+        code: 'orders-not-composed',
+        message: 'this deployment composes no orders capability; add the dsh-expert-orders seam and a NocoBase source of truth',
+        details: {},
+      }),
+      fulfill: request => err(request, {
+        code: 'orders-not-composed',
+        message: 'this deployment composes no orders capability; add the dsh-expert-orders seam and a NocoBase source of truth',
+        details: {},
+      }),
+      // Satisfies the ApiProxy contract type only: the deliverable download
+      // rides the native download manager like session.export below.
+      download: () => Promise.resolve(new Response('fixture mode does not serve order deliverables', { status: 404 })),
+    },
+
+    assets: {
+      // Same refusal discipline as orders: the browser fixture composes no
+      // connector seam, so every method answers the structured not-composed
+      // error the market surfaces render inline.
+      list: request => err(request, {
+        code: 'assets-not-composed',
+        message: 'this deployment has not enabled the market domain; set the api-gateway config assetsEnabled: true to expose the data-asset market',
+        details: {},
+      }),
+      detail: request => err(request, {
+        code: 'assets-not-composed',
+        message: 'this deployment has not enabled the market domain; set the api-gateway config assetsEnabled: true to expose the data-asset market',
+        details: {},
+      }),
+      stats: request => err(request, {
+        code: 'assets-not-composed',
+        message: 'this deployment has not enabled the market domain; set the api-gateway config assetsEnabled: true to expose the data-asset market',
+        details: {},
+      }),
+    },
+
+    connectors: {
+      list: request => err(request, {
+        code: 'connectors-not-composed',
+        message: 'this deployment has not enabled the connector-page domain; set the api-gateway config connectorsEnabled: true to expose the connector catalog',
+        details: {},
+      }),
+      connections: request => err(request, {
+        code: 'connectors-not-composed',
+        message: 'this deployment has not enabled the connector-page domain; set the api-gateway config connectorsEnabled: true to expose the connector catalog',
+        details: {},
+      }),
+      transfers: request => err(request, {
+        code: 'connectors-not-composed',
+        message: 'this deployment has not enabled the connector-page domain; set the api-gateway config connectorsEnabled: true to expose the connector catalog',
+        details: {},
+      }),
+    },
+
+    kg: {
+      schema: request => err(request, {
+        code: 'kg-not-composed',
+        message: 'this deployment has not enabled the kg domain; set the api-gateway config kgEnabled: true to expose the graph page reads',
+        details: {},
+      }),
+      search: request => err(request, {
+        code: 'kg-not-composed',
+        message: 'this deployment has not enabled the kg domain; set the api-gateway config kgEnabled: true to expose the graph page reads',
+        details: {},
+      }),
+      subgraph: request => err(request, {
+        code: 'kg-not-composed',
+        message: 'this deployment has not enabled the kg domain; set the api-gateway config kgEnabled: true to expose the graph page reads',
+        details: {},
+      }),
+      expand: request => err(request, {
+        code: 'kg-not-composed',
+        message: 'this deployment has not enabled the kg domain; set the api-gateway config kgEnabled: true to expose the graph page reads',
+        details: {},
+      }),
+      stats: request => err(request, {
+        code: 'kg-not-composed',
+        message: 'this deployment has not enabled the kg domain; set the api-gateway config kgEnabled: true to expose the graph page reads',
         details: {},
       }),
     },
@@ -3258,10 +3379,29 @@ export class FixtureApiClient extends AbstractApiClient {
       case 'llm.providers': return this.api.llm.providers(request)
       case 'llm.models': return this.api.llm.models(request)
       case 'llm.discoverModels': return this.api.llm.discoverModels(request, signal)
+      case 'nocobase.listMeta': return this.api.nocobase.listMeta(request, signal)
+      case 'nocobase.list': return this.api.nocobase.list(request, signal)
+      case 'nocobase.get': return this.api.nocobase.get(request, signal)
       case 'kb.stats': return this.api.kb.stats(request)
       case 'kb.search': return this.api.kb.search(request, signal)
       case 'kb.ingest': return this.api.kb.ingest(request, signal)
       case 'kb.ingestUrl': return this.api.kb.ingestUrl(request, signal)
+      case 'data.upload': return this.api.data.upload(request, signal)
+      case 'orders.create': return this.api.orders.create(request, signal)
+      case 'orders.get': return this.api.orders.get(request, signal)
+      case 'assets.list': return this.api.assets.list(request, signal)
+      case 'assets.detail': return this.api.assets.detail(request, signal)
+      case 'assets.stats': return this.api.assets.stats(request, signal)
+      case 'connectors.list': return this.api.connectors.list(request, signal)
+      case 'connectors.connections': return this.api.connectors.connections(request, signal)
+      case 'connectors.transfers': return this.api.connectors.transfers(request, signal)
+      case 'kg.schema': return this.api.kg.schema(request, signal)
+      case 'kg.search': return this.api.kg.search(request, signal)
+      case 'kg.subgraph': return this.api.kg.subgraph(request, signal)
+      case 'kg.expand': return this.api.kg.expand(request, signal)
+      case 'kg.stats': return this.api.kg.stats(request, signal)
+      case 'orders.list': return this.api.orders.list(request, signal)
+      case 'orders.fulfill': return this.api.orders.fulfill(request, signal)
       case 'kb.upload': return this.api.kb.upload(request, signal)
     }
   }

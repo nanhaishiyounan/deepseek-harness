@@ -26,6 +26,8 @@ export interface KbHitState {
   readonly heading_path?: string
   readonly doc_kind: string
   readonly content: string
+  /** Fused relevance score, present on hits a scoring seam returned. */
+  readonly score?: number
 }
 
 /** The `kb.search` value (mirrored from the wire contract). */

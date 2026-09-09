@@ -10,8 +10,8 @@
  */
 import { readFile } from 'node:fs/promises'
 import { existsSync, globSync, readFileSync } from 'node:fs'
-import { isBuiltin } from 'node:module'
-import { basename, dirname, isAbsolute, relative, resolve as resolvePath, sep } from 'node:path'
+import { createRequire, isBuiltin } from 'node:module'
+import { basename, dirname, isAbsolute, join, relative, resolve as resolvePath, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type { UserConfig } from 'tsdown'
 import { transform } from 'lightningcss'
@@ -477,6 +477,21 @@ function clientConfig(id: string, entry: string): UserConfig {
       'import.meta.env': JSON.stringify({ MODE: process.env.NODE_ENV ?? 'production' }),
     },
     plugins: [{
+      // A specifier that names a Node built-in but resolves to a real npm
+      // package from its importer (sigma's `events` dependency, the browser
+      // EventEmitter polyfill) must inline that package: rolldown externalizes
+      // built-in names on the browser platform by default, and a bare
+      // require("events") is nothing the browser module table can answer.
+      // Sub-path resolution bypasses the built-in name match in Node's
+      // resolver, so the polyfill's package.json yields its real entry file.
+      name: 'dsh-npm-package-over-builtin',
+      resolveId(source: string, importer: string | undefined) {
+        if (source !== 'events' || importer === undefined) return null
+        const pkgJson = createRequire(importer).resolve('events/package.json')
+        const pkg = JSON.parse(readFileSync(pkgJson, 'utf8')) as { main?: string }
+        return { id: join(dirname(pkgJson), pkg.main ?? 'index.js'), external: false }
+      },
+    }, {
       // Bundle purity gate (build-time mirror of the module-edge rules): the
       // baseline and package-specific requests stay external, inline-safe wire layers
       // inline, and every other @deepseek-ai value import is a build error — a
@@ -494,6 +509,23 @@ function clientConfig(id: string, entry: string): UserConfig {
           + 'cross-plugin value imports are forbidden; declare a non-default module request or collaborate through cordis services '
           + '(type-only imports are erased and never reach this gate)',
         )
+      },
+    }, {
+      // Single-artifact gate: the browser module table serves exactly
+      // /plugins/<id>/client.js, so a bundle that split into chunks (a dynamic
+      // import() in the sources is the trigger) dies in the browser at factory
+      // activation. Fail the build at the source of the split.
+      name: 'dsh-client-single-artifact',
+      generateBundle(_options: unknown, bundle: Readonly<Record<string, { type: string }>>): void {
+        for (const [fileName, emitted] of Object.entries(bundle)) {
+          if (fileName === 'client.js' || fileName === 'client.js.map') continue
+          if (emitted.type === 'chunk') {
+            throw new Error(
+              `client bundle single-artifact: extra chunk "${fileName}" — a dsh.client bundle must be one client.js; `
+              + `a dynamic import() in ${id}'s sources split the bundle, and the browser module table serves no relative-path chunks (import statically or through the module table)`,
+            )
+          }
+        }
       },
     }, {
       name: 'dsh-css-modules-inline',

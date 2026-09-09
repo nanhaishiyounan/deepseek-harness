@@ -158,6 +158,14 @@
   color: var(--dsw-alias-label-secondary);
 }
 
+/* The relevance score stays a deliberately quiet technical readout. */
+.hitScore {
+  flex: none;
+  font: var(--dsw-font-xxxs-11);
+  font-variant-numeric: tabular-nums;
+  color: var(--dsw-alias-label-tertiary);
+}
+
 .hitCarry {
   flex: none;
 }

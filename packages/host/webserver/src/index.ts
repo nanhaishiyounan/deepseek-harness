@@ -35,6 +35,8 @@ declare module '@deepseek-ai/cordis' {
   }
 }
 
+import { createNocobaseProxyHandler, createNocobaseWsUpgradeHandler, NOCOBASE_PROXY_PREFIX, NOCOBASE_WS_PATH } from './nocobase-proxy.ts'
+
 /** Route match kind: 'exact' matches the pathname verbatim; 'prefix' p matches p and p/<anything>. */
 export type WebRouteKind = 'exact' | 'prefix'
 
@@ -55,12 +57,19 @@ export interface WebUpgradeRoute {
   handler: (req: IncomingMessage, socket: Duplex, head: Buffer) => void | Promise<void>
 }
 
-/** Gateway config: the listen address. */
+/** Gateway config: the listen address (and the optional NocoBase proxy). */
 export interface Config {
   /** Listen host; the two supported values are loopback and all-interfaces. */
   host: '127.0.0.1' | '0.0.0.0'
   /** Listen port; zero requests an OS-assigned port. */
   port: number
+  /**
+   * NocoBase origin (scheme + host + port) the `/nocobase` prefix proxies
+   * to, with framing guards stripped so the business page's embed entry can
+   * render the admin UI same-origin. Absent means no proxy route — the
+   * unauthenticated gateway must not proxy a business backend by default.
+   */
+  nocobaseProxyOrigin?: string
 }
 
 /**
@@ -74,6 +83,7 @@ export class WebServer extends Service {
   static Config: z<Config> = z.object({
     host: z.union([z.const('127.0.0.1'), z.const('0.0.0.0')]).required(),
     port: z.natural().max(65535).required(),
+    nocobaseProxyOrigin: z.string(),
   })
 
   private readonly exact = new Map<string, WebRoute>()
@@ -87,6 +97,29 @@ export class WebServer extends Service {
 
   constructor(ctx: Context, private config: Config) {
     super(ctx, 'webServer')
+    // A local const keeps the undefined-narrowing inside the effect closure
+    // (property-access narrowing does not survive into closures).
+    const proxyOrigin = config.nocobaseProxyOrigin
+    if (proxyOrigin !== undefined) {
+      ctx.effect(
+        () => {
+          const disposeHttp = this.register({
+            kind: 'prefix',
+            path: NOCOBASE_PROXY_PREFIX,
+            handler: createNocobaseProxyHandler(proxyOrigin),
+          })
+          const disposeUpgrade = this.registerUpgrade({
+            path: NOCOBASE_WS_PATH,
+            handler: createNocobaseWsUpgradeHandler(proxyOrigin),
+          })
+          return () => {
+            disposeUpgrade()
+            disposeHttp()
+          }
+        },
+        'webServer.nocobaseProxy',
+      )
+    }
   }
 
   /** The listening port (the OS-assigned value when config.port is 0). */

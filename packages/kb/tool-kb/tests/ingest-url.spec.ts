@@ -22,7 +22,7 @@ import WebRuntime from '@deepseek-ai/dsh-web'
 import type { WebFetchProvider } from '@deepseek-ai/dsh-web'
 import * as WebFetchHttp from '@deepseek-ai/dsh-web-fetch-http'
 import * as ToolKb from '../src/index.ts'
-import { isPrivateAddress, parseIngestUrlArgs } from '../src/url-policy.ts'
+import { isPrivateAddress, parseIngestUrlArgs, resolveAdmittedAddresses } from '../src/url-policy.ts'
 
 const signal = new AbortController().signal
 const here = import.meta.dirname
@@ -144,7 +144,41 @@ describe('parseIngestUrlArgs', () => {
   })
 })
 
+describe('resolveAdmittedAddresses', () => {
+  it('returns a literal public host as the pin set for the fetch request', async () => {
+    expect(await resolveAdmittedAddresses(new URL('http://8.8.8.8/docs'), false)).toEqual(['8.8.8.8'])
+  })
+
+  it('pins the intranet opt-in path too, so its fetches cannot re-resolve either', async () => {
+    expect(await resolveAdmittedAddresses(new URL('http://127.0.0.1:9/x'), true)).toEqual(['127.0.0.1'])
+  })
+
+  it('refuses hosts resolving into private space unless the composition opted in', async () => {
+    await expect(resolveAdmittedAddresses(new URL('http://127.0.0.1/x'), false)).rejects.toThrow(/private or internal/u)
+  })
+
+  it('admits an unresolvable host with an empty pin set (the provider resolves)', async () => {
+    expect(await resolveAdmittedAddresses(new URL('http://no-such-host-9f61a.test/x'), false)).toEqual([])
+  })
+})
+
 describe('kb_ingest_url through the real seam', () => {
+  it('sends the admitted addresses with the fetch request as its pins', async () => {
+    const seen: Array<{ url: string; pinned: readonly string[] | undefined }> = []
+    const recorder: WebFetchProvider = {
+      id: 'recording-fetch',
+      available: () => true,
+      fetch: async (request) => {
+        seen.push({ url: request.url, pinned: request.pinnedAddresses })
+        return { url: request.url, statusCode: 200, body: { kind: 'text', content: 'pinned page body' }, truncated: false }
+      },
+    }
+    const { url } = await localPageServer()
+    const { execute } = await mount({ allowPrivateNetworks: true, fetchProvider: recorder })
+    const result = await execute('kb_ingest_url', { url })
+    expect(result.isError).toBe(false)
+    expect(seen).toEqual([{ url, pinned: ['127.0.0.1'] }])
+  })
   it('fetches a local page, stores it under the bound tenant, and makes it searchable', async () => {
     const { url } = await localPageServer()
     const { execute } = await mount({ allowPrivateNetworks: true, realFetch: true })

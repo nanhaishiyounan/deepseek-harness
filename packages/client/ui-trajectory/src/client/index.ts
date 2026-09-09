@@ -43,7 +43,10 @@ export function apply(ctx: Context): void {
   ctx.slots.inject('conversation.view', () => ctx.slots.register({
     name: 'conversation.view',
     id: 'trajectory',
-    order: 10,
+    // After the kb(10) and market/connectors/kg/business(11-14) seats: the
+    // trajectory is a per-session lens, not a business page, so it closes the
+    // ring (plans/nocobase-native-integration/02-design.md §1.1).
+    order: 15,
     locale: NS,
     label: () => t('view.trajectory'),
     inject: (sessionId: SessionId): TrajectoryViewInjected => {

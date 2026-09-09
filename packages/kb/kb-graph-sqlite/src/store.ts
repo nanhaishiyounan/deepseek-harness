@@ -1,28 +1,168 @@
 /**
- * The SQLite `GraphStore` provider: tenant-isolated triples with idempotent
- * writes, one-hop neighbor expansion, two-hop path search, and entity search
- * over the entities projection.
+ * The SQLite `KgStore` provider: the seven-table property graph (schema v2)
+ * with merge-shaped idempotent upserts, k-hop subgraph walks (recursive CTE),
+ * source-run watermarks, aliases, and tombstoning — plus the v1 `GraphStore`
+ * face (`putTriples` translates internally onto the node/edge merges).
  * @module @deepseek-ai/dsh-kb-graph-sqlite/store
  */
 
 import { resolve } from 'node:path'
 import type { DatabaseSync } from 'node:sqlite'
-import { KbGraphError } from '@deepseek-ai/dsh-kb-graph'
-import type { GraphStore, KbGraphEntity, KbGraphEntityType, KbGraphPredicate, KbGraphStoredTriple, KbGraphTriple } from '@deepseek-ai/dsh-kb-graph'
+import {
+  KbGraphError, kgNodeTypeId, kgRelationId,
+  type KbGraphEntity, type KbGraphStoredTriple, type KbGraphTriple,
+  type KgEdge, type KgNode, type KgNodeHit, type KgNodeTypeId, type KgNodeType, type KgPropDef,
+  type KgProvenance, type KgRelation, type KgRelationConstraint, type KgRelationId,
+  type KgSourceRun, type KgStore, type KgSubgraph, type KgSubgraphLimits, type KgSubgraphNode,
+} from '@deepseek-ai/dsh-kb-graph'
 import { validateSchema } from './schema.ts'
+import { sql } from './sql.ts'
 
 type DatabaseSyncConstructor = typeof import('node:sqlite')['DatabaseSync']
 
-/** One raw triple row. */
-interface TripleRow {
-  id: number
+/** One kg_nodes row (id resolution only). */
+interface NodeIdRow { id: string }
+
+/** One v1-facing stored-triple projection row. */
+interface TripleProjectionRow {
+  row_id: number
   tenant_id: string
+  source_system: string
+  source_id: string
+  relation_id: string
   subject_type: string
   subject_id: string
-  predicate: string
   object_type: string
   object_id: string
-  source_path: string | null
+}
+
+/** One kg_edges row for the v2 face. */
+interface EdgeRow {
+  id: string
+  tenant_id: string
+  src_id: string
+  dst_id: string
+  relation_id: string
+  fact: string | null
+  props: string | null
+  confidence: number
+  source_system: string
+  source_id: string
+  extracted_at: string
+  valid_from: string
+  valid_until: string | null
+  recorded_at: string
+}
+
+/** One subgraph walk row. */
+interface WalkRow { id: string; type_id: string; name: string; natural_key: string | null; depth: number }
+
+/** One kg_source_runs row. */
+interface SourceRunRow {
+  source_system: string
+  scope: string
+  watermark: string | null
+  content_hash: string | null
+  run_config: string | null
+  last_run_at: string
+}
+
+/** One kg_node_types row. */
+interface NodeTypeRow {
+  readonly type_id: string
+  readonly label: string
+  readonly description: string | null
+  readonly layer: string
+  readonly extends_type: string | null
+  readonly props_schema: string
+  readonly natural_key: string | null
+  readonly source: string
+  readonly status: string
+  readonly created_at: string
+  readonly updated_at: string
+}
+
+/** One kg_relations row. */
+interface RelationRow {
+  readonly relation_id: string
+  readonly label: string
+  readonly description: string | null
+  readonly domain_type: string | null
+  readonly range_type: string | null
+  readonly constraints_json: string
+  readonly kind: string
+  readonly inverse_of: string | null
+  readonly source: string
+  readonly created_at: string
+  readonly updated_at: string
+}
+
+/** Narrow one stored registry string onto its closed runtime union, fail-loud on corruption. */
+function closedRegistryValue<T extends string>(value: string, members: readonly T[], what: string): T {
+  const hit = members.find(entry => entry === value)
+  if (hit === undefined) {
+    throw new KbGraphError(`stored registry row has unknown ${what} "${value}"`, 'KB_GRAPH_SQLITE_REGISTRY_CORRUPT')
+  }
+  return hit
+}
+
+const ONTOLOGY_LAYERS = ['top', 'domain'] as const
+const NODE_TYPE_STATUSES = ['draft', 'active'] as const
+const ONTOLOGY_SOURCES = ['builtin-ontology', 'builtin-food', 'nocobase-derived', 'agent-defined'] as const
+const RELATION_KINDS = ['object', 'hierarchical'] as const
+
+/** Rebuild one {@link KgNodeType} from a kg_node_types row (durable-boundary parse). */
+function rowToNodeType(row: NodeTypeRow): KgNodeType {
+  let props: unknown
+  try {
+    props = JSON.parse(row.props_schema)
+  } catch (error: unknown) {
+    throw new KbGraphError(
+      /* v8 ignore next -- JSON.parse throws SyntaxError only. */
+      `stored node type "${row.type_id}" has an unreadable props schema: ${error instanceof Error ? error.message : String(error)}`,
+      'KB_GRAPH_SQLITE_REGISTRY_CORRUPT',
+    )
+  }
+  if (!Array.isArray(props)) {
+    throw new KbGraphError(`stored node type "${row.type_id}" props schema is not an array`, 'KB_GRAPH_SQLITE_REGISTRY_CORRUPT')
+  }
+  return {
+    id: kgNodeTypeId(row.type_id),
+    label: row.label,
+    ...(row.description === null ? {} : { description: row.description }),
+    layer: closedRegistryValue(row.layer, ONTOLOGY_LAYERS, 'layer'),
+    ...(row.extends_type === null ? {} : { extends: kgNodeTypeId(row.extends_type) }),
+    props: props as readonly KgPropDef[],
+    ...(row.natural_key === null ? {} : { naturalKey: row.natural_key }),
+    source: closedRegistryValue(row.source, ONTOLOGY_SOURCES, 'source'),
+    status: closedRegistryValue(row.status, NODE_TYPE_STATUSES, 'status'),
+  }
+}
+
+/** Rebuild one {@link KgRelation} from a kg_relations row (durable-boundary parse). */
+function rowToRelation(row: RelationRow): KgRelation {
+  let constraints: unknown
+  try {
+    constraints = JSON.parse(row.constraints_json)
+  } catch (error: unknown) {
+    throw new KbGraphError(
+      /* v8 ignore next -- JSON.parse throws SyntaxError only. */
+      `stored relation "${row.relation_id}" has unreadable constraints: ${error instanceof Error ? error.message : String(error)}`,
+      'KB_GRAPH_SQLITE_REGISTRY_CORRUPT',
+    )
+  }
+  if (!Array.isArray(constraints)) {
+    throw new KbGraphError(`stored relation "${row.relation_id}" constraints are not an array`, 'KB_GRAPH_SQLITE_REGISTRY_CORRUPT')
+  }
+  return {
+    id: kgRelationId(row.relation_id),
+    label: row.label,
+    ...(row.description === null ? {} : { description: row.description }),
+    constraints: constraints.map(pair => pair as KgRelationConstraint),
+    kind: closedRegistryValue(row.kind, RELATION_KINDS, 'kind'),
+    ...(row.inverse_of === null ? {} : { inverseOf: kgRelationId(row.inverse_of) }),
+    source: closedRegistryValue(row.source, ONTOLOGY_SOURCES, 'source'),
+  }
 }
 
 /** Constructor options for {@link SqliteGraphStore}. */
@@ -39,14 +179,50 @@ function throwIfAborted(signal: AbortSignal | undefined): void {
   if (signal?.aborted) throw signal.reason ?? new DOMException('The operation was aborted', 'AbortError')
 }
 
-function rowToTriple(row: TripleRow): KbGraphStoredTriple {
+/** Mint the compat node id for a v1 entity: `kb:<type>:<id>`, both parts escaped. */
+function compatNodeId(entity: KbGraphEntity): string {
+  return `kb:${encodeURIComponent(String(entity.type))}:${encodeURIComponent(entity.id)}`
+}
+
+/**
+ * Rebuild a v1 stored triple from a projection row. The compat provenance
+ * address is the sourcePath when one was given; the `graph:`-prefixed
+ * derived anchor marks triples asserted without a citation.
+ */
+function rowToStoredTriple(row: TripleProjectionRow): KbGraphStoredTriple {
+  const hasCitation = row.source_system === 'kb' && !row.source_id.startsWith('graph:')
   return {
-    rowId: row.id,
+    rowId: row.row_id,
     tenantId: row.tenant_id,
-    subject: { type: row.subject_type as KbGraphEntityType, id: row.subject_id },
-    predicate: row.predicate as KbGraphPredicate,
-    object: { type: row.object_type as KbGraphEntityType, id: row.object_id },
-    ...(row.source_path === null ? {} : { sourcePath: row.source_path }),
+    subject: { type: kgNodeTypeId(row.subject_type), id: row.subject_id },
+    predicate: kgRelationId(row.relation_id),
+    object: { type: kgNodeTypeId(row.object_type), id: row.object_id },
+    ...(hasCitation ? { sourcePath: row.source_id } : {}),
+  }
+}
+
+/** Rebuild one v2 edge from a kg_edges row. */
+function rowToEdge(row: EdgeRow): KgEdge {
+  return {
+    id: row.id,
+    tenantId: row.tenant_id,
+    srcId: row.src_id,
+    dstId: row.dst_id,
+    relation: kgRelationId(row.relation_id),
+    ...(row.fact === null ? {} : { fact: row.fact }),
+    ...(row.props === null ? {} : { props: JSON.parse(row.props) as Record<string, unknown> }),
+    confidence: row.confidence,
+    provenance: {
+      sourceSystem: row.source_system as KgProvenance['sourceSystem'],
+      sourceId: row.source_id,
+      extractedAt: row.extracted_at,
+    },
+    validFrom: row.valid_from,
+    // Every read face filters live edges only, so valid_until is always NULL
+    // here; the tombstone value stays queryable through SQL until a v2 read
+    // face for historical edges exists.
+    /* v8 ignore next 1 */
+    ...(row.valid_until === null ? {} : { validUntil: row.valid_until }),
   }
 }
 
@@ -55,11 +231,12 @@ function rowToTriple(row: TripleRow): KbGraphStoredTriple {
 // the kb and session groups stay cross-dependency-free
 // (Agent Note 2026-08-29-duplication-gate-intentional-symmetry).
 /**
- * The `node:sqlite`-backed `GraphStore`. Opens and validates the database in
- * the constructor (fail-loud on schema mismatch); one instance owns one
+ * The `node:sqlite`-backed graph store (schema v2). Opens and validates the
+ * database in the constructor (fail-loud on schema mismatch, including the
+ * no-migration rejection of v1 `triples` databases); one instance owns one
  * connection until {@link SqliteGraphStore.close}.
  */
-export class SqliteGraphStore implements GraphStore {
+export class SqliteGraphStore implements KgStore {
   readonly id = 'kb-graph-sqlite'
   private readonly db: DatabaseSync
   private closed = false
@@ -95,114 +272,180 @@ export class SqliteGraphStore implements GraphStore {
     }
   }
 
+  /** Run `fn` inside one immediate write transaction, rolling back on failure. */
+  private write<T>(fn: () => T): T {
+    this.db.exec(sql('begin-immediate'))
+    try {
+      const result = fn()
+      this.db.exec(sql('commit'))
+      return result
+    } catch (error: unknown) {
+      this.rollback()
+      throw error
+    }
+  }
+
+  /**
+   * Ensure one registry row exists for the node type (the persistent half of
+   * the two-layer registry: runtime registrations materialize on first
+   * write). Existing rows win.
+   */
+  private ensureNodeTypeRow(type: KgNodeTypeId, at: string): void {
+    const id = String(type)
+    this.db.prepare(sql('insert-node-type')).run(
+      id, id, null, 'domain', null, '[]', null, 'agent-defined', 'active', at, at,
+    )
+  }
+
+  /**
+   * Ensure one registry row exists for the relation; see
+   * {@link ensureNodeTypeRow}.
+   */
+  private ensureRelationRow(relation: KgRelationId, at: string): void {
+    const id = String(relation)
+    this.db.prepare(sql('insert-relation')).run(
+      id, id, null, null, null, '[]', 'object', null, 'agent-defined', at, at,
+    )
+  }
+
+  /** Resolve the minted node id of a v1 entity under one tenant, if stored. */
+  private compatNodeIdRow(tenantId: string, entity: KbGraphEntity): NodeIdRow | undefined {
+    return this.db.prepare(sql('select-node-by-anchor')).get(tenantId, String(entity.type), entity.id) as unknown as NodeIdRow | undefined
+  }
+
+  /**
+   * Merge one node onto its anchors (natural key first, then id); returns
+   * whether an existing row took the update.
+   */
+  private mergeNodeRaw(node: KgNode): boolean {
+    const byAnchor = node.naturalKey === undefined
+      ? undefined
+      : this.db.prepare(sql('select-node-by-anchor')).get(node.tenantId, String(node.type), node.naturalKey) as unknown as NodeIdRow | undefined
+    const target = byAnchor?.id ?? (this.db.prepare(sql('select-node-by-id')).get(node.id) as unknown as NodeIdRow | undefined)?.id
+    if (target !== undefined) {
+      this.db.prepare(sql('update-node-by-id')).run(
+        node.name,
+        node.summary ?? null,
+        node.props === undefined ? null : JSON.stringify(node.props),
+        node.updatedAt,
+        target,
+      )
+      return true
+    }
+    this.db.prepare(sql('insert-node')).run(
+      node.id, node.tenantId, String(node.type), node.naturalKey ?? null,
+      node.name, node.summary ?? null,
+      node.props === undefined ? null : JSON.stringify(node.props),
+      node.createdAt, node.updatedAt,
+    )
+    return false
+  }
+
+  /**
+   * Merge one edge onto the seven-column anchor: fresh rows insert; known
+   * anchors converge confidence, keep the newest fact, and revive
+   * tombstones. Returns whether a row was newly inserted.
+   */
+  private mergeEdgeRaw(edge: KgEdge): boolean {
+    const existing = this.db.prepare(sql('select-edge-by-anchor')).get(
+      edge.tenantId, edge.srcId, edge.dstId, String(edge.relation),
+      edge.provenance.sourceSystem, edge.provenance.sourceId,
+    ) as unknown as NodeIdRow | undefined
+    if (existing === undefined) {
+      this.db.prepare(sql('insert-edge')).run(
+        edge.id, edge.tenantId, edge.srcId, edge.dstId, String(edge.relation),
+        edge.fact ?? null, edge.props === undefined ? null : JSON.stringify(edge.props),
+        edge.confidence, edge.provenance.sourceSystem, edge.provenance.sourceId,
+        edge.provenance.extractedAt, edge.validFrom, new Date().toISOString(),
+      )
+      return true
+    }
+    this.db.prepare(sql('merge-edge')).run(
+      edge.confidence, edge.fact ?? null,
+      edge.props === undefined ? null : JSON.stringify(edge.props),
+      edge.provenance.extractedAt, new Date().toISOString(), existing.id,
+    )
+    return false
+  }
+
+  /** The v1 `putTriples` face: translate onto node/edge merges in one transaction. */
   async putTriples(tenantId: string, triples: readonly KbGraphTriple[], signal?: AbortSignal): Promise<number> {
     // node:sqlite is synchronous; the await keeps the store contract a promise.
     await Promise.resolve()
     this.assertLive()
     throwIfAborted(signal)
-    this.db.exec('BEGIN IMMEDIATE')
-    let inserted = 0
-    try {
-      const statement = this.db.prepare(`
-        INSERT INTO triples (tenant_id, subject_type, subject_id, predicate, object_type, object_id, source_path)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT (tenant_id, subject_type, subject_id, predicate, object_type, object_id) DO NOTHING
-      `)
+    const now = new Date().toISOString()
+    return this.write(() => {
+      let inserted = 0
       for (const triple of triples) {
         throwIfAborted(signal)
-        const result = statement.run(
-          tenantId,
-          triple.subject.type,
-          triple.subject.id,
-          triple.predicate,
-          triple.object.type,
-          triple.object.id,
-          triple.sourcePath ?? null,
-        ) as { changes: number | bigint }
-        inserted += Number(result.changes)
+        const srcId = compatNodeId(triple.subject)
+        const dstId = compatNodeId(triple.object)
+        this.ensureNodeTypeRow(triple.subject.type, now)
+        this.ensureNodeTypeRow(triple.object.type, now)
+        this.mergeNodeRaw({
+          id: srcId, tenantId, type: triple.subject.type,
+          name: triple.subject.id, naturalKey: triple.subject.id,
+          createdAt: now, updatedAt: now,
+        })
+        this.mergeNodeRaw({
+          id: dstId, tenantId, type: triple.object.type,
+          name: triple.object.id, naturalKey: triple.object.id,
+          createdAt: now, updatedAt: now,
+        })
+        const sourceId = triple.sourcePath ?? `graph:${srcId}:${dstId}`
+        inserted += this.mergeEdgeRaw({
+          id: `kb:${sourceId}:${srcId}:${String(triple.predicate)}:${dstId}`,
+          tenantId, srcId, dstId, relation: triple.predicate,
+          confidence: 1.0,
+          provenance: { sourceSystem: 'kb', sourceId, extractedAt: now },
+          validFrom: now,
+        }) ? 1 : 0
       }
-      this.db.exec('COMMIT')
-    } catch (error: unknown) {
-      this.rollback()
-      throw error
-    }
-    return inserted
+      return inserted
+    })
   }
 
-  async neighbors(
-    tenantId: string,
-    entity: KbGraphEntity,
-    _signal?: AbortSignal,
-  ): Promise<KbGraphStoredTriple[]> {
+  async neighbors(tenantId: string, entity: KbGraphEntity, _signal?: AbortSignal): Promise<KbGraphStoredTriple[]> {
     await Promise.resolve()
     this.assertLive()
-    const rows = this.db.prepare(`
-      SELECT * FROM triples
-      WHERE tenant_id = ?
-        AND ((subject_type = ? AND subject_id = ?) OR (object_type = ? AND object_id = ?))
-      ORDER BY id
-    `).all(tenantId, entity.type, entity.id, entity.type, entity.id) as unknown as TripleRow[]
-    return rows.map(rowToTriple)
+    const rows = this.db.prepare(sql('select-neighbor-edges')).all(
+      tenantId, String(entity.type), entity.id, String(entity.type), entity.id,
+    ) as unknown as TripleProjectionRow[]
+    return rows.map(rowToStoredTriple)
   }
 
   async twoHopPaths(tenantId: string, entity: KbGraphEntity, target: KbGraphEntity, _signal?: AbortSignal): Promise<KbGraphStoredTriple[]> {
     await Promise.resolve()
     this.assertLive()
-    // Path of at most two edges entity — mid — target, undirected: the first
-    // edge touches the start and the second the target at a shared middle
-    // endpoint that is neither endpoint itself. Each branch below fixes one
-    // direction combination, so the middle endpoint is pinned by a single
-    // equality per branch — a spur, a fan-in edge, or a target self-loop
-    // shares no qualifying middle and cannot pose as a bridge.
-    const endpoints = [entity.type, entity.id, target.type, target.id]
-    const branch = [...endpoints, ...endpoints]
-    const rows = this.db.prepare(`
-      SELECT DISTINCT e1.id AS first_id, e2.id AS second_id
-      FROM triples e1
-      JOIN triples e2 ON e2.id <> e1.id AND e2.tenant_id = e1.tenant_id
-      WHERE e1.tenant_id = ?
-        AND (
-          (e1.subject_type = ? AND e1.subject_id = ? AND e2.object_type = ? AND e2.object_id = ?
-            AND e1.object_type = e2.subject_type AND e1.object_id = e2.subject_id
-            AND NOT (e1.object_type = ? AND e1.object_id = ?) AND NOT (e1.object_type = ? AND e1.object_id = ?))
-          OR (e1.subject_type = ? AND e1.subject_id = ? AND e2.subject_type = ? AND e2.subject_id = ?
-            AND e1.object_type = e2.object_type AND e1.object_id = e2.object_id
-            AND NOT (e1.object_type = ? AND e1.object_id = ?) AND NOT (e1.object_type = ? AND e1.object_id = ?))
-          OR (e1.object_type = ? AND e1.object_id = ? AND e2.object_type = ? AND e2.object_id = ?
-            AND e1.subject_type = e2.subject_type AND e1.subject_id = e2.subject_id
-            AND NOT (e1.subject_type = ? AND e1.subject_id = ?) AND NOT (e1.subject_type = ? AND e1.subject_id = ?))
-          OR (e1.object_type = ? AND e1.object_id = ? AND e2.subject_type = ? AND e2.subject_id = ?
-            AND e1.subject_type = e2.object_type AND e1.subject_id = e2.object_id
-            AND NOT (e1.subject_type = ? AND e1.subject_id = ?) AND NOT (e1.subject_type = ? AND e1.subject_id = ?))
-        )
-    `).all(tenantId, ...branch, ...branch, ...branch, ...branch) as unknown as Array<{ first_id: number; second_id: number }>
+    const src = this.compatNodeIdRow(tenantId, entity)
+    const dst = this.compatNodeIdRow(tenantId, target)
+    if (src === undefined || dst === undefined) return []
     const rowIds = new Set<number>()
-    for (const path of rows) {
+    const endpoints = [src.id, dst.id]
+    const branch = [...endpoints, ...endpoints]
+    const pairs = this.db.prepare(sql('select-two-hop-pairs')).all(
+      tenantId, ...branch, ...branch, ...branch, ...branch,
+    ) as unknown as Array<{ first_id: number; second_id: number }>
+    for (const path of pairs) {
       rowIds.add(path.first_id)
       rowIds.add(path.second_id)
     }
     // A direct edge is itself a path of at most two edges; include it in
     // either direction.
-    const direct = this.db.prepare(`
-      SELECT id FROM triples
-      WHERE tenant_id = ?
-        AND ((subject_type = ? AND subject_id = ? AND object_type = ? AND object_id = ?)
-          OR (subject_type = ? AND subject_id = ? AND object_type = ? AND object_id = ?))
-    `).all(
-      tenantId,
-      entity.type, entity.id, target.type, target.id,
-      target.type, target.id, entity.type, entity.id,
-    ) as unknown as Array<{ id: number }>
+    const direct = this.db.prepare(sql('select-edges-between')).all(
+      tenantId, src.id, dst.id, dst.id, src.id,
+    ) as unknown as TripleProjectionRow[]
     for (const row of direct) {
-      rowIds.add(row.id)
+      rowIds.add(row.row_id)
     }
     if (rowIds.size === 0) return []
-    const fetch = this.db.prepare('SELECT * FROM triples WHERE id = ?')
+    const fetch = this.db.prepare(sql('select-edges-by-rowids'))
     const seen = new Map<number, KbGraphStoredTriple>()
     for (const rowId of rowIds) {
       // The ids come from queries on this same synchronous connection, so
       // every fetch lands.
-      seen.set(rowId, rowToTriple(fetch.get(rowId) as unknown as TripleRow))
+      seen.set(rowId, rowToStoredTriple(fetch.get(rowId) as unknown as TripleProjectionRow))
     }
     return [...seen.values()].sort((a, b) => a.rowId - b.rowId)
   }
@@ -210,23 +453,24 @@ export class SqliteGraphStore implements GraphStore {
   async searchEntities(
     tenantId: string,
     query: string,
-    type: KbGraphEntityType | undefined,
+    type: KgNodeTypeId | undefined,
     k: number,
     _signal?: AbortSignal,
   ): Promise<KbGraphEntity[]> {
     await Promise.resolve()
     this.assertLive()
-    const rows = this.db.prepare(`
-      SELECT subject_type AS type, subject_id AS id FROM triples WHERE tenant_id = ?
-      UNION
-      SELECT object_type AS type, object_id AS id FROM triples WHERE tenant_id = ?
-    `).all(tenantId, tenantId) as unknown as Array<{ type: string; id: string }>
+    const needle = query.toLowerCase()
     const entities = new Map<string, KbGraphEntity>()
-    for (const row of rows) {
-      if (type !== undefined && row.type !== type) continue
-      if (!row.id.toLowerCase().includes(query.toLowerCase())) continue
-      // The UNION above already deduplicates (type, id) pairs.
-      entities.set(`${row.type}:${row.id}`, { type: row.type as KbGraphEntityType, id: row.id })
+    for (const row of this.db.prepare(sql('select-nodes-for-search')).all(tenantId, type === undefined ? null : String(type), type === undefined ? null : String(type)) as unknown as Array<{ type_id: string; entity_key: string; name: string }>) {
+      if (!row.entity_key.toLowerCase().includes(needle) && !row.name.toLowerCase().includes(needle)) continue
+      entities.set(`${row.type_id}:${row.entity_key}`, { type: kgNodeTypeId(row.type_id), id: row.entity_key })
+      if (entities.size >= k) return [...entities.values()]
+    }
+    // Aliases resolve to their binding node's entity key; the primary-key
+    // pass above already deduplicated type/key pairs.
+    for (const row of this.db.prepare(sql('select-aliases-for-search')).all(tenantId, type === undefined ? null : String(type), type === undefined ? null : String(type)) as unknown as Array<{ type_id: string; entity_key: string; alias: string }>) {
+      if (!row.alias.toLowerCase().includes(needle)) continue
+      entities.set(`${row.type_id}:${row.entity_key}`, { type: kgNodeTypeId(row.type_id), id: row.entity_key })
       if (entities.size >= k) break
     }
     return [...entities.values()]
@@ -235,23 +479,190 @@ export class SqliteGraphStore implements GraphStore {
   async stats(tenantId: string | undefined, _signal?: AbortSignal): Promise<{ triples: number; entities: number }> {
     await Promise.resolve()
     this.assertLive()
-    const triples = (this.db.prepare(
-      'SELECT COUNT(*) AS n FROM triples WHERE (? IS NULL OR tenant_id = ?)',
-    ).get(tenantId ?? null, tenantId ?? null) as { n: number }).n
-    const entityRow = this.db.prepare(`
-      SELECT COUNT(*) AS n FROM (
-        SELECT subject_type AS type, subject_id AS id FROM triples WHERE (? IS NULL OR tenant_id = ?)
-        UNION
-        SELECT object_type AS type, object_id AS id FROM triples WHERE (? IS NULL OR tenant_id = ?)
+    const triples = (this.db.prepare(sql('count-edges')).get(tenantId ?? null, tenantId ?? null) as { n: number }).n
+    const entities = (this.db.prepare(sql('count-nodes')).get(tenantId ?? null, tenantId ?? null) as { n: number }).n
+    return { triples, entities }
+  }
+
+  async upsertNode(node: KgNode): Promise<{ merged: boolean }> {
+    await Promise.resolve()
+    this.assertLive()
+    return this.write(() => {
+      this.ensureNodeTypeRow(node.type, new Date().toISOString())
+      return { merged: this.mergeNodeRaw(node) }
+    })
+  }
+
+  async upsertEdges(edges: readonly KgEdge[]): Promise<number> {
+    await Promise.resolve()
+    this.assertLive()
+    return this.write(() => {
+      let inserted = 0
+      for (const edge of edges) {
+        this.ensureRelationRow(edge.relation, new Date().toISOString())
+        inserted += this.mergeEdgeRaw(edge) ? 1 : 0
+      }
+      return inserted
+    })
+  }
+
+  async subgraph(tenantId: string, seedIds: readonly string[], hops: number, limits?: KgSubgraphLimits): Promise<KgSubgraph> {
+    await Promise.resolve()
+    this.assertLive()
+    if (!Number.isInteger(hops) || hops < 0) {
+      throw new KbGraphError(`subgraph hops must be a non-negative integer, got ${String(hops)}`, 'KB_GRAPH_SQLITE_INVALID_HOPS')
+    }
+    if (seedIds.length === 0) return { nodes: [], edges: [], truncated: false }
+    const maxNodes = Math.min(Math.max(limits?.maxNodes ?? 200, 1), 2_000)
+    const maxEdges = Math.min(Math.max(limits?.maxEdges ?? 1_000, 0), 10_000)
+    const walkRows = this.db.prepare(sql('select-subgraph-nodes')).all(
+      JSON.stringify([...seedIds]), tenantId, hops, tenantId, maxNodes + 1,
+    ) as unknown as WalkRow[]
+    const truncatedNodes = walkRows.length > maxNodes
+    const nodes: KgSubgraphNode[] = walkRows.slice(0, maxNodes).map(row => ({
+      id: row.id,
+      type: kgNodeTypeId(row.type_id),
+      name: row.name,
+      ...(row.natural_key === null ? {} : { naturalKey: row.natural_key }),
+      depth: row.depth,
+    }))
+    if (nodes.length === 0) return { nodes: [], edges: [], truncated: false }
+    const nodeIds = JSON.stringify(nodes.map(node => node.id))
+    const edgeRows = this.db.prepare(sql('select-edges-by-nodes')).all(
+      tenantId, nodeIds, nodeIds, maxEdges + 1,
+    ) as unknown as EdgeRow[]
+    return {
+      nodes,
+      edges: edgeRows.slice(0, maxEdges).map(rowToEdge),
+      truncated: truncatedNodes || edgeRows.length > maxEdges,
+    }
+  }
+
+  async expand(tenantId: string, nodeId: string, limit?: number): Promise<KgSubgraph> {
+    return await this.subgraph(tenantId, [nodeId], 1, { maxNodes: limit ?? 200 })
+  }
+
+  async tombstoneBySource(sourceSystem: string, sourceId: string, at: string): Promise<number> {
+    await Promise.resolve()
+    this.assertLive()
+    const result = this.db.prepare(sql('tombstone-by-source')).run(
+      at, sourceSystem, sourceId,
+    ) as { changes: number | bigint }
+    return Number(result.changes)
+  }
+
+  async putAlias(tenantId: string, typeId: KgNodeTypeId, alias: string, nodeId: string): Promise<void> {
+    await Promise.resolve()
+    this.assertLive()
+    this.write(() => {
+      const existing = this.db.prepare(sql('select-alias')).get(tenantId, String(typeId), alias) as unknown as NodeIdRow | undefined
+      if (existing !== undefined) {
+        if (existing.id !== nodeId) {
+          throw new KbGraphError(
+            `alias "${alias}" already resolves to node "${existing.id}" under ${String(typeId)}`,
+            'KB_GRAPH_ALIAS_CONFLICT',
+          )
+        }
+        return
+      }
+      this.db.prepare(sql('insert-alias')).run(tenantId, String(typeId), alias, nodeId)
+    })
+  }
+
+  async putSourceRun(run: KgSourceRun): Promise<void> {
+    await Promise.resolve()
+    this.assertLive()
+    this.write(() => {
+      this.db.prepare(sql('upsert-source-run')).run(
+        run.sourceSystem, run.scope, run.watermark ?? null, run.contentHash ?? null, run.runConfig ?? null, run.lastRunAt,
       )
-    `).get(tenantId ?? null, tenantId ?? null, tenantId ?? null, tenantId ?? null) as { n: number }
-    return { triples, entities: entityRow.n }
+    })
+  }
+
+  async getSourceRun(sourceSystem: string, scope: string): Promise<KgSourceRun | undefined> {
+    await Promise.resolve()
+    this.assertLive()
+    const row = this.db.prepare(sql('select-source-run')).get(sourceSystem, scope) as unknown as SourceRunRow | undefined
+    if (row === undefined) return undefined
+    return {
+      sourceSystem: row.source_system,
+      scope: row.scope,
+      ...(row.watermark === null ? {} : { watermark: row.watermark }),
+      ...(row.content_hash === null ? {} : { contentHash: row.content_hash }),
+      ...(row.run_config === null ? {} : { runConfig: row.run_config }),
+      lastRunAt: row.last_run_at,
+    }
+  }
+
+  async upsertNodeType(type: KgNodeType): Promise<void> {
+    await Promise.resolve()
+    this.assertLive()
+    this.write(() => {
+      const now = new Date().toISOString()
+      this.db.prepare(sql('upsert-node-type')).run(
+        String(type.id), type.label, type.description ?? null, type.layer,
+        type.extends === undefined ? null : String(type.extends),
+        JSON.stringify(type.props), type.naturalKey ?? null,
+        type.source, type.status, now, now,
+      )
+    })
+  }
+
+  async upsertRelation(relation: KgRelation): Promise<void> {
+    await Promise.resolve()
+    this.assertLive()
+    this.write(() => {
+      const now = new Date().toISOString()
+      const [primary] = relation.constraints
+      this.db.prepare(sql('upsert-relation')).run(
+        String(relation.id), relation.label, relation.description ?? null,
+        primary === undefined ? null : String(primary.domain),
+        primary === undefined ? null : String(primary.range),
+        JSON.stringify(relation.constraints.map(constraint => ({ domain: String(constraint.domain), range: String(constraint.range) }))),
+        relation.kind,
+        relation.inverseOf === undefined ? null : String(relation.inverseOf),
+        relation.source, now, now,
+      )
+    })
+  }
+
+  async listStoredNodeTypes(): Promise<readonly KgNodeType[]> {
+    await Promise.resolve()
+    this.assertLive()
+    return (this.db.prepare(sql('select-node-types')).all() as unknown as NodeTypeRow[]).map(rowToNodeType)
+  }
+
+  async listStoredRelations(): Promise<readonly KgRelation[]> {
+    await Promise.resolve()
+    this.assertLive()
+    return (this.db.prepare(sql('select-relations')).all() as unknown as RelationRow[]).map(rowToRelation)
+  }
+
+  async searchNodes(tenantId: string, query: string, type: KgNodeTypeId | undefined, k: number): Promise<readonly KgNodeHit[]> {
+    await Promise.resolve()
+    this.assertLive()
+    const needle = query.toLowerCase()
+    const hits: KgNodeHit[] = []
+    for (const row of this.db.prepare(sql('select-nodes-by-type')).all(
+      tenantId, type === undefined ? null : String(type), type === undefined ? null : String(type),
+    ) as unknown as Array<{ id: string; type_id: string; name: string; natural_key: string | null }>) {
+      const hay = `${row.name}\n${row.natural_key ?? ''}\n${row.id}`.toLowerCase()
+      if (!hay.includes(needle)) continue
+      hits.push({
+        id: row.id,
+        type: kgNodeTypeId(row.type_id),
+        name: row.name,
+        ...(row.natural_key === null ? {} : { naturalKey: row.natural_key }),
+      })
+      if (hits.length >= k) break
+    }
+    return hits
   }
 
   /** Roll back the open transaction, retaining the original failure. */
   private rollback(): void {
     try {
-      this.db.exec('ROLLBACK')
+      this.db.exec(sql('rollback'))
     } catch {
       // The original statement failure remains actionable.
     }

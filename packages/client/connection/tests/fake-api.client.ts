@@ -225,12 +225,49 @@ export class FakeApiClient implements IApiClient {
     discoverModels: payload => this.record('llm.discoverModels', payload, Promise.resolve(ok({ models: [] }))),
   }
 
+  readonly data: IApiClient['data'] = {
+    upload: payload => this.record('data.upload', payload, Promise.resolve(ok({ destination: 'kb', replaced: false, document: { doc_id: 0, chunks: 0, embedded: false } }))),
+  }
+
+  readonly orders: IApiClient['orders'] = {
+    create: payload => this.record('orders.create', payload, Promise.resolve(ok({ id: 0, order_no: 'ORD-00000000-0000', service_id: payload.service_id, service_name: '', brief: payload.brief, status: 'pending', created_at: '' }))),
+    get: payload => this.record('orders.get', payload, Promise.resolve(ok({ id: payload.order_id, order_no: 'ORD-00000000-0000', service_id: '', service_name: '', brief: '', status: 'pending', created_at: '' }))),
+    list: payload => this.record('orders.list', payload, Promise.resolve(ok({ orders: [] }))),
+    fulfill: payload => this.record('orders.fulfill', payload, Promise.resolve(ok({ id: payload.order_id, order_no: 'ORD-00000000-0000', service_id: '', service_name: '', brief: '', status: 'delivered', created_at: '' }))),
+  }
+
   readonly kb: IApiClient['kb'] = {
     stats: payload => this.record('kb.stats', payload, Promise.resolve(ok({ documents: 0, chunks: 0, embedded_chunks: 0, embed_available: false, usage: { searches: 0, ingested_documents: 0, ingested_chunks: 0, embed_texts: 0, embed_tokens: 0 } }))),
     search: payload => this.record('kb.search', payload, Promise.resolve(ok({ mode: 'text', results: [] }))),
     ingest: payload => this.record('kb.ingest', payload, Promise.resolve(ok({ doc_id: 0, chunks: 0, embedded: false }))),
     ingestUrl: payload => this.record('kb.ingestUrl', payload, Promise.resolve(ok({ doc_id: 0, chunks: 0, embedded: false }))),
-    upload: payload => this.record('kb.upload', payload, Promise.resolve(ok({ doc_id: 0, chunks: 0, embedded: false }))),
+    upload: payload => this.record('kb.upload', payload, Promise.resolve(ok({ doc_id: 0, chunks: 0, embedded: false, replaced: false }))),
+  }
+
+  readonly assets: IApiClient['assets'] = {
+    list: payload => this.record('assets.list', payload, Promise.resolve(ok({ assets: [] }))),
+    detail: payload => this.record('assets.detail', payload, Promise.resolve(ok({ provider_id: payload.provider_id, dataset_id: payload.dataset_id, title: '', kind: 'tabular' }))),
+    stats: payload => this.record('assets.stats', payload, Promise.resolve(ok({ products: 0, providers: 0, monthly_orders: 0, featured: [] }))),
+  }
+
+  readonly connectors: IApiClient['connectors'] = {
+    list: payload => this.record('connectors.list', payload, Promise.resolve(ok({ providers: [] }))),
+    connections: payload => this.record('connectors.connections', payload, Promise.resolve(ok({ connections: [] }))),
+    transfers: payload => this.record('connectors.transfers', payload, Promise.resolve(ok({ transfers: [] }))),
+  }
+
+  readonly kg: IApiClient['kg'] = {
+    schema: payload => this.record('kg.schema', payload, Promise.resolve(ok({ node_types: [], relations: [] }))),
+    search: payload => this.record('kg.search', payload, Promise.resolve(ok({ nodes: [] }))),
+    subgraph: payload => this.record('kg.subgraph', payload, Promise.resolve(ok({ nodes: [], edges: [], truncated: false, seeds_resolved: payload.seeds.slice(0, 0) }))),
+    expand: payload => this.record('kg.expand', payload, Promise.resolve(ok({ nodes: [], edges: [], truncated: false }))),
+    stats: payload => this.record('kg.stats', payload, Promise.resolve(ok({ triples: 0, entities: 0, node_types: 0, relations: 0 }))),
+  }
+
+  readonly nocobase: IApiClient['nocobase'] = {
+    listMeta: payload => this.record('nocobase.listMeta', payload, Promise.resolve(ok({ collections: [] }))),
+    list: payload => this.record('nocobase.list', payload, Promise.resolve(ok({ count: 0, page: 1, page_size: 20, rows: [] }))),
+    get: payload => this.record('nocobase.get', payload, Promise.resolve(ok({ collection: payload.collection, row: {} }))),
   }
 
   /** When true, streams never fire onOpen (misbehaving-carrier material for the handshake timeout guard). */

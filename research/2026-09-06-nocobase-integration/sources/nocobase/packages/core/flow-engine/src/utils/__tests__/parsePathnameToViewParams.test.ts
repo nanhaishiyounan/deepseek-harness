@@ -1,0 +1,193 @@
+/**
+ * This file is part of the NocoBase (R) project.
+ * Copyright (c) 2020-2024 NocoBase Co., Ltd.
+ * Authors: NocoBase Team.
+ *
+ * This project is dual-licensed under AGPL-3.0 and NocoBase Commercial License.
+ * For more information, please refer to: https://www.nocobase.com/agreement.
+ */
+
+import { parsePathnameToViewParams } from '../parsePathnameToViewParams';
+import { encodeOpenViewRouteState } from '../openViewRouteState';
+
+describe('parsePathnameToViewParams', () => {
+  test('should return single view param for basic admin path', () => {
+    const result = parsePathnameToViewParams('/admin/xxx');
+    expect(result).toEqual([{ viewUid: 'xxx' }]);
+  });
+
+  test('should return view param with tab for admin path with tab', () => {
+    const result = parsePathnameToViewParams('/admin/xxx/tab/yyy');
+    expect(result).toEqual([{ viewUid: 'xxx', tabUid: 'yyy' }]);
+  });
+
+  test('should return two view params for admin with view', () => {
+    const result = parsePathnameToViewParams('/admin/xxx/view/yyy');
+    expect(result).toEqual([{ viewUid: 'xxx' }, { viewUid: 'yyy' }]);
+  });
+
+  test('should return two view params with second having tab', () => {
+    const result = parsePathnameToViewParams('/admin/xxx/view/yyy/tab/zzz');
+    expect(result).toEqual([{ viewUid: 'xxx' }, { viewUid: 'yyy', tabUid: 'zzz' }]);
+  });
+
+  test('should handle complex path with admin tab and view tab', () => {
+    const result = parsePathnameToViewParams('/admin/xxx/tab/yyy/view/zzz/tab/aaa');
+    expect(result).toEqual([
+      { viewUid: 'xxx', tabUid: 'yyy' },
+      { viewUid: 'zzz', tabUid: 'aaa' },
+    ]);
+  });
+
+  test('should handle view with filterByTk parameter', () => {
+    const result = parsePathnameToViewParams('/admin/xxx/view/yyy/filterbytk/1');
+    expect(result).toEqual([{ viewUid: 'xxx' }, { viewUid: 'yyy', filterByTk: '1' }]);
+  });
+
+  test('should handle view with filterByTk and sourceId parameters', () => {
+    const result = parsePathnameToViewParams('/admin/xxx/view/yyy/filterbytk/1/sourceid/1');
+    expect(result).toEqual([{ viewUid: 'xxx' }, { viewUid: 'yyy', filterByTk: '1', sourceId: '1' }]);
+  });
+
+  test('should parse RunJS openView route state without losing route params', () => {
+    const token = encodeOpenViewRouteState('yyy', { mode: 'dialog', size: 'large' });
+    if (!token) {
+      throw new Error('Expected openView route state token.');
+    }
+    const result = parsePathnameToViewParams(`/admin/xxx/view/yyy/opts/${token}/filterbytk/1/sourceid/2`);
+
+    expect(result).toEqual([
+      { viewUid: 'xxx' },
+      {
+        viewUid: 'yyy',
+        openViewRouteState: { mode: 'dialog', size: 'large' },
+        filterByTk: '1',
+        sourceId: '2',
+      },
+    ]);
+  });
+
+  test('should ignore invalid RunJS openView opts and keep following params', () => {
+    const result = parsePathnameToViewParams('/admin/xxx/view/yyy/opts/AbCdEfGh/filterbytk/1');
+
+    expect(result).toEqual([{ viewUid: 'xxx' }, { viewUid: 'yyy', filterByTk: '1' }]);
+  });
+
+  test('should not parse bare RunJS openView route state token segments', () => {
+    const token = encodeOpenViewRouteState('yyy', { mode: 'dialog', size: 'large' });
+    if (!token) {
+      throw new Error('Expected openView route state token.');
+    }
+    const result = parsePathnameToViewParams(`/admin/xxx/view/yyy/${token}/filterbytk/1`);
+
+    expect(result[1]).toMatchObject({ viewUid: 'yyy' });
+    expect(result[1]?.openViewRouteState).toBeUndefined();
+  });
+
+  test('should handle multiple views with different filterByTk and sourceId', () => {
+    const result = parsePathnameToViewParams(
+      '/admin/xxx/view/yyy/filterbytk/1/sourceid/1/view/zzz/filterbytk/2/sourceid/2',
+    );
+    expect(result).toEqual([
+      { viewUid: 'xxx' },
+      { viewUid: 'yyy', filterByTk: '1', sourceId: '1' },
+      { viewUid: 'zzz', filterByTk: '2', sourceId: '2' },
+    ]);
+  });
+
+  test('should handle complex path with tab, filterByTk and sourceId', () => {
+    const result = parsePathnameToViewParams(
+      '/admin/xxx/view/yyy/tab/zzz/filterbytk/1/sourceid/1/view/aaa/filterbytk/2/sourceid/2',
+    );
+    expect(result).toEqual([
+      { viewUid: 'xxx' },
+      { viewUid: 'yyy', filterByTk: '1', sourceId: '1', tabUid: 'zzz' },
+      { viewUid: 'aaa', filterByTk: '2', sourceId: '2' },
+    ]);
+  });
+
+  test('should return empty array for empty pathname', () => {
+    expect(parsePathnameToViewParams('')).toEqual([]);
+    expect(parsePathnameToViewParams('/')).toEqual([]);
+  });
+
+  test('should return empty array for invalid pathname', () => {
+    expect(parsePathnameToViewParams('/admin')).toEqual([]);
+    expect(parsePathnameToViewParams('/invalid')).toEqual([]);
+  });
+
+  test('should handle different parameter orders', () => {
+    const result1 = parsePathnameToViewParams('/admin/xxx/tab/yyy/filterbytk/1/sourceid/2');
+    const result2 = parsePathnameToViewParams('/admin/xxx/filterbytk/1/tab/yyy/sourceid/2');
+    const result3 = parsePathnameToViewParams('/admin/xxx/sourceid/2/filterbytk/1/tab/yyy');
+
+    const expected = [{ viewUid: 'xxx', tabUid: 'yyy', filterByTk: '1', sourceId: '2' }];
+
+    expect(result1).toEqual(expected);
+    expect(result2).toEqual(expected);
+    expect(result3).toEqual(expected);
+  });
+
+  test('should ignore unknown parameters', () => {
+    const result = parsePathnameToViewParams('/admin/xxx/unknown/value/tab/yyy');
+    expect(result).toEqual([{ viewUid: 'xxx', tabUid: 'yyy' }]);
+  });
+
+  test('should handle paths with extra slashes', () => {
+    const result = parsePathnameToViewParams('///admin//xxx//tab//yyy//');
+    expect(result).toEqual([{ viewUid: 'xxx', tabUid: 'yyy' }]);
+  });
+
+  test('should parse custom root prefix', () => {
+    const result = parsePathnameToViewParams('/embed/xxx/tab/yyy/view/zzz', { rootPrefix: 'embed' });
+    expect(result).toEqual([{ viewUid: 'xxx', tabUid: 'yyy' }, { viewUid: 'zzz' }]);
+  });
+
+  test('should parse pathname by basePath', () => {
+    const result = parsePathnameToViewParams('/embed/xxx/tab/yyy/view/zzz', { basePath: '/embed' });
+    expect(result).toEqual([{ viewUid: 'xxx', tabUid: 'yyy' }, { viewUid: 'zzz' }]);
+  });
+
+  test('should parse pathname by nested basePath', () => {
+    const result = parsePathnameToViewParams('/admin/settings/public-forms/xxx/view/zzz', {
+      basePath: '/admin/settings/public-forms',
+    });
+    expect(result).toEqual([{ viewUid: 'xxx' }, { viewUid: 'zzz' }]);
+  });
+
+  test('should keep admin as default root prefix', () => {
+    expect(parsePathnameToViewParams('/embed/xxx')).toEqual([]);
+  });
+
+  test('should parse filterByTk from key-value encoded segment into object', () => {
+    const kv = encodeURIComponent('id=1&tenant=ac');
+    const path = `/admin/xxx/filterbytk/${kv}`;
+    const result = parsePathnameToViewParams(path);
+    expect(result).toEqual([{ viewUid: 'xxx', filterByTk: { id: '1', tenant: 'ac' } }]);
+  });
+
+  test('should parse filterByTk from single key-value encoded segment into object', () => {
+    const kv = encodeURIComponent('id=1');
+    const path = `/admin/xxx/filterbytk/${kv}`;
+    const result = parsePathnameToViewParams(path);
+    expect(result).toEqual([{ viewUid: 'xxx', filterByTk: { id: '1' } }]);
+  });
+
+  test('should parse filterByTk from JSON object segment', () => {
+    const json = encodeURIComponent('{"id":"1","tenant":"ac"}');
+    const path = `/admin/xxx/filterbytk/${json}`;
+    const result = parsePathnameToViewParams(path);
+    expect(result).toEqual([{ viewUid: 'xxx', filterByTk: { id: '1', tenant: 'ac' } }]);
+  });
+
+  test('should keep non-object JSON (array/number) as string for filterByTk', () => {
+    const arr = encodeURIComponent('["a"]');
+    const num = encodeURIComponent('123');
+    const t = encodeURIComponent('true');
+    expect(parsePathnameToViewParams(`/admin/xxx/filterbytk/${arr}`)).toEqual([
+      { viewUid: 'xxx', filterByTk: '["a"]' },
+    ]);
+    expect(parsePathnameToViewParams(`/admin/xxx/filterbytk/${num}`)).toEqual([{ viewUid: 'xxx', filterByTk: '123' }]);
+    expect(parsePathnameToViewParams(`/admin/xxx/filterbytk/${t}`)).toEqual([{ viewUid: 'xxx', filterByTk: 'true' }]);
+  });
+});

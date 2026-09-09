@@ -16,7 +16,7 @@ import type { GenericCallView, GenericResultView, ToolResult } from '@deepseek-a
 import type {} from '@deepseek-ai/dsh-web'
 import { KB_DOC_KINDS } from '@deepseek-ai/dsh-kb'
 import { htmlToStructuredText } from './extract.ts'
-import { assertPublicUrl, parseIngestUrlArgs, type KbIngestUrlArgs } from './url-policy.ts'
+import { parseIngestUrlArgs, resolveAdmittedAddresses, type KbIngestUrlArgs } from './url-policy.ts'
 
 /** The canonical `kb_ingest_url` output value. */
 export interface KbIngestUrlToolValue {
@@ -117,8 +117,8 @@ export function applyKbIngestUrlTool(ctx: Context, tenant: string, allowPrivateN
       if (web === undefined) {
         throw new Error('kb_ingest_url: no web service is composed; add the dsh-web plugin and a fetch provider to ingest URLs')
       }
-      await assertPublicUrl(new URL(input.url), allowPrivateNetworks)
-      const fetched = await web.fetch({ url: input.url }, exec.signal)
+      const pinnedAddresses = await resolveAdmittedAddresses(new URL(input.url), allowPrivateNetworks)
+      const fetched = await web.fetch({ url: input.url, pinnedAddresses }, exec.signal)
       if (fetched.statusCode < 200 || fetched.statusCode >= 300) {
         throw new Error(`kb_ingest_url: the page returned HTTP ${fetched.statusCode}; refusing to store an error response`)
       }

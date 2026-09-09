@@ -34,6 +34,14 @@ import * as WebFetchLocal from '@deepseek-ai/dsh-web-fetch-http'
 import KbRuntime from '@deepseek-ai/dsh-kb'
 import * as KbSqlite from '@deepseek-ai/dsh-kb-sqlite'
 import * as ToolKb from '@deepseek-ai/dsh-tool-kb'
+import LakehouseRuntime from '@deepseek-ai/dsh-lakehouse'
+import type { EngineTableRef, LakehouseQueryResult, QueryProvider } from '@deepseek-ai/dsh-lakehouse'
+import * as LakehouseSqliteCatalog from '@deepseek-ai/dsh-lakehouse-sqlite-catalog'
+import * as ToolLakehouse from '@deepseek-ai/dsh-tool-lakehouse'
+import ConnectorRuntime from '@deepseek-ai/dsh-connector'
+import type { ConnectorDatasetRef, ConnectorProvider } from '@deepseek-ai/dsh-connector'
+import * as ToolConnector from '@deepseek-ai/dsh-tool-connector'
+import * as ToolNocoBase from '@deepseek-ai/dsh-tool-nocobase'
 import SubagentRuntime from '@deepseek-ai/dsh-subagent'
 import type { SubagentProvider, SubagentReportDelivery } from '@deepseek-ai/dsh-subagent'
 import * as ToolSubagentControl from '@deepseek-ai/dsh-tool-subagent-control'
@@ -188,6 +196,39 @@ export interface ToolPackage {
  * `packages/`). Ordered by package name (the render order); the completeness
  * guard proves it is exhaustive against the on-disk glob.
  */
+/** Catalog-only engine stand-in: satisfies provider selection so the tools register for schema collection; queries never run here. */
+class CatalogEngineStub implements QueryProvider {
+  readonly id = 'catalog-stub'
+
+  available(): boolean {
+    return true
+  }
+
+  async writeParquet(): Promise<void> {}
+
+  query(_tenantId: string, _sql: string, _tables: readonly EngineTableRef[]): Promise<LakehouseQueryResult> {
+    throw new Error('the catalog stub engine never executes queries')
+  }
+}
+
+/** A catalog-harvest stub: an empty provider keeps the connector seam usable without upstreams. */
+class CatalogConnectorStub implements ConnectorProvider {
+  readonly id = 'catalog-stub'
+  readonly capabilities = ['discover', 'fetch'] as const
+
+  available(): boolean {
+    return true
+  }
+
+  discover(): Promise<readonly never[]> {
+    return Promise.resolve([])
+  }
+
+  fetch(ref: ConnectorDatasetRef): Promise<never> {
+    throw new Error(`the catalog stub connector has no dataset ${ref.datasetId}`)
+  }
+}
+
 const TOOL_PACKAGES: ToolPackage[] = [
   {
     pkg: '@deepseek-ai/dsh-tool-kb',
@@ -203,6 +244,51 @@ const TOOL_PACKAGES: ToolPackage[] = [
     },
     note:
       'kb_search, kb_ingest, kb_ingest_url, and kb_stats stay visible without a usable store and fail with a structured error at execution time; all four run under the deployment-bound tenant (the model never supplies one), retrieval results carry numbered citations, and the degraded text-only mode is observable in every search result.',
+  },
+  {
+    pkg: '@deepseek-ai/dsh-tool-lakehouse',
+    dir: 'tool-lakehouse',
+    source: 'packages/lakehouse/tool-lakehouse/src/index.ts',
+    requires: ['ctx.tools', 'ctx.lakehouse', 'ctx.systemPrompt'],
+    writes: ['tool/call', 'tool/result'],
+    async mount(ctx) {
+      await ctx.plugin(LakehouseRuntime)
+      await ctx.plugin(LakehouseSqliteCatalog, { path: ':memory:' })
+      ctx.lakehouse.registerQueryProvider(new CatalogEngineStub())
+      await ctx.plugin(ToolLakehouse, { tenant: 'catalog' })
+    },
+    note:
+      'lakehouse_tables and lakehouse_query stay visible without a usable engine and fail with a structured error at execution time (the catalog listing keeps answering); both run under the deployment-bound tenant (the model never supplies one), query results are capped rows with a truncation marker, and the rendered text carries the source-table attribution line.',
+  },
+  {
+    pkg: '@deepseek-ai/dsh-tool-connector',
+    dir: 'tool-connector',
+    source: 'packages/connector/tool-connector/src/index.ts',
+    requires: ['ctx.tools', 'ctx.connector', 'ctx.systemPrompt'],
+    writes: ['tool/call', 'tool/result'],
+    async mount(ctx) {
+      await ctx.plugin(ConnectorRuntime)
+      ctx.connector.registerProvider(new CatalogConnectorStub())
+      await ctx.plugin(ToolConnector, { tenant: 'catalog' })
+      await Promise.resolve()
+    },
+    note:
+      'connector_discover, connector_fetch, and connector_transfer run under the deployment-bound tenant (the model never supplies one); discovery answers with a grouped listing carrying provider and dataset ids, previews are capped (8 rows / 400 characters), and transfers render the landing receipt with the catalog transfer-record id and the next-step guidance (lakehouse_query over the named table, or kb_search with citations).',
+  },
+  {
+    pkg: '@deepseek-ai/dsh-tool-nocobase',
+    dir: 'tool-nocobase',
+    source: 'packages/connector/tool-nocobase/src/index.ts',
+    requires: ['ctx.tools', 'ctx.systemPrompt'],
+    writes: ['tool/call', 'tool/result'],
+    async mount(ctx) {
+      // No credentials in the catalog harness: the tools register in the
+      // documented degraded mode (each call would refuse with the structured
+      // no-credentials error); the schema surface is what the catalog harvests.
+      await ctx.plugin(ToolNocoBase, {})
+    },
+    note:
+      'nb_collections, nb_list, nb_get, nb_create, and nb_update speak to the deployment\'s NocoBase under a service account (the model never supplies a tenant); the filter vocabulary is closed (eq/in/gt/lt joined by one and/or), and the write tools carry the confirmed-change contract — the system-prompt guidance demands the presented preview / before→after diff and the user\'s explicit go-ahead before nb_create/nb_update run, and their receipts echo the landing id or the field-by-field diff.',
   },
   {
     pkg: '@deepseek-ai/dsh-tool-ask-user',

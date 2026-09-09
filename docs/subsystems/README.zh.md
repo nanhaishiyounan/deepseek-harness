@@ -28,6 +28,8 @@
 | [approval.md](approval.zh.md) | 一次性用户审批 seam：`ApprovalRequest`、`ApprovalOutcome`、逐会话策略、审计事件和 answerer 约定 |
 | [attachment.md](attachment.zh.md) | 持久图片标识与元数据、校验输入、经校验读取，以及 `AttachmentStore` seam |
 | [kb.md](kb.zh.md) | 知识库缝：`KbStore`/`EmbedProvider` 契约、RRF 融合的混合检索，与纯文本降级模式 |
+| [lakehouse.md](lakehouse.zh.md) | 湖仓缝：`CatalogStore`/`QueryProvider` 契约、租户可见表集合下的 Parquet load/query，与无引擎的显式失败降级 |
+| [connector.md](connector.zh.md) | 连接器缝：`ConnectorProvider` 注册表、统一数据集数据包，以及经共享数据路由器把外部数据集落进 kb 或湖仓的五步传输 |
 | [shell.md](shell.zh.md) | bash 执行器 seam：`ShellExecRequest`/`Spec`、`ShellRunResult`、后台 `ShellProcess` 句柄 |
 | [subprocess.md](subprocess.zh.md) | 子进程 seam：完全显式的 `SubprocessSpawnSpec`、基于偏移的输出读取器、不含分类的 `SubprocessOutcome`，以及受管 `DSH_*` 环境词汇 |
 | [terminal.md](terminal.zh.md) | 持久化终端 ID、后端/会话约定、发送就绪状态、有界读取与 owner 可见快照 |

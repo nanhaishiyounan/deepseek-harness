@@ -1,0 +1,31 @@
+{
+  "date": "2026-09-06",
+  "topic": "NocoBase L4 深度调研：融入纯 ESM pnpm workspace monorepo 的实证分析",
+  "depth": "Exhaustive",
+  "sourceCount": 48,
+  "queries": [
+    "nocobase-main 根 package.json/lerna.json/yarn.lock/tsconfig*（本地只读审计）",
+    "packages/*/* 159 个 workspace 包清单与抽样 package.json（exports/deps/peer 形态）",
+    "nocobase-v1 build/dev/start/postinstall 命令链与 packages/presets/nocobase 入口形态",
+    "APP_PORT/DB_DIALECT/DB_STORAGE 等环境变量读取点与 dev 三进程端口分配",
+    "sqlite3/better-sqlite3/pg/mysql2 驱动声明与安装状态（sqlite 缺件验证）",
+    "LICENSE.txt/LICENSE-APACHE.txt/逐包 LICENSE 分布/CHANGELOG 许可变更考古",
+    "nocobase license AGPL pro commercial（chrome-devtools DuckDuckGo + nocobase.com/agreement）",
+    "pnpm-workspace.yaml globs/run-gates.ts/check-workspace-constraints/oxlint/lefthook/vitest/knip/publint 扫描范围",
+    "vendor/README.md vendoring 合同 + check-vendor-manifest.sh + native/landlock-run 独立子树先例",
+    "examples/kb-agent QUICKSTART.zh.md/setup-nocobase.mts/connector-nocobase 现有轨道与对接面",
+    "du/find 体积测量与 include/exclude 复制范围（rsync）"
+  ],
+  "clonedRepos": [],
+  "assets": {
+    "images": [],
+    "attachments": [],
+    "totalSizeMB": 0
+  },
+  "triangulation": {
+    "claimsTotal": 0,
+    "claimsMultiSourced": 0,
+    "contradictionsFound": 0,
+    "contradictionsResolved": 0
+  }
+}

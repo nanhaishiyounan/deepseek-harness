@@ -82,6 +82,14 @@ DSH_HOME=examples/kb-agent/.dsh pnpm dsh --profile headless --patch examples/kb-
 
 Expect the same cited answer shape, with `mode: 'text'` and `embed_available: false` observable in the `kb_search`/`kb_stats` results the model reports, while MiniMax-M3 still answers on `MINIMAX_API_KEY`.
 
+## Expert-service orders (NocoBase business backend)
+
+The composition also mounts the connector seam and the orders domain: `connector_discover` surfaces the 张红喜 expert dataset (expert card + orderable services) and `order_create` places an order and generates the proposal PDF. The single source of truth for orders is an external NocoBase 2.x backend: `scripts/setup-nocobase.mts` brings it up end to end — install, start, collections, dataset seeding, API key issuance, and the approval workflow (manual approval → approve calls back into DSH to produce the deliverable / reject writes the failure) — writing credentials into the repository root `.env`; without them the related tests self-skip. Full steps and the real-track e2e live in the NocoBase section of [QUICKSTART.zh.md](QUICKSTART.zh.md) (Chinese). Delivered PDFs hang off the order row's attachment field through `attachments:upload`; the local `workspace/deliverables/` copy is only a cache.
+
+## One-command demo of the three user journeys
+
+`scripts/demo-full-journey.mts` chains the three customer motions (upload auto-routing csv→lakehouse / md→kb, the export-risk question with President Zhang's expert card, and order → approval → PDF delivery) into one real end-to-end run: with-key + with-NocoBase, tracks whose preconditions are missing self-skip with an explanation, each scenario asserts and appends its transcript under `demos/`. Command and preconditions live in the demo section of [QUICKSTART.zh.md](QUICKSTART.zh.md) (Chinese).
+
 ## FAQ
 
 - **A v1 knowledge base is rejected at boot** — the current build refuses an old `workspace/kb.sqlite` (schema v1) fail-loud. Rename it (e.g. `workspace/kb.sqlite.v1-backup`); the next boot rebuilds a fresh database, then re-ingest the corpus. See the FAQ section of [QUICKSTART.zh.md](QUICKSTART.zh.md) and DEPLOY.md §6.

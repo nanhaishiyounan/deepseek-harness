@@ -29,12 +29,19 @@ Match order is fixed: exact table first, then longest matching prefix, then the 
 ## Config
 
 ```ts type-equiv
-/** Gateway config: the listen address. */
+/** Gateway config: the listen address (and the optional NocoBase proxy). */
 interface Config {
   /** Listen host; the two supported values are loopback and all-interfaces. */
   host: '127.0.0.1' | '0.0.0.0'
   /** Listen port; zero requests an OS-assigned port. */
   port: number
+  /**
+   * NocoBase origin (scheme + host + port) the `/nocobase` prefix proxies
+   * to, with framing guards stripped so the business page's embed entry can
+   * render the admin UI same-origin. Absent means no proxy route — the
+   * unauthenticated gateway must not proxy a business backend by default.
+   */
+  nocobaseProxyOrigin?: string
 }
 ```
 

@@ -37,6 +37,12 @@ import AgentLoop from '@deepseek-ai/dsh-agent-loop'
 import AgentPresets from '@deepseek-ai/dsh-agent-presets'
 import * as Persona from '@deepseek-ai/dsh-persona'
 import * as ToolKb from '@deepseek-ai/dsh-tool-kb'
+import LakehouseRuntime from '@deepseek-ai/dsh-lakehouse'
+import * as LakehouseSqliteCatalog from '@deepseek-ai/dsh-lakehouse-sqlite-catalog'
+import * as LakehouseDuckDb from '@deepseek-ai/dsh-lakehouse-duckdb'
+import * as ToolLakehouse from '@deepseek-ai/dsh-tool-lakehouse'
+import ConnectorRuntime from '@deepseek-ai/dsh-connector'
+import * as ToolConnector from '@deepseek-ai/dsh-tool-connector'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const exampleRoot = join(here, '..')
@@ -108,6 +114,12 @@ async function boot(presetRoot: string): Promise<Context> {
     ['@deepseek-ai/dsh-agent-presets', AgentPresets],
     ['@deepseek-ai/dsh-persona', Persona],
     ['@deepseek-ai/dsh-tool-kb', ToolKb],
+    ['@deepseek-ai/dsh-lakehouse', LakehouseRuntime],
+    ['@deepseek-ai/dsh-lakehouse-sqlite-catalog', LakehouseSqliteCatalog],
+    ['@deepseek-ai/dsh-lakehouse-duckdb', LakehouseDuckDb],
+    ['@deepseek-ai/dsh-tool-lakehouse', ToolLakehouse],
+    ['@deepseek-ai/dsh-connector', ConnectorRuntime],
+    ['@deepseek-ai/dsh-tool-connector', ToolConnector],
   ])
   context.loader.internal = {
     version: 'v2',
@@ -197,7 +209,7 @@ describe('kb-agent scenario set (keyless, text-only degraded mode)', () => {
       })
       const agent: Agent = handle.agent
       const names = context.tools.schemas(agent).map(schema => schema.name).sort()
-      expect(names, `${slug} tool surface`).toEqual(['kb_graph_add', 'kb_graph_query', 'kb_ingest', 'kb_ingest_url', 'kb_search', 'kb_stats'])
+      expect(names, `${slug} tool surface`).toEqual(['kb_graph_add', 'kb_graph_query', 'kb_ingest', 'kb_ingest_url', 'kb_search', 'kb_stats', 'kg_schema', 'kg_subgraph'])
       out.push(`- tools: ${String(names.length)} kb tools`)
 
       // Retrieve: the scenario's own corpus answers its probe query with a citation.

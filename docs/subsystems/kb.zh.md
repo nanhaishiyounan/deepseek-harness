@@ -88,6 +88,11 @@ interface KbSearchHit {
   readonly content: string
   /** Data-space provenance, when the ingest carried it. */
   readonly provenance?: KbProvenance
+  /**
+   * Fused RRF relevance score, attached by `search()` (stores rank; they do
+   * not score). One meaning in both modes — the threshold's score basis.
+   */
+  readonly score?: number
 }
 ```
 
@@ -215,7 +220,7 @@ Source: [`packages/kb/kb/src/index.ts`](../../packages/kb/kb/src/index.ts)
 
 ### `ctx.kbGraph` — `KbGraphRuntime`
 
-The knowledge-graph service. Registered as `ctx.kbGraph` (one instance per context).
+The knowledge-graph service. Registered as `ctx.kbGraph` (one instance per context). Owns two registries: graph store providers and the ontology (node types and relations, seeded with the built-in three-layer model).
 
 Store selection (resolved at execution time, never order-dependent):
 
@@ -232,6 +237,63 @@ Store selection (resolved at execution time, never order-dependent):
  * @returns the disposer that unregisters the store.
  */
 registerStoreProvider(store: GraphStore): () => void
+
+/**
+ * Register one node type. The `extends` parent must already be registered;
+ * a duplicate id refuses. Returns a disposer; disposed with the calling
+ * fiber.
+ * @param type - the node-type registration entry.
+ * @returns the disposer that unregisters the type.
+ */
+registerNodeType(type: KgNodeType): () => void
+
+/**
+ * Register one relation. Every constraint endpoint and a declared
+ * `inverseOf` must already be registered; a duplicate id refuses. Returns
+ * a disposer; disposed with the calling fiber.
+ * @param relation - the relation registration entry.
+ * @returns the disposer that unregisters the relation.
+ */
+registerRelation(relation: KgRelation): () => void
+
+/**
+ * Look up one registered node type.
+ * @param id - the registry key.
+ * @returns the registered entry, or `undefined` when absent.
+ */
+nodeType(id: KgNodeTypeId): KgNodeType | undefined
+
+/**
+ * Look up one registered relation.
+ * @param id - the registry key.
+ * @returns the registered entry, or `undefined` when absent.
+ */
+relation(id: KgRelationId): KgRelation | undefined
+
+/**
+ * List registered node types, optionally narrowed to one layer, in
+ * registration order (top layer first, then domain, then later plugins).
+ * @param layer - optional layer filter.
+ * @returns the matching registry entries.
+ */
+listNodeTypes(layer?: KgOntologyLayer): readonly KgNodeType[]
+
+/**
+ * List registered relations in registration order.
+ * @returns the registry entries.
+ */
+listRelations(): readonly KgRelation[]
+
+/**
+ * Closed-set shape validation for one edge: unknown relation, unknown
+ * endpoint types, and (for constrained relations) direction violations.
+ * Unrestricted hierarchical relations accept any two registered endpoints.
+ * @param relationId - the relation to check.
+ * @param src - the subject node type.
+ * @param dst - the object node type.
+ * @returns the violations (empty when the edge shape is legal).
+ */
+validateEdge(relationId: KgRelationId, src: KgNodeTypeId, dst: KgNodeTypeId): KgShapeViolation[]
 
 /**
  * Store triples idempotently under one tenant.
@@ -270,7 +332,7 @@ async twoHopPaths(tenantId: string, entity: KbGraphEntity, target: KbGraphEntity
  * @param signal - cancellation signal.
  * @returns the matching entities.
  */
-async searchEntities( tenantId: string, query: string, type?: KbGraphEntityType, limit?: number, signal?: AbortSignal, ): Promise<KbGraphEntity[]>
+async searchEntities( tenantId: string, query: string, type?: KgNodeTypeId, limit?: number, signal?: AbortSignal, ): Promise<KbGraphEntity[]>
 
 /**
  * Count stored triples and distinct entities.
@@ -279,9 +341,131 @@ async searchEntities( tenantId: string, query: string, type?: KbGraphEntityType,
  * @returns the triple count and the distinct-entity count.
  */
 async stats(tenantId?: string, signal?: AbortSignal): Promise<{ triples: number; entities: number }>
+
+/**
+ * Search nodes by name / natural-key substring — the name→id resolution
+ * primitive behind seed lookup and entity alignment.
+ * @param tenantId - owning tenant; the hard isolation key.
+ * @param query - case-insensitive substring of the name or natural key.
+ * @param type - optional node-type restriction.
+ * @param k - maximum nodes to return; defaults to 10.
+ * @returns the matching node hits.
+ */
+async searchNodes(tenantId: string, query: string, type?: KgNodeTypeId, k: number = 10): Promise<readonly KgNodeHit[]>
+
+/**
+ * Merge one node onto its anchors through the v2 store face.
+ * @param node - the node to merge.
+ * @returns whether an existing row was merged (false = fresh insert).
+ */
+async upsertNode(node: KgNode): Promise<{ merged: boolean }>
+
+/**
+ * Merge edges onto their seven-column anchors through the v2 store face.
+ * @param edges - the edges to merge.
+ * @returns how many edges were newly inserted.
+ */
+async upsertEdges(edges: readonly KgEdge[]): Promise<number>
+
+/**
+ * Read the k-hop neighborhood around seed nodes (undirected, cycle-safe).
+ * @param tenantId - owning tenant; the hard isolation key.
+ * @param seedIds - minted node ids the walk starts from.
+ * @param hops - maximum walk depth; 0 returns just the seeds.
+ * @param limits - optional size bounds; defaults apply.
+ * @returns the subgraph with a truncation signal.
+ */
+async subgraph(tenantId: string, seedIds: readonly string[], hops: number, limits?: KgSubgraphLimits): Promise<KgSubgraph>
+
+/**
+ * Read the one-hop neighborhood of one node (the visualization
+ * load-on-demand primitive).
+ * @param tenantId - owning tenant.
+ * @param nodeId - the minted node id to expand.
+ * @param limit - maximum nodes returned.
+ * @returns the one-hop subgraph.
+ */
+async expand(tenantId: string, nodeId: string, limit?: number): Promise<KgSubgraph>
+
+/**
+ * Tombstone every live edge one source currently asserts; parallel
+ * assertions from other sources survive.
+ * @param sourceSystem - the asserting system.
+ * @param sourceId - the assertion address inside that system.
+ * @param at - ISO timestamp written into `valid_until`.
+ * @returns how many edges were tombstoned.
+ */
+async tombstoneBySource(sourceSystem: string, sourceId: string, at: string): Promise<number>
+
+/**
+ * Bind one alias for entity resolution; refuses an alias already bound to
+ * a different node.
+ * @param tenantId - owning tenant.
+ * @param typeId - the node type the alias narrows within.
+ * @param alias - the alias text.
+ * @param nodeId - the minted node id the alias resolves to.
+ */
+async putAlias(tenantId: string, typeId: KgNodeTypeId, alias: string, nodeId: string): Promise<void>
+
+/**
+ * Advance (or create) one source-run watermark row.
+ * @param run - the run snapshot to persist.
+ */
+async putSourceRun(run: KgSourceRun): Promise<void>
+
+/**
+ * Read one source-run watermark row.
+ * @param sourceSystem - the asserting system.
+ * @param scope - the collection/table/prefix scope.
+ * @returns the stored run, or `undefined` when never run.
+ */
+async getSourceRun(sourceSystem: string, scope: string): Promise<KgSourceRun | undefined>
+
+/**
+ * Register one node type in the runtime registry AND persist it as a
+ * registry row (the two-layer registry's write path). Idempotent per id:
+ * an already-registered id skips the runtime registration and refreshes
+ * only the persisted row.
+ * @param type - the node-type registration entry.
+ */
+async persistNodeType(type: KgNodeType): Promise<void>
+
+/**
+ * Register one relation in the runtime registry AND persist it as a
+ * registry row; see {@link persistNodeType}. Constraint endpoint types
+ * persist first (the registry tables foreign-key them), as does a declared
+ * inverse other than the relation itself.
+ * @param relation - the relation registration entry.
+ */
+async persistRelation(relation: KgRelation): Promise<void>
+
+/**
+ * Read every persisted registry row (the two-layer registry's read path;
+ * store providers re-register these at boot).
+ * @returns the stored node types and relations.
+ */
+async storedRegistry(): Promise<{ nodeTypes: readonly KgNodeType[]; relations: readonly KgRelation[] }>
 ```
 
 Source: [`packages/kb/kb-graph/src/index.ts`](../../packages/kb/kb-graph/src/index.ts)
+
+<a id="ctxkgbuild--kgbuildruntime"></a>
+
+### `ctx.kgBuild` — `KgBuildRuntime`
+
+The pipeline service. One instance per context; `run()` executes one full pipeline pass (structured sources, then extraction) and resolves with the per-scope report. Fails loud on a missing seam: every enabled source requires its service at run time.
+
+```ts cordis-catalog
+/**
+ * Execute one full pipeline pass: registry mapping + structured ingestion,
+ * then corpus extraction, alignment, and watermark persistence.
+ * @param options - cooperative cancellation.
+ * @returns the per-scope run report.
+ */
+async run(options: RunOptions = {}): Promise<KgBuildRunReport>
+```
+
+Source: [`packages/kb/kg-build/src/index.ts`](../../packages/kb/kg-build/src/index.ts)
 <!-- END GENERATED cordis-surface -->
 
 ## 可信数据空间衔接

@@ -1,0 +1,76 @@
+# Test-only composition for the with-key expert-order e2e: the live model
+# stack (settings, credentials, llm-minimax, and the MiniMax embedder) over
+# the kb seam and the orders seam — order_create drafts the proposal through
+# the real MiniMax-M3 stream (the draft key resolves through the credentials
+# seam) and expert-pdf typesets the real deliverable. The NocoBase provider
+# and the orders source are pinned to the in-spec mock server (the mock
+# serves the same authoritative dataset.json the seed script uses).
+# Self-skips without MINIMAX_API_KEY.
+
+- id: settings
+  name: '@deepseek-ai/dsh-settings-file'
+
+- id: credentials
+  name: '@deepseek-ai/dsh-credentials-local'
+
+- id: llm
+  name: '@deepseek-ai/dsh-llm'
+
+- id: llm-minimax
+  name: '@deepseek-ai/dsh-llm-minimax'
+
+- id: kb
+  name: '@deepseek-ai/dsh-kb'
+
+- id: kb-sqlite
+  name: '@deepseek-ai/dsh-kb-sqlite'
+  config:
+    path: !!js "process.env.KB_TEST_DB ?? 'workspace/kb.sqlite'"
+
+- id: kb-embed-minimax
+  name: '@deepseek-ai/dsh-kb-embed-minimax'
+
+- id: fs-local
+  name: '@deepseek-ai/dsh-fs-local'
+  config:
+    cwd: !!js "process.env.KB_TEST_ROOT ?? process.cwd()"
+
+- id: tools
+  name: '@deepseek-ai/dsh-tools'
+
+- id: system-prompt
+  name: '@deepseek-ai/dsh-system-prompt'
+
+- id: tool-kb
+  name: '@deepseek-ai/dsh-tool-kb'
+  config:
+    tenant: demo-food-co
+
+- id: connector
+  name: '@deepseek-ai/dsh-connector'
+
+- id: connector-nocobase
+  name: '@deepseek-ai/dsh-connector-nocobase'
+  config:
+    baseUrl: !!js "process.env.EO_TEST_NC_URL ?? ''"
+    apiKeyEnv: EO_TEST_NC_TOKEN
+
+- id: tool-connector
+  name: '@deepseek-ai/dsh-tool-connector'
+  config:
+    tenant: demo-food-co
+
+- id: expert-orders
+  name: '@deepseek-ai/dsh-expert-orders'
+  config:
+    baseUrl: !!js "process.env.EO_TEST_NC_URL ?? ''"
+    apiKeyEnv: EO_TEST_NC_TOKEN
+    draftApiKeyEnv: MINIMAX_API_KEY
+    draftProvider: minimax
+    draftModel: MiniMax-M3
+    # Live drafting over this brief runs long: 4096 (the seam default)
+    # truncates the DraftSpec JSON mid-flight ("max-tokens" finish).
+    draftMaxTokens: 16384
+    draftTimeoutMs: 120000
+    tenant: demo-food-co
+    deliverablesDir: !!js "process.env.EO_TEST_DELIVERABLES ?? 'workspace/deliverables'"

@@ -412,13 +412,13 @@ Important 项（H5-H7）：部署统一（`DSH_KB_TENANT` 单一事实源、kb-s
 
 | # | 债务 | 修复方向 |
 |---|---|---|
-| 1 | `kb_ingest_url` 的 DNS rebinding TOCTOU：url-policy 校验时解析的 IP 与 `ctx.web.fetch` 实际解析分离 | pin-IP：校验时解析的 IP 随请求下发，fetch 直连该 IP（SNI/Host 保持原域名） |
+| 1 | ✅ 已清偿（2026-09-03，connector-lakehouse-nocobase N0）：`kb_ingest_url` 的 DNS rebinding TOCTOU。pin-IP 方案落地——url-policy 校验时解析的 IP 随请求下发，fetch 直连该 IP（SNI/Host 保持原域名） | Agent Note：[`2026-09-03-upload-chain-debt-clearing.md`](../.agents/notes/implemented/bug-fix/2026-09-03-upload-chain-debt-clearing.md) |
 | 2 | `kb_graph_query`/`kb_graph_add` 零 usage 计量：graph 查询不经 `ctx.kb` 的 recordUsage 缝 | graph execute 按 action 计量（graphQueries/graphAdds），与 `kb.search`/`kb.ingest` 的 meter 对称 |
 | 3 | 19 个场景待内容填充 | 复制场景模板改写 preset/agent/SKILL/corpus 四文件，`tests/scenarios.spec.ts` 自动纳入校验 |
 | 4 | UI doc_kind 选择器小增强 | ui-kb 检索面板 doc_kind 过滤交互增强（H1 后过滤链路已通） |
 | 5 | CI coverage/snapshot lane 复验 | 本机 Node 22 抖动无法佐证，合并前在 CI 复验（P0 完成记录同项债务延续） |
 | 6 | 预存 vendor rescape 红 | 与本批无关，随 vendor/ 同步流程处置 |
-| 7 | 检索无相关性阈值：低分命中与高分命中同列，长结果列表混入弱相关片段 | 后端在 `kb.search` 融合后按分数门过滤（RRF 分数下限可配置），hit 携带分数供前端弱化展示 |
+| 7 | ✅ 已清偿（2026-09-05，connector-lakehouse-nocobase N4）：检索相关性阈值。`kb.search` 的 `minRelevanceScore`（示例组合 0.015，deep-rank 剪枝语义）已启用，hit 携带分数 | 校准依据与取舍见 [cordis.patch.yml](../../examples/kb-agent/cordis.patch.yml) 注释与 [`calibrate-relevance.mts`](../../examples/kb-agent/scripts/calibrate-relevance.mts) |
 | 8 | 大文档 embed 稳定性：单次全量 embed 在超大切片数下超时/失败面大 | embed 分批（chunk 数上限 + 批间退避），失败批次重试，仍失败才整体 fail-loud（FIX-K 已锁 embed 失败不落库的原子性） |
 | 9 | ✅ 已清偿（2026-09-02）：MiniMax 并行 tool-call id 聚合缺陷（会话永久 2013）。根因=续传 delta 空字符串覆盖首个 delta 的 id/name；双层修复（translate.ts 聚合仅非空值推进 + serialize.ts 出站唯一化）；日志 fixture 回归（parallel-tool-calls.events.json + session-excerpt.jsonl）；真实 key 复现 export-tax 场景 2 轮完成、8 个 tool-call 全唯一、0×2013 | Agent Note：[`2026-09-02-minimax-parallel-tool-call-id-aggregation.md`](../.agents/notes/implemented/bug-fix/2026-09-02-minimax-parallel-tool-call-id-aggregation.md)；收尾复跑（CLOSEOUT-BUG2）全绿并顺带修复 adapter.e2e.ts 的 CallId 类型回归（typecheck 门首跑红、修后绿） |
 

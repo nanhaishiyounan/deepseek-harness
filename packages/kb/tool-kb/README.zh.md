@@ -31,6 +31,8 @@ interface Config {
 
 各预算以 `ToolDefinition.timeoutMs` 挂到工具上，由 `@deepseek-ai/dsh-tool-call-timeout-policy` 执行。`kb_search` 与 `kb_stats` 是并发安全读；`kb_ingest` 与 `kb_ingest_url` 不是。
 
+kg 面新增 `kg_schema`（本体浏览）与 `kg_subgraph`（k-hop 子图读取，按实体聚合的 YAML 序列化——不存在自由图查询生成）。
+
 ## 模型体验（Model Experience）
 
 ### 系统提示词
@@ -126,6 +128,5 @@ schema 校验在执行前拒绝类型错误的字段。值错误变成 `Error: <
 ## 已知限制与遗留工作
 
 - **PDF 抽取仅限文本层** —— unpdf 读文本层；扫描图片 PDF（无 OCR）入库为空并触发无可抽取文本检查失败。
-- **未防 DNS rebinding** —— SSRF 门每次入库解析一次主机，fetch provider 会再解析；把解析 IP 钉进 fetch 需要请求字段变更。见采集通道 Agent Note。
 - **截断是触顶而非总量感知** —— seam 不报总命中数，`truncated` 表示结果到达上限。
 - **`embed_tokens` 计零** —— MiniMax 原生 wire 只返回向量；在 provider 上报 token 用量前按 embed 文本条数计量。

@@ -19,7 +19,10 @@
 
 | 工具包 | 模型可见名称 | 依赖 | 写入／影响 | 随产品发布的别名 | 部署说明 |
 | --- | --- | --- | --- | --- | --- |
-| `@deepseek-ai/dsh-tool-kb` | `kb_graph_add`, `kb_graph_query`, `kb_ingest`, `kb_ingest_url`, `kb_search`, `kb_stats` | `ctx.tools`、`ctx.kb`、`ctx.fs`、`ctx.systemPrompt` | `tool/call`、`tool/result` | - | kb_search、kb_ingest、kb_ingest_url 与 kb_stats 在无可用 store 时保持可见并在执行时以结构化错误失败；四者都在部署绑定租户下运行（模型从不提供租户），检索结果带编号引用，降级 text-only 模式在每次检索结果中可观测。 |
+| `@deepseek-ai/dsh-tool-kb` | `kb_graph_add`, `kb_graph_query`, `kb_ingest`, `kb_ingest_url`, `kb_search`, `kb_stats`, `kg_schema`, `kg_subgraph` | `ctx.tools`、`ctx.kb`、`ctx.fs`、`ctx.systemPrompt` | `tool/call`、`tool/result` | - | kb_search、kb_ingest、kb_ingest_url 与 kb_stats 在无可用 store 时保持可见并在执行时以结构化错误失败；四者都在部署绑定租户下运行（模型从不提供租户），检索结果带编号引用，降级 text-only 模式在每次检索结果中可观测。 |
+| `@deepseek-ai/dsh-tool-lakehouse` | `lakehouse_query`, `lakehouse_tables` | `ctx.tools`, `ctx.lakehouse`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | lakehouse_tables 与 lakehouse_query 在无可用引擎时保持可见并在执行时以结构化错误失败（表清单仍可应答）；两者都运行在部署侧绑定租户下（模型永不提供租户），查询结果是带截断标记的封顶行集，渲染文本携带来源表溯源行。 |
+| `@deepseek-ai/dsh-tool-connector` | `connector_discover`, `connector_fetch`, `connector_transfer`, `order_create`, `order_status` | `ctx.tools`, `ctx.connector`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | connector_discover、connector_fetch 与 connector_transfer 都运行在部署侧绑定租户下（模型永不提供租户）；发现以携带 provider 与 dataset id 的分组清单作答，预览有上限（8 行 / 400 字符），传输渲染落地回执——含 catalog 传输记录 id 与下一步指引（对命名表用 lakehouse_query，或带引用的 kb_search）。 |
+| `@deepseek-ai/dsh-tool-nocobase` | `nb_collections`, `nb_create`, `nb_get`, `nb_list`, `nb_update` | `ctx.tools`、`ctx.systemPrompt` | `tool/call`、`tool/result` | - | nb_collections、nb_list、nb_get、nb_create 与 nb_update 以服务账号对话部署的 NocoBase（模型永不提供租户）；筛选词汇为封闭集（eq/in/gt/lt 加单一 and/or 连接），写工具承载确认式变更契约——系统提示指引要求先呈现预览 / 改前→改后对比并取得用户明确同意才运行 nb_create/nb_update，其回执复述落地 id 或逐字段 diff。 |
 | `@deepseek-ai/dsh-tool-ask-user` | `ask_user_question` | `ctx.tools`、`ctx.userQuestions` | `tool/call`、`tool/result after a UI/provider answers the question` | - | ask_user_question 会暂停工具调用，直到当前 UI 提供方返回人类答案。 |
 | `@deepseek-ai/dsh-tools` | `run_code` | `ctx.tools`、`ctx.codeRuntime (execution time)`、`ctx.systemPrompt` | `tool/call`、`one tool/code-dispatch-start + tool/code-dispatch pair per bridged sub-call`、`tool/result` | - | 在 `mode: code`／`mode: both` 下，它由工具注册表所有，作为可过滤能力层之外的保留传输机制（参见 Code Mode Agent Note）。在 `code` 下，它是注册表对协议格式（wire format）的唯一贡献；其他可见能力在使用已加载运行时语言生成的 SDK 章节中声明。程序通过 binding 调用这些能力，调用按照原生并发约定调度：启动顺序和策略遵循提交顺序，并发安全的函数体最多重叠执行 `maxParallelSubCalls` 个。调用会重新进入完整且受守卫保护的工具流水线，并将每个嵌套执行关联到此外层结果。 |
 | `@deepseek-ai/dsh-plan-mode` | `exit_plan_mode` | `ctx.tools`、`ctx.systemPrompt`、`ctx.userQuestions (execution time, opportunistic)` | `tool/call`、`plan/mode inactive on an approved review`、`tool/result` | - | 规划未激活时，exit_plan_mode 仍保留在面向模型的 schema 中，这样状态转换不会在规划策略变更之外额外造成工具目录变动。其执行路径会拒绝规划模式之外的调用；在规划模式下，它通过用户交互 seam 提交计划（批准／根据反馈继续规划），批准后会在步骤边界记录规划模式已停用。 |
@@ -62,7 +65,7 @@ Store entity-relation triples extracted from ingested documents into the knowled
   "properties": {
     "triples": {
       "type": "array",
-      "description": "Triples to store. Entity types: company, product, ingredient, additive, standard, process, risk. Predicates: produces, uses, contains, complies_with, follows, flags, supplies.",
+      "description": "Triples to store. Entity types: Object, Process, Event, Role, Concept, Customer, Supplier, Product, ProductCategory, Order, OrderItem, Shipment, Carrier, Warehouse, StockLevel, Expert, ExpertService, Service, Deliverable, Dataset, Connector, Region, Address, Ingredient, company, product, ingredient, additive, standard, process, risk. Predicates: produces, uses, contains, complies_with, follows, flags, supplies, broader, related, places, located_in, fulfills, belongs_to, placed_by, includes, shipped_to, carries, departs_from, stores, offers, certified_for, derived_from, sourced_via.",
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -106,7 +109,7 @@ Source: [`packages/kb/tool-kb/src/index.ts`](../packages/kb/tool-kb/src/index.ts
 
 ### `kb_graph_query`
 
-Query the knowledge graph: neighbors of one entity, a two-hop path between two entities, or entities by id substring. Entity types: company, product, ingredient, additive, standard, process, risk. Predicates: produces, uses, contains, complies_with, follows, flags, supplies.
+Query the knowledge graph: neighbors of one entity, a two-hop path between two entities, or entities by id substring. Entity types: Object, Process, Event, Role, Concept, Customer, Supplier, Product, ProductCategory, Order, OrderItem, Shipment, Carrier, Warehouse, StockLevel, Expert, ExpertService, Service, Deliverable, Dataset, Connector, Region, Address, Ingredient, company, product, ingredient, additive, standard, process, risk. Predicates: produces, uses, contains, complies_with, follows, flags, supplies, broader, related, places, located_in, fulfills, belongs_to, placed_by, includes, shipped_to, carries, departs_from, stores, offers, certified_for, derived_from, sourced_via.
 
 ```json
 {
@@ -118,7 +121,7 @@ Query the knowledge graph: neighbors of one entity, a two-hop path between two e
     },
     "entity_type": {
       "type": "string",
-      "description": "Entity type (company, product, ingredient, additive, standard, process, risk); required for neighbors/paths, optional type filter for search."
+      "description": "Entity type (Object, Process, Event, Role, Concept, Customer, Supplier, Product, ProductCategory, Order, OrderItem, Shipment, Carrier, Warehouse, StockLevel, Expert, ExpertService, Service, Deliverable, Dataset, Connector, Region, Address, Ingredient, company, product, ingredient, additive, standard, process, risk); required for neighbors/paths, optional type filter for search."
     },
     "entity_id": {
       "type": "string",
@@ -257,7 +260,438 @@ Source: [`packages/kb/tool-kb/src/index.ts`](../packages/kb/tool-kb/src/index.ts
 
 Source: [`packages/kb/tool-kb/src/index.ts`](../packages/kb/tool-kb/src/index.ts)
 
+### `kg_schema`
+
+浏览知识图谱本体：实体类型（含标签、层级、自然键、属性键）与关系（含合法的主语→宾语方向）。不确定图里有什么时，先于 kg_subgraph 使用。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "layer": {
+      "type": "string",
+      "description": "Optional layer filter: top (五个顶层类) or domain (业务域类型). Omitted lists everything."
+    }
+  }
+}
+```
+
+Source: [`packages/kb/tool-kb/src/index.ts`](../packages/kb/tool-kb/src/index.ts)
+
+### `kg_subgraph`
+
+读取知识图谱中具名实体的 k-hop 邻域（默认 2 跳、≤200 节点）。种子按实体名或别名解析；回答列出每个实体及其关系与溯源来源。"谁给谁供货 / 有哪些订单 / 合规关系"类问题用它，而不是 SQL。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "seeds": {
+      "type": "array",
+      "description": "Entity names or aliases to walk from (1–5), for example [\"张红喜\"].",
+      "items": {
+        "type": "string"
+      }
+    },
+    "hops": {
+      "type": "number",
+      "description": "Maximum walk depth, 0–2; default 2."
+    },
+    "max_nodes": {
+      "type": "number",
+      "description": "Node budget, 1–200; default 200."
+    },
+    "relation_types": {
+      "type": "array",
+      "description": "Optional relation-id filter (see kg_schema).",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "seeds"
+  ]
+}
+```
+
+Source: [`packages/kb/tool-kb/src/index.ts`](../packages/kb/tool-kb/src/index.ts)
+
 kb_search, kb_ingest, kb_ingest_url, and kb_stats stay visible without a usable store and fail with a structured error at execution time; all four run under the deployment-bound tenant (the model never supplies one), retrieval results carry numbered citations, and the degraded text-only mode is observable in every search result.
+
+<a id="deepseek-aidsh-tool-lakehouse"></a>
+
+## `@deepseek-ai/dsh-tool-lakehouse`
+
+### `lakehouse_query`
+
+Run one read SQL statement (SELECT) over the registered lakehouse tables. Returns the result columns, the row set, a truncation marker, and the source-table attribution. List tables with lakehouse_tables first.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "sql": {
+      "type": "string",
+      "description": "One single-statement read SQL query (SELECT ...)."
+    }
+  },
+  "required": [
+    "sql"
+  ]
+}
+```
+
+Source: [`packages/lakehouse/tool-lakehouse/src/index.ts`](../packages/lakehouse/tool-lakehouse/src/index.ts)
+
+### `lakehouse_tables`
+
+List the registered lakehouse tables with their column schemas (name and SQL type per column), row counts, and formats. Pass table to narrow to one table. Use before writing lakehouse_query SQL.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "table": {
+      "type": "string",
+      "description": "One table name to describe; omit to list every registered table."
+    }
+  }
+}
+```
+
+Source: [`packages/lakehouse/tool-lakehouse/src/index.ts`](../packages/lakehouse/tool-lakehouse/src/index.ts)
+
+lakehouse_tables 与 lakehouse_query 在无可用引擎时保持可见并在执行时以结构化错误失败（表清单仍可应答）；两者都运行在部署侧绑定租户下（模型永不提供租户），查询结果是带截断标记的封顶行集，渲染文本携带来源表溯源行。
+
+<a id="deepseek-aidsh-tool-connector"></a>
+
+## `@deepseek-ai/dsh-tool-connector`
+
+### `connector_discover`
+
+Search connector providers for datasets, expert profiles, and expert services. Expert results render as cards with affiliation, domain tags, and orderable services (deliverable + pricing). Each result carries its provider and dataset id for connector_fetch (preview) and connector_transfer (land into the kb or the lakehouse).
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "Free-text query matched against each provider's searchable fields (names, titles, domains, summaries)."
+    },
+    "kinds": {
+      "type": "array",
+      "description": "Restrict results to these dataset kinds (tabular, file, document, expert-profile, service).",
+      "items": {
+        "type": "string",
+        "enum": [
+          "tabular",
+          "file",
+          "document",
+          "expert-profile",
+          "service"
+        ]
+      }
+    }
+  }
+}
+```
+
+Source: [`packages/connector/tool-connector/src/index.ts`](../packages/connector/tool-connector/src/index.ts)
+
+### `connector_fetch`
+
+Preview one connector dataset: tabular rows, a document excerpt, a file receipt, or a service offering. Use the dataset id from connector_discover; add provider_id when several providers share the id.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "dataset_id": {
+      "type": "string",
+      "description": "The dataset id from connector_discover (for example `experts/1` or `customs-export.csv`)."
+    },
+    "provider_id": {
+      "type": "string",
+      "description": "The owning provider id, when several providers expose the same dataset id."
+    }
+  },
+  "required": [
+    "dataset_id"
+  ]
+}
+```
+
+Source: [`packages/connector/tool-connector/src/index.ts`](../packages/connector/tool-connector/src/index.ts)
+
+### `connector_transfer`
+
+Land one connector dataset in this deployment: tabular datasets and csv/xlsx/json files become lakehouse tables; documents and expert profiles ingest into the knowledge base. Returns the landing receipt (table or document, row counts, transfer record id).
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "dataset_id": {
+      "type": "string",
+      "description": "The dataset id from connector_discover."
+    },
+    "provider_id": {
+      "type": "string",
+      "description": "The owning provider id, when several providers expose the same dataset id."
+    },
+    "target": {
+      "type": "string",
+      "description": "Where the dataset lands: auto follows the content classification (default), kb and lakehouse pin it.",
+      "enum": [
+        "auto",
+        "kb",
+        "lakehouse"
+      ]
+    }
+  },
+  "required": [
+    "dataset_id"
+  ]
+}
+```
+
+Source: [`packages/connector/tool-connector/src/index.ts`](../packages/connector/tool-connector/src/index.ts)
+
+connector_discover、connector_fetch 与 connector_transfer 都运行在部署侧绑定租户下（模型永不提供租户）；发现以携带 provider 与 dataset id 的分组清单作答，预览有上限（8 行 / 400 字符），传输渲染落地回执——含 catalog 传输记录 id 与下一步指引（对命名表用 lakehouse_query，或带引用的 kb_search）。
+
+### `order_create`
+
+一次调用完成专家服务下单并生成其方案 PDF 交付物。返回订单号、终态（delivered 或 failed）以及用户可打开的 PDF workspace 路径。service_id 取自 connector_discover 的专家卡；请先与用户确认定价服务。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "service_id": {
+      "type": "string",
+      "description": "The ordered service's dataset id from connector_discover (for example expert_services/2)."
+    },
+    "brief": {
+      "type": "string",
+      "description": "The client's need in their own words; drives the deliverable's retrieval and drafting."
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Client display name for the deliverable's cover page, when the conversation knows it."
+    }
+  },
+  "required": [
+    "service_id",
+    "brief"
+  ]
+}
+```
+
+Source: [`packages/connector/tool-connector/src/index.ts`](../packages/connector/tool-connector/src/index.ts)
+
+### `order_status`
+
+按 id 读取一笔专家服务订单；未给 id 时列出最近订单。每行携带状态（pending/generating/delivered/failed），已交付行携带方案 PDF 的 workspace 路径。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "order_id": {
+      "type": "number",
+      "description": "The order id from order_create; omit to list the recent orders."
+    }
+  }
+}
+```
+
+Source: [`packages/connector/tool-connector/src/index.ts`](../packages/connector/tool-connector/src/index.ts)
+
+<a id="deepseek-aidsh-tool-nocobase"></a>
+
+## `@deepseek-ai/dsh-tool-nocobase`
+
+### `nb_collections`
+
+列出业务系统的集合（表）及其字段——读取或变更业务记录所需的 schema。除非 include_hidden 为 true，隐藏集合保持剔除。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "include_hidden": {
+      "type": "boolean",
+      "description": "Include collections the backend marks hidden; defaults to false."
+    }
+  }
+}
+```
+
+Source: [`packages/connector/tool-nocobase/src/index.ts`](../packages/connector/tool-nocobase/src/index.ts)
+
+### `nb_create`
+
+在业务集合中创建一行。确认式变更契约：先向用户呈现完整新行并取得明确同意后才调用。返回带分配 id 与存储行的落地回执。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "collection": {
+      "type": "string",
+      "description": "Collection name from nb_collections."
+    },
+    "values": {
+      "type": "object",
+      "description": "The new row's fields (no id); the exact row the user confirmed.",
+      "additionalProperties": true
+    }
+  },
+  "required": [
+    "collection",
+    "values"
+  ]
+}
+```
+
+Source: [`packages/connector/tool-nocobase/src/index.ts`](../packages/connector/tool-nocobase/src/index.ts)
+
+### `nb_get`
+
+按 collection 与行 id 读取一条业务记录。返回按存储原样的完整行。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "collection": {
+      "type": "string",
+      "description": "Collection name from nb_collections."
+    },
+    "id": {
+      "type": "number",
+      "description": "The row's primary-key id."
+    }
+  },
+  "required": [
+    "collection",
+    "id"
+  ]
+}
+```
+
+Source: [`packages/connector/tool-nocobase/src/index.ts`](../packages/connector/tool-nocobase/src/index.ts)
+
+### `nb_list`
+
+以受限筛选（eq/in/gt/lt、and/or）、排序、字段投影与分页查询一个业务集合的行。返回页、总数与行。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "collection": {
+      "type": "string",
+      "description": "Collection name from nb_collections (for example orders)."
+    },
+    "filter": {
+      "type": "array",
+      "description": "Conditions: {field, op: eq|in|gt|lt, value}; scalars for eq/gt/lt, a non-empty array for in.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "op": {
+            "type": "string",
+            "enum": [
+              "eq",
+              "in",
+              "gt",
+              "lt"
+            ]
+          },
+          "value": {}
+        },
+        "required": [
+          "field",
+          "op",
+          "value"
+        ]
+      }
+    },
+    "match": {
+      "type": "string",
+      "description": "How conditions join: \"and\" (default) or \"or\"."
+    },
+    "page": {
+      "type": "number",
+      "description": "1-based page number; defaults to 1."
+    },
+    "page_size": {
+      "type": "number",
+      "description": "Rows per page, 1-100; defaults to 20."
+    },
+    "sort": {
+      "type": "array",
+      "description": "Sort keys; a leading `-` marks descending (for example [\"-updatedAt\"]).",
+      "items": {
+        "type": "string"
+      }
+    },
+    "fields": {
+      "type": "array",
+      "description": "Field projection; limits the returned columns.",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "collection"
+  ]
+}
+```
+
+Source: [`packages/connector/tool-nocobase/src/index.ts`](../packages/connector/tool-nocobase/src/index.ts)
+
+### `nb_update`
+
+按 collection 与 id 变更一条业务行的字段。确认式变更契约：先 nb_get 当前行、呈现改前→改后对比并取得用户明确同意后才调用。返回 diff 回执与合并后的存储行。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "collection": {
+      "type": "string",
+      "description": "Collection name from nb_collections."
+    },
+    "id": {
+      "type": "number",
+      "description": "The row's primary-key id."
+    },
+    "values": {
+      "type": "object",
+      "description": "The fields to change (no id); exactly the diff the user confirmed.",
+      "additionalProperties": true
+    }
+  },
+  "required": [
+    "collection",
+    "id",
+    "values"
+  ]
+}
+```
+
+Source: [`packages/connector/tool-nocobase/src/index.ts`](../packages/connector/tool-nocobase/src/index.ts)
+
+nb_collections, nb_list, nb_get, nb_create, and nb_update speak to the deployment's NocoBase under a service account (the model never supplies a tenant); the filter vocabulary is closed (eq/in/gt/lt joined by one and/or), and the write tools carry the confirmed-change contract — the system-prompt guidance demands the presented preview / before→after diff and the user's explicit go-ahead before nb_create/nb_update run, and their receipts echo the landing id or the field-by-field diff.
 
 <a id="deepseek-aidsh-tool-ask-user"></a>
 
@@ -265,7 +699,7 @@ kb_search, kb_ingest, kb_ingest_url, and kb_stats stay visible without a usable 
 
 ### `ask_user_question`
 
-继续操作前，如果需要确认、选择或缺失的信息，请向用户提出简明问题。发送一个或多个问题，每个问题都带一个稳定 id，该 id 会在答案中原样返回。
+Ask the user a concise question when you need confirmation, a choice, or missing information before proceeding. Send one or more questions, each with a stable id that will be echoed in the answer.
 
 ```json
 {
@@ -329,7 +763,7 @@ kb_search, kb_ingest, kb_ingest_url, and kb_stats stay visible without a usable 
 }
 ```
 
-来源：[`packages/interaction/tool-ask-user/src/index.ts`](../packages/interaction/tool-ask-user/src/index.ts)
+Source: [`packages/interaction/tool-ask-user/src/index.ts`](../packages/interaction/tool-ask-user/src/index.ts)
 
 ask_user_question 会暂停工具调用，直到当前 UI 提供方返回人类答案。
 
@@ -2242,6 +2676,7 @@ lsp 工具将提供方选择和语言服务器子进程置于 ctx.lsp 之后，�
 来源：[`packages/experimental/tool-agent-team/src/index.ts`](../packages/experimental/tool-agent-team/src/index.ts)
 
 这 10 个工具限定于隐式 Team Lead 与持久 teammate 作用域。随产品发布的 dsh-base bundle 默认禁用该包；文档中的 Agent Teams profile patch 会启用它，并禁用旧 continuable child 的同名控制工具。
+
 
 
 <a id="deepseek-aidsh-tool-todo"></a>

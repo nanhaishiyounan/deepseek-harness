@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/kb/kb-graph-sqlite/README.md
-README.md: 68ccd5aa7a5ca72505dd5617e9eb5d0608aa5205
-README.zh.md: 912a5fa2049ebfc41570e46235f0bd7a8a5bea74
+README.md: f18fdd6e8184819590ef6fe4de531007aa529371
+README.zh.md: ab5afa8eab82019f9d9317da07830f1c0ed0f905

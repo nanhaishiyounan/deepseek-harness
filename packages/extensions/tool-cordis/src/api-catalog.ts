@@ -620,6 +620,49 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
     ],
   },
   {
+    key: 'connector',
+    summary: 'The connector service.',
+    description: 'The connector service. Registered as `ctx.connector` (one instance per context). Discover fans out to every available provider declaring the capability and skips unavailable ones (the documented degraded mode — a missing credential must not fail the providers that work); fetch resolves exactly one provider and fails loud when it is missing, unavailable, or lacks the capability.',
+    methods: [
+      {
+        signature: 'registerProvider(provider: ConnectorProvider): () => void',
+        description: 'Register a connector provider. Throws ConnectorError `CONNECTOR_DUPLICATE_PROVIDER` if its id is already registered. Returns a disposer; disposed with the calling fiber.',
+        parameters: [{ name: 'provider', description: 'the connector provider; its `id` is the registry key.' }],
+        returns: 'the disposer that unregisters the provider.',
+      },
+      {
+        signature: 'providerIds(): readonly string[]',
+        description: 'Registered provider ids in registration order, for observability surfaces.',
+        parameters: [],
+        returns: 'the registered provider ids.',
+      },
+      {
+        signature: 'describeProviders(): readonly ConnectorProviderView[]',
+        description: 'Every registered provider with its live availability and declared capabilities, for connector-catalog surfaces (the connector page). A provider absent from this list is not registered; an unavailable one carries its credentials-missing state rather than being hidden.',
+        parameters: [],
+        returns: 'provider views ordered by id.',
+      },
+      {
+        signature: 'async discover(request: ConnectorDiscoverRequest, signal?: AbortSignal): Promise<readonly ConnectorDatasetSummary[]>',
+        description: 'List datasets across every available provider declaring `discover`. Unavailable providers are skipped (degraded, not failed); an available provider that errors mid-discover fails the whole call loud.',
+        parameters: [{ name: 'request', description: 'query text and optional kind restriction.' }, { name: 'signal', description: 'cancellation signal forwarded to every provider.' }],
+        returns: 'merged summaries, ordered by provider id then dataset id.',
+      },
+      {
+        signature: 'async fetch(ref: ConnectorDatasetRef, signal?: AbortSignal): Promise<ConnectorDataset>',
+        description: 'Pull one dataset\'s full content packet from its provider.',
+        parameters: [{ name: 'ref', description: 'the dataset address.' }, { name: 'signal', description: 'cancellation signal forwarded to the provider.' }],
+        returns: 'the unified dataset packet.',
+      },
+      {
+        signature: 'async transfer(request: ConnectorTransferRequest, signal?: AbortSignal): Promise<ConnectorTransferResult>',
+        description: 'Run the five-step transfer: pull the dataset, classify its destination (kind-driven; file bytes go through the shared data router so connector transfers and workbench uploads route by one truth), deliver to the kb (`ingest`, overwrite-shaped) or the lakehouse (`load`, overwrite-shaped), and confirm by appending the catalog transfer record. Usage metering rides the destination seams (a load counts `loadedTables`, an ingest counts `ingestedDocuments`). Both landings are idempotent under retry, so a confirm failure retries the same transfer safely.',
+        parameters: [{ name: 'request', description: 'source address, owning tenant, and target pin.' }, { name: 'signal', description: 'cancellation signal honored across every step.' }],
+        returns: 'the landing receipt and the catalog transfer-record id.',
+      },
+    ],
+  },
+  {
     key: 'credentials',
     summary: 'Abstract credential service over two key spaces that answer two questions.',
     description: 'Abstract credential service over two key spaces that answer two questions.\n\nA CredentialRef answers "what is behind this environment-variable name", layered over the process environment, the provider-managed store, and `.env` files. One seam-wide rule binds that half: an empty stored value is absent everywhere — `resolve` skips it, `describe` reports it unconfigured — so a blank never masquerades as a configured secret.\n\nA CredentialKey answers "what credential does this plugin hold for this id". Nothing can layer here — an authorization grant has no environment to be read from — so presence of the record is the whole fact, and modifyRecord is the only write path because a correct write depends on the current value (a token refresh is read-decide-replace under one lock).',
@@ -1006,13 +1049,55 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
   {
     key: 'kbGraph',
     summary: 'The knowledge-graph service.',
-    description: 'The knowledge-graph service. Registered as `ctx.kbGraph` (one instance per context).\n\nStore selection (resolved at execution time, never order-dependent):\n\n- Exactly one registered usable store → that store.\n- Multiple usable stores → `KB_GRAPH_STORE_AMBIGUOUS`.\n- No usable store → `KB_GRAPH_STORE_UNAVAILABLE`.',
+    description: 'The knowledge-graph service. Registered as `ctx.kbGraph` (one instance per context). Owns two registries: graph store providers and the ontology (node types and relations, seeded with the built-in three-layer model).\n\nStore selection (resolved at execution time, never order-dependent):\n\n- Exactly one registered usable store → that store.\n- Multiple usable stores → `KB_GRAPH_STORE_AMBIGUOUS`.\n- No usable store → `KB_GRAPH_STORE_UNAVAILABLE`.',
     methods: [
       {
         signature: 'registerStoreProvider(store: GraphStore): () => void',
         description: 'Register a graph store provider. Throws KbGraphError `KB_GRAPH_DUPLICATE_PROVIDER` if its id is already registered. Returns a disposer; disposed with the calling fiber.',
         parameters: [{ name: 'store', description: 'the store; its `id` is the registry key.' }],
         returns: 'the disposer that unregisters the store.',
+      },
+      {
+        signature: 'registerNodeType(type: KgNodeType): () => void',
+        description: 'Register one node type. The `extends` parent must already be registered; a duplicate id refuses. Returns a disposer; disposed with the calling fiber.',
+        parameters: [{ name: 'type', description: 'the node-type registration entry.' }],
+        returns: 'the disposer that unregisters the type.',
+      },
+      {
+        signature: 'registerRelation(relation: KgRelation): () => void',
+        description: 'Register one relation. Every constraint endpoint and a declared `inverseOf` must already be registered; a duplicate id refuses. Returns a disposer; disposed with the calling fiber.',
+        parameters: [{ name: 'relation', description: 'the relation registration entry.' }],
+        returns: 'the disposer that unregisters the relation.',
+      },
+      {
+        signature: 'nodeType(id: KgNodeTypeId): KgNodeType | undefined',
+        description: 'Look up one registered node type.',
+        parameters: [{ name: 'id', description: 'the registry key.' }],
+        returns: 'the registered entry, or `undefined` when absent.',
+      },
+      {
+        signature: 'relation(id: KgRelationId): KgRelation | undefined',
+        description: 'Look up one registered relation.',
+        parameters: [{ name: 'id', description: 'the registry key.' }],
+        returns: 'the registered entry, or `undefined` when absent.',
+      },
+      {
+        signature: 'listNodeTypes(layer?: KgOntologyLayer): readonly KgNodeType[]',
+        description: 'List registered node types, optionally narrowed to one layer, in registration order (top layer first, then domain, then later plugins).',
+        parameters: [{ name: 'layer', description: 'optional layer filter.' }],
+        returns: 'the matching registry entries.',
+      },
+      {
+        signature: 'listRelations(): readonly KgRelation[]',
+        description: 'List registered relations in registration order.',
+        parameters: [],
+        returns: 'the registry entries.',
+      },
+      {
+        signature: 'validateEdge(relationId: KgRelationId, src: KgNodeTypeId, dst: KgNodeTypeId): KgShapeViolation[]',
+        description: 'Closed-set shape validation for one edge: unknown relation, unknown endpoint types, and (for constrained relations) direction violations. Unrestricted hierarchical relations accept any two registered endpoints.',
+        parameters: [{ name: 'relationId', description: 'the relation to check.' }, { name: 'src', description: 'the subject node type.' }, { name: 'dst', description: 'the object node type.' }],
+        returns: 'the violations (empty when the edge shape is legal).',
       },
       {
         signature: 'async putTriples( tenantId: string, triples: readonly KbGraphTriple[], signal?: AbortSignal, ): Promise<number>',
@@ -1033,7 +1118,7 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         returns: 'the triples of every matching path, deduplicated.',
       },
       {
-        signature: 'async searchEntities( tenantId: string, query: string, type?: KbGraphEntityType, limit?: number, signal?: AbortSignal, ): Promise<KbGraphEntity[]>',
+        signature: 'async searchEntities( tenantId: string, query: string, type?: KgNodeTypeId, limit?: number, signal?: AbortSignal, ): Promise<KbGraphEntity[]>',
         description: 'Search entities by id substring and optional type.',
         parameters: [{ name: 'tenantId', description: 'owning tenant.' }, { name: 'query', description: 'case-insensitive substring of the entity id.' }, { name: 'type', description: 'optional entity-type restriction.' }, { name: 'limit', description: 'maximum entities to return; defaults to 10.' }, { name: 'signal', description: 'cancellation signal.' }],
         returns: 'the matching entities.',
@@ -1043,6 +1128,154 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         description: 'Count stored triples and distinct entities.',
         parameters: [{ name: 'tenantId', description: 'tenant filter; `undefined` counts across tenants.' }, { name: 'signal', description: 'cancellation signal.' }],
         returns: 'the triple count and the distinct-entity count.',
+      },
+      {
+        signature: 'async searchNodes(tenantId: string, query: string, type?: KgNodeTypeId, k: number = 10): Promise<readonly KgNodeHit[]>',
+        description: 'Search nodes by name / natural-key substring — the name→id resolution primitive behind seed lookup and entity alignment.',
+        parameters: [{ name: 'tenantId', description: 'owning tenant; the hard isolation key.' }, { name: 'query', description: 'case-insensitive substring of the name or natural key.' }, { name: 'type', description: 'optional node-type restriction.' }, { name: 'k', description: 'maximum nodes to return; defaults to 10.' }],
+        returns: 'the matching node hits.',
+      },
+      {
+        signature: 'async upsertNode(node: KgNode): Promise<{ merged: boolean }>',
+        description: 'Merge one node onto its anchors through the v2 store face.',
+        parameters: [{ name: 'node', description: 'the node to merge.' }],
+        returns: 'whether an existing row was merged (false = fresh insert).',
+      },
+      {
+        signature: 'async upsertEdges(edges: readonly KgEdge[]): Promise<number>',
+        description: 'Merge edges onto their seven-column anchors through the v2 store face.',
+        parameters: [{ name: 'edges', description: 'the edges to merge.' }],
+        returns: 'how many edges were newly inserted.',
+      },
+      {
+        signature: 'async subgraph(tenantId: string, seedIds: readonly string[], hops: number, limits?: KgSubgraphLimits): Promise<KgSubgraph>',
+        description: 'Read the k-hop neighborhood around seed nodes (undirected, cycle-safe).',
+        parameters: [{ name: 'tenantId', description: 'owning tenant; the hard isolation key.' }, { name: 'seedIds', description: 'minted node ids the walk starts from.' }, { name: 'hops', description: 'maximum walk depth; 0 returns just the seeds.' }, { name: 'limits', description: 'optional size bounds; defaults apply.' }],
+        returns: 'the subgraph with a truncation signal.',
+      },
+      {
+        signature: 'async expand(tenantId: string, nodeId: string, limit?: number): Promise<KgSubgraph>',
+        description: 'Read the one-hop neighborhood of one node (the visualization load-on-demand primitive).',
+        parameters: [{ name: 'tenantId', description: 'owning tenant.' }, { name: 'nodeId', description: 'the minted node id to expand.' }, { name: 'limit', description: 'maximum nodes returned.' }],
+        returns: 'the one-hop subgraph.',
+      },
+      {
+        signature: 'async tombstoneBySource(sourceSystem: string, sourceId: string, at: string): Promise<number>',
+        description: 'Tombstone every live edge one source currently asserts; parallel assertions from other sources survive.',
+        parameters: [{ name: 'sourceSystem', description: 'the asserting system.' }, { name: 'sourceId', description: 'the assertion address inside that system.' }, { name: 'at', description: 'ISO timestamp written into `valid_until`.' }],
+        returns: 'how many edges were tombstoned.',
+      },
+      {
+        signature: 'async putAlias(tenantId: string, typeId: KgNodeTypeId, alias: string, nodeId: string): Promise<void>',
+        description: 'Bind one alias for entity resolution; refuses an alias already bound to a different node.',
+        parameters: [{ name: 'tenantId', description: 'owning tenant.' }, { name: 'typeId', description: 'the node type the alias narrows within.' }, { name: 'alias', description: 'the alias text.' }, { name: 'nodeId', description: 'the minted node id the alias resolves to.' }],
+      },
+      {
+        signature: 'async putSourceRun(run: KgSourceRun): Promise<void>',
+        description: 'Advance (or create) one source-run watermark row.',
+        parameters: [{ name: 'run', description: 'the run snapshot to persist.' }],
+      },
+      {
+        signature: 'async getSourceRun(sourceSystem: string, scope: string): Promise<KgSourceRun | undefined>',
+        description: 'Read one source-run watermark row.',
+        parameters: [{ name: 'sourceSystem', description: 'the asserting system.' }, { name: 'scope', description: 'the collection/table/prefix scope.' }],
+        returns: 'the stored run, or `undefined` when never run.',
+      },
+      {
+        signature: 'async persistNodeType(type: KgNodeType): Promise<void>',
+        description: 'Register one node type in the runtime registry AND persist it as a registry row (the two-layer registry\'s write path). Idempotent per id: an already-registered id skips the runtime registration and refreshes only the persisted row.',
+        parameters: [{ name: 'type', description: 'the node-type registration entry.' }],
+      },
+      {
+        signature: 'async persistRelation(relation: KgRelation): Promise<void>',
+        description: 'Register one relation in the runtime registry AND persist it as a registry row; see persistNodeType. Constraint endpoint types persist first (the registry tables foreign-key them), as does a declared inverse other than the relation itself.',
+        parameters: [{ name: 'relation', description: 'the relation registration entry.' }],
+      },
+      {
+        signature: 'async storedRegistry(): Promise<{ nodeTypes: readonly KgNodeType[]; relations: readonly KgRelation[] }>',
+        description: 'Read every persisted registry row (the two-layer registry\'s read path; store providers re-register these at boot).',
+        parameters: [],
+        returns: 'the stored node types and relations.',
+      },
+    ],
+  },
+  {
+    key: 'kgBuild',
+    summary: 'The pipeline service.',
+    description: 'The pipeline service. One instance per context; `run()` executes one full pipeline pass (structured sources, then extraction) and resolves with the per-scope report. Fails loud on a missing seam: every enabled source requires its service at run time.',
+    methods: [
+      {
+        signature: 'async run(options: RunOptions = {}): Promise<KgBuildRunReport>',
+        description: 'Execute one full pipeline pass: registry mapping + structured ingestion, then corpus extraction, alignment, and watermark persistence.',
+        parameters: [{ name: 'options', description: 'cooperative cancellation.' }],
+        returns: 'the per-scope run report.',
+      },
+    ],
+  },
+  {
+    key: 'lakehouse',
+    summary: 'The lakehouse service.',
+    description: 'The lakehouse service. Registered as `ctx.lakehouse` (one instance per context).\n\nCatalog selection (resolved at execution time, never order-dependent):\n\n- A configured id that is registered and `available()` → that catalog.\n- A configured id not registered → `LAKEHOUSE_CATALOG_CONFIGURED_MISSING`.\n- A configured id registered but unavailable → `LAKEHOUSE_CATALOG_CONFIGURED_UNAVAILABLE`.\n- No id configured, exactly one registered usable catalog → that catalog.\n- No id configured, multiple usable catalogs → `LAKEHOUSE_CATALOG_AMBIGUOUS`.\n- No id configured, no usable catalog → `LAKEHOUSE_CATALOG_UNAVAILABLE`.\n\nEngine selection mirrors those five branches with `LAKEHOUSE_ENGINE_*` codes. The engine has no degraded substitution: with no usable engine the catalog surface (`listTables`, `stats`, `usage`) keeps working while `load` and `query` fail loud with `LAKEHOUSE_ENGINE_UNAVAILABLE`.',
+    methods: [
+      {
+        signature: 'registerCatalogStore(store: CatalogStore): () => void',
+        description: 'Register a catalog store. Throws LakehouseError `LAKEHOUSE_DUPLICATE_PROVIDER` if its id is already registered. Returns a disposer; disposed with the calling fiber.',
+        parameters: [{ name: 'store', description: 'the catalog store; its `id` is the registry key.' }],
+        returns: 'the disposer that unregisters the store.',
+      },
+      {
+        signature: 'registerQueryProvider(provider: QueryProvider): () => void',
+        description: 'Register a query engine. Throws LakehouseError `LAKEHOUSE_DUPLICATE_PROVIDER` if its id is already registered. Returns a disposer; disposed with the calling fiber.',
+        parameters: [{ name: 'provider', description: 'the query engine; its `id` is the registry key.' }],
+        returns: 'the disposer that unregisters the provider.',
+      },
+      {
+        signature: 'async load(request: LakehouseLoadRequest, signal?: AbortSignal): Promise<LakehouseLoadResult>',
+        description: 'Write one tabular dataset as a Parquet file under the data root and register it in the catalog. Loading the same `(tenantId, tableName)` replaces the prior registration and its data file.',
+        parameters: [{ name: 'request', description: 'table identity, content, and optional provenance.' }, { name: 'signal', description: 'cancellation signal forwarded to the engine and catalog.' }],
+        returns: 'the registered table and whether it replaced a prior one.',
+      },
+      {
+        signature: 'async query(tenantId: string, sql: string, signal?: AbortSignal): Promise<LakehouseQueryResult>',
+        description: 'Run one SQL query over the tenant\'s registered tables. The engine sees exactly that tenant\'s tables, so references to another tenant\'s tables fail as unknown tables.',
+        parameters: [{ name: 'tenantId', description: 'owning tenant; scopes every visible table.' }, { name: 'sql', description: 'single-statement SQL text.' }, { name: 'signal', description: 'cancellation signal checked before provider work.' }],
+        returns: 'result columns, rows cut to `maxRows`, and the truncation marker.',
+      },
+      {
+        signature: 'async listTables(tenantId: string, signal?: AbortSignal): Promise<readonly LakehouseTable[]>',
+        description: 'List one tenant\'s registered tables through the resolved catalog.',
+        parameters: [{ name: 'tenantId', description: 'owning tenant.' }, { name: 'signal', description: 'cancellation signal.' }],
+        returns: 'the tenant\'s registrations, ordered by table name.',
+      },
+      {
+        signature: 'async dropTable(tenantId: string, tableName: string, signal?: AbortSignal): Promise<boolean>',
+        description: 'Drop one registration and best-effort delete its data file. The catalog record is the authority: once deleted, a leftover file cannot be queried. A file-delete failure (other than the file already being gone) is logged for the operator and does not fail the drop.',
+        parameters: [{ name: 'tenantId', description: 'owning tenant.' }, { name: 'tableName', description: 'table identity within the tenant.' }, { name: 'signal', description: 'cancellation signal.' }],
+        returns: 'whether a registration was deleted.',
+      },
+      {
+        signature: 'async stats(tenantId: string, signal?: AbortSignal): Promise<LakehouseStats>',
+        description: 'Report table counts plus engine observability for stats tooling. A missing engine degrades to `engineAvailable: false` instead of throwing, so the catalog side stays observable in the degraded mode.',
+        parameters: [{ name: 'tenantId', description: 'owning tenant.' }, { name: 'signal', description: 'cancellation signal.' }],
+        returns: 'table counts plus engine availability and identity.',
+      },
+      {
+        signature: 'async usage(tenantId: string, signal?: AbortSignal): Promise<LakehouseUsage>',
+        description: 'Read one tenant\'s cumulative usage counters through the resolved catalog.',
+        parameters: [{ name: 'tenantId', description: 'owning tenant.' }, { name: 'signal', description: 'cancellation signal.' }],
+        returns: 'the tenant\'s counters; all zeros when none were recorded.',
+      },
+      {
+        signature: 'async recordTransfer(record: LakehouseTransferRecord, signal?: AbortSignal): Promise<{ transferId: number }>',
+        description: 'Append one connector transfer record through the resolved catalog — the confirm step of the connector seam\'s transfer orchestration, registering where a dataset landed regardless of destination.',
+        parameters: [{ name: 'record', description: 'the transfer trail entry.' }, { name: 'signal', description: 'cancellation signal.' }],
+        returns: 'the stored record\'s id.',
+      },
+      {
+        signature: 'async listTransfers(limit: number, signal?: AbortSignal): Promise<readonly LakehouseTransferEntry[]>',
+        description: 'Read the stored transfer trail through the resolved catalog, newest first — the delivery-tracking read behind the connector page\'s timeline.',
+        parameters: [{ name: 'limit', description: 'maximum number of records to return.' }, { name: 'signal', description: 'cancellation signal.' }],
+        returns: 'the most recent transfer entries.',
       },
     ],
   },
@@ -1166,6 +1399,43 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         description: 'Delete one feedback item. Absence is successful regardless of the supplied version; an existing item requires an exact version match.',
         parameters: [{ name: 'request', description: 'Session, message, and observed item version.' }],
         returns: 'the stable absent postcondition, or an explicit failure.',
+      },
+    ],
+  },
+  {
+    key: 'orders',
+    summary: 'The orders service: order lifecycle plus the deliverable pipeline, bound to one NocoBase source of truth.',
+    description: 'The orders service: order lifecycle plus the deliverable pipeline, bound to one NocoBase source of truth. Registered as `ctx.orders`.',
+    methods: [
+      {
+        signature: 'async create(request: OrderCreateRequest, signal?: AbortSignal): Promise<OrderRecord>',
+        description: 'Resolve the ordered service, snapshot identity and pricing, and land a `pending` order at the source of truth.',
+        parameters: [{ name: 'request', description: 'the ordered service, brief, and optional client name.' }, { name: 'signal', description: 'caller cancellation.' }],
+        returns: 'the stored pending order.',
+      },
+      {
+        signature: 'async get(orderId: number | string, signal?: AbortSignal): Promise<OrderRecord | undefined>',
+        description: 'Read one order by its primary key.',
+        parameters: [{ name: 'orderId', description: 'the NocoBase orders row id.' }, { name: 'signal', description: 'caller cancellation.' }],
+        returns: 'the stored order, or `undefined` when the source has no such row.',
+      },
+      {
+        signature: 'async list(signal?: AbortSignal): Promise<readonly OrderRecord[]>',
+        description: 'List orders (newest rows last, source order, one page).',
+        parameters: [{ name: 'signal', description: 'caller cancellation.' }],
+        returns: 'every stored order row on the page.',
+      },
+      {
+        signature: 'async fulfill(orderId: number | string, signal?: AbortSignal): Promise<OrderRecord>',
+        description: 'Run the deliverable pipeline for one order: transition to `generating`, retrieve kb references, draft the proposal (model stream or the named template fallback), typeset it through expert-pdf, land the PDF under the configured deliverables directory, and write `delivered` with the path back at the source. A failure writes `failed` with the cause and rethrows; a `failed` order may be fulfilled again (retry).',
+        parameters: [{ name: 'orderId', description: 'the NocoBase orders row id.' }, { name: 'signal', description: 'caller cancellation.' }],
+        returns: 'the stored order in `delivered` status.',
+      },
+      {
+        signature: 'async readDeliverable(orderId: number | string, signal?: AbortSignal): Promise<OrderDeliverableFile>',
+        description: 'Read one delivered order\'s PDF deliverable.',
+        parameters: [{ name: 'orderId', description: 'the NocoBase orders row id.' }, { name: 'signal', description: 'caller cancellation.' }],
+        returns: 'the landed file\'s path and bytes.',
       },
     ],
   },
@@ -3114,6 +3384,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface CancelOptions {\n    keepInbox?: boolean | undefined;\n}',
   },
   {
+    name: 'CatalogStore',
+    declaration: 'export interface CatalogStore {\n    readonly id: string;\n    available(): boolean;\n    registerTable(table: LakehouseTable, signal?: AbortSignal): Promise<{\n        replaced: boolean;\n    }>;\n    listTables(tenantId: string, signal?: AbortSignal): Promise<readonly LakehouseTable[]>;\n    describeTable(tenantId: string, tableName: string, signal?: AbortSignal): Promise<LakehouseTable | undefined>;\n    dropTable(tenantId: string, tableName: string, signal?: AbortSignal): Promise<boolean>;\n    recordTransfer(record: LakehouseTransferRecord, signal?: AbortSignal): Promise<{\n        transferId: number;\n    }>;\n    listTransfers(limit: number, signal?: AbortSignal): Promise<readonly LakehouseTransferEntry[]>;\n    recordUsage(tenantId: string, delta: LakehouseUsageDelta, signal?: AbortSignal): Promise<void>;\n    usage(tenantId: string, signal?: AbortSignal): Promise<LakehouseUsage>;\n}',
+  },
+  {
     name: 'ClientResponse',
     declaration: 'export interface ClientResponse {\n    type: \'client-response\';\n    rpcId: RpcId;\n    result: RpcResult<unknown>;\n}',
   },
@@ -3152,6 +3426,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'CollectedOutput',
     declaration: 'export interface CollectedOutput {\n    text: string;\n    truncated: boolean;\n    spillPath?: string;\n}',
+  },
+  {
+    name: 'CollectionRunReport',
+    declaration: 'export interface CollectionRunReport {\n    readonly scope: string;\n    readonly rows: number;\n    readonly nodesUpserted: number;\n    readonly edgesUpserted: number;\n    readonly newRows: number;\n    readonly tombstoned: number;\n    readonly skipped: boolean;\n    readonly watermark: string;\n    readonly contentHash: string;\n}',
   },
   {
     name: 'CommandDefinition',
@@ -3204,6 +3482,74 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'ConfinedSandboxMode',
     declaration: 'export type ConfinedSandboxMode = Exclude<SandboxMode, \'danger-full-access\'>;',
+  },
+  {
+    name: 'ConnectorCapability',
+    declaration: 'export type ConnectorCapability = \'discover\' | \'fetch\' | \'transfer\';',
+  },
+  {
+    name: 'ConnectorDataset',
+    declaration: 'export type ConnectorDataset = (ConnectorDatasetBase & {\n    readonly kind: \'tabular\';\n    readonly tabular: TabularData;\n    readonly tableName?: string;\n}) | (ConnectorDatasetBase & {\n    readonly kind: \'file\';\n    readonly file: ConnectorFileContent;\n}) | (ConnectorDatasetBase & {\n    readonly kind: \'document\' | \'expert-profile\';\n    readonly ingest: ConnectorDocumentContent;\n}) | (ConnectorDatasetBase & {\n    readonly kind: \'service\';\n    readonly service: ExpertServiceRef;\n});',
+  },
+  {
+    name: 'ConnectorDatasetKind',
+    declaration: 'export type ConnectorDatasetKind = \'tabular\' | \'file\' | \'document\' | \'expert-profile\' | \'service\';',
+  },
+  {
+    name: 'ConnectorDatasetRef',
+    declaration: 'export interface ConnectorDatasetRef {\n    readonly providerId: string;\n    readonly datasetId: string;\n}',
+  },
+  {
+    name: 'ConnectorDatasetSummary',
+    declaration: 'export interface ConnectorDatasetSummary {\n    readonly id: string;\n    readonly title: string;\n    readonly kind: ConnectorDatasetKind;\n    readonly manifest: ConnectorManifest;\n    readonly expert?: ConnectorExpertDetail;\n    readonly service?: ExpertServiceRef;\n}',
+  },
+  {
+    name: 'ConnectorDiscoverRequest',
+    declaration: 'export interface ConnectorDiscoverRequest {\n    readonly query?: string;\n    readonly kinds?: readonly ConnectorDatasetKind[];\n}',
+  },
+  {
+    name: 'ConnectorDocumentContent',
+    declaration: 'export interface ConnectorDocumentContent {\n    readonly sourcePath: string;\n    readonly title?: string;\n    readonly docKind: KbDocKind;\n    readonly collectedAt?: string;\n    readonly content: string;\n}',
+  },
+  {
+    name: 'ConnectorExpertDetail',
+    declaration: 'export interface ConnectorExpertDetail {\n    readonly org?: string;\n    readonly domains: readonly string[];\n}',
+  },
+  {
+    name: 'ConnectorFileContent',
+    declaration: 'export interface ConnectorFileContent {\n    readonly filename: string;\n    readonly bytes: Uint8Array;\n    readonly mime?: string;\n}',
+  },
+  {
+    name: 'ConnectorKbLanding',
+    declaration: 'export interface ConnectorKbLanding {\n    readonly docId: number;\n    readonly chunks: number;\n    readonly embedded: boolean;\n}',
+  },
+  {
+    name: 'ConnectorManifest',
+    declaration: 'export interface ConnectorManifest {\n    readonly providerId: string;\n    readonly updatedAt?: string;\n    readonly scope?: ConnectorScope;\n    readonly description?: string;\n}',
+  },
+  {
+    name: 'ConnectorProvider',
+    declaration: 'export interface ConnectorProvider {\n    readonly id: string;\n    available(): boolean;\n    readonly capabilities: readonly ConnectorCapability[];\n    discover(request: ConnectorDiscoverRequest, signal?: AbortSignal): Promise<readonly ConnectorDatasetSummary[]>;\n    fetch(ref: ConnectorDatasetRef, signal?: AbortSignal): Promise<ConnectorDataset>;\n}',
+  },
+  {
+    name: 'ConnectorProviderView',
+    declaration: 'export interface ConnectorProviderView {\n    readonly id: string;\n    readonly available: boolean;\n    readonly capabilities: readonly ConnectorCapability[];\n}',
+  },
+  {
+    name: 'ConnectorScope',
+    declaration: 'export type ConnectorScope = \'search\' | \'derive\' | \'share\';',
+  },
+  {
+    name: 'ConnectorTransferRequest',
+    declaration: 'export interface ConnectorTransferRequest {\n    readonly providerId: string;\n    readonly datasetId: string;\n    readonly tenantId: string;\n    readonly target: ConnectorTransferTarget;\n}',
+  },
+  {
+    name: 'ConnectorTransferResult',
+    declaration: 'export interface ConnectorTransferResult {\n    readonly datasetId: string;\n    readonly datasetKind: ConnectorDatasetKind;\n    readonly destination: \'kb\' | \'lakehouse\';\n    readonly rows: number;\n    readonly replaced: boolean;\n    readonly table?: string;\n    readonly document?: ConnectorKbLanding;\n    readonly transferRecordId: number;\n}',
+  },
+  {
+    name: 'ConnectorTransferTarget',
+    declaration: 'export type ConnectorTransferTarget = \'auto\' | \'kb\' | \'lakehouse\';',
   },
   {
     name: 'ContentBlockMap',
@@ -3272,6 +3618,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'CordisInspectRequestId',
     declaration: 'export type CordisInspectRequestId = Branded<\'CordisInspectRequestId\'>;',
+  },
+  {
+    name: 'CorpusReport',
+    declaration: 'export interface CorpusReport {\n    readonly documents: number;\n    readonly chunks: number;\n    readonly extractionCalls: number;\n    readonly extractedEntities: number;\n    readonly extractedRelations: number;\n    readonly degradedEntities: number;\n    readonly droppedRelations: number;\n    readonly mergedEntities: number;\n    readonly tombstonedEdges: number;\n}',
   },
   {
     name: 'CreateAgentOptions',
@@ -3430,8 +3780,20 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface EncodedImageAttachment {\n    mediaType: ImageMediaType;\n    data: string;\n    name?: string;\n}',
   },
   {
+    name: 'EngineQueryOptions',
+    declaration: 'export interface EngineQueryOptions {\n    readonly maxRows: number;\n}',
+  },
+  {
+    name: 'EngineTableRef',
+    declaration: 'export interface EngineTableRef {\n    readonly tableName: string;\n    readonly location: string;\n    readonly format: LakehouseFormat;\n}',
+  },
+  {
     name: 'EpochHeader',
     declaration: 'export interface EpochHeader {\n    config: LlmCallConfig;\n    adapterDefaults?: LlmCallConfigAdapterDefaults;\n    system?: string;\n    tools?: ToolSchema[];\n}',
+  },
+  {
+    name: 'ExpertServiceRef',
+    declaration: 'export interface ExpertServiceRef {\n    readonly serviceId: string;\n    readonly expertId?: string;\n    readonly name: string;\n    readonly deliverable?: string;\n    readonly price?: string;\n    readonly summary?: string;\n}',
   },
   {
     name: 'FileDiff',
@@ -3543,7 +3905,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'GraphStore',
-    declaration: 'export interface GraphStore {\n    readonly id: string;\n    available(): boolean;\n    putTriples(tenantId: string, triples: readonly KbGraphTriple[], signal?: AbortSignal): Promise<number>;\n    neighbors(tenantId: string, entity: KbGraphEntity, signal?: AbortSignal): Promise<KbGraphStoredTriple[]>;\n    twoHopPaths(tenantId: string, entity: KbGraphEntity, target: KbGraphEntity, signal?: AbortSignal): Promise<KbGraphStoredTriple[]>;\n    searchEntities(tenantId: string, query: string, type: KbGraphEntityType | undefined, k: number, signal?: AbortSignal): Promise<KbGraphEntity[]>;\n    stats(tenantId: string | undefined, signal?: AbortSignal): Promise<{\n        triples: number;\n        entities: number;\n    }>;\n    close(): void;\n}',
+    declaration: 'export interface GraphStore {\n    readonly id: string;\n    available(): boolean;\n    putTriples(tenantId: string, triples: readonly KbGraphTriple[], signal?: AbortSignal): Promise<number>;\n    neighbors(tenantId: string, entity: KbGraphEntity, signal?: AbortSignal): Promise<KbGraphStoredTriple[]>;\n    twoHopPaths(tenantId: string, entity: KbGraphEntity, target: KbGraphEntity, signal?: AbortSignal): Promise<KbGraphStoredTriple[]>;\n    searchEntities(tenantId: string, query: string, type: KgNodeTypeId | undefined, k: number, signal?: AbortSignal): Promise<KbGraphEntity[]>;\n    stats(tenantId: string | undefined, signal?: AbortSignal): Promise<{\n        triples: number;\n        entities: number;\n    }>;\n    close(): void;\n}',
   },
   {
     name: 'ImageAttachmentLimits',
@@ -3687,15 +4049,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'KbGraphEntity',
-    declaration: 'export interface KbGraphEntity {\n    readonly type: KbGraphEntityType;\n    readonly id: string;\n}',
-  },
-  {
-    name: 'KbGraphEntityType',
-    declaration: 'export type KbGraphEntityType = \'company\' | \'product\' | \'ingredient\' | \'additive\' | \'standard\' | \'process\' | \'risk\';',
-  },
-  {
-    name: 'KbGraphPredicate',
-    declaration: 'export type KbGraphPredicate = \'produces\' | \'uses\' | \'contains\' | \'complies_with\' | \'follows\' | \'flags\' | \'supplies\';',
+    declaration: 'export interface KbGraphEntity {\n    readonly type: KgNodeTypeId;\n    readonly id: string;\n}',
   },
   {
     name: 'KbGraphStoredTriple',
@@ -3703,7 +4057,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'KbGraphTriple',
-    declaration: 'export interface KbGraphTriple {\n    readonly subject: KbGraphEntity;\n    readonly predicate: KbGraphPredicate;\n    readonly object: KbGraphEntity;\n    readonly sourcePath?: string;\n}',
+    declaration: 'export interface KbGraphTriple {\n    readonly subject: KbGraphEntity;\n    readonly predicate: KgRelationId;\n    readonly object: KbGraphEntity;\n    readonly sourcePath?: string;\n}',
   },
   {
     name: 'KbIngestRequest',
@@ -3727,7 +4081,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'KbSearchHit',
-    declaration: 'export interface KbSearchHit {\n    readonly chunkId: number;\n    readonly docId: number;\n    readonly tenantId: string;\n    readonly sourcePath: string;\n    readonly title?: string;\n    readonly docKind: KbDocKind;\n    readonly collectedAt?: string;\n    readonly headingPath?: string;\n    readonly chunkIdx: number;\n    readonly content: string;\n    readonly provenance?: KbProvenance;\n}',
+    declaration: 'export interface KbSearchHit {\n    readonly chunkId: number;\n    readonly docId: number;\n    readonly tenantId: string;\n    readonly sourcePath: string;\n    readonly title?: string;\n    readonly docKind: KbDocKind;\n    readonly collectedAt?: string;\n    readonly headingPath?: string;\n    readonly chunkIdx: number;\n    readonly content: string;\n    readonly provenance?: KbProvenance;\n    readonly score?: number;\n}',
   },
   {
     name: 'KbSearchRequest',
@@ -3758,6 +4112,82 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface KbUsageDelta {\n    readonly searches?: number;\n    readonly ingestedDocuments?: number;\n    readonly ingestedChunks?: number;\n    readonly embedTexts?: number;\n    readonly embedTokens?: number;\n}',
   },
   {
+    name: 'KgBuildRunReport',
+    declaration: 'export interface KgBuildRunReport {\n    readonly collections: readonly CollectionRunReport[];\n    readonly lakehouse?: SimpleSourceReport;\n    readonly connector?: SimpleSourceReport;\n    readonly corpus?: CorpusReport;\n    readonly persistedTypes: number;\n    readonly persistedRelations: number;\n    readonly startedAt: string;\n    readonly finishedAt: string;\n}',
+  },
+  {
+    name: 'KgEdge',
+    declaration: 'export interface KgEdge {\n    readonly id: string;\n    readonly tenantId: string;\n    readonly srcId: string;\n    readonly dstId: string;\n    readonly relation: KgRelationId;\n    readonly fact?: string;\n    readonly props?: Readonly<Record<string, unknown>>;\n    readonly confidence: number;\n    readonly provenance: KgProvenance;\n    readonly validFrom: string;\n    readonly validUntil?: string;\n}',
+  },
+  {
+    name: 'KgNode',
+    declaration: 'export interface KgNode {\n    readonly id: string;\n    readonly tenantId: string;\n    readonly type: KgNodeTypeId;\n    readonly name: string;\n    readonly naturalKey?: string;\n    readonly summary?: string;\n    readonly props?: Readonly<Record<string, unknown>>;\n    readonly createdAt: string;\n    readonly updatedAt: string;\n}',
+  },
+  {
+    name: 'KgNodeHit',
+    declaration: 'export interface KgNodeHit {\n    readonly id: string;\n    readonly type: KgNodeTypeId;\n    readonly name: string;\n    readonly naturalKey?: string;\n}',
+  },
+  {
+    name: 'KgNodeType',
+    declaration: 'export interface KgNodeType {\n    readonly id: KgNodeTypeId;\n    readonly label: string;\n    readonly description?: string;\n    readonly layer: KgOntologyLayer;\n    readonly extends?: KgNodeTypeId;\n    readonly props: readonly KgPropDef[];\n    readonly naturalKey?: string;\n    readonly aliases?: readonly string[];\n    readonly source: KgOntologySource;\n    readonly status: KgNodeTypeStatus;\n}',
+  },
+  {
+    name: 'KgNodeTypeId',
+    declaration: 'export type KgNodeTypeId = Branded<\'KgNodeTypeId\'>;',
+  },
+  {
+    name: 'KgNodeTypeStatus',
+    declaration: 'export type KgNodeTypeStatus = \'draft\' | \'active\';',
+  },
+  {
+    name: 'KgOntologyLayer',
+    declaration: 'export type KgOntologyLayer = \'top\' | \'domain\';',
+  },
+  {
+    name: 'KgOntologySource',
+    declaration: 'export type KgOntologySource = \'builtin-ontology\' | \'builtin-food\' | \'nocobase-derived\' | \'agent-defined\';',
+  },
+  {
+    name: 'KgPropDef',
+    declaration: 'export interface KgPropDef {\n    readonly key: string;\n    readonly datatype: \'string\' | \'number\' | \'boolean\' | \'date\' | \'json\';\n    readonly required?: boolean;\n    readonly enumValues?: readonly string[];\n    readonly description?: string;\n}',
+  },
+  {
+    name: 'KgProvenance',
+    declaration: 'export interface KgProvenance {\n    readonly sourceSystem: \'nocobase\' | \'lakehouse\' | \'connector\' | \'kb\';\n    readonly sourceId: string;\n    readonly extractedAt: string;\n}',
+  },
+  {
+    name: 'KgRelation',
+    declaration: 'export interface KgRelation {\n    readonly id: KgRelationId;\n    readonly label: string;\n    readonly description?: string;\n    readonly constraints: readonly KgRelationConstraint[];\n    readonly kind: \'object\' | \'hierarchical\';\n    readonly inverseOf?: KgRelationId;\n    readonly source: KgOntologySource;\n}',
+  },
+  {
+    name: 'KgRelationConstraint',
+    declaration: 'export interface KgRelationConstraint {\n    readonly domain: KgNodeTypeId;\n    readonly range: KgNodeTypeId;\n}',
+  },
+  {
+    name: 'KgRelationId',
+    declaration: 'export type KgRelationId = Branded<\'KgRelationId\'>;',
+  },
+  {
+    name: 'KgShapeViolation',
+    declaration: 'export interface KgShapeViolation {\n    readonly code: \'KG_UNKNOWN_RELATION\' | \'KG_UNKNOWN_NODE_TYPE\' | \'KG_DIRECTION_VIOLATION\';\n    readonly message: string;\n}',
+  },
+  {
+    name: 'KgSourceRun',
+    declaration: 'export interface KgSourceRun {\n    readonly sourceSystem: string;\n    readonly scope: string;\n    readonly watermark?: string;\n    readonly contentHash?: string;\n    readonly runConfig?: string;\n    readonly lastRunAt: string;\n}',
+  },
+  {
+    name: 'KgSubgraph',
+    declaration: 'export interface KgSubgraph {\n    readonly nodes: readonly KgSubgraphNode[];\n    readonly edges: readonly KgEdge[];\n    readonly truncated: boolean;\n}',
+  },
+  {
+    name: 'KgSubgraphLimits',
+    declaration: 'export interface KgSubgraphLimits {\n    readonly maxNodes?: number;\n    readonly maxEdges?: number;\n}',
+  },
+  {
+    name: 'KgSubgraphNode',
+    declaration: 'export interface KgSubgraphNode {\n    readonly id: string;\n    readonly type: KgNodeTypeId;\n    readonly name: string;\n    readonly naturalKey?: string;\n    readonly depth: number;\n}',
+  },
+  {
     name: 'KnobState',
     declaration: 'export interface KnobState {\n    preset: string | null;\n    sandbox: SandboxMode | null;\n    approval: ApprovalPolicy | null;\n}',
   },
@@ -3776,6 +4206,58 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'KvUnitDescriptor',
     declaration: 'export interface KvUnitDescriptor {\n    readonly name: string;\n    readonly version: number;\n    readonly tables: readonly string[];\n    readonly hasGlobal: boolean;\n}',
+  },
+  {
+    name: 'LakehouseColumn',
+    declaration: 'export interface LakehouseColumn {\n    readonly name: string;\n    readonly sqlType: string;\n}',
+  },
+  {
+    name: 'LakehouseFormat',
+    declaration: 'export type LakehouseFormat = \'parquet\' | \'csv\';',
+  },
+  {
+    name: 'LakehouseLoadRequest',
+    declaration: 'export interface LakehouseLoadRequest {\n    readonly tenantId: string;\n    readonly tableName: string;\n    readonly tabular: TabularData;\n    readonly provenance?: LakehouseProvenance;\n}',
+  },
+  {
+    name: 'LakehouseLoadResult',
+    declaration: 'export interface LakehouseLoadResult {\n    readonly table: LakehouseTable;\n    readonly replaced: boolean;\n}',
+  },
+  {
+    name: 'LakehouseProvenance',
+    declaration: 'export interface LakehouseProvenance {\n    readonly provider: string;\n    readonly scope?: LakehouseScope;\n    readonly collectedSource?: string;\n}',
+  },
+  {
+    name: 'LakehouseQueryResult',
+    declaration: 'export interface LakehouseQueryResult {\n    readonly columns: readonly LakehouseColumn[];\n    readonly rows: readonly (readonly unknown[])[];\n    readonly truncated: boolean;\n}',
+  },
+  {
+    name: 'LakehouseScope',
+    declaration: 'export type LakehouseScope = \'search\' | \'derive\' | \'share\';',
+  },
+  {
+    name: 'LakehouseStats',
+    declaration: 'export interface LakehouseStats {\n    readonly tables: number;\n    readonly engineAvailable: boolean;\n    readonly engineId?: string;\n}',
+  },
+  {
+    name: 'LakehouseTable',
+    declaration: 'export interface LakehouseTable {\n    readonly tenantId: string;\n    readonly tableName: string;\n    readonly columns: readonly LakehouseColumn[];\n    readonly format: LakehouseFormat;\n    readonly location: string;\n    readonly rowCount: number;\n    readonly provenance?: LakehouseProvenance;\n    readonly createdAt: string;\n    readonly updatedAt: string;\n}',
+  },
+  {
+    name: 'LakehouseTransferEntry',
+    declaration: 'export interface LakehouseTransferEntry extends LakehouseTransferRecord {\n    readonly transferId: number;\n}',
+  },
+  {
+    name: 'LakehouseTransferRecord',
+    declaration: 'export interface LakehouseTransferRecord {\n    readonly source: string;\n    readonly destination: \'kb\' | \'lakehouse\';\n    readonly datasetId: string;\n    readonly rows: number;\n    readonly transferredAt: string;\n}',
+  },
+  {
+    name: 'LakehouseUsage',
+    declaration: 'export interface LakehouseUsage {\n    readonly loadedTables: number;\n    readonly lakehouseQueries: number;\n}',
+  },
+  {
+    name: 'LakehouseUsageDelta',
+    declaration: 'export interface LakehouseUsageDelta {\n    readonly loadedTables?: number;\n    readonly lakehouseQueries?: number;\n}',
   },
   {
     name: 'LlmAdapter',
@@ -3990,6 +4472,22 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface OneShotSubagentDescriptorData extends SubagentDescriptorBase {\n    readonly mode: \'one-shot\';\n    readonly label?: string;\n}',
   },
   {
+    name: 'OrderCreateRequest',
+    declaration: 'export interface OrderCreateRequest {\n    readonly serviceId: string;\n    readonly brief: string;\n    readonly clientName?: string;\n}',
+  },
+  {
+    name: 'OrderDeliverableFile',
+    declaration: 'export interface OrderDeliverableFile {\n    readonly path: string;\n    readonly bytes: Uint8Array;\n}',
+  },
+  {
+    name: 'OrderRecord',
+    declaration: 'export interface OrderRecord {\n    readonly id: number;\n    readonly orderNo: string;\n    readonly serviceId: string;\n    readonly serviceName: string;\n    readonly price?: string;\n    readonly brief: string;\n    readonly clientName?: string;\n    readonly expertName?: string;\n    readonly expertOrg?: string;\n    readonly status: OrderStatus;\n    readonly error?: string;\n    readonly deliverablePath?: string;\n    readonly deliverableUrl?: string;\n    readonly deliverable?: readonly number[];\n    readonly generatedAt?: string;\n    readonly note?: string;\n    readonly createdAt: string;\n}',
+  },
+  {
+    name: 'OrderStatus',
+    declaration: 'export type OrderStatus = \'pending\' | \'generating\' | \'delivered\' | \'failed\';',
+  },
+  {
     name: 'PermissionSelect',
     declaration: 'export interface PermissionSelect {\n    options: PresetOption[];\n    currentValue: string;\n}',
   },
@@ -4076,6 +4574,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'PruneResult',
     declaration: 'export interface PruneResult {\n    readonly pruned: readonly PrunedEntry[];\n    readonly charsRemoved: number;\n}',
+  },
+  {
+    name: 'QueryProvider',
+    declaration: 'export interface QueryProvider {\n    readonly id: string;\n    available(): boolean;\n    query(tenantId: string, sql: string, tables: readonly EngineTableRef[], options: EngineQueryOptions, signal?: AbortSignal): Promise<LakehouseQueryResult>;\n    writeParquet(location: string, tabular: TabularData, signal?: AbortSignal): Promise<void>;\n}',
   },
   {
     name: 'ReadFileLine',
@@ -4554,6 +5056,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface ShellSandboxInfo {\n    mode: SandboxMode;\n    denied: boolean;\n    enforcement?: SandboxEnforcement;\n    runnerFailed?: boolean;\n}',
   },
   {
+    name: 'SimpleSourceReport',
+    declaration: 'export interface SimpleSourceReport {\n    readonly scope: string;\n    readonly items: number;\n    readonly nodesUpserted: number;\n    readonly edgesUpserted: number;\n    readonly skipped: boolean;\n    readonly contentHash: string;\n}',
+  },
+  {
     name: 'SkillCandidate',
     declaration: 'export interface SkillCandidate extends SkillSummary {\n    readonly rank: number;\n    readonly locator: unknown;\n    readonly path?: string;\n    readonly metadata?: Readonly<Record<string, unknown>>;\n}',
   },
@@ -4792,6 +5298,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'TableValueOf',
     declaration: 'export type TableValueOf<S extends DomainSpec, N extends keyof S[\'tables\']> = S[\'tables\'][N] extends DomainTableSpec<string, infer V> ? V : never;',
+  },
+  {
+    name: 'TabularData',
+    declaration: 'export interface TabularData {\n    readonly columns: readonly LakehouseColumn[];\n    readonly rows: readonly (readonly unknown[])[];\n}',
   },
   {
     name: 'TeamId',
@@ -5139,7 +5649,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'WebFetchRequest',
-    declaration: 'export interface WebFetchRequest {\n    readonly url: string;\n}',
+    declaration: 'export interface WebFetchRequest {\n    readonly url: string;\n    readonly pinnedAddresses?: readonly string[];\n}',
   },
   {
     name: 'WebFetchResult',

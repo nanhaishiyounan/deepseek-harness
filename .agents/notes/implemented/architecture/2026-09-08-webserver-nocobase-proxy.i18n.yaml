@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-09-08-webserver-nocobase-proxy.md
+2026-09-08-webserver-nocobase-proxy.md: 46b38f17c67768efa2ec62aaba8c17f72df4dc35
+2026-09-08-webserver-nocobase-proxy.zh.md: 2cf32014cfeca8cd9b617f654f01335102340c5a

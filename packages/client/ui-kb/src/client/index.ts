@@ -34,6 +34,8 @@ import { KbSettingsSection } from './KbSettingsSection.tsx'
 import { KbHeroDock } from './hero/KbHeroDock.tsx'
 import { KbHeroHeadline } from './hero/KbHeroHeadline.tsx'
 import { KbToolRow } from './toolviews/KbToolRow.tsx'
+import { ConnectorToolRow } from './toolviews/ConnectorToolRow.tsx'
+import { OrderToolRow } from './toolviews/OrderToolRow.tsx'
 import { KbWorkbench } from './workbench/KbWorkbench.tsx'
 import { en, zh } from './locales.ts'
 import type { KbKey } from './locales.ts'
@@ -46,10 +48,15 @@ export type {
 } from './KbHeaderButton.tsx'
 export type { KbSettingsSectionInjected, KbSettingsSectionProps } from './KbSettingsSection.tsx'
 export type { KbToolRowProps } from './toolviews/KbToolRow.tsx'
+export type { ConnectorToolRowProps } from './toolviews/ConnectorToolRow.tsx'
+export type { OrderToolRowProps } from './toolviews/OrderToolRow.tsx'
+export { orderRowModel } from './toolviews/order-tool-model.ts'
+export type { OrderRowModel } from './toolviews/order-tool-model.ts'
 export type {
   KbCitation, KbIngestRowModel, KbSearchRowModel, KbStatsRowModel,
   KbToolRowState, KbUsageFigures,
 } from './toolviews/kb-tool-model.ts'
+export type { ConnectorDiscoverRowModel } from './toolviews/connector-tool-model.ts'
 export { parseCitations, resultTextOf } from './toolviews/kb-tool-model.ts'
 export type {
   KbHeroDockInjected, KbHeroDockProps,
@@ -139,9 +146,15 @@ export function apply(ctx: ClientContext): void {
     })
   }
 
-  /** Record one completed ingest and refresh the counters. */
+  /** Record one completed ingest (either destination) and refresh the counters. */
   const noteIngested = (receipt: IngestReceipt, path: string): (void) => {
-    store.noteIngested({ name: receipt.name, path, chunks: receipt.chunks })
+    store.noteIngested({
+      name: receipt.name,
+      path,
+      ...receipt.chunks === undefined ? {} : { chunks: receipt.chunks },
+      ...receipt.destination === undefined ? {} : { destination: receipt.destination },
+      ...receipt.rows === undefined ? {} : { rows: receipt.rows },
+    })
     refresh()
   }
 
@@ -206,10 +219,22 @@ export function apply(ctx: ClientContext): void {
         store.noteSearched(hits.map(hit => hit.source_path), documentLabelOf)
       },
       uploadFile: (file: File) => file.arrayBuffer().then(buffer =>
-        api.kb.upload({ filename: file.name, data: base64Of(new Uint8Array(buffer)) }).then((response) => {
+        api.data.upload({
+          filename: file.name,
+          data: base64Of(new Uint8Array(buffer)),
+          ...(file.type.length === 0 ? {} : { mime: file.type }),
+        }).then((response) => {
           const value = unwrap(response)
-          noteIngested({ name: file.name, chunks: value.chunks }, `workspace/data/uploads/${file.name}`)
-          return { name: file.name, chunks: value.chunks } satisfies IngestReceipt
+          if (value.destination === 'lakehouse') {
+            noteIngested({ name: value.table, destination: 'lakehouse', table: value.table, rows: value.rows }, `lakehouse/${value.table}`)
+            return {
+              name: file.name, destination: 'lakehouse', table: value.table, rows: value.rows, replaced: value.replaced,
+            } satisfies IngestReceipt
+          }
+          noteIngested({ name: file.name, chunks: value.document.chunks }, `workspace/data/uploads/${file.name}`)
+          return {
+            name: file.name, chunks: value.document.chunks, replaced: value.replaced, destination: 'kb',
+          } satisfies IngestReceipt
         })),
       ingestFile: (directory: string, fileName: string) =>
         relativeDirectory(directory).then(path =>
@@ -251,6 +276,9 @@ export function apply(ctx: ClientContext): void {
     yield ctx.slots.register({ name: 'tool.call.toolview', key: 'kb_ingest', locale: NS }, KbToolRow)
     yield ctx.slots.register({ name: 'tool.call.toolview', key: 'kb_ingest_url', locale: NS }, KbToolRow)
     yield ctx.slots.register({ name: 'tool.call.toolview', key: 'kb_stats', locale: NS }, KbToolRow)
+    yield ctx.slots.register({ name: 'tool.call.toolview', key: 'connector_discover', locale: NS }, ConnectorToolRow)
+    yield ctx.slots.register({ name: 'tool.call.toolview', key: 'order_create', locale: NS }, OrderToolRow)
+    yield ctx.slots.register({ name: 'tool.call.toolview', key: 'order_status', locale: NS }, OrderToolRow)
   })
 
   ctx.slots.inject('settings.section', () => ctx.slots.register({

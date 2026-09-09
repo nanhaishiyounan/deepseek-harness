@@ -1,0 +1,308 @@
+/**
+ * This file is part of the NocoBase (R) project.
+ * Copyright (c) 2020-2024 NocoBase Co., Ltd.
+ * Authors: NocoBase Team.
+ *
+ * This project is dual-licensed under AGPL-3.0 and NocoBase Commercial License.
+ * For more information, please refer to: https://www.nocobase.com/agreement.
+ */
+
+import { Context } from '@nocobase/actions';
+import Database, { Repository } from '@nocobase/database';
+import { createMockServer, MockServer } from '@nocobase/test';
+
+describe('actions', () => {
+  let app: MockServer;
+  let db: Database;
+  let repo: Repository;
+  let agent: ReturnType<MockServer['agent']>;
+  let resource: ReturnType<ReturnType<MockServer['agent']>['resource']>;
+  let user;
+
+  beforeAll(async () => {
+    app = await createMockServer({
+      registerActions: true,
+      acl: true,
+      plugins: [
+        'field-sort',
+        'users',
+        'auth',
+        'acl',
+        'action-custom-request',
+        'data-source-manager',
+        'ui-schema-storage',
+        'system-settings',
+      ],
+    });
+    db = app.db;
+    repo = db.getRepository('customRequests');
+    agent = app.agent();
+    resource = ((agent as any).set('X-Role', 'admin') as any).resource('customRequests');
+    user = await db.getRepository('users').findOne();
+    await agent.login(user.id);
+  });
+
+  describe('send', () => {
+    let params = null;
+    beforeAll(async () => {
+      app.resourcer.getResource('customRequests').addAction('test', (ctx: Context) => {
+        params = ctx.action.params.values;
+        return ctx.action.params.values;
+      });
+      await repo.create({
+        values: {
+          key: 'test',
+          options: {
+            url: '/customRequests:test',
+            method: 'GET',
+            data: {
+              username: '{{ currentRecord.username }}',
+            },
+          },
+        },
+      });
+    });
+
+    test('basic', async () => {
+      const res = await resource.send({
+        filterByTk: 'test',
+      });
+      expect(res.status).toBe(200);
+      expect(params).toMatchObject({});
+    });
+
+    test('currentRecord.data', async () => {
+      const res = await resource.send({
+        filterByTk: 'test',
+        values: {
+          currentRecord: {
+            data: {
+              username: 'testname',
+            },
+          },
+        },
+      });
+      expect(res.status).toBe(200);
+      expect(params).toMatchSnapshot();
+    });
+
+    test('parse o2m variables correctly', async () => {
+      await repo.create({
+        values: {
+          key: 'o2m',
+          options: {
+            url: '/customRequests:test',
+            method: 'GET',
+            data: {
+              o2m: '{{ currentRecord.o2m.id }}',
+            },
+          },
+        },
+      });
+
+      const res = await resource.send({
+        filterByTk: 'o2m',
+        values: {
+          currentRecord: {
+            data: {
+              o2m: [
+                {
+                  id: 1,
+                },
+                {
+                  id: 2,
+                },
+              ],
+            },
+          },
+        },
+      });
+      expect(res.status).toBe(200);
+      expect(params).toMatchObject({
+        o2m: [1, 2],
+      });
+    });
+
+    test('currentRecord.id with collectionName works fine', async () => {
+      await repo.create({
+        values: {
+          key: 'test2',
+          options: {
+            method: 'GET',
+            headers: [],
+            params: [{ name: 'userId', value: '{{currentRecord.id}}' }],
+            url: '/users:get',
+            collectionName: 'users',
+            data: null,
+          },
+        },
+      });
+
+      const userId = user.id;
+      const res = await resource.send({
+        filterByTk: 'test2',
+        values: {
+          currentRecord: {
+            id: userId,
+          },
+        },
+      });
+      expect(res.status).toBe(200);
+      expect(res.body.data.id).toBe(userId);
+    });
+
+    test('currentUser with association data', async () => {
+      await repo.create({
+        values: {
+          key: 'currentUser-with-association-data',
+          options: {
+            method: 'POST',
+            headers: [],
+            data: {
+              a: '{{currentUser.roles.name}}',
+              b: '{{currentUser.roles.title}}',
+              c: '{{currentUser.roles.rolesUsers.userId}}',
+            },
+            url: '/customRequests:test',
+          },
+        },
+      });
+
+      const res = await resource.send({
+        filterByTk: 'currentUser-with-association-data',
+      });
+      expect(res.status).toBe(200);
+      expect(expect.arrayContaining(params.a)).toMatchObject(['root', 'member', 'admin']);
+      expect(expect.arrayContaining(params.b)).toMatchObject(['{{t("Member")}}', '{{t("Root")}}', '{{t("Admin")}}']);
+      expect(expect.arrayContaining(params.c)).toMatchObject([user.id, user.id, user.id]);
+    });
+
+    test('vars payload should resolve ctx paths', async () => {
+      await repo.create({
+        values: {
+          key: 'vars-payload',
+          options: {
+            method: 'POST',
+            headers: [],
+            data: {
+              a: '{{ctx.user.name}}',
+              b: '{{ctx.record.id}} + {{ctx.record.name}}',
+            },
+            url: '/customRequests:test',
+          },
+        },
+      });
+
+      const res = await resource.send({
+        filterByTk: 'vars-payload',
+        values: {
+          vars: {
+            'ctx.user.name': 'alice',
+            'ctx.record.id': 100,
+            'ctx.record.name': 'order-100',
+          },
+        },
+      });
+
+      expect(res.status).toBe(200);
+      expect(params).toMatchObject({
+        a: 'alice',
+        b: '100 + order-100',
+      });
+    });
+
+    test('runtime options cannot override request target', async () => {
+      params = undefined;
+
+      const res = await resource.send({
+        filterByTk: 'test',
+        values: {
+          options: {
+            url: 'http://169.254.169.254/latest/meta-data/',
+            baseURL: 'http://169.254.169.254',
+            proxy: {
+              host: '169.254.169.254',
+              port: 80,
+            },
+            socketPath: '/var/run/docker.sock',
+          },
+        },
+      });
+
+      expect(res.status).toBe(400);
+      expect(params).toBeUndefined();
+    });
+  });
+
+  describe('SSRF protection via SERVER_REQUEST_WHITELIST', () => {
+    const ENV_KEY = 'SERVER_REQUEST_WHITELIST';
+    let savedEnv: string | undefined;
+
+    beforeAll(async () => {
+      await repo.create({
+        values: {
+          key: 'ssrf-relative',
+          options: {
+            url: '/customRequests:test',
+            method: 'GET',
+          },
+        },
+      });
+      await repo.create({
+        values: {
+          key: 'ssrf-external',
+          options: {
+            url: 'http://169.254.169.254/latest/meta-data/',
+            method: 'GET',
+          },
+        },
+      });
+    });
+
+    beforeEach(() => {
+      savedEnv = process.env[ENV_KEY];
+    });
+
+    afterEach(() => {
+      if (savedEnv === undefined) {
+        delete process.env[ENV_KEY];
+      } else {
+        process.env[ENV_KEY] = savedEnv;
+      }
+    });
+
+    test('no whitelist: relative URL (same-server call) is allowed', async () => {
+      delete process.env[ENV_KEY];
+      const res = await resource.send({ filterByTk: 'ssrf-relative' });
+      expect(res.status).toBe(200);
+    });
+
+    test('whitelist set: relative URL (same-server call) is still allowed', async () => {
+      process.env[ENV_KEY] = 'api.example.com';
+      const res = await resource.send({ filterByTk: 'ssrf-relative' });
+      expect(res.status).toBe(200);
+    });
+
+    test('whitelist set: external absolute URL to unlisted host is blocked', async () => {
+      process.env[ENV_KEY] = 'api.example.com';
+      const res = await resource.send({ filterByTk: 'ssrf-external' });
+      // checkUrlAgainstWhitelist throws, which becomes a 500
+      expect(res.status).toBeGreaterThanOrEqual(400);
+    });
+
+    test('no whitelist: non-http scheme is always blocked', async () => {
+      delete process.env[ENV_KEY];
+      await repo.create({
+        values: {
+          key: 'ssrf-file-scheme',
+          options: {
+            url: 'file:///etc/passwd',
+            method: 'GET',
+          },
+        },
+      });
+      const res = await resource.send({ filterByTk: 'ssrf-file-scheme' });
+      expect(res.status).toBeGreaterThanOrEqual(400);
+    });
+  });
+});

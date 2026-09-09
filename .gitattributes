@@ -6,7 +6,13 @@
 # in-repo form stays LF; CRLF becomes checkout-time presentation only.
 * text=auto eol=lf
 
+# The NocoBase snapshot keeps upstream bytes verbatim: no LF normalization, no
+# trailing-whitespace rewriting, so re-syncs diff cleanly against the upstream tag.
+platform/nocobase/** -text
+
 *.pdf binary
+# Bundled font faces (expert-pdf's Noto Sans SC) are opaque binaries.
+*.otf binary
 
 # Pairing records are generated from the three confirmed owner-blob pairs.
 # The worktree-local installer registers the fail-closed driver command.

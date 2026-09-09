@@ -27,6 +27,11 @@ describe('publication payload policy', () => {
     'src/index.ts',
     './src/index.ts',
     String.raw`src\index.ts`,
+    'nocobase',
+    'nocobase/',
+    'nocobase/package.json',
+    'nocobase/packages/core/server/src/index.ts',
+    './nocobase/package.json',
     'lib/types/index.d.ts.map',
     './lib/types/index.d.ts.map',
     'lib/typert.remote-client.d.ts.map',
@@ -34,6 +39,18 @@ describe('publication payload policy', () => {
     './lib/client.js.map',
   ])('rejects static manifest path %s', (file) => {
     expect(isForbiddenPublicationFile(file)).toBe(true)
+  })
+
+  it('accepts connector-nocobase payload paths despite the nocobase name', () => {
+    expect(isForbiddenPublicationFile('lib/index.js')).toBe(false)
+    expect(isForbiddenPublicationFile('lib/nocobase-client.js')).toBe(false)
+  })
+
+  it('rejects NocoBase snapshot members in packed tarballs', () => {
+    expect(validateFixtureTarball([
+      'package/package.json',
+      'package/nocobase/packages/core/server/src/index.ts',
+    ])).toThrow('fixture.tgz publishes NocoBase snapshot file package/nocobase/packages/core/server/src/index.ts')
   })
 
   it('rejects source members in packed tarballs', () => {

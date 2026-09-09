@@ -4,7 +4,7 @@
 
 ## 这是什么
 
-kb-agent 是一个食品产业知识库 agent：把走访食品企业得到的纪要、企业档案、法规标准等资料入库，然后向它提问，回答带 `[n]` 编号引用（文档名 + 标题路径），可回溯到原文。对话与向量化由 MiniMax-M3 / embo-01 驱动，知识库是本地一个 SQLite 文件（`workspace/kb.sqlite`），数据不出本机。检索默认返回全部命中；可选相关性阈值 `minRelevanceScore`（默认 0 不启用）让乱码查询落到零结果空态，部署侧在 `cordis.patch.yml` 调整（权衡见 [DEPLOY.zh.md](DEPLOY.zh.md)）。
+kb-agent 是一个食品产业知识库 agent：把走访食品企业得到的纪要、企业档案、法规标准等资料入库，然后向它提问，回答带 `[n]` 编号引用（文档名 + 标题路径），可回溯到原文。对话与向量化由 MiniMax-M3 / embo-01 驱动，知识库是本地一个 SQLite 文件（`workspace/kb.sqlite`），数据不出本机。检索带相关性阈值 `minRelevanceScore`（组合实配 `0.015`——2026-09-02 校准：保住全部单路金标命中、修剪 60 名外的融合噪声；设 0 可退回全量返回），乱码查询因此落到零结果空态，部署侧在 `cordis.patch.yml` 调整（权衡见 [DEPLOY.zh.md](DEPLOY.zh.md)）。
 
 ## 一次性准备
 
@@ -17,6 +17,9 @@ pnpm install
 
 # 3. 在仓库根目录创建 .env（已配置过的跳过）；key 于 MiniMax 开放平台申请：https://platform.minimaxi.com/
 echo 'MINIMAX_API_KEY=sk-xxx' >> .env
+
+# 4. 建连接器投递目录（组合挂载的 connector-file 提供程序要求它存在；不放文件即为空数据集）
+mkdir -p examples/kb-agent/workspace/data/connector-files
 ```
 
 `MINIMAX_API_KEY` 同时服务对话（MiniMax-M3）与向量化（embo-01）；可选 `MINIMAX_BASE_URL=https://api.minimaxi.com/v1`（默认值即此）。没有 key 时入库/检索/统计仍可完整运行（纯文本检索），对话请求会以 `MISSING_CREDENTIAL` 失败。`pnpm dsh` 从源码经 tsx 启动，无需先 `pnpm run build`。
@@ -51,7 +54,7 @@ DSH_HOME=examples/kb-agent/.dsh pnpm dsh --profile headless --patch examples/kb-
 
 ## 导入我自己的资料
 
-**上传本地文件（推荐，随时随地）**：打开 Web 工作台的「知识库」页签 → 文档区「添加文档」→「上传本地文件」，选择本机的 .md / .txt / .pdf / .docx 文件（可多选，单文件最大 64 MiB），选完即自动入库——每份文件一行进度，成功显示入库片段数。上传的文件会落在服务器工作区 `workspace/data/uploads/` 下，引用身份即文件名；同名文件再次上传会替换旧文档（与 `kb_ingest` 同路径幂等语义一致）。浏览器能打开工作台就能上传，不需要在服务器上预先放置文件。
+**上传本地文件（推荐，随时随地）**：打开 Web 工作台的「知识库」页签 → 文档区「添加文档」→「上传本地文件」，选择本机的 .md / .txt / .pdf / .docx 文件（可多选，单文件最大 64 MiB），选完即自动入库——每份文件一行进度，成功显示入库片段数；同名文件再次上传会替换旧文档（与 `kb_ingest` 同路径幂等语义一致），完成时的提示条会明确标注「已替换同名文档」。上传的文件会落在服务器工作区 `workspace/data/uploads/` 下，引用身份即文件名。浏览器能打开工作台就能上传，不需要在服务器上预先放置文件。
 
 **网页**：工作台向导切到「网页链接」页签粘贴 URL（或让 agent 抓取一个 http(s) 页面入库），引用身份即 URL：
 
@@ -74,6 +77,113 @@ DSH_HOME=examples/kb-agent/.dsh pnpm dsh --profile headless --patch examples/kb-
 语料目录结构即分类：`workspace/data/` 下 `meetings`（走访纪要）、`profiles`（企业档案）、`regulations`（法规标准）三类可经脚本拷入，目录名映射 `doc_kind`（meeting / profile / regulation）。真实纪要先脱敏再入库，绝不把含密文件拷进仓库。
 
 私网/内网地址默认被拒绝。
+
+## 上传表格数据（数据湖）
+
+组合同时挂载了湖仓（SQLite catalog + DuckDB 引擎）与统一上传路由。工作台的「添加文档」上传 csv / xlsx / json 时会自动进入数据湖成为一张可查询的表（表名由文件名派生，同名重传即替换），md / txt / pdf / docx 仍进知识库：
+
+- 上传 csv 后 toast 显示「已入数据湖：<表名> · N 行」；
+- 在会话里问数值类问题（如「这张表按地区汇总出口额」），助手会先调 `lakehouse_tables` 看表结构，再用 `lakehouse_query` 执行 SQL 并在回答中注明来源表；
+- 数据文件落在 `examples/kb-agent/workspace/lakehouse/`（Parquet），原始上传字节在 `workspace/data/uploads/`。
+
+无 key 验证（纯路由与查询链路，不调模型）：
+
+```sh
+pnpm vitest run examples/kb-agent/tests/data-routing.spec.ts
+```
+
+真实 key 全链路（上传→湖仓→查询→MiniMax-M3 答数）：
+
+```sh
+node --env-file=.env -e "process.env.MINIMAX_API_KEY && console.log('key ok')"
+pnpm exec vitest run --config vitest.e2e.config.ts examples/kb-agent/tests/data-routing.e2e.ts
+```
+
+## 专家数据集与出海风险问答（张会长）
+
+组合同时挂载了连接器缝（`ctx.connector`）：NocoBase 业务后台作为一个外部数据源，`connector_discover` 能在其上发现**张红喜专家数据集**——漯河市电子商务协会会长、食品出海（中亚五国 + 俄罗斯）方向行业专家。其本人即一个高质量数据集：
+
+- **专家画像**（`experts/1`）：机构、领域标签（食品出海/中亚五国/俄罗斯/跨境电商/海外仓）、履历要点；
+- **可服务项**（`expert_services/1-3`，可下单、交付物为 PDF 方案）：中亚货运动线方案 ¥8,800/份、海外仓风险应对咨询 ¥6,800/份、食品出海合规咨询 ¥12,000/份；
+- **知识资产**（`datasets/2-3`）：中亚市场准入指南、俄罗斯·中亚海外仓风险应对手册。
+
+权威真源是 `workspace/data/experts/dataset.json`：连接器测试的 mock 服务与种子脚本（`scripts/seed-experts.mts`）都读这一份 JSON，真实 NocoBase 实例（N6 实装）经 `NOCOBASE_BASE_URL` + `NOCOBASE_API_KEY` 播种同一数据，双源不漂移。
+
+配套的出海风险应对语料在 `workspace/data/export-risk/`（9 篇报告：仓库受损应急、中俄班列与改道、公路 TIR、一主两备仓储、货运保险与理赔、中亚清关、转口走廊、海运改道、风险总览）加 2 篇法规摘录（CIM/CMR 不可抗力条款、ICC 2020 合同条款），覆盖「俄罗斯的仓库被乌克兰炸了怎么办」这类不可抗力应急场景。
+
+无 key 快照（语料入库 → kb_search 引用命中 → connector_discover 返回张会长专家卡，转录锁定）：
+
+```sh
+pnpm vitest run examples/kb-agent/tests/expert-discovery.spec.ts
+```
+
+真实 key 全链路（hybrid 检索 + 真实 MiniMax-M3 回答：应对要点带 [n] 引用 + 按专家卡字段推荐张会长）：
+
+```sh
+pnpm exec vitest run --config vitest.e2e.config.ts examples/kb-agent/tests/expert-discovery.e2e.ts
+```
+
+## NocoBase 业务后台（真实订单轨道）
+
+订单的单一事实源在 NocoBase 2.x（DSH 不建平行订单表）。`scripts/setup-nocobase.mts` 一条命令把仓内 NocoBase 快照（`platform/nocobase`，隔离式上游副本——升级即重新快照，修改须登记其 MANIFEST）从零带到可用：依赖安装（yarn，首次约 15 分钟）、完整 UI 客户端产物构建（首次约 20 分钟，产物保留、之后秒级启动；`NOCOBASE_FORCE_BUILD=1` 强制重建）、本地 postgres 引导、后台启动 dev-server、应用初始化、五个 collections（`experts` / `expert_services` / `datasets` / `customs_export` / `orders`——orders 带 `deliverable` 附件字段）、张会长数据集播种、root 角色 API key，以及订单审批 workflow（collection 触发 → manual 审批 → 通过分支 request 回调 DSH `orders.fulfill` / 驳回分支回写 failed）。凭据写入仓库根 `.env`（`NOCOBASE_BASE_URL` / `NOCOBASE_API_KEY`），组合重启后 connector 与订单域即走真实后台。
+
+浏览器打开 http://127.0.0.1:13000 即完整 NocoBase 业务系统（登录 → 数据管理、workflow、设置全部可用），与 DSH 工作台互为双入口——业务管理页「高级配置」的 iframe 内嵌同一后台，首次打开需登录。初始管理员账号 `admin@nocobase.com` / `admin123`（由 install 时 `NOCOBASE_ROOT_*` 创建，可覆盖）。同一端口同时伺服 UI 与 `/api/*`，REST 轨道（connector、订单域、demo）不经过额外代理层。
+
+功能导览（登录后即可走遍，2026-09-09 实配）：
+
+- **九组业务菜单**：CRM 客户（线索看板/客户/联系人/产品与服务/客户仪表盘）、销售流程（订单/报价单/回款/发票/销售仪表盘）、工作台（个人任务聚合单页）、项目管理（项目/任务看板/任务列表/任务日历/任务甘特/里程碑）、工单中心（工单/知识文章）、资产管理（资产台账/供应商/维保记录）、人事管理（员工/部门/请假审批）、基础数据（分类维护），加上既有的专家数据组——业务管理菜单全景。
+- **AI 雇员两个入口**：AI 工作台（admin 菜单第二项）v2 页——内嵌聊天框 + 页面右下角官方同款悬浮球 + 表格区块，默认 Atlas / MiniMax-M3，可查业务数据源；或后台 :13000 设置 → AI employees 管理页（同一对话面板）。
+- **双 Portal**：CRM 在 http://127.0.0.1:13000/dist/crm/ ，Hub 在 http://127.0.0.1:13000/dist/hub/ ——同源 cookie 直登，须从入口页进，深链直开会 404。
+- **商业版边界**：AI 知识库（RAG）、审批/子流程/Webhook workflow 节点、审计日志等商业插件未装，替代路径已在上文（DSH 知识库、manual+condition+request 节点链），明细清单见 [plans/nocobase-full-features/PLAN.md](../../plans/nocobase-full-features/PLAN.md) §4。
+
+```sh
+# 从零到可用（可重复执行；已存在的构建产物/collections/种子/workflow 跳过）
+node --import tsx/esm examples/kb-agent/scripts/setup-nocobase.mts          # = install → build → start → init → verify
+
+# 分步执行 / 日常操作
+node --import tsx/esm examples/kb-agent/scripts/setup-nocobase.mts start    # 后台启动（健康检查）
+node --import tsx/esm examples/kb-agent/scripts/setup-nocobase.mts verify   # 断言 collections + 附件字段 + 种子 + workflow 节点链 + API key
+node --import tsx/esm examples/kb-agent/scripts/setup-nocobase.mts stop     # 停止 dev-server
+node --import tsx/esm examples/kb-agent/scripts/setup-nocobase.mts reset    # 停止 + 重建数据库 + 全新初始化
+```
+
+环境变量可覆盖：`NOCOBASE_HOME`（源码快照路径，默认仓内 `platform/nocobase`）、`NOCOBASE_BASE_URL`（默认 `http://127.0.0.1:13000`）、`NOCOBASE_ROOT_EMAIL` / `NOCOBASE_ROOT_PASSWORD`（默认 `admin@nocobase.com` / `admin123`）、`NOCOBASE_DSH_CALLBACK`（workflow 回调地址，默认 `http://127.0.0.1:3080`，即 `dsh web` 的 api-gateway）、`NOCOBASE_FORCE_BUILD`（=1 强制重建客户端产物）。
+
+真实轨道全链路 e2e（无 NocoBase 或不可达时自跳过并说明原因）：
+
+```sh
+pnpm exec vitest run --config vitest.e2e.config.ts examples/kb-agent/tests/nocobase-track.e2e.ts
+```
+
+该测试走完整闭环：`connector_discover` 读真实 collections（张会长专家卡）→ 下单落真实订单行 → workflow 生成 manual 审批任务 → 测试以审批人身份 resolve → request 节点回调 DSH `orders.fulfill`（有 MINIMAX_API_KEY 时真实 MiniMax-M3 起草，否则模板兜底）→ PDF 经 `attachments:upload` 挂回订单行 `deliverable` 附件字段 → 断言本地 PDF 与 NocoBase 附件字节一致。审批驳回分支由 workflow 的 update 节点回写 `failed`（error=审批驳回）。
+
+业务读写工具的真实轨道 e2e（同样自跳过）：
+
+```sh
+pnpm exec vitest run --config vitest.e2e.config.ts examples/kb-agent/tests/nocobase-business.e2e.ts
+```
+
+该测试验证 nb_* 工具组（nb_collections/nb_list/nb_get/nb_create/nb_update）：读真实 schema 与种子行（张红喜）→ UUID 标记的 create 落真实行并回读断言 → nb_update 以「改前→改后」diff 回执合并字段并经裸 client 回读验证 → 清理销毁测试行。写确认契约由 persona 承载（工具无 UI 确认状态）；keyless 快照 `pnpm exec vitest run examples/kb-agent/tests/nocobase-tools.spec.ts` 在 mock 后端锁定同一动线（确认步骤前零写请求）。
+
+**多租户映射（MVP 形态）**：四级租户（平台/运营商/企业/用户）映射到 NocoBase 的 roles + departments 树 + 行级 scope——平台=superuser 角色、运营商=每运营主体一个 role、企业=department 节点（collections 行按 department scope 隔离）、用户=部门成员。本示例是 MVP 单租户：一个 root 角色 API key 服务全部连接器与订单读写（与 `kbWriteEnabled`/`ordersEnabled` 的单租户盘级访问控制同立场，见 [DEPLOY.zh.md](DEPLOY.zh.md) §3），不做行级隔离；多租户接入时按上述映射在 NocoBase 建 roles/departments 并为每个租户签发绑定 role 的 key，DSH 侧把 `DSH_KB_TENANT` 与 key 一并按租户部署。
+
+## 五条用户动线一串演示（demo-full-journey）
+
+上面各节按能力分述；`demo-full-journey.mts` 把五条用户核心动线串成一次可复跑的真实端到端（with-key + with-NC，无前置的轨道自跳过并说明原因）：
+
+| 动线 | 场景 | 真实轨道 |
+|---|---|---|
+| 上传任意文件自动路由 | 海关 csv → 数据湖、走访纪要 md → 知识库，数值问题湖仓答、文档问题 KB 答 | 真实上传通道 + 真实嵌入 + MiniMax-M3 双路回答 |
+| 专家发现与咨询 | 问「俄罗斯的仓库被乌克兰炸了怎么办」→ 应对要点带 [n] 引用 + 张会长专家卡 | 真实 embo-01 检索 + 真实 NocoBase 发现 + MiniMax-M3 作答 |
+| 会话内下单拿 PDF | 下单张会长方案 → 审批 → 交付 → 下载 | 真实 NocoBase 订单 + workflow 审批 + `orders.fulfill` 回调 + PDF 落盘与附件字节比对 |
+| 业务管理对话改数据 | nb_collections 发现业务对象 → nb_create 建专家 → nb_update 改名 → nb_get 回读 | 真实 NocoBase 行级读写（业务管理页同一通道） |
+| 图谱问答 | kg_schema 本体浏览 → kg_subgraph 实体邻域 → MiniMax 组织答案 | 真实 kg-graph v2 存储种子 + 图谱页同一读面（keyless 可跑，组织答案需 key） |
+
+```sh
+node --import tsx/esm examples/kb-agent/scripts/demo-full-journey.mts
+```
+
+前置即上文各节的环境（`.env` 里 MINIMAX_API_KEY；启用订单/业务动线需 NocoBase 已 start）。逐场景断言 + 实录输出，全程约 4–6 分钟；实录落 `examples/kb-agent/demos/full-journey-<时间戳>.md`（入库与湖仓/图谱数据都在独立临时工作区，不碰 `workspace/`）。任一场景断言失败则该场景记 FAIL 且退出码非零。一条说明：场景 3 用 seam 直调下单——`order_create` 工具的「一次调用完成下单+交付」语义服务 DSH 内同步闭环轨道，真实审批轨道的 fulfill 由 workflow request 回调驱动（NocoBase 节的 e2e 与本演示一致）。2026-09-07 实跑实录：`demos/full-journey-20260907-135731.md`（五场景全 PASS）。
 
 ## 换角色
 
@@ -101,7 +211,47 @@ agent-presets:
 DSH_HOME=examples/kb-agent/.dsh pnpm dsh web --patch examples/kb-agent/cordis.patch.yml
 ```
 
-启动后输出 `dsh web: http://127.0.0.1:3080` 并自动打开浏览器（`--no-open` 关闭自动打开）。工作台无鉴权，只在本机使用，不要暴露到公网。新建会话默认使用企业数据助手预设（见上节换角色）。暗色外观跟随系统设置。
+启动后输出 `dsh web: http://127.0.0.1:3080` 并自动打开浏览器；追加 `--no-open` 关闭自动打开（完整命令：`DSH_HOME=examples/kb-agent/.dsh pnpm dsh web --patch examples/kb-agent/cordis.patch.yml --no-open`）。注意 flag 顺序：`--patch` 是 dsh 启动器的 flag，必须写在 web 应用自己的 flag（如 `--no-open`、`--host`）之前——从第一个启动器不认识的参数起，其余参数全部原样交给 web 应用。工作台无鉴权，只在本机使用，不要暴露到公网。新建会话默认使用企业数据助手预设（见上节换角色）。暗色外观跟随系统设置。
+
+## 数据资产市场与连接器页
+
+会话页签环在「知识库」之后多了两页：**数据资产**与**连接器**（侧栏同款入口常驻）。
+
+- **数据资产**：板块门户（商品/供方/本月成交计数 + 典型产品位，文案来自 `workspace/data/market/seed.json`，改文件即改运营位）→ 目录（搜索 + 类型筛选，卡片带定价与来源）→ 详情（价格/交付物/专家机构 + 「问数」「引用并提问」直接预填对话）→ **下单**：确认卡只读展示服务/金额/交付方式，唯一可编辑的是需求简述，确认后经订单域落真实订单并显示订单号与「待审批」徽标。
+- **连接器**：数据源目录（正常/缺凭据状态）+ 交付跟踪（每个数据源的交付次数、行数、最近落库）+ 运行时间线（入数据湖/入知识库）；「接入新数据源」把需求预填进对话，由助手推荐数据源、补参数、测连接——页面无表单。
+
+两页的数据来自 apiproxy 的 `assets.*` 与 `connectors.*` 域（组合已在 `cordis.patch.yml` 开启 `assetsEnabled`/`connectorsEnabled`）。真实轨道 e2e（无 NocoBase 时自跳过）：
+
+```sh
+pnpm exec vitest run --config vitest.e2e.config.ts examples/kb-agent/tests/market-track.e2e.ts
+```
+
+该测试走真实闭环：真实 collections 投影为市场卡（张会长可下单服务带价格）→ `orders.create` 落真实订单行 → 真实数据集 `connector.transfer` 落数据湖 → 连接器页读到交付聚合与时间线。
+
+## 图谱页与业务管理页
+
+页签环再添两页：**图谱**（`kg`）与**业务管理**（`business`），侧栏同款入口常驻。
+
+- **图谱**：短语框把子图查询包装成自然语言（「宏发食品的供货链」「含棕榈油的商品」，其余文本按实体名直接游走）→ 实体搜索带别名解析 → sigma.js 画布（双击节点展开一跳邻居、单击选中、滚轮缩放；节点颜色按本体类型稳定分配）→ 类型图例点选过滤画布 → 详情面板（类型/关联数/业务键）与「问此实体」预填对话。只读：写图谱归 kg-build 管线。数据来自 apiproxy 的 `kg.*` 域（`cordis.patch.yml` 已开 `kgEnabled`/`kgTenant`）；画布渲染栈（sigma/graphology/force-atlas2）动态加载不进主包，无 WebGL 环境自动降级为同语义关系清单。
+- **业务管理**：对象切换器（`nocobase.listMeta` 动态清单，隐藏表不露）→ 实体卡流（主标签 + 三对字段预览，「问此记录」「编辑（对话）」与对象级「新建（对话）」全部预填对话，页面零表单）→ 辅助表格视图（hasNext 翻页）→ **高级配置**：`/nocobase` 反代把业务后台同源嵌进页面（低频管理：页面编辑器/角色权限细配；日常读写走对话）。数据来自 V2 的 `nocobase.listMeta/list` 域。
+
+构建图谱数据：跑 kg-build 管线（业务表结构化映射 + 文档实体抽取）——
+
+```sh
+node --import tsx/esm examples/kb-agent/scripts/kg-build.mts
+```
+
+业务数据批量充实（批次五起，全部幂等、重跑不重复）：五个按域播种脚本把示例规模的演示面撑成有运营厚度的业务面——专家名册（32 位领域专家 + 可下单服务 + 知识资产，真源 `workspace/data/experts/roster-batch5.json`）、市场数据资产（63 条八域目录，真源 `workspace/data/market/assets-batch5.json`，`datasets` collection 自动扩展 domain/source/pricing/summary 字段）、历史订单（近 30 天 24 条，播种期间自动暂停审批 workflow）、湖仓三表（原辅料价格/进出口统计/冷链运价，经 `lakehouse.load` 正规入库并留 transfer 记录）、KB 语料入库（五个新语料目录，真实 embo-01 嵌入）。全部跑完后再执行上面的 kg-build 重建图谱。
+
+```sh
+node --env-file=.env --import tsx/esm examples/kb-agent/scripts/seed-experts-roster.mts   # 专家名册 + 清理 e2e/demo 残留
+node --env-file=.env --import tsx/esm examples/kb-agent/scripts/seed-market.mts          # 市场数据资产目录
+node --env-file=.env --import tsx/esm examples/kb-agent/scripts/seed-orders.mts          # 历史订单
+node --import tsx/esm examples/kb-agent/scripts/seed-lakehouse.mts                       # 湖仓三表 + 交付跟踪记录
+node --import tsx/esm examples/kb-agent/scripts/seed-kb.mts                              # KB 语料（需 MINIMAX_API_KEY）
+```
+
+MCP 通道对照评估结论（REST 窄面保持主通道）见 Agent Note `2026-09-07-mcp-channel-evaluation`；探针 `scripts/mcp-probe.mts` 可复跑对照。
 
 首屏是知识库门户：产品名与一句话价值、用量行（文档数 · 检索次数 · 场景数）、示例问题（点击填入输入框）、30 个场景卡（按市场洞察、工艺等八类分组，点击卡片经确认框后以该角色开新会话，见"换角色"节）。
 
@@ -137,7 +287,7 @@ DSH_HOME=examples/kb-agent/.dsh pnpm dsh --profile headless --patch examples/kb-
 
 ## 质量评测
 
-100 题检索评测（`eval/questions.json`），两种模式：
+120 题检索评测（`eval/questions.json`，2026-09-05 实测混合模式 Top5 命中 98.3%，出海/工艺/市场/食安四类 100%），两种模式：
 
 ```sh
 # 纯文本模式（无需 key）
@@ -155,10 +305,16 @@ DSH_EVAL_HYBRID=1 node --import tsx/esm examples/kb-agent/scripts/eval-retrieval
 ## 常见问题
 
 - **启动报 `No such built-in module: node:sqlite`**：Node 版本过低。执行 `nvm use 22.19.0` 后重试；本仓库要求 Node 22.19+。
+- **启动报 `ENOENT ... scandir .../examples/kb-agent/workspace/data/connector-files`**：连接器投递目录不存在（干净检出后的首次启动）。执行一次性准备第 4 步的 `mkdir -p examples/kb-agent/workspace/data/connector-files` 后重试。
 - **拔掉 embed key 后还能用吗**：能检索。没有 `MINIMAX_API_KEY` 时每次 `kb_search` 以 `mode: 'text'` 纯文本运行、`embed_available: false`，入库/检索/统计闭环完整；仅对话请求以 `MISSING_CREDENTIAL` 失败。key 写入根 `.env` 或导出环境变量后两半都工作（仅经工作台 Models 页存入的 key 服务对话但不服务向量）。
 - **换企业/换租户**：租户是部署配置不是对话参数——`cordis.patch.yml` 的 `tool-kb` 行读取环境变量 `DSH_KB_TENANT`（默认 `demo-food-co`），模型从不提供租户。一家企业一个部署，见 [DEPLOY.zh.md](DEPLOY.zh.md) §3。
 - **升级后启动报 schema version 不兼容**：旧知识库文件被新构建拒绝（fail-loud），报错含盘上版本号。从源文档重新入库，或恢复同版本备份；不要手改 SQLite 文件。本示例的旧 v1 库已改名 `workspace/kb.sqlite.v1-backup` 留存（新库随后自动重建），旧库不会被新构建读取；升级与回滚的完整处理见 [DEPLOY.zh.md](DEPLOY.zh.md) §6。
+- **下单后订单变 `failed`，error 提到 `max-tokens` 截断**：起草的方案 JSON 在输出预算内写不完（seam 默认 4096 token 不够真实方案）。生产组合已在 `cordis.patch.yml` 的 expert-orders 段配 `draftMaxTokens: 16384` 与 `draftTimeoutMs: 120000`；自建组合若漏配这两项会复现截断，补配后对 `failed` 订单重新发起交付即可。
+- **订单 `failed`，error 是「起草输出不是合法 JSON」**：模型偶尔在 JSON 前后夹说明文字、留尾随逗号或提前截断。解析层会先自动修复这些常见噪声；修复不了时携带解析错误自动重新起草一次，两次都失败才把订单落 `failed`（不假装成功，可重新交付）。若频繁出现，检查起草路由是否偏离 MiniMax-M3。
+- **无 key、无 NocoBase 时跑 `demo-full-journey` 会怎样**：三个场景各自自跳过（SKIP）并输出原因，进程正常退出（退出码 0），实录照常落 `demos/full-journey-<时间戳>.md`；只有某个场景的断言失败才以非零码退出。跳过不是失败——按实录里的提示补齐环境（`.env` 写入 MINIMAX_API_KEY、`setup-nocobase.mts start`）后重跑即可。
+- **进程中途被杀或恢复失败后，订单停在审批前不动**：demo 与真实轨道 e2e 会临时停用生产审批流、用私有副本（标题带 `-demo` / `-e2e` 后缀）跑完再恢复；进程被强杀或恢复请求失败时，生产流停留在停用态，新订单不会触发审批。手动恢复：打开 NocoBase（默认 `http://127.0.0.1:13000`）→ 左侧「工作流」→ 列表中「专家服务订单审批交付」行启用；残留的私有副本可在同一列表删除。
 - **对话报错 `duplicate tool_call id (2013)` 或工具调用显示 `unknown tool`？**：这是 2026-09-02 已修复的 MiniMax 并行工具调用聚合缺陷（模型并行调用多个工具时，流式续传片段的空 id/name 覆盖了正确身份）。修复后新会话的并行检索正常；**此前因此报废的旧会话在重启服务后也能继续使用**（发送端防线会自动修复历史中的空 id）。若仍遇此错，重启 Web 服务即可。
+- **`dsh web --no-open --patch x` 报 `unknown option '--patch'`**：flag 顺序契约——`--patch`/`--profile` 等是 dsh 启动器的 flag，必须写在 `web` 之后、web 应用自己的 flag（`--no-open`、`--host`、`--port` 等）之前；从第一个启动器不认识的参数起，其余参数全部原样交给 web 应用。正确写法：`dsh web --patch x --no-open`。
 - 更多细节：[README.zh.md](README.zh.md)（能力与已知限制）、[DEPLOY.zh.md](DEPLOY.zh.md)（私有化部署）、[WEBSITE.zh.md](WEBSITE.zh.md)（运营站对接）。
 
 ## 生产部署

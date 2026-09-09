@@ -80,6 +80,7 @@ export interface KbSearchToolValue {
     heading_path?: string
     chunk_idx: number
     content: string
+    score?: number
   }>
   truncated: boolean
 }
@@ -108,6 +109,7 @@ export function searchValueFromResult(input: KbSearchInput, result: KbSearchResu
       ...hit.headingPath === undefined ? {} : { heading_path: hit.headingPath },
       chunk_idx: hit.chunkIdx,
       content: hit.content,
+      ...hit.score === undefined ? {} : { score: hit.score },
     })),
     truncated: result.results.length >= input.maxResults,
   }
@@ -259,6 +261,7 @@ export function applyKbSearchTool(ctx: Context, maxResults: number, tenant: stri
                 collected_at: { type: 'string' },
                 heading_path: { type: 'string' },
                 chunk_idx: { type: 'number', required: true },
+                score: { type: 'number' },
                 content: { type: 'string', required: true },
               },
             },

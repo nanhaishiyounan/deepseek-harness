@@ -22,6 +22,8 @@ export interface KbHitView {
   readonly heading_path?: string
   readonly chunk_idx: number
   readonly content: string
+  /** Fused RRF relevance score, present on hits a scoring seam returned. */
+  readonly score?: number
 }
 
 /** `kb.stats` response: store counts, embed-route facts, and usage counters. */
@@ -55,6 +57,17 @@ export interface KbIngestView {
   readonly embed_model?: string
 }
 
+/** `kb.upload` response: the stored document summary plus the replacement fact. */
+export interface KbUploadView extends KbIngestView {
+  /**
+   * True when a prior upload had already landed under the same sanitized name
+   * — the uploads-path identity whose re-ingest the seam's same-path
+   * semantics replaced. The overwrite itself is unconditional; this field
+   * only reports it so the client can surface the fact.
+   */
+  readonly replaced: boolean
+}
+
 /** Knowledge-base workbench methods; every call fails loud when no kb capability is composed. */
 export interface KbApi {
   /** Store counts, embed availability, and the tenant's cumulative usage counters. */
@@ -74,14 +87,15 @@ export interface KbApi {
 
   /**
    * Store one browser-uploaded file (base64 bytes + file name) under the
-   * workspace uploads directory and ingest it. Single file per call — the
-   * client loops for batches, matching the per-image admission `session.prompt`
-   * established for browser→host byte transfer.
+   * workspace uploads directory and ingest it, reporting whether the same-name
+   * landing replaced a prior one. Single file per call — the client loops for
+   * batches, matching the per-image admission `session.prompt` established
+   * for browser→host byte transfer.
    */
   upload(
     request: RpcRequest<{ filename: string; data: string; doc_kind?: string; title?: string; collected_at?: string }>,
     signal?: AbortSignal,
-  ): Promise<RpcResponse<KbIngestView>>
+  ): Promise<RpcResponse<KbUploadView>>
 
   /** Fetch one public http(s) page and ingest it (same SSRF gate as the kb_ingest_url tool). */
   ingestUrl(

@@ -1,0 +1,44 @@
+# Test-only composition for the expert-discovery keyless snapshot: the kb seam
+# with its sqlite store (text-only degraded mode; the embed credential
+# reference is pinned through the environment to a name nothing sets) and the
+# connector seam with the NocoBase provider pinned to the in-spec mock server,
+# so one scenario conversation can retrieve the export-risk corpus and
+# discover the 张红喜 expert card in the same transcript.
+
+- id: kb
+  name: '@deepseek-ai/dsh-kb'
+
+- id: kb-sqlite
+  name: '@deepseek-ai/dsh-kb-sqlite'
+  config:
+    path: !!js "process.env.KB_TEST_DB ?? 'workspace/kb.sqlite'"
+
+- id: fs-local
+  name: '@deepseek-ai/dsh-fs-local'
+  config:
+    cwd: !!js "process.env.KB_TEST_ROOT ?? process.cwd()"
+
+- id: tools
+  name: '@deepseek-ai/dsh-tools'
+
+- id: system-prompt
+  name: '@deepseek-ai/dsh-system-prompt'
+
+- id: tool-kb
+  name: '@deepseek-ai/dsh-tool-kb'
+  config:
+    tenant: demo-food-co
+
+- id: connector
+  name: '@deepseek-ai/dsh-connector'
+
+- id: connector-nocobase
+  name: '@deepseek-ai/dsh-connector-nocobase'
+  config:
+    baseUrl: !!js "process.env.ED_TEST_NC_URL ?? ''"
+    apiKeyEnv: ED_TEST_NC_TOKEN
+
+- id: tool-connector
+  name: '@deepseek-ai/dsh-tool-connector'
+  config:
+    tenant: demo-food-co

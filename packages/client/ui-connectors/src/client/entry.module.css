@@ -1,0 +1,85 @@
+/* The sidebar's connector-page entry row. Colors ride the --dsw-alias-* /
+   --dsw-specific-* semantic tokens (docs/web-styling.md); the shape follows
+   the market entry beside it. */
+
+.entry {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  cursor: pointer;
+  color: var(--dsw-alias-label-primary);
+  font: var(--dsw-font-s-14);
+  transition: background-color var(--ds-transition-duration-fast) var(--ds-ease-in-out);
+}
+
+.entry:hover {
+  background: var(--dsw-specific-sidebar-nav-item-hover);
+}
+
+.entry:active {
+  background: var(--dsw-specific-sidebar-nav-item-active);
+}
+
+.entry:focus-visible {
+  outline: 2px solid var(--dsw-alias-state-business-primary);
+  outline-offset: 1px;
+}
+
+/* The session-header variant: a compact icon button in the title row. */
+.headerButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+  color: var(--dsw-alias-label-secondary);
+  transition: background-color var(--ds-transition-duration-fast) var(--ds-ease-in-out);
+}
+
+.headerButton:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-primary);
+}
+
+.headerButton:focus-visible {
+  outline: 2px solid var(--dsw-alias-state-business-primary);
+  outline-offset: 1px;
+}
+
+/* Below 900px the session-header row has no spare width: the sidebar entry
+   stays the page's reachability path, so the header icon hides instead of
+   crowding the title and the header actions it shares the row with. */
+@media (max-width: 900px) {
+  .headerButton {
+    display: none;
+  }
+}
+
+.label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: start;
+}
+
+.badge {
+  flex: none;
+  min-width: 18px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: var(--dsw-alias-state-business-tertiary);
+  color: var(--dsw-alias-label-primary-bluish);
+  font: var(--dsw-font-xxxs-strong-11);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}

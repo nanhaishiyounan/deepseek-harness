@@ -69,6 +69,21 @@ import {
   kbUploadRequestSchema,
 } from '../api/kb.schema.ts'
 import {
+  nocobaseGetRequestSchema, nocobaseListMetaRequestSchema, nocobaseListRequestSchema,
+} from '../api/nocobase.schema.ts'
+import { dataUploadRequestSchema } from '../api/data.schema.ts'
+import { ordersCreateRequestSchema, ordersListRequestSchema, ordersOrderIdRequestSchema } from '../api/orders.schema.ts'
+import {
+  assetsDetailRequestSchema, assetsListRequestSchema, assetsStatsRequestSchema,
+} from '../api/assets.schema.ts'
+import {
+  connectorsConnectionsRequestSchema, connectorsListRequestSchema, connectorsTransfersRequestSchema,
+} from '../api/connectors.schema.ts'
+import {
+  kgExpandRequestSchema, kgSchemaRequestSchema, kgSearchRequestSchema, kgStatsRequestSchema,
+  kgSubgraphRequestSchema,
+} from '../api/kg.schema.ts'
+import {
   subagentHistoryRequestSchema,
   subagentInterruptRequestSchema,
   subagentListRequestSchema,
@@ -144,6 +159,25 @@ const UNARY_ROUTES: UnaryRoutes = {
   'llm.providers': { schema: llmProvidersRequestSchema, invoke: (api, r) => api.llm.providers(r) },
   'llm.models': { schema: llmModelsRequestSchema, invoke: (api, r) => api.llm.models(r) },
   'llm.discoverModels': { schema: llmDiscoverModelsRequestSchema, invoke: (api, r, signal) => api.llm.discoverModels(r, signal) },
+  'data.upload': { schema: dataUploadRequestSchema, invoke: (api, r, signal) => api.data.upload(r, signal) },
+  'orders.create': { schema: ordersCreateRequestSchema, invoke: (api, r, signal) => api.orders.create(r, signal) },
+  'orders.get': { schema: ordersOrderIdRequestSchema, invoke: (api, r, signal) => api.orders.get(r, signal) },
+  'orders.list': { schema: ordersListRequestSchema, invoke: (api, r, signal) => api.orders.list(r, signal) },
+  'orders.fulfill': { schema: ordersOrderIdRequestSchema, invoke: (api, r, signal) => api.orders.fulfill(r, signal) },
+  'assets.list': { schema: assetsListRequestSchema, invoke: (api, r, signal) => api.assets.list(r, signal) },
+  'assets.detail': { schema: assetsDetailRequestSchema, invoke: (api, r, signal) => api.assets.detail(r, signal) },
+  'assets.stats': { schema: assetsStatsRequestSchema, invoke: (api, r, signal) => api.assets.stats(r, signal) },
+  'connectors.list': { schema: connectorsListRequestSchema, invoke: (api, r, signal) => api.connectors.list(r, signal) },
+  'connectors.connections': { schema: connectorsConnectionsRequestSchema, invoke: (api, r, signal) => api.connectors.connections(r, signal) },
+  'connectors.transfers': { schema: connectorsTransfersRequestSchema, invoke: (api, r, signal) => api.connectors.transfers(r, signal) },
+  'kg.schema': { schema: kgSchemaRequestSchema, invoke: (api, r, signal) => api.kg.schema(r, signal) },
+  'kg.search': { schema: kgSearchRequestSchema, invoke: (api, r, signal) => api.kg.search(r, signal) },
+  'kg.subgraph': { schema: kgSubgraphRequestSchema, invoke: (api, r, signal) => api.kg.subgraph(r, signal) },
+  'kg.expand': { schema: kgExpandRequestSchema, invoke: (api, r, signal) => api.kg.expand(r, signal) },
+  'kg.stats': { schema: kgStatsRequestSchema, invoke: (api, r, signal) => api.kg.stats(r, signal) },
+  'nocobase.listMeta': { schema: nocobaseListMetaRequestSchema, invoke: (api, r, signal) => api.nocobase.listMeta(r, signal) },
+  'nocobase.list': { schema: nocobaseListRequestSchema, invoke: (api, r, signal) => api.nocobase.list(r, signal) },
+  'nocobase.get': { schema: nocobaseGetRequestSchema, invoke: (api, r, signal) => api.nocobase.get(r, signal) },
   'kb.stats': { schema: kbStatsRequestSchema, invoke: (api, r) => api.kb.stats(r) },
   'kb.search': { schema: kbSearchRequestSchema, invoke: (api, r, signal) => api.kb.search(r, signal) },
   'kb.ingest': { schema: kbIngestRequestSchema, invoke: (api, r, signal) => api.kb.ingest(r, signal) },
@@ -265,6 +299,16 @@ export function toFetchHandler(api: ApiProxy): { fetch: typeof fetch } {
       }
       if (path === '/api/events.host' && req.method === 'GET') {
         return sseResponse(api.events.host({ rpcId: RpcId(randomUUID()), payload: {} }, req.signal))
+      }
+      if (path === '/api/orders.download' && (req.method === 'GET' || req.method === 'HEAD')) {
+        const rawOrderId = Number(url.searchParams.get('orderId'))
+        if (!Number.isInteger(rawOrderId) || rawOrderId < 1) {
+          return new Response('missing or invalid orderId query parameter', { status: 400 })
+        }
+        const response = await api.orders.download({ orderId: rawOrderId }, req.signal)
+        if (req.method === 'GET') return response
+        await response.body?.cancel()
+        return new Response(null, { status: response.status, headers: response.headers })
       }
       if (path === '/api/session.export' && (req.method === 'GET' || req.method === 'HEAD')) {
         // Query params are a different boundary from the POST envelope, but

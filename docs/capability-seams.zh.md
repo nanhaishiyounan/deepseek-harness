@@ -23,6 +23,21 @@ flowchart LR
   pkg_kb_graph["kb-graph"]
   svc_kbGraph["ctx.kbGraph<br/>Knowledge-graph seam"]
   pkg_kb_graph_sqlite["kb-graph-sqlite"]
+  pkg_lakehouse["lakehouse"]
+  svc_lakehouse["ctx.lakehouse<br/>Lakehouse seam"]
+  pkg_lakehouse_sqlite_catalog["lakehouse-sqlite-catalog"]
+  pkg_lakehouse_duckdb["lakehouse-duckdb"]
+  pkg_tool_lakehouse["tool-lakehouse"]
+  pkg_connector["connector"]
+  svc_connector["ctx.connector<br/>Connector seam"]
+  pkg_connector_file["connector-file"]
+  pkg_connector_nocobase["connector-nocobase"]
+  pkg_tool_connector["tool-connector"]
+  pkg_kg_build["kg-build"]
+  svc_kgBuild["ctx.kgBuild<br/>KG build pipeline"]
+  pkg_expert_orders["expert-orders"]
+  svc_orders["ctx.orders<br/>Expert orders"]
+  pkg_host_apiproxy["host-apiproxy"]
   pkg_llm["llm"]
   svc_llm["ctx.llm<br/>LLM adapter registry"]
   pkg_llm_deepseek["llm-deepseek"]
@@ -110,7 +125,6 @@ flowchart LR
   svc_commands["ctx.commands<br/>Human command registry"]
   pkg_session_projection["session-projection"]
   svc_sessionProjections["ctx.sessionProjections<br/>Session projection units"]
-  pkg_host_apiproxy["host-apiproxy"]
   pkg_session_projection_cache["session-projection-cache"]
   svc_sessionProjectionCache["ctx.sessionProjectionCache<br/>Persisted projection cache"]
   pkg_skill["skill"]
@@ -233,6 +247,9 @@ flowchart LR
   pkg_compaction --> svc_compaction
   pkg_compaction_basic --> svc_compaction
   pkg_compaction_tool_result_pruner --> svc_toolResultPruner
+  pkg_connector --> svc_connector
+  pkg_connector_file --> svc_connector
+  pkg_connector_nocobase --> svc_connector
   pkg_cordis_host_runner --> svc_cordisInspect
   pkg_cordis_host_runner --> svc_dynamicCordisRunner
   pkg_credentials --> svc_credentials
@@ -241,6 +258,7 @@ flowchart LR
   pkg_directory_picker_browse --> svc_directoryPicker
   pkg_directory_picker_native --> svc_directoryPicker
   pkg_e2b --> svc_e2b
+  pkg_expert_orders --> svc_orders
   pkg_file_reference --> svc_fileReferences
   pkg_file_reference_local --> svc_fileReferences
   pkg_fs --> svc_fs
@@ -257,6 +275,10 @@ flowchart LR
   pkg_kb_graph --> svc_kbGraph
   pkg_kb_graph_sqlite --> svc_kbGraph
   pkg_kb_sqlite --> svc_kb
+  pkg_kg_build --> svc_kgBuild
+  pkg_lakehouse --> svc_lakehouse
+  pkg_lakehouse_duckdb --> svc_lakehouse
+  pkg_lakehouse_sqlite_catalog --> svc_lakehouse
   pkg_llm --> svc_llm
   pkg_llm_deepseek --> svc_llm
   pkg_llm_minimax --> svc_llm
@@ -341,6 +363,7 @@ flowchart LR
   svc_clientModules --> pkg_hmr
   svc_codeRuntime --> pkg_tools
   svc_compaction --> pkg_compaction_basic
+  svc_connector --> pkg_tool_connector
   svc_cordisInspect --> pkg_tool_cordis
   svc_credentials --> pkg_apiproxy
   svc_credentials --> pkg_llm_deepseek
@@ -360,9 +383,12 @@ flowchart LR
   svc_jobs --> pkg_tool_terminal
   svc_kb --> pkg_tool_kb
   svc_kbGraph --> pkg_tool_kb
+  svc_lakehouse --> pkg_tool_lakehouse
   svc_llm --> pkg_agent_loop
   svc_llm --> pkg_compaction_basic
   svc_lsp --> pkg_tool_lsp
+  svc_orders --> pkg_host_apiproxy
+  svc_orders --> pkg_tool_connector
   svc_sandbox --> pkg_bash_sandbox
   svc_sandbox --> pkg_terminal_bash
   svc_sandboxPolicy --> pkg_bash_sandbox
@@ -449,6 +475,10 @@ flowchart LR
 | `ctx.attachments` | `seam` | [`attachment`](../packages/attachment/attachment) | [`attachment-local`](../packages/attachment/attachment-local) | `host-runtime`, [`llm-pi-ai`](../packages/llm/llm-pi-ai) | - | 宿主会在会话事件之前提交已接受的图片；提供方适配器将已授权的持久引用解析为提供方原生内容。 |
 | `ctx.kb` | `seam` | [`kb`](../packages/kb/kb) | [`kb-sqlite`](../packages/kb/kb-sqlite), [`kb-embed-minimax`](../packages/kb/kb-embed-minimax), [`kb-embed-dashscope`](../packages/kb/kb-embed-dashscope) | [`tool-kb`](../packages/kb/tool-kb) | - | Store 与 embed provider 注册实现；入库/检索编排融合全文与向量两路排名，无可用 embed provider 时降级为纯文本。 |
 | `ctx.kbGraph` | `seam` | [`kb-graph`](../packages/kb/kb-graph) | [`kb-graph-sqlite`](../packages/kb/kb-graph-sqlite) | [`tool-kb`](../packages/kb/tool-kb) | - | A sibling of the kb seam for entity-relation triples: the graph store registers implementations, and the kb tool suite queries neighbors/two-hop paths/entities under the tenant isolation model. |
+| `ctx.lakehouse` | `seam` | [`lakehouse`](../packages/lakehouse/lakehouse) | [`lakehouse-sqlite-catalog`](../packages/lakehouse/lakehouse-sqlite-catalog), [`lakehouse-duckdb`](../packages/lakehouse/lakehouse-duckdb) | [`tool-lakehouse`](../packages/lakehouse/tool-lakehouse) | - | The catalog and engine providers register implementations; loads write Parquet under the data root and queries run DuckDB SQL over the tenant-visible table set, failing loud with no usable engine. |
+| `ctx.connector` | `seam` | [`connector`](../packages/connector/connector) | [`connector-file`](../packages/connector/connector-file), [`connector-nocobase`](../packages/connector/connector-nocobase) | [`tool-connector`](../packages/connector/tool-connector) | - | 连接器 Provider 注册实现；发现跨可用 Provider 扇出，五步传输经共享数据路由器把数据集落进 kb 或湖仓，并以 catalog 传输记录作为确认轨迹。 |
+| `ctx.kgBuild` | `core` | [`kg-build`](../packages/kb/kg-build) | - | - | - | 图谱写入侧的管线消费者：对 NocoBase collections、湖仓 catalog 表与连接器数据集做确定性 R01–R13 映射，叠加闭集语料抽取——每次运行按 source-run 指纹幂等。 |
+| `ctx.orders` | `core` | [`expert-orders`](../packages/expert/expert-orders) | - | [`tool-connector`](../packages/connector/tool-connector), [`host-apiproxy`](../packages/host/apiproxy) | - | 以 NocoBase 订单事实源为唯一后端的单体功能服务：下单对定价服务落快照，履约跑「起草—排版—落盘 PDF」管线，每次状态转移先写真源行。 |
 | `ctx.llm` | `seam` | [`llm`](../packages/llm/llm) | [`llm-deepseek`](../packages/llm/llm-deepseek), [`llm-minimax`](../packages/llm/llm-minimax), [`llm-pi-ai`](../packages/llm/llm-pi-ai), [`llm-replay`](../packages/test-support/llm-replay) | [`agent-loop`](../packages/core/agent-loop), [`compaction-basic`](../packages/compaction/compaction-basic) | - | 适配器注册提供方实现；agent loop（智能体循环）与压缩功能调用提供方无关的流服务。 |
 | `ctx.tokenMeter` | `core` | [`token-meter`](../packages/llm/token-meter) | - | [`compaction-basic`](../packages/compaction/compaction-basic) | - | 拥有按会话隔离的回放折叠区；压力消费方共享不可变且带修订版本的测量结果。 |
 | `ctx.toolResultPruner` | `core` | [`compaction-tool-result-pruner`](../packages/compaction/compaction-tool-result-pruner) | - | [`compaction-basic`](../packages/compaction/compaction-basic) | - | 在摘要压缩前，通过可回放的单节点表层替换来改写过大的当前工具结果。 |

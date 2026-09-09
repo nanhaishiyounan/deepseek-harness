@@ -541,6 +541,52 @@ export interface ToolResultPruneConfig {
 
 来源：[`packages/compaction/compaction-tool-result-pruner/src/types.ts:4`](../packages/compaction/compaction-tool-result-pruner/src/types.ts)
 
+<a id="deepseek-aidsh-connector-file"></a>
+
+## `@deepseek-ai/dsh-connector-file`
+
+Requires: `connector`
+
+```ts config-catalog
+/** Plugin configuration. */
+export interface Config {
+  /** Directory holding the file set, resolved against the process cwd when relative. */
+  root: string
+  /** Per-file fetch cap in bytes; defaults to 10485760 (10 MiB). */
+  maxFileBytes?: number
+}
+```
+
+Source: [`packages/connector/connector-file/src/index.ts:26`](../packages/connector/connector-file/src/index.ts)
+
+<a id="deepseek-aidsh-connector-nocobase"></a>
+
+## `@deepseek-ai/dsh-connector-nocobase`
+
+Requires: `connector`
+
+```ts config-catalog
+/** Plugin configuration. */
+export interface Config {
+  /**
+   * NocoBase server origin (for example `http://127.0.0.1:13000`). Omitted =
+   * the `NOCOBASE_BASE_URL` environment variable; neither present degrades
+   * the provider to unavailable.
+   */
+  baseUrl?: string
+  /** Credential reference (environment-variable name) the API token resolves through; defaults to `NOCOBASE_API_KEY`. */
+  apiKeyEnv?: string
+  /** Per-request timeout (ms); defaults to 15000. */
+  timeoutMs?: number
+  /** Discovery page size per collection; defaults to 100. */
+  listPageSize?: number
+  /** Row cap for one tabular dataset fetch; defaults to 1000. */
+  fetchRowsCap?: number
+}
+```
+
+Source: [`packages/connector/connector-nocobase/src/index.ts:42`](../packages/connector/connector-nocobase/src/index.ts)
+
 <a id="deepseek-aidsh-cordis-host-runner"></a>
 
 ## `@deepseek-ai/dsh-cordis-host-runner`
@@ -636,6 +682,38 @@ export interface Config {
 ```
 
 来源：[`packages/experimental/tool-agent-team/src/index.ts:17`](../packages/experimental/tool-agent-team/src/index.ts)
+
+<a id="deepseek-aidsh-expert-orders"></a>
+
+## `@deepseek-ai/dsh-expert-orders`
+
+```ts config-catalog
+/** Plugin configuration. */
+export interface Config {
+  /** NocoBase server origin; omitted = the `NOCOBASE_BASE_URL` environment variable. */
+  baseUrl?: string
+  /** Credential reference for the NocoBase token; defaults to `NOCOBASE_API_KEY`. */
+  apiKeyEnv?: string
+  /** kb tenant binding for reference retrieval (the deployment's shared tenant). */
+  tenant: string
+  /** Credential reference the draft model key resolves through; defaults to `MINIMAX_API_KEY`. Unresolved = the named template fallback. */
+  draftApiKeyEnv?: string
+  /** Draft model provider route; defaults to `minimax`. */
+  draftProvider?: string
+  /** Draft model id; defaults to `MiniMax-M3`. */
+  draftModel?: string
+  /** Draft output-token budget; defaults to 4096. */
+  draftMaxTokens?: number
+  /** Draft call deadline (ms); defaults to 55000. */
+  draftTimeoutMs?: number
+  /** Per-request NocoBase timeout (ms); defaults to 15000. */
+  timeoutMs?: number
+  /** Directory deliverables land under (workspace-relative or absolute); defaults to `workspace/deliverables`. */
+  deliverablesDir?: string
+}
+```
+
+Source: [`packages/expert/expert-orders/src/index.ts:72`](../packages/expert/expert-orders/src/index.ts)
 
 <a id="deepseek-aidsh-file-reference-local"></a>
 
@@ -803,6 +881,59 @@ export interface Config {
 /** Gateway plugin configuration. */
 export interface Config {
   /**
+   * Whether the unified data-upload surface (`data.upload`) answers.
+   * Absent means refused: the gateway is unauthenticated, and a unified
+   * upload writes into the kb or the lakehouse, so it needs an explicit
+   * per-deployment opt-in independent of `kbWriteEnabled`.
+   */
+  dataUploadEnabled?: boolean
+  /**
+   * Whether the orders domain's write methods (`orders.create`,
+   * `orders.fulfill`) answer. Absent means refused: an order is a real
+   * transaction against a priced expert service, so the unauthenticated
+   * gateway needs an explicit per-deployment opt-in; reads (get/list) and
+   * the deliverable download stay open.
+   */
+  ordersEnabled?: boolean
+  /**
+   * Whether the nocobase domain's read methods (`nocobase.listMeta`,
+   * `nocobase.list`, `nocobase.get`) answer. Absent means refused: business
+   * reads run against the deployment's NocoBase under a service account, so
+   * the unauthenticated gateway needs an explicit per-deployment opt-in.
+   */
+  nocobaseEnabled?: boolean
+  /**
+   * NocoBase server origin for the domain; omitted = the
+   * `NOCOBASE_BASE_URL` environment variable.
+   */
+  nocobaseBaseUrl?: string
+  /** Credential reference (environment-variable name) the API token resolves through; defaults to `NOCOBASE_API_KEY`. */
+  nocobaseApiKeyEnv?: string
+  /**
+   * Whether the data-asset market domain (`assets.list/detail/stats`) answers;
+   * absent means refused (the unauthenticated gateway opts in per deployment).
+   */
+  assetsEnabled?: boolean
+  /** Market seed file (featured cards + board copy); absent means no featured rail. */
+  assetsSeedPath?: string
+  /**
+   * Whether the connector-page domain (`connectors.list/connections/transfers`)
+   * answers; absent means refused, same stance as `assetsEnabled`.
+   */
+  connectorsEnabled?: boolean
+  /**
+   * Whether the graph-page domain (`kg.schema/search/subgraph/expand/stats`)
+   * answers; absent means refused, same stance as `assetsEnabled`.
+   */
+  kgEnabled?: boolean
+  /**
+   * The tenant the kg domain operates on — the deployment-side binding for
+   * every graph read, mirroring `kbTenant`'s stance (never wire input).
+   * Required when `kgEnabled` is true; a missing binding fails every kg
+   * method with `kg-tenant-unbound`.
+   */
+  kgTenant?: string
+  /**
    * The tenant the kb workbench domain operates on — the deployment-side
    * binding for stats/search/ingest, mirroring the `tool-kb` row's `tenant`.
    * Required: a missing binding fails load instead of silently landing on a
@@ -876,12 +1007,19 @@ export interface Config {
 ## `@deepseek-ai/dsh-host-webserver`
 
 ```ts config-catalog
-/** Gateway config: the listen address. */
+/** Gateway config: the listen address (and the optional NocoBase proxy). */
 export interface Config {
   /** Listen host; the two supported values are loopback and all-interfaces. */
   host: '127.0.0.1' | '0.0.0.0'
   /** Listen port; zero requests an OS-assigned port. */
   port: number
+  /**
+   * NocoBase origin (scheme + host + port) the `/nocobase` prefix proxies
+   * to, with framing guards stripped so the business page's embed entry can
+   * render the admin UI same-origin. Absent means no proxy route — the
+   * unauthenticated gateway must not proxy a business backend by default.
+   */
+  nocobaseProxyOrigin?: string
 }
 ```
 
@@ -1061,6 +1199,184 @@ export interface Config {
 ```
 
 Source: [`packages/kb/kb-sqlite/src/index.ts:25`](../packages/kb/kb-sqlite/src/index.ts)
+
+<a id="deepseek-aidsh-kg-build"></a>
+
+## `@deepseek-ai/dsh-kg-build`
+
+```ts config-catalog
+/** The validated plugin config the loader hands the constructor (defaults filled). */
+export type KgBuildPluginConfig = Required<Omit<Config, 'nocobase' | 'corpus' | 'extract' | 'align'>>
+  & Pick<Config, 'nocobase' | 'corpus' | 'extract' | 'align'>
+
+/** Plugin config: the tenant binding, the enabled sources, and the budgets. */
+export interface Config extends KgBuildConfig {}
+
+/** Pipeline plugin configuration (the schemastery-validated shape). */
+export interface KgBuildConfig {
+  /** Tenant every graph write lands under — the deployment-side binding. */
+  tenant: string
+  /** NocoBase structured source; absent disables the source. */
+  nocobase?: NocoBaseSourceConfig
+  /** Lakehouse catalog source; default true when the seam is composed. */
+  lakehouse?: boolean
+  /** Connector discovery source; default true when the seam is composed. */
+  connector?: boolean
+  /** Extraction corpus source; absent disables extraction. */
+  corpus?: CorpusSourceConfig
+  /** Closed-set extraction settings. */
+  extract?: ExtractConfig
+  /** Entity alignment settings. */
+  align?: AlignConfig
+  /** Page size for NocoBase row fetches; default 100 (R13 batching). */
+  pageSize?: number
+  /** Repeat-run interval in ms; 0 (default) disables scheduling — manual runs only. */
+  intervalMs?: number
+}
+
+/** NocoBase source configuration. */
+export interface NocoBaseSourceConfig {
+  /**
+   * Server origin; defaults through the same env chain as tool-nocobase.
+   * Explicitly undefined-typed: schemastery materializes the nested object
+   * even when the deployment omits it, so the runtime value is undefined.
+   */
+  baseUrl?: string | undefined
+  /** Credential reference (env var name) the API token resolves through. */
+  apiKeyEnv?: string
+  /** Collections to map — the explicit whitelist; absent users/system tables never map. */
+  collections?: NocoBaseCollectionConfig[]
+}
+
+/** Extraction corpus configuration (plain-text/Markdown documents on disk). */
+export interface CorpusSourceConfig {
+  /**
+   * Directory holding the corpus files (md/txt). Explicitly undefined-typed:
+   * schemastery materializes the nested object even when the deployment omits
+   * it, so the runtime value is undefined.
+   */
+  root?: string | undefined
+  /** Glob-free suffix filter list; defaults to md and txt. */
+  extensions?: string[]
+  /** Maximum documents per run; newest mtime first; default 50. */
+  maxDocuments?: number
+  /** Maximum chunks per document; default 4. */
+  maxChunksPerDocument?: number
+}
+
+/** Closed-set LLM extraction configuration. */
+export interface ExtractConfig {
+  /** LLM provider name on the llm seam; default `minimax`. */
+  provider?: string
+  /** Model name; default `MiniMax-M3`. */
+  model?: string
+  /** Maximum characters per chunk handed to extraction; default 4000. */
+  maxChunkChars?: number
+}
+
+/** Entity alignment configuration. */
+export interface AlignConfig {
+  /** Jaro-Winkler score at or above which same-type candidates auto-merge; default 0.9. */
+  autoThreshold?: number
+  /** Lower bound of the gray zone sent to LLM adjudication; default 0.8. */
+  grayFloor?: number
+}
+
+/** One NocoBase collection the pipeline maps (whitelist entry). */
+export interface NocoBaseCollectionConfig {
+  /** Collection name as `collections:listMeta` reports it. */
+  name: string
+  /** Builtin node-type id the derived type extends (owl:subClassOf anchor). */
+  anchor?: string
+  /** Field whose value becomes the node display name; default heuristics otherwise. */
+  titleField?: string
+  /** Explicit foreign-key links from this collection's scalar columns. */
+  fkLinks?: FkLinkConfig[]
+}
+
+/**
+ * One explicitly configured cross-collection foreign-key link — the extension
+ * of mapping rule R06 for schemas that store the reference as a scalar column
+ * (denormalized integer id, or a `<collection>/<pk>` address string) instead
+ * of a declared relation field. Explicit configuration, never guessing.
+ */
+export interface FkLinkConfig {
+  /** Owning collection field carrying the reference value. */
+  field: string
+  /** Target collection name (must also appear in the mapped collection set). */
+  target: string
+  /** Registered relation id the derived edge uses. */
+  relation: string
+  /** `plain-id` = the value is the target pk; `collection-address` = `<collection>/<pk>`. */
+  style: FkLinkStyle
+}
+
+/** How a configured foreign-key link stores the target row address. */
+export type FkLinkStyle = 'plain-id' | 'collection-address'
+```
+
+Source: [`packages/kb/kg-build/src/index.ts:131`](../packages/kb/kg-build/src/index.ts)
+
+<a id="deepseek-aidsh-lakehouse"></a>
+
+## `@deepseek-ai/dsh-lakehouse`
+
+```ts config-catalog
+/**
+ * Config for the lakehouse seam. `catalogStore` / `queryProvider` pin which
+ * provider wins for each role; both are optional (a single registered usable
+ * provider auto-selects).
+ */
+export interface LakehouseRuntimeConfig {
+  /** Explicit catalog store id. Omitted = auto-select when exactly one usable. */
+  readonly catalogStore?: string
+  /** Explicit query engine id. Omitted = auto-select when exactly one usable. */
+  readonly queryProvider?: string
+  /** Workspace-relative (or absolute) data-file root; defaults to `workspace/lakehouse`. */
+  readonly dataRoot?: string
+  /** Query result cap; defaults to 200. */
+  readonly maxRows?: number
+}
+```
+
+Source: [`packages/lakehouse/lakehouse/src/index.ts:66`](../packages/lakehouse/lakehouse/src/index.ts)
+
+<a id="deepseek-aidsh-lakehouse-duckdb"></a>
+
+## `@deepseek-ai/dsh-lakehouse-duckdb`
+
+需要：`lakehouse`
+
+```ts config-catalog
+/** Plugin configuration. */
+export interface Config {
+  /** DuckDB memory limit in MB; omitted = DuckDB's own default. */
+  memoryLimitMb?: number
+  /** DuckDB worker-thread count; omitted = DuckDB's own default. */
+  threads?: number
+}
+```
+
+Source: [`packages/lakehouse/lakehouse-duckdb/src/index.ts:22`](../packages/lakehouse/lakehouse-duckdb/src/index.ts)
+
+<a id="deepseek-aidsh-lakehouse-sqlite-catalog"></a>
+
+## `@deepseek-ai/dsh-lakehouse-sqlite-catalog`
+
+需要：`lakehouse`
+
+```ts config-catalog
+/** Plugin configuration. */
+export interface Config {
+  /** SQLite database path (`:memory:` supported), resolved against the process cwd when relative. */
+  path: string
+  /** Maximum wait for another SQLite connection's lock; defaults to 5,000 ms. */
+  busyTimeoutMs?: number
+}
+```
+
+Source: [`packages/lakehouse/lakehouse-sqlite-catalog/src/index.ts:25`](../packages/lakehouse/lakehouse-sqlite-catalog/src/index.ts)
+
 
 <a id="deepseek-aidsh-llm-deepseek"></a>
 
@@ -2749,6 +3065,45 @@ export interface Config {
 
 来源：[`packages/shell/tool-bash-persistent/src/index.ts:432`](../packages/shell/tool-bash-persistent/src/index.ts)
 
+<a id="deepseek-aidsh-tool-connector"></a>
+
+## `@deepseek-ai/dsh-tool-connector`
+
+Requires: `tools` · `connector` · `systemPrompt`
+
+```ts config-catalog
+/** Plugin config: which connector tools to register, per-tool budgets, and the bound tenant. */
+export interface Config {
+  /** Register `connector_discover`. Defaults to true. */
+  discover?: boolean
+  /** Register `connector_fetch`. Defaults to true. */
+  fetch?: boolean
+  /** Register `connector_transfer`. Defaults to true. */
+  transfer?: boolean
+  /** Register `order_create`/`order_status`. Defaults to true. */
+  orders?: boolean
+  /**
+   * The tenant every connector landing operates on — the deployment-side
+   * tenant binding. The model never supplies a tenant; a `tenant` argument
+   * on any connector tool call is rejected. Required, so a composition
+   * without a binding fails config validation at load.
+   */
+  tenant: string
+  /** Cooperative timeout budget (ms) for `connector_discover`. Defaults to 15000. */
+  discoverTimeoutMs?: number
+  /** Cooperative timeout budget (ms) for `connector_fetch`. Defaults to 30000. */
+  fetchTimeoutMs?: number
+  /** Cooperative timeout budget (ms) for `connector_transfer`. Defaults to 120000. */
+  transferTimeoutMs?: number
+  /** Cooperative timeout budget (ms) for `order_create` (the whole drafting pipeline). Defaults to 60000. */
+  orderCreateTimeoutMs?: number
+  /** Cooperative timeout budget (ms) for `order_status`. Defaults to 10000. */
+  orderStatusTimeoutMs?: number
+}
+```
+
+Source: [`packages/connector/tool-connector/src/index.ts:63`](../packages/connector/tool-connector/src/index.ts)
+
 <a id="deepseek-aidsh-tool-fs"></a>
 
 ## `@deepseek-ai/dsh-tool-fs`
@@ -2860,7 +3215,7 @@ export type CompletionDelivery = 'quiet' | 'wakeup'
 
 ## `@deepseek-ai/dsh-tool-kb`
 
-需要：`tools` · `kb` · `fs` · `systemPrompt`
+Requires: `tools` · `kb` · `fs` · `systemPrompt`
 
 ```ts config-catalog
 /** Plugin config: which kb tools to register, per-tool budgets, the citation cap, and the bound tenant. */
@@ -2902,10 +3257,47 @@ export interface Config {
   graphQueryTimeoutMs?: number
   /** Cooperative timeout budget (ms) for `kb_graph_add`. Defaults to 30000. */
   graphAddTimeoutMs?: number
+  /** Register `kg_schema` (ontology browsing) over the optional `ctx.kbGraph` seam. Defaults to true. */
+  kgSchema?: boolean
+  /** Register `kg_subgraph` (k-hop reads) over the optional `ctx.kbGraph` seam. Defaults to true. */
+  kgSubgraph?: boolean
+  /** Cooperative timeout budget (ms) for `kg_schema`. Defaults to 10000. */
+  kgSchemaTimeoutMs?: number
+  /** Cooperative timeout budget (ms) for `kg_subgraph`. Defaults to 20000. */
+  kgSubgraphTimeoutMs?: number
 }
 ```
 
-Source: [`packages/kb/tool-kb/src/index.ts:65`](../packages/kb/tool-kb/src/index.ts)
+Source: [`packages/kb/tool-kb/src/index.ts:83`](../packages/kb/tool-kb/src/index.ts)
+
+<a id="deepseek-aidsh-tool-lakehouse"></a>
+
+## `@deepseek-ai/dsh-tool-lakehouse`
+
+Requires: `tools` · `lakehouse` · `systemPrompt`
+
+```ts config-catalog
+/** Plugin config: which lakehouse tools to register, per-tool budgets, and the bound tenant. */
+export interface Config {
+  /** Register `lakehouse_tables`. Defaults to true. */
+  tables?: boolean
+  /** Register `lakehouse_query`. Defaults to true. */
+  query?: boolean
+  /**
+   * The tenant every lakehouse tool operates on — the deployment-side tenant
+   * binding. The model never supplies a tenant; a `tenant` argument on any
+   * lakehouse tool call is rejected. Required, so a composition without a
+   * binding fails config validation at load.
+   */
+  tenant: string
+  /** Cooperative timeout budget (ms) for `lakehouse_tables`. Defaults to 10000. */
+  tablesTimeoutMs?: number
+  /** Cooperative timeout budget (ms) for `lakehouse_query`. Defaults to 30000. */
+  queryTimeoutMs?: number
+}
+```
+
+Source: [`packages/lakehouse/tool-lakehouse/src/index.ts:50`](../packages/lakehouse/tool-lakehouse/src/index.ts)
 
 <a id="deepseek-aidsh-tool-lsp"></a>
 
@@ -2926,6 +3318,40 @@ export interface Config {
 ```
 
 来源：[`packages/lsp/tool-lsp/src/index.ts:58`](../packages/lsp/tool-lsp/src/index.ts)
+
+<a id="deepseek-aidsh-tool-nocobase"></a>
+
+## `@deepseek-ai/dsh-tool-nocobase`
+
+Requires: `tools` · `systemPrompt`
+
+```ts config-catalog
+/** Plugin config: which nb_* tools to register, the credential references, and per-tool budgets. */
+export interface Config {
+  /** Register `nb_collections`. Defaults to true. */
+  collections?: boolean
+  /** Register `nb_list`/`nb_get`. Defaults to true. */
+  reads?: boolean
+  /** Register `nb_create`/`nb_update`. Defaults to true. */
+  writes?: boolean
+  /**
+   * NocoBase server origin (for example `http://127.0.0.1:13000`). Omitted =
+   * the `NOCOBASE_BASE_URL` environment variable; neither present degrades
+   * every tool to the structured no-credentials failure.
+   */
+  baseUrl?: string
+  /** Credential reference (environment-variable name) the API token resolves through; defaults to `NOCOBASE_API_KEY`. */
+  apiKeyEnv?: string
+  /** Per-request REST timeout (ms); defaults to 15000. */
+  timeoutMs?: number
+  /** Cooperative timeout budget (ms) for the read tools; defaults to 10000. */
+  readTimeoutMs?: number
+  /** Cooperative timeout budget (ms) for the write tools; defaults to 60000. */
+  writeTimeoutMs?: number
+}
+```
+
+Source: [`packages/connector/tool-nocobase/src/index.ts:86`](../packages/connector/tool-nocobase/src/index.ts)
 
 <a id="deepseek-aidsh-tool-pwsh"></a>
 
@@ -3487,9 +3913,12 @@ export interface Config {
 - `@deepseek-ai/dsh-client-modules` — 需要 `webServer` · `loader`（[`packages/client/modules/src/index.ts`](../packages/client/modules/src/index.ts)）
 - `@deepseek-ai/dsh-client-runtime`（[`packages/client/runtime/src/index.ts`](../packages/client/runtime/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-agent-preset`（[`packages/client/ui-agent-preset/src/index.ts`](../packages/client/ui-agent-preset/src/index.ts)）
+- `@deepseek-ai/dsh-client-ui-assets`（[`packages/client/ui-assets/src/index.ts`](../packages/client/ui-assets/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-attachment`（[`packages/client/ui-attachment/src/index.ts`](../packages/client/ui-attachment/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-brand-official`（[`packages/client/ui-brand-official/src/index.ts`](../packages/client/ui-brand-official/src/index.ts)）
+- `@deepseek-ai/dsh-client-ui-business`（[`packages/client/ui-business/src/index.ts`](../packages/client/ui-business/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-commands`（[`packages/client/ui-commands/src/index.ts`](../packages/client/ui-commands/src/index.ts)）
+- `@deepseek-ai/dsh-client-ui-connectors`（[`packages/client/ui-connectors/src/index.ts`](../packages/client/ui-connectors/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-conversation`（[`packages/client/ui-conversation/src/index.ts`](../packages/client/ui-conversation/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-cordis`（[`packages/extensions/ui-cordis/src/index.ts`](../packages/extensions/ui-cordis/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-deliverables` — 需要 `systemPrompt`（[`packages/client/ui-deliverables/src/index.ts`](../packages/client/ui-deliverables/src/index.ts)）
@@ -3499,6 +3928,7 @@ export interface Config {
 - `@deepseek-ai/dsh-client-ui-input-trigger`（[`packages/client/ui-input-trigger/src/index.ts`](../packages/client/ui-input-trigger/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-jobs`（[`packages/client/ui-jobs/src/index.ts`](../packages/client/ui-jobs/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-kb`（[`packages/client/ui-kb/src/index.ts`](../packages/client/ui-kb/src/index.ts)）
+- `@deepseek-ai/dsh-client-ui-kg`（[`packages/client/ui-kg/src/index.ts`](../packages/client/ui-kg/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-layout`（[`packages/client/ui-layout/src/index.ts`](../packages/client/ui-layout/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-message-feedback`（[`packages/client/ui-message-feedback/src/index.ts`](../packages/client/ui-message-feedback/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-model-selection`（[`packages/client/ui-model-selection/src/index.ts`](../packages/client/ui-model-selection/src/index.ts)）
@@ -3524,6 +3954,7 @@ export interface Config {
 - `@deepseek-ai/dsh-command-feedback` — 需要 `commands`（[`packages/feedback/command-feedback/src/index.ts`](../packages/feedback/command-feedback/src/index.ts)）
 - `@deepseek-ai/dsh-command-goal` — 需要 `commands` · `goals`（[`packages/goal/command-goal/src/index.ts`](../packages/goal/command-goal/src/index.ts)）
 - `@deepseek-ai/dsh-commands`（[`packages/interaction/commands/src/index.ts`](../packages/interaction/commands/src/index.ts)）
+- `@deepseek-ai/dsh-connector`（[`packages/connector/connector/src/index.ts`](../packages/connector/connector/src/index.ts)）
 - `@deepseek-ai/dsh-cordis-client-runner`（[`packages/extensions/cordis-client-runner/src/index.ts`](../packages/extensions/cordis-client-runner/src/index.ts)）
 - `@deepseek-ai/dsh-fs-e2b` — 需要 `e2b`（[`packages/e2b/fs-e2b/src/index.ts`](../packages/e2b/fs-e2b/src/index.ts)）
 - `@deepseek-ai/dsh-fs-observation-policy`（[`packages/fs/fs-observation-policy/src/index.ts`](../packages/fs/fs-observation-policy/src/index.ts)）
@@ -3589,6 +4020,7 @@ export interface Config {
 - `@deepseek-ai/dsh-client-web`（[`packages/client/web/src/index.ts`](../packages/client/web/src/index.ts)）
 - `@deepseek-ai/dsh-cmdline`（[`packages/boot/cmdline/src/index.ts`](../packages/boot/cmdline/src/index.ts)）
 - `@deepseek-ai/dsh-code-runtime-python`（[`packages/code-runtime/code-runtime-python/src/index.ts`](../packages/code-runtime/code-runtime-python/src/index.ts)）
+- `@deepseek-ai/dsh-expert-pdf` ([`packages/expert/expert-pdf/src/index.ts`](../packages/expert/expert-pdf/src/index.ts))
 - `@deepseek-ai/dsh-home-paths`（[`packages/util/home-paths/src/index.ts`](../packages/util/home-paths/src/index.ts)）
 - `@deepseek-ai/dsh-hook-protocol`（[`packages/hooks/hook-protocol/src/index.ts`](../packages/hooks/hook-protocol/src/index.ts)）
 - `@deepseek-ai/dsh-kb-embed-shared`（[`packages/kb/kb-embed-shared/src/index.ts`](../packages/kb/kb-embed-shared/src/index.ts)）

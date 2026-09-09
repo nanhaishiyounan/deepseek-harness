@@ -20,8 +20,10 @@ import KbRuntime from '@deepseek-ai/dsh-kb'
 import * as KbSqlite from '@deepseek-ai/dsh-kb-sqlite'
 import LocalFileSystem from '@deepseek-ai/dsh-fs-local'
 import * as ToolKb from '../src/index.ts'
-import { formatGraphQueryOutput, parseGraphAddArgs, parseGraphQueryArgs, presentGraphQueryCall, presentGraphQueryResult } from '../src/index.ts'
+import { formatGraphQueryOutput, graphOntologySnapshot, parseGraphAddArgs, parseGraphQueryArgs, presentGraphQueryCall, presentGraphQueryResult } from '../src/index.ts'
 import type { KbGraphAddArgs, KbGraphQueryToolValue } from '../src/index.ts'
+
+const ontology = graphOntologySnapshot(undefined)
 
 const signal = new AbortController().signal
 let counter = 0
@@ -34,58 +36,61 @@ async function call(ctx: Context, name: string, args: unknown): Promise<{ isErro
 
 describe('graph argument validation', () => {
   it('rejects unknown entity types and predicates', () => {
-    expect(parseGraphQueryArgs({ action: 'neighbors', entity_type: 'planet', entity_id: 'mars' }).kind).toBe('invalid')
-    expect(parseGraphAddArgs({ triples: [{ subject_type: 'company', subject_id: 'a', predicate: 'orbits', object_type: 'planet', object_id: 'mars' }] })).toHaveProperty('invalid')
+    expect(parseGraphQueryArgs({ action: 'neighbors', entity_type: 'planet', entity_id: 'mars' }, ontology).kind).toBe('invalid')
+    expect(parseGraphAddArgs({ triples: [{ subject_type: 'company', subject_id: 'a', predicate: 'orbits', object_type: 'planet', object_id: 'mars' }] }, ontology)).toHaveProperty('invalid')
   })
 
   it('accepts a well-formed neighbors query', () => {
-    expect(parseGraphQueryArgs({ action: 'neighbors', entity_type: 'company', entity_id: '宏发食品' }))
+    expect(parseGraphQueryArgs({ action: 'neighbors', entity_type: 'company', entity_id: '宏发食品' }, ontology))
       .toEqual({ kind: 'neighbors', entity: { type: 'company', id: '宏发食品' } })
   })
 
   it('rejects an unknown action', () => {
-    expect(parseGraphQueryArgs({ action: 'delete' }))
+    expect(parseGraphQueryArgs({ action: 'delete' }, ontology))
       .toEqual({ kind: 'invalid', reason: 'kb_graph_query: action must be one of neighbors, paths, search' })
   })
 
   it('rejects a search without a query and with a foreign entity type', () => {
-    expect(parseGraphQueryArgs({ action: 'search' }))
+    expect(parseGraphQueryArgs({ action: 'search' }, ontology))
       .toEqual({ kind: 'invalid', reason: 'kb_graph_query: search requires a non-empty query' })
-    expect(parseGraphQueryArgs({ action: 'search', query: '   ' }))
+    expect(parseGraphQueryArgs({ action: 'search', query: '   ' }, ontology))
       .toEqual({ kind: 'invalid', reason: 'kb_graph_query: search requires a non-empty query' })
-    expect(parseGraphQueryArgs({ action: 'search', query: '酱油', entity_type: 'planet' }))
-      .toEqual({ kind: 'invalid', reason: 'kb_graph_query: entity_type must be one of company, product, ingredient, additive, standard, process, risk' })
+    const foreignType = parseGraphQueryArgs({ action: 'search', query: '酱油', entity_type: 'planet' }, ontology)
+    expect(foreignType).toHaveProperty('kind', 'invalid')
+    // The enumeration is registry-driven: three layers, food 7×7 included.
+    expect((foreignType as { reason: string }).reason).toContain('Object, Process, Event, Role, Concept')
+    expect((foreignType as { reason: string }).reason).toContain('company, product, ingredient, additive, standard, process, risk')
   })
 
   it('accepts a search, trimming the query and clamping the limit', () => {
-    expect(parseGraphQueryArgs({ action: 'search', query: '  酱油  ', limit: 99 }))
+    expect(parseGraphQueryArgs({ action: 'search', query: '  酱油  ', limit: 99 }, ontology))
       .toEqual({ kind: 'search', query: '酱油', type: undefined, limit: 20 })
-    expect(parseGraphQueryArgs({ action: 'search', query: '酱油', limit: 0 }))
+    expect(parseGraphQueryArgs({ action: 'search', query: '酱油', limit: 0 }, ontology))
       .toEqual({ kind: 'search', query: '酱油', type: undefined, limit: 1 })
   })
 
   it('rejects neighbors and paths without entity identification', () => {
-    expect(parseGraphQueryArgs({ action: 'neighbors', entity_type: 'company' }).kind).toBe('invalid')
-    expect(parseGraphQueryArgs({ action: 'neighbors', entity_type: 'company', entity_id: '  ' }).kind).toBe('invalid')
-    expect(parseGraphQueryArgs({ action: 'paths', entity_type: 'company', entity_id: '宏发食品' }).kind).toBe('invalid')
-    expect(parseGraphQueryArgs({ action: 'paths', entity_type: 'company', entity_id: '宏发食品', target_type: 'standard' }).kind).toBe('invalid')
+    expect(parseGraphQueryArgs({ action: 'neighbors', entity_type: 'company' }, ontology).kind).toBe('invalid')
+    expect(parseGraphQueryArgs({ action: 'neighbors', entity_type: 'company', entity_id: '  ' }, ontology).kind).toBe('invalid')
+    expect(parseGraphQueryArgs({ action: 'paths', entity_type: 'company', entity_id: '宏发食品' }, ontology).kind).toBe('invalid')
+    expect(parseGraphQueryArgs({ action: 'paths', entity_type: 'company', entity_id: '宏发食品', target_type: 'standard' }, ontology).kind).toBe('invalid')
   })
 
   it('accepts a well-formed paths query', () => {
-    expect(parseGraphQueryArgs({ action: 'paths', entity_type: 'company', entity_id: '宏发食品', target_type: 'standard', target_id: 'GB 2760' }))
+    expect(parseGraphQueryArgs({ action: 'paths', entity_type: 'company', entity_id: '宏发食品', target_type: 'standard', target_id: 'GB 2760' }, ontology))
       .toEqual({ kind: 'paths', entity: { type: 'company', id: '宏发食品' }, target: { type: 'standard', id: 'GB 2760' } })
   })
 
   it('rejects empty, oversized, and blank-id add batches', () => {
-    expect(parseGraphAddArgs({ triples: [] })).toEqual({ invalid: 'kb_graph_add: triples must not be empty' })
+    expect(parseGraphAddArgs({ triples: [] }, ontology)).toEqual({ invalid: 'kb_graph_add: triples must not be empty' })
     const many = Array.from({ length: 51 }, () => ({ subject_type: 'company', subject_id: 'a', predicate: 'supplies', object_type: 'company', object_id: 'b' }))
-    expect(parseGraphAddArgs({ triples: many })).toEqual({ invalid: 'kb_graph_add: at most 50 triples per call' })
-    expect(parseGraphAddArgs({ triples: [{ subject_type: 'company', subject_id: ' ', predicate: 'supplies', object_type: 'company', object_id: 'b' }] }))
+    expect(parseGraphAddArgs({ triples: many }, ontology)).toEqual({ invalid: 'kb_graph_add: at most 50 triples per call' })
+    expect(parseGraphAddArgs({ triples: [{ subject_type: 'company', subject_id: ' ', predicate: 'supplies', object_type: 'company', object_id: 'b' }] }, ontology))
       .toEqual({ invalid: 'kb_graph_add: subject_id and object_id must be non-empty' })
   })
 
   it('keeps a trimmed source path on parsed triples', () => {
-    const parsed = parseGraphAddArgs({ triples: [{ subject_type: 'company', subject_id: ' 宏发食品 ', predicate: 'produces', object_type: 'product', object_id: '老抽酱油', source_path: '  workspace/data/profiles/hongfa-food.md  ' }] })
+    const parsed = parseGraphAddArgs({ triples: [{ subject_type: 'company', subject_id: ' 宏发食品 ', predicate: 'produces', object_type: 'product', object_id: '老抽酱油', source_path: '  workspace/data/profiles/hongfa-food.md  ' }] }, ontology)
     expect(parsed).toEqual({
       triples: [{
         subject: { type: 'company', id: '宏发食品' },

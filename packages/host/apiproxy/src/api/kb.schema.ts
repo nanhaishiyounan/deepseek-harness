@@ -4,7 +4,7 @@
 
 import { z } from 'zod'
 import type { Wire } from './rpc.schema.ts'
-import type { KbHitView, KbIngestView, KbSearchView, KbStatsView, RequestPayload } from './index.ts'
+import type { KbHitView, KbIngestView, KbSearchView, KbStatsView, KbUploadView, RequestPayload } from './index.ts'
 
 /** One retrieved passage (the citation row the panel renders). */
 const kbHitSchema = z.object({
@@ -17,6 +17,7 @@ const kbHitSchema = z.object({
   heading_path: z.string().optional(),
   chunk_idx: z.number(),
   content: z.string(),
+  score: z.number().optional(),
 }) as unknown as z.ZodType<Wire<KbHitView>>
 
 /** kb.stats request payload (empty by design: the deployment owns the tenant). */
@@ -72,21 +73,58 @@ export const kbIngestUrlRequestSchema = z.object({
 }) as unknown as z.ZodType<Wire<RequestPayload<'kb.ingestUrl'>>>
 
 /**
- * kb.upload request payload: the browser file's base64 bytes. The regex pins
- * canonical RFC-4648 base64 (Node's decoder is lenient and would otherwise
- * silently drop invalid characters); the byte-size cap is a business refusal,
- * not schema, so the client gets the structured too-large error.
+ * Chunk width for the base64 alphabet scan. Bounded slices keep the regex
+ * engine's stack flat; quartet alignment keeps padding out of every scanned
+ * slice.
+ */
+const BASE64_CHUNK = 4_096
+
+/**
+ * Stack-safe canonical RFC-4648 base64 check. A whole-string regex over the
+ * upload body exhausted V8's backtracking stack from ~3.5 MB (the channel's
+ * cap is 64 MiB), so validation splits into a length-modulo-4 gate, an
+ * alphabet scan in 4 KiB slices over everything before the final quartet, and
+ * a final-quartet check that alone may carry '=' padding. Node's decoder is
+ * lenient and would silently drop invalid characters; this keeps every
+ * non-canonical shape refusing before decoding.
+ * @param value - the raw `data` string from the upload request.
+ * @returns true when the string is canonical base64 (the empty body included).
+ */
+export function isCanonicalBase64(value: string): boolean {
+  if (value.length === 0) return true
+  if (value.length % 4 !== 0) return false
+  for (let offset = 0; offset < value.length - 4; offset += BASE64_CHUNK) {
+    const end = Math.min(offset + BASE64_CHUNK, value.length - 4)
+    if (!/^[A-Za-z0-9+/]+$/u.test(value.slice(offset, end))) return false
+  }
+  return /^(?:[A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$/u.test(value.slice(-4))
+}
+
+/**
+ * kb.upload request payload: the browser file's base64 bytes, validated as
+ * canonical RFC-4648 (Node's decoder is lenient and would otherwise silently
+ * drop invalid characters); the byte-size cap is a business refusal, not
+ * schema, so the client gets the structured too-large error.
  */
 export const kbUploadRequestSchema = z.object({
   filename: z.string().min(1),
-  data: z.string().regex(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/),
+  data: z.string().refine(isCanonicalBase64, { message: 'data must be canonical RFC-4648 base64' }),
   ...ingestFields,
 }) as unknown as z.ZodType<Wire<RequestPayload<'kb.upload'>>>
 
-/** Shared ingest response value (kb.ingest, kb.ingestUrl, and kb.upload). */
-export const kbIngestValueSchema = z.object({
+/** Stored-document summary fields shared by every ingest response. */
+const ingestValueFields = {
   doc_id: z.number(),
   chunks: z.number(),
   embedded: z.boolean(),
   embed_model: z.string().optional(),
-}) as unknown as z.ZodType<Wire<KbIngestView>>
+} as const
+
+/** Shared ingest response value (kb.ingest and kb.ingestUrl). */
+export const kbIngestValueSchema = z.object(ingestValueFields) as unknown as z.ZodType<Wire<KbIngestView>>
+
+/** kb.upload response value: the ingest summary plus the replacement fact. */
+export const kbUploadValueSchema = z.object({
+  ...ingestValueFields,
+  replaced: z.boolean(),
+}) as unknown as z.ZodType<Wire<KbUploadView>>

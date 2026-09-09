@@ -1,0 +1,290 @@
+/**
+ * This file is part of the NocoBase (R) project.
+ * Copyright (c) 2020-2024 NocoBase Co., Ltd.
+ * Authors: NocoBase Team.
+ *
+ * This project is dual-licensed under AGPL-3.0 and NocoBase Commercial License.
+ * For more information, please refer to: https://www.nocobase.com/agreement.
+ */
+
+import { observer } from '@nocobase/flow-engine';
+import { Plugin, useCompile, lazy } from '@nocobase/client';
+import { Registry } from '@nocobase/utils/client';
+import MobileManager from '@nocobase/plugin-mobile/client';
+
+// import { ExecutionPage } from './ExecutionPage';
+// import { WorkflowPage } from './WorkflowPage';
+// import { WorkflowPane } from './WorkflowPane';
+const { ExecutionPage } = lazy(() => import('./ExecutionPage'), 'ExecutionPage');
+const { WorkflowPage } = lazy(() => import('./WorkflowPage'), 'WorkflowPage');
+const { WorkflowPane } = lazy(() => import('./WorkflowPane'), 'WorkflowPane');
+
+import { lang, NAMESPACE } from './locale';
+import { Instruction } from './nodes';
+import CalculationInstruction from './nodes/calculation';
+import ConditionInstruction from './nodes/condition';
+import MultiConditionsInstruction from './nodes/multi-conditions';
+import CreateInstruction from './nodes/create';
+import DestroyInstruction from './nodes/destroy';
+import EndInstruction from './nodes/end';
+import OutputInstruction from './nodes/output';
+import QueryInstruction from './nodes/query';
+import UpdateInstruction from './nodes/update';
+import { BindWorkflowConfig } from './settings/BindWorkflowConfig';
+import { Trigger } from './triggers';
+import CollectionTrigger from './triggers/collection';
+import ScheduleTrigger from './triggers/schedule';
+import { getWorkflowDetailPath, getWorkflowExecutionsPath } from './utils';
+import { VariableOption } from './variable';
+import {
+  MobileTabBarWorkflowTasksItem,
+  TasksCountsProvider,
+  TasksProvider,
+  tasksSchemaInitializerItem,
+  TaskTypeOptions,
+  WorkflowTasks,
+  WorkflowTasksMobile,
+} from './WorkflowTasks';
+import { WorkflowCollectionsProvider } from './WorkflowCollectionsProvider';
+import { Tooltip } from 'antd';
+import React from 'react';
+import { QuestionCircleOutlined } from '@ant-design/icons';
+import { NodeDetailsModel, NodeValueModel, TaskCardCommonItemModel } from '../client-v2/models';
+import { Collection } from '@nocobase/flow-engine';
+import workflows from '../common/collections/workflows';
+import flow_nodes from '../common/collections/flow_nodes';
+import executions from '../common/collections/executions';
+import workflowCategories from '../common/collections/workflowCategories';
+import workflowStats from '../common/collections/workflowStats';
+import workflowVersionStats from '../common/collections/workflowVersionStats';
+import { NodeDetailsGridModel } from '../client-v2/models/NodeDetailsGridModel';
+
+const workflowConfigSettings = {
+  Component: BindWorkflowConfig,
+};
+
+type InstructionGroup = {
+  key?: string;
+  label: string;
+};
+
+export default class PluginWorkflowClient extends Plugin {
+  triggers = new Registry<Trigger>();
+  instructions = new Registry<Instruction>();
+  instructionGroups = new Registry<InstructionGroup>();
+  systemVariables = new Registry<VariableOption>();
+
+  taskTypes = new Registry<TaskTypeOptions>();
+
+  useTriggersOptions = () => {
+    const compile = useCompile();
+    return Array.from(this.triggers.getEntities())
+      .map(([value, { title, ...options }]) => ({
+        value,
+        label: compile(title),
+        color: 'gold',
+        options,
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  };
+
+  useInstructionGroupOptions = () => {
+    const compile = useCompile();
+    return Array.from(this.instructionGroups.getEntities()).map(([key, { label }]) => ({
+      key,
+      label: compile(label),
+    }));
+  };
+
+  isWorkflowSync(workflow) {
+    return this.triggers.get(workflow.type)?.sync ?? workflow.sync;
+  }
+
+  registerTrigger(type: string, trigger: Trigger | { new (): Trigger }) {
+    if (typeof trigger === 'function') {
+      this.triggers.register(type, new trigger());
+    } else if (trigger) {
+      this.triggers.register(type, trigger);
+    } else {
+      throw new TypeError('invalid trigger type to register');
+    }
+  }
+
+  registerInstruction(type: string, instruction: Instruction | { new (): Instruction }) {
+    if (typeof instruction === 'function') {
+      this.instructions.register(type, new instruction());
+    } else if (instruction instanceof Instruction) {
+      this.instructions.register(type, instruction);
+    } else {
+      throw new TypeError('invalid instruction type to register');
+    }
+  }
+
+  registerInstructionGroup(key: string, group: InstructionGroup) {
+    this.instructionGroups.register(key, group);
+  }
+
+  registerSystemVariable(option: VariableOption) {
+    this.systemVariables.register(option.key, option);
+  }
+
+  registerTaskType(key: string, option: TaskTypeOptions) {
+    this.taskTypes.register(key, { ...option, key });
+  }
+
+  registerCollectionsToDataSource(collectionOptions: any[]) {
+    collectionOptions.forEach((option) => {
+      this.flowEngine.dataSourceManager
+        .getDataSource('main')
+        .addCollection(new Collection({ ...option, hidden: true }));
+    });
+  }
+
+  async load() {
+    this.app.addProvider(WorkflowCollectionsProvider);
+    this.app.addProvider(TasksProvider);
+
+    this.app.pluginSettingsManager.add(NAMESPACE, {
+      icon: 'PartitionOutlined',
+      title: `{{t("Workflow", { ns: "${NAMESPACE}" })}}`,
+      isPinned: true,
+      Component: WorkflowPane,
+      sort: 300,
+      aclSnippet: 'pm.workflow.workflows',
+    });
+
+    this.app.schemaSettingsManager.addItem('actionSettings:submit', 'workflowConfig', workflowConfigSettings);
+    this.app.schemaSettingsManager.addItem('actionSettings:createSubmit', 'workflowConfig', workflowConfigSettings);
+    this.app.schemaSettingsManager.addItem('actionSettings:updateSubmit', 'workflowConfig', workflowConfigSettings);
+    this.app.schemaSettingsManager.addItem('actionSettings:saveRecord', 'workflowConfig', workflowConfigSettings);
+    this.app.schemaSettingsManager.addItem('actionSettings:updateRecord', 'workflowConfig', workflowConfigSettings);
+    this.app.schemaSettingsManager.addItem('actionSettings:delete', 'workflowConfig', workflowConfigSettings);
+    this.app.schemaSettingsManager.addItem('actionSettings:bulkEditSubmit', 'workflowConfig', workflowConfigSettings);
+
+    this.router.add('admin.workflow.workflows.id', {
+      path: getWorkflowDetailPath(':id'),
+      Component: WorkflowPage,
+    });
+
+    this.router.add('admin.workflow.executions.id', {
+      path: getWorkflowExecutionsPath(':id'),
+      Component: ExecutionPage,
+    });
+
+    this.router.add('admin.workflow.tasks', {
+      path: '/admin/workflow/tasks/:taskType?/:status?/:popupId?',
+      Component: WorkflowTasks,
+    });
+
+    const mobileManager = this.pm.get(MobileManager);
+    this.app.schemaInitializerManager.addItem('mobile:tab-bar', 'workflow-tasks', tasksSchemaInitializerItem);
+    this.app.addComponents({ TasksCountsProvider, MobileTabBarWorkflowTasksItem });
+    if (mobileManager.mobileRouter) {
+      const MobileComponent = observer(WorkflowTasksMobile, { displayName: 'WorkflowTasksMobile' });
+      // mobileManager.mobileRouter.add('mobile.page.workflow.tasks', {
+      //   path: '/page/workflow-tasks',
+      //   Component: MobileComponent,
+      // });
+      mobileManager.mobileRouter.add('mobile.page.workflow.tasks.list', {
+        path: '/page/workflow-tasks/:taskType?/:status?/:popupId?',
+        Component: MobileComponent,
+      });
+    }
+
+    this.registerInstructionGroup('control', { key: 'control', label: `{{t("Control", { ns: "${NAMESPACE}" })}}` });
+    this.registerInstructionGroup('calculation', {
+      key: 'calculation',
+      label: `{{t("Calculation", { ns: "${NAMESPACE}" })}}`,
+    });
+    this.registerInstructionGroup('collection', {
+      key: 'collection',
+      label: `{{t("Collection operations", { ns: "${NAMESPACE}" })}}`,
+    });
+    this.registerInstructionGroup('manual', { key: 'manual', label: `{{t("Manual", { ns: "${NAMESPACE}" })}}` });
+    this.registerInstructionGroup('extended', {
+      key: 'extended',
+      label: `{{t("Extended types", { ns: "${NAMESPACE}" })}}`,
+    });
+
+    this.registerTrigger('collection', CollectionTrigger);
+    this.registerTrigger('schedule', ScheduleTrigger);
+
+    this.registerInstruction('calculation', CalculationInstruction);
+    this.registerInstruction('condition', ConditionInstruction);
+    this.registerInstruction('multi-conditions', MultiConditionsInstruction);
+
+    this.registerInstruction('end', EndInstruction);
+    this.registerInstruction('output', OutputInstruction);
+
+    this.registerInstruction('query', QueryInstruction);
+    this.registerInstruction('create', CreateInstruction);
+    this.registerInstruction('update', UpdateInstruction);
+    this.registerInstruction('destroy', DestroyInstruction);
+
+    this.registerSystemVariable({
+      key: 'now',
+      label: `{{t("System time", { ns: "${NAMESPACE}" })}}`,
+      value: 'now',
+    });
+    this.registerSystemVariable({
+      key: 'instanceId',
+      label: (
+        <>
+          <span style={{ marginRight: '0.5em' }}>{lang('Instance ID')}</span>
+          <Tooltip title={lang('The ID of current server instance')}>
+            <QuestionCircleOutlined />
+          </Tooltip>
+        </>
+      ),
+      value: 'instanceId',
+    });
+    this.registerSystemVariable({
+      key: 'genSnowflakeId',
+      label: (
+        <>
+          <span style={{ marginRight: '0.5em' }}>{lang('Generate snowflake ID')}</span>
+          <Tooltip
+            title={lang(
+              '53 bit (JavaScript safe) unique ID generated by Snowflake algorithm. Will always generate new one each time use this variable.',
+            )}
+          >
+            <QuestionCircleOutlined />
+          </Tooltip>
+        </>
+      ),
+      value: 'genSnowflakeId',
+    });
+
+    this.flowEngine.registerModels({
+      NodeDetailsModel,
+      NodeDetailsGridModel,
+      NodeValueModel,
+      TaskCardCommonItemModel,
+    });
+
+    this.registerCollectionsToDataSource([
+      workflows,
+      flow_nodes,
+      executions,
+      workflowCategories,
+      workflowStats,
+      workflowVersionStats,
+    ]);
+  }
+}
+
+export * from './Branch';
+export * from './components';
+export * from './constants';
+export * from './ExecutionContextProvider';
+export * from './FlowContext';
+export * from './hooks';
+export * from './nodes';
+export * from './settings/BindWorkflowConfig';
+export { default as useStyles } from './style';
+export { Trigger, useTrigger } from './triggers';
+export * from './utils';
+export * from './variable';
+export { usePopupRecordContext, useTasksCountsContext, useWorkflowTaskFilterContext } from './WorkflowTasks';
+export { createTriggerWorkflowsSchema } from './flows/triggerWorkflows';
+export { NodeDetailsModel, NodeValueModel };

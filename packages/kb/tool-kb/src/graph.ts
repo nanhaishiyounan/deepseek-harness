@@ -3,9 +3,11 @@
  * knowledge-graph seam (`ctx.kbGraph`, optional like the web service): query
  * runs neighbors / two-hop paths / entity search under the deployment's bound
  * tenant; add stores extracted triples idempotently so a scenario SKILL can
- * drive entity extraction without a built-in LLM call. The seam absent, both
- * tools stay visible and fail with a structured error at execution time —
- * the store-availability convention.
+ * drive entity extraction without a built-in LLM call. The closed-set
+ * validation reads the runtime ontology registry, materialized once at tool
+ * registration (descriptions are pure functions of the frozen session
+ * snapshot). The seam absent, both tools stay visible and fail with a
+ * structured error at execution time — the store-availability convention.
  * @module @deepseek-ai/dsh-tool-kb/graph
  */
 
@@ -14,8 +16,10 @@ import { defineTool } from '@deepseek-ai/dsh-tools'
 import type { GenericCallView, GenericResultView, ToolResult } from '@deepseek-ai/dsh-tools'
 // Side-effect type import: resolves `ctx.get('kbGraph')` to the service type.
 import type {} from '@deepseek-ai/dsh-kb-graph'
-import { KB_GRAPH_ENTITY_TYPES, KB_GRAPH_PREDICATES } from '@deepseek-ai/dsh-kb-graph'
-import type { KbGraphEntity, KbGraphEntityType, KbGraphPredicate, KbGraphStoredTriple, KbGraphTriple } from '@deepseek-ai/dsh-kb-graph'
+import { builtinOntology, kgNodeTypeId, kgRelationId } from '@deepseek-ai/dsh-kb-graph'
+import type {
+  KbGraphEntity, KbGraphStoredTriple, KbGraphTriple, KgNodeTypeId, KgRelationId,
+} from '@deepseek-ai/dsh-kb-graph'
 
 /** Model-facing `kb_graph_query` arguments. */
 export interface KbGraphQueryArgs {
@@ -38,6 +42,15 @@ export interface KbGraphAddArgs {
     object_id: string
     source_path?: string
   }>
+}
+
+/**
+ * One session's materialized ontology snapshot: the registry's active node
+ * types and relations as plain strings, frozen at tool registration.
+ */
+export interface GraphOntologySnapshot {
+  readonly entityTypes: readonly string[]
+  readonly predicates: readonly string[]
 }
 
 /** The canonical `kb_graph_query` output value. */
@@ -71,26 +84,51 @@ const triplePropertyRows = {
   source_path: { type: 'string' },
 } as const
 
-/** Narrow a wire entity type to the closed ontology union, or undefined when unknown. */
-function parseEntityType(type: string | undefined): KbGraphEntityType | undefined {
-  return type !== undefined && (KB_GRAPH_ENTITY_TYPES as readonly string[]).includes(type)
-    ? type as KbGraphEntityType
-    : undefined
+/** The registry face {@link graphOntologySnapshot} reads: structural, so any registry satisfies it. */
+export interface GraphOntologySource {
+  listNodeTypes(): readonly { readonly id: KgNodeTypeId; readonly status: string }[]
+  listRelations(): readonly { readonly id: KgRelationId }[]
 }
 
-/** Narrow a wire predicate to the closed union, or undefined when unknown. */
-function parsePredicate(predicate: string): KbGraphPredicate | undefined {
-  return (KB_GRAPH_PREDICATES as readonly string[]).includes(predicate) ? predicate as KbGraphPredicate : undefined
+/**
+ * Materialize one session's ontology snapshot: the composed registry's active
+ * types and relations, or the built-in seed when the graph seam is absent
+ * (the tools stay visible and refuse at execution time).
+ * @param registry - the runtime registry face, when composed.
+ * @returns the frozen snapshot for tool descriptions and validation.
+ */
+export function graphOntologySnapshot(registry: GraphOntologySource | undefined): GraphOntologySnapshot {
+  if (registry === undefined) {
+    const seed = builtinOntology()
+    return {
+      entityTypes: seed.nodeTypes.filter(type => type.status === 'active').map(type => String(type.id)),
+      predicates: seed.relations.map(relation => String(relation.id)),
+    }
+  }
+  return {
+    entityTypes: registry.listNodeTypes().filter(type => type.status === 'active').map(type => String(type.id)),
+    predicates: registry.listRelations().map(relation => String(relation.id)),
+  }
+}
+
+/** Narrow a wire entity type to a registered id, or undefined when unknown. */
+function parseEntityType(type: string | undefined, entityTypes: readonly string[]): KgNodeTypeId | undefined {
+  return type !== undefined && entityTypes.includes(type) ? kgNodeTypeId(type) : undefined
+}
+
+/** Narrow a wire predicate to a registered id, or undefined when unknown. */
+function parsePredicate(predicate: string, predicates: readonly string[]): KgRelationId | undefined {
+  return predicates.includes(predicate) ? kgRelationId(predicate) : undefined
 }
 
 /** One stored triple as the model-facing wire row. */
 function tripleRow(triple: KbGraphStoredTriple): KbGraphQueryToolValue['triples'][number] {
   return {
     row_id: triple.rowId,
-    subject_type: triple.subject.type,
+    subject_type: String(triple.subject.type),
     subject_id: triple.subject.id,
-    predicate: triple.predicate,
-    object_type: triple.object.type,
+    predicate: String(triple.predicate),
+    object_type: String(triple.object.type),
     object_id: triple.object.id,
     ...triple.sourcePath === undefined ? {} : { source_path: triple.sourcePath },
   }
@@ -98,57 +136,65 @@ function tripleRow(triple: KbGraphStoredTriple): KbGraphQueryToolValue['triples'
 
 /**
  * Validate `kb_graph_query` arguments: every action names its required
- * fields, and every entity type is inside the closed ontology.
+ * fields, and every entity type is inside the session's registry snapshot.
  * @param args - the schema-validated arguments.
+ * @param ontology - the frozen registry snapshot.
  * @returns the parsed query, or a string naming the first problem.
  */
-export function parseGraphQueryArgs(args: KbGraphQueryArgs | (Omit<KbGraphQueryArgs, 'action'> & { action: string })):
+export function parseGraphQueryArgs(
+  args: KbGraphQueryArgs | (Omit<KbGraphQueryArgs, 'action'> & { action: string }),
+  ontology: GraphOntologySnapshot,
+):
   | { kind: 'neighbors'; entity: KbGraphEntity }
   | { kind: 'paths'; entity: KbGraphEntity; target: KbGraphEntity }
-  | { kind: 'search'; query: string; type: KbGraphEntityType | undefined; limit: number }
+  | { kind: 'search'; query: string; type: KgNodeTypeId | undefined; limit: number }
   | { kind: 'invalid'; reason: string } {
-  const entityType = parseEntityType(args.entity_type)
+  const entityType = parseEntityType(args.entity_type, ontology.entityTypes)
   if (args.action !== 'neighbors' && args.action !== 'paths' && args.action !== 'search') {
     return { kind: 'invalid', reason: 'kb_graph_query: action must be one of neighbors, paths, search' }
   }
   if (args.action === 'search') {
     const query = args.query?.trim() ?? ''
     if (query.length === 0) return { kind: 'invalid', reason: 'kb_graph_query: search requires a non-empty query' }
-    const type = parseEntityType(args.entity_type)
+    const type = parseEntityType(args.entity_type, ontology.entityTypes)
     if (args.entity_type !== undefined && type === undefined) {
-      return { kind: 'invalid', reason: `kb_graph_query: entity_type must be one of ${KB_GRAPH_ENTITY_TYPES.join(', ')}` }
+      return { kind: 'invalid', reason: `kb_graph_query: entity_type must be one of ${ontology.entityTypes.join(', ')}` }
     }
     return { kind: 'search', query, type, limit: Math.min(Math.max(Math.floor(args.limit ?? 10), 1), 20) }
   }
   if (entityType === undefined || args.entity_id === undefined || args.entity_id.trim().length === 0) {
-    return { kind: 'invalid', reason: `kb_graph_query: ${args.action} requires entity_type (${KB_GRAPH_ENTITY_TYPES.join(', ')}) and entity_id` }
+    return { kind: 'invalid', reason: `kb_graph_query: ${args.action} requires entity_type (${ontology.entityTypes.join(', ')}) and entity_id` }
   }
   const entity: KbGraphEntity = { type: entityType, id: args.entity_id.trim() }
   if (args.action === 'neighbors') return { kind: 'neighbors', entity }
-  const targetType = parseEntityType(args.target_type)
+  const targetType = parseEntityType(args.target_type, ontology.entityTypes)
   if (targetType === undefined || args.target_id === undefined || args.target_id.trim().length === 0) {
-    return { kind: 'invalid', reason: `kb_graph_query: paths requires target_type (${KB_GRAPH_ENTITY_TYPES.join(', ')}) and target_id` }
+    return { kind: 'invalid', reason: `kb_graph_query: paths requires target_type (${ontology.entityTypes.join(', ')}) and target_id` }
   }
   return { kind: 'paths', entity, target: { type: targetType, id: args.target_id.trim() } }
 }
 
 /**
- * Validate `kb_graph_add` arguments: every triple names known entity types
- * and a known predicate.
+ * Validate `kb_graph_add` arguments: every triple names registered entity
+ * types and a registered predicate.
  * @param args - the schema-validated arguments.
+ * @param ontology - the frozen registry snapshot.
  * @returns the parsed triples, or a string naming the first problem.
  */
-export function parseGraphAddArgs(args: KbGraphAddArgs): { triples: KbGraphTriple[] } | { invalid: string } {
+export function parseGraphAddArgs(
+  args: KbGraphAddArgs,
+  ontology: GraphOntologySnapshot,
+): { triples: KbGraphTriple[] } | { invalid: string } {
   if (args.triples.length === 0) return { invalid: 'kb_graph_add: triples must not be empty' }
   if (args.triples.length > 50) return { invalid: 'kb_graph_add: at most 50 triples per call' }
   const triples: KbGraphTriple[] = []
   for (const row of args.triples) {
-    const subjectType = parseEntityType(row.subject_type)
-    const objectType = parseEntityType(row.object_type)
-    const predicate = parsePredicate(row.predicate)
+    const subjectType = parseEntityType(row.subject_type, ontology.entityTypes)
+    const objectType = parseEntityType(row.object_type, ontology.entityTypes)
+    const predicate = parsePredicate(row.predicate, ontology.predicates)
     if (subjectType === undefined || objectType === undefined || predicate === undefined) {
       return {
-        invalid: `kb_graph_add: entity types must be one of ${KB_GRAPH_ENTITY_TYPES.join(', ')} and predicate one of ${KB_GRAPH_PREDICATES.join(', ')}`,
+        invalid: `kb_graph_add: entity types must be one of ${ontology.entityTypes.join(', ')} and predicate one of ${ontology.predicates.join(', ')}`,
       }
     }
     if (row.subject_id.trim().length === 0 || row.object_id.trim().length === 0) {
@@ -213,7 +259,8 @@ export function presentGraphQueryResult(_args: KbGraphQueryArgs, result: ToolRes
 
 /**
  * Register the graph tools and the graph system-prompt guidance, scoped to
- * the deployment's bound tenant.
+ * the deployment's bound tenant. The ontology snapshot is materialized once
+ * here; mid-session registry changes surface in the next session.
  * @param ctx - context whose registries receive the registrations; execution uses
  *   its optional `kbGraph` service.
  * @param tenant - the deployment-side tenant binding; every query runs within it.
@@ -221,15 +268,16 @@ export function presentGraphQueryResult(_args: KbGraphQueryArgs, result: ToolRes
  * @param addTimeoutMs - cooperative budget for `kb_graph_add`.
  */
 export function applyKbGraphTools(ctx: Context, tenant: string, queryTimeoutMs: number, addTimeoutMs: number): void {
+  const ontology = graphOntologySnapshot(ctx.get('kbGraph'))
   ctx.systemPrompt.section({
     name: 'tool:kb_graph',
     order: 111,
-    text: `Use kb_graph_query to answer entity-relation questions over the ingested knowledge graph (entity types: ${KB_GRAPH_ENTITY_TYPES.join(', ')}; predicates: ${KB_GRAPH_PREDICATES.join(', ')}). Actions: neighbors (one hop around one entity), paths (two-hop path between two entities), search (entities by id substring). When a corpus names entities and relations, store them with kb_graph_add (idempotent; cite the source document in source_path).`,
+    text: `Use kb_graph_query to answer entity-relation questions over the ingested knowledge graph (entity types: ${ontology.entityTypes.join(', ')}; predicates: ${ontology.predicates.join(', ')}). Actions: neighbors (one hop around one entity), paths (two-hop path between two entities), search (entities by id substring). When a corpus names entities and relations, store them with kb_graph_add (idempotent; cite the source document in source_path).`,
   })
 
   ctx.tools.register(defineTool({
     name: 'kb_graph_query',
-    description: `Query the knowledge graph: neighbors of one entity, a two-hop path between two entities, or entities by id substring. Entity types: ${KB_GRAPH_ENTITY_TYPES.join(', ')}. Predicates: ${KB_GRAPH_PREDICATES.join(', ')}.`,
+    description: `Query the knowledge graph: neighbors of one entity, a two-hop path between two entities, or entities by id substring. Entity types: ${ontology.entityTypes.join(', ')}. Predicates: ${ontology.predicates.join(', ')}.`,
     parameters: {
       action: {
         type: 'string',
@@ -238,7 +286,7 @@ export function applyKbGraphTools(ctx: Context, tenant: string, queryTimeoutMs: 
       },
       entity_type: {
         type: 'string',
-        description: `Entity type (${KB_GRAPH_ENTITY_TYPES.join(', ')}); required for neighbors/paths, optional type filter for search.`,
+        description: `Entity type (${ontology.entityTypes.join(', ')}); required for neighbors/paths, optional type filter for search.`,
       },
       entity_id: {
         type: 'string',
@@ -307,7 +355,7 @@ export function applyKbGraphTools(ctx: Context, tenant: string, queryTimeoutMs: 
       if (graph === undefined) {
         throw new Error('kb_graph_query: no knowledge-graph service is composed; add the dsh-kb-graph seam and a store provider')
       }
-      const parsed = parseGraphQueryArgs(args as unknown as KbGraphQueryArgs)
+      const parsed = parseGraphQueryArgs(args as unknown as KbGraphQueryArgs, ontology)
       if (parsed.kind === 'invalid') throw new Error(parsed.reason)
       if (parsed.kind === 'neighbors') {
         const triples = await graph.neighbors(tenant, parsed.entity, exec.signal)
@@ -318,7 +366,11 @@ export function applyKbGraphTools(ctx: Context, tenant: string, queryTimeoutMs: 
         return { action: 'paths', triples: triples.map(tripleRow), entities: [] } satisfies KbGraphQueryToolValue
       }
       const entities = await graph.searchEntities(tenant, parsed.query, parsed.type, parsed.limit, exec.signal)
-      return { action: 'search', triples: [], entities } satisfies KbGraphQueryToolValue
+      return {
+        action: 'search',
+        triples: [],
+        entities: entities.map(entity => ({ type: String(entity.type), id: entity.id })),
+      } satisfies KbGraphQueryToolValue
     },
     presentCall: presentGraphQueryCall,
     presentResult: (args, result) => presentGraphQueryResult(args as KbGraphQueryArgs, result),
@@ -331,7 +383,7 @@ export function applyKbGraphTools(ctx: Context, tenant: string, queryTimeoutMs: 
       triples: {
         type: 'array',
         required: true,
-        description: `Triples to store. Entity types: ${KB_GRAPH_ENTITY_TYPES.join(', ')}. Predicates: ${KB_GRAPH_PREDICATES.join(', ')}.`,
+        description: `Triples to store. Entity types: ${ontology.entityTypes.join(', ')}. Predicates: ${ontology.predicates.join(', ')}.`,
         items: {
           type: 'object',
           additionalProperties: false,
@@ -362,7 +414,7 @@ export function applyKbGraphTools(ctx: Context, tenant: string, queryTimeoutMs: 
       if (graph === undefined) {
         throw new Error('kb_graph_add: no knowledge-graph service is composed; add the dsh-kb-graph seam and a store provider')
       }
-      const parsed = parseGraphAddArgs(args)
+      const parsed = parseGraphAddArgs(args, ontology)
       if ('invalid' in parsed) throw new Error(parsed.invalid)
       const inserted = await graph.putTriples(tenant, parsed.triples, exec.signal)
       return { inserted, total: parsed.triples.length } satisfies KbGraphAddToolValue

@@ -1,0 +1,90 @@
+/**
+ * This file is part of the NocoBase (R) project.
+ * Copyright (c) 2020-2024 NocoBase Co., Ltd.
+ * Authors: NocoBase Team.
+ *
+ * This project is dual-licensed under AGPL-3.0 and NocoBase Commercial License.
+ * For more information, please refer to: https://www.nocobase.com/agreement.
+ */
+
+import Joi from 'joi';
+import { DEFAULT_PAGE, DEFAULT_PER_PAGE, utils } from '@nocobase/actions';
+import { parseCollectionName } from '@nocobase/data-source-manager';
+
+import type Processor from '../Processor';
+import { JOB_STATUS } from '../constants';
+import type { FlowNodeModel } from '../types';
+import { toJSON, validateCollectionField } from '../utils';
+import { Instruction } from '.';
+
+export class QueryInstruction extends Instruction {
+  configSchema = Joi.object({
+    collection: Joi.string().required().messages({ 'any.required': 'Collection is not configured' }),
+    multiple: Joi.boolean(),
+    params: Joi.object({
+      filter: Joi.object(),
+      appends: Joi.array().items(Joi.string()),
+      page: Joi.alternatives(Joi.number(), Joi.string()),
+      pageSize: Joi.alternatives(Joi.number(), Joi.string()),
+      sort: Joi.array().items(Joi.object({ field: Joi.string(), direction: Joi.string().allow('asc', 'desc') })),
+    }),
+    failOnEmpty: Joi.boolean(),
+  });
+
+  validateConfig(config: Record<string, any>) {
+    const errors = super.validateConfig(config);
+    if (errors) {
+      return errors;
+    }
+    return validateCollectionField(config.collection, this.workflow.app.dataSourceManager);
+  }
+
+  async run(node: FlowNodeModel, input, processor: Processor) {
+    const { collection, multiple, params = {}, failOnEmpty = false } = node.config;
+
+    const [dataSourceName, collectionName] = parseCollectionName(collection);
+
+    const { repository } = this.workflow.app.dataSourceManager.dataSources
+      .get(dataSourceName)
+      .collectionManager.getCollection(collectionName);
+    const { page, pageSize, sort = [], ...options } = processor.getParsedValue(params, node.id);
+    const appends = options.appends
+      ? Array.from(
+          options.appends.reduce((set, field) => {
+            set.add(field.split('.')[0]);
+            set.add(field);
+            return set;
+          }, new Set()),
+        )
+      : options.appends;
+    const transaction =
+      processor.getScopeTransaction(node, dataSourceName) ??
+      this.workflow.useDataSourceTransaction(dataSourceName, processor.transaction);
+    const result = await (multiple ? repository.find : repository.findOne).call(repository, {
+      ...options,
+      ...utils.pageArgsToLimitArgs(page ?? DEFAULT_PAGE, pageSize ?? DEFAULT_PER_PAGE),
+      sort: sort
+        .filter((item) => item.field)
+        .map((item) => `${item.direction?.toLowerCase() === 'desc' ? '-' : ''}${item.field}`),
+      appends,
+      transaction,
+    });
+
+    if (failOnEmpty && (multiple ? !result.length : !result)) {
+      return {
+        result,
+        status: JOB_STATUS.FAILED,
+      };
+    }
+
+    // NOTE: `toJSON()` to avoid getting undefined value from Proxied model instance (#380)
+    // e.g. Object.prototype.hasOwnProperty.call(result, 'id') // false
+    // so the properties can not be get by json-templates(object-path)
+    return {
+      result: toJSON(result),
+      status: JOB_STATUS.RESOLVED,
+    };
+  }
+}
+
+export default QueryInstruction;

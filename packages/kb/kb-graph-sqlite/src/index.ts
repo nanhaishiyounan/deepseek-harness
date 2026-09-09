@@ -7,6 +7,7 @@
 
 import type { Context } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
+import { KbGraphError } from '@deepseek-ai/dsh-kb-graph'
 import { SqliteGraphStore } from './store.ts'
 
 export { SCHEMA_VERSION } from './schema.ts'
@@ -77,9 +78,66 @@ async function importNodeSqlite(): Promise<typeof import('node:sqlite')> {
 /* jscpd:ignore-end */
 
 /**
+ * Re-register persisted registry rows the runtime registry lacks (the
+ * two-layer registry's boot read: nocobase-derived and agent-defined types
+ * survive restarts). Parents register before the types extending them via a
+ * fixpoint pass; a row whose parent never lands fails loud as corruption.
+ * @param store - the freshly opened store.
+ * @param ctx - context whose `kbGraph` runtime receives the registrations.
+ * @returns the disposers for every registration made.
+ */
+async function reregisterStoredRegistry(ctx: Context, store: SqliteGraphStore): Promise<Array<() => void>> {
+  const graph = ctx.kbGraph
+  const disposers: Array<() => void> = []
+  const pendingTypes = (await store.listStoredNodeTypes()).filter(type => graph.nodeType(type.id) === undefined)
+  while (pendingTypes.length > 0) {
+    const before = pendingTypes.length
+    for (let index = 0; index < pendingTypes.length; index += 1) {
+      const type = pendingTypes[index] as (typeof pendingTypes)[number]
+      if (type.extends !== undefined && graph.nodeType(type.extends) === undefined) continue
+      disposers.push(graph.registerNodeType(type))
+      pendingTypes.splice(index, 1)
+      index -= 1
+    }
+    if (pendingTypes.length === before) {
+      throw new KbGraphError(
+        `stored node types with unresolvable parents: ${pendingTypes.map(type => String(type.id)).join(', ')}`,
+        'KB_GRAPH_SQLITE_REGISTRY_CORRUPT',
+      )
+    }
+  }
+  const pendingRelations = (await store.listStoredRelations()).filter(relation => graph.relation(relation.id) === undefined)
+  while (pendingRelations.length > 0) {
+    const before = pendingRelations.length
+    for (let index = 0; index < pendingRelations.length; index += 1) {
+      const relation = pendingRelations[index] as (typeof pendingRelations)[number]
+      const endpointsMissing = relation.constraints.some(
+        constraint => graph.nodeType(constraint.domain) === undefined || graph.nodeType(constraint.range) === undefined,
+      )
+      /* v8 ignore next -- fixpoint clause permutation; outcomes covered by the cross- and self-inverse tests */
+      const inverseMissing = relation.inverseOf !== undefined && graph.relation(relation.inverseOf) === undefined
+        && relation.inverseOf !== relation.id
+      if (endpointsMissing || inverseMissing) continue
+      disposers.push(graph.registerRelation(relation))
+      pendingRelations.splice(index, 1)
+      index -= 1
+    }
+    if (pendingRelations.length === before) {
+      throw new KbGraphError(
+        `stored relations with unresolvable endpoints: ${pendingRelations.map(relation => String(relation.id)).join(', ')}`,
+        'KB_GRAPH_SQLITE_REGISTRY_CORRUPT',
+      )
+    }
+  }
+  return disposers
+}
+
+/**
  * Open the configured database and register it as the graph store provider.
  * The open itself is eager: an unwritable path or a foreign on-disk schema
- * fails composition load instead of the first query.
+ * fails composition load instead of the first query. Persisted registry rows
+ * re-register into the runtime registry here, so derived types survive
+ * restarts.
  * @param ctx - context whose `kbGraph` service receives the registration.
  * @param config - validated plugin configuration.
  */
@@ -89,8 +147,10 @@ export async function apply(ctx: Context, config: Config): Promise<void> {
     path: config.path,
     busyTimeoutMs: config.busyTimeoutMs ?? DEFAULT_BUSY_TIMEOUT_MS,
   }, sqlite.DatabaseSync)
+  const registryDisposers = await reregisterStoredRegistry(ctx, store)
   const unregister = ctx.kbGraph.registerStoreProvider(store)
   ctx.effect(() => () => {
+    for (const dispose of registryDisposers) dispose()
     unregister()
     store.close()
   }, 'kb-graph-sqlite.store')

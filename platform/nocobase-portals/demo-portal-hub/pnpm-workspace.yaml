@@ -1,0 +1,9 @@
+packages:
+  - sdk
+
+allowBuilds:
+  '@nocobase/portal-sdk': true
+  esbuild: true
+
+minimumReleaseAgeExclude:
+  - '@nocobase/portal-sdk@2.0.2 || 2.0.3 || 2.0.4 || 2.1.0'
