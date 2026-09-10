@@ -2,9 +2,10 @@ import { type HttpError, useTranslate } from "@refinedev/core";
 import { useForm } from "@refinedev/react-hook-form";
 import { useEffect, useMemo } from "react";
 import { useParams } from "react-router";
-import { AiFillPanel, useAiFill, type AiFillField } from "@/components/ai-fill";
+import { useAiEmployeeFill } from "@/components/ai-employee-fill";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
+import type { AIFormField } from "@/extensions/nocobase-ai/providers";
 import { useRouteSurfaceClose } from "@nocobase/portal-sdk/routing";
 import {
   RouteDrawer,
@@ -84,7 +85,7 @@ function DealCreateForm({ presetCustomerId }: DealSurfaceProps) {
   });
 
   // Stage options come from the same constant the stage Select renders from.
-  const aiFields = useMemo<AiFillField[]>(
+  const aiFields = useMemo<AIFormField[]>(
     () => [
       {
         name: "title",
@@ -122,7 +123,7 @@ function DealCreateForm({ presetCustomerId }: DealSurfaceProps) {
     [translate]
   );
 
-  const ai = useAiFill({
+  const aiEmployee = useAiEmployeeFill({
     formId: "crm-deal-create",
     title: translate("crm.deals.drawer.create.title", { ns: "starter" }, "New deal"),
     fields: aiFields,
@@ -139,6 +140,11 @@ function DealCreateForm({ presetCustomerId }: DealSurfaceProps) {
     instructions:
       "A deal that is still being scoped is inquiry; once pricing has been sent it is quote. " +
       "Only use won or lost when the text says the deal is already decided.",
+    placeholder: translate(
+      "crm.deals.form.aiFillPlaceholder",
+      { ns: "starter" },
+      "Example: Brightline Logistics wants 40 telematics units, around 96000 USD. We sent pricing last week and they want to close before the end of next month."
+    ),
   });
 
   return (
@@ -148,31 +154,15 @@ function DealCreateForm({ presetCustomerId }: DealSurfaceProps) {
         className="flex min-h-0 flex-1 flex-col"
       >
         <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-5">
-          <AiFillPanel
-            ai={ai}
-            description={translate(
-              "crm.deals.form.aiFillDescription",
-              { ns: "starter" },
-              "Paste the call note or email thread. AI assist will structure the deal for you."
-            )}
-            inputLabel={translate(
-              "crm.deals.form.aiFillLabel",
-              { ns: "starter" },
-              "Describe the deal"
-            )}
-            placeholder={translate(
-              "crm.deals.form.aiFillPlaceholder",
-              { ns: "starter" },
-              "Example: Brightline Logistics wants 40 telematics units, around 96000 USD. We sent pricing last week and they want to close before the end of next month."
-            )}
-          />
+          {aiEmployee.panel}
           <DealFormFields
             form={form}
             translate={translate}
             presetCustomerId={presetCustomerId}
           />
         </div>
-        <RouteDrawerFooter className="flex-row justify-end">
+        <RouteDrawerFooter className="flex-row items-center justify-end gap-2">
+          {aiEmployee.trigger}
           <Button type="button" variant="outline" onClick={() => close()}>
             {translate("crm.common.cancel", { ns: "starter" }, "Cancel")}
           </Button>

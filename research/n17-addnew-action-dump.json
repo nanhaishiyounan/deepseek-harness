@@ -1,0 +1,21 @@
+{
+    "data": {
+        "use": "AddNewActionModel",
+        "parentId": "22641d46a19",
+        "subKey": "actions",
+        "subType": "array",
+        "props": {},
+        "stepParams": {
+            "popupSettings": {
+                "openView": {
+                    "collectionName": "hub_tk_tickets",
+                    "dataSourceKey": "main"
+                }
+            }
+        },
+        "sortIndex": 1,
+        "flowRegistry": {},
+        "uid": "6dc3b3e54d7",
+        "parent": "22641d46a19"
+    }
+}

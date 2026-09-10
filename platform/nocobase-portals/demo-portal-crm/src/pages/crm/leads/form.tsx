@@ -3,8 +3,9 @@ import { useForm } from "@refinedev/react-hook-form";
 import { useEffect, useMemo } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import { useParams } from "react-router";
-import { AiFillPanel, useAiFill, type AiFillField } from "@/components/ai-fill";
+import { useAiEmployeeFill } from "@/components/ai-employee-fill";
 import { Button } from "@/components/ui/button";
+import type { AIFormField } from "@/extensions/nocobase-ai/providers";
 import { Form } from "@/components/ui/form";
 import { useRouteSurfaceClose } from "@nocobase/portal-sdk/routing";
 import {
@@ -461,7 +462,7 @@ function LeadCreateForm({ translate }: { translate: Translate }) {
 
   // Allowed values are the same constants the Select inputs below render from,
   // so the model can never write a status or source the form cannot display.
-  const aiFields = useMemo<AiFillField[]>(
+  const aiFields = useMemo<AIFormField[]>(
     () => [
       {
         name: "name",
@@ -521,7 +522,7 @@ function LeadCreateForm({ translate }: { translate: Translate }) {
     [translate]
   );
 
-  const ai = useAiFill({
+  const aiEmployee = useAiEmployeeFill({
     formId: "crm-lead-create",
     title: translate(
       "crm.leads.drawer.create.title",
@@ -542,6 +543,11 @@ function LeadCreateForm({ translate }: { translate: Translate }) {
     instructions:
       "Use the converted status only when the text says the lead already became a customer. " +
       "A lead that has only just made contact is new.",
+    placeholder: translate(
+      "crm.leads.form.aiFillPlaceholder",
+      { ns: "starter" },
+      "Example: Met Sarah Chen from Brightline Logistics at the trade show; she runs a 40-vehicle fleet and asked for pricing. sarah.chen@brightline.example"
+    ),
   });
 
   return (
@@ -553,27 +559,11 @@ function LeadCreateForm({ translate }: { translate: Translate }) {
         className="flex min-h-0 flex-1 flex-col"
       >
         <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-5">
-          <AiFillPanel
-            ai={ai}
-            description={translate(
-              "crm.leads.form.aiFillDescription",
-              { ns: "starter" },
-              "Paste the enquiry, business card or call note. AI assist will structure the lead for you."
-            )}
-            inputLabel={translate(
-              "crm.leads.form.aiFillLabel",
-              { ns: "starter" },
-              "Describe the lead"
-            )}
-            placeholder={translate(
-              "crm.leads.form.aiFillPlaceholder",
-              { ns: "starter" },
-              "Example: Met Sarah Chen from Brightline Logistics at the trade show; she runs a 40-vehicle fleet and asked for pricing. sarah.chen@brightline.example"
-            )}
-          />
+          {aiEmployee.panel}
           <LeadFormFields form={form} translate={translate} />
         </div>
-        <RouteDrawerFooter className="flex-row justify-end">
+        <RouteDrawerFooter className="flex-row items-center justify-end gap-2">
+          {aiEmployee.trigger}
           <Button type="button" variant="outline" onClick={() => close()}>
             {translate("crm.common.cancel", { ns: "starter" }, "Cancel")}
           </Button>

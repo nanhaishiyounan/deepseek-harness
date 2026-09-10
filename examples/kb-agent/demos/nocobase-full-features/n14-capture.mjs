@@ -54,9 +54,9 @@ async function shot(name, url, { settle = 2500, maxWait = 120_000 } = {}) {
 }
 
 await shot('01-experts', `${base}/admin/c8rl4krpqqx`);
-await shot('02-crm-customers', `${base}/admin/au68dxqrell`);
-await shot('03-crm-quotes', `${base}/admin/n89llwk9xhx`);
-await shot('04-hub-tickets', `${base}/admin/10xmp7hfhcv`);
+await shot('02-crm-customers', `${base}/admin/n170ttrd6avg0w`);
+await shot('03-crm-quotes', `${base}/admin/n177nm2motr58p`);
+await shot('04-hub-tickets', `${base}/admin/n17gv6nc2z51te`);
 await shot('05-ai-workbench', `${base}/admin/sdia2fwjc22`);
 
 await browser.close();

@@ -11,11 +11,13 @@ import {
 } from "@/extensions/nocobase-ai/providers";
 
 /**
- * The CRM-specific AI employee. Created on the NocoBase instance as
- * `crm-assistant`; when it is missing or the LLM service is unconfigured the
- * shortcut renders nothing rather than showing a dead control.
+ * The AI employee backing the CRM shortcuts. `dex` ships with plugin-ai, is
+ * localized on this instance, and is the same employee the form-fill panels
+ * and the admin-side v2 Add-new popups use; when it is missing or the LLM
+ * service is unconfigured the shortcut renders nothing rather than showing a
+ * dead control.
  */
-export const CRM_AI_EMPLOYEE = "crm-assistant";
+export const CRM_AI_EMPLOYEE = "dex";
 
 type CrmAIContextProps = {
   /** Stable identifier so the composer's page-element picker can list it. */

@@ -26,13 +26,21 @@
  *
  * Usage (repo root, tsx loader):
  *   node --import tsx/esm examples/kb-agent/scripts/setup-nocobase.mts [command]
- * Commands: all (default) | install | build | start | init | plugins | verify | stop | reset.
+ * Commands: all (default) | install | build | start | init | plugins | verify | stop | reset
+ *   | ai (point the llmService at the N22 attachment proxy) | ai-direct
+ *   (point it back at api.minimaxi.com) | ai-proxy start | ai-proxy stop.
+ * "ai-proxy start" launches the attachment proxy (N22, PDF file-part rewrite)
+ * in the background and points the llmService at it; "ai-proxy stop" stops the
+ * proxy and AUTOMATICALLY rolls the llmService back to the direct upstream
+ * (when NocoBase is reachable) so the AI surface never stays wired to a dead
+ * proxy — for a manual rollback without stopping, run "ai-direct".
  * Environment overrides: NOCOBASE_HOME, NOCOBASE_BASE_URL, NOCOBASE_ROOT_EMAIL,
  * NOCOBASE_ROOT_PASSWORD, NOCOBASE_DSH_CALLBACK, NOCOBASE_PG_DATA,
- * NOCOBASE_FORCE_BUILD (=1 rebuilds the client artifacts even when present).
+ * NOCOBASE_FORCE_BUILD (=1 rebuilds the client artifacts even when present),
+ * NOCOBASE_AI_PROXY_PORT (N22 proxy port, default 13100).
  */
 import { spawn, spawnSync } from 'node:child_process'
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { resolveEnv } from './resolve-env.ts'
@@ -51,6 +59,14 @@ const buildLog = '/tmp/nocobase-dsh-build.log'
 
 const API_KEY_NAME = 'dsh-harness'
 const WORKFLOW_TITLE = '专家服务订单审批交付'
+
+/** N22 attachment-proxy wiring: the only surfaces that may vary per deployment. */
+const AI_PROXY_PORT = Number(process.env.NOCOBASE_AI_PROXY_PORT ?? 13_100)
+const LLM_DIRECT_BASE = 'https://api.minimaxi.com/v1'
+const LLM_PROXY_BASE = `http://127.0.0.1:${AI_PROXY_PORT}/v1`
+const aiProxyScript = join(repoRoot, 'examples/kb-agent/scripts/nocobase-n22-llm-proxy.mts')
+const aiProxyLog = '/tmp/nocobase-dsh-ai-proxy.log'
+const aiProxyPidFile = join(repoRoot, 'examples/kb-agent/.dsh/ai-proxy.pid')
 
 /**
  * Feature plugins shipped in the snapshot source tree but left disabled by
@@ -489,28 +505,121 @@ async function waitAppReady(token: string): Promise<void> {
 
 /**
  * Wire the built-in AI employees to MiniMax through the repo's configured
- * OpenAI-compatible endpoint (batch B4). Without at least one llmServices
- * row the AI panel renders but every employee answers nothing — the empty
- * table was the root cause of "no AI employees visible in action".
+ * OpenAI-compatible endpoint (batch B4), as an idempotent upsert on the
+ * `options.baseURL`/`options.apiKey` pair (N22): without at least one
+ * llmServices row the AI panel renders but every employee answers nothing —
+ * the empty table was the root cause of "no AI employees visible in action".
+ * The default target is the local N22 attachment proxy (PDF visibility); pass
+ * LLM_DIRECT_BASE for the direct upstream.
  */
-async function ensureLlmService(token: string): Promise<void> {
-  const list = await call(token, 'GET', `/api/llmServices:list?filter=${encodeURIComponent(JSON.stringify({ title: { $eq: LLM_SERVICE_TITLE } }))}&pageSize=10`) as { data?: Array<{ id: number }> }
-  if ((list?.data?.length ?? 0) > 0) {
-    console.log(`setup-nocobase: llmService "${LLM_SERVICE_TITLE}" exists (kept)`)
-    return
-  }
+async function ensureLlmService(token: string, baseURL: string = LLM_PROXY_BASE): Promise<void> {
+  const list = await call(token, 'GET', `/api/llmServices:list?filter=${encodeURIComponent(JSON.stringify({ title: { $eq: LLM_SERVICE_TITLE } }))}&pageSize=10`) as { data?: Array<{ name?: string, id?: number, options?: { baseURL?: string, apiKey?: string } }> }
   const apiKey = resolveEnv('MINIMAX_API_KEY')
   if (apiKey === undefined) {
     throw new Error('MINIMAX_API_KEY not found in env nor the repository root .env; the AI employees need it')
   }
-  await call(token, 'POST', '/api/llmServices:create', {
-    title: LLM_SERVICE_TITLE,
-    provider: 'openai-completions',
-    options: { baseURL: 'https://api.minimaxi.com/v1', apiKey },
+  const row = list?.data?.[0]
+  // llmServices has no auto id column — the primary key is the `name` string,
+  // so an update keyed on a missing numeric id silently matches zero rows.
+  if (row === undefined || (row.name === undefined && row.id === undefined)) {
+    await call(token, 'POST', '/api/llmServices:create', {
+      title: LLM_SERVICE_TITLE,
+      provider: 'openai-completions',
+      options: { baseURL, apiKey },
+      enabledModels: ['MiniMax-M3'],
+      enabled: true,
+    })
+    console.log(`setup-nocobase: llmService "${LLM_SERVICE_TITLE}" created (openai-completions → ${baseURL}, model MiniMax-M3)`)
+    return
+  }
+  if (row.options?.baseURL === baseURL && row.options?.apiKey === apiKey) {
+    console.log(`setup-nocobase: llmService "${LLM_SERVICE_TITLE}" exists (kept, baseURL ${baseURL})`)
+    return
+  }
+  // Repeating an update with the same values is a no-op, so it retries.
+  await call(token, 'POST', `/api/llmServices:update?filterByTk=${encodeURIComponent(String(row.name ?? row.id))}`, {
+    options: { ...row.options, baseURL, apiKey },
     enabledModels: ['MiniMax-M3'],
     enabled: true,
-  })
-  console.log(`setup-nocobase: llmService "${LLM_SERVICE_TITLE}" created (openai-completions → api.minimaxi.com/v1, model MiniMax-M3)`)
+  }, CALL_RETRY)
+  console.log(`setup-nocobase: llmService "${LLM_SERVICE_TITLE}" updated (baseURL ${row.options?.baseURL ?? '?'} → ${baseURL})`)
+}
+
+/** True when the N22 attachment proxy answers its keyless health probe. */
+async function proxyHealthy(): Promise<boolean> {
+  try {
+    const response = await fetch(`http://127.0.0.1:${AI_PROXY_PORT}/healthz`, { signal: AbortSignal.timeout(3000) })
+    return response.ok
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Bring the N22 attachment proxy up (idempotent) and point the llmService at
+ * it while NocoBase is reachable. A second run while healthy is a no-op.
+ */
+async function stepAiProxyStart(): Promise<void> {
+  if (await proxyHealthy()) {
+    console.log(`setup-nocobase: ai-proxy already healthy at 127.0.0.1:${AI_PROXY_PORT} (kept)`)
+  } else {
+    if (existsSync(aiProxyPidFile)) rmSync(aiProxyPidFile)
+    console.log(`setup-nocobase: starting ai-proxy in the background (log: ${aiProxyLog})`)
+    const fs = await import('node:fs')
+    const logFd = fs.openSync(aiProxyLog, 'a')
+    const child = spawn(process.execPath, ['--import', 'tsx/esm', aiProxyScript], {
+      cwd: repoRoot,
+      env: process.env,
+      detached: true,
+      stdio: ['ignore', logFd, logFd],
+    })
+    child.unref()
+    mkdirSync(dirname(aiProxyPidFile), { recursive: true })
+    writeFileSync(aiProxyPidFile, String(child.pid))
+    const deadline = Date.now() + 20_000
+    while (Date.now() < deadline && !(await proxyHealthy())) {
+      await new Promise(resolve => setTimeout(resolve, 500))
+    }
+    if (!(await proxyHealthy())) {
+      throw new Error(`ai-proxy did not become healthy within 20s; inspect ${aiProxyLog}`)
+    }
+    console.log(`setup-nocobase: ai-proxy healthy at 127.0.0.1:${AI_PROXY_PORT}`)
+  }
+  if (await healthy()) {
+    await ensureLlmService(await signIn())
+  } else {
+    console.log(`setup-nocobase: warning — NocoBase not healthy at ${baseUrl}; run "ai" once it is up to point the llmService at the proxy`)
+  }
+}
+
+/**
+ * Stop the N22 attachment proxy (idempotent) and automatically roll the
+ * llmService back to the direct upstream while NocoBase is reachable — the
+ * chosen stop behavior (documented in the usage header) keeps the AI surface
+ * from staying wired to a dead proxy.
+ */
+async function stepAiProxyStop(): Promise<void> {
+  const wasRunning = await proxyHealthy()
+  if (wasRunning) {
+    const pid = existsSync(aiProxyPidFile) ? Number(readFileSync(aiProxyPidFile, 'utf8').trim()) : Number.NaN
+    if (Number.isInteger(pid)) process.kill(pid, 'SIGTERM')
+    else spawnSync('pkill', ['-f', 'nocobase-n22-llm-proxy'])
+    const deadline = Date.now() + 10_000
+    while (Date.now() < deadline && await proxyHealthy()) {
+      await new Promise(resolve => setTimeout(resolve, 500))
+    }
+    if (await proxyHealthy()) throw new Error('ai-proxy still healthy 10s after SIGTERM; kill it manually (pkill -f nocobase-n22-llm-proxy)')
+    console.log('setup-nocobase: ai-proxy stopped')
+  } else {
+    console.log('setup-nocobase: ai-proxy not running (no-op)')
+  }
+  if (existsSync(aiProxyPidFile)) rmSync(aiProxyPidFile)
+  if (await healthy()) {
+    await ensureLlmService(await signIn(), LLM_DIRECT_BASE)
+    console.log(`setup-nocobase: llmService "${LLM_SERVICE_TITLE}" rolled back to the direct upstream ${LLM_DIRECT_BASE}`)
+  } else if (wasRunning) {
+    console.log(`setup-nocobase: NocoBase not healthy at ${baseUrl}; once it is up run "ai-direct" to roll the llmService back to ${LLM_DIRECT_BASE}`)
+  }
 }
 
 /** Enable every shipped-but-disabled feature plugin; idempotent by enabled state. */
@@ -582,14 +691,56 @@ async function stepVerify(): Promise<void> {
       failures.push('workflow node chain wiring is wrong')
     }
   }
-  const llmServices = await call(token, 'GET', '/api/llmServices:list?pageSize=20') as { data?: Array<{ enabled?: boolean, title?: string }> }
+  const llmServices = await call(token, 'GET', '/api/llmServices:list?pageSize=20') as { data?: Array<{ enabled?: boolean, title?: string, options?: { baseURL?: string } }> }
   if ((llmServices?.data ?? []).every(service => service.enabled !== true)) {
     failures.push('no enabled llmService (AI employees cannot answer; re-run "ai" or "init")')
+  }
+  // N22: the attachment proxy must be healthy and the llmService must point
+  // at it — a missing proxy means PDF attachments fall back to the silently
+  // ignored file part, so both states fail loud with their fix command.
+  const proxyProbe = await fetch(`http://127.0.0.1:${AI_PROXY_PORT}/healthz`, { signal: AbortSignal.timeout(3000) }).catch(() => null)
+  if (proxyProbe === null || !proxyProbe.ok) {
+    failures.push(`AI attachment proxy not healthy at http://127.0.0.1:${AI_PROXY_PORT}/healthz; run "node --env-file=.env --import tsx/esm examples/kb-agent/scripts/setup-nocobase.mts ai-proxy start"`)
+  }
+  const minimax = (llmServices?.data ?? []).find(service => service.title === LLM_SERVICE_TITLE)
+  if (minimax === undefined) {
+    failures.push(`llmService "${LLM_SERVICE_TITLE}" missing; run "ai" (with the proxy up) or "init"`)
+  } else if (minimax.options?.baseURL !== LLM_PROXY_BASE) {
+    failures.push(`llmService "${LLM_SERVICE_TITLE}" baseURL is ${JSON.stringify(minimax.options?.baseURL)}, expected the attachment proxy ${LLM_PROXY_BASE}; run "ai-proxy start" (or "ai" while the proxy is up)`)
   }
   // The admin-side AI employee entry is the "AI 工作台" v2 flowPage (N13);
   // its absence means the n13-rebuild replay never ran.
   const workbenchRoutes = await call(token, 'GET', `/api/desktopRoutes:list?filter=${encodeURIComponent(JSON.stringify({ title: { $eq: 'AI 工作台' }, type: { $eq: 'flowPage' } }))}&pageSize=1`) as { data?: Array<{ id: number }> }
   if ((workbenchRoutes?.data?.length ?? 0) === 0) failures.push('AI workbench flowPage missing (run the all chain so nocobase-n13-rebuild.mts replays)')
+  // N17: platform zh-CN, the app-hub stand-in for multi-portal, and the v2
+  // flowPage upgrades whose floating ball is the official AI entry.
+  const settings = await dataOf(token, 'GET', '/api/systemSettings:get') as { enabledLanguages?: string[], options?: { enabledLanguages?: string[] } }
+  // Both layers must say zh-CN: admin reads options.enabledLanguages, the
+  // portals read the top-level column (N17 finding).
+  if (JSON.stringify(settings?.enabledLanguages) !== JSON.stringify(['zh-CN']) || JSON.stringify(settings?.options?.enabledLanguages) !== JSON.stringify(['zh-CN'])) {
+    failures.push(`systemSettings enabledLanguages is ${JSON.stringify(settings?.enabledLanguages)}/${JSON.stringify(settings?.options?.enabledLanguages)} (expected ["zh-CN"] on both layers)`)
+  }
+  const appHubRoutes = await call(token, 'GET', `/api/desktopRoutes:list?filter=${encodeURIComponent(JSON.stringify({ title: { $eq: '应用中心' } }))}&pageSize=1`) as { data?: Array<{ id: number }> }
+  if ((appHubRoutes?.data?.length ?? 0) === 0) failures.push('应用中心 app hub page missing (run nocobase-n17-alignment.mts)')
+  const v2Routes = await call(token, 'GET', `/api/desktopRoutes:list?filter=${encodeURIComponent(JSON.stringify({ type: { $eq: 'flowPage' } }))}&pageSize=100`) as { data?: Array<{ title?: string | null }> }
+  const v2Titles = new Set((v2Routes?.data ?? []).map(row => row.title ?? ''))
+  const missingV2 = ['客户', '销售线索', '联系人', '订单', '报价单', '工单', '资产台账', '员工'].filter(title => !v2Titles.has(title))
+  if (missingV2.length > 0) failures.push(`v2 table flowPages missing: ${missingV2.join(', ')} (run nocobase-n17-alignment.mts)`)
+  const flowModels = await call(token, 'GET', '/api/flowModels:list?pageSize=1000') as { data?: Array<{ use?: string, uid?: string }> }
+  const modelCount = (use: string) => (flowModels?.data ?? []).filter(row => row.use === use).length
+  if (modelCount('AddNewActionModel') < 8) failures.push('AddNewActionModel count < 8 (v2 table action bars incomplete)')
+  if (modelCount('FormSubmitActionModel') < 8) failures.push('FormSubmitActionModel count < 8 (Add-new popups cannot submit)')
+  // N18: every Add-new popup carries the in-form AI fill button (the official
+  // AIEmployeeButtonModel on CreateFormModel.actions). Counting only the
+  // deterministic `n18ai-` uid prefix keeps foreign AIEmployeeButtonModel rows
+  // from padding the count, and requiring every such row to carry the prefix
+  // surfaces unexpected mounts instead of letting them hide among ours.
+  const aiButtons = (flowModels?.data ?? []).filter(row => row.use === 'AIEmployeeButtonModel')
+  const n18Buttons = aiButtons.filter(row => row.uid?.startsWith('n18ai-'))
+  if (n18Buttons.length < 8) failures.push(`n18ai- AIEmployeeButtonModel count ${n18Buttons.length} < 8 (form AI fill buttons missing; run nocobase-n18-form-ai.mts)`)
+  if (n18Buttons.length !== aiButtons.length) failures.push(`${aiButtons.length - n18Buttons.length} AIEmployeeButtonModel row(s) carry no n18ai- uid prefix (unexpected foreign mounts; inspect flowModels)`)
+  const atlas = await call(token, 'GET', `/api/aiEmployees:list?filter=${encodeURIComponent(JSON.stringify({ username: { $eq: 'atlas' } }))}&pageSize=1`) as { data?: Array<{ about?: string }> }
+  if (!(atlas?.data?.[0]?.about ?? '').includes('简体中文')) failures.push('atlas about is not the Chinese prompt (re-run nocobase-n17-alignment.mts)')
   // N13 data widening floors; verify asserts presence, not the exact counts.
   const rowFloor = async (collection: string, floor: number): Promise<string | null> => {
     const rows = await call(token, 'GET', `/api/${collection}:list?pageSize=1`) as { meta?: { count?: number } } | null
@@ -633,7 +784,7 @@ async function stepVerify(): Promise<void> {
     process.exitCode = 1
     return
   }
-  console.log('setup-nocobase verify: OK — full UI + collections + attachment field + seed + workflow chain + AI workbench + row floors + m2o fieldNames + API key all verified')
+  console.log('setup-nocobase verify: OK — full UI + collections + attachment field + seed + workflow chain + AI workbench + row floors + m2o fieldNames + n18ai- form AI buttons + portals + ai-proxy + API key all verified')
 }
 
 /** Upsert the two NocoBase lines in the repository root .env, preserving the rest. */
@@ -677,6 +828,13 @@ async function main(): Promise<void> {
     case 'init': return void await stepInit()
     case 'plugins': return void await stepPlugins()
     case 'ai': return void await ensureLlmService(await signIn())
+    case 'ai-direct': return void await ensureLlmService(await signIn(), LLM_DIRECT_BASE)
+    case 'ai-proxy': {
+      const action = process.argv[3]
+      if (action === 'start') return void await stepAiProxyStart()
+      if (action === 'stop') return void await stepAiProxyStop()
+      throw new Error('ai-proxy needs "start" or "stop"')
+    }
     case 'verify': return void await stepVerify()
     case 'stop': return void await stepStop()
     case 'reset': return void await stepReset()
@@ -686,7 +844,7 @@ async function main(): Promise<void> {
       await stepStart()
       await stepInit()
       await stepPlugins()
-      await ensureLlmService(await signIn())
+      await stepAiProxyStart()
       // Replay the demo-grade module builds (collections/seeds/menus/blocks,
       // all REST-idempotent) so "all" restores the full feature surface:
       // crm/hub modules, the AI workbench page + orphan-model cleanup (N13),
@@ -696,6 +854,7 @@ async function main(): Promise<void> {
       for (const script of [
         'nocobase-crm-modules.mts', 'nocobase-hub-modules.mts',
         'nocobase-n13-rebuild.mts', 'nocobase-n13-seed.mts', 'nocobase-n14-fix.mts',
+        'nocobase-n17-alignment.mts', 'nocobase-n18-form-ai.mts',
       ]) {
         if (!run('node', ['--import', 'tsx/esm', join(repoRoot, 'examples/kb-agent/scripts', script)])) {
           throw new Error(`${script} failed during the all chain`)
@@ -703,7 +862,7 @@ async function main(): Promise<void> {
       }
       return void await stepVerify()
     default:
-      throw new Error(`unknown command "${command}" (install | build | start | init | plugins | ai | verify | stop | reset | all)`)
+      throw new Error(`unknown command "${command}" (install | build | start | init | plugins | ai | ai-direct | "ai-proxy start|stop" | verify | stop | reset | all)`)
   }
 }
 

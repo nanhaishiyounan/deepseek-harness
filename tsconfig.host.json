@@ -97,6 +97,7 @@
     "examples/*/tests/**/*.ts",
     "examples/kb-agent/scripts/seed-experts.mts",
     "examples/kb-agent/scripts/seed-experts-roster.mts",
+    "examples/kb-agent/scripts/nocobase-n22-llm-proxy.mts",
     "examples/kb-agent/scripts/nocobase-workflow.ts",
     "examples/kb-agent/scripts/resolve-env.ts",
     "examples/kb-agent/scripts/resilience.ts",

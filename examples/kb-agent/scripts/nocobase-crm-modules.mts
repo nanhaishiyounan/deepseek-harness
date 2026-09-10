@@ -472,6 +472,12 @@ async function ensureBlocks(token: string): Promise<void> {
   const routeByTitle = new Map((routes ?? []).map(row => [row.title ?? '', row]))
   for (const block of BLOCKS) {
     const route = routeByTitle.get(block.page)
+    // N17: a flowPage of the same title owns the page now (v2 table with the
+    // AI floating ball); the v1 block replay must not touch it.
+    if ((route as { type?: string } | undefined)?.type === 'flowPage') {
+      console.log(`nocobase-crm: block on "${block.page}" owned by an N17 v2 flowPage (kept)`)
+      continue
+    }
     if (route === undefined || route.schemaUid === null || route.schemaUid === undefined) {
       throw new Error(`page "${block.page}" has no schemaUid; run the menu step first`)
     }

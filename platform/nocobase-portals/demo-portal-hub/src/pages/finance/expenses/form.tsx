@@ -3,8 +3,9 @@ import { useForm } from "@refinedev/react-hook-form";
 import { useMemo } from "react";
 import type { UseFormReturn } from "react-hook-form";
 
-import { AiFillPanel, useAiFill, type AiFillField } from "@/components/ai-fill";
+import { useAiEmployeeFill } from "@/components/ai-employee-fill";
 import { Button } from "@/components/ui/button";
+import type { AIFormField } from "@/extensions/nocobase-ai/providers";
 import {
   Form,
   FormControl,
@@ -117,7 +118,7 @@ function ExpenseForm({ mode }: { mode: "create" | "edit" }) {
   const users = usersResult?.data ?? [];
 
   // Allowed values are the same option lists the Select inputs below render.
-  const aiFields = useMemo<AiFillField[]>(
+  const aiFields = useMemo<AIFormField[]>(
     () => [
       {
         name: "title",
@@ -155,7 +156,7 @@ function ExpenseForm({ mode }: { mode: "create" | "edit" }) {
     [t]
   );
 
-  const ai = useAiFill({
+  const aiEmployee = useAiEmployeeFill({
     formId: "hub-expense-create",
     title: t("finance.expenses.drawer.create.title", "New expense"),
     fields: aiFields,
@@ -174,6 +175,10 @@ function ExpenseForm({ mode }: { mode: "create" | "edit" }) {
     instructions:
       "A newly submitted claim is pending. Only use approved, rejected or reimbursed " +
       "when the text says the claim has already been through review.",
+    placeholder: t(
+      "finance.expenses.aiFill.placeholder",
+      "Example: Return flight to the Berlin client kickoff on 12 May 2026, 842.50 USD on my company card."
+    ),
   });
 
   return (
@@ -189,20 +194,7 @@ function ExpenseForm({ mode }: { mode: "create" | "edit" }) {
         className="flex min-h-0 flex-1 flex-col"
       >
         <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-5 [&_[data-slot=input]]:h-10 [&_[data-slot=select-trigger]]:h-10">
-          {mode === "create" ? (
-            <AiFillPanel
-              ai={ai}
-              description={t(
-                "finance.expenses.aiFill.desc",
-                "Describe the expense in plain language. AI assist will structure the claim for you."
-              )}
-              inputLabel={t("finance.expenses.aiFill.label", "Describe the expense")}
-              placeholder={t(
-                "finance.expenses.aiFill.placeholder",
-                "Example: Return flight to the Berlin client kickoff on 12 May 2026, 842.50 USD on my company card."
-              )}
-            />
-          ) : null}
+          {mode === "create" ? aiEmployee.panel : null}
           <TextField
             form={form}
             name="title"
@@ -266,7 +258,8 @@ function ExpenseForm({ mode }: { mode: "create" | "edit" }) {
             )}
           />
         </div>
-        <RouteDrawerFooter className="flex-row justify-end">
+        <RouteDrawerFooter className="flex-row items-center justify-end gap-2">
+          {mode === "create" ? aiEmployee.trigger : null}
           <Button type="button" variant="outline" onClick={() => close()}>
             {t("finance.common.cancel", "Cancel")}
           </Button>

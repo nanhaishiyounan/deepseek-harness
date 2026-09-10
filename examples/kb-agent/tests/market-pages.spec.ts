@@ -199,7 +199,7 @@ describe('market and connector pages over the real seams (keyless)', () => {
       ...assets.result.value.assets.map(asset => `- ${asset.provider_id}/${asset.dataset_id} · ${asset.kind} · ${asset.title}${asset.price === undefined ? '' : ` · ${asset.price}`}`),
       '## assets.detail',
       `- ${detail.result.value.provider_id}/${detail.result.value.dataset_id} · ${detail.result.value.kind} · ${detail.result.value.title}`,
-      `  description: ${detail.result.value.description ?? ''}`,
+      `  description:${detail.result.value.description === undefined ? '' : ` ${detail.result.value.description}`}`,
       '## assets.stats',
       `- products: ${stats.result.value.products}`,
       `- providers: ${stats.result.value.providers}`,

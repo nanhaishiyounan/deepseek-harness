@@ -308,6 +308,11 @@ async function ensureMenus(token: string): Promise<Map<string, string>> {
         }
         pageByUrl.set(page.title, schema['x-uid'])
         console.log(`nocobase-hub: page "${page.title}" wired (${baseUrl}/admin/${schema['x-uid']})`)
+      } else if ((pageRow as { type?: string }).type === 'flowPage') {
+        // N17 v2 upgrade: no uiSchemas tree to wire; the block replay must
+        // skip this title (flowOwnedPages).
+        flowOwnedPages.add(page.title)
+        console.log(`nocobase-hub: page "${page.title}" owned by an N17 v2 flowPage (kept)`)
       } else {
         pageByUrl.set(page.title, pageRow.schemaUid)
         console.log(`nocobase-hub: page "${page.title}" at ${baseUrl}/admin/${pageRow.schemaUid}`)
@@ -503,6 +508,12 @@ async function ensureBlocks(token: string, pageByUrl: Map<string, string>): Prom
     }
   }
   for (const page of PAGE_BLOCKS) {
+    // N17: pages upgraded to v2 flowPages (same title, no uiSchemas Grid)
+    // are owned by nocobase-n17-alignment.mts; the v1 block replay skips them.
+    if (flowOwnedPages.has(page.page)) {
+      console.log(`nocobase-hub: blocks on "${page.page}" owned by an N17 v2 flowPage (kept)`)
+      continue
+    }
     const pageUid = pageByUrl.get(page.page)
     if (pageUid === undefined) throw new Error(`page "${page.page}" was not created in the menu step`)
     const pageTree = await dataOf(token, 'GET', `/api/uiSchemas:getJsonSchema/${pageUid}`)
@@ -605,6 +616,9 @@ async function ensurePortalFields(token: string): Promise<void> {
   }
   console.log(`nocobase-hub: portal alignment fields ${added.length > 0 ? added.join(', ') : 'all present (kept)'}`)
 }
+
+/** Pages upgraded to N17 v2 flowPages; their titles are skipped by the v1 block replay. */
+const flowOwnedPages = new Set<string>()
 
 async function main(): Promise<void> {
   const token = await signIn()

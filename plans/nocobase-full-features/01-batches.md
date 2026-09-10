@@ -371,6 +371,51 @@ backup-restore field-china-region collection-fdw
 
 ---
 
+## N17 对齐官方 v12 demo 体验（2026-09-10）
+
+**用户四点原话**：① "admin 页面有 crm，但是搭建页面，怎么访问搭建好的页面" ② v12 demo `/settings/multi-portal` 多应用入口 ③ v12 `/v/admin/k3bsm39m9t6` add new 旁 AI 员工按钮 ④ 全平台中文化 + 数据不空。
+
+**诊断（先探后改）**：
+1. **"搭建页面"观感 = UI Editor 误开，非页面损坏**。浏览器实测本地订单页 `/admin/5p4a85fmjve`：数据/列头/Add new 全部正常，但快照里每个区块都有 designer-drag-handler/designer-schema-settings 按钮——`localStorage.NOCOBASE_MAIN_DESIGNABLE="true"`（顶栏 "UI Editor" 高亮开关曾被打開）。该状态是**浏览器本地存储**，服务端无法代关；业务页真实入口 = 左侧九组菜单（本批在 handoff 写明使用指引）。
+2. **multi-portal 是 v12 商业插件，2.2.6 OSS 明确不含**：[`multiPortal.test.ts`](../../../platform/nocobase/packages/presets/nocobase/src/server/__tests__/multiPortal.test.ts) 断言 `plugin-multi-portal` 不在 preset；但 2.2.6 plugin-client 已有 [`appPortals.ts`](../../../platform/nocobase/packages/plugins/@nocobase/plugin-client/src/server/appPortals.ts) 服务端数据层（`appClient:getPortals`、DEFAULT_PORTALS `__default_admin__`/`__default_mobile__` 与 v12 no-code portal 同 uid）。v12 实测数据源：`GET /api/multiPortals:list`（字段 uid/title/icon/portalType: ai|no-code/routePath/options.git 源仓库），8 个 AI-mode 独立前端（/x/crm 等，git sourceStorage）+ 2 个 no-code portal（/v/admin、/v/mobile）。**等价实现**：admin 建"应用中心"页聚合 CRM Portal/Hub Portal/AI 工作台/DSH 入口。
+3. **"add new 旁 AI 员工" = v2 页 ChatButton 悬浮球**（截图实证：v12 Customers 页操作栏本身无 AI 按钮，右下角渐变圆形悬浮球 a11y 名 "Open AI chat"）。2.2.6 [`ChatButton.tsx`](../../../platform/nocobase/packages/plugins/@nocobase/plugin-ai/src/client-v2/ai-employees/chatbox/components/ChatButton.tsx) 挂载条件五项：ChatBox 未开 ∨ 无 AI 雇员 ∨ **v1 页** ∨ 移动布局 ∨ pathname 不以 /admin 开头 → return null。CRM/Hub 表格页全是 B2/B3 v1 页 → 无悬浮球。**官方同款路径**：表格页升级 v2 flowPage；2.2.6 client-v2 有全套 ActionModel（AddNew/Filter/Refresh/BulkDelete，v12 抓包实证 TableBlockModel.subModels.actions 同构）。v12 AI-mode 卡片的 "Connect coding agent" 走 `portalAgentConnect:getConfig`（商业功能，不在范围）。
+4. **中文化现状**：`systemSettings.enabledLanguages` 为空 → [`getLang`](../../../platform/nocobase/packages/plugins/@nocobase/plugin-client/src/server/server.ts) fallback en-US；users.appLang 空；aiEmployees 9 个内置（atlas/dara/dex/ellis/lexi/lina/nathan/vera/viz，builtIn）DB 文案全英文（about 为 null 走代码英文默认）。Portal 双前端 `configurePortalI18n` 的 `resolveSystemLocale`：storedLocale > appLang > **enabledLanguages[0]** > default——服务端设 zh-CN 后双 Portal 新访客自动中文，零 portal 源码修改。
+
+**实施与证据**（全部幂等，[`nocobase-n17-alignment.mts`](../../../examples/kb-agent/scripts/nocobase-n17-alignment.mts)，已入 `all` 链）：
+
+1. **N17e 中文化**：`systemSettings` **顶层列与 options 双层**写 `enabledLanguages=['zh-CN']`（关键发现：admin 端 getLang 读 options 层、portal-sdk `resolveSystemLocale` 读顶层列——首版只写 options 层导致 Portal 登录页仍英文，隔离浏览器复测发现后补双层）+ `appLang`；9 个内置雇员中文文案 upsert（about 为运行时系统提示词唯一来源，null 走代码英文默认，故必须落库）。
+2. **N17d v2 表格页 ×8**：每页 = 同 title 替换 v1 行为 flowPage（保 icon/parentId/sort）+ RouteModel×2 / RootPageModel / BlockGridModel / TableBlockModel（N16 官方双写列）+ **AddNewActionModel / RefreshActionModel 操作栏** + **Add new 弹窗子树**（ChildPageModel→ChildPageTabModel→BlockGridModel→CreateFormModel→FormGridModel→FormItemModel+Input/Select/NumberFieldModel，官方 wire 从 AI 工作台手建样本 dump）+ FormSubmitActionModel（`n17sb-<formUid>` 确定性 uid 保证 list 端点幂等——list 不回 parentId，首版按 parentId 判重全部误判 kept，DB 复核抓出）。ChatButton 五条件（非 v1 页 + /admin 前缀 + 有 AI 雇员）随 v2 页自动满足。
+3. **N17c 应用中心**：v1 页 + 官方 `Markdown.Void`+`CardItem` 形态（首版误用不存在的 `Markdown` 组件导致卡片空白，对照 [`MarkdownBlockInitializer.tsx`](../../../platform/nocobase/packages/core/client/src/modules/blocks/other-blocks/markdown/MarkdownBlockInitializer.tsx) 修正），4 卡片链到双 Portal / AI 工作台 / DSH。
+4. **兼容收口**：crm/hub 模块 `ensureBlocks` 对同名 flowPage 感知跳过（否则 all 链二跑在 v2 页上找 v1 Grid 会炸）；`verify` 补六组 N17 断言（双层 locale / 应用中心 / 8 v2 页 / AddNew≥8 / FormSubmit≥8 / atlas 中文 prompt）；N14 截图脚本三个 v1 页 URL 换成 v2。
+5. **证据截图**（`N17-*.png`，[n17-capture.mjs](../../../examples/kb-agent/demos/nocobase-full-features/n17-capture.mjs)）：01 客户页 v2（数据+添加+悬浮球）、02 工单页 v2、03 Add new 中文表单+Submit、04 客户页悬浮球→Atlas 中文回答（思考链明示遵循中文指示）、05 应用中心四卡片、06/07 双 Portal 新访客中文登录页。写库闭环实测：Add new→填→Submit→`crm_customers` 新行落库（验收后清理）。
+6. **遗留（不阻塞）**：v2 Add new 表单暂覆盖 input/select/number 字段（date/m2o 编辑控件 wire 未 dump）；v12 multi-portal 的 AI-mode git 源仓库 + Connect coding agent 为商业能力，OSS 2.2.6 不可达（preset 测试 + multiPortals API 404 双证据）；曾手动切过语言的浏览器（storedLocale）Portal 保持原选语言，新访客/清存储后默认中文。
+
+---
+
+## N18 v2 弹窗表单 AI 助手填充（2026-09-10）
+
+**用户原话**："这个功能未完全实现，AI 助手当前不可用，未填写任何内容 — 请手动填写表单。"——在 N17 建的 v2 表格页点「添加」弹窗表单，尝试表单内 AI 填充（v12 demo "add new 旁 AI 员工"的完整功能）得到不可用提示。
+
+**诊断（官方 demo 实探 + 快照源码 + DB 三方对齐）**：
+1. **"不可用"的根因是 N17 wire 缺口，非插件故障**。官方 v12 demo（a1js3lumcbox.v12.demo.nocobase.com/admin）Customers 页 Add new 弹窗的真身：弹窗右下角 **AI 员工头像按钮**（React fiber 实证 `AIEmployeeButtonModel`，挂在 `CreateFormModel` 的 `actions` subKey，props：`aiEmployee.username='dex'`、`context.workContext=[{type:'flow-model', uid:<表单uid>}]`、40px 头像）→ 点开内嵌聊天面板 → 输入意图 → LLM 调前端工具 `formFiller`（v2 内置，经 workContext 的 frontendTools manifest 注入对话）→ `flowEngine.getModel(uid).context.setFormValues` 写表单。N17 当时把"add new 旁 AI"判定为页面级 ChatButton 悬浮球，建弹窗子树时（dump 自 AI 工作台手建样本，无 AI 节点）**没有挂 AIEmployeeButtonModel**——悬浮球对话不携带表单 flow-model 上下文，员工既看不到表单 schema 也没有 formFiller 工具，只能回复"不可用请手动填写"（该文案不在任何源码/locale 中，是 LLM 生成的兜底话术）。
+2. 辅助证据：2.2.6 快照有表单专员模板 [`form-assistant.ts`](../../../platform/nocobase/packages/plugins/@nocobase/plugin-ai/src/server/ai-employees/templates/form-assistant.ts)（艾芮，tools:['formFiller']），但本地 `aiEmployees` 表 9 个内置员工（atlas…viz）**不含 form_assistant**（模板从未播种）；官方 demo 用的也是 dex 而非该模板员工。 [`AIEmployeeShortcut.tsx`](../../../platform/nocobase/packages/plugins/@nocobase/plugin-ai/src/client-v2/ai-employees/AIEmployeeShortcut.tsx) 在 `listByUser` 查不到指定员工时静默 return（点了没反应的另一形态）。
+3. **官方 demo 行为闭环实录**：弹窗 AI 面板输入 "Fill the form: company Contoso Ltd" → Dex 回复 "Done! I've filled in the company name" → 表单 Customer name 已填 "Contoso Ltd"。
+
+**实施（纯运行配置，零源码修改）**：
+1. 新脚本 [`nocobase-n18-form-ai.mts`](../../../examples/kb-agent/scripts/nocobase-n18-form-ai.mts)（幂等，确定性 uid `n18ai-<formUid>`，入 `all` 链）：给 8 个 v2 页 CreateFormModel.actions 各挂一个 AIEmployeeButtonModel——`aiEmployee=dex`（与官方 demo 同款；本地 N17 已中文化其 about 且明示"支持自动填写表单"；root 经 `listByUser` 天然可见）、workContext 指向表单自身 uid、sortIndex=2（FormSubmit 之后，对齐官方）。
+2. `verify` 补断言：`AIEmployeeButtonModel` ≥8。
+3. 验收截图脚本 [`n18-capture.mjs`](../../../examples/kb-agent/demos/nocobase-full-features/n18-capture.mjs)（Playwright，同 n17-capture 落盘通道）。
+
+**证据**（`N18-*.png`，[n18-capture.mjs](../../../examples/kb-agent/demos/nocobase-full-features/n18-capture.mjs)）：
+- 01 弹窗表单右下角 Dex 头像按钮（官方同款形态）；02 点击展开聊天面板（Dex 中文问候）；03 输入意图"漯河一家中型调味品企业，名叫卫味轩食品…"→ formFiller 工具调用 → 6 字段全填中文（客户名称=卫味轩食品、类型=工厂、行业=调味品生产、国家=中国、等级=A 级、状态=潜在）+ Dex 中文回复；04 提交后落库闭环 `crm_customers` row22（industry=调味品生产/level=A/status=prospect，验收后 destroy 清理）。
+- aiMessages 对话层实证：user 中文意图 → tool `{"status":"success","content":"I have filled the form…"}` → dex 确认。
+
+**回归终态**：n18 二跑 kept；all 链 7 脚本重放全幂等（+0/kept，应用中心仍单页）；`verify` OK（含 N18 断言）；五场景 demo 5/5 PASS（实录 `full-journey-20260910-033109.md`）；`pnpm run typecheck` EXIT=0；`pnpm run doc-sync` 28/28；:13000/:3080 均 200。
+
+**备注**：MiniMax-M3 端到端延迟 15~100+s（推理后才调工具），n18-capture 等待窗口按 150s 设置；form_assistant 模板员工未播种属上游现状，如需专职表单员工可后续按模板 upsert 并把按钮 props 切换 username。
+
+---
+
 ## 附：实施者快查
 
 - NocoBase REST 授权模式：[`setup-nocobase.mts` 的 `call/dataOf`](../../../examples/kb-agent/scripts/setup-nocobase.mts:145)（Bearer + v2 wire `data` 包装，`withResilience` 超时/分级重试同在此）。

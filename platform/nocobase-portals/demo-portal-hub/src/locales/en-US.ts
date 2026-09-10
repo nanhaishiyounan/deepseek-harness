@@ -343,6 +343,11 @@ export const starter = {
   "auth.brand.foundationBody": "Reliable data, access control, workflows and governance.",
   "auth.brand.tagline": "Freedom above. Confidence below.",
   "auth.brand.headline": "Track every account from inquiry to won.",
+  // AI-employee form fill (src/components/ai-employee-fill)
+  "ai.employeeFill.open": "Fill with AI employee",
+  "ai.employeeFill.close": "Close AI panel",
+  "ai.employeeFill.placeholder":
+    "Describe this record in your own words; the AI employee fills the form for you.",
   // Reusable AI form-fill panel (src/components/ai-fill)
   "ai.fill.title": "AI assist",
   "ai.fill.action": "Fill with AI",

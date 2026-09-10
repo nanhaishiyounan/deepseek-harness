@@ -131,9 +131,14 @@ pnpm exec vitest run --config vitest.e2e.config.ts examples/kb-agent/tests/exper
 
 功能导览（登录后即可走遍，2026-09-09 实配）：
 
-- **九组业务菜单**：CRM 客户（线索看板/客户/联系人/产品与服务/客户仪表盘）、销售流程（订单/报价单/回款/发票/销售仪表盘）、工作台（个人任务聚合单页）、项目管理（项目/任务看板/任务列表/任务日历/任务甘特/里程碑）、工单中心（工单/知识文章）、资产管理（资产台账/供应商/维保记录）、人事管理（员工/部门/请假审批）、基础数据（分类维护），加上既有的专家数据组——业务管理菜单全景。
-- **AI 雇员两个入口**：AI 工作台（admin 菜单第二项）v2 页——内嵌聊天框 + 页面右下角官方同款悬浮球 + 表格区块，默认 Atlas / MiniMax-M3，可查业务数据源；或后台 :13000 设置 → AI employees 管理页（同一对话面板）。
+- **九组业务菜单（日常使用从左侧菜单进入）**：CRM 客户（线索/客户/联系人/产品与服务/客户仪表盘）、销售流程（订单/报价单/回款/发票/销售仪表盘）、工作台、项目管理（项目/任务看板/列表/日历/甘特/里程碑）、工单中心（工单/知识文章）、资产管理（资产台账/供应商/维保记录）、人事管理（员工/部门/请假审批）、基础数据（分类维护）+ 专家数据。其中八个核心表格页（客户/销售线索/联系人/订单/报价单/工单/资产台账/员工）为 v2 页：数据 + 「添加」/刷新操作栏 + **右下角 AI 员工悬浮球**（点开即 Atlas 中文对话；官方 v12 同款形态）。
+- **应用中心（多应用入口，N17）**：admin 顶层菜单「应用中心」四张卡片直达 CRM Portal / Hub Portal / AI 工作台 / DSH 工作台——对齐官方 v12 multi-portal 入口页的 OSS 等价实现（该页在 v12 为商业插件）。
+- **UI Editor（搭建态）说明**：顶栏「UI Editor」开关点亮时页面显示拖拽/配置把手（搭建态，用于改页面布局）；日常使用请点灭它——该状态只存在你自己的浏览器（localStorage），关掉后所有业务页即为干净的使用界面。
+- **AI 雇员两个入口**：任一 v2 业务页或 AI 工作台（admin 菜单）右下角悬浮球——内嵌聊天框 + 表格区块，默认 Atlas / MiniMax-M3，中文问答可查业务数据源；或后台 :13000 设置 → AI employees 管理页（九位内置雇员已全中文化）。
 - **双 Portal**：CRM 在 http://127.0.0.1:13000/dist/crm/ ，Hub 在 http://127.0.0.1:13000/dist/hub/ ——同源 cookie 直登，须从入口页进，深链直开会 404。
+- **AI 雇员对话附件与图片（上传即模型可见）**：任一 AI 雇员聊天输入框用回形针/拖拽/粘贴上传附件后直接提问——pdf/docx/xlsx/md 的文本内容与图片都会进入模型请求，模型能复述附件文字、描述图片内容。其中 pdf 依赖本地附件代理（`ai-proxy`，随 `all` 链自动启动）：代理把 llmService 指向的 `http://127.0.0.1:13100/v1` 请求里的 PDF file part 解析为文本注入，并默认过滤模型回复内联的 `<think>` 推理链（最终用户看不到推理过程，仅见正文）。代理启停：`ai-proxy start` / `ai-proxy stop`（stop 自动把 llmService 回切直连）；只想恢复 think 回显：`ai-proxy stop` 后 `N22_FILTER_THINK=0 ai-proxy start`，再不带该变量重启即恢复过滤。verify 会断言代理健康与 baseURL 指向。
+- **Portal AI 智能员工（四个表单挂载点）**：CRM Portal 的「销售流程 → 商机」与「销售线索」、Hub Portal 的「报销」与「销售线索」新建抽屉——底部按钮旁有 dex 头像按钮（「AI 智能员工」）：点击打开表单内嵌聊天 → 用中文描述意图（如「漯河一家调味品企业，名叫卫味轩食品，50 万金额，预计月底成交」）→ 模型流式回复并经 formFiller 自动填充表单字段 → 核对补选必填项后提交落库（CRM 两挂载点完整可用；Hub 两挂载点填充可用，本示例实例未建对应业务集合，提交会显式报错）。流式面板可见推理与填充全过程；发送按钮带防抖，连点不会重复开会话。
+- **已知边界**：图片单张 ≤10MB（JPEG/PNG/GIF/WEBP），超大图上传时前端显式报错、不会静默丢图；MiniMax-M3 推理延迟在 40~240 秒间波动（表单填充与长问答都需等待模型思考，流式输出期间有逐字反馈）；PDF 走文本层解析，扫描件/纯图片 PDF 无法提取内容，代理会显式报错而不是让模型猜。
 - **商业版边界**：AI 知识库（RAG）、审批/子流程/Webhook workflow 节点、审计日志等商业插件未装，替代路径已在上文（DSH 知识库、manual+condition+request 节点链），明细清单见 [plans/nocobase-full-features/PLAN.md](../../plans/nocobase-full-features/PLAN.md) §4。
 
 ```sh
@@ -142,7 +147,8 @@ node --import tsx/esm examples/kb-agent/scripts/setup-nocobase.mts          # = 
 
 # 分步执行 / 日常操作
 node --import tsx/esm examples/kb-agent/scripts/setup-nocobase.mts start    # 后台启动（健康检查）
-node --import tsx/esm examples/kb-agent/scripts/setup-nocobase.mts verify   # 断言 collections + 附件字段 + 种子 + workflow 节点链 + API key
+node --env-file=.env --import tsx/esm examples/kb-agent/scripts/setup-nocobase.mts verify   # 断言 collections + 附件字段 + 种子 + workflow 节点链 + n18ai- 表单 AI 按钮 + 双 Portal 探活 + ai-proxy + API key
+node --env-file=.env --import tsx/esm examples/kb-agent/scripts/setup-nocobase.mts "ai-proxy" start   # 启动本地附件代理（PDF 可见 + think 过滤；stop 自动回切直连）
 node --import tsx/esm examples/kb-agent/scripts/setup-nocobase.mts stop     # 停止 dev-server
 node --import tsx/esm examples/kb-agent/scripts/setup-nocobase.mts reset    # 停止 + 重建数据库 + 全新初始化
 ```

@@ -2,9 +2,10 @@ import { type HttpError, useTranslate } from "@refinedev/core";
 import { useForm } from "@refinedev/react-hook-form";
 import { useMemo } from "react";
 import { useParams } from "react-router";
-import { AiFillPanel, useAiFill, type AiFillField } from "@/components/ai-fill";
+import { useAiEmployeeFill } from "@/components/ai-employee-fill";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
+import type { AIFormField } from "@/extensions/nocobase-ai/providers";
 import { useRouteSurfaceClose } from "@nocobase/portal-sdk/routing";
 import {
   RouteDrawer,
@@ -72,7 +73,7 @@ function LeadCreateForm() {
   });
 
   // Allowed values are the same option lists the Select inputs render.
-  const aiFields = useMemo<AiFillField[]>(
+  const aiFields = useMemo<AIFormField[]>(
     () => [
       {
         name: "name",
@@ -107,7 +108,7 @@ function LeadCreateForm() {
     [translate]
   );
 
-  const ai = useAiFill({
+  const aiEmployee = useAiEmployeeFill({
     formId: "hub-sales-lead-create",
     title: translate("sales.leads.drawer.create.title", { ns: "starter" }, "Add lead"),
     fields: aiFields,
@@ -126,6 +127,11 @@ function LeadCreateForm() {
       "only when the text says the lead has already been assessed. Never set converted " +
       "by hand — the conversion flow writes it together with the account, contact and " +
       "deal it produced.",
+    placeholder: translate(
+      "sales.leads.aiFill.placeholder",
+      { ns: "starter" },
+      "Example: Tom Reyes from Halden Freight called after seeing our website; he asked for a quote for 12 depot scanners."
+    ),
   });
 
   return (
@@ -135,23 +141,11 @@ function LeadCreateForm() {
         className="flex min-h-0 flex-1 flex-col"
       >
         <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-5">
-          <AiFillPanel
-            ai={ai}
-            description={translate(
-              "sales.leads.aiFill.desc",
-              { ns: "starter" },
-              "Paste the enquiry, business card or call note. AI assist will structure the lead for you."
-            )}
-            inputLabel={translate("sales.leads.aiFill.label", { ns: "starter" }, "Describe the lead")}
-            placeholder={translate(
-              "sales.leads.aiFill.placeholder",
-              { ns: "starter" },
-              "Example: Tom Reyes from Halden Freight called after seeing our website; he asked for a quote for 12 depot scanners."
-            )}
-          />
+          {aiEmployee.panel}
           <LeadFormFields form={form} />
         </div>
-        <RouteDrawerFooter className="flex-row justify-end">
+        <RouteDrawerFooter className="flex-row items-center justify-end gap-2">
+          {aiEmployee.trigger}
           <Button type="button" variant="outline" onClick={() => close()}>
             {translate("sales.common.cancel", { ns: "starter" }, "Cancel")}
           </Button>

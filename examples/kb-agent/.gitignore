@@ -49,3 +49,7 @@ eval/calibration-*.json
 # repo instead of the run's temp root; the staging now lives under mkdtemp,
 # and this rule is the backstop if a future edit regresses that landing spot.
 scenarios-staged/
+# scripts/fixtures/n21/ holds probe files regenerated on every nocobase-n21
+# attachment-probe run (pdf/docx patched copies, xlsx/md/png generators) —
+# runtime artifacts, never committed.
+scripts/fixtures/

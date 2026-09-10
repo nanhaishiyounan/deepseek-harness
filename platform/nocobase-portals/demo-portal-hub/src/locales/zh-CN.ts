@@ -324,6 +324,10 @@ export const starter = {
   "auth.brand.foundationBody": "可靠的数据、权限、工作流与治理。",
   "auth.brand.tagline": "上层自由，底层可靠。",
   "auth.brand.headline": "从询盘到成交，跟踪每一个客户。",
+  // AI 智能员工填表（src/components/ai-employee-fill）
+  "ai.employeeFill.open": "AI 智能员工",
+  "ai.employeeFill.close": "收起 AI 面板",
+  "ai.employeeFill.placeholder": "用中文描述这条记录，AI 智能员工会帮你填写表单。",
   // 可复用 AI 填单面板（src/components/ai-fill）
   "ai.fill.title": "AI 智能填单",
   "ai.fill.action": "AI 智能填单",
