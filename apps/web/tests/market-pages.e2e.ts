@@ -345,6 +345,10 @@ describe('market and connector pages (in-process seams, Chinese UI)', () => {
     if (await coldTrigger.waitFor({ timeout: 5_000 }).then(() => true, () => false)) {
       await connectFreshWorkspaceZh(page, scaffold.workspaceCwd)
     } else {
+      // Swallows only the click rejection on this warm-session branch: the
+      // workspace selector never appeared, so the button can already be gone
+      // or mid-click from an earlier step. Every later assertion targets the
+      // market page, never a fresh-session composer.
       await page.getByRole('button', { name: '新建会话', exact: true }).first().click().catch(() => {})
     }
     await page.getByRole('button', { name: '数据资产数' }).click()
