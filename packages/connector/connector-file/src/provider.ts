@@ -7,6 +7,7 @@
  * @module @deepseek-ai/dsh-connector-file/provider
  */
 
+import type { Dirent } from 'node:fs'
 import { readFile, readdir, stat } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
 import { ConnectorError } from '@deepseek-ai/dsh-connector'
@@ -22,9 +23,9 @@ const ROUTED_EXTENSIONS = ['.csv', '.xlsx', '.json', '.md', '.txt', '.pdf', '.do
 const PLAIN_FILENAME = /^[^\\/:]+$/u
 
 /**
- * The file-set provider. `available()` is a constant `true`: the root's
- * existence was proven at plugin load (fail-loud composition), so no I/O
- * happens in the usability check.
+ * The file-set provider. `available()` is a constant `true`: the root was
+ * proven (or provisioned) at plugin load, so no I/O happens in the usability
+ * check.
  */
 export class FileConnectorProvider implements ConnectorProvider {
   readonly id = FILE_PROVIDER_ID
@@ -50,7 +51,17 @@ export class FileConnectorProvider implements ConnectorProvider {
    */
   async discover(request: ConnectorDiscoverRequest, signal?: AbortSignal): Promise<readonly ConnectorDatasetSummary[]> {
     if (request.kinds !== undefined && !request.kinds.includes('file')) return []
-    const entries = await readdir(this.root, { withFileTypes: true })
+    let entries: Dirent[]
+    try {
+      entries = await readdir(this.root, { withFileTypes: true })
+    } catch (error: unknown) {
+      /* Swallows only ENOENT — the root deleted out from under the running
+         composition, where an empty dataset list is the honest answer. Every
+         other errno (ENOTDIR, EACCES, …) is real misconfiguration and still
+         fails the call loud. */
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
+      return []
+    }
     const summaries: ConnectorDatasetSummary[] = []
     for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
       if (!entry.isFile()) continue

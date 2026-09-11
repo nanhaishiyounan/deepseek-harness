@@ -1,0 +1,13 @@
+{
+  "shipment_id": "SHP-2026-0903-018",
+  "lane": "广州 → 阿拉木图（铁路）",
+  "incoterm": "CIP",
+  "events": [
+    { "at": "2026-09-03T09:20:00+08:00", "kind": "loaded", "location": "广州南沙", "temp_c": 2.8 },
+    { "at": "2026-09-06T14:45:00+08:00", "kind": "customs_cleared", "location": "霍尔果斯", "temp_c": 3.4 },
+    { "at": "2026-09-09T11:05:00+06:00", "kind": "arrived", "location": "阿拉木图", "temp_c": 3.1 }
+  ],
+  "alerts": [
+    { "at": "2026-09-05T02:10:00+08:00", "kind": "temp_excursion", "detail": "40 分钟 >4℃，复核后放行" }
+  ]
+}

@@ -1,13 +1,14 @@
 /**
  * The file-set provider's behavior: directory scanning with the routed
  * extension whitelist, query and kind filtering, per-file fetches with
- * traversal-proof ids and size caps, eager root validation at plugin load,
- * and a Loader-booted composition running discover → fetch through the real
- * plugin rows.
+ * traversal-proof ids and size caps, root provisioning at plugin load
+ * (missing roots are created, occupied paths still fail loud), and a
+ * Loader-booted composition running discover → fetch through the real plugin
+ * rows.
  */
 
 import { afterEach, describe, expect, it } from 'vitest'
-import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, mkdir, rm, stat, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
@@ -53,6 +54,12 @@ describe('FileConnectorProvider discover', () => {
     expect(await provider.discover({ kinds: ['tabular'] })).toEqual([])
     expect((await provider.discover({ kinds: ['file'] })).map(summary => summary.id).sort()).toEqual(['customs-export.csv', 'visit-note.md'])
   })
+
+  it('returns an empty list when the root directory disappears after load', async () => {
+    const provider = new FileConnectorProvider(await fileRoot(), 10 * 1024 * 1024)
+    await rm(root as string, { recursive: true, force: true })
+    expect(await provider.discover({})).toEqual([])
+  })
 })
 
 describe('FileConnectorProvider fetch', () => {
@@ -88,10 +95,25 @@ describe('FileConnectorProvider fetch', () => {
 })
 
 describe('connector-file plugin', () => {
-  it('fails composition load on a missing root', async () => {
+  it('creates a missing root at composition load and serves an empty discovery', async () => {
+    root = await mkdtemp(join(tmpdir(), 'dsh-connector-file-'))
+    const missing = join(root, 'nested/connector-files')
     const ctx = new Context()
     await ctx.plugin(ConnectorRuntime)
-    await expect(ctx.plugin(FilePlugin, { root: '/nonexistent/dsh-connector-file-root' })).rejects.toThrow(/ENOENT/u)
+    await ctx.plugin(FilePlugin, { root: missing })
+    expect(ctx.connector.providerIds()).toEqual(['connector-file'])
+    expect((await stat(missing)).isDirectory()).toBe(true)
+    expect(await ctx.connector.discover({})).toEqual([])
+    await ctx.fiber.dispose()
+  })
+
+  it('fails composition load when a regular file occupies the root path', async () => {
+    root = await mkdtemp(join(tmpdir(), 'dsh-connector-file-'))
+    const blocker = join(root, 'blocker')
+    await writeFile(blocker, 'not a directory')
+    const ctx = new Context()
+    await ctx.plugin(ConnectorRuntime)
+    await expect(ctx.plugin(FilePlugin, { root: join(blocker, 'connector-files') })).rejects.toThrow(/ENOTDIR/u)
     expect(ctx.connector.providerIds()).toEqual([])
     await ctx.fiber.dispose()
   })

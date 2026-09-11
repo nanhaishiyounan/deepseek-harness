@@ -1,12 +1,12 @@
 /**
- * File-set connector provider plugin: scans one local directory at load
- * (fail-loud on a missing root) and registers the provider on
- * `ctx.connector`. Every dataset is a raw file; routing decisions stay with
- * the seam's shared data router.
+ * File-set connector provider plugin: proves one local directory at load,
+ * creating it when absent (an occupied or unreadable root still fails the
+ * composition), and registers the provider on `ctx.connector`. Every dataset
+ * is a raw file; routing decisions stay with the seam's shared data router.
  * @module @deepseek-ai/dsh-connector-file
  */
 
-import { readdir } from 'node:fs/promises'
+import { mkdir, readdir } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import type { Context } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
@@ -36,8 +36,10 @@ export const Config: z<Config> = z.object({
 })
 
 /**
- * Prove the root exists and is readable at load (misconfiguration fails the
- * composition, not the first call), then register the provider.
+ * Prove the root is readable at load, provisioning it when a clean checkout
+ * has not created the drop-in directory yet; any other root problem (an
+ * occupied path, missing permissions) fails the composition, not the first
+ * call.
  * @param ctx - context whose `connector` service receives the registration.
  * @param config - validated plugin configuration.
  */
@@ -47,7 +49,15 @@ type ResolvedConfig = Required<Config>
 export async function apply(ctx: Context, config: Config): Promise<void> {
   // schemastery (the exported Config) has already filled every defaulted field.
   const root = resolve(config.root)
-  await readdir(root)
+  try {
+    await readdir(root)
+  } catch (error: unknown) {
+    /* Swallows only ENOENT — the legitimate not-yet-provisioned first boot.
+       ENOTDIR (a file occupies the path), EACCES, and every other errno are
+       real misconfiguration and still fail the composition. */
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
+    await mkdir(root, { recursive: true })
+  }
   const provider = new FileConnectorProvider(root, (config as ResolvedConfig).maxFileBytes)
   const unregister = ctx.connector.registerProvider(provider)
   ctx.effect(() => unregister, 'connector-file.provider')

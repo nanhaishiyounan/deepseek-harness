@@ -6,8 +6,8 @@ File-set connector provider: one local directory of data files exposed as `file`
 
 ## Behavior
 
-- **Load-time validation** — the root must exist and be readable; a missing root fails composition load (misconfiguration fails loud at the earliest point), so `available()` is a constant `true` with no I/O.
-- **`discover`** — lists files whose extensions the data router admits (`.csv` `.xlsx` `.json` `.md` `.txt` `.pdf` `.docx`), skipping directories and everything else; matches the request's query against file names case-insensitively and honors kind restrictions (every dataset here is `file` kind). Each summary carries the file's mtime as `updatedAt`.
+- **Load-time provisioning** — a missing root is created at composition load (a clean checkout starts with an empty file set); every other root problem (an occupied path, an unreadable parent) fails the composition loud, so `available()` is a constant `true` with no I/O.
+- **`discover`** — lists files whose extensions the data router admits (`.csv` `.xlsx` `.json` `.md` `.txt` `.pdf` `.docx`), skipping directories and everything else; matches the request's query against file names case-insensitively and honors kind restrictions (every dataset here is `file` kind). Each summary carries the file's mtime as `updatedAt`. A root deleted while the composition keeps running answers an empty list — only this ENOENT is swallowed; every other errno still fails the call loud.
 - **`fetch`** — the dataset id must be one plain file name (anything carrying separators refuses before any filesystem work); a missing file or directory refuses `CONNECTOR_DATASET_MISSING`, an over-cap file refuses `CONNECTOR_FILE_TOO_LARGE`.
 
 ## Configuration (schemastery)

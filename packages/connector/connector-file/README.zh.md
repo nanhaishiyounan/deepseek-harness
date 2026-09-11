@@ -6,8 +6,8 @@
 
 ## 行为
 
-- **加载期校验** —— root 必须存在且可读；缺失时组合加载直接失败（错误配置在最早可判定点 fail-loud），因此 `available()` 是不做 I/O 的恒真。
-- **`discover`** —— 列出数据路由器准入扩展名（`.csv` `.xlsx` `.json` `.md` `.txt` `.pdf` `.docx`）的文件，跳过目录与其余扩展名；对请求的查询词做文件名大小写不敏感匹配，并尊重类型过滤（本 Provider 的数据集全部是 `file` 类型）。每条摘要以文件 mtime 作为 `updatedAt`。
+- **加载期建目录** —— root 缺失时在组合加载期自动创建（干净检出以空文件集起步）；其余 root 问题（路径被普通文件占据、父级不可读）仍然让组合加载 fail-loud，因此 `available()` 是不做 I/O 的恒真。
+- **`discover`** —— 列出数据路由器准入扩展名（`.csv` `.xlsx` `.json` `.md` `.txt` `.pdf` `.docx`）的文件，跳过目录与其余扩展名；对请求的查询词做文件名大小写不敏感匹配，并尊重类型过滤（本 Provider 的数据集全部是 `file` 类型）。每条摘要以文件 mtime 作为 `updatedAt`。组合运行期间 root 被删时回答空列表——仅吞这一种 ENOENT，其余 errno 仍让调用 fail-loud。
 - **`fetch`** —— 数据集 id 必须是纯文件名（带分隔符的一律在任何文件系统操作前拒绝）；文件缺失或目标是目录拒绝 `CONNECTOR_DATASET_MISSING`，超过上限拒绝 `CONNECTOR_FILE_TOO_LARGE`。
 
 ## 配置（schemastery）

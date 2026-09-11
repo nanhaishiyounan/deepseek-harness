@@ -218,7 +218,8 @@ describe('filterNonStreamBody', () => {
   it('strips think from message.content and updates content bytes', () => {
     const raw = Buffer.from(JSON.stringify({ choices: [{ index: 0, message: { role: 'assistant', content: '<think>想</think>答' } }] }))
     const { body, stats } = filterNonStreamBody(raw)
-    expect(JSON.parse(body.toString('utf8')).choices[0].message.content).toBe('答')
+    const parsed = JSON.parse(body.toString('utf8')) as { choices: { message: { content: string } }[] }
+    expect(parsed.choices[0]?.message.content).toBe('答')
     expect(stats.segments).toBe(1)
     expect(body.equals(raw)).toBe(false)
   })
