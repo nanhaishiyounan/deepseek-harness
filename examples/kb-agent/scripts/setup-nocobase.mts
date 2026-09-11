@@ -839,6 +839,30 @@ function writeEnv(url: string, token: string): void {
   writeFileSync(envFile, text.endsWith('\n') ? text : `${text}\n`)
 }
 
+/** Common local ports for a long-lived `dsh web` gateway (QUICKSTART.zh.md, reset section). */
+const DSH_WEB_GATEWAY_PORTS = [3080, 3081, 3083, 3084, 3085, 3086]
+
+/**
+ * Warn — never fail — when a `dsh web` gateway stays up across a reset: the
+ * long-lived process keeps open handles to the deleted sqlite files, so
+ * post-reset writes through it land in the orphaned inodes and are lost. The
+ * operator may keep the gateway on purpose, hence a probe warning instead of
+ * an automatic kill/restart.
+ */
+async function warnLiveDshWebGateways(): Promise<void> {
+  const alive: number[] = []
+  for (const port of DSH_WEB_GATEWAY_PORTS) {
+    const probe = await fetch(`http://127.0.0.1:${port}/`, { signal: AbortSignal.timeout(1500) }).catch(() => null)
+    if (probe) alive.push(port)
+  }
+  if (alive.length === 0) return
+  console.warn([
+    `setup-nocobase: WARNING — live dsh web gateway detected on ${alive.map((port) => `:${port}`).join(', ')}.`,
+    'A long-lived gateway keeps open handles to the deleted sqlite files; writes through it after this reset are lost.',
+    'Restart the dsh web gateway after reset — see the reset section in examples/kb-agent/QUICKSTART.zh.md.',
+  ].join('\n'))
+}
+
 async function stepStop(): Promise<void> {
   // The dev-server runs under tsx watch; match its command line and TERM it.
   const listed = spawnSync('pkill', ['-f', 'dev.*--server.*nocobase|nocobase.*dev.*--server'], { encoding: 'utf8' })
@@ -849,6 +873,7 @@ async function stepStop(): Promise<void> {
 }
 
 async function stepReset(): Promise<void> {
+  await warnLiveDshWebGateways()
   await stepStop()
   run('psql', ['-U', process.env.USER ?? 'mac', '-d', 'postgres', '-c', 'DROP DATABASE IF EXISTS nocobase'])
   console.log('setup-nocobase: database dropped; re-running install + init')

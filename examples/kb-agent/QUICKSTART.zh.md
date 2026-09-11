@@ -152,6 +152,8 @@ node --import tsx/esm examples/kb-agent/scripts/setup-nocobase.mts stop     # �
 node --import tsx/esm examples/kb-agent/scripts/setup-nocobase.mts reset    # 停止 + 重建数据库 + 全新初始化
 ```
 
+**重置数据（reset）**：`reset` 停止 dev-server、drop `nocobase` 库并全新重装；重置后**必须重启 dsh web 网关**（`Ctrl-C` 后重跑上面的 `pnpm dsh web` 命令）——长驻网关进程持有已删除库文件的 inode，不重启的话此后经它的写入落在孤儿 inode 上全部丢失（进程内存 / 新库文件 / 旧 inode 三个世界不一致）。彻底重置顺序：停 dsh web → `rm -f examples/kb-agent/workspace/{kg-graph,kb,lakehouse-catalog}.sqlite*` → `setup-nocobase.mts reset` → 默认 `all`（重建 DSH 数据面）→ 再起 dsh web。
+
 环境变量可覆盖：`NOCOBASE_HOME`（源码快照路径，默认仓内 `platform/nocobase`）、`NOCOBASE_BASE_URL`（默认 `http://127.0.0.1:13000`）、`NOCOBASE_ROOT_EMAIL` / `NOCOBASE_ROOT_PASSWORD`（默认 `admin@nocobase.com` / `admin123`）、`NOCOBASE_DSH_CALLBACK`（workflow 回调地址，默认 `http://127.0.0.1:3080`，即 `dsh web` 的 api-gateway）、`NOCOBASE_FORCE_BUILD`（=1 强制重建客户端产物）。
 
 真实轨道全链路 e2e（无 NocoBase 或不可达时自跳过并说明原因）：
