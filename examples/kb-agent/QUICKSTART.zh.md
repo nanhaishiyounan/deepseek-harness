@@ -18,8 +18,7 @@ pnpm install
 # 3. 在仓库根目录创建 .env（已配置过的跳过）；key 于 MiniMax 开放平台申请：https://platform.minimaxi.com/
 echo 'MINIMAX_API_KEY=sk-xxx' >> .env
 
-# 4. 建连接器投递目录（组合挂载的 connector-file 提供程序要求它存在；不放文件即为空数据集）
-mkdir -p examples/kb-agent/workspace/data/connector-files
+# 4. 连接器投递目录无需手动创建：组合挂载的 connector-file 提供程序首次启动自动建目录，且仓库自带三个 sample-*.csv/.md/.json 示例资产（examples/kb-agent/workspace/data/connector-files/，随 clone 即有）
 ```
 
 `MINIMAX_API_KEY` 同时服务对话（MiniMax-M3）与向量化（embo-01）；可选 `MINIMAX_BASE_URL=https://api.minimaxi.com/v1`（默认值即此）。没有 key 时入库/检索/统计仍可完整运行（纯文本检索），对话请求会以 `MISSING_CREDENTIAL` 失败。`pnpm dsh` 从源码经 tsx 启动，无需先 `pnpm run build`。
@@ -125,7 +124,7 @@ pnpm exec vitest run --config vitest.e2e.config.ts examples/kb-agent/tests/exper
 
 ## NocoBase 业务后台（真实订单轨道）
 
-订单的单一事实源在 NocoBase 2.x（DSH 不建平行订单表）。`scripts/setup-nocobase.mts` 一条命令把仓内 NocoBase 快照（`platform/nocobase`，隔离式上游副本——升级即重新快照，修改须登记其 MANIFEST）从零带到可用：依赖安装（yarn，首次约 15 分钟）、完整 UI 客户端产物构建（首次约 20 分钟，产物保留、之后秒级启动；`NOCOBASE_FORCE_BUILD=1` 强制重建）、本地 postgres 引导、后台启动 dev-server、应用初始化、五个 collections（`experts` / `expert_services` / `datasets` / `customs_export` / `orders`——orders 带 `deliverable` 附件字段）、张会长数据集播种、root 角色 API key，以及订单审批 workflow（collection 触发 → manual 审批 → 通过分支 request 回调 DSH `orders.fulfill` / 驳回分支回写 failed）。凭据写入仓库根 `.env`（`NOCOBASE_BASE_URL` / `NOCOBASE_API_KEY`），组合重启后 connector 与订单域即走真实后台。
+订单的单一事实源在 NocoBase 2.x（DSH 不建平行订单表）。`scripts/setup-nocobase.mts` 一条命令把仓内 NocoBase 快照（`platform/nocobase`，隔离式上游副本——升级即重新快照，修改须登记其 MANIFEST）从零带到可用：依赖安装（yarn，首次约 15 分钟）、完整 UI 客户端产物构建（首次约 20 分钟，产物保留、之后秒级启动；`NOCOBASE_FORCE_BUILD=1` 强制重建）、本地 postgres 引导、后台启动 dev-server、应用初始化、五个 collections（`experts` / `expert_services` / `datasets` / `customs_export` / `orders`——orders 带 `deliverable` 附件字段）、张会长数据集播种、root 角色 API key，以及订单审批 workflow（collection 触发 → manual 审批 → 通过分支 request 回调 DSH `orders.fulfill` / 驳回分支回写 failed）。随后重放 `scripts/setup-dsh-data.mts`（DSH 侧数据面：connector-files 目录与示例资产、专家名册、湖仓三表、市场目录、本体知识图谱构建、KB 语料入库——见下文"图谱页与业务管理页"），最后 verify 断言含 `kg_nodes>0` 与专家名册行数下限。凭据写入仓库根 `.env`（`NOCOBASE_BASE_URL` / `NOCOBASE_API_KEY`），组合重启后 connector 与订单域即走真实后台。
 
 浏览器打开 http://127.0.0.1:13000 即完整 NocoBase 业务系统（登录 → 数据管理、workflow、设置全部可用），与 DSH 工作台互为双入口——业务管理页「高级配置」的 iframe 内嵌同一后台，首次打开需登录。初始管理员账号 `admin@nocobase.com` / `admin123`（由 install 时 `NOCOBASE_ROOT_*` 创建，可覆盖）。同一端口同时伺服 UI 与 `/api/*`，REST 轨道（connector、订单域、demo）不经过额外代理层。
 
@@ -142,8 +141,8 @@ pnpm exec vitest run --config vitest.e2e.config.ts examples/kb-agent/tests/exper
 - **商业版边界**：AI 知识库（RAG）、审批/子流程/Webhook workflow 节点、审计日志等商业插件未装，替代路径已在上文（DSH 知识库、manual+condition+request 节点链），明细清单见 [plans/nocobase-full-features/PLAN.md](../../plans/nocobase-full-features/PLAN.md) §4。
 
 ```sh
-# 从零到可用（可重复执行；已存在的构建产物/collections/种子/workflow 跳过）
-node --import tsx/esm examples/kb-agent/scripts/setup-nocobase.mts          # = install → build → start → init → verify
+# 从零到可用（可重复执行；已存在的构建产物/collections/种子/workflow/DSH 数据面跳过）
+node --import tsx/esm examples/kb-agent/scripts/setup-nocobase.mts          # = install → build → start → init → 模块重放 → DSH 数据初始化 → verify
 
 # 分步执行 / 日常操作
 node --import tsx/esm examples/kb-agent/scripts/setup-nocobase.mts start    # 后台启动（健康检查）
@@ -241,13 +240,13 @@ pnpm exec vitest run --config vitest.e2e.config.ts examples/kb-agent/tests/marke
 - **图谱**：短语框把子图查询包装成自然语言（「宏发食品的供货链」「含棕榈油的商品」，其余文本按实体名直接游走）→ 实体搜索带别名解析 → sigma.js 画布（双击节点展开一跳邻居、单击选中、滚轮缩放；节点颜色按本体类型稳定分配）→ 类型图例点选过滤画布 → 详情面板（类型/关联数/业务键）与「问此实体」预填对话。只读：写图谱归 kg-build 管线。数据来自 apiproxy 的 `kg.*` 域（`cordis.patch.yml` 已开 `kgEnabled`/`kgTenant`）；画布渲染栈（sigma/graphology/force-atlas2）动态加载不进主包，无 WebGL 环境自动降级为同语义关系清单。
 - **业务管理**：对象切换器（`nocobase.listMeta` 动态清单，隐藏表不露）→ 实体卡流（主标签 + 三对字段预览，「问此记录」「编辑（对话）」与对象级「新建（对话）」全部预填对话，页面零表单）→ 辅助表格视图（hasNext 翻页）→ **高级配置**：`/nocobase` 反代把业务后台同源嵌进页面（低频管理：页面编辑器/角色权限细配；日常读写走对话）。数据来自 V2 的 `nocobase.listMeta/list` 域。
 
-构建图谱数据：跑 kg-build 管线（业务表结构化映射 + 文档实体抽取）——
+图谱数据随 `setup-nocobase.mts`（all 链）内置产出：链尾重放 `scripts/setup-dsh-data.mts`，其中 kg-build 管线综合三源建图（NocoBase 业务表结构化映射 + 湖仓表结构 + KB 语料闭集 LLM 抽取——无 `MINIMAX_API_KEY` 时语料腿跳过、确定性腿照跑），删除 `workspace/kg-*.sqlite` 后单跑 all 即重建；图谱页打开即自动加载默认子图。增量重建（数据变化后刷新图）仍可单独跑：
 
 ```sh
 node --import tsx/esm examples/kb-agent/scripts/kg-build.mts
 ```
 
-业务数据批量充实（批次五起，全部幂等、重跑不重复）：五个按域播种脚本把示例规模的演示面撑成有运营厚度的业务面——专家名册（32 位领域专家 + 可下单服务 + 知识资产，真源 `workspace/data/experts/roster-batch5.json`）、市场数据资产（63 条八域目录，真源 `workspace/data/market/assets-batch5.json`，`datasets` collection 自动扩展 domain/source/pricing/summary 字段）、历史订单（近 30 天 24 条，播种期间自动暂停审批 workflow）、湖仓三表（原辅料价格/进出口统计/冷链运价，经 `lakehouse.load` 正规入库并留 transfer 记录）、KB 语料入库（五个新语料目录，真实 embo-01 嵌入）。全部跑完后再执行上面的 kg-build 重建图谱。
+业务数据批量充实（批次五起，全部幂等、重跑不重复）：五个按域播种脚本把示例规模的演示面撑成有运营厚度的业务面——专家名册（32 位领域专家 + 可下单服务 + 知识资产，真源 `workspace/data/experts/roster-batch5.json`）、市场数据资产（63 条八域目录，真源 `workspace/data/market/assets-batch5.json`，`datasets` collection 自动扩展 domain/source/pricing/summary 字段）、历史订单（近 30 天 24 条，播种期间自动暂停审批 workflow）、湖仓三表（原辅料价格/进出口统计/冷链运价，经 `lakehouse.load` 正规入库并留 transfer 记录）、KB 语料入库（五个新语料目录，真实 embo-01 嵌入）。五个播种步与图谱构建均已并入 all 链（`setup-dsh-data.mts` 编排，水位探测幂等——名册水位按 32 位专家名全在、订单水位按 `ORD-B5-` 前缀 24 条全在判定，缺则重放播种脚本）。单独充实后重建图谱跑上面的 kg-build，或重放整个数据面：`node --import tsx/esm examples/kb-agent/scripts/setup-dsh-data.mts`。
 
 ```sh
 node --env-file=.env --import tsx/esm examples/kb-agent/scripts/seed-experts-roster.mts   # 专家名册 + 清理 e2e/demo 残留
@@ -311,7 +310,7 @@ DSH_EVAL_HYBRID=1 node --import tsx/esm examples/kb-agent/scripts/eval-retrieval
 ## 常见问题
 
 - **启动报 `No such built-in module: node:sqlite`**：Node 版本过低。执行 `nvm use 22.19.0` 后重试；本仓库要求 Node 22.19+。
-- **启动报 `ENOENT ... scandir .../examples/kb-agent/workspace/data/connector-files`**：连接器投递目录不存在（干净检出后的首次启动）。执行一次性准备第 4 步的 `mkdir -p examples/kb-agent/workspace/data/connector-files` 后重试。
+- **启动报 `ENOENT ... scandir .../examples/kb-agent/workspace/data/connector-files`**：2026-09-10 起不再发生——connector-file 提供程序对缺失目录自动创建（以空数据集起步），运行中目录被删也只降级为空文件资产、不再打挂整个市场；目录被普通文件占据等真实配置错仍会 fail-loud。
 - **拔掉 embed key 后还能用吗**：能检索。没有 `MINIMAX_API_KEY` 时每次 `kb_search` 以 `mode: 'text'` 纯文本运行、`embed_available: false`，入库/检索/统计闭环完整；仅对话请求以 `MISSING_CREDENTIAL` 失败。key 写入根 `.env` 或导出环境变量后两半都工作（仅经工作台 Models 页存入的 key 服务对话但不服务向量）。
 - **换企业/换租户**：租户是部署配置不是对话参数——`cordis.patch.yml` 的 `tool-kb` 行读取环境变量 `DSH_KB_TENANT`（默认 `demo-food-co`），模型从不提供租户。一家企业一个部署，见 [DEPLOY.zh.md](DEPLOY.zh.md) §3。
 - **升级后启动报 schema version 不兼容**：旧知识库文件被新构建拒绝（fail-loud），报错含盘上版本号。从源文档重新入库，或恢复同版本备份；不要手改 SQLite 文件。本示例的旧 v1 库已改名 `workspace/kb.sqlite.v1-backup` 留存（新库随后自动重建），旧库不会被新构建读取；升级与回滚的完整处理见 [DEPLOY.zh.md](DEPLOY.zh.md) §6。
