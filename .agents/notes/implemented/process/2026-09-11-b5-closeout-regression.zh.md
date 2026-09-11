@@ -12,7 +12,7 @@ B1-B4 四批验证累积了六项债务，且全量 `pnpm run test:web` 有约 4
 
 - **assembled jsdom 的 WebGL 常量 stub 归测试基建**（`apps/web/tests/assembled-boot.ts`）：内联进 client bundle 的 sigma 渲染栈在模块顶层读取 `WebGL2RenderingContext` 静态枚举，jsdom 无此全局导致 ui-kg 包 factory 首次 require 即抛错、整包加载失败。stub 只提供枚举数字（与 ui-kg 包内测试的 `vi.hoisted` 同形），降级关系清单路径不会触碰真实 GL 上下文。
 - **本地跑 test:web 必须先出 official 产物**：`pnpm run build`（无 profile）产出的 bundle 里 `DSH_CLIENT_BUILD_PROFILE` 被 define 成空对象读取，ui-brand-official 的 official 守卫自我关闭，built-boot 断言的品牌 wordmark 落在 fallback。CI 设了 `DSH_BUILD_CLIENT_PROFILE=official`；本地等价命令是 `DSH_BUILD_CLIENT_PROFILE=official pnpm run build`。
-- **golden 重录以 diff 审核为准**：B4 侧栏四入口（Data assets/Connectors/Graph/Business 按钮与 tab）引发的 aria golden 漂移经 `DSH_SNAPSHOT=refresh` 重录，逐文件 diff 审核确认全部为纯新增行（366 insertions / 0 deletions；lifecycle-chrome 的 hero/plan-active 另含 B3 场景 IA 的合法语义——精选 + 分类收纳 + 检索）。任何内容丢失或控件消失都必须先查根因。
+- **golden 重录以 diff 审核为准**：B4 侧栏四入口（Data assets/Connectors/Graph/Business 按钮与 tab）引发的 aria golden 漂移经 `DSH_SNAPSHOT=refresh` 重录，逐文件 diff 审核真实口径为 45 文件 +536/-54——删除行仅 lifecycle-chrome 的 hero/plan-active 两文件，属 B3 场景 IA 的合法语义替换（精选 + 分类收纳 + 检索取代旧平铺 hero）。任何内容丢失或控件消失都必须先查根因。
 - **测试选择器跟随合法的重复文本收窄**：steering 的 `getByText('Standard mode')` 因 hero 预设 label 与 composer 预设 seat 两处同名而 strict violation（57a87db34c 引入的产品形态），断言收窄为 seat 按钮角色。
 - **上传通道的 opt-in 跟随通道迁移**：浏览器上传走统一 `data.upload` 路由后，kb-workbench e2e overlay 需要同时 opt-in `dataUploadEnabled`（与 `kbWriteEnabled` 并列），一行配置缺失会让上传行永远停在失败态。
 - **专家名册与历史订单并入 `all` 链**（`setup-dsh-data.mts`）：名册水位按 roster 32 位专家名全在判定，订单水位按 `ORD-B5-` 前缀 24 条全在判定，缺则重放各自播种脚本（两者自身均幂等）；verify 断言组相应加 experts/expert_services/datasets/orders 行数下限。这是「重置后单跑 all 即完整系统」的最后一环。

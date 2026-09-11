@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/process/2026-09-11-b5-closeout-regression.md
-2026-09-11-b5-closeout-regression.md: 09b340f61af8bf3204d0c7a43bb447f3461c67b9
-2026-09-11-b5-closeout-regression.zh.md: 74d7a8eea3d796a6b9f378bd6cf13d75a2b30050
+2026-09-11-b5-closeout-regression.md: 1e8e10a6230cb9216d812754dd5f310528328a60
+2026-09-11-b5-closeout-regression.zh.md: cb8302f2a070b9243ff2250d0e86530ea32d6644
