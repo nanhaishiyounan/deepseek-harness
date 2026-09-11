@@ -6,12 +6,22 @@
   - button "Knowledge base":
     - img
     - text: "?"
+  - button "Data assets":
+    - img
+  - button "Connectors":
+    - img
+  - button "Graph"
+  - button "Business"
   - button "Session log":
     - text: Session log
     - img
   - tablist:
     - tab "Chat" [selected]
     - tab "Knowledge base"
+    - tab "Data assets"
+    - tab "Connectors"
+    - tab "Graph"
+    - tab "Business"
     - tab "Trajectory"
 - text: "Use the bash tool to run exactly: echo WEB_E2E_OK. Then reply with the single word DONE and stop. {{clock}}"
 - button "Copy":

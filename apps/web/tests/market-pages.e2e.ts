@@ -328,4 +328,32 @@ describe('market and connector pages (in-process seams, Chinese UI)', () => {
       { timeout: 15_000 },
     ).toContain('帮我接入一个新数据源')
   }, 120_000)
+
+  it('keeps the market page alive when the connector-files directory disappears', async () => {
+    onTestFailed(() => saveFailureShot(page, 'web-e2e-market-missing-dir'))
+    // The production ENOENT: a clean checkout (or a mid-run deletion) of the
+    // drop-in directory used to 500 the whole market through the runtime's
+    // fail-fast fan-out. The wiped root must degrade to an empty file dataset.
+    await rm(join(world as string, 'connector-files'), { recursive: true, force: true })
+    // The sidebar entry preloads the shared stats/catalog caches at page
+    // load; reload so both refetch against the wiped root instead of serving
+    // the pre-delete snapshot.
+    await page.reload({ waitUntil: 'load' })
+    await page.waitForSelector('[class*="frame"]', { timeout: 30_000 })
+    await dismissWelcome(page)
+    const coldTrigger = page.getByRole('textbox', { name: '选择工作区' })
+    if (await coldTrigger.waitFor({ timeout: 5_000 }).then(() => true, () => false)) {
+      await connectFreshWorkspaceZh(page, scaffold.workspaceCwd)
+    } else {
+      await page.getByRole('button', { name: '新建会话', exact: true }).first().click().catch(() => {})
+    }
+    await page.getByRole('button', { name: '数据资产数' }).click()
+    await page.getByRole('heading', { name: '数据资产市场' }).waitFor({ timeout: 15_000 })
+    // The service provider's asset still counts (products > 0) and the file
+    // provider contributes an empty dataset instead of failing the market.
+    await page.getByText(/数据产品 [1-9] · 供方 2/u).waitFor({ timeout: 15_000 })
+    await page.getByRole('button', { name: /中亚货运动线方案/ }).waitFor({ timeout: 15_000 })
+    expect(await page.getByText('customs-export-2026').count()).toBe(0)
+    expect(await page.getByText('市场暂不可用').count()).toBe(0)
+  }, 120_000)
 })

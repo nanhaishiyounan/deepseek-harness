@@ -313,7 +313,9 @@ describe('web e2e: empty-draft Cmd+Enter steers the whole queue', () => {
     await page.goto(scaffold.baseUrl, { waitUntil: 'load' })
     await page.waitForSelector('[class*="frame"]', { timeout: 30_000 })
     await connectFreshWorkspace(page, scaffold.workspaceCwd)
-    await page.getByText('Standard mode', { exact: true }).waitFor({ timeout: 10_000 })
+    // The blank hero's preset label and the composer's preset seat both carry
+    // the name verbatim; the seat is the actionable one this lane steers from.
+    await page.getByRole('button', { name: 'Standard mode' }).waitFor({ timeout: 10_000 })
   }, 120_000)
 
   afterAll(async () => {

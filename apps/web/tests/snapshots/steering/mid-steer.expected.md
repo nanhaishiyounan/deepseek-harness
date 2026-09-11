@@ -6,12 +6,22 @@
   - button "Knowledge base":
     - img
     - text: "?"
+  - button "Data assets":
+    - img
+  - button "Connectors":
+    - img
+  - button "Graph"
+  - button "Business"
   - button "Session log":
     - text: Session log
     - img
   - tablist:
     - tab "Chat" [selected]
     - tab "Knowledge base"
+    - tab "Data assets"
+    - tab "Connectors"
+    - tab "Graph"
+    - tab "Business"
     - tab "Trajectory"
 - text: Use the ask_user_question tool to ask me exactly one question with id "checkpoint", question "Ready to continue?", header "Checkpoint", and options labeled "Yes" and "No". After I answer, reply with one short sentence acknowledging my answer and stop. {{clock}}
 - button "Copy":

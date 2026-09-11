@@ -6,12 +6,22 @@
   - button "Knowledge base":
     - img
     - text: "?"
+  - button "Data assets":
+    - img
+  - button "Connectors":
+    - img
+  - button "Graph"
+  - button "Business"
   - button "Session log":
     - text: Session log
     - img
   - tablist:
     - tab "Chat" [selected]
     - tab "Knowledge base"
+    - tab "Data assets"
+    - tab "Connectors"
+    - tab "Graph"
+    - tab "Business"
     - tab "Trajectory"
 - text: Use web_search once with queries ["DeepSeek Harness snapshot search","DeepSeek Harness multi-query search"]. Then reply exactly SEARCH_DONE and stop. {{clock}}
 - button "Copy":

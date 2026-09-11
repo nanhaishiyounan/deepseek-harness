@@ -6,12 +6,22 @@
   - button "Knowledge base":
     - img
     - text: "?"
+  - button "Data assets":
+    - img
+  - button "Connectors":
+    - img
+  - button "Graph"
+  - button "Business"
   - button "Session log":
     - text: Session log
     - img
   - tablist:
     - tab "Chat" [selected]
     - tab "Knowledge base"
+    - tab "Data assets"
+    - tab "Connectors"
+    - tab "Graph"
+    - tab "Business"
     - tab "Trajectory"
 - text: Begin your reply with the plain sentence "Reading the workspace now." as text, and in that same message call the bash tool with the command "echo alpha". After the tool result, reply with the single word DONE and stop. {{clock}}
 - button "Copy":

@@ -4,12 +4,22 @@
   - button "Knowledge base":
     - img
     - text: "?"
+  - button "Data assets":
+    - img
+  - button "Connectors":
+    - img
+  - button "Graph"
+  - button "Business"
   - button "Session log":
     - text: Session log
     - img
   - tablist:
     - tab "Chat" [selected]
     - tab "Knowledge base"
+    - tab "Data assets"
+    - tab "Connectors"
+    - tab "Graph"
+    - tab "Business"
     - tab "Trajectory"
 - text: "Use the read tool twice in one assistant message: read a.txt and b.txt. Then reply with the single word DONE and stop. 7/25 {{clock}}"
 - button "Copy":

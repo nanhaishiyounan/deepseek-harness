@@ -20,6 +20,14 @@
 - button "Knowledge-base documents":
   - img
   - text: Knowledge base ?
+- button "data-asset count":
+  - img
+  - text: Data assets ?
+- button "data-source count":
+  - img
+  - text: Connectors ?
+- button "graph entity count": Graph ?
+- button "business-object count": Business ?
 - button "Settings":
   - img
   - text: Settings
@@ -31,12 +39,22 @@
   - button "Knowledge base":
     - img
     - text: "?"
+  - button "Data assets":
+    - img
+  - button "Connectors":
+    - img
+  - button "Graph"
+  - button "Business"
   - button "Session log":
     - text: Session log
     - img
   - tablist:
     - tab "Chat" [selected]
     - tab "Knowledge base"
+    - tab "Data assets"
+    - tab "Connectors"
+    - tab "Graph"
+    - tab "Business"
     - tab "Trajectory"
 - img
 - text: Food-industry knowledge Q&A Search your documents · cited answers across compliance, process, cost and supply Preview
@@ -55,33 +73,43 @@
   - button "What is the max sorbate level in soy sauce?"
   - button "What does GB 14881 say on pest control?"
 - region "Scenarios":
-  - text: Scenarios Market insight
+  - text: Scenarios30 scenarios · browse by category
   - img
-  - button "AI Marketing Insight Lead Retrieves market corpus; outputs category size, channel mix, and opportunities with cited dates."
-  - button "Consumer Insight Lead Retrieves consumer-research corpus; outputs audience, preference, and unmet-need findings with sample sizes."
-  - text: Process
-  - img
-  - button "Smart Quality Control Lead Retrieves process and QC corpus; outputs standard parameters, limits, and exception handling with citations."
-  - button "AI Product R&D Assistant Retrieves recipe, ingredient, and competitor corpus; outputs directions, compliance checks, and cost estimates."
-  - text: Food safety
-  - img
-  - button "AI Food-safety Service Lead Retrieves regulation and system corpus; outputs clause basis, assessment, corrective actions, and verification."
-  - button "AI Food-safety Inspector Retrieves inspection-checklist corpus; outputs zone, check item, criteria, and evidence requirements."
-  - text: Cost
-  - img
-  - button "AI Inventory & Pricing Steward Retrieves cost, inventory, and market corpus; outputs basis, calculation, advice, and risks with price dates."
-  - text: Supply chain
-  - img
-  - button "Supplier Risk Assessor Retrieves supplier and delivery corpus; outputs performance, risks, rating, and mitigation actions."
-  - text: Export
-  - img
-  - button "AI Export-tax Steward Retrieves export-tax-refund corpus; outputs eligibility, documents, deadlines, and risk notes with citations."
-  - text: Equipment
-  - img
-  - button "AI Equipment Maintenance Lead Retrieves equipment-manual and work-order corpus; outputs symptoms, causes, checks, and safety notes."
-  - text: Data assets
-  - img
-  - button "Data-asset Accounting Advisor Retrieves data-asset policy corpus; outputs policy basis, capitalization conditions, cost pooling, and risks."
+  - searchbox "Search scenarios"
+  - group "Featured scenarios":
+    - text: Featured scenarios
+    - button "AI Marketing Insight Lead Retrieves market corpus; outputs category size, channel mix, and opportunities with cited dates."
+    - button "AI Food-safety Service Lead Retrieves regulation and system corpus; outputs clause basis, assessment, corrective actions, and verification."
+    - button "AI Inventory & Pricing Steward Retrieves cost, inventory, and market corpus; outputs basis, calculation, advice, and risks with price dates."
+    - button "AI Export-compliance Officer Retrieves export-compliance corpus; outputs regulatory requirements, obligations, and implementation actions with cited clauses."
+    - button "AI Supply-chain Finance Officer Retrieves supply-chain-finance corpus; outputs product terms, costs, and applicable scenarios with cited product ids."
+    - button "AI Cold-chain Management Lead Retrieves cold-chain corpus; outputs temperature standards, monitoring requirements, and exception handling with cited procedure ids."
+  - group "Browse by category":
+    - text: Browse by category
+    - button "Market insight 5":
+      - img
+      - text: Market insight 5
+    - button "Process 4":
+      - img
+      - text: Process 4
+    - button "Food safety 4":
+      - img
+      - text: Food safety 4
+    - button "Cost 3":
+      - img
+      - text: Cost 3
+    - button "Supply chain 6":
+      - img
+      - text: Supply chain 6
+    - button "Export 5":
+      - img
+      - text: Export 5
+    - button "Equipment 1":
+      - img
+      - text: Equipment 1
+    - button "Data assets 2":
+      - img
+      - text: Data assets 2
 - region "Recent searches":
   - text: Recent searches
   - paragraph: No searches yet — try a sample above

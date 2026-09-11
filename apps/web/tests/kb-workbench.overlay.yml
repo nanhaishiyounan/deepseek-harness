@@ -2,7 +2,10 @@
 # web-app bundle keeps them opt-in, so this overlay opts in for the in-process
 # kb stack the scenario mounts after boot (restating the bundle's tenant
 # binding keeps the row self-contained under either patch-merge semantics).
+# The browser uploads ride the unified data-upload route, which carries its
+# own opt-in next to the kb write methods.
 - id: api-gateway
   config:
     kbTenant: default
     kbWriteEnabled: true
+    dataUploadEnabled: true

@@ -409,26 +409,87 @@ describe('kb workbench (text-only degraded mode, Chinese UI)', () => {
     // Both ingests (the gateway case's corpus and the wizard's supplier
     // note) drive the document chip.
     await page.getByText('文档 2').first().waitFor({ timeout: 15_000 })
-    await page.getByText('30 个场景').first().waitFor({ timeout: 15_000 })
-    // Sample questions fill the composer; the scenario rail shows the catalog.
+    // The usage chip keeps the whole-catalog count; the browse heading
+    // restates it over the folded categories.
+    await page.getByText('30 个场景', { exact: true }).first().waitFor({ timeout: 15_000 })
+    await page.getByText('30 个场景 · 分类浏览').first().waitFor({ timeout: 15_000 })
+    // Sample questions fill the composer; the scenario portal leads with the
+    // featured row (both named leads are featured picks).
     await page.getByRole('button', { name: '酱油中山梨酸钾的最大使用量？' }).click()
     await expect.poll(() => page.locator('textarea:enabled').first().inputValue()).toContain('酱油中山梨酸钾')
     await page.getByText('AI 营销洞察主管').waitFor()
     await page.getByText('AI 食安服务主管').waitFor()
+    // IA assertion: the default viewport renders at most ten scenario cards —
+    // exactly the featured six in the DOM (every category folded), and none
+    // of the rendered cards clipped outside the viewport box.
+    expect(await page.locator('[class*="scenarioCard"]').count()).toBe(6)
+    const visibleCards = await page.evaluate(() => Array.from(document.querySelectorAll('[class*="scenarioCard"]'))
+      .filter((card) => {
+        const rect = card.getBoundingClientRect()
+        return rect.width > 0 && rect.height > 0
+          && rect.bottom > 0 && rect.top < window.innerHeight
+          && rect.right > 0 && rect.left < window.innerWidth
+      }).length)
+    expect(visibleCards).toBeLessThanOrEqual(10)
   }, 120_000)
 
-  it('starts a new session from a newly synced scenario card through the real preset selection', async () => {
+  it('starts a new session from a newly synced featured card through the real preset selection', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-kb-scenario-card'))
     await openBlankHero(page)
-    await page.getByText('30 个场景').first().waitFor({ timeout: 15_000 })
-    // cold-chain joined the catalog with the thirty-card sync, so this card
-    // exercises a roster entry the portal previously could not offer: the
-    // confirm modal states the probe, and starting applies the preset and
-    // fills that probe into the composer.
+    // cold-chain joined the catalog with the thirty-card sync and is one of
+    // the six featured picks, so it sits on the default viewport: the confirm
+    // modal states the probe, and starting applies the preset and fills that
+    // probe into the composer.
+    await page.getByText('30 个场景 · 分类浏览').first().waitFor({ timeout: 15_000 })
     await page.getByRole('button', { name: /AI 冷链管理主管/ }).click()
     await page.getByText('示例问题：冷链 断链处置').waitFor({ timeout: 15_000 })
     await page.getByRole('button', { name: '开始会话' }).click()
     await expect.poll(() => page.locator('textarea:enabled').first().inputValue()).toContain('冷链 断链处置')
+    expect(await page.getByText('场景切换失败').count()).toBe(0)
+  }, 120_000)
+
+  it('filters the scenario portal through the live search and recovers the browse view', async () => {
+    onTestFailed(() => saveFailureShot(page, 'web-e2e-kb-scenario-search'))
+    await openBlankHero(page)
+    const search = page.getByRole('searchbox', { name: '搜索场景' })
+    await search.waitFor({ timeout: 15_000 })
+    // The default view folds everything but the featured six.
+    expect(await page.locator('[class*="scenarioCard"]').count()).toBe(6)
+    // A keyword filters the whole catalog: 0 < visible < 30, with the
+    // hit-count summary naming both numbers.
+    await search.fill('食安')
+    await page.getByText('匹配 4 / 30 个场景').waitFor({ timeout: 15_000 })
+    await expect.poll(() => page.locator('[class*="scenarioCard"]').count()).toBe(4)
+    await page.getByText('AI 食安服务主管').waitFor()
+    // A keyword the featured market lead does not carry drops it from view.
+    expect(await page.getByText('AI 营销洞察主管').count()).toBe(0)
+    // A miss renders the empty state with zero cards.
+    await search.fill('不存在的关键词')
+    await page.getByText('没有匹配的场景 — 换个关键词试试').waitFor({ timeout: 15_000 })
+    expect(await page.locator('[class*="scenarioCard"]').count()).toBe(0)
+    // Clearing the query restores the featured row plus the folded browse
+    // (all thirty scenarios stay reachable).
+    await search.fill('')
+    expect(await page.locator('[class*="scenarioCard"]').count()).toBe(6)
+    await page.getByText('精选场景').waitFor()
+  }, 120_000)
+
+  it('reaches a folded scenario by expanding its category and starts it from the card', async () => {
+    onTestFailed(() => saveFailureShot(page, 'web-e2e-kb-scenario-foldout'))
+    await openBlankHero(page)
+    // label-review is neither featured nor matched by the portal search's
+    // obvious food-safety keywords: the folded category row is its path.
+    const row = page.getByRole('button', { name: /食品安全/ })
+    await row.waitFor({ timeout: 15_000 })
+    expect(await row.getAttribute('aria-expanded')).toBe('false')
+    await row.click()
+    await expect.poll(() => row.getAttribute('aria-expanded')).toBe('true')
+    // Featured six plus the bucket's four cards, still within the cap.
+    await expect.poll(() => page.locator('[class*="scenarioCard"]').count()).toBe(10)
+    await page.getByRole('button', { name: /AI 标签合规审查员/ }).click()
+    await page.getByText('示例问题：营养标签 修约规则').waitFor({ timeout: 15_000 })
+    await page.getByRole('button', { name: '开始会话' }).click()
+    await expect.poll(() => page.locator('textarea:enabled').first().inputValue()).toContain('营养标签 修约规则')
     expect(await page.getByText('场景切换失败').count()).toBe(0)
   }, 120_000)
 
@@ -448,10 +509,11 @@ describe('kb workbench (text-only degraded mode, Chinese UI)', () => {
     await page.getByPlaceholder('检索知识库，如：山梨酸 酱油 限量').fill('山梨酸')
     await page.getByRole('button', { name: '检索', exact: true }).click()
     await page.getByText('[1]').first().waitFor({ timeout: 15_000 })
-    // Back on the chat tab, the still-blank hero returns with its portal.
+    // Back on the chat tab, the still-blank hero returns with its portal
+    // (browse heading restating the catalog count over the folded rows).
     await page.getByRole('tab', { name: '对话', exact: true }).click()
     await page.getByText('食品产业知识库问答').first().waitFor({ timeout: 15_000 })
-    await page.getByText('30 个场景').first().waitFor({ timeout: 15_000 })
+    await page.getByText('30 个场景 · 分类浏览').first().waitFor({ timeout: 15_000 })
   }, 120_000)
 
   it('syncs the hero recent-search rail with the workbench history across views', async () => {

@@ -137,6 +137,30 @@ class EventSourceStub {
   close(): void {}
 }
 
+// The inlined sigma renderer reads WebGL enum constants off the globals at
+// module top level (its SIZE_FACTOR_PER_ATTRIBUTE_TYPE table), so the
+// ui-kg factory throws on first require before any component-level degrade
+// logic can run. Only enum numbers ride these stubs — the degraded-list path
+// never reaches a real GL context (the same shape the ui-kg package tests
+// install via vi.hoisted).
+// oxlint-disable-next-line typescript/no-extraneous-class -- GL enum constants ride statics; the constructor shape is required.
+class WebGL2Stub {
+  static readonly BOOL = 0x8b56
+  static readonly BYTE = 0x1400
+  static readonly UNSIGNED_BYTE = 0x1401
+  static readonly SHORT = 0x1402
+  static readonly UNSIGNED_SHORT = 0x1403
+  static readonly INT = 0x1404
+  static readonly UNSIGNED_INT = 0x1405
+  static readonly FLOAT = 0x1406
+}
+
+// oxlint-disable-next-line typescript/no-extraneous-class -- constructor shape required; only static enum numbers are read.
+class WebGL1Stub {
+  static readonly UNSIGNED_BYTE = 0x1401
+  static readonly FLOAT = 0x1406
+}
+
 const win = window as FixtureWindow
 let unmount: (() => Promise<void>) | undefined
 
@@ -159,6 +183,8 @@ export function installAssembledBootEnv(): void {
     document.title = 'DeepSeek Harness'
     vi.stubGlobal('ResizeObserver', ResizeObserverStub)
     vi.stubGlobal('EventSource', EventSourceStub)
+    vi.stubGlobal('WebGL2RenderingContext', WebGL2Stub)
+    vi.stubGlobal('WebGLRenderingContext', WebGL1Stub)
     vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) =>
       setTimeout(() => { callback(0) }, 0) as unknown as number)
     vi.stubGlobal('cancelAnimationFrame', (id: number) => { clearTimeout(id) })

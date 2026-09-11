@@ -6,12 +6,22 @@
   - button "Knowledge base":
     - img
     - text: "?"
+  - button "Data assets":
+    - img
+  - button "Connectors":
+    - img
+  - button "Graph"
+  - button "Business"
   - button "Session log":
     - text: Session log
     - img
   - tablist:
     - tab "Chat" [selected]
     - tab "Knowledge base"
+    - tab "Data assets"
+    - tab "Connectors"
+    - tab "Graph"
+    - tab "Business"
     - tab "Trajectory"
 - group "Command input": /goal Keep the composer context panels aligned
 - 'button "goal Goal created Status: active Objective: Keep the composer context panels aligned Rounds: 0/256 Activation: armed Commands: /goal edit <objective>, /goal pause, /goal clear"':

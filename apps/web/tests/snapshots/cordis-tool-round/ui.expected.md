@@ -6,12 +6,22 @@
   - button "Knowledge base":
     - img
     - text: "?"
+  - button "Data assets":
+    - img
+  - button "Connectors":
+    - img
+  - button "Graph"
+  - button "Business"
   - button "Session log":
     - text: Session log
     - img
   - tablist:
     - tab "Chat" [selected]
     - tab "Knowledge base"
+    - tab "Data assets"
+    - tab "Connectors"
+    - tab "Graph"
+    - tab "Business"
     - tab "Trajectory"
 - text: "Use only Cordis tools. First call cordis_inspect_self with no arguments. Then call cordis_define with plugin kind \"new\", idPrefix \"snap\", name \"snapshot noop\", purpose \"does nothing, for the snapshot\", code.host exactly \"return { name: \\\"snapshot-noop\\\", apply(ctx) {} }\" and code.client exactly \"return { inject: [\\\"slots\\\"], apply(ctx) { ctx.slots.register({ name: \\\"shell.overlay\\\", id: \\\"snapshot-probe\\\" }, () => React.createElement(\\\"div\\\", { \\\"data-snapshot-probe\\\": \\\"loaded\\\" })) } }\". Read its returned pluginId and packageId, then call cordis_run with those exact IDs and mode \"run\". After the run request returns, reply exactly CORDIS_UI_READY and stop. {{clock}}"
 - button "Copy":
