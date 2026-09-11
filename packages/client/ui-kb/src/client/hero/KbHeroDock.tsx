@@ -1,22 +1,29 @@
 /**
  * The KB portal dock: the blank-session hero's usage chips, sample questions,
- * scenario rail, and recent-search rail (the localStorage-backed last five
- * queries), riding the `conversation.input.dock` seat above the composer
- * card. Renders only while the session is blank in its blank phase — an
- * active conversation sees nothing (the presentation stays a pure function
- * of the owner's session snapshot).
+ * the scenario portal (a featured front row, a category browse with collapsed
+ * groups, and a live search that filters all thirty cards), and the
+ * recent-search rail (the localStorage-backed last five queries), riding the
+ * `conversation.input.dock` seat above the composer card. Renders only while
+ * the session is blank in its blank phase — an active conversation sees
+ * nothing (the presentation stays a pure function of the owner's session
+ * snapshot).
  * @module @deepseek-ai/dsh-client-ui-kb/client/hero/KbHeroDock
  */
 
 import { useEffect, useState } from 'react'
 import type { JSX } from 'react'
+import clsx from 'clsx'
 import type { SnapshotStore } from '@deepseek-ai/dsh-client-runtime/client'
-import { Button, IconChevronRightOutline14, Modal } from '@deepseek-ai/dsh-client-ui-primitives'
+import {
+  Button, IconChevronDownOutline14, IconChevronRightOutline14, IconSearchOutline16, Input, Modal,
+} from '@deepseek-ai/dsh-client-ui-primitives'
 import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 // Type-only: pulls the ui-conversation SlotMap merge (the input-dock seat).
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type { KbClientState } from '../kbStore.ts'
-import { KB_SCENARIOS, scenariosByCategory, type KbScenario } from './scenarios.ts'
+import {
+  KB_SCENARIOS, featuredScenarios, filterScenarios, scenariosByCategory, type KbScenario, type KbScenarioCategory,
+} from './scenarios.ts'
 import { clearRecentSearches, recentSearches } from '../recentSearches.ts'
 import css from './hero.module.css'
 
@@ -59,6 +66,11 @@ export function KbHeroDock({
   const [pending, setPending] = useState<KbScenario | undefined>(undefined)
   const [busy, setBusy] = useState(false)
   const [failed, setFailed] = useState(false)
+  // The scenario portal's browse state: a live search query plus the set of
+  // category groups the user has expanded. Both live only in this component —
+  // the catalog itself stays static.
+  const [query, setQuery] = useState('')
+  const [openCategories, setOpenCategories] = useState<ReadonlySet<KbScenarioCategory>>(() => new Set())
   // The recent rail reads on mount and after every workbench occupation: the
   // dock stays mounted while the workbench tab owns the column (it renders
   // nothing), so those are exactly the windows in which the log can change.
@@ -75,6 +87,17 @@ export function KbHeroDock({
   if (workbenchMounted) return null
 
   const zh = language() === 'zh'
+  // Null query = the browse view (featured + collapsed categories); otherwise
+  // the catalog-wide filter result replaces both zones.
+  const matches = filterScenarios(KB_SCENARIOS, query)
+  const toggleCategory = (category: KbScenarioCategory): void => {
+    setOpenCategories((previous) => {
+      const next = new Set(previous)
+      if (next.has(category)) next.delete(category)
+      else next.add(category)
+      return next
+    })
+  }
   const fillDraft = (text: string): void => {
     inputActions.setDraft(text)
     document.querySelector<HTMLTextAreaElement>('textarea')?.focus()
@@ -107,44 +130,110 @@ export function KbHeroDock({
       </div>
 
       <section className={css.scenarios} aria-label={t('scenario.title')}>
-        <span className={css.scenarioHeading}>
-          {t('scenario.title')}
-          <span className={css.railCount}>{t('scenario.railCount', { n: KB_SCENARIOS.length })}</span>
-        </span>
-        <div className={css.rail}>
-          {scenariosByCategory().map((group) => {
-            const lead = group[0]
-            /* v8 ignore next -- every KB_SCENARIO_CATEGORIES bucket is non-empty
-               in the shipped catalog; the guard is the map's own default. */
-            if (lead === undefined) return null
-            return (
-              <div key={lead.category} className={css.scenarioGroup}>
-                <span className={css.categoryLabel}>
-                  {t(`scenario.category.${lead.category}`)}
-                  <IconChevronRightOutline14 className={css.categoryChevron} size={12} />
-                </span>
-                <div className={css.scenarioCards}>
-                  {group.map(scenario => (
-                    <button
+        <div className={css.scenarioToolbar}>
+          <span className={css.scenarioHeading}>
+            {t('scenario.title')}
+            <span className={css.railCount}>{t('scenario.railCount', { n: KB_SCENARIOS.length })}</span>
+          </span>
+          <Input
+            className={clsx(css.scenarioSearch)}
+            icon={<IconSearchOutline16 size={16} className={css.searchIcon} aria-hidden="true" />}
+            type="search"
+            aria-label={t('scenario.searchLabel')}
+            placeholder={t('scenario.searchPlaceholder')}
+            value={query}
+            onChange={(event) => { setQuery(event.target.value) }}
+          />
+        </div>
+        {matches === null
+          ? (
+            <>
+              <div className={css.featuredZone} role="group" aria-label={t('scenario.featuredTitle')}>
+                <span className={css.zoneLabel}>{t('scenario.featuredTitle')}</span>
+                <div className={css.cardGrid}>
+                  {featuredScenarios().map(scenario => (
+                    <ScenarioCard
                       key={scenario.id}
-                      type="button"
-                      className={css.scenarioCard}
-                      onClick={() => {
-                        setFailed(false)
-                        setPending(scenario)
-                      }}
-                    >
-                      <span className={css.scenarioName}>{zh ? scenario.nameZh : scenario.nameEn}</span>
-                      <span className={css.scenarioDescription}>
-                        {zh ? scenario.descriptionZh : scenario.descriptionEn}
-                      </span>
-                    </button>
+                      scenario={scenario}
+                      zh={zh}
+                      onPick={() => { setFailed(false); setPending(scenario) }}
+                    />
                   ))}
                 </div>
               </div>
-            )
-          })}
-        </div>
+              <div className={css.browseZone} role="group" aria-label={t('scenario.browseTitle')}>
+                <span className={css.zoneLabel}>{t('scenario.browseTitle')}</span>
+                {scenariosByCategory().map((group) => {
+                  const lead = group[0]
+                  /* v8 ignore next -- every KB_SCENARIO_CATEGORIES bucket is non-empty
+                     in the shipped catalog; the guard is the map's own default. */
+                  if (lead === undefined) return null
+                  const open = openCategories.has(lead.category)
+                  return (
+                    <div key={lead.category} className={css.categoryGroup}>
+                      <button
+                        type="button"
+                        className={css.categoryRow}
+                        aria-expanded={open}
+                        onClick={() => { toggleCategory(lead.category) }}
+                      >
+                        <IconChevronDownOutline14
+                          className={open ? css.chevronOpen : css.chevronClosed}
+                          size={12}
+                          aria-hidden="true"
+                        />
+                        <span className={css.categoryName}>{t(`scenario.category.${lead.category}`)}</span>
+                        <span className={css.categoryCount}>{group.length}</span>
+                      </button>
+                      {open && (
+                        <div className={css.cardGrid}>
+                          {group.map(scenario => (
+                            <ScenarioCard
+                              key={scenario.id}
+                              scenario={scenario}
+                              zh={zh}
+                              onPick={() => { setFailed(false); setPending(scenario) }}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </>
+          )
+          : matches.length === 0
+            ? <p className={css.searchEmpty}>{t('scenario.searchEmpty')}</p>
+            : (
+              <div className={css.resultsZone} role="group" aria-label={t('scenario.searchResultCount', { n: matches.length, total: KB_SCENARIOS.length })}>
+                <span className={css.zoneLabel}>
+                  {t('scenario.searchResultCount', { n: matches.length, total: KB_SCENARIOS.length })}
+                </span>
+                {scenariosByCategory(matches).map((group) => {
+                  const lead = group[0]
+                  if (lead === undefined) return null
+                  return (
+                    <div key={lead.category} className={css.categoryGroup}>
+                      <span className={css.categoryName}>
+                        {t(`scenario.category.${lead.category}`)}
+                        <IconChevronRightOutline14 className={css.categoryChevron} size={12} aria-hidden="true" />
+                      </span>
+                      <div className={css.cardGrid}>
+                        {group.map(scenario => (
+                          <ScenarioCard
+                            key={scenario.id}
+                            scenario={scenario}
+                            zh={zh}
+                            onPick={() => { setFailed(false); setPending(scenario) }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
       </section>
 
       <section className={css.recents} aria-label={t('hero.recent')}>
@@ -195,6 +284,28 @@ export function KbHeroDock({
         )}
       </Modal>
     </div>
+  )
+}
+
+/**
+ * One scenario card as every zone renders it — featured row, expanded
+ * category, or search result. Presentation only; the pick action routes
+ * through the confirm modal.
+ * @param props - the scenario, the active language face, and the pick action.
+ * @returns the card button.
+ */
+function ScenarioCard({ scenario, zh, onPick }: {
+  scenario: KbScenario
+  zh: boolean
+  onPick: () => void
+}): JSX.Element {
+  return (
+    <button type="button" className={css.scenarioCard} onClick={onPick}>
+      <span className={css.scenarioName}>{zh ? scenario.nameZh : scenario.nameEn}</span>
+      <span className={css.scenarioDescription}>
+        {zh ? scenario.descriptionZh : scenario.descriptionEn}
+      </span>
+    </button>
   )
 }
 

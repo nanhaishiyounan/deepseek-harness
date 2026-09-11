@@ -1,0 +1,30 @@
+/* The shared failure strip. All values ride --dsw-* tokens (docs/web-styling.md). */
+
+.errorStrip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: var(--dsw-alias-state-error-tertiary);
+  color: var(--dsw-alias-state-error-primary);
+  font: var(--dsw-font-xxs-12);
+}
+
+.icon {
+  flex: none;
+  color: var(--dsw-alias-state-error-primary);
+}
+
+.message {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.action {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+}

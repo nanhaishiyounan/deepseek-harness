@@ -10,7 +10,9 @@
 import { useEffect } from 'react'
 import type { JSX } from 'react'
 import type { SnapshotStore } from '@deepseek-ai/dsh-client-runtime/client'
-import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
+import {
+  Button, EmptyState, ErrorStrip, IconLinkOutline14, PageHero, PageSkeleton,
+} from '@deepseek-ai/dsh-client-ui-primitives'
 import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 // Type-only: pulls the ui-conversation SlotMap merge (the view seat).
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
@@ -61,16 +63,13 @@ export function ConnectorsView({ inputActions, useConnectors, refresh, requestVi
   return (
     <div className={css.page}>
       {providers !== undefined && providers.status === 'error' && (
-        <div className={css.errorStrip} role="alert">
-          <span>{t('error.unavailable')} — {providers.error}</span>
-          <Button variant="ghost" size="sm" onClick={refresh}>{t('error.retry')}</Button>
-        </div>
+        <ErrorStrip
+          message={<>{t('error.unavailable')} — {providers.error}</>}
+          action={<Button variant="ghost" size="sm" onClick={refresh}>{t('error.retry')}</Button>}
+        />
       )}
 
-      <section className={css.hero}>
-        <h2 className={css.heroTitle}>{t('page.title')}</h2>
-        <p className={css.heroTagline}>{t('page.tagline')}</p>
-      </section>
+      <PageHero eyebrow={t('view.connectors')} title={t('page.title')} tagline={t('page.tagline')} />
 
       <section className={css.zone}>
         <div className={css.zoneHead}>
@@ -78,12 +77,9 @@ export function ConnectorsView({ inputActions, useConnectors, refresh, requestVi
           <Button variant="ghost" size="sm" onClick={startWizard}>{t('catalog.connectNew')}</Button>
         </div>
         {providers === undefined || providers.status === 'loading' ? (
-          <div className={css.rowSkeleton} aria-hidden="true" />
+          <PageSkeleton variant="list" rows={3} />
         ) : providers.status === 'ready' && providers.value.length === 0 ? (
-          <div className={css.emptyState}>
-            <p className={css.emptyTitle}>{t('catalog.noProviders')}</p>
-            <p className={css.emptyHint}>{t('catalog.noProvidersHint')}</p>
-          </div>
+          <EmptyState title={t('catalog.noProviders')} hint={t('catalog.noProvidersHint')} icon={<IconLinkOutline14 />} />
         ) : providers.status === 'ready' && (
           <ul className={css.providerList}>
             {providers.value.map(provider => (
@@ -117,17 +113,14 @@ export function ConnectorsView({ inputActions, useConnectors, refresh, requestVi
             ))}
           </ul>
         ) : connections !== undefined && connections.status === 'error' ? (
-          <div className={css.errorStrip} role="alert">
-            <span>{t('error.unavailable')} — {connections.error}</span>
-            <Button variant="ghost" size="sm" onClick={refresh}>{t('error.retry')}</Button>
-          </div>
+          <ErrorStrip
+            message={<>{t('error.unavailable')} — {connections.error}</>}
+            action={<Button variant="ghost" size="sm" onClick={refresh}>{t('error.retry')}</Button>}
+          />
         ) : connections !== undefined && connections.status === 'loading' ? (
-          <div className={css.rowSkeleton} aria-hidden="true" />
+          <PageSkeleton variant="list" rows={2} />
         ) : (
-          <div className={css.emptyState}>
-            <p className={css.emptyTitle}>{t('delivery.empty')}</p>
-            <p className={css.emptyHint}>{t('delivery.emptyHint')}</p>
-          </div>
+          <EmptyState title={t('delivery.empty')} hint={t('delivery.emptyHint')} />
         )}
 
         {timeline !== undefined && timeline.status === 'ready' && timeline.value.length > 0 && (
@@ -150,7 +143,7 @@ export function ConnectorsView({ inputActions, useConnectors, refresh, requestVi
 
       <section className={css.wizard}>
         <h3 className={css.zoneTitle}>{t('wizard.title')}</h3>
-        <p className={css.emptyHint}>{t('wizard.body')}</p>
+        <p className={css.wizardBody}>{t('wizard.body')}</p>
         <Button variant="primary" size="sm" onClick={startWizard}>{t('wizard.action')}</Button>
       </section>
     </div>

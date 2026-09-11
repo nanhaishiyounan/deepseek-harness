@@ -14,24 +14,6 @@
   background: var(--dsw-alias-bg-base);
 }
 
-.hero {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.heroTitle {
-  margin: 0;
-  font: var(--dsw-font-xl-24);
-  color: var(--dsw-alias-label-primary);
-}
-
-.heroTagline {
-  margin: 0;
-  font: var(--dsw-font-s-14);
-  color: var(--dsw-alias-label-secondary);
-}
-
 .zone {
   display: flex;
   flex-direction: column;
@@ -76,10 +58,17 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
-  padding: 10px 12px;
+  padding: 12px 14px;
   border: 1px solid var(--dsw-alias-border-l1);
-  border-radius: 10px;
-  background: var(--dsw-alias-bg-module-platform);
+  border-radius: 12px;
+  background: var(--dsw-alias-bg-layer-1);
+  transition: border-color var(--ds-transition-duration-fast) var(--ds-ease-in-out),
+    box-shadow var(--ds-transition-duration-fast) var(--ds-ease-in-out);
+}
+
+.providerRow:hover {
+  border-color: var(--dsw-alias-border-l2);
+  box-shadow: var(--dsw-shadow-lv1-blur);
 }
 
 .providerDot {
@@ -124,10 +113,10 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 8px 16px;
-  padding: 10px 12px;
+  padding: 12px 14px;
   border: 1px solid var(--dsw-alias-border-l1);
-  border-radius: 10px;
-  background: var(--dsw-alias-bg-module-platform);
+  border-radius: 12px;
+  background: var(--dsw-alias-bg-layer-1);
 }
 
 .connectionName {
@@ -185,7 +174,7 @@
   overflow-wrap: anywhere;
 }
 
-/* Connect guidance */
+/* Connect guidance: the page's primary call-out gets the accent-tinted frame. */
 
 .wizard {
   display: flex;
@@ -193,49 +182,15 @@
   align-items: flex-start;
   gap: 8px;
   padding: 16px;
-  border: 1px dashed var(--dsw-alias-border-l1);
+  border: 1px solid var(--dsw-alias-state-business-primary);
   border-radius: 12px;
+  background: var(--dsw-alias-state-business-tertiary);
 }
 
-/* Empty + error + loading states */
-
-.emptyState {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 20px 16px;
-  border: 1px dashed var(--dsw-alias-border-l1);
-  border-radius: 12px;
-  text-align: center;
-}
-
-.emptyTitle {
+.wizardBody {
   margin: 0;
-  font: var(--dsw-font-s-strong-14);
+  font: var(--dsw-font-xxs-12);
   color: var(--dsw-alias-label-secondary);
 }
 
-.emptyHint {
-  margin: 0;
-  font: var(--dsw-font-xxs-12);
-  color: var(--dsw-alias-label-tertiary);
-}
-
-.errorStrip {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  background: var(--dsw-alias-state-error-tertiary);
-  color: var(--dsw-alias-state-error-primary);
-  font: var(--dsw-font-xxs-12);
-}
-
-.rowSkeleton {
-  height: 44px;
-  border-radius: 10px;
-  background: var(--dsw-alias-bg-skeleton);
-  animation: var(--ds-skeleton-pulse);
-}
+/* Empty + error + loading states live in the shared ui-primitives atoms. */

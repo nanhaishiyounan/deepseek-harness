@@ -104,7 +104,7 @@
 .scenarios {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
 }
 
@@ -115,28 +115,86 @@
   letter-spacing: 0.04em;
 }
 
-.rail {
+/* The scenario portal's information architecture: a toolbar (heading + live
+   search), then a featured front row and a collapsed category browse (or the
+   catalog-wide search results once a query lands). The featured six are the
+   only cards the default viewport shows; every other scenario stays two
+   interactions away — expand its category, or type a keyword. */
+
+.scenarioToolbar {
   display: flex;
-  flex-direction: row;
-  /* Category groups wrap into rows on the desktop rail: the first screen
-     shows roughly two rows of cards (the 6–8 visible entries) and the rows
-     themselves fill the hero's lower half, instead of one scrollable strip
-     that hides the catalog past the fourth card. */
   flex-wrap: wrap;
-  gap: 12px 16px;
-  padding-bottom: 4px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
-.scenarioGroup {
+.scenarioSearch {
+  flex: 0 1 320px;
+  min-width: 200px;
+}
+
+.searchIcon {
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.featuredZone,
+.browseZone,
+.resultsZone {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.zoneLabel {
+  font: var(--dsw-font-xxxs-strong-11);
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.cardGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.categoryGroup {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  flex: none;
-  /* The cap lets the card row wrap inside the rail instead of overflowing it. */
-  max-width: 100%;
 }
 
-.categoryLabel {
+.categoryRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font: var(--dsw-font-xs-strong-13);
+  cursor: pointer;
+  transition: background-color var(--ds-transition-duration-fast) var(--ds-ease-in-out),
+    color var(--ds-transition-duration-fast) var(--ds-ease-in-out);
+}
+
+.categoryRow:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-primary);
+}
+
+.chevronClosed,
+.chevronOpen {
+  color: var(--dsw-alias-label-tertiary);
+  transition: transform var(--ds-transition-duration-fast) var(--ds-ease-in-out);
+}
+
+.chevronClosed {
+  transform: rotate(-90deg);
+}
+
+.categoryName {
   display: inline-flex;
   align-items: center;
   gap: 2px;
@@ -148,12 +206,27 @@
   color: var(--dsw-alias-label-tertiary);
 }
 
-.scenarioCards {
-  display: flex;
-  gap: 8px;
-  /* Six-card groups (supply-chain) wrap on narrower desktop rails instead of
-     overflowing the portal's max-width. */
-  flex-wrap: wrap;
+.categoryCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--dsw-alias-bg-layer-2);
+  color: var(--dsw-alias-label-secondary);
+  font: var(--dsw-font-xxs-12);
+  font-variant-numeric: tabular-nums;
+}
+
+.searchEmpty {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-layer-1);
+  font: var(--dsw-font-xs-13);
+  color: var(--dsw-alias-label-secondary);
 }
 
 .scenarioCard {
@@ -266,30 +339,29 @@
     align-items: stretch;
   }
 
-  /* Narrow screens keep the one-row horizontal scroll: wrapped rows of
-     160px cards would stack into a tall, mostly-clipped column. The sheet
-     also paints elevated chips (bg-layer-2), so the scrolling rail binds its
-     thumb to the elevated rung (the shared scrollbar skin). */
-  .rail {
-    flex-wrap: nowrap;
-    overflow-x: auto;
+  .scenarioToolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .scenarioSearch {
+    flex-basis: auto;
+    min-width: 0;
+  }
+
+  /* The portal's own column still scrolls (max-height backstop above), so the
+     card grids keep wrapping instead of riding a nested horizontal scroll. */
+  .cardGrid {
     --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2);
     --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2);
-  }
-
-  /* The one-row scroll needs the unwrapped, unclamped group back: cards ride
-     the rail's horizontal overflow instead of stacking. */
-  .scenarioGroup {
-    max-width: none;
-  }
-
-  .scenarioCards {
-    flex-wrap: nowrap;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .scenarioCard {
+  .scenarioCard,
+  .chevronClosed,
+  .chevronOpen,
+  .categoryRow {
     transition: none;
   }
 }

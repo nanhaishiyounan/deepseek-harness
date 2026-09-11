@@ -18,6 +18,7 @@ Global style sheets belong in `ui-theme/src/styles/`. Component styles live besi
 - Pair font sizes with line heights and use the theme typography variables when an existing role matches.
 - Keep source text, terminal output, and diff lines unwrapped when their component contract requires column preservation; use the shared scrollbar styles rather than component-specific scrollbar selectors.
 - Put presentation in CSS. Inline React styles may pass component-local custom-property values but must not encode theme branches.
+- View-tab pages compose the shared page-skeleton atoms from ui-primitives (PageHero/EmptyState/ErrorStrip/PageSkeleton) for their header, empty, error, and loading states instead of re-declaring per-domain hero/errorStrip/emptyState/skeleton classes; type scale and state styling stay owned by those atoms.
 - Preserve keyboard focus visibility and reduced-motion behavior when adding transitions or hover-only controls.
 
 ## Changing the system

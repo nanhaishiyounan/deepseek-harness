@@ -11,7 +11,7 @@
 import { useEffect, useState } from 'react'
 import type { JSX } from 'react'
 import type { SnapshotStore } from '@deepseek-ai/dsh-client-runtime/client'
-import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
+import { Button, EmptyState, ErrorStrip, PageHero, PageSkeleton } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 // Type-only: pulls the ui-conversation SlotMap merge (the view seat).
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
@@ -102,21 +102,24 @@ export function MarketView({ inputActions, useMarket, refresh, placeOrder, reque
   return (
     <div className={css.market}>
       {stats !== undefined && stats.status === 'error' && (
-        <div className={css.errorStrip} role="alert">
-          <span>{t('error.unavailable')} — {stats.error}</span>
-          <Button variant="ghost" size="sm" onClick={refresh}>{t('error.retry')}</Button>
-        </div>
+        <ErrorStrip
+          message={<>{t('error.unavailable')} — {stats.error}</>}
+          action={<Button variant="ghost" size="sm" onClick={refresh}>{t('error.retry')}</Button>}
+        />
       )}
 
-      <section className={css.hero} aria-label={t('hero.title')}>
-        <h2 className={css.heroTitle}>{t('hero.title')}</h2>
-        <p className={css.heroTagline}>{t('hero.tagline')}</p>
-        {stats !== undefined && stats.status === 'ready' && (
-          <p className={css.counters}>
-            {t('hero.products')} {stats.value.products} · {t('hero.providers')} {stats.value.providers} · {t('hero.monthlyOrders')} {stats.value.monthly_orders}
-          </p>
-        )}
-        {stats !== undefined && stats.status === 'loading' && <div className={css.countersSkeleton} aria-hidden="true" />}
+      <PageHero
+        eyebrow={t('view.market')}
+        title={t('hero.title')}
+        tagline={t('hero.tagline')}
+        meta={stats === undefined ? undefined : stats.status === 'ready'
+          ? (
+            <span>
+              {t('hero.products')} {stats.value.products} · {t('hero.providers')} {stats.value.providers} · {t('hero.monthlyOrders')} {stats.value.monthly_orders}
+            </span>
+          )
+          : <PageSkeleton variant="list" rows={1} />}
+      >
         {stats !== undefined && stats.status === 'ready' && stats.value.featured.length > 0 && (
           <div className={css.featured}>
             <h3 className={css.zoneTitle}>{t('hero.featured')}</h3>
@@ -131,7 +134,7 @@ export function MarketView({ inputActions, useMarket, refresh, placeOrder, reque
             </div>
           </div>
         )}
-      </section>
+      </PageHero>
 
       {flow.stage === 'receipt' && (
         <section className={css.receipt} aria-label={t('order.receiptTitle')}>
@@ -149,16 +152,12 @@ export function MarketView({ inputActions, useMarket, refresh, placeOrder, reque
       )}
 
       {catalog === undefined || catalog.status === 'loading' ? (
-        <div className={css.gridSkeleton} aria-hidden="true">
-          <div className={css.cardSkeleton} />
-          <div className={css.cardSkeleton} />
-          <div className={css.cardSkeleton} />
-        </div>
+        <PageSkeleton variant="grid" />
       ) : catalog.status === 'error' ? (
-        <div className={css.errorStrip} role="alert">
-          <span>{t('error.unavailable')} — {catalog.error}</span>
-          <Button variant="ghost" size="sm" onClick={refresh}>{t('error.retry')}</Button>
-        </div>
+        <ErrorStrip
+          message={<>{t('error.unavailable')} — {catalog.error}</>}
+          action={<Button variant="ghost" size="sm" onClick={refresh}>{t('error.retry')}</Button>}
+        />
       ) : selected !== undefined ? (
         <section className={css.detail} aria-label={selected.title}>
           <button type="button" className={css.backLink} onClick={() => { setSelected(undefined) }}>{t('detail.back')}</button>
@@ -227,10 +226,7 @@ export function MarketView({ inputActions, useMarket, refresh, placeOrder, reque
           )}
         </section>
       ) : catalog.value.length === 0 ? (
-        <section className={css.emptyState}>
-          <h3 className={css.zoneTitle}>{t('catalog.empty')}</h3>
-          <p className={css.emptyHint}>{t('catalog.emptyHint')}</p>
-        </section>
+        <EmptyState title={t('catalog.empty')} hint={t('catalog.emptyHint')} />
       ) : (
         <section className={css.catalog}>
           <h3 className={css.zoneTitle}>{t('catalog.title')}</h3>

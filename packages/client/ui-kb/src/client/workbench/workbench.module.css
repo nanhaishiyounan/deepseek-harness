@@ -92,13 +92,7 @@
 .hits {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-}
-
-.hitSkeleton {
-  height: 96px;
-  border-radius: 8px;
-  background: var(--dsw-alias-bg-skeleton);
+  gap: 10px;
 }
 
 .emptyResult {
@@ -120,15 +114,17 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 10px 12px;
-  border-radius: 8px;
+  padding: 12px 14px;
+  border-radius: 12px;
   border: 1px solid var(--dsw-alias-border-l1);
   background: var(--dsw-alias-bg-layer-1);
-  transition: border-color var(--ds-transition-duration-fast) var(--ds-ease-in-out);
+  transition: border-color var(--ds-transition-duration-fast) var(--ds-ease-in-out),
+    box-shadow var(--ds-transition-duration-fast) var(--ds-ease-in-out);
 }
 
 .hit:hover {
   border-color: var(--dsw-alias-border-l2);
+  box-shadow: var(--dsw-shadow-lv1-blur);
 }
 
 .hitHead {
@@ -405,23 +401,7 @@
   font: var(--dsw-font-xs-13);
 }
 
-/* Document list */
-
-.docsEmpty {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 16px;
-  border-radius: 8px;
-  border: 1px dashed var(--dsw-alias-border-l2);
-  background: var(--dsw-alias-bg-layer-1);
-  font: var(--dsw-font-s-14);
-  color: var(--dsw-alias-label-secondary);
-}
-
-.docsEmpty strong {
-  color: var(--dsw-alias-label-primary);
-}
+/* Document list (the empty state lives in the shared ui-primitives atom) */
 
 .docs {
   margin: 0;
@@ -463,8 +443,8 @@
 }
 
 .docReady {
-  padding: 1px 8px;
-  border-radius: 999px;
+  padding: 1px 7px;
+  border-radius: 5px;
   background: var(--dsw-alias-state-success-tertiary);
   color: var(--dsw-alias-label-secondary);
 }
@@ -474,13 +454,18 @@
 .usage {
   margin: 0;
   display: flex;
-  gap: 32px;
+  gap: 0;
 }
 
 .usageCell {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  padding: 0 28px;
+}
+
+.usageCell + .usageCell {
+  border-left: 1px solid var(--dsw-alias-border-l1);
 }
 
 .usageCell dd {
@@ -495,26 +480,7 @@
   color: var(--dsw-alias-label-secondary);
 }
 
-.usageSkeleton {
-  width: 320px;
-  height: 56px;
-  border-radius: 8px;
-  background: var(--dsw-alias-bg-skeleton);
-}
-
-/* Shared failure strip */
-
-.failure {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 6px 8px;
-  border-radius: 8px;
-  background: var(--dsw-alias-state-error-secondary);
-  color: var(--dsw-alias-state-error-primary);
-  font: var(--dsw-font-xs-13);
-}
+/* Failure + loading states live in the shared ui-primitives atoms. */
 
 @media (max-width: 768px) {
   .searchRow {
@@ -525,7 +491,7 @@
     flex-basis: 100%;
   }
 
-  .usage {
-    gap: 16px;
+  .usageCell {
+    padding: 0 16px;
   }
 }

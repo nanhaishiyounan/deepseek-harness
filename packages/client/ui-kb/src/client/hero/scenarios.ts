@@ -28,6 +28,12 @@ export interface KbScenario {
   readonly probeZh: string
   /** English example question. */
   readonly probeEn: string
+  /**
+   * Portal-picked front card: the blank hero's featured row shows these
+   * before anything else while every other scenario folds behind its
+   * category. Presentation-only; never affects roster or selection.
+   */
+  readonly featured?: true
 }
 
 /** The eight grouping categories, ordered as the portal rail shows them. */
@@ -49,6 +55,7 @@ export const KB_SCENARIOS: readonly KbScenario[] = [
     descriptionEn: 'Retrieves market corpus; outputs category size, channel mix, and opportunities with cited dates.',
     probeZh: '电商渠道 GMV',
     probeEn: 'e-commerce channel GMV',
+    featured: true,
   },
   {
     id: 'consumer-insight',
@@ -89,6 +96,7 @@ export const KB_SCENARIOS: readonly KbScenario[] = [
     descriptionEn: 'Retrieves regulation and system corpus; outputs clause basis, assessment, corrective actions, and verification.',
     probeZh: '金属探测 CCP 限值',
     probeEn: 'metal-detection CCP limit',
+    featured: true,
   },
   {
     id: 'food-safety-inspection',
@@ -109,6 +117,7 @@ export const KB_SCENARIOS: readonly KbScenario[] = [
     descriptionEn: 'Retrieves cost, inventory, and market corpus; outputs basis, calculation, advice, and risks with price dates.',
     probeZh: '蚝油 完全成本 毛利率',
     probeEn: 'oyster-sauce full cost margin',
+    featured: true,
   },
   {
     id: 'supply-risk',
@@ -179,6 +188,7 @@ export const KB_SCENARIOS: readonly KbScenario[] = [
     descriptionEn: 'Retrieves export-compliance corpus; outputs regulatory requirements, obligations, and implementation actions with cited clauses.',
     probeZh: 'FDA 设施注册 FSVP',
     probeEn: 'FDA facility registration FSVP',
+    featured: true,
   },
   {
     id: 'customs-logistics',
@@ -199,6 +209,7 @@ export const KB_SCENARIOS: readonly KbScenario[] = [
     descriptionEn: 'Retrieves supply-chain-finance corpus; outputs product terms, costs, and applicable scenarios with cited product ids.',
     probeZh: '信用证 保理贴现',
     probeEn: 'letter of credit factoring discount',
+    featured: true,
   },
   {
     id: 'channel-matching',
@@ -299,6 +310,7 @@ export const KB_SCENARIOS: readonly KbScenario[] = [
     descriptionEn: 'Retrieves cold-chain corpus; outputs temperature standards, monitoring requirements, and exception handling with cited procedure ids.',
     probeZh: '冷链 断链处置',
     probeEn: 'cold chain break response',
+    featured: true,
   },
   {
     id: 'label-review',
@@ -343,10 +355,47 @@ export const KB_SCENARIOS: readonly KbScenario[] = [
 ]
 
 /**
- * Group the scenario catalog into category buckets, keeping each bucket in
- * catalog order.
+ * Group a scenario pool into category buckets, keeping each bucket in catalog
+ * order.
+ * @param pool - the scenarios to bucket (defaults to the whole catalog; the
+ *   search-results view passes its filtered subset).
  * @returns one readonly scenario array per category id, categories in rail order.
  */
-export function scenariosByCategory(): readonly (readonly KbScenario[])[] {
-  return KB_SCENARIO_CATEGORIES.map(category => KB_SCENARIOS.filter(scenario => scenario.category === category))
+export function scenariosByCategory(pool: readonly KbScenario[] = KB_SCENARIOS): readonly (readonly KbScenario[])[] {
+  return KB_SCENARIO_CATEGORIES.map(category => pool.filter(scenario => scenario.category === category))
+}
+
+/**
+ * The portal's featured front row.
+ * @param pool - the scenarios to pick from (defaults to the whole catalog).
+ * @returns the featured-flagged scenarios in catalog order.
+ */
+export function featuredScenarios(pool: readonly KbScenario[] = KB_SCENARIOS): readonly KbScenario[] {
+  return pool.filter(scenario => scenario.featured === true)
+}
+
+/**
+ * Case-insensitive substring match over every display field of a scenario —
+ * both language faces plus the probe questions, so a keyword finds its card
+ * whichever copy the user read.
+ * @param scenario - one catalog entry.
+ * @param needle - the lowercased query fragment.
+ * @returns whether any display field contains the fragment.
+ */
+function scenarioMatches(scenario: KbScenario, needle: string): boolean {
+  return [scenario.nameZh, scenario.nameEn, scenario.descriptionZh, scenario.descriptionEn, scenario.probeZh, scenario.probeEn]
+    .some(field => field.toLowerCase().includes(needle))
+}
+
+/**
+ * Filter a scenario pool by the portal search box's live query.
+ * @param pool - the scenarios to filter (defaults to the whole catalog).
+ * @param query - the raw input value; whitespace-only counts as no query.
+ * @returns the matching scenarios in catalog order, or null when the query is
+ *   blank (the caller renders the featured + category browse view instead).
+ */
+export function filterScenarios(pool: readonly KbScenario[] = KB_SCENARIOS, query: string): readonly KbScenario[] | null {
+  const needle = query.trim().toLowerCase()
+  if (needle === '') return null
+  return pool.filter(scenario => scenarioMatches(scenario, needle))
 }

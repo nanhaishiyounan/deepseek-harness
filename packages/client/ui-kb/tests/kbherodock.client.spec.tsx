@@ -2,7 +2,10 @@
 // The blank-session portal dock: renders only in the hero phase, walks the
 // usage-chip matrix (loading / error / empty / ready), fills sample questions
 // into the draft, and starts a scenario through the confirm dialog (success
-// fills the probe; failure shows the retry copy).
+// fills the probe; failure shows the retry copy). The scenario portal's
+// information architecture gets its own cases: six featured cards on the
+// default view, category rows that expand in place, and the live search that
+// filters all thirty cards.
 
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -53,6 +56,23 @@ function mount(state: KbClientState, options: {
     />,
   )
   return { refresh, selectScenario, setDraft, store, workbench }
+}
+
+/** Type into the scenario portal's search box (input type=search ⇒ searchbox role). */
+function searchScenarios(text: string): void {
+  fireEvent.change(screen.getByRole('searchbox', { name: zh['scenario.searchLabel'] }), { target: { value: text } })
+}
+
+/** Click one collapsed category row in the browse zone (zh label + its count). */
+function expandCategory(label: string): void {
+  // Anchored: scenario-card descriptions also carry words like 工艺/供应链,
+  // and those cards must not swallow the category-row click.
+  fireEvent.click(screen.getByRole('button', { name: new RegExp(`^${label}\\d+$`, 'u') }))
+}
+
+/** Every scenario card currently in the document (featured, expanded, or search hits). */
+function scenarioCards(): HTMLElement[] {
+  return screen.getAllByRole('button').filter(button => button.className.includes('scenarioCard'))
 }
 
 afterEach(() => {
@@ -122,13 +142,69 @@ describe('KbHeroDock', () => {
     expect(setDraft).toHaveBeenCalledWith(zh['hero.sample2'])
   })
 
+  it('shows only the six featured cards on the default browse view', () => {
+    mount({ stats: { status: 'ready', usage: READY_USAGE }, records: [] })
+    // The featured front row is the whole default card surface: every
+    // non-featured scenario folds behind its collapsed category row.
+    expect(scenarioCards()).toHaveLength(6)
+    expect(screen.getByText('AI 营销洞察主管')).toBeTruthy()
+    expect(screen.queryByText('智能品控主管')).toBeNull()
+    // Both browse zones are present with their labels.
+    expect(screen.getByRole('group', { name: zh['scenario.featuredTitle'] })).toBeTruthy()
+    expect(screen.getByRole('group', { name: zh['scenario.browseTitle'] })).toBeTruthy()
+    // Every category row starts collapsed.
+    const rows = screen.getAllByRole('button', { expanded: false })
+    expect(rows.map(row => row.textContent)).toContain('市场洞察5')
+    for (const row of rows) expect(row.getAttribute('aria-expanded')).toBe('false')
+  })
+
+  it('expands a category row in place and keeps other categories collapsed', () => {
+    mount({ stats: { status: 'ready', usage: READY_USAGE }, records: [] })
+    expandCategory('工艺')
+    // The process bucket's four cards appear beside the featured six.
+    expect(scenarioCards()).toHaveLength(10)
+    expect(screen.getByText('智能品控主管')).toBeTruthy()
+    expect(screen.getByRole('button', { name: /^工艺\d+$/u }).getAttribute('aria-expanded')).toBe('true')
+    // Sibling categories stay folded.
+    expect(screen.getByRole('button', { name: /^食品安全\d+$/u }).getAttribute('aria-expanded')).toBe('false')
+    expect(screen.queryByText('AI 食安合规官')).toBeNull()
+    // A second click folds the group back.
+    expandCategory('工艺')
+    expect(screen.getByRole('button', { name: /^工艺\d+$/u }).getAttribute('aria-expanded')).toBe('false')
+    expect(screen.queryByText('智能品控主管')).toBeNull()
+  })
+
+  it('filters all thirty cards through the live search and recovers the browse view on clear', () => {
+    mount({ stats: { status: 'ready', usage: READY_USAGE }, records: [] })
+    searchScenarios('食安')
+    // Four hits across two categories (three food-safety names plus the
+    // enterprise-data description), each still under its category label.
+    expect(scenarioCards()).toHaveLength(4)
+    expect(screen.getByText('AI 食安服务主管')).toBeTruthy()
+    expect(screen.queryByText('AI 营销洞察主管')).toBeNull()
+    expect(screen.getByText(zh['scenario.searchResultCount']
+      .replaceAll('{n}', '4')
+      .replaceAll('{total}', String(KB_SCENARIOS.length)))).toBeTruthy()
+    // A miss renders the empty state instead of cards.
+    searchScenarios('不存在的关键词')
+    expect(screen.getByText(zh['scenario.searchEmpty'])).toBeTruthy()
+    expect(scenarioCards()).toHaveLength(0)
+    // Clearing the query restores the featured + browse view.
+    searchScenarios('')
+    expect(scenarioCards()).toHaveLength(6)
+    expect(screen.getByRole('group', { name: zh['scenario.featuredTitle'] })).toBeTruthy()
+  })
+
   it('renders the English catalog copy and fills the English probe', async () => {
     const { setDraft } = mount(
       { stats: { status: 'ready', usage: READY_USAGE }, records: [] },
       { language: () => 'en', selectScenario: vi.fn(async () => {}) },
     )
     expect(screen.getByText('AI Marketing Insight Lead')).toBeTruthy()
-    // The confirm dialog mirrors the language, including the probe.
+    // The confirm dialog mirrors the language, including the probe. The
+    // process-quality card reaches through the search box (not featured).
+    searchScenarios('UHT')
+    expect(screen.getByRole('button', { name: /Smart Quality Control Lead/u })).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: /Smart Quality Control Lead/u }))
     expect(screen.getByRole('dialog').textContent).toContain('standard parameters, limits, and exception handling')
     expect(screen.getByText(`${zh['scenario.probeLabel']}${zh['scenario.probeColon']}UHT 137 hold test`)).toBeTruthy()
@@ -138,6 +214,7 @@ describe('KbHeroDock', () => {
 
   it('closes the confirm dialog through the cancel action and the escape key', () => {
     mount({ stats: { status: 'ready', usage: READY_USAGE }, records: [] })
+    expandCategory('工艺')
     fireEvent.click(screen.getByRole('button', { name: /智能品控主管/u }))
     fireEvent.click(screen.getByRole('button', { name: zh['scenario.cancel'] }))
     expect(screen.queryByRole('dialog')).toBeNull()
@@ -150,6 +227,7 @@ describe('KbHeroDock', () => {
   it('ignores a second start click while one selection is in flight', async () => {
     const selectScenario = vi.fn(() => new Promise<void>(() => {}))
     mount({ stats: { status: 'ready', usage: READY_USAGE }, records: [] }, { selectScenario })
+    expandCategory('工艺')
     fireEvent.click(screen.getByRole('button', { name: /智能品控主管/u }))
     fireEvent.click(screen.getByRole('button', { name: zh['scenario.start'] }))
     fireEvent.click(screen.getByRole('button', { name: zh['scenario.start'] }))
@@ -158,6 +236,7 @@ describe('KbHeroDock', () => {
 
   it('starts a scenario from the confirm dialog and fills its probe', async () => {
     const { selectScenario, setDraft } = mount({ stats: { status: 'ready', usage: READY_USAGE }, records: [] })
+    expandCategory('工艺')
     fireEvent.click(screen.getByRole('button', { name: /智能品控主管/u }))
     expect(screen.getByRole('dialog')).toBeTruthy()
     expect(screen.getByText(`${zh['scenario.probeLabel']}${zh['scenario.probeColon']}UHT 137 保温试验`)).toBeTruthy()
@@ -172,6 +251,7 @@ describe('KbHeroDock', () => {
     mount({ stats: { status: 'ready', usage: READY_USAGE }, records: [] }, {
       selectScenario: vi.fn(async () => { throw new Error('session not blank') }),
     })
+    expandCategory('供应链')
     fireEvent.click(screen.getByRole('button', { name: /供应商风险评估员/u }))
     fireEvent.click(screen.getByRole('button', { name: zh['scenario.start'] }))
     await waitFor(() => { expect(screen.getByRole('alert').textContent).toContain(zh['scenario.failed']) })

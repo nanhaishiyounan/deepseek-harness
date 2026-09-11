@@ -7,7 +7,7 @@
  */
 
 import type { JSX } from 'react'
-import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
+import { Button, ErrorStrip, PageSkeleton } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import type { KbClientState } from '../kbStore.ts'
 import css from './workbench.module.css'
@@ -36,13 +36,13 @@ export function KbUsageCard({ state, refresh, requestChatView, t }: KbUsageCardP
       </header>
 
       {stats === undefined || stats.status === 'loading'
-        ? <span className={css.usageSkeleton} aria-busy="true" />
+        ? <div aria-busy="true"><PageSkeleton variant="list" rows={1} /></div>
         : stats.status === 'error'
           ? (
-            <div className={css.failure} role="alert">
-              <span>{t('error.unavailable')}</span>
-              <Button variant="ghost" size="sm" onClick={refresh}>{t('error.retry')}</Button>
-            </div>
+            <ErrorStrip
+              message={t('error.unavailable')}
+              action={<Button variant="ghost" size="sm" onClick={refresh}>{t('error.retry')}</Button>}
+            />
           )
           : (
             <dl className={css.usage}>

@@ -62,7 +62,7 @@ export function KbEntry({ wide, useSessions, useKb, refresh, requestKbView, t }:
     <button
       type="button"
       className={css.entry}
-      aria-label={t('entry.label')}
+      aria-label={t('entry.documentsBadge')}
       onClick={() => {
         if (noSession) refresh()
         else requestKbView()

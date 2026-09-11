@@ -8,7 +8,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import type { JSX } from 'react'
-import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
+import { Button, ErrorStrip, PageSkeleton } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import type { KbHitState, KbSearchState } from '../KbTypes.ts'
 import { noteRecentSearch } from '../recentSearches.ts'
@@ -89,15 +89,15 @@ export function KbSearch({ search, noteSearched, refresh, setDraft, requestChatV
       </div>
 
       {failure !== undefined && (
-        <div className={css.failure} role="alert">
-          <span>{t('error.searchFailed')}</span>
-          <Button variant="ghost" size="sm" onClick={() => { runWith(query.trim()) }}>{t('error.retry')}</Button>
-        </div>
+        <ErrorStrip
+          message={t('error.searchFailed')}
+          action={<Button variant="ghost" size="sm" onClick={() => { runWith(query.trim()) }}>{t('error.retry')}</Button>}
+        />
       )}
 
       {busy && result === undefined && (
-        <div className={css.hits} aria-busy="true">
-          {[0, 1, 2].map(index => <span key={index} className={css.hitSkeleton} />)}
+        <div aria-busy="true">
+          <PageSkeleton variant="list" rows={3} />
         </div>
       )}
 

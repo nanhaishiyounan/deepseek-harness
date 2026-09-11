@@ -12,7 +12,9 @@
 import { useEffect, useState } from 'react'
 import type { JSX } from 'react'
 import type { SnapshotStore } from '@deepseek-ai/dsh-client-runtime/client'
-import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
+import {
+  Button, EmptyState, ErrorStrip, IconDataOutline16, PageHero, PageSkeleton,
+} from '@deepseek-ai/dsh-client-ui-primitives'
 import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 // Type-only: pulls the ui-conversation SlotMap merge (the view seat).
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
@@ -90,16 +92,13 @@ export function BizView(
   return (
     <div className={css.page}>
       {collections !== undefined && collections.status === 'error' && (
-        <div className={css.errorStrip} role="alert">
-          <span>{t('error.unavailable')} — {collections.error}</span>
-          <Button variant="ghost" size="sm" onClick={refresh}>{t('error.retry')}</Button>
-        </div>
+        <ErrorStrip
+          message={<>{t('error.unavailable')} — {collections.error}</>}
+          action={<Button variant="ghost" size="sm" onClick={refresh}>{t('error.retry')}</Button>}
+        />
       )}
 
-      <section className={css.hero}>
-        <h2 className={css.heroTitle}>{t('page.title')}</h2>
-        <p className={css.heroTagline}>{t('page.tagline')}</p>
-      </section>
+      <PageHero eyebrow={t('view.business')} title={t('page.title')} tagline={t('page.tagline')} />
 
       <section className={css.toolbar}>
         <label className={css.switchLabel}>
@@ -141,12 +140,9 @@ export function BizView(
       </section>
 
       {collections === undefined || collections.status === 'loading' ? (
-        <div className={css.rowSkeleton} aria-hidden="true" />
+        <PageSkeleton variant="list" rows={3} />
       ) : collections.status === 'ready' && roster.length === 0 ? (
-        <div className={css.emptyState}>
-          <p className={css.emptyTitle}>{t('roster.empty')}</p>
-          <p className={css.emptyHint}>{t('roster.emptyHint')}</p>
-        </div>
+        <EmptyState title={t('roster.empty')} hint={t('roster.emptyHint')} icon={<IconDataOutline16 />} />
       ) : state.selected !== undefined && (
         <section className={css.zone}>
           <div className={css.zoneHead}>
@@ -164,17 +160,14 @@ export function BizView(
           </div>
 
           {rows === undefined || rows.status === 'loading' ? (
-            <div className={css.rowSkeleton} aria-hidden="true" />
+            <PageSkeleton variant="list" rows={4} />
           ) : rows.status === 'error' ? (
-            <div className={css.errorStrip} role="alert">
-              <span>{t('error.unavailable')} — {rows.error}</span>
-              <Button variant="ghost" size="sm" onClick={() => { const selected = state.selected; if (selected !== undefined) loadRows(selected) }}>{t('error.retry')}</Button>
-            </div>
+            <ErrorStrip
+              message={<>{t('error.unavailable')} — {rows.error}</>}
+              action={<Button variant="ghost" size="sm" onClick={() => { const selected = state.selected; if (selected !== undefined) loadRows(selected) }}>{t('error.retry')}</Button>}
+            />
           ) : rows.value.rows.length === 0 ? (
-            <div className={css.emptyState}>
-              <p className={css.emptyTitle}>{t('cards.empty')}</p>
-              <p className={css.emptyHint}>{t('cards.emptyHint')}</p>
-            </div>
+            <EmptyState title={t('cards.empty')} hint={t('cards.emptyHint')} />
           ) : tableView ? (
             <div className={css.tableWrap}>
               <table className={css.table}>

@@ -9,7 +9,7 @@
 
 import { useState } from 'react'
 import type { JSX } from 'react'
-import { Button, IconPlusOutline16 } from '@deepseek-ai/dsh-client-ui-primitives'
+import { Button, EmptyState, IconListPenOutline16, IconPlusOutline16 } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import type { KbClientState } from '../kbStore.ts'
 import { relativeTimeOf } from './source.ts'
@@ -46,10 +46,11 @@ export function KbDocumentList({ state, language, onAdd, t }: KbDocumentListProp
 
       {empty
         ? (
-          <div className={css.docsEmpty}>
-            <strong>{t('docs.empty.title')}</strong>
-            <span>{t('docs.empty.body')}</span>
-          </div>
+          <EmptyState
+            title={t('docs.empty.title')}
+            hint={t('docs.empty.body')}
+            icon={<IconListPenOutline16 />}
+          />
         )
         : state.records.length === 0
           ? (

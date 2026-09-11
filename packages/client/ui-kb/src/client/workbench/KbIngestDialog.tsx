@@ -13,7 +13,9 @@ import { useEffect, useRef, useState } from 'react'
 import type { JSX } from 'react'
 import clsx from 'clsx'
 import type { DirectoryListing } from '@deepseek-ai/dsh-client-runtime/client'
-import { Button, IconChevronRightOutline14, IconFolderClose16, Modal } from '@deepseek-ai/dsh-client-ui-primitives'
+import {
+  Button, IconChevronRightOutline14, IconFolderClose16, Modal, PageSkeleton,
+} from '@deepseek-ai/dsh-client-ui-primitives'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import css from './workbench.module.css'
 
@@ -322,7 +324,7 @@ export function KbIngestDialog({
                 {browseFailed
                   ? <p className={css.fileHint}>{t('ingest.hostUnavailable')}</p>
                   : listing === undefined
-                    ? <span className={css.hitSkeleton} aria-busy="true" />
+                    ? <div aria-busy="true"><PageSkeleton variant="list" rows={1} /></div>
                     : (
                       <>
                         <span className={css.fileLabel}>{t('ingest.directoryLabel')}</span>

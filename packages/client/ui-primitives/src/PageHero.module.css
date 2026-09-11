@@ -1,0 +1,42 @@
+/* The shared page header. All values ride --dsw-* tokens (docs/web-styling.md);
+   the type scale is the single source the six view tabs consume. */
+
+.pageHero {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--dsw-alias-label-tertiary);
+  font: var(--dsw-font-xxxs-strong-11);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.title {
+  margin: 0;
+  color: var(--dsw-alias-label-primary);
+  font: var(--dsw-font-l-20);
+  text-wrap: balance;
+}
+
+.tagline {
+  margin: 0;
+  max-width: 62ch;
+  color: var(--dsw-alias-label-secondary);
+  font: var(--dsw-font-xs-13);
+  text-wrap: pretty;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 16px;
+  margin-top: 4px;
+  color: var(--dsw-alias-label-secondary);
+  font: var(--dsw-font-xxs-12);
+  font-variant-numeric: tabular-nums;
+}

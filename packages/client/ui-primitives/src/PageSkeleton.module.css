@@ -1,0 +1,48 @@
+/* The shared loading skeleton. All values ride --dsw-* tokens; the
+   phase-opposed pulse/shimmer pair comes from the ui-theme base keyframes
+   (reduced-motion users get a static skeleton for free). */
+
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.unit {
+  border-radius: 10px;
+  background: var(--dsw-alias-bg-skeleton);
+}
+
+.pulse {
+  animation: var(--ds-skeleton-pulse);
+}
+
+.shimmer {
+  animation: var(--ds-skeleton-shimmer);
+}
+
+/* List rows: row-card previews; the first row is a zone-title bar. */
+.list .unit {
+  height: 44px;
+}
+
+.list .unit:first-child {
+  width: 30%;
+  height: 16px;
+  border-radius: 6px;
+}
+
+/* Card grid: catalog-card previews. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+.grid .unit {
+  height: 108px;
+}
+
+/* One tall block: canvas/panel previews. */
+.block .unit {
+  min-height: 300px;
+}

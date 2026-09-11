@@ -19,61 +19,30 @@
   color: var(--dsw-alias-label-primary);
 }
 
-/* Hero portal */
-
-.hero {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.heroTitle {
-  margin: 0;
-  font: var(--dsw-font-xl-24);
-  color: var(--dsw-alias-label-primary);
-}
-
-.heroTagline {
-  margin: 0;
-  font: var(--dsw-font-s-14);
-  color: var(--dsw-alias-label-secondary);
-}
-
-.counters {
-  margin: 0;
-  font: var(--dsw-font-xxs-12);
-  color: var(--dsw-alias-label-secondary);
-  font-variant-numeric: tabular-nums;
-}
-
-.countersSkeleton {
-  height: 16px;
-  width: 260px;
-  border-radius: 6px;
-  background: var(--dsw-alias-bg-skeleton);
-  animation: var(--ds-skeleton-pulse);
-}
+/* Featured rail (the hero's trailing slot) */
 
 .featured {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  margin-top: 12px;
 }
 
 .featuredGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 8px;
+  gap: 12px;
 }
 
 .featuredCard {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 12px;
+  padding: 14px;
   border: 1px solid var(--dsw-alias-border-l1);
-  border-radius: 10px;
-  background: var(--dsw-alias-bg-module-platform);
+  border-radius: 12px;
+  background: var(--dsw-alias-bg-layer-2);
+  box-shadow: var(--dsw-shadow-lv1-blur);
 }
 
 .featuredTitle {
@@ -96,11 +65,12 @@
 }
 
 .tag {
-  padding: 1px 8px;
-  border-radius: 999px;
+  padding: 1px 7px;
+  border-radius: 5px;
   background: var(--dsw-alias-state-business-tertiary);
   color: var(--dsw-alias-label-primary-bluish);
   font: var(--dsw-font-xxxs-11);
+  letter-spacing: 0.02em;
 }
 
 /* Catalog */
@@ -143,11 +113,14 @@
 .kindChip {
   padding: 3px 10px;
   border: 1px solid var(--dsw-alias-border-l1);
-  border-radius: 999px;
+  border-radius: 8px;
   background: none;
   color: var(--dsw-alias-label-secondary);
   font: var(--dsw-font-xxs-12);
   cursor: pointer;
+  transition: border-color var(--ds-transition-duration-fast) var(--ds-ease-in-out),
+    background-color var(--ds-transition-duration-fast) var(--ds-ease-in-out),
+    color var(--ds-transition-duration-fast) var(--ds-ease-in-out);
 }
 
 .kindChip:hover {
@@ -156,6 +129,7 @@
 
 .kindChipActive {
   border-color: var(--dsw-alias-state-business-primary);
+  background: var(--dsw-alias-state-business-tertiary);
   color: var(--dsw-alias-label-primary-bluish);
 }
 
@@ -169,37 +143,28 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 8px;
-}
-
-.gridSkeleton {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 8px;
-}
-
-.cardSkeleton {
-  height: 108px;
-  border-radius: 10px;
-  background: var(--dsw-alias-bg-skeleton);
-  animation: var(--ds-skeleton-pulse);
+  gap: 12px;
 }
 
 .assetCard {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 12px;
+  padding: 14px;
   border: 1px solid var(--dsw-alias-border-l1);
-  border-radius: 10px;
-  background: var(--dsw-alias-bg-module-platform);
+  border-radius: 12px;
+  background: var(--dsw-alias-bg-layer-1);
   cursor: pointer;
   text-align: start;
-  transition: border-color var(--ds-transition-duration-fast) var(--ds-ease-in-out);
+  transition: border-color var(--ds-transition-duration) var(--ds-ease-in-out),
+    box-shadow var(--ds-transition-duration) var(--ds-ease-in-out),
+    transform var(--ds-transition-duration) var(--ds-ease-in-out);
 }
 
 .assetCard:hover {
   border-color: var(--dsw-alias-state-business-primary);
+  box-shadow: var(--dsw-shadow-lv1-blur);
+  transform: translateY(-1px);
 }
 
 .assetCard:focus-visible {
@@ -225,11 +190,12 @@
 
 .orderableBadge {
   flex: none;
-  padding: 1px 8px;
-  border-radius: 999px;
+  padding: 1px 7px;
+  border-radius: 5px;
   background: var(--dsw-alias-state-business-tertiary);
   color: var(--dsw-alias-label-primary-bluish);
   font: var(--dsw-font-xxxs-11);
+  letter-spacing: 0.02em;
 }
 
 .assetKind {
@@ -287,11 +253,12 @@
 .kindBadge {
   align-self: flex-start;
   margin: 0;
-  padding: 1px 8px;
-  border-radius: 999px;
+  padding: 1px 7px;
+  border-radius: 5px;
   background: var(--dsw-alias-state-business-tertiary);
   color: var(--dsw-alias-label-primary-bluish);
   font: var(--dsw-font-xxxs-11);
+  letter-spacing: 0.02em;
 }
 
 .detailBody {
@@ -329,7 +296,7 @@
   padding: 8px 10px;
   border: 1px solid var(--dsw-alias-border-l1);
   border-radius: 8px;
-  background: var(--dsw-alias-bg-module-platform);
+  background: var(--dsw-alias-bg-layer-1);
 }
 
 .pair dt {
@@ -360,7 +327,8 @@
   padding: 16px;
   border: 1px solid var(--dsw-alias-border-l1);
   border-radius: 12px;
-  background: var(--dsw-alias-bg-module-platform);
+  background: var(--dsw-alias-bg-layer-1);
+  box-shadow: var(--dsw-shadow-lv1-blur);
 }
 
 .cardTitle {
@@ -412,9 +380,10 @@
 }
 
 .statusBadge {
-  padding: 1px 8px;
-  border-radius: 999px;
+  padding: 1px 7px;
+  border-radius: 5px;
   font: var(--dsw-font-xxxs-11);
+  letter-spacing: 0.02em;
   background: var(--dsw-alias-state-business-tertiary);
   color: var(--dsw-alias-label-primary-bluish);
 }
@@ -429,32 +398,4 @@
   color: var(--dsw-alias-bg-base);
 }
 
-/* Empty + error states */
-
-.emptyState {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 24px 16px;
-  border: 1px dashed var(--dsw-alias-border-l1);
-  border-radius: 12px;
-  text-align: center;
-}
-
-.emptyHint {
-  margin: 0;
-  font: var(--dsw-font-xxs-12);
-  color: var(--dsw-alias-label-tertiary);
-}
-
-.errorStrip {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  background: var(--dsw-alias-state-error-tertiary);
-  color: var(--dsw-alias-state-error-primary);
-  font: var(--dsw-font-xxs-12);
-}
+/* Empty + error states live in the shared ui-primitives atoms. */

@@ -39,6 +39,12 @@ export type KbKey =
   | 'usage.firstSearch'
   | 'scenario.title'
   | 'scenario.railCount'
+  | 'scenario.featuredTitle'
+  | 'scenario.browseTitle'
+  | 'scenario.searchLabel'
+  | 'scenario.searchPlaceholder'
+  | 'scenario.searchResultCount'
+  | 'scenario.searchEmpty'
   | 'scenario.start'
   | 'scenario.cancel'
   | 'scenario.probeLabel'
@@ -136,7 +142,13 @@ export const zh: Record<KbKey, string> = {
   'usage.ingested': '入库文档',
   'usage.firstSearch': '开始第一次检索',
   'scenario.title': '场景',
-  'scenario.railCount': '{n} 个场景 · 滚动查看',
+  'scenario.railCount': '{n} 个场景 · 分类浏览',
+  'scenario.featuredTitle': '精选场景',
+  'scenario.browseTitle': '按分类浏览',
+  'scenario.searchLabel': '搜索场景',
+  'scenario.searchPlaceholder': '搜索场景，如：食安 / 出口 / 成本',
+  'scenario.searchResultCount': '匹配 {n} / {total} 个场景',
+  'scenario.searchEmpty': '没有匹配的场景 — 换个关键词试试',
   'scenario.start': '开始会话',
   'scenario.cancel': '取消',
   'scenario.probeLabel': '示例问题',
@@ -235,7 +247,13 @@ export const en: Record<KbKey, string> = {
   'usage.ingested': 'Ingested',
   'usage.firstSearch': 'Run your first search',
   'scenario.title': 'Scenarios',
-  'scenario.railCount': '{n} scenarios · scroll for more',
+  'scenario.railCount': '{n} scenarios · browse by category',
+  'scenario.featuredTitle': 'Featured scenarios',
+  'scenario.browseTitle': 'Browse by category',
+  'scenario.searchLabel': 'Search scenarios',
+  'scenario.searchPlaceholder': 'Search scenarios, e.g. food safety / export / cost',
+  'scenario.searchResultCount': '{n} of {total} scenarios match',
+  'scenario.searchEmpty': 'No matching scenarios — try other terms',
   'scenario.start': 'Start session',
   'scenario.cancel': 'Cancel',
   'scenario.probeLabel': 'Example question',
