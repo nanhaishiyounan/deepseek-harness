@@ -847,13 +847,16 @@ const DSH_WEB_GATEWAY_PORTS = [3080, 3081, 3083, 3084, 3085, 3086]
  * long-lived process keeps open handles to the deleted sqlite files, so
  * post-reset writes through it land in the orphaned inodes and are lost. The
  * operator may keep the gateway on purpose, hence a probe warning instead of
- * an automatic kill/restart.
+ * an automatic kill/restart. The probe requests the gateway's static manifest
+ * and matches its DSH identity, so an unrelated HTTP listener that merely
+ * occupies a listed port stays silent.
  */
 async function warnLiveDshWebGateways(): Promise<void> {
   const alive: number[] = []
   for (const port of DSH_WEB_GATEWAY_PORTS) {
-    const probe = await fetch(`http://127.0.0.1:${port}/`, { signal: AbortSignal.timeout(1500) }).catch(() => null)
-    if (probe) alive.push(port)
+    const probe = await fetch(`http://127.0.0.1:${port}/manifest.webmanifest`, { signal: AbortSignal.timeout(1500) }).catch(() => null)
+    const body = probe === null ? '' : await probe.text().catch(() => '')
+    if (body.includes('"short_name": "DSH"')) alive.push(port)
   }
   if (alive.length === 0) return
   console.warn([
