@@ -126,9 +126,16 @@ try {
   check('second run changes no counts', statsAfter.entities === stats.entities && statsAfter.triples === stats.triples, `nodes ${String(stats.entities)}→${String(statsAfter.entities)}, edges ${String(stats.triples)}→${String(statsAfter.triples)}`)
 
   // ⑥ Incremental: create one order → new node appears; delete → tombstone.
+  // The scenario mints a throwaway order row every run and the node itself
+  // survives the reconcile (only its edges tombstone), so count-stable
+  // replays — the setup chain's setup-dsh-data orchestration — pass
+  // --no-incremental to skip this acceptance-only leg.
+  const incrementalEnabled = !process.argv.includes('--no-incremental')
   const ncBase = process.env.NOCOBASE_BASE_URL
   const ncKey = process.env.NOCOBASE_API_KEY
-  if (typeof ncBase === 'string' && typeof ncKey === 'string') {
+  if (!incrementalEnabled) {
+    check('incremental scenario skipped (--no-incremental)', true, 'kept for manual verification runs; setup-chain replays stay count-stable')
+  } else if (typeof ncBase === 'string' && typeof ncKey === 'string') {
     const client = new NocoBaseClient({ baseUrl: ncBase, token: ncKey })
     const orderNo = `KG-BUILD-${String(Date.now()).slice(-8)}`
     const created = await client.create('orders', {

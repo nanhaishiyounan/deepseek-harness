@@ -12,6 +12,10 @@
  * manual → condition → request-callback into DSH / reject-update), the
  * crm/hub module builds, the "AI 工作台" v2 page (N13), the 30/20/40/24
  * data widening (N13), and the page-tabs backfill safety net (N14).
+ * "all" then replays setup-dsh-data.mts — the DSH-side data plane
+ * (connector-files provisioning, lakehouse tables, market catalog,
+ * knowledge-graph build, KB corpus) — so a reset world regains every
+ * workbench page's data from this one command.
  * Finally writes NOCOBASE_BASE_URL/NOCOBASE_API_KEY into the repository
  * root .env so every DSH surface (connector-nocobase provider,
  * expert-orders seam) picks the real backend up on its next launch.
@@ -40,6 +44,7 @@
  * NOCOBASE_AI_PROXY_PORT (N22 proxy port, default 13100).
  */
 import { spawn, spawnSync } from 'node:child_process'
+import { DatabaseSync } from 'node:sqlite'
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -751,6 +756,15 @@ async function stepVerify(): Promise<void> {
     const failure = await rowFloor(collection, floor)
     if (failure !== null) failures.push(failure)
   }
+  // The expert roster and the historical orders ride the all chain through
+  // setup-dsh-data (the market experts/services, the roster's document-kind
+  // datasets, and the ORD-B5- history are builtin data after a reset): 32
+  // roster experts + the authoritative 张红喜 row, the roster's 49 orderable
+  // services, the market catalog's dataset rows, and the 24 seeded orders.
+  for (const [collection, floor] of [['experts', 33], ['expert_services', 50], ['datasets', 89], ['orders', 24]] as const) {
+    const failure = await rowFloor(collection, floor)
+    if (failure !== null) failures.push(`${failure}; run the all chain so setup-dsh-data.mts seeds the expert roster and the historical orders`)
+  }
   // m2o display anchor (N16): AssociationField renders the target's name
   // column only when the field uiSchema carries fieldNames.label.
   const quoteFields = await call(token, 'GET', `/api/fields:list?filter=${encodeURIComponent(JSON.stringify({ collectionName: { $eq: 'crm_quotes' }, type: { $eq: 'belongsTo' } }))}&pageSize=10`) as { data?: Array<{ name?: string, uiSchema?: { 'x-component-props'?: { fieldNames?: { label?: string } } } }> }
@@ -769,6 +783,30 @@ async function stepVerify(): Promise<void> {
   for (const name of PLUGINS) {
     if (!enabledPlugins.has(name)) failures.push(`plugin ${name} not enabled`)
   }
+  // The knowledge graph is builtin data now: the graph page must have nodes
+  // to draw after "all" (a zero-node graph means setup-dsh-data's kg step
+  // was skipped or failed — the stepVerify floor catches the fake-empty
+  // world before the user opens an empty canvas).
+  const kgGraph = join(repoRoot, 'examples/kb-agent/workspace/kg-graph.sqlite')
+  if (!existsSync(kgGraph)) {
+    failures.push('workspace/kg-graph.sqlite missing (run the all chain so setup-dsh-data.mts builds the graph)')
+  } else {
+    let kgNodes: number | undefined
+    try {
+      const db = new DatabaseSync(kgGraph, { readOnly: true })
+      try {
+        const row = db.prepare('SELECT COUNT(*) AS c FROM kg_nodes').get() as { c?: number } | undefined
+        kgNodes = row?.c
+      } finally {
+        db.close()
+      }
+    } catch (error: unknown) {
+      failures.push(`kg-graph.sqlite is not readable: ${error instanceof Error ? error.message : String(error)}`)
+    }
+    if (kgNodes !== undefined && kgNodes <= 0) {
+      failures.push('kg_nodes table is empty (run the all chain so kg-build.mts populates the graph)')
+    }
+  }
   // The all chain verifies right after init wrote the credentials, so read
   // through the shared resolver (ambient first, repository root .env second)
   // instead of demanding the key in this process's ambient environment.
@@ -784,7 +822,7 @@ async function stepVerify(): Promise<void> {
     process.exitCode = 1
     return
   }
-  console.log('setup-nocobase verify: OK — full UI + collections + attachment field + seed + workflow chain + AI workbench + row floors + m2o fieldNames + n18ai- form AI buttons + portals + ai-proxy + API key all verified')
+  console.log('setup-nocobase verify: OK — full UI + collections + attachment field + seed + workflow chain + AI workbench + row floors + m2o fieldNames + n18ai- form AI buttons + portals + ai-proxy + API key + kg graph all verified')
 }
 
 /** Upsert the two NocoBase lines in the repository root .env, preserving the rest. */
@@ -859,6 +897,12 @@ async function main(): Promise<void> {
         if (!run('node', ['--import', 'tsx/esm', join(repoRoot, 'examples/kb-agent/scripts', script)])) {
           throw new Error(`${script} failed during the all chain`)
         }
+      }
+      // The DSH-side data plane (connector-files + lakehouse + market + the
+      // knowledge graph + the KB corpus): one child replay, its own steps
+      // probe watermarks so a settled world stays all-kept.
+      if (!run('node', ['--import', 'tsx/esm', join(repoRoot, 'examples/kb-agent/scripts/setup-dsh-data.mts')])) {
+        throw new Error('setup-dsh-data.mts failed during the all chain')
       }
       return void await stepVerify()
     default:

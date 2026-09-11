@@ -16,7 +16,7 @@ import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client'
 // Type-only: pulls the ui-conversation slot declarations (view ring, header actions).
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type { ConnectionHandle } from '@deepseek-ai/dsh-client-connection/client'
-import type { KgEdgeRow, KgSubgraphNodeRow } from './kgTypes.ts'
+import type { KgEdgeRow, KgNodeHitRow, KgSubgraphNodeRow } from './kgTypes.ts'
 import { createKgClientStore } from './kgStore.ts'
 import { createKgViewBridge } from './kgBridge.ts'
 import { KgEntry } from './KgEntry.tsx'
@@ -91,6 +91,34 @@ export function apply(ctx: ClientContext): void {
     })
   }
 
+  /** The default view runs at most once per client session (a flag, not store state: it is an orchestration fact). */
+  let defaultViewDone = false
+
+  /**
+   * Load the default canvas view: gate on the counters, then walk the
+   * neighborhood of the first entities the seed probe returns (the empty
+   * substring matches every node — searchNodes is a substring filter).
+   */
+  const ensureDefaultView = (): void => {
+    if (defaultViewDone) return
+    defaultViewDone = true
+    api.kg.stats({}).then((response) => {
+      const value = unwrap<{ entities: number }>(response)
+      // A zero-entity graph keeps the build-guide empty state: the default
+      // view must not draw a canvas over an unbuilt world.
+      if (value.entities === 0) return
+      return api.kg.search({ query: '', k: 3 }).then((searchResponse) => {
+        const hits = unwrap<{ nodes: readonly KgNodeHitRow[] }>(searchResponse).nodes
+        if (hits.length === 0) return
+        walk(hits.map(hit => hit.name), 1)
+      })
+    }).catch(() => {
+      // Swallows the stats/search probe failures of the default view only:
+      // the canvas stays untouched (the empty-state guide renders), and the
+      // user's own walks re-enter the same calls with full error surfacing.
+    })
+  }
+
   /** Run one subgraph walk from name seeds. */
   const walk = (seeds: readonly string[], hops: number): void => {
     store.beginCanvas()
@@ -151,6 +179,7 @@ export function apply(ctx: ClientContext): void {
     inject: () => ({
       hooks: { kg: store.store },
       refresh,
+      ensureDefaultView,
       walk,
       expandNode,
       searchSeeds,

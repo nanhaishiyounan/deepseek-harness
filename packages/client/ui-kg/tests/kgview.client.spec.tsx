@@ -79,6 +79,7 @@ function mount(state: KgClientState) {
   const store = createSnapshotStore<KgClientState>(state)
   const actions = {
     refresh: vi.fn(),
+    ensureDefaultView: vi.fn(),
     walk: vi.fn(),
     expandNode: vi.fn(),
     searchSeeds: vi.fn(),
@@ -133,11 +134,23 @@ describe('parseKgPhrase templates', () => {
 })
 
 describe('KgView state matrix', () => {
-  it('loads the legend on mount and renders the canvas skeleton while in flight', () => {
-    const { refresh } = mount({ legend: undefined, canvas: undefined, search: undefined, selected: undefined, typeFilter: undefined })
+  it('loads the legend and asks for the default view on mount while the canvas is untouched', () => {
+    const { refresh, ensureDefaultView } = mount({
+      legend: undefined, canvas: undefined, search: undefined, selected: undefined, typeFilter: undefined,
+    })
     expect(refresh).toHaveBeenCalled()
+    expect(ensureDefaultView).toHaveBeenCalled()
     expect(screen.getByText(zh['page.title'])).toBeTruthy()
     expect(screen.getByText(zh['canvas.emptyTitle'])).toBeTruthy()
+  })
+
+  it('never asks for the default view once a canvas state exists', () => {
+    const { ensureDefaultView } = mount({
+      legend: LEGEND_READY,
+      canvas: { status: 'loading' },
+      search: undefined, selected: undefined, typeFilter: undefined,
+    })
+    expect(ensureDefaultView).not.toHaveBeenCalled()
   })
 
   it('renders the canvas loading skeleton while a walk is in flight', () => {

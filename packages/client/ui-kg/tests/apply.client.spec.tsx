@@ -58,6 +58,7 @@ async function bench(overrides: {
   subgraph?: () => Promise<unknown>
   search?: () => Promise<unknown>
   expand?: () => Promise<unknown>
+  stats?: () => Promise<unknown>
 } = {}) {
   const ctx = new Context()
   await ctx.plugin(SlotRegistry).await()
@@ -65,8 +66,9 @@ async function bench(overrides: {
   const subgraph = vi.fn(overrides.subgraph ?? (async () => ok(SUBGRAPH)))
   const search = vi.fn(overrides.search ?? (async () => ok({ nodes: [] })))
   const expand = vi.fn(overrides.expand ?? (async () => ok({ nodes: [], edges: [], truncated: false })))
+  const stats = vi.fn(overrides.stats ?? (async () => ok({ triples: 0, entities: 0, node_types: 0, relations: 0 })))
   ctx.provide('connection', {
-    api: { kg: { schema, search, subgraph, expand, stats: vi.fn() } },
+    api: { kg: { schema, search, subgraph, expand, stats } },
   } as never)
   const locale = new LocaleRuntime(ctx)
   locale.setLocale('zh')
@@ -82,7 +84,7 @@ async function bench(overrides: {
       'conversation.session.header.actions': { kind: 'list', scope: 'session' },
     },
   } as never, () => null)
-  return { ctx, slots, declare, schema, subgraph, search, expand }
+  return { ctx, slots, declare, schema, subgraph, search, expand, stats }
 }
 
 describe('ui-kg browser half apply', () => {
@@ -129,6 +131,42 @@ describe('ui-kg browser half apply', () => {
     ;(viewFace.expandNode as (nodeId: string) => void)('nocobase:customers:1')
     ;(viewFace.searchSeeds as (query: string) => void)('宏发')
     await vi.waitFor(() => { expect(expand).toHaveBeenCalled(); expect(search).toHaveBeenCalled() })
+    revoke()
+    void ctx.fiber.dispose()
+  })
+
+  it('the default view walks the first entities once, gated on the counters', async () => {
+    const { ctx, declare, schema, subgraph, search, stats } = await bench({
+      stats: async () => ok({ triples: 12, entities: 3, node_types: 31, relations: 23 }),
+      search: async () => ok({ nodes: [
+        { id: 'nocobase:customers:1', type: 'Customer', name: '宏发食品' },
+        { id: 'kb:doc:酱油', type: 'Concept', name: '酱油' },
+      ] }),
+    })
+    const revoke = declare()
+    const viewFace = (ctx.slots.entries('conversation.view')
+      .find(entry => entry.options.id === 'kg')?.inject as unknown as (sessionId: string) => Record<string, unknown>)('s1')
+    const ensureDefaultView = viewFace.ensureDefaultView as () => void
+    ensureDefaultView()
+    ensureDefaultView()
+    await vi.waitFor(() => { expect(subgraph).toHaveBeenCalledWith({ seeds: ['宏发食品', '酱油'], hops: 1 }) })
+    expect(stats).toHaveBeenCalledTimes(1)
+    expect(search).toHaveBeenCalledWith({ query: '', k: 3 })
+    // The legend load stays a separate call the entry/tab owns.
+    expect(schema).not.toHaveBeenCalled()
+    revoke()
+    void ctx.fiber.dispose()
+  })
+
+  it('the default view leaves a zero-entity graph untouched', async () => {
+    const { ctx, declare, subgraph, search, stats } = await bench()
+    const revoke = declare()
+    const viewFace = (ctx.slots.entries('conversation.view')
+      .find(entry => entry.options.id === 'kg')?.inject as unknown as (sessionId: string) => Record<string, unknown>)('s1')
+    ;(viewFace.ensureDefaultView as () => void)()
+    await vi.waitFor(() => { expect(stats).toHaveBeenCalledTimes(1) })
+    expect(search).not.toHaveBeenCalled()
+    expect(subgraph).not.toHaveBeenCalled()
     revoke()
     void ctx.fiber.dispose()
   })

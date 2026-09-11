@@ -6,11 +6,16 @@
  * 「张会长提供哪些服务、谁下过单」 from the graph with provenance, and the
  * closed-set defense stays observable on the real model (degraded or dropped
  * counts reported; nothing unregistered written). Self-skips without
- * reachable NocoBase or MINIMAX_API_KEY, explaining why.
+ * reachable NocoBase or MINIMAX_API_KEY, explaining why. One case also
+ * replays setup-dsh-data.mts against the real workspace and checks the
+ * built graph by direct SQLite count — the "one setup run leaves a graph"
+ * guarantee the all chain's verify step asserts on every run.
  * Run: pnpm vitest run --config vitest.e2e.config.ts examples/kb-agent/tests/kg-pipeline.e2e.ts
  */
 
 import { mkdtemp, rm } from 'node:fs/promises'
+import { spawnSync } from 'node:child_process'
+import { DatabaseSync } from 'node:sqlite'
 import { mkdir } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
@@ -168,6 +173,34 @@ describe.skipIf(!reachable || minimaxKey === undefined)('kg pipeline e2e: real t
     const finalAnswer = await callText('kg_subgraph', { seeds: [orderNo], hops: 1 })
     expect(finalAnswer).toContain('truncated: false')
     expect(finalAnswer).not.toContain('中亚货运动线方案')
+  })
+
+  it('replays setup-dsh-data idempotently and the workspace graph stays non-empty by direct count', { timeout: 600_000 }, async () => {
+    // The orchestrator runs against the real workspace (the same world the
+    // all chain owns); on a settled world every step is kept/skip and the
+    // graph counts do not move.
+    const countNodes = (): number => {
+      const db = new DatabaseSync(join(here, '..', 'workspace', 'kg-graph.sqlite'), { readOnly: true })
+      try {
+        return (db.prepare('SELECT COUNT(*) AS c FROM kg_nodes').get() as { c: number }).c
+      } finally {
+        db.close()
+      }
+    }
+    const before = countNodes()
+    const child = spawnSync(process.execPath, ['--import', 'tsx/esm', join(here, '..', 'scripts', 'setup-dsh-data.mts')], {
+      cwd: join(here, '..', '..', '..'),
+      env: { ...process.env, NOCOBASE_BASE_URL: ncBaseUrl!, NOCOBASE_API_KEY: ncApiKey! },
+      encoding: 'utf8',
+      timeout: 540_000,
+    })
+    expect(child.status, `setup-dsh-data output:\n${child.stdout}\n${child.stderr}`).toBe(0)
+    expect(child.stdout).toContain('setup-dsh-data: done')
+    // The expert roster rides the chain: a settled world reports it kept.
+    expect(child.stdout).toContain('setup-dsh-data: expert roster present (32 experts, kept)')
+    // Both runs of the built-in chain leave a drawable graph behind.
+    expect(countNodes()).toBeGreaterThan(0)
+    expect(countNodes()).toBe(before)
   })
 })
 

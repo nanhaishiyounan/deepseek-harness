@@ -1,0 +1,10 @@
+# The kg graph-page scenario needs the gateway's graph reads: the shipped
+# web-app bundle keeps them opt-in, so this overlay opts in for the
+# in-process kg stack the scenario mounts after boot. Restating the bundle's
+# kb tenant binding keeps the row self-contained under either patch-merge
+# semantics (the kb-workbench overlay's pattern).
+- id: api-gateway
+  config:
+    kbTenant: default
+    kgEnabled: true
+    kgTenant: default

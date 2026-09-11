@@ -90,6 +90,7 @@
     "apps/web/tests/workflow-run.e2e.ts",
     "apps/web/tests/kb-workbench.e2e.ts",
     "apps/web/tests/market-pages.e2e.ts",
+    "apps/web/tests/kg-graph-page.e2e.ts",
     "apps/web/stress-tests/reasoning-chunks.stress.ts",
     "apps/cli/tests/**/*.ts",
     "examples/*/src/**/*.ts",

@@ -12,7 +12,9 @@
 import { useEffect, useState } from 'react'
 import type { JSX } from 'react'
 import type { SnapshotStore } from '@deepseek-ai/dsh-client-runtime/client'
-import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
+import {
+  Button, EmptyState, ErrorStrip, IconBranchOutline16, PageHero, PageSkeleton,
+} from '@deepseek-ai/dsh-client-ui-primitives'
 import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 // Type-only: pulls the ui-conversation SlotMap merge (the view seat).
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
@@ -30,6 +32,8 @@ export interface KgViewInjected {
   }
   /** Load or reload the legend + counters. */
   refresh: () => void
+  /** Load the default canvas view once per client session (stats-gated walk). */
+  ensureDefaultView: () => void
   /** Run one subgraph walk from name seeds. */
   walk: (seeds: readonly string[], hops: number) => void
   /** Expand one minted node id (load-on-demand). */
@@ -66,7 +70,7 @@ interface KgLocalInput {
  */
 export function KgView(
   {
-    inputActions, useKg, refresh, walk, expandNode, searchSeeds, selectNode,
+    inputActions, useKg, refresh, ensureDefaultView, walk, expandNode, searchSeeds, selectNode,
     toggleTypeFilter, clearTypeFilter, requestView, t,
   }: KgViewProps,
 ): JSX.Element {
@@ -76,6 +80,12 @@ export function KgView(
   useEffect(() => {
     if (state.legend === undefined) refresh()
   }, [state.legend, refresh])
+
+  // Opening the tab is itself the default-view trigger: an untouched canvas
+  // asks for one automatic walk, a walked or failed one stays as it is.
+  useEffect(() => {
+    if (state.canvas === undefined) ensureDefaultView()
+  }, [state.canvas, ensureDefaultView])
 
   const legend = state.legend
   const canvas = state.canvas
@@ -118,16 +128,13 @@ export function KgView(
   return (
     <div className={css.page}>
       {legend !== undefined && legend.status === 'error' && (
-        <div className={css.errorStrip} role="alert">
-          <span>{t('error.unavailable')} — {legend.error}</span>
-          <Button variant="ghost" size="sm" onClick={refresh}>{t('error.retry')}</Button>
-        </div>
+        <ErrorStrip
+          message={<>{t('error.unavailable')} — {legend.error}</>}
+          action={<Button variant="ghost" size="sm" onClick={refresh}>{t('error.retry')}</Button>}
+        />
       )}
 
-      <section className={css.hero}>
-        <h2 className={css.heroTitle}>{t('page.title')}</h2>
-        <p className={css.heroTagline}>{t('page.tagline')}</p>
-      </section>
+      <PageHero eyebrow={t('view.kg')} title={t('page.title')} tagline={t('page.tagline')} />
 
       <section className={css.toolbar}>
         <div className={css.phraseBox}>
@@ -175,18 +182,19 @@ export function KgView(
         <section className={css.canvasZone}>
           <h3 className={css.zoneTitle}>{t('canvas.title')}</h3>
           {canvas !== undefined && canvas.status === 'error' ? (
-            <div className={css.errorStrip} role="alert">
-              <span>{t('error.unavailable')} — {canvas.error}</span>
-              <Button variant="ghost" size="sm" onClick={refresh}>{t('error.retry')}</Button>
-            </div>
+            <ErrorStrip
+              message={<>{t('error.unavailable')} — {canvas.error}</>}
+              action={<Button variant="ghost" size="sm" onClick={refresh}>{t('error.retry')}</Button>}
+            />
           ) : canvas?.status === 'ready' ? (
             <>
               {canvas.value.truncated && <p className={css.truncatedNote}>{t('canvas.truncated')}</p>}
               {unbuilt ? (
-                <div className={css.emptyState}>
-                  <p className={css.emptyTitle}>{t('build.unbuiltTitle')}</p>
-                  <p className={css.emptyHint}>{t('build.unbuiltHint')}</p>
-                </div>
+                <EmptyState
+                  title={t('build.unbuiltTitle')}
+                  hint={t('build.unbuiltHint')}
+                  icon={<IconBranchOutline16 />}
+                />
               ) : (
                 <KgGraphCanvas
                   nodes={canvas.value.nodes}
@@ -200,12 +208,9 @@ export function KgView(
               )}
             </>
           ) : canvas?.status === 'loading' ? (
-            <div className={css.canvasSkeleton} aria-hidden="true" />
+            <PageSkeleton variant="block" />
           ) : (
-            <div className={css.emptyState}>
-              <p className={css.emptyTitle}>{t('canvas.emptyTitle')}</p>
-              <p className={css.emptyHint}>{t('canvas.emptyHint')}</p>
-            </div>
+            <EmptyState title={t('canvas.emptyTitle')} hint={t('canvas.emptyHint')} icon={<IconBranchOutline16 />} />
           )}
         </section>
 

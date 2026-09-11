@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-09-10-kg-builtin-data-setup-chain.md
+2026-09-10-kg-builtin-data-setup-chain.md: 9bd4bbcfe48db84b2fb815b73d6e05bc29dde8de
+2026-09-10-kg-builtin-data-setup-chain.zh.md: 69d6ae72e74da7f9d5de1d7f44f72ed824e3ee32
