@@ -43,11 +43,12 @@ export function rewriteNocobaseHtml(html: string, prefix: string): string {
   return html
     // (href|src)="/x" → (href|src)="<prefix>/x"; `//` (protocol-relative) stays.
     .replace(/((?:href|src)=")\/(?!\/)/gu, `$1${prefix}/`)
-    // The portal entries' `<meta property="og:image" content="/x">` carries
-    // the root-absolute preview image (the overlaid logo-mark) in the content
-    // attribute, which the href/src rewrite does not reach; the matched tag
-    // re-roots its own content value while other meta content keeps its bytes.
-    .replace(/<meta\b[^>]*\bproperty="og:image"[^>]*>/gu, tag => tag.replace(/(\bcontent=")\/(?!\/)/u, `$1${prefix}/`))
+    // The portal entries' `<meta property="og:image" content="/x">` and
+    // `<meta name="twitter:image" content="/x">` carry the root-absolute
+    // preview image (the overlaid logo-mark) in the content attribute, which
+    // the href/src rewrite does not reach; the matched tag re-roots its own
+    // content value while other meta content keeps its bytes.
+    .replace(/<meta\b[^>]*\b(?:property="og:image"|name="twitter:image")[^>]*>/gu, tag => tag.replace(/(\bcontent=")\/(?!\/)/u, `$1${prefix}/`))
     // The deployed portal entries inline `window.NOCOBASE_PORTAL_BASE="/dist/<name>/"`
     // and `window.NOCOBASE_API_URL="/api"` (the deploy script's defines). Under
     // the prefix the portal is mounted at `<prefix>/dist/<name>/` and its API

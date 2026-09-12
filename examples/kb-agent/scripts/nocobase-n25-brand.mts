@@ -88,6 +88,10 @@ function overlayStaticAssets(): void {
     if (!existsSync(root)) continue
     const overlays = [
       [faviconPath, join(root, 'favicon', 'favicon.ico')],
+      // The admin entry ships no favicon link (upstream pins a missing path
+      // on purpose), so browsers fall back to the origin root /favicon.ico —
+      // serve the brand mark there instead of the gateway's HTML 200.
+      [faviconPath, join(root, 'favicon.ico')],
       [fallbackPngPath, join(root, 'nocobase.png')],
       [logoPath, join(root, 'dsh-brand-logo.svg')],
     ] as const

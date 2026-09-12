@@ -4,7 +4,7 @@
 // English only - it is meant to be pasted into a coding agent.
 
 export function buildReplicatePrompt() {
-  return `Build an "All in one" app on NocoBase with your coding agent.
+  return `Build a "DSH食品业务平台" app on NocoBase with your coding agent.
 
 What it is: a broad back-office suite: sales pipeline, projects, HR, inventory, procurement, finance, helpdesk, assets and a knowledge base.
 

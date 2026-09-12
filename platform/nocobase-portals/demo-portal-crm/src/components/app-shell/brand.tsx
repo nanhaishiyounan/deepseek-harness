@@ -1,6 +1,6 @@
 import { assetUrl, cn } from "@/lib/utils";
 
-const APP_NAME = "Salesroom CRM";
+const APP_NAME = "DSH食品业务平台";
 
 type BrandLogoProps = {
   className?: string;

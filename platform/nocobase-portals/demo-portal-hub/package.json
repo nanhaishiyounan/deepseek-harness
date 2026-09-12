@@ -1,6 +1,6 @@
 {
   "name": "@nocobase/demo-portal-hub",
-  "displayName": "CRM DEMO",
+  "displayName": "DSH食品业务平台",
   "version": "1.0.0",
   "private": true,
   "type": "module",

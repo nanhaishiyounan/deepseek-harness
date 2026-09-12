@@ -1,4 +1,4 @@
-// Shared visual + chart tokens for the All in one suite.
+// Shared visual + chart tokens for the DSH食品业务平台 suite.
 // This is the design anchor: every module should import from here so all
 // dashboards read as one system. Do NOT hardcode chart hex in a module —
 // import CHART_PALETTE / useChartTheme instead.

@@ -853,6 +853,16 @@ async function stepVerify(): Promise<void> {
       }
     }
   }
+  // D4: the admin entry pins no favicon link, so every browser falls back to
+  // the origin root /favicon.ico — the overlay must answer 200 with the ico
+  // bytes (the gateway's HTML 200 was the bug).
+  {
+    const probe = await fetch(`${baseUrl}/favicon.ico`, { signal: AbortSignal.timeout(5000) }).catch(() => null)
+    const type = probe?.headers.get('content-type') ?? ''
+    if (probe === null || !probe.ok || type.includes('text/html')) {
+      failures.push(`root /favicon.ico is ${probe?.status ?? 'network error'} (${type}); rerun the n25 brand overlay`)
+    }
+  }
   // C3-A: the portal list pages pin default sorters, columns, and filters on
   // fields the seeded collections must actually carry — replay the exact
   // wire requests so a missing column fails the 400 here, not in the user's

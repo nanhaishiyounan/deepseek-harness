@@ -101,6 +101,7 @@ describe('nocobase proxy handler', () => {
       '<link href="//cdn.example.com/x.css" rel="stylesheet">',
       '<script>window.NOCOBASE_PORTAL_BASE="/dist/crm/";window.NOCOBASE_API_URL="/api"</script>',
       '<meta data-rh="true" property="og:image" content="/dist/crm/logo-mark.png" />',
+      '<meta data-rh="true" name="twitter:image" content="/dist/crm/logo-mark.png" />',
       '<meta data-rh="true" property="og:title" content="Salesroom CRM" />',
     ].join('\n')
     const hits: UpstreamHit[] = []
@@ -126,9 +127,10 @@ describe('nocobase proxy handler', () => {
     // The entry's API define follows, so the runtime gate's API probes and
     // sign-in ride the proxy instead of the gateway's own root.
     expect(body).toContain('window.NOCOBASE_API_URL="/nocobase/api"')
-    // The og:image preview (the overlaid logo-mark) re-roots like href/src;
-    // other meta content values keep their bytes.
+    // The og:image and twitter:image previews (the overlaid logo-mark)
+    // re-root like href/src; other meta content values keep their bytes.
     expect(body).toContain('content="/nocobase/dist/crm/logo-mark.png"')
+    expect(body.match(/content="\/nocobase\/dist\/crm\/logo-mark.png"/gu)?.length).toBe(2)
     expect(body).toContain('property="og:title" content="Salesroom CRM"')
     // The stale upstream length is dropped; the response is valid and complete.
     expect(response.headers.get('content-length')).toBe(String(body.length))
