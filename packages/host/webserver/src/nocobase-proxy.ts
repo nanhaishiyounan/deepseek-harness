@@ -91,6 +91,50 @@ export function rewriteNocobasePluginManifest(json: string, prefix: string): str
 export const NOCOBASE_WS_PATH = '/nocobase/ws'
 
 /**
+ * The portal deep-link prefixes the webserver registers ahead of the plain
+ * `/nocobase` route (longest prefix wins). Adding a portal here is the whole
+ * wiring for its SPA fallback.
+ */
+export const NOCOBASE_PORTAL_PREFIXES = {
+  crm: '/nocobase/dist/crm',
+  hub: '/nocobase/dist/hub',
+} as const
+
+export type NocobasePortalName = keyof typeof NOCOBASE_PORTAL_PREFIXES
+
+/**
+ * Options for {@link createNocobaseProxyHandler}.
+ */
+export interface NocobaseProxyOptions {
+  /**
+   * SPA fallback for deep links: when the upstream answers 404 to a
+   * navigation request (GET/HEAD whose Accept includes text/html) and this
+   * path is set, the proxy fetches it instead — the portal entries are
+   * history-mode SPAs whose routes exist only client-side, and the NocoBase
+   * gateway serves `/dist/*` with no rewrites. Asset and API requests keep
+   * their 404.
+   */
+  spaFallbackIndex?: string
+}
+
+/**
+ * Create the portal deep-link handler for one deployed portal: the plain
+ * proxy behavior plus the SPA fallback to the portal entry. The gateway's
+ * static handler answers `/dist/<portal>/` with the index (a cleanUrls
+ * `/dist/<portal>/index.html` only 301s to it), so the fallback path is the
+ * directory form.
+ * @param origin - the NocoBase origin (scheme + host + port, no trailing slash).
+ * @param portal - the portal name (a key of {@link NOCOBASE_PORTAL_PREFIXES}).
+ * @returns the WebRoute handler.
+ */
+/** Handler shape every proxy factory below returns. */
+type ProxyHandler = (req: IncomingMessage, res: ServerResponse) => void
+
+export function createNocobasePortalHandler(origin: string, portal: NocobasePortalName): ProxyHandler {
+  return createNocobaseProxyHandler(origin, { spaFallbackIndex: `/dist/${portal}/` })
+}
+
+/**
  * Create the WebSocket upgrade forwarding handler for one upstream origin.
  * The browser handshake keeps its `connection`/`upgrade`/`sec-websocket-*`
  * headers through the proxy; the upstream 101 (or refusal) is written back
@@ -144,9 +188,10 @@ export function createNocobaseWsUpgradeHandler(origin: string): (req: IncomingMe
 /**
  * Create the forwarding handler for one upstream origin.
  * @param origin - the NocoBase origin (scheme + host + port, no trailing slash).
+ * @param options - see {@link NocobaseProxyOptions}.
  * @returns the WebRoute handler.
  */
-export function createNocobaseProxyHandler(origin: string): (req: IncomingMessage, res: ServerResponse) => void {
+export function createNocobaseProxyHandler(origin: string, options: NocobaseProxyOptions = {}): ProxyHandler {
   return (req, res) => {
     // Strip the route prefix: /nocobase/api/x → /api/x on the upstream.
     const upstreamPath = req.url?.replace(/^\/nocobase(?=\/|$)/u, '') ?? '/'
@@ -160,13 +205,66 @@ export function createNocobaseProxyHandler(origin: string): (req: IncomingMessag
     // forwarding headers, so the proxied origin stays trusted.
     if (req.headers.host !== undefined) headers['x-forwarded-host'] = req.headers.host
     headers['x-forwarded-proto'] = 'http'
+    // A navigation request is the SPA-fallback candidate: browsers ask for
+    // text/html on document loads; asset and API fetches carry other types.
+    const accept = req.headers.accept
+    const isNavigation = (req.method === 'GET' || req.method === 'HEAD') && typeof accept === 'string' && accept.includes('text/html')
+    const serveRewrittenBody = (status: number, body: string, resHeaders: IncomingMessage['headers']): void => {
+      for (const [name, value] of Object.entries(resHeaders)) {
+        const lower = name.toLowerCase()
+        if (value === undefined || STRIP_RESPONSE_HEADERS.has(lower)) continue
+        // Rewriting changes the length; the buffered body carries its own.
+        if (lower === 'content-length' || lower === 'transfer-encoding') continue
+        res.setHeader(name, value)
+      }
+      res.setHeader('content-length', String(Buffer.byteLength(body)))
+      res.writeHead(status)
+      res.end(req.method === 'HEAD' ? undefined : body)
+    }
     const upstream = httpRequest(
       `${origin}${upstreamPath}`,
       { method: req.method, headers },
       (upstreamRes) => {
+        // The static gateway redirects inside the deployment with origin-root
+        // Locations (e.g. /dist/hub → /dist/hub/); re-root them onto the
+        // proxy prefix — the symmetric opposite of stripping it above.
+        const location = upstreamRes.headers.location
+        const status = upstreamRes.statusCode ?? 0
+        if (location !== undefined && location.startsWith('/') && !location.startsWith('//') && upstreamPath.startsWith('/dist/') && status >= 300 && status < 400) {
+          upstreamRes.headers.location = `${NOCOBASE_PROXY_PREFIX}${location}`
+        }
         const contentType = upstreamRes.headers['content-type'] ?? ''
         const isHtml = contentType.includes('text/html')
         const isPluginManifest = contentType.includes('application/json') && upstreamPath.split('?')[0] === '/api/pm:listEnabled'
+        // SPA deep link: the gateway has no rewrites for /dist/* routes, so a
+        // missing file is a client-side route, not a broken link — answer with
+        // the portal entry (rewritten) instead of the 404 shell.
+        if (options.spaFallbackIndex !== undefined && status === 404 && isNavigation) {
+          upstreamRes.resume()
+          const indexRequest = httpRequest(
+            `${origin}${options.spaFallbackIndex}`,
+            { method: 'GET', headers: { ...headers, accept: 'text/html' } },
+            (indexRes) => {
+              const chunks: Buffer[] = []
+              indexRes.on('data', (chunk: Buffer) => { chunks.push(chunk) })
+              indexRes.on('end', () => {
+                if ((indexRes.statusCode ?? 502) !== 200) {
+                  serveRewrittenBody(502, 'nocobase proxy: portal index unavailable', {})
+                  return
+                }
+                serveRewrittenBody(200, rewriteNocobaseHtml(Buffer.concat(chunks).toString('utf8'), NOCOBASE_PROXY_PREFIX), indexRes.headers)
+              })
+              indexRes.on('error', (error) => { res.destroy(error) })
+            },
+          )
+          indexRequest.on('error', (error) => {
+            if (res.headersSent) { res.destroy(error); return }
+            res.writeHead(502, { 'content-type': 'text/plain; charset=utf-8' })
+            res.end(`nocobase proxy: upstream unreachable (${error instanceof Error ? error.message : String(error)})`)
+          })
+          indexRequest.end()
+          return
+        }
         if (!isHtml && !isPluginManifest) {
           for (const [name, value] of Object.entries(upstreamRes.headers)) {
             if (value === undefined || STRIP_RESPONSE_HEADERS.has(name.toLowerCase())) continue
@@ -183,16 +281,7 @@ export function createNocobaseProxyHandler(origin: string): (req: IncomingMessag
           const body = isHtml
             ? rewriteNocobaseHtml(raw, NOCOBASE_PROXY_PREFIX)
             : rewriteNocobasePluginManifest(raw, NOCOBASE_PROXY_PREFIX)
-          for (const [name, value] of Object.entries(upstreamRes.headers)) {
-            const lower = name.toLowerCase()
-            if (value === undefined || STRIP_RESPONSE_HEADERS.has(lower)) continue
-            // Rewriting changes the length; the buffered body carries its own.
-            if (lower === 'content-length' || lower === 'transfer-encoding') continue
-            res.setHeader(name, value)
-          }
-          res.setHeader('content-length', String(Buffer.byteLength(body)))
-          res.writeHead(upstreamRes.statusCode ?? 502)
-          res.end(body)
+          serveRewrittenBody(upstreamRes.statusCode ?? 502, body, upstreamRes.headers)
         })
         upstreamRes.on('error', (error) => { res.destroy(error) })
       },

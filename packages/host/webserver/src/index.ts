@@ -35,7 +35,15 @@ declare module '@deepseek-ai/cordis' {
   }
 }
 
-import { createNocobaseProxyHandler, createNocobaseWsUpgradeHandler, NOCOBASE_PROXY_PREFIX, NOCOBASE_WS_PATH } from './nocobase-proxy.ts'
+import {
+  createNocobasePortalHandler,
+  createNocobaseProxyHandler,
+  createNocobaseWsUpgradeHandler,
+  NOCOBASE_PORTAL_PREFIXES,
+  NOCOBASE_PROXY_PREFIX,
+  NOCOBASE_WS_PATH,
+  type NocobasePortalName,
+} from './nocobase-proxy.ts'
 
 /** Route match kind: 'exact' matches the pathname verbatim; 'prefix' p matches p and p/<anything>. */
 export type WebRouteKind = 'exact' | 'prefix'
@@ -104,6 +112,16 @@ export class WebServer extends Service {
     if (proxyOrigin !== undefined) {
       ctx.effect(
         () => {
+          // Portal deep-link routes first: longest prefix wins over the plain
+          // /nocobase route, so /nocobase/dist/hub/<route> reaches the SPA
+          // fallback handler instead of the bare proxy.
+          const disposePortals = Object.entries(NOCOBASE_PORTAL_PREFIXES).map(([portal, prefix]) =>
+            this.register({
+              kind: 'prefix',
+              path: prefix,
+              handler: createNocobasePortalHandler(proxyOrigin, portal as NocobasePortalName),
+            }),
+          )
           const disposeHttp = this.register({
             kind: 'prefix',
             path: NOCOBASE_PROXY_PREFIX,
@@ -116,6 +134,7 @@ export class WebServer extends Service {
           return () => {
             disposeUpgrade()
             disposeHttp()
+            for (const dispose of disposePortals.reverse()) dispose()
           }
         },
         'webServer.nocobaseProxy',

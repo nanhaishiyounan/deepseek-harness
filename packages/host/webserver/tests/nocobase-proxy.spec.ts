@@ -10,7 +10,7 @@ import { connect } from 'node:net'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import WebServer from '../src/index.ts'
-import { createNocobaseProxyHandler, NOCOBASE_PROXY_PREFIX, rewriteNocobaseHtml, rewriteNocobasePluginManifest } from '../src/nocobase-proxy.ts'
+import { createNocobasePortalHandler, createNocobaseProxyHandler, NOCOBASE_PORTAL_PREFIXES, NOCOBASE_PROXY_PREFIX, rewriteNocobaseHtml, rewriteNocobasePluginManifest } from '../src/nocobase-proxy.ts'
 
 /** One recorded proxied request the fake upstream saw. */
 interface UpstreamHit {
@@ -181,6 +181,97 @@ describe('nocobase proxy handler', () => {
   })
 })
 
+describe('nocobase portal deep-link fallback', () => {
+  /** A fake upstream that answers per-path: routes 404, the index 200. */
+  async function portalUpstream(hits: UpstreamHit[]): Promise<string> {
+    const server = createServer((req, res) => {
+      let body = ''
+      req.on('data', (chunk) => { body += String(chunk) })
+      req.on('end', () => {
+        hits.push({ method: req.method ?? '', url: req.url ?? '', headers: req.headers, body })
+        if (req.url === '/dist/hub/') {
+          res.setHeader('content-type', 'text/html; charset=utf-8')
+          res.end('<script>window.NOCOBASE_PORTAL_BASE="/dist/hub/"</script><title>hub</title>')
+          return
+        }
+        if (req.url === '/dist/hub' || req.url === '/dist/crm') {
+          res.writeHead(301, { location: `${req.url}/` })
+          res.end()
+          return
+        }
+        res.writeHead(404, { 'content-type': 'text/html' })
+        res.end('<html>404</html>')
+      })
+    })
+    await new Promise<void>((resolve) => { server.listen(0, '127.0.0.1', () => { resolve() }) })
+    upstream = server
+    const address = server.address()
+    if (address === null || typeof address === 'string') throw new Error('no address')
+    return `http://127.0.0.1:${address.port}`
+  }
+
+  it('answers a navigation 404 with the rewritten portal index (deep link)', async () => {
+    const hits: UpstreamHit[] = []
+    const origin = await portalUpstream(hits)
+    const handler = createNocobasePortalHandler(origin, 'hub')
+    const response = await call(handler, '/nocobase/dist/hub/projects', { headers: { accept: 'text/html,application/xhtml+xml' } })
+    expect(response.status).toBe(200)
+    expect(response.headers.get('content-type')).toContain('text/html')
+    // The fallback body runs the same rewrite pipeline as the entry itself.
+    expect(await response.text()).toContain('window.NOCOBASE_PORTAL_BASE="/nocobase/dist/hub/"')
+    expect(hits.map(hit => hit.url)).toEqual(['/dist/hub/projects', '/dist/hub/'])
+  })
+
+  it('answers a navigation HEAD 404 with the index status and no body', async () => {
+    const hits: UpstreamHit[] = []
+    const origin = await portalUpstream(hits)
+    const handler = createNocobasePortalHandler(origin, 'hub')
+    const response = await call(handler, '/nocobase/dist/hub/kb-search', { method: 'HEAD', headers: { accept: 'text/html' } })
+    expect(response.status).toBe(200)
+    expect(await response.text()).toBe('')
+  })
+
+  it('keeps asset-request 404s (no text/html accept)', async () => {
+    const hits: UpstreamHit[] = []
+    const origin = await portalUpstream(hits)
+    const handler = createNocobasePortalHandler(origin, 'hub')
+    const response = await call(handler, '/nocobase/dist/hub/assets/old-hash.js', { headers: { accept: '*/*' } })
+    expect(response.status).toBe(404)
+    expect(await response.text()).toBe('<html>404</html>')
+  })
+
+  it('keeps non-GET 404s (POST form posts)', async () => {
+    const hits: UpstreamHit[] = []
+    const origin = await portalUpstream(hits)
+    const handler = createNocobasePortalHandler(origin, 'hub')
+    const response = await call(handler, '/nocobase/dist/hub/projects', { method: 'POST', headers: { accept: 'text/html' }, body: 'x=1' })
+    expect(response.status).toBe(404)
+  })
+
+  it('re-roots /dist redirect Locations onto the proxy prefix', async () => {
+    const hits: UpstreamHit[] = []
+    const origin = await portalUpstream(hits)
+    const handler = createNocobasePortalHandler(origin, 'hub')
+    const response = await call(handler, '/nocobase/dist/hub', { redirect: 'manual', headers: { accept: 'text/html' } })
+    expect(response.status).toBe(301)
+    // Without the rewrite the browser would follow to the origin root,
+    // leaving the proxy prefix (and its HTML rewrites) behind.
+    expect(response.headers.get('location')).toBe('/nocobase/dist/hub/')
+  })
+
+  it('falls back per portal only where registered (crm picks its own index)', async () => {
+    const hits: UpstreamHit[] = []
+    const origin = await portalUpstream(hits)
+    const handler = createNocobasePortalHandler(origin, 'crm')
+    // The crm handler falls back to /dist/crm/, which the fake upstream
+    // does not serve — proving the index path follows the portal name
+    // rather than a shared constant.
+    const response = await call(handler, '/nocobase/dist/crm/deals', { headers: { accept: 'text/html' } })
+    expect(response.status).toBe(502)
+    expect(hits.map(hit => hit.url)).toEqual(['/dist/crm/deals', '/dist/crm/'])
+  })
+})
+
 describe('webserver config wiring', () => {
   it('registers the proxy route only when the origin is configured', async () => {
     const off = new Context()
@@ -193,6 +284,20 @@ describe('webserver config wiring', () => {
     // when the constructor already claimed the prefix.
     expect(() => { offServer.register(probe) }).not.toThrow()
     expect(() => { onServer.register(probe) }).toThrow(/duplicate/u)
+    await off.fiber.dispose()
+    await on.fiber.dispose()
+  })
+
+  it('registers both portal deep-link prefixes alongside the plain proxy route', async () => {
+    const off = new Context()
+    const offServer = new WebServer(off, { host: '127.0.0.1', port: 0 })
+    const on = new Context()
+    const onServer = new WebServer(on, { host: '127.0.0.1', port: 0, nocobaseProxyOrigin: 'http://127.0.0.1:13000' })
+    const probeFor = (path: string) => ({ kind: 'prefix' as const, path, handler: (): void => {} })
+    for (const prefix of Object.values(NOCOBASE_PORTAL_PREFIXES)) {
+      expect(() => { offServer.register(probeFor(prefix)) }).not.toThrow()
+      expect(() => { onServer.register(probeFor(prefix)) }).toThrow(/duplicate/u)
+    }
     await off.fiber.dispose()
     await on.fiber.dispose()
   })
