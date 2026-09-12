@@ -70,6 +70,11 @@ const QUOTE_STATUSES = options([
   ['converted', '已转订单', 'purple'], ['void', '已作废', 'default'], ['rejected', '已拒绝', 'red'],
   ['pending_approval', '待审批', 'orange'],
 ])
+/** demo-portal-crm's lead source enum (constants.ts LEAD_SOURCES). */
+const LEAD_SOURCE_OPTIONS = options([
+  ['website', 'Website', 'blue'], ['referral', 'Referral', 'green'], ['event', 'Event', 'cyan'],
+  ['outbound', 'Outbound', 'orange'], ['partner', 'Partner', 'purple'],
+])
 
 /**
  * The ten CRM collections. Timestamps are deliberately not declared
@@ -532,6 +537,15 @@ async function ensureAssociationFieldNames(token: string): Promise<void> {
  * crm_follow_ups.status/due_date). Add those columns and backfill them from
  * the existing rows so the portal dashboard aggregates resolve; idempotent
  * by field presence and by already-equal target values.
+ *
+ * The c8eaf64e76 portal rebuild (N24, 2026-09-10) also pinned each list
+ * page's default sorter and column set onto fields the seeded collections
+ * never had — crm_contacts.name, crm_activities.date (plus the appended
+ * contact association), crm_leads.score/source, and crm_quotes
+ * issue_date/root_quote_id/version/is_current/total — so every portal list
+ * request compiled into ORDER BY over a missing column and failed 400.
+ * Same repair shape: add the column, backfill from the semantic twin or a
+ * deterministic distribution, and the sort request returns 200.
  */
 async function ensurePortalFields(token: string): Promise<void> {
   const hasField = async (collection: string, name: string): Promise<boolean> => {
@@ -552,7 +566,20 @@ async function ensurePortalFields(token: string): Promise<void> {
   if (await addField('crm_deals', { name: 'closed_date', type: 'dateOnly', interface: 'date', uiSchema: { type: 'string', 'x-component': 'DatePicker', title: '成交日期(portal)' } })) added.push('crm_deals.closed_date')
   if (await addField('crm_follow_ups', { name: 'status', type: 'string', interface: 'select', uiSchema: { type: 'string', 'x-component': 'Select', title: '状态(portal)', enum: options([['pending', '待办', 'orange'], ['done', '已完成', 'green']]) } })) added.push('crm_follow_ups.status')
   if (await addField('crm_follow_ups', { name: 'due_date', type: 'dateOnly', interface: 'date', uiSchema: { type: 'string', 'x-component': 'DatePicker', title: '到期(portal)' } })) added.push('crm_follow_ups.due_date')
+  // Portal list-page sorters and columns the N24 rebuild pinned (C3-A).
+  if (await addField('crm_contacts', { name: 'name', type: 'string', interface: 'input', uiSchema: { type: 'string', 'x-component': 'Input', title: '姓名(portal)' } })) added.push('crm_contacts.name')
+  if (await addField('crm_activities', { name: 'date', type: 'dateOnly', interface: 'date', uiSchema: { type: 'string', 'x-component': 'DatePicker', title: '日期(portal)' } })) added.push('crm_activities.date')
+  if (await addField('crm_activities', { name: 'contact', type: 'belongsTo', interface: 'm2o', target: 'crm_contacts', foreignKey: 'contact_id', uiSchema: { type: 'object', 'x-component': 'AssociationField', title: '联系人(portal)', 'x-component-props': { multiple: false, fieldNames: { label: 'name', value: 'id' } } } })) added.push('crm_activities.contact')
+  if (await addField('crm_leads', { name: 'score', type: 'integer', interface: 'integer', uiSchema: { type: 'number', 'x-component': 'InputNumber', title: '评分(portal)' } })) added.push('crm_leads.score')
+  if (await addField('crm_leads', { name: 'source', type: 'string', interface: 'select', uiSchema: { type: 'string', 'x-component': 'Select', title: '来源(portal)', enum: LEAD_SOURCE_OPTIONS } })) added.push('crm_leads.source')
+  if (await addField('crm_quotes', { name: 'issue_date', type: 'dateOnly', interface: 'date', uiSchema: { type: 'string', 'x-component': 'DatePicker', title: '开立日期(portal)' } })) added.push('crm_quotes.issue_date')
+  if (await addField('crm_quotes', { name: 'root_quote_id', type: 'integer', interface: 'integer', uiSchema: { type: 'number', 'x-component': 'InputNumber', title: '根报价ID(portal)' } })) added.push('crm_quotes.root_quote_id')
+  if (await addField('crm_quotes', { name: 'version', type: 'integer', interface: 'integer', uiSchema: { type: 'number', 'x-component': 'InputNumber', title: '版本(portal)' } })) added.push('crm_quotes.version')
+  if (await addField('crm_quotes', { name: 'is_current', type: 'boolean', interface: 'boolean', uiSchema: { type: 'boolean', 'x-component': 'Checkbox', title: '当前版本(portal)' } })) added.push('crm_quotes.is_current')
+  if (await addField('crm_quotes', { name: 'total', type: 'float', interface: 'number', uiSchema: { type: 'number', 'x-component': 'InputNumber', title: '总金额(portal)' } })) added.push('crm_quotes.total')
   const dealStage = ['inquiry', 'quote', 'negotiation'] as const
+  const leadScores = [45, 62, 78, 88, 55, 95, 70, 40, 82, 58] as const
+  const leadSources = ['website', 'referral', 'event', 'outbound', 'partner'] as const
   const backfill: Array<{ collection: string; assign: (row: any, index: number) => Array<[string, unknown]> }> = [
     { collection: 'crm_leads', assign: row => [['status', row.stage]] },
     { collection: 'crm_customers', assign: row => [['company_name', row.name]] },
@@ -564,7 +591,44 @@ async function ensurePortalFields(token: string): Promise<void> {
       ],
     },
     { collection: 'crm_follow_ups', assign: row => [['status', row.next_at && String(row.next_at) <= '2026-09-10' ? 'done' : 'pending'], ['due_date', row.next_at ?? null]] },
+    // C3-A portal sorters: name mirrors full_name, date mirrors due_at, the
+    // contact association picks the customer's first contact, scores and
+    // sources get a deterministic spread so sorting and grade filters bite.
+    { collection: 'crm_contacts', assign: row => [['name', row.full_name ?? null]] },
+    {
+      collection: 'crm_activities', assign: (row, index) => {
+        // The bare foreign key keeps the idempotence check scalar; row.contact
+        // arrives null without an append, so comparing the association object
+        // would re-update every row on every run.
+        const patch: Array<[string, unknown]> = [['date', row.due_at ?? null]]
+        const contacts = contactsByCustomer.get(row.customer_id ?? null) ?? []
+        if (contacts.length > 0) patch.push(['contact_id', contacts[index % contacts.length]])
+        return patch
+      },
+    },
+    {
+      collection: 'crm_leads', assign: (_row, index) => [
+        ['score', leadScores[index % leadScores.length]],
+        ['source', leadSources[index % leadSources.length]],
+      ],
+    },
+    {
+      collection: 'crm_quotes', assign: row => [
+        ['issue_date', String(row.valid_until ?? '2026-08-01').slice(0, 10)],
+        ['root_quote_id', row.id],
+        ['version', 1],
+        ['is_current', true],
+        ['total', row.total_amount ?? 0],
+      ],
+    },
   ]
+  // crm_contacts rows grouped by customer for the activities contact backfill.
+  const contactsByCustomer = new Map<number | null, number[]>()
+  for (const row of await dataOf(token, 'GET', '/api/crm_contacts:list?pageSize=500') as any[] ?? []) {
+    const bucket = contactsByCustomer.get(row.customer_id ?? null) ?? []
+    bucket.push(row.id)
+    contactsByCustomer.set(row.customer_id ?? null, bucket)
+  }
   for (const spec of backfill) {
     const rows = await dataOf(token, 'GET', `/api/${spec.collection}:list?pageSize=500`) as any[] | null
     let updated = 0

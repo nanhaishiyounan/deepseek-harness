@@ -137,7 +137,7 @@ pnpm exec vitest run --config vitest.e2e.config.ts examples/kb-agent/tests/exper
 - **双 Portal**：CRM 在 http://127.0.0.1:13000/dist/crm/ ，Hub 在 http://127.0.0.1:13000/dist/hub/ ——同源 cookie 直登，须从入口页进，深链直开会 404。
 - **AI 雇员对话附件与图片（上传即模型可见）**：任一 AI 雇员聊天输入框用回形针/拖拽/粘贴上传附件后直接提问——pdf/docx/xlsx/md 的文本内容与图片都会进入模型请求，模型能复述附件文字、描述图片内容。其中 pdf 依赖本地附件代理（`ai-proxy`，随 `all` 链自动启动）：代理把 llmService 指向的 `http://127.0.0.1:13100/v1` 请求里的 PDF file part 解析为文本注入，并默认过滤模型回复内联的 `<think>` 推理链（最终用户看不到推理过程，仅见正文）。代理启停：`ai-proxy start` / `ai-proxy stop`（stop 自动把 llmService 回切直连）；只想恢复 think 回显：`ai-proxy stop` 后 `N22_FILTER_THINK=0 ai-proxy start`，再不带该变量重启即恢复过滤。verify 会断言代理健康与 baseURL 指向。
 - **Portal AI 智能员工（四个表单挂载点）**：CRM Portal 的「销售流程 → 商机」与「销售线索」、Hub Portal 的「报销」与「销售线索」新建抽屉——底部按钮旁有 dex 头像按钮（「AI 智能员工」）：点击打开表单内嵌聊天 → 用中文描述意图（如「漯河一家调味品企业，名叫卫味轩食品，50 万金额，预计月底成交」）→ 模型流式回复并经 formFiller 自动填充表单字段 → 核对补选必填项后提交落库（CRM 两挂载点完整可用；Hub 两挂载点填充可用，本示例实例未建对应业务集合，提交会显式报错）。流式面板可见推理与填充全过程；发送按钮带防抖，连点不会重复开会话。
-- **已知边界**：图片单张 ≤10MB（JPEG/PNG/GIF/WEBP），超大图上传时前端显式报错、不会静默丢图；MiniMax-M3 推理延迟在 40~240 秒间波动（表单填充与长问答都需等待模型思考，流式输出期间有逐字反馈）；PDF 走文本层解析，扫描件/纯图片 PDF 无法提取内容，代理会显式报错而不是让模型猜。
+- **已知边界**：图片单张 ≤10MB（JPEG/PNG/GIF/WEBP），超大图上传时前端显式报错、不会静默丢图；MiniMax-M3 推理延迟在 40~240 秒间波动（表单填充与长问答都需等待模型思考，流式输出期间有逐字反馈）；PDF 走文本层解析，扫描件/纯图片 PDF 无法提取内容，代理会显式报错而不是让模型猜。Portal 库存/销售/财务/帮助台四域表（`hub_inv_*`/`hub_sales_*`/`hub_hd_*`/`hub_fin_*`）由种子链幂等补建并回填演示数据（2026-09-12 起，verify 断言 list/sort/append 全 200）；Hub Portal 深链仍须从入口页进。
 - **商业版边界**：AI 知识库（RAG）、审批/子流程/Webhook workflow 节点、审计日志等商业插件未装，替代路径已在上文（DSH 知识库、manual+condition+request 节点链），明细清单见 [plans/nocobase-full-features/PLAN.md](../../plans/nocobase-full-features/PLAN.md) §4。
 
 ```sh

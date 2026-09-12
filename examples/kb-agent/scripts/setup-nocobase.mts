@@ -778,6 +778,41 @@ async function stepVerify(): Promise<void> {
     const probe = await fetch(`${baseUrl}/dist/${portal}/`, { headers: { accept: 'text/html' }, signal: AbortSignal.timeout(5000) }).catch(() => null)
     if (probe === null || !probe.ok) failures.push(`portal /dist/${portal}/ not reachable; run nocobase-portal-deploy.mts`)
   }
+  // C3-A: the portal list pages pin default sorters, columns, and filters on
+  // fields the seeded collections must actually carry — replay the exact
+  // wire requests so a missing column fails the 400 here, not in the user's
+  // browser (regression class introduced by the c8eaf64e76 portal rebuild).
+  const portalListProbe = async (label: string, path: string): Promise<void> => {
+    try {
+      await call(token, 'GET', path)
+    } catch (error) {
+      failures.push(`portal list ${label} failed: ${error instanceof Error ? error.message : String(error)}; re-run the crm module step`)
+    }
+  }
+  await portalListProbe('crm_contacts?sort=name&appends=customer', `/api/crm_contacts:list?sort=name&appends[]=${encodeURIComponent('customer')}`)
+  await portalListProbe('crm_activities?sort=-date&appends=customer,contact', `/api/crm_activities:list?sort=-date&appends[]=${encodeURIComponent('customer,contact')}`)
+  await portalListProbe('crm_leads?sort=-score&fields=score,source', `/api/crm_leads:list?sort=-score&fields[]=${encodeURIComponent('score')}&fields[]=${encodeURIComponent('source')}`)
+  await portalListProbe('crm_quotes?sort=-issue_date&filter=is_current', `/api/crm_quotes:list?sort=-issue_date&fields[]=${encodeURIComponent('root_quote_id')}&fields[]=${encodeURIComponent('version')}&filter=${encodeURIComponent('{"is_current":true}')}`)
+  try {
+    await call(token, 'POST', '/api/crm_activities:query', { measures: [{ field: 'id', aggregation: 'count' }], dimensions: [{ field: 'type' }] })
+  } catch (error) {
+    failures.push(`crm_activities:query failed: ${error instanceof Error ? error.message : String(error)} (query authorization or measure compilation broke)`)
+  }
+  // C3-B: the four portal domains (inventory / sales / helpdesk / finance)
+  // need their tables to exist with rows — the hub module's seeded floors.
+  for (const [collection, floor] of [
+    ['hub_inv_products', 5], ['hub_inv_stock_moves', 5], ['hub_sales_deals', 4], ['hub_sales_activities', 4],
+    ['hub_hd_tickets', 4], ['hub_fin_invoices', 4], ['hub_fin_expenses', 4], ['hub_fin_invoice_items', 3],
+  ] as const) {
+    const failure = await rowFloor(collection, floor)
+    if (failure !== null) failures.push(`${failure}; run the hub module step so the portal-domain tables seed`)
+  }
+  // Appends the domain list pages wire: a missing association compiles into
+  // the same 400 class as a missing column, so probe one representative each.
+  await portalListProbe('hub_inv_stock_moves?appends=product,warehouse', `/api/hub_inv_stock_moves:list?sort=-moved_at&appends[]=${encodeURIComponent('product,warehouse')}`)
+  await portalListProbe('hub_sales_deals?appends=account,owner', `/api/hub_sales_deals:list?sort=createdAt&appends[]=${encodeURIComponent('account,owner')}`)
+  await portalListProbe('hub_hd_tickets?appends=requester,assignee,replies', `/api/hub_hd_tickets:list?sort=-createdAt&appends[]=${encodeURIComponent('requester,assignee,replies')}`)
+  await portalListProbe('hub_fin_expenses?appends=employee', `/api/hub_fin_expenses:list?sort=-spent_at&appends[]=${encodeURIComponent('employee')}`)
   const plugins = await call(token, 'GET', '/api/pm:list?pageSize=300') as { data?: Array<{ name?: string, enabled?: boolean }> }
   const enabledPlugins = new Set((plugins?.data ?? []).filter(plugin => plugin.enabled === true).map(plugin => plugin.name))
   for (const name of PLUGINS) {
@@ -822,7 +857,7 @@ async function stepVerify(): Promise<void> {
     process.exitCode = 1
     return
   }
-  console.log('setup-nocobase verify: OK — full UI + collections + attachment field + seed + workflow chain + AI workbench + row floors + m2o fieldNames + n18ai- form AI buttons + portals + ai-proxy + API key + kg graph all verified')
+  console.log('setup-nocobase verify: OK — full UI + collections + attachment field + seed + workflow chain + AI workbench + row floors + m2o fieldNames + n18ai- form AI buttons + portals + portal list probes + ai-proxy + API key + kg graph all verified')
 }
 
 /** Upsert the two NocoBase lines in the repository root .env, preserving the rest. */

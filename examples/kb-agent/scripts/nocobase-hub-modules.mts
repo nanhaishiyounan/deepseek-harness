@@ -39,6 +39,18 @@ const belongsTo = (name: string, title: string, target: string, foreignKey: stri
   // N/A even though the list request appends the association (N16).
   uiSchema: { type: 'object', 'x-component': 'AssociationField', title, 'x-component-props': { multiple: false, fieldNames: { label: 'name', value: 'id' } } },
 })
+// Users associations render nickname (users has no name column).
+const belongsToUser = (name: string, title: string, foreignKey: string): object => ({
+  name, type: 'belongsTo', interface: 'm2o', target: 'users', foreignKey,
+  uiSchema: { type: 'object', 'x-component': 'AssociationField', title, 'x-component-props': { multiple: false, fieldNames: { label: 'nickname', value: 'id' } } },
+})
+const hasMany = (name: string, title: string, target: string, foreignKey: string): object => ({
+  name, type: 'hasMany', interface: 'o2m', target, foreignKey,
+  uiSchema: { type: 'array', 'x-component': 'AssociationField', title, 'x-component-props': { multiple: true, fieldNames: { label: 'name', value: 'id' } } },
+})
+// Tables created through collections:create in this snapshot only gain id +
+// declared fields, so every portal-sorted table declares createdAt itself.
+const createdAt = (title: string): object => ({ name: 'createdAt', type: 'dateOnly', interface: 'date', uiSchema: { type: 'string', 'x-component': 'DatePicker', title, 'x-component-props': { dateFormat: 'YYYY-MM-DD' } } })
 
 const TASK_STATUS = options([
   ['backlog', '待规划', 'default'], ['todo', '待处理', 'blue'], ['in_progress', '进行中', 'cyan'],
@@ -51,8 +63,8 @@ const TICKET_STATUS = options([
   ['waiting_internal', '待内部', 'purple'], ['in_progress', '处理中', 'cyan'], ['resolved', '已解决', 'green'], ['closed', '已关闭', 'default'], ['reopened', '重开', 'red'],
 ])
 
-/** The sixteen hub collections, resource names aligned with demo-portal-hub. */
-const COLLECTIONS: ReadonlyArray<{ name: string; title: string; fields: object[] }> = [
+/** The sixteen admin-facing hub collections, resource names aligned with demo-portal-hub. */
+const HUB_CORE_COLLECTIONS: ReadonlyArray<{ name: string; title: string; fields: object[] }> = [
   {
     name: 'hub_pj_projects', title: '项目', fields: [
       input('name', '项目名称'), input('no', '项目编号'), input('customer', '客户'), input('owner', '负责人'),
@@ -150,6 +162,130 @@ const COLLECTIONS: ReadonlyArray<{ name: string; title: string; fields: object[]
   },
 ]
 
+/**
+ * The four portal domains the seed never covered (C3-B): inventory, sales,
+ * helpdesk, and finance. Field names, enums, appended associations, and
+ * createdAt sort columns mirror demo-portal-hub's list pages
+ * (src/pages/{inventory,sales,helpdesk,finance}) so every page's list,
+ * sort, and filter request compiles against a real column.
+ */
+const INVENTORY_MOVE_TYPES = options([['in', '入库', 'green'], ['out', '出库', 'orange'], ['adjust', '调整', 'default']])
+const PRODUCT_STATUSES = options([['active', '在售', 'green'], ['discontinued', '停售', 'default']])
+const SALES_DEAL_STAGES = options([['inquiry', '询价', 'default'], ['quote', '报价', 'blue'], ['negotiation', '谈判', 'orange'], ['won', '赢单', 'green'], ['lost', '丢失', 'red']])
+const SALES_LEAD_STATUSES = options([['new', '新线索', 'default'], ['qualified', '已验证', 'blue'], ['converted', '已转化', 'green']])
+const SALES_LEAD_SOURCES = options([['website', 'Website', 'blue'], ['referral', 'Referral', 'green'], ['event', 'Event', 'cyan'], ['outbound', 'Outbound', 'orange'], ['partner', 'Partner', 'purple']])
+const SALES_ACTIVITY_TYPES = options([['call', '电话', 'blue'], ['email', '邮件', 'cyan'], ['meeting', '会议', 'green']])
+const HD_TICKET_STATUSES = options([['open', 'Open', 'blue'], ['pending', 'Pending', 'orange'], ['resolved', 'Resolved', 'green'], ['closed', 'Closed', 'default']])
+const HD_TICKET_PRIORITIES = options([['low', 'Low', 'default'], ['med', 'Medium', 'blue'], ['high', 'High', 'orange'], ['urgent', 'Urgent', 'red']])
+const HD_TICKET_CATEGORIES = options([['billing', 'Billing', 'blue'], ['technical', 'Technical', 'cyan'], ['account', 'Account', 'purple'], ['other', 'Other', 'default']])
+const FIN_INVOICE_STATUSES = options([['draft', 'Draft', 'default'], ['sent', 'Sent', 'blue'], ['paid', 'Paid', 'green'], ['overdue', 'Overdue', 'red']])
+const FIN_EXPENSE_CATEGORIES = options([['travel', 'Travel', 'blue'], ['meals', 'Meals', 'cyan'], ['software', 'Software', 'green'], ['equipment', 'Equipment', 'purple'], ['other', 'Other', 'default']])
+const FIN_EXPENSE_STATUSES = options([['pending', 'Pending', 'orange'], ['approved', 'Approved', 'green'], ['rejected', 'Rejected', 'red'], ['reimbursed', 'Reimbursed', 'blue']])
+
+const PORTAL_DOMAIN_COLLECTIONS: ReadonlyArray<{ name: string; title: string; fields: object[] }> = [
+  {
+    name: 'hub_inv_warehouses', title: '仓库', fields: [
+      input('name', '名称'), input('code', '编码'), input('location', '位置'), createdAt('建仓日'),
+    ],
+  },
+  {
+    name: 'hub_inv_products', title: '库存产品', fields: [
+      input('sku', 'SKU'), input('name', '名称'), input('category', '分类'), number('unit_price', '单价'),
+      integer('reorder_level', '补货点'), select('status', '状态', PRODUCT_STATUSES), createdAt('建档日'),
+    ],
+  },
+  {
+    name: 'hub_inv_stock_moves', title: '库存流水', fields: [
+      select('type', '类型', INVENTORY_MOVE_TYPES), integer('qty', '数量'), date('moved_at', '移动日'), textarea('note', '备注'),
+      belongsTo('product', '产品', 'hub_inv_products', 'product_id'), belongsTo('warehouse', '仓库', 'hub_inv_warehouses', 'warehouse_id'),
+    ],
+  },
+  {
+    name: 'hub_sales_accounts', title: '销售客户', fields: [
+      input('name', '名称'), input('industry', '行业'), input('website', '网站'),
+      belongsToUser('owner', '负责人', 'owner_id'), createdAt('建档日'),
+    ],
+  },
+  {
+    name: 'hub_sales_contacts', title: '销售联系人', fields: [
+      input('name', '姓名'), input('title', '职务'), input('email', '邮箱'), input('phone', '电话'),
+      belongsTo('account', '客户', 'hub_sales_accounts', 'account_id'), createdAt('建档日'),
+    ],
+  },
+  {
+    name: 'hub_sales_leads', title: '销售线索', fields: [
+      input('name', '名称'), input('company', '公司'), input('email', '邮箱'),
+      select('source', '来源', SALES_LEAD_SOURCES), select('status', '状态', SALES_LEAD_STATUSES),
+      belongsToUser('owner', '负责人', 'owner_id'), createdAt('建档日'),
+    ],
+  },
+  {
+    name: 'hub_sales_deals', title: '销售订单', fields: [
+      input('title', '名称'), select('stage', '阶段', SALES_DEAL_STAGES), number('amount', '金额'),
+      date('expected_close_date', '预计成交'),
+      belongsTo('account', '客户', 'hub_sales_accounts', 'account_id'), belongsToUser('owner', '负责人', 'owner_id'), createdAt('建档日'),
+    ],
+  },
+  {
+    name: 'hub_sales_activities', title: '销售活动', fields: [
+      select('type', '类型', SALES_ACTIVITY_TYPES), input('subject', '主题'), textarea('notes', '备注'), date('date', '日期'),
+      belongsTo('deal', '订单', 'hub_sales_deals', 'deal_id'), createdAt('建档日'),
+    ],
+  },
+  {
+    name: 'hub_hd_tickets', title: '帮助台工单', fields: [
+      input('subject', '主题'), textarea('description', '描述'),
+      select('category', '分类', HD_TICKET_CATEGORIES), select('priority', '优先级', HD_TICKET_PRIORITIES), select('status', '状态', HD_TICKET_STATUSES),
+      belongsToUser('requester', '请求人', 'requesterId'), belongsToUser('assignee', '经办人', 'assigneeId'),
+      hasMany('replies', '回复', 'hub_hd_replies', 'ticketId'), createdAt('创建日'),
+    ],
+  },
+  {
+    name: 'hub_hd_replies', title: '工单回复', fields: [
+      textarea('body', '内容'),
+      belongsTo('ticket', '工单', 'hub_hd_tickets', 'ticketId'), belongsToUser('author', '作者', 'authorId'),
+    ],
+  },
+  {
+    name: 'hub_hd_sla_policies', title: 'SLA 策略', fields: [
+      input('name', '名称'), select('priority', '优先级', HD_TICKET_PRIORITIES),
+      integer('response_mins', '响应分钟'), integer('resolve_mins', '解决分钟'), createdAt('创建日'),
+    ],
+  },
+  {
+    name: 'hub_hd_faqs', title: 'FAQ', fields: [
+      input('question', '问题'), textarea('answer', '答案'), select('category', '分类', HD_TICKET_CATEGORIES),
+    ],
+  },
+  {
+    name: 'hub_fin_invoices', title: '发票', fields: [
+      input('invoice_number', '发票号'), input('client_name', '客户'), number('amount', '金额'),
+      date('issue_date', '开票日'), date('due_date', '到期日'), select('status', '状态', FIN_INVOICE_STATUSES), createdAt('创建日'),
+    ],
+  },
+  {
+    name: 'hub_fin_invoice_items', title: '发票明细', fields: [
+      input('description', '描述'), integer('quantity', '数量'), number('unit_price', '单价'), number('amount', '金额'),
+      belongsTo('invoice', '发票', 'hub_fin_invoices', 'invoice_id'),
+    ],
+  },
+  {
+    name: 'hub_fin_expenses', title: '费用报销', fields: [
+      input('title', '标题'), select('category', '类别', FIN_EXPENSE_CATEGORIES), number('amount', '金额'),
+      date('spent_at', '支出日'), select('status', '状态', FIN_EXPENSE_STATUSES),
+      belongsToUser('employee', '员工', 'employee_id'), createdAt('创建日'),
+    ],
+  },
+  {
+    name: 'hub_fin_budgets', title: '预算', fields: [
+      input('category', '类别'), input('period', '期间'), number('amount', '金额'),
+    ],
+  },
+]
+const COLLECTIONS: ReadonlyArray<{ name: string; title: string; fields: object[] }> = [
+  ...HUB_CORE_COLLECTIONS, ...PORTAL_DOMAIN_COLLECTIONS,
+]
+
 const MENU: ReadonlyArray<{ group: string | null; groupIcon?: string; pages: ReadonlyArray<{ title: string; icon: string }> }> = [
   { group: null, pages: [{ title: '工作台', icon: 'DashboardOutlined' }] },
   {
@@ -198,6 +334,23 @@ const SEEDS: ReadonlyArray<{ fixtureKey: string; collection: string; uniqueKey: 
   { fixtureKey: 'ticket_categories', collection: 'hub_md_ticket_categories', uniqueKey: 'code', refs: {} },
   { fixtureKey: 'asset_categories', collection: 'hub_md_asset_categories', uniqueKey: 'code', refs: {} },
   { fixtureKey: 'product_categories', collection: 'hub_md_product_categories', uniqueKey: 'code', refs: {} },
+  // C3-B portal-domain seeds; user-facing refs resolve against users.nickname.
+  { fixtureKey: 'inv_warehouses', collection: 'hub_inv_warehouses', uniqueKey: 'code', refs: {} },
+  { fixtureKey: 'inv_products', collection: 'hub_inv_products', uniqueKey: 'sku', refs: {} },
+  { fixtureKey: 'inv_stock_moves', collection: 'hub_inv_stock_moves', uniqueKey: 'note', refs: { product: 'hub_inv_products', warehouse: 'hub_inv_warehouses' } },
+  { fixtureKey: 'sales_accounts', collection: 'hub_sales_accounts', uniqueKey: 'name', refs: { owner: 'users' } },
+  { fixtureKey: 'sales_contacts', collection: 'hub_sales_contacts', uniqueKey: 'email', refs: { account: 'hub_sales_accounts' } },
+  { fixtureKey: 'sales_leads', collection: 'hub_sales_leads', uniqueKey: 'name', refs: { owner: 'users' } },
+  { fixtureKey: 'sales_deals', collection: 'hub_sales_deals', uniqueKey: 'title', refs: { account: 'hub_sales_accounts', owner: 'users' } },
+  { fixtureKey: 'sales_activities', collection: 'hub_sales_activities', uniqueKey: 'subject', refs: { deal: 'hub_sales_deals' } },
+  { fixtureKey: 'hd_tickets', collection: 'hub_hd_tickets', uniqueKey: 'subject', refs: { requester: 'users', assignee: 'users' } },
+  { fixtureKey: 'hd_replies', collection: 'hub_hd_replies', uniqueKey: 'body', refs: { ticket: 'hub_hd_tickets', author: 'users' } },
+  { fixtureKey: 'hd_sla_policies', collection: 'hub_hd_sla_policies', uniqueKey: 'name', refs: {} },
+  { fixtureKey: 'hd_faqs', collection: 'hub_hd_faqs', uniqueKey: 'question', refs: {} },
+  { fixtureKey: 'fin_invoices', collection: 'hub_fin_invoices', uniqueKey: 'invoice_number', refs: {} },
+  { fixtureKey: 'fin_invoice_items', collection: 'hub_fin_invoice_items', uniqueKey: 'description', refs: { invoice: 'hub_fin_invoices' } },
+  { fixtureKey: 'fin_expenses', collection: 'hub_fin_expenses', uniqueKey: 'title', refs: { employee: 'users' } },
+  { fixtureKey: 'fin_budgets', collection: 'hub_fin_budgets', uniqueKey: 'category', refs: {} },
 ]
 
 async function call(token: string, method: 'GET' | 'POST', path: string, body?: unknown): Promise<any> {
@@ -244,7 +397,7 @@ async function keyMap(token: string, collection: string, key: string): Promise<M
 
 async function seed(token: string, fixtures: Record<string, Array<Record<string, unknown>>>): Promise<void> {
   const refCache = new Map<string, Map<string, number>>()
-  const refKey = new Map([['hub_pj_projects', 'name'], ['hub_as_assets', 'name'], ['hub_as_vendors', 'name'], ['hub_hr_departments', 'name'], ['hub_hr_employees', 'name']])
+  const refKey = new Map([['hub_pj_projects', 'name'], ['hub_as_assets', 'name'], ['hub_as_vendors', 'name'], ['hub_hr_departments', 'name'], ['hub_hr_employees', 'name'], ['hub_inv_products', 'name'], ['hub_inv_warehouses', 'name'], ['hub_sales_accounts', 'name'], ['hub_sales_deals', 'title'], ['hub_hd_tickets', 'subject'], ['hub_fin_invoices', 'invoice_number'], ['users', 'nickname']])
   for (const spec of SEEDS) {
     const rows = fixtures[spec.fixtureKey]
     if (rows === undefined) throw new Error(`fixture file has no "${spec.fixtureKey}" array`)
@@ -559,12 +712,14 @@ async function ensureAssociationFieldNames(token: string): Promise<void> {
   for (const collection of COLLECTIONS) {
     const hasM2o = collection.fields.some((field) => (field as { type?: string }).type === 'belongsTo')
     if (!hasM2o) continue
-    const rows = await dataOf(token, 'GET', `/api/fields:list?filter=${encodeURIComponent(JSON.stringify({ collectionName: { $eq: collection.name }, type: { $eq: 'belongsTo' } }))}&pageSize=100`) as Array<{ name?: string, uiSchema?: { 'x-component-props'?: { fieldNames?: { label?: string } } } }> | null
+    const rows = await dataOf(token, 'GET', `/api/fields:list?filter=${encodeURIComponent(JSON.stringify({ collectionName: { $eq: collection.name }, type: { $eq: 'belongsTo' } }))}&pageSize=100`) as Array<{ name?: string, target?: string, uiSchema?: { 'x-component-props'?: { fieldNames?: { label?: string } } } }> | null
     for (const row of rows ?? []) {
       if (row.name === undefined) continue
-      if (row.uiSchema?.['x-component-props']?.fieldNames?.label === 'name') continue
+      // Users associations render nickname; every other target has a name column.
+      const label = row.target === 'users' ? 'nickname' : 'name'
+      if (row.uiSchema?.['x-component-props']?.fieldNames?.label === label) continue
       await dataOf(token, 'POST', `/api/collections/${collection.name}/fields:update?filterByTk=${row.name}`, {
-        uiSchema: { 'x-component-props': { fieldNames: { label: 'name', value: 'id' } } },
+        uiSchema: { 'x-component-props': { fieldNames: { label, value: 'id' } } },
       })
       patched += 1
     }
