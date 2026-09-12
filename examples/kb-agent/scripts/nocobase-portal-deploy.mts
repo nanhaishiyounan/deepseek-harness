@@ -15,22 +15,15 @@
  * Usage: node --import tsx/esm examples/kb-agent/scripts/nocobase-portal-deploy.mts
  */
 import { spawnSync } from 'node:child_process'
-import { copyFileSync, cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { BRAND_TITLE, overlayFile } from './dsh-brand.mts'
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 const portalsRoot = join(repoRoot, 'platform', 'nocobase-portals')
 const distClient = join(repoRoot, 'platform', 'nocobase', 'storage', 'dist-client')
 const brandDir = join(repoRoot, 'examples/kb-agent/workspace/assets/brand')
-const BRAND_TITLE = 'DSH食品业务平台'
-
-/** Byte-compared overlay so rebuilds restore the upstream assets and reruns reapply ours. */
-function overlayFile(source: string, target: string): boolean {
-  if (existsSync(target) && readFileSync(target).equals(readFileSync(source))) return false
-  copyFileSync(source, target)
-  return true
-}
 
 const PORTALS = [
   { name: 'crm', dir: 'demo-portal-crm', base: '/dist/crm/' },
@@ -87,11 +80,22 @@ for (const portal of PORTALS) {
   // onto its prefix so the portal's runtime API probes ride the proxy too.
   const entry = join(target, 'index.html')
   let html = readFileSync(entry, 'utf8')
-  const define = `<script>window.NOCOBASE_PORTAL_BASE=${JSON.stringify(portal.base)};window.NOCOBASE_API_URL="/api"</script>`
-  if (!html.includes('window.NOCOBASE_PORTAL_BASE')) {
-    html = html.replace('<head>', `<head>\n    ${define}`)
-    if (!html.includes(define)) throw new Error(`${portal.name} entry has no <head> element to host the NOCOBASE_PORTAL_BASE define`)
-    console.log(`nocobase-portals: injected window.NOCOBASE_PORTAL_BASE=${portal.base} + NOCOBASE_API_URL=/api into ${portal.name}/index.html`)
+  // The two defines inject independently: an entry that already ships one
+  // marker must not silence the other's injection, and each marker still
+  // missing after injection fails the deploy instead of the portal runtime
+  // gate that reads it.
+  const missingDefines = [
+    ['window.NOCOBASE_PORTAL_BASE', `window.NOCOBASE_PORTAL_BASE=${JSON.stringify(portal.base)}`],
+    ['window.NOCOBASE_API_URL', 'window.NOCOBASE_API_URL="/api"'],
+  ].filter(([marker]) => !html.includes(marker))
+  if (missingDefines.length > 0) {
+    const script = `<script>${missingDefines.map(([, expr]) => expr).join(';')}</script>`
+    html = html.replace('<head>', `<head>\n    ${script}`)
+    if (!html.includes(script)) throw new Error(`${portal.name} entry has no <head> element to host the ${missingDefines.map(([marker]) => marker).join(' + ')} define`)
+    console.log(`nocobase-portals: injected ${missingDefines.map(([marker]) => marker).join(' + ')} into ${portal.name}/index.html`)
+  }
+  for (const marker of ['window.NOCOBASE_PORTAL_BASE', 'window.NOCOBASE_API_URL']) {
+    if (!html.includes(marker)) throw new Error(`${portal.name} entry lacks ${marker} after injection`)
   }
   // The entry title is the DSH site name (the in-app DocumentTitleHandler
   // appName carries the runtime title); fail loud when a template change

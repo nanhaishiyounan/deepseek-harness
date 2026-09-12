@@ -48,6 +48,7 @@ import { DatabaseSync } from 'node:sqlite'
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { BRAND_TITLE } from './dsh-brand.mts'
 import { resolveEnv } from './resolve-env.ts'
 import { withResilience } from './resilience.ts'
 import type { ResilienceOptions } from './resilience.ts'
@@ -807,7 +808,7 @@ async function stepVerify(): Promise<void> {
   // proxied fetch is asserted in the C6 acceptance evidence.
   {
     const brandSettings = await dataOf(token, 'GET', '/api/systemSettings:get') as { title?: string, logo?: { url?: string } | null }
-    if (brandSettings?.title !== 'DSH食品业务平台') failures.push(`systemSettings.title is ${JSON.stringify(brandSettings?.title)} (expected the DSH brand; run nocobase-n25-brand.mts)`)
+    if (brandSettings?.title !== BRAND_TITLE) failures.push(`systemSettings.title is ${JSON.stringify(brandSettings?.title)} (expected "${BRAND_TITLE}"; run nocobase-n25-brand.mts)`)
     const logoUrl = brandSettings?.logo?.url
     if (logoUrl !== '/nocobase/dsh-brand-logo.svg') failures.push(`systemSettings.logo.url is ${JSON.stringify(logoUrl)} (expected /nocobase/dsh-brand-logo.svg; run nocobase-n25-brand.mts)`)
     else {
@@ -825,18 +826,29 @@ async function stepVerify(): Promise<void> {
   // bytes, not the upstream demo marks and not the HTML fallback.
   {
     const brandDir = join(repoRoot, 'examples/kb-agent/workspace/assets/brand')
-    const markBytes = existsSync(join(brandDir, 'dsh-logo-mark.png')) ? readFileSync(join(brandDir, 'dsh-logo-mark.png')) : undefined
+    // The byte-compare sources must ship with the example: a missing local
+    // asset fails the verify outright instead of downgrading to the MIME-only
+    // probe (misconfiguration fails loud).
+    const markPath = join(brandDir, 'dsh-logo-mark.png')
+    const faviconPath = join(brandDir, 'favicon.ico')
+    if (!existsSync(markPath)) throw new Error(`${markPath} missing (derive it from dsh-brand-logo.svg; see the C6 batch log)`)
+    if (!existsSync(faviconPath)) throw new Error(`${faviconPath} missing (derive it from dsh-favicon.svg; see the C4 batch log)`)
+    const expectedBytes = {
+      'favicon.ico': readFileSync(faviconPath),
+      'logo-mark.png': readFileSync(markPath),
+      'logo-mark-dark.png': readFileSync(markPath),
+    } as const
     for (const portal of ['crm', 'hub']) {
       const entryProbe = await fetch(`${baseUrl}/dist/${portal}/`, { headers: { accept: 'text/html' }, signal: AbortSignal.timeout(5000) }).catch(() => null)
       const entryHtml = await entryProbe?.text().catch(() => undefined)
       const title = entryHtml?.match(/<title>([^<]*)<\/title>/u)?.[1]
-      if (title !== 'DSH食品业务平台') failures.push(`portal ${portal} entry title is ${JSON.stringify(title)} (expected the DSH brand); rerun nocobase-portal-deploy.mts`)
+      if (title !== BRAND_TITLE) failures.push(`portal ${portal} entry title is ${JSON.stringify(title)} (expected "${BRAND_TITLE}"); rerun nocobase-portal-deploy.mts`)
       for (const [asset, mime] of [['favicon.ico', 'image/'], ['logo-mark.png', 'image/png'], ['logo-mark-dark.png', 'image/png']] as const) {
         const probe = await fetch(`${baseUrl}/dist/${portal}/${asset}`, { signal: AbortSignal.timeout(5000) }).catch(() => null)
         const type = probe?.headers.get('content-type') ?? ''
         if (probe === null || !probe.ok || !type.includes(mime)) failures.push(`portal ${portal} ${asset} not served as ${mime} (HTTP ${probe?.status ?? 'network error'}, "${type}"); rerun nocobase-portal-deploy.mts`)
-        else if (asset !== 'favicon.ico' && markBytes !== undefined && !Buffer.from(await probe.arrayBuffer()).equals(markBytes)) {
-          failures.push(`portal ${portal} ${asset} is not the overlaid DSH brand mark; rerun nocobase-portal-deploy.mts`)
+        else if (!Buffer.from(await probe.arrayBuffer()).equals(expectedBytes[asset])) {
+          failures.push(`portal ${portal} ${asset} is not the overlaid DSH brand asset; rerun nocobase-portal-deploy.mts`)
         }
       }
     }

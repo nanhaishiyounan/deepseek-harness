@@ -23,9 +23,10 @@
  *
  * Usage: node --import tsx/esm examples/kb-agent/scripts/nocobase-n25-brand.mts
  */
-import { copyFileSync, existsSync, readFileSync } from 'node:fs'
+import { existsSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { BRAND_TITLE, overlayFile } from './dsh-brand.mts'
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 const baseUrl = process.env.NOCOBASE_BASE_URL ?? 'http://127.0.0.1:13000'
@@ -36,7 +37,6 @@ const brandDir = join(repoRoot, 'examples/kb-agent/workspace/assets/brand')
 const logoPath = join(brandDir, 'dsh-brand-logo.svg')
 const faviconPath = join(brandDir, 'favicon.ico')
 const fallbackPngPath = join(brandDir, 'dsh-fallback.png')
-const BRAND_TITLE = 'DSH食品业务平台'
 const LOGO_TITLE = 'dsh-brand-logo'
 /** Public static URL the logo plain-object points at (gateway-proxy shaped). */
 const LOGO_URL = '/nocobase/dsh-brand-logo.svg'
@@ -81,13 +81,6 @@ async function ensureSystemSettings(token: string): Promise<void> {
     logo: { title: LOGO_TITLE, filename: 'dsh-brand-logo.svg', extname: '.svg', mimetype: 'image/svg+xml', url: LOGO_URL },
   })
   console.log(`nocobase-n25: systemSettings title -> "${BRAND_TITLE}" + logo ${LOGO_URL}`)
-}
-
-/** Byte-compared overlay so rebuilds restore the official assets and reruns reapply ours. */
-function overlayFile(source: string, target: string): boolean {
-  if (existsSync(target) && readFileSync(target).equals(readFileSync(source))) return false
-  copyFileSync(source, target)
-  return true
 }
 
 function overlayStaticAssets(): void {

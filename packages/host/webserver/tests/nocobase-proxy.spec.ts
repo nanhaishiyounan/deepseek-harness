@@ -100,6 +100,8 @@ describe('nocobase proxy handler', () => {
       '<script type="module" src="/assets/index-6f4405c1.js"></script>',
       '<link href="//cdn.example.com/x.css" rel="stylesheet">',
       '<script>window.NOCOBASE_PORTAL_BASE="/dist/crm/";window.NOCOBASE_API_URL="/api"</script>',
+      '<meta data-rh="true" property="og:image" content="/dist/crm/logo-mark.png" />',
+      '<meta data-rh="true" property="og:title" content="Salesroom CRM" />',
     ].join('\n')
     const hits: UpstreamHit[] = []
     const origin = await fakeUpstream(hits, (res) => {
@@ -124,6 +126,10 @@ describe('nocobase proxy handler', () => {
     // The entry's API define follows, so the runtime gate's API probes and
     // sign-in ride the proxy instead of the gateway's own root.
     expect(body).toContain('window.NOCOBASE_API_URL="/nocobase/api"')
+    // The og:image preview (the overlaid logo-mark) re-roots like href/src;
+    // other meta content values keep their bytes.
+    expect(body).toContain('content="/nocobase/dist/crm/logo-mark.png"')
+    expect(body).toContain('property="og:title" content="Salesroom CRM"')
     // The stale upstream length is dropped; the response is valid and complete.
     expect(response.headers.get('content-length')).toBe(String(body.length))
   })
@@ -162,6 +168,9 @@ describe('nocobase proxy handler', () => {
     expect(rewritten).toContain('<a href="/nocobase/keep">')
     // A portal base define without a leading slash is not root-absolute; it keeps its bytes.
     expect(rewritten).toContain('window.NOCOBASE_PORTAL_BASE="dist/crm/"')
+    const ogAbsolute = rewriteNocobaseHtml('<meta property="og:image" content="https://cdn.example.com/mark.png">', '/nocobase')
+    // An absolute og:image URL is not proxy-relative; it keeps its bytes.
+    expect(ogAbsolute).toBe('<meta property="og:image" content="https://cdn.example.com/mark.png">')
   })
 
   it('answers 502 with the cause when the upstream is unreachable', async () => {

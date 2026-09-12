@@ -31,10 +31,10 @@ const STRIP_REQUEST_HEADERS = new Set(['host', 'connection', 'transfer-encoding'
 
 /**
  * Rewrite one upstream HTML entry to serve under the proxy prefix: root-absolute
- * asset URLs gain the prefix, and the runtime base-path globals the NocoBase
- * client reads (webpack public path, app public path, API base, websocket
- * path, portal base) re-root onto the proxy so in-frame fetches and lazy
- * chunks ride it.
+ * asset URLs gain the prefix (href/src plus the og:image meta's content
+ * attribute), and the runtime base-path globals the NocoBase client reads
+ * (webpack public path, app public path, API base, websocket path, portal
+ * base) re-root onto the proxy so in-frame fetches and lazy chunks ride it.
  * @param html - the upstream index.html body (uncompressed).
  * @param prefix - the proxy prefix without a trailing slash (e.g. `/nocobase`).
  * @returns the rewritten HTML.
@@ -43,6 +43,11 @@ export function rewriteNocobaseHtml(html: string, prefix: string): string {
   return html
     // (href|src)="/x" → (href|src)="<prefix>/x"; `//` (protocol-relative) stays.
     .replace(/((?:href|src)=")\/(?!\/)/gu, `$1${prefix}/`)
+    // The portal entries' `<meta property="og:image" content="/x">` carries
+    // the root-absolute preview image (the overlaid logo-mark) in the content
+    // attribute, which the href/src rewrite does not reach; the matched tag
+    // re-roots its own content value while other meta content keeps its bytes.
+    .replace(/<meta\b[^>]*\bproperty="og:image"[^>]*>/gu, tag => tag.replace(/(\bcontent=")\/(?!\/)/u, `$1${prefix}/`))
     // The deployed portal entries inline `window.NOCOBASE_PORTAL_BASE="/dist/<name>/"`
     // and `window.NOCOBASE_API_URL="/api"` (the deploy script's defines). Under
     // the prefix the portal is mounted at `<prefix>/dist/<name>/` and its API

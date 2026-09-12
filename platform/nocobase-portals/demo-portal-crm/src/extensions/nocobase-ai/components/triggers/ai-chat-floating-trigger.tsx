@@ -81,6 +81,7 @@ export function AIChatFloatingTrigger({
   const triggerRef = useRef<HTMLDivElement>(null);
   const dragSessionRef = useRef<VerticalDragSession | null>(null);
   const [top, setTop] = useState<number | null>(null);
+  const [iconFailed, setIconFailed] = useState(false);
 
   useEffect(() => {
     const keepInsideBounds = () => {
@@ -187,14 +188,18 @@ export function AIChatFloatingTrigger({
         onClick={openChat}
       >
         <span className="flex size-full overflow-hidden rounded-lg">
-          <img
-            src={assetUrl(nocobaseAIChatIcon)}
-            alt=""
-            className="size-full object-contain"
-            onError={(event) => {
-              event.currentTarget.style.display = "none";
-            }}
-          />
+          {iconFailed ? (
+            <span className="flex size-full items-center justify-center text-sm font-semibold text-muted-foreground">
+              AI
+            </span>
+          ) : (
+            <img
+              src={assetUrl(nocobaseAIChatIcon)}
+              alt=""
+              className="size-full object-contain"
+              onError={() => setIconFailed(true)}
+            />
+          )}
         </span>
         {unreadCount > 0 ? (
           <span className="absolute -top-1.5 -right-1.5 z-10 flex min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] leading-4 font-semibold text-white ring-2 ring-background">
