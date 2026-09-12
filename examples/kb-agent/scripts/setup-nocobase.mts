@@ -45,7 +45,7 @@
  */
 import { spawn, spawnSync } from 'node:child_process'
 import { DatabaseSync } from 'node:sqlite'
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { resolveEnv } from './resolve-env.ts'
@@ -778,6 +778,44 @@ async function stepVerify(): Promise<void> {
     const probe = await fetch(`${baseUrl}/dist/${portal}/`, { headers: { accept: 'text/html' }, signal: AbortSignal.timeout(5000) }).catch(() => null)
     if (probe === null || !probe.ok) failures.push(`portal /dist/${portal}/ not reachable; run nocobase-portal-deploy.mts`)
   }
+  // C4: the portal's floating AI-chat icon must resolve as a real SVG —
+  // before the NOCOBASE_PORTAL_BASE injection its root-absolute URL fell
+  // into the gateway's HTML fallback (a fake 200 text/html, blank icon), so
+  // reachability alone proves nothing. The icon is a hashed vite asset the
+  // bundle imports at runtime (not in the entry HTML), so locate it in the
+  // deployed assets directory and fetch its served URL.
+  for (const portal of ['crm', 'hub']) {
+    const assetsDir = join(repoRoot, 'platform/nocobase/storage/dist-client', portal, 'assets')
+    const iconFile = existsSync(assetsDir) ? readdirSync(assetsDir).find(name => name.startsWith('nocobase-ai-chat') && name.endsWith('.svg')) : undefined
+    if (iconFile === undefined) {
+      failures.push(`portal ${portal} assets name no nocobase-ai-chat icon; rerun nocobase-portal-deploy.mts`)
+      continue
+    }
+    const iconUrl = `${baseUrl}/dist/${portal}/assets/${iconFile}`
+    const iconProbe = await fetch(iconUrl, { signal: AbortSignal.timeout(5000) }).catch(() => null)
+    const iconType = iconProbe?.headers.get('content-type') ?? ''
+    if (iconProbe === null || !iconProbe.ok) failures.push(`portal ${portal} AI icon ${iconFile} unreachable (HTTP ${iconProbe?.status ?? 'network error'}); rerun nocobase-portal-deploy.mts`)
+    else if (!iconType.includes('image/svg+xml')) failures.push(`portal ${portal} AI icon ${iconFile} served "${iconType}" (HTML fallback, blank icon); rerun nocobase-portal-deploy.mts with the NOCOBASE_PORTAL_BASE injection`)
+  }
+  // C4: brand whitelabel inside the OSS license boundary — the site title
+  // and logo row must be ours, the favicon must not be the HTML fallback.
+  // The logo lives in public statics (attachment ACLs block the anonymous
+  // login page), so the probe fetches the stored url unauthenticated.
+  {
+    const brandSettings = await dataOf(token, 'GET', '/api/systemSettings:get') as { title?: string, logo?: { url?: string } | null }
+    if (brandSettings?.title !== 'DSH食品业务平台') failures.push(`systemSettings.title is ${JSON.stringify(brandSettings?.title)} (expected the DSH brand; run nocobase-n25-brand.mts)`)
+    const logoUrl = brandSettings?.logo?.url
+    if (logoUrl !== '/dsh-brand-logo.svg') failures.push(`systemSettings.logo.url is ${JSON.stringify(logoUrl)} (expected /dsh-brand-logo.svg; run nocobase-n25-brand.mts)`)
+    else {
+      const logoProbe = await fetch(`${baseUrl}${logoUrl}`, { signal: AbortSignal.timeout(5000) }).catch(() => null)
+      const logoType = logoProbe?.headers.get('content-type') ?? ''
+      if (logoProbe === null || !logoProbe.ok || !logoType.includes('image/svg+xml')) failures.push(`systemSettings.logo ${logoUrl} not fetchable as SVG (HTTP ${logoProbe?.status ?? 'network error'}, "${logoType}"); run nocobase-n25-brand.mts`)
+    }
+    const faviconProbe = await fetch(`${baseUrl}/favicon/favicon.ico`, { signal: AbortSignal.timeout(5000) }).catch(() => null)
+    const faviconType = faviconProbe?.headers.get('content-type') ?? ''
+    if (faviconProbe === null || !faviconProbe.ok) failures.push(`/favicon/favicon.ico unreachable (HTTP ${faviconProbe?.status ?? 'network error'}); run nocobase-n25-brand.mts after build`)
+    else if (faviconType.includes('text/html')) failures.push('/favicon/favicon.ico served the HTML fallback; run nocobase-n25-brand.mts after build')
+  }
   // C3-A: the portal list pages pin default sorters, columns, and filters on
   // fields the seeded collections must actually carry — replay the exact
   // wire requests so a missing column fails the 400 here, not in the user's
@@ -955,7 +993,7 @@ async function main(): Promise<void> {
       for (const script of [
         'nocobase-crm-modules.mts', 'nocobase-hub-modules.mts',
         'nocobase-n13-rebuild.mts', 'nocobase-n13-seed.mts', 'nocobase-n14-fix.mts',
-        'nocobase-n17-alignment.mts', 'nocobase-n18-form-ai.mts',
+        'nocobase-n17-alignment.mts', 'nocobase-n18-form-ai.mts', 'nocobase-n25-brand.mts',
       ]) {
         if (!run('node', ['--import', 'tsx/esm', join(repoRoot, 'examples/kb-agent/scripts', script)])) {
           throw new Error(`${script} failed during the all chain`)

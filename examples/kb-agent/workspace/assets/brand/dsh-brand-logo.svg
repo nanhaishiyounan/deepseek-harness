@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" fill="none">
+  <!-- DSH food-business mark: a leaf (food industry) whose tip grows into a
+       knowledge-graph cluster (three nodes, edges through the centers) — the
+       product's KB + agent promise. DSH brand blue on a rounded square; white
+       glyph reads on both light and dark chrome. -->
+  <rect x="4" y="4" width="88" height="88" rx="22" fill="#4176E6"/>
+  <path d="M24 72C24 44.4 42.4 26 70 26C70 53.6 51.6 72 24 72Z" fill="#FFFFFF"/>
+  <path d="M27 69L65 31" stroke="#4176E6" stroke-width="3.2" stroke-linecap="round"/>
+  <path d="M70 26L64 16" stroke="#FFFFFF" stroke-width="3.2" stroke-linecap="round"/>
+  <path d="M64 16L78 40" stroke="#FFFFFF" stroke-width="3.2" stroke-linecap="round"/>
+  <path d="M64 16L84 10" stroke="#FFFFFF" stroke-width="3.2" stroke-linecap="round"/>
+  <circle cx="64" cy="16" r="6" fill="#FFFFFF"/>
+  <circle cx="78" cy="40" r="6" fill="#FFFFFF"/>
+  <circle cx="84" cy="10" r="4.5" fill="#FFFFFF"/>
+</svg>

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
+  <!-- Compact favicon cut of the DSH food-business mark (leaf + knowledge
+       nodes); derives examples/kb-agent/workspace/assets/brand/favicon.ico. -->
+  <rect x="2" y="2" width="60" height="60" rx="15" fill="#4176E6"/>
+  <path d="M16 48C16 29.6 28.3 17.3 46.7 17.3C46.7 35.7 34.4 48 16 48Z" fill="#FFFFFF"/>
+  <path d="M18 46L44 20" stroke="#4176E6" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M46.7 17.3L42.7 10.7" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M42.7 10.7L52 26.7" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M42.7 10.7L56 6.7" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round"/>
+  <circle cx="42.7" cy="10.7" r="4.2" fill="#FFFFFF"/>
+  <circle cx="52" cy="26.7" r="4.2" fill="#FFFFFF"/>
+  <circle cx="56" cy="6.7" r="3.2" fill="#FFFFFF"/>
+</svg>

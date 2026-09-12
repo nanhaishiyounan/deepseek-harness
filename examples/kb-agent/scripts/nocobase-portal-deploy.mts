@@ -10,7 +10,7 @@
  * Usage: node --import tsx/esm examples/kb-agent/scripts/nocobase-portal-deploy.mts
  */
 import { spawnSync } from 'node:child_process'
-import { cpSync, existsSync, mkdirSync, rmSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -23,8 +23,8 @@ const PORTALS = [
   { name: 'hub', dir: 'demo-portal-hub', base: '/dist/hub/' },
 ] as const
 
-function run(command: string, args: string[], cwd: string): boolean {
-  const result = spawnSync(command, args, { stdio: 'inherit', cwd })
+function run(command: string, args: string[], cwd: string, env: Record<string, string> = {}): boolean {
+  const result = spawnSync(command, args, { stdio: 'inherit', cwd, env: { ...process.env, ...env } })
   return result.status === 0
 }
 
@@ -38,12 +38,28 @@ for (const portal of PORTALS) {
     if (!run('pnpm', ['install'], source)) throw new Error(`pnpm install failed in ${portal.dir}`)
   }
   console.log(`nocobase-portals: building ${portal.dir}`)
-  if (!run('pnpm', ['build'], source)) throw new Error(`build failed in ${portal.dir}`)
+  // NOCOBASE_PORTAL_BASE is the vendored vite.config's native deployment
+  // prefix (vite.config.ts normalizeBase): without it the bundle emits
+  // root-absolute asset URLs, so the portal's floating AI-chat icon 404s into
+  // the gateway's HTML fallback and renders blank (C4 root cause).
+  if (!run('pnpm', ['build'], source, { NOCOBASE_PORTAL_BASE: portal.base })) throw new Error(`build failed in ${portal.dir}`)
   const target = join(distClient, portal.name)
   mkdirSync(target, { recursive: true })
   rmSync(target, { recursive: true, force: true })
   mkdirSync(target, { recursive: true })
   cpSync(join(source, 'dist'), target, { recursive: true })
+  // The bundle resolves runtime asset URLs against window.NOCOBASE_PORTAL_BASE
+  // (vite emits `new URL(path, new URL(window.NOCOBASE_PORTAL_BASE || "/",
+  // window.location.origin))`), so the entry HTML must define it — without
+  // the define every dynamically-resolved asset (the floating AI-chat icon)
+  // falls back to the origin root and dies in the gateway's HTML fallback.
+  const entry = join(target, 'index.html')
+  const html = readFileSync(entry, 'utf8')
+  const define = `<script>window.NOCOBASE_PORTAL_BASE=${JSON.stringify(portal.base)}</script>`
+  if (!html.includes('window.NOCOBASE_PORTAL_BASE')) {
+    writeFileSync(entry, html.replace('<head>', `<head>\n    ${define}`))
+    console.log(`nocobase-portals: injected window.NOCOBASE_PORTAL_BASE=${portal.base} into ${portal.name}/index.html`)
+  }
   console.log(`nocobase-portals: deployed ${portal.name} → ${target} (served at /dist/${portal.name}/)`)
 }
 console.log('nocobase-portals: done')
