@@ -27,12 +27,12 @@
    - `pnpm run test`（分区按改动面 + scenario 双门禁）；
    - `DSH_BUILD_CLIENT_PROFILE=official pnpm run build && pnpm run test:web`（official 产物前置，品牌守卫契约）；
    - `pnpm run typecheck && pnpm run lint && pnpm run doc-sync`；
-   - 五场景 demo `node --env-file=.env --import tsx/esm examples/kb-agent/scripts/demo-full-journey.mts` 全 PASS（真实轨道）；
+   - 五场景 demo `node --env-file=.env --import tsx/esm examples/kb-agent/scripts/demo-full-journey.mts` 全 PASS（真实轨道；flaky 边界：场景 3 偶发竞态——搁浅审批饿死 NocoBase 串行队列导致轮询超时，重跑即绿，非产品回归）；
    - lefthook pre-commit 门禁：C1-C4 每批提交（含本批）经 pre-commit（oxlint 140 字符折行、EOF 单空行、third-party-notices 再生）零绕过。
 4. **证据归档**：C1-C4 各批截图/GIF/命令输出已落 `examples/kb-agent/demos/acceptance-c{1..4}/`；本批补收口实录（路径与要点写入本文件勾选记录）。
 5. **文档终态**：
    - [QUICKSTART.zh.md](../../examples/kb-agent/QUICKSTART.zh.md)：冷启动链（含 portal 部署/品牌步骤的新语义）、白标节、已知边界更新；
-   - [plans/handoff-2026-09-10.zh.md](../handoff-2026-09-10.zh.md) 顶部追加本轮终态节（新窗口入口、接口修复结论、品牌面、图谱交互能力清单、遗留债）或另立 handoff-2026-09-11（按届时 plans 目录惯例裁决）；
+   - [plans/handoff-2026-09-10.zh.md](../handoff-2026-09-10.zh.md) 顶部 0.a 节追加本轮终态（新窗口入口、接口修复结论、品牌面、图谱交互能力清单），遗留债登记在该节末尾（[handoff-2026-09-10.zh.md:13](../handoff-2026-09-10.zh.md)，未另立 handoff-2026-09-11）；
    - 本 [PLAN.md](PLAN.md) 批次总览表勾选完成状态与实际数据；
    - Agent Note 索引汇总（C1 滚动通道裁决、C2 新窗口产品裁决、C3 字段适配根因、C4 白标方案与许可边界）。
 6. `pnpm run doc-sync` 终验 EXIT=0。

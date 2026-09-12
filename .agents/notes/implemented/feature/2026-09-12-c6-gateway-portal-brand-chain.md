@@ -1,0 +1,37 @@
+# Agent Note: C6 — the gateway proxy owns the portal runtime bases, the deploy chain owns the portal brand
+
+Status: implemented
+
+English | [中文](2026-09-12-c6-gateway-portal-brand-chain.zh.md)
+
+## Problem
+
+Unified verification scored the round FAIL 70/100 with all three mandatory dimensions green: the failures concentrated on the brand surface as seen from the gateway's same-origin entry (`:3080/nocobase/...`). Three in-scope defects: (1) the portals shipped the upstream demo brand (NocoBase logo-marks, upstream favicon, a runtime document title ending in `| NocoBase`); (2) `systemSettings.logo.url` was root-absolute `/dsh-brand-logo.svg`, which the admin page resolves against the gateway origin — 200 on `:13000`, 404 on `:3080` root, 200 only under the proxy prefix; (3) the portal entry's inline `window.NOCOBASE_PORTAL_BASE="/dist/<name>/"` was not rewritten by the proxy, so under `/nocobase/dist/<name>/` the router basename and every runtime asset URL missed, degrading the page from broken images to a white screen. Fixing (3) further exposed that the portal runtime gate also probes `window.NOCOBASE_API_URL ?? "/api"` — under the proxy those probes hit the gateway's own root (`404`/`415`).
+
+## Decision
+
+- **The proxy rewrites the portal entry's inline runtime defines** (`rewriteNocobaseHtml`): root-absolute `window.NOCOBASE_PORTAL_BASE` and `window.NOCOBASE_API_URL` values gain the proxy prefix, mirroring the existing runtime-global rewrites (webpack public path, API base, ws path). Non-root-absolute values pass through untouched.
+- **The deploy script injects `window.NOCOBASE_API_URL="/api"` explicitly** alongside the portal-base define. The value equals the direct-serving default, so `:13000` behavior is unchanged — the explicit define exists to give the proxy a stable marker to rewrite; without it there is no inline value to reroute and the gate probes cannot follow the proxy.
+- **Portal branding rides the deploy chain, not the portal source**: every `nocobase-portal-deploy.mts` run rebrands the entry `<title>` and byte-compares-overlays `favicon.ico` + `logo-mark.png`/`logo-mark-dark.png` with the DSH mark (`dsh-logo-mark.png`, derived from the brand SVG via the repo's sharp). A rebuild restores the upstream assets, so the overlay runs after each copy and reruns land on identical bytes; missing markers or absent `<head>`/`<title>` fail loud.
+- **Source-level changes stay minimal**: `DocumentTitleHandler appName` (both App.tsx) carries the runtime title; `BrandLogo` (both portals) resolves the marks through `assetUrl` (runtime portal base) instead of the build-time `import.meta.env.BASE_URL` concat, which baked root-absolute strings that 404 under the proxy; the AI floating trigger hides its `<img>` on error.
+- **`systemSettings.logo.url` is stored gateway-shaped** (`/nocobase/dsh-brand-logo.svg`): the user-real origin is the same-origin proxy, whose prefix strip resolves the client-dist root. The `:13000` direct entry is the debug surface and renders the logo as the SPA HTML fallback there — an accepted boundary. `verify` probes the static at its upstream root and asserts the stored proxy-shaped value; the proxied fetch is acceptance evidence.
+- **The upstream footer is rendered by default** (closure 1): the v2.2.6 `AuthLayout` renders `<PoweredBy />` unconditionally on the signin page — confirmed at runtime in an isolated browser context and by the built `plugin-auth/dist/client-v2` bundle. No vendored file was touched; the QUICKSTART compliance wording states the verified default.
+
+## Verification
+
+- Webserver spec 8/8 including the new portal-define rewrites (root-absolute gains the prefix, relative passes through); `packages/client/ui-business` 37/37; `pnpm run typecheck` and `pnpm run lint` 0/0; `doc-sync` green.
+- `:3080` main chain: portal entries serve `window.NOCOBASE_PORTAL_BASE="/nocobase/dist/<name>/"` + `window.NOCOBASE_API_URL="/nocobase/api"`; both portals render data, the DSH marks (light + dark), DSH titles (`销售看板 | DSH食品业务平台`, `总览 | DSH食品业务平台`), and the AI floating icon (200 `image/svg+xml`); zero console errors. Admin signin shows the footer "Powered by NocoBase" and the DSH h1; the sidebar logo loads `/nocobase/dsh-brand-logo.svg` (200 SVG, no broken image).
+- Idempotence: `nocobase-portal-deploy.mts` double run produces identical `storage/dist-client` tree hashes; `nocobase-n25-brand.mts` first run drift-updates the logo url, second run reports every step kept; `setup-nocobase.mts verify` (with the new portal-brand assertion group: title, favicon, logo-mark bytes) OK.
+- Closure 2 (kg click→select→details): synthetic mouse events — an 81-point grid plus exact node coordinates from `sigma.graphToViewport` — never trigger sigma's hit test (untrusted input); a trusted CDP click at the exact node position reaches the container but the canvas remounts on walk refreshes, defeating DOM probes. The chain is verified through the sigma instance API (fiber-located `rendererRef` → `sigma.emit('clickNode')`): the details card renders (screenshot `demos/acceptance-c1/c1-graph-click-select-details.png`). A real-mouse single click on any node remains a one-step manual review item.
+
+## Consequences
+
+- Portals are first-class citizens of the proxied origin: `/nocobase/dist/{crm,hub}/` carries data, auth, and branding; the earlier "from the entry page only" deep-link boundary still applies (same on `:13000`).
+- The direct `:13000` admin entry no longer renders the sidebar logo (SPA HTML fallback for the prefixed path); the gateway chain is the asserted user path.
+- Portal deep-title probes in `verify` read the deployed entry HTML; the runtime title lives in the portal source (`appName`), covered by browser acceptance rather than `verify`.
+
+## Alternatives considered
+
+- **Proxying brand assets at the gateway root** so the root-absolute logo url keeps working on both chains: rejected — it adds a product-surface route keyed to example asset names and contradicts the gateway's default-off proxy stance; one stored-url change plus the prefix strip achieves the same user-path result.
+- **Post-processing the built JS bundle** to reroute the baked `/dist/<name>/logo-mark.png` strings: rejected — string surgery in minified bundles is fragile; `assetUrl` gives runtime resolution through the same define the proxy already rewrites.
+- **Grid-scanning synthetic clicks / DOM probe + trusted CDP clicks for closure 2**: attempted and documented above; the sigma-instance route is the reproducible automation seam, the DOM-level hit test stays manual.
