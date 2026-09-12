@@ -186,6 +186,32 @@ async function ensureChineseEmployees(token: string): Promise<void> {
   console.log(`nocobase-n17: built-in employees zh-CN copy ${updated > 0 ? `${updated} updated` : 'already in place (kept)'}`)
 }
 
+/**
+ * D2: the projects module's assignee/owner pickers list `users`, but the
+ * nine AI employees lived only in plugin-ai's aiEmployees table — nothing AI
+ * was selectable. Ensure one password-less users row per employee (username
+ * joins the aiEmployees identity, nickname is the Chinese display name the
+ * pickers render); idempotent by username.
+ */
+const AI_EMPLOYEE_USER_NICKNAMES: Record<string, string> = {
+  atlas: '阿特拉斯', dara: '达拉', dex: '得克斯', ellis: '埃利斯',
+  lexi: '莱克茜', lina: '丽娜', nathan: '内森', vera: '薇拉', viz: '维兹',
+}
+
+async function ensureAiEmployeeUsers(token: string): Promise<void> {
+  let added = 0
+  for (const [username, nickname] of Object.entries(AI_EMPLOYEE_USER_NICKNAMES)) {
+    const found = await dataOf(token, 'GET', `/api/users:list?filter=${encodeURIComponent(JSON.stringify({ username: { $eq: username } }))}&pageSize=5`)
+    if ((found ?? [])[0]?.id !== undefined) continue
+    await dataOf(token, 'POST', '/api/users:create', { username, nickname })
+    added += 1
+  }
+  const users = await dataOf(token, 'GET', '/api/users:list?pageSize=100')
+  const total = (users ?? []).length
+  console.log(`nocobase-n17: AI employees in users ${added > 0 ? `+${added}` : 'all present (kept)'} (users total ${total})`)
+  if (total < 10) throw new Error(`users table holds only ${total} rows (expected >=10: Super Admin + 4 legacy names + 9 AI employees)`)
+}
+
 /** Column + form field shorthand shared by the v2 page factory below. */
 type FieldKind = 'input' | 'select' | 'number'
 type FieldSpec = { name: string, title: string, kind: FieldKind, options?: object[] }
@@ -614,6 +640,7 @@ async function main(): Promise<void> {
   const token = await signInWithRetry()
   await ensureChineseLocale(token)
   await ensureChineseEmployees(token)
+  await ensureAiEmployeeUsers(token)
   for (const spec of V2_PAGES) {
     await ensureV2TablePage(token, spec)
   }

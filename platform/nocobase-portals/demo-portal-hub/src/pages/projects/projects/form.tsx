@@ -1,8 +1,9 @@
 import { type HttpError, useTranslate } from "@refinedev/core";
 import { useForm } from "@refinedev/react-hook-form";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { type UseFormReturn } from "react-hook-form";
 import { useParams } from "react-router";
+import { useAiEmployeeFill } from "@/components/ai-employee-fill";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -26,6 +27,7 @@ import {
   RouteDrawerFooter,
   useRefineUnsavedChangesGuard,
 } from "@/extensions/nocobase-route-surfaces";
+import type { AIFormField } from "@/extensions/nocobase-ai/providers";
 import { PROJECT_STATUSES, labelFor, toDateInputValue } from "../constants";
 import { UserPicker } from "../pickers";
 import { useContextualCloseTo } from "../route-surfaces";
@@ -273,6 +275,40 @@ function ProjectCreateForm() {
     },
   });
 
+  const aiFields = useMemo<AIFormField[]>(
+    () => [
+      { name: "name", title: translate("projects.projects.fields.name", { ns: "starter" }, "Project name"), type: "string", required: true },
+      { name: "code", title: translate("projects.projects.fields.code", { ns: "starter" }, "Code"), type: "string" },
+      { name: "status", title: translate("projects.projects.fields.status", { ns: "starter" }, "Status"), type: "string", enum: [...PROJECT_STATUSES] },
+      { name: "start_date", title: translate("projects.projects.fields.startDate", { ns: "starter" }, "Start date"), type: "string", description: "ISO date (YYYY-MM-DD)" },
+      { name: "due_date", title: translate("projects.projects.fields.dueDate", { ns: "starter" }, "Due date"), type: "string", description: "ISO date (YYYY-MM-DD)" },
+    ],
+    [translate]
+  );
+  const aiEmployee = useAiEmployeeFill({
+    formId: "hub-project-create",
+    title: translate("projects.projects.drawer.create.title", { ns: "starter" }, "New project"),
+    fields: aiFields,
+    getValues: () => form.getValues() as Record<string, unknown>,
+    setValues: (values) => {
+      for (const [name, value] of Object.entries(values)) {
+        form.setValue(name as keyof ProjectFormValues, value as never, {
+          shouldDirty: true,
+          shouldTouch: true,
+          shouldValidate: true,
+        });
+      }
+    },
+    instructions:
+      "A new project starts as planning unless the text says execution already began. " +
+      "Status values are planning, active, on_hold or done; dates are ISO (YYYY-MM-DD).",
+    placeholder: translate(
+      "projects.projects.aiFill.placeholder",
+      { ns: "starter" },
+      "Example: Halal certification advisory for the Saudi pilot client, code KSA-01, starting 2026-10-01, due 2027-01-31."
+    ),
+  });
+
   return (
     <Form {...form}>
       <form
@@ -280,9 +316,11 @@ function ProjectCreateForm() {
         className="flex min-h-0 flex-1 flex-col"
       >
         <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-5">
+          {aiEmployee.panel}
           <ProjectFormFields form={form} />
         </div>
         <RouteDrawerFooter className="flex-row justify-end">
+          {aiEmployee.trigger}
           <Button type="button" variant="outline" onClick={() => close()}>
             {translate("projects.common.cancel", { ns: "starter" }, "Cancel")}
           </Button>

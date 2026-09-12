@@ -914,6 +914,15 @@ async function stepVerify(): Promise<void> {
     const failure = await rowFloor(collection, floor)
     if (failure !== null) failures.push(`${failure}; run the hub/crm module step so the D1 tables seed`)
   }
+  // D2: the nine AI employees must exist as users rows too — the projects
+  // assignee/owner pickers list users, aiEmployees alone is invisible there.
+  {
+    const aiUsernames = ['atlas', 'dara', 'dex', 'ellis', 'lexi', 'lina', 'nathan', 'vera', 'viz']
+    const rows = await dataOf(token, 'GET', `/api/users:list?filter=${encodeURIComponent(JSON.stringify({ username: { $in: aiUsernames } }))}&pageSize=50`) as Array<{ username?: string }> | null
+    const present = new Set((rows ?? []).map(row => row.username))
+    const missing = aiUsernames.filter(name => !present.has(name))
+    if (missing.length > 0) failures.push(`AI employees missing from users: ${missing.join(', ')}; re-run nocobase-n17-alignment.mts`)
+  }
   const plugins = await call(token, 'GET', '/api/pm:list?pageSize=300') as { data?: Array<{ name?: string, enabled?: boolean }> }
   const enabledPlugins = new Set((plugins?.data ?? []).filter(plugin => plugin.enabled === true).map(plugin => plugin.name))
   for (const name of PLUGINS) {

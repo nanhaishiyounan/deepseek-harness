@@ -1,9 +1,11 @@
 import { type HttpError, useList, useTranslate } from "@refinedev/core";
 import { useForm } from "@refinedev/react-hook-form";
 import { AlertTriangle } from "lucide-react";
+import { useMemo } from "react";
 import { type PropsWithChildren, useEffect, useRef } from "react";
 import { type UseFormReturn } from "react-hook-form";
 import { useParams } from "react-router";
+import { useAiEmployeeFill } from "@/components/ai-employee-fill";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,6 +31,7 @@ import {
   RouteDrawerFooter,
   useRefineUnsavedChangesGuard,
 } from "@/extensions/nocobase-route-surfaces";
+import type { AIFormField } from "@/extensions/nocobase-ai/providers";
 import { TASK_PRIORITIES, TASK_STATUSES, labelFor, toDateInputValue } from "../constants";
 import { ProjectPicker, UserPicker } from "../pickers";
 import { useContextualCloseTo } from "../route-surfaces";
@@ -408,6 +411,39 @@ function TaskCreateForm({ presetProjectId }: TaskSurfaceProps) {
     },
   });
 
+  const aiFields = useMemo<AIFormField[]>(
+    () => [
+      { name: "title", title: translate("projects.tasks.fields.title", { ns: "starter" }, "Task"), type: "string", required: true },
+      { name: "priority", title: translate("projects.tasks.fields.priority", { ns: "starter" }, "Priority"), type: "string", enum: [...TASK_PRIORITIES] },
+      { name: "status", title: translate("projects.tasks.fields.status", { ns: "starter" }, "Status"), type: "string", enum: [...TASK_STATUSES] },
+      { name: "due_date", title: translate("projects.tasks.fields.dueDate", { ns: "starter" }, "Due date"), type: "string", description: "ISO date (YYYY-MM-DD)" },
+    ],
+    [translate]
+  );
+  const aiEmployee = useAiEmployeeFill({
+    formId: "hub-task-create",
+    title: translate("projects.tasks.drawer.create.title", { ns: "starter" }, "New task"),
+    fields: aiFields,
+    getValues: () => form.getValues() as Record<string, unknown>,
+    setValues: (values) => {
+      for (const [name, value] of Object.entries(values)) {
+        form.setValue(name as keyof TaskFormValues, value as never, {
+          shouldDirty: true,
+          shouldTouch: true,
+          shouldValidate: true,
+        });
+      }
+    },
+    instructions:
+      "A new task starts as todo unless the text says work is already underway. " +
+      "Priority values are low, med or high; status values are todo, in_progress, review or done.",
+    placeholder: translate(
+      "projects.tasks.aiFill.placeholder",
+      { ns: "starter" },
+      "Example: Draft the EAC certification checklist for the Russia export project, high priority, due 2026-09-30."
+    ),
+  });
+
   return (
     <Form {...form}>
       <form
@@ -415,6 +451,7 @@ function TaskCreateForm({ presetProjectId }: TaskSurfaceProps) {
         className="flex min-h-0 flex-1 flex-col"
       >
         <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-5">
+          {aiEmployee.panel}
           <TaskFormFields
             form={form}
             presetProjectId={presetProjectId}
@@ -422,6 +459,7 @@ function TaskCreateForm({ presetProjectId }: TaskSurfaceProps) {
           />
         </div>
         <RouteDrawerFooter className="flex-row justify-end">
+          {aiEmployee.trigger}
           <Button type="button" variant="outline" onClick={() => close()}>
             {translate("projects.common.cancel", { ns: "starter" }, "Cancel")}
           </Button>
