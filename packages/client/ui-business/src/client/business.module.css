@@ -224,6 +224,11 @@
   box-shadow: var(--dsw-shadow-lv1-blur);
 }
 
+.embedCard:focus-visible {
+  outline: 2px solid var(--dsw-alias-state-business-primary);
+  outline-offset: 1px;
+}
+
 .embedHint {
   margin: 0;
   color: var(--dsw-alias-label-secondary);

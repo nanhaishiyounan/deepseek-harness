@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { assetUrl, cn } from "@/lib/utils";
 
 const APP_NAME = "Salesroom CRM";
 
@@ -6,16 +6,23 @@ type BrandLogoProps = {
   className?: string;
 };
 
+// DSH logo mark (light + dark slots share one asset: the rounded-square
+// brand mark reads on both themes). assetUrl resolves the runtime portal
+// base, so the mark loads under any mount prefix (direct or proxied).
 export function BrandLogo({ className }: BrandLogoProps) {
   return (
-    <span
-      className={cn(
-        "inline-flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primary text-lg font-bold text-primary-foreground",
-        className
-      )}
-    >
-      S
-    </span>
+    <>
+      <img
+        src={assetUrl("logo-mark.png")}
+        alt="DSH"
+        className={cn("h-7 w-auto shrink-0 dark:hidden", className)}
+      />
+      <img
+        src={assetUrl("logo-mark-dark.png")}
+        alt="DSH"
+        className={cn("hidden h-7 w-auto shrink-0 dark:block", className)}
+      />
+    </>
   );
 }
 

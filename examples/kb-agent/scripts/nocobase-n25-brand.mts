@@ -11,7 +11,12 @@
  * (server.ts: { title, filename, extname, mimetype, url }). The attachment
  * store's ACL blocks anonymous reads (the login page renders the logo
  * before any session exists), so the SVG lives in the client's public
- * statics where every reader reaches it.
+ * statics. The stored url is gateway-shaped (`/nocobase/...`): the user-real
+ * origin is the same-origin proxy, where a root-absolute `/dsh-brand-logo.svg`
+ * would hit the gateway root (404); the proxy strips the prefix down to the
+ * client-dist root, so the static resolves there. Direct :13000 admin reads
+ * of the prefixed path fall into the SPA HTML fallback — the direct entry is
+ * the debug surface, the proxied chain is the asserted one.
  *
  * Idempotent: systemSettings updates only on drift; file overlays compare
  * bytes before writing.
@@ -33,8 +38,8 @@ const faviconPath = join(brandDir, 'favicon.ico')
 const fallbackPngPath = join(brandDir, 'dsh-fallback.png')
 const BRAND_TITLE = 'DSH食品业务平台'
 const LOGO_TITLE = 'dsh-brand-logo'
-/** Public static URL the logo plain-object points at. */
-const LOGO_URL = '/dsh-brand-logo.svg'
+/** Public static URL the logo plain-object points at (gateway-proxy shaped). */
+const LOGO_URL = '/nocobase/dsh-brand-logo.svg'
 
 /** Built client roots whose favicon/, nocobase.png, and logo get the overlay. */
 const CLIENT_ROOTS = ['client', 'client-v2'].map(name => join(repoRoot, 'platform/nocobase/packages/core/app/dist', name))
@@ -63,6 +68,9 @@ async function dataOf(token: string, method: 'GET' | 'POST', path: string, body?
 
 async function ensureSystemSettings(token: string): Promise<void> {
   const settings = await dataOf(token, 'GET', '/api/systemSettings:get')
+  if (settings === null || settings.id === undefined) {
+    throw new Error('systemSettings:get returned no settings row to brand')
+  }
   const logoMatch = settings?.logo?.title === LOGO_TITLE && settings?.logo?.url === LOGO_URL
   if (settings?.title === BRAND_TITLE && logoMatch) {
     console.log('nocobase-n25: systemSettings brand already applied (kept)')

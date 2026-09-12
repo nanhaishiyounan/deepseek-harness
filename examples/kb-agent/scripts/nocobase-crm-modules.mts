@@ -592,8 +592,9 @@ async function ensurePortalFields(token: string): Promise<void> {
     },
     { collection: 'crm_follow_ups', assign: row => [['status', row.next_at && String(row.next_at) <= '2026-09-10' ? 'done' : 'pending'], ['due_date', row.next_at ?? null]] },
     // C3-A portal sorters: name mirrors full_name, date mirrors due_at, the
-    // contact association picks the customer's first contact, scores and
-    // sources get a deterministic spread so sorting and grade filters bite.
+    // contact association spreads round-robin across the customer's
+    // contacts, scores and sources get a deterministic spread so sorting
+    // and grade filters bite.
     { collection: 'crm_contacts', assign: row => [['name', row.full_name ?? null]] },
     {
       collection: 'crm_activities', assign: (row, index) => {

@@ -191,6 +191,9 @@ export function AIChatFloatingTrigger({
             src={assetUrl(nocobaseAIChatIcon)}
             alt=""
             className="size-full object-contain"
+            onError={(event) => {
+              event.currentTarget.style.display = "none";
+            }}
           />
         </span>
         {unreadCount > 0 ? (

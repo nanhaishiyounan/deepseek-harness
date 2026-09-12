@@ -33,7 +33,8 @@ const STRIP_REQUEST_HEADERS = new Set(['host', 'connection', 'transfer-encoding'
  * Rewrite one upstream HTML entry to serve under the proxy prefix: root-absolute
  * asset URLs gain the prefix, and the runtime base-path globals the NocoBase
  * client reads (webpack public path, app public path, API base, websocket
- * path) re-root onto the proxy so in-frame fetches and lazy chunks ride it.
+ * path, portal base) re-root onto the proxy so in-frame fetches and lazy
+ * chunks ride it.
  * @param html - the upstream index.html body (uncompressed).
  * @param prefix - the proxy prefix without a trailing slash (e.g. `/nocobase`).
  * @returns the rewritten HTML.
@@ -42,6 +43,14 @@ export function rewriteNocobaseHtml(html: string, prefix: string): string {
   return html
     // (href|src)="/x" → (href|src)="<prefix>/x"; `//` (protocol-relative) stays.
     .replace(/((?:href|src)=")\/(?!\/)/gu, `$1${prefix}/`)
+    // The deployed portal entries inline `window.NOCOBASE_PORTAL_BASE="/dist/<name>/"`
+    // and `window.NOCOBASE_API_URL="/api"` (the deploy script's defines). Under
+    // the prefix the portal is mounted at `<prefix>/dist/<name>/` and its API
+    // rides `<prefix>/api`, so root-absolute values gain the prefix — the
+    // entry's router basename, every runtime asset resolution, and the portal
+    // runtime gate's API probes follow them.
+    .replace(/window\.NOCOBASE_PORTAL_BASE="\/([^"]*)"/gu, `window.NOCOBASE_PORTAL_BASE="${prefix}/$1"`)
+    .replace(/window\.NOCOBASE_API_URL="\/([^"]*)"/gu, `window.NOCOBASE_API_URL="${prefix}/$1"`)
     .replace('window[\'__webpack_public_path__\'] = \'\';', `window['__webpack_public_path__'] = '${prefix}/';`)
     .replace('window[\'__nocobase_public_path__\'] = \'/\';', `window['__nocobase_public_path__'] = '${prefix}/';`)
     .replace('window[\'__nocobase_api_base_url__\'] = \'/api/\';', `window['__nocobase_api_base_url__'] = '${prefix}/api/';`)

@@ -99,6 +99,7 @@ describe('nocobase proxy handler', () => {
       '<script src="/browser-checker.js?v=1"></script>',
       '<script type="module" src="/assets/index-6f4405c1.js"></script>',
       '<link href="//cdn.example.com/x.css" rel="stylesheet">',
+      '<script>window.NOCOBASE_PORTAL_BASE="/dist/crm/";window.NOCOBASE_API_URL="/api"</script>',
     ].join('\n')
     const hits: UpstreamHit[] = []
     const origin = await fakeUpstream(hits, (res) => {
@@ -117,6 +118,12 @@ describe('nocobase proxy handler', () => {
     expect(body).toContain('src="/nocobase/assets/index-6f4405c1.js"')
     // Protocol-relative URLs keep their scheme-host form.
     expect(body).toContain('href="//cdn.example.com/x.css"')
+    // The deployed portal entry's inline base define re-roots onto the proxy
+    // so the portal router basename and runtime asset URLs ride the prefix.
+    expect(body).toContain('window.NOCOBASE_PORTAL_BASE="/nocobase/dist/crm/"')
+    // The entry's API define follows, so the runtime gate's API probes and
+    // sign-in ride the proxy instead of the gateway's own root.
+    expect(body).toContain('window.NOCOBASE_API_URL="/nocobase/api"')
     // The stale upstream length is dropped; the response is valid and complete.
     expect(response.headers.get('content-length')).toBe(String(body.length))
   })
@@ -148,11 +155,13 @@ describe('nocobase proxy handler', () => {
   })
 
   it('rewriteNocobaseHtml leaves values that do not match the built-entry shape alone', () => {
-    const html = 'window[\'__nocobase_api_base_url__\'] = \'https://api.example.com/api/\';<a href="/keep">'
+    const html = 'window[\'__nocobase_api_base_url__\'] = \'https://api.example.com/api/\';<a href="/keep"><script>window.NOCOBASE_PORTAL_BASE="dist/crm/"</script>'
     const rewritten = rewriteNocobaseHtml(html, '/nocobase')
     // A configured absolute API base is not a proxy-relative form; only asset URLs gain the prefix.
     expect(rewritten).toContain('\'https://api.example.com/api/\'')
     expect(rewritten).toContain('<a href="/nocobase/keep">')
+    // A portal base define without a leading slash is not root-absolute; it keeps its bytes.
+    expect(rewritten).toContain('window.NOCOBASE_PORTAL_BASE="dist/crm/"')
   })
 
   it('answers 502 with the cause when the upstream is unreachable', async () => {

@@ -800,21 +800,46 @@ async function stepVerify(): Promise<void> {
   // C4: brand whitelabel inside the OSS license boundary — the site title
   // and logo row must be ours, the favicon must not be the HTML fallback.
   // The logo lives in public statics (attachment ACLs block the anonymous
-  // login page), so the probe fetches the stored url unauthenticated.
+  // login page), so the probe fetches the stored url unauthenticated. The
+  // stored url is gateway-shaped (/nocobase/...): the user-real origin is
+  // the same-origin proxy, whose prefix strip resolves the client-dist
+  // root — so the probe hits the static at its upstream root here and the
+  // proxied fetch is asserted in the C6 acceptance evidence.
   {
     const brandSettings = await dataOf(token, 'GET', '/api/systemSettings:get') as { title?: string, logo?: { url?: string } | null }
     if (brandSettings?.title !== 'DSH食品业务平台') failures.push(`systemSettings.title is ${JSON.stringify(brandSettings?.title)} (expected the DSH brand; run nocobase-n25-brand.mts)`)
     const logoUrl = brandSettings?.logo?.url
-    if (logoUrl !== '/dsh-brand-logo.svg') failures.push(`systemSettings.logo.url is ${JSON.stringify(logoUrl)} (expected /dsh-brand-logo.svg; run nocobase-n25-brand.mts)`)
+    if (logoUrl !== '/nocobase/dsh-brand-logo.svg') failures.push(`systemSettings.logo.url is ${JSON.stringify(logoUrl)} (expected /nocobase/dsh-brand-logo.svg; run nocobase-n25-brand.mts)`)
     else {
-      const logoProbe = await fetch(`${baseUrl}${logoUrl}`, { signal: AbortSignal.timeout(5000) }).catch(() => null)
+      const logoProbe = await fetch(`${baseUrl}/dsh-brand-logo.svg`, { signal: AbortSignal.timeout(5000) }).catch(() => null)
       const logoType = logoProbe?.headers.get('content-type') ?? ''
-      if (logoProbe === null || !logoProbe.ok || !logoType.includes('image/svg+xml')) failures.push(`systemSettings.logo ${logoUrl} not fetchable as SVG (HTTP ${logoProbe?.status ?? 'network error'}, "${logoType}"); run nocobase-n25-brand.mts`)
+      if (logoProbe === null || !logoProbe.ok || !logoType.includes('image/svg+xml')) failures.push(`systemSettings.logo static /dsh-brand-logo.svg not fetchable as SVG (HTTP ${logoProbe?.status ?? 'network error'}, "${logoType}"); run nocobase-n25-brand.mts`)
     }
     const faviconProbe = await fetch(`${baseUrl}/favicon/favicon.ico`, { signal: AbortSignal.timeout(5000) }).catch(() => null)
     const faviconType = faviconProbe?.headers.get('content-type') ?? ''
     if (faviconProbe === null || !faviconProbe.ok) failures.push(`/favicon/favicon.ico unreachable (HTTP ${faviconProbe?.status ?? 'network error'}); run nocobase-n25-brand.mts after build`)
     else if (faviconType.includes('text/html')) failures.push('/favicon/favicon.ico served the HTML fallback; run nocobase-n25-brand.mts after build')
+  }
+  // C6: the portal surfaces carry the DSH brand — the entry title is ours,
+  // and the favicon plus the light/dark logo-marks are the overlaid brand
+  // bytes, not the upstream demo marks and not the HTML fallback.
+  {
+    const brandDir = join(repoRoot, 'examples/kb-agent/workspace/assets/brand')
+    const markBytes = existsSync(join(brandDir, 'dsh-logo-mark.png')) ? readFileSync(join(brandDir, 'dsh-logo-mark.png')) : undefined
+    for (const portal of ['crm', 'hub']) {
+      const entryProbe = await fetch(`${baseUrl}/dist/${portal}/`, { headers: { accept: 'text/html' }, signal: AbortSignal.timeout(5000) }).catch(() => null)
+      const entryHtml = await entryProbe?.text().catch(() => undefined)
+      const title = entryHtml?.match(/<title>([^<]*)<\/title>/u)?.[1]
+      if (title !== 'DSH食品业务平台') failures.push(`portal ${portal} entry title is ${JSON.stringify(title)} (expected the DSH brand); rerun nocobase-portal-deploy.mts`)
+      for (const [asset, mime] of [['favicon.ico', 'image/'], ['logo-mark.png', 'image/png'], ['logo-mark-dark.png', 'image/png']] as const) {
+        const probe = await fetch(`${baseUrl}/dist/${portal}/${asset}`, { signal: AbortSignal.timeout(5000) }).catch(() => null)
+        const type = probe?.headers.get('content-type') ?? ''
+        if (probe === null || !probe.ok || !type.includes(mime)) failures.push(`portal ${portal} ${asset} not served as ${mime} (HTTP ${probe?.status ?? 'network error'}, "${type}"); rerun nocobase-portal-deploy.mts`)
+        else if (asset !== 'favicon.ico' && markBytes !== undefined && !Buffer.from(await probe.arrayBuffer()).equals(markBytes)) {
+          failures.push(`portal ${portal} ${asset} is not the overlaid DSH brand mark; rerun nocobase-portal-deploy.mts`)
+        }
+      }
+    }
   }
   // C3-A: the portal list pages pin default sorters, columns, and filters on
   // fields the seeded collections must actually carry — replay the exact

@@ -1,26 +1,25 @@
-import { cn } from "@/lib/utils";
+import { assetUrl, cn } from "@/lib/utils";
 
 const APP_NAME = "All in one";
-// Base-path aware (Vite injects BASE_URL = the portal base, e.g. /x/hub/).
-const LOGO = `${import.meta.env.BASE_URL}logo-mark.png`;
-const LOGO_DARK = `${import.meta.env.BASE_URL}logo-mark-dark.png`;
 
 type BrandLogoProps = {
   className?: string;
 };
 
-// Default NocoBase logo mark (light + dark variants).
+// DSH logo mark (light + dark slots share one asset: the rounded-square
+// brand mark reads on both themes). assetUrl resolves the runtime portal
+// base, so the mark loads under any mount prefix (direct or proxied).
 export function BrandLogo({ className }: BrandLogoProps) {
   return (
     <>
       <img
-        src={LOGO}
-        alt="NocoBase"
+        src={assetUrl("logo-mark.png")}
+        alt="DSH"
         className={cn("h-7 w-auto shrink-0 dark:hidden", className)}
       />
       <img
-        src={LOGO_DARK}
-        alt="NocoBase"
+        src={assetUrl("logo-mark-dark.png")}
+        alt="DSH"
         className={cn("hidden h-7 w-auto shrink-0 dark:block", className)}
       />
     </>
