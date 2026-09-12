@@ -50,12 +50,12 @@
 | hmr-live 上游缺陷豁免维持 | 不重复修复（上轮裁决，证据见 Agent Note `2026-09-11-b5-closeout-regression`） |
 | demo 增量导致行数断言漂移 | verify 断言只设下限；demo 后跑 verify 属预期增量 |
 
-## 完成后 PLAN 勾选记录（实施后填写）
+## 完成后 PLAN 勾选记录（2026-09-12 实施后填写）
 
 | 批次 | 状态 | 实录/证据路径 |
 |---|---|---|
-| C1 图谱画布 UX | 待填 | `demos/acceptance-c1/` |
-| C2 业务后台新窗口 | 待填 | `demos/acceptance-c2/` |
-| C3 NocoBase 接口修复 | 待填 | `demos/acceptance-c3/` |
-| C4 品牌白标 | 待填 | `demos/acceptance-c4/` |
-| C5 收口 | 待填 | 待填 |
+| C1 图谱画布 UX | ✅ 提交 69ebc3e9ae + 6b3757543c | `demos/acceptance-c1/`（C1 批次内产出） |
+| C2 业务后台新窗口 | ✅ 提交 8609c92263 | `examples/kb-agent/demos/acceptance-c2/`（双主题截图 + 点击动线 GIF + 单测 23 绿） |
+| C3 NocoBase 接口修复 | ✅ 提交 b428c313ab | `examples/kb-agent/demos/acceptance-c3/`（CRM/Hub 截图；6 接口 curl 200；verify 探针组全绿） |
+| C4 品牌白标 | ✅ 提交 6725728794 | `examples/kb-agent/demos/acceptance-c4/`（logo/悬浮球截图；图标 200+svg+xml；二跑幂等） |
+| C5 收口 | ✅ 两轮幂等 + 四问题复验 + 门禁 | `examples/kb-agent/demos/acceptance-c5/`；handoff 0.a 节（kg 1065 双世界一致；test:web 309 passed，唯一 failed=hmr-live 上轮豁免项） |

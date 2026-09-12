@@ -12,7 +12,7 @@ Three failure classes hit the NocoBase portals at once (2026-09-11 live diagnosi
 
 ### Repair on the seed side; never edit the vendored portal source
 
-The portal front end is an upstream fork pinned by the deploy script; the collections are ours. [`nocobase-crm-modules.mts`](../../../../../examples/kb-agent/scripts/nocobase-crm-modules.mts)'s `ensurePortalFields` (the N16-era same-shape precedent) gains the ten missing fields plus the `crm_activities.contact` belongsTo, and backfills them from semantic twins (`name` ← `full_name`, `date` ← `due_at`, `total` ← `total_amount`, `issue_date` ← `valid_until`) or deterministic distributions (lead scores 40–95 cycled, sources rotated over the portal's five-value enum, `is_current` true, `version` 1, `root_quote_id` self). The contact backfill writes the bare `contact_id` — comparing an appended association object would re-update every row every run and break the chain's idempotence contract.
+The portal front end is an upstream fork pinned by the deploy script; the collections are ours. [`nocobase-crm-modules.mts`](../../../../examples/kb-agent/scripts/nocobase-crm-modules.mts)'s `ensurePortalFields` (the N16-era same-shape precedent) gains the ten missing fields plus the `crm_activities.contact` belongsTo, and backfills them from semantic twins (`name` ← `full_name`, `date` ← `due_at`, `total` ← `total_amount`, `issue_date` ← `valid_until`) or deterministic distributions (lead scores 40–95 cycled, sources rotated over the portal's five-value enum, `is_current` true, `version` 1, `root_quote_id` self). The contact backfill writes the bare `contact_id` — comparing an appended association object would re-update every row every run and break the chain's idempotence contract.
 
 ### Field feasibility was verified against the live server before scripting
 
@@ -20,11 +20,11 @@ Plain columns plus `fields:create` were validated by hand first (`crm_contacts` 
 
 ### The hub domains get real tables with the pages' exact wire contract
 
-[`nocobase-hub-modules.mts`](../../../../../examples/kb-agent/scripts/nocobase-hub-modules.mts) declares the four domains' 16 collections with enums mirrored from the portal's constants (`TICKET_STATUSES`, `DEAL_STAGES`, `INVOICE_STATUSES`, …), `belongsToUser` associations rendering `nickname`, a `hasMany` replies pair on `hub_hd_tickets`, and a declared `createdAt` column on every portal-sorted table — `collections:create` tables in this snapshot gain only `id` plus declared fields (the `hub_kb_articles.createdAt` precedent). Seeds live in the hub fixture; user-facing refs resolve against `users.nickname` through the existing refKey map. The m2o fieldNames backfill now labels users associations `nickname` (users has no `name` column).
+[`nocobase-hub-modules.mts`](../../../../examples/kb-agent/scripts/nocobase-hub-modules.mts) declares the four domains' 16 collections with enums mirrored from the portal's constants (`TICKET_STATUSES`, `DEAL_STAGES`, `INVOICE_STATUSES`, …), `belongsToUser` associations rendering `nickname`, a `hasMany` replies pair on `hub_hd_tickets`, and a declared `createdAt` column on every portal-sorted table — `collections:create` tables in this snapshot gain only `id` plus declared fields (the `hub_kb_articles.createdAt` precedent). Seeds live in the hub fixture; user-facing refs resolve against `users.nickname` through the existing refKey map. The m2o fieldNames backfill now labels users associations `nickname` (users has no `name` column).
 
 ### verify replays the exact wire requests
 
-[`setup-nocobase.mts`](../../../../../examples/kb-agent/scripts/setup-nocobase.mts) verify replays the four pinned list requests (sort, fields, filter, appends), `crm_activities:query` with a legal measures/dimensions body, row floors for the eight primary domain tables, and one append representative per domain — a future schema drift fails the 400 here, not in the user's browser.
+[`setup-nocobase.mts`](../../../../examples/kb-agent/scripts/setup-nocobase.mts) verify replays the four pinned list requests (sort, fields, filter, appends), `crm_activities:query` with a legal measures/dimensions body, row floors for the eight primary domain tables, and one append representative per domain — a future schema drift fails the 400 here, not in the user's browser.
 
 ## Alternatives considered
 

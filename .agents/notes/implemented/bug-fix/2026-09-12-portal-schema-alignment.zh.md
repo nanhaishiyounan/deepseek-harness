@@ -12,7 +12,7 @@ NocoBase Portal 同时出现三类故障（2026-09-11 真实起服诊断）。�
 
 ### 修复落在种子侧；绝不改 vendored portal 源码
 
-Portal 前端是部署脚本钉住的上游 fork；collection 是我们自己的。[`nocobase-crm-modules.mts`](../../../../../examples/kb-agent/scripts/nocobase-crm-modules.mts) 的 `ensurePortalFields`（N16 时代同形态先例）补上十个缺失字段与 `crm_activities.contact` belongsTo，并从语义孪生列回填（`name`←`full_name`、`date`←`due_at`、`total`←`total_amount`、`issue_date`←`valid_until`）或确定性分布（线索评分 40–95 轮转、来源按 Portal 五值枚举轮换、`is_current` 真、`version` 1、`root_quote_id` 指自身）。联系人回填写裸 `contact_id`——比较 append 出来的关联对象会让每行每次重跑都重新 update，破坏链的幂等契约。
+Portal 前端是部署脚本钉住的上游 fork；collection 是我们自己的。[`nocobase-crm-modules.mts`](../../../../examples/kb-agent/scripts/nocobase-crm-modules.mts) 的 `ensurePortalFields`（N16 时代同形态先例）补上十个缺失字段与 `crm_activities.contact` belongsTo，并从语义孪生列回填（`name`←`full_name`、`date`←`due_at`、`total`←`total_amount`、`issue_date`←`valid_until`）或确定性分布（线索评分 40–95 轮转、来源按 Portal 五值枚举轮换、`is_current` 真、`version` 1、`root_quote_id` 指自身）。联系人回填写裸 `contact_id`——比较 append 出来的关联对象会让每行每次重跑都重新 update，破坏链的幂等契约。
 
 ### 字段可行性先在真实服上手工验证，再固化脚本
 
@@ -20,11 +20,11 @@ Portal 前端是部署脚本钉住的上游 fork；collection 是我们自己的
 
 ### hub 四域拿到带页面精确 wire 契约的真实表
 
-[`nocobase-hub-modules.mts`](../../../../../examples/kb-agent/scripts/nocobase-hub-modules.mts) 声明四域 16 张 collection：枚举镜像 Portal 常量（`TICKET_STATUSES`、`DEAL_STAGES`、`INVOICE_STATUSES`……）、渲染 `nickname` 的 `belongsToUser` 关联、`hub_hd_tickets` 上的 `hasMany` 回复对、以及每张被 Portal 排序的表都声明 `createdAt` 列——本快照中 `collections:create` 的表只有 `id` 加声明字段（`hub_kb_articles.createdAt` 先例）。种子落在 hub fixture；面向用户的引用经既有 refKey map 按 `users.nickname` 解析。m2o fieldNames 回填现在把 users 关联标注 `nickname`（users 无 `name` 列）。
+[`nocobase-hub-modules.mts`](../../../../examples/kb-agent/scripts/nocobase-hub-modules.mts) 声明四域 16 张 collection：枚举镜像 Portal 常量（`TICKET_STATUSES`、`DEAL_STAGES`、`INVOICE_STATUSES`……）、渲染 `nickname` 的 `belongsToUser` 关联、`hub_hd_tickets` 上的 `hasMany` 回复对、以及每张被 Portal 排序的表都声明 `createdAt` 列——本快照中 `collections:create` 的表只有 `id` 加声明字段（`hub_kb_articles.createdAt` 先例）。种子落在 hub fixture；面向用户的引用经既有 refKey map 按 `users.nickname` 解析。m2o fieldNames 回填现在把 users 关联标注 `nickname`（users 无 `name` 列）。
 
 ### verify 重放精确的 wire 请求
 
-[`setup-nocobase.mts`](../../../../../examples/kb-agent/scripts/setup-nocobase.mts) verify 重放四条钉死的列表请求（sort、fields、filter、appends）、带合法 measures/dimensions body 的 `crm_activities:query`、八张主域表的行数下限、以及每域一条 append 代表——未来的 schema 漂移在这里 400，而不是在用户浏览器里。
+[`setup-nocobase.mts`](../../../../examples/kb-agent/scripts/setup-nocobase.mts) verify 重放四条钉死的列表请求（sort、fields、filter、appends）、带合法 measures/dimensions body 的 `crm_activities:query`、八张主域表的行数下限、以及每域一条 append 代表——未来的 schema 漂移在这里 400，而不是在用户浏览器里。
 
 ## 已考虑的替代方案
 
