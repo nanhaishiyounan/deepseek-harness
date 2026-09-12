@@ -126,7 +126,16 @@ export function KgView(
   const unbuilt = canvas?.status === 'ready' && canvas.value.nodes.length === 0
 
   return (
-    <div className={css.page}>
+    // data-conversation-composer-overlay opts the view into the skeleton's
+    // self-managed-scroll channel (the trajectory precedent): the viewArea
+    // gets a bounded box and this .page becomes the page's one scroller, so
+    // the canvas flex chain resolves against real viewport height and the
+    // wheel never fights the session-level scrollBody.
+    <div
+      className={css.page}
+      data-conversation-composer-overlay=""
+      data-testid="kg-page"
+    >
       {legend !== undefined && legend.status === 'error' && (
         <ErrorStrip
           message={<>{t('error.unavailable')} — {legend.error}</>}
@@ -178,7 +187,7 @@ export function KgView(
         </div>
       </section>
 
-      <div className={css.mainSplit}>
+      <div className={css.mainSplit} data-testid="kg-main-split">
         <section className={css.canvasZone}>
           <h3 className={css.zoneTitle}>{t('canvas.title')}</h3>
           {canvas !== undefined && canvas.status === 'error' ? (

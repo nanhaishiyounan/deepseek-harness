@@ -9,7 +9,12 @@
   gap: 16px;
   min-width: 0;
   overflow-y: auto;
-  padding: 16px 20px 24px;
+  /* Under the composer-overlay channel this box is the view's one scroller:
+     the viewArea above it is height-bounded, so content taller than the
+     viewport rolls here while the wheel over the sigma canvas zooms. The
+     bottom padding clears the floating composer (its live height rides
+     --dsh-composer-height from ConversationRoot's seat observer). */
+  padding: 16px 20px calc(var(--dsh-composer-height, 152px) + 24px);
   /* Scrolls over module-platform surfaces: the elevated surface pair. */
   --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2);
   --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2);
@@ -115,7 +120,24 @@
   display: flex;
   flex: 1;
   gap: 16px;
-  min-height: 0;
+  /* The split declares its own viewport-proportional floor instead of
+     racing the composer clearance for leftover flex space: a tall composer
+     seat (long drafts stack above 600px) can otherwise squeeze the canvas
+     to its 380px floor on every wide viewport. Overflow rolls the page. */
+  min-height: min(62vh, 640px);
+}
+
+/* Narrow viewports stack the side zone under the canvas (the 900px cut the
+   session-header kg button already uses in entry.module.css), so the canvas
+   keeps a usable width instead of being squeezed beside the legend. */
+@media (max-width: 900px) {
+  .mainSplit {
+    flex-direction: column;
+  }
+
+  .sideZone {
+    min-width: 0;
+  }
 }
 
 .canvasZone {
@@ -151,11 +173,33 @@
 }
 
 .canvasViewport {
+  position: relative;
   flex: 1;
-  min-height: 300px;
+  /* The floor keeps short viewports (flex fill ≈ composer clearance +
+     hero/toolbar) a usable canvas; the overflow rolls the page scroller. */
+  min-height: 380px;
+  /* Caps the canvas on tall/narrow viewports so a full-height flex fill
+     cannot push the rest of the page under the floating composer; the
+     100% arm keeps the wide-screen fill intact. */
+  max-height: min(62vh, 100%);
   border: 1px solid var(--dsw-alias-border-l1);
   border-radius: 10px;
   background: var(--dsw-alias-bg-module-platform);
+}
+
+/* Zoom controls ride the viewport's top-right corner over the WebGL canvas. */
+.canvasControls {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  display: flex;
+  gap: 4px;
+  padding: 2px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 8px;
+  background: var(--dsw-alias-bg-layer-1);
+  box-shadow: var(--dsw-shadow-lv1-blur);
 }
 
 .canvasHint {

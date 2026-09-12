@@ -30,6 +30,9 @@ export type KgKey =
   | 'canvas.degradedTitle'
   | 'canvas.degradedHint'
   | 'canvas.expandHint'
+  | 'canvas.zoomIn'
+  | 'canvas.zoomOut'
+  | 'canvas.reset'
   | 'legend.title'
   | 'legend.all'
   | 'legend.groupOntology'
@@ -76,6 +79,9 @@ export const zh: Record<KgKey, string> = {
   'canvas.degradedTitle': '当前环境不支持图形渲染',
   'canvas.degradedHint': '已切换为关系清单视图，双击展开与详情面板仍然可用',
   'canvas.expandHint': '双击节点展开邻居，单击查看详情',
+  'canvas.zoomIn': '放大',
+  'canvas.zoomOut': '缩小',
+  'canvas.reset': '重置视图（适配全图）',
   'legend.title': '类型图例',
   'legend.all': '全部类型',
   'legend.groupOntology': '通用类型',
@@ -123,6 +129,9 @@ export const en: Record<KgKey, string> = {
   'canvas.degradedTitle': 'Graphics rendering unavailable here',
   'canvas.degradedHint': 'Switched to the relation list view; double-click expand and the details panel still work',
   'canvas.expandHint': 'Double-click a node to expand neighbors; click for details',
+  'canvas.zoomIn': 'Zoom in',
+  'canvas.zoomOut': 'Zoom out',
+  'canvas.reset': 'Reset view (fit graph)',
   'legend.title': 'Type legend',
   'legend.all': 'All types',
   'legend.groupOntology': 'General types',

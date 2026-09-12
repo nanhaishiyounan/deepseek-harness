@@ -4,7 +4,12 @@
  * overlay pattern), opening the 图谱 tab must draw existing graph data by
  * itself — a canvas (or the no-WebGL relation list) with nodes, never the
  * "legend renders but zero entities" empty canvas. The gateway-face stats
- * assertion pins the same guarantee server-side.
+ * assertion pins the same guarantee server-side. The geometry cases pin the
+ * composer-overlay scroll chain: the canvas fills the viewport-bounded
+ * viewArea (wheel zooms, the view's own .page never scrolls under it),
+ * the canvas follows sidebar drags through its ResizeObserver, narrow
+ * viewports stack the split without horizontal overflow, and the zoom
+ * control cluster stays clickable.
  * Run: pnpm run test:web -- kg-graph-page
  */
 
@@ -117,22 +122,105 @@ describe('kg graph page (in-memory seeded store, Chinese UI)', () => {
   })
 
   it('draws the default view on tab open — no manual seed typing', { timeout: 120_000 }, async () => {
-    // Open the seeded session from the sidebar (ungrouped bucket: group row
-    // first, session row second — the seeded-history pattern).
-    const groupRow = page.locator('[role="treeitem"]').first()
-    await groupRow.waitFor({ timeout: 30_000 })
-    await groupRow.click()
-    await page.locator('[role="treeitem"]').nth(1).click()
-    await page.getByRole('tab', { name: '图谱', exact: true }).waitFor({ timeout: 30_000 })
-    await page.getByRole('tab', { name: '图谱', exact: true }).click()
-    // The default view walks on open: a rendered canvas implies nodes > 0
-    // (the unbuilt branch renders no canvas), and the no-WebGL fallback is
-    // the same-semantics relation list.
-    await page.locator('canvas').or(page.getByTestId('kg-canvas-list')).first().waitFor({ timeout: 15_000 })
+    await openKgTab(page)
     await expect.poll(
       () => page.getByText('画布还是空的').count(),
       { timeout: 15_000 },
     ).toBe(0)
     await page.getByText('类型图例').waitFor({ timeout: 15_000 })
   })
+
+  it('fills the viewport-bounded view area and keeps the wheel over the canvas zoom-only', { timeout: 120_000 }, async () => {
+    await openKgTab(page)
+    const viewport = page.getByTestId('kg-canvas-viewport')
+    await viewport.waitFor()
+    // Wide (1680×1000): the canvas resolves against the real viewport height,
+    // not the old min-height floor.
+    const wide = await viewport.boundingBox()
+    expect(wide!.height).toBeGreaterThanOrEqual(500)
+    // Mid (1280×800): the composer clearance eats most of the flex fill, so
+    // the canvas rides its 380px floor — the flex chain answered (not the
+    // old dead 300px), and the overflow rolls the page scroller.
+    await page.setViewportSize({ width: 1280, height: 800 })
+    const mid = await viewport.boundingBox()
+    expect(mid!.height).toBeGreaterThanOrEqual(360)
+    // Wheel over the canvas is sigma's zoom: the view's own .page scroller
+    // and the session-level scroll body both stay put.
+    const box = (await viewport.boundingBox())!
+    const kgPage = page.getByTestId('kg-page')
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+    await page.mouse.wheel(0, -240)
+    await page.waitForTimeout(300)
+    expect(await kgPage.evaluate(el => el.scrollTop)).toBe(0)
+    expect(await page.locator('[data-conversation-scroll]').evaluate(el => el.scrollTop)).toBe(0)
+    // Wheel over the side panel (outside the canvas) scrolls .page, and the
+    // session-level scroll body still never moves.
+    const legend = page.getByText('类型图例')
+    const legendBox = (await legend.boundingBox())!
+    await page.mouse.move(legendBox.x + legendBox.width / 2, legendBox.y + 20)
+    await page.mouse.wheel(0, 240)
+    await expect.poll(() => kgPage.evaluate(el => el.scrollTop), { timeout: 10_000 }).toBeGreaterThan(0)
+    expect(await page.locator('[data-conversation-scroll]').evaluate(el => el.scrollTop)).toBe(0)
+  })
+
+  it('follows sidebar drags with a canvas resize (container resize, not window)', { timeout: 120_000 }, async () => {
+    await openKgTab(page)
+    const canvas = page.getByTestId('kg-canvas-viewport').locator('canvas').first()
+    await canvas.waitFor()
+    const canvasWidth = () => canvas.evaluate(el => (el as HTMLCanvasElement).width)
+    const before = await canvasWidth()
+    // Drag the sidebar handle wider; no window resize fires, so only the
+    // canvas's own ResizeObserver can carry the new geometry to sigma.
+    const handle = page.locator('[data-side="sidebar"]')
+    const handleBox = (await handle.boundingBox())!
+    await page.mouse.move(handleBox.x + handleBox.width / 2, handleBox.y + 40)
+    await page.mouse.down()
+    await page.mouse.move(handleBox.x + handleBox.width / 2 + 120, handleBox.y + 40, { steps: 8 })
+    await page.mouse.up()
+    await expect.poll(canvasWidth, { timeout: 10_000 }).toBeLessThan(before)
+  })
+
+  it('stacks the split on narrow viewports without horizontal overflow', { timeout: 120_000 }, async () => {
+    // Open wide first (the narrow sidebar auto-collapse hides the session
+    // tree), then shrink: the media query restacks the live layout. The
+    // frame's ResizeObserver settles the auto-collapsed sidebar over a
+    // frame, so wait for the collapsed attribute before pinning geometry.
+    await openKgTab(page)
+    await page.setViewportSize({ width: 375, height: 812 })
+    await page.locator('[data-sidebar-collapsed="true"]').first().waitFor({ timeout: 10_000 })
+    const flex = await page.getByTestId('kg-main-split').evaluate(el => getComputedStyle(el).flexDirection)
+    expect(flex).toBe('column')
+    const overflow = await page.evaluate(() =>
+      document.documentElement.scrollWidth - document.documentElement.clientWidth)
+    expect(overflow).toBeLessThanOrEqual(0)
+    // The collapsed rail plus page gutters leave ~279px of canvas; the poll
+    // rides out the frame's column transition before pinning the width.
+    await expect
+      .poll(async () => (await page.getByTestId('kg-canvas-viewport').boundingBox())?.width, { timeout: 10_000 })
+      .toBeGreaterThan(250)
+  })
+
+  it('keeps the zoom control cluster clickable', { timeout: 120_000 }, async () => {
+    await openKgTab(page)
+    await page.getByRole('button', { name: '放大' }).click()
+    await page.getByRole('button', { name: '缩小' }).click()
+    await page.getByRole('button', { name: '重置视图（适配全图）' }).click()
+    // The tripwire in afterEach owns the zero-console-error assertion.
+  })
 })
+
+/** Open the seeded session's 图谱 tab and wait for a drawn canvas or list. */
+async function openKgTab(target: Page): Promise<void> {
+  // Open the seeded session from the sidebar (ungrouped bucket: group row
+  // first, session row second — the seeded-history pattern).
+  const groupRow = target.locator('[role="treeitem"]').first()
+  await groupRow.waitFor({ timeout: 30_000 })
+  await groupRow.click()
+  await target.locator('[role="treeitem"]').nth(1).click()
+  await target.getByRole('tab', { name: '图谱', exact: true }).waitFor({ timeout: 30_000 })
+  await target.getByRole('tab', { name: '图谱', exact: true }).click()
+  // The default view walks on open: a rendered canvas implies nodes > 0
+  // (the unbuilt branch renders no canvas), and the no-WebGL fallback is
+  // the same-semantics relation list.
+  await target.locator('canvas').or(target.getByTestId('kg-canvas-list')).first().waitFor({ timeout: 15_000 })
+}
