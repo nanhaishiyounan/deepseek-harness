@@ -101,6 +101,7 @@ export const NOCOBASE_PORTAL_PREFIXES = {
   hub: '/nocobase/dist/hub',
 } as const
 
+/** The deployable portal names (keys of {@link NOCOBASE_PORTAL_PREFIXES}). */
 export type NocobasePortalName = keyof typeof NOCOBASE_PORTAL_PREFIXES
 
 /**
@@ -118,6 +119,9 @@ export interface NocobaseProxyOptions {
   spaFallbackIndex?: string
 }
 
+/** Handler shape every proxy factory below returns. */
+type ProxyHandler = (req: IncomingMessage, res: ServerResponse) => void
+
 /**
  * Create the portal deep-link handler for one deployed portal: the plain
  * proxy behavior plus the SPA fallback to the portal entry. The gateway's
@@ -128,9 +132,6 @@ export interface NocobaseProxyOptions {
  * @param portal - the portal name (a key of {@link NOCOBASE_PORTAL_PREFIXES}).
  * @returns the WebRoute handler.
  */
-/** Handler shape every proxy factory below returns. */
-type ProxyHandler = (req: IncomingMessage, res: ServerResponse) => void
-
 export function createNocobasePortalHandler(origin: string, portal: NocobasePortalName): ProxyHandler {
   return createNocobaseProxyHandler(origin, { spaFallbackIndex: `/dist/${portal}/` })
 }

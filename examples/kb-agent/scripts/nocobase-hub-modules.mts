@@ -400,17 +400,19 @@ const MENU: ReadonlyArray<{ group: string | null; groupIcon?: string; pages: Rea
   },
 ]
 
-const SEEDS: ReadonlyArray<{ fixtureKey: string; collection: string; uniqueKey: string; refs: Record<string, string> }> = [
-  { fixtureKey: 'projects', collection: 'hub_pj_projects', uniqueKey: 'no', refs: { owner: 'users' } },
-  { fixtureKey: 'tasks', collection: 'hub_pj_tasks', uniqueKey: 'title', refs: { project: 'hub_pj_projects', assignee: 'users' } },
+const SEEDS: ReadonlyArray<{ fixtureKey: string; collection: string; uniqueKey: string; refs: Record<string, string>; directFk?: Record<string, string> }> = [
+  { fixtureKey: 'projects', collection: 'hub_pj_projects', uniqueKey: 'no', refs: { owner: 'users' }, directFk: { owner: 'hub_pj_project_owner_id' } },
+  { fixtureKey: 'tasks', collection: 'hub_pj_tasks', uniqueKey: 'title', refs: { project: 'hub_pj_projects', assignee: 'users' }, directFk: { assignee: 'hub_pj_task_assignee_id' } },
   { fixtureKey: 'milestones', collection: 'hub_pj_milestones', uniqueKey: 'name', refs: { project: 'hub_pj_projects' } },
   { fixtureKey: 'tickets', collection: 'hub_tk_tickets', uniqueKey: 'title', refs: {} },
-  { fixtureKey: 'articles', collection: 'hub_kb_articles', uniqueKey: 'title', refs: { author: 'users', category: 'hub_kb_categories' } },
+  // kb_categories seeds before articles: articles reference categories by
+  // name on fresh databases (existing ones reach the same rows later).
+  { fixtureKey: 'kb_categories', collection: 'hub_kb_categories', uniqueKey: 'name', refs: {} },
+  { fixtureKey: 'articles', collection: 'hub_kb_articles', uniqueKey: 'title', refs: { author: 'users', category: 'hub_kb_categories' }, directFk: { category: 'category_id' } },
   { fixtureKey: 'vendors', collection: 'hub_as_vendors', uniqueKey: 'name', refs: {} },
   { fixtureKey: 'assets', collection: 'hub_as_assets', uniqueKey: 'no', refs: { vendor: 'hub_as_vendors' } },
   { fixtureKey: 'assignments', collection: 'hub_as_assignments', uniqueKey: 'note', refs: { asset: 'hub_as_assets', assignee: 'users' } },
   { fixtureKey: 'maintenance', collection: 'hub_as_maintenance', uniqueKey: 'scheduled_at', refs: { asset: 'hub_as_assets', vendor: 'hub_as_vendors' } },
-  { fixtureKey: 'kb_categories', collection: 'hub_kb_categories', uniqueKey: 'name', refs: {} },
   { fixtureKey: 'pj_checklist', collection: 'hub_pj_checklist', uniqueKey: 'title', refs: { task: 'hub_pj_tasks' } },
   { fixtureKey: 'article_feedback', collection: 'hub_kb_article_feedback', uniqueKey: 'comment', refs: { author: 'users', article: 'hub_kb_articles' } },
   { fixtureKey: 'po_suppliers', collection: 'hub_po_suppliers', uniqueKey: 'name', refs: {} },
@@ -587,6 +589,13 @@ async function seed(token: string, fixtures: Record<string, Array<Record<string,
         const id = refCache.get(target)!.get(String(value))
         if (id === undefined) throw new Error(`seed ${field}: no ${target} row named "${String(value)}"`)
         payload[field] = { id }
+        // The migrated associations (assignee/owner/category) drop the
+        // object-form association payload on fresh databases where the
+        // belongsTo was declared at table creation — the bare foreign-key
+        // column writes on both build paths (the portal form submits the
+        // same scalar shape; D2 verified it end-to-end).
+        const direct = spec.directFk?.[field]
+        if (direct !== undefined) payload[direct] = id
       }
       await dataOf(token, 'POST', `/api/${spec.collection}:create`, payload)
       added += 1
@@ -980,7 +989,10 @@ async function ensurePortalFields(token: string, usersByNickname: Map<string, nu
   const userId = (name: unknown): number | null => (name === null || name === undefined ? null : usersByNickname.get(String(name)) ?? null)
   const hireDates = ['2021-03-01', '2022-07-15', '2020-01-06', '2023-09-11', '2019-05-20', '2024-02-26'] as const
   const backfill: Array<{ collection: string; assign: (row: any, index: number) => Array<[string, unknown]> }> = [
-    { collection: 'hub_pj_tasks', assign: row => [['due_date', row.due_at ?? null], ['hub_pj_task_project_id', row.project_id ?? null], ['hub_pj_task_assignee_id', userId(row.assignee_text)]] },
+    // Migrated foreign keys keep an already-set value (the fresh-database
+    // seed writes them directly; only a text backup with no live FK falls
+    // through to the name resolution).
+    { collection: 'hub_pj_tasks', assign: row => [['due_date', row.due_at ?? null], ['hub_pj_task_project_id', row.project_id ?? null], ['hub_pj_task_assignee_id', row.hub_pj_task_assignee_id ?? userId(row.assignee_text)]] },
     { collection: 'hub_hr_leave_requests', assign: row => [['start_date', row.start_at ?? null], ['end_date', row.end_at ?? null], ['approved_at', row.status === 'approved' ? row.start_at ?? null : null], ['approver_id', row.status === 'approved' && superAdmin !== undefined ? superAdmin : null]] },
     {
       collection: 'hub_kb_articles', assign: (row, index) => [
@@ -988,11 +1000,11 @@ async function ensurePortalFields(token: string, usersByNickname: Map<string, nu
         ['updatedAt', row.createdAt ?? '2026-09-01'],
         ['views', 10 + (index * 37) % 190],
         ['author_id', superAdmin ?? null],
-        ['category_id', categoryByKey.get(String(row.category_text)) ?? null],
+        ['category_id', row.category_id ?? categoryByKey.get(String(row.category_text)) ?? null],
       ],
     },
-    { collection: 'hub_pj_projects', assign: row => [['due_date', row.planned_end_date ?? null], ['hub_pj_project_owner_id', userId(row.owner_text)]] },
-    { collection: 'hub_as_assignments', assign: row => [['assigned_date', row.assigned_at ?? null], ['returned_date', row.returned_at ?? null], ['assignee_id', userId(row.assignee_text)]] },
+    { collection: 'hub_pj_projects', assign: row => [['due_date', row.planned_end_date ?? null], ['hub_pj_project_owner_id', row.hub_pj_project_owner_id ?? userId(row.owner_text)]] },
+    { collection: 'hub_as_assignments', assign: row => [['assigned_date', row.assigned_at ?? null], ['returned_date', row.returned_at ?? null], ['assignee_id', row.assignee_id ?? userId(row.assignee_text)]] },
     { collection: 'hub_as_maintenance', assign: row => [['scheduled_date', row.scheduled_at ?? null], ['completed_date', row.status === 'done' ? row.scheduled_at ?? null : null], ['assetId', row.asset_id ?? null]] },
     { collection: 'hub_hr_employees', assign: (row, index) => [['job_title', row.title ?? null], ['hire_date', hireDates[index % hireDates.length]], ['updatedAt', '2026-07-01']] },
     { collection: 'hub_hr_departments', assign: () => [['updatedAt', '2026-07-01']] },

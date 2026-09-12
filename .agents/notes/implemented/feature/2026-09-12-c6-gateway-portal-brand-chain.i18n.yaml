@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-09-12-c6-gateway-portal-brand-chain.md
-2026-09-12-c6-gateway-portal-brand-chain.md: 3e0296417cc99ed4b21c963f51e36aa7fbab13a3
-2026-09-12-c6-gateway-portal-brand-chain.zh.md: 2bf8e441cba4928287f8277b9aa3bdadb79ebf7a
+2026-09-12-c6-gateway-portal-brand-chain.md: 5b436a08cdc84a8b36015e7b1a9e19a772c4f009
+2026-09-12-c6-gateway-portal-brand-chain.zh.md: 22ff5a5a32f7513793ee99a463a0660d41a94b31
