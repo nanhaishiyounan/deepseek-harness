@@ -3,8 +3,9 @@
 // roster, empty guidance, error retry), the collection switcher's row load,
 // the entity card stream with its conversation handoffs (ask/edit/new —
 // draft prefill + chat switch, never a form), the auxiliary table view
-// toggle with the hasNext footer, and the embed entry's iframe reveal. Plus
-// the presentation helpers (label priority, preview cut).
+// toggle with the hasNext footer, and the external entry card's new-window
+// link contract. Plus the presentation helpers (label priority, preview
+// cut).
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -135,12 +136,14 @@ describe('BizView cards and handoffs', () => {
     expect(screen.getByRole('button', { name: zh['table.showAsCards'] })).toBeTruthy()
   })
 
-  it('reveals the embed iframe on demand (the /nocobase proxy)', () => {
+  it('opens the business backend through a new-window link card (no iframe)', () => {
     mountReady()
     expect(document.querySelector('iframe')).toBeNull()
-    fireEvent.click(screen.getByRole('button', { name: zh['embed.open'] }))
-    const frame = document.querySelector('iframe')
-    expect(frame?.getAttribute('src')).toBe('/nocobase/')
+    const link = screen.getByRole('link', { name: new RegExp(zh['embed.open'], 'u') })
+    expect(link.getAttribute('href')).toBe('/nocobase/')
+    expect(link.getAttribute('target')).toBe('_blank')
+    expect(link.getAttribute('rel')).toContain('noopener')
+    expect(link.getAttribute('rel')).toContain('noreferrer')
   })
 })
 

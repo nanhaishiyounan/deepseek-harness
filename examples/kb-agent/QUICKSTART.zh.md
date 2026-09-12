@@ -126,7 +126,7 @@ pnpm exec vitest run --config vitest.e2e.config.ts examples/kb-agent/tests/exper
 
 订单的单一事实源在 NocoBase 2.x（DSH 不建平行订单表）。`scripts/setup-nocobase.mts` 一条命令把仓内 NocoBase 快照（`platform/nocobase`，隔离式上游副本——升级即重新快照，修改须登记其 MANIFEST）从零带到可用：依赖安装（yarn，首次约 15 分钟）、完整 UI 客户端产物构建（首次约 20 分钟，产物保留、之后秒级启动；`NOCOBASE_FORCE_BUILD=1` 强制重建）、本地 postgres 引导、后台启动 dev-server、应用初始化、五个 collections（`experts` / `expert_services` / `datasets` / `customs_export` / `orders`——orders 带 `deliverable` 附件字段）、张会长数据集播种、root 角色 API key，以及订单审批 workflow（collection 触发 → manual 审批 → 通过分支 request 回调 DSH `orders.fulfill` / 驳回分支回写 failed）。随后重放 `scripts/setup-dsh-data.mts`（DSH 侧数据面：connector-files 目录与示例资产、专家名册、湖仓三表、市场目录、本体知识图谱构建、KB 语料入库——见下文"图谱页与业务管理页"），最后 verify 断言含 `kg_nodes>0` 与专家名册行数下限。凭据写入仓库根 `.env`（`NOCOBASE_BASE_URL` / `NOCOBASE_API_KEY`），组合重启后 connector 与订单域即走真实后台。
 
-浏览器打开 http://127.0.0.1:13000 即完整 NocoBase 业务系统（登录 → 数据管理、workflow、设置全部可用），与 DSH 工作台互为双入口——业务管理页「高级配置」的 iframe 内嵌同一后台，首次打开需登录。初始管理员账号 `admin@nocobase.com` / `admin123`（由 install 时 `NOCOBASE_ROOT_*` 创建，可覆盖）。同一端口同时伺服 UI 与 `/api/*`，REST 轨道（connector、订单域、demo）不经过额外代理层。
+浏览器打开 http://127.0.0.1:13000 即完整 NocoBase 业务系统（登录 → 数据管理、workflow、设置全部可用），与 DSH 工作台互为双入口——业务管理页「高级配置」的外链入口卡片在新浏览器窗口打开同一后台（经 DSH 网关 `/nocobase` 同源反代，登录态共享），首次打开需登录。初始管理员账号 `admin@nocobase.com` / `admin123`（由 install 时 `NOCOBASE_ROOT_*` 创建，可覆盖）。同一端口同时伺服 UI 与 `/api/*`，REST 轨道（connector、订单域、demo）不经过额外代理层。
 
 功能导览（登录后即可走遍，2026-09-09 实配）：
 
@@ -240,7 +240,7 @@ pnpm exec vitest run --config vitest.e2e.config.ts examples/kb-agent/tests/marke
 页签环再添两页：**图谱**（`kg`）与**业务管理**（`business`），侧栏同款入口常驻。
 
 - **图谱**：短语框把子图查询包装成自然语言（「宏发食品的供货链」「含棕榈油的商品」，其余文本按实体名直接游走）→ 实体搜索带别名解析 → sigma.js 画布（双击节点展开一跳邻居、单击选中、滚轮缩放；节点颜色按本体类型稳定分配）→ 类型图例点选过滤画布 → 详情面板（类型/关联数/业务键）与「问此实体」预填对话。只读：写图谱归 kg-build 管线。数据来自 apiproxy 的 `kg.*` 域（`cordis.patch.yml` 已开 `kgEnabled`/`kgTenant`）；画布渲染栈（sigma/graphology/force-atlas2）动态加载不进主包，无 WebGL 环境自动降级为同语义关系清单。
-- **业务管理**：对象切换器（`nocobase.listMeta` 动态清单，隐藏表不露）→ 实体卡流（主标签 + 三对字段预览，「问此记录」「编辑（对话）」与对象级「新建（对话）」全部预填对话，页面零表单）→ 辅助表格视图（hasNext 翻页）→ **高级配置**：`/nocobase` 反代把业务后台同源嵌进页面（低频管理：页面编辑器/角色权限细配；日常读写走对话）。数据来自 V2 的 `nocobase.listMeta/list` 域。
+- **业务管理**：对象切换器（`nocobase.listMeta` 动态清单，隐藏表不露）→ 实体卡流（主标签 + 三对字段预览，「问此记录」「编辑（对话）」与对象级「新建（对话）」全部预填对话，页面零表单）→ 辅助表格视图（hasNext 翻页）→ **高级配置**：外链入口卡片经 `/nocobase` 同源反代在新浏览器窗口打开业务后台（低频管理：页面编辑器/角色权限细配；日常读写走对话）。数据来自 V2 的 `nocobase.listMeta/list` 域。
 
 图谱数据随 `setup-nocobase.mts`（all 链）内置产出：链尾重放 `scripts/setup-dsh-data.mts`，其中 kg-build 管线综合三源建图（NocoBase 业务表结构化映射 + 湖仓表结构 + KB 语料闭集 LLM 抽取——无 `MINIMAX_API_KEY` 时语料腿跳过、确定性腿照跑），删除 `workspace/kg-*.sqlite` 后单跑 all 即重建；图谱页打开即自动加载默认子图。增量重建（数据变化后刷新图）仍可单独跑：
 

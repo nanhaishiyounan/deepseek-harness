@@ -3,9 +3,10 @@
  * roster), the ask bar (a conversation handoff, not a query box), the
  * conversation-first entity card stream with per-record "edit (in chat)" and
  * collection-level "new (in chat)" handoffs, the auxiliary table view
- * (simplePaginate semantics), and the NocoBase embed entry (the low-frequency
- * admin aid over the /nocobase proxy). No forms: every write routes through
- * the conversation's nb_* confirmation flow.
+ * (simplePaginate semantics), and the NocoBase external entry (the
+ * low-frequency admin aid opened in a new browser window over the /nocobase
+ * proxy). No forms: every write routes through the conversation's nb_
+ * confirmation flow.
  * @module @deepseek-ai/dsh-client-ui-business/client/BizView
  */
 
@@ -63,7 +64,6 @@ export function BizView(
   const state = useBusiness(snapshot => snapshot)
   const [ask, setAsk] = useState('')
   const [tableView, setTableView] = useState(false)
-  const [embedOpen, setEmbedOpen] = useState(false)
 
   useEffect(() => {
     if (state.collections === undefined) refresh()
@@ -212,14 +212,14 @@ export function BizView(
       )}
 
       <section className={css.embedZone}>
-        <div className={css.zoneHead}>
-          <h3 className={css.zoneTitle}>{t('embed.title')}</h3>
-          <Button variant="ghost" size="sm" onClick={() => { setEmbedOpen(!embedOpen) }}>{t('embed.open')}</Button>
-        </div>
-        <p className={css.embedHint}>{t('embed.openHint')}</p>
-        {embedOpen && (
-          <iframe className={css.embedFrame} src="/nocobase/" title={t('embed.frameTitle')} />
-        )}
+        <a className={css.embedCard} href="/nocobase/" target="_blank" rel="noopener noreferrer">
+          <span className={css.zoneTitle}>{t('embed.title')}</span>
+          <p className={css.embedHint}>{t('embed.openHint')}</p>
+          <span className={css.embedCardMeta}>
+            <code className={css.embedUrl}>/nocobase/</code>
+            <span className={css.embedOpen}>{t('embed.open')}</span>
+          </span>
+        </a>
       </section>
     </div>
   )

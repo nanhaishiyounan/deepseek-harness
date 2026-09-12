@@ -1,13 +1,14 @@
 /**
- * The optional `/nocobase` reverse proxy: a debugging and iframe fallback
- * that forwards everything under the prefix to the deployment's NocoBase
- * origin (default `http://127.0.0.1:13000`), stripping the framing headers
- * (`x-frame-options`, CSP `frame-ancestors`) so the business page's embed
- * entry can render the admin UI same-origin. HTML entry responses are
- * rewritten onto the proxy prefix — the built index.html references every
- * asset and runtime base path from the origin root, which would 404 inside
- * the iframe's origin. Off unless `nocobaseProxyOrigin` is set — the
- * unauthenticated gateway must not proxy a business backend by default.
+ * The optional `/nocobase` reverse proxy: a debugging and same-origin entry
+ * carrier that forwards everything under the prefix to the deployment's
+ * NocoBase origin (default `http://127.0.0.1:13000`), stripping the framing
+ * headers (`x-frame-options`, CSP `frame-ancestors`) so the business page's
+ * external entry can open the admin UI on the gateway's domain (login state
+ * included). HTML entry responses are rewritten onto the proxy prefix — the
+ * built index.html references every asset and runtime base path from the
+ * origin root, which would 404 under the proxy prefix. Off unless
+ * `nocobaseProxyOrigin` is set — the unauthenticated gateway must not proxy
+ * a business backend by default.
  * @module @deepseek-ai/dsh-host-webserver/nocobase-proxy
  */
 
@@ -50,8 +51,8 @@ export function rewriteNocobaseHtml(html: string, prefix: string): string {
 /**
  * Rewrite the plugin manifest (`/api/pm:listEnabled`) onto the proxy prefix:
  * the client's module loader fetches every plugin bundle at the manifest's
- * root-absolute `url`/`clientV2Url`, which would 404 inside the iframe's
- * origin. Structural, not a string splice — a body that is not the expected
+ * root-absolute `url`/`clientV2Url`, which would 404 under the proxy
+ * prefix. Structural, not a string splice — a body that is not the expected
  * JSON `{data: [...]}` shape passes through unchanged.
  * @param json - the upstream manifest body.
  * @param prefix - the proxy prefix without a trailing slash.

@@ -2,10 +2,10 @@
  * Business-page surface plugin, browser half: the sidebar first-class entry
  * and the `business` conversation view tab (the collection switcher over
  * `nocobase.listMeta`, the conversation-first entity card stream, the
- * auxiliary table view, and the NocoBase embed entry over the /nocobase
- * proxy). Writes never ride this surface: edits and creates hand off to the
- * conversation, where the nb_* tools carry the in-conversation confirmation
- * contract.
+ * auxiliary table view, and the NocoBase external entry — a new-window link
+ * card over the /nocobase proxy). Writes never ride this surface: edits and
+ * creates hand off to the conversation, where the nb_* tools carry the
+ * in-conversation confirmation contract.
  */
 import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
 // Type-only: pulls the locale plugin's Context merge (ctx.locale).

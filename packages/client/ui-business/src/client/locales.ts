@@ -35,7 +35,6 @@ export type BusinessKey =
   | 'embed.title'
   | 'embed.open'
   | 'embed.openHint'
-  | 'embed.frameTitle'
   | 'error.unavailable'
   | 'error.retry'
 
@@ -66,10 +65,9 @@ export const zh: Record<BusinessKey, string> = {
   'table.showAsCards': '卡片视图',
   'table.more': '加载更多',
   'table.end': '已全部加载',
-  'embed.title': '高级配置',
-  'embed.open': '在业务后台中打开',
-  'embed.openHint': '低频管理辅助：页面编辑器与角色权限细配在业务后台完成，日常读写走对话；打开后需登录（初始管理员账号见 QUICKSTART「NocoBase 业务后台」）',
-  'embed.frameTitle': '业务后台（嵌入）',
+  'embed.title': '高级配置（业务后台）',
+  'embed.open': '在新窗口打开业务后台',
+  'embed.openHint': '低频管理辅助：页面编辑器与角色权限细配在业务后台完成，日常读写走对话；将在新浏览器窗口打开（同源入口，无需额外地址），打开后需登录（初始管理员账号见 QUICKSTART「NocoBase 业务后台」）',
   'error.unavailable': '业务管理页暂不可用',
   'error.retry': '重试',
 }
@@ -101,10 +99,9 @@ export const en: Record<BusinessKey, string> = {
   'table.showAsCards': 'Card view',
   'table.more': 'Load more',
   'table.end': 'All loaded',
-  'embed.title': 'Advanced configuration',
-  'embed.open': 'Open in the business backend',
-  'embed.openHint': 'Low-frequency admin aid: the page editor and fine-grained role ACL live in the backend; daily reads and writes stay in chat — sign in after opening (the initial admin account is in the QUICKSTART "NocoBase 业务后台" section)',
-  'embed.frameTitle': 'Business backend (embedded)',
+  'embed.title': 'Advanced configuration (business backend)',
+  'embed.open': 'Open the business backend in a new window',
+  'embed.openHint': 'Low-frequency admin aid: the page editor and fine-grained role ACL live in the backend; daily reads and writes stay in chat — opens in a new browser window (same-origin entry, no extra address needed), sign in after opening (the initial admin account is in the QUICKSTART "NocoBase 业务后台" section)',
   'error.unavailable': 'The business page is unavailable',
   'error.retry': 'Retry',
 }

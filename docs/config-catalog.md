@@ -1013,9 +1013,10 @@ export interface Config {
   port: number
   /**
    * NocoBase origin (scheme + host + port) the `/nocobase` prefix proxies
-   * to, with framing guards stripped so the business page's embed entry can
-   * render the admin UI same-origin. Absent means no proxy route — the
-   * unauthenticated gateway must not proxy a business backend by default.
+   * to, same-origin, so the business page's external entry can open the
+   * admin UI in a new browser window on the gateway's domain (login state
+   * included). Absent means no proxy route — the unauthenticated gateway
+   * must not proxy a business backend by default.
    */
   nocobaseProxyOrigin?: string
 }
