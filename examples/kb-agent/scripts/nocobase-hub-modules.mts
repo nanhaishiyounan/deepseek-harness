@@ -63,25 +63,36 @@ const TICKET_STATUS = options([
   ['waiting_internal', '待内部', 'purple'], ['in_progress', '处理中', 'cyan'], ['resolved', '已解决', 'green'], ['closed', '已关闭', 'default'], ['reopened', '重开', 'red'],
 ])
 
-/** The sixteen admin-facing hub collections, resource names aligned with demo-portal-hub. */
+/**
+ * The sixteen admin-facing hub collections, resource names aligned with
+ * demo-portal-hub. D1: assignee/owner are declared as the belongsTo
+ * associations the portal filters and appends (foreign keys take the
+ * portal's derived contract names, e.g. hub_pj_task_assignee_id);
+ * existing installs migrate to this shape (migrateTextFieldToAssociation).
+ */
 const HUB_CORE_COLLECTIONS: ReadonlyArray<{ name: string; title: string; fields: object[] }> = [
   {
     name: 'hub_pj_projects', title: '项目', fields: [
-      input('name', '项目名称'), input('no', '项目编号'), input('customer', '客户'), input('owner', '负责人'),
+      input('name', '项目名称'), input('no', '项目编号'), input('customer', '客户'),
+      belongsToUser('owner', '负责人', 'hub_pj_project_owner_id'),
       select('status', '状态', PROJECT_STATUS), integer('progress', '进度 %'), select('priority', '优先级', PRIORITY), date('planned_end_date', '计划完成'),
+      date('start_date', '开始日期'), date('due_date', '到期日'),
     ],
   },
   {
     name: 'hub_pj_tasks', title: '任务', fields: [
-      input('title', '任务标题'), belongsTo('project', '所属项目', 'hub_pj_projects', 'project_id'), input('assignee', '负责人'),
+      input('title', '任务标题'), belongsTo('project', '所属项目', 'hub_pj_projects', 'project_id'),
+      belongsToUser('assignee', '负责人', 'hub_pj_task_assignee_id'),
       select('status', '状态', TASK_STATUS), select('priority', '优先级', PRIORITY),
       date('due_at', '截止日期'), date('plan_start', '计划开始'), date('plan_end', '计划结束'),
+      integer('hub_pj_task_project_id', '项目ID(portal)'),
     ],
   },
   {
     name: 'hub_pj_milestones', title: '里程碑', fields: [
       input('name', '里程碑'), belongsTo('project', '所属项目', 'hub_pj_projects', 'project_id'), date('due_at', '到期日'),
       select('status', '状态', options([['pending', '待达成', 'blue'], ['reached', '已达成', 'green']])),
+      checkbox('done', '已达成'), date('due_date', '到期日(portal)'), integer('hub_pj_ms_project_id', '项目ID(portal)'),
     ],
   },
   {
@@ -92,10 +103,19 @@ const HUB_CORE_COLLECTIONS: ReadonlyArray<{ name: string; title: string; fields:
     ],
   },
   {
+    name: 'hub_kb_categories', title: '知识分类', fields: [
+      input('name', '分类'), textarea('description', '描述'),
+      belongsTo('parent', '上级分类', 'hub_kb_categories', 'parent_id'),
+      hasMany('children', '子分类', 'hub_kb_categories', 'parent_id'),
+    ],
+  },
+  {
     name: 'hub_kb_articles', title: '知识文章', fields: [
       input('title', '标题'),
-      select('category', '类别', options([['compliance', '合规认证', 'blue'], ['logistics', '物流仓储', 'cyan'], ['payment', '结算支付', 'orange'], ['channel', '渠道拓展', 'green']])),
+      belongsTo('category', '分类', 'hub_kb_categories', 'category_id'),
+      belongsToUser('author', '作者', 'author_id'),
       select('status', '状态', options([['draft', '草稿', 'default'], ['published', '已发布', 'green']])),
+      date('updatedAt', '更新日'), integer('views', '浏览量'),
     ],
   },
   {
@@ -116,7 +136,10 @@ const HUB_CORE_COLLECTIONS: ReadonlyArray<{ name: string; title: string; fields:
   },
   {
     name: 'hub_as_assignments', title: '资产领用', fields: [
-      belongsTo('asset', '资产', 'hub_as_assets', 'asset_id'), input('assignee', '领用人'), date('assigned_at', '领用日期'), date('returned_at', '归还日期'), textarea('note', '备注'),
+      belongsTo('asset', '资产', 'hub_as_assets', 'asset_id'),
+      belongsToUser('assignee', '领用人', 'assignee_id'),
+      date('assigned_at', '领用日期'), date('returned_at', '归还日期'), textarea('note', '备注'),
+      date('assigned_date', '领用日(portal)'), date('returned_date', '归还日(portal)'),
     ],
   },
   {
@@ -125,11 +148,16 @@ const HUB_CORE_COLLECTIONS: ReadonlyArray<{ name: string; title: string; fields:
       select('type', '类型', options([['repair', '维修', 'red'], ['inspection', '巡检', 'blue'], ['calibration', '校准', 'cyan']])),
       date('scheduled_at', '计划日期'), belongsTo('vendor', '服务商', 'hub_as_vendors', 'vendor_id'), number('cost', '费用'),
       select('status', '状态', options([['pending', '待执行', 'orange'], ['done', '已完成', 'green']])),
+      date('scheduled_date', '计划日(portal)'), date('completed_date', '完成日(portal)'),
+      input('title', '标题(portal)'), textarea('notes', '备注(portal)'), integer('assetId', '资产ID(portal)'),
     ],
   },
   {
     name: 'hub_hr_departments', title: '部门', fields: [
       input('name', '部门'), input('code', '编码'), input('manager', '负责人'), integer('headcount', '编制人数'),
+      date('updatedAt', '更新日(portal)'),
+      belongsTo('parent', '上级部门', 'hub_hr_departments', 'parentId'),
+      hasMany('children', '子部门', 'hub_hr_departments', 'parentId'),
     ],
   },
   {
@@ -137,6 +165,8 @@ const HUB_CORE_COLLECTIONS: ReadonlyArray<{ name: string; title: string; fields:
       input('name', '姓名'), input('employee_no', '工号'), belongsTo('department', '部门', 'hub_hr_departments', 'department_id'),
       input('title', '职务'), input('phone', '电话'),
       select('status', '状态', options([['active', '在职', 'green'], ['on_leave', '休假', 'orange'], ['resigned', '离职', 'default']])),
+      date('hire_date', '入职日(portal)'), input('email', '邮箱(portal)'), input('job_title', '职务(portal)'), date('updatedAt', '更新日(portal)'),
+      belongsTo('manager', '上级', 'hub_hr_employees', 'manager_id'),
     ],
   },
   {
@@ -146,6 +176,8 @@ const HUB_CORE_COLLECTIONS: ReadonlyArray<{ name: string; title: string; fields:
       date('start_at', '开始'), date('end_at', '结束'), number('days', '天数'),
       select('status', '状态', options([['pending', '待审批', 'orange'], ['approved', '已批准', 'green'], ['rejected', '已驳回', 'red']])),
       input('reason', '事由'),
+      date('approved_at', '批准日(portal)'),
+      belongsToUser('approver', '审批人', 'approver_id'),
     ],
   },
   {
@@ -217,6 +249,10 @@ const PORTAL_DOMAIN_COLLECTIONS: ReadonlyArray<{ name: string; title: string; fi
       input('name', '名称'), input('company', '公司'), input('email', '邮箱'),
       select('source', '来源', SALES_LEAD_SOURCES), select('status', '状态', SALES_LEAD_STATUSES),
       belongsToUser('owner', '负责人', 'owner_id'), createdAt('建档日'),
+      date('converted_at', '转化日(portal)'), input('conversion_key', '转化键(portal)'),
+      belongsTo('converted_account', '转化客户', 'hub_sales_accounts', 'converted_account_id'),
+      belongsTo('converted_contact', '转化联系人', 'hub_sales_contacts', 'converted_contact_id'),
+      belongsTo('converted_deal', '转化订单', 'hub_sales_deals', 'converted_deal_id'),
     ],
   },
   {
@@ -238,6 +274,7 @@ const PORTAL_DOMAIN_COLLECTIONS: ReadonlyArray<{ name: string; title: string; fi
       select('category', '分类', HD_TICKET_CATEGORIES), select('priority', '优先级', HD_TICKET_PRIORITIES), select('status', '状态', HD_TICKET_STATUSES),
       belongsToUser('requester', '请求人', 'requesterId'), belongsToUser('assignee', '经办人', 'assigneeId'),
       hasMany('replies', '回复', 'hub_hd_replies', 'ticketId'), createdAt('创建日'),
+      date('updatedAt', '更新日(portal)'),
     ],
   },
   {
@@ -282,8 +319,54 @@ const PORTAL_DOMAIN_COLLECTIONS: ReadonlyArray<{ name: string; title: string; fi
     ],
   },
 ]
+const PO_STATUSES = options([['draft', '草稿', 'default'], ['sent', '已发出', 'blue'], ['received', '已到货', 'green'], ['cancelled', '已取消', 'red']])
+
+/**
+ * D1: collections whole tables the portal reads but the seed never created
+ * (checklist / kb categories / article feedback / procurement), field and
+ * foreign-key names per the replicate-prompt contract.
+ */
+const D1_PORTAL_COLLECTIONS: ReadonlyArray<{ name: string; title: string; fields: object[] }> = [
+  {
+    name: 'hub_pj_checklist', title: '任务清单', fields: [
+      input('title', '事项'), checkbox('done', '已完成'),
+      belongsTo('task', '任务', 'hub_pj_tasks', 'hub_pj_checklist_task_id'),
+    ],
+  },
+  {
+    name: 'hub_kb_article_feedback', title: '文章反馈', fields: [
+      select('rating', '评价', options([['helpful', '有帮助', 'green'], ['not_helpful', '没帮助', 'orange']])),
+      textarea('comment', '意见'),
+      belongsToUser('author', '反馈人', 'author_id'),
+      belongsTo('article', '文章', 'hub_kb_articles', 'article_id'),
+      createdAt('反馈日'),
+    ],
+  },
+  {
+    name: 'hub_po_suppliers', title: '采购供应商', fields: [
+      input('name', '供应商'), input('email', '邮箱'), input('contact_name', '联系人'),
+      integer('rating', '评分'), select('status', '状态', options([['active', '合作中', 'green'], ['inactive', '停用', 'default']])),
+    ],
+  },
+  {
+    name: 'hub_po_purchase_orders', title: '采购单', fields: [
+      input('po_number', '采购单号'), select('status', '状态', PO_STATUSES), number('total', '总额'),
+      date('order_date', '下单日'),
+      belongsTo('supplier', '供应商', 'hub_po_suppliers', 'supplier_id'),
+      belongsToUser('owner', '经办人', 'owner_id'),
+      hasMany('items', '明细', 'hub_po_items', 'purchase_order_id'),
+      createdAt('创建日'),
+    ],
+  },
+  {
+    name: 'hub_po_items', title: '采购明细', fields: [
+      input('product_name', '品名'), integer('qty', '数量'), number('unit_price', '单价'),
+      belongsTo('purchase_order', '采购单', 'hub_po_purchase_orders', 'purchase_order_id'),
+    ],
+  },
+]
 const COLLECTIONS: ReadonlyArray<{ name: string; title: string; fields: object[] }> = [
-  ...HUB_CORE_COLLECTIONS, ...PORTAL_DOMAIN_COLLECTIONS,
+  ...HUB_CORE_COLLECTIONS, ...PORTAL_DOMAIN_COLLECTIONS, ...D1_PORTAL_COLLECTIONS,
 ]
 
 const MENU: ReadonlyArray<{ group: string | null; groupIcon?: string; pages: ReadonlyArray<{ title: string; icon: string }> }> = [
@@ -318,15 +401,21 @@ const MENU: ReadonlyArray<{ group: string | null; groupIcon?: string; pages: Rea
 ]
 
 const SEEDS: ReadonlyArray<{ fixtureKey: string; collection: string; uniqueKey: string; refs: Record<string, string> }> = [
-  { fixtureKey: 'projects', collection: 'hub_pj_projects', uniqueKey: 'no', refs: {} },
-  { fixtureKey: 'tasks', collection: 'hub_pj_tasks', uniqueKey: 'title', refs: { project: 'hub_pj_projects' } },
+  { fixtureKey: 'projects', collection: 'hub_pj_projects', uniqueKey: 'no', refs: { owner: 'users' } },
+  { fixtureKey: 'tasks', collection: 'hub_pj_tasks', uniqueKey: 'title', refs: { project: 'hub_pj_projects', assignee: 'users' } },
   { fixtureKey: 'milestones', collection: 'hub_pj_milestones', uniqueKey: 'name', refs: { project: 'hub_pj_projects' } },
   { fixtureKey: 'tickets', collection: 'hub_tk_tickets', uniqueKey: 'title', refs: {} },
-  { fixtureKey: 'articles', collection: 'hub_kb_articles', uniqueKey: 'title', refs: {} },
+  { fixtureKey: 'articles', collection: 'hub_kb_articles', uniqueKey: 'title', refs: { author: 'users', category: 'hub_kb_categories' } },
   { fixtureKey: 'vendors', collection: 'hub_as_vendors', uniqueKey: 'name', refs: {} },
   { fixtureKey: 'assets', collection: 'hub_as_assets', uniqueKey: 'no', refs: { vendor: 'hub_as_vendors' } },
-  { fixtureKey: 'assignments', collection: 'hub_as_assignments', uniqueKey: 'note', refs: { asset: 'hub_as_assets' } },
+  { fixtureKey: 'assignments', collection: 'hub_as_assignments', uniqueKey: 'note', refs: { asset: 'hub_as_assets', assignee: 'users' } },
   { fixtureKey: 'maintenance', collection: 'hub_as_maintenance', uniqueKey: 'scheduled_at', refs: { asset: 'hub_as_assets', vendor: 'hub_as_vendors' } },
+  { fixtureKey: 'kb_categories', collection: 'hub_kb_categories', uniqueKey: 'name', refs: {} },
+  { fixtureKey: 'pj_checklist', collection: 'hub_pj_checklist', uniqueKey: 'title', refs: { task: 'hub_pj_tasks' } },
+  { fixtureKey: 'article_feedback', collection: 'hub_kb_article_feedback', uniqueKey: 'comment', refs: { author: 'users', article: 'hub_kb_articles' } },
+  { fixtureKey: 'po_suppliers', collection: 'hub_po_suppliers', uniqueKey: 'name', refs: {} },
+  { fixtureKey: 'po_purchase_orders', collection: 'hub_po_purchase_orders', uniqueKey: 'po_number', refs: { supplier: 'hub_po_suppliers', owner: 'users' } },
+  { fixtureKey: 'po_items', collection: 'hub_po_items', uniqueKey: 'product_name', refs: { purchase_order: 'hub_po_purchase_orders' } },
   { fixtureKey: 'departments', collection: 'hub_hr_departments', uniqueKey: 'code', refs: {} },
   { fixtureKey: 'employees', collection: 'hub_hr_employees', uniqueKey: 'employee_no', refs: { department: 'hub_hr_departments' } },
   { fixtureKey: 'leave_requests', collection: 'hub_hr_leave_requests', uniqueKey: 'reason', refs: { employee: 'hub_hr_employees' } },
@@ -390,6 +479,91 @@ async function ensureCollections(token: string): Promise<void> {
   }
 }
 
+/**
+ * D1: the four Chinese names the legacy text columns carried as plain
+ * strings. They get password-less users rows so the migrated belongsTo
+ * foreign keys can point somewhere (demo semantics: not sign-in accounts).
+ */
+const LEGACY_USERS: ReadonlyArray<{ nickname: string; username: string }> = [
+  { nickname: '陈立群', username: 'chenliqun' },
+  { nickname: '王一帆', username: 'wangyifan' },
+  { nickname: '林静怡', username: 'linjingyi' },
+  { nickname: '赵晓芳', username: 'zhaoxiaofang' },
+]
+
+/** nickname -> users.id for every LEGACY_USERS row, creating missing rows. */
+async function ensureLegacyUsers(token: string): Promise<Map<string, number>> {
+  const byNickname = new Map<string, number>()
+  for (const person of LEGACY_USERS) {
+    const found = await dataOf(token, 'GET', `/api/users:list?filter=${encodeURIComponent(JSON.stringify({ nickname: { $eq: person.nickname } }))}&pageSize=5`)
+    const existing = (found ?? [])[0]?.id
+    if (existing !== undefined) {
+      byNickname.set(person.nickname, existing)
+      continue
+    }
+    const created = await dataOf(token, 'POST', '/api/users:create', { username: person.username, nickname: person.nickname })
+    byNickname.set(person.nickname, created?.id)
+    console.log(`nocobase-hub: legacy user ${person.nickname} ensured (id ${created?.id})`)
+  }
+  return byNickname
+}
+
+/** Current type of a collection field, or null when the field does not exist. */
+async function fieldType(token: string, collection: string, name: string): Promise<string | null> {
+  const rows = await dataOf(token, 'GET', `/api/fields:list?filter=${encodeURIComponent(JSON.stringify({ collectionName: { $eq: collection }, name: { $eq: name } }))}&pageSize=5`)
+  return (rows ?? [])[0]?.type ?? null
+}
+
+/**
+ * Three-state idempotent migration of a legacy text field to a belongsTo
+ * association under the same name (D1). The portal appends and filters these
+ * fields as associations, while seeded tables carried them as plain inputs,
+ * and NocoBase refuses two same-name fields — so the text column must be
+ * destroyed before the association is created. A `*_text` backup column
+ * preserves the original values first (kept as the rollback channel), which
+ * makes every interruption point safe to re-run:
+ * - type string   -> backup column + copy values + destroy + create association
+ * - field missing -> previous run died between destroy and create: create only
+ * - type belongsTo -> already migrated (kept)
+ */
+async function migrateTextFieldToAssociation(token: string, collection: string, name: string, title: string, association: Record<string, unknown>, backupName: string): Promise<void> {
+  const type = await fieldType(token, collection, name)
+  if (type === 'belongsTo') {
+    console.log(`nocobase-hub: ${collection}.${name} already belongsTo (kept)`)
+    return
+  }
+  if (type === null) {
+    await dataOf(token, 'POST', `/api/collections/${collection}/fields:create`, association)
+    console.log(`nocobase-hub: ${collection}.${name} created as belongsTo (resumed or fresh)`)
+    return
+  }
+  if (await fieldType(token, collection, backupName) === null) {
+    await dataOf(token, 'POST', `/api/collections/${collection}/fields:create`, input(backupName, `${title}(原文本)`))
+    const rows = await dataOf(token, 'GET', `/api/${collection}:list?pageSize=500`)
+    for (const row of rows ?? []) {
+      if (row[name] === null || row[name] === undefined) continue
+      await dataOf(token, 'POST', `/api/${collection}:update?filterByTk=${row.id}`, { [backupName]: row[name] })
+    }
+  }
+  await dataOf(token, 'POST', `/api/collections/${collection}/fields:destroy?filterByTk=${name}`)
+  await dataOf(token, 'POST', `/api/collections/${collection}/fields:create`, association)
+  console.log(`nocobase-hub: ${collection}.${name} migrated text -> belongsTo (${backupName} retained)`)
+}
+
+/** Runs every D1 same-name field migration (idempotent per three-state check). */
+async function migrateLegacyTextFields(token: string): Promise<Map<string, number>> {
+  const usersByNickname = await ensureLegacyUsers(token)
+  await migrateTextFieldToAssociation(token, 'hub_pj_tasks', 'assignee', '负责人',
+    belongsToUser('assignee', '负责人', 'hub_pj_task_assignee_id'), 'assignee_text')
+  await migrateTextFieldToAssociation(token, 'hub_pj_projects', 'owner', '负责人',
+    belongsToUser('owner', '负责人', 'hub_pj_project_owner_id'), 'owner_text')
+  await migrateTextFieldToAssociation(token, 'hub_as_assignments', 'assignee', '领用人',
+    belongsToUser('assignee', '领用人', 'assignee_id'), 'assignee_text')
+  await migrateTextFieldToAssociation(token, 'hub_kb_articles', 'category', '分类',
+    belongsTo('category', '分类', 'hub_kb_categories', 'category_id'), 'category_text')
+  return usersByNickname
+}
+
 async function keyMap(token: string, collection: string, key: string): Promise<Map<string, number>> {
   const rows = await dataOf(token, 'GET', `/api/${collection}:list?pageSize=500`)
   return new Map((rows ?? []).map((row: any) => [String(row[key]), row.id]))
@@ -397,7 +571,7 @@ async function keyMap(token: string, collection: string, key: string): Promise<M
 
 async function seed(token: string, fixtures: Record<string, Array<Record<string, unknown>>>): Promise<void> {
   const refCache = new Map<string, Map<string, number>>()
-  const refKey = new Map([['hub_pj_projects', 'name'], ['hub_as_assets', 'name'], ['hub_as_vendors', 'name'], ['hub_hr_departments', 'name'], ['hub_hr_employees', 'name'], ['hub_inv_products', 'name'], ['hub_inv_warehouses', 'name'], ['hub_sales_accounts', 'name'], ['hub_sales_deals', 'title'], ['hub_hd_tickets', 'subject'], ['hub_fin_invoices', 'invoice_number'], ['users', 'nickname']])
+  const refKey = new Map([['hub_pj_projects', 'name'], ['hub_pj_tasks', 'title'], ['hub_as_assets', 'name'], ['hub_as_vendors', 'name'], ['hub_hr_departments', 'name'], ['hub_hr_employees', 'name'], ['hub_inv_products', 'name'], ['hub_inv_warehouses', 'name'], ['hub_sales_accounts', 'name'], ['hub_sales_deals', 'title'], ['hub_hd_tickets', 'subject'], ['hub_fin_invoices', 'invoice_number'], ['hub_kb_articles', 'title'], ['hub_kb_categories', 'name'], ['hub_po_suppliers', 'name'], ['hub_po_purchase_orders', 'po_number'], ['users', 'nickname']])
   for (const spec of SEEDS) {
     const rows = fixtures[spec.fixtureKey]
     if (rows === undefined) throw new Error(`fixture file has no "${spec.fixtureKey}" array`)
@@ -732,8 +906,14 @@ async function ensureAssociationFieldNames(token: string): Promise<void> {
  * ones (tasks.due_date, leave_requests.start_date/end_date, and
  * kb_articles.createdAt for recent-article sorting). Add them and backfill
  * from existing rows; idempotent by field presence and equal values.
+ *
+ * D1 widened this step to the full portal-contract alignment: every column,
+ * association, and migrated foreign key the rebuilt portal pages filter,
+ * sort, or append (plan 01-hub-schema-alignment B/C lists). Backfills read
+ * the `*_text` backup columns left by migrateLegacyTextFields so an
+ * interrupted migration still recovers its original values.
  */
-async function ensurePortalFields(token: string): Promise<void> {
+async function ensurePortalFields(token: string, usersByNickname: Map<string, number>): Promise<void> {
   const hasField = async (collection: string, name: string): Promise<boolean> => {
     const rows = await dataOf(token, 'GET', `/api/fields:list?filter=${encodeURIComponent(JSON.stringify({ collectionName: { $eq: collection }, name: { $eq: name } }))}&pageSize=5`)
     return (rows ?? []).length > 0
@@ -753,16 +933,78 @@ async function ensurePortalFields(token: string): Promise<void> {
   // the portal sorts recent articles by createdAt, so add it as a plain
   // dateOnly column.
   if (await addField('hub_kb_articles', { name: 'createdAt', type: 'dateOnly', interface: 'date', uiSchema: { type: 'string', 'x-component': 'DatePicker', title: '发布日(portal)' } })) added.push('hub_kb_articles.createdAt')
-  const backfill: Array<{ collection: string; assign: (row: any) => Array<[string, unknown]> }> = [
-    { collection: 'hub_pj_tasks', assign: row => [['due_date', row.due_at ?? null]] },
-    { collection: 'hub_hr_leave_requests', assign: row => [['start_date', row.start_at ?? null], ['end_date', row.end_at ?? null]] },
-    { collection: 'hub_kb_articles', assign: row => [['createdAt', '2026-09-01']] },
+  // D1-B columns on existing tables (all plain ALTER ADD COLUMN, lossless).
+  if (await addField('hub_kb_articles', date('updatedAt', '更新日(portal)'))) added.push('hub_kb_articles.updatedAt')
+  if (await addField('hub_kb_articles', integer('views', '浏览量(portal)'))) added.push('hub_kb_articles.views')
+  if (await addField('hub_as_assignments', date('assigned_date', '领用日(portal)'))) added.push('hub_as_assignments.assigned_date')
+  if (await addField('hub_as_assignments', date('returned_date', '归还日(portal)'))) added.push('hub_as_assignments.returned_date')
+  if (await addField('hub_as_maintenance', date('scheduled_date', '计划日(portal)'))) added.push('hub_as_maintenance.scheduled_date')
+  if (await addField('hub_as_maintenance', date('completed_date', '完成日(portal)'))) added.push('hub_as_maintenance.completed_date')
+  if (await addField('hub_as_maintenance', input('title', '标题(portal)'))) added.push('hub_as_maintenance.title')
+  if (await addField('hub_as_maintenance', textarea('notes', '备注(portal)'))) added.push('hub_as_maintenance.notes')
+  if (await addField('hub_as_maintenance', integer('assetId', '资产ID(portal)'))) added.push('hub_as_maintenance.assetId')
+  if (await addField('hub_hr_employees', date('hire_date', '入职日(portal)'))) added.push('hub_hr_employees.hire_date')
+  if (await addField('hub_hr_employees', input('email', '邮箱(portal)'))) added.push('hub_hr_employees.email')
+  if (await addField('hub_hr_employees', input('job_title', '职务(portal)'))) added.push('hub_hr_employees.job_title')
+  if (await addField('hub_hr_employees', date('updatedAt', '更新日(portal)'))) added.push('hub_hr_employees.updatedAt')
+  if (await addField('hub_hr_departments', date('updatedAt', '更新日(portal)'))) added.push('hub_hr_departments.updatedAt')
+  if (await addField('hub_hr_leave_requests', date('approved_at', '批准日(portal)'))) added.push('hub_hr_leave_requests.approved_at')
+  if (await addField('hub_sales_leads', date('converted_at', '转化日(portal)'))) added.push('hub_sales_leads.converted_at')
+  if (await addField('hub_sales_leads', input('conversion_key', '转化键(portal)'))) added.push('hub_sales_leads.conversion_key')
+  if (await addField('hub_hd_tickets', date('updatedAt', '更新日(portal)'))) added.push('hub_hd_tickets.updatedAt')
+  if (await addField('hub_pj_projects', date('start_date', '开始日期(portal)'))) added.push('hub_pj_projects.start_date')
+  if (await addField('hub_pj_projects', date('due_date', '到期日(portal)'))) added.push('hub_pj_projects.due_date')
+  if (await addField('hub_pj_milestones', checkbox('done', '已达成(portal)'))) added.push('hub_pj_milestones.done')
+  if (await addField('hub_pj_milestones', date('due_date', '到期日(portal)'))) added.push('hub_pj_milestones.due_date')
+  if (await addField('hub_pj_milestones', integer('hub_pj_ms_project_id', '项目ID(portal)'))) added.push('hub_pj_milestones.hub_pj_ms_project_id')
+  if (await addField('hub_pj_tasks', integer('hub_pj_task_project_id', '项目ID(portal)'))) added.push('hub_pj_tasks.hub_pj_task_project_id')
+  // D1-C associations on existing tables (fresh installs already declare
+  // them; this branch only lifts older seeded tables).
+  if (await addField('hub_kb_articles', belongsToUser('author', '作者', 'author_id'))) added.push('hub_kb_articles.author')
+  if (await addField('hub_kb_articles', belongsTo('category', '分类', 'hub_kb_categories', 'category_id'))) added.push('hub_kb_articles.category')
+  if (await addField('hub_hr_leave_requests', belongsToUser('approver', '审批人', 'approver_id'))) added.push('hub_hr_leave_requests.approver')
+  if (await addField('hub_hr_employees', belongsTo('manager', '上级', 'hub_hr_employees', 'manager_id'))) added.push('hub_hr_employees.manager')
+  if (await addField('hub_hr_departments', belongsTo('parent', '上级部门', 'hub_hr_departments', 'parentId'))) added.push('hub_hr_departments.parent')
+  if (await addField('hub_hr_departments', hasMany('children', '子部门', 'hub_hr_departments', 'parentId'))) added.push('hub_hr_departments.children')
+  if (await addField('hub_sales_leads', belongsTo('converted_account', '转化客户', 'hub_sales_accounts', 'converted_account_id'))) added.push('hub_sales_leads.converted_account')
+  if (await addField('hub_sales_leads', belongsTo('converted_contact', '转化联系人', 'hub_sales_contacts', 'converted_contact_id'))) added.push('hub_sales_leads.converted_contact')
+  if (await addField('hub_sales_leads', belongsTo('converted_deal', '转化订单', 'hub_sales_deals', 'converted_deal_id'))) added.push('hub_sales_leads.converted_deal')
+
+  // Legacy category enum keys -> hub_kb_categories row names.
+  const categoryByName = await keyMap(token, 'hub_kb_categories', 'name')
+  const categoryByKey = new Map([
+    ['compliance', categoryByName.get('合规认证')], ['logistics', categoryByName.get('物流仓储')],
+    ['payment', categoryByName.get('结算支付')], ['channel', categoryByName.get('渠道拓展')],
+  ])
+  const superAdmin = (await dataOf(token, 'GET', `/api/users:list?filter=${encodeURIComponent(JSON.stringify({ nickname: { $eq: 'Super Admin' } }))}&pageSize=5`) ?? [])[0]?.id
+  const userId = (name: unknown): number | null => (name === null || name === undefined ? null : usersByNickname.get(String(name)) ?? null)
+  const hireDates = ['2021-03-01', '2022-07-15', '2020-01-06', '2023-09-11', '2019-05-20', '2024-02-26'] as const
+  const backfill: Array<{ collection: string; assign: (row: any, index: number) => Array<[string, unknown]> }> = [
+    { collection: 'hub_pj_tasks', assign: row => [['due_date', row.due_at ?? null], ['hub_pj_task_project_id', row.project_id ?? null], ['hub_pj_task_assignee_id', userId(row.assignee_text)]] },
+    { collection: 'hub_hr_leave_requests', assign: row => [['start_date', row.start_at ?? null], ['end_date', row.end_at ?? null], ['approved_at', row.status === 'approved' ? row.start_at ?? null : null], ['approver_id', row.status === 'approved' && superAdmin !== undefined ? superAdmin : null]] },
+    {
+      collection: 'hub_kb_articles', assign: (row, index) => [
+        ['createdAt', '2026-09-01'],
+        ['updatedAt', row.createdAt ?? '2026-09-01'],
+        ['views', 10 + (index * 37) % 190],
+        ['author_id', superAdmin ?? null],
+        ['category_id', categoryByKey.get(String(row.category_text)) ?? null],
+      ],
+    },
+    { collection: 'hub_pj_projects', assign: row => [['due_date', row.planned_end_date ?? null], ['hub_pj_project_owner_id', userId(row.owner_text)]] },
+    { collection: 'hub_as_assignments', assign: row => [['assigned_date', row.assigned_at ?? null], ['returned_date', row.returned_at ?? null], ['assignee_id', userId(row.assignee_text)]] },
+    { collection: 'hub_as_maintenance', assign: row => [['scheduled_date', row.scheduled_at ?? null], ['completed_date', row.status === 'done' ? row.scheduled_at ?? null : null], ['assetId', row.asset_id ?? null]] },
+    { collection: 'hub_hr_employees', assign: (row, index) => [['job_title', row.title ?? null], ['hire_date', hireDates[index % hireDates.length]], ['updatedAt', '2026-07-01']] },
+    { collection: 'hub_hr_departments', assign: () => [['updatedAt', '2026-07-01']] },
+    { collection: 'hub_sales_leads', assign: row => [['converted_at', row.status === 'converted' ? row.createdAt ?? null : null], ['conversion_key', row.status === 'converted' ? `CONV-${row.id}` : null]] },
+    { collection: 'hub_hd_tickets', assign: row => [['updatedAt', row.createdAt ?? null]] },
+    { collection: 'hub_pj_milestones', assign: row => [['done', row.status === 'reached'], ['due_date', row.due_at ?? null], ['hub_pj_ms_project_id', row.project_id ?? null]] },
   ]
   for (const spec of backfill) {
     const rows = await dataOf(token, 'GET', `/api/${spec.collection}:list?pageSize=500`) as any[] | null
     let updated = 0
-    for (const row of rows ?? []) {
-      const patchEntries = spec.assign(row).filter(([key, value]) => row[key] !== value)
+    for (const [index, row] of (rows ?? []).entries()) {
+      const patchEntries = spec.assign(row, index).filter(([key, value]) => row[key] !== value)
       if (patchEntries.length === 0) continue
       await dataOf(token, 'POST', `/api/${spec.collection}:update?filterByTk=${row.id}`, Object.fromEntries(patchEntries))
       updated += 1
@@ -772,18 +1014,55 @@ async function ensurePortalFields(token: string): Promise<void> {
   console.log(`nocobase-hub: portal alignment fields ${added.length > 0 ? added.join(', ') : 'all present (kept)'}`)
 }
 
+/**
+ * D1-F optional enum alignment: the portal filter dropdowns use a slightly
+ * different vocabulary than the seeded select options (e.g. maintenance
+ * Preventive/Corrective/Inspection vs repair/inspection/calibration). Append
+ * the portal's values to each uiSchema.enum without touching existing
+ * options or seeded row values — a filter then at least lists every value
+ * the portal offers.
+ */
+const ENUM_ALIGNMENTS: ReadonlyArray<{ collection: string; field: string; values: ReadonlyArray<{ value: string; label: string }> }> = [
+  { collection: 'hub_as_maintenance', field: 'type', values: [{ value: 'Preventive', label: 'Preventive' }, { value: 'Corrective', label: 'Corrective' }, { value: 'Inspection', label: 'Inspection' }] },
+  { collection: 'hub_as_maintenance', field: 'status', values: [{ value: 'Scheduled', label: 'Scheduled' }, { value: 'In progress', label: 'In progress' }, { value: 'Done', label: 'Done' }] },
+  { collection: 'hub_pj_tasks', field: 'priority', values: [{ value: 'med', label: 'Med' }] },
+  { collection: 'hub_hr_employees', field: 'status', values: [{ value: 'onleave', label: 'On leave' }, { value: 'terminated', label: 'Terminated' }] },
+  { collection: 'hub_sales_leads', field: 'status', values: [{ value: 'unqualified', label: 'Unqualified' }] },
+  { collection: 'hub_sales_leads', field: 'source', values: [{ value: 'cold_call', label: 'Cold call' }] },
+  { collection: 'hub_pj_projects', field: 'status', values: [{ value: 'active', label: 'Active' }, { value: 'done', label: 'Done' }, { value: 'on_hold', label: 'On hold' }] },
+  { collection: 'hub_as_assets', field: 'status', values: [{ value: 'assigned', label: 'Assigned' }, { value: 'in_stock', label: 'In stock' }] },
+]
+
+async function alignPortalEnums(token: string): Promise<void> {
+  let patched = 0
+  for (const target of ENUM_ALIGNMENTS) {
+    const rows = await dataOf(token, 'GET', `/api/fields:list?filter=${encodeURIComponent(JSON.stringify({ collectionName: { $eq: target.collection }, name: { $eq: target.field } }))}&pageSize=5`) as Array<{ uiSchema?: { enum?: Array<{ value: string, label?: string, color?: string }> } }> | null
+    const field = (rows ?? [])[0]
+    const current = field?.uiSchema?.enum ?? []
+    const missing = target.values.filter(option => !current.some(existing => existing.value === option.value))
+    if (missing.length === 0) continue
+    await dataOf(token, 'POST', `/api/collections/${target.collection}/fields:update?filterByTk=${target.field}`, {
+      uiSchema: { enum: [...current, ...missing] },
+    })
+    patched += 1
+  }
+  console.log(`nocobase-hub: portal enum alignment ${patched > 0 ? `${patched} field(s) extended` : 'all present (kept)'}`)
+}
+
 /** Pages upgraded to N17 v2 flowPages; their titles are skipped by the v1 block replay. */
 const flowOwnedPages = new Set<string>()
 
 async function main(): Promise<void> {
   const token = await signIn()
   await ensureCollections(token)
+  const usersByNickname = await migrateLegacyTextFields(token)
   const fixtures = JSON.parse(readFileSync(fixturePath, 'utf8'))
   await seed(token, fixtures)
   const pageByUrl = await ensureMenus(token)
   await ensureBlocks(token, pageByUrl)
   await ensureAssociationFieldNames(token)
-  await ensurePortalFields(token)
+  await ensurePortalFields(token, usersByNickname)
+  await alignPortalEnums(token)
   console.log('nocobase-hub: done')
 }
 

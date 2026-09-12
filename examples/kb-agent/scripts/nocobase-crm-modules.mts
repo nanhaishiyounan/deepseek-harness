@@ -53,6 +53,11 @@ const belongsTo = (name: string, title: string, target: string, foreignKey: stri
   // N/A even though the list request appends the association (N16).
   uiSchema: { type: 'object', 'x-component': 'AssociationField', title, 'x-component-props': { multiple: false, fieldNames: { label: 'name', value: 'id' } } },
 })
+// Users associations render nickname (users has no name column).
+const belongsToUser = (name: string, title: string, foreignKey: string): object => ({
+  name, type: 'belongsTo', interface: 'm2o', target: 'users', foreignKey,
+  uiSchema: { type: 'object', 'x-component': 'AssociationField', title, 'x-component-props': { multiple: false, fieldNames: { label: 'nickname', value: 'id' } } },
+})
 const checkbox = (name: string, title: string): object => ({ name, type: 'boolean', interface: 'boolean', uiSchema: { type: 'boolean', 'x-component': 'Checkbox', title } })
 const textarea = (name: string, title: string): object => ({ name, type: 'text', interface: 'textarea', uiSchema: { type: 'string', 'x-component': 'Input.TextArea', title } })
 
@@ -153,6 +158,16 @@ const COLLECTIONS: ReadonlyArray<{ name: string; title: string; fields: object[]
       date('issued_at', '开票日期'), select('status', '状态', options([['draft', '草稿', 'default'], ['issued', '已开具', 'blue'], ['paid', '已收款', 'green'], ['void', '已作废', 'red']])),
     ],
   },
+  {
+    // D1: the targets page reads this table whole (period sort + owner
+    // appends); it was never seeded. No camelCase needs — owner is a plain
+    // belongsTo with the owner_id foreign key.
+    name: 'crm_targets', title: '销售目标', fields: [
+      input('period', '期间'), number('quota_amount', '目标金额'),
+      belongsToUser('owner', '负责人', 'owner_id'),
+      date('createdAt', '创建日'),
+    ],
+  },
 ]
 
 /** Menu groups and their pages; blocks are added by hand in the browser. */
@@ -196,6 +211,9 @@ const SEEDS: ReadonlyArray<{ fixtureKey: string; uniqueKey: string; refs: Record
   { fixtureKey: 'follow_ups', uniqueKey: 'note', refs: { customer: 'customers', lead: 'leads' } },
   { fixtureKey: 'payments', uniqueKey: 'paid_at', refs: { customer: 'customers', deal: 'deals' } },
   { fixtureKey: 'invoices', uniqueKey: 'invoice_no', refs: { customer: 'customers', deal: 'deals' } },
+  // D1: targets rows seed by period; the owner association is backfilled to
+  // Super Admin in ensurePortalFields (the generic ref resolver is crm_-only).
+  { fixtureKey: 'targets', uniqueKey: 'period', refs: {} },
 ]
 
 async function call(token: string, method: 'GET' | 'POST', path: string, body?: unknown): Promise<any> {
@@ -517,12 +535,14 @@ async function ensureAssociationFieldNames(token: string): Promise<void> {
   for (const collection of COLLECTIONS) {
     const hasM2o = collection.fields.some((field) => (field as { type?: string }).type === 'belongsTo')
     if (!hasM2o) continue
-    const rows = await dataOf(token, 'GET', `/api/fields:list?filter=${encodeURIComponent(JSON.stringify({ collectionName: { $eq: collection.name }, type: { $eq: 'belongsTo' } }))}&pageSize=100`) as Array<{ name?: string, uiSchema?: { 'x-component-props'?: { fieldNames?: { label?: string } } } }> | null
+    const rows = await dataOf(token, 'GET', `/api/fields:list?filter=${encodeURIComponent(JSON.stringify({ collectionName: { $eq: collection.name }, type: { $eq: 'belongsTo' } }))}&pageSize=100`) as Array<{ name?: string, target?: string, uiSchema?: { 'x-component-props'?: { fieldNames?: { label?: string } } } }> | null
     for (const row of rows ?? []) {
       if (row.name === undefined) continue
-      if (row.uiSchema?.['x-component-props']?.fieldNames?.label === 'name') continue
+      // Users associations render nickname; every other target has a name column.
+      const label = row.target === 'users' ? 'nickname' : 'name'
+      if (row.uiSchema?.['x-component-props']?.fieldNames?.label === label) continue
       await dataOf(token, 'POST', `/api/collections/${collection.name}/fields:update?filterByTk=${row.name}`, {
-        uiSchema: { 'x-component-props': { fieldNames: { label: 'name', value: 'id' } } },
+        uiSchema: { 'x-component-props': { fieldNames: { label, value: 'id' } } },
       })
       patched += 1
     }
@@ -577,6 +597,13 @@ async function ensurePortalFields(token: string): Promise<void> {
   if (await addField('crm_quotes', { name: 'version', type: 'integer', interface: 'integer', uiSchema: { type: 'number', 'x-component': 'InputNumber', title: '版本(portal)' } })) added.push('crm_quotes.version')
   if (await addField('crm_quotes', { name: 'is_current', type: 'boolean', interface: 'boolean', uiSchema: { type: 'boolean', 'x-component': 'Checkbox', title: '当前版本(portal)' } })) added.push('crm_quotes.is_current')
   if (await addField('crm_quotes', { name: 'total', type: 'float', interface: 'number', uiSchema: { type: 'number', 'x-component': 'InputNumber', title: '总金额(portal)' } })) added.push('crm_quotes.total')
+  // D1: the deals drawer filters follow-ups and activities by the camelCase
+  // `dealId` column (deals/show.tsx); the seeded associations use deal_id /
+  // nothing, and a same-name belongsTo (association as === foreignKey) hits a
+  // Sequelize naming collision. A bare integer column satisfies the filter —
+  // the drawer never appends the deal association itself.
+  if (await addField('crm_follow_ups', { name: 'dealId', type: 'integer', interface: 'integer', uiSchema: { type: 'number', 'x-component': 'InputNumber', title: '订单ID(portal)' } })) added.push('crm_follow_ups.dealId')
+  if (await addField('crm_activities', { name: 'dealId', type: 'integer', interface: 'integer', uiSchema: { type: 'number', 'x-component': 'InputNumber', title: '订单ID(portal)' } })) added.push('crm_activities.dealId')
   const dealStage = ['inquiry', 'quote', 'negotiation'] as const
   const leadScores = [45, 62, 78, 88, 55, 95, 70, 40, 82, 58] as const
   const leadSources = ['website', 'referral', 'event', 'outbound', 'partner'] as const
@@ -622,6 +649,13 @@ async function ensurePortalFields(token: string): Promise<void> {
         ['total', row.total_amount ?? 0],
       ],
     },
+    // D1: mirror the snake_case deal_id onto the portal's dealId column, and
+    // give follow-ups their customer's first deal so the deals drawer lists
+    // something on freshly migrated installs.
+    { collection: 'crm_activities', assign: row => [['dealId', row.deal_id ?? null]] },
+    { collection: 'crm_follow_ups', assign: row => [['dealId', dealsByCustomer.get(row.customer_id ?? null)?.[0] ?? null]] },
+    // D1: seeded targets rows (period-unique) get their owner association.
+    { collection: 'crm_targets', assign: () => [['owner_id', superAdminId ?? null]] },
   ]
   // crm_contacts rows grouped by customer for the activities contact backfill.
   const contactsByCustomer = new Map<number | null, number[]>()
@@ -630,6 +664,14 @@ async function ensurePortalFields(token: string): Promise<void> {
     bucket.push(row.id)
     contactsByCustomer.set(row.customer_id ?? null, bucket)
   }
+  // crm_deals rows grouped by customer for the follow-up dealId backfill.
+  const dealsByCustomer = new Map<number | null, number[]>()
+  for (const row of await dataOf(token, 'GET', '/api/crm_deals:list?pageSize=500&sort=id') as any[] ?? []) {
+    const bucket = dealsByCustomer.get(row.customer_id ?? null) ?? []
+    bucket.push(row.id)
+    dealsByCustomer.set(row.customer_id ?? null, bucket)
+  }
+  const superAdminId = (await dataOf(token, 'GET', `/api/users:list?filter=${encodeURIComponent(JSON.stringify({ nickname: { $eq: 'Super Admin' } }))}&pageSize=5`) ?? [])[0]?.id
   for (const spec of backfill) {
     const rows = await dataOf(token, 'GET', `/api/${spec.collection}:list?pageSize=500`) as any[] | null
     let updated = 0

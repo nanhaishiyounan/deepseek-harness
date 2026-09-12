@@ -888,6 +888,32 @@ async function stepVerify(): Promise<void> {
   await portalListProbe('hub_sales_deals?appends=account,owner', `/api/hub_sales_deals:list?sort=createdAt&appends[]=${encodeURIComponent('account,owner')}`)
   await portalListProbe('hub_hd_tickets?appends=requester,assignee,replies', `/api/hub_hd_tickets:list?sort=-createdAt&appends[]=${encodeURIComponent('requester,assignee,replies')}`)
   await portalListProbe('hub_fin_expenses?appends=employee', `/api/hub_fin_expenses:list?sort=-spent_at&appends[]=${encodeURIComponent('employee')}`)
+  // D1: hub schema alignment. The portal pages filter and sort on the
+  // NocoBase-derived belongsTo contract columns (hub_pj_task_assignee_id and
+  // siblings) and on date/count columns the seed never had — replay the exact
+  // wire requests so a missing column fails the 400 here, not in the browser.
+  await portalListProbe('hub_pj_tasks?filter=hub_pj_task_assignee_id&appends=project,assignee', `/api/hub_pj_tasks:list?filter=${encodeURIComponent('{"hub_pj_task_assignee_id":1}')}&appends[]=${encodeURIComponent('project')}&appends[]=${encodeURIComponent('assignee')}`)
+  await portalListProbe('hub_pj_projects?filter=hub_pj_project_owner_id', `/api/hub_pj_projects:list?filter=${encodeURIComponent('{"hub_pj_project_owner_id":{"$gt":0}}')}`)
+  await portalListProbe('hub_pj_milestones?sort=due_date', `/api/hub_pj_milestones:list?sort=due_date`)
+  await portalListProbe('hub_pj_checklist?filter=hub_pj_checklist_task_id&appends=task', `/api/hub_pj_checklist:list?filter=${encodeURIComponent('{"hub_pj_checklist_task_id":{"$gt":0}}')}&appends[]=${encodeURIComponent('task')}`)
+  await portalListProbe('hub_kb_articles?sort=-updatedAt&appends=category,author', `/api/hub_kb_articles:list?sort=-updatedAt&appends[]=${encodeURIComponent('category,author')}`)
+  await portalListProbe('hub_kb_articles?sort=-views', `/api/hub_kb_articles:list?sort=-views`)
+  await portalListProbe('hub_as_assignments?sort=-assigned_date&appends=asset,assignee', `/api/hub_as_assignments:list?sort=-assigned_date&appends[]=${encodeURIComponent('asset,assignee')}`)
+  await portalListProbe('hub_sales_leads?sort=-converted_at', `/api/hub_sales_leads:list?sort=-converted_at`)
+  await portalListProbe('hub_po_purchase_orders?appends=supplier,owner', `/api/hub_po_purchase_orders:list?sort=-order_date&appends[]=${encodeURIComponent('supplier,owner')}`)
+  // D1: the CRM deals drawer filters follow-ups and activities by the
+  // camelCase dealId column, and the targets page reads crm_targets whole.
+  await portalListProbe('crm_follow_ups?filter=dealId', `/api/crm_follow_ups:list?filter=${encodeURIComponent('{"dealId":{"$gt":0}}')}&sort=due_date`)
+  await portalListProbe('crm_activities?filter=dealId&appends=contact', `/api/crm_activities:list?filter=${encodeURIComponent('{"dealId":{"$gt":0}}')}&sort=-date&appends[]=${encodeURIComponent('contact')}`)
+  await portalListProbe('crm_targets?sort=-period&appends=owner', `/api/crm_targets:list?sort=-period&appends[]=${encodeURIComponent('owner')}`)
+  // D1: the six new hub tables and crm_targets seed with row floors.
+  for (const [collection, floor] of [
+    ['hub_kb_categories', 4], ['hub_pj_checklist', 6], ['hub_kb_article_feedback', 4],
+    ['hub_po_suppliers', 3], ['hub_po_purchase_orders', 4], ['hub_po_items', 6], ['crm_targets', 3],
+  ] as const) {
+    const failure = await rowFloor(collection, floor)
+    if (failure !== null) failures.push(`${failure}; run the hub/crm module step so the D1 tables seed`)
+  }
   const plugins = await call(token, 'GET', '/api/pm:list?pageSize=300') as { data?: Array<{ name?: string, enabled?: boolean }> }
   const enabledPlugins = new Set((plugins?.data ?? []).filter(plugin => plugin.enabled === true).map(plugin => plugin.name))
   for (const name of PLUGINS) {
