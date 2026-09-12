@@ -522,8 +522,9 @@ async function fieldType(token: string, collection: string, name: string): Promi
  * fields as associations, while seeded tables carried them as plain inputs,
  * and NocoBase refuses two same-name fields — so the text column must be
  * destroyed before the association is created. A `*_text` backup column
- * preserves the original values first (kept as the rollback channel), which
- * makes every interruption point safe to re-run:
+ * preserves the original values first (kept as the rollback channel); the
+ * copy re-runs unconditionally (an idempotent overwrite), which makes every
+ * interruption point safe to re-run:
  * - type string   -> backup column + copy values + destroy + create association
  * - field missing -> previous run died between destroy and create: create only
  * - type belongsTo -> already migrated (kept)
@@ -541,11 +542,16 @@ async function migrateTextFieldToAssociation(token: string, collection: string, 
   }
   if (await fieldType(token, collection, backupName) === null) {
     await dataOf(token, 'POST', `/api/collections/${collection}/fields:create`, input(backupName, `${title}(原文本)`))
-    const rows = await dataOf(token, 'GET', `/api/${collection}:list?pageSize=500`)
-    for (const row of rows ?? []) {
-      if (row[name] === null || row[name] === undefined) continue
-      await dataOf(token, 'POST', `/api/${collection}:update?filterByTk=${row.id}`, { [backupName]: row[name] })
-    }
+  }
+  // The copy stays outside the existence check: a run interrupted between
+  // the backup-column create and the end of the copy would otherwise skip
+  // straight to the destroy below and permanently lose the rows the first
+  // pass never copied. Re-copying overwrites idempotently, so the loop is
+  // safe on every re-entry.
+  const rows = await dataOf(token, 'GET', `/api/${collection}:list?pageSize=500`)
+  for (const row of rows ?? []) {
+    if (row[name] === null || row[name] === undefined) continue
+    await dataOf(token, 'POST', `/api/${collection}:update?filterByTk=${row.id}`, { [backupName]: row[name] })
   }
   await dataOf(token, 'POST', `/api/collections/${collection}/fields:destroy?filterByTk=${name}`)
   await dataOf(token, 'POST', `/api/collections/${collection}/fields:create`, association)

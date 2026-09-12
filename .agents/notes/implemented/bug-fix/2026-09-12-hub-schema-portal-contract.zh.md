@@ -12,7 +12,7 @@ Status: implemented
 
 ### 三态字段迁移，绝不破坏数据
 
-`examples/kb-agent/scripts/nocobase-hub-modules.mts` 的 `migrateTextFieldToAssociation` 把旧的同名文本字段转换为 Portal FK 合同下的 belongsTo。同名字段在 NocoBase 中不能并存，文本列必须先 destroy 再 create 关联；`*_text` 备份列（`assignee_text`/`owner_text`/`category_text`）先行保留原值，并作为回滚通道长期保留。三个可观测状态使任意中断点都能安全重跑：`string` → 备份 + 拷贝 + destroy + create；字段缺失（上次运行死在 destroy 与 create 之间）→ 只 create；`belongsTo` → kept。外键一律取 Portal 的派生合同名，任何安装都不会再派生出第二个名字。
+`examples/kb-agent/scripts/nocobase-hub-modules.mts` 的 `migrateTextFieldToAssociation` 把旧的同名文本字段转换为 Portal FK 合同下的 belongsTo。同名字段在 NocoBase 中不能并存，文本列必须先 destroy 再 create 关联；`*_text` 备份列（`assignee_text`/`owner_text`/`category_text`）先行保留原值，并作为回滚通道长期保留。三个可观测状态使任意中断点都能安全重跑：`string` → 备份 + 拷贝 + destroy + create（拷贝无条件重放——重入重拷全部行、幂等覆盖，死在备份列落地与拷贝完成之间的运行不丢未拷到的行）；字段缺失（上次运行死在 destroy 与 create 之间）→ 只 create；`belongsTo` → kept。外键一律取 Portal 的派生合同名，任何安装都不会再派生出第二个名字。
 
 ### 一个种子，两条路径到同一终态
 

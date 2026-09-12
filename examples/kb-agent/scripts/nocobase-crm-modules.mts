@@ -653,7 +653,10 @@ async function ensurePortalFields(token: string): Promise<void> {
     // give follow-ups their customer's first deal so the deals drawer lists
     // something on freshly migrated installs.
     { collection: 'crm_activities', assign: row => [['dealId', row.deal_id ?? null]] },
-    { collection: 'crm_follow_ups', assign: row => [['dealId', dealsByCustomer.get(row.customer_id ?? null)?.[0] ?? null]] },
+    // The follow-up dealId is a guess (the customer's first deal), unlike the
+    // activities mirror of deal_id: once a value is present — backfilled or
+    // hand-edited in the drawer — reruns keep it.
+    { collection: 'crm_follow_ups', assign: row => row.dealId == null ? [['dealId', dealsByCustomer.get(row.customer_id ?? null)?.[0] ?? null]] : [] },
     // D1: seeded targets rows (period-unique) get their owner association.
     { collection: 'crm_targets', assign: () => [['owner_id', superAdminId ?? null]] },
   ]

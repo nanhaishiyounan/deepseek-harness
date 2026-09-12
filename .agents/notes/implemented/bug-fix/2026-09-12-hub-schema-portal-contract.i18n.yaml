@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/bug-fix/2026-09-12-hub-schema-portal-contract.md
-2026-09-12-hub-schema-portal-contract.md: 5a222d4ff89b0f67a309a51de69c022b797f8769
-2026-09-12-hub-schema-portal-contract.zh.md: fba1e02f62b58d3350e1cbbcb3ec460f4c2fd88f
+2026-09-12-hub-schema-portal-contract.md: 388c80293692fd4bb1e47b9dce9cfb1c7e5dc735
+2026-09-12-hub-schema-portal-contract.zh.md: bd639e483af8f51c3063f3de5c3cb461909c22db

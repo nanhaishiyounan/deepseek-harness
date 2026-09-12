@@ -44,6 +44,7 @@
  * NOCOBASE_AI_PROXY_PORT (N22 proxy port, default 13100).
  */
 import { spawn, spawnSync } from 'node:child_process'
+import { createHash } from 'node:crypto'
 import { DatabaseSync } from 'node:sqlite'
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
@@ -798,6 +799,21 @@ async function stepVerify(): Promise<void> {
     if (iconProbe === null || !iconProbe.ok) failures.push(`portal ${portal} AI icon ${iconFile} unreachable (HTTP ${iconProbe?.status ?? 'network error'}); rerun nocobase-portal-deploy.mts`)
     else if (!iconType.includes('image/svg+xml')) failures.push(`portal ${portal} AI icon ${iconFile} served "${iconType}" (HTML fallback, blank icon); rerun nocobase-portal-deploy.mts with the NOCOBASE_PORTAL_BASE injection`)
   }
+  // D7 anti-forgery: the C6/C7 byte assertions were self-consistent against
+  // a polluted source (the brand favicon shipped as an upstream default
+  // copy), so pin the known upstream favicon digests and refuse the local
+  // source itself before any probe trusts it.
+  const brandFaviconPath = join(repoRoot, 'examples/kb-agent/workspace/assets/brand/favicon.ico')
+  if (!existsSync(brandFaviconPath)) throw new Error(`${brandFaviconPath} missing (derive it from dsh-favicon.svg; see the C4 batch log)`)
+  const brandFaviconBytes = readFileSync(brandFaviconPath)
+  const UPSTREAM_FAVICON_SHA256 = new Set([
+    '189d0a2f805653c64225a889f5b79078a09afb15b570da88dfd0b7f93bb9cce1', // built dist default (5496 B)
+    '3c1668c3b5c6593efcfb4454b45aa9be64a6a647906b29dd2842e8b62697e562', // client public default (15406 B)
+  ])
+  const brandFaviconSha = createHash('sha256').update(brandFaviconBytes).digest('hex')
+  if (UPSTREAM_FAVICON_SHA256.has(brandFaviconSha)) {
+    failures.push(`${brandFaviconPath} is an upstream default favicon (sha256 ${brandFaviconSha}); derive it from dsh-favicon.svg, then rerun nocobase-n25-brand.mts + nocobase-portal-deploy.mts`)
+  }
   // C4: brand whitelabel inside the OSS license boundary — the site title
   // and logo row must be ours, the favicon must not be the HTML fallback.
   // The logo lives in public statics (attachment ACLs block the anonymous
@@ -820,6 +836,9 @@ async function stepVerify(): Promise<void> {
     const faviconType = faviconProbe?.headers.get('content-type') ?? ''
     if (faviconProbe === null || !faviconProbe.ok) failures.push(`/favicon/favicon.ico unreachable (HTTP ${faviconProbe?.status ?? 'network error'}); run nocobase-n25-brand.mts after build`)
     else if (faviconType.includes('text/html')) failures.push('/favicon/favicon.ico served the HTML fallback; run nocobase-n25-brand.mts after build')
+    else if (!Buffer.from(await faviconProbe.arrayBuffer()).equals(brandFaviconBytes)) {
+      failures.push('/favicon/favicon.ico is not the overlaid DSH brand favicon; run nocobase-n25-brand.mts after build')
+    }
   }
   // C6: the portal surfaces carry the DSH brand — the entry title is ours,
   // and the favicon plus the light/dark logo-marks are the overlaid brand
@@ -830,11 +849,9 @@ async function stepVerify(): Promise<void> {
     // asset fails the verify outright instead of downgrading to the MIME-only
     // probe (misconfiguration fails loud).
     const markPath = join(brandDir, 'dsh-logo-mark.png')
-    const faviconPath = join(brandDir, 'favicon.ico')
     if (!existsSync(markPath)) throw new Error(`${markPath} missing (derive it from dsh-brand-logo.svg; see the C6 batch log)`)
-    if (!existsSync(faviconPath)) throw new Error(`${faviconPath} missing (derive it from dsh-favicon.svg; see the C4 batch log)`)
     const expectedBytes = {
-      'favicon.ico': readFileSync(faviconPath),
+      'favicon.ico': brandFaviconBytes,
       'logo-mark.png': readFileSync(markPath),
       'logo-mark-dark.png': readFileSync(markPath),
     } as const
@@ -855,12 +872,42 @@ async function stepVerify(): Promise<void> {
   }
   // D4: the admin entry pins no favicon link, so every browser falls back to
   // the origin root /favicon.ico — the overlay must answer 200 with the ico
-  // bytes (the gateway's HTML 200 was the bug).
+  // bytes (the gateway's HTML 200 was the bug), byte-identical to the brand
+  // source (D7: an upstream default also passed the old MIME-only probe).
   {
     const probe = await fetch(`${baseUrl}/favicon.ico`, { signal: AbortSignal.timeout(5000) }).catch(() => null)
     const type = probe?.headers.get('content-type') ?? ''
     if (probe === null || !probe.ok || type.includes('text/html')) {
       failures.push(`root /favicon.ico is ${probe?.status ?? 'network error'} (${type}); rerun the n25 brand overlay`)
+    } else if (!Buffer.from(await probe.arrayBuffer()).equals(brandFaviconBytes)) {
+      failures.push('root /favicon.ico is not the overlaid DSH brand favicon; rerun the n25 brand overlay')
+    }
+  }
+  // D7: the user-facing chain is the dsh web gateway (:3080 by default) —
+  // when one is up, all three favicon paths it serves must carry the brand
+  // bytes. `all` legitimately runs before the gateway restarts (the reset
+  // flow), so a silent gateway skips this group with a note instead of
+  // failing; the anti-forgery digest above and the direct :13000 byte
+  // assertions still run unconditionally.
+  {
+    let gatewayBase: string | null = null
+    for (const port of DSH_WEB_GATEWAY_PORTS) {
+      const probe = await fetch(`http://127.0.0.1:${port}/manifest.webmanifest`, { signal: AbortSignal.timeout(1500) }).catch(() => null)
+      const body = probe === null ? '' : await probe.text().catch(() => '')
+      if (probe?.ok === true && body.includes('"short_name": "DSH"')) {
+        gatewayBase = `http://127.0.0.1:${port}`
+        break
+      }
+    }
+    if (gatewayBase === null) {
+      console.log('setup-nocobase verify: no live dsh web gateway; the :3080 favicon chain was not probed (start dsh web and rerun verify for the user-path assertion)')
+    } else {
+      for (const path of ['/nocobase/favicon.ico', '/nocobase/dist/crm/favicon.ico', '/nocobase/dist/hub/favicon.ico']) {
+        const probe = await fetch(`${gatewayBase}${path}`, { signal: AbortSignal.timeout(5000) }).catch(() => null)
+        const sha = probe === null ? '' : createHash('sha256').update(Buffer.from(await probe.arrayBuffer())).digest('hex')
+        if (probe === null || !probe.ok) failures.push(`gateway ${path} unreachable (HTTP ${probe?.status ?? 'network error'}); check the dsh web gateway nocobase proxy`)
+        else if (sha !== brandFaviconSha) failures.push(`gateway ${path} is not the overlaid DSH brand favicon (sha256 ${sha}); rerun nocobase-n25-brand.mts + nocobase-portal-deploy.mts, then restart the gateway`)
+      }
     }
   }
   // C3-A: the portal list pages pin default sorters, columns, and filters on
@@ -1030,6 +1077,26 @@ async function stepStop(): Promise<void> {
   console.log(`setup-nocobase: stopped (port free: ${!(await serverUp())})`)
 }
 
+/**
+ * Widen every hub_/crm_ integer id-reference column to bigint (D7): the
+ * referenced primary keys are bigint, so an integer reference column
+ * overflows long before the rows it points at do. Idempotent — the ALTER
+ * list comes from information_schema, so already-widened columns produce
+ * no statement and a settled world stays untouched.
+ */
+function stepNormalizeFkColumns(): void {
+  const survey = "SELECT format('ALTER TABLE %I ALTER COLUMN %I TYPE bigint', table_name, column_name) FROM information_schema.columns WHERE table_schema = 'public' AND data_type = 'integer' AND table_name ~ '^(hub_|crm_)' AND column_name ~ '(id|Id)$'"
+  const listed = spawnSync('psql', ['-U', process.env.USER ?? 'mac', '-d', 'nocobase', '-t', '-A', '-c', survey], { encoding: 'utf8' })
+  if (listed.status !== 0) throw new Error(`FK bigint survey failed: ${listed.stderr}`)
+  const statements = listed.stdout.split('\n').map(line => line.trim()).filter(line => line.length > 0)
+  for (const statement of statements) {
+    const altered = spawnSync('psql', ['-U', process.env.USER ?? 'mac', '-d', 'nocobase', '-c', statement], { encoding: 'utf8' })
+    if (altered.status !== 0) throw new Error(`FK bigint widen failed (${statement}): ${altered.stderr}`)
+    console.log(`setup-nocobase: ${statement}`)
+  }
+  console.log(`setup-nocobase: FK bigint normalization ${statements.length > 0 ? `widened ${statements.length} column(s)` : 'already bigint (kept)'}`)
+}
+
 async function stepReset(): Promise<void> {
   await warnLiveDshWebGateways()
   await stepStop()
@@ -1081,6 +1148,10 @@ async function main(): Promise<void> {
           throw new Error(`${script} failed during the all chain`)
         }
       }
+      // The module scripts above leave id-reference columns as NocoBase
+      // integer fields; align them with the bigint primary keys they point
+      // at (D7, idempotent).
+      stepNormalizeFkColumns()
       // The DSH-side data plane (connector-files + lakehouse + market + the
       // knowledge graph + the KB corpus): one child replay, its own steps
       // probe watermarks so a settled world stays all-kept.
