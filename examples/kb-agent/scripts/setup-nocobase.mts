@@ -1172,6 +1172,7 @@ async function main(): Promise<void> {
         'nocobase-crm-modules.mts', 'nocobase-hub-modules.mts',
         'nocobase-n13-rebuild.mts', 'nocobase-n13-seed.mts', 'nocobase-n14-fix.mts',
         'nocobase-n17-alignment.mts', 'nocobase-e1-pj-v2.mts', 'nocobase-f1-view-v2.mts', 'nocobase-f2-crm-v2.mts', 'nocobase-f3-hub-v2.mts', 'nocobase-n18-form-ai.mts', 'nocobase-n25-brand.mts',
+        'nocobase-f4-charts.mts',
       ]) {
         if (!run('node', ['--import', 'tsx/esm', join(repoRoot, 'examples/kb-agent/scripts', script)])) {
           throw new Error(`${script} failed during the all chain`)
