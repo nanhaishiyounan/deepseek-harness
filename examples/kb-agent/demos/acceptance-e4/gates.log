@@ -1,0 +1,17 @@
+# E4 门禁与冒烟实录（2026-09-13）
+
+| 门禁 | 命令 | 结果 |
+|---|---|---|
+| 幂等双跑 | e1 → n18 → n17 ×2 | 全 kept（37 个 kept 标记，零 rebuild/added），见 idempotent-rerun.log |
+| typecheck | pnpm run typecheck | EXIT=0 |
+| lint | pnpm run lint | 0 warnings 0 errors（2997 文件） |
+| doc-sync | pnpm run doc-sync | 28 passed, 0 failed |
+| verify（含新断言 11 v2 flowPage + 11 n18ai-） | setup-nocobase.mts verify | OK 全绿 |
+| portal tsc ×2 | demo-portal-hub / demo-portal-crm `tsc --noEmit` | EXIT=0 / EXIT=0 |
+| deploy 双跑树哈希 | nocobase-portal-deploy.mts ×2 | b2f9b28df1375f5222a36033c9fb1bcfbb5c1a0c110bea66035ceca58bde7944 一致 |
+| 网关冒烟 | curl :3080 ×5 | nocobase/dist/hub/、/dist/crm/、/admin/n17e1jrca9wq3r、/admin/qj3wstl3cfl、/favicon.ico 全 200 |
+| Agent Note 分类 | pnpm run verify-agent-note-classification | 660 notes 结构一致 |
+| i18n 配对 | verify-translation-pairing --write（新 note） | 1 record written |
+| favicon hash 口径 | shasum -a 1 workspace/assets/brand/favicon.ico | f717367a03a56b90ca80198b81bc2456288c69d7（与 handoff :29 记载一致） |
+
+注：portal 重建产物为静态文件，:3080 网关即时伺服（E2 浏览器验收即经网关通过）——重启义务仅属于 reset 后的 inode 场景（QUICKSTART reset 节）。
