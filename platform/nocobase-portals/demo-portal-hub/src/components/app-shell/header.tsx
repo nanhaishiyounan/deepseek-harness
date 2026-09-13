@@ -3,7 +3,6 @@ import {
   useLogout,
   useTranslate,
 } from "@refinedev/core";
-import { resolveNocoBaseSettingsUrl } from "@nocobase/portal-sdk/runtime";
 import {
   DropdownMenu,
   DropdownMenuItem,
@@ -109,6 +108,20 @@ function MobileHeader() {
   );
 }
 
+/**
+ * The local NocoBase snapshot (2.2.6) mounts every settings route under
+ * /admin/settings/*; portal-sdk 2.1.0's resolveNocoBaseSettingsUrl()
+ * generates the v2.13+ bare /settings form, which the admin SPA's client
+ * router renders as Not Found. Derive the data-source-manager URL from the
+ * runtime api base instead — it is correct behind the dsh gateway
+ * (apiBase /nocobase/api) and on direct access (/api) alike.
+ */
+function adminDataSourceManagerUrl(): string {
+  const apiBase = window.NOCOBASE_API_URL ?? "/api";
+  const adminBase = apiBase.replace(/\/api\/?$/, "");
+  return `${adminBase}/admin/settings/data-source-manager/main/collections`;
+}
+
 function SettingsLink({ className }: { className?: string }) {
   const translate = useTranslate();
   const label = translate("shell.settings", "Settings");
@@ -121,7 +134,7 @@ function SettingsLink({ className }: { className?: string }) {
             <Button
               render={
                 <a
-                  href={resolveNocoBaseSettingsUrl()}
+                  href={adminDataSourceManagerUrl()}
                   target="_blank"
                   rel="noopener noreferrer"
                 />
