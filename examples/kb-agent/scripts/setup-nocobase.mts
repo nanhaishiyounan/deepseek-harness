@@ -733,8 +733,12 @@ async function stepVerify(): Promise<void> {
   const v2Titles = new Set((v2Routes?.data ?? []).map(row => row.title ?? ''))
   const missingV2 = ['客户', '销售线索', '联系人', '订单', '报价单', '工单', '资产台账', '员工', '项目', '任务列表', '里程碑'].filter(title => !v2Titles.has(title))
   if (missingV2.length > 0) failures.push(`v2 table flowPages missing: ${missingV2.join(', ')} (run nocobase-n17-alignment.mts + nocobase-e1-pj-v2.mts for the 项目管理 pages)`)
-  const flowModels = await call(token, 'GET', '/api/flowModels:list?pageSize=1000') as { data?: Array<{ use?: string, uid?: string }> }
-  const modelCount = (use: string) => (flowModels?.data ?? []).filter(row => row.use === use).length
+  const flowModels = await call(token, 'GET', '/api/flowModels:list?pageSize=1000') as { data?: Array<{ use?: string, uid?: string }>, meta?: { total?: number } }
+  const flowModelRows = flowModels?.data ?? []
+  if (typeof flowModels?.meta?.total === 'number' && flowModels.meta.total > flowModelRows.length) {
+    failures.push(`flowModels:list returned ${flowModelRows.length} of ${flowModels.meta.total} rows; raise the verify pageSize`)
+  }
+  const modelCount = (use: string) => flowModelRows.filter(row => row.use === use).length
   if (modelCount('AddNewActionModel') < 8) failures.push('AddNewActionModel count < 8 (v2 table action bars incomplete)')
   if (modelCount('FormSubmitActionModel') < 8) failures.push('FormSubmitActionModel count < 8 (Add-new popups cannot submit)')
   // N18: every Add-new popup carries the in-form AI fill button (the official

@@ -19,17 +19,21 @@
  * The kanban / calendar / gantt pages stay v1: the 2.2.6 flowModel catalog
  * has no block model for those views (documented QUICKSTART boundary).
  *
- * Idempotent: an existing flowPage of the same title is kept whole (the
- * n18 button uid derives from the form uid, so keeping the page keeps the
- * buttons). The v1 route row destroyed before the upgrade is logged to
- * demos/acceptance-e1/rollback-records.json; `--rollback` re-creates those
- * rows and tears down the n17e1* / n18ai-n17e1* flowModels trees.
+ * Idempotent: an existing flowPage of the same title is kept only when its
+ * flowModels tree still carries the acceptance spine (route models, table
+ * block, form, submit action); a page whose tree was truncated is torn down
+ * and rebuilt from the rollback record, never silently left blank. The v1
+ * route row is merged into demos/acceptance-e1/rollback-records.json
+ * (keyed by title) and flushed to disk BEFORE the row is destroyed, so a
+ * crash mid-upgrade never loses the restore payload. `--rollback` re-creates
+ * the recorded rows and tears down the n17e1* trees plus the n18ai- buttons
+ * orphaned by that teardown.
  *
  * Usage:
  *   node --import tsx/esm examples/kb-agent/scripts/nocobase-e1-pj-v2.mts [--only 项目]
  *   node --import tsx/esm examples/kb-agent/scripts/nocobase-e1-pj-v2.mts --rollback
  */
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -83,7 +87,7 @@ async function signInWithRetry(attempts = 4): Promise<string> {
 
 /** Column + form field shorthand shared by the page factory below (N17 kinds + E1 kinds). */
 type FieldKind = 'input' | 'select' | 'number' | 'm2o' | 'date' | 'boolean'
-type FieldSpec = { name: string, title: string, kind: FieldKind, options?: object[] }
+type FieldSpec = { name: string, title: string, kind: FieldKind, options?: object[], required?: boolean }
 
 type V2PageSpec = {
   title: string
@@ -132,7 +136,7 @@ const PJ_PAGES: ReadonlyArray<V2PageSpec> = [
       { name: 'planned_end_date', title: '计划完成', kind: 'date' },
     ],
     formFields: [
-      { name: 'name', title: '项目名称', kind: 'input' },
+      { name: 'name', title: '项目名称', kind: 'input', required: true },
       { name: 'no', title: '项目编号', kind: 'input' },
       { name: 'customer', title: '客户', kind: 'input' },
       { name: 'owner', title: '负责人', kind: 'm2o' },
@@ -157,7 +161,7 @@ const PJ_PAGES: ReadonlyArray<V2PageSpec> = [
       { name: 'plan_end', title: '计划结束', kind: 'date' },
     ],
     formFields: [
-      { name: 'title', title: '任务标题', kind: 'input' },
+      { name: 'title', title: '任务标题', kind: 'input', required: true },
       { name: 'project', title: '所属项目', kind: 'm2o' },
       { name: 'assignee', title: '负责人', kind: 'm2o' },
       { name: 'status', title: '状态', kind: 'select', options: TASK_STATUS },
@@ -176,7 +180,7 @@ const PJ_PAGES: ReadonlyArray<V2PageSpec> = [
       { name: 'status', title: '状态', kind: 'select', options: MILESTONE_STATUS },
     ],
     formFields: [
-      { name: 'name', title: '里程碑', kind: 'input' },
+      { name: 'name', title: '里程碑', kind: 'input', required: true },
       { name: 'project', title: '所属项目', kind: 'm2o' },
       { name: 'due_at', title: '到期日', kind: 'date' },
       { name: 'status', title: '状态', kind: 'select', options: MILESTONE_STATUS },
@@ -210,29 +214,178 @@ const editModelFor = (kind: FieldKind): string => {
 }
 
 type RouteRow = { id: number, title: string | null, parentId: number | null, type: string, schemaUid: string | null, icon: string | null, sort: number | null }
+type FlowModelRow = Record<string, any>
+
+/** Restore payload for one destroyed v1 route row; kept in sync with rollback-records.json. */
+type RollbackRecord = { title: string, parentId: number | null, icon: string | null, sort: number | null, schemaUid: string | null, destroyedId?: number }
+
+/**
+ * Read the rollback record. A missing file means "nothing upgraded from
+ * this checkout yet" (empty list); a file that exists but does not parse
+ * is corruption of the only restore payload — fail loud instead of
+ * pretending there is nothing to restore.
+ */
+function loadRollbackRecords(): RollbackRecord[] {
+  try {
+    return JSON.parse(readFileSync(rollbackPath, 'utf8')) as RollbackRecord[]
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code
+    if (code === 'ENOENT') return []
+    throw new Error(`rollback record at ${rollbackPath} is unreadable (${String(error)}); fix or delete it before re-running`)
+  }
+}
+
+/** Persist the merged record array; called before every destructive write so a crash loses nothing. */
+function saveRollbackRecords(records: RollbackRecord[]): void {
+  writeFileSync(rollbackPath, `${JSON.stringify(records, null, 2)}\n`)
+}
+
+/** Merge one v1 row into the on-disk record keyed by title (read-modify-write, never a whole-file overwrite). */
+function upsertRollbackRecord(record: RollbackRecord): void {
+  const records = loadRollbackRecords()
+  const index = records.findIndex(row => row.title === record.title)
+  if (index >= 0) records.splice(index, 1, record)
+  else records.push(record)
+  saveRollbackRecords(records)
+}
+
+/**
+ * List all flowModels rows, refusing to continue when the page size was
+ * exceeded: a truncated list would make the kept-tree check and the orphan
+ * sweep below silently miss rows. Raise pageSize here when the catalog grows.
+ */
+async function listFlowModels(token: string): Promise<FlowModelRow[]> {
+  const pageSize = 1000
+  const payload = await call(token, 'GET', `/api/flowModels:list?pageSize=${pageSize}`)
+  const rows = (payload?.data ?? null) as FlowModelRow[] | null
+  if (rows === null) return []
+  const total = payload?.meta?.total
+  if (typeof total === 'number' && total > rows.length) {
+    throw new Error(`flowModels:list returned ${rows.length} of ${total} rows (pageSize=${pageSize}); raise the page size or paginate before running E1`)
+  }
+  return rows
+}
 
 async function listRoutes(token: string): Promise<RouteRow[]> {
-  const routes = await dataOf(token, 'GET', '/api/desktopRoutes:list?pageSize=400') as RouteRow[] | null
-  return routes ?? []
+  const pageSize = 400
+  const payload = await call(token, 'GET', `/api/desktopRoutes:list?pageSize=${pageSize}`)
+  const routes = (payload?.data ?? null) as RouteRow[] | null
+  if (routes === null) return []
+  const total = payload?.meta?.total
+  if (typeof total === 'number' && total > routes.length) {
+    throw new Error(`desktopRoutes:list returned ${routes.length} of ${total} rows (pageSize=${pageSize}); raise the page size before running E1`)
+  }
+  return routes
+}
+
+/**
+ * The acceptance spine every kept v2 page must still render: a
+ * TableBlockModel and a CreateFormModel on the page's collection, and that
+ * form's submit action. RouteModel rows are deliberately NOT required:
+ * flowModels:save accepts the `{use:'RouteModel'}` payload but never
+ * persists it, and every rendered E1 page since the first upgrade proves
+ * the trees mount without it — asserting it would force a rebuild on every
+ * run.
+ */
+async function v2TreeComplete(token: string, spec: V2PageSpec, flow: RouteRow): Promise<boolean> {
+  const rows = await listFlowModels(token)
+  const uids = new Set(rows.map(row => String(row.uid ?? '')))
+  const collectionOf = (row: FlowModelRow): string | undefined => row?.stepParams?.resourceSettings?.init?.collectionName
+  const hasTable = rows.some(row => row.use === 'TableBlockModel' && collectionOf(row) === spec.collection)
+  const form = rows.find(row => row.use === 'CreateFormModel' && row.parentId == null && collectionOf(row) === spec.collection)
+  const hasSubmit = form !== undefined && uids.has(`submit-${form.uid}`)
+  if (hasTable && hasSubmit) return true
+  console.log(`nocobase-e1: v2 page "${spec.title}" (${flow.schemaUid}) tree incomplete (table ${hasTable}, form submit ${hasSubmit})`)
+  return false
+}
+
+/**
+ * Detect truncated v2 pages, then tear EVERY E1 page back to its v1 row in
+ * one pass. Per-page healing cannot work here: a tree teardown is global
+ * (n17e1* rows carry no page marker), so healing page B destroys page A's
+ * fresh tree and the run would end with only the last page intact. Returns
+ * true when a teardown happened — callers must then rebuild all PJ_PAGES,
+ * not just the requested subset.
+ */
+async function healTruncatedPages(token: string, pages: ReadonlyArray<V2PageSpec>): Promise<boolean> {
+  const incomplete: V2PageSpec[] = []
+  for (const spec of pages) {
+    const flow = (await listRoutes(token)).find(row => row.title === spec.title && row.type === 'flowPage')
+    if (flow !== undefined && !(await v2TreeComplete(token, spec, flow))) incomplete.push(spec)
+  }
+  if (incomplete.length === 0) return false
+  console.log(`nocobase-e1: truncated v2 page(s) ${incomplete.map(spec => spec.title).join(' / ')}; tearing every E1 page down for a full rebuild`)
+  await destroyE1Trees(token)
+  const records = loadRollbackRecords()
+  for (const spec of PJ_PAGES) {
+    const routes = await listRoutes(token)
+    const flow = routes.find(row => row.title === spec.title && row.type === 'flowPage')
+    if (flow !== undefined) {
+      for (const row of routes.filter(r => r.parentId === flow.id && r.type === 'tabs')) {
+        await call(token, 'DELETE', `/api/desktopRoutes:destroy?filterByTk=${row.id}`)
+      }
+      await call(token, 'DELETE', `/api/desktopRoutes:destroy?filterByTk=${flow.id}`)
+    }
+    const hasV1 = routes.some(row => row.title === spec.title && row.type === 'page')
+    if (hasV1) continue
+    const record = records.find(row => row.title === spec.title)
+    if (record === undefined || record.schemaUid === null) {
+      throw new Error(`v2 page "${spec.title}" is truncated and no v1 rollback record exists for it; restore from demos/acceptance-e1/pre-e1-routes-models-dump.sql or re-run nocobase-hub-modules.mts reset`)
+    }
+    await dataOf(token, 'POST', '/api/desktopRoutes:create', { title: record.title, icon: record.icon, type: 'page', parentId: record.parentId, sort: record.sort, schemaUid: record.schemaUid })
+  }
+  return true
+}
+
+/**
+ * Destroy every n17e1* flowModels tree, then sweep the n18ai- buttons the
+ * teardown orphaned. Orphans must be judged against the post-destroy list:
+ * before the destroy, every E1 button still points at a live (doomed) form,
+ * so a pre-destroy snapshot would match everything and clean nothing.
+ */
+async function destroyE1Trees(token: string): Promise<void> {
+  let destroyedModels = 0
+  for (const row of await listFlowModels(token)) {
+    const uid = String(row.uid ?? '')
+    if (uid.startsWith('n17e1')) {
+      await call(token, 'POST', `/api/flowModels:destroy?filterByTk=${encodeURIComponent(uid)}`)
+      destroyedModels += 1
+    }
+  }
+  if (destroyedModels === 0) return
+  const survivors = await listFlowModels(token)
+  const liveForms = new Set(survivors.filter(row => row.use === 'CreateFormModel').map(row => String(row.uid ?? '')))
+  let destroyedButtons = 0
+  for (const row of survivors) {
+    const uid = String(row.uid ?? '')
+    if (uid.startsWith('n18ai-') && !liveForms.has(uid.slice('n18ai-'.length))) {
+      await call(token, 'POST', `/api/flowModels:destroy?filterByTk=${encodeURIComponent(uid)}`)
+      destroyedButtons += 1
+    }
+  }
+  console.log(`nocobase-e1: ${destroyedModels} n17e1 flowModels destroyed, ${destroyedButtons} orphaned n18ai- buttons swept`)
 }
 
 /**
  * Replace one v1 table page with a v2 flowPage (N17d factory replica). The
- * destroyed v1 row is appended to the rollback record before any write, so
- * a failed upgrade never loses the restore payload.
+ * destroyed v1 row is merged into the on-disk rollback record and flushed
+ * BEFORE the destroy call, so a crash mid-upgrade never loses the payload.
  */
-async function ensureV2TablePage(token: string, spec: V2PageSpec, rollbackLog: Array<Record<string, unknown>>): Promise<void> {
+async function ensureV2TablePage(token: string, spec: V2PageSpec): Promise<void> {
   const rows = (await listRoutes(token)).filter(row => row.title === spec.title)
   const flow = rows.find(row => row.type === 'flowPage')
   if (flow !== undefined) {
+    if (!(await v2TreeComplete(token, spec, flow))) {
+      throw new Error(`v2 page "${spec.title}" is still truncated after the heal pass; refusing to silently keep a blank page`)
+    }
     console.log(`nocobase-e1: v2 page "${spec.title}" exists (kept)`)
     return
   }
-  const v1 = rows.find(row => row.type === 'page')
+  const v1 = (await listRoutes(token)).find(row => row.title === spec.title && row.type === 'page')
   if (v1 === undefined) throw new Error(`page "${spec.title}" not found; run nocobase-hub-modules.mts first`)
   const { parentId, icon, sort, schemaUid } = v1
-  rollbackLog.push({ title: spec.title, parentId, icon, sort, schemaUid, destroyedId: v1.id })
-  console.log(`nocobase-e1: v1 page "${spec.title}" row ${JSON.stringify({ id: v1.id, parentId, icon, sort, schemaUid })} recorded, destroying`)
+  upsertRollbackRecord({ title: spec.title, parentId, icon, sort, schemaUid, destroyedId: v1.id })
+  console.log(`nocobase-e1: v1 page "${spec.title}" row ${JSON.stringify({ id: v1.id, parentId, icon, sort, schemaUid })} recorded to disk, destroying`)
   await call(token, 'DELETE', `/api/desktopRoutes:destroy?filterByTk=${v1.id}`)
   const routeUid = `n17e1${nodeKey()}`
   const page = await dataOf(token, 'POST', '/api/desktopRoutes:create', { title: spec.title, icon, type: 'flowPage', parentId, sort, schemaUid: routeUid })
@@ -339,9 +492,9 @@ async function ensurePjTitleFields(token: string): Promise<void> {
  * same deterministic `submit-<formUid>` ids as N17.
  */
 async function ensureFormSubmits(token: string): Promise<void> {
-  const rows = await dataOf(token, 'GET', '/api/flowModels:list?pageSize=1000') as Array<Record<string, any>> | null
-  const existingSubmits = new Set((rows ?? []).filter(row => row.use === 'FormSubmitActionModel').map(row => row.uid))
-  const forms = (rows ?? []).filter(row => row.use === 'CreateFormModel' && row.parentId == null && row.stepParams?.resourceSettings?.init?.collectionName
+  const rows = await listFlowModels(token)
+  const existingSubmits = new Set(rows.filter(row => row.use === 'FormSubmitActionModel').map(row => row.uid))
+  const forms = rows.filter(row => row.use === 'CreateFormModel' && row.parentId == null && row.stepParams?.resourceSettings?.init?.collectionName
     && ['hub_pj_projects', 'hub_pj_tasks', 'hub_pj_milestones'].includes(String(row.stepParams.resourceSettings.init.collectionName)))
   let added = 0
   for (const form of forms) {
@@ -355,7 +508,35 @@ async function ensureFormSubmits(token: string): Promise<void> {
   console.log(`nocobase-e1: form submit actions ${added > 0 ? `${added} added` : 'already in place (kept)'}`)
 }
 
-/** Build the FormGridModel schema node for one popup form (one row per field; N17 shape). */
+/**
+ * Flag every `required: true` form field on already-upgraded pages too.
+ * The factory seeds the flag on fresh builds, but a kept page never
+ * rebuilds, so this sweep merges `props.required` onto the existing
+ * FormItemModel rows (flowModels:save merges — the field binding and other
+ * props survive) until the flag is present.
+ */
+async function ensureRequiredFields(token: string): Promise<void> {
+  const rows = await listFlowModels(token)
+  const targets = PJ_PAGES.flatMap(spec => spec.formFields.filter(field => field.required === true)
+    .map(field => ({ collection: spec.collection, name: field.name })))
+  const fieldInit = (row: FlowModelRow): { collectionName?: string, fieldPath?: string } => row?.stepParams?.fieldSettings?.init ?? {}
+  let flagged = 0
+  for (const target of targets) {
+    const row = rows.find(candidate => candidate.use === 'FormItemModel'
+      && fieldInit(candidate).collectionName === target.collection && fieldInit(candidate).fieldPath === target.name)
+    if (row === undefined || row.props?.required === true) continue
+    await call(token, 'POST', '/api/flowModels:save', { uid: row.uid, props: { required: true } })
+    flagged += 1
+  }
+  console.log(`nocobase-e1: required form fields ${flagged > 0 ? `${flagged} flagged` : 'already in place (kept)'}`)
+}
+
+/**
+ * Build the FormGridModel schema node for one popup form (one row per
+ * field; N17 shape). `required` lands on the FormItemModel props — the same
+ * slot the flow-engine `required` step writes — so formily blocks submission
+ * of an empty title/name before any request leaves the browser.
+ */
 function formGrid(collection: string, fields: ReadonlyArray<FieldSpec>): Record<string, unknown> {
   const itemUids = fields.map(() => `n17e1i${nodeKey()}`)
   const rows = itemUids.map((itemUid, index) => ({
@@ -369,7 +550,8 @@ function formGrid(collection: string, fields: ReadonlyArray<FieldSpec>): Record<
     stepParams: { gridSettings: { grid: { layout: { version: 2, rows } } } },
     subModels: {
       items: fields.map((field, index) => ({
-        uid: itemUids[index], use: 'FormItemModel', subKey: 'items', subType: 'array', sortIndex: index + 1, props: {},
+        uid: itemUids[index], use: 'FormItemModel', subKey: 'items', subType: 'array', sortIndex: index + 1,
+        props: field.required === true ? { required: true } : {},
         stepParams: { fieldSettings: { init: { dataSourceKey: 'main', collectionName: collection, fieldPath: field.name } } },
         subModels: {
           field: {
@@ -383,42 +565,23 @@ function formGrid(collection: string, fields: ReadonlyArray<FieldSpec>): Record<
 }
 
 /**
- * Tear the upgrade down: destroy each E1 flowPage route row (with its tabs
- * child), every n17e1* flowModels tree, the orphaned n18ai- form buttons
- * (the embedded CreateFormModel gets a server-generated uid, so no
- * n18ai-n17e1* prefix exists — orphans are matched exactly the way
- * nocobase-n18-form-ai.mts self-heals), then re-create the recorded v1
- * route rows pointing at their original uiSchemas. Re-run
- * nocobase-hub-modules.mts afterwards to replay the v1 blocks if the
- * uiSchemas tree was cascade-deleted (probe note: it is not).
+ * Tear the upgrade down: destroy every n17e1* flowModels tree and the
+ * n18ai- buttons the teardown orphaned (judged against the post-destroy
+ * list, see destroyE1Trees), then each E1 flowPage route row (with its
+ * tabs child), then re-create the recorded v1 route rows pointing at
+ * their original uiSchemas. Re-run nocobase-hub-modules.mts afterwards to
+ * replay the v1 blocks if the uiSchemas tree was cascade-deleted (probe
+ * note: it is not).
  */
 async function rollback(token: string): Promise<void> {
-  let records: Array<{ title: string, parentId: number | null, icon: string | null, sort: number | null, schemaUid: string | null }> = []
-  try {
-    records = JSON.parse(readFileSync(rollbackPath, 'utf8')) as typeof records
-  } catch {
+  const records = loadRollbackRecords()
+  if (records.length === 0) {
     console.log(`nocobase-e1: no rollback record at ${rollbackPath} (nothing upgraded from this checkout?)`)
   }
-  const models = await dataOf(token, 'GET', '/api/flowModels:list?pageSize=1000') as Array<Record<string, any>> | null
-  const formUidSet = new Set((models ?? []).filter(row => row.use === 'CreateFormModel').map(row => String(row.uid ?? '')))
-  let destroyedModels = 0
-  let destroyedButtons = 0
-  for (const row of models ?? []) {
-    const uid = String(row.uid ?? '')
-    if (uid.startsWith('n17e1')) {
-      await call(token, 'POST', `/api/flowModels:destroy?filterByTk=${encodeURIComponent(uid)}`)
-      destroyedModels += 1
-      continue
-    }
-    if (uid.startsWith('n18ai-') && !formUidSet.has(uid.slice('n18ai-'.length))) {
-      await call(token, 'POST', `/api/flowModels:destroy?filterByTk=${encodeURIComponent(uid)}`)
-      destroyedButtons += 1
-    }
-  }
-  const routes = await listRoutes(token)
+  await destroyE1Trees(token)
   let destroyedRoutes = 0
   for (const spec of PJ_PAGES) {
-    const flow = routes.find(row => row.title === spec.title && row.type === 'flowPage')
+    const flow = (await listRoutes(token)).find(row => row.title === spec.title && row.type === 'flowPage')
     if (flow === undefined) continue
     const tabs = (await listRoutes(token)).filter(row => row.parentId === flow.id && row.type === 'tabs')
     for (const tab of tabs) {
@@ -435,7 +598,7 @@ async function rollback(token: string): Promise<void> {
     await dataOf(token, 'POST', '/api/desktopRoutes:create', { title: record.title, icon: record.icon, type: 'page', parentId: record.parentId, sort: record.sort, schemaUid: record.schemaUid })
     restored += 1
   }
-  console.log(`nocobase-e1: rollback done — ${destroyedModels} flowModels destroyed, ${destroyedButtons} orphaned AI buttons destroyed, ${destroyedRoutes} v2 route rows destroyed, ${restored} v1 route rows restored (re-run nocobase-hub-modules.mts to replay v1 blocks if needed)`)
+  console.log(`nocobase-e1: rollback done — ${destroyedRoutes} v2 route rows destroyed, ${restored} v1 route rows restored (re-run nocobase-hub-modules.mts to replay v1 blocks if needed)`)
 }
 
 async function main(): Promise<void> {
@@ -451,16 +614,13 @@ async function main(): Promise<void> {
   const pages = only === undefined ? PJ_PAGES : PJ_PAGES.filter(spec => spec.title === only)
   if (pages.length === 0) throw new Error(`--only "${only}" matches no E1 page (${PJ_PAGES.map(spec => spec.title).join(' / ')})`)
   await ensurePjTitleFields(token)
-  const rollbackLog: Array<Record<string, unknown>> = []
-  for (const spec of pages) {
-    await ensureV2TablePage(token, spec, rollbackLog)
+  const rebuilt = await healTruncatedPages(token, pages)
+  const targets = rebuilt ? PJ_PAGES : pages
+  for (const spec of targets) {
+    await ensureV2TablePage(token, spec)
   }
   await ensureFormSubmits(token)
-  if (rollbackLog.length > 0) {
-    mkdirSync(dirname(rollbackPath), { recursive: true })
-    writeFileSync(rollbackPath, `${JSON.stringify(rollbackLog, null, 2)}\n`)
-    console.log(`nocobase-e1: rollback record written to ${rollbackPath}`)
-  }
+  await ensureRequiredFields(token)
   console.log('nocobase-e1: done')
 }
 

@@ -34,7 +34,7 @@ psql `fields` 表（30 行）+ `nocobase-hub-modules.mts:75-98` 定义交叉：
 ## 0-4 destroy v1 路由行后 uiSchemas 行为
 
 - 实证：任务列表页试点 destroy 前后 `SELECT count(*) FROM "uiSchemas"` = 673 → 673（不变）。
-- **结论：desktopRoutes:destroy 不级联删除 uiSchemas**——v1 uiSchema 树保留为孤儿（不渲染但可引用），rollback 分支 re-create 路由行引用原 schemaUid 即完整恢复 v1 页（含用户手配弹窗）。rollback-records.json 存了三行 `{title,parentId,icon,sort,schemaUid}`。
+- **结论：desktopRoutes:destroy 不级联删除 uiSchemas**——v1 uiSchema 树保留为孤儿（不渲染但可引用），rollback 分支 re-create 路由行引用原 schemaUid 即完整恢复 v1 页（含用户手配弹窗）。rollback-records.json 按页存 `{title,parentId,icon,sort,schemaUid}`；probe 当时仅两行（项目/里程碑）——任务列表的记录在 E1 分批跑时被整文件覆盖丢失，E5 已从本 dump 第 128 行考证补录（脚本同时改为按 title 合并写入、destroy 前逐页落盘，覆盖路径不复存在）。
 
 ## 0-5 N22 LLM 服务状态
 

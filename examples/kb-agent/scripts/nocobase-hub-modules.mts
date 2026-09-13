@@ -725,6 +725,14 @@ function kanbanCardField(collection: string, field: string): Record<string, unkn
   }
 }
 
+/**
+ * Kanban block factory honoring the official renderer's contracts
+ * (plugin-kanban Kanban.tsx renderCard + __e2e__/templates.ts shape):
+ * - the Kanban array's card child sits under the fixed `card` properties
+ *   key — renderCard reads `fieldSchema.properties.card` by name;
+ * - every card field is wrapped in Grid.Row → Grid.Col — the card Grid
+ *   only renders row children, a bare field node under it stays invisible.
+ */
 function kanbanBlock(collection: string, groupField: string, cardFields: string[]): Record<string, unknown> {
   return {
     _isJSONSchemaObject: true, version: '2.0', type: 'void',
@@ -737,7 +745,7 @@ function kanbanBlock(collection: string, groupField: string, cardFields: string[
       [nodeKey()]: {
         type: 'array', 'x-component': 'Kanban', 'x-use-component-props': 'useKanbanBlockProps',
         properties: {
-          [nodeKey()]: {
+          card: {
             type: 'void', 'x-read-pretty': true, 'x-label-disabled': true,
             'x-decorator': 'BlockItem', 'x-component': 'Kanban.Card',
             'x-component-props': { openMode: 'drawer' },
@@ -745,7 +753,10 @@ function kanbanBlock(collection: string, groupField: string, cardFields: string[
             properties: {
               [nodeKey()]: {
                 type: 'void', 'x-component': 'Grid', 'x-component-props': { dndContext: false },
-                properties: Object.fromEntries(cardFields.map(field => [field, kanbanCardField(collection, field)])),
+                properties: Object.fromEntries(cardFields.map(field => [nodeKey(), {
+                  type: 'void', 'x-component': 'Grid.Row',
+                  properties: { [nodeKey()]: { type: 'void', 'x-component': 'Grid.Col', properties: { [field]: kanbanCardField(collection, field) } } },
+                }])),
               },
             },
           },
@@ -798,6 +809,42 @@ function schemaHasComponent(node: unknown, component: string): boolean {
     if (schemaHasComponent(child, component)) return true
   }
   return false
+}
+
+/**
+ * Report whether the page's Kanban array honors the official card
+ * contracts: the card child sits under the fixed `card` properties key
+ * (plugin-kanban's renderCard reads that key by name) and its fields are
+ * wrapped in Grid.Row → Grid.Col (the card Grid only renders row children).
+ */
+function kanbanCardKeyIntact(node: unknown): boolean {
+  if (node === null || typeof node !== 'object') return false
+  const record = node as Record<string, unknown>
+  if (record['x-component'] === 'Kanban') {
+    const card = (record.properties as Record<string, unknown> | undefined)?.card as Record<string, unknown> | undefined
+    const cardGrid = card && schemaHasComponent(card, 'Grid') ? card : undefined
+    const gridIntact = cardGrid !== undefined && schemaHasComponent(cardGrid, 'Grid.Row')
+    return card?.['x-component'] === 'Kanban.Card' && gridIntact
+  }
+  for (const child of Object.values(record.properties ?? {})) {
+    if (kanbanCardKeyIntact(child)) return true
+  }
+  return false
+}
+
+/** Collect the Grid.Row x-uids whose subtree carries the given component (used to destroy broken blocks). */
+function collectRowsWithComponent(node: unknown, component: string, rows: string[] = []): string[] {
+  if (node === null || typeof node !== 'object') return rows
+  const record = node as Record<string, unknown>
+  if (record['x-component'] === 'Grid.Row' && schemaHasComponent(record, component)) {
+    const uid = record['x-uid']
+    if (typeof uid === 'string') rows.push(uid)
+    return rows
+  }
+  for (const child of Object.values(record.properties ?? {})) {
+    collectRowsWithComponent(child, component, rows)
+  }
+  return rows
 }
 
 type BlockSpec =
@@ -866,7 +913,14 @@ async function ensureBlocks(token: string, pageByUrl: Map<string, string>): Prom
       // block of the same kind (table pages with multiple table blocks stack
       // in insertion order on first run only).
       const already = schemaHasComponent(pageTree, spec.kind === 'table' ? 'TableV2' : spec.kind === 'kanban' ? 'Kanban' : spec.kind === 'calendar' ? 'CalendarV2' : 'Gantt')
-      if (already && spec.kind !== 'table') {
+      if (already && spec.kind === 'kanban' && !kanbanCardKeyIntact(pageTree)) {
+        // A pre-contract kanban block renders empty card shells; destroy its
+        // Grid.Rows (the shared Grid node stays) and fall through to reseed.
+        for (const rowUid of collectRowsWithComponent(pageTree, 'Kanban')) {
+          await call(token, 'POST', `/api/uiSchemas:destroy?filterByTk=${rowUid}`)
+        }
+        console.log(`nocobase-hub: kanban block on "${page.page}" lacks the card-key contract, destroyed for reseed`)
+      } else if (already && spec.kind !== 'table') {
         console.log(`nocobase-hub: ${spec.kind} block on "${page.page}" exists (kept)`)
         continue
       }
@@ -1070,9 +1124,30 @@ async function alignPortalEnums(token: string): Promise<void> {
 /** Pages upgraded to N17 v2 flowPages; their titles are skipped by the v1 block replay. */
 const flowOwnedPages = new Set<string>()
 
+/**
+ * Declare the `id` primary key in field metadata for every seeded table.
+ * collections:create adds the id database column but no fields row, and
+ * without a primaryKey:true field the client Collection.getPrimaryKey()
+ * returns undefined — the kanban renderer then builds every card with
+ * `card-undefined` and renders empty shells. The fields:create call is a
+ * metadata no-op against the existing column (no DDL) and idempotent by
+ * field presence.
+ */
+async function ensurePrimaryKeyFields(token: string): Promise<void> {
+  let added = 0
+  for (const collection of COLLECTIONS) {
+    const rows = await dataOf(token, 'GET', `/api/fields:list?filter=${encodeURIComponent(JSON.stringify({ collectionName: { $eq: collection.name } }))}&pageSize=200`) as { name?: string, primaryKey?: boolean }[] | null
+    if ((rows ?? []).some(field => field.primaryKey === true)) continue
+    await dataOf(token, 'POST', `/api/collections/${collection.name}/fields:create`, { name: 'id', type: 'bigInt', interface: 'id', primaryKey: true, autoIncrement: true })
+    added += 1
+  }
+  console.log(`nocobase-hub: primary-key field declarations ${added > 0 ? `${added} added` : 'all present (kept)'}`)
+}
+
 async function main(): Promise<void> {
   const token = await signIn()
   await ensureCollections(token)
+  await ensurePrimaryKeyFields(token)
   const usersByNickname = await migrateLegacyTextFields(token)
   const fixtures = JSON.parse(readFileSync(fixturePath, 'utf8'))
   await seed(token, fixtures)
