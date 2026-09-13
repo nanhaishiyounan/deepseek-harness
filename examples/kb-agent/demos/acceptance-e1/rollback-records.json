@@ -1,0 +1,18 @@
+[
+  {
+    "title": "项目",
+    "parentId": 386332338028547,
+    "icon": "ContainerOutlined",
+    "sort": 1,
+    "schemaUid": "dspbkroytnp",
+    "destroyedId": 386332338028549
+  },
+  {
+    "title": "里程碑",
+    "parentId": 386332338028547,
+    "icon": "FlagOutlined",
+    "sort": 6,
+    "schemaUid": "rbm53gqk979",
+    "destroyedId": 386332342222849
+  }
+]

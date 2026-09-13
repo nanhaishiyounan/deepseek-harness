@@ -731,8 +731,8 @@ async function stepVerify(): Promise<void> {
   if ((appHubRoutes?.data?.length ?? 0) === 0) failures.push('应用中心 app hub page missing (run nocobase-n17-alignment.mts)')
   const v2Routes = await call(token, 'GET', `/api/desktopRoutes:list?filter=${encodeURIComponent(JSON.stringify({ type: { $eq: 'flowPage' } }))}&pageSize=100`) as { data?: Array<{ title?: string | null }> }
   const v2Titles = new Set((v2Routes?.data ?? []).map(row => row.title ?? ''))
-  const missingV2 = ['客户', '销售线索', '联系人', '订单', '报价单', '工单', '资产台账', '员工'].filter(title => !v2Titles.has(title))
-  if (missingV2.length > 0) failures.push(`v2 table flowPages missing: ${missingV2.join(', ')} (run nocobase-n17-alignment.mts)`)
+  const missingV2 = ['客户', '销售线索', '联系人', '订单', '报价单', '工单', '资产台账', '员工', '项目', '任务列表', '里程碑'].filter(title => !v2Titles.has(title))
+  if (missingV2.length > 0) failures.push(`v2 table flowPages missing: ${missingV2.join(', ')} (run nocobase-n17-alignment.mts + nocobase-e1-pj-v2.mts for the 项目管理 pages)`)
   const flowModels = await call(token, 'GET', '/api/flowModels:list?pageSize=1000') as { data?: Array<{ use?: string, uid?: string }> }
   const modelCount = (use: string) => (flowModels?.data ?? []).filter(row => row.use === use).length
   if (modelCount('AddNewActionModel') < 8) failures.push('AddNewActionModel count < 8 (v2 table action bars incomplete)')
@@ -744,7 +744,8 @@ async function stepVerify(): Promise<void> {
   // surfaces unexpected mounts instead of letting them hide among ours.
   const aiButtons = (flowModels?.data ?? []).filter(row => row.use === 'AIEmployeeButtonModel')
   const n18Buttons = aiButtons.filter(row => row.uid?.startsWith('n18ai-'))
-  if (n18Buttons.length < 8) failures.push(`n18ai- AIEmployeeButtonModel count ${n18Buttons.length} < 8 (form AI fill buttons missing; run nocobase-n18-form-ai.mts)`)
+  // 11 = the N17d eight CRM/Hub pages + the E1 项目管理 three (项目/任务列表/里程碑).
+  if (n18Buttons.length < 11) failures.push(`n18ai- AIEmployeeButtonModel count ${n18Buttons.length} < 11 (form AI fill buttons missing; run nocobase-n18-form-ai.mts after nocobase-e1-pj-v2.mts)`)
   if (n18Buttons.length !== aiButtons.length) failures.push(`${aiButtons.length - n18Buttons.length} AIEmployeeButtonModel row(s) carry no n18ai- uid prefix (unexpected foreign mounts; inspect flowModels)`)
   const atlas = await call(token, 'GET', `/api/aiEmployees:list?filter=${encodeURIComponent(JSON.stringify({ username: { $eq: 'atlas' } }))}&pageSize=1`) as { data?: Array<{ about?: string }> }
   if (!(atlas?.data?.[0]?.about ?? '').includes('简体中文')) failures.push('atlas about is not the Chinese prompt (re-run nocobase-n17-alignment.mts)')
@@ -1142,7 +1143,7 @@ async function main(): Promise<void> {
       for (const script of [
         'nocobase-crm-modules.mts', 'nocobase-hub-modules.mts',
         'nocobase-n13-rebuild.mts', 'nocobase-n13-seed.mts', 'nocobase-n14-fix.mts',
-        'nocobase-n17-alignment.mts', 'nocobase-n18-form-ai.mts', 'nocobase-n25-brand.mts',
+        'nocobase-n17-alignment.mts', 'nocobase-e1-pj-v2.mts', 'nocobase-n18-form-ai.mts', 'nocobase-n25-brand.mts',
       ]) {
         if (!run('node', ['--import', 'tsx/esm', join(repoRoot, 'examples/kb-agent/scripts', script)])) {
           throw new Error(`${script} failed during the all chain`)
