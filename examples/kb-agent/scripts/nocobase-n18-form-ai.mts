@@ -67,7 +67,17 @@ async function ensureFormAIButtons(token: string): Promise<void> {
     throw new Error(`AI employee ${FORM_AI_EMPLOYEE} is missing or disabled; run the all chain so the built-in seed and nocobase-n17-alignment.mts land first`)
   }
 
-  const rows = await dataOf(token, 'GET', '/api/flowModels:list?pageSize=1000') as Array<Record<string, any>> | null
+  // Fail-closed catalog read: a truncated list would make the orphan sweep
+  // below delete the buttons of perfectly live forms (F3 once pushed the
+  // catalog past 1000 rows and five real buttons were swept before this
+  // guard existed).
+  const pageSize = 2000
+  const catalog = await call(token, 'GET', `/api/flowModels:list?pageSize=${pageSize}`)
+  const rows = (catalog?.data ?? null) as Array<Record<string, any>> | null
+  const total = catalog?.meta?.total
+  if (rows === null || (typeof total === 'number' ? total > rows.length : rows.length === pageSize)) {
+    throw new Error(`flowModels:list is truncated (got ${rows?.length ?? 0} rows${typeof total === 'number' ? ` of ${total}` : ''}, pageSize=${pageSize}); raise the page size before running n18`)
+  }
   const existingButtons = new Set((rows ?? []).filter(row => row.use === 'AIEmployeeButtonModel').map(row => row.uid))
   const forms = (rows ?? []).filter(row => row.use === 'CreateFormModel' && row.parentId == null && row.stepParams?.resourceSettings?.init?.collectionName)
   const formUidSet = new Set((rows ?? []).filter(row => row.use === 'CreateFormModel').map(row => row.uid))

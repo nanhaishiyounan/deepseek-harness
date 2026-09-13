@@ -252,12 +252,12 @@ function upsertRollbackRecord(record: RollbackRecord): void {
 }
 
 async function listFlowModels(token: string): Promise<FlowModelRow[]> {
-  const pageSize = 1000
+  const pageSize = 2000
   const payload = await call(token, 'GET', `/api/flowModels:list?pageSize=${pageSize}`)
   const rows = (payload?.data ?? null) as FlowModelRow[] | null
   if (rows === null) return []
   const total = payload?.meta?.total
-  if (typeof total === 'number' && total > rows.length) {
+  if (typeof total === 'number' ? total > rows.length : rows.length === pageSize) {
     throw new Error(`flowModels:list returned ${rows.length} of ${total} rows (pageSize=${pageSize}); raise the page size or paginate before running F2`)
   }
   return rows

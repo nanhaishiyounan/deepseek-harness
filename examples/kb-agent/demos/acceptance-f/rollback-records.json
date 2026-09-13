@@ -103,5 +103,110 @@
       }
     ],
     "destroyedId": 386332298182657
+  },
+  {
+    "title": "工作台",
+    "parentId": null,
+    "icon": "DashboardOutlined",
+    "sort": 7,
+    "schemaUid": "b4k6wf2zu6k",
+    "tabs": [
+      {
+        "schemaUid": "o8u7f1fk903",
+        "tabSchemaName": "7h9hpxsui4a",
+        "sort": 1
+      }
+    ],
+    "destroyedId": 386332338028544
+  },
+  {
+    "title": "知识文章",
+    "parentId": 386332342222852,
+    "icon": "ReadOutlined",
+    "sort": 2,
+    "schemaUid": "qn9j7laut2c",
+    "tabs": [
+      {
+        "schemaUid": "9amd91p9pjk",
+        "tabSchemaName": "vjldgdcv71w",
+        "sort": 1
+      }
+    ],
+    "destroyedId": 386332342222857
+  },
+  {
+    "title": "维保记录",
+    "parentId": 386332342222860,
+    "icon": "ToolOutlined",
+    "sort": 3,
+    "schemaUid": "fiyoi38ke5c",
+    "tabs": [
+      {
+        "schemaUid": "m4az3j2q86f",
+        "tabSchemaName": "kopvn19ixrc",
+        "sort": 1
+      }
+    ],
+    "destroyedId": 386332344320003
+  },
+  {
+    "title": "部门",
+    "parentId": 386332344320006,
+    "icon": "ApartmentOutlined",
+    "sort": 2,
+    "schemaUid": "kdud3tb3iq6",
+    "tabs": [
+      {
+        "schemaUid": "dq3l8m8yhsc",
+        "tabSchemaName": "7lv084n4gbn",
+        "sort": 1
+      }
+    ],
+    "destroyedId": 386332344320011
+  },
+  {
+    "title": "请假审批",
+    "parentId": 386332344320006,
+    "icon": "FileProtectOutlined",
+    "sort": 3,
+    "schemaUid": "i7lcu24opl5",
+    "tabs": [
+      {
+        "schemaUid": "2am6xd3zbmi",
+        "tabSchemaName": "hi814p7ugsn",
+        "sort": 1
+      }
+    ],
+    "destroyedId": 386332346417152
+  },
+  {
+    "title": "供应商",
+    "parentId": 386332342222860,
+    "icon": "ShopOutlined",
+    "sort": 2,
+    "schemaUid": "8bjc6gykw7e",
+    "tabs": [
+      {
+        "schemaUid": "6f098vpu2ja",
+        "tabSchemaName": "x441ri3fgvp",
+        "sort": 1
+      }
+    ],
+    "destroyedId": 386332344320000
+  },
+  {
+    "title": "分类维护",
+    "parentId": 386332346417155,
+    "icon": "TableOutlined",
+    "sort": 1,
+    "schemaUid": "xpcbg0tntto",
+    "tabs": [
+      {
+        "schemaUid": "1ecrb76t6dk",
+        "tabSchemaName": "vtljoiyb0qs",
+        "sort": 1
+      }
+    ],
+    "destroyedId": 386332346417157
   }
 ]

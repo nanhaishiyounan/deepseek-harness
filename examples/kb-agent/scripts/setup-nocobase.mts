@@ -742,10 +742,14 @@ async function stepVerify(): Promise<void> {
   // pages despite the name; both menu entries stay — see QUICKSTART).
   const missingV2Crm = ['产品与服务', '回款', '发票', '客户仪表盘', '销售仪表盘'].filter(title => !v2Titles.has(title))
   if (missingV2Crm.length > 0) failures.push(`v2 CRM flowPages missing: ${missingV2Crm.join(', ')} (run nocobase-f2-crm-v2.mts)`)
-  const flowModels = await call(token, 'GET', '/api/flowModels:list?pageSize=1000') as { data?: Array<{ use?: string, uid?: string }>, meta?: { total?: number } }
+  // F3: the Hub/HR/master-data pages, including the two composite pages
+  // (工作台 = two stacked table blocks, 分类维护 = four).
+  const missingV2Hub = ['知识文章', '维保记录', '部门', '请假审批', '供应商', '工作台', '分类维护'].filter(title => !v2Titles.has(title))
+  if (missingV2Hub.length > 0) failures.push(`v2 Hub flowPages missing: ${missingV2Hub.join(', ')} (run nocobase-f3-hub-v2.mts)`)
+  const flowModels = await call(token, 'GET', '/api/flowModels:list?pageSize=2000') as { data?: Array<{ use?: string, uid?: string }>, meta?: { total?: number } }
   const flowModelRows = flowModels?.data ?? []
-  if (typeof flowModels?.meta?.total === 'number' && flowModels.meta.total > flowModelRows.length) {
-    failures.push(`flowModels:list returned ${flowModelRows.length} of ${flowModels.meta.total} rows; raise the verify pageSize`)
+  if (typeof flowModels?.meta?.total === 'number' ? flowModels.meta.total > flowModelRows.length : flowModelRows.length === 2000) {
+    failures.push(`flowModels:list may be truncated (${flowModelRows.length} rows); raise the verify pageSize`)
   }
   const modelCount = (use: string) => flowModelRows.filter(row => row.use === use).length
   if (modelCount('AddNewActionModel') < 8) failures.push('AddNewActionModel count < 8 (v2 table action bars incomplete)')
@@ -758,8 +762,9 @@ async function stepVerify(): Promise<void> {
   const aiButtons = (flowModels?.data ?? []).filter(row => row.use === 'AIEmployeeButtonModel')
   const n18Buttons = aiButtons.filter(row => row.uid?.startsWith('n18ai-'))
   // 11 = the N17d eight CRM/Hub pages + the E1 项目管理 three (项目/任务列表/里程碑);
-  // +2 = the F1 kanban/calendar Add-new popups; +5 = the F2 CRM pages.
-  if (n18Buttons.length < 18) failures.push(`n18ai- AIEmployeeButtonModel count ${n18Buttons.length} < 18 (form AI fill buttons missing; run nocobase-n18-form-ai.mts after nocobase-e1-pj-v2.mts + nocobase-f1-view-v2.mts + nocobase-f2-crm-v2.mts)`)
+  // +2 = the F1 kanban/calendar Add-new popups; +5 = the F2 CRM pages; +7 =
+  // the F3 pages (2 Add-new popups on 工作台, 4 on 分类维护).
+  if (n18Buttons.length < 25) failures.push(`n18ai- AIEmployeeButtonModel count ${n18Buttons.length} < 25 (form AI fill buttons missing; run nocobase-n18-form-ai.mts after the f1/f2/f3 seeds)`)
   // Row-level AI actions configured by hand in the UI (not seeded) are legal;
   // only unknown foreign mounts may pad the AIEmployeeButtonModel census.
   const KNOWN_HAND_CONFIGURED_AI_BUTTONS = new Set(['26c6ab488b1']) // viz action on the E1 项目 table
@@ -1166,7 +1171,7 @@ async function main(): Promise<void> {
       for (const script of [
         'nocobase-crm-modules.mts', 'nocobase-hub-modules.mts',
         'nocobase-n13-rebuild.mts', 'nocobase-n13-seed.mts', 'nocobase-n14-fix.mts',
-        'nocobase-n17-alignment.mts', 'nocobase-e1-pj-v2.mts', 'nocobase-f1-view-v2.mts', 'nocobase-f2-crm-v2.mts', 'nocobase-n18-form-ai.mts', 'nocobase-n25-brand.mts',
+        'nocobase-n17-alignment.mts', 'nocobase-e1-pj-v2.mts', 'nocobase-f1-view-v2.mts', 'nocobase-f2-crm-v2.mts', 'nocobase-f3-hub-v2.mts', 'nocobase-n18-form-ai.mts', 'nocobase-n25-brand.mts',
       ]) {
         if (!run('node', ['--import', 'tsx/esm', join(repoRoot, 'examples/kb-agent/scripts', script)])) {
           throw new Error(`${script} failed during the all chain`)
