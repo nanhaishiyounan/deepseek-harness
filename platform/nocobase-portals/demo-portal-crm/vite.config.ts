@@ -1,8 +1,9 @@
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import fs from "node:fs";
+import type { ServerResponse } from "node:http";
 import path from "path";
-import { defineConfig, loadEnv } from "vite";
+import { defineConfig, loadEnv, type Plugin } from "vite";
 import {
   portalRawIndexHtmlPlugin,
   portalSdkCompatibilityPlugin,
@@ -39,6 +40,79 @@ const normalizeBase = (base?: string) => {
   return `/${normalized.replace(/^\/+|\/+$/g, "")}/`;
 };
 
+// The Playwright suites assert the upstream English copy, but this deployment
+// pins systemSettings.enabledLanguages to ["zh-CN"] on both layers (the verify
+// gate locks that value), and app:getLang echoes the signed-in user's zh-CN
+// profile regardless of the requested locale. The portal-sdk locale resolver
+// and the server-resources bootstrap would therefore force every page to
+// zh-CN. Under `vite --mode e2e` only, the dev server pins the browser to
+// en-US: the index document seeds the stored locale before the app boots, the
+// proxied systemSettings response gains en-US in its enabled-language lists so
+// resolveSystemLocale accepts the stored value, and the proxied app:getLang
+// response reports lang=en-US so loadServerLocaleResources keeps it.
+// Production (:13000/:3080) and the verify gate stay untouched.
+const portalE2EEnglishLocalePlugin = (upstreamOrigin: string): Plugin => ({
+  name: "portal-e2e-english-locale",
+  transformIndexHtml(html) {
+    return html.replace(
+      "<head>",
+      `<head><script>try{localStorage.setItem("NOCOBASE_LOCALE","en-US")}catch{}</script>`
+    );
+  },
+  configureServer(server) {
+    const proxyJson = async (
+      pathWithSearch: string,
+      headers: Record<string, string>,
+      patch: (payload: Record<string, unknown>) => void,
+      res: ServerResponse
+    ) => {
+      try {
+        const upstream = await fetch(`${upstreamOrigin}${pathWithSearch}`, {
+          headers: { accept: "application/json", ...headers },
+          signal: AbortSignal.timeout(10_000),
+        });
+        const payload = (await upstream.json()) as Record<string, unknown>;
+        patch(payload);
+        res.setHeader("content-type", "application/json; charset=utf-8");
+        res.end(JSON.stringify(payload));
+      } catch {
+        res.statusCode = 502;
+        res.end(`{"errors":["e2e locale patch: upstream fetch failed for ${pathWithSearch.split("?")[0]}"]}`);
+      }
+    };
+
+    server.middlewares.use("/api/systemSettings:get", (req, res) => {
+      void proxyJson("/api/systemSettings:get", {}, (payload) => {
+        const data = (payload.data ?? {}) as {
+          enabledLanguages?: string[];
+          options?: { enabledLanguages?: string[] };
+        };
+        const withEnglish = (languages?: string[]) =>
+          languages ? Array.from(new Set([...languages, "en-US"])) : ["en-US"];
+        data.enabledLanguages = withEnglish(data.enabledLanguages);
+        if (data.options) {
+          data.options.enabledLanguages = withEnglish(data.options.enabledLanguages);
+        }
+        payload.data = data;
+      }, res as ServerResponse);
+    });
+
+    server.middlewares.use("/api/app:getLang", (req, res) => {
+      const search = (req.url ?? "").split("?")[1] ?? "";
+      void proxyJson(
+        `/api/app:getLang${search ? `?${search}` : ""}`,
+        { cookie: req.headers.cookie ?? "" },
+        (payload) => {
+          const data = (payload.data ?? {}) as { lang?: string };
+          data.lang = "en-US";
+          payload.data = data;
+        },
+        res as ServerResponse
+      );
+    });
+  },
+});
+
 // https://vite.dev/config/
 export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
@@ -74,6 +148,9 @@ export default defineConfig(({ command, mode }) => {
       react(),
       tailwindcss(),
       portalRawIndexHtmlPlugin({ root: __dirname, base: portalBase }),
+      ...(mode === "e2e" && proxyOrigin
+        ? [portalE2EEnglishLocalePlugin(proxyOrigin)]
+        : []),
     ],
     resolve: {
       alias: {

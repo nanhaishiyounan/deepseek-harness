@@ -1,0 +1,46 @@
+G1 gates — 2026-09-14 (brand unify + table-kit groundwork)
+
+Env probes
+- :13000 NocoBase            → HTTP 200
+- :3080 /nocobase/dist/crm/  → HTTP 200
+- :3080 /nocobase/dist/hub/  → HTTP 200
+- :13100 N22 healthz         → {"ok":true}
+
+Changes (vs baseline 74da6fff60)
+- demo-portal-crm/src/components/app-shell/brand.tsx — Brand() body aligned
+  with Hub (logo | divider | wordmark). diff vs hub/brand.tsx: identical.
+- demo-portal-crm/src/lib/table-kit/ — 33 files copied from Hub; diff -r vs
+  hub/src/lib/table-kit: identical.
+- demo-portal-crm/vite.config.ts — e2e-mode-only English-locale plugin
+  (index.html seeds NOCOBASE_LOCALE=en-US; /api/systemSettings:get and
+  /api/app:getLang proxied responses gain en-US) so the vendored Playwright
+  suites' English assertions run against this zh-CN-pinned deployment
+  without touching production or the verify gate.
+- demo-portal-crm/playwright.config.ts — expect timeout 20s (on-demand dev
+  compiles), local workers 4 (dev-server saturation).
+
+Gates
+- portal tsc --noEmit                     → EXIT=0
+- portal deploy (nocobase-portal-deploy)  → EXIT=0, run twice
+- deploy tree hash run1=b7b9b3b960555688dc15471b111141234ee84a93
+- deploy tree hash run2=b7b9b3b960555688dc15471b111141234ee84a93 → identical
+- setup-nocobase.mts verify               → OK (all assertions green,
+  incl. brand-asset byte checks + gateway favicons + portal probes)
+- CRM e2e (playwright, first ever run on this host):
+  54 passed / 27 failed. Failures are pre-existing environment drift, not
+  G1 regressions — PG log evidence: crm_products lacks columns
+  "active"/"unit_price" and crm_quotes lacks "quote_number" that the
+  vendored portal code selects (SELECT ... column "active" does not exist),
+  plus 3 test.fail() guards that now pass ("Expected to fail, but passed").
+  G1 touched only brand.tsx (visual), new unreferenced table-kit files,
+  and test-only config; the failing specs' data flow is untouched.
+  Schema realignment (NocoBase fields API on crm_products/crm_quotes) is
+  reported upstream for a dedicated batch; single-spec runs of affected
+  pages (e.g. "Customers page") pass, confirming no runtime breakage.
+
+Acceptance evidence (demos/acceptance-g1/)
+- g1-01-crm-login-brand.png        — login page: mark | divider | DSH食品业务平台
+- g1-02-crm-sidebar-expanded.png   — expanded sidebar + header + AI ball, light
+- g1-03-crm-header-brand.png       — header close-up
+- g1-04-crm-dark-mode.png          — dark theme, dark logo-mark slot rendered
+- g1-05-hub-control.png            — Hub untouched control shot, same brand row

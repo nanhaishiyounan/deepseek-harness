@@ -16,11 +16,17 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  // The dev server compiles route chunks on demand; high parallelism starves
+  // cold compiles past the expect timeout. Four workers keep the suite under
+  // ~5 minutes locally without saturating the dev server.
+  workers: process.env.CI ? 1 : 4,
   reporter: process.env.CI
     ? [["line"], ["html", { open: "never" }]]
     : "list",
   outputDir: "./test-results",
+  // The dev server compiles route chunks on demand, so first visits to a
+  // route can exceed the 5s default expect timeout on cold runs.
+  expect: { timeout: 20_000 },
   use: {
     baseURL: environment.baseURL,
     trace: "on-first-retry",
