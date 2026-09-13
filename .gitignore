@@ -2,6 +2,10 @@ CLAUDE.local.md
 .env
 node_modules/
 lib/
+# Vendored portal source lives under src/lib — re-include it (the bare `lib/`
+# rule above targets tsc build outputs).
+!platform/nocobase-portals/demo-portal-crm/src/lib/
+!platform/nocobase-portals/demo-portal-crm/src/lib/**
 *.tsbuildinfo
 pnpm-debug.log
 .pnpm-store/

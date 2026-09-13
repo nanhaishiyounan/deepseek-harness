@@ -38,23 +38,23 @@ export function BrandWordmark({ className }: BrandLogoProps) {
     </span>
   );
 }
+
 type BrandProps = {
   className?: string;
   logoClassName?: string;
   showText?: boolean;
 };
 
-export function Brand({
-  className,
-  logoClassName,
-  showText = true,
-}: BrandProps) {
+// NocoBase logo | App name
+export function Brand({ className, logoClassName, showText = true }: BrandProps) {
   return (
-    <div className={cn("flex min-w-0 items-center", className)}>
-      {showText ? (
-        <BrandWordmark className={logoClassName} />
-      ) : (
-        <BrandLogo className={logoClassName} />
+    <div className={cn("flex min-w-0 items-center gap-2.5", className)}>
+      <BrandLogo className={logoClassName} />
+      {showText && (
+        <>
+          <span className="h-5 w-px shrink-0 bg-border" aria-hidden="true" />
+          <BrandWordmark />
+        </>
       )}
     </div>
   );
