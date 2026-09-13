@@ -568,21 +568,53 @@ async function ensureFormSubmits(token: string): Promise<void> {
 }
 
 /**
+ * Copy-drift fingerprint for the app-hub cards: a phrase that only the
+ * current card wording carries. The hub card once trailed the real
+ * nine-domain surface ("项目、工单、资产与人事一站式协作"), which users read
+ * as the whole story; the fingerprint lets ensureAppHub detect the stale
+ * wording on an existing install and rebuild the page in place (E3).
+ */
+const APP_HUB_COPY_FINGERPRINT = '九域合一'
+
+/**
  * N17c: the "应用中心" app-hub page — the OSS stand-in for the commercial
  * multi-portal plugin. A top-level v1 page whose Markdown card grid links to
  * every entrance (CRM Portal, Hub Portal, AI workbench, DSH web app), plus a
- * short usage note. Idempotent by page title + card-marker scan.
+ * short usage note. Idempotent by page title + card-marker + copy-fingerprint
+ * scan; a marker match with drifted copy rebuilds the page.
  */
 async function ensureAppHub(token: string): Promise<void> {
   const title = '应用中心'
   const routes = await dataOf(token, 'GET', '/api/desktopRoutes:list?pageSize=400') as Array<{ id: number, title: string | null, type: string, schemaUid: string | null, sort: number | null }> | null
   let page = (routes ?? []).find(row => row.title === title && row.type === 'page')
   if (page?.schemaUid) {
-    const tree = await dataOf(token, 'GET', `/api/uiSchemas:getJsonSchema/${page.schemaUid}`)
-    if (JSON.stringify(tree).includes('NOCOBASE_APP_HUB')) {
-      console.log('nocobase-n17: app hub page exists (kept)')
+    // The copy fingerprint alone decides freshness: the historic
+    // NOCOBASE_APP_HUB marker lives in neither the current intro nor the
+    // cards, so it cannot distinguish editions (E3 probe). The tabs child's
+    // tree is the rendered surface — check it first, then the page tree.
+    const tabs = (routes ?? []).find(row => row.parentId === page.id && row.type === 'tabs')
+    const renderedUid = tabs?.schemaUid ?? page.schemaUid
+    const tree = await dataOf(token, 'GET', `/api/uiSchemas:getJsonSchema/${renderedUid}`)
+    const treeJson = JSON.stringify(tree)
+    if (treeJson.includes(APP_HUB_COPY_FINGERPRINT)) {
+      console.log('nocobase-n17: app hub page exists with current card copy (kept)')
       return
     }
+    // The hub card copy once trailed the real nine-domain surface (it read
+    // "项目、工单、资产与人事" and users took it as the whole story). Rebuild
+    // the page in place so an existing install picks the new copy. The tabs
+    // child must go first: desktopRoutes:destroy leaves it orphaned, and the
+    // deterministic page id gets reused on recreate, so the stale tabs row
+    // would re-attach to the new page and keep rendering the old grid
+    // (probed 2026-09-13 — the rendered card copy came from the old tabs
+    // schemaUid even though the page row pointed at the fresh tree).
+    const staleTabs = (routes ?? []).filter(row => row.parentId === page.id && row.type === 'tabs')
+    for (const tab of staleTabs) {
+      await call(token, 'DELETE', `/api/desktopRoutes:destroy?filterByTk=${tab.id}`)
+    }
+    await call(token, 'DELETE', `/api/desktopRoutes:destroy?filterByTk=${page.id}`)
+    page = undefined
+    console.log(`nocobase-n17: app hub page copy drifted from the current card wording (rebuilding; ${staleTabs.length} stale tabs row(s) removed)`)
   }
   if (page === undefined) {
     page = await dataOf(token, 'POST', '/api/desktopRoutes:create', { title, icon: 'AppstoreOutlined', type: 'page', sort: 1 })
@@ -601,8 +633,8 @@ async function ensureAppHub(token: string): Promise<void> {
   const origin = process.env.NOCOBASE_PUBLIC_URL ?? 'http://127.0.0.1:13000'
   const dsh = process.env.DSH_PUBLIC_URL ?? 'http://127.0.0.1:3080'
   const cards = [
-    ['🛒', 'CRM 客户门户', '客户主数据、销售线索、商机与订单流程', `${origin}/dist/crm/`],
-    ['🎧', 'Hub 一体化门户', '项目、工单、资产与人事一站式协作', `${origin}/dist/hub/`],
+    ['🛒', 'CRM 客户门户', '销售作业门户：线索 → 客户 → 联系人 → 报价 → 订单 → 回款一条链路做到底', `${origin}/dist/crm/`],
+    ['🎧', 'Hub 一体化门户', '综合运营协作门户：销售、项目、人事、库存、采购、财务、客服、资产、知识库九域合一', `${origin}/dist/hub/`],
     ['🤖', 'AI 工作台', 'AI 员工对话（Atlas 团队）与工单速览', `${origin}/admin/sdia2fwjc22`],
     ['🧠', 'DeepSeek Harness', 'KB 智能体与食品行业知识库', `${dsh}/`],
   ] as const
