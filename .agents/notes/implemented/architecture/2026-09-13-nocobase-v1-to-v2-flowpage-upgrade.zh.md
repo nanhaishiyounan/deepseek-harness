@@ -21,7 +21,7 @@ plugin-ai 的体验（悬浮球、表单内 AI 员工填充）只渲染在 v2 fl
 - **回滚**：`--rollback` 先销毁 `n17e1*` flowModels（嵌套表单与挂在其上的 n18ai- 按钮随之级联消失），再对存活列表做孤儿按钮清扫——孤儿判定必须基于**销毁后重拉**的列表（销毁前快照里 E1 按钮都指向活着的表单，恒不匹配、恒不清理），最后按记录重建 v1 行并指向原 schemaUid。`desktopRoutes:destroy` 不级联 uiSchemas（实测：行数不变），v1 树以不渲染的孤儿形态存活，回滚连用户手配弹窗一并恢复。
 - **标题字段必填**：三页新建弹窗的名称字段（name/title）在 FormItemModel props 上带 `required: true`（flow-engine `required` step 的同款落点），formily 在浏览器侧拦截空提交（零请求发出）；已升级页由幂等 sweep 补挂——flowModels:save 是合并写，字段绑定与其余 props 不丢。
 - **列表全量护栏**：flowModels/desktopRoutes 的 list 调用校验 `meta.total ≤ 返回行数`，超出即抛错（截断列表会让 kept 校验与孤儿清扫静默漏行）。
-- **已知边界**：看板/日历/甘特保持 v1——2.2.6 flowModel 目录没有对应视图的区块模型，强行升级会丢视图能力。v1 视图页无悬浮球（plugin-ai 客户端硬编码）。
+- **已知边界（F1 修订）**：本 Note 初版断言"2.2.6 flowModel 目录没有看板/日历/甘特区块模型"——F1 复核推翻前半：看板/日历的模型四层俱全（插件 client-v2 注册 + flow-engine node-use-sets 白名单 + support-matrix 全 true + 官方 fixture），已由 `nocobase-f1-view-v2.mts` 升级（见 [v2 视图区块升级机制 Note](2026-09-13-nocobase-v2-view-block-upgrade.zh.md)）。甘特仍保持 v1：plugin-gantt 客户端模型有注册，但未进入 flow-engine 的 server authoring 体系（不在 node-use-sets/support-matrix，无 fixture、无 `.define()` 元数据）——程序化 wire 无合同保护、UI 不可维护，不值得交付。v1 视图页无悬浮球（plugin-ai 客户端硬编码）这一事实不变。
 
 ## 备选方案
 

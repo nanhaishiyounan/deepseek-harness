@@ -1,0 +1,20 @@
+=== hub-modules replay regression ===
+nocobase-hub: portal alignment fields all present (kept)
+nocobase-hub: portal enum alignment all present (kept)
+nocobase-hub: done
+=== F idempotent chain replay ===
+--- nocobase-f1-view-v2.mts
+nocobase-f1: required form fields already in place (kept)
+nocobase-f1: done
+--- nocobase-f2-crm-v2.mts
+nocobase-f2: required form fields already in place (kept)
+nocobase-f2: done
+--- nocobase-f3-hub-v2.mts
+nocobase-f3: required form fields already in place (kept)
+nocobase-f3: done
+--- nocobase-f4-charts.mts
+nocobase-f4: chart "回款按方式分布" exists on 销售仪表盘 (kept)
+nocobase-f4: done
+--- nocobase-n18-form-ai.mts
+nocobase-n18: form AI buttons already in place on dex (kept) across 29 popup forms (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts)
+nocobase-n18: done

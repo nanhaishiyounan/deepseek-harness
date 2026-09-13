@@ -1,0 +1,4 @@
+routes: group=7 page=2 flowPage=26 tabs=28
+rows: crm_customers=20 crm_products=10 crm_payments=10 crm_invoices=10 hub_pj_tasks=19 hub_tk_tickets=40 hub_kb_articles=6 hub_as_maintenance=4 hub_hr_departments=5 hub_hr_leave_requests=5 hub_as_vendors=5
+flowModels total=1067 n18ai=29
+remaining v1 pages: 任务甘特, 应用中心
