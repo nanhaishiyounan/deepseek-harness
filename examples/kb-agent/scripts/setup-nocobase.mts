@@ -738,6 +738,10 @@ async function stepVerify(): Promise<void> {
   // card chain, or the "upgrade" silently degraded to a blank page.
   const missingV2Views = ['任务看板', '任务日历'].filter(title => !v2Titles.has(title))
   if (missingV2Views.length > 0) failures.push(`v2 view flowPages missing: ${missingV2Views.join(', ')} (run nocobase-f1-view-v2.mts)`)
+  // F2: the five remaining CRM table pages (the two "仪表盘" pages are table
+  // pages despite the name; both menu entries stay — see QUICKSTART).
+  const missingV2Crm = ['产品与服务', '回款', '发票', '客户仪表盘', '销售仪表盘'].filter(title => !v2Titles.has(title))
+  if (missingV2Crm.length > 0) failures.push(`v2 CRM flowPages missing: ${missingV2Crm.join(', ')} (run nocobase-f2-crm-v2.mts)`)
   const flowModels = await call(token, 'GET', '/api/flowModels:list?pageSize=1000') as { data?: Array<{ use?: string, uid?: string }>, meta?: { total?: number } }
   const flowModelRows = flowModels?.data ?? []
   if (typeof flowModels?.meta?.total === 'number' && flowModels.meta.total > flowModelRows.length) {
@@ -754,8 +758,8 @@ async function stepVerify(): Promise<void> {
   const aiButtons = (flowModels?.data ?? []).filter(row => row.use === 'AIEmployeeButtonModel')
   const n18Buttons = aiButtons.filter(row => row.uid?.startsWith('n18ai-'))
   // 11 = the N17d eight CRM/Hub pages + the E1 项目管理 three (项目/任务列表/里程碑);
-  // +2 = the F1 kanban/calendar Add-new popups.
-  if (n18Buttons.length < 13) failures.push(`n18ai- AIEmployeeButtonModel count ${n18Buttons.length} < 13 (form AI fill buttons missing; run nocobase-n18-form-ai.mts after nocobase-e1-pj-v2.mts + nocobase-f1-view-v2.mts)`)
+  // +2 = the F1 kanban/calendar Add-new popups; +5 = the F2 CRM pages.
+  if (n18Buttons.length < 18) failures.push(`n18ai- AIEmployeeButtonModel count ${n18Buttons.length} < 18 (form AI fill buttons missing; run nocobase-n18-form-ai.mts after nocobase-e1-pj-v2.mts + nocobase-f1-view-v2.mts + nocobase-f2-crm-v2.mts)`)
   // Row-level AI actions configured by hand in the UI (not seeded) are legal;
   // only unknown foreign mounts may pad the AIEmployeeButtonModel census.
   const KNOWN_HAND_CONFIGURED_AI_BUTTONS = new Set(['26c6ab488b1']) // viz action on the E1 项目 table
@@ -1162,7 +1166,7 @@ async function main(): Promise<void> {
       for (const script of [
         'nocobase-crm-modules.mts', 'nocobase-hub-modules.mts',
         'nocobase-n13-rebuild.mts', 'nocobase-n13-seed.mts', 'nocobase-n14-fix.mts',
-        'nocobase-n17-alignment.mts', 'nocobase-e1-pj-v2.mts', 'nocobase-f1-view-v2.mts', 'nocobase-n18-form-ai.mts', 'nocobase-n25-brand.mts',
+        'nocobase-n17-alignment.mts', 'nocobase-e1-pj-v2.mts', 'nocobase-f1-view-v2.mts', 'nocobase-f2-crm-v2.mts', 'nocobase-n18-form-ai.mts', 'nocobase-n25-brand.mts',
       ]) {
         if (!run('node', ['--import', 'tsx/esm', join(repoRoot, 'examples/kb-agent/scripts', script)])) {
           throw new Error(`${script} failed during the all chain`)

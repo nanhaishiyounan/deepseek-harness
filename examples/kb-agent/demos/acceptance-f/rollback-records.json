@@ -28,5 +28,80 @@
       }
     ],
     "destroyedId": 386332340125699
+  },
+  {
+    "title": "产品与服务",
+    "parentId": 386332291891200,
+    "icon": "AppstoreOutlined",
+    "sort": 4,
+    "schemaUid": "g50posy0qxc",
+    "tabs": [
+      {
+        "schemaUid": "zglcwwab145",
+        "tabSchemaName": "5o8akdc0mxt",
+        "sort": 1
+      }
+    ],
+    "destroyedId": 386332293988360
+  },
+  {
+    "title": "回款",
+    "parentId": 386332296085507,
+    "icon": "PayCircleOutlined",
+    "sort": 3,
+    "schemaUid": "ihfgg15bm8x",
+    "tabs": [
+      {
+        "schemaUid": "hkr6nvogp0g",
+        "tabSchemaName": "f7q4i1veiv1",
+        "sort": 1
+      }
+    ],
+    "destroyedId": 386332296085515
+  },
+  {
+    "title": "发票",
+    "parentId": 386332296085507,
+    "icon": "AuditOutlined",
+    "sort": 4,
+    "schemaUid": "nx1znh4rs6i",
+    "tabs": [
+      {
+        "schemaUid": "75kqrkvy7gh",
+        "tabSchemaName": "f3z0lwfmdoq",
+        "sort": 1
+      }
+    ],
+    "destroyedId": 386332296085518
+  },
+  {
+    "title": "客户仪表盘",
+    "parentId": 386332291891200,
+    "icon": "DashboardOutlined",
+    "sort": 5,
+    "schemaUid": "w6nyh5dtycq",
+    "tabs": [
+      {
+        "schemaUid": "qfjd61d5wwj",
+        "tabSchemaName": "i8j03fx2x2m",
+        "sort": 1
+      }
+    ],
+    "destroyedId": 386332296085504
+  },
+  {
+    "title": "销售仪表盘",
+    "parentId": 386332296085507,
+    "icon": "BarChartOutlined",
+    "sort": 5,
+    "schemaUid": "x00jse3wllw",
+    "tabs": [
+      {
+        "schemaUid": "hhozqul2o6x",
+        "tabSchemaName": "x4javna79sj",
+        "sort": 1
+      }
+    ],
+    "destroyedId": 386332298182657
   }
 ]
