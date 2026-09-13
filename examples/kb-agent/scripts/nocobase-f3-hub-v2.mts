@@ -29,56 +29,16 @@
  *   node --import tsx/esm examples/kb-agent/scripts/nocobase-f3-hub-v2.mts [--only 供应商]
  *   node --import tsx/esm examples/kb-agent/scripts/nocobase-f3-hub-v2.mts --rollback
  */
-import { readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import {
+  batchScopedRows, call, dataOf, listFlowModels, listRoutes, loadRollbackRecords,
+  signInWithRetry, withN17Prefix, writeRollbackRecord,
+} from './nocobase-flow-page-lib.mts'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const repoRoot = resolve(here, '../../..')
-const baseUrl = process.env.NOCOBASE_BASE_URL ?? 'http://127.0.0.1:13000'
-const rootEmail = process.env.NOCOBASE_ROOT_EMAIL ?? 'admin@nocobase.com'
-const rootPassword = process.env.NOCOBASE_ROOT_PASSWORD ?? 'admin123'
 const rollbackPath = join(repoRoot, 'examples/kb-agent/demos/acceptance-f/rollback-records.json')
-
-const nodeKey = (): string => Math.random().toString(36).slice(2, 13)
-
-async function call(token: string, method: 'GET' | 'POST' | 'DELETE', path: string, body?: unknown): Promise<any> {
-  const response = await fetch(`${baseUrl}${path}`, {
-    method,
-    headers: { authorization: `Bearer ${token}`, ...(body === undefined ? {} : { 'content-type': 'application/json' }) },
-    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
-  })
-  const payload = await response.json().catch(() => null)
-  if (!response.ok) {
-    throw new Error(`${method} ${path} -> HTTP ${response.status}: ${JSON.stringify(payload).slice(0, 300)}`)
-  }
-  return payload
-}
-
-async function dataOf(token: string, method: 'GET' | 'POST' | 'DELETE', path: string, body?: unknown): Promise<any> {
-  const payload = await call(token, method, path, body)
-  return payload?.data ?? null
-}
-
-async function signIn(): Promise<string> {
-  const payload = await call('', 'POST', '/api/auth:signIn', { account: rootEmail, password: rootPassword })
-  const token = payload?.data?.token
-  if (typeof token !== 'string' || token.length === 0) throw new Error(`sign-in as ${rootEmail} returned no token`)
-  return token
-}
-
-async function signInWithRetry(attempts = 4): Promise<string> {
-  let lastError: unknown
-  for (let i = 0; i < attempts; i++) {
-    try {
-      return await signIn()
-    } catch (error) {
-      lastError = error
-      await new Promise(resolve => setTimeout(resolve, 8000))
-    }
-  }
-  throw lastError
-}
 
 type FieldKind = 'input' | 'select' | 'number' | 'm2o' | 'date' | 'boolean'
 type FieldSpec = { name: string, title: string, kind: FieldKind, options?: object[], required?: boolean }
@@ -321,79 +281,27 @@ const editModelFor = (kind: FieldKind): string => {
   }
 }
 
-type RouteRow = { id: number, title: string | null, parentId: number | null, type: string, schemaUid: string | null, icon: string | null, sort: number | null, tabSchemaName?: string | null }
-type FlowModelRow = Record<string, any>
+type RouteRow = import('./nocobase-flow-page-lib.mts').RouteRow
+type FlowModelRow = import('./nocobase-flow-page-lib.mts').FlowModelRow
+type RollbackRecord = import('./nocobase-flow-page-lib.mts').RollbackRecord
 
-type RollbackRecord = {
-  title: string
-  parentId: number | null
-  icon: string | null
-  sort: number | null
-  schemaUid: string | null
-  tabs?: Array<{ schemaUid: string | null, tabSchemaName: string | null, sort: number | null }>
-  destroyedId?: number
-}
-
-function loadRollbackRecords(): RollbackRecord[] {
-  try {
-    return JSON.parse(readFileSync(rollbackPath, 'utf8')) as RollbackRecord[]
-  } catch (error) {
-    const code = (error as NodeJS.ErrnoException).code
-    if (code === 'ENOENT') return []
-    throw new Error(`rollback record at ${rollbackPath} is unreadable (${String(error)}); fix or delete it before re-running`)
-  }
-}
-
-function saveRollbackRecords(records: RollbackRecord[]): void {
-  writeFileSync(rollbackPath, `${JSON.stringify(records, null, 2)}\n`)
-}
-
-function upsertRollbackRecord(record: RollbackRecord): void {
-  const records = loadRollbackRecords()
-  const index = records.findIndex(row => row.title === record.title)
-  if (index >= 0) records.splice(index, 1, record)
-  else records.push(record)
-  saveRollbackRecords(records)
-}
-
-async function listFlowModels(token: string): Promise<FlowModelRow[]> {
-  const pageSize = 2000
-  const payload = await call(token, 'GET', `/api/flowModels:list?pageSize=${pageSize}`)
-  const rows = (payload?.data ?? null) as FlowModelRow[] | null
-  if (rows === null) return []
-  const total = payload?.meta?.total
-  if (typeof total === 'number' ? total > rows.length : rows.length === pageSize) {
-    throw new Error(`flowModels:list returned ${rows.length} of ${total} rows (pageSize=${pageSize}); raise the page size or paginate before running F3`)
-  }
-  return rows
-}
-
-async function listRoutes(token: string): Promise<RouteRow[]> {
-  const pageSize = 400
-  const payload = await call(token, 'GET', `/api/desktopRoutes:list?pageSize=${pageSize}`)
-  const routes = (payload?.data ?? null) as RouteRow[] | null
-  if (routes === null) return []
-  const total = payload?.meta?.total
-  if (typeof total === 'number' && total > routes.length) {
-    throw new Error(`desktopRoutes:list returned ${routes.length} of ${total} rows (pageSize=${pageSize}); raise the page size before running F3`)
-  }
-  return routes
-}
+const loadRecords = (): RollbackRecord[] => loadRollbackRecords(rollbackPath)
+const listModels = (token: string): Promise<FlowModelRow[]> => listFlowModels(token, 'F3')
+const listAllRoutes = (token: string): Promise<RouteRow[]> => listRoutes(token, 'F3')
 
 /**
  * Composite-page spine: per collection, one n17f3-prefixed TableBlockModel
- * (the prefix rules out E1/F1 blocks on the same collections) plus a
- * top-level CreateFormModel and its submit. 工作台 is a top-level route
- * (parentId null); its record captures that.
+ * (batchScopedRows — the prefix rules out E1/F1 blocks on the same
+ * collections) plus a top-level CreateFormModel and its submit. 工作台 is
+ * a top-level route (parentId null); its record captures that.
  */
 async function v2TreeComplete(token: string, spec: V2PageSpec, flow: RouteRow): Promise<boolean> {
-  const rows = await listFlowModels(token)
+  const rows = await listModels(token)
   const uids = new Set(rows.map(row => String(row.uid ?? '')))
   const collectionOf = (row: FlowModelRow): string | undefined => row?.stepParams?.resourceSettings?.init?.collectionName
   let complete = true
   for (const block of spec.blocks) {
-    const hasTable = rows.some(row => row.use === 'TableBlockModel' && collectionOf(row) === block.collection
-      && String(row.uid ?? '').startsWith('n17f3'))
+    const hasTable = batchScopedRows(rows, { use: 'TableBlockModel', collection: block.collection, uidPrefix: 'n17f3' }).length > 0
     const form = rows.find(row => row.use === 'CreateFormModel' && row.parentId == null && collectionOf(row) === block.collection)
     const hasSubmit = form !== undefined && uids.has(`submit-${form.uid}`)
     if (!(hasTable && hasSubmit)) {
@@ -406,9 +314,9 @@ async function v2TreeComplete(token: string, spec: V2PageSpec, flow: RouteRow): 
 
 /** Destroy the flowPage route row (tabs children first) for one F3 title. */
 async function destroyFlowPageRow(token: string, title: string): Promise<void> {
-  const flow = (await listRoutes(token)).find(row => row.title === title && row.type === 'flowPage')
+  const flow = (await listAllRoutes(token)).find(row => row.title === title && row.type === 'flowPage')
   if (flow === undefined) return
-  for (const row of (await listRoutes(token)).filter(r => r.parentId === flow.id && r.type === 'tabs')) {
+  for (const row of (await listAllRoutes(token)).filter(r => r.parentId === flow.id && r.type === 'tabs')) {
     await call(token, 'DELETE', `/api/desktopRoutes:destroy?filterByTk=${row.id}`)
   }
   await call(token, 'DELETE', `/api/desktopRoutes:destroy?filterByTk=${flow.id}`)
@@ -430,7 +338,7 @@ async function restoreV1Row(token: string, record: RollbackRecord): Promise<void
 /** Destroy every n17f3* flowModels tree, then sweep orphaned n18ai- buttons (post-destroy list, E5 fix). */
 async function destroyF3Trees(token: string): Promise<void> {
   let destroyedModels = 0
-  for (const row of await listFlowModels(token)) {
+  for (const row of await listModels(token)) {
     const uid = String(row.uid ?? '')
     if (uid.startsWith('n17f3')) {
       await call(token, 'POST', `/api/flowModels:destroy?filterByTk=${encodeURIComponent(uid)}`)
@@ -438,7 +346,7 @@ async function destroyF3Trees(token: string): Promise<void> {
     }
   }
   if (destroyedModels === 0) return
-  const survivors = await listFlowModels(token)
+  const survivors = await listModels(token)
   const liveForms = new Set(survivors.filter(row => row.use === 'CreateFormModel').map(row => String(row.uid ?? '')))
   let destroyedButtons = 0
   for (const row of survivors) {
@@ -455,16 +363,16 @@ async function destroyF3Trees(token: string): Promise<void> {
 async function healTruncatedPages(token: string, pages: ReadonlyArray<V2PageSpec>): Promise<boolean> {
   const incomplete: V2PageSpec[] = []
   for (const spec of pages) {
-    const flow = (await listRoutes(token)).find(row => row.title === spec.title && row.type === 'flowPage')
+    const flow = (await listAllRoutes(token)).find(row => row.title === spec.title && row.type === 'flowPage')
     if (flow !== undefined && !(await v2TreeComplete(token, spec, flow))) incomplete.push(spec)
   }
   if (incomplete.length === 0) return false
   console.log(`nocobase-f3: truncated v2 page(s) ${incomplete.map(spec => spec.title).join(' / ')}; tearing every F3 page down for a full rebuild`)
   await destroyF3Trees(token)
-  const records = loadRollbackRecords()
+  const records = loadRecords()
   for (const spec of HUB_PAGES) {
     await destroyFlowPageRow(token, spec.title)
-    const routes = await listRoutes(token)
+    const routes = await listAllRoutes(token)
     const hasV1 = routes.some(row => row.title === spec.title && row.type === 'page')
     if (hasV1) continue
     const record = records.find(row => row.title === spec.title)
@@ -478,7 +386,7 @@ async function healTruncatedPages(token: string, pages: ReadonlyArray<V2PageSpec
 
 /** Build the FormGridModel schema node for one popup form (E1 shape, uid prefix n17f3). */
 function formGrid(collection: string, fields: ReadonlyArray<FieldSpec>): Record<string, unknown> {
-  const itemUids = fields.map(() => `n17f3i${nodeKey()}`)
+  const itemUids = fields.map(() => withN17Prefix('n17f3', 'i'))
   const rows = itemUids.map((itemUid, index) => ({
     id: `r${index}`,
     cells: [{ id: `r${index}:cell:0`, items: [itemUid] }],
@@ -510,7 +418,7 @@ function formGrid(collection: string, fields: ReadonlyArray<FieldSpec>): Record<
  * the plain F2 shape).
  */
 async function ensureV2HubPage(token: string, spec: V2PageSpec): Promise<void> {
-  const rows = (await listRoutes(token)).filter(row => row.title === spec.title)
+  const rows = (await listAllRoutes(token)).filter(row => row.title === spec.title)
   const flow = rows.find(row => row.type === 'flowPage')
   if (flow !== undefined) {
     if (!(await v2TreeComplete(token, spec, flow))) {
@@ -522,29 +430,29 @@ async function ensureV2HubPage(token: string, spec: V2PageSpec): Promise<void> {
   const v1 = rows.find(row => row.type === 'page')
   if (v1 === undefined) throw new Error(`page "${spec.title}" not found; run nocobase-hub-modules.mts first`)
   const { parentId, icon, sort, schemaUid } = v1
-  const v1Tabs = (await listRoutes(token))
+  const v1Tabs = (await listAllRoutes(token))
     .filter(row => row.parentId === v1.id && row.type === 'tabs')
     .map(row => ({ schemaUid: row.schemaUid, tabSchemaName: row.tabSchemaName ?? null, sort: row.sort }))
-  upsertRollbackRecord({ title: spec.title, parentId, icon, sort, schemaUid, tabs: v1Tabs, destroyedId: v1.id })
+  writeRollbackRecord(rollbackPath, { title: spec.title, parentId, icon, sort, schemaUid, tabs: v1Tabs, destroyedId: v1.id })
   console.log(`nocobase-f3: v1 page "${spec.title}" row ${JSON.stringify({ id: v1.id, parentId, icon, sort, schemaUid, tabs: v1Tabs.length })} recorded to disk, destroying`)
   await call(token, 'DELETE', `/api/desktopRoutes:destroy?filterByTk=${v1.id}`)
-  const routeUid = `n17f3${nodeKey()}`
+  const routeUid = withN17Prefix('n17f3', '')
   const page = await dataOf(token, 'POST', '/api/desktopRoutes:create', { title: spec.title, icon, type: 'flowPage', parentId, sort, schemaUid: routeUid })
-  const tabUid = `n17f3t${nodeKey()}`
-  await dataOf(token, 'POST', '/api/desktopRoutes:create', { title: '', type: 'tabs', parentId: page.id, schemaUid: tabUid, tabSchemaName: `n17f3ts${nodeKey()}` })
+  const tabUid = withN17Prefix('n17f3', 't')
+  await dataOf(token, 'POST', '/api/desktopRoutes:create', { title: '', type: 'tabs', parentId: page.id, schemaUid: tabUid, tabSchemaName: withN17Prefix('n17f3', 'ts') })
 
   const save = (model: Record<string, unknown>) => dataOf(token, 'POST', '/api/flowModels:save', model)
   await save({ uid: routeUid, schema: { use: 'RouteModel' } })
   await save({ uid: tabUid, schema: { use: 'RouteModel' } })
-  const pageUid = `n17f3p${nodeKey()}`
+  const pageUid = withN17Prefix('n17f3', 'p')
   await save({ uid: pageUid, parentId: routeUid, subKey: 'page', subType: 'object', use: 'RootPageModel', props: { title: spec.title, displayTitle: true, enableTabs: false }, stepParams: { pageSettings: { general: { title: spec.title, displayTitle: true, enableTabs: false } } } })
-  const gridUid = `n17f3g${nodeKey()}`
+  const gridUid = withN17Prefix('n17f3', 'g')
   await save({ uid: gridUid, parentId: tabUid, subKey: 'grid', subType: 'object', use: 'BlockGridModel', props: {}, filterManager: [] })
 
   let blockIndex = 0
   for (const block of spec.blocks) {
     blockIndex += 1
-    const tableUid = `n17f3tb${nodeKey()}`
+    const tableUid = withN17Prefix('n17f3', 'tb')
     await save({
       uid: tableUid, use: 'TableBlockModel', parentId: gridUid, subKey: 'items', subType: 'array', sortIndex: blockIndex,
       props: block.heading === undefined ? {} : { title: block.heading },
@@ -552,7 +460,7 @@ async function ensureV2HubPage(token: string, spec: V2PageSpec): Promise<void> {
     })
     let sortIndex = 1
     for (const column of block.columns) {
-      const uid = `n17f3c${nodeKey()}`
+      const uid = withN17Prefix('n17f3', 'c')
       const model = displayModelFor(column.kind)
       await save({
         uid, use: 'TableColumnModel', parentId: tableUid, subKey: 'columns', subType: 'array', sortIndex,
@@ -571,7 +479,7 @@ async function ensureV2HubPage(token: string, spec: V2PageSpec): Promise<void> {
     }
 
     await save({
-      uid: `n17f3an${nodeKey()}`, parentId: tableUid, subKey: 'actions', subType: 'array', sortIndex: 1, use: 'AddNewActionModel', props: {},
+      uid: withN17Prefix('n17f3', 'an'), parentId: tableUid, subKey: 'actions', subType: 'array', sortIndex: 1, use: 'AddNewActionModel', props: {},
       stepParams: { popupSettings: { openView: { collectionName: block.collection, dataSourceKey: 'main' } } },
       subModels: {
         page: {
@@ -599,12 +507,12 @@ async function ensureV2HubPage(token: string, spec: V2PageSpec): Promise<void> {
       },
     })
     await save({
-      uid: `n17f3rf${nodeKey()}`, parentId: tableUid, subKey: 'actions', subType: 'array', sortIndex: 2, use: 'RefreshActionModel',
+      uid: withN17Prefix('n17f3', 'rf'), parentId: tableUid, subKey: 'actions', subType: 'array', sortIndex: 2, use: 'RefreshActionModel',
       props: { title: '', icon: 'ReloadOutlined' },
       stepParams: { buttonSettings: { general: { title: '', icon: 'ReloadOutlined' } } },
     })
   }
-  console.log(`nocobase-f3: v2 page "${spec.title}" created (${baseUrl}/admin/${routeUid}) with ${spec.blocks.length} block(s) + Add new + floating ball`)
+  console.log(`nocobase-f3: v2 page "${spec.title}" created (/admin/${routeUid}) with ${spec.blocks.length} block(s) + Add new + floating ball`)
 }
 
 /**
@@ -630,7 +538,7 @@ async function ensureHubTitleFields(token: string): Promise<void> {
 
 /** Ensure every F3 CreateFormModel carries its submit action (E1 rule). */
 async function ensureFormSubmits(token: string): Promise<void> {
-  const rows = await listFlowModels(token)
+  const rows = await listModels(token)
   const existingSubmits = new Set(rows.filter(row => row.use === 'FormSubmitActionModel').map(row => row.uid))
   const collections = new Set(HUB_PAGES.flatMap(spec => spec.blocks.map(block => block.collection)))
   const forms = rows.filter(row => row.use === 'CreateFormModel' && row.parentId == null
@@ -649,7 +557,7 @@ async function ensureFormSubmits(token: string): Promise<void> {
 
 /** Flag every `required: true` form field on the F3 popup forms (n17f3 scope). */
 async function ensureRequiredFields(token: string): Promise<void> {
-  const rows = await listFlowModels(token)
+  const rows = await listModels(token)
   const targets = HUB_PAGES.flatMap(spec => spec.blocks.flatMap(block => block.formFields.filter(field => field.required === true)
     .map(field => ({ collection: block.collection, name: field.name }))))
   const fieldInit = (row: FlowModelRow): { collectionName?: string, fieldPath?: string } => row?.stepParams?.fieldSettings?.init ?? {}
@@ -668,14 +576,14 @@ async function ensureRequiredFields(token: string): Promise<void> {
 
 /** Tear the F3 upgrade down: n17f3* trees + orphaned buttons + flowPage rows out, recorded v1 rows back. */
 async function rollback(token: string): Promise<void> {
-  const records = loadRollbackRecords()
+  const records = loadRecords()
   if (records.length === 0) {
     console.log(`nocobase-f3: no rollback record at ${rollbackPath} (nothing upgraded from this checkout?)`)
   }
   await destroyF3Trees(token)
   let destroyedRoutes = 0
   for (const spec of HUB_PAGES) {
-    const flow = (await listRoutes(token)).find(row => row.title === spec.title && row.type === 'flowPage')
+    const flow = (await listAllRoutes(token)).find(row => row.title === spec.title && row.type === 'flowPage')
     if (flow === undefined) continue
     await destroyFlowPageRow(token, spec.title)
     destroyedRoutes += 1
@@ -683,7 +591,7 @@ async function rollback(token: string): Promise<void> {
   let restored = 0
   for (const record of records) {
     if (!HUB_PAGES.some(spec => spec.title === record.title) || record.schemaUid === null) continue
-    const exists = (await listRoutes(token)).some(row => row.title === record.title && row.type === 'page')
+    const exists = (await listAllRoutes(token)).some(row => row.title === record.title && row.type === 'page')
     if (exists) continue
     await restoreV1Row(token, record)
     restored += 1

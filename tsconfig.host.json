@@ -96,6 +96,8 @@
     "examples/*/src/**/*.ts",
     "examples/*/start.ts",
     "examples/*/tests/**/*.ts",
+    "examples/kb-agent/scripts/nocobase-flow-page-lib.mts",
+    "examples/kb-agent/scripts/nocobase-f2-crm-v2.mts",
     "examples/kb-agent/scripts/seed-experts.mts",
     "examples/kb-agent/scripts/seed-experts-roster.mts",
     "examples/kb-agent/scripts/nocobase-n22-llm-proxy.mts",

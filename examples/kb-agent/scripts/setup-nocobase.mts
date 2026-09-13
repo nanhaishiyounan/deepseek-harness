@@ -759,6 +759,11 @@ async function stepVerify(): Promise<void> {
   // deterministic `n18ai-` uid prefix keeps foreign AIEmployeeButtonModel rows
   // from padding the count, and requiring every such row to carry the prefix
   // surfaces unexpected mounts instead of letting them hide among ours.
+  // This is a flowModels (DB) assertion: the button's uid never enters the
+  // runtime DOM (it renders as a plain 40px ant-avatar next to the submit
+  // button — see QUICKSTART's AI-button note for the render-layer shape and
+  // the correct probe); do not re-introduce a "search the DOM for n18ai"
+  // acceptance check.
   const aiButtons = (flowModels?.data ?? []).filter(row => row.use === 'AIEmployeeButtonModel')
   const n18Buttons = aiButtons.filter(row => row.uid?.startsWith('n18ai-'))
   // 11 = the N17d eight CRM/Hub pages + the E1 项目管理 three (项目/任务列表/里程碑);

@@ -26,41 +26,10 @@
  *   node --import tsx/esm examples/kb-agent/scripts/nocobase-f4-charts.mts
  *   node --import tsx/esm examples/kb-agent/scripts/nocobase-f4-charts.mts --remove
  */
-import { dirname, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { call, dataOf, listFlowModels, listRoutes, signInWithRetry } from './nocobase-flow-page-lib.mts'
 
-const here = dirname(fileURLToPath(import.meta.url))
-const baseUrl = process.env.NOCOBASE_BASE_URL ?? 'http://127.0.0.1:13000'
-const rootEmail = process.env.NOCOBASE_ROOT_EMAIL ?? 'admin@nocobase.com'
-const rootPassword = process.env.NOCOBASE_ROOT_PASSWORD ?? 'admin123'
-
-async function call(token: string, method: 'GET' | 'POST' | 'DELETE', path: string, body?: unknown): Promise<any> {
-  const response = await fetch(`${baseUrl}${path}`, {
-    method,
-    headers: { authorization: `Bearer ${token}`, ...(body === undefined ? {} : { 'content-type': 'application/json' }) },
-    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
-  })
-  const payload = await response.json().catch(() => null)
-  if (!response.ok) {
-    throw new Error(`${method} ${path} -> HTTP ${response.status}: ${JSON.stringify(payload).slice(0, 300)}`)
-  }
-  return payload
-}
-
-async function dataOf(token: string, method: 'GET' | 'POST' | 'DELETE', path: string, body?: unknown): Promise<any> {
-  const payload = await call(token, method, path, body)
-  return payload?.data ?? null
-}
-
-async function signIn(): Promise<string> {
-  const payload = await call('', 'POST', '/api/auth:signIn', { account: rootEmail, password: rootPassword })
-  const token = payload?.data?.token
-  if (typeof token !== 'string' || token.length === 0) throw new Error(`sign-in as ${rootEmail} returned no token`)
-  return token
-}
-
-type RouteRow = { id: number, title: string | null, parentId: number | null, type: string, schemaUid: string | null }
-type FlowModelRow = Record<string, any>
+type RouteRow = import('./nocobase-flow-page-lib.mts').RouteRow
+type FlowModelRow = import('./nocobase-flow-page-lib.mts').FlowModelRow
 
 type ChartSpec = {
   page: string
@@ -77,33 +46,12 @@ const CHARTS: ReadonlyArray<ChartSpec> = [
   { page: '销售仪表盘', title: '回款按方式分布', collection: 'crm_payments', dimension: 'method', chartType: 'doughnut' },
 ]
 
-async function listRoutes(token: string): Promise<RouteRow[]> {
-  const pageSize = 400
-  const payload = await call(token, 'GET', `/api/desktopRoutes:list?pageSize=${pageSize}`)
-  const routes = (payload?.data ?? null) as RouteRow[] | null
-  if (routes === null) return []
-  const total = payload?.meta?.total
-  if (typeof total === 'number' ? total > routes.length : routes.length === pageSize) {
-    throw new Error('desktopRoutes:list may be truncated; raise the page size before running F4')
-  }
-  return routes
-}
-
-async function listFlowModels(token: string): Promise<FlowModelRow[]> {
-  const pageSize = 2000
-  const payload = await call(token, 'GET', `/api/flowModels:list?pageSize=${pageSize}`)
-  const rows = (payload?.data ?? null) as FlowModelRow[] | null
-  if (rows === null) return []
-  const total = payload?.meta?.total
-  if (typeof total === 'number' ? total > rows.length : rows.length === pageSize) {
-    throw new Error(`flowModels:list may be truncated; raise the page size before running F4`)
-  }
-  return rows
-}
+const listRoutesFor = (token: string): Promise<RouteRow[]> => listRoutes(token, 'F4')
+const listModels = (token: string): Promise<FlowModelRow[]> => listFlowModels(token, 'F4')
 
 /** Resolve the BlockGrid uid of one v2 page (its tabs child row carries the grid parent uid). */
 async function pageGridUid(token: string, pageTitle: string): Promise<string> {
-  const routes = await listRoutes(token)
+  const routes = await listRoutesFor(token)
   const flow = routes.find(row => row.title === pageTitle && row.type === 'flowPage')
   if (flow === undefined) throw new Error(`v2 page "${pageTitle}" not found; run nocobase-f2-crm-v2.mts first`)
   const tab = routes.find(row => row.parentId === flow.id && row.type === 'tabs')
@@ -125,7 +73,7 @@ const queryTargets = (query: any, spec: ChartSpec): boolean => {
 }
 
 async function main(): Promise<void> {
-  const token = await signIn()
+  const token = await signInWithRetry()
   const gridUids = new Map<string, string>()
   for (const chart of CHARTS) {
     if (!gridUids.has(chart.page)) gridUids.set(chart.page, await pageGridUid(token, chart.page))
@@ -133,7 +81,7 @@ async function main(): Promise<void> {
   if (process.argv.includes('--remove')) {
     let removed = 0
     for (const [page, gridUid] of gridUids) {
-      const rows = await listFlowModels(token)
+      const rows = await listModels(token)
       for (const row of rows.filter(candidate => candidate.use === 'ChartBlockModel' && candidate.parentId === gridUid)) {
         await call(token, 'POST', `/api/flowModels:destroy?filterByTk=${encodeURIComponent(String(row.uid))}`)
         removed += 1
@@ -145,7 +93,7 @@ async function main(): Promise<void> {
   }
   for (const chart of CHARTS) {
     const gridUid = gridUids.get(chart.page) as string
-    const rows = await listFlowModels(token)
+    const rows = await listModels(token)
     const existing = rows.find(row => row.use === 'ChartBlockModel' && row.parentId === gridUid && queryTargets(chartQueryOf(row), chart))
     if (existing !== undefined) {
       console.log(`nocobase-f4: chart "${chart.title}" exists on ${chart.page} (kept)`)

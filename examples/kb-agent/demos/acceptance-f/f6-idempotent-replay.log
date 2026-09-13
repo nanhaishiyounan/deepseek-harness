@@ -1,0 +1,88 @@
+=== RUN 1 ===
+--- nocobase-f1-view-v2 (run 1)
+nocobase-f1: v2 page "任务看板" exists (kept)
+nocobase-f1: v2 page "任务日历" exists (kept)
+nocobase-f1: form submit actions already in place (kept)
+nocobase-f1: card/event drawer content already in place (kept)
+nocobase-f1: required form fields already in place (kept)
+nocobase-f1: done
+EXIT=0
+--- nocobase-f2-crm-v2 (run 1)
+nocobase-f2: crm collection titleFields already in place (kept)
+nocobase-f2: v2 page "产品与服务" exists (kept)
+nocobase-f2: v2 page "回款" exists (kept)
+nocobase-f2: v2 page "发票" exists (kept)
+nocobase-f2: v2 page "客户仪表盘" exists (kept)
+nocobase-f2: v2 page "销售仪表盘" exists (kept)
+nocobase-f2: form submit actions already in place (kept)
+nocobase-f2: required form fields already in place (kept)
+nocobase-f2: done
+EXIT=0
+--- nocobase-f3-hub-v2 (run 1)
+nocobase-f3: hub collection titleFields already in place (kept)
+nocobase-f3: v2 page "知识文章" exists (kept)
+nocobase-f3: v2 page "维保记录" exists (kept)
+nocobase-f3: v2 page "部门" exists (kept)
+nocobase-f3: v2 page "请假审批" exists (kept)
+nocobase-f3: v2 page "供应商" exists (kept)
+nocobase-f3: v2 page "工作台" exists (kept)
+nocobase-f3: v2 page "分类维护" exists (kept)
+nocobase-f3: form submit actions already in place (kept)
+nocobase-f3: required form fields already in place (kept)
+nocobase-f3: done
+EXIT=0
+--- nocobase-f4-charts (run 1)
+nocobase-f4: chart "客户按行业分布" exists on 客户仪表盘 (kept)
+nocobase-f4: chart "客户按等级分布" exists on 客户仪表盘 (kept)
+nocobase-f4: chart "回款按状态分布" exists on 销售仪表盘 (kept)
+nocobase-f4: chart "回款按方式分布" exists on 销售仪表盘 (kept)
+nocobase-f4: done
+EXIT=0
+--- nocobase-n18-form-ai (run 1)
+nocobase-n18: form AI buttons already in place on dex (kept) across 29 popup forms (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts)
+nocobase-n18: done
+EXIT=0
+=== RUN 2 ===
+--- nocobase-f1-view-v2 (run 2)
+nocobase-f1: v2 page "任务看板" exists (kept)
+nocobase-f1: v2 page "任务日历" exists (kept)
+nocobase-f1: form submit actions already in place (kept)
+nocobase-f1: card/event drawer content already in place (kept)
+nocobase-f1: required form fields already in place (kept)
+nocobase-f1: done
+EXIT=0
+--- nocobase-f2-crm-v2 (run 2)
+nocobase-f2: crm collection titleFields already in place (kept)
+nocobase-f2: v2 page "产品与服务" exists (kept)
+nocobase-f2: v2 page "回款" exists (kept)
+nocobase-f2: v2 page "发票" exists (kept)
+nocobase-f2: v2 page "客户仪表盘" exists (kept)
+nocobase-f2: v2 page "销售仪表盘" exists (kept)
+nocobase-f2: form submit actions already in place (kept)
+nocobase-f2: required form fields already in place (kept)
+nocobase-f2: done
+EXIT=0
+--- nocobase-f3-hub-v2 (run 2)
+nocobase-f3: hub collection titleFields already in place (kept)
+nocobase-f3: v2 page "知识文章" exists (kept)
+nocobase-f3: v2 page "维保记录" exists (kept)
+nocobase-f3: v2 page "部门" exists (kept)
+nocobase-f3: v2 page "请假审批" exists (kept)
+nocobase-f3: v2 page "供应商" exists (kept)
+nocobase-f3: v2 page "工作台" exists (kept)
+nocobase-f3: v2 page "分类维护" exists (kept)
+nocobase-f3: form submit actions already in place (kept)
+nocobase-f3: required form fields already in place (kept)
+nocobase-f3: done
+EXIT=0
+--- nocobase-f4-charts (run 2)
+nocobase-f4: chart "客户按行业分布" exists on 客户仪表盘 (kept)
+nocobase-f4: chart "客户按等级分布" exists on 客户仪表盘 (kept)
+nocobase-f4: chart "回款按状态分布" exists on 销售仪表盘 (kept)
+nocobase-f4: chart "回款按方式分布" exists on 销售仪表盘 (kept)
+nocobase-f4: done
+EXIT=0
+--- nocobase-n18-form-ai (run 2)
+nocobase-n18: form AI buttons already in place on dex (kept) across 29 popup forms (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts)
+nocobase-n18: done
+EXIT=0

@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-09-13-nocobase-v2-view-block-upgrade.md
-2026-09-13-nocobase-v2-view-block-upgrade.md: 196b2573c4e1f083de27cbffe234fe113e2ef17f
-2026-09-13-nocobase-v2-view-block-upgrade.zh.md: 6d9f697d258356cd85238630564fcbe7760ec7a1
+2026-09-13-nocobase-v2-view-block-upgrade.md: 5d0eff2238fa6fb8691a295114c9cc4d78e3978a
+2026-09-13-nocobase-v2-view-block-upgrade.zh.md: cefb6c572052dfa0cfead7e2a6c1fc9a670ca7df
