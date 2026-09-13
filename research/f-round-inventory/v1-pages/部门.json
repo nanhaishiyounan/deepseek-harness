@@ -1,0 +1,211 @@
+{
+  "fetchedAt": "2026-09-13T06:28:49.029Z",
+  "title": "部门",
+  "pageUid": "kdud3tb3iq6",
+  "tree": {
+    "type": "void",
+    "properties": {
+      "7lv084n4gbn": {
+        "type": "void",
+        "x-component": "Grid",
+        "x-initializer": "page:addBlock",
+        "properties": {
+          "uas7c8wledb": {
+            "type": "void",
+            "x-component": "Grid.Row",
+            "properties": {
+              "8euwf5stwlt": {
+                "type": "void",
+                "x-component": "Grid.Col",
+                "properties": {
+                  "7h64y8ldxfc": {
+                    "_isJSONSchemaObject": true,
+                    "version": "2.0",
+                    "type": "void",
+                    "x-decorator": "TableBlockProvider",
+                    "x-acl-action": "hub_hr_departments:list",
+                    "x-use-decorator-props": "useTableBlockDecoratorProps",
+                    "x-decorator-props": {
+                      "collection": "hub_hr_departments",
+                      "dataSource": "main",
+                      "action": "list",
+                      "params": {
+                        "pageSize": 20
+                      },
+                      "showIndex": true,
+                      "dragSort": false
+                    },
+                    "x-toolbar": "BlockSchemaToolbar",
+                    "x-settings": "blockSettings:table",
+                    "x-filter-targets": [],
+                    "x-component": "CardItem",
+                    "properties": {
+                      "6xe3seyi9dp": {
+                        "type": "void",
+                        "x-initializer": "table:configureActions",
+                        "x-component": "ActionBar",
+                        "x-component-props": {
+                          "style": {
+                            "marginBottom": "var(--nb-spacing)"
+                          }
+                        },
+                        "x-uid": "b623aep59su",
+                        "x-async": false,
+                        "x-index": 1
+                      },
+                      "vn2wwwz7qys": {
+                        "type": "array",
+                        "x-initializer": "table:configureColumns",
+                        "x-component": "TableV2",
+                        "x-use-component-props": "useTableBlockProps",
+                        "x-component-props": {
+                          "rowKey": "id",
+                          "rowSelection": {
+                            "type": "checkbox"
+                          }
+                        },
+                        "properties": {
+                          "5phd5jckniv": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "name": {
+                                "x-collection-field": "hub_hr_departments.name",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "1x2bx8c1eyv",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "1zxz4k0mzjf",
+                            "x-async": false,
+                            "x-index": 1
+                          },
+                          "ua7et4e9y0h": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "code": {
+                                "x-collection-field": "hub_hr_departments.code",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "i3g2x2wray8",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "4yol7d8lbr3",
+                            "x-async": false,
+                            "x-index": 2
+                          },
+                          "u5a6yhvo5nd": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "manager": {
+                                "x-collection-field": "hub_hr_departments.manager",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "1cmli5m9poo",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "yow49skum6v",
+                            "x-async": false,
+                            "x-index": 3
+                          },
+                          "g5rxuis3wap": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "headcount": {
+                                "x-collection-field": "hub_hr_departments.headcount",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "h2mjnwhhl95",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "reheaxpzaxl",
+                            "x-async": false,
+                            "x-index": 4
+                          }
+                        },
+                        "x-uid": "nfrj61gtkrv",
+                        "x-async": false,
+                        "x-index": 2
+                      }
+                    },
+                    "x-uid": "ueywuq1l9ot",
+                    "x-async": false,
+                    "x-index": 1
+                  }
+                },
+                "x-uid": "crvjeb6s0x5",
+                "x-async": false,
+                "x-index": 1
+              }
+            },
+            "x-uid": "62pedtfd35g",
+            "x-async": false,
+            "x-index": 1
+          }
+        },
+        "x-uid": "dq3l8m8yhsc",
+        "x-async": false,
+        "x-index": 1
+      }
+    }
+  }
+}

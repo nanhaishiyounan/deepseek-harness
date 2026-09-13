@@ -16,8 +16,11 @@
  * The m2o pickers are the acceptance core: owner/assignee must select the
  * nine AI-employee users rows — a text input here would regress D1.
  *
- * The kanban / calendar / gantt pages stay v1: the 2.2.6 flowModel catalog
- * has no block model for those views (documented QUICKSTART boundary).
+ * Kanban and calendar were upgraded to v2 by F1 (nocobase-f1-view-v2.mts);
+ * gantt stays v1 — plugin-gantt's client model is registered but absent
+ * from flow-engine's server authoring surface (no use-set entry, no
+ * support-matrix key, no fixture, no .define() metadata; documented
+ * QUICKSTART boundary).
  *
  * Idempotent: an existing flowPage of the same title is kept only when its
  * flowModels tree still carries the acceptance spine (route models, table

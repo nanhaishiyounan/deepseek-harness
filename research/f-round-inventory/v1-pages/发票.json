@@ -1,0 +1,269 @@
+{
+  "fetchedAt": "2026-09-13T06:28:48.905Z",
+  "title": "发票",
+  "pageUid": "nx1znh4rs6i",
+  "tree": {
+    "type": "void",
+    "properties": {
+      "f3z0lwfmdoq": {
+        "type": "void",
+        "x-component": "Grid",
+        "x-initializer": "page:addBlock",
+        "properties": {
+          "v59jtscp5v5": {
+            "type": "void",
+            "x-component": "Grid.Row",
+            "properties": {
+              "19jm8x5qdio": {
+                "type": "void",
+                "x-component": "Grid.Col",
+                "properties": {
+                  "333zk4llh4t": {
+                    "_isJSONSchemaObject": true,
+                    "version": "2.0",
+                    "type": "void",
+                    "x-decorator": "TableBlockProvider",
+                    "x-acl-action": "crm_invoices:list",
+                    "x-use-decorator-props": "useTableBlockDecoratorProps",
+                    "x-decorator-props": {
+                      "collection": "crm_invoices",
+                      "dataSource": "main",
+                      "action": "list",
+                      "params": {
+                        "pageSize": 20
+                      },
+                      "showIndex": true,
+                      "dragSort": false
+                    },
+                    "x-toolbar": "BlockSchemaToolbar",
+                    "x-settings": "blockSettings:table",
+                    "x-filter-targets": [],
+                    "x-component": "CardItem",
+                    "properties": {
+                      "xexv4v60sn": {
+                        "type": "void",
+                        "x-initializer": "table:configureActions",
+                        "x-component": "ActionBar",
+                        "x-component-props": {
+                          "style": {
+                            "marginBottom": "var(--nb-spacing)"
+                          }
+                        },
+                        "x-uid": "vgyhdprzaww",
+                        "x-async": false,
+                        "x-index": 1
+                      },
+                      "4lz0u11qiwe": {
+                        "type": "array",
+                        "x-initializer": "table:configureColumns",
+                        "x-component": "TableV2",
+                        "x-use-component-props": "useTableBlockProps",
+                        "x-component-props": {
+                          "rowKey": "id",
+                          "rowSelection": {
+                            "type": "checkbox"
+                          }
+                        },
+                        "properties": {
+                          "2hb2wvimw69": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "invoice_no": {
+                                "x-collection-field": "crm_invoices.invoice_no",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "3v5nt0006xp",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "6x0xrfl1wb1",
+                            "x-async": false,
+                            "x-index": 1
+                          },
+                          "rmbn5o6yxs": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "customer": {
+                                "x-collection-field": "crm_invoices.customer",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "b5puasj247o",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "edq38v2nwz4",
+                            "x-async": false,
+                            "x-index": 2
+                          },
+                          "zq8f5pyc0v": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "deal": {
+                                "x-collection-field": "crm_invoices.deal",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "byjg4g1zq12",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "hdexnqajmnp",
+                            "x-async": false,
+                            "x-index": 3
+                          },
+                          "uul0jptqnvc": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "amount": {
+                                "x-collection-field": "crm_invoices.amount",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "nwidt5byqjz",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "jwoxmjnzebo",
+                            "x-async": false,
+                            "x-index": 4
+                          },
+                          "y14fd2p7u8f": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "issued_at": {
+                                "x-collection-field": "crm_invoices.issued_at",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "kczpo9p96x9",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "tnsqyc8m7fi",
+                            "x-async": false,
+                            "x-index": 5
+                          },
+                          "nhn4lyvwenr": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "status": {
+                                "x-collection-field": "crm_invoices.status",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "98oat1bub2w",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "5kuspqy1l8z",
+                            "x-async": false,
+                            "x-index": 6
+                          }
+                        },
+                        "x-uid": "ms1ejj06omh",
+                        "x-async": false,
+                        "x-index": 2
+                      }
+                    },
+                    "x-uid": "d8zw8vyo2sn",
+                    "x-async": false,
+                    "x-index": 1
+                  }
+                },
+                "x-uid": "vaxpftoubwb",
+                "x-async": false,
+                "x-index": 1
+              }
+            },
+            "x-uid": "tyel9l504r0",
+            "x-async": false,
+            "x-index": 1
+          }
+        },
+        "x-uid": "75kqrkvy7gh",
+        "x-async": false,
+        "x-index": 1
+      }
+    }
+  }
+}

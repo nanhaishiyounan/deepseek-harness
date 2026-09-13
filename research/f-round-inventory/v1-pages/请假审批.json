@@ -1,0 +1,298 @@
+{
+  "fetchedAt": "2026-09-13T06:28:49.045Z",
+  "title": "请假审批",
+  "pageUid": "i7lcu24opl5",
+  "tree": {
+    "type": "void",
+    "properties": {
+      "hi814p7ugsn": {
+        "type": "void",
+        "x-component": "Grid",
+        "x-initializer": "page:addBlock",
+        "properties": {
+          "7jjx9iqprzi": {
+            "type": "void",
+            "x-component": "Grid.Row",
+            "properties": {
+              "15o9lbijws7": {
+                "type": "void",
+                "x-component": "Grid.Col",
+                "properties": {
+                  "r3im1pexfag": {
+                    "_isJSONSchemaObject": true,
+                    "version": "2.0",
+                    "type": "void",
+                    "x-decorator": "TableBlockProvider",
+                    "x-acl-action": "hub_hr_leave_requests:list",
+                    "x-use-decorator-props": "useTableBlockDecoratorProps",
+                    "x-decorator-props": {
+                      "collection": "hub_hr_leave_requests",
+                      "dataSource": "main",
+                      "action": "list",
+                      "params": {
+                        "pageSize": 20
+                      },
+                      "showIndex": true,
+                      "dragSort": false
+                    },
+                    "x-toolbar": "BlockSchemaToolbar",
+                    "x-settings": "blockSettings:table",
+                    "x-filter-targets": [],
+                    "x-component": "CardItem",
+                    "properties": {
+                      "cf38e3h9wh": {
+                        "type": "void",
+                        "x-initializer": "table:configureActions",
+                        "x-component": "ActionBar",
+                        "x-component-props": {
+                          "style": {
+                            "marginBottom": "var(--nb-spacing)"
+                          }
+                        },
+                        "x-uid": "d3rujvwzdys",
+                        "x-async": false,
+                        "x-index": 1
+                      },
+                      "47yblru0m1g": {
+                        "type": "array",
+                        "x-initializer": "table:configureColumns",
+                        "x-component": "TableV2",
+                        "x-use-component-props": "useTableBlockProps",
+                        "x-component-props": {
+                          "rowKey": "id",
+                          "rowSelection": {
+                            "type": "checkbox"
+                          }
+                        },
+                        "properties": {
+                          "55gudpqqf9": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "employee": {
+                                "x-collection-field": "hub_hr_leave_requests.employee",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "7d1skqdcgx4",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "qcrtjzf8s9g",
+                            "x-async": false,
+                            "x-index": 1
+                          },
+                          "iu0qtxpz2oh": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "type": {
+                                "x-collection-field": "hub_hr_leave_requests.type",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "evhu1y3x8cv",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "9bymem3jac2",
+                            "x-async": false,
+                            "x-index": 2
+                          },
+                          "7jjn8q6yxjf": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "start_at": {
+                                "x-collection-field": "hub_hr_leave_requests.start_at",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "aty0scclczc",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "4jco8cbix4d",
+                            "x-async": false,
+                            "x-index": 3
+                          },
+                          "vtptsi8ud": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "end_at": {
+                                "x-collection-field": "hub_hr_leave_requests.end_at",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "nvvw959t3go",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "97nroyjjjgv",
+                            "x-async": false,
+                            "x-index": 4
+                          },
+                          "eycjo111oyu": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "days": {
+                                "x-collection-field": "hub_hr_leave_requests.days",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "622tlnd9phe",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "966mtg68tos",
+                            "x-async": false,
+                            "x-index": 5
+                          },
+                          "5ur6lcib04u": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "status": {
+                                "x-collection-field": "hub_hr_leave_requests.status",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "yg8ke4rugoq",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "sqv457gk7jt",
+                            "x-async": false,
+                            "x-index": 6
+                          },
+                          "93u50eu4y37": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "reason": {
+                                "x-collection-field": "hub_hr_leave_requests.reason",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "le8mc8saqsh",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "1hkxrom5ljv",
+                            "x-async": false,
+                            "x-index": 7
+                          }
+                        },
+                        "x-uid": "6cjp4ylo2yr",
+                        "x-async": false,
+                        "x-index": 2
+                      }
+                    },
+                    "x-uid": "fqqmmkenwg7",
+                    "x-async": false,
+                    "x-index": 1
+                  }
+                },
+                "x-uid": "mw8sy9bfxzw",
+                "x-async": false,
+                "x-index": 1
+              }
+            },
+            "x-uid": "yprihoi4igo",
+            "x-async": false,
+            "x-index": 1
+          }
+        },
+        "x-uid": "2am6xd3zbmi",
+        "x-async": false,
+        "x-index": 1
+      }
+    }
+  }
+}

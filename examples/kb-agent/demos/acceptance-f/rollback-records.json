@@ -1,0 +1,32 @@
+[
+  {
+    "title": "任务看板",
+    "parentId": 386332338028547,
+    "icon": "AppstoreOutlined",
+    "sort": 2,
+    "schemaUid": "r9152u4r41q",
+    "tabs": [
+      {
+        "schemaUid": "4ahv5yplz0s",
+        "tabSchemaName": "i0nt8wjbdxt",
+        "sort": 1
+      }
+    ],
+    "destroyedId": 386420397965312
+  },
+  {
+    "title": "任务日历",
+    "parentId": 386332338028547,
+    "icon": "CalendarOutlined",
+    "sort": 4,
+    "schemaUid": "f0z48rz5pye",
+    "tabs": [
+      {
+        "schemaUid": "aoxrvu5pb5i",
+        "tabSchemaName": "d92u5iken75",
+        "sort": 1
+      }
+    ],
+    "destroyedId": 386332340125699
+  }
+]

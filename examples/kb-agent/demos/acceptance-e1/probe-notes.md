@@ -47,3 +47,4 @@ psql `fields` 表（30 行）+ `nocobase-hub-modules.mts:75-98` 定义交叉：
 - **FormSubmitActionModel 时序坑**：n17 的 ensureFormSubmits 在 all 链中先于 e1 跑，E1 新建表单会漏提交按钮——e1 脚本已内置同款 ensure（`submit-<formUid>` 确定性 uid）。
 - **嵌套 CreateFormModel 的 uid 是服务端生成的**（flat save 的 subModels 无显式 uid），因此 n18 按钮 uid 是 `n18ai-<serverUid>` 而非 `n18ai-n17e1*`——rollback 的按钮清理按 n18 同款孤儿匹配（formUid 不在 CreateFormModel 集合中即销毁）。
 - 看板/日历/甘特三页保持 v1（flowModel 体系无对应区块模型），v1 页无悬浮球（ChatButton isV1Page→null）——已知边界，QUICKSTART 声明。
+- **F1 复核（2026-09-13）推翻上文前半**：看板/日历在 2.2.6 有完整落地——客户端注册（plugin-kanban/plugin-calendar client-v2 plugin.tsx registerModelLoaders）、server 白名单（flow-engine node-use-sets.ts:14,16）、支持矩阵（support-matrix.ts:71,83 全 true）、官方 fixture（flow-surfaces-fixtures/kanban|calendar-block-live.*）四层证据俱全；两页已由 nocobase-f1-view-v2.mts 升级 v2。甘特仍保留 v1：客户端有注册但 server authoring 体系零支持（不在 use-sets/support-matrix/fixture）——边界依据修正为「甘特插件未进入 flow-engine 官方支持矩阵」。E 轮误判根源：判定止步于 n17d 工厂能力与核心内置模型目录，未查插件侧 client-v2 注册面。

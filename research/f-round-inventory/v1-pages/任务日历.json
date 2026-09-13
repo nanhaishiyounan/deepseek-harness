@@ -1,0 +1,91 @@
+{
+  "fetchedAt": "2026-09-13T06:28:48.960Z",
+  "title": "任务日历",
+  "pageUid": "f0z48rz5pye",
+  "tree": {
+    "type": "void",
+    "properties": {
+      "d92u5iken75": {
+        "type": "void",
+        "x-component": "Grid",
+        "x-initializer": "page:addBlock",
+        "properties": {
+          "xpvaufnhb4f": {
+            "type": "void",
+            "x-component": "Grid.Row",
+            "properties": {
+              "sfgojj4oiyp": {
+                "type": "void",
+                "x-component": "Grid.Col",
+                "properties": {
+                  "y3tu5ej1ep": {
+                    "_isJSONSchemaObject": true,
+                    "version": "2.0",
+                    "type": "void",
+                    "x-acl-action": "hub_pj_tasks:list",
+                    "x-decorator": "CalendarBlockProvider",
+                    "x-use-decorator-props": "useCalendarBlockDecoratorProps",
+                    "x-decorator-props": {
+                      "collection": "hub_pj_tasks",
+                      "dataSource": "main",
+                      "action": "list",
+                      "fieldNames": {
+                        "id": "id",
+                        "start": "due_at",
+                        "title": "title",
+                        "end": []
+                      },
+                      "params": {
+                        "paginate": false
+                      }
+                    },
+                    "x-toolbar": "BlockSchemaToolbar",
+                    "x-settings": "blockSettings:calendar",
+                    "x-component": "CardItem",
+                    "properties": {
+                      "lplwk22tezm": {
+                        "type": "void",
+                        "x-component": "CalendarV2",
+                        "x-use-component-props": "useCalendarBlockProps",
+                        "properties": {
+                          "rsfjimeh96": {
+                            "type": "void",
+                            "x-component": "CalendarV2.ActionBar",
+                            "x-component-props": {
+                              "style": {
+                                "marginBottom": 24
+                              }
+                            },
+                            "x-initializer": "calendar:configureActions",
+                            "x-uid": "plg5wqcd7ma",
+                            "x-async": false,
+                            "x-index": 1
+                          }
+                        },
+                        "x-uid": "a3bmhkv94rr",
+                        "x-async": false,
+                        "x-index": 1
+                      }
+                    },
+                    "x-uid": "t6i5tjegqpj",
+                    "x-async": false,
+                    "x-index": 1
+                  }
+                },
+                "x-uid": "6i38df7ed3o",
+                "x-async": false,
+                "x-index": 1
+              }
+            },
+            "x-uid": "qaleqcpi3sd",
+            "x-async": false,
+            "x-index": 1
+          }
+        },
+        "x-uid": "aoxrvu5pb5i",
+        "x-async": false,
+        "x-index": 1
+      }
+    }
+  }
+}

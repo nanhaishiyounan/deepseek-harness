@@ -1,0 +1,211 @@
+{
+  "fetchedAt": "2026-09-13T06:28:48.862Z",
+  "title": "客户仪表盘",
+  "pageUid": "w6nyh5dtycq",
+  "tree": {
+    "type": "void",
+    "properties": {
+      "i8j03fx2x2m": {
+        "type": "void",
+        "x-component": "Grid",
+        "x-initializer": "page:addBlock",
+        "properties": {
+          "kdmc73ic039": {
+            "type": "void",
+            "x-component": "Grid.Row",
+            "properties": {
+              "mbp9o5m03e": {
+                "type": "void",
+                "x-component": "Grid.Col",
+                "properties": {
+                  "nanwcivokf": {
+                    "_isJSONSchemaObject": true,
+                    "version": "2.0",
+                    "type": "void",
+                    "x-decorator": "TableBlockProvider",
+                    "x-acl-action": "crm_customers:list",
+                    "x-use-decorator-props": "useTableBlockDecoratorProps",
+                    "x-decorator-props": {
+                      "collection": "crm_customers",
+                      "dataSource": "main",
+                      "action": "list",
+                      "params": {
+                        "pageSize": 20
+                      },
+                      "showIndex": true,
+                      "dragSort": false
+                    },
+                    "x-toolbar": "BlockSchemaToolbar",
+                    "x-settings": "blockSettings:table",
+                    "x-filter-targets": [],
+                    "x-component": "CardItem",
+                    "properties": {
+                      "rg9xyqnkso": {
+                        "type": "void",
+                        "x-initializer": "table:configureActions",
+                        "x-component": "ActionBar",
+                        "x-component-props": {
+                          "style": {
+                            "marginBottom": "var(--nb-spacing)"
+                          }
+                        },
+                        "x-uid": "u5qcs601vxc",
+                        "x-async": false,
+                        "x-index": 1
+                      },
+                      "e55ol8f8c9": {
+                        "type": "array",
+                        "x-initializer": "table:configureColumns",
+                        "x-component": "TableV2",
+                        "x-use-component-props": "useTableBlockProps",
+                        "x-component-props": {
+                          "rowKey": "id",
+                          "rowSelection": {
+                            "type": "checkbox"
+                          }
+                        },
+                        "properties": {
+                          "wdu0dt6gsb": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "name": {
+                                "x-collection-field": "crm_customers.name",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "ts0q85wt8sn",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "buoyop0xi76",
+                            "x-async": false,
+                            "x-index": 1
+                          },
+                          "6svagzcchw7": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "industry": {
+                                "x-collection-field": "crm_customers.industry",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "t6kvntrws8i",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "utm9frm7t92",
+                            "x-async": false,
+                            "x-index": 2
+                          },
+                          "z50c4yb5ro8": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "level": {
+                                "x-collection-field": "crm_customers.level",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "17y8fpxhmua",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "tqpaeaoio71",
+                            "x-async": false,
+                            "x-index": 3
+                          },
+                          "0s4tom7xz9p": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "status": {
+                                "x-collection-field": "crm_customers.status",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "n21sns1fitc",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "96x0kdbnxto",
+                            "x-async": false,
+                            "x-index": 4
+                          }
+                        },
+                        "x-uid": "3dt3k7l8sdr",
+                        "x-async": false,
+                        "x-index": 2
+                      }
+                    },
+                    "x-uid": "aw43kfaqj67",
+                    "x-async": false,
+                    "x-index": 1
+                  }
+                },
+                "x-uid": "5ueqbo9aipt",
+                "x-async": false,
+                "x-index": 1
+              }
+            },
+            "x-uid": "4dfexi807pe",
+            "x-async": false,
+            "x-index": 1
+          }
+        },
+        "x-uid": "qfjd61d5wwj",
+        "x-async": false,
+        "x-index": 1
+      }
+    }
+  }
+}

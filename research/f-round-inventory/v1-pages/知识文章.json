@@ -1,0 +1,182 @@
+{
+  "fetchedAt": "2026-09-13T06:28:48.986Z",
+  "title": "知识文章",
+  "pageUid": "qn9j7laut2c",
+  "tree": {
+    "type": "void",
+    "properties": {
+      "vjldgdcv71w": {
+        "type": "void",
+        "x-component": "Grid",
+        "x-initializer": "page:addBlock",
+        "properties": {
+          "q61b7p304e1": {
+            "type": "void",
+            "x-component": "Grid.Row",
+            "properties": {
+              "eepxihxech4": {
+                "type": "void",
+                "x-component": "Grid.Col",
+                "properties": {
+                  "xnvplev4z2": {
+                    "_isJSONSchemaObject": true,
+                    "version": "2.0",
+                    "type": "void",
+                    "x-decorator": "TableBlockProvider",
+                    "x-acl-action": "hub_kb_articles:list",
+                    "x-use-decorator-props": "useTableBlockDecoratorProps",
+                    "x-decorator-props": {
+                      "collection": "hub_kb_articles",
+                      "dataSource": "main",
+                      "action": "list",
+                      "params": {
+                        "pageSize": 20
+                      },
+                      "showIndex": true,
+                      "dragSort": false
+                    },
+                    "x-toolbar": "BlockSchemaToolbar",
+                    "x-settings": "blockSettings:table",
+                    "x-filter-targets": [],
+                    "x-component": "CardItem",
+                    "properties": {
+                      "lwsnivlbuqc": {
+                        "type": "void",
+                        "x-initializer": "table:configureActions",
+                        "x-component": "ActionBar",
+                        "x-component-props": {
+                          "style": {
+                            "marginBottom": "var(--nb-spacing)"
+                          }
+                        },
+                        "x-uid": "3m5b8nszqt2",
+                        "x-async": false,
+                        "x-index": 1
+                      },
+                      "0j9nunkiqrc": {
+                        "type": "array",
+                        "x-initializer": "table:configureColumns",
+                        "x-component": "TableV2",
+                        "x-use-component-props": "useTableBlockProps",
+                        "x-component-props": {
+                          "rowKey": "id",
+                          "rowSelection": {
+                            "type": "checkbox"
+                          }
+                        },
+                        "properties": {
+                          "d9kr1ie7sak": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "title": {
+                                "x-collection-field": "hub_kb_articles.title",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "4gkcm5jlb2d",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "yg09x066bh7",
+                            "x-async": false,
+                            "x-index": 1
+                          },
+                          "a2zgt0u7vi7": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "category": {
+                                "x-collection-field": "hub_kb_articles.category",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "426bwn2icei",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "r9wvtyyw83v",
+                            "x-async": false,
+                            "x-index": 2
+                          },
+                          "aqi9folsik": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "status": {
+                                "x-collection-field": "hub_kb_articles.status",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "bmryn67vkek",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "a58j76s7ksl",
+                            "x-async": false,
+                            "x-index": 3
+                          }
+                        },
+                        "x-uid": "znrfb3208nf",
+                        "x-async": false,
+                        "x-index": 2
+                      }
+                    },
+                    "x-uid": "f5s06v4nf00",
+                    "x-async": false,
+                    "x-index": 1
+                  }
+                },
+                "x-uid": "p4vvcx5dvs2",
+                "x-async": false,
+                "x-index": 1
+              }
+            },
+            "x-uid": "embcxa55fcn",
+            "x-async": false,
+            "x-index": 1
+          }
+        },
+        "x-uid": "9amd91p9pjk",
+        "x-async": false,
+        "x-index": 1
+      }
+    }
+  }
+}

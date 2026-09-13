@@ -733,6 +733,11 @@ async function stepVerify(): Promise<void> {
   const v2Titles = new Set((v2Routes?.data ?? []).map(row => row.title ?? ''))
   const missingV2 = ['客户', '销售线索', '联系人', '订单', '报价单', '工单', '资产台账', '员工', '项目', '任务列表', '里程碑'].filter(title => !v2Titles.has(title))
   if (missingV2.length > 0) failures.push(`v2 table flowPages missing: ${missingV2.join(', ')} (run nocobase-n17-alignment.mts + nocobase-e1-pj-v2.mts for the 项目管理 pages)`)
+  // F1: the two view pages ride the flowModel catalog (kanban + calendar
+  // blocks on hub_pj_tasks); their trees must keep the view block plus the
+  // card chain, or the "upgrade" silently degraded to a blank page.
+  const missingV2Views = ['任务看板', '任务日历'].filter(title => !v2Titles.has(title))
+  if (missingV2Views.length > 0) failures.push(`v2 view flowPages missing: ${missingV2Views.join(', ')} (run nocobase-f1-view-v2.mts)`)
   const flowModels = await call(token, 'GET', '/api/flowModels:list?pageSize=1000') as { data?: Array<{ use?: string, uid?: string }>, meta?: { total?: number } }
   const flowModelRows = flowModels?.data ?? []
   if (typeof flowModels?.meta?.total === 'number' && flowModels.meta.total > flowModelRows.length) {
@@ -748,9 +753,19 @@ async function stepVerify(): Promise<void> {
   // surfaces unexpected mounts instead of letting them hide among ours.
   const aiButtons = (flowModels?.data ?? []).filter(row => row.use === 'AIEmployeeButtonModel')
   const n18Buttons = aiButtons.filter(row => row.uid?.startsWith('n18ai-'))
-  // 11 = the N17d eight CRM/Hub pages + the E1 项目管理 three (项目/任务列表/里程碑).
-  if (n18Buttons.length < 11) failures.push(`n18ai- AIEmployeeButtonModel count ${n18Buttons.length} < 11 (form AI fill buttons missing; run nocobase-n18-form-ai.mts after nocobase-e1-pj-v2.mts)`)
-  if (n18Buttons.length !== aiButtons.length) failures.push(`${aiButtons.length - n18Buttons.length} AIEmployeeButtonModel row(s) carry no n18ai- uid prefix (unexpected foreign mounts; inspect flowModels)`)
+  // 11 = the N17d eight CRM/Hub pages + the E1 项目管理 three (项目/任务列表/里程碑);
+  // +2 = the F1 kanban/calendar Add-new popups.
+  if (n18Buttons.length < 13) failures.push(`n18ai- AIEmployeeButtonModel count ${n18Buttons.length} < 13 (form AI fill buttons missing; run nocobase-n18-form-ai.mts after nocobase-e1-pj-v2.mts + nocobase-f1-view-v2.mts)`)
+  // Row-level AI actions configured by hand in the UI (not seeded) are legal;
+  // only unknown foreign mounts may pad the AIEmployeeButtonModel census.
+  const KNOWN_HAND_CONFIGURED_AI_BUTTONS = new Set(['26c6ab488b1']) // viz action on the E1 项目 table
+  const foreignAiButtons = aiButtons.filter(row => !row.uid?.startsWith('n18ai-') && !KNOWN_HAND_CONFIGURED_AI_BUTTONS.has(row.uid ?? ''))
+  if (foreignAiButtons.length > 0) failures.push(`${foreignAiButtons.length} AIEmployeeButtonModel row(s) carry no n18ai- uid prefix (unexpected foreign mounts; inspect flowModels)`)
+  // F1 view-page spine: exactly one Kanban/Calendar block on hub_pj_tasks,
+  // and the kanban card chain survives (KanbanCardItemModel + DetailsGridModel).
+  if (modelCount('KanbanBlockModel') < 1) failures.push('KanbanBlockModel missing (run nocobase-f1-view-v2.mts for 任务看板)')
+  if (modelCount('CalendarBlockModel') < 1) failures.push('CalendarBlockModel missing (run nocobase-f1-view-v2.mts for 任务日历)')
+  if (modelCount('KanbanCardItemModel') < 1 || modelCount('DetailsGridModel') < 1) failures.push('kanban card chain incomplete (KanbanCardItemModel/DetailsGridModel missing; re-run nocobase-f1-view-v2.mts)')
   const atlas = await call(token, 'GET', `/api/aiEmployees:list?filter=${encodeURIComponent(JSON.stringify({ username: { $eq: 'atlas' } }))}&pageSize=1`) as { data?: Array<{ about?: string }> }
   if (!(atlas?.data?.[0]?.about ?? '').includes('简体中文')) failures.push('atlas about is not the Chinese prompt (re-run nocobase-n17-alignment.mts)')
   // N13 data widening floors; verify asserts presence, not the exact counts.
@@ -1147,7 +1162,7 @@ async function main(): Promise<void> {
       for (const script of [
         'nocobase-crm-modules.mts', 'nocobase-hub-modules.mts',
         'nocobase-n13-rebuild.mts', 'nocobase-n13-seed.mts', 'nocobase-n14-fix.mts',
-        'nocobase-n17-alignment.mts', 'nocobase-e1-pj-v2.mts', 'nocobase-n18-form-ai.mts', 'nocobase-n25-brand.mts',
+        'nocobase-n17-alignment.mts', 'nocobase-e1-pj-v2.mts', 'nocobase-f1-view-v2.mts', 'nocobase-n18-form-ai.mts', 'nocobase-n25-brand.mts',
       ]) {
         if (!run('node', ['--import', 'tsx/esm', join(repoRoot, 'examples/kb-agent/scripts', script)])) {
           throw new Error(`${script} failed during the all chain`)

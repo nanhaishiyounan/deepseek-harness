@@ -1,0 +1,50 @@
+{
+  "fetchedAt": "2026-09-13T06:29:49.000Z",
+  "database": "nocobase",
+  "connection": {
+    "host": "localhost",
+    "port": 5432,
+    "user": "mac (OS current user, passwordless)",
+    "server": "PostgreSQL 17 (homebrew postgresql@17)"
+  },
+  "psqlCommand": "psql -h localhost -p 5432 -d nocobase -t -A -F '|' -c \"SELECT '<table>',(SELECT count(*) FROM <table>) UNION ALL ...\" (23 business tables)",
+  "collectionCounts": {
+    "crm_contacts": 10,
+    "crm_customers": 20,
+    "crm_deals": 12,
+    "crm_invoices": 10,
+    "crm_leads": 30,
+    "crm_payments": 10,
+    "crm_products": 10,
+    "crm_quotes": 12,
+    "hub_as_assets": 24,
+    "hub_as_maintenance": 4,
+    "hub_as_vendors": 5,
+    "hub_hr_departments": 5,
+    "hub_hr_employees": 6,
+    "hub_hr_leave_requests": 5,
+    "hub_kb_articles": 6,
+    "hub_md_asset_categories": 3,
+    "hub_md_customer_categories": 4,
+    "hub_md_product_categories": 3,
+    "hub_md_ticket_categories": 4,
+    "hub_pj_milestones": 5,
+    "hub_pj_projects": 16,
+    "hub_pj_tasks": 19,
+    "hub_tk_tickets": 40
+  },
+  "extraQueries": {
+    "tableNamesNote": "NocoBase system tables are camelCase (confirmed via information_schema): desktopRoutes, flowModels, uiSchemas. Business collections are snake_case.",
+    "desktopRoutesByTypeSql": "SELECT type, count(*) FROM \"desktopRoutes\" GROUP BY type ORDER BY count(*) DESC;",
+    "desktopRoutesByType": "tabs|28\npage|16\nflowPage|12\ngroup|7",
+    "desktopRoutesTotal": 63,
+    "uiSchemasRowCountSql": "SELECT count(*) FROM \"uiSchemas\";",
+    "uiSchemasRowCount": 770
+  },
+  "apiCrossCheck": {
+    "desktopRoutesApiRowCount": 63,
+    "desktopRoutesPsqlSum": 63,
+    "match": true,
+    "collectionCountsVsApi": "all 23 tables identical to browser-API inventory values"
+  }
+}

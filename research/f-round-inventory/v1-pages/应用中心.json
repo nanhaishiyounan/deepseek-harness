@@ -1,0 +1,177 @@
+{
+  "fetchedAt": "2026-09-13T06:28:48.875Z",
+  "title": "应用中心",
+  "pageUid": "qj3wstl3cfl",
+  "tree": {
+    "type": "void",
+    "properties": {
+      "w025x39tmuj": {
+        "type": "void",
+        "x-component": "Grid",
+        "x-initializer": "page:addBlock",
+        "properties": {
+          "v9hubgt2koi": {
+            "type": "void",
+            "x-component": "Grid.Row",
+            "properties": {
+              "stiq4jm9yqn": {
+                "type": "void",
+                "x-component": "Grid.Col",
+                "properties": {
+                  "fz1prz3id8g": {
+                    "type": "void",
+                    "x-settings": "blockSettings:markdown",
+                    "x-decorator": "CardItem",
+                    "x-decorator-props": {
+                      "name": "markdown",
+                      "engine": "handlebars"
+                    },
+                    "x-component": "Markdown.Void",
+                    "x-editable": false,
+                    "x-component-props": {
+                      "content": "### 🤖 [AI 工作台](http://127.0.0.1:13000/admin/sdia2fwjc22)\n\nAI 员工对话（Atlas 团队）与工单速览\n\n[打开应用 →](http://127.0.0.1:13000/admin/sdia2fwjc22)"
+                    },
+                    "x-uid": "7p6mvyu880h",
+                    "x-async": false,
+                    "x-index": 1
+                  }
+                },
+                "x-uid": "3kke83c94pn",
+                "x-async": false,
+                "x-index": 1
+              },
+              "jgg7imok0in": {
+                "type": "void",
+                "x-component": "Grid.Col",
+                "properties": {
+                  "h5f745yk4s": {
+                    "type": "void",
+                    "x-settings": "blockSettings:markdown",
+                    "x-decorator": "CardItem",
+                    "x-decorator-props": {
+                      "name": "markdown",
+                      "engine": "handlebars"
+                    },
+                    "x-component": "Markdown.Void",
+                    "x-editable": false,
+                    "x-component-props": {
+                      "content": "### 🧠 [DeepSeek Harness](http://127.0.0.1:3080/)\n\nKB 智能体与食品行业知识库\n\n[打开应用 →](http://127.0.0.1:3080/)"
+                    },
+                    "x-uid": "qgf7ukva76o",
+                    "x-async": false,
+                    "x-index": 1
+                  }
+                },
+                "x-uid": "ah79fbrsggu",
+                "x-async": false,
+                "x-index": 2
+              }
+            },
+            "x-uid": "ycqen886ans",
+            "x-async": false,
+            "x-index": 1
+          },
+          "kuxiukr5umh": {
+            "type": "void",
+            "x-component": "Grid.Row",
+            "properties": {
+              "eii6x7g4dfb": {
+                "type": "void",
+                "x-component": "Grid.Col",
+                "properties": {
+                  "p6zge0thj9": {
+                    "type": "void",
+                    "x-settings": "blockSettings:markdown",
+                    "x-decorator": "CardItem",
+                    "x-decorator-props": {
+                      "name": "markdown",
+                      "engine": "handlebars"
+                    },
+                    "x-component": "Markdown.Void",
+                    "x-editable": false,
+                    "x-component-props": {
+                      "content": "### 🛒 [CRM 客户门户](http://127.0.0.1:13000/dist/crm/)\n\n销售作业门户：线索 → 客户 → 联系人 → 报价 → 订单 → 回款一条链路做到底\n\n[打开应用 →](http://127.0.0.1:13000/dist/crm/)"
+                    },
+                    "x-uid": "ngd841i4zgs",
+                    "x-async": false,
+                    "x-index": 1
+                  }
+                },
+                "x-uid": "kkjxumvv7mv",
+                "x-async": false,
+                "x-index": 1
+              },
+              "13a0pjx3vzg": {
+                "type": "void",
+                "x-component": "Grid.Col",
+                "properties": {
+                  "3qus43fpn1n": {
+                    "type": "void",
+                    "x-settings": "blockSettings:markdown",
+                    "x-decorator": "CardItem",
+                    "x-decorator-props": {
+                      "name": "markdown",
+                      "engine": "handlebars"
+                    },
+                    "x-component": "Markdown.Void",
+                    "x-editable": false,
+                    "x-component-props": {
+                      "content": "### 🎧 [Hub 一体化门户](http://127.0.0.1:13000/dist/hub/)\n\n综合运营协作门户：销售、项目、人事、库存、采购、财务、客服、资产、知识库九域合一\n\n[打开应用 →](http://127.0.0.1:13000/dist/hub/)"
+                    },
+                    "x-uid": "5wc524j8ptn",
+                    "x-async": false,
+                    "x-index": 1
+                  }
+                },
+                "x-uid": "ballf0q6kmg",
+                "x-async": false,
+                "x-index": 2
+              }
+            },
+            "x-uid": "wnukminnfx4",
+            "x-async": false,
+            "x-index": 2
+          },
+          "f8s7l3uzrdi": {
+            "type": "void",
+            "x-component": "Grid.Row",
+            "properties": {
+              "y1t7shfpyie": {
+                "type": "void",
+                "x-component": "Grid.Col",
+                "properties": {
+                  "dgm3f5le0od": {
+                    "type": "void",
+                    "x-settings": "blockSettings:markdown",
+                    "x-decorator": "CardItem",
+                    "x-decorator-props": {
+                      "name": "markdown",
+                      "engine": "handlebars"
+                    },
+                    "x-component": "Markdown.Void",
+                    "x-editable": false,
+                    "x-component-props": {
+                      "content": "## 📦 应用中心\n\n每个应用都是独立入口，点击卡片直达。业务后台从左侧菜单进入各模块。"
+                    },
+                    "x-uid": "8lr5uoue3vw",
+                    "x-async": false,
+                    "x-index": 1
+                  }
+                },
+                "x-uid": "zpoyjkx47u8",
+                "x-async": false,
+                "x-index": 1
+              }
+            },
+            "x-uid": "k0gry48a9q0",
+            "x-async": false,
+            "x-index": 3
+          }
+        },
+        "x-uid": "w160hpvmgc6",
+        "x-async": false,
+        "x-index": 1
+      }
+    }
+  }
+}

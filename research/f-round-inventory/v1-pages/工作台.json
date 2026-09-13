@@ -1,0 +1,500 @@
+{
+  "fetchedAt": "2026-09-13T06:28:48.935Z",
+  "title": "工作台",
+  "pageUid": "b4k6wf2zu6k",
+  "tree": {
+    "type": "void",
+    "properties": {
+      "7h9hpxsui4a": {
+        "type": "void",
+        "x-component": "Grid",
+        "x-initializer": "page:addBlock",
+        "properties": {
+          "nqlapu2j3j8": {
+            "type": "void",
+            "x-component": "Grid.Row",
+            "properties": {
+              "x0a24dc1bzk": {
+                "type": "void",
+                "x-component": "Grid.Col",
+                "properties": {
+                  "t2ypoe1hn3": {
+                    "_isJSONSchemaObject": true,
+                    "version": "2.0",
+                    "type": "void",
+                    "x-decorator": "TableBlockProvider",
+                    "x-acl-action": "hub_pj_tasks:list",
+                    "x-use-decorator-props": "useTableBlockDecoratorProps",
+                    "x-decorator-props": {
+                      "collection": "hub_pj_tasks",
+                      "dataSource": "main",
+                      "action": "list",
+                      "params": {
+                        "pageSize": 20,
+                        "filter": {
+                          "status": {
+                            "$notIn": [
+                              "done",
+                              "cancelled"
+                            ]
+                          }
+                        }
+                      },
+                      "showIndex": true,
+                      "dragSort": false
+                    },
+                    "x-toolbar": "BlockSchemaToolbar",
+                    "x-settings": "blockSettings:table",
+                    "x-filter-targets": [],
+                    "x-component": "CardItem",
+                    "properties": {
+                      "qbf1irqjpr8": {
+                        "type": "void",
+                        "x-initializer": "table:configureActions",
+                        "x-component": "ActionBar",
+                        "x-component-props": {
+                          "style": {
+                            "marginBottom": "var(--nb-spacing)"
+                          }
+                        },
+                        "x-uid": "bd603un987u",
+                        "x-async": false,
+                        "x-index": 1
+                      },
+                      "zuycxu7c8l": {
+                        "type": "array",
+                        "x-initializer": "table:configureColumns",
+                        "x-component": "TableV2",
+                        "x-use-component-props": "useTableBlockProps",
+                        "x-component-props": {
+                          "rowKey": "id",
+                          "rowSelection": {
+                            "type": "checkbox"
+                          }
+                        },
+                        "properties": {
+                          "vp79uu3zww": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "title": {
+                                "x-collection-field": "hub_pj_tasks.title",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "hpzg0y7jqog",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "akyas3ebmib",
+                            "x-async": false,
+                            "x-index": 1
+                          },
+                          "c80rg4r2mvw": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "project": {
+                                "x-collection-field": "hub_pj_tasks.project",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "eai2ruyvxjr",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "jbh8zw3ab7x",
+                            "x-async": false,
+                            "x-index": 2
+                          },
+                          "nr0gmcvfohr": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "assignee": {
+                                "x-collection-field": "hub_pj_tasks.assignee",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "wuw8ff7jd04",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "2yg9zznzaoz",
+                            "x-async": false,
+                            "x-index": 3
+                          },
+                          "sb7snspeyud": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "status": {
+                                "x-collection-field": "hub_pj_tasks.status",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "fwihpbj3xct",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "xudg21i7zmr",
+                            "x-async": false,
+                            "x-index": 4
+                          },
+                          "o1u4djvvra": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "priority": {
+                                "x-collection-field": "hub_pj_tasks.priority",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "fvjndeiruf7",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "18faxl12zbz",
+                            "x-async": false,
+                            "x-index": 5
+                          },
+                          "n3uf33m1d2a": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "due_at": {
+                                "x-collection-field": "hub_pj_tasks.due_at",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "oocpy8bytta",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "0cpiubyrlem",
+                            "x-async": false,
+                            "x-index": 6
+                          }
+                        },
+                        "x-uid": "obw9dcbl3bm",
+                        "x-async": false,
+                        "x-index": 2
+                      }
+                    },
+                    "x-uid": "d624mggj3gw",
+                    "x-async": false,
+                    "x-index": 1
+                  }
+                },
+                "x-uid": "atc9dbwwv2f",
+                "x-async": false,
+                "x-index": 1
+              }
+            },
+            "x-uid": "dmai499k5fn",
+            "x-async": false,
+            "x-index": 1
+          },
+          "8dil08y0ncm": {
+            "type": "void",
+            "x-component": "Grid.Row",
+            "properties": {
+              "de8m43fu3y4": {
+                "type": "void",
+                "x-component": "Grid.Col",
+                "properties": {
+                  "bbrsvzv4dp9": {
+                    "_isJSONSchemaObject": true,
+                    "version": "2.0",
+                    "type": "void",
+                    "x-decorator": "TableBlockProvider",
+                    "x-acl-action": "hub_tk_tickets:list",
+                    "x-use-decorator-props": "useTableBlockDecoratorProps",
+                    "x-decorator-props": {
+                      "collection": "hub_tk_tickets",
+                      "dataSource": "main",
+                      "action": "list",
+                      "params": {
+                        "pageSize": 20,
+                        "filter": {
+                          "is_overdue": true
+                        }
+                      },
+                      "showIndex": true,
+                      "dragSort": false
+                    },
+                    "x-toolbar": "BlockSchemaToolbar",
+                    "x-settings": "blockSettings:table",
+                    "x-filter-targets": [],
+                    "x-component": "CardItem",
+                    "properties": {
+                      "lzh0gmhelse": {
+                        "type": "void",
+                        "x-initializer": "table:configureActions",
+                        "x-component": "ActionBar",
+                        "x-component-props": {
+                          "style": {
+                            "marginBottom": "var(--nb-spacing)"
+                          }
+                        },
+                        "x-uid": "na3x5c3gywx",
+                        "x-async": false,
+                        "x-index": 1
+                      },
+                      "sd7u9ign7zg": {
+                        "type": "array",
+                        "x-initializer": "table:configureColumns",
+                        "x-component": "TableV2",
+                        "x-use-component-props": "useTableBlockProps",
+                        "x-component-props": {
+                          "rowKey": "id",
+                          "rowSelection": {
+                            "type": "checkbox"
+                          }
+                        },
+                        "properties": {
+                          "uvblk8ykwu": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "title": {
+                                "x-collection-field": "hub_tk_tickets.title",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "rc56zl0e8ji",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "g8cbfqb2wxc",
+                            "x-async": false,
+                            "x-index": 1
+                          },
+                          "o2zp91owbhc": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "customer": {
+                                "x-collection-field": "hub_tk_tickets.customer",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "10ytbfkggw8",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "vg6zbzkar24",
+                            "x-async": false,
+                            "x-index": 2
+                          },
+                          "g8yzh0bviq": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "assignee": {
+                                "x-collection-field": "hub_tk_tickets.assignee",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "dro7ah13nwn",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "ruyxt1g2m8h",
+                            "x-async": false,
+                            "x-index": 3
+                          },
+                          "gakpqwvtl6u": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "status": {
+                                "x-collection-field": "hub_tk_tickets.status",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "z7suapt4llw",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "msd7z67zqbl",
+                            "x-async": false,
+                            "x-index": 4
+                          },
+                          "4p633sbjo6": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "planned_resolve_at": {
+                                "x-collection-field": "hub_tk_tickets.planned_resolve_at",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "n3ujfyndcus",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "rsn1cs126ks",
+                            "x-async": false,
+                            "x-index": 5
+                          }
+                        },
+                        "x-uid": "nzze5tknm8y",
+                        "x-async": false,
+                        "x-index": 2
+                      }
+                    },
+                    "x-uid": "hxn81bt3b0y",
+                    "x-async": false,
+                    "x-index": 1
+                  }
+                },
+                "x-uid": "v5uvavebtrl",
+                "x-async": false,
+                "x-index": 1
+              }
+            },
+            "x-uid": "c5z63xwdh5o",
+            "x-async": false,
+            "x-index": 2
+          }
+        },
+        "x-uid": "o8u7f1fk903",
+        "x-async": false,
+        "x-index": 1
+      }
+    }
+  }
+}

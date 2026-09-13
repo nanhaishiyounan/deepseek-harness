@@ -1,0 +1,269 @@
+{
+  "fetchedAt": "2026-09-13T06:28:48.892Z",
+  "title": "回款",
+  "pageUid": "ihfgg15bm8x",
+  "tree": {
+    "type": "void",
+    "properties": {
+      "f7q4i1veiv1": {
+        "type": "void",
+        "x-component": "Grid",
+        "x-initializer": "page:addBlock",
+        "properties": {
+          "xc65566p3va": {
+            "type": "void",
+            "x-component": "Grid.Row",
+            "properties": {
+              "tmuhhs15dt": {
+                "type": "void",
+                "x-component": "Grid.Col",
+                "properties": {
+                  "xn57bvk8eu": {
+                    "_isJSONSchemaObject": true,
+                    "version": "2.0",
+                    "type": "void",
+                    "x-decorator": "TableBlockProvider",
+                    "x-acl-action": "crm_payments:list",
+                    "x-use-decorator-props": "useTableBlockDecoratorProps",
+                    "x-decorator-props": {
+                      "collection": "crm_payments",
+                      "dataSource": "main",
+                      "action": "list",
+                      "params": {
+                        "pageSize": 20
+                      },
+                      "showIndex": true,
+                      "dragSort": false
+                    },
+                    "x-toolbar": "BlockSchemaToolbar",
+                    "x-settings": "blockSettings:table",
+                    "x-filter-targets": [],
+                    "x-component": "CardItem",
+                    "properties": {
+                      "0pdps5n1wgr": {
+                        "type": "void",
+                        "x-initializer": "table:configureActions",
+                        "x-component": "ActionBar",
+                        "x-component-props": {
+                          "style": {
+                            "marginBottom": "var(--nb-spacing)"
+                          }
+                        },
+                        "x-uid": "6vgleqwxyun",
+                        "x-async": false,
+                        "x-index": 1
+                      },
+                      "hywnkbxuj1a": {
+                        "type": "array",
+                        "x-initializer": "table:configureColumns",
+                        "x-component": "TableV2",
+                        "x-use-component-props": "useTableBlockProps",
+                        "x-component-props": {
+                          "rowKey": "id",
+                          "rowSelection": {
+                            "type": "checkbox"
+                          }
+                        },
+                        "properties": {
+                          "efsb0b2mdtp": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "customer": {
+                                "x-collection-field": "crm_payments.customer",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "1l27117ktyj",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "tctukccbqht",
+                            "x-async": false,
+                            "x-index": 1
+                          },
+                          "o5fhlzcyz9": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "deal": {
+                                "x-collection-field": "crm_payments.deal",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "jxrantrrn9m",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "8lg5vtkxdvz",
+                            "x-async": false,
+                            "x-index": 2
+                          },
+                          "v8p0m344iz": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "amount": {
+                                "x-collection-field": "crm_payments.amount",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "e5xffwuwei8",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "qczd9lri28m",
+                            "x-async": false,
+                            "x-index": 3
+                          },
+                          "ujq6u5tboac": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "method": {
+                                "x-collection-field": "crm_payments.method",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "cpu6ges1m2g",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "b9m3fsytir8",
+                            "x-async": false,
+                            "x-index": 4
+                          },
+                          "gx8b11yfiq": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "paid_at": {
+                                "x-collection-field": "crm_payments.paid_at",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "y28haqe7oz0",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "9s2t77ofque",
+                            "x-async": false,
+                            "x-index": 5
+                          },
+                          "xitkwnuptfp": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "status": {
+                                "x-collection-field": "crm_payments.status",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "nmeeaof8bmm",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "peopnr4e55y",
+                            "x-async": false,
+                            "x-index": 6
+                          }
+                        },
+                        "x-uid": "bdaoizuccss",
+                        "x-async": false,
+                        "x-index": 2
+                      }
+                    },
+                    "x-uid": "tg0ew3m7nz4",
+                    "x-async": false,
+                    "x-index": 1
+                  }
+                },
+                "x-uid": "3rec53xt0if",
+                "x-async": false,
+                "x-index": 1
+              }
+            },
+            "x-uid": "bi9jnd8t3zf",
+            "x-async": false,
+            "x-index": 1
+          }
+        },
+        "x-uid": "hkr6nvogp0g",
+        "x-async": false,
+        "x-index": 1
+      }
+    }
+  }
+}

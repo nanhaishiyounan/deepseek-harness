@@ -1,0 +1,269 @@
+{
+  "fetchedAt": "2026-09-13T06:28:49.016Z",
+  "title": "维保记录",
+  "pageUid": "fiyoi38ke5c",
+  "tree": {
+    "type": "void",
+    "properties": {
+      "kopvn19ixrc": {
+        "type": "void",
+        "x-component": "Grid",
+        "x-initializer": "page:addBlock",
+        "properties": {
+          "w8qzjk8fpim": {
+            "type": "void",
+            "x-component": "Grid.Row",
+            "properties": {
+              "k4v1j1pa6to": {
+                "type": "void",
+                "x-component": "Grid.Col",
+                "properties": {
+                  "kdyb3whj33": {
+                    "_isJSONSchemaObject": true,
+                    "version": "2.0",
+                    "type": "void",
+                    "x-decorator": "TableBlockProvider",
+                    "x-acl-action": "hub_as_maintenance:list",
+                    "x-use-decorator-props": "useTableBlockDecoratorProps",
+                    "x-decorator-props": {
+                      "collection": "hub_as_maintenance",
+                      "dataSource": "main",
+                      "action": "list",
+                      "params": {
+                        "pageSize": 20
+                      },
+                      "showIndex": true,
+                      "dragSort": false
+                    },
+                    "x-toolbar": "BlockSchemaToolbar",
+                    "x-settings": "blockSettings:table",
+                    "x-filter-targets": [],
+                    "x-component": "CardItem",
+                    "properties": {
+                      "8jxd3qwy6hc": {
+                        "type": "void",
+                        "x-initializer": "table:configureActions",
+                        "x-component": "ActionBar",
+                        "x-component-props": {
+                          "style": {
+                            "marginBottom": "var(--nb-spacing)"
+                          }
+                        },
+                        "x-uid": "648x2txyc3a",
+                        "x-async": false,
+                        "x-index": 1
+                      },
+                      "1r3fkzze8ib": {
+                        "type": "array",
+                        "x-initializer": "table:configureColumns",
+                        "x-component": "TableV2",
+                        "x-use-component-props": "useTableBlockProps",
+                        "x-component-props": {
+                          "rowKey": "id",
+                          "rowSelection": {
+                            "type": "checkbox"
+                          }
+                        },
+                        "properties": {
+                          "t0adv5d0h2e": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "asset": {
+                                "x-collection-field": "hub_as_maintenance.asset",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "16qm26oy7fx",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "inmblt3pnuz",
+                            "x-async": false,
+                            "x-index": 1
+                          },
+                          "mq1dfdy8xgk": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "type": {
+                                "x-collection-field": "hub_as_maintenance.type",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "jt27revpkze",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "zb3sf7j8s0r",
+                            "x-async": false,
+                            "x-index": 2
+                          },
+                          "xtunoxqrqxr": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "scheduled_at": {
+                                "x-collection-field": "hub_as_maintenance.scheduled_at",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "d23hklj45jr",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "qlco7e44yjh",
+                            "x-async": false,
+                            "x-index": 3
+                          },
+                          "7nhvky9epga": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "vendor": {
+                                "x-collection-field": "hub_as_maintenance.vendor",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "qbrxzwvwr2i",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "zwaerttltgg",
+                            "x-async": false,
+                            "x-index": 4
+                          },
+                          "5a7jm1oem6a": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "cost": {
+                                "x-collection-field": "hub_as_maintenance.cost",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "2ezpyq9q38i",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "dbhzdu5l5j3",
+                            "x-async": false,
+                            "x-index": 5
+                          },
+                          "a616ifskhvb": {
+                            "type": "void",
+                            "x-decorator": "TableV2.Column.Decorator",
+                            "x-toolbar": "TableColumnSchemaToolbar",
+                            "x-settings": "fieldSettings:TableColumn",
+                            "x-component": "TableV2.Column",
+                            "properties": {
+                              "status": {
+                                "x-collection-field": "hub_as_maintenance.status",
+                                "x-component": "CollectionField",
+                                "x-component-props": {
+                                  "ellipsis": true
+                                },
+                                "x-read-pretty": true,
+                                "x-decorator": null,
+                                "x-decorator-props": {
+                                  "labelStyle": {
+                                    "display": "none"
+                                  }
+                                },
+                                "x-uid": "hxblvr34zd2",
+                                "x-async": false,
+                                "x-index": 1
+                              }
+                            },
+                            "x-uid": "bqpf7uhgloy",
+                            "x-async": false,
+                            "x-index": 6
+                          }
+                        },
+                        "x-uid": "wdq2m2sic8l",
+                        "x-async": false,
+                        "x-index": 2
+                      }
+                    },
+                    "x-uid": "jkbpn7xo5dr",
+                    "x-async": false,
+                    "x-index": 1
+                  }
+                },
+                "x-uid": "nqvcvsp4pf9",
+                "x-async": false,
+                "x-index": 1
+              }
+            },
+            "x-uid": "yux0ro38pdt",
+            "x-async": false,
+            "x-index": 1
+          }
+        },
+        "x-uid": "m4az3j2q86f",
+        "x-async": false,
+        "x-index": 1
+      }
+    }
+  }
+}
