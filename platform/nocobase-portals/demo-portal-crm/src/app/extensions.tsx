@@ -3,6 +3,15 @@ import {
   type PropsWithChildren,
   type ReactNode,
 } from "react";
+import type { ResourceProps } from "@refinedev/core";
+import {
+  BookOpen,
+  Boxes,
+  LifeBuoy,
+  Truck,
+  Users,
+  Wallet,
+} from "lucide-react";
 import {
   collectAppExtensionContributions,
   type AppExtension,
@@ -51,8 +60,73 @@ const extensionContributions = collectAppExtensionContributions({
 
 export const appExtensions = extensionContributions.extensions;
 
+// --- Sidebar grouping (migrated Hub domains) -------------------------------
+// Each group is a route-less parent nav item; the template renders a
+// parent-with-children as a collapsible row when the sidebar is open and a
+// hover dropdown when collapsed. Migrated Hub resources attach via meta.parent
+// (see the map below) without touching the module files. The CRM-native groups
+// (crm_nav_*) keep their inline priorities 0-40 in src/routes.tsx; the Hub
+// groups follow at 50+ so the sales domain stays first.
+const makeGroup = (
+  name: string,
+  label: string,
+  i18nKey: string,
+  icon: ReactNode,
+  priority: number
+): ResourceProps => ({
+  name,
+  meta: {
+    label,
+    i18nKey,
+    i18nOptions: { ns: "starter" },
+    icon,
+    priority,
+  },
+});
+
+const sidebarGroups: ResourceProps[] = [
+  makeGroup("group_delivery", "Delivery", "groups.delivery", <Truck />, 50),
+  makeGroup("group_people", "People", "groups.people", <Users />, 51),
+  makeGroup("group_operations", "Operations", "groups.operations", <Boxes />, 52),
+  makeGroup("group_finance", "Finance", "groups.finance", <Wallet />, 53),
+  makeGroup("group_support", "Support", "groups.support", <LifeBuoy />, 54),
+  makeGroup("group_knowledge", "Knowledge", "groups.knowledge", <BookOpen />, 55),
+];
+
+// Which migrated module nav resource belongs to which group. Resources absent
+// from this map (all CRM-native ones) keep their inline meta untouched.
+const resourceGroupParent: Record<string, string> = {
+  // Support — Helpdesk
+  hub_hd_tickets: "group_support",
+  "helpdesk-dashboard": "group_support",
+  "hd-agents": "group_support",
+  "hd-sla": "group_support",
+  "hd-faq": "group_support",
+};
+
+// Reserved for domains whose nav priorities interleave inside one shared
+// group (Inventory/Procurement/Assets land together in Operations later).
+const priorityOverride: Record<string, number> = {};
+
+const groupedRouteResources = buildRouteResources(
+  extensionContributions.routeDefinitions
+).map((resource) => {
+  const parent = resourceGroupParent[resource.name];
+  const priority = priorityOverride[resource.name];
+  if (!parent && priority === undefined) return resource;
+  return {
+    ...resource,
+    meta: {
+      ...resource.meta,
+      ...(parent ? { parent } : {}),
+      ...(priority !== undefined ? { priority } : {}),
+    },
+  };
+});
+
 export const configuredResources = [
-  ...buildRouteResources(extensionContributions.routeDefinitions),
+  ...sidebarGroups,
+  ...groupedRouteResources,
   ...extensionContributions.resources,
 ];
 

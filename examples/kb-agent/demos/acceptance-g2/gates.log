@@ -1,0 +1,43 @@
+G2 gates — 2026-09-14 (sidebar grouping + locale aggregation + helpdesk pilot)
+
+Changes (on 8103cd0678)
+- src/app/extensions.tsx — Hub's four-part sidebar grouping mechanism
+  (makeGroup/sidebarGroups/resourceGroupParent/priorityOverride/
+  groupedRouteResources). Adaptation decision: the CRM-native inline groups
+  (crm_nav_*, priorities 0-40 in src/routes.tsx) stay untouched per the
+  "CRM current state wins" rule; the six Hub groups (delivery/people/
+  operations/finance/support/knowledge — revenue dropped because the sales
+  domain is not migrated) land at priorities 50-55 after Analytics. The
+  02-plan's "new group_sales at priority 1" was superseded by this find:
+  CRM already owns a five-group inline structure; re-parenting crm_* into a
+  single group_sales would have reshuffled the existing menu.
+- src/locales/index.ts — Hub-style starter-namespace aggregation; merges the
+  helpdesk locale pair + groups.* labels (zh-CN/en-US).
+- src/pages/helpdesk/ — 20 files / 6,658 lines copied byte-identical from
+  the frozen Hub source; plus src/pages/home/theme.ts (90 lines, the shared
+  ECharts theme hook the helpdesk charts import — copied standalone because
+  the home domain itself is a G6 batch).
+- src/routes.tsx — +import helpdeskModule, +...helpdeskModule.routes spread.
+
+Gates
+- portal tsc --noEmit          → EXIT=0 (only pre-existing drift elsewhere)
+- deploy run1/run2 tree hash   → ba46a9fdf1169967a5456f48dc33dd78216fe9ac
+                                 identical
+- portal vitest                → 13/13 passed
+- CRM e2e baseline comparison  → 55 passed / 26 failed (G1 baseline 54/27;
+                                 net +1 pass, zero new failures; remaining
+                                 failures are the known crm_* schema drift)
+- Hub source untouched         → cp-only from demo-portal-hub; no writes.
+
+Browser acceptance (demos/acceptance-g2/, playwright vs :3080) — 23/23 PASS
+- CRM-native groups 概览/客户/销售/产品/分析 all render (regression guard)
+- 支持 group renders, expands (aria-expanded), empty groups (交付/人事/运营/
+  财务/知识) correctly hidden until they gain members in later batches
+- tickets board renders real hub_hd_tickets data (seed cards 蜂蜜标签法规咨询/
+  礼柜包装破损换货/平台发票抬头变更/API 对接签名过期) + KPI tiles (待处理工单 3)
+- create form opens at /tickets/create
+- 工作负载 / 客服绩效 / SLA 策略 / 自助 FAQ pages render with content
+- ticket detail opens (tickets/show/5) with the reply thread
+- AI floating ball present on the tickets page
+- CRM regression: dashboard (销售看板) + leads (潜在客户) intact
+- Chinese labels everywhere the migrated module renders (locale merge works)
