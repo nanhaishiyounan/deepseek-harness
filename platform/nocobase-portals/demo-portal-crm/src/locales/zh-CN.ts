@@ -96,7 +96,7 @@ export const starter = {
   "notifications.createSuccess": "已成功创建{{resource}}",
   "notifications.editSuccess": "已成功更新{{resource}}",
   "notifications.deleteSuccess": "已成功删除{{resource}}",
-  "crm.resources.dashboard": "销售看板",
+  "crm.resources.dashboard": "销售工作台",
   "crm.resources.pipeline": "销售管道",
   "crm.resources.deal": "商机",
   "crm.resources.pipeline.description":

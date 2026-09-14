@@ -23,6 +23,7 @@ import {
 } from "@nocobase/portal-sdk/routing";
 import { Navigate } from "react-router";
 import { crmRoutes } from "@/pages/crm/routes";
+import { homeModule } from "@/pages/home/module";
 import { helpdeskModule } from "@/pages/helpdesk/module";
 import { projectsModule } from "@/pages/projects/module";
 import { hrModule } from "@/pages/hr/module";
@@ -801,4 +802,5 @@ export const appRoutes = defineAppRoutes([
   ...financeModule.routes,
   ...procurementModule.routes,
   ...knowledgeModule.routes,
+  ...homeModule.routes,
 ]);

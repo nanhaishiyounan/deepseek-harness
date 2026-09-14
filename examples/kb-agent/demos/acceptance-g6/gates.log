@@ -1,0 +1,55 @@
+# G6 acceptance gates — home domain + new overview landing (2026-09-14)
+
+## Step 0: sales datasource audit (decision A taken)
+
+- crm_deals columns: id,name,deadline,amount,status,owner,customer_id,stage,
+  expected_close_date,closed_date; stage enum identical to hub_sales_deals
+  (inquiry/quote/negotiation/won/lost) and `amount` shares the name+type.
+- Mapping: hub_sales_deals→crm_deals (title→name, account append→customer),
+  hub_sales_activities→crm_activities (subject→title), quick-search sources →
+  crm_customers / crm_contacts / crm_deals / crm_leads. No fallback branch
+  needed; every field the overview/week-strip consumes exists on crm_*.
+
+## Recorded forks (intentional, vs frozen Hub source)
+
+- pages/home/data.ts + quick-search.tsx: sales queries rebound per the
+  mapping above; all other home files stay byte-identical to Hub.
+- quick-search deep links remapped: /accounts/show→/customers/show,
+  /deals/show→/pipeline/show (CRM route shapes), /contacts/show→/contacts
+  (CRM has no contact detail route), /leads/show unchanged.
+- pages/home/module.tsx: resource priority 0→-1 so the overview precedes the
+  crm_nav_* groups and the root NavigateToAccessibleResource lands on
+  /overview (the new default home).
+- crm.resources.dashboard label: 销售看板→销售工作台 (zh) / Dashboard→Sales
+  workspace (en) — the legacy dashboard demotes to a secondary entry.
+
+## Commands
+
+- portal `pnpm tsc --noEmit` → EXIT=0
+- deploy ×2 → tree hash 4ef37bb194fb2b03280a98f536d96708bc224c87 identical
+
+## Browser acceptance (:3080 gateway, zh-CN, admin)
+
+- root `/` after sign-in redirects to /overview (menu first item = Overview) ✓
+- overview renders: BuildStoryBanner, 4 KPI cards, week strip「我的一周」
+  (3 meetings · 5 due tasks · 1 expected close, seven day chips), queues
+  tabs 全员/分配给我 — g6-01 light, g6-02 dark (charts follow theme),
+  g6-05 full page
+- sales KPI consistency: overview card 进行中商机金额 US$85.9万 / 8 个进行中
+  商机 equals the direct crm_deals API aggregate (8 open deals / 859,000) ✓
+- quick-search (Cmd+K) “工单” returns cross-domain hits incl. tickets ✓
+  (g6-03)
+- legacy sales workspace reachable at /dashboard with the new 销售工作台
+  label — g6-04
+- regression: /expenses (G5) — g6-06
+- pinnedModules mechanism rides with the template (localStorage key
+  hub.home.pinnedModules, null = all modules default-visible)
+
+## Known pre-existing drift surfaced (CRM-native, NOT from this batch)
+
+- CrmGlobalSearch (pages/crm/global-search.tsx) filters reference
+  crm_customers.phone, crm_leads.email, crm_deals.title,
+  crm_quotes.quote_number, crm_products.sku — columns absent from the seeded
+  crm_* tables. The header search 500s per collection (page keeps working).
+  Same family as the 23 known G1–G3 schema-drift failures; queued for the
+  G8 cleanup batch, not introduced here.

@@ -102,7 +102,7 @@ export const starter = {
   "notifications.createSuccess": "Successfully created {{resource}}",
   "notifications.editSuccess": "Successfully updated {{resource}}",
   "notifications.deleteSuccess": "Successfully deleted {{resource}}",
-  "crm.resources.dashboard": "Dashboard",
+  "crm.resources.dashboard": "Sales workspace",
   "crm.resources.pipeline": "Pipeline",
   "crm.resources.deal": "Deal",
   "crm.resources.pipeline.description":
