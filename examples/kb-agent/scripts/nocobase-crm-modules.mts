@@ -597,6 +597,15 @@ async function ensurePortalFields(token: string): Promise<void> {
   if (await addField('crm_quotes', { name: 'version', type: 'integer', interface: 'integer', uiSchema: { type: 'number', 'x-component': 'InputNumber', title: '版本(portal)' } })) added.push('crm_quotes.version')
   if (await addField('crm_quotes', { name: 'is_current', type: 'boolean', interface: 'boolean', uiSchema: { type: 'boolean', 'x-component': 'Checkbox', title: '当前版本(portal)' } })) added.push('crm_quotes.is_current')
   if (await addField('crm_quotes', { name: 'total', type: 'float', interface: 'number', uiSchema: { type: 'number', 'x-component': 'InputNumber', title: '总金额(portal)' } })) added.push('crm_quotes.total')
+  // G8 drift cleanup: the portal products page lists active/unit_price (and
+  // the header search filters sku) and the quotes drawer reads
+  // quote_number/revision_note — columns the original seed never declared.
+  if (await addField('crm_products', { name: 'active', type: 'boolean', interface: 'boolean', uiSchema: { type: 'boolean', 'x-component': 'Checkbox', title: '在售(portal)' } })) added.push('crm_products.active')
+  if (await addField('crm_products', { name: 'unit_price', type: 'float', interface: 'number', uiSchema: { type: 'number', 'x-component': 'InputNumber', title: '单价(portal)' } })) added.push('crm_products.unit_price')
+  if (await addField('crm_products', { name: 'sku', type: 'string', interface: 'input', uiSchema: { type: 'string', 'x-component': 'Input', title: 'SKU(portal)' } })) added.push('crm_products.sku')
+  if (await addField('crm_quotes', { name: 'quote_number', type: 'string', interface: 'input', uiSchema: { type: 'string', 'x-component': 'Input', title: '报价编号(portal)' } })) added.push('crm_quotes.quote_number')
+  if (await addField('crm_quotes', { name: 'revision_note', type: 'text', interface: 'textarea', uiSchema: { type: 'string', 'x-component': 'Input.TextArea', title: '修订说明(portal)' } })) added.push('crm_quotes.revision_note')
+  if (await addField('crm_quotes', { name: 'createdAt', type: 'dateOnly', interface: 'date', uiSchema: { type: 'string', 'x-component': 'DatePicker', title: '创建日(portal)' } })) added.push('crm_quotes.createdAt')
   // D1: the deals drawer filters follow-ups and activities by the camelCase
   // `dealId` column (deals/show.tsx); the seeded associations use deal_id /
   // nothing, and a same-name belongsTo (association as === foreignKey) hits a
@@ -657,6 +666,11 @@ async function ensurePortalFields(token: string): Promise<void> {
     // activities mirror of deal_id: once a value is present — backfilled or
     // hand-edited in the drawer — reruns keep it.
     { collection: 'crm_follow_ups', assign: row => row.dealId == null ? [['dealId', dealsByCustomer.get(row.customer_id ?? null)?.[0] ?? null]] : [] },
+    // G8: backfill the new portal columns — active defaults true, unit_price
+    // mirrors base_price, sku derives from the row id, quote_number mirrors
+    // the seeded quote_no.
+    { collection: 'crm_products', assign: row => [['active', row.active ?? true], ['unit_price', row.unit_price ?? row.base_price ?? null], ['sku', row.sku ?? `SKU-CRM-${String(row.id).padStart(4, '0')}`]] },
+    { collection: 'crm_quotes', assign: row => [...(row.quote_number == null ? [['quote_number', row.quote_no ?? `QT-${row.id}`]] : []), ...([['createdAt', row.issue_date ?? '2026-09-01']])] },
     // D1: seeded targets rows (period-unique) get their owner association.
     { collection: 'crm_targets', assign: () => [['owner_id', superAdminId ?? null]] },
   ]

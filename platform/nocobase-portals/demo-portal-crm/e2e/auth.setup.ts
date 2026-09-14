@@ -20,8 +20,10 @@ setup("authenticate through the real sign-in UI", async ({ page }) => {
   await page.getByRole("textbox", { name: "Password" }).fill(password);
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
 
-  await expect(page).toHaveURL(/\/x\/crm\/dashboard(?:\?|$)/);
-  await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
+  // G6: the overview page is the portal's default landing now; the sales
+  // dashboard stays reachable at /dashboard as a secondary entry.
+  await expect(page).toHaveURL(/\/x\/crm\/overview(?:\?|$)/);
+  await expect(page.getByRole("heading", { name: "Overview" })).toBeVisible();
 
   const nocobaseKeys = await page.evaluate(() =>
     Object.keys(localStorage).filter((key) => key.startsWith("NOCOBASE_"))

@@ -1,0 +1,62 @@
+# G8 acceptance gates — closeout regression (2026-09-14)
+
+## Schema-drift cleanup (the opportunistic batch)
+
+Columns added idempotently via nocobase-crm-modules.mts (double-run kept):
+
+- crm_products: active (bool, backfill true) / unit_price (backfill base_price)
+  / sku (backfill SKU-CRM-####)
+- crm_quotes: quote_number (backfill quote_no) / revision_note / createdAt
+  (backfill issue_date)
+- crm/global-search.tsx: dropped filters the seeded tables never had —
+  customers phone (→ name), leads email (removed), deals title (→ name);
+  DealRecord type carries both title and name (hub vs crm sources).
+
+Effect: the CRM e2e schema-drift family is gone — the final full run's PG
+tail has zero `column … does not exist`. Baseline moves 58/23 → **59 passed
+/ 22 failed**; the remaining 22 are pre-existing data-semantics/UI-shape
+assertions (leads conversion-rate non-zero, saved-view menu shape,
+customer-detail timeline, login-session reload, drawer-select, bulk
+actions…), recorded per the batch instruction as out of scope for column
+backfills. auth.setup.ts follows the G6 landing change (/overview + English
+"Overview" heading).
+
+## Full gates
+
+| gate | result |
+|---|---|
+| setup-nocobase.mts verify ×2 | both "OK — … all verified"; outputs identical (only the node PID warning differs) |
+| pnpm run typecheck | EXIT=0 |
+| pnpm run lint | 0 warnings 0 errors (3003 files) |
+| pnpm run doc-sync | 28 passed / 0 failed (agent-note format fixed: 664 notes conform; bilingual pair recorded) |
+| portal tsc (crm) | EXIT=0 |
+| portal tsc (hub, frozen) | EXIT=0 |
+| vitest (crm) | 13/13 |
+| deploy ×2 | tree hash 5614b05f0682c0b4811a083454d2c095438b9b7f identical |
+| gateway smoke ×5 | crm/, crm/tickets, crm/overview, hub/, favicon.ico all 200 |
+| CRM e2e | 59 passed / 22 failed — schema family cleared, remainder registered |
+| deep links | 33/33 → 200 (SPA fallback with accept: text/html) |
+
+## Ten-domain inspection (screenshots g8-01…11)
+
+overview / pipeline / tickets / tasks / employees / inventory / asset-registry
+/ invoices / articles / sales-workspace (legacy dashboard) all render real
+data; AI ball present on the assets spot-check; Hub portal landing shot as
+the frozen-reference proof (g8-11).
+
+## Knowledge artifacts
+
+- Agent Note (bilingual, format-gate clean, pairing recorded):
+  .agents/notes/implemented/architecture/2026-09-14-crm-portal-hub-domain-
+  absorption{,.zh.md,.i18n.yaml}
+- handoff 0.h section with the six-item H-round Hub-retirement dependency
+  list
+- QUICKSTART reread against reality: the G7 rewrites (portal entry, single
+  entry story, admin-config boundary, two mount systems) match what shipped
+
+## Commit chain (74da6fff60..HEAD)
+
+3ad150fc98 (G1) → 8103cd0678 (G1 e2e) → c307d32bea (G2) → f52661a24d (G3) →
+4cd1952e75 (G4) → 759177b359 (G5) → 3698268a18 (G6) → 1e10e7a036 (G7) → G8
+closeout — one conventional commit per batch, each independently revertable;
+Hub tree untouched (git status clean under platform/nocobase-portals/).

@@ -58,6 +58,8 @@ export type ContactFormValues = {
 export type DealRecord = AuditableRecord & {
   id: string | number;
   title?: string;
+  /** crm_deals carries the display name in `name`; hub_sales_deals uses title. */
+  name?: string;
   stage?: string | null;
   amount?: number | null;
   expected_close_date?: string | null;

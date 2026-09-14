@@ -144,7 +144,9 @@ export function CrmGlobalSearch({
 
   const customers = useList<CustomerRecord>({
     resource: "crm_customers",
-    filters: searchFilter(["company_name", "phone"], debouncedTerm),
+    // The seeded crm_* tables have no phone column; search the customer name
+    // (the seeded company display name) instead.
+    filters: searchFilter(["company_name", "name"], debouncedTerm),
     pagination: { mode: "server", currentPage: 1, pageSize: 5 },
     errorNotification: false,
     queryOptions: { enabled: queryEnabled, retry: false },
@@ -159,14 +161,14 @@ export function CrmGlobalSearch({
   });
   const leads = useList<LeadRecord>({
     resource: "crm_leads",
-    filters: searchFilter(["name", "company", "email"], debouncedTerm),
+    filters: searchFilter(["name", "company"], debouncedTerm),
     pagination: { mode: "server", currentPage: 1, pageSize: 5 },
     errorNotification: false,
     queryOptions: { enabled: queryEnabled, retry: false },
   });
   const deals = useList<DealRecord>({
     resource: "crm_deals",
-    filters: searchFilter(["title"], debouncedTerm),
+    filters: searchFilter(["name"], debouncedTerm),
     pagination: { mode: "server", currentPage: 1, pageSize: 5 },
     meta: { appends: ["customer"] },
     errorNotification: false,
@@ -252,7 +254,7 @@ export function CrmGlobalSearch({
       rows: deals.result.data.map((record) => ({
         kind: "deal",
         id: String(record.id),
-        label: record.title ?? "",
+        label: record.name ?? "",
         secondary: secondaryLabel(
           record.customer?.company_name,
           formatCurrency(record.amount, locale)
