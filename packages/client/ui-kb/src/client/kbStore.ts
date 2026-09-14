@@ -121,23 +121,16 @@ export function createKbClientStore(): KbClientStore {
 /**
  * The cross-entry view-navigation bridge: the header action entry owns the
  * session's `setView` (handed to it as a best-effort owner prop) and publishes
- * it here while mounted; the sidebar entry and the workbench request view
- * switches through {@link KbViewBridge.request} and simply no-op while no
- * publisher is mounted (the tabs stay manually clickable — the documented
- * degradation).
+ * it here while mounted; the sidebar entry, the workbench, and the scenarios
+ * view request view switches through {@link KbViewBridge.request} and simply
+ * no-op while no publisher is mounted (the tabs stay manually clickable — the
+ * documented degradation).
  */
 export interface KbViewBridge {
   /** Publish the live view switch; returns the revoker. */
   provide(setView: (view: string) => void): () => void
   /** Request a view switch; a no-op while no publisher is mounted. */
   request(view: string): void
-  /**
-   * Mount mirror for the workbench view tab: true while its component is
-   * mounted. The blank-session hero portal reads it to step aside while the
-   * workbench itself is on screen — the session stays blank (hero-eligible
-   * snapshot-wise), so the mount state is the only view signal it has.
-   */
-  workbench: SnapshotStore<boolean>
 }
 
 /**
@@ -156,6 +149,5 @@ export function createKbViewBridge(): KbViewBridge {
     request(view): void {
       setView?.(view)
     },
-    workbench: createSnapshotStore(false),
   }
 }

@@ -1,13 +1,14 @@
 /**
- * The KB portal dock: the blank-session hero's usage chips, sample questions,
- * the scenario portal (a featured front row, a category browse with collapsed
- * groups, and a live search that filters all thirty cards), and the
- * recent-search rail (the localStorage-backed last five queries), riding the
- * `conversation.input.dock` seat above the composer card. Renders only while
- * the session is blank in its blank phase — an active conversation sees
- * nothing (the presentation stays a pure function of the owner's session
- * snapshot).
- * @module @deepseek-ai/dsh-client-ui-kb/client/hero/KbHeroDock
+ * The scenarios view tab: the scenario portal as its own business page — a
+ * PageHero header with the usage counters in its meta row, the sample
+ * questions, the scenario catalog (a featured front row, a category browse
+ * with collapsed groups, and a live search that filters all thirty cards),
+ * and the recent-search rail (the localStorage-backed last five queries).
+ * Registered as the `scenarios` entry of the conversation view ring; the
+ * portal renders in every session state — a session with history keeps the
+ * full catalog reachable (the presenter is a pure function of the shared
+ * store, never of the session's blank phase).
+ * @module @deepseek-ai/dsh-client-ui-kb/client/scenarios/ScenarioView
  */
 
 import { useEffect, useState } from 'react'
@@ -16,75 +17,65 @@ import clsx from 'clsx'
 import type { SnapshotStore } from '@deepseek-ai/dsh-client-runtime/client'
 import {
   Button, IconChevronDownOutline14, IconChevronRightOutline14, IconSearchOutline16, Input, Modal,
+  PageHero, PageSkeleton,
 } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
-// Type-only: pulls the ui-conversation SlotMap merge (the input-dock seat).
+// Type-only: pulls the ui-conversation SlotMap merge (the view seat).
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type { KbClientState } from '../kbStore.ts'
 import {
   KB_SCENARIOS, featuredScenarios, filterScenarios, scenariosByCategory, type KbScenario, type KbScenarioCategory,
-} from './scenarios.ts'
+} from '../hero/scenarios.ts'
 import { clearRecentSearches, recentSearches } from '../recentSearches.ts'
-import css from './hero.module.css'
+import css from './scenarios.module.css'
 
-/** Registration-side business face for the portal dock. */
-export interface KbHeroDockInjected {
+/** Registration-side business face for the scenarios view. */
+export interface ScenarioViewInjected {
   hooks: {
     /** Shared client-session snapshot bound by the renderer as useKb. */
     kb: SnapshotStore<KbClientState>
-    /** The view bridge's workbench mount mirror (the portal yields while true). */
-    workbench: SnapshotStore<boolean>
   }
   /** Load or reload the shared stats cache. */
   refresh: () => void
-  /** Apply one scenario preset to the blank session; rejects on failure. */
-  selectScenario: (scenarioId: string) => Promise<void>
+  /** Apply one scenario preset to the session; rejects on failure. */
+  selectScenario: (sessionId: string, scenarioId: string) => Promise<void>
   /** Active display language for the scenario catalog's own copy. */
   language: () => 'zh' | 'en'
+  /** Best-effort view switch through the header bridge. */
+  requestView: (view: string) => void
 }
 
-/** Full component props: the input-zone owner share plus the inject face and locale seat. */
-export type KbHeroDockProps =
-  PropsRuntime<'conversation.input.dock'>
+/** Full component props: the view-seat runtime share plus the inject face and locale seat. */
+export type ScenarioViewProps =
+  PropsRuntime<'conversation.view'>
   & PropsLocale<'kb'>
-  & InjectFace<KbHeroDockInjected>
+  & InjectFace<ScenarioViewInjected>
 
 /**
- * Render the portal content for the blank hero, or nothing once the session
- * has content.
- * @param props - the input-zone snapshot, the shared store hook, and the actions.
- * @returns the portal column, or null outside the hero phase.
+ * Render the scenario portal page.
+ * @param props - the view seat's standard kit plus the inject face and locale seat.
+ * @returns the scenarios column.
  */
-export function KbHeroDock({
-  session, inputActions, useKb, useWorkbench, refresh, selectScenario, language, t,
-}: KbHeroDockProps): JSX.Element | null {
+export function ScenarioView({
+  sessionId, inputActions, useKb, refresh, selectScenario, language, requestView, t,
+}: ScenarioViewProps): JSX.Element {
   const state = useKb(snapshot => snapshot)
-  // A blank session keeps its view ring (the shell renders it once tabs
-  // exist), so the workbench tab can own the column while the session stays
-  // blank — the portal steps aside for that mount and returns on switch-back.
-  const workbenchMounted = useWorkbench(mounted => mounted)
   const [pending, setPending] = useState<KbScenario | undefined>(undefined)
   const [busy, setBusy] = useState(false)
   const [failed, setFailed] = useState(false)
-  // The scenario portal's browse state: a live search query plus the set of
+  // The scenario catalog's browse state: a live search query plus the set of
   // category groups the user has expanded. Both live only in this component —
   // the catalog itself stays static.
   const [query, setQuery] = useState('')
   const [openCategories, setOpenCategories] = useState<ReadonlySet<KbScenarioCategory>>(() => new Set())
-  // The recent rail reads on mount and after every workbench occupation: the
-  // dock stays mounted while the workbench tab owns the column (it renders
-  // nothing), so those are exactly the windows in which the log can change.
+  // The recent rail reads on mount: every view switch remounts this component,
+  // which is exactly the window in which the persisted log can change (the
+  // workbench tab records searches while this tab is unmounted).
   const [recent, setRecent] = useState<string[]>(() => recentSearches())
-  useEffect(() => {
-    if (!workbenchMounted) setRecent(recentSearches())
-  }, [workbenchMounted])
 
   useEffect(() => {
     if (state.stats === undefined) refresh()
   }, [state.stats, refresh])
-
-  if (!(session.blank && session.composerPhase === 'blank')) return null
-  if (workbenchMounted) return null
 
   const zh = language() === 'zh'
   // Null query = the browse view (featured + collapsed categories); otherwise
@@ -102,6 +93,11 @@ export function KbHeroDock({
     inputActions.setDraft(text)
     document.querySelector<HTMLTextAreaElement>('textarea')?.focus()
   }
+  /** Fill the draft and land on the chat tab, where the answer will arrive. */
+  const askInChat = (text: string): void => {
+    fillDraft(text)
+    requestView('chat')
+  }
 
   const startScenario = (): void => {
     /* v8 ignore next -- the start button lives inside the confirm modal, whose
@@ -110,8 +106,8 @@ export function KbHeroDock({
     if (pending === undefined || busy) return
     setBusy(true)
     setFailed(false)
-    selectScenario(pending.id).then(() => {
-      fillDraft(language() === 'zh' ? pending.probeZh : pending.probeEn)
+    selectScenario(sessionId, pending.id).then(() => {
+      askInChat(language() === 'zh' ? pending.probeZh : pending.probeEn)
       setPending(undefined)
     }).catch(() => {
       setFailed(true)
@@ -120,16 +116,41 @@ export function KbHeroDock({
     })
   }
 
+  const stats = state.stats
+
   return (
-    <div className={css.portal}>
-      <UsageChips state={state} refresh={refresh} onEmptyFill={() => { fillDraft(t('hero.sample1')) }} t={t} />
+    <div className={css.scenarios}>
+      <PageHero
+        eyebrow={t('view.scenarios')}
+        title={t('scenarios.page.title')}
+        tagline={t('scenarios.page.tagline')}
+        meta={stats === undefined || stats.status === 'loading'
+          ? <PageSkeleton variant="list" rows={1} />
+          : stats.status === 'ready'
+            ? <UsageMeta state={state} t={t} />
+            : undefined}
+      >
+        {stats !== undefined && stats.status === 'ready' && stats.usage.documents === 0 && (
+          <p className={css.empty}>
+            <span>{t('hero.empty')}</span>
+            <Button variant="ghost" size="sm" onClick={() => { askInChat(t('hero.sample1')) }}>{t('hero.emptyAction')}</Button>
+          </p>
+        )}
+      </PageHero>
+
+      {stats !== undefined && stats.status === 'error' && (
+        <div className={css.unavailable} role="alert">
+          <span>{t('error.unavailable')}</span>
+          <Button variant="ghost" size="sm" onClick={refresh}>{t('error.retry')}</Button>
+        </div>
+      )}
 
       <div className={css.samples} role="group" aria-label={t('hero.sample1')}>
-        <Button variant="ghost" size="sm" onClick={() => { fillDraft(t('hero.sample1')) }}>{t('hero.sample1')}</Button>
-        <Button variant="ghost" size="sm" onClick={() => { fillDraft(t('hero.sample2')) }}>{t('hero.sample2')}</Button>
+        <Button variant="ghost" size="sm" onClick={() => { askInChat(t('hero.sample1')) }}>{t('hero.sample1')}</Button>
+        <Button variant="ghost" size="sm" onClick={() => { askInChat(t('hero.sample2')) }}>{t('hero.sample2')}</Button>
       </div>
 
-      <section className={css.scenarios} aria-label={t('scenario.title')}>
+      <section className={css.catalog} aria-label={t('scenario.title')}>
         <div className={css.scenarioToolbar}>
           <span className={css.scenarioHeading}>
             {t('scenario.title')}
@@ -243,7 +264,7 @@ export function KbHeroDock({
           : (
             <div className={css.recentRow} role="list">
               {recent.map(item => (
-                <Button key={item} variant="ghost" size="sm" onClick={() => { fillDraft(item) }}>{item}</Button>
+                <Button key={item} variant="ghost" size="sm" onClick={() => { askInChat(item) }}>{item}</Button>
               ))}
               <Button
                 variant="ghost"
@@ -310,50 +331,23 @@ function ScenarioCard({ scenario, zh, onPick }: {
 }
 
 /**
- * The usage chip row with its load/empty/error matrix.
- * @param props - the shared snapshot, the reload action, the empty-state fill, and the locale seat.
- * @param props.state - shared client-session snapshot.
- * @param props.refresh - stats reload action.
- * @param props.onEmptyFill - the empty-KB guidance action (fills a starter question).
- * @param props.t - locale seat.
- * @returns the chip row, the empty guidance, or the error strip.
+ * The usage chip row for the PageHero meta tier (the ready state of the
+ * load/empty/error matrix; loading renders the PageSkeleton, error the
+ * strip below the hero, and the empty guidance rides the hero's content).
+ * @param props - the shared snapshot and the locale seat.
+ * @returns the chip row.
  */
-function UsageChips({ state, refresh, onEmptyFill, t }: {
+function UsageMeta({ state, t }: {
   state: KbClientState
-  refresh: () => void
-  onEmptyFill: () => void
   t: PropsLocale<'kb'>['t']
 }): JSX.Element {
-  const stats = state.stats
-  if (stats === undefined || stats.status === 'loading') {
-    return (
-      <div className={css.chips}>
-        {[0, 1, 2].map(index => <span key={index} className={css.chipSkeleton} aria-hidden="true" />)}
-      </div>
-    )
-  }
-  if (stats.status === 'error') {
-    return (
-      <div className={css.unavailable} role="alert">
-        <span>{t('error.unavailable')}</span>
-        <Button variant="ghost" size="sm" onClick={refresh}>{t('error.retry')}</Button>
-      </div>
-    )
-  }
-  const usage = stats.usage
-  if (usage.documents === 0) {
-    return (
-      <div className={css.empty}>
-        <span>{t('hero.empty')}</span>
-        <Button variant="ghost" size="sm" onClick={onEmptyFill}>{t('hero.emptyAction')}</Button>
-      </div>
-    )
-  }
+  const usage = state.stats?.status === 'ready' ? state.stats.usage : undefined
+  if (usage === undefined) return <></>
   return (
-    <div className={css.chips}>
+    <span className={css.chips}>
       <span className={css.chip}>{t('usage.chipDocuments', { n: usage.documents })}</span>
       <span className={css.chip}>{t('usage.chipSearches', { n: usage.searches })}</span>
       <span className={css.chip}>{t('usage.chipScenarios', { n: KB_SCENARIOS.length })}</span>
-    </div>
+    </span>
   )
 }

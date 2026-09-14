@@ -1,0 +1,320 @@
+/* The scenarios view page (hero headline stays in hero.module.css): a
+   business-tab column sharing the other views' PageHero rhythm. Colors ride
+   the --dsw-alias-* semantic tokens (docs/web-styling.md); spacing follows
+   the 4px-grid convention. */
+
+.scenarios {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+/* The empty-KB guidance rides the PageHero content tier (ready stats, zero
+   documents); the error strip renders below the hero instead. */
+.empty {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-layer-2);
+  color: var(--dsw-alias-label-secondary);
+  font: var(--dsw-font-xs-13);
+}
+
+.unavailable {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: var(--dsw-alias-state-error-secondary);
+  color: var(--dsw-alias-state-error-primary);
+  font: var(--dsw-font-xs-13);
+}
+
+.chips {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  /* The brand-tinted rung reads as live system state, not static decoration. */
+  background: var(--dsw-alias-state-business-tertiary);
+  color: var(--dsw-alias-label-primary);
+  font: var(--dsw-font-xs-13);
+  font-variant-numeric: tabular-nums;
+}
+
+.samples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* The scenario catalog's information architecture: a toolbar (heading + live
+   search), then a featured front row and a collapsed category browse (or the
+   catalog-wide search results once a query lands). The featured six are the
+   only cards the default viewport shows; every other scenario stays two
+   interactions away — expand its category, or type a keyword. */
+
+.catalog {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.scenarioToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.scenarioSearch {
+  flex: 0 1 320px;
+  min-width: 200px;
+}
+
+.searchIcon {
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.featuredZone,
+.browseZone,
+.resultsZone {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.zoneLabel {
+  font: var(--dsw-font-xxxs-strong-11);
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.cardGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.categoryGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.categoryRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font: var(--dsw-font-xs-strong-13);
+  cursor: pointer;
+  transition: background-color var(--ds-transition-duration-fast) var(--ds-ease-in-out),
+    color var(--ds-transition-duration-fast) var(--ds-ease-in-out);
+}
+
+.categoryRow:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-primary);
+}
+
+.chevronClosed,
+.chevronOpen {
+  color: var(--dsw-alias-label-tertiary);
+  transition: transform var(--ds-transition-duration-fast) var(--ds-ease-in-out);
+}
+
+.chevronClosed {
+  transform: rotate(-90deg);
+}
+
+.categoryName {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font: var(--dsw-font-xxxs-strong-11);
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.categoryChevron {
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.categoryCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--dsw-alias-bg-layer-2);
+  color: var(--dsw-alias-label-secondary);
+  font: var(--dsw-font-xxs-12);
+  font-variant-numeric: tabular-nums;
+}
+
+.searchEmpty {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-layer-1);
+  font: var(--dsw-font-xs-13);
+  color: var(--dsw-alias-label-secondary);
+}
+
+.scenarioCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  flex: none;
+  width: 240px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-layer-1);
+  text-align: start;
+  transition: border-color var(--ds-transition-duration-fast) var(--ds-ease-in-out),
+    background-color var(--ds-transition-duration-fast) var(--ds-ease-in-out);
+}
+
+.scenarioCard:hover {
+  border-color: var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.scenarioName {
+  font: var(--dsw-font-xs-strong-13);
+  color: var(--dsw-alias-label-primary);
+}
+
+.scenarioDescription {
+  font: var(--dsw-font-xxs-12);
+  color: var(--dsw-alias-label-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.railCount {
+  /* Inline inside the heading's uppercase small-caps label. */
+  margin-left: 8px;
+  text-transform: none;
+  font: var(--dsw-font-xxs-12);
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.scenarioHeading {
+  font: var(--dsw-font-xxxs-strong-11);
+  color: var(--dsw-alias-label-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.confirmDescription {
+  margin: 0;
+  font: var(--dsw-font-s-14);
+  color: var(--dsw-alias-label-primary);
+}
+
+.confirmProbe {
+  margin: 0;
+  font: var(--dsw-font-xs-13);
+  color: var(--dsw-alias-label-secondary);
+}
+
+.scenarioError {
+  margin: 0;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: var(--dsw-alias-state-error-secondary);
+  color: var(--dsw-alias-state-error-primary);
+  font: var(--dsw-font-xs-13);
+}
+
+/* The recent-search rail: one heading plus a wrapping row of ghost chips (the
+   samples row's shape). */
+.recents {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.recentRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* One recorded query can be arbitrarily long; the chip caps at the row width
+   and ellipsizes instead of stretching the page past its column. */
+.recentRow > button {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recentEmpty {
+  margin: 0;
+  font: var(--dsw-font-xs-13);
+  color: var(--dsw-alias-label-secondary);
+}
+
+@media (max-width: 768px) {
+  .samples {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .scenarioToolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .scenarioSearch {
+    flex-basis: auto;
+    min-width: 0;
+  }
+
+  .scenarioCard {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scenarioCard,
+  .chevronClosed,
+  .chevronOpen,
+  .categoryRow {
+    transition: none;
+  }
+}

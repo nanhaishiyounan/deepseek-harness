@@ -105,12 +105,14 @@ describe('ui-kb apply', () => {
     expect(inject).toEqual(['slots', 'locale', 'connection'])
   })
 
-  it('registers the seven workbench seats and the kb dictionary', async () => {
+  it('registers the workbench seats and the kb dictionary', async () => {
     const { ctx, slots, locale } = await bench()
     const dispose = declareSeats(ctx)
     expect(slots.entries('sidebar.footer.action')[0]?.options.id).toBe('kb')
-    expect(slots.entries('conversation.input.dock')[0]?.options.id).toBe('kb-portal')
-    expect(slots.entries('conversation.view').map(entry => entry.options.id)).toContain('kb')
+    // The input-dock portal is retired: the scenario portal rides its own
+    // view tab instead of the every-view dock seat.
+    expect(slots.entries('conversation.input.dock')).toHaveLength(0)
+    expect(slots.entries('conversation.view').map(entry => entry.options.id)).toEqual(expect.arrayContaining(['kb', 'scenarios']))
     expect(slots.entries('conversation.session.header.actions').map(entry => entry.options.id)).toContain('kb')
     // The headline seat is single-kind: the entry registers without an id.
     expect(slots.entries('conversation.hero.headline')).toHaveLength(1)
@@ -125,6 +127,12 @@ describe('ui-kb apply', () => {
     const viewEntry = slots.entries('conversation.view').find(entry => entry.options.id === 'kb')
     expect(viewEntry?.options.label).toEqual(expect.any(Function))
     expect((viewEntry?.options.label as () => string)()).toBe(zh['view.kb'])
+    // The scenarios view tab: label through zh, order between kb (10) and
+    // market (11) so the ring reads 知识库 · 场景 · 数据资产.
+    const scenariosEntry = slots.entries('conversation.view').find(entry => entry.options.id === 'scenarios')
+    expect(scenariosEntry?.options.label).toEqual(expect.any(Function))
+    expect((scenariosEntry?.options.label as () => string)()).toBe(zh['view.scenarios'])
+    expect(scenariosEntry?.options.order).toBe(10.5)
     expect(locale).toBeDefined()
     dispose()
     await ctx.fiber.dispose()
@@ -148,9 +156,10 @@ describe('ui-kb apply', () => {
     expect(viewFace.ingestFile).toEqual(expect.any(Function))
     expect(viewFace.ingestUrl).toEqual(expect.any(Function))
     expect(viewFace.listDirectory).toEqual(expect.any(Function))
-    const dockEntry = slots.entries('conversation.input.dock')[0]
-    const dockFace = (dockEntry?.inject as (sessionId: string) => Record<string, unknown>)('s1')
-    expect(dockFace.selectScenario).toEqual(expect.any(Function))
+    const scenariosEntry = slots.entries('conversation.view').find(candidate => candidate.options.id === 'scenarios')
+    const scenariosFace = (scenariosEntry?.inject as () => Record<string, unknown>)()
+    expect(scenariosFace.selectScenario).toEqual(expect.any(Function))
+    expect(scenariosFace.requestView).toEqual(expect.any(Function))
     const sectionEntry = slots.entries('settings.section').find(candidate => candidate.options.id === 'kb')
     const sectionFace = (sectionEntry?.inject as () => Record<string, unknown>)()
     expect(sectionFace.refresh).toEqual(expect.any(Function))
@@ -178,12 +187,13 @@ describe('ui-kb apply', () => {
     expect(withdraw).toEqual(expect.any(Function))
     withdraw()
 
-    const dockFace = (slots.entries('conversation.input.dock')[0]?.inject as (sessionId: string) => {
-      selectScenario: (scenarioId: string) => Promise<void>
+    const scenariosFace = (slots.entries('conversation.view').find(candidate => candidate.options.id === 'scenarios')
+      ?.inject as () => {
+      selectScenario: (sessionId: string, scenarioId: string) => Promise<void>
       language: () => 'zh' | 'en'
-    })('s1')
-    await dockFace.selectScenario('market-insight')
-    expect(dockFace.language()).toBe('zh')
+    })()
+    await scenariosFace.selectScenario('s1', 'market-insight')
+    expect(scenariosFace.language()).toBe('zh')
 
     const viewFace = (slots.entries('conversation.view').find(candidate => candidate.options.id === 'kb')
       ?.inject as (sessionId: string) => {
@@ -194,7 +204,6 @@ describe('ui-kb apply', () => {
       ingestUrl: (url: string) => Promise<{ name: string; chunks: number }>
       listDirectory: (path?: string) => Promise<unknown>
       requestView: (view: string) => void
-      settleWorkbench: (mounted: boolean) => void
       language: () => 'zh' | 'en'
     })('s1')
     await viewFace.search('山梨酸')
@@ -225,14 +234,6 @@ describe('ui-kb apply', () => {
     await expect(viewFace.uploadFile(plain)).resolves.toMatchObject({ destination: 'lakehouse', table: 'orders' })
     expect(upload).toHaveBeenCalledWith(expect.objectContaining({ filename: 'plain.csv', data: 'YSxiCjEsMg==' }))
     viewFace.requestView('chat')
-    // The mount mirror the hero portal reads: settle flips the shared boolean.
-    const workbenchMirror = (slots.entries('conversation.input.dock')[0]?.inject as (sessionId: string) => {
-      hooks: { workbench: { getSnapshot: () => boolean } }
-    })('s1').hooks.workbench
-    viewFace.settleWorkbench(true)
-    expect(workbenchMirror.getSnapshot()).toBe(true)
-    viewFace.settleWorkbench(false)
-    expect(workbenchMirror.getSnapshot()).toBe(false)
     expect(viewFace.language()).toBe('zh')
     expect(stats).toHaveBeenCalled()
     const settingsFace = (slots.entries('settings.section').find(candidate => candidate.options.id === 'kb')
@@ -277,21 +278,23 @@ describe('ui-kb apply', () => {
     await expect(viewFace.ingestUrl('https://example.com/x')).rejects.toThrow('kb not composed')
     await expect(viewFace.listDirectory()).rejects.toThrow('kb not composed')
 
-    const dockFace = (slots.entries('conversation.input.dock')[0]?.inject as (sessionId: string) => {
-      selectScenario: (scenarioId: string) => Promise<void>
-    })('s1')
-    await expect(dockFace.selectScenario('market-insight')).rejects.toThrow('roster refused')
+    const scenariosFace = (slots.entries('conversation.view').find(candidate => candidate.options.id === 'scenarios')
+      ?.inject as () => {
+      selectScenario: (sessionId: string, scenarioId: string) => Promise<void>
+    })()
+    await expect(scenariosFace.selectScenario('s1', 'market-insight')).rejects.toThrow('roster refused')
     await ctx.fiber.dispose()
   })
 
-  it('rejects a refused scenario selection through the dock face', async () => {
+  it('rejects a refused scenario selection through the scenarios view face', async () => {
     const { ctx, slots } = await scriptedWorld({
       select: vi.fn(async () => ({ result: { ok: false as const, error: { message: 'preset not found' } } })),
     })
-    const dockFace = (slots.entries('conversation.input.dock')[0]?.inject as (sessionId: string) => {
-      selectScenario: (scenarioId: string) => Promise<void>
-    })('s1')
-    await expect(dockFace.selectScenario('ghost')).rejects.toThrow('preset not found')
+    const scenariosFace = (slots.entries('conversation.view').find(candidate => candidate.options.id === 'scenarios')
+      ?.inject as () => {
+      selectScenario: (sessionId: string, scenarioId: string) => Promise<void>
+    })()
+    await expect(scenariosFace.selectScenario('s1', 'ghost')).rejects.toThrow('preset not found')
     await ctx.fiber.dispose()
   })
 

@@ -31,12 +31,12 @@ import type { IngestReceipt } from './workbench/KbIngestDialog.tsx'
 import { KbEntry } from './KbEntry.tsx'
 import { KbHeaderButton } from './KbHeaderButton.tsx'
 import { KbSettingsSection } from './KbSettingsSection.tsx'
-import { KbHeroDock } from './hero/KbHeroDock.tsx'
 import { KbHeroHeadline } from './hero/KbHeroHeadline.tsx'
 import { KbToolRow } from './toolviews/KbToolRow.tsx'
 import { ConnectorToolRow } from './toolviews/ConnectorToolRow.tsx'
 import { OrderToolRow } from './toolviews/OrderToolRow.tsx'
 import { KbWorkbench } from './workbench/KbWorkbench.tsx'
+import { ScenarioView } from './scenarios/ScenarioView.tsx'
 import { en, zh } from './locales.ts'
 import type { KbKey } from './locales.ts'
 
@@ -58,10 +58,8 @@ export type {
 } from './toolviews/kb-tool-model.ts'
 export type { ConnectorDiscoverRowModel } from './toolviews/connector-tool-model.ts'
 export { parseCitations, resultTextOf } from './toolviews/kb-tool-model.ts'
-export type {
-  KbHeroDockInjected, KbHeroDockProps,
-} from './hero/KbHeroDock.tsx'
 export type { KbHeroHeadlineProps } from './hero/KbHeroHeadline.tsx'
+export type { ScenarioViewInjected, ScenarioViewProps } from './scenarios/ScenarioView.tsx'
 export type { KbWorkbenchInjected, KbWorkbenchProps } from './workbench/KbWorkbench.tsx'
 export type { IngestReceipt } from './workbench/KbIngestDialog.tsx'
 export type {
@@ -184,23 +182,29 @@ export function apply(ctx: ClientContext): void {
     locale: NS,
   }, KbHeroHeadline))
 
-  ctx.slots.inject('conversation.input.dock', () => ctx.slots.register({
-    name: 'conversation.input.dock',
-    id: 'kb-portal',
-    order: 5,
+  // The scenario portal rides its own view tab (not the input dock): the dock
+  // seat renders in every view, which leaked the portal onto the connector and
+  // graph tabs. The view seat scopes it to the scenarios tab alone, in blank
+  // and non-blank sessions alike.
+  ctx.slots.inject('conversation.view', () => ctx.slots.register({
+    name: 'conversation.view',
+    id: 'scenarios',
+    order: 10.5,
     locale: NS,
-    inject: (sessionId: string) => ({
-      hooks: { kb: store.store, workbench: bridge.workbench },
+    label: () => bound('view.scenarios'),
+    inject: () => ({
+      hooks: { kb: store.store },
       refresh,
       language,
-      selectScenario: (scenarioId: string) => api.agentPresets.select({
+      selectScenario: (sessionId: string, scenarioId: string) => api.agentPresets.select({
         sessionId: sessionId as never,
         agentPreset: scenarioId,
       }).then((response) => {
         if (!response.result.ok) throw new Error(response.result.error.message)
       }),
+      requestView: (view: string) => { bridge.request(view) },
     }),
-  }, KbHeroDock))
+  }, ScenarioView))
 
   ctx.slots.inject('conversation.view', () => ctx.slots.register({
     name: 'conversation.view',
@@ -210,7 +214,6 @@ export function apply(ctx: ClientContext): void {
     label: () => bound('view.kb'),
     inject: () => ({
       hooks: { kb: store.store },
-      settleWorkbench: (mounted: boolean) => { bridge.workbench.set(mounted) },
       refresh,
       language,
       requestView: (view: string) => { bridge.request(view) },

@@ -56,14 +56,12 @@ function mount(state: KbClientState, overrides: {
   const noteSearched = vi.fn()
   const refresh = vi.fn()
   const requestView = vi.fn()
-  const settleWorkbench = vi.fn()
   const setDraft = vi.fn()
   const view = render(
     <KbWorkbench
       {...SESSION_KIT}
       inputActions={{ setDraft } as never}
       useKb={bindStoreHook(store) as never}
-      settleWorkbench={settleWorkbench}
       refresh={refresh}
       search={search}
       noteSearched={noteSearched}
@@ -77,7 +75,7 @@ function mount(state: KbClientState, overrides: {
     />,
   )
   return {
-    view, store, search, noteSearched, refresh, requestView, settleWorkbench,
+    view, store, search, noteSearched, refresh, requestView,
     setDraft, uploadFile, ingestFile, ingestUrl, listDirectory,
   }
 }
@@ -102,13 +100,12 @@ describe('KbWorkbench search zone', () => {
     expect(screen.getByRole('button', { name: zh['workbench.sample1'] })).toBeTruthy()
   })
 
-  it('publishes its mount state to the bridge workbench mirror', () => {
-    // The blank-session hero portal reads this mirror to step aside; true on
-    // mount, false on unmount (the tab can mount on a still-blank session).
-    const { view, settleWorkbench } = mount({ stats: { status: 'ready', usage: READY_USAGE }, records: [] })
-    expect(settleWorkbench).toHaveBeenCalledWith(true)
-    view.unmount()
-    expect(settleWorkbench).toHaveBeenLastCalledWith(false)
+  it('renders the page header with the shared PageHero rhythm', () => {
+    // The workbench page header aligns with the other business tabs (eyebrow,
+    // title, tagline) after the hero portal moved off the input dock.
+    mount({ stats: { status: 'ready', usage: READY_USAGE }, records: [] })
+    expect(screen.getByRole('heading', { name: zh['workbench.page.title'] })).toBeTruthy()
+    expect(screen.getByText(zh['workbench.page.tagline'])).toBeTruthy()
   })
 
   it('runs a search, renders the numbered highlighted card, and carries it to chat', async () => {

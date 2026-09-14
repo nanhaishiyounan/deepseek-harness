@@ -13,8 +13,9 @@
  *   drive — ingests one corpus document, retrieves a cited passage, and
  *   observes the usage counters;
  * - a real Chromium drives the redesigned UI end to end in Chinese: the
- *   blank-session portal hero (product headline, usage chips, sample
- *   questions, scenario rail), the seeded session's kb_search toolview row,
+ *   scenarios view tab (its own business tab since the input-dock portal
+ *   retired: product hero, usage chips, sample questions, scenario rail), the
+ *   seeded session's kb_search toolview row,
  *   the workbench view tab's search-and-carry flow, the ingest wizard's
  *   browsed-file path, and the sidebar entry's document badge. The seeded
  *   session is synthesized through the Session API (one closed turn with a
@@ -363,12 +364,13 @@ describe('kb workbench (text-only degraded mode, Chinese UI)', () => {
   }, 180_000)
 
   /**
-   * Land on the blank hero of a freshly connected workspace: the seeded
-   * session may have auto-selected, so a fresh blank session carries the
-   * portal. Leaves the page on the blank hero with the recent log cleared.
+   * Land on the blank hero of a freshly connected workspace and open the
+   * scenarios view tab: the seeded session may have auto-selected, so a fresh
+   * blank session is what carries the view ring. Leaves the page on the
+   * scenarios tab with the recent log cleared.
    * @param page - the page under test.
    */
-  async function openBlankHero(page: Page): Promise<void> {
+  async function openScenarios(page: Page): Promise<void> {
     // Clear before anything mounts: earlier cases in this one-world lane
     // record searches, and each cross-view case asserts its own full history.
     await page.evaluate(() => { localStorage.removeItem('dsh-kb-recent-searches') })
@@ -381,23 +383,23 @@ describe('kb workbench (text-only degraded mode, Chinese UI)', () => {
       await connectFreshWorkspaceZh(page, scaffold.workspaceCwd)
     } else {
       // Startup auto-selection may have opened the seeded session; a fresh
-      // blank session is what carries the portal. The button's accessible
+      // blank session is what carries the view ring. The button's accessible
       // name is its aria-label; the visible "新会话" text is not the a11y
       // name, and two mounted buttons share it.
       await page.getByRole('button', { name: '新建会话', exact: true }).first().click()
     }
-    // The no-session hero shows the headline too (the seat is root-scoped);
-    // the session-backed blank hero is what carries the view ring, so wait
-    // for its live composer.
     await page.locator('textarea:enabled[placeholder="问一个问题，或描述你的任务"]').waitFor({ timeout: 15_000 })
     await page.getByText('食品产业知识库问答').first().waitFor({ timeout: 15_000 })
+    // The scenario portal lives on its own tab now.
+    await page.getByRole('tab', { name: '场景', exact: true }).click()
+    await page.getByRole('heading', { name: '场景中心' }).waitFor({ timeout: 15_000 })
   }
 
-  it('renders the portal hero on the blank session: headline, usage chips, samples, scenarios', async () => {
+  it('keeps the blank chat hero to its headline and gates the scenario portal behind its own tab', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-kb-hero'))
     await connectFreshWorkspaceZh(page, scaffold.workspaceCwd)
     // Startup auto-selection may have opened the seeded session; a fresh
-    // blank session is what carries the portal.
+    // blank session is what carries the hero.
     const newSession = page.getByRole('button', { name: '新会话' })
     if (await newSession.count() > 0) await newSession.click()
     // The headline seat renders icon + name + tagline (+ preview badge) as one
@@ -406,17 +408,26 @@ describe('kb workbench (text-only degraded mode, Chinese UI)', () => {
     await heroHeadline.waitFor({ timeout: 15_000 })
     await expect.poll(() => heroHeadline.innerText()).toContain('食品产业知识库问答')
     await expect.poll(() => heroHeadline.innerText()).toContain('检索企业文档 · 带编号引用回答 · 覆盖合规/工艺/成本/供应链')
+    // The dock portal is retired: the blank chat hero carries no scenario
+    // portal, no usage chips, no sample questions (the user's core ask —
+    // every other surface stays clear of KB chrome).
+    expect(await page.locator('[class*="scenarioCard"]').count()).toBe(0)
+    expect(await page.getByText('30 个场景 · 分类浏览').count()).toBe(0)
+    expect(await page.getByText('最近检索').count()).toBe(0)
+    // The scenarios tab owns the portal now: header, chips, samples, catalog.
+    await page.getByRole('tab', { name: '场景', exact: true }).click()
+    await page.getByRole('heading', { name: '场景中心' }).waitFor({ timeout: 15_000 })
+    await page.getByText('三十个食品产业 AI 场景 · 一键配置专属智能体').waitFor({ timeout: 15_000 })
     // Both ingests (the gateway case's corpus and the wizard's supplier
     // note) drive the document chip.
     await page.getByText('文档 2').first().waitFor({ timeout: 15_000 })
-    // The usage chip keeps the whole-catalog count; the browse heading
-    // restates it over the folded categories.
-    await page.getByText('30 个场景', { exact: true }).first().waitFor({ timeout: 15_000 })
     await page.getByText('30 个场景 · 分类浏览').first().waitFor({ timeout: 15_000 })
-    // Sample questions fill the composer; the scenario portal leads with the
-    // featured row (both named leads are featured picks).
+    // Sample questions fill the composer and land back on the chat tab.
     await page.getByRole('button', { name: '酱油中山梨酸钾的最大使用量？' }).click()
     await expect.poll(() => page.locator('textarea:enabled').first().inputValue()).toContain('酱油中山梨酸钾')
+    expect(await page.getByRole('tab', { name: '对话', exact: true }).getAttribute('aria-selected')).toBe('true')
+    // Back on the scenarios tab, the portal leads with the featured row.
+    await page.getByRole('tab', { name: '场景', exact: true }).click()
     await page.getByText('AI 营销洞察主管').waitFor()
     await page.getByText('AI 食安服务主管').waitFor()
     // IA assertion: the default viewport renders at most ten scenario cards —
@@ -435,7 +446,7 @@ describe('kb workbench (text-only degraded mode, Chinese UI)', () => {
 
   it('starts a new session from a newly synced featured card through the real preset selection', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-kb-scenario-card'))
-    await openBlankHero(page)
+    await openScenarios(page)
     // cold-chain joined the catalog with the thirty-card sync and is one of
     // the six featured picks, so it sits on the default viewport: the confirm
     // modal states the probe, and starting applies the preset and fills that
@@ -450,7 +461,7 @@ describe('kb workbench (text-only degraded mode, Chinese UI)', () => {
 
   it('filters the scenario portal through the live search and recovers the browse view', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-kb-scenario-search'))
-    await openBlankHero(page)
+    await openScenarios(page)
     const search = page.getByRole('searchbox', { name: '搜索场景' })
     await search.waitFor({ timeout: 15_000 })
     // The default view folds everything but the featured six.
@@ -476,7 +487,7 @@ describe('kb workbench (text-only degraded mode, Chinese UI)', () => {
 
   it('reaches a folded scenario by expanding its category and starts it from the card', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-kb-scenario-foldout'))
-    await openBlankHero(page)
+    await openScenarios(page)
     // label-review is neither featured nor matched by the portal search's
     // obvious food-safety keywords: the folded category row is its path.
     const row = page.getByRole('button', { name: /食品安全/ })
@@ -493,32 +504,36 @@ describe('kb workbench (text-only degraded mode, Chinese UI)', () => {
     expect(await page.getByText('场景切换失败').count()).toBe(0)
   }, 120_000)
 
-  it('opens the workbench from the blank hero through the sidebar entry and returns to the hero', async () => {
+  it('opens the workbench from the scenarios tab through the sidebar entry and keeps both surfaces clean', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-kb-blank-entry'))
-    await openBlankHero(page)
+    await openScenarios(page)
     // The blank session keeps its view ring (the shell's additive rule), so
     // the kb tab renders before the first message.
     await page.getByRole('tab', { name: '知识库', exact: true }).waitFor({ timeout: 15_000 })
     // The sidebar entry jumps straight to the workbench view.
     await page.getByRole('button', { name: '知识库文档数' }).click()
     await page.getByPlaceholder('检索知识库，如：山梨酸 酱油 限量').waitFor({ timeout: 15_000 })
-    // While the workbench owns the column, the hero chrome and its portal
-    // step aside (the headline seat only renders under the hero phase).
-    await page.getByText('食品产业知识库问答').first().waitFor({ state: 'detached', timeout: 15_000 })
+    // While the workbench owns the column, no scenario portal renders either
+    // (the retired dock seat used to leak it here).
+    expect(await page.getByText('30 个场景 · 分类浏览').count()).toBe(0)
+    expect(await page.locator('[class*="scenarioCard"]').count()).toBe(0)
     // One real search over the gateway face.
     await page.getByPlaceholder('检索知识库，如：山梨酸 酱油 限量').fill('山梨酸')
     await page.getByRole('button', { name: '检索', exact: true }).click()
     await page.getByText('[1]').first().waitFor({ timeout: 15_000 })
-    // Back on the chat tab, the still-blank hero returns with its portal
-    // (browse heading restating the catalog count over the folded rows).
+    // Back on the chat tab, the still-blank hero keeps only its headline.
     await page.getByRole('tab', { name: '对话', exact: true }).click()
     await page.getByText('食品产业知识库问答').first().waitFor({ timeout: 15_000 })
+    expect(await page.getByText('30 个场景 · 分类浏览').count()).toBe(0)
+    // The scenarios tab still carries the whole portal.
+    await page.getByRole('tab', { name: '场景', exact: true }).click()
+    await page.getByRole('heading', { name: '场景中心' }).waitFor({ timeout: 15_000 })
     await page.getByText('30 个场景 · 分类浏览').first().waitFor({ timeout: 15_000 })
   }, 120_000)
 
-  it('syncs the hero recent-search rail with the workbench history across views', async () => {
+  it('syncs the scenarios tab recent-search rail with the workbench history across views', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-kb-recent-sync'))
-    await openBlankHero(page)
+    await openScenarios(page)
     await page.getByRole('tab', { name: '知识库', exact: true }).click()
     const input = page.getByPlaceholder('检索知识库，如：山梨酸 酱油 限量')
     await input.waitFor({ timeout: 15_000 })
@@ -529,9 +544,11 @@ describe('kb workbench (text-only degraded mode, Chinese UI)', () => {
       await page.getByRole('button', { name: '检索', exact: true }).click()
       await page.getByText('[1]').first().waitFor({ timeout: 15_000 })
     }
-    // Back on the chat tab, the hero's recent rail lists the same queries
-    // newest-first (the clear action rides the same row).
-    await page.getByRole('tab', { name: '对话', exact: true }).click()
+    // Back on the scenarios tab, the recent rail lists the same queries
+    // newest-first (the clear action rides the same row); the remount after
+    // the view switch is what re-reads the persisted log.
+    await page.getByRole('tab', { name: '场景', exact: true }).click()
+    await page.getByRole('heading', { name: '场景中心' }).waitFor({ timeout: 15_000 })
     const rail = page.locator('[class*="recentRow"]')
     await rail.waitFor({ timeout: 15_000 })
     await expect.poll(() => rail.locator('button').allInnerTexts()).toEqual([
@@ -542,9 +559,9 @@ describe('kb workbench (text-only degraded mode, Chinese UI)', () => {
     expect(JSON.parse(stored ?? '[]')).toEqual(['添加剂', '调味品', '山梨酸'])
   }, 120_000)
 
-  it('caps the hero recent-search chip width for very long queries', async () => {
+  it('caps the scenarios tab recent-search chip width for very long queries', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-kb-recent-truncate'))
-    await openBlankHero(page)
+    await openScenarios(page)
     await page.getByRole('tab', { name: '知识库', exact: true }).click()
     const input = page.getByPlaceholder('检索知识库，如：山梨酸 酱油 限量')
     await input.waitFor({ timeout: 15_000 })
@@ -556,7 +573,8 @@ describe('kb workbench (text-only degraded mode, Chinese UI)', () => {
       () => page.evaluate(() => localStorage.getItem('dsh-kb-recent-searches')),
       { timeout: 15_000 },
     ).toContain('山梨酸')
-    await page.getByRole('tab', { name: '对话', exact: true }).click()
+    await page.getByRole('tab', { name: '场景', exact: true }).click()
+    await page.getByRole('heading', { name: '场景中心' }).waitFor({ timeout: 15_000 })
     const chip = page.locator('[class*="recentRow"] button').first()
     await chip.waitFor({ timeout: 15_000 })
     // The full query is stored whole while the chip clips it geometrically:

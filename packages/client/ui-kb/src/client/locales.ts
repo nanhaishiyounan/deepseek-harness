@@ -10,6 +10,9 @@ export type KbKey =
   | 'entry.label'
   | 'entry.documentsBadge'
   | 'view.kb'
+  | 'view.scenarios'
+  | 'scenarios.page.title'
+  | 'scenarios.page.tagline'
   | 'settings.nav'
   | 'tool.searchTitle'
   | 'tool.sourcesUnit'
@@ -58,6 +61,8 @@ export type KbKey =
   | 'scenario.category.export'
   | 'scenario.category.equipment'
   | 'scenario.category.data-asset'
+  | 'workbench.page.title'
+  | 'workbench.page.tagline'
   | 'workbench.searchPlaceholder'
   | 'workbench.searchAction'
   | 'workbench.resultSummary'
@@ -114,6 +119,9 @@ export const zh: Record<KbKey, string> = {
   'entry.label': '知识库',
   'entry.documentsBadge': '知识库文档数',
   'view.kb': '知识库',
+  'view.scenarios': '场景',
+  'scenarios.page.title': '场景中心',
+  'scenarios.page.tagline': '三十个食品产业 AI 场景 · 一键配置专属智能体',
   'settings.nav': '知识库',
   'tool.searchTitle': '知识库检索',
   'tool.sourcesUnit': '{n} 条来源',
@@ -162,6 +170,8 @@ export const zh: Record<KbKey, string> = {
   'scenario.category.export': '出海',
   'scenario.category.equipment': '设备',
   'scenario.category.data-asset': '数据资产',
+  'workbench.page.title': '知识库工作台',
+  'workbench.page.tagline': '检索 · 文档 · 用量 —— 企业知识资产运行面板',
   'workbench.searchPlaceholder': '检索知识库，如：山梨酸 酱油 限量',
   'workbench.searchAction': '检索',
   'workbench.resultSummary': '约 {hits} 条结果 · 来自 {docs} 份文档',
@@ -219,6 +229,9 @@ export const en: Record<KbKey, string> = {
   'entry.label': 'Knowledge base',
   'entry.documentsBadge': 'Knowledge-base documents',
   'view.kb': 'Knowledge base',
+  'view.scenarios': 'Scenarios',
+  'scenarios.page.title': 'Scenario center',
+  'scenarios.page.tagline': 'Thirty food-industry AI scenarios — one click composes the dedicated agent',
   'settings.nav': 'Knowledge base',
   'tool.searchTitle': 'Knowledge search',
   'tool.sourcesUnit': '{n} sources',
@@ -267,6 +280,8 @@ export const en: Record<KbKey, string> = {
   'scenario.category.export': 'Export',
   'scenario.category.equipment': 'Equipment',
   'scenario.category.data-asset': 'Data assets',
+  'workbench.page.title': 'Knowledge workbench',
+  'workbench.page.tagline': 'Search, documents, and usage — the knowledge asset panel',
   'workbench.searchPlaceholder': 'Search the knowledge base, e.g. sorbate soy sauce limit',
   'workbench.searchAction': 'Search',
   'workbench.resultSummary': 'About {hits} results · from {docs} documents',

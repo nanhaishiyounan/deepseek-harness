@@ -11,7 +11,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { JSX } from 'react'
 import type { DirectoryListing } from '@deepseek-ai/dsh-client-runtime/client'
 import type { SnapshotStore } from '@deepseek-ai/dsh-client-runtime/client'
-import { Toast } from '@deepseek-ai/dsh-client-ui-primitives'
+import { PageHero, Toast } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 // Type-only: pulls the ui-conversation SlotMap merge (the view seat).
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
@@ -29,8 +29,6 @@ export interface KbWorkbenchInjected {
     /** Shared client-session snapshot bound by the renderer as useKb. */
     kb: SnapshotStore<KbClientState>
   }
-  /** Publish this tab's mount state to the view bridge's workbench mirror. */
-  settleWorkbench: (mounted: boolean) => void
   /** Load or reload the shared stats cache. */
   refresh: () => void
   /** Run one knowledge-base search; rejects with the failure message. */
@@ -63,7 +61,7 @@ export type KbWorkbenchProps =
  * @returns the workbench column.
  */
 export function KbWorkbench({
-  inputActions, useKb, settleWorkbench, refresh, search, noteSearched, uploadFile, ingestFile, ingestUrl,
+  inputActions, useKb, refresh, search, noteSearched, uploadFile, ingestFile, ingestUrl,
   listDirectory, requestView, language, t,
 }: KbWorkbenchProps): JSX.Element {
   const state = useKb(snapshot => snapshot)
@@ -77,14 +75,6 @@ export function KbWorkbench({
     if (state.stats === undefined) refresh()
   }, [state.stats, refresh])
 
-  // The bridge's workbench mirror lets the blank-session hero portal step
-  // aside while this tab is mounted; the tab can mount on a blank session
-  // (the shell keeps the view ring reachable before the first message).
-  useEffect(() => {
-    settleWorkbench(true)
-    return () => { settleWorkbench(false) }
-  }, [settleWorkbench])
-
   const show = (text: string): void => {
     toastSeq.current += 1
     setToast({ seq: toastSeq.current, text })
@@ -92,6 +82,8 @@ export function KbWorkbench({
 
   return (
     <div className={css.workbench}>
+      <PageHero eyebrow={t('view.kb')} title={t('workbench.page.title')} tagline={t('workbench.page.tagline')} />
+
       <KbSearch
         t={t}
         search={search}
