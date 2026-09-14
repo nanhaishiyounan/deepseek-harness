@@ -12,14 +12,17 @@ Columns added idempotently via nocobase-crm-modules.mts (double-run kept):
   customers phone (→ name), leads email (removed), deals title (→ name);
   DealRecord type carries both title and name (hub vs crm sources).
 
-Effect: the CRM e2e schema-drift family is gone — the final full run's PG
-tail has zero `column … does not exist`. Baseline moves 58/23 → **59 passed
-/ 22 failed**; the remaining 22 are pre-existing data-semantics/UI-shape
-assertions (leads conversion-rate non-zero, saved-view menu shape,
-customer-detail timeline, login-session reload, drawer-select, bulk
-actions…), recorded per the batch instruction as out of scope for column
-backfills. auth.setup.ts follows the G6 landing change (/overview + English
-"Overview" heading).
+Effect: the e2e filters this batch touched no longer raise column errors,
+but the claim that the full run's PG tail had zero `column … does not
+exist` overstated it — the crm_leads.email family (and, seen live on
+2026-09-14, crm_deals.contact_id on the contact-show deals rollup) still
+throws; those residuals are registered for the H-round cleanup. Baseline
+moves 58/23 → **59 passed / 22 failed**; the remaining 22 are pre-existing
+data-semantics/UI-shape assertions (leads conversion-rate non-zero,
+saved-view menu shape, customer-detail timeline, login-session reload,
+drawer-select, bulk actions…), recorded per the batch instruction as out of
+scope for column backfills. auth.setup.ts follows the G6 landing change
+(/overview + English "Overview" heading).
 
 ## Full gates
 
@@ -33,7 +36,7 @@ backfills. auth.setup.ts follows the G6 landing change (/overview + English
 | portal tsc (hub, frozen) | EXIT=0 |
 | vitest (crm) | 13/13 |
 | deploy ×2 | tree hash 5614b05f0682c0b4811a083454d2c095438b9b7f identical |
-| gateway smoke ×5 | crm/, crm/tickets, crm/overview, hub/, favicon.ico all 200 |
+| gateway smoke ×5 | crm/, crm/tickets, crm/overview, hub/, favicon.ico all 200 (SPA paths ride the accept: text/html fallback, same as the deep-link probe below; the entry paths /crm/ and /hub/ serve their static index) |
 | CRM e2e | 59 passed / 22 failed — schema family cleared, remainder registered |
 | deep links | 33/33 → 200 (SPA fallback with accept: text/html) |
 

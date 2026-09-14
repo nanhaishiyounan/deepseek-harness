@@ -1103,7 +1103,8 @@ async function ensurePortalFields(token: string, usersByNickname: Map<string, nu
       ],
     },
     { collection: 'hub_pj_projects', assign: row => [['due_date', row.planned_end_date ?? null], ['hub_pj_project_owner_id', row.hub_pj_project_owner_id ?? userId(row.owner_text)]] },
-    { collection: 'hub_as_assets', assign: (_row, index) => [['tag', `AST-${String(1000 + index)}`], ['value', [12800, 5400, 8900, 2200, 4600][index % 5]]] },
+    // tag is demo backfill: a hand-edited tag survives reruns.
+    { collection: 'hub_as_assets', assign: (row, index) => [['tag', row.tag ?? `AST-${String(1000 + index)}`], ['value', [12800, 5400, 8900, 2200, 4600][index % 5]]] },
     { collection: 'hub_as_assignments', assign: row => [['assigned_date', row.assigned_at ?? null], ['returned_date', row.returned_at ?? null], ['assignee_id', row.assignee_id ?? userId(row.assignee_text)]] },
     { collection: 'hub_as_maintenance', assign: row => [['scheduled_date', row.scheduled_at ?? null], ['completed_date', row.status === 'done' ? row.scheduled_at ?? null : null], ['assetId', row.asset_id ?? null]] },
     { collection: 'hub_hr_employees', assign: (row, index) => [['job_title', row.title ?? null], ['hire_date', hireDates[index % hireDates.length]], ['updatedAt', '2026-07-01']] },

@@ -33,7 +33,10 @@
 - root `/` after sign-in redirects to /overview (menu first item = Overview) ✓
 - overview renders: BuildStoryBanner, 4 KPI cards, week strip「我的一周」
   (3 meetings · 5 due tasks · 1 expected close, seven day chips), queues
-  tabs 全员/分配给我 — g6-01 light, g6-02 dark (charts follow theme),
+  tabs 全员/分配给我 — g6-01 light, g6-02 dark (charts follow theme;
+  G9 correction: the original g6-02 capture was light-theme — MD5 identical
+  to g6-01; re-shot with nocobase-theme=dark + 700 ms settle, viewport
+  1600×1000, MD5 1a1d040c…, mean brightness 20.3 vs light 245.5),
   g6-05 full page
 - sales KPI consistency: overview card 进行中商机金额 US$85.9万 / 8 个进行中
   商机 equals the direct crm_deals API aggregate (8 open deals / 859,000) ✓
@@ -53,3 +56,11 @@
   crm_* tables. The header search 500s per collection (page keeps working).
   Same family as the 23 known G1–G3 schema-drift failures; queued for the
   G8 cleanup batch, not introduced here.
+
+## G9 corrections to this log (2026-09-14)
+
+- The "/contacts/show→/contacts (CRM has no contact detail route)" fork
+  above was wrong even at G6 time: routes.tsx ships crm_contacts.show at
+  show/:id. G9 re-pointed the quick-search contacts deep link to
+  /contacts/show/:id; browser-verified (李国栋 → /contacts/show/1 renders
+  the detail page).

@@ -670,7 +670,7 @@ async function ensurePortalFields(token: string): Promise<void> {
     // mirrors base_price, sku derives from the row id, quote_number mirrors
     // the seeded quote_no.
     { collection: 'crm_products', assign: row => [['active', row.active ?? true], ['unit_price', row.unit_price ?? row.base_price ?? null], ['sku', row.sku ?? `SKU-CRM-${String(row.id).padStart(4, '0')}`]] },
-    { collection: 'crm_quotes', assign: row => [...(row.quote_number == null ? [['quote_number', row.quote_no ?? `QT-${row.id}`]] : []), ...([['createdAt', row.issue_date ?? '2026-09-01']])] },
+    { collection: 'crm_quotes', assign: row => [...(row.quote_number == null ? [['quote_number', row.quote_no ?? `QT-${row.id}`]] : []), ...(row.createdAt == null ? [['createdAt', row.issue_date ?? '2026-09-01']] : [])] },
     // D1: seeded targets rows (period-unique) get their owner association.
     { collection: 'crm_targets', assign: () => [['owner_id', superAdminId ?? null]] },
   ]

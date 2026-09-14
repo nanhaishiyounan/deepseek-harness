@@ -8,7 +8,7 @@ export type UserRef = {
 export type ProjectRecord = {
   id: string | number;
   name?: string;
-  code?: string | null;
+  no?: string | null;
   status?: string | null;
   start_date?: string | null;
   due_date?: string | null;
@@ -20,7 +20,7 @@ export type ProjectRecord = {
 
 export type ProjectFormValues = {
   name: string;
-  code: string;
+  no: string;
   status: string;
   start_date: string | null;
   due_date: string | null;

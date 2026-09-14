@@ -63,7 +63,7 @@ type TicketRecord = {
 type ProjectRecord = {
   id: RecordId;
   name?: string | null;
-  code?: string | null;
+  no?: string | null;
   status?: string | null;
 };
 
@@ -319,7 +319,7 @@ export function QuickSearch({
         id: String(record.id),
         label: record.name || "—",
         secondary: joinSecondary([record.email]),
-        to: `/contacts`,
+        to: `/contacts/show/${record.id}`,
       })),
     },
     {
@@ -372,7 +372,7 @@ export function QuickSearch({
       results: projects.data.map((record) => ({
         id: String(record.id),
         label: record.name || "—",
-        secondary: joinSecondary([record.code, enumLabel(record.status)]),
+        secondary: joinSecondary([record.no, enumLabel(record.status)]),
         to: `/projects/show/${record.id}`,
       })),
     },

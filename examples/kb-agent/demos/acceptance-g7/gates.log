@@ -33,7 +33,12 @@ New this batch (6 files, D-round E pattern):
 - dex trigger verified present on all six new forms (g7-01…06; 05/06 re-shot
   after anchoring on the button rather than the drawer title)
 - sidebar with all six migrated groups expanded — g7-09
-- dark theme across overview / tickets / articles — g7-10…12
+- dark theme across overview / tickets / articles — g7-10…12 (G9
+  correction: the originals were light-theme captures — g7-10 MD5-identical
+  to the light overview, g7-11/12 brightness 246; re-shot with
+  nocobase-theme=dark + 700 ms settle, viewport 1600×1000: g7-10
+  MD5 1a1d040c… brightness 20.3, g7-11 MD5 27f6cbfe… brightness 20.7,
+  g7-12 MD5 1d0a036c… brightness 19.9)
 - no empty group: Delivery/People/Operations/Finance/Support/Knowledge all
   populated after G2–G5
 

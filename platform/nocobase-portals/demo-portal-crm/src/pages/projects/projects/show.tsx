@@ -151,7 +151,7 @@ export function ProjectShow() {
               items={[
                 [
                   translate("projects.projects.show.fields.code", { ns: "starter" }, "Code"),
-                  record?.code || "—",
+                  record?.no || "—",
                 ],
                 [
                   translate("projects.projects.show.fields.status", { ns: "starter" }, "Status"),

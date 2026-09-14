@@ -1,0 +1,90 @@
+# G9 acceptance gates — unified-verification FAIL fixes (2026-09-14)
+
+Scope: 2 must-fix + 3 should-fix + evidence-chain corrections. Core business
+was already green (ten domains + live AI + KPI reconciliation); this batch
+repairs the two real defects and the falsified evidence.
+
+## Must-fix 1: contacts deep link (quick-search)
+
+- quick-search.tsx `to: '/contacts'` → `` to: `/contacts/show/${record.id}` ``
+  (aligns with the other 8 groups; the show/:id route existed all along).
+- Browser-verified: Cmd+K →「李国栋」→ click → URL
+  /nocobase/dist/crm/contacts/show/1, title「#1 Show 联系人」, name + email
+  rendered. The G6 fork note claiming "CRM has no contact detail route" was
+  wrong at G6 time; corrected in the G6 gates.log.
+
+## Must-fix 2: dark screenshot re-record (evidence chain)
+
+Original state re-confirmed falsified: g6-02/g7-10 MD5-identical to the light
+overview (2341d1fc…, brightness 245.5), g7-11/12 brightness 246.1/246.4.
+
+Re-recorded for real: localStorage `nocobase-theme=dark` + reload + 700 ms
+settle, emulated viewport 1600×1000 (F7 lesson: plain viewport shot, no
+fullPage), resized to the archive dimensions:
+
+| archive | MD5 | mean brightness |
+|---|---|---|
+| g6/g6-02-overview-dark.png | 1a1d040c… | 20.3 |
+| g7/g7-10-dark-overview.png | 1a1d040c… | 20.3 |
+| g7/g7-11-dark-tickets.png | 27f6cbfe… | 20.7 |
+| g7/g7-12-dark-articles.png | 1d0a036c… | 19.9 |
+
+Assertions: every dark shot differs from the light overview MD5; every
+brightness < 150 (light reference 245.5). Both gates.log dark lines rewritten
+with the new MD5 prefixes + brightness values.
+
+## Should-fix 3: seed backfill guards (negative-path verified)
+
+- nocobase-hub-modules.mts hub_as_assets: `row.tag ?? AST-####` — a
+  hand-edited tag survives reruns.
+- nocobase-crm-modules.mts crm_quotes: createdAt only backfilled when null.
+- Negative path: hand-set tag=AST-HAND-EDIT (id 1) and createdAt=2026-05-05
+  (id 1), reran both scripts → both values survived verbatim; crm_quotes
+  backfill reported 0 rows for the guarded fields.
+
+## Should-fix 4: project form binds the real column `no`
+
+Root cause: the form field was `code` but hub_pj_projects ships `no` (no
+`code` column) — AI fill showed the value in the UI while the API silently
+dropped it (pre-existing id 20 row has NULL no). Fixed the whole read/write
+chain, not just the AI binding: form.tsx (FormField/defaultValues ×2/aiFields)
++ types.ts (ProjectRecord/ProjectFormValues) + list.tsx (cell + CSV export) +
+show.tsx + quick-search.tsx local type and secondary line.
+Browser-verified: created「G9防重验证-中东清真认证二期」with 编号 PRJ-G9-001 →
+hub_pj_projects id 21, no='PRJ-G9-001' non-null; the projects list now also
+renders the seeded nos (PRJ-2026-022 etc. — impossible before, the reader
+consulted a nonexistent column).
+
+## Should-fix 5: create double-submit guard
+
+submitting ref in the create handler (`if (submitting.current) return` +
+finally reset). Browser-verified: three click() calls in one tick → exactly
+1 row (17 → 18 rows, one G9-named row). The API-level idempotency key stays
+registered for the H round (handoff 0.h G9 line).
+
+## Evidence-chain corrections
+
+- QUICKSTART.zh.md:142 formId 线索（crm-leads）→ crm-lead-create (grep of all
+  11 formIds confirms the other ten were exact).
+- QUICKSTART.zh.md:140 sidebar group count: was "8 组"; the real hard-coded
+  structure is 5 CRM-native nav groups (overview/customers/sales/products/
+  analytics in routes.tsx) + 6 migrated groups (extensions.tsx) = 11.
+- plans/.../08-closeout-regression.md:84 "本批零产品改动" → records the
+  actual 20 files in b2bd0c78b7 (incl. crm/global-search.tsx).
+- G8 gates.log "zero column … does not exist" → truthful wording: the crm_leads.email
+  family still throws, plus crm_deals.contact_id seen live 2026-09-14 on the
+  contact-show deals rollup; registered for H-round cleanup.
+- G8 gates.log gateway-smoke row now carries the accept: text/html fallback
+  caveat (same probe convention as the deep-link row).
+
+## Gates
+
+| gate | result |
+|---|---|
+| portal tsc (crm) | EXIT=0 |
+| portal vitest | 13/13 |
+| deploy ×2 | dist-client tree hash 92455f327536d9a9bc2636283260a2f8 identical |
+| CRM e2e spot-check | smoke 12/12; lead-conversion-guard 1 failed — pre-existing (stash-baseline rerun fails identically; G9 touched no leads file) |
+| pnpm run typecheck | EXIT=0 |
+| pnpm run lint | 0 warnings 0 errors (3003 files) |
+| pnpm run doc-sync | 28 passed / 0 failed |

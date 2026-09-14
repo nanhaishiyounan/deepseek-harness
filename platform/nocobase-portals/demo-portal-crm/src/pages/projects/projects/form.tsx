@@ -96,7 +96,7 @@ function ProjectFormFields({
 
         <FormField
           control={form.control}
-          name="code"
+          name="no"
           render={({ field }) => (
             <FormItem>
               <FormLabel>
@@ -267,7 +267,7 @@ function ProjectCreateForm() {
     },
     defaultValues: {
       name: "",
-      code: "",
+      no: "",
       status: "planning",
       start_date: null,
       due_date: null,
@@ -278,7 +278,7 @@ function ProjectCreateForm() {
   const aiFields = useMemo<AIFormField[]>(
     () => [
       { name: "name", title: translate("projects.projects.fields.name", { ns: "starter" }, "Project name"), type: "string", required: true },
-      { name: "code", title: translate("projects.projects.fields.code", { ns: "starter" }, "Code"), type: "string" },
+      { name: "no", title: translate("projects.projects.fields.code", { ns: "starter" }, "Code"), type: "string" },
       { name: "status", title: translate("projects.projects.fields.status", { ns: "starter" }, "Status"), type: "string", enum: [...PROJECT_STATUSES] },
       { name: "start_date", title: translate("projects.projects.fields.startDate", { ns: "starter" }, "Start date"), type: "string", description: "ISO date (YYYY-MM-DD)" },
       { name: "due_date", title: translate("projects.projects.fields.dueDate", { ns: "starter" }, "Due date"), type: "string", description: "ISO date (YYYY-MM-DD)" },
@@ -309,10 +309,22 @@ function ProjectCreateForm() {
     ),
   });
 
+  // Double-submit guard: isSubmitting lags a tick, so a fast double click
+  // would fire onFinish twice and create duplicate rows.
+  const submitting = useRef(false);
+
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit((values) => onFinish(toServerValues(values)))}
+        onSubmit={form.handleSubmit(async (values) => {
+          if (submitting.current) return;
+          submitting.current = true;
+          try {
+            await onFinish(toServerValues(values));
+          } finally {
+            submitting.current = false;
+          }
+        })}
         className="flex min-h-0 flex-1 flex-col"
       >
         <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-5">
@@ -385,7 +397,7 @@ function ProjectEditForm({ recordId }: { recordId?: string }) {
     seeded.current = true;
     form.reset({
       name: record.name ?? "",
-      code: record.code ?? "",
+      no: record.no ?? "",
       status: record.status ?? "planning",
       start_date: record.start_date ?? null,
       due_date: record.due_date ?? null,

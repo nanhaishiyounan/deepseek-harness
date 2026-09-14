@@ -351,9 +351,9 @@ function ProjectList() {
             <span className="font-medium underline-offset-2 hover:underline">
               {row.original.name || "—"}
             </span>
-            {row.original.code ? (
+            {row.original.no ? (
               <span className="text-xs text-muted-foreground">
-                {row.original.code}
+                {row.original.no}
               </span>
             ) : null}
           </button>
@@ -569,7 +569,7 @@ function ProjectList() {
         const rollup = rollupFor(row);
         return [
           row.name,
-          row.code,
+          row.no,
           labelFor(PROJECT_STATUSES, row.status ?? "planning", translate),
           healthLabels[rollup.health],
           `${rollup.progress}%`,
