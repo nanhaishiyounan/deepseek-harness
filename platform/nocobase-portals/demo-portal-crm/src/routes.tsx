@@ -24,6 +24,8 @@ import {
 import { Navigate } from "react-router";
 import { crmRoutes } from "@/pages/crm/routes";
 import { helpdeskModule } from "@/pages/helpdesk/module";
+import { projectsModule } from "@/pages/projects/module";
+import { hrModule } from "@/pages/hr/module";
 
 export const registryRoutesEnabled = false;
 
@@ -787,4 +789,6 @@ export const appRoutes = defineAppRoutes([
     },
   },
   ...helpdeskModule.routes,
+  ...projectsModule.routes,
+  ...hrModule.routes,
 ]);

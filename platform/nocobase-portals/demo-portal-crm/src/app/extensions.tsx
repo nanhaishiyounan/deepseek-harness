@@ -96,6 +96,18 @@ const sidebarGroups: ResourceProps[] = [
 // Which migrated module nav resource belongs to which group. Resources absent
 // from this map (all CRM-native ones) keep their inline meta untouched.
 const resourceGroupParent: Record<string, string> = {
+  // Delivery — Projects
+  hub_pj_projects: "group_delivery",
+  hub_pj_tasks: "group_delivery",
+  hub_pj_milestones: "group_delivery",
+  "projects-my-tasks": "group_delivery",
+  "projects-calendar": "group_delivery",
+  // People — HR
+  hub_hr_employees: "group_people",
+  hub_hr_departments: "group_people",
+  hub_hr_leave_requests: "group_people",
+  "hr-org-chart": "group_people",
+  "hr-leave-calendar": "group_people",
   // Support — Helpdesk
   hub_hd_tickets: "group_support",
   "helpdesk-dashboard": "group_support",

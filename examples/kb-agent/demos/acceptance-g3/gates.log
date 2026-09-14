@@ -1,0 +1,44 @@
+G3 gates — 2026-09-14 (projects + hr domains)
+
+Changes (on c307d32bea)
+- src/pages/projects/ — 25 files / 9,247 lines copied byte-identical from the
+  frozen Hub source (includes the two ai-employee-fill mount points
+  hub-project-create and hub-task-create riding along).
+- src/pages/hr/ — 25 files / 8,648 lines copied byte-identical.
+- src/routes.tsx — +projectsModule/hrModule imports and spreads.
+- src/app/extensions.tsx — resourceGroupParent gains the ten Hub keys
+  (delivery: hub_pj_projects/hub_pj_tasks/hub_pj_milestones/projects-my-tasks/
+  projects-calendar; people: hub_hr_employees/hub_hr_departments/
+  hub_hr_leave_requests/hr-org-chart/hr-leave-calendar).
+- src/locales/index.ts — mods gains projectsLocale + hrLocale.
+- Zero forked-file merges needed: tsc passed on the first run after copy;
+  the only cross-domain import (home/theme) landed in G2.
+
+Gates
+- portal tsc --noEmit          → EXIT=0
+- deploy run1/run2 tree hash   → 36c34f4b75aa530437c9f772ed7d7a1d3cbd9568
+                                 identical
+- portal vitest                → 13/13 passed
+- CRM e2e baseline comparison  → 58 passed / 23 failed (G2 55/26, G1 54/27;
+                                 monotonically improving, same known crm_*
+                                 schema-drift failure set, zero new failures)
+- Hub source untouched         → cp-only from demo-portal-hub; no writes.
+
+Browser acceptance (demos/acceptance-g3/) — 21/21 scripted PASS + live DnD
+- 交付 + 人事 sidebar groups render with members and expand
+  (g3-01); all 12 migrated routes render real data:
+  /projects /tasks /milestones /my-tasks /project-calendar /workload
+  /employees /departments /leave /org-chart /leave-calendar /joiners-leavers
+- tasks board carries 14 seeded hub_pj_tasks cards in 4 status columns
+  (待办4/进行中5/评审1/已完成4); live HTML5 drag moved
+  五国渠道商回访纪要 待办→进行中, survived a reload (API persisted), then
+  dragged back to restore the seed state — both directions verified (g3-10)
+- ai-employee-fill mount points present on /projects/create (hub-project-
+  create) and /tasks/create (hub-task-create) — g3-07/g3-08; the streamed
+  Chinese fill flow itself is the G7 batch's acceptance item
+- helpdesk pilot unregressed (/tickets, g3-09); CRM dashboard/leads intact
+- AI floating ball on migrated pages
+- org-chart renders the vendored component's real form: department-grouped
+  employee cards (4 depts / 6 seeded hub_hr_employees), not a connected
+  tree — same as the Hub source, recorded as upstream design rather than a
+  migration defect

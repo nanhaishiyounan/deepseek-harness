@@ -2,6 +2,8 @@ import { registerTranslationResources } from "@nocobase/portal-sdk/i18n";
 import { starter as enUSStarter } from "./en-US";
 import { starter as zhCNStarter } from "./zh-CN";
 import { helpdeskLocale } from "@/pages/helpdesk/locale";
+import { projectsLocale } from "@/pages/projects/locale";
+import { hrLocale } from "@/pages/hr/locale";
 import { additionalTranslations } from "./generated";
 
 // Sidebar group labels for the migrated Hub domains (the CRM-native groups
@@ -25,7 +27,7 @@ const groupLabels = {
   },
 } as const;
 
-const mods = [helpdeskLocale];
+const mods = [helpdeskLocale, projectsLocale, hrLocale];
 
 const enUS = Object.assign(
   {},
