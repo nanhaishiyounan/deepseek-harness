@@ -1,6 +1,9 @@
 import { type HttpError, useTranslate } from "@refinedev/core";
 import { useForm } from "@refinedev/react-hook-form";
+import { useMemo } from "react";
 import { useParams } from "react-router";
+import { useAiEmployeeFill } from "@/components/ai-employee-fill";
+import type { AIFormField } from "@/extensions/nocobase-ai/providers";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useRouteSurfaceClose } from "@nocobase/portal-sdk/routing";
@@ -74,6 +77,39 @@ function PurchaseOrderCreateForm() {
     },
   });
 
+  const aiFields = useMemo<AIFormField[]>(
+    () => [
+      { name: "po_number", title: translate("procurement.po.fields.poNumber", { ns: "starter" }, "PO number"), type: "string", required: true },
+      { name: "status", title: translate("procurement.po.fields.status", { ns: "starter" }, "Status"), type: "string", enum: ["draft", "submitted", "approved", "received", "cancelled"] },
+      { name: "order_date", title: translate("procurement.po.fields.orderDate", { ns: "starter" }, "Order date"), type: "string", description: "ISO date (YYYY-MM-DD)" },
+      { name: "total", title: translate("procurement.po.fields.total", { ns: "starter" }, "Total (USD)"), type: "number" },
+    ],
+    [translate]
+  );
+  const aiEmployee = useAiEmployeeFill({
+    formId: "crm-po-create",
+    title: translate("procurement.po.drawer.create.title", { ns: "starter" }, "New purchase order"),
+    fields: aiFields,
+    getValues: () => form.getValues() as Record<string, unknown>,
+    setValues: (values) => {
+      for (const [name, value] of Object.entries(values)) {
+        form.setValue(name as keyof PurchaseOrderFormValues, value as never, {
+          shouldDirty: true,
+          shouldTouch: true,
+          shouldValidate: true,
+        });
+      }
+    },
+    instructions:
+      "A new purchase order starts as draft. Status values are draft, submitted, " +
+      "approved, received or cancelled; total is a number in USD.",
+    placeholder: translate(
+      "procurement.po.aiFill.placeholder",
+      { ns: "starter" },
+      "Example: 给青岛港冷链供应商下 PO-2026-0142，冻虾 2 吨约 18,600 美元，9 月 25 日下单。"
+    ),
+  });
+
   return (
     <Form {...form}>
       <form
@@ -81,9 +117,11 @@ function PurchaseOrderCreateForm() {
         className="flex min-h-0 flex-1 flex-col"
       >
         <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-5">
+          {aiEmployee.panel}
           <PurchaseOrderFormFields form={form} translate={translate} />
         </div>
         <RouteDrawerFooter className="flex-row justify-end">
+          {aiEmployee.trigger}
           <Button type="button" variant="outline" onClick={() => close()}>
             {translate("procurement.common.cancel", { ns: "starter" }, "Cancel")}
           </Button>

@@ -1,7 +1,9 @@
 import { type HttpError, useTranslate } from "@refinedev/core";
 import { useForm } from "@refinedev/react-hook-form";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useParams } from "react-router";
+import { useAiEmployeeFill } from "@/components/ai-employee-fill";
+import type { AIFormField } from "@/extensions/nocobase-ai/providers";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useRouteSurfaceClose } from "@nocobase/portal-sdk/routing";
@@ -62,6 +64,41 @@ function AssetCreateForm() {
     },
   });
 
+  const aiFields = useMemo<AIFormField[]>(
+    () => [
+      { name: "tag", title: translate("assets.assets.fields.tag", { ns: "starter" }, "Asset tag"), type: "string", required: true },
+      { name: "name", title: translate("assets.assets.fields.name", { ns: "starter" }, "Name"), type: "string", required: true },
+      { name: "category", title: translate("assets.assets.fields.category", { ns: "starter" }, "Category"), type: "string", enum: ["it", "equipment", "furniture"] },
+      { name: "status", title: translate("assets.assets.fields.status", { ns: "starter" }, "Status"), type: "string", enum: ["in_stock", "assigned", "repair", "retired"] },
+      { name: "purchase_date", title: translate("assets.assets.fields.purchaseDate", { ns: "starter" }, "Purchase date"), type: "string", description: "ISO date (YYYY-MM-DD)" },
+      { name: "value", title: translate("assets.assets.fields.value", { ns: "starter" }, "Value (USD)"), type: "number" },
+    ],
+    [translate]
+  );
+  const aiEmployee = useAiEmployeeFill({
+    formId: "crm-asset-create",
+    title: translate("assets.assets.drawer.create.title", { ns: "starter" }, "Add asset"),
+    fields: aiFields,
+    getValues: () => form.getValues() as Record<string, unknown>,
+    setValues: (values) => {
+      for (const [name, value] of Object.entries(values)) {
+        form.setValue(name as keyof AssetFormValues, value as never, {
+          shouldDirty: true,
+          shouldTouch: true,
+          shouldValidate: true,
+        });
+      }
+    },
+    instructions:
+      "A new device starts as in_stock unless the text says it was handed out. " +
+      "Category values are it, equipment or furniture; status values are in_stock, assigned, repair or retired.",
+    placeholder: translate(
+      "assets.assets.aiFill.placeholder",
+      { ns: "starter" },
+      "Example: Register a cold-chain temperature data logger AST-1024, equipment, purchased 2026-08-30 for 3,600 USD."
+    ),
+  });
+
   return (
     <Form {...form}>
       <form
@@ -69,9 +106,11 @@ function AssetCreateForm() {
         className="flex min-h-0 flex-1 flex-col"
       >
         <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-5">
+          {aiEmployee.panel}
           <AssetFormFields form={form} />
         </div>
         <RouteDrawerFooter className="flex-row justify-end">
+          {aiEmployee.trigger}
           <Button type="button" variant="outline" onClick={() => close()}>
             {translate("assets.common.cancel", { ns: "starter" }, "Cancel")}
           </Button>

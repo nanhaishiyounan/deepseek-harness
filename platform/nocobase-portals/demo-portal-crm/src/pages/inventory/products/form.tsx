@@ -1,6 +1,9 @@
 import { type HttpError, useTranslate } from "@refinedev/core";
 import { useForm } from "@refinedev/react-hook-form";
+import { useMemo } from "react";
 import { useParams } from "react-router";
+import { useAiEmployeeFill } from "@/components/ai-employee-fill";
+import type { AIFormField } from "@/extensions/nocobase-ai/providers";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useRouteSurfaceClose } from "@nocobase/portal-sdk/routing";
@@ -86,6 +89,41 @@ function ProductForm({ mode, id }: { mode: "create" | "edit"; id?: string }) {
     },
   });
 
+  const aiFields = useMemo<AIFormField[]>(
+    () => [
+      { name: "sku", title: translate("inventory.products.fields.sku", { ns: "starter" }, "SKU"), type: "string", required: true },
+      { name: "name", title: translate("inventory.products.fields.name", { ns: "starter" }, "Name"), type: "string", required: true },
+      { name: "category", title: translate("inventory.products.fields.category", { ns: "starter" }, "Category"), type: "string" },
+      { name: "unit_price", title: translate("inventory.products.fields.unitPrice", { ns: "starter" }, "Unit price (USD)"), type: "number" },
+      { name: "reorder_level", title: translate("inventory.products.fields.reorderAt", { ns: "starter" }, "Reorder at"), type: "number" },
+      { name: "status", title: translate("inventory.products.fields.status", { ns: "starter" }, "Status"), type: "string", enum: ["active", "discontinued"] },
+    ],
+    [translate]
+  );
+  const aiEmployee = useAiEmployeeFill({
+    formId: "crm-inv-product-create",
+    title: translate("inventory.products.drawer.create.title", { ns: "starter" }, "Add product"),
+    fields: aiFields,
+    getValues: () => form.getValues() as Record<string, unknown>,
+    setValues: (values) => {
+      for (const [name, value] of Object.entries(values)) {
+        form.setValue(name as keyof ProductFormValues, value as never, {
+          shouldDirty: true,
+          shouldTouch: true,
+          shouldValidate: true,
+        });
+      }
+    },
+    instructions:
+      "A new product starts as active. Status values are active or discontinued; " +
+      "unit_price and reorder_level are numbers.",
+    placeholder: translate(
+      "inventory.products.aiFill.placeholder",
+      { ns: "starter" },
+      "Example: 新品冻干蓝莓粒 3kg，SKU-LD-0012，冷冻类，单价 42 美元，补货点 60。"
+    ),
+  });
+
   return (
     <Form {...form}>
       <form
@@ -93,9 +131,11 @@ function ProductForm({ mode, id }: { mode: "create" | "edit"; id?: string }) {
         className="flex min-h-0 flex-1 flex-col"
       >
         <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-5 [&_[data-slot=input]]:h-10 [&_[data-slot=select-trigger]]:h-10">
+          {mode === "create" ? aiEmployee.panel : null}
           <ProductFormFields form={form} translate={translate} />
         </div>
         <RouteDrawerFooter className="flex-row justify-end">
+          {mode === "create" ? aiEmployee.trigger : null}
           <Button type="button" variant="outline" onClick={() => close()}>
             {translate("inventory.common.cancel", { ns: "starter" }, "Cancel")}
           </Button>

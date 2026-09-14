@@ -1,6 +1,9 @@
 import { type HttpError, useTranslate } from "@refinedev/core";
 import { useForm } from "@refinedev/react-hook-form";
+import { useMemo } from "react";
 import { useParams } from "react-router";
+import { useAiEmployeeFill } from "@/components/ai-employee-fill";
+import type { AIFormField } from "@/extensions/nocobase-ai/providers";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useRouteSurfaceClose } from "@nocobase/portal-sdk/routing";
@@ -63,6 +66,40 @@ function EmployeeCreateForm() {
     },
   });
 
+  const aiFields = useMemo<AIFormField[]>(
+    () => [
+      { name: "name", title: translate("hr.employees.fields.name", { ns: "starter" }, "Name"), type: "string", required: true },
+      { name: "email", title: translate("hr.employees.fields.email", { ns: "starter" }, "Email"), type: "string" },
+      { name: "job_title", title: translate("hr.employees.fields.jobTitle", { ns: "starter" }, "Job title"), type: "string" },
+      { name: "status", title: translate("hr.employees.fields.status", { ns: "starter" }, "Status"), type: "string", enum: ["active", "on_leave", "resigned"] },
+      { name: "hire_date", title: translate("hr.employees.fields.hireDate", { ns: "starter" }, "Hire date"), type: "string", description: "ISO date (YYYY-MM-DD)" },
+    ],
+    [translate]
+  );
+  const aiEmployee = useAiEmployeeFill({
+    formId: "crm-hr-employee-create",
+    title: translate("hr.employees.drawer.create.title", { ns: "starter" }, "Add employee"),
+    fields: aiFields,
+    getValues: () => form.getValues() as Record<string, unknown>,
+    setValues: (values) => {
+      for (const [name, value] of Object.entries(values)) {
+        form.setValue(name as keyof EmployeeFormValues, value as never, {
+          shouldDirty: true,
+          shouldTouch: true,
+          shouldValidate: true,
+        });
+      }
+    },
+    instructions:
+      "A new employee starts as active unless the text says otherwise. " +
+      "Status values are active, on_leave or resigned.",
+    placeholder: translate(
+      "hr.employees.aiFill.placeholder",
+      { ns: "starter" },
+      "Example: 新同事陈默入职，质量合规专员，chenmo@dsh-foods.example，2026-09-21 到岗。"
+    ),
+  });
+
   return (
     <Form {...form}>
       <form
@@ -70,9 +107,11 @@ function EmployeeCreateForm() {
         className="flex min-h-0 flex-1 flex-col"
       >
         <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-5">
+          {aiEmployee.panel}
           <EmployeeFormFields form={form} />
         </div>
         <RouteDrawerFooter className="flex-row justify-end">
+          {aiEmployee.trigger}
           <Button type="button" variant="outline" onClick={() => close()}>
             {translate("hr.common.cancel", { ns: "starter" }, "Cancel")}
           </Button>

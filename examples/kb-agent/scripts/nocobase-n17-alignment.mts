@@ -574,7 +574,7 @@ async function ensureFormSubmits(token: string): Promise<void> {
  * as the whole story; the fingerprint lets ensureAppHub detect the stale
  * wording on an existing install and rebuild the page in place (E3).
  */
-const APP_HUB_COPY_FINGERPRINT = '九域合一'
+const APP_HUB_COPY_FINGERPRINT = '主要入口'
 
 /**
  * N17c: the "应用中心" app-hub page — the OSS stand-in for the commercial
@@ -633,8 +633,8 @@ async function ensureAppHub(token: string): Promise<void> {
   const origin = process.env.NOCOBASE_PUBLIC_URL ?? 'http://127.0.0.1:13000'
   const dsh = process.env.DSH_PUBLIC_URL ?? 'http://127.0.0.1:3080'
   const cards = [
-    ['🛒', 'CRM 客户门户', '销售作业门户：线索 → 客户 → 联系人 → 报价 → 订单 → 回款一条链路做到底', `${origin}/dist/crm/`],
-    ['🎧', 'Hub 一体化门户', '综合运营协作门户：销售、项目、人事、库存、采购、财务、客服、资产、知识库九域合一', `${origin}/dist/hub/`],
+    ['🛒', 'CRM Portal（主要入口）', '九域合一：销售/项目/人事/库存/采购/财务/客服/资产/知识库全部并入本门户，含全域 AI 化表单与仪表式首页', `${origin}/dist/crm/`],
+    ['🎧', 'Hub Portal（模板参考）', '功能已全部并入 CRM Portal；保留作官方模板参考，数据与 CRM 同源', `${origin}/dist/hub/`],
     ['🤖', 'AI 工作台', 'AI 员工对话（Atlas 团队）与工单速览', `${origin}/admin/sdia2fwjc22`],
     ['🧠', 'DeepSeek Harness', 'KB 智能体与食品行业知识库', `${dsh}/`],
   ] as const

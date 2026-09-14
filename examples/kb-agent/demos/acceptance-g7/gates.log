@@ -1,0 +1,57 @@
+# G7 acceptance gates — AI mounts + UI closeout + narrative downgrade (2026-09-14)
+
+## AI form mounts (final roster: 11 formIds, ≥10 required)
+
+Pre-existing (rode with earlier batches): crm-deal-create, crm-leads (CRM),
+hub-project-create, hub-task-create (G3), hub-expense-create (G5).
+New this batch (6 files, D-round E pattern):
+
+| formId | file |
+|---|---|
+| crm-helpdesk-ticket-create | pages/helpdesk/tickets/create-edit.tsx |
+| crm-asset-create | pages/assets/assets/create-edit.tsx |
+| crm-kb-article-create | pages/knowledge/articles/form.tsx |
+| crm-hr-employee-create | pages/hr/employees/create-edit.tsx |
+| crm-inv-product-create (create mode only) | pages/inventory/products/form.tsx |
+| crm-po-create | pages/procurement/purchase-orders/create-edit.tsx |
+
+`grep -r useAiEmployeeFill platform/nocobase-portals/demo-portal-crm/src/pages | wc -l` → 22
+(11 forms x import + call).
+
+## Streamed-fill live tests (real LLM via N22 :13100, dex + formFiller)
+
+1. helpdesk ticket: prompt「客户反馈到货破损：冷链盒装蓝莓 12 盒…优先级用高，
+   分类选技术」→ panel streamed the field plan, formFiller filled all five
+   fields (subject 到货破损赔付申请 - 客户C-2087 / description / 技术 / 高 /
+   open), submit persisted hub_hd_tickets id 6 (technical/high/open) —
+   g7-07/08 panel shots, g7-13 list shot.
+2. assets: prompt「冷链温控数据记录仪 AST-2041…3600 美元」→ tag field filled
+   AST-2041 in ~5s — g7-14.
+
+## UI closeout
+
+- dex trigger verified present on all six new forms (g7-01…06; 05/06 re-shot
+  after anchoring on the button rather than the drawer title)
+- sidebar with all six migrated groups expanded — g7-09
+- dark theme across overview / tickets / articles — g7-10…12
+- no empty group: Delivery/People/Operations/Finance/Support/Knowledge all
+  populated after G2–G5
+
+## Narrative downgrade
+
+- n17 app hub rebuilt (fingerprint 九域合一 → 主要入口; 1 stale tabs row
+  cleaned): CRM card 「CRM Portal（主要入口）——九域合一…」 first, Hub card
+  「Hub Portal（模板参考）——功能已全部并入 CRM Portal…」 — g7-15
+- QUICKSTART.zh.md :138 Portal 进入路径（CRM 为主要入口，深链示例换 crm 侧）;
+  :139 CRM Portal 单主入口（G 轮定稿，sales 不并入的原因）; :140 十域菜单
+  前端硬编码 + admin 配置边界; :142 两套挂载体系（n18 admin 侧 11 个 +
+  Portal 前端 ai-employee-fill 11 个，互不相干）
+- gateway favicon / verify probes untouched (Hub physical dependency kept for
+  the H-round retirement list)
+
+## Commands
+
+- portal `pnpm tsc --noEmit` → EXIT=0 (after all six mounts)
+- `node --import tsx/esm examples/kb-agent/scripts/nocobase-n17-alignment.mts`
+  → page copy drifted (rebuilt) then idempotent re-run kept
+- deploy ran during the batch; final hash re-verified in the G8 gates

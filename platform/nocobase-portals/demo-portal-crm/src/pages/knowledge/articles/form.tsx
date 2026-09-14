@@ -1,9 +1,11 @@
 import { type HttpError, useList, useTranslate } from "@refinedev/core";
 import { useForm } from "@refinedev/react-hook-form";
 import { AlertTriangle } from "lucide-react";
-import type { PropsWithChildren } from "react";
+import { useMemo, type PropsWithChildren } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import { useParams } from "react-router";
+import { useAiEmployeeFill } from "@/components/ai-employee-fill";
+import type { AIFormField } from "@/extensions/nocobase-ai/providers";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -404,6 +406,39 @@ function ArticleCreateForm({ presetCategoryId }: ArticleSurfaceProps) {
     },
   });
 
+  const aiFields = useMemo<AIFormField[]>(
+    () => [
+      { name: "title", title: translate("knowledge.articles.fields.title", { ns: "starter" }, "Title"), type: "string", required: true },
+      { name: "summary", title: translate("knowledge.articles.fields.summary", { ns: "starter" }, "Summary"), type: "string" },
+      { name: "body", title: translate("knowledge.articles.fields.body", { ns: "starter" }, "Body"), type: "string", description: "Markdown body of the article" },
+      { name: "status", title: translate("knowledge.articles.fields.status", { ns: "starter" }, "Status"), type: "string", enum: ["draft", "published"] },
+    ],
+    [translate]
+  );
+  const aiEmployee = useAiEmployeeFill({
+    formId: "crm-kb-article-create",
+    title: translate("knowledge.articles.drawer.create.title", { ns: "starter" }, "New article"),
+    fields: aiFields,
+    getValues: () => form.getValues() as Record<string, unknown>,
+    setValues: (values) => {
+      for (const [name, value] of Object.entries(values)) {
+        form.setValue(name as keyof ArticleFormValues, value as never, {
+          shouldDirty: true,
+          shouldTouch: true,
+          shouldValidate: true,
+        });
+      }
+    },
+    instructions:
+      "A new article starts as draft unless the text asks to publish. " +
+      "Status values are draft or published; write the body in Markdown.",
+    placeholder: translate(
+      "knowledge.articles.aiFill.placeholder",
+      { ns: "starter" },
+      "Example: 写一篇《对俄出口食品标签合规自查清单》，覆盖俄语标签必需要素与常见退运原因，发布为草稿。"
+    ),
+  });
+
   return (
     <Form {...form}>
       <form
@@ -411,9 +446,11 @@ function ArticleCreateForm({ presetCategoryId }: ArticleSurfaceProps) {
         className="flex min-h-0 flex-1 flex-col"
       >
         <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-5">
+          {aiEmployee.panel}
           <ArticleFormFields form={form} presetCategoryId={presetCategoryId} />
         </div>
         <RouteDrawerFooter className="flex-row justify-end">
+          {aiEmployee.trigger}
           <Button type="button" variant="outline" onClick={() => close()}>
             {translate("knowledge.common.cancel", { ns: "starter" }, "Cancel")}
           </Button>
