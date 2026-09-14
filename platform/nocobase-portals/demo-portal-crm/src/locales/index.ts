@@ -4,6 +4,8 @@ import { starter as zhCNStarter } from "./zh-CN";
 import { helpdeskLocale } from "@/pages/helpdesk/locale";
 import { projectsLocale } from "@/pages/projects/locale";
 import { hrLocale } from "@/pages/hr/locale";
+import { assetsLocale } from "@/pages/assets/locale";
+import { inventoryLocale } from "@/pages/inventory/locale";
 import { additionalTranslations } from "./generated";
 
 // Sidebar group labels for the migrated Hub domains (the CRM-native groups
@@ -27,7 +29,13 @@ const groupLabels = {
   },
 } as const;
 
-const mods = [helpdeskLocale, projectsLocale, hrLocale];
+const mods = [
+  helpdeskLocale,
+  projectsLocale,
+  hrLocale,
+  assetsLocale,
+  inventoryLocale,
+];
 
 const enUS = Object.assign(
   {},

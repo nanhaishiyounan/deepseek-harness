@@ -26,6 +26,8 @@ import { crmRoutes } from "@/pages/crm/routes";
 import { helpdeskModule } from "@/pages/helpdesk/module";
 import { projectsModule } from "@/pages/projects/module";
 import { hrModule } from "@/pages/hr/module";
+import { assetsModule } from "@/pages/assets/module";
+import { inventoryModule } from "@/pages/inventory/module";
 
 export const registryRoutesEnabled = false;
 
@@ -791,4 +793,6 @@ export const appRoutes = defineAppRoutes([
   ...helpdeskModule.routes,
   ...projectsModule.routes,
   ...hrModule.routes,
+  ...assetsModule.routes,
+  ...inventoryModule.routes,
 ]);

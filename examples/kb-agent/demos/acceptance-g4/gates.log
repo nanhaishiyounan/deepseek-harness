@@ -1,0 +1,51 @@
+# G4 acceptance gates — assets + inventory domains (2026-09-14)
+
+## Commands
+
+- cp -R hub src/pages/{assets,inventory} → crm src/pages/: 52 files, `diff -rq` byte-identical (pre route-fork)
+- portal `pnpm tsc --noEmit` → EXIT=0
+- `node --import tsx/esm examples/kb-agent/scripts/nocobase-portal-deploy.mts` ×2 →
+  tree hash 4ba06b4ee3b7177708d9e04cf55ca41a71e3d01f both runs (identical)
+- `node --import tsx/esm examples/kb-agent/scripts/nocobase-hub-modules.mts` ×2 →
+  first run: hub_as_assets.tag/value added, 24-row backfill, hub_as_maintenance.vendor
+  migrated belongsTo→input; second run: `already input (kept)`, `backfill 0 rows` (idempotent)
+
+## Schema drift fixes (seed-side, G4-discovered)
+
+- hub_as_assets lacked the portal list/sort column `tag` and the ledger value column
+  `value` (default sorter ORDER BY tag made the list query 500). Both added via
+  ensurePortalFields with a 24-row demo backfill (AST-1000…, US$ values).
+- hub_as_maintenance.vendor was a belongsTo (vendor_id bigint) while the template form
+  posts free text; NocoBase coerced the string into the bigint FK and 500'd. Migrated
+  to an input column once, carrying provider names over (0 legacy rows referenced one).
+
+## Route fork (recorded divergence from the frozen Hub source)
+
+- crmRoutes.products ("/products", CRM price book) and inventoryRoutes.products
+  collided; per the CRM-native-wins rule the inventory catalog nests under
+  /inventory/products (4 constants in pages/inventory/routes.ts). All other
+  assets/inventory routes are collision-free and byte-identical to Hub.
+
+## Browser acceptance (:3080 gateway, zh-CN, admin)
+
+- assets 4 pages: /asset-registry (KPI 24 rows + AST-1000… ledger table), /assignments,
+  /asset-maintenance, /asset-ledger (NBV/depreciation KPIs + charts) — g4-01…04
+- inventory 7 pages: /inventory dashboard, /inventory/products, /warehouses,
+  /stock-moves, /reorder, /stock-by-warehouse, /inventory-turnover — g4-05…11
+- Operations group order: 库存→商品→仓库→库存流水→资产→领用记录→维保→补货预警
+  (inventory 10-13, assets override 30-32, inv-reorder 50) — matches Hub layout
+- form create → DB: stock move +5 膨化果蔬脆片混合装 → 上海中心仓 (toast
+  已成功创建 hub_inv_stock_move, list row 1/9) — g4-16
+- asset lifecycle state machine: AST-1003 idle → assign 陈立群 (已领用, guards
+  disabled 报废/维修/重新分配) → return (在库, history row kept) — g4-17
+- maintenance create: G4 验收维保…260 vendor text → toast 已成功创建
+  hub_as_maintenance, 维保 tab 1→2 — g4-18
+- AI ball present on every audited page (打开 AI 对话)
+- zero-regression spot checks: /dashboard, /pipeline, /tickets, /tasks — g4-12…15
+- deep links direct-open with SPA fallback (curl needs accept: text/html): 200
+
+## Known demo-data notes (Hub-identical, not regressions)
+
+- asset-ledger category table shows 0 under laptop/monitor/phone/peripheral rows:
+  seeded category values (it/equipment/furniture) use a different vocabulary than the
+  template's enum; top KPIs and depreciation math are correct.

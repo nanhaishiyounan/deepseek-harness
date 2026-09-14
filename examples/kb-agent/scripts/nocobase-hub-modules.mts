@@ -558,6 +558,40 @@ async function migrateTextFieldToAssociation(token: string, collection: string, 
   console.log(`nocobase-hub: ${collection}.${name} migrated text -> belongsTo (${backupName} retained)`)
 }
 
+/**
+ * G4: the portal maintenance form posts `vendor` as plain text (the template
+ * renders a free-text service-provider input), so the seeded belongsTo
+ * association under the same name cannot accept it. Flip the field to an
+ * input column once, carrying the old association's display names over so
+ * existing rows keep a readable provider. Idempotent: a string-typed field
+ * means the flip already happened.
+ */
+async function migrateMaintenanceVendorToText(token: string): Promise<void> {
+  const type = await fieldType(token, 'hub_as_maintenance', 'vendor')
+  if (type === null) {
+    await dataOf(token, 'POST', '/api/collections/hub_as_maintenance/fields:create', input('vendor', '服务商(portal)'))
+    console.log('nocobase-hub: hub_as_maintenance.vendor created as input')
+    return
+  }
+  if (type !== 'belongsTo') {
+    console.log('nocobase-hub: hub_as_maintenance.vendor already input (kept)')
+    return
+  }
+  const vendors = await keyMap(token, 'hub_as_vendors', 'name')
+  const vendorsById = new Map([...vendors.entries()].map(([name, id]) => [id, name]))
+  await dataOf(token, 'POST', '/api/collections/hub_as_maintenance/fields:destroy?filterByTk=vendor')
+  await dataOf(token, 'POST', '/api/collections/hub_as_maintenance/fields:create', input('vendor', '服务商(portal)'))
+  const rows = await dataOf(token, 'GET', '/api/hub_as_maintenance:list?pageSize=500')
+  let updated = 0
+  for (const row of rows ?? []) {
+    const name = vendorsById.get(row.vendor_id)
+    if (name === undefined) continue
+    await dataOf(token, 'POST', `/api/hub_as_maintenance:update?filterByTk=${row.id}`, { vendor: name })
+    updated += 1
+  }
+  console.log(`nocobase-hub: hub_as_maintenance.vendor migrated belongsTo -> input (${updated} rows named)`)
+}
+
 /** Runs every D1 same-name field migration (idempotent per three-state check). */
 async function migrateLegacyTextFields(token: string): Promise<Map<string, number>> {
   const usersByNickname = await ensureLegacyUsers(token)
@@ -1002,6 +1036,11 @@ async function ensurePortalFields(token: string, usersByNickname: Map<string, nu
   // the portal sorts recent articles by createdAt, so add it as a plain
   // dateOnly column.
   if (await addField('hub_kb_articles', { name: 'createdAt', type: 'dateOnly', interface: 'date', uiSchema: { type: 'string', 'x-component': 'DatePicker', title: '发布日(portal)' } })) added.push('hub_kb_articles.createdAt')
+  // G4 portal columns: the assets list sorts by tag (asset number) and the
+  // ledger computes net book value from value; both were absent from the
+  // original seed table.
+  if (await addField('hub_as_assets', input('tag', '资产标签(portal)'))) added.push('hub_as_assets.tag')
+  if (await addField('hub_as_assets', number('value', '账面价值(portal)'))) added.push('hub_as_assets.value')
   // D1-B columns on existing tables (all plain ALTER ADD COLUMN, lossless).
   if (await addField('hub_kb_articles', date('updatedAt', '更新日(portal)'))) added.push('hub_kb_articles.updatedAt')
   if (await addField('hub_kb_articles', integer('views', '浏览量(portal)'))) added.push('hub_kb_articles.views')
@@ -1064,6 +1103,7 @@ async function ensurePortalFields(token: string, usersByNickname: Map<string, nu
       ],
     },
     { collection: 'hub_pj_projects', assign: row => [['due_date', row.planned_end_date ?? null], ['hub_pj_project_owner_id', row.hub_pj_project_owner_id ?? userId(row.owner_text)]] },
+    { collection: 'hub_as_assets', assign: (_row, index) => [['tag', `AST-${String(1000 + index)}`], ['value', [12800, 5400, 8900, 2200, 4600][index % 5]]] },
     { collection: 'hub_as_assignments', assign: row => [['assigned_date', row.assigned_at ?? null], ['returned_date', row.returned_at ?? null], ['assignee_id', row.assignee_id ?? userId(row.assignee_text)]] },
     { collection: 'hub_as_maintenance', assign: row => [['scheduled_date', row.scheduled_at ?? null], ['completed_date', row.status === 'done' ? row.scheduled_at ?? null : null], ['assetId', row.asset_id ?? null]] },
     { collection: 'hub_hr_employees', assign: (row, index) => [['job_title', row.title ?? null], ['hire_date', hireDates[index % hireDates.length]], ['updatedAt', '2026-07-01']] },
@@ -1155,6 +1195,7 @@ async function main(): Promise<void> {
   await ensureBlocks(token, pageByUrl)
   await ensureAssociationFieldNames(token)
   await ensurePortalFields(token, usersByNickname)
+  await migrateMaintenanceVendorToText(token)
   await alignPortalEnums(token)
   console.log('nocobase-hub: done')
 }

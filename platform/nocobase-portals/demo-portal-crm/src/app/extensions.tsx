@@ -108,6 +108,15 @@ const resourceGroupParent: Record<string, string> = {
   hub_hr_leave_requests: "group_people",
   "hr-org-chart": "group_people",
   "hr-leave-calendar": "group_people",
+  // Operations — Inventory, Assets (Procurement lands in G5)
+  "inventory-dashboard": "group_operations",
+  hub_inv_products: "group_operations",
+  hub_inv_warehouses: "group_operations",
+  hub_inv_stock_moves: "group_operations",
+  "inv-reorder": "group_operations",
+  hub_as_assets: "group_operations",
+  hub_as_assignments: "group_operations",
+  hub_as_maintenance: "group_operations",
   // Support — Helpdesk
   hub_hd_tickets: "group_support",
   "helpdesk-dashboard": "group_support",
@@ -116,9 +125,15 @@ const resourceGroupParent: Record<string, string> = {
   "hd-faq": "group_support",
 };
 
-// Reserved for domains whose nav priorities interleave inside one shared
-// group (Inventory/Procurement/Assets land together in Operations later).
-const priorityOverride: Record<string, number> = {};
+// Assets items start at nav priorities 10/11/50, interleaving with the
+// Inventory items (10-13) inside the shared Operations group. Nudge Assets
+// after Inventory to keep each module's items contiguous (Procurement takes
+// the 20s band when it lands in G5).
+const priorityOverride: Record<string, number> = {
+  hub_as_assets: 30,
+  hub_as_assignments: 31,
+  hub_as_maintenance: 32,
+};
 
 const groupedRouteResources = buildRouteResources(
   extensionContributions.routeDefinitions
