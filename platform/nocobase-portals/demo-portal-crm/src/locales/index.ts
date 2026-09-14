@@ -6,6 +6,9 @@ import { projectsLocale } from "@/pages/projects/locale";
 import { hrLocale } from "@/pages/hr/locale";
 import { assetsLocale } from "@/pages/assets/locale";
 import { inventoryLocale } from "@/pages/inventory/locale";
+import { financeLocale } from "@/pages/finance/locale";
+import { procurementLocale } from "@/pages/procurement/locale";
+import { knowledgeLocale } from "@/pages/knowledge/locale";
 import { additionalTranslations } from "./generated";
 
 // Sidebar group labels for the migrated Hub domains (the CRM-native groups
@@ -35,6 +38,9 @@ const mods = [
   hrLocale,
   assetsLocale,
   inventoryLocale,
+  financeLocale,
+  procurementLocale,
+  knowledgeLocale,
 ];
 
 const enUS = Object.assign(

@@ -1,0 +1,43 @@
+# G5 acceptance gates — finance + procurement + knowledge domains (2026-09-14)
+
+## Commands
+
+- cp -R hub src/pages/{finance,procurement,knowledge} → crm src/pages/: 65 files,
+  `diff -rq` byte-identical (zero route forks this batch — no CRM collisions)
+- portal `pnpm tsc --noEmit` → EXIT=0; `pnpm vitest run` → 13/13
+- `node --import tsx/esm examples/kb-agent/scripts/nocobase-portal-deploy.mts` ×2 →
+  tree hash 95031cad93994de9ca31906eb99dcd62d232880e both runs (identical)
+- schema drift audit: frontend field sets for hub_fin_* / hub_po_* / hub_kb_*
+  fully covered by the F-round seed (incl. its earlier "(portal)" columns) —
+  zero new columns needed this batch
+
+## Browser acceptance (:3080 gateway, zh-CN, admin)
+
+- finance 7 pages: /finance dashboard (AR $105,800 · overdue $50,800 · paid
+  $156,000 KPIs + 3 ECharts), /invoices, /expenses, /cash-flow, /budget,
+  /ar-aging, /finance/reports — g5-01…07
+- procurement 3 pages: /procurement-spend (921-line analytics), /purchase-orders,
+  /suppliers — g5-08…10
+- knowledge 5 pages: /kb-overview, /articles, /categories, /kb-search, /kb-tags —
+  g5-11…15
+- sidebar: Finance + Knowledge groups appear; Operations completes with
+  procurement in the 20s band — g5-16
+- form flows → DB:
+  - invoice INV-G5-2026-001 created (issue 2026-09-14 / due 2026-10-14, id 6)
+    + line item 冻干草莓粒 40 × $385 persisted — g5-20
+  - expense 客户选品会餐叙 (id 2) decision approve: status pending → approved —
+    g5-21
+  - article 对俄结算通道对比速查 (id 4) feedback: helpful + comment row id 9 —
+    g5-22
+- knowledge dual-surface note: admin v2 知识文章 page and Portal /articles read
+  the same hub_kb_articles collection (6 seeded rows + G5-era rows), so counts
+  match by construction
+- zero-regression spot checks: /pipeline, /asset-registry (G4), /tickets (G2) —
+  g5-17…19
+- deep links 12/12 → 200 with SPA fallback (accept: text/html)
+
+## Template notes (recorded, Hub-identical)
+
+- The invoice create form posts an "Invalid date" string when dates are left
+  empty (no client-side required guard); filling the two date inputs submits
+  cleanly. Same behavior on the frozen Hub source — not a migration regression.

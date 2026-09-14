@@ -28,6 +28,9 @@ import { projectsModule } from "@/pages/projects/module";
 import { hrModule } from "@/pages/hr/module";
 import { assetsModule } from "@/pages/assets/module";
 import { inventoryModule } from "@/pages/inventory/module";
+import { financeModule } from "@/pages/finance/module";
+import { procurementModule } from "@/pages/procurement/module";
+import { knowledgeModule } from "@/pages/knowledge/module";
 
 export const registryRoutesEnabled = false;
 
@@ -795,4 +798,7 @@ export const appRoutes = defineAppRoutes([
   ...hrModule.routes,
   ...assetsModule.routes,
   ...inventoryModule.routes,
+  ...financeModule.routes,
+  ...procurementModule.routes,
+  ...knowledgeModule.routes,
 ]);

@@ -117,6 +117,24 @@ const resourceGroupParent: Record<string, string> = {
   hub_as_assets: "group_operations",
   hub_as_assignments: "group_operations",
   hub_as_maintenance: "group_operations",
+  // Operations — Procurement (completes the group: Inventory 10s, Procurement
+  // 20s, Assets 30s)
+  hub_po_purchase_orders: "group_operations",
+  hub_po_suppliers: "group_operations",
+  "po-spend": "group_operations",
+  // Finance
+  "finance-dashboard": "group_finance",
+  hub_fin_invoices: "group_finance",
+  hub_fin_expenses: "group_finance",
+  "finance-cashflow": "group_finance",
+  "finance-budget": "group_finance",
+  "finance-reports": "group_finance",
+  // Knowledge
+  knowledge_overview: "group_knowledge",
+  hub_kb_articles: "group_knowledge",
+  hub_kb_categories: "group_knowledge",
+  "kb-search": "group_knowledge",
+  "kb-tags": "group_knowledge",
   // Support — Helpdesk
   hub_hd_tickets: "group_support",
   "helpdesk-dashboard": "group_support",
@@ -125,11 +143,13 @@ const resourceGroupParent: Record<string, string> = {
   "hd-faq": "group_support",
 };
 
-// Assets items start at nav priorities 10/11/50, interleaving with the
-// Inventory items (10-13) inside the shared Operations group. Nudge Assets
-// after Inventory to keep each module's items contiguous (Procurement takes
-// the 20s band when it lands in G5).
+// Procurement and Assets items start at nav priorities that interleave with
+// the Inventory items (10-13) inside the shared Operations group. Nudge
+// Procurement into the 20s band and Assets into the 30s so each module's
+// items stay contiguous (band layout copied from the Hub source).
 const priorityOverride: Record<string, number> = {
+  hub_po_purchase_orders: 20,
+  hub_po_suppliers: 21,
   hub_as_assets: 30,
   hub_as_assignments: 31,
   hub_as_maintenance: 32,
