@@ -2,7 +2,7 @@
 
 English | [中文](README.zh.md)
 
-This directory owns the food-industry knowledge-base agent composition: MiniMax-M3 chat + the kb capability seam (SQLite store, MiniMax embeddings, `kb_search`/`kb_ingest`/`kb_ingest_url`/`kb_stats`/`kb_graph_query`/`kb_graph_add` tools). It demonstrates the closed loop "ingest corpus → retrieve with numbered citations → answer grounded in the knowledge base", including the text-only degraded mode with chat still live. The tenant is a deployment-side binding (the overlay reads `DSH_KB_TENANT`, falling back to `demo-food-co`); the model never supplies one. For a hands-on first run (Chinese, every command verified on the repository root) see [QUICKSTART.zh.md](QUICKSTART.zh.md).
+This directory owns the food-industry knowledge-base agent composition: MiniMax-M3 chat + the kb capability seam (SQLite store, MiniMax embeddings, `kb_search`/`kb_ingest`/`kb_ingest_url`/`kb_stats`/`kg_schema`/`kg_subgraph` tools). It demonstrates the closed loop "ingest corpus → retrieve with numbered citations → answer grounded in the knowledge base", including the text-only degraded mode with chat still live. The tenant is a deployment-side binding (the overlay reads `DSH_KB_TENANT`, falling back to `demo-food-co`); the model never supplies one. For a hands-on first run (Chinese, every command verified on the repository root) see [QUICKSTART.zh.md](QUICKSTART.zh.md).
 
 ## Configure the key
 
@@ -23,7 +23,7 @@ DSH_HOME=examples/kb-agent/.dsh pnpm dsh --profile headless --patch examples/kb-
   "列出你当前可用的工具名，然后用 kb_stats 报告知识库覆盖情况"
 ```
 
-The overlay swaps the chat route to MiniMax-M3 (disabling `llm-pi-ai`, whose installed catalog already declares the `minimax` configurable provider), mounts the kb seam, and inserts the `web-fetch-http` provider on the base bundle's already-mounted web seam (powering `kb_ingest_url`). It also disables the base bundle's model-facing tool rows — shell, editor, filesystem, web search, delegation — so every agent in this composition answers from the knowledge base alone and cannot list directories: ingest prompts must name exact file paths. Expect `kb_search`, `kb_ingest`, `kb_ingest_url`, `kb_stats`, `kb_graph_query`, and `kb_graph_add` in the tool list (`graph` registers by default; the graph pair refuses calls while no kb-graph provider is composed) and a stats answer naming the bound tenant; the SQLite store opens eagerly at `examples/kb-agent/workspace/kb.sqlite`.
+The overlay swaps the chat route to MiniMax-M3 (disabling `llm-pi-ai`, whose installed catalog already declares the `minimax` configurable provider), mounts the kb seam, and inserts the `web-fetch-http` provider on the base bundle's already-mounted web seam (powering `kb_ingest_url`). It also disables the base bundle's model-facing tool rows — shell, editor, filesystem, web search, delegation — so every agent in this composition answers from the knowledge base alone and cannot list directories: ingest prompts must name exact file paths. Expect `kb_search`, `kb_ingest`, `kb_ingest_url`, `kb_stats`, `kg_schema`, and `kg_subgraph` in the tool list (the legacy v1 graph pair `kb_graph_query`/`kb_graph_add` stays off by default; opt back in with tool-kb `graph: true`) and a stats answer naming the bound tenant; the SQLite store opens eagerly at `examples/kb-agent/workspace/kb.sqlite`.
 
 ## Ingest the shipped corpus
 

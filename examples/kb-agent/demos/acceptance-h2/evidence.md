@@ -40,7 +40,7 @@ revisions: 1|…5 new type(s)…  2|mapping run persisted 1 new type(s), 0 new r
 
 ## 断言 4：skippedRelationFields 出现在 run report
 
-`CollectionRunReport.skippedRelationFields`（[mappers.ts 收集点](../../packages/kb/kg-build/src/mappers.ts) R06 未接线关系字段上报）+ `KgBuildRunReport.ruleHits`（R01/R02/R06/R11/R12 计数）；单测覆盖于 `pipeline.spec.ts`/`mappings.spec.ts`；真机 readout：`build.mappings()` 输出 5 collections + v1。
+`CollectionRunReport.skippedRelationFields`（`packages/kb/kg-build/src/mappers.ts` 收集点 R06 未接线关系字段上报）+ `KgBuildRunReport.ruleHits`（R01/R02/R06/R11/R12 计数）；单测覆盖于 `pipeline.spec.ts`/`mappings.spec.ts`；真机 readout：`build.mappings()` 输出 5 collections + v1。
 
 ## 断言 5：v2 旧库被拒（单测）
 

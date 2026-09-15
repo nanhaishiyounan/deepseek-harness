@@ -117,7 +117,7 @@ describe('tool-kb pure presenters and formatters (direct)', () => {
 
 describe('kb_graph tools without the graph seam', () => {
   it('refuse graph queries and adds with the structured error', async () => {
-    const ctx = await mount()
+    const ctx = await mount({ tenant: 'demo-food-co', graph: true })
     const signal = new AbortController().signal
     const query = await ctx.tools.execute({ signal, callId: CallId('graph-absent-query'), name: 'kb_graph_query', arguments: { action: 'neighbors', entity_type: 'company', entity_id: '宏发食品' } })
     expect(query.isError).toBe(true)

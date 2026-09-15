@@ -83,6 +83,8 @@ function mount(state: KgClientState) {
     walk: vi.fn(),
     expandNode: vi.fn(),
     searchSeeds: vi.fn(),
+    loadPanel: vi.fn(),
+    queryPhrase: vi.fn().mockRejectedValue(new Error('kg.query offline')),
     selectNode: vi.fn(),
     toggleTypeFilter: vi.fn(),
     clearTypeFilter: vi.fn(),
@@ -135,11 +137,12 @@ describe('parseKgPhrase templates', () => {
 
 describe('KgView state matrix', () => {
   it('loads the legend and asks for the default view on mount while the canvas is untouched', () => {
-    const { refresh, ensureDefaultView } = mount({
-      legend: undefined, canvas: undefined, search: undefined, selected: undefined, typeFilter: undefined,
+    const { refresh, ensureDefaultView, loadPanel } = mount({
+      legend: undefined, canvas: undefined, search: undefined, panel: undefined, selected: undefined, typeFilter: undefined,
     })
     expect(refresh).toHaveBeenCalled()
     expect(ensureDefaultView).toHaveBeenCalled()
+    expect(loadPanel).toHaveBeenCalled()
     expect(screen.getByText(zh['page.title'])).toBeTruthy()
     expect(screen.getByText(zh['canvas.emptyTitle'])).toBeTruthy()
   })
@@ -148,7 +151,7 @@ describe('KgView state matrix', () => {
     const { ensureDefaultView } = mount({
       legend: LEGEND_READY,
       canvas: { status: 'loading' },
-      search: undefined, selected: undefined, typeFilter: undefined,
+      search: undefined, panel: undefined, selected: undefined, typeFilter: undefined,
     })
     expect(ensureDefaultView).not.toHaveBeenCalled()
   })
@@ -157,7 +160,7 @@ describe('KgView state matrix', () => {
     mount({
       legend: LEGEND_READY,
       canvas: { status: 'loading' },
-      search: undefined, selected: undefined, typeFilter: undefined,
+      search: undefined, panel: undefined, selected: undefined, typeFilter: undefined,
     })
     expect(document.querySelector('[aria-hidden="true"]')).toBeTruthy()
   })
@@ -165,7 +168,7 @@ describe('KgView state matrix', () => {
   it('shows the error strip with a retry on a failed legend load', () => {
     const { refresh } = mount({
       legend: { status: 'error', error: 'kg-not-composed' },
-      canvas: undefined, search: undefined, selected: undefined, typeFilter: undefined,
+      canvas: undefined, search: undefined, panel: undefined, selected: undefined, typeFilter: undefined,
     })
     expect(screen.getByText(/kg-not-composed/u)).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: zh['error.retry'] }))
@@ -176,7 +179,7 @@ describe('KgView state matrix', () => {
     mount({
       legend: LEGEND_READY,
       canvas: { status: 'ready', value: { nodes: [], edges: [], truncated: false, seeds: [] } },
-      search: undefined, selected: undefined, typeFilter: undefined,
+      search: undefined, panel: undefined, selected: undefined, typeFilter: undefined,
     })
     expect(screen.getByText(zh['build.unbuiltTitle'])).toBeTruthy()
   })
@@ -187,7 +190,7 @@ describe('KgView canvas and interactions', () => {
     const { selectNode, expandNode } = mount({
       legend: LEGEND_READY,
       canvas: CANVAS_READY,
-      search: undefined, selected: undefined, typeFilter: undefined,
+      search: undefined, panel: undefined, selected: undefined, typeFilter: undefined,
     })
     // The dynamic sigma import either throws or Sigma's constructor fails on
     // the null WebGL context — both land in the degraded list.
@@ -199,20 +202,65 @@ describe('KgView canvas and interactions', () => {
     expect(expandNode).toHaveBeenCalled()
   })
 
-  it('walks from the phrase box and shows the restatement', () => {
+  it('walks from the phrase box through the server query and shows its restatement', async () => {
+    const queryPhrase = vi.fn().mockResolvedValue('宏发食品 · 2 hops')
+    const store = createSnapshotStore<KgClientState>({
+      legend: LEGEND_READY, canvas: undefined, search: undefined, panel: undefined, selected: undefined, typeFilter: undefined,
+    })
+    const walk = vi.fn()
+    render(
+      <KgView
+        {...SESSION_KIT}
+        inputActions={{ setDraft: vi.fn() } as never}
+        useKg={bindStoreHook(store) as never}
+        refresh={vi.fn()} ensureDefaultView={vi.fn()} walk={walk} expandNode={vi.fn()} searchSeeds={vi.fn()}
+        loadPanel={vi.fn()} queryPhrase={queryPhrase} selectNode={vi.fn()} toggleTypeFilter={vi.fn()}
+        clearTypeFilter={vi.fn()} requestView={vi.fn()} t={t}
+      />,
+    )
+    const phraseBox = screen.getByLabelText(zh['phrase.action']) as HTMLInputElement
+    fireEvent.change(phraseBox, { target: { value: '宏发食品的供货链' } })
+    fireEvent.click(screen.getByRole('button', { name: zh['phrase.action'] }))
+    await waitFor(() => { expect(screen.getByText('宏发食品 · 2 hops')).toBeTruthy() })
+    expect(queryPhrase).toHaveBeenCalledWith('宏发食品的供货链')
+    expect(walk).not.toHaveBeenCalled()
+  })
+
+  it('falls back to the built-in parse when the server query is unreachable', async () => {
     const { walk } = mount({
-      legend: LEGEND_READY, canvas: undefined, search: undefined, selected: undefined, typeFilter: undefined,
+      legend: LEGEND_READY, canvas: undefined, search: undefined, panel: undefined, selected: undefined, typeFilter: undefined,
     })
     const phraseBox = screen.getByLabelText(zh['phrase.action']) as HTMLInputElement
     fireEvent.change(phraseBox, { target: { value: '宏发食品的供货链' } })
     fireEvent.click(screen.getByRole('button', { name: zh['phrase.action'] }))
-    expect(walk).toHaveBeenCalledWith(['宏发食品'], 2)
+    await waitFor(() => { expect(walk).toHaveBeenCalledWith(['宏发食品'], 2) })
     expect(screen.getByText(zh['phrase.restate.supply'].replace('{entity}', '宏发食品'))).toBeTruthy()
+  })
+
+  it('surfaces the unsupported-shape hint when no template matches', async () => {
+    const store = createSnapshotStore<KgClientState>({
+      legend: LEGEND_READY, canvas: undefined, search: undefined, panel: undefined, selected: undefined, typeFilter: undefined,
+    })
+    render(
+      <KgView
+        {...SESSION_KIT}
+        inputActions={{ setDraft: vi.fn() } as never}
+        useKg={bindStoreHook(store) as never}
+        refresh={vi.fn()} ensureDefaultView={vi.fn()} walk={vi.fn()} expandNode={vi.fn()} searchSeeds={vi.fn()}
+        loadPanel={vi.fn()}
+        queryPhrase={vi.fn().mockRejectedValue(new Error('kg.query: no template matches'))}
+        selectNode={vi.fn()} toggleTypeFilter={vi.fn()} clearTypeFilter={vi.fn()} requestView={vi.fn()} t={t}
+      />,
+    )
+    const phraseBox = screen.getByLabelText(zh['phrase.action']) as HTMLInputElement
+    fireEvent.change(phraseBox, { target: { value: '一句话随便说说看' } })
+    fireEvent.click(screen.getByRole('button', { name: zh['phrase.action'] }))
+    await waitFor(() => { expect(screen.getByTestId('kg-phrase-error').textContent).toContain(zh['phrase.unsupported']) })
   })
 
   it('queries seeds as the search box types', () => {
     const { searchSeeds } = mount({
-      legend: LEGEND_READY, canvas: undefined, search: undefined, selected: undefined, typeFilter: undefined,
+      legend: LEGEND_READY, canvas: undefined, search: undefined, panel: undefined, selected: undefined, typeFilter: undefined,
     })
     fireEvent.change(screen.getByLabelText(zh['search.action']), { target: { value: '宏发' } })
     expect(searchSeeds).toHaveBeenCalledWith('宏发')
@@ -222,7 +270,7 @@ describe('KgView canvas and interactions', () => {
     const { clearTypeFilter } = mount({
       legend: LEGEND_READY,
       canvas: CANVAS_READY,
-      search: undefined, selected: undefined, typeFilter: new Set(['Customer']),
+      search: undefined, panel: undefined, selected: undefined, typeFilter: new Set(['Customer']),
     })
     expect(screen.getByText('客户')).toBeTruthy()
     expect(screen.getByText('订单')).toBeTruthy()
@@ -230,11 +278,48 @@ describe('KgView canvas and interactions', () => {
     expect(clearTypeFilter).toHaveBeenCalled()
   })
 
+  it('renders the quality panel with counters, coverage, and the mapping list', () => {
+    mount({
+      legend: LEGEND_READY,
+      canvas: undefined,
+      search: undefined,
+      panel: {
+        status: 'ready',
+        value: {
+          quality: {
+            islands: 3,
+            conflicts: 1,
+            coverage: { numerator: 42, denominator: 50, ratio: 0.84 },
+            last_run_at: '2026-09-15T03:00:00.000Z',
+          },
+          stats: { triples: 120, entities: 80 },
+          mappings: {
+            file: 'kg-mappings.yml',
+            version: 1,
+            rules: { skipHiddenCollections: true, emptyFkNoEdge: true, derivesTitle: true },
+            collections: [{ name: 'experts', fkLinkCount: 0 }],
+            lastRun: {
+              finishedAt: '2026-09-15T03:00:00.000Z',
+              ruleHits: { R01: 5 },
+              collections: [{ scope: 'experts', nodesUpserted: 12, edgesUpserted: 4, skipped: false, skippedRelationFields: [] }],
+            },
+          },
+        },
+      },
+      selected: undefined, typeFilter: undefined,
+    })
+    expect(screen.getByTestId('kg-quality-islands').textContent).toBe('3')
+    expect(screen.getByText('42/50（84%）')).toBeTruthy()
+    const mappingRow = screen.getByTestId('kg-mapping-list')
+    expect(mappingRow.textContent).toContain('experts')
+    expect(mappingRow.textContent).toContain('12')
+  })
+
   it('shows the details panel for the selected node with its degree', async () => {
     mount({
       legend: LEGEND_READY,
       canvas: CANVAS_READY,
-      search: undefined, selected: NODE_A.id, typeFilter: undefined,
+      search: undefined, panel: undefined, selected: NODE_A.id, typeFilter: undefined,
     })
     // The name appears in the details paragraph; the degraded canvas list
     // (jsdom has no WebGL) renders the same name in a span.
@@ -249,7 +334,7 @@ describe('KgView canvas and interactions', () => {
 describe('KgEntry', () => {
   it('renders the legend badge and switches views on click when a session exists', () => {
     const store = createSnapshotStore<KgClientState>({
-      legend: LEGEND_READY, canvas: undefined, search: undefined, selected: undefined, typeFilter: undefined,
+      legend: LEGEND_READY, canvas: undefined, search: undefined, panel: undefined, selected: undefined, typeFilter: undefined,
     })
     const sessions = createSnapshotStore(sessionListState({ id: 's1', blank: false }))
     const refresh = vi.fn()

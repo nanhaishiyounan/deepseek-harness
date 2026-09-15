@@ -2,7 +2,7 @@
 
 [English](README.md) | 中文
 
-本目录承载食品产业知识库 agent 组合：MiniMax-M3 对话 + kb 能力缝（SQLite 存储、MiniMax 向量、`kb_search`/`kb_ingest`/`kb_ingest_url`/`kb_stats`/`kb_graph_query`/`kb_graph_add` 工具）。它演示"语料入库 → 带编号引用检索 → 基于知识库作答"的闭环，包括对话仍可用的纯文本降级模式。租户是部署侧绑定（overlay 读取 `DSH_KB_TENANT`，未设置时回落 `demo-food-co`）；模型从不提供租户。上手首选入口：[QUICKSTART.zh.md](QUICKSTART.zh.md)（中文实操指南，每条命令在仓库根目录实跑验证）。
+本目录承载食品产业知识库 agent 组合：MiniMax-M3 对话 + kb 能力缝（SQLite 存储、MiniMax 向量、`kb_search`/`kb_ingest`/`kb_ingest_url`/`kb_stats`/`kg_schema`/`kg_subgraph` 工具）。它演示"语料入库 → 带编号引用检索 → 基于知识库作答"的闭环，包括对话仍可用的纯文本降级模式。租户是部署侧绑定（overlay 读取 `DSH_KB_TENANT`，未设置时回落 `demo-food-co`）；模型从不提供租户。上手首选入口：[QUICKSTART.zh.md](QUICKSTART.zh.md)（中文实操指南，每条命令在仓库根目录实跑验证）。
 
 ## 配置 key
 
@@ -23,7 +23,7 @@ DSH_HOME=examples/kb-agent/.dsh pnpm dsh --profile headless --patch examples/kb-
   "列出你当前可用的工具名，然后用 kb_stats 报告知识库覆盖情况"
 ```
 
-overlay 把对话路由切到 MiniMax-M3（禁用 `llm-pi-ai`，其内置目录已声明 `minimax` 可配置 provider），挂载 kb 缝，并在 base bundle 已挂载的 web 缝上插入 `web-fetch-http` provider（驱动 `kb_ingest_url`）。它同时禁用 base bundle 的模型面工具行——shell、编辑器、文件系统、网页搜索、委派——组合内所有 agent 只从知识库作答，无法列目录：入库指令必须写出确切文件路径。预期工具列表出现 `kb_search`、`kb_ingest`、`kb_ingest_url`、`kb_stats`、`kb_graph_query`、`kb_graph_add`（graph 默认注册；组合未挂 kb-graph provider 时这两个图谱工具调用即拒），stats 回答报出绑定租户名；SQLite 存储急切打开于 `examples/kb-agent/workspace/kb.sqlite`。
+overlay 把对话路由切到 MiniMax-M3（禁用 `llm-pi-ai`，其内置目录已声明 `minimax` 可配置 provider），挂载 kb 缝，并在 base bundle 已挂载的 web 缝上插入 `web-fetch-http` provider（驱动 `kb_ingest_url`）。它同时禁用 base bundle 的模型面工具行——shell、编辑器、文件系统、网页搜索、委派——组合内所有 agent 只从知识库作答，无法列目录：入库指令必须写出确切文件路径。预期工具列表出现 `kb_search`、`kb_ingest`、`kb_ingest_url`、`kb_stats`、`kg_schema`、`kg_subgraph`（旧 v1 图谱对 `kb_graph_query`/`kb_graph_add` 默认关闭，需要时在 tool-kb 配置 `graph: true` 重新打开），stats 回答报出绑定租户名；SQLite 存储急切打开于 `examples/kb-agent/workspace/kb.sqlite`。
 
 ## 入库自带语料
 

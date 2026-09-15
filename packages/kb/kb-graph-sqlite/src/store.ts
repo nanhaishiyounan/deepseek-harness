@@ -11,8 +11,9 @@ import type { DatabaseSync } from 'node:sqlite'
 import {
   KbGraphError, kgNodeTypeId, kgRelationId,
   type KbGraphEntity, type KbGraphStoredTriple, type KbGraphTriple,
-  type KgEdge, type KgNode, type KgNodeHit, type KgNodeTypeId, type KgNodeType,
-  type KgOntologyRevision, type KgOntologyRevisionInput, type KgPropDef,
+  type KgBuildRunInput, type KgBuildRunRow, type KgEdge, type KgNode, type KgNodeHit,
+  type KgNodeTypeId, type KgNodeType, type KgOntologyRevision,
+  type KgOntologyRevisionInput, type KgPropDef,
   type KgProvenance, type KgRelation, type KgRelationConstraint, type KgRelationId,
   type KgSourceRun, type KgStore, type KgSubgraph, type KgSubgraphLimits, type KgSubgraphNode,
 } from '@deepseek-ai/dsh-kb-graph'
@@ -23,6 +24,16 @@ type DatabaseSyncConstructor = typeof import('node:sqlite')['DatabaseSync']
 
 /** One kg_nodes row (id resolution only). */
 interface NodeIdRow { id: string }
+
+/** One kg_build_runs row as the ledger read shapes it. */
+interface BuildRunSqlRow {
+  id: number
+  tenant_id: string
+  started_at: string
+  finished_at: string
+  report_json: string
+  metrics_json: string
+}
 
 /** One kg_ontology_revisions row as the audit read shapes it. */
 interface RevisionRow {
@@ -657,6 +668,51 @@ export class SqliteGraphStore implements KgStore {
       )
       return Number(result.lastInsertRowid)
     })
+  }
+
+  async recordBuildRun(run: KgBuildRunInput): Promise<number> {
+    await Promise.resolve()
+    this.assertLive()
+    return this.write(() => {
+      const result = this.db.prepare(sql('insert-build-run')).run(
+        run.tenantId, run.startedAt, run.finishedAt,
+        JSON.stringify(run.report), JSON.stringify(run.metrics), run.createdAt,
+      )
+      return Number(result.lastInsertRowid)
+    })
+  }
+
+  async latestBuildRun(tenantId: string): Promise<KgBuildRunRow | undefined> {
+    await Promise.resolve()
+    this.assertLive()
+    const row = this.db.prepare(sql('select-latest-build-run')).get(tenantId) as unknown as BuildRunSqlRow | undefined
+    if (row === undefined) return undefined
+    return {
+      id: row.id,
+      tenantId: row.tenant_id,
+      startedAt: row.started_at,
+      finishedAt: row.finished_at,
+      report: JSON.parse(row.report_json) as unknown,
+      metrics: JSON.parse(row.metrics_json) as unknown,
+    }
+  }
+
+  async islandNodes(tenantId: string): Promise<number> {
+    await Promise.resolve()
+    this.assertLive()
+    return (this.db.prepare(sql('count-island-nodes')).get(tenantId) as { islands: number }).islands
+  }
+
+  async conflictingFacts(tenantId: string): Promise<number> {
+    await Promise.resolve()
+    this.assertLive()
+    return (this.db.prepare(sql('count-conflicting-facts')).get(tenantId) as { conflicts: number }).conflicts
+  }
+
+  async nodeCountByType(tenantId: string, typeId: KgNodeTypeId): Promise<number> {
+    await Promise.resolve()
+    this.assertLive()
+    return (this.db.prepare(sql('count-nodes-by-type')).get(tenantId, String(typeId)) as { n: number }).n
   }
 
   async ontologyRevisions(limit: number): Promise<readonly KgOntologyRevision[]> {

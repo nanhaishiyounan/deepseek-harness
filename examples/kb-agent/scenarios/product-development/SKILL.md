@@ -8,4 +8,4 @@
 
 ## 工具
 - `kb_search`：检索本场景语料（data/corpus.md 已入库时）。
-- `kb_graph_add` / `kb_graph_query`：从语料抽取实体关系入库并查询（闭集见工具描述）。
+- `kg_schema` / `kg_subgraph`：浏览知识图谱本体并读取实体周边的子图（企业、订单、合规等关系）。

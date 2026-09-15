@@ -19,6 +19,8 @@ export type KgKey =
   | 'search.noHits'
   | 'phrase.placeholder'
   | 'phrase.action'
+  | 'phrase.unsupported'
+  | 'phrase.examples'
   | 'phrase.restate.supply'
   | 'phrase.restate.orders'
   | 'phrase.restate.contains'
@@ -47,6 +49,17 @@ export type KgKey =
   | 'details.ask'
   | 'details.expand'
   | 'details.selectHint'
+  | 'quality.title'
+  | 'quality.nodes'
+  | 'quality.edges'
+  | 'quality.islands'
+  | 'quality.conflicts'
+  | 'quality.coverage'
+  | 'quality.lastRun'
+  | 'quality.mappingsTitle'
+  | 'quality.mappingPending'
+  | 'quality.mappingNodes'
+  | 'quality.mappingEdges'
   | 'stats.counters'
   | 'build.unbuiltTitle'
   | 'build.unbuiltHint'
@@ -66,8 +79,10 @@ export const zh: Record<KgKey, string> = {
   'search.emptyTitle': '输入实体名开始探索',
   'search.emptyHint': '例如：宏发食品、张红喜，或任意客户/商品名',
   'search.noHits': '没有匹配的实体，换个说法试试',
-  'phrase.placeholder': '试试自然语言：宏发食品的供货链',
+  'phrase.placeholder': '试试自然语言：宏发食品的供货链 / 张红喜供货的所有产品 / 酱油相关的2跳关系',
   'phrase.action': '查子图',
+  'phrase.unsupported': '暂不支持这种问法，换个模板试试',
+  'phrase.examples': '如：宏发食品的供货链 · 含山梨酸钾的产品 · 张红喜供货的所有产品 · 宏发食品相关的2跳关系',
   'phrase.restate.supply': '「{entity}」周边两跳关系',
   'phrase.restate.orders': '「{entity}」的订单关系',
   'phrase.restate.contains': '含「{entity}」的商品关系',
@@ -96,6 +111,17 @@ export const zh: Record<KgKey, string> = {
   'details.ask': '问此实体',
   'details.expand': '展开邻居',
   'details.selectHint': '点击画布节点查看详情',
+  'quality.title': '质量与映射',
+  'quality.nodes': '节点',
+  'quality.edges': '边',
+  'quality.islands': '孤岛节点',
+  'quality.conflicts': '冲突事实',
+  'quality.coverage': '节点覆盖',
+  'quality.lastRun': '上次构建',
+  'quality.mappingsTitle': '映射清单',
+  'quality.mappingPending': '尚未构建',
+  'quality.mappingNodes': '节点',
+  'quality.mappingEdges': '边',
   'stats.counters': '实体',
   'build.unbuiltTitle': '图谱还未构建',
   'build.unbuiltHint': '运行 kg-build 管线（业务表结构化映射 + 文档实体抽取）后，这里会呈现企业实体关系',
@@ -116,8 +142,10 @@ export const en: Record<KgKey, string> = {
   'search.emptyTitle': 'Type an entity name to explore',
   'search.emptyHint': 'e.g. a customer, product, or expert name',
   'search.noHits': 'No matching entity; try another phrasing',
-  'phrase.placeholder': 'Try natural language: supply chain around a company',
+  'phrase.placeholder': 'Try natural language: supply chain around a company / products supplied by an expert',
   'phrase.action': 'Walk',
+  'phrase.unsupported': 'This phrasing is not supported yet; try a template',
+  'phrase.examples': 'e.g. supply chain of a company · products containing an additive · products supplied by an expert',
   'phrase.restate.supply': 'Two-hop relations around "{entity}"',
   'phrase.restate.orders': 'Order relations of "{entity}"',
   'phrase.restate.contains': 'Products containing "{entity}"',
@@ -146,6 +174,17 @@ export const en: Record<KgKey, string> = {
   'details.ask': 'Ask about this',
   'details.expand': 'Expand neighbors',
   'details.selectHint': 'Click a canvas node to inspect it',
+  'quality.title': 'Quality & mappings',
+  'quality.nodes': 'Nodes',
+  'quality.edges': 'Edges',
+  'quality.islands': 'Islands',
+  'quality.conflicts': 'Conflicts',
+  'quality.coverage': 'Coverage',
+  'quality.lastRun': 'Last build',
+  'quality.mappingsTitle': 'Mapped collections',
+  'quality.mappingPending': 'not built yet',
+  'quality.mappingNodes': 'nodes',
+  'quality.mappingEdges': 'edges',
   'stats.counters': 'entities',
   'build.unbuiltTitle': 'The graph is not built yet',
   'build.unbuiltHint': 'Run the kg-build pipeline (structured business-table mapping + document extraction) and company relations appear here',

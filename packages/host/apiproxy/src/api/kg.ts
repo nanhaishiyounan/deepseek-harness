@@ -98,6 +98,21 @@ export interface KgSubgraphView {
   readonly truncated: boolean
 }
 
+/** The quality panel's coverage document (self-stating caliber). */
+export interface KgCoverageView {
+  readonly numerator: number
+  readonly denominator: number
+  readonly ratio: number
+}
+
+/** The `kg.stats` quality extension: structural counters plus the last run's coverage. */
+export interface KgQualityView {
+  readonly islands: number
+  readonly conflicts: number
+  readonly coverage?: KgCoverageView
+  readonly last_run_at?: string
+}
+
 /** Graph-page methods. */
 export interface KgApi {
   /** Read the ontology registry (legend and type-filter source). */
@@ -120,6 +135,23 @@ export interface KgApi {
     request: RpcRequest<Record<string, never>>,
     signal?: AbortSignal,
   ): Promise<RpcResponse<KgMappingsWireValue>>
+
+  /**
+   * Compile one natural-language phrase into a subgraph walk and execute it
+   * (template + slot fill; a miss reports the supported shapes — no free
+   * generation). The response carries the compiled plan beside the walk.
+   */
+  query(
+    request: RpcRequest<{ phrase: string }>,
+    signal?: AbortSignal,
+  ): Promise<RpcResponse<KgSubgraphView & {
+    seeds_resolved: readonly string[]
+    unresolved?: readonly string[]
+    template: string
+    hops: number
+    relation_types?: readonly string[]
+    restated: string
+  }>>
 
   /** Resolve entity names or aliases to node hits (the seed picker). */
   search(
@@ -148,9 +180,19 @@ export interface KgApi {
     signal?: AbortSignal,
   ): Promise<RpcResponse<KgSubgraphView>>
 
-  /** Count stored triples and distinct entities. */
+  /** Count stored triples and distinct entities, plus the quality readout. */
   stats(
     request: RpcRequest<Record<string, never>>,
     signal?: AbortSignal,
-  ): Promise<RpcResponse<{ triples: number; entities: number; node_types: number; relations: number }>>
+  ): Promise<RpcResponse<{
+    triples: number
+    entities: number
+    node_types: number
+    relations: number
+    ontology_version: string
+    islands: number
+    conflicts: number
+    coverage?: KgCoverageView
+    last_run_at?: string
+  }>>
 }

@@ -310,11 +310,13 @@ export class FakeApiClient implements IApiClient {
   }
 
   readonly kg: IApiClient['kg'] = {
-    schema: payload => this.record('kg.schema', payload, Promise.resolve(ok({ node_types: [], relations: [] }))),
+    mappings: payload => this.record('kg.mappings', payload, Promise.resolve(ok({ file: 'fixture', version: 1, rules: { skipHiddenCollections: true, emptyFkNoEdge: true, derivesTitle: true }, collections: [] }))),
+    schema: payload => this.record('kg.schema', payload, Promise.resolve(ok({ ontology_version: '0.0.0-fixture', node_types: [], relations: [] }))),
+    query: payload => this.record('kg.query', payload, Promise.resolve(ok({ nodes: [], edges: [], truncated: false, seeds_resolved: [], template: 'fixture', hops: 1, restated: payload.phrase }))),
     search: payload => this.record('kg.search', payload, Promise.resolve(ok({ nodes: [] }))),
     subgraph: payload => this.record('kg.subgraph', payload, Promise.resolve(ok({ nodes: [], edges: [], truncated: false, seeds_resolved: payload.seeds.slice(0, 0) }))),
     expand: payload => this.record('kg.expand', payload, Promise.resolve(ok({ nodes: [], edges: [], truncated: false }))),
-    stats: payload => this.record('kg.stats', payload, Promise.resolve(ok({ triples: 0, entities: 0, node_types: 0, relations: 0 }))),
+    stats: payload => this.record('kg.stats', payload, Promise.resolve(ok({ triples: 0, entities: 0, node_types: 0, relations: 0, ontology_version: '0.0.0-fixture', islands: 0, conflicts: 0 }))),
   }
 
   readonly nocobase: IApiClient['nocobase'] = {

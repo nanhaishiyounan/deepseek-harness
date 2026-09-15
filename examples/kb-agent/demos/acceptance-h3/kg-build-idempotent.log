@@ -1,0 +1,28 @@
+  collection datasets: rows=89 nodes=0 edges=0 watermark=89 skipped=true
+  collection customs_export: rows=3 nodes=0 edges=0 watermark=3 skipped=true
+  collection orders: rows=27 nodes=0 edges=0 watermark=28 skipped=true
+  lakehouse: items=3 skipped=true
+  connector: items=177 skipped=true
+  corpus: docs=47 calls=0 entities=0 degraded=0 dropped=0 merged=0
+[PASS] full build ingested every collection
+[PASS] ontologyVersion is 1.0.0 — 1.0.0
+[PASS] mappings readout carries 5 collections — 5 collections, v1
+[PASS] registry carries ≥4 nocobase-derived types — 5: experts, expert_services, datasets, customs_export, orders
+[PASS] draft statuses carry through
+  graph stats: nodes=1094 edges=665
+[PASS] graph holds ≥19 nodes — nodes=1094
+[PASS] graph holds derived fk edges — edges=665
+[PASS] 张红喜 canonical node exists
+[PASS] 张红喜 reaches its services (hop 1) — 中亚货运动线方案、海外仓风险应对咨询、食品出海合规咨询
+  张红喜 2-hop orders in graph: 5
+[PASS] watermark persisted for experts — watermark=33
+[PASS] second run skips every unchanged scope — experts:true expert_services:true datasets:true customs_export:true orders:true
+[PASS] second run changes no counts — nodes 1094→1094, edges 665→665
+[PASS] incremental run ingests the new row — newRows=1
+[PASS] new order node appears in the graph
+[PASS] new order connects to its service
+[PASS] 张红喜 now reaches the new order
+[PASS] reconcile tombstones the deleted row edges — tombstoned=1
+[PASS] deleted order no longer reaches its service
+
+kg-build.mts: ALL CHECKS PASSED

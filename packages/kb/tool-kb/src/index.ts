@@ -112,7 +112,12 @@ export interface Config {
   statsTimeoutMs?: number
   /** Cooperative timeout budget (ms) for `kb_ingest_url`. Defaults to 300000. */
   urlIngestTimeoutMs?: number
-  /** Register `kb_graph_query`/`kb_graph_add` over the optional `ctx.kbGraph` seam. Defaults to true. */
+  /**
+   * Register the legacy v1 `kb_graph_query`/`kb_graph_add` triple tools over
+   * the optional `ctx.kbGraph` seam. Defaults to false — `kg_schema` and
+   * `kg_subgraph` are the model-facing graph surface; the v1 pair stays
+   * opt-in for deployments that still compose it.
+   */
   graph?: boolean
   /** Cooperative timeout budget (ms) for `kb_graph_query`. Defaults to 15000. */
   graphQueryTimeoutMs?: number
@@ -140,7 +145,7 @@ export const Config: z<Config> = z.object({
   ingestTimeoutMs: z.number().step(1).min(1).default(DEFAULT_KB_INGEST_TIMEOUT_MS),
   statsTimeoutMs: z.number().step(1).min(1).default(DEFAULT_KB_STATS_TIMEOUT_MS),
   urlIngestTimeoutMs: z.number().step(1).min(1).default(DEFAULT_KB_URL_INGEST_TIMEOUT_MS),
-  graph: z.boolean().default(true),
+  graph: z.boolean().default(false),
   graphQueryTimeoutMs: z.number().step(1).min(1).default(DEFAULT_KB_GRAPH_QUERY_TIMEOUT_MS),
   graphAddTimeoutMs: z.number().step(1).min(1).default(DEFAULT_KB_GRAPH_ADD_TIMEOUT_MS),
   kgSchema: z.boolean().default(true),

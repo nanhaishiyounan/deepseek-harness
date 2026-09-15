@@ -38,6 +38,7 @@ import type { PresetBearingSession } from '@deepseek-ai/dsh-agent-presets'
 import { KB_DOC_KINDS } from '@deepseek-ai/dsh-kb'
 import type { KbDocKind, KbRuntime } from '@deepseek-ai/dsh-kb'
 import type { KbIngestView } from './api/kb.ts'
+import { compileKgQuery, KG_QUERY_EXAMPLES } from './kg-nl.ts'
 // Type-only: resolves `ctx.get('kb')`/`ctx.get('fs')`/`ctx.get('web')` service types.
 import type {} from '@deepseek-ai/dsh-kb'
 import type {} from '@deepseek-ai/dsh-fs'
@@ -4130,12 +4131,11 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
         })
       },
 
-      // oxlint-disable-next-line typescript/require-await -- async adapts the sync body to the seam's method type.
       async mappings(request) {
         // The pipeline service is optional here by design: the graph page
         // reads it when composed and shows the structured refusal otherwise.
         type MappingsValue = Awaited<ReturnType<KgApi['mappings']>> extends RpcResponse<infer V> ? V : never
-        const build = ctx.get('kgBuild') as { mappings(): MappingsValue } | undefined
+        const build = ctx.get('kgBuild') as { mappings(): Promise<MappingsValue> } | undefined
         if (build === undefined) {
           return err(request, {
             code: 'kg-not-composed',
@@ -4143,7 +4143,11 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
             details: {},
           })
         }
-        return ok(request, build.mappings())
+        try {
+          return ok(request, await build.mappings())
+        } catch (error: unknown) {
+          return err(request, kgReadFailed(error))
+        }
       },
 
       async search(request) {
@@ -4233,12 +4237,69 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
         const gates = kgGates()
         if ('refusal' in gates) return err(request, gates.refusal)
         try {
-          const [counts] = await Promise.all([gates.graph.stats(gates.tenant, signal)])
+          const [counts, islands, conflicts] = await Promise.all([
+            gates.graph.stats(gates.tenant, signal),
+            gates.graph.islandNodes(gates.tenant),
+            gates.graph.conflictingFacts(gates.tenant),
+          ])
+          // The quality tail is the pipeline's persisted readout; a deployment
+          // without kg-build keeps the structural counters alone.
+          const build = ctx.get('kgBuild') as { qualityReport(): Promise<{ islands: number; conflicts: number; coverage?: { numerator: number; denominator: number; ratio: number }; lastRunAt?: string }> } | undefined
+          const quality = build === undefined ? undefined : await build.qualityReport().catch(() => undefined)
           return ok(request, {
             triples: counts.triples,
             entities: counts.entities,
             node_types: gates.graph.listNodeTypes().length,
             relations: gates.graph.listRelations().length,
+            ontology_version: gates.graph.ontologyVersion(),
+            islands: quality?.islands ?? islands,
+            conflicts: quality?.conflicts ?? conflicts,
+            ...quality?.coverage === undefined ? {} : { coverage: quality.coverage },
+            ...quality?.lastRunAt === undefined ? {} : { last_run_at: quality.lastRunAt },
+          })
+        } catch (error: unknown) {
+          return err(request, kgReadFailed(error))
+        }
+      },
+
+      async query(request) {
+        const gates = kgGates()
+        if ('refusal' in gates) return err(request, gates.refusal)
+        const plan = compileKgQuery(request.payload.phrase, {
+          relationIds: gates.graph.listRelations().map(relation => String(relation.id)),
+        })
+        if (plan === undefined) {
+          return err(request, {
+            code: 'kg-query-unsupported',
+            message: `kg.query: no template matches this phrase; supported shapes: ${KG_QUERY_EXAMPLES.slice(0, 4).join(' / ')}`,
+            details: { examples: [...KG_QUERY_EXAMPLES] },
+          })
+        }
+        const resolved: string[] = []
+        const missing: string[] = []
+        try {
+          for (const seed of plan.seeds) {
+            const [hit] = await gates.graph.searchNodes(gates.tenant, seed, undefined, 1)
+            if (hit === undefined) missing.push(seed)
+            else resolved.push(hit.id)
+          }
+          if (resolved.length === 0) {
+            return err(request, {
+              code: 'kg-seed-unresolved',
+              message: `kg.query: no graph entity matches any seed (${plan.seeds.join(', ')})`,
+              details: { seeds: [...plan.seeds] },
+            })
+          }
+          const subgraph = await gates.graph.subgraph(gates.tenant, resolved, plan.hops, { maxNodes: 200 })
+          const restated = `${plan.seeds.join(' + ')} · ${String(plan.hops)} hops${plan.relationTypes === undefined ? '' : ` · ${plan.relationTypes.join('+')}`}`
+          return ok(request, {
+            ...kgSubgraphViewsOf(subgraph, plan.relationTypes === undefined ? undefined : new Set(plan.relationTypes)),
+            seeds_resolved: resolved,
+            ...missing.length === 0 ? {} : { unresolved: missing },
+            template: plan.templateId,
+            hops: plan.hops,
+            ...plan.relationTypes === undefined ? {} : { relation_types: [...plan.relationTypes] },
+            restated,
           })
         } catch (error: unknown) {
           return err(request, kgReadFailed(error))

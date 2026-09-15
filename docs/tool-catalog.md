@@ -15,7 +15,7 @@ This table connects model-visible tool names to the plugin package and service s
 
 | Tool package | Model-visible names | Requires | Writes / affects | Shipped aliases | Deployment note |
 | --- | --- | --- | --- | --- | --- |
-| `@deepseek-ai/dsh-tool-kb` | `kb_graph_add`, `kb_graph_query`, `kb_ingest`, `kb_ingest_url`, `kb_search`, `kb_stats`, `kg_schema`, `kg_subgraph` | `ctx.tools`, `ctx.kb`, `ctx.fs`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | kb_search, kb_ingest, kb_ingest_url, and kb_stats stay visible without a usable store and fail with a structured error at execution time; all four run under the deployment-bound tenant (the model never supplies one), retrieval results carry numbered citations, and the degraded text-only mode is observable in every search result. |
+| `@deepseek-ai/dsh-tool-kb` | `kb_ingest`, `kb_ingest_url`, `kb_search`, `kb_stats`, `kg_schema`, `kg_subgraph` | `ctx.tools`, `ctx.kb`, `ctx.fs`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | kb_search, kb_ingest, kb_ingest_url, and kb_stats stay visible without a usable store and fail with a structured error at execution time; all four run under the deployment-bound tenant (the model never supplies one), retrieval results carry numbered citations, and the degraded text-only mode is observable in every search result. |
 | `@deepseek-ai/dsh-tool-lakehouse` | `lakehouse_query`, `lakehouse_tables` | `ctx.tools`, `ctx.lakehouse`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | lakehouse_tables and lakehouse_query stay visible without a usable engine and fail with a structured error at execution time (the catalog listing keeps answering); both run under the deployment-bound tenant (the model never supplies one), query results are capped rows with a truncation marker, and the rendered text carries the source-table attribution line. |
 | `@deepseek-ai/dsh-tool-connector` | `connector_discover`, `connector_fetch`, `connector_transfer`, `order_create`, `order_status` | `ctx.tools`, `ctx.connector`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | connector_discover, connector_fetch, and connector_transfer run under the deployment-bound tenant (the model never supplies one); discovery answers with a grouped listing carrying provider and dataset ids, previews are capped (8 rows / 400 characters), and transfers render the landing receipt with the catalog transfer-record id and the next-step guidance (lakehouse_query over the named table, or kb_search with citations). |
 | `@deepseek-ai/dsh-tool-nocobase` | `nb_collections`, `nb_create`, `nb_get`, `nb_list`, `nb_update` | `ctx.tools`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | nb_collections, nb_list, nb_get, nb_create, and nb_update speak to the deployment's NocoBase under a service account (the model never supplies a tenant); the filter vocabulary is closed (eq/in/gt/lt joined by one and/or), and the write tools carry the confirmed-change contract — the system-prompt guidance demands the presented preview / before→after diff and the user's explicit go-ahead before nb_create/nb_update run, and their receipts echo the landing id or the field-by-field diff. |
@@ -49,103 +49,6 @@ This table connects model-visible tool names to the plugin package and service s
 <a id="deepseek-aidsh-tool-kb"></a>
 
 ## `@deepseek-ai/dsh-tool-kb`
-
-### `kb_graph_add`
-
-Store entity-relation triples extracted from ingested documents into the knowledge graph (idempotent; up to 50 per call). Cite the source document in source_path so graph answers stay traceable.
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "triples": {
-      "type": "array",
-      "description": "Triples to store. Entity types: Object, Process, Event, Role, Concept, Customer, Supplier, Product, ProductCategory, Order, OrderItem, Shipment, Carrier, Warehouse, StockLevel, Expert, ExpertService, Service, Deliverable, Dataset, Connector, Region, Address, Ingredient, company, product, ingredient, additive, standard, process, risk. Predicates: produces, uses, contains, complies_with, follows, flags, supplies, broader, related, places, located_in, fulfills, belongs_to, placed_by, includes, shipped_to, carries, departs_from, stores, offers, certified_for, derived_from, sourced_via.",
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "subject_type": {
-            "type": "string"
-          },
-          "subject_id": {
-            "type": "string"
-          },
-          "predicate": {
-            "type": "string"
-          },
-          "object_type": {
-            "type": "string"
-          },
-          "object_id": {
-            "type": "string"
-          },
-          "source_path": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "subject_type",
-          "subject_id",
-          "predicate",
-          "object_type",
-          "object_id"
-        ]
-      }
-    }
-  },
-  "required": [
-    "triples"
-  ]
-}
-```
-
-Source: [`packages/kb/tool-kb/src/index.ts`](../packages/kb/tool-kb/src/index.ts)
-
-### `kb_graph_query`
-
-Query the knowledge graph: neighbors of one entity, a two-hop path between two entities, or entities by id substring. Entity types: Object, Process, Event, Role, Concept, Customer, Supplier, Product, ProductCategory, Order, OrderItem, Shipment, Carrier, Warehouse, StockLevel, Expert, ExpertService, Service, Deliverable, Dataset, Connector, Region, Address, Ingredient, company, product, ingredient, additive, standard, process, risk. Predicates: produces, uses, contains, complies_with, follows, flags, supplies, broader, related, places, located_in, fulfills, belongs_to, placed_by, includes, shipped_to, carries, departs_from, stores, offers, certified_for, derived_from, sourced_via.
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "action": {
-      "type": "string",
-      "description": "One of: neighbors, paths, search."
-    },
-    "entity_type": {
-      "type": "string",
-      "description": "Entity type (Object, Process, Event, Role, Concept, Customer, Supplier, Product, ProductCategory, Order, OrderItem, Shipment, Carrier, Warehouse, StockLevel, Expert, ExpertService, Service, Deliverable, Dataset, Connector, Region, Address, Ingredient, company, product, ingredient, additive, standard, process, risk); required for neighbors/paths, optional type filter for search."
-    },
-    "entity_id": {
-      "type": "string",
-      "description": "Entity id for neighbors/paths, or the substring filter for search."
-    },
-    "target_type": {
-      "type": "string",
-      "description": "Target entity type for paths."
-    },
-    "target_id": {
-      "type": "string",
-      "description": "Target entity id for paths."
-    },
-    "query": {
-      "type": "string",
-      "description": "Id substring for the search action."
-    },
-    "limit": {
-      "type": "number",
-      "description": "Maximum entities for search (1–20)."
-    }
-  },
-  "required": [
-    "action"
-  ]
-}
-```
-
-Source: [`packages/kb/tool-kb/src/index.ts`](../packages/kb/tool-kb/src/index.ts)
 
 ### `kb_ingest`
 

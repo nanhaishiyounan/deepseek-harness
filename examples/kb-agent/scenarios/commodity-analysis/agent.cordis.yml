@@ -15,5 +15,4 @@
     ingest: true
     urlIngest: true
     stats: true
-    graph: true
     tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"

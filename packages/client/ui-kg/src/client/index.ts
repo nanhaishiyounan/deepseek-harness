@@ -16,7 +16,7 @@ import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client'
 // Type-only: pulls the ui-conversation slot declarations (view ring, header actions).
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type { ConnectionHandle } from '@deepseek-ai/dsh-client-connection/client'
-import type { KgEdgeRow, KgNodeHitRow, KgSubgraphNodeRow } from './kgTypes.ts'
+import type { KgEdgeRow, KgMappingsRow, KgNodeHitRow, KgQueryWire, KgQualityRow, KgSubgraphNodeRow } from './kgTypes.ts'
 import { createKgClientStore } from './kgStore.ts'
 import { createKgViewBridge } from './kgBridge.ts'
 import { KgEntry } from './KgEntry.tsx'
@@ -149,6 +149,61 @@ export function apply(ctx: ClientContext): void {
     })
   }
 
+  /** Load the quality panel: the stats extension plus the mappings readout. */
+  const loadPanel = (): void => {
+    if (store.store.getSnapshot().panel?.status === 'loading') return
+    store.beginPanel()
+    Promise.all([
+      api.kg.stats({}),
+      api.kg.mappings({}).catch(() => undefined),
+    ]).then(([statsResponse, mappingsResponse]) => {
+      const stats = unwrap<{
+        triples: number
+        entities: number
+        islands: number
+        conflicts: number
+        coverage?: { numerator: number; denominator: number; ratio: number }
+        last_run_at?: string
+      }>(statsResponse)
+      const quality: KgQualityRow = {
+        islands: stats.islands,
+        conflicts: stats.conflicts,
+        ...stats.coverage === undefined ? {} : { coverage: stats.coverage },
+        ...stats.last_run_at === undefined ? {} : { last_run_at: stats.last_run_at },
+      }
+      // The mappings readout is optional in the panel: a deployment without
+      // the pipeline shows the counters alone (the catch above swallows only
+      // the mappings refusal, naming it here).
+      let mappings: KgMappingsRow | undefined
+      if (mappingsResponse !== undefined) {
+        try {
+          mappings = unwrap<KgMappingsRow>(mappingsResponse)
+        } catch {
+          mappings = undefined
+        }
+      }
+      store.setPanel(quality, { triples: stats.triples, entities: stats.entities }, mappings)
+    }).catch((error: unknown) => {
+      store.failPanel(messageOf(error))
+    })
+  }
+
+  /**
+   * Compile one phrase server-side (`kg.query`) and land the walked canvas;
+   * resolves with the restatement, or rejects with the refusal message.
+   */
+  const queryPhrase = (phrase: string): Promise<string> => {
+    store.beginCanvas()
+    return api.kg.query({ phrase }).then((response) => {
+      const value = unwrap<KgQueryWire>(response)
+      store.setCanvas({ nodes: value.nodes, edges: value.edges, truncated: value.truncated }, value.seeds_resolved)
+      return value.restated
+    }).catch((error: unknown) => {
+      store.failCanvas(messageOf(error))
+      throw error
+    })
+  }
+
   /** Toggle one type in the canvas filter (an empty whitelist clears it). */
   const toggleTypeFilter = (typeId: string): void => {
     const current = store.store.getSnapshot().typeFilter
@@ -183,6 +238,8 @@ export function apply(ctx: ClientContext): void {
       walk,
       expandNode,
       searchSeeds,
+      loadPanel,
+      queryPhrase,
       selectNode: (nodeId: string | undefined) => { store.select(nodeId) },
       toggleTypeFilter,
       clearTypeFilter: () => { store.setTypeFilter(undefined) },

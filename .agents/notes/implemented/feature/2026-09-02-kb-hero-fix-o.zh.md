@@ -30,5 +30,5 @@ Status: implemented
 ## 后果
 
 - `packages/client/ui-kb/src/client/hero/hero.module.css`（组上限、换行、railCount 样式、reduced-motion 块）、`src/client/locales.ts`（新键，zh + en）、`src/client/hero/KbHeroDock.tsx`（railCount span）。
-- `packages/client/ui-kb/tests/kbherodock.client.spec.tsx`（派生徽标 + railCount 断言）；`examples/kb-agent/tests/scenarios.spec.ts`（probe fail-loud、隔离的 afterEach）。
+- `packages/client/ui-kb/tests/scenarioview.client.spec.tsx`（派生徽标 + railCount 断言）；`examples/kb-agent/tests/scenarios.spec.ts`（probe fail-loud、隔离的 afterEach）。
 - 800px 证据截图是运行期产物（`.artifacts/`，gitignored）；几何断言位于截取后即删除的临时 spec 中。

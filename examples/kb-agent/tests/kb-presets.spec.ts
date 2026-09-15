@@ -206,8 +206,9 @@ describe('kb-agent role presets (keyless, text-only degraded mode)', () => {
       out.push(`- tools: ${names.join(', ')}`)
       // The compliance officer stays kb-only; the data assistant adds the
       // lakehouse, connector, and NocoBase business suites (its persona
-      // routes all four surfaces).
-      const kbTools = ['kb_graph_add', 'kb_graph_query', 'kb_ingest', 'kb_ingest_url', 'kb_search', 'kb_stats', 'kg_schema', 'kg_subgraph']
+      // routes all four surfaces). The v1 graph tools stay off by default
+      // (kg_schema/kg_subgraph are the graph surface).
+      const kbTools = ['kb_ingest', 'kb_ingest_url', 'kb_search', 'kb_stats', 'kg_schema', 'kg_subgraph']
       const expectedTools = preset.id === 'enterprise-data-assistant'
         ? [...kbTools, 'lakehouse_query', 'lakehouse_tables', 'connector_discover', 'connector_fetch', 'connector_transfer', 'order_create', 'order_status', 'nb_collections', 'nb_list', 'nb_get', 'nb_create', 'nb_update'].sort()
         : kbTools

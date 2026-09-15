@@ -440,11 +440,69 @@ async persistNodeType(type: KgNodeType): Promise<void>
 async persistRelation(relation: KgRelation): Promise<void>
 
 /**
+ * The built-in ontology's semantic version — the TS seed is the single
+ * source of truth; derived registrations (nocobase-derived, agent-defined)
+ * ride the store's revision audit instead.
+ * @returns the seed's semver string.
+ */
+ontologyVersion(): string
+
+/**
  * Read every persisted registry row (the two-layer registry's read path;
  * store providers re-register these at boot).
  * @returns the stored node types and relations.
  */
 async storedRegistry(): Promise<{ nodeTypes: readonly KgNodeType[]; relations: readonly KgRelation[] }>
+
+/**
+ * Append one ontology-revision audit row (the pipeline's registry diff).
+ * @param revision - the revision snapshot.
+ * @returns the inserted revision id.
+ */
+async recordOntologyRevision(revision: KgOntologyRevisionInput): Promise<number>
+
+/**
+ * Read the newest ontology-revision audit rows.
+ * @param limit - maximum rows to return.
+ * @returns the revisions, newest first.
+ */
+async ontologyRevisions(limit: number): Promise<readonly KgOntologyRevision[]>
+
+/**
+ * Append one build-run ledger row (report + metrics JSON).
+ * @param run - the ledger snapshot.
+ * @returns the inserted row id.
+ */
+async recordBuildRun(run: KgBuildRunInput): Promise<number>
+
+/**
+ * Read the newest build-run ledger row for one tenant.
+ * @param tenantId - owning tenant.
+ * @returns the row, or undefined before the first persisted run.
+ */
+async latestBuildRun(tenantId: string): Promise<KgBuildRunRow | undefined>
+
+/**
+ * Count live nodes with zero live edges (the island metric).
+ * @param tenantId - owning tenant.
+ * @returns the island-node count.
+ */
+async islandNodes(tenantId: string): Promise<number>
+
+/**
+ * Count (src, dst, relation) groups asserting more than one distinct fact.
+ * @param tenantId - owning tenant.
+ * @returns the conflicting-fact group count.
+ */
+async conflictingFacts(tenantId: string): Promise<number>
+
+/**
+ * Count live nodes of one type under one tenant (the coverage numerator).
+ * @param tenantId - owning tenant.
+ * @param typeId - the node type to count.
+ * @returns the live-node count for that type.
+ */
+async nodeCountByType(tenantId: string, typeId: KgNodeTypeId): Promise<number>
 ```
 
 Source: [`packages/kb/kb-graph/src/index.ts`](../../packages/kb/kb-graph/src/index.ts)
@@ -463,6 +521,28 @@ The pipeline service. One instance per context; `run()` executes one full pipeli
  * @returns the per-scope run report.
  */
 async run(options: RunOptions = {}): Promise<KgBuildRunReport>
+
+/**
+ * The newest persisted build-run ledger row (the report evidence that
+ * outlives the process).
+ * @returns the row, or undefined before the first persisted run.
+ */
+async latestRun(): Promise<KgBuildRunRecord | undefined>
+
+/**
+ * The live quality readout: structural counters straight from the store,
+ * plus the persisted metrics' coverage document.
+ * @returns the quality report.
+ */
+async qualityReport(): Promise<KgQualityReadout>
+
+/**
+ * The mappings read-out: the loaded file's shape plus the last run's
+ * per-collection outcome (the graph tab's rule panel and the apiproxy
+ * `kg.mappings` read this).
+ * @returns the mappings readout.
+ */
+mappings(): KgMappingsReadout
 ```
 
 Source: [`packages/kb/kg-build/src/index.ts`](../../packages/kb/kg-build/src/index.ts)

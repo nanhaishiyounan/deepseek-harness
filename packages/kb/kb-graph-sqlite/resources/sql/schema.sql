@@ -1,8 +1,9 @@
--- kg-graph-sqlite SCHEMA_VERSION 3 (versioned registry + ontology revision
--- audit; evolves the v2 property graph). Application id "DSHG" is retained:
--- same store identity, new major format. A v1 or v2 database (user_version
--- < 3) is rejected, not migrated — the graph is derived data with provenance
--- and rebuilds from its sources.
+-- kg-graph-sqlite SCHEMA_VERSION 4 (build-run ledger; evolves the v3
+-- versioned registry with ontology revision audit, which itself evolved the
+-- v2 property graph). Application id "DSHG" is retained: same store identity,
+-- new major format. A v1/v2/v3 database (user_version < 4) is rejected, not
+-- migrated — the graph is derived data with provenance and rebuilds from its
+-- sources.
 
 -- ① Node type registry (persistent layer; built-in seed inserted by code).
 -- `version` is the registry-row revision counter (1 at first persist).
@@ -119,6 +120,19 @@ CREATE TABLE kg_source_runs (
   last_run_at   TEXT NOT NULL,
   PRIMARY KEY (source_system, scope)
 ) STRICT;
+
+-- ⑥c Build-run ledger: one row per kg-build run() with the full report and
+-- quality-metrics JSON — the run evidence survives the process.
+CREATE TABLE kg_build_runs (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  tenant_id    TEXT NOT NULL,
+  started_at   TEXT NOT NULL,
+  finished_at  TEXT NOT NULL,
+  report_json  TEXT NOT NULL,
+  metrics_json TEXT NOT NULL,
+  created_at   TEXT NOT NULL
+) STRICT;
+CREATE INDEX kg_build_runs_tenant ON kg_build_runs (tenant_id, id);
 
 -- ⑥b Ontology revision audit: one row per registry-changing pipeline run
 -- (added/removed/changed type and relation ids ride changes_json). An

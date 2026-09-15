@@ -58,6 +58,7 @@ function scriptedApi(overrides: {
     kg: {
       mappings: err,
       schema: err,
+      query: err,
       search: err,
       subgraph: err,
       expand: err,

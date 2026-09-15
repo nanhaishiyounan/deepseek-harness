@@ -252,6 +252,28 @@ export interface KgOntologyRevisionInput {
   readonly createdAt: string
 }
 
+/** One build-run ledger row a pipeline run appends (input half, JSON-payload). */
+export interface KgBuildRunInput {
+  readonly tenantId: string
+  readonly startedAt: string
+  readonly finishedAt: string
+  /** The pipeline's run report as JSON (the pipeline owns the shape). */
+  readonly report: unknown
+  /** The quality metrics document as JSON. */
+  readonly metrics: unknown
+  readonly createdAt: string
+}
+
+/** One persisted kg_build_runs ledger row (read half). */
+export interface KgBuildRunRow {
+  readonly id: number
+  readonly tenantId: string
+  readonly startedAt: string
+  readonly finishedAt: string
+  readonly report: unknown
+  readonly metrics: unknown
+}
+
 /** One persisted ontology-revision audit row (read half). */
 export interface KgOntologyRevision {
   readonly id: number
@@ -445,4 +467,35 @@ export interface KgStore extends GraphStore {
    * @returns the revisions, newest first.
    */
   ontologyRevisions(limit: number): Promise<readonly KgOntologyRevision[]>
+  /**
+   * Append one build-run ledger row (report + metrics JSON). Every run()
+   * appends — the ledger is the run evidence that outlives the process.
+   * @param run - the ledger snapshot.
+   * @returns the inserted row id.
+   */
+  recordBuildRun(run: KgBuildRunInput): Promise<number>
+  /**
+   * Read the newest build-run ledger row for one tenant.
+   * @param tenantId - owning tenant.
+   * @returns the row, or undefined before the first persisted run.
+   */
+  latestBuildRun(tenantId: string): Promise<KgBuildRunRow | undefined>
+  /**
+   * Count live nodes with zero live edges (the island metric).
+   * @param tenantId - owning tenant.
+   */
+  islandNodes(tenantId: string): Promise<number>
+  /**
+   * Count (src, dst, relation) groups whose live rows assert more than one
+   * distinct fact (the conflict metric).
+   * @param tenantId - owning tenant.
+   */
+  conflictingFacts(tenantId: string): Promise<number>
+  /**
+   * Count live nodes of one type under one tenant (the coverage numerator
+   * per derived type).
+   * @param tenantId - owning tenant.
+   * @param typeId - the node type to count.
+   */
+  nodeCountByType(tenantId: string, typeId: KgNodeTypeId): Promise<number>
 }

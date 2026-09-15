@@ -35,8 +35,10 @@ import { alignEntity } from './align.ts'
 import type { AdjudicatingLlm } from './align.ts'
 import { planScopeRun, priorStateOf, sha256Hex } from './incremental.ts'
 import type {
-  CollectionRunReport, CorpusReport, KgBuildConfig, KgBuildRunReport, KgMappingsFile, SimpleSourceReport,
+  CollectionRunReport, CorpusReport, KgBuildConfig, KgBuildRunMetrics, KgBuildRunRecord,
+  KgBuildRunReport, KgMappingsFile, SimpleSourceReport,
 } from './types.ts'
+import { computeQualityMetrics } from './quality.ts'
 import { loadMappingsFile } from './mappings.ts'
 import type { KgEdge, KgNode, KgNodeTypeId, KgRelation } from '@deepseek-ai/dsh-kb-graph'
 // Side-effect type import: resolves `ctx.get('kbGraph')` to the service type.
@@ -45,6 +47,7 @@ import { kgNodeTypeId, kgRelationId, ONTOLOGY_VERSION } from '@deepseek-ai/dsh-k
 
 export { KgBuildError } from './error.ts'
 export * from './types.ts'
+export { computeQualityMetrics } from './quality.ts'
 export { loadMappingsFile, parseMappings } from './mappings.ts'
 export type { KgMappingRules } from './mappings.ts'
 export {
@@ -158,6 +161,16 @@ export interface KgMappingsReadout {
       skippedRelationFields: readonly string[]
     }[]
   }
+}
+
+/** The live quality readout the graph tab's panel and `kg.stats` serve. */
+export interface KgQualityReadout {
+  readonly nodes: number
+  readonly edges: number
+  readonly islands: number
+  readonly conflicts: number
+  readonly coverage?: { readonly numerator: number; readonly denominator: number; readonly ratio: number }
+  readonly lastRunAt?: string
 }
 
 /**
@@ -343,7 +356,23 @@ export class KgBuildRuntime extends Service {
       R11: collections.reduce((sum, entry) => sum + entry.edgesUpserted, 0),
       R12: this.mappingsFile?.sources.reduce((sum, source) => sum + source.collections.length, 0) ?? 0,
     }
-    const report: KgBuildRunReport = {
+    const finishedIso = new Date().toISOString()
+    const graph = this.graph()
+    const tenant = this.resolved.tenant
+    const [storeStats, islands, conflicts, derivedTypes] = await Promise.all([
+      graph.stats(tenant),
+      graph.islandNodes(tenant),
+      graph.conflictingFacts(tenant),
+      graph.storedRegistry(),
+    ])
+    const derivedTypeIds = derivedTypes.nodeTypes
+      .filter(type => type.source === 'nocobase-derived')
+      .map(type => type.id)
+    let derivedNodes = 0
+    for (const typeId of derivedTypeIds) {
+      derivedNodes += await graph.nodeCountByType(tenant, typeId)
+    }
+    const provisional: KgBuildRunReport = {
       collections,
       ...(lakehouse === undefined ? {} : { lakehouse }),
       ...(connector === undefined ? {} : { connector }),
@@ -353,10 +382,72 @@ export class KgBuildRuntime extends Service {
       ruleHits,
       ...(ontologyRevision === undefined ? {} : { ontologyRevision }),
       startedAt,
-      finishedAt: new Date().toISOString(),
+      finishedAt: finishedIso,
+    }
+    const metrics = computeQualityMetrics(
+      { nodes: storeStats.entities, edges: storeStats.triples, islands, conflicts },
+      provisional,
+      derivedNodes,
+    )
+    const buildRunId = await graph.recordBuildRun({
+      tenantId: tenant,
+      startedAt,
+      finishedAt: finishedIso,
+      report: provisional,
+      metrics,
+      createdAt: finishedIso,
+    })
+    const report: KgBuildRunReport = {
+      ...provisional,
+      buildRunId,
+      metrics,
     }
     this.lastReport = report
     return report
+  }
+
+  /**
+   * The newest persisted build-run ledger row (the report evidence that
+   * outlives the process).
+   * @returns the row, or undefined before the first persisted run.
+   */
+  async latestRun(): Promise<KgBuildRunRecord | undefined> {
+    const row = await this.graph().latestBuildRun(this.resolved.tenant)
+    if (row === undefined) return undefined
+    return {
+      id: row.id,
+      tenant: row.tenantId,
+      startedAt: row.startedAt,
+      finishedAt: row.finishedAt,
+      report: row.report as KgBuildRunReport,
+      metrics: row.metrics as KgBuildRunMetrics,
+    }
+  }
+
+  /**
+   * The live quality readout: structural counters straight from the store,
+   * plus the persisted metrics' coverage document.
+   * @returns the quality report.
+   */
+  async qualityReport(): Promise<KgQualityReadout> {
+    const graph = this.graph()
+    const tenant = this.resolved.tenant
+    const [stats, islands, conflicts, last] = await Promise.all([
+      graph.stats(tenant),
+      graph.islandNodes(tenant),
+      graph.conflictingFacts(tenant),
+      graph.latestBuildRun(tenant),
+    ])
+    return {
+      nodes: stats.entities,
+      edges: stats.triples,
+      islands,
+      conflicts,
+      ...(last === undefined ? {} : {
+        coverage: (last.metrics as KgBuildRunMetrics).nodeCoverage,
+        lastRunAt: last.finishedAt,
+      }),
+    }
   }
 
   /**
@@ -365,12 +456,14 @@ export class KgBuildRuntime extends Service {
    * `kg.mappings` read this).
    * @returns the mappings readout.
    */
-  mappings(): KgMappingsReadout {
+  async mappings(): Promise<KgMappingsReadout> {
     const file = this.mappingsFile
     if (file === undefined) {
       throw new KgBuildError('no mappings file configured (nocobase.mappingsFile)', 'KG_BUILD_SEAM_MISSING')
     }
-    const last = this.lastReport
+    // The in-memory report wins; a fresh process falls back to the persisted
+    // ledger row so the readout survives restarts (the ledger's whole point).
+    const last = this.lastReport ?? (await this.latestRun())?.report
     return {
       file: this.resolved.nocobase?.mappingsFile ?? '',
       version: file.version,

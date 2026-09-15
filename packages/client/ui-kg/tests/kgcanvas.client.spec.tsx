@@ -419,7 +419,7 @@ describe('KgEntry branch matrix', () => {
   it('refreshes instead of switching when no session exists, and shows the error badge', () => {
     const store = createSnapshotStore<KgClientState>({
       legend: { status: 'error', error: 'kg-not-composed' },
-      canvas: undefined, search: undefined, selected: undefined, typeFilter: undefined,
+      canvas: undefined, search: undefined, panel: undefined, selected: undefined, typeFilter: undefined,
     })
     const noSessions = createSnapshotStore({ ...sessionListState({ id: 's1', blank: false }), current: undefined })
     const refresh = vi.fn()
@@ -445,7 +445,7 @@ describe('KgEntry branch matrix', () => {
   it('shows the loading placeholder badge while the legend is in flight', () => {
     const store = createSnapshotStore<KgClientState>({
       legend: { status: 'loading' },
-      canvas: undefined, search: undefined, selected: undefined, typeFilter: undefined,
+      canvas: undefined, search: undefined, panel: undefined, selected: undefined, typeFilter: undefined,
     })
     const sessions = createSnapshotStore(sessionListState({ id: 's1', blank: false }))
     render(

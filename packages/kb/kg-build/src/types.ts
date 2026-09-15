@@ -236,6 +236,30 @@ export interface CorpusReport {
   readonly tombstonedEdges: number
 }
 
+/** The quality metrics document one run computes and persists. */
+export interface KgBuildRunMetrics {
+  readonly nodes: number
+  readonly edges: number
+  readonly islands: number
+  readonly conflicts: number
+  readonly nodeCoverage: { readonly numerator: number; readonly denominator: number; readonly ratio: number }
+  readonly degraded: number
+  readonly droppedRelations: number
+  readonly mergedEntities: number
+  readonly tombstonedEdges: number
+  readonly computedAt: string
+}
+
+/** The persisted build-run ledger row (the latest-run readout). */
+export interface KgBuildRunRecord {
+  readonly id: number
+  readonly tenant: string
+  readonly startedAt: string
+  readonly finishedAt: string
+  readonly report: KgBuildRunReport
+  readonly metrics: KgBuildRunMetrics
+}
+
 /** The aggregated per-run report `ctx.kgBuild.run()` resolves with. */
 export interface KgBuildRunReport {
   readonly collections: readonly CollectionRunReport[]
@@ -249,6 +273,10 @@ export interface KgBuildRunReport {
   readonly ruleHits: Readonly<Record<string, number>>
   /** The ontology revision id appended this run, when the registry changed. */
   readonly ontologyRevision?: number
+  /** The kg_build_runs ledger row id this run persisted. */
+  readonly buildRunId?: number
+  /** The quality metrics computed at run end (same document as the ledger row). */
+  readonly metrics?: KgBuildRunMetrics
   readonly startedAt: string
   readonly finishedAt: string
 }

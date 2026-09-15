@@ -84,7 +84,7 @@ try {
 
   // ①b Versioned ontology and the mappings readout.
   check('ontologyVersion is 1.0.0', graph.ontologyVersion() === '1.0.0', graph.ontologyVersion())
-  const readout = build.mappings()
+  const readout = await build.mappings()
   check('mappings readout carries 5 collections', readout.collections.length === 5 && readout.version === 1, `${String(readout.collections.length)} collections, v${String(readout.version)}`)
 
   // ② Derived registry: ≥4 nocobase-derived types persisted and visible.

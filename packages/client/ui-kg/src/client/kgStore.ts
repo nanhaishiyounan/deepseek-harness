@@ -1,13 +1,14 @@
 /**
  * The graph page's client-session state: the cached ontology legend
  * (`kg.schema`), the canvas graph (one `kg.subgraph` walk or `kg.expand`
- * patch at a time), the seed-search hits, and the counters. Shared by the
- * sidebar entry, the view tab, and the tool-row handoff; nothing persists.
+ * patch at a time), the seed-search hits, and the quality-panel counters
+ * (`kg.stats` extension + `kg.mappings`). Shared by the sidebar entry, the
+ * view tab, and the tool-row handoff; nothing persists.
  * @module @deepseek-ai/dsh-client-ui-kg/client/kgStore
  */
 
 import { createSnapshotStore, type SnapshotStore } from '@deepseek-ai/dsh-client-runtime/client'
-import type { KgCanvasGraph, KgNodeHitRow, KgNodeTypeRow, KgRelationRow } from './kgTypes.ts'
+import type { KgCanvasGraph, KgMappingsRow, KgNodeHitRow, KgNodeTypeRow, KgQualityRow, KgRelationRow } from './kgTypes.ts'
 
 /** One discriminated load state per cache. */
 export type KgCache<T> =
@@ -23,6 +24,8 @@ export interface KgClientState {
   readonly canvas: KgCache<KgCanvasGraph & { readonly seeds: readonly string[] }> | undefined
   /** The latest seed search; `undefined` until the user searches. */
   readonly search: KgCache<readonly KgNodeHitRow[]> | undefined
+  /** The quality panel's counters (`kg.stats` extension + `kg.mappings`); `undefined` before the first load. */
+  readonly panel: KgCache<{ quality: KgQualityRow; stats: { triples: number; entities: number }; mappings?: KgMappingsRow }> | undefined
   /** The selected node id (details panel); absent when nothing is selected. */
   readonly selected: string | undefined
   /** Type-filter whitelist; `undefined` renders every type. */
@@ -30,7 +33,10 @@ export interface KgClientState {
 }
 
 /** Initial snapshot: nothing loaded, nothing selected. */
-const INITIAL: KgClientState = { legend: undefined, canvas: undefined, search: undefined, selected: undefined, typeFilter: undefined }
+const INITIAL: KgClientState = {
+  legend: undefined, canvas: undefined, search: undefined,
+  panel: undefined, selected: undefined, typeFilter: undefined,
+}
 
 /** The shared store handle created once per apply. */
 export interface KgClientStore {
@@ -56,6 +62,12 @@ export interface KgClientStore {
   setSearch(hits: readonly KgNodeHitRow[]): void
   /** Record a failed seed search. */
   failSearch(message: string): void
+  /** Record a quality-panel load start. */
+  beginPanel(): void
+  /** Record a successful quality-panel load (stats plus an optional mappings readout). */
+  setPanel(quality: KgQualityRow, stats: { triples: number; entities: number }, mappings?: KgMappingsRow): void
+  /** Record a failed quality-panel load. */
+  failPanel(message: string): void
   /** Select one node (details panel) or clear the selection. */
   select(nodeId: string | undefined): void
   /** Replace the type-filter whitelist (`undefined` clears the filter). */
@@ -124,6 +136,15 @@ export function createKgClientStore(): KgClientStore {
     },
     failSearch(message): void {
       patch({ search: { status: 'error', error: message } })
+    },
+    beginPanel(): void {
+      patch({ panel: { status: 'loading' } })
+    },
+    setPanel(quality, stats, mappings): void {
+      patch({ panel: { status: 'ready', value: { quality, stats, ...(mappings === undefined ? {} : { mappings }) } } })
+    },
+    failPanel(message): void {
+      patch({ panel: { status: 'error', error: message } })
     },
     select(nodeId): void {
       patch({ selected: nodeId })

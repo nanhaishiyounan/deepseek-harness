@@ -233,6 +233,63 @@ describe('SqliteGraphStore', () => {
     store.close()
   })
 
+  it('appends build-run ledger rows and reads the newest per tenant', async () => {
+    const store = freshStore()
+    expect(await store.latestBuildRun('t')).toBeUndefined()
+    const first = await store.recordBuildRun({
+      tenantId: 't', startedAt: '2026-09-15T00:00:00.000Z', finishedAt: '2026-09-15T00:01:00.000Z',
+      report: { collections: [] }, metrics: { nodes: 1 }, createdAt: '2026-09-15T00:01:00.000Z',
+    })
+    const second = await store.recordBuildRun({
+      tenantId: 't', startedAt: '2026-09-15T01:00:00.000Z', finishedAt: '2026-09-15T01:01:00.000Z',
+      report: { collections: [{ scope: 'experts' }] }, metrics: { nodes: 2 }, createdAt: '2026-09-15T01:01:00.000Z',
+    })
+    expect(second).toBeGreaterThan(first)
+    const latest = await store.latestBuildRun('t')
+    expect(latest?.id).toBe(second)
+    expect(latest?.metrics).toEqual({ nodes: 2 })
+    expect(latest?.report).toEqual({ collections: [{ scope: 'experts' }] })
+    expect(await store.latestBuildRun('other')).toBeUndefined()
+    store.close()
+  })
+
+  it('counts island nodes against live edges in both directions', async () => {
+    const store = freshStore()
+    const now = '2026-09-15T00:00:00.000Z'
+    await store.upsertNode({ id: 'n:1', tenantId: 't', type: kgNodeTypeId('company'), naturalKey: '孤岛公司', name: '孤岛公司', createdAt: now, updatedAt: now })
+    await store.upsertNode({ id: 'n:2', tenantId: 't', type: kgNodeTypeId('product'), naturalKey: '在线产品', name: '在线产品', createdAt: now, updatedAt: now })
+    await store.upsertEdges([
+      {
+        id: 'e:1', tenantId: 't', srcId: 'n:2', dstId: 'n:1', relation: kgRelationId('produces'), confidence: 1,
+        provenance: { sourceSystem: 'kb', sourceId: 'doc.md', extractedAt: now }, validFrom: now,
+      },
+    ])
+    expect(await store.islandNodes('t')).toBe(0)
+    await store.upsertNode({ id: 'n:3', tenantId: 't', type: kgNodeTypeId('additive'), naturalKey: '无链接添加剂', name: '无链接添加剂', createdAt: now, updatedAt: now })
+    expect(await store.islandNodes('t')).toBe(1)
+    store.close()
+  })
+
+  it('counts conflicting fact groups and nodes by type', async () => {
+    const store = freshStore()
+    const now = '2026-09-15T00:00:00.000Z'
+    for (const [id, name] of [['n:1', '宏发食品'], ['n:2', '老抽酱油']] as const) {
+      await store.upsertNode({
+        id, tenantId: 't', type: kgNodeTypeId(id === 'n:1' ? 'company' : 'product'),
+        naturalKey: name, name, createdAt: now, updatedAt: now,
+      })
+    }
+    const edge = (suffix: string, fact: string): Parameters<SqliteGraphStore['upsertEdges']>[0][number] => ({
+      id: `e:${suffix}`, tenantId: 't', srcId: 'n:1', dstId: 'n:2', relation: kgRelationId('produces'), confidence: 1, fact,
+      provenance: { sourceSystem: 'kb', sourceId: `${suffix}.md`, extractedAt: now }, validFrom: now,
+    })
+    await store.upsertEdges([edge('a', '证据一'), edge('b', '证据二')])
+    expect(await store.conflictingFacts('t')).toBe(1)
+    expect(await store.nodeCountByType('t', kgNodeTypeId('company'))).toBe(1)
+    expect(await store.nodeCountByType('t', kgNodeTypeId('additive'))).toBe(0)
+    store.close()
+  })
+
   it('counts across all tenants when stats gets no tenant', async () => {
     const store = freshStore()
     await store.putTriples('tenant-a', [hongfa])
@@ -254,6 +311,19 @@ describe('SqliteGraphStore', () => {
     db.close()
     expect(() => new SqliteGraphStore({ path, busyTimeoutMs: 5_000 }, DatabaseSync))
       .toThrow(/schema version 99.*incompatible/u)
+  })
+
+  it('rejects a v3 database (the pre-ledger schema) with the rebuild instruction', () => {
+    const directory = mkdtempSync(join(tmpdir(), 'dsh-kb-graph-'))
+    directories.push(directory)
+    const path = join(directory, 'graph.sqlite')
+    const seed = new SqliteGraphStore({ path, busyTimeoutMs: 5_000 }, DatabaseSync)
+    seed.close()
+    const db = new DatabaseSync(path)
+    db.exec('PRAGMA user_version = 3')
+    db.close()
+    expect(() => new SqliteGraphStore({ path, busyTimeoutMs: 5_000 }, DatabaseSync))
+      .toThrow(/schema version 3, incompatible with this build \(4\); delete the file and rebuild/u)
   })
 
   it('rejects an unversioned database that carries an application identity', () => {

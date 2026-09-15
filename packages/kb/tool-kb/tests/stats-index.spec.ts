@@ -138,21 +138,21 @@ describe('tool-kb plugin', () => {
     expect(() => ToolKb.Config({} as unknown as ToolKb.Config)).toThrow(/tenant/u)
   })
 
-  it('registers all six tools by default', async () => {
+  it('registers the four document tools by default (v1 graph tools off)', async () => {
     const { registered } = await mount()
     expect(toolNames(registered).sort())
-      .toEqual(['kb_graph_add', 'kb_graph_query', 'kb_ingest', 'kb_ingest_url', 'kb_search', 'kb_stats'])
+      .toEqual(['kb_ingest', 'kb_ingest_url', 'kb_search', 'kb_stats'])
   })
 
   it('honors per-tool enablement switches', async () => {
-    const { registered } = await mount({ tenant: 'demo-food-co', search: false, stats: false })
+    const { registered } = await mount({ tenant: 'demo-food-co', search: false, stats: false, graph: true })
     expect(toolNames(registered).sort()).toEqual(['kb_graph_add', 'kb_graph_query', 'kb_ingest', 'kb_ingest_url'])
-    const fileOnly = await mount({ tenant: 'demo-food-co', urlIngest: false })
+    const fileOnly = await mount({ tenant: 'demo-food-co', urlIngest: false, graph: true })
     expect(toolNames(fileOnly.registered).sort())
       .toEqual(['kb_graph_add', 'kb_graph_query', 'kb_ingest', 'kb_search', 'kb_stats'])
-    const noGraph = await mount({ tenant: 'demo-food-co', graph: false })
-    expect(toolNames(noGraph.registered).sort())
-      .toEqual(['kb_ingest', 'kb_ingest_url', 'kb_search', 'kb_stats'])
+    const legacyGraph = await mount({ tenant: 'demo-food-co', graph: true })
+    expect(toolNames(legacyGraph.registered).sort())
+      .toEqual(['kb_graph_add', 'kb_graph_query', 'kb_ingest', 'kb_ingest_url', 'kb_search', 'kb_stats'])
   })
 
   it('keeps the tools visible without a store and failing at execution', async () => {
@@ -172,7 +172,7 @@ describe('tool-kb plugin', () => {
     })
     await ctx.plugin(ToolKb, { tenant: 'demo-food-co' })
     expect(toolNames(registered).sort())
-      .toEqual(['kb_graph_add', 'kb_graph_query', 'kb_ingest', 'kb_ingest_url', 'kb_search', 'kb_stats'])
+      .toEqual(['kb_ingest', 'kb_ingest_url', 'kb_search', 'kb_stats'])
     const result = await ctx.tools.execute({ signal, callId: CallId('c1'), name: 'kb_stats', arguments: {} })
     expect(result.isError).toBe(true)
   })

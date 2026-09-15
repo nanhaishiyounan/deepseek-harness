@@ -151,7 +151,7 @@ describe('kb_graph tools through the real seam', () => {
     await ctx.plugin(LocalFileSystem, { cwd: root })
     await ctx.plugin(KbGraphRuntime)
     await ctx.plugin(KbGraphSqlite, { path: join(root, 'graph.sqlite') })
-    await ctx.plugin(ToolKb, { tenant: 'demo-food-co' })
+    await ctx.plugin(ToolKb, { tenant: 'demo-food-co', graph: true })
   })
 
   afterEach(async () => {
@@ -223,7 +223,7 @@ describe('kb_graph tools through the real seam', () => {
     await bare.plugin(KbRuntime)
     await bare.plugin(KbSqlite, { path: ':memory:' })
     await bare.plugin(LocalFileSystem, { cwd: root })
-    await bare.plugin(ToolKb, { tenant: 'demo-food-co' })
+    await bare.plugin(ToolKb, { tenant: 'demo-food-co', graph: true })
     const refusal = await call(bare, 'kb_graph_query', { action: 'search', query: 'x' })
     expect(refusal.isError).toBe(true)
     expect(refusal.text).toContain('no knowledge-graph service')

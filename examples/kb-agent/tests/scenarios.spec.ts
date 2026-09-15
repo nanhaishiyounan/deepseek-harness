@@ -209,7 +209,7 @@ describe('kb-agent scenario set (keyless, text-only degraded mode)', () => {
       })
       const agent: Agent = handle.agent
       const names = context.tools.schemas(agent).map(schema => schema.name).sort()
-      expect(names, `${slug} tool surface`).toEqual(['kb_graph_add', 'kb_graph_query', 'kb_ingest', 'kb_ingest_url', 'kb_search', 'kb_stats', 'kg_schema', 'kg_subgraph'])
+      expect(names, `${slug} tool surface`).toEqual(['kb_ingest', 'kb_ingest_url', 'kb_search', 'kb_stats', 'kg_schema', 'kg_subgraph'])
       out.push(`- tools: ${String(names.length)} kb tools`)
 
       // Retrieve: the scenario's own corpus answers its probe query with a citation.

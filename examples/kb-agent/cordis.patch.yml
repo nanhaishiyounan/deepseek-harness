@@ -2,8 +2,9 @@
 # `--patch` from the repository root (see README.md). It swaps the chat route
 # to MiniMax-M3 and mounts the knowledge-base seam: SQLite store, MiniMax
 # embeddings, and the kb tool rows — kb_search/kb_ingest/kb_ingest_url/kb_stats
-# plus kb_graph_query/kb_graph_add, which register by default and refuse calls
-# until a kb-graph provider joins the composition. llm-pi-ai is
+# plus kg_schema/kg_subgraph over the kb-graph seam (the legacy v1
+# kb_graph_query/kb_graph_add pair stays off; opt back in with tool-kb's
+# `graph: true`). llm-pi-ai is
 # disabled because its installed catalog already declares the "minimax"
 # configurable provider, which would collide with llm-minimax's own
 # declaration at load; the dedicated MiniMax adapter replaces that whole half.

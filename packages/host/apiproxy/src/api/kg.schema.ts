@@ -82,6 +82,10 @@ export const kgExpandRequestSchema = z.object({
 export const kgStatsRequestSchema = z.object({}) as unknown as z.ZodType<Wire<RequestPayload<'kg.stats'>>>
 /** kg.mappings request payload (empty). */
 export const kgMappingsRequestSchema = z.object({}) as unknown as z.ZodType<Wire<RequestPayload<'kg.mappings'>>>
+/** kg.query request payload. */
+export const kgQueryRequestSchema = z.object({
+  phrase: z.string().min(1),
+}) as unknown as z.ZodType<Wire<RequestPayload<'kg.query'>>>
 
 /** kg.schema response value. */
 export const kgSchemaValueSchema = z.object({
@@ -144,10 +148,27 @@ export const kgExpandValueSchema = z.object({
   truncated: z.boolean(),
 })
 
+/** kg.query response value. */
+export const kgQueryValueSchema = kgSubgraphValueSchema.extend({
+  template: z.string(),
+  hops: z.number().int().min(1).max(2),
+  relation_types: z.array(z.string()).optional(),
+  restated: z.string(),
+})
+
 /** kg.stats response value. */
 export const kgStatsValueSchema = z.object({
   triples: z.number().int().min(0),
   entities: z.number().int().min(0),
   node_types: z.number().int().min(0),
   relations: z.number().int().min(0),
+  ontology_version: z.string(),
+  islands: z.number().int().min(0),
+  conflicts: z.number().int().min(0),
+  coverage: z.object({
+    numerator: z.number().int().min(0),
+    denominator: z.number().int().min(0),
+    ratio: z.number(),
+  }).optional(),
+  last_run_at: z.string().optional(),
 })

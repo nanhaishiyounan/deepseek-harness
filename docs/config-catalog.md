@@ -1243,8 +1243,13 @@ export interface NocoBaseSourceConfig {
   baseUrl?: string | undefined
   /** Credential reference (env var name) the API token resolves through. */
   apiKeyEnv?: string
-  /** Collections to map — the explicit whitelist; absent users/system tables never map. */
-  collections?: NocoBaseCollectionConfig[]
+  /**
+   * The declarative mapping file (kg-mappings.yml) — the collection
+   * whitelist's only home. The inline `collections` key is retired: an old
+   * configuration fails config validation loudly instead of silently
+   * mapping nothing.
+   */
+  mappingsFile?: string
 }
 
 /** Extraction corpus configuration (plain-text/Markdown documents on disk). */
@@ -1280,41 +1285,9 @@ export interface AlignConfig {
   /** Lower bound of the gray zone sent to LLM adjudication; default 0.8. */
   grayFloor?: number
 }
-
-/** One NocoBase collection the pipeline maps (whitelist entry). */
-export interface NocoBaseCollectionConfig {
-  /** Collection name as `collections:listMeta` reports it. */
-  name: string
-  /** Builtin node-type id the derived type extends (owl:subClassOf anchor). */
-  anchor?: string
-  /** Field whose value becomes the node display name; default heuristics otherwise. */
-  titleField?: string
-  /** Explicit foreign-key links from this collection's scalar columns. */
-  fkLinks?: FkLinkConfig[]
-}
-
-/**
- * One explicitly configured cross-collection foreign-key link — the extension
- * of mapping rule R06 for schemas that store the reference as a scalar column
- * (denormalized integer id, or a `<collection>/<pk>` address string) instead
- * of a declared relation field. Explicit configuration, never guessing.
- */
-export interface FkLinkConfig {
-  /** Owning collection field carrying the reference value. */
-  field: string
-  /** Target collection name (must also appear in the mapped collection set). */
-  target: string
-  /** Registered relation id the derived edge uses. */
-  relation: string
-  /** `plain-id` = the value is the target pk; `collection-address` = `<collection>/<pk>`. */
-  style: FkLinkStyle
-}
-
-/** How a configured foreign-key link stores the target row address. */
-export type FkLinkStyle = 'plain-id' | 'collection-address'
 ```
 
-Source: [`packages/kb/kg-build/src/index.ts:131`](../packages/kb/kg-build/src/index.ts)
+Source: [`packages/kb/kg-build/src/index.ts:130`](../packages/kb/kg-build/src/index.ts)
 
 <a id="deepseek-aidsh-lakehouse"></a>
 
@@ -3249,7 +3222,12 @@ export interface Config {
   statsTimeoutMs?: number
   /** Cooperative timeout budget (ms) for `kb_ingest_url`. Defaults to 300000. */
   urlIngestTimeoutMs?: number
-  /** Register `kb_graph_query`/`kb_graph_add` over the optional `ctx.kbGraph` seam. Defaults to true. */
+  /**
+   * Register the legacy v1 `kb_graph_query`/`kb_graph_add` triple tools over
+   * the optional `ctx.kbGraph` seam. Defaults to false — `kg_schema` and
+   * `kg_subgraph` are the model-facing graph surface; the v1 pair stays
+   * opt-in for deployments that still compose it.
+   */
   graph?: boolean
   /** Cooperative timeout budget (ms) for `kb_graph_query`. Defaults to 15000. */
   graphQueryTimeoutMs?: number

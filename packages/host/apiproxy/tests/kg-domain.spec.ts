@@ -141,13 +141,45 @@ describe('kg domain reads', () => {
     expect(search.result.value.nodes.map(node => node.name)).toEqual(['宏发食品'])
   })
 
-  it('counts the store and the registry in stats', async () => {
+  it('counts the store and the registry in stats, with the quality tail', async () => {
     const api = await boot({ kgEnabled: true, kgTenant: 't1' })
     const stats = await api.kg.stats(request({}))
     if (!stats.result.ok) throw new Error('stats refused')
     expect(stats.result.value.triples).toBe(2)
     expect(stats.result.value.entities).toBe(3)
     expect(stats.result.value.node_types).toBeGreaterThan(0)
+    expect(stats.result.value.ontology_version).toMatch(/^\d+\.\d+\.\d+$/u)
+    // The seeded chain (宏发→酱油→山梨酸钾) has no islands and no conflicts;
+    // no pipeline is composed, so the coverage tail stays absent.
+    expect(stats.result.value.islands).toBe(0)
+    expect(stats.result.value.conflicts).toBe(0)
+    expect(stats.result.value.coverage).toBeUndefined()
+    expect(stats.result.value.last_run_at).toBeUndefined()
+  })
+
+  it('compiles and walks a templated phrase through kg.query', async () => {
+    const api = await boot({ kgEnabled: true, kgTenant: 't1' })
+    const walk = await api.kg.query(request({ phrase: '宏发食品生产的产品' }))
+    if (!walk.result.ok) throw new Error('query refused')
+    const value = walk.result.value
+    expect(value.template).toBe('produces-products')
+    expect(value.hops).toBe(1)
+    expect(value.relation_types).toEqual(['produces'])
+    expect(value.seeds_resolved).toEqual(['kb:t#宏发食品'])
+    expect(value.edges.map(edge => edge.relation)).toEqual(['produces'])
+    expect(value.restated).toContain('宏发食品')
+  })
+
+  it('refuses unsupported phrase shapes with the example list', async () => {
+    const api = await boot({ kgEnabled: true, kgTenant: 't1' })
+    const refused = await api.kg.query(request({ phrase: '今天天气怎么样' }))
+    expect(refused.result).toMatchObject({ ok: false, error: { code: 'kg-query-unsupported' } })
+    if (!refused.result.ok) {
+      const details = refused.result.error.details as { examples?: readonly string[] }
+      expect(details.examples?.length).toBeGreaterThan(3)
+    }
+    const unresolved = await api.kg.query(request({ phrase: '不存在的实体的订单' }))
+    expect(unresolved.result).toMatchObject({ ok: false, error: { code: 'kg-seed-unresolved' } })
   })
 
   it('wraps store failures as kg-read-failed', async () => {

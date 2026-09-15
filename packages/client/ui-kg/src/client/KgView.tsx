@@ -40,6 +40,10 @@ export interface KgViewInjected {
   expandNode: (nodeId: string) => void
   /** Resolve an entity name to seed hits. */
   searchSeeds: (query: string) => void
+  /** Load or reload the quality panel (stats extension + mappings). */
+  loadPanel: () => void
+  /** Compile one phrase server-side and land the walked canvas; resolves with the restatement. */
+  queryPhrase: (phrase: string) => Promise<string>
   /** Select one node (details panel) or clear the selection. */
   selectNode: (nodeId: string | undefined) => void
   /** Toggle one type in the canvas type filter. */
@@ -60,6 +64,7 @@ export type KgViewProps =
 interface KgLocalInput {
   phrase: string
   restatement: string | undefined
+  phraseError: string | undefined
   query: string
 }
 
@@ -71,15 +76,19 @@ interface KgLocalInput {
 export function KgView(
   {
     inputActions, useKg, refresh, ensureDefaultView, walk, expandNode, searchSeeds, selectNode,
-    toggleTypeFilter, clearTypeFilter, requestView, t,
+    loadPanel, queryPhrase, toggleTypeFilter, clearTypeFilter, requestView, t,
   }: KgViewProps,
 ): JSX.Element {
   const state = useKg(snapshot => snapshot)
-  const [input, setInput] = useState<KgLocalInput>({ phrase: '', restatement: undefined, query: '' })
+  const [input, setInput] = useState<KgLocalInput>({ phrase: '', restatement: undefined, phraseError: undefined, query: '' })
 
   useEffect(() => {
     if (state.legend === undefined) refresh()
   }, [state.legend, refresh])
+
+  useEffect(() => {
+    if (state.panel === undefined) loadPanel()
+  }, [state.panel, loadPanel])
 
   // Opening the tab is itself the default-view trigger: an untouched canvas
   // asks for one automatic walk, a walked or failed one stays as it is.
@@ -91,12 +100,31 @@ export function KgView(
   const canvas = state.canvas
   const search = state.search
 
-  /** Phrase-box submit: parse the template (or fall back to a raw seed) and walk. */
+  /**
+   * Phrase-box submit: the server compiles the template first (`kg.query` —
+   * the richer set). When the call fails, a built-in three-template match is
+   * the offline fallback (an older gateway); a phrase no template knows
+   * surfaces the unsupported-shape hint instead of walking a nonsense seed.
+   */
   const submitPhrase = (): void => {
-    const plan = parseKgPhrase(input.phrase, (kind, entity) => t(`phrase.restate.${kind}`, { entity }))
-    if (plan === undefined) return
-    setInput({ ...input, restatement: plan.restated })
-    walk(plan.seeds, plan.hops)
+    const text = input.phrase.trim()
+    if (text.length === 0) return
+    const builtin = /^(.+?)的供货(链|路径)?$/u.test(text)
+      || /^(.+?)的订单$/u.test(text)
+      || /^(?:含|包含)(.+?)的(?:商品|产品)$/u.test(text)
+    queryPhrase(text).then((restated) => {
+      setInput({ ...input, restatement: restated, phraseError: undefined })
+    }).catch(() => {
+      if (builtin) {
+        const plan = parseKgPhrase(text, (kind, entity) => t(`phrase.restate.${kind}`, { entity }))
+        if (plan !== undefined) {
+          setInput({ ...input, restatement: plan.restated, phraseError: undefined })
+          walk(plan.seeds, plan.hops)
+          return
+        }
+      }
+      setInput({ ...input, restatement: undefined, phraseError: t('phrase.unsupported') })
+    })
   }
 
   /** One seed hit from the search box starts its own walk. */
@@ -152,11 +180,16 @@ export function KgView(
             value={input.phrase}
             placeholder={t('phrase.placeholder')}
             aria-label={t('phrase.action')}
-            onChange={(event) => { setInput({ ...input, phrase: event.target.value, restatement: undefined }) }}
+            onChange={(event) => { setInput({ ...input, phrase: event.target.value, restatement: undefined, phraseError: undefined }) }}
             onKeyDown={(event) => { if (event.key === 'Enter') submitPhrase() }}
           />
           <Button variant="ghost" size="sm" onClick={submitPhrase}>{t('phrase.action')}</Button>
           {input.restatement !== undefined && <span className={css.phraseRestate}>{input.restatement}</span>}
+          {input.phraseError !== undefined && (
+            <span className={css.phraseError} data-testid="kg-phrase-error">
+              {input.phraseError}（{t('phrase.examples')}）
+            </span>
+          )}
         </div>
         <div className={css.searchBox}>
           <input
@@ -277,6 +310,70 @@ export function KgView(
               </ul>
             )}
             <p className={css.legendHint}>{t('legend.filterHint')}</p>
+          </section>
+
+          <section className={css.qualityZone} data-testid="kg-quality-panel">
+            <h3 className={css.zoneTitle}>{t('quality.title')}</h3>
+            {state.panel === undefined || state.panel.status === 'loading' ? (
+              <p className={css.legendLoading}>{t('legend.loading')}</p>
+            ) : state.panel.status === 'error' ? (
+              <p className={css.legendLoading}>{t('error.unavailable')}</p>
+            ) : (
+              <>
+                <dl className={css.qualityRows}>
+                  <div className={css.qualityRow}>
+                    <dt>{t('quality.nodes')}</dt>
+                    <dd data-testid="kg-quality-nodes">{String(state.panel.value.stats.entities)}</dd>
+                  </div>
+                  <div className={css.qualityRow}>
+                    <dt>{t('quality.edges')}</dt>
+                    <dd>{String(state.panel.value.stats.triples)}</dd>
+                  </div>
+                  <div className={css.qualityRow}>
+                    <dt>{t('quality.islands')}</dt>
+                    <dd data-testid="kg-quality-islands">{String(state.panel.value.quality.islands)}</dd>
+                  </div>
+                  <div className={css.qualityRow}>
+                    <dt>{t('quality.conflicts')}</dt>
+                    <dd>{String(state.panel.value.quality.conflicts)}</dd>
+                  </div>
+                  {state.panel.value.quality.coverage !== undefined && (
+                    <div className={css.qualityRow}>
+                      <dt>{t('quality.coverage')}</dt>
+                      <dd>{`${String(state.panel.value.quality.coverage.numerator)}/${String(state.panel.value.quality.coverage.denominator)}（${String(Math.round(state.panel.value.quality.coverage.ratio * 100))}%）`}</dd>
+                    </div>
+                  )}
+                  {state.panel.value.quality.last_run_at !== undefined && (
+                    <div className={css.qualityRow}>
+                      <dt>{t('quality.lastRun')}</dt>
+                      <dd>{state.panel.value.quality.last_run_at.slice(0, 19).replace('T', ' ')}</dd>
+                    </div>
+                  )}
+                </dl>
+                {state.panel.value.mappings !== undefined && (
+                  <>
+                    <h4 className={css.qualitySubTitle}>{t('quality.mappingsTitle')}</h4>
+                    <ul className={css.mappingList} data-testid="kg-mapping-list">
+                      {state.panel.value.mappings.collections.map((collection) => {
+                        const run = state.panel?.status === 'ready'
+                          ? state.panel.value.mappings?.lastRun?.collections.find(entry => entry.scope === collection.name)
+                          : undefined
+                        return (
+                          <li key={collection.name} className={css.mappingRow}>
+                            <span className={css.mappingName}>{collection.name}</span>
+                            <span className={css.mappingMeta}>
+                              {run === undefined
+                                ? t('quality.mappingPending')
+                                : `${t('quality.mappingNodes')} ${String(run.nodesUpserted)} · ${t('quality.mappingEdges')} ${String(run.edgesUpserted)}`}
+                            </span>
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  </>
+                )}
+              </>
+            )}
           </section>
 
           <section className={css.detailsZone}>

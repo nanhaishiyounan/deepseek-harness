@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-09-02-kb-hero-fix-o.md
-2026-09-02-kb-hero-fix-o.md: f5bb4dcb12fc889a1526d0d8c00eca8326dbbb4d
-2026-09-02-kb-hero-fix-o.zh.md: eabd05cc36672505de243f058b53408ed1dedb20
+2026-09-02-kb-hero-fix-o.md: f760f592ed072fdbc8008053aafc514e9de1f2aa
+2026-09-02-kb-hero-fix-o.zh.md: 01347b45490ac052075650dccb10aa55dba9983d

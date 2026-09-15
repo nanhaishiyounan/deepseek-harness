@@ -80,8 +80,8 @@ import {
   connectorsConnectionsRequestSchema, connectorsListRequestSchema, connectorsTransfersRequestSchema,
 } from '../api/connectors.schema.ts'
 import {
-  kgExpandRequestSchema, kgMappingsRequestSchema, kgSchemaRequestSchema, kgSearchRequestSchema,
-  kgStatsRequestSchema, kgSubgraphRequestSchema,
+  kgExpandRequestSchema, kgMappingsRequestSchema, kgQueryRequestSchema, kgSchemaRequestSchema,
+  kgSearchRequestSchema, kgStatsRequestSchema, kgSubgraphRequestSchema,
 } from '../api/kg.schema.ts'
 import {
   subagentHistoryRequestSchema,
@@ -172,6 +172,7 @@ const UNARY_ROUTES: UnaryRoutes = {
   'connectors.transfers': { schema: connectorsTransfersRequestSchema, invoke: (api, r, signal) => api.connectors.transfers(r, signal) },
   'kg.mappings': { schema: kgMappingsRequestSchema, invoke: (api, r, signal) => api.kg.mappings(r, signal) },
   'kg.schema': { schema: kgSchemaRequestSchema, invoke: (api, r, signal) => api.kg.schema(r, signal) },
+  'kg.query': { schema: kgQueryRequestSchema, invoke: (api, r, signal) => api.kg.query(r, signal) },
   'kg.search': { schema: kgSearchRequestSchema, invoke: (api, r, signal) => api.kg.search(r, signal) },
   'kg.subgraph': { schema: kgSubgraphRequestSchema, invoke: (api, r, signal) => api.kg.subgraph(r, signal) },
   'kg.expand': { schema: kgExpandRequestSchema, invoke: (api, r, signal) => api.kg.expand(r, signal) },

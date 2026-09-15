@@ -132,6 +132,8 @@ export interface RpcErrorDetailsMap {
   'assets-asset-missing': { providerId: string; datasetId: string }
   /** A kg-domain call ran in a deployment that did not opt in through `kgEnabled`. */
   'kg-not-composed': {}
+  /** A kg.query phrase matched no template; details carry the supported examples. */
+  'kg-query-unsupported': { examples: string[] }
   /** A kg-domain call found the deployment composing no knowledge-graph seam. */
   'kg-graph-missing': {}
   /** A kg-domain call found no tenant binding (`kgTenant` unset). */

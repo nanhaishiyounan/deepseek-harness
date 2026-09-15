@@ -19,7 +19,7 @@
 
 | 工具包 | 模型可见名称 | 依赖 | 写入／影响 | 随产品发布的别名 | 部署说明 |
 | --- | --- | --- | --- | --- | --- |
-| `@deepseek-ai/dsh-tool-kb` | `kb_graph_add`, `kb_graph_query`, `kb_ingest`, `kb_ingest_url`, `kb_search`, `kb_stats`, `kg_schema`, `kg_subgraph` | `ctx.tools`、`ctx.kb`、`ctx.fs`、`ctx.systemPrompt` | `tool/call`、`tool/result` | - | kb_search、kb_ingest、kb_ingest_url 与 kb_stats 在无可用 store 时保持可见并在执行时以结构化错误失败；四者都在部署绑定租户下运行（模型从不提供租户），检索结果带编号引用，降级 text-only 模式在每次检索结果中可观测。 |
+| `@deepseek-ai/dsh-tool-kb` | `kb_ingest`, `kb_ingest_url`, `kb_search`, `kb_stats`, `kg_schema`, `kg_subgraph` | `ctx.tools`、`ctx.kb`、`ctx.fs`、`ctx.systemPrompt` | `tool/call`、`tool/result` | - | kb_search、kb_ingest、kb_ingest_url 与 kb_stats 在无可用 store 时保持可见并在执行时以结构化错误失败；四者都在部署绑定租户下运行（模型从不提供租户），检索结果带编号引用，降级 text-only 模式在每次检索结果中可观测。 |
 | `@deepseek-ai/dsh-tool-lakehouse` | `lakehouse_query`, `lakehouse_tables` | `ctx.tools`, `ctx.lakehouse`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | lakehouse_tables 与 lakehouse_query 在无可用引擎时保持可见并在执行时以结构化错误失败（表清单仍可应答）；两者都运行在部署侧绑定租户下（模型永不提供租户），查询结果是带截断标记的封顶行集，渲染文本携带来源表溯源行。 |
 | `@deepseek-ai/dsh-tool-connector` | `connector_discover`, `connector_fetch`, `connector_transfer`, `order_create`, `order_status` | `ctx.tools`, `ctx.connector`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | connector_discover、connector_fetch 与 connector_transfer 都运行在部署侧绑定租户下（模型永不提供租户）；发现以携带 provider 与 dataset id 的分组清单作答，预览有上限（8 行 / 400 字符），传输渲染落地回执——含 catalog 传输记录 id 与下一步指引（对命名表用 lakehouse_query，或带引用的 kb_search）。 |
 | `@deepseek-ai/dsh-tool-nocobase` | `nb_collections`, `nb_create`, `nb_get`, `nb_list`, `nb_update` | `ctx.tools`、`ctx.systemPrompt` | `tool/call`、`tool/result` | - | nb_collections、nb_list、nb_get、nb_create 与 nb_update 以服务账号对话部署的 NocoBase（模型永不提供租户）；筛选词汇为封闭集（eq/in/gt/lt 加单一 and/or 连接），写工具承载确认式变更契约——系统提示指引要求先呈现预览 / 改前→改后对比并取得用户明确同意才运行 nb_create/nb_update，其回执复述落地 id 或逐字段 diff。 |
@@ -54,103 +54,6 @@
 <a id="deepseek-aidsh-tool-kb"></a>
 
 ## `@deepseek-ai/dsh-tool-kb`
-
-### `kb_graph_add`
-
-Store entity-relation triples extracted from ingested documents into the knowledge graph (idempotent; up to 50 per call). Cite the source document in source_path so graph answers stay traceable.
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "triples": {
-      "type": "array",
-      "description": "Triples to store. Entity types: Object, Process, Event, Role, Concept, Customer, Supplier, Product, ProductCategory, Order, OrderItem, Shipment, Carrier, Warehouse, StockLevel, Expert, ExpertService, Service, Deliverable, Dataset, Connector, Region, Address, Ingredient, company, product, ingredient, additive, standard, process, risk. Predicates: produces, uses, contains, complies_with, follows, flags, supplies, broader, related, places, located_in, fulfills, belongs_to, placed_by, includes, shipped_to, carries, departs_from, stores, offers, certified_for, derived_from, sourced_via.",
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "subject_type": {
-            "type": "string"
-          },
-          "subject_id": {
-            "type": "string"
-          },
-          "predicate": {
-            "type": "string"
-          },
-          "object_type": {
-            "type": "string"
-          },
-          "object_id": {
-            "type": "string"
-          },
-          "source_path": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "subject_type",
-          "subject_id",
-          "predicate",
-          "object_type",
-          "object_id"
-        ]
-      }
-    }
-  },
-  "required": [
-    "triples"
-  ]
-}
-```
-
-Source: [`packages/kb/tool-kb/src/index.ts`](../packages/kb/tool-kb/src/index.ts)
-
-### `kb_graph_query`
-
-Query the knowledge graph: neighbors of one entity, a two-hop path between two entities, or entities by id substring. Entity types: Object, Process, Event, Role, Concept, Customer, Supplier, Product, ProductCategory, Order, OrderItem, Shipment, Carrier, Warehouse, StockLevel, Expert, ExpertService, Service, Deliverable, Dataset, Connector, Region, Address, Ingredient, company, product, ingredient, additive, standard, process, risk. Predicates: produces, uses, contains, complies_with, follows, flags, supplies, broader, related, places, located_in, fulfills, belongs_to, placed_by, includes, shipped_to, carries, departs_from, stores, offers, certified_for, derived_from, sourced_via.
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "action": {
-      "type": "string",
-      "description": "One of: neighbors, paths, search."
-    },
-    "entity_type": {
-      "type": "string",
-      "description": "Entity type (Object, Process, Event, Role, Concept, Customer, Supplier, Product, ProductCategory, Order, OrderItem, Shipment, Carrier, Warehouse, StockLevel, Expert, ExpertService, Service, Deliverable, Dataset, Connector, Region, Address, Ingredient, company, product, ingredient, additive, standard, process, risk); required for neighbors/paths, optional type filter for search."
-    },
-    "entity_id": {
-      "type": "string",
-      "description": "Entity id for neighbors/paths, or the substring filter for search."
-    },
-    "target_type": {
-      "type": "string",
-      "description": "Target entity type for paths."
-    },
-    "target_id": {
-      "type": "string",
-      "description": "Target entity id for paths."
-    },
-    "query": {
-      "type": "string",
-      "description": "Id substring for the search action."
-    },
-    "limit": {
-      "type": "number",
-      "description": "Maximum entities for search (1–20)."
-    }
-  },
-  "required": [
-    "action"
-  ]
-}
-```
-
-Source: [`packages/kb/tool-kb/src/index.ts`](../packages/kb/tool-kb/src/index.ts)
 
 ### `kb_ingest`
 

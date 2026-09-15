@@ -30,5 +30,5 @@ Six small defects clustered on the kb blank-session hero and its owning tests: t
 ## Consequences
 
 - `packages/client/ui-kb/src/client/hero/hero.module.css` (group cap, wrap, railCount styling, reduced-motion block), `src/client/locales.ts` (new key, zh + en), `src/client/hero/KbHeroDock.tsx` (railCount span).
-- `packages/client/ui-kb/tests/kbherodock.client.spec.tsx` (derived badge + railCount assertions); `examples/kb-agent/tests/scenarios.spec.ts` (probe fail-loud, isolated afterEach).
+- `packages/client/ui-kb/tests/scenarioview.client.spec.tsx` (derived badge + railCount assertions); `examples/kb-agent/tests/scenarios.spec.ts` (probe fail-loud, isolated afterEach).
 - The 800px evidence shot is run-scoped (`.artifacts/`, gitignored); the geometry assertion lived in a temporary spec deleted after the capture.

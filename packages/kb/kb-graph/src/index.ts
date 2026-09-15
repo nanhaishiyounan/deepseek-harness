@@ -15,7 +15,8 @@ import { Context, Service } from '@deepseek-ai/cordis'
 import { builtinOntology, ONTOLOGY_VERSION, validateOntology } from './ontology.ts'
 import { KbGraphError } from './types.ts'
 import type {
-  GraphStore, KbGraphEntity, KbGraphStoredTriple, KbGraphTriple, KgEdge,
+  GraphStore, KbGraphEntity, KbGraphStoredTriple, KbGraphTriple,
+  KgBuildRunInput, KgBuildRunRow, KgEdge,
   KgNode, KgNodeHit, KgNodeTypeId, KgNodeType, KgOntologyLayer, KgOntologyRevision,
   KgOntologyRevisionInput, KgRelation, KgRelationId,
   KgShapeViolation, KgSourceRun, KgStore, KgSubgraph, KgSubgraphLimits,
@@ -28,7 +29,8 @@ export {
 } from './types.ts'
 export type {
   GraphStore, KbGraphEntity, KbGraphStoredTriple, KbGraphTriple,
-  KgEdge, KgNode, KgNodeHit, KgNodeTypeId, KgNodeType, KgNodeTypeStatus, KgOntologyLayer,
+  KgBuildRunInput, KgBuildRunRow, KgEdge,
+  KgNode, KgNodeHit, KgNodeTypeId, KgNodeType, KgNodeTypeStatus, KgOntologyLayer,
   KgOntologyRevision, KgOntologyRevisionInput, KgOntologySource, KgPropDef, KgProvenance,
   KgRelation, KgRelationConstraint, KgRelationId, KgShapeViolation, KgSourceRun, KgStore,
   KgSubgraph, KgSubgraphLimits, KgSubgraphNode,
@@ -577,6 +579,52 @@ export class KbGraphRuntime extends Service {
    */
   async ontologyRevisions(limit: number): Promise<readonly KgOntologyRevision[]> {
     return await this.resolveKgStore().ontologyRevisions(limit)
+  }
+
+  /**
+   * Append one build-run ledger row (report + metrics JSON).
+   * @param run - the ledger snapshot.
+   * @returns the inserted row id.
+   */
+  async recordBuildRun(run: KgBuildRunInput): Promise<number> {
+    return await this.resolveKgStore().recordBuildRun(run)
+  }
+
+  /**
+   * Read the newest build-run ledger row for one tenant.
+   * @param tenantId - owning tenant.
+   * @returns the row, or undefined before the first persisted run.
+   */
+  async latestBuildRun(tenantId: string): Promise<KgBuildRunRow | undefined> {
+    return await this.resolveKgStore().latestBuildRun(tenantId)
+  }
+
+  /**
+   * Count live nodes with zero live edges (the island metric).
+   * @param tenantId - owning tenant.
+   * @returns the island-node count.
+   */
+  async islandNodes(tenantId: string): Promise<number> {
+    return await this.resolveKgStore().islandNodes(tenantId)
+  }
+
+  /**
+   * Count (src, dst, relation) groups asserting more than one distinct fact.
+   * @param tenantId - owning tenant.
+   * @returns the conflicting-fact group count.
+   */
+  async conflictingFacts(tenantId: string): Promise<number> {
+    return await this.resolveKgStore().conflictingFacts(tenantId)
+  }
+
+  /**
+   * Count live nodes of one type under one tenant (the coverage numerator).
+   * @param tenantId - owning tenant.
+   * @param typeId - the node type to count.
+   * @returns the live-node count for that type.
+   */
+  async nodeCountByType(tenantId: string, typeId: KgNodeTypeId): Promise<number> {
+    return await this.resolveKgStore().nodeCountByType(tenantId, typeId)
   }
 }
 
