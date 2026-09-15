@@ -54,5 +54,8 @@
     "lib/index.js",
     "lib/invariant.js",
     "lib/types/**/*.d.ts"
-  ]
+  ],
+  "dependencies": {
+    "yaml": "^2.9.0"
+  }
 }

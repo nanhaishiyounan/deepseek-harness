@@ -1,9 +1,11 @@
--- kg-graph-sqlite SCHEMA_VERSION 2 (property graph; evolves the v1 single
--- `triples` table). Application id "DSHG" is retained: same store identity,
--- new major format. A v1 database (user_version 1) is rejected, not migrated
--- — the graph is derived data with provenance and rebuilds from its sources.
+-- kg-graph-sqlite SCHEMA_VERSION 3 (versioned registry + ontology revision
+-- audit; evolves the v2 property graph). Application id "DSHG" is retained:
+-- same store identity, new major format. A v1 or v2 database (user_version
+-- < 3) is rejected, not migrated — the graph is derived data with provenance
+-- and rebuilds from its sources.
 
 -- ① Node type registry (persistent layer; built-in seed inserted by code).
+-- `version` is the registry-row revision counter (1 at first persist).
 CREATE TABLE kg_node_types (
   type_id      TEXT PRIMARY KEY,
   label        TEXT NOT NULL,
@@ -14,6 +16,7 @@ CREATE TABLE kg_node_types (
   natural_key  TEXT,
   source       TEXT NOT NULL,
   status       TEXT NOT NULL DEFAULT 'active',
+  version      INTEGER NOT NULL DEFAULT 1,
   created_at   TEXT NOT NULL,
   updated_at   TEXT NOT NULL
 );
@@ -33,6 +36,7 @@ CREATE TABLE kg_relations (
   kind             TEXT NOT NULL,
   inverse_of       TEXT REFERENCES kg_relations(relation_id),
   source           TEXT NOT NULL,
+  version          INTEGER NOT NULL DEFAULT 1,
   created_at       TEXT NOT NULL,
   updated_at       TEXT NOT NULL
 );
@@ -114,6 +118,17 @@ CREATE TABLE kg_source_runs (
   run_config    TEXT,
   last_run_at   TEXT NOT NULL,
   PRIMARY KEY (source_system, scope)
+) STRICT;
+
+-- ⑥b Ontology revision audit: one row per registry-changing pipeline run
+-- (added/removed/changed type and relation ids ride changes_json). An
+-- idempotent no-change run appends nothing.
+CREATE TABLE kg_ontology_revisions (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  ontology_version TEXT NOT NULL,
+  summary      TEXT NOT NULL,
+  changes_json TEXT NOT NULL,
+  created_at   TEXT NOT NULL
 ) STRICT;
 
 -- ⑦ Usage counters (the kb seam's counter pattern, KG dimensions).

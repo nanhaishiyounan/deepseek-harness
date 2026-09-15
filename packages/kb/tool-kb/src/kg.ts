@@ -17,7 +17,7 @@ import { defineTool } from '@deepseek-ai/dsh-tools'
 import type { GenericCallView, GenericResultView, ToolResult } from '@deepseek-ai/dsh-tools'
 // Side-effect type import: resolves `ctx.get('kbGraph')` to the service type.
 import type {} from '@deepseek-ai/dsh-kb-graph'
-import { builtinOntology } from '@deepseek-ai/dsh-kb-graph'
+import { builtinOntology, ONTOLOGY_VERSION } from '@deepseek-ai/dsh-kb-graph'
 import type { KgNodeTypeId, KgSubgraph } from '@deepseek-ai/dsh-kb-graph'
 
 /** Model-facing `kg_schema` arguments. */
@@ -54,6 +54,8 @@ export interface KgSchemaRelationView {
 
 /** The canonical `kg_schema` output value. */
 export interface KgSchemaToolValue {
+  /** The built-in ontology's semver (the TS seed is the source of truth). */
+  ontology_version: string
   layer?: 'top' | 'domain'
   types: KgSchemaTypeView[]
   relations: KgSchemaRelationView[]
@@ -92,11 +94,12 @@ interface OntologyRegistryFace {
  */
 export function kgOntologyViews(
   registry: OntologyRegistryFace | undefined,
-): { types: KgSchemaTypeView[]; relations: KgSchemaRelationView[] } {
+): { ontologyVersion: string; types: KgSchemaTypeView[]; relations: KgSchemaRelationView[] } {
   const seed = builtinOntology()
   const nodeTypes = registry === undefined ? seed.nodeTypes : registry.listNodeTypes()
   const relations = registry === undefined ? seed.relations : registry.listRelations()
   return {
+    ontologyVersion: ONTOLOGY_VERSION,
     types: nodeTypes.map(type => ({
       id: String(type.id),
       label: type.label,
@@ -126,7 +129,7 @@ function yaml(text: string): string {
  * @returns the rendered schema listing.
  */
 export function formatKgSchemaOutput(value: KgSchemaToolValue): string {
-  const lines: string[] = ['entity_types:']
+  const lines: string[] = [`ontology_version: ${value.ontology_version}`, 'entity_types:']
   for (const type of value.types) {
     lines.push(`  - id: ${yaml(type.id)} | label: ${yaml(type.label)} | layer: ${type.layer}${type.extends === undefined ? '' : ` | extends: ${type.extends}`}${type.status === 'active' ? '' : ` | status: ${type.status}`}${type.natural_key === undefined ? '' : ` | natural_key: ${type.natural_key}`}${type.props.length === 0 ? '' : ` | props: ${type.props.join(', ')}`}`)
   }
@@ -276,6 +279,7 @@ export function applyKgTools(
           type: 'object',
           additionalProperties: false,
           properties: {
+            ontology_version: { type: 'string', required: true },
             layer: { type: 'string' },
             types: {
               type: 'array',
@@ -326,6 +330,7 @@ export function applyKgTools(
           ? views.types.filter(type => type.layer === layer)
           : views.types
         return Promise.resolve({
+          ontology_version: views.ontologyVersion,
           ...(layer === undefined ? {} : { layer }),
           types: filtered,
           relations: views.relations,

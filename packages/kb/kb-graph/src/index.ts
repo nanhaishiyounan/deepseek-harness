@@ -12,25 +12,26 @@
  */
 
 import { Context, Service } from '@deepseek-ai/cordis'
-import { builtinOntology } from './ontology.ts'
+import { builtinOntology, ONTOLOGY_VERSION, validateOntology } from './ontology.ts'
 import { KbGraphError } from './types.ts'
 import type {
   GraphStore, KbGraphEntity, KbGraphStoredTriple, KbGraphTriple, KgEdge,
-  KgNode, KgNodeHit, KgNodeTypeId, KgNodeType, KgOntologyLayer, KgRelation, KgRelationId,
+  KgNode, KgNodeHit, KgNodeTypeId, KgNodeType, KgOntologyLayer, KgOntologyRevision,
+  KgOntologyRevisionInput, KgRelation, KgRelationId,
   KgShapeViolation, KgSourceRun, KgStore, KgSubgraph, KgSubgraphLimits,
 } from './types.ts'
 
-export { builtinOntology } from './ontology.ts'
-export type { KgBuiltinOntology } from './ontology.ts'
+export { builtinOntology, exportOntology, validateOntology, ONTOLOGY_VERSION } from './ontology.ts'
+export type { KgBuiltinOntology, KgOntologyDocument } from './ontology.ts'
 export {
   kgNodeTypeId, kgRelationId, KbGraphError,
 } from './types.ts'
 export type {
   GraphStore, KbGraphEntity, KbGraphStoredTriple, KbGraphTriple,
   KgEdge, KgNode, KgNodeHit, KgNodeTypeId, KgNodeType, KgNodeTypeStatus, KgOntologyLayer,
-  KgOntologySource, KgPropDef, KgProvenance, KgRelation, KgRelationConstraint,
-  KgRelationId, KgShapeViolation, KgSourceRun, KgStore, KgSubgraph,
-  KgSubgraphLimits, KgSubgraphNode,
+  KgOntologyRevision, KgOntologyRevisionInput, KgOntologySource, KgPropDef, KgProvenance,
+  KgRelation, KgRelationConstraint, KgRelationId, KgShapeViolation, KgSourceRun, KgStore,
+  KgSubgraph, KgSubgraphLimits, KgSubgraphNode,
 } from './types.ts'
 
 declare module '@deepseek-ai/cordis' {
@@ -60,6 +61,10 @@ export class KbGraphRuntime extends Service {
   constructor(ctx: Context) {
     super(ctx, 'kbGraph')
     const seed = builtinOntology()
+    // The seed is the typed TS boundary's own document; its referential
+    // invariants assert here so an ontology edit that dangles an extends or
+    // constraint fails at construction, never at first write.
+    validateOntology({ version: ONTOLOGY_VERSION, ...seed })
     for (const type of seed.nodeTypes) this.nodeTypes.set(type.id, type)
     for (const relation of seed.relations) this.relations.set(relation.id, relation)
   }
@@ -534,6 +539,16 @@ export class KbGraphRuntime extends Service {
   }
 
   /**
+   * The built-in ontology's semantic version — the TS seed is the single
+   * source of truth; derived registrations (nocobase-derived, agent-defined)
+   * ride the store's revision audit instead.
+   * @returns the seed's semver string.
+   */
+  ontologyVersion(): string {
+    return ONTOLOGY_VERSION
+  }
+
+  /**
    * Read every persisted registry row (the two-layer registry's read path;
    * store providers re-register these at boot).
    * @returns the stored node types and relations.
@@ -544,6 +559,24 @@ export class KbGraphRuntime extends Service {
       nodeTypes: await store.listStoredNodeTypes(),
       relations: await store.listStoredRelations(),
     }
+  }
+
+  /**
+   * Append one ontology-revision audit row (the pipeline's registry diff).
+   * @param revision - the revision snapshot.
+   * @returns the inserted revision id.
+   */
+  async recordOntologyRevision(revision: KgOntologyRevisionInput): Promise<number> {
+    return await this.resolveKgStore().recordOntologyRevision(revision)
+  }
+
+  /**
+   * Read the newest ontology-revision audit rows.
+   * @param limit - maximum rows to return.
+   * @returns the revisions, newest first.
+   */
+  async ontologyRevisions(limit: number): Promise<readonly KgOntologyRevision[]> {
+    return await this.resolveKgStore().ontologyRevisions(limit)
   }
 }
 

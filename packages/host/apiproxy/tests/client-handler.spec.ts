@@ -56,6 +56,7 @@ function scriptedApi(overrides: {
       transfers: err,
     },
     kg: {
+      mappings: err,
       schema: err,
       search: err,
       subgraph: err,

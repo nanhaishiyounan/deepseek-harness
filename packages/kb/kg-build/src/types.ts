@@ -53,8 +53,13 @@ export interface NocoBaseSourceConfig {
   baseUrl?: string | undefined
   /** Credential reference (env var name) the API token resolves through. */
   apiKeyEnv?: string
-  /** Collections to map — the explicit whitelist; absent users/system tables never map. */
-  collections?: NocoBaseCollectionConfig[]
+  /**
+   * The declarative mapping file (kg-mappings.yml) — the collection
+   * whitelist's only home. The inline `collections` key is retired: an old
+   * configuration fails config validation loudly instead of silently
+   * mapping nothing.
+   */
+  mappingsFile?: string
 }
 
 /** Extraction corpus configuration (plain-text/Markdown documents on disk). */
@@ -170,6 +175,29 @@ export interface ExtractionOutcome {
   readonly retried: boolean
 }
 
+/** One declared fk link in the mappings file (reference → edge wiring). */
+export interface KgMappingFkLink {
+  readonly field: string
+  readonly target: string
+  readonly relation: string
+  readonly style?: 'plain-id' | 'collection-address'
+}
+
+/** One collection entry in the mappings file. */
+export interface KgMappingCollection {
+  readonly name: string
+  readonly anchor?: string
+  readonly titleField?: string
+  readonly fkLinks?: readonly KgMappingFkLink[]
+}
+
+/** The declarative mappings file (kg-mappings.yml) as code reads it. */
+export interface KgMappingsFile {
+  readonly version: number
+  readonly sources: readonly { system: 'nocobase'; collections: readonly KgMappingCollection[] }[]
+  readonly rules: { skipHiddenCollections: boolean; emptyFkNoEdge: boolean; derivesTitle: boolean }
+}
+
 /** One NocoBase collection run slice in the report. */
 export interface CollectionRunReport {
   readonly scope: string
@@ -181,6 +209,8 @@ export interface CollectionRunReport {
   readonly skipped: boolean
   readonly watermark: string
   readonly contentHash: string
+  /** Relation-shaped fields the mapping could not wire (R06 target unmapped, self-links, …). */
+  readonly skippedRelationFields: readonly string[]
 }
 
 /** The lakehouse / connector / corpus slices in the report. */
@@ -215,6 +245,10 @@ export interface KgBuildRunReport {
   /** Registry entries persisted this run (derived types and relations). */
   readonly persistedTypes: number
   readonly persistedRelations: number
+  /** Rule hit counts keyed by the mappers.ts header numbering (R01…R13). */
+  readonly ruleHits: Readonly<Record<string, number>>
+  /** The ontology revision id appended this run, when the registry changed. */
+  readonly ontologyRevision?: number
   readonly startedAt: string
   readonly finishedAt: string
 }

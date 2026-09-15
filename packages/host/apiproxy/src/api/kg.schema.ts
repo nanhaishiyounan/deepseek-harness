@@ -80,11 +80,47 @@ export const kgExpandRequestSchema = z.object({
 }) as unknown as z.ZodType<Wire<RequestPayload<'kg.expand'>>>
 /** kg.stats request payload (empty). */
 export const kgStatsRequestSchema = z.object({}) as unknown as z.ZodType<Wire<RequestPayload<'kg.stats'>>>
+/** kg.mappings request payload (empty). */
+export const kgMappingsRequestSchema = z.object({}) as unknown as z.ZodType<Wire<RequestPayload<'kg.mappings'>>>
 
 /** kg.schema response value. */
 export const kgSchemaValueSchema = z.object({
+  ontology_version: z.string(),
   node_types: z.array(kgNodeTypeViewSchema),
   relations: z.array(kgRelationViewSchema),
+  revisions: z.array(z.object({
+    id: z.number().int(),
+    summary: z.string(),
+    created_at: z.string(),
+  })),
+})
+
+/** kg.mappings response value. */
+export const kgMappingsValueSchema = z.object({
+  file: z.string(),
+  version: z.number().int(),
+  rules: z.object({
+    skipHiddenCollections: z.boolean(),
+    emptyFkNoEdge: z.boolean(),
+    derivesTitle: z.boolean(),
+  }),
+  collections: z.array(z.object({
+    name: z.string(),
+    anchor: z.string().optional(),
+    titleField: z.string().optional(),
+    fkLinkCount: z.number().int().min(0),
+  })),
+  lastRun: z.object({
+    finishedAt: z.string(),
+    ruleHits: z.record(z.string(), z.number()),
+    collections: z.array(z.object({
+      scope: z.string(),
+      nodesUpserted: z.number().int().min(0),
+      edgesUpserted: z.number().int().min(0),
+      skipped: z.boolean(),
+      skippedRelationFields: z.array(z.string()),
+    })),
+  }).optional(),
 })
 
 /** kg.search response value. */

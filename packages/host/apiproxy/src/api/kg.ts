@@ -67,6 +67,30 @@ export interface KgEdgeView {
   readonly asserted_by: 'nocobase' | 'lakehouse' | 'connector' | 'kb'
 }
 
+/** The `kg.mappings` response value: the pipeline's mappings readout. */
+export interface KgMappingsWireValue {
+  readonly file: string
+  readonly version: number
+  readonly rules: { readonly skipHiddenCollections: boolean; readonly emptyFkNoEdge: boolean; readonly derivesTitle: boolean }
+  readonly collections: readonly {
+    readonly name: string
+    readonly anchor?: string
+    readonly titleField?: string
+    readonly fkLinkCount: number
+  }[]
+  readonly lastRun?: {
+    readonly finishedAt: string
+    readonly ruleHits: Readonly<Record<string, number>>
+    readonly collections: readonly {
+      readonly scope: string
+      readonly nodesUpserted: number
+      readonly edgesUpserted: number
+      readonly skipped: boolean
+      readonly skippedRelationFields: readonly string[]
+    }[]
+  }
+}
+
 /** Shared subgraph result projection. */
 export interface KgSubgraphView {
   readonly nodes: readonly KgSubgraphNodeView[]
@@ -80,7 +104,22 @@ export interface KgApi {
   schema(
     request: RpcRequest<Record<string, never>>,
     signal?: AbortSignal,
-  ): Promise<RpcResponse<{ node_types: readonly KgNodeTypeView[]; relations: readonly KgRelationView[] }>>
+  ): Promise<RpcResponse<{
+    ontology_version: string
+    node_types: readonly KgNodeTypeView[]
+    relations: readonly KgRelationView[]
+    /** Newest registry-change audit rows (newest first). */
+    revisions?: readonly { readonly id: number; readonly summary: string; readonly created_at: string }[]
+  }>>
+
+  /**
+   * Read the kg-build mappings file state (the rule panel's source): the
+   * loaded collection whitelist plus the last run's per-collection outcome.
+   */
+  mappings(
+    request: RpcRequest<Record<string, never>>,
+    signal?: AbortSignal,
+  ): Promise<RpcResponse<KgMappingsWireValue>>
 
   /** Resolve entity names or aliases to node hits (the seed picker). */
   search(

@@ -35,15 +35,18 @@ import { alignEntity } from './align.ts'
 import type { AdjudicatingLlm } from './align.ts'
 import { planScopeRun, priorStateOf, sha256Hex } from './incremental.ts'
 import type {
-  CollectionRunReport, CorpusReport, KgBuildConfig, KgBuildRunReport, SimpleSourceReport,
+  CollectionRunReport, CorpusReport, KgBuildConfig, KgBuildRunReport, KgMappingsFile, SimpleSourceReport,
 } from './types.ts'
+import { loadMappingsFile } from './mappings.ts'
 import type { KgEdge, KgNode, KgNodeTypeId, KgRelation } from '@deepseek-ai/dsh-kb-graph'
 // Side-effect type import: resolves `ctx.get('kbGraph')` to the service type.
 import type {} from '@deepseek-ai/dsh-kb-graph'
-import { kgNodeTypeId, kgRelationId } from '@deepseek-ai/dsh-kb-graph'
+import { kgNodeTypeId, kgRelationId, ONTOLOGY_VERSION } from '@deepseek-ai/dsh-kb-graph'
 
 export { KgBuildError } from './error.ts'
 export * from './types.ts'
+export { loadMappingsFile, parseMappings } from './mappings.ts'
+export type { KgMappingRules } from './mappings.ts'
 export {
   buildExtractionPrompt, extractChunk,
 } from './extract.ts'
@@ -83,13 +86,6 @@ export const DEFAULT_CHUNK_CHARS = 4_000
 /** Environment variable the NocoBase base url falls back to. */
 export const NOCOBASE_BASE_URL_ENV = 'NOCOBASE_BASE_URL'
 
-const fkLink = z.object({
-  field: z.string().required(),
-  target: z.string().required(),
-  relation: z.string().required(),
-  style: z.union(['plain-id', 'collection-address']).default('plain-id'),
-})
-
 /** Plugin config: the tenant binding, the enabled sources, and the budgets. */
 export interface Config extends KgBuildConfig {}
 export type { KgBuildConfig }
@@ -99,12 +95,12 @@ export const Config = z.object({
   nocobase: z.object({
     baseUrl: z.string(),
     apiKeyEnv: z.string().role('credential-ref'),
-    collections: z.array(z.object({
-      name: z.string().required(),
-      anchor: z.string(),
-      titleField: z.string(),
-      fkLinks: z.array(fkLink),
-    })),
+    // The declarative mapping file is the collection whitelist's only home
+    // (kg-mappings.yml). The inline `collections` key is captured only so the
+    // constructor can reject it loudly — a deployment still carrying it must
+    // fail at load, never silently map nothing.
+    mappingsFile: z.string(),
+    collections: z.any(),
   }),
   lakehouse: z.boolean().default(true),
   connector: z.boolean().default(true),
@@ -138,6 +134,33 @@ export interface RunOptions {
 }
 
 /**
+ * The mappings read-out surface: the loaded file plus the last run's
+ * per-collection outcome (the graph tab's rule panel reads this).
+ */
+export interface KgMappingsReadout {
+  readonly file: string
+  readonly version: number
+  readonly rules: KgMappingsFile['rules']
+  readonly collections: readonly {
+    name: string
+    anchor?: string
+    titleField?: string
+    fkLinkCount: number
+  }[]
+  readonly lastRun?: {
+    finishedAt: string
+    ruleHits: Readonly<Record<string, number>>
+    collections: readonly {
+      scope: string
+      nodesUpserted: number
+      edgesUpserted: number
+      skipped: boolean
+      skippedRelationFields: readonly string[]
+    }[]
+  }
+}
+
+/**
  * The pipeline service. One instance per context; `run()` executes one full
  * pipeline pass (structured sources, then extraction) and resolves with the
  * per-scope report. Fails loud on a missing seam: every enabled source
@@ -146,10 +169,29 @@ export interface RunOptions {
 export class KgBuildRuntime extends Service {
   static Config = Config
   private readonly resolved: KgBuildPluginConfig
+  private mappingsFile: KgMappingsFile | undefined
+  private lastReport: KgBuildRunReport | undefined
 
   constructor(ctx: Context, config: KgBuildPluginConfig) {
     super(ctx, 'kgBuild')
     this.resolved = config
+    const nocobase = this.resolved.nocobase as { mappingsFile?: string; collections?: unknown }
+    {
+      // Fail loud at load: the retired inline key rejects with the migration
+      // instruction, an unreadable or malformed mapping file stops the plugin
+      // here, and a fully-empty source block means the source stays disabled
+      // (the seam-missing failures still fire from run()).
+      if (Array.isArray(nocobase.collections) && nocobase.collections.length > 0) {
+        throw new KgBuildError(
+          'nocobase.collections is retired: move the collection whitelist and fk links into a versioned kg-mappings.yml and set nocobase.mappingsFile',
+          'KG_BUILD_MAPPINGS_INVALID',
+        )
+      }
+      const mappingsPath = nocobase.mappingsFile
+      if (mappingsPath !== undefined && mappingsPath.length > 0) {
+        this.mappingsFile = loadMappingsFile(mappingsPath)
+      }
+    }
     if (this.resolved.intervalMs > 0) {
       const timer = setInterval(() => {
         // Scheduled failures surface through the logger; the next tick retries.
@@ -175,8 +217,8 @@ export class KgBuildRuntime extends Service {
 
   /** Resolve the NocoBase REST client from config and the credential chain. */
   private async nocoBaseClient(): Promise<NocoBaseClient> {
-    // runNocoBase guarantees a non-empty collection whitelist at this point.
-    const source = this.resolved.nocobase as NonNullable<KgBuildPluginConfig['nocobase']> & { collections: NonNullable<NonNullable<KgBuildPluginConfig['nocobase']>['collections']> }
+    // runNocoBase guarantees a configured mappings file at this point.
+    const source = this.resolved.nocobase as NonNullable<KgBuildPluginConfig['nocobase']>
     const apiKeyEnv = source.apiKeyEnv ?? 'NOCOBASE_API_KEY'
     const ambientBase = launchEnvironmentOf(this.ctx).get(NOCOBASE_BASE_URL_ENV)
     /* v8 ignore next -- ambient chain arm; the resolved outcome asserted by the ambient test */
@@ -268,28 +310,99 @@ export class KgBuildRuntime extends Service {
     const collections: CollectionRunReport[] = []
     let persistedTypes = 0
     let persistedRelations = 0
-    const ncobase = this.resolved.nocobase as
-      | ({ collections: readonly NocoBaseCollectionConfig[] } & Omit<NonNullable<KgBuildPluginConfig['nocobase']>, 'collections'>)
-      | undefined
-    if (ncobase !== undefined && ncobase.collections.length > 0) {
+    let ontologyRevision: number | undefined
+    const mappings = this.mappingsFile
+    const hasMappedCollections = mappings !== undefined
+      && mappings.sources[0] !== undefined && mappings.sources[0].collections.length > 0
+    if (hasMappedCollections) {
       const counted = await this.runNocoBase(signal)
       collections.push(...counted.reports)
       persistedTypes += counted.persistedTypes
       persistedRelations += counted.persistedRelations
+      if (counted.addedTypeIds.length > 0 || counted.addedRelationIds.length > 0) {
+        ontologyRevision = await this.graph().recordOntologyRevision({
+          ontologyVersion: ONTOLOGY_VERSION,
+          summary: `mapping run persisted ${String(counted.addedTypeIds.length)} new type(s), `
+            + `${String(counted.addedRelationIds.length)} new relation(s)`,
+          changes: {
+            added: { types: counted.addedTypeIds, relations: counted.addedRelationIds },
+            removed: { types: [], relations: [] },
+            changed: { types: [], relations: [] },
+          },
+          createdAt: new Date().toISOString(),
+        })
+      }
     }
     const lakehouse = await this.runLakehouse(signal)
     const connector = await this.runConnector(signal)
     const corpus = await this.runCorpus(signal)
-    return {
+    const ruleHits: Record<string, number> = {
+      R01: persistedTypes,
+      R02: collections.reduce((sum, entry) => sum + entry.nodesUpserted, 0),
+      R06: persistedRelations,
+      R11: collections.reduce((sum, entry) => sum + entry.edgesUpserted, 0),
+      R12: this.mappingsFile?.sources.reduce((sum, source) => sum + source.collections.length, 0) ?? 0,
+    }
+    const report: KgBuildRunReport = {
       collections,
       ...(lakehouse === undefined ? {} : { lakehouse }),
       ...(connector === undefined ? {} : { connector }),
       ...(corpus === undefined ? {} : { corpus }),
       persistedTypes,
       persistedRelations,
+      ruleHits,
+      ...(ontologyRevision === undefined ? {} : { ontologyRevision }),
       startedAt,
       finishedAt: new Date().toISOString(),
     }
+    this.lastReport = report
+    return report
+  }
+
+  /**
+   * The mappings read-out: the loaded file's shape plus the last run's
+   * per-collection outcome (the graph tab's rule panel and the apiproxy
+   * `kg.mappings` read this).
+   * @returns the mappings readout.
+   */
+  mappings(): KgMappingsReadout {
+    const file = this.mappingsFile
+    if (file === undefined) {
+      throw new KgBuildError('no mappings file configured (nocobase.mappingsFile)', 'KG_BUILD_SEAM_MISSING')
+    }
+    const last = this.lastReport
+    return {
+      file: this.resolved.nocobase?.mappingsFile ?? '',
+      version: file.version,
+      rules: file.rules,
+      collections: file.sources[0]?.collections.map(entry => ({
+        name: entry.name,
+        ...(entry.anchor === undefined ? {} : { anchor: entry.anchor }),
+        ...(entry.titleField === undefined ? {} : { titleField: entry.titleField }),
+        fkLinkCount: entry.fkLinks?.length ?? 0,
+      })) ?? [],
+      ...(last === undefined ? {} : {
+        lastRun: {
+          finishedAt: last.finishedAt,
+          ruleHits: last.ruleHits,
+          collections: last.collections.map(entry => ({
+            scope: entry.scope,
+            nodesUpserted: entry.nodesUpserted,
+            edgesUpserted: entry.edgesUpserted,
+            skipped: entry.skipped,
+            skippedRelationFields: entry.skippedRelationFields,
+          })),
+        },
+      }),
+    }
+  }
+
+  /** The loaded mappings file (fail loud: the constructor pre-validated it). */
+  private requireMappings(): KgMappingsFile {
+    if (this.mappingsFile === undefined) {
+      throw new KgBuildError('no mappings file configured (nocobase.mappingsFile)', 'KG_BUILD_SEAM_MISSING')
+    }
+    return this.mappingsFile
   }
 
   /** The NocoBase leg: registry mapping plus per-collection idempotent ingestion. */
@@ -297,19 +410,30 @@ export class KgBuildRuntime extends Service {
     reports: readonly CollectionRunReport[]
     persistedTypes: number
     persistedRelations: number
+    addedTypeIds: string[]
+    addedRelationIds: string[]
   }> {
-    const source = this.resolved.nocobase as {
-      collections: NonNullable<NonNullable<KgBuildConfig['nocobase']>['collections']>
+    const file = this.requireMappings()
+    const source = file.sources[0]
+    if (source === undefined) {
+      throw new KgBuildError('kg-mappings: sources is empty', 'KG_BUILD_MAPPINGS_INVALID')
     }
+    const entries = source.collections as readonly NocoBaseCollectionConfig[]
     const graph = this.graph()
     const client = await this.nocoBaseClient()
     const meta = await client.listMeta(signal)
-    const mappable = meta.filter(isMappableCollection)
-    const names = source.collections.map(entry => entry.name)
+    const skipHidden = file.rules.skipHiddenCollections
+    const mappable = meta.filter(candidate => !skipHidden || isMappableCollection(candidate))
+    const names = entries.map(entry => entry.name)
+    const priorRegistry = await graph.storedRegistry()
+    const knownTypeIds = new Set(priorRegistry.nodeTypes.map(type => String(type.id)))
+    const knownRelationIds = new Set(priorRegistry.relations.map(relation => String(relation.id)))
     const reports: CollectionRunReport[] = []
     let persistedTypes = 0
     let persistedRelations = 0
-    for (const entry of source.collections) {
+    const addedTypeIds: string[] = []
+    const addedRelationIds: string[] = []
+    for (const entry of entries) {
       const collectionMeta = mappable.find(candidate => candidate.name === entry.name)
       if (collectionMeta === undefined) {
         throw new KgBuildError(`collection "${entry.name}" is not mappable (hidden, inherited, or absent on the server)`, 'KG_BUILD_COLLECTION_UNMAPPABLE')
@@ -318,6 +442,7 @@ export class KgBuildRuntime extends Service {
       /* v8 ignore next -- fkLinks-present clause permutation; both link shapes asserted */
       await graph.persistNodeType(mapping.nodeType)
       persistedTypes += 1
+      if (!knownTypeIds.has(String(mapping.nodeType.id))) addedTypeIds.push(String(mapping.nodeType.id))
       const relations: KgRelation[] = [...mapping.declaredRelations]
       /* v8 ignore next -- fkLinks-present clause permutation; both link shapes asserted */
       for (const link of entry.fkLinks ?? []) {
@@ -333,10 +458,11 @@ export class KgBuildRuntime extends Service {
       for (const relation of relations) {
         await graph.persistRelation(relation)
         persistedRelations += 1
+        if (!knownRelationIds.has(String(relation.id))) addedRelationIds.push(String(relation.id))
       }
-      reports.push(await this.ingestCollection(client, collectionMeta, entry, signal))
+      reports.push(await this.ingestCollection(client, collectionMeta, entry, mapping.skippedRelationFields, signal))
     }
-    return { reports, persistedTypes, persistedRelations }
+    return { reports, persistedTypes, persistedRelations, addedTypeIds, addedRelationIds }
   }
 
   /** Fetch one collection fully (paged, appends per R13) and apply the run plan. */
@@ -344,6 +470,7 @@ export class KgBuildRuntime extends Service {
     client: NocoBaseClient,
     collectionMeta: NocoBaseCollectionMeta,
     entry: NocoBaseCollectionConfig,
+    skippedRelationFields: readonly string[],
     signal: AbortSignal | undefined,
   ): Promise<CollectionRunReport> {
     const graph = this.graph()
@@ -378,6 +505,7 @@ export class KgBuildRuntime extends Service {
         skipped: true,
         watermark: plan.watermark,
         contentHash: plan.contentHash,
+        skippedRelationFields,
       }
     }
     const nodes: KgNode[] = []
@@ -416,6 +544,7 @@ export class KgBuildRuntime extends Service {
       skipped: false,
       watermark: plan.watermark,
       contentHash: plan.contentHash,
+      skippedRelationFields,
     }
   }
 

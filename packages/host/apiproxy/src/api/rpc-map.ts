@@ -75,6 +75,7 @@ export interface RpcMethodMap {
   'connectors.list': ConnectorsApi['list']
   'connectors.connections': ConnectorsApi['connections']
   'connectors.transfers': ConnectorsApi['transfers']
+  'kg.mappings': KgApi['mappings']
   'kg.schema': KgApi['schema']
   'kg.search': KgApi['search']
   'kg.subgraph': KgApi['subgraph']

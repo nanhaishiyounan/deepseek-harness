@@ -62,7 +62,7 @@ import type { AssetFeaturedView, AssetView } from './api/assets.ts'
 import type {
   ConnectorConnectionView, ConnectorProviderWireView, ConnectorTransferWireView,
 } from './api/connectors.ts'
-import type { KgEdgeView, KgNodeHitView, KgNodeTypeView, KgRelationView, KgSubgraphNodeView } from './api/kg.ts'
+import type { KgApi, KgEdgeView, KgNodeHitView, KgNodeTypeView, KgRelationView, KgSubgraphNodeView } from './api/kg.ts'
 // Type-only: resolves `ctx.get('kbGraph')` to the seam's runtime type.
 import type {} from '@deepseek-ai/dsh-kb-graph'
 import type {
@@ -4114,10 +4114,36 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
       async schema(request) {
         const gates = kgGates()
         if ('refusal' in gates) return err(request, gates.refusal)
+        let revisions: readonly { id: number; summary: string; created_at: string }[]
+        try {
+          revisions = (await gates.graph.ontologyRevisions(5)).map(row => ({ id: row.id, summary: row.summary, created_at: row.createdAt }))
+        } catch (error: unknown) {
+          // A store backend without persisted revisions (no pipeline run yet)
+          // still serves the registry; only the audit tail stays absent.
+          return err(request, kgReadFailed(error))
+        }
         return ok(request, {
+          ontology_version: gates.graph.ontologyVersion(),
           node_types: gates.graph.listNodeTypes().map(kgNodeTypeViewOf),
           relations: gates.graph.listRelations().map(kgRelationViewOf),
+          revisions,
         })
+      },
+
+      // oxlint-disable-next-line typescript/require-await -- async adapts the sync body to the seam's method type.
+      async mappings(request) {
+        // The pipeline service is optional here by design: the graph page
+        // reads it when composed and shows the structured refusal otherwise.
+        type MappingsValue = Awaited<ReturnType<KgApi['mappings']>> extends RpcResponse<infer V> ? V : never
+        const build = ctx.get('kgBuild') as { mappings(): MappingsValue } | undefined
+        if (build === undefined) {
+          return err(request, {
+            code: 'kg-not-composed',
+            message: 'this deployment composes no kg-build pipeline; add dsh-kg-build to expose the mappings readout',
+            details: {},
+          })
+        }
+        return ok(request, build.mappings())
       },
 
       async search(request) {

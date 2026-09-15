@@ -1,0 +1,41 @@
+# Knowledge-graph mapping declarations (kg-mappings.yml) — the versioned
+# source of truth the kg-build pipeline reads. The inline `nocobase.collections`
+# config key is retired: this file is the collection whitelist's only home.
+#
+# sources[].system  closed set: only "nocobase" today
+# collections[]      whitelist entries (name/anchor/titleField/fkLinks)
+# fkLinks[]          scalar reference columns wired onto declared relations
+# rules              R10/R11/R12 toggles (defaults true; false opts out)
+version: 1
+sources:
+  - system: nocobase
+    collections:
+      - name: experts
+        anchor: Expert
+        titleField: name
+      - name: expert_services
+        anchor: ExpertService
+        titleField: name
+        fkLinks:
+          - field: expertId
+            target: experts
+            relation: expert_services.expert
+            style: plain-id
+      - name: datasets
+        anchor: Dataset
+        titleField: title
+      - name: customs_export
+        anchor: Dataset
+        titleField: region
+      - name: orders
+        anchor: Order
+        titleField: orderNo
+        fkLinks:
+          - field: serviceId
+            target: expert_services
+            relation: ordered_service
+            style: collection-address
+rules:
+  skipHiddenCollections: true
+  emptyFkNoEdge: true
+  derivesTitle: true

@@ -241,6 +241,26 @@ export interface KgSourceRun {
   readonly lastRunAt: string
 }
 
+/** One ontology-revision audit row a pipeline run appends (input half). */
+export interface KgOntologyRevisionInput {
+  /** The built-in ontology's semver the pipeline ran against. */
+  readonly ontologyVersion: string
+  /** Human-readable one-liner (what changed and why the row exists). */
+  readonly summary: string
+  /** The {added, removed, changed}×{types, relations} diff document. */
+  readonly changes: unknown
+  readonly createdAt: string
+}
+
+/** One persisted ontology-revision audit row (read half). */
+export interface KgOntologyRevision {
+  readonly id: number
+  readonly ontologyVersion: string
+  readonly summary: string
+  readonly changes: unknown
+  readonly createdAt: string
+}
+
 /**
  * A storage backend for the knowledge graph. Registered with
  * `ctx.kbGraph.registerStoreProvider`. `putTriples` is idempotent per
@@ -411,4 +431,18 @@ export interface KgStore extends GraphStore {
    * @returns the matching node hits.
    */
   searchNodes(tenantId: string, query: string, type: KgNodeTypeId | undefined, k: number): Promise<readonly KgNodeHit[]>
+  /**
+   * Append one ontology-revision audit row. A registry-changing pipeline
+   * run records its diff; an idempotent no-change run appends nothing (the
+   * caller decides — the store only journals).
+   * @param revision - the revision snapshot.
+   * @returns the inserted revision id.
+   */
+  recordOntologyRevision(revision: KgOntologyRevisionInput): Promise<number>
+  /**
+   * Read the newest ontology-revision audit rows.
+   * @param limit - maximum rows to return.
+   * @returns the revisions, newest first.
+   */
+  ontologyRevisions(limit: number): Promise<readonly KgOntologyRevision[]>
 }

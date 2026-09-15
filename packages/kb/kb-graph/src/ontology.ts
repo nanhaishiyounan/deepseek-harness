@@ -158,8 +158,22 @@ const RELATIONS: readonly KgRelation[] = [
   relation('sourced_via', '经…接入', 'builtin-ontology', [['Dataset', 'Connector']], '数据集经连接器接入。'),
 ] as const
 
+/**
+ * The built-in ontology's semantic version (semver). It starts at 1.0.0 and
+ * bumps only when this seed changes shape: added types/relations bump the
+ * minor, removals or constraint changes bump the major.
+ */
+export const ONTOLOGY_VERSION = '1.0.0'
+
 /** The built-in ontology seed: everything above, freshly built per call. */
 export interface KgBuiltinOntology {
+  readonly nodeTypes: readonly KgNodeType[]
+  readonly relations: readonly KgRelation[]
+}
+
+/** The versioned ontology document `exportOntology` emits. */
+export interface KgOntologyDocument {
+  readonly version: string
   readonly nodeTypes: readonly KgNodeType[]
   readonly relations: readonly KgRelation[]
 }
@@ -174,5 +188,47 @@ export function builtinOntology(): KgBuiltinOntology {
   return {
     nodeTypes: NODE_TYPES.map(clone),
     relations: RELATIONS.map(clone),
+  }
+}
+
+/**
+ * Export the built-in ontology as one versioned document (the single source
+ * of truth in TS form; tooling and gateways surface `version` verbatim).
+ * @returns the seed stamped with {@link ONTOLOGY_VERSION}.
+ */
+export function exportOntology(): KgOntologyDocument {
+  return { version: ONTOLOGY_VERSION, ...builtinOntology() }
+}
+
+/**
+ * Validate an ontology document's internal consistency — unique type and
+ * relation ids, `extends` references that resolve, relation constraint
+ * endpoints and declared inverses that exist. The typed TS boundary makes
+ * shape checking the compiler's job; this asserts the referential invariants
+ * a constructor of a new ontology document must uphold (seed loading and
+ * any future ontology-editing surface call it before registration).
+ * @param ontology - the document to validate.
+ * @throws the first violated invariant, named with the offending id.
+ */
+export function validateOntology(ontology: KgOntologyDocument): void {
+  const typeIds = new Set(ontology.nodeTypes.map(type => String(type.id)))
+  for (const type of ontology.nodeTypes) {
+    if (type.extends !== undefined && !typeIds.has(String(type.extends))) {
+      throw new Error(`ontology type "${String(type.id)}" extends unknown type "${String(type.extends)}"`)
+    }
+  }
+  const relationIds = new Set(ontology.relations.map(relation => String(relation.id)))
+  for (const relation of ontology.relations) {
+    for (const pair of relation.constraints) {
+      if (!typeIds.has(String(pair.domain))) {
+        throw new Error(`ontology relation "${String(relation.id)}" constrains unknown domain "${String(pair.domain)}"`)
+      }
+      if (!typeIds.has(String(pair.range))) {
+        throw new Error(`ontology relation "${String(relation.id)}" constrains unknown range "${String(pair.range)}"`)
+      }
+    }
+    if (relation.inverseOf !== undefined && !relationIds.has(String(relation.inverseOf))) {
+      throw new Error(`ontology relation "${String(relation.id)}" declares unknown inverse "${String(relation.inverseOf)}"`)
+    }
   }
 }

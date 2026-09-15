@@ -1,6 +1,7 @@
 # kb-agent kg tools (keyless)
 
 ## kg_schema() — before the build (builtin ontology only)
+ontology_version: 1.0.0
 entity_types:
   - id: "Customer" | label: "客户" | layer: domain | extends: Object
   - id: "Supplier" | label: "供应商" | layer: domain | extends: Object
@@ -60,6 +61,7 @@ relations:
   corpus: docs=1 calls=1 entities=4 degraded=1 dropped=1 merged=1
 
 ## kg_schema() — after the build (nocobase-derived types live)
+ontology_version: 1.0.0
 entity_types:
   - id: "Object" | label: "业务对象" | layer: top
   - id: "Process" | label: "业务过程" | layer: top

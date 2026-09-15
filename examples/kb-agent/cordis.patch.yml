@@ -169,33 +169,11 @@
       name: '@deepseek-ai/dsh-kg-build'
       config:
         tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"
+        # The collection whitelist and fk wiring live in the versioned
+        # kg-mappings.yml beside this composition (the inline `collections`
+        # key is retired).
         nocobase:
-          collections:
-            - name: experts
-              anchor: Expert
-              titleField: name
-            - name: expert_services
-              anchor: ExpertService
-              titleField: name
-              fkLinks:
-                - field: expertId
-                  target: experts
-                  relation: expert_services.expert
-                  style: plain-id
-            - name: datasets
-              anchor: Dataset
-              titleField: title
-            - name: customs_export
-              anchor: Dataset
-              titleField: region
-            - name: orders
-              anchor: Order
-              titleField: orderNo
-              fkLinks:
-                - field: serviceId
-                  target: expert_services
-                  relation: ordered_service
-                  style: collection-address
+          mappingsFile: examples/kb-agent/kg-mappings.yml
         corpus:
           root: examples/kb-agent/workspace/data
           extensions: ['.md']

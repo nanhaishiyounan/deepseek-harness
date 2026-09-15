@@ -53,13 +53,14 @@ function insertBuiltinOntology(db: DatabaseSync): void {
 }
 
 /**
- * Current graph store schema version: 2 is the seven-table property graph
+ * Current graph store schema version: 3 adds the versioned registry rows
+ * and the `kg_ontology_revisions` audit table over the v2 property graph
  * (registry / nodes+FTS5 / edges / aliases / source runs / usage counters).
- * Pre-release builds reject any other on-disk version: a v1 `triples`
+ * Pre-release builds reject any other on-disk version: a v1 `triples` or v2
  * database must be deleted and rebuilt — the graph is derived, provenance-
  * traceable data, so a full pipeline run restores it.
  */
-export const SCHEMA_VERSION = 2
+export const SCHEMA_VERSION = 3
 /** Application id reserved for DeepSeek Harness knowledge-graph databases ("DSHG"). */
 export const KB_GRAPH_SQLITE_APPLICATION_ID = 1146308687
 
@@ -113,7 +114,7 @@ export function validateSchema(db: DatabaseSync, path: string): void {
       db.exec(sql('schema'))
       insertBuiltinOntology(db)
       db.exec(sql('set-application-id'))
-      db.exec(sql('set-user-version-2'))
+      db.exec(sql('set-user-version-3'))
     }
     db.exec(sql('commit'))
     began = false

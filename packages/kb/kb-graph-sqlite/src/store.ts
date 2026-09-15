@@ -11,7 +11,8 @@ import type { DatabaseSync } from 'node:sqlite'
 import {
   KbGraphError, kgNodeTypeId, kgRelationId,
   type KbGraphEntity, type KbGraphStoredTriple, type KbGraphTriple,
-  type KgEdge, type KgNode, type KgNodeHit, type KgNodeTypeId, type KgNodeType, type KgPropDef,
+  type KgEdge, type KgNode, type KgNodeHit, type KgNodeTypeId, type KgNodeType,
+  type KgOntologyRevision, type KgOntologyRevisionInput, type KgPropDef,
   type KgProvenance, type KgRelation, type KgRelationConstraint, type KgRelationId,
   type KgSourceRun, type KgStore, type KgSubgraph, type KgSubgraphLimits, type KgSubgraphNode,
 } from '@deepseek-ai/dsh-kb-graph'
@@ -22,6 +23,15 @@ type DatabaseSyncConstructor = typeof import('node:sqlite')['DatabaseSync']
 
 /** One kg_nodes row (id resolution only). */
 interface NodeIdRow { id: string }
+
+/** One kg_ontology_revisions row as the audit read shapes it. */
+interface RevisionRow {
+  id: number
+  ontology_version: string
+  summary: string
+  changes_json: string
+  created_at: string
+}
 
 /** One v1-facing stored-triple projection row. */
 interface TripleProjectionRow {
@@ -636,6 +646,30 @@ export class SqliteGraphStore implements KgStore {
     await Promise.resolve()
     this.assertLive()
     return (this.db.prepare(sql('select-relations')).all() as unknown as RelationRow[]).map(rowToRelation)
+  }
+
+  async recordOntologyRevision(revision: KgOntologyRevisionInput): Promise<number> {
+    await Promise.resolve()
+    this.assertLive()
+    return this.write(() => {
+      const result = this.db.prepare(sql('insert-ontology-revision')).run(
+        revision.ontologyVersion, revision.summary, JSON.stringify(revision.changes), revision.createdAt,
+      )
+      return Number(result.lastInsertRowid)
+    })
+  }
+
+  async ontologyRevisions(limit: number): Promise<readonly KgOntologyRevision[]> {
+    await Promise.resolve()
+    this.assertLive()
+    const rows = this.db.prepare(sql('select-ontology-revisions')).all(limit) as unknown as readonly RevisionRow[]
+    return rows.map(row => ({
+      id: row.id,
+      ontologyVersion: row.ontology_version,
+      summary: row.summary,
+      changes: JSON.parse(row.changes_json) as unknown,
+      createdAt: row.created_at,
+    }))
   }
 
   async searchNodes(tenantId: string, query: string, type: KgNodeTypeId | undefined, k: number): Promise<readonly KgNodeHit[]> {

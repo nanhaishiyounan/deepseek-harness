@@ -154,6 +154,43 @@ function bootMockNocoBase(): Promise<Server> {
   })
 }
 
+/** One collection entry the test mappings writer understands. */
+interface MappingEntry {
+  name: string
+  anchor?: string
+  titleField?: string
+  fkLinks?: Array<{ field: string; target: string; relation: string; style?: string }>
+}
+
+/** Write one mappings file into the run's temp dir and return its path. */
+async function writeMappings(collections: readonly MappingEntry[]): Promise<string> {
+  const dir = await mkdtemp(join(tmpdir(), 'kg-build-mappings-'))
+  const path = join(dir, 'kg-mappings.yml')
+  const text = [
+    'version: 1',
+    'sources:',
+    '  - system: nocobase',
+    ...(collections.length === 0 ? ['    collections: []'] : ['    collections:']),
+    ...collections.flatMap((entry) => {
+      const lines = [`      - name: ${entry.name}`]
+      if (entry.anchor !== undefined) lines.push(`        anchor: ${entry.anchor}`)
+      if (entry.titleField !== undefined) lines.push(`        titleField: ${entry.titleField}`)
+      for (const link of entry.fkLinks ?? []) {
+        lines.push('        fkLinks:')
+        lines.push(`          - field: ${link.field}`)
+        lines.push(`            target: ${link.target}`)
+        lines.push(`            relation: ${link.relation}`)
+        if (link.style !== undefined) lines.push(`            style: ${link.style}`)
+      }
+      return lines
+    }),
+  ].join('\n')
+  await writeFile(path, `${text}\n`, 'utf8')
+  return path
+}
+
+let mappingsPath: string | undefined
+
 /** The track config: the seeded collection whitelist with explicit fk links. */
 function trackConfig(overrides: Partial<KgBuildPluginConfig> = {}): KgBuildPluginConfig {
   return {
@@ -161,15 +198,7 @@ function trackConfig(overrides: Partial<KgBuildPluginConfig> = {}): KgBuildPlugi
     nocobase: {
       baseUrl: ncUrl,
       apiKeyEnv: 'KG_TEST_NC_KEY',
-      collections: [
-        { name: 'experts', anchor: 'Expert', titleField: 'name' },
-        { name: 'expert_services', anchor: 'ExpertService', titleField: 'name', fkLinks: [
-          { field: 'expertId', target: 'experts', relation: 'expert_services.expert', style: 'plain-id' },
-        ] },
-        { name: 'orders', anchor: 'Order', titleField: 'orderNo', fkLinks: [
-          { field: 'serviceId', target: 'expert_services', relation: 'ordered_service', style: 'collection-address' },
-        ] },
-      ],
+      mappingsFile: mappingsPath as string,
     },
     lakehouse: true,
     connector: true,
@@ -197,6 +226,15 @@ async function boot(overrides: Partial<KgBuildPluginConfig> = {}, withFakes = tr
 beforeEach(async () => {
   process.env.KG_TEST_NC_KEY = 'kg-test-token'
   ncServer = await bootMockNocoBase()
+  mappingsPath = await writeMappings([
+    { name: 'experts', anchor: 'Expert', titleField: 'name' },
+    { name: 'expert_services', anchor: 'ExpertService', titleField: 'name', fkLinks: [
+      { field: 'expertId', target: 'experts', relation: 'expert_services.expert', style: 'plain-id' },
+    ] },
+    { name: 'orders', anchor: 'Order', titleField: 'orderNo', fkLinks: [
+      { field: 'serviceId', target: 'expert_services', relation: 'ordered_service', style: 'collection-address' },
+    ] },
+  ])
   ncUrl = `http://127.0.0.1:${String((ncServer.address() as { port: number }).port)}`
   corpusRoot = await mkdtemp(join(tmpdir(), 'kg-build-corpus-'))
   await writeFile(join(corpusRoot, 'supply-note.md'), '宏发食品与张红喜会长合作，张红喜主持中亚货运动线。冷锋过境影响运输。', 'utf8')
@@ -325,7 +363,7 @@ describe('KgBuildRuntime pipeline', () => {
       nocobase: {
         ...(ncUrl === undefined ? {} : { baseUrl: ncUrl }),
         apiKeyEnv: 'KG_TEST_NC_KEY',
-        collections: [{ name: 'secret' }],
+        mappingsFile: await writeMappings([{ name: 'secret' }]),
       },
     })
     await expect(hidden.get('kgBuild')!.run()).rejects.toMatchObject({ code: 'KG_BUILD_COLLECTION_UNMAPPABLE' })
@@ -393,10 +431,10 @@ describe('KgBuildRuntime pipeline', () => {
     await context.plugin(KgBuildRuntime, {
       tenant: 't',
       nocobase: {
-        collections: [
+        mappingsFile: await writeMappings([
           { name: 'experts', anchor: 'Expert', titleField: 'name' },
           { name: 'bare' },
-        ],
+        ]),
       },
       lakehouse: false,
       connector: false,
@@ -417,7 +455,7 @@ describe('KgBuildRuntime pipeline', () => {
     // Chunk caps and the aborted signal run through a corpus-enabled boot.
     const capped = await boot({
       corpus: { root: corpusRoot, maxDocuments: 1, maxChunksPerDocument: 1 },
-      nocobase: { baseUrl: ncUrl, apiKeyEnv: 'KG_TEST_NC_KEY', collections: [{ name: 'experts', anchor: 'Expert', titleField: 'name' }] },
+      nocobase: { baseUrl: ncUrl, apiKeyEnv: 'KG_TEST_NC_KEY', mappingsFile: await writeMappings([{ name: 'experts', anchor: 'Expert', titleField: 'name' }]) },
     })
     const cappedReport = await capped.get('kgBuild')!.run()
     expect(cappedReport.corpus?.chunks).toBe(1)
@@ -428,7 +466,7 @@ describe('KgBuildRuntime pipeline', () => {
     new FakeLlm(aborting, [EXTRACTION])
     await aborting.plugin(KgBuildRuntime, {
       tenant: 't',
-      nocobase: { collections: [] },
+      nocobase: { mappingsFile: await writeMappings([]) },
       corpus: { root: corpusRoot, maxDocuments: 5, extensions: [] },
       lakehouse: false,
       connector: false,
@@ -462,7 +500,7 @@ describe('KgBuildRuntime pipeline', () => {
     await context.plugin(KbGraphSqlite, { path: ':memory:' })
     await context.plugin(KgBuildRuntime, {
       tenant: 't',
-      nocobase: { baseUrl: ncUrl, apiKeyEnv: 'KG_TEST_MISSING_KEY', collections: [{ name: 'experts' }] },
+      nocobase: { baseUrl: ncUrl, apiKeyEnv: 'KG_TEST_MISSING_KEY', mappingsFile: await writeMappings([{ name: 'experts' }]) },
       lakehouse: false,
       connector: false,
       pageSize: 100,
@@ -491,7 +529,7 @@ describe('KgBuildRuntime pipeline', () => {
     await context.plugin(KbGraphSqlite, { path: ':memory:' })
     await context.plugin(KgBuildRuntime, {
       tenant: 't',
-      nocobase: { baseUrl: ncUrl, apiKeyEnv: 'KG_TEST_NC_ABSENT', collections: [{ name: 'experts' }] },
+      nocobase: { baseUrl: ncUrl, apiKeyEnv: 'KG_TEST_NC_ABSENT', mappingsFile: await writeMappings([{ name: 'experts' }]) },
       lakehouse: false,
       connector: false,
       pageSize: 100,
@@ -520,7 +558,7 @@ describe('KgBuildRuntime pipeline', () => {
       nocobase: {
         baseUrl: ncUrl,
         apiKeyEnv: 'KG_TEST_NC_ABSENT',
-        collections: [{ name: 'experts', anchor: 'Expert', titleField: 'name' }],
+        mappingsFile: await writeMappings([{ name: 'experts', anchor: 'Expert', titleField: 'name' }]),
       },
       lakehouse: false,
       connector: false,

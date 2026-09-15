@@ -90,7 +90,11 @@ describe('kgOntologyViews and rendering', () => {
     const views = kgOntologyViews(undefined)
     expect(views.types.some(type => type.id === 'company' && type.layer === 'domain')).toBe(true)
     expect(views.relations.find(relation => relation.id === 'produces')?.directions).toEqual(['company→product', 'Service→Deliverable'])
-    const text = formatKgSchemaOutput({ types: views.types, relations: views.relations })
+    const text = formatKgSchemaOutput({
+      ontology_version: views.ontologyVersion,
+      types: views.types,
+      relations: views.relations,
+    })
     expect(text).toContain('entity_types:')
     expect(text).toContain('- id: "company"')
     expect(text).toContain('company→product')
@@ -138,6 +142,7 @@ describe('kgOntologyViews and rendering', () => {
     expect(views.types[0]?.natural_key).toBe('id')
     expect(views.types[0]?.extends).toBe('Expert')
     const schemaText = formatKgSchemaOutput({
+      ontology_version: views.ontologyVersion,
       types: [{ ...(views.types[0] as object), props: ['org'] } as KgSchemaTypeView],
       relations: views.relations,
     })

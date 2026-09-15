@@ -72,8 +72,8 @@ import {
   connectorsConnectionsValueSchema, connectorsListValueSchema, connectorsTransfersValueSchema,
 } from '../api/connectors.schema.ts'
 import {
-  kgExpandValueSchema, kgSchemaValueSchema, kgSearchValueSchema, kgStatsValueSchema,
-  kgSubgraphValueSchema,
+  kgExpandValueSchema, kgMappingsValueSchema, kgSchemaValueSchema, kgSearchValueSchema,
+  kgStatsValueSchema, kgSubgraphValueSchema,
 } from '../api/kg.schema.ts'
 import {
   subagentHistoryValueSchema,
@@ -195,6 +195,7 @@ export interface IApiClient {
     transfers(payload: RequestPayload<'connectors.transfers'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'connectors.transfers'>>>
   }
   kg: {
+    mappings(payload: RequestPayload<'kg.mappings'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kg.mappings'>>>
     schema(payload: RequestPayload<'kg.schema'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kg.schema'>>>
     search(payload: RequestPayload<'kg.search'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kg.search'>>>
     subgraph(payload: RequestPayload<'kg.subgraph'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kg.subgraph'>>>
@@ -285,6 +286,7 @@ const UNARY_VALUE_SCHEMAS: { [K in keyof RpcMethodMap]: z.ZodType<Wire<ResponseV
   'connectors.list': connectorsListValueSchema,
   'connectors.connections': connectorsConnectionsValueSchema,
   'connectors.transfers': connectorsTransfersValueSchema,
+  'kg.mappings': kgMappingsValueSchema,
   'kg.schema': kgSchemaValueSchema,
   'kg.search': kgSearchValueSchema,
   'kg.subgraph': kgSubgraphValueSchema,
@@ -612,6 +614,7 @@ export abstract class AbstractApiClient implements IApiClient {
   readonly kg: IApiClient['kg'] = {
     // Graph reads follow the caller's signal alone: a wide k-hop walk must
     // not die at the transport default.
+    mappings: (payload, signal) => this.callUnary('kg.mappings', payload, signal, 'caller-signal-only'),
     schema: (payload, signal) => this.callUnary('kg.schema', payload, signal, 'caller-signal-only'),
     search: (payload, signal) => this.callUnary('kg.search', payload, signal, 'caller-signal-only'),
     subgraph: (payload, signal) => this.callUnary('kg.subgraph', payload, signal, 'caller-signal-only'),

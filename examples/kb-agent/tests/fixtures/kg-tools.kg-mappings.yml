@@ -1,0 +1,25 @@
+# The kg-tools spec's mapping declarations: the same three-collection
+# whitelist the mock NocoBase serves (see fixtures/kg-tools.cordis.yml).
+version: 1
+sources:
+  - system: nocobase
+    collections:
+      - name: experts
+        anchor: Expert
+        titleField: name
+      - name: expert_services
+        anchor: ExpertService
+        titleField: name
+        fkLinks:
+          - field: expertId
+            target: experts
+            relation: expert_services.expert
+            style: plain-id
+      - name: orders
+        anchor: Order
+        titleField: orderNo
+        fkLinks:
+          - field: serviceId
+            target: expert_services
+            relation: ordered_service
+            style: collection-address

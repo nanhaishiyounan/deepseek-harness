@@ -35,6 +35,7 @@ import { closeHttpServer } from '../scripts/nocobase-workflow.ts'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const configPath = join(here, 'fixtures/kg-tools.cordis.yml')
+const mappingsPath = join(here, 'fixtures/kg-tools.kg-mappings.yml')
 const snapshotsDir = join(here, 'snapshots/kg-tools')
 const expectedPath = join(snapshotsDir, 'expected.md')
 const refreshing = process.env.DSH_SNAPSHOT === 'refresh'
@@ -105,6 +106,7 @@ beforeEach(async () => {
   await writeFile(join(corpusDir, 'supply-note.md'), '宏发食品生产宏发牌酱油，与张红喜会长合作。冷锋过境影响运输。', 'utf8')
   process.env.KG_TEST_ROOT = root
   process.env.KG_TEST_CORPUS = corpusDir
+  process.env.KG_TEST_MAPPINGS = mappingsPath
   process.env.KG_TEST_NC_TOKEN = NC_TOKEN
   ncServer = createServer((request, response) => {
     const finish = (status: number, body: unknown): void => {
@@ -171,6 +173,7 @@ beforeEach(async () => {
 afterEach(async () => {
   delete process.env.KG_TEST_ROOT
   delete process.env.KG_TEST_CORPUS
+  delete process.env.KG_TEST_MAPPINGS
   delete process.env.KG_TEST_NC_URL
   delete process.env.KG_TEST_NC_TOKEN
   await ctx?.fiber.dispose()

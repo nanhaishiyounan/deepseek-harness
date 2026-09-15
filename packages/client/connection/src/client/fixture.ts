@@ -3162,6 +3162,11 @@ function createFixtureWorld(options: FixtureOptions): FixtureWorld {
     },
 
     kg: {
+      mappings: request => err(request, {
+        code: 'kg-not-composed',
+        message: 'this deployment has not enabled the kg domain; set the api-gateway config kgEnabled: true to expose the graph page reads',
+        details: {},
+      }),
       schema: request => err(request, {
         code: 'kg-not-composed',
         message: 'this deployment has not enabled the kg domain; set the api-gateway config kgEnabled: true to expose the graph page reads',
@@ -3395,6 +3400,7 @@ export class FixtureApiClient extends AbstractApiClient {
       case 'connectors.list': return this.api.connectors.list(request, signal)
       case 'connectors.connections': return this.api.connectors.connections(request, signal)
       case 'connectors.transfers': return this.api.connectors.transfers(request, signal)
+      case 'kg.mappings': return this.api.kg.mappings(request, signal)
       case 'kg.schema': return this.api.kg.schema(request, signal)
       case 'kg.search': return this.api.kg.search(request, signal)
       case 'kg.subgraph': return this.api.kg.subgraph(request, signal)

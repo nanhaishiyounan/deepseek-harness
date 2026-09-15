@@ -6205,6 +6205,10 @@ importers:
         version: 6.0.3
 
   packages/kb/kg-build:
+    dependencies:
+      yaml:
+        specifier: ^2.9.0
+        version: 2.9.0
     devDependencies:
       '@deepseek-ai/cordis':
         specifier: workspace:^

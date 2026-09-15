@@ -42,17 +42,7 @@ function check(name: string, ok: boolean, detail = ''): void {
   if (!ok) failures.push(name)
 }
 
-const collections = [
-  { name: 'experts', anchor: 'Expert', titleField: 'name' },
-  { name: 'expert_services', anchor: 'ExpertService', titleField: 'name', fkLinks: [
-    { field: 'expertId', target: 'experts', relation: 'expert_services.expert', style: 'plain-id' },
-  ] },
-  { name: 'datasets', anchor: 'Dataset', titleField: 'title' },
-  { name: 'customs_export', anchor: 'Dataset', titleField: 'region' },
-  { name: 'orders', anchor: 'Order', titleField: 'orderNo', fkLinks: [
-    { field: 'serviceId', target: 'expert_services', relation: 'ordered_service', style: 'collection-address' },
-  ] },
-]
+const mappingsFile = 'examples/kb-agent/kg-mappings.yml'
 
 const ctx = new Context()
 try {
@@ -67,7 +57,7 @@ try {
   await ctx.plugin(ConnectorNocoBase, {})
   await ctx.plugin(KgBuildRuntime, {
     tenant,
-    nocobase: { collections },
+    nocobase: { mappingsFile },
     ...(withKey ? { corpus: { root: 'examples/kb-agent/workspace/data', extensions: ['.md'], maxDocuments: 50, maxChunksPerDocument: 4 } } : {}),
     pageSize: 100,
     intervalMs: 0,
@@ -91,6 +81,11 @@ try {
     console.log(`  corpus: docs=${String(first.corpus.documents)} calls=${String(first.corpus.extractionCalls)} entities=${String(first.corpus.extractedEntities)} degraded=${String(first.corpus.degradedEntities)} dropped=${String(first.corpus.droppedRelations)} merged=${String(first.corpus.mergedEntities)}`)
   }
   check('full build ingested every collection', first.collections.length === 5 && first.collections.every(entry => entry.rows > 0))
+
+  // ①b Versioned ontology and the mappings readout.
+  check('ontologyVersion is 1.0.0', graph.ontologyVersion() === '1.0.0', graph.ontologyVersion())
+  const readout = build.mappings()
+  check('mappings readout carries 5 collections', readout.collections.length === 5 && readout.version === 1, `${String(readout.collections.length)} collections, v${String(readout.version)}`)
 
   // ② Derived registry: ≥4 nocobase-derived types persisted and visible.
   const derived = (await graph.storedRegistry()).nodeTypes.filter(type => type.source === 'nocobase-derived')

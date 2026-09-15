@@ -330,7 +330,7 @@ describe('SqliteGraphStore v2 schema ownership', () => {
     legacy.exec('CREATE TABLE triples (id INTEGER PRIMARY KEY) STRICT;')
     legacy.close()
     expect(() => new SqliteGraphStore({ path, busyTimeoutMs: 5_000 }, DatabaseSync))
-      .toThrow(/schema version 1, incompatible with this build \(2\).*rebuild/u)
+      .toThrow(/schema version 1, incompatible with this build \(3\).*rebuild/u)
   })
 
   it('writes schema version 2 into fresh databases', () => {
