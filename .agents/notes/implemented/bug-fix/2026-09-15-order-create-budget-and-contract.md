@@ -16,7 +16,7 @@ An AI-conversation order on `expert_services/2` failed with `tool call timed out
 - `cordis.patch.yml`, `demo-full-journey.cordis.yml`, and `expert-order-e2e.cordis.yml` pin `tool-connector.orderCreateTimeoutMs: 180000` — the draft deadline (120000) plus the non-draft steps and one JSON-repair retry window. The nocobase-track fixture is untouched: it drives `orders.fulfill` directly and never mounts the order tools.
 - tool-connector's `Config.orderCreateTimeoutMs` JSDoc states the constraint: the budget must clear the composed `draftTimeoutMs` plus the pipeline's non-draft steps.
 - `fulfill` returns `normalizeOrderRow(settled)`, so callers and the tool output schema see the same contract-shaped record every other path serves; the `deliverable` appends field is wire-only and stays off the returned record (the update-wire payload asserts the attachment linkage instead).
-- `examples/kb-agent/tests/order-budget.spec.ts` (keyless) guards the relation on all three compositions: `orderCreateTimeoutMs >= draftTimeoutMs + 30000`.
+- `examples/kb-agent/tests/order-budget.spec.ts` (keyless) guards the relation on all three compositions: `orderCreateTimeoutMs` covers `draftTimeoutMs` plus the repair-retry and non-draft floors (derived in [2026-09-15-order-create-verify-surface.md](2026-09-15-order-create-verify-surface.md)).
 - `examples/kb-agent/scripts/order-create-verify.mts` reproduces the conversation tool path (timeout-policy wrapper included) against the live stack and lands evidence in `demos/order-create-verify-*.md`.
 
 ## Alternatives considered

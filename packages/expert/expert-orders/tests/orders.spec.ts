@@ -102,7 +102,23 @@ async function bootMockNocoBase(): Promise<MockNocoBase> {
           return
         }
         Object.assign(row, body as Record<string, unknown>)
-        finish(200, { data: [row] })
+        // The live v2 wire serves the full row back with SQL NULL for unset
+        // optional columns (error/note/deliverablePath/deliverableUrl/
+        // generatedAt verified null against the real resourcer), so the
+        // orders update answer mirrors that instead of echoing only the
+        // patched fields — the fulfill return path then exercises the same
+        // NULL collapse normalizeOrderRow performs for the live wire.
+        const servedRow = updateMatch[1] === 'orders'
+          ? {
+            ...row,
+            error: row.error ?? null,
+            note: row.note ?? null,
+            deliverablePath: row.deliverablePath ?? null,
+            deliverableUrl: row.deliverableUrl ?? null,
+            generatedAt: row.generatedAt ?? null,
+          }
+          : row
+        finish(200, { data: [servedRow] })
         return
       }
       const getMatch = /^\/api\/([^/]+)\/([^/]+)$/u.exec(url.pathname)
@@ -300,7 +316,10 @@ describe('OrdersRuntime.fulfill (model drafting)', () => {
     const order = await runtime.create({ serviceId: 'expert_services/2', brief: '海外仓应急方案。' })
     const delivered = await runtime.fulfill(order.id)
     expect(delivered.status).toBe('delivered')
+    // The mock serves the delivered row with SQL NULL note (no fallback note
+    // when the model drafted); the normalized return must collapse it away.
     expect(delivered.note).toBeUndefined()
+    expect('note' in delivered).toBe(false)
     const { text } = await extracted(delivered.deliverablePath as string)
     for (const expected of ['风险分析', '解决方案', '实施路线图', '双口岸互备', '海外仓风险应对手册']) {
       expect(text).toContain(expected)

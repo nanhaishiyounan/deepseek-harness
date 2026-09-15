@@ -149,34 +149,44 @@ if (ncBaseUrl === undefined || ncApiKey === undefined) {
     say(`前置：真实 NocoBase（${ncBaseUrl}）在线；生产 workflow「${WORKFLOW_TITLE}」${lease === undefined ? '未找到（跳过暂停）' : `#${String(productionId)} 已暂停（teardown 恢复）`}。`)
 
     const tool = ctx.tools.get('order_create')
-    say(`order_create 工具预算 timeoutMs = ${String(tool?.timeoutMs)}（timeout-policy 包装生效）`)
-    check(tool?.timeoutMs === 180_000, '组合 pin 的 orderCreateTimeoutMs=180000 已挂到工具定义')
-
-    // The orders collection has no createdAt column (creation rides the wire
-    // payload only), so the segment timeline comes from a concurrent poll of
-    // the newest orders rows: the first sighting of the new row's pending /
-    // generating / delivered statuses approximates each segment boundary.
-    const baseline = await ncClient.list<{ id: number }>('orders', { page: 1, pageSize: 5 })
-    const maxOrderId = Math.max(0, ...baseline.rows.map(row => row.id))
-    const timeline: Array<{ orderNo: string; status: string; t: number }> = []
-    let polling = true
-    const poll = (async (): Promise<void> => {
-      while (polling) {
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        try {
-          const { rows } = await ncClient.list<{ id: number; orderNo?: string; status?: string }>('orders', { page: 1, pageSize: 20, sort: '-id' })
-          for (const row of rows) {
-            if (row.id > maxOrderId && row.orderNo !== undefined && row.status !== undefined) {
-              timeline.push({ orderNo: row.orderNo, status: row.status, t: performance.now() })
-            }
-          }
-        } catch {
-          // One lost poll round only blurs a boundary by its own interval.
-        }
-      }
-    })()
+    let stopPoll: (() => Promise<void>) | undefined
 
     try {
+      // The orders collection has no createdAt column (creation rides the
+      // wire payload only), so the segment timeline comes from a concurrent
+      // poll of the newest orders rows: the first sighting of the new row's
+      // pending / generating / delivered statuses approximates each segment
+      // boundary. The sort key rides the client's array form — a bare '-id'
+      // string has no join method, so it throws inside the poll's swallowed
+      // catch every round and silently starves the whole timeline (the
+      // earlier run where every segment read unobserved). The 60ms cadence
+      // usually puts a poll response inside the ~30-50ms pending window; the
+      // first-sighting fallback below anchors the misses.
+      const baseline = await ncClient.list<{ id: number }>('orders', { page: 1, pageSize: 5, sort: ['-id'] })
+      const maxOrderId = Math.max(0, ...baseline.rows.map(row => row.id))
+      const timeline: Array<{ orderNo: string; status: string; t: number }> = []
+      let polling = true
+      const poll = (async (): Promise<void> => {
+        while (polling) {
+          await new Promise(resolve => setTimeout(resolve, 60))
+          try {
+            const { rows } = await ncClient.list<{ id: number; orderNo?: string; status?: string }>('orders', { page: 1, pageSize: 20, sort: ['-id'] })
+            for (const row of rows) {
+              if (row.id > maxOrderId && row.orderNo !== undefined && row.status !== undefined) {
+                timeline.push({ orderNo: row.orderNo, status: row.status, t: performance.now() })
+              }
+            }
+          } catch {
+            // One lost poll round only blurs a boundary by its own interval.
+          }
+        }
+      })()
+      stopPoll = async (): Promise<void> => {
+        polling = false
+        await Promise.race([poll, new Promise(resolve => setTimeout(resolve, 3000))])
+      }
+      say(`order_create 工具预算 timeoutMs = ${String(tool?.timeoutMs)}（timeout-policy 包装生效）`)
+      check(tool?.timeoutMs === 180_000, '组合 pin 的 orderCreateTimeoutMs=180000 已挂到工具定义')
       const started = performance.now()
       const result = await ctx.tools.execute({
         signal: new AbortController().signal,
@@ -199,38 +209,75 @@ if (ncBaseUrl === undefined || ncApiKey === undefined) {
         deliverable_path?: string; deliverable_url?: string
       }
       check(value.status === 'delivered', `订单 ${String(value.order_no)} 状态 delivered（同步闭环完成）`)
-      const firstSeen = new Map<string, number>()
-      for (const entry of timeline.filter(entry => entry.orderNo === value.order_no)) {
-        if (!firstSeen.has(entry.status)) firstSeen.set(entry.status, entry.t)
-      }
-      const at = (status: string): string => {
-        const seen = firstSeen.get(status)
-        return seen === undefined ? '未观测到' : `+${String(Math.max(0, Math.round(seen - started)))}ms`
-      }
-      const segment = (from: string, to: string): string => {
-        const a = firstSeen.get(from)
-        const b = firstSeen.get(to)
-        return a === undefined || b === undefined ? '未观测到' : `${String(Math.max(0, Math.round(b - a)))}ms`
-      }
       const pdf = await readFile(value.deliverable_path!)
       check(Buffer.from(pdf.subarray(0, 5)).toString('ascii') === '%PDF-', `交付物是真 PDF: ${String(value.deliverable_path)}`)
       check(/^\/(files|storage\/uploads)\//u.test(value.deliverable_url ?? ''), `NocoBase 附件 URL: ${String(value.deliverable_url)}`)
 
       const settled = await ncClient.get<{ orderNo?: string }>('orders', value.order_id!, undefined)
       check(settled?.orderNo === value.order_no, `真源回读订单行一致（${String(value.order_no)}）`)
+      // The row is terminal now, so the next poll round sights `delivered`;
+      // give it two cadences before building the timeline so the segment
+      // carries the polled figure rather than the fallback anchor.
+      await new Promise(resolve => setTimeout(resolve, 120))
+      // First sightings from the poll, with fallback anchors so every segment
+      // lands a millisecond figure even when a window is narrower than the
+      // poll cadence: the read-back moment anchors `delivered` (the row is
+      // already terminal once the tool returned), and the order's first
+      // sighting of any status anchors `pending`.
+      const orderEvents = timeline.filter(entry => entry.orderNo === value.order_no)
+      const firstSeen = new Map<string, number>()
+      for (const entry of orderEvents) {
+        if (!firstSeen.has(entry.status)) firstSeen.set(entry.status, entry.t)
+      }
+      const anchored = new Set<string>()
+      if (!firstSeen.has('delivered')) {
+        firstSeen.set('delivered', performance.now())
+        anchored.add('delivered')
+      }
+      if (!firstSeen.has('pending') && orderEvents.length > 0) {
+        firstSeen.set('pending', orderEvents[0]!.t)
+        anchored.add('pending')
+      }
+      const at = (status: string): string => {
+        const seen = firstSeen.get(status)
+        if (seen === undefined) return '未观测到'
+        return `+${String(Math.max(0, Math.round(seen - started)))}ms${anchored.has(status) ? '（回退锚定时刻）' : ''}`
+      }
+      const segment = (from: string, to: string): string => {
+        const a = firstSeen.get(from)
+        const b = firstSeen.get(to)
+        if (a === undefined || b === undefined) return '未观测到'
+        const prefix = anchored.has(from) || anchored.has(to) ? '≤' : ''
+        return `${prefix}${String(Math.max(0, Math.round(b - a)))}ms`
+      }
       const observed = firstSeen.size > 0
-      say(`\n## 分段计时${observed ? '（1s 轮询订单行状态首见时刻，边界含 ±1s 轮询粒度）' : '（本次轮询未覆盖到状态窗口，分段以独立实测为准）'}`)
+      say(`\n## 分段计时${observed ? '（60ms 轮询订单行状态首见时刻，边界含轮询粒度；「回退锚定」= 窗口窄于轮询粒度，以首见/回读时刻为锚，段差为上界）' : '（本次轮询未覆盖到状态窗口，分段以独立实测为准）'}`)
       if (observed) {
         say(`- create（落库 pending）：${at('pending')}\n- 进入 generating（kb 检索 + 起草 + PDF + 上传开始）：${at('generating')}（pending→generating 约 ${segment('pending', 'generating')}）\n- 交付 delivered：${at('delivered')}（generating→delivered 约 ${segment('generating', 'delivered')}）`)
       }
       say(`- 工具总耗时：${String(totalMs)}ms，工具预算 180000ms（修复前 60000ms）\n- 独立实测参考：MiniMax-M3 同款 draft 提示词直连计时 38.9s（TTFB 0.9s，生产长 brief/带 refs 更长）；NocoBase REST 单次读写 12-21ms；PDF 渲染与附件上传为本地毫秒级`)
       say(`\n**PASS** — 同一单（expert_services/2 张红喜·海外仓风险应对咨询）在 180s 预算内同步交付落库，不再 60s 超时。`)
     } finally {
-      polling = false
-      await Promise.race([poll, new Promise(resolve => setTimeout(resolve, 3000))])
+      await stopPoll?.()
       try {
         await lease?.restore()
+      } catch (error) {
+        say(`**警告** — 恢复生产 workflow 失败：${error instanceof Error ? error.message : String(error)}；需人工在 NocoBase 重新启用「${WORKFLOW_TITLE}」`)
       } finally {
+        // Null-guarded terminal-state read into the transcript: the row may
+        // be absent and the query itself may fail; neither may take down the
+        // disposal below, or the run leaks more than it reports.
+        try {
+          const { rows: wfRows } = await ncClient.list<{ id: number; enabled?: boolean | null }>('workflows', { filter: { title: { $eq: WORKFLOW_TITLE } }, page: 1, pageSize: 1 })
+          const restored = wfRows[0]
+          if (restored === undefined) {
+            say(`teardown：生产 workflow「${WORKFLOW_TITLE}」未找到（无可恢复项）。`)
+          } else {
+            say(`teardown：生产 workflow #${String(restored.id)} 终态 enabled=${String(restored.enabled)}${restored.enabled === true ? '（已恢复，无残留）' : '（异常：仍停用，需人工恢复）'}。`)
+          }
+        } catch (error) {
+          say(`**警告** — 查询 workflow 终态失败：${error instanceof Error ? error.message : String(error)}`)
+        }
         await ctx.fiber.dispose()
         await rm(root, { recursive: true, force: true })
         for (const name of ['DEMO_KB_DB', 'DEMO_KG_DB', 'DEMO_LH_ROOT', 'DEMO_LH_DB', 'DEMO_CWD', 'DEMO_NC_URL', 'DEMO_DELIVERABLES']) delete process.env[name]

@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/bug-fix/2026-09-15-order-create-budget-and-contract.md
-2026-09-15-order-create-budget-and-contract.md: 0d6ac729123ade5bbc3b4cd262a8a858a787b524
-2026-09-15-order-create-budget-and-contract.zh.md: f8d6d0c1c2e17fd592da7f0d64f97ca27c079844
+2026-09-15-order-create-budget-and-contract.md: c6c1124c67e9e77ea4a10a0e61bf67d410aa3c47
+2026-09-15-order-create-budget-and-contract.zh.md: baa1487862cf1d1d48610e14c28dd4b891f7c1cd

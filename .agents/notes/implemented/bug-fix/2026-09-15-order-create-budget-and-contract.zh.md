@@ -16,7 +16,7 @@ AI 对话下单 `expert_services/2` 报 `tool call timed out after 60000ms`。�
 - `cordis.patch.yml`、`demo-full-journey.cordis.yml`、`expert-order-e2e.cordis.yml` pin `tool-connector.orderCreateTimeoutMs: 180000`——起草死线（120000）加非起草环节与一次 JSON 修复重试窗口。nocobase-track fixture 不动：它直驱 `orders.fulfill`，从不挂订单工具。
 - tool-connector 的 `Config.orderCreateTimeoutMs` JSDoc 写明约束：预算必须覆盖组合的 `draftTimeoutMs` 加管道非起草环节。
 - `fulfill` 返回 `normalizeOrderRow(settled)`，调用方与工具输出 schema 看到与其他路径一致的契约形状记录；`deliverable` appends 字段只存在于 wire，不进返回记录（附件挂载改由 update wire payload 断言）。
-- `examples/kb-agent/tests/order-budget.spec.ts`（keyless）守卫三个组合的关系：`orderCreateTimeoutMs >= draftTimeoutMs + 30000`。
+- `examples/kb-agent/tests/order-budget.spec.ts`（keyless）守卫三个组合的关系：`orderCreateTimeoutMs` 覆盖 `draftTimeoutMs` 加修复重试与非 draft 下界（派生见 [2026-09-15-order-create-verify-surface.zh.md](2026-09-15-order-create-verify-surface.zh.md)）。
 - `examples/kb-agent/scripts/order-create-verify.mts` 复现对话工具路径（含 timeout-policy 包装），对实机栈落证据到 `demos/order-create-verify-*.md`。
 
 ## Alternatives considered
