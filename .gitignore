@@ -57,3 +57,10 @@ screenshots/
 
 # Local agent state
 .roo/
+
+# Local rollback and research-clone assets: kg sqlite backups kept under
+# demos/ for H2-style schema rollback, and upstream source clones archived
+# under research/**/sources/ (the sources.md manifest itself stays tracked).
+examples/kb-agent/demos/**/*-backup.sqlite
+research/**/sources/*
+!research/**/sources/sources.md

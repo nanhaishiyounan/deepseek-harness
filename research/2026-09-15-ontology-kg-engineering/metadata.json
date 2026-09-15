@@ -1,0 +1,63 @@
+{
+  "date": "2026-09-15",
+  "topic": "本体知识图谱工程：AI + 开源库（L4 深度调研）",
+  "depth": "Exhaustive",
+  "sourceCount": 72,
+  "queries": [
+    "knowledge graph ontology engineering open source LinkML SHACL",
+    "Kuzu archived embedded graph database LadybugDB",
+    "LLM knowledge graph construction GraphRAG LLMGraphTransformer",
+    "SHACL javascript typescript rdf-validate-shacl",
+    "Morph-KGC RML YARRRML mapping",
+    "sqlite recursive cte graph traversal graphology",
+    "text2cypher best practices",
+    "knowledge graph quality metrics entity resolution"
+  ],
+  "clonedRepos": [
+    {
+      "name": "linkml-runtime.js",
+      "url": "https://github.com/linkml/linkml-runtime.js",
+      "commit": "master (shallow clone, .git removed)",
+      "sizeMB": 0.4,
+      "keyFindings": "EXPERIMENTAL；无任何校验能力；CJS；npm linkml-runtime 最后发布 2022-09；inducedSlot/gen-linkml/kitchen_sink 可抄"
+    },
+    {
+      "name": "graphiti",
+      "url": "https://github.com/getzep/graphiti",
+      "commit": "v0.30.2 (2026-09-11, shallow clone, .git removed)",
+      "sizeMB": 45,
+      "keyFindings": "Python 时态 KG；三层去重漏斗（余弦0.6→MinHash→LLM 终审）+ bi-temporal 边失效 + prompts 全家桶可移植 TS；GraphOperationsInterface 可照写 SQLite driver"
+    },
+    {
+      "name": "rdf-validate-shacl",
+      "url": "https://github.com/zazuko/rdf-validate-shacl",
+      "commit": "master@2025-10-28 (codeload zip)",
+      "sizeMB": 2.1,
+      "keyFindings": "SHACL Core 28/28；W3C data-shapes 套件；纯 ESM TS；JSON→手工 quads 集成路径成立；分批复用勿设 maxErrors"
+    },
+    {
+      "name": "kuzu-npm",
+      "url": "https://www.npmjs.com/package/kuzu",
+      "commit": "0.11.3 (2025-10-10, deprecated; tarball 解包静态审计)",
+      "sizeMB": 176,
+      "keyFindings": "unpacked 500MB/5747 文件；五平台全量二进制；NAPI 6；API 快照供 @ladybugdb/core 逐符号 diff"
+    }
+  ],
+  "assets": {
+    "images": [],
+    "attachments": [],
+    "totalSizeMB": 0
+  },
+  "triangulation": {
+    "claimsTotal": 62,
+    "claimsMultiSourced": 21,
+    "contradictionsFound": 9,
+    "contradictionsResolved": 7
+  },
+  "report": {
+    "sections": 9,
+    "totalLines": 1370,
+    "sha256": "159e097875c2233f7c6b34c8208292c4d1fe8f20fb77e613778389e999744d36",
+    "path": "research/2026-09-15-ontology-kg-engineering/report.md"
+  }
+}
