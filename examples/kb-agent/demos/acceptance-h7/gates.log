@@ -1,0 +1,155 @@
+=== H7 终审回归 2026-09-15T19:49:36+08:00 ===
+--- vitest kb-agent: 17 files / 52 tests PASS（另录） ---
+--- typecheck: 0 errors ---
+--- lint: 0 errors (1 pre-existing warning) ---
+--- doc-sync: 28 passed / 0 failed ---
+
+===== 两轮幂等 round 1 =====
+nocobase-h4: hub_inv_products food columns already in place (kept)
+nocobase-h4: collection srm_suppliers exists (kept)
+nocobase-h4: collection srm_certificates exists (kept)
+nocobase-h4: collection srm_audit_checklists exists (kept)
+nocobase-h4: collection srm_audit_records exists (kept)
+nocobase-h4: collection srm_score_cards exists (kept)
+nocobase-h4: collection srm_capas exists (kept)
+nocobase-h4: food SKUs +0 created, 0 existing rows backfilled (null-guarded)
+nocobase-h4: seed srm_suppliers +0 (kept: 10/9)
+nocobase-h4: seed srm_certificates +0 (kept: 15/15)
+nocobase-h4: seed srm_audit_checklists +0 (kept: 33/33)
+nocobase-h4: seed srm_audit_records +0 (kept: 12/12)
+nocobase-h4: seed srm_score_cards +0 (kept: 16/16)
+nocobase-h4: seed srm_capas +0 (kept: 6/5)
+nocobase-h4: workflow "SRM供应商准入审批" exists (kept)
+nocobase-h4: workflow "SRM低评分自动整改" exists (kept)
+nocobase-h4: menu group "供应链" exists (kept)
+nocobase-h4: v2 page "供应商档案" exists (kept)
+nocobase-h4: v2 page "供应商准入" exists (kept)
+nocobase-h4: v2 page "证照效期预警" exists (kept)
+nocobase-h4: v2 page "审核检查表" exists (kept)
+nocobase-h4: v2 page "审核评分录入" exists (kept)
+nocobase-h4: v2 page "绩效评分卡" exists (kept)
+nocobase-h4: v2 page "供应商绩效雷达" exists (kept)
+nocobase-h4: v2 page "整改跟踪" exists (kept)
+nocobase-h4: form submit actions already in place (kept)
+nocobase-h4: chart "各考核期平均总分" exists (kept)
+nocobase-h4: chart "五维绩效雷达" exists (kept)
+nocobase-h4: done
+nocobase-h5: collection wms_zones exists (kept)
+nocobase-h5: collection wms_bins exists (kept)
+nocobase-h5: collection wms_lots exists (kept)
+nocobase-h5: collection wms_stock exists (kept)
+nocobase-h5: collection wms_movements exists (kept)
+nocobase-h5: collection wms_receipts exists (kept)
+nocobase-h5: collection wms_shipments exists (kept)
+nocobase-h5: collection wms_transfers exists (kept)
+nocobase-h5: collection wms_counts exists (kept)
+nocobase-h5: seed wms_zones +0 (kept: 6/6)
+nocobase-h5: seed wms_bins +0 (kept: 72; target 72 total)
+nocobase-h5: seed wms_lots +0 (kept: 13/12)
+nocobase-h5: seed wms_stock +0 (kept: 9/8)
+nocobase-h5: seed wms_movements +0 (kept: 43/30)
+nocobase-h5: opening-balance alignment already balanced (kept)
+nocobase-h5: seed wms_receipts +0 (kept: 5/5)
+nocobase-h5: seed wms_shipments +0 (kept: 5/4)
+nocobase-h5: seed wms_transfers +0 (kept: 2/2)
+nocobase-h5: seed wms_counts +0 (kept: 3/3)
+nocobase-h5: workflow "WMS盘点差异调整审批" exists (kept)
+nocobase-h5: menu group "仓储管理" exists (kept)
+nocobase-h5: v2 page "仓库库区" exists (kept)
+nocobase-h5: v2 page "库位平面图" exists (kept)
+nocobase-h5: v2 page "入库单" exists (kept)
+nocobase-h5: v2 page "出库单" exists (kept)
+nocobase-h5: v2 page "库存查询" exists (kept)
+nocobase-h5: v2 page "批次主数据" exists (kept)
+nocobase-h5: v2 page "盘点管理" exists (kept)
+nocobase-h5: v2 page "移库管理" exists (kept)
+nocobase-h5: v2 page "库存流水" exists (kept)
+nocobase-h5: form submit actions already in place (kept)
+nocobase-h5: bin-map JSBlock exists (kept)
+nocobase-h5: done
+
+===== 两轮幂等 round 2 =====
+nocobase-h4: hub_inv_products food columns already in place (kept)
+nocobase-h4: collection srm_suppliers exists (kept)
+nocobase-h4: collection srm_certificates exists (kept)
+nocobase-h4: collection srm_audit_checklists exists (kept)
+nocobase-h4: collection srm_audit_records exists (kept)
+nocobase-h4: collection srm_score_cards exists (kept)
+nocobase-h4: collection srm_capas exists (kept)
+nocobase-h4: food SKUs +0 created, 0 existing rows backfilled (null-guarded)
+nocobase-h4: seed srm_suppliers +0 (kept: 10/9)
+nocobase-h4: seed srm_certificates +0 (kept: 15/15)
+nocobase-h4: seed srm_audit_checklists +0 (kept: 33/33)
+nocobase-h4: seed srm_audit_records +0 (kept: 12/12)
+nocobase-h4: seed srm_score_cards +0 (kept: 16/16)
+nocobase-h4: seed srm_capas +0 (kept: 6/5)
+nocobase-h4: workflow "SRM供应商准入审批" exists (kept)
+nocobase-h4: workflow "SRM低评分自动整改" exists (kept)
+nocobase-h4: menu group "供应链" exists (kept)
+nocobase-h4: v2 page "供应商档案" exists (kept)
+nocobase-h4: v2 page "供应商准入" exists (kept)
+nocobase-h4: v2 page "证照效期预警" exists (kept)
+nocobase-h4: v2 page "审核检查表" exists (kept)
+nocobase-h4: v2 page "审核评分录入" exists (kept)
+nocobase-h4: v2 page "绩效评分卡" exists (kept)
+nocobase-h4: v2 page "供应商绩效雷达" exists (kept)
+nocobase-h4: v2 page "整改跟踪" exists (kept)
+nocobase-h4: form submit actions already in place (kept)
+nocobase-h4: chart "各考核期平均总分" exists (kept)
+nocobase-h4: chart "五维绩效雷达" exists (kept)
+nocobase-h4: done
+nocobase-h5: collection wms_zones exists (kept)
+nocobase-h5: collection wms_bins exists (kept)
+nocobase-h5: collection wms_lots exists (kept)
+nocobase-h5: collection wms_stock exists (kept)
+nocobase-h5: collection wms_movements exists (kept)
+nocobase-h5: collection wms_receipts exists (kept)
+nocobase-h5: collection wms_shipments exists (kept)
+nocobase-h5: collection wms_transfers exists (kept)
+nocobase-h5: collection wms_counts exists (kept)
+nocobase-h5: seed wms_zones +0 (kept: 6/6)
+nocobase-h5: seed wms_bins +0 (kept: 72; target 72 total)
+nocobase-h5: seed wms_lots +0 (kept: 13/12)
+nocobase-h5: seed wms_stock +0 (kept: 9/8)
+nocobase-h5: seed wms_movements +0 (kept: 43/30)
+nocobase-h5: opening-balance alignment already balanced (kept)
+nocobase-h5: seed wms_receipts +0 (kept: 5/5)
+nocobase-h5: seed wms_shipments +0 (kept: 5/4)
+nocobase-h5: seed wms_transfers +0 (kept: 2/2)
+nocobase-h5: seed wms_counts +0 (kept: 3/3)
+nocobase-h5: workflow "WMS盘点差异调整审批" exists (kept)
+nocobase-h5: menu group "仓储管理" exists (kept)
+nocobase-h5: v2 page "仓库库区" exists (kept)
+nocobase-h5: v2 page "库位平面图" exists (kept)
+nocobase-h5: v2 page "入库单" exists (kept)
+nocobase-h5: v2 page "出库单" exists (kept)
+nocobase-h5: v2 page "库存查询" exists (kept)
+nocobase-h5: v2 page "批次主数据" exists (kept)
+nocobase-h5: v2 page "盘点管理" exists (kept)
+nocobase-h5: v2 page "移库管理" exists (kept)
+nocobase-h5: v2 page "库存流水" exists (kept)
+nocobase-h5: form submit actions already in place (kept)
+nocobase-h5: bin-map JSBlock exists (kept)
+nocobase-h5: done
+
+===== verify =====
+(node:83291) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+setup-nocobase verify: OK — full UI + collections + attachment field + seed + workflow chain + AI workbench + row floors + m2o fieldNames + n18ai- form AI buttons + portals + portal list probes + ai-proxy + API key + kg graph + h4 SRM (pages/group/floors/food columns) + h5 WMS (pages/group/floors/bin-map JSBlock) all verified
+
+===== setup-dsh-data 水位 skip 链 =====
+[PASS] second run changes no counts — nodes 1095→1095, edges 665→665
+[PASS] incremental scenario skipped (--no-incremental) — kept for manual verification runs; setup-chain replays stay count-stable
+
+kg-build.mts: ALL CHECKS PASSED
+setup-dsh-data: kb corpus already ingested (21 documents, kept)
+setup-dsh-data: done
+
+===== drift 断言（0 期望） =====
+0
+===== 行数终态 =====
+srm_suppliers|10
+srm_capas|6
+wms_bins|72
+wms_stock|9
+wms_movements|43
