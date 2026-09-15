@@ -178,6 +178,17 @@ pnpm exec vitest run --config vitest.e2e.config.ts examples/kb-agent/tests/nocob
 
 **多租户映射（MVP 形态）**：四级租户（平台/运营商/企业/用户）映射到 NocoBase 的 roles + departments 树 + 行级 scope——平台=superuser 角色、运营商=每运营主体一个 role、企业=department 节点（collections 行按 department scope 隔离）、用户=部门成员。本示例是 MVP 单租户：一个 root 角色 API key 服务全部连接器与订单读写（与 `kbWriteEnabled`/`ordersEnabled` 的单租户盘级访问控制同立场，见 [DEPLOY.zh.md](DEPLOY.zh.md) §3），不做行级隔离；多租户接入时按上述映射在 NocoBase 建 roles/departments 并为每个租户签发绑定 role 的 key，DSH 侧把 `DSH_KB_TENANT` 与 key 一并按租户部署。
 
+## 供应链双系统：SRM + WMS 完整闭环（H 轮）
+
+五大企业系统（CRM ERP/MES/WMS/PLM/SRM）走「类似 admin、可 UI 配置」的单 NocoBase 应用路线，每系统一个菜单组、v2 flowPage 形态、工厂脚本幂等建成。H 轮交付**共享地基 + SRM + WMS 两个完整闭环**；PLM（含酱油山梨酸钾 GB2760 硬阻断场景）/MES/ERP+CRM 升级按 I/J/K 轮路线图分期（`plans/acceptance-fixes-2026-09-15-h/04-roadmap-five-systems.md`），未建系统的菜单组不出现。
+
+- **共享地基**：`hub_inv_products` 增加五个可空食品列（保质期天数/温层/储存条件/GB2760 分类号/致敏原，后两项为 I 轮 PLM 预埋）；存量 7 行按真实 SKU 编码空值守卫回填，另有 4 个食品 SKU 种子。
+- **SRM（「供应链」组，6 表 8 页）**：供应商档案（三套分级独立字段：监管风险/审核评级/IQC 严格度）、供应商准入（第二视角 + 双人工审批链：资质审核→现场审核评级→合格/已拒绝，生命周期状态机落库）、证照效期预警（30/60/90/过期分组）、审核检查表（GMP20+HACCP7+ISO220006 条款）、审核评分录入、绩效评分卡（五维+加权总分）、供应商绩效雷达（柱状图 + **五维雷达图**——图表 authoring 通道 `visual.mode='custom'` 原生 ECharts option）、整改跟踪看板（发起/供应商回复/验证/关闭四列）。低于 60 分的评分卡创建自动触发整改单（workflow `create` 节点）。
+- **WMS（「仓储管理」组，9 表 9 页）**：仓库库区/库位（2 仓×3 温层区×12 位=72 库位，四状态分布）、**库位平面图**（A 路 JSBlockModel 自定义区块：runjs 白名单词汇 `ctx.makeResource` 读 `wms_bins` 渲染四色网格+悬停存货摘要——探针结论「完全可行」，B 路 GridCard 回退未启用）、入库单（过账自动按物料温层推荐空闲库位并按保质期推四日期）、出库单（**FEFO 推荐批次**列：按应下架日升序）、库存查询（SKU×库位×批次四数量+乐观锁版本列）、批次主数据（效期四日期+供应商追溯锚）、盘点管理（差异审批工作流）、移库管理、库存流水（append-only，`stock==Σmovements` 期初对齐恒成立）。
+- **过账引擎**（脚本侧，`--post-receipt/--post-shipment`）：版本校验乐观锁（过期版本命中零行即 fail loud 拒双重扣减，已实测）+ 流水追加 + 单据状态单次翻转；`--fefo <sku> <qty>` 按应下架日升序给出批次分配建议。workflow update 节点做不了四数量读-改-写算术，故过账不进 workflow（决策记录见 `.agents/notes/implemented/process/2026-09-15-five-systems-factory-srm-wms.md`）。
+- **AI 化**：全部 17 个新表单经 n18 自动挂载 dex 填充按钮（n18ai- 下限 25→42）；六张表单中文一句话流式填充实测（SRM 准入/审核/证照/CAPA + WMS 入库/出库，AI 能自主解析供应商/物料关联 ID）。
+- **证据**：`demos/acceptance-h4/`、`demos/acceptance-h5/`（逐页截图、状态机/自动整改/过账/FEFO/乐观锁实录、gates.log）。
+
 ## 五条用户动线一串演示（demo-full-journey）
 
 上面各节按能力分述；`demo-full-journey.mts` 把五条用户核心动线串成一次可复跑的真实端到端（with-key + with-NC，无前置的轨道自跳过并说明原因）：

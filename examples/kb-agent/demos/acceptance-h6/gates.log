@@ -1,0 +1,14 @@
+=== KG 三问面证明（H3 表面直查，workbench 会话同源） ===
+问1 图谱质量（最近构建 metrics）: {"nodes":1095,"edges":665,"islands":403,"conflicts":4,"nodeCoverage":{"numerator":211,"denominator":431,"ratio":0.49},"degraded":0,"droppedRelations":0,"mergedEntities":0,"tombstonedEdges":0,"computedAt":"2026-09-15T06:04:24.302Z"}
+节点总数: 1095
+(node:79291) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+    collections:
+      - name: experts
+        anchor: Expert
+        titleField: name
+      - name: expert_services
+        anchor: ExpertService
+        titleField: name
+问3 本体版本: TS registry ontologyVersion（kg-build 输出与网关 kg.stats 同源）
+examples/kb-agent/scripts/kg-build.mts:86:  check('ontologyVersion is 1.0.0', graph.ontologyVersion() === '1.0.0', graph.ontologyVersion())
