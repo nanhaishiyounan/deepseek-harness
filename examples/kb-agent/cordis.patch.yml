@@ -224,6 +224,11 @@
       name: '@deepseek-ai/dsh-tool-connector'
       config:
         tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"
+        # order_create runs the whole deliverable pipeline in one tool call,
+        # so its budget must clear expert-orders' draftTimeoutMs (120000
+        # below) plus the NocoBase reads/writes, kb retrieval, PDF rendering,
+        # and attachment upload; the 60000 seam default times out mid-draft.
+        orderCreateTimeoutMs: 180000
 
     # The NocoBase business tools: nb_collections/nb_list/nb_get read the
     # business schema and rows, nb_create/nb_update land confirmed record

@@ -119,7 +119,13 @@ export interface Config {
   fetchTimeoutMs?: number
   /** Cooperative timeout budget (ms) for `connector_transfer`. Defaults to 120000. */
   transferTimeoutMs?: number
-  /** Cooperative timeout budget (ms) for `order_create` (the whole drafting pipeline). Defaults to 60000. */
+  /**
+   * Cooperative timeout budget (ms) for `order_create` (the whole drafting pipeline).
+   * Defaults to 60000. Must clear the composed expert-orders `draftTimeoutMs`
+   * plus its non-draft steps (NocoBase reads/writes, kb retrieval, PDF
+   * rendering, attachment upload) — an under-sized budget surfaces as
+   * `TOOL_TIMEOUT` mid-draft, stranding a `generating` order.
+   */
   orderCreateTimeoutMs?: number
   /** Cooperative timeout budget (ms) for `order_status`. Defaults to 10000. */
   orderStatusTimeoutMs?: number

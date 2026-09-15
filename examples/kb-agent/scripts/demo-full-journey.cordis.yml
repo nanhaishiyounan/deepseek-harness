@@ -93,6 +93,9 @@
   name: '@deepseek-ai/dsh-tool-connector'
   config:
     tenant: demo-food-co
+    # Must clear expert-orders' draftTimeoutMs (120000 below) plus the
+    # pipeline's non-draft steps; the 60000 seam default times out mid-draft.
+    orderCreateTimeoutMs: 180000
 
 - id: expert-orders
   name: '@deepseek-ai/dsh-expert-orders'

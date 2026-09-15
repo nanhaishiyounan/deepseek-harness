@@ -392,7 +392,10 @@ export class OrdersRuntime extends Service implements OrdersSeam {
         generatedAt: new Date().toISOString(),
         ...(note === undefined ? {} : { note }),
       }, signal)
-      return settled
+      // The wire row carries SQL NULL for unset columns (`note` when the
+      // model drafted); normalize so callers and the tool output schema see
+      // the contract-shaped record every other read path returns.
+      return normalizeOrderRow(settled)
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error)
       try {

@@ -273,7 +273,11 @@ describe('OrdersRuntime.fulfill (keyless template fallback)', () => {
     // the delivered write-back hangs the attachment id off the order row.
     const uploadWire = nc!.served.find(request => request.path === '/api/attachments:upload')
     expect(uploadWire).toBeDefined()
-    expect(delivered.deliverable).toEqual([1])
+    // fulfill returns the contract-shaped record (normalizeOrderRow), not the
+    // raw wire row: the attachment linkage is asserted on the update wire
+    // below, and unset columns (SQL NULL on the wire) must not survive into
+    // the returned record — the tool output schema rejects them.
+    expect(delivered).not.toHaveProperty('deliverable')
     expect(delivered.deliverableUrl).toBe(`/storage/uploads/${order.orderNo}.pdf`)
     const updates = nc!.served.filter(request => request.path === '/api/orders:update' && request.query?.get('filterByTk') === String(order.id))
     expect(updates.map(request => (request.body as { status: string }).status)).toEqual(['generating', 'delivered'])
