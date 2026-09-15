@@ -1,0 +1,36 @@
+(node:53700) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+setup-nocobase verify: OK — full UI + collections + attachment field + seed + workflow chain + AI workbench + row floors + m2o fieldNames + n18ai- form AI buttons + portals + portal list probes + ai-proxy + API key + kg graph + h4 SRM (pages/group/floors/food columns) all verified
+nocobase-h4: hub_inv_products food columns already in place (kept)
+nocobase-h4: collection srm_suppliers exists (kept)
+nocobase-h4: collection srm_certificates exists (kept)
+nocobase-h4: collection srm_audit_checklists exists (kept)
+nocobase-h4: collection srm_audit_records exists (kept)
+nocobase-h4: collection srm_score_cards exists (kept)
+nocobase-h4: collection srm_capas exists (kept)
+nocobase-h4: food SKUs +0 created, 0 existing rows backfilled (null-guarded)
+nocobase-h4: seed srm_suppliers +0 (kept: 10/9)
+nocobase-h4: seed srm_certificates +0 (kept: 15/15)
+nocobase-h4: seed srm_audit_checklists +0 (kept: 33/33)
+nocobase-h4: seed srm_audit_records +0 (kept: 12/12)
+nocobase-h4: seed srm_score_cards +0 (kept: 16/16)
+nocobase-h4: seed srm_capas +0 (kept: 6/5)
+nocobase-h4: workflow "SRM供应商准入审批" exists (kept)
+nocobase-h4: workflow "SRM低评分自动整改" exists (kept)
+nocobase-h4: menu group "供应链" exists (kept)
+nocobase-h4: v2 page "供应商档案" exists (kept)
+nocobase-h4: v2 page "供应商准入" exists (kept)
+nocobase-h4: v2 page "证照效期预警" exists (kept)
+nocobase-h4: v2 page "审核检查表" exists (kept)
+nocobase-h4: v2 page "审核评分录入" exists (kept)
+nocobase-h4: v2 page "绩效评分卡" exists (kept)
+nocobase-h4: v2 page "供应商绩效雷达" exists (kept)
+nocobase-h4: v2 page "整改跟踪" exists (kept)
+nocobase-h4: form submit actions already in place (kept)
+nocobase-h4: chart "各考核期平均总分" exists (kept)
+nocobase-h4: chart "五维绩效雷达" exists (kept)
+nocobase-h4: done
+suppliers|10
+certs|15
+capas|6
+scores|17

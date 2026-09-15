@@ -746,6 +746,12 @@ async function stepVerify(): Promise<void> {
   // (工作台 = two stacked table blocks, 分类维护 = four).
   const missingV2Hub = ['知识文章', '维保记录', '部门', '请假审批', '供应商', '工作台', '分类维护'].filter(title => !v2Titles.has(title))
   if (missingV2Hub.length > 0) failures.push(`v2 Hub flowPages missing: ${missingV2Hub.join(', ')} (run nocobase-f3-hub-v2.mts)`)
+  // H4: the SRM pages under the 供应链 group (six table/chart pages + the
+  // CAPA kanban + the admission second view).
+  const missingV2H4 = ['供应商档案', '供应商准入', '证照效期预警', '审核检查表', '审核评分录入', '绩效评分卡', '供应商绩效雷达', '整改跟踪'].filter(title => !v2Titles.has(title))
+  if (missingV2H4.length > 0) failures.push(`v2 SRM flowPages missing: ${missingV2H4.join(', ')} (run nocobase-h4-srm.mts)`)
+  const srmGroupRoutes = await call(token, 'GET', `/api/desktopRoutes:list?filter=${encodeURIComponent(JSON.stringify({ title: { $eq: '供应链' }, type: { $eq: 'group' } }))}&pageSize=1`) as { data?: Array<{ id: number }> }
+  if ((srmGroupRoutes?.data?.length ?? 0) === 0) failures.push('供应链 menu group missing (run nocobase-h4-srm.mts)')
   const flowModels = await call(token, 'GET', '/api/flowModels:list?pageSize=2000') as { data?: Array<{ use?: string, uid?: string }>, meta?: { total?: number } }
   const flowModelRows = flowModels?.data ?? []
   if (typeof flowModels?.meta?.total === 'number' ? flowModels.meta.total > flowModelRows.length : flowModelRows.length === 2000) {
@@ -768,8 +774,10 @@ async function stepVerify(): Promise<void> {
   const n18Buttons = aiButtons.filter(row => row.uid?.startsWith('n18ai-'))
   // 11 = the N17d eight CRM/Hub pages + the E1 项目管理 three (项目/任务列表/里程碑);
   // +2 = the F1 kanban/calendar Add-new popups; +5 = the F2 CRM pages; +7 =
-  // the F3 pages (2 Add-new popups on 工作台, 4 on 分类维护).
-  if (n18Buttons.length < 25) failures.push(`n18ai- AIEmployeeButtonModel count ${n18Buttons.length} < 25 (form AI fill buttons missing; run nocobase-n18-form-ai.mts after the f1/f2/f3 seeds)`)
+  // the F3 pages (2 Add-new popups on 工作台, 4 on 分类维护); +8 = the H4 SRM
+  // pages (供应商档案/供应商准入/证照效期预警/审核检查表/审核评分录入/绩效评分卡/
+  // 供应商绩效雷达/整改跟踪).
+  if (n18Buttons.length < 33) failures.push(`n18ai- AIEmployeeButtonModel count ${n18Buttons.length} < 33 (form AI fill buttons missing; run nocobase-n18-form-ai.mts after the f1/f2/f3/h4 seeds)`)
   // Row-level AI actions configured by hand in the UI (not seeded) are legal;
   // only unknown foreign mounts may pad the AIEmployeeButtonModel census.
   const KNOWN_HAND_CONFIGURED_AI_BUTTONS = new Set(['26c6ab488b1']) // viz action on the E1 项目 table
@@ -800,6 +808,26 @@ async function stepVerify(): Promise<void> {
   for (const [collection, floor] of [['experts', 33], ['expert_services', 50], ['datasets', 89], ['orders', 24]] as const) {
     const failure = await rowFloor(collection, floor)
     if (failure !== null) failures.push(`${failure}; run the all chain so setup-dsh-data.mts seeds the expert roster and the historical orders`)
+  }
+  // H4: the SRM seed floors (9 suppliers with the three-tier grading, 15
+  // certificates covering every warn band, 33 checklist rows, 12 audits, 16
+  // quarter cards, 5 CAPAs) — the CAPA floor stays 5: the <60 auto-CAPA
+  // workflow only fires on live low-score creates, never on seeds.
+  for (const [collection, floor] of [
+    ['srm_suppliers', 9], ['srm_certificates', 15], ['srm_audit_checklists', 30],
+    ['srm_audit_records', 12], ['srm_score_cards', 16], ['srm_capas', 5],
+  ] as const) {
+    const failure = await rowFloor(collection, floor)
+    if (failure !== null) failures.push(`${failure}; run nocobase-h4-srm.mts so the SRM domain seeds`)
+  }
+  // H4 foundation: hub_inv_products carries the five nullable food columns
+  // (shelf-life/temp-zone/storage/GB2760/allergens — the I-round PLM anchors).
+  {
+    const productFields = await call(token, 'GET', `/api/fields:list?filter=${encodeURIComponent(JSON.stringify({ collectionName: { $eq: 'hub_inv_products' } }))}&pageSize=200`) as { data?: Array<{ name?: string }> }
+    const productFieldNames = new Set((productFields?.data ?? []).map(field => field.name))
+    for (const foodField of ['shelf_life_days', 'temp_zone', 'storage_conditions', 'gb2760_category', 'allergens']) {
+      if (!productFieldNames.has(foodField)) failures.push(`hub_inv_products.${foodField} missing (run nocobase-h4-srm.mts for the food foundation columns)`)
+    }
   }
   // m2o display anchor (N16): AssociationField renders the target's name
   // column only when the field uiSchema carries fieldNames.label.
@@ -1058,7 +1086,7 @@ async function stepVerify(): Promise<void> {
     process.exitCode = 1
     return
   }
-  console.log('setup-nocobase verify: OK — full UI + collections + attachment field + seed + workflow chain + AI workbench + row floors + m2o fieldNames + n18ai- form AI buttons + portals + portal list probes + ai-proxy + API key + kg graph all verified')
+  console.log('setup-nocobase verify: OK — full UI + collections + attachment field + seed + workflow chain + AI workbench + row floors + m2o fieldNames + n18ai- form AI buttons + portals + portal list probes + ai-proxy + API key + kg graph + h4 SRM (pages/group/floors/food columns) all verified')
 }
 
 /** Upsert the two NocoBase lines in the repository root .env, preserving the rest. */
@@ -1176,7 +1204,7 @@ async function main(): Promise<void> {
       for (const script of [
         'nocobase-crm-modules.mts', 'nocobase-hub-modules.mts',
         'nocobase-n13-rebuild.mts', 'nocobase-n13-seed.mts', 'nocobase-n14-fix.mts',
-        'nocobase-n17-alignment.mts', 'nocobase-e1-pj-v2.mts', 'nocobase-f1-view-v2.mts', 'nocobase-f2-crm-v2.mts', 'nocobase-f3-hub-v2.mts', 'nocobase-n18-form-ai.mts', 'nocobase-n25-brand.mts',
+        'nocobase-n17-alignment.mts', 'nocobase-e1-pj-v2.mts', 'nocobase-f1-view-v2.mts', 'nocobase-f2-crm-v2.mts', 'nocobase-f3-hub-v2.mts', 'nocobase-h4-srm.mts', 'nocobase-n18-form-ai.mts', 'nocobase-n25-brand.mts',
         'nocobase-f4-charts.mts',
       ]) {
         if (!run('node', ['--import', 'tsx/esm', join(repoRoot, 'examples/kb-agent/scripts', script)])) {
