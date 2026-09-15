@@ -1,0 +1,49 @@
+(node:77423) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+setup-nocobase verify: OK — full UI + collections + attachment field + seed + workflow chain + AI workbench + row floors + m2o fieldNames + n18ai- form AI buttons + portals + portal list probes + ai-proxy + API key + kg graph + h4 SRM (pages/group/floors/food columns) + h5 WMS (pages/group/floors/bin-map JSBlock) all verified
+=== h5 final idempotency ===
+nocobase-h5: collection wms_zones exists (kept)
+nocobase-h5: collection wms_bins exists (kept)
+nocobase-h5: collection wms_lots exists (kept)
+nocobase-h5: collection wms_stock exists (kept)
+nocobase-h5: collection wms_movements exists (kept)
+nocobase-h5: collection wms_receipts exists (kept)
+nocobase-h5: collection wms_shipments exists (kept)
+nocobase-h5: collection wms_transfers exists (kept)
+nocobase-h5: collection wms_counts exists (kept)
+nocobase-h5: seed wms_zones +0 (kept: 6/6)
+nocobase-h5: seed wms_bins +0 (kept: 72; target 72 total)
+nocobase-h5: seed wms_lots +0 (kept: 13/12)
+nocobase-h5: seed wms_stock +0 (kept: 9/8)
+nocobase-h5: seed wms_movements +0 (kept: 43/30)
+nocobase-h5: opening-balance alignment already balanced (kept)
+nocobase-h5: seed wms_receipts +0 (kept: 5/5)
+nocobase-h5: seed wms_shipments +0 (kept: 5/4)
+nocobase-h5: seed wms_transfers +0 (kept: 2/2)
+nocobase-h5: seed wms_counts +0 (kept: 3/3)
+nocobase-h5: workflow "WMS盘点差异调整审批" exists (kept)
+nocobase-h5: menu group "仓储管理" exists (kept)
+nocobase-h5: v2 page "仓库库区" exists (kept)
+nocobase-h5: v2 page "库位平面图" exists (kept)
+nocobase-h5: v2 page "入库单" exists (kept)
+nocobase-h5: v2 page "出库单" exists (kept)
+nocobase-h5: v2 page "库存查询" exists (kept)
+nocobase-h5: v2 page "批次主数据" exists (kept)
+nocobase-h5: v2 page "盘点管理" exists (kept)
+nocobase-h5: v2 page "移库管理" exists (kept)
+nocobase-h5: v2 page "库存流水" exists (kept)
+nocobase-h5: form submit actions already in place (kept)
+nocobase-h5: bin-map JSBlock exists (kept)
+nocobase-h5: done
+=== drift check (0 expected) ===
+0
+=== row counts ===
+zones|6
+bins|72
+lots|13
+stock|9
+moves|43
+receipts|5
+shipments|5
+transfers|2
+counts|3

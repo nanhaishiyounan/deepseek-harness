@@ -752,6 +752,12 @@ async function stepVerify(): Promise<void> {
   if (missingV2H4.length > 0) failures.push(`v2 SRM flowPages missing: ${missingV2H4.join(', ')} (run nocobase-h4-srm.mts)`)
   const srmGroupRoutes = await call(token, 'GET', `/api/desktopRoutes:list?filter=${encodeURIComponent(JSON.stringify({ title: { $eq: '供应链' }, type: { $eq: 'group' } }))}&pageSize=1`) as { data?: Array<{ id: number }> }
   if ((srmGroupRoutes?.data?.length ?? 0) === 0) failures.push('供应链 menu group missing (run nocobase-h4-srm.mts)')
+  // H5: the WMS pages under the 仓储管理 group (eight tables + the bin-map
+  // page whose JSBlock is the A-route custom block).
+  const missingV2H5 = ['仓库库区', '库位平面图', '入库单', '出库单', '库存查询', '批次主数据', '盘点管理', '移库管理', '库存流水'].filter(title => !v2Titles.has(title))
+  if (missingV2H5.length > 0) failures.push(`v2 WMS flowPages missing: ${missingV2H5.join(', ')} (run nocobase-h5-wms.mts)`)
+  const wmsGroupRoutes = await call(token, 'GET', `/api/desktopRoutes:list?filter=${encodeURIComponent(JSON.stringify({ title: { $eq: '仓储管理' }, type: { $eq: 'group' } }))}&pageSize=1`) as { data?: Array<{ id: number }> }
+  if ((wmsGroupRoutes?.data?.length ?? 0) === 0) failures.push('仓储管理 menu group missing (run nocobase-h5-wms.mts)')
   const flowModels = await call(token, 'GET', '/api/flowModels:list?pageSize=2000') as { data?: Array<{ use?: string, uid?: string }>, meta?: { total?: number } }
   const flowModelRows = flowModels?.data ?? []
   if (typeof flowModels?.meta?.total === 'number' ? flowModels.meta.total > flowModelRows.length : flowModelRows.length === 2000) {
@@ -775,9 +781,12 @@ async function stepVerify(): Promise<void> {
   // 11 = the N17d eight CRM/Hub pages + the E1 项目管理 three (项目/任务列表/里程碑);
   // +2 = the F1 kanban/calendar Add-new popups; +5 = the F2 CRM pages; +7 =
   // the F3 pages (2 Add-new popups on 工作台, 4 on 分类维护); +8 = the H4 SRM
-  // pages (供应商档案/供应商准入/证照效期预警/审核检查表/审核评分录入/绩效评分卡/
-  // 供应商绩效雷达/整改跟踪).
-  if (n18Buttons.length < 33) failures.push(`n18ai- AIEmployeeButtonModel count ${n18Buttons.length} < 33 (form AI fill buttons missing; run nocobase-n18-form-ai.mts after the f1/f2/f3/h4 seeds)`)
+  // pages; +9 = the H5 WMS pages (仓库库区/库位平面图/入库单/出库单/库存查询/
+  // 批次主数据/盘点管理/移库管理/库存流水).
+  if (n18Buttons.length < 42) failures.push(`n18ai- AIEmployeeButtonModel count ${n18Buttons.length} < 42 (form AI fill buttons missing; run nocobase-n18-form-ai.mts after the f1/f2/f3/h4/h5 seeds)`)
+  // H5: the bin-map custom block rides the JSBlockModel authoring channel —
+  // exactly one on the 库位平面图 grid.
+  if (modelCount('JSBlockModel') < 1) failures.push('JSBlockModel missing (run nocobase-h5-wms.mts for the 库位平面图 map block)')
   // Row-level AI actions configured by hand in the UI (not seeded) are legal;
   // only unknown foreign mounts may pad the AIEmployeeButtonModel census.
   const KNOWN_HAND_CONFIGURED_AI_BUTTONS = new Set(['26c6ab488b1']) // viz action on the E1 项目 table
@@ -819,6 +828,17 @@ async function stepVerify(): Promise<void> {
   ] as const) {
     const failure = await rowFloor(collection, floor)
     if (failure !== null) failures.push(`${failure}; run nocobase-h4-srm.mts so the SRM domain seeds`)
+  }
+  // H5: the WMS seed floors (72 bins over six zones, 12 lots with the
+  // four-date model, the stock/movement pair balanced by the opening
+  // alignment, and the documents across states).
+  for (const [collection, floor] of [
+    ['wms_zones', 6], ['wms_bins', 72], ['wms_lots', 12], ['wms_stock', 9],
+    ['wms_movements', 39], ['wms_receipts', 5], ['wms_shipments', 5],
+    ['wms_transfers', 2], ['wms_counts', 3],
+  ] as const) {
+    const failure = await rowFloor(collection, floor)
+    if (failure !== null) failures.push(`${failure}; run nocobase-h5-wms.mts so the WMS domain seeds`)
   }
   // H4 foundation: hub_inv_products carries the five nullable food columns
   // (shelf-life/temp-zone/storage/GB2760/allergens — the I-round PLM anchors).
@@ -1086,7 +1106,7 @@ async function stepVerify(): Promise<void> {
     process.exitCode = 1
     return
   }
-  console.log('setup-nocobase verify: OK — full UI + collections + attachment field + seed + workflow chain + AI workbench + row floors + m2o fieldNames + n18ai- form AI buttons + portals + portal list probes + ai-proxy + API key + kg graph + h4 SRM (pages/group/floors/food columns) all verified')
+  console.log('setup-nocobase verify: OK — full UI + collections + attachment field + seed + workflow chain + AI workbench + row floors + m2o fieldNames + n18ai- form AI buttons + portals + portal list probes + ai-proxy + API key + kg graph + h4 SRM (pages/group/floors/food columns) + h5 WMS (pages/group/floors/bin-map JSBlock) all verified')
 }
 
 /** Upsert the two NocoBase lines in the repository root .env, preserving the rest. */
@@ -1204,7 +1224,7 @@ async function main(): Promise<void> {
       for (const script of [
         'nocobase-crm-modules.mts', 'nocobase-hub-modules.mts',
         'nocobase-n13-rebuild.mts', 'nocobase-n13-seed.mts', 'nocobase-n14-fix.mts',
-        'nocobase-n17-alignment.mts', 'nocobase-e1-pj-v2.mts', 'nocobase-f1-view-v2.mts', 'nocobase-f2-crm-v2.mts', 'nocobase-f3-hub-v2.mts', 'nocobase-h4-srm.mts', 'nocobase-n18-form-ai.mts', 'nocobase-n25-brand.mts',
+        'nocobase-n17-alignment.mts', 'nocobase-e1-pj-v2.mts', 'nocobase-f1-view-v2.mts', 'nocobase-f2-crm-v2.mts', 'nocobase-f3-hub-v2.mts', 'nocobase-h4-srm.mts', 'nocobase-h5-wms.mts', 'nocobase-n18-form-ai.mts', 'nocobase-n25-brand.mts',
         'nocobase-f4-charts.mts',
       ]) {
         if (!run('node', ['--import', 'tsx/esm', join(repoRoot, 'examples/kb-agent/scripts', script)])) {

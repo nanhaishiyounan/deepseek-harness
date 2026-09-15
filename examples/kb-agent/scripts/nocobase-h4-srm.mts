@@ -554,13 +554,13 @@ const SEED_FOOD_SKUS: ReadonlyArray<Record<string, unknown>> = [
 
 /** Backfill the food columns on the pre-existing SKUs only where still null. */
 const EXISTING_SKU_BACKFILL: ReadonlyArray<{ sku: string, values: Record<string, unknown> }> = [
-  { sku: 'SHR-500', values: { shelf_life_days: 365, temp_zone: 'frozen', storage_conditions: '-18℃ 以下冷冻保存', gb2760_category: '16.05 冷冻水产品', allergens: ['crustacean'] } },
-  { sku: 'CORN-1KG', values: { shelf_life_days: 365, temp_zone: 'frozen', storage_conditions: '-18℃ 以下冷冻保存', gb2760_category: '16.05 冷冻水产品', allergens: [] } },
-  { sku: 'VEG-CHIP', values: { shelf_life_days: 270, temp_zone: 'ambient', storage_conditions: '常温干燥保存', gb2760_category: '16.06 膨化食品', allergens: ['wheat'] } },
-  { sku: 'MOON-25KG', values: { shelf_life_days: 180, temp_zone: 'ambient', storage_conditions: '常温干燥保存，防潮', gb2760_category: '16.39 月饼', allergens: ['wheat', 'egg'] } },
-  { sku: 'STRAW-5KG', values: { shelf_life_days: 540, temp_zone: 'frozen', storage_conditions: '-18℃ 以下冷冻保存', gb2760_category: '16.01 水果制品', allergens: [] } },
-  { sku: 'HONEY-350', values: { shelf_life_days: 730, temp_zone: 'ambient', storage_conditions: '常温避光保存', gb2760_category: '16.02 蜂蜜', allergens: [] } },
-  { sku: 'MILK-1L', values: { shelf_life_days: 7, temp_zone: 'chilled', storage_conditions: '0-4℃ 冷藏，避光', gb2760_category: '14.02 果蔬汁类', allergens: ['milk'] } },
+  { sku: 'SKU-FZ-0001', values: { shelf_life_days: 365, temp_zone: 'frozen', storage_conditions: '-18℃ 以下冷冻保存', gb2760_category: '16.05 冷冻水产品', allergens: ['crustacean'] } },
+  { sku: 'SKU-FZ-0002', values: { shelf_life_days: 365, temp_zone: 'frozen', storage_conditions: '-18℃ 以下冷冻保存', gb2760_category: '16.05 冷冻水产品', allergens: [] } },
+  { sku: 'SKU-GZ-0003', values: { shelf_life_days: 270, temp_zone: 'ambient', storage_conditions: '常温干燥保存', gb2760_category: '16.06 膨化食品', allergens: ['wheat'] } },
+  { sku: 'SKU-DZ-0004', values: { shelf_life_days: 180, temp_zone: 'ambient', storage_conditions: '常温干燥保存，防潮', gb2760_category: '16.39 月饼', allergens: ['wheat', 'egg'] } },
+  { sku: 'SKU-FZ-0005', values: { shelf_life_days: 540, temp_zone: 'frozen', storage_conditions: '-18℃ 以下冷冻保存', gb2760_category: '16.01 水果制品', allergens: [] } },
+  { sku: 'SKU-BZ-0006', values: { shelf_life_days: 730, temp_zone: 'ambient', storage_conditions: '常温避光保存', gb2760_category: '16.02 蜂蜜', allergens: [] } },
+  { sku: 'SKU-LD-0007', values: { shelf_life_days: 7, temp_zone: 'chilled', storage_conditions: '0-4℃ 冷藏，避光', gb2760_category: '14.02 果蔬汁类', allergens: ['milk'] } },
 ]
 
 async function seedFoundationSkus(token: string): Promise<void> {
