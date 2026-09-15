@@ -1192,10 +1192,58 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         parameters: [{ name: 'relation', description: 'the relation registration entry.' }],
       },
       {
+        signature: 'ontologyVersion(): string',
+        description: 'The built-in ontology\'s semantic version — the TS seed is the single source of truth; derived registrations (nocobase-derived, agent-defined) ride the store\'s revision audit instead.',
+        parameters: [],
+        returns: 'the seed\'s semver string.',
+      },
+      {
         signature: 'async storedRegistry(): Promise<{ nodeTypes: readonly KgNodeType[]; relations: readonly KgRelation[] }>',
         description: 'Read every persisted registry row (the two-layer registry\'s read path; store providers re-register these at boot).',
         parameters: [],
         returns: 'the stored node types and relations.',
+      },
+      {
+        signature: 'async recordOntologyRevision(revision: KgOntologyRevisionInput): Promise<number>',
+        description: 'Append one ontology-revision audit row (the pipeline\'s registry diff).',
+        parameters: [{ name: 'revision', description: 'the revision snapshot.' }],
+        returns: 'the inserted revision id.',
+      },
+      {
+        signature: 'async ontologyRevisions(limit: number): Promise<readonly KgOntologyRevision[]>',
+        description: 'Read the newest ontology-revision audit rows.',
+        parameters: [{ name: 'limit', description: 'maximum rows to return.' }],
+        returns: 'the revisions, newest first.',
+      },
+      {
+        signature: 'async recordBuildRun(run: KgBuildRunInput): Promise<number>',
+        description: 'Append one build-run ledger row (report + metrics JSON).',
+        parameters: [{ name: 'run', description: 'the ledger snapshot.' }],
+        returns: 'the inserted row id.',
+      },
+      {
+        signature: 'async latestBuildRun(tenantId: string): Promise<KgBuildRunRow | undefined>',
+        description: 'Read the newest build-run ledger row for one tenant.',
+        parameters: [{ name: 'tenantId', description: 'owning tenant.' }],
+        returns: 'the row, or undefined before the first persisted run.',
+      },
+      {
+        signature: 'async islandNodes(tenantId: string): Promise<number>',
+        description: 'Count live nodes with zero live edges (the island metric).',
+        parameters: [{ name: 'tenantId', description: 'owning tenant.' }],
+        returns: 'the island-node count.',
+      },
+      {
+        signature: 'async conflictingFacts(tenantId: string): Promise<number>',
+        description: 'Count (src, dst, relation) groups asserting more than one distinct fact.',
+        parameters: [{ name: 'tenantId', description: 'owning tenant.' }],
+        returns: 'the conflicting-fact group count.',
+      },
+      {
+        signature: 'async nodeCountByType(tenantId: string, typeId: KgNodeTypeId): Promise<number>',
+        description: 'Count live nodes of one type under one tenant (the coverage numerator).',
+        parameters: [{ name: 'tenantId', description: 'owning tenant.' }, { name: 'typeId', description: 'the node type to count.' }],
+        returns: 'the live-node count for that type.',
       },
     ],
   },
@@ -1209,6 +1257,24 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         description: 'Execute one full pipeline pass: registry mapping + structured ingestion, then corpus extraction, alignment, and watermark persistence.',
         parameters: [{ name: 'options', description: 'cooperative cancellation.' }],
         returns: 'the per-scope run report.',
+      },
+      {
+        signature: 'async latestRun(): Promise<KgBuildRunRecord | undefined>',
+        description: 'The newest persisted build-run ledger row (the report evidence that outlives the process).',
+        parameters: [],
+        returns: 'the row, or undefined before the first persisted run.',
+      },
+      {
+        signature: 'async qualityReport(): Promise<KgQualityReadout>',
+        description: 'The live quality readout: structural counters straight from the store, plus the persisted metrics\' coverage document.',
+        parameters: [],
+        returns: 'the quality report.',
+      },
+      {
+        signature: 'async mappings(): Promise<KgMappingsReadout>',
+        description: 'The mappings read-out: the loaded file\'s shape plus the last run\'s per-collection outcome (the graph tab\'s rule panel and the apiproxy `kg.mappings` read this).',
+        parameters: [],
+        returns: 'the mappings readout.',
       },
     ],
   },
@@ -3429,7 +3495,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'CollectionRunReport',
-    declaration: 'export interface CollectionRunReport {\n    readonly scope: string;\n    readonly rows: number;\n    readonly nodesUpserted: number;\n    readonly edgesUpserted: number;\n    readonly newRows: number;\n    readonly tombstoned: number;\n    readonly skipped: boolean;\n    readonly watermark: string;\n    readonly contentHash: string;\n}',
+    declaration: 'export interface CollectionRunReport {\n    readonly scope: string;\n    readonly rows: number;\n    readonly nodesUpserted: number;\n    readonly edgesUpserted: number;\n    readonly newRows: number;\n    readonly tombstoned: number;\n    readonly skipped: boolean;\n    readonly watermark: string;\n    readonly contentHash: string;\n    readonly skippedRelationFields: readonly string[];\n}',
   },
   {
     name: 'CommandDefinition',
@@ -4112,12 +4178,44 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface KbUsageDelta {\n    readonly searches?: number;\n    readonly ingestedDocuments?: number;\n    readonly ingestedChunks?: number;\n    readonly embedTexts?: number;\n    readonly embedTokens?: number;\n}',
   },
   {
+    name: 'KgBuildRunInput',
+    declaration: 'export interface KgBuildRunInput {\n    readonly tenantId: string;\n    readonly startedAt: string;\n    readonly finishedAt: string;\n    readonly report: unknown;\n    readonly metrics: unknown;\n    readonly createdAt: string;\n}',
+  },
+  {
+    name: 'KgBuildRunMetrics',
+    declaration: 'export interface KgBuildRunMetrics {\n    readonly nodes: number;\n    readonly edges: number;\n    readonly islands: number;\n    readonly conflicts: number;\n    readonly nodeCoverage: {\n        readonly numerator: number;\n        readonly denominator: number;\n        readonly ratio: number;\n    };\n    readonly degraded: number;\n    readonly droppedRelations: number;\n    readonly mergedEntities: number;\n    readonly tombstonedEdges: number;\n    readonly computedAt: string;\n}',
+  },
+  {
+    name: 'KgBuildRunRecord',
+    declaration: 'export interface KgBuildRunRecord {\n    readonly id: number;\n    readonly tenant: string;\n    readonly startedAt: string;\n    readonly finishedAt: string;\n    readonly report: KgBuildRunReport;\n    readonly metrics: KgBuildRunMetrics;\n}',
+  },
+  {
     name: 'KgBuildRunReport',
-    declaration: 'export interface KgBuildRunReport {\n    readonly collections: readonly CollectionRunReport[];\n    readonly lakehouse?: SimpleSourceReport;\n    readonly connector?: SimpleSourceReport;\n    readonly corpus?: CorpusReport;\n    readonly persistedTypes: number;\n    readonly persistedRelations: number;\n    readonly startedAt: string;\n    readonly finishedAt: string;\n}',
+    declaration: 'export interface KgBuildRunReport {\n    readonly collections: readonly CollectionRunReport[];\n    readonly lakehouse?: SimpleSourceReport;\n    readonly connector?: SimpleSourceReport;\n    readonly corpus?: CorpusReport;\n    readonly persistedTypes: number;\n    readonly persistedRelations: number;\n    readonly ruleHits: Readonly<Record<string, number>>;\n    readonly ontologyRevision?: number;\n    readonly buildRunId?: number;\n    readonly metrics?: KgBuildRunMetrics;\n    readonly startedAt: string;\n    readonly finishedAt: string;\n}',
+  },
+  {
+    name: 'KgBuildRunRow',
+    declaration: 'export interface KgBuildRunRow {\n    readonly id: number;\n    readonly tenantId: string;\n    readonly startedAt: string;\n    readonly finishedAt: string;\n    readonly report: unknown;\n    readonly metrics: unknown;\n}',
   },
   {
     name: 'KgEdge',
     declaration: 'export interface KgEdge {\n    readonly id: string;\n    readonly tenantId: string;\n    readonly srcId: string;\n    readonly dstId: string;\n    readonly relation: KgRelationId;\n    readonly fact?: string;\n    readonly props?: Readonly<Record<string, unknown>>;\n    readonly confidence: number;\n    readonly provenance: KgProvenance;\n    readonly validFrom: string;\n    readonly validUntil?: string;\n}',
+  },
+  {
+    name: 'KgMappingCollection',
+    declaration: 'export interface KgMappingCollection {\n    readonly name: string;\n    readonly anchor?: string;\n    readonly titleField?: string;\n    readonly fkLinks?: readonly KgMappingFkLink[];\n}',
+  },
+  {
+    name: 'KgMappingFkLink',
+    declaration: 'export interface KgMappingFkLink {\n    readonly field: string;\n    readonly target: string;\n    readonly relation: string;\n    readonly style?: \'plain-id\' | \'collection-address\';\n}',
+  },
+  {
+    name: 'KgMappingsFile',
+    declaration: 'export interface KgMappingsFile {\n    readonly version: number;\n    readonly sources: readonly {\n        system: \'nocobase\';\n        collections: readonly KgMappingCollection[];\n    }[];\n    readonly rules: {\n        skipHiddenCollections: boolean;\n        emptyFkNoEdge: boolean;\n        derivesTitle: boolean;\n    };\n}',
+  },
+  {
+    name: 'KgMappingsReadout',
+    declaration: 'export interface KgMappingsReadout {\n    readonly file: string;\n    readonly version: number;\n    readonly rules: KgMappingsFile[\'rules\'];\n    readonly collections: readonly {\n        name: string;\n        anchor?: string;\n        titleField?: string;\n        fkLinkCount: number;\n    }[];\n    readonly lastRun?: {\n        finishedAt: string;\n        ruleHits: Readonly<Record<string, number>>;\n        collections: readonly {\n            scope: string;\n            nodesUpserted: number;\n            edgesUpserted: number;\n            skipped: boolean;\n            skippedRelationFields: readonly string[];\n        }[];\n    };\n}',
   },
   {
     name: 'KgNode',
@@ -4144,6 +4242,14 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export type KgOntologyLayer = \'top\' | \'domain\';',
   },
   {
+    name: 'KgOntologyRevision',
+    declaration: 'export interface KgOntologyRevision {\n    readonly id: number;\n    readonly ontologyVersion: string;\n    readonly summary: string;\n    readonly changes: unknown;\n    readonly createdAt: string;\n}',
+  },
+  {
+    name: 'KgOntologyRevisionInput',
+    declaration: 'export interface KgOntologyRevisionInput {\n    readonly ontologyVersion: string;\n    readonly summary: string;\n    readonly changes: unknown;\n    readonly createdAt: string;\n}',
+  },
+  {
     name: 'KgOntologySource',
     declaration: 'export type KgOntologySource = \'builtin-ontology\' | \'builtin-food\' | \'nocobase-derived\' | \'agent-defined\';',
   },
@@ -4154,6 +4260,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'KgProvenance',
     declaration: 'export interface KgProvenance {\n    readonly sourceSystem: \'nocobase\' | \'lakehouse\' | \'connector\' | \'kb\';\n    readonly sourceId: string;\n    readonly extractedAt: string;\n}',
+  },
+  {
+    name: 'KgQualityReadout',
+    declaration: 'export interface KgQualityReadout {\n    readonly nodes: number;\n    readonly edges: number;\n    readonly islands: number;\n    readonly conflicts: number;\n    readonly coverage?: {\n        readonly numerator: number;\n        readonly denominator: number;\n        readonly ratio: number;\n    };\n    readonly lastRunAt?: string;\n}',
   },
   {
     name: 'KgRelation',

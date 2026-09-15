@@ -542,7 +542,7 @@ async qualityReport(): Promise<KgQualityReadout>
  * `kg.mappings` read this).
  * @returns the mappings readout.
  */
-mappings(): KgMappingsReadout
+async mappings(): Promise<KgMappingsReadout>
 ```
 
 Source: [`packages/kb/kg-build/src/index.ts`](../../packages/kb/kg-build/src/index.ts)
