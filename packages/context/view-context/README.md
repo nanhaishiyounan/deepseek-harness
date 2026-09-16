@@ -22,6 +22,28 @@ View state is the user's screen, not conversation history — the cache is proce
 
 The prepended `agent/pre-step` listener delegates first, then reads the session's cached view state. `chat` (and the absent-cache case) inject the one-line minimal block; a business view injects `tab=<label>(<view>)` plus each snapshot field as `key=value`, followed by the view-tools hint. Unchanged text (same view and snapshot) reuses the previous durable injection instead of appending a duplicate block, and a static `systemPrompt.context` entry documents the view-tool vocabulary for deployments that compose system-prompt.
 
+## Model Experience
+
+### System prompt
+
+#### What the model sees
+
+A static `view-context:tools` guidance block (order 130) teaching the workbench-view vocabulary: each request carries a snapshot of the active tab, user messages target that view, view changes go through the view tools, and an unreachable browser falls back to conversation context.
+
+##### view-context:tools guidance
+
+```markdown
+Workbench views: the user may switch the browser workbench tab while chatting. Each request carries a 【当前工作台视图】snapshot of the active tab; treat the user's messages as targeting that view. To change what the view shows (filters, focus, in-view queries) or to switch tabs, call the view tools (switch_view, view_apply, view_state_get) instead of asking the user to operate the UI by hand. When the browser is unreachable the view tools fail with a readable error; answer from conversation context instead.
+```
+
+#### Token effect
+
+The guidance is a fixed ~90-token block. Per step, a fresh snapshot message of a few hundred tokens appends when the view state changed; the text-diff skip reuses the last injection verbatim while the screen is unchanged.
+
+#### KV Cache effect
+
+No prefix invalidation: the guidance is a stable system-prompt section and snapshots append on the user side after prior turns, so any reusable request prefix stays valid.
+
 ## Known Limitations and Deferred Work
 
 - Only the active tab is injected; parallel multi-tab references (a main tab plus background descriptions) are deferred.
