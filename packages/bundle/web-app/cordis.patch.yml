@@ -335,6 +335,12 @@
     - id: ui-user-questions
       name: '@deepseek-ai/dsh-client-ui-user-questions'
 
+    # Tab-aware context: business views register state projections here and
+    # the service uplinks them over session.viewStateReport; the host-side
+    # view-context plugin turns the cache into per-request snapshots.
+    - id: ui-view-context
+      name: '@deepseek-ai/dsh-client-ui-view-context'
+
     - id: ui-trajectory
       name: '@deepseek-ai/dsh-client-ui-trajectory'
 

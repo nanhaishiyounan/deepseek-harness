@@ -18,6 +18,8 @@ import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client'
 // Type-only: pulls the ui-conversation slot declarations (headline, dock,
 // view ring, header actions).
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
+// Type-only: pulls the view-context service Context merge (ctx.viewContext).
+import type {} from '@deepseek-ai/dsh-client-ui-view-context/client'
 // Type-only: pulls the agentPresetMode optional-service Context merge (the
 // scenario fallback below reads it via ctx.get).
 import type {} from '@deepseek-ai/dsh-client-ui-agent-preset/client'
@@ -310,4 +312,35 @@ export function apply(ctx: ClientContext): void {
       refresh,
     }),
   }, KbSettingsSection))
+
+  // Workbench-view projections: the host injects these snapshots into every
+  // model request while the kb or scenarios tab is the active conversation
+  // view. Both tabs share the kb store; per-tab selection state (documents,
+  // scenario categories) is component-local and rides K/L-round follow-ups.
+  const viewContext = ctx.get('viewContext')
+  if (viewContext !== undefined) {
+    ctx.effect(() => viewContext.provide({
+      view: 'kb',
+      label: () => bound('view.kb'),
+      changes: store.store,
+      snapshot: () => {
+        const state = store.store.getSnapshot()
+        return {
+          '知识库文档': state.stats?.status === 'ready' ? state.stats.usage.documents : '未加载',
+          '本会话记录': state.records.length,
+        }
+      },
+    }), 'ui-kb: view-context provider (kb)')
+    ctx.effect(() => viewContext.provide({
+      view: 'scenarios',
+      label: () => bound('view.scenarios'),
+      changes: store.store,
+      snapshot: () => {
+        const state = store.store.getSnapshot()
+        return {
+          '知识库文档': state.stats?.status === 'ready' ? state.stats.usage.documents : '未加载',
+        }
+      },
+    }), 'ui-kb: view-context provider (scenarios)')
+  }
 }

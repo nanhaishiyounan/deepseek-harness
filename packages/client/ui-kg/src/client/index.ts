@@ -15,6 +15,8 @@ import type {} from '@deepseek-ai/dsh-client-ui-slots'
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client'
 // Type-only: pulls the ui-conversation slot declarations (view ring, header actions).
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
+// Type-only: pulls the view-context service Context merge (ctx.viewContext).
+import type {} from '@deepseek-ai/dsh-client-ui-view-context/client'
 import type { ConnectionHandle } from '@deepseek-ai/dsh-client-connection/client'
 import type { KgEdgeRow, KgMappingsRow, KgNodeHitRow, KgQueryWire, KgQualityRow, KgSubgraphNodeRow } from './kgTypes.ts'
 import { createKgClientStore } from './kgStore.ts'
@@ -256,4 +258,25 @@ export function apply(ctx: ClientContext): void {
       publishViewSwitch: (setView: (view: string) => void) => bridge.provide(setView),
     }),
   }, KgHeaderButton))
+
+  // Workbench-view projection: the host injects this snapshot into every
+  // model request while the kg tab is the active conversation view.
+  const viewContext = ctx.get('viewContext')
+  if (viewContext !== undefined) {
+    ctx.effect(() => viewContext.provide({
+      view: 'kg',
+      label: () => bound('view.kg'),
+      changes: store.store,
+      snapshot: () => {
+        const state = store.store.getSnapshot()
+        return {
+          '选中实体': state.selected ?? '无',
+          '类型过滤': state.typeFilter === undefined ? '全部' : [...state.typeFilter].sort(),
+          '图规模': state.canvas?.status === 'ready'
+            ? `节点 ${String(state.canvas.value.nodes.length)}/边 ${String(state.canvas.value.edges.length)}`
+            : '未加载',
+        }
+      },
+    }), 'ui-kg: view-context provider')
+  }
 }

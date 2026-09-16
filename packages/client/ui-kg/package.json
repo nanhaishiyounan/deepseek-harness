@@ -73,13 +73,14 @@
     "@deepseek-ai/dsh-client-ui-primitives": "workspace:^",
     "@deepseek-ai/dsh-client-ui-sidebar": "workspace:^",
     "@deepseek-ai/dsh-client-ui-slots": "workspace:^",
+    "@deepseek-ai/dsh-client-ui-view-context": "workspace:^",
     "@deepseek-ai/dsh-invariants": "workspace:^",
     "@testing-library/react": "^16.1.0",
-    "graphology": "^0.26.0",
-    "sigma": "^3.0.2",
     "@types/react": "~18.3.1",
+    "graphology": "^0.26.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "sigma": "^3.0.2"
   },
   "files": [
     "lib/index.js",

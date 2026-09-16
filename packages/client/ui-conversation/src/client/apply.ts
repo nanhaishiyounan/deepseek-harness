@@ -259,7 +259,18 @@ export function apply(ctx: Context): void {
         views,
         releaseSessionImages: (id) => { conversation.releaseSessionImages(id) },
         bindDraftMirror: write => inputHub.shell(sessionId).bindMirror(write),
-        reportActiveView: (view) => { activeViewMirror.set(view) },
+        reportActiveView: (view) => {
+          activeViewMirror.set(view)
+          if (view === undefined) return
+          // Structural forward, deliberately not a typed import: this package
+          // sits below ui-view-context in the client composition, and the
+          // report is optional cooperation — absent service means the
+          // deployment simply runs without tab-aware context.
+          const viewContext = ctx.get('viewContext') as
+            | { reportActiveView(id: SessionId, view: string): void }
+            | undefined
+          viewContext?.reportActiveView(sessionId, view)
+        },
       }
     },
   }, ConversationSession)

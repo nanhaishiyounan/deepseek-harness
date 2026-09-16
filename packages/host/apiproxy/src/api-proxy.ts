@@ -41,6 +41,7 @@ import type { KbIngestView } from './api/kb.ts'
 import { compileKgQuery, KG_QUERY_EXAMPLES } from '@deepseek-ai/dsh-kb-graph'
 // Type-only: resolves `ctx.get('kb')`/`ctx.get('fs')`/`ctx.get('web')` service types.
 import type {} from '@deepseek-ai/dsh-kb'
+import type {} from '@deepseek-ai/dsh-view-context'
 import type {} from '@deepseek-ai/dsh-fs'
 import type {} from '@deepseek-ai/dsh-web'
 import {
@@ -1654,6 +1655,13 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
   let workspaceCreationChain = Promise.resolve()
   const pendingQuestions = new Map<RpcId, PendingQuestion>()
   const pendingApprovals = new Map<RpcId, PendingApproval>()
+  // Cached view state describes the user's screen; it must not outlive the
+  // session it describes. Lazy resolution: the view-context plugin may mount
+  // after the gateway in the same process, and a deployment without it keeps
+  // this a no-op (its reports already fail with view-state-unavailable).
+  ctx.on('session/disposed', (session: Session) => {
+    ctx.get('viewState')?.clear(session.id)
+  })
   const muxQueues = new Set<FrameQueue<RpcRequest<MuxFrame>>>()
   const imageAdmissionChains = new WeakMap<Agent, Promise<void>>()
 
@@ -3113,6 +3121,28 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
           return Promise.resolve(err(request, subagentOwnershipError(sessionId)))
         }
         agent.cancel({ kind: 'user' }, { keepInbox: true })
+        return Promise.resolve(ok(request, { accepted: true as const }))
+      },
+
+      viewStateReport(request) {
+        const { sessionId, ...report } = request.payload
+        const viewState = ctx.get('viewState')
+        if (viewState === undefined) {
+          return Promise.resolve(err(request, {
+            code: 'view-state-unavailable',
+            message: 'view state is not composed in this deployment (mount the view-context plugin)',
+            details: { sessionId },
+          }))
+        }
+        try {
+          viewState.report(sessionId, report)
+        } catch (error: unknown) {
+          return Promise.resolve(err(request, {
+            code: 'view-state-invalid',
+            message: error instanceof Error ? error.message : 'invalid view state report',
+            details: { sessionId },
+          }))
+        }
         return Promise.resolve(ok(request, { accepted: true as const }))
       },
     },

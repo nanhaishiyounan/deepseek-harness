@@ -13,6 +13,7 @@ import {
   sessionSearchRequestSchema, sessionSearchValueSchema, sessionSelectModelRequestSchema,
   sessionSelectModelValueSchema, sessionSummarySchema,
   sessionUpdateQueueRequestSchema, sessionUpdateQueueValueSchema,
+  sessionViewStateReportRequestSchema, sessionViewStateReportValueSchema,
 } from '../src/api/sessions.schema.ts'
 import {
   hostCreateDirectoryRequestSchema, hostCreateDirectoryValueSchema,
@@ -580,5 +581,34 @@ describe('agent-preset schemas', () => {
       .toEqual({ opened: false, path: '/presets/mine' })
     // A closed reply must carry the path the surface shows instead.
     expect(() => agentPresetOpenDocumentValueSchema.parse({ opened: false })).toThrow()
+  })
+})
+
+describe('view-state report schemas', () => {
+  it('accepts a full report and echoes the accepted value', () => {
+    const request = sessionViewStateReportRequestSchema.parse({
+      sessionId: 's1',
+      view: 'kg',
+      label: '知识图谱',
+      snapshot: { '选中实体': '海天味业', '类型过滤': ['Supplier'] },
+      actions: { kg: ['set_type_filter', 'focus_entity'] },
+    })
+    expect(request.view).toBe('kg')
+    expect(sessionViewStateReportValueSchema.parse({ accepted: true })).toEqual({ accepted: true })
+  })
+
+  it('keeps the chat minimal report valid and rejects degenerate payloads', () => {
+    expect(sessionViewStateReportRequestSchema.parse({
+      sessionId: 's1', view: 'chat', snapshot: {}, actions: {},
+    }).view).toBe('chat')
+    for (const invalid of [
+      { sessionId: 's1', view: '', snapshot: {}, actions: {} },
+      { sessionId: 's1', snapshot: {}, actions: {} },
+      { sessionId: 's1', view: 'kg', actions: {} },
+      { sessionId: 's1', view: 'kg', snapshot: { nested: { deep: true } }, actions: {} },
+      { sessionId: 's1', view: 'kg', snapshot: {}, actions: { kg: [''] } },
+    ]) {
+      expect(() => sessionViewStateReportRequestSchema.parse(invalid)).toThrow()
+    }
   })
 })

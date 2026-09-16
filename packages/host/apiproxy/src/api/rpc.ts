@@ -54,6 +54,10 @@ export interface RpcErrorDetailsMap {
   'attachment-error': { reason: string }
   'queue-item-not-found': { itemId: MessageId }
   'steer-unavailable': { itemId: MessageId }
+  /** The session.viewStateReport uplink found no view-context plugin composed in the deployment. */
+  'view-state-unavailable': { sessionId: SessionId }
+  /** The session.viewStateReport payload failed the view-state cache's bounds (size, empty view). */
+  'view-state-invalid': { sessionId: SessionId }
   /** A known slash command reported a usage/state error; the message is the command's own text. */
   'command-error': {}
   /** A leading-/ prompt named no registered command; the message names the token. */

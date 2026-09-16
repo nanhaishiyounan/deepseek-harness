@@ -12,6 +12,7 @@ import type { SessionEvent, SessionId } from '@deepseek-ai/dsh-session/types'
 // cordis Context merge (via dsh-agent) must not enter client aggregates.
 import type { SessionProjectionMap } from '@deepseek-ai/dsh-session-projection/types'
 import type { RpcId, RpcRequest, RpcResponse } from './rpc.ts'
+import type { ViewReport } from '@deepseek-ai/dsh-view-context/types'
 import type { ToolEventView } from './events.ts'
 import type { WorkspaceId } from './workspace.ts'
 
@@ -373,5 +374,16 @@ export interface SessionsApi {
    * subagents reject with `agent-busy`.
    */
   cancel(request: RpcRequest<{ sessionId: SessionId }>): Promise<RpcResponse<{ accepted: true }>>
+
+  /**
+   * Caches the browser's latest workbench view report for this session:
+   * active tab, its flat state projection, and the registered view-action
+   * catalog. Screen state, never logged — the durable model-visible half is
+   * the snapshot message the view-context plugin injects. Fails with
+   * `view-state-unavailable` when the deployment composes no view-context
+   * plugin, and `view-state-invalid` when the report exceeds the wire bound.
+   */
+  viewStateReport(request: RpcRequest<{ sessionId: SessionId } & ViewReport>):
+  Promise<RpcResponse<{ accepted: true }>>
 
 }

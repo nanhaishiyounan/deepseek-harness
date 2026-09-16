@@ -105,6 +105,9 @@
       "path": "../../interaction/user-approval"
     },
     {
+      "path": "../../context/view-context"
+    },
+    {
       "path": "../../interaction/user-questions"
     },
     {

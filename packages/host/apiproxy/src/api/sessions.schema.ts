@@ -354,3 +354,32 @@ export const sessionCancelRequestSchema = z.object({
 export const sessionCancelValueSchema = z.object({
   accepted: z.literal(true),
 }) satisfies z.ZodType<Wire<ResponseValue<'session.cancel'>>>
+
+/** One scalar value inside a session.viewStateReport snapshot. */
+const viewSnapshotValueSchema = z.union([
+  z.string(),
+  z.number(),
+  z.boolean(),
+  z.null(),
+  z.array(z.string()),
+])
+
+/** Flat snapshot projection of the active workbench view. */
+export const viewSnapshotSchema = z.record(z.string(), viewSnapshotValueSchema)
+
+/** Per-view registered action names riding every view-state report. */
+export const viewActionCatalogSchema = z.record(z.string(), z.array(z.string().min(1)))
+
+/** session.viewStateReport request payload. */
+export const sessionViewStateReportRequestSchema = z.object({
+  sessionId: sessionIdSchema,
+  view: z.string().min(1),
+  label: z.string().min(1).optional(),
+  snapshot: viewSnapshotSchema,
+  actions: viewActionCatalogSchema,
+}) satisfies z.ZodType<Wire<RequestPayload<'session.viewStateReport'>>>
+
+/** session.viewStateReport response value. */
+export const sessionViewStateReportValueSchema = z.object({
+  accepted: z.literal(true),
+}) satisfies z.ZodType<Wire<ResponseValue<'session.viewStateReport'>>>

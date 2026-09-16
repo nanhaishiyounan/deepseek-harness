@@ -240,6 +240,12 @@
     - id: tool-nocobase
       name: '@deepseek-ai/dsh-tool-nocobase'
 
+    # Tab-aware workbench context (J3): the gateway's session.viewStateReport
+    # RPC writes this plugin's per-session view cache, and its pre-step hook
+    # injects the active tab's snapshot as a durable user-role message.
+    - id: view-context
+      name: '@deepseek-ai/dsh-view-context'
+
     # The order lifecycle over the same NocoBase source the connector reads:
     # order_create places an expert-service order and runs the deliverable
     # pipeline (kb-referenced MiniMax-M3 drafting, or the named template when

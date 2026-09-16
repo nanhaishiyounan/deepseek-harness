@@ -24,6 +24,9 @@
       "path": "../ui-conversation"
     },
     {
+      "path": "../ui-view-context"
+    },
+    {
       "path": "../ui-sidebar"
     },
     {

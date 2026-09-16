@@ -16,6 +16,8 @@ import type {} from '@deepseek-ai/dsh-client-ui-slots'
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client'
 // Type-only: pulls the ui-conversation slot declarations (view ring, header actions).
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
+// Type-only: pulls the view-context service Context merge (ctx.viewContext).
+import type {} from '@deepseek-ai/dsh-client-ui-view-context/client'
 import type { ConnectionHandle } from '@deepseek-ai/dsh-client-connection/client'
 import type { MarketAssetRow, MarketOrderReceipt, MarketStatsRow } from './marketTypes.ts'
 import { createMarketClientStore } from './marketStore.ts'
@@ -139,4 +141,22 @@ export function apply(ctx: ClientContext): void {
       publishViewSwitch: (setView: (view: string) => void) => bridge.provide(setView),
     }),
   }, MarketHeaderButton))
+
+  // Workbench-view projection: the host injects this snapshot into every
+  // model request while the market tab is the active conversation view.
+  const viewContext = ctx.get('viewContext')
+  if (viewContext !== undefined) {
+    ctx.effect(() => viewContext.provide({
+      view: 'market',
+      label: () => bound('view.market'),
+      changes: store.store,
+      snapshot: () => {
+        const state = store.store.getSnapshot()
+        return {
+          '资产目录': state.catalog?.status === 'ready' ? `${String(state.catalog.value.length)} 项` : '未加载',
+          '服务商数': state.stats?.status === 'ready' ? state.stats.value.providers : '未加载',
+        }
+      },
+    }), 'ui-assets: view-context provider')
+  }
 }

@@ -2590,6 +2590,9 @@ function createFixtureWorld(options: FixtureOptions): FixtureWorld {
         message: 'fixture has no pending queue item',
         details: { itemId: request.payload.itemId },
       }),
+      // Screen-state uplink: the fixture has no injection plugin to read it,
+      // so the stub accepts and drops the report.
+      viewStateReport: request => ok(request, { accepted: true as const }),
       cancel: (request) => {
         const replay = replays.get(request.payload.sessionId)
         if (replay !== undefined) {
@@ -3349,6 +3352,7 @@ export class FixtureApiClient extends AbstractApiClient {
       case 'session.attachment': return this.api.sessions.attachment(request)
       case 'session.updateQueue': return this.api.sessions.updateQueue(request)
       case 'session.cancel': return this.api.sessions.cancel(request)
+      case 'session.viewStateReport': return this.api.sessions.viewStateReport(request)
       case 'subagent.list': return this.api.subagents.list(request)
       case 'subagent.history': return this.api.subagents.history(request)
       case 'subagent.prompt': return this.api.subagents.prompt(request, signal)
