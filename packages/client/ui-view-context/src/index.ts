@@ -1,6 +1,9 @@
 /**
- * Browser-side entry: re-export the client surface so a node-side bundler can
- * pull the invariant companion without the web modules.
+ * View-context surface plugin, node half. Pure UI plugin: the empty apply
+ * exists so the plugin appears in the host cordis.yml / Loader; the browser
+ * half ships via exports["./client"], discovered through the package.json
+ * dsh.client declaration.
  */
-export * from './client/index.ts'
-export { apply, inject } from './client/index.ts'
+
+/** Host plugin body — no host-side behavior for this surface plugin. */
+export function apply(): void {}
