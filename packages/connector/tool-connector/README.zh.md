@@ -2,7 +2,7 @@
 
 [English](README.md) | 中文
 
-面向模型的 `connector_discover`、`connector_fetch`、`connector_transfer`、`order_create`、`order_status` 五工具，架在连接器缝（`ctx.connector`）与可选订单缝（`ctx.orders`）之上。本包拥有 schema、校验、prompt 指引、预算与呈现，不拥有任何具体 Provider。租户是部署侧绑定（`Config.tenant`，必填）：模型永不提供租户，任何调用带 `tenant` 实参都会被拒绝。开关控制工具注册；无可用 Provider 时已启用的工具保持可见，在执行时给出结构化错误——这是缝的文档化降级模式。
+面向模型的 `connector_discover`、`connector_fetch`、`connector_transfer`、`order_create`、`order_status`、`assets_browse` 六工具，架在连接器缝（`ctx.connector`）与可选订单缝（`ctx.orders`）之上。本包拥有 schema、校验、prompt 指引、预算与呈现，不拥有任何具体 Provider。租户是部署侧绑定（`Config.tenant`，必填）：模型永不提供租户，任何调用带 `tenant` 实参都会被拒绝。开关控制工具注册；无可用 Provider 时已启用的工具保持可见，在执行时给出结构化错误——这是缝的文档化降级模式。
 
 ## 工具
 
@@ -11,10 +11,12 @@
 - **`connector_transfer`** —— 为单个数据集在绑定租户下执行缝的五步传输并渲染落地回执：湖仓表（含替换事实与下一步 `lakehouse_query` 指引）或 kb 文档（含 `kb_search` 引用指引），外加 catalog 传输记录 id。`target` 可钉住目的地；与分类不一致时 fail-loud。默认预算 120 秒；非并发安全（写落地）。
 - **`order_create`** —— 一次调用完成下单与整条交付管线（经 `ctx.orders` 的 create → fulfill）：service id 取自发现的专家卡，brief 复述客户需求，回执携带订单号、终态与方案 PDF 的 workspace 路径。默认预算 60 秒（含起草与排版）；非并发安全（交易写入）。
 - **`order_status`** —— 按 id 读取一笔订单，未给 id 则列最近订单；已交付行携带交付物路径。默认预算 10 秒；并发安全（只读）。
+- **`assets_browse`** —— 数据资产市场的只读目录面，与网关 assets 域服务同一发现数据：`list` 渲染资产卡（标题、类型、provider 与 dataset id、服务类的价格锚点），`detail` 渲染单资产完整卡，`stats` 按类型与提供方计数。下单与落地各走各的工具。默认预算 15 秒；并发安全（只读投影）。
 
 ## 配置（schemastery）
 
 - `discover?` / `fetch?` / `transfer?: boolean` —— 各工具注册开关（默认 `true`）。
+- `assets?: boolean` —— 注册 `assets_browse`（默认 `true`）；`assetsTimeoutMs?: number` —— 其协作预算（默认 `15000`）。
 - `tenant: string`（必填）—— 每次落地操作的部署侧租户绑定。
 - `discoverTimeoutMs?` / `fetchTimeoutMs?` / `transferTimeoutMs?: number` —— 协作预算（默认 `15000` / `30000` / `120000`）。
 
@@ -60,7 +62,7 @@ Use the connector_transfer tool to land one connector dataset into this deployme
 
 #### 模型所见
 
-模型看到生成的 [`connector_discover`、`connector_fetch`、`connector_transfer`、`order_create`、`order_status` schema](../../../docs/tool-catalog.zh.md#deepseek-aidsh-tool-connector)。`connector_discover` 声明可选 `query` 字符串与可选 `kinds` 字符串数组（枚举闭集）；`connector_fetch` 声明必填 `dataset_id` 与可选 `provider_id`；`connector_transfer` 追加可选 `target` 枚举；`order_create` 声明必填 `service_id` 与 `brief` 及可选 `client_name`；`order_status` 声明可选 `order_id`。它们都不声明 `tenant`。
+模型看到生成的 [`connector_discover`、`connector_fetch`、`connector_transfer`、`order_create`、`order_status`、`assets_browse` schema](../../../docs/tool-catalog.zh.md#deepseek-aidsh-tool-connector)。`connector_discover` 声明可选 `query` 字符串与可选 `kinds` 字符串数组（枚举闭集）；`connector_fetch` 声明必填 `dataset_id` 与可选 `provider_id`；`connector_transfer` 追加可选 `target` 枚举；`order_create` 声明必填 `service_id` 与 `brief` 及可选 `client_name`；`order_status` 声明可选 `order_id`；`assets_browse` 声明必填 `action` 枚举（`list`/`detail`/`stats`）及可选 `query`、`provider_id`、`dataset_id`。它们都不声明 `tenant`。
 
 #### Token effect
 

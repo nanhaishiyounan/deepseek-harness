@@ -10,11 +10,21 @@
 
 import type { Context } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
+import { applyAssetsBrowseTool } from './assets.ts'
 import { applyConnectorDiscoverTool } from './discover.ts'
 import { applyConnectorFetchTool } from './fetch.ts'
 import { applyConnectorTransferTool } from './transfer.ts'
 import { applyOrderCreateTool, applyOrderStatusTool } from './order.ts'
 
+export {
+  assetsBrowseMetaFromResult,
+  parseAssetsBrowseArgs,
+  presentAssetsBrowseCall,
+  presentAssetsBrowseResult,
+} from './assets.ts'
+export type {
+  AssetsBrowseAction, AssetsBrowseArgs, AssetsBrowseInput, AssetsBrowseMetaView, AssetsBrowseToolValue, AssetRow,
+} from './assets.ts'
 export {
   discoverMetaFromResult,
   discoverValueFromSummaries,
@@ -96,6 +106,9 @@ export const DEFAULT_ORDER_CREATE_TIMEOUT_MS = 60_000
 /** Default cooperative tool-call timeout budget (ms) for `order_status`. */
 export const DEFAULT_ORDER_STATUS_TIMEOUT_MS = 10_000
 
+/** Default cooperative tool-call timeout budget (ms) for `assets_browse`. */
+export const DEFAULT_ASSETS_BROWSE_TIMEOUT_MS = 15_000
+
 /** Plugin config: which connector tools to register, per-tool budgets, and the bound tenant. */
 export interface Config {
   /** Register `connector_discover`. Defaults to true. */
@@ -129,6 +142,10 @@ export interface Config {
   orderCreateTimeoutMs?: number
   /** Cooperative timeout budget (ms) for `order_status`. Defaults to 10000. */
   orderStatusTimeoutMs?: number
+  /** Register `assets_browse` (the market catalog's read-only browse face). Defaults to true. */
+  assets?: boolean
+  /** Cooperative timeout budget (ms) for `assets_browse`. Defaults to 15000. */
+  assetsTimeoutMs?: number
 }
 
 export const Config: z<Config> = z.object({
@@ -142,6 +159,8 @@ export const Config: z<Config> = z.object({
   orders: z.boolean().default(true),
   orderCreateTimeoutMs: z.number().step(1).min(1).default(DEFAULT_ORDER_CREATE_TIMEOUT_MS),
   orderStatusTimeoutMs: z.number().step(1).min(1).default(DEFAULT_ORDER_STATUS_TIMEOUT_MS),
+  assets: z.boolean().default(true),
+  assetsTimeoutMs: z.number().step(1).min(1).default(DEFAULT_ASSETS_BROWSE_TIMEOUT_MS),
 })
 
 /** Complete config after schemastery applies every field default. */
@@ -171,5 +190,8 @@ export function apply(ctx: Context, config: Config): void {
   if (resolved.orders) {
     applyOrderCreateTool(ctx, resolved.orderCreateTimeoutMs)
     applyOrderStatusTool(ctx, resolved.orderStatusTimeoutMs)
+  }
+  if (resolved.assets) {
+    applyAssetsBrowseTool(ctx, resolved.assetsTimeoutMs)
   }
 }

@@ -15,9 +15,9 @@ This table connects model-visible tool names to the plugin package and service s
 
 | Tool package | Model-visible names | Requires | Writes / affects | Shipped aliases | Deployment note |
 | --- | --- | --- | --- | --- | --- |
-| `@deepseek-ai/dsh-tool-kb` | `kb_ingest`, `kb_ingest_url`, `kb_search`, `kb_stats`, `kg_schema`, `kg_subgraph` | `ctx.tools`, `ctx.kb`, `ctx.fs`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | kb_search, kb_ingest, kb_ingest_url, and kb_stats stay visible without a usable store and fail with a structured error at execution time; all four run under the deployment-bound tenant (the model never supplies one), retrieval results carry numbered citations, and the degraded text-only mode is observable in every search result. |
+| `@deepseek-ai/dsh-tool-kb` | `kb_ingest`, `kb_ingest_url`, `kb_search`, `kb_stats`, `kg_query`, `kg_schema`, `kg_subgraph` | `ctx.tools`, `ctx.kb`, `ctx.fs`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | kb_search, kb_ingest, kb_ingest_url, and kb_stats stay visible without a usable store and fail with a structured error at execution time; all four run under the deployment-bound tenant (the model never supplies one), retrieval results carry numbered citations, and the degraded text-only mode is observable in every search result. |
 | `@deepseek-ai/dsh-tool-lakehouse` | `lakehouse_query`, `lakehouse_tables` | `ctx.tools`, `ctx.lakehouse`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | lakehouse_tables and lakehouse_query stay visible without a usable engine and fail with a structured error at execution time (the catalog listing keeps answering); both run under the deployment-bound tenant (the model never supplies one), query results are capped rows with a truncation marker, and the rendered text carries the source-table attribution line. |
-| `@deepseek-ai/dsh-tool-connector` | `connector_discover`, `connector_fetch`, `connector_transfer`, `order_create`, `order_status` | `ctx.tools`, `ctx.connector`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | connector_discover, connector_fetch, and connector_transfer run under the deployment-bound tenant (the model never supplies one); discovery answers with a grouped listing carrying provider and dataset ids, previews are capped (8 rows / 400 characters), and transfers render the landing receipt with the catalog transfer-record id and the next-step guidance (lakehouse_query over the named table, or kb_search with citations). |
+| `@deepseek-ai/dsh-tool-connector` | `assets_browse`, `connector_discover`, `connector_fetch`, `connector_transfer`, `order_create`, `order_status` | `ctx.tools`, `ctx.connector`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | connector_discover, connector_fetch, and connector_transfer run under the deployment-bound tenant (the model never supplies one); discovery answers with a grouped listing carrying provider and dataset ids, previews are capped (8 rows / 400 characters), and transfers render the landing receipt with the catalog transfer-record id and the next-step guidance (lakehouse_query over the named table, or kb_search with citations). |
 | `@deepseek-ai/dsh-tool-nocobase` | `nb_collections`, `nb_create`, `nb_get`, `nb_list`, `nb_update` | `ctx.tools`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | nb_collections, nb_list, nb_get, nb_create, and nb_update speak to the deployment's NocoBase under a service account (the model never supplies a tenant); the filter vocabulary is closed (eq/in/gt/lt joined by one and/or), and the write tools carry the confirmed-change contract — the system-prompt guidance demands the presented preview / before→after diff and the user's explicit go-ahead before nb_create/nb_update run, and their receipts echo the landing id or the field-by-field diff. |
 | `@deepseek-ai/dsh-tool-ask-user` | `ask_user_question` | `ctx.tools`, `ctx.userQuestions` | `tool/call`, `tool/result after a UI/provider answers the question` | - | ask_user_question pauses the tool call until the active UI provider returns a human answer. |
 | `@deepseek-ai/dsh-tools` | `run_code` | `ctx.tools`, `ctx.codeRuntime (execution time)`, `ctx.systemPrompt` | `tool/call`, `one tool/code-dispatch-start + tool/code-dispatch pair per bridged sub-call`, `tool/result` | - | Owned by the tool registry as a reserved transport outside filterable capability layers under `mode: code` / `mode: both` (see the Code Mode Agent Note). Under `code` it is the registry's only wire contribution; the other visible capabilities are declared in a generated SDK section in the loaded runtime's language, and a program calls them through bindings scheduled under the native concurrency contract (submission-ordered starts and policy; concurrency-safe bodies overlap up to `maxParallelSubCalls`) that re-enter the complete guarded tool pipeline and link each nested execution to this outer result. |
@@ -158,6 +158,27 @@ Report knowledge-base coverage: document, chunk, and embedded-chunk counts plus 
 
 Source: [`packages/kb/tool-kb/src/index.ts`](../packages/kb/tool-kb/src/index.ts)
 
+### `kg_query`
+
+Ask the knowledge graph one templated Chinese phrase (e.g. 「宏发食品供货的所有产品」) and get the walked subgraph as entity-aggregated YAML. Supported shapes: X的供货链 / X的订单 / 含Y的产品 / X供货(供应)的所有产品 / X生产的产品 / X使用的原料 / X的合规信息 / X相关的1-2跳关系 / X和Y的关系. For other question shapes use kg_schema + kg_subgraph.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "phrase": {
+      "type": "string",
+      "description": "One supported question phrase, for example 「张红喜的供货链」."
+    }
+  },
+  "required": [
+    "phrase"
+  ]
+}
+```
+
+Source: [`packages/kb/tool-kb/src/index.ts`](../packages/kb/tool-kb/src/index.ts)
+
 ### `kg_schema`
 
 Browse the knowledge-graph ontology: entity types (with labels, layers, natural keys, property keys) and relations (with their legal subject→object directions). Use it before kg_subgraph when unsure what the graph contains.
@@ -265,6 +286,44 @@ lakehouse_tables and lakehouse_query stay visible without a usable engine and fa
 <a id="deepseek-aidsh-tool-connector"></a>
 
 ## `@deepseek-ai/dsh-tool-connector`
+
+### `assets_browse`
+
+Browse the data-asset market catalog (read-only): list assets as cards (title, kind, provider id, dataset id, pricing for services), read one asset's detail, or get stats (per-kind counts, providers). Use for「市场上有哪些专家服务/数据资产」questions; fetch/transfer/order go through their own tools.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "action": {
+      "type": "string",
+      "description": "list = asset cards (optional query filter); detail = one asset (provider_id + dataset_id); stats = counts.",
+      "enum": [
+        "list",
+        "detail",
+        "stats"
+      ]
+    },
+    "query": {
+      "type": "string",
+      "description": "Free-text filter for list, matched against each provider's searchable fields."
+    },
+    "provider_id": {
+      "type": "string",
+      "description": "The asset's owning provider id (required by detail)."
+    },
+    "dataset_id": {
+      "type": "string",
+      "description": "The asset's dataset id within its provider (required by detail)."
+    }
+  },
+  "required": [
+    "action"
+  ]
+}
+```
+
+Source: [`packages/connector/tool-connector/src/index.ts`](../packages/connector/tool-connector/src/index.ts)
 
 ### `connector_discover`
 

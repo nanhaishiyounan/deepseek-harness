@@ -204,13 +204,14 @@ describe('kb-agent role presets (keyless, text-only degraded mode)', () => {
 
       const names = toolNames(agent)
       out.push(`- tools: ${names.join(', ')}`)
-      // The compliance officer stays kb-only; the data assistant adds the
+      // The compliance officer stays kb+kg; the data assistant adds the
       // lakehouse, connector, and NocoBase business suites (its persona
-      // routes all four surfaces). The v1 graph tools stay off by default
-      // (kg_schema/kg_subgraph are the graph surface).
-      const kbTools = ['kb_ingest', 'kb_ingest_url', 'kb_search', 'kb_stats', 'kg_schema', 'kg_subgraph']
+      // routes all five surfaces, kg_query and assets_browse included). The
+      // v1 graph tools stay off by default (kg_schema/kg_subgraph/kg_query
+      // are the graph surface).
+      const kbTools = ['kb_ingest', 'kb_ingest_url', 'kb_search', 'kb_stats', 'kg_query', 'kg_schema', 'kg_subgraph']
       const expectedTools = preset.id === 'enterprise-data-assistant'
-        ? [...kbTools, 'lakehouse_query', 'lakehouse_tables', 'connector_discover', 'connector_fetch', 'connector_transfer', 'order_create', 'order_status', 'nb_collections', 'nb_list', 'nb_get', 'nb_create', 'nb_update'].sort()
+        ? [...kbTools, 'assets_browse', 'lakehouse_query', 'lakehouse_tables', 'connector_discover', 'connector_fetch', 'connector_transfer', 'order_create', 'order_status', 'nb_collections', 'nb_list', 'nb_get', 'nb_create', 'nb_update'].sort()
         : kbTools
       expect(names).toEqual(expectedTools)
 

@@ -19,9 +19,9 @@
 
 | 工具包 | 模型可见名称 | 依赖 | 写入／影响 | 随产品发布的别名 | 部署说明 |
 | --- | --- | --- | --- | --- | --- |
-| `@deepseek-ai/dsh-tool-kb` | `kb_ingest`, `kb_ingest_url`, `kb_search`, `kb_stats`, `kg_schema`, `kg_subgraph` | `ctx.tools`、`ctx.kb`、`ctx.fs`、`ctx.systemPrompt` | `tool/call`、`tool/result` | - | kb_search、kb_ingest、kb_ingest_url 与 kb_stats 在无可用 store 时保持可见并在执行时以结构化错误失败；四者都在部署绑定租户下运行（模型从不提供租户），检索结果带编号引用，降级 text-only 模式在每次检索结果中可观测。 |
+| `@deepseek-ai/dsh-tool-kb` | `kb_ingest`, `kb_ingest_url`, `kb_search`, `kb_stats`, `kg_query`, `kg_schema`, `kg_subgraph` | `ctx.tools`、`ctx.kb`、`ctx.fs`、`ctx.systemPrompt` | `tool/call`、`tool/result` | - | kb_search、kb_ingest、kb_ingest_url 与 kb_stats 在无可用 store 时保持可见并在执行时以结构化错误失败；四者都在部署绑定租户下运行（模型从不提供租户），检索结果带编号引用，降级 text-only 模式在每次检索结果中可观测。 |
 | `@deepseek-ai/dsh-tool-lakehouse` | `lakehouse_query`, `lakehouse_tables` | `ctx.tools`, `ctx.lakehouse`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | lakehouse_tables 与 lakehouse_query 在无可用引擎时保持可见并在执行时以结构化错误失败（表清单仍可应答）；两者都运行在部署侧绑定租户下（模型永不提供租户），查询结果是带截断标记的封顶行集，渲染文本携带来源表溯源行。 |
-| `@deepseek-ai/dsh-tool-connector` | `connector_discover`, `connector_fetch`, `connector_transfer`, `order_create`, `order_status` | `ctx.tools`, `ctx.connector`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | connector_discover、connector_fetch 与 connector_transfer 都运行在部署侧绑定租户下（模型永不提供租户）；发现以携带 provider 与 dataset id 的分组清单作答，预览有上限（8 行 / 400 字符），传输渲染落地回执——含 catalog 传输记录 id 与下一步指引（对命名表用 lakehouse_query，或带引用的 kb_search）。 |
+| `@deepseek-ai/dsh-tool-connector` | `assets_browse`, `connector_discover`, `connector_fetch`, `connector_transfer`, `order_create`, `order_status` | `ctx.tools`, `ctx.connector`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | connector_discover、connector_fetch 与 connector_transfer 都运行在部署侧绑定租户下（模型永不提供租户）；发现以携带 provider 与 dataset id 的分组清单作答，预览有上限（8 行 / 400 字符），传输渲染落地回执——含 catalog 传输记录 id 与下一步指引（对命名表用 lakehouse_query，或带引用的 kb_search）；assets_browse 只读浏览资产目录（list/detail/stats）。 |
 | `@deepseek-ai/dsh-tool-nocobase` | `nb_collections`, `nb_create`, `nb_get`, `nb_list`, `nb_update` | `ctx.tools`、`ctx.systemPrompt` | `tool/call`、`tool/result` | - | nb_collections、nb_list、nb_get、nb_create 与 nb_update 以服务账号对话部署的 NocoBase（模型永不提供租户）；筛选词汇为封闭集（eq/in/gt/lt 加单一 and/or 连接），写工具承载确认式变更契约——系统提示指引要求先呈现预览 / 改前→改后对比并取得用户明确同意才运行 nb_create/nb_update，其回执复述落地 id 或逐字段 diff。 |
 | `@deepseek-ai/dsh-tool-ask-user` | `ask_user_question` | `ctx.tools`、`ctx.userQuestions` | `tool/call`、`tool/result after a UI/provider answers the question` | - | ask_user_question 会暂停工具调用，直到当前 UI 提供方返回人类答案。 |
 | `@deepseek-ai/dsh-tools` | `run_code` | `ctx.tools`、`ctx.codeRuntime (execution time)`、`ctx.systemPrompt` | `tool/call`、`one tool/code-dispatch-start + tool/code-dispatch pair per bridged sub-call`、`tool/result` | - | 在 `mode: code`／`mode: both` 下，它由工具注册表所有，作为可过滤能力层之外的保留传输机制（参见 Code Mode Agent Note）。在 `code` 下，它是注册表对协议格式（wire format）的唯一贡献；其他可见能力在使用已加载运行时语言生成的 SDK 章节中声明。程序通过 binding 调用这些能力，调用按照原生并发约定调度：启动顺序和策略遵循提交顺序，并发安全的函数体最多重叠执行 `maxParallelSubCalls` 个。调用会重新进入完整且受守卫保护的工具流水线，并将每个嵌套执行关联到此外层结果。 |
@@ -163,6 +163,27 @@ Source: [`packages/kb/tool-kb/src/index.ts`](../packages/kb/tool-kb/src/index.ts
 
 Source: [`packages/kb/tool-kb/src/index.ts`](../packages/kb/tool-kb/src/index.ts)
 
+### `kg_query`
+
+以一条模板化中文短语直问知识图谱（如「宏发食品供货的所有产品」），返回按实体聚合的 YAML 子图。支持的句式：X的供货链 / X的订单 / 含Y的产品 / X供货(供应)的所有产品 / X生产的产品 / X使用的原料 / X的合规信息 / X相关的1-2跳关系 / X和Y的关系。其他问法请用 kg_schema + kg_subgraph。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "phrase": {
+      "type": "string",
+      "description": "One supported question phrase, for example 「张红喜的供货链」."
+    }
+  },
+  "required": [
+    "phrase"
+  ]
+}
+```
+
+Source: [`packages/kb/tool-kb/src/index.ts`](../packages/kb/tool-kb/src/index.ts)
+
 ### `kg_schema`
 
 浏览知识图谱本体：实体类型（含标签、层级、自然键、属性键）与关系（含合法的主语→宾语方向）。不确定图里有什么时，先于 kg_subgraph 使用。
@@ -270,6 +291,44 @@ lakehouse_tables 与 lakehouse_query 在无可用引擎时保持可见并在执�
 <a id="deepseek-aidsh-tool-connector"></a>
 
 ## `@deepseek-ai/dsh-tool-connector`
+
+### `assets_browse`
+
+浏览数据资产市场目录（只读）：list 以资产卡列出（标题、类型、provider id、dataset id、服务类的价格锚点），detail 读单个资产详情，stats 给统计（分类计数、提供方）。用于「市场上有哪些专家服务/数据资产」类问题；获取/传输/下单各走各的工具。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "action": {
+      "type": "string",
+      "description": "list = asset cards (optional query filter); detail = one asset (provider_id + dataset_id); stats = counts.",
+      "enum": [
+        "list",
+        "detail",
+        "stats"
+      ]
+    },
+    "query": {
+      "type": "string",
+      "description": "Free-text filter for list, matched against each provider's searchable fields."
+    },
+    "provider_id": {
+      "type": "string",
+      "description": "The asset's owning provider id (required by detail)."
+    },
+    "dataset_id": {
+      "type": "string",
+      "description": "The asset's dataset id within its provider (required by detail)."
+    }
+  },
+  "required": [
+    "action"
+  ]
+}
+```
+
+Source: [`packages/connector/tool-connector/src/index.ts`](../packages/connector/tool-connector/src/index.ts)
 
 ### `connector_discover`
 

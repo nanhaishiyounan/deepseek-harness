@@ -31,7 +31,7 @@ interface Config {
 
 各预算以 `ToolDefinition.timeoutMs` 挂到工具上，由 `@deepseek-ai/dsh-tool-call-timeout-policy` 执行。`kb_search` 与 `kb_stats` 是并发安全读；`kb_ingest` 与 `kb_ingest_url` 不是。
 
-kg 面新增 `kg_schema`（本体浏览）与 `kg_subgraph`（k-hop 子图读取，按实体聚合的 YAML 序列化——不存在自由图查询生成）。
+kg 面新增 `kg_schema`（本体浏览）、`kg_subgraph`（k-hop 子图读取，按实体聚合的 YAML 序列化——不存在自由图查询生成）与 `kg_query`（一条模板化中文短语——「X的供货链」「含Y的产品」「X和Y的关系」——经 `dsh-kb-graph` 内共享的 kg-nl 模块编译，与 apiproxy `kg.query` RPC 同一编译器，随后按 kg_subgraph 形态走查；不匹配时报出支持的句式并指向 kg_schema + kg_subgraph 回退）。
 
 ## 模型体验（Model Experience）
 

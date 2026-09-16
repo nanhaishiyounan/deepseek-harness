@@ -1,10 +1,13 @@
 /**
- * Natural-language query compilation for `kg.query`: the template-plus-slot
- * fill from the kg research verdict (template-first beats free generation —
- * a miss reports the supported shapes instead of guessing). The compiler is
- * a pure function over the phrase text and the registry's closed sets; the
- * caller resolves seeds and walks the subgraph.
- * @module @deepseek-ai/dsh-apiproxy/kg-nl
+ * Natural-language query compilation for the knowledge graph: the
+ * template-plus-slot fill from the kg research verdict (template-first beats
+ * free generation — a miss reports the supported shapes instead of guessing).
+ * The compiler is a pure function over the phrase text and the registry's
+ * closed sets; the caller resolves seeds and walks the subgraph. Two faces
+ * share this one home: the apiproxy `kg.query` RPC (the graph page's search
+ * box) and the model-facing `kg_query` tool — RPC and tool behavior cannot
+ * drift apart because there is one compiler.
+ * @module @deepseek-ai/dsh-kb-graph/kg-nl
  */
 
 /** One compiled query plan (the structured walk parameters). */

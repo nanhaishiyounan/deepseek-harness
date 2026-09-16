@@ -43,6 +43,7 @@ import * as LakehouseDuckDb from '@deepseek-ai/dsh-lakehouse-duckdb'
 import * as ToolLakehouse from '@deepseek-ai/dsh-tool-lakehouse'
 import ConnectorRuntime from '@deepseek-ai/dsh-connector'
 import * as ToolConnector from '@deepseek-ai/dsh-tool-connector'
+import * as ToolNocoBase from '@deepseek-ai/dsh-tool-nocobase'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const exampleRoot = join(here, '..')
@@ -120,6 +121,7 @@ async function boot(presetRoot: string): Promise<Context> {
     ['@deepseek-ai/dsh-tool-lakehouse', ToolLakehouse],
     ['@deepseek-ai/dsh-connector', ConnectorRuntime],
     ['@deepseek-ai/dsh-tool-connector', ToolConnector],
+    ['@deepseek-ai/dsh-tool-nocobase', ToolNocoBase],
   ])
   context.loader.internal = {
     version: 'v2',
@@ -197,6 +199,16 @@ describe('kb-agent scenario set (keyless, text-only degraded mode)', () => {
       expect(skill.length, `${slug} SKILL.md non-empty`).toBeGreaterThan(50)
       out.push(`- preset: ${meta.name}`)
 
+      // Five-domain composition (J2): every scenario yml must carry the
+      // lakehouse, connector, and NocoBase rows beside tool-kb — the focused
+      // persona stays, the data plane rides along. kg_query and assets_browse
+      // come from the tool-kb/tool-connector rows themselves.
+      const composition = await readFile(join(scenariosRoot, slug, 'agent.cordis.yml'), 'utf8')
+      for (const row of ['dsh-tool-kb', 'dsh-tool-lakehouse', 'dsh-tool-connector', 'dsh-tool-nocobase']) {
+        expect(composition, `${slug} mounts ${row}`).toContain(row)
+      }
+      expect(composition, `${slug} persona keeps the data-plane boundary`).toContain('数据面使用边界')
+
       // Mount: the composition loads as a preset with the retrieval-only surface.
       const preset = byId.get(slug)
       expect(preset, `${slug} on roster`).toBeDefined()
@@ -209,8 +221,17 @@ describe('kb-agent scenario set (keyless, text-only degraded mode)', () => {
       })
       const agent: Agent = handle.agent
       const names = context.tools.schemas(agent).map(schema => schema.name).sort()
-      expect(names, `${slug} tool surface`).toEqual(['kb_ingest', 'kb_ingest_url', 'kb_search', 'kb_stats', 'kg_schema', 'kg_subgraph'])
-      out.push(`- tools: ${String(names.length)} kb tools`)
+      // The full five-domain surface: kb/kg (tool-kb row, kg_query included),
+      // lakehouse, connector (assets_browse + orders included), NocoBase.
+      expect(names, `${slug} tool surface`).toEqual([
+        'assets_browse', 'connector_discover', 'connector_fetch', 'connector_transfer',
+        'kb_ingest', 'kb_ingest_url', 'kb_search', 'kb_stats',
+        'kg_query', 'kg_schema', 'kg_subgraph',
+        'lakehouse_query', 'lakehouse_tables',
+        'nb_collections', 'nb_create', 'nb_get', 'nb_list', 'nb_update',
+        'order_create', 'order_status',
+      ].sort())
+      out.push(`- tools: ${String(names.length)} tools (five-domain)`)
 
       // Retrieve: the scenario's own corpus answers its probe query with a citation.
       const keyword = meta.probe ?? meta.name!

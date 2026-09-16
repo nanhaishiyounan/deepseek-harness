@@ -3079,10 +3079,14 @@ export interface Config {
   orderCreateTimeoutMs?: number
   /** Cooperative timeout budget (ms) for `order_status`. Defaults to 10000. */
   orderStatusTimeoutMs?: number
+  /** Register `assets_browse` (the market catalog's read-only browse face). Defaults to true. */
+  assets?: boolean
+  /** Cooperative timeout budget (ms) for `assets_browse`. Defaults to 15000. */
+  assetsTimeoutMs?: number
 }
 ```
 
-Source: [`packages/connector/tool-connector/src/index.ts:63`](../packages/connector/tool-connector/src/index.ts)
+Source: [`packages/connector/tool-connector/src/index.ts:113`](../packages/connector/tool-connector/src/index.ts)
 
 <a id="deepseek-aidsh-tool-fs"></a>
 
@@ -3246,14 +3250,22 @@ export interface Config {
   kgSchema?: boolean
   /** Register `kg_subgraph` (k-hop reads) over the optional `ctx.kbGraph` seam. Defaults to true. */
   kgSubgraph?: boolean
+  /**
+   * Register `kg_query` (templated natural-language phrase walks) over the
+   * optional `ctx.kbGraph` seam, compiling through the shared kg-nl module.
+   * Defaults to true.
+   */
+  kgQuery?: boolean
   /** Cooperative timeout budget (ms) for `kg_schema`. Defaults to 10000. */
   kgSchemaTimeoutMs?: number
   /** Cooperative timeout budget (ms) for `kg_subgraph`. Defaults to 20000. */
   kgSubgraphTimeoutMs?: number
+  /** Cooperative timeout budget (ms) for `kg_query`. Defaults to 20000. */
+  kgQueryTimeoutMs?: number
 }
 ```
 
-Source: [`packages/kb/tool-kb/src/index.ts:83`](../packages/kb/tool-kb/src/index.ts)
+Source: [`packages/kb/tool-kb/src/index.ts:91`](../packages/kb/tool-kb/src/index.ts)
 
 <a id="deepseek-aidsh-tool-lakehouse"></a>
 

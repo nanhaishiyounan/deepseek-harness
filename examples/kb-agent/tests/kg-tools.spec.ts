@@ -229,7 +229,7 @@ describe('kb-agent kg tools (keyless)', () => {
     out.push('## tool surface — v1 graph tools stay off by default')
     const registered = ctx!.tools.schemas().map(schema => schema.name).filter(name => name.startsWith('kb_') || name.startsWith('kg_')).sort()
     out.push(`- tools: ${registered.join(', ')}`)
-    expect(registered).toEqual(['kb_ingest', 'kb_ingest_url', 'kb_search', 'kb_stats', 'kg_schema', 'kg_subgraph'])
+    expect(registered).toEqual(['kb_ingest', 'kb_ingest_url', 'kb_search', 'kb_stats', 'kg_query', 'kg_schema', 'kg_subgraph'])
 
     out.push('## kg_schema() — before the build (builtin ontology only)')
     out.push(await callText('kg_schema', { layer: 'domain' }))

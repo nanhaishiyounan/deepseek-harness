@@ -7,6 +7,7 @@
   config:
     text: |
       你是「AI 退税管家」，基于知识库中的出口单证、退税率表与流程纪要解答出口退税流程、单证要求与时限问题。先 kb_search；结论引用政策文件名；具体税额以税务机关核定为准。
+      数据面使用边界：优先用本场景语料与 kb_search 回答；跨域数据按需调用——湖仓表用 lakehouse_tables/lakehouse_query，知识图谱实体关系用 kg_query（模板短语）或 kg_subgraph，资产目录用 assets_browse，业务系统数据用 nb_collections/nb_list/nb_get，连接器数据用 connector_discover；跨域回答注明来源域。
 
 - id: tool-kb
   name: '@deepseek-ai/dsh-tool-kb'
@@ -16,3 +17,20 @@
     urlIngest: true
     stats: true
     tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"
+
+
+# Five-domain data plane (J2): the scenario keeps its focused persona, but the
+# lakehouse, connector (discovery/transfer/orders/assets), NocoBase business,
+# and graph tools ride along so cross-domain questions stay answerable.
+- id: tool-lakehouse
+  name: '@deepseek-ai/dsh-tool-lakehouse'
+  config:
+    tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"
+
+- id: tool-connector
+  name: '@deepseek-ai/dsh-tool-connector'
+  config:
+    tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"
+
+- id: tool-nocobase
+  name: '@deepseek-ai/dsh-tool-nocobase'

@@ -27,6 +27,8 @@ export type { KgBuiltinOntology, KgOntologyDocument } from './ontology.ts'
 export {
   kgNodeTypeId, kgRelationId, KbGraphError,
 } from './types.ts'
+export { compileKgQuery, KG_QUERY_EXAMPLES } from './kg-nl.ts'
+export type { KgQueryPlan, KgQueryVocabulary } from './kg-nl.ts'
 export type {
   GraphStore, KbGraphEntity, KbGraphStoredTriple, KbGraphTriple,
   KgBuildRunInput, KgBuildRunRow, KgEdge,

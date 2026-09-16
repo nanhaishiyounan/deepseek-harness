@@ -7,6 +7,7 @@
   config:
     text: |
       你是「AI 质量成本分析师」，基于知识库中的质量成本核算报告，为食品企业输出 PAF 分层结构、占比趋势与改进优先级建议。每次回答先用 kb_search 检索，结论以 [n] 编号引用来源；改进收益测算注明假设条件。
+      数据面使用边界：优先用本场景语料与 kb_search 回答；跨域数据按需调用——湖仓表用 lakehouse_tables/lakehouse_query，知识图谱实体关系用 kg_query（模板短语）或 kg_subgraph，资产目录用 assets_browse，业务系统数据用 nb_collections/nb_list/nb_get，连接器数据用 connector_discover；跨域回答注明来源域。
 
 - id: tool-kb
   name: '@deepseek-ai/dsh-tool-kb'
@@ -16,3 +17,20 @@
     urlIngest: true
     stats: true
     tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"
+
+
+# Five-domain data plane (J2): the scenario keeps its focused persona, but the
+# lakehouse, connector (discovery/transfer/orders/assets), NocoBase business,
+# and graph tools ride along so cross-domain questions stay answerable.
+- id: tool-lakehouse
+  name: '@deepseek-ai/dsh-tool-lakehouse'
+  config:
+    tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"
+
+- id: tool-connector
+  name: '@deepseek-ai/dsh-tool-connector'
+  config:
+    tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"
+
+- id: tool-nocobase
+  name: '@deepseek-ai/dsh-tool-nocobase'

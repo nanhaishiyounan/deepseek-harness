@@ -617,7 +617,7 @@ describe('pure projections', () => {
     await ctx.plugin(ToolRuntime)
     await ctx.plugin(ConnectorRuntime)
     ctx.connector.registerProvider(alphaProvider())
-    await ctx.plugin(ToolConnector, { tenant: 'bound-tenant', discover: false, fetch: false, transfer: false, orders: false })
+    await ctx.plugin(ToolConnector, { tenant: 'bound-tenant', discover: false, fetch: false, transfer: false, orders: false, assets: false })
     expect(ctx.tools.schemas().map(schema => schema.name)).toEqual([])
   })
 

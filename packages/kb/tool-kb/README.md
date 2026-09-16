@@ -31,7 +31,7 @@ interface Config {
 
 Each budget attaches to the tool as `ToolDefinition.timeoutMs` for `@deepseek-ai/dsh-tool-call-timeout-policy` to enforce. `kb_search` and `kb_stats` are concurrency-safe reads; `kb_ingest` and `kb_ingest_url` are not.
 
-The kg face adds `kg_schema` (ontology browsing) and `kg_subgraph` (k-hop subgraph reads serialized as entity-aggregated YAML — no free-form graph-query generation).
+The kg face adds `kg_schema` (ontology browsing), `kg_subgraph` (k-hop subgraph reads serialized as entity-aggregated YAML — no free-form graph-query generation), and `kg_query` (one templated Chinese phrase — 「X的供货链」「含Y的产品」「X和Y的关系」 — compiled through the shared kg-nl module in `dsh-kb-graph`, the same compiler apiproxy's `kg.query` RPC serves, then walked as a kg_subgraph-shaped read; a miss names the supported shapes and points at the kg_schema + kg_subgraph fallback).
 
 ## Model Experience
 

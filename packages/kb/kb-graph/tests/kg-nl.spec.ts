@@ -1,8 +1,11 @@
 /**
- * The kg.query template compiler: every built-in template's slot fill (seeds,
- * hops, relation filter), the closed-set guard that drops a template naming
- * an unregistered relation, and the explicit-miss policy (blank or unknown
- * shapes compile to undefined — the refusal, never a guessed walk).
+ * The kg template compiler (moved verbatim from apiproxy's kg-nl spec): every
+ * built-in template's slot fill (seeds, hops, relation filter), the
+ * closed-set guard that drops a template naming an unregistered relation, and
+ * the explicit-miss policy (blank or unknown shapes compile to undefined —
+ * the refusal, never a guessed walk). apiproxy's `kg.query` RPC and the
+ * `kg_query` tool both compile through this one module, so these assertions
+ * lock both faces at once.
  */
 
 import { describe, expect, it } from 'vitest'
@@ -63,5 +66,13 @@ describe('compileKgQuery', () => {
     for (const example of KG_QUERY_EXAMPLES) {
       expect(compileKgQuery(example, VOCAB), example).toBeDefined()
     }
+  })
+
+  it('answers through the package root the apiproxy RPC imports', async () => {
+    // The RPC face resolves '@deepseek-ai/dsh-kb-graph', so the root export
+    // must carry the compiler — a dropped re-export is an RPC break.
+    const root = await import('../src/index.ts')
+    expect(root.compileKgQuery).toBe(compileKgQuery)
+    expect(root.KG_QUERY_EXAMPLES).toBe(KG_QUERY_EXAMPLES)
   })
 })

@@ -1,7 +1,7 @@
 # kb-agent kg tools (keyless)
 
 ## tool surface — v1 graph tools stay off by default
-- tools: kb_ingest, kb_ingest_url, kb_search, kb_stats, kg_schema, kg_subgraph
+- tools: kb_ingest, kb_ingest_url, kb_search, kb_stats, kg_query, kg_schema, kg_subgraph
 ## kg_schema() — before the build (builtin ontology only)
 ontology_version: 1.0.0
 entity_types:

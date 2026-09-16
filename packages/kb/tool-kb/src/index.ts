@@ -11,6 +11,7 @@ import type { Context } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
 import { applyKbGraphTools } from './graph.ts'
 import { applyKgTools } from './kg.ts'
+import { applyKgQueryTool } from './kg-query.ts'
 import { applyKbIngestTool } from './ingest.ts'
 import { applyKbIngestUrlTool } from './ingest-url.ts'
 import { applyKbSearchTool, KB_SEARCH_MAX_RESULTS } from './search.ts'
@@ -27,6 +28,10 @@ export type {
 export {
   formatKgSchemaOutput, formatKgSubgraphYaml, kgOntologyViews, presentKgCall, presentKgResult,
 } from './kg.ts'
+export {
+  parseKgQueryArgs, presentKgQueryCall, presentKgQueryResult,
+} from './kg-query.ts'
+export type { KgQueryArgs, KgQueryToolValue } from './kg-query.ts'
 export type {
   KgSchemaArgs, KgSchemaRelationView, KgSchemaToolValue, KgSchemaTypeView, KgSubgraphArgs,
   KgSubgraphToolValue,
@@ -79,6 +84,9 @@ export const DEFAULT_KG_SCHEMA_TIMEOUT_MS = 10_000
 /** Default cooperative tool-call timeout budget (ms) for `kg_subgraph`. */
 export const DEFAULT_KG_SUBGRAPH_TIMEOUT_MS = 20_000
 
+/** Default cooperative tool-call timeout budget (ms) for `kg_query`. */
+export const DEFAULT_KG_QUERY_TIMEOUT_MS = 20_000
+
 /** Plugin config: which kb tools to register, per-tool budgets, the citation cap, and the bound tenant. */
 export interface Config {
   /** Register `kb_search`. Defaults to true. */
@@ -127,10 +135,18 @@ export interface Config {
   kgSchema?: boolean
   /** Register `kg_subgraph` (k-hop reads) over the optional `ctx.kbGraph` seam. Defaults to true. */
   kgSubgraph?: boolean
+  /**
+   * Register `kg_query` (templated natural-language phrase walks) over the
+   * optional `ctx.kbGraph` seam, compiling through the shared kg-nl module.
+   * Defaults to true.
+   */
+  kgQuery?: boolean
   /** Cooperative timeout budget (ms) for `kg_schema`. Defaults to 10000. */
   kgSchemaTimeoutMs?: number
   /** Cooperative timeout budget (ms) for `kg_subgraph`. Defaults to 20000. */
   kgSubgraphTimeoutMs?: number
+  /** Cooperative timeout budget (ms) for `kg_query`. Defaults to 20000. */
+  kgQueryTimeoutMs?: number
 }
 
 export const Config: z<Config> = z.object({
@@ -150,8 +166,10 @@ export const Config: z<Config> = z.object({
   graphAddTimeoutMs: z.number().step(1).min(1).default(DEFAULT_KB_GRAPH_ADD_TIMEOUT_MS),
   kgSchema: z.boolean().default(true),
   kgSubgraph: z.boolean().default(true),
+  kgQuery: z.boolean().default(true),
   kgSchemaTimeoutMs: z.number().step(1).min(1).default(DEFAULT_KG_SCHEMA_TIMEOUT_MS),
   kgSubgraphTimeoutMs: z.number().step(1).min(1).default(DEFAULT_KG_SUBGRAPH_TIMEOUT_MS),
+  kgQueryTimeoutMs: z.number().step(1).min(1).default(DEFAULT_KG_QUERY_TIMEOUT_MS),
 })
 
 /** Complete config after schemastery applies every field default. */
@@ -187,5 +205,8 @@ export function apply(ctx: Context, config: Config): void {
   }
   if (resolved.kgSchema || resolved.kgSubgraph) {
     applyKgTools(ctx, resolved.tenant, resolved.kgSchema, resolved.kgSubgraph, resolved.kgSchemaTimeoutMs, resolved.kgSubgraphTimeoutMs)
+  }
+  if (resolved.kgQuery) {
+    applyKgQueryTool(ctx, resolved.tenant, resolved.kgQueryTimeoutMs)
   }
 }

@@ -7,7 +7,7 @@
   食品安全合规问答：依据知识库中的 GB 2760/GB 14881 等法规标准作答，编号引用原文，输出审核要点清单；仅检索类工具，无破坏性操作。
 
 ## food-compliance-officer
-- tools: kb_ingest, kb_ingest_url, kb_search, kb_stats, kg_schema, kg_subgraph
+- tools: kb_ingest, kb_ingest_url, kb_search, kb_stats, kg_query, kg_schema, kg_subgraph
 - persona: contains "AI 食安合规官"
 - kb_search "调味品 防腐剂 使用限量":
   (text-only mode: no embed provider is available; results come from full-text search alone)
@@ -18,7 +18,7 @@
   - 数据来源：走访调研（已脱敏）
 
 ## enterprise-data-assistant
-- tools: connector_discover, connector_fetch, connector_transfer, kb_ingest, kb_ingest_url, kb_search, kb_stats, kg_schema, kg_subgraph, lakehouse_query, lakehouse_tables, nb_collections, nb_create, nb_get, nb_list, nb_update, order_create, order_status
+- tools: assets_browse, connector_discover, connector_fetch, connector_transfer, kb_ingest, kb_ingest_url, kb_search, kb_stats, kg_query, kg_schema, kg_subgraph, lakehouse_query, lakehouse_tables, nb_collections, nb_create, nb_get, nb_list, nb_update, order_create, order_status
 - persona: contains "企业数据助手"
 - kb_search "宏发食品 成本测算 原材料":
   (text-only mode: no embed provider is available; results come from full-text search alone)

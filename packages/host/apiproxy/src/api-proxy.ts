@@ -38,7 +38,7 @@ import type { PresetBearingSession } from '@deepseek-ai/dsh-agent-presets'
 import { KB_DOC_KINDS } from '@deepseek-ai/dsh-kb'
 import type { KbDocKind, KbRuntime } from '@deepseek-ai/dsh-kb'
 import type { KbIngestView } from './api/kb.ts'
-import { compileKgQuery, KG_QUERY_EXAMPLES } from './kg-nl.ts'
+import { compileKgQuery, KG_QUERY_EXAMPLES } from '@deepseek-ai/dsh-kb-graph'
 // Type-only: resolves `ctx.get('kb')`/`ctx.get('fs')`/`ctx.get('web')` service types.
 import type {} from '@deepseek-ai/dsh-kb'
 import type {} from '@deepseek-ai/dsh-fs'
