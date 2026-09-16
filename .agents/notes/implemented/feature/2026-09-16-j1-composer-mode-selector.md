@@ -26,6 +26,8 @@ The "stage then start a session" sequence has one home: the optional `ctx.agentP
 
 The hero chip keeps its narrow window (blank + chat); the selector is the always-mounted seat and both read one store, so the two entries cannot disagree. Compositions without `ui-agent-preset` see no row at all (the empty accessory collapses). The e2e lane's preset-name button selectors are now scoped to the hero row because the trigger names duplicate across the two surfaces.
 
+Known edge (real-machine acceptance, `demos/acceptance-j1/README.md`): when New Session reuses a session-list row whose `blank` bit predates that session's first turn (the mirror's cold-probe bit is stale), the reused session refuses the swap and the pick lands on the deployment default. The same chain is green in the `agent-preset-selection` e2e lane and in prior production logs (`agent-preset/selected` events exist); the root fix — validating blankness at reuse time — belongs to the workspaces-domain reuse scan, not this selector.
+
 ## Alternatives considered
 
 **Host-side hot-swap of a running session's preset** — rejected. The lock exists because a session's history was produced under its preset's tool set; the composition owns the recorded tool calls (documented in `packages/preset/agent-presets/README.md`).

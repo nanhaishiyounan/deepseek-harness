@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-09-16-j1-composer-mode-selector.md
-2026-09-16-j1-composer-mode-selector.md: 4e83417c5c7edb73c6e87b03d22adc256094c5d8
-2026-09-16-j1-composer-mode-selector.zh.md: 898f4e0c1face622f07fdca611cc378d95b41d7c
+2026-09-16-j1-composer-mode-selector.md: 3d04f50cdc3305c1213ebe0b9e382c862a5bbd0f
+2026-09-16-j1-composer-mode-selector.zh.md: 361c1ed8cd24209203f32872e16b1633b27754df

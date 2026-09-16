@@ -1,0 +1,68 @@
+[
+ {
+  "tag": "lakehouse",
+  "expect": "lakehouse",
+  "ask": "数据湖仓里现在有哪些表？每张表多少行？",
+  "toolSeen": true,
+  "reply": "Tool call lakehouse_tables · {} — 数据湖仓里目前注册了 3 张表（统一为 parquet 格式，最近一次更新均为 2026-09-12）：ingredient_prices_monthly 240 行；import_export_monthly 120 行；cold_chain_rates 108 行。"
+ },
+ {
+  "tag": "assets",
+  "expect": "assets_browse",
+  "ask": "市场上有哪些专家服务和数据资产？大概分几类？",
+  "toolSeen": false,
+  "note": "model routed via nb_list this run; the explicit assets_browse run is the assets-browse-2 entry"
+ },
+ {
+  "tag": "kb",
+  "expect": "kb_search",
+  "ask": "知识库里有哪些关于食品添加剂使用的规范要点？请引用来源。",
+  "toolSeen": false,
+  "reply": "knowledge base for relevant information about food additive standards and regulations.\n知识库检索\n食品添加剂使用规范 GB 2760 配料表 · 8 条来源\nThink\nThe user is asking about food additive usage regulations in the knowledge base. Let me search more specifically for GB 2760 (the Chinese national food safety standard for food additive usage) and related additive usage norms.\n知识库检索\n食品添加剂使用原则 最大使用量 配料表标示 · 8 条来源\n知识库检索\n添加剂 复合配料 带入原则 加工助剂 GB 2760 · 6 条来源\nDeep diving...\n20秒\n企业数据助手\nWorkspace Write\nMiniMax-M3\n1 轮 · 2 步| LLM "
+ },
+ {
+  "tag": "kg",
+  "expect": "kg_query",
+  "ask": "宏发食品和张红喜是什么关系？",
+  "toolSeen": false,
+  "reply": "客户档案），\"张红喜\"是 experts 类型（外部专家），它们分属不同侧。\n\n但围绕两人/企业，业务上是订单与服务关系：张红喜是宏发食品在跨境物流与海外合规场景上使用过的外部专家——他在系统里挂了 3 项 expert_services：\n\n服务\t订单证据\n中亚货运动线方案\tKG-BUILD-32901040、ORD-B5-20260911-3e8\n海外仓风险应对咨询\tORD-B5-20260824-613、ORD-20260912-21faa991、ORD-20260912-0991ebe1\n食品出海合规咨询\t（目前无订单）\n\n也就是说，张红喜是宏发食品可调用的外部专家，提供\"中亚货运动线方案\"\"海外仓风险应对咨询\"\"食品出海合规咨询\"三项可下单服务。前两项已有实际成交订单。订单详情需要的话我可以再 nb_get 逐单看。\n\n需要我把张红喜的三项服务进一步展开，或者查看宏发食品最近一笔订单的细节吗？\n\n15:26 · 用时 14秒 · 首 token 3.8秒 · 56 tok/s\n企业数据助手\nWorkspace Write\nMiniMax-M3\n3 轮 · 9 步| LLM 1"
+ },
+ {
+  "tag": "business",
+  "expect": "nb_",
+  "ask": "SRM 业务系统里现在有多少家供应商？",
+  "toolSeen": true,
+  "reply": "按生命周期和分类的分布。\n\n一、按生命周期状态\n状态\t数量\t占比\t含义\nqualified（合格）\t4\t40%\t已通过审核，正常合作\npreferred（优选）\t1\t10%\t合格之上的优选合作\nrestricted（受控）\t1\t10%\t限期整改中（江南乳业，上季度交期评分偏低）\nfrozen（冻结）\t1\t10%\t黑名单/已冻结供货（丹东禾丰，农残抽检不合格整改无效）\npotential（潜在）\t1\t10%\t新增候选，未准入（内蒙古草原雪花粮油）\nreviewing（评审中）\t1\t10%\t准入评审进行中（漳州蜜果）\n实际在用（qualified + preferred）\t5\t50%\t当前可下单的供应商池\n二、按物料/服务类别\ncategory\t数量\t备注\nraw（原料）\t5\t水产、乳品、调味汁、冻干果蔬、油料候选、果蔬脆片\naux（辅料）\t1\t月饼皮预拌粉/膨化原料\npackaging（包材）\t1\t玻璃罐/复合膜\nservice（服务）\t1\t冷链干线\n未\t\t\nDeep diving...\n企业数据助手\nWorkspace Write\nMiniMax-M3\n5 轮 · 13 步| LLM "
+ },
+ {
+  "tag": "connector",
+  "expect": "connector_discover",
+  "ask": "能发现哪些外部数据集？",
+  "toolSeen": true,
+  "reply": "测能力、展会日历\t免费·实名发布\n金融产品（9 条）\t信保+保理、存货质押、电子债权、汇率避险、设备融资租赁、厂房/冷库租赁、溯源 SaaS、出口订单融资、信用风险国别评分\t免费检索 或 ¥6,000/年\n经营知识手册（16 条）\tHACCP 手册、标签双审模板、冷链验证、F 值规程、清真/犹太、汇率避险、海外仓风险、退税单证、原料农残、虫害、电子债权、供应商管理、数据入表等\t多数未挂价，作为知识资产\n\n可发现数量：约 73 条 document + 1 条 tabular（海关出口台账中亚 → datasets/1）。\n\n2. connector-file（本地样例文件）\n数据集\t类型\nsample-export-compliance.md\tfile\nsample-shipment-events.json\tfile\nsample-supplier-prices.csv\tfile\n二、目前没接到的（知识库空白）\n\nconnector_discover 没\n\nDeep diving...\n企业数据助手\nWorkspace Write\nMiniMax-M3\n5 轮 · 14 步| LLM "
+ },
+ {
+  "tag": "kg-query-2",
+  "ask": "宏发食品的供货链有哪些环节？（请用 kg_query 图谱查询回答）",
+  "toolSeen": true,
+  "reply": "品出口方向（kb:connector-files/sample-export-compliance.md）\n预制菜：复合调味料下游应用场景（kb:cold-chain/2026-08-cold-chain-validation.md）\n数据来源说明\n来源文档：宏发食品企业档案 (hongfa-food.md)、2026-08-20 供应商走访纪要、绿源配料档案 (lvyuan-ingredients.md)、酱油工艺说明 (2026-08-process-soy-sauce.md)、GB 2760 / GB 14881 / GB 2763 法规摘录、出口合规说明 (sample-export-compliance.md)、冷链验证报告 (2026-08-cold-chain-validation.md)\n知识图谱共返回 22 个相关实体，跨 5 个来源文档，未截断\n\n说明：本次回答基于图谱 1–2 跳关系展开。若需进一步看原料价格波动、特定订单批次或合规风险，可针对「原料价格」「宏发食品的订单」「宏发食品的合规信息」等模板短语继续追问，或切换到 lakehouse 数据表与 nb 业务"
+ },
+ {
+  "tag": "assets-browse-2",
+  "ask": "用 assets_browse 的 stats 和 list 看看市场资产目录总览：一共几类、各多少个？",
+  "toolSeen": true,
+  "reply": "file：仅贡献 3 个文件样本（sample-export-compliance.md / sample-shipment-events.json / sample-supplier-prices.csv）\n三、形态提示\ndocument、expert-profile 和 service 三类占 173 个，是市场目录的主体；其中 service 类带定价锚点（如\"标签合规审核 ¥800/款\"、\"数据资源入表咨询 ¥42,000/项目\"），可走 order_create 流程下单生成 PDF 方案。\ntabular 类的\"海关出口台账（中亚）\"是目录里唯一的结构化数据资产，若需要用 SQL 聚合查询，可走 connector_transfer 落入 lakehouse 后用 lakehouse_query 读取。\n想看某条资产详情（provider_id + dataset_id）或按关键词筛选，可用 assets_browse 的 detail / list(带 query)。\n\n需要我展开某一类（例如把88 篇 document 按主题归类、或者把 52 项 service 按价"
+ },
+ {
+  "tag": "default-cross-domain",
+  "ask": "SRM 系统里现在有多少家供应商？",
+  "nbSeen": true,
+  "reply": "限制使用）\t1\t江南乳业集团股份有限公司\nfrozen（冻结）\t1\t丹东禾丰果蔬专业合作社\npotential（潜在）\t1\t内蒙古草原雪花粮油有限公司\nreviewing（审核中）\t1\t漳州市蜜果休闲食品有限公司\n\n按品类粗分：原料 raw 6 家、辅料 aux 1 家、包材 packaging 1 家、物流服务 service 1 家、未填品类 1 家（泉州安记香辛料）。\n\n需要的话我可以继续看：合格供应商里是否已录入证照 srm_certificates、是否都已覆盖最新审核 srm_audit_records，或最新绩效评分卡 srm_score_cards 的等级情况——告诉我侧重哪个"
+ },
+ {
+  "tag": "scenario-cross-domain",
+  "ask": "跳出本场景查一下：SRM 里供应商有多少家？",
+  "nbSeen": true,
+  "reply": "闲食品有限公司\treviewing\t否\nSUP-010\t泉州市安记香辛料有限公司\tqualified\t否\n状态分布参考\nqualified（合格）：4 家\npreferred（优选）：1 家\nrestricted（受限）：1 家\nreviewing（审核中）：1 家\npotential（潜在）：1 家\nfrozen（冻结）：1 家（SUP-006 已被列入黑名单）\n\n是否需要进一步按品类、地域或证照有效性做拆分分析？\n\n15:36 · 用时 11秒 · 首 token 1.2秒 · 79 tok/s\n企业数据助手\nWorkspace Write\nMiniMax-M3\n1 轮 · 3 步| LL"
+ }
+]

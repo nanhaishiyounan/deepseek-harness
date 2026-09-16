@@ -26,6 +26,8 @@ agent 预设的选择入口只存在于 hero chip，而它只在会话开始前�
 
 hero chip 保持其窄窗口（blank + chat）；选择器是常驻座位，二者读取同一 store，两个入口不会不一致。未组合 `ui-agent-preset` 的组装看不到任何行（空 accessory 收起）。e2e lane 的预设名按钮选择器现在限定在 hero 行内，因为两个表面的 trigger 名称会重复。
 
+已知边缘（真机验收，`demos/acceptance-j1/README.md`）：当 New Session 复用的会话列表行的 `blank` 位早于该会话的第一次提问（mirror 的 cold-probe 位已过期）时，被复用的会话拒绝切换，选择落回部署默认。同链路在 `agent-preset-selection` e2e lane 与既有生产日志（存在 `agent-preset/selected` 事件）中均为成功；根修——在复用时校验 blankness——属于 workspaces 域的复用扫描，不属于本选择器。
+
 ## 考虑过的替代方案
 
 **host 侧热切进行中会话的预设** —— 否决。锁的存在是因为会话历史是在其预设的工具集下产生的；组装拥有已记录的 tool calls（见 `packages/preset/agent-presets/README.md`）。
