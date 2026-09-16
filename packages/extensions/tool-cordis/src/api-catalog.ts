@@ -2648,6 +2648,55 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
     ],
   },
   {
+    key: 'viewActions',
+    summary: '`ctx.viewActions`: one active UI provider plus an `apply()` API.',
+    description: '`ctx.viewActions`: one active UI provider plus an `apply()` API.',
+    methods: [
+      {
+        signature: 'registerProvider(provider: ViewActionProvider): () => void',
+        description: 'Register the UI provider. Only one provider may be active in a context.',
+        parameters: [{ name: 'provider', description: 'UI-side implementation executing whitelisted actions.' }],
+        returns: 'Disposer that unregisters this provider.',
+      },
+      {
+        signature: 'async apply(request: ViewActionApplyRequest): Promise<ViewActionResult>',
+        description: 'Apply one view action through the active UI provider and await its summary.\n\nWhen a caller supplies an agent, view manipulation is valid only for the exact live runtime root — the same ownership boundary ask() enforces: an owned child has no browser to serve it and would block until timeout, while a lineage-bearing session resumed as a new runtime root may apply normally.',
+        parameters: [{ name: 'request', description: 'Target view/action/args, owner agent, and abort signal.' }],
+        returns: 'The executor\'s result summary.',
+        throws: ['{ViewActionError} code `CALLER_NOT_LIVE` when a supplied agent is not the registry\'s exact live instance, `DELEGATED_CALLER` when that live agent is owned by another agent, `BAD_REQUEST_SHAPE` on empty view or action names, `NO_PROVIDER` before any provider registers, or `APPLY_ABORTED` when the owning signal fires first.'],
+      },
+    ],
+  },
+  {
+    key: 'viewState',
+    summary: '`ctx.viewState`: per-session latest view-state cache (screen state, never logged).',
+    description: '`ctx.viewState`: per-session latest view-state cache (screen state, never logged). Fields are TypeScript-private (not `#private`): the runtime service shadow Cordis hands scoped consumers is a prototype heir, which a private-field brand check would reject.',
+    methods: [
+      {
+        signature: 'report(sessionId: SessionId, report: ViewReport): void',
+        description: 'Cache one session\'s latest view report, replacing any prior entry.',
+        parameters: [{ name: 'sessionId', description: 'the session whose screen the report describes.' }, { name: 'report', description: 'the browser\'s report (view, projection, action catalog).' }],
+        throws: ['when the view id is empty or the serialized snapshot exceeds the wire bound.'],
+      },
+      {
+        signature: 'read(sessionId: SessionId, maxAgeMs: number = 0): ViewStateEntry | undefined',
+        description: 'Read a session\'s cached view state under the age bound.',
+        parameters: [{ name: 'sessionId', description: 'the session to read.' }, { name: 'maxAgeMs', description: 'when positive, entries older than this are treated as absent.' }],
+        returns: 'the cached entry, or undefined when absent or expired.',
+      },
+      {
+        signature: 'clear(sessionId: SessionId): void',
+        description: 'Drop one session\'s cached view state.',
+        parameters: [{ name: 'sessionId', description: 'the session being removed.' }],
+      },
+      {
+        signature: 'clearAll(): void',
+        description: 'Drop every cached view state (plugin teardown).',
+        parameters: [],
+      },
+    ],
+  },
+  {
     key: 'web',
     summary: 'The web access service.',
     description: 'The web access service. Registered as `ctx.web` (one instance per context).\n\nSelection semantics (resolved at execution time, never order-dependent):\n\n- A configured id that is registered and `available()` → that provider.\n- A configured id not registered → `WEB_PROVIDER_CONFIGURED_MISSING`.\n- A configured id registered but unavailable → `WEB_PROVIDER_CONFIGURED_UNAVAILABLE`.\n- No id configured, exactly one registered usable provider → that provider.\n- No id configured, multiple usable providers → `WEB_PROVIDER_AMBIGUOUS`.\n- No id configured, no usable provider → `WEB_PROVIDER_UNAVAILABLE`.',
@@ -5740,6 +5789,42 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'UserQuestionProvider',
     declaration: 'export interface UserQuestionProvider {\n    ask(request: AskUserQuestionRequest): Promise<AskUserQuestionAnswer>;\n}',
+  },
+  {
+    name: 'ViewActionApplyRequest',
+    declaration: 'export interface ViewActionApplyRequest extends ViewActionRequest {\n    agent?: Agent;\n    signal?: AbortSignal;\n}',
+  },
+  {
+    name: 'ViewActionArgs',
+    declaration: 'export type ViewActionArgs = Readonly<Record<string, unknown>>;',
+  },
+  {
+    name: 'ViewActionCatalog',
+    declaration: 'export type ViewActionCatalog = Readonly<Record<string, readonly string[]>>;',
+  },
+  {
+    name: 'ViewActionRequest',
+    declaration: 'export interface ViewActionRequest {\n    view: string;\n    action: string;\n    args: ViewActionArgs;\n}',
+  },
+  {
+    name: 'ViewActionResult',
+    declaration: 'export interface ViewActionResult {\n    summary: string;\n}',
+  },
+  {
+    name: 'ViewReport',
+    declaration: 'export interface ViewReport {\n    view: string;\n    label?: string;\n    snapshot: ViewSnapshot;\n    actions: ViewActionCatalog;\n}',
+  },
+  {
+    name: 'ViewSnapshot',
+    declaration: 'export type ViewSnapshot = Readonly<Record<string, ViewSnapshotValue>>;',
+  },
+  {
+    name: 'ViewSnapshotValue',
+    declaration: 'export type ViewSnapshotValue = string | number | boolean | null | readonly string[];',
+  },
+  {
+    name: 'ViewStateEntry',
+    declaration: 'export interface ViewStateEntry extends ViewReport {\n    reportedAt: number;\n}',
   },
   {
     name: 'WebBootEntry',

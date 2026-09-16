@@ -5,7 +5,12 @@
 
 import type { ViewStateEntry, ViewSnapshotValue } from './types.ts'
 
-/** Render one snapshot scalar for the model-facing block. */
+/**
+ * Render one snapshot scalar for the model-facing block.
+ *
+ * @param value - the snapshot scalar (string/number/boolean/null/string array).
+ * @returns the display text (`无` for null, bracketed for arrays, `String` otherwise).
+ */
 export function formatViewSnapshotValue(value: ViewSnapshotValue): string {
   if (value === null) return '无'
   if (typeof value === 'boolean') return value ? '是' : '否'

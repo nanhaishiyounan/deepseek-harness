@@ -100,7 +100,11 @@ export class ViewContextService extends Service {
     }
   }
 
-  /** The per-view action names the next report carries (the host's gate). */
+  /**
+   * The per-view action names the next report carries (the host's gate).
+   *
+   * @returns registered executor names keyed by view id.
+   */
   actionCatalog(): Record<string, readonly string[]> {
     const catalog: Record<string, readonly string[]> = {}
     for (const [view, actions] of this.actionSets) {
@@ -123,7 +127,12 @@ export class ViewContextService extends Service {
     }
   }
 
-  /** Best-effort switch to a view; false when no header switch is mounted. */
+  /**
+   * Best-effort switch to a view.
+   *
+   * @param view - the conversation view id to switch to.
+   * @returns whether a header switch was mounted and received the request.
+   */
   switchView(view: string): boolean {
     if (this.liveSetView === undefined) return false
     this.liveSetView(view)

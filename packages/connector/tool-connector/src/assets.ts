@@ -220,6 +220,13 @@ const ASSET_ROW_SCHEMA = {
   },
 } as const
 
+/**
+ * Mount the read-only assets_browse tool (list/detail/stats over the market
+ * catalog) with its system-prompt guidance.
+ *
+ * @param ctx - plugin context; the tool row is disposed with it.
+ * @param timeoutMs - per-call timeout handed to the connector seam.
+ */
 export function applyAssetsBrowseTool(ctx: Context, timeoutMs: number): void {
   ctx.systemPrompt.section({
     name: 'tool:assets_browse',

@@ -24,6 +24,7 @@
 | `@deepseek-ai/dsh-tool-connector` | `assets_browse`, `connector_discover`, `connector_fetch`, `connector_transfer`, `order_create`, `order_status` | `ctx.tools`, `ctx.connector`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | connector_discover、connector_fetch 与 connector_transfer 都运行在部署侧绑定租户下（模型永不提供租户）；发现以携带 provider 与 dataset id 的分组清单作答，预览有上限（8 行 / 400 字符），传输渲染落地回执——含 catalog 传输记录 id 与下一步指引（对命名表用 lakehouse_query，或带引用的 kb_search）；assets_browse 只读浏览资产目录（list/detail/stats）。 |
 | `@deepseek-ai/dsh-tool-nocobase` | `nb_collections`, `nb_create`, `nb_get`, `nb_list`, `nb_update` | `ctx.tools`、`ctx.systemPrompt` | `tool/call`、`tool/result` | - | nb_collections、nb_list、nb_get、nb_create 与 nb_update 以服务账号对话部署的 NocoBase（模型永不提供租户）；筛选词汇为封闭集（eq/in/gt/lt 加单一 and/or 连接），写工具承载确认式变更契约——系统提示指引要求先呈现预览 / 改前→改后对比并取得用户明确同意才运行 nb_create/nb_update，其回执复述落地 id 或逐字段 diff。 |
 | `@deepseek-ai/dsh-tool-ask-user` | `ask_user_question` | `ctx.tools`、`ctx.userQuestions` | `tool/call`、`tool/result after a UI/provider answers the question` | - | ask_user_question 会暂停工具调用，直到当前 UI 提供方返回人类答案。 |
+| `@deepseek-ai/dsh-tool-view-actions` | `switch_view`, `view_apply`, `view_state_get` | `ctx.tools`, `ctx.viewActions`, `ctx.viewState` | `tool/call`, `tool/result` | - | switch_view、view_apply 与 view_state_get 指挥浏览器工作台视图；视图操控是可逆 UI 状态、不带审批（破坏性写仍走 nb_* 确认契约），动作对照浏览器上报目录校验，浏览器不可达时以可读错误失败而不是挂起。 |
 | `@deepseek-ai/dsh-tools` | `run_code` | `ctx.tools`、`ctx.codeRuntime (execution time)`、`ctx.systemPrompt` | `tool/call`、`one tool/code-dispatch-start + tool/code-dispatch pair per bridged sub-call`、`tool/result` | - | 在 `mode: code`／`mode: both` 下，它由工具注册表所有，作为可过滤能力层之外的保留传输机制（参见 Code Mode Agent Note）。在 `code` 下，它是注册表对协议格式（wire format）的唯一贡献；其他可见能力在使用已加载运行时语言生成的 SDK 章节中声明。程序通过 binding 调用这些能力，调用按照原生并发约定调度：启动顺序和策略遵循提交顺序，并发安全的函数体最多重叠执行 `maxParallelSubCalls` 个。调用会重新进入完整且受守卫保护的工具流水线，并将每个嵌套执行关联到此外层结果。 |
 | `@deepseek-ai/dsh-plan-mode` | `exit_plan_mode` | `ctx.tools`、`ctx.systemPrompt`、`ctx.userQuestions (execution time, opportunistic)` | `tool/call`、`plan/mode inactive on an approved review`、`tool/result` | - | 规划未激活时，exit_plan_mode 仍保留在面向模型的 schema 中，这样状态转换不会在规划策略变更之外额外造成工具目录变动。其执行路径会拒绝规划模式之外的调用；在规划模式下，它通过用户交互 seam 提交计划（批准／根据反馈继续规划），批准后会在步骤边界记录规划模式已停用。 |
 | `@deepseek-ai/dsh-tool-bash` | `bash` | `ctx.tools`、`ctx.shell`、`ctx.systemPrompt`、`ctx.shellEnv`、`ctx.jobs at call time for run_in_background` | `tool/call`、`tool/result` | - | bash 工具是 bash 执行器 seam 面向模型的消费方。使用 `run_in_background` 的运行会注册到通用 `ctx.jobs` 运行时，并通过 `job_*` 工具（来自 `@deepseek-ai/dsh-tool-jobs`）收集／停止；禁用 `enableRunInBackground` 配置（默认为 true）后，该参数会被完全移除。 |
@@ -728,6 +729,78 @@ Ask the user a concise question when you need confirmation, a choice, or missing
 Source: [`packages/interaction/tool-ask-user/src/index.ts`](../packages/interaction/tool-ask-user/src/index.ts)
 
 ask_user_question 会暂停工具调用，直到当前 UI 提供方返回人类答案。
+
+<a id="deepseek-aidsh-tool-view-actions"></a>
+
+## `@deepseek-ai/dsh-tool-view-actions`
+
+### `switch_view`
+
+把用户的工作台切到另一个 tab。当用户要求前往或查看另一个视图时使用；在对用户当前没有看着的视图执行视图动作之前也应先切换。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "view": {
+      "type": "string",
+      "description": "Target tab id: chat, kb, scenarios, market, connectors, kg, business."
+    }
+  },
+  "required": [
+    "view"
+  ]
+}
+```
+
+Source: [`packages/interaction/tool-view-actions/src/index.ts`](../packages/interaction/tool-view-actions/src/index.ts)
+
+### `view_apply`
+
+在工作台视图内执行一个白名单动作并等待返回的视图状态摘要。已知动作：kg 的 set_type_filter/focus_entity/clear_selection/run_phrase_query；market 的 select_asset/filter_category；business 的 select_collection/set_table_filter。相同参数重复调用幂等。浏览器不可达时调用以可读错误失败——此时改为依据会话上下文作答。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "view": {
+      "type": "string",
+      "description": "View id the action targets: chat, kb, scenarios, market, connectors, kg, business."
+    },
+    "action": {
+      "type": "string",
+      "description": "Registered action name within that view (see the tool description for the known list)."
+    },
+    "args": {
+      "type": "object",
+      "description": "Action arguments, e.g. {\"types\":[\"Supplier\"]} for kg set_type_filter, {\"entity\":\"海天味业\"} for focus_entity, {\"phrase\":\"供应酱油原料的供应商\"} for run_phrase_query.",
+      "additionalProperties": true
+    }
+  },
+  "required": [
+    "view",
+    "action",
+    "args"
+  ]
+}
+```
+
+Source: [`packages/interaction/tool-view-actions/src/index.ts`](../packages/interaction/tool-view-actions/src/index.ts)
+
+### `view_state_get`
+
+读取用户当前工作台视图的缓存状态：tab id、显示标签、状态字段与已注册动作名。当注入的【当前工作台视图】快照不够用、作答或行动前需要完整视图状态时使用。
+
+```json
+{
+  "type": "object",
+  "properties": {}
+}
+```
+
+Source: [`packages/interaction/tool-view-actions/src/index.ts`](../packages/interaction/tool-view-actions/src/index.ts)
+
+switch_view、view_apply 与 view_state_get 指挥浏览器工作台视图；视图操控是可逆 UI 状态、不带审批（破坏性写仍走 nb_* 确认契约），动作对照浏览器上报目录校验，浏览器不可达时以可读错误失败而不是挂起。
 
 <a id="deepseek-aidsh-tools"></a>
 

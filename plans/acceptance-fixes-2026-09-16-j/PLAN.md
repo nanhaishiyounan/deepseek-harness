@@ -38,7 +38,7 @@
 1. **J1 选择器挂 `accessory` 孔渲染新 slot `conversation.input.mode`**（ui-conversation 一处声明+一处传参，InputBar 零改动）；三态常驻（无会话=stage / blank=直接切 / 非 blank=一键开新会话，复用创造模式 stage+startSession 先例 [`ui-agent-preset/index.ts:159-164`](../../packages/client/ui-agent-preset/src/client/index.ts:159)）；**host 锁定语义零改动**；场景卡失败降级复用同路径。
 2. **J2 场景 preset 全量挂载**（30×工具行对齐默认会话，persona 保聚焦段对冲）；**kg-nl 编译器下沉 [`packages/kb`](../../packages/kb) 单一事实源**（apiproxy `kg.query` 与新工具 `kg_query` 共用，RPC 零漂移由单测锁）；新增只读 `assets_browse`（list/detail/stats 三动作）；默认 persona 补 kg；连接器管理/workflow 工具**明确不做**。
 3. **J3 三层架构**（03 §0.1 总图）：
-   - **注入层**：新包 `packages/context/view-context`（time-context 同构）挂 `agent/pre-step`，读 apiproxy 新 RPC `session.viewState.report` 的 per-session 内存缓存（视图态不落 log，**注入的 snapshot 消息本身 durable——模型可见⟺logged 天然满足**）；浏览器侧新包 `ui-view-context` 提供 `ctx.viewContext` 注册面（provider 投影+防抖上报），七业务包各注册；几百 tok 固定格式+hash diff 跳过。
+   - **注入层**：新包 `packages/context/view-context`（time-context 同构）挂 `agent/pre-step`，读 apiproxy 新 RPC `session.viewState.report` 的 per-session 内存缓存（视图态不落 log，**注入的 snapshot 消息本身 durable——模型可见⟺logged 天然满足**）；浏览器侧新包 `ui-view-context` 提供 `ctx.viewContext` 注册面（provider 投影+防抖上报），七业务包各注册；几百 tok 固定格式+文本 diff 跳过。
    - **操控层**：新能力缝 `packages/interaction/view-actions`（Service Definition/host provider/wire 帧 `view-action/requested`，**同构复刻 user-questions 全链**，30s 超时 fail loud）+ 模型面 `packages/interaction/tool-view-actions`（`view_apply` 单工具+per-tab action 枚举 / `view_state_get` / `switch_view` 走前端）；前端执行器白名单注册在 ui-view-context，未注册 fail loud，幂等纯状态写入，未挂载自动 switch；首批 action=kg 全套（含 `run_phrase_query` 视图内问数）+market 两枚+business 两枚；不新增 SessionEventMap 事件（复用 tool/call+tool/result，toolview 认领渲染）；回收 kgBridge 预留。
    - **问数层**：对话内=J2 工具族+注入上下文；视图内=kg 短语 action；persona/PromptContext 统一词汇表。
 4. **「优先 AI」原则的工程化**：前端只实现原子 action 与状态投影，**编排（组合 action 达成意图）全部交模型**；白名单是安全边界不是能力边界，扩展走 K/L 轮（@ chip、`apply_view_patch` RFC6902 子集、多 tab 引用）。
@@ -88,7 +88,7 @@
 | wire 请求-响应回路（view-action 关联/超时/乱序）实现复杂 | 高 | 03 段 2a 第 0 步强制先列 user-questions 通道清单再复刻；30s fail loud；e2e 断连场景 | J3 |
 | 场景会话工具 6→22 系统提示膨胀、模型分心 | 中 | persona 聚焦段对冲；J4 实调质量观察，必要时 K 轮工具分组提示精简 | J2/J3 |
 | kg-nl 下沉破坏 apiproxy `kg.query` | 中 | 单测锁 9 模板+错误码零漂移；真机短语回归 | J2 |
-| 每请求注入 token 成本 | 中 | 几百 tok 固定格式+hash diff 跳过；ContextMeter 可观测；J4 量化 | J3 |
+| 每请求注入 token 成本 | 中 | 几百 tok 固定格式+文本 diff 跳过；ContextMeter 可观测；J4 量化 | J3 |
 | 选择器与 hero chip 双入口、accessory 行视觉挤占 | 低 | 同一 store 同数据；空 roster 返回 null 不占高；真机截图裁决，必要时 hero 窗口隐藏新行 | J1 |
 | composer e2e aria 树波及（新 accessory 行） | 低 | 空态不占高把波及压最小；受影响断言逐个更新 | J1 |
 | duplication 门禁对能力缝复刻段误报 | 低 | 共享类型从 Service Definition 导出、最小重写；窄例外+Note 说明 | J3/J4 |

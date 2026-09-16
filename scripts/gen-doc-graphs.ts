@@ -348,6 +348,22 @@ const SERVICE_ROLES: ServiceRole[] = [
     note: 'UI front ends provide the active human-answer provider; tool-ask-user pauses a tool call on the provider-neutral ask() promise.',
   },
   {
+    key: 'viewActions',
+    pkg: 'view-actions',
+    title: 'Workbench view-action seam',
+    mode: 'seam',
+    consumers: ['tool-view-actions'],
+    note: 'The gateway registers the browser-serving provider (an optional seam: a browser-less host mounts none); tool-view-actions drives whitelisted view changes through apply().',
+  },
+  {
+    key: 'viewState',
+    pkg: 'view-context',
+    title: 'Workbench view-state cache and snapshot injection',
+    mode: 'seam',
+    consumers: ['agent-loop', 'tool-view-actions'],
+    note: 'Caches the browser workbench view per session and injects a durable snapshot before each step; the view tools read it through view_state_get.',
+  },
+  {
     key: 'planMode',
     pkg: 'plan-mode',
     title: 'Plan collaboration state',

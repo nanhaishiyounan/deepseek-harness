@@ -6,7 +6,7 @@ Browser half of the tab-aware workbench context: publishes `ctx.viewContext`, th
 
 ## Registration surface
 
-```ts
+```ts ignore-check
 ctx.effect(() => ctx.viewContext.provide({
   view: 'kg',
   label: () => bound('view.kg'),
@@ -16,6 +16,14 @@ ctx.effect(() => ctx.viewContext.provide({
 ```
 
 The `chat` view never registers: its report carries the minimal empty snapshot the host renders as the one-line conversation-view block. Transport failures are swallowed by name — the retry is the next notify (tab switch or store change).
+
+## Model Experience
+
+None, as a browser-side registration layer: the providers project view state over the uplink and register nothing model-facing.
+
+#### KV Cache effect
+
+None: the layer runs in the browser and never contributes to a model request.
 
 ## Known Limitations and Deferred Work
 

@@ -28,6 +28,8 @@ flowchart LR
   cfg --> plugin_dsh_base_session_title_llm
   plugin_dsh_base_user_questions["user-questions<br/>@deepseek-ai/dsh-user-questions"]
   cfg --> plugin_dsh_base_user_questions
+  plugin_dsh_base_view_actions["view-actions<br/>@deepseek-ai/dsh-view-actions"]
+  cfg --> plugin_dsh_base_view_actions
   plugin_dsh_base_agent["agent<br/>@deepseek-ai/dsh-agent"]
   cfg --> plugin_dsh_base_agent
   plugin_dsh_base_agent_default_model["agent-default-model<br/>@deepseek-ai/dsh-agent-default-model"]
@@ -178,6 +180,7 @@ flowchart LR
 | `session-title` | `@deepseek-ai/dsh-session-title` |
 | `session-title-llm` | `@deepseek-ai/dsh-session-title-first-prompt-llm` |
 | `user-questions` | `@deepseek-ai/dsh-user-questions` |
+| `view-actions` | `@deepseek-ai/dsh-view-actions` |
 | `agent` | `@deepseek-ai/dsh-agent` |
 | `agent-default-model` | `@deepseek-ai/dsh-agent-default-model` |
 | `jobs` | `@deepseek-ai/dsh-jobs-local` |

@@ -20,6 +20,7 @@ This table connects model-visible tool names to the plugin package and service s
 | `@deepseek-ai/dsh-tool-connector` | `assets_browse`, `connector_discover`, `connector_fetch`, `connector_transfer`, `order_create`, `order_status` | `ctx.tools`, `ctx.connector`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | connector_discover, connector_fetch, and connector_transfer run under the deployment-bound tenant (the model never supplies one); discovery answers with a grouped listing carrying provider and dataset ids, previews are capped (8 rows / 400 characters), and transfers render the landing receipt with the catalog transfer-record id and the next-step guidance (lakehouse_query over the named table, or kb_search with citations). |
 | `@deepseek-ai/dsh-tool-nocobase` | `nb_collections`, `nb_create`, `nb_get`, `nb_list`, `nb_update` | `ctx.tools`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | nb_collections, nb_list, nb_get, nb_create, and nb_update speak to the deployment's NocoBase under a service account (the model never supplies a tenant); the filter vocabulary is closed (eq/in/gt/lt joined by one and/or), and the write tools carry the confirmed-change contract — the system-prompt guidance demands the presented preview / before→after diff and the user's explicit go-ahead before nb_create/nb_update run, and their receipts echo the landing id or the field-by-field diff. |
 | `@deepseek-ai/dsh-tool-ask-user` | `ask_user_question` | `ctx.tools`, `ctx.userQuestions` | `tool/call`, `tool/result after a UI/provider answers the question` | - | ask_user_question pauses the tool call until the active UI provider returns a human answer. |
+| `@deepseek-ai/dsh-tool-view-actions` | `switch_view`, `view_apply`, `view_state_get` | `ctx.tools`, `ctx.viewActions`, `ctx.viewState` | `tool/call`, `tool/result` | - | switch_view, view_apply, and view_state_get steer the browser workbench view; view manipulation is reversible UI state and carries no approval (destructive writes stay on the nb_* confirmation contract), actions are validated against the browser-reported catalog, and an unreachable browser fails with a readable error instead of a hang. |
 | `@deepseek-ai/dsh-tools` | `run_code` | `ctx.tools`, `ctx.codeRuntime (execution time)`, `ctx.systemPrompt` | `tool/call`, `one tool/code-dispatch-start + tool/code-dispatch pair per bridged sub-call`, `tool/result` | - | Owned by the tool registry as a reserved transport outside filterable capability layers under `mode: code` / `mode: both` (see the Code Mode Agent Note). Under `code` it is the registry's only wire contribution; the other visible capabilities are declared in a generated SDK section in the loaded runtime's language, and a program calls them through bindings scheduled under the native concurrency contract (submission-ordered starts and policy; concurrency-safe bodies overlap up to `maxParallelSubCalls`) that re-enter the complete guarded tool pipeline and link each nested execution to this outer result. |
 | `@deepseek-ai/dsh-plan-mode` | `exit_plan_mode` | `ctx.tools`, `ctx.systemPrompt`, `ctx.userQuestions (execution time, opportunistic)` | `tool/call`, `plan/mode inactive on an approved review`, `tool/result` | - | exit_plan_mode stays in the model-facing schema while planning is inactive so transitions add no tool-catalog churn on top of the plan-policy change. Its execute path rejects calls outside plan mode; in plan mode it presents the plan over the user-questions seam (approve / keep planning with feedback), and approval logs plan mode inactive at the step boundary. |
 | `@deepseek-ai/dsh-tool-bash` | `bash` | `ctx.tools`, `ctx.shell`, `ctx.systemPrompt`, `ctx.shellEnv`, `ctx.jobs at call time for run_in_background` | `tool/call`, `tool/result` | - | The bash tool is the model-facing consumer of the bash executor seam. A `run_in_background` run registers with the generic `ctx.jobs` runtime and is collected/stopped through the `job_*` tools from `@deepseek-ai/dsh-tool-jobs`; the `enableRunInBackground` config (default true) removes the parameter entirely when disabled. |
@@ -723,6 +724,78 @@ Ask the user a concise question when you need confirmation, a choice, or missing
 Source: [`packages/interaction/tool-ask-user/src/index.ts`](../packages/interaction/tool-ask-user/src/index.ts)
 
 ask_user_question pauses the tool call until the active UI provider returns a human answer.
+
+<a id="deepseek-aidsh-tool-view-actions"></a>
+
+## `@deepseek-ai/dsh-tool-view-actions`
+
+### `switch_view`
+
+Switch the user's workbench to another tab. Use it when the user asks to go to or look at another view, and before running view actions on a view the user is not looking at.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "view": {
+      "type": "string",
+      "description": "Target tab id: chat, kb, scenarios, market, connectors, kg, business."
+    }
+  },
+  "required": [
+    "view"
+  ]
+}
+```
+
+Source: [`packages/interaction/tool-view-actions/src/index.ts`](../packages/interaction/tool-view-actions/src/index.ts)
+
+### `view_apply`
+
+Run one whitelisted action inside a workbench view and await the resulting view-state summary. Known actions: kg set_type_filter/focus_entity/clear_selection/run_phrase_query; market select_asset/filter_category; business select_collection/set_table_filter. Repeat calls with the same arguments are idempotent. When the browser is unreachable the call fails with a readable error — answer from conversation context instead.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "view": {
+      "type": "string",
+      "description": "View id the action targets: chat, kb, scenarios, market, connectors, kg, business."
+    },
+    "action": {
+      "type": "string",
+      "description": "Registered action name within that view (see the tool description for the known list)."
+    },
+    "args": {
+      "type": "object",
+      "description": "Action arguments, e.g. {\"types\":[\"Supplier\"]} for kg set_type_filter, {\"entity\":\"海天味业\"} for focus_entity, {\"phrase\":\"供应酱油原料的供应商\"} for run_phrase_query.",
+      "additionalProperties": true
+    }
+  },
+  "required": [
+    "view",
+    "action",
+    "args"
+  ]
+}
+```
+
+Source: [`packages/interaction/tool-view-actions/src/index.ts`](../packages/interaction/tool-view-actions/src/index.ts)
+
+### `view_state_get`
+
+Read the cached state of the user's current workbench view: tab id, display label, state fields, and the registered action names. Use it when the injected 【当前工作台视图】 snapshot is not enough and you need the full view state before answering or acting.
+
+```json
+{
+  "type": "object",
+  "properties": {}
+}
+```
+
+Source: [`packages/interaction/tool-view-actions/src/index.ts`](../packages/interaction/tool-view-actions/src/index.ts)
+
+switch_view, view_apply, and view_state_get steer the browser workbench view; view manipulation is reversible UI state and carries no approval (destructive writes stay on the nb_* confirmation contract), actions are validated against the browser-reported catalog, and an unreachable browser fails with a readable error instead of a hang.
 
 <a id="deepseek-aidsh-tools"></a>
 

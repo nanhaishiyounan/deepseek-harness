@@ -126,6 +126,12 @@ export interface Config {
    * @default 1024
    */
   coldBlankProbeMaxBytes?: number
+  /**
+   * Per-apply timeout waiting for the browser to execute a view action before
+   * the pending apply rejects with APPLY_TIMEOUT.
+   * @default 30000
+   */
+  viewActionTimeoutMs?: number
 }
 
 /**
@@ -136,7 +142,7 @@ export interface Config {
 export class ApiProxyService extends Service implements ApiProxy {
   static inject = [
     'agentDefaultModel', 'agents', 'attachments', 'directoryPicker', 'llm', 'sessions', 'subagents', 'sessionQuery',
-    'tools', 'userQuestions', 'viewActions', 'workspaceRegistry',
+    'tools', 'userQuestions', 'workspaceRegistry',
   ]
 
   static Config: z<Config> = z.object({

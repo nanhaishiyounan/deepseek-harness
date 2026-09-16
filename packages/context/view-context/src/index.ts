@@ -98,7 +98,7 @@ export class ViewStateService extends Service {
    * @param maxAgeMs - when positive, entries older than this are treated as absent.
    * @returns the cached entry, or undefined when absent or expired.
    */
-  read(sessionId: SessionId, maxAgeMs = 0): ViewStateEntry | undefined {
+  read(sessionId: SessionId, maxAgeMs: number = 0): ViewStateEntry | undefined {
     const entry = this.entries.get(sessionId)
     if (entry === undefined) return undefined
     if (maxAgeMs > 0 && Date.now() - entry.reportedAt > maxAgeMs) return undefined

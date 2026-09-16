@@ -1987,67 +1987,73 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
     })
   }
 
-  const disposeViewActionProvider = ctx.viewActions.registerProvider({
-    apply(request: ViewActionApplyRequest): Promise<ViewActionResult> {
-      const sessionId = request.agent?.id
-      if (sessionId === undefined) {
-        return Promise.reject(new ViewActionError(
-          'web view manipulation requires an agent-owned session', 'APPLY_MISSING_AGENT'))
-      }
-      // Fail loud before the wire when the action is not in the browser's
-      // reported catalog for that view; switch_view is the host-built-in
-      // navigation exception.
-      if (request.action !== 'switch_view') {
-        const catalog = ctx.get('viewState')?.read(sessionId)?.actions[request.view]
-        if (catalog === undefined || !catalog.includes(request.action)) {
-          const known = catalog === undefined ? 'none reported' : catalog.join(', ')
+  // Optional seam: a browser-less host (pure API session, headless harness)
+  // mounts no ViewActionService — view_apply then reports NO_PROVIDER from the
+  // service. The sub-fiber registers the provider once the service is
+  // available (assembly row order carries no load semantics) and withdraws
+  // it, settling pending applies as APPLY_ABORTED, when either side unloads.
+  ctx.inject(['viewActions'], (viewCtx) => {
+    const disposeProvider = viewCtx.viewActions.registerProvider({
+      apply(request: ViewActionApplyRequest): Promise<ViewActionResult> {
+        const sessionId = request.agent?.id
+        if (sessionId === undefined) {
           return Promise.reject(new ViewActionError(
-            `view "${request.view}" has no registered action "${request.action}" (known: ${known})`,
-            'UNKNOWN_ACTION'))
+            'web view manipulation requires an agent-owned session', 'APPLY_MISSING_AGENT'))
         }
+        // Fail loud before the wire when the action is not in the browser's
+        // reported catalog for that view; switch_view is the host-built-in
+        // navigation exception.
+        if (request.action !== 'switch_view') {
+          const catalog = ctx.get('viewState')?.read(sessionId)?.actions[request.view]
+          if (catalog === undefined || !catalog.includes(request.action)) {
+            const known = catalog === undefined ? 'none reported' : catalog.join(', ')
+            return Promise.reject(new ViewActionError(
+              `view "${request.view}" has no registered action "${request.action}" (known: ${known})`,
+              'UNKNOWN_ACTION'))
+          }
+        }
+        return new Promise<ViewActionResult>((resolve, reject) => {
+          const rpcId = RpcId(randomUUID())
+          const pending: PendingViewAction = {
+            rpcId, sessionId, view: request.view, action: request.action, args: request.args,
+            resolve, reject,
+            ...(request.signal === undefined ? {} : { signal: request.signal }),
+          }
+          const onAbort = (): void => {
+            claimViewAction(pending, 'cancelled')
+            pending.reject(new ViewActionError(
+              'view_apply was aborted before the browser executed it', 'APPLY_ABORTED'))
+          }
+          const onTimeout = (): void => {
+            claimViewAction(pending, 'cancelled')
+            pending.reject(new ViewActionError(
+              'view_apply timed out waiting for the browser to execute it (frontend unreachable or busy)',
+              'APPLY_TIMEOUT'))
+          }
+          pending.onAbort = onAbort
+          pendingViewActions.set(rpcId, pending)
+          request.signal?.addEventListener('abort', onAbort, { once: true })
+          pending.timer = setTimeout(onTimeout, defaults.viewActionTimeoutMs ?? DEFAULT_VIEW_ACTION_TIMEOUT_MS)
+          const envelope: RpcRequest<MuxFrame> = {
+            rpcId,
+            payload: {
+              type: 'view-action/requested', sessionId,
+              view: request.view, action: request.action, args: request.args,
+            },
+          }
+          for (const queue of muxQueues) queue.push(envelope)
+        })
+      },
+    })
+    return () => {
+      disposeProvider()
+      for (const pending of [...pendingViewActions.values()]) {
+        claimViewAction(pending, 'cancelled')
+        pending.reject(new ViewActionError(
+          'web view-actions provider was disposed', 'APPLY_ABORTED'))
       }
-      return new Promise<ViewActionResult>((resolve, reject) => {
-        const rpcId = RpcId(randomUUID())
-        const pending: PendingViewAction = {
-          rpcId, sessionId, view: request.view, action: request.action, args: request.args,
-          resolve, reject,
-          ...(request.signal === undefined ? {} : { signal: request.signal }),
-        }
-        const onAbort = (): void => {
-          claimViewAction(pending, 'cancelled')
-          pending.reject(new ViewActionError(
-            'view_apply was aborted before the browser executed it', 'APPLY_ABORTED'))
-        }
-        const onTimeout = (): void => {
-          claimViewAction(pending, 'cancelled')
-          pending.reject(new ViewActionError(
-            'view_apply timed out waiting for the browser to execute it (frontend unreachable or busy)',
-            'APPLY_TIMEOUT'))
-        }
-        pending.onAbort = onAbort
-        pendingViewActions.set(rpcId, pending)
-        request.signal?.addEventListener('abort', onAbort, { once: true })
-        pending.timer = setTimeout(onTimeout, defaults.viewActionTimeoutMs ?? DEFAULT_VIEW_ACTION_TIMEOUT_MS)
-        const envelope: RpcRequest<MuxFrame> = {
-          rpcId,
-          payload: {
-            type: 'view-action/requested', sessionId,
-            view: request.view, action: request.action, args: request.args,
-          },
-        }
-        for (const queue of muxQueues) queue.push(envelope)
-      })
-    },
-  })
-
-  ctx.effect(() => () => {
-    disposeViewActionProvider()
-    for (const pending of [...pendingViewActions.values()]) {
-      claimViewAction(pending, 'cancelled')
-      pending.reject(new ViewActionError(
-        'web view-actions provider was disposed', 'APPLY_ABORTED'))
     }
-  }, 'api-proxy: view-actions provider')
+  })
 
   // --- Approval pending registry ------------------------------------------
   // The proxy is the approval channel for every agent this host owns: an ask

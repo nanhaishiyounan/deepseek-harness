@@ -42,6 +42,9 @@ import ConnectorRuntime from '@deepseek-ai/dsh-connector'
 import type { ConnectorDatasetRef, ConnectorProvider } from '@deepseek-ai/dsh-connector'
 import * as ToolConnector from '@deepseek-ai/dsh-tool-connector'
 import * as ToolNocoBase from '@deepseek-ai/dsh-tool-nocobase'
+import ViewActionService from '@deepseek-ai/dsh-view-actions'
+import * as ViewContext from '@deepseek-ai/dsh-view-context'
+import * as ToolViewActions from '@deepseek-ai/dsh-tool-view-actions'
 import SubagentRuntime from '@deepseek-ai/dsh-subagent'
 import type { SubagentProvider, SubagentReportDelivery } from '@deepseek-ai/dsh-subagent'
 import * as ToolSubagentControl from '@deepseek-ai/dsh-tool-subagent-control'
@@ -302,6 +305,21 @@ const TOOL_PACKAGES: ToolPackage[] = [
     },
     note:
       'ask_user_question pauses the tool call until the active UI provider returns a human answer.',
+  },
+  {
+    pkg: '@deepseek-ai/dsh-tool-view-actions',
+    dir: 'tool-view-actions',
+    source: 'packages/interaction/tool-view-actions/src/index.ts',
+    requires: ['ctx.tools', 'ctx.viewActions', 'ctx.viewState'],
+    writes: ['tool/call', 'tool/result'],
+    async mount(ctx) {
+      await ctx.plugin(AgentRegistry)
+      await ctx.plugin(ViewActionService)
+      await ctx.plugin(ViewContext, { enabled: false, maxAgeMs: 0 })
+      await ctx.plugin(ToolViewActions)
+    },
+    note:
+      'switch_view, view_apply, and view_state_get steer the browser workbench view; view manipulation is reversible UI state and carries no approval (destructive writes stay on the nb_* confirmation contract), actions are validated against the browser-reported catalog, and an unreachable browser fails with a readable error instead of a hang.',
   },
   {
     pkg: '@deepseek-ai/dsh-tools',

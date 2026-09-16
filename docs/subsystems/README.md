@@ -25,6 +25,7 @@ One page per subsystem of the DeepSeek Harness: what it is, the data structures 
 | [system-prompt.md](system-prompt.md) | per-assembly context, tool-provider results, prompt sections, and cooperative assembly |
 | [tools.md](tools.md) | `ToolDefinition` full fields, the schema DSL, `ToolExecution`/`ToolResult`, tool-presentation UI types, and the guarded execution pipeline |
 | [user-questions.md](user-questions.md) | the UI-backed human question/answer seam: `AskUserQuestionRequest`, answer/options vocabulary, provider API, error taxonomy |
+| [view-context.md](view-context.md) | the tab-aware workbench view surfaces: `ViewReport` cache, durable snapshot injection, and the `ViewActionProvider`/`ViewActionResult` steering vocabulary |
 | [approval.md](approval.md) | the one-shot user-approval seam: `ApprovalRequest`, `ApprovalOutcome`, per-session policy, audit events, and answerer contracts |
 | [attachment.md](attachment.md) | durable image identity and metadata, validation inputs, verified reads, and the `AttachmentStore` seam |
 | [kb.md](kb.md) | the knowledge-base seam: `KbStore`/`EmbedProvider` contracts, hybrid retrieval with RRF fusion, and the text-only degradation mode |

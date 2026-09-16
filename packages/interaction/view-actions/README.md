@@ -8,6 +8,14 @@ Abstract view-actions seam (`ctx.viewActions`): an agent tool call can adjust th
 
 `apply()` enforces the same runtime-ownership boundary as user-questions: a supplied agent must be the registry's exact live instance and must not be owned by another live agent. An owned child has no browser to serve it and would block until the provider timeout; a lineage-bearing session resumed as a new runtime root applies normally.
 
+## Model Experience
+
+Indirectly, through the view tools: this seam registers no prompt, schema, or tool of its own; `dsh-tool-view-actions` owns every model-facing projection, and executor summaries return to the model as that tool's results.
+
+#### KV Cache effect
+
+Independent of the model request stream: applies produce tool results consumed by a later request, so this package neither appends to nor invalidates any reusable request prefix.
+
 ## Known Limitations and Deferred Work
 
 - The seam carries one action per call; composing several actions into one transactional apply is deferred (the model composes by sequencing calls).

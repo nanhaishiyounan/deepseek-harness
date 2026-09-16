@@ -6,7 +6,7 @@ tab 感知工作台上下文的浏览器半边：发布 `ctx.viewContext`——�
 
 ## 注册面
 
-```ts
+```ts ignore-check
 ctx.effect(() => ctx.viewContext.provide({
   view: 'kg',
   label: () => bound('view.kg'),
@@ -16,6 +16,14 @@ ctx.effect(() => ctx.viewContext.provide({
 ```
 
 `chat` 视图不注册：它的上报只带最简空快照，host 渲染为一行的对话视图块。传输失败按名吞掉——重试就是下一次 notify（切 tab 或 store 变化）。
+
+## Model Experience
+
+无：本包是浏览器侧注册层，provider 经上行链路投影视图状态，不注册任何模型可见内容。
+
+#### KV Cache effect
+
+无：本层运行在浏览器中，从不参与模型请求。
 
 ## 已知限制与后续工作
 

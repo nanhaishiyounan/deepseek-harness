@@ -25,6 +25,7 @@
 | [system-prompt.md](system-prompt.zh.md) | 逐次组装的上下文、工具提供方结果、提示词段落与协作式组装 |
 | [tools.md](tools.zh.md) | `ToolDefinition` 完整字段、schema DSL、`ToolExecution`/`ToolResult`、工具展示 UI 类型，以及受保护的执行流水线 |
 | [user-questions.md](user-questions.zh.md) | UI 支持的人工问答 seam：`AskUserQuestionRequest`、answer/options 词汇、提供方 API、错误分类体系 |
+| [view-context.md](view-context.zh.md) | tab 感知的工作台视图面：`ViewReport` 缓存、durable 快照注入，以及 `ViewActionProvider`/`ViewActionResult` 视图操控词汇 |
 | [approval.md](approval.zh.md) | 一次性用户审批 seam：`ApprovalRequest`、`ApprovalOutcome`、逐会话策略、审计事件和 answerer 约定 |
 | [attachment.md](attachment.zh.md) | 持久图片标识与元数据、校验输入、经校验读取，以及 `AttachmentStore` seam |
 | [kb.md](kb.zh.md) | 知识库缝：`KbStore`/`EmbedProvider` 契约、RRF 融合的混合检索，与纯文本降级模式 |

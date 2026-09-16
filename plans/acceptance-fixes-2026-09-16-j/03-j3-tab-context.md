@@ -143,7 +143,7 @@
 | 风险 | 等级 | 预案 |
 |---|---|---|
 | wire 请求-响应回路实现复杂度（view-action 关联/超时/乱序） | 高 | 段 2a 第 0 步强制先列 user-questions 通道清单再复刻；30s 超时 fail loud；e2e 断连场景 |
-| 每请求注入 token 成本 | 中 | 几百 tok 固定格式 + hash diff 跳过；ContextMeter 可观测；J4 实测量化 |
+| 每请求注入 token 成本 | 中 | 几百 tok 固定格式 + 文本 diff 跳过；ContextMeter 可观测；J4 实测量化 |
 | 浏览器多 tab/离线时工具挂起 | 中 | 超时+可读失败；模型可改答文本指引（提示词说明前端不可达时降级） |
 | action 白名单与「优先 AI」张力（用户期望无限操控） | 中 | PLAN 期待管理明示边界与 K 轮 patch 工具路线；首批 action 覆盖高频意图（过滤/聚焦/查询/切换） |
 | viewState 上报面被滥用（无鉴权层） | 低 | 只读数据上行、<4KB 限幅、session 域内清理；不接受任何下行执行语义（执行只经 view-action 通道） |

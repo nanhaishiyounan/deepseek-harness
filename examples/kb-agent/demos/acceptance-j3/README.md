@@ -8,6 +8,7 @@
 2. **视图操控**（j3-1→j3-2）：
    - before：图谱画布全类型（节点 1095/边 665 全库，画布默认子图 10/7）；
    - 模型调 `view_apply(kg, set_type_filter, {types:"Supplier"})` → toolview 行「调整视图 · 已将图谱类型过滤为 [Supplier]」→ after：`view_state_get` 回读 `类型过滤:["Supplier"]`，快照确认过滤持久化。
+   - j3-2 于 2026-09-17 补拍为强视觉证据：短语查询「宏发食品的供货链」渲染子图后点选类型图例「供应商」，画布仅剩 6 个 Supplier 节点（初拍图过滤已生效但画布尚未渲染节点，弱视觉证据——J5 M3 补拍替换）。
 3. **视图内问数**（j3-3）：`view_apply(kg, run_phrase_query, {phrase:"宏发食品供货的所有产品"})` →「短语查询…已渲染（宏发食品 · 1 hops · supplies；节点 12/边 0）」——AI 构造中文短语→模板编译→图谱直接渲染结果子图。
 4. **对话内问数**：「当前图谱有多少实体」→ 模型从注入快照直接作答（节点 10/边 7）。
 5. **降级链路**（j3-0，第一轮浏览器 bundle 未重建时）：switch_view 超时（APPLY_TIMEOUT fail loud）→ view_apply 报 UNKNOWN_ACTION（known: none reported）→ 模型自动降级到 kg_schema/kg_query/nb_list 从数据面作答并给出手动过滤参数——降级契约按设计工作。

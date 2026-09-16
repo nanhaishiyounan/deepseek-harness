@@ -965,6 +965,12 @@ export interface Config {
    * @default 1024
    */
   coldBlankProbeMaxBytes?: number
+  /**
+   * Per-apply timeout waiting for the browser to execute a view action before
+   * the pending apply rejects with APPLY_TIMEOUT.
+   * @default 30000
+   */
+  viewActionTimeoutMs?: number
 }
 ```
 
@@ -3715,6 +3721,29 @@ export type ApprovalPolicy = 'ask' | 'never'
 
 Source: [`packages/interaction/user-approval/src/index.ts:177`](../packages/interaction/user-approval/src/index.ts)
 
+<a id="deepseek-aidsh-view-context"></a>
+
+## `@deepseek-ai/dsh-view-context`
+
+Requires: `agents`
+
+```ts config-catalog
+/** Snapshot injection and cache retention configuration. Invalid values fail plugin load. */
+export interface Config {
+  /**
+   * Whether to inject the workbench-view block at all. Omit or set to true to inject.
+   */
+  enabled?: boolean
+  /**
+   * Drop cached view states older than this many milliseconds so a stale screen never
+   * outlives its session's usefulness. Zero or omission keeps entries until `clear`.
+   */
+  maxAgeMs?: number
+}
+```
+
+Source: [`packages/context/view-context/src/index.ts:39`](../packages/context/view-context/src/index.ts)
+
 <a id="deepseek-aidsh-web"></a>
 
 ## `@deepseek-ai/dsh-web`
@@ -3942,6 +3971,7 @@ These load from a `cordis.yml` entry with no `config:` block; they declare no co
 - `@deepseek-ai/dsh-client-ui-tool` ([`packages/client/ui-tool/src/index.ts`](../packages/client/ui-tool/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-trajectory` ([`packages/client/ui-trajectory/src/index.ts`](../packages/client/ui-trajectory/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-user-questions` ([`packages/client/ui-user-questions/src/index.ts`](../packages/client/ui-user-questions/src/index.ts))
+- `@deepseek-ai/dsh-client-ui-view-context` ([`packages/client/ui-view-context/src/index.ts`](../packages/client/ui-view-context/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-workflow-run` ([`packages/client/ui-workflow-run/src/index.ts`](../packages/client/ui-workflow-run/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-workspace` ([`packages/client/ui-workspace/src/index.ts`](../packages/client/ui-workspace/src/index.ts))
 - `@deepseek-ai/dsh-command-compact` — requires `commands` · `compaction` ([`packages/compaction/command-compact/src/index.ts`](../packages/compaction/command-compact/src/index.ts))
@@ -3974,7 +4004,9 @@ These load from a `cordis.yml` entry with no `config:` block; they declare no co
 - `@deepseek-ai/dsh-tool-call-timeout-policy` — requires `tools` ([`packages/guard/timeout-policy/src/index.ts`](../packages/guard/timeout-policy/src/index.ts))
 - `@deepseek-ai/dsh-tool-cordis` — requires `tools` · `systemPrompt` · `dynamicCordisRunner` · `cordisInspect` ([`packages/extensions/tool-cordis/src/index.ts`](../packages/extensions/tool-cordis/src/index.ts))
 - `@deepseek-ai/dsh-tool-subagent-control` — requires `tools` · `subagents` ([`packages/subagent/tool-subagent-control/src/index.ts`](../packages/subagent/tool-subagent-control/src/index.ts))
+- `@deepseek-ai/dsh-tool-view-actions` — requires `tools` · `viewActions` · `viewState` ([`packages/interaction/tool-view-actions/src/index.ts`](../packages/interaction/tool-view-actions/src/index.ts))
 - `@deepseek-ai/dsh-user-questions` ([`packages/interaction/user-questions/src/index.ts`](../packages/interaction/user-questions/src/index.ts))
+- `@deepseek-ai/dsh-view-actions` ([`packages/interaction/view-actions/src/index.ts`](../packages/interaction/view-actions/src/index.ts))
 - `@deepseek-ai/dsh-workspace` — requires `storageDomain` · `sessionPersistence` ([`packages/workspace/workspace/src/index.ts`](../packages/workspace/workspace/src/index.ts))
 
 ## Seam packages (not directly loadable)

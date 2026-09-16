@@ -2,7 +2,7 @@
 
 Status: implemented
 
-English | [中文](2026-09-16-view-context-capability-seam.zh.md)
+[English](2026-09-16-view-context-capability-seam.md) | 中文
 
 ## Problem
 

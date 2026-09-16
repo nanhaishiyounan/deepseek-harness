@@ -6,10 +6,12 @@ export const zh = {
   'tool.stateTitle': '读取视图状态',
 } as const
 
+/** English copy, key-for-key with {@link zh}. */
 export const en = {
   'tool.switchTitle': 'Switch view',
   'tool.applyTitle': 'Adjust view',
   'tool.stateTitle': 'Read view state',
 } as const
 
+/** Locale key understood by the view-tools copy surfaces. */
 export type ViewContextKey = keyof typeof zh
