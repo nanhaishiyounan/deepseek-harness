@@ -103,6 +103,7 @@
       "@deepseek-ai/dsh-user-approval/types": ["./packages/interaction/user-approval/src/types.ts"],
       "@deepseek-ai/dsh-user-questions/types": ["./packages/interaction/user-questions/src/types.ts"],
       "@deepseek-ai/dsh-view-context/types": ["./packages/context/view-context/src/types.ts"],
+      "@deepseek-ai/dsh-view-actions/types": ["./packages/interaction/view-actions/src/types.ts"],
       "@deepseek-ai/dsh-agent/types": ["./packages/core/agent/src/types.ts"],
       "@deepseek-ai/dsh-agent/brand": ["./packages/core/agent/src/brand.ts"],
       "@deepseek-ai/dsh-agent/invariant": ["./packages/core/agent/src/invariant.ts"],

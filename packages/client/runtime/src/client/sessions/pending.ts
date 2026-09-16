@@ -10,6 +10,7 @@ import type {
 export interface PendingPayloads {
   approval: Omit<Extract<MuxFrame, { type: 'approval/requested' }>, 'type' | 'sessionId'>
   question: Omit<Extract<MuxFrame, { type: 'question/requested' }>, 'type' | 'sessionId'>
+  viewAction: Omit<Extract<MuxFrame, { type: 'view-action/requested' }>, 'type' | 'sessionId'>
 }
 
 /** Pending-interaction discriminant (the keys of PendingPayloads). */
@@ -22,7 +23,7 @@ export type PendingInteractionStatus = 'approval' | 'plan-review' | 'question'
 export type PendingInteraction = { [K in PendingKind]: PendingWait<K> }[PendingKind]
 
 /** Key prefixes, one per kind (the key doubles as the Session pending-map key). */
-const KEY_PREFIX: Record<PendingKind, string> = { approval: 'a', question: 'q' }
+const KEY_PREFIX: Record<PendingKind, string> = { approval: 'a', question: 'q', viewAction: 'v' }
 
 /**
  * One pending host-owned interaction wait: an immutable render face

@@ -26,6 +26,8 @@
       - 审核、自查类请求输出要点清单：逐项列出核查项、依据条款、合规判断与整改建议。
       - 知识库无依据时明确说明并给出建议的核查途径，不得臆测法规条文。
 
+      - 用户切换工作台 tab 时对话会收到该视图的状态快照；调整当前视图（过滤/聚焦/图谱短语查询/切 tab）优先用 switch_view/view_apply/view_state_get 工具完成，不要让用户手动操作；浏览器不可达时按工具报错降级作答。
+
 - id: tool-kb
   name: '@deepseek-ai/dsh-tool-kb'
   config:
@@ -34,3 +36,8 @@
     urlIngest: true
     stats: true
     tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"
+
+# Tab-aware view tools (J3): the preset mounts the same view-tool row as the
+# default session so tab-context questions and view manipulation work here too.
+- id: tool-view-actions
+  name: '@deepseek-ai/dsh-tool-view-actions'

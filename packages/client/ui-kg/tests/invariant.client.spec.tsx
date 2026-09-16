@@ -82,11 +82,9 @@ describe('kg view bridge', () => {
     expect(setView).toHaveBeenCalledTimes(1)
   })
 
-  it('parks seeds one-shot for the next view mount', () => {
+  it('exposes no seed-parking residue (retired with view_apply)', () => {
     const bridge = createKgViewBridge()
-    expect(bridge.takeSeeds()).toBeUndefined()
-    bridge.parkSeeds(['宏发食品'])
-    expect(bridge.takeSeeds()).toEqual(['宏发食品'])
-    expect(bridge.takeSeeds()).toBeUndefined()
+    expect('parkSeeds' in bridge).toBe(false)
+    expect('takeSeeds' in bridge).toBe(false)
   })
 })

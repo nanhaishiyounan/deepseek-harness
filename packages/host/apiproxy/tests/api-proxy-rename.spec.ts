@@ -15,6 +15,7 @@ import type { Agent, AgentHandle, CreateAgentOptions } from '@deepseek-ai/dsh-ag
 import { createUserMessage } from '@deepseek-ai/dsh-llm'
 import SessionTitleService from '@deepseek-ai/dsh-session-title'
 import UserQuestionService from '@deepseek-ai/dsh-user-questions'
+import ViewActionService from '@deepseek-ai/dsh-view-actions'
 import type { Session, SessionId } from '@deepseek-ai/dsh-session'
 import type { RpcRequest } from '@deepseek-ai/dsh-host-apiproxy/api/rpc'
 import { RpcId } from '@deepseek-ai/dsh-host-apiproxy/api/rpc'
@@ -32,6 +33,7 @@ async function composed(withTitles = true): Promise<Context> {
   await ctx.plugin(SessionStore)
   await ctx.plugin(AgentRegistry)
   await ctx.plugin(UserQuestionService)
+  await ctx.plugin(ViewActionService)
   if (withTitles) {
     await ctx.plugin(SessionTitleService, { fallbackMaxWords: 5, fallbackMaxBytes: 40, maxTitleBytes: 40 })
   }

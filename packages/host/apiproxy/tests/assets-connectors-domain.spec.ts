@@ -16,6 +16,7 @@ import AgentRegistry from '@deepseek-ai/dsh-agent'
 import SessionStore from '@deepseek-ai/dsh-session'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import UserQuestionService from '@deepseek-ai/dsh-user-questions'
+import ViewActionService from '@deepseek-ai/dsh-view-actions'
 import LakehouseRuntime from '@deepseek-ai/dsh-lakehouse'
 import type { CatalogStore, LakehouseTable, LakehouseTransferEntry, LakehouseTransferRecord } from '@deepseek-ai/dsh-lakehouse'
 import ConnectorRuntime from '@deepseek-ai/dsh-connector'
@@ -163,6 +164,7 @@ async function harness(defaults: {
   await ctx.plugin(SessionStore)
   await ctx.plugin(SystemPrompt, { persona: '' })
   await ctx.plugin(UserQuestionService)
+  await ctx.plugin(ViewActionService)
   await ctx.plugin(AgentRegistry)
   if (defaults.mountConnector !== false) {
     await ctx.plugin(ConnectorRuntime, {})

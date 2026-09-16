@@ -19,6 +19,7 @@ import type { Session } from '@deepseek-ai/dsh-session'
 import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
 import type { ProjectionDefinition } from '@deepseek-ai/dsh-session-projection'
 import UserQuestionService from '@deepseek-ai/dsh-user-questions'
+import ViewActionService from '@deepseek-ai/dsh-view-actions'
 import type { MuxFrame, RpcRequest } from '@deepseek-ai/dsh-host-apiproxy/api'
 import { RpcId } from '@deepseek-ai/dsh-host-apiproxy/api/rpc'
 import { createApiProxy } from '@deepseek-ai/dsh-host-apiproxy'
@@ -66,6 +67,7 @@ async function harness(withRegistry: boolean): Promise<{ ctx: Context; session: 
   const ctx = new Context()
   await ctx.plugin(SessionStore)
   await ctx.plugin(UserQuestionService)
+  await ctx.plugin(ViewActionService)
   await ctx.plugin(AgentRegistry)
   if (withRegistry) await ctx.plugin(SessionProjectionRegistry)
   const session = ctx.sessions.create()
@@ -221,7 +223,7 @@ describe('session.history projections block', () => {
     expect('sessionListMetadata' in ctx.sessionProjections.snapshot(session).values).toBe(false)
     const fiber = ctx.plugin(Object.assign((gatewayCtx: Context) => {
       createApiProxy(gatewayCtx, { defaultModelSelection: () => ({ provider: 'p', model: 'm' }), cwd: '/tmp' })
-    }, { inject: ['sessions', 'agents', 'userQuestions', 'sessionProjections'] }))
+    }, { inject: ['sessions', 'agents', 'userQuestions', 'viewActions', 'sessionProjections'] }))
     await fiber.await()
     await vi.waitFor(() => {
       expect(ctx.sessionProjections.snapshot(session).values.sessionListMetadata)

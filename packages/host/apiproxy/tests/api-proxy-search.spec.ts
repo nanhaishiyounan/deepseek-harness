@@ -12,6 +12,7 @@ import { createUserMessage } from '@deepseek-ai/dsh-llm'
 import SessionStore from '@deepseek-ai/dsh-session'
 import type { SessionHeader, SessionId } from '@deepseek-ai/dsh-session'
 import UserQuestionService from '@deepseek-ai/dsh-user-questions'
+import ViewActionService from '@deepseek-ai/dsh-view-actions'
 import {
   SessionQueryError,
   type SessionSearchHit,
@@ -64,6 +65,7 @@ async function baseContext(): Promise<Context> {
   await ctx.plugin(SessionStore)
   await ctx.plugin(AgentRegistry)
   await ctx.plugin(UserQuestionService)
+  await ctx.plugin(ViewActionService)
   return ctx
 }
 

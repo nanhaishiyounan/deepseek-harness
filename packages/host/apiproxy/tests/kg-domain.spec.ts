@@ -12,6 +12,7 @@ import AgentRegistry from '@deepseek-ai/dsh-agent'
 import SessionStore from '@deepseek-ai/dsh-session'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import UserQuestionService from '@deepseek-ai/dsh-user-questions'
+import ViewActionService from '@deepseek-ai/dsh-view-actions'
 import KbGraphRuntime, { kgNodeTypeId, kgRelationId } from '@deepseek-ai/dsh-kb-graph'
 import * as KbGraphSqlite from '@deepseek-ai/dsh-kb-graph-sqlite'
 import { createApiProxy } from '../src/api-proxy.ts'
@@ -32,6 +33,7 @@ async function boot(defaults: Record<string, unknown>, mountGraph = true): Promi
   await context.plugin(SessionStore)
   await context.plugin(SystemPrompt, { persona: '' })
   await context.plugin(UserQuestionService)
+  await context.plugin(ViewActionService)
   await context.plugin(AgentRegistry)
   if (!mountGraph) {
     ctx = context

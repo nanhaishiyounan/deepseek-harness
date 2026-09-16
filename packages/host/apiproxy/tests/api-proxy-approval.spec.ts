@@ -13,6 +13,7 @@ import type { Agent } from '@deepseek-ai/dsh-agent'
 import SessionStore from '@deepseek-ai/dsh-session'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import UserQuestionService from '@deepseek-ai/dsh-user-questions'
+import ViewActionService from '@deepseek-ai/dsh-view-actions'
 import ApprovalService from '@deepseek-ai/dsh-user-approval'
 import type { ApprovalRequestId } from '@deepseek-ai/dsh-user-approval'
 import type { ApiProxy, MuxFrame, RpcRequest } from '@deepseek-ai/dsh-host-apiproxy/api'
@@ -25,6 +26,7 @@ async function harness(): Promise<{ ctx: Context; api: ApiProxy }> {
   await ctx.plugin(SessionStore)
   await ctx.plugin(SystemPrompt, { persona: '' })
   await ctx.plugin(UserQuestionService)
+  await ctx.plugin(ViewActionService)
   await ctx.plugin(AgentRegistry)
   await ctx.plugin(ApprovalService)
   const api = createApiProxy(ctx, { defaultModelSelection: () => ({ provider: 'p', model: 'm' }), cwd: '/tmp' })
@@ -213,12 +215,13 @@ describe('approval pending registry', () => {
     await ctx.plugin(SessionStore)
     await ctx.plugin(SystemPrompt, { persona: '' })
     await ctx.plugin(UserQuestionService)
+    await ctx.plugin(ViewActionService)
     await ctx.plugin(AgentRegistry)
     await ctx.plugin(ApprovalService)
     let api!: ApiProxy
     const fiber = ctx.plugin(Object.assign((fiberCtx: Context) => {
       api = createApiProxy(fiberCtx, { defaultModelSelection: () => ({ provider: 'p', model: 'm' }), cwd: '/tmp' })
-    }, { inject: ['sessions', 'agents', 'userQuestions', 'approval'] }))
+    }, { inject: ['sessions', 'agents', 'userQuestions', 'viewActions', 'approval'] }))
     await fiber.await()
     const abort = new AbortController()
     const mux = openMux(api, abort)

@@ -10,6 +10,7 @@ import type { Session } from '@deepseek-ai/dsh-session'
 import Storage from '@deepseek-ai/dsh-storage'
 import { DomainFacility } from '@deepseek-ai/dsh-storage-domain'
 import UserQuestionService from '@deepseek-ai/dsh-user-questions'
+import ViewActionService from '@deepseek-ai/dsh-view-actions'
 import { DirectoryPickerError } from '@deepseek-ai/dsh-host-directory-picker'
 import type { DirectoryPickerCapability } from '@deepseek-ai/dsh-host-directory-picker'
 import WorkspaceRegistry from '@deepseek-ai/dsh-workspace'
@@ -70,6 +71,7 @@ async function harness(
   await ctx.plugin(SessionStore)
   await ctx.plugin(AgentRegistry)
   await ctx.plugin(UserQuestionService)
+  await ctx.plugin(ViewActionService)
   await ctx.plugin(Storage)
   ctx.storage.backend.register('memory', new MemoryStorageBackend())
   const storageDomain = new DomainFacility(ctx, { backend: 'memory', routes: {} })

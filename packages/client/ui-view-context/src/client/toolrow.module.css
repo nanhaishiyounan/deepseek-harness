@@ -1,0 +1,31 @@
+/* The view-tools toolview row: the shared collapsed summary line (icon +
+   title + summary). Colors ride the --dsw-alias-* semantic tokens
+   (docs/web-styling.md); spacing is this component's own 4px grid. */
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  font: var(--dsw-font-xs-13);
+  color: var(--dsw-alias-label-primary);
+}
+
+.icon {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.title {
+  flex: none;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.summary {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

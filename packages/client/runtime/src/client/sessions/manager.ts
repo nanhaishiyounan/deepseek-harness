@@ -82,8 +82,9 @@ function bufferedRequestKey(envelope: RpcRequest<MuxFrame>): string | undefined 
   switch (frame.type) {
     case 'approval/requested': return `a:${frame.approvalId}`
     case 'question/requested': return `q:${envelope.rpcId}`
+    case 'view-action/requested': return `v:${envelope.rpcId}`
     case 'session/queue': return 'queue'
-    /* v8 ignore next -- pendingBuffers contains only the three frame types above. */
+    /* v8 ignore next -- pendingBuffers contains only the four frame types above. */
     default: return undefined
   }
 }
@@ -747,6 +748,11 @@ export class SessionManager {
       )
     } else if (frame.type === 'question/resolved') {
       this.resolvePending(frame.sessionId, `q:${frame.questionRpcId}`)
+    } else if (frame.type === 'view-action/resolved') {
+      // View-action waits are automatic browser work, not user-blocking
+      // interactions: they never join pendingInteractions (the sidebar's
+      // amber-dot state); resolution only clears any buffered replay.
+      this.resolvePending(frame.sessionId, `v:${frame.actionRpcId}`)
     }
     const session = this.sessions.get(frame.sessionId)
     if (session === undefined) {
@@ -758,11 +764,13 @@ export class SessionManager {
       switch (frame.type) {
         case 'approval/requested':
         case 'question/requested':
+        case 'view-action/requested':
         case 'session/queue': {
           const buffer = this.pendingBuffers.get(frame.sessionId) ?? []
           const key = frame.type === 'approval/requested'
             ? `a:${frame.approvalId}`
-            : frame.type === 'question/requested' ? `q:${envelope.rpcId}` : 'queue'
+            : frame.type === 'view-action/requested' ? `v:${envelope.rpcId}`
+              : frame.type === 'question/requested' ? `q:${envelope.rpcId}` : 'queue'
           const prior = buffer.findIndex(item => bufferedRequestKey(item) === key)
           if (prior === -1) buffer.push(envelope)
           else buffer[prior] = envelope
@@ -891,7 +899,8 @@ export class SessionManager {
     }
     for (const [sessionId, buffer] of [...this.pendingBuffers]) {
       const kept = buffer.filter(item =>
-        item.payload.type !== 'approval/requested' && item.payload.type !== 'question/requested')
+        item.payload.type !== 'approval/requested' && item.payload.type !== 'question/requested'
+        && item.payload.type !== 'view-action/requested')
       if (kept.length === buffer.length) continue
       if (kept.length === 0) this.pendingBuffers.delete(sessionId)
       else this.pendingBuffers.set(sessionId, kept)

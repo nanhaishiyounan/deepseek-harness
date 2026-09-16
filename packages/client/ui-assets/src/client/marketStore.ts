@@ -23,10 +23,14 @@ export interface MarketClientState {
   readonly stats: MarketCache<MarketStatsRow> | undefined
   /** The catalog; `undefined` before the first load starts. */
   readonly catalog: MarketCache<readonly MarketAssetRow[]> | undefined
+  /** AI-driven asset selection (view_apply select_asset); absent when idle. */
+  readonly selectedAssetId: string | undefined
+  /** AI-driven category filter (view_apply filter_category); absent shows all. */
+  readonly categoryFilter: string | undefined
 }
 
 /** Initial snapshot: nothing loaded. */
-const INITIAL: MarketClientState = { stats: undefined, catalog: undefined }
+const INITIAL: MarketClientState = { stats: undefined, catalog: undefined, selectedAssetId: undefined, categoryFilter: undefined }
 
 /** The shared store handle created once per apply. */
 export interface MarketClientStore {
@@ -44,6 +48,10 @@ export interface MarketClientStore {
   setCatalog(assets: readonly MarketAssetRow[]): void
   /** Record a failed catalog load. */
   failCatalog(message: string): void
+  /** Select one catalog asset by dataset id (view_apply select_asset). */
+  selectAsset(id: string | undefined): void
+  /** Replace the category filter (view_apply filter_category; undefined clears). */
+  setCategoryFilter(category: string | undefined): void
 }
 
 /**
@@ -74,6 +82,12 @@ export function createMarketClientStore(): MarketClientStore {
     },
     failCatalog(message): void {
       patch({ catalog: { status: 'error', error: message } })
+    },
+    selectAsset(id): void {
+      patch({ selectedAssetId: id })
+    },
+    setCategoryFilter(category): void {
+      patch({ categoryFilter: category })
     },
   }
 }

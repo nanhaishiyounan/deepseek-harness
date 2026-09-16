@@ -11,6 +11,7 @@ import { Context } from '@deepseek-ai/cordis'
 import { unzipSync, strFromU8 } from 'fflate'
 import type { ImageAttachmentRef } from '@deepseek-ai/dsh-attachment'
 import UserQuestionService from '@deepseek-ai/dsh-user-questions'
+import ViewActionService from '@deepseek-ai/dsh-view-actions'
 import type { SessionHeader, SessionId } from '@deepseek-ai/dsh-session'
 import type { SessionLineageNode } from '@deepseek-ai/dsh-session-query'
 import type { SessionRawArtifact } from '@deepseek-ai/dsh-session-persistence'
@@ -78,6 +79,7 @@ async function buildApi(
 ) {
   const ctx = new Context()
   await ctx.plugin(UserQuestionService)
+  await ctx.plugin(ViewActionService)
   const query = services.query ?? true
   const persistence = services.persistence ?? true
   if (query) {

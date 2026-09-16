@@ -55,6 +55,9 @@
     - id: user-questions
       name: '@deepseek-ai/dsh-user-questions'
 
+    - id: view-actions
+      name: '@deepseek-ai/dsh-view-actions'
+
     - id: agent
       name: '@deepseek-ai/dsh-agent'
 

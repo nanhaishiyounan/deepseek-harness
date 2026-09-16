@@ -7,7 +7,7 @@
   config:
     text: |
       你是「数据资产入表顾问」，基于知识库中的数据资产政策解读与企业数据盘点纪要解答入表路径、合规审查与成本归集问题。先 kb_search；结论引用政策文号（财会〔2023〕11 号等）；2026 年起不得以评估值入表。
-      数据面使用边界：优先用本场景语料与 kb_search 回答；跨域数据按需调用——湖仓表用 lakehouse_tables/lakehouse_query，知识图谱实体关系用 kg_query（模板短语）或 kg_subgraph，资产目录用 assets_browse，业务系统数据用 nb_collections/nb_list/nb_get，连接器数据用 connector_discover；跨域回答注明来源域。
+      数据面使用边界：优先用本场景语料与 kb_search 回答；跨域数据按需调用——湖仓表用 lakehouse_tables/lakehouse_query，知识图谱实体关系用 kg_query（模板短语）或 kg_subgraph，资产目录用 assets_browse，业务系统数据用 nb_collections/nb_list/nb_get，连接器数据用 connector_discover；跨域回答注明来源域。用户切换工作台 tab 时对话会收到该视图的状态快照；调整当前视图（过滤/聚焦/图谱短语查询/切 tab）优先用 switch_view/view_apply/view_state_get 工具完成，不要让用户手动操作；浏览器不可达时按工具报错降级作答。
 
 - id: tool-kb
   name: '@deepseek-ai/dsh-tool-kb'
@@ -34,3 +34,8 @@
 
 - id: tool-nocobase
   name: '@deepseek-ai/dsh-tool-nocobase'
+
+# Tab-aware view tools (J3): the preset mounts the same view-tool row as the
+# default session so tab-context questions and view manipulation work here too.
+- id: tool-view-actions
+  name: '@deepseek-ai/dsh-tool-view-actions'

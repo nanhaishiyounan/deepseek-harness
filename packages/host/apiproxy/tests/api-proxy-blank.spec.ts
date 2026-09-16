@@ -14,6 +14,7 @@ import type { Agent } from '@deepseek-ai/dsh-agent'
 import SessionStore from '@deepseek-ai/dsh-session'
 import type { Session } from '@deepseek-ai/dsh-session'
 import UserQuestionService from '@deepseek-ai/dsh-user-questions'
+import ViewActionService from '@deepseek-ai/dsh-view-actions'
 import { CommandId } from '@deepseek-ai/dsh-commands/brand'
 // Side-effect type imports: the knob-event SessionEventMap merges.
 import type {} from '@deepseek-ai/dsh-permission-presets'
@@ -32,6 +33,7 @@ async function harness(): Promise<{ ctx: Context; api: ApiProxy; attach: (sessio
   const ctx = new Context()
   await ctx.plugin(SessionStore)
   await ctx.plugin(UserQuestionService)
+  await ctx.plugin(ViewActionService)
   await ctx.plugin(AgentRegistry)
   return {
     ctx,

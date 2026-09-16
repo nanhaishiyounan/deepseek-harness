@@ -13,6 +13,7 @@ import AgentRegistry from '@deepseek-ai/dsh-agent'
 import SessionStore from '@deepseek-ai/dsh-session'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import UserQuestionService from '@deepseek-ai/dsh-user-questions'
+import ViewActionService from '@deepseek-ai/dsh-view-actions'
 import { createApiProxy } from '../src/api-proxy.ts'
 import type { RpcRequest } from '../src/api/rpc.ts'
 import type { OrderDeliverableFile, OrderRecord } from '@deepseek-ai/dsh-expert-orders'
@@ -74,6 +75,7 @@ async function harness(defaults: { ordersEnabled?: boolean; deliverable?: OrderD
   await ctx.plugin(SessionStore)
   await ctx.plugin(SystemPrompt, { persona: '' })
   await ctx.plugin(UserQuestionService)
+  await ctx.plugin(ViewActionService)
   await ctx.plugin(AgentRegistry)
   ctx.provide('orders', stub.orders as never)
   const api = createApiProxy(ctx, {
@@ -101,6 +103,7 @@ describe('orders domain gates and forwarding', () => {
     await ctx.plugin(SessionStore)
     await ctx.plugin(SystemPrompt, { persona: '' })
     await ctx.plugin(UserQuestionService)
+    await ctx.plugin(ViewActionService)
     await ctx.plugin(AgentRegistry)
     const api = createApiProxy(ctx, {
       defaultModelSelection: () => ({ provider: 'p', model: 'm' }),

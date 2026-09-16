@@ -18,6 +18,9 @@
       "path": "../../context/view-context"
     },
     {
+      "path": "../../interaction/view-actions"
+    },
+    {
       "path": "../locale"
     },
     {

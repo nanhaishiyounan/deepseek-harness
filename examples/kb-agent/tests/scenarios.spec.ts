@@ -37,6 +37,9 @@ import AgentLoop from '@deepseek-ai/dsh-agent-loop'
 import AgentPresets from '@deepseek-ai/dsh-agent-presets'
 import * as Persona from '@deepseek-ai/dsh-persona'
 import * as ToolKb from '@deepseek-ai/dsh-tool-kb'
+import * as ViewActions from '@deepseek-ai/dsh-view-actions'
+import * as ViewContext from '@deepseek-ai/dsh-view-context'
+import * as ToolViewActions from '@deepseek-ai/dsh-tool-view-actions'
 import LakehouseRuntime from '@deepseek-ai/dsh-lakehouse'
 import * as LakehouseSqliteCatalog from '@deepseek-ai/dsh-lakehouse-sqlite-catalog'
 import * as LakehouseDuckDb from '@deepseek-ai/dsh-lakehouse-duckdb'
@@ -115,6 +118,9 @@ async function boot(presetRoot: string): Promise<Context> {
     ['@deepseek-ai/dsh-agent-presets', AgentPresets],
     ['@deepseek-ai/dsh-persona', Persona],
     ['@deepseek-ai/dsh-tool-kb', ToolKb],
+    ['@deepseek-ai/dsh-view-actions', ViewActions],
+    ['@deepseek-ai/dsh-view-context', ViewContext],
+    ['@deepseek-ai/dsh-tool-view-actions', ToolViewActions],
     ['@deepseek-ai/dsh-lakehouse', LakehouseRuntime],
     ['@deepseek-ai/dsh-lakehouse-sqlite-catalog', LakehouseSqliteCatalog],
     ['@deepseek-ai/dsh-lakehouse-duckdb', LakehouseDuckDb],
@@ -204,7 +210,7 @@ describe('kb-agent scenario set (keyless, text-only degraded mode)', () => {
       // persona stays, the data plane rides along. kg_query and assets_browse
       // come from the tool-kb/tool-connector rows themselves.
       const composition = await readFile(join(scenariosRoot, slug, 'agent.cordis.yml'), 'utf8')
-      for (const row of ['dsh-tool-kb', 'dsh-tool-lakehouse', 'dsh-tool-connector', 'dsh-tool-nocobase']) {
+      for (const row of ['dsh-tool-kb', 'dsh-tool-lakehouse', 'dsh-tool-connector', 'dsh-tool-nocobase', 'dsh-tool-view-actions']) {
         expect(composition, `${slug} mounts ${row}`).toContain(row)
       }
       expect(composition, `${slug} persona keeps the data-plane boundary`).toContain('数据面使用边界')
@@ -230,6 +236,7 @@ describe('kb-agent scenario set (keyless, text-only degraded mode)', () => {
         'lakehouse_query', 'lakehouse_tables',
         'nb_collections', 'nb_create', 'nb_get', 'nb_list', 'nb_update',
         'order_create', 'order_status',
+        'switch_view', 'view_apply', 'view_state_get',
       ].sort())
       out.push(`- tools: ${String(names.length)} tools (five-domain)`)
 

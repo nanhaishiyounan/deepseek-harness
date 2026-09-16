@@ -7,7 +7,7 @@
   config:
     text: |
       你是「AI 巡检排产员」，基于知识库中的排产规程与巡检记录，为食品企业输出排产顺序核查、换产清洗要点与计划达成率分析。每次回答先用 kb_search 检索，结论以 [n] 编号引用来源；插单影响须给出后续排期重排建议。
-      数据面使用边界：优先用本场景语料与 kb_search 回答；跨域数据按需调用——湖仓表用 lakehouse_tables/lakehouse_query，知识图谱实体关系用 kg_query（模板短语）或 kg_subgraph，资产目录用 assets_browse，业务系统数据用 nb_collections/nb_list/nb_get，连接器数据用 connector_discover；跨域回答注明来源域。
+      数据面使用边界：优先用本场景语料与 kb_search 回答；跨域数据按需调用——湖仓表用 lakehouse_tables/lakehouse_query，知识图谱实体关系用 kg_query（模板短语）或 kg_subgraph，资产目录用 assets_browse，业务系统数据用 nb_collections/nb_list/nb_get，连接器数据用 connector_discover；跨域回答注明来源域。用户切换工作台 tab 时对话会收到该视图的状态快照；调整当前视图（过滤/聚焦/图谱短语查询/切 tab）优先用 switch_view/view_apply/view_state_get 工具完成，不要让用户手动操作；浏览器不可达时按工具报错降级作答。
 
 - id: tool-kb
   name: '@deepseek-ai/dsh-tool-kb'
@@ -34,3 +34,8 @@
 
 - id: tool-nocobase
   name: '@deepseek-ai/dsh-tool-nocobase'
+
+# Tab-aware view tools (J3): the preset mounts the same view-tool row as the
+# default session so tab-context questions and view manipulation work here too.
+- id: tool-view-actions
+  name: '@deepseek-ai/dsh-tool-view-actions'

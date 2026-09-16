@@ -460,6 +460,8 @@ describe('events frame schemas', () => {
       { type: 'approval/resolved', sessionId: 's', approvalId: 'a', outcome: 'allowed-once' },
       { type: 'question/requested', sessionId: 's', questions: [{ id: 'q', question: 'Q?', options: [{ label: 'L' }], multiSelect: true }] },
       { type: 'question/resolved', sessionId: 's', questionRpcId: 'r', outcome: 'answered' },
+      { type: 'view-action/requested', sessionId: 's', view: 'kg', action: 'set_type_filter', args: { types: ['Supplier'] } },
+      { type: 'view-action/resolved', sessionId: 's', actionRpcId: 'r', outcome: 'applied' },
       { type: 'session/queue', sessionId: 's', items: [
         {
           id: 'm1',

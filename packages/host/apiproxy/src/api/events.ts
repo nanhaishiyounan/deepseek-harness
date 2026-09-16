@@ -7,6 +7,7 @@
  */
 
 import type { AskUserQuestionItem } from '@deepseek-ai/dsh-user-questions/types'
+import type { ViewActionArgs } from '@deepseek-ai/dsh-view-actions/types'
 import type { ApprovalOutcome, ApprovalRequestId } from '@deepseek-ai/dsh-user-approval/types'
 import type { Message } from '@deepseek-ai/dsh-llm/types'
 import type { MessageId } from '@deepseek-ai/dsh-llm/brand'
@@ -73,6 +74,14 @@ export type MuxFrame =
   | { type: 'approval/resolved'; sessionId: SessionId; approvalId: ApprovalRequestId; outcome: ApprovalOutcome }
   | { type: 'question/requested'; sessionId: SessionId; questions: AskUserQuestionItem[] }
   | { type: 'question/resolved'; sessionId: SessionId; questionRpcId: RpcId; outcome: 'answered' | 'cancelled' }
+  /**
+   * One view-action request (the question channel's automatic sibling): the
+   * browser executes the whitelisted action and answers by client-response.
+   * `resolved` outcomes: `applied` (executor answered), `failed` (executor
+   * refused), `cancelled` (abort, timeout, or provider disposal).
+   */
+  | { type: 'view-action/requested'; sessionId: SessionId; view: string; action: string; args: ViewActionArgs }
+  | { type: 'view-action/resolved'; sessionId: SessionId; actionRpcId: RpcId; outcome: 'applied' | 'failed' | 'cancelled' }
   /**
    * Complete transient inbox state after every enqueue, mutation, claim, or
    * discard. Pending work is not model-visible and therefore has no durable

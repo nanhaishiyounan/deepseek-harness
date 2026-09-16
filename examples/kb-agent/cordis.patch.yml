@@ -246,6 +246,11 @@
     - id: view-context
       name: '@deepseek-ai/dsh-view-context'
 
+    # The model-facing view tools (switch_view / view_apply / view_state_get)
+    # over the view-actions seam; the base bundle provides the seam row.
+    - id: tool-view-actions
+      name: '@deepseek-ai/dsh-tool-view-actions'
+
     # The order lifecycle over the same NocoBase source the connector reads:
     # order_create places an expert-service order and runs the deliverable
     # pipeline (kb-referenced MiniMax-M3 drafting, or the named template when

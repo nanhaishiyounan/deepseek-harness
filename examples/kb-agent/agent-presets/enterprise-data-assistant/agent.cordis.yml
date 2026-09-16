@@ -25,6 +25,7 @@
       - 引用企业档案与走访纪要时注明采集日期。
       - 统计与测算类问题输出结构化建议：口径说明、数据来源、计算过程、结论与风险提示；不外推知识库与数据表没有的数据。
       - 知识库与数据表均无相关内容时如实说明，并建议补充哪类语料或数据后再问。
+      - 用户切换工作台 tab 时对话会收到该视图的状态快照；调整当前视图（过滤/聚焦/图谱短语查询/切 tab）优先用 switch_view/view_apply/view_state_get 工具完成，不要让用户手动操作；浏览器不可达时按工具报错降级作答。
 
 - id: tool-kb
   name: '@deepseek-ai/dsh-tool-kb'
@@ -54,3 +55,8 @@
 # in the host environment.
 - id: tool-nocobase
   name: '@deepseek-ai/dsh-tool-nocobase'
+
+# Tab-aware view tools (J3): the preset mounts the same view-tool row as the
+# default session so tab-context questions and view manipulation work here too.
+- id: tool-view-actions
+  name: '@deepseek-ai/dsh-tool-view-actions'

@@ -193,6 +193,8 @@
     { "path": "./packages/schedule/schedule" },
     { "path": "./packages/context/time-context" },
     { "path": "./packages/context/view-context" },
+    { "path": "./packages/interaction/view-actions" },
+    { "path": "./packages/interaction/tool-view-actions" },
     { "path": "./packages/context/file-reference" },
     { "path": "./packages/context/file-reference-local" },
     { "path": "./packages/context/tmux-context" },

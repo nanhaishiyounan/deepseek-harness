@@ -45,6 +45,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@deepseek-ai/dsh-view-actions": "workspace:^",
     "@deepseek-ai/dsh-view-context": "workspace:^",
     "clsx": "^2.0.0"
   },
@@ -55,7 +56,8 @@
     "@deepseek-ai/dsh-client-runtime": "workspace:^",
     "@deepseek-ai/dsh-client-ui-conversation": "workspace:^",
     "@deepseek-ai/dsh-client-ui-tool": "workspace:^",
-    "@deepseek-ai/dsh-invariants": "workspace:^"
+    "@deepseek-ai/dsh-invariants": "workspace:^",
+    "@deepseek-ai/dsh-view-actions": "workspace:^"
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "workspace:^",

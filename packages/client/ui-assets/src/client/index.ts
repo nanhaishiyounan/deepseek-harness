@@ -146,6 +146,38 @@ export function apply(ctx: ClientContext): void {
   // model request while the market tab is the active conversation view.
   const viewContext = ctx.get('viewContext')
   if (viewContext !== undefined) {
+
+    // First-batch market actions: hoisted store fields (selection + category
+    // filter) the snapshot projection reports; the catalog UI binds to them
+    // in a later round.
+    ctx.effect(() => viewContext.registerActions({
+      view: 'market',
+      actions: {
+        select_asset: (args: Record<string, unknown>) => {
+          const id = args['id']
+          if (typeof id !== 'string' || id === '') {
+            throw new Error('select_asset: {"id": string} required (dataset_id or title)')
+          }
+          const catalog = store.store.getSnapshot().catalog
+          const hit = catalog?.status === 'ready'
+            ? catalog.value.find(asset => asset.dataset_id === id || asset.title === id)
+            : undefined
+          if (hit === undefined) {
+            throw new Error(`select_asset: 资产目录中找不到资产「${id}」`)
+          }
+          store.selectAsset(hit.dataset_id)
+          return { summary: `已选中资产「${hit.title}」` }
+        },
+        filter_category: (args: Record<string, unknown>) => {
+          const category = args['category']
+          if (typeof category !== 'string' || category === '') {
+            throw new Error('filter_category: {"category": string} required')
+          }
+          store.setCategoryFilter(category)
+          return { summary: `已将资产目录分类过滤设为「${category}」` }
+        },
+      },
+    }), 'ui-assets: view-actions executors')
     ctx.effect(() => viewContext.provide({
       view: 'market',
       label: () => bound('view.market'),
@@ -155,6 +187,8 @@ export function apply(ctx: ClientContext): void {
         return {
           '资产目录': state.catalog?.status === 'ready' ? `${String(state.catalog.value.length)} 项` : '未加载',
           '服务商数': state.stats?.status === 'ready' ? state.stats.value.providers : '未加载',
+          '选中资产': state.selectedAssetId ?? '无',
+          '分类过滤': state.categoryFilter ?? '全部',
         }
       },
     }), 'ui-assets: view-context provider')

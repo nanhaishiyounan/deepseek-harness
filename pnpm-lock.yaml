@@ -796,6 +796,9 @@ importers:
       '@deepseek-ai/dsh-tool-todo':
         specifier: workspace:*
         version: link:../packages/todo/tool-todo
+      '@deepseek-ai/dsh-tool-view-actions':
+        specifier: workspace:*
+        version: link:../packages/interaction/tool-view-actions
       '@deepseek-ai/dsh-tool-web':
         specifier: workspace:*
         version: link:../packages/web/tool-web
@@ -811,6 +814,9 @@ importers:
       '@deepseek-ai/dsh-user-questions':
         specifier: workspace:*
         version: link:../packages/interaction/user-questions
+      '@deepseek-ai/dsh-view-actions':
+        specifier: workspace:*
+        version: link:../packages/interaction/view-actions
       '@deepseek-ai/dsh-view-context':
         specifier: workspace:*
         version: link:../packages/context/view-context
@@ -1300,6 +1306,9 @@ importers:
       '@deepseek-ai/dsh-user-questions':
         specifier: workspace:^
         version: link:../../interaction/user-questions
+      '@deepseek-ai/dsh-view-actions':
+        specifier: workspace:^
+        version: link:../../interaction/view-actions
       '@deepseek-ai/dsh-web':
         specifier: workspace:^
         version: link:../../web/web
@@ -3473,6 +3482,9 @@ importers:
 
   packages/client/ui-view-context:
     dependencies:
+      '@deepseek-ai/dsh-view-actions':
+        specifier: workspace:^
+        version: link:../../interaction/view-actions
       '@deepseek-ai/dsh-view-context':
         specifier: workspace:^
         version: link:../../context/view-context
@@ -5721,6 +5733,9 @@ importers:
       '@deepseek-ai/dsh-user-questions':
         specifier: workspace:^
         version: link:../../interaction/user-questions
+      '@deepseek-ai/dsh-view-actions':
+        specifier: workspace:^
+        version: link:../../interaction/view-actions
       '@deepseek-ai/dsh-view-context':
         specifier: workspace:^
         version: link:../../context/view-context
@@ -6015,6 +6030,21 @@ importers:
         specifier: workspace:^
         version: link:../user-questions
 
+  packages/interaction/tool-view-actions:
+    devDependencies:
+      '@deepseek-ai/cordis':
+        specifier: workspace:^
+        version: link:../../../vendor/cordis
+      '@deepseek-ai/dsh-invariants':
+        specifier: workspace:^
+        version: link:../../runtime-diagnostics/invariants
+      '@deepseek-ai/dsh-view-actions':
+        specifier: workspace:^
+        version: link:../view-actions
+      '@deepseek-ai/dsh-view-context':
+        specifier: workspace:^
+        version: link:../../context/view-context
+
   packages/interaction/user-approval:
     dependencies:
       '@deepseek-ai/schemastery':
@@ -6047,6 +6077,21 @@ importers:
         version: link:../../core/system-prompt
 
   packages/interaction/user-questions:
+    devDependencies:
+      '@deepseek-ai/cordis':
+        specifier: workspace:^
+        version: link:../../../vendor/cordis
+      '@deepseek-ai/dsh-agent':
+        specifier: workspace:^
+        version: link:../../core/agent
+      '@deepseek-ai/dsh-invariants':
+        specifier: workspace:^
+        version: link:../../runtime-diagnostics/invariants
+      '@deepseek-ai/dsh-llm':
+        specifier: workspace:^
+        version: link:../../llm/llm
+
+  packages/interaction/view-actions:
     devDependencies:
       '@deepseek-ai/cordis':
         specifier: workspace:^

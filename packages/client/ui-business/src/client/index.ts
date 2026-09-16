@@ -161,6 +161,36 @@ export function apply(ctx: ClientContext): void {
   // model request while the business tab is the active conversation view.
   const viewContext = ctx.get('viewContext')
   if (viewContext !== undefined) {
+
+    // First-batch business actions: collection selection (the store's own
+    // select) plus the hoisted row filter the projection reports.
+    ctx.effect(() => viewContext.registerActions({
+      view: 'business',
+      actions: {
+        select_collection: (args: Record<string, unknown>) => {
+          const collection = args['collection']
+          if (typeof collection !== 'string' || collection === '') {
+            throw new Error('select_collection: {"collection": string} required')
+          }
+          const roster = store.store.getSnapshot().collections
+          const exists = roster?.status === 'ready' && roster.value.some(row => row.name === collection)
+          if (!exists) {
+            throw new Error(`select_collection: 业务表清单中找不到「${collection}」`)
+          }
+          store.select(collection)
+          loadRows(collection)
+          return { summary: `已切换业务表到「${collection}」` }
+        },
+        set_table_filter: (args: Record<string, unknown>) => {
+          const filter = args['filter']
+          if (typeof filter !== 'string' || filter === '') {
+            throw new Error('set_table_filter: {"filter": string} required')
+          }
+          store.setTableFilter(filter)
+          return { summary: `已将当前表行过滤设为「${filter}」` }
+        },
+      },
+    }), 'ui-business: view-actions executors')
     ctx.effect(() => viewContext.provide({
       view: 'business',
       label: () => bound('view.business'),
@@ -170,6 +200,7 @@ export function apply(ctx: ClientContext): void {
         return {
           '当前表': state.selected ?? '未选择',
           '数据状态': state.rows?.status === 'ready' ? `${String(state.rows.value.count)} 行` : '未加载',
+          '行过滤': state.tableFilter ?? '无',
         }
       },
     }), 'ui-business: view-context provider')

@@ -38,6 +38,9 @@ import AgentLoop from '@deepseek-ai/dsh-agent-loop'
 import AgentPresets from '@deepseek-ai/dsh-agent-presets'
 import * as Persona from '@deepseek-ai/dsh-persona'
 import * as ToolKb from '@deepseek-ai/dsh-tool-kb'
+import * as ViewActions from '@deepseek-ai/dsh-view-actions'
+import * as ViewContext from '@deepseek-ai/dsh-view-context'
+import * as ToolViewActions from '@deepseek-ai/dsh-tool-view-actions'
 import LakehouseRuntime from '@deepseek-ai/dsh-lakehouse'
 import * as LakehouseSqliteCatalog from '@deepseek-ai/dsh-lakehouse-sqlite-catalog'
 import * as LakehouseDuckDb from '@deepseek-ai/dsh-lakehouse-duckdb'
@@ -117,6 +120,9 @@ async function boot(): Promise<Context> {
     ['@deepseek-ai/dsh-agent-presets', AgentPresets],
     ['@deepseek-ai/dsh-persona', Persona],
     ['@deepseek-ai/dsh-tool-kb', ToolKb],
+    ['@deepseek-ai/dsh-view-actions', ViewActions],
+    ['@deepseek-ai/dsh-view-context', ViewContext],
+    ['@deepseek-ai/dsh-tool-view-actions', ToolViewActions],
     ['@deepseek-ai/dsh-lakehouse', LakehouseRuntime],
     ['@deepseek-ai/dsh-lakehouse-sqlite-catalog', LakehouseSqliteCatalog],
     ['@deepseek-ai/dsh-lakehouse-duckdb', LakehouseDuckDb],
@@ -210,9 +216,10 @@ describe('kb-agent role presets (keyless, text-only degraded mode)', () => {
       // v1 graph tools stay off by default (kg_schema/kg_subgraph/kg_query
       // are the graph surface).
       const kbTools = ['kb_ingest', 'kb_ingest_url', 'kb_search', 'kb_stats', 'kg_query', 'kg_schema', 'kg_subgraph']
+      const viewTools = ['switch_view', 'view_apply', 'view_state_get']
       const expectedTools = preset.id === 'enterprise-data-assistant'
-        ? [...kbTools, 'assets_browse', 'lakehouse_query', 'lakehouse_tables', 'connector_discover', 'connector_fetch', 'connector_transfer', 'order_create', 'order_status', 'nb_collections', 'nb_list', 'nb_get', 'nb_create', 'nb_update'].sort()
-        : kbTools
+        ? [...kbTools, ...viewTools, 'assets_browse', 'lakehouse_query', 'lakehouse_tables', 'connector_discover', 'connector_fetch', 'connector_transfer', 'order_create', 'order_status', 'nb_collections', 'nb_list', 'nb_get', 'nb_create', 'nb_update'].sort()
+        : [...kbTools, ...viewTools]
       expect(names).toEqual(expectedTools)
 
       const assembly = await ctx!.systemPrompt.assemble(assembleContextFor(agent))

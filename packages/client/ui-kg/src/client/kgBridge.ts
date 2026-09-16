@@ -14,10 +14,6 @@ export interface KgViewBridge {
   provide(setView: (view: string) => void): () => void
   /** Request a view switch; a no-op while no publisher is mounted. */
   request(view: string): void
-  /** Park seeds for the next view mount; the view takes them (one-shot). */
-  parkSeeds(seeds: readonly string[]): void
-  /** Take the parked seeds, if any (clears the slot). */
-  takeSeeds(): readonly string[] | undefined
 }
 
 /**
@@ -26,7 +22,6 @@ export interface KgViewBridge {
  */
 export function createKgViewBridge(): KgViewBridge {
   let setView: ((view: string) => void) | undefined
-  let parked: readonly string[] | undefined
   return {
     provide(next): () => void {
       setView = next
@@ -36,14 +31,6 @@ export function createKgViewBridge(): KgViewBridge {
     },
     request(view): void {
       setView?.(view)
-    },
-    parkSeeds(seeds): void {
-      parked = seeds
-    },
-    takeSeeds(): readonly string[] | undefined {
-      const taken = parked
-      parked = undefined
-      return taken
     },
   }
 }

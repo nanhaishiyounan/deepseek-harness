@@ -513,6 +513,18 @@ export class Session implements SessionFace {
         this.notifier.markDirty()
         return
       }
+      case 'view-action/requested': {
+        const { type: _type, sessionId: _sid, ...payload } = frame
+        this.mint(new PendingWait('viewAction', rpcId, this.sessionId, payload, m => this.api.respond(m)))
+        this.notifier.markDirty()
+        return
+      }
+      case 'view-action/resolved': {
+        const item = this.pending.get(`v:${frame.actionRpcId}`)
+        if (item !== undefined) this.settle(item)
+        this.notifier.markDirty()
+        return
+      }
       default:
         return // stream/error never reaches Session (Controller converges it); unknown frames ignored (documented default)
     }

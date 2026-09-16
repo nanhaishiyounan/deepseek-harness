@@ -130,12 +130,16 @@ import type {} from '@deepseek-ai/dsh-user-approval'
 import { approvalResponsePayloadSchema } from './api/approvals.schema.ts'
 import { imageLimitsProjectionSchema, sessionListMetadataProjectionSchema } from './api/sessions.schema.ts'
 import { questionResponsePayloadSchema } from './api/questions.schema.ts'
+import { viewActionResponsePayloadSchema } from './api/view-actions.schema.ts'
 import type { ClientResponse, RpcError, RpcReceipt, RpcRequest, RpcResponse } from './api/rpc.ts'
 import { RpcId } from './api/rpc.ts'
 import type {
   AskUserQuestionAnswer, AskUserQuestionItem, AskUserQuestionRequest,
 } from '@deepseek-ai/dsh-user-questions'
+import type { ViewActionApplyRequest, ViewActionResult } from '@deepseek-ai/dsh-view-actions'
+import type { ViewActionArgs } from '@deepseek-ai/dsh-view-actions/types'
 import { UserQuestionError } from '@deepseek-ai/dsh-user-questions'
+import { ViewActionError } from '@deepseek-ai/dsh-view-actions'
 import { DirectoryPickerError } from '@deepseek-ai/dsh-host-directory-picker'
 import {
   ApiRemoteSessionNotFound as SessionNotFound,
@@ -158,6 +162,9 @@ const SESSION_SEARCH_PROVIDER_CALL_LIMIT = 100
 const COLD_SUMMARY_BATCH_SIZE = 16
 /** Default maximum artifact size eligible for one cold blankness read. */
 export const DEFAULT_COLD_BLANK_PROBE_MAX_BYTES = 1024
+
+/** Default wire wait for one view-action apply before the fail-loud timeout. */
+export const DEFAULT_VIEW_ACTION_TIMEOUT_MS = 30_000
 
 /** Conversation message event types (the pagination counting unit). */
 const MESSAGE_TYPES = new Set(['user/message', 'assistant/message'])
@@ -850,6 +857,11 @@ export interface ApiProxyDefaults {
   /** Maximum artifact size eligible for one cold blankness read. */
   coldBlankProbeMaxBytes?: number
   /**
+   * Wire wait for one view-action apply before the fail-loud timeout rejects
+   * the calling tool. Defaults to {@link DEFAULT_VIEW_ACTION_TIMEOUT_MS}.
+   */
+  viewActionTimeoutMs?: number
+  /**
    * Whether handing a path to the native opener can work at all — the
    * `hasDocument` capability the preset roster reports, and the switch
    * between opening a preset directory and answering its path as text.
@@ -900,6 +912,20 @@ interface PendingQuestion {
   reject: (error: UserQuestionError) => void
   signal?: AbortSignal
   onAbort?: () => void
+}
+
+/** One host-owned view-action wait, addressed by the stable server-request id. */
+interface PendingViewAction {
+  rpcId: RpcId
+  sessionId: SessionId
+  view: string
+  action: string
+  args: ViewActionArgs
+  resolve: (result: ViewActionResult) => void
+  reject: (error: ViewActionError) => void
+  signal?: AbortSignal
+  onAbort?: () => void
+  timer?: ReturnType<typeof setTimeout>
 }
 
 /** Validate one answer batch against the exact question request it resolves. */
@@ -1654,6 +1680,7 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
   /** Serializes path ownership and explicit title checks with Workspace mutations. */
   let workspaceCreationChain = Promise.resolve()
   const pendingQuestions = new Map<RpcId, PendingQuestion>()
+  const pendingViewActions = new Map<RpcId, PendingViewAction>()
   const pendingApprovals = new Map<RpcId, PendingApproval>()
   // Cached view state describes the user's screen; it must not outlive the
   // session it describes. Lazy resolution: the view-context plugin may mount
@@ -1661,6 +1688,12 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
   // this a no-op (its reports already fail with view-state-unavailable).
   ctx.on('session/disposed', (session: Session) => {
     ctx.get('viewState')?.clear(session.id)
+    for (const pending of [...pendingViewActions.values()]) {
+      if (pending.sessionId !== session.id) continue
+      claimViewAction(pending, 'cancelled')
+      pending.reject(new ViewActionError(
+        'the session owning this view action was removed', 'APPLY_ABORTED'))
+    }
   })
   const muxQueues = new Set<FrameQueue<RpcRequest<MuxFrame>>>()
   const imageAdmissionChains = new WeakMap<Agent, Promise<void>>()
@@ -1936,6 +1969,85 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
         'web user-questions provider was disposed', 'ASK_ABORTED'))
     }
   }, 'api-proxy: user-questions provider')
+
+  // --- View-actions pending registry --------------------------------------
+  // The question channel's automatic sibling: ctx.viewActions.apply() from an
+  // agent tool call becomes an answerable `view-action/requested` frame on the
+  // mux stream, settled by client-response (POST /api/respond) or — fail loud
+  // when the browser cannot serve it — by the apply timeout.
+  function claimViewAction(pending: PendingViewAction, outcome: 'applied' | 'failed' | 'cancelled'): void {
+    pendingViewActions.delete(pending.rpcId)
+    if (pending.signal !== undefined && pending.onAbort !== undefined) {
+      pending.signal.removeEventListener('abort', pending.onAbort)
+    }
+    if (pending.timer !== undefined) clearTimeout(pending.timer)
+    broadcast({
+      type: 'view-action/resolved', sessionId: pending.sessionId,
+      actionRpcId: pending.rpcId, outcome,
+    })
+  }
+
+  const disposeViewActionProvider = ctx.viewActions.registerProvider({
+    apply(request: ViewActionApplyRequest): Promise<ViewActionResult> {
+      const sessionId = request.agent?.id
+      if (sessionId === undefined) {
+        return Promise.reject(new ViewActionError(
+          'web view manipulation requires an agent-owned session', 'APPLY_MISSING_AGENT'))
+      }
+      // Fail loud before the wire when the action is not in the browser's
+      // reported catalog for that view; switch_view is the host-built-in
+      // navigation exception.
+      if (request.action !== 'switch_view') {
+        const catalog = ctx.get('viewState')?.read(sessionId)?.actions[request.view]
+        if (catalog === undefined || !catalog.includes(request.action)) {
+          const known = catalog === undefined ? 'none reported' : catalog.join(', ')
+          return Promise.reject(new ViewActionError(
+            `view "${request.view}" has no registered action "${request.action}" (known: ${known})`,
+            'UNKNOWN_ACTION'))
+        }
+      }
+      return new Promise<ViewActionResult>((resolve, reject) => {
+        const rpcId = RpcId(randomUUID())
+        const pending: PendingViewAction = {
+          rpcId, sessionId, view: request.view, action: request.action, args: request.args,
+          resolve, reject,
+          ...(request.signal === undefined ? {} : { signal: request.signal }),
+        }
+        const onAbort = (): void => {
+          claimViewAction(pending, 'cancelled')
+          pending.reject(new ViewActionError(
+            'view_apply was aborted before the browser executed it', 'APPLY_ABORTED'))
+        }
+        const onTimeout = (): void => {
+          claimViewAction(pending, 'cancelled')
+          pending.reject(new ViewActionError(
+            'view_apply timed out waiting for the browser to execute it (frontend unreachable or busy)',
+            'APPLY_TIMEOUT'))
+        }
+        pending.onAbort = onAbort
+        pendingViewActions.set(rpcId, pending)
+        request.signal?.addEventListener('abort', onAbort, { once: true })
+        pending.timer = setTimeout(onTimeout, defaults.viewActionTimeoutMs ?? DEFAULT_VIEW_ACTION_TIMEOUT_MS)
+        const envelope: RpcRequest<MuxFrame> = {
+          rpcId,
+          payload: {
+            type: 'view-action/requested', sessionId,
+            view: request.view, action: request.action, args: request.args,
+          },
+        }
+        for (const queue of muxQueues) queue.push(envelope)
+      })
+    },
+  })
+
+  ctx.effect(() => () => {
+    disposeViewActionProvider()
+    for (const pending of [...pendingViewActions.values()]) {
+      claimViewAction(pending, 'cancelled')
+      pending.reject(new ViewActionError(
+        'web view-actions provider was disposed', 'APPLY_ABORTED'))
+    }
+  }, 'api-proxy: view-actions provider')
 
   // --- Approval pending registry ------------------------------------------
   // The proxy is the approval channel for every agent this host owns: an ask
@@ -4769,6 +4881,15 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
         // Refresh recovery: still-pending approval questions replay with their
         // stable rpcId so a reconnecting client can still answer them.
         for (const pending of pendingApprovals.values()) queue.push(requestedFrame(pending))
+        for (const pending of pendingViewActions.values()) {
+          queue.push({
+            rpcId: pending.rpcId,
+            payload: {
+              type: 'view-action/requested', sessionId: pending.sessionId,
+              view: pending.view, action: pending.action, args: pending.args,
+            },
+          })
+        }
         // Queue snapshot baseline (pendingQuestions precedent): frames replayed
         // in arrival order per session; a reconnecting client rebuilds its
         // queue view from these alone.
@@ -5030,6 +5151,25 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
           return Promise.resolve({ accepted: false, reason: 'bad-response' })
         }
         approval.resolve(parsed.data.outcome)
+        return Promise.resolve({ accepted: true })
+      }
+      const viewAction = pendingViewActions.get(message.rpcId)
+      if (viewAction !== undefined) {
+        if (!message.result.ok) {
+          if (message.result.error.code !== 'view-action-failed') {
+            return Promise.resolve({ accepted: false, reason: 'bad-response' })
+          }
+          claimViewAction(viewAction, 'failed')
+          viewAction.reject(new ViewActionError(
+            message.result.error.message, 'VIEW_ACTION_FAILED'))
+          return Promise.resolve({ accepted: true })
+        }
+        const viewParsed = viewActionResponsePayloadSchema.safeParse(message.result.value)
+        if (!viewParsed.success || viewParsed.data.sessionId !== viewAction.sessionId) {
+          return Promise.resolve({ accepted: false, reason: 'bad-response' })
+        }
+        claimViewAction(viewAction, 'applied')
+        viewAction.resolve({ summary: viewParsed.data.summary })
         return Promise.resolve({ accepted: true })
       }
       const pending = pendingQuestions.get(message.rpcId)

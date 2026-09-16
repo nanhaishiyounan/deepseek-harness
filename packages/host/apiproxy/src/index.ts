@@ -136,7 +136,7 @@ export interface Config {
 export class ApiProxyService extends Service implements ApiProxy {
   static inject = [
     'agentDefaultModel', 'agents', 'attachments', 'directoryPicker', 'llm', 'sessions', 'subagents', 'sessionQuery',
-    'tools', 'userQuestions', 'workspaceRegistry',
+    'tools', 'userQuestions', 'viewActions', 'workspaceRegistry',
   ]
 
   static Config: z<Config> = z.object({
@@ -156,6 +156,7 @@ export class ApiProxyService extends Service implements ApiProxy {
     connectorsEnabled: z.boolean(),
     kgEnabled: z.boolean(),
     kgTenant: z.string(),
+    viewActionTimeoutMs: z.number().step(1).min(1000),
   })
 
   readonly sessions: ApiProxy['sessions']

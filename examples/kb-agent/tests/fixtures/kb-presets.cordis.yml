@@ -72,6 +72,17 @@
 - id: connector
   name: '@deepseek-ai/dsh-connector'
 
+# The view-tools services the preset tool row resolves outward to (the
+# keyless bench has no gateway; tools fail loud with NO_PROVIDER at execute;
+# injection stays off so the bench never emits view snapshots).
+- id: view-actions
+  name: '@deepseek-ai/dsh-view-actions'
+
+- id: view-context
+  name: '@deepseek-ai/dsh-view-context'
+  config:
+    enabled: false
+
 - id: tool-kb
   name: '@deepseek-ai/dsh-tool-kb'
   config:

@@ -3,5 +3,4 @@
  * pull the invariant companion without the web modules.
  */
 export * from './client/index.ts'
-export { apply } from './client/index.ts'
-export { name, inject } from './client/index.ts'
+export { apply, inject } from './client/index.ts'

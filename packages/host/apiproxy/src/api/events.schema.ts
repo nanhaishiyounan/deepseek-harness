@@ -51,6 +51,21 @@ export const muxFrameSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('question/requested'), sessionId: sessionIdSchema, questions: z.array(askUserQuestionItemSchema).min(1) }),
   z.object({ type: z.literal('question/resolved'), sessionId: sessionIdSchema, questionRpcId: rpcIdSchema, outcome: z.union([z.literal('answered'), z.literal('cancelled')]) }),
   z.object({
+    type: z.literal('view-action/requested'),
+    sessionId: sessionIdSchema,
+    view: z.string().min(1),
+    action: z.string().min(1),
+    // Wide on purpose: each view's executors validate their own fields; the
+    // carrier only proves the request names a view and an action.
+    args: z.record(z.string(), z.unknown()),
+  }),
+  z.object({
+    type: z.literal('view-action/resolved'),
+    sessionId: sessionIdSchema,
+    actionRpcId: rpcIdSchema,
+    outcome: z.union([z.literal('applied'), z.literal('failed'), z.literal('cancelled')]),
+  }),
+  z.object({
     type: z.literal('session/queue'),
     sessionId: sessionIdSchema,
     items: z.array(z.object({

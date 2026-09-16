@@ -263,6 +263,53 @@ export function apply(ctx: ClientContext): void {
   // model request while the kg tab is the active conversation view.
   const viewContext = ctx.get('viewContext')
   if (viewContext !== undefined) {
+
+    // First-batch view actions: pure store writes plus the in-view phrase
+    // query (kg 视图内问数) — the browser half the view_apply tool reaches.
+    ctx.effect(() => viewContext.registerActions({
+      view: 'kg',
+      actions: {
+        set_type_filter: (args) => {
+          const types = args['types']
+          if (!Array.isArray(types) || !types.every(t => typeof t === 'string')) {
+            throw new Error('set_type_filter: {"types": string[]} required')
+          }
+          store.setTypeFilter(types.length === 0 ? undefined : new Set(types))
+          return { summary: types.length === 0 ? '已清除类型过滤（显示全部类型）' : `已将图谱类型过滤为 [${types.join(', ')}]` }
+        },
+        focus_entity: (args) => {
+          const entity = args['entity']
+          if (typeof entity !== 'string' || entity === '') {
+            throw new Error('focus_entity: {"entity": string} required')
+          }
+          const state = store.store.getSnapshot()
+          const hit = state.canvas?.status === 'ready'
+            ? state.canvas.value.nodes.find(node => node.name === entity)
+            : undefined
+          if (hit === undefined) {
+            throw new Error(`focus_entity: 当前画布中找不到实体「${entity}」；可先用 run_phrase_query 或 view_state_get 查看图内容`)
+          }
+          store.select(hit.id)
+          return { summary: `已选中并聚焦实体「${entity}」` }
+        },
+        clear_selection: () => {
+          store.select(undefined)
+          return { summary: '已清除选中实体' }
+        },
+        run_phrase_query: async (args: Record<string, unknown>) => {
+          const phrase = args['phrase']
+          if (typeof phrase !== 'string' || phrase.trim() === '') {
+            throw new Error('run_phrase_query: {"phrase": string} required')
+          }
+          const restated = await queryPhrase(phrase.trim())
+          const state = store.store.getSnapshot()
+          const size = state.canvas?.status === 'ready'
+            ? `节点 ${String(state.canvas.value.nodes.length)}/边 ${String(state.canvas.value.edges.length)}`
+            : '图未加载'
+          return { summary: `短语查询「${phrase.trim()}」已渲染（${restated}；${size}）` }
+        },
+      },
+    }), 'ui-kg: view-actions executors')
     ctx.effect(() => viewContext.provide({
       view: 'kg',
       label: () => bound('view.kg'),

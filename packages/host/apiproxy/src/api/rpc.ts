@@ -58,6 +58,8 @@ export interface RpcErrorDetailsMap {
   'view-state-unavailable': { sessionId: SessionId }
   /** The session.viewStateReport payload failed the view-state cache's bounds (size, empty view). */
   'view-state-invalid': { sessionId: SessionId }
+  /** The browser refused a view-action request it had registered (unknown local state, executor error). */
+  'view-action-failed': {}
   /** A known slash command reported a usage/state error; the message is the command's own text. */
   'command-error': {}
   /** A leading-/ prompt named no registered command; the message names the token. */

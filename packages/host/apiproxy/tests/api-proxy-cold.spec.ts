@@ -16,6 +16,7 @@ import TypertRegistry from '@deepseek-ai/dsh-typert-registry'
 import { createUserMessage, MessageId } from '@deepseek-ai/dsh-llm'
 import type { Agent } from '@deepseek-ai/dsh-agent'
 import UserQuestionService from '@deepseek-ai/dsh-user-questions'
+import ViewActionService from '@deepseek-ai/dsh-view-actions'
 import type { SessionEvent, SessionHeader, SessionId } from '@deepseek-ai/dsh-session'
 import {
   PersistenceCoordinator,
@@ -43,6 +44,7 @@ describe('sessions.list cold merge', () => {
     const ctx = new Context()
     await ctx.plugin(SessionStore)
     await ctx.plugin(UserQuestionService)
+    await ctx.plugin(ViewActionService)
     const root = mkdtempSync(join(tmpdir(), 'dsh-cold-'))
     const smallPath = join(root, 'small.log')
     const largePath = join(root, 'large.log')
@@ -136,6 +138,7 @@ describe('sessions.list cold merge', () => {
     const ctx = new Context()
     await ctx.plugin(SessionStore)
     await ctx.plugin(UserQuestionService)
+    await ctx.plugin(ViewActionService)
     const meta = header('probe-disabled', 100)
     const readFrom = vi.fn()
     ctx.provide('sessionPersistence', {
@@ -161,6 +164,7 @@ describe('sessions.list cold merge', () => {
     const ctx = new Context()
     await ctx.plugin(SessionStore)
     await ctx.plugin(UserQuestionService)
+    await ctx.plugin(ViewActionService)
     await ctx.plugin(AgentRegistry)
     const meta = header('attached-during-probe', 100)
     const root = mkdtempSync(join(tmpdir(), 'dsh-cold-race-'))
@@ -219,6 +223,7 @@ describe('attached updatedAt tracks human prompts', () => {
     const ctx = new Context()
     await ctx.plugin(SessionStore)
     await ctx.plugin(UserQuestionService)
+    await ctx.plugin(ViewActionService)
     await ctx.plugin(AgentRegistry)
     const api = createApiProxy(ctx, { defaultModelSelection: () => ({ provider: 'p', model: 'm' }), cwd: '/tmp' })
 
@@ -269,6 +274,7 @@ describe('cold history recovery view', () => {
     const ctx = new Context()
     await ctx.plugin(SessionStore)
     await ctx.plugin(UserQuestionService)
+    await ctx.plugin(ViewActionService)
     const sessionId = sid('session-interrupted')
     const meta = header(sessionId, 1000)
     const stored: StoredPrefix<never> = {
@@ -331,6 +337,7 @@ describe('Remote Agent and Session lookup policy', () => {
     await ctx.plugin(SessionStore)
     await ctx.plugin(AgentRegistry)
     await ctx.plugin(UserQuestionService)
+    await ctx.plugin(ViewActionService)
     const sessionId = sid('session-remote-cold')
     const meta = header(sessionId, 1000)
     const inspect = vi.fn(() => Promise.resolve({ meta, events: [] as SessionEvent[] }))
@@ -373,6 +380,7 @@ describe('Remote Agent and Session lookup policy', () => {
     await ctx.plugin(SessionStore)
     await ctx.plugin(AgentRegistry)
     await ctx.plugin(UserQuestionService)
+    await ctx.plugin(ViewActionService)
     const coldId = sid('session-remote-cold-child')
     const coldMeta = header(coldId, 1000, {
       parentSession: sid('session-parent'),
@@ -424,6 +432,7 @@ describe('subagent ownership fence', () => {
     await ctx.plugin(SessionStore)
     await ctx.plugin(AgentRegistry)
     await ctx.plugin(UserQuestionService)
+    await ctx.plugin(ViewActionService)
     const sessionId = sid('session-child')
     const meta = header('session-child', 1000, {
       parentSession: sid('session-parent'),
@@ -489,6 +498,7 @@ describe('subagent ownership fence', () => {
     await ctx.plugin(SessionStore)
     await ctx.plugin(AgentRegistry)
     await ctx.plugin(UserQuestionService)
+    await ctx.plugin(ViewActionService)
     const sessionId = sid('session-legacy-child')
     const meta = header('session-legacy-child', 1000, {
       parentSession: sid('session-parent'),
@@ -530,6 +540,7 @@ describe('subagent ownership fence', () => {
     await ctx.plugin(SessionStore)
     await ctx.plugin(AgentRegistry)
     await ctx.plugin(UserQuestionService)
+    await ctx.plugin(ViewActionService)
     const parentSession = ctx.sessions.create(sid('session-parent'), { meta: { cwd: '/proj' } })
     const parent = { id: parentSession.id, session: parentSession, status: 'idle', ctx } as Agent
     ctx.agents.register(parent)
@@ -588,6 +599,7 @@ describe('subagent ownership fence', () => {
     await ctx.plugin(SessionStore)
     await ctx.plugin(AgentRegistry)
     await ctx.plugin(UserQuestionService)
+    await ctx.plugin(ViewActionService)
     const session = ctx.sessions.create(sid('session-ordinary-fork'), {
       seed: [{
         type: 'subagent/descriptor',
@@ -616,6 +628,7 @@ describe('subagent ownership fence', () => {
     await ctx.plugin(SessionStore)
     await ctx.plugin(AgentRegistry)
     await ctx.plugin(UserQuestionService)
+    await ctx.plugin(ViewActionService)
     const session = ctx.sessions.create(sid('session-browser-zone'), { meta: { cwd: '/proj' } })
     const followup = vi.fn()
     const agent = { id: session.id, session, status: 'idle', ctx, followup } as unknown as Agent
@@ -692,6 +705,7 @@ describe('degenerate composition (no persistence, no factory)', () => {
     await ctx.plugin(SessionStore)
     await ctx.plugin(AgentRegistry)
     await ctx.plugin(UserQuestionService)
+    await ctx.plugin(ViewActionService)
     const api = createApiProxy(ctx, { defaultModelSelection: () => ({ provider: 'p', model: 'm' }), cwd: '/tmp' })
 
     const listed = await api.sessions.list(request({}))
@@ -712,6 +726,7 @@ describe('degenerate composition (no persistence, no factory)', () => {
     await ctx.plugin(SessionStore)
     await ctx.plugin(AgentRegistry)
     await ctx.plugin(UserQuestionService)
+    await ctx.plugin(ViewActionService)
     const inspect = vi.fn()
     ctx.provide('sessionPersistence', {
       list: () => Promise.resolve([]),
@@ -732,6 +747,7 @@ describe('sessions.prompt synchronous rejection', () => {
     await ctx.plugin(SessionStore)
     await ctx.plugin(AgentRegistry)
     await ctx.plugin(UserQuestionService)
+    await ctx.plugin(ViewActionService)
     const session = ctx.sessions.create(sid('session-throwing'))
     // A live structural stub whose delivery verbs throw synchronously, the
     // shape a disposed loop presents at this gateway boundary.
@@ -765,6 +781,7 @@ describe('sessions.prompt synchronous rejection', () => {
     await ctx.plugin(SessionStore)
     await ctx.plugin(AgentRegistry)
     await ctx.plugin(UserQuestionService)
+    await ctx.plugin(ViewActionService)
     const sessionId = sid('race-resume')
     const meta: SessionHeader = header('race-resume', 1000)
     ctx.provide('sessionPersistence', {
