@@ -317,8 +317,10 @@ export function apply(ctx: ClientContext): void {
   // model request while the kb or scenarios tab is the active conversation
   // view. Both tabs share the kb store; per-tab selection state (documents,
   // scenario categories) is component-local and rides K/L-round follow-ups.
-  const viewContext = ctx.get('viewContext')
-  if (viewContext !== undefined) {
+  // Deferred activation: ui-view-context may apply after this package;
+  // ctx.inject runs the registration once the service exists.
+  ctx.inject(['viewContext'], (sub) => {
+    const viewContext = sub.viewContext
     ctx.effect(() => viewContext.provide({
       view: 'kb',
       label: () => bound('view.kb'),
@@ -342,5 +344,5 @@ export function apply(ctx: ClientContext): void {
         }
       },
     }), 'ui-kb: view-context provider (scenarios)')
-  }
+  })
 }

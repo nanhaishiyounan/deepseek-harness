@@ -69,13 +69,26 @@ export function apply(ctx: ClientContext): void {
     const sessions = ctx.sessions
     let unsubscribeSession: (() => void) | undefined
     let lastCurrent: SessionId | undefined
-    const trackSession = (sessionId: SessionId | undefined): void => {
-      if (sessionId === undefined || sessionId === lastCurrent) return
-      lastCurrent = sessionId
-      unsubscribeSession?.()
-      unsubscribeSession = undefined
+    let retryTimer: ReturnType<typeof setTimeout> | undefined
+    const clearRetry = (): void => {
+      if (retryTimer !== undefined) clearTimeout(retryTimer)
+      retryTimer = undefined
+    }
+    const bind = (sessionId: SessionId, attempt: number): void => {
+      if (sessionId !== lastCurrent) return
       const binding = sessions.binding(sessionId)
-      if (binding === undefined) return
+      if (binding === undefined) {
+        // A just-created session may not have its scope record yet; the list
+        // store emits no event for scope creation, so retry on a bounded
+        // backoff until the binding appears (the current session is where
+        // view-action frames land).
+        if (attempt >= 20) return
+        retryTimer = setTimeout(() => {
+          retryTimer = undefined
+          bind(sessionId, attempt + 1)
+        }, 500)
+        return
+      }
       const drain = (): void => {
         for (const wait of binding.session.getSnapshot().pending) {
           if (wait.kind !== 'viewAction' || served.has(wait.key)) continue
@@ -89,6 +102,15 @@ export function apply(ctx: ClientContext): void {
       drain()
       unsubscribeSession = binding.session.subscribe(drain)
     }
+    const trackSession = (sessionId: SessionId | undefined): void => {
+      if (sessionId === undefined) return
+      if (sessionId === lastCurrent) return
+      lastCurrent = sessionId
+      unsubscribeSession?.()
+      unsubscribeSession = undefined
+      clearRetry()
+      bind(sessionId, 0)
+    }
     const unsubscribeList = sessions.list.subscribe(() => {
       trackSession(sessions.list.getSnapshot().current)
     })
@@ -96,6 +118,7 @@ export function apply(ctx: ClientContext): void {
     return () => {
       unsubscribeList()
       unsubscribeSession?.()
+      clearRetry()
     }
   }, 'ui-view-context: view-action executor loop')
 

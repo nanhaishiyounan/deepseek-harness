@@ -143,8 +143,10 @@ export function apply(ctx: ClientContext): void {
 
   // Workbench-view projection: the host injects this snapshot into every
   // model request while the connectors tab is the active conversation view.
-  const viewContext = ctx.get('viewContext')
-  if (viewContext !== undefined) {
+  // Deferred activation: ui-view-context may apply after this package;
+  // ctx.inject runs the registration once the service exists.
+  ctx.inject(['viewContext'], (sub) => {
+    const viewContext = sub.viewContext
     ctx.effect(() => viewContext.provide({
       view: 'connectors',
       label: () => bound('view.connectors'),
@@ -158,5 +160,5 @@ export function apply(ctx: ClientContext): void {
         }
       },
     }), 'ui-connectors: view-context provider')
-  }
+  })
 }

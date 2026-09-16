@@ -24,9 +24,9 @@ export interface MarketClientState {
   /** The catalog; `undefined` before the first load starts. */
   readonly catalog: MarketCache<readonly MarketAssetRow[]> | undefined
   /** AI-driven asset selection (view_apply select_asset); absent when idle. */
-  readonly selectedAssetId: string | undefined
+  readonly selectedAssetId?: string | undefined
   /** AI-driven category filter (view_apply filter_category); absent shows all. */
-  readonly categoryFilter: string | undefined
+  readonly categoryFilter?: string | undefined
 }
 
 /** Initial snapshot: nothing loaded. */

@@ -144,8 +144,10 @@ export function apply(ctx: ClientContext): void {
 
   // Workbench-view projection: the host injects this snapshot into every
   // model request while the market tab is the active conversation view.
-  const viewContext = ctx.get('viewContext')
-  if (viewContext !== undefined) {
+  // Deferred activation: ui-view-context may apply after this package;
+  // ctx.inject runs the registration once the service exists.
+  ctx.inject(['viewContext'], (sub) => {
+    const viewContext = sub.viewContext
 
     // First-batch market actions: hoisted store fields (selection + category
     // filter) the snapshot projection reports; the catalog UI binds to them
@@ -192,5 +194,5 @@ export function apply(ctx: ClientContext): void {
         }
       },
     }), 'ui-assets: view-context provider')
-  }
+  })
 }

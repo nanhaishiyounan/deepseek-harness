@@ -159,8 +159,10 @@ export function apply(ctx: ClientContext): void {
 
   // Workbench-view projection: the host injects this snapshot into every
   // model request while the business tab is the active conversation view.
-  const viewContext = ctx.get('viewContext')
-  if (viewContext !== undefined) {
+  // Deferred activation: ui-view-context may apply after this package;
+  // ctx.inject runs the registration once the service exists.
+  ctx.inject(['viewContext'], (sub) => {
+    const viewContext = sub.viewContext
 
     // First-batch business actions: collection selection (the store's own
     // select) plus the hoisted row filter the projection reports.
@@ -204,5 +206,5 @@ export function apply(ctx: ClientContext): void {
         }
       },
     }), 'ui-business: view-context provider')
-  }
+  })
 }

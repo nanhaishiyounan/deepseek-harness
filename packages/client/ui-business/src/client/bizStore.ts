@@ -25,7 +25,7 @@ export interface BizClientState {
   /** The selected collection's first row page; `undefined` before the first load starts. */
   readonly rows: BizCache<BizRowPageView> | undefined
   /** AI-driven row filter (view_apply set_table_filter); absent shows all rows. */
-  readonly tableFilter: string | undefined
+  readonly tableFilter?: string | undefined
 }
 
 /** Initial snapshot: nothing loaded, nothing selected. */

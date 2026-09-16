@@ -261,8 +261,10 @@ export function apply(ctx: ClientContext): void {
 
   // Workbench-view projection: the host injects this snapshot into every
   // model request while the kg tab is the active conversation view.
-  const viewContext = ctx.get('viewContext')
-  if (viewContext !== undefined) {
+  // Deferred activation: ui-view-context may apply after this package;
+  // ctx.inject runs the registration once the service exists.
+  ctx.inject(['viewContext'], (sub) => {
+    const viewContext = sub.viewContext
 
     // First-batch view actions: pure store writes plus the in-view phrase
     // query (kg 视图内问数) — the browser half the view_apply tool reaches.
@@ -270,9 +272,15 @@ export function apply(ctx: ClientContext): void {
       view: 'kg',
       actions: {
         set_type_filter: (args) => {
-          const types = args['types']
-          if (!Array.isArray(types) || !types.every(t => typeof t === 'string')) {
-            throw new Error('set_type_filter: {"types": string[]} required')
+          // Tolerant parse at the model-visible boundary: models and adapters
+          // serialize nested arrays inconsistently, so accept a string[] or a
+          // comma/space-separated string for the type list.
+          const raw = args['types']
+          const types = typeof raw === 'string'
+            ? raw.split(/[,，\s]+/).map(t => t.trim()).filter(t => t !== '')
+            : Array.isArray(raw) && raw.every(t => typeof t === 'string') ? raw : undefined
+          if (types === undefined) {
+            throw new Error('set_type_filter: {"types": string[]} required (array or comma-separated string)')
           }
           store.setTypeFilter(types.length === 0 ? undefined : new Set(types))
           return { summary: types.length === 0 ? '已清除类型过滤（显示全部类型）' : `已将图谱类型过滤为 [${types.join(', ')}]` }
@@ -325,5 +333,5 @@ export function apply(ctx: ClientContext): void {
         }
       },
     }), 'ui-kg: view-context provider')
-  }
+  })
 }
