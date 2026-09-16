@@ -1,8 +1,8 @@
-# Tab 感知上下文与视图操控能力缝（J3：view-context 三层架构 + view-actions 缝）
+# Agent Note: Tab-aware view context and the view-actions capability seam (J3)
 
-- 日期：2026-09-16
-- 状态：已实现（真机验收通过）
-- 提交：a2812d081f（注入层）/ c2a443a33f+（能力缝与工具面）/ 4c3ac3a14c（node 半区纯化）及后续浏览器修复
+Status: implemented
+
+English | [中文](2026-09-16-view-context-capability-seam.zh.md)
 
 ## Problem
 
