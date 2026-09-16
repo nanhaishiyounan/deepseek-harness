@@ -4,7 +4,7 @@
 - 状态：已实现（真机验收通过）
 - 提交：a2812d081f（注入层）/ c2a443a33f+（能力缝与工具面）/ 4c3ac3a14c（node 半区纯化）及后续浏览器修复
 
-## 背景
+## Problem
 
 用户验收诉求（J 轮诉求 3）：切换工作台 tab 后对话上下文以当前 tab 为主；通过输入框能对知识图谱做智能调整与问答问数；「优先 AI」。业界先例（research/2026-09-16-tab-aware-context-architecture.md，约 90 个一手来源）：三层结构（隐式轻量状态块 + 显式引用 + 按需全量拉取）与「白名单语义工具 + SSE 下行 + 请求-响应回传」是头部产品收敛共识；通用 DOM/computer-use 操控被一致否定用于自家界面。
 
@@ -26,6 +26,8 @@
 ### 首批 action
 
 kg 全套（set_type_filter/focus_entity/clear_selection/run_phrase_query——后者即「视图内问数」：中文短语→kg-nl 模板编译→画布渲染子图）；market（select_asset/filter_category，hoisted store 字段）；business（select_collection/set_table_filter）。挂载：30 场景 + 2 角色 preset + kb-agent host patch；快照 20→23 再生。
+
+## Notes
 
 ## 真机暴露的两个坑（关键经验）
 
