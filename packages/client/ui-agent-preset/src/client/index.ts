@@ -22,12 +22,15 @@ import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
 import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
 import { AgentPresetLabel } from './AgentPresetLabel.tsx'
 import type { AgentPresetLabelInjected } from './AgentPresetLabel.tsx'
+import { ModeSelector } from './ModeSelector.tsx'
+import type { ModeSelectorInjected } from './ModeSelector.tsx'
 import { AgentPresetRow } from './AgentPresetRow.tsx'
 import type { AgentPresetRowInjected } from './AgentPresetRow.tsx'
 import { AgentPresetSeat } from './AgentPresetSeat.tsx'
 import type { AgentPresetSeatInjected } from './AgentPresetSeat.tsx'
 import { AgentPresetSection } from './AgentPresetSection.tsx'
 import type { AgentPresetSectionInjected } from './AgentPresetSection.tsx'
+import type { AgentPresetModeBridge } from './mode-bridge.ts'
 import { AgentPresetSeatController } from './seat-store.ts'
 import type { SeatSessionSummary } from './seat-store.ts'
 import { AgentPresetSectionController } from './section-store.ts'
@@ -35,10 +38,12 @@ import { en, zh } from './locales.ts'
 import { AGENT_PRESET_SETTINGS_NS, AgentPresetSettingsController } from './settings-store.ts'
 
 export type { AgentPresetLabelInjected, AgentPresetLabelProps } from './AgentPresetLabel.tsx'
+export type { ModeSelectorInjected, ModeSelectorProps } from './ModeSelector.tsx'
 export type { AgentPresetRowInjected, AgentPresetRowProps } from './AgentPresetRow.tsx'
 export type { AgentPresetSeatInjected, AgentPresetSeatProps } from './AgentPresetSeat.tsx'
 export type { AgentPresetSectionInjected, AgentPresetSectionProps } from './AgentPresetSection.tsx'
 export type { AgentPresetSeatState, SeatSessionSummary } from './seat-store.ts'
+export type { AgentPresetModeBridge } from './mode-bridge.ts'
 export {
   draftBlocker, type AgentPresetSectionState, type CopyDraft, type PresetRow, type PresetView,
 } from './section-store.ts'
@@ -127,11 +132,34 @@ export function apply(ctx: ClientContext): void {
       load: () => controller.load(),
     })
 
+    // The one "cannot swap the running composition" answer: stage the pick
+    // WITHOUT applying (the running session would refuse and drop the stage),
+    // then start the session the stage lands on. The composer mode selector's
+    // started-session path and the scenario portal's fallback both ride it.
+    const startSessionOn = (presetId: string): void => {
+      seat.stage(presetId)
+      scope.workspaces.startSession()
+    }
+    scope.provide('agentPresetMode', { startSessionOn } satisfies AgentPresetModeBridge)
+
+    const modeInjected = (): ModeSelectorInjected => ({
+      hooks: { agentPresetSeat: seat.store },
+      load: () => seat.load(),
+      select: (id: string) => seat.select(id),
+      startSessionOn,
+    })
+
     scope.effect(() => {
+      // Mirror the flow's session into the selector's snapshot first — the
+      // posture (no session / blank / started) must never lag a list change.
+      seat.syncSession()
       // Connecting a workspace either creates a blank session or reuses one,
       // and either way the chip's pick predates it — so the stage is applied
       // when the session arrives, not when it was made.
-      const stop = scope.sessions.list.subscribe(() => { void seat.apply() })
+      const stop = scope.sessions.list.subscribe(() => {
+        seat.syncSession()
+        void seat.apply()
+      })
       // The chip opens on the deployment default, so a default changed from
       // the settings surface moves it too — otherwise the screen that starts
       // the next session keeps offering the previous default until a reload,
@@ -167,6 +195,13 @@ export function apply(ctx: ClientContext): void {
         locale: 'settings.agentPreset',
         inject: seatInjected,
       }, AgentPresetSeat)
+      const mode = scope.slots.register({
+        name: 'conversation.input.mode',
+        id: 'agent-preset',
+        order: -5,
+        locale: 'settings.agentPreset',
+        inject: modeInjected,
+      }, ModeSelector)
       const label = scope.slots.register({
         name: 'conversation.session.header.actions',
         id: 'agent-preset',
@@ -182,9 +217,10 @@ export function apply(ctx: ClientContext): void {
         rosterReaders.delete(readRoster)
         creatorDraft = undefined
         chip()
+        mode()
         label()
       }
-    }, 'ui-agent-preset: new-session chip and header label')
+    }, 'ui-agent-preset: new-session chip, mode selector, and header label')
   })
 
   const sectionInjected = (): AgentPresetSectionInjected => ({

@@ -39,6 +39,7 @@ const SEAT_READY: AgentPresetSeatState = {
     { id: 'standard', trust: 'system', name: '标准模式', description: '完整的编码 agent。' },
     { id: 'mine', trust: 'user' },
   ],
+  session: undefined,
   busy: false,
   error: null,
   introduce: false,

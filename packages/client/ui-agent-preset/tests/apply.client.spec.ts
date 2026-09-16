@@ -19,6 +19,7 @@ import { AgentPresetRow } from '../src/client/AgentPresetRow.tsx'
 import type { AgentPresetRowInjected } from '../src/client/AgentPresetRow.tsx'
 import { AgentPresetSection } from '../src/client/AgentPresetSection.tsx'
 import type { AgentPresetSectionInjected } from '../src/client/AgentPresetSection.tsx'
+import { ModeSelector } from '../src/client/ModeSelector.tsx'
 import { AgentPresetSeat } from '../src/client/AgentPresetSeat.tsx'
 import type { AgentPresetSeatInjected } from '../src/client/AgentPresetSeat.tsx'
 
@@ -134,12 +135,13 @@ function declareRoot(slots: SlotRegistry): () => void {
   } as never, () => null)
 }
 
-/** The conversation's own declarations, which the chip and label wait for. */
+/** The conversation's own declarations, which the chip, mode selector, and label wait for. */
 function declareConversation(slots: SlotRegistry): () => void {
   return slots.register({
     name: 'conversation',
     children: {
       'conversation.hero.agentPreset': { kind: 'single', scope: 'root' },
+      'conversation.input.mode': { kind: 'list', scope: 'session-maybe' },
       'conversation.session.header.actions': { kind: 'list', scope: 'session' },
     },
   } as never, () => null)
@@ -302,7 +304,7 @@ describe('ui-agent-preset apply', () => {
     expect(calls.length - before).toBe(1)
   })
 
-  it('registers the new-session chip and the header label, and drops both on disposal', async () => {
+  it('registers the new-session chip, the mode selector, and the header label, and drops all on disposal', async () => {
     const { ctx, slots } = await bench()
     declareRoot(slots)
     const conversation = declareConversation(slots)
@@ -311,14 +313,20 @@ describe('ui-agent-preset apply', () => {
     ctx.provide('workspaces', workspacesDouble() as never)
     const fiber = ctx.plugin({ inject: [...inject, 'conversation', 'sessions', 'workspaces'], apply })
     await fiber.await()
+    console.log('CHIP ENTRIES:', slots.entries('conversation.hero.agentPreset').length,
+      'MODE ENTRIES:', slots.entries('conversation.input.mode').length)
 
     const chip = slots.entries('conversation.hero.agentPreset')[0]!
     expect(chip.component).toBe(AgentPresetSeat)
+    const mode = slots.entries('conversation.input.mode')[0]!
+    expect(mode.component).toBe(ModeSelector)
+    expect(mode.options).toMatchObject({ id: 'agent-preset', order: -5 })
     const label = slots.entries('conversation.session.header.actions')[0]!
     expect(label.component).toBe(AgentPresetLabel)
     expect(label.options).toMatchObject({ id: 'agent-preset', order: -10 })
     await fiber.dispose()
     expect(slots.entries('conversation.hero.agentPreset')).toHaveLength(0)
+    expect(slots.entries('conversation.input.mode')).toHaveLength(0)
     expect(slots.entries('conversation.session.header.actions')).toHaveLength(0)
     expect(slots.entries('settings.section')).toHaveLength(0)
     conversation()

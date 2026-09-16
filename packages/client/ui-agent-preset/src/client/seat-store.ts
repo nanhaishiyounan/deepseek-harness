@@ -23,6 +23,12 @@ export interface AgentPresetSeatState {
   options: readonly AgentPresetOption[]
   /** The staged choice, empty until the roster loads. */
   current: string
+  /**
+   * The flow's current session as the selector posture reads it: absent (no
+   * session) or with `blank` deciding between an in-place switch and the
+   * open-a-new-session offer. Kept current by {@link AgentPresetSeatController.syncSession}.
+   */
+  session: SeatSessionSummary | undefined
   /** A rejected apply's message, cleared by the next attempt. */
   error: string | null
   busy: boolean
@@ -35,7 +41,7 @@ export interface AgentPresetSeatState {
 }
 
 const INITIAL: AgentPresetSeatState = {
-  options: [], current: '', error: null, busy: false, introduce: false,
+  options: [], current: '', session: undefined, error: null, busy: false, introduce: false,
 }
 
 /** One session's identity and whether it has started. */
@@ -139,6 +145,19 @@ export class AgentPresetSeatController {
   introduced(): void {
     if (!this.store.getSnapshot().introduce) return
     this.set({ introduce: false })
+  }
+
+  /**
+   * Mirror the flow's current session into the snapshot so the composer's
+   * mode selector can pick its posture (no session / blank / started). Called
+   * by whoever observes the session list changing; a no-op while the summary
+   * is unchanged.
+   */
+  syncSession(): void {
+    const session = this.currentSession()
+    const before = this.store.getSnapshot().session
+    if (before?.id === session?.id && before?.blank === session?.blank && before?.agentPreset === session?.agentPreset) return
+    this.set({ session })
   }
 
   /**

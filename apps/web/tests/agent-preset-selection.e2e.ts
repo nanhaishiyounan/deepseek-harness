@@ -207,7 +207,9 @@ describe('web e2e: agent-preset selection', () => {
 
   it('names every preset and what it is for', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-agent-preset-menu'))
-    await page.getByRole('button', { name: 'Standard mode' }).click()
+    // The composer's mode selector names the same preset with the same copy,
+    // so the hero chip is addressed inside its own row.
+    await page.locator('[class*="heroWorkspaceRow"]').getByRole('button', { name: 'Standard mode' }).click()
     const menu = page.getByRole('menu')
     await menu.waitFor({ timeout: 10_000 })
 
@@ -223,7 +225,7 @@ describe('web e2e: agent-preset selection', () => {
 
   it('applies the staged pick to the blank session, and the host honors it', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-agent-preset-stage'))
-    await page.getByRole('button', { name: 'Standard mode' }).click()
+    await page.locator('[class*="heroWorkspaceRow"]').getByRole('button', { name: 'Standard mode' }).click()
     await page.getByRole('menuitem', { name: /Minimal mode/ }).click()
 
     // The chip stages; the blank session the workspace connect produced is
@@ -256,7 +258,7 @@ describe('web e2e: agent-preset selection', () => {
     // against its list row, so a row that never reprojected the first switch
     // answers "already standard" and sends nothing — and restores the catalog
     // instead of leaving the session reading the narrower composition.
-    await page.getByRole('button', { name: 'Minimal mode' }).click()
+    await page.locator('[class*="heroWorkspaceRow"]').getByRole('button', { name: 'Minimal mode' }).click()
     await page.getByRole('menuitem', { name: /^Standard mode/ }).first().click()
     await expect.poll(() => livePreset(scaffold.baseUrl), { timeout: 15_000 }).toBe('standard')
 
@@ -288,6 +290,24 @@ describe('web e2e: agent-preset selection', () => {
     // the host would refuse to change.
     expect(snapshot).not.toContain('button "Minimal mode"')
   })
+
+  it('keeps the mode selector on a running session and opens a new session on a pick', async () => {
+    onTestFailed(() => saveFailureShot(page, 'web-e2e-agent-preset-mode-started'))
+    // Still on the seeded session: the conversation has started, so the hero
+    // chip's window is closed — the composer's accessory band is the one
+    // selector that remains, naming what the session runs.
+    const mode = page.getByRole('button', { name: 'Agent mode' })
+    await mode.waitFor({ timeout: 15_000 })
+    await expect.poll(() => mode.textContent(), { timeout: 15_000 }).toContain('Minimal mode')
+
+    // The started session keeps its composition; the pick's offer is a NEW
+    // session on it, not a swap the host would refuse.
+    await mode.click()
+    await page.getByRole('menuitem', { name: /^Standard mode/ }).first().click()
+    await expect.poll(() => livePreset(scaffold.baseUrl), { timeout: 15_000 }).toBe('standard')
+    // The new session's own accessory names the composition it landed on.
+    await expect.poll(() => mode.textContent(), { timeout: 15_000 }).toContain('Standard mode')
+  }, 60_000)
 
   it('drove every surface without a page error or a stream warning', () => {
     expect(tripwire.pageErrors).toEqual([])

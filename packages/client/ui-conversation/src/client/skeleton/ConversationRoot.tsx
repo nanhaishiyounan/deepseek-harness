@@ -158,6 +158,11 @@ export function ConversationRoot({
         ? { blocked: composerBlock, placeholder: composerBlock.reason }
         : hero ? { placeholder: t('placeholder.hero') } : {}),
     overlay: renderSlot('conversation.input.overlay', {}),
+    // The mode/agent selector band above the textarea — session-maybe, so it
+    // renders in the no-session state too (the hero chip's window closes once
+    // a conversation starts; this one never does). An unregistered or empty
+    // seat collapses via .accessory:empty.
+    accessory: renderSlot('conversation.input.mode', {}),
     leftItems: zone === undefined ? null : renderSlot('conversation.input.left', zone),
     rightItems: zone === undefined ? null : renderSlot('conversation.input.right', zone),
     // Stats band under the card, inside the bar's width column so both

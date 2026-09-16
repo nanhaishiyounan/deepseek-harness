@@ -108,6 +108,13 @@
   padding: 10px 12px 0;
 }
 
+/* An unregistered or self-emptied mode seat leaves the wrapper with no DOM
+   children (list dispatch renders an empty fragment), so the row collapses
+   instead of keeping its top padding. */
+.accessory:empty {
+  display: none;
+}
+
 /* Floating overlay anchor (menu / popupSelect shell): entries position
    themselves against the card (bottom: 100% + gap); closed entries render null. */
 .overlayAnchor {

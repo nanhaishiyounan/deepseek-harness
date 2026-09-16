@@ -18,6 +18,9 @@ import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client'
 // Type-only: pulls the ui-conversation slot declarations (headline, dock,
 // view ring, header actions).
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
+// Type-only: pulls the agentPresetMode optional-service Context merge (the
+// scenario fallback below reads it via ctx.get).
+import type {} from '@deepseek-ai/dsh-client-ui-agent-preset/client'
 // Type-only: pulls the ui-tool keyed toolview declaration the kb rows ride.
 import type {} from '@deepseek-ai/dsh-client-ui-tool/client'
 // Type-only: pulls the ui-settings section declaration the settings page rides.
@@ -196,12 +199,24 @@ export function apply(ctx: ClientContext): void {
       hooks: { kb: store.store },
       refresh,
       language,
-      selectScenario: (sessionId: string, scenarioId: string) => api.agentPresets.select({
-        sessionId: sessionId as never,
-        agentPreset: scenarioId,
-      }).then((response) => {
-        if (!response.result.ok) throw new Error(response.result.error.message)
-      }),
+      // The in-place switch for a blank session; a started session keeps its
+      // composition (the host's agent-preset lock), so that refusal degrades
+      // to opening a new session on the scenario instead of a red failure.
+      selectScenario: async (sessionId: string, scenarioId: string) => {
+        const response = await api.agentPresets.select({
+          sessionId: sessionId as never,
+          agentPreset: scenarioId,
+        })
+        if (response.result.ok) return
+        if (response.result.error.code === 'agent-preset-locked') {
+          const mode = ctx.get('agentPresetMode')
+          if (mode !== undefined) {
+            mode.startSessionOn(scenarioId)
+            return
+          }
+        }
+        throw new Error(response.result.error.message)
+      },
       requestView: (view: string) => { bridge.request(view) },
     }),
   }, ScenarioView))

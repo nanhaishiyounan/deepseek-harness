@@ -277,6 +277,20 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
      * a model here.
      */
     'conversation.input.model': { kind: 'single'; scope: 'session'; owner: InputControlOwnerProps }
+    /**
+     * The agent/mode-selector band at the top of the composer card (rendered
+     * into the bar's `accessory` hole by the conversation entry) — a
+     * persistent preset picker that stays mounted across the no-session,
+     * blank-session, and running-session states, unlike the hero chip whose
+     * window closes once a conversation starts. The registrant owns the roster
+     * and the session state it reads; a pick on no session or a blank session
+     * stages/selects the composition the next session runs, while a started
+     * session keeps its composition (the host's agent-preset lock) and the
+     * entry's offer becomes opening a new session on the pick. Session-maybe:
+     * the no-session state renders too. An unregistered seat renders nothing —
+     * the bar paints no row.
+     */
+    'conversation.input.mode': { kind: 'list'; scope: 'session-maybe'; owner: InputModeOwnerProps }
   }
 
   /**
@@ -301,6 +315,12 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
 /** Owner share of the hero agent-preset chip: the shell supplies nothing. */
 export interface HeroAgentPresetOwnerProps {
   /** Marker field: the chip owns its own roster, staging, and menu state. */
+  children?: never
+}
+
+/** Owner share of the composer-card mode selector: the shell supplies nothing. */
+export interface InputModeOwnerProps {
+  /** Marker field: the selector owns its own roster, session state, and menu. */
   children?: never
 }
 
@@ -669,6 +689,7 @@ export type ConversationSlotProps =
     | 'conversation.session' | 'conversation.session.header'
     | 'conversation.composer' | 'conversation.composer.bar'
     | 'conversation.input.overlay'
+    | 'conversation.input.mode'
     | 'conversation.input.dock' | 'conversation.composer.dock'
     | 'conversation.input.left' | 'conversation.input.right'
     | 'conversation.hero.brand.mark'
