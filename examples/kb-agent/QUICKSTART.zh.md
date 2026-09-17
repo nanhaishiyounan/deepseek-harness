@@ -263,7 +263,7 @@ pnpm exec vitest run --config vitest.e2e.config.ts examples/kb-agent/tests/marke
 node --import tsx/esm examples/kb-agent/scripts/kg-build.mts
 ```
 
-业务数据批量充实（批次五起，全部幂等、重跑不重复）：五个按域播种脚本把示例规模的演示面撑成有运营厚度的业务面——专家名册（32 位领域专家 + 可下单服务 + 知识资产，真源 `workspace/data/experts/roster-batch5.json`）、市场数据资产（63 条八域目录，真源 `workspace/data/market/assets-batch5.json`，`datasets` collection 自动扩展 domain/source/pricing/summary 字段）、历史订单（近 30 天 24 条，播种期间自动暂停审批 workflow）、湖仓三表（原辅料价格/进出口统计/冷链运价，经 `lakehouse.load` 正规入库并留 transfer 记录）、KB 语料入库（五个新语料目录，真实 embo-01 嵌入）。五个播种步与图谱构建均已并入 all 链（`setup-dsh-data.mts` 编排，水位探测幂等——名册水位按 32 位专家名全在、订单水位按 `ORD-B5-` 前缀 24 条全在判定，缺则重放播种脚本）。单独充实后重建图谱跑上面的 kg-build，或重放整个数据面：`node --import tsx/esm examples/kb-agent/scripts/setup-dsh-data.mts`。
+业务数据批量充实（批次五起，全部幂等、重跑不重复）：五个按域播种脚本把示例规模的演示面撑成有运营厚度的业务面——专家名册（32 位领域专家 + 可下单服务 + 知识资产，真源 `workspace/data/experts/roster-batch5.json`）、市场数据资产（63 条八域目录，真源 `workspace/data/market/assets-batch5.json`，`datasets` collection 自动扩展 domain/source/pricing/summary 字段）、历史订单（近 30 天 24 条，播种期间自动暂停审批 workflow）、湖仓三表（原辅料价格/进出口统计/冷链运价，经 `lakehouse.load` 正规入库并留 transfer 记录）、KB 语料入库（清单 kb-corpus.yml 登记的 14 个语料目录共 46 篇，真实 embo-01 嵌入；seed-kb、setup-dsh-data 与 kg-build 语料腿读同一份清单，新增语料目录只改清单一处）。五个播种步与图谱构建均已并入 all 链（`setup-dsh-data.mts` 编排，水位探测幂等——名册水位按 32 位专家名全在、订单水位按 `ORD-B5-` 前缀 24 条全在判定，缺则重放播种脚本）。单独充实后重建图谱跑上面的 kg-build，或重放整个数据面：`node --import tsx/esm examples/kb-agent/scripts/setup-dsh-data.mts`。
 
 ```sh
 node --env-file=.env --import tsx/esm examples/kb-agent/scripts/seed-experts-roster.mts   # 专家名册 + 清理 e2e/demo 残留

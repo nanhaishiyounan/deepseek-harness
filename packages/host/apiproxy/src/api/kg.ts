@@ -64,7 +64,7 @@ export interface KgEdgeView {
   /** Relation description text, when the build recorded one. */
   readonly fact?: string
   /** Which source system asserted the fact. */
-  readonly asserted_by: 'nocobase' | 'lakehouse' | 'connector' | 'kb'
+  readonly asserted_by: 'nocobase' | 'lakehouse' | 'connector' | 'kb' | 'kg-align'
 }
 
 /** The `kg.mappings` response value: the pipeline's mappings readout. */

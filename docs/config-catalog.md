@@ -1211,8 +1211,8 @@ Source: [`packages/kb/kb-sqlite/src/index.ts:25`](../packages/kb/kb-sqlite/src/i
 
 ```ts config-catalog
 /** The validated plugin config the loader hands the constructor (defaults filled). */
-export type KgBuildPluginConfig = Required<Omit<Config, 'nocobase' | 'corpus' | 'extract' | 'align'>>
-  & Pick<Config, 'nocobase' | 'corpus' | 'extract' | 'align'>
+export type KgBuildPluginConfig = Required<Omit<Config, 'nocobase' | 'corpus' | 'extract' | 'align' | 'crossSourceAlign'>>
+  & Pick<Config, 'nocobase' | 'corpus' | 'extract' | 'align' | 'crossSourceAlign'>
 
 /** Plugin config: the tenant binding, the enabled sources, and the budgets. */
 export interface Config extends KgBuildConfig {}
@@ -1233,6 +1233,8 @@ export interface KgBuildConfig {
   extract?: ExtractConfig
   /** Entity alignment settings. */
   align?: AlignConfig
+  /** Cross-source coreference alignment settings; absent keeps the pass on. */
+  crossSourceAlign?: CrossSourceAlignConfig
   /** Page size for NocoBase row fetches; default 100 (R13 batching). */
   pageSize?: number
   /** Repeat-run interval in ms; 0 (default) disables scheduling — manual runs only. */
@@ -1266,9 +1268,20 @@ export interface CorpusSourceConfig {
    * it, so the runtime value is undefined.
    */
   root?: string | undefined
+  /**
+   * The declarative corpus manifest (kb-corpus.yml) — the corpus directory
+   * list's only home. When set, the scan covers exactly the manifest
+   * directories instead of recursing the whole root, so non-corpus drop-ins
+   * under the root never enter extraction. Explicitly undefined-typed for the
+   * same schemastery-materialization reason as {@link root}.
+   */
+  manifestFile?: string | undefined
   /** Glob-free suffix filter list; defaults to md and txt. */
   extensions?: string[]
-  /** Maximum documents per run; newest mtime first; default 50. */
+  /**
+   * Protective document ceiling per run: a scan finding more documents than
+   * this fails the run loudly instead of silently truncating; default 50.
+   */
   maxDocuments?: number
   /** Maximum chunks per document; default 4. */
   maxChunksPerDocument?: number
@@ -1291,9 +1304,17 @@ export interface AlignConfig {
   /** Lower bound of the gray zone sent to LLM adjudication; default 0.8. */
   grayFloor?: number
 }
+
+/** Cross-source coreference alignment configuration. */
+export interface CrossSourceAlignConfig {
+  /** Whether the pass runs at all; default true (edges only, never merges). */
+  enabled?: boolean
+  /** Restrict matching to normalized-name equality, dropping containment matches; default false. */
+  exactOnly?: boolean
+}
 ```
 
-Source: [`packages/kb/kg-build/src/index.ts:130`](../packages/kb/kg-build/src/index.ts)
+Source: [`packages/kb/kg-build/src/index.ts:146`](../packages/kb/kg-build/src/index.ts)
 
 <a id="deepseek-aidsh-lakehouse"></a>
 

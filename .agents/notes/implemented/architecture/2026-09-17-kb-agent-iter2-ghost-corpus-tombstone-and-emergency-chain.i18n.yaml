@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-09-17-kb-agent-iter2-ghost-corpus-tombstone-and-emergency-chain.md
+2026-09-17-kb-agent-iter2-ghost-corpus-tombstone-and-emergency-chain.md: 2c94801ff485039687b85c2e78d4bd554d674fb4
+2026-09-17-kb-agent-iter2-ghost-corpus-tombstone-and-emergency-chain.zh.md: 8943de367b1558f51473a63d49ee13b0605dfe96

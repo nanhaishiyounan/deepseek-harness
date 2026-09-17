@@ -19,7 +19,7 @@ function reportOf(overrides: Partial<KgBuildRunReport> = {}): KgBuildRunReport {
     connector: { scope: 'datasets', items: 2, nodesUpserted: 2, edgesUpserted: 0, skipped: false, contentHash: 'h2' },
     corpus: {
       documents: 3, chunks: 6, extractionCalls: 3, extractedEntities: 9, extractedRelations: 7,
-      degradedEntities: 1, droppedRelations: 2, mergedEntities: 1, tombstonedEdges: 0,
+      degradedEntities: 1, droppedRelations: 2, mergedEntities: 1, tombstonedEdges: 0, tombstonedScopes: 0,
     },
     persistedTypes: 2,
     persistedRelations: 0,
@@ -58,7 +58,7 @@ describe('computeQualityMetrics', () => {
       collections: [],
       corpus: {
         documents: 3, chunks: 6, extractionCalls: 3, extractedEntities: 9, extractedRelations: 7,
-        degradedEntities: 1, droppedRelations: 2, mergedEntities: 1, tombstonedEdges: 0,
+        degradedEntities: 1, droppedRelations: 2, mergedEntities: 1, tombstonedEdges: 0, tombstonedScopes: 0,
       },
       persistedTypes: 2,
       persistedRelations: 0,

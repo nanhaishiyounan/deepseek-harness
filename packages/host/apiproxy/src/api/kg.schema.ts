@@ -55,7 +55,7 @@ export const kgEdgeViewSchema = z.object({
   source: z.string().min(1),
   target: z.string().min(1),
   fact: z.string().optional(),
-  asserted_by: z.enum(['nocobase', 'lakehouse', 'connector', 'kb']),
+  asserted_by: z.enum(['nocobase', 'lakehouse', 'connector', 'kb', 'kg-align']),
 })
 
 /** kg.schema request payload (empty). */

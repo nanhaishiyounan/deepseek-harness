@@ -9,9 +9,7 @@
  */
 
 import type { ToolExecution } from '@deepseek-ai/dsh-tools'
-import { canonicalPath } from '@deepseek-ai/dsh-sandbox'
-
-const PARENT_PATH_SEGMENT = /(?:^|[\\/])\.\.(?:[\\/]|$)/
+import { sessionResolveCwd } from '@deepseek-ai/dsh-fs'
 
 /**
  * The session workspace cwd for this call, or `undefined` when none applies.
@@ -21,9 +19,7 @@ const PARENT_PATH_SEGMENT = /(?:^|[\\/])\.\.(?:[\\/]|$)/
  * @returns the calling agent's session cwd, or undefined for a non-agent caller (the backend then applies its own default).
  */
 export function sessionCwd(exec: ToolExecution, requestedPath: string): string | undefined {
-  const cwd = exec.agent?.session.header.cwd
-  if (cwd === undefined || (!PARENT_PATH_SEGMENT.test(cwd) && !PARENT_PATH_SEGMENT.test(requestedPath))) return cwd
-  return canonicalPath(cwd)
+  return sessionResolveCwd(exec.agent?.session.header.cwd, requestedPath)
 }
 
 /**

@@ -88,7 +88,9 @@
       {{model}} model. Answer enterprise questions by routing to the right
       data surface: business records (customers, orders, experts, business
       tables) through nb_collections to learn the schema, then nb_list and
-      nb_get to read rows; document passages and prose facts through
+      nb_get to read rows — service rows carry expertId ids, so surface the
+      person behind a service (e.g. 张红喜) with one more nb_list on experts
+      filtering id in [expertId]; document passages and prose facts through
       kb_search with [n] citations (document name and heading path); numbers,
       statistics, aggregates, and record lists through lakehouse_tables
       first, then lakehouse_query SQL over the uploaded tables, naming the
@@ -99,6 +101,18 @@
       关系) through kg_schema first when unsure what the graph holds, then
       kg_subgraph with the entity names as seeds, citing the graph relations
       in the answer. Say when no surface has the data instead of guessing.
+
+      Emergency-class questions (force majeure: a warehouse destroyed or on
+      fire, war, closed ports or border crossings, strikes, and other supply
+      disruptions) carry a mandatory closing chain — an answer that ends
+      with only KG, freight-rate, or document facts is incomplete. Before
+      the final answer you MUST: (1) map the disruption with kg_subgraph,
+      seeding with the affected warehouse/region/route names to surface the
+      flows and alternatives; (2) call nb_list on expert_services for the
+      matching services; (3) resolve each service's expertId to a person
+      with one more nb_list on experts (filter id in [expertId]); then name
+      the expert(s), their service, price, and deliverable in the answer
+      alongside the reroute facts.
 
       When the user wants an expert to produce a solution, walk the ordering
       journey: connector_discover surfaces the expert card with orderable
@@ -172,13 +186,20 @@
         tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"
         # The collection whitelist and fk wiring live in the versioned
         # kg-mappings.yml beside this composition (the inline `collections`
-        # key is retired).
+        # key is retired); the corpus directory list lives in the versioned
+        # kb-corpus.yml the same way — the single source of truth seed-kb and
+        # setup-dsh-data also read, so the KG extraction scan and the KB
+        # document set cannot drift apart.
         nocobase:
           mappingsFile: examples/kb-agent/kg-mappings.yml
         corpus:
           root: examples/kb-agent/workspace/data
+          manifestFile: examples/kb-agent/kb-corpus.yml
           extensions: ['.md']
-          maxDocuments: 50
+          # A protective ceiling, not a truncation: the manifest's ~46
+          # documents sit under it, and a corpus that outgrows it fails the
+          # run instead of silently dropping the oldest files.
+          maxDocuments: 60
           maxChunksPerDocument: 4
 
     # The lakehouse seam: tables live as Parquet under the example workspace

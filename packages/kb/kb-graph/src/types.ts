@@ -151,7 +151,7 @@ export interface KbGraphStoredTriple extends KbGraphTriple {
 
 /** Provenance of one graph fact: which source system asserted it, when. */
 export interface KgProvenance {
-  readonly sourceSystem: 'nocobase' | 'lakehouse' | 'connector' | 'kb'
+  readonly sourceSystem: 'nocobase' | 'lakehouse' | 'connector' | 'kb' | 'kg-align'
   /** Row primary key, sourcePath, or datasetId — the assertion's address in the source. */
   readonly sourceId: string
   readonly extractedAt: string
@@ -392,7 +392,7 @@ export interface KgStore extends GraphStore {
   /**
    * Tombstone every live edge one source currently asserts. Parallel
    * assertions from other sources survive.
-   * @param sourceSystem - the asserting system ('nocobase' | 'lakehouse' | 'connector' | 'kb').
+   * @param sourceSystem - the asserting system ('nocobase' | 'lakehouse' | 'connector' | 'kb' | 'kg-align').
    * @param sourceId - the assertion address inside that system.
    * @param at - ISO timestamp written into `valid_until`.
    * @returns how many edges were tombstoned.
@@ -419,6 +419,19 @@ export interface KgStore extends GraphStore {
    * @returns the stored run, or `undefined` when never run.
    */
   getSourceRun(sourceSystem: string, scope: string): Promise<KgSourceRun | undefined>
+  /**
+   * List every source-run watermark row one system owns.
+   * @param sourceSystem - the asserting system ('nocobase' | 'lakehouse' | 'connector' | 'kb' | 'kg-align').
+   * @returns the stored runs, scope-ordered.
+   */
+  listSourceRuns(sourceSystem: string): Promise<readonly KgSourceRun[]>
+  /**
+   * Delete one retired source-run watermark row (a scope that disappeared
+   * from its source). Deleting a never-run scope is a no-op.
+   * @param sourceSystem - the asserting system.
+   * @param scope - the collection/table/prefix scope.
+   */
+  deleteSourceRun(sourceSystem: string, scope: string): Promise<void>
   /**
    * Merge one node-type registration row (the persistent half of the
    * two-layer registry; runtime registrations materialize here). The store
@@ -453,6 +466,16 @@ export interface KgStore extends GraphStore {
    * @returns the matching node hits.
    */
   searchNodes(tenantId: string, query: string, type: KgNodeTypeId | undefined, k: number): Promise<readonly KgNodeHit[]>
+  /**
+   * List the nodes of one tenant capped at `k`, in row order. The bulk
+   * enumeration primitive for passes that must see every node (cross-source
+   * alignment); callers that can name what they want use
+   * {@link searchNodes} instead.
+   * @param tenantId - owning tenant; the hard isolation key.
+   * @param k - maximum nodes to return.
+   * @returns the nodes (no embeddings), insertion-ordered.
+   */
+  listNodes(tenantId: string, k: number): Promise<readonly KgNode[]>
   /**
    * Append one ontology-revision audit row. A registry-changing pipeline
    * run records its diff; an idempotent no-change run appends nothing (the

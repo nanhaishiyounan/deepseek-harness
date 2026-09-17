@@ -141,6 +141,19 @@ const RELATIONS: readonly KgRelation[] = [
     source: 'builtin-ontology',
   },
 
+  // Cross-source coreference: a document-extracted entity and a business-data
+  // row denote the same subject. Endpoints unrestricted — the pair spans
+  // ontology layers (a doc Region is a Concept; a NocoBase row is an Object).
+  // Alignment edges only; the two nodes stay separate (reversible, no merge).
+  {
+    id: kgRelationId('corefers_with'),
+    label: '共指',
+    description: '文档抽取实体与业务数据行的主题共指（跨源对齐边，只建边不合并实体）。',
+    constraints: [],
+    kind: 'object',
+    source: 'builtin-ontology',
+  },
+
   // Domain-module relations.
   relation('places', '下单', 'builtin-ontology', [['Customer', 'Order']], '客户下单。'),
   relation('located_in', '位于', 'builtin-ontology', [['Customer', 'Region'], ['Warehouse', 'Region']]),
@@ -163,7 +176,7 @@ const RELATIONS: readonly KgRelation[] = [
  * bumps only when this seed changes shape: added types/relations bump the
  * minor, removals or constraint changes bump the major.
  */
-export const ONTOLOGY_VERSION = '1.0.0'
+export const ONTOLOGY_VERSION = '1.1.0'
 
 /** The built-in ontology seed: everything above, freshly built per call. */
 export interface KgBuiltinOntology {

@@ -205,7 +205,7 @@ Source: [`packages/kb/tool-kb/src/index.ts`](../packages/kb/tool-kb/src/index.ts
 
 ### `kg_subgraph`
 
-读取知识图谱中具名实体的 k-hop 邻域（默认 2 跳、≤200 节点）。种子按实体名或别名解析；回答列出每个实体及其关系与溯源来源。"谁给谁供货 / 有哪些订单 / 合规关系"类问题用它，而不是 SQL。
+读取知识图谱中具名实体的 k-hop 邻域（默认 2 跳、至多 3 跳、≤200 节点）。种子按实体名或别名解析；回答列出每个实体及其关系与溯源来源。"谁给谁供货 / 有哪些订单 / 合规关系"类问题用它，而不是 SQL。
 
 ```json
 {
@@ -220,7 +220,7 @@ Source: [`packages/kb/tool-kb/src/index.ts`](../packages/kb/tool-kb/src/index.ts
     },
     "hops": {
       "type": "number",
-      "description": "Maximum walk depth, 0–2; default 2."
+      "description": "Maximum walk depth, 0–3; default 2. Three hops cross the corefers_with bridge between document entities and business rows."
     },
     "max_nodes": {
       "type": "number",
@@ -523,7 +523,7 @@ Source: [`packages/connector/tool-nocobase/src/index.ts`](../packages/connector/
 
 ### `nb_get`
 
-按 collection 与行 id 读取一条业务记录。返回按存储原样的完整行。
+按 collection 与行 id 读取一条业务记录。返回按存储原样的完整行。标量外键 id 保持 id 原样——用目标集合再一次 nb_list（filter op in）解析引用名。
 
 ```json
 {
@@ -549,7 +549,7 @@ Source: [`packages/connector/tool-nocobase/src/index.ts`](../packages/connector/
 
 ### `nb_list`
 
-以受限筛选（eq/in/gt/lt、and/or）、排序、字段投影与分页查询一个业务集合的行。返回页、总数与行。
+以受限筛选（eq/in/gt/lt/includes——模糊匹配用 includes（子串匹配），绝不用 like——、and/or）、排序、字段投影与分页查询一个业务集合的行。返回页、总数与行。
 
 ```json
 {
@@ -561,7 +561,7 @@ Source: [`packages/connector/tool-nocobase/src/index.ts`](../packages/connector/
     },
     "filter": {
       "type": "array",
-      "description": "Conditions: {field, op: eq|in|gt|lt, value}; scalars for eq/gt/lt, a non-empty array for in.",
+      "description": "Conditions: {field, op: eq|in|gt|lt|includes, value}; scalars for eq/gt/lt/includes, a non-empty array for in. For fuzzy matching use includes (substring match), not like.",
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -575,7 +575,8 @@ Source: [`packages/connector/tool-nocobase/src/index.ts`](../packages/connector/
               "eq",
               "in",
               "gt",
-              "lt"
+              "lt",
+              "includes"
             ]
           },
           "value": {}

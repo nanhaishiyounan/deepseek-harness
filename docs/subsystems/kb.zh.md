@@ -354,6 +354,17 @@ async stats(tenantId?: string, signal?: AbortSignal): Promise<{ triples: number;
 async searchNodes(tenantId: string, query: string, type?: KgNodeTypeId, k: number = 10): Promise<readonly KgNodeHit[]>
 
 /**
+ * List one tenant's nodes capped at `k` — the bulk enumeration primitive
+ * for passes that must see every node (cross-source alignment). Prefer
+ * {@link KbGraphRuntime.searchNodes} whenever a name or id can narrow the
+ * read.
+ * @param tenantId - owning tenant; the hard isolation key.
+ * @param k - maximum nodes to return.
+ * @returns the nodes (no embeddings), insertion-ordered.
+ */
+async listNodes(tenantId: string, k: number): Promise<readonly KgNode[]>
+
+/**
  * Merge one node onto its anchors through the v2 store face.
  * @param node - the node to merge.
  * @returns whether an existing row was merged (false = fresh insert).
@@ -420,6 +431,20 @@ async putSourceRun(run: KgSourceRun): Promise<void>
  * @returns the stored run, or `undefined` when never run.
  */
 async getSourceRun(sourceSystem: string, scope: string): Promise<KgSourceRun | undefined>
+
+/**
+ * List every source-run watermark row one system owns.
+ * @param sourceSystem - the asserting system.
+ * @returns the stored runs, scope-ordered.
+ */
+async listSourceRuns(sourceSystem: string): Promise<readonly KgSourceRun[]>
+
+/**
+ * Delete one retired source-run watermark row; a never-run scope is a no-op.
+ * @param sourceSystem - the asserting system.
+ * @param scope - the collection/table/prefix scope.
+ */
+async deleteSourceRun(sourceSystem: string, scope: string): Promise<void>
 
 /**
  * Register one node type in the runtime registry AND persist it as a

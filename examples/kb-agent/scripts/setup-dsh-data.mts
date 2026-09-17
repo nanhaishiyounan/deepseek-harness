@@ -32,6 +32,7 @@ import { DatabaseSync } from 'node:sqlite'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { NocoBaseClient } from '@deepseek-ai/dsh-connector-nocobase'
+import { loadCorpusManifest } from '@deepseek-ai/dsh-kg-build'
 import { resolveEnv } from './resolve-env.ts'
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
@@ -44,11 +45,14 @@ const SAMPLE_ASSETS = ['sample-export-compliance.md', 'sample-shipment-events.js
 /** The lakehouse tables seed-lakehouse.mts owns (keep in sync with its header). */
 const LAKEHOUSE_TABLES = ['ingredient_prices_monthly', 'import_export_monthly', 'cold_chain_rates'] as const
 
-/** The corpus directories seed-kb.mts owns, as workspace-relative paths (keep in sync with its CORPUS_DIRS). */
-const KB_CORPUS_DIRS = [
-  'workspace/data/trade-finance', 'workspace/data/export-compliance', 'workspace/data/quality',
-  'workspace/data/ecommerce', 'workspace/data/cold-chain',
-] as const
+/**
+ * The corpus directories the KB corpus step owns, from the versioned
+ * kb-corpus.yml manifest every corpus consumer (seed-kb, this probe, and the
+ * kg-build corpus leg) reads — no second list to keep in sync.
+ */
+const KB_CORPUS_DIRS: readonly string[] = loadCorpusManifest(
+  join(repoRoot, 'examples/kb-agent/kb-corpus.yml'),
+).dirs.map(entry => `workspace/data/${entry.dir}`)
 
 /** Replay one sibling script as a child, failing loud on a non-zero exit. */
 function replay(script: string, args: readonly string[] = []): void {

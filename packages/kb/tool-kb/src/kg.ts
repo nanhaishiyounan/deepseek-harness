@@ -344,7 +344,7 @@ export function applyKgTools(
   if (!subgraphEnabled) return
   ctx.tools.register(defineTool({
     name: 'kg_subgraph',
-    description: 'Read the k-hop neighborhood of named entities in the knowledge graph (default 2 hops, ≤200 nodes). Seeds resolve by entity name or alias; the answer lists each entity with its relations and the provenance sources. For "谁给谁供货 / 有哪些订单 / 合规关系" questions use this, not SQL.',
+    description: 'Read the k-hop neighborhood of named entities in the knowledge graph (default 2 hops, up to 3, ≤200 nodes). Seeds resolve by entity name or alias; the answer lists each entity with its relations and the provenance sources. For "谁给谁供货 / 有哪些订单 / 合规关系" questions use this, not SQL.',
     parameters: {
       seeds: {
         type: 'array',
@@ -354,7 +354,7 @@ export function applyKgTools(
       },
       hops: {
         type: 'number',
-        description: 'Maximum walk depth, 0–2; default 2.',
+        description: 'Maximum walk depth, 0–3; default 2. Three hops cross the corefers_with bridge between document entities and business rows.',
       },
       max_nodes: {
         type: 'number',
@@ -402,7 +402,7 @@ export function applyKgTools(
       const typed = args
       const seeds = [...new Set(typed.seeds.map(seed => seed.trim()).filter(seed => seed.length > 0))].slice(0, 5)
       if (seeds.length === 0) throw new Error('kg_subgraph: seeds must name at least one entity')
-      const hops = Math.min(Math.max(Math.floor(typed.hops ?? 2), 0), 2)
+      const hops = Math.min(Math.max(Math.floor(typed.hops ?? 2), 0), 3)
       const maxNodes = Math.min(Math.max(Math.floor(typed.max_nodes ?? 200), 1), 200)
       const resolved: string[] = []
       const missing: string[] = []

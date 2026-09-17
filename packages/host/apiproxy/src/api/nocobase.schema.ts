@@ -32,7 +32,7 @@ export const nocobaseListMetaValueSchema = z.object({
 /** One restricted filter condition. */
 export const nocobaseFilterConditionSchema = z.object({
   field: z.string().min(1),
-  op: z.enum(['eq', 'in', 'gt', 'lt']),
+  op: z.enum(['eq', 'in', 'gt', 'lt', 'includes']),
   value: z.union([z.string(), z.number(), z.boolean(), z.array(z.union([z.string(), z.number(), z.boolean()])).min(1)]),
 })
 

@@ -16,6 +16,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { Context, Service } from '@deepseek-ai/cordis'
 import type { GenerateOptions, StreamChunk } from '@deepseek-ai/dsh-llm'
 import KbGraphRuntime from '@deepseek-ai/dsh-kb-graph'
+import { kgNodeTypeId, kgRelationId } from '@deepseek-ai/dsh-kb-graph'
 import * as KbGraphSqlite from '@deepseek-ai/dsh-kb-graph-sqlite'
 import type { LakehouseTable } from '@deepseek-ai/dsh-lakehouse'
 import type { ConnectorDatasetSummary } from '@deepseek-ai/dsh-connector'
@@ -452,13 +453,15 @@ describe('KgBuildRuntime pipeline', () => {
       await context.fiber.dispose()
     }
 
-    // Chunk caps and the aborted signal run through a corpus-enabled boot.
+    // Chunk caps and the aborted signal run through a corpus-enabled boot
+    // (two documents on disk: supply-note plus two-parts, both inside the
+    // maxDocuments ceiling, each collapsing to one chunk under the cap).
     const capped = await boot({
-      corpus: { root: corpusRoot, maxDocuments: 1, maxChunksPerDocument: 1 },
+      corpus: { root: corpusRoot, maxDocuments: 2, maxChunksPerDocument: 1 },
       nocobase: { baseUrl: ncUrl, apiKeyEnv: 'KG_TEST_NC_KEY', mappingsFile: await writeMappings([{ name: 'experts', anchor: 'Expert', titleField: 'name' }]) },
     })
     const cappedReport = await capped.get('kgBuild')!.run()
-    expect(cappedReport.corpus?.chunks).toBe(1)
+    expect(cappedReport.corpus?.chunks).toBe(2)
     await capped.fiber.dispose()
     const aborting = new Context()
     await aborting.plugin(KbGraphRuntime)
@@ -481,8 +484,8 @@ describe('KgBuildRuntime pipeline', () => {
   it('splits over-budget paragraphs and skips cross-document dangling relations', async () => {
     await writeFile(join(corpusRoot as string, 'long-doc.md'), `${'甲'.repeat(240)}\n\n${'乙'.repeat(240)}\n\n${'丙'.repeat(20)}`, 'utf8')
     const firstDoc = await readFile(join(corpusRoot as string, 'supply-note.md'), 'utf8')
-    // mtime order: long-doc is newest, supply-note second — two documents,
-    // the second one's relations reference a name only the first declares.
+    // Two documents under the budget: both extract in one run, and the
+    // second one's relations reference a name only the first declares.
     const context = await boot({
       corpus: { root: corpusRoot, maxDocuments: 2, maxChunksPerDocument: 2 },
       extract: { maxChunkChars: 200 },
@@ -568,5 +571,130 @@ describe('KgBuildRuntime pipeline', () => {
     const report = await context.get('kgBuild')!.run()
     expect(report.collections.every(entry => entry.rows > 0)).toBe(true)
     await context.fiber.dispose()
+  })
+})
+
+describe('KgBuildRuntime corpus manifest and budget guard', () => {
+  /** Write one corpus manifest into a fresh temp dir and return its path. */
+  async function writeManifest(dirs: ReadonlyArray<{ dir: string; kind?: string }>): Promise<string> {
+    const dir = await mkdtemp(join(tmpdir(), 'kg-build-manifest-'))
+    const path = join(dir, 'kb-corpus.yml')
+    const text = [
+      'version: 1',
+      'dirs:',
+      ...dirs.map(entry => `  - dir: ${entry.dir}\n    kind: ${entry.kind ?? 'report'}`),
+    ].join('\n')
+    await writeFile(path, `${text}\n`, 'utf8')
+    return path
+  }
+
+  beforeEach(async () => {
+    process.env.KG_TEST_NC_KEY = 'kg-test-token'
+    ncServer = await bootMockNocoBase()
+    mappingsPath = await writeMappings([{ name: 'experts', anchor: 'Expert', titleField: 'name' }])
+    ncUrl = `http://127.0.0.1:${String((ncServer.address() as { port: number }).port)}`
+    corpusRoot = await mkdtemp(join(tmpdir(), 'kg-build-corpus-'))
+    // The manifest shape: one listed directory (nested) carrying a document,
+    // one unlisted root document the manifest must exclude.
+    await mkdir(join(corpusRoot, 'nested'), { recursive: true })
+    await writeFile(join(corpusRoot, 'nested', 'note.md'), '宏发食品与张红喜会长合作，冷锋过境影响运输。', 'utf8')
+    await writeFile(join(corpusRoot, 'supply-note.md'), '宏发食品与张红喜会长合作，张红喜主持中亚货运动线。', 'utf8')
+  })
+
+  it('scans only the manifest directories and records their corpus-relative scopes', async () => {
+    const manifestFile = await writeManifest([{ dir: 'nested', kind: 'report' }])
+    const context = await boot({ corpus: { root: corpusRoot, manifestFile, maxDocuments: 5, maxChunksPerDocument: 2 } })
+    const report = await context.kgBuild.run()
+    expect(report.corpus?.documents).toBe(1)
+    // Only the manifest file produced a watermark; the unlisted root document
+    // never entered the scan.
+    expect(await context.get('kbGraph')!.getSourceRun('kb', 'nested/note.md')).toBeDefined()
+    expect(await context.get('kbGraph')!.getSourceRun('kb', 'supply-note.md')).toBeUndefined()
+    await context.fiber.dispose()
+  })
+
+  it('tombstones manifest-external kb scopes, deletes their watermarks, and stays idempotent', async () => {
+    const manifestFile = await writeManifest([{ dir: 'nested', kind: 'report' }])
+    const context = await boot({ corpus: { root: corpusRoot, manifestFile, maxDocuments: 5, maxChunksPerDocument: 2 } })
+    const graph = context.get('kbGraph')!
+    await context.kgBuild.run()
+    // Legacy drift: a kb scope outside the manifest still holds a live edge
+    // and a watermark row from a whole-root scan era.
+    const ghostAt = '2026-09-02T00:00:00.000Z'
+    await graph.upsertNode({ id: 'kb:connector-files/drop.md#莫斯科旧仓', tenantId: 't', type: kgNodeTypeId('Region'), name: '莫斯科旧仓', createdAt: ghostAt, updatedAt: ghostAt })
+    await graph.upsertNode({ id: 'kb:connector-files/drop.md#中亚旧仓', tenantId: 't', type: kgNodeTypeId('Region'), name: '中亚旧仓', createdAt: ghostAt, updatedAt: ghostAt })
+    await graph.upsertEdges([{
+      id: 'kb:connector-files/drop.md:莫斯科旧仓:related:中亚旧仓',
+      tenantId: 't',
+      srcId: 'kb:connector-files/drop.md#莫斯科旧仓',
+      dstId: 'kb:connector-files/drop.md#中亚旧仓',
+      relation: kgRelationId('related'),
+      confidence: 1,
+      provenance: { sourceSystem: 'kb', sourceId: 'connector-files/drop.md', extractedAt: ghostAt },
+      validFrom: ghostAt,
+    }])
+    await graph.putSourceRun({ sourceSystem: 'kb', scope: 'connector-files/drop.md', contentHash: 'legacy', lastRunAt: ghostAt })
+
+    const repair = await context.kgBuild.run()
+    expect(repair.corpus?.tombstonedScopes).toBe(1)
+    expect(repair.corpus?.tombstonedEdges).toBe(1)
+    // The retired watermark is gone; a later run cannot treat the scope as
+    // unchanged corpus.
+    expect(await graph.getSourceRun('kb', 'connector-files/drop.md')).toBeUndefined()
+    // The ghost scope's edge died with the sweep: no live edge touches the
+    // ghost nodes.
+    expect((await graph.expand('t', 'kb:connector-files/drop.md#莫斯科旧仓', 10)).edges).toHaveLength(0)
+    // The manifest-scoped document keeps its live watermark.
+    expect((await graph.getSourceRun('kb', 'nested/note.md'))?.contentHash).toBeDefined()
+
+    // Idempotent: a third run sweeps nothing and changes no counts.
+    const before = await graph.stats('t')
+    const again = await context.kgBuild.run()
+    expect(again.corpus?.tombstonedScopes).toBe(0)
+    expect(again.corpus?.tombstonedEdges).toBe(0)
+    expect(await graph.stats('t')).toEqual(before)
+    await context.fiber.dispose()
+  })
+
+  it('fails loud when the scan exceeds maxDocuments instead of truncating', async () => {
+    const context = await boot({ corpus: { root: corpusRoot, maxDocuments: 1, maxChunksPerDocument: 2 } })
+    await expect(context.kgBuild.run()).rejects.toMatchObject({ code: 'KG_BUILD_CORPUS_OVER_BUDGET' })
+    await context.fiber.dispose()
+  })
+
+  it('fails loud when a manifest directory is missing or carries no matching files', async () => {
+    const absent = await boot({ corpus: { root: corpusRoot, manifestFile: await writeManifest([{ dir: 'absent' }]), maxDocuments: 5 } })
+    await expect(absent.kgBuild.run()).rejects.toMatchObject({ code: 'KG_BUILD_CORPUS_DIR_EMPTY' })
+    await absent.fiber.dispose()
+
+    // A listed directory whose files all miss the extension filter fails the
+    // same way — the manifest declared corpus that the scan cannot find.
+    const dir = await mkdtemp(join(tmpdir(), 'kg-build-emptydir-'))
+    await mkdir(join(dir, 'only-txt'), { recursive: true })
+    await writeFile(join(dir, 'only-txt', 'note.txt'), 'not markdown', 'utf8')
+    const wrongExt = new Context()
+    await wrongExt.plugin(KbGraphRuntime)
+    await wrongExt.plugin(KbGraphSqlite, { path: ':memory:' })
+    new FakeLlm(wrongExt, [EXTRACTION])
+    await wrongExt.plugin(KgBuildRuntime, trackConfig({
+      corpus: { root: dir, manifestFile: await writeManifest([{ dir: 'only-txt' }]), extensions: ['.md'], maxDocuments: 5, maxChunksPerDocument: 2 },
+    }) as never)
+    await expect(wrongExt.get('kgBuild')!.run()).rejects.toMatchObject({ code: 'KG_BUILD_CORPUS_DIR_EMPTY' })
+    await wrongExt.fiber.dispose()
+    await rm(dir, { recursive: true, force: true })
+  })
+
+  it('rejects an invalid manifest file at load', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'kg-build-badmanifest-'))
+    const path = join(dir, 'kb-corpus.yml')
+    await writeFile(path, 'version: 1\ndirs: []\n', 'utf8')
+    const context = new Context()
+    await context.plugin(KbGraphRuntime)
+    await context.plugin(KbGraphSqlite, { path: ':memory:' })
+    await expect(context.plugin(KgBuildRuntime, trackConfig({
+      corpus: { root: corpusRoot, manifestFile: path, maxDocuments: 5, maxChunksPerDocument: 2 },
+    }) as never)).rejects.toMatchObject({ code: 'KG_BUILD_CORPUS_MANIFEST_INVALID' })
+    await context.fiber.dispose()
+    await rm(dir, { recursive: true, force: true })
   })
 })

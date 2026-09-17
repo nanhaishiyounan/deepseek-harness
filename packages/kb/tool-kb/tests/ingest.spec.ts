@@ -177,6 +177,29 @@ describe('kb_ingest through the real seam', () => {
     expect(value.embed_model).toBe('stub-embed:stub-model')
   })
 
+  it('resolves a relative path against the per-session cwd, not the backend default', async () => {
+    const { ctx, root } = await mount()
+    // The backend default (config.cwd) is `root`; the session workspace is a
+    // different directory holding the document — only session-cwd resolution
+    // (the same basis read/write/edit use) finds it.
+    const sessionDir = await mkdtemp(join(tmpdir(), 'tool-kb-session-cwd-'))
+    roots.push(sessionDir)
+    await writeFile(join(sessionDir, 'export-note.md'), '# 出海风险\n\n莫斯科主仓断电，启用阿拉木图备仓。', { encoding: 'utf8' })
+    const result = await ctx.tools.execute({
+      signal,
+      callId: CallId('c-session-cwd'),
+      name: 'kb_ingest',
+      arguments: { path: 'export-note.md' },
+      agent: { session: { header: { cwd: sessionDir } } } as never,
+    })
+    expect(result.isError).toBe(false)
+    const hits = await ctx.kb.search({ query: '莫斯科主仓', tenantId: 'demo-food-co' })
+    expect(hits.results[0]?.sourcePath).toBe('export-note.md')
+    // The read basis was the session dir: the backend-default dir never held the file.
+    const atDefault = await (await import('node:fs/promises')).readFile(join(root, 'export-note.md'), 'utf8').catch(() => 'missing')
+    expect(atDefault).toBe('missing')
+  })
+
   it('ingests a PDF fixture through the text extractor', async () => {
     const { ctx, call } = await mount()
     const { copyFile } = await import('node:fs/promises')

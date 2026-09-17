@@ -295,6 +295,39 @@ describe('SqliteGraphStore v2 aliases and watermarks', () => {
     store.close()
   })
 
+  it('resolves v2 node search through aliases with name-pass deduplication', async () => {
+    const store = freshStore()
+    await store.upsertNode(node('c1', 'company', '宏发食品', 'c1'))
+    await store.upsertNode(node('c2', 'company', '宏发集团', 'c2'))
+    await store.putAlias('t', kgNodeTypeId('company'), '老宏发', 'c1')
+    // The node names miss the query; the alias pass resolves the binding node.
+    const byAlias = await store.searchNodes('t', '老宏发', undefined, 10)
+    expect(byAlias).toEqual([{ id: 'c1', type: kgNodeTypeId('company'), name: '宏发食品' }])
+    // The name pass already found the node; the alias adds no duplicate.
+    const deduped = await store.searchNodes('t', '宏发', undefined, 10)
+    expect(deduped.map(hit => hit.id).sort()).toEqual(['c1', 'c2'])
+    // The type filter narrows the alias pass too.
+    await store.putAlias('t', kgNodeTypeId('company'), '集团别名', 'c2')
+    const narrowed = await store.searchNodes('t', '老宏发', kgNodeTypeId('company'), 10)
+    expect(narrowed.map(hit => hit.id)).toEqual(['c1'])
+    store.close()
+  })
+
+  it('lists the nodes of one tenant capped at k, newest writes last', async () => {
+    const store = freshStore()
+    await store.upsertNode(node('kb:doc#中亚', 'Region', '中亚', '中亚'))
+    await store.upsertNode(node('nocobase:experts:1', 'Expert', '张红喜', '1'))
+    await store.upsertNode(node('other:node', 'company', '别家', 'x'))
+    const other = freshStore()
+    await other.upsertNode(node('x:1', 'company', '他租户', '1'))
+    const listed = await store.listNodes('t', 10)
+    expect(listed.map(n => n.id).sort()).toEqual(['kb:doc#中亚', 'nocobase:experts:1', 'other:node'])
+    expect(listed.map(n => n.name)).toContain('张红喜')
+    expect(await store.listNodes('t', 1)).toHaveLength(1)
+    store.close()
+    other.close()
+  })
+
   it('upserts source-run watermarks per (source, scope)', async () => {
     const store = freshStore()
     expect(await store.getSourceRun('nocobase', 'orders')).toBeUndefined()
@@ -315,6 +348,65 @@ describe('SqliteGraphStore v2 aliases and watermarks', () => {
     }
     await store.putSourceRun(second)
     expect(await store.getSourceRun('nocobase', 'orders')).toEqual(second)
+    store.close()
+  })
+
+  it('lists source runs per system and deletes retired scopes', async () => {
+    const store = freshStore()
+    await store.putSourceRun({ sourceSystem: 'kb', scope: 'corpus/a.md', lastRunAt: '2026-09-06T09:00:00.000Z' })
+    await store.putSourceRun({ sourceSystem: 'kb', scope: 'connector-files/b.md', lastRunAt: '2026-09-06T09:00:01.000Z' })
+    await store.putSourceRun({ sourceSystem: 'nocobase', scope: 'orders', lastRunAt: '2026-09-06T09:00:02.000Z' })
+    // Scope-ordered regardless of insertion order.
+    expect((await store.listSourceRuns('kb')).map(run => run.scope)).toEqual(['connector-files/b.md', 'corpus/a.md'])
+    expect(await store.listSourceRuns('lakehouse')).toEqual([])
+    await store.deleteSourceRun('kb', 'connector-files/b.md')
+    expect((await store.listSourceRuns('kb')).map(run => run.scope)).toEqual(['corpus/a.md'])
+    expect(await store.getSourceRun('kb', 'connector-files/b.md')).toBeUndefined()
+    // Deleting a never-run scope is a no-op, not a failure.
+    await store.deleteSourceRun('kb', 'never/ran.md')
+    expect((await store.listSourceRuns('kb')).map(run => run.scope)).toEqual(['corpus/a.md'])
+    store.close()
+  })
+})
+
+describe('SqliteGraphStore v2 write parity (fail-closed)', () => {
+  /** Open one file-backed store (a second connection can inject trigger failures). */
+  function fileStore(name: string): { store: SqliteGraphStore; path: string } {
+    const directory = mkdtempSync(join(tmpdir(), 'dsh-kb-graph-parity-'))
+    directories.push(directory)
+    const path = join(directory, name)
+    return { store: new SqliteGraphStore({ path, busyTimeoutMs: 5_000 }, DatabaseSync), path }
+  }
+
+  it('rolls back tombstoneBySource with no partial tombstones under a forced mid-statement failure', async () => {
+    const { store, path } = fileStore('parity.sqlite')
+    await store.upsertNode(node('s1', 'company', '宏发食品'))
+    await store.upsertNode(node('p1', 'product', '老抽酱油'))
+    await store.upsertNode(node('p2', 'product', '生抽酱油'))
+    // Two live edges share one provenance address, so one tombstone sweep
+    // updates both rows in a single statement.
+    const shared = { provenance: { sourceSystem: 'nocobase' as const, sourceId: 'row:batch', extractedAt: NOW } }
+    await store.upsertEdges([edge('e1', 's1', 'p1', 'produces', shared), edge('e2', 's1', 'p2', 'produces', shared)])
+    const before = (await store.stats('t')).triples
+    const trigger = new DatabaseSync(path)
+    trigger.exec("CREATE TRIGGER force_fail AFTER UPDATE ON kg_edges BEGIN SELECT RAISE(FAIL, 'forced'); END")
+    trigger.close()
+    await expect(store.tombstoneBySource('nocobase', 'row:batch', '2026-09-06T13:00:00.000Z'))
+      .rejects.toThrow(/forced/u)
+    // The first matching row completed before the trigger fired; only the
+    // surrounding write transaction keeps that partial update from sticking.
+    expect((await store.stats('t')).triples).toBe(before)
+    store.close()
+  })
+
+  it('rolls back deleteSourceRun with no partial watermark loss under a forced mid-statement failure', async () => {
+    const { store, path } = fileStore('parity-runs.sqlite')
+    await store.putSourceRun({ sourceSystem: 'kb', scope: 'corpus/a.md', lastRunAt: NOW })
+    const trigger = new DatabaseSync(path)
+    trigger.exec("CREATE TRIGGER force_fail AFTER DELETE ON kg_source_runs BEGIN SELECT RAISE(FAIL, 'forced'); END")
+    trigger.close()
+    await expect(store.deleteSourceRun('kb', 'corpus/a.md')).rejects.toThrow(/forced/u)
+    expect(await store.getSourceRun('kb', 'corpus/a.md')).toBeDefined()
     store.close()
   })
 })

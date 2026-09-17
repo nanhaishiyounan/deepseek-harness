@@ -34,7 +34,7 @@ DSH_HOME=examples/kb-agent/.dsh pnpm dsh --profile headless --patch examples/kb-
   "用 kb_ingest 逐篇入库这六篇文档：examples/kb-agent/workspace/data/meetings/2026-08-20-supplier-visit-hongfa.md 与 examples/kb-agent/workspace/data/meetings/2026-08-27-project-kickoff.md（doc_kind 取 meeting）、examples/kb-agent/workspace/data/profiles/hongfa-food.md 与 examples/kb-agent/workspace/data/profiles/lvyuan-ingredients.md（doc_kind 取 profile）、examples/kb-agent/workspace/data/regulations/gb2760-excerpt.md 与 examples/kb-agent/workspace/data/regulations/gb14881-excerpt.md（doc_kind 取 regulation），完成后用 kb_stats 报告覆盖情况"
 ```
 
-入库按来源路径覆盖写入，重跑这条命令是替换同六篇文档，不会翻倍。
+入库按来源路径覆盖写入，重跑这条命令是替换同六篇文档，不会翻倍。完整批量语料登记在版本化的 `kb-corpus.yml` 清单（`workspace/data/` 下 14 个目录、46 篇文档）：`scripts/seed-kb.mts` 以真实 MiniMax 向量把它灌入 KB，kg-build 语料腿经 `corpus.manifestFile` 读同一份清单，KB 文档集与 KG 抽取扫描因此不会漂移（清单刻意排除 `connector-files/` 等非语料投递目录）。
 
 ## 提一个有依据的问题
 

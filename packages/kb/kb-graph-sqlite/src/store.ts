@@ -57,6 +57,19 @@ interface TripleProjectionRow {
   object_id: string
 }
 
+/** One `select-nodes` projection row (the bulk node-listing read). */
+interface NodeListRow {
+  id: string
+  tenant_id: string
+  type_id: string
+  natural_key: string | null
+  name: string
+  summary: string | null
+  props: string | null
+  created_at: string
+  updated_at: string
+}
+
 /** One kg_edges row for the v2 face. */
 interface EdgeRow {
   id: string
@@ -219,6 +232,18 @@ function rowToStoredTriple(row: TripleProjectionRow): KbGraphStoredTriple {
     predicate: kgRelationId(row.relation_id),
     object: { type: kgNodeTypeId(row.object_type), id: row.object_id },
     ...(hasCitation ? { sourcePath: row.source_id } : {}),
+  }
+}
+
+/** Map one kg_source_runs row onto the seam shape. */
+function rowToSourceRun(row: SourceRunRow): KgSourceRun {
+  return {
+    sourceSystem: row.source_system,
+    scope: row.scope,
+    ...(row.watermark === null ? {} : { watermark: row.watermark }),
+    ...(row.content_hash === null ? {} : { contentHash: row.content_hash }),
+    ...(row.run_config === null ? {} : { runConfig: row.run_config }),
+    lastRunAt: row.last_run_at,
   }
 }
 
@@ -566,10 +591,12 @@ export class SqliteGraphStore implements KgStore {
   async tombstoneBySource(sourceSystem: string, sourceId: string, at: string): Promise<number> {
     await Promise.resolve()
     this.assertLive()
-    const result = this.db.prepare(sql('tombstone-by-source')).run(
-      at, sourceSystem, sourceId,
-    ) as { changes: number | bigint }
-    return Number(result.changes)
+    return this.write(() => {
+      const result = this.db.prepare(sql('tombstone-by-source')).run(
+        at, sourceSystem, sourceId,
+      ) as { changes: number | bigint }
+      return Number(result.changes)
+    })
   }
 
   async putAlias(tenantId: string, typeId: KgNodeTypeId, alias: string, nodeId: string): Promise<void> {
@@ -605,14 +632,22 @@ export class SqliteGraphStore implements KgStore {
     this.assertLive()
     const row = this.db.prepare(sql('select-source-run')).get(sourceSystem, scope) as unknown as SourceRunRow | undefined
     if (row === undefined) return undefined
-    return {
-      sourceSystem: row.source_system,
-      scope: row.scope,
-      ...(row.watermark === null ? {} : { watermark: row.watermark }),
-      ...(row.content_hash === null ? {} : { contentHash: row.content_hash }),
-      ...(row.run_config === null ? {} : { runConfig: row.run_config }),
-      lastRunAt: row.last_run_at,
-    }
+    return rowToSourceRun(row)
+  }
+
+  async listSourceRuns(sourceSystem: string): Promise<readonly KgSourceRun[]> {
+    await Promise.resolve()
+    this.assertLive()
+    const rows = this.db.prepare(sql('list-source-runs')).all(sourceSystem) as unknown as SourceRunRow[]
+    return rows.map(rowToSourceRun)
+  }
+
+  async deleteSourceRun(sourceSystem: string, scope: string): Promise<void> {
+    await Promise.resolve()
+    this.assertLive()
+    this.write(() => {
+      this.db.prepare(sql('delete-source-run')).run(sourceSystem, scope)
+    })
   }
 
   async upsertNodeType(type: KgNodeType): Promise<void> {
@@ -746,7 +781,38 @@ export class SqliteGraphStore implements KgStore {
       })
       if (hits.length >= k) break
     }
+    // Alias pass (the v1 search's own second round): a query matching a bound
+    // alias resolves to its binding node, deduplicated against the name pass.
+    if (hits.length < k) {
+      const seen = new Set(hits.map(hit => hit.id))
+      for (const row of this.db.prepare(sql('select-aliases-for-search')).all(
+        tenantId, type === undefined ? null : String(type), type === undefined ? null : String(type),
+      ) as unknown as Array<{ alias: string; node_id: string; node_name: string; node_type: string }>) {
+        if (!row.alias.toLowerCase().includes(needle)) continue
+        if (seen.has(row.node_id)) continue
+        seen.add(row.node_id)
+        hits.push({ id: row.node_id, type: kgNodeTypeId(row.node_type), name: row.node_name })
+        if (hits.length >= k) break
+      }
+    }
     return hits
+  }
+
+  async listNodes(tenantId: string, k: number): Promise<readonly KgNode[]> {
+    await Promise.resolve()
+    this.assertLive()
+    const rows = this.db.prepare(sql('select-nodes')).all(tenantId, k) as unknown as readonly NodeListRow[]
+    return rows.map(row => ({
+      id: row.id,
+      tenantId: row.tenant_id,
+      type: kgNodeTypeId(row.type_id),
+      ...(row.natural_key === null ? {} : { naturalKey: row.natural_key }),
+      name: row.name,
+      ...(row.summary === null ? {} : { summary: row.summary }),
+      ...(row.props === null ? {} : { props: JSON.parse(row.props) as Record<string, unknown> }),
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    }))
   }
 
   /** Roll back the open transaction, retaining the original failure. */

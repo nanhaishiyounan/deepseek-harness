@@ -21,6 +21,8 @@ interface ScriptedStore extends KgStore {
   putAlias: Mock
   putSourceRun: Mock
   getSourceRun: Mock
+  listSourceRuns: Mock
+  deleteSourceRun: Mock
   upsertNodeType: Mock
   upsertRelation: Mock
   listStoredNodeTypes: Mock
@@ -54,6 +56,8 @@ function scriptedKgStore(id: string): ScriptedStore {
     putAlias: vi.fn(async () => {}),
     putSourceRun: vi.fn(async () => {}),
     getSourceRun: vi.fn(async (): Promise<KgSourceRun | undefined> => undefined),
+    listSourceRuns: vi.fn(async (): Promise<readonly KgSourceRun[]> => []),
+    deleteSourceRun: vi.fn(async () => {}),
     upsertNodeType: vi.fn(async () => {}),
     upsertRelation: vi.fn(async () => {}),
     listStoredNodeTypes: vi.fn(async (): Promise<readonly KgNodeType[]> => []),
@@ -238,5 +242,16 @@ describe('KbGraphRuntime v2 forwarding', () => {
     expect(store.listStoredNodeTypes).toHaveBeenCalledTimes(1)
     expect(store.listStoredRelations).toHaveBeenCalledTimes(1)
     expect(registry).toEqual({ nodeTypes: [], relations: [] })
+  })
+
+  it('forwards source-run listing and deletion to the v2 store', async () => {
+    const ctx = await boot()
+    const store = scriptedKgStore('s')
+    ctx.kbGraph.registerStoreProvider(store)
+    const runs = await ctx.kbGraph.listSourceRuns('kb')
+    await ctx.kbGraph.deleteSourceRun('kb', 'connector-files/drop.md')
+    expect(store.listSourceRuns).toHaveBeenCalledWith('kb')
+    expect(runs).toEqual([])
+    expect(store.deleteSourceRun).toHaveBeenCalledWith('kb', 'connector-files/drop.md')
   })
 })

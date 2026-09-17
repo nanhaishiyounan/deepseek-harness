@@ -6,11 +6,11 @@
  * alignment merges extracted entities onto canonical NocoBase rows by
  * normalized name and aliases. Incremental runs are idempotent — per-scope
  * fingerprint comparisons skip unchanged sources, merges converge, and
- * disappeared rows tombstone.
+ * disappeared rows and retired corpus scopes tombstone.
  * @module @deepseek-ai/dsh-kg-build
  */
 
-import { readdir, readFile, stat } from 'node:fs/promises'
+import { readdir, readFile } from 'node:fs/promises'
 import { join, relative } from 'node:path'
 import { Context, Service } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
@@ -31,12 +31,15 @@ import {
 import type { NocoBaseRow } from './mappers.ts'
 import { buildExtractionPrompt, extractChunk } from './extract.ts'
 import type { ExtractionLlm, OntologyView } from './extract.ts'
-import { alignEntity } from './align.ts'
+import { alignEntity, normalizeName } from './align.ts'
 import type { AdjudicatingLlm } from './align.ts'
+import { loadCorpusManifest, normalizeCorpusDir } from './corpus-manifest.ts'
+import type { KbCorpusManifest } from './corpus-manifest.ts'
+import { crossSourceEdges, CROSS_SOURCE_MIN_NAME_LENGTH, CROSS_SOURCE_SYSTEM, kbScopeOfNodeId } from './cross-source.ts'
 import { planScopeRun, priorStateOf, sha256Hex } from './incremental.ts'
 import type {
-  CollectionRunReport, CorpusReport, KgBuildConfig, KgBuildRunMetrics, KgBuildRunRecord,
-  KgBuildRunReport, KgMappingsFile, SimpleSourceReport,
+  CollectionRunReport, CorpusReport, CrossSourceAlignReport, KgBuildConfig, KgBuildRunMetrics,
+  KgBuildRunRecord, KgBuildRunReport, KgMappingsFile, SimpleSourceReport,
 } from './types.ts'
 import { computeQualityMetrics } from './quality.ts'
 import { loadMappingsFile } from './mappings.ts'
@@ -47,6 +50,8 @@ import { kgNodeTypeId, kgRelationId, ONTOLOGY_VERSION } from '@deepseek-ai/dsh-k
 
 export { KgBuildError } from './error.ts'
 export * from './types.ts'
+export { loadCorpusManifest, normalizeCorpusDir, parseCorpusManifest } from './corpus-manifest.ts'
+export type { KbCorpusDir, KbCorpusManifest } from './corpus-manifest.ts'
 export { computeQualityMetrics } from './quality.ts'
 export { loadMappingsFile, parseMappings } from './mappings.ts'
 export type { KgMappingRules } from './mappings.ts'
@@ -58,6 +63,10 @@ export {
   DEFAULT_AUTO_THRESHOLD, DEFAULT_GRAY_FLOOR, alignEntity, jaroWinkler, normalizeName,
 } from './align.ts'
 export type { AdjudicatingLlm, AlignGraphFace, AlignmentDecision } from './align.ts'
+export {
+  CONTAINS_COREFERENCE_CONFIDENCE, CROSS_SOURCE_EXCLUDED_TYPES, CROSS_SOURCE_MIN_NAME_LENGTH,
+  CROSS_SOURCE_SYSTEM, EXACT_COREFERENCE_CONFIDENCE, crossSourceEdges, kbScopeOfNodeId,
+} from './cross-source.ts'
 export {
   fingerprintRows, planScopeRun, priorStateOf, sha256Hex,
 } from './incremental.ts'
@@ -88,6 +97,8 @@ export const DEFAULT_MAX_CHUNKS = 4
 export const DEFAULT_CHUNK_CHARS = 4_000
 /** Environment variable the NocoBase base url falls back to. */
 export const NOCOBASE_BASE_URL_ENV = 'NOCOBASE_BASE_URL'
+/** Enumeration cap for the cross-source alignment pass (nodes it must see whole). */
+export const LIST_NODES_CAP = 10_000
 
 /** Plugin config: the tenant binding, the enabled sources, and the budgets. */
 export interface Config extends KgBuildConfig {}
@@ -109,6 +120,7 @@ export const Config = z.object({
   connector: z.boolean().default(true),
   corpus: z.object({
     root: z.string(),
+    manifestFile: z.string(),
     extensions: z.array(z.string()).default(['.md', '.txt']),
     maxDocuments: z.number().step(1).min(1),
     maxChunksPerDocument: z.number().step(1).min(1),
@@ -122,13 +134,17 @@ export const Config = z.object({
     autoThreshold: z.number().min(0).max(1),
     grayFloor: z.number().min(0).max(1),
   }),
+  crossSourceAlign: z.object({
+    enabled: z.boolean().default(true),
+    exactOnly: z.boolean().default(false),
+  }),
   pageSize: z.number().step(1).min(1).max(500).default(DEFAULT_PAGE_SIZE),
   intervalMs: z.number().step(1).min(0).default(0),
 })
 
 /** The validated plugin config the loader hands the constructor (defaults filled). */
-export type KgBuildPluginConfig = Required<Omit<Config, 'nocobase' | 'corpus' | 'extract' | 'align'>>
-  & Pick<Config, 'nocobase' | 'corpus' | 'extract' | 'align'>
+export type KgBuildPluginConfig = Required<Omit<Config, 'nocobase' | 'corpus' | 'extract' | 'align' | 'crossSourceAlign'>>
+  & Pick<Config, 'nocobase' | 'corpus' | 'extract' | 'align' | 'crossSourceAlign'>
 
 /** Options one manual run accepts. */
 export interface RunOptions {
@@ -183,6 +199,7 @@ export class KgBuildRuntime extends Service {
   static Config = Config
   private readonly resolved: KgBuildPluginConfig
   private mappingsFile: KgMappingsFile | undefined
+  private corpusManifest: KbCorpusManifest | undefined
   private lastReport: KgBuildRunReport | undefined
 
   constructor(ctx: Context, config: KgBuildPluginConfig) {
@@ -203,6 +220,15 @@ export class KgBuildRuntime extends Service {
       const mappingsPath = nocobase.mappingsFile
       if (mappingsPath !== undefined && mappingsPath.length > 0) {
         this.mappingsFile = loadMappingsFile(mappingsPath)
+      }
+    }
+    {
+      // Fail loud at load: an unreadable or malformed corpus manifest stops
+      // the plugin here, exactly like the mappings file.
+      const corpus = this.resolved.corpus as { manifestFile?: string } | undefined
+      const manifestPath = corpus?.manifestFile
+      if (manifestPath !== undefined && manifestPath.length > 0) {
+        this.corpusManifest = loadCorpusManifest(manifestPath)
       }
     }
     if (this.resolved.intervalMs > 0) {
@@ -349,6 +375,7 @@ export class KgBuildRuntime extends Service {
     const lakehouse = await this.runLakehouse(signal)
     const connector = await this.runConnector(signal)
     const corpus = await this.runCorpus(signal)
+    const crossSourceAlign = await this.runCrossSourceAlign()
     const ruleHits: Record<string, number> = {
       R01: persistedTypes,
       R02: collections.reduce((sum, entry) => sum + entry.nodesUpserted, 0),
@@ -377,6 +404,7 @@ export class KgBuildRuntime extends Service {
       ...(lakehouse === undefined ? {} : { lakehouse }),
       ...(connector === undefined ? {} : { connector }),
       ...(corpus === undefined ? {} : { corpus }),
+      ...(crossSourceAlign === undefined ? {} : { crossSourceAlign }),
       persistedTypes,
       persistedRelations,
       ruleHits,
@@ -687,6 +715,7 @@ export class KgBuildRuntime extends Service {
   private async runCorpus(signal: AbortSignal | undefined): Promise<CorpusReport | undefined> {
     const corpus = this.resolved.corpus
     if (corpus === undefined || corpus.root === undefined || corpus.root.length === 0) return undefined
+    const corpusRoot = corpus.root
     const graph = this.graph()
     /* v8 ignore next -- extensions-default clause permutation; both default and explicit lists asserted */
     const tenant = this.resolved.tenant
@@ -699,26 +728,61 @@ export class KgBuildRuntime extends Service {
     const maxChunks = corpus.maxChunksPerDocument ?? DEFAULT_MAX_CHUNKS
     /* v8 ignore next -- maxChunkChars config arm; the default path asserted */
     const maxChunkChars = this.resolved.extract?.maxChunkChars ?? DEFAULT_CHUNK_CHARS
-    const entries = await readdir(corpus.root, { withFileTypes: true, recursive: true })
-    const files: Array<{ path: string; mtimeMs: number }> = []
-    for (const entry of entries) {
-      if (!entry.isFile()) continue
-      if (!extensions.some(ext => entry.name.endsWith(ext))) continue
-      const path = join(entry.parentPath, entry.name)
-      files.push({ path, mtimeMs: (await stat(path)).mtimeMs })
+    // The scan surface: the manifest's directories when one is configured
+    // (non-corpus drop-ins under the root never enter extraction), otherwise
+    // the whole root recursively.
+    const manifest = this.corpusManifest
+    const files: string[] = []
+    if (manifest === undefined) {
+      const entries = await readdir(corpus.root, { withFileTypes: true, recursive: true })
+      for (const entry of entries) {
+        if (!entry.isFile()) continue
+        if (!extensions.some(ext => entry.name.endsWith(ext))) continue
+        files.push(join(entry.parentPath, entry.name))
+      }
+    } else {
+      for (const { dir } of manifest.dirs) {
+        const dirPath = join(corpus.root, dir)
+        let names: string[]
+        try {
+          names = (await readdir(dirPath)).filter(name => extensions.some(ext => name.endsWith(ext))).sort()
+        } catch (error: unknown) {
+          throw new KgBuildError(
+            `kb-corpus manifest directory "${dir}" is missing under ${corpus.root} (${error instanceof Error ? error.message : String(error)})`,
+            'KG_BUILD_CORPUS_DIR_EMPTY',
+          )
+        }
+        if (names.length === 0) {
+          throw new KgBuildError(
+            `kb-corpus manifest directory "${dir}" carries no ${extensions.join('/')} file under ${corpus.root}`,
+            'KG_BUILD_CORPUS_DIR_EMPTY',
+          )
+        }
+        for (const name of names) files.push(join(dirPath, name))
+      }
     }
-    files.sort((left, right) => right.mtimeMs - left.mtimeMs)
+    // maxDocuments is a protective ceiling, not a truncation: a scan past it
+    // fails the run so a quietly shrinking corpus can never go unnoticed.
+    if (files.length > maxDocuments) {
+      throw new KgBuildError(
+        `corpus scan found ${String(files.length)} documents under ${corpus.root}`
+          + `${manifest === undefined ? '' : ` across ${String(manifest.dirs.length)} manifest directories`},`
+          + ` over the maxDocuments ceiling of ${String(maxDocuments)} — raise corpus.maxDocuments or shrink the corpus`,
+        'KG_BUILD_CORPUS_OVER_BUDGET',
+      )
+    }
     const report = {
       documents: 0, chunks: 0, extractionCalls: 0, extractedEntities: 0, extractedRelations: 0,
       degradedEntities: 0, droppedRelations: 0, mergedEntities: 0, tombstonedEdges: 0,
+      tombstonedScopes: 0,
     }
     const nodeIdOfName = new Map<string, { id: string; type: KgNodeTypeId }>()
-    for (const file of files.slice(0, maxDocuments)) {
+    for (const file of files) {
       if (signal?.aborted) break
-      const text = await readFile(file.path, 'utf8')
+      const text = await readFile(file, 'utf8')
       // The provenance scope is corpus-relative: stable across machines and
       // snapshot-hermetic (the absolute tmp path never enters an id).
-      const scope = relative(corpus.root, file.path)
+      const scope = relative(corpus.root, file)
       const contentHash = sha256Hex(text)
       const prior = priorStateOf(await graph.getSourceRun('kb', scope))
       report.documents += 1
@@ -789,7 +853,88 @@ export class KgBuildRuntime extends Service {
       }
       await graph.putSourceRun({ sourceSystem: 'kb', scope, contentHash, lastRunAt: now })
     }
+    // The manifest diff sweep (the corpus leg's disappeared protocol, mirroring
+    // the nocobase leg's plan.disappeared): a kb scope the manifest no longer
+    // admits loses its live edges and its watermark, so a retired corpus
+    // document can never linger as ghost extraction state. Without a manifest
+    // the whole root is admissible and the sweep has no ground truth to diff
+    // against.
+    if (manifest !== undefined) {
+      const allowed = new Set(files.map(file => relative(corpusRoot, file)))
+      const sweepAt = new Date().toISOString()
+      for (const run of await graph.listSourceRuns('kb')) {
+        if (allowed.has(run.scope)) continue
+        report.tombstonedEdges += await graph.tombstoneBySource('kb', run.scope, sweepAt)
+        await graph.deleteSourceRun('kb', run.scope)
+        report.tombstonedScopes += 1
+      }
+    }
     return report satisfies CorpusReport
+  }
+
+  /**
+   * The cross-source coreference leg: deterministic `corefers_with` edges
+   * between corpus-extracted entities and NocoBase rows. Reruns rebuild the
+   * pass's assertions per doc entity (tombstone then re-upsert under the
+   * seven-column anchor), so an unchanged world converges and a renamed row
+   * drops its stale edge. With a corpus manifest only manifest-scoped doc
+   * entities re-pair; a manifest-external ghost keeps its tombstone.
+   */
+  private async runCrossSourceAlign(): Promise<CrossSourceAlignReport | undefined> {
+    const settings = this.resolved.crossSourceAlign
+    if (settings?.enabled === false) {
+      return { docCandidates: 0, nocobaseNodes: 0, edgesCreated: 0, tombstonedEdges: 0 }
+    }
+    const graph = this.graph()
+    const tenant = this.resolved.tenant
+    const all = await graph.listNodes(tenant, LIST_NODES_CAP)
+    if (all.length === LIST_NODES_CAP) {
+      throw new KgBuildError(
+        `cross-source align: the tenant holds at least ${String(LIST_NODES_CAP)} nodes, over the pass's enumeration cap — split the tenant or raise the cap`,
+        'KG_BUILD_ALIGN_CAP_EXCEEDED',
+      )
+    }
+    const kbNodes = all.filter(node => node.id.startsWith('kb:'))
+    const docNodes = this.manifestScopedDocNodes(kbNodes)
+    const nocobaseNodes = all.filter(node => node.id.startsWith('nocobase:'))
+    const now = new Date().toISOString()
+    // Stale edges go first, for every kb node including manifest-external
+    // ghosts: each surviving doc entity's assertions rebuild below, a doc
+    // entity that no longer pairs with anything keeps its tombstone (the edge
+    // is gone, the nodes stay), and a ghost never re-asserts.
+    let tombstoned = 0
+    for (const doc of kbNodes) {
+      tombstoned += await graph.tombstoneBySource(CROSS_SOURCE_SYSTEM, doc.id, now)
+    }
+    const edges = crossSourceEdges(docNodes, nocobaseNodes, {
+      tenantId: tenant,
+      now,
+      ...(settings?.exactOnly === undefined ? {} : { exactOnly: settings.exactOnly }),
+    })
+    if (edges.length > 0) await graph.upsertEdges(edges)
+    return {
+      docCandidates: docNodes.filter(node => normalizeName(node.name).length >= CROSS_SOURCE_MIN_NAME_LENGTH).length,
+      nocobaseNodes: nocobaseNodes.length,
+      edgesCreated: edges.length,
+      tombstonedEdges: tombstoned,
+    }
+  }
+
+  /**
+   * Keep only the doc nodes whose scope sits under a manifest directory; with
+   * no manifest every `kb:` node stays a candidate (the whole root is
+   * admissible corpus then).
+   * @param kbNodes - every tenant node with the corpus leg's `kb:` prefix.
+   * @returns the manifest-scoped subset, insertion-ordered.
+   */
+  private manifestScopedDocNodes(kbNodes: readonly KgNode[]): KgNode[] {
+    const manifest = this.corpusManifest
+    if (manifest === undefined) return [...kbNodes]
+    const prefixes = manifest.dirs.map(entry => `${normalizeCorpusDir(entry.dir)}/`)
+    return kbNodes.filter((node) => {
+      const scope = kbScopeOfNodeId(node.id)
+      return scope !== undefined && prefixes.some(prefix => scope.startsWith(prefix))
+    })
   }
 }
 

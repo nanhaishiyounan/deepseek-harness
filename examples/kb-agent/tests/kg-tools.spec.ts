@@ -267,6 +267,12 @@ describe('kb-agent kg tools (keyless)', () => {
     const bucket = await ctx!.get('kbGraph')!.searchNodes('demo-food-co', '冷锋过境', undefined, 5)
     expect(bucket[0]?.id).toContain('#冷锋过境')
 
+    out.push('## kg_query(备份启用流程是什么) — the miss names every supported shape')
+    const miss = await callText('kg_query', { phrase: '备份启用流程是什么' })
+    out.push(miss)
+    out.push('')
+    expect(miss).toContain('宏发食品和张红喜的关系')
+
     const second = await build.run()
     out.push('## kgBuild.run() again — the idempotent pass')
     out.push(reportText(second))

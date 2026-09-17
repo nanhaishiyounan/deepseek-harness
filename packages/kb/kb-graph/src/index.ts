@@ -397,6 +397,19 @@ export class KbGraphRuntime extends Service {
   }
 
   /**
+   * List one tenant's nodes capped at `k` — the bulk enumeration primitive
+   * for passes that must see every node (cross-source alignment). Prefer
+   * {@link KbGraphRuntime.searchNodes} whenever a name or id can narrow the
+   * read.
+   * @param tenantId - owning tenant; the hard isolation key.
+   * @param k - maximum nodes to return.
+   * @returns the nodes (no embeddings), insertion-ordered.
+   */
+  async listNodes(tenantId: string, k: number): Promise<readonly KgNode[]> {
+    return await this.resolveKgStore().listNodes(tenantId, k)
+  }
+
+  /**
    * Merge one node onto its anchors through the v2 store face.
    * @param node - the node to merge.
    * @returns whether an existing row was merged (false = fresh insert).
@@ -480,6 +493,24 @@ export class KbGraphRuntime extends Service {
    */
   async getSourceRun(sourceSystem: string, scope: string): Promise<KgSourceRun | undefined> {
     return await this.resolveKgStore().getSourceRun(sourceSystem, scope)
+  }
+
+  /**
+   * List every source-run watermark row one system owns.
+   * @param sourceSystem - the asserting system.
+   * @returns the stored runs, scope-ordered.
+   */
+  async listSourceRuns(sourceSystem: string): Promise<readonly KgSourceRun[]> {
+    return await this.resolveKgStore().listSourceRuns(sourceSystem)
+  }
+
+  /**
+   * Delete one retired source-run watermark row; a never-run scope is a no-op.
+   * @param sourceSystem - the asserting system.
+   * @param scope - the collection/table/prefix scope.
+   */
+  async deleteSourceRun(sourceSystem: string, scope: string): Promise<void> {
+    await this.resolveKgStore().deleteSourceRun(sourceSystem, scope)
   }
 
   /**

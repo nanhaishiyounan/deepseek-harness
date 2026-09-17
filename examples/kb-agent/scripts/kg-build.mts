@@ -10,6 +10,7 @@
  * Run from the repo root:
  *   node --import tsx/esm examples/kb-agent/scripts/kg-build.mts
  */
+import { DatabaseSync } from 'node:sqlite'
 import { Context } from '@deepseek-ai/cordis'
 import LlmRuntime from '@deepseek-ai/dsh-llm'
 import * as LlmMiniMax from '@deepseek-ai/dsh-llm-minimax'
@@ -58,7 +59,15 @@ try {
   await ctx.plugin(KgBuildRuntime, {
     tenant,
     nocobase: { mappingsFile },
-    ...(withKey ? { corpus: { root: 'examples/kb-agent/workspace/data', extensions: ['.md'], maxDocuments: 50, maxChunksPerDocument: 4 } } : {}),
+    ...(withKey ? { corpus: {
+      root: 'examples/kb-agent/workspace/data',
+      // The same manifest seed-kb and setup-dsh-data read: one corpus list
+      // for the KB and the KG, non-corpus drop-ins excluded.
+      manifestFile: 'examples/kb-agent/kb-corpus.yml',
+      extensions: ['.md'],
+      maxDocuments: 60,
+      maxChunksPerDocument: 4,
+    } } : {}),
     pageSize: 100,
     intervalMs: 0,
   })
@@ -83,7 +92,7 @@ try {
   check('full build ingested every collection', first.collections.length === 5 && first.collections.every(entry => entry.rows > 0))
 
   // ①b Versioned ontology and the mappings readout.
-  check('ontologyVersion is 1.0.0', graph.ontologyVersion() === '1.0.0', graph.ontologyVersion())
+  check('ontologyVersion is 1.1.0', graph.ontologyVersion() === '1.1.0', graph.ontologyVersion())
   const readout = await build.mappings()
   check('mappings readout carries 5 collections', readout.collections.length === 5 && readout.version === 1, `${String(readout.collections.length)} collections, v${String(readout.version)}`)
 
@@ -107,6 +116,45 @@ try {
     check('张红喜 reaches its services (hop 1)', services.length >= 2, services.join('、'))
     const ordersBefore = subgraph.nodes.filter(node => String(node.type) === 'orders')
     console.log(`  张红喜 2-hop orders in graph: ${String(ordersBefore.length)}`)
+  }
+
+  // ③b Cross-source coreference: the corefers_with bridge between the kb-doc
+  // family and the nocobase family (with a corpus run only; the deterministic
+  // legs carry no kb: entities). A recursive-CTE reachability check walks
+  // 莫斯科主仓 (document warehouse) onto nocobase:experts:1 with no hop limit —
+  // the structural acceptance the original session failed.
+  if (first.crossSourceAlign !== undefined) {
+    console.log(`  cross-source align: docCandidates=${String(first.crossSourceAlign.docCandidates)} nocobaseNodes=${String(first.crossSourceAlign.nocobaseNodes)} edgesCreated=${String(first.crossSourceAlign.edgesCreated)}`)
+    const db = new DatabaseSync(graphPath, { readOnly: true })
+    try {
+      const crossFamily = db.prepare(
+        "SELECT COUNT(*) AS n FROM kg_edges WHERE source_system = 'kg-align' AND valid_until IS NULL AND ((src_id LIKE 'kb:%' AND dst_id LIKE 'nocobase:%') OR (src_id LIKE 'nocobase:%' AND dst_id LIKE 'kb:%'))",
+      ).get() as { n: number }
+      check('corefers_with wires kb-doc and nocobase families', crossFamily.n > 0, `${String(crossFamily.n)} cross-family edges`)
+      const warehouse = db.prepare("SELECT id FROM kg_nodes WHERE tenant_id = ? AND name LIKE '%莫斯科主仓%' AND id LIKE 'kb:%' LIMIT 1").get(tenant) as { id: string } | undefined
+      check('document 莫斯科主仓 entity exists', warehouse !== undefined, warehouse?.id ?? 'none')
+      // The doc side of the bridge reaches the expert services too: the doc
+      // Region 中亚 corefers onto expert_services:1 (中亚货运动线方案).
+      const zhongyaEdge = db.prepare(
+        "SELECT src_id FROM kg_edges WHERE relation_id = 'corefers_with' AND valid_until IS NULL AND dst_id = 'nocobase:expert_services:1' AND src_id LIKE 'kb:%' LIMIT 1",
+      ).get() as { src_id: string } | undefined
+      check('a doc 中亚 entity corefers onto 中亚货运动线方案', zhongyaEdge !== undefined, zhongyaEdge?.src_id ?? 'none')
+      if (warehouse !== undefined && zhangNode !== undefined) {
+        const reachable = db.prepare(`
+          WITH RECURSIVE walk(node, depth) AS (
+            SELECT ?, 0
+            UNION
+            SELECT CASE WHEN e.src_id = walk.node THEN e.dst_id ELSE e.src_id END, walk.depth + 1
+            FROM kg_edges e JOIN walk ON (e.src_id = walk.node OR e.dst_id = walk.node)
+            WHERE e.valid_until IS NULL AND e.tenant_id = ? AND walk.depth < 8
+          )
+          SELECT EXISTS(SELECT 1 FROM walk WHERE node = ?) AS hit
+        `).get(warehouse.id, tenant, zhangNode.id) as { hit: number }
+        check('莫斯科主仓 ↔ nocobase:experts:1 connected through the graph', reachable.hit === 1, `${warehouse.id} → ${zhangNode.id}`)
+      }
+    } finally {
+      db.close()
+    }
   }
 
   // ④ Watermarks persisted.

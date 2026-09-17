@@ -1136,6 +1136,12 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         returns: 'the matching node hits.',
       },
       {
+        signature: 'async listNodes(tenantId: string, k: number): Promise<readonly KgNode[]>',
+        description: 'List one tenant\'s nodes capped at `k` — the bulk enumeration primitive for passes that must see every node (cross-source alignment). Prefer KbGraphRuntime.searchNodes whenever a name or id can narrow the read.',
+        parameters: [{ name: 'tenantId', description: 'owning tenant; the hard isolation key.' }, { name: 'k', description: 'maximum nodes to return.' }],
+        returns: 'the nodes (no embeddings), insertion-ordered.',
+      },
+      {
         signature: 'async upsertNode(node: KgNode): Promise<{ merged: boolean }>',
         description: 'Merge one node onto its anchors through the v2 store face.',
         parameters: [{ name: 'node', description: 'the node to merge.' }],
@@ -1180,6 +1186,17 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         description: 'Read one source-run watermark row.',
         parameters: [{ name: 'sourceSystem', description: 'the asserting system.' }, { name: 'scope', description: 'the collection/table/prefix scope.' }],
         returns: 'the stored run, or `undefined` when never run.',
+      },
+      {
+        signature: 'async listSourceRuns(sourceSystem: string): Promise<readonly KgSourceRun[]>',
+        description: 'List every source-run watermark row one system owns.',
+        parameters: [{ name: 'sourceSystem', description: 'the asserting system.' }],
+        returns: 'the stored runs, scope-ordered.',
+      },
+      {
+        signature: 'async deleteSourceRun(sourceSystem: string, scope: string): Promise<void>',
+        description: 'Delete one retired source-run watermark row; a never-run scope is a no-op.',
+        parameters: [{ name: 'sourceSystem', description: 'the asserting system.' }, { name: 'scope', description: 'the collection/table/prefix scope.' }],
       },
       {
         signature: 'async persistNodeType(type: KgNodeType): Promise<void>',
@@ -3736,7 +3753,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'CorpusReport',
-    declaration: 'export interface CorpusReport {\n    readonly documents: number;\n    readonly chunks: number;\n    readonly extractionCalls: number;\n    readonly extractedEntities: number;\n    readonly extractedRelations: number;\n    readonly degradedEntities: number;\n    readonly droppedRelations: number;\n    readonly mergedEntities: number;\n    readonly tombstonedEdges: number;\n}',
+    declaration: 'export interface CorpusReport {\n    readonly documents: number;\n    readonly chunks: number;\n    readonly extractionCalls: number;\n    readonly extractedEntities: number;\n    readonly extractedRelations: number;\n    readonly degradedEntities: number;\n    readonly droppedRelations: number;\n    readonly mergedEntities: number;\n    readonly tombstonedEdges: number;\n    readonly tombstonedScopes: number;\n}',
   },
   {
     name: 'CreateAgentOptions',
@@ -3781,6 +3798,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'CredentialRef',
     declaration: 'export type CredentialRef = Branded<\'CredentialRef\'>;',
+  },
+  {
+    name: 'CrossSourceAlignReport',
+    declaration: 'export interface CrossSourceAlignReport {\n    readonly docCandidates: number;\n    readonly nocobaseNodes: number;\n    readonly edgesCreated: number;\n    readonly tombstonedEdges: number;\n}',
   },
   {
     name: 'DiffCallView',
@@ -4240,7 +4261,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'KgBuildRunReport',
-    declaration: 'export interface KgBuildRunReport {\n    readonly collections: readonly CollectionRunReport[];\n    readonly lakehouse?: SimpleSourceReport;\n    readonly connector?: SimpleSourceReport;\n    readonly corpus?: CorpusReport;\n    readonly persistedTypes: number;\n    readonly persistedRelations: number;\n    readonly ruleHits: Readonly<Record<string, number>>;\n    readonly ontologyRevision?: number;\n    readonly buildRunId?: number;\n    readonly metrics?: KgBuildRunMetrics;\n    readonly startedAt: string;\n    readonly finishedAt: string;\n}',
+    declaration: 'export interface KgBuildRunReport {\n    readonly collections: readonly CollectionRunReport[];\n    readonly lakehouse?: SimpleSourceReport;\n    readonly connector?: SimpleSourceReport;\n    readonly corpus?: CorpusReport;\n    readonly crossSourceAlign?: CrossSourceAlignReport;\n    readonly persistedTypes: number;\n    readonly persistedRelations: number;\n    readonly ruleHits: Readonly<Record<string, number>>;\n    readonly ontologyRevision?: number;\n    readonly buildRunId?: number;\n    readonly metrics?: KgBuildRunMetrics;\n    readonly startedAt: string;\n    readonly finishedAt: string;\n}',
   },
   {
     name: 'KgBuildRunRow',
@@ -4308,7 +4329,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'KgProvenance',
-    declaration: 'export interface KgProvenance {\n    readonly sourceSystem: \'nocobase\' | \'lakehouse\' | \'connector\' | \'kb\';\n    readonly sourceId: string;\n    readonly extractedAt: string;\n}',
+    declaration: 'export interface KgProvenance {\n    readonly sourceSystem: \'nocobase\' | \'lakehouse\' | \'connector\' | \'kb\' | \'kg-align\';\n    readonly sourceId: string;\n    readonly extractedAt: string;\n}',
   },
   {
     name: 'KgQualityReadout',

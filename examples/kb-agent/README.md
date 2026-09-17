@@ -34,7 +34,7 @@ DSH_HOME=examples/kb-agent/.dsh pnpm dsh --profile headless --patch examples/kb-
   "用 kb_ingest 逐篇入库这六篇文档：examples/kb-agent/workspace/data/meetings/2026-08-20-supplier-visit-hongfa.md 与 examples/kb-agent/workspace/data/meetings/2026-08-27-project-kickoff.md（doc_kind 取 meeting）、examples/kb-agent/workspace/data/profiles/hongfa-food.md 与 examples/kb-agent/workspace/data/profiles/lvyuan-ingredients.md（doc_kind 取 profile）、examples/kb-agent/workspace/data/regulations/gb2760-excerpt.md 与 examples/kb-agent/workspace/data/regulations/gb14881-excerpt.md（doc_kind 取 regulation），完成后用 kb_stats 报告覆盖情况"
 ```
 
-Ingest is overwrite-shaped per source path, so re-running the command replaces the same six documents instead of duplicating them.
+Ingest is overwrite-shaped per source path, so re-running the command replaces the same six documents instead of duplicating them. The full batch corpus lives in the versioned `kb-corpus.yml` manifest (14 directories under `workspace/data/`, 46 documents): `scripts/seed-kb.mts` ingests it into the KB with real MiniMax embeddings, and the kg-build corpus leg reads the same manifest through `corpus.manifestFile`, so the KB document set and the KG extraction scan cannot drift apart (the manifest deliberately excludes non-corpus drop-ins like `connector-files/`).
 
 ## Ask a grounded question
 

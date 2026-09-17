@@ -200,7 +200,7 @@ Source: [`packages/kb/tool-kb/src/index.ts`](../packages/kb/tool-kb/src/index.ts
 
 ### `kg_subgraph`
 
-Read the k-hop neighborhood of named entities in the knowledge graph (default 2 hops, ≤200 nodes). Seeds resolve by entity name or alias; the answer lists each entity with its relations and the provenance sources. For "谁给谁供货 / 有哪些订单 / 合规关系" questions use this, not SQL.
+Read the k-hop neighborhood of named entities in the knowledge graph (default 2 hops, up to 3, ≤200 nodes). Seeds resolve by entity name or alias; the answer lists each entity with its relations and the provenance sources. For "谁给谁供货 / 有哪些订单 / 合规关系" questions use this, not SQL.
 
 ```json
 {
@@ -215,7 +215,7 @@ Read the k-hop neighborhood of named entities in the knowledge graph (default 2 
     },
     "hops": {
       "type": "number",
-      "description": "Maximum walk depth, 0–2; default 2."
+      "description": "Maximum walk depth, 0–3; default 2. Three hops cross the corefers_with bridge between document entities and business rows."
     },
     "max_nodes": {
       "type": "number",
@@ -518,7 +518,7 @@ Source: [`packages/connector/tool-nocobase/src/index.ts`](../packages/connector/
 
 ### `nb_get`
 
-Read one business record by collection and row id. Returns the full row as stored.
+Read one business record by collection and row id. Returns the full row as stored. Scalar foreign-key ids stay ids — resolve the referenced name with one more nb_list on the target collection (filter op in).
 
 ```json
 {
@@ -544,7 +544,7 @@ Source: [`packages/connector/tool-nocobase/src/index.ts`](../packages/connector/
 
 ### `nb_list`
 
-Query rows of one business collection with restricted filters (eq/in/gt/lt, and/or), sorting, field projection, and paging. Returns the page, the total count, and the rows.
+Query rows of one business collection with restricted filters (eq/in/gt/lt/includes — for fuzzy matching use includes (substring match), never like — and/or), sorting, field projection, and paging. Returns the page, the total count, and the rows.
 
 ```json
 {
@@ -556,7 +556,7 @@ Query rows of one business collection with restricted filters (eq/in/gt/lt, and/
     },
     "filter": {
       "type": "array",
-      "description": "Conditions: {field, op: eq|in|gt|lt, value}; scalars for eq/gt/lt, a non-empty array for in.",
+      "description": "Conditions: {field, op: eq|in|gt|lt|includes, value}; scalars for eq/gt/lt/includes, a non-empty array for in. For fuzzy matching use includes (substring match), not like.",
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -570,7 +570,8 @@ Query rows of one business collection with restricted filters (eq/in/gt/lt, and/
               "eq",
               "in",
               "gt",
-              "lt"
+              "lt",
+              "includes"
             ]
           },
           "value": {}

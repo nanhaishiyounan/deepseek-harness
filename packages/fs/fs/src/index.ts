@@ -28,6 +28,7 @@ export {
   FsTargetKey,
   FsVersion,
 } from './types.ts'
+export { sessionResolveCwd } from './session-path.ts'
 export type {
   FsEditOutcome,
   FsEditRequest,

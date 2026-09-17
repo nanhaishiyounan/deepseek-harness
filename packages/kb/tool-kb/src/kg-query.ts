@@ -60,7 +60,7 @@ export function parseKgQueryArgs(args: KgQueryArgs): string {
 
 /** Format the miss the model reads: the supported shapes plus the fallback. */
 function unsupportedMessage(): string {
-  return `kg_query: no template matches this phrase; supported shapes: ${KG_QUERY_EXAMPLES.slice(0, 4).join(' / ')} — fall back to kg_schema + kg_subgraph for anything else`
+  return `kg_query: no template matches this phrase; supported shapes: ${KG_QUERY_EXAMPLES.join(' / ')} — fall back to kg_schema + kg_subgraph for anything else`
 }
 
 /**

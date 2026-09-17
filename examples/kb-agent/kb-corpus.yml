@@ -1,0 +1,43 @@
+# Knowledge-corpus manifest (kb-corpus.yml) — the versioned single source of
+# truth for which workspace/data directories are corpus. seed-kb.mts (KB
+# ingestion), setup-dsh-data.mts (the KB watermark probe), and the kg-build
+# corpus leg (kg-build corpus.manifestFile in cordis.patch.yml) all read this
+# one file: adding a directory here is the only step new corpus needs, and the
+# KB document set and the KG extraction scan cannot drift apart.
+#
+# Non-corpus directories stay deliberately unlisted: connector-files (the
+# connector drop-in), crm / experts / hub (business data and rosters, not
+# prose corpus).
+#
+# dirs[].dir   directory name under workspace/data (flat, no nesting)
+# dirs[].kind  document kind stamped onto every document the directory owns
+version: 1
+dirs:
+  - dir: trade-finance
+    kind: report
+  - dir: export-compliance
+    kind: regulation
+  - dir: quality
+    kind: report
+  - dir: ecommerce
+    kind: report
+  - dir: cold-chain
+    kind: report
+  - dir: export-risk
+    kind: report
+  - dir: market
+    kind: report
+  - dir: meetings
+    kind: meeting
+  - dir: process
+    kind: report
+  - dir: profiles
+    kind: profile
+  - dir: regulations
+    kind: regulation
+  - dir: supply
+    kind: report
+  - dir: cost
+    kind: report
+  - dir: food-safety
+    kind: regulation

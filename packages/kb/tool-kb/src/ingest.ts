@@ -7,7 +7,7 @@
 
 import type { Context } from '@deepseek-ai/cordis'
 import { defineTool } from '@deepseek-ai/dsh-tools'
-import type {} from '@deepseek-ai/dsh-fs'
+import { sessionResolveCwd } from '@deepseek-ai/dsh-fs'
 import type { GenericCallView, GenericResultView, ToolResult } from '@deepseek-ai/dsh-tools'
 import { KB_DOC_KINDS } from '@deepseek-ai/dsh-kb'
 import type { KbDocKind } from '@deepseek-ai/dsh-kb'
@@ -177,7 +177,8 @@ export function applyKbIngestTool(ctx: Context, tenant: string, timeoutMs: numbe
     timeoutMs,
     async execute(args, exec) {
       const input = parseIngestArgs(args, tenant)
-      const target = await ctx.fs.resolve(input.path, { signal: exec.signal })
+      const cwd = sessionResolveCwd(exec.agent?.session.header.cwd, input.path)
+      const target = await ctx.fs.resolve(input.path, { ...cwd === undefined ? {} : { cwd }, signal: exec.signal })
       const content = TEXT_EXTENSIONS.some(extension => input.path.toLowerCase().endsWith(extension))
         ? await ctx.fs.readText(target, exec.signal)
         : await readParsedDocument(ctx, target, input.path, exec.signal)

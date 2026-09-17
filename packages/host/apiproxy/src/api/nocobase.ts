@@ -42,11 +42,11 @@ export interface NocobaseRowPageView {
   readonly rows: readonly NocobaseRowView[]
 }
 
-/** One restricted filter condition (the same eq/in/gt/lt vocabulary the nb_* tools accept). */
+/** One restricted filter condition (the same eq/in/gt/lt/includes vocabulary the nb_* tools accept). */
 export interface NocobaseFilterConditionView {
   readonly field: string
-  readonly op: 'eq' | 'in' | 'gt' | 'lt'
-  /** Scalar for eq/gt/lt; non-empty array for in. */
+  readonly op: 'eq' | 'in' | 'gt' | 'lt' | 'includes'
+  /** Scalar for eq/gt/lt/includes; non-empty array for in. */
   readonly value: string | number | boolean | readonly (string | number | boolean)[]
 }
 

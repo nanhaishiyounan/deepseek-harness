@@ -212,10 +212,11 @@ describe('kg_subgraph tool', () => {
     expect(answer.text).toBe(value.yaml)
   })
 
-  it('clamps hops and nodes and applies the relation filter', async () => {
+  it('clamps hops to 3 and nodes to the budget, applying the relation filter', async () => {
     await seedFoodChain()
     const direct = await call('kg_subgraph', { seeds: ['宏发食品'], hops: 99, max_nodes: 1, relation_types: ['produces'] })
-    const value = direct.value as { node_count: number; truncated: boolean; yaml: string }
+    const value = direct.value as { hops: number; node_count: number; truncated: boolean; yaml: string }
+    expect(value.hops).toBe(3)
     expect(value.node_count).toBe(1)
     expect(value.truncated).toBe(true)
     expect(value.yaml).not.toContain('contains:')

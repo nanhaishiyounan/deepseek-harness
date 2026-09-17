@@ -70,9 +70,20 @@ export interface CorpusSourceConfig {
    * it, so the runtime value is undefined.
    */
   root?: string | undefined
+  /**
+   * The declarative corpus manifest (kb-corpus.yml) — the corpus directory
+   * list's only home. When set, the scan covers exactly the manifest
+   * directories instead of recursing the whole root, so non-corpus drop-ins
+   * under the root never enter extraction. Explicitly undefined-typed for the
+   * same schemastery-materialization reason as {@link root}.
+   */
+  manifestFile?: string | undefined
   /** Glob-free suffix filter list; defaults to md and txt. */
   extensions?: string[]
-  /** Maximum documents per run; newest mtime first; default 50. */
+  /**
+   * Protective document ceiling per run: a scan finding more documents than
+   * this fails the run loudly instead of silently truncating; default 50.
+   */
   maxDocuments?: number
   /** Maximum chunks per document; default 4. */
   maxChunksPerDocument?: number
@@ -96,6 +107,14 @@ export interface AlignConfig {
   grayFloor?: number
 }
 
+/** Cross-source coreference alignment configuration. */
+export interface CrossSourceAlignConfig {
+  /** Whether the pass runs at all; default true (edges only, never merges). */
+  enabled?: boolean
+  /** Restrict matching to normalized-name equality, dropping containment matches; default false. */
+  exactOnly?: boolean
+}
+
 /** Pipeline plugin configuration (the schemastery-validated shape). */
 export interface KgBuildConfig {
   /** Tenant every graph write lands under — the deployment-side binding. */
@@ -112,6 +131,8 @@ export interface KgBuildConfig {
   extract?: ExtractConfig
   /** Entity alignment settings. */
   align?: AlignConfig
+  /** Cross-source coreference alignment settings; absent keeps the pass on. */
+  crossSourceAlign?: CrossSourceAlignConfig
   /** Page size for NocoBase row fetches; default 100 (R13 batching). */
   pageSize?: number
   /** Repeat-run interval in ms; 0 (default) disables scheduling — manual runs only. */
@@ -234,6 +255,20 @@ export interface CorpusReport {
   readonly droppedRelations: number
   readonly mergedEntities: number
   readonly tombstonedEdges: number
+  /** Retired scopes (manifest-external leftovers) whose edges and watermarks this run swept. */
+  readonly tombstonedScopes: number
+}
+
+/** Cross-source coreference alignment totals for one run. */
+export interface CrossSourceAlignReport {
+  /** Corpus-extracted entities eligible for coreference this run. */
+  readonly docCandidates: number
+  /** NocoBase row nodes considered this run. */
+  readonly nocobaseNodes: number
+  /** corefers_with edges (re)asserted this run. */
+  readonly edgesCreated: number
+  /** Stale coreference edges tombstoned before the rebuild. */
+  readonly tombstonedEdges: number
 }
 
 /** The quality metrics document one run computes and persists. */
@@ -266,6 +301,7 @@ export interface KgBuildRunReport {
   readonly lakehouse?: SimpleSourceReport
   readonly connector?: SimpleSourceReport
   readonly corpus?: CorpusReport
+  readonly crossSourceAlign?: CrossSourceAlignReport
   /** Registry entries persisted this run (derived types and relations). */
   readonly persistedTypes: number
   readonly persistedRelations: number

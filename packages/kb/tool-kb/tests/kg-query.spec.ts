@@ -15,7 +15,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { CallId } from '@deepseek-ai/dsh-llm'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import ToolRuntime from '@deepseek-ai/dsh-tools'
-import KbGraphRuntime, { kgNodeTypeId, kgRelationId } from '@deepseek-ai/dsh-kb-graph'
+import KbGraphRuntime, { KG_QUERY_EXAMPLES, kgNodeTypeId, kgRelationId } from '@deepseek-ai/dsh-kb-graph'
 import * as KbGraphSqlite from '@deepseek-ai/dsh-kb-graph-sqlite'
 import KbRuntime from '@deepseek-ai/dsh-kb'
 import * as KbSqlite from '@deepseek-ai/dsh-kb-sqlite'
@@ -135,6 +135,15 @@ describe('kg_query', () => {
     expect(result.isError).toBe(true)
     expect(result.text).toContain('no template matches')
     expect(result.text).toContain('kg_schema + kg_subgraph')
+  })
+
+  it('names every supported shape in the miss message', async () => {
+    await seedFoodChain()
+    const result = await call('kg_query', { phrase: '备份启用流程是什么' })
+    expect(result.isError).toBe(true)
+    for (const example of KG_QUERY_EXAMPLES) {
+      expect(result.text).toContain(example)
+    }
   })
 
   it('fails model-readably when no seed resolves', async () => {

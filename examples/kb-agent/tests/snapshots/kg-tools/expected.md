@@ -3,7 +3,7 @@
 ## tool surface — v1 graph tools stay off by default
 - tools: kb_ingest, kb_ingest_url, kb_search, kb_stats, kg_query, kg_schema, kg_subgraph
 ## kg_schema() — before the build (builtin ontology only)
-ontology_version: 1.0.0
+ontology_version: 1.1.0
 entity_types:
   - id: "Customer" | label: "客户" | layer: domain | extends: Object
   - id: "Supplier" | label: "供应商" | layer: domain | extends: Object
@@ -41,6 +41,7 @@ relations:
   - id: "supplies" | label: "供应" | kind: object | company→ingredient / Supplier→Product
   - id: "broader" | label: "广义" | kind: hierarchical | 任意方向
   - id: "related" | label: "相关" | kind: hierarchical | 任意方向
+  - id: "corefers_with" | label: "共指" | kind: object | 任意方向
   - id: "places" | label: "下单" | kind: object | Customer→Order
   - id: "located_in" | label: "位于" | kind: object | Customer→Region / Warehouse→Region
   - id: "fulfills" | label: "履约" | kind: object | Supplier→OrderItem
@@ -63,7 +64,7 @@ relations:
   corpus: docs=1 calls=1 entities=4 degraded=1 dropped=1 merged=1
 
 ## kg_schema() — after the build (nocobase-derived types live)
-ontology_version: 1.0.0
+ontology_version: 1.1.0
 entity_types:
   - id: "Object" | label: "业务对象" | layer: top
   - id: "Process" | label: "业务过程" | layer: top
@@ -109,6 +110,7 @@ relations:
   - id: "supplies" | label: "供应" | kind: object | company→ingredient / Supplier→Product
   - id: "broader" | label: "广义" | kind: hierarchical | 任意方向
   - id: "related" | label: "相关" | kind: hierarchical | 任意方向
+  - id: "corefers_with" | label: "共指" | kind: object | 任意方向
   - id: "places" | label: "下单" | kind: object | Customer→Order
   - id: "located_in" | label: "位于" | kind: object | Customer→Region / Warehouse→Region
   - id: "fulfills" | label: "履约" | kind: object | Supplier→OrderItem
@@ -145,6 +147,9 @@ entities:
   - id: "kb:supply-note.md#宏发牌酱油" | type: product | name: "宏发牌酱油" | depth: 1
 sources: "kb:supply-note.md"
 truncated: false
+
+## kg_query(备份启用流程是什么) — the miss names every supported shape
+Error: kg_query: no template matches this phrase; supported shapes: 张红喜的供货链 / 张红喜的订单 / 含山梨酸钾的产品 / 宏发食品供货的所有产品 / 宏发食品生产的产品 / 酱油使用的原料 / 酱油的合规信息 / 宏发食品相关的2跳关系 / 宏发食品和张红喜的关系 — fall back to kg_schema + kg_subgraph for anything else
 
 ## kgBuild.run() again — the idempotent pass
   experts: rows=1 nodes=0 edges=0 newRows=0 tombstoned=0 skipped=true watermark=1
