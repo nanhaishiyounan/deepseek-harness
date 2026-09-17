@@ -167,24 +167,43 @@ export function presentOrderCreateCall(args: OrderCreateArgs): GenericCallView {
 
 /** Replay-safe projection of one order_create result meta. */
 export interface OrderCreateMetaView {
+  /**
+   * The order's numeric id, the jump key the toolview's「查看订单」entry rides;
+   * absent on sessions logged before the field was projected (replay-tolerant).
+   */
+  readonly order_id?: number
   readonly order_no: string
   readonly status: string
   readonly service_name: string
+  /** The deliverable PDF's workspace path when the order settled delivered. */
+  readonly deliverable_path?: string
+  readonly deliverable_url?: string
 }
 
 /**
  * Narrow opaque live or replayed result metadata for presentation; malformed
  * metadata returns `undefined` so presentation falls back to the generic card.
+ * The three identity fields stay strict; `order_id` and the deliverable fields
+ * are late additions, so replays of older logs simply omit them instead of
+ * failing the whole projection.
  * @param meta - result metadata.
  * @returns the validated order meta, or `undefined`.
  */
 export function orderCreateMetaFromResult(meta: unknown): OrderCreateMetaView | undefined {
   if (typeof meta !== 'object' || meta === null || Array.isArray(meta)) return undefined
-  const { order_no: orderNo, status, service_name: serviceName } = meta as Record<string, unknown>
+  const { order_id: orderId, order_no: orderNo, status, service_name: serviceName,
+    deliverable_path: deliverablePath, deliverable_url: deliverableUrl } = meta as Record<string, unknown>
   if (typeof orderNo !== 'string' || orderNo.length === 0) return undefined
   if (typeof status !== 'string' || status.length === 0) return undefined
   if (typeof serviceName !== 'string' || serviceName.length === 0) return undefined
-  return { order_no: orderNo, status, service_name: serviceName }
+  return {
+    ...(typeof orderId === 'number' && Number.isInteger(orderId) && orderId > 0 ? { order_id: orderId } : {}),
+    order_no: orderNo,
+    status,
+    service_name: serviceName,
+    ...(typeof deliverablePath === 'string' && deliverablePath.length > 0 ? { deliverable_path: deliverablePath } : {}),
+    ...(typeof deliverableUrl === 'string' && deliverableUrl.length > 0 ? { deliverable_url: deliverableUrl } : {}),
+  }
 }
 
 /**
@@ -311,7 +330,14 @@ export function applyOrderCreateTool(ctx: Context, timeoutMs: number): void {
       render: (_args, value) => [{ type: 'text', text: formatOrderCreateOutput(value as OrderCreateToolValue) }],
       presentationMeta: (_args, value) => {
         const projected = value as OrderCreateToolValue
-        return { order_no: projected.order_no, status: projected.status, service_name: projected.service_name }
+        return {
+          order_id: projected.order_id,
+          order_no: projected.order_no,
+          status: projected.status,
+          service_name: projected.service_name,
+          ...projected.deliverable_path === undefined ? {} : { deliverable_path: projected.deliverable_path },
+          ...projected.deliverable_url === undefined ? {} : { deliverable_url: projected.deliverable_url },
+        }
       },
     },
     timeoutMs,

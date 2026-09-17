@@ -191,6 +191,7 @@ describe('restricted filter vocabulary', () => {
       { field: 'status', op: 'in', value: ['a', 'b'] },
       { field: 'region', op: 'eq', value: '中亚' },
     ], 'or')).toEqual({ $or: [{ status: { $in: ['a', 'b'] } }, { region: { $eq: '中亚' } }] })
+    expect(compileNbFilter([{ field: 'name', op: 'includes', value: '中亚' }])).toEqual({ name: { $includes: '中亚' } })
     expect(compileNbFilter([])).toEqual({})
   })
 
@@ -203,6 +204,8 @@ describe('restricted filter vocabulary', () => {
     expect(parseNbFilterCondition({ field: 's', op: 'eq', value: { nested: true } })).toMatchObject({ ok: false })
     expect(parseNbFilterCondition({ field: 's', op: 'gt', value: ['x'] })).toMatchObject({ ok: false })
     expect(parseNbFilterCondition({ field: ' s ', op: 'lt', value: 5 })).toEqual({ ok: true, value: { field: 's', op: 'lt', value: 5 } })
+    expect(parseNbFilterCondition({ field: 'name', op: 'includes', value: '中亚' })).toEqual({ ok: true, value: { field: 'name', op: 'includes', value: '中亚' } })
+    expect(parseNbFilterCondition({ field: 'name', op: 'includes', value: ['中亚'] })).toMatchObject({ ok: false })
     expect(describeNbFilterCondition({ field: 's', op: 'in', value: ['a', 1] })).toBe('s in [a, 1]')
   })
 })

@@ -54,7 +54,7 @@ export type {
 export type { KbSettingsSectionInjected, KbSettingsSectionProps } from './KbSettingsSection.tsx'
 export type { KbToolRowProps } from './toolviews/KbToolRow.tsx'
 export type { ConnectorToolRowProps } from './toolviews/ConnectorToolRow.tsx'
-export type { OrderToolRowProps } from './toolviews/OrderToolRow.tsx'
+export type { OrderToolRowProps, OrderToolViewInjected } from './toolviews/OrderToolRow.tsx'
 export { orderRowModel } from './toolviews/order-tool-model.ts'
 export type { OrderRowModel } from './toolviews/order-tool-model.ts'
 export type {
@@ -297,8 +297,18 @@ export function apply(ctx: ClientContext): void {
     yield ctx.slots.register({ name: 'tool.call.toolview', key: 'kb_ingest_url', locale: NS }, KbToolRow)
     yield ctx.slots.register({ name: 'tool.call.toolview', key: 'kb_stats', locale: NS }, KbToolRow)
     yield ctx.slots.register({ name: 'tool.call.toolview', key: 'connector_discover', locale: NS }, ConnectorToolRow)
-    yield ctx.slots.register({ name: 'tool.call.toolview', key: 'order_create', locale: NS }, OrderToolRow)
-    yield ctx.slots.register({ name: 'tool.call.toolview', key: 'order_status', locale: NS }, OrderToolRow)
+    yield ctx.slots.register({
+      name: 'tool.call.toolview',
+      key: 'order_create',
+      locale: NS,
+      inject: () => ({ requestView: (view: string) => { bridge.request(view) } }),
+    }, OrderToolRow)
+    yield ctx.slots.register({
+      name: 'tool.call.toolview',
+      key: 'order_status',
+      locale: NS,
+      inject: () => ({ requestView: (view: string) => { bridge.request(view) } }),
+    }, OrderToolRow)
   })
 
   ctx.slots.inject('settings.section', () => ctx.slots.register({

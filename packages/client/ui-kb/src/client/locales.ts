@@ -23,6 +23,7 @@ export type KbKey =
   | 'tool.datasetsUnit'
   | 'tool.orderCreateTitle'
   | 'tool.orderStatusTitle'
+  | 'tool.orderViewOrder'
   | 'hero.title'
   | 'hero.tagline'
   | 'hero.sample1'
@@ -132,6 +133,7 @@ export const zh: Record<KbKey, string> = {
   'tool.datasetsUnit': '{n} 个数据集',
   'tool.orderCreateTitle': '专家服务下单',
   'tool.orderStatusTitle': '订单状态查询',
+  'tool.orderViewOrder': '查看订单',
   'hero.title': '食品产业知识库问答',
   'hero.tagline': '检索企业文档 · 带编号引用回答 · 覆盖合规/工艺/成本/供应链',
   'hero.sample1': '酱油中山梨酸钾的最大使用量？',
@@ -241,6 +243,7 @@ export const en: Record<KbKey, string> = {
   'tool.discoverTitle': 'Connector discovery',
   'tool.orderCreateTitle': 'Expert service order',
   'tool.orderStatusTitle': 'Order status',
+  'tool.orderViewOrder': 'View order',
   'tool.datasetsUnit': '{n} datasets',
   'hero.title': 'Food-industry knowledge Q&A',
   'hero.tagline': 'Search your documents · cited answers across compliance, process, cost and supply',

@@ -61,13 +61,15 @@ export interface OrdersApi {
   fulfill(request: RpcRequest<{ order_id: number }>, signal?: AbortSignal): Promise<RpcResponse<OrderView>>
 
   /**
-   * Stream one delivered order's PDF as an attachment response. Host-only:
+   * Stream one delivered order's PDF as a download response. Host-only:
    * the carrier's GET route answers this directly; the browser never calls
    * it through the RPC envelope.
-   * @param request - the order id and whether the body is needed (HEAD omits it).
+   * @param request - the order id, whether the body is needed (HEAD omits
+   * it), and `inline: true` to answer `Content-Disposition: inline` so an
+   * in-page same-origin iframe can render the PDF (attachment otherwise).
    * @param signal - cancellation for the underlying read.
-   * @returns the PDF attachment response; a missing seam answers 500, an
-   * unknown or undelivered order 404.
+   * @returns the PDF download response (inline or attachment disposition);
+   * a missing seam answers 500, an unknown or undelivered order 404.
    */
-  download(request: { orderId: number }, signal: AbortSignal): Promise<Response>
+  download(request: { orderId: number; inline?: boolean }, signal: AbortSignal): Promise<Response>
 }

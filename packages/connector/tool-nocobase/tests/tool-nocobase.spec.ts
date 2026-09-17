@@ -138,7 +138,7 @@ async function bootMock(): Promise<MockServer> {
   }
 }
 
-/** Apply one mock-side filter tree: top-level keys AND, `$or` any-clause, `$eq`/`$in`/`$gt`/`$lt` operators. */
+/** Apply one mock-side filter tree: top-level keys AND, `$or` any-clause, `$eq`/`$in`/`$gt`/`$lt`/`$includes` operators. */
 function matchesFilter(row: Record<string, unknown>, filter: Record<string, unknown>): boolean {
   for (const [field, cell] of Object.entries(filter)) {
     if (field === '$or') {
@@ -156,6 +156,7 @@ function matchesFilter(row: Record<string, unknown>, filter: Record<string, unkn
     if ('$in' in operators && Array.isArray(operators.$in) && !operators.$in.includes(row[field])) return false
     if ('$gt' in operators && !(typeof row[field] === 'number' && row[field] > (operators.$gt as number))) return false
     if ('$lt' in operators && !(typeof row[field] === 'number' && row[field] < (operators.$lt as number))) return false
+    if ('$includes' in operators && !(typeof row[field] === 'string' && row[field].includes(operators.$includes as string))) return false
   }
   return true
 }
@@ -284,6 +285,23 @@ describe('nb_list', () => {
     const eqArray = await execute('nb_list', { collection: 'orders', filter: [{ field: 'status', op: 'eq', value: ['pending'] }] })
     expect(eqArray.isError).toBe(true)
     expect(eqArray.text).toContain('needs a scalar value')
+  })
+
+  it('compiles includes to the $includes wire operator for fuzzy matching', async () => {
+    const { execute, mock } = await mount()
+    const result = await execute('nb_list', { collection: 'experts', filter: [{ field: 'name', op: 'includes', value: '红喜' }] })
+    expect(result.isError).toBe(false)
+    expect(JSON.parse(mock!.served[0]!.query.get('filter') ?? 'null')).toEqual({ name: { $includes: '红喜' } })
+    expect(result.value).toMatchObject({ collection: 'experts', count: 1 })
+    expect(result.meta).toMatchObject({ filters: ['name includes 红喜'] })
+  })
+
+  it('refuses like, naming the supported operators (including includes) in the refusal', async () => {
+    const { execute } = await mount()
+    const result = await execute('nb_list', { collection: 'experts', filter: [{ field: 'name', op: 'like', value: '张%' }] })
+    expect(result.isError).toBe(true)
+    expect(result.text).toContain('must be one of')
+    expect(result.text).toContain('includes')
   })
 
   it('rejects a model-supplied tenant', async () => {

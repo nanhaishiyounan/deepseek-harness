@@ -27,7 +27,10 @@ export interface NbCollectionsArgs {
 /** Model-facing `nb_list` arguments. */
 export interface NbListArgs {
   readonly collection: string
-  /** Restricted conditions (eq/in/gt/lt); an empty list lists unfiltered. Operands arrive as JSON and are validated by the parse step. */
+  /**
+   * Restricted conditions (eq/in/gt/lt/includes); an empty list lists unfiltered.
+   * Operands arrive as JSON and are validated by the parse step.
+   */
   readonly filter?: readonly NbFilterConditionInput[] | undefined
   /** How conditions join; `and` by default (narrowed by the parse step). */
   readonly match?: string | undefined
@@ -341,12 +344,12 @@ export function applyNbListTool(ctx: Context, client: NocoBaseClient | undefined
   ctx.systemPrompt.section({
     name: 'tool:nb_list',
     order: 121,
-    text: 'Use the nb_list tool to answer questions over business records: name the collection from nb_collections, filter with the restricted conditions (field, op eq/in/gt/lt, value; joined by match and/or), sort with leading `-` for descending, and page when count exceeds page_size. Answer from the returned rows and name the collection.',
+    text: 'Use the nb_list tool to answer questions over business records: name the collection from nb_collections, filter with the restricted conditions (field, op eq/in/gt/lt/includes, value — includes is substring fuzzy matching, the replacement for like; joined by match and/or), sort with leading `-` for descending, and page when count exceeds page_size. Rows referencing other collections by scalar id (expert_services.expertId is an expert id, not a name) resolve the person or target with one more nb_list on the target collection — filter: [{field: "id", op: "in", value: [<ids>]}] on experts surfaces the names. Answer from the returned rows and name the collection.',
   })
 
   ctx.tools.register(defineTool({
     name: 'nb_list',
-    description: 'Query rows of one business collection with restricted filters (eq/in/gt/lt, and/or), sorting, field projection, and paging. Returns the page, the total count, and the rows.',
+    description: 'Query rows of one business collection with restricted filters (eq/in/gt/lt/includes — for fuzzy matching use includes (substring match), never like — and/or), sorting, field projection, and paging. Returns the page, the total count, and the rows.',
     parameters: {
       collection: {
         type: 'string',
@@ -355,13 +358,13 @@ export function applyNbListTool(ctx: Context, client: NocoBaseClient | undefined
       },
       filter: {
         type: 'array',
-        description: 'Conditions: {field, op: eq|in|gt|lt, value}; scalars for eq/gt/lt, a non-empty array for in.',
+        description: 'Conditions: {field, op: eq|in|gt|lt|includes, value}; scalars for eq/gt/lt/includes, a non-empty array for in. For fuzzy matching use includes (substring match), not like.',
         items: {
           type: 'object',
           additionalProperties: false,
           properties: {
             field: { type: 'string', required: true },
-            op: { type: 'string', required: true, enum: ['eq', 'in', 'gt', 'lt'] },
+            op: { type: 'string', required: true, enum: ['eq', 'in', 'gt', 'lt', 'includes'] },
             value: { type: 'json', required: true },
           },
         },
@@ -464,7 +467,7 @@ export function applyNbGetTool(ctx: Context, client: NocoBaseClient | undefined,
 
   ctx.tools.register(defineTool({
     name: 'nb_get',
-    description: 'Read one business record by collection and row id. Returns the full row as stored.',
+    description: 'Read one business record by collection and row id. Returns the full row as stored. Scalar foreign-key ids stay ids — resolve the referenced name with one more nb_list on the target collection (filter op in).',
     parameters: {
       collection: {
         type: 'string',

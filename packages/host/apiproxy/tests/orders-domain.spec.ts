@@ -3,8 +3,9 @@
  * method refuses with `orders-not-composed` when no orders capability is
  * composed, writes refuse until `ordersEnabled` opts in, reads forward onto
  * the seam, unknown orders answer `orders-rejected`, and the host-only
- * deliverable download answers the PDF attachment (404 for the seam's
- * missing/undelivered/lost-file codes).
+ * deliverable download answers the PDF attachment (or inline disposition for
+ * in-page preview, both with nosniff/no-store) and 404 for the seam's
+ * missing/undelivered/lost-file codes.
  */
 
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -15,6 +16,7 @@ import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import UserQuestionService from '@deepseek-ai/dsh-user-questions'
 import ViewActionService from '@deepseek-ai/dsh-view-actions'
 import { createApiProxy } from '../src/api-proxy.ts'
+import { toFetchHandler } from '../src/fetch/handler.ts'
 import type { RpcRequest } from '../src/api/rpc.ts'
 import type { OrderDeliverableFile, OrderRecord } from '@deepseek-ai/dsh-expert-orders'
 
@@ -170,6 +172,8 @@ describe('orders domain gates and forwarding', () => {
     expect(download.status).toBe(200)
     expect(download.headers.get('content-type')).toBe('application/pdf')
     expect(download.headers.get('content-disposition')).toBe('attachment; filename="ORD-20260905-00a1.pdf"')
+    expect(download.headers.get('x-content-type-options')).toBe('nosniff')
+    expect(download.headers.get('cache-control')).toBe('private, no-store')
     expect(new Uint8Array(await download.arrayBuffer())).toEqual(bytes)
     await ctx.fiber.dispose()
 
@@ -177,5 +181,41 @@ describe('orders domain gates and forwarding', () => {
     const refusal = await pending.api.orders.download({ orderId: 9 }, new AbortController().signal)
     expect(refusal.status).toBe(404)
     await pending.ctx.fiber.dispose()
+  })
+
+  it('answers inline disposition for in-page PDF preview with the same filename and hardening headers', async () => {
+    const bytes = new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d])
+    const { api, ctx } = await harness({ ordersEnabled: true, deliverable: { path: 'workspace/deliverables/ORD-20260905-00a1.pdf', bytes } })
+    const download = await api.orders.download({ orderId: 7, inline: true }, new AbortController().signal)
+    expect(download.status).toBe(200)
+    expect(download.headers.get('content-type')).toBe('application/pdf')
+    expect(download.headers.get('content-disposition')).toBe('inline; filename="ORD-20260905-00a1.pdf"')
+    expect(download.headers.get('x-content-type-options')).toBe('nosniff')
+    expect(download.headers.get('cache-control')).toBe('private, no-store')
+    expect(new Uint8Array(await download.arrayBuffer())).toEqual(bytes)
+    await ctx.fiber.dispose()
+  })
+
+  it('routes inline and attachment downloads through the fetch carrier for GET and HEAD', async () => {
+    const bytes = new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d])
+    const { api, ctx } = await harness({ ordersEnabled: true, deliverable: { path: 'workspace/deliverables/ORD-20260905-00a1.pdf', bytes } })
+    const handler = toFetchHandler(api)
+
+    const inline = await handler.fetch(new Request('http://host/api/orders.download?orderId=7&inline=1'))
+    expect(inline.status).toBe(200)
+    expect(inline.headers.get('content-disposition')).toBe('inline; filename="ORD-20260905-00a1.pdf"')
+    expect(inline.headers.get('x-content-type-options')).toBe('nosniff')
+    expect(inline.headers.get('cache-control')).toBe('private, no-store')
+
+    const attached = await handler.fetch(new Request('http://host/api/orders.download?orderId=7'))
+    expect(attached.status).toBe(200)
+    expect(attached.headers.get('content-disposition')).toBe('attachment; filename="ORD-20260905-00a1.pdf"')
+    expect(attached.headers.get('x-content-type-options')).toBe('nosniff')
+
+    const head = await handler.fetch(new Request('http://host/api/orders.download?orderId=7&inline=1', { method: 'HEAD' }))
+    expect(head.status).toBe(200)
+    expect(head.body).toBeNull()
+    expect(head.headers.get('content-disposition')).toBe('inline; filename="ORD-20260905-00a1.pdf"')
+    await ctx.fiber.dispose()
   })
 })

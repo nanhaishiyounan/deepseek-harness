@@ -46,6 +46,7 @@ function mountWithPlaceOrder(placeOrder: (asset: MarketAssetRow, brief: string) 
   const store = createSnapshotStore<MarketClientState>({
     stats: { status: 'ready', value: { products: 1, providers: 1, monthly_orders: 0, featured: [] } },
     catalog: { status: 'ready', value: [BARE_SERVICE] },
+    orders: { status: 'ready', value: [] },
   })
   const requestView = vi.fn()
   render(
@@ -54,6 +55,7 @@ function mountWithPlaceOrder(placeOrder: (asset: MarketAssetRow, brief: string) 
       inputActions={{ setDraft: vi.fn() } as never}
       useMarket={bindStoreHook(store) as never}
       refresh={vi.fn()}
+      refreshOrders={vi.fn()}
       placeOrder={placeOrder}
       requestView={requestView}
       t={t}
@@ -74,6 +76,7 @@ function mount(state: MarketClientState) {
       inputActions={{ setDraft } as never}
       useMarket={bindStoreHook(store) as never}
       refresh={refresh}
+      refreshOrders={vi.fn()}
       placeOrder={placeOrder}
       requestView={requestView}
       t={t}
@@ -89,6 +92,7 @@ describe('MarketView remaining branches', () => {
     mount({
       stats: { status: 'loading' },
       catalog: { status: 'loading' },
+      orders: undefined,
     })
     expect(document.querySelector('[aria-hidden="true"]')).toBeTruthy()
     expect(screen.queryByText(zh['hero.featured'])).toBeNull()
@@ -110,6 +114,7 @@ describe('MarketView remaining branches', () => {
     const { setDraft, requestView } = mount({
       stats: { status: 'ready', value: { products: 1, providers: 1, monthly_orders: 0, featured: [] } },
       catalog: { status: 'ready', value: [EXPERT] },
+      orders: undefined,
     })
     fireEvent.click(screen.getByRole('button', { name: new RegExp(EXPERT.title) }))
     expect(screen.getByText(EXPERT.expert_org!)).toBeTruthy()
@@ -125,6 +130,7 @@ describe('MarketView remaining branches', () => {
     mount({
       stats: { status: 'ready', value: { products: 1, providers: 1, monthly_orders: 0, featured: [] } },
       catalog: { status: 'ready', value: [summarized] },
+      orders: undefined,
     })
     fireEvent.click(screen.getByRole('button', { name: new RegExp(summarized.title) }))
     expect(screen.getByText('覆盖清关与仓配')).toBeTruthy()
@@ -136,6 +142,7 @@ describe('MarketView remaining branches', () => {
     mount({
       stats: { status: 'ready', value: { products: 1, providers: 1, monthly_orders: 0, featured: [] } },
       catalog: { status: 'ready', value: [BARE_SERVICE] },
+      orders: undefined,
     })
     fireEvent.click(screen.getByRole('button', { name: new RegExp(BARE_SERVICE.title) }))
     fireEvent.click(screen.getByRole('button', { name: zh['detail.order'] }))
@@ -147,6 +154,7 @@ describe('MarketView remaining branches', () => {
     const { placeOrder, setDraft, requestView } = mount({
       stats: { status: 'ready', value: { products: 1, providers: 1, monthly_orders: 0, featured: [] } },
       catalog: { status: 'ready', value: [BARE_SERVICE] },
+      orders: undefined,
     })
     fireEvent.click(screen.getByRole('button', { name: new RegExp(BARE_SERVICE.title) }))
     fireEvent.click(screen.getByRole('button', { name: zh['detail.order'] }))

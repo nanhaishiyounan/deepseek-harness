@@ -14,9 +14,12 @@ import type { KbToolRowState } from './kb-tool-model.ts'
 
 /** The presentation meta `order_create` attaches to its result event. */
 interface OrderCreateMeta {
+  /** The order's numeric id; absent on sessions logged before it was projected. */
+  readonly order_id?: number
   readonly order_no: string
   readonly status: string
   readonly service_name: string
+  readonly deliverable_path?: string
 }
 
 /** The presentation meta `order_status` attaches to its result event. */
@@ -28,11 +31,18 @@ interface OrderStatusMeta {
 /** Narrow the opaque create meta; anything else is undefined and the row falls back to raw text. */
 function createMetaOf(meta: unknown): OrderCreateMeta | undefined {
   if (typeof meta !== 'object' || meta === null || Array.isArray(meta)) return undefined
-  const { order_no: orderNo, status, service_name: serviceName } = meta as Record<string, unknown>
+  const { order_id: orderId, order_no: orderNo, status, service_name: serviceName,
+    deliverable_path: deliverablePath } = meta as Record<string, unknown>
   if (typeof orderNo !== 'string' || orderNo === '') return undefined
   if (typeof status !== 'string' || status === '') return undefined
   if (typeof serviceName !== 'string' || serviceName === '') return undefined
-  return { order_no: orderNo, status, service_name: serviceName }
+  return {
+    ...(typeof orderId === 'number' && Number.isInteger(orderId) && orderId > 0 ? { order_id: orderId } : {}),
+    order_no: orderNo,
+    status,
+    service_name: serviceName,
+    ...(typeof deliverablePath === 'string' && deliverablePath !== '' ? { deliverable_path: deliverablePath } : {}),
+  }
 }
 
 /** Narrow the opaque status meta; anything else is undefined and the row falls back to raw text. */
@@ -51,6 +61,8 @@ export interface OrderRowModel {
   readonly subject: string
   /** The order receipt line, when the create meta validated. */
   readonly receipt: string | null
+  /** The settled order's numeric id when the create meta carried one; the「查看订单」entry needs it. */
+  readonly viewOrderId: number | null
   /** The status counts line, when the status meta validated. */
   readonly counts: string | null
   /** The raw result text (the expanded fallback and error summary source). */
@@ -79,6 +91,7 @@ export function orderRowModel(block: ToolCallBlock, toolName: 'order_create' | '
     state,
     subject,
     receipt: createMeta === undefined ? null : `${createMeta.order_no} · ${createMeta.service_name} — ${createMeta.status}`,
+    viewOrderId: createMeta?.order_id ?? null,
     counts: statusMeta === undefined ? null : `${statusMeta.orders} / ${statusMeta.delivered}`,
     output,
     errorSummary: state === 'error' && output !== null ? firstLine(output) : null,

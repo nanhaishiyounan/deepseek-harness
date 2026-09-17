@@ -489,7 +489,7 @@ function buildAlphaLog(): SessionEvent[] {
     push({ type: 'step/end', data: { turn, step: 0 } })
     push({ type: 'turn/end', data: { turn, reason: { kind: 'completed' } } })
   }
-  // Turn 74: todo_write sample — the TodoRow toolview in the flow plus the
+  // Turn 76: todo_write sample — the TodoRow toolview in the flow plus the
   // todo/write snapshot event feeding the TodoPanel plan strip. Two items are
   // in_progress: this fixture chooses the parallel policy, so both surfaces
   // must render a parallel plan rather than the first active item alone.
@@ -548,35 +548,69 @@ function buildAlphaLog(): SessionEvent[] {
   toolTurn(70, 'web_search', '{"queries":["deepseek harness architecture"]}', 'Search results for deepseek harness architecture.')
   toolTurn(71, 'web_fetch', '{"url":"https://www.deepseek.com/blog/harness-architecture"}', '# Harness architecture\n\nEverything is a plugin.')
 
-  // Turn 72: max-tokens sample — the provider ends the turn at its output cap
+  // Turns 72-73: the order_create toolview's two replay shapes. Turn 72
+  // carries the full current meta (order_id + deliverable_path, delivered) —
+  // the row renders its「查看订单」entry beside the receipt; turn 73 replays
+  // the pre-projection meta (the three identity fields only) — the receipt
+  // renders, the entry does not. Ordered before the todo turn for the same
+  // standing-plan reason the bash turn is.
+  const orderTurn = (turn: number, meta: Record<string, unknown>): void => {
+    const callId = `fx-call-${turn}`
+    const args = JSON.stringify({ service_id: 'expert_services/2', brief: '海外仓风险应对咨询。', client_name: '漯河宏发食品有限公司' })
+    const receipt = '订单已创建并完成生成：ORD-20260905-0001\n- 服务：海外仓风险应对咨询\n- 状态：已交付\n- 方案 PDF：workspace/deliverables/ORD-20260905-0001.pdf'
+    push({ type: 'turn/start', data: { turn } })
+    push({ type: 'user/message', surfaceOp: 'append', data: userMessage(text(`问题 ${turn}：order_create 样本。`)) })
+    push({ type: 'step/start', data: { turn, step: 0 } })
+    push({
+      type: 'assistant/message', surfaceOp: 'append',
+      data: { turn, step: 0, message: assistantMessage([{ type: 'tool-call', id: callId, name: 'order_create', arguments: args } as ContentBlock]) },
+    })
+    push({ type: 'tool/call', data: { turn, step: 0, callId, name: 'order_create', arguments: args } })
+    push({
+      type: 'tool/result', surfaceOp: 'append',
+      data: { turn, step: 0, message: toolResultMessage(callId, text(receipt), false), meta },
+    })
+    push({ type: 'step/end', data: { turn, step: 0 } })
+    push({ type: 'turn/end', data: { turn, reason: { kind: 'completed' } } })
+  }
+  orderTurn(72, {
+    order_id: 1,
+    order_no: 'ORD-20260905-0001',
+    status: 'delivered',
+    service_name: '海外仓风险应对咨询',
+    deliverable_path: 'workspace/deliverables/ORD-20260905-0001.pdf',
+  })
+  orderTurn(73, { order_no: 'ORD-20260905-0001', status: 'delivered', service_name: '海外仓风险应对咨询' })
+
+  // Turn 74: max-tokens sample — the provider ends the turn at its output cap
   // mid-sentence, so the chat flow must render the turn-max-tokens notice
   // instead of ending silently. Ordered before the todo turn for the same
   // standing-plan reason the bash turn is.
-  push({ type: 'turn/start', data: { turn: 72 } })
-  push({ type: 'user/message', surfaceOp: 'append', data: userMessage(text('问题 72：请完整列出全部一百条条目。')) })
-  push({ type: 'step/start', data: { turn: 72, step: 0 } })
+  push({ type: 'turn/start', data: { turn: 74 } })
+  push({ type: 'user/message', surfaceOp: 'append', data: userMessage(text('问题 74：请完整列出全部一百条条目。')) })
+  push({ type: 'step/start', data: { turn: 74, step: 0 } })
   push({
     type: 'assistant/message',
     surfaceOp: 'append',
-    data: { turn: 72, step: 0, message: assistantMessage(text('条目 1：第一条。条目 2：第二条。条目 3：这一条写到一半被')) },
+    data: { turn: 74, step: 0, message: assistantMessage(text('条目 1：第一条。条目 2：第二条。条目 3：这一条写到一半被')) },
   })
-  push({ type: 'step/end', data: { turn: 72, step: 0 } })
-  push({ type: 'turn/end', data: { turn: 72, reason: { kind: 'max-tokens' } } })
+  push({ type: 'step/end', data: { turn: 74, step: 0 } })
+  push({ type: 'turn/end', data: { turn: 74, reason: { kind: 'max-tokens' } } })
 
-  // Turn 73: user and assistant images share one durable fixture object.
+  // Turn 75: user and assistant images share one durable fixture object.
   // The todo turn remains last so its standing projection stays visible.
-  push({ type: 'turn/start', data: { turn: 73 } })
+  push({ type: 'turn/start', data: { turn: 75 } })
   push({
     type: 'user/message',
     surfaceOp: 'append',
     data: userMessage([{ type: 'image', attachment: FIXTURE_IMAGE_REF }, ...text('历史用户图片')]),
   })
-  push({ type: 'step/start', data: { turn: 73, step: 0 } })
+  push({ type: 'step/start', data: { turn: 75, step: 0 } })
   push({
     type: 'assistant/message',
     surfaceOp: 'append',
     data: {
-      turn: 73,
+      turn: 75,
       step: 0,
       message: assistantMessage(
         [...text('结构化模型图片：'), { type: 'image', attachment: FIXTURE_IMAGE_REF }],
@@ -584,11 +618,11 @@ function buildAlphaLog(): SessionEvent[] {
       ),
     },
   })
-  push({ type: 'step/end', data: { turn: 73, step: 0 } })
-  push({ type: 'turn/end', data: { turn: 73, reason: { kind: 'completed' } } })
+  push({ type: 'step/end', data: { turn: 75, step: 0 } })
+  push({ type: 'turn/end', data: { turn: 75, reason: { kind: 'completed' } } })
 
   const todoArgs = JSON.stringify({ todos: fixtureTodos })
-  toolTurn(74, 'todo_write', todoArgs, 'Updated todo list: 1 pending, 2 in progress, 1 completed.')
+  toolTurn(76, 'todo_write', todoArgs, 'Updated todo list: 1 pending, 2 in progress, 1 completed.')
   // The real tool appends the snapshot mid-execution — between tool/call and
   // tool/result — so the fixture reproduces that exact ordering (the last
   // toolTurn events run ... tool/call, tool/result, step/end, turn/end).

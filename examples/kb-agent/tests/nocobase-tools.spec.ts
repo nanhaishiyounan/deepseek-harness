@@ -122,6 +122,7 @@ async function bootMockNocoBase(): Promise<string> {
           const filter = JSON.parse(filterRaw) as Record<string, Record<string, unknown>>
           for (const [field, cell] of Object.entries(filter)) {
             if ('$eq' in cell) filtered = filtered.filter(row => row[field] === cell.$eq)
+            if ('$includes' in cell) filtered = filtered.filter(row => typeof row[field] === 'string' && row[field].includes(cell.$includes as string))
           }
         }
         const page = Number(url.searchParams.get('page') ?? 1)
@@ -219,6 +220,10 @@ describe('kb-agent nocobase tools (keyless)', () => {
 
     out.push('## nb_list(orders, status eq pending)')
     out.push(await callText('nb_list', { collection: 'orders', filter: [{ field: 'status', op: 'eq', value: 'pending' }] }))
+    out.push('')
+
+    out.push('## nb_list(orders, serviceName includes 合规) — the fuzzy-match operator')
+    out.push(await callText('nb_list', { collection: 'orders', filter: [{ field: 'serviceName', op: 'includes', value: '合规' }] }))
     out.push('')
 
     out.push('## nb_get(orders, 101) — the pre-change read')

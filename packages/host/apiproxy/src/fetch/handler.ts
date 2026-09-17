@@ -312,7 +312,10 @@ export function toFetchHandler(api: ApiProxy): { fetch: typeof fetch } {
         if (!Number.isInteger(rawOrderId) || rawOrderId < 1) {
           return new Response('missing or invalid orderId query parameter', { status: 400 })
         }
-        const response = await api.orders.download({ orderId: rawOrderId }, req.signal)
+        const response = await api.orders.download(
+          url.searchParams.get('inline') === '1' ? { orderId: rawOrderId, inline: true } : { orderId: rawOrderId },
+          req.signal,
+        )
         if (req.method === 'GET') return response
         await response.body?.cancel()
         return new Response(null, { status: response.status, headers: response.headers })

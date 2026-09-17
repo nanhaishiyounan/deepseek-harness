@@ -22,6 +22,11 @@ const fail = (message: string): { result: { ok: false; error: { message: string 
 
 const STATS: MarketStatsRow = { products: 2, providers: 1, monthly_orders: 0, featured: [] }
 
+const ORDER_ROW = {
+  id: 1, order_no: 'ORD-20260917-0001', service_name: '中亚货运动线方案', price: '¥8,800/份',
+  status: 'pending' as const, created_at: '2026-09-17T08:00:00.000Z',
+}
+
 const SERVICE: MarketAssetRow = {
   provider_id: 'connector-nocobase', dataset_id: 'expert_services/1', title: '中亚货运动线方案', kind: 'service',
   service_id: 'expert_services/1', service_name: '中亚货运动线方案', price: '¥8,800/份', deliverable: 'PDF 方案',
@@ -31,18 +36,20 @@ const SERVICE: MarketAssetRow = {
 async function bench(overrides: {
   stats?: () => Promise<unknown>
   list?: () => Promise<unknown>
+  listOrders?: () => Promise<unknown>
   create?: (payload: { service_id: string; brief: string }) => Promise<unknown>
 } = {}) {
   const ctx = new Context()
   await ctx.plugin(SlotRegistry).await()
   const stats = vi.fn(overrides.stats ?? (async () => ok(STATS)))
   const list = vi.fn(overrides.list ?? (async () => ok({ assets: [SERVICE] })))
+  const listOrders = vi.fn(overrides.listOrders ?? (async () => ok({ orders: [ORDER_ROW] })))
   const create = vi.fn(overrides.create ?? (async (payload: { service_id: string; brief: string }) =>
     ok({ id: 1, order_no: 'ORD-20260907-0001', service_name: payload.service_id, status: 'pending', created_at: '' })))
   ctx.provide('connection', {
     api: {
       assets: { stats, list, detail: vi.fn(async () => ok(SERVICE)) },
-      orders: { create },
+      orders: { create, list: listOrders },
     },
   } as never)
   const locale = new LocaleRuntime(ctx)
@@ -59,7 +66,7 @@ async function bench(overrides: {
       'conversation.session.header.actions': { kind: 'list', scope: 'session' },
     },
   } as never, () => null)
-  return { ctx, slots, declare, stats, list, create }
+  return { ctx, slots, declare, stats, list, listOrders, create }
 }
 
 describe('ui-assets browser half apply', () => {
@@ -96,6 +103,7 @@ describe('ui-assets browser half apply', () => {
       .find(candidate => candidate.options.id === 'market')?.inject as unknown as (sessionId: string) => Record<string, unknown>)('s1')
     expect(viewFace.placeOrder).toEqual(expect.any(Function))
     expect(viewFace.requestView).toEqual(expect.any(Function))
+    expect(viewFace.refreshOrders).toEqual(expect.any(Function))
     revoke()
     void ctx.fiber.dispose()
   })
@@ -129,6 +137,43 @@ describe('ui-assets browser half apply', () => {
     expect(create).toHaveBeenCalledWith({ service_id: 'expert_services/1', brief: '走铁路' })
     // Placement refreshes the counters so the hero follows.
     await vi.waitFor(() => { expect(stats).toHaveBeenCalled() })
+    revoke()
+    void ctx.fiber.dispose()
+  })
+
+  it('loads the orders cache through the view face and after a placement', async () => {
+    const { ctx, slots, declare, listOrders } = await bench()
+    const revoke = declare()
+    const viewFace = (slots.entries('conversation.view')
+      .find(candidate => candidate.options.id === 'market')?.inject as unknown as (sessionId: string) => {
+      refreshOrders: () => void
+      placeOrder: (asset: MarketAssetRow, brief: string) => Promise<{ order_no: string }>
+      hooks: { market: { getSnapshot: () => { orders?: { status: string; value?: unknown[] } } } }
+    })('s1')
+    viewFace.refreshOrders()
+    await vi.waitFor(() => {
+      expect(viewFace.hooks.market.getSnapshot().orders).toMatchObject({ status: 'ready' })
+    })
+    expect(listOrders).toHaveBeenCalledTimes(1)
+    // A placement refreshes the orders cache beside the counters.
+    await viewFace.placeOrder(SERVICE, '走铁路')
+    await vi.waitFor(() => { expect(listOrders).toHaveBeenCalledTimes(2) })
+    revoke()
+    void ctx.fiber.dispose()
+  })
+
+  it('propagates a failed orders load into the shared error cache', async () => {
+    const { ctx, slots, declare } = await bench({ listOrders: async () => fail('orders-not-composed') })
+    const revoke = declare()
+    const viewFace = (slots.entries('conversation.view')
+      .find(candidate => candidate.options.id === 'market')?.inject as unknown as (sessionId: string) => {
+      refreshOrders: () => void
+      hooks: { market: { getSnapshot: () => { orders?: { status: string; error?: string } } } }
+    })('s1')
+    viewFace.refreshOrders()
+    await vi.waitFor(() => {
+      expect(viewFace.hooks.market.getSnapshot().orders).toMatchObject({ status: 'error', error: 'orders-not-composed' })
+    })
     revoke()
     void ctx.fiber.dispose()
   })

@@ -9,6 +9,13 @@
   gap: 4px;
 }
 
+/* One summary line: the expandable head plus the optional trailing action. */
+.line {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .head {
   display: flex;
   align-items: center;
@@ -30,6 +37,28 @@
 
 .head:not(:disabled):hover {
   background: var(--dsw-alias-interactive-bg-hover);
+}
+
+/* The trailing「查看订单」entry on a settled order_create row. */
+.action {
+  flex: none;
+  padding: 2px 6px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+  font: var(--dsw-font-xxs-12);
+  color: var(--dsw-alias-state-business-primary);
+}
+
+.action:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+/* Inside the summary line the head shares the row with the trailing action. */
+.line .head {
+  flex: 1;
+  width: auto;
 }
 
 .icon {

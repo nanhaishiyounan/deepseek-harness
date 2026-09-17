@@ -5,7 +5,7 @@
 // error row's first result line, and the expanded raw receipt text.
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { ToolCallBlock } from '@deepseek-ai/dsh-client-runtime/client'
 import { OrderToolRow } from '../src/client/toolviews/OrderToolRow.tsx'
 import { orderRowModel } from '../src/client/toolviews/order-tool-model.ts'
@@ -58,8 +58,8 @@ const CREATE_OUTPUT = [
 /** The status listing exactly as formatOrderStatusOutput renders it. */
 const STATUS_OUTPUT = '- ORD-20260905-00a1（海外仓风险应对咨询）：已交付，方案 PDF：workspace/deliverables/ORD-20260905-00a1.pdf'
 
-function mount(toolName: 'order_create' | 'order_status', block: ToolCallBlock): void {
-  render(<OrderToolRow {...SESSION_KIT} toolName={toolName} callId="c1" block={block} openFile={() => {}} t={t} />)
+function mount(toolName: 'order_create' | 'order_status', block: ToolCallBlock, requestView: (view: string) => void = () => {}): void {
+  render(<OrderToolRow {...SESSION_KIT} toolName={toolName} callId="c1" block={block} openFile={() => {}} t={t} requestView={requestView} />)
 }
 
 afterEach(cleanup)
@@ -69,15 +69,29 @@ describe('orderRowModel', () => {
     const model = orderRowModel(settled('order_create', {
       argsRaw: '{"service_id":"expert_services/2","brief":"海外仓应急。"}',
       content: [{ type: 'text', text: CREATE_OUTPUT }],
-      meta: { order_no: 'ORD-20260905-00a1', status: 'delivered', service_name: '海外仓风险应对咨询' },
+      meta: { order_id: 1, order_no: 'ORD-20260905-00a1', status: 'delivered', service_name: '海外仓风险应对咨询', deliverable_path: 'workspace/deliverables/ORD-20260905-00a1.pdf' },
     }), 'order_create')
     expect(model).toMatchObject({
       state: 'ok',
       subject: 'expert_services/2',
       receipt: 'ORD-20260905-00a1 · 海外仓风险应对咨询 — delivered',
+      viewOrderId: 1,
       counts: null,
       errorSummary: null,
     })
+  })
+
+  it('keeps the receipt on an older replayed meta and omits the jump id', () => {
+    const model = orderRowModel(settled('order_create', {
+      argsRaw: '{"service_id":"expert_services/2","brief":"海外仓应急。"}',
+      content: [{ type: 'text', text: CREATE_OUTPUT }],
+      meta: { order_no: 'ORD-20260905-00a1', status: 'delivered', service_name: '海外仓风险应对咨询' },
+    }), 'order_create')
+    expect(model.receipt).toBe('ORD-20260905-00a1 · 海外仓风险应对咨询 — delivered')
+    expect(model.viewOrderId).toBeNull()
+    // A malformed order_id is dropped rather than trusted.
+    expect(orderRowModel(settled('order_create', { meta: { order_id: 0, order_no: 'ORD-1', status: 'delivered', service_name: 's' } }), 'order_create').viewOrderId).toBeNull()
+    expect(orderRowModel(settled('order_create', { meta: { order_id: 'x', order_no: 'ORD-1', status: 'delivered', service_name: 's' } }), 'order_create').viewOrderId).toBeNull()
   })
 
   it('derives the status counts off the presentation meta', () => {
@@ -141,12 +155,43 @@ describe('OrderToolRow', () => {
     mount('order_create', settled('order_create', {
       argsRaw: '{"service_id":"expert_services/2","brief":"海外仓应急。"}',
       content: [{ type: 'text', text: CREATE_OUTPUT }],
+      meta: { order_id: 1, order_no: 'ORD-20260905-00a1', status: 'delivered', service_name: '海外仓风险应对咨询', deliverable_path: 'workspace/deliverables/ORD-20260905-00a1.pdf' },
+    }))
+    expect(screen.getByText('ORD-20260905-00a1 · 海外仓风险应对咨询 — delivered')).toBeDefined()
+    fireEvent.click(screen.getByRole('button', { name: /专家服务下单/u }))
+    expect(screen.getByText(/订单已创建并完成生成：ORD-20260905-00a1/u)).toBeDefined()
+    expect(screen.getByText(/方案 PDF：workspace\/deliverables\/ORD-20260905-00a1\.pdf/u)).toBeDefined()
+  })
+
+  it('renders the「查看订单」entry on a meta with order_id and requests the market view on click', () => {
+    const requestView = vi.fn()
+    mount('order_create', settled('order_create', {
+      argsRaw: '{"service_id":"expert_services/2","brief":"海外仓应急。"}',
+      content: [{ type: 'text', text: CREATE_OUTPUT }],
+      meta: { order_id: 3, order_no: 'ORD-20260905-00a1', status: 'delivered', service_name: '海外仓风险应对咨询' },
+    }), requestView)
+    fireEvent.click(screen.getByRole('button', { name: zh['tool.orderViewOrder'] }))
+    expect(requestView).toHaveBeenCalledWith('market')
+  })
+
+  it('omits the「查看订单」entry on older replays without order_id', () => {
+    mount('order_create', settled('order_create', {
+      argsRaw: '{"service_id":"expert_services/2","brief":"海外仓应急。"}',
+      content: [{ type: 'text', text: CREATE_OUTPUT }],
       meta: { order_no: 'ORD-20260905-00a1', status: 'delivered', service_name: '海外仓风险应对咨询' },
     }))
     expect(screen.getByText('ORD-20260905-00a1 · 海外仓风险应对咨询 — delivered')).toBeDefined()
-    fireEvent.click(screen.getByRole('button'))
-    expect(screen.getByText(/订单已创建并完成生成：ORD-20260905-00a1/u)).toBeDefined()
-    expect(screen.getByText(/方案 PDF：workspace\/deliverables\/ORD-20260905-00a1\.pdf/u)).toBeDefined()
+    expect(screen.queryByRole('button', { name: zh['tool.orderViewOrder'] })).toBeNull()
+  })
+
+  it('omits the「查看订单」entry on error rows even with an order_id meta', () => {
+    mount('order_create', settled('order_create', {
+      isError: true,
+      argsRaw: '{"service_id":"expert_services/2","brief":"海外仓应急。"}',
+      content: [{ type: 'text', text: 'ORDERS_SOURCE_UNAVAILABLE: no NocoBase source' }],
+      meta: { order_id: 3, order_no: 'ORD-20260905-00a1', status: 'failed', service_name: '海外仓风险应对咨询' },
+    }))
+    expect(screen.queryByRole('button', { name: zh['tool.orderViewOrder'] })).toBeNull()
   })
 
   it('renders the settled status row with the counts summary', () => {

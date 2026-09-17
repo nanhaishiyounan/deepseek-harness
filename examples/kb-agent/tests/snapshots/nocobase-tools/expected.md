@@ -18,6 +18,10 @@
 orders 第 1 页（每页 20，共 1 行）
 - {"id":101,"orderNo":"ORD-101","serviceName":"中亚货运动线方案","status":"pending"}
 
+## nb_list(orders, serviceName includes 合规) — the fuzzy-match operator
+orders 第 1 页（每页 20，共 1 行）
+- {"id":102,"orderNo":"ORD-102","serviceName":"出口合规审查","status":"delivered"}
+
 ## nb_get(orders, 101) — the pre-change read
 orders: {"id":101,"orderNo":"ORD-101","serviceName":"中亚货运动线方案","status":"pending"}
 

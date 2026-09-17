@@ -4125,11 +4125,16 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
         try {
           const file = await orders.readDeliverable(request.orderId, signal)
           const filename = file.path.split('/').pop() ?? 'deliverable.pdf'
+          // Inline disposition serves the same-origin in-page preview iframe;
+          // nosniff pins the content type and no-store keeps the transaction
+          // document out of shared caches in both modes.
           // slice() re-bases the bytes on a plain ArrayBuffer, the BodyInit the DOM lib accepts.
           return new Response(file.bytes.slice(), {
             headers: {
               'content-type': 'application/pdf',
-              'content-disposition': `attachment; filename="${filename}"`,
+              'content-disposition': `${request.inline === true ? 'inline' : 'attachment'}; filename="${filename}"`,
+              'x-content-type-options': 'nosniff',
+              'cache-control': 'private, no-store',
             },
           })
         } catch (error: unknown) {

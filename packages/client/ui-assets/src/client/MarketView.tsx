@@ -18,6 +18,7 @@ import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type { MarketClientState } from './marketStore.ts'
 import type { MarketAssetKind, MarketAssetRow, MarketOrderReceipt } from './marketTypes.ts'
 import { OrderConfirmCard } from './OrderConfirmCard.tsx'
+import { OrdersSection } from './OrdersSection.tsx'
 import { MARKET_KIND_FILTERS, filterCatalog, providerLabelOf } from './presentation.ts'
 import css from './market.module.css'
 
@@ -32,6 +33,8 @@ export interface MarketViewInjected {
   }
   /** Load or reload both shared caches (stats + catalog). */
   refresh: () => void
+  /** Load or reload the orders cache (the 「我的订单」 section). */
+  refreshOrders: () => void
   /** Place one order; rejects with the failure message. */
   placeOrder: (asset: MarketAssetRow, brief: string) => Promise<MarketOrderReceipt>
   /** Best-effort view switch through the header bridge. */
@@ -55,7 +58,7 @@ type OrderFlow =
  * @param props - the standard view kit plus the market's inject face.
  * @returns the market column.
  */
-export function MarketView({ inputActions, useMarket, refresh, placeOrder, requestView, t }: MarketViewProps): JSX.Element {
+export function MarketView({ inputActions, useMarket, refresh, refreshOrders, placeOrder, requestView, t }: MarketViewProps): JSX.Element {
   const state = useMarket(snapshot => snapshot)
   const [query, setQuery] = useState('')
   const [kind, setKind] = useState<MarketAssetKind | 'all'>('all')
@@ -148,8 +151,13 @@ export function MarketView({ inputActions, useMarket, refresh, placeOrder, reque
             inputActions.setDraft(t('ask.prefix', { title: flow.receipt.service_name }))
             requestView('chat')
           }}>{t('order.receiptAskProgress')}</Button>
+          <Button variant="ghost" size="sm" onClick={() => {
+            document.getElementById('market-orders')?.scrollIntoView({ behavior: 'smooth' })
+          }}>{t('order.receiptViewOrder')}</Button>
         </section>
       )}
+
+      <OrdersSection orders={state.orders} refreshOrders={refreshOrders} t={t} />
 
       {catalog === undefined || catalog.status === 'loading' ? (
         <PageSkeleton variant="grid" />

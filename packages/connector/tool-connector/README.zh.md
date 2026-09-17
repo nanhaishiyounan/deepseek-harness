@@ -9,7 +9,7 @@
 - **`connector_discover`** —— 跨所有可用连接器 Provider 检索数据集、专家画像与专家服务。专家条目渲染为专家卡（机构、领域标签、该专家可下单的服务清单及交付物与定价）；关联到已发现专家的服务折叠进该专家卡，未关联的服务保留独立分组，数据数据集照常列出 provider 与 dataset id——即后续工具要用的地址。空结果显式说明而非空列表。默认预算 15 秒；并发安全（只读扇出）。
 - **`connector_fetch`** —— 预览单个数据集：表格内容前 8 行加截断标记、文档/专家画像 400 字符摘录、文件回执与可解码文本头、或服务商品。把 dataset id 解析到唯一所属 Provider；多个 Provider 同 id 时要求 `provider_id`；未知 id fail-loud。默认预算 30 秒；并发安全。
 - **`connector_transfer`** —— 为单个数据集在绑定租户下执行缝的五步传输并渲染落地回执：湖仓表（含替换事实与下一步 `lakehouse_query` 指引）或 kb 文档（含 `kb_search` 引用指引），外加 catalog 传输记录 id。`target` 可钉住目的地；与分类不一致时 fail-loud。默认预算 120 秒；非并发安全（写落地）。
-- **`order_create`** —— 一次调用完成下单与整条交付管线（经 `ctx.orders` 的 create → fulfill）：service id 取自发现的专家卡，brief 复述客户需求，回执携带订单号、终态与方案 PDF 的 workspace 路径。默认预算 60 秒（含起草与排版）；非并发安全（交易写入）。
+- **`order_create`** —— 一次调用完成下单与整条交付管线（经 `ctx.orders` 的 create → fulfill）：service id 取自发现的专家卡，brief 复述客户需求，回执携带订单号、终态与方案 PDF 的 workspace 路径。默认预算 60 秒（含起草与排版）；非并发安全（交易写入）结果的 presentation meta 恒携 `order_id`，存在时一并投出 `deliverable_path`/`deliverable_url`，供会话订单工具卡渲染「查看订单」入口跳到 market 页订单区块；无 `order_id` 的旧日志回放仍照常渲染回执。
 - **`order_status`** —— 按 id 读取一笔订单，未给 id 则列最近订单；已交付行携带交付物路径。默认预算 10 秒；并发安全（只读）。
 - **`assets_browse`** —— 数据资产市场的只读目录面，与网关 assets 域服务同一发现数据：`list` 渲染资产卡（标题、类型、provider 与 dataset id、服务类的价格锚点），`detail` 渲染单资产完整卡，`stats` 按类型与提供方计数。下单与落地各走各的工具。默认预算 15 秒；并发安全（只读投影）。
 

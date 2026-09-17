@@ -51,3 +51,15 @@ export interface MarketOrderReceipt {
   readonly status: MarketOrderStatus
   readonly created_at: string
 }
+
+/** One order row as the `orders.list` wire projects it (the rendered subset). */
+export interface MarketOrderRow {
+  readonly id: number
+  readonly order_no: string
+  readonly service_name: string
+  readonly price?: string
+  readonly status: MarketOrderStatus
+  readonly error?: string
+  readonly generated_at?: string
+  readonly created_at: string
+}

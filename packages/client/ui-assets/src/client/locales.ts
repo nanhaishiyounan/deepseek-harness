@@ -52,10 +52,20 @@ export type MarketKey =
   | 'order.receiptTitle'
   | 'order.receiptOrderNo'
   | 'order.receiptAskProgress'
+  | 'order.receiptViewOrder'
   | 'order.status.pending'
   | 'order.status.generating'
   | 'order.status.delivered'
   | 'order.status.failed'
+  | 'orders.title'
+  | 'orders.refresh'
+  | 'orders.close'
+  | 'orders.empty'
+  | 'orders.emptyHint'
+  | 'orders.viewDeliverable'
+  | 'orders.download'
+  | 'orders.previewTitle'
+  | 'orders.openExternal'
   | 'error.unavailable'
   | 'error.retry'
   | 'ask.prefix'
@@ -106,10 +116,20 @@ export const zh: Record<MarketKey, string> = {
   'order.receiptTitle': '下单成功',
   'order.receiptOrderNo': '订单号',
   'order.receiptAskProgress': '去对话跟踪进度',
+  'order.receiptViewOrder': '查看订单',
   'order.status.pending': '待审批',
   'order.status.generating': '生成中',
   'order.status.delivered': '已交付',
   'order.status.failed': '已失败',
+  'orders.title': '我的订单',
+  'orders.refresh': '刷新',
+  'orders.close': '关闭',
+  'orders.empty': '还没有订单',
+  'orders.emptyHint': '在资产目录选择可下单的专家服务，或在对话中让助手下单',
+  'orders.viewDeliverable': '查看方案',
+  'orders.download': '下载 PDF',
+  'orders.previewTitle': '方案预览',
+  'orders.openExternal': '新窗口打开',
   'error.unavailable': '市场暂不可用',
   'error.retry': '重试',
   'ask.prefix': '关于「{title}」：',
@@ -161,10 +181,20 @@ export const en: Record<MarketKey, string> = {
   'order.receiptTitle': 'Order placed',
   'order.receiptOrderNo': 'Order no.',
   'order.receiptAskProgress': 'Track progress in chat',
+  'order.receiptViewOrder': 'View order',
   'order.status.pending': 'Pending approval',
   'order.status.generating': 'Generating',
   'order.status.delivered': 'Delivered',
   'order.status.failed': 'Failed',
+  'orders.title': 'My orders',
+  'orders.refresh': 'Refresh',
+  'orders.close': 'Close',
+  'orders.empty': 'No orders yet',
+  'orders.emptyHint': 'Pick an orderable expert service in the catalog, or ask the assistant to order in chat',
+  'orders.viewDeliverable': 'View deliverable',
+  'orders.download': 'Download PDF',
+  'orders.previewTitle': 'Deliverable preview',
+  'orders.openExternal': 'Open in new window',
   'error.unavailable': 'The market is unavailable',
   'error.retry': 'Retry',
   'ask.prefix': 'About “{title}”: ',

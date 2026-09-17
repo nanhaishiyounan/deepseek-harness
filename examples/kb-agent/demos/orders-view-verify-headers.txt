@@ -1,0 +1,65 @@
+# orders.download 响应头实证（2026-09-17T12:28:54Z）
+
+## C1 GET orderId=54 无参（期望 200 attachment + nosniff + private,no-store）
+HTTP/1.1 200 OK
+cache-control: private, no-store
+content-disposition: attachment; filename="ORD-20260917-ffec946d.pdf"
+content-type: application/pdf
+x-content-type-options: nosniff
+Date: Thu, 17 Sep 2026 12:28:54 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Transfer-Encoding: chunked
+
+body head: %PDF-1.7
+body size: 128412
+
+## C2 GET orderId=54 &inline=1（期望 200 inline 同 filename）
+HTTP/1.1 200 OK
+cache-control: private, no-store
+content-disposition: inline; filename="ORD-20260917-ffec946d.pdf"
+content-type: application/pdf
+x-content-type-options: nosniff
+Date: Thu, 17 Sep 2026 12:28:54 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Transfer-Encoding: chunked
+
+body head: %PDF-1.7
+
+## C3 GET orderId=55 pending 未交付（期望 404）
+HTTP/1.1 404 Not Found
+content-type: text/plain;charset=UTF-8
+Date: Thu, 17 Sep 2026 12:28:54 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Transfer-Encoding: chunked
+
+order 55 is "pending"; no deliverable has landed yet
+## C4 GET orderId=99999 不存在（期望 404）
+HTTP/1.1 404 Not Found
+content-type: text/plain;charset=UTF-8
+Date: Thu, 17 Sep 2026 12:28:54 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Transfer-Encoding: chunked
+
+no order 99999 exists at the orders source of truth
+## C5 GET orderId=1 种子 delivered 但无交付文件（期望 404 DELIVERABLE_MISSING）
+HTTP/1.1 404 Not Found
+content-type: text/plain;charset=UTF-8
+Date: Thu, 17 Sep 2026 12:28:54 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Transfer-Encoding: chunked
+
+order 1 is "delivered"; no deliverable has landed yet
+## C6 HEAD orderId=54（同头空体）
+HTTP/1.1 200 OK
+cache-control: private, no-store
+content-disposition: inline; filename="ORD-20260917-ffec946d.pdf"
+content-type: application/pdf
+x-content-type-options: nosniff
+Date: Thu, 17 Sep 2026 12:28:54 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5

@@ -398,4 +398,110 @@
   color: var(--dsw-alias-bg-base);
 }
 
+/* My orders section */
+
+.orders {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--dsw-alias-border-l1);
+}
+
+.ordersHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ordersList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ordersRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 12px;
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+.ordersMeta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  font: var(--dsw-font-s-14);
+  color: var(--dsw-alias-label-primary);
+}
+
+.ordersNo {
+  font: var(--dsw-font-s-strong-14);
+}
+
+.ordersDate {
+  font: var(--dsw-font-xxs-12);
+  color: var(--dsw-alias-label-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.ordersActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ordersError {
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font: var(--dsw-font-xxs-12);
+  color: var(--dsw-alias-state-error-primary);
+  overflow-wrap: anywhere;
+}
+
+/* Link-styled action (the download and open-in-new-window anchors). */
+
+.linkAction {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 8px;
+  color: var(--dsw-alias-label-secondary);
+  font: var(--dsw-font-xxs-12);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.linkAction:hover {
+  border-color: var(--dsw-alias-state-business-primary);
+  color: var(--dsw-alias-label-primary);
+}
+
+.linkAction:focus-visible {
+  outline: 2px solid var(--dsw-alias-state-business-primary);
+  outline-offset: 1px;
+}
+
+/* Deliverable preview modal */
+
+.previewModal {
+  width: min(920px, 92vw);
+}
+
+.previewFrame {
+  width: 100%;
+  min-height: min(72vh, 640px);
+  border: 0;
+}
+
 /* Empty + error states live in the shared ui-primitives atoms. */

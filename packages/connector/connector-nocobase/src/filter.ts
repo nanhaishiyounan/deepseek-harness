@@ -1,21 +1,22 @@
 /**
  * The restricted filter vocabulary every NocoBase consumer (the nb_* tools,
  * the apiproxy nocobase domain) accepts: a flat list of field conditions
- * (eq/in/gt/lt) joined by one top-level and/or, compiled onto the NocoBase
- * filter tree. Arbitrary operator trees never cross a consumer boundary —
- * callers name fields and operands, never raw `$operators` beyond these
- * four.
+ * (eq/in/gt/lt/includes) joined by one top-level and/or, compiled onto the
+ * NocoBase filter tree. `includes` maps to NocoBase `$includes` (substring
+ * fuzzy match) — the vocabulary's only containment-semantics operator.
+ * Arbitrary operator trees never cross a consumer boundary — callers name
+ * fields and operands, never raw `$operators` beyond these five.
  * @module @deepseek-ai/dsh-connector-nocobase/filter
  */
 
 /** The closed comparison-operator set the restricted vocabulary accepts. */
-export type NbFilterOp = 'eq' | 'in' | 'gt' | 'lt'
+export type NbFilterOp = 'eq' | 'in' | 'gt' | 'lt' | 'includes'
 
 /** One field condition in the restricted vocabulary. */
 export interface NbFilterCondition {
   readonly field: string
   readonly op: NbFilterOp
-  /** Scalar for eq/gt/lt; non-empty array for in. */
+  /** Scalar for eq/gt/lt/includes; non-empty array for in. */
   readonly value: string | number | boolean | readonly (string | number | boolean)[]
 }
 
@@ -35,6 +36,7 @@ const OPERATOR_KEYS: Readonly<Record<NbFilterOp, string>> = {
   in: '$in',
   gt: '$gt',
   lt: '$lt',
+  includes: '$includes',
 }
 
 /**

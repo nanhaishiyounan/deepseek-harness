@@ -72,6 +72,7 @@ const READY: MarketClientState = {
     },
   },
   catalog: { status: 'ready', value: CATALOG },
+  orders: { status: 'ready', value: [] },
 }
 
 const RECEIPT: MarketOrderReceipt = {
@@ -87,6 +88,7 @@ function mount(state: MarketClientState, overrides: {
 } = {}) {
   const store = createSnapshotStore<MarketClientState>(state)
   const refresh = vi.fn()
+  const refreshOrders = vi.fn()
   const placeOrder = overrides.placeOrder ?? vi.fn(async () => RECEIPT)
   const requestView = vi.fn()
   const setDraft = vi.fn()
@@ -96,19 +98,20 @@ function mount(state: MarketClientState, overrides: {
       inputActions={{ setDraft } as never}
       useMarket={bindStoreHook(store) as never}
       refresh={refresh}
+      refreshOrders={refreshOrders}
       placeOrder={placeOrder}
       requestView={requestView}
       t={t}
     />,
   )
-  return { view, refresh, placeOrder, requestView, setDraft }
+  return { view, refresh, refreshOrders, placeOrder, requestView, setDraft }
 }
 
 afterEach(cleanup)
 
 describe('MarketView state matrix', () => {
   it('renders skeletons while the first load is in flight and loads on mount', () => {
-    const { refresh } = mount({ stats: undefined, catalog: undefined })
+    const { refresh } = mount({ stats: undefined, catalog: undefined, orders: undefined })
     expect(refresh).toHaveBeenCalled()
     // The hero copy renders without counters; the catalog zone shows its skeleton.
     expect(screen.getByText(zh['hero.title'])).toBeTruthy()
@@ -130,6 +133,7 @@ describe('MarketView state matrix', () => {
     mount({
       stats: READY.stats,
       catalog: { status: 'ready', value: [] },
+      orders: undefined,
     })
     expect(screen.getByText(zh['catalog.empty'])).toBeTruthy()
     expect(screen.getByText(zh['catalog.emptyHint'])).toBeTruthy()
@@ -139,6 +143,7 @@ describe('MarketView state matrix', () => {
     const { refresh } = mount({
       stats: { status: 'error', error: 'assets-not-composed' },
       catalog: { status: 'error', error: 'assets-not-composed' },
+      orders: undefined,
     })
     expect(screen.getAllByText(/assets-not-composed/u).length).toBeGreaterThan(0)
     fireEvent.click(screen.getAllByRole('button', { name: zh['error.retry'] })[0]!)
@@ -201,6 +206,25 @@ describe('MarketView detail panel and order journey', () => {
     expect(screen.getByText(zh['order.status.pending'])).toBeTruthy()
   })
 
+  it('scrolls from the receipt to the orders section through the view-order entry', async () => {
+    const scrollIntoView = vi.fn()
+    // oxlint-disable-next-line typescript/unbound-method -- saving the prototype slot for restoration; never invoked.
+    const original = Element.prototype.scrollIntoView
+    Element.prototype.scrollIntoView = scrollIntoView
+    try {
+      openService()
+      fireEvent.click(screen.getByRole('button', { name: zh['detail.order'] }))
+      fireEvent.click(screen.getByRole('button', { name: zh['order.confirm'] }))
+      await waitFor(() => { expect(screen.getByText(RECEIPT.order_no)).toBeTruthy() })
+      // The orders section anchor exists once the receipt lands.
+      expect(document.getElementById('market-orders')).toBeTruthy()
+      fireEvent.click(screen.getByRole('button', { name: zh['order.receiptViewOrder'] }))
+      expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth' })
+    } finally {
+      Element.prototype.scrollIntoView = original
+    }
+  })
+
   it('surfaces a placement failure inside the card and keeps the snapshot editable', async () => {
     const mounted = mount(READY, {
       placeOrder: vi.fn(async () => { throw new Error('orders-not-composed') }),
@@ -241,7 +265,7 @@ describe('MarketEntry', () => {
   }
 
   it('loads on mount, badges the product count, and switches views on click', () => {
-    const idle = mountEntry({ stats: undefined, catalog: undefined })
+    const idle = mountEntry({ stats: undefined, catalog: undefined, orders: undefined })
     expect(idle.refresh).toHaveBeenCalled()
     expect(screen.queryByText('3')).toBeNull()
     cleanup()
@@ -254,7 +278,11 @@ describe('MarketEntry', () => {
   })
 
   it('shows the question mark on error and refreshes when no session exists', () => {
-    const failing: MarketClientState = { stats: { status: 'error', error: 'x' }, catalog: { status: 'error', error: 'x' } }
+    const failing: MarketClientState = {
+      stats: { status: 'error', error: 'x' },
+      catalog: { status: 'error', error: 'x' },
+      orders: undefined,
+    }
     mountEntry(failing)
     expect(screen.getByText('?')).toBeTruthy()
     cleanup()

@@ -879,7 +879,27 @@ describe('order tools', () => {
     expect(result.text).toContain('订单已创建并完成生成：ORD-20260905-0001')
     expect(result.text).toContain('workspace/deliverables/ORD-20260905-0001.pdf')
     expect(calls).toEqual(['create:expert_services/2', 'fulfill:1'])
-    expect(result.meta).toEqual({ order_no: 'ORD-20260905-0001', status: 'delivered', service_name: '海外仓风险应对咨询' })
+    expect(result.meta).toEqual({
+      order_id: 1,
+      order_no: 'ORD-20260905-0001',
+      status: 'delivered',
+      service_name: '海外仓风险应对咨询',
+      deliverable_path: 'workspace/deliverables/ORD-20260905-0001.pdf',
+    })
+  })
+
+  it('orderCreateMetaFromResult replays older metas without order_id and drops malformed late fields', () => {
+    // A pre-projection log carries the three identity fields only; the view
+    // keeps rendering the receipt and simply omits the jump entry.
+    expect(ToolConnector.orderCreateMetaFromResult({ order_no: 'ORD-20260905-0001', status: 'delivered', service_name: '海外仓风险应对咨询' }))
+      .toEqual({ order_no: 'ORD-20260905-0001', status: 'delivered', service_name: '海外仓风险应对咨询' })
+    // Non-positive-integer / non-string late fields are ignored, not fatal.
+    expect(ToolConnector.orderCreateMetaFromResult({ order_id: 0, order_no: 'ORD-1', status: 'delivered', service_name: 's', deliverable_path: '' }))
+      .toEqual({ order_no: 'ORD-1', status: 'delivered', service_name: 's' })
+    expect(ToolConnector.orderCreateMetaFromResult({ order_id: 'x', order_no: 'ORD-1', status: 'delivered', service_name: 's' })?.order_id)
+      .toBeUndefined()
+    // The strict identity fields still gate the whole projection.
+    expect(ToolConnector.orderCreateMetaFromResult({ order_id: 3, order_no: '', status: 'delivered', service_name: 's' })).toBeUndefined()
   })
 
   it('order_create rejects a model-supplied tenant and blank fields', async () => {
