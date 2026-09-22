@@ -629,6 +629,51 @@ function buildAlphaLog(): SessionEvent[] {
   const callIndex = events.length - 4
   const callTime = events[callIndex]?.time as number
   events.splice(callIndex + 1, 0, { type: 'todo/write', time: callTime + 400, data: { todos: fixtureTodos } })
+
+  // Turns 77-78: the answer-source trail and the lakehouse chart surfaces —
+  // each a one-call turn in the canonical withTool shape (call at step 0,
+  // closing text at step 1), so the closing turn-tail renders the aggregated
+  // source chips and the lakehouse row renders its chart stack.
+  const KB_TEXT = [
+    '检索完成（hybrid，5 命中）。',
+    '[1] export-risk/hongfa-chukou.md — 出口台账 — doc — c2',
+    '  宏发食品 2026 年出口记录。',
+    '[2] regulations/gb-2760.md — 限量标准 — doc — c5',
+    '  防腐剂限量条款。',
+  ].join('\n')
+  const LAKEHOUSE_TEXT = [
+    '| month | total |',
+    '| --- | --- |',
+    '| 2026-06 | 96 |',
+    '| 2026-07 | 104 |',
+    '| 2026-08 | 118 |',
+    '',
+    'Data source: lakehouse table import_export_monthly',
+    'Answer from the rows above; name the source table(s) in your answer.',
+  ].join('\n')
+  const sourceTurn = (turn: number, name: string, args: string, resultText: string, answer: string): void => {
+    const callId = `fx-src-${turn}`
+    push({ type: 'turn/start', data: { turn } })
+    push({ type: 'user/message', surfaceOp: 'append', data: userMessage(text(`问题 ${turn}：${name} 样本。`)) })
+    push({ type: 'step/start', data: { turn, step: 0 } })
+    push({
+      type: 'assistant/message', surfaceOp: 'append',
+      data: { turn, step: 0, message: assistantMessage([{ type: 'tool-call', id: callId, name, arguments: args } as ContentBlock]) },
+    })
+    push({ type: 'tool/call', data: { turn, step: 0, callId, name, arguments: args } })
+    push({ type: 'tool/result', surfaceOp: 'append', data: { turn, step: 0, message: toolResultMessage(callId, text(resultText), false) } })
+    push({ type: 'step/end', data: { turn, step: 0 } })
+    push({ type: 'step/start', data: { turn, step: 1 } })
+    push({
+      type: 'assistant/message', surfaceOp: 'append',
+      data: { turn, step: 1, message: assistantMessage(text(answer)) },
+    })
+    push({ type: 'step/end', data: { turn, step: 1 } })
+    push({ type: 'turn/end', data: { turn, reason: { kind: 'completed' } } })
+  }
+  sourceTurn(77, 'kb_search', '{"query":"宏发食品 出口"}', KB_TEXT, '回答 77：宏发食品 2026 年出口记录与限量标准条款如上，来源见下方标签。')
+  sourceTurn(78, 'lakehouse_query', '{"sql":"SELECT month, ROUND(SUM(export_value_10kusd),0) AS total FROM import_export_monthly WHERE month >= \'2026-06\' GROUP BY month ORDER BY month"}', LAKEHOUSE_TEXT, '回答 78：宏发食品近三个月出口额 96→104→118 万美元，环比回升。')
+
   events.forEach((e, i) => { e.seq = i })
   return events as unknown as SessionEvent[]
 }
@@ -3078,23 +3123,71 @@ function createFixtureWorld(options: FixtureOptions): FixtureWorld {
       upload: request => err(request, { code: 'data-write-disabled', message: 'the demo fixture refuses data writes', details: {} }),
     },
     nocobase: {
-      // The fixture answers every nocobase method with the structured
-      // not-composed refusal: the browser fixture enables no NocoBase
-      // domain, and the business surfaces' inline failure path is exactly
-      // this shape.
-      listMeta: request => err(request, {
-        code: 'nocobase-not-composed',
-        message: 'this deployment has not enabled the nocobase domain; set the api-gateway config nocobaseEnabled: true to expose business reads',
-        details: {},
+      // The business page's deterministic fixture: three collections (the
+      // grouped navigator's order/supplier/expert buckets) with two rows
+      // each. Reads answer inline so the assembled snapshots can drive the
+      // navigator and the inline-edit refusal; `get` keeps the structured
+      // not-composed refusal (nothing reads it through the fixture).
+      listMeta: request => ok(request, {
+        collections: [
+          {
+            name: 'orders',
+            title: '订单',
+            fields: [
+              { name: 'order_no', type: 'string' },
+              { name: 'status', type: 'string' },
+              { name: 'note', type: 'text' },
+            ],
+          },
+          {
+            name: 'suppliers',
+            title: '供应商',
+            fields: [
+              { name: 'name', type: 'string' },
+              { name: 'license_expiry', type: 'date' },
+              { name: 'remark', type: 'text' },
+            ],
+          },
+          {
+            name: 'experts',
+            title: '专家',
+            fields: [{ name: 'name', type: 'string' }],
+          },
+        ],
       }),
-      list: request => err(request, {
-        code: 'nocobase-not-composed',
-        message: 'this deployment has not enabled the nocobase domain; set the api-gateway config nocobaseEnabled: true to expose business reads',
-        details: {},
-      }),
+      list: (request) => {
+        const collection = (request.payload as { collection?: unknown }).collection
+        const rowsFor = (name: unknown): Array<Record<string, unknown>> => {
+          if (name === 'orders') {
+            return [
+              { id: 1, order_no: 'SO-101', status: 'pending', note: '待确认交期' },
+              { id: 2, order_no: 'SO-102', status: 'delivered', note: '已发货' },
+            ]
+          }
+          if (name === 'suppliers') {
+            return [
+              { id: 1, name: '宏达塑业', license_expiry: '2026-11-01', remark: '包材主力' },
+              { id: 2, name: '金晟印铁', license_expiry: '2027-03-15', remark: '罐体' },
+            ]
+          }
+          return [
+            { id: 1, name: '张红喜' },
+            { id: 2, name: '李工' },
+          ]
+        }
+        const rows = rowsFor(collection)
+        return ok(request, { count: rows.length, page: 1, page_size: 20, rows })
+      },
       get: request => err(request, {
         code: 'nocobase-not-composed',
         message: 'this deployment has not enabled the nocobase domain; set the api-gateway config nocobaseEnabled: true to expose business reads',
+        details: {},
+      }),
+      // The inline-edit fast path's structured refusal: the fixture composes
+      // no NocoBase and keeps record writes off the wire surface.
+      update: request => err(request, {
+        code: 'nocobase-write-disabled',
+        message: 'this deployment has not enabled the inline record write; set the api-gateway config nocobaseWriteEnabled: true to expose nocobase.update',
         details: {},
       }),
     },
@@ -3180,6 +3273,20 @@ function createFixtureWorld(options: FixtureOptions): FixtureWorld {
       }),
     },
 
+    lakehouse: {
+      // The overview band's deterministic fixture: three KPI chips with
+      // fixed values (the assembled snapshot pins the chip row; the live
+      // gateway evaluates the configured seed SQL instead).
+      overview: request => ok(request, {
+        generated_at: '2026-09-17T00:00:00.000Z',
+        kpis: [
+          { id: 'export-value', label: '本月出口额', value: 4318, unit: '万美元', trend: 4.6 },
+          { id: 'dest-count', label: '出口目的地', value: 12 },
+          { id: 'price-rises', label: '原料涨价项', value: 7, trend: -2 },
+        ],
+      }),
+    },
+
     connectors: {
       list: request => err(request, {
         code: 'connectors-not-composed',
@@ -3199,6 +3306,41 @@ function createFixtureWorld(options: FixtureOptions): FixtureWorld {
     },
 
     kg: {
+      ontologyEdit: request => err(request, {
+        code: 'kg-not-composed',
+        message: 'this deployment has not enabled the kg domain; set the api-gateway config kgEnabled: true to expose the graph page reads',
+        details: {},
+      }),
+      reviewQueue: request => err(request, {
+        code: 'kg-not-composed',
+        message: 'this deployment has not enabled the kg domain; set the api-gateway config kgEnabled: true to expose the graph page reads',
+        details: {},
+      }),
+      reviewDecide: request => err(request, {
+        code: 'kg-not-composed',
+        message: 'this deployment has not enabled the kg domain; set the api-gateway config kgEnabled: true to expose the graph page reads',
+        details: {},
+      }),
+      communities: request => err(request, {
+        code: 'kg-not-composed',
+        message: 'this deployment has not enabled the kg domain; set the api-gateway config kgEnabled: true to expose the graph page reads',
+        details: {},
+      }),
+      history: request => err(request, {
+        code: 'kg-not-composed',
+        message: 'this deployment has not enabled the kg domain; set the api-gateway config kgEnabled: true to expose the graph page reads',
+        details: {},
+      }),
+      episodes: request => err(request, {
+        code: 'kg-not-composed',
+        message: 'this deployment has not enabled the kg domain; set the api-gateway config kgEnabled: true to expose the graph page reads',
+        details: {},
+      }),
+      rollback: request => err(request, {
+        code: 'kg-not-composed',
+        message: 'this deployment has not enabled the kg domain; set the api-gateway config kgEnabled: true to expose the graph page reads',
+        details: {},
+      }),
       mappings: request => err(request, {
         code: 'kg-not-composed',
         message: 'this deployment has not enabled the kg domain; set the api-gateway config kgEnabled: true to expose the graph page reads',
@@ -3430,6 +3572,7 @@ export class FixtureApiClient extends AbstractApiClient {
       case 'nocobase.listMeta': return this.api.nocobase.listMeta(request, signal)
       case 'nocobase.list': return this.api.nocobase.list(request, signal)
       case 'nocobase.get': return this.api.nocobase.get(request, signal)
+      case 'nocobase.update': return this.api.nocobase.update(request, signal)
       case 'kb.stats': return this.api.kb.stats(request)
       case 'kb.search': return this.api.kb.search(request, signal)
       case 'kb.ingest': return this.api.kb.ingest(request, signal)
@@ -3440,6 +3583,7 @@ export class FixtureApiClient extends AbstractApiClient {
       case 'assets.list': return this.api.assets.list(request, signal)
       case 'assets.detail': return this.api.assets.detail(request, signal)
       case 'assets.stats': return this.api.assets.stats(request, signal)
+      case 'lakehouse.overview': return this.api.lakehouse.overview(request, signal)
       case 'connectors.list': return this.api.connectors.list(request, signal)
       case 'connectors.connections': return this.api.connectors.connections(request, signal)
       case 'connectors.transfers': return this.api.connectors.transfers(request, signal)
@@ -3449,6 +3593,13 @@ export class FixtureApiClient extends AbstractApiClient {
       case 'kg.search': return this.api.kg.search(request, signal)
       case 'kg.subgraph': return this.api.kg.subgraph(request, signal)
       case 'kg.expand': return this.api.kg.expand(request, signal)
+      case 'kg.episodes': return this.api.kg.episodes(request, signal)
+      case 'kg.rollback': return this.api.kg.rollback(request, signal)
+      case 'kg.ontologyEdit': return this.api.kg.ontologyEdit(request, signal)
+      case 'kg.reviewQueue': return this.api.kg.reviewQueue(request, signal)
+      case 'kg.reviewDecide': return this.api.kg.reviewDecide(request, signal)
+      case 'kg.communities': return this.api.kg.communities(request, signal)
+      case 'kg.history': return this.api.kg.history(request, signal)
       case 'kg.stats': return this.api.kg.stats(request, signal)
       case 'orders.list': return this.api.orders.list(request, signal)
       case 'orders.fulfill': return this.api.orders.fulfill(request, signal)

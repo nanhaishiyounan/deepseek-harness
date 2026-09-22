@@ -4,7 +4,7 @@
 
 ## 这是什么
 
-kb-agent 是一个食品产业知识库 agent：把走访食品企业得到的纪要、企业档案、法规标准等资料入库，然后向它提问，回答带 `[n]` 编号引用（文档名 + 标题路径），可回溯到原文。对话与向量化由 MiniMax-M3 / embo-01 驱动，知识库是本地一个 SQLite 文件（`workspace/kb.sqlite`），数据不出本机。检索带相关性阈值 `minRelevanceScore`（组合实配 `0.015`——2026-09-02 校准：保住全部单路金标命中、修剪 60 名外的融合噪声；设 0 可退回全量返回），乱码查询因此落到零结果空态，部署侧在 `cordis.patch.yml` 调整（权衡见 [DEPLOY.zh.md](DEPLOY.zh.md)）。
+kb-agent 是一个食品产业知识库 agent：把走访食品企业得到的纪要、企业档案、法规标准等资料入库，然后向它提问，回答带 `[n]` 编号引用（文档名 + 标题路径），可回溯到原文。对话与向量化由 MiniMax-M3 / embo-01 驱动，知识库是本地一个 SQLite 文件（`workspace/kb.sqlite`），数据不出本机。检索带相关性阈值 `minRelevanceScore`（组合实配 `0.015`——2026-09-02 校准：保住全部单路金标命中、修剪 60 名外的融合噪声；设 0 可退回全量返回），乱码查询因此落到零结果空态，部署侧在 `cordis.patch.yml` 调整（权衡见 [DEPLOY.zh.md](DEPLOY.zh.md)）。PC 工作台首屏为经营概览，图谱页是可编辑的 KG 工作台（本体树/变更流/审核队列），另有移动端入口与 AI 填表助手（见对应节）。
 
 ## 一次性准备
 
@@ -21,7 +21,7 @@ echo 'MINIMAX_API_KEY=sk-xxx' >> .env
 # 4. 连接器投递目录无需手动创建：组合挂载的 connector-file 提供程序首次启动自动建目录，且仓库自带三个 sample-*.csv/.md/.json 示例资产（examples/kb-agent/workspace/data/connector-files/，随 clone 即有）
 ```
 
-`MINIMAX_API_KEY` 同时服务对话（MiniMax-M3）与向量化（embo-01）；可选 `MINIMAX_BASE_URL=https://api.minimaxi.com/v1`（默认值即此）。没有 key 时入库/检索/统计仍可完整运行（纯文本检索），对话请求会以 `MISSING_CREDENTIAL` 失败。`pnpm dsh` 从源码经 tsx 启动，无需先 `pnpm run build`。
+`MINIMAX_API_KEY` 同时服务对话（MiniMax-M3）与向量化（embo-01）；可选 `MINIMAX_BASE_URL=https://api.minimaxi.com/v1`（默认值即此）。没有 key 时入库/检索/统计仍可完整运行（纯文本检索），对话请求会以 `MISSING_CREDENTIAL` 失败。`pnpm dsh` 从源码经 tsx 启动，无需先 `pnpm run build`；唯一例外是网页版的浏览器面产物（见下文「网页版工作台」的产物契约）。
 
 ## 5 分钟跑通
 
@@ -235,6 +235,16 @@ DSH_HOME=examples/kb-agent/.dsh pnpm dsh web --patch examples/kb-agent/cordis.pa
 
 启动后输出 `dsh web: http://127.0.0.1:3080` 并自动打开浏览器；追加 `--no-open` 关闭自动打开（完整命令：`DSH_HOME=examples/kb-agent/.dsh pnpm dsh web --patch examples/kb-agent/cordis.patch.yml --no-open`）。注意 flag 顺序：`--patch` 是 dsh 启动器的 flag，必须写在 web 应用自己的 flag（如 `--no-open`、`--host`）之前——从第一个启动器不认识的参数起，其余参数全部原样交给 web 应用。工作台无鉴权，只在本机使用，不要暴露到公网。新建会话默认使用企业数据助手预设（见上节换角色）。暗色外观跟随系统设置。
 
+**浏览器面产物契约**：host 侧代码经 tsx 走 src，但网页版两个浏览器面读的是磁盘构建产物——`/plugins/<id>/client.js` 读 `packages/client/*/lib/client.js`（tsdown 打包），`/assets/*` 读 `apps/web/dist`（vite 构建）。改了 `packages/client/*` 后跑 `pnpm run build:lib:client`，改了 `apps/web` 后跑 `pnpm run build:web`。`pnpm run clean` 会删掉 `lib/`；此时只复跑 `pnpm run typecheck` 不够（它只产 `lib/types`，不出 client bundles）——首页会报 `Failed to load plugins` + `client-modules: HTML did not preload @deepseek-ai/dsh-client-modules/client.js`（preload 脚本 404），重跑 `build:lib:client` 即恢复。新增或删除声明 `dsh.client` 的包后重启 dsh web：模块表在进程启动时扫描 `package.json`，长驻进程不会自己发现新包。
+
+## 移动端与 PC 移动端预览
+
+dsh web 启动后，手机浏览器（或桌面浏览器开 390×844 视口）打开 `http://127.0.0.1:3080/mobile`：手机号 + 6 位验证码登录（演示级鉴权——无防重放、无频控，仅本机使用，边界见 [DEPLOY.zh.md](DEPLOY.zh.md)），落「消息」Tab。
+
+- **四 Tab**：消息（AI 员工会话与人类会话混排，AI 徽章区分）、工作台、数据、我的。会话与 PC 端同一存储——PC 上问过的，手机上接着看。
+- **AI 填表助手**：在移动端会话里说「登记一张采购单：向宏发食品采购棕榈油 2 吨」——AI 预填任务卡（字段可改、附支撑数据），「驳回 / 推送」双动作审批：推送经真实网关落业务表，驳回即作废；两种结果都落会话日志，可追溯。
+- **PC「移动端预览」**：PC 会话页签环的「移动端预览」tab 内嵌手机壳 + 同源 `/mobile` iframe，可在桌面直接登录操作移动界面，双端同数据。
+
 ## 数据资产市场与连接器页
 
 会话页签环在「知识库」之后多了两页：**数据资产**与**连接器**（侧栏同款入口常驻）。
@@ -254,10 +264,12 @@ pnpm exec vitest run --config vitest.e2e.config.ts examples/kb-agent/tests/marke
 
 页签环再添两页：**图谱**（`kg`）与**业务管理**（`business`），侧栏同款入口常驻。
 
-- **图谱**：短语框把子图查询包装成自然语言（「宏发食品的供货链」「含棕榈油的商品」，其余文本按实体名直接游走）→ 实体搜索带别名解析 → sigma.js 画布（双击节点展开一跳邻居、单击选中、滚轮缩放；节点颜色按本体类型稳定分配）→ 类型图例点选过滤画布 → 详情面板（类型/关联数/业务键）与「问此实体」预填对话。只读：写图谱归 kg-build 管线。数据来自 apiproxy 的 `kg.*` 域（`cordis.patch.yml` 已开 `kgEnabled`/`kgTenant`）；画布渲染栈（sigma/graphology/force-atlas2）动态加载不进主包，无 WebGL 环境自动降级为同语义关系清单。
-- **业务管理**：对象切换器（`nocobase.listMeta` 动态清单，隐藏表不露）→ 实体卡流（主标签 + 三对字段预览，「问此记录」「编辑（对话）」与对象级「新建（对话）」全部预填对话，页面零表单）→ 辅助表格视图（hasNext 翻页）→ **高级配置**：外链入口卡片经 `/nocobase` 同源反代在新浏览器窗口打开业务后台（低频管理：页面编辑器/角色权限细配；日常读写走对话）。数据来自 V2 的 `nocobase.listMeta/list` 域。
+- **图谱**：短语框把子图查询包装成自然语言（「宏发食品的供货链」「含棕榈油的商品」，其余文本按实体名直接游走）→ 实体搜索带别名解析 → sigma.js 画布（双击节点展开一跳邻居、单击选中、滚轮缩放）→ 类型图例点选过滤画布 → 详情面板（类型/关联数/业务键）与「问此实体」预填对话。节点语义着色按本体类派生（「按本体语义」一档），本体树改类即刻重着色。数据来自 apiproxy 的 `kg.*` 域（`cordis.patch.yml` 已开 `kgEnabled`/`kgTenant`）；画布渲染栈（sigma/graphology/force-atlas2）动态加载不进主包，无 WebGL 环境自动降级为同语义关系清单。
+- **KG 工作台**（图谱页的模式切换）：**本体树**按类层级编辑——新增/改名/移动父类/废弃走 KGCL 原语，每次变更写 ontology revision 并在变更流留痕；**变更流**是 episode 时间线（每条记录指令原文、操作者与 diff），任意时刻可**回滚**（该 episode 新增的边失效、其恢复过的边还原）或**回放**该时刻的图状态；**共指审核队列**收纳 0.5–0.9 置信灰区的同义合并候选，人工判决合并或驳回。
+- **语义化改图**：在会话里直接发自然语言指令（如「把宏发食品的供货关系改成由绿源提供」），agent 走 kg_edit 工具：先出修改提案与 diff 预览，确认后落库并记一条 episode，可随时在变更流一键回滚（`cordis.patch.yml` 已开 `kgEdit`）。
+- **业务管理**：对象切换器按业务域分组导航（`nocobase.listMeta` 动态清单，隐藏表不露）→ 实体卡流（主标签 + 三对字段预览，「问此记录」「编辑（对话）」与对象级「新建（对话）」全部预填对话，页面零表单）→ 辅助表格视图（hasNext 翻页）→ **高级配置**：外链入口卡片经 `/nocobase` 同源反代在新浏览器窗口打开业务后台（低频管理：页面编辑器/角色权限细配；日常读写走对话）。数据来自 V2 的 `nocobase.listMeta/list` 域。
 
-图谱数据随 `setup-nocobase.mts`（all 链）内置产出：链尾重放 `scripts/setup-dsh-data.mts`，其中 kg-build 管线综合三源建图（NocoBase 业务表结构化映射 + 湖仓表结构 + KB 语料闭集 LLM 抽取——无 `MINIMAX_API_KEY` 时语料腿跳过、确定性腿照跑），删除 `workspace/kg-*.sqlite` 后单跑 all 即重建；图谱页打开即自动加载默认子图。增量重建（数据变化后刷新图）仍可单独跑：
+图谱数据随 `setup-nocobase.mts`（all 链）内置产出：链尾重放 `scripts/setup-dsh-data.mts`，其中 kg-build 管线综合三源建图（NocoBase 业务表结构化映射 + 湖仓表结构 + KB 语料闭集 LLM 抽取——无 `MINIMAX_API_KEY` 时语料腿跳过、确定性腿照跑），删除 `workspace/kg-*.sqlite` 后单跑 all 即重建；图谱页打开即自动加载默认子图。增量重建（数据变化后刷新图）仍可单独跑——重跑做五源增量 ingest：未变源按 scope 快照指纹跳过、消失的行落墓碑，本体层把 FoodOn 精选子树锚点幂等物化进注册表（类与实体可挂 FoodOn URI 对齐标准词）：
 
 ```sh
 node --import tsx/esm examples/kb-agent/scripts/kg-build.mts
@@ -285,7 +297,7 @@ MCP 通道对照评估结论（REST 窄面保持主通道）见 Agent Note `2026
 
 助手侧的三件工具：`switch_view`（切页签）、`view_apply`（执行页面动作，动作白名单与 30 秒超时保护）、`view_state_get`（回读当前视图状态确认生效）。kb、场景、连接器 tab 的操控动作与显式 @ 引用、文档型 patch（`apply_view_patch`）留待 K/L 轮分期（清单见 [plans/handoff-2026-09-15.zh.md](../../plans/handoff-2026-09-15.zh.md)）。
 
-首屏是知识库门户：产品名与一句话价值、用量行（文档数 · 检索次数 · 场景数）、示例问题（点击填入输入框）、30 个场景卡（按市场洞察、工艺等八类分组，点击卡片经确认框后以该角色开新会话，见"换角色"节）。
+首屏是经营概览首页：顶部 KPI 带直读湖仓关键数（零依赖数字卡），下方最近交付轨列出最新订单交付物；场景门户的 30 张场景卡按市场洞察、工艺等八类分组（点击卡片经确认框后以该角色开新会话，见"换角色"节），点 ★ 把常用场景置顶进前列，示例问题点击填入输入框。
 
 ![门户首屏（亮色）](../../screenshots/kb-redesign/01-hero-light.png)
 
@@ -297,7 +309,7 @@ MCP 通道对照评估结论（REST 窄面保持主通道）见 Agent Note `2026
 
 ![入库向导](../../screenshots/kb-redesign/05-workbench-ingest.png)
 
-侧栏的**知识库**入口始终显示当前文档数徽标，有会话时点击直达知识库页签；设置里的**知识库**页展示用量明细。会话内每次 agent 检索都渲染为编号来源卡，展开可核对原文摘录与命中词。
+侧栏的**知识库**入口始终显示当前文档数徽标，有会话时点击直达知识库页签；设置里的**知识库**页展示用量明细。每条答案下方渲染来源轨迹（SourceTrail）：编号引用 chip 一行排开，点开知识库 chip 可核对原文摘录与命中词，湖仓答案的 chip 直接标注来源表名——跨源（知识库/数据湖/业务平台）答案一眼可溯。
 
 ![会话内编号来源卡](../../screenshots/kb-redesign/07-toolview-citations.png)
 

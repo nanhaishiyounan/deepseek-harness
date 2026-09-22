@@ -19,6 +19,7 @@ function fakeApi(overrides: Partial<{ muxFrames: MuxFrame[]; hostFrames: HostFra
     ({ rpcId: request.rpcId, result: { ok: false, error: { code: 'internal', message: 'kb stub', details: {} } } })
   return {
     data: { upload: kbRefuse },
+    lakehouse: { overview: kbRefuse },
     orders: {
       create: kbRefuse,
       get: kbRefuse,
@@ -44,6 +45,13 @@ function fakeApi(overrides: Partial<{ muxFrames: MuxFrame[]; hostFrames: HostFra
       subgraph: kbRefuse,
       expand: kbRefuse,
       stats: kbRefuse,
+      episodes: kbRefuse,
+      rollback: kbRefuse,
+      ontologyEdit: kbRefuse,
+      reviewQueue: kbRefuse,
+      reviewDecide: kbRefuse,
+      communities: kbRefuse,
+      history: kbRefuse,
     },
     kb: {
       stats: kbRefuse,
@@ -56,6 +64,7 @@ function fakeApi(overrides: Partial<{ muxFrames: MuxFrame[]; hostFrames: HostFra
       listMeta: kbRefuse,
       list: kbRefuse,
       get: kbRefuse,
+      update: kbRefuse,
     },
     sessions: {
       async list(request) {

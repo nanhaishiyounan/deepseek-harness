@@ -9,14 +9,17 @@
 // the live search that filters all thirty cards.
 
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-runtime/client'
 import type { KbClientState } from '../src/client/kbStore.ts'
 import { KB_SCENARIOS } from '../src/client/hero/scenarios.ts'
 import { ScenarioView } from '../src/client/scenarios/ScenarioView.tsx'
+import { KbHeroHeadline } from '../src/client/hero/KbHeroHeadline.tsx'
+import { KbOverviewBand } from '../src/client/hero/KbOverviewBand.tsx'
+import { setScenarioPinned } from '../src/client/hero/pinnedScenarios.ts'
 import { zh } from '../src/client/locales.ts'
 import { clearRecentSearches, noteRecentSearch } from '../src/client/recentSearches.ts'
-import { bindStoreHook, READY_USAGE, SESSION_KIT } from './kb-fixture.client.ts'
+import { bindStoreHook, GLOBAL_KIT, READY_USAGE, SESSION_KIT } from './kb-fixture.client.ts'
 
 /** The zh dictionary as the view's t (params rendered the way the runtime does). */
 const t = ((key: string, params?: Record<string, string | number>) => {
@@ -29,6 +32,8 @@ function mount(state: KbClientState, options: {
   selectScenario?: (scenarioId: string) => Promise<void>
   refresh?: () => void
   language?: () => 'zh' | 'en'
+  loadOverview?: () => Promise<readonly { id: string; label: string; value: number }[]>
+  loadDeliverables?: () => Promise<readonly { orderNo: string; serviceName: string | undefined; generatedAt: string | undefined }[]>
 } = {}) {
   const store = createSnapshotStore<KbClientState>(state)
   const refresh = options.refresh ?? vi.fn()
@@ -44,6 +49,10 @@ function mount(state: KbClientState, options: {
       selectScenario={(_sessionId: string, scenarioId: string) => selectScenario(scenarioId)}
       language={options.language ?? (() => 'zh')}
       requestView={requestView}
+      loadOverview={options.loadOverview ?? (vi.fn(async () => {
+        throw new Error('fixture: overview unconfigured')
+      }) as never)}
+      loadDeliverables={options.loadDeliverables ?? (vi.fn(async () => []) as never)}
       t={t}
     />,
   )
@@ -253,5 +262,177 @@ describe('ScenarioView', () => {
   it('shows the recent-search empty guidance on a fresh session', () => {
     mount({ stats: { status: 'ready', usage: READY_USAGE }, records: [] })
     expect(screen.getByText(zh['hero.recentEmpty'])).toBeTruthy()
+  })
+})
+
+describe('ScenarioView overview home', () => {
+  it('renders the KPI band from the overview loader and pins a scenario into the front rail', async () => {
+    const pinned = await import('../src/client/hero/pinnedScenarios.ts')
+    localStorage.clear()
+    const loadOverview = vi.fn(async () => [
+      { id: 'export-value', label: '本月出口额', value: 4318, unit: '万美元', trend: 4.6 },
+      { id: 'dest-count', label: '出口目的地', value: 12 },
+      { id: 'price-rises', label: '原料涨价项', value: 7, trend: -2, error: undefined },
+    ] as never)
+    const loadDeliverables = vi.fn(async () => [
+      { orderNo: 'ORD-20260917-2c5c436b', serviceName: '海外仓风险应对咨询', generatedAt: '2026-09-17T08:00:00.000Z' },
+    ] as never)
+    mount({ stats: { status: 'ready', usage: READY_USAGE }, records: [] }, { loadOverview, loadDeliverables })
+
+    const band = await screen.findByTestId('overview-band')
+    expect(band.textContent).toContain('本月出口额')
+    expect(band.textContent).toContain('4,318')
+    expect(band.textContent).toContain('▲4.6%')
+    expect(band.textContent).toContain('ORD-20260917-2c5c436b')
+    expect(loadOverview).toHaveBeenCalledTimes(1)
+
+    // Pin the first featured card: the pinned rail appears above the catalog.
+    const pinButtons = await screen.findAllByRole('button', { name: '钉选场景' })
+    fireEvent.click(pinButtons[0]!)
+    const rail = await screen.findByRole('region', { name: '钉选场景' })
+    expect(rail.textContent).toContain('AI 营销洞察主管')
+    expect(pinned.pinnedScenarios()).toEqual(['market-insight'])
+    localStorage.clear()
+  })
+
+  it('degrades the band inline when the overview read refuses', async () => {
+    mount({ stats: { status: 'ready', usage: READY_USAGE }, records: [] }, {
+      loadOverview: vi.fn(async () => { throw new Error('unconfigured') }),
+    })
+    const band = await screen.findByTestId('overview-band')
+    await waitFor(() => {
+      expect(band.textContent).toContain('概览数据暂不可用')
+    })
+  })
+})
+
+describe('KbHeroHeadline', () => {
+  it('renders the product name and tagline the hero seat swaps in', () => {
+    render(<KbHeroHeadline {...GLOBAL_KIT} useSessions={() => undefined as never} t={t} />)
+    expect(screen.getByText(zh['hero.title'])).toBeTruthy()
+    expect(screen.getByText(zh['hero.tagline'])).toBeTruthy()
+  })
+})
+
+describe('KbOverviewBand loads', () => {
+  /** One manual-settling promise. */
+  function deferred<T>(): { promise: Promise<T>; resolve: (value: T) => void; reject: (reason?: unknown) => void } {
+    let resolve!: (value: T) => void
+    let reject!: (reason?: unknown) => void
+    const promise = new Promise<T>((res, rej) => { resolve = res; reject = rej })
+    return { promise, resolve, reject }
+  }
+
+  it('ignores tier settlements that land after unmount', async () => {
+    const overview = deferred<readonly object[]>()
+    const deliverables = deferred<readonly object[]>()
+    render(
+      <KbOverviewBand
+        loadOverview={() => overview.promise as never}
+        loadDeliverables={() => deliverables.promise as never}
+        t={t}
+      />,
+    )
+    // Unmount first: the resolves below must stop at the alive guard.
+    cleanup()
+    overview.resolve([])
+    deliverables.resolve([])
+    // The reject arm shares the same guard: an orders-less deployment that
+    // answers after the tab switch never touches unmounted state either.
+    const rejected = deferred<readonly object[]>()
+    render(
+      <KbOverviewBand
+        loadOverview={() => rejected.promise as never}
+        loadDeliverables={() => rejected.promise as never}
+        t={t}
+      />,
+    )
+    cleanup()
+    rejected.reject(new Error('late'))
+    await Promise.allSettled([overview.promise, deliverables.promise, rejected.promise])
+  })
+
+  it('renders the per-KPI error line and a bare deliverable row', async () => {
+    render(
+      <KbOverviewBand
+        loadOverview={vi.fn(async () => [
+          { id: 'no-seed', label: '本月出口额', value: 0, error: 'seed not configured' },
+        ] as never)}
+        loadDeliverables={vi.fn(async () => [
+          { orderNo: 'ORD-BARE', serviceName: undefined, generatedAt: undefined },
+        ] as never)}
+        t={t}
+      />,
+    )
+    const band = await screen.findByTestId('overview-band')
+    await waitFor(() => { expect(band.textContent).toContain(zh['overview.kpiError']) })
+    expect(band.textContent).toContain('ORD-BARE')
+    expect(band.textContent).not.toContain(' · ')
+  })
+
+  it('renders the empty rail when the deliverables read rejects', async () => {
+    render(
+      <KbOverviewBand
+        loadOverview={vi.fn(async () => [] as never)}
+        loadDeliverables={vi.fn(async () => { throw new Error('no orders seam') })}
+        t={t}
+      />,
+    )
+    const band = await screen.findByTestId('overview-band')
+    await waitFor(() => { expect(band.textContent).toContain(zh['overview.deliverablesEmpty']) })
+  })
+})
+
+describe('ScenarioView pinned rail', () => {
+  // The pin set keeps a module-level in-memory fallback that earlier specs
+  // may have written; an empty-array seed keeps reads on the storage leg.
+  beforeEach(() => { localStorage.setItem('dsh-kb-pinned-scenarios', '[]') })
+  afterEach(() => { localStorage.setItem('dsh-kb-pinned-scenarios', '[]') })
+
+  it('picks from the featured row directly through the confirm dialog', () => {
+    mount({ stats: { status: 'ready', usage: READY_USAGE }, records: [] })
+    // The card's accessible name concatenates its description, so anchor on
+    // the leading card name (the existing pick-path convention).
+    fireEvent.click(screen.getByRole('button', { name: /AI 营销洞察主管/u }))
+    expect(screen.getByRole('dialog').textContent).toContain('AI 营销洞察主管')
+    fireEvent.click(screen.getByRole('button', { name: zh['scenario.cancel'] }))
+    expect(screen.queryByRole('dialog')).toBeNull()
+  })
+
+  it('unpins through the rail card and shows the empty guidance', () => {
+    mount({ stats: { status: 'ready', usage: READY_USAGE }, records: [] })
+    fireEvent.click(screen.getAllByRole('button', { name: zh['scenario.pin'] })[0]!)
+    const rail = screen.getByRole('region', { name: zh['overview.pinned'] })
+    expect(rail.textContent).toContain('AI 营销洞察主管')
+    // Picking from the rail opens the same confirm dialog; the rail copy
+    // precedes the featured row in the document.
+    fireEvent.click(screen.getAllByRole('button', { name: /AI 营销洞察主管/u })[0]!)
+    expect(screen.getByRole('dialog')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: zh['scenario.cancel'] }))
+    // The rail card's own star toggles the pin off; the featured twin of the
+    // same scenario carries the same unpin label, and the rail precedes it.
+    fireEvent.click(screen.getAllByRole('button', { name: zh['scenario.unpin'] })[0]!)
+    expect(screen.getByText(zh['overview.pinnedEmpty'])).toBeTruthy()
+  })
+
+  it('pins a card from an expanded category group', () => {
+    mount({ stats: { status: 'ready', usage: READY_USAGE }, records: [] })
+    expandCategory('工艺')
+    const groupPin = screen.getAllByRole('button', { name: zh['scenario.pin'] })
+      .find(button => button.closest('[class*="categoryGroup"]') !== null)!
+    fireEvent.click(groupPin)
+    const rail = screen.getByRole('region', { name: zh['overview.pinned'] })
+    expect(rail.textContent).toContain('智能品控主管')
+    expect(setScenarioPinned('process-quality', true)[0]).toBe('process-quality')
+  })
+
+  it('pins a card from a search result row', () => {
+    mount({ stats: { status: 'ready', usage: READY_USAGE }, records: [] })
+    searchScenarios('食安')
+    const resultPin = screen.getAllByRole('button', { name: zh['scenario.pin'] })
+      .find(button => button.closest('[class*="resultsZone"]') !== null)!
+    fireEvent.click(resultPin)
+    const rail = screen.getByRole('region', { name: zh['overview.pinned'] })
+    expect(rail.textContent).toContain('AI 食安服务主管')
   })
 })

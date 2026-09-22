@@ -61,6 +61,7 @@ import type {} from '@deepseek-ai/dsh-connector'
 import type { ConnectorDatasetSummary } from '@deepseek-ai/dsh-connector'
 import type { LakehouseTransferEntry } from '@deepseek-ai/dsh-lakehouse'
 import type { AssetFeaturedView, AssetView } from './api/assets.ts'
+import type { LakehouseKpiView } from './api/lakehouse.ts'
 import type {
   ConnectorConnectionView, ConnectorProviderWireView, ConnectorTransferWireView,
 } from './api/connectors.ts'
@@ -70,6 +71,8 @@ import type {} from '@deepseek-ai/dsh-kb-graph'
 import type {
   KbGraphRuntime, KgEdge, KgNodeHit, KgNodeType, KgNodeTypeId, KgRelation, KgSubgraph, KgSubgraphNode,
 } from '@deepseek-ai/dsh-kb-graph'
+import { kgCorefEdgeId, kgCorefPairKey, kgRelationId } from '@deepseek-ai/dsh-kb-graph'
+import type { KgOntologyChangeOp } from '@deepseek-ai/dsh-kb-graph'
 import { compileNbFilter, NocoBaseClient, parseNbFilterCondition, unwrapNbTitle } from '@deepseek-ai/dsh-connector-nocobase'
 import type { NbFilterCondition, NocoBaseCollectionMeta, NocoBaseListResult } from '@deepseek-ai/dsh-connector-nocobase'
 import type {} from '@deepseek-ai/dsh-tools'
@@ -814,6 +817,13 @@ export interface ApiProxyDefaults {
    */
   nocobaseEnabled?: boolean
   /**
+   * Whether the nocobase domain's write method (`nocobase.update`) answers.
+   * Absent means refused: the business page's inline edit fast path stays
+   * off and every record change routes through the agent's nb_update
+   * confirmation flow, same stance as `ordersEnabled`.
+   */
+  nocobaseWriteEnabled?: boolean
+  /**
    * Whether the data-asset market domain (`assets.list/detail/stats`) answers.
    * Absent means refused: market reads ride the connector seam's discovery,
    * so the unauthenticated gateway needs an explicit per-deployment opt-in.
@@ -825,6 +835,13 @@ export interface ApiProxyDefaults {
    * a configured path that cannot be read or parsed fails loud.
    */
   assetsSeedPath?: string
+  /**
+   * Workspace-relative or absolute path of the overview-home KPI seed file
+   * (id/label/unit/SQL definitions, the operations seat). Absent means the
+   * `lakehouse.overview` read is refused; a configured path that cannot be
+   * read or parsed fails loud.
+   */
+  lakehouseOverviewPath?: string
   /**
    * Whether the connector-page domain (`connectors.list/connections/transfers`)
    * answers. Absent means refused, same stance as `assetsEnabled`.
@@ -1455,6 +1472,24 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
     message: error instanceof Error ? error.message : String(error),
     details: {},
   })
+  /** The refusal `lakehouse.overview` answers with when no overview seed is configured. */
+  const lakehouseOverviewNotConfigured = (): RpcError => ({
+    code: 'lakehouse-overview-not-configured',
+    message: 'this deployment has not configured the overview-home KPI band; set the api-gateway config lakehouseOverviewPath to a kpi seed file',
+    details: {},
+  })
+  /** The refusal `lakehouse.overview` answers with when no lakehouse seam is composed. */
+  const lakehouseNotComposed = (): RpcError => ({
+    code: 'lakehouse-not-composed',
+    message: 'this deployment composes no lakehouse seam; add the dsh-lakehouse seam, a catalog store, and a query engine to evaluate overview KPIs',
+    details: {},
+  })
+  /** The refusal `lakehouse.overview` answers with when the seed file cannot be read or parsed. */
+  const lakehouseOverviewSeedInvalid = (path: string): RpcError => ({
+    code: 'lakehouse-overview-seed-invalid',
+    message: `the configured overview KPI seed file cannot be read or parsed: ${path}`,
+    details: { path },
+  })
   /** The shared refusal every connectors method answers with unless the deployment opted in. */
   const connectorsNotComposed = (): RpcError => ({
     code: 'connectors-not-composed',
@@ -1502,6 +1537,9 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
     ...type.extends === undefined ? {} : { extends: String(type.extends) },
     ...type.naturalKey === undefined ? {} : { natural_key: type.naturalKey },
     prop_keys: type.props.map(prop => prop.key),
+    ...type.foodonUri === undefined ? {} : { foodon_uri: type.foodonUri },
+    ...type.foodonId === undefined ? {} : { foodon_id: type.foodonId },
+    ...(type.synonyms === undefined || type.synonyms.length === 0 ? {} : { synonyms: [...type.synonyms] }),
     source: type.source,
     status: type.status,
   })
@@ -1622,6 +1660,29 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
     }).parse(JSON.parse(raw))
     return parsed.featured
   }
+  /** One overview KPI definition off the configured seed file. */
+  interface OverviewKpiDef {
+    readonly id: string
+    readonly label: string
+    readonly sql: string
+    readonly unit?: string | undefined
+  }
+  /** Read and parse the overview KPI seed; read/parse failures fail loud per the config contract. */
+  const readOverviewSeed = async (): Promise<readonly OverviewKpiDef[]> => {
+    const raw = await readFile(defaults.lakehouseOverviewPath as string, 'utf8')
+    const parsed = zod.object({
+      kpis: zod.array(zod.object({
+        id: zod.string().min(1),
+        label: zod.string().min(1),
+        sql: zod.string().min(1),
+        unit: zod.string().optional(),
+      })),
+    }).parse(JSON.parse(raw))
+    return parsed.kpis
+  }
+  /** Numeric cells of one result row, in order (the KPI value, then the trend). */
+  const numericCells = (row: readonly unknown[]): readonly number[] =>
+    row.filter((cell): cell is number => typeof cell === 'number')
   /** The delivery trail through the optional lakehouse seam; no seam reads as no records (the catalog-only degradation). */
   const transferEntries = async (limit: number, signal: AbortSignal | undefined): Promise<readonly LakehouseTransferEntry[]> => {
     const lakehouse = ctx.get('lakehouse')
@@ -3724,6 +3785,26 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
         }
         return ok(request, { collection, row })
       },
+
+      async update(request, signal) {
+        if (defaults.nocobaseWriteEnabled !== true) {
+          return err(request, {
+            code: 'nocobase-write-disabled',
+            message: 'this deployment has not enabled the inline record write; set the api-gateway config nocobaseWriteEnabled: true to expose nocobase.update',
+            details: {},
+          })
+        }
+        const gates = await nocobaseGates()
+        if ('refusal' in gates) return err(request, gates.refusal)
+        const { collection, id, values } = request.payload
+        let row: Record<string, unknown> & { id: number }
+        try {
+          row = await gates.client.update<Record<string, unknown>>(collection, id, values, signal)
+        } catch (error: unknown) {
+          return err(request, nocobaseRequestError(error))
+        }
+        return ok(request, { collection, row })
+      },
     },
 
     kb: {
@@ -4218,6 +4299,56 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
     },
 
     /**
+     * The overview-home KPI band: the configured seed file's KPI definitions
+     * evaluated live against the optional `ctx.lakehouse` seam under the
+     * deployment's kb tenant binding. A KPI whose SQL fails (or returns no
+     * numeric cell) degrades to its error text on the chip — one broken
+     * definition never blanks the band.
+     */
+    lakehouse: {
+      async overview(request, signal) {
+        void request
+        const seedPath = defaults.lakehouseOverviewPath
+        if (seedPath === undefined) return err(request, lakehouseOverviewNotConfigured())
+        const lakehouse = ctx.get('lakehouse')
+        if (lakehouse === undefined) return err(request, lakehouseNotComposed())
+        const tenant = kbTenant()
+        if (tenant === undefined) return err(request, kbTenantUnbound())
+        let defs: readonly OverviewKpiDef[]
+        try {
+          defs = await readOverviewSeed()
+        } catch {
+          return err(request, lakehouseOverviewSeedInvalid(seedPath))
+        }
+        const kpis = await Promise.all(defs.map(async (def): Promise<LakehouseKpiView> => {
+          const base = {
+            id: def.id,
+            label: def.label,
+            ...def.unit === undefined ? {} : { unit: def.unit },
+          }
+          try {
+            const result = await lakehouse.query(tenant, def.sql, signal)
+            const row = result.rows[0] ?? []
+            const numbers = numericCells(row)
+            const value = numbers[0]
+            const trend = numbers[1]
+            if (value === undefined) {
+              return { ...base, value: 0, error: 'no numeric result' }
+            }
+            return {
+              ...base,
+              value,
+              ...trend === undefined ? {} : { trend },
+            }
+          } catch (error: unknown) {
+            return { ...base, value: 0, error: error instanceof Error ? error.message : String(error) }
+          }
+        }))
+        return ok(request, { generated_at: new Date().toISOString(), kpis })
+      },
+    },
+
+    /**
      * The connector page's read surface: the provider catalog (the seam's
      * registry with live availability), per-provider delivery aggregates, and
      * the raw delivery trail. Delivery reads ride the optional lakehouse
@@ -4264,7 +4395,6 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
       // the ontology registry for the legend, name→node seed resolution, the
       // k-hop neighborhood walk, one-hop canvas expansion, and the counters.
       // Graph writes belong to the kg-build pipeline alone.
-      // oxlint-disable-next-line typescript/require-await -- async adapts the sync body to the seam's Promise-returning method type.
       async schema(request) {
         const gates = kgGates()
         if ('refusal' in gates) return err(request, gates.refusal)
@@ -4458,6 +4588,296 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
           return err(request, kgReadFailed(error))
         }
       },
+
+      async episodes(request) {
+        const gates = kgGates()
+        if ('refusal' in gates) return err(request, gates.refusal)
+        const { limit } = request.payload
+        try {
+          const rows = await gates.graph.listEpisodes(gates.tenant, Math.min(Math.max(limit ?? 20, 1), 100))
+          return ok(request, {
+            episodes: rows.map(row => ({
+              uuid: row.uuid,
+              source: row.source,
+              name: row.name,
+              content: row.content,
+              created_at: row.createdAt,
+              mentions: row.mentionCount,
+            })),
+          })
+        } catch (error: unknown) {
+          return err(request, kgReadFailed(error))
+        }
+      },
+
+      async rollback(request) {
+        const gates = kgGates()
+        if ('refusal' in gates) return err(request, gates.refusal)
+        const { episode_uuid: episodeUuid, reason } = request.payload
+        try {
+          const episodes = await gates.graph.listEpisodes(gates.tenant, 100)
+          const target = episodes.find(row => row.uuid === episodeUuid)
+          if (target === undefined) {
+            return err(request, {
+              code: 'kg-episode-unknown',
+              message: `kg.rollback: episode "${episodeUuid}" not found`,
+              details: { episode_uuid: episodeUuid },
+            })
+          }
+          if (target.source === 'rollback') {
+            return err(request, {
+              code: 'kg-rollback-invalid',
+              message: 'kg.rollback: a rollback episode cannot be rolled back',
+              details: { episode_uuid: episodeUuid },
+            })
+          }
+          const edgeIds = await gates.graph.edgeIdsOfEpisode(episodeUuid)
+          const metadata = target.metadata as { addedEdgeIds?: string[]; retiredEdgeIds?: string[] } | undefined
+          const added = new Set(metadata?.addedEdgeIds ?? [])
+          const retired = new Set(metadata?.retiredEdgeIds ?? [])
+          const now = new Date().toISOString()
+          const toRetire = edgeIds.filter(id => added.has(id))
+          const toRestore = edgeIds.filter(id => retired.has(id))
+          if (toRetire.length > 0) await gates.graph.expireEdges(toRetire, now)
+          if (toRestore.length > 0) await gates.graph.restoreEdges(toRestore, now)
+          const rollbackUuid = `rollback:${now}`
+          await gates.graph.putEpisode({
+            uuid: rollbackUuid,
+            tenantId: gates.tenant,
+            source: 'rollback',
+            name: `回滚 ${target.name}`,
+            content: reason === undefined ? `回滚 episode ${episodeUuid}（${target.name}）` : `回滚 episode ${episodeUuid}：${reason}`,
+            validAt: now,
+            createdAt: now,
+            metadata: { rolledBack: episodeUuid, retired: toRetire, restored: toRestore },
+          })
+          if (edgeIds.length > 0) await gates.graph.linkMentions(rollbackUuid, edgeIds)
+          return ok(request, {
+            rollback_uuid: rollbackUuid,
+            rolled_back: episodeUuid,
+            retired: toRetire.length,
+            restored: toRestore.length,
+          })
+        } catch (error: unknown) {
+          return err(request, kgReadFailed(error))
+        }
+      },
+
+      async ontologyEdit(request) {
+        const gates = kgGates()
+        if ('refusal' in gates) return err(request, gates.refusal)
+        const ops = request.payload.ops.map((op): KgOntologyChangeOp => {
+          switch (op.op) {
+            case 'add_node':
+              return { op: 'add_node', targetId: op.target_id, label: op.label, ...(op.parent_id === undefined ? {} : { parentId: op.parent_id }) }
+            case 'rename_node':
+              return { op: 'rename_node', targetId: op.target_id, label: op.label }
+            case 'set_parent':
+              return { op: 'set_parent', targetId: op.target_id, newParentId: op.new_parent_id }
+            case 'deprecate_node':
+              return { op: 'deprecate_node', targetId: op.target_id, ...(op.replaced_by === undefined ? {} : { replacedBy: op.replaced_by }) }
+            case 'change_cardinality':
+              return {
+                op: 'change_cardinality',
+                relationId: kgRelationId(op.relation_id),
+                domainId: op.domain_id,
+                rangeId: op.range_id,
+                ...(op.min === undefined ? {} : { min: op.min }),
+                ...(op.max === undefined ? {} : { max: op.max }),
+              }
+          }
+        })
+        try {
+          const result = await gates.graph.applyOntologyOps(ops)
+          const now = new Date().toISOString()
+          const episodeUuid = `human-edit:${now}`
+          await gates.graph.putEpisode({
+            uuid: episodeUuid,
+            tenantId: gates.tenant,
+            source: 'human-edit',
+            name: '本体编辑',
+            content: result.applied.join('\n'),
+            validAt: now,
+            createdAt: now,
+            metadata: { kind: 'ontology-edit', ops: request.payload.ops, revisionId: result.revisionId },
+          })
+          return ok(request, { applied: [...result.applied], revision_id: result.revisionId, episode_uuid: episodeUuid })
+        } catch (error: unknown) {
+          return err(request, kgReadFailed(error))
+        }
+      },
+
+      async reviewQueue(request) {
+        const gates = kgGates()
+        if ('refusal' in gates) return err(request, gates.refusal)
+        try {
+          const episodes = await gates.graph.listEpisodes(gates.tenant, 100)
+          // The queue's source of truth is the newest align episode's review
+          // list (the pipeline journals the gray-zone pairs it deferred);
+          // decisions ride later human-edit episodes' metadata.
+          type ReviewMeta = {
+            docId: string
+            rowId: string
+            docName: string
+            rowName: string
+            verdict: { confidence: number; reason: string }
+          }
+          const reviewMetaOf = (metadata: unknown): readonly ReviewMeta[] => {
+            const review = (metadata as { review?: unknown } | undefined)?.review
+            return Array.isArray(review)
+              ? review.flatMap((entry) => {
+                const docId = (entry as { docId?: unknown }).docId
+                const rowId = (entry as { rowId?: unknown }).rowId
+                const docName = (entry as { docName?: unknown }).docName
+                const rowName = (entry as { rowName?: unknown }).rowName
+                const verdict = (entry as { verdict?: unknown }).verdict as { confidence?: unknown; reason?: unknown } | undefined
+                if (typeof docId !== 'string' || typeof rowId !== 'string') return []
+                return [{
+                  docId, rowId,
+                  docName: typeof docName === 'string' ? docName : docId,
+                  rowName: typeof rowName === 'string' ? rowName : rowId,
+                  verdict: { confidence: typeof verdict?.confidence === 'number' ? verdict.confidence : 0.5, reason: typeof verdict?.reason === 'string' ? verdict.reason : '' },
+                }]
+              })
+              : []
+          }
+          const align = episodes.find(row => row.source === 'ingest' && reviewMetaOf(row.metadata).length > 0)
+          const candidates = align === undefined ? [] : reviewMetaOf(align.metadata)
+          const rejects = await gates.graph.listCorefRejects()
+          const decided = new Set<string>(rejects)
+          for (const episode of episodes) {
+            const decision = (episode.metadata as { reviewDecision?: { docId?: unknown; rowId?: unknown } } | undefined)?.reviewDecision
+            if (decision !== undefined && typeof decision.docId === 'string' && typeof decision.rowId === 'string') {
+              decided.add(kgCorefPairKey(decision.docId, decision.rowId))
+            }
+          }
+          const pending = candidates.filter(entry => !decided.has(kgCorefPairKey(entry.docId, entry.rowId)))
+          const merged = pending.length === 0
+            ? []
+            : await gates.graph.edgesByIds(pending.map(entry => kgCorefEdgeId(entry.docId, entry.rowId)))
+          const liveMerged = new Set(merged.map(edge => edge.id))
+          return ok(request, {
+            entries: pending
+              .filter(entry => !liveMerged.has(kgCorefEdgeId(entry.docId, entry.rowId)))
+              .map(entry => ({
+                doc_id: entry.docId,
+                row_id: entry.rowId,
+                doc_name: entry.docName,
+                row_name: entry.rowName,
+                confidence: entry.verdict.confidence,
+                reason: entry.verdict.reason,
+              })),
+            source_episode: align?.uuid ?? '',
+          })
+        } catch (error: unknown) {
+          return err(request, kgReadFailed(error))
+        }
+      },
+
+      async reviewDecide(request) {
+        const gates = kgGates()
+        if ('refusal' in gates) return err(request, gates.refusal)
+        const { doc_id: docId, row_id: rowId, decision, doc_name: docName, row_name: rowName, reason } = request.payload
+        const now = new Date().toISOString()
+        try {
+          if (decision === 'merge') {
+            const edgeId = kgCorefEdgeId(docId, rowId)
+            await gates.graph.upsertEdges([{
+              id: edgeId,
+              tenantId: gates.tenant,
+              srcId: docId,
+              dstId: rowId,
+              relation: kgRelationId('corefers_with'),
+              fact: `跨源共指（人工裁决合并）：${docName ?? docId} ≈ ${rowName ?? rowId}`,
+              confidence: 1,
+              provenance: { sourceSystem: 'kg-align', sourceId: docId, extractedAt: now },
+              validFrom: now,
+            }])
+            const episodeUuid = `human-edit:${now}`
+            await gates.graph.putEpisode({
+              uuid: episodeUuid,
+              tenantId: gates.tenant,
+              source: 'human-edit',
+              name: '共指审核：合并',
+              content: `人工裁决合并共指对 ${docName ?? docId} ≈ ${rowName ?? rowId}${reason === undefined ? '' : `：${reason}`}`,
+              validAt: now,
+              createdAt: now,
+              metadata: { kind: 'review-decision', reviewDecision: { docId, rowId, decision }, reason },
+            })
+            await gates.graph.linkMentions(episodeUuid, [edgeId])
+            return ok(request, { episode_uuid: episodeUuid, decided: 'merge', edge_id: edgeId })
+          }
+          if (decision === 'reject') {
+            await gates.graph.putCorefRejects([{
+              pairKey: kgCorefPairKey(docId, rowId),
+              docId,
+              rowId,
+              reason: reason === undefined ? '人工裁决：不合并' : `人工裁决：${reason}`,
+              decidedAt: now,
+            }])
+            const episodeUuid = `human-edit:${now}`
+            await gates.graph.putEpisode({
+              uuid: episodeUuid,
+              tenantId: gates.tenant,
+              source: 'human-edit',
+              name: '共指审核：不合并',
+              content: `人工裁决不合并共指对 ${docName ?? docId} ≉ ${rowName ?? rowId}${reason === undefined ? '' : `：${reason}`}`,
+              validAt: now,
+              createdAt: now,
+              metadata: { kind: 'review-decision', reviewDecision: { docId, rowId, decision }, reason },
+            })
+            return ok(request, { episode_uuid: episodeUuid, decided: 'reject' })
+          }
+          const episodeUuid = `human-edit:${now}`
+          await gates.graph.putEpisode({
+            uuid: episodeUuid,
+            tenantId: gates.tenant,
+            source: 'human-edit',
+            name: '共指审核：跳过',
+            content: `跳过共指对 ${docName ?? docId} / ${rowName ?? rowId}（本轮不裁决）`,
+            validAt: now,
+            createdAt: now,
+            metadata: { kind: 'review-decision', reviewDecision: { docId, rowId, decision }, reason },
+          })
+          return ok(request, { episode_uuid: episodeUuid, decided: 'skip' })
+        } catch (error: unknown) {
+          return err(request, kgReadFailed(error))
+        }
+      },
+
+      async communities(request) {
+        const gates = kgGates()
+        if ('refusal' in gates) return err(request, gates.refusal)
+        try {
+          const readout = await gates.graph.communities(gates.tenant)
+          return ok(request, {
+            communities: readout.communities.map(community => ({ id: community.id, nodes: [...community.nodes] })),
+            modularity: readout.modularity,
+            node_count: readout.nodeCount,
+          })
+        } catch (error: unknown) {
+          return err(request, kgReadFailed(error))
+        }
+      },
+
+      async history(request) {
+        const gates = kgGates()
+        if ('refusal' in gates) return err(request, gates.refusal)
+        const asOf = request.payload.as_of
+        if (Number.isNaN(Date.parse(asOf))) {
+          return err(request, {
+            code: 'kg-history-invalid',
+            message: `kg.history: as_of "${asOf}" is not a parseable ISO instant`,
+            details: { as_of: asOf },
+          })
+        }
+        try {
+          const snapshot = await gates.graph.snapshotAt(gates.tenant, asOf, { maxNodes: 300, maxEdges: 1_500 })
+          return ok(request, { ...kgSubgraphViewsOf(snapshot), as_of: asOf })
+        } catch (error: unknown) {
+          return err(request, kgReadFailed(error))
+        }
+      },
     },
 
     goals: {
@@ -4523,6 +4943,7 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
             isDefault: preset.id === defaultId,
             ...preset.name === undefined ? {} : { name: preset.name },
             ...preset.description === undefined ? {} : { description: preset.description },
+            ...preset.welcome === undefined ? {} : { welcome: preset.welcome },
             ...preset.broken === undefined ? {} : { broken: preset.broken },
           })),
           authorable: presets.authorable,

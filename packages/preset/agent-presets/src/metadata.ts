@@ -24,6 +24,28 @@ import yaml from 'js-yaml'
 /** The optional display-metadata file beside a preset's composition. */
 export const METADATA_FILE = 'preset.yml'
 
+/** One starter chip of the welcome block: shown label and sent text. */
+export interface PresetWelcomeStarter {
+  /** Chip label the surface renders. */
+  readonly label: string
+  /** Message text picking the chip sends as the user's own message. */
+  readonly send: string
+}
+
+/**
+ * The welcome block a preset may publish: what a new session's empty state
+ * renders locally. Display text only — it never becomes a logged message, so
+ * publishing it grants no capability.
+ */
+export interface PresetWelcome {
+  /** One-line identity (the welcome card's title). */
+  readonly greeting: string
+  /** Capability lines (2-4). */
+  readonly capabilities: readonly string[]
+  /** Starter chips; picking one sends it as the user's own message. */
+  readonly starters: readonly PresetWelcomeStarter[]
+}
+
 /** Display text a preset may publish about itself. */
 export interface PresetMetadata {
   /** Human-facing name; falls back to the preset id when absent. */
@@ -36,6 +58,31 @@ export interface PresetMetadata {
    * can read in capability order while authored ones stay alphabetical.
    */
   readonly order?: number
+  /** The new-session welcome block, when the preset publishes one. */
+  readonly welcome?: PresetWelcome
+}
+
+/** Parse the welcome block: greeting required, lines and starters sanitized. */
+function welcomeOf(value: unknown): PresetWelcome | undefined {
+  if (typeof value !== 'object' || value === null) return undefined
+  const block = value as Record<string, unknown>
+  const greeting = text(block.greeting)
+  if (greeting === undefined) return undefined
+  const capabilities = Array.isArray(block.capabilities)
+    ? block.capabilities.map(text).filter((line): line is string => line !== undefined)
+    : []
+  const starters: PresetWelcomeStarter[] = []
+  if (Array.isArray(block.starters)) {
+    for (const raw of block.starters) {
+      if (typeof raw !== 'object' || raw === null) continue
+      const starter = raw as Record<string, unknown>
+      const label = text(starter.label)
+      const send = text(starter.send)
+      if (label === undefined || send === undefined) continue
+      starters.push({ label, send })
+    }
+  }
+  return { greeting, capabilities, starters }
 }
 
 /** A non-empty trimmed string, or undefined for anything else. */
@@ -77,10 +124,12 @@ export async function readPresetMetadata(directory: string): Promise<PresetMetad
   const order = typeof record.order === 'number' && Number.isFinite(record.order)
     ? record.order
     : undefined
+  const welcome = welcomeOf(record.welcome)
   return {
     ...name === undefined ? {} : { name },
     ...description === undefined ? {} : { description },
     ...order === undefined ? {} : { order },
+    ...welcome === undefined ? {} : { welcome },
   }
 }
 
@@ -95,11 +144,12 @@ export async function readPresetMetadata(directory: string): Promise<PresetMetad
 export function renderPresetMetadata(metadata: PresetMetadata): string | undefined {
   const name = text(metadata.name)
   const description = text(metadata.description)
-  const { order } = metadata
-  if (name === undefined && description === undefined && order === undefined) return undefined
+  const { order, welcome } = metadata
+  if (name === undefined && description === undefined && order === undefined && welcome === undefined) return undefined
   return yaml.dump({
     ...name === undefined ? {} : { name },
     ...description === undefined ? {} : { description },
     ...order === undefined ? {} : { order },
+    ...welcome === undefined ? {} : { welcome },
   }, { lineWidth: -1 })
 }

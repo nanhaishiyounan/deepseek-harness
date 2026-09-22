@@ -40,4 +40,13 @@ describe('biz client store', () => {
     store.setRows({ count: 0, page: 1, page_size: 20, rows: [] })
     expect(store.store.getSnapshot().rows).toMatchObject({ status: 'ready', value: { count: 0 } })
   })
+
+  it('replaces the AI-driven row filter and clears it back', () => {
+    const store = createBizClientStore()
+    expect(store.store.getSnapshot().tableFilter).toBeUndefined()
+    store.setTableFilter('status = pending')
+    expect(store.store.getSnapshot().tableFilter).toBe('status = pending')
+    store.setTableFilter(undefined)
+    expect(store.store.getSnapshot().tableFilter).toBeUndefined()
+  })
 })

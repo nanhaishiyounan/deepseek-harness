@@ -148,6 +148,10 @@ export interface RpcErrorDetailsMap {
   'kg-seed-unresolved': { seeds: string[] }
   /** A kg-domain read failed at the graph store; the message is the cause's text. */
   'kg-read-failed': {}
+  'kg-episode-unknown': {}
+  'kg-rollback-invalid': {}
+  /** A kg.history instant failed ISO parsing; the details carry the raw text. */
+  'kg-history-invalid': { as_of: string }
   /** A connectors-domain call ran in a deployment that did not opt in through `connectorsEnabled`. */
   'connectors-not-composed': {}
   /** A connectors-domain call found the deployment composing no connector capability. */
@@ -174,6 +178,14 @@ export interface RpcErrorDetailsMap {
   'data-upload-too-large': { filename: string; maxBytes: number }
   /** A unified data upload failed (decode, parser, or seam refusal); the message is the cause's text. */
   'data-ingest-failed': { path: string }
+  /** A lakehouse-overview call ran in a deployment that configured no overview seed (`lakehouseOverviewPath`). */
+  'lakehouse-overview-not-configured': {}
+  /** A lakehouse-overview call found the deployment composing no lakehouse seam. */
+  'lakehouse-not-composed': {}
+  /** The configured overview seed file could not be read or parsed; details carry the path. */
+  'lakehouse-overview-seed-invalid': { path: string }
+  /** A nocobase.update call ran in a deployment that did not opt in through `nocobaseWriteEnabled`. */
+  'nocobase-write-disabled': {}
   'internal': {}
 }
 

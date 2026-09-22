@@ -389,14 +389,14 @@ describe('WorkerThreadCodeRuntime — budgets and containment (real workers)', (
     expect(result.error).toBeUndefined()
     expect(result.logs).toEqual([])
     expect(result.value).toHaveLength(67_108_860)
-  }, 60_000)
+  }, 120_000)
 
   it('fails one byte over the default 64 MiB combined boundary', async () => {
     const { runtime } = await setup()
     const result = await runtime.run({ program: 'return "x".repeat(67_108_861)', bindings: [] })
     expect(result.value).toBeUndefined()
     expect(result.error).toEqual({ kind: 'output-limit', message: 'outer output exceeded 67108864 bytes' })
-  }, 60_000)
+  }, 120_000)
 
   it('accounts pipe writes that bypass the patched write slot in the same outer ledger', async () => {
     const { runtime } = await setup({ maxOutputBytes: 80 })

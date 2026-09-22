@@ -22,7 +22,7 @@ describe('kg client store caches', () => {
     expect(store.store.getSnapshot().legend).toBeUndefined()
     store.beginLegend()
     expect(store.store.getSnapshot().legend).toEqual({ status: 'loading' })
-    store.setLegend([{ id: 'Customer', label: '客户', layer: 'domain', prop_keys: [], source: 'builtin-food', status: 'active' }], [])
+    store.setLegend([{ id: 'Customer', label: '客户', layer: 'domain', prop_keys: [], source: 'builtin-food', status: 'active' }], [], [])
     expect(store.store.getSnapshot().legend?.status).toBe('ready')
     store.failLegend('boom')
     expect(store.store.getSnapshot().legend).toEqual({ status: 'error', error: 'boom' })

@@ -303,7 +303,7 @@ describe('hooks-claude-code bridge — SubagentStart / SubagentStop (observe)', 
 
     // Both hooks run async (detached .then); poll for their marker files rather
     // than a fixed sleep that flakes under load.
-    await waitFor(() => existsSync(startMarker) && existsSync(stopMarker))
+    await waitFor(() => existsSync(startMarker) && existsSync(stopMarker), 30_000)
     expect(existsSync(startMarker)).toBe(true)
     expect(existsSync(stopMarker)).toBe(true)
     // The markers prove the hook PROCESSES ran, not that the detached `.then`

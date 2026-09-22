@@ -1,0 +1,656 @@
+/* Chats tab + message components (03 §4.6/§4.7): the session list with
+   stamp avatars and kind badges, the welcome card, the ask_choice trio, the
+   pick capsule, and the markdown ticket face. */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--dshm-background);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  min-height: 48px;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--dshm-card);
+  border-bottom: 1px solid var(--dshm-border);
+  flex: none;
+}
+
+.headerTitle {
+  margin: 0;
+  font-size: 17px;
+  line-height: 24px;
+  font-weight: 600;
+  color: var(--dshm-foreground);
+}
+
+.plus {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--dshm-primary);
+  color: var(--dshm-on-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.searchWrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 12px 4px;
+  padding: 0 12px;
+  height: 32px;
+  border-radius: var(--dshm-radius);
+  background: var(--dshm-muted);
+  flex: none;
+}
+
+.searchIcon {
+  color: var(--dshm-muted-foreground);
+  display: inline-flex;
+  flex: none;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  color: var(--dshm-foreground);
+}
+
+.searchInput:focus {
+  outline: none;
+}
+
+.searchInput::placeholder {
+  color: var(--dshm-muted-foreground);
+}
+
+.chips {
+  display: flex;
+  gap: 8px;
+  padding: 6px 12px 10px;
+  flex: none;
+}
+
+.chip,
+.chipActive {
+  height: 28px;
+  padding: 0 14px;
+  font-size: 12px;
+  line-height: 26px;
+  border: none;
+  border-radius: 999px;
+  flex: none;
+}
+
+.chip {
+  background: var(--dshm-muted);
+  color: var(--dshm-muted-foreground);
+}
+
+.chipActive {
+  background: var(--dshm-primary);
+  color: var(--dshm-on-primary);
+  font-weight: 500;
+}
+
+.list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+}
+
+/* One session row (03 §4.7): 64px tall, stamp avatar, kind badge, summary. */
+.sessionRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  min-height: 64px;
+  text-align: left;
+  background: var(--dshm-card);
+  border-bottom: 1px solid var(--dshm-stroke-soft);
+}
+
+.sessionRow:active {
+  background: var(--dshm-muted);
+}
+
+.sessionMain {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sessionTop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sessionTitle {
+  font-size: 14px;
+  line-height: 22px;
+  font-weight: 500;
+  color: var(--dshm-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sessionTime {
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--dshm-muted-foreground);
+  flex: none;
+}
+
+.sessionBottom {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: space-between;
+}
+
+.sessionKind {
+  flex: none;
+  font-size: 10px;
+  line-height: 14px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--dshm-primary-10);
+  color: var(--dshm-primary);
+}
+
+.sessionKindAdvisor {
+  background: var(--dshm-muted);
+  color: var(--dshm-muted-foreground);
+}
+
+.sessionSummary {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dshm-muted-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.unreadDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--dshm-destructive);
+  flex: none;
+}
+
+.sessionSide {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex: none;
+}
+
+.runningTag {
+  font-size: 10px;
+  line-height: 14px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--dshm-success-10);
+  color: var(--dshm-success);
+}
+
+.pendingTag {
+  font-size: 10px;
+  line-height: 14px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--dshm-warning-10);
+  color: var(--dshm-warning);
+}
+
+.identityCard {
+  flex: none;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--dshm-border);
+  font-size: 10px;
+  line-height: 16px;
+  color: var(--dshm-muted-foreground);
+  background: var(--dshm-card);
+}
+
+/* Welcome card (03 §4.1/§4.6): the full-width identity card over the empty flow. */
+.welcomeCard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-border);
+  border-radius: var(--dshm-radius-lg);
+  box-shadow: var(--dshm-shadow-card);
+}
+
+.welcomeTitle {
+  margin: 0;
+  font-size: 28px;
+  line-height: 34px;
+  font-weight: 700;
+  color: var(--dshm-foreground);
+}
+
+.welcomeList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.welcomeLine {
+  font-size: 15px;
+  line-height: 24px;
+  color: var(--dshm-foreground);
+  display: flex;
+  align-items: baseline;
+}
+
+/* The 4px ink-teal square bullet (03 §4.1). */
+.welcomeLine::before {
+  content: '';
+  flex: none;
+  width: 4px;
+  height: 4px;
+  margin-right: 8px;
+  background: var(--dshm-primary);
+}
+
+.welcomeStarters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.starter {
+  height: 32px;
+  padding: 0 14px;
+  font-size: 12px;
+  line-height: 30px;
+  border: none;
+  border-radius: 999px;
+  background: var(--dshm-primary-soft);
+  color: var(--dshm-primary);
+}
+
+/* ask bubbles (03 §4.2): the three pick forms with the pick feedback and the
+   answered fade. */
+.askBubble {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--dshm-bubble-ai-bg);
+  border: 1px solid var(--dshm-bubble-ai-border);
+  border-radius: var(--dshm-radius-corner) var(--dshm-radius-bubble) var(--dshm-radius-bubble) var(--dshm-radius-bubble);
+  box-shadow: var(--dshm-shadow-card);
+  max-width: min(84vw, 326px);
+}
+
+/* The answered group fades as one (03 §6.2). */
+.askAnswered {
+  opacity: 0.55;
+  transition: opacity 200ms ease-out;
+}
+
+.askQuestion {
+  margin: 0;
+  font-size: 15px;
+  line-height: 24px;
+  color: var(--dshm-foreground);
+}
+
+.askCards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.askCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  text-align: left;
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-border);
+  border-radius: var(--dshm-radius);
+  transition: background-color 120ms ease-out, border-color 120ms ease-out, color 120ms ease-out;
+}
+
+.askCardLabel {
+  font-size: 14px;
+  line-height: 22px;
+  font-weight: 500;
+}
+
+.askCardHint {
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--dshm-muted-foreground);
+}
+
+.askChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.askChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 12px;
+  font-size: 12px;
+  line-height: 16px;
+  border: none;
+  border-radius: 999px;
+  background: var(--dshm-primary-soft);
+  color: var(--dshm-primary);
+  transition: background-color 120ms ease-out, color 120ms ease-out;
+}
+
+.askChipHint {
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--dshm-muted-foreground);
+}
+
+.askButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.askButton {
+  height: 36px;
+  padding: 0 16px;
+  font-size: 13px;
+  line-height: 34px;
+  border: 1px solid var(--dshm-border);
+  border-radius: var(--dshm-radius);
+  background: var(--dshm-card);
+  color: var(--dshm-foreground);
+  transition: background-color 120ms ease-out, border-color 120ms ease-out, color 120ms ease-out;
+}
+
+/* The picked option carries the 12px pass-green check seal (03 §2.4). */
+.askSelected {
+  background: var(--dshm-primary);
+  border-color: var(--dshm-primary);
+  color: var(--dshm-on-primary);
+}
+
+.askSelected .askCardHint,
+.askSelected .askChipHint {
+  color: var(--dshm-on-primary);
+  opacity: 0.8;
+}
+
+.askCard.askSelected::before {
+  content: '✓';
+  position: absolute;
+  top: 4px;
+  left: 6px;
+  font-size: 12px;
+  color: var(--dshm-success);
+  font-weight: 700;
+}
+
+.askFree {
+  align-self: flex-start;
+  padding: 0;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--dshm-muted-foreground);
+  background: none;
+  border: none;
+  text-decoration: underline;
+}
+
+.fieldAskLabel {
+  margin: 0;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 500;
+  color: var(--dshm-muted-foreground);
+}
+
+.actionBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-end;
+  height: 28px;
+  padding: 0 12px;
+  font-size: 12px;
+  line-height: 16px;
+  border-radius: 999px;
+  background: var(--dshm-primary-10);
+  color: var(--dshm-primary);
+}
+
+.actionBadgeReject {
+  background: var(--dshm-destructive-10);
+  color: var(--dshm-destructive);
+}
+
+/* Rich narrative (03 §4.5): the sanitized markdown ticket face. */
+.richContent {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.richText {
+  font-size: 15px;
+  line-height: 24px;
+  color: var(--dshm-bubble-ai-fg);
+}
+
+.richText :global(p) {
+  margin: 0;
+}
+
+.richText :global(p + p) {
+  margin-top: 4px;
+}
+
+/* Key info: bold keeps its size, gains weight and the 2px primary wash
+   underline — no recolor (03 §4.5). */
+.richText :global(strong) {
+  font-weight: 600;
+  border-bottom: 2px solid var(--dshm-primary-10);
+}
+
+.richText :global(ul),
+.richText :global(ol) {
+  margin: 4px 0;
+  padding-left: 4px;
+  list-style: none;
+}
+
+.richText :global(li) {
+  position: relative;
+  padding-left: 12px;
+}
+
+.richText :global(ul > li)::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  width: 4px;
+  height: 4px;
+  background: var(--dshm-primary);
+}
+
+.richText :global(ol) {
+  counter-reset: rich-ol;
+}
+
+.richText :global(ol > li)::before {
+  counter-increment: rich-ol;
+  content: counter(rich-ol);
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 12px;
+  color: var(--dshm-muted-foreground);
+}
+
+.richText :global(li + li) {
+  margin-top: 2px;
+}
+
+/* Two-column ticket tables: label column slate, value column ink (03 §4.5);
+   wider tables scroll horizontally inside the bubble. */
+.richText :global(table) {
+  margin: 6px 0;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  line-height: 32px;
+  overflow-x: auto;
+}
+
+.richText :global(th) {
+  text-align: left;
+  padding: 0 10px;
+  background: var(--dshm-muted);
+  color: var(--dshm-muted-foreground);
+  font-weight: 500;
+}
+
+.richText :global(td) {
+  padding: 0 10px;
+  border-bottom: 1px solid var(--dshm-stroke-soft);
+}
+
+.richText :global(td:first-child),
+.richText :global(th:first-child) {
+  color: var(--dshm-muted-foreground);
+}
+
+.richText :global(td + td) {
+  color: var(--dshm-foreground);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.richText :global(code) {
+  font-family: var(--dshm-font-num);
+  font-size: 13px;
+  background: var(--dshm-muted);
+  border-radius: 4px;
+  padding: 1px 4px;
+}
+
+.richText :global(pre) {
+  margin: 6px 0;
+  padding: 8px 10px;
+  background: var(--dshm-muted);
+  border-radius: var(--dshm-radius);
+  overflow-x: auto;
+}
+
+.richText :global(pre code) {
+  background: none;
+  padding: 0;
+}
+
+.richText :global(a) {
+  color: var(--dshm-primary);
+}
+
+/* Promoted metric minis (03 §4.5): half-width pairs in the ticket face. */
+.metricPair {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(126px, 1fr));
+  gap: 8px;
+  margin: 4px 0;
+}
+
+.metricMini {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 8px 10px;
+  background: var(--dshm-muted);
+  border-radius: var(--dshm-radius);
+}
+
+.metricMiniValue {
+  font-size: 20px;
+  line-height: 26px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--dshm-foreground);
+}
+
+.metricMiniLabel {
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--dshm-muted-foreground);
+}
+
+/* The pick receipt capsule (03 §4.1): a 28px pill, never a full bubble. */
+.choiceCapsule {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-end;
+  max-width: 260px;
+  height: 28px;
+  padding: 0 12px;
+  font-size: 12px;
+  line-height: 16px;
+  border-radius: 999px;
+  background: var(--dshm-primary-10);
+  color: var(--dshm-primary);
+}
+
+/* Motion discipline (03 §6): pick feedback and the answered fade collapse. */
+@media (prefers-reduced-motion: reduce) {
+  .askCard,
+  .askChip,
+  .askButton,
+  .askAnswered {
+    transition: none;
+  }
+}

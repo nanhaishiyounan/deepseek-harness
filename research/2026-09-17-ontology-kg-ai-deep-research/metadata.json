@@ -1,0 +1,15 @@
+{
+  "date": "2026-09-17",
+  "topic": "本体工程 + 知识图谱构建 + LLM/AI 混合范式：deepseek-harness 食品行业 KB+Agent KG 链路重建选型调研",
+  "depth": "Exhaustive",
+  "subtaskCount": 17,
+  "branches": ["repo-audit", "neo4j-llm-graph-builder", "microsoft-graphrag", "lightrag", "llamaindex-property-graph", "graphiti", "openspg", "deepke-instructkgc", "foodon", "shacl-loop", "ontology-toolchain", "ontology-versioning", "academic-survey", "entity-linking-coref", "graphrag-qa-integration", "ts-graph-ecosystem"],
+  "clonedRepos": [
+    {"name": "llm-graph-builder", "url": "https://github.com/neo4j-labs/llm-graph-builder", "location": "/tmp/drr-kg-sources/llm-graph-builder"},
+    {"name": "graphrag", "url": "https://github.com/microsoft/graphrag", "location": "/tmp/drr-kg-sources/graphrag"},
+    {"name": "lightrag", "url": "https://github.com/HKUDS/LightRAG", "location": "/tmp/drr-kg-sources/lightrag"},
+    {"name": "graphiti", "url": "https://github.com/getzep/graphiti", "location": "/tmp/drr-kg-sources/graphiti"}
+  ],
+  "queries": ["LLM knowledge graph construction framework 2025 2026", "ontology-grounded LLM extraction schema constrained", "TypeScript RDF SHACL rdfjs library", "FoodOn food ontology", "entity linking survey LLM era", "KGCL ontology change language", "graphrag local global drift search", "HippoRAG personalized pagerank"],
+  "finalReport": "research/2026-09-17-ontology-kg-ai-deep-research.md"
+}

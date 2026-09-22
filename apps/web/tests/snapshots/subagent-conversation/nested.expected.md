@@ -20,11 +20,13 @@
   - tablist:
     - tab "Chat" [selected]
     - tab "Knowledge base"
+    - tab "Scenarios"
     - tab "Data assets"
     - tab "Connectors"
     - tab "Graph"
     - tab "Business"
     - tab "Trajectory"
+    - tab "Mobile preview"
 - text: Give one concrete event sourcing example. {{clock}}
 - button "Copy":
   - img

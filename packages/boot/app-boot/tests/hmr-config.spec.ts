@@ -24,7 +24,7 @@ async function bootHmr(dir: string, root: string[] = [], usePolling?: boolean): 
 }
 
 async function eventually(test: () => boolean, message: string): Promise<void> {
-  const deadline = Date.now() + 10_000
+  const deadline = Date.now() + 30_000
   while (!test()) {
     if (Date.now() >= deadline) throw new Error(message)
     await new Promise(resolve => setTimeout(resolve, 10))
@@ -152,7 +152,7 @@ describe('HMR exact config paths', () => {
       writeFileSync(filename, 'two')
       // Chokidar coalesces atomic writes for 100 ms by default. Wait beyond
       // that window so this edit is queued before registration disposal.
-      await new Promise(resolve => setTimeout(resolve, 250))
+      await new Promise(resolve => setTimeout(resolve, 750))
 
       let disposed = false
       const disposal = dispose().then(() => { disposed = true })

@@ -21,7 +21,7 @@ afterAll(() => {
   for (const directory of directories) {
     for (const suffix of ['', '-wal', '-shm']) {
       try {
-        new DatabaseSync(join(directory, `graph-v2${suffix}.sqlite`), { readOnly: true }).close()
+        new DatabaseSync(join(directory, `graph-v2${suffix}.sqlite`), { readOnly: true, timeout: 5_000 }).close()
       } catch {
         // Best-effort cleanup; the temp tree is removed by the OS.
       }
@@ -388,7 +388,7 @@ describe('SqliteGraphStore v2 write parity (fail-closed)', () => {
     const shared = { provenance: { sourceSystem: 'nocobase' as const, sourceId: 'row:batch', extractedAt: NOW } }
     await store.upsertEdges([edge('e1', 's1', 'p1', 'produces', shared), edge('e2', 's1', 'p2', 'produces', shared)])
     const before = (await store.stats('t')).triples
-    const trigger = new DatabaseSync(path)
+    const trigger = new DatabaseSync(path, { timeout: 5_000 })
     trigger.exec("CREATE TRIGGER force_fail AFTER UPDATE ON kg_edges BEGIN SELECT RAISE(FAIL, 'forced'); END")
     trigger.close()
     await expect(store.tombstoneBySource('nocobase', 'row:batch', '2026-09-06T13:00:00.000Z'))
@@ -402,7 +402,7 @@ describe('SqliteGraphStore v2 write parity (fail-closed)', () => {
   it('rolls back deleteSourceRun with no partial watermark loss under a forced mid-statement failure', async () => {
     const { store, path } = fileStore('parity-runs.sqlite')
     await store.putSourceRun({ sourceSystem: 'kb', scope: 'corpus/a.md', lastRunAt: NOW })
-    const trigger = new DatabaseSync(path)
+    const trigger = new DatabaseSync(path, { timeout: 5_000 })
     trigger.exec("CREATE TRIGGER force_fail AFTER DELETE ON kg_source_runs BEGIN SELECT RAISE(FAIL, 'forced'); END")
     trigger.close()
     await expect(store.deleteSourceRun('kb', 'corpus/a.md')).rejects.toThrow(/forced/u)
@@ -416,13 +416,13 @@ describe('SqliteGraphStore v2 schema ownership', () => {
     const directory = mkdtempSync(join(tmpdir(), 'dsh-kb-graph-v1-'))
     directories.push(directory)
     const path = join(directory, 'graph-v2.sqlite')
-    const legacy = new DatabaseSync(path)
+    const legacy = new DatabaseSync(path, { timeout: 5_000 })
     legacy.exec(`PRAGMA application_id = ${String(KB_GRAPH_SQLITE_APPLICATION_ID)}`)
     legacy.exec('PRAGMA user_version = 1')
     legacy.exec('CREATE TABLE triples (id INTEGER PRIMARY KEY) STRICT;')
     legacy.close()
     expect(() => new SqliteGraphStore({ path, busyTimeoutMs: 5_000 }, DatabaseSync))
-      .toThrow(/schema version 1, incompatible with this build \(4\).*rebuild/u)
+      .toThrow(/schema version 1, incompatible with this build \(5\).*rebuild/u)
   })
 
   it('writes schema version 2 into fresh databases', () => {
@@ -431,7 +431,7 @@ describe('SqliteGraphStore v2 schema ownership', () => {
     const path = join(directory, 'graph-v2.sqlite')
     const store = new SqliteGraphStore({ path, busyTimeoutMs: 5_000 }, DatabaseSync)
     store.close()
-    const db = new DatabaseSync(path)
+    const db = new DatabaseSync(path, { timeout: 5_000 })
     const version = (db.prepare('PRAGMA user_version').get() as { user_version: number }).user_version
     const tables = (db.prepare("SELECT COUNT(*) AS n FROM sqlite_master WHERE type='table' AND name LIKE 'kg_%'").get() as { n: number }).n
     db.close()

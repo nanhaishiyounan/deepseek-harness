@@ -34,12 +34,36 @@ export interface AgentPresetEntry {
   /** One sentence on what the preset is for, when it published one. */
   readonly description?: string
   /**
+   * The new-session welcome block the preset published, when it carried one:
+   * what a fresh session's empty state renders locally. Display text only —
+   * it never becomes a logged message.
+   */
+  readonly welcome?: PresetWelcome
+  /**
    * Why this preset cannot compose a session, absent when it can. A broken
    * preset stays listed — its directory still occupies the id, so a surface
    * must be able to show and delete it — but offering it for selection would
    * only defer this reason to a failed session start.
    */
   readonly broken?: string
+}
+
+/** One starter chip of the welcome block: shown label and sent text. */
+export interface PresetWelcomeStarter {
+  /** Chip label the surface renders. */
+  readonly label: string
+  /** Message text picking the chip sends as the user's own message. */
+  readonly send: string
+}
+
+/** The welcome block shape (mirrors the agent-presets package's PresetWelcome). */
+export interface PresetWelcome {
+  /** One-line identity (the welcome card's title). */
+  readonly greeting: string
+  /** Capability lines. */
+  readonly capabilities: readonly string[]
+  /** Starter chips; picking one sends it as the user's own message. */
+  readonly starters: readonly PresetWelcomeStarter[]
 }
 
 /** agent-preset-domain unary methods (the map key agentPreset.* of RpcMethodMap). */

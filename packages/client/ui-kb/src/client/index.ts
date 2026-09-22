@@ -220,6 +220,19 @@ export function apply(ctx: ClientContext): void {
         throw new Error(response.result.error.message)
       },
       requestView: (view: string) => { bridge.request(view) },
+      loadOverview: () => api.lakehouse.overview({}).then(response =>
+        unwrap<{ readonly generated_at: string; readonly kpis: readonly import('@deepseek-ai/dsh-client-connection/client').LakehouseKpiView[] }>(response).kpis),
+      loadDeliverables: () => api.orders.list({}).then((response) => {
+        const value = unwrap<{ readonly orders: readonly {
+          readonly order_no: string
+          readonly service_name: string
+          readonly generated_at?: string
+        }[] }>(response)
+        return value.orders
+          .filter(order => order.generated_at !== undefined)
+          .slice(0, 5)
+          .map(order => ({ orderNo: order.order_no, serviceName: order.service_name, generatedAt: order.generated_at }))
+      }),
     }),
   }, ScenarioView))
 

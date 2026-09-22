@@ -17,7 +17,7 @@ type DomainId =
   | 'Customer' | 'Supplier' | 'Product' | 'ProductCategory' | 'Order' | 'OrderItem'
   | 'Shipment' | 'Carrier' | 'Warehouse' | 'StockLevel' | 'Expert' | 'ExpertService'
   | 'Service' | 'Deliverable' | 'Dataset' | 'Connector' | 'Region' | 'Address' | 'Ingredient'
-type FoodId = 'company' | 'product' | 'ingredient' | 'additive' | 'standard' | 'process' | 'risk'
+type FoodId = 'company' | 'product' | 'ingredient' | 'additive' | 'standard' | 'process' | 'risk' | 'packaging'
 
 function topType(id: TopId, label: string, description: string): KgNodeType {
   return {
@@ -44,7 +44,13 @@ function domainType(id: DomainId, label: string, parentId: TopId | DomainId, des
   }
 }
 
-function foodType(id: FoodId, label: string, parentId: TopId | DomainId, description: string): KgNodeType {
+function foodType(
+  id: FoodId,
+  label: string,
+  parentId: TopId | DomainId,
+  description: string,
+  foodon?: { readonly uri: string; readonly id: string; readonly synonyms?: readonly string[] },
+): KgNodeType {
   return {
     id: kgNodeTypeId(id),
     label,
@@ -52,6 +58,8 @@ function foodType(id: FoodId, label: string, parentId: TopId | DomainId, descrip
     layer: 'domain',
     extends: kgNodeTypeId(parentId),
     props: [],
+    ...(foodon === undefined ? {} : { foodonUri: foodon.uri, foodonId: foodon.id }),
+    ...(foodon?.synonyms === undefined ? {} : { synonyms: foodon.synonyms }),
     source: 'builtin-food',
     status: 'active',
   }
@@ -104,12 +112,24 @@ const NODE_TYPES: readonly KgNodeType[] = [
   domainType('Ingredient', '配料', 'Object', '食品配料实体。'),
 
   foodType('company', '企业', 'Object', '食品行业企业（v1 闭集实体类型）。'),
-  foodType('product', '食品产品', 'Product', '食品产品（v1 闭集实体类型）。'),
-  foodType('ingredient', '食品配料', 'Ingredient', '食品配料（v1 闭集实体类型）。'),
+  foodType('product', '食品产品', 'Product', '食品产品（v1 闭集实体类型）。', {
+    uri: 'http://purl.obolibrary.org/obo/FOODON_00001002', id: 'FOODON:00001002',
+  }),
+  foodType('ingredient', '食品配料', 'Ingredient', '食品配料（v1 闭集实体类型）。', {
+    uri: 'http://purl.obolibrary.org/obo/FOODON_00002403', id: 'FOODON:00002403',
+    synonyms: ['food material', 'foodstuff', 'nourishment'],
+  }),
   foodType('additive', '食品添加剂', 'Object', '食品添加剂（v1 闭集实体类型）。'),
-  foodType('standard', '标准', 'Concept', '食品安全标准（v1 闭集实体类型）。'),
-  foodType('process', '工艺', 'Process', '食品加工工艺（v1 闭集实体类型）。'),
+  foodType('standard', '标准', 'Concept', '食品安全标准（v1 闭集实体类型）。', {
+    uri: 'http://purl.obolibrary.org/obo/FOODON_00004277', id: 'FOODON:00004277',
+  }),
+  foodType('process', '工艺', 'Process', '食品加工工艺（v1 闭集实体类型）。', {
+    uri: 'http://purl.obolibrary.org/obo/FOODON_00002451', id: 'FOODON:00002451',
+  }),
   foodType('risk', '风险', 'Concept', '食品安全风险（v1 闭集实体类型）。'),
+  foodType('packaging', '包材', 'Object', '食品接触材料（FoodOn food contact material 锚点）。', {
+    uri: 'http://purl.obolibrary.org/obo/FOODON_00003368', id: 'FOODON:00003368',
+  }),
 ] as const
 
 const RELATIONS: readonly KgRelation[] = [
@@ -174,9 +194,10 @@ const RELATIONS: readonly KgRelation[] = [
 /**
  * The built-in ontology's semantic version (semver). It starts at 1.0.0 and
  * bumps only when this seed changes shape: added types/relations bump the
- * minor, removals or constraint changes bump the major.
+ * minor, removals or constraint changes bump the major. 1.2.0 adds the
+ * FoodOn anchors (foodon_uri/foodon_id/synonyms) and the packaging class.
  */
-export const ONTOLOGY_VERSION = '1.1.0'
+export const ONTOLOGY_VERSION = '1.2.0'
 
 /** The built-in ontology seed: everything above, freshly built per call. */
 export interface KgBuiltinOntology {

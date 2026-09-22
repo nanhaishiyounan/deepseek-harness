@@ -90,7 +90,7 @@ describe('SqliteKbStore usage counters', () => {
     const seed = new SqliteKbStore({ path, busyTimeoutMs: 5_000 }, DatabaseSync)
     seed.close()
     // Downgrade the on-disk version to the previous schema generation.
-    const db = new DatabaseSync(path)
+    const db = new DatabaseSync(path, { timeout: 5_000 })
     db.exec(testSql('set-user-version-2'))
     db.close()
     expect(() => new SqliteKbStore({ path, busyTimeoutMs: 5_000 }, DatabaseSync))
@@ -104,7 +104,7 @@ describe('SqliteKbStore usage counters', () => {
     // fails inside the transaction and must roll back without corrupting.
     const directory = directories[directories.length - 1]!
     const path = join(directory, 'kb.sqlite')
-    const sabotage = new DatabaseSync(path)
+    const sabotage = new DatabaseSync(path, { timeout: 5_000 })
     sabotage.exec(testSql('drop-usage-table'))
     sabotage.close()
     const reopened = new SqliteKbStore({ path, busyTimeoutMs: 5_000 }, DatabaseSync)

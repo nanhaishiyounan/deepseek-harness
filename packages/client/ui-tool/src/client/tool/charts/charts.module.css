@@ -1,0 +1,109 @@
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 86px;
+  padding: 8px 12px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 8px;
+  background: var(--dsw-alias-bg-base);
+}
+
+.cardValue {
+  margin: 0;
+  font: var(--dsw-font-s-strong-14);
+  color: var(--dsw-alias-label-primary);
+}
+
+.cardLabel {
+  color: var(--dsw-alias-label-caption);
+}
+
+.chart {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.chart svg {
+  width: 100%;
+  height: auto;
+}
+
+.line {
+  stroke: var(--dsw-static-deepseek-500);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.area {
+  fill: var(--dsw-static-deepseek-500);
+  opacity: 0.08;
+}
+
+.grid {
+  stroke: var(--dsw-alias-border-l1);
+  stroke-dasharray: 3 3;
+}
+
+.axis {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--dsw-alias-label-caption);
+}
+
+.axisValue {
+  flex: none;
+}
+
+.bars {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.barRow {
+  display: grid;
+  grid-template-columns: minmax(64px, 128px) 1fr auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.barLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.barTrack {
+  display: block;
+  height: 10px;
+  border-radius: 5px;
+  background: var(--dsw-alias-border-l1);
+  overflow: hidden;
+}
+
+.bar {
+  display: block;
+  height: 100%;
+  border-radius: 5px;
+  background: var(--dsw-static-deepseek-500);
+}
+
+.bar[data-negative] {
+  background: var(--dsw-alias-state-error-primary);
+}
+
+.barValue {
+  color: var(--dsw-alias-label-secondary);
+  font-variant-numeric: tabular-nums;
+}

@@ -84,4 +84,15 @@ export interface NocobaseApi {
     request: RpcRequest<{ collection: string; id: number }>,
     signal?: AbortSignal,
   ): Promise<RpcResponse<{ collection: string; row: NocobaseRowView }>>
+
+  /**
+   * Patch one row's whitelisted low-risk fields inline (the business page's
+   * 备注/数量/日期 fast path). Refused until the deployment opts in through
+   * `nocobaseWriteEnabled`; higher-risk changes stay on the agent's nb_update
+   * confirmation flow by contract.
+   */
+  update(
+    request: RpcRequest<{ collection: string; id: number; values: Record<string, string | number | null> }>,
+    signal?: AbortSignal,
+  ): Promise<RpcResponse<{ collection: string; row: NocobaseRowView }>>
 }

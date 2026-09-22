@@ -139,6 +139,9 @@ export function apply(ctx: ClientContext): void {
       loadRows,
       loadMore,
       requestView,
+      updateRow: (collection: string, id: number, values: Record<string, string | number | null>) =>
+        api.nocobase.update({ collection, id, values }).then(response =>
+          unwrap<{ collection: string; row: Record<string, unknown> }>(response).row),
     }),
   }, BizView))
 

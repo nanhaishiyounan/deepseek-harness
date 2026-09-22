@@ -24,6 +24,14 @@ export type KgKey =
   | 'phrase.restate.supply'
   | 'phrase.restate.orders'
   | 'phrase.restate.contains'
+  | 'phrase.restate.input-suppliers'
+  | 'phrase.restate.batch-flow'
+  | 'phrase.restate.suppliers'
+  | 'phrase.restate.customers'
+  | 'phrase.restate.made-from'
+  | 'kg.freshness'
+  | 'kg.freshnessUnknown'
+  | 'phrase.traceExamples'
   | 'canvas.title'
   | 'canvas.loading'
   | 'canvas.emptyTitle'
@@ -64,6 +72,49 @@ export type KgKey =
   | 'build.unbuiltTitle'
   | 'build.unbuiltHint'
   | 'build.runBuild'
+  | 'mode.graph'
+  | 'mode.onto'
+  | 'mode.feed'
+  | 'color.type'
+  | 'color.semantic'
+  | 'color.community'
+  | 'replay.banner'
+  | 'replay.back'
+  | 'onto.title'
+  | 'onto.hint'
+  | 'onto.addChild'
+  | 'onto.rename'
+  | 'onto.move'
+  | 'onto.deprecate'
+  | 'onto.apply'
+  | 'onto.cancel'
+  | 'onto.idPlaceholder'
+  | 'onto.labelPlaceholder'
+  | 'onto.parentPlaceholder'
+  | 'onto.replacePlaceholder'
+  | 'onto.revisions'
+  | 'onto.empty'
+  | 'onto.propsCount'
+  | 'onto.cardinality'
+  | 'feed.title'
+  | 'feed.hint'
+  | 'feed.refresh'
+  | 'feed.reviewTitle'
+  | 'feed.reviewHint'
+  | 'feed.merge'
+  | 'feed.reject'
+  | 'feed.skip'
+  | 'feed.confidence'
+  | 'feed.source.ingest'
+  | 'feed.source.ai-edit'
+  | 'feed.source.human-edit'
+  | 'feed.source.rollback'
+  | 'feed.mentions'
+  | 'feed.rollback'
+  | 'feed.rollbackConfirm'
+  | 'feed.replay'
+  | 'feed.empty'
+  | 'feed.rollbackDone'
   | 'error.unavailable'
   | 'error.retry'
 
@@ -86,6 +137,14 @@ export const zh: Record<KgKey, string> = {
   'phrase.restate.supply': '「{entity}」周边两跳关系',
   'phrase.restate.orders': '「{entity}」的订单关系',
   'phrase.restate.contains': '含「{entity}」的商品关系',
+  'phrase.restate.input-suppliers': '「{entity}」的原料供应商（两跳）',
+  'phrase.restate.batch-flow': '「{entity}」批次的客户流向（两跳）',
+  'phrase.restate.suppliers': '「{entity}」的供应商（两跳）',
+  'phrase.restate.customers': '「{entity}」的客户（两跳）',
+  'phrase.restate.made-from': '「{entity}」使用的原料',
+  'kg.freshness': '数据截至 {time}',
+  'kg.freshnessUnknown': '数据时点未知（未运行过构建）',
+  'phrase.traceExamples': '追溯：酱油的原料来自哪些供应商 · 20260911批次流向哪些客户 · 宏发食品的供应商',
   'canvas.title': '关系画布',
   'canvas.loading': '子图绘制中…',
   'canvas.emptyTitle': '画布还是空的',
@@ -126,6 +185,49 @@ export const zh: Record<KgKey, string> = {
   'build.unbuiltTitle': '图谱还未构建',
   'build.unbuiltHint': '运行 kg-build 管线（业务表结构化映射 + 文档实体抽取）后，这里会呈现企业实体关系',
   'build.runBuild': '查看构建指引',
+  'mode.graph': '实例图',
+  'mode.onto': '本体树',
+  'mode.feed': '变更流',
+  'color.type': '按类型',
+  'color.semantic': '按本体语义',
+  'color.community': '按社区',
+  'replay.banner': '历史快照 · {time}（只读）',
+  'replay.back': '返回实时图',
+  'onto.title': '本体树（KGCL 编辑）',
+  'onto.hint': '新增/改名/移动父类/废弃走 KGCL 原语；每次变更写 ontology revision 并在变更流留痕',
+  'onto.addChild': '＋子类',
+  'onto.rename': '改名',
+  'onto.move': '移动',
+  'onto.deprecate': '废弃',
+  'onto.apply': '应用',
+  'onto.cancel': '取消',
+  'onto.idPlaceholder': '类 id（字母开头）',
+  'onto.labelPlaceholder': '显示名',
+  'onto.parentPlaceholder': '选择新父类…',
+  'onto.replacePlaceholder': '（可选）替代类…',
+  'onto.revisions': '本体变更留痕（ontology revision）',
+  'onto.empty': '本体未加载',
+  'onto.propsCount': '{n} 个属性',
+  'onto.cardinality': '已注册关系：',
+  'feed.title': '变更流（episode 时间线）',
+  'feed.hint': '每条 episode 记录指令原文、操作者与 diff；可回滚或按时间点回放图状态',
+  'feed.refresh': '刷新',
+  'feed.reviewTitle': '共指审核队列（0.5–0.9 灰区）',
+  'feed.reviewHint': '人工裁决合并/不合并/跳过；裁决作为 episode 留痕，合并走 corefers_with 边',
+  'feed.merge': '合并',
+  'feed.reject': '不合并',
+  'feed.skip': '跳过',
+  'feed.confidence': '置信度 ',
+  'feed.source.ingest': '构建',
+  'feed.source.ai-edit': 'AI',
+  'feed.source.human-edit': '人工',
+  'feed.source.rollback': '回滚',
+  'feed.mentions': '涉及边 ',
+  'feed.rollback': '回滚到此之前',
+  'feed.rollbackConfirm': '回滚该 episode：其新增边失效、其恢复过的边还原',
+  'feed.replay': '回放此时刻',
+  'feed.empty': '暂无 episode 记录（构建或编辑后出现）',
+  'feed.rollbackDone': '已回滚：{retired} 条边失效、{restored} 条恢复',
   'error.unavailable': '图谱页暂不可用',
   'error.retry': '重试',
 }
@@ -149,6 +251,14 @@ export const en: Record<KgKey, string> = {
   'phrase.restate.supply': 'Two-hop relations around "{entity}"',
   'phrase.restate.orders': 'Order relations of "{entity}"',
   'phrase.restate.contains': 'Products containing "{entity}"',
+  'phrase.restate.input-suppliers': 'input suppliers of "{entity}" (2 hops)',
+  'phrase.restate.batch-flow': 'customer flow of batch "{entity}" (2 hops)',
+  'phrase.restate.suppliers': 'suppliers of "{entity}" (2 hops)',
+  'phrase.restate.customers': 'customers of "{entity}" (2 hops)',
+  'phrase.restate.made-from': 'inputs used by "{entity}"',
+  'kg.freshness': 'Data as of {time}',
+  'kg.freshnessUnknown': 'Data freshness unknown (no build run)',
+  'phrase.traceExamples': 'Trace: input suppliers of 酱油 · customer flow of batch 20260911 · suppliers of 宏发食品',
   'canvas.title': 'Relation canvas',
   'canvas.loading': 'Drawing the subgraph…',
   'canvas.emptyTitle': 'The canvas is empty',
@@ -189,6 +299,49 @@ export const en: Record<KgKey, string> = {
   'build.unbuiltTitle': 'The graph is not built yet',
   'build.unbuiltHint': 'Run the kg-build pipeline (structured business-table mapping + document extraction) and company relations appear here',
   'build.runBuild': 'See the build guide',
+  'mode.graph': 'Instance graph',
+  'mode.onto': 'Ontology tree',
+  'mode.feed': 'Change feed',
+  'color.type': 'By type',
+  'color.semantic': 'By ontology',
+  'color.community': 'By community',
+  'replay.banner': 'Historical snapshot · {time} (read-only)',
+  'replay.back': 'Back to live graph',
+  'onto.title': 'Ontology tree (KGCL editing)',
+  'onto.hint': 'Add/rename/re-parent/deprecate ride KGCL primitives; every change journals an ontology revision and an episode',
+  'onto.addChild': '+ subclass',
+  'onto.rename': 'Rename',
+  'onto.move': 'Move',
+  'onto.deprecate': 'Deprecate',
+  'onto.apply': 'Apply',
+  'onto.cancel': 'Cancel',
+  'onto.idPlaceholder': 'class id (starts with a letter)',
+  'onto.labelPlaceholder': 'Display label',
+  'onto.parentPlaceholder': 'Pick a new parent…',
+  'onto.replacePlaceholder': '(optional) replaced by…',
+  'onto.revisions': 'Ontology change trail (revisions)',
+  'onto.empty': 'Ontology not loaded',
+  'onto.propsCount': '{n} props',
+  'onto.cardinality': 'Registered relations:',
+  'feed.title': 'Change feed (episode timeline)',
+  'feed.hint': 'Each episode carries the instruction, the operator, and the diff; roll back or replay the graph at its instant',
+  'feed.refresh': 'Refresh',
+  'feed.reviewTitle': 'Coreference review queue (0.5–0.9 gray zone)',
+  'feed.reviewHint': 'Human merge/reject/skip verdicts; every decision lands as an episode, merges ride the corefers_with edge',
+  'feed.merge': 'Merge',
+  'feed.reject': 'Keep apart',
+  'feed.skip': 'Skip',
+  'feed.confidence': 'confidence ',
+  'feed.source.ingest': 'build',
+  'feed.source.ai-edit': 'AI',
+  'feed.source.human-edit': 'human',
+  'feed.source.rollback': 'rollback',
+  'feed.mentions': 'edges touched ',
+  'feed.rollback': 'Roll back to before this',
+  'feed.rollbackConfirm': 'Rolls the episode back: edges it added retire, edges it restored return',
+  'feed.replay': 'Replay at this instant',
+  'feed.empty': 'No episodes yet (appear after a build or edit)',
+  'feed.rollbackDone': 'Rolled back: {retired} edges retired, {restored} restored',
   'error.unavailable': 'The graph page is unavailable',
   'error.retry': 'Retry',
 }

@@ -1,0 +1,31 @@
+{
+  "scenes": [
+    {
+      "scene": "A-draft",
+      "ok": false,
+      "extra": "tiers=false; forkPath=[\"ask_choice: 新建鲜丰供应商 | 名字可能记错了\"]; cardHead="
+    },
+    {
+      "scene": "A-chain",
+      "ok": false,
+      "extra": "TimeoutError: locator.scrollIntoViewIfNeeded: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"draft-card-v3\"]').last()\n"
+    },
+    {
+      "scene": "B-chain",
+      "ok": false,
+      "extra": "Error: supplier draft missing; path=[]"
+    },
+    {
+      "scene": "C-rich",
+      "ok": false,
+      "extra": "strong=0 list=0 table=0 h=0 leaks=[]"
+    },
+    {
+      "scene": "D-dark-receipt",
+      "ok": false,
+      "extra": "TimeoutError: locator.waitFor: Timeout 20000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"receipt-card-v3\"]').last() to be visible\n"
+    }
+  ],
+  "pageErrors": [],
+  "consoleErrors": []
+}

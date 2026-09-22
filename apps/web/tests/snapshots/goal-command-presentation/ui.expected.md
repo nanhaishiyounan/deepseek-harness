@@ -18,16 +18,22 @@
   - tablist:
     - tab "Chat" [selected]
     - tab "Knowledge base"
+    - tab "Scenarios"
     - tab "Data assets"
     - tab "Connectors"
     - tab "Graph"
     - tab "Business"
     - tab "Trajectory"
+    - tab "Mobile preview"
 - group "Command input": /goal
 - 'button "goal No goal is currently set. Usage: /goal [<objective>|clear|edit <objective>|pause|resume]"':
   - img
   - img
   - text: "goal No goal is currently set. Usage: /goal [<objective>|clear|edit <objective>|pause|resume]"
+- button "Agent mode":
+  - img
+  - text: Standard mode
+  - img
 - textbox "Message the agent"
 - button "Commands":
   - img

@@ -98,7 +98,7 @@ describe('KbGraphRuntime ontology registry', () => {
     const food = ctx.kbGraph.listNodeTypes('domain')
       .filter(type => type.source === 'builtin-food')
       .map(type => String(type.id))
-    expect(food).toEqual(['company', 'product', 'ingredient', 'additive', 'standard', 'process', 'risk'])
+    expect(food).toEqual(['company', 'product', 'ingredient', 'additive', 'standard', 'process', 'risk', 'packaging'])
     const relations = ctx.kbGraph.listRelations().map(rel => String(rel.id))
     for (const predicate of ['produces', 'uses', 'contains', 'complies_with', 'follows', 'flags', 'supplies']) {
       expect(relations).toContain(predicate)

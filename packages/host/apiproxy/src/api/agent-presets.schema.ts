@@ -9,6 +9,17 @@ import type { Wire } from './rpc.schema.ts'
 import { sessionIdSchema } from './sessions.schema.ts'
 import type { AgentPresetEntry } from './agent-presets.ts'
 
+const presetWelcomeStarterSchema = z.object({
+  label: z.string().min(1),
+  send: z.string().min(1),
+})
+
+const presetWelcomeSchema = z.object({
+  greeting: z.string().min(1),
+  capabilities: z.array(z.string()),
+  starters: z.array(presetWelcomeStarterSchema),
+})
+
 /** AgentPresetEntry row of agentPreset.list. */
 export const agentPresetEntrySchema = z.object({
   id: z.string().min(1),
@@ -16,6 +27,7 @@ export const agentPresetEntrySchema = z.object({
   isDefault: z.boolean(),
   name: z.string().optional(),
   description: z.string().optional(),
+  welcome: presetWelcomeSchema.optional(),
   broken: z.string().min(1).optional(),
 }) satisfies z.ZodType<Wire<AgentPresetEntry>>
 

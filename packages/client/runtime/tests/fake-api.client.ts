@@ -304,6 +304,10 @@ export class FakeApiClient implements IApiClient {
     stats: payload => this.record('assets.stats', payload, Promise.resolve(ok({ products: 0, providers: 0, monthly_orders: 0, featured: [] }))),
   }
 
+  readonly lakehouse: IApiClient['lakehouse'] = {
+    overview: payload => this.record('lakehouse.overview', payload, Promise.resolve(ok({ generated_at: '', kpis: [] }))),
+  }
+
   readonly connectors: IApiClient['connectors'] = {
     list: payload => this.record('connectors.list', payload, Promise.resolve(ok({ providers: [] }))),
     connections: payload => this.record('connectors.connections', payload, Promise.resolve(ok({ connections: [] }))),
@@ -318,9 +322,17 @@ export class FakeApiClient implements IApiClient {
     subgraph: payload => this.record('kg.subgraph', payload, Promise.resolve(ok({ nodes: [], edges: [], truncated: false, seeds_resolved: payload.seeds.slice(0, 0) }))),
     expand: payload => this.record('kg.expand', payload, Promise.resolve(ok({ nodes: [], edges: [], truncated: false }))),
     stats: payload => this.record('kg.stats', payload, Promise.resolve(ok({ triples: 0, entities: 0, node_types: 0, relations: 0, ontology_version: '0.0.0-fixture', islands: 0, conflicts: 0 }))),
+    episodes: payload => this.record('kg.episodes', payload, Promise.resolve(ok({ episodes: [] }))),
+    rollback: payload => this.record('kg.rollback', payload, Promise.resolve(ok({ rollback_uuid: 'rollback:fixture', rolled_back: payload.episode_uuid, retired: 0, restored: 0 }))),
+    ontologyEdit: payload => this.record('kg.ontologyEdit', payload, Promise.resolve(ok({ applied: [], revision_id: 0, episode_uuid: 'human-edit:fixture' }))),
+    reviewQueue: payload => this.record('kg.reviewQueue', payload, Promise.resolve(ok({ entries: [], source_episode: '' }))),
+    reviewDecide: payload => this.record('kg.reviewDecide', payload, Promise.resolve(ok({ episode_uuid: 'human-edit:fixture', decided: payload.decision }))),
+    communities: payload => this.record('kg.communities', payload, Promise.resolve(ok({ communities: [], modularity: 0, node_count: 0 }))),
+    history: payload => this.record('kg.history', payload, Promise.resolve(ok({ nodes: [], edges: [], truncated: false, as_of: payload.as_of }))),
   }
 
   readonly nocobase: IApiClient['nocobase'] = {
+    update: payload => this.record('nocobase.update', payload, Promise.resolve(ok({ collection: payload.collection, row: { id: payload.id } }))),
     listMeta: payload => this.record('nocobase.listMeta', payload, Promise.resolve(ok({ collections: [] }))),
     list: payload => this.record('nocobase.list', payload, Promise.resolve(ok({ count: 0, page: 1, page_size: 20, rows: [] }))),
     get: payload => this.record('nocobase.get', payload, Promise.resolve(ok({ collection: payload.collection, row: {} }))),

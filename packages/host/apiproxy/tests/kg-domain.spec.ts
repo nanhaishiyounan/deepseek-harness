@@ -3,7 +3,9 @@
  * seam-missing, tenant-unbound), the ontology legend projection, the seed
  * resolution, the k-hop walk with its server-side seed resolution and
  * relation filter (tool-parity semantics), the one-hop expansion, the
- * counters, and the store-failure error wrap.
+ * counters, the store-failure error wrap, and the history/rollback negative
+ * payloads (unparseable as_of, rollback-of-rollback) through both the domain
+ * call and the fetch wire.
  */
 
 import { afterEach, describe, expect, it } from 'vitest'
@@ -16,6 +18,7 @@ import ViewActionService from '@deepseek-ai/dsh-view-actions'
 import KbGraphRuntime, { kgNodeTypeId, kgRelationId } from '@deepseek-ai/dsh-kb-graph'
 import * as KbGraphSqlite from '@deepseek-ai/dsh-kb-graph-sqlite'
 import { createApiProxy } from '../src/api-proxy.ts'
+import { toFetchHandler } from '../src/index.ts'
 import type { RpcRequest } from '../src/api/rpc.ts'
 
 /** One typed RPC request envelope (the rpcId is branded on the wire contract). */
@@ -215,5 +218,108 @@ describe('kg domain reads', () => {
     ctx = undefined
     const response = await api.kg.stats(request({}))
     expect(response.result).toMatchObject({ ok: false, error: { code: 'kg-graph-missing' } })
+  })
+})
+
+describe('kg history/rollback negatives', () => {
+  /** Seed one rollback-source episode (what a previous rollback leaves behind) and return its uuid. */
+  async function seedRollbackEpisode(suffix: string): Promise<string> {
+    const graph = ctx!.get('kbGraph')
+    if (graph === undefined) throw new Error('kbGraph missing')
+    const uuid = `ep-rb-${suffix}`
+    await graph.putEpisode({
+      uuid, tenantId: 't1', source: 'rollback', name: `回滚 ${suffix}`,
+      content: 'seeded rollback episode', validAt: NOW, createdAt: NOW,
+      metadata: {},
+    })
+    return uuid
+  }
+
+  /** POST one wire envelope through the raw fetch handler. */
+  function post(handler: { fetch: typeof fetch }, method: string, payload: unknown): Promise<Response> {
+    return handler.fetch(new Request(`http://host/api/${method}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ type: 'client-request', rpcId: 'wire-neg-1', method, payload }),
+    }))
+  }
+
+  /** The three as_of forms Date.parse refuses, with the raw text each error details must echo. */
+  const HISTORY_CASES: readonly { label: string; payload: unknown; raw: string | null | undefined }[] = [
+    { label: 'unparseable text', payload: { as_of: 'not-a-date' }, raw: 'not-a-date' },
+    { label: 'null', payload: { as_of: null }, raw: null },
+    { label: 'absent', payload: {}, raw: undefined },
+  ]
+
+  it.each(HISTORY_CASES)('refuses kg.history with kg-history-invalid when as_of is $label', async ({ payload, raw }) => {
+    const api = await boot({ kgEnabled: true, kgTenant: 't1' })
+    const response = await api.kg.history({ rpcId: 'r' as never, payload: payload as never })
+    expect(response.result).toMatchObject({ ok: false, error: { code: 'kg-history-invalid' } })
+    if (!response.result.ok) {
+      expect(response.result.error.message).toContain('not a parseable ISO instant')
+      expect(response.result.error.details).toEqual({ as_of: raw })
+    }
+  })
+
+  /** Three rollback attempts that all target rollback-source episodes. */
+  const ROLLBACK_CASES: readonly { label: string; suffix: string; reason?: string }[] = [
+    { label: 'plain uuid', suffix: 'plain' },
+    { label: 'with reason', suffix: 'reasoned', reason: '误操作再回滚' },
+    { label: 'empty reason', suffix: 'blank', reason: '' },
+  ]
+
+  it.each(ROLLBACK_CASES)('refuses kg.rollback with kg-rollback-invalid for a rollback episode ($label)', async ({ suffix, reason }) => {
+    const api = await boot({ kgEnabled: true, kgTenant: 't1' })
+    const uuid = await seedRollbackEpisode(suffix)
+    const response = await api.kg.rollback(request({ episode_uuid: uuid, ...(reason === undefined ? {} : { reason }) }))
+    expect(response.result).toMatchObject({ ok: false, error: { code: 'kg-rollback-invalid' } })
+    if (!response.result.ok) {
+      expect(response.result.error.message).toContain('a rollback episode cannot be rolled back')
+      expect(response.result.error.details).toEqual({ episode_uuid: uuid })
+    }
+  })
+
+  it('carries kg-history-invalid across the fetch wire with the envelope intact', async () => {
+    const api = await boot({ kgEnabled: true, kgTenant: 't1' })
+    const response = await post(toFetchHandler(api), 'kg.history', { as_of: 'not-a-date' })
+    expect(response.status).toBe(200)
+    const body = await response.json() as {
+      type: string
+      rpcId: string
+      result: { ok: boolean; error?: { code: string; message: string } }
+    }
+    expect(body.type).toBe('server-response')
+    expect(body.rpcId).toBe('wire-neg-1')
+    expect(body.result.ok).toBe(false)
+    expect(body.result.error?.code).toBe('kg-history-invalid')
+    expect(body.result.error?.message).toContain('not-a-date')
+  })
+
+  it('carries kg-rollback-invalid across the fetch wire with the envelope intact', async () => {
+    const api = await boot({ kgEnabled: true, kgTenant: 't1' })
+    const uuid = await seedRollbackEpisode('wire')
+    const response = await post(toFetchHandler(api), 'kg.rollback', { episode_uuid: uuid })
+    expect(response.status).toBe(200)
+    const body = await response.json() as {
+      type: string
+      rpcId: string
+      result: { ok: boolean; error?: { code: string; message: string } }
+    }
+    expect(body.type).toBe('server-response')
+    expect(body.rpcId).toBe('wire-neg-1')
+    expect(body.result.ok).toBe(false)
+    expect(body.result.error?.code).toBe('kg-rollback-invalid')
+  })
+
+  it('keeps schema-invalid as_of forms at the carrier (bad-request), one step before the impl', async () => {
+    const api = await boot({ kgEnabled: true, kgTenant: 't1' })
+    const handler = toFetchHandler(api)
+    for (const payload of [{ as_of: null }, {}] as const) {
+      const response = await post(handler, 'kg.history', payload)
+      expect(response.status).toBe(200)
+      const body = await response.json() as { type: string; result: { ok: boolean; error?: { code: string } } }
+      expect(body.result.ok).toBe(false)
+      expect(body.result.error?.code).toBe('bad-request')
+    }
   })
 })

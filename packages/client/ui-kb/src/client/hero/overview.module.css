@@ -1,0 +1,101 @@
+.band {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 12px;
+  background: var(--dsw-alias-bg-base);
+}
+
+.kpis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 118px;
+  padding: 10px 14px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 10px;
+}
+
+.kpiLabel {
+  color: var(--dsw-alias-label-caption);
+}
+
+.kpiValue {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  font: var(--dsw-font-s-strong-14);
+  color: var(--dsw-alias-label-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.kpiUnit {
+  font: var(--dsw-font-xs-13);
+  color: var(--dsw-alias-label-caption);
+}
+
+.kpiTrend {
+  font: var(--dsw-font-xs-13);
+  color: var(--dsw-alias-state-error-primary);
+}
+
+.kpiTrend[data-positive] {
+  color: var(--dsw-alias-state-business-primary);
+}
+
+.kpiError {
+  color: var(--dsw-alias-label-caption);
+}
+
+.deliverables {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  min-width: 0;
+}
+
+.deliverablesLabel {
+  flex: none;
+  color: var(--dsw-alias-label-caption);
+}
+
+.deliverableList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+
+.deliverableRow {
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+}
+
+.deliverableName {
+  flex: none;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.deliverableMeta {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--dsw-alias-label-caption);
+}
+
+.bandNote {
+  color: var(--dsw-alias-label-caption);
+}

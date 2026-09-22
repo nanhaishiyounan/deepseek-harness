@@ -431,6 +431,19 @@ export function apply(ctx: Context): void {
           actions.setInspect({ callId })
           actions.setView('trajectory')
         },
+        requestView: (view, options) => {
+          // The optional payload rides the view-context pending channel so
+          // the target view (the kg tab's seed deep link) receives it whether
+          // it mounts now or is already mounted. Typed structurally: no value
+          // dependency on the view-context package from this bundle.
+          const viewContext = ctx.get('viewContext') as
+            | { offerPending: (view: string, payload: unknown) => void }
+            | undefined
+          if (view === 'kg' && options?.seeds !== undefined && options.seeds.length > 0) {
+            viewContext?.offerPending('kg', { seeds: options.seeds })
+          }
+          actions.setView(view)
+        },
         chatScroll: {
           save: (position) => {
             if (position === null) chatScrollPositions.delete(sessionId)

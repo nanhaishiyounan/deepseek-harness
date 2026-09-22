@@ -18,11 +18,13 @@
   - tablist:
     - tab "Chat" [selected]
     - tab "Knowledge base"
+    - tab "Scenarios"
     - tab "Data assets"
     - tab "Connectors"
     - tab "Graph"
     - tab "Business"
     - tab "Trajectory"
+    - tab "Mobile preview"
 - text: Reply with a one-sentence description of event sourcing, then stop. {{clock}}
 - button "Copy":
   - img
@@ -33,6 +35,10 @@
 - paragraph: partial
 - status: Deep diving...
 - button "2 queued messages"
+- button "Agent mode":
+  - img
+  - text: Standard mode
+  - img
 - textbox "Cmd/Ctrl+Enter steers all queued messages"
 - button "Commands":
   - img

@@ -22,11 +22,38 @@ export interface KgNodeTypeView {
   readonly natural_key?: string
   /** Property keys of the closed shape, in definition order. */
   readonly prop_keys: readonly string[]
-  /** Registry provenance. */
-  readonly source: 'builtin-ontology' | 'builtin-food' | 'nocobase-derived' | 'agent-defined'
-  /** Draft types accept writes but stay out of model-facing enumerations. */
-  readonly status: 'draft' | 'active'
+  /** FoodOn term anchor, when the class carries one (the ontology-xref link). */
+  readonly foodon_uri?: string
+  /** FoodOn compact id (`FOODON:00002403`) — the xref convenience form. */
+  readonly foodon_id?: string
+  /** Source-ontology synonym set. */
+  readonly synonyms?: readonly string[]
+  readonly source: 'builtin-ontology' | 'builtin-food' | 'foodon-imported' | 'nocobase-derived' | 'agent-defined'
+  /**
+   * Draft types accept writes but stay out of model-facing enumerations;
+   * deprecated types (KGCL NodeObsoletion) keep their instances but leave
+   * every creation-facing enumeration.
+   */
+  readonly status: 'draft' | 'active' | 'deprecated'
 }
+
+/**
+ * One KGCL ontology change op as the wire carries it (the manual editor's
+ * vocabulary; snake_case mirror of the seam's `KgOntologyChangeOp`).
+ */
+export type KgOntologyOpWire =
+  | { readonly op: 'add_node'; readonly target_id: string; readonly label: string; readonly parent_id?: string }
+  | { readonly op: 'rename_node'; readonly target_id: string; readonly label: string }
+  | { readonly op: 'set_parent'; readonly target_id: string; readonly new_parent_id: string }
+  | { readonly op: 'deprecate_node'; readonly target_id: string; readonly replaced_by?: string }
+  | {
+    readonly op: 'change_cardinality'
+    readonly relation_id: string
+    readonly domain_id: string
+    readonly range_id: string
+    readonly min?: number
+    readonly max?: number
+  }
 
 /** One registered relation as the wire projects it. */
 export interface KgRelationView {
@@ -35,7 +62,7 @@ export interface KgRelationView {
   /** Legal (domain → range) endpoint pairs; empty means unrestricted. */
   readonly constraints: readonly { readonly domain: string; readonly range: string }[]
   readonly kind: 'object' | 'hierarchical'
-  readonly source: 'builtin-ontology' | 'builtin-food' | 'nocobase-derived' | 'agent-defined'
+  readonly source: 'builtin-ontology' | 'builtin-food' | 'foodon-imported' | 'nocobase-derived' | 'agent-defined'
 }
 
 /** One node hit from seed resolution. */
@@ -64,7 +91,7 @@ export interface KgEdgeView {
   /** Relation description text, when the build recorded one. */
   readonly fact?: string
   /** Which source system asserted the fact. */
-  readonly asserted_by: 'nocobase' | 'lakehouse' | 'connector' | 'kb' | 'kg-align'
+  readonly asserted_by: 'nocobase' | 'lakehouse' | 'connector' | 'kb' | 'kg-align' | 'ai-edit'
 }
 
 /** The `kg.mappings` response value: the pipeline's mappings readout. */
@@ -179,6 +206,120 @@ export interface KgApi {
     request: RpcRequest<{ node_id: string; limit?: number }>,
     signal?: AbortSignal,
   ): Promise<RpcResponse<KgSubgraphView>>
+
+  /**
+   * List the temporal ledger's newest episodes (the change feed's source):
+   * ingest runs, AI edits, human edits, and rollbacks, with mention counts.
+   */
+  episodes(
+    request: RpcRequest<{ limit?: number }>,
+    signal?: AbortSignal,
+  ): Promise<RpcResponse<{
+    episodes: readonly {
+      readonly uuid: string
+      readonly source: 'ingest' | 'ai-edit' | 'human-edit' | 'rollback'
+      readonly name: string
+      readonly content: string
+      readonly created_at: string
+      readonly mentions: number
+    }[]
+  }>>
+
+  /**
+   * Roll back one episode: edges it added retire, edges it retired restore,
+   * and the reversal itself lands as a rollback episode (writes stay
+   * append-only). The kg domain's one graph write path.
+   */
+  rollback(
+    request: RpcRequest<{ episode_uuid: string; reason?: string }>,
+    signal?: AbortSignal,
+  ): Promise<RpcResponse<{
+    rollback_uuid: string
+    rolled_back: string
+    retired: number
+    restored: number
+  }>>
+
+  /**
+   * Apply one KGCL ontology change set (the ontology editor's write path):
+   * the seam validates the whole set against the live registry, persists
+   * the touched rows, appends one ontology_change revision, and this method
+   * records the human-edit episode. The applied preview lines return for
+   * the editor's receipt.
+   */
+  ontologyEdit(
+    request: RpcRequest<{ ops: readonly KgOntologyOpWire[] }>,
+    signal?: AbortSignal,
+  ): Promise<RpcResponse<{
+    applied: readonly string[]
+    revision_id: number
+    episode_uuid: string
+  }>>
+
+  /**
+   * Read the cross-source alignment gray-zone review queue: the pending
+   * same-verdict pairs under the auto floor (0.5–0.9), derived from the
+   * newest align episode's review list minus the pairs already decided
+   * (a live merge edge, a reject tombstone, or a recorded decision).
+   */
+  reviewQueue(
+    request: RpcRequest<Record<string, never>>,
+    signal?: AbortSignal,
+  ): Promise<RpcResponse<{
+    entries: readonly {
+      readonly doc_id: string
+      readonly row_id: string
+      readonly doc_name: string
+      readonly row_name: string
+      readonly confidence: number
+      readonly reason: string
+    }[]
+    source_episode: string
+  }>>
+
+  /**
+   * Record one human verdict on a gray-zone pair: merge lands the
+   * coreference edge and links the mention, reject writes the tombstone,
+   * skip defers. Every decision lands as a human-edit episode.
+   */
+  reviewDecide(
+    request: RpcRequest<{
+      doc_id: string
+      row_id: string
+      decision: 'merge' | 'reject' | 'skip'
+      doc_name?: string
+      row_name?: string
+      reason?: string
+    }>,
+    signal?: AbortSignal,
+  ): Promise<RpcResponse<{
+    episode_uuid: string
+    decided: 'merge' | 'reject' | 'skip'
+    edge_id?: string
+  }>>
+
+  /**
+   * Detect communities over the tenant's live adjacency (the pure louvain
+   * pass runs server-side; the canvas consumes the precomputed partition).
+   */
+  communities(
+    request: RpcRequest<Record<string, never>>,
+    signal?: AbortSignal,
+  ): Promise<RpcResponse<{
+    communities: readonly { readonly id: number; readonly nodes: readonly string[] }[]
+    modularity: number
+    node_count: number
+  }>>
+
+  /**
+   * Read the graph state as of one instant (revision replay): nodes created
+   * at or before it plus edges recorded at or before it that were neither
+   * tombstoned nor record-retired before it.
+   */
+  history(
+    request: RpcRequest<{ as_of: string }>,
+    signal?: AbortSignal,
+  ): Promise<RpcResponse<KgSubgraphView & { as_of: string }>>
 
   /** Count stored triples and distinct entities, plus the quality readout. */
   stats(

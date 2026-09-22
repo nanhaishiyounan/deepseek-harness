@@ -22,10 +22,13 @@ import {
 import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 // Type-only: pulls the ui-conversation SlotMap merge (the view seat).
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
+import type { LakehouseKpiView } from '@deepseek-ai/dsh-client-connection/client'
 import type { KbClientState } from '../kbStore.ts'
 import {
   KB_SCENARIOS, featuredScenarios, filterScenarios, scenariosByCategory, type KbScenario, type KbScenarioCategory,
 } from '../hero/scenarios.ts'
+import { KbOverviewBand, type OverviewDeliverable } from '../hero/KbOverviewBand.tsx'
+import { pinnedScenarios, setScenarioPinned } from '../hero/pinnedScenarios.ts'
 import { clearRecentSearches, recentSearches } from '../recentSearches.ts'
 import css from './scenarios.module.css'
 
@@ -43,6 +46,10 @@ export interface ScenarioViewInjected {
   language: () => 'zh' | 'en'
   /** Best-effort view switch through the header bridge. */
   requestView: (view: string) => void
+  /** Evaluate the overview-home KPI seed (the gateway's lakehouse.overview). */
+  loadOverview: () => Promise<readonly LakehouseKpiView[]>
+  /** List the latest delivered orders for the overview rail. */
+  loadDeliverables: () => Promise<readonly OverviewDeliverable[]>
 }
 
 /** Full component props: the view-seat runtime share plus the inject face and locale seat. */
@@ -57,7 +64,7 @@ export type ScenarioViewProps =
  * @returns the scenarios column.
  */
 export function ScenarioView({
-  sessionId, inputActions, useKb, refresh, selectScenario, language, requestView, t,
+  sessionId, inputActions, useKb, refresh, selectScenario, language, requestView, loadOverview, loadDeliverables, t,
 }: ScenarioViewProps): JSX.Element {
   const state = useKb(snapshot => snapshot)
   const [pending, setPending] = useState<KbScenario | undefined>(undefined)
@@ -72,6 +79,10 @@ export function ScenarioView({
   // which is exactly the window in which the persisted log can change (the
   // workbench tab records searches while this tab is unmounted).
   const [recent, setRecent] = useState<string[]>(() => recentSearches())
+  // The pinned rail: like the recent log, it reads on mount — every view
+  // switch remounts this component, which is exactly when another tab's pin
+  // writes could have landed.
+  const [pinned, setPinned] = useState<string[]>(() => pinnedScenarios())
 
   useEffect(() => {
     if (state.stats === undefined) refresh()
@@ -145,6 +156,35 @@ export function ScenarioView({
         </div>
       )}
 
+      <KbOverviewBand loadOverview={loadOverview} loadDeliverables={loadDeliverables} t={t} />
+
+      <section className={css.pinnedZone} aria-label={t('overview.pinned')}>
+        <span className={css.zoneLabel}>{t('overview.pinned')}</span>
+        {pinned.length === 0
+          ? <p className={css.pinnedEmpty}>{t('overview.pinnedEmpty')}</p>
+          : (
+            <div className={css.cardGrid}>
+              {pinned.flatMap((id) => {
+                const scenario = KB_SCENARIOS.find(entry => entry.id === id)
+                /* v8 ignore next -- both pinned readers (pinnedScenarios.ts
+                   readPersisted and setScenarioPinned) filter ids against the
+                   shipped catalog, so the find always resolves. */
+                return scenario === undefined ? [] : [(
+                  <ScenarioCard
+                    key={scenario.id}
+                    scenario={scenario}
+                    zh={zh}
+                    t={t}
+                    pinned
+                    onTogglePin={() => { setPinned(setScenarioPinned(scenario.id, false)) }}
+                    onPick={() => { setFailed(false); setPending(scenario) }}
+                  />
+                )]
+              })}
+            </div>
+          )}
+      </section>
+
       <div className={css.samples} role="group" aria-label={t('hero.sample1')}>
         <Button variant="ghost" size="sm" onClick={() => { askInChat(t('hero.sample1')) }}>{t('hero.sample1')}</Button>
         <Button variant="ghost" size="sm" onClick={() => { askInChat(t('hero.sample2')) }}>{t('hero.sample2')}</Button>
@@ -177,6 +217,9 @@ export function ScenarioView({
                       key={scenario.id}
                       scenario={scenario}
                       zh={zh}
+                      t={t}
+                      pinned={pinned.includes(scenario.id)}
+                      onTogglePin={() => { setPinned(setScenarioPinned(scenario.id, !pinned.includes(scenario.id))) }}
                       onPick={() => { setFailed(false); setPending(scenario) }}
                     />
                   ))}
@@ -213,6 +256,9 @@ export function ScenarioView({
                               key={scenario.id}
                               scenario={scenario}
                               zh={zh}
+                              t={t}
+                              pinned={pinned.includes(scenario.id)}
+                              onTogglePin={() => { setPinned(setScenarioPinned(scenario.id, !pinned.includes(scenario.id))) }}
                               onPick={() => { setFailed(false); setPending(scenario) }}
                             />
                           ))}
@@ -246,6 +292,9 @@ export function ScenarioView({
                             key={scenario.id}
                             scenario={scenario}
                             zh={zh}
+                            t={t}
+                            pinned={pinned.includes(scenario.id)}
+                            onTogglePin={() => { setPinned(setScenarioPinned(scenario.id, !pinned.includes(scenario.id))) }}
                             onPick={() => { setFailed(false); setPending(scenario) }}
                           />
                         ))}
@@ -315,18 +364,37 @@ export function ScenarioView({
  * @param props - the scenario, the active language face, and the pick action.
  * @returns the card button.
  */
-function ScenarioCard({ scenario, zh, onPick }: {
+function ScenarioCard({ scenario, zh, t, pinned = false, onTogglePin, onPick }: {
   scenario: KbScenario
   zh: boolean
+  t: PropsLocale<'kb'>['t']
+  /** Whether this scenario currently sits in the pinned rail. */
+  pinned?: boolean
+  /** Toggle the pin state; absent renders no pin control (the pinned rail's own cards unpin through it). */
+  onTogglePin?: () => void
   onPick: () => void
 }): JSX.Element {
   return (
-    <button type="button" className={css.scenarioCard} onClick={onPick}>
-      <span className={css.scenarioName}>{zh ? scenario.nameZh : scenario.nameEn}</span>
-      <span className={css.scenarioDescription}>
-        {zh ? scenario.descriptionZh : scenario.descriptionEn}
-      </span>
-    </button>
+    <div className={css.scenarioCardWrap}>
+      <button type="button" className={css.scenarioCard} onClick={onPick}>
+        <span className={css.scenarioName}>{zh ? scenario.nameZh : scenario.nameEn}</span>
+        <span className={css.scenarioDescription}>
+          {zh ? scenario.descriptionZh : scenario.descriptionEn}
+        </span>
+      </button>
+      {onTogglePin !== undefined && (
+        <button
+          type="button"
+          className={css.scenarioPin}
+          data-pinned={pinned || undefined}
+          aria-label={pinned ? t('scenario.unpin') : t('scenario.pin')}
+          title={pinned ? t('scenario.unpin') : t('scenario.pin')}
+          onClick={onTogglePin}
+        >
+          {pinned ? '★' : '☆'}
+        </button>
+      )}
+    </div>
   )
 }
 
@@ -341,8 +409,12 @@ function UsageMeta({ state, t }: {
   state: KbClientState
   t: PropsLocale<'kb'>['t']
 }): JSX.Element {
+  /* v8 ignore start -- the sole call site renders UsageMeta only after
+     narrowing stats to 'ready', so the fallback arms answer the shared-state
+     type, not a reachable render. */
   const usage = state.stats?.status === 'ready' ? state.stats.usage : undefined
   if (usage === undefined) return <></>
+  /* v8 ignore stop */
   return (
     <span className={css.chips}>
       <span className={css.chip}>{t('usage.chipDocuments', { n: usage.documents })}</span>

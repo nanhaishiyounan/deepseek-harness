@@ -76,10 +76,22 @@ export interface Config {
   /** Market seed file (featured cards + board copy); absent means no featured rail. */
   assetsSeedPath?: string
   /**
+   * Overview-home KPI seed file (id/label/unit/SQL definitions) evaluated
+   * live against the lakehouse seam by `lakehouse.overview`; absent means
+   * the read is refused.
+   */
+  lakehouseOverviewPath?: string
+  /**
    * Whether the connector-page domain (`connectors.list/connections/transfers`)
    * answers; absent means refused, same stance as `assetsEnabled`.
    */
   connectorsEnabled?: boolean
+  /**
+   * Whether the business page's inline record write (`nocobase.update`) answers;
+   * absent means every record change routes through the agent's nb_update
+   * confirmation flow.
+   */
+  nocobaseWriteEnabled?: boolean
   /**
    * Whether the graph-page domain (`kg.schema/search/subgraph/expand/stats`)
    * answers; absent means refused, same stance as `assetsEnabled`.
@@ -155,10 +167,12 @@ export class ApiProxyService extends Service implements ApiProxy {
     dataUploadEnabled: z.boolean(),
     ordersEnabled: z.boolean(),
     nocobaseEnabled: z.boolean(),
+    nocobaseWriteEnabled: z.boolean(),
     nocobaseBaseUrl: z.string(),
     nocobaseApiKeyEnv: z.string().role('credential-ref'),
     assetsEnabled: z.boolean(),
     assetsSeedPath: z.string(),
+    lakehouseOverviewPath: z.string(),
     connectorsEnabled: z.boolean(),
     kgEnabled: z.boolean(),
     kgTenant: z.string(),
@@ -179,6 +193,7 @@ export class ApiProxyService extends Service implements ApiProxy {
   readonly orders: ApiProxy['orders']
   readonly nocobase: ApiProxy['nocobase']
   readonly assets: ApiProxy['assets']
+  readonly lakehouse: ApiProxy['lakehouse']
   readonly connectors: ApiProxy['connectors']
   readonly kg: ApiProxy['kg']
   readonly kb: ApiProxy['kb']
@@ -197,10 +212,12 @@ export class ApiProxyService extends Service implements ApiProxy {
       ...config.dataUploadEnabled === undefined ? {} : { dataUploadEnabled: config.dataUploadEnabled },
       ...config.ordersEnabled === undefined ? {} : { ordersEnabled: config.ordersEnabled },
       ...config.nocobaseEnabled === undefined ? {} : { nocobaseEnabled: config.nocobaseEnabled },
+      ...config.nocobaseWriteEnabled === undefined ? {} : { nocobaseWriteEnabled: config.nocobaseWriteEnabled },
       ...config.nocobaseBaseUrl === undefined ? {} : { nocobaseBaseUrl: config.nocobaseBaseUrl },
       ...config.nocobaseApiKeyEnv === undefined ? {} : { nocobaseApiKeyEnv: config.nocobaseApiKeyEnv },
       ...config.assetsEnabled === undefined ? {} : { assetsEnabled: config.assetsEnabled },
       ...config.assetsSeedPath === undefined ? {} : { assetsSeedPath: config.assetsSeedPath },
+      ...config.lakehouseOverviewPath === undefined ? {} : { lakehouseOverviewPath: config.lakehouseOverviewPath },
       ...config.connectorsEnabled === undefined ? {} : { connectorsEnabled: config.connectorsEnabled },
       ...config.kgEnabled === undefined ? {} : { kgEnabled: config.kgEnabled },
       ...config.kgTenant === undefined ? {} : { kgTenant: config.kgTenant },
@@ -226,6 +243,7 @@ export class ApiProxyService extends Service implements ApiProxy {
     this.orders = api.orders
     this.nocobase = api.nocobase
     this.assets = api.assets
+    this.lakehouse = api.lakehouse
     this.connectors = api.connectors
     this.kg = api.kg
     this.kb = api.kb

@@ -272,6 +272,19 @@ describe('agent loop', () => {
     expect(adapter.requests[0]!.system).toBe('You are an AI agent powered by DeepSeek Harness.\n\nWorking in /work/space.')
   })
 
+  it('resolves {{today}} as the host-local calendar date, re-evaluated per step', async () => {
+    const adapter = new MockAdapter([textResponse('ok')])
+    const ctx = await harness(adapter, 'Today is {{today}}.')
+    const agent = ctx.agentLoop.create(SessionId('s-today'), { provider: 'mock', model: 'mock' })
+    const today = new Date()
+    const iso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+
+    send(agent, 'hi')
+    await waitForIdle(ctx, agent)
+
+    expect(adapter.requests[0]!.system).toBe(`You are an AI agent powered by DeepSeek Harness.\n\nToday is ${iso}.`)
+  })
+
   it('contains a strict-variable render failure: the turn errors, the loop keeps serving turns', async () => {
     // A missing cwd variable must fail one turn without preventing a later valid turn.
     const adapter = new MockAdapter([textResponse('ok after rescue')])

@@ -1,0 +1,31 @@
+{
+  "scenes": [
+    {
+      "scene": "A-draft",
+      "ok": true,
+      "extra": "tiers=true leakedInternalNames=[] path=[] head=采购单 / 宏发食品 · 冷链箱 200 箱 / 待确认 / 需要你定 / 供应商 / 采购明细 / 请确认 · AI 推导 / 采购日期 · 登记日=今天 / 2026-05-14 / 状态 · 新建草稿默认 draft / draft / 合计金额 · 数量 200 × 单价 32 / 6400 / 系统生成（1） / 驳回 / 确认写入"
+    },
+    {
+      "scene": "A-receipt",
+      "ok": true,
+      "extra": "№=15 amount=6,400 leaks=[] confirmOnWire=true realUserMsgs=2 receiptHead=已登记 · 采购单 / № / 15 / PO-2026-0047 / 单号 / 宏发食品 / 供应商 / ¥6,400 / 合计金额 / 2026-05-14 / 采购日期 / 对话 / 确认 / 已落库 / 查看这条记录"
+    },
+    {
+      "scene": "B-chain",
+      "ok": false,
+      "extra": "Error: no draft; path=[]"
+    },
+    {
+      "scene": "C-rich",
+      "ok": false,
+      "extra": "strong=0 list=0 table=0 leaks=[]"
+    },
+    {
+      "scene": "D-dark-receipt",
+      "ok": true,
+      "extra": ""
+    }
+  ],
+  "pageErrors": [],
+  "consoleErrors": []
+}

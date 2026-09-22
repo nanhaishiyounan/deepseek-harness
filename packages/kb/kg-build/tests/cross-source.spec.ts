@@ -181,6 +181,10 @@ async function boot(overrides: Partial<KgBuildPluginConfig> = {}): Promise<Conte
     lakehouse: false,
     connector: false,
     corpus: { root: corpusRoot, maxDocuments: 5, maxChunksPerDocument: 2 },
+    // These tests assert the deterministic pairing semantics; the v2 LLM
+    // bridge has its own module tests (FakeLlm answers extraction JSON, not
+    // judge verdicts).
+    crossSourceAlign: { enabled: true, v2: false },
     pageSize: 100,
     intervalMs: 0,
     ...overrides,

@@ -20,11 +20,13 @@
   - tablist:
     - tab "Chat" [selected]
     - tab "Knowledge base"
+    - tab "Scenarios"
     - tab "Data assets"
     - tab "Connectors"
     - tab "Graph"
     - tab "Business"
     - tab "Trajectory"
+    - tab "Mobile preview"
 - text: Explain event sourcing in one sentence. {{clock}}
 - button "Copy":
   - img
@@ -34,6 +36,10 @@
   - text: Context injection @deepseek-ai/dsh-system-prompt
 - paragraph: partial
 - status: Deep diving...
+- button "Agent mode":
+  - img
+  - text: Standard mode
+  - img
 - textbox "Parent session offline; sending is unavailable but you can still stop the run" [disabled]
 - button "Commands" [disabled]:
   - img

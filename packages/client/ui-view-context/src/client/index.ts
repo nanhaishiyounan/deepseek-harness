@@ -75,6 +75,9 @@ export function apply(ctx: ClientContext): void {
       retryTimer = undefined
     }
     const bind = (sessionId: SessionId, attempt: number): void => {
+      /* v8 ignore next 1 -- defensive: the only re-entry is the retry timer,
+       * and trackSession clears that timer before changing lastCurrent, so a
+       * stale session id can never reach this comparison. */
       if (sessionId !== lastCurrent) return
       const binding = sessions.binding(sessionId)
       if (binding === undefined) {

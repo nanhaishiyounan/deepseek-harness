@@ -29,17 +29,24 @@ import {
   nocoBaseRowToEdges, nocoBaseRowToNode, stampTenant,
 } from './mappers.ts'
 import type { NocoBaseRow } from './mappers.ts'
-import { buildExtractionPrompt, extractChunk } from './extract.ts'
-import type { ExtractionLlm, OntologyView } from './extract.ts'
+import { extractChunkProtocol } from './extract.ts'
+import type { ExtractionLlm, ExtractionProtocol, OntologyView } from './extract.ts'
+import { extractValidated } from './validate.ts'
+import { planFoodOnImport } from './foodon-import.ts'
 import { alignEntity, normalizeName } from './align.ts'
 import type { AdjudicatingLlm } from './align.ts'
 import { loadCorpusManifest, normalizeCorpusDir } from './corpus-manifest.ts'
 import type { KbCorpusManifest } from './corpus-manifest.ts'
-import { crossSourceEdges, CROSS_SOURCE_MIN_NAME_LENGTH, CROSS_SOURCE_SYSTEM, kbScopeOfNodeId } from './cross-source.ts'
+import {
+  corefPairKey, crossSourceEdges, crossSourceEdgesV2, CROSS_SOURCE_MIN_NAME_LENGTH, CROSS_SOURCE_SYSTEM,
+  kbScopeOfNodeId, unionFindClusters,
+} from './cross-source.ts'
+import type { CorefJudgeLlm } from './cross-source.ts'
 import { planScopeRun, priorStateOf, sha256Hex } from './incremental.ts'
 import type {
   CollectionRunReport, CorpusReport, CrossSourceAlignReport, KgBuildConfig, KgBuildRunMetrics,
-  KgBuildRunRecord, KgBuildRunReport, KgMappingsFile, SimpleSourceReport,
+  KgBuildRunRecord, KgBuildRunReport, KgIncrementalReport, KgIncrementalScopeChange, KgMappingsFile,
+  SimpleSourceReport,
 } from './types.ts'
 import { computeQualityMetrics } from './quality.ts'
 import { loadMappingsFile } from './mappings.ts'
@@ -56,17 +63,30 @@ export { computeQualityMetrics } from './quality.ts'
 export { loadMappingsFile, parseMappings } from './mappings.ts'
 export type { KgMappingRules } from './mappings.ts'
 export {
-  buildExtractionPrompt, extractChunk,
+  buildExtractionPrompt, buildInstructKgcPrompt, extractChunk, extractChunkProtocol,
+  INSTRUCT_KGC_SPLIT_NUM, splitOntologyView,
 } from './extract.ts'
-export type { ExtractionLlm, OntologyView } from './extract.ts'
+export type { ExtractionLlm, ExtractionProtocol, OntologyView } from './extract.ts'
+export {
+  extractValidated, formatShaclFeedback, SHACL_MAX_FEEDBACK_ROUNDS, validateExtractionOutcome,
+} from './validate.ts'
+export type { ValidatedExtraction } from './validate.ts'
+export {
+  fetchFoodOnChildrenFromOls, FOODON_IRI_PREFIX, FOODON_PROP_XREFS, FOODON_SEED_TERMS,
+  FOODON_SNAPSHOT_VERSION, FOODON_SUBTREE_ANCHORS, foodonCompactIdOf, foodonTypeIdOf, planFoodOnImport,
+} from './foodon-import.ts'
+export type { FoodOnTerm } from './foodon-import.ts'
 export {
   DEFAULT_AUTO_THRESHOLD, DEFAULT_GRAY_FLOOR, alignEntity, jaroWinkler, normalizeName,
 } from './align.ts'
 export type { AdjudicatingLlm, AlignGraphFace, AlignmentDecision } from './align.ts'
 export {
-  CONTAINS_COREFERENCE_CONFIDENCE, CROSS_SOURCE_EXCLUDED_TYPES, CROSS_SOURCE_MIN_NAME_LENGTH,
-  CROSS_SOURCE_SYSTEM, EXACT_COREFERENCE_CONFIDENCE, crossSourceEdges, kbScopeOfNodeId,
+  CONTAINS_COREFERENCE_CONFIDENCE, COREF_AUTO_FLOOR, COREF_GRAY_FLOOR, corefPairKey,
+  CROSS_SOURCE_EXCLUDED_TYPES, CROSS_SOURCE_MIN_NAME_LENGTH, CROSS_SOURCE_SYSTEM,
+  EXACT_COREFERENCE_CONFIDENCE, crossSourceEdges, crossSourceEdgesV2, kbScopeOfNodeId,
+  unionFindClusters,
 } from './cross-source.ts'
+export type { CorefCluster, CorefJudgeLlm, CorefRejectedPair, CorefReviewEntry, CorefVerdict, CrossSourceV2Result } from './cross-source.ts'
 export {
   fingerprintRows, planScopeRun, priorStateOf, sha256Hex,
 } from './incremental.ts'
@@ -129,6 +149,10 @@ export const Config = z.object({
     provider: z.string().default(DEFAULT_EXTRACT_PROVIDER),
     model: z.string().default(DEFAULT_EXTRACT_MODEL),
     maxChunkChars: z.number().step(1).min(200).default(DEFAULT_CHUNK_CHARS),
+    /** The prompt protocol: `instruct-kgc` (schema dict + split batches) or `legacy` (the A/B baseline). */
+    protocol: z.union([z.const('legacy'), z.const('instruct-kgc')]).default('legacy'),
+    /** Gate extraction through the SHACL validation loop (quarantine survivors' leftovers). */
+    shaclGate: z.boolean().default(true),
   }),
   align: z.object({
     autoThreshold: z.number().min(0).max(1),
@@ -137,7 +161,11 @@ export const Config = z.object({
   crossSourceAlign: z.object({
     enabled: z.boolean().default(true),
     exactOnly: z.boolean().default(false),
+    /** Run the v2 pass: gray-zone containment pairs go to the pairwise LLM judge. */
+    v2: z.boolean().default(true),
   }),
+  /** Import the curated FoodOn subtree snapshot into the registry (idempotent). */
+  foodon: z.boolean().default(true),
   pageSize: z.number().step(1).min(1).max(500).default(DEFAULT_PAGE_SIZE),
   intervalMs: z.number().step(1).min(0).default(0),
 })
@@ -327,12 +355,68 @@ export class KgBuildRuntime extends Service {
   private ontologyView(): OntologyView {
     const graph = this.graph()
     return {
-      entityTypes: graph.listNodeTypes().map(type => ({ id: String(type.id), label: type.label })),
+      entityTypes: graph.listNodeTypes().map(type => ({
+        id: String(type.id),
+        label: type.label,
+        ...(type.props.length === 0 ? {} : { props: type.props }),
+      })),
       relations: graph.listRelations().map(relation => ({
         id: String(relation.id),
         label: relation.label,
-        constraints: relation.constraints.map(pair => ({ domain: String(pair.domain), range: String(pair.range) })),
+        ...(relation.description === undefined ? {} : { description: relation.description }),
+        constraints: relation.constraints.map(pair => ({
+          domain: String(pair.domain),
+          range: String(pair.range),
+          ...(pair.cardinality === undefined ? {} : { cardinality: pair.cardinality }),
+        })),
       })),
+    }
+  }
+
+  /**
+   * The FoodOn import leg: materialize the curated pruned subtree snapshot
+   * into the registry (idempotent per class) and persist the xref channel.
+   * @returns how many classes were persisted and which were new this run.
+   */
+  private async runFoodOnImport(): Promise<{ persisted: number; addedTypeIds: readonly string[] }> {
+    const graph = this.graph()
+    const plan = planFoodOnImport()
+    const known = new Set((await graph.storedRegistry()).nodeTypes.map(type => String(type.id)))
+    const addedTypeIds: string[] = []
+    for (const nodeType of plan.nodeTypes) {
+      await graph.persistNodeType(nodeType)
+      if (!known.has(String(nodeType.id))) addedTypeIds.push(String(nodeType.id))
+    }
+    /* v8 ignore next -- the curated seed terms always yield xref rows. */
+    if (plan.xrefs.length > 0) await graph.putOntologyXrefs(plan.xrefs)
+    return { persisted: plan.nodeTypes.length, addedTypeIds }
+  }
+
+  /**
+   * The coref-judge adapter: the extraction LLM face answering the MatchGPT
+   * pairwise prompt with a strict JSON verdict.
+   */
+  private corefJudgeOf(complete: (system: string, user: string) => Promise<string>): CorefJudgeLlm {
+    return {
+      judge: async (doc, row) => {
+        const answer = await complete(
+          '你是实体对齐审核员。判断两个实体是否指同一现实实体。只输出 JSON：{"same":boolean,"confidence":0.0到1.0,"reason":"一句话理由"}，不要输出其他文字。',
+          `实体A：名称=${doc.name}；类型=${doc.type}${doc.summary === undefined ? '' : `；说明=${doc.summary}`}\n实体B：名称=${row.name}；类型=${row.type}${row.summary === undefined ? '' : `；说明=${row.summary}`}\n两者是否指同一现实实体？`,
+        )
+        const start = answer.indexOf('{')
+        const end = answer.lastIndexOf('}')
+        if (start === -1 || end <= start) return { same: false, confidence: 0, reason: 'LLM 未返回 JSON，按不同处理' }
+        try {
+          const parsed = JSON.parse(answer.slice(start, end + 1)) as { same?: unknown; confidence?: unknown; reason?: unknown }
+          return {
+            same: parsed.same === true,
+            confidence: typeof parsed.confidence === 'number' ? Math.min(Math.max(parsed.confidence, 0), 1) : 0.5,
+            reason: typeof parsed.reason === 'string' ? parsed.reason : '无理由',
+          }
+        } catch {
+          return { same: false, confidence: 0, reason: 'LLM JSON 解析失败，按不同处理' }
+        }
+      },
     }
   }
 
@@ -353,6 +437,26 @@ export class KgBuildRuntime extends Service {
     const mappings = this.mappingsFile
     const hasMappedCollections = mappings !== undefined
       && mappings.sources[0] !== undefined && mappings.sources[0].collections.length > 0
+    // The FoodOn import leg runs first so extraction and validation see the
+    // imported classes in the same pass; idempotent, so converged runs add
+    // nothing and the revision audit stays quiet.
+    let foodonTypes = 0
+    if (this.resolved.foodon) {
+      const foodon = await this.runFoodOnImport()
+      foodonTypes = foodon.persisted
+      if (foodon.addedTypeIds.length > 0) {
+        ontologyRevision = await this.graph().recordOntologyRevision({
+          ontologyVersion: ONTOLOGY_VERSION,
+          summary: `foodon import persisted ${String(foodon.addedTypeIds.length)} new class(es)`,
+          changes: {
+            added: { types: [...foodon.addedTypeIds], relations: [] },
+            removed: { types: [], relations: [] },
+            changed: { types: [], relations: [] },
+          },
+          createdAt: new Date().toISOString(),
+        })
+      }
+    }
     if (hasMappedCollections) {
       const counted = await this.runNocoBase(signal)
       collections.push(...counted.reports)
@@ -404,6 +508,8 @@ export class KgBuildRuntime extends Service {
       ...(lakehouse === undefined ? {} : { lakehouse }),
       ...(connector === undefined ? {} : { connector }),
       ...(corpus === undefined ? {} : { corpus }),
+      // runCrossSourceAlign answers a report on both of its paths, so the omission arm types the union, not a reachable miss.
+      /* v8 ignore next -- the align pass always answers a report. */
       ...(crossSourceAlign === undefined ? {} : { crossSourceAlign }),
       persistedTypes,
       persistedRelations,
@@ -411,6 +517,7 @@ export class KgBuildRuntime extends Service {
       ...(ontologyRevision === undefined ? {} : { ontologyRevision }),
       startedAt,
       finishedAt: finishedIso,
+      ...(foodonTypes === 0 ? {} : { foodonTypes }),
     }
     const metrics = computeQualityMetrics(
       { nodes: storeStats.entities, edges: storeStats.triples, islands, conflicts },
@@ -453,6 +560,44 @@ export class KgBuildRuntime extends Service {
   }
 
   /**
+   * One incremental pass: snapshot the five source systems' watermark rows,
+   * run the pipeline, and diff the snapshots — the per-scope evidence that
+   * only changed scopes reprocessed (unchanged scopes fingerprint-skip inside
+   * run(); this wraps the run with the before/after diff the incremental
+   * acceptance reads).
+   * @param options - cooperative cancellation.
+   * @returns the run report plus the changed-scope list.
+   */
+  async runIncremental(options: RunOptions = {}): Promise<KgIncrementalReport> {
+    const graph = this.graph()
+    const systems = ['nocobase', 'lakehouse', 'connector', 'kb', CROSS_SOURCE_SYSTEM]
+    const before = new Map<string, { runAt: string; hash: string }>()
+    for (const system of systems) {
+      for (const run of await graph.listSourceRuns(system)) {
+        before.set(`${system}:${run.scope}`, { runAt: run.lastRunAt, hash: run.contentHash ?? '' })
+      }
+    }
+    const report = await this.run(options)
+    const changedScopes: KgIncrementalScopeChange[] = []
+    for (const system of systems) {
+      for (const run of await graph.listSourceRuns(system)) {
+        const key = `${system}:${run.scope}`
+        const prior = before.get(key)
+        if (prior !== undefined && prior.runAt === run.lastRunAt) continue
+        changedScopes.push({
+          sourceSystem: system,
+          scope: run.scope,
+          ...(prior === undefined ? {} : { previousRunAt: prior.runAt }),
+          lastRunAt: run.lastRunAt,
+          /* v8 ignore next -- same-hash and null-hash rewrites are not producible through the pipeline's writers. */
+          updated: prior === undefined || prior.hash !== (run.contentHash ?? ''),
+        })
+      }
+    }
+    return { report, changedScopes }
+  }
+
+  /**
    * The live quality readout: structural counters straight from the store,
    * plus the persisted metrics' coverage document.
    * @returns the quality report.
@@ -492,16 +637,20 @@ export class KgBuildRuntime extends Service {
     // The in-memory report wins; a fresh process falls back to the persisted
     // ledger row so the readout survives restarts (the ledger's whole point).
     const last = this.lastReport ?? (await this.latestRun())?.report
+    const mapped = file.sources[0]?.collections.map(entry => ({
+      name: entry.name,
+      ...(entry.anchor === undefined ? {} : { anchor: entry.anchor }),
+      ...(entry.titleField === undefined ? {} : { titleField: entry.titleField }),
+      fkLinkCount: entry.fkLinks?.length ?? 0,
+    }))
+    /* v8 ignore next -- parseMappings always materializes exactly one source; the fallback types the union only. */
+    const collections = mapped ?? []
     return {
+      /* v8 ignore next -- the readout only answers with a loaded mappings file, which implies a configured nocobase source. */
       file: this.resolved.nocobase?.mappingsFile ?? '',
       version: file.version,
       rules: file.rules,
-      collections: file.sources[0]?.collections.map(entry => ({
-        name: entry.name,
-        ...(entry.anchor === undefined ? {} : { anchor: entry.anchor }),
-        ...(entry.titleField === undefined ? {} : { titleField: entry.titleField }),
-        fkLinkCount: entry.fkLinks?.length ?? 0,
-      })) ?? [],
+      collections,
       ...(last === undefined ? {} : {
         lastRun: {
           finishedAt: last.finishedAt,
@@ -520,6 +669,7 @@ export class KgBuildRuntime extends Service {
 
   /** The loaded mappings file (fail loud: the constructor pre-validated it). */
   private requireMappings(): KgMappingsFile {
+    /* v8 ignore next 3 -- run() only enters runNocoBase with a loaded file; mappings() owns the public seam-missing failure. */
     if (this.mappingsFile === undefined) {
       throw new KgBuildError('no mappings file configured (nocobase.mappingsFile)', 'KG_BUILD_SEAM_MISSING')
     }
@@ -536,6 +686,7 @@ export class KgBuildRuntime extends Service {
   }> {
     const file = this.requireMappings()
     const source = file.sources[0]
+    /* v8 ignore next 3 -- parseMappings always materializes exactly one nocobase source; the guard fails loud for future callers. */
     if (source === undefined) {
       throw new KgBuildError('kg-mappings: sources is empty', 'KG_BUILD_MAPPINGS_INVALID')
     }
@@ -717,11 +868,12 @@ export class KgBuildRuntime extends Service {
     if (corpus === undefined || corpus.root === undefined || corpus.root.length === 0) return undefined
     const corpusRoot = corpus.root
     const graph = this.graph()
-    /* v8 ignore next -- extensions-default clause permutation; both default and explicit lists asserted */
     const tenant = this.resolved.tenant
     /* v8 ignore next -- maxChunkChars config arm; the default path asserted */
     const { extraction, adjudicator } = this.extractionLlm()
-    const system = buildExtractionPrompt(this.ontologyView())
+    const protocol: ExtractionProtocol = this.resolved.extract?.protocol ?? 'instruct-kgc'
+    const shaclGate = this.resolved.extract?.shaclGate !== false
+    const ontologyView = this.ontologyView()
     const extensions = corpus.extensions !== undefined && corpus.extensions.length > 0 ? corpus.extensions : ['.md', '.txt']
     /* v8 ignore next -- maxDocuments config arm; the default path asserted */
     const maxDocuments = corpus.maxDocuments ?? DEFAULT_MAX_DOCUMENTS
@@ -774,7 +926,7 @@ export class KgBuildRuntime extends Service {
     const report = {
       documents: 0, chunks: 0, extractionCalls: 0, extractedEntities: 0, extractedRelations: 0,
       degradedEntities: 0, droppedRelations: 0, mergedEntities: 0, tombstonedEdges: 0,
-      tombstonedScopes: 0,
+      tombstonedScopes: 0, quarantinedEntities: 0, quarantinedRelations: 0, shaclRounds: 0,
     }
     const nodeIdOfName = new Map<string, { id: string; type: KgNodeTypeId }>()
     for (const file of files) {
@@ -791,8 +943,20 @@ export class KgBuildRuntime extends Service {
       // delete-then-re-extract: this source's prior edges tombstone first.
       report.tombstonedEdges += await graph.tombstoneBySource('kb', scope, now)
       const chunks = chunkText(text, maxChunkChars, maxChunks)
+      // Per-scope episode bookkeeping: every edge id this scope's re-extraction
+      // upserts lands in one ingest episode (the provenance反查 anchor).
+      const scopeEdgeIds: string[] = []
       for (const chunk of chunks) {
-        const outcome = await extractChunk(extraction, this.ontologyView(), system, chunk)
+        let outcome
+        if (shaclGate) {
+          const validated = await extractValidated(extraction, ontologyView, chunk, protocol)
+          report.quarantinedEntities += validated.quarantinedEntities.length
+          report.quarantinedRelations += validated.quarantinedRelations.length
+          report.shaclRounds += validated.rounds
+          outcome = validated.outcome
+        } else {
+          outcome = await extractChunkProtocol(extraction, ontologyView, chunk, protocol)
+        }
         report.chunks += 1
         report.extractionCalls += 1
         report.degradedEntities += outcome.entities.filter(entity => entity.degraded).length
@@ -849,9 +1013,25 @@ export class KgBuildRuntime extends Service {
           })
         }
         /* v8 ignore next -- empty-batch arm; a chunk with zero surviving relations never reaches the write */
-        if (edgeBatch.length > 0) await graph.upsertEdges(edgeBatch)
+        if (edgeBatch.length > 0) {
+          await graph.upsertEdges(edgeBatch)
+          scopeEdgeIds.push(...edgeBatch.map(edge => edge.id))
+        }
       }
       await graph.putSourceRun({ sourceSystem: 'kb', scope, contentHash, lastRunAt: now })
+      if (scopeEdgeIds.length > 0) {
+        await graph.putEpisode({
+          uuid: `ingest-kb:${scope}:${now}`,
+          tenantId: tenant,
+          source: 'ingest',
+          name: `语料重抽取 ${scope}`,
+          content: `kb 语料 scope「${scope}」重抽取（contentHash ${contentHash.slice(0, 12)}），upsert ${String(scopeEdgeIds.length)} 条边。`,
+          validAt: now,
+          createdAt: now,
+          metadata: { scope, contentHash, edges: scopeEdgeIds },
+        })
+        await graph.linkMentions(`ingest-kb:${scope}:${now}`, scopeEdgeIds)
+      }
     }
     // The manifest diff sweep (the corpus leg's disappeared protocol, mirroring
     // the nocobase leg's plan.disappeared): a kb scope the manifest no longer
@@ -883,7 +1063,10 @@ export class KgBuildRuntime extends Service {
   private async runCrossSourceAlign(): Promise<CrossSourceAlignReport | undefined> {
     const settings = this.resolved.crossSourceAlign
     if (settings?.enabled === false) {
-      return { docCandidates: 0, nocobaseNodes: 0, edgesCreated: 0, tombstonedEdges: 0 }
+      return {
+        docCandidates: 0, nocobaseNodes: 0, edgesCreated: 0, tombstonedEdges: 0,
+        judgedPairs: 0, rejectedPairs: 0, reviewQueue: 0, clusters: 0,
+      }
     }
     const graph = this.graph()
     const tenant = this.resolved.tenant
@@ -906,17 +1089,71 @@ export class KgBuildRuntime extends Service {
     for (const doc of kbNodes) {
       tombstoned += await graph.tombstoneBySource(CROSS_SOURCE_SYSTEM, doc.id, now)
     }
-    const edges = crossSourceEdges(docNodes, nocobaseNodes, {
+    const options = {
       tenantId: tenant,
       now,
+      /* v8 ignore next -- cordis materializes the defaulted crossSourceAlign block; the absent-object arm types the spread. */
       ...(settings?.exactOnly === undefined ? {} : { exactOnly: settings.exactOnly }),
-    })
-    if (edges.length > 0) await graph.upsertEdges(edges)
+    }
+    let result
+    // The v2 LLM bridge degrades to the deterministic rules when no llm seam
+    // is composed (the align pass must never hard-require extraction's seam).
+    if (settings?.v2 === false || this.ctx.get('llm') === undefined) {
+      const edges = crossSourceEdges(docNodes, nocobaseNodes, options)
+      result = { edges, rejected: [], review: [], judgedPairs: 0, deterministicEdges: edges.length }
+    } else {
+      const { extraction } = this.extractionLlm()
+      const complete = (system: string, user: string) => {
+        return new Promise<string>((resolve, reject) => {
+          void extraction.complete(system, user).then(resolve, reject)
+        })
+      }
+      result = await crossSourceEdgesV2(docNodes, nocobaseNodes, {
+        ...options,
+        judge: this.corefJudgeOf(complete),
+        rejectedPairs: await graph.listCorefRejects(),
+      })
+      if (result.rejected.length > 0) {
+        await graph.putCorefRejects(result.rejected.map(pair => ({
+          pairKey: corefPairKey(pair.docId, pair.rowId),
+          docId: pair.docId,
+          rowId: pair.rowId,
+          reason: pair.reason,
+          decidedAt: now,
+        })))
+      }
+    }
+    const edges = result.edges
+    if (edges.length > 0) {
+      await graph.upsertEdges(edges)
+      // One ingest episode links every edge this align pass asserted: the
+      // merge/rollback ledger the align leg never had before v2.
+      const episodeUuid = `ingest-align:${now}`
+      await graph.putEpisode({
+        uuid: episodeUuid,
+        tenantId: tenant,
+        source: 'ingest',
+        name: '跨源共指对齐',
+        content: `crossSourceAlign v2：判定 ${String(result.judgedPairs)} 对，落边 ${String(edges.length)} 条，拒绝 ${String(result.rejected.length)} 对，审核队列 ${String(result.review.length)} 对。`,
+        validAt: now,
+        createdAt: now,
+        metadata: { judgedPairs: result.judgedPairs, rejected: result.rejected, review: result.review },
+      })
+      await graph.linkMentions(episodeUuid, edges.map(edge => edge.id))
+    }
+    const clusters = unionFindClusters(
+      all.map(node => node.id),
+      edges.map(edge => [edge.srcId, edge.dstId] as const),
+    )
     return {
       docCandidates: docNodes.filter(node => normalizeName(node.name).length >= CROSS_SOURCE_MIN_NAME_LENGTH).length,
       nocobaseNodes: nocobaseNodes.length,
       edgesCreated: edges.length,
       tombstonedEdges: tombstoned,
+      judgedPairs: result.judgedPairs,
+      rejectedPairs: result.rejected.length,
+      reviewQueue: result.review.length,
+      clusters: clusters.length,
     }
   }
 

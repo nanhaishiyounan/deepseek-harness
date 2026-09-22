@@ -57,6 +57,8 @@ export class ViewContextService extends Service {
   private active: ActiveView | undefined
   private timer: ReturnType<typeof setTimeout> | undefined
   private liveSetView: ((view: string) => void) | undefined
+  private readonly pendingByView = new Map<string, unknown>()
+  private readonly pendingListeners = new Map<string, Set<(payload: unknown) => void>>()
 
   /**
    * @param ctx - the client root context; the service registers as `viewContext`.
@@ -68,6 +70,54 @@ export class ViewContextService extends Service {
   }
 
   private readonly reportApi: ConnectionHandle['api']
+
+  /**
+   * Offer one pending cross-view handoff payload: the sender stores it for
+   * the target view and (when a listener already subscribes) delivers it
+   * immediately — the SourceTrail→kg seed deep-link channel. A view's
+   * payload shape is owned by that view; the service treats it as opaque.
+   * @param view - the target conversation view id.
+   * @param payload - the view-owned handoff payload.
+   */
+  offerPending(view: string, payload: unknown): void {
+    this.pendingByView.set(view, payload)
+    const listeners = this.pendingListeners.get(view)
+    if (listeners !== undefined) {
+      for (const listener of listeners) listener(payload)
+      this.pendingByView.delete(view)
+    }
+  }
+
+  /**
+   * Take (and clear) the pending payload one view has not consumed yet —
+   * the mount-time drain for a handoff that arrived before the listener.
+   * @param view - the consuming conversation view id.
+   * @returns the stored payload, or `undefined` when none is pending.
+   */
+  takePending(view: string): unknown {
+    const payload = this.pendingByView.get(view)
+    this.pendingByView.delete(view)
+    return payload
+  }
+
+  /**
+   * Subscribe one view to live handoff payloads (delivered while mounted).
+   * @param view - the subscribing conversation view id.
+   * @param listener - the payload consumer.
+   * @returns the disposer removing the subscription.
+   */
+  onPending(view: string, listener: (payload: unknown) => void): () => void {
+    const listeners = this.pendingListeners.get(view) ?? new Set()
+    listeners.add(listener)
+    this.pendingListeners.set(view, listeners)
+    return () => {
+      const current = this.pendingListeners.get(view)
+      if (current !== undefined) {
+        current.delete(listener)
+        if (current.size === 0) this.pendingListeners.delete(view)
+      }
+    }
+  }
 
   /**
    * Register (or replace) one view's state provider.

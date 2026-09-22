@@ -70,19 +70,21 @@ import {
   kbUploadRequestSchema,
 } from '../api/kb.schema.ts'
 import {
-  nocobaseGetRequestSchema, nocobaseListMetaRequestSchema, nocobaseListRequestSchema,
+  nocobaseGetRequestSchema, nocobaseListMetaRequestSchema, nocobaseListRequestSchema, nocobaseUpdateRequestSchema,
 } from '../api/nocobase.schema.ts'
 import { dataUploadRequestSchema } from '../api/data.schema.ts'
 import { ordersCreateRequestSchema, ordersListRequestSchema, ordersOrderIdRequestSchema } from '../api/orders.schema.ts'
 import {
   assetsDetailRequestSchema, assetsListRequestSchema, assetsStatsRequestSchema,
 } from '../api/assets.schema.ts'
+import { lakehouseOverviewRequestSchema } from '../api/lakehouse.schema.ts'
 import {
   connectorsConnectionsRequestSchema, connectorsListRequestSchema, connectorsTransfersRequestSchema,
 } from '../api/connectors.schema.ts'
 import {
-  kgExpandRequestSchema, kgMappingsRequestSchema, kgQueryRequestSchema, kgSchemaRequestSchema,
-  kgSearchRequestSchema, kgStatsRequestSchema, kgSubgraphRequestSchema,
+  kgCommunitiesRequestSchema, kgEpisodesRequestSchema, kgExpandRequestSchema, kgHistoryRequestSchema, kgMappingsRequestSchema,
+  kgOntologyEditRequestSchema, kgQueryRequestSchema, kgReviewDecideRequestSchema, kgReviewQueueRequestSchema, kgRollbackRequestSchema,
+  kgSchemaRequestSchema, kgSearchRequestSchema, kgStatsRequestSchema, kgSubgraphRequestSchema,
 } from '../api/kg.schema.ts'
 import {
   subagentHistoryRequestSchema,
@@ -172,12 +174,20 @@ const UNARY_ROUTES: UnaryRoutes = {
   'assets.list': { schema: assetsListRequestSchema, invoke: (api, r, signal) => api.assets.list(r, signal) },
   'assets.detail': { schema: assetsDetailRequestSchema, invoke: (api, r, signal) => api.assets.detail(r, signal) },
   'assets.stats': { schema: assetsStatsRequestSchema, invoke: (api, r, signal) => api.assets.stats(r, signal) },
+  'lakehouse.overview': { schema: lakehouseOverviewRequestSchema, invoke: (api, r, signal) => api.lakehouse.overview(r, signal) },
   'connectors.list': { schema: connectorsListRequestSchema, invoke: (api, r, signal) => api.connectors.list(r, signal) },
   'connectors.connections': { schema: connectorsConnectionsRequestSchema, invoke: (api, r, signal) => api.connectors.connections(r, signal) },
   'connectors.transfers': { schema: connectorsTransfersRequestSchema, invoke: (api, r, signal) => api.connectors.transfers(r, signal) },
   'kg.mappings': { schema: kgMappingsRequestSchema, invoke: (api, r, signal) => api.kg.mappings(r, signal) },
   'kg.schema': { schema: kgSchemaRequestSchema, invoke: (api, r, signal) => api.kg.schema(r, signal) },
   'kg.query': { schema: kgQueryRequestSchema, invoke: (api, r, signal) => api.kg.query(r, signal) },
+  'kg.episodes': { schema: kgEpisodesRequestSchema, invoke: (api, r, signal) => api.kg.episodes(r, signal) },
+  'kg.rollback': { schema: kgRollbackRequestSchema, invoke: (api, r, signal) => api.kg.rollback(r, signal) },
+  'kg.ontologyEdit': { schema: kgOntologyEditRequestSchema, invoke: (api, r, signal) => api.kg.ontologyEdit(r, signal) },
+  'kg.reviewQueue': { schema: kgReviewQueueRequestSchema, invoke: (api, r, signal) => api.kg.reviewQueue(r, signal) },
+  'kg.reviewDecide': { schema: kgReviewDecideRequestSchema, invoke: (api, r, signal) => api.kg.reviewDecide(r, signal) },
+  'kg.communities': { schema: kgCommunitiesRequestSchema, invoke: (api, r, signal) => api.kg.communities(r, signal) },
+  'kg.history': { schema: kgHistoryRequestSchema, invoke: (api, r, signal) => api.kg.history(r, signal) },
   'kg.search': { schema: kgSearchRequestSchema, invoke: (api, r, signal) => api.kg.search(r, signal) },
   'kg.subgraph': { schema: kgSubgraphRequestSchema, invoke: (api, r, signal) => api.kg.subgraph(r, signal) },
   'kg.expand': { schema: kgExpandRequestSchema, invoke: (api, r, signal) => api.kg.expand(r, signal) },
@@ -185,6 +195,7 @@ const UNARY_ROUTES: UnaryRoutes = {
   'nocobase.listMeta': { schema: nocobaseListMetaRequestSchema, invoke: (api, r, signal) => api.nocobase.listMeta(r, signal) },
   'nocobase.list': { schema: nocobaseListRequestSchema, invoke: (api, r, signal) => api.nocobase.list(r, signal) },
   'nocobase.get': { schema: nocobaseGetRequestSchema, invoke: (api, r, signal) => api.nocobase.get(r, signal) },
+  'nocobase.update': { schema: nocobaseUpdateRequestSchema, invoke: (api, r, signal) => api.nocobase.update(r, signal) },
   'kb.stats': { schema: kbStatsRequestSchema, invoke: (api, r) => api.kb.stats(r) },
   'kb.search': { schema: kbSearchRequestSchema, invoke: (api, r, signal) => api.kb.search(r, signal) },
   'kb.ingest': { schema: kbIngestRequestSchema, invoke: (api, r, signal) => api.kb.ingest(r, signal) },

@@ -30,6 +30,7 @@
     "@deepseek-ai/dsh-client-modules": "workspace:^",
     "@deepseek-ai/dsh-client-ui-primitives": "workspace:^",
     "@deepseek-ai/dsh-client-ui-slots": "workspace:^",
+    "@deepseek-ai/dsh-client-ui-mobile": "workspace:^",
     "@deepseek-ai/dsh-client-web": "workspace:^",
     "@deepseek-ai/dsh-cmdline": "workspace:^",
     "@deepseek-ai/dsh-kb": "workspace:^",

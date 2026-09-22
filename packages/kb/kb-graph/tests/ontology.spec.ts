@@ -17,7 +17,7 @@ describe('builtin ontology corefers_with', () => {
   })
 
   it('carries the minor version the added relation bumped', () => {
-    expect(ONTOLOGY_VERSION).toBe('1.1.0')
+    expect(ONTOLOGY_VERSION).toBe('1.2.0')
     expect(exportOntology().version).toBe(ONTOLOGY_VERSION)
   })
 })

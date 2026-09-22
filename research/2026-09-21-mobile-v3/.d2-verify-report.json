@@ -1,0 +1,60 @@
+{
+  "today": "2026-09-22",
+  "results": [
+    {
+      "name": "N1 header identity",
+      "ok": true,
+      "detail": "AI 同事 · mobile-form-assistant"
+    },
+    {
+      "name": "N1 welcome identity",
+      "ok": true,
+      "detail": "我是智能填表助手说一句话就能登记：采购单、供应商"
+    },
+    {
+      "name": "N2 draft po_number visible",
+      "ok": true,
+      "detail": "PO-2026-0133"
+    },
+    {
+      "name": "Minor draft date = today",
+      "ok": true,
+      "detail": "today=2026-09-22"
+    },
+    {
+      "name": "N2 receipt po_number non-empty",
+      "ok": true,
+      "detail": "PO-2026-0131"
+    },
+    {
+      "name": "Minor receipt date = today",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N3 zero hub_ in innerText",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N3 zero snake_case field ids",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N4 zero protocol tool names",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N5 avatar count ≤ user turns",
+      "ok": true,
+      "detail": "seals=6 userBubbles=6"
+    },
+    {
+      "name": "flow completed",
+      "ok": true,
+      "detail": "chats"
+    }
+  ]
+}

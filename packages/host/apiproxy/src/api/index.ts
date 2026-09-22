@@ -20,6 +20,7 @@ import type { NocobaseApi } from './nocobase.ts'
 import type { DataApi } from './data.ts'
 import type { OrdersApi } from './orders.ts'
 import type { AssetsApi } from './assets.ts'
+import type { LakehouseApi } from './lakehouse.ts'
 import type { ConnectorsApi } from './connectors.ts'
 import type { KgApi } from './kg.ts'
 import type { DownloadsApi } from './downloads.ts'
@@ -43,6 +44,7 @@ export interface ApiProxy {
   data: DataApi
   orders: OrdersApi
   assets: AssetsApi
+  lakehouse: LakehouseApi
   connectors: ConnectorsApi
   kg: KgApi
   /** Host-only download surfaces (GET, no wire envelope); absent from IApiClient. */
@@ -85,6 +87,9 @@ export type { OrderStatusView, OrderView, OrdersApi } from './orders.ts'
 export type {
   AssetFeaturedView, AssetKindView, AssetView, AssetsApi, AssetsStatsView,
 } from './assets.ts'
+export type {
+  LakehouseApi, LakehouseKpiView, LakehouseOverviewView,
+} from './lakehouse.ts'
 export type {
   ConnectorCapabilityView, ConnectorConnectionView, ConnectorProviderWireView,
   ConnectorTransferWireView, ConnectorsApi,

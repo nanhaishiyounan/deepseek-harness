@@ -18,11 +18,13 @@
   - tablist:
     - tab "Chat" [selected]
     - tab "Knowledge base"
+    - tab "Scenarios"
     - tab "Data assets"
     - tab "Connectors"
     - tab "Graph"
     - tab "Business"
     - tab "Trajectory"
+    - tab "Mobile preview"
 - group "Command input": /goal Keep the composer context panels aligned
 - 'button "goal Goal created Status: active Objective: Keep the composer context panels aligned Rounds: 0/256 Activation: armed Commands: /goal edit <objective>, /goal pause, /goal clear"':
   - img
@@ -49,6 +51,10 @@
 - button "Clear goal":
   - img
 - button "2 queued messages"
+- button "Agent mode":
+  - img
+  - text: Standard mode
+  - img
 - textbox "Cmd/Ctrl+Enter steers all queued messages"
 - button "Commands":
   - img

@@ -1,0 +1,28 @@
+/* Shell: routed body above the two-tab bar. */
+
+.shell {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.tabbar {
+  flex: none;
+  background: var(--dshm-background);
+  border-top: 1px solid var(--dshm-border);
+}
+
+.tabbar :global(.adm-tab-bar) {
+  --adm-color-primary: var(--dshm-primary);
+  --adm-color: var(--dshm-muted-foreground);
+  --height: var(--dshm-tabbar-height);
+  background: transparent;
+}

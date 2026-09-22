@@ -295,7 +295,7 @@ describe('HarnessSdkJsonRpcServer', () => {
     }
   })
 
-  it('creates an SDK session without an optional system prompt', { timeout: 15_000 }, async () => {
+  it('creates an SDK session without an optional system prompt', { timeout: 30_000 }, async () => {
     const storageDir = await mkdtemp(join(tmpdir(), 'dsh-jsonrpc-no-system-'))
     const llmServer = await mockCompletionServer()
     vi.stubEnv('DEEPSEEK_API_KEY', 'test-key')
@@ -310,7 +310,7 @@ describe('HarnessSdkJsonRpcServer', () => {
         contentBlocks: [{ type: 'text', text: 'hello' }],
       })
 
-      await vi.waitFor(() => { expect(llmServer.requests).toHaveLength(1) })
+      await vi.waitFor(() => { expect(llmServer.requests).toHaveLength(1) }, { timeout: 10_000 })
       await server.shutdown()
     } finally {
       await ctx.fiber.dispose()

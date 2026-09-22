@@ -16,11 +16,13 @@
   - tablist:
     - tab "Chat" [selected]
     - tab "Knowledge base"
+    - tab "Scenarios"
     - tab "Data assets"
     - tab "Connectors"
     - tab "Graph"
     - tab "Business"
     - tab "Trajectory"
+    - tab "Mobile preview"
 - text: m1 7/25 {{clock}}
 - button "Copy":
   - img
@@ -359,6 +361,10 @@
   - img
 - text: 7/25 {{clock}} Ran for {{duration}}
 - button "Back to bottom":
+  - img
+- button "Agent mode":
+  - img
+  - text: Standard mode
   - img
 - textbox "Message the agent"
 - button "Commands":

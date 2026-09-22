@@ -18,11 +18,13 @@
   - tablist:
     - tab "Chat" [selected]
     - tab "Knowledge base"
+    - tab "Scenarios"
     - tab "Data assets"
     - tab "Connectors"
     - tab "Graph"
     - tab "Business"
     - tab "Trajectory"
+    - tab "Mobile preview"
 - text: Reply with the single word LIGHTHOUSE and stop. {{clock}}
 - button "Copy":
   - img
@@ -48,6 +50,10 @@
   - img
   - img
   - text: "feedback Feedback recorded for session session-{{uuid}} Anonymous user: {{uuid}}. Session sharing is enabled."
+- button "Agent mode":
+  - img
+  - text: Standard mode
+  - img
 - textbox "Message the agent"
 - button "Commands":
   - img

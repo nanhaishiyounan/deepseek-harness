@@ -262,3 +262,229 @@
 }
 
 /* Empty + error + loading states live in the shared ui-primitives atoms. */
+
+.navBox {
+  position: relative;
+  min-width: 0;
+}
+
+.navToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 320px;
+  padding: 6px 12px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 8px;
+  background: var(--dsw-alias-bg-base);
+  cursor: pointer;
+}
+
+.navToggleLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.navToggleCount {
+  flex: none;
+  color: var(--dsw-alias-label-caption);
+}
+
+.navPanel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 30;
+  width: min(420px, 90vw);
+  max-height: 380px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 10px;
+  background: var(--dsw-alias-bg-base);
+  box-shadow: var(--dsw-shadow-lv2);
+}
+
+.navSearch {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 8px;
+}
+
+.navGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.navGroupLabel {
+  color: var(--dsw-alias-label-caption);
+}
+
+.navGroupItems {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.navItem {
+  padding: 3px 12px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 999px;
+  background: none;
+  color: var(--dsw-alias-label-secondary);
+  cursor: pointer;
+}
+
+.navItem:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.navItem[data-selected] {
+  border-color: var(--dsw-static-deepseek-500);
+  color: var(--dsw-alias-label-primary);
+}
+
+.navEmpty {
+  margin: 0;
+  color: var(--dsw-alias-label-caption);
+}
+
+.askedInline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--dsw-alias-label-caption);
+}
+
+.askedLink {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--dsw-static-deepseek-500);
+  cursor: pointer;
+  font: inherit;
+}
+
+.askedLink:hover {
+  text-decoration: underline;
+}
+
+.inlineCell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.inlineInput {
+  width: 140px;
+  padding: 2px 8px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 6px;
+}
+
+.inlineAction {
+  flex: none;
+  padding: 1px 8px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 999px;
+  background: none;
+  color: var(--dsw-alias-label-secondary);
+  cursor: pointer;
+  font: inherit;
+}
+
+.inlineAction:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.inlineEdit {
+  flex: none;
+  padding: 0 4px;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  color: var(--dsw-static-deepseek-500);
+  cursor: pointer;
+  font: inherit;
+}
+
+.inlineEdit:hover {
+  text-decoration: underline;
+}
+
+.inlineError {
+  margin: 4px 0 0;
+  color: var(--dsw-alias-state-error-primary);
+}
+
+.orderStatus {
+  margin: 2px 0 0;
+  color: var(--dsw-alias-label-caption);
+}
+
+.supplierZone {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 10px;
+}
+
+.supplierList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.supplierRow {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+
+.supplierName {
+  flex: none;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.supplierCerts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+.certChip {
+  padding: 1px 10px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 999px;
+  color: var(--dsw-alias-label-caption);
+}
+
+.certChip[data-expiring] {
+  border-color: var(--dsw-alias-state-warn-primary);
+  color: var(--dsw-alias-state-warn-primary);
+}

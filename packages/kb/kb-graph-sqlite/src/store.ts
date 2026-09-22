@@ -11,9 +11,10 @@ import type { DatabaseSync } from 'node:sqlite'
 import {
   KbGraphError, kgNodeTypeId, kgRelationId,
   type KbGraphEntity, type KbGraphStoredTriple, type KbGraphTriple,
-  type KgBuildRunInput, type KgBuildRunRow, type KgEdge, type KgNode, type KgNodeHit,
+  type KgBuildRunInput, type KgBuildRunRow, type KgEdge, type KgEdgeMention,
+  type KgEpisodeInput, type KgEpisodeRow, type KgNode, type KgNodeHit,
   type KgNodeTypeId, type KgNodeType, type KgOntologyRevision,
-  type KgOntologyRevisionInput, type KgPropDef,
+  type KgOntologyRevisionInput, type KgOntologyXref, type KgPropDef,
   type KgProvenance, type KgRelation, type KgRelationConstraint, type KgRelationId,
   type KgSourceRun, type KgStore, type KgSubgraph, type KgSubgraphLimits, type KgSubgraphNode,
 } from '@deepseek-ai/dsh-kb-graph'
@@ -85,6 +86,7 @@ interface EdgeRow {
   extracted_at: string
   valid_from: string
   valid_until: string | null
+  expired_at: string | null
   recorded_at: string
 }
 
@@ -110,6 +112,9 @@ interface NodeTypeRow {
   readonly extends_type: string | null
   readonly props_schema: string
   readonly natural_key: string | null
+  readonly foodon_uri: string | null
+  readonly foodon_id: string | null
+  readonly synonyms_json: string | null
   readonly source: string
   readonly status: string
   readonly created_at: string
@@ -126,9 +131,37 @@ interface RelationRow {
   readonly constraints_json: string
   readonly kind: string
   readonly inverse_of: string | null
+  readonly foodon_prop_uri: string | null
   readonly source: string
   readonly created_at: string
   readonly updated_at: string
+}
+
+/** One kg_episode row joined with its mention count. */
+interface EpisodeSqlRow {
+  readonly uuid: string
+  readonly tenant_id: string
+  readonly source: string
+  readonly name: string
+  readonly content: string
+  readonly valid_at: string
+  readonly created_at: string
+  readonly metadata: string | null
+  readonly mention_count: number
+}
+
+/** One kg_mention row joined with its episode (the edge-first read). */
+interface EdgeMentionSqlRow {
+  readonly episode_uuid: string
+  readonly edge_id: string
+  readonly created_at: string
+  readonly episode_tenant: string
+  readonly episode_source: string
+  readonly episode_name: string
+  readonly episode_content: string
+  readonly episode_valid_at: string
+  readonly episode_created_at: string
+  readonly episode_metadata: string | null
 }
 
 /** Narrow one stored registry string onto its closed runtime union, fail-loud on corruption. */
@@ -141,9 +174,10 @@ function closedRegistryValue<T extends string>(value: string, members: readonly 
 }
 
 const ONTOLOGY_LAYERS = ['top', 'domain'] as const
-const NODE_TYPE_STATUSES = ['draft', 'active'] as const
-const ONTOLOGY_SOURCES = ['builtin-ontology', 'builtin-food', 'nocobase-derived', 'agent-defined'] as const
+const NODE_TYPE_STATUSES = ['draft', 'active', 'deprecated'] as const
+const ONTOLOGY_SOURCES = ['builtin-ontology', 'builtin-food', 'foodon-imported', 'nocobase-derived', 'agent-defined'] as const
 const RELATION_KINDS = ['object', 'hierarchical'] as const
+const EPISODE_SOURCES = ['ingest', 'ai-edit', 'human-edit', 'rollback'] as const
 
 /** Rebuild one {@link KgNodeType} from a kg_node_types row (durable-boundary parse). */
 function rowToNodeType(row: NodeTypeRow): KgNodeType {
@@ -160,6 +194,23 @@ function rowToNodeType(row: NodeTypeRow): KgNodeType {
   if (!Array.isArray(props)) {
     throw new KbGraphError(`stored node type "${row.type_id}" props schema is not an array`, 'KB_GRAPH_SQLITE_REGISTRY_CORRUPT')
   }
+  const synonyms = (() => {
+    if (row.synonyms_json === null) return undefined
+    let parsed: unknown
+    try {
+      parsed = JSON.parse(row.synonyms_json)
+    } catch (error: unknown) {
+      throw new KbGraphError(
+        /* v8 ignore next -- JSON.parse throws SyntaxError only. */
+        `stored node type "${row.type_id}" has unreadable synonyms: ${error instanceof Error ? error.message : String(error)}`,
+        'KB_GRAPH_SQLITE_REGISTRY_CORRUPT',
+      )
+    }
+    if (!Array.isArray(parsed) || !parsed.every(entry => typeof entry === 'string')) {
+      throw new KbGraphError(`stored node type "${row.type_id}" synonyms are not a string array`, 'KB_GRAPH_SQLITE_REGISTRY_CORRUPT')
+    }
+    return parsed as readonly string[]
+  })()
   return {
     id: kgNodeTypeId(row.type_id),
     label: row.label,
@@ -168,6 +219,9 @@ function rowToNodeType(row: NodeTypeRow): KgNodeType {
     ...(row.extends_type === null ? {} : { extends: kgNodeTypeId(row.extends_type) }),
     props: props as readonly KgPropDef[],
     ...(row.natural_key === null ? {} : { naturalKey: row.natural_key }),
+    ...(row.foodon_uri === null ? {} : { foodonUri: row.foodon_uri }),
+    ...(row.foodon_id === null ? {} : { foodonId: row.foodon_id }),
+    ...(synonyms === undefined ? {} : { synonyms }),
     source: closedRegistryValue(row.source, ONTOLOGY_SOURCES, 'source'),
     status: closedRegistryValue(row.status, NODE_TYPE_STATUSES, 'status'),
   }
@@ -195,7 +249,23 @@ function rowToRelation(row: RelationRow): KgRelation {
     constraints: constraints.map(pair => pair as KgRelationConstraint),
     kind: closedRegistryValue(row.kind, RELATION_KINDS, 'kind'),
     ...(row.inverse_of === null ? {} : { inverseOf: kgRelationId(row.inverse_of) }),
+    ...(row.foodon_prop_uri === null ? {} : { foodonPropUri: row.foodon_prop_uri }),
     source: closedRegistryValue(row.source, ONTOLOGY_SOURCES, 'source'),
+  }
+}
+
+/** Rebuild one {@link KgEpisodeRow} from an episodes join row. */
+function rowToEpisode(row: EpisodeSqlRow): KgEpisodeRow {
+  return {
+    uuid: row.uuid,
+    tenantId: row.tenant_id,
+    source: closedRegistryValue(row.source, EPISODE_SOURCES, 'episode source'),
+    name: row.name,
+    content: row.content,
+    validAt: row.valid_at,
+    createdAt: row.created_at,
+    ...(row.metadata === null ? {} : { metadata: JSON.parse(row.metadata) as unknown }),
+    mentionCount: row.mention_count,
   }
 }
 
@@ -267,8 +337,10 @@ function rowToEdge(row: EdgeRow): KgEdge {
     // Every read face filters live edges only, so valid_until is always NULL
     // here; the tombstone value stays queryable through SQL until a v2 read
     // face for historical edges exists.
-    /* v8 ignore next 1 */
+    /* v8 ignore next 1 -- live-edge reads always leave valid_until NULL here. */
     ...(row.valid_until === null ? {} : { validUntil: row.valid_until }),
+    /* v8 ignore next 1 -- the read face never projects expiry; SQL still can. */
+    ...(row.expired_at === null ? {} : { expiredAt: row.expired_at }),
   }
 }
 
@@ -339,7 +411,7 @@ export class SqliteGraphStore implements KgStore {
   private ensureNodeTypeRow(type: KgNodeTypeId, at: string): void {
     const id = String(type)
     this.db.prepare(sql('insert-node-type')).run(
-      id, id, null, 'domain', null, '[]', null, 'agent-defined', 'active', at, at,
+      id, id, null, 'domain', null, '[]', null, null, null, null, 'agent-defined', 'active', at, at,
     )
   }
 
@@ -350,7 +422,7 @@ export class SqliteGraphStore implements KgStore {
   private ensureRelationRow(relation: KgRelationId, at: string): void {
     const id = String(relation)
     this.db.prepare(sql('insert-relation')).run(
-      id, id, null, null, null, '[]', 'object', null, 'agent-defined', at, at,
+      id, id, null, null, null, '[]', 'object', null, null, 'agent-defined', at, at,
     )
   }
 
@@ -659,6 +731,8 @@ export class SqliteGraphStore implements KgStore {
         String(type.id), type.label, type.description ?? null, type.layer,
         type.extends === undefined ? null : String(type.extends),
         JSON.stringify(type.props), type.naturalKey ?? null,
+        type.foodonUri ?? null, type.foodonId ?? null,
+        type.synonyms === undefined || type.synonyms.length === 0 ? null : JSON.stringify(type.synonyms),
         type.source, type.status, now, now,
       )
     })
@@ -674,9 +748,14 @@ export class SqliteGraphStore implements KgStore {
         String(relation.id), relation.label, relation.description ?? null,
         primary === undefined ? null : String(primary.domain),
         primary === undefined ? null : String(primary.range),
-        JSON.stringify(relation.constraints.map(constraint => ({ domain: String(constraint.domain), range: String(constraint.range) }))),
+        JSON.stringify(relation.constraints.map(constraint => ({
+          domain: String(constraint.domain),
+          range: String(constraint.range),
+          ...(constraint.cardinality === undefined ? {} : { cardinality: constraint.cardinality }),
+        }))),
         relation.kind,
         relation.inverseOf === undefined ? null : String(relation.inverseOf),
+        relation.foodonPropUri ?? null,
         relation.source, now, now,
       )
     })
@@ -812,6 +891,210 @@ export class SqliteGraphStore implements KgStore {
       ...(row.props === null ? {} : { props: JSON.parse(row.props) as Record<string, unknown> }),
       createdAt: row.created_at,
       updatedAt: row.updated_at,
+    }))
+  }
+
+  async putEpisode(episode: KgEpisodeInput): Promise<void> {
+    await Promise.resolve()
+    this.assertLive()
+    this.write(() => {
+      this.db.prepare(sql('insert-episode')).run(
+        episode.uuid, episode.tenantId, episode.source, episode.name, episode.content,
+        episode.validAt, episode.createdAt,
+        episode.metadata === undefined ? null : JSON.stringify(episode.metadata),
+      )
+    })
+  }
+
+  async linkMentions(episodeUuid: string, edgeIds: readonly string[]): Promise<number> {
+    await Promise.resolve()
+    this.assertLive()
+    return this.write(() => {
+      let inserted = 0
+      const statement = this.db.prepare(sql('link-mentions'))
+      for (const edgeId of edgeIds) {
+        const result = statement.run(episodeUuid, edgeId, new Date().toISOString()) as { changes: number | bigint }
+        inserted += Number(result.changes)
+      }
+      return inserted
+    })
+  }
+
+  async listEpisodes(tenantId: string, limit: number): Promise<readonly KgEpisodeRow[]> {
+    await Promise.resolve()
+    this.assertLive()
+    return (this.db.prepare(sql('select-episodes')).all(tenantId, limit) as unknown as readonly EpisodeSqlRow[]).map(rowToEpisode)
+  }
+
+  async edgeMentions(edgeId: string): Promise<readonly KgEdgeMention[]> {
+    await Promise.resolve()
+    this.assertLive()
+    const rows = this.db.prepare(sql('select-edge-mentions')).all(edgeId) as unknown as readonly EdgeMentionSqlRow[]
+    return rows.map((row) => {
+      return {
+        episodeUuid: row.episode_uuid,
+        edgeId: row.edge_id,
+        createdAt: row.created_at,
+        episode: {
+          uuid: row.episode_uuid,
+          tenantId: row.episode_tenant,
+          source: closedRegistryValue(row.episode_source, EPISODE_SOURCES, 'episode source'),
+          name: row.episode_name,
+          content: row.episode_content,
+          validAt: row.episode_valid_at,
+          createdAt: row.episode_created_at,
+          ...(row.episode_metadata === null ? {} : { metadata: JSON.parse(row.episode_metadata) as unknown }),
+        },
+      }
+    })
+  }
+
+  async edgeIdsOfEpisode(episodeUuid: string): Promise<readonly string[]> {
+    await Promise.resolve()
+    this.assertLive()
+    return (this.db.prepare(sql('select-episode-edges')).all(episodeUuid) as unknown as Array<{ edge_id: string }>).map(row => row.edge_id)
+  }
+
+  async expireEdges(edgeIds: readonly string[], at: string): Promise<number> {
+    await Promise.resolve()
+    this.assertLive()
+    return this.write(() => {
+      let changed = 0
+      const statement = this.db.prepare(sql('expire-edges'))
+      for (const edgeId of edgeIds) {
+        const result = statement.run(at, edgeId) as { changes: number | bigint }
+        changed += Number(result.changes)
+      }
+      return changed
+    })
+  }
+
+  async restoreEdges(edgeIds: readonly string[], at: string): Promise<number> {
+    // The `at` timestamp rides the call for the audit contract; the row
+    // records the restore through the rollback episode's mention join.
+    void at
+    await Promise.resolve()
+    this.assertLive()
+    return this.write(() => {
+      let changed = 0
+      const statement = this.db.prepare(sql('restore-edges'))
+      for (const edgeId of edgeIds) {
+        const result = statement.run(edgeId) as { changes: number | bigint }
+        changed += Number(result.changes)
+      }
+      return changed
+    })
+  }
+
+  async edgesByIds(edgeIds: readonly string[]): Promise<readonly KgEdge[]> {
+    await Promise.resolve()
+    this.assertLive()
+    if (edgeIds.length === 0) return []
+    const rows = this.db.prepare(sql('select-edges-by-ids')).all(JSON.stringify([...edgeIds])) as unknown as readonly EdgeRow[]
+    return rows.map(rowToEdge)
+  }
+
+  async liveEdgesBetween(tenantId: string, srcId: string, dstId: string, relation?: KgRelationId): Promise<readonly KgEdge[]> {
+    await Promise.resolve()
+    this.assertLive()
+    const relationText = relation === undefined ? null : String(relation)
+    const rows = this.db.prepare(sql('select-live-edges-between')).all(
+      tenantId, srcId, dstId, dstId, srcId, relationText, relationText,
+    ) as unknown as readonly EdgeRow[]
+    return rows.map(rowToEdge)
+  }
+
+  async liveAdjacency(
+    tenantId: string,
+    cap: number,
+  ): Promise<{ nodeIds: readonly string[]; pairs: readonly (readonly [string, string])[] }> {
+    await Promise.resolve()
+    this.assertLive()
+    const nodeIds = (this.db.prepare(sql('select-node-ids')).all(tenantId) as unknown as Array<{ id: string }>).map(row => row.id)
+    const pairs = (this.db.prepare(sql('select-live-adjacency')).all(tenantId, cap) as unknown as Array<{ src_id: string; dst_id: string }>)
+      .map(row => [row.src_id, row.dst_id] as const)
+    return { nodeIds, pairs }
+  }
+
+  async snapshotAt(tenantId: string, asOf: string, limits?: KgSubgraphLimits): Promise<KgSubgraph> {
+    await Promise.resolve()
+    this.assertLive()
+    const maxNodes = Math.min(Math.max(limits?.maxNodes ?? 200, 1), 2_000)
+    const maxEdges = Math.min(Math.max(limits?.maxEdges ?? 1_000, 0), 10_000)
+    const nodeRows = this.db.prepare(sql('select-snapshot-nodes')).all(
+      tenantId, asOf, maxNodes + 1,
+    ) as unknown as WalkRow[]
+    const truncatedNodes = nodeRows.length > maxNodes
+    const nodes: KgSubgraphNode[] = nodeRows.slice(0, maxNodes).map(row => ({
+      id: row.id,
+      type: kgNodeTypeId(row.type_id),
+      name: row.name,
+      ...(row.natural_key === null ? {} : { naturalKey: row.natural_key }),
+      depth: 0,
+    }))
+    if (nodes.length === 0) return { nodes: [], edges: [], truncated: false }
+    const nodeIds = JSON.stringify(nodes.map(node => node.id))
+    const edgeRows = this.db.prepare(sql('select-snapshot-edges')).all(
+      tenantId, asOf, asOf, asOf, nodeIds, nodeIds, maxEdges + 1,
+    ) as unknown as EdgeRow[]
+    return {
+      nodes,
+      edges: edgeRows.slice(0, maxEdges).map(rowToEdge),
+      truncated: truncatedNodes || edgeRows.length > maxEdges,
+    }
+  }
+
+  async putOntologyXrefs(entries: readonly KgOntologyXref[]): Promise<number> {
+    await Promise.resolve()
+    this.assertLive()
+    return this.write(() => {
+      let inserted = 0
+      const statement = this.db.prepare(sql('insert-xref'))
+      for (const entry of entries) {
+        const result = statement.run(
+          entry.subjectId, entry.predicateId, entry.objectId, entry.mappingJustification ?? null,
+        ) as { changes: number | bigint }
+        inserted += Number(result.changes)
+      }
+      return inserted
+    })
+  }
+
+  async putCorefRejects(
+    entries: readonly { pairKey: string; docId: string; rowId: string; reason: string; decidedAt: string }[],
+  ): Promise<number> {
+    await Promise.resolve()
+    this.assertLive()
+    return this.write(() => {
+      let inserted = 0
+      const statement = this.db.prepare(sql('insert-align-reject'))
+      for (const entry of entries) {
+        const result = statement.run(entry.pairKey, entry.docId, entry.rowId, entry.reason, entry.decidedAt) as { changes: number | bigint }
+        inserted += Number(result.changes)
+      }
+      return inserted
+    })
+  }
+
+  async listCorefRejects(): Promise<ReadonlySet<string>> {
+    await Promise.resolve()
+    this.assertLive()
+    return new Set((this.db.prepare(sql('select-align-rejects')).all() as unknown as Array<{ pair_key: string }>).map(row => row.pair_key))
+  }
+
+  async listOntologyXrefs(limit: number): Promise<readonly KgOntologyXref[]> {
+    await Promise.resolve()
+    this.assertLive()
+    return (this.db.prepare(sql('select-xrefs')).all(limit) as unknown as Array<{
+      subject_id: string
+      predicate_id: string
+      object_id: string
+      mapping_justification: string | null
+    }>).map(row => ({
+      subjectId: row.subject_id,
+      predicateId: row.predicate_id,
+      objectId: row.object_id,
+      ...(row.mapping_justification === null ? {} : { mappingJustification: row.mapping_justification }),
     }))
   }
 

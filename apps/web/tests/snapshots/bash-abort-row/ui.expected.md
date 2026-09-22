@@ -16,11 +16,13 @@
   - tablist:
     - tab "Chat" [selected]
     - tab "Knowledge base"
+    - tab "Scenarios"
     - tab "Data assets"
     - tab "Connectors"
     - tab "Graph"
     - tab "Business"
     - tab "Trajectory"
+    - tab "Mobile preview"
 - text: "Run two shell commands: wait for cancellation, then write skipped.txt. {{clock}}"
 - button "Copy":
   - img
@@ -36,6 +38,10 @@
 - 'button "Failed Bash Error: tool call aborted before dispatch"':
   - img
   - text: "Failed Bash Error: tool call aborted before dispatch"
+- button "Agent mode":
+  - img
+  - text: Standard mode
+  - img
 - textbox "Message the agent"
 - button "Commands":
   - img

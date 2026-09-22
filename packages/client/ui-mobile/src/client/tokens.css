@@ -1,0 +1,137 @@
+/*
+ * Mobile v3 token set: the cold-chain ledger direction (plans/2026-09-21
+ * mobile-v3 03 §2) — ink-teal primary on mist, frost cards, pass/hold/reject
+ * semantics, the three temperature-layer accents, and the numeric ticket face
+ * (tabular digits everywhere, the monospace stack on ticket numbers). Light
+ * and dark are two whole tracks swapped on .dshm-root[data-theme]; antd-mobile
+ * reads the same names through var() references, so its components follow the
+ * track without per-theme overrides.
+ */
+.dshm-root {
+  /* Brand axis */
+  --dshm-primary: #0b5d56;          /* 墨青 ink-teal */
+  --dshm-on-primary: #ffffff;       /* selected-state foreground (dark track flips to 青黑) */
+  --dshm-primary-10: rgba(11, 93, 86, 0.10);
+  --dshm-primary-soft: #e3eeec;     /* selected chip / starter chip fill */
+  --dshm-foreground: #1c2b29;       /* 青墨 teal-ink */
+  --dshm-muted-foreground: #5c716d; /* 青灰 slate-teal */
+  --dshm-background: #f4f7f6;       /* 冷雾白 mist */
+  --dshm-card: #ffffff;             /* 霜白 frost */
+  --dshm-muted: #e8efed;            /* fold zones, input fills */
+  --dshm-border: #d5e0dd;           /* 冷缘 rim */
+  /* Semantics */
+  --dshm-success: #1f7a4d;          /* 检验绿 pass-green */
+  --dshm-success-10: rgba(31, 122, 77, 0.12);
+  --dshm-warning: #a85a10;          /* 临期琥珀 hold-amber */
+  --dshm-warning-10: rgba(168, 90, 16, 0.12);
+  --dshm-destructive: #c0452e;      /* 驳回砖红 reject-brick */
+  --dshm-destructive-10: rgba(192, 69, 46, 0.12);
+  /* Temperature-layer badges (cargo fields only, never brand surfaces) */
+  --dshm-temp-chill: #0e7490;
+  --dshm-temp-frozen: #1e40af;
+  --dshm-temp-ambient: #8a6a3b;
+  /* Bubbles */
+  --dshm-bubble-user-bg: #0b5d56;
+  --dshm-bubble-user-fg: #ffffff;
+  --dshm-bubble-ai-bg: #ffffff;
+  --dshm-bubble-ai-fg: #1c2b29;
+  --dshm-bubble-ai-border: #d5e0dd;
+  /* Structure */
+  --dshm-radius: 10px;              /* field rows, small controls */
+  --dshm-radius-lg: 16px;           /* cards, sheets */
+  --dshm-radius-bubble: 18px;       /* chat bubbles */
+  --dshm-radius-corner: 6px;        /* speaking corner */
+  --dshm-tabbar-height: 56px;
+  --dshm-shadow-card: 0 1px 6px 0 rgba(28, 43, 41, 0.05);
+  --dshm-stroke-soft: rgba(213, 224, 221, 0.6); /* in-card ledger dividers */
+  --dshm-font-sans: -apple-system, 'PingFang SC', 'HarmonyOS Sans SC', 'MiSans', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+  --dshm-font-num: 'SF Mono', ui-monospace, 'Menlo', 'Roboto Mono', monospace;
+
+  /* antd-mobile theme mapping (03 §7): same container, var()-linked so both
+     tracks and every adm- component follow without extra work. */
+  --adm-color-primary: var(--dshm-primary);
+  --adm-color-success: var(--dshm-success);
+  --adm-color-warning: var(--dshm-warning);
+  --adm-color-danger: var(--dshm-destructive);
+  --adm-color-text: var(--dshm-foreground);
+  --adm-color-text-secondary: var(--dshm-muted-foreground);
+  --adm-color-weak: var(--dshm-muted-foreground);
+  --adm-color-border: var(--dshm-border);
+  --adm-color-box: var(--dshm-muted);
+  --adm-color-background: var(--dshm-card);
+  --adm-color-background-body: var(--dshm-background);
+  --adm-font-family: var(--dshm-font-sans);
+  --adm-border-radius-m: var(--dshm-radius);
+  --adm-border-radius-l: var(--dshm-radius-lg);
+
+  box-sizing: border-box;
+  font-family: var(--dshm-font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+  color: var(--dshm-foreground);
+  background: var(--dshm-background);
+  -webkit-font-smoothing: antialiased;
+}
+
+.dshm-root[data-theme='dark'] {
+  --dshm-primary: #4ca79c;
+  --dshm-on-primary: #0d1413;
+  --dshm-primary-10: rgba(76, 167, 156, 0.16);
+  --dshm-primary-soft: #1c2e2b;
+  --dshm-foreground: #e4ebe9;
+  --dshm-muted-foreground: #9bb0ab;
+  --dshm-background: #0d1413;       /* 青黑 */
+  --dshm-card: #172220;
+  --dshm-muted: #1f2c2a;
+  --dshm-border: #2a3835;
+  --dshm-success: #4e9e6f;
+  --dshm-success-10: rgba(78, 158, 111, 0.18);
+  --dshm-warning: #d08a3e;
+  --dshm-warning-10: rgba(208, 138, 62, 0.18);
+  --dshm-destructive: #d97a66;
+  --dshm-destructive-10: rgba(217, 122, 102, 0.18);
+  --dshm-temp-chill: #57b3cc;
+  --dshm-temp-frozen: #8fa8f0;
+  --dshm-temp-ambient: #c0a276;
+  --dshm-bubble-user-bg: #18554e;
+  --dshm-bubble-user-fg: #f0f7f5;
+  --dshm-bubble-ai-bg: #172220;
+  --dshm-bubble-ai-fg: #e4ebe9;
+  --dshm-bubble-ai-border: #2a3835;
+  --dshm-shadow-card: 0 1px 6px 0 rgba(0, 0, 0, 0.25);
+  --dshm-stroke-soft: rgba(42, 56, 53, 0.7);
+}
+
+.dshm-root *,
+.dshm-root *::before,
+.dshm-root *::after {
+  box-sizing: border-box;
+}
+
+.dshm-root button {
+  font: inherit;
+  border: none;
+  cursor: pointer;
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+
+.dshm-root input,
+.dshm-root textarea {
+  font: inherit;
+  color: inherit;
+}
+
+/* Host document plumbing: the mobile page fills the viewport (and the preview
+ * iframe's bezel) without default margins. */
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+#mobile-root {
+  height: 100%;
+}

@@ -1,0 +1,7 @@
+{"type": "session", "version": 0, "id": "{{sessionId}}", "createdAt": 1785011380476, "cwd": "{{cwd}}/workspace", "agentPreset": "mobile-form-assistant"}
+{"type": "turn/start", "data": {"turn": 1, "trigger": {"kind": "message", "source": {"kind": "user", "rpcId": "{{rpcId}}"}}}}
+{"type": "user/message", "data": {"content": [{"type": "text", "text": "帮我登记一下，刚和鲜丰谈好一批冷链箱"}], "source": {"kind": "user", "rpcId": "{{rpcId}}"}}, "surfaceOp": "append"}
+{"type": "step/start", "data": {"turn": 1, "step": 1}}
+{"type": "assistant/message", "data": {"turn": 1, "step": 1, "content": [{"type": "text", "text": "这笔可以从两个方向登记，请点选：\n```dsh\n{\"v\":3,\"type\":\"ask_choice\",\"id\":\"choice_1\",\"mode\":\"single\",\"variant\":\"cards\",\"question\":\"这笔要登记成什么单据？\",\"options\":[{\"label\":\"采购单\",\"value\":\"hub_po_purchase_orders\",\"hint\":\"我们向鲜丰买进 · 鲜丰作为供应商\",\"send\":\"是采购单，我们从鲜丰买进\"},{\"label\":\"出库单\",\"value\":\"hub_wms_outbound\",\"hint\":\"我们向鲜丰发货 · 鲜丰作为客户\",\"send\":\"是出库单，我们发货给鲜丰\"}],\"allowFreeText\":true}\n```"}], "provenance": {"provider": "minimax", "model": "MiniMax-M3"}, "usage": {"inputTokens": 120, "outputTokens": 60}}, "surfaceOp": "append"}
+{"type": "step/end", "data": {"turn": 1, "step": 1}}
+{"type": "turn/end", "data": {"turn": 1, "reason": {"kind": "completed"}}}

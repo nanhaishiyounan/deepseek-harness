@@ -3,6 +3,6 @@
 -- ahead of the relations referencing them where possible.
 SELECT
   relation_id, label, description, domain_type, range_type, constraints_json,
-  kind, inverse_of, source, created_at, updated_at
+  kind, inverse_of, foodon_prop_uri, source, created_at, updated_at
 FROM kg_relations
 ORDER BY created_at, relation_id

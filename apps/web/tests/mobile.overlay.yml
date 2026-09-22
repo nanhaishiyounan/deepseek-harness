@@ -1,0 +1,15 @@
+# The mobile scenarios need the /mobile entry served (web-runtime's opt-in
+# surface) and the graph reads the KG evidence cards walk (the kb-workbench
+# overlay's pattern for the kg domain).
+- id: api-gateway
+  config:
+    kbTenant: default
+    kgEnabled: true
+    kgTenant: default
+- id: web-runtime
+  config:
+    openBrowser: false
+    printUrl: false
+    surfaceContext: true
+    trustedHosts: []
+    mobileEnabled: true

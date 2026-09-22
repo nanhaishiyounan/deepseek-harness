@@ -1,0 +1,20 @@
+{
+  "scenes": [
+    {
+      "scene": "B-draft",
+      "ok": true,
+      "extra": "path=[] head=供应商登记 / 供应商登记 · 鲜丰 / 待确认 / 需要你定 / 供应商名称 / 联系人 / 请确认 · AI 推导 / 邮箱 · 用户口头补充 / ops@xianfeng.example / 状态 · 按注册表规则默认 / 待审核 / 驳回 / 确认写入"
+    },
+    {
+      "scene": "B-chain",
+      "ok": false,
+      "extra": "Error: receipt missing"
+    },
+    {
+      "scene": "C-rich",
+      "ok": false,
+      "extra": "strong=3 list=0 table=0 leaks=[\"hub_\"]"
+    }
+  ],
+  "pageErrors": []
+}

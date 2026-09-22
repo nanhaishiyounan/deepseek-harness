@@ -11,6 +11,7 @@ import type { Context } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
 import { applyKbGraphTools } from './graph.ts'
 import { applyKgTools } from './kg.ts'
+import { applyKgEditTool } from './kg-edit.ts'
 import { applyKgQueryTool } from './kg-query.ts'
 import { applyKbIngestTool } from './ingest.ts'
 import { applyKbIngestUrlTool } from './ingest-url.ts'
@@ -32,6 +33,10 @@ export {
   parseKgQueryArgs, presentKgQueryCall, presentKgQueryResult,
 } from './kg-query.ts'
 export type { KgQueryArgs, KgQueryToolValue } from './kg-query.ts'
+export { AI_EDIT_SOURCE_SYSTEM, parsePlannedOps } from './kg-edit.ts'
+export type { KgEditArgs } from './kg-edit.ts'
+export { completeViaLlm } from './llm-complete.ts'
+export type { ToolLlmOptions } from './llm-complete.ts'
 export type {
   KgSchemaArgs, KgSchemaRelationView, KgSchemaToolValue, KgSchemaTypeView, KgSubgraphArgs,
   KgSubgraphToolValue,
@@ -87,6 +92,15 @@ export const DEFAULT_KG_SUBGRAPH_TIMEOUT_MS = 20_000
 /** Default cooperative tool-call timeout budget (ms) for `kg_query`. */
 export const DEFAULT_KG_QUERY_TIMEOUT_MS = 20_000
 
+/** Default cooperative tool-call timeout budget (ms) for `kg_edit`. */
+export const DEFAULT_KG_EDIT_TIMEOUT_MS = 60_000
+
+/** Default LLM provider for kg_edit planning and the kg_query L1 fill. */
+export const DEFAULT_KG_LLM_PROVIDER = 'minimax'
+
+/** Default LLM model for kg_edit planning and the kg_query L1 fill. */
+export const DEFAULT_KG_LLM_MODEL = 'MiniMax-M3'
+
 /** Plugin config: which kb tools to register, per-tool budgets, the citation cap, and the bound tenant. */
 export interface Config {
   /** Register `kb_search`. Defaults to true. */
@@ -141,12 +155,24 @@ export interface Config {
    * Defaults to true.
    */
   kgQuery?: boolean
+  /**
+   * Register `kg_edit` (natural-language graph editing with a diff preview,
+   * episode bookkeeping, and rollback) over the optional `ctx.kbGraph` seam.
+   * Defaults to false — a write surface deployments opt into.
+   */
+  kgEdit?: boolean
   /** Cooperative timeout budget (ms) for `kg_schema`. Defaults to 10000. */
   kgSchemaTimeoutMs?: number
   /** Cooperative timeout budget (ms) for `kg_subgraph`. Defaults to 20000. */
   kgSubgraphTimeoutMs?: number
   /** Cooperative timeout budget (ms) for `kg_query`. Defaults to 20000. */
   kgQueryTimeoutMs?: number
+  /** Cooperative timeout budget (ms) for `kg_edit` (includes one LLM planning stream). Defaults to 60000. */
+  kgEditTimeoutMs?: number
+  /** LLM provider for `kg_edit` planning and the `kg_query` L1 fill fallback. Defaults to `minimax`. */
+  kgLlmProvider?: string
+  /** LLM model for `kg_edit` planning and the `kg_query` L1 fill fallback. Defaults to `MiniMax-M3`. */
+  kgLlmModel?: string
 }
 
 export const Config: z<Config> = z.object({
@@ -167,9 +193,13 @@ export const Config: z<Config> = z.object({
   kgSchema: z.boolean().default(true),
   kgSubgraph: z.boolean().default(true),
   kgQuery: z.boolean().default(true),
+  kgEdit: z.boolean().default(false),
   kgSchemaTimeoutMs: z.number().step(1).min(1).default(DEFAULT_KG_SCHEMA_TIMEOUT_MS),
   kgSubgraphTimeoutMs: z.number().step(1).min(1).default(DEFAULT_KG_SUBGRAPH_TIMEOUT_MS),
   kgQueryTimeoutMs: z.number().step(1).min(1).default(DEFAULT_KG_QUERY_TIMEOUT_MS),
+  kgEditTimeoutMs: z.number().step(1).min(1).default(DEFAULT_KG_EDIT_TIMEOUT_MS),
+  kgLlmProvider: z.string().default(DEFAULT_KG_LLM_PROVIDER),
+  kgLlmModel: z.string().default(DEFAULT_KG_LLM_MODEL),
 })
 
 /** Complete config after schemastery applies every field default. */
@@ -207,6 +237,10 @@ export function apply(ctx: Context, config: Config): void {
     applyKgTools(ctx, resolved.tenant, resolved.kgSchema, resolved.kgSubgraph, resolved.kgSchemaTimeoutMs, resolved.kgSubgraphTimeoutMs)
   }
   if (resolved.kgQuery) {
-    applyKgQueryTool(ctx, resolved.tenant, resolved.kgQueryTimeoutMs)
+    const llmOptions = { provider: resolved.kgLlmProvider, model: resolved.kgLlmModel }
+    applyKgQueryTool(ctx, resolved.tenant, resolved.kgQueryTimeoutMs, ctx.get('llm') === undefined ? undefined : llmOptions)
+  }
+  if (resolved.kgEdit) {
+    applyKgEditTool(ctx, resolved.tenant, resolved.kgEditTimeoutMs, { provider: resolved.kgLlmProvider, model: resolved.kgLlmModel })
   }
 }

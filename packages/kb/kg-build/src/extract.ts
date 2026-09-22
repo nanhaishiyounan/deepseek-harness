@@ -10,16 +10,27 @@
  */
 
 import { kgNodeTypeId, kgRelationId } from '@deepseek-ai/dsh-kb-graph'
+import type { KgPropDef } from '@deepseek-ai/dsh-kb-graph'
 import { UNCLASSIFIED_TYPE } from './mappers.ts'
 import type { DroppedRelation, ExtractedEntity, ExtractedRelation, ExtractionOutcome } from './types.ts'
 
 /** The registry face extraction reads: every registered type and relation. */
 export interface OntologyView {
-  readonly entityTypes: readonly { readonly id: string; readonly label: string }[]
+  readonly entityTypes: readonly {
+    readonly id: string
+    readonly label: string
+    /** Property definitions (the SHACL gate's shapes source); absent on legacy snapshots. */
+    readonly props?: readonly KgPropDef[]
+  }[]
   readonly relations: readonly {
     readonly id: string
     readonly label: string
-    readonly constraints: readonly { readonly domain: string; readonly range: string }[]
+    readonly description?: string
+    readonly constraints: readonly {
+      readonly domain: string
+      readonly range: string
+      readonly cardinality?: { readonly min?: number; readonly max?: number }
+    }[]
   }[]
 }
 
@@ -237,4 +248,144 @@ export async function extractChunk(llm: ExtractionLlm, view: OntologyView, syste
   }
   const typeOfEntity = new Map<string, string>()
   return { ...adjudicate(shapedFirst, view, typeOfEntity), retried: false }
+}
+
+/** The selectable extraction prompt protocols (the A/B gate's two arms). */
+export type ExtractionProtocol = 'legacy' | 'instruct-kgc'
+
+/** How many relations one instruct-kgc schema-dict batch carries (split_num). */
+export const INSTRUCT_KGC_SPLIT_NUM = 4
+
+/**
+ * Build the Instruct-KGC JSON-protocol prompt: the schema-dict mode OneKE
+ * validated — each relation entry becomes `label → 定义 + 头/尾实体类型说明`,
+ * the instruction fixes the strict JSON answer shape, and unknown shapes
+ * must return empty lists instead of inventions.
+ * @param view - the registry snapshot.
+ * @returns the system prompt text.
+ */
+export function buildInstructKgcPrompt(view: OntologyView): string {
+  const types = new Map(view.entityTypes.map(type => [type.id, type]))
+  const schemaDict: Record<string, string> = {}
+  for (const relation of view.relations) {
+    const pairText = relation.constraints.length === 0
+      ? '头尾实体类型不限'
+      : relation.constraints.map(pair => `${types.get(pair.domain)?.label ?? pair.domain}(${pair.domain})→${types.get(pair.range)?.label ?? pair.range}(${pair.range})`).join(' / ')
+    const definition = relation.description ?? relation.label
+    schemaDict[`${relation.id}（${relation.label}）`] = `${definition}。合法方向：${pairText}。`
+  }
+  const schemaLines = Object.entries(schemaDict).map(([key, value]) => `- ${key}: ${value}`).join('\n')
+  return [
+    '你是专门进行知识图谱三元组抽取的专家。请从 input 中抽取符合 schema 定义的实体与关系，不存在的关系类型返回空列表，不确定的实体不要发明。',
+    '实体类型闭集：',
+    ...view.entityTypes.map(type => `- ${type.id}（${type.label}）`),
+    '关系 schema dict（关系 id（标签）: 定义与合法方向）：',
+    schemaLines,
+    '输出要求：只输出一个 JSON 对象，不要输出任何其他文字。结构如下：',
+    '{"entities":[{"type":"<闭集实体类型>","name":"<实体名>","props":{可选属性},"evidence":"<原文片段>"}],',
+    '"relations":[{"subject":"<主语实体名>","predicate":"<关系id>","object":"<宾语实体名>","confidence":0.0到1.0,"evidence":"<原文片段>"}]}',
+    '硬约束：predicate 必须逐字使用上面关系 id 闭集；type 必须逐字使用实体类型闭集；一条关系抽不出就整个省略，不要输出占位。',
+  ].join('\n')
+}
+
+/**
+ * Split one registry snapshot into schema-dict batches (the split_num
+ * discipline: small schema slices per call beat one giant schema the model
+ * skips over). Grouping keeps relations sharing a domain together where the
+ * order allows.
+ * @param view - the full registry snapshot.
+ * @param splitNum - relations per batch.
+ * @returns the batches, in registry order.
+ */
+export function splitOntologyView(view: OntologyView, splitNum: number = INSTRUCT_KGC_SPLIT_NUM): readonly OntologyView[] {
+  const batches: OntologyView[] = []
+  for (let index = 0; index < view.relations.length; index += splitNum) {
+    batches.push({ entityTypes: view.entityTypes, relations: view.relations.slice(index, index + splitNum) })
+  }
+  return batches.length > 0 ? batches : [{ entityTypes: view.entityTypes, relations: [] }]
+}
+
+/** Merge batch outcomes: dedupe entities by (name, resolved type), relations by (subject, predicate, object). */
+function mergeOutcomes(parts: readonly ExtractionOutcome[]): ExtractionOutcome {
+  const entityKeys = new Set<string>()
+  const relationKeys = new Set<string>()
+  const entities: ExtractedEntity[] = []
+  const relations: ExtractedRelation[] = []
+  const dropped: DroppedRelation[] = []
+  let retried = false
+  for (const part of parts) {
+    if (part.retried) retried = true
+    for (const entity of part.entities) {
+      const key = `${String(entity.resolvedType)}:${entity.name}`
+      if (entityKeys.has(key)) continue
+      entityKeys.add(key)
+      entities.push(entity)
+    }
+    for (const relation of part.relations) {
+      const key = `${relation.subjectName}:${String(relation.relation)}:${relation.objectName}`
+      if (relationKeys.has(key)) continue
+      relationKeys.add(key)
+      relations.push(relation)
+    }
+    dropped.push(...part.dropped)
+  }
+  return { entities, relations, dropped, retried }
+}
+
+/**
+ * Run one chunk under a selectable protocol. `legacy` keeps the single-prompt
+ * closed-set extraction (the A/B baseline); `instruct-kgc` runs the JSON
+ * schema-dict protocol over split batches and merges the outcomes through
+ * the same closed-set adjudication chain.
+ * @param llm - the LLM face.
+ * @param view - the registry snapshot.
+ * @param chunkText - the chunk handed to the model.
+ * @param protocol - which prompt protocol to run.
+ * @returns the merged extraction outcome.
+ */
+export async function extractChunkProtocol(
+  llm: ExtractionLlm,
+  view: OntologyView,
+  chunkText: string,
+  protocol: ExtractionProtocol,
+): Promise<ExtractionOutcome> {
+  if (protocol === 'legacy') {
+    return await extractChunk(llm, view, buildExtractionPrompt(view), chunkText)
+  }
+  const parts: ExtractionOutcome[] = []
+  for (const batch of splitOntologyView(view)) {
+    parts.push(await extractChunk(llm, batch, buildInstructKgcPrompt(batch), chunkText))
+  }
+  return mergeOutcomes(parts)
+}
+
+/**
+ * Parse and shape one raw model answer with the decode-side chain (exposed
+ * for the SHACL feedback loop, which re-adjudicates corrected answers).
+ * @param text - the raw model output.
+ * @returns the shaped parse result.
+ */
+export type ShapedExtraction = { entities: RawEntity[]; relations: RawRelation[] } | { badJson: string } | { badShape: string }
+
+/**
+ * Parse one legacy-protocol extraction answer into the shaped result.
+ * @param text - the raw model output.
+ * @returns the shaped parse result.
+ */
+export function parseExtractionAnswer(text: string): ShapedExtraction {
+  return parseShaped(text)
+}
+
+/**
+ * Adjudicate one pre-shaped answer against the registry (exposed for the
+ * SHACL feedback loop).
+ * @param shaped - the shaped raw output.
+ * @param view - the registry snapshot.
+ * @returns the outcome pieces.
+ */
+export function adjudicateShaped(
+  shaped: { entities: RawEntity[]; relations: RawRelation[] },
+  view: OntologyView,
+): { entities: ExtractedEntity[]; relations: ExtractedRelation[]; dropped: DroppedRelation[] } {
+  return adjudicate(shaped, view, new Map<string, string>())
 }

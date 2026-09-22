@@ -1,0 +1,4 @@
+{"type": "session", "version": 0, "id": "{{sessionId}}", "createdAt": 1785011380476, "cwd": "{{cwd}}/workspace", "agentPreset": "mobile-form-assistant"}
+{"type": "turn/start", "data": {"turn": 1, "trigger": {"kind": "message", "source": {"kind": "plugin", "rpcId": "{{rpcId}}"}}}}
+{"type": "user/message", "data": {"content": [{"type": "text", "text": "surface context"}], "source": {"kind": "plugin", "rpcId": "{{rpcId}}"}}, "surfaceOp": "append"}
+{"type": "turn/end", "data": {"turn": 1, "reason": {"kind": "completed"}}}

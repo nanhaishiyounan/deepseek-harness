@@ -36,6 +36,19 @@ describe('compileKgQuery', () => {
     expect(compileKgQuery('酱油的合规信息', VOCAB)?.relationTypes).toEqual(['complies_with'])
   })
 
+  it('compiles the trace family (suppliers, batch flow, made-from)', () => {
+    expect(compileKgQuery('酱油的原料来自哪些供应商', VOCAB))
+      .toEqual({ seeds: ['酱油'], hops: 2, templateId: 'trace-input-suppliers' })
+    expect(compileKgQuery('20260911批次流向哪些客户', VOCAB))
+      .toEqual({ seeds: ['20260911'], hops: 2, templateId: 'trace-batch-flow' })
+    expect(compileKgQuery('宏发食品的供应商', VOCAB))
+      .toEqual({ seeds: ['宏发食品'], hops: 2, templateId: 'suppliers-of' })
+    expect(compileKgQuery('宏发食品的客户', VOCAB))
+      .toEqual({ seeds: ['宏发食品'], hops: 2, templateId: 'customers-of' })
+    expect(compileKgQuery('蚝油由哪些原料制成', VOCAB))
+      .toEqual({ seeds: ['蚝油'], hops: 1, relationTypes: ['uses'], templateId: 'made-from' })
+  })
+
   it('fills the hop slot and the two-entity pair shape', () => {
     expect(compileKgQuery('宏发食品相关的2跳关系', VOCAB))
       .toEqual({ seeds: ['宏发食品'], hops: 2, templateId: 'n-hop' })

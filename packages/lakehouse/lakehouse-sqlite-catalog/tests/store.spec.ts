@@ -170,7 +170,7 @@ describe('SqliteCatalogStore', () => {
     const directory = mkdtempSync(join(tmpdir(), 'dsh-catalog-foreign-'))
     const path = join(directory, 'catalog.sqlite')
     try {
-      const outsider = new DatabaseSync(path)
+      const outsider = new DatabaseSync(path, { timeout: 5_000 })
       outsider.exec(testSql('set-user-version-2'))
       outsider.close()
       expect(() => new SqliteCatalogStore({ path, busyTimeoutMs: 5_000 }, DatabaseSync))
@@ -186,7 +186,7 @@ describe('SqliteCatalogStore', () => {
     const store = new SqliteCatalogStore({ path, busyTimeoutMs: 5_000 }, DatabaseSync)
     try {
       await store.registerTable(table())
-      const outsider = new DatabaseSync(path)
+      const outsider = new DatabaseSync(path, { timeout: 5_000 })
       outsider.exec(testSql('create-failing-insert-trigger'))
       outsider.close()
       await expect(store.registerTable(table({ tableName: 'another' }))).rejects.toThrow(/injected failure/u)
@@ -204,7 +204,7 @@ describe('SqliteCatalogStore', () => {
     const store = new SqliteCatalogStore({ path, busyTimeoutMs: 5_000 }, DatabaseSync)
     try {
       await store.registerTable(table())
-      const outsider = new DatabaseSync(path)
+      const outsider = new DatabaseSync(path, { timeout: 5_000 })
       outsider.prepare(testSql('corrupt-columns-array')).run()
       outsider.close()
       await expect(store.describeTable('hongfa-food', 'orders')).rejects.toMatchObject({ code: 'LAKEHOUSE_CATALOG_CORRUPT' })
@@ -220,7 +220,7 @@ describe('SqliteCatalogStore', () => {
     const store = new SqliteCatalogStore({ path, busyTimeoutMs: 5_000 }, DatabaseSync)
     try {
       await store.registerTable(table())
-      const outsider = new DatabaseSync(path)
+      const outsider = new DatabaseSync(path, { timeout: 5_000 })
       outsider.prepare(testSql('corrupt-columns-entry')).run()
       outsider.close()
       await expect(store.describeTable('hongfa-food', 'orders')).rejects.toMatchObject({ code: 'LAKEHOUSE_CATALOG_CORRUPT' })
@@ -236,7 +236,7 @@ describe('SqliteCatalogStore', () => {
     const store = new SqliteCatalogStore({ path, busyTimeoutMs: 5_000 }, DatabaseSync)
     try {
       await store.registerTable(table())
-      const outsider = new DatabaseSync(path)
+      const outsider = new DatabaseSync(path, { timeout: 5_000 })
       outsider.prepare(testSql('corrupt-columns')).run()
       outsider.close()
       await expect(store.describeTable('hongfa-food', 'orders')).rejects.toMatchObject({ code: 'LAKEHOUSE_CATALOG_CORRUPT' })

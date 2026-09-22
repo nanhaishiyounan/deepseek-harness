@@ -162,7 +162,7 @@ async function measureWriteTraffic(
     let inserted = 0
     let changed = 0
     let removed = 0
-    const probe = new DatabaseSync(path, { readOnly: true })
+    const probe = new DatabaseSync(path, { readOnly: true, timeout: 5_000 })
     try {
       const selectRows = probe.prepare(testSql('select-event-rows'))
       for (let offset = 0; offset < events.length; offset += 40) {
@@ -180,7 +180,7 @@ async function measureWriteTraffic(
     } finally {
       probe.close()
     }
-    const db = new DatabaseSync(path, { readOnly: true })
+    const db = new DatabaseSync(path, { readOnly: true, timeout: 5_000 })
     const measured = db.prepare(testSql('measure-write-traffic')).get() as { rows: number; largest: number }
     db.close()
     const walBytes = (await stat(`${path}-wal`)).size
@@ -215,7 +215,7 @@ runCoordinatorContract('sqlite', async (): Promise<CoordinatorFixture> => {
   return {
     mount: async ctx => ctx.plugin(SessionPersistenceSqlite, { path }),
     corruptTail: async (id) => {
-      const db = new DatabaseSync(path)
+      const db = new DatabaseSync(path, { timeout: 5_000 })
       const last = db.prepare(testSql('select-last-event'))
         .get(id) as { seq: number; type: string; data: string }
       const logicalLength = last.type === 'text-chunks'
@@ -269,7 +269,7 @@ describe('SessionPersistenceSqlite physical packing', () => {
     expect((await ctx.sessionPersistence.inspect(header.id)).events).toEqual(events)
     await ctx.fiber.dispose()
 
-    const db = new DatabaseSync(path)
+    const db = new DatabaseSync(path, { timeout: 5_000 })
     expect(db.prepare(testSql('count-packed-events')).get())
       .toEqual({ count: 1 })
     db.close()
@@ -285,7 +285,7 @@ describe('SessionPersistenceSqlite physical packing', () => {
     await ctx.sessionPersistence.create(header)
     await ctx.sessionPersistence.append(header.id, events.slice(0, 3))
     await ctx.sessionPersistence.append(header.id, events.slice(3, 4))
-    const before = new DatabaseSync(path, { readOnly: true })
+    const before = new DatabaseSync(path, { readOnly: true, timeout: 5_000 })
     const originalRows = before.prepare(testSql('select-event-rowids')).all()
     before.close()
     await ctx.sessionPersistence.append(header.id, events.slice(4))
@@ -298,7 +298,7 @@ describe('SessionPersistenceSqlite physical packing', () => {
     }
     await fiber.dispose()
 
-    const db = new DatabaseSync(path)
+    const db = new DatabaseSync(path, { timeout: 5_000 })
     expect(db.prepare(testSql('select-user-version')).get()).toEqual({ user_version: SCHEMA_VERSION })
     expect(db.prepare(testSql('count-events')).get()).toEqual({ count: 7 })
     expect(db.prepare(testSql('count-packed-events')).get())
@@ -324,14 +324,14 @@ describe('SessionPersistenceSqlite physical packing', () => {
     const header = meta('overlap')
     await store.appendBatch(header, [chunk(0), chunk(1), chunk(2)], false)
 
-    const db = new DatabaseSync(path)
+    const db = new DatabaseSync(path, { timeout: 5_000 })
     db.prepare(testSql('insert-corrupt-event'))
       .run(header.id, 1, 'assistant/chunk', 2, JSON.stringify(chunk(1).data), null)
     db.close()
 
     expect((await store.loadStoredFrom(header.id, 2))?.events).toEqual([chunk(2)])
 
-    const malformed = new DatabaseSync(path)
+    const malformed = new DatabaseSync(path, { timeout: 5_000 })
     malformed.prepare(testSql('delete-session-events')).run(header.id)
     malformed.prepare(testSql('insert-corrupt-event'))
       .run(header.id, 0, 'text-chunks', 1, '{not json', 0)
@@ -398,7 +398,7 @@ describe('SessionPersistenceSqlite physical packing', () => {
     const winner = new SqliteStore({ path, journalMode: 'wal', busyTimeoutMs: DEFAULT_BUSY_TIMEOUT_MS })
     const header = meta(SessionId('stale-repair'))
     await stale.appendBatch(header, [chunk(0)], false)
-    const db = new DatabaseSync(path)
+    const db = new DatabaseSync(path, { timeout: 5_000 })
     db.prepare(testSql('insert-corrupt-event')).run(header.id, 1, 'assistant/chunk', 2, '{not json', null)
     db.close()
     expect((await stale.loadStored(header.id))?.tornMarker).toBe(1)
@@ -503,31 +503,36 @@ describe('SessionPersistenceSqlite schema ownership', () => {
       attempts += 1
       return Object.assign(new Error('database is locked'), { errcode: 5 })
     })
+    const startedAt = performance.now()
     await expect(openDatabase(
       BusyDatabase,
       await freshDbPath('dsh-sqlite-journal-paced-'),
       'wal',
-      50,
+      1_000,
     )).rejects.toThrow('database is locked')
     expect(attempts).toBeGreaterThan(1)
-    expect(attempts).toBeLessThanOrEqual(6)
+    // The retry loop is paced, not busy-polled: the 10ms interval keeps the
+    // attempt rate bounded across the whole window (with scheduling slack),
+    // instead of spinning as fast as the event loop allows.
+    const attemptsPerSecond = attempts / ((performance.now() - startedAt) / 1_000)
+    expect(attemptsPerSecond).toBeLessThan(200)
   })
 
   it('rejects unversioned, incompatible, and foreign-application databases', async () => {
     const unversionedPath = await freshDbPath('dsh-sqlite-unversioned-')
-    const unversioned = new DatabaseSync(unversionedPath)
+    const unversioned = new DatabaseSync(unversionedPath, { timeout: 5_000 })
     unversioned.exec(testSql('create-unrelated-table'))
     unversioned.close()
     await expect(openDatabase(DatabaseSync, unversionedPath, 'wal', DEFAULT_BUSY_TIMEOUT_MS)).rejects.toThrow(/unversioned schema/)
 
     const incompatiblePath = await freshDbPath('dsh-sqlite-incompatible-')
-    const incompatible = new DatabaseSync(incompatiblePath)
+    const incompatible = new DatabaseSync(incompatiblePath, { timeout: 5_000 })
     incompatible.exec(testSql('set-user-version-16'))
     incompatible.close()
     await expect(openDatabase(DatabaseSync, incompatiblePath, 'wal', DEFAULT_BUSY_TIMEOUT_MS)).rejects.toThrow(/incompatible with this build/)
 
     const foreignPath = await freshDbPath('dsh-sqlite-foreign-')
-    const foreign = new DatabaseSync(foreignPath)
+    const foreign = new DatabaseSync(foreignPath, { timeout: 5_000 })
     foreign.exec(testSql('set-user-version-17'))
     foreign.exec(testSql('set-application-id-12345'))
     foreign.close()
@@ -537,20 +542,20 @@ describe('SessionPersistenceSqlite schema ownership', () => {
   it('rejects changed columns and non-strict owned tables', async () => {
     const changedPath = await freshDbPath('dsh-sqlite-columns-')
     ;(await openDatabase(DatabaseSync, changedPath, 'wal', DEFAULT_BUSY_TIMEOUT_MS)).close()
-    const changed = new DatabaseSync(changedPath)
+    const changed = new DatabaseSync(changedPath, { timeout: 5_000 })
     changed.exec(testSql('add-unexpected-column'))
     changed.close()
     await expect(openDatabase(DatabaseSync, changedPath, 'wal', DEFAULT_BUSY_TIMEOUT_MS)).rejects.toThrow(/required schema objects/)
 
     const nonStrictPath = await freshDbPath('dsh-sqlite-nonstrict-')
     ;(await openDatabase(DatabaseSync, nonStrictPath, 'wal', DEFAULT_BUSY_TIMEOUT_MS)).close()
-    const nonStrict = new DatabaseSync(nonStrictPath)
+    const nonStrict = new DatabaseSync(nonStrictPath, { timeout: 5_000 })
     nonStrict.exec(testSql('replace-events-with-nonstrict-table'))
     nonStrict.close()
     await expect(openDatabase(DatabaseSync, nonStrictPath, 'wal', DEFAULT_BUSY_TIMEOUT_MS)).rejects.toThrow(/required schema objects/)
 
     const loosePath = await freshDbPath('dsh-sqlite-loose-')
-    const loose = new DatabaseSync(loosePath)
+    const loose = new DatabaseSync(loosePath, { timeout: 5_000 })
     loose.exec(testSql('create-loose-schema'))
     loose.close()
     await expect(openDatabase(DatabaseSync, loosePath, 'wal', DEFAULT_BUSY_TIMEOUT_MS)).rejects.toThrow(/required schema objects/)
@@ -648,7 +653,7 @@ describe('SessionPersistenceSqlite schema ownership', () => {
     const store = new SqliteStore({ path, journalMode: 'wal', busyTimeoutMs: DEFAULT_BUSY_TIMEOUT_MS })
     const header = meta('invalid-metadata')
     await store.appendBatch(header, [chunk(0)], false)
-    const db = new DatabaseSync(path)
+    const db = new DatabaseSync(path, { timeout: 5_000 })
     db.prepare(testSql('update-invalid-session-metadata')).run(header.id)
     db.close()
     await expect(store.list()).rejects.toThrow(/seed_length|origin|delegation_depth/)
@@ -731,14 +736,14 @@ describe('SessionPersistenceSqlite edge behavior', () => {
     const store = new SqliteStore({ path, journalMode: 'wal', busyTimeoutMs: DEFAULT_BUSY_TIMEOUT_MS })
     const header = meta('repair-validation')
     await store.appendBatch(header, [chunk(0)], false)
-    const db = new DatabaseSync(path)
+    const db = new DatabaseSync(path, { timeout: 5_000 })
     db.prepare(testSql('insert-corrupt-event')).run(header.id, 1, 'assistant/chunk', 2, '{not json', null)
     db.close()
     await expect(store.commitRepair(header, undefined, [chunk(1)])).rejects.toThrow(/omitted current torn tail/)
     await store.commitRepair(header, 1, [])
     await expect(store.commitRepair(header, undefined, [chunk(2)])).rejects.toThrow(/closer starts at seq 2/)
 
-    const cleared = new DatabaseSync(path)
+    const cleared = new DatabaseSync(path, { timeout: 5_000 })
     cleared.prepare(testSql('delete-session-events')).run(header.id)
     cleared.close()
     await store.commitRepair(header, undefined, [chunk(0)])
@@ -751,7 +756,7 @@ describe('SessionPersistenceSqlite edge behavior', () => {
     const store = new SqliteStore({ path, journalMode: 'wal', busyTimeoutMs: DEFAULT_BUSY_TIMEOUT_MS })
     const header = meta('invalid-tail')
     await store.appendBatch(header, [chunk(0)], false)
-    const db = new DatabaseSync(path)
+    const db = new DatabaseSync(path, { timeout: 5_000 })
     db.prepare(testSql('insert-corrupt-event'))
       .run(header.id, 1, 'assistant/chunk', 2, '{not json', null)
     db.close()

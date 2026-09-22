@@ -113,6 +113,7 @@
     "gen-client-catalog": "tsx scripts/gen-client-catalog.ts",
     "gen-cordis-inspect-catalog": "tsx scripts/gen-cordis-inspect-catalog.ts",
     "verify-client-catalog": "tsx scripts/gen-client-catalog.ts --check",
+    "v8-ignore-budget": "tsx scripts/v8-ignore-budget.ts",
     "verify-export-jsdoc": "tsx scripts/verify-export-jsdoc.ts",
     "gen-tool-catalog": "tsx scripts/gen-tool-catalog.ts",
     "verify-tool-catalog": "tsx scripts/gen-tool-catalog.ts --check",

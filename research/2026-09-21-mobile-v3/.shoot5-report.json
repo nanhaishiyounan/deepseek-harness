@@ -1,0 +1,20 @@
+{
+  "scenes": [
+    {
+      "scene": "B-draft",
+      "ok": true,
+      "extra": "供应商登记 / 新建供应商：鲜丰 / 待确认 / 需要你定 / 供应商名称 / 联系人 / 邮箱 / 请确认 · AI 推导 / 状态 · 新建供应商默认待审核 / 待审核 / 驳回 / 确认写入"
+    },
+    {
+      "scene": "B-receipt",
+      "ok": true,
+      "extra": "№=8 已登记 · 供应商登记 / № / 8 / 鲜丰 / 供应商名称 / 张经理 / 联系人 / ops@xianfeng.example / 邮箱 / 待审核 / 状态 / 对话 / 确认 / 已落库 / 查看这条记录"
+    },
+    {
+      "scene": "C-localize",
+      "ok": true,
+      "extra": "strong=13 list=5; hub_ ctx=\"况帮我总结一下，重点讲金额和主要供应商，用加粗和列表排版\\n表单\\nAI\\n\\n我来查一下这个月的采购数据，先看下结构。\\n\\n✓\\n读取业务表结构\\n表单\\nAI\\n\\n我看到有 hub_po_purchase_orders 采购单 collection，查一下这个月的数据。\\n\\n✕\\n查询业务记录\\n表单\\nAI\\n\\n不支持 gte/lte，换 includes 模\"; backticks=false"
+    }
+  ],
+  "pageErrors": []
+}

@@ -7,7 +7,8 @@ SELECT DISTINCT e1.rowid AS first_id, e2.rowid AS second_id
 FROM kg_edges e1
 JOIN kg_edges e2 ON e2.rowid <> e1.rowid AND e2.tenant_id = e1.tenant_id
 WHERE e1.tenant_id = ?
-  AND e1.valid_until IS NULL AND e2.valid_until IS NULL
+  AND e1.valid_until IS NULL AND e1.expired_at IS NULL
+  AND e2.valid_until IS NULL AND e2.expired_at IS NULL
   AND (
     (e1.src_id = ? AND e2.dst_id = ? AND e1.dst_id = e2.src_id
       AND e1.dst_id <> ? AND e1.dst_id <> ?)

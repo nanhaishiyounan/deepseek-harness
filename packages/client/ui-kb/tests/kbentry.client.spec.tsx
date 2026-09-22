@@ -29,8 +29,8 @@ function mountEntry(state: KbClientState, options: {
   render(
     <KbEntry
       wide={options.wide ?? true}
-      useSessions={bindStoreHook(sessions) as never}
       {...GLOBAL_KIT}
+      useSessions={bindStoreHook(sessions) as never}
       useKb={bindStoreHook(store) as never}
       refresh={refresh}
       requestKbView={requestKbView}

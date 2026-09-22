@@ -28,6 +28,8 @@ function firstLine(text: string): string {
 
 /** Flatten a settled result's content blocks to display text; null while running. */
 function resultTextOf(block: ToolCallBlock): string | null {
+  /* v8 ignore next 1 -- defensive: the sole caller has already narrowed to
+   * the settled form, so a kind-less (running) block cannot reach here. */
   if (!('kind' in block)) return null
   const parts: string[] = []
   for (const item of block.content) {
@@ -41,6 +43,8 @@ function resultTextOf(block: ToolCallBlock): string | null {
 
 /** The parsed arguments object; undefined while the JSON is still streaming. */
 function argsOf(block: ToolCallBlock): Record<string, unknown> | undefined {
+  /* v8 ignore next 1 -- the sole caller passes the running form, which never
+   * carries kind; the settled arm of this guard is unreachable. */
   const raw = ('kind' in block ? block.call?.argsRaw : block.argsRaw) ?? ''
   try {
     const parsed: unknown = JSON.parse(raw)

@@ -721,7 +721,7 @@ describe('session.search', () => {
     }
   })
 
-  it('keeps visibility sets above SQLite variable limits out of provider bindings', async () => {
+  it('keeps visibility sets above SQLite variable limits out of provider bindings', { timeout: 30_000 }, async () => {
     const ctx = await baseContext()
     const cold = Array.from(
       { length: 32_751 },

@@ -112,6 +112,14 @@ export default defineConfig({
   build: {
     sourcemap: true,
     rollupOptions: {
+      // Two HTML entries: the PC shell (index) and the mobile client
+      // (mobile), served by the same webserver at / and /mobile. Sharing one
+      // build keeps the rollup chunk graph (react, vendor families) common
+      // and the deployment single-dist.
+      input: {
+        index: src('index.html'),
+        mobile: src('mobile.html'),
+      },
       output: {
         // Output layout: the two main chunks stay at assets/ root; lazy
         // @shikijs/langs grammar chunks group under assets/langs/; fonts

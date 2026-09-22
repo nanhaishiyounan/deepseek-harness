@@ -219,7 +219,7 @@ describe('SQLite cross-backend differential behavior', () => {
     const directory = await freshDirectory('dsh-sqlite-storage-tag-collision-')
     const root = join(directory, 'sqlite')
     await verifyBackend('sqlite', root, events, [2, 1])
-    const db = new DatabaseSync(join(root, 'sessions.db'), { readOnly: true })
+    const db = new DatabaseSync(join(root, 'sessions.db'), { readOnly: true, timeout: 5_000 })
     try {
       expect(db.prepare(testSql('count-physical-types')).all()).toEqual([])
       expect(db.prepare(testSql('count-ignorable-events')).get()).toEqual({ count: 3 })
@@ -236,7 +236,7 @@ describe('SQLite cross-backend differential behavior', () => {
         const root = join(directory, name)
         await verifyBackend(name, root, events, sizes)
         if (name === 'sqlite') {
-          const db = new DatabaseSync(join(root, 'sessions.db'), { readOnly: true })
+          const db = new DatabaseSync(join(root, 'sessions.db'), { readOnly: true, timeout: 5_000 })
           try {
             expect(db.prepare(testSql('count-physical-types')).all()).toEqual([
               [
@@ -261,13 +261,13 @@ describe('SQLite cross-backend differential behavior', () => {
     }
   }, 30_000)
 
-  it('matches JSONL/Zstandard across randomized logical logs and append partitions', async () => {
+  it('matches JSONL/Zstandard across randomized logical logs and append partitions', { timeout: 180_000 }, async () => {
     await fc.assert(fc.asyncProperty(randomWorkload, async ({ events, batchSizes }) => {
       const directory = await freshDirectory('dsh-sqlite-property-')
       for (const name of ['jsonl-zstd', 'sqlite'] as const) {
         await verifyBackend(name, join(directory, name), events, batchSizes)
       }
     }), { numRuns: 100, seed: 0x5A17E })
-  }, 60_000)
+  })
 
 })

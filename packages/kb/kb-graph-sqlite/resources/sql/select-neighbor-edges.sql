@@ -5,6 +5,6 @@ SELECT
 FROM kg_edges e
 JOIN kg_nodes s ON s.id = e.src_id
 JOIN kg_nodes d ON d.id = e.dst_id
-WHERE e.tenant_id = ? AND e.valid_until IS NULL
+WHERE e.tenant_id = ? AND e.valid_until IS NULL AND e.expired_at IS NULL
   AND ((s.type_id = ? AND s.natural_key = ?) OR (d.type_id = ? AND d.natural_key = ?))
 ORDER BY e.rowid

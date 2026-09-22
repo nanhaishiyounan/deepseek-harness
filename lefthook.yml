@@ -45,6 +45,11 @@ pre-commit:
     - name: vendor manifest guard
       run: scripts/check-vendor-manifest.sh
 
+    - name: v8 ignore budget
+      # Coverage-exemption markers are debt: the committed baseline caps their
+      # net growth at ten per batch (scripts/v8-ignore-budget.baseline.json).
+      run: node_modules/.bin/tsx scripts/v8-ignore-budget.ts
+
 pre-merge-commit:
   jobs:
     - name: translation pairing (staged records)

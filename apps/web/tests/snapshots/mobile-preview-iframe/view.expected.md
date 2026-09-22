@@ -1,0 +1,75 @@
+- button "New session"
+- button "Collapse sidebar":
+  - img
+- button "New session":
+  - img
+  - text: New Session
+- text: Workspaces
+- button "Search sessions":
+  - img
+- textbox "Search sessions..."
+- button "View options":
+  - img
+- button "Add workspace":
+  - img
+- tree "Sessions":
+  - treeitem "Ungrouped" [expanded]:
+    - img
+    - text: Ungrouped
+  - 'treeitem "NavScenario: first run bash to 1min" [selected]'
+- button "Knowledge-base documents":
+  - img
+  - text: Knowledge base ?
+- button "data-asset count":
+  - img
+  - text: Data assets ?
+- button "data-source count":
+  - img
+  - text: Connectors ?
+- button "graph entity count": Graph ?
+- button "business-object count": Business ?
+- button "Settings":
+  - img
+  - text: Settings
+- banner:
+  - navigation "Session hierarchy":
+    - 'button "NavScenario: first run bash to" [disabled]'
+  - button "Knowledge base":
+    - img
+    - text: "?"
+  - button "Data assets":
+    - img
+  - button "Connectors":
+    - img
+  - button "Graph"
+  - button "Business"
+  - button "Session log":
+    - text: Session log
+    - img
+  - tablist:
+    - tab "Chat"
+    - tab "Knowledge base"
+    - tab "Scenarios"
+    - tab "Data assets"
+    - tab "Connectors"
+    - tab "Graph"
+    - tab "Business"
+    - tab "Trajectory"
+    - tab "Mobile preview" [selected]
+- paragraph: Same-origin iframe · 390×844 · shares sessions and data with this workbench
+- iframe
+- button "Agent mode":
+  - img
+  - text: Standard mode
+  - img
+- textbox "Message the agent"
+- button "Commands":
+  - img
+- 'button "Access mode, current: Workspace Write"': Workspace Write
+- button "Select model, current DeepSeek-V4-Flash":
+  - text: DeepSeek-V4-Flash
+  - img
+- button "Send message" [disabled]
+- text: 2 turns · 3 steps LLM 0.2s · Tool call 0s TTFT avg 0s · 1273 tok/s Cache hit 97% Input 24.2K tok · Output 289 tok Details
+- button "Close details"
+- text: Click a tool row in the message flow to view its details

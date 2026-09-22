@@ -8,7 +8,7 @@ import type { Wire } from './rpc.schema.ts'
 import type { RequestPayload } from './index.ts'
 
 /** Where a registered entry came from (mirrors the registry vocabulary). */
-const sourceSchema = z.enum(['builtin-ontology', 'builtin-food', 'nocobase-derived', 'agent-defined'])
+const sourceSchema = z.enum(['builtin-ontology', 'builtin-food', 'foodon-imported', 'nocobase-derived', 'agent-defined'])
 
 /** One registered node type as the wire projects it. */
 export const kgNodeTypeViewSchema = z.object({
@@ -18,8 +18,11 @@ export const kgNodeTypeViewSchema = z.object({
   extends: z.string().optional(),
   natural_key: z.string().optional(),
   prop_keys: z.array(z.string()),
+  foodon_uri: z.string().optional(),
+  foodon_id: z.string().optional(),
+  synonyms: z.array(z.string()).optional(),
   source: sourceSchema,
-  status: z.enum(['draft', 'active']),
+  status: z.enum(['draft', 'active', 'deprecated']),
 })
 
 /** One registered relation as the wire projects it. */
@@ -55,7 +58,7 @@ export const kgEdgeViewSchema = z.object({
   source: z.string().min(1),
   target: z.string().min(1),
   fact: z.string().optional(),
-  asserted_by: z.enum(['nocobase', 'lakehouse', 'connector', 'kb', 'kg-align']),
+  asserted_by: z.enum(['nocobase', 'lakehouse', 'connector', 'kb', 'kg-align', 'ai-edit']),
 })
 
 /** kg.schema request payload (empty). */
@@ -80,6 +83,51 @@ export const kgExpandRequestSchema = z.object({
 }) as unknown as z.ZodType<Wire<RequestPayload<'kg.expand'>>>
 /** kg.stats request payload (empty). */
 export const kgStatsRequestSchema = z.object({}) as unknown as z.ZodType<Wire<RequestPayload<'kg.stats'>>>
+/** kg.episodes request payload. */
+export const kgEpisodesRequestSchema = z.object({
+  limit: z.number().int().min(1).max(100).optional(),
+}) as unknown as z.ZodType<Wire<RequestPayload<'kg.episodes'>>>
+/** kg.rollback request payload. */
+export const kgRollbackRequestSchema = z.object({
+  episode_uuid: z.string().min(1),
+  reason: z.string().optional(),
+}) as unknown as z.ZodType<Wire<RequestPayload<'kg.rollback'>>>
+/** One KGCL ontology op as the wire carries it (the manual editor's vocabulary). */
+export const kgOntologyOpWireSchema = z.discriminatedUnion('op', [
+  z.object({ op: z.literal('add_node'), target_id: z.string().min(1), label: z.string().min(1), parent_id: z.string().min(1).optional() }),
+  z.object({ op: z.literal('rename_node'), target_id: z.string().min(1), label: z.string().min(1) }),
+  z.object({ op: z.literal('set_parent'), target_id: z.string().min(1), new_parent_id: z.string().min(1) }),
+  z.object({ op: z.literal('deprecate_node'), target_id: z.string().min(1), replaced_by: z.string().min(1).optional() }),
+  z.object({
+    op: z.literal('change_cardinality'),
+    relation_id: z.string().min(1),
+    domain_id: z.string().min(1),
+    range_id: z.string().min(1),
+    min: z.number().int().min(0).optional(),
+    max: z.number().int().min(0).optional(),
+  }),
+])
+/** kg.ontologyEdit request payload. */
+export const kgOntologyEditRequestSchema = z.object({
+  ops: z.array(kgOntologyOpWireSchema).min(1).max(20),
+}) as unknown as z.ZodType<Wire<RequestPayload<'kg.ontologyEdit'>>>
+/** kg.reviewQueue request payload (empty). */
+export const kgReviewQueueRequestSchema = z.object({}) as unknown as z.ZodType<Wire<RequestPayload<'kg.reviewQueue'>>>
+/** kg.reviewDecide request payload. */
+export const kgReviewDecideRequestSchema = z.object({
+  doc_id: z.string().min(1),
+  row_id: z.string().min(1),
+  decision: z.enum(['merge', 'reject', 'skip']),
+  doc_name: z.string().optional(),
+  row_name: z.string().optional(),
+  reason: z.string().optional(),
+}) as unknown as z.ZodType<Wire<RequestPayload<'kg.reviewDecide'>>>
+/** kg.communities request payload (empty). */
+export const kgCommunitiesRequestSchema = z.object({}) as unknown as z.ZodType<Wire<RequestPayload<'kg.communities'>>>
+/** kg.history request payload. */
+export const kgHistoryRequestSchema = z.object({
+  as_of: z.string().min(1),
+}) as unknown as z.ZodType<Wire<RequestPayload<'kg.history'>>>
 /** kg.mappings request payload (empty). */
 export const kgMappingsRequestSchema = z.object({}) as unknown as z.ZodType<Wire<RequestPayload<'kg.mappings'>>>
 /** kg.query request payload. */
@@ -154,6 +202,76 @@ export const kgQueryValueSchema = kgSubgraphValueSchema.extend({
   hops: z.number().int().min(1).max(2),
   relation_types: z.array(z.string()).optional(),
   restated: z.string(),
+})
+
+/** kg.episodes response value. */
+export const kgEpisodesValueSchema = z.object({
+  episodes: z.array(z.object({
+    uuid: z.string(),
+    source: z.enum(['ingest', 'ai-edit', 'human-edit', 'rollback']),
+    name: z.string(),
+    content: z.string(),
+    created_at: z.string(),
+    mentions: z.number().int().min(0),
+  })),
+})
+
+/** kg.rollback response value. */
+export const kgRollbackValueSchema = z.object({
+  rollback_uuid: z.string(),
+  rolled_back: z.string(),
+  retired: z.number().int().min(0),
+  restored: z.number().int().min(0),
+})
+
+/** kg.ontologyEdit response value. */
+export const kgOntologyEditValueSchema = z.object({
+  applied: z.array(z.string()),
+  revision_id: z.number().int().min(0),
+  episode_uuid: z.string(),
+})
+
+/** One pending gray-zone pair the review queue serves. */
+export const kgReviewEntryViewSchema = z.object({
+  doc_id: z.string().min(1),
+  row_id: z.string().min(1),
+  doc_name: z.string(),
+  row_name: z.string(),
+  confidence: z.number().min(0).max(1),
+  reason: z.string(),
+})
+
+/** kg.reviewQueue response value. */
+export const kgReviewQueueValueSchema = z.object({
+  entries: z.array(kgReviewEntryViewSchema),
+  source_episode: z.string(),
+})
+
+/** kg.reviewDecide response value. */
+export const kgReviewDecideValueSchema = z.object({
+  episode_uuid: z.string(),
+  decided: z.enum(['merge', 'reject', 'skip']),
+  edge_id: z.string().optional(),
+})
+
+/** kg.communities response value. */
+export const kgCommunitiesValueSchema = z.object({
+  communities: z.array(z.object({
+    id: z.number().int().min(0),
+    nodes: z.array(z.string().min(1)),
+  })),
+  modularity: z.number(),
+  node_count: z.number().int().min(0),
+})
+
+/** kg.history response value (a frozen subgraph plus the instant; no seed
+ * resolution rides the replay read, so it builds on the shared projections
+ * instead of the subgraph response, which requires `seeds_resolved`). */
+export const kgHistoryValueSchema = z.object({
+  nodes: z.array(kgSubgraphNodeViewSchema),
+  edges: z.array(kgEdgeViewSchema),
+  truncated: z.boolean(),
+  as_of: z.string(),
 })
 
 /** kg.stats response value. */

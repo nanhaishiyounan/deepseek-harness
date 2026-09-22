@@ -64,16 +64,18 @@ import {
 import { llmDiscoverModelsValueSchema, llmModelsValueSchema, llmProvidersValueSchema } from '../api/llm.schema.ts'
 import { kbIngestValueSchema, kbSearchValueSchema, kbStatsValueSchema, kbUploadValueSchema } from '../api/kb.schema.ts'
 import {
-  nocobaseGetValueSchema, nocobaseListMetaValueSchema, nocobaseListValueSchema,
+  nocobaseGetValueSchema, nocobaseListMetaValueSchema, nocobaseListValueSchema, nocobaseUpdateValueSchema,
 } from '../api/nocobase.schema.ts'
 import { dataUploadValueSchema } from '../api/data.schema.ts'
 import { orderValueSchema, ordersListValueSchema } from '../api/orders.schema.ts'
 import { assetDetailValueSchema, assetsListValueSchema, assetsStatsValueSchema } from '../api/assets.schema.ts'
+import { lakehouseOverviewValueSchema } from '../api/lakehouse.schema.ts'
 import {
   connectorsConnectionsValueSchema, connectorsListValueSchema, connectorsTransfersValueSchema,
 } from '../api/connectors.schema.ts'
 import {
-  kgExpandValueSchema, kgMappingsValueSchema, kgQueryValueSchema,
+  kgCommunitiesValueSchema, kgExpandValueSchema, kgHistoryValueSchema, kgMappingsValueSchema, kgEpisodesValueSchema,
+  kgOntologyEditValueSchema, kgQueryValueSchema, kgReviewDecideValueSchema, kgReviewQueueValueSchema, kgRollbackValueSchema,
   kgSchemaValueSchema, kgSearchValueSchema, kgStatsValueSchema, kgSubgraphValueSchema,
 } from '../api/kg.schema.ts'
 import {
@@ -191,6 +193,9 @@ export interface IApiClient {
     detail(payload: RequestPayload<'assets.detail'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'assets.detail'>>>
     stats(payload: RequestPayload<'assets.stats'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'assets.stats'>>>
   }
+  lakehouse: {
+    overview(payload: RequestPayload<'lakehouse.overview'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'lakehouse.overview'>>>
+  }
   connectors: {
     list(payload: RequestPayload<'connectors.list'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'connectors.list'>>>
     connections(payload: RequestPayload<'connectors.connections'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'connectors.connections'>>>
@@ -200,6 +205,13 @@ export interface IApiClient {
     mappings(payload: RequestPayload<'kg.mappings'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kg.mappings'>>>
     schema(payload: RequestPayload<'kg.schema'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kg.schema'>>>
     query(payload: RequestPayload<'kg.query'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kg.query'>>>
+    episodes(payload: RequestPayload<'kg.episodes'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kg.episodes'>>>
+    rollback(payload: RequestPayload<'kg.rollback'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kg.rollback'>>>
+    ontologyEdit(payload: RequestPayload<'kg.ontologyEdit'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kg.ontologyEdit'>>>
+    reviewQueue(payload: RequestPayload<'kg.reviewQueue'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kg.reviewQueue'>>>
+    reviewDecide(payload: RequestPayload<'kg.reviewDecide'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kg.reviewDecide'>>>
+    communities(payload: RequestPayload<'kg.communities'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kg.communities'>>>
+    history(payload: RequestPayload<'kg.history'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kg.history'>>>
     search(payload: RequestPayload<'kg.search'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kg.search'>>>
     subgraph(payload: RequestPayload<'kg.subgraph'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kg.subgraph'>>>
     expand(payload: RequestPayload<'kg.expand'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kg.expand'>>>
@@ -216,6 +228,7 @@ export interface IApiClient {
     listMeta(payload: RequestPayload<'nocobase.listMeta'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'nocobase.listMeta'>>>
     list(payload: RequestPayload<'nocobase.list'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'nocobase.list'>>>
     get(payload: RequestPayload<'nocobase.get'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'nocobase.get'>>>
+    update(payload: RequestPayload<'nocobase.update'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'nocobase.update'>>>
   }
   /** client-response passthrough (rpcId is a backfill of the server-request's id — never minted here). */
   respond(message: ClientResponse, signal?: AbortSignal): Promise<RpcReceipt>
@@ -287,11 +300,19 @@ const UNARY_VALUE_SCHEMAS: { [K in keyof RpcMethodMap]: z.ZodType<Wire<ResponseV
   'assets.list': assetsListValueSchema,
   'assets.detail': assetDetailValueSchema,
   'assets.stats': assetsStatsValueSchema,
+  'lakehouse.overview': lakehouseOverviewValueSchema,
   'connectors.list': connectorsListValueSchema,
   'connectors.connections': connectorsConnectionsValueSchema,
   'connectors.transfers': connectorsTransfersValueSchema,
   'kg.mappings': kgMappingsValueSchema,
   'kg.query': kgQueryValueSchema,
+  'kg.episodes': kgEpisodesValueSchema,
+  'kg.rollback': kgRollbackValueSchema,
+  'kg.ontologyEdit': kgOntologyEditValueSchema,
+  'kg.reviewQueue': kgReviewQueueValueSchema,
+  'kg.reviewDecide': kgReviewDecideValueSchema,
+  'kg.communities': kgCommunitiesValueSchema,
+  'kg.history': kgHistoryValueSchema,
   'kg.schema': kgSchemaValueSchema,
   'kg.search': kgSearchValueSchema,
   'kg.subgraph': kgSubgraphValueSchema,
@@ -305,6 +326,7 @@ const UNARY_VALUE_SCHEMAS: { [K in keyof RpcMethodMap]: z.ZodType<Wire<ResponseV
   'nocobase.listMeta': nocobaseListMetaValueSchema,
   'nocobase.list': nocobaseListValueSchema,
   'nocobase.get': nocobaseGetValueSchema,
+  'nocobase.update': nocobaseUpdateValueSchema,
 }
 
 /** Default timeout for bounded unary calls (rpc-compare 2026-07-19: a hung host must not leave callers pending forever). */
@@ -603,6 +625,11 @@ export abstract class AbstractApiClient implements IApiClient {
     stats: (payload, signal) => this.callUnary('assets.stats', payload, signal, 'caller-signal-only'),
   }
 
+  readonly lakehouse: IApiClient['lakehouse'] = {
+    // The overview evaluates the seed's KPI SQL; the caller's signal alone bounds it.
+    overview: (payload, signal) => this.callUnary('lakehouse.overview', payload, signal, 'caller-signal-only'),
+  }
+
   readonly connectors: IApiClient['connectors'] = {
     list: (payload, signal) => this.callUnary('connectors.list', payload, signal, 'caller-signal-only'),
     connections: (payload, signal) => this.callUnary('connectors.connections', payload, signal, 'caller-signal-only'),
@@ -623,6 +650,13 @@ export abstract class AbstractApiClient implements IApiClient {
     mappings: (payload, signal) => this.callUnary('kg.mappings', payload, signal, 'caller-signal-only'),
     schema: (payload, signal) => this.callUnary('kg.schema', payload, signal, 'caller-signal-only'),
     query: (payload, signal) => this.callUnary('kg.query', payload, signal, 'caller-signal-only'),
+    episodes: (payload, signal) => this.callUnary('kg.episodes', payload, signal, 'caller-signal-only'),
+    rollback: (payload, signal) => this.callUnary('kg.rollback', payload, signal, 'caller-signal-only'),
+    ontologyEdit: (payload, signal) => this.callUnary('kg.ontologyEdit', payload, signal, 'caller-signal-only'),
+    reviewQueue: (payload, signal) => this.callUnary('kg.reviewQueue', payload, signal, 'caller-signal-only'),
+    reviewDecide: (payload, signal) => this.callUnary('kg.reviewDecide', payload, signal, 'caller-signal-only'),
+    communities: (payload, signal) => this.callUnary('kg.communities', payload, signal, 'caller-signal-only'),
+    history: (payload, signal) => this.callUnary('kg.history', payload, signal, 'caller-signal-only'),
     search: (payload, signal) => this.callUnary('kg.search', payload, signal, 'caller-signal-only'),
     subgraph: (payload, signal) => this.callUnary('kg.subgraph', payload, signal, 'caller-signal-only'),
     expand: (payload, signal) => this.callUnary('kg.expand', payload, signal, 'caller-signal-only'),
@@ -635,6 +669,7 @@ export abstract class AbstractApiClient implements IApiClient {
     listMeta: (payload, signal) => this.callUnary('nocobase.listMeta', payload, signal, 'caller-signal-only'),
     list: (payload, signal) => this.callUnary('nocobase.list', payload, signal, 'caller-signal-only'),
     get: (payload, signal) => this.callUnary('nocobase.get', payload, signal, 'caller-signal-only'),
+    update: (payload, signal) => this.callUnary('nocobase.update', payload, signal, 'caller-signal-only'),
   }
 
   readonly events: IApiClient['events'] = {

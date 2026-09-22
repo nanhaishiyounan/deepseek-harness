@@ -16,11 +16,13 @@
   - tablist:
     - tab "Chat" [selected]
     - tab "Knowledge base"
+    - tab "Scenarios"
     - tab "Data assets"
     - tab "Connectors"
     - tab "Graph"
     - tab "Business"
     - tab "Trajectory"
+    - tab "Mobile preview"
 - text: Render adjacent CJK strong emphasis. {{clock}}
 - button "Copy":
   - img
@@ -59,6 +61,10 @@
 - button "Branch into a new conversation":
   - img
 - text: {{clock}} Ran for {{duration}}
+- button "Agent mode":
+  - img
+  - text: Standard mode
+  - img
 - textbox "Message the agent"
 - button "Commands":
   - img

@@ -8,6 +8,7 @@ import { CONVERSATION_NS as NS } from './locale.ts'
 import { askQuestionToolview } from './tool/toolviews/ask-question-row.tsx'
 import { bashToolviewSample } from './tool/toolviews/bash-sample.tsx'
 import { fileMutationToolview } from './tool/toolviews/file-mutation-row.tsx'
+import { lakehouseToolview } from './tool/toolviews/lakehouse-row.tsx'
 import { readToolview } from './tool/toolviews/read-row.tsx'
 import { searchToolview } from './tool/toolviews/search-row.tsx'
 import { todoToolview } from './tool/toolviews/todo-row.tsx'
@@ -46,4 +47,5 @@ export function apply(ctx: ClientContext): void {
   ctx.plugin(webToolview)
   ctx.plugin(todoToolview)
   ctx.plugin(askQuestionToolview)
+  ctx.plugin(lakehouseToolview)
 }

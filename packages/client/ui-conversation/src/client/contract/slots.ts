@@ -451,6 +451,13 @@ export interface ChatNodeTurnDataInjected {
 
 /** Stable owner currency delivered to one keyed Chat business renderer. */
 export interface ChatNodeOwnerProps {
+  /**
+   * Best-effort view-ring switch by entry id (the source trail's cross-tab
+   * jumps): an unregistered id falls back to the ring's first view. Absent
+   * when the render site carries no view ring, so consumers must treat it as
+   * optional.
+   */
+  requestView?: ((view: string, options?: { readonly seeds?: readonly string[] }) => void) | undefined
   /** Selected Tool call, when the shared details store names one. */
   selectedCallId?: CallId | undefined
   /** Session workspace root; Tool summaries display paths relative to it. */
@@ -812,6 +819,12 @@ export interface ChatViewInjected {
   loadImage: (attachment: ImageAttachmentRef) => Promise<string>
   /** Hand a call off to the trajectory view: write the one-shot inspect target and switch tabs. */
   inspectCall: (callId: CallId) => void
+  /**
+   * Best-effort view-ring switch by entry id, threaded to chat node
+   * renderers for cross-tab jumps (the answer-source trail's kg entry). An
+   * unregistered id falls back to the ring's first view.
+   */
+  requestView: (view: string, options?: { readonly seeds?: readonly string[] }) => void
   /**
    * Per-session scroll memory surviving view switches (in-memory, never
    * persisted): the view saves on every scroll and restores on remount; a

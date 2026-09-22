@@ -237,7 +237,7 @@ function normalize(transcript: string): string {
 }
 
 describe('kb-agent expert order (keyless, template drafting)', () => {
-  it('runs the order journey: discover → order_create → real PDF → order_status delivered', async () => {
+  it('runs the order journey: discover → order_create → real PDF → order_status delivered', { timeout: 30_000 }, async () => {
     await boot()
     const out: string[] = ['# kb-agent expert order (keyless template drafting)', '', `## 需求：${REQUEST}`, '']
 

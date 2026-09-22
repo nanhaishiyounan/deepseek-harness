@@ -15,6 +15,11 @@ const STATS_VALUE = {
 /** One ok rpc envelope. */
 const ok = <T,>(value: T): { result: { ok: true; value: T } } => ({ result: { ok: true, value } })
 
+/** One refused rpc envelope. */
+const fail = (message: string): { result: { ok: false; error: { message: string } } } => ({
+  result: { ok: false, error: { message } },
+})
+
 /** Boot the client plugin over the slot/locale runtimes and a scripted api face. */
 async function bench() {
   const ctx = new Context()
@@ -71,6 +76,10 @@ async function scriptedWorld(overrides: {
   listDirectory?: () => Promise<unknown>
   describe?: () => Promise<unknown>
   ingestUrl?: () => Promise<unknown>
+  lakehouseOverview?: () => Promise<unknown>
+  ordersList?: () => Promise<unknown>
+  agentPresetMode?: { startSessionOn: (scenarioId: string) => void }
+  viewContext?: { provide: (projection: unknown) => () => void }
 }): Promise<{ ctx: Context; slots: SlotRegistry }> {
   const ctx = new Context()
   await ctx.plugin(SlotRegistry).await()
@@ -90,8 +99,17 @@ async function scriptedWorld(overrides: {
           version: '1', cwd: '/srv', attachedSessions: 0, home: '/srv', canOpenPath: false,
         })),
       },
+      lakehouse: {
+        overview: overrides.lakehouseOverview
+          ?? vi.fn(async () => ok({ generated_at: '2026-09-19T00:00:00.000Z', kpis: [] })),
+      },
+      orders: {
+        list: overrides.ordersList ?? vi.fn(async () => ok({ orders: [] })),
+      },
     },
   } as never)
+  if (overrides.agentPresetMode !== undefined) ctx.provide('agentPresetMode', overrides.agentPresetMode as never)
+  if (overrides.viewContext !== undefined) ctx.provide('viewContext', overrides.viewContext as never)
   const locale = new LocaleRuntime(ctx)
   locale.setLocale('zh')
   ctx.provide('locale', locale)
@@ -333,6 +351,134 @@ describe('ui-kb apply', () => {
       ?.inject as (sessionId: string) => { ingestUrl: (url: string) => Promise<{ name: string }> })('s1')
     // Not a parseable URL: the receipt keeps the raw string as its label.
     await expect(viewFace.ingestUrl('not-a-url')).resolves.toEqual({ name: 'not-a-url', chunks: 1 })
+    await ctx.fiber.dispose()
+  })
+
+  it('falls back to a new session on the scenario when the preset is locked', async () => {
+    const startSessionOn = vi.fn()
+    const { ctx, slots } = await scriptedWorld({
+      select: vi.fn(async () => ({ result: { ok: false as const, error: { code: 'agent-preset-locked', message: 'preset locked' } } })),
+      agentPresetMode: { startSessionOn },
+    })
+    const scenariosFace = (slots.entries('conversation.view').find(candidate => candidate.options.id === 'scenarios')
+      ?.inject as () => { selectScenario: (sessionId: string, scenarioId: string) => Promise<void> })()
+    await expect(scenariosFace.selectScenario('s1', 'market-insight')).resolves.toBeUndefined()
+    expect(startSessionOn).toHaveBeenCalledWith('market-insight')
+    await ctx.fiber.dispose()
+  })
+
+  it('rethrows a locked refusal when no preset mode is composed', async () => {
+    const { ctx, slots } = await scriptedWorld({
+      select: vi.fn(async () => ({ result: { ok: false as const, error: { code: 'agent-preset-locked', message: 'preset locked' } } })),
+    })
+    const scenariosFace = (slots.entries('conversation.view').find(candidate => candidate.options.id === 'scenarios')
+      ?.inject as () => { selectScenario: (sessionId: string, scenarioId: string) => Promise<void> })()
+    await expect(scenariosFace.selectScenario('s1', 'market-insight')).rejects.toThrow('preset locked')
+    await ctx.fiber.dispose()
+  })
+
+  it('carries overview KPIs and the capped delivered-order rail through the scenarios face', async () => {
+    const { ctx, slots } = await scriptedWorld({
+      lakehouseOverview: vi.fn(async () => ok({
+        generated_at: '2026-09-19T00:00:00.000Z',
+        kpis: [{ id: 'kpi', label: '本月出口额', value: 4318, unit: '万美元' }],
+      })),
+      ordersList: vi.fn(async () => ok({
+        orders: [
+          { order_no: 'ORD-1', service_name: '海外仓风险应对咨询', generated_at: '2026-09-17T08:00:00.000Z' },
+          { order_no: 'ORD-2', service_name: undefined, generated_at: '2026-09-16T08:00:00.000Z' },
+          { order_no: 'ORD-3', service_name: '工艺参数复核', generated_at: undefined },
+          ...Array.from({ length: 5 }, (_, index) => ({
+            order_no: `ORD-${index + 10}`,
+            service_name: '批量',
+            generated_at: `2026-09-1${index}T08:00:00.000Z`,
+          })),
+        ],
+      })),
+    })
+    const scenariosFace = (slots.entries('conversation.view').find(candidate => candidate.options.id === 'scenarios')
+      ?.inject as () => {
+      loadOverview: () => Promise<readonly { id: string }[]>
+      loadDeliverables: () => Promise<readonly { orderNo: string; serviceName: string | undefined; generatedAt: string | undefined }[]>
+    })()
+    await expect(scenariosFace.loadOverview()).resolves.toEqual([
+      { id: 'kpi', label: '本月出口额', value: 4318, unit: '万美元' },
+    ])
+    // Only delivered orders ride the rail, newest-known first, capped at five.
+    await expect(scenariosFace.loadDeliverables()).resolves.toEqual([
+      { orderNo: 'ORD-1', serviceName: '海外仓风险应对咨询', generatedAt: '2026-09-17T08:00:00.000Z' },
+      { orderNo: 'ORD-2', serviceName: undefined, generatedAt: '2026-09-16T08:00:00.000Z' },
+      { orderNo: 'ORD-10', serviceName: '批量', generatedAt: '2026-09-10T08:00:00.000Z' },
+      { orderNo: 'ORD-11', serviceName: '批量', generatedAt: '2026-09-11T08:00:00.000Z' },
+      { orderNo: 'ORD-12', serviceName: '批量', generatedAt: '2026-09-12T08:00:00.000Z' },
+    ])
+    await ctx.fiber.dispose()
+  })
+
+  it('surfaces refused overview and deliverables reads through the scenarios face', async () => {
+    const { ctx, slots } = await scriptedWorld({
+      lakehouseOverview: vi.fn(async () => fail('lakehouse not composed')),
+      ordersList: vi.fn(async () => fail('orders not composed')),
+    })
+    const scenariosFace = (slots.entries('conversation.view').find(candidate => candidate.options.id === 'scenarios')
+      ?.inject as () => {
+      loadOverview: () => Promise<never>
+      loadDeliverables: () => Promise<never>
+    })()
+    await expect(scenariosFace.loadOverview()).rejects.toThrow('lakehouse not composed')
+    await expect(scenariosFace.loadDeliverables()).rejects.toThrow('orders not composed')
+    await ctx.fiber.dispose()
+  })
+
+  it('routes the order toolview requests through the shared view bridge', async () => {
+    const { ctx, slots } = await scriptedWorld({})
+    const seen: string[] = []
+    const headerFace = (slots.entries('conversation.session.header.actions').find(candidate => candidate.options.id === 'kb')
+      ?.inject as () => { publishViewSwitch: (setView: (view: string) => void) => () => void })()
+    headerFace.publishViewSwitch((view: string) => { seen.push(view) })
+    for (const key of ['order_create', 'order_status']) {
+      const entry = slots.entries('tool.call.toolview').find(candidate => candidate.options.key === key)
+      const face = (entry?.inject as () => { requestView: (view: string) => void })()
+      face.requestView('orders')
+    }
+    expect(seen).toEqual(['orders', 'orders'])
+    // The scenarios tab's own request view rides the same bridge.
+    const scenariosFace = (slots.entries('conversation.view').find(candidate => candidate.options.id === 'scenarios')
+      ?.inject as () => { requestView: (view: string) => void })()
+    scenariosFace.requestView('chat')
+    expect(seen).toEqual(['orders', 'orders', 'chat'])
+    await ctx.fiber.dispose()
+  })
+
+  it('provides kb and scenarios view snapshots once view-context arrives', async () => {
+    const provide = vi.fn((_projection: unknown) => () => {})
+    const { ctx, slots } = await scriptedWorld({ viewContext: { provide } })
+    // The registrations ride the context's fiber: settle before asserting.
+    await vi.waitFor(() => { expect(provide).toHaveBeenCalledTimes(2) })
+    const kbProjection = provide.mock.calls[0]![0] as {
+      view: string
+      label: () => string
+      snapshot: () => Record<string, string | number>
+    }
+    const scenariosProjection = provide.mock.calls[1]![0] as {
+      view: string
+      label: () => string
+      snapshot: () => Record<string, string>
+    }
+    expect(kbProjection.view).toBe('kb')
+    expect(scenariosProjection.view).toBe('scenarios')
+    expect(kbProjection.label()).toBe(zh['view.kb'])
+    expect(scenariosProjection.label()).toBe(zh['view.scenarios'])
+    // Before the first stats read both tabs report the not-loaded document count.
+    expect(kbProjection.snapshot()).toEqual({ '知识库文档': '未加载', '本会话记录': 0 })
+    expect(scenariosProjection.snapshot()).toEqual({ '知识库文档': '未加载' })
+    const entryFace = (slots.entries('sidebar.footer.action')[0]?.inject as () => {
+      refresh: () => void
+      hooks: { kb: { getSnapshot: () => { records: unknown[] } } }
+    })()
+    entryFace.refresh()
+    await vi.waitFor(() => { expect(kbProjection.snapshot()['知识库文档']).toBe(STATS_VALUE.documents) })
+    expect(scenariosProjection.snapshot()).toEqual({ '知识库文档': STATS_VALUE.documents })
     await ctx.fiber.dispose()
   })
 })

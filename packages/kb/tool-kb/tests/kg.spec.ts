@@ -327,3 +327,24 @@ describe('kg presentations and flags', () => {
     await bare.fiber.dispose()
   })
 })
+
+describe('kg evidence read surfaces over the composed service', () => {
+  it('serves edge mentions, id lookups, and live adjacency', async () => {
+    await seedFoodChain()
+    const graph = ctx!.get('kbGraph')
+    if (graph === undefined) throw new Error('kbGraph missing in test composition')
+    await graph.putEpisode({
+      uuid: 'evidence:1', tenantId: 'demo-food-co', source: 'ai-edit',
+      name: '证据回放', content: '宏发食品生产酱油的原文依据', validAt: NOW, createdAt: NOW,
+    })
+    expect(await graph.linkMentions('evidence:1', ['kb:test:e1'])).toBe(1)
+    const mentions = await graph.edgeMentions('kb:test:e1')
+    expect(mentions).toHaveLength(1)
+    expect(mentions[0]?.episode?.content).toBe('宏发食品生产酱油的原文依据')
+    const edges = await graph.edgesByIds(['kb:test:e1', 'kb:test:missing'])
+    expect(edges.map(edge => edge.id)).toEqual(['kb:test:e1'])
+    const adjacency = await graph.liveAdjacency('demo-food-co', 10)
+    expect(adjacency.nodeIds).toContain('kb:test#酱油')
+    expect(adjacency.pairs).toContainEqual(['kb:test#宏发食品', 'kb:test#酱油'])
+  })
+})

@@ -1,0 +1,80 @@
+/* Shared atoms: badges, running row, notices. */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  border-radius: 999px;
+  font-size: 10px;
+  line-height: 1;
+  padding: 3px 6px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.badge.primary {
+  background: var(--dshm-primary-10);
+  color: var(--dshm-primary);
+}
+
+.badge.success {
+  background: var(--dshm-success-10);
+  color: var(--dshm-success);
+}
+
+.badge.warning {
+  background: var(--dshm-warning-10);
+  color: var(--dshm-warning);
+}
+
+.badge.muted {
+  background: var(--dshm-muted);
+  color: var(--dshm-muted-foreground);
+}
+
+.badge.destructive {
+  background: var(--dshm-destructive-10);
+  color: var(--dshm-destructive);
+}
+
+.runningRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--dshm-muted-foreground);
+  font-size: 13px;
+  padding: 4px 2px;
+}
+
+.runningDot {
+  display: inline-flex;
+  flex: none;
+  color: var(--dshm-primary);
+}
+
+.notice {
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-border);
+  border-radius: var(--dshm-radius);
+  color: var(--dshm-muted-foreground);
+  font-size: 14px;
+  padding: 20px 16px;
+  text-align: center;
+}
+
+.noticeError {
+  color: var(--dshm-destructive);
+  border-color: var(--dshm-destructive-10);
+}
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: 1px;
+  flex: none;
+  user-select: none;
+}

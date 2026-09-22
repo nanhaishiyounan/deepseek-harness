@@ -14,8 +14,68 @@ export interface KgNodeTypeRow {
   readonly extends?: string
   readonly natural_key?: string
   readonly prop_keys: readonly string[]
-  readonly source: 'builtin-ontology' | 'builtin-food' | 'nocobase-derived' | 'agent-defined'
-  readonly status: 'draft' | 'active'
+  readonly foodon_uri?: string
+  readonly foodon_id?: string
+  readonly synonyms?: readonly string[]
+  readonly source: 'builtin-ontology' | 'builtin-food' | 'foodon-imported' | 'nocobase-derived' | 'agent-defined'
+  readonly status: 'draft' | 'active' | 'deprecated'
+}
+
+/** One KGCL ontology op as the kg.ontologyEdit wire carries it. */
+export type KgOntologyOpRow =
+  | { readonly op: 'add_node'; readonly target_id: string; readonly label: string; readonly parent_id?: string }
+  | { readonly op: 'rename_node'; readonly target_id: string; readonly label: string }
+  | { readonly op: 'set_parent'; readonly target_id: string; readonly new_parent_id: string }
+  | { readonly op: 'deprecate_node'; readonly target_id: string; readonly replaced_by?: string }
+  | {
+    readonly op: 'change_cardinality'
+    readonly relation_id: string
+    readonly domain_id: string
+    readonly range_id: string
+    readonly min?: number
+    readonly max?: number
+  }
+
+/** The kg.ontologyEdit receipt (applied previews + the revision row). */
+export interface KgOntologyEditResultRow {
+  readonly applied: readonly string[]
+  readonly revision_id: number
+  readonly episode_uuid: string
+}
+
+/** One ledger episode from `kg.episodes` (the change feed's row). */
+export interface KgEpisodeRow {
+  readonly uuid: string
+  readonly source: 'ingest' | 'ai-edit' | 'human-edit' | 'rollback'
+  readonly name: string
+  readonly content: string
+  readonly created_at: string
+  readonly mentions: number
+}
+
+/** One pending gray-zone pair from `kg.reviewQueue`. */
+export interface KgReviewEntryRow {
+  readonly doc_id: string
+  readonly row_id: string
+  readonly doc_name: string
+  readonly row_name: string
+  readonly confidence: number
+  readonly reason: string
+}
+
+/** The `kg.communities` readout (the precomputed louvain partition). */
+export interface KgCommunitiesRow {
+  readonly communities: readonly { readonly id: number; readonly nodes: readonly string[] }[]
+  readonly modularity: number
+  readonly node_count: number
+}
+
+/** One rollback receipt from `kg.rollback`. */
+export interface KgRollbackResultRow {
+  readonly rollback_uuid: string
+  readonly rolled_back: string
+  readonly retired: number
+  readonly restored: number
 }
 
 /** One registered relation. */
@@ -24,7 +84,7 @@ export interface KgRelationRow {
   readonly label: string
   readonly constraints: readonly { readonly domain: string; readonly range: string }[]
   readonly kind: 'object' | 'hierarchical'
-  readonly source: 'builtin-ontology' | 'builtin-food' | 'nocobase-derived' | 'agent-defined'
+  readonly source: 'builtin-ontology' | 'builtin-food' | 'foodon-imported' | 'nocobase-derived' | 'agent-defined'
 }
 
 /** One seed hit from `kg.search`. */
@@ -51,7 +111,7 @@ export interface KgEdgeRow {
   readonly source: string
   readonly target: string
   readonly fact?: string
-  readonly asserted_by: 'nocobase' | 'lakehouse' | 'connector' | 'kb'
+  readonly asserted_by: 'nocobase' | 'lakehouse' | 'connector' | 'kb' | 'kg-align' | 'ai-edit'
 }
 
 /** The `kg.stats` quality extension the panel renders. */
@@ -105,4 +165,10 @@ export interface KgCanvasGraph {
   readonly nodes: readonly KgSubgraphNodeRow[]
   readonly edges: readonly KgEdgeRow[]
   readonly truncated: boolean
+}
+
+/** The `kg.history` frozen subgraph (the replay canvas input). */
+export interface KgHistoryRow extends KgCanvasGraph {
+  /** The instant the snapshot froze. */
+  readonly asOf: string
 }

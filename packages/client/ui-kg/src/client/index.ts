@@ -18,7 +18,10 @@ import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 // Type-only: pulls the view-context service Context merge (ctx.viewContext).
 import type {} from '@deepseek-ai/dsh-client-ui-view-context/client'
 import type { ConnectionHandle } from '@deepseek-ai/dsh-client-connection/client'
-import type { KgEdgeRow, KgMappingsRow, KgNodeHitRow, KgQueryWire, KgQualityRow, KgSubgraphNodeRow } from './kgTypes.ts'
+import type {
+  KgCommunitiesRow, KgEdgeRow, KgEpisodeRow, KgMappingsRow, KgNodeHitRow, KgOntologyEditResultRow,
+  KgOntologyOpRow, KgQueryWire, KgQualityRow, KgReviewEntryRow, KgRollbackResultRow, KgSubgraphNodeRow,
+} from './kgTypes.ts'
 import { createKgClientStore } from './kgStore.ts'
 import { createKgViewBridge } from './kgBridge.ts'
 import { KgEntry } from './KgEntry.tsx'
@@ -30,10 +33,18 @@ import type { KgKey } from './locales.ts'
 export type { KgEntryInjected, KgEntryProps } from './KgEntry.tsx'
 export type { KgHeaderButtonInjected, KgHeaderButtonProps } from './KgHeaderButton.tsx'
 export type { KgViewInjected, KgViewProps } from './KgView.tsx'
+export type { OntoTreeProps } from './OntoTree.tsx'
+export { buildOntoTree } from './OntoTree.tsx'
+export type { ChangeFeedProps } from './ChangeFeed.tsx'
 export type { KgViewBridge } from './kgBridge.ts'
 export type { KgCache, KgClientState, KgClientStore } from './kgStore.ts'
-export type { KgEdgeRow, KgNodeHitRow, KgNodeTypeRow, KgRelationRow, KgSubgraphNodeRow } from './kgTypes.ts'
-export { KG_NODE_COLOR_COUNT, nodeColorOf, parseKgPhrase } from './presentation.ts'
+export type {
+  KgCommunitiesRow, KgEdgeRow, KgEpisodeRow, KgHistoryRow, KgNodeHitRow, KgNodeTypeRow, KgOntologyEditResultRow,
+  KgOntologyOpRow, KgRelationRow, KgReviewEntryRow, KgRollbackResultRow, KgSubgraphNodeRow,
+} from './kgTypes.ts'
+export {
+  KG_NODE_COLOR_COUNT, nodeColorOf, parseKgPhrase, semanticColorOf, semanticRootOf, communityColorOf,
+} from './presentation.ts'
 export type { KgPhrasePlan } from './presentation.ts'
 export type { KgKey } from './locales.ts'
 
@@ -86,11 +97,86 @@ export function apply(ctx: ClientContext): void {
     if (snapshot.legend?.status === 'loading') return
     store.beginLegend()
     api.kg.schema({}).then((response) => {
-      const value = unwrap<{ node_types: readonly import('./kgTypes.ts').KgNodeTypeRow[]; relations: readonly import('./kgTypes.ts').KgRelationRow[] }>(response)
-      store.setLegend(value.node_types, value.relations)
+      const value = unwrap<{
+        node_types: readonly import('./kgTypes.ts').KgNodeTypeRow[]
+        relations: readonly import('./kgTypes.ts').KgRelationRow[]
+        revisions?: readonly { id: number; summary: string; created_at: string }[]
+      }>(response)
+      store.setLegend(value.node_types, value.relations, value.revisions ?? [])
     }).catch((error: unknown) => {
       store.failLegend(messageOf(error))
     })
+  }
+
+  /** Load or reload the episode ledger and the review queue (the change feed). */
+  const loadFeed = (): void => {
+    if (store.store.getSnapshot().episodes?.status === 'loading') return
+    store.beginEpisodes()
+    api.kg.episodes({ limit: 50 }).then((response) => {
+      store.setEpisodes(unwrap<{ episodes: readonly KgEpisodeRow[] }>(response).episodes)
+    }).catch((error: unknown) => {
+      store.failEpisodes(messageOf(error))
+    })
+    if (store.store.getSnapshot().review?.status === 'loading') return
+    store.beginReview()
+    api.kg.reviewQueue({}).then((response) => {
+      const value = unwrap<{ entries: readonly KgReviewEntryRow[]; source_episode: string }>(response)
+      store.setReview(value.entries, value.source_episode)
+    }).catch((error: unknown) => {
+      store.failReview(messageOf(error))
+    })
+  }
+
+  /** Load the precomputed louvain partition (community coloring's input). */
+  const loadCommunities = (): void => {
+    if (store.store.getSnapshot().communities?.status === 'loading') return
+    store.beginCommunities()
+    api.kg.communities({}).then((response) => {
+      store.setCommunities(unwrap<KgCommunitiesRow>(response))
+    }).catch((error: unknown) => {
+      store.failCommunities(messageOf(error))
+    })
+  }
+
+  /** Roll back one episode; the caller refreshes the feed and canvas. */
+  const rollbackEpisode = (episodeUuid: string): Promise<KgRollbackResultRow> =>
+    api.kg.rollback({ episode_uuid: episodeUuid }).then(response => unwrap<KgRollbackResultRow>(response))
+
+  /** Record one gray-zone verdict; rejects with the refusal message, the caller refreshes the queue. */
+  const decideReview = (entry: KgReviewEntryRow, decision: 'merge' | 'reject' | 'skip'): Promise<void> =>
+    api.kg.reviewDecide({
+      doc_id: entry.doc_id,
+      row_id: entry.row_id,
+      decision,
+      doc_name: entry.doc_name,
+      row_name: entry.row_name,
+    }).then((response) => { unwrap<unknown>(response) })
+
+  /** Apply one KGCL ontology op set; resolves with the receipt. */
+  const applyOntoEdit = (ops: readonly KgOntologyOpRow[]): Promise<KgOntologyEditResultRow> =>
+    api.kg.ontologyEdit({ ops: [...ops] }).then(response => unwrap<KgOntologyEditResultRow>(response))
+
+  /** Replay the canvas at one instant (kg.history snapshot). */
+  const replayAt = (asOf: string): void => {
+    if (store.store.getSnapshot().history?.status === 'loading') return
+    store.beginHistory()
+    api.kg.history({ as_of: asOf }).then((response) => {
+      type HistoryWire = {
+        readonly nodes: readonly KgSubgraphNodeRow[]
+        readonly edges: readonly KgEdgeRow[]
+        readonly truncated: boolean
+        readonly as_of: string
+      }
+      const value = unwrap<HistoryWire>(response)
+      store.setHistory({ nodes: value.nodes, edges: value.edges, truncated: value.truncated, asOf: value.as_of })
+    }).catch((error: unknown) => {
+      store.failHistory(messageOf(error))
+    })
+  }
+
+  /** Leave replay (the live canvas renders again). */
+  const leaveReplay = (): void => {
+    store.clearHistory()
   }
 
   /** The default view runs at most once per client session (a flag, not store state: it is an orchestration fact). */
@@ -125,7 +211,9 @@ export function apply(ctx: ClientContext): void {
   const walk = (seeds: readonly string[], hops: number): void => {
     store.beginCanvas()
     api.kg.subgraph({ seeds: [...seeds], hops }).then((response) => {
-      const value = unwrap<KgSubgraphWire & { seeds_resolved: readonly string[] }>(response)
+      // `unresolved` seeds ride the wire from a newer gateway; the canvas
+      // walks the resolved set alone and ignores the tail.
+      const value = unwrap<KgSubgraphWire & { seeds_resolved: readonly string[]; unresolved?: readonly string[] | undefined }>(response)
       store.setCanvas({ nodes: value.nodes, edges: value.edges, truncated: value.truncated }, value.seeds_resolved)
     }).catch((error: unknown) => {
       store.failCanvas(messageOf(error))
@@ -245,6 +333,14 @@ export function apply(ctx: ClientContext): void {
       selectNode: (nodeId: string | undefined) => { store.select(nodeId) },
       toggleTypeFilter,
       clearTypeFilter: () => { store.setTypeFilter(undefined) },
+      loadFeed,
+      loadCommunities,
+      rollbackEpisode,
+      decideReview,
+      applyOntoEdit,
+      replayAt,
+      leaveReplay,
+      setColorMode: (mode: 'type' | 'semantic' | 'community') => { store.setColorMode(mode) },
       requestView: (view: string) => { bridge.request(view) },
     }),
   }, KgView))
@@ -265,6 +361,30 @@ export function apply(ctx: ClientContext): void {
   // ctx.inject runs the registration once the service exists.
   ctx.inject(['viewContext'], (sub) => {
     const viewContext = sub.viewContext
+
+    // The SourceTrail seed deep link: walk the carried entities' two-hop
+    // neighborhood and select the first resolved seed — the canvas's
+    // selection highlight (the node plus its direct neighbors) then marks
+    // the trail's path. Delivered live while mounted, or drained on mount.
+    const deepLink = (seeds: readonly string[]): void => {
+      if (seeds.length === 0) return
+      store.beginCanvas()
+      api.kg.subgraph({ seeds: [...seeds], hops: 2 }).then((response) => {
+        const value = unwrap<KgSubgraphWire & { seeds_resolved: readonly string[] }>(response)
+        store.setCanvas({ nodes: value.nodes, edges: value.edges, truncated: value.truncated }, value.seeds_resolved)
+        const first = value.seeds_resolved[0]
+        if (first !== undefined) store.select(first)
+      }).catch((error: unknown) => {
+        store.failCanvas(messageOf(error))
+      })
+    }
+    const consumeDeepLink = (payload: unknown): void => {
+      const seeds = (payload as { seeds?: unknown } | undefined)?.seeds
+      if (Array.isArray(seeds) && seeds.every(entry => typeof entry === 'string')) deepLink(seeds)
+    }
+    ctx.effect(() => viewContext.onPending('kg', consumeDeepLink), 'ui-kg: kg deep-link listener')
+    const pending = viewContext.takePending('kg')
+    if (pending !== undefined) consumeDeepLink(pending)
 
     // First-batch view actions: pure store writes plus the in-view phrase
     // query (kg 视图内问数) — the browser half the view_apply tool reaches.
@@ -311,9 +431,12 @@ export function apply(ctx: ClientContext): void {
           }
           const restated = await queryPhrase(phrase.trim())
           const state = store.store.getSnapshot()
+          /* v8 ignore start -- queryPhrase resolves only after its then-callback
+             landed the ready canvas, so this re-read cannot find it unready. */
           const size = state.canvas?.status === 'ready'
             ? `节点 ${String(state.canvas.value.nodes.length)}/边 ${String(state.canvas.value.edges.length)}`
             : '图未加载'
+          /* v8 ignore stop */
           return { summary: `短语查询「${phrase.trim()}」已渲染（${restated}；${size}）` }
         },
       },

@@ -194,6 +194,7 @@
       "@deepseek-ai/dsh-client-ui-connectors": ["./packages/client/ui-connectors/src"],
       "@deepseek-ai/dsh-client-ui-kg": ["./packages/client/ui-kg/src"],
       "@deepseek-ai/dsh-client-ui-business": ["./packages/client/ui-business/src"],
+      "@deepseek-ai/dsh-client-ui-mobile-preview": ["./packages/client/ui-mobile-preview/src"],
       "@deepseek-ai/dsh-client-ui-slots": ["./packages/client/ui-slots/src"],
       "@deepseek-ai/dsh-client-ui-attachment": ["./packages/client/ui-attachment/src"],
       "@deepseek-ai/dsh-client-ui-primitives": ["./packages/client/ui-primitives/src"],

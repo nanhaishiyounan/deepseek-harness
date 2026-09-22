@@ -23,7 +23,7 @@ afterAll(() => {
   for (const directory of directories) {
     for (const suffix of ['', '-wal', '-shm']) {
       try {
-        new DatabaseSync(join(directory, `graph${suffix}.sqlite`), { readOnly: true }).close()
+        new DatabaseSync(join(directory, `graph${suffix}.sqlite`), { readOnly: true, timeout: 5_000 }).close()
       } catch {
         // Best-effort cleanup; the temp tree is removed by the OS.
       }
@@ -306,7 +306,7 @@ describe('SqliteGraphStore', () => {
     const path = join(directory, 'graph.sqlite')
     const seed = new SqliteGraphStore({ path, busyTimeoutMs: 5_000 }, DatabaseSync)
     seed.close()
-    const db = new DatabaseSync(path)
+    const db = new DatabaseSync(path, { timeout: 5_000 })
     db.exec('PRAGMA user_version = 99')
     db.close()
     expect(() => new SqliteGraphStore({ path, busyTimeoutMs: 5_000 }, DatabaseSync))
@@ -319,11 +319,11 @@ describe('SqliteGraphStore', () => {
     const path = join(directory, 'graph.sqlite')
     const seed = new SqliteGraphStore({ path, busyTimeoutMs: 5_000 }, DatabaseSync)
     seed.close()
-    const db = new DatabaseSync(path)
+    const db = new DatabaseSync(path, { timeout: 5_000 })
     db.exec('PRAGMA user_version = 3')
     db.close()
     expect(() => new SqliteGraphStore({ path, busyTimeoutMs: 5_000 }, DatabaseSync))
-      .toThrow(/schema version 3, incompatible with this build \(4\); delete the file and rebuild/u)
+      .toThrow(/schema version 3, incompatible with this build \(5\); delete the file and rebuild/u)
   })
 
   it('rejects an unversioned database that carries an application identity', () => {
@@ -332,7 +332,7 @@ describe('SqliteGraphStore', () => {
     const path = join(directory, 'graph.sqlite')
     const seed = new SqliteGraphStore({ path, busyTimeoutMs: 5_000 }, DatabaseSync)
     seed.close()
-    const db = new DatabaseSync(path)
+    const db = new DatabaseSync(path, { timeout: 5_000 })
     db.exec('PRAGMA user_version = 0')
     db.close()
     expect(() => new SqliteGraphStore({ path, busyTimeoutMs: 5_000 }, DatabaseSync))
@@ -345,7 +345,7 @@ describe('SqliteGraphStore', () => {
     const path = join(directory, 'graph.sqlite')
     const seed = new SqliteGraphStore({ path, busyTimeoutMs: 5_000 }, DatabaseSync)
     seed.close()
-    const db = new DatabaseSync(path)
+    const db = new DatabaseSync(path, { timeout: 5_000 })
     db.exec(`PRAGMA application_id = ${String(KB_GRAPH_SQLITE_APPLICATION_ID + 1)}`)
     db.close()
     expect(() => new SqliteGraphStore({ path, busyTimeoutMs: 5_000 }, DatabaseSync))
@@ -358,7 +358,7 @@ describe('SqliteGraphStore', () => {
     const path = join(directory, 'graph.sqlite')
     const seed = new SqliteGraphStore({ path, busyTimeoutMs: 5_000 }, DatabaseSync)
     seed.close()
-    const db = new DatabaseSync(path)
+    const db = new DatabaseSync(path, { timeout: 5_000 })
     const version = (db.prepare('PRAGMA user_version').get() as { user_version: number }).user_version
     db.close()
     expect(version).toBe(SCHEMA_VERSION)

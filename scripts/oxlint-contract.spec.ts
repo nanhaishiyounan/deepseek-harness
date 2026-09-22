@@ -1,8 +1,10 @@
 import { spawnSync } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
-import { existsSync } from 'node:fs'
+import { closeSync, existsSync, openSync, rmSync, statSync } from 'node:fs'
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
 import { join, relative } from 'node:path'
+import { setTimeout as delay } from 'node:timers/promises'
 import { fileURLToPath } from 'node:url'
 import { flattenDiagnosticMessageText, parseConfigFileTextToJson } from 'typescript'
 import { describe, expect, it } from 'vitest'
@@ -10,6 +12,43 @@ import { describe, expect, it } from 'vitest'
 const repositoryRoot = fileURLToPath(new URL('..', import.meta.url))
 const oxlintCli = fileURLToPath(new URL('../node_modules/oxlint/bin/oxlint', import.meta.url))
 const tsxCli = fileURLToPath(new URL('../node_modules/tsx/dist/cli.mjs', import.meta.url))
+
+const oxlintLockPath = join(tmpdir(), 'dsh-oxlint-contract.lock')
+
+/**
+ * Serialize every spawned oxlint across parallel vitest workers: two oxlint
+ * processes racing the same repository's type-aware caches intermittently
+ * crash each other, so the spawn runs under a cross-process lock file created
+ * atomically with O_EXCL. A holder that died without releasing leaves the file
+ * behind; after STALE_MS any waiter breaks it instead of deadlocking.
+ * @param run - the spawn to run under the lock.
+ * @returns whatever the spawn produces.
+ */
+async function withOxlintLock<T>(run: () => T): Promise<T> {
+  const STALE_MS = 120_000
+  const deadline = Date.now() + STALE_MS
+  let fd: number | undefined
+  while (fd === undefined) {
+    try {
+      fd = openSync(oxlintLockPath, 'wx')
+    } catch (error: unknown) {
+      if (!(error instanceof Error) || !('code' in error) || error.code !== 'EEXIST') throw error
+      try {
+        if (Date.now() - statSync(oxlintLockPath).mtimeMs > STALE_MS) rmSync(oxlintLockPath, { force: true })
+      } catch {
+        // The holder released between stat and our retry: the next open wins.
+      }
+      if (Date.now() > deadline) throw new Error(`oxlint contract lock: timed out after ${String(STALE_MS)}ms`)
+      await delay(50)
+    }
+  }
+  try {
+    return await run()
+  } finally {
+    closeSync(fd)
+    rmSync(oxlintLockPath, { force: true })
+  }
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -19,23 +58,23 @@ function isUnknownArray(value: unknown): value is unknown[] {
   return Array.isArray(value)
 }
 
-function runRepositoryOxlint(args: readonly string[], env: NodeJS.ProcessEnv = {}) {
-  return spawnSync(process.execPath, [tsxCli, 'scripts/run-oxlint.ts', ...args], {
+async function runRepositoryOxlint(args: readonly string[], env: NodeJS.ProcessEnv = {}) {
+  return await withOxlintLock(() => spawnSync(process.execPath, [tsxCli, 'scripts/run-oxlint.ts', ...args], {
     cwd: repositoryRoot,
     encoding: 'utf8',
     env: { ...process.env, NO_COLOR: '1', ...env },
-  })
+  }))
 }
 
-function runOxlint(args: readonly string[], env: NodeJS.ProcessEnv = {}) {
-  return spawnSync(process.execPath, [oxlintCli, ...args], {
+async function runOxlint(args: readonly string[], env: NodeJS.ProcessEnv = {}) {
+  return await withOxlintLock(() => spawnSync(process.execPath, [oxlintCli, ...args], {
     cwd: repositoryRoot,
     encoding: 'utf8',
     env: { ...process.env, NO_COLOR: '1', ...env },
-  })
+  }))
 }
 
-function normalizedOutput(result: ReturnType<typeof runOxlint>): string {
+function normalizedOutput(result: ReturnType<typeof spawnSync>): string {
   return `${result.stdout}${result.stderr}`.replaceAll('\\', '/')
 }
 
@@ -75,7 +114,7 @@ probePromise()
       }
       const clientScript = 'scripts/client-bundle-purity.spec.ts'
 
-      const result = runOxlint([
+      const result = await runOxlint([
         '--config',
         relative(repositoryRoot, configPath),
         '--format',
@@ -105,7 +144,7 @@ probePromise()
         rm(configPath, { force: true }),
       ])
     }
-  }, 20_000)
+  }, 60_000)
 
   it('runs JavaScript compatibility and nursery rules', async () => {
     const suffix = randomUUID()
@@ -132,7 +171,7 @@ export const longProbe = 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 +
 
     try {
       await writeFile(path, source)
-      const result = runOxlint([
+      const result = await runOxlint([
         '--config',
         relative(repositoryRoot, configPath),
         '--format',
@@ -152,7 +191,7 @@ export const longProbe = 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 +
         rm(configPath, { force: true }),
       ])
     }
-  }, 20_000)
+  }, 60_000)
 
   it('keeps the complete stylistic contract in Oxlint', async () => {
     const oxlintPath = join(repositoryRoot, '.oxlintrc.json')
@@ -196,8 +235,8 @@ export const longProbe = 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 +
     })
   })
 
-  it('checks preserved TypeGraph syntax without type-aware analysis', () => {
-    const result = runOxlint([
+  it('checks preserved TypeGraph syntax without type-aware analysis', { timeout: 60_000 }, async () => {
+    const result = await runOxlint([
       '--config',
       '.oxlintrc.staged.json',
       'packages/typert/generator/tests/fixtures/type-model',
@@ -234,7 +273,7 @@ export const longProbe = 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 +
 
     try {
       await writeFile(path, '// oxlint-disable-next-line no-console\nexport const value = 1\n')
-      const result = runOxlint([
+      const result = await runOxlint([
         '--config',
         relative(repositoryRoot, configPath),
         '--format',
@@ -252,10 +291,10 @@ export const longProbe = 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 +
         rm(configPath, { force: true }),
       ])
     }
-  }, 20_000)
+  }, 60_000)
 
-  it('accepts an ignored-only staged selection', () => {
-    const result = runOxlint([
+  it('accepts an ignored-only staged selection', { timeout: 60_000 }, async () => {
+    const result = await runOxlint([
       '--fix',
       '--no-error-on-unmatched-pattern',
       'scripts/install-lefthook.mjs',
@@ -265,7 +304,7 @@ export const longProbe = 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 +
     expect(result.status, normalizedOutput(result)).toBe(0)
   })
 
-  it('keeps staged validation project-free while preserving source rules', async () => {
+  it('keeps staged validation project-free while preserving source rules', { timeout: 60_000 }, async () => {
     const configPath = join(repositoryRoot, '.oxlintrc.staged.json')
     const result = parseConfigFileTextToJson(configPath, await readFile(configPath, 'utf8'))
     if (result.error !== undefined) {
@@ -283,7 +322,7 @@ export const longProbe = 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 +
     const path = join(repositoryRoot, 'scripts', `staged-lint-probe-${suffix}.ts`)
     try {
       await writeFile(path, 'export const value={answer:1};\n')
-      const lint = runOxlint([
+      const lint = await runOxlint([
         '--config',
         relative(repositoryRoot, configPath),
         '--format',
@@ -307,7 +346,7 @@ export const longProbe = 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 +
 
     try {
       await writeFile(path, '// oxlint-disable-next-line no-console\nexport const value = 1\n')
-      const result = runRepositoryOxlint([
+      const result = await runRepositoryOxlint([
         '--config',
         '.oxlintrc.staged.json',
         '--format',
@@ -325,13 +364,13 @@ export const longProbe = 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 +
     }
   })
 
-  it('prints only the final diagnostics when a fix retry still fails', async () => {
+  it('prints only the final diagnostics when a fix retry still fails', { timeout: 60_000 }, async () => {
     const suffix = randomUUID()
     const path = join(repositoryRoot, 'scripts', `staged-lint-probe-${suffix}.ts`)
 
     try {
       await writeFile(path, `export const longProbe = ${'1 + '.repeat(80)}1\n`)
-      const result = runRepositoryOxlint([
+      const result = await runRepositoryOxlint([
         '--config',
         '.oxlintrc.staged.json',
         '--format',
@@ -361,7 +400,7 @@ export const longProbe = 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 +
         await writeFile(path, 'const value={answer:1};  \nconsole.log(value)\n')
 
         const relativePath = relative(repositoryRoot, path)
-        const lintResult = runRepositoryOxlint(['--config', '.oxlintrc.staged.json', fixFlag, relativePath])
+        const lintResult = await runRepositoryOxlint(['--config', '.oxlintrc.staged.json', fixFlag, relativePath])
 
         expect(lintResult.error).toBeUndefined()
         expect(lintResult.status, normalizedOutput(lintResult)).toBe(0)
@@ -371,6 +410,6 @@ export const longProbe = 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 +
         await rm(directory, { recursive: true, force: true })
       }
     },
-    20_000,
+    60_000,
   )
 })

@@ -20,6 +20,7 @@ function reportOf(overrides: Partial<KgBuildRunReport> = {}): KgBuildRunReport {
     corpus: {
       documents: 3, chunks: 6, extractionCalls: 3, extractedEntities: 9, extractedRelations: 7,
       degradedEntities: 1, droppedRelations: 2, mergedEntities: 1, tombstonedEdges: 0, tombstonedScopes: 0,
+      quarantinedEntities: 0, quarantinedRelations: 0, shaclRounds: 0,
     },
     persistedTypes: 2,
     persistedRelations: 0,
@@ -59,6 +60,7 @@ describe('computeQualityMetrics', () => {
       corpus: {
         documents: 3, chunks: 6, extractionCalls: 3, extractedEntities: 9, extractedRelations: 7,
         degradedEntities: 1, droppedRelations: 2, mergedEntities: 1, tombstonedEdges: 0, tombstonedScopes: 0,
+        quarantinedEntities: 0, quarantinedRelations: 0, shaclRounds: 0,
       },
       persistedTypes: 2,
       persistedRelations: 0,

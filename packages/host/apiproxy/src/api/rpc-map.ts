@@ -15,6 +15,7 @@ import type { NocobaseApi } from './nocobase.ts'
 import type { DataApi } from './data.ts'
 import type { OrdersApi } from './orders.ts'
 import type { AssetsApi } from './assets.ts'
+import type { LakehouseApi } from './lakehouse.ts'
 import type { ConnectorsApi } from './connectors.ts'
 import type { KgApi } from './kg.ts'
 import type { SettingsApi } from './settings.ts'
@@ -73,6 +74,7 @@ export interface RpcMethodMap {
   'assets.list': AssetsApi['list']
   'assets.detail': AssetsApi['detail']
   'assets.stats': AssetsApi['stats']
+  'lakehouse.overview': LakehouseApi['overview']
   'connectors.list': ConnectorsApi['list']
   'connectors.connections': ConnectorsApi['connections']
   'connectors.transfers': ConnectorsApi['transfers']
@@ -83,6 +85,13 @@ export interface RpcMethodMap {
   'kg.subgraph': KgApi['subgraph']
   'kg.expand': KgApi['expand']
   'kg.stats': KgApi['stats']
+  'kg.episodes': KgApi['episodes']
+  'kg.rollback': KgApi['rollback']
+  'kg.ontologyEdit': KgApi['ontologyEdit']
+  'kg.reviewQueue': KgApi['reviewQueue']
+  'kg.reviewDecide': KgApi['reviewDecide']
+  'kg.communities': KgApi['communities']
+  'kg.history': KgApi['history']
   'kb.stats': KbApi['stats']
   'kb.search': KbApi['search']
   'kb.ingest': KbApi['ingest']
@@ -91,6 +100,7 @@ export interface RpcMethodMap {
   'nocobase.listMeta': NocobaseApi['listMeta']
   'nocobase.list': NocobaseApi['list']
   'nocobase.get': NocobaseApi['get']
+  'nocobase.update': NocobaseApi['update']
   'goal.create': GoalsApi['create']
   'goal.edit': GoalsApi['edit']
   'goal.pause': GoalsApi['pause']

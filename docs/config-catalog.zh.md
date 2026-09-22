@@ -917,10 +917,22 @@ export interface Config {
   /** Market seed file (featured cards + board copy); absent means no featured rail. */
   assetsSeedPath?: string
   /**
+   * Overview-home KPI seed file (id/label/unit/SQL definitions) evaluated
+   * live against the lakehouse seam by `lakehouse.overview`; absent means
+   * the read is refused.
+   */
+  lakehouseOverviewPath?: string
+  /**
    * Whether the connector-page domain (`connectors.list/connections/transfers`)
    * answers; absent means refused, same stance as `assetsEnabled`.
    */
   connectorsEnabled?: boolean
+  /**
+   * Whether the business page's inline record write (`nocobase.update`) answers;
+   * absent means every record change routes through the agent's nb_update
+   * confirmation flow.
+   */
+  nocobaseWriteEnabled?: boolean
   /**
    * Whether the graph-page domain (`kg.schema/search/subgraph/expand/stats`)
    * answers; absent means refused, same stance as `assetsEnabled`.
@@ -1237,6 +1249,8 @@ export interface KgBuildConfig {
   align?: AlignConfig
   /** Cross-source coreference alignment settings; absent keeps the pass on. */
   crossSourceAlign?: CrossSourceAlignConfig
+  /** Import the curated FoodOn subtree snapshot into the registry (idempotent); default true. */
+  foodon?: boolean
   /** Page size for NocoBase row fetches; default 100 (R13 batching). */
   pageSize?: number
   /** Repeat-run interval in ms; 0 (default) disables scheduling — manual runs only. */
@@ -1297,6 +1311,11 @@ export interface ExtractConfig {
   model?: string
   /** Maximum characters per chunk handed to extraction; default 4000. */
   maxChunkChars?: number
+  /** Prompt protocol: `instruct-kgc` (JSON schema dict, split batches) or `legacy`;
+   * default `legacy` until the zh-corpus A/B gate passes (the plan's adoption rule). */
+  protocol?: 'legacy' | 'instruct-kgc'
+  /** Gate extraction through the SHACL validation loop; default true. */
+  shaclGate?: boolean
 }
 
 /** Entity alignment configuration. */
@@ -1313,6 +1332,8 @@ export interface CrossSourceAlignConfig {
   enabled?: boolean
   /** Restrict matching to normalized-name equality, dropping containment matches; default false. */
   exactOnly?: boolean
+  /** Run the v2 pass: gray-zone containment pairs go to the pairwise LLM judge; default true. */
+  v2?: boolean
 }
 ```
 
@@ -3283,12 +3304,24 @@ export interface Config {
    * Defaults to true.
    */
   kgQuery?: boolean
+  /**
+   * Register `kg_edit` (natural-language graph editing with a diff preview,
+   * episode bookkeeping, and rollback) over the optional `ctx.kbGraph` seam.
+   * Defaults to false — a write surface deployments opt into.
+   */
+  kgEdit?: boolean
   /** Cooperative timeout budget (ms) for `kg_schema`. Defaults to 10000. */
   kgSchemaTimeoutMs?: number
   /** Cooperative timeout budget (ms) for `kg_subgraph`. Defaults to 20000. */
   kgSubgraphTimeoutMs?: number
   /** Cooperative timeout budget (ms) for `kg_query`. Defaults to 20000. */
   kgQueryTimeoutMs?: number
+  /** Cooperative timeout budget (ms) for `kg_edit` (includes one LLM planning stream). Defaults to 60000. */
+  kgEditTimeoutMs?: number
+  /** LLM provider for `kg_edit` planning and the `kg_query` L1 fill fallback. Defaults to `minimax`. */
+  kgLlmProvider?: string
+  /** LLM model for `kg_edit` planning and the `kg_query` L1 fill fallback. Defaults to `MiniMax-M3`. */
+  kgLlmModel?: string
 }
 ```
 
@@ -3811,10 +3844,17 @@ export interface Config {
   surfaceContext: boolean
   /** Explicit `--trusted-host` authorities from this invocation. */
   trustedHosts: string[]
+  /**
+   * Serve the mobile client at `/mobile` (the built dist/mobile.html). The
+   * mobile page talks to the same `/api` gateway, so enabling it changes
+   * only the served surface, never the data; a deployment without the page
+   * keeps the fallback SPA semantics untouched.
+   */
+  mobileEnabled: boolean
 }
 ```
 
-来源：[`packages/bundle/web-app/src/index.ts:42`](../packages/bundle/web-app/src/index.ts)
+来源：[`packages/bundle/web-app/src/index.ts:43`](../packages/bundle/web-app/src/index.ts)
 
 <a id="deepseek-aidsh-web-fetch-http"></a>
 
@@ -3978,6 +4018,7 @@ export interface Config {
 - `@deepseek-ai/dsh-client-ui-kg`（[`packages/client/ui-kg/src/index.ts`](../packages/client/ui-kg/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-layout`（[`packages/client/ui-layout/src/index.ts`](../packages/client/ui-layout/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-message-feedback`（[`packages/client/ui-message-feedback/src/index.ts`](../packages/client/ui-message-feedback/src/index.ts)）
+- `@deepseek-ai/dsh-client-ui-mobile-preview`（[`packages/client/ui-mobile-preview/src/index.ts`](../packages/client/ui-mobile-preview/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-model-selection`（[`packages/client/ui-model-selection/src/index.ts`](../packages/client/ui-model-selection/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-permission-presets`（[`packages/client/ui-permission-presets/src/index.ts`](../packages/client/ui-permission-presets/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-plan`（[`packages/client/ui-plan/src/index.ts`](../packages/client/ui-plan/src/index.ts)）
@@ -4065,6 +4106,7 @@ export interface Config {
 - `@deepseek-ai/dsh-base`（[`packages/bundle/base/src/index.ts`](../packages/bundle/base/src/index.ts)）
 - `@deepseek-ai/dsh-brand`（[`packages/util/brand/src/index.ts`](../packages/util/brand/src/index.ts)）
 - `@deepseek-ai/dsh-client-test-runtime`（[`packages/test-support/client-runtime/src/index.ts`](../packages/test-support/client-runtime/src/index.ts)）
+- `@deepseek-ai/dsh-client-ui-mobile`（[`packages/client/ui-mobile/src/index.ts`](../packages/client/ui-mobile/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-primitives`（[`packages/client/ui-primitives/src/index.ts`](../packages/client/ui-primitives/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-slots`（[`packages/client/ui-slots/src/index.ts`](../packages/client/ui-slots/src/index.ts)）
 - `@deepseek-ai/dsh-client-web`（[`packages/client/web/src/index.ts`](../packages/client/web/src/index.ts)）

@@ -97,6 +97,11 @@ export interface ExtractConfig {
   model?: string
   /** Maximum characters per chunk handed to extraction; default 4000. */
   maxChunkChars?: number
+  /** Prompt protocol: `instruct-kgc` (JSON schema dict, split batches) or `legacy`;
+   * default `legacy` until the zh-corpus A/B gate passes (the plan's adoption rule). */
+  protocol?: 'legacy' | 'instruct-kgc'
+  /** Gate extraction through the SHACL validation loop; default true. */
+  shaclGate?: boolean
 }
 
 /** Entity alignment configuration. */
@@ -113,6 +118,8 @@ export interface CrossSourceAlignConfig {
   enabled?: boolean
   /** Restrict matching to normalized-name equality, dropping containment matches; default false. */
   exactOnly?: boolean
+  /** Run the v2 pass: gray-zone containment pairs go to the pairwise LLM judge; default true. */
+  v2?: boolean
 }
 
 /** Pipeline plugin configuration (the schemastery-validated shape). */
@@ -133,6 +140,8 @@ export interface KgBuildConfig {
   align?: AlignConfig
   /** Cross-source coreference alignment settings; absent keeps the pass on. */
   crossSourceAlign?: CrossSourceAlignConfig
+  /** Import the curated FoodOn subtree snapshot into the registry (idempotent); default true. */
+  foodon?: boolean
   /** Page size for NocoBase row fetches; default 100 (R13 batching). */
   pageSize?: number
   /** Repeat-run interval in ms; 0 (default) disables scheduling — manual runs only. */
@@ -257,6 +266,12 @@ export interface CorpusReport {
   readonly tombstonedEdges: number
   /** Retired scopes (manifest-external leftovers) whose edges and watermarks this run swept. */
   readonly tombstonedScopes: number
+  /** Entities quarantined by the SHACL gate (never landed). */
+  readonly quarantinedEntities: number
+  /** Relations quarantined by the SHACL gate (never landed). */
+  readonly quarantinedRelations: number
+  /** Feedback rounds the SHACL gate ran across chunks (0 = all first-pass conforms). */
+  readonly shaclRounds: number
 }
 
 /** Cross-source coreference alignment totals for one run. */
@@ -269,6 +284,14 @@ export interface CrossSourceAlignReport {
   readonly edgesCreated: number
   /** Stale coreference edges tombstoned before the rebuild. */
   readonly tombstonedEdges: number
+  /** Gray-zone pairs the LLM judge ruled on (v2). */
+  readonly judgedPairs: number
+  /** Pairs the judge rejected — reject tombstones persisted (v2). */
+  readonly rejectedPairs: number
+  /** Same-verdict pairs under the auto floor, queued for review (v2). */
+  readonly reviewQueue: number
+  /** Materialized equivalence classes over the accepted edges (v2). */
+  readonly clusters: number
 }
 
 /** The quality metrics document one run computes and persists. */
@@ -315,4 +338,22 @@ export interface KgBuildRunReport {
   readonly metrics?: KgBuildRunMetrics
   readonly startedAt: string
   readonly finishedAt: string
+  /** FoodOn-imported registry classes persisted this run (0 when disabled or already converged). */
+  readonly foodonTypes?: number
+}
+
+/** One scope an incremental run observed changing (the five-source diff evidence). */
+export interface KgIncrementalScopeChange {
+  readonly sourceSystem: string
+  readonly scope: string
+  readonly previousRunAt?: string
+  readonly lastRunAt: string
+  /** Whether the scope's fingerprint advanced (false = watermark-only touch). */
+  readonly updated: boolean
+}
+
+/** The `runIncremental()` verdict: the run report plus the changed-scope diff. */
+export interface KgIncrementalReport {
+  readonly report: KgBuildRunReport
+  readonly changedScopes: readonly KgIncrementalScopeChange[]
 }

@@ -232,6 +232,12 @@
     - id: ui-kg
       name: '@deepseek-ai/dsh-client-ui-kg'
 
+    # Mobile-preview conversation view: the 390×844 phone bezel embedding
+    # the same-origin /mobile page (the mobile client served by web-runtime's
+    # mobileEnabled route) for demos and cross-device debugging.
+    - id: ui-mobile-preview
+      name: '@deepseek-ai/dsh-client-ui-mobile-preview'
+
     # Business-management page: sidebar entry + the `business` conversation
     # view tab (collection switcher, entity card stream, table view, NocoBase
     # embed entry). Data rides the gateway's nocobase domain (listMeta/list).

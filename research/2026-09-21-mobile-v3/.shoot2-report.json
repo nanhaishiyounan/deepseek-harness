@@ -1,0 +1,26 @@
+{
+  "scenes": [
+    {
+      "scene": "A-chain",
+      "ok": false,
+      "extra": "Error: neither ask-choice nor draft-card appeared within 240s"
+    },
+    {
+      "scene": "B-chain",
+      "ok": false,
+      "extra": "Error: supplier draft never appeared"
+    },
+    {
+      "scene": "C-rich",
+      "ok": false,
+      "extra": "markdown-ish=false leaks=[]; sample:  / 表单 / AI /  / 我查一下本月的采购单。 /  / ✓ / 查询业务记录 / ✓ / 查询业务记录 / 表单 / AI /  / 本月（2026-09）采购情况： /  / 整体：共 8 张采购单，合计 ¥14,480.65。 /  / 草稿 6 张、待处理 1 张、已收货 1 张 /  / 按供应商： /  / 宏发食品 — 7 张单，¥13,228.90（占比约 91%），是绝对主力 / 速达冷链设备 — 1 张单，¥1,251.75（占比约 9%） /  / 绝大多数金额"
+    },
+    {
+      "scene": "D-dark-receipt",
+      "ok": false,
+      "extra": "TimeoutError: locator.waitFor: Timeout 20000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"receipt-card-v3\"]').first() to be visible\n"
+    }
+  ],
+  "pageErrors": [],
+  "consoleErrors": []
+}

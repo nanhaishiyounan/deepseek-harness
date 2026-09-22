@@ -28,6 +28,9 @@ function insertBuiltinOntology(db: DatabaseSync): void {
       type.extends === undefined ? null : String(type.extends),
       JSON.stringify(type.props),
       type.naturalKey ?? null,
+      type.foodonUri ?? null,
+      type.foodonId ?? null,
+      type.synonyms === undefined || type.synonyms.length === 0 ? null : JSON.stringify(type.synonyms),
       type.source,
       type.status,
       seededAt,
@@ -42,9 +45,15 @@ function insertBuiltinOntology(db: DatabaseSync): void {
       entry.description ?? null,
       primary === undefined ? null : String(primary.domain),
       primary === undefined ? null : String(primary.range),
-      JSON.stringify(entry.constraints.map(constraint => ({ domain: String(constraint.domain), range: String(constraint.range) }))),
+      JSON.stringify(entry.constraints.map(constraint => ({
+        domain: String(constraint.domain),
+        range: String(constraint.range),
+        /* v8 ignore next -- the builtin seed registry declares no cardinality bounds. */
+        ...(constraint.cardinality === undefined ? {} : { cardinality: constraint.cardinality }),
+      }))),
       entry.kind,
       entry.inverseOf === undefined ? null : String(entry.inverseOf),
+      entry.foodonPropUri ?? null,
       entry.source,
       seededAt,
       seededAt,
@@ -53,14 +62,15 @@ function insertBuiltinOntology(db: DatabaseSync): void {
 }
 
 /**
- * Current graph store schema version: 4 adds the `kg_build_runs` ledger over
- * the v3 versioned registry (version columns + `kg_ontology_revisions` audit;
- * v2 property graph: registry / nodes+FTS5 / edges / aliases / source runs /
- * usage counters). Pre-release builds reject any other on-disk version: a
- * v1/v2/v3 database must be deleted and rebuilt — the graph is derived,
+ * Current graph store schema version: 5 adds the temporal + ontology-anchor
+ * format (kg_episode/kg_mention ledger, kg_edges.expired_at record
+ * retirement with the idx_edge_live partial index, ontology_xref channel,
+ * and the registry's foodon_uri/foodon_id/synonyms_json columns) over the
+ * v4 build-run ledger. Pre-release builds reject any other on-disk version:
+ * a v1-v4 database must be deleted and rebuilt — the graph is derived,
  * provenance-traceable data, so a full pipeline run restores it.
  */
-export const SCHEMA_VERSION = 4
+export const SCHEMA_VERSION = 5
 /** Application id reserved for DeepSeek Harness knowledge-graph databases ("DSHG"). */
 export const KB_GRAPH_SQLITE_APPLICATION_ID = 1146308687
 
@@ -114,7 +124,7 @@ export function validateSchema(db: DatabaseSync, path: string): void {
       db.exec(sql('schema'))
       insertBuiltinOntology(db)
       db.exec(sql('set-application-id'))
-      db.exec(sql('set-user-version-4'))
+      db.exec(sql('set-user-version-5'))
     }
     db.exec(sql('commit'))
     began = false

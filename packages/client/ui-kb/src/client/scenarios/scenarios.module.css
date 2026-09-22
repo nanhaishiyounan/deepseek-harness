@@ -318,3 +318,50 @@
     transition: none;
   }
 }
+
+.pinnedZone {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pinnedEmpty {
+  margin: 0;
+  color: var(--dsw-alias-label-caption);
+}
+
+.scenarioCardWrap {
+  position: relative;
+  min-width: 0;
+}
+
+.scenarioCard {
+  width: 100%;
+}
+
+.scenarioPin {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--dsw-alias-label-caption);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.scenarioPin:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-secondary);
+}
+
+.scenarioPin[data-pinned] {
+  color: var(--dsw-static-deepseek-500);
+}

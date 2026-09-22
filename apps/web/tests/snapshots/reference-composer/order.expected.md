@@ -16,17 +16,23 @@
   - tablist:
     - tab "Chat" [selected]
     - tab "Knowledge base"
+    - tab "Scenarios"
     - tab "Data assets"
     - tab "Connectors"
     - tab "Graph"
     - tab "Business"
     - tab "Trajectory"
+    - tab "Mobile preview"
 - text: Research notes what changed? Referenced session · Research notes {{clock}}
 - button "Copy":
   - img
 - button "Session recall Research notes":
   - img
   - text: Session recall Research notes
+- button "Agent mode":
+  - img
+  - text: Standard mode
+  - img
 - textbox "Message the agent"
 - button "Commands":
   - img

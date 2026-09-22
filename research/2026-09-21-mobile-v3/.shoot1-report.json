@@ -1,0 +1,36 @@
+{
+  "steps": [
+    {
+      "step": "01-login",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "step": "03-plus-sheet",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "step": "02-welcome",
+      "ok": true,
+      "extra": "sessionId=session-b6011bf8-3b22-452b-ab0c-7cb93928ebcd userMessages=0 noAutoUserBubble=true"
+    },
+    {
+      "step": "11-profile",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "step": "10-dark",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "step": "12-pc-iframe",
+      "ok": true,
+      "extra": ""
+    }
+  ],
+  "pageErrors": [],
+  "consoleErrors": []
+}

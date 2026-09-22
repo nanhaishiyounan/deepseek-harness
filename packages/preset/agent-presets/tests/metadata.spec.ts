@@ -78,6 +78,46 @@ describe('reading display metadata', () => {
     expect(await readPresetMetadata(await presetDir('order: .inf\n'))).toEqual({})
   })
 
+  it('reads the welcome block with its starters', async () => {
+    const dir = await presetDir([
+      'name: 智能填表助手',
+      'welcome:',
+      '  greeting: 我是智能填表助手',
+      '  capabilities:',
+      '    - 说一句话就能登记：采购单、供应商登记',
+      '  starters:',
+      '    - { label: 登记一条采购单, send: 向宏发食品采购 500kg 面粉 }',
+      '    - { label: 建档, send: 给供应商三味食品登个档 }',
+    ].join('\n'))
+
+    expect(await readPresetMetadata(dir)).toEqual({
+      name: '智能填表助手',
+      welcome: {
+        greeting: '我是智能填表助手',
+        capabilities: ['说一句话就能登记：采购单、供应商登记'],
+        starters: [
+          { label: '登记一条采购单', send: '向宏发食品采购 500kg 面粉' },
+          { label: '建档', send: '给供应商三味食品登个档' },
+        ],
+      },
+    })
+  })
+
+  it('drops a welcome block without a greeting or with malformed rows', async () => {
+    expect(await readPresetMetadata(await presetDir('welcome:\n  capabilities:\n    - 一条能力\n'))).toEqual({})
+    expect(await readPresetMetadata(await presetDir('welcome: not-a-map\n'))).toEqual({})
+    const dir = await presetDir([
+      'welcome:',
+      '  greeting: 我是助手',
+      '  starters:',
+      '    - { label: 只有标签 }',
+    ].join('\n'))
+    // The greeting survives; the starter without a send text is dropped.
+    expect(await readPresetMetadata(dir)).toEqual({
+      welcome: { greeting: '我是助手', capabilities: [], starters: [] },
+    })
+  })
+
   it('cannot carry identity or trust', async () => {
     const dir = await presetDir('name: mine\nid: standard\ntrust: system\n')
 

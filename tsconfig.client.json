@@ -102,6 +102,8 @@
     { "path": "./packages/client/locale" },
     { "path": "./packages/client/ui-renderer" },
     { "path": "./packages/client/web" },
+    { "path": "./packages/client/ui-mobile" },
+    { "path": "./packages/client/ui-mobile-preview" },
     { "path": "./apps/web" }
   ]
 }

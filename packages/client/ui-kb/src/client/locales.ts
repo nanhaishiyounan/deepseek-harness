@@ -54,6 +54,16 @@ export type KbKey =
   | 'scenario.probeLabel'
   | 'scenario.probeColon'
   | 'scenario.failed'
+  | 'overview.loading'
+  | 'overview.title'
+  | 'overview.kpiError'
+  | 'overview.pinned'
+  | 'overview.pinnedEmpty'
+  | 'overview.deliverables'
+  | 'overview.deliverablesEmpty'
+  | 'overview.unavailable'
+  | 'scenario.pin'
+  | 'scenario.unpin'
   | 'scenario.category.market'
   | 'scenario.category.process'
   | 'scenario.category.food-safety'
@@ -164,6 +174,16 @@ export const zh: Record<KbKey, string> = {
   'scenario.probeLabel': '示例问题',
   'scenario.probeColon': '：',
   'scenario.failed': '场景切换失败，请重试',
+  'overview.loading': '加载中…',
+  'overview.title': '经营概览',
+  'overview.kpiError': '暂不可用',
+  'overview.pinned': '钉选场景',
+  'overview.pinnedEmpty': '在场景卡上点 ★ 钉选高频场景，随时从这里直达。',
+  'overview.deliverables': '最近交付物',
+  'overview.deliverablesEmpty': '暂无交付物。',
+  'overview.unavailable': '概览数据暂不可用',
+  'scenario.pin': '钉选场景',
+  'scenario.unpin': '取消钉选',
   'scenario.category.market': '市场洞察',
   'scenario.category.process': '工艺',
   'scenario.category.food-safety': '食品安全',
@@ -275,6 +295,16 @@ export const en: Record<KbKey, string> = {
   'scenario.probeLabel': 'Example question',
   'scenario.probeColon': ': ',
   'scenario.failed': 'Could not switch scenario; try again',
+  'overview.loading': 'Loading…',
+  'overview.title': 'Business overview',
+  'overview.kpiError': 'unavailable',
+  'overview.pinned': 'Pinned scenarios',
+  'overview.pinnedEmpty': 'Pin frequent scenarios with ★ on their cards; they land here.',
+  'overview.deliverables': 'Recent deliverables',
+  'overview.deliverablesEmpty': 'No deliverables yet.',
+  'overview.unavailable': 'Overview figures are unavailable',
+  'scenario.pin': 'Pin scenario',
+  'scenario.unpin': 'Unpin scenario',
   'scenario.category.market': 'Market insight',
   'scenario.category.process': 'Process',
   'scenario.category.food-safety': 'Food safety',

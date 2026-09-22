@@ -203,6 +203,7 @@ function trackConfig(overrides: Partial<KgBuildPluginConfig> = {}): KgBuildPlugi
     },
     lakehouse: true,
     connector: true,
+    foodon: false,
     pageSize: 100,
     intervalMs: 0,
     ...overrides,

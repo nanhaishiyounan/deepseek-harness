@@ -3,7 +3,7 @@
 ## tool surface — v1 graph tools stay off by default
 - tools: kb_ingest, kb_ingest_url, kb_search, kb_stats, kg_query, kg_schema, kg_subgraph
 ## kg_schema() — before the build (builtin ontology only)
-ontology_version: 1.1.0
+ontology_version: 1.2.0
 entity_types:
   - id: "Customer" | label: "客户" | layer: domain | extends: Object
   - id: "Supplier" | label: "供应商" | layer: domain | extends: Object
@@ -31,6 +31,7 @@ entity_types:
   - id: "standard" | label: "标准" | layer: domain | extends: Concept
   - id: "process" | label: "工艺" | layer: domain | extends: Process
   - id: "risk" | label: "风险" | layer: domain | extends: Concept
+  - id: "packaging" | label: "包材" | layer: domain | extends: Object
 relations:
   - id: "produces" | label: "生产" | kind: object | company→product / Service→Deliverable
   - id: "uses" | label: "使用" | kind: object | product→ingredient / product→additive
@@ -64,7 +65,7 @@ relations:
   corpus: docs=1 calls=1 entities=4 degraded=1 dropped=1 merged=1
 
 ## kg_schema() — after the build (nocobase-derived types live)
-ontology_version: 1.1.0
+ontology_version: 1.2.0
 entity_types:
   - id: "Object" | label: "业务对象" | layer: top
   - id: "Process" | label: "业务过程" | layer: top
@@ -97,6 +98,22 @@ entity_types:
   - id: "standard" | label: "标准" | layer: domain | extends: Concept
   - id: "process" | label: "工艺" | layer: domain | extends: Process
   - id: "risk" | label: "风险" | layer: domain | extends: Concept
+  - id: "packaging" | label: "包材" | layer: domain | extends: Object
+  - id: "foodon:00001002" | label: "食品产品" | layer: domain | extends: product
+  - id: "foodon:00001015" | label: "植物性食品" | layer: domain | extends: foodon:00001002
+  - id: "foodon:00001264" | label: "豆类食品" | layer: domain | extends: foodon:00001015
+  - id: "foodon:00001635" | label: "豆（菜豆）类食品" | layer: domain | extends: foodon:00001264
+  - id: "foodon:00002153" | label: "植物种子类蔬菜食品" | layer: domain | extends: foodon:00001635
+  - id: "foodon:00002265" | label: "大豆种子（田间）食品" | layer: domain | extends: foodon:00002153
+  - id: "foodon:00002266" | label: "大豆食品" | layer: domain | extends: foodon:00002265
+  - id: "foodon:03301415" | label: "大豆" | layer: domain | extends: foodon:00002266
+  - id: "foodon:00004697" | label: "豆腐" | layer: domain | extends: foodon:03301415
+  - id: "foodon:03420116" | label: "生物体材料" | layer: domain | extends: ingredient
+  - id: "foodon:00004331" | label: "植物材料" | layer: domain | extends: foodon:03420116
+  - id: "foodon:00002753" | label: "菜豆" | layer: domain | extends: foodon:00004331
+  - id: "foodon:00002451" | label: "食品转化工艺" | layer: domain | extends: process
+  - id: "foodon:00003368" | label: "食品接触材料" | layer: domain | extends: packaging
+  - id: "foodon:00004277" | label: "受监管食品材料" | layer: domain | extends: standard
   - id: "experts" | label: "专家" | layer: domain | extends: Expert | status: draft | natural_key: id | props: name, org
   - id: "expert_services" | label: "专家服务" | layer: domain | extends: ExpertService | status: draft | natural_key: id | props: expertId, name
   - id: "orders" | label: "专家服务订单" | layer: domain | extends: Order | status: draft | natural_key: id | props: orderNo, serviceId, clientName
@@ -149,7 +166,7 @@ sources: "kb:supply-note.md"
 truncated: false
 
 ## kg_query(备份启用流程是什么) — the miss names every supported shape
-Error: kg_query: no template matches this phrase; supported shapes: 张红喜的供货链 / 张红喜的订单 / 含山梨酸钾的产品 / 宏发食品供货的所有产品 / 宏发食品生产的产品 / 酱油使用的原料 / 酱油的合规信息 / 宏发食品相关的2跳关系 / 宏发食品和张红喜的关系 — fall back to kg_schema + kg_subgraph for anything else
+Error: kg_query: no template matches this phrase; supported shapes: 张红喜的供货链 / 张红喜的订单 / 含山梨酸钾的产品 / 宏发食品供货的所有产品 / 宏发食品生产的产品 / 酱油使用的原料 / 酱油的合规信息 / 酱油的原料来自哪些供应商 / 20260911批次流向哪些客户 / 蚝油由哪些原料制成 / 宏发食品的供应商 / 宏发食品的客户 / 宏发食品相关的2跳关系 / 宏发食品和张红喜的关系 — fall back to kg_schema + kg_subgraph for anything else
 
 ## kgBuild.run() again — the idempotent pass
   experts: rows=1 nodes=0 edges=0 newRows=0 tombstoned=0 skipped=true watermark=1

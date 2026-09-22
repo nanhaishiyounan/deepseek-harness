@@ -52,7 +52,8 @@ export const AgentPresetSettingsSchema: z<AgentPresetSettings> = z.object({
 
 export { COMPOSITION_FILE, discoverPresets, scanRoot } from './discovery.ts'
 export {
-  METADATA_FILE, readPresetMetadata, renderPresetMetadata, type PresetMetadata,
+  METADATA_FILE, readPresetMetadata, renderPresetMetadata,
+  type PresetMetadata, type PresetWelcome, type PresetWelcomeStarter,
 } from './metadata.ts'
 export {
   inactiveRows, leakedServices, livePresetMounts, mountPreset, serviceForAgent, standingMountFor,

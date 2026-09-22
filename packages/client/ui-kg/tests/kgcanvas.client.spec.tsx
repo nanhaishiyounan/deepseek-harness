@@ -3,8 +3,9 @@
 // fill + FA2 layout + Sigma construction, the click/double-click wiring, the
 // drag gesture (threshold + click suppression), the zoom bounds and control
 // camera calls, the ResizeObserver lifecycle, the selection highlight
-// reducer, and the camera hand-off across renderer rebuilds, plus the
-// sidebar entry's no-session and error-badge branches (the jsdom
+// reducer, and the camera hand-off across renderer rebuilds, the KgView
+// coloring closures feeding the live canvas (community partition), plus the
+// sidebar entry's cold-start and no-session/error-badge branches (the jsdom
 // degraded-list path lives in kgview.client.spec.tsx).
 
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
@@ -12,11 +13,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-runtime/client'
 import { KgGraphCanvas } from '../src/client/KgGraphCanvas.tsx'
 import { KgEntry } from '../src/client/KgEntry.tsx'
+import { KgView } from '../src/client/KgView.tsx'
 import type { KgClientState } from '../src/client/kgStore.ts'
+import { communityColorOf } from '../src/client/presentation.ts'
 import { zh } from '../src/client/locales.ts'
 import { bindStoreHook, GLOBAL_KIT, SESSION_KIT, sessionListState } from './kg-fixture.client.ts'
 
-const t = ((key: string) => zh[key as keyof typeof zh] ?? key) as never
+const t = ((key: string, params?: Record<string, string | number>) => {
+  const template = zh[key as keyof typeof zh]
+  if (template === undefined) return key
+  return template.replaceAll(/\{(\w+)\}/g, (_, name: string) => String(params?.[name] ?? ''))
+}) as never
 
 /** One recorded sigma event handler (the payloads the gestures feed). */
 type MockHandler = (payload: { node?: string; event?: { x: number; y: number; preventSigmaDefault: () => void } }) => void
@@ -285,6 +292,86 @@ describe('KgGraphCanvas renderer stack (mocked sigma)', () => {
     expect(reducer('n1', { size: 8 })).toEqual({ size: 8, highlighted: true, forceLabel: true })
     expect(reducer('n2', { size: 8 })).toEqual({ size: 8, highlighted: true })
     expect(reducer('n3', { size: 8 })).toEqual({ size: 8 })
+    // Selecting the edge's target walks the else-if arm: its source glows too.
+    rerender(
+      <KgGraphCanvas
+        nodes={NODES}
+        edges={EDGES}
+        typeFilter={undefined}
+        selected="n2"
+        onSelect={vi.fn()}
+        onExpand={vi.fn()}
+        t={t}
+      />,
+    )
+    expect(reducer('n2', { size: 8 })).toEqual({ size: 8, highlighted: true, forceLabel: true })
+    expect(reducer('n1', { size: 8 })).toEqual({ size: 8, highlighted: true })
+  })
+
+  it('ignores moveBody events that arrive without a pressed node', async () => {
+    render(
+      <KgGraphCanvas
+        nodes={NODES}
+        edges={EDGES}
+        typeFilter={undefined}
+        selected={undefined}
+        onSelect={vi.fn()}
+        onExpand={vi.fn()}
+        t={t}
+      />,
+    )
+    await waitFor(() => { expect(sigmaInstances.length).toBe(1) })
+    sigmaInstances[0]!.handlers.get('moveBody')!({ event: { x: 40, y: 40, preventSigmaDefault: vi.fn() } })
+    expect(setNodeAttributeCalls).toEqual([])
+  })
+
+  it('colors graph nodes by their louvain community assignment through the view closure', async () => {
+    const store = createSnapshotStore<KgClientState>({
+      legend: {
+        status: 'ready',
+        value: {
+          types: [{ id: 'Customer', label: '客户', layer: 'domain', prop_keys: [], source: 'builtin-food', status: 'active' }],
+          relations: [],
+          revisions: [],
+        },
+      },
+      canvas: {
+        status: 'ready',
+        value: {
+          nodes: [
+            { id: 'n1', type: 'Customer', name: '宏发食品', depth: 0 },
+            { id: 'n2', type: 'Order', name: 'SO-1', depth: 1 },
+          ],
+          edges: [{ id: 'e1', relation: 'placed_by', source: 'n1', target: 'n2', asserted_by: 'nocobase' }],
+          truncated: false,
+          seeds: ['n1'],
+        },
+      },
+      communities: {
+        status: 'ready',
+        value: { communities: [{ id: 3, nodes: ['n1'] }], modularity: 0.5, node_count: 2 },
+      },
+      search: undefined, panel: undefined, selected: undefined, typeFilter: undefined,
+      episodes: undefined, review: undefined, history: undefined, colorMode: 'community',
+    })
+    render(
+      <KgView
+        {...SESSION_KIT}
+        inputActions={{ setDraft: vi.fn() } as never}
+        useKg={bindStoreHook(store) as never}
+        refresh={vi.fn()} ensureDefaultView={vi.fn()} walk={vi.fn()} expandNode={vi.fn()} searchSeeds={vi.fn()}
+        loadPanel={vi.fn()} queryPhrase={vi.fn().mockRejectedValue(new Error('offline'))} selectNode={vi.fn()}
+        toggleTypeFilter={vi.fn()} clearTypeFilter={vi.fn()} loadFeed={vi.fn()} loadCommunities={vi.fn()}
+        rollbackEpisode={vi.fn()} decideReview={vi.fn()} applyOntoEdit={vi.fn()} replayAt={vi.fn()}
+        leaveReplay={vi.fn()} setColorMode={vi.fn()} requestView={vi.fn()} t={t}
+      />,
+    )
+    await waitFor(() => { expect(sigmaInstances.length).toBe(1) })
+    const colors = new Map(graphs[0]?.nodes.map(([id, attrs]) => [id, attrs.color as string]))
+    // Assigned nodes carry their community's ladder color; unassigned ones
+    // fall back to community 0.
+    expect(colors.get('n1')).toBe(communityColorOf(3))
+    expect(colors.get('n2')).toBe(communityColorOf(0))
   })
 
   it('carries camera state across renderer rebuilds', async () => {
@@ -416,10 +503,33 @@ describe('KgGraphCanvas renderer stack (mocked sigma)', () => {
 })
 
 describe('KgEntry branch matrix', () => {
+  it('pulls the legend on mount when the store starts cold', () => {
+    const store = createSnapshotStore<KgClientState>({
+      legend: undefined, canvas: undefined, search: undefined, panel: undefined, selected: undefined,
+      typeFilter: undefined, episodes: undefined, review: undefined, communities: undefined,
+      history: undefined, colorMode: 'semantic',
+    })
+    const sessions = createSnapshotStore(sessionListState({ id: 's1', blank: false }))
+    const refresh = vi.fn()
+    render(
+      <KgEntry
+        {...GLOBAL_KIT}
+        wide
+        useSessions={bindStoreHook(sessions) as never}
+        useKg={bindStoreHook(store) as never}
+        refresh={refresh}
+        requestKgView={vi.fn()}
+        t={t}
+      />,
+    )
+    expect(refresh).toHaveBeenCalledTimes(1)
+  })
+
   it('refreshes instead of switching when no session exists, and shows the error badge', () => {
     const store = createSnapshotStore<KgClientState>({
       legend: { status: 'error', error: 'kg-not-composed' },
       canvas: undefined, search: undefined, panel: undefined, selected: undefined, typeFilter: undefined,
+      episodes: undefined, review: undefined, communities: undefined, history: undefined, colorMode: 'semantic',
     })
     const noSessions = createSnapshotStore({ ...sessionListState({ id: 's1', blank: false }), current: undefined })
     const refresh = vi.fn()
@@ -446,6 +556,7 @@ describe('KgEntry branch matrix', () => {
     const store = createSnapshotStore<KgClientState>({
       legend: { status: 'loading' },
       canvas: undefined, search: undefined, panel: undefined, selected: undefined, typeFilter: undefined,
+      episodes: undefined, review: undefined, communities: undefined, history: undefined, colorMode: 'semantic',
     })
     const sessions = createSnapshotStore(sessionListState({ id: 's1', blank: false }))
     render(

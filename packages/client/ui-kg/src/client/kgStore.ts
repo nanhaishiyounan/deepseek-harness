@@ -8,7 +8,10 @@
  */
 
 import { createSnapshotStore, type SnapshotStore } from '@deepseek-ai/dsh-client-runtime/client'
-import type { KgCanvasGraph, KgMappingsRow, KgNodeHitRow, KgNodeTypeRow, KgQualityRow, KgRelationRow } from './kgTypes.ts'
+import type {
+  KgCanvasGraph, KgCommunitiesRow, KgEpisodeRow, KgHistoryRow, KgMappingsRow, KgNodeHitRow,
+  KgNodeTypeRow, KgQualityRow, KgRelationRow, KgReviewEntryRow,
+} from './kgTypes.ts'
 
 /** One discriminated load state per cache. */
 export type KgCache<T> =
@@ -18,8 +21,15 @@ export type KgCache<T> =
 
 /** The shared client-session snapshot. */
 export interface KgClientState {
-  /** Ontology legend (registry projection); `undefined` before the first load starts. */
-  readonly legend: KgCache<{ readonly types: readonly KgNodeTypeRow[]; readonly relations: readonly KgRelationRow[] }> | undefined
+  /**
+   * Ontology legend (registry projection, revisions tail included — the
+   * ontology tree's audit footer); `undefined` before the first load starts.
+   */
+  readonly legend: KgCache<{
+    readonly types: readonly KgNodeTypeRow[]
+    readonly relations: readonly KgRelationRow[]
+    readonly revisions: readonly { readonly id: number; readonly summary: string; readonly created_at: string }[]
+  }> | undefined
   /** The canvas graph; `undefined` before the first walk. */
   readonly canvas: KgCache<KgCanvasGraph & { readonly seeds: readonly string[] }> | undefined
   /** The latest seed search; `undefined` until the user searches. */
@@ -30,12 +40,24 @@ export interface KgClientState {
   readonly selected: string | undefined
   /** Type-filter whitelist; `undefined` renders every type. */
   readonly typeFilter: ReadonlySet<string> | undefined
+  /** The episode ledger (change feed); `undefined` before the first load starts. */
+  readonly episodes: KgCache<readonly KgEpisodeRow[]> | undefined
+  /** The cross-source gray-zone review queue; `undefined` before the first load starts. */
+  readonly review: KgCache<{ readonly entries: readonly KgReviewEntryRow[]; readonly sourceEpisode: string }> | undefined
+  /** The precomputed louvain partition; `undefined` before the first load starts. */
+  readonly communities: KgCache<KgCommunitiesRow> | undefined
+  /** The frozen history snapshot during replay; `undefined` renders the live canvas. */
+  readonly history: KgCache<KgHistoryRow> | undefined
+  /** The canvas coloring mode: per-type hash, ontology-root semantic, or louvain community. */
+  readonly colorMode: 'type' | 'semantic' | 'community'
 }
 
 /** Initial snapshot: nothing loaded, nothing selected. */
 const INITIAL: KgClientState = {
   legend: undefined, canvas: undefined, search: undefined,
   panel: undefined, selected: undefined, typeFilter: undefined,
+  episodes: undefined, review: undefined, communities: undefined, history: undefined,
+  colorMode: 'semantic',
 }
 
 /** The shared store handle created once per apply. */
@@ -45,7 +67,11 @@ export interface KgClientStore {
   /** Record a legend load start. */
   beginLegend(): void
   /** Record a successful legend load. */
-  setLegend(types: readonly KgNodeTypeRow[], relations: readonly KgRelationRow[]): void
+  setLegend(
+    types: readonly KgNodeTypeRow[],
+    relations: readonly KgRelationRow[],
+    revisions: readonly { readonly id: number; readonly summary: string; readonly created_at: string }[],
+  ): void
   /** Record a failed legend load. */
   failLegend(message: string): void
   /** Record a canvas walk start. */
@@ -72,6 +98,34 @@ export interface KgClientStore {
   select(nodeId: string | undefined): void
   /** Replace the type-filter whitelist (`undefined` clears the filter). */
   setTypeFilter(types: ReadonlySet<string> | undefined): void
+  /** Record an episode-ledger load start. */
+  beginEpisodes(): void
+  /** Record a successful episode-ledger load. */
+  setEpisodes(episodes: readonly KgEpisodeRow[]): void
+  /** Record a failed episode-ledger load. */
+  failEpisodes(message: string): void
+  /** Record a review-queue load start. */
+  beginReview(): void
+  /** Record a successful review-queue load. */
+  setReview(entries: readonly KgReviewEntryRow[], sourceEpisode: string): void
+  /** Record a failed review-queue load. */
+  failReview(message: string): void
+  /** Record a communities load start. */
+  beginCommunities(): void
+  /** Record a successful communities load. */
+  setCommunities(row: KgCommunitiesRow): void
+  /** Record a failed communities load. */
+  failCommunities(message: string): void
+  /** Record a history-snapshot load start. */
+  beginHistory(): void
+  /** Record a successful history snapshot (enter replay). */
+  setHistory(row: KgHistoryRow): void
+  /** Record a failed history load. */
+  failHistory(message: string): void
+  /** Leave replay; the live canvas renders again. */
+  clearHistory(): void
+  /** Switch the canvas coloring mode. */
+  setColorMode(mode: 'type' | 'semantic' | 'community'): void
 }
 
 /**
@@ -88,8 +142,8 @@ export function createKgClientStore(): KgClientStore {
     beginLegend(): void {
       patch({ legend: { status: 'loading' } })
     },
-    setLegend(types, relations): void {
-      patch({ legend: { status: 'ready', value: { types, relations } } })
+    setLegend(types, relations, revisions): void {
+      patch({ legend: { status: 'ready', value: { types, relations, revisions } } })
     },
     failLegend(message): void {
       patch({ legend: { status: 'error', error: message } })
@@ -153,6 +207,48 @@ export function createKgClientStore(): KgClientStore {
       // An empty whitelist filters nothing; normalize to `undefined` so the
       // render never distinguishes "no filter" from "filter with zero types".
       patch({ typeFilter: types !== undefined && types.size === 0 ? undefined : types })
+    },
+    beginEpisodes(): void {
+      patch({ episodes: { status: 'loading' } })
+    },
+    setEpisodes(episodes): void {
+      patch({ episodes: { status: 'ready', value: episodes } })
+    },
+    failEpisodes(message): void {
+      patch({ episodes: { status: 'error', error: message } })
+    },
+    beginReview(): void {
+      patch({ review: { status: 'loading' } })
+    },
+    setReview(entries, sourceEpisode): void {
+      patch({ review: { status: 'ready', value: { entries, sourceEpisode } } })
+    },
+    failReview(message): void {
+      patch({ review: { status: 'error', error: message } })
+    },
+    beginCommunities(): void {
+      patch({ communities: { status: 'loading' } })
+    },
+    setCommunities(row): void {
+      patch({ communities: { status: 'ready', value: row } })
+    },
+    failCommunities(message): void {
+      patch({ communities: { status: 'error', error: message } })
+    },
+    beginHistory(): void {
+      patch({ history: { status: 'loading' } })
+    },
+    setHistory(row): void {
+      patch({ history: { status: 'ready', value: row } })
+    },
+    failHistory(message): void {
+      patch({ history: { status: 'error', error: message } })
+    },
+    clearHistory(): void {
+      patch({ history: undefined })
+    },
+    setColorMode(mode): void {
+      patch({ colorMode: mode })
     },
   }
 }

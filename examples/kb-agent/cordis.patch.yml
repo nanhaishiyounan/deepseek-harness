@@ -160,6 +160,10 @@
       name: '@deepseek-ai/dsh-tool-kb'
       config:
         tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"
+        # kg_edit: the AI semantic-edit surface (propose → diff → apply →
+        # episode → rollback), planning through the same MiniMax provider
+        # kg-build extracts with.
+        kgEdit: true
 
     # The knowledge-graph seam and its SQLite v2 store: the kg-build pipeline
     # below writes the property graph here, and the kg_schema/kg_subgraph
@@ -201,6 +205,20 @@
           # run instead of silently dropping the oldest files.
           maxDocuments: 60
           maxChunksPerDocument: 4
+        extract:
+          provider: minimax
+          model: MiniMax-M3
+          # M2: the JSON schema-dict protocol (batched, closed-set hard
+          # rules) gated by the SHACL explanatory-feedback loop; the A/B
+          # report under research/2026-09-17-m2-extraction-ab-report.md is
+          # the adoption evidence.
+          protocol: instruct-kgc
+          shaclGate: true
+        crossSourceAlign:
+          enabled: true
+          # M2: gray-zone containment pairs go through the pairwise LLM
+          # judge; negative verdicts persist as reject tombstones.
+          v2: true
 
     # The lakehouse seam: tables live as Parquet under the example workspace
     # with a SQLite catalog, queried by the DuckDB engine. The tool rows give
@@ -309,9 +327,16 @@
     # business-management pages; reads only — record writes stay on the
     # agent's nb_* tools with the in-conversation confirmation contract.
     nocobaseEnabled: true
+    # The business page's inline-edit fast path over the same service account
+    # (whitelisted low-risk fields only; high-risk changes stay on the
+    # agent's nb_update confirmation flow).
+    nocobaseWriteEnabled: true
     # The data-asset market surface (assets.list/detail/stats): connector
     # discovery projects the catalog; orders.create backs the confirm card.
     assetsEnabled: true
+    # The overview-home KPI band: the seed file's SQL definitions evaluated
+    # live against the lakehouse seam on every lakehouse.overview read.
+    lakehouseOverviewPath: examples/kb-agent/workspace/data/overview/kpis.json
     # Market operations seat: featured cards + board copy, data outside code.
     assetsSeedPath: examples/kb-agent/workspace/data/market/seed.json
     # The connector page (connectors.list/connections/transfers): provider
@@ -333,6 +358,19 @@
     host: !!js "ctx.webStartup.host ?? '127.0.0.1'"
     port: !!js "ctx.webStartup.port ?? 3080"
     nocobaseProxyOrigin: !!js "process.env.NOCOBASE_BASE_URL ?? 'http://127.0.0.1:13000'"
+
+# The mobile client rides the same web process: mobileEnabled serves the
+# built dist/mobile.html at /mobile (same origin, same /api gateway, same
+# SQLite ×3 + NocoBase PG — no new data path). Patched, not inserted: the
+# web-app bundle already mounts the web-runtime row; the restated keys keep
+# the bundle's own expressions for the fields this patch does not change.
+- id: web-runtime
+  config:
+    openBrowser: !!js ctx.webStartup.openBrowser
+    printUrl: true
+    surfaceContext: true
+    trustedHosts: !!js ctx.webStartup.trustedHosts
+    mobileEnabled: true
 
 # The web workbench composes new sessions from the enterprise-data-assistant
 # role preset instead of the shipped `standard`. Patched, not inserted: the

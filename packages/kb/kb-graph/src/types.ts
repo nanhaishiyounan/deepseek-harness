@@ -47,13 +47,17 @@ export function kgRelationId(id: string): KgRelationId {
 }
 
 /** Where a registered type or relation came from. */
-export type KgOntologySource = 'builtin-ontology' | 'builtin-food' | 'nocobase-derived' | 'agent-defined'
+export type KgOntologySource = 'builtin-ontology' | 'builtin-food' | 'foodon-imported' | 'nocobase-derived' | 'agent-defined'
 
 /** Ontology layer: schema.org-style top anchors or a business domain module. */
 export type KgOntologyLayer = 'top' | 'domain'
 
-/** Lifecycle gate for registered node types: draft types are writable but not model-visible. */
-export type KgNodeTypeStatus = 'draft' | 'active'
+/**
+ * Lifecycle gate for registered node types: draft types are writable but not
+ * model-visible; deprecated types (KGCL NodeObsoletion) keep their instances
+ * and history but stay out of every creation-facing enumeration.
+ */
+export type KgNodeTypeStatus = 'draft' | 'active' | 'deprecated'
 
 /** One property definition on a node type (closed shape metadata). */
 export interface KgPropDef {
@@ -62,6 +66,13 @@ export interface KgPropDef {
   readonly required?: boolean
   /** Exhaustive legal values when the value domain is a small enumeration. */
   readonly enumValues?: readonly string[]
+  /**
+   * Value-domain regex (source text; compile with the `u` flag) — one of the
+   * constraint quartet (`required`/`isArray`/`enumValues`/`pattern`).
+   */
+  readonly pattern?: string
+  /** Whether the property holds an array of the datatype (the quartet's multiplicity arm). */
+  readonly isArray?: boolean
   readonly description?: string
 }
 
@@ -84,6 +95,16 @@ export interface KgNodeType {
   readonly naturalKey?: string
   /** Static aliases (skos:altLabel); dynamic aliases live in the store's alias table. */
   readonly aliases?: readonly string[]
+  /**
+   * FoodOn term this class is anchored to (`http://purl.obolibrary.org/obo/FOODON_…`);
+   * `foodon-imported` classes always carry one, builtin food classes carry
+   * their canonical anchor.
+   */
+  readonly foodonUri?: string
+  /** FoodOn compact id (`FOODON:00002403`) — the xref convenience form of {@link foodonUri}. */
+  readonly foodonId?: string
+  /** Source-ontology synonym set (FoodOn OLS synonyms; entity-resolution input). */
+  readonly synonyms?: readonly string[]
   readonly source: KgOntologySource
   /** Draft types accept writes but stay out of model-facing enumerations. */
   readonly status: KgNodeTypeStatus
@@ -93,6 +114,12 @@ export interface KgNodeType {
 export interface KgRelationConstraint {
   readonly domain: KgNodeTypeId
   readonly range: KgNodeTypeId
+  /**
+   * Cardinality bounds per pair (how many edges of this relation one domain
+   * instance may hold toward the range): `min` asserts required links,
+   * `max` caps multiplicity. Absent means unbounded.
+   */
+  readonly cardinality?: { readonly min?: number; readonly max?: number }
 }
 
 /**
@@ -111,6 +138,10 @@ export interface KgRelation {
   readonly kind: 'object' | 'hierarchical'
   /** Declared inverse (a reverse edge stored under another relation), when known. */
   readonly inverseOf?: KgRelationId
+  /** FoodOn object-property IRI this relation was mapped from, when one was. */
+  readonly foodonPropUri?: string
+  /** Source-ontology synonym set for the relation label. */
+  readonly synonyms?: readonly string[]
   readonly source: KgOntologySource
 }
 
@@ -151,7 +182,7 @@ export interface KbGraphStoredTriple extends KbGraphTriple {
 
 /** Provenance of one graph fact: which source system asserted it, when. */
 export interface KgProvenance {
-  readonly sourceSystem: 'nocobase' | 'lakehouse' | 'connector' | 'kb' | 'kg-align'
+  readonly sourceSystem: 'nocobase' | 'lakehouse' | 'connector' | 'kb' | 'kg-align' | 'ai-edit'
   /** Row primary key, sourcePath, or datasetId — the assertion's address in the source. */
   readonly sourceId: string
   readonly extractedAt: string
@@ -174,7 +205,14 @@ export interface KgNode {
   readonly updatedAt: string
 }
 
-/** One property-graph edge: bitemporal, provenance-carrying, merge-anchored on a seven-column key. */
+/**
+ * One property-graph edge: quad-temporal, provenance-carrying, merge-anchored
+ * on a seven-column key. The four timestamps follow the Graphiti episode
+ * model: `validFrom`/`validUntil` state the fact's world validity (tombstones
+ * write `validUntil`), `recordedAt` states when the row was created, and
+ * `expiredAt` retires the record itself (rollback marks; a re-assertion of
+ * the same anchor revives it).
+ */
 export interface KgEdge {
   /** Stable edge id; the store keys rows on it and on the seven-column anchor. */
   readonly id: string
@@ -192,6 +230,12 @@ export interface KgEdge {
   readonly validFrom: string
   /** Set on tombstone; re-asserting the same anchor revives the edge (NULL again). */
   readonly validUntil?: string
+  /**
+   * Record-level retirement (the rollback mark): an edge expired by an
+   * episode rollback keeps its row and its fact-validity window; only the
+   * record stops being live. Restoring the edge clears it.
+   */
+  readonly expiredAt?: string
 }
 
 /** Size bounds for a subgraph read; both are clamped server-side. */
@@ -274,6 +318,53 @@ export interface KgBuildRunRow {
   readonly metrics: unknown
 }
 
+/** What caused one episode: a pipeline ingest, an AI edit, a human edit, or a rollback of another episode. */
+export type KgEpisodeSource = 'ingest' | 'ai-edit' | 'human-edit' | 'rollback'
+
+/**
+ * One episode row (the Graphiti temporal ledger's input half): the natural
+ * language instruction or ingestion event that produced graph changes, with
+ * the diff carried in `metadata`. Episodes are the rollback unit.
+ */
+export interface KgEpisodeInput {
+  /** Caller-minted unique id (a uuid or slug); the mention table references it. */
+  readonly uuid: string
+  readonly tenantId: string
+  readonly source: KgEpisodeSource
+  /** Short episode name (the instruction's first clause or the run scope). */
+  readonly name: string
+  /** The full instruction text / event description, verbatim. */
+  readonly content: string
+  readonly validAt: string
+  readonly createdAt: string
+  /** JSON document: actor, the ChangeOp diff, affected ids. */
+  readonly metadata?: unknown
+}
+
+/** One persisted episode row (read half). */
+export interface KgEpisodeRow extends KgEpisodeInput {
+  readonly mentionCount: number
+}
+
+/** One mention join row: the edge an episode touched, with both sides' identities. */
+export interface KgEdgeMention {
+  readonly episodeUuid: string
+  readonly edgeId: string
+  readonly createdAt: string
+  /** The episode's source/name/content when read edge-first (the provenance反查). */
+  readonly episode?: KgEpisodeInput
+}
+
+/** One ontology cross-reference row (the SSSOM-shaped mapping channel). */
+export interface KgOntologyXref {
+  /** Subject registry id (a node-type id, relation id, or a FoodOn term id). */
+  readonly subjectId: string
+  /** Mapping predicate (`sssom:exactMatch`, `cross-facet`, `foodon-import`…). */
+  readonly predicateId: string
+  readonly objectId: string
+  readonly mappingJustification?: string
+}
+
 /** One persisted ontology-revision audit row (read half). */
 export interface KgOntologyRevision {
   readonly id: number
@@ -281,6 +372,23 @@ export interface KgOntologyRevision {
   readonly summary: string
   readonly changes: unknown
   readonly createdAt: string
+}
+
+/** One applied KGCL ontology change set's outcome (the editor's receipt). */
+export interface KgOntologyApplyResult {
+  /** One preview line per applied op (the episode ledger stores the same text). */
+  readonly applied: readonly string[]
+  /** The ontology_change audit row the edit appended. */
+  readonly revisionId: number
+}
+
+/** One louvain community: the partition id plus its member node ids. */
+export interface KgCommunityReadout {
+  readonly communities: readonly { readonly id: number; readonly nodes: readonly string[] }[]
+  /** The partition's modularity (the clustering-quality readout). */
+  readonly modularity: number
+  /** The node count the detection ran over. */
+  readonly nodeCount: number
 }
 
 /**
@@ -521,4 +629,135 @@ export interface KgStore extends GraphStore {
    * @param typeId - the node type to count.
    */
   nodeCountByType(tenantId: string, typeId: KgNodeTypeId): Promise<number>
+  /**
+   * Append one episode row (the temporal ledger's write). The uuid is the
+   * caller's; a duplicate uuid refreshes content and metadata in place.
+   * @param episode - the episode snapshot.
+   */
+  putEpisode(episode: KgEpisodeInput): Promise<void>
+  /**
+   * Link edges to an episode (the mention join). Idempotent per pair.
+   * @param episodeUuid - the owning episode.
+   * @param edgeIds - the edges the episode created or invalidated.
+   * @returns how many mention rows were newly inserted.
+   */
+  linkMentions(episodeUuid: string, edgeIds: readonly string[]): Promise<number>
+  /**
+   * List newest episodes for one tenant.
+   * @param tenantId - owning tenant.
+   * @param limit - maximum rows.
+   */
+  listEpisodes(tenantId: string, limit: number): Promise<readonly KgEpisodeRow[]>
+  /**
+   * Reverse-lookup: every episode that touched one edge (the「这条边来自哪次修改」query).
+   * @param edgeId - the minted edge id.
+   */
+  edgeMentions(edgeId: string): Promise<readonly KgEdgeMention[]>
+  /**
+   * Read the edges one episode mentions (the rollback unit's membership).
+   * @param episodeUuid - the episode whose edges to read.
+   */
+  edgeIdsOfEpisode(episodeUuid: string): Promise<readonly string[]>
+  /**
+   * Retire edge records (set `expired_at`); the rollback mark. Live reads
+   * stop returning them; the rows and fact windows stay.
+   * @param edgeIds - the edges to retire.
+   * @param at - the ISO mark timestamp.
+   * @returns how many rows changed.
+   */
+  expireEdges(edgeIds: readonly string[], at: string): Promise<number>
+  /**
+   * Restore retired edge records (clear `expired_at`) — the rollback inverse.
+   * @param edgeIds - the edges to restore.
+   * @param at - the ISO restore timestamp (audit only).
+   * @returns how many rows changed.
+   */
+  restoreEdges(edgeIds: readonly string[], at: string): Promise<number>
+  /**
+   * Read live edge rows by ids (missing ids simply drop out).
+   * @param edgeIds - the minted edge ids.
+   */
+  edgesByIds(edgeIds: readonly string[]): Promise<readonly KgEdge[]>
+  /**
+   * Read the live edges between two nodes, optionally one relation only —
+   * the kg_edit contradiction-resolution read.
+   * @param tenantId - owning tenant.
+   * @param srcId - one endpoint (either direction matches).
+   * @param dstId - the other endpoint.
+   * @param relation - optional relation filter.
+   */
+  liveEdgesBetween(tenantId: string, srcId: string, dstId: string, relation?: KgRelationId): Promise<readonly KgEdge[]>
+  /**
+   * Read the tenant's whole live adjacency (the PPR input): node ids plus
+   * undirected endpoint pairs, capped.
+   * @param tenantId - owning tenant.
+   * @param cap - maximum edges read.
+   */
+  liveAdjacency(tenantId: string, cap: number): Promise<{ nodeIds: readonly string[]; pairs: readonly (readonly [string, string])[] }>
+  /**
+   * Read the graph state as of one time point (the revision-replay read):
+   * nodes created at or before `asOf`, joined with edges recorded at or
+   * before `asOf` that were neither tombstoned nor record-retired before
+   * it. Live is the `asOf = now` special case.
+   * @param tenantId - owning tenant.
+   * @param asOf - the ISO instant the snapshot freezes.
+   * @param limits - optional size bounds; defaults apply.
+   */
+  snapshotAt(tenantId: string, asOf: string, limits?: KgSubgraphLimits): Promise<KgSubgraph>
+  /**
+   * Persist ontology cross-reference rows (the FoodOn import channel).
+   * Idempotent per (subject, predicate, object).
+   * @param entries - the xref rows.
+   * @returns how many rows were newly inserted.
+   */
+  putOntologyXrefs(entries: readonly KgOntologyXref[]): Promise<number>
+  /**
+   * Read persisted ontology cross-reference rows.
+   * @param limit - maximum rows.
+   */
+  listOntologyXrefs(limit: number): Promise<readonly KgOntologyXref[]>
+  /**
+   * Persist coreference reject tombstones (pairs the LLM judge ruled
+   * different); the align pass reads the set to skip re-judging them.
+   * @param entries - the reject rows.
+   * @returns how many rows were newly inserted.
+   */
+  putCorefRejects(entries: readonly KgCorefReject[]): Promise<number>
+  /**
+   * Read every persisted coreference reject pair key.
+   * @returns the reject tombstone set.
+   */
+  listCorefRejects(): Promise<ReadonlySet<string>>
+}
+
+/** One coreference reject tombstone (an align-pass negative verdict, persisted). */
+export interface KgCorefReject {
+  readonly pairKey: string
+  readonly docId: string
+  readonly rowId: string
+  readonly reason: string
+  readonly decidedAt: string
+}
+
+/**
+ * The unordered cross-source coreference pair key (the align pass's reject
+ * tombstone channel and the review queue's decided-set share it).
+ * @param docId - the corpus-extracted node id (`kb:` prefixed).
+ * @param rowId - the business-row node id (`nocobase:` prefixed).
+ * @returns the order-independent `a::b` key.
+ */
+export function kgCorefPairKey(docId: string, rowId: string): string {
+  return docId < rowId ? `${docId}::${rowId}` : `${rowId}::${docId}`
+}
+
+/**
+ * The minted coreference edge id for one pair (the align pass's
+ * `kg-align:<doc>:<row>` convention; human merges ride the same anchor so
+ * re-deciding merge stays idempotent).
+ * @param docId - the corpus-extracted node id.
+ * @param rowId - the business-row node id.
+ * @returns the deterministic edge id.
+ */
+export function kgCorefEdgeId(docId: string, rowId: string): string {
+  return `kg-align:${docId}:${rowId}`
 }

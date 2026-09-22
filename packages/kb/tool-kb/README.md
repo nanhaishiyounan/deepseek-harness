@@ -26,12 +26,18 @@ interface Config {
   ingestTimeoutMs?: number   // default 300,000 ms
   statsTimeoutMs?: number    // default 10,000 ms
   urlIngestTimeoutMs?: number // default 300,000 ms
+  kgQuery?: boolean          // register kg_query (needs the llm seam for L1 fills); default true
+  kgEdit?: boolean           // register kg_edit; default false
+  kgQueryTimeoutMs?: number  // default 60,000 ms
+  kgEditTimeoutMs?: number   // default 60,000 ms (includes one planning stream)
+  kgLlmProvider?: string     // kg_edit planning + kg_query L1 fill provider; default 'minimax'
+  kgLlmModel?: string        // kg_edit planning + kg_query L1 fill model; default 'MiniMax-M3'
 }
 ```
 
 Each budget attaches to the tool as `ToolDefinition.timeoutMs` for `@deepseek-ai/dsh-tool-call-timeout-policy` to enforce. `kb_search` and `kb_stats` are concurrency-safe reads; `kb_ingest` and `kb_ingest_url` are not.
 
-The kg face adds `kg_schema` (ontology browsing), `kg_subgraph` (k-hop subgraph reads serialized as entity-aggregated YAML — no free-form graph-query generation), and `kg_query` (one templated Chinese phrase — 「X的供货链」「含Y的产品」「X和Y的关系」 — compiled through the shared kg-nl module in `dsh-kb-graph`, the same compiler apiproxy's `kg.query` RPC serves, then walked as a kg_subgraph-shaped read; a miss names the supported shapes and points at the kg_schema + kg_subgraph fallback).
+The kg face adds `kg_schema` (ontology browsing — FoodOn anchors, synonyms, cardinality included), `kg_subgraph` (k-hop subgraph reads serialized as entity-aggregated YAML — no free-form graph-query generation), and `kg_query` (one templated Chinese phrase — 「X的供货链」「含Y的产品」「X和Y的关系」 — compiled through the shared kg-nl module in `dsh-kb-graph`, the same compiler apiproxy's `kg.query` RPC serves, then walked as a kg_subgraph-shaped read; a miss names the supported shapes and points at the kg_schema + kg_subgraph fallback). `kg_edit` (opt-in via `kgEdit`) edits the graph from one natural-language instruction through the four-step contract: `propose` plans a validated KGCL op set against the registry's closed sets and renders the diff (nothing lands), `apply` executes one confirmed proposal as an episode (`source: 'ai-edit'`, instruction verbatim, diff in metadata) with edge-record retirement instead of deletes and contradiction resolution, `rollback` reverses one episode as a rollback episode, and `episodes` lists the change ledger. Every write is an episode — 「这条边来自哪次修改」 is answerable from the mention table alone.
 
 ## Model Experience
 

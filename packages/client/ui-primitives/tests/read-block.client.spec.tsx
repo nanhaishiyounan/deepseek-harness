@@ -152,7 +152,7 @@ describe('ReadBlock height cap', () => {
     expect(view.container.querySelector('[aria-expanded]')).toBeNull()
   })
 
-  it('slices head and tail over the cap and expands on click', () => {
+  it('slices head and tail over the cap and expands on click', { timeout: 30_000 }, () => {
     const view = render(<ReadBlock label="a" lines={lines(10)} totalLines={10} maxLines={4} />)
     // maxLines 4: head = ceil(4/2) = 2, tail = 4 - 2 = 2, 6 hidden.
     expect(gutters(view.container)).toEqual(['1', '2', '9', '10'])

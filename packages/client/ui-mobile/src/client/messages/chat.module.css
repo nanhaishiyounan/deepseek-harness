@@ -1,0 +1,367 @@
+/* Chat page (03 §4.1/§4.12): header, ticket bubbles with the speaking
+   corner, one entrance motion, the composer with context chips. */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--dshm-background);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  min-height: 52px;
+  background: var(--dshm-card);
+  border-bottom: 1px solid var(--dshm-border);
+  flex: none;
+}
+
+.back {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--dshm-muted);
+  color: var(--dshm-muted-foreground);
+  font-size: 20px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+.headerPlus {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--dshm-primary);
+  color: var(--dshm-on-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+.headerMain {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.headerTitle {
+  font-size: 17px;
+  line-height: 24px;
+  font-weight: 600;
+  color: var(--dshm-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.headerHint {
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--dshm-muted-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flow {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 12px 20px;
+}
+
+/* The one entrance motion (03 §6.1): a new flow row settles up into place.
+   CSS animations run at insertion, so only genuinely new items move. */
+.flow > * {
+  animation: chat-enter 180ms ease-out;
+}
+
+@keyframes chat-enter {
+  from {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+}
+
+.daySeparator {
+  align-self: center;
+  font-size: 10px;
+  line-height: 16px;
+  color: var(--dshm-muted-foreground);
+  background: var(--dshm-muted);
+  border-radius: 999px;
+  padding: 3px 10px;
+  flex: none;
+}
+
+.assistantBlock {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: 100%;
+}
+
+.assistantCol {
+  position: relative;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* The turn-level avatar ghost (03 §4.1): continuation segments of one AI
+   turn keep the column width for alignment without repeating the identity. */
+.assistantColGhost {
+  flex: none;
+  width: 32px;
+}
+
+/* The AI seal: a 10px stroked round badge at the avatar's lower right —
+   identity in the stamp language, not a spark glyph (03 §4.1). */
+.aiSeal {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid var(--dshm-primary);
+  background: var(--dshm-card);
+  color: var(--dshm-primary);
+  font-size: 8px;
+  line-height: 1;
+  font-weight: 600;
+}
+
+.assistantBubble {
+  background: var(--dshm-bubble-ai-bg);
+  border: 1px solid var(--dshm-bubble-ai-border);
+  border-radius: var(--dshm-radius-corner) var(--dshm-radius-bubble) var(--dshm-radius-bubble) var(--dshm-radius-bubble);
+  box-shadow: var(--dshm-shadow-card);
+  padding: 12px 14px;
+  font-size: 15px;
+  line-height: 24px;
+  color: var(--dshm-bubble-ai-fg);
+  max-width: min(76vw, 296px);
+  overflow-wrap: anywhere;
+}
+
+.userBubble {
+  align-self: flex-end;
+  background: var(--dshm-bubble-user-bg);
+  color: var(--dshm-bubble-user-fg);
+  border-radius: var(--dshm-radius-bubble) var(--dshm-radius-corner) var(--dshm-radius-bubble) var(--dshm-radius-bubble);
+  padding: 12px 14px;
+  font-size: 15px;
+  line-height: 24px;
+  max-width: min(76vw, 296px);
+  overflow-wrap: anywhere;
+}
+
+.cardRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.cardRow > :last-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.toolRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 4px 0 40px;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--dshm-muted-foreground);
+}
+
+.toolDot,
+.toolDotRunning,
+.toolDotError {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  flex: none;
+}
+
+.toolDot {
+  background: var(--dshm-success-10);
+  color: var(--dshm-success);
+}
+
+.toolDotRunning {
+  background: var(--dshm-primary-10);
+  color: var(--dshm-primary);
+}
+
+.toolDotError {
+  background: var(--dshm-destructive-10);
+  color: var(--dshm-destructive);
+}
+
+.degradedNotice {
+  max-width: min(76vw, 296px);
+  font-size: 11px;
+  line-height: 18px;
+  color: var(--dshm-muted-foreground);
+  border: 1px dashed var(--dshm-bubble-ai-border);
+  border-radius: var(--dshm-radius-bubble);
+  padding: 6px 10px;
+  overflow-wrap: anywhere;
+}
+
+.degradedNotice summary {
+  cursor: pointer;
+  user-select: none;
+}
+
+.degradedNoticeBody {
+  margin: 6px 0 0;
+  padding: 8px;
+  font-family: var(--dshm-font-mono, monospace);
+  font-size: 10px;
+  line-height: 14px;
+  white-space: pre-wrap;
+  background: var(--dshm-bubble-ai-bg);
+  border-radius: 6px;
+}
+
+.toolLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Composer (03 §4.12): context chips row over the adaptive textarea. */
+.composer {
+  flex: none;
+  border-top: 1px solid var(--dshm-border);
+  background: var(--dshm-card);
+  padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chipRow {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.chipRow::-webkit-scrollbar {
+  display: none;
+}
+
+.chip {
+  flex: none;
+  height: 28px;
+  padding: 0 12px;
+  font-size: 12px;
+  line-height: 26px;
+  color: var(--dshm-primary);
+  background: var(--dshm-primary-soft);
+  border: none;
+  border-radius: 999px;
+}
+
+.chip:disabled {
+  opacity: 0.5;
+}
+
+.inputRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  resize: none;
+  max-height: 96px;
+  background: var(--dshm-muted);
+  border-radius: var(--dshm-radius);
+  border: none;
+  padding: 12px 14px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--dshm-foreground);
+  box-sizing: border-box;
+}
+
+.send {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--dshm-primary);
+  color: var(--dshm-on-primary);
+  font-size: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+.send:active {
+  background: color-mix(in srgb, var(--dshm-primary) 85%, #000);
+}
+
+.send:disabled {
+  background: var(--dshm-muted);
+  color: color-mix(in srgb, var(--dshm-card) 40%, transparent);
+}
+
+.stop {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: var(--dshm-muted);
+  color: var(--dshm-muted-foreground);
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+.error {
+  margin: 0;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dshm-destructive);
+}
+
+/* Motion discipline (03 §6): the entrance settles instantly instead. */
+@media (prefers-reduced-motion: reduce) {
+  .flow > * {
+    animation: none;
+  }
+}

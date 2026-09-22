@@ -1,0 +1,443 @@
+/**
+ * Session-event fold for the mobile chat surface: a pure projection from raw
+ * `session.history` events onto chat items — narrative bubbles (never
+ * protocol fences), tool-call rows with their running/done state, the v3
+ * structured items (ask / field-ask / action / receipt), the form-assistant
+ * task cards, the collapsed notices for unvalidatable dsh fences, and the KG
+ * evidence descriptors the answer cited. v3 fences (```dsh) split out of the
+ * narrative; v2 drafts (```json) keep their legacy parse with the recognized
+ * fence stripped from the bubble. Deterministic by seq; no React imports.
+ */
+
+import { parseConfirmPush, splitDraftMessage, type ConfirmPush, type FormDraft } from './form-draft.ts'
+import {
+  answerTextOf,
+  splitMessage,
+  type MessageSegment,
+  type AskChoicePayload,
+  type AskFieldPayload,
+  type FormConfirmPayload,
+  type FormDraftPayload,
+  type RejectFlowPayload,
+  type SubmitReceiptPayload,
+} from './protocol.ts'
+
+/** One folded text bubble. */
+export interface ChatTextMessage {
+  readonly kind: 'text'
+  readonly seq: number
+  readonly time: number
+  readonly role: 'user' | 'assistant'
+  readonly text: string
+  /** Derived: this user bubble answered the preceding ask (renders as the small pick capsule). */
+  choiceReply?: boolean
+}
+
+/** One tool-call row; `state` flips to done/error when its result lands. */
+export interface ChatToolRow {
+  readonly kind: 'tool'
+  readonly seq: number
+  readonly time: number
+  readonly name: string
+  readonly label: string
+  state: 'running' | 'done' | 'error'
+  /**
+   * A protocol-fence name the model emitted as a tool call (ask_* /
+   * form_draft / …): the row renders as the neutral status line, never the
+   * protocol name and never the failure mark.
+   */
+  readonly protocol?: true
+}
+
+/** One AI-prefilled form draft rendered as the task card (v3 payload when one rode the message). */
+export interface ChatTaskCard {
+  readonly kind: 'task-card'
+  readonly seq: number
+  readonly time: number
+  readonly draft: FormDraft
+  /** The v3 three-tier payload; absent on v2-legacy drafts. */
+  readonly payload?: FormDraftPayload
+}
+
+/** One ask_choice interaction: the question and its pickable options. */
+export interface ChatAsk {
+  readonly kind: 'ask'
+  readonly seq: number
+  readonly time: number
+  readonly payload: AskChoicePayload
+  /** Derived: set when the following user message answered this ask (selected = the picked value). */
+  answered?: { selected?: string }
+}
+
+/** One ask_field interaction: a single missing required field. */
+export interface ChatFieldAsk {
+  readonly kind: 'field-ask'
+  readonly seq: number
+  readonly time: number
+  readonly payload: AskFieldPayload
+  /** Derived: set when the following user message answered this ask. */
+  answered?: { selected?: string }
+}
+
+/** One user action message (确认写入 / 驳回), fenced in v3 or prefix-parsed in v2. */
+export interface ChatAction {
+  readonly kind: 'action'
+  readonly seq: number
+  readonly time: number
+  readonly action: 'confirm' | 'reject'
+  /** The human-readable line ("确认写入" / "驳回" / the v2 protocol text). */
+  readonly text: string
+  /** The v3 fence payload when the action rode one. */
+  readonly payload?: FormConfirmPayload | RejectFlowPayload
+  /** The v2 confirm-push parse when the action rode the legacy prefix. */
+  readonly legacy?: ConfirmPush
+}
+
+/** One submit_receipt fence: the landing-row receipt card. */
+export interface ChatReceipt {
+  readonly kind: 'receipt'
+  readonly seq: number
+  readonly time: number
+  readonly payload: SubmitReceiptPayload
+}
+
+/** One dsh fence that failed validation: the collapsed summary row, never the raw JSON bubble. */
+export interface ChatDegradedNotice {
+  readonly kind: 'degraded'
+  readonly seq: number
+  readonly time: number
+  /** The original fenced text, kept for the expandable原文 view. */
+  readonly text: string
+}
+
+/** The chat surface's item union in seq order. */
+export type ChatItem = ChatTextMessage | ChatToolRow | ChatTaskCard | ChatAsk | ChatFieldAsk | ChatAction | ChatReceipt | ChatDegradedNotice
+
+/** A KG walk the assistant performed, kept for the evidence cards. */
+export type KgEvidenceQuery =
+  | { readonly kind: 'subgraph'; readonly seeds: readonly string[] }
+  | { readonly kind: 'phrase'; readonly phrase: string }
+
+/** The whole fold output for one history window. */
+export interface FoldedTurn {
+  readonly items: readonly ChatItem[]
+  /** True when the newest turn opened but has not ended. */
+  readonly running: boolean
+  /** KG queries in event order (deduplicated, last occurrence wins position). */
+  readonly kgQueries: readonly KgEvidenceQuery[]
+  /** dsh fences that failed validation and degraded to collapsed summary rows (the §5.3 report point). */
+  readonly degradedFences: number
+}
+
+/**
+ * The neutral status-line labels for protocol-fence names arriving as tool
+ * calls (a contract violation the surface still renders people-language).
+ */
+const PROTOCOL_TOOL_LABELS: Readonly<Record<string, string>> = {
+  form_draft: '正在整理草稿…',
+  form_confirm: '正在确认…',
+  reject_flow: '正在处理驳回…',
+  submit_receipt: '正在登记…',
+}
+
+/** Ask-shaped protocol names share one label (`ask_choice`, `ask_field_pricing`, …). */
+const ASK_TOOL_LABEL = '补充信息…'
+
+/**
+ * Whether a tool-call name belongs to the structured-message protocol: those
+ * payloads are fences, not tools, so a call under one folds to the neutral
+ * status line instead of a tool row.
+ */
+function protocolToolLabel(name: string): string | undefined {
+  if (name.startsWith('ask_')) return ASK_TOOL_LABEL
+  return PROTOCOL_TOOL_LABELS[name]
+}
+
+/** Chinese label for a tool name (the fold's presentation vocabulary). */
+const TOOL_LABELS: Readonly<Record<string, string>> = {
+  nb_collections: '读取业务表结构',
+  nb_list: '查询业务记录',
+  nb_get: '读取业务行',
+  nb_create: '写入业务记录',
+  nb_update: '更新业务记录',
+  kb_search: '检索知识库',
+  lakehouse_tables: '数仓表清单',
+  lakehouse_query: '数仓查询',
+  kg_schema: '读取图谱本体',
+  kg_subgraph: '图谱走查',
+  kg_query: '图谱短语查询',
+  connector_discover: '连接器发现',
+  connector_fetch: '连接器预览',
+  connector_transfer: '连接器落库',
+  order_create: '下单',
+  order_status: '订单状态',
+}
+
+/** The raw session-event shape the fold consumes (structural wire read). */
+export interface FoldEvent {
+  readonly type: string
+  readonly seq: number
+  readonly time: number
+  readonly data: unknown
+}
+
+/** Text blocks of an event's message content array (absent when not one). */
+function textBlocksOf(content: unknown): string[] {
+  if (!Array.isArray(content)) return []
+  return content
+    .filter((block): block is { type: string; text?: unknown } =>
+      typeof block === 'object' && block !== null && (block as { type?: unknown }).type === 'text')
+    .map(block => typeof block.text === 'string' ? block.text : '')
+}
+
+/** The content array of a message-shaped event data field. */
+function contentOf(data: unknown): unknown {
+  return (data as { content?: unknown } | undefined)?.content
+}
+
+/**
+ * The tool-use id a tool/result event answers: the result message's first
+ * block carries the provider-neutral `toolCallId` (the event data itself has
+ * no callId field). `isError` on the same block marks the failed calls.
+ */
+function resultCallOf(data: unknown): { callId?: string; failed?: boolean } {
+  const content = (data as { message?: { content?: unknown } } | undefined)?.message?.content
+  if (!Array.isArray(content) || content.length === 0) return {}
+  const block = content[0] as { toolCallId?: unknown; tool_use_id?: unknown; isError?: unknown }
+  const id = typeof block.toolCallId === 'string' ? block.toolCallId
+    : typeof block.tool_use_id === 'string' ? block.tool_use_id
+      : undefined
+  return id === undefined ? {} : { callId: id, failed: block.isError === true }
+}
+
+/** The v2 flat-draft projection of a v3 payload (the legacy render path's data). */
+function legacyDraftOf(payload: FormDraftPayload): FormDraft {
+  const fields: Record<string, string> = {}
+  for (const field of payload.fields) {
+    if (field.value !== null) fields[field.name] = field.value
+  }
+  return { collection: payload.form.collection, title: payload.title, fields }
+}
+
+/** Fold one assistant message's text through the v3 splitter into items. */
+function foldAssistantText(text: string, seq: number, time: number, items: ChatItem[], degradedOut: { count: number }): void {
+  const { segments, degraded } = splitMessage(text)
+  degradedOut.count += degraded
+  // A degraded dsh fence still marks the message as v3: its payload failed
+  // validation, but the fence itself must never fall into the v2 narrative.
+  const hasV3 = segments.some(segment => segment.kind === 'dsh' || segment.kind === 'degraded')
+  if (!hasV3) {
+    // v2 legacy: the recognized ```json draft fences leave the narrative.
+    const { narrative, drafts } = splitDraftMessage(text)
+    if (narrative !== '') items.push({ kind: 'text', seq, time, role: 'assistant', text: narrative })
+    drafts.forEach((draft, index) => {
+      items.push({ kind: 'task-card', seq: seq + 0.5 + index * 0.1, time, draft })
+    })
+    return
+  }
+  segments.forEach((segment, index) => {
+    const itemSeq = seq + index * 0.01
+    if (segment.kind === 'text') {
+      items.push({ kind: 'text', seq: itemSeq, time, role: 'assistant', text: segment.text })
+      return
+    }
+    if (segment.kind === 'degraded') {
+      items.push({ kind: 'degraded', seq: itemSeq, time, text: segment.text })
+      return
+    }
+    const payload = segment.payload
+    switch (payload.type) {
+      case 'ask_choice':
+        items.push({ kind: 'ask', seq: itemSeq, time, payload })
+        break
+      case 'ask_field':
+        items.push({ kind: 'field-ask', seq: itemSeq, time, payload })
+        break
+      case 'form_draft':
+        items.push({ kind: 'task-card', seq: itemSeq, time, draft: legacyDraftOf(payload), payload })
+        break
+      case 'submit_receipt':
+        items.push({ kind: 'receipt', seq: itemSeq, time, payload })
+        break
+      case 'form_confirm':
+      case 'reject_flow':
+        // User-action fences never render from an assistant message; a model
+        // emitting one is violating the contract, and dropping the payload
+        // keeps the replay honest.
+        break
+    }
+  })
+}
+
+/** The action message's display line: its narrative text or the fixed default. */
+function actionLineOf(action: 'confirm' | 'reject', segments: readonly MessageSegment[]): string {
+  const line = segments.find(segment => segment.kind === 'text')
+  if (line !== undefined) return line.text
+  return action === 'confirm' ? '确认写入' : '驳回'
+}
+
+/** Fold one user message: fenced/prefixed actions collapse, the rest bubbles. */
+function foldUserText(text: string, seq: number, time: number, items: ChatItem[]): void {
+  const { segments } = splitMessage(text)
+  const fence = segments.find((segment): segment is { kind: 'dsh'; payload: FormConfirmPayload | RejectFlowPayload } =>
+    segment.kind === 'dsh' && (segment.payload.type === 'form_confirm' || segment.payload.type === 'reject_flow'))
+  if (fence !== undefined) {
+    const action = fence.payload.type === 'form_confirm' ? 'confirm' : 'reject'
+    items.push({
+      kind: 'action',
+      seq,
+      time,
+      action,
+      text: actionLineOf(action, segments),
+      payload: fence.payload,
+    })
+    return
+  }
+  const legacyConfirm = parseConfirmPush(text)
+  if (legacyConfirm !== undefined) {
+    items.push({ kind: 'action', seq, time, action: 'confirm', text, legacy: legacyConfirm })
+    return
+  }
+  if (text.startsWith('驳回：')) {
+    items.push({ kind: 'action', seq, time, action: 'reject', text })
+    return
+  }
+  items.push({ kind: 'text', seq, time, role: 'user', text })
+}
+
+/**
+ * Derive the answered state of every ask/field-ask: the first user text item
+ * after an ask answers it (picked option highlighted on an exact send-text
+ * match; free text answers it without a highlight); any assistant-owned item
+ * before that retires the ask. Tool rows do not retire an ask.
+ */
+function deriveAnswered(items: ChatItem[]): void {
+  let pending: ChatAsk | ChatFieldAsk | undefined
+  for (const item of items) {
+    if (item.kind === 'ask' || item.kind === 'field-ask') {
+      pending = item
+      continue
+    }
+    if (item.kind === 'tool') continue
+    if (item.kind === 'text' && item.role === 'user' && pending !== undefined) {
+      let selected: string | undefined
+      if (pending.kind === 'ask') {
+        selected = pending.payload.options.find(option => answerTextOf(option) === item.text)?.value
+      } else {
+        selected = pending.payload.field.suggestions.find(
+          suggestion => suggestion.label === item.text || suggestion.value === item.text,
+        )?.value
+      }
+      pending.answered = selected === undefined ? {} : { selected }
+      item.choiceReply = selected !== undefined
+      pending = undefined
+      continue
+    }
+    if (item.kind === 'text' && item.role === 'user') continue
+    // Assistant narrative, cards, asks, receipts, notices, and actions all
+    // mean the conversation moved on; a stale ask renders unanswered.
+    pending = undefined
+  }
+}
+
+/**
+ * Fold one history window into chat items.
+ * @param events - raw session events (envelope + data), any order tolerated.
+ * @returns the folded surface plus running state and KG queries.
+ */
+export function foldHistory(events: readonly FoldEvent[]): FoldedTurn {
+  const sorted = [...events].sort((a, b) => a.seq - b.seq)
+  const items: ChatItem[] = []
+  const toolRows = new Map<string, ChatToolRow>()
+  const kgQueries: KgEvidenceQuery[] = []
+  const degraded = { count: 0 }
+  // Turn bookkeeping: an open turn/start without its turn/end means running.
+  const openTurns = new Set<number>()
+  let sawAnyTurn = false
+
+  for (const event of sorted) {
+    switch (event.type) {
+      case 'turn/start': {
+        sawAnyTurn = true
+        openTurns.add((event.data as { turn?: unknown }).turn as number)
+        break
+      }
+      case 'turn/end': {
+        openTurns.delete((event.data as { turn?: unknown }).turn as number)
+        break
+      }
+      case 'user/message': {
+        const data = event.data as { source?: { kind?: unknown } } | undefined
+        if (data?.source?.kind !== 'user') break
+        const text = textBlocksOf(contentOf(data)).join('')
+        if (text === '') break
+        foldUserText(text, event.seq, event.time, items)
+        break
+      }
+      case 'assistant/message': {
+        // The event data wraps the message: {turn, step, message}.
+        const text = textBlocksOf((event.data as { message?: { content?: unknown } }).message?.content).join('')
+        if (text === '') break
+        foldAssistantText(text, event.seq, event.time, items, degraded)
+        break
+      }
+      case 'tool/call': {
+        const data = event.data as { callId?: unknown; name?: unknown; arguments?: unknown }
+        const name = typeof data.name === 'string' ? data.name : 'tool'
+        const protocolLabel = protocolToolLabel(name)
+        const row: ChatToolRow = {
+          kind: 'tool',
+          seq: event.seq,
+          time: event.time,
+          name,
+          label: protocolLabel ?? TOOL_LABELS[name] ?? name,
+          state: 'running',
+          ...(protocolLabel !== undefined ? { protocol: true } : {}),
+        }
+        items.push(row)
+        if (typeof data.callId === 'string') toolRows.set(data.callId, row)
+        collectKgQuery(name, data.arguments, kgQueries)
+        break
+      }
+      case 'tool/result': {
+        const { callId, failed } = resultCallOf(event.data)
+        if (callId !== undefined) {
+          const row = toolRows.get(callId)
+          if (row !== undefined) row.state = failed === true ? 'error' : 'done'
+        }
+        break
+      }
+      default:
+        break
+    }
+  }
+  deriveAnswered(items)
+  const running = sawAnyTurn && openTurns.size > 0
+  return { items, running, kgQueries, degradedFences: degraded.count }
+}
+
+/** Record one KG walk descriptor from a tool call's raw arguments string. */
+function collectKgQuery(name: string, rawArguments: unknown, sink: KgEvidenceQuery[]): void {
+  if (typeof rawArguments !== 'string') return
+  if (name !== 'kg_subgraph' && name !== 'kg_query') return
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(rawArguments)
+  } catch {
+    return
+  }
+  const args = parsed as { seeds?: unknown; phrase?: unknown } | null
+  if (args === null || typeof args !== 'object') return
+  if (name === 'kg_subgraph' && Array.isArray(args.seeds) && args.seeds.every(s => typeof s === 'string')) {
+    pushDedup(sink, { kind: 'subgraph', seeds: args.seeds })
+  }
+  if (name === 'kg_query' && typeof args.phrase === 'string' && args.phrase !== '') {
+    pushDedup(sink, { kind: 'phrase', phrase: args.phrase })
+  }
+}
+
+/** Append unless an equal descriptor is already present. */
+function pushDedup(sink: KgEvidenceQuery[], query: KgEvidenceQuery): void {
+  const equal = sink.some(existing => JSON.stringify(existing) === JSON.stringify(query))
+  if (!equal) sink.push(query)
+}

@@ -89,7 +89,7 @@ describe('validateSchema', () => {
     const directory = mkdtempSync(join(tmpdir(), 'dsh-kb-schema-'))
     const path = join(directory, 'kb.sqlite')
     try {
-      const db = new DatabaseSync(path)
+      const db = new DatabaseSync(path, { timeout: 5_000 })
       validateSchema(db, path)
       const mode = (db.prepare(sql('select-user-version')).get() as { user_version: number }).user_version
       expect(mode).toBe(SCHEMA_VERSION)

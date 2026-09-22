@@ -18,8 +18,16 @@ interface Answered {
   message?: string
 }
 
-/** Minimal fake of PendingWait<'viewAction'>: payload + respond capturing the wire answer. */
-function fakeWait(view: string, action: string, args: Record<string, unknown> = {}) {
+/**
+ * Minimal fake of PendingWait<'viewAction'>: payload + respond capturing the wire answer.
+ * The refusal receipt may carry reasons beyond the wire enum: serve must forward them verbatim.
+ */
+function fakeWait(
+  view: string,
+  action: string,
+  args: Record<string, unknown> = {},
+  respondReceipt?: RpcReceipt | { accepted: false; reason: string },
+) {
   const answers: Answered[] = []
   const wait = {
     kind: 'viewAction' as const,
@@ -30,7 +38,7 @@ function fakeWait(view: string, action: string, args: Record<string, unknown> = 
       answers.push(result.ok
         ? { ok: true, summary: (result.value as { summary: string }).summary }
         : { ok: false, message: result.error.message })
-      return Promise.resolve({ accepted: true })
+      return Promise.resolve((respondReceipt ?? { accepted: true }) as RpcReceipt)
     },
   }
   return { wait: wait as never, answers }
@@ -150,5 +158,38 @@ describe('ViewContextService.serve', () => {
     } finally {
       vi.useRealTimers()
     }
+  })
+
+  it('fails naming the empty registry for an action on an unregistered view', async () => {
+    const { svc } = await service()
+    const { wait, answers } = fakeWait('market', 'filter_category')
+    await svc.serve(wait)
+    expect(answers[0]?.ok).toBe(false)
+    expect(String(answers[0]?.message)).toContain('视图 market 未注册任何动作')
+  })
+
+  it('maps a non-Error executor throw to its string form', async () => {
+    const { svc } = await service({
+      view: 'kg',
+      actions: { focus_entity: () => { throw '画布未挂载' } },
+    })
+    const { wait, answers } = fakeWait('kg', 'focus_entity')
+    await svc.serve(wait)
+    expect(answers).toEqual([{ ok: false, message: '画布未挂载' }])
+  })
+
+  it('a rejected receipt surfaces as a thrown response rejection on the success path', async () => {
+    const { svc } = await service({
+      view: 'kg',
+      actions: { focus_entity: () => ({ summary: 'x' }) },
+    })
+    const { wait } = fakeWait('kg', 'focus_entity', {}, { accepted: false, reason: 'stale rpc' })
+    await expect(svc.serve(wait)).rejects.toThrow('view-action response rejected: stale rpc')
+  })
+
+  it('a rejected receipt surfaces as a thrown response rejection on the failure path', async () => {
+    const { svc } = await service()
+    const { wait } = fakeWait('ghost', 'anything', {}, { accepted: false, reason: 'session closed' })
+    await expect(svc.serve(wait)).rejects.toThrow('view-action response rejected: session closed')
   })
 })

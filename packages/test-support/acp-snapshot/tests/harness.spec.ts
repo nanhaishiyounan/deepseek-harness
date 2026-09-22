@@ -631,11 +631,13 @@ describe('runScenario', () => {
   })
 
   it('waitForInboxMessage times out when the session log or matching insertion is absent', { timeout: 20_000 }, async () => {
+    // Both timeout forms pass: under load the first poll can outlive the 20ms
+    // window, so vi.waitFor's own timeout fires before the harness mismatch error.
     const absent = await scenario({ prompt: 'hang-until-cancel', persistLogsOnCancel: true })
     await expect(runScenario(
       { steps: [...boot, { op: 'promptAndCancel', text: 'hang' }, { op: 'waitForInboxMessage', text: 'missing', timeoutMs: 20 }] },
       { agent: AGENT, mode: 'replay', fixtureFile: absent.fixtureFile },
-    )).rejects.toThrow(/did not persist expected inbox message within 20ms/)
+    )).rejects.toThrow(/did not persist expected inbox message within 20ms|Timed out in waitFor!/)
 
     const unmatched = await scenario({
       prompt: 'hang-until-cancel',
@@ -648,7 +650,7 @@ describe('runScenario', () => {
     await expect(runScenario(
       { steps: [...boot, { op: 'promptAndCancel', text: 'hang' }, { op: 'waitForInboxMessage', text: 'missing', timeoutMs: 20 }] },
       { agent: AGENT, mode: 'replay', fixtureFile: unmatched.fixtureFile },
-    )).rejects.toThrow(/did not persist expected inbox message within 20ms/)
+    )).rejects.toThrow(/did not persist expected inbox message within 20ms|Timed out in waitFor!/)
   })
 
   it('waitForTitleAfterTurnEnd holds the app through a standalone durable title', { timeout: 20_000 }, async () => {
@@ -915,17 +917,17 @@ describe('runScenario', () => {
         steps: [
           ...boot,
           { op: 'promptAndCancel', text: 'hang' },
-          { op: 'waitForSubagentTurnEnd', timeoutMs: 20 },
+          { op: 'waitForSubagentTurnEnd', timeoutMs: 250 },
         ],
       },
       { agent: AGENT, mode: 'replay', fixtureFile: seedOnly.fixtureFile },
-    )).rejects.toThrow(/subagent child #1 did not persist closed turn 1 within 20ms/)
+    )).rejects.toThrow(/subagent child #1 did not persist closed turn 1 within 250ms/)
 
     const missing = await scenario({})
     await expect(runScenario(
-      { steps: [...boot, { op: 'waitForSubagentTurnEnd', child: 2, timeoutMs: 20 }] },
+      { steps: [...boot, { op: 'waitForSubagentTurnEnd', child: 2, timeoutMs: 250 }] },
       { agent: AGENT, mode: 'replay', fixtureFile: missing.fixtureFile },
-    )).rejects.toThrow(/subagent child #2 did not persist closed turn 1 within 20ms/)
+    )).rejects.toThrow(/subagent child #2 did not persist closed turn 1 within 250ms/)
   })
 
   it('waitForTitleAfterTurnEnd times out when the title precedes the boundary', { timeout: 20_000 }, async () => {

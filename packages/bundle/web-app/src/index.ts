@@ -12,6 +12,7 @@
  */
 
 import { spawn, type ChildProcess } from 'node:child_process'
+import { readFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import { networkInterfaces } from 'node:os'
 import { fileURLToPath } from 'node:url'
@@ -53,6 +54,13 @@ export interface Config {
   surfaceContext: boolean
   /** Explicit `--trusted-host` authorities from this invocation. */
   trustedHosts: string[]
+  /**
+   * Serve the mobile client at `/mobile` (the built dist/mobile.html). The
+   * mobile page talks to the same `/api` gateway, so enabling it changes
+   * only the served surface, never the data; a deployment without the page
+   * keeps the fallback SPA semantics untouched.
+   */
+  mobileEnabled: boolean
 }
 
 export const Config: z<Config> = z.object({
@@ -60,6 +68,7 @@ export const Config: z<Config> = z.object({
   printUrl: z.boolean().default(true),
   surfaceContext: z.boolean().default(true),
   trustedHosts: z.array(String).default([]),
+  mobileEnabled: z.boolean().default(false),
 })
 
 /** Bind-dependent Web values shared by the trust fence and URL display. */
@@ -170,6 +179,20 @@ function resolveDistIndex(): string {
   }
 }
 
+/**
+ * The mobile page's built document inside the same dist. Unlike the SPA
+ * index it is served raw (no index injections): the mobile bundle is a
+ * self-contained Vite entry that reads no boot manifest.
+ */
+function resolveMobileIndex(): string {
+  const require = createRequire(import.meta.url)
+  try {
+    return require.resolve('@deepseek-ai/dsh-web-frontend/dist/mobile.html')
+  } catch {
+    throw new Error('web-app: frontend mobile page not built; run pnpm run build from the repository root first')
+  }
+}
+
 /** Start the maintained platform opener without forwarding Harness credentials. */
 function spawnBrowserLauncher(url: string): ChildProcess {
   return spawn(process.execPath, [
@@ -214,8 +237,9 @@ async function openBrowser(url: string): Promise<void> {
 /** Test hooks for the built dist and native browser handoff; production never mutates them. */
 export const internals: {
   resolveDistIndex: () => string
+  resolveMobileIndex: () => string
   openBrowser: (url: string) => Promise<void>
-} = { resolveDistIndex, openBrowser }
+} = { resolveDistIndex, resolveMobileIndex, openBrowser }
 
 /**
  * Mount the Web runtime: dist serving, surface prompt, the bash runtime
@@ -231,6 +255,37 @@ export function apply(ctx: Context, config: Config): void {
   // Release dependent rows only after bind-dependent trust has been sampled once.
   ctx.provide(WEB_RUNTIME_SERVICE, runtime)
   ctx.plugin(FrontendStatic, { distIndex: internals.resolveDistIndex() })
+  if (config.mobileEnabled) {
+    // The mobile client's own surface: the built mobile.html served at
+    // /mobile and any hash-deep path under it. Same origin, same /api
+    // gateway, no framing concerns for the PC preview iframe.
+    const mobileIndex = internals.resolveMobileIndex()
+    ctx.effect(() => ctx.webServer.register({
+      kind: 'prefix',
+      path: '/mobile',
+      handler: async (req, res) => {
+        if (req.method !== 'GET' && req.method !== 'HEAD') {
+          res.writeHead(405)
+          res.end()
+          return
+        }
+        let body: string
+        try {
+          body = await readFile(mobileIndex, 'utf8')
+        } catch {
+          // A missing mobile build (ENOENT) is the only expected rejection;
+          // every failure answers 404 without echoing error text. The 404
+          // cannot hit ERR_HTTP_HEADERS_SENT: success headers are written
+          // only after the read resolves.
+          res.writeHead(404)
+          res.end()
+          return
+        }
+        res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' })
+        res.end(body)
+      },
+    }), 'web-app: /mobile route')
+  }
   if (config.surfaceContext) {
     ctx.inject(['systemPrompt'], (promptCtx) => {
       addHarnessSourceSection(promptCtx, SOURCE_ROOT)

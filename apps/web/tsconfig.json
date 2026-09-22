@@ -103,7 +103,11 @@
     "tests/kb-workbench.e2e.ts",
     "tests/market-pages.e2e.ts",
     "tests/kg-graph-page.e2e.ts",
-    "tests/new-session-lifecycle.e2e.ts"
+    "tests/kg-workbench-p2.e2e.ts",
+    "tests/new-session-lifecycle.e2e.ts",
+    "tests/mobile-shell.e2e.ts",
+    "tests/mobile-assistant.e2e.ts",
+    "tests/mobile-preview-iframe.e2e.ts"
   ],
   "references": [
     {
@@ -111,6 +115,9 @@
     },
     {
       "path": "../../packages/client/modules"
+    },
+    {
+      "path": "../../packages/client/ui-mobile"
     }
   ]
 }

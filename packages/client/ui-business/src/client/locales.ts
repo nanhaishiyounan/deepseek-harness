@@ -37,6 +37,27 @@ export type BusinessKey =
   | 'embed.openHint'
   | 'error.unavailable'
   | 'error.retry'
+  | 'nav.placeholder'
+  | 'nav.objects'
+  | 'nav.searchPlaceholder'
+  | 'nav.noHits'
+  | 'nav.frequent'
+  | 'nav.crm'
+  | 'nav.srm'
+  | 'nav.wms'
+  | 'nav.orders'
+  | 'nav.helpdesk'
+  | 'nav.finance'
+  | 'nav.food'
+  | 'nav.other'
+  | 'ask.sent'
+  | 'ask.viewAnswer'
+  | 'inline.edit'
+  | 'inline.save'
+  | 'inline.cancel'
+  | 'supplier.title'
+  | 'supplier.expired'
+  | 'supplier.expiring'
 
 /** Chinese copy (the business page's primary language). */
 export const zh: Record<BusinessKey, string> = {
@@ -70,6 +91,27 @@ export const zh: Record<BusinessKey, string> = {
   'embed.openHint': '低频管理辅助：页面编辑器与角色权限细配在业务后台完成，日常读写走对话；将在新浏览器窗口打开（同源入口，无需额外地址），打开后需登录（初始管理员账号见 QUICKSTART「NocoBase 业务后台」）',
   'error.unavailable': '业务管理页暂不可用',
   'error.retry': '重试',
+  'nav.placeholder': '选择业务对象',
+  'nav.objects': '个对象',
+  'nav.searchPlaceholder': '搜索对象（名称或标题）…',
+  'nav.noHits': '没有匹配的业务对象',
+  'nav.frequent': '常用',
+  'nav.crm': '客户与专家（CRM）',
+  'nav.srm': '供应商（SRM）',
+  'nav.wms': '仓储与批次（WMS）',
+  'nav.orders': '订单',
+  'nav.helpdesk': '工单与巡检',
+  'nav.finance': '费用与发票',
+  'nav.food': '食品业务',
+  'nav.other': '其他',
+  'ask.sent': '问题已填入对话草稿，',
+  'ask.viewAnswer': '去对话查看回答 →',
+  'inline.edit': '改',
+  'inline.save': '保存',
+  'inline.cancel': '取消',
+  'supplier.title': '供应商 360（证照与审核）',
+  'supplier.expired': '已过期',
+  'supplier.expiring': '· {days} 天后到期',
 }
 
 /** English mirror. */
@@ -104,4 +146,25 @@ export const en: Record<BusinessKey, string> = {
   'embed.openHint': 'Low-frequency admin aid: the page editor and fine-grained role ACL live in the backend; daily reads and writes stay in chat — opens in a new browser window (same-origin entry, no extra address needed), sign in after opening (the initial admin account is in the QUICKSTART "NocoBase 业务后台" section)',
   'error.unavailable': 'The business page is unavailable',
   'error.retry': 'Retry',
+  'nav.placeholder': 'Pick a business object',
+  'nav.objects': 'objects',
+  'nav.searchPlaceholder': 'Search objects (name or title)…',
+  'nav.noHits': 'No matching business objects',
+  'nav.frequent': 'Frequent',
+  'nav.crm': 'Customers & experts (CRM)',
+  'nav.srm': 'Suppliers (SRM)',
+  'nav.wms': 'Warehouse & batches (WMS)',
+  'nav.orders': 'Orders',
+  'nav.helpdesk': 'Tickets & inspection',
+  'nav.finance': 'Expense & invoices',
+  'nav.food': 'Food operations',
+  'nav.other': 'Other',
+  'ask.sent': 'Question staged in the chat draft — ',
+  'ask.viewAnswer': 'open the answer →',
+  'inline.edit': 'edit',
+  'inline.save': 'Save',
+  'inline.cancel': 'Cancel',
+  'supplier.title': 'Supplier 360 (certificates & audits)',
+  'supplier.expired': 'expired',
+  'supplier.expiring': '· expires in {days}d',
 }

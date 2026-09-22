@@ -1209,6 +1209,24 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         parameters: [{ name: 'relation', description: 'the relation registration entry.' }],
       },
       {
+        signature: 'async applyOntologyOps(ops: readonly KgOntologyChangeOp[]): Promise<KgOntologyApplyResult>',
+        description: 'Apply one KGCL ontology change set (the manual editor\'s write path). The whole set validates first against the live registry overlaid with the set\'s own earlier ops — unknown targets, duplicate ids, parent cycles, and illegal cardinality pairs reject before anything lands — then the touched rows persist through the two-layer registry and one ontology_change audit row records the whole set. The caller owns the episode ledger entry; this method owns the registry and its revision audit.',
+        parameters: [{ name: 'ops', description: 'the closed op vocabulary (see {@link KgOntologyChangeOp}).' }],
+        returns: 'one preview line per applied op plus the revision row id.',
+      },
+      {
+        signature: 'async communities(tenantId: string, cap: number = 20_000): Promise<KgCommunityReadout>',
+        description: 'Detect communities over the tenant\'s live adjacency with the pure louvain pass (the canvas\'s community coloring consumes this read; the computation stays off the browser\'s main thread by construction).',
+        parameters: [{ name: 'tenantId', description: 'owning tenant.' }, { name: 'cap', description: 'maximum edges read; defaults to 20,000.' }],
+        returns: 'the partition plus its modularity.',
+      },
+      {
+        signature: 'async snapshotAt(tenantId: string, asOf: string, limits?: KgSubgraphLimits): Promise<KgSubgraph>',
+        description: 'Read the graph state as of one time point (the revision-replay read): nodes created at or before `asOf` plus edges recorded at or before it that were neither tombstoned nor record-retired before it.',
+        parameters: [{ name: 'tenantId', description: 'owning tenant.' }, { name: 'asOf', description: 'the ISO instant the snapshot freezes.' }, { name: 'limits', description: 'optional size bounds; defaults apply.' }],
+        returns: 'the snapshot subgraph.',
+      },
+      {
         signature: 'ontologyVersion(): string',
         description: 'The built-in ontology\'s semantic version — the TS seed is the single source of truth; derived registrations (nocobase-derived, agent-defined) ride the store\'s revision audit instead.',
         parameters: [],
@@ -1262,6 +1280,95 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         parameters: [{ name: 'tenantId', description: 'owning tenant.' }, { name: 'typeId', description: 'the node type to count.' }],
         returns: 'the live-node count for that type.',
       },
+      {
+        signature: 'async putEpisode(episode: KgEpisodeInput): Promise<void>',
+        description: 'Append one episode row (the temporal ledger write).',
+        parameters: [{ name: 'episode', description: 'the episode snapshot.' }],
+      },
+      {
+        signature: 'async linkMentions(episodeUuid: string, edgeIds: readonly string[]): Promise<number>',
+        description: 'Link edges to an episode (the mention join).',
+        parameters: [{ name: 'episodeUuid', description: 'the owning episode.' }, { name: 'edgeIds', description: 'the edges the episode touched.' }],
+        returns: 'how many mention rows were newly inserted.',
+      },
+      {
+        signature: 'async listEpisodes(tenantId: string, limit: number): Promise<readonly KgEpisodeRow[]>',
+        description: 'List newest episodes for one tenant.',
+        parameters: [{ name: 'tenantId', description: 'owning tenant.' }, { name: 'limit', description: 'maximum rows.' }],
+        returns: 'the episodes, newest first, with mention counts.',
+      },
+      {
+        signature: 'async edgeMentions(edgeId: string): Promise<readonly KgEdgeMention[]>',
+        description: 'Reverse-lookup: every episode that touched one edge.',
+        parameters: [{ name: 'edgeId', description: 'the minted edge id.' }],
+        returns: 'the mentions with their episodes.',
+      },
+      {
+        signature: 'async edgeIdsOfEpisode(episodeUuid: string): Promise<readonly string[]>',
+        description: 'Read the edges one episode mentions (the rollback unit).',
+        parameters: [{ name: 'episodeUuid', description: 'the episode whose edges to read.' }],
+        returns: 'the minted edge ids.',
+      },
+      {
+        signature: 'async expireEdges(edgeIds: readonly string[], at: string): Promise<number>',
+        description: 'Retire edge records (the rollback mark); live reads stop returning them.',
+        parameters: [{ name: 'edgeIds', description: 'the edges to retire.' }, { name: 'at', description: 'the ISO mark timestamp.' }],
+        returns: 'how many rows changed.',
+      },
+      {
+        signature: 'async restoreEdges(edgeIds: readonly string[], at: string): Promise<number>',
+        description: 'Restore retired edge records — the rollback inverse.',
+        parameters: [{ name: 'edgeIds', description: 'the edges to restore.' }, { name: 'at', description: 'the ISO restore timestamp.' }],
+        returns: 'how many rows changed.',
+      },
+      {
+        signature: 'async edgesByIds(edgeIds: readonly string[]): Promise<readonly KgEdge[]>',
+        description: 'Read live edge rows by ids.',
+        parameters: [{ name: 'edgeIds', description: 'the minted edge ids.' }],
+        returns: 'the live edges (missing ids drop out).',
+      },
+      {
+        signature: 'async liveEdgesBetween(tenantId: string, srcId: string, dstId: string, relation?: KgRelationId): Promise<readonly KgEdge[]>',
+        description: 'Read the live edges between two nodes, optionally one relation only.',
+        parameters: [{ name: 'tenantId', description: 'owning tenant.' }, { name: 'srcId', description: 'one endpoint (either direction matches).' }, { name: 'dstId', description: 'the other endpoint.' }, { name: 'relation', description: 'optional relation filter.' }],
+        returns: 'the live edges between the endpoints, either direction.',
+      },
+      {
+        signature: 'async liveAdjacency( tenantId: string, cap: number, ): Promise<{ nodeIds: readonly string[]; pairs: readonly (readonly [string, string])[] }>',
+        description: 'Read the tenant\'s whole live adjacency (the PPR input).',
+        parameters: [{ name: 'tenantId', description: 'owning tenant.' }, { name: 'cap', description: 'maximum edges read.' }],
+        returns: 'node ids plus undirected endpoint pairs.',
+      },
+      {
+        signature: 'async pprNeighborhood(tenantId: string, seedIds: readonly string[], topN: number): Promise<{ ranking: readonly { nodeId: string; rank: number }[] subgraph: KgSubgraph }>',
+        description: 'Rank the neighborhood around seeds by Personalized PageRank and read the induced subgraph over the top nodes (the L1.5 retrieval layer): the ranking orders, the subgraph carries names and the edges among the cut.',
+        parameters: [{ name: 'tenantId', description: 'owning tenant.' }, { name: 'seedIds', description: 'resolved seed node ids.' }, { name: 'topN', description: 'neighborhood size.' }],
+        returns: 'the ranking plus the induced subgraph (depth 0 nodes).',
+      },
+      {
+        signature: 'async putOntologyXrefs(entries: readonly KgOntologyXref[]): Promise<number>',
+        description: 'Persist ontology cross-reference rows (the FoodOn import channel).',
+        parameters: [{ name: 'entries', description: 'the xref rows.' }],
+        returns: 'how many rows were newly inserted.',
+      },
+      {
+        signature: 'async listOntologyXrefs(limit: number): Promise<readonly KgOntologyXref[]>',
+        description: 'Read persisted ontology cross-reference rows.',
+        parameters: [{ name: 'limit', description: 'maximum rows.' }],
+        returns: 'the xref rows.',
+      },
+      {
+        signature: 'async putCorefRejects(entries: readonly KgCorefReject[]): Promise<number>',
+        description: 'Persist coreference reject tombstones (the align pass\'s negative verdicts).',
+        parameters: [{ name: 'entries', description: 'the reject rows.' }],
+        returns: 'how many rows were newly inserted.',
+      },
+      {
+        signature: 'async listCorefRejects(): Promise<ReadonlySet<string>>',
+        description: 'Read every persisted coreference reject pair key.',
+        parameters: [],
+        returns: 'the reject tombstone set.',
+      },
     ],
   },
   {
@@ -1280,6 +1387,12 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         description: 'The newest persisted build-run ledger row (the report evidence that outlives the process).',
         parameters: [],
         returns: 'the row, or undefined before the first persisted run.',
+      },
+      {
+        signature: 'async runIncremental(options: RunOptions = {}): Promise<KgIncrementalReport>',
+        description: 'One incremental pass: snapshot the five source systems\' watermark rows, run the pipeline, and diff the snapshots — the per-scope evidence that only changed scopes reprocessed (unchanged scopes fingerprint-skip inside run(); this wraps the run with the before/after diff the incremental acceptance reads).',
+        parameters: [{ name: 'options', description: 'cooperative cancellation.' }],
+        returns: 'the run report plus the changed-scope list.',
       },
       {
         signature: 'async qualityReport(): Promise<KgQualityReadout>',
@@ -3361,7 +3474,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'AgentPreset',
-    declaration: 'export interface AgentPreset {\n    readonly id: string;\n    readonly trust: PresetTrust;\n    readonly path: string;\n    readonly name?: string;\n    readonly description?: string;\n    readonly order?: number;\n    readonly broken?: string;\n}',
+    declaration: 'export interface AgentPreset {\n    readonly id: string;\n    readonly trust: PresetTrust;\n    readonly path: string;\n    readonly name?: string;\n    readonly description?: string;\n    readonly order?: number;\n    readonly welcome?: PresetWelcome;\n    readonly broken?: string;\n}',
   },
   {
     name: 'AgentSetup',
@@ -3753,7 +3866,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'CorpusReport',
-    declaration: 'export interface CorpusReport {\n    readonly documents: number;\n    readonly chunks: number;\n    readonly extractionCalls: number;\n    readonly extractedEntities: number;\n    readonly extractedRelations: number;\n    readonly degradedEntities: number;\n    readonly droppedRelations: number;\n    readonly mergedEntities: number;\n    readonly tombstonedEdges: number;\n    readonly tombstonedScopes: number;\n}',
+    declaration: 'export interface CorpusReport {\n    readonly documents: number;\n    readonly chunks: number;\n    readonly extractionCalls: number;\n    readonly extractedEntities: number;\n    readonly extractedRelations: number;\n    readonly degradedEntities: number;\n    readonly droppedRelations: number;\n    readonly mergedEntities: number;\n    readonly tombstonedEdges: number;\n    readonly tombstonedScopes: number;\n    readonly quarantinedEntities: number;\n    readonly quarantinedRelations: number;\n    readonly shaclRounds: number;\n}',
   },
   {
     name: 'CreateAgentOptions',
@@ -3801,7 +3914,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'CrossSourceAlignReport',
-    declaration: 'export interface CrossSourceAlignReport {\n    readonly docCandidates: number;\n    readonly nocobaseNodes: number;\n    readonly edgesCreated: number;\n    readonly tombstonedEdges: number;\n}',
+    declaration: 'export interface CrossSourceAlignReport {\n    readonly docCandidates: number;\n    readonly nocobaseNodes: number;\n    readonly edgesCreated: number;\n    readonly tombstonedEdges: number;\n    readonly judgedPairs: number;\n    readonly rejectedPairs: number;\n    readonly reviewQueue: number;\n    readonly clusters: number;\n}',
   },
   {
     name: 'DiffCallView',
@@ -4261,15 +4374,43 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'KgBuildRunReport',
-    declaration: 'export interface KgBuildRunReport {\n    readonly collections: readonly CollectionRunReport[];\n    readonly lakehouse?: SimpleSourceReport;\n    readonly connector?: SimpleSourceReport;\n    readonly corpus?: CorpusReport;\n    readonly crossSourceAlign?: CrossSourceAlignReport;\n    readonly persistedTypes: number;\n    readonly persistedRelations: number;\n    readonly ruleHits: Readonly<Record<string, number>>;\n    readonly ontologyRevision?: number;\n    readonly buildRunId?: number;\n    readonly metrics?: KgBuildRunMetrics;\n    readonly startedAt: string;\n    readonly finishedAt: string;\n}',
+    declaration: 'export interface KgBuildRunReport {\n    readonly collections: readonly CollectionRunReport[];\n    readonly lakehouse?: SimpleSourceReport;\n    readonly connector?: SimpleSourceReport;\n    readonly corpus?: CorpusReport;\n    readonly crossSourceAlign?: CrossSourceAlignReport;\n    readonly persistedTypes: number;\n    readonly persistedRelations: number;\n    readonly ruleHits: Readonly<Record<string, number>>;\n    readonly ontologyRevision?: number;\n    readonly buildRunId?: number;\n    readonly metrics?: KgBuildRunMetrics;\n    readonly startedAt: string;\n    readonly finishedAt: string;\n    readonly foodonTypes?: number;\n}',
   },
   {
     name: 'KgBuildRunRow',
     declaration: 'export interface KgBuildRunRow {\n    readonly id: number;\n    readonly tenantId: string;\n    readonly startedAt: string;\n    readonly finishedAt: string;\n    readonly report: unknown;\n    readonly metrics: unknown;\n}',
   },
   {
+    name: 'KgCommunityReadout',
+    declaration: 'export interface KgCommunityReadout {\n    readonly communities: readonly {\n        readonly id: number;\n        readonly nodes: readonly string[];\n    }[];\n    readonly modularity: number;\n    readonly nodeCount: number;\n}',
+  },
+  {
+    name: 'KgCorefReject',
+    declaration: 'export interface KgCorefReject {\n    readonly pairKey: string;\n    readonly docId: string;\n    readonly rowId: string;\n    readonly reason: string;\n    readonly decidedAt: string;\n}',
+  },
+  {
     name: 'KgEdge',
-    declaration: 'export interface KgEdge {\n    readonly id: string;\n    readonly tenantId: string;\n    readonly srcId: string;\n    readonly dstId: string;\n    readonly relation: KgRelationId;\n    readonly fact?: string;\n    readonly props?: Readonly<Record<string, unknown>>;\n    readonly confidence: number;\n    readonly provenance: KgProvenance;\n    readonly validFrom: string;\n    readonly validUntil?: string;\n}',
+    declaration: 'export interface KgEdge {\n    readonly id: string;\n    readonly tenantId: string;\n    readonly srcId: string;\n    readonly dstId: string;\n    readonly relation: KgRelationId;\n    readonly fact?: string;\n    readonly props?: Readonly<Record<string, unknown>>;\n    readonly confidence: number;\n    readonly provenance: KgProvenance;\n    readonly validFrom: string;\n    readonly validUntil?: string;\n    readonly expiredAt?: string;\n}',
+  },
+  {
+    name: 'KgEdgeMention',
+    declaration: 'export interface KgEdgeMention {\n    readonly episodeUuid: string;\n    readonly edgeId: string;\n    readonly createdAt: string;\n    readonly episode?: KgEpisodeInput;\n}',
+  },
+  {
+    name: 'KgEpisodeInput',
+    declaration: 'export interface KgEpisodeInput {\n    readonly uuid: string;\n    readonly tenantId: string;\n    readonly source: KgEpisodeSource;\n    readonly name: string;\n    readonly content: string;\n    readonly validAt: string;\n    readonly createdAt: string;\n    readonly metadata?: unknown;\n}',
+  },
+  {
+    name: 'KgEpisodeSource',
+    declaration: 'export type KgEpisodeSource = \'ingest\' | \'ai-edit\' | \'human-edit\' | \'rollback\';',
+  },
+  {
+    name: 'KgIncrementalReport',
+    declaration: 'export interface KgIncrementalReport {\n    readonly report: KgBuildRunReport;\n    readonly changedScopes: readonly KgIncrementalScopeChange[];\n}',
+  },
+  {
+    name: 'KgIncrementalScopeChange',
+    declaration: 'export interface KgIncrementalScopeChange {\n    readonly sourceSystem: string;\n    readonly scope: string;\n    readonly previousRunAt?: string;\n    readonly lastRunAt: string;\n    readonly updated: boolean;\n}',
   },
   {
     name: 'KgMappingCollection',
@@ -4297,7 +4438,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'KgNodeType',
-    declaration: 'export interface KgNodeType {\n    readonly id: KgNodeTypeId;\n    readonly label: string;\n    readonly description?: string;\n    readonly layer: KgOntologyLayer;\n    readonly extends?: KgNodeTypeId;\n    readonly props: readonly KgPropDef[];\n    readonly naturalKey?: string;\n    readonly aliases?: readonly string[];\n    readonly source: KgOntologySource;\n    readonly status: KgNodeTypeStatus;\n}',
+    declaration: 'export interface KgNodeType {\n    readonly id: KgNodeTypeId;\n    readonly label: string;\n    readonly description?: string;\n    readonly layer: KgOntologyLayer;\n    readonly extends?: KgNodeTypeId;\n    readonly props: readonly KgPropDef[];\n    readonly naturalKey?: string;\n    readonly aliases?: readonly string[];\n    readonly foodonUri?: string;\n    readonly foodonId?: string;\n    readonly synonyms?: readonly string[];\n    readonly source: KgOntologySource;\n    readonly status: KgNodeTypeStatus;\n}',
   },
   {
     name: 'KgNodeTypeId',
@@ -4305,7 +4446,15 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'KgNodeTypeStatus',
-    declaration: 'export type KgNodeTypeStatus = \'draft\' | \'active\';',
+    declaration: 'export type KgNodeTypeStatus = \'draft\' | \'active\' | \'deprecated\';',
+  },
+  {
+    name: 'KgOntologyApplyResult',
+    declaration: 'export interface KgOntologyApplyResult {\n    readonly applied: readonly string[];\n    readonly revisionId: number;\n}',
+  },
+  {
+    name: 'KgOntologyChangeOp',
+    declaration: 'export type KgOntologyChangeOp = {\n    readonly op: \'add_node\';\n    readonly targetId: string;\n    readonly label: string;\n    readonly parentId?: string;\n} | {\n    readonly op: \'rename_node\';\n    readonly targetId: string;\n    readonly label: string;\n} | {\n    readonly op: \'set_parent\';\n    readonly targetId: string;\n    readonly newParentId: string;\n} | {\n    readonly op: \'deprecate_node\';\n    readonly targetId: string;\n    readonly replacedBy?: string;\n} | {\n    readonly op: \'change_cardinality\';\n    readonly relationId: KgRelationId;\n    readonly domainId: string;\n    readonly rangeId: string;\n    readonly min?: number;\n    readonly max?: number;\n};',
   },
   {
     name: 'KgOntologyLayer',
@@ -4321,15 +4470,19 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'KgOntologySource',
-    declaration: 'export type KgOntologySource = \'builtin-ontology\' | \'builtin-food\' | \'nocobase-derived\' | \'agent-defined\';',
+    declaration: 'export type KgOntologySource = \'builtin-ontology\' | \'builtin-food\' | \'foodon-imported\' | \'nocobase-derived\' | \'agent-defined\';',
+  },
+  {
+    name: 'KgOntologyXref',
+    declaration: 'export interface KgOntologyXref {\n    readonly subjectId: string;\n    readonly predicateId: string;\n    readonly objectId: string;\n    readonly mappingJustification?: string;\n}',
   },
   {
     name: 'KgPropDef',
-    declaration: 'export interface KgPropDef {\n    readonly key: string;\n    readonly datatype: \'string\' | \'number\' | \'boolean\' | \'date\' | \'json\';\n    readonly required?: boolean;\n    readonly enumValues?: readonly string[];\n    readonly description?: string;\n}',
+    declaration: 'export interface KgPropDef {\n    readonly key: string;\n    readonly datatype: \'string\' | \'number\' | \'boolean\' | \'date\' | \'json\';\n    readonly required?: boolean;\n    readonly enumValues?: readonly string[];\n    readonly pattern?: string;\n    readonly isArray?: boolean;\n    readonly description?: string;\n}',
   },
   {
     name: 'KgProvenance',
-    declaration: 'export interface KgProvenance {\n    readonly sourceSystem: \'nocobase\' | \'lakehouse\' | \'connector\' | \'kb\' | \'kg-align\';\n    readonly sourceId: string;\n    readonly extractedAt: string;\n}',
+    declaration: 'export interface KgProvenance {\n    readonly sourceSystem: \'nocobase\' | \'lakehouse\' | \'connector\' | \'kb\' | \'kg-align\' | \'ai-edit\';\n    readonly sourceId: string;\n    readonly extractedAt: string;\n}',
   },
   {
     name: 'KgQualityReadout',
@@ -4337,11 +4490,11 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'KgRelation',
-    declaration: 'export interface KgRelation {\n    readonly id: KgRelationId;\n    readonly label: string;\n    readonly description?: string;\n    readonly constraints: readonly KgRelationConstraint[];\n    readonly kind: \'object\' | \'hierarchical\';\n    readonly inverseOf?: KgRelationId;\n    readonly source: KgOntologySource;\n}',
+    declaration: 'export interface KgRelation {\n    readonly id: KgRelationId;\n    readonly label: string;\n    readonly description?: string;\n    readonly constraints: readonly KgRelationConstraint[];\n    readonly kind: \'object\' | \'hierarchical\';\n    readonly inverseOf?: KgRelationId;\n    readonly foodonPropUri?: string;\n    readonly synonyms?: readonly string[];\n    readonly source: KgOntologySource;\n}',
   },
   {
     name: 'KgRelationConstraint',
-    declaration: 'export interface KgRelationConstraint {\n    readonly domain: KgNodeTypeId;\n    readonly range: KgNodeTypeId;\n}',
+    declaration: 'export interface KgRelationConstraint {\n    readonly domain: KgNodeTypeId;\n    readonly range: KgNodeTypeId;\n    readonly cardinality?: {\n        readonly min?: number;\n        readonly max?: number;\n    };\n}',
   },
   {
     name: 'KgRelationId',

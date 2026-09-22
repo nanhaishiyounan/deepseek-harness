@@ -36,6 +36,14 @@ const INACTIVE_STATES: ReadonlySet<FiberState> = new Set([
   FiberState.FAILED,
 ])
 
+/** The host process's local calendar date in ISO `YYYY-MM-DD` form (the `{{today}}` prompt variable). */
+function localToday(): string {
+  const now = new Date()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  return `${now.getFullYear()}-${month}-${day}`
+}
+
 /** Factory-level ownership: live agent teardowns plus config startup work. */
 class FactoryOwnership {
   private accepting = true
@@ -351,6 +359,9 @@ export class AgentLoop extends Service implements AgentFactory {
     ctx.systemPrompt.variable('provider', context => context.agent?.options.provider)
     ctx.systemPrompt.variable('model', context => context.agent?.options.model)
     ctx.systemPrompt.variable('cwd', context => context.agent?.session.header.cwd)
+    // Evaluated per assembly, so a session crossing midnight renders the new
+    // date on its next step.
+    ctx.systemPrompt.variable('today', () => localToday())
 
     for (const { id, sessionId, cwd, resumeSessionId, ...options } of this.config.agents) {
       const meta = cwd === undefined ? {} : { cwd }

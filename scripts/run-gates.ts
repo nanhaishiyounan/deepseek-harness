@@ -663,6 +663,7 @@ function docSyncLeafGates(options: {
     pnpmScript('translation-pairing', 'verify-translation-pairing', { label: 'translation pairing' }),
     pnpmScript('markdown-wrap', 'verify-md-wrap', { label: 'markdown wrap' }),
     pnpmScript('client-catalog', 'verify-client-catalog', { label: 'client catalog' }),
+    pnpmScript('v8-ignore-budget', 'v8-ignore-budget', { label: 'v8 ignore budget' }),
     pnpmScript('export-jsdoc', 'verify-export-jsdoc', { label: 'export jsdoc' }),
     pnpmScript('tool-catalog', 'verify-tool-catalog', { label: 'tool catalog' }),
     pnpmScript('config-catalog', 'verify-config-catalog', { label: 'config catalog' }),

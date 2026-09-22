@@ -2,11 +2,29 @@
 
 English | [中文](README.zh.md)
 
-The knowledge-graph capability seam (`ctx.kbGraph`): a store provider registry, the runtime ontology registry, and the query orchestration over entity-relation triples. A sibling of the document seam (`ctx.kb`) — triples and retrieval hits have different contracts, so each owns its seam; both share the tenant isolation model.
+The knowledge-graph capability seam (`ctx.kbGraph`): a store provider registry, the runtime ontology registry, and the read/write orchestration over the property graph. A sibling of the document seam (`ctx.kb`) — triples and retrieval hits have different contracts, so each owns its seam; both share the tenant isolation model.
 
-The ontology is a three-layer, runtime registry: five schema.org-style top anchors (Object/Process/Event/Role/Concept), business-domain modules (Customer, Supplier, Product, Order, …), and the food-compliance 7×7 as the `builtin-food` seed. Node types and predicates are branded open-set ids (`KgNodeTypeId`/`KgRelationId`); plugins extend the ontology with `registerNodeType`/`registerRelation` (ctx.effect-backed disposers, duplicate ids refuse), and closed-set validation lives at the registry boundary — writes with unregistered types or predicates fail loud with machine-routable codes (`KB_GRAPH_UNKNOWN_ENTITY_TYPE`, `KB_GRAPH_UNKNOWN_PREDICATE`). `validateEdge` checks direction constraints (SHACL-style shapes over the registry snapshot).
+## Registry (ontology v5)
 
-The runtime also forwards the property-graph v2 face — merge upserts, k-hop `subgraph`/`expand` reads, tombstoning, aliases, source-run watermarks, registry persistence (`persistNodeType`/`persistRelation` over the two-layer registry), and `searchNodes` (the name→id resolution primitive behind seed lookup and entity alignment).
+Node types and relations are branded open-set ids (`KgNodeTypeId`/`KgRelationId`). Each class carries the constraint quartet on its props (`required`/`isArray`/`enumValues`/`pattern`), a `naturalKey` merge anchor, and FoodOn anchors (`foodonUri`/`foodonId` plus source-ontology `synonyms` for entity resolution). Sources: `builtin-ontology`, `builtin-food`, `foodon-imported`, `nocobase-derived`, `agent-defined`. Status gates writes vs. model visibility: `draft` accepts writes but stays out of model-facing enumerations; `deprecated` (KGCL NodeObsoletion) keeps instances and history but leaves every creation-facing surface. Plugins extend the registry with `registerNodeType`/`registerRelation`; `persistNodeType`/`persistRelation` write through the two-layer registry (runtime map + store rows). Closed-set validation lives at the registry boundary — unknown ids and direction violations fail loud (`KB_GRAPH_UNKNOWN_ENTITY_TYPE`, `KG_DIRECTION_VIOLATION`, …).
+
+## Pure algorithm layer
+
+- `kgcl.ts` — the closed KGCL op vocabularies: instance ops (`add_edge`/`remove_edge`/`set_node_props`) the `kg_edit` tool plans, schema-level ops (`add_node`/`rename_node`/`set_parent`/`deprecate_node`/`change_cardinality`), and the diff preview rendering both share.
+- `shacl.ts` — registry→shapes compilation, candidate validation with per-violation paths, and the explanatory feedback string the extraction repair loop re-feeds.
+- `kg-nl.ts` — the L0 template compiler (phrase→walk plan) and the L1 parameter-fill contract.
+- `ppr.ts` — Personalized PageRank over flat adjacency (the L1.5 retrieval layer).
+- `louvain.ts` — deterministic Louvain community detection over flat adjacency (`assignments` per node plus partition modularity; node order is the tie-breaker).
+
+## Temporal ledger and write faces
+
+`KgStore` providers carry the episode ledger (`putEpisode`/`linkMentions`/`listEpisodes`/`edgeMentions`/`edgeIdsOfEpisode`), record retirement (`expireEdges`/`restoreEdges`), contradiction reads (`liveEdgesBetween`), whole-graph adjacency (`liveAdjacency`, the PPR/louvain input), the time-point replay read (`snapshotAt(tenant, asOf)`), the FoodOn xref channel (`putOntologyXrefs`/`listOntologyXrefs`), and coreference reject tombstones (`putCorefRejects`/`listCorefRejects`); `kgCorefPairKey`/`kgCorefEdgeId` mint the shared pair keys and merge-edge ids.
+
+The runtime adds three orchestration faces over the store:
+
+- `applyOntologyOps(ops)` — the manual editor's write path: the whole op set validates first against the live registry overlaid with its own earlier ops (duplicate ids, parent cycles, illegal cardinality pairs reject before anything lands), then the touched rows persist and one ontology revision audit row records the set.
+- `communities(tenant)` — the precomputed louvain partition for canvas coloring.
+- `snapshotAt(tenant, asOf)` — the revision-replay read (live is the `asOf = now` special case).
 
 ## Model Experience
 
@@ -19,5 +37,5 @@ Independent of the model request stream: graph queries produce tool results cons
 ## Known Limitations and Deferred Work
 
 - Store selection is auto only: exactly one usable provider wins; multiple usable providers throw `KB_GRAPH_STORE_AMBIGUOUS` (configure by composing one).
-- Two-hop is the deepest path query on the v1 face; the v2 `KgStore.subgraph` walks k-hop neighborhoods but is not yet forwarded through the runtime (consumers take the store directly until the kg-build batch).
-- The registry is per-context in memory plus the sqlite seed rows; cross-process registration sync arrives with the kg-build pipeline (registry upserts).
+- Community detection runs per request over `liveAdjacency`; materialized cluster tables arrive with the pipeline batch that needs them across runs.
+- `applyOntologyOps` journals the revision and updates the registry; undo rides the caller's episode semantics (a reversing op set), not a dedicated registry-revision rollback.

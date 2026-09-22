@@ -1,0 +1,194 @@
+/* Me tab (v3, 03 §4.10): identity card, two-column ledger metrics, 48px
+   settings rows with rim dividers. */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--dshm-background);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  min-height: 48px;
+  background: var(--dshm-card);
+  border-bottom: 1px solid var(--dshm-border);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  flex: none;
+}
+
+.headerTitle {
+  margin: 0;
+  font-size: 17px;
+  line-height: 24px;
+  font-weight: 600;
+  color: var(--dshm-foreground);
+}
+
+.userCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 12px 12px 0;
+  padding: 16px;
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-border);
+  border-radius: var(--dshm-radius-lg);
+  box-shadow: var(--dshm-shadow-card);
+  flex: none;
+}
+
+.userMain {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.userName {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+  color: var(--dshm-foreground);
+}
+
+.userMeta {
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--dshm-muted-foreground);
+}
+
+.logout {
+  flex: none;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dshm-destructive);
+  border: 1px solid var(--dshm-destructive-10);
+  background: var(--dshm-destructive-10);
+  border-radius: 999px;
+  padding: 6px 12px;
+}
+
+.metrics {
+  display: flex;
+  align-items: stretch;
+  margin: 12px 12px 0;
+  padding: 14px 16px;
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-border);
+  border-radius: var(--dshm-radius-lg);
+  flex: none;
+}
+
+.metricRow {
+  flex: 1;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.metricLabel {
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--dshm-muted-foreground);
+}
+
+.metricValue {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--dshm-foreground);
+}
+
+.metricDivider {
+  flex: none;
+  width: 1px;
+  margin: 0 16px;
+  background: var(--dshm-stroke-soft);
+}
+
+.group {
+  margin: 12px 12px 0;
+  background: var(--dshm-card);
+  border-radius: var(--dshm-radius-lg);
+  border: 1px solid var(--dshm-border);
+  overflow: hidden;
+  flex: none;
+}
+
+.entry {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  padding: 8px 16px;
+  text-align: left;
+  background: none;
+}
+
+.entry + .entry {
+  border-top: 1px solid var(--dshm-border);
+}
+
+.entry:active {
+  background: var(--dshm-muted);
+}
+
+.entryIcon {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--dshm-radius);
+  background: var(--dshm-primary-soft);
+  color: var(--dshm-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+.entryMain {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.entryTitle {
+  font-size: 14px;
+  line-height: 22px;
+  font-weight: 500;
+  color: var(--dshm-foreground);
+}
+
+.entryHint {
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--dshm-muted-foreground);
+}
+
+.chevron {
+  color: var(--dshm-muted-foreground);
+  font-size: 18px;
+  flex: none;
+}
+
+.footer {
+  margin: 16px 0 20px;
+  text-align: center;
+  font-size: 10px;
+  line-height: 16px;
+  color: var(--dshm-muted-foreground);
+  flex: none;
+}

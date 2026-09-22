@@ -63,6 +63,7 @@ describe('BizView edge branches', () => {
         loadRows={vi.fn()}
         loadMore={vi.fn()}
         requestView={vi.fn()}
+        updateRow={vi.fn(async () => ({}))}
         t={t}
       />,
     )
@@ -71,8 +72,7 @@ describe('BizView edge branches', () => {
     fireEvent.keyDown(input, { key: 'Enter' })
     fireEvent.click(screen.getByRole('button', { name: zh['roster.askAction'] }))
     expect(setDraft).not.toHaveBeenCalled()
-    fireEvent.change(screen.getByLabelText(zh['roster.title']), { target: { value: 'orders' } })
-    // Same selection and blank stay inert.
+    // The navigator keeps the current selection inert (no reselect churn).
     expect(screen.getByText(`订单 · ${zh['cards.title']}`)).toBeTruthy()
   })
 
@@ -92,6 +92,7 @@ describe('BizView edge branches', () => {
         loadRows={vi.fn()}
         loadMore={vi.fn()}
         requestView={vi.fn()}
+        updateRow={vi.fn(async () => ({}))}
         t={t}
       />,
     )

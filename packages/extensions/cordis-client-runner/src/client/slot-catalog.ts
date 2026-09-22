@@ -216,7 +216,7 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
       },
     ],
     ownerProps: [
-      '/** Stable owner currency delivered to one keyed Chat business renderer. */\nexport interface ChatNodeOwnerProps {\n  /** Selected Tool call, when the shared details store names one. */\n  selectedCallId?: CallId | undefined\n  /** Session workspace root; Tool summaries display paths relative to it. */\n  cwd?: string | undefined\n  openFile: (path: string) => void\n  inspectCall: (callId: CallId) => void\n  forkAt: (seq: number) => void\n  /** Render a historical image group through the attachment slot. */\n  renderMessageImages: RenderMessageImages\n  fileMentions: (owner: TurnTailOwnerProps) => MarkdownFileMentions | undefined\n}',
+      '/** Stable owner currency delivered to one keyed Chat business renderer. */\nexport interface ChatNodeOwnerProps {\n  /**\n   * Best-effort view-ring switch by entry id (the source trail\'s cross-tab\n   * jumps): an unregistered id falls back to the ring\'s first view. Absent\n   * when the render site carries no view ring, so consumers must treat it as\n   * optional.\n   */\n  requestView?: ((view: string, options?: { readonly seeds?: readonly string[] }) => void) | undefined\n  /** Selected Tool call, when the shared details store names one. */\n  selectedCallId?: CallId | undefined\n  /** Session workspace root; Tool summaries display paths relative to it. */\n  cwd?: string | undefined\n  openFile: (path: string) => void\n  inspectCall: (callId: CallId) => void\n  forkAt: (seq: number) => void\n  /** Render a historical image group through the attachment slot. */\n  renderMessageImages: RenderMessageImages\n  fileMentions: (owner: TurnTailOwnerProps) => MarkdownFileMentions | undefined\n}',
     ],
     ownerPropsReferences: [
       'MarkdownFileMentions',
@@ -1223,6 +1223,7 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
       'client-ui-kb ScenarioView id \'scenarios\'',
       'client-ui-kb KbWorkbench id \'kb\'',
       'client-ui-kg KgView id \'kg\'',
+      'client-ui-mobile-preview MobilePreviewView id \'mobile-preview\'',
       'client-ui-trajectory TrajectoryView id \'trajectory\'',
     ],
     replaceRisk: 'none',
@@ -1911,7 +1912,7 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
       'useInput: SnapshotSelectorHook<InputState>',
       'inputActions: InputActions',
     ],
-    keyDomain: 'open: any string the owner dispatches (no compile-time key set), already taken: ask_user_question, bash, connector_discover, cordis_define, cordis_run, cordis_stop, cordis_undefine, edit, glob, grep, kb_ingest, kb_ingest_url, kb_search, kb_stats, order_create, order_status, read, skill, switch_view, todo_write, view_apply, view_state_get, web_fetch, web_search, write',
+    keyDomain: 'open: any string the owner dispatches (no compile-time key set), already taken: ask_user_question, bash, connector_discover, cordis_define, cordis_run, cordis_stop, cordis_undefine, edit, glob, grep, kb_ingest, kb_ingest_url, kb_search, kb_stats, lakehouse_query, order_create, order_status, read, skill, switch_view, todo_write, view_apply, view_state_get, web_fetch, web_search, write',
     hookContext: '',
     slotInject: '',
     declaredBy: 'an entry in \'conversation.chat.node\' (client-ui-tool), so it exists while that entry is mounted',
@@ -1928,6 +1929,7 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
       'client-ui-tool BashRow key \'bash\'',
       'client-ui-tool FileMutationRow key \'edit\'',
       'client-ui-tool FileMutationRow key \'write\'',
+      'client-ui-tool LakehouseRow key \'lakehouse_query\'',
       'client-ui-tool ReadRow key \'read\'',
       'client-ui-tool SearchRow key \'grep\'',
       'client-ui-tool SearchRow key \'glob\'',

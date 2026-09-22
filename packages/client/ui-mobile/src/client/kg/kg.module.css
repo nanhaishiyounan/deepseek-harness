@@ -1,0 +1,183 @@
+/* KG evidence: the collapsed entry row plus the bottom sheet's node chips
+   and edge lines (03 §4.11). */
+
+.entryRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: var(--dshm-radius);
+  background: var(--dshm-muted);
+  color: var(--dshm-foreground);
+  font-size: 12px;
+  line-height: 18px;
+  text-align: left;
+}
+
+.entryRow:active {
+  opacity: 0.75;
+}
+
+.entryIcon {
+  flex: none;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.entryText {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.entryChevron {
+  flex: none;
+  color: var(--dshm-muted-foreground);
+  font-size: 16px;
+}
+
+.sheetWrap {
+  z-index: 100;
+}
+
+.sheetBody {
+  border-radius: var(--dshm-radius-lg) var(--dshm-radius-lg) 0 0;
+  background: var(--dshm-card);
+  max-height: 70vh;
+}
+
+.evidenceSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+  color: var(--dshm-foreground);
+  overflow-y: auto;
+}
+
+.evidenceHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--dshm-muted-foreground);
+}
+
+.evidenceHeadSide {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sheetClose {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--dshm-muted);
+  color: var(--dshm-muted-foreground);
+  font-size: 16px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card {
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-border);
+  border-radius: var(--dshm-radius-lg);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cardTitle {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.phrase {
+  font-size: 12px;
+  color: var(--dshm-muted-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nodeRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.nodeChip {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 1px;
+  border: 1px solid var(--dshm-border);
+  border-radius: var(--dshm-radius);
+  background: var(--dshm-background);
+  padding: 4px 8px;
+}
+
+.nodeName {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.nodeType {
+  font-size: 10px;
+  color: var(--dshm-muted-foreground);
+}
+
+.edgeList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.edgeLine {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  font-size: 12px;
+}
+
+.edgeEndpoint {
+  color: var(--dshm-foreground);
+  font-weight: 500;
+}
+
+.edgeRelation {
+  color: var(--dshm-muted-foreground);
+}
+
+
+.hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--dshm-muted-foreground);
+}
+
+.hintError {
+  margin: 0;
+  font-size: 12px;
+  color: var(--dshm-destructive);
+}

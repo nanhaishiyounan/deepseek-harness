@@ -399,8 +399,13 @@ export async function launchWebScaffold(options: LaunchOptions = {}): Promise<We
   const composedRows = composeEntries([basePatches, surfacePatches, extraOverlayPatches])
   const webRuntimeConfig = composedRows.find(row => row.id === 'web-runtime')?.config as {
     surfaceContext?: boolean
+    mobileEnabled?: boolean
   } | undefined
   const surfaceContext = webRuntimeConfig?.surfaceContext !== false
+  // The mobile-entry surface (/mobile) is a deployment opt-in the way the
+  // surface context is: an overlay turning it on must survive this lane's
+  // own web-runtime restatement (mobile-* scenarios do exactly that).
+  const mobileEnabled = webRuntimeConfig?.mobileEnabled === true
   const patches: PatchOptions[] = [
     ...basePatches,
     ...surfacePatches,
@@ -472,7 +477,7 @@ export async function launchWebScaffold(options: LaunchOptions = {}): Promise<We
     // URL line are disabled because this scaffold owns its Playwright browser.
     // Preserve the composed surface-context choice because a patch replaces
     // the row's complete config.
-    { id: 'web-runtime', config: { openBrowser: false, printUrl: false, surfaceContext } },
+    { id: 'web-runtime', config: { openBrowser: false, printUrl: false, surfaceContext, mobileEnabled } },
     ...options.remoteAuthority === undefined
       ? []
       : [{ id: 'connection', config: { trustedHosts: [options.remoteAuthority] } }],

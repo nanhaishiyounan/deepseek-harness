@@ -66,3 +66,16 @@ export const nocobaseGetValueSchema = z.object({
   collection: z.string(),
   row: z.record(z.string(), z.unknown()),
 }) as unknown as z.ZodType<Wire<{ collection: string; row: Record<string, unknown> }>>
+
+/** nocobase.update request payload. */
+export const nocobaseUpdateRequestSchema = z.object({
+  collection: z.string().min(1),
+  id: z.number().int().min(1),
+  values: z.record(z.string(), z.union([z.string(), z.number(), z.null()])),
+}) as unknown as z.ZodType<Wire<RequestPayload<'nocobase.update'>>>
+
+/** nocobase.update response value. */
+export const nocobaseUpdateValueSchema = z.object({
+  collection: z.string(),
+  row: z.record(z.string(), z.unknown()),
+}) as unknown as z.ZodType<Wire<{ collection: string; row: Record<string, unknown> }>>

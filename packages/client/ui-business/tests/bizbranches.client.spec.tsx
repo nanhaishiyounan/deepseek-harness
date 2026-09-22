@@ -28,6 +28,7 @@ function mountView(state: BizClientState, rows?: NonNullable<BizClientState['row
     loadRows: vi.fn(),
     loadMore: vi.fn(),
     requestView: vi.fn(),
+    updateRow: vi.fn(async () => ({})),
   }
   const setDraft = vi.fn()
   const resolved = rows === undefined ? state : { ...state, rows }
@@ -109,16 +110,18 @@ describe('BizEntry branch matrix', () => {
 })
 
 describe('BizView remaining interactions', () => {
-  it('loads rows when the switcher selects a collection, and ignores a blank selection', () => {
+  it('loads rows when the navigator opens a collection', () => {
     const { loadRows } = mountView({ collections: ROSTER, selected: 'orders', rows: undefined })
-    const select = screen.getByLabelText(zh['roster.title']) as HTMLSelectElement
-    fireEvent.change(select, { target: { value: 'experts' } })
+    // The grouped navigator replaces the old flat <select>: open the panel,
+    // search, and click one item (the in-page replacement for the switcher).
+    fireEvent.click(screen.getByTestId('biz-nav-toggle'))
+    const search = screen.getByLabelText(zh['nav.searchPlaceholder']) as HTMLInputElement
+    fireEvent.change(search, { target: { value: 'experts' } })
+    fireEvent.click(screen.getByRole('button', { name: '专家' }))
     expect(loadRows).toHaveBeenCalledWith('experts')
-    fireEvent.change(select, { target: { value: '' } })
-    expect(loadRows).toHaveBeenCalledTimes(1)
   })
 
-  it('submits the ask bar through Enter and the button', () => {
+  it('submits the ask bar through Enter and the button, staying on the page', () => {
     const { setDraft, requestView } = mountView({ collections: ROSTER, selected: 'orders', rows: undefined })
     const input = screen.getByLabelText(zh['roster.askAction']) as HTMLInputElement
     fireEvent.change(input, { target: { value: '上月 pending 订单有多少' } })
@@ -127,7 +130,10 @@ describe('BizView remaining interactions', () => {
     fireEvent.change(input, { target: { value: '换一个问题' } })
     fireEvent.click(screen.getByRole('button', { name: zh['roster.askAction'] }))
     expect(setDraft).toHaveBeenCalledTimes(2)
-    expect(requestView).toHaveBeenCalledWith('chat')
+    // The ask is a draft hand-off, never a forced jump: the inline hop-link
+    // carries the view switch instead (the M1 fix for the page-jump pain).
+    expect(requestView).not.toHaveBeenCalled()
+    expect(screen.getByTestId('biz-asked-inline').textContent).toContain(zh['ask.viewAnswer'])
   })
 
   it('hands the per-record ask to the conversation', () => {

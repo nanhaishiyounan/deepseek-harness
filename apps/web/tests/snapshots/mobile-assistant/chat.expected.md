@@ -1,0 +1,25 @@
+- main:
+  - button "返回": ‹
+  - text: 未命名会话 本地会话
+  - button "新建会话"
+  - text: 2026年7月26日 帮我登记一下，刚和鲜丰谈好一批冷链箱 ✓ 图谱走查
+  - paragraph: 这笔可以从两个方向登记，请点选：
+  - paragraph: 这笔要登记成什么单据？
+  - radiogroup "这笔要登记成什么单据？":
+    - radio "✓ 采购单 我们向鲜丰买进 · 鲜丰作为供应商" [checked] [disabled]
+    - radio "出库单 我们向鲜丰发货 · 鲜丰作为客户" [disabled]
+  - text: ✓ 是采购单，我们从鲜丰买进
+  - paragraph:
+    - text: 好的，登记一张
+    - strong: 采购单
+    - text: 。日期、状态、合计我来推导，你确认数量就行：
+  - text: 你确认了这张采购单
+  - paragraph: 已登记完成，单号 PO-2026-0042。
+  - region "落库回执卡":
+    - text: 已登记 · 采购单 № 1042 ¥6,400 合计金额 200 箱 数量 2026-09-21 日期 对话 确认 已落库
+    - button "查看这条记录"
+  - button "KG 证据入口": 依据 · 知识图谱 1 条
+  - button "再来一单"
+  - button "查这条记录"
+  - textbox "问我任何经营问题..."
+  - button "发送" [disabled]: ➤

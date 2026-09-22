@@ -1,0 +1,46 @@
+kg-m2-verify: reusing the existing v5 graph database
+
+=== ① 全量重建（FoodOn 导入 + SHACL 门禁，真实 LLM） ===
+[PASS] 重建完成 — nodes=1138 edges=793 foodonTypes=15 quarantinedEntities=0 quarantinedRelations=0 shaclRounds=0 dropped=2（复用已建库）
+[PASS] 复用库规模报告 — entities=1138 triples=793
+[PASS] FoodOn 导入类目（soybean/tofu 落点） — soybean=http://purl.obolibrary.org/obo/FOODON_03301415 label=大豆；tofu=http://purl.obolibrary.org/obo/FOODON_00004697 label=豆腐；共 15 类
+[PASS] 内置食品类 FoodOn 锚点（kg.schema 展示 foodon_uri） — ingredient→FOODON:00002403 packaging→FOODON:00003368 process→FOODON:00002451 product→FOODON:00001002 standard→FOODON:00004277
+[PASS] ontology_xref 通道（锚点+跨面+属性映射） — xrefs=7
+
+=== ② SHACL 解释性回灌（构造违例样本，真实 LLM 修复） ===
+[PASS] SHACL 违例拦截（枚举外 grade=S） — 属性 "grade" 值 "S" 不在枚举闭集 [A, B] 内
+  回灌提示词（节选）：你上一轮抽取的以下候选未通过本体约束校验，请修正后重新输出（仅重出被点名的条目，禁止改动未点名条目，其余条目保持原样输出）：
+1. 有机豆腐 的属性 "grade"（当前值 "S"）：违反 属性 "grade" 值 "S" 不在枚举闭集 [A, B] 内（InConstraintComponent）…
+  LLM 修复输出：[{"name":"有机豆腐","grade":"A"}]
+[PASS] 解释性回灌 1 轮内修复（真实 LLM）
+
+=== ③ A/B 抽取门禁（legacy vs instruct-kgc，同语料） ===
+  legacy: {"protocol":"legacy","entities":13,"relations":4,"degraded":0,"dropped":4,"quarantined":0,"rounds":0}
+  instruct-kgc: {"protocol":"instruct-kgc","entities":8,"relations":3,"degraded":0,"dropped":0,"quarantined":0,"rounds":1}
+[PASS] A/B 报告落盘 — research/2026-09-17-m2-extraction-ab-report.md
+
+=== ④ kg_edit 语义化改图全链（NL → diff → apply → episode → 反查 → 回滚） ===
+[PASS] A① propose 产出 diff 预览 — diff=− 移除关系 宏发食品 —[produces]→ 酱油 / + 新增关系 中粮油脂 —[produces]→ 酱油
+[PASS] A② apply 落库并生成 episode — episode=ai-edit:2026-09-18T04:10:21.973Z applied=2 rejected=0
+[PASS] A③ 图已变更（中粮油脂—produces→酱油 在效）
+[PASS] A④ 矛盾消解（宏发食品—produces→酱油 已退役）
+[PASS] A⑤ episode 指令原文留痕 — content=把宏发食品生产酱油的关系改成中粮油脂生产酱油 mentions=2
+[PASS] A⑥ kg_mention 反查指令原文 — edgeIds=2 反查命中 1 条 episode
+[PASS] A⑦ 回滚执行 — {"status":"已回滚 episode ai-edit:2026-09-18T04:10:21.973Z（失效 1 条边、恢复 1 条边）","episode_uuid":"rollback:2026-09-18T04:10:22.211Z","applied":2}
+[PASS] A⑧ 回滚后图复原（新增边退役、旧边恢复） — new=0 old=1
+[PASS] B 张红喜指令被 SHACL 预检安全拦截 — add_edge 中粮 —[supplies]→ 张红喜: relation "supplies" allows company→ingredient, Supplier→Product, not Supplier→experts
+[PASS] episode 账本可查 — episodes=20
+
+=== ⑤ kg_query：L0 模板 + L1.5 PPR（gold 召回对比） ===
+[PASS] PPR 子图 gold 召回不低于基线（张红喜） — baseline=3 ppr=3 pprNodes=41 baseNodes=5 pprTop5=张红喜、食品、海外仓风险应对咨询、中亚、ICC 2020 不可抗力条款
+[PASS] PPR 子图 gold 召回不低于基线（宏发食品） — baseline=2 ppr=2 pprNodes=41 baseNodes=7 pprTop5=宏发食品、食品、海外仓风险应对咨询、中亚、ICC 2020 不可抗力条款
+[PASS] PPR 子图 gold 召回不低于基线（酱油） — baseline=1 ppr=1 pprNodes=41 baseNodes=2 pprTop5=酱油、食品、海外仓风险应对咨询、中亚、ICC 2020 不可抗力条款
+  kg_query「张红喜的供货链」→ template=supply-chain restated=张红喜 · 2 hops · PPR nodes=41 edges=17
+[PASS] kg_query 模型可见路径可用（PPR 邻域）
+
+=== ⑥ 五源增量 ingest（变更一行语料 → 仅该 scope 重处理） ===
+[PASS] 增量运行只更新变更 scope — kb:supply/2026-08-supply-packaging.md(updated)
+[PASS] 未变更语料 scope 跳过（contentHash 命中） — documents=46 edges now=788 (was 793)
+[PASS] 增量运行后实体仍可检索（中粮，kg_edit 新建实体持久） — 中粮 hits=2
+
+M2 verification PASSED

@@ -135,7 +135,7 @@ describe('registry persistence', () => {
     directories.push(directory)
     const path = join(directory, 'graph.sqlite')
     const store = new SqliteGraphStore({ path, busyTimeoutMs: 5_000 }, DatabaseSync)
-    const raw = new DatabaseSync(path, { enableForeignKeyConstraints: false })
+    const raw = new DatabaseSync(path, { enableForeignKeyConstraints: false, timeout: 5_000 })
     raw.prepare(
       "INSERT INTO kg_node_types (type_id, label, layer, props_schema, source, status, created_at, updated_at) VALUES ('badprops', 'x', 'domain', 'not json', 'agent-defined', 'active', '2026-01-01T00:00:00.000Z', '2026-01-01T00:00:00.000Z')",
     ).run()
@@ -168,7 +168,7 @@ describe('registry persistence', () => {
 
     const ctx = new Context()
     await ctx.plugin(KbGraphRuntime)
-    const db = new DatabaseSync(path, { enableForeignKeyConstraints: false })
+    const db = new DatabaseSync(path, { enableForeignKeyConstraints: false, timeout: 5_000 })
     db.prepare(
       "INSERT INTO kg_relations (relation_id, label, kind, domain_type, range_type, constraints_json, source, created_at, updated_at) VALUES ('ghostrel', '幽灵关系', 'object', 'ghostA', 'ghostB', '[{\"domain\":\"ghostA\",\"range\":\"ghostB\"}]', 'agent-defined', '2026-01-01T00:00:00.000Z', '2026-01-01T00:00:00.000Z')",
     ).run()
@@ -217,7 +217,7 @@ describe('registry persistence', () => {
     directories.push(directory)
     const path = join(directory, 'graph.sqlite')
     const store = new SqliteGraphStore({ path, busyTimeoutMs: 5_000 }, DatabaseSync)
-    const raw = new DatabaseSync(path, { enableForeignKeyConstraints: false })
+    const raw = new DatabaseSync(path, { enableForeignKeyConstraints: false, timeout: 5_000 })
     raw.prepare(
       "INSERT INTO kg_node_types (type_id, label, layer, props_schema, source, status, created_at, updated_at) VALUES ('bad', 'x', 'sideways', '[]', 'agent-defined', 'active', '2026-01-01T00:00:00.000Z', '2026-01-01T00:00:00.000Z')",
     ).run()
@@ -275,7 +275,7 @@ describe('registry persistence', () => {
     const ctx = new Context()
     await ctx.plugin(KbGraphRuntime)
     // An orphan extends_type row (no parent) fails the boot pass loud.
-    const db = new DatabaseSync(path, { enableForeignKeyConstraints: false })
+    const db = new DatabaseSync(path, { enableForeignKeyConstraints: false, timeout: 5_000 })
     db.prepare(
       "INSERT INTO kg_node_types (type_id, label, layer, extends_type, props_schema, source, status, created_at, updated_at) VALUES ('orphan', '孤儿', 'domain', 'ghost', '[]', 'agent-defined', 'active', '2026-01-01T00:00:00.000Z', '2026-01-01T00:00:00.000Z')",
     ).run()

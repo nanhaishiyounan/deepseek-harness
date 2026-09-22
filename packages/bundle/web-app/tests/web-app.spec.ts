@@ -117,7 +117,7 @@ describe('web-app runtime glue', () => {
     const log = vi.spyOn(console, 'log').mockImplementation((message) => { lifecycle.push(String(message)) })
     const openBrowser = vi.fn(async (url: string) => { lifecycle.push(`open:${url}`) })
     internals.openBrowser = openBrowser
-    apply(ctx, new Config({ openBrowser: true, printUrl: true, surfaceContext: true, trustedHosts: ['lab.internal'] }))
+    apply(ctx, new Config({ openBrowser: true, printUrl: true, surfaceContext: true, trustedHosts: ['lab.internal'], mobileEnabled: false }))
     await ctx.plugin(SystemPrompt, { persona: '' })
     // Settle the injected registrations.
     await new Promise(resolve => setTimeout(resolve, 0))
@@ -154,7 +154,7 @@ describe('web-app runtime glue', () => {
     const log = vi.spyOn(console, 'log').mockImplementation(() => {})
     const openBrowser = vi.fn(async () => {})
     internals.openBrowser = openBrowser
-    apply(ctx, new Config({ openBrowser: false, printUrl: false, surfaceContext: true, trustedHosts: [] }))
+    apply(ctx, new Config({ openBrowser: false, printUrl: false, surfaceContext: true, trustedHosts: [], mobileEnabled: false }))
     await ctx.plugin(SystemPrompt, { persona: '' })
     await new Promise(resolve => setTimeout(resolve, 0))
     expect(log).not.toHaveBeenCalled()
@@ -163,6 +163,114 @@ describe('web-app runtime glue', () => {
     expect(assembly.sections.find(entry => entry.name === 'app:web-surface')?.text)
       .toContain('rebuilding the affected Web artifacts')
     await ctx.fiber.dispose()
+  })
+
+  it('serves the mobile page at /mobile only when mobileEnabled opts in', async () => {
+    stageDist()
+    const mobile = join(dist!, 'dist', 'mobile.html')
+    writeFileSync(mobile, '<!doctype html><html><body>mobile-shell</body></html>')
+    const originalMobile = internals.resolveMobileIndex
+    internals.resolveMobileIndex = () => mobile
+    try {
+      const routes = new Map<string, unknown>()
+      const server = {
+        host: '127.0.0.1',
+        port: 4567,
+        registerFallback: () => () => {},
+        renderIndex: (html: string) => html,
+        register: (route: { kind: string; path: string; handler: unknown }) => {
+          routes.set(`${route.kind} ${route.path}`, route.handler)
+          return () => { routes.delete(`${route.kind} ${route.path}`) }
+        },
+      } as unknown as WebServer
+      const ctx = new Context()
+      ctx.provide('webServer', server)
+      apply(ctx, new Config({ openBrowser: false, printUrl: false, surfaceContext: false, trustedHosts: [], mobileEnabled: true }))
+      const handler = routes.get('prefix /mobile') as
+        | ((req: { method: string }, res: {
+          code?: number
+          body?: string
+          headers?: Record<string, string>
+          writeHead(code: number, headers?: Record<string, string>): void
+          end(body?: string): void
+        }) => Promise<void>)
+        | undefined
+      expect(handler).toBeDefined()
+      const serve = handler ?? (async () => {})
+      const served: { code: number; body: string; type: string }[] = []
+      for (const method of ['GET', 'HEAD', 'POST']) {
+        await serve({ method }, {
+          writeHead(code, headers) { served.push({ code, body: '', type: headers?.['content-type'] ?? '' }) },
+          end(body) { if (served.length > 0) served[served.length - 1]!.body = body ?? '' },
+        })
+      }
+      expect(served[0]).toMatchObject({ code: 200, body: '<!doctype html><html><body>mobile-shell</body></html>' })
+      expect(served[1]?.code).toBe(200)
+      expect(served[2]?.code).toBe(405)
+      await new Promise(resolve => setTimeout(resolve, 5))
+      await new Promise(resolve => setTimeout(resolve, 5))
+      await ctx.fiber.dispose()
+    } finally {
+      internals.resolveMobileIndex = originalMobile
+    }
+  })
+
+  it('answers 404 when the resolved mobile document disappeared from disk', async () => {
+    stageDist()
+    const originalMobile = internals.resolveMobileIndex
+    internals.resolveMobileIndex = () => join(dist!, 'dist', 'gone.html')
+    try {
+      const routes = new Map<string, unknown>()
+      const server = {
+        host: '127.0.0.1',
+        port: 4567,
+        registerFallback: () => () => {},
+        renderIndex: (html: string) => html,
+        register: (route: { kind: string; path: string; handler: unknown }) => {
+          routes.set(`${route.kind} ${route.path}`, route.handler)
+          return () => { routes.delete(`${route.kind} ${route.path}`) }
+        },
+      } as unknown as WebServer
+      const ctx = new Context()
+      ctx.provide('webServer', server)
+      apply(ctx, new Config({ openBrowser: false, printUrl: false, surfaceContext: false, trustedHosts: [], mobileEnabled: true }))
+      const handler = routes.get('prefix /mobile') as
+        | ((req: { method: string }, res: { writeHead(code: number): void; end(): void }) => Promise<void>)
+        | undefined
+      expect(handler).toBeDefined()
+      const codes: number[] = []
+      await (handler ?? (async () => {}))({ method: 'GET' }, {
+        writeHead(code) { codes.push(code) },
+        end() {},
+      })
+      expect(codes).toEqual([404])
+      await new Promise(resolve => setTimeout(resolve, 5))
+      await ctx.fiber.dispose()
+    } finally {
+      internals.resolveMobileIndex = originalMobile
+    }
+  })
+
+  it('keeps the /mobile route off when mobileEnabled stays false', async () => {
+    stageDist()
+    const off = new Map<string, unknown>()
+    const offServer = {
+      host: '127.0.0.1',
+      port: 4567,
+      registerFallback: () => () => {},
+      renderIndex: (html: string) => html,
+      register: (route: { kind: string; path: string }) => {
+        off.set(`${route.kind} ${route.path}`, true)
+        return () => { off.delete(`${route.kind} ${route.path}`) }
+      },
+    } as unknown as WebServer
+    const offCtx = new Context()
+    offCtx.provide('webServer', offServer)
+    apply(offCtx, new Config({ openBrowser: false, printUrl: false, surfaceContext: false, trustedHosts: [], mobileEnabled: false }))
+    expect(off.has('prefix /mobile')).toBe(false)
+    await new Promise(resolve => setTimeout(resolve, 5))
+    await new Promise(resolve => setTimeout(resolve, 5))
+    await offCtx.fiber.dispose()
   })
 
   it('skips the surface context when disabled (the one-shot layer): no prompt section, no bash variables', async () => {
@@ -176,7 +284,7 @@ describe('web-app runtime glue', () => {
         return () => {}
       },
     } as never)
-    apply(ctx, new Config({ openBrowser: false, printUrl: false, surfaceContext: false, trustedHosts: [] }))
+    apply(ctx, new Config({ openBrowser: false, printUrl: false, surfaceContext: false, trustedHosts: [], mobileEnabled: false }))
     await ctx.plugin(SystemPrompt, { persona: '' })
     await new Promise(resolve => setTimeout(resolve, 0))
     const assembly = await ctx.systemPrompt.assemble()
@@ -191,8 +299,10 @@ describe('web-app runtime glue', () => {
     const ctx = new Context()
     ctx.provide('webServer', fakeHttpServer().server)
     const log = vi.spyOn(console, 'log').mockImplementation(() => {})
-    apply(ctx, new Config({ openBrowser: false, printUrl: true, surfaceContext: true, trustedHosts: [] }))
-    await new Promise(resolve => setTimeout(resolve, 0))
+    provideLoader(ctx)
+    apply(ctx, new Config({ openBrowser: false, printUrl: true, surfaceContext: true, trustedHosts: [], mobileEnabled: false }))
+    await new Promise(resolve => setTimeout(resolve, 5))
+    await new Promise(resolve => setTimeout(resolve, 5))
     expect(log).toHaveBeenCalledWith('dsh web: http://127.0.0.1:4567')
     await ctx.fiber.dispose()
   })
@@ -208,8 +318,9 @@ describe('web-app runtime glue', () => {
     const log = vi.spyOn(console, 'log').mockImplementation(() => {})
     const openBrowser = vi.fn(async () => {})
     internals.openBrowser = openBrowser
-    apply(ctx, new Config({ openBrowser: true, printUrl: true, surfaceContext: false, trustedHosts: [] }))
-    await new Promise(resolve => setTimeout(resolve, 0))
+    apply(ctx, new Config({ openBrowser: true, printUrl: true, surfaceContext: false, trustedHosts: [], mobileEnabled: false }))
+    await new Promise(resolve => setTimeout(resolve, 5))
+    await new Promise(resolve => setTimeout(resolve, 5))
     expect(log).toHaveBeenCalledWith('dsh web: http://127.0.0.1:4567')
     expect(openBrowser).not.toHaveBeenCalled()
     await ctx.fiber.dispose()
@@ -227,7 +338,7 @@ describe('web-app runtime glue', () => {
     const settlement = new Promise<void>((resolve) => { release = resolve })
     provideLoader(settled, () => settlement)
     const log = vi.spyOn(console, 'log').mockImplementation(() => {})
-    apply(settled, new Config({ openBrowser: true, printUrl: true, surfaceContext: true, trustedHosts: [] }))
+    apply(settled, new Config({ openBrowser: true, printUrl: true, surfaceContext: true, trustedHosts: [], mobileEnabled: false }))
     await new Promise(resolve => setTimeout(resolve, 0))
     expect(log).not.toHaveBeenCalled()
     expect(openBrowser).not.toHaveBeenCalled()
@@ -244,7 +355,7 @@ describe('web-app runtime glue', () => {
     const failed = new Context()
     failed.provide('webServer', fakeHttpServer().server)
     provideLoader(failed, async () => { throw new Error('boot failed') })
-    apply(failed, new Config({ openBrowser: true, printUrl: true, surfaceContext: true, trustedHosts: [] }))
+    apply(failed, new Config({ openBrowser: true, printUrl: true, surfaceContext: true, trustedHosts: [], mobileEnabled: false }))
     await new Promise(resolve => setTimeout(resolve, 0))
     expect(log).not.toHaveBeenCalled()
     expect(openBrowser).not.toHaveBeenCalled()
@@ -262,7 +373,7 @@ describe('web-app runtime glue', () => {
     let releaseTorn: () => void
     const tornSettlement = new Promise<void>((resolve) => { releaseTorn = resolve })
     provideLoader(torn, () => tornSettlement)
-    apply(torn, new Config({ openBrowser: true, printUrl: true, surfaceContext: true, trustedHosts: [] }))
+    apply(torn, new Config({ openBrowser: true, printUrl: true, surfaceContext: true, trustedHosts: [], mobileEnabled: false }))
     await child.dispose() // the webServer service goes away
     releaseTorn!()
     await new Promise(resolve => setTimeout(resolve, 0))
@@ -279,7 +390,7 @@ describe('web-app runtime glue', () => {
     const { server } = fakeHttpServer()
     Object.defineProperty(server, 'port', { get: () => undefined })
     ctx.provide('webServer', server)
-    apply(ctx, new Config({ openBrowser: false, printUrl: false, surfaceContext: true, trustedHosts: [] }))
+    apply(ctx, new Config({ openBrowser: false, printUrl: false, surfaceContext: true, trustedHosts: [], mobileEnabled: false }))
     await ctx.plugin(SystemPrompt, { persona: '' })
     await new Promise(resolve => setTimeout(resolve, 0))
     await expect(ctx.systemPrompt.assemble()).rejects.toThrow('webServer service missing')
@@ -308,7 +419,7 @@ describe('web-app runtime glue', () => {
     internals.openBrowser = vi.fn(async () => { throw failure })
     const log = vi.spyOn(console, 'log').mockImplementation(() => {})
     const diagnostic = vi.spyOn(console, 'error').mockImplementation(() => {})
-    apply(ctx, new Config({ openBrowser: true, printUrl: false, surfaceContext: false, trustedHosts: [] }))
+    apply(ctx, new Config({ openBrowser: true, printUrl: false, surfaceContext: false, trustedHosts: [], mobileEnabled: false }))
     await new Promise(resolve => setTimeout(resolve, 0))
     expect(log).toHaveBeenCalledWith('dsh web: opening the default browser; pass --no-open to disable')
     expect(diagnostic).toHaveBeenCalledWith(

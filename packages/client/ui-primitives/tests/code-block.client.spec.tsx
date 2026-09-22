@@ -41,14 +41,18 @@ describe('highlightToHtml', () => {
     'xml', 'lua',
   ]
 
+  // The 23 dynamic imports plus each grammar's eager regex compilation cost
+  // ~2s alone but stretch past the default 5s it-budget when vitest runs the
+  // whole ui-primitives suite in parallel and the import pool contends for
+  // CPU; the test-level budget leaves waitFor its window under that load.
   it('lazily loads every read-card grammar: plain first, highlighted after load', async () => {
     // First touch returns the plain fallback (undefined) and starts the import.
     for (const alias of LAZY_ALIASES) expect(highlightToHtml('x', alias)).toBeUndefined()
     // Once every grammar has registered, the same call highlights.
     await vi.waitFor(() => {
       for (const alias of LAZY_ALIASES) expect(highlightToHtml('x', alias)).toContain('shiki')
-    }, { timeout: 5_000 })
-  })
+    }, { timeout: 25_000 })
+  }, 30_000)
 })
 
 describe('CodeBlock', () => {

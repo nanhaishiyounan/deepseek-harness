@@ -45,6 +45,11 @@ export interface KgGraphCanvasProps extends KgCanvasActions {
   typeFilter: ReadonlySet<string> | undefined
   /** The selected node id. */
   selected: string | undefined
+  /**
+   * Node color resolver (the semantic/community coloring modes); absent
+   * falls back to the per-type hash ladder.
+   */
+  nodeColor?: (node: KgSubgraphNodeRow) => string
   /** Locale lookup (control labels and the degraded list). */
   t: (key: 'canvas.degradedTitle' | 'canvas.degradedHint' | 'canvas.expandHint' | 'canvas.zoomIn' | 'canvas.zoomOut' | 'canvas.reset' | 'details.expand') => string
 }
@@ -98,7 +103,7 @@ function neighborhoodOf(
  * @returns the canvas or its degraded list.
  */
 export function KgGraphCanvas(
-  { nodes, edges, typeFilter, selected, onSelect, onExpand, t }: KgGraphCanvasProps,
+  { nodes, edges, typeFilter, selected, nodeColor, onSelect, onExpand, t }: KgGraphCanvasProps,
 ): JSX.Element {
   const containerRef = useRef<HTMLDivElement | null>(null)
   // WebGL failure is sticky for the page session: retrying the renderer
@@ -141,10 +146,12 @@ export function KgGraphCanvas(
           x: Math.cos(angle) * 10,
           y: Math.sin(angle) * 10,
           size: 8,
-          color: nodeColorOf(node.type),
+          color: nodeColor?.(node) ?? nodeColorOf(node.type),
         })
       })
       visibleEdges.forEach((edge) => { graph.addEdge(edge.source, edge.target, { size: 1 }) })
+      /* v8 ignore next -- the effect returns early without visible nodes, and
+         each visible node was just added, so order is always positive here. */
       if (graph.order > 0) fa2.assign(graph, { iterations: 60 })
       highlightRef.current = neighborhoodOf(selectedRef.current, edges)
       const sigma = new Sigma(graph, container, {
@@ -241,6 +248,8 @@ export function KgGraphCanvas(
   /** Drive the camera from a control; a dead renderer (degraded or gone) no-ops. */
   const zoom = (action: 'zoom-in' | 'zoom-out' | 'reset'): void => {
     const camera = rendererRef.current?.getCamera()
+    /* v8 ignore next -- the zoom controls render only on the non-degraded canvas,
+       where the renderer effect already installed a live sigma instance. */
     if (camera === undefined) return
     if (action === 'zoom-in') void camera.animatedZoom()
     else if (action === 'zoom-out') void camera.animatedUnzoom()

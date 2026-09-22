@@ -465,6 +465,41 @@ async persistNodeType(type: KgNodeType): Promise<void>
 async persistRelation(relation: KgRelation): Promise<void>
 
 /**
+ * Apply one KGCL ontology change set (the manual editor's write path). The
+ * whole set validates first against the live registry overlaid with the
+ * set's own earlier ops — unknown targets, duplicate ids, parent cycles,
+ * and illegal cardinality pairs reject before anything lands — then the
+ * touched rows persist through the two-layer registry and one
+ * ontology_change audit row records the whole set. The caller owns the
+ * episode ledger entry; this method owns the registry and its revision
+ * audit.
+ * @param ops - the closed op vocabulary (see {@link KgOntologyChangeOp}).
+ * @returns one preview line per applied op plus the revision row id.
+ */
+async applyOntologyOps(ops: readonly KgOntologyChangeOp[]): Promise<KgOntologyApplyResult>
+
+/**
+ * Detect communities over the tenant's live adjacency with the pure
+ * louvain pass (the canvas's community coloring consumes this read; the
+ * computation stays off the browser's main thread by construction).
+ * @param tenantId - owning tenant.
+ * @param cap - maximum edges read; defaults to 20,000.
+ * @returns the partition plus its modularity.
+ */
+async communities(tenantId: string, cap: number = 20_000): Promise<KgCommunityReadout>
+
+/**
+ * Read the graph state as of one time point (the revision-replay read):
+ * nodes created at or before `asOf` plus edges recorded at or before it
+ * that were neither tombstoned nor record-retired before it.
+ * @param tenantId - owning tenant.
+ * @param asOf - the ISO instant the snapshot freezes.
+ * @param limits - optional size bounds; defaults apply.
+ * @returns the snapshot subgraph.
+ */
+async snapshotAt(tenantId: string, asOf: string, limits?: KgSubgraphLimits): Promise<KgSubgraph>
+
+/**
  * The built-in ontology's semantic version — the TS seed is the single
  * source of truth; derived registrations (nocobase-derived, agent-defined)
  * ride the store's revision audit instead.
@@ -528,6 +563,121 @@ async conflictingFacts(tenantId: string): Promise<number>
  * @returns the live-node count for that type.
  */
 async nodeCountByType(tenantId: string, typeId: KgNodeTypeId): Promise<number>
+
+/**
+ * Append one episode row (the temporal ledger write).
+ * @param episode - the episode snapshot.
+ */
+async putEpisode(episode: KgEpisodeInput): Promise<void>
+
+/**
+ * Link edges to an episode (the mention join).
+ * @param episodeUuid - the owning episode.
+ * @param edgeIds - the edges the episode touched.
+ * @returns how many mention rows were newly inserted.
+ */
+async linkMentions(episodeUuid: string, edgeIds: readonly string[]): Promise<number>
+
+/**
+ * List newest episodes for one tenant.
+ * @param tenantId - owning tenant.
+ * @param limit - maximum rows.
+ * @returns the episodes, newest first, with mention counts.
+ */
+async listEpisodes(tenantId: string, limit: number): Promise<readonly KgEpisodeRow[]>
+
+/**
+ * Reverse-lookup: every episode that touched one edge.
+ * @param edgeId - the minted edge id.
+ * @returns the mentions with their episodes.
+ */
+async edgeMentions(edgeId: string): Promise<readonly KgEdgeMention[]>
+
+/**
+ * Read the edges one episode mentions (the rollback unit).
+ * @param episodeUuid - the episode whose edges to read.
+ * @returns the minted edge ids.
+ */
+async edgeIdsOfEpisode(episodeUuid: string): Promise<readonly string[]>
+
+/**
+ * Retire edge records (the rollback mark); live reads stop returning them.
+ * @param edgeIds - the edges to retire.
+ * @param at - the ISO mark timestamp.
+ * @returns how many rows changed.
+ */
+async expireEdges(edgeIds: readonly string[], at: string): Promise<number>
+
+/**
+ * Restore retired edge records — the rollback inverse.
+ * @param edgeIds - the edges to restore.
+ * @param at - the ISO restore timestamp.
+ * @returns how many rows changed.
+ */
+async restoreEdges(edgeIds: readonly string[], at: string): Promise<number>
+
+/**
+ * Read live edge rows by ids.
+ * @param edgeIds - the minted edge ids.
+ * @returns the live edges (missing ids drop out).
+ */
+async edgesByIds(edgeIds: readonly string[]): Promise<readonly KgEdge[]>
+
+/**
+ * Read the live edges between two nodes, optionally one relation only.
+ * @param tenantId - owning tenant.
+ * @param srcId - one endpoint (either direction matches).
+ * @param dstId - the other endpoint.
+ * @param relation - optional relation filter.
+ * @returns the live edges between the endpoints, either direction.
+ */
+async liveEdgesBetween(tenantId: string, srcId: string, dstId: string, relation?: KgRelationId): Promise<readonly KgEdge[]>
+
+/**
+ * Read the tenant's whole live adjacency (the PPR input).
+ * @param tenantId - owning tenant.
+ * @param cap - maximum edges read.
+ * @returns node ids plus undirected endpoint pairs.
+ */
+async liveAdjacency( tenantId: string, cap: number, ): Promise<{ nodeIds: readonly string[]; pairs: readonly (readonly [string, string])[] }>
+
+/**
+ * Rank the neighborhood around seeds by Personalized PageRank and read the
+ * induced subgraph over the top nodes (the L1.5 retrieval layer): the
+ * ranking orders, the subgraph carries names and the edges among the cut.
+ * @param tenantId - owning tenant.
+ * @param seedIds - resolved seed node ids.
+ * @param topN - neighborhood size.
+ * @returns the ranking plus the induced subgraph (depth 0 nodes).
+ */
+async pprNeighborhood(tenantId: string, seedIds: readonly string[], topN: number): Promise<{ ranking: readonly { nodeId: string; rank: number }[] subgraph: KgSubgraph }>
+
+/**
+ * Persist ontology cross-reference rows (the FoodOn import channel).
+ * @param entries - the xref rows.
+ * @returns how many rows were newly inserted.
+ */
+async putOntologyXrefs(entries: readonly KgOntologyXref[]): Promise<number>
+
+/**
+ * Read persisted ontology cross-reference rows.
+ * @param limit - maximum rows.
+ * @returns the xref rows.
+ */
+async listOntologyXrefs(limit: number): Promise<readonly KgOntologyXref[]>
+
+/**
+ * Persist coreference reject tombstones (the align pass's negative verdicts).
+ * @param entries - the reject rows.
+ * @returns how many rows were newly inserted.
+ */
+async putCorefRejects(entries: readonly KgCorefReject[]): Promise<number>
+
+/**
+ * Read every persisted coreference reject pair key.
+ * @returns the reject tombstone set.
+ */
+async listCorefRejects(): Promise<ReadonlySet<string>>
 ```
 
 Source: [`packages/kb/kb-graph/src/index.ts`](../../packages/kb/kb-graph/src/index.ts)
@@ -553,6 +703,17 @@ async run(options: RunOptions = {}): Promise<KgBuildRunReport>
  * @returns the row, or undefined before the first persisted run.
  */
 async latestRun(): Promise<KgBuildRunRecord | undefined>
+
+/**
+ * One incremental pass: snapshot the five source systems' watermark rows,
+ * run the pipeline, and diff the snapshots — the per-scope evidence that
+ * only changed scopes reprocessed (unchanged scopes fingerprint-skip inside
+ * run(); this wraps the run with the before/after diff the incremental
+ * acceptance reads).
+ * @param options - cooperative cancellation.
+ * @returns the run report plus the changed-scope list.
+ */
+async runIncremental(options: RunOptions = {}): Promise<KgIncrementalReport>
 
 /**
  * The live quality readout: structural counters straight from the store,

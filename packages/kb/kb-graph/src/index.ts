@@ -13,30 +13,43 @@
 
 import { Context, Service } from '@deepseek-ai/cordis'
 import { builtinOntology, ONTOLOGY_VERSION, validateOntology } from './ontology.ts'
-import { KbGraphError } from './types.ts'
+import { louvainCommunities } from './louvain.ts'
+import { personalizedPageRank } from './ppr.ts'
+import { KbGraphError, kgNodeTypeId } from './types.ts'
 import type {
   GraphStore, KbGraphEntity, KbGraphStoredTriple, KbGraphTriple,
-  KgBuildRunInput, KgBuildRunRow, KgEdge,
-  KgNode, KgNodeHit, KgNodeTypeId, KgNodeType, KgOntologyLayer, KgOntologyRevision,
-  KgOntologyRevisionInput, KgRelation, KgRelationId,
+  KgBuildRunInput, KgBuildRunRow, KgCommunityReadout, KgCorefReject, KgEdge, KgEdgeMention, KgEpisodeInput, KgEpisodeRow,
+  KgNode, KgNodeHit, KgNodeTypeId, KgNodeType, KgOntologyApplyResult, KgOntologyLayer, KgOntologyRevision,
+  KgOntologyRevisionInput, KgOntologyXref, KgRelation, KgRelationId,
   KgShapeViolation, KgSourceRun, KgStore, KgSubgraph, KgSubgraphLimits,
 } from './types.ts'
+import { previewOfOntologyOp } from './kgcl.ts'
+import type { KgOntologyChangeOp } from './kgcl.ts'
 
 export { builtinOntology, exportOntology, validateOntology, ONTOLOGY_VERSION } from './ontology.ts'
 export type { KgBuiltinOntology, KgOntologyDocument } from './ontology.ts'
 export {
-  kgNodeTypeId, kgRelationId, KbGraphError,
+  kgNodeTypeId, kgRelationId, kgCorefPairKey, kgCorefEdgeId, KbGraphError,
 } from './types.ts'
-export { compileKgQuery, KG_QUERY_EXAMPLES } from './kg-nl.ts'
-export type { KgQueryPlan, KgQueryVocabulary } from './kg-nl.ts'
+export { louvainCommunities } from './louvain.ts'
+export type { LouvainResult } from './louvain.ts'
+export { compileKgQuery, fillKgQueryPlan, KG_QUERY_EXAMPLES, KG_QUERY_TEMPLATE_IDS } from './kg-nl.ts'
+export type { KgQueryL1Fill, KgQueryPlan, KgQueryVocabulary } from './kg-nl.ts'
 export type {
   GraphStore, KbGraphEntity, KbGraphStoredTriple, KbGraphTriple,
   KgBuildRunInput, KgBuildRunRow, KgEdge,
-  KgNode, KgNodeHit, KgNodeTypeId, KgNodeType, KgNodeTypeStatus, KgOntologyLayer,
-  KgOntologyRevision, KgOntologyRevisionInput, KgOntologySource, KgPropDef, KgProvenance,
+  KgCommunityReadout, KgCorefReject, KgEdgeMention, KgEpisodeInput, KgEpisodeRow, KgEpisodeSource,
+  KgNode, KgNodeHit, KgNodeTypeId, KgNodeType, KgNodeTypeStatus, KgOntologyApplyResult, KgOntologyLayer,
+  KgOntologyRevision, KgOntologyRevisionInput, KgOntologySource, KgOntologyXref, KgPropDef, KgProvenance,
   KgRelation, KgRelationConstraint, KgRelationId, KgShapeViolation, KgSourceRun, KgStore,
   KgSubgraph, KgSubgraphLimits, KgSubgraphNode,
 } from './types.ts'
+export { buildChangeDiff, formatChangeDiff, formatOntologyChange, previewOfOp, previewOfOntologyOp } from './kgcl.ts'
+export type { KgAddEdgeOp, KgChangeDiff, KgChangeDiffEntry, KgDiffNodeRef, KgGraphChangeOp, KgOntologyChangeOp, KgRemoveEdgeOp, KgSetNodePropsOp } from './kgcl.ts'
+export { compileShaclShapes, formatShaclFeedback, validateShaclCandidates } from './shacl.ts'
+export type { ShaclEdgeCandidate, ShaclEntityCandidate, ShaclNodeShape, ShaclPropertyShape, ShaclRelationShape, ShaclReport, ShaclResult, ShaclShapes } from './shacl.ts'
+export { personalizedPageRank } from './ppr.ts'
+export type { PprOptions, PprRankEntry } from './ppr.ts'
 
 declare module '@deepseek-ai/cordis' {
   interface Context {
@@ -574,6 +587,199 @@ export class KbGraphRuntime extends Service {
   }
 
   /**
+   * Apply one KGCL ontology change set (the manual editor's write path). The
+   * whole set validates first against the live registry overlaid with the
+   * set's own earlier ops — unknown targets, duplicate ids, parent cycles,
+   * and illegal cardinality pairs reject before anything lands — then the
+   * touched rows persist through the two-layer registry and one
+   * ontology_change audit row records the whole set. The caller owns the
+   * episode ledger entry; this method owns the registry and its revision
+   * audit.
+   * @param ops - the closed op vocabulary (see {@link KgOntologyChangeOp}).
+   * @returns one preview line per applied op plus the revision row id.
+   */
+  async applyOntologyOps(ops: readonly KgOntologyChangeOp[]): Promise<KgOntologyApplyResult> {
+    if (ops.length === 0) {
+      throw new KbGraphError('ontology edit: the op set is empty', 'KG_ONTOLOGY_EDIT_INVALID')
+    }
+    const applied: string[] = ops.map(previewOfOntologyOp)
+    // The validation overlay: the registry as the set's own earlier ops
+    // leave it, so a later op may target a class an earlier op just added.
+    const overlayTypes = new Map<KgNodeTypeId, KgNodeType>()
+    const overlayRelations = new Map<KgRelationId, KgRelation>()
+    const typeOf = (id: string): KgNodeType | undefined =>
+      overlayTypes.get(kgNodeTypeId(id)) ?? this.nodeTypes.get(kgNodeTypeId(id))
+    const relationOf = (id: KgRelationId): KgRelation | undefined =>
+      overlayRelations.get(id) ?? this.relations.get(id)
+    /** Every ancestor of one class under the overlay; a visited set guards stale loops. */
+    const ancestorsOf = (start: KgNodeTypeId): ReadonlySet<string> => {
+      const seen = new Set<string>()
+      let cursor: KgNodeType | undefined = typeOf(String(start))
+      while (cursor !== undefined && !seen.has(String(cursor.id))) {
+        seen.add(String(cursor.id))
+        cursor = cursor.extends === undefined ? undefined : typeOf(String(cursor.extends))
+      }
+      return seen
+    }
+    for (const op of ops) {
+      switch (op.op) {
+        case 'add_node': {
+          if (!/^[A-Za-z][A-Za-z0-9_-]*$/.test(op.targetId)) {
+            throw new KbGraphError(`ontology edit: class id "${op.targetId}" must start with a letter and carry only letters, digits, "_", "-"`, 'KG_ONTOLOGY_EDIT_INVALID')
+          }
+          if (op.label.trim().length === 0) {
+            throw new KbGraphError(`ontology edit: class "${op.targetId}" needs a non-empty label`, 'KG_ONTOLOGY_EDIT_INVALID')
+          }
+          if (typeOf(op.targetId) !== undefined) {
+            throw new KbGraphError(`node type "${op.targetId}" is already registered`, 'KB_GRAPH_DUPLICATE_NODE_TYPE')
+          }
+          if (op.parentId === undefined) {
+            throw new KbGraphError(`ontology edit: class "${op.targetId}" needs a parent (domain types extend a top or domain type)`, 'KG_ONTOLOGY_EDIT_INVALID')
+          }
+          const parent = typeOf(op.parentId)
+          if (parent === undefined) {
+            throw new KbGraphError(`ontology edit: parent class "${op.parentId}" is not registered`, 'KG_UNKNOWN_NODE_TYPE')
+          }
+          if (parent.status === 'deprecated') {
+            throw new KbGraphError(`ontology edit: parent class "${op.parentId}" is deprecated`, 'KG_ONTOLOGY_EDIT_INVALID')
+          }
+          overlayTypes.set(kgNodeTypeId(op.targetId), {
+            id: kgNodeTypeId(op.targetId), label: op.label.trim(), layer: 'domain', extends: parent.id,
+            props: [], source: 'agent-defined', status: 'draft',
+          })
+          break
+        }
+        case 'rename_node': {
+          const existing = typeOf(op.targetId)
+          if (existing === undefined) {
+            throw new KbGraphError(`ontology edit: class "${op.targetId}" is not registered`, 'KG_UNKNOWN_NODE_TYPE')
+          }
+          if (op.label.trim().length === 0) {
+            throw new KbGraphError(`ontology edit: class "${op.targetId}" needs a non-empty label`, 'KG_ONTOLOGY_EDIT_INVALID')
+          }
+          overlayTypes.set(existing.id, { ...existing, label: op.label.trim() })
+          break
+        }
+        case 'set_parent': {
+          const existing = typeOf(op.targetId)
+          if (existing === undefined) {
+            throw new KbGraphError(`ontology edit: class "${op.targetId}" is not registered`, 'KG_UNKNOWN_NODE_TYPE')
+          }
+          const parent = typeOf(op.newParentId)
+          if (parent === undefined) {
+            throw new KbGraphError(`ontology edit: parent class "${op.newParentId}" is not registered`, 'KG_UNKNOWN_NODE_TYPE')
+          }
+          if (ancestorsOf(parent.id).has(String(existing.id))) {
+            throw new KbGraphError(`ontology edit: re-parenting "${op.targetId}" under "${op.newParentId}" would cycle the class tree`, 'KG_ONTOLOGY_EDIT_INVALID')
+          }
+          overlayTypes.set(existing.id, { ...existing, extends: parent.id })
+          break
+        }
+        case 'deprecate_node': {
+          const existing = typeOf(op.targetId)
+          if (existing === undefined) {
+            throw new KbGraphError(`ontology edit: class "${op.targetId}" is not registered`, 'KG_UNKNOWN_NODE_TYPE')
+          }
+          if (op.replacedBy !== undefined && typeOf(op.replacedBy) === undefined) {
+            throw new KbGraphError(`ontology edit: replacement class "${op.replacedBy}" is not registered`, 'KG_UNKNOWN_NODE_TYPE')
+          }
+          overlayTypes.set(existing.id, { ...existing, status: 'deprecated' })
+          break
+        }
+        case 'change_cardinality': {
+          const existing = relationOf(op.relationId)
+          if (existing === undefined) {
+            throw new KbGraphError(`ontology edit: relation "${String(op.relationId)}" is not registered`, 'KG_UNKNOWN_RELATION')
+          }
+          const pair = existing.constraints.find(c => String(c.domain) === op.domainId && String(c.range) === op.rangeId)
+          if (pair === undefined) {
+            throw new KbGraphError(`ontology edit: relation "${String(op.relationId)}" has no legal pair ${op.domainId}→${op.rangeId}`, 'KG_ONTOLOGY_EDIT_INVALID')
+          }
+          for (const bound of [op.min, op.max]) {
+            if (bound !== undefined && (!Number.isInteger(bound) || bound < 0)) {
+              throw new KbGraphError(`ontology edit: cardinality bounds must be non-negative integers (${String(bound)} given)`, 'KG_ONTOLOGY_EDIT_INVALID')
+            }
+          }
+          if (op.min !== undefined && op.max !== undefined && op.min > op.max) {
+            throw new KbGraphError(`ontology edit: cardinality min ${String(op.min)} exceeds max ${String(op.max)}`, 'KG_ONTOLOGY_EDIT_INVALID')
+          }
+          const unbounded = op.min === undefined && op.max === undefined
+          const cardinality = unbounded
+            ? undefined
+            : { ...(op.min === undefined ? {} : { min: op.min }), ...(op.max === undefined ? {} : { max: op.max }) }
+          overlayRelations.set(existing.id, {
+            ...existing,
+            constraints: existing.constraints.map(c => c === pair ? { ...c, ...(cardinality === undefined ? {} : { cardinality }) } : c),
+          })
+          break
+        }
+      }
+    }
+    // Every op validated: commit the overlay to the runtime registry, then
+    // persist the touched rows (new classes register through the effectful
+    // path so their lifecycle rides the context like every registration).
+    for (const type of overlayTypes.values()) {
+      if (!this.nodeTypes.has(type.id)) this.registerNodeType(type)
+      else this.nodeTypes.set(type.id, type)
+      await this.persistNodeType(type)
+    }
+    for (const relation of overlayRelations.values()) {
+      this.relations.set(relation.id, relation)
+      await this.persistRelation(relation)
+    }
+    const counts = ops.reduce< Record<string, number>>((tally, op) => {
+      tally[op.op] = (tally[op.op] ?? 0) + 1
+      return tally
+    }, {})
+    const summary = `ontology-edit：${String(ops.length)} 个 KGCL 操作（${Object.entries(counts).map(([name, count]) => `${name} ×${String(count)}`).join('，')}）`
+    const revisionId = await this.recordOntologyRevision({
+      ontologyVersion: ONTOLOGY_VERSION,
+      summary,
+      changes: { ops: applied },
+      createdAt: new Date().toISOString(),
+    })
+    return { applied, revisionId }
+  }
+
+  /**
+   * Detect communities over the tenant's live adjacency with the pure
+   * louvain pass (the canvas's community coloring consumes this read; the
+   * computation stays off the browser's main thread by construction).
+   * @param tenantId - owning tenant.
+   * @param cap - maximum edges read; defaults to 20,000.
+   * @returns the partition plus its modularity.
+   */
+  async communities(tenantId: string, cap: number = 20_000): Promise<KgCommunityReadout> {
+    const adjacency = await this.resolveKgStore().liveAdjacency(tenantId, cap)
+    const result = louvainCommunities(adjacency.nodeIds, adjacency.pairs)
+    const grouped = new Map<number, string[]>()
+    for (const [nodeId, community] of result.assignments) {
+      const bucket = grouped.get(community)
+      if (bucket === undefined) grouped.set(community, [nodeId])
+      else bucket.push(nodeId)
+    }
+    return {
+      communities: [...grouped.entries()].sort((a, b) => b[1].length - a[1].length || a[0] - b[0])
+        .map(([, nodes], index) => ({ id: index, nodes })),
+      modularity: result.modularity,
+      nodeCount: adjacency.nodeIds.length,
+    }
+  }
+
+  /**
+   * Read the graph state as of one time point (the revision-replay read):
+   * nodes created at or before `asOf` plus edges recorded at or before it
+   * that were neither tombstoned nor record-retired before it.
+   * @param tenantId - owning tenant.
+   * @param asOf - the ISO instant the snapshot freezes.
+   * @param limits - optional size bounds; defaults apply.
+   * @returns the snapshot subgraph.
+   */
+  async snapshotAt(tenantId: string, asOf: string, limits?: KgSubgraphLimits): Promise<KgSubgraph> {
+    return await this.resolveKgStore().snapshotAt(tenantId, asOf, limits)
+  }
+
+  /**
    * The built-in ontology's semantic version — the TS seed is the single
    * source of truth; derived registrations (nocobase-derived, agent-defined)
    * ride the store's revision audit instead.
@@ -658,6 +864,163 @@ export class KbGraphRuntime extends Service {
    */
   async nodeCountByType(tenantId: string, typeId: KgNodeTypeId): Promise<number> {
     return await this.resolveKgStore().nodeCountByType(tenantId, typeId)
+  }
+
+  /**
+   * Append one episode row (the temporal ledger write).
+   * @param episode - the episode snapshot.
+   */
+  async putEpisode(episode: KgEpisodeInput): Promise<void> {
+    await this.resolveKgStore().putEpisode(episode)
+  }
+
+  /**
+   * Link edges to an episode (the mention join).
+   * @param episodeUuid - the owning episode.
+   * @param edgeIds - the edges the episode touched.
+   * @returns how many mention rows were newly inserted.
+   */
+  async linkMentions(episodeUuid: string, edgeIds: readonly string[]): Promise<number> {
+    return await this.resolveKgStore().linkMentions(episodeUuid, edgeIds)
+  }
+
+  /**
+   * List newest episodes for one tenant.
+   * @param tenantId - owning tenant.
+   * @param limit - maximum rows.
+   * @returns the episodes, newest first, with mention counts.
+   */
+  async listEpisodes(tenantId: string, limit: number): Promise<readonly KgEpisodeRow[]> {
+    return await this.resolveKgStore().listEpisodes(tenantId, limit)
+  }
+
+  /**
+   * Reverse-lookup: every episode that touched one edge.
+   * @param edgeId - the minted edge id.
+   * @returns the mentions with their episodes.
+   */
+  async edgeMentions(edgeId: string): Promise<readonly KgEdgeMention[]> {
+    return await this.resolveKgStore().edgeMentions(edgeId)
+  }
+
+  /**
+   * Read the edges one episode mentions (the rollback unit).
+   * @param episodeUuid - the episode whose edges to read.
+   * @returns the minted edge ids.
+   */
+  async edgeIdsOfEpisode(episodeUuid: string): Promise<readonly string[]> {
+    return await this.resolveKgStore().edgeIdsOfEpisode(episodeUuid)
+  }
+
+  /**
+   * Retire edge records (the rollback mark); live reads stop returning them.
+   * @param edgeIds - the edges to retire.
+   * @param at - the ISO mark timestamp.
+   * @returns how many rows changed.
+   */
+  async expireEdges(edgeIds: readonly string[], at: string): Promise<number> {
+    return await this.resolveKgStore().expireEdges(edgeIds, at)
+  }
+
+  /**
+   * Restore retired edge records — the rollback inverse.
+   * @param edgeIds - the edges to restore.
+   * @param at - the ISO restore timestamp.
+   * @returns how many rows changed.
+   */
+  async restoreEdges(edgeIds: readonly string[], at: string): Promise<number> {
+    return await this.resolveKgStore().restoreEdges(edgeIds, at)
+  }
+
+  /**
+   * Read live edge rows by ids.
+   * @param edgeIds - the minted edge ids.
+   * @returns the live edges (missing ids drop out).
+   */
+  async edgesByIds(edgeIds: readonly string[]): Promise<readonly KgEdge[]> {
+    return await this.resolveKgStore().edgesByIds(edgeIds)
+  }
+
+  /**
+   * Read the live edges between two nodes, optionally one relation only.
+   * @param tenantId - owning tenant.
+   * @param srcId - one endpoint (either direction matches).
+   * @param dstId - the other endpoint.
+   * @param relation - optional relation filter.
+   * @returns the live edges between the endpoints, either direction.
+   */
+  async liveEdgesBetween(tenantId: string, srcId: string, dstId: string, relation?: KgRelationId): Promise<readonly KgEdge[]> {
+    return await this.resolveKgStore().liveEdgesBetween(tenantId, srcId, dstId, relation)
+  }
+
+  /**
+   * Read the tenant's whole live adjacency (the PPR input).
+   * @param tenantId - owning tenant.
+   * @param cap - maximum edges read.
+   * @returns node ids plus undirected endpoint pairs.
+   */
+  async liveAdjacency(
+    tenantId: string,
+    cap: number,
+  ): Promise<{ nodeIds: readonly string[]; pairs: readonly (readonly [string, string])[] }> {
+    return await this.resolveKgStore().liveAdjacency(tenantId, cap)
+  }
+
+  /**
+   * Rank the neighborhood around seeds by Personalized PageRank and read the
+   * induced subgraph over the top nodes (the L1.5 retrieval layer): the
+   * ranking orders, the subgraph carries names and the edges among the cut.
+   * @param tenantId - owning tenant.
+   * @param seedIds - resolved seed node ids.
+   * @param topN - neighborhood size.
+   * @returns the ranking plus the induced subgraph (depth 0 nodes).
+   */
+  async pprNeighborhood(tenantId: string, seedIds: readonly string[], topN: number): Promise<{
+    ranking: readonly { nodeId: string; rank: number }[]
+    subgraph: KgSubgraph
+  }> {
+    const store = this.resolveKgStore()
+    const adjacency = await store.liveAdjacency(tenantId, 20_000)
+    const ranking = personalizedPageRank(adjacency.nodeIds, adjacency.pairs, seedIds, { topN })
+    const topIds = [...new Set([...seedIds, ...ranking.map(entry => entry.nodeId)])]
+    if (topIds.length === 0) return { ranking: [], subgraph: { nodes: [], edges: [], truncated: false } }
+    const subgraph = await store.subgraph(tenantId, topIds, 0, { maxNodes: topIds.length, maxEdges: 1_000 })
+    return { ranking, subgraph }
+  }
+
+  /**
+   * Persist ontology cross-reference rows (the FoodOn import channel).
+   * @param entries - the xref rows.
+   * @returns how many rows were newly inserted.
+   */
+  async putOntologyXrefs(entries: readonly KgOntologyXref[]): Promise<number> {
+    return await this.resolveKgStore().putOntologyXrefs(entries)
+  }
+
+  /**
+   * Read persisted ontology cross-reference rows.
+   * @param limit - maximum rows.
+   * @returns the xref rows.
+   */
+  async listOntologyXrefs(limit: number): Promise<readonly KgOntologyXref[]> {
+    return await this.resolveKgStore().listOntologyXrefs(limit)
+  }
+
+  /**
+   * Persist coreference reject tombstones (the align pass's negative verdicts).
+   * @param entries - the reject rows.
+   * @returns how many rows were newly inserted.
+   */
+  async putCorefRejects(entries: readonly KgCorefReject[]): Promise<number> {
+    return await this.resolveKgStore().putCorefRejects(entries)
+  }
+
+  /**
+   * Read every persisted coreference reject pair key.
+   * @returns the reject tombstone set.
+   */
+  async listCorefRejects(): Promise<ReadonlySet<string>> {
+    return await this.resolveKgStore().listCorefRejects()
   }
 }
 
