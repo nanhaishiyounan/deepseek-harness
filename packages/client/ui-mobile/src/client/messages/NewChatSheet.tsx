@@ -6,8 +6,8 @@
  * replaces the standalone contacts route.
  */
 
-import { useMemo, useState, type JSX } from 'react'
-import { Popup } from 'antd-mobile'
+import { useEffect, useMemo, useState, type JSX } from 'react'
+import { Popup, Toast } from 'antd-mobile'
 import { X } from 'lucide-react'
 import { navigate } from '../router.ts'
 import { useAsync } from '../hooks.ts'
@@ -35,6 +35,14 @@ export function NewChatSheet({ visible, onClose }: NewChatSheetProps): JSX.Eleme
     const fill = value.find(row => row.id === 'mobile-form-assistant')
     return fill === undefined ? value : [fill, ...value.filter(row => row.id !== fill.id)]
   }, [roster.value])
+
+  // A failed roster read or start lands as one transient toast.
+  useEffect(() => {
+    if (roster.error !== undefined) Toast.show({ content: roster.error })
+  }, [roster.error])
+  useEffect(() => {
+    if (error !== undefined) Toast.show({ content: error })
+  }, [error])
 
   const recentRows = useMemo(() => (recent.value ?? []).slice(0, 3), [recent.value])
 
@@ -74,8 +82,6 @@ export function NewChatSheet({ visible, onClose }: NewChatSheetProps): JSX.Eleme
             <X size={18} aria-hidden="true" />
           </button>
         </header>
-        {roster.status === 'error' && <p className={css.error} role="alert">{roster.error}</p>}
-        {error !== undefined && <p className={css.error} role="alert">{error}</p>}
         <ul className={css.roster} aria-label="AI 同事">
           {rows.map((employee) => {
             const visual = colleagueOf(employee.id)
@@ -92,7 +98,18 @@ export function NewChatSheet({ visible, onClose }: NewChatSheetProps): JSX.Eleme
                     <span className={css.rosterDuty}>{duty}</span>
                     {formChips.length > 0 && (
                       <span className={css.rosterChips}>
-                        {formChips.map(chip => <span key={chip} className={css.rosterChip}>{chip}</span>)}
+                        {formChips.map(chip => (
+                          <button
+                            key={chip}
+                            type="button"
+                            className={css.rosterChip}
+                            disabled={busy}
+                            aria-label={`新建 ${chip} 会话`}
+                            onClick={() => { void start('mobile-form-assistant') }}
+                          >
+                            {chip}
+                          </button>
+                        ))}
                       </span>
                     )}
                   </span>

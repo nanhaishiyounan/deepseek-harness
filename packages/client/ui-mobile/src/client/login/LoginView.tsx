@@ -110,9 +110,8 @@ export function LoginView({ onLoggedIn }: LoginViewProps): JSX.Element {
         >
           登录
         </Button>
-        <p className={css.demo}>演示环境 · 数据仅限内测</p>
       </div>
-      <p className={css.footer}>DeepSeek Harness · 移动端 v3</p>
+      <p className={css.footer}>演示环境 · 数据仅限内测 · DeepSeek Harness</p>
     </div>
   )
 }

@@ -1,7 +1,6 @@
 /**
  * The user-action badge row: the lightweight marker a 确认写入 / 驳回 action
- * message renders as (never a full protocol-text bubble). Minimal v3
- * scaffolding; the visual batch owns the final look.
+ * message renders as (never a full protocol-text bubble).
  */
 
 import type { JSX } from 'react'

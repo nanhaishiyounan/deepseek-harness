@@ -44,6 +44,9 @@
   --dshm-tabbar-height: 56px;
   --dshm-shadow-card: 0 1px 6px 0 rgba(28, 43, 41, 0.05);
   --dshm-stroke-soft: rgba(213, 224, 221, 0.6); /* in-card ledger dividers */
+  --dshm-primary-press: #094b46;    /* pressed primary (sends, seals) */
+  --dshm-receipt-wash: rgba(31, 122, 77, 0.16); /* the receipt card's fill */
+  --dshm-success-rim: rgba(31, 122, 77, 0.55);  /* the receipt card's rim */
   --dshm-font-sans: -apple-system, 'PingFang SC', 'HarmonyOS Sans SC', 'MiSans', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
   --dshm-font-num: 'SF Mono', ui-monospace, 'Menlo', 'Roboto Mono', monospace;
 
@@ -101,6 +104,9 @@
   --dshm-bubble-ai-border: #2a3835;
   --dshm-shadow-card: 0 1px 6px 0 rgba(0, 0, 0, 0.25);
   --dshm-stroke-soft: rgba(42, 56, 53, 0.7);
+  --dshm-primary-press: #3d9186;
+  --dshm-receipt-wash: rgba(78, 158, 111, 0.22);
+  --dshm-success-rim: rgba(78, 158, 111, 0.6);
 }
 
 .dshm-root *,

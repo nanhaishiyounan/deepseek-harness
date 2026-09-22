@@ -55,21 +55,22 @@ export function useAsync<T>(fetcher: () => Promise<T>): AsyncCell<T> {
 
 /** The poll hook's latest read (discriminated by `status`). */
 export type PollRead<T> =
-  | { readonly status: 'loading'; readonly value: undefined; readonly error: undefined }
-  | { readonly status: 'ready'; readonly value: T; readonly error: undefined }
-  | { readonly status: 'error'; readonly value: undefined; readonly error: string }
+  | { readonly status: 'loading'; readonly value: undefined; readonly error: undefined; readonly refresh: () => void }
+  | { readonly status: 'ready'; readonly value: T; readonly error: undefined; readonly refresh: () => void }
+  | { readonly status: 'error'; readonly value: undefined; readonly error: string; readonly refresh: () => void }
 
 /**
  * Poll an async producer on an interval while `active`.
  * @param producer - async producer returning the fresh value.
  * @param intervalMs - poll period.
  * @param active - polling gate (false suspends the timer).
- * @returns the latest read, refreshed by the timer.
+ * @returns the latest read, refreshed by the timer; `refresh` re-reads now.
  */
 export function usePoll<T>(producer: () => Promise<T>, intervalMs: number, active: boolean): PollRead<T> {
-  const [read, setRead] = useState<PollRead<T>>({ status: 'loading', value: undefined, error: undefined })
+  const [read, setRead] = useState<PollRead<T>>({ status: 'loading', value: undefined, error: undefined, refresh: () => {} })
   const producerRef = useRef(producer)
   producerRef.current = producer
+  const [tick, setTick] = useState(0)
   useEffect(() => {
     if (!active) return
     let alive = true
@@ -77,10 +78,10 @@ export function usePoll<T>(producer: () => Promise<T>, intervalMs: number, activ
     const run = (): void => {
       producerRef.current().then((next) => {
         if (!alive) return
-        setRead({ status: 'ready', value: next, error: undefined })
+        setRead({ status: 'ready', value: next, error: undefined, refresh: () => { setTick(current => current + 1) } })
       }, (cause: unknown) => {
         if (!alive) return
-        setRead({ status: 'error', value: undefined, error: messageOf(cause) })
+        setRead({ status: 'error', value: undefined, error: messageOf(cause), refresh: () => { setTick(current => current + 1) } })
       }).finally(() => {
         if (alive) timer = window.setTimeout(run, intervalMs)
       })
@@ -90,6 +91,14 @@ export function usePoll<T>(producer: () => Promise<T>, intervalMs: number, activ
       alive = false
       if (timer !== undefined) window.clearTimeout(timer)
     }
-  }, [intervalMs, active])
-  return read
+  }, [intervalMs, active, tick])
+  const refresh = useCallback(() => { setTick(current => current + 1) }, [])
+  switch (read.status) {
+    case 'ready':
+      return { ...read, refresh }
+    case 'error':
+      return { ...read, refresh }
+    default:
+      return { status: 'loading', value: undefined, error: undefined, refresh }
+  }
 }

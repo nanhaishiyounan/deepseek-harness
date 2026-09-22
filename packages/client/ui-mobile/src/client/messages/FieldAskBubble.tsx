@@ -1,8 +1,7 @@
 /**
  * The ask_field interaction bubble: one missing required field with its
  * suggested-value chips (a pick sends the suggestion as the user's own
- * answer) and the answered state. Minimal v3 scaffolding; the visual batch
- * owns the final look.
+ * answer) and the answered state.
  */
 
 import type { JSX } from 'react'

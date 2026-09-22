@@ -1,5 +1,6 @@
-/* Chat page (03 §4.1/§4.12): header, ticket bubbles with the speaking
-   corner, one entrance motion, the composer with context chips. */
+/* Chat page (03 §4.1/§4.12): NavBar header, ticket bubbles with the speaking
+   corner, one entrance motion, the composer with context chips. The detail
+   page is a full-screen layer — no tab bar under it. */
 
 .page {
   display: flex;
@@ -9,29 +10,29 @@
   background: var(--dshm-background);
 }
 
-.header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-  min-height: 52px;
-  background: var(--dshm-card);
-  border-bottom: 1px solid var(--dshm-border);
+/* The full-screen layer's NavBar: card face, rim underline, 52px tall. */
+.navbar {
+  --adm-nav-bar-height: 52px;
+  --adm-nav-bar-background: var(--dshm-card);
+  --adm-font-size-10: 11px;
   flex: none;
+  border-bottom: 1px solid var(--dshm-border);
 }
 
-.back {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: var(--dshm-muted);
-  color: var(--dshm-muted-foreground);
-  font-size: 20px;
-  line-height: 1;
+/* The full-screen layer's own back button (44px touch target). */
+.backButton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex: none;
+  width: 40px;
+  height: 40px;
+  margin-left: -8px;
+  border-radius: 50%;
+  color: var(--dshm-foreground);
+}
+
+.backButton:active {
+  background: var(--dshm-muted);
 }
 
 .headerPlus {
@@ -47,30 +48,40 @@
 }
 
 .headerMain {
-  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   min-width: 0;
+}
+
+.headerTexts {
   display: flex;
   flex-direction: column;
   gap: 1px;
+  min-width: 0;
+  text-align: left;
 }
 
 .headerTitle {
-  font-size: 17px;
-  line-height: 24px;
+  font-size: 16px;
+  line-height: 22px;
   font-weight: 600;
   color: var(--dshm-foreground);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  max-width: 200px;
 }
 
 .headerHint {
   font-size: 11px;
-  line-height: 16px;
+  line-height: 14px;
   color: var(--dshm-muted-foreground);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  max-width: 200px;
 }
 
 .flow {
@@ -95,6 +106,15 @@
     transform: translateY(8px);
     opacity: 0;
   }
+}
+
+/* The empty-session welcome renders as a centered stage, not a list row. */
+.welcomeStage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .daySeparator {
@@ -130,20 +150,21 @@
   width: 32px;
 }
 
-/* The AI seal: a 10px stroked round badge at the avatar's lower right —
+/* The AI seal: a stroked round badge at the avatar's lower right —
    identity in the stamp language, not a spark glyph (03 §4.1). */
 .aiSeal {
   position: absolute;
   right: -3px;
   bottom: -3px;
+  z-index: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
   border-radius: 50%;
-  border: 1px solid var(--dshm-primary);
-  background: var(--dshm-card);
+  border: 1.5px solid var(--dshm-primary);
+  background: var(--dshm-background);
   color: var(--dshm-primary);
   font-size: 8px;
   line-height: 1;
@@ -175,6 +196,21 @@
   overflow-wrap: anywhere;
 }
 
+/* The answered pick capsule (03 §4.1): one small pill with the check seal. */
+.choiceCapsule {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-end;
+  height: 28px;
+  padding: 0 12px;
+  font-size: 12px;
+  line-height: 16px;
+  border-radius: 999px;
+  background: var(--dshm-primary-10);
+  color: var(--dshm-primary);
+}
+
 .cardRow {
   display: flex;
   align-items: flex-start;
@@ -186,11 +222,17 @@
   min-width: 0;
 }
 
+/* Tool rows ride in a quiet container: muted fill, rim roundels. */
 .toolRow {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 0 4px 0 40px;
+  align-self: flex-start;
+  margin-left: 40px;
+  max-width: calc(100% - 40px);
+  padding: 4px 10px 4px 4px;
+  border-radius: 999px;
+  background: var(--dshm-muted);
   font-size: 11px;
   line-height: 16px;
   color: var(--dshm-muted-foreground);
@@ -205,7 +247,6 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
   flex: none;
 }
 
@@ -304,17 +345,17 @@
 .input {
   flex: 1;
   min-width: 0;
-  min-height: 44px;
-  resize: none;
-  max-height: 96px;
-  background: var(--dshm-muted);
+  --font-size: 14px;
+  --color: var(--dshm-foreground);
+  --placeholder-color: var(--dshm-muted-foreground);
+  --background: var(--dshm-muted);
+  --border-radius: var(--dshm-radius);
+  --adm-text-area-min-height: calc(44px - 16px);
+  --adm-text-area-max-height: calc(4 * 20px + 16px);
+  --padding: 6px 14px;
+  --box-sizing: border-box;
+  --line-height: 20px;
   border-radius: var(--dshm-radius);
-  border: none;
-  padding: 12px 14px;
-  font-size: 14px;
-  line-height: 20px;
-  color: var(--dshm-foreground);
-  box-sizing: border-box;
 }
 
 .send {
@@ -323,20 +364,20 @@
   border-radius: 50%;
   background: var(--dshm-primary);
   color: var(--dshm-on-primary);
-  font-size: 15px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex: none;
+  margin-bottom: 4px;
 }
 
 .send:active {
-  background: color-mix(in srgb, var(--dshm-primary) 85%, #000);
+  background: var(--dshm-primary-press);
 }
 
 .send:disabled {
   background: var(--dshm-muted);
-  color: color-mix(in srgb, var(--dshm-card) 40%, transparent);
+  color: var(--dshm-muted-foreground);
 }
 
 .stop {
@@ -346,17 +387,12 @@
   background: var(--dshm-muted);
   color: var(--dshm-muted-foreground);
   font-size: 12px;
+  gap: 4px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex: none;
-}
-
-.error {
-  margin: 0;
-  font-size: 12px;
-  line-height: 18px;
-  color: var(--dshm-destructive);
+  margin-bottom: 4px;
 }
 
 /* Motion discipline (03 §6): the entrance settles instantly instead. */

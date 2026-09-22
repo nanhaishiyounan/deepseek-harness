@@ -1,7 +1,9 @@
 /* v3 form cards: the cold-chain ledger look (03 §4.3/§4.4) — the three-tier
    draft card with in-card ledger dividers and the 44px phase stamp, the
    receipt metric card with the ticket-face hero number. Colors ride the
-   --dshm-* tracks only. */
+   --dshm-* tracks only. Each card class carries its material tier: the draft
+   card stays paper-white (the blank being filled), the receipt card rides the
+   pass-green wash (the finished copy). */
 
 .card {
   display: flex;
@@ -28,6 +30,17 @@
   }
 }
 
+/* The receipt-material tier: the pass-green wash copy of the ticket. */
+.receiptCard {
+  background: var(--dshm-receipt-wash);
+  border-color: var(--dshm-success-rim);
+}
+
+/* The receipt's metric cells keep the card face against the green wash. */
+.receiptCard .metricCell {
+  background: var(--dshm-card);
+}
+
 .cardHeader {
   display: flex;
   align-items: flex-start;
@@ -43,9 +56,25 @@
 }
 
 .cardBiz {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 16px;
   font-weight: 600;
   line-height: 24px;
+}
+
+/* The pass-green check seal heading the receipt copy. */
+.receiptSeal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--dshm-success);
+  color: var(--dshm-on-primary);
+  flex: none;
 }
 
 .cardTitle {
@@ -86,7 +115,7 @@
 .stamp_submitted {
   border-color: var(--dshm-success);
   background: var(--dshm-success);
-  color: #fff;
+  color: var(--dshm-on-primary);
   /* The stamp comes down oversized and askew, settling at a slight tilt. */
   animation: v3-stamp-in 200ms cubic-bezier(0.2, 1.4, 0.4, 1) both;
 }
@@ -135,6 +164,13 @@
   gap: 2px;
 }
 
+/* The derived tier rides a washed panel: read-only rest, boxed override. */
+.tierDerived {
+  background: var(--dshm-muted);
+  border-radius: var(--dshm-radius);
+  padding: 8px 10px;
+}
+
 .tierHead {
   display: flex;
   align-items: center;
@@ -154,6 +190,12 @@
   background: var(--dshm-stroke-soft);
 }
 
+/* Inside the washed derived panel the divider drops out (panel is the line). */
+.tierDerived .tierHead::before,
+.tierDerived .tierHead::after {
+  background: var(--dshm-border);
+}
+
 .fieldRow {
   display: flex;
   align-items: center;
@@ -167,6 +209,7 @@
   font-weight: 500;
   line-height: 18px;
   color: var(--dshm-foreground);
+  flex: none;
 }
 
 .rationale {
@@ -174,6 +217,7 @@
   line-height: 16px;
   color: var(--dshm-muted-foreground);
   font-weight: 400;
+  text-align: right;
 }
 
 .fieldInput {
@@ -196,8 +240,28 @@
   padding: 0 9px;
 }
 
+/* The relation picker's trigger rides the boxed-input face; the resolved
+   name shows, never the id. */
+.fieldPicker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  max-width: 180px;
+  height: 36px;
+  padding: 0 10px;
+  font-size: 14px;
+  line-height: 22px;
+  border: 1px solid var(--dshm-border);
+  border-radius: var(--dshm-radius);
+  background: var(--dshm-card);
+  color: var(--dshm-foreground);
+  box-sizing: border-box;
+}
+
 /* The derived row in its resting read-only form: the value shows as the
-   settled figure; tapping the row opens the override input. */
+   settled figure with the rationale under it; tapping the row opens the
+   override input. */
 .derivedRow {
   width: 100%;
   padding: 0;
@@ -206,6 +270,15 @@
 
 .derivedRow:active {
   opacity: 0.75;
+}
+
+.derivedMain {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0;
+  flex: 1;
+  min-width: 0;
 }
 
 .derivedValue {
@@ -247,19 +320,26 @@
   background: var(--dshm-primary-10);
 }
 
+/* The system tier folds into a Collapse strip (antd-mobile default motion). */
 .systemFold {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  --adm-color-primary: var(--dshm-primary);
+  --adm-color-text: var(--dshm-muted-foreground);
+  --adm-color-border: var(--dshm-stroke-soft);
+  --adm-border-radius-s: var(--dshm-radius);
+  --adm-collapse-panel-content-padding: 2px 0;
+  --adm-collapse-panel-header-padding: 8px 2px;
+  border-top: none;
+  border-bottom: none;
 }
 
-.systemFold summary {
-  list-style: none;
-  cursor: pointer;
+.systemFold :global(.adm-collapse-panel-header) {
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
 }
 
-.systemFold summary::-webkit-details-marker {
-  display: none;
+.systemFold :global(.adm-collapse-panel-header .adm-list-item-content-main) {
+  padding: 0;
 }
 
 .systemValue {
@@ -386,6 +466,32 @@
   color: var(--dshm-muted-foreground);
 }
 
+/* The ticket-number strip: label left, monospace value right. */
+.ticketStrip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 2px;
+  padding: 6px 10px;
+  border: 1px dashed var(--dshm-border);
+  border-radius: var(--dshm-radius);
+}
+
+.ticketLabel {
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--dshm-muted-foreground);
+}
+
+.ticketValue {
+  font-family: var(--dshm-font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 500;
+}
+
 .receiptFooter {
   margin-top: 4px;
 }
@@ -398,7 +504,7 @@
 /* Motion discipline (03 §6): the stamp and rim flash collapse to instant
    stillness under reduced motion. */
 @media (prefers-reduced-motion: reduce) {
-  .stamp[data-phase='submitted'] {
+  .stamp_submitted {
     animation: none;
   }
 

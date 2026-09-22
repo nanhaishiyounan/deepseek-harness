@@ -5,7 +5,7 @@
  * truth. v3 actions and receipts discriminate by their `dsh` fence payloads
  * (draftId + revision anchors — model wording drift cannot break the chain);
  * v2 sessions keep the text-prefix and receipt-regex replay so history
- * reloads identically. Pending state no longer depends on localStorage.
+ * reloads identically. Pending state derives from the log replay alone.
  */
 
 import type { ChatItem } from './fold.ts'

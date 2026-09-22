@@ -191,6 +191,9 @@ describe('mobile app shell', () => {
     fireEvent(window, new HashChangeEvent('hashchange'))
     await waitFor(() => screen.getByRole('button', { name: /退出登录/ }))
     fireEvent.click(screen.getByRole('button', { name: /退出登录/ }))
+    // Logout confirms first; the dialog's destructive button performs it.
+    await waitFor(() => screen.getByRole('button', { name: '退出' }))
+    fireEvent.click(screen.getByRole('button', { name: '退出' }))
     await waitFor(() => { expect(screen.getByText('食链通 · AI 员工')).toBeTruthy() })
     expect(localStorage.getItem('dsh-mobile-auth')).toBeNull()
     cleanup()
@@ -239,7 +242,7 @@ describe('mobile app shell', () => {
     expect(localStorage.getItem('dsh-mobile-theme')).toBe('dark')
   })
 
-  it('renders the chat route under the chats tab', async () => {
+  it('renders the chat route as a full-screen layer over the shell', async () => {
     stubGateway({
       'agentPreset.list': { presets: [] },
       'session.list': { items: [] },
@@ -251,14 +254,17 @@ describe('mobile app shell', () => {
     navigate('#/chat/session-abc')
     fireEvent(window, new HashChangeEvent('hashchange'))
     await waitFor(() => { expect(screen.getByRole('button', { name: '新建会话' })).toBeTruthy() })
-    expect(screen.getByText('消息')).toBeTruthy()
-    expect(screen.getByText('我的')).toBeTruthy()
+    // The tab bar hides under the full-screen chat layer (T1).
+    expect(screen.queryByText('消息')).toBeNull()
+    expect(screen.queryByText('我的')).toBeNull()
+    expect(screen.getByRole('button', { name: '返回' })).toBeTruthy()
   })
 })
 
 describe('mobile chats tab', () => {
   it('renders the six-element rows with filters, search, and the unread dot', async () => {
     const now = Date.now()
+    const receiptFence = '```dsh\n{"v":3,"type":"submit_receipt","draftId":"d_1","form":{"collection":"hub_po_purchase_orders","label":"采购单"},"rowId":"1042","summary":[{"label":"合计金额","value":"¥4,500","kind":"money"}]}\n```'
     stubGateway({
       'agentPreset.list': { presets: [
         { id: 'purchase-assistant', name: '采购助理', description: '采购登记', isDefault: false },
@@ -267,23 +273,26 @@ describe('mobile chats tab', () => {
         { sessionId: 's1', updatedAt: now, running: true, agentPreset: 'purchase-assistant', projections: { values: { title: '采购会话' } } },
         { sessionId: 's2', updatedAt: now - 10_000, blank: true },
       ] },
+      'session.history': { events: [{ event: assistantMessage(2, receiptFence) }] },
     })
     render(<MessagesView />)
     await waitFor(() => { expect(screen.getByText('采购会话')).toBeTruthy() })
-    expect(screen.getByText('采购登记')).toBeTruthy()
+    // The subtitle is the last-message projection (C1), not the roster description.
+    await waitFor(() => { expect(screen.getAllByText('已登记 №1042 · 采购单').length).toBeGreaterThan(0) })
     expect(screen.getAllByText('刚刚').length).toBeGreaterThan(0)
     expect(screen.getByText('处理中')).toBeTruthy()
     expect(screen.getAllByLabelText('有新消息').length).toBeGreaterThan(0)
     // The AI-colleague filter drops the local session.
-    fireEvent.click(screen.getByRole('tab', { name: 'AI 同事' }))
+    fireEvent.click(screen.getByText('AI 同事'))
     await waitFor(() => { expect(screen.queryByText('新会话')).toBeNull() })
     // Search narrows by title.
-    fireEvent.click(screen.getByRole('tab', { name: '全部' }))
+    fireEvent.click(screen.getByText('全部'))
     const search = screen.getByPlaceholderText('搜索会话/同事') as HTMLInputElement
     fireEvent.change(search, { target: { value: '采购会话' } })
     expect(screen.getByText('采购会话')).toBeTruthy()
     fireEvent.change(search, { target: { value: '不存在' } })
-    await waitFor(() => { expect(screen.getByText('没有匹配的会话：右上角 + 找 AI 同事开聊')).toBeTruthy() })
+    await waitFor(() => { expect(screen.getByText('没有匹配的会话')).toBeTruthy() })
+    expect(screen.getByText('右上角 + 找 AI 同事开聊')).toBeTruthy()
     fireEvent.change(search, { target: { value: '' } })
     fireEvent.click(screen.getByText('新会话'))
     expect(location.hash).toBe('#/chat/s2')
@@ -314,7 +323,7 @@ describe('mobile chats tab', () => {
     localStorage.setItem('dsh-mobile-read', JSON.stringify({ 'pending-1': 0, 'plain-1': 0 }))
     render(<MessagesView />)
     await waitFor(() => { expect(screen.getByText('待审').textContent).toBe('待审') })
-    fireEvent.click(screen.getByRole('tab', { name: '待审核' }))
+    fireEvent.click(screen.getByText('待审核'))
     await waitFor(() => { expect(screen.queryByText('plain-1')).toBeNull() })
   })
 
@@ -447,8 +456,10 @@ describe('mobile me tab', () => {
       />,
     )
     await waitFor(() => { expect(screen.getByText('本月登记')).toBeTruthy() })
-    fireEvent.click(screen.getByRole('button', { name: /会话与缓存/ }))
-    fireEvent.click(screen.getByRole('button', { name: /版本 v3\.0/ }))
+    fireEvent.click(screen.getByText('数据'))
+    // The description renders on the row and again in the opened dialog.
+    await waitFor(() => { expect(screen.getAllByText('会话与业务数据存储于服务端，与 PC 工作台同库；本机仅保留主题与输入中的草稿。').length).toBeGreaterThan(1) })
+    fireEvent.click(screen.getByText('v4.0'))
   })
 
   it('ignores a ledger rejection that lands after unmount', async () => {
@@ -514,7 +525,7 @@ describe('mobile me tab', () => {
     expect(onDark).toHaveBeenCalledWith(true)
   })
 
-  it('counts this month\'s registered receipts from the durable logs', async () => {
+  it('counts this month\'s registered receipts and leads the recent strip', async () => {
     stubGateway({
       'agentPreset.list': { presets: [] },
       'session.list': { items: [
@@ -524,7 +535,7 @@ describe('mobile me tab', () => {
       'session.history': (payload: Record<string, unknown>) => {
         if (payload.sessionId === 'local-1') throw new Error('窗口 503')
         return { events: [
-          { event: assistantMessage(1, '已登记。\n```dsh\n{"v":3,"type":"submit_receipt","draftId":"d_1","form":{"collection":"hub_po_purchase_orders","label":"采购单"},"rowId":"1042","summary":[{"label":"合计金额","value":"¥6,400","kind":"money"}]}\n```') },
+          { event: assistantMessage(1, '已登记。\n```dsh\n{"v":3,"type":"submit_receipt","draftId":"d_1","form":{"collection":"hub_po_purchase_orders","label":"采购单"},"rowId":"1042","summary":[{"label":"合计金额","value":"¥6,400","kind":"money"}]}\n```', Date.now()) },
         ] }
       },
     })
@@ -537,9 +548,12 @@ describe('mobile me tab', () => {
       />,
     )
     await waitFor(() => { expect(screen.getByText('1 条')).toBeTruthy() })
+    // The recent-receipts strip leads with the landing's ticket face.
+    await waitFor(() => { expect(screen.getByText('№1042')).toBeTruthy() })
+    expect(screen.getByText('¥6,400')).toBeTruthy()
   })
 
-  it('logs out through the button', () => {
+  it('logs out through the confirm dialog', async () => {
     const onLogout = vi.fn()
     render(
       <ProfileView
@@ -550,7 +564,9 @@ describe('mobile me tab', () => {
       />,
     )
     fireEvent.click(screen.getByRole('button', { name: '退出登录' }))
-    expect(onLogout).toHaveBeenCalledTimes(1)
+    await waitFor(() => screen.getByRole('button', { name: '退出' }))
+    fireEvent.click(screen.getByRole('button', { name: '退出' }))
+    await waitFor(() => { expect(onLogout).toHaveBeenCalledTimes(1) })
   })
 })
 
@@ -649,7 +665,7 @@ describe('mobile chat view', () => {
     fireEvent.keyDown(box, { key: 'Enter', isComposing: true })
     expect(prompts).toBe(1)
     fireEvent.keyDown(box, { key: 'Enter' })
-    await waitFor(() => { expect(screen.getByRole('alert').textContent).toContain('推送通道拒绝') })
+    await waitFor(() => { expect(document.querySelector('.adm-toast-main')?.textContent ?? '').toContain('推送通道拒绝') })
     // The empty session renders the welcome card; picking a starter sends it
     // as the user's own first message (01 ④a).
     fireEvent.click(screen.getByRole('button', { name: '登记一条采购单' }))
@@ -892,10 +908,10 @@ describe('mobile chat view durable states', () => {
     })
     render(<ChatView sessionId="named-1" />)
     await waitFor(() => { expect(screen.getByText('采购专线')).toBeTruthy() })
-    expect(screen.getByText('AI 同事 · purchase-assistant · 处理中')).toBeTruthy()
+    // The header names the colleague in people language, never the preset id.
+    expect(screen.getByText('AI 同事 · 处理中')).toBeTruthy()
     await waitFor(() => { expect(screen.getByText('查询业务记录')).toBeTruthy() })
-    expect(screen.getByText('✓')).toBeTruthy()
-    expect(screen.getByText('✕')).toBeTruthy()
+    expect(screen.getByText('读取业务行')).toBeTruthy()
   })
 
   it('surfaces a failed stop and drops blank enter sends', async () => {
@@ -912,7 +928,7 @@ describe('mobile chat view durable states', () => {
     fireEvent.keyDown(box, { key: 'Enter' })
     await waitFor(() => { expect(screen.getByRole('status').textContent).toContain('AI 同事正在处理') })
     fireEvent.click(screen.getByRole('button', { name: '停止生成' }))
-    await waitFor(() => { expect(screen.getByRole('alert').textContent).toContain('取消通道 502') })
+    await waitFor(() => { expect(document.querySelector('.adm-toast-main')?.textContent ?? '').toContain('取消通道 502') })
     expect(calls.filter(call => call.url === '/api/session.prompt')).toHaveLength(0)
   })
 
@@ -1410,9 +1426,9 @@ describe('mobile chat view (D2 acceptance fixes)', () => {
     })
     await createSession('mobile-form-assistant')
     render(<ChatView sessionId="fresh-1" />)
-    // First paint carries the colleague identity and its local welcome.
-    expect(screen.getByText('AI 同事 · mobile-form-assistant')).toBeTruthy()
-    expect(screen.getByText('一句话登记六类业务单据')).toBeTruthy()
+    // First paint carries the colleague identity and its local welcome (the
+    // header names the duty, never the preset id).
+    expect(screen.getAllByText('一句话登记六类业务单据').length).toBeGreaterThan(0)
     await waitFor(() => { expect(screen.getByTestId('welcome-card')).toBeTruthy() })
     expect(screen.getByText('我是智能填表助手')).toBeTruthy()
   })
@@ -1461,9 +1477,11 @@ describe('mobile chat view (D2 acceptance fixes)', () => {
     })
     render(<ChatView sessionId="session-12" />)
     const card = await screen.findByTestId('draft-card-v3')
-    // The generated number shows in the system tier and the 今天 date snaps to the client calendar.
+    // The 今天 date snaps to the client calendar on the derived tier's face.
+    await waitFor(() => { expect(card.textContent).toContain(todayOf()) })
+    // The system tier folds; opening it reveals the generated number.
+    fireEvent.click(screen.getByText('系统生成（1）'))
     await waitFor(() => { expect(card.textContent).toContain('PO-2026-0008') })
-    expect(card.textContent).toContain(todayOf())
     fireEvent.click(screen.getByRole('button', { name: '确认写入' }))
     await waitFor(() => {
       const confirm = calls.filter(call => call.url === '/api/session.prompt').pop()

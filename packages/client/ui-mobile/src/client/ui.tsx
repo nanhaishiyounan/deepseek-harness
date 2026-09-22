@@ -1,10 +1,11 @@
 /**
  * Shared mobile UI atoms: the flat stamp avatar, the badge chip, the running
- * spinner row, and the empty/error states. Presentation only; no data paths.
+ * spinner row, and the empty/error states (antd-mobile Empty / ErrorBlock on
+ * this app's token track). Presentation only; no data paths.
  */
 
 import type { JSX, ReactNode } from 'react'
-import { DotLoading } from 'antd-mobile'
+import { DotLoading, ErrorBlock } from 'antd-mobile'
 import css from './ui.module.css'
 
 /** Avatar props: the flat background css, the acronym block, and an optional glyph. */
@@ -46,11 +47,18 @@ export function RunningRow({ text }: { text: string }): JSX.Element {
   )
 }
 
-/** Load-failure / empty state card. */
+/** Load-failure / empty state card (antd ErrorBlock faces on this track). */
 export function NoticeCard({ kind, text }: { kind: 'empty' | 'error'; text: string }): JSX.Element {
+  if (kind === 'error') {
+    return (
+      <div className={css.notice} role="error">
+        <ErrorBlock status="disconnected" title={text} className={css.noticeBlock as string} />
+      </div>
+    )
+  }
   return (
-    <div className={`${css.notice} ${kind === 'error' ? css.noticeError : ''}`} role={kind}>
-      {text}
+    <div className={css.notice} role="empty">
+      <ErrorBlock status="empty" title={text} className={css.noticeBlock as string} />
     </div>
   )
 }

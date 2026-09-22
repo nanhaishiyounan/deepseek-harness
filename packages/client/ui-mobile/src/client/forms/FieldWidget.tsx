@@ -1,20 +1,15 @@
 /**
  * The draft card's field widget: one field rendered per its resolved control
  * spec — Input/TextArea for text, Stepper for number, Switch for bool,
- * Picker for enum, DatePicker for date, and a target-table Picker for
- * relations (options fetched on demand). Picker/DatePicker/Relation open
- * their popup layers through the functional-children `actions.open` binding
- * on the rendered span. Read-only phases render the same spec as a locked
- * label:value row.
+ * Picker for enum, DatePicker for date, and the shared RelationSelect for
+ * relations. Read-only phases render the same spec as a locked label:value
+ * row.
  */
 
-import { useEffect, useMemo, useState, type JSX } from 'react'
+import { type JSX } from 'react'
 import { DatePicker, Input, Picker, Stepper, Switch, TextArea } from 'antd-mobile'
-import type { NocobaseRowView } from '@deepseek-ai/dsh-host-apiproxy/api'
 import type { FieldControlSpec } from '../fieldControls.ts'
-import { relationLabelColumn } from '../fieldControls.ts'
-import { rpc } from '../rpc.ts'
-import { useRelationLabel } from './relation-label.ts'
+import { RelationSelect } from './RelationSelect.tsx'
 import css from './field-widget.module.css'
 
 /** One editable field row's props. */
@@ -103,7 +98,20 @@ export function FieldWidget({ spec, value, locked, onChange }: FieldWidgetProps)
         </div>
       )
     case 'relation':
-      return <RelationWidget spec={spec} value={value} onChange={onChange} />
+      return (
+        <div className={css.row}>
+          <span className={css.label}>{spec.label}</span>
+          <RelationSelect
+            target={spec.target}
+            value={value}
+            placeholder="请选择"
+            ariaLabel={spec.label}
+            triggerClassName={css.pickerValue}
+            testId="relation-value"
+            onChange={onChange}
+          />
+        </div>
+      )
     case 'textarea':
       return (
         <div className={css.rowStack}>
@@ -164,63 +172,6 @@ interface PickerItem {
 function pickerText(item: PickerItem | null | undefined, fallback: string): string {
   if (item === null || item === undefined) return fallback
   return String(item.label)
-}
-
-/** Render one opaque row cell as picker text (numbers pass through, objects show empty). */
-function cellText(value: unknown): string {
-  if (typeof value === 'string') return value
-  if (typeof value === 'number') return String(value)
-  return ''
-}
-
-/**
- * The relation picker: options read from the target table on first open. The
- * span shows the matched option's label (the target-row name) while every
- * confirm submits the option's value (the target-row id) — the submitted
- * field stays an id. An id the options page does not carry (AI-prefilled
- * beyond the first page, or a failed option read) falls back to the shared
- * relation-label read, so the edit phase shows the same name the review and
- * receipt phases do, degrading to the raw id when that read fails too.
- */
-function RelationWidget(
-  { spec, value, onChange }: { readonly spec: FieldControlSpec; readonly value: string; readonly onChange: (value: string) => void },
-): JSX.Element {
-  const [options, setOptions] = useState<{ value: string; label: string }[] | undefined>(undefined)
-  const resolved = useRelationLabel(spec, value)
-  const labelColumn = useMemo(() => relationLabelColumn(spec.target ?? ''), [spec.target])
-  useEffect(() => {
-    let alive = true
-    const target = spec.target
-    if (target === undefined) return
-    rpc('nocobase.list', { collection: target, page: 1, page_size: 50, sort: ['id'] }).then((page) => {
-      if (!alive) return
-      setOptions(page.rows.map((row: NocobaseRowView) => ({
-        value: cellText(row['id']),
-        label: cellText(row[labelColumn] ?? row['id']),
-      })))
-    }, () => {
-      // A failed option read keeps the row usable as plain text.
-      if (alive) setOptions([])
-    })
-    return () => { alive = false }
-  }, [spec.target, labelColumn])
-  return (
-    <div className={css.row}>
-      <span className={css.label}>{spec.label}</span>
-      <Picker
-        columns={[options ?? []]}
-        value={[value]}
-        aria-label={spec.label}
-        onConfirm={(choice) => { onChange(confirmedValue(choice, value)) }}
-      >
-        {(items, actions) => (
-          <span className={css.pickerValue} data-testid="relation-value" onClick={actions.open}>
-            {pickerText(items[0], value === '' ? '请选择' : resolved ?? value)}
-          </span>
-        )}
-      </Picker>
-    </div>
-  )
 }
 
 /** Parse a draft's date string (YYYY-MM-DD or epoch) into a Date. */

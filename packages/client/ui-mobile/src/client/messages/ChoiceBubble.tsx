@@ -2,11 +2,14 @@
  * The ask_choice interaction bubble: the question plus its pickable options
  * in the payload's suggested variant (cards / chips / buttons). A pick sends
  * the option's text as the user's own message; the answered state (replay
- * derived) greys the group and highlights the picked option. Minimal v3
- * scaffolding; the visual batch owns the final look.
+ * derived) greys the group and marks the picked option with the check seal.
+ * The bubble rides the ask-material tier — the washed primary fill with the
+ * ink bar on its speaking edge — so a question never reads as another white
+ * card in the flow.
  */
 
 import type { JSX } from 'react'
+import { Check } from 'lucide-react'
 import type { ChatAsk } from '../fold.ts'
 import { answerTextOf } from '../protocol.ts'
 import { sanitizeBizText } from './rich.ts'
@@ -39,20 +42,29 @@ export function ChoiceBubble({ ask, onSend, onFreeText, disabled }: ChoiceBubble
       <p className={css.askQuestion}>{question}</p>
       {payload.variant === 'cards' && (
         <div className={css.askCards} role="radiogroup" aria-label={question}>
-          {payload.options.map(option => (
-            <button
-              key={option.value}
-              type="button"
-              role="radio"
-              aria-checked={answered?.selected === option.value}
-              className={`${css.askCard} ${answered?.selected === option.value ? css.askSelected : ''}`}
-              disabled={busy}
-              onClick={() => { onSend(answerTextOf(option)) }}
-            >
-              <span className={css.askCardLabel}>{sanitizeBizText(option.label)}</span>
-              {option.hint !== undefined && <span className={css.askCardHint}>{sanitizeBizText(option.hint)}</span>}
-            </button>
-          ))}
+          {payload.options.map((option) => {
+            const picked = answered?.selected === option.value
+            return (
+              <button
+                key={option.value}
+                type="button"
+                role="radio"
+                aria-checked={picked}
+                className={`${css.askCard} ${picked ? css.askSelected : ''}`}
+                disabled={busy}
+                onClick={() => { onSend(answerTextOf(option)) }}
+              >
+                <span className={css.askCardRadio} aria-hidden="true">
+                  <span className={css.askCardRadioDot} />
+                </span>
+                <span className={css.askCardMain}>
+                  <span className={css.askCardLabel}>{sanitizeBizText(option.label)}</span>
+                  {option.hint !== undefined && <span className={css.askCardHint}>{sanitizeBizText(option.hint)}</span>}
+                </span>
+                {picked && <Check className={css.askCardSeal} size={14} strokeWidth={3} aria-hidden="true" />}
+              </button>
+            )
+          })}
         </div>
       )}
       {payload.variant === 'chips' && (

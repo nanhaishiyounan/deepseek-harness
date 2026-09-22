@@ -6,14 +6,16 @@
  * business messages shows the local welcome (never a logged message); the
  * composer chips follow the conversation phase. v2-legacy cards keep their
  * two-step review flow. Edits persist to localStorage until the confirm
- * consumes them; card phases replay from the durable log.
+ * consumes them; card phases replay from the durable log. The page renders as
+ * a full-screen layer: no tab bar under it, an antd-mobile NavBar over it.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, type JSX } from 'react'
-import { Plus } from 'lucide-react'
+import { NavBar, SpinLoading, TextArea, Toast, type TextAreaRef } from 'antd-mobile'
+import { Check, ChevronLeft, Plus, Send, Square, X } from 'lucide-react'
 import type { NocobaseFieldView, SessionSummary } from '@deepseek-ai/dsh-host-apiproxy/api'
 import { Avatar, NoticeCard, RunningRow } from '../ui.tsx'
-import { colleagueColor, colleagueOf, welcomeOf, type Welcome } from '../colleagues.ts'
+import { colleagueColor, colleagueOf, welcomeOf, type ColleagueVisual, type Welcome } from '../colleagues.ts'
 import { foldHistory, type ChatItem } from '../fold.ts'
 import { navigate } from '../router.ts'
 import { rpc } from '../rpc.ts'
@@ -28,6 +30,7 @@ import { DraftCard, ReceiptCard, RejectedCard, ReviewCard, type CollectionFieldM
 import { DraftCard as DraftCardV3 } from '../forms/v3/DraftCard.tsx'
 import { ReceiptCard as ReceiptCardV3 } from '../forms/v3/ReceiptCard.tsx'
 import { buildConfirmMessage, buildRejectMessage, type FormConfirmPayload, type FormDraftPayload } from '../protocol.ts'
+import { sanitizeBizText } from './rich.ts'
 import { WelcomeCard } from './WelcomeCard.tsx'
 import { ChoiceBubble } from './ChoiceBubble.tsx'
 import { FieldAskBubble } from './FieldAskBubble.tsx'
@@ -35,6 +38,12 @@ import { ActionBadge } from './ActionBadge.tsx'
 import { RichContent } from './RichContent.tsx'
 import { NewChatSheet } from './NewChatSheet.tsx'
 import css from './chat.module.css'
+
+/** The header's colleague label: the roster name, else the duty tag. */
+function presetLabelOf(preset: string | undefined, rosterRow: { readonly name: string } | undefined, visual: ColleagueVisual): string {
+  if (preset === undefined) return '本地会话'
+  return rosterRow?.name ?? visual.duty
+}
 
 /** The conversation page props: the session id from the route. */
 export interface ChatViewProps {
@@ -123,8 +132,12 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
   /** Generated system numbers keyed by draft id (the N2 landing guarantee). */
   const [systemValues, setSystemValues] = useState<ReadonlyMap<string, Record<string, string>>>(new Map())
   const flowRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLTextAreaElement>(null)
+  const inputRef = useRef<TextAreaRef>(null)
   const stickToBottom = useRef(true)
+  const rosterRow = useMemo(
+    () => roster.value?.find(row => row.id === preset),
+    [roster.value, preset],
+  )
 
   const send = useCallback(async (text: string) => {
     const trimmed = text.trim()
@@ -277,7 +290,7 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
   }, [sessionId])
 
   const focusComposer = useCallback(() => {
-    inputRef.current?.focus()
+    inputRef.current?.nativeElement?.focus()
   }, [])
 
   const title = summary === undefined ? colleague.duty : titleOf(summary)
@@ -285,25 +298,40 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
 
   return (
     <div className={css.page}>
-      <header className={css.header}>
-        <button type="button" className={css.back} aria-label="返回" onClick={() => { navigate('#/chats') }}>‹</button>
-        <Avatar background={colleagueColor(preset)} acronym={colleague.acronym} size={30} />
-        <div className={css.headerMain}>
-          <span className={css.headerTitle}>{title}</span>
-          <span className={css.headerHint}>
-            {preset === undefined ? '本地会话' : `AI 同事 · ${preset}`}
-            {summary?.running === true ? ' · 处理中' : ''}
+      <NavBar
+        className={css.navbar as string}
+        left={
+          <button
+            type="button"
+            className={css.backButton}
+            aria-label="返回"
+            onClick={() => { navigate('#/chats') }}
+          >
+            <ChevronLeft size={24} aria-hidden="true" />
+          </button>
+        }
+        right={
+          <button
+            type="button"
+            className={css.headerPlus}
+            aria-label="新建会话"
+            onClick={() => { setNewChatOpen(true) }}
+          >
+            <Plus size={18} aria-hidden="true" />
+          </button>
+        }
+      >
+        <span className={css.headerMain}>
+          <Avatar background={colleagueColor(preset)} acronym={colleague.acronym} size={30} />
+          <span className={css.headerTexts}>
+            <span className={css.headerTitle}>{title}</span>
+            <span className={css.headerHint}>
+              {presetLabelOf(preset, rosterRow, colleague)}
+              {summary?.running === true ? ' · 处理中' : ''}
+            </span>
           </span>
-        </div>
-        <button
-          type="button"
-          className={css.headerPlus}
-          aria-label="新建会话"
-          onClick={() => { setNewChatOpen(true) }}
-        >
-          <Plus size={18} aria-hidden="true" />
-        </button>
-      </header>
+        </span>
+      </NavBar>
 
       <div
         className={css.flow}
@@ -315,7 +343,11 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
       >
         {history.value === undefined && history.error === undefined && <NoticeCard kind="empty" text="会话加载中…" />}
         {history.error !== undefined && <NoticeCard kind="error" text={history.error} />}
-        {showWelcome && <WelcomeCard welcome={welcome} onSend={(text) => { void send(text) }} disabled={sending} />}
+        {showWelcome && (
+          <div className={css.welcomeStage}>
+            <WelcomeCard welcome={welcome} onSend={(text) => { void send(text) }} disabled={sending} />
+          </div>
+        )}
         {folded.items.map((item, index) => (
           <FlowItem
             key={renderKeyOf(item)}
@@ -361,13 +393,13 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
           </div>
         )}
         <div className={css.inputRow}>
-          <textarea
+          <TextArea
             ref={inputRef}
             className={css.input}
-            rows={1}
             placeholder="问我任何经营问题..."
             value={draft}
-            onChange={(event) => { setDraft(event.target.value) }}
+            autoSize={{ minRows: 1, maxRows: 4 }}
+            onChange={(next) => { setDraft(next) }}
             onKeyDown={(event) => {
               if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
                 event.preventDefault()
@@ -378,6 +410,7 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
           {folded.running
             ? (
               <button type="button" className={css.stop} aria-label="停止生成" onClick={onStop}>
+                <Square size={12} aria-hidden="true" />
                 停止
               </button>
             )
@@ -389,15 +422,23 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
                 disabled={draft.trim() === '' || sending}
                 onClick={() => { void send(draft) }}
               >
-                ➤
+                <Send size={15} aria-hidden="true" />
               </button>
             )}
         </div>
-        {error !== undefined && <p className={css.error} role="alert">{error}</p>}
+        {error !== undefined && <ErrorToast error={error} />}
       </div>
       <NewChatSheet visible={newChatOpen} onClose={() => { setNewChatOpen(false) }} />
     </div>
   )
+}
+
+/** One transient composer failure: a toast, retriable by sending again. */
+function ErrorToast({ error }: { readonly error: string }): JSX.Element | null {
+  useEffect(() => {
+    Toast.show({ content: error, position: 'bottom' })
+  }, [error])
+  return null
 }
 
 /** The stable render key of one flow item (sub-seq offsets disambiguate splits). */
@@ -458,7 +499,12 @@ function FlowItem(
   if (item.kind === 'text') {
     if (item.role === 'user') {
       const body = item.choiceReply === true
-        ? <div className={css.choiceCapsule} aria-label="选择回执">✓ {item.text}</div>
+        ? (
+          <div className={css.choiceCapsule} aria-label="选择回执">
+            <Check size={12} aria-hidden="true" />
+            {sanitizeBizText(item.text)}
+          </div>
+        )
         : <div className={css.userBubble}>{item.text}</div>
       return <>{separator}{body}</>
     }
@@ -477,12 +523,17 @@ function FlowItem(
         </>
       )
     }
+    const dot = item.state === 'running' ? css.toolDotRunning : item.state === 'error' ? css.toolDotError : css.toolDot
     return (
       <>
         {separator}
         <div className={css.toolRow}>
-          <span className={item.state === 'running' ? css.toolDotRunning : item.state === 'error' ? css.toolDotError : css.toolDot}>
-            {item.state === 'running' ? '◌' : item.state === 'error' ? '✕' : '✓'}
+          <span className={dot}>
+            {item.state === 'running'
+              ? <SpinLoading color="currentColor" style={{ '--size': '10px' }} />
+              : item.state === 'error'
+                ? <X size={10} strokeWidth={3} aria-hidden="true" />
+                : <Check size={10} strokeWidth={3} aria-hidden="true" />}
           </span>
           <span className={css.toolLabel}>
             {item.state === 'running' ? `正在调用：${item.label}…` : item.label}
@@ -570,6 +621,7 @@ function FlowItem(
             payload={item.payload}
             values={values}
             phase={phase}
+            meta={props.meta?.get(item.payload.form.collection)}
             onEdit={props.onDraftEdit(item.seq)}
             onConfirm={props.onConfirmV3(item.seq, item.payload, values)}
             onReject={props.onRejectV3(item.seq, item.payload.draftId)}

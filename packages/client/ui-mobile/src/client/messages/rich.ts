@@ -162,12 +162,16 @@ const LEFTOVER_SNAKE = /[A-Za-z][A-Za-z0-9]*(?:_[A-Za-z0-9]+)+/
 
 /** One balanced full- or half-width parenthesized group. */
 const PAREN_GROUP = /（[^（）()]*）|\([^（）()]*\)/g
+
+/** A bare row-id reference a model label may carry (`id 7`, `（id 7）`). */
+const ID_REF = /[(（]\s*id\s*[:：]?\s*\d+\s*[)）]|\bid\s+\d+/gi
 /**
  * Display-side sanitization of one narrative or ask string (03 §4.5): known
  * collection and field identifiers become their business terms; an
- * unmappable `hub_` name degrades to 业务记录; a parenthesized group still
- * carrying a leftover identifier drops out whole. The persona bans these
- * leaks — this is the guarantee the user never sees one anyway.
+ * unmappable `hub_` name degrades to 业务记录; a bare row-id reference drops
+ * out; a parenthesized group still carrying a leftover identifier drops out
+ * whole. The persona bans these leaks — this is the guarantee the user never
+ * sees one anyway.
  * @param text - the model-authored display string.
  * @returns the people-language rendering.
  */
@@ -176,6 +180,7 @@ export function sanitizeBizText(text: string): string {
     .replace(/[A-Za-z0-9]+/g, match => WORD_TERMS[match] ?? match)
     .replace(SNAKE_ID, match => BIZ_TERMS[match] ?? match)
     .replace(/\bhub_[A-Za-z0-9_]+/g, '业务记录')
+    .replace(ID_REF, '')
   const cleaned = mapped.replace(PAREN_GROUP, group => (LEFTOVER_SNAKE.test(group) ? '' : group))
   return cleaned.replace(/ {2,}/g, ' ').trim()
 }

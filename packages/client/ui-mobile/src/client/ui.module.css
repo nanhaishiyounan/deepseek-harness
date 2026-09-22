@@ -53,13 +53,15 @@
 }
 
 .notice {
-  background: var(--dshm-card);
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius);
-  color: var(--dshm-muted-foreground);
-  font-size: 14px;
-  padding: 20px 16px;
-  text-align: center;
+  padding: 16px 8px;
+}
+
+.noticeBlock {
+  --adm-color-text: var(--dshm-muted-foreground);
+  --adm-color-text-description: var(--dshm-muted-foreground);
+  --adm-color-border: var(--dshm-border);
+  --adm-color-fill: var(--dshm-muted);
+  padding: 8px 0;
 }
 
 .noticeError {
@@ -72,7 +74,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  color: #fff;
+  color: var(--dshm-on-primary);
   font-weight: 600;
   letter-spacing: 1px;
   flex: none;

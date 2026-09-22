@@ -18,7 +18,8 @@
   text-align: center;
 }
 
-/* The stamp-form logo: the 表 seal inside the AI ring (03 §4.6/§4.9). */
+/* The stamp-form logo: the 表 seal inside the stroked AI ring (03 §4.6/§4.9);
+   the ring carries its full 2px weight — the seal must read at a glance. */
 .stampLogo {
   position: relative;
   width: 96px;
@@ -32,14 +33,14 @@
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  border: 1px dashed var(--dshm-primary);
-  opacity: 0.45;
+  border: 2px solid var(--dshm-primary);
+  opacity: 0.85;
   box-sizing: border-box;
 }
 
 .stampGlyph {
-  width: 72px;
-  height: 72px;
+  width: 76px;
+  height: 76px;
   border-radius: 50%;
   border: 2px solid var(--dshm-primary);
   color: var(--dshm-primary);
@@ -129,14 +130,6 @@
   --border-radius: var(--dshm-radius);
   --font-weight: 600;
   --height: 48px;
-}
-
-.demo {
-  margin: 0;
-  text-align: center;
-  font-size: 11px;
-  line-height: 16px;
-  color: var(--dshm-muted-foreground);
 }
 
 .footer {

@@ -206,10 +206,14 @@ describe('DraftCard v3', () => {
     expect(screen.getByText('需要你定')).toBeTruthy()
     expect(screen.getByText('请确认 · AI 推导')).toBeTruthy()
     expect(screen.getByText('系统生成（1）')).toBeTruthy()
-    expect(screen.getByText('· 今天')).toBeTruthy()
-    expect(screen.getByText('PO-2026-0042')).toBeTruthy()
+    // The rationale rests under the value in its own right-aligned line.
+    expect(screen.getByText('今天').className).toContain('rationale')
     // The derived row rests read-only with its settled value.
     expect(screen.getByText('2026-09-21').className).toContain('derivedValue')
+    // The system tier folds by default; opening it reveals the value.
+    expect(screen.queryByText('PO-2026-0042')).toBeNull()
+    fireEvent.click(screen.getByText('系统生成（1）'))
+    expect(screen.getByText('PO-2026-0042')).toBeTruthy()
     fireEvent.change(screen.getByLabelText('数量'), { target: { value: '260' } })
     expect(onEdit).toHaveBeenCalledWith('quantity', '260')
   })

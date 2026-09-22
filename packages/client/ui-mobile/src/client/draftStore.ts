@@ -15,6 +15,8 @@ const DRAFT_KEY_PREFIX = 'dsh-mobile-draft-'
 const PENDING_KEY = 'dsh-mobile-pending'
 /** Key of the per-session read watermark map. */
 const READ_KEY = 'dsh-mobile-read'
+/** Key of the pinned-session set (the list's 置顶 order). */
+const PIN_KEY = 'dsh-mobile-pins'
 
 /** FNV-1a 32-bit hash of a string (hex), the draft-content digest. */
 function contentHash(text: string): string {
@@ -124,18 +126,7 @@ export function pendingReviewSessions(): Set<string> {
  * @param updatedAt - the session summary's updatedAt the user has seen.
  */
 export function markSessionRead(sessionId: string, updatedAt: number): void {
-  const raw = localStorage.getItem(READ_KEY)
-  let map: Record<string, number> = {}
-  if (raw !== null) {
-    try {
-      const parsed: unknown = JSON.parse(raw)
-      if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
-        map = parsed as Record<string, number>
-      }
-    } catch {
-      map = {}
-    }
-  }
+  const map = readWatermarkMap()
   map[sessionId] = updatedAt
   localStorage.setItem(READ_KEY, JSON.stringify(map))
 }
@@ -143,17 +134,52 @@ export function markSessionRead(sessionId: string, updatedAt: number): void {
 /**
  * The read watermark of one session.
  * @param sessionId - the session to look up.
- * @returns the last-seen updatedAt, or 0 when never opened.
+ * @returns the last-seen updatedAt, or 0 when never opened or corrupt.
  */
 export function readWatermarkOf(sessionId: string): number {
+  const value = readWatermarkMap()[sessionId]
+  return typeof value === 'number' ? value : 0
+}
+
+/** The parsed read-watermark map (tolerating corruption). */
+function readWatermarkMap(): Record<string, number> {
   const raw = localStorage.getItem(READ_KEY)
-  if (raw === null) return 0
+  if (raw === null) return {}
   try {
     const parsed: unknown = JSON.parse(raw)
-    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return 0
-    const value = (parsed as Record<string, unknown>)[sessionId]
-    return typeof value === 'number' ? value : 0
+    if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
+      return parsed as Record<string, number>
+    }
   } catch {
-    return 0
+    // A corrupt map reads as never-opened.
   }
+  return {}
+}
+
+/**
+ * Pin one session to the top of the chats list (置顶).
+ * @param sessionId - the session to pin.
+ */
+export function pinSession(sessionId: string): void {
+  const set = readSet(PIN_KEY)
+  set.add(sessionId)
+  writeSet(PIN_KEY, set)
+}
+
+/**
+ * Drop one session's pin.
+ * @param sessionId - the session to unpin.
+ */
+export function unpinSession(sessionId: string): void {
+  const set = readSet(PIN_KEY)
+  if (!set.delete(sessionId)) return
+  writeSet(PIN_KEY, set)
+}
+
+/**
+ * The sessions currently pinned to the top of the chats list.
+ * @returns the pinned session ids (empty when none).
+ */
+export function pinnedSessions(): Set<string> {
+  return readSet(PIN_KEY)
 }

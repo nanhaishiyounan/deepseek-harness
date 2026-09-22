@@ -44,67 +44,34 @@
 }
 
 .searchWrap {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 8px 12px 4px;
-  padding: 0 12px;
-  height: 32px;
-  border-radius: var(--dshm-radius);
-  background: var(--dshm-muted);
+  margin: 8px 12px 0;
   flex: none;
 }
 
-.searchIcon {
-  color: var(--dshm-muted-foreground);
-  display: inline-flex;
+.searchBar {
+  --height: 32px;
+  --border-radius: var(--dshm-radius);
+  --background: var(--dshm-muted);
+  --placeholder-color: var(--dshm-muted-foreground);
   flex: none;
 }
 
-.searchInput {
-  flex: 1;
-  min-width: 0;
-  border: none;
-  background: transparent;
-  font-size: 12px;
-  color: var(--dshm-foreground);
+.searchBar :global(.adm-search-bar-input) {
+  font-size: 13px;
 }
 
-.searchInput:focus {
-  outline: none;
-}
-
-.searchInput::placeholder {
-  color: var(--dshm-muted-foreground);
-}
-
-.chips {
-  display: flex;
-  gap: 8px;
-  padding: 6px 12px 10px;
+/* The filter capsules (CapsuleTabs) ride the ink selected fill. */
+.filterTabs {
+  --adm-color-primary: var(--dshm-primary);
+  --adm-color-text: var(--dshm-muted-foreground);
+  --adm-color-text-active: var(--dshm-on-primary);
+  --adm-border-radius-s: 999px;
+  --adm-font-size-7: 12px;
+  padding: 6px 12px 8px;
   flex: none;
-}
-
-.chip,
-.chipActive {
-  height: 28px;
-  padding: 0 14px;
-  font-size: 12px;
-  line-height: 26px;
-  border: none;
-  border-radius: 999px;
-  flex: none;
-}
-
-.chip {
-  background: var(--dshm-muted);
-  color: var(--dshm-muted-foreground);
-}
-
-.chipActive {
-  background: var(--dshm-primary);
-  color: var(--dshm-on-primary);
-  font-weight: 500;
+  --active-line-height: 0;
+  --active-line-color: transparent;
+  --title-font-size: 12px;
 }
 
 .list {
@@ -123,6 +90,7 @@
   gap: 12px;
   padding: 10px 14px;
   min-height: 64px;
+  width: 100%;
   text-align: left;
   background: var(--dshm-card);
   border-bottom: 1px solid var(--dshm-stroke-soft);
@@ -130,6 +98,17 @@
 
 .sessionRow:active {
   background: var(--dshm-muted);
+}
+
+/* A pinned row keeps a quiet ink bar on its leading edge. */
+.sessionPinned {
+  border-left: 3px solid var(--dshm-primary);
+  padding-left: 11px;
+}
+
+.empty {
+  --adm-color-text: var(--dshm-muted-foreground);
+  padding: 32px 0;
 }
 
 .sessionMain {
@@ -164,6 +143,20 @@
   flex: none;
 }
 
+/* The time text rides inside the unread badge; the dot marks unread. */
+.timeBadge {
+  --color: var(--dshm-destructive);
+  flex: none;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--dshm-muted-foreground);
+}
+
+.timeBadge :global(.adm-badge.fixed) {
+  --right: -4px;
+  --top: -3px;
+}
+
 .sessionBottom {
   display: flex;
   align-items: center;
@@ -171,19 +164,19 @@
   justify-content: space-between;
 }
 
-.sessionKind {
+.sessionSide {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   flex: none;
-  font-size: 10px;
-  line-height: 14px;
-  padding: 1px 6px;
-  border-radius: 999px;
-  background: var(--dshm-primary-10);
-  color: var(--dshm-primary);
 }
 
-.sessionKindAdvisor {
-  background: var(--dshm-muted);
-  color: var(--dshm-muted-foreground);
+.kindTag {
+  --adm-font-size-9: 10px;
+  --adm-height: 16px;
+  --adm-border-radius: 999px;
+  --adm-padding: 0 6px;
+  flex: none;
 }
 
 .sessionSummary {
@@ -193,40 +186,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.unreadDot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--dshm-destructive);
-  flex: none;
-}
-
-.sessionSide {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
-  flex: none;
-}
-
-.runningTag {
-  font-size: 10px;
-  line-height: 14px;
-  padding: 2px 6px;
-  border-radius: 999px;
-  background: var(--dshm-success-10);
-  color: var(--dshm-success);
-}
-
-.pendingTag {
-  font-size: 10px;
-  line-height: 14px;
-  padding: 2px 6px;
-  border-radius: 999px;
-  background: var(--dshm-warning-10);
-  color: var(--dshm-warning);
 }
 
 .identityCard {
@@ -242,16 +201,51 @@
   background: var(--dshm-card);
 }
 
-/* Welcome card (03 §4.1/§4.6): the full-width identity card over the empty flow. */
+/* Welcome screen (03 §4.6): the centered invitation over the empty flow —
+   the 72px stamp logo, the display greeting, the capability ledger, the
+   starter chips. No card chrome: the empty state is a stage, not a row. */
 .welcomeCard {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 16px;
-  background: var(--dshm-card);
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius-lg);
-  box-shadow: var(--dshm-shadow-card);
+  align-items: center;
+  gap: 14px;
+  padding: 24px 12px;
+  max-width: 326px;
+  text-align: center;
+}
+
+/* The 72px stamp-form logo: the 表 seal inside the stroked ring. */
+.welcomeLogo {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.welcomeLogoRing {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--dshm-primary);
+  opacity: 0.85;
+  box-sizing: border-box;
+}
+
+.welcomeLogoGlyph {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: 2px solid var(--dshm-primary);
+  color: var(--dshm-primary);
+  font-size: 22px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
 .welcomeTitle {
@@ -268,6 +262,7 @@
   list-style: none;
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 6px;
 }
 
@@ -307,16 +302,17 @@
 }
 
 /* ask bubbles (03 §4.2): the three pick forms with the pick feedback and the
-   answered fade. */
+   answered fade. The ask tier rides the washed-primary material with the ink
+   bar on its speaking edge — a question is never another white card. */
 .askBubble {
   display: flex;
   flex-direction: column;
   gap: 10px;
   padding: 12px 14px;
-  background: var(--dshm-bubble-ai-bg);
-  border: 1px solid var(--dshm-bubble-ai-border);
-  border-radius: var(--dshm-radius-corner) var(--dshm-radius-bubble) var(--dshm-radius-bubble) var(--dshm-radius-bubble);
-  box-shadow: var(--dshm-shadow-card);
+  background: var(--dshm-primary-soft);
+  border: none;
+  border-left: 3px solid var(--dshm-primary);
+  border-radius: var(--dshm-radius-corner) var(--dshm-radius-lg) var(--dshm-radius-lg) var(--dshm-radius-lg);
   max-width: min(84vw, 326px);
 }
 
@@ -342,14 +338,69 @@
 .askCard {
   position: relative;
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 12px 14px;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
   text-align: left;
   background: var(--dshm-card);
   border: 1px solid var(--dshm-border);
   border-radius: var(--dshm-radius);
+  box-shadow: var(--dshm-shadow-card);
   transition: background-color 120ms ease-out, border-color 120ms ease-out, color 120ms ease-out;
+}
+
+/* The pick radio: a stroked roundel whose dot only fills when picked. */
+.askCardRadio {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--dshm-border);
+  flex: none;
+  transition: border-color 120ms ease-out;
+}
+
+.askCardRadioDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: transparent;
+  transition: background-color 120ms ease-out;
+}
+
+.askCard.askSelected .askCardRadio,
+.askCard.askSelected .askCardRadioDot {
+  border-color: var(--dshm-on-primary);
+}
+
+.askCard.askSelected .askCardRadioDot {
+  background: var(--dshm-on-primary);
+}
+
+.askCardMain {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* The picked card's pass-green check seal, upper right. */
+.askCardSeal {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--dshm-success);
+  color: var(--dshm-on-primary);
 }
 
 .askCardLabel {
@@ -409,7 +460,7 @@
   transition: background-color 120ms ease-out, border-color 120ms ease-out, color 120ms ease-out;
 }
 
-/* The picked option carries the 12px pass-green check seal (03 §2.4). */
+/* The picked option: ink fill, on-primary face (03 §2.4). */
 .askSelected {
   background: var(--dshm-primary);
   border-color: var(--dshm-primary);
@@ -420,16 +471,6 @@
 .askSelected .askChipHint {
   color: var(--dshm-on-primary);
   opacity: 0.8;
-}
-
-.askCard.askSelected::before {
-  content: '✓';
-  position: absolute;
-  top: 4px;
-  left: 6px;
-  font-size: 12px;
-  color: var(--dshm-success);
-  font-weight: 700;
 }
 
 .askFree {

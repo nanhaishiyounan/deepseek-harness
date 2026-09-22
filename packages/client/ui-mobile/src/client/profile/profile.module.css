@@ -1,26 +1,30 @@
-/* Me tab (v3, 03 §4.10): identity card, two-column ledger metrics, 48px
-   settings rows with rim dividers. */
+/* Me tab (03 §4.10): identity card, ledger metrics, the recent-receipts
+   strip (the ticket face), quick-start shortcuts, antd List settings, and
+   the destructive logout block. */
 
 .page {
   display: flex;
   flex-direction: column;
+  gap: 10px;
   height: 100%;
   min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   background: var(--dshm-background);
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
 }
 
 .header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 10px 16px;
   min-height: 48px;
-  background: var(--dshm-card);
-  border-bottom: 1px solid var(--dshm-border);
   position: sticky;
   top: 0;
   z-index: 5;
+  background: var(--dshm-card);
+  border-bottom: 1px solid var(--dshm-border);
   flex: none;
 }
 
@@ -35,9 +39,9 @@
 .userCard {
   display: flex;
   align-items: center;
-  gap: 14px;
-  margin: 12px 12px 0;
-  padding: 16px;
+  gap: 12px;
+  margin: 4px 12px 0;
+  padding: 14px;
   background: var(--dshm-card);
   border: 1px solid var(--dshm-border);
   border-radius: var(--dshm-radius-lg);
@@ -46,11 +50,11 @@
 }
 
 .userMain {
-  flex: 1;
-  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
 }
 
 .userName {
@@ -61,131 +65,176 @@
 }
 
 .userMeta {
-  font-size: 11px;
-  line-height: 16px;
-  color: var(--dshm-muted-foreground);
-}
-
-.logout {
-  flex: none;
   font-size: 12px;
   line-height: 18px;
-  color: var(--dshm-destructive);
-  border: 1px solid var(--dshm-destructive-10);
-  background: var(--dshm-destructive-10);
-  border-radius: 999px;
-  padding: 6px 12px;
+  color: var(--dshm-muted-foreground);
 }
 
 .metrics {
   display: flex;
   align-items: stretch;
-  margin: 12px 12px 0;
-  padding: 14px 16px;
+  gap: 10px;
+  margin: 0 12px;
+  padding: 12px 14px;
   background: var(--dshm-card);
   border: 1px solid var(--dshm-border);
   border-radius: var(--dshm-radius-lg);
+  box-shadow: var(--dshm-shadow-card);
   flex: none;
 }
 
 .metricRow {
   flex: 1;
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .metricLabel {
-  font-size: 13px;
-  line-height: 20px;
+  font-size: 11px;
+  line-height: 16px;
   color: var(--dshm-muted-foreground);
 }
 
 .metricValue {
-  font-size: 16px;
-  line-height: 24px;
+  font-size: 22px;
+  line-height: 28px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: var(--dshm-foreground);
 }
 
 .metricDivider {
-  flex: none;
   width: 1px;
-  margin: 0 16px;
   background: var(--dshm-stroke-soft);
 }
 
-.group {
-  margin: 12px 12px 0;
+/* The recent-receipts strip: the newest landings in the ticket face. */
+.recentBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0 12px;
+  padding: 12px 14px;
   background: var(--dshm-card);
-  border-radius: var(--dshm-radius-lg);
   border: 1px solid var(--dshm-border);
-  overflow: hidden;
+  border-radius: var(--dshm-radius-lg);
+  box-shadow: var(--dshm-shadow-card);
   flex: none;
 }
 
-.entry {
+.recentTitle {
+  margin: 0 0 4px;
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 500;
+  color: var(--dshm-muted-foreground);
+}
+
+.recentRow {
   display: flex;
   align-items: center;
-  gap: 12px;
-  width: 100%;
-  min-height: 48px;
-  padding: 8px 16px;
+  gap: 10px;
+  min-height: 40px;
+  padding: 4px 0;
   text-align: left;
-  background: none;
+  border-bottom: 1px solid var(--dshm-stroke-soft);
 }
 
-.entry + .entry {
-  border-top: 1px solid var(--dshm-border);
+.recentRow:last-child {
+  border-bottom: none;
 }
 
-.entry:active {
-  background: var(--dshm-muted);
+.receiptNo {
+  font-family: var(--dshm-font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 600;
+  color: var(--dshm-success);
+  flex: none;
 }
 
-.entryIcon {
-  width: 34px;
-  height: 34px;
-  border-radius: var(--dshm-radius);
+.recentForm {
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 500;
+  color: var(--dshm-foreground);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recentHero {
+  font-family: var(--dshm-font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--dshm-foreground);
+  flex: none;
+}
+
+/* Quick-start shortcuts: the washed chips from the welcome language. */
+.shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 12px;
+  flex: none;
+}
+
+.shortcut {
+  height: 30px;
+  padding: 0 14px;
+  font-size: 12px;
+  line-height: 28px;
+  border: none;
+  border-radius: 999px;
   background: var(--dshm-primary-soft);
   color: var(--dshm-primary);
+}
+
+.shortcut:disabled {
+  opacity: 0.5;
+}
+
+/* The settings group: antd List on the card face. */
+.settings {
+  margin: 0 12px;
+  border-radius: var(--dshm-radius-lg);
+  overflow: hidden;
+  --adm-font-size-9: 14px;
+  flex: none;
+}
+
+.settings :global(.adm-list) {
+  --adm-color-background: var(--dshm-card);
+  border-radius: var(--dshm-radius-lg);
+  box-shadow: var(--dshm-shadow-card);
+}
+
+/* The destructive logout block stands alone, off the settings group. */
+.logout {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex: none;
-}
-
-.entryMain {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.entryTitle {
+  gap: 6px;
+  margin: 4px 12px 0;
+  height: 44px;
   font-size: 14px;
-  line-height: 22px;
   font-weight: 500;
-  color: var(--dshm-foreground);
-}
-
-.entryHint {
-  font-size: 11px;
-  line-height: 16px;
-  color: var(--dshm-muted-foreground);
-}
-
-.chevron {
-  color: var(--dshm-muted-foreground);
-  font-size: 18px;
+  color: var(--dshm-destructive);
+  background: var(--dshm-destructive-10);
+  border: none;
+  border-radius: var(--dshm-radius-lg);
   flex: none;
 }
 
 .footer {
-  margin: 16px 0 20px;
+  margin: 8px 16px 0;
   text-align: center;
   font-size: 10px;
   line-height: 16px;

@@ -1,8 +1,9 @@
 /**
- * The new-session welcome card: the local rendering of the preset's welcome
- * metadata (never a logged message) — greeting, capability lines, and the
- * starter chips whose pick sends the user's own first message. Styling is
- * minimal v3 scaffolding; the visual batch owns the final look.
+ * The new-session welcome screen: the local rendering of the preset's welcome
+ * metadata (never a logged message) — the 72px stamp logo, the display-size
+ * greeting, the capability ledger, and the starter chips whose pick sends the
+ * user's own first message. The chat flow centers it vertically (03 §4.6):
+ * an empty session is an invitation to act, not a list row.
  */
 
 import type { JSX } from 'react'
@@ -17,13 +18,17 @@ export interface WelcomeCardProps {
 }
 
 /**
- * The welcome card the empty chat state renders.
+ * The welcome screen the empty chat state renders.
  * @param props - the welcome metadata, the send sink, the busy gate.
- * @returns the welcome card.
+ * @returns the welcome screen.
  */
 export function WelcomeCard({ welcome, onSend, disabled }: WelcomeCardProps): JSX.Element {
   return (
-    <section className={css.welcomeCard} data-testid="welcome-card" aria-label="会话欢迎卡">
+    <section className={css.welcomeCard} data-testid="welcome-card" aria-label="会话欢迎屏">
+      <span className={css.welcomeLogo} aria-hidden="true">
+        <span className={css.welcomeLogoRing} />
+        <span className={css.welcomeLogoGlyph}>表</span>
+      </span>
       <h2 className={css.welcomeTitle}>{welcome.greeting}</h2>
       <ul className={css.welcomeList}>
         {welcome.capabilities.map(line => <li key={line} className={css.welcomeLine}>{line}</li>)}

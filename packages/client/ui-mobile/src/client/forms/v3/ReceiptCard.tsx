@@ -1,12 +1,16 @@
 /**
- * The v3 receipt card: the landing-row receipt as a metric ticket — the money
- * summary as the big number in the monospace face, the date/count/id summaries
- * in a two-column grid, the three-dot ticket trail (对话→确认→已落库), the
- * row-number phase stamp, and the view-record entry. No raw JSON ever renders.
+ * The v3 receipt card: the landing-row receipt as a metric ticket — the
+ * money summary as the big number in the monospace face, the date/count/id
+ * summaries in a two-column grid, the three-dot ticket trail (对话→确认→已落库),
+ * the row-number phase stamp, the ticket-number strip, and the view-record
+ * entry. The card rides the receipt-material tier — the pass-green wash with
+ * the green rim — so a landed ticket reads as the finished copy at a glance.
+ * No raw JSON ever renders.
  */
 
 import { type JSX } from 'react'
 import { Button } from 'antd-mobile'
+import { Check } from 'lucide-react'
 import type { SubmitReceiptPayload } from '../../protocol.ts'
 import css from './v3.module.css'
 import { PhaseStamp } from './PhaseStamp.tsx'
@@ -21,6 +25,13 @@ export interface ReceiptCardProps {
 /** The three-step trail labels (all complete on a receipt). */
 const TRAIL = ['对话', '确认', '已落库'] as const
 
+/** The receipt summary rows the ticket-number strip carries (id-kind, or a
+ *  row a model labeled 单号 with a text kind). */
+function ticketOf(payload: SubmitReceiptPayload): { readonly label: string; readonly value: string } | undefined {
+  return payload.summary.find(row => row.kind === 'id')
+    ?? payload.summary.find(row => row.label.includes('单号'))
+}
+
 /**
  * The v3 receipt card.
  * @param props - the submit_receipt payload and the optional view sink.
@@ -29,11 +40,17 @@ const TRAIL = ['对话', '确认', '已落库'] as const
 export function ReceiptCard({ payload, onView }: ReceiptCardProps): JSX.Element {
   const [hero, ...rest] = payload.summary
   const heroIsMoney = hero?.kind === 'money'
+  const ticket = ticketOf(payload)
   return (
-    <section className={css.card} data-testid="receipt-card-v3" aria-label="落库回执卡">
+    <section className={`${css.card} ${css.receiptCard}`} data-testid="receipt-card-v3" aria-label="落库回执卡">
       <header className={css.cardHeader}>
         <div className={css.cardTitles}>
-          <span className={css.cardBiz}>已登记 · {payload.form.label}</span>
+          <span className={css.cardBiz}>
+            <span className={css.receiptSeal} aria-hidden="true">
+              <Check size={12} strokeWidth={3} />
+            </span>
+            已登记 · {payload.form.label}
+          </span>
         </div>
         <PhaseStamp phase="submitted" rowId={payload.rowId} />
       </header>
@@ -60,6 +77,12 @@ export function ReceiptCard({ payload, onView }: ReceiptCardProps): JSX.Element 
           </span>
         ))}
       </div>
+      {ticket !== undefined && (
+        <div className={css.ticketStrip}>
+          <span className={css.ticketLabel}>{ticket.label}</span>
+          <span className={css.ticketValue}>{ticket.value}</span>
+        </div>
+      )}
       {onView !== undefined && (
         <footer className={css.receiptFooter}>
           <Button size="large" onClick={onView}>查看这条记录</Button>

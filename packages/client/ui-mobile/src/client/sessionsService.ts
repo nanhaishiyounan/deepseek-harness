@@ -78,10 +78,11 @@ export async function searchSessions(query: string): Promise<SessionSearchHit[]>
 /**
  * Read one session's raw event window (the fold's input).
  * @param sessionId - the session whose history window to read.
+ * @param maxMessages - the newest-message window size (default 200).
  * @returns the raw session events in seq order.
  */
-export async function readHistory(sessionId: string): Promise<readonly FoldEvent[]> {
-  const value = await rpc('session.history', { sessionId: sessionOf(sessionId), maxMessages: 200 })
+export async function readHistory(sessionId: string, maxMessages: number = 200): Promise<readonly FoldEvent[]> {
+  const value = await rpc('session.history', { sessionId: sessionOf(sessionId), maxMessages })
   return value.events.map(entry => entry.event as FoldEvent)
 }
 

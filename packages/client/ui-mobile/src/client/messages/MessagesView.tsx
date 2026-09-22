@@ -1,26 +1,35 @@
 /**
- * The chats tab (the default landing, v3): the session list — search, filter
- * chips (全部/AI 同事/待审核), the 64px rows (stamp avatar, kind badge 表单/参谋,
- * summary, relative time, running badge, unread dot), and the plus button
- * that opens the new-chat bottom sheet (the contacts route's replacement).
- * Polls while mounted so cross-device activity appears without
- * pull-to-refresh.
+ * The chats tab (the default landing, v3): the session list — SearchBar,
+ * CapsuleTabs filter (全部/AI 同事/待审核), the 64px rows (stamp avatar, Tag
+ * kind badge, the last-message projection, relative time, running/pending
+ * Tag, unread Badge), SwipeAction 置顶/已读 on each row, pull-to-refresh, and
+ * incremental paging over the list. The plus button opens the new-chat
+ * bottom sheet. Polls while mounted so cross-device activity appears without
+ * pulling; pinned sessions order above the rest.
  */
 
-import { useMemo, useState, type JSX } from 'react'
-import { Plus, Search } from 'lucide-react'
+import { useEffect, useMemo, useState, type JSX } from 'react'
+import { Badge, CapsuleTabs, ErrorBlock, InfiniteScroll, PullToRefresh, SearchBar, SwipeAction, Tag } from 'antd-mobile'
+import { Plus } from 'lucide-react'
 import type { SessionSummary } from '@deepseek-ai/dsh-host-apiproxy/api'
 import { navigate } from '../router.ts'
-import { useAsync, usePoll } from '../hooks.ts'
-import { Avatar, NoticeCard } from '../ui.tsx'
+import { usePoll } from '../hooks.ts'
+import { Avatar } from '../ui.tsx'
 import { colleagueColor, colleagueOf } from '../colleagues.ts'
-import { listAiEmployees, listSessions, relativeTimeOf, subtitleOf, titleOf } from '../sessionsService.ts'
-import { markSessionRead, pendingReviewSessions, readWatermarkOf } from '../draftStore.ts'
+import { listSessions, relativeTimeOf, titleOf } from '../sessionsService.ts'
+import { markSessionRead, pendingReviewSessions, pinSession, pinnedSessions, readWatermarkOf, unpinSession } from '../draftStore.ts'
+import { cachedProjectionOf, loadProjection } from './projection.ts'
 import { NewChatSheet } from './NewChatSheet.tsx'
 import css from './messages.module.css'
 
 /** The filter chips (全部 / AI 同事 / 待审核). */
 type ChatFilter = 'all' | 'colleagues' | 'pending'
+
+/** Rows loaded per incremental page. */
+const PAGE_SIZE = 20
+
+/** Rows whose projection (a tail history read) stays warm. */
+const PROJECTION_WINDOW = 15
 
 /** The kind badge of one row (03 §4.7): registration vs advisory vs local. */
 function kindBadgeOf(preset: string | undefined): { label: string; advisor: boolean } | undefined {
@@ -32,30 +41,87 @@ function kindBadgeOf(preset: string | undefined): { label: string; advisor: bool
 /** The chats tab. */
 export function MessagesView(): JSX.Element {
   const sessionsPoll = usePoll(listSessions, 4000, true)
-  const roster = useAsync(listAiEmployees)
   const sessions = sessionsPoll.value
   const [filter, setFilter] = useState<ChatFilter>('all')
   const [keyword, setKeyword] = useState('')
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [pins, setPins] = useState<ReadonlySet<string>>(() => pinnedSessions())
+  /** Locally-visible row count over the filtered list (incremental paging). */
+  const [visible, setVisible] = useState(PAGE_SIZE)
+  /** The projection texts keyed by session id (loaded tails, C1). */
+  const [projections, setProjections] = useState<ReadonlyMap<string, string>>(new Map())
 
   const pendingSet = useMemo(() => pendingReviewSessions(), [sessionsPoll.value])
-  const rosterById = useMemo(() => new Map((roster.value ?? []).map(row => [row.id, row])), [roster.value])
   const rows = useMemo(() => {
     if (sessions === undefined) return undefined
-    return sessions.filter((summary) => {
+    const filtered = sessions.filter((summary) => {
       if (filter === 'colleagues' && summary.agentPreset === undefined) return false
       if (filter === 'pending' && !pendingSet.has(summary.sessionId)) return false
       if (keyword.trim() !== '') {
         const needle = keyword.trim()
-        return titleOf(summary).includes(needle) || subtitleOf(summary).includes(needle)
+        const projection = cachedProjectionOf(summary.sessionId, summary.updatedAt)
+        return titleOf(summary).includes(needle)
+          || (projection !== undefined && projection.includes(needle))
       }
       return true
     })
-  }, [sessions, filter, keyword, pendingSet])
+    // Pinned sessions order above the rest, newest first within each band.
+    return [...filtered].sort((a, b) => {
+      const aPin = pins.has(a.sessionId) ? 1 : 0
+      const bPin = pins.has(b.sessionId) ? 1 : 0
+      if (aPin !== bPin) return bPin - aPin
+      return b.updatedAt - a.updatedAt
+    })
+  }, [sessions, filter, keyword, pendingSet, pins])
+
+  // Keep the projection window warm (C1): tail reads for the visible top
+  // rows, cached by updatedAt so quiet sessions never re-read.
+  const windowKey = useMemo(
+    () => (rows ?? []).slice(0, PROJECTION_WINDOW).map(row => `${row.sessionId}:${String(row.updatedAt)}`).join('|'),
+    [rows],
+  )
+  useEffect(() => {
+    let alive = true
+    const missing = (rows ?? [])
+      .slice(0, PROJECTION_WINDOW)
+      .filter(row => cachedProjectionOf(row.sessionId, row.updatedAt) === undefined)
+    if (missing.length === 0) return
+    void Promise.all(missing.map(async (row) => {
+      try {
+        return [row.sessionId, await loadProjection(row.sessionId, row.updatedAt)] as const
+      } catch {
+        // A failed tail read leaves the row on its roster fallback.
+        return [row.sessionId, undefined] as const
+      }
+    })).then((entries) => {
+      if (!alive) return
+      setProjections((current) => {
+        const next = new Map(current)
+        for (const [sessionId, text] of entries) {
+          if (text !== undefined) next.set(sessionId, text)
+        }
+        return next
+      })
+    })
+    return () => { alive = false }
+    // The string key re-runs only when the window's stamps actually change.
+  }, [windowKey])
 
   const open = (summary: SessionSummary): void => {
     markSessionRead(summary.sessionId, summary.updatedAt)
     navigate(`#/chat/${summary.sessionId}`)
+  }
+
+  const togglePin = (summary: SessionSummary, pinned: boolean): void => {
+    if (pinned) unpinSession(summary.sessionId)
+    else pinSession(summary.sessionId)
+    setPins(pinnedSessions())
+  }
+
+  const markRead = (summary: SessionSummary): void => {
+    markSessionRead(summary.sessionId, summary.updatedAt)
+    // Re-read the pin set (new identity) to re-render the unread badges.
+    setPins(pinnedSessions())
   }
 
   return (
@@ -74,77 +140,116 @@ export function MessagesView(): JSX.Element {
       </header>
 
       <div className={css.searchWrap}>
-        <span className={css.searchIcon} aria-hidden="true"><Search size={14} /></span>
-        <input
-          className={css.searchInput}
-          type="search"
+        <SearchBar
           placeholder="搜索会话/同事"
           value={keyword}
-          onChange={(event) => { setKeyword(event.target.value) }}
+          onChange={setKeyword}
+          className={css.searchBar}
         />
       </div>
 
-      <div className={css.chips} role="tablist" aria-label="会话筛选">
-        {([['all', '全部'], ['colleagues', 'AI 同事'], ['pending', '待审核']] as const).map(([id, label]) => (
-          <button
-            key={id}
-            type="button"
-            role="tab"
-            aria-selected={filter === id}
-            className={filter === id ? css.chipActive : css.chip}
-            onClick={() => { setFilter(id) }}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+      <CapsuleTabs
+        activeKey={filter}
+        onChange={(key) => { setFilter(key as ChatFilter) }}
+        className={css.filterTabs as string}
+      >
+        <CapsuleTabs.Tab title="全部" key="all" />
+        <CapsuleTabs.Tab title="AI 同事" key="colleagues" />
+        <CapsuleTabs.Tab title="待审核" key="pending" />
+      </CapsuleTabs>
 
       <section className={css.list} aria-label="会话列表">
-        {sessions === undefined && sessionsPoll.error === undefined && <NoticeCard kind="empty" text="会话加载中…" />}
-        {sessionsPoll.error !== undefined && <NoticeCard kind="error" text={sessionsPoll.error} />}
-        {rows?.length === 0 && <NoticeCard kind="empty" text="没有匹配的会话：右上角 + 找 AI 同事开聊" />}
-        {rows?.map((summary: SessionSummary) => {
-          const preset = summary.agentPreset
-          const visual = colleagueOf(preset)
-          const rosterRow = preset === undefined ? undefined : rosterById.get(preset)
-          const unread = summary.updatedAt > readWatermarkOf(summary.sessionId)
-          const kind = kindBadgeOf(preset)
-          return (
-            <button
-              key={summary.sessionId}
-              type="button"
-              className={css.sessionRow}
-              onClick={() => { open(summary) }}
-            >
-              <Avatar background={colleagueColor(preset)} acronym={visual.acronym} size={44} />
-              <span className={css.sessionMain}>
-                <span className={css.sessionTop}>
-                  <span className={css.sessionTitle}>{titleOf(summary)}</span>
-                  <span className={css.sessionTime}>{relativeTimeOf(summary.updatedAt)}</span>
-                </span>
-                <span className={css.sessionBottom}>
-                  <span className={css.sessionSummary}>
-                    {preset === undefined
-                      ? '本地会话'
-                      : rosterRow?.description !== '' && rosterRow?.description !== undefined
-                        ? rosterRow.description
-                        : visual.duty}
+        <PullToRefresh onRefresh={() => Promise.resolve(sessionsPoll.refresh())}>
+          {sessions === undefined && sessionsPoll.error === undefined && (
+            <ErrorBlock status="empty" title="会话加载中…" className={css.empty as string} />
+          )}
+          {sessionsPoll.error !== undefined && (
+            <ErrorBlock status="disconnected" title={sessionsPoll.error} className={css.empty as string} />
+          )}
+          {rows?.length === 0 && (
+            <ErrorBlock status="empty" title="没有匹配的会话" description="右上角 + 找 AI 同事开聊" className={css.empty as string} />
+          )}
+          {rows?.slice(0, visible).map((summary: SessionSummary) => {
+            const preset = summary.agentPreset
+            const visual = colleagueOf(preset)
+            const unread = summary.updatedAt > readWatermarkOf(summary.sessionId)
+            const kind = kindBadgeOf(preset)
+            const pinned = pins.has(summary.sessionId)
+            const projection = cachedProjectionOf(summary.sessionId, summary.updatedAt)
+              ?? projections.get(summary.sessionId)
+            const subtitle = projection ?? (preset === undefined ? '本地会话' : visual.duty)
+            return (
+              <SwipeAction
+                key={summary.sessionId}
+                rightActions={[
+                  {
+                    key: 'pin',
+                    text: pinned ? '取消置顶' : '置顶',
+                    color: 'primary',
+                    onClick: () => { togglePin(summary, pinned) },
+                  },
+                  {
+                    key: 'read',
+                    text: '标记已读',
+                    color: 'default',
+                    onClick: () => { markRead(summary) },
+                  },
+                ]}
+              >
+                <button
+                  type="button"
+                  className={`${css.sessionRow} ${pinned ? css.sessionPinned : ''}`}
+                  onClick={() => { open(summary) }}
+                >
+                  <Avatar background={colleagueColor(preset)} acronym={visual.acronym} size={44} />
+                  <span className={css.sessionMain}>
+                    <span className={css.sessionTop}>
+                      <span className={css.sessionTitle}>{titleOf(summary)}</span>
+                      {unread
+                        ? (
+                          <Badge
+                            content={Badge.dot}
+                            color="var(--dshm-destructive)"
+                            aria-label="有新消息"
+                            className={css.timeBadge as string}
+                          >
+                            <span className={css.sessionTime}>{relativeTimeOf(summary.updatedAt)}</span>
+                          </Badge>
+                        )
+                        : <span className={css.sessionTime}>{relativeTimeOf(summary.updatedAt)}</span>}
+                    </span>
+                    <span className={css.sessionBottom}>
+                      <span className={css.sessionSummary}>{subtitle}</span>
+                      <span className={css.sessionSide}>
+                        {kind !== undefined && (
+                          <Tag
+                            color={kind.advisor ? 'default' : 'primary'}
+                            fill="outline"
+                            className={css.kindTag as string}
+                          >
+                            {kind.label}
+                          </Tag>
+                        )}
+                        {summary.running && (
+                          <Tag color="success" fill="outline" className={css.kindTag as string}>处理中</Tag>
+                        )}
+                        {pendingSet.has(summary.sessionId) && (
+                          <Tag color="warning" fill="outline" className={css.kindTag as string}>待审</Tag>
+                        )}
+                      </span>
+                    </span>
                   </span>
-                  {unread && <span className={css.unreadDot} aria-label="有新消息" />}
-                </span>
-              </span>
-              <span className={css.sessionSide}>
-                {kind !== undefined && (
-                  <span className={kind.advisor ? `${css.sessionKind} ${css.sessionKindAdvisor}` : css.sessionKind}>
-                    {kind.label}
-                  </span>
-                )}
-                {summary.running && <span className={css.runningTag}>处理中</span>}
-                {pendingSet.has(summary.sessionId) && <span className={css.pendingTag}>待审</span>}
-              </span>
-            </button>
-          )
-        })}
+                </button>
+              </SwipeAction>
+            )
+          })}
+          {rows !== undefined && rows.length > visible && (
+            <InfiniteScroll
+              loadMore={() => { setVisible(current => current + PAGE_SIZE); return Promise.resolve() }}
+              hasMore={rows.length > visible}
+            />
+          )}
+        </PullToRefresh>
       </section>
 
       <footer className={css.identityCard}>
