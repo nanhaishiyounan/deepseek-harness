@@ -1,0 +1,14 @@
+{
+  "04c-ghost-contrast-dark": {
+    "pass": true,
+    "detail": "data-theme=null ratio=5.09 color=rgb(29, 95, 214) on rgb(234, 242, 255)"
+  },
+  "06c-work-four-states": {
+    "pass": true,
+    "detail": "capsule tab texts = [\"待处理 0进行中 1待确认 1已完成 1\",\"待处理 0进行中 1待确认 1已完成 1\",\"待处理 0\",\"待处理 0\",\"进行中 1\",\"进行中 1\",\"待确认 1\",\"待确认 1\",\"已完成 1\",\"已完成 1\"]"
+  },
+  "08c-theme-persist": {
+    "pass": false,
+    "detail": "real-click switch; data-theme before=null afterReload=null"
+  }
+}

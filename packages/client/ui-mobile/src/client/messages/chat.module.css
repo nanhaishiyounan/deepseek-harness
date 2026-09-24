@@ -1,6 +1,11 @@
-/* Chat page (03 §4.1/§4.12): NavBar header, ticket bubbles with the speaking
-   corner, one entrance motion, the composer with context chips. The detail
-   page is a full-screen layer — no tab bar under it. */
+/* Chat page (v6, the design's page-chat): the two-state bubbles — the bot's
+    white bordered plate with the 6px top-left speaking corner, the user's
+    gradient bubble with the top-right corner — the breathing typing plate,
+    the deep degraded notice, and the input bar with the + entry over the
+    slide-up quick panel, the rounded textarea, and the gradient send button
+    (the gradient's two sanctioned chat surfaces: the user bubble and send).
+    The detail page is a full-screen layer — no tab bar under it; the header
+    is the shared PageNav. */
 
 .page {
   display: flex;
@@ -10,34 +15,10 @@
   background: var(--dshm-background);
 }
 
-/* The full-screen layer's NavBar: card face, rim underline, 52px tall. */
-.navbar {
-  --adm-nav-bar-height: 52px;
-  --adm-nav-bar-background: var(--dshm-card);
-  --adm-font-size-10: 11px;
-  flex: none;
-  border-bottom: 1px solid var(--dshm-border);
-}
-
-/* The full-screen layer's own back button (44px touch target). */
-.backButton {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  margin-left: -8px;
-  border-radius: 50%;
-  color: var(--dshm-foreground);
-}
-
-.backButton:active {
-  background: var(--dshm-muted);
-}
-
+/* The header's new-chat entry: the primary touch target. */
 .headerPlus {
-  width: 32px;
-  height: 32px;
+  width: var(--dshm-touch);
+  height: var(--dshm-touch);
   border-radius: 50%;
   background: var(--dshm-primary);
   color: var(--dshm-on-primary);
@@ -66,22 +47,20 @@
 .headerTitle {
   font-size: 16px;
   line-height: 22px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--dshm-foreground);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 200px;
 }
 
 .headerHint {
-  font-size: 11px;
+  font-size: 11.5px;
   line-height: 14px;
   color: var(--dshm-muted-foreground);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 200px;
 }
 
 .flow {
@@ -91,19 +70,20 @@
   -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 14px 12px 20px;
+  gap: 10px;
+  padding: 14px 12px 16px;
 }
 
-/* The one entrance motion (03 §6.1): a new flow row settles up into place.
-   CSS animations run at insertion, so only genuinely new items move. */
+/* The one entrance motion (the design's msgIn .28s): a new flow row settles
+    up into place; CSS animations run at insertion, so only genuinely new
+    items move. */
 .flow > * {
-  animation: chat-enter 180ms ease-out;
+  animation: chat-enter 280ms ease;
 }
 
 @keyframes chat-enter {
   from {
-    transform: translateY(8px);
+    transform: translateY(9px);
     opacity: 0;
   }
 }
@@ -117,21 +97,20 @@
   justify-content: center;
 }
 
+/* The design's .day-divider: the quiet centered 11.5 label. */
 .daySeparator {
   align-self: center;
-  font-size: 10px;
+  font-size: 11.5px;
   line-height: 16px;
   color: var(--dshm-muted-foreground);
-  background: var(--dshm-muted);
-  border-radius: 999px;
-  padding: 3px 10px;
+  padding: 4px 0;
   flex: none;
 }
 
 .assistantBlock {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: 9px;
   max-width: 100%;
 }
 
@@ -144,14 +123,14 @@
 }
 
 /* The turn-level avatar ghost (03 §4.1): continuation segments of one AI
-   turn keep the column width for alignment without repeating the identity. */
+    turn keep the column width for alignment without repeating the identity. */
 .assistantColGhost {
   flex: none;
   width: 32px;
 }
 
 /* The AI seal: a stroked round badge at the avatar's lower right —
-   identity in the stamp language, not a spark glyph (03 §4.1). */
+    identity in the stamp language, not a spark glyph (03 §4.1). */
 .aiSeal {
   position: absolute;
   right: -3px;
@@ -171,28 +150,32 @@
   font-weight: 600;
 }
 
+/* The bot bubble (the design's .msg-row.bot .bubble): the white bordered
+    plate, the 6px top-left corner, the card shadow. */
 .assistantBubble {
   background: var(--dshm-bubble-ai-bg);
   border: 1px solid var(--dshm-bubble-ai-border);
   border-radius: var(--dshm-radius-corner) var(--dshm-radius-bubble) var(--dshm-radius-bubble) var(--dshm-radius-bubble);
   box-shadow: var(--dshm-shadow-card);
-  padding: 12px 14px;
-  font-size: 15px;
-  line-height: 24px;
+  padding: 10px 13px;
+  font-size: 14.5px;
+  line-height: 1.62;
   color: var(--dshm-bubble-ai-fg);
-  max-width: min(76vw, 296px);
+  max-width: min(78vw, 320px);
   overflow-wrap: anywhere;
 }
 
+/* The user bubble (the design's .msg-row.user .bubble): the gradient face,
+    white text, the 6px top-right corner. */
 .userBubble {
   align-self: flex-end;
-  background: var(--dshm-bubble-user-bg);
+  background: var(--dshm-user-grad);
   color: var(--dshm-bubble-user-fg);
   border-radius: var(--dshm-radius-bubble) var(--dshm-radius-corner) var(--dshm-radius-bubble) var(--dshm-radius-bubble);
-  padding: 12px 14px;
-  font-size: 15px;
-  line-height: 24px;
-  max-width: min(76vw, 296px);
+  padding: 10px 13px;
+  font-size: 14.5px;
+  line-height: 1.62;
+  max-width: min(78vw, 320px);
   overflow-wrap: anywhere;
 }
 
@@ -214,7 +197,7 @@
 .cardRow {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: 9px;
 }
 
 .cardRow > :last-child {
@@ -228,8 +211,8 @@
   align-items: center;
   gap: 6px;
   align-self: flex-start;
-  margin-left: 40px;
-  max-width: calc(100% - 40px);
+  margin-left: 41px;
+  max-width: calc(100% - 41px);
   padding: 4px 10px 4px 4px;
   border-radius: 999px;
   background: var(--dshm-muted);
@@ -265,14 +248,17 @@
   color: var(--dshm-destructive);
 }
 
+/* The degraded fence (the design's .notice form): the brand-soft strip with
+    the dashed rim; the summary keeps the human copy, the body the raw text. */
 .degradedNotice {
-  max-width: min(76vw, 296px);
-  font-size: 11px;
-  line-height: 18px;
-  color: var(--dshm-muted-foreground);
+  max-width: min(78vw, 320px);
+  font-size: 12.8px;
+  line-height: 1.55;
+  color: var(--dshm-foreground);
+  background: var(--dshm-primary-soft);
   border: 1px dashed var(--dshm-bubble-ai-border);
-  border-radius: var(--dshm-radius-bubble);
-  padding: 6px 10px;
+  border-radius: 11px;
+  padding: 9px 11px;
   overflow-wrap: anywhere;
 }
 
@@ -284,12 +270,13 @@
 .degradedNoticeBody {
   margin: 6px 0 0;
   padding: 8px;
-  font-family: var(--dshm-font-mono, monospace);
+  font-family: var(--dshm-font-num);
   font-size: 10px;
   line-height: 14px;
   white-space: pre-wrap;
   background: var(--dshm-bubble-ai-bg);
   border-radius: 6px;
+  color: var(--dshm-muted-foreground);
 }
 
 .toolLabel {
@@ -298,15 +285,177 @@
   white-space: nowrap;
 }
 
-/* Composer (03 §4.12): context chips row over the adaptive textarea. */
+/* The first-read spinner row (never an empty-state card: loading is loading). */
+.loadingRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 18px 0;
+  color: var(--dshm-muted-foreground);
+  font-size: 12px;
+}
+
+/* ---- Typing indicator (the design's .typing-bubble): the bot-plate bubble
+       with three breathing dots, .18s apart. ---- */
+
+.typingRow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.typingBubble {
+  display: inline-flex;
+  gap: 5px;
+  padding: 13px 15px;
+  background: var(--dshm-bubble-ai-bg);
+  border: 1px solid var(--dshm-bubble-ai-border);
+  border-radius: var(--dshm-radius-corner) var(--dshm-radius-bubble) var(--dshm-radius-bubble) var(--dshm-radius-bubble);
+  box-shadow: var(--dshm-shadow-card);
+  animation: chat-enter 200ms ease;
+}
+
+.typingDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--dshm-muted-foreground);
+  animation: typing-blink 1.1s infinite;
+}
+
+.typingDot:nth-child(2) {
+  animation-delay: 0.18s;
+}
+
+.typingDot:nth-child(3) {
+  animation-delay: 0.36s;
+}
+
+@keyframes typing-blink {
+  0%,
+  60%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+/* ---- Composer (the design's .chat-input-bar + #quick-panel): the slide-up
+       quick panel, the context chips, the + entry, the rounded textarea, and
+       the gradient send button. ---- */
+
 .composer {
+  position: relative;
   flex: none;
   border-top: 1px solid var(--dshm-border);
-  background: var(--dshm-card);
-  padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+  background: var(--dshm-tabbar-bg);
+  padding: 9px 12px calc(9px + env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+/* The quick panel (the design's #quick-panel): the top-rounded sheet with
+    the upward shadow, sliding in over the flow. */
+.quickPanel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  background: var(--dshm-tabbar-bg);
+  border-top: 1px solid var(--dshm-border);
+  border-radius: 18px 18px 0 0;
+  padding: 14px 16px 12px;
+  box-shadow: 0 -8px 30px rgba(23, 43, 77, 0.12);
+  animation: quick-panel-in 240ms cubic-bezier(0.22, 0.9, 0.35, 1);
+}
+
+@keyframes quick-panel-in {
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+}
+
+.qpTitle {
+  margin: 0 0 10px;
+  font-size: 13.5px;
+  line-height: 18px;
+  font-weight: 600;
+  color: var(--dshm-muted-foreground);
+}
+
+.qpGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 9px;
+}
+
+.qpItem {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 46px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--dshm-muted);
+  border: 1px solid var(--dshm-border);
+  font-size: 13.2px;
+  line-height: 18px;
+  font-weight: 600;
+  color: var(--dshm-foreground);
+  text-align: left;
+}
+
+.qpItem:active {
+  background: var(--dshm-primary-soft);
+}
+
+.qpItem:disabled {
+  opacity: 0.5;
+}
+
+.qpItem svg {
+  color: var(--dshm-primary);
+  flex: none;
+}
+
+.qpEmpty {
+  margin: 0;
+  padding: 10px 2px;
+  font-size: 12.5px;
+  line-height: 18px;
+  color: var(--dshm-muted-foreground);
+}
+
+.qpTools {
+  display: flex;
+  gap: 9px;
+  margin-top: 10px;
+}
+
+.qpTool {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 46px;
+  border-radius: 12px;
+  border: 1px solid var(--dshm-border);
+  color: var(--dshm-muted-foreground);
+  font-size: 12.5px;
+  line-height: 16px;
+}
+
+.qpTool:active {
+  background: var(--dshm-muted);
 }
 
 .chipRow {
@@ -322,13 +471,13 @@
 
 .chip {
   flex: none;
-  height: 28px;
+  height: var(--dshm-touch-sm);
   padding: 0 12px;
   font-size: 12px;
   line-height: 26px;
   color: var(--dshm-primary);
-  background: var(--dshm-primary-soft);
-  border: none;
+  background: var(--dshm-card);
+  border: 1px solid rgba(46, 124, 246, 0.35);
   border-radius: 999px;
 }
 
@@ -339,49 +488,75 @@
 .inputRow {
   display: flex;
   align-items: flex-end;
-  gap: 10px;
+  gap: 8px;
+}
+
+/* The + entry (the design's .plus-btn): 44px, radius 12, brand-soft when on. */
+.plusBtn {
+  width: var(--dshm-touch);
+  height: var(--dshm-touch);
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--dshm-muted-foreground);
+  flex: none;
+  transition: background-color 150ms ease-out, color 150ms ease-out;
+}
+
+.plusBtn:active {
+  background: var(--dshm-muted);
+}
+
+.plusBtnOn {
+  background: var(--dshm-primary-soft);
+  color: var(--dshm-primary);
 }
 
 .input {
   flex: 1;
   min-width: 0;
-  --font-size: 14px;
+  --font-size: 16px;
   --color: var(--dshm-foreground);
   --placeholder-color: var(--dshm-muted-foreground);
-  --background: var(--dshm-muted);
-  --border-radius: var(--dshm-radius);
-  --adm-text-area-min-height: calc(44px - 16px);
-  --adm-text-area-max-height: calc(4 * 20px + 16px);
-  --padding: 6px 14px;
+  --background: var(--dshm-input-bg);
+  --border-radius: 22px;
+  --adm-text-area-min-height: calc(44px - 20px);
+  --adm-text-area-max-height: calc(4 * 22px + 20px);
+  --padding: 10px 15px;
   --box-sizing: border-box;
-  --line-height: 20px;
-  border-radius: var(--dshm-radius);
+  --line-height: 22px;
+  border: 1px solid var(--dshm-border);
+  border-radius: 22px;
 }
 
+/* The send button (the design's .send-btn): the gradient circle, the pressed
+    scale, the disabled dim. */
 .send {
-  width: 36px;
-  height: 36px;
+  width: var(--dshm-touch);
+  height: var(--dshm-touch);
   border-radius: 50%;
-  background: var(--dshm-primary);
-  color: var(--dshm-on-primary);
+  background: var(--dshm-user-grad);
+  color: var(--dshm-bubble-user-fg);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex: none;
-  margin-bottom: 4px;
+  box-shadow: 0 4px 12px rgba(46, 124, 246, 0.35);
+  transition: transform 120ms ease-out, opacity 150ms ease-out;
 }
 
 .send:active {
-  background: var(--dshm-primary-press);
+  transform: scale(0.92);
 }
 
 .send:disabled {
-  background: var(--dshm-muted);
-  color: var(--dshm-muted-foreground);
+  opacity: 0.45;
+  box-shadow: none;
 }
 
 .stop {
-  height: 36px;
+  height: var(--dshm-touch-sm);
   padding: 0 14px;
   border-radius: 999px;
   background: var(--dshm-muted);
@@ -395,9 +570,20 @@
   margin-bottom: 4px;
 }
 
-/* Motion discipline (03 §6): the entrance settles instantly instead. */
+/* Motion discipline: the entrance and the panel settle instantly instead. */
 @media (prefers-reduced-motion: reduce) {
-  .flow > * {
+  .flow > *,
+  .typingBubble,
+  .quickPanel {
     animation: none;
+  }
+
+  .typingDot {
+    animation: none;
+    opacity: 0.6;
+  }
+
+  .send {
+    transition: none;
   }
 }

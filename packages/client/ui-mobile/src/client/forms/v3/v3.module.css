@@ -1,20 +1,18 @@
-/* v3 form cards: the cold-chain ledger look (03 §4.3/§4.4) — the three-tier
-   draft card with in-card ledger dividers and the 44px phase stamp, the
-   receipt metric card with the ticket-face hero number. Colors ride the
-   --dshm-* tracks only. Each card class carries its material tier: the draft
-   card stays paper-white (the blank being filled), the receipt card rides the
-   pass-green wash (the finished copy). */
+/* v3 form cards (v6 rich-card base): the three-tier draft card on the card2
+    plate with dashed field rules and the 44px phase stamp, the receipt metric
+    card with the ticket-face hero number on the pass-green wash. Colors ride
+    the --dshm-* tracks only; the inner panels take the card face against the
+    card2 plate. */
 
 .card {
   display: flex;
   flex-direction: column;
   gap: 8px;
   width: 100%;
-  padding: 14px;
-  background: var(--dshm-card);
+  padding: 12px 13px;
+  background: var(--dshm-muted);
   border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius-lg);
-  box-shadow: var(--dshm-shadow-card);
+  border-radius: 13px;
   box-sizing: border-box;
   text-align: left;
 }
@@ -83,7 +81,9 @@
   color: var(--dshm-muted-foreground);
 }
 
-/* The phase stamp: a 44px round seal, the v3 signature (03 §4.3). */
+/* The phase stamp: a round lifecycle seal, the v3 signature (03 §4.3). The
+   material family sizes and typeface through local overrides so the v5 work
+   stamp shares it (03 §5.2): default 44px detail grade, --stamp-size opts out. */
 .stamp {
   flex: none;
   position: relative;
@@ -92,10 +92,10 @@
   align-items: center;
   justify-content: center;
   gap: 1px;
-  width: 44px;
-  height: 44px;
+  width: var(--stamp-size, var(--dshm-stamp-lg, 44px));
+  height: var(--stamp-size, var(--dshm-stamp-lg, 44px));
   border-radius: 50%;
-  font-size: 11px;
+  font-size: var(--stamp-font, 11px);
   line-height: 1.15;
   border: 2px solid;
   text-align: center;
@@ -117,7 +117,7 @@
   background: var(--dshm-success);
   color: var(--dshm-on-primary);
   /* The stamp comes down oversized and askew, settling at a slight tilt. */
-  animation: v3-stamp-in 200ms cubic-bezier(0.2, 1.4, 0.4, 1) both;
+  animation: v3-stamp-in 200ms var(--dshm-ease-stamp) both;
 }
 
 .stamp_rejected {
@@ -164,9 +164,10 @@
   gap: 2px;
 }
 
-/* The derived tier rides a washed panel: read-only rest, boxed override. */
+/* The derived tier rides the card-face panel against the card2 plate. */
 .tierDerived {
-  background: var(--dshm-muted);
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-border);
   border-radius: var(--dshm-radius);
   padding: 8px 10px;
 }
@@ -196,12 +197,24 @@
   background: var(--dshm-border);
 }
 
+/* The field rows (the design's .rc-field): the dashed rule between them. */
 .fieldRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
   min-height: 44px;
+  border-top: 1px dashed var(--dshm-border);
+  padding-top: 6px;
+  margin-top: 6px;
+}
+
+/* The leading row of a tier carries no rule (the tier head owns the break). */
+.tier > .fieldRow:first-of-type,
+.tierDerived .fieldRow:first-of-type {
+  border-top: none;
+  padding-top: 0;
+  margin-top: 0;
 }
 
 .fieldLabel {
@@ -349,16 +362,18 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* The decision row (the design's .btn-row): pri = brand solid, ghost =
+    brand on brand-soft, gray = card2 with the hairline rim. */
 .actions {
   display: flex;
-  gap: 10px;
+  gap: 9px;
   margin-top: 4px;
 }
 
 .actions :global(.adm-button) {
-  --border-radius: var(--dshm-radius);
+  --border-radius: 11px;
   height: 44px;
-  font-weight: 600;
+  font-weight: 650;
 }
 
 .primaryButton {
@@ -367,6 +382,24 @@
 
 .ghostButton {
   flex: 1;
+  /* on-soft, not primary: the dark soft track lifts brand text past the
+     4.5:1 floor (brand on the dark soft fill reads 3.5:1). */
+  color: var(--dshm-on-soft);
+  background: var(--dshm-primary-soft);
+  border: none;
+}
+
+/* The reject arm rides the quiet gray capsule. */
+.actions :global(.adm-button):not(.primaryButton) {
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-border);
+  color: var(--dshm-muted-foreground);
+}
+
+.actions :global(.adm-button).ghostButton {
+  background: var(--dshm-primary-soft);
+  border: none;
+  color: var(--dshm-on-soft);
 }
 
 .phaseNote {
@@ -412,7 +445,8 @@
   flex-direction: column;
   gap: 2px;
   padding: 8px 10px;
-  background: var(--dshm-muted);
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-border);
   border-radius: var(--dshm-radius);
 }
 
@@ -426,7 +460,8 @@
 .metricLabel {
   font-size: 11px;
   line-height: 16px;
-  color: var(--dshm-muted-foreground);
+  /* Muted-fill labels ≤13px take the foreground token (03 §7.2-1: 4.46:1 fails). */
+  color: var(--dshm-foreground);
 }
 
 /* The three-step ticket trail: dots and a rim line (03 §4.4). */
@@ -463,7 +498,8 @@
   flex: none;
   font-size: 11px;
   line-height: 16px;
-  color: var(--dshm-muted-foreground);
+  /* Small text on the receipt's green wash takes the foreground token (03 §7.2-3). */
+  color: var(--dshm-foreground);
 }
 
 /* The ticket-number strip: label left, monospace value right. */

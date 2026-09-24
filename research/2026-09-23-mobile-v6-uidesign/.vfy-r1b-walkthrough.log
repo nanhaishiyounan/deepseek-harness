@@ -1,0 +1,16 @@
+04b dark ghost contrast: {"found":true,"parsed":true,"ratio":5.09,"color":"rgb(29, 95, 214)","bg":"rgb(234, 242, 255)","theme":"dark","label":"驳回"}
+shot vfy-r1-04b-ghost-contrast-dark.png
+04b-ghost-contrast-dark: PASS — ratio=5.09 color=rgb(29, 95, 214) on rgb(234, 242, 255) theme=dark
+shot vfy-r1-05-home-offline-alert.png
+05-error-alert: PASS — alerts=["同事目录加载失败：Failed to fetch重试","最近对话加载失败：Failed to fetch重试"] retry=true
+06-work-four-states: FAIL — capsule tabs = []
+shot vfy-r1-06-work-four-states.png
+07-tab-nav: PASS — tabs=["消息","同事","工作台","我的"] hashes=["#/home","#/agents","#/work","#/me"]
+shot vfy-r1-07-tabs.png
+08-theme-persist: FAIL — data-theme before=light afterReload=light
+shot vfy-r1-08-theme-persist-dark.png
+shot vfy-r1-09-430px.png
+09-430px-shell: PASS — clientWidth=430 horizontalOverflow=false
+shot vfy-r1-10-chats-layer.png
+10-chats-back: PASS — chatsHash=#/chats backHash=#/home
+shot vfy-r1-10-chats-back.png

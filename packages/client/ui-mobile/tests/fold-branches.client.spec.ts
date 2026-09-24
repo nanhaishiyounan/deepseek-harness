@@ -123,3 +123,21 @@ describe('parseFormDrafts rejection shapes', () => {
     expect(parsePushReceipt('行 id=9 但没有表名')).toBeUndefined()
   })
 })
+
+describe('foldHistory user-side report fences', () => {
+  /** One legal report fence (the assistant-side shape). */
+  const reportFence = '```dsh\n{"v":3,"type":"report","id":"r_1","title":"项目风险",'
+    + '"metrics":[{"label":"待处理","value":"5","kind":"count"}]}\n```'
+
+  it('renders a user message carrying a report fence as a plain bubble, never a report item', () => {
+    const folded = foldHistory([
+      { type: 'user/message', seq: 1, time: 1, data: { source: { kind: 'user' }, content: [{ type: 'text', text: reportFence }] } },
+    ])
+    expect(folded.items).toHaveLength(1)
+    const bubble = folded.items[0]
+    if (bubble?.kind !== 'text') throw new Error('expected text bubble')
+    expect(bubble.role).toBe('user')
+    expect(bubble.text).toContain('```dsh')
+    expect(folded.degradedFences).toBe(0)
+  })
+})

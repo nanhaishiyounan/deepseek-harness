@@ -5,6 +5,7 @@
  */
 
 import type { JSX } from 'react'
+import { Info } from 'lucide-react'
 import type { ChatFieldAsk } from '../fold.ts'
 import { sanitizeBizText } from './rich.ts'
 import css from './messages.module.css'
@@ -31,7 +32,10 @@ export function FieldAskBubble({ ask, onSend, disabled }: FieldAskBubbleProps): 
       data-testid="field-ask"
       aria-label="字段补问"
     >
-      <p className={css.askQuestion}>{sanitizeBizText(payload.question)}</p>
+      <p className={css.askQuestion}>
+        <Info className={css.askMark} size={15} strokeWidth={1.8} aria-hidden="true" />
+        {sanitizeBizText(payload.question)}
+      </p>
       <p className={css.fieldAskLabel}>
         {sanitizeBizText(payload.field.label)}
         {payload.field.unit !== undefined ? `（${payload.field.unit}）` : ''}

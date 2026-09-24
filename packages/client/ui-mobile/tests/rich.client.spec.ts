@@ -2,7 +2,7 @@
 /** The v3 rich pipeline: markdown render + sanitize, the metric-line trigger, block splitting. */
 
 import { describe, expect, it } from 'vitest'
-import { parseMetricLine, renderMarkdown, sanitizeBizText, splitRichBlocks } from '../src/client/messages/rich.ts'
+import { parseMetricLine, renderMarkdown, sanitizeBizText, splitCodeBlocks, splitRichBlocks } from '../src/client/messages/rich.ts'
 
 describe('renderMarkdown', () => {
   it('renders paragraphs, bold, and single-newline breaks', () => {
@@ -95,6 +95,28 @@ describe('splitRichBlocks', () => {
 
   it('returns empty for an empty narrative', () => {
     expect(splitRichBlocks('')).toEqual([])
+  })
+})
+
+describe('splitCodeBlocks', () => {
+  it('lifts fenced code out whole and keeps the surrounding text', () => {
+    const runs = splitCodeBlocks('先看代码：\n```javascript\nconst qty = 1\n```\n就这些。')
+    expect(runs).toEqual([
+      { kind: 'text', text: '先看代码：' },
+      { kind: 'code', lang: 'javascript', code: 'const qty = 1' },
+      { kind: 'text', text: '就这些。' },
+    ])
+  })
+
+  it('labels a bare fence text and swallows an unterminated body', () => {
+    expect(splitCodeBlocks('```\nplain\n```')).toEqual([{ kind: 'code', lang: 'text', code: 'plain' }])
+    // A fence left open runs to the narrative's end.
+    expect(splitCodeBlocks('```python\nprint(1)')).toEqual([{ kind: 'code', lang: 'python', code: 'print(1)' }])
+  })
+
+  it('returns one text run for fence-free prose and empty input', () => {
+    expect(splitCodeBlocks('一句话。')).toEqual([{ kind: 'text', text: '一句话。' }])
+    expect(splitCodeBlocks('')).toEqual([])
   })
 })
 

@@ -1,0 +1,11 @@
+b1-01-home-light.png: #/ under light track
+b1-02-agents-light.png: #/agents under light track
+b1-03-work-light.png: #/work under light track
+b1-04-me-light.png: #/me under light track
+b1-05-home-dark.png: #/ under dark track
+b1-06-agents-dark.png: #/agents under dark track
+b1-07-work-dark.png: #/work under dark track
+b1-08-me-dark.png: #/me under dark track
+b1-09: #/chats renders as the full-screen layer — PageNav 返回头 present, tab bar absent
+metrics: {"tabbarHeight":null,"tabbarBg":null,"activeColor":null,"activeFont":null,"rootBg":"rgb(242, 245, 249)","cardVar":"#ffffff","brandVar":"#2e7cf6","deskBg":"rgb(233, 237, 244)"}
+b1-10: desktop shell {"width":430,"radius":"24px","centered":true}

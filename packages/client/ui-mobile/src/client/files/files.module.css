@@ -1,0 +1,174 @@
+/* Files (03 §6.8): the three-section secondary page — the AI-generated
+   artifact rows (24px type badge + title + provenance meta), the recent-files
+   subset, and the pinned favorites with the amber star. Colors ride the
+   --dshm-* tokens; the star's amber is the warm semantic slot; the header is
+   the shared PageNav. */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--dshm-background);
+}
+
+.list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 12px calc(16px + env(safe-area-inset-bottom));
+}
+
+.sectionTitle {
+  margin: 4px 4px 0;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 500;
+  color: var(--dshm-muted-foreground);
+}
+
+.sectionCard {
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-border);
+  border-radius: var(--dshm-radius-lg);
+  box-shadow: var(--dshm-shadow-card);
+  overflow: hidden;
+}
+
+.fileRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  min-height: 60px;
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--dshm-stroke-soft);
+}
+
+.fileRow:last-child {
+  border-bottom: none;
+}
+
+.fileTop {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* The open affordance: badges + title inside the row's leading button. */
+.fileTopMain {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+/* The 24px type badge: soft fill, the type's lead character. */
+.typeBadge {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: var(--dshm-primary-soft);
+  color: var(--dshm-on-soft);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* The row's origin badge: marks AI-generated files inside the recent window. */
+.originBadge {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--dshm-primary-10);
+  color: var(--dshm-on-soft);
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 600;
+}
+
+.fileName {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  color: var(--dshm-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The favorite star: amber fill when active, rim outline when not. The hit
+   area rides the secondary touch target around the 20px glyph. */
+.star {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--dshm-touch-sm);
+  height: var(--dshm-touch-sm);
+  margin-right: -10px;
+  color: var(--dshm-border);
+}
+
+.starActive {
+  color: var(--dshm-warning);
+}
+
+.fileMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 32px;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--dshm-muted-foreground);
+}
+
+.fileMetaLink {
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--dshm-primary);
+}
+
+.demoTag {
+  flex: none;
+  font-size: 10px;
+  line-height: 14px;
+  padding: 0 6px;
+  border: 1px solid var(--dshm-border);
+  border-radius: 999px;
+  color: var(--dshm-muted-foreground);
+}
+
+/* The inline read-only ReportCard preview under an expanded row. */
+.preview {
+  padding: 0 14px 10px;
+  display: flex;
+  justify-content: center;
+}
+
+.sectionEmpty {
+  padding: 14px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dshm-muted-foreground);
+}

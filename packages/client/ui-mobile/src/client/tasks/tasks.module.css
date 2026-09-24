@@ -1,0 +1,124 @@
+/* Tasks (03 §6.7): the two-group secondary page — capsule tabs over the
+   mine/team split, h56 task rows (8px status dot, single-line title, the due
+   date in the mono face with the due-soon amber), the team group's 演示团队
+   banner and owner tails. Colors ride the --dshm-* tokens only. */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--dshm-background);
+}
+
+.tabs {
+  --active-line-height: 0;
+  --active-line-color: transparent;
+  --title-font-size: 12px;
+  padding: 0 12px;
+  flex: none;
+}
+
+.list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 10px 12px calc(16px + env(safe-area-inset-bottom));
+}
+
+/* The team group's demo-team banner (02 §10.1's identifiable seed mark). */
+.teamBanner {
+  margin: 0 0 6px;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--dshm-on-soft);
+  background: var(--dshm-primary-10);
+  border-radius: var(--dshm-radius);
+  padding: 4px 10px;
+}
+
+.rowCard {
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-border);
+  border-radius: var(--dshm-radius-lg);
+  box-shadow: var(--dshm-shadow-card);
+  overflow: hidden;
+}
+
+.taskRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 56px;
+  padding: 8px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--dshm-stroke-soft);
+}
+
+.taskRow:last-child {
+  border-bottom: none;
+}
+
+.taskTitle {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  color: var(--dshm-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.taskOwner {
+  flex: none;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--dshm-muted-foreground);
+}
+
+.taskDue {
+  flex: none;
+  font-family: var(--dshm-font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--dshm-muted-foreground);
+}
+
+.dueSoon {
+  color: var(--dshm-warning);
+}
+
+.demoTag {
+  flex: none;
+  font-size: 10px;
+  line-height: 14px;
+  padding: 0 6px;
+  border: 1px solid var(--dshm-border);
+  border-radius: 999px;
+  color: var(--dshm-muted-foreground);
+}
+
+.emptyWrap {
+  flex: none;
+  padding-top: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.emptyCta {
+  height: 36px;
+  padding: 0 16px;
+  border: 1px solid var(--dshm-border);
+  border-radius: var(--dshm-radius);
+  background: var(--dshm-card);
+  color: var(--dshm-foreground);
+  font-size: 13px;
+  font-weight: 500;
+}

@@ -1,10 +1,11 @@
 /**
  * The session-list projection: the last business-meaningful item of one
  * session's fold, rendered as the row's one-line subtitle — a receipt
- * projects as 「已登记 №1042 · 采购单」, an open ask as 「等你选择：…」, the
- * last bubble as its clipped text. The roster duty only projects when the
- * session has no messages yet. Reads ride a per-session cache keyed by the
- * summary's updatedAt, so the polling list never re-reads a quiet session.
+ * projects as 「已登记 №1042 · 采购单」, a report as 「报告：{title}」, an
+ * open ask as 「等你选择：…」, the last bubble as its clipped text. The
+ * roster duty only projects when the session has no messages yet. Reads ride
+ * a per-session cache keyed by the summary's updatedAt, so the polling list
+ * never re-reads a quiet session.
  */
 
 import { foldHistory, type ChatItem } from '../fold.ts'
@@ -52,6 +53,9 @@ export function lastProjectionOf(items: readonly ChatItem[]): string | undefined
     if (item.kind === 'tool' || item.kind === 'degraded') continue
     if (item.kind === 'receipt') {
       return `已登记 №${item.payload.rowId} · ${item.payload.form.label}`
+    }
+    if (item.kind === 'report') {
+      return `报告：${item.payload.title}`
     }
     if (item.kind === 'task-card') {
       const label = item.payload?.form.label ?? item.draft.title

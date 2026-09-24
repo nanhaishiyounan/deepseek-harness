@@ -1,11 +1,11 @@
-/* Task cards: white chat-embedded cards (draft/review/rejected/receipt). */
+/* Task cards (v6 rich-card base): the card2-plate chat-embedded cards
+    (draft/review/rejected/receipt) with dashed field rules. */
 
 .card {
-  background: var(--dshm-background);
+  background: var(--dshm-muted);
   border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius-bubble);
-  box-shadow: var(--dshm-shadow-card);
-  padding: 12px 14px;
+  border-radius: 13px;
+  padding: 12px 13px;
   width: min(78vw, 300px);
   display: flex;
   flex-direction: column;

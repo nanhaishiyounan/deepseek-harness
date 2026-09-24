@@ -1,10 +1,10 @@
 /**
- * The chats tab (the default landing, v3): the session list — SearchBar,
- * CapsuleTabs filter (全部/AI 同事/待审核), the 64px rows (stamp avatar, Tag
- * kind badge, the last-message projection, relative time, running/pending
- * Tag, unread Badge), SwipeAction 置顶/已读 on each row, pull-to-refresh, and
- * incremental paging over the list. The plus button opens the new-chat
- * bottom sheet. Polls while mounted so cross-device activity appears without
+ * The all-chats full-screen layer (v6 IA): the session list — the PageNav
+ * back header with the new-chat plus in its right slot, SearchBar, CapsuleTabs
+ * filter (全部/AI 同事/待审核), the 64px rows (stamp avatar, Tag kind badge, the
+ * last-message projection, relative time, running/pending Tag, unread Badge),
+ * SwipeAction 置顶/已读 on each row, pull-to-refresh, and incremental paging
+ * over the list. Polls while mounted so cross-device activity appears without
  * pulling; pinned sessions order above the rest.
  */
 
@@ -12,12 +12,14 @@ import { useEffect, useMemo, useState, type JSX } from 'react'
 import { Badge, CapsuleTabs, ErrorBlock, InfiniteScroll, PullToRefresh, SearchBar, SwipeAction, Tag } from 'antd-mobile'
 import { Plus } from 'lucide-react'
 import type { SessionSummary } from '@deepseek-ai/dsh-host-apiproxy/api'
-import { navigate } from '../router.ts'
+import { goBackOr, navigate } from '../router.ts'
+import { PageNav } from '../PageNav.tsx'
 import { usePoll } from '../hooks.ts'
-import { Avatar } from '../ui.tsx'
+import { Avatar, SkelRow } from '../ui.tsx'
 import { colleagueColor, colleagueOf } from '../colleagues.ts'
 import { listSessions, relativeTimeOf, titleOf } from '../sessionsService.ts'
 import { markSessionRead, pendingReviewSessions, pinSession, pinnedSessions, readWatermarkOf, unpinSession } from '../draftStore.ts'
+import { isWorkSession } from '../workStore.ts'
 import { cachedProjectionOf, loadProjection } from './projection.ts'
 import { NewChatSheet } from './NewChatSheet.tsx'
 import css from './messages.module.css'
@@ -55,6 +57,8 @@ export function MessagesView(): JSX.Element {
   const rows = useMemo(() => {
     if (sessions === undefined) return undefined
     const filtered = sessions.filter((summary) => {
+      // Registered exec sessions never surface here (02 §9 isolation).
+      if (isWorkSession(summary.sessionId)) return false
       if (filter === 'colleagues' && summary.agentPreset === undefined) return false
       if (filter === 'pending' && !pendingSet.has(summary.sessionId)) return false
       if (keyword.trim() !== '') {
@@ -124,20 +128,30 @@ export function MessagesView(): JSX.Element {
     setPins(pinnedSessions())
   }
 
+  /** The pull-to-refresh arm: an immediate re-read, resolved when it lands. */
+  /* v8 ignore next 3 -- the drag gesture needs real touch layout; the poll refresh covers the lane elsewhere. */
+  const onPullRefresh = (): Promise<void> => {
+    sessionsPoll.refresh()
+    return Promise.resolve()
+  }
+
   return (
     <div className={css.page}>
-      <header className={css.header}>
-        <h1 className={css.headerTitle}>消息</h1>
-        <button
-          type="button"
-          className={css.plus}
-          aria-label="新建会话"
-          title="新建会话"
-          onClick={() => { setSheetOpen(true) }}
-        >
-          <Plus size={18} aria-hidden="true" />
-        </button>
-      </header>
+      <PageNav
+        title={<h1 className={css.headerTitle}>消息</h1>}
+        onBack={() => { goBackOr('#/') }}
+        right={(
+          <button
+            type="button"
+            className={css.plus}
+            aria-label="新建会话"
+            title="新建会话"
+            onClick={() => { setSheetOpen(true) }}
+          >
+            <Plus size={18} aria-hidden="true" />
+          </button>
+        )}
+      />
 
       <div className={css.searchWrap}>
         <SearchBar
@@ -159,9 +173,11 @@ export function MessagesView(): JSX.Element {
       </CapsuleTabs>
 
       <section className={css.list} aria-label="会话列表">
-        <PullToRefresh onRefresh={() => Promise.resolve(sessionsPoll.refresh())}>
+        <PullToRefresh onRefresh={onPullRefresh}>
           {sessions === undefined && sessionsPoll.error === undefined && (
-            <ErrorBlock status="empty" title="会话加载中…" className={css.empty as string} />
+            <div className={css.skelGroup} role="status" aria-label="正在加载会话">
+              {Array.from({ length: 5 }, (_, index) => <SkelRow key={index} />)}
+            </div>
           )}
           {sessionsPoll.error !== undefined && (
             <ErrorBlock status="disconnected" title={sessionsPoll.error} className={css.empty as string} />

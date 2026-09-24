@@ -22,8 +22,8 @@
 
 .entryIcon {
   flex: none;
-  font-size: 14px;
-  line-height: 1;
+  display: inline-flex;
+  color: var(--dshm-muted-foreground);
 }
 
 .entryText {
@@ -75,13 +75,11 @@
 }
 
 .sheetClose {
-  width: 28px;
-  height: 28px;
+  width: var(--dshm-touch-sm);
+  height: var(--dshm-touch-sm);
   border-radius: 50%;
   background: var(--dshm-muted);
   color: var(--dshm-muted-foreground);
-  font-size: 16px;
-  line-height: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;

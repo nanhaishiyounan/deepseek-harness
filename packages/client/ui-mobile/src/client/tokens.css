@@ -1,57 +1,88 @@
 /*
- * Mobile v3 token set: the cold-chain ledger direction (plans/2026-09-21
- * mobile-v3 03 §2) — ink-teal primary on mist, frost cards, pass/hold/reject
- * semantics, the three temperature-layer accents, and the numeric ticket face
- * (tabular digits everywhere, the monospace stack on ticket numbers). Light
- * and dark are two whole tracks swapped on .dshm-root[data-theme]; antd-mobile
- * reads the same names through var() references, so its components follow the
- * track without per-theme overrides.
+ * Mobile v6 token set: the「AI 同事」design direction (plans/2026-09-23
+ * mobile-v6-uidesign B1) — brand blue #2E7CF6 with the #22B8E8 gradient partner
+ * on mist-blue surfaces, white cards, and pass/hold/reject semantics carried
+ * over from the ledger era. Light and dark are two whole tracks swapped on
+ * .dshm-root[data-theme]; antd-mobile reads the same names through var()
+ * references, so its components follow the track without per-theme overrides.
+ * The root also draws the 430px phone shell: fluid full-width below 720px, a
+ * centered rounded bezel with an outer shadow on desktop.
  */
+
 .dshm-root {
   /* Brand axis */
-  --dshm-primary: #0b5d56;          /* 墨青 ink-teal */
-  --dshm-on-primary: #ffffff;       /* selected-state foreground (dark track flips to 青黑) */
-  --dshm-primary-10: rgba(11, 93, 86, 0.10);
-  --dshm-primary-soft: #e3eeec;     /* selected chip / starter chip fill */
-  --dshm-foreground: #1c2b29;       /* 青墨 teal-ink */
-  --dshm-muted-foreground: #5c716d; /* 青灰 slate-teal */
-  --dshm-background: #f4f7f6;       /* 冷雾白 mist */
-  --dshm-card: #ffffff;             /* 霜白 frost */
-  --dshm-muted: #e8efed;            /* fold zones, input fills */
-  --dshm-border: #d5e0dd;           /* 冷缘 rim */
+  --dshm-primary: #2e7cf6;          /* 品牌蓝 brand */
+  --dshm-on-primary: #ffffff;       /* selected-state foreground (brand is track-constant) */
+  --dshm-brand2: #22b8e8;           /* 渐变副色 / 会议中状态 (brand2) */
+  --dshm-user-grad: linear-gradient(135deg, #2e7cf6, #22b8e8); /* hero/send/bubble accent (user-grad) */
+  --dshm-primary-10: rgba(46, 124, 246, 0.10);
+  --dshm-primary-soft: #eaf2ff;     /* selected chip / starter chip fill (brand-soft) */
+  --dshm-foreground: #18202f;       /* 墨蓝 text */
+  --dshm-muted-foreground: #758199; /* 蓝灰 sub */
+  --dshm-background: #f2f5f9;       /* 雾蓝白 bg */
+  --dshm-card: #ffffff;             /* card */
+  --dshm-muted: #f7f9fd;            /* fold zones, input fills (card2) */
+  --dshm-border: #e8edf4;           /* line */
+  --dshm-nav-line: var(--dshm-border);  /* PageNav 底边线（引用型；暗轨压深一阶） */
+  --dshm-header-bg: #ffffff;        /* chat/page header surface (header) */
+  --dshm-tabbar-bg: #ffffff;        /* bottom tab bar surface (tabbar) */
+  --dshm-input-bg: #ffffff;         /* composer input fill (input-bg) */
   /* Semantics */
-  --dshm-success: #1f7a4d;          /* 检验绿 pass-green */
-  --dshm-success-10: rgba(31, 122, 77, 0.12);
-  --dshm-warning: #a85a10;          /* 临期琥珀 hold-amber */
-  --dshm-warning-10: rgba(168, 90, 16, 0.12);
-  --dshm-destructive: #c0452e;      /* 驳回砖红 reject-brick */
-  --dshm-destructive-10: rgba(192, 69, 46, 0.12);
+  --dshm-success: #18a058;          /* 通过绿 ok（暗轨同值：4.8:1 on card） */
+  --dshm-success-10: rgba(24, 160, 88, 0.12);
+  --dshm-warning: #f59e0b;          /* 琥珀 warn（双轨同值：暗轨 on card 7.5:1，无需抬升） */
+  --dshm-warning-10: rgba(245, 158, 11, 0.12);
+  --dshm-destructive: #e5484d;      /* 危险红 danger */
+  --dshm-destructive-10: rgba(229, 72, 77, 0.12);
   /* Temperature-layer badges (cargo fields only, never brand surfaces) */
   --dshm-temp-chill: #0e7490;
   --dshm-temp-frozen: #1e40af;
   --dshm-temp-ambient: #8a6a3b;
   /* Bubbles */
-  --dshm-bubble-user-bg: #0b5d56;
+  --dshm-bubble-user-bg: #2e7cf6;   /* solid fallback; the accent face is --dshm-user-grad */
   --dshm-bubble-user-fg: #ffffff;
   --dshm-bubble-ai-bg: #ffffff;
-  --dshm-bubble-ai-fg: #1c2b29;
-  --dshm-bubble-ai-border: #d5e0dd;
+  --dshm-bubble-ai-fg: #18202f;
+  --dshm-bubble-ai-border: #e8edf4;
   /* Structure */
   --dshm-radius: 10px;              /* field rows, small controls */
-  --dshm-radius-lg: 16px;           /* cards, sheets */
-  --dshm-radius-bubble: 18px;       /* chat bubbles */
+  --dshm-radius-lg: 16px;           /* cards, sheets (radius) */
+  --dshm-radius-bubble: 16px;       /* chat bubbles */
   --dshm-radius-corner: 6px;        /* speaking corner */
-  --dshm-tabbar-height: 56px;
-  --dshm-shadow-card: 0 1px 6px 0 rgba(28, 43, 41, 0.05);
-  --dshm-stroke-soft: rgba(213, 224, 221, 0.6); /* in-card ledger dividers */
-  --dshm-primary-press: #094b46;    /* pressed primary (sends, seals) */
-  --dshm-receipt-wash: rgba(31, 122, 77, 0.16); /* the receipt card's fill */
-  --dshm-success-rim: rgba(31, 122, 77, 0.55);  /* the receipt card's rim */
-  --dshm-font-sans: -apple-system, 'PingFang SC', 'HarmonyOS Sans SC', 'MiSans', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+  --dshm-tabbar-height: 58px;
+  --dshm-touch: 44px;               /* primary touch target (send, back, new-chat) */
+  --dshm-touch-sm: 36px;            /* secondary touch target (chips, entries, stars) */
+  --dshm-shadow-card: 0 6px 24px rgba(23, 43, 77, 0.07);
+  --dshm-stroke-soft: rgba(232, 237, 244, 0.6); /* in-card ledger dividers */
+  --dshm-primary-press: #2468cc;    /* pressed primary (sends, seals) */
+  --dshm-receipt-wash: rgba(24, 160, 88, 0.16); /* the receipt card's fill */
+  --dshm-success-rim: rgba(24, 160, 88, 0.55);  /* the receipt card's rim */
+  --dshm-font-sans: -apple-system, 'BlinkMacSystemFont', 'PingFang SC', 'HarmonyOS Sans SC',
+    'Noto Sans SC', 'Microsoft YaHei', sans-serif;
   --dshm-font-num: 'SF Mono', ui-monospace, 'Menlo', 'Roboto Mono', monospace;
+  --dshm-shell-shadow: 0 0 40px rgba(23, 43, 77, 0.12); /* the desktop phone-shell halo */
+  /* The narrative code block's near-black plate (v6 B3: track-deepened). */
+  --dshm-code-bg: #131926;
+  --dshm-code-fg: #dce6f5;
+  --dshm-code-chrome: rgba(255, 255, 255, 0.05);
+  --dshm-code-muted: #93a3bc;
 
-  /* antd-mobile theme mapping (03 §7): same container, var()-linked so both
-     tracks and every adm- component follow without extra work. */
+  /* v5 · work-ledger increments (kept as reference tokens) */
+  --dshm-work-todo: var(--dshm-muted-foreground);   /* 待处理（引用型） */
+  --dshm-work-doing: var(--dshm-primary);           /* 进行中（引用型） */
+  --dshm-work-review: var(--dshm-warning);          /* 待确认（引用型） */
+  --dshm-work-done: var(--dshm-success);            /* 已完成（引用型） */
+  --dshm-on-soft: #1d5fd6;          /* foreground on primary-10/primary-soft fills (5.1:1 on soft) */
+  --dshm-stamp-lg: 44px;           /* detail-grade stamp (phase/work) */
+  --dshm-stamp-sm: 28px;           /* list-grade stamp (work/report) */
+  --dshm-stamp-avatar: 36px;       /* role stamp */
+  --dshm-motion-fast: 220ms;       /* tab fade — the design's pageIn .22s */
+  --dshm-motion-page: 220ms;       /* secondary-page push — the design's pageIn .22s */
+  --dshm-ease-slide: cubic-bezier(0.2, 0.8, 0.2, 1);   /* overshoot-free decaying push */
+  --dshm-ease-stamp: cubic-bezier(0.2, 1.4, 0.4, 1);   /* stamping curve */
+
+  /* antd-mobile theme mapping: same container, var()-linked so both tracks and
+     every adm- component follow without extra work. */
   --adm-color-primary: var(--dshm-primary);
   --adm-color-success: var(--dshm-success);
   --adm-color-warning: var(--dshm-warning);
@@ -68,6 +99,9 @@
   --adm-border-radius-l: var(--dshm-radius-lg);
 
   box-sizing: border-box;
+  /* The host page sets viewport-fit=cover; the root clears the notch / status
+     bar for every page (each surface owns its own bottom inset). */
+  padding-top: env(safe-area-inset-top);
   font-family: var(--dshm-font-sans);
   font-size: 16px;
   line-height: 1.5;
@@ -75,38 +109,58 @@
   color: var(--dshm-foreground);
   background: var(--dshm-background);
   -webkit-font-smoothing: antialiased;
+  /* The 430px phone shell: fluid (full width) under 720px, centered with a
+     halo otherwise; the login gate and the shell ride the same form. */
+  height: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+  box-shadow: var(--dshm-shell-shadow);
 }
 
 .dshm-root[data-theme='dark'] {
-  --dshm-primary: #4ca79c;
-  --dshm-on-primary: #0d1413;
-  --dshm-primary-10: rgba(76, 167, 156, 0.16);
-  --dshm-primary-soft: #1c2e2b;
-  --dshm-foreground: #e4ebe9;
-  --dshm-muted-foreground: #9bb0ab;
-  --dshm-background: #0d1413;       /* 青黑 */
-  --dshm-card: #172220;
-  --dshm-muted: #1f2c2a;
-  --dshm-border: #2a3835;
-  --dshm-success: #4e9e6f;
-  --dshm-success-10: rgba(78, 158, 111, 0.18);
-  --dshm-warning: #d08a3e;
-  --dshm-warning-10: rgba(208, 138, 62, 0.18);
-  --dshm-destructive: #d97a66;
-  --dshm-destructive-10: rgba(217, 122, 102, 0.18);
+  --dshm-primary-10: rgba(46, 124, 246, 0.16);
+  --dshm-primary-soft: #1b2c4a;
+  --dshm-foreground: #e8ecf4;
+  --dshm-muted-foreground: #8c96aa;
+  --dshm-background: #0e131b;       /* 深蓝黑 */
+  --dshm-card: #1a212d;
+  --dshm-muted: #151b26;
+  --dshm-border: #252e3e;
+  --dshm-nav-line: #1f2734;         /* PageNav 底边线：深于 line 一阶，暗面 1px 不刺眼 */
+  --dshm-header-bg: #131924;
+  --dshm-tabbar-bg: #131924;
+  --dshm-input-bg: #1a212d;
+  --dshm-success-10: rgba(24, 160, 88, 0.18);
+  --dshm-warning-10: rgba(245, 158, 11, 0.18);
+  --dshm-destructive: #ef5f64;      /* dark-track lift: #e5484d reads 4.1:1 on card (v5 B3 先例) */
+  --dshm-destructive-10: rgba(239, 95, 100, 0.18);
   --dshm-temp-chill: #57b3cc;
   --dshm-temp-frozen: #8fa8f0;
   --dshm-temp-ambient: #c0a276;
-  --dshm-bubble-user-bg: #18554e;
-  --dshm-bubble-user-fg: #f0f7f5;
-  --dshm-bubble-ai-bg: #172220;
-  --dshm-bubble-ai-fg: #e4ebe9;
-  --dshm-bubble-ai-border: #2a3835;
-  --dshm-shadow-card: 0 1px 6px 0 rgba(0, 0, 0, 0.25);
-  --dshm-stroke-soft: rgba(42, 56, 53, 0.7);
-  --dshm-primary-press: #3d9186;
-  --dshm-receipt-wash: rgba(78, 158, 111, 0.22);
-  --dshm-success-rim: rgba(78, 158, 111, 0.6);
+  --dshm-bubble-user-bg: #2e7cf6;
+  --dshm-bubble-user-fg: #ffffff;
+  --dshm-bubble-ai-bg: #1a212d;
+  --dshm-bubble-ai-fg: #e8ecf4;
+  --dshm-bubble-ai-border: #252e3e;
+  --dshm-shadow-card: 0 6px 24px rgba(0, 0, 0, 0.4);
+  --dshm-code-bg: #0c111a;
+  --dshm-stroke-soft: rgba(37, 46, 62, 0.7);
+  --dshm-primary-press: #4a92f8;
+  --dshm-receipt-wash: rgba(24, 160, 88, 0.22);
+  --dshm-success-rim: rgba(24, 160, 88, 0.6);
+  --dshm-on-soft: #e8ecf4;         /* dark-track chip foreground: brand on #1b2c4a is 3.5:1 */
+  --dshm-shell-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+}
+
+/* The desktop phone-shell form (the design's @media ≥720px): a floating
+ * rounded bezel with breathing room, matching #app in the v6 mock. */
+@media (min-width: 720px) {
+  .dshm-root {
+    margin: 14px auto;
+    height: calc(100% - 28px);
+    border-radius: 24px;
+    overflow: hidden;
+  }
 }
 
 .dshm-root *,
@@ -131,13 +185,35 @@
 }
 
 /* Host document plumbing: the mobile page fills the viewport (and the preview
- * iframe's bezel) without default margins. */
+ * iframe's bezel) without default margins; the body carries the desk surface
+ * behind the 430px shell, so App mirrors the theme onto it. */
 html,
 body {
   height: 100%;
   margin: 0;
 }
 
+body {
+  background: #e9edf4;
+}
+
+body[data-theme='dark'] {
+  background: #0a0e15;
+}
+
 #mobile-root {
   height: 100%;
+}
+
+/* The loading-skeleton breathing pulse, shared by every module's skeleton
+ * placeholders (the keyframe stays global; CSS Modules keep foreign animation
+ * names verbatim). */
+@keyframes dshm-skel-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.9;
+  }
 }

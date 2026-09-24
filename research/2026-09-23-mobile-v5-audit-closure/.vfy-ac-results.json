@@ -1,0 +1,81 @@
+{
+  "base": "http://localhost:3080",
+  "chatHash": "#/chat/session-56e73331-e1d6-42a4-a8ac-669df6f64de4",
+  "results": [
+    {
+      "id": "A1-enter",
+      "ok": true,
+      "detail": "entered chat via sessionRow"
+    },
+    {
+      "id": "A1-single-back",
+      "ok": true,
+      "detail": "chat nav labeled-back=1 imgs=0 svgs=2"
+    },
+    {
+      "id": "A1-touch",
+      "ok": true,
+      "detail": "back hit 44x44"
+    },
+    {
+      "id": "A2-back-works",
+      "ok": true,
+      "detail": "after click hash=#/chats (from #/chat/session-56e73331-e1d6-42a4-a8ac-669df6f64de4)"
+    },
+    {
+      "id": "A3-work-detail",
+      "ok": true,
+      "detail": "enter=cardHeadButton hash=#/work/w_mudl8t4g4eqr nav={\"present\":true,\"labeled\":1,\"imgs\":0,\"svgs\":1,\"height\":\"45px\",\"hit\":{\"w\":44,\"h\":44,\"top\":0}}"
+    },
+    {
+      "id": "A4-tasks",
+      "ok": true,
+      "detail": "tasks nav={\"present\":true,\"labeled\":1,\"imgs\":0,\"svgs\":1,\"height\":\"45px\",\"hit\":{\"w\":44,\"h\":44,\"top\":0}}"
+    },
+    {
+      "id": "A5-files",
+      "ok": true,
+      "detail": "files nav={\"present\":true,\"labeled\":1,\"imgs\":0,\"svgs\":1,\"height\":\"45px\",\"hit\":{\"w\":44,\"h\":44,\"top\":0}}"
+    },
+    {
+      "id": "A6-agents",
+      "ok": true,
+      "detail": "agents nav={\"present\":true,\"labeled\":1,\"imgs\":0,\"svgs\":1,\"height\":\"45px\",\"hit\":{\"w\":44,\"h\":44,\"top\":0}}"
+    },
+    {
+      "id": "A7-safe-area",
+      "ok": true,
+      "detail": "desktop paddingTop=0px (no stray inset), simulated 47px shifts nav to y=47, covered=false, restored=0px"
+    },
+    {
+      "id": "A8-skeleton-visible",
+      "ok": true,
+      "detail": "skeleton/status nodes while delayed: 21"
+    },
+    {
+      "id": "A8-ready",
+      "ok": true,
+      "detail": "status rows after release: 0 (0 expected once loaded)"
+    },
+    {
+      "id": "A9-dark-chat",
+      "ok": true,
+      "detail": "dark chat nav={\"present\":true,\"labeled\":1,\"imgs\":0,\"svgs\":2,\"height\":\"45px\",\"hit\":{\"w\":44,\"h\":44,\"top\":0}}"
+    },
+    {
+      "id": "A10-sheet-no-nesting",
+      "ok": true,
+      "detail": "sheet chips=4 tags=[\"SPAN\"] nestedButtons=0"
+    },
+    {
+      "id": "A11-files-sibling-star",
+      "ok": true,
+      "detail": "fileTop DIVs=3 fileTopMain buttons=3 rows=3 bad=[] pageNestedButtons=0"
+    },
+    {
+      "id": "A12-send-touch",
+      "ok": true,
+      "detail": "send hit 44x44"
+    }
+  ]
+}

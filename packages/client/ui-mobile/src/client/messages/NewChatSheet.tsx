@@ -98,17 +98,11 @@ export function NewChatSheet({ visible, onClose }: NewChatSheetProps): JSX.Eleme
                     <span className={css.rosterDuty}>{duty}</span>
                     {formChips.length > 0 && (
                       <span className={css.rosterChips}>
+                        {/* The chips ride inside the row button (their start
+                            action is the row's own), so they render as plain
+                            spans — a nested button would be invalid HTML. */}
                         {formChips.map(chip => (
-                          <button
-                            key={chip}
-                            type="button"
-                            className={css.rosterChip}
-                            disabled={busy}
-                            aria-label={`新建 ${chip} 会话`}
-                            onClick={() => { void start('mobile-form-assistant') }}
-                          >
-                            {chip}
-                          </button>
+                          <span key={chip} className={css.rosterChip}>{chip}</span>
                         ))}
                       </span>
                     )}

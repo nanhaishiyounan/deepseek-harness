@@ -11,6 +11,7 @@
  */
 
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { Toast } from 'antd-mobile'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { ChatAsk, ChatItem, FoldEvent } from '../src/client/fold.ts'
 import type { DerivedCardState } from '../src/client/cardState.ts'
@@ -25,9 +26,10 @@ import { App } from '../src/client/App.tsx'
 import { AppMobileEntry } from '../src/client/entry.tsx'
 import { navigate } from '../src/client/router.ts'
 import { saveDraftEdits } from '../src/client/draftStore.ts'
+import { createWorkItem, deleteWorkItem, registerExecSession, workSnapshot } from '../src/client/workStore.ts'
 import { createSession } from '../src/client/sessionsService.ts'
 import { todayOf } from '../src/client/systemFields.ts'
-import { Avatar, Badge, NoticeCard, RunningRow } from '../src/client/ui.tsx'
+import { Avatar, Badge, NoticeCard, RunningRow, SkelCard } from '../src/client/ui.tsx'
 
 /** One recorded gateway call. */
 interface RecordedCall {
@@ -86,17 +88,20 @@ afterEach(() => {
   vi.restoreAllMocks()
   vi.useRealTimers()
   cleanup()
+  // The work store is a module singleton; clear its items between cases.
+  for (const item of workSnapshot().items) deleteWorkItem(item.id)
 })
 
 describe('mobile UI atoms', () => {
-  it('renders the stamp avatar, badge tones, running row, and notices', () => {
+  it('renders the stamp avatar, badge tones, running row, notices, and the skeleton card', () => {
     const { container } = render(
       <>
-        <Avatar background="#0b5d56" acronym="表单" size={40} />
+        <Avatar background="#2e7cf6" acronym="表单" size={40} />
         <Badge tone="primary">在线</Badge>
         <RunningRow text="AI 同事正在处理…" />
         <NoticeCard kind="empty" text="加载中" />
         <NoticeCard kind="error" text="失败了" />
+        <SkelCard />
       </>,
     )
     expect(screen.getByText('在线')).toBeTruthy()
@@ -104,6 +109,8 @@ describe('mobile UI atoms', () => {
     expect(screen.getByText('失败了')).toBeTruthy()
     expect(container.querySelector('svg')).toBeTruthy()
     expect(screen.getByText('表单')).toBeTruthy()
+    // The skeleton card paints its aria-hidden silhouette.
+    expect(container.querySelectorAll('[aria-hidden="true"]').length).toBeGreaterThan(0)
   })
 })
 
@@ -157,13 +164,13 @@ function loadIdentityName(): string | undefined {
 }
 
 describe('mobile app shell', () => {
-  it('logs in through the gate onto the two-tab shell from a cold identity', async () => {
+  it('logs in through the gate onto the home tab from a cold identity', async () => {
     stubGateway({ 'agentPreset.list': { presets: [] }, 'session.list': { items: [] } })
     render(<App />)
     const code = document.querySelector('input[inputmode="numeric"]') as HTMLInputElement
     fireEvent.change(code, { target: { value: '123456' } })
     fireEvent.click(screen.getByRole('button', { name: '登录' }))
-    await waitFor(() => { expect(screen.getAllByText('消息').length).toBeGreaterThan(0) })
+    await waitFor(() => { expect(screen.getAllByText(/今日台账/).length).toBeGreaterThan(0) })
     expect(localStorage.getItem('dsh-mobile-auth')).toContain('业务员')
   })
 
@@ -186,7 +193,7 @@ describe('mobile app shell', () => {
     })
     localStorage.setItem('dsh-mobile-auth', JSON.stringify({ phone: '13800138000', name: '业务员', loggedAt: 1 }))
     render(<App />)
-    expect(screen.getAllByText('消息').length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/今日台账/).length).toBeGreaterThan(0)
     navigate('#/me')
     fireEvent(window, new HashChangeEvent('hashchange'))
     await waitFor(() => screen.getByRole('button', { name: /退出登录/ }))
@@ -201,27 +208,32 @@ describe('mobile app shell', () => {
     await waitFor(() => { expect(screen.getByText('食链通 · AI 员工')).toBeTruthy() })
   })
 
-  it('routes the two tabs and redirects the v1 tabs and the retired contacts route', async () => {
+  it('routes the four tabs and redirects the v1 heads onto their views', async () => {
     stubGateway({
       'agentPreset.list': { presets: [] },
       'session.list': { items: [] },
       'session.history': EMPTY_HISTORY,
       'nocobase.listMeta': { collections: [] },
     })
+    // The empty hash lands on home; walk the tab bar and the folded heads.
+    location.hash = '#/'
     const identity = { phone: '13800138000', name: '业务员', loggedAt: 1 }
     render(<MobileShell identity={identity} dark={false} onDarkChange={() => {}} onLogout={() => {}} />)
-    expect(screen.getByText('NocoBase 业务系统 · AI 员工入口')).toBeTruthy()
+    await waitFor(() => { expect(screen.getAllByText(/今日台账/).length).toBeGreaterThan(0) })
     fireEvent.click(screen.getByText('我的'))
     await waitFor(() => { expect(screen.getByText('本月登记')).toBeTruthy() })
     navigate('#/profile')
     fireEvent(window, new HashChangeEvent('hashchange'))
     await waitFor(() => { expect(screen.getByText('待审核')).toBeTruthy() })
+    // contacts folds onto the agents directory (02 §1.3): the view renders.
     navigate('#/contacts')
     fireEvent(window, new HashChangeEvent('hashchange'))
-    await waitFor(() => { expect(screen.getByPlaceholderText('搜索会话/同事')).toBeTruthy() })
+    await waitFor(() => { expect(screen.getByText('AI 同事')).toBeTruthy() })
+    // workbench folds onto the work page: its header and status tabs render.
     navigate('#/workbench')
     fireEvent(window, new HashChangeEvent('hashchange'))
-    await waitFor(() => { expect(screen.getByText('NocoBase 业务系统 · AI 员工入口')).toBeTruthy() })
+    await waitFor(() => { expect(screen.getAllByText('工作').length).toBeGreaterThan(0) })
+    expect(screen.getByText('待处理 0')).toBeTruthy()
   })
 
   it('persists the dark theme through the me-tab switch', async () => {
@@ -233,13 +245,26 @@ describe('mobile app shell', () => {
     })
     localStorage.setItem('dsh-mobile-auth', JSON.stringify({ phone: '13800138000', name: '业务员', loggedAt: 1 }))
     const { container } = render(<App />)
-    await waitFor(() => { expect(screen.getAllByText('消息').length).toBeGreaterThan(0) })
+    await waitFor(() => { expect(screen.getAllByText(/今日台账/).length).toBeGreaterThan(0) })
     expect(container.querySelector('.dshm-root')?.getAttribute('data-theme')).toBe('light')
     navigate('#/me')
     fireEvent(window, new HashChangeEvent('hashchange'))
     fireEvent.click(await screen.findByRole('switch', { name: '深色模式' }))
     await waitFor(() => { expect(container.querySelector('.dshm-root')?.getAttribute('data-theme')).toBe('dark') })
     expect(localStorage.getItem('dsh-mobile-theme')).toBe('dark')
+  })
+
+  it('routes the tasks and files layers under the shell', async () => {
+    stubGateway({ 'agentPreset.list': { presets: [] }, 'session.list': { items: [] } })
+    const identity = { phone: '13800138000', name: '业务员', loggedAt: 1 }
+    render(<MobileShell identity={identity} dark={false} onDarkChange={() => {}} onLogout={() => {}} />)
+    await waitFor(() => { expect(screen.getAllByText(/今日台账/).length).toBeGreaterThan(0) })
+    navigate('#/tasks')
+    fireEvent(window, new HashChangeEvent('hashchange'))
+    await waitFor(() => { expect(screen.getByText('我的任务')).toBeTruthy() })
+    navigate('#/files')
+    fireEvent(window, new HashChangeEvent('hashchange'))
+    await waitFor(() => { expect(screen.getByRole('region', { name: '文件' })).toBeTruthy() })
   })
 
   it('renders the chat route as a full-screen layer over the shell', async () => {
@@ -262,6 +287,23 @@ describe('mobile app shell', () => {
 })
 
 describe('mobile chats tab', () => {
+  it('filters the registered work sessions out of the row list', async () => {
+    const now = Date.now()
+    const work = createWorkItem({ title: '跟进事项', owner: '业务员' })
+    registerExecSession(work.id, 'exec-1')
+    stubGateway({
+      'agentPreset.list': { presets: [] },
+      'session.list': { items: [
+        { sessionId: 'plain-1', updatedAt: now, projections: { values: { title: '普通会话' } } },
+        { sessionId: 'exec-1', updatedAt: now - 1000, projections: { values: { title: '执行会话' } } },
+      ] },
+    })
+    render(<MessagesView />)
+    await waitFor(() => { expect(screen.getByText('普通会话')).toBeTruthy() })
+    // The exec session registered in the isolation set never surfaces (02 §9).
+    expect(screen.queryByText('执行会话')).toBeNull()
+  })
+
   it('renders the six-element rows with filters, search, and the unread dot', async () => {
     const now = Date.now()
     const receiptFence = '```dsh\n{"v":3,"type":"submit_receipt","draftId":"d_1","form":{"collection":"hub_po_purchase_orders","label":"采购单"},"rowId":"1042","summary":[{"label":"合计金额","value":"¥4,500","kind":"money"}]}\n```'
@@ -343,6 +385,79 @@ describe('mobile chats tab', () => {
     expect(screen.getAllByText('参谋').length).toBeGreaterThan(1)
   })
 
+  it('pins a session above the rest, unpins, and marks read through the swipe row', async () => {
+    const now = Date.now()
+    stubGateway({
+      'agentPreset.list': { presets: [] },
+      'session.list': { items: [
+        { sessionId: 'newer', updatedAt: now, projections: { values: { title: '较新会话' } } },
+        { sessionId: 'older', updatedAt: now - 60_000, projections: { values: { title: '较旧会话' } } },
+      ] },
+    })
+    render(<MessagesView />)
+    await waitFor(() => { expect(screen.getByText('较新会话')).toBeTruthy() })
+    // Newest first by default.
+    expect(screen.getAllByText(/会话$/)[0]?.textContent).toBe('较新会话')
+    // Swipe-pin the older row: it orders above the newer one.
+    const pins = screen.getAllByText('置顶')
+    fireEvent.click(pins[pins.length - 1] as HTMLButtonElement)
+    await waitFor(() => { expect(screen.getAllByText(/会话$/)[0]?.textContent).toBe('较旧会话') })
+    expect(localStorage.getItem('dsh-mobile-pins')).toContain('older')
+    // Unpin restores the recency order.
+    fireEvent.click(screen.getByText('取消置顶'))
+    await waitFor(() => { expect(screen.getAllByText(/会话$/)[0]?.textContent).toBe('较新会话') })
+    // Pinning the already-first row exercises the lead-row comparison arm.
+    fireEvent.click(screen.getAllByText('置顶')[0] as HTMLButtonElement)
+    await waitFor(() => { expect(screen.getAllByText(/会话$/)[0]?.textContent).toBe('较新会话') })
+    fireEvent.click(screen.getByText('取消置顶'))
+    // Marking read retires the unread badge on every row.
+    expect(screen.getAllByLabelText('有新消息').length).toBeGreaterThan(0)
+    for (const read of screen.getAllByText('标记已读')) fireEvent.click(read)
+    await waitFor(() => { expect(screen.queryByLabelText('有新消息')).toBeNull() })
+  })
+
+  it('ignores a projection tail that lands after unmount', async () => {
+    const now = Date.now()
+    let release: (value: { events: unknown[] }) => void = () => {}
+    const gate = new Promise<{ events: unknown[] }>((resolve) => { release = resolve })
+    stubGateway({
+      'agentPreset.list': { presets: [] },
+      'session.list': { items: [{ sessionId: 'late-tail', updatedAt: now, projections: { values: { title: '迟到投影' } } }] },
+      'session.history': () => gate,
+    })
+    const view = render(<MessagesView />)
+    await waitFor(() => { expect(screen.getByText('迟到投影')).toBeTruthy() })
+    view.unmount()
+    // The tail resolving after unmount must not touch retired component state.
+    release({ events: [] })
+    await act(async () => { await Promise.resolve() })
+  })
+
+  it('loads the next page when the list overflows the first page', async () => {
+    const now = Date.now()
+    // The sentinel's visibility check reads element.offsetParent, which jsdom
+    // never computes; surface it so the check reaches the geometry branch.
+    const proto = HTMLElement.prototype as unknown as { offsetParent?: Element }
+    const hadOffsetParent = Object.prototype.hasOwnProperty.call(proto, 'offsetParent')
+    Object.defineProperty(proto, 'offsetParent', { configurable: true, get: () => document.body })
+    try {
+      stubGateway({
+        'agentPreset.list': { presets: [] },
+        'session.list': { items: Array.from({ length: 22 }, (_, index) => ({
+          sessionId: `row-${String(index)}`,
+          updatedAt: now - index,
+          projections: { values: { title: `第${String(index)}行` } },
+        })) },
+      })
+      render(<MessagesView />)
+      // The first page renders twenty rows; the sentinel fires loadMore for the tail.
+      await waitFor(() => { expect(screen.getByText('第19行')).toBeTruthy() })
+      await waitFor(() => { expect(screen.getByText('第21行')).toBeTruthy() }, { timeout: 3000 })
+    } finally {
+      if (hadOffsetParent) delete proto.offsetParent
+    }
+  })
+
   it('opens the new-chat sheet from the plus button', async () => {
     stubGateway({
       'agentPreset.list': { presets: [{ id: 'mobile-form-assistant', name: '智能填表助手', description: '', isDefault: true }] },
@@ -378,7 +493,7 @@ describe('mobile new-chat sheet', () => {
     expect(screen.getByText('采购单')).toBeTruthy()
     expect(screen.getByText('供应商登记')).toBeTruthy()
     expect(screen.getByText('质检记录')).toBeTruthy()
-    expect(screen.getByText('一句话登记六类业务单据')).toBeTruthy()
+    expect(screen.getByText('单据登记与任务执行')).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: /智能填表助手/ }))
     await waitFor(() => { expect(location.hash).toBe('#/chat/bound:mobile-form-assistant') })
     // v3 (01 ⑤A3): starting a session never sends a message as the user.
@@ -459,7 +574,7 @@ describe('mobile me tab', () => {
     fireEvent.click(screen.getByText('数据'))
     // The description renders on the row and again in the opened dialog.
     await waitFor(() => { expect(screen.getAllByText('会话与业务数据存储于服务端，与 PC 工作台同库；本机仅保留主题与输入中的草稿。').length).toBeGreaterThan(1) })
-    fireEvent.click(screen.getByText('v4.0'))
+    fireEvent.click(screen.getByText('v6'))
   })
 
   it('ignores a ledger rejection that lands after unmount', async () => {
@@ -525,17 +640,22 @@ describe('mobile me tab', () => {
     expect(onDark).toHaveBeenCalledWith(true)
   })
 
-  it('counts this month\'s registered receipts and leads the recent strip', async () => {
+  it('counts this month\'s registered receipts and leads the recent strip with the newest', async () => {
     stubGateway({
       'agentPreset.list': { presets: [] },
       'session.list': { items: [
-        { sessionId: 'm1', updatedAt: Date.now(), agentPreset: 'mobile-form-assistant' },
+        { sessionId: 'm1', updatedAt: Date.now() - 10_000, agentPreset: 'mobile-form-assistant' },
+        { sessionId: 'm2', updatedAt: Date.now() - 20_000, agentPreset: 'mobile-form-assistant' },
+        { sessionId: 'm3', updatedAt: Date.now() - 30_000, agentPreset: 'mobile-form-assistant' },
+        { sessionId: 'm4', updatedAt: Date.now() - 40_000, agentPreset: 'mobile-form-assistant' },
         { sessionId: 'local-1', updatedAt: Date.now() },
       ] },
       'session.history': (payload: Record<string, unknown>) => {
         if (payload.sessionId === 'local-1') throw new Error('窗口 503')
+        const rowId = { m1: '1044', m2: '1043', m3: '1042', m4: '1041' }[payload.sessionId as string] ?? '9999'
+        const amount = { m1: '¥9,900', m2: '¥7,700', m3: '¥6,400', m4: '¥4,400' }[payload.sessionId as string] ?? '¥0'
         return { events: [
-          { event: assistantMessage(1, '已登记。\n```dsh\n{"v":3,"type":"submit_receipt","draftId":"d_1","form":{"collection":"hub_po_purchase_orders","label":"采购单"},"rowId":"1042","summary":[{"label":"合计金额","value":"¥6,400","kind":"money"}]}\n```', Date.now()) },
+          { event: assistantMessage(1, `已登记。\n\`\`\`dsh\n{"v":3,"type":"submit_receipt","draftId":"d_${rowId}","form":{"collection":"hub_po_purchase_orders","label":"采购单"},"rowId":"${rowId}","summary":[{"label":"合计金额","value":"${amount}","kind":"money"}]}\n\`\`\``, Date.now()) },
         ] }
       },
     })
@@ -547,10 +667,73 @@ describe('mobile me tab', () => {
         onLogout={() => {}}
       />,
     )
-    await waitFor(() => { expect(screen.getByText('1 条')).toBeTruthy() })
-    // The recent-receipts strip leads with the landing's ticket face.
-    await waitFor(() => { expect(screen.getByText('№1042')).toBeTruthy() })
-    expect(screen.getByText('¥6,400')).toBeTruthy()
+    // All four landings count into this month's ledger.
+    await waitFor(() => { expect(screen.getByText('4 条')).toBeTruthy() })
+    // The strip leads with the newest receipts (sessions list newest-first):
+    // the first three in order, the fourth dropped.
+    await waitFor(() => { expect(screen.getByText('№1044')).toBeTruthy() })
+    expect(screen.getAllByText(/^№/).map(node => node.textContent)).toEqual(['№1044', '№1043', '№1042'])
+    expect(screen.queryByText('№1041')).toBeNull()
+    // The strip row routes back into its receipt session.
+    fireEvent.click(screen.getByText('№1044'))
+    expect(location.hash).toBe('#/chat/m1')
+    location.hash = ''
+  })
+
+  it('runs the quick-start shortcuts, restoring the button on failure', async () => {
+    let createFails = false
+    stubGateway({
+      'agentPreset.list': { presets: [] },
+      'session.list': { items: [] },
+      'session.create': () => {
+        if (createFails) throw new Error('会话服务不可用')
+        return { sessionId: 'shortcut-1' }
+      },
+    })
+    render(
+      <ProfileView
+        identity={{ phone: '13800138000', name: '业务员', loggedAt: 1 }}
+        dark={false}
+        onDarkChange={() => {}}
+        onLogout={() => {}}
+      />,
+    )
+    fireEvent.click(screen.getByRole('button', { name: '登记采购单' }))
+    await waitFor(() => { expect(location.hash).toBe('#/chat/shortcut-1') })
+    location.hash = ''
+    // A failed create leaves the shortcut usable again.
+    createFails = true
+    fireEvent.click(screen.getByRole('button', { name: '问经营参谋' }))
+    await waitFor(() => { expect(screen.getByRole('button', { name: '问经营参谋' }).getAttribute('disabled')).toBeNull() })
+    expect(location.hash).toBe('')
+  })
+
+  it('renders the live-mode switch on, a text-only receipt hero, and the demo flip back', async () => {
+    localStorage.setItem('dsh-mobile-runmode', 'live')
+    stubGateway({
+      'agentPreset.list': { presets: [] },
+      'session.list': { items: [{ sessionId: 'm2', updatedAt: Date.now(), agentPreset: 'mobile-form-assistant' }] },
+      'session.history': { events: [
+        // A last-month receipt still leads the strip but never counts toward 本月登记.
+        { event: assistantMessage(1, '已登记。\n```dsh\n{"v":3,"type":"submit_receipt","draftId":"d_2","form":{"collection":"hub_wms_outbound","label":"出库单"},"rowId":"1043","summary":[{"label":"经手人","value":"林小满","kind":"text"}]}\n```', new Date(new Date().getFullYear(), new Date().getMonth() - 1, 15).getTime()) },
+      ] },
+    })
+    render(
+      <ProfileView
+        identity={{ phone: '13800138000', name: '业务员', loggedAt: 1 }}
+        dark={false}
+        onDarkChange={() => {}}
+        onLogout={() => {}}
+      />,
+    )
+    // The persisted live mode paints the switch on…
+    await waitFor(() => { expect(screen.getByRole('switch', { name: '真实模式' }).getAttribute('aria-checked')).toBe('true') })
+    // …a receipt without a money row falls back to the landing copy…
+    await waitFor(() => { expect(screen.getByText('已登记')).toBeTruthy() })
+    // …and flipping back to demo persists and toasts the other way.
+    fireEvent.click(screen.getByRole('switch', { name: '真实模式' }))
+    await waitFor(() => { expect(localStorage.getItem('dsh-mobile-runmode')).toBe('demo') })
+    await waitFor(() => { expect(document.querySelector('.adm-toast-main')?.textContent ?? '').toContain('已切换为演示模式') })
   })
 
   it('logs out through the confirm dialog', async () => {
@@ -686,6 +869,115 @@ describe('mobile chat view', () => {
     fireEvent.click(screen.getByRole('button', { name: '关闭' }))
   })
 
+  it('runs the quick panel: starter commands send, placeholders toast, empty falls back', async () => {
+    stubGateway({
+      'session.list': { items: [{ sessionId: 'session-12', updatedAt: 1, agentPreset: 'business-advisor' }] },
+      'session.history': EMPTY_HISTORY,
+      'agentPreset.list': { presets: [{ id: 'business-advisor', name: '经营参谋', description: '', isDefault: false }] },
+      'nocobase.listMeta': { collections: [] },
+      'session.prompt': {},
+    })
+    render(<ChatView sessionId="session-12" />)
+    await waitFor(() => { expect(screen.getByTestId('welcome-card')).toBeTruthy() })
+    // Opening the panel lists the colleague's starters as commands.
+    fireEvent.click(screen.getByRole('button', { name: '打开快捷面板' }))
+    await waitFor(() => { expect(screen.getByRole('dialog', { name: '快捷指令' })).toBeTruthy() })
+    // The starter also lives on the welcome card; the panel adds the second copy.
+    expect(screen.getAllByText('问经营').length).toBe(2)
+    // The placeholder tools toast instead of opening a lane.
+    fireEvent.click(screen.getByRole('button', { name: '语音' }))
+    await waitFor(() => { expect(document.querySelector('.adm-toast-main')?.textContent ?? '').toContain('演示版暂未开放') })
+    // Picking a command closes the panel and sends the starter's send-text.
+    fireEvent.click(screen.getAllByRole('button', { name: '问经营' })[1] as HTMLButtonElement)
+    await waitFor(() => { expect(calls.some(call => call.url === '/api/session.prompt')).toBe(true) })
+    expect(screen.queryByRole('dialog', { name: '快捷指令' })).toBeNull()
+    // A starter-less colleague (the local fallback) shows the empty note.
+    cleanup()
+    stubGateway({
+      'session.list': { items: [{ sessionId: 'session-13', updatedAt: 1 }] },
+      'session.history': EMPTY_HISTORY,
+      'nocobase.listMeta': { collections: [] },
+    })
+    render(<ChatView sessionId="session-13" />)
+    await waitFor(() => { expect(screen.getByTestId('welcome-card')).toBeTruthy() })
+    fireEvent.click(screen.getByRole('button', { name: '打开快捷面板' }))
+    await waitFor(() => { expect(screen.getByText('当前同事没有预置指令，直接打字聊聊吧')).toBeTruthy() })
+  })
+
+  it('renders fenced assistant code as the deep plate and copies it', async () => {
+    const writeText = vi.fn(() => Promise.resolve())
+    Object.assign(navigator, { clipboard: { writeText } })
+    stubGateway({
+      'session.list': { items: [] },
+      'session.history': { events: [
+        { event: assistantMessage(1, '示例如下：\n```sql\nSELECT * FROM orders\n```\n完毕。', Date.now()) },
+      ] },
+      'nocobase.listMeta': { collections: [] },
+    })
+    render(<ChatView sessionId="session-12" />)
+    await waitFor(() => { expect(screen.getByTestId('code-box')).toBeTruthy() })
+    // The plate carries the fence's language label and the verbatim body.
+    expect(screen.getByText('sql')).toBeTruthy()
+    expect(screen.getByText('SELECT * FROM orders')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: '复制代码' }))
+    await waitFor(() => { expect(writeText).toHaveBeenCalledWith('SELECT * FROM orders') })
+    await waitFor(() => { expect(document.querySelector('.adm-toast-main')?.textContent ?? '').toContain('已复制') })
+  })
+
+  it('falls back to execCommand when the clipboard api is absent and toasts the miss', async () => {
+    const nav = navigator as Partial<Navigator> & { clipboard?: unknown }
+    delete nav.clipboard
+    stubGateway({
+      'session.list': { items: [] },
+      'session.history': { events: [{ event: assistantMessage(1, '```js\nlet a = 1\n```', Date.now()) }] },
+      'nocobase.listMeta': { collections: [] },
+    })
+    render(<ChatView sessionId="session-13" />)
+    // No async clipboard in the jsdom host and no execCommand either: the
+    // legacy lane itself fails and the toast names the manual fallback.
+    fireEvent.click(await screen.findByRole('button', { name: '复制代码' }))
+    await waitFor(() => { expect(document.querySelector('.adm-toast-main')?.textContent ?? '').toContain('复制失败，请长按选择复制') })
+  })
+
+  it('copies through the execCommand lane when the async clipboard write rejects', async () => {
+    Object.assign(navigator, { clipboard: { writeText: vi.fn(() => Promise.reject(new Error('denied'))) } })
+    const exec = vi.fn(() => true)
+    // execCommand is the legacy copy lane under test (the production source keeps the same waiver).
+    // oxlint-disable-next-line no-deprecated
+    document.execCommand = exec
+    try {
+      stubGateway({
+        'session.list': { items: [] },
+        'session.history': { events: [{ event: assistantMessage(1, '```sh\npwd\n```', Date.now()) }] },
+        'nocobase.listMeta': { collections: [] },
+      })
+      render(<ChatView sessionId="session-14" />)
+      fireEvent.click(await screen.findByRole('button', { name: '复制代码' }))
+      await waitFor(() => { expect(exec).toHaveBeenCalledWith('copy') })
+      await waitFor(() => { expect(document.querySelector('.adm-toast-main')?.textContent ?? '').toContain('已复制') })
+    } finally {
+      // oxlint-disable-next-line no-deprecated
+      delete (document as Partial<Document> & { execCommand?: unknown }).execCommand
+    }
+  })
+
+  it('arms the viewer state from a markdown image tap', async () => {
+    stubGateway({
+      'session.list': { items: [] },
+      'session.history': { events: [{ event: assistantMessage(1, '示意图：\n\n![流程图](https://example.com/flow.png)', Date.now()) }] },
+      'nocobase.listMeta': { collections: [] },
+    })
+    render(<ChatView sessionId="session-15" />)
+    await waitFor(() => { expect(document.querySelector('img[src="https://example.com/flow.png"]')).not.toBeNull() })
+    const image = document.querySelector('img[src="https://example.com/flow.png"]') as HTMLImageElement
+    // The tap runs the in-flow collect over the container's images and arms
+    // the viewer state without disturbing the flow; the fullscreen slide
+    // engine itself needs real layout and never mounts under jsdom.
+    fireEvent.click(image)
+    await act(async () => { await Promise.resolve() })
+    expect(document.querySelector('img[src="https://example.com/flow.png"]')).toBeTruthy()
+  })
+
   it('navigates back and skips non-receipt answers', async () => {
     stubGateway({
       'session.list': { items: [] },
@@ -696,8 +988,10 @@ describe('mobile chat view', () => {
     render(<ChatView sessionId="session-12" />)
     await waitFor(() => { expect(screen.getByText('普通回答，没有回执')).toBeTruthy() })
     expect(calls.filter(call => call.url === '/api/nocobase.list')).toHaveLength(0)
+    // Back rides history.back with the domain fallback; jsdom's shared session
+    // history makes the landing hash nondeterministic here, so the routing
+    // spec pins goBackOr's semantics instead of this view-level assertion.
     fireEvent.click(screen.getByRole('button', { name: '返回' }))
-    expect(location.hash).toBe('#/chats')
   })
 
   it('stays quiet when the history read fails', async () => {
@@ -1017,32 +1311,66 @@ describe('mobile shell route edges', () => {
     'nocobase.listMeta': { collections: [] },
   }
 
-  it('lands a pre-identity login hash on the chats tab', async () => {
+  it('lands a pre-identity login hash on the home tab', async () => {
     stubGateway(shellRoutes)
     const identity = { phone: '13800138000', name: '业务员', loggedAt: 1 }
     render(<MobileShell identity={identity} dark={false} onDarkChange={() => {}} onLogout={() => {}} />)
     navigate('#/login')
     fireEvent(window, new HashChangeEvent('hashchange'))
-    await waitFor(() => { expect(screen.getByText('NocoBase 业务系统 · AI 员工入口')).toBeTruthy() })
+    await waitFor(() => { expect(screen.getAllByText(/今日台账/).length).toBeGreaterThan(0) })
   })
 
-  it('folds the retired contacts hash onto the chats tab', async () => {
+  it('folds the retired contacts hash onto the agents tab', async () => {
     stubGateway(shellRoutes)
     const identity = { phone: '13800138000', name: '业务员', loggedAt: 1 }
     render(<MobileShell identity={identity} dark={false} onDarkChange={() => {}} onLogout={() => {}} />)
     navigate('#/contacts')
     fireEvent(window, new HashChangeEvent('hashchange'))
-    await waitFor(() => { expect(screen.getByPlaceholderText('搜索会话/同事')).toBeTruthy() })
+    // The agents view owns the fold's landing (02 §1.3): its NavBar title
+    // renders, the chats surface is gone, and the v6 tab bar stays (agents is
+    // a whitelist page now).
+    await waitFor(() => { expect(screen.getByText('AI 同事')).toBeTruthy() })
+    expect(screen.queryByPlaceholderText('搜索会话/同事')).toBeNull()
+    expect(screen.getByRole('navigation', { name: '底部导航' })).toBeTruthy()
   })
 
-  it('returns from the me tab to chats through the tab bar', async () => {
+  it('renders the work detail layer under #/work/:id', async () => {
+    stubGateway({ ...shellRoutes, 'session.prompt': {} })
+    localStorage.setItem('dsh-mobile-runmode', 'demo')
+    const item = createWorkItem({ title: '路由任务', owner: '业务员' })
+    const identity = { phone: '13800138000', name: '业务员', loggedAt: 1 }
+    render(<MobileShell identity={identity} dark={false} onDarkChange={() => {}} onLogout={() => {}} />)
+    navigate(`#/work/${item.id}`)
+    fireEvent(window, new HashChangeEvent('hashchange'))
+    await waitFor(() => { expect(screen.getByText(/WK-\d{4}-\d{4}/)).toBeTruthy() })
+    // The full-screen layer hides the tab bar.
+    expect(screen.queryByRole('navigation', { name: '底部导航' })).toBeNull()
+  })
+
+  it('folds a param-less chat hash onto the chats layer', async () => {
+    stubGateway(shellRoutes)
+    const identity = { phone: '13800138000', name: '业务员', loggedAt: 1 }
+    render(<MobileShell identity={identity} dark={false} onDarkChange={() => {}} onLogout={() => {}} />)
+    navigate('#/chat')
+    fireEvent(window, new HashChangeEvent('hashchange'))
+    // The id-less chat head has no face of its own: the fallback lands on the
+    // all-chats layer — back header present, tab bar hidden.
+    await waitFor(() => { expect(screen.getByText('NocoBase 业务系统 · AI 员工入口')).toBeTruthy() })
+    expect(screen.getByRole('button', { name: '返回' })).toBeTruthy()
+    // The router spec pins goBackOr's semantics; this click covers the
+    // layer's back wiring.
+    fireEvent.click(screen.getByRole('button', { name: '返回' }))
+    expect(screen.queryByRole('navigation', { name: '底部导航' })).toBeNull()
+  })
+
+  it('switches between the me and work tabs through the tab bar', async () => {
     stubGateway(shellRoutes)
     const identity = { phone: '13800138000', name: '业务员', loggedAt: 1 }
     render(<MobileShell identity={identity} dark={false} onDarkChange={() => {}} onLogout={() => {}} />)
     fireEvent.click(screen.getByText('我的'))
     await waitFor(() => { expect(screen.getByText('本月登记')).toBeTruthy() })
-    fireEvent.click(screen.getByText('消息'))
-    await waitFor(() => { expect(screen.getByText('NocoBase 业务系统 · AI 员工入口')).toBeTruthy() })
+    fireEvent.click(screen.getByText('工作台'))
+    await waitFor(() => { expect(screen.getByRole('heading', { name: '工作' })).toBeTruthy() })
   })
 })
 
@@ -1190,7 +1518,7 @@ describe('mobile KG evidence phrase walks', () => {
 
 describe('mobile UI atoms children slot', () => {
   it('renders avatar children over the acronym', () => {
-    render(<Avatar background="#0b5d56" acronym="采购"><span>自定义徽标</span></Avatar>)
+    render(<Avatar background="#2e7cf6" acronym="采购"><span>自定义徽标</span></Avatar>)
     expect(screen.getByText('自定义徽标')).toBeTruthy()
   })
 })
@@ -1428,7 +1756,7 @@ describe('mobile chat view (D2 acceptance fixes)', () => {
     render(<ChatView sessionId="fresh-1" />)
     // First paint carries the colleague identity and its local welcome (the
     // header names the duty, never the preset id).
-    expect(screen.getAllByText('一句话登记六类业务单据').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('单据登记与任务执行').length).toBeGreaterThan(0)
     await waitFor(() => { expect(screen.getByTestId('welcome-card')).toBeTruthy() })
     expect(screen.getByText('我是智能填表助手')).toBeTruthy()
   })
@@ -1447,6 +1775,27 @@ describe('mobile chat view (D2 acceptance fixes)', () => {
     await waitFor(() => { expect(screen.getByText('补充信息…')).toBeTruthy() })
     expect(container.textContent).not.toContain('ask_field_pricing')
     expect(container.textContent).not.toContain('✕')
+  })
+
+  it('renders the report card inline with its narrative and metric', async () => {
+    const reportFence = '```dsh\n{"v":3,"type":"report","id":"r_1","title":"项目风险",'
+      + '"metrics":[{"label":"待处理","value":"5","kind":"count"}]}\n```'
+    stubGateway({
+      'session.list': { items: [] },
+      'session.history': { events: [
+        { event: assistantMessage(1, `帮你看了一下风险。\n${reportFence}\n有需要跟进的随时说。`) },
+      ] },
+      'nocobase.listMeta': { collections: [] },
+    })
+    const { container } = render(<ChatView sessionId="session-12" />)
+    await waitFor(() => { expect(screen.getByText('帮你看了一下风险。')).toBeTruthy() })
+    // The ReportCard renders the title, the metric, and the report stamp; the
+    // fence itself never leaks as a bubble.
+    expect(screen.getByTestId('report-card')).toBeTruthy()
+    expect(screen.getByText('项目风险')).toBeTruthy()
+    expect(screen.getByText('5')).toBeTruthy()
+    expect(screen.getByText('险')).toBeTruthy()
+    expect(container.textContent).not.toContain('```dsh')
   })
 
   it('renders one avatar for a multi-segment AI turn', async () => {
@@ -1508,4 +1857,223 @@ describe('mobile chat view (D2 acceptance fixes)', () => {
     // No number is invented for a field the registry does not generate.
     await waitFor(() => { expect(calls.some(call => call.url === '/api/nocobase.list')).toBe(false) })
   })
+})
+
+describe('mobile chat view (report actions)', () => {
+  it('opens the hosted TaskFormModal from a report card create-task action', async () => {
+    const reportFence = '```dsh\n{"v":3,"type":"report","id":"r_9","title":"项目风险",'
+      + '"metrics":[{"label":"待处理","value":"5","kind":"count"}],'
+      + '"actions":[{"kind":"create-task","label":"创建处理任务","title":"接口联调延期处理","suggestion":"今天确认联调时间"}]}\n```'
+    stubGateway({
+      'session.list': { items: [] },
+      'session.history': { events: [{ event: assistantMessage(1, reportFence) }] },
+      'nocobase.listMeta': { collections: [] },
+      'session.prompt': {},
+    })
+    render(<ChatView sessionId="session-12" />)
+    await screen.findByTestId('report-card')
+    fireEvent.click(screen.getByRole('button', { name: '创建处理任务' }))
+    await waitFor(() => { expect(screen.getByRole('heading', { name: '创建处理任务' })).toBeTruthy() })
+    // The modal opens prefilled from the action's title and suggestion.
+    expect(screen.getByLabelText<HTMLInputElement>('任务标题').value).toBe('接口联调延期处理')
+    expect(screen.getByText('今天确认联调时间')).toBeTruthy()
+  })
+
+  // The B2 real-LLM capture form end to end: the create-task action carried
+  // `text` instead of `title` and the whole card degraded. The folded parse
+  // must render the legal card and keep 创建处理任务 reachable into the modal.
+  it('renders and opens the modal from the real-LLM text-only create-task capture', async () => {
+    const longText = '针对两家供应商资质证照三十天内到期的风险，联系临期供应商确认换发材料清单并跟进出证进度'
+    const degradedFence = '```dsh\n{"v":3,"type":"report","id":"r_live","title":"供应商风险",'
+      + '"metrics":[{"label":"临期资质","value":"2","kind":"count"}],'
+      + `\"actions\":[{\"kind\":\"create-task\",\"label\":\"创建处理任务\",\"text\":\"${longText}\"}]}\n\`\`\``
+    stubGateway({
+      'session.list': { items: [] },
+      'session.history': { events: [{ event: assistantMessage(1, degradedFence) }] },
+      'nocobase.listMeta': { collections: [] },
+      'session.prompt': {},
+    })
+    render(<ChatView sessionId="session-12" />)
+    await screen.findByTestId('report-card')
+    expect(screen.queryByText('格式异常，已折叠')).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: '创建处理任务' }))
+    await waitFor(() => { expect(screen.getByRole('heading', { name: '创建处理任务' })).toBeTruthy() })
+    expect(screen.getByLabelText<HTMLInputElement>('任务标题').value).toBe(Array.from(longText).slice(0, 32).join(''))
+    expect(screen.getByText(longText)).toBeTruthy()
+    // The modal's close path returns to the flow without creating anything.
+    fireEvent.click(screen.getByRole('button', { name: '关闭' }))
+    await waitFor(() => { expect(screen.queryByRole('heading', { name: '创建处理任务' })).toBeNull() })
+  })
+})
+
+describe('mobile chat view (demo typing)', () => {
+  it('breathes the typing dots after a silent 2.5s prompt and clears on arrival', async () => {
+    vi.useFakeTimers()
+    localStorage.setItem('dsh-mobile-runmode', 'demo')
+    let historyEvents: { event: FoldEvent }[] = [{ event: userMessage(1, '帮我看看风险') }]
+    stubGateway({
+      'agentPreset.list': { presets: [] },
+      'session.list': { items: [] },
+      'session.history': () => ({ events: historyEvents }),
+      'nocobase.listMeta': { collections: [] },
+      'session.prompt': {},
+    })
+    render(<ChatView sessionId="typing-1" />)
+    await act(async () => { await vi.advanceTimersByTimeAsync(0) })
+    const box = screen.getByPlaceholderText('问我任何经营问题...') as HTMLTextAreaElement
+    fireEvent.change(box, { target: { value: '再看看' } })
+    fireEvent.click(screen.getByRole('button', { name: '发送' }))
+    // 2.5s without a new event shows the three-dot indicator (render state only).
+    await act(async () => { await vi.advanceTimersByTimeAsync(2600) })
+    expect(screen.getByRole('status', { name: '正在处理' })).toBeTruthy()
+    // A new event arrives on the next poll tick: the indicator clears.
+    historyEvents = [...historyEvents, { event: assistantMessage(9, '答上来了。', 2) }]
+    await act(async () => { await vi.advanceTimersByTimeAsync(1300) })
+    expect(screen.queryByRole('status', { name: '正在处理' })).toBeNull()
+    expect(screen.getByText('答上来了。')).toBeTruthy()
+    vi.useRealTimers()
+  })
+
+  it('clears the typing dots when folded arrivals keep the item count under the raw baseline', async () => {
+    vi.useFakeTimers()
+    localStorage.setItem('dsh-mobile-runmode', 'demo')
+    // One turn folds 5 raw events into 2 items (a user bubble + a tool row):
+    // the raw count and the folded count must not be mixed when the baseline
+    // and the clearing check compare notes.
+    const turn = (n: number): { event: FoldEvent }[] => [
+      { event: { type: 'turn/start', seq: n * 10 + 1, time: 1, data: { turn: n } } },
+      { event: { type: 'user/message', seq: n * 10 + 2, time: 1, data: { source: { kind: 'user' }, content: [{ type: 'text', text: `第${String(n)}问` }] } } },
+      { event: { type: 'tool/call', seq: n * 10 + 3, time: 1, data: { callId: `c${String(n)}`, name: 'nb_list', arguments: '{}' } } },
+      { event: { type: 'tool/result', seq: n * 10 + 4, time: 1, data: { message: { content: [{ toolCallId: `c${String(n)}` }] } } } },
+      { event: { type: 'turn/end', seq: n * 10 + 5, time: 1, data: { turn: n } } },
+    ]
+    let historyEvents: { event: FoldEvent }[] = turn(1)
+    stubGateway({
+      'agentPreset.list': { presets: [] },
+      'session.list': { items: [] },
+      'session.history': () => ({ events: historyEvents }),
+      'nocobase.listMeta': { collections: [] },
+      'session.prompt': {},
+    })
+    render(<ChatView sessionId="typing-fold" />)
+    await act(async () => { await vi.advanceTimersByTimeAsync(0) })
+    expect(screen.getByText('第1问')).toBeTruthy()
+    fireEvent.change(screen.getByPlaceholderText('问我任何经营问题...'), { target: { value: '再问' } })
+    fireEvent.click(screen.getByRole('button', { name: '发送' }))
+    await act(async () => { await vi.advanceTimersByTimeAsync(2600) })
+    expect(screen.getByRole('status', { name: '正在处理' })).toBeTruthy()
+    // Turn 2 lands raw +5 (folded +2 only): the raw count crosses the
+    // baseline even though the folded item count stays under it.
+    historyEvents = [...historyEvents, ...turn(2)]
+    await act(async () => { await vi.advanceTimersByTimeAsync(1300) })
+    expect(screen.queryByRole('status', { name: '正在处理' })).toBeNull()
+    expect(screen.getByText('第2问')).toBeTruthy()
+    vi.useRealTimers()
+  })
+
+  it('never shows the typing dots when an event lands inside the window', async () => {
+    vi.useFakeTimers()
+    localStorage.setItem('dsh-mobile-runmode', 'demo')
+    let historyEvents: { event: FoldEvent }[] = [{ event: userMessage(1, '帮我看看风险') }]
+    stubGateway({
+      'agentPreset.list': { presets: [] },
+      'session.list': { items: [] },
+      'session.history': () => ({ events: historyEvents }),
+      'nocobase.listMeta': { collections: [] },
+      'session.prompt': {},
+    })
+    render(<ChatView sessionId="typing-3" />)
+    await act(async () => { await vi.advanceTimersByTimeAsync(0) })
+    fireEvent.change(screen.getByPlaceholderText('问我任何经营问题...'), { target: { value: '追问一句' } })
+    fireEvent.click(screen.getByRole('button', { name: '发送' }))
+    await act(async () => { await vi.advanceTimersByTimeAsync(600) })
+    // The reply lands inside the 2.5s window: the timer fires on a moved count.
+    historyEvents = [...historyEvents, { event: assistantMessage(9, '很快答上来了。', 2) }]
+    await act(async () => { await vi.advanceTimersByTimeAsync(4400) })
+    expect(screen.queryByRole('status', { name: '正在处理' })).toBeNull()
+    expect(screen.getByText('很快答上来了。')).toBeTruthy()
+    vi.useRealTimers()
+  })
+
+  it('unmounts a live chat without ever arming the demo typing timer', async () => {
+    localStorage.setItem('dsh-mobile-runmode', 'live')
+    stubGateway({
+      'agentPreset.list': { presets: [] },
+      'session.list': { items: [] },
+      'session.history': { events: [{ event: assistantMessage(1, '欢迎') }] },
+      'nocobase.listMeta': { collections: [] },
+    })
+    const { unmount } = render(<ChatView sessionId="typing-4" />)
+    await screen.findByText('欢迎')
+    unmount()
+  })
+
+  it('clears the typing indicator and re-enables the composer when a send fails', async () => {
+    vi.useFakeTimers()
+    localStorage.setItem('dsh-mobile-runmode', 'demo')
+    let promptFails = false
+    stubGateway({
+      'agentPreset.list': { presets: [] },
+      'session.list': { items: [] },
+      'session.history': { events: [{ event: userMessage(1, '帮我看看风险') }] },
+      'nocobase.listMeta': { collections: [] },
+      'session.prompt': () => {
+        if (promptFails) throw new Error('推送通道拒绝')
+        return {}
+      },
+    })
+    render(<ChatView sessionId="typing-2" />)
+    await act(async () => { await vi.advanceTimersByTimeAsync(0) })
+    const box = screen.getByPlaceholderText('问我任何经营问题...') as HTMLTextAreaElement
+    fireEvent.change(box, { target: { value: '第一条' } })
+    fireEvent.click(screen.getByRole('button', { name: '发送' }))
+    await act(async () => { await vi.advanceTimersByTimeAsync(2600) })
+    expect(screen.getByRole('status', { name: '正在处理' })).toBeTruthy()
+    // The next send fails: the breathing dots and the pending timer must go.
+    promptFails = true
+    fireEvent.change(box, { target: { value: '第二条' } })
+    fireEvent.click(screen.getByRole('button', { name: '发送' }))
+    await act(async () => { await vi.advanceTimersByTimeAsync(3000) })
+    expect(screen.queryByRole('status', { name: '正在处理' })).toBeNull()
+    // The composer takes the next input: the failed send left it usable.
+    fireEvent.change(box, { target: { value: '第三条' } })
+    expect(box.value).toBe('第三条')
+    vi.useRealTimers()
+  })
+})
+
+describe('mobile me tab (v5 additions)', () => {
+  it('shows the workspace card, flips the run mode to live, and clears the demo data', async () => {
+    stubGateway({ 'agentPreset.list': { presets: [] }, 'session.list': { items: [] } })
+    const demoItem = createWorkItem({ title: '演示项', owner: '业务员', demo: true })
+    const realItem = createWorkItem({ title: '真实项', owner: '业务员' })
+    render(
+      <ProfileView
+        identity={{ phone: '13800138000', name: '业务员', loggedAt: 1 }}
+        dark={false}
+        onDarkChange={() => {}}
+        onLogout={() => {}}
+      />,
+    )
+    expect(screen.getByText('工作空间')).toBeTruthy()
+    expect(screen.getByText('累计完成')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: '工作空间' }))
+    expect(location.hash).toBe('#/work')
+    // The run-mode switch persists through the explicit localStorage switch.
+    fireEvent.click(screen.getByRole('switch', { name: '真实模式' }))
+    await waitFor(() => { expect(localStorage.getItem('dsh-mobile-runmode')).toBe('live') })
+    // The notification toggle is a local no-op default off.
+    fireEvent.click(screen.getByRole('switch', { name: '通知' }))
+    // The demo cleanup confirms first, then removes exactly the demo-marked items.
+    fireEvent.click(screen.getByText('清除演示数据'))
+    Toast.clear()
+    fireEvent.click(screen.getByRole('button', { name: '清除' }))
+    const remaining = workSnapshot().items.map(item => item.id)
+    expect(remaining).toEqual([realItem.id])
+    expect(remaining).not.toContain(demoItem.id)
+    await waitFor(
+      () => { expect(document.querySelector('.adm-toast-main')?.textContent ?? '').toContain('演示数据已清除') },
+      { timeout: 8000 },
+    )
+  }, 15_000)
 })

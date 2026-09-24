@@ -1,0 +1,963 @@
+/* The work domain's shared stylesheet (03 §6.2/§6.3/§6.5): the work stamp's
+   status modifiers, the four-status work cards with their per-status action
+   row, the detail page's ticket head / context card / binding-line timeline /
+   result card / bottom action area, and the task-form bottom sheet. Every
+   color rides the --dshm-* tokens (the work statuses only through the
+   --dshm-work-* four). */
+
+/* ---- Work stamp (03 §5) ---- */
+
+.stampSm {
+  --stamp-size: var(--dshm-stamp-sm);
+  --stamp-font: 10px;
+}
+
+.stamp_todo {
+  border-color: var(--dshm-work-todo);
+  color: var(--dshm-work-todo);
+}
+
+.stamp_doing {
+  border-color: var(--dshm-work-doing);
+  color: var(--dshm-work-doing);
+}
+
+.stamp_review {
+  border-color: var(--dshm-work-review);
+  color: var(--dshm-work-review);
+}
+
+.stamp_done {
+  border-color: var(--dshm-work-done);
+  background: var(--dshm-work-done);
+  color: var(--dshm-on-primary);
+  /* The done seal comes down oversized and askew, same as the phase stamp. */
+  animation: work-stamp-in 200ms var(--dshm-ease-stamp) both;
+}
+
+@keyframes work-stamp-in {
+  from {
+    transform: scale(1.25) rotate(-8deg);
+  }
+  to {
+    transform: scale(1) rotate(-3deg);
+  }
+}
+
+/* The 8px status dots (TasksView rows, field lines — 03 §5.3). */
+.dot_todo,
+.dot_doing,
+.dot_review,
+.dot_done {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.dot_todo {
+  background: var(--dshm-work-todo);
+}
+
+.dot_doing {
+  background: var(--dshm-work-doing);
+}
+
+.dot_review {
+  background: var(--dshm-work-review);
+}
+
+.dot_done {
+  background: var(--dshm-work-done);
+}
+
+/* ---- Work list page (03 §6.2) ---- */
+
+.workPage {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--dshm-background);
+}
+
+.workHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 16px;
+  min-height: 52px;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--dshm-card);
+  border-bottom: 1px solid var(--dshm-border);
+  flex: none;
+}
+
+.workTitle {
+  margin: 0;
+  font-size: 17px;
+  line-height: 24px;
+  font-weight: 600;
+  color: var(--dshm-foreground);
+}
+
+.workEntries {
+  display: flex;
+  gap: 8px;
+}
+
+/* ---- Tool grid (v6 page-tools): the roster presets as 2-col entry cards. ---- */
+
+.toolsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  flex: none;
+  padding: 12px 12px 2px;
+}
+
+/* The design's .tool-card: the 42px icon block over name/desc/去聊聊. */
+.toolCard {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 16px 14px;
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-border);
+  border-radius: var(--dshm-radius-lg);
+  text-align: left;
+  transition: transform 120ms ease-out;
+}
+
+.toolCard:active {
+  transform: scale(0.97);
+}
+
+.toolCard:disabled {
+  opacity: 0.5;
+}
+
+.toolIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  color: var(--dshm-on-primary);
+}
+
+.toolName {
+  font-size: 15px;
+  line-height: 21px;
+  font-weight: 650;
+  color: var(--dshm-foreground);
+}
+
+.toolDesc {
+  font-size: 12.5px;
+  line-height: 1.45;
+  min-height: 34px;
+  color: var(--dshm-muted-foreground);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.toolGo {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--dshm-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toolCard {
+    transition: none;
+  }
+}
+
+.entryLink {
+  height: var(--dshm-touch-sm);
+  padding: 0 14px;
+  font-size: 12px;
+  line-height: 34px;
+  border: 1px solid var(--dshm-border);
+  border-radius: 999px;
+  background: var(--dshm-card);
+  color: var(--dshm-foreground);
+}
+
+.statusTabs {
+  --active-line-height: 0;
+  --active-line-color: transparent;
+  --title-font-size: 12px;
+  --adm-color-primary: var(--dshm-primary);
+  padding: 0 12px;
+  flex: none;
+}
+
+.workList {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 12px calc(16px + env(safe-area-inset-bottom));
+}
+
+/* One work card: stamp head, ledger fields, per-status action row. */
+.workCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-border);
+  border-radius: var(--dshm-radius-lg);
+  box-shadow: var(--dshm-shadow-card);
+  text-align: left;
+}
+
+.cardHeadRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cardHeadButton {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+.cardTitle {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 500;
+  color: var(--dshm-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cardMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dshm-muted-foreground);
+}
+
+.cardDemoTag {
+  font-size: 10px;
+  line-height: 14px;
+  padding: 0 6px;
+  border: 1px solid var(--dshm-border);
+  border-radius: 999px;
+  color: var(--dshm-muted-foreground);
+  flex: none;
+}
+
+/* The source-chat back-link badge (10px capsule on primary-10). */
+.sourceBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 20px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 999px;
+  background: var(--dshm-primary-10);
+  color: var(--dshm-on-soft);
+  font-size: 10px;
+  line-height: 18px;
+}
+
+.cardActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--dshm-touch-sm);
+}
+
+.actionPrimary {
+  height: var(--dshm-touch-sm);
+  padding: 0 16px;
+  border: none;
+  border-radius: var(--dshm-radius);
+  background: var(--dshm-primary);
+  color: var(--dshm-on-primary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.actionPrimary:active {
+  background: var(--dshm-primary-press);
+}
+
+.actionPrimary:disabled {
+  opacity: 0.5;
+}
+
+.actionSecondary {
+  height: var(--dshm-touch-sm);
+  padding: 0 14px;
+  border: 1px solid var(--dshm-border);
+  border-radius: var(--dshm-radius);
+  background: transparent;
+  color: var(--dshm-foreground);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.actionLink {
+  height: var(--dshm-touch-sm);
+  padding: 0 10px;
+  border: none;
+  background: none;
+  color: var(--dshm-primary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* The doing row's breathing marker text. */
+.doingNote {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--dshm-work-doing);
+}
+
+.doneSummary {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dshm-muted-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.emptyWrap {
+  flex: none;
+  padding-top: 40px;
+}
+
+/* ---- Work detail page (03 §6.3) ---- */
+
+.detailPage {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--dshm-background);
+}
+
+.demoBanner {
+  flex: none;
+  padding: 6px 16px;
+  font-size: 11px;
+  line-height: 18px;
+  color: var(--dshm-on-soft);
+  background: var(--dshm-primary-10);
+  text-align: center;
+}
+
+.detailBody {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 12px;
+}
+
+/* Ticket head: work number left, 44px stamp right (03 §6.3). */
+.ticketHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-border);
+  border-radius: var(--dshm-radius-lg);
+  box-shadow: var(--dshm-shadow-card);
+}
+
+.ticketMain {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ticketNo {
+  font-family: var(--dshm-font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--dshm-muted-foreground);
+}
+
+.ticketStatus {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dshm-muted-foreground);
+}
+
+.ticketStatusValue {
+  color: var(--dshm-foreground);
+  font-weight: 500;
+}
+
+.dueSoon {
+  color: var(--dshm-warning);
+}
+
+/* The section card shell every detail block rides. */
+.detailCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-border);
+  border-radius: var(--dshm-radius-lg);
+  box-shadow: var(--dshm-shadow-card);
+}
+
+.tierHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 2px 0;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--dshm-muted-foreground);
+}
+
+.tierHead::before,
+.tierHead::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--dshm-stroke-soft);
+}
+
+/* The suggestion quote: muted fill, ink-teal left bar, two-line clip. */
+.quote {
+  padding: 8px 10px;
+  background: var(--dshm-muted);
+  border-left: 3px solid var(--dshm-primary);
+  border-radius: var(--dshm-radius);
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--dshm-foreground);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+
+.quoteEmpty {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dshm-muted-foreground);
+}
+
+.sourceLink {
+  align-self: flex-start;
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--dshm-primary);
+}
+
+/* The execution progress (v6, the design's .progress-box): the gradient
+    fill over the hairline track, done/total in the tabular digits. */
+.progressBox {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 11px 13px;
+  background: var(--dshm-muted);
+  border: 1px solid var(--dshm-border);
+  border-radius: 13px;
+}
+
+.progressLabel {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: 12.8px;
+  font-weight: 600;
+  line-height: 18px;
+  color: var(--dshm-foreground);
+}
+
+.progressNum {
+  font-style: normal;
+  font-family: var(--dshm-font-num);
+  font-variant-numeric: tabular-nums;
+  color: var(--dshm-muted-foreground);
+}
+
+.progressTrack {
+  display: block;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--dshm-border);
+  overflow: hidden;
+}
+
+.progressFill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--dshm-user-grad);
+  transition: width 800ms cubic-bezier(0.22, 0.9, 0.35, 1);
+}
+
+/* The execution timeline (v6, the design's .tl): the 56px right-aligned
+    time column, the 10px halo dot over the 2px spine. */
+.timeline {
+  display: flex;
+  flex-direction: column;
+}
+
+.timelineEmpty {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dshm-muted-foreground);
+}
+
+.stepRow {
+  display: grid;
+  grid-template-columns: 56px 22px 1fr;
+  column-gap: 2px;
+  padding-bottom: 14px;
+}
+
+.stepRow:last-child {
+  padding-bottom: 2px;
+}
+
+.stepTime {
+  text-align: right;
+  padding-top: 2px;
+  font-size: 12.3px;
+  line-height: 18px;
+  color: var(--dshm-muted-foreground);
+  font-family: var(--dshm-font-num);
+  font-variant-numeric: tabular-nums;
+}
+
+.stepAxis {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* The 2px spine; the last row drops it. */
+.stepLine {
+  flex: 1;
+  width: 2px;
+  margin-top: 3px;
+  background: var(--dshm-border);
+}
+
+.stepRow:last-child .stepLine {
+  display: none;
+}
+
+.stepDot {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-sizing: border-box;
+  margin-top: 3px;
+}
+
+/* Each state's dot carries its soft halo (the design's 0 0 0 3px rim). */
+.stepDone {
+  background: var(--dshm-success);
+  box-shadow: 0 0 0 3px var(--dshm-success-10);
+}
+
+.stepRunning {
+  border: 2px solid var(--dshm-primary);
+  background: var(--dshm-card);
+  box-shadow: 0 0 0 3px var(--dshm-primary-10);
+}
+
+.stepRunning::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  background: var(--dshm-primary);
+  animation: work-step-breathe 1.2s ease-in-out infinite;
+}
+
+@keyframes work-step-breathe {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.stepError {
+  border: 2px solid var(--dshm-destructive);
+  background: var(--dshm-destructive-10);
+  box-shadow: 0 0 0 3px var(--dshm-destructive-10);
+}
+
+.stepFuture {
+  /* Future/undecided point: the slate outline (never the 1.35:1 rim, 03 §7.2-4). */
+  border: 2px solid var(--dshm-muted-foreground);
+  background: var(--dshm-card);
+}
+
+.stepMain {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+  animation: work-step-in 180ms ease-out;
+}
+
+@keyframes work-step-in {
+  from {
+    transform: translateY(6px);
+    opacity: 0;
+  }
+}
+
+.stepLabel {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  color: var(--dshm-foreground);
+}
+
+.stepDetail {
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--dshm-muted-foreground);
+}
+
+/* The result card: receipt wash + pass-green rim + 20px check seal. */
+.resultCard {
+  background: var(--dshm-receipt-wash);
+  border-color: var(--dshm-success-rim);
+}
+
+.resultSeal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--dshm-success);
+  color: var(--dshm-on-primary);
+  flex: none;
+}
+
+.resultTitle {
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 600;
+  color: var(--dshm-foreground);
+}
+
+.resultSummary {
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--dshm-foreground);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.resultMeta {
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--dshm-muted-foreground);
+}
+
+.resultLink {
+  align-self: flex-start;
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--dshm-primary);
+}
+
+/* The bottom action area: card face, rim top, buttons by status. */
+.detailActions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+  background: var(--dshm-card);
+  border-top: 1px solid var(--dshm-border);
+}
+
+/* ---- Task form bottom sheet (03 §6.5) ---- */
+
+.sheetBody {
+  border-radius: var(--dshm-radius-lg) var(--dshm-radius-lg) 0 0;
+  background: var(--dshm-card);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 16px 14px;
+}
+
+.sheetHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.sheetTitle {
+  margin: 0;
+  font-size: 17px;
+  line-height: 24px;
+  font-weight: 600;
+  color: var(--dshm-foreground);
+}
+
+.sheetClose {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--dshm-touch-sm);
+  height: var(--dshm-touch-sm);
+  color: var(--dshm-muted-foreground);
+}
+
+/* The source summary strip (primary-10 fill). */
+.sourceStrip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  border-radius: var(--dshm-radius);
+  background: var(--dshm-primary-10);
+  color: var(--dshm-on-soft);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.fieldLabel {
+  margin: 10px 0 4px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  color: var(--dshm-muted-foreground);
+}
+
+.fieldError {
+  margin: 2px 0 0;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--dshm-destructive);
+}
+
+.fieldInput {
+  width: 100%;
+  height: 44px;
+  padding: 0 12px;
+  font-size: 14px;
+  line-height: 22px;
+  border: 1px solid var(--dshm-border);
+  border-radius: var(--dshm-radius);
+  background: var(--dshm-card);
+  color: var(--dshm-foreground);
+  box-sizing: border-box;
+}
+
+.fieldInput:focus {
+  outline: none;
+  border: 2px solid var(--dshm-primary);
+  padding: 0 11px;
+}
+
+.fieldInvalid {
+  border-color: var(--dshm-destructive);
+}
+
+.pickerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 2px;
+  font-size: 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--dshm-stroke-soft);
+}
+
+.pickerLabel {
+  font-size: 14px;
+  color: var(--dshm-foreground);
+}
+
+.pickerValue {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--dshm-primary);
+}
+
+/* The read-only AI suggestion block (no override entry — advice reads). */
+.suggestionBlock {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: var(--dshm-radius);
+  background: var(--dshm-muted);
+}
+
+.suggestionLabel {
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--dshm-muted-foreground);
+}
+
+.suggestionText {
+  margin-top: 2px;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--dshm-foreground);
+}
+
+/* The immediate-run switch row. */
+.switchRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+  min-height: 40px;
+}
+
+.switchTexts {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.switchTitle {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  color: var(--dshm-foreground);
+}
+
+.switchHint {
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--dshm-muted-foreground);
+}
+
+.sheetActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.sheetCancel {
+  flex: 1;
+  height: 44px;
+  border: 1px solid var(--dshm-border);
+  border-radius: var(--dshm-radius);
+  background: transparent;
+  color: var(--dshm-foreground);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.sheetSubmit {
+  flex: 1.4;
+  height: 44px;
+  border: none;
+  border-radius: var(--dshm-radius);
+  background: var(--dshm-primary);
+  color: var(--dshm-on-primary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.sheetSubmit:disabled {
+  opacity: 0.5;
+}
+
+.sheetSubmit:active {
+  background: var(--dshm-primary-press);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stamp_done {
+    animation: none;
+  }
+
+  .stepRunning::after {
+    animation: none;
+    opacity: 0.6;
+  }
+
+  .stepMain {
+    animation: none;
+  }
+}

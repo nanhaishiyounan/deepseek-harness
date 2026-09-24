@@ -1,23 +1,30 @@
 /**
- * The AI-colleague conversation page (v3): the folded flow renders the six
- * item kinds — narrative bubbles (rich-content seam), tool rows, the v3
- * three-tier draft cards with fenced 确认写入/驳回 actions, the ask/field-ask
- * interaction bubbles, action badges, and receipt cards. A session with no
- * business messages shows the local welcome (never a logged message); the
- * composer chips follow the conversation phase. v2-legacy cards keep their
- * two-step review flow. Edits persist to localStorage until the confirm
- * consumes them; card phases replay from the durable log. The page renders as
- * a full-screen layer: no tab bar under it, an antd-mobile NavBar over it.
+ * The AI-colleague conversation page (v6 chat surface): the folded flow
+ * renders the item kinds — narrative bubbles (the rich-content seam with deep
+ * code plates), tool rows, the v3 three-tier draft cards with fenced
+ * 确认写入/驳回 actions, the ask/field-ask interaction bubbles, action badges,
+ * and receipt cards. A session with no business messages shows the local
+ * welcome (never a logged message); the composer rides the v6 input bar — the
+ * + entry over the slide-up quick panel (the colleague's own starters plus
+ * the three placeholder tools), the rounded textarea, and the gradient send
+ * button. v2-legacy cards keep their two-step review flow. Edits persist to
+ * localStorage until the confirm consumes them; card phases replay from the
+ * durable log. The page renders as a full-screen layer: no tab bar under it,
+ * an antd-mobile NavBar over it.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, type JSX } from 'react'
-import { NavBar, SpinLoading, TextArea, Toast, type TextAreaRef } from 'antd-mobile'
-import { Check, ChevronLeft, Plus, Send, Square, X } from 'lucide-react'
+import { SpinLoading, TextArea, Toast, type TextAreaRef } from 'antd-mobile'
+import { BarChart3, CalendarClock, Check, ClipboardCheck, FileText, Mic, Paperclip, PenLine, Plus, Search, Send, Smile, Square, X } from 'lucide-react'
 import type { NocobaseFieldView, SessionSummary } from '@deepseek-ai/dsh-host-apiproxy/api'
 import { Avatar, NoticeCard, RunningRow } from '../ui.tsx'
+import { PageNav } from '../PageNav.tsx'
+import { loadIdentity } from '../auth.ts'
+import { dispatchReportAction } from '../actions.ts'
 import { colleagueColor, colleagueOf, welcomeOf, type ColleagueVisual, type Welcome } from '../colleagues.ts'
 import { foldHistory, type ChatItem } from '../fold.ts'
-import { navigate } from '../router.ts'
+import { goBackOr } from '../router.ts'
+import { currentRunMode } from '../runMode.ts'
 import { rpc } from '../rpc.ts'
 import { useAsync, usePoll } from '../hooks.ts'
 import { cancelSession, listAiEmployees, listSessions, pendingPresetOf, promptSession, readHistory, titleOf } from '../sessionsService.ts'
@@ -35,8 +42,11 @@ import { WelcomeCard } from './WelcomeCard.tsx'
 import { ChoiceBubble } from './ChoiceBubble.tsx'
 import { FieldAskBubble } from './FieldAskBubble.tsx'
 import { ActionBadge } from './ActionBadge.tsx'
+import { ReportCard } from './ReportCard.tsx'
 import { RichContent } from './RichContent.tsx'
 import { NewChatSheet } from './NewChatSheet.tsx'
+import { TaskFormModal, type TaskPrefill } from '../work/TaskFormModal.tsx'
+import type { ReportAction } from '../protocol.ts'
 import css from './chat.module.css'
 
 /** The header's colleague label: the roster name, else the duty tag. */
@@ -44,6 +54,23 @@ function presetLabelOf(preset: string | undefined, rosterRow: { readonly name: s
   if (preset === undefined) return '本地会话'
   return rosterRow?.name ?? visual.duty
 }
+
+/** The quick panel's icon pool: one glyph per command slot (17px brand). */
+const QP_ICONS: readonly JSX.Element[] = [
+  <PenLine key="pen" size={17} strokeWidth={1.8} aria-hidden="true" />,
+  <BarChart3 key="chart" size={17} strokeWidth={1.8} aria-hidden="true" />,
+  <Search key="search" size={17} strokeWidth={1.8} aria-hidden="true" />,
+  <FileText key="file" size={17} strokeWidth={1.8} aria-hidden="true" />,
+  <ClipboardCheck key="clipboard" size={17} strokeWidth={1.8} aria-hidden="true" />,
+  <CalendarClock key="calendar" size={17} strokeWidth={1.8} aria-hidden="true" />,
+]
+
+/** The quick panel's placeholder tools: local toasts, never real lanes. */
+const QP_TOOLS: ReadonlyArray<{ readonly label: string; readonly icon: JSX.Element }> = [
+  { label: '语音', icon: <Mic size={16} strokeWidth={1.8} aria-hidden="true" /> },
+  { label: '文件', icon: <Paperclip size={16} strokeWidth={1.8} aria-hidden="true" /> },
+  { label: '表情', icon: <Smile size={16} strokeWidth={1.8} aria-hidden="true" /> },
+]
 
 /** The conversation page props: the session id from the route. */
 export interface ChatViewProps {
@@ -93,8 +120,22 @@ export function contextChipsOf(
  */
 export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
   const [pollInterval, setPollInterval] = useState(5000)
+  /** The demo run mode (drives the simulated typing indicator, render-only). */
+  const [demoMode, setDemoMode] = useState(false)
+  /** The simulated typing indicator state (never a logged message). */
+  const [typing, setTyping] = useState(false)
+  /** The task-form modal: open flag, the report action's prefill, its anchor seq. */
+  const [taskForm, setTaskForm] = useState<{ open: boolean; prefill: TaskPrefill | undefined; anchor: string | undefined }>({
+    open: false, prefill: undefined, anchor: undefined,
+  })
+  const typingTimer = useRef<number | undefined>(undefined)
+  /** The raw event count at the last prompt (the typing trigger's baseline). */
+  const typingBaseline = useRef(0)
+  /** The newest raw event count (kept fresh every render for the typing timer). */
+  const eventCount = useRef(0)
   const producer = useCallback(() => readHistory(sessionId), [sessionId])
   const history = usePoll(producer, pollInterval, true)
+  eventCount.current = (history.value ?? []).length
   const sessionsPoll = usePoll(listSessions, 8000, true)
   const roster = useAsync(listAiEmployees)
 
@@ -119,11 +160,15 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
   )
   const welcome = useMemo(() => welcomeOf(preset, wireWelcome), [preset, wireWelcome])
   const chips = useMemo(() => contextChipsOf(folded.items, cardStates), [folded.items, cardStates])
+  /** The quick panel's commands: the colleague's own starters (the welcome card's source, capped at six). */
+  const quickCommands = useMemo(() => welcome.starters.slice(0, 6), [welcome])
 
   const meta = useAsync(readCollectionMeta)
   const [draft, setDraft] = useState('')
   const [sending, setSending] = useState(false)
   const [newChatOpen, setNewChatOpen] = useState(false)
+  /** The quick panel's open flag (local view state; a send or route change closes it). */
+  const [panelOpen, setPanelOpen] = useState(false)
   const [error, setError] = useState<string | undefined>(undefined)
   /** Seqs the user locally reopened for editing (rejected → draft). */
   const [reopened, setReopened] = useState<ReadonlySet<number>>(new Set())
@@ -148,14 +193,47 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
       await promptSession(sessionId, trimmed)
       setDraft('')
       setPollInterval(1200)
+      if (demoMode) {
+        // The demo typing window (04 §4.2): 2.5s without a new event shows
+        // the breathing dots; the next event clears them. Render state only.
+        typingBaseline.current = eventCount.current
+        if (typingTimer.current !== undefined) window.clearTimeout(typingTimer.current)
+        typingTimer.current = window.setTimeout(() => {
+          // Still-silent flow breathes; an already-moved count stays quiet.
+          setTyping(eventCount.current === typingBaseline.current)
+        }, 2500)
+      }
     } catch (cause) {
+      // A failed send must not leave the simulated typing dots breathing
+      // forever: retire the pending timer and the indicator, then surface the
+      // error so the composer is clearly usable again.
+      if (typingTimer.current !== undefined) window.clearTimeout(typingTimer.current)
+      setTyping(false)
       // the rpc seam only rejects with Error.
       /* v8 ignore next -- the rpc seam never rejects with a non-Error value. */
       setError(cause instanceof Error ? cause.message : String(cause))
     } finally {
       setSending(false)
     }
-  }, [sessionId, sending])
+  }, [sessionId, sending, demoMode])
+
+  // Resolve the run mode once; clear the typing indicator's timer on unmount.
+  useEffect(() => {
+    let alive = true
+    void currentRunMode().then((mode) => { if (alive && mode === 'demo') setDemoMode(true) })
+    return () => {
+      alive = false
+      if (typingTimer.current !== undefined) window.clearTimeout(typingTimer.current)
+    }
+  }, [])
+
+  // A new event after a prompt retires the simulated typing indicator. The
+  // baseline and this check both count raw events: the fold merges events
+  // into fewer items, so an item-count comparison would almost never clear
+  // the dots.
+  useEffect(() => {
+    if (typing && eventCount.current > typingBaseline.current) setTyping(false)
+  }, [history.value, typing])
 
   // Keep the flow pinned to the newest item while the user is at the bottom.
   useEffect(() => {
@@ -296,21 +374,33 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
   const title = summary === undefined ? colleague.duty : titleOf(summary)
   const showWelcome = history.status === 'ready' && folded.items.length === 0
 
+  /** One report-card action: dispatch through the shared executor; create-task opens the hosted modal. */
+  const onReportAction = useCallback((action: ReportAction, anchorSeq: number) => {
+    void dispatchReportAction(action, {
+      sessionId,
+      onCreateTask: (prefill) => {
+        setTaskForm({ open: true, prefill, anchor: String(anchorSeq) })
+      },
+    })
+  }, [sessionId])
+
   return (
     <div className={css.page}>
-      <NavBar
-        className={css.navbar as string}
-        left={
-          <button
-            type="button"
-            className={css.backButton}
-            aria-label="返回"
-            onClick={() => { navigate('#/chats') }}
-          >
-            <ChevronLeft size={24} aria-hidden="true" />
-          </button>
-        }
-        right={
+      <PageNav
+        title={(
+          <span className={css.headerMain}>
+            <Avatar background={colleagueColor(preset)} acronym={colleague.acronym} size={30} />
+            <span className={css.headerTexts}>
+              <span className={css.headerTitle}>{title}</span>
+              <span className={css.headerHint}>
+                {presetLabelOf(preset, rosterRow, colleague)}
+                {summary?.running === true ? ' · 处理中' : ''}
+              </span>
+            </span>
+          </span>
+        )}
+        onBack={() => { goBackOr('#/chats') }}
+        right={(
           <button
             type="button"
             className={css.headerPlus}
@@ -319,19 +409,8 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
           >
             <Plus size={18} aria-hidden="true" />
           </button>
-        }
-      >
-        <span className={css.headerMain}>
-          <Avatar background={colleagueColor(preset)} acronym={colleague.acronym} size={30} />
-          <span className={css.headerTexts}>
-            <span className={css.headerTitle}>{title}</span>
-            <span className={css.headerHint}>
-              {presetLabelOf(preset, rosterRow, colleague)}
-              {summary?.running === true ? ' · 处理中' : ''}
-            </span>
-          </span>
-        </span>
-      </NavBar>
+        )}
+      />
 
       <div
         className={css.flow}
@@ -341,7 +420,12 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
           stickToBottom.current = flow.scrollHeight - flow.scrollTop - flow.clientHeight < 40
         }}
       >
-        {history.value === undefined && history.error === undefined && <NoticeCard kind="empty" text="会话加载中…" />}
+        {history.value === undefined && history.error === undefined && (
+          <div className={css.loadingRow} role="status">
+            <SpinLoading color="currentColor" style={{ '--size': '16px' }} />
+            <span>会话加载中…</span>
+          </div>
+        )}
         {history.error !== undefined && <NoticeCard kind="error" text={history.error} />}
         {showWelcome && (
           <div className={css.welcomeStage}>
@@ -369,14 +453,63 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
             onRedraft={onRedraft}
             onSend={(text) => { void send(text) }}
             onFreeText={focusComposer}
+            onReportAction={onReportAction}
             localPending={localPending}
           />
         ))}
         {folded.running && <RunningRow text="AI 同事正在处理…" />}
+        {typing && !folded.running && (
+          <div className={css.typingRow} role="status" aria-label="正在处理">
+            <span className={css.typingBubble} aria-hidden="true">
+              <span className={css.typingDot} />
+              <span className={css.typingDot} />
+              <span className={css.typingDot} />
+            </span>
+          </div>
+        )}
         <KgEvidenceSection queries={folded.kgQueries} />
       </div>
 
       <div className={css.composer}>
+        {panelOpen && (
+          <div className={css.quickPanel} role="dialog" aria-label="快捷指令">
+            <p className={css.qpTitle}>快捷指令</p>
+            {quickCommands.length > 0 ? (
+              <div className={css.qpGrid}>
+                {quickCommands.map((command, index) => (
+                  <button
+                    key={command.send}
+                    type="button"
+                    className={css.qpItem}
+                    disabled={sending}
+                    onClick={() => {
+                      setPanelOpen(false)
+                      void send(command.send)
+                    }}
+                  >
+                    {QP_ICONS[index % QP_ICONS.length]}
+                    {command.label}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <p className={css.qpEmpty}>当前同事没有预置指令，直接打字聊聊吧</p>
+            )}
+            <div className={css.qpTools}>
+              {QP_TOOLS.map(tool => (
+                <button
+                  key={tool.label}
+                  type="button"
+                  className={css.qpTool}
+                  onClick={() => { Toast.show({ content: '演示版暂未开放，先用文字试试吧' }) }}
+                >
+                  {tool.icon}
+                  {tool.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         {chips.length > 0 && (
           <div className={css.chipRow}>
             {chips.map(text => (
@@ -393,6 +526,15 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
           </div>
         )}
         <div className={css.inputRow}>
+          <button
+            type="button"
+            className={`${css.plusBtn} ${panelOpen ? css.plusBtnOn : ''}`}
+            aria-label={panelOpen ? '收起快捷面板' : '打开快捷面板'}
+            aria-expanded={panelOpen}
+            onClick={() => { setPanelOpen(open => !open) }}
+          >
+            <Plus size={22} strokeWidth={1.8} aria-hidden="true" />
+          </button>
           <TextArea
             ref={inputRef}
             className={css.input}
@@ -422,13 +564,21 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
                 disabled={draft.trim() === '' || sending}
                 onClick={() => { void send(draft) }}
               >
-                <Send size={15} aria-hidden="true" />
+                <Send size={18} aria-hidden="true" />
               </button>
             )}
         </div>
         {error !== undefined && <ErrorToast error={error} />}
       </div>
       <NewChatSheet visible={newChatOpen} onClose={() => { setNewChatOpen(false) }} />
+      <TaskFormModal
+        visible={taskForm.open}
+        onClose={() => { setTaskForm(current => ({ ...current, open: false })) }}
+        identityName={loadIdentity()?.name ?? '我'}
+        prefill={taskForm.prefill}
+        sourceSessionId={sessionId}
+        sourceAnchor={taskForm.anchor}
+      />
     </div>
   )
 }
@@ -472,6 +622,7 @@ function FlowItem(
     readonly onRedraft: (seq: number) => () => void
     readonly onSend: (text: string) => void
     readonly onFreeText: () => void
+    readonly onReportAction: (action: ReportAction, anchorSeq: number) => void
     readonly localPending: ReadonlyMap<number, Record<string, string>>
   },
 ): JSX.Element | null {
@@ -591,6 +742,16 @@ function FlowItem(
             <summary>结构化消息（格式异常，已折叠）</summary>
             <pre className={css.degradedNoticeBody}>{item.text}</pre>
           </details>,
+        )}
+      </>
+    )
+  }
+  if (item.kind === 'report') {
+    return (
+      <>
+        {separator}
+        {aiRow(
+          <ReportCard payload={item.payload} onAction={(action) => { props.onReportAction(action, item.seq) }} />,
         )}
       </>
     )

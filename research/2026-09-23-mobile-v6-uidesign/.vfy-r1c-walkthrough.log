@@ -1,0 +1,9 @@
+04c dark-theme state=null contrast: {"found":true,"parsed":true,"ratio":5.09,"color":"rgb(29, 95, 214)","bg":"rgb(234, 242, 255)","label":"驳回"}
+shot vfy-r1-04c-ghost-contrast-dark.png
+04c-ghost-contrast-dark: PASS — data-theme=null ratio=5.09 color=rgb(29, 95, 214) on rgb(234, 242, 255)
+06c tab dump: {"names":[{"cls":"[object SVGAnimatedString]","text":""},{"cls":"adm-capsule-tabs _statusTabs_2v0z6_195","text":"待处理 0进行中 1待确认 1已完成 1"},{"cls":"adm-capsule-tabs-header","text":"待处理 0进行中 1待确认 1已完成 1"},{"cls":"adm-capsule-tabs-tab-list","text":"待处理 0进行中 1待确认 1已完成 1"},{"cls":"adm-capsule-tabs-tab-wrapper","text":"待处理 0"},{"cls":"adm-capsule-tabs-tab adm-capsule-tabs-tab-active","text":"待处理 0"},{"cls":"adm-capsule-tabs-tab-wrapper","text":"进行中 1"},{"cls":"adm-capsule-tabs-tab","text":"进行中 1"},{"cls":"adm-capsule-tabs-tab-wrapper","text":"待确认 1"},{"cls":"adm-capsule-tabs-tab","text":"待确认 1"},{"cls":"adm-capsule-tabs-tab-wrapper","text":"已完成 1"},{"cls":"adm-capsule-tabs-tab","text":"已完成 1"},{"cls":"_tabbar_4wyk1_19","text":"消息同事工作台我的"},{"cls":"adm-tab-bar","text":"消息同事工作台我的"}],"bodyAround":["全部","全部","进行","待确认","已完成"]}
+06c-work-four-states: PASS — capsule tab texts = ["待处理 0进行中 1待确认 1已完成 1","待处理 0进行中 1待确认 1已完成 1","待处理 0","待处理 0","进行中 1","进行中 1","待确认 1","待确认 1","已完成 1","已完成 1"]
+shot vfy-r1-06c-work-tabs.png
+08c dark switch located: {"found":true,"checked":false}
+shot vfy-r1-08c-theme-persist-dark.png
+08c-theme-persist: FAIL — real-click switch; data-theme before=null afterReload=null

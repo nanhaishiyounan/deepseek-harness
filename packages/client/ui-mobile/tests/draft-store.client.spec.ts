@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import type { FormDraft } from '../src/client/form-draft.ts'
 import {
   clearDraftEdits, clearPendingReview, loadDraftEdits, markPendingReview, markSessionRead,
-  pendingReviewSessions, readWatermarkOf, saveDraftEdits,
+  pendingReviewSessions, pinSession, pinnedSessions, readWatermarkOf, saveDraftEdits, unpinSession,
 } from '../src/client/draftStore.ts'
 
 const DRAFT: FormDraft = { collection: 'hub_po_orders', title: '采购单', fields: { po_number: 'PO-1', total: '100' } }
@@ -31,6 +31,19 @@ describe('draft edits', () => {
     expect(loadDraftEdits('s2', DRAFT)).toBeUndefined()
     clearDraftEdits('s1', DRAFT)
     expect(loadDraftEdits('s1', DRAFT)).toBeUndefined()
+  })
+
+  it('pins, unpins, and ignores an unpin of an unpinned session', () => {
+    expect(pinnedSessions().size).toBe(0)
+    pinSession('s1')
+    pinSession('s2')
+    expect(pinnedSessions().has('s1')).toBe(true)
+    unpinSession('s1')
+    expect(pinnedSessions().has('s1')).toBe(false)
+    // Unpinning a session that never pinned stays a no-op.
+    unpinSession('never-pinned')
+    expect(pinnedSessions().has('never-pinned')).toBe(false)
+    unpinSession('s2')
   })
 
   it('tolerates corrupted storage', () => {

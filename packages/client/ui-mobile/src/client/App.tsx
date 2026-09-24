@@ -1,10 +1,12 @@
 /**
- * The mobile application tree: identity gate → two-tab shell with the hash
+ * The mobile application tree: identity gate → four-tab shell with the hash
  * router and the persisted theme. Route rendering stays in the shell so every
- * view module stays pure presentation over its own data hooks.
+ * view module stays pure presentation over its own data hooks; the root also
+ * mirrors the theme onto the host body so the 430px phone shell sits on the
+ * right desk color in both tracks.
  */
 
-import { useState, type JSX } from 'react'
+import { useEffect, useState, type JSX } from 'react'
 import { clearIdentity, loadIdentity, type MobileIdentity } from './auth.ts'
 import { LoginView } from './login/LoginView.tsx'
 import { MobileShell } from './shell/MobileShell.tsx'
@@ -17,10 +19,13 @@ function loadTheme(): boolean {
   return localStorage.getItem(THEME_KEY) === 'dark'
 }
 
-/** Root component: login gate plus the two-tab shell. */
+/** Root component: login gate plus the four-tab shell. */
 export function App(): JSX.Element {
   const [identity, setIdentity] = useState<MobileIdentity | undefined>(() => loadIdentity())
   const [dark, setDark] = useState<boolean>(() => loadTheme())
+  useEffect(() => {
+    document.body.dataset.theme = dark ? 'dark' : 'light'
+  }, [dark])
   const applyDark = (next: boolean): void => {
     setDark(next)
     if (next) {
@@ -31,7 +36,7 @@ export function App(): JSX.Element {
   }
   if (identity === undefined) {
     return (
-      <div className="dshm-root" data-theme={dark ? 'dark' : 'light'} style={{ height: '100%' }}>
+      <div className="dshm-root" data-theme={dark ? 'dark' : 'light'}>
         <LoginView
           onLoggedIn={(next) => { setIdentity(next) }}
         />
@@ -39,7 +44,7 @@ export function App(): JSX.Element {
     )
   }
   return (
-    <div className="dshm-root" data-theme={dark ? 'dark' : 'light'} style={{ height: '100%' }}>
+    <div className="dshm-root" data-theme={dark ? 'dark' : 'light'}>
       <MobileShell
         identity={identity}
         dark={dark}

@@ -1,0 +1,8 @@
+walkthrough: full page reload kept the workStore (four capsules + demo cards + walkthrough item intact) — localStorage persistence verified
+verify-08: #/tasks renders 我的/团队 split; team tab carries the demo 示例 tags
+verify-09: #/files renders AI 生成 / 最近文件 / 收藏 sections
+verify-10: #/agents renders the colleague role cards (roster-driven)
+verify-11: #/me renders workspace stats + AI preference (真实模式 switch off = demo) + notifications + demo-data cleanup
+verify-12: home in dark track (data-theme dark via the profile switch)
+verify-13: chat report card on the dark track
+verify-14: PC 移动端预览 tab renders the 390×844 iframe shell over /mobile

@@ -9,7 +9,7 @@
  */
 
 import type { JSX } from 'react'
-import { Check } from 'lucide-react'
+import { Check, Info } from 'lucide-react'
 import type { ChatAsk } from '../fold.ts'
 import { answerTextOf } from '../protocol.ts'
 import { sanitizeBizText } from './rich.ts'
@@ -39,7 +39,10 @@ export function ChoiceBubble({ ask, onSend, onFreeText, disabled }: ChoiceBubble
       data-testid="ask-choice"
       aria-label="选择询问"
     >
-      <p className={css.askQuestion}>{question}</p>
+      <p className={css.askQuestion}>
+        <Info className={css.askMark} size={15} strokeWidth={1.8} aria-hidden="true" />
+        {question}
+      </p>
       {payload.variant === 'cards' && (
         <div className={css.askCards} role="radiogroup" aria-label={question}>
           {payload.options.map((option) => {

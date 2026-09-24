@@ -8,6 +8,7 @@
 
 import { useCallback, useEffect, useState, type JSX } from 'react'
 import { Popup } from 'antd-mobile'
+import { Search, X } from 'lucide-react'
 import type { KgEvidenceQuery } from '../fold.ts'
 import { rpc } from '../rpc.ts'
 import { messageOf } from '../hooks.ts'
@@ -47,7 +48,7 @@ export function KgEvidenceSection({ queries }: KgEvidenceSectionProps): JSX.Elem
   return (
     <>
       <button type="button" className={css.entryRow} aria-label="KG 证据入口" onClick={() => { setOpen(true) }}>
-        <span className={css.entryIcon} aria-hidden="true">🔍</span>
+        <span className={css.entryIcon} aria-hidden="true"><Search size={14} /></span>
         <span className={css.entryText}>依据 · 知识图谱 {String(queries.length)} 条</span>
         <span className={css.entryChevron} aria-hidden="true">›</span>
       </button>
@@ -63,7 +64,9 @@ export function KgEvidenceSection({ queries }: KgEvidenceSectionProps): JSX.Elem
             <span>依据 · 知识图谱</span>
             <span className={css.evidenceHeadSide}>
               <Badge tone="muted">{String(queries.length)} 条</Badge>
-              <button type="button" className={css.sheetClose} aria-label="关闭证据" onClick={close}>×</button>
+              <button type="button" className={css.sheetClose} aria-label="关闭证据" onClick={close}>
+                <X size={18} aria-hidden="true" />
+              </button>
             </span>
           </header>
           {queries.map((query, index) => (

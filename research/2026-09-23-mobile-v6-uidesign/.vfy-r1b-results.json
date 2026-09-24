@@ -1,0 +1,30 @@
+{
+  "04b-ghost-contrast-dark": {
+    "pass": true,
+    "detail": "ratio=5.09 color=rgb(29, 95, 214) on rgb(234, 242, 255) theme=dark"
+  },
+  "05-error-alert": {
+    "pass": true,
+    "detail": "alerts=[\"同事目录加载失败：Failed to fetch重试\",\"最近对话加载失败：Failed to fetch重试\"] retry=true"
+  },
+  "06-work-four-states": {
+    "pass": false,
+    "detail": "capsule tabs = []"
+  },
+  "07-tab-nav": {
+    "pass": true,
+    "detail": "tabs=[\"消息\",\"同事\",\"工作台\",\"我的\"] hashes=[\"#/home\",\"#/agents\",\"#/work\",\"#/me\"]"
+  },
+  "08-theme-persist": {
+    "pass": false,
+    "detail": "data-theme before=light afterReload=light"
+  },
+  "09-430px-shell": {
+    "pass": true,
+    "detail": "clientWidth=430 horizontalOverflow=false"
+  },
+  "10-chats-back": {
+    "pass": true,
+    "detail": "chatsHash=#/chats backHash=#/home"
+  }
+}

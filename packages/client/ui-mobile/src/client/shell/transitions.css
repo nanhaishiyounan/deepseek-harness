@@ -1,0 +1,44 @@
+/*
+ * Page-transition keyframes for the hash router: the shell remounts <main>
+ * per route key, so a CSS animation that runs once on mount carries the
+ * motion — tab switches fade, full-screen layers and secondary pages push in
+ * from the right. The v6 design's pageIn (`.page.active` in the AI-colleague
+ * mock) is one .22s ease entrance from translateX(14px); both channels align
+ * to it (opacity-only fade between tabs, the 14px push for layers). A plain
+ * stylesheet, not a CSS module: the keyframe names stay stable across files.
+ * prefers-reduced-motion collapses every transition to an instant paint.
+ *
+ * Direction decision: layers enter from the right whether the navigation is a
+ * push or a back. Reversing the slide on back would require owning a history
+ * stack (the hash router cannot tell a link-driven push from history.back()),
+ * and a wrong-guess direction reads worse than a consistent single-side
+ * entrance; the deliberate single-direction entrance is the stance.
+ */
+
+@keyframes dsh-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes dsh-slide-in-right {
+  from {
+    transform: translateX(14px);
+    opacity: 0;
+  }
+}
+
+main[data-transition='fade'] {
+  animation: dsh-fade-in var(--dshm-motion-fast) ease;
+}
+
+main[data-transition='slide'] {
+  animation: dsh-slide-in-right var(--dshm-motion-page) ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main[data-transition='fade'],
+  main[data-transition='slide'] {
+    animation-duration: 0.01ms;
+  }
+}

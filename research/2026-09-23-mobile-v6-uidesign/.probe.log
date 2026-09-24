@@ -1,0 +1,2 @@
+[light] {"labels":["消息","同事","工作台","我的"],"barHeight":"58px","navBg":"rgb(255, 255, 255)","navBorderTop":"1px rgb(232, 237, 244)","activeColor":"rgb(46, 124, 246)","labelFont":"10.5px / w600","iconBox":"22px x 22px","iconStroke":"1.8","itemColor":"rgb(46, 124, 246)"}
+[dark] {"labels":["消息","同事","工作台","我的"],"barHeight":"58px","navBg":"rgb(19, 25, 36)","navBorderTop":"1px rgb(37, 46, 62)","activeColor":"rgb(46, 124, 246)","labelFont":"10.5px / w600","iconBox":"22px x 22px","iconStroke":"1.8","itemColor":"rgb(46, 124, 246)"}

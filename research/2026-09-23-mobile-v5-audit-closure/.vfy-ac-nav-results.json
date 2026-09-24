@@ -1,0 +1,41 @@
+{
+  "base": "http://localhost:3080",
+  "chatHash": "#/chat/session-30dbc300-7f49-4cd6-9e73-990d189f79c7",
+  "results": [
+    {
+      "id": "N1-height-52px",
+      "ok": true,
+      "detail": "getComputedStyle(.adm-nav-bar).height=52px"
+    },
+    {
+      "id": "N1-card-face",
+      "ok": true,
+      "detail": "backgroundColor=rgb(255, 255, 255) (expect frost #ffffff)"
+    },
+    {
+      "id": "N1-light-rim",
+      "ok": true,
+      "detail": "borderBottomColor=rgb(213, 224, 221) (expect --dshm-border #d5e0dd), width=1px"
+    },
+    {
+      "id": "N2-dark-theme",
+      "ok": true,
+      "detail": "data-theme=dark"
+    },
+    {
+      "id": "N2-dark-rim-deeper",
+      "ok": true,
+      "detail": "borderBottomColor=rgb(34, 46, 43) (expect --dshm-nav-line #222e2b, deeper than --dshm-border #2a3835)"
+    },
+    {
+      "id": "N2-dark-card-face",
+      "ok": true,
+      "detail": "backgroundColor=rgb(23, 34, 32) (expect dark frost #172220)"
+    },
+    {
+      "id": "N2-height-52px",
+      "ok": true,
+      "detail": "dark track height=52px"
+    }
+  ]
+}

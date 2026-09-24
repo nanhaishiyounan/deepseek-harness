@@ -1,9 +1,10 @@
 /**
  * The mobile login page (v3, 03 §4.9): the stamp-form logo (the 表 seal with
  * the AI ring) over the mist background, the phone + code card with the
- * 60-second countdown, and the demo-auth disclosure. The demo handshake logic
- * (any six-digit code) rides the same NocoBase JWT channel as before; this
- * page owns the visuals only.
+ * 60-second countdown, and the demo-auth disclosure. The handshake rides the
+ * demo channel ([auth.ts](../auth.ts): any six-digit code verifies locally,
+ * no server round-trip — production auth replaces that one seam); this page
+ * owns the visuals only.
  */
 
 import { useEffect, useRef, useState, type JSX } from 'react'

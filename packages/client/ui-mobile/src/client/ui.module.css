@@ -64,11 +64,6 @@
   padding: 8px 0;
 }
 
-.noticeError {
-  color: var(--dshm-destructive);
-  border-color: var(--dshm-destructive-10);
-}
-
 .avatar {
   display: inline-flex;
   align-items: center;
@@ -79,4 +74,76 @@
   letter-spacing: 1px;
   flex: none;
   user-select: none;
+}
+
+/* Skeleton placeholders (loading states): purely visual blocks breathing on
+ * the global dshm-skel-pulse keyframe (tokens.css). The wrapping page group
+ * carries role="status"; these blocks stay aria-hidden. */
+
+.skelRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  padding: 10px 14px;
+  background: var(--dshm-card);
+  border-bottom: 1px solid var(--dshm-stroke-soft);
+}
+
+.skelCard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-border);
+  border-radius: var(--dshm-radius-lg);
+  box-shadow: var(--dshm-shadow-card);
+}
+
+.skelHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.skelAvatar {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--dshm-muted);
+  animation: dshm-skel-pulse 1.2s ease-in-out infinite;
+}
+
+.skelTexts {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skelLine {
+  height: 12px;
+  border-radius: 6px;
+  background: var(--dshm-muted);
+  animation: dshm-skel-pulse 1.2s ease-in-out infinite;
+}
+
+.skelLineShort {
+  width: 50%;
+  height: 10px;
+  border-radius: 5px;
+  background: var(--dshm-muted);
+  animation: dshm-skel-pulse 1.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skelAvatar,
+  .skelLine,
+  .skelLineShort {
+    animation: none;
+    opacity: 0.6;
+  }
 }

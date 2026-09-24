@@ -215,6 +215,19 @@ describe('FieldWidget relation Picker', () => {
     await waitFor(() => { expect(onChange).toHaveBeenCalledWith('42') })
   })
 
+  it('opens the relation picker from the keyboard and ignores unrelated keys', async () => {
+    stubGateway({ 'nocobase.list': supplierPage })
+    render(<FieldWidget spec={relationSpec} value="" locked={false} onChange={() => {}} />)
+    await waitFor(() => { expect(calls.filter(call => call.url === '/api/nocobase.list')).toHaveLength(1) })
+    const trigger = screen.getByTestId('relation-value')
+    // An unrelated key never opens the popup.
+    fireEvent.keyDown(trigger, { key: 'Escape' })
+    expect(document.querySelector('.adm-picker')).toBeNull()
+    // The Enter arm opens it.
+    fireEvent.keyDown(trigger, { key: 'Enter' })
+    await waitFor(() => { expect(document.querySelector('.adm-picker')).toBeTruthy() })
+  })
+
   it('shows the matched option label for an AI-prefilled id and still confirms the id', async () => {
     stubGateway({ 'nocobase.list': supplierPage })
     const onChange = vi.fn()

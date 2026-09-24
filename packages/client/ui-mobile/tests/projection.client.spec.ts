@@ -44,6 +44,17 @@ describe('last projection of one session', () => {
     expect(lastProjectionOf([ask(true), text('user', '就用采购单')])).toBe('我：就用采购单')
   })
 
+  it('projects a report as its title line', () => {
+    const report: ChatItem = {
+      kind: 'report', seq: 2, time: 1,
+      payload: {
+        v: 3, type: 'report', id: 'r_1', title: '项目风险',
+        metrics: [{ label: '待处理', value: '5', kind: 'count' }],
+      },
+    }
+    expect(lastProjectionOf([text('user', '有什么风险'), report])).toBe('报告：项目风险')
+  })
+
   it('projects the draft under review and the actions', () => {
     const draft: ChatItem = {
       kind: 'task-card', seq: 1, time: 1,
@@ -57,6 +68,26 @@ describe('last projection of one session', () => {
     expect(lastProjectionOf([draft])).toBe('正在确认采购单草稿')
     const action: ChatItem = { kind: 'action', seq: 2, time: 1, action: 'confirm', text: '确认写入' }
     expect(lastProjectionOf([draft, action])).toBe('确认写入，等待落库')
+  })
+
+  it('projects an open field-ask, skips the answered one, and the reject action', () => {
+    const fieldAsk: ChatItem = {
+      kind: 'field-ask', seq: 3, time: 1,
+      payload: {
+        v: 3, type: 'ask_field', id: 'f1', question: '数量是多少？',
+        field: { name: 'quantity', label: '数量', widget: 'number', suggestions: [] },
+      },
+    }
+    expect(lastProjectionOf([fieldAsk])).toBe('等你选择：数量是多少？')
+    expect(lastProjectionOf([{ ...fieldAsk, answered: {} }, text('user', '大概 260 箱')])).toBe('我：大概 260 箱')
+    const reject: ChatItem = { kind: 'action', seq: 4, time: 1, action: 'reject', text: '驳回' }
+    expect(lastProjectionOf([reject])).toBe('已驳回')
+  })
+
+  it('skips an answered ask on the way back and projects the v2 legacy card title', () => {
+    expect(lastProjectionOf([text('user', '就用采购单'), ask(true)])).toBe('我：就用采购单')
+    const legacy: ChatItem = { kind: 'task-card', seq: 5, time: 1, draft: { collection: 'hub_po_orders', title: '采购单', fields: {} } }
+    expect(lastProjectionOf([legacy])).toBe('采购单草稿待确认')
   })
 
   it('clips long bubbles and projects nothing for tool rows alone', () => {

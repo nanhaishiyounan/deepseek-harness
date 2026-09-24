@@ -301,3 +301,59 @@ describe('foldHistory (protocol names as tool calls)', () => {
     expect(row.label).toBe('some_real_tool')
   })
 })
+
+describe('foldHistory (report fences)', () => {
+  const reportFence = '```dsh\n{"v":3,"type":"report","id":"r_1","title":"项目风险",'
+    + '"metrics":[{"label":"待处理","value":"5","kind":"count","tone":"warning"},{"label":"采购额","value":"¥16,000","kind":"money"}],'
+    + '"rows":[{"label":"接口联调延期","hint":"影响测试开始 1～2 天","level":"high"}],'
+    + '"actions":[{"kind":"create-task","label":"创建处理任务","title":"接口联调延期处理"}]}\n```'
+
+  it('folds a report fence into a report item in narrative order', () => {
+    const folded = foldHistory([
+      event('assistant/message', { message: { content: [{ type: 'text', text: `帮你看了一下。\n${reportFence}\n有需要跟进的随时说。` }] } }, 1),
+    ])
+    expect(folded.items.map(item => item.kind)).toEqual(['text', 'report', 'text'])
+    const report = folded.items[1]
+    if (report?.kind !== 'report') throw new Error('expected report item')
+    expect(report.payload.title).toBe('项目风险')
+    expect(report.payload.metrics).toHaveLength(2)
+    expect(report.payload.rows?.[0]?.level).toBe('high')
+    expect(report.payload.actions?.[0]?.kind).toBe('create-task')
+    // The fence itself never leaks into a bubble.
+    for (const item of folded.items) {
+      if (item.kind === 'text') expect(item.text.includes('```dsh')).toBe(false)
+    }
+  })
+
+  it('mixes a report with the v3 fences in one assistant message', () => {
+    const draftFence = '```dsh\n{"v":3,"type":"form_draft","draftId":"d_1","revision":1,'
+      + '"form":{"collection":"c","label":"采购单"},"title":"t",'
+      + '"fields":[{"name":"n","label":"数量","value":"1","tier":"required","widget":"number"}]}\n```'
+    const folded = foldHistory([
+      event('assistant/message', { message: { content: [{ type: 'text', text: `先看报告。\n${reportFence}\n另有草稿。\n${draftFence}` }] } }, 1),
+    ])
+    expect(folded.items.map(item => item.kind)).toEqual(['text', 'report', 'text', 'task-card'])
+  })
+
+  it('degrades an over-limit report fence to the collapsed notice', () => {
+    const overLimit = '```dsh\n{"v":3,"type":"report","id":"r_9","title":"超限","metrics":[]}\n```'
+    const folded = foldHistory([
+      event('assistant/message', { message: { content: [{ type: 'text', text: `报告来了。\n${overLimit}` }] } }, 1),
+    ])
+    expect(folded.degradedFences).toBe(1)
+    expect(folded.items.map(item => item.kind)).toEqual(['text', 'degraded'])
+  })
+
+  it('retires a stale ask when a report follows it', () => {
+    const askFence = '```dsh\n{"v":3,"type":"ask_choice","id":"choice_1","question":"登记成什么？",'
+      + '"options":[{"label":"采购单","value":"hub_po"}]}\n```'
+    const folded = foldHistory([
+      event('assistant/message', { message: { content: [{ type: 'text', text: askFence }] } }, 1),
+      event('assistant/message', { message: { content: [{ type: 'text', text: reportFence }] } }, 2),
+      event('user/message', { content: [{ type: 'text', text: '是采购单' }], source: { kind: 'user' } }, 3),
+    ])
+    const ask = folded.items[0]
+    if (ask?.kind !== 'ask') throw new Error('expected ask item')
+    expect(ask.answered).toBeUndefined()
+  })
+})

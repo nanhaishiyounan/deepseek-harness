@@ -246,3 +246,149 @@ describe('parseDshPayload remaining first-condition arms', () => {
     expect(parseDshPayload('{"v":3,"type":"form_confirm","draftId":"d","revision":1,"form":{"label":"采购单"},"fields":[{"name":"n","label":"l","value":"1"}]}')).toBeUndefined()
   })
 })
+
+describe('parseDshPayload report payloads', () => {
+  /** One minimal legal report body with every optional member present. */
+  const fullReport = '{"v":3,"type":"report","id":"r_1","title":"项目风险","subtitle":"截至今天 · 数据来自湖仓指标",'
+    + '"metrics":[{"label":"待处理","value":"5","kind":"count","tone":"warning"},{"label":"采购额","value":"¥16,000","kind":"money"}],'
+    + '"rows":[{"label":"接口联调延期","hint":"影响测试开始 1～2 天","level":"high"},{"label":"文档滞后","level":"low"}],'
+    + '"table":{"columns":[{"label":"风险"},{"label":"影响","kind":"percent"}],"rows":[["接口联调延期","40%"]]},'
+    + '"actions":[{"kind":"create-task","label":"创建处理任务","title":"接口联调延期处理","suggestion":"今天与技术负责人确认新联调时间"},'
+    + '{"kind":"view","label":"查看工作","route":"#/work"},{"kind":"send","label":"追问影响","text":"对联调的具体影响再展开说说"},'
+    + '{"kind":"link","label":"相关文档","url":"https://example.com/doc"}]}'
+
+  /** One minimal legal body with extra JSON members appended before the closing brace. */
+  const report = (extra: string): string =>
+    `{"v":3,"type":"report","id":"r","title":"t","metrics":[{"label":"a","value":"1","kind":"text"}]${extra}}`
+  const lowRows = (count: number): string =>
+    Array.from({ length: count }, (_, i) => `{"label":"r${String(i)}","level":"low"}`).join(',')
+  const plainColumns = (count: number): string => Array.from({ length: count }, () => '{"label":"列"}').join(',')
+  const cellRows = (count: number, width: number): string =>
+    Array.from({ length: count }, () => JSON.stringify(Array.from({ length: width }, () => 'a'))).join(',')
+  const sendActions = (count: number): string =>
+    Array.from({ length: count }, () => '{"kind":"send","label":"问","text":"追问"}').join(',')
+
+  it('parses the full legal report into the DshPayload union', () => {
+    const payload = parseDshPayload(fullReport)
+    expect(payload?.type).toBe('report')
+    if (payload?.type !== 'report') throw new Error('expected report')
+    expect(payload.title).toBe('项目风险')
+    expect(payload.subtitle).toBe('截至今天 · 数据来自湖仓指标')
+    expect(payload.metrics).toHaveLength(2)
+    expect(payload.metrics[0]).toEqual({ label: '待处理', value: '5', kind: 'count', tone: 'warning' })
+    expect(payload.metrics[1]?.tone).toBeUndefined()
+    expect(payload.rows?.[0]).toEqual({ label: '接口联调延期', hint: '影响测试开始 1～2 天', level: 'high' })
+    expect(payload.rows?.[1]?.hint).toBeUndefined()
+    expect(payload.table?.columns[1]).toEqual({ label: '影响', kind: 'percent' })
+    expect(payload.actions?.[0]).toEqual({ kind: 'create-task', label: '创建处理任务', title: '接口联调延期处理', suggestion: '今天与技术负责人确认新联调时间' })
+  })
+
+  it('parses the minimal report (metrics only) and trims a blank subtitle away', () => {
+    const minimal = parseDshPayload('{"v":3,"type":"report","id":"r_2","title":"本月经营概览","metrics":[{"label":"交付率","value":"96%","kind":"percent"}]}')
+    if (minimal?.type !== 'report') throw new Error('expected report')
+    expect(minimal.rows).toBeUndefined()
+    expect(minimal.table).toBeUndefined()
+    expect(minimal.actions).toBeUndefined()
+    const trimmed = parseDshPayload('{"v":3,"type":"report","id":"r_3","title":"t","subtitle":"   ","metrics":[{"label":"a","value":"1","kind":"text"}]}')
+    if (trimmed?.type !== 'report') throw new Error('expected report')
+    expect(trimmed.subtitle).toBeUndefined()
+  })
+
+  // The B2 real-LLM capture form: the model writes the follow-up instruction
+  // into `text` instead of `title` (hasTitle:false / hasText:true across two
+  // independent business-advisor sessions). The parser folds it back onto the
+  // legal title+suggestion shape instead of degrading the whole card.
+  it('folds a text-only create-task action onto title+suggestion (real capture form)', () => {
+    const longText = '针对两家供应商资质证照三十天内到期的风险，联系临期供应商确认换发材料清单并跟进出证进度'
+    const payload = parseDshPayload(`{"v":3,"type":"report","id":"r_live","title":"供应商风险","metrics":[{"label":"临期资质","value":"2","kind":"count","tone":"warning"}],"actions":[{"kind":"create-task","label":"创建处理任务","text":"${longText}"}]}`)
+    if (payload?.type !== 'report') throw new Error('expected report')
+    expect(payload.actions?.[0]).toEqual({
+      kind: 'create-task',
+      label: '创建处理任务',
+      title: Array.from(longText).slice(0, 32).join(''),
+      suggestion: longText,
+    })
+  })
+
+  it('keeps an explicit create-task title and lets text stand in for the suggestion', () => {
+    const payload = parseDshPayload('{"v":3,"type":"report","id":"r_live2","title":"项目风险","metrics":[{"label":"a","value":"1","kind":"text"}],"actions":[{"kind":"create-task","label":"创建处理任务","title":"接口联调延期处理","text":"今天与技术负责人确认新联调时间"},{"kind":"create-task","label":"再次创建","title":"带建议","text":"被建议覆盖","suggestion":"显式建议优先"}]}')
+    if (payload?.type !== 'report') throw new Error('expected report')
+    expect(payload.actions?.[0]).toEqual({ kind: 'create-task', label: '创建处理任务', title: '接口联调延期处理', suggestion: '今天与技术负责人确认新联调时间' })
+    expect(payload.actions?.[1]).toEqual({ kind: 'create-task', label: '再次创建', title: '带建议', suggestion: '显式建议优先' })
+  })
+
+  it('treats an explicit null table/rows as absent (the real capture writes "table": null)', () => {
+    const payload = parseDshPayload('{"v":3,"type":"report","id":"r_null","title":"当前项目风险概览","metrics":[{"label":"出口负增长品类","value":"3 项","kind":"count","tone":"danger"}],"rows":null,"table":null,"actions":[{"kind":"create-task","label":"创建油脂锁价任务","title":"跟进棕榈油/大豆油锁价","suggestion":"漯河油脂高位，建议协商远期锁价"},{"kind":"send","label":"油脂原料近半年走势","text":"看棕榈油近 6 个月双市场价走势"}]}')
+    if (payload?.type !== 'report') throw new Error('expected report')
+    expect(payload.rows).toBeUndefined()
+    expect(payload.table).toBeUndefined()
+    expect(payload.actions).toHaveLength(2)
+    expect(payload.actions?.[0]).toEqual({ kind: 'create-task', label: '创建油脂锁价任务', title: '跟进棕榈油/大豆油锁价', suggestion: '漯河油脂高位，建议协商远期锁价' })
+  })
+
+  it('still rejects a create-task action whose text is blank (neither title nor text)', () => {
+    expect(parseDshPayload('{"v":3,"type":"report","id":"r","title":"t","metrics":[{"label":"a","value":"1","kind":"text"}],"actions":[{"kind":"create-task","label":"建","text":"   "}]}')).toBeUndefined()
+  })
+  it('accepts the exact ceilings: 6 metrics, 8 rows, 5 columns × 10 rows, 4 actions', () => {
+    const metrics = Array.from({ length: 6 }, (_, i) => `{"label":"m${String(i)}","value":"1","kind":"text"}`).join(',')
+    const rows = Array.from({ length: 8 }, (_, i) => `{"label":"r${String(i)}","level":"low"}`).join(',')
+    const columns = Array.from({ length: 5 }, () => '{"label":"列"}').join(',')
+    const tableRows = Array.from({ length: 10 }, () => '["a","b","c","d","e"]').join(',')
+    const actions = Array.from({ length: 4 }, () => '{"kind":"send","label":"问","text":"追问"}').join(',')
+    const atCeiling = parseDshPayload(`{"v":3,"type":"report","id":"r_4","title":"上限","metrics":[${metrics}],`
+      + `"rows":[${rows}],"table":{"columns":[${columns}],"rows":[${tableRows}]},"actions":[${actions}]}`)
+    if (atCeiling?.type !== 'report') throw new Error('expected report')
+    expect(atCeiling.metrics).toHaveLength(6)
+    expect(atCeiling.rows).toHaveLength(8)
+    expect(atCeiling.table?.columns).toHaveLength(5)
+    expect(atCeiling.table?.rows).toHaveLength(10)
+    expect(atCeiling.actions).toHaveLength(4)
+  })
+
+  it('rejects a non-array metrics and the 0/7 metric bounds', () => {
+    expect(parseDshPayload('{"v":3,"type":"report","id":"r","title":"t","metrics":{"label":"a"}}')).toBeUndefined()
+    expect(parseDshPayload('{"v":3,"type":"report","id":"r","title":"t","metrics":[]}')).toBeUndefined()
+    const seven = Array.from({ length: 7 }, (_, i) => `{"label":"m${String(i)}","value":"1","kind":"text"}`).join(',')
+    expect(parseDshPayload(`{"v":3,"type":"report","id":"r","title":"t","metrics":[${seven}]}`)).toBeUndefined()
+  })
+
+  it.each([
+    ['without id', '{"v":3,"type":"report","title":"t","metrics":[{"label":"a","value":"1","kind":"text"}]}'],
+    ['without title', '{"v":3,"type":"report","id":"r","metrics":[{"label":"a","value":"1","kind":"text"}]}'],
+    ['metric missing label', '{"v":3,"type":"report","id":"r","title":"t","metrics":[{"value":"1","kind":"text"}]}'],
+    ['metric missing value', '{"v":3,"type":"report","id":"r","title":"t","metrics":[{"label":"a","kind":"text"}]}'],
+    ['metric with an illegal kind', '{"v":3,"type":"report","id":"r","title":"t","metrics":[{"label":"a","value":"1","kind":"date"}]}'],
+    ['metric with an illegal tone', '{"v":3,"type":"report","id":"r","title":"t","metrics":[{"label":"a","value":"1","kind":"text","tone":"info"}]}'],
+    ['metric row not an object', '{"v":3,"type":"report","id":"r","title":"t","metrics":["x"]}'],
+    ['nine rows', report(`,"rows":[${lowRows(9)}]`)],
+    ['row with an illegal level', '{"v":3,"type":"report","id":"r","title":"t","metrics":[{"label":"a","value":"1","kind":"text"}],"rows":[{"label":"x","level":"critical"}]}'],
+    ['row not an object', report(',"rows":["x"]')],
+    ['table column not an object', report(',"table":{"columns":["x"],"rows":[]}')],
+    ['action not an object', report(',"actions":["x"]')],
+    ['rows not an array', '{"v":3,"type":"report","id":"r","title":"t","metrics":[{"label":"a","value":"1","kind":"text"}],"rows":"x"}'],
+    ['table not an object', '{"v":3,"type":"report","id":"r","title":"t","metrics":[{"label":"a","value":"1","kind":"text"}],"table":"x"}'],
+    ['table with six columns', report(`,"table":{"columns":[${plainColumns(6)}],"rows":[]}`)],
+    ['table with eleven rows', report(`,"table":{"columns":[{"label":"列"}],"rows":[${cellRows(11, 1)}]}`)],
+    ['table row wider than the columns', '{"v":3,"type":"report","id":"r","title":"t","metrics":[{"label":"a","value":"1","kind":"text"}],"table":{"columns":[{"label":"列"}],"rows":[["a","b"]]}}'],
+    ['table with a non-string cell', '{"v":3,"type":"report","id":"r","title":"t","metrics":[{"label":"a","value":"1","kind":"text"}],"table":{"columns":[{"label":"列"}],"rows":[[3]]}}'],
+    ['table column without a label', '{"v":3,"type":"report","id":"r","title":"t","metrics":[{"label":"a","value":"1","kind":"text"}],"table":{"columns":[{"kind":"money"}],"rows":[["1"]]}}'],
+    ['table column with an illegal kind', '{"v":3,"type":"report","id":"r","title":"t","metrics":[{"label":"a","value":"1","kind":"text"}],"table":{"columns":[{"label":"列","kind":"date"}],"rows":[["1"]]}}'],
+    ['five actions', report(`,"actions":[${sendActions(5)}]`)],
+    ['view action without a route', '{"v":3,"type":"report","id":"r","title":"t","metrics":[{"label":"a","value":"1","kind":"text"}],"actions":[{"kind":"view","label":"看"}]}'],
+    ['create-task action without a title', '{"v":3,"type":"report","id":"r","title":"t","metrics":[{"label":"a","value":"1","kind":"text"}],"actions":[{"kind":"create-task","label":"建"}]}'],
+    ['send action without a text', '{"v":3,"type":"report","id":"r","title":"t","metrics":[{"label":"a","value":"1","kind":"text"}],"actions":[{"kind":"send","label":"问"}]}'],
+    ['link action without a url', '{"v":3,"type":"report","id":"r","title":"t","metrics":[{"label":"a","value":"1","kind":"text"}],"actions":[{"kind":"link","label":"链"}]}'],
+    ['action without a label', '{"v":3,"type":"report","id":"r","title":"t","metrics":[{"label":"a","value":"1","kind":"text"}],"actions":[{"kind":"send","text":"追问"}]}'],
+    ['action with an unknown kind', '{"v":3,"type":"report","id":"r","title":"t","metrics":[{"label":"a","value":"1","kind":"text"}],"actions":[{"kind":"delete","label":"删"}]}'],
+    ['a wrong envelope version', '{"v":5,"type":"report","id":"r","title":"t","metrics":[{"label":"a","value":"1","kind":"text"}]}'],
+  ])('rejects %s', (_label, body) => {
+    expect(parseDshPayload(body)).toBeUndefined()
+  })
+
+  it('degrades an over-limit report fence to the collapsed notice path', () => {
+    const { segments, degraded } = splitMessage('```dsh\n{"v":3,"type":"report","id":"r","title":"超限","metrics":[]}\n```')
+    expect(degraded).toBe(1)
+    if (segments[0]?.kind !== 'degraded') throw new Error('expected degraded segment')
+    expect(segments[0].text).toContain('"type":"report"')
+  })
+})

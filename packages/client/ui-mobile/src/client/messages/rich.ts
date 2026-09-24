@@ -75,6 +75,49 @@ export type RichBlock =
   | { readonly kind: 'text'; readonly text: string }
   | { readonly kind: 'metric'; readonly metrics: readonly MetricLine[] }
 
+/** One narrative run: fenced code lifted out whole, or the remaining text. */
+export type RichRun =
+  | { readonly kind: 'text'; readonly text: string }
+  | { readonly kind: 'code'; readonly lang: string; readonly code: string }
+
+/**
+ * Split a narrative into fenced-code runs and the text between them (v6 B3):
+ * code leaves before sanitizeBizText so the display-term pass never rewrites
+ * an identifier inside a snippet, and each fence renders as its own deep
+ * code plate with the language label off the fence's info string.
+ * @param text - the whole narrative text.
+ * @returns the ordered runs (fences keep their interior verbatim).
+ */
+export function splitCodeBlocks(text: string): RichRun[] {
+  const runs: RichRun[] = []
+  let pending = ''
+  const lines = text.split('\n')
+  for (let index = 0; index < lines.length; index++) {
+    const line = lines[index] as string
+    const fence = /^```([^\s`]*)\s*$/.exec(line.trim())
+    if (fence === null) {
+      pending = pending === '' ? line : `${pending}\n${line}`
+      continue
+    }
+    /* v8 ignore next -- the regex's single group always captures (possibly empty). */
+    const lang = fence[1] ?? ''
+    const body: string[] = []
+    index += 1
+    for (; index < lines.length; index++) {
+      const inner = lines[index] as string
+      if (inner.trim() === '```') break
+      body.push(inner)
+    }
+    if (pending !== '') {
+      runs.push({ kind: 'text', text: pending })
+      pending = ''
+    }
+    runs.push({ kind: 'code', lang: lang === '' ? 'text' : lang, code: body.join('\n') })
+  }
+  if (pending !== '') runs.push({ kind: 'text', text: pending })
+  return runs
+}
+
 /**
  * Split a narrative into rich blocks (03 §4.5): blank lines separate
  * paragraphs; inside a paragraph, adjacent metric lines gather into one

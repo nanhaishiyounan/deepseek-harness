@@ -1,0 +1,419 @@
+/* Home (v6「消息」, the design's page-home): the gradient hero greeting card,
+    the search-box entry, the compact today-ledger chip strip, the quick-task
+    chips, the colleagues' avatar rail, and the recent-chats conv-item rows
+    (presence dot, preview, time, unread dot). Colors ride the --dshm-* tokens;
+    the work-status numbers only through the --dshm-work-* four. The gradient
+    appears here once — the hero — of the four sanctioned surfaces (hero, user
+    bubble, send button, progress fill). */
+
+.homePage {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--dshm-background);
+  padding: 10px 12px calc(16px + env(safe-area-inset-bottom));
+}
+
+/* ---- Hero greeting card (the design's .hero-card): the user gradient face. ---- */
+
+.heroCard {
+  margin: 2px 0 0;
+  padding: 14px 15px;
+  border-radius: var(--dshm-radius-lg);
+  background: var(--dshm-user-grad);
+  box-shadow: 0 10px 26px rgba(46, 124, 246, 0.28);
+  color: var(--dshm-bubble-user-fg);
+}
+
+.heroTitle {
+  margin: 0;
+  font-size: 16.5px;
+  line-height: 24px;
+  font-weight: 700;
+}
+
+.heroDesc {
+  margin: 5px 0 0;
+  font-size: 14px;
+  line-height: 1.55;
+  opacity: 0.92;
+}
+
+/* ---- Search-box entry (the design's .search-box): a card-faced affordance
+       landing on the all-chats layer, which owns the real filtering. ---- */
+
+.searchEntry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border: 1px solid var(--dshm-border);
+  border-radius: 14px;
+  background: var(--dshm-card);
+  color: var(--dshm-muted-foreground);
+  text-align: left;
+}
+
+.searchEntry:active {
+  background: var(--dshm-muted);
+}
+
+.searchEntryText {
+  font-size: 15px;
+  line-height: 22px;
+}
+
+/* ---- Today-ledger chip strip: the four status counts in one card row. ---- */
+
+.statsCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-border);
+  border-radius: 14px;
+  text-align: left;
+}
+
+.statsCard:active {
+  background: var(--dshm-muted);
+}
+
+.statsHeadLabel {
+  font-size: 11px;
+  line-height: 16px;
+  font-family: var(--dshm-font-num);
+  font-variant-numeric: tabular-nums;
+  color: var(--dshm-muted-foreground);
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.statCell {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.statValue {
+  font-family: var(--dshm-font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 20px;
+  line-height: 26px;
+  font-weight: 600;
+  color: var(--dshm-foreground);
+}
+
+.statTodo {
+  color: var(--dshm-work-todo);
+}
+
+.statDoing {
+  color: var(--dshm-work-doing);
+}
+
+.statReview {
+  color: var(--dshm-work-review);
+}
+
+.statDone {
+  color: var(--dshm-work-done);
+}
+
+.statLabel {
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--dshm-foreground);
+}
+
+/* ---- Section head rows (13/600 sub + 12 link). ---- */
+
+.sectionRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2px;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 18px;
+  font-weight: 600;
+  color: var(--dshm-muted-foreground);
+}
+
+.sectionLink {
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 600;
+  color: var(--dshm-primary);
+}
+
+/* ---- Quick-task starter chips (h36 全圆角, brand-soft fill). ---- */
+
+.quickRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.quickChip {
+  height: var(--dshm-touch-sm);
+  padding: 0 14px;
+  font-size: 12px;
+  line-height: 34px;
+  border: none;
+  border-radius: 999px;
+  background: var(--dshm-primary-soft);
+  color: var(--dshm-on-soft);
+}
+
+.quickChip:active {
+  opacity: 0.75;
+}
+
+.quickChip:disabled {
+  opacity: 0.5;
+}
+
+/* ---- Colleagues' avatar rail (the design's .ava form, w72). ---- */
+
+.rosterScroller {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 2px;
+  /* The right-edge fade keeps the horizontal overflow discoverable. */
+  mask-image: linear-gradient(to right, #000 calc(100% - 18px), transparent);
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 18px), transparent);
+}
+
+.rosterCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 72px;
+  padding: 8px 0;
+  flex: none;
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-border);
+  border-radius: 14px;
+}
+
+.rosterCard:active {
+  background: var(--dshm-muted);
+}
+
+/* The 42px avatar with its presence dot (AI colleagues stay 在线). */
+.rosterAva {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+}
+
+.rosterAvaDot {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid var(--dshm-card);
+  background: var(--dshm-success);
+}
+
+.rosterName {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  color: var(--dshm-foreground);
+  max-width: 64px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rosterEmpty {
+  padding: 8px 4px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dshm-muted-foreground);
+}
+
+/* The roster's loading placeholders: the avatar-card silhouette breathing
+ * on the token pulse. */
+.rosterSkelGroup {
+  display: flex;
+  gap: 8px;
+}
+
+.rosterSkel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 72px;
+  padding: 8px 0;
+  flex: none;
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-border);
+  border-radius: 14px;
+}
+
+.rosterSkelStamp {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--dshm-muted);
+  animation: dshm-skel-pulse 1.2s ease-in-out infinite;
+}
+
+.rosterSkelName {
+  width: 44px;
+  height: 10px;
+  border-radius: 5px;
+  background: var(--dshm-muted);
+  animation: dshm-skel-pulse 1.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rosterSkelStamp,
+  .rosterSkelName {
+    animation: none;
+    opacity: 0.6;
+  }
+}
+
+/* ---- Recent chats: the design's .conv-item rows on a card list. ---- */
+
+.recentList {
+  display: flex;
+  flex-direction: column;
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-border);
+  border-radius: var(--dshm-radius-lg);
+  overflow: hidden;
+}
+
+.recentRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 10px;
+  min-height: 62px;
+  text-align: left;
+}
+
+.recentRow:active {
+  background: var(--dshm-muted);
+}
+
+/* The 42px avatar with the presence dot (AI-colleague sessions only). */
+.recentAva {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+}
+
+.recentAvaDot {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid var(--dshm-card);
+  background: var(--dshm-success);
+}
+
+.recentMain {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+
+.recentTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.recentTitle {
+  font-size: 15px;
+  line-height: 21px;
+  font-weight: 650;
+  color: var(--dshm-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recentTime {
+  flex: none;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--dshm-muted-foreground);
+}
+
+.recentSummary {
+  font-size: 14px;
+  line-height: 19px;
+  color: var(--dshm-muted-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The unread dot badge (the draftStore watermark's boolean face), riding the
+   top row beside the time like the design's .conv-badge. */
+.recentBadge {
+  flex: none;
+  align-self: center;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--dshm-destructive);
+  margin-left: 6px;
+}
+
+.recentEmpty {
+  padding: 14px 12px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dshm-muted-foreground);
+}
+
+/* The error strip's retry entry: the brand link word after the failure text. */
+.retryLink {
+  margin-left: 8px;
+  color: var(--dshm-primary);
+  font-weight: 600;
+}
+
+/* The recent-chats loading group keeps the card list's silhouette. */
+.recentSkelGroup {
+  display: flex;
+  flex-direction: column;
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-border);
+  border-radius: var(--dshm-radius-lg);
+  overflow: hidden;
+}

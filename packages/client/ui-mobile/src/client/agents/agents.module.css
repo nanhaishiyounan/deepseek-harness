@@ -1,0 +1,238 @@
+/* Agents tab (v6「同事」, the design's page-roster): the page header with the
+    card-faced search box, the capability-band roster — the 42px stamp avatar
+    with its presence dot, the name·role line, the duty tag, the brand-soft
+    skill pills, and the presence chip (在线=ok / 忙碌=warn / 会议中=brand2).
+    Colors ride the --dshm-* tokens only. */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--dshm-background);
+}
+
+.header {
+  display: flex;
+  align-items: flex-end;
+  padding: 12px 16px 8px;
+  min-height: 52px;
+  background: var(--dshm-header-bg);
+  border-bottom: 1px solid var(--dshm-border);
+  flex: none;
+}
+
+.headerTitle {
+  margin: 0;
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--dshm-foreground);
+}
+
+.searchWrap {
+  padding: 8px 12px 4px;
+  flex: none;
+}
+
+/* The design's .search-box: card face, hairline border, the 17px glyph. */
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--dshm-border);
+  border-radius: 14px;
+  background: var(--dshm-card);
+  color: var(--dshm-muted-foreground);
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: none;
+  font-size: 15px;
+  line-height: 22px;
+  color: var(--dshm-foreground);
+}
+
+.searchInput::placeholder {
+  color: var(--dshm-muted-foreground);
+}
+
+.list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 12px calc(16px + env(safe-area-inset-bottom));
+}
+
+/* One capability band: the 13/600 group title over its roster items. */
+.band {
+  display: flex;
+  flex-direction: column;
+}
+
+.bandTitle {
+  margin: 14px 2px 6px;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  color: var(--dshm-muted-foreground);
+}
+
+/* The design's .roster-item: avatar + info column + the trailing chip. */
+.rosterItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 10px;
+  border-radius: var(--dshm-radius-lg);
+  text-align: left;
+}
+
+.rosterItem:active {
+  background: var(--dshm-muted);
+}
+
+.rosterAva {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+}
+
+/* The presence dot (the design's .ava-dot): 11px on the avatar's lower right. */
+.avaDot {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid var(--dshm-card);
+}
+
+.dot_online {
+  background: var(--dshm-success);
+}
+
+.dot_busy {
+  background: var(--dshm-warning);
+}
+
+.dot_meeting {
+  background: var(--dshm-brand2);
+}
+
+.rosterInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.rosterNameRow {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+
+.rosterName {
+  font-size: 15.5px;
+  line-height: 22px;
+  font-weight: 650;
+  color: var(--dshm-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rosterRole {
+  font-size: 12.5px;
+  line-height: 18px;
+  font-weight: 500;
+  color: var(--dshm-muted-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: none;
+}
+
+.rosterTag {
+  margin-top: 2px;
+  font-size: 13px;
+  line-height: 19px;
+  color: var(--dshm-muted-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The design's .skill-pill: 11px brand on brand-soft, full-round. */
+.skillPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.skillPill {
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 600;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--dshm-primary-soft);
+  color: var(--dshm-on-soft);
+}
+
+/* The design's .status-chip: the quiet capsule colored by presence. */
+.statusChip {
+  flex: none;
+  font-size: 11px;
+  line-height: 16px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--dshm-border);
+  background: var(--dshm-muted);
+  color: var(--dshm-muted-foreground);
+}
+
+.chip_online {
+  color: var(--dshm-success);
+}
+
+.chip_busy {
+  color: var(--dshm-warning);
+}
+
+.chip_meeting {
+  color: var(--dshm-brand2);
+}
+
+/* The busy mark while a colleague's session is being created. */
+.starting {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--dshm-muted-foreground);
+}
+
+/* The loading skeleton group keeps the roster rows' rhythm. */
+.skelGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 8px;
+}

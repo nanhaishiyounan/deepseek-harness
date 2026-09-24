@@ -20,6 +20,7 @@ export type MobileRpcMethod =
   | 'session.rename'
   | 'session.search'
   | 'agentPreset.list'
+  | 'llm.models'
   | 'kg.stats'
   | 'kg.search'
   | 'kg.subgraph'

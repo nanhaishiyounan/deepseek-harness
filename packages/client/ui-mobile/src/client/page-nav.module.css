@@ -1,0 +1,39 @@
+/* The shared secondary-page header (52px NavBar, card face, rim underline).
+ * antd-mobile sizes NavBar from its own --height variable, so the override
+ * rides the pageNav class that lands on the NavBar element itself. The back
+ * hit carries the 44px primary touch target; the antd back wrapper's own
+ * paddings collapse to it. */
+
+.pageNav {
+  --height: 52px;
+  background: var(--dshm-card);
+  flex: none;
+  border-bottom: 1px solid var(--dshm-nav-line);
+}
+
+.pageNav :global(.adm-nav-bar-back) {
+  margin-right: 8px;
+  padding: 0;
+}
+
+/* The arrow span only wraps our button; its icon metrics would double the box. */
+.pageNav :global(.adm-nav-bar-back-arrow) {
+  margin-right: 0;
+  font-size: 0;
+  line-height: 0;
+}
+
+.backHit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--dshm-touch);
+  height: var(--dshm-touch);
+  margin-left: -10px;
+  border-radius: 50%;
+  color: var(--dshm-foreground);
+}
+
+.backHit:active {
+  background: var(--dshm-muted);
+}

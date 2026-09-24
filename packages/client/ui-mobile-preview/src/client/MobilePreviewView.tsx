@@ -1,9 +1,10 @@
 /**
- * The mobile-preview conversation view: a scaled 390×844 phone bezel holding
- * a same-origin iframe over `/mobile`. The iframe is fully interactive — the
- * demo path is switching to this view inside a PC session and completing a
- * task-card flow in the embedded page. Scale keeps the whole device visible
- * in the conversation body; pointer events pass through the transform.
+ * The mobile-preview conversation view: a scaled 430×844 phone bezel holding
+ * a same-origin iframe over `/mobile` (the v6 desktop form's width). The
+ * iframe is fully interactive — the demo path is switching to this view inside
+ * a PC session and completing a task-card flow in the embedded page. Scale
+ * keeps the whole device visible in the conversation body; pointer events pass
+ * through the transform.
  */
 
 import { useEffect, useRef, useState, type JSX } from 'react'
@@ -14,8 +15,8 @@ import css from './preview.module.css'
 /** Full props: the conversation-view runtime share plus the locale seat. */
 export type MobilePreviewViewProps = ConvViewProps & PropsLocale<'mobilePreview'>
 
-/** Device metrics the bezel draws around the iframe. */
-const DEVICE_WIDTH = 390
+/** Device metrics the bezel draws around the iframe (the v6 phone-shell width). */
+const DEVICE_WIDTH = 430
 const DEVICE_HEIGHT = 844
 
 /** The preview view component. */

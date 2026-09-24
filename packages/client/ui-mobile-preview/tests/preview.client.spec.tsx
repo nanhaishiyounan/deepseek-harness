@@ -151,7 +151,7 @@ describe('MobilePreviewView', () => {
     expect(frame?.getAttribute('src')).toBe('/mobile')
     expect(frame?.getAttribute('title')).toBe('移动端预览')
     const device = view.container.querySelector('iframe')?.parentElement
-    expect(device?.style.width).toBe('390px')
+    expect(device?.style.width).toBe('430px')
     expect(device?.style.height).toBe('844px')
     expect(device?.style.transform).toBe('scale(1)')
   })
@@ -161,9 +161,9 @@ describe('MobilePreviewView', () => {
     const view = mountView()
     act(() => { fire(300, 900) })
     const device = view.container.querySelector('iframe')?.parentElement
-    // (300-24)/390 ≈ 0.71 is the binding constraint; height 900 fits whole.
+    // (300-24)/430 ≈ 0.64 is the binding constraint; height 900 fits whole.
     const scale = Number(device?.style.transform.match(/scale\(([\d.]+)\)/u)?.[1] ?? NaN)
-    expect(scale).toBeCloseTo(276 / 390, 10)
+    expect(scale).toBeCloseTo(276 / 430, 10)
   })
 
   it('clamps the fit back to full size when the stage collapses', () => {

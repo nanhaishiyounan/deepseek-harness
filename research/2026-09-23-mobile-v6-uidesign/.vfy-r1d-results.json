@@ -1,0 +1,10 @@
+{
+  "04d-ghost-contrast-dark": {
+    "pass": true,
+    "detail": "dshm-root=dark ratio=11.78 color=rgb(232, 236, 244) on rgb(27, 44, 74)"
+  },
+  "08d-theme-persist": {
+    "pass": true,
+    "detail": "click→dark reload→dark"
+  }
+}

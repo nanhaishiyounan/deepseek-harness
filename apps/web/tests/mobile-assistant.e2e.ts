@@ -1,11 +1,12 @@
 /**
- * Mobile assistant e2e (keyless): the seeded v3 form-assistant sessions
+ * Mobile assistant e2e (keyless): the seeded v3+v5 form-assistant sessions
  * render on the mobile chat view from the SAME session store the PC client
  * reads — the ask_choice fork (two-form disambiguation) with its answered
  * replay state, the three-tier v3 draft card, the fenced 确认写入 action, the
- * receipt metric card, the KG evidence section, and the fresh-session
- * welcome that never sends a message as the user. Picks and confirms ride
- * the durable session log through the real gateway.
+ * receipt metric card, the KG evidence section, the v5 report card (the
+ * seeded ```dsh report fence with its M1/M3 action messages), and the
+ * fresh-session welcome that never sends a message as the user. Picks and
+ * confirms ride the durable session log through the real gateway.
  * Run: pnpm run test:web -- mobile-assistant
  */
 
@@ -68,7 +69,7 @@ async function userMessageCount(baseUrl: string, sessionId: string): Promise<num
   }).length
 }
 
-describe('mobile v3 assistant (seeded sessions → fork pick + three-tier draft + fenced confirm + receipt + welcome)', () => {
+describe('mobile v3+v5 assistant (seeded sessions → fork pick + draft + confirm + receipt + report + welcome)', () => {
   let scaffold: WebScaffold
   let browser: Browser
   let page: Page
@@ -134,10 +135,16 @@ describe('mobile v3 assistant (seeded sessions → fork pick + three-tier draft 
     }
   }
 
-  it('keeps the mobile chat golden stable (aria snapshot of the folded v3 flow)', async () => {
+  it('keeps the mobile chat golden stable (aria snapshot of the folded v3+v5 flow)', async () => {
     await openChat(SEED_ID)
     await page.getByTestId('ask-choice').waitFor({ timeout: 15_000 })
     await page.locator('[data-testid="receipt-card-v3"]').waitFor({ timeout: 15_000 })
+    // The v5 report card lands after the form flow (the seeded risk turn).
+    await page.getByTestId('report-card').waitFor({ timeout: 15_000 })
+    // The M1/M3 action messages render as ordinary user bubbles (the seeded
+    // create/done notices after the report turn).
+    await page.getByText('已创建处理任务：跟进鲜丰冷链箱交期').waitFor({ timeout: 15_000 })
+    await page.getByText('工作已完成：跟进鲜丰冷链箱交期').waitFor({ timeout: 15_000 })
     // The KG evidence collapsed into its single entry row (02 §4.5).
     await page.getByRole('button', { name: 'KG 证据入口' }).waitFor({ timeout: 15_000 })
     const mode = webSnapshotMode()
@@ -146,13 +153,14 @@ describe('mobile v3 assistant (seeded sessions → fork pick + three-tier draft 
     await compareOrRefreshGolden(join(GOLDEN_DIR, 'chat.expected.md'), normalized, mode)
   })
 
-  it('renders the folded v3 flow without any protocol leakage', async () => {
+  it('renders the folded v3+v5 flows without any protocol leakage', async () => {
     await openChat(SEED_ID)
     await page.getByText('这笔要登记成什么单据？').first().waitFor({ timeout: 15_000 })
     // The answered fork greys out and highlights the picked card (01 ⑤D1/D2).
     await expect.poll(async () => page.locator('[data-testid="ask-choice"]').getAttribute('class'), { timeout: 10_000 })
       .toContain('askAnswered')
     await page.locator('[data-testid="receipt-card-v3"]').waitFor({ timeout: 15_000 })
+    await page.getByTestId('report-card').waitFor({ timeout: 15_000 })
     const body = await page.locator('main').innerText()
     // The narrative carries the fork pick as the small capsule (D3 replay).
     expect(body).toContain('是采购单，我们从鲜丰买进')
@@ -160,12 +168,29 @@ describe('mobile v3 assistant (seeded sessions → fork pick + three-tier draft 
     expect(body.includes('```dsh')).toBe(false)
     expect(body.includes('hub_po_purchase_orders')).toBe(false)
     expect(body.includes('hub_wms_outbound')).toBe(false)
+    // Protocol invisibility (04 §7.3): no bare JSON, no report field names.
+    expect(body.includes('{"v":3')).toBe(false)
+    expect(body.includes('"kind"')).toBe(false)
+    expect(body.includes('"tone"')).toBe(false)
+    expect(body.includes('"payload"')).toBe(false)
+    expect(body.includes('"metrics"')).toBe(false)
+    expect(body.includes('"rows"')).toBe(false)
+    expect(body.includes('"subtitle"')).toBe(false)
     // The landed card hides behind its receipt; the action badge and the
     // metric card carry the landing anchor (E1/C3).
     expect(body).toContain('你确认了这张采购单')
     expect(body).toContain('已登记 · 采购单')
     expect(body).toContain('¥6,400')
     expect(body).toContain('1042')
+    // The v5 report card carries its business-language surface only: title,
+    // metric cells, severity rows, and the action buttons (04 §7.3 #6).
+    expect(body).toContain('项目风险')
+    expect(body).toContain('鲜丰冷链箱交期推迟')
+    expect(body).toContain('创建处理任务')
+    // The M1/M3 action messages are human-readable chat lines, never fences
+    // (04 §7.3 #7).
+    expect(body).toContain('已创建处理任务：跟进鲜丰冷链箱交期')
+    expect(body).toContain('工作已完成：跟进鲜丰冷链箱交期')
     // The seeded kg walk feeds the evidence sheet behind the entry row.
     await page.getByRole('button', { name: 'KG 证据入口' }).click()
     await page.getByRole('region', { name: 'KG 证据卡' }).waitFor({ timeout: 15_000 })
@@ -182,10 +207,12 @@ describe('mobile v3 assistant (seeded sessions → fork pick + three-tier draft 
       async () => await userMessageWith(scaffold.baseUrl, ASK_SEED_ID, '是采购单，我们从鲜丰买进'),
       { timeout: 15_000 },
     ).toContain('是采购单，我们从鲜丰买进')
-    // The UI replays the answer: greyed group, highlighted pick, capsule reply.
+    // The UI replays the answer: greyed group, highlighted pick, capsule reply
+    // (the capsule carries the send-text verbatim; the check mark is a lucide
+    // glyph since the v4 visual batch).
     await expect.poll(async () => page.locator('[data-testid="ask-choice"]').getAttribute('class'), { timeout: 10_000 })
       .toContain('askAnswered')
-    await page.getByText('✓ 是采购单，我们从鲜丰买进').first().waitFor({ timeout: 10_000 })
+    await page.getByText('是采购单，我们从鲜丰买进').first().waitFor({ timeout: 10_000 })
     expect(tripwire.pageErrors).toEqual([])
   })
 
@@ -194,13 +221,14 @@ describe('mobile v3 assistant (seeded sessions → fork pick + three-tier draft 
     const card = page.locator('[data-testid="draft-card-v3"]')
     await card.waitFor({ timeout: 15_000 })
     // The three tiers render by their business names with the rationale
-    // annotations (01 ⑤B1/B2) before the decision.
+    // annotations (01 ⑤B1/B2) before the decision — the rationale rides under
+    // its value without a separator glyph since the v4 visual batch.
     const tiers = await card.innerText()
     expect(tiers).toContain('需要你定')
     expect(tiers).toContain('请确认 · AI 推导')
     expect(tiers).toContain('系统生成（1）')
-    expect(tiers).toContain('· 今天')
-    expect(tiers).toContain('· 200×32')
+    expect(tiers).toContain('今天')
+    expect(tiers).toContain('200×32')
     // Field-level edit before deciding: the required quantity.
     await card.locator('input[aria-label="数量"]').fill('260')
     await card.getByRole('button', { name: '确认写入' }).click()
@@ -219,7 +247,6 @@ describe('mobile v3 assistant (seeded sessions → fork pick + three-tier draft 
 
   it('renders the fresh-session welcome with zero user messages in the log', async () => {
     await openChat(BLANK_SEED_ID)
-    const listBody = await page.evaluate(async (b) => { const r = await fetch(b + '/api/session.list', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ type: 'client-request', rpcId: 'dbg', method: 'session.list', payload: {} }) }); return JSON.stringify(await r.json()).slice(0, 600) }, scaffold.baseUrl); console.log('BLANK-BODY:', JSON.stringify((await page.locator('main').innerText()).slice(0, 200))); console.log('LIST:', listBody)
     await page.getByTestId('welcome-card').waitFor({ timeout: 15_000 })
     // The welcome card carries the identity, capabilities, and starters (01 ⑤A2).
     const card = await page.getByTestId('welcome-card').innerText()

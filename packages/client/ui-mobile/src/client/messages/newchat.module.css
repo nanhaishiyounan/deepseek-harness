@@ -42,8 +42,8 @@
 }
 
 .close {
-  width: 32px;
-  height: 32px;
+  width: var(--dshm-touch-sm);
+  height: var(--dshm-touch-sm);
   border-radius: 50%;
   background: var(--dshm-muted);
   color: var(--dshm-muted-foreground);
@@ -111,6 +111,7 @@
   margin-top: 4px;
 }
 
+/* Plain display chips: the whole roster row is the one button. */
 .rosterChip {
   font-size: 10px;
   line-height: 16px;

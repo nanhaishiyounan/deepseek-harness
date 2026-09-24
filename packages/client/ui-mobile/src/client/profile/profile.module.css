@@ -1,6 +1,8 @@
-/* Me tab (03 §4.10): identity card, ledger metrics, the recent-receipts
-   strip (the ticket face), quick-start shortcuts, antd List settings, and
-   the destructive logout block. */
+/* Me tab (v6「我的」, the design's page-me): the identity card on the gradient
+    avatar, ledger metrics, the recent-receipts strip (the ticket face),
+    quick-start shortcuts, the set-group settings cards (偏好 / 数据与关于),
+    the 46×27 switches, the dashed disclaimer note, and the destructive
+    logout block. */
 
 .page {
   display: flex;
@@ -39,9 +41,9 @@
 .userCard {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   margin: 4px 12px 0;
-  padding: 14px;
+  padding: 18px 16px;
   background: var(--dshm-card);
   border: 1px solid var(--dshm-border);
   border-radius: var(--dshm-radius-lg);
@@ -58,9 +60,9 @@
 }
 
 .userName {
-  font-size: 16px;
+  font-size: 17px;
   line-height: 24px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--dshm-foreground);
 }
 
@@ -107,6 +109,59 @@
 .metricDivider {
   width: 1px;
   background: var(--dshm-stroke-soft);
+}
+
+/* The v5 workspace card (02 §2.9): the four-cell status counts, tap → work. */
+.workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 12px;
+  padding: 12px 14px;
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-border);
+  border-radius: var(--dshm-radius-lg);
+  box-shadow: var(--dshm-shadow-card);
+  text-align: left;
+  flex: none;
+}
+
+.workspaceTitle {
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--dshm-muted-foreground);
+}
+
+.workspaceGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.workspaceCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 6px;
+  background: var(--dshm-muted);
+  border-radius: var(--dshm-radius);
+  min-width: 0;
+}
+
+.workspaceValue {
+  font-family: var(--dshm-font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 20px;
+  line-height: 26px;
+  font-weight: 600;
+  color: var(--dshm-foreground);
+}
+
+.workspaceLabel {
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--dshm-foreground);
 }
 
 /* The recent-receipts strip: the newest landings in the ticket face. */
@@ -187,10 +242,10 @@
 }
 
 .shortcut {
-  height: 30px;
+  height: var(--dshm-touch-sm);
   padding: 0 14px;
   font-size: 12px;
-  line-height: 28px;
+  line-height: 34px;
   border: none;
   border-radius: 999px;
   background: var(--dshm-primary-soft);
@@ -201,19 +256,42 @@
   opacity: 0.5;
 }
 
-/* The settings group: antd List on the card face. */
-.settings {
+/* The settings band (the design's .set-group): the group title over one card
+    of antd List rows. */
+.setGroup {
+  display: flex;
+  flex-direction: column;
   margin: 0 12px;
+  flex: none;
+}
+
+.setTitle {
+  margin: 0;
+  padding: 12px 14px 4px;
+  font-size: 12.5px;
+  line-height: 18px;
+  font-weight: 600;
+  color: var(--dshm-muted-foreground);
+}
+
+.settings {
   border-radius: var(--dshm-radius-lg);
   overflow: hidden;
   --adm-font-size-9: 14px;
-  flex: none;
 }
 
 .settings :global(.adm-list) {
   --adm-color-background: var(--dshm-card);
   border-radius: var(--dshm-radius-lg);
-  box-shadow: var(--dshm-shadow-card);
+  border: 1px solid var(--dshm-border);
+}
+
+/* The design's 46×27 switch capsule: brand fill when checked. */
+.settings :global(.adm-switch) {
+  --width: 46px;
+  --height: 27px;
+  --border-radius: 999px;
+  --checked-color: var(--dshm-primary);
 }
 
 /* The destructive logout block stands alone, off the settings group. */
@@ -233,11 +311,16 @@
   flex: none;
 }
 
-.footer {
-  margin: 8px 16px 0;
+/* The dashed disclaimer note (the design's .me-note). */
+.disclaimerNote {
+  margin: 16px 12px 0;
+  padding: 12px 14px;
   text-align: center;
-  font-size: 10px;
-  line-height: 16px;
+  font-size: 12px;
+  line-height: 1.6;
   color: var(--dshm-muted-foreground);
+  background: var(--dshm-card);
+  border: 1px dashed var(--dshm-border);
+  border-radius: 12px;
   flex: none;
 }

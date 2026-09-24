@@ -174,13 +174,20 @@ describe('mobile sessions service', () => {
     expect(calls[1]?.payload).toMatchObject({ sessionId: 'session-1', title: '新标题' })
   })
 
-  it('projects the title and subtitle fallbacks and the HH:mm clock', () => {
+  it('projects the title and subtitle fallbacks and the HH:mm clock', async () => {
     const base = { sessionId: 's', updatedAt: 0 } as unknown as SessionSummary
     expect(titleOf({ ...base, projections: { values: { title: '已置顶' } } } as never)).toBe('已置顶')
     expect(titleOf({ ...base, projections: { values: { title: '   ' } } } as never)).toBe('未命名会话')
     expect(titleOf({ ...base, blank: true })).toBe('新会话')
     expect(subtitleOf(base)).toBe('本地会话')
-    expect(subtitleOf({ ...base, agentPreset: 'form-assistant' })).toBe('AI 同事 · form-assistant')
+    // Before the roster read lands, the colleague duty table (and its fallback) project; the bare preset id never does.
+    expect(subtitleOf({ ...base, agentPreset: 'business-advisor' })).toBe('经营洞察问答（只读）')
+    expect(subtitleOf({ ...base, agentPreset: 'not-in-any-table' })).toBe('AI 同事')
+    stubGateway({
+      'agentPreset.list': { presets: [{ id: 'mobile-form-assistant', name: '智能填表助手', isDefault: false }] },
+    })
+    await listAiEmployees()
+    expect(subtitleOf({ ...base, agentPreset: 'mobile-form-assistant' })).toBe('智能填表助手')
     expect(clockOf(new Date('2026-09-19T09:05:00').getTime())).toBe('09:05')
   })
 
@@ -327,7 +334,7 @@ describe('mobile auth non-object branch and routes', () => {
     expect(parseRoute('#/login').name).toBe('login')
     expect(parseRoute('#/login?next=/data').query.get('next')).toBe('/data')
     const fallback = parseRoute('#/nowhere')
-    expect(fallback.name).toBe('chats')
+    expect(fallback.name).toBe('home')
     expect(fallback.query.get('seed')).toBeNull()
   })
 })

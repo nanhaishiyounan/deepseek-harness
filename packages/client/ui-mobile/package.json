@@ -1,6 +1,6 @@
 {
   "name": "@deepseek-ai/dsh-client-ui-mobile",
-  "description": "Mobile v2 client shell: WeChat-style AI-colleague entry (two tabs: chats/me) into the NocoBase business system over the same /api gateway — chat flow, editable draft cards, human review, agent nb_create submit, and KG evidence",
+  "description": "Mobile v5 AI Workmate client: a ten-route workbench (four tabs: AI colleagues / chats / work / me) over the same /api gateway — chat with structured report cards, the todo→doing→review→done work loop driven from chat actions, editable draft cards with agent nb_create submit, and KG evidence",
   "version": "0.1.1-rc.2",
   "publishConfig": {
     "access": "public"

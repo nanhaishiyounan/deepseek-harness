@@ -2,11 +2,12 @@
  * Session-event fold for the mobile chat surface: a pure projection from raw
  * `session.history` events onto chat items — narrative bubbles (never
  * protocol fences), tool-call rows with their running/done state, the v3
- * structured items (ask / field-ask / action / receipt), the form-assistant
- * task cards, the collapsed notices for unvalidatable dsh fences, and the KG
- * evidence descriptors the answer cited. v3 fences (```dsh) split out of the
- * narrative; v2 drafts (```json) keep their legacy parse with the recognized
- * fence stripped from the bubble. Deterministic by seq; no React imports.
+ * structured items (ask / field-ask / action / receipt / report), the
+ * form-assistant task cards, the collapsed notices for unvalidatable dsh
+ * fences, and the KG evidence descriptors the answer cited. v3 fences
+ * (```dsh) split out of the narrative; v2 drafts (```json) keep their legacy
+ * parse with the recognized fence stripped from the bubble. Deterministic by
+ * seq; no React imports.
  */
 
 import { parseConfirmPush, splitDraftMessage, type ConfirmPush, type FormDraft } from './form-draft.ts'
@@ -19,6 +20,7 @@ import {
   type FormConfirmPayload,
   type FormDraftPayload,
   type RejectFlowPayload,
+  type ReportPayload,
   type SubmitReceiptPayload,
 } from './protocol.ts'
 
@@ -101,6 +103,14 @@ export interface ChatReceipt {
   readonly payload: SubmitReceiptPayload
 }
 
+/** One report fence: the structured report card (metrics/rows/table/actions). */
+export interface ChatReport {
+  readonly kind: 'report'
+  readonly seq: number
+  readonly time: number
+  readonly payload: ReportPayload
+}
+
 /** One dsh fence that failed validation: the collapsed summary row, never the raw JSON bubble. */
 export interface ChatDegradedNotice {
   readonly kind: 'degraded'
@@ -111,7 +121,8 @@ export interface ChatDegradedNotice {
 }
 
 /** The chat surface's item union in seq order. */
-export type ChatItem = ChatTextMessage | ChatToolRow | ChatTaskCard | ChatAsk | ChatFieldAsk | ChatAction | ChatReceipt | ChatDegradedNotice
+export type ChatItem =
+  | ChatTextMessage | ChatToolRow | ChatTaskCard | ChatAsk | ChatFieldAsk | ChatAction | ChatReceipt | ChatReport | ChatDegradedNotice
 
 /** A KG walk the assistant performed, kept for the evidence cards. */
 export type KgEvidenceQuery =
@@ -258,6 +269,9 @@ function foldAssistantText(text: string, seq: number, time: number, items: ChatI
         break
       case 'submit_receipt':
         items.push({ kind: 'receipt', seq: itemSeq, time, payload })
+        break
+      case 'report':
+        items.push({ kind: 'report', seq: itemSeq, time, payload })
         break
       case 'form_confirm':
       case 'reject_flow':

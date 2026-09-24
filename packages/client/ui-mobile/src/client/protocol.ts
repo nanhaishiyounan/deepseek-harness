@@ -1,9 +1,9 @@
 /**
  * The v3 structured message protocol: the `dsh` fenced payloads that ride
- * assistant messages (ask_choice / ask_field / form_draft / submit_receipt)
- * and user action messages (form_confirm / reject_flow). This module owns the
- * wire shapes' validation and the narrative/fence splitting every fold
- * consumer rides; an invalid or unknown fence degrades to ordinary text
+ * assistant messages (ask_choice / ask_field / form_draft / submit_receipt /
+ * report) and user action messages (form_confirm / reject_flow). This module
+ * owns the wire shapes' validation and the narrative/fence splitting every
+ * fold consumer rides; an invalid or unknown fence degrades to ordinary text
  * instead of breaking the chat flow. No React imports.
  */
 
@@ -116,6 +116,64 @@ export interface SubmitReceiptPayload {
   readonly summary: ReadonlyArray<{ label: string; value: string; kind: ReceiptSummaryKind }>
 }
 
+/** The layout variant of one report metric cell. */
+export type ReportMetricKind = 'count' | 'money' | 'percent' | 'text'
+
+/** The semantic tone of one report metric cell (absent = neutral). */
+export type ReportTone = 'positive' | 'warning' | 'danger'
+
+/** One report metric cell; the value arrives pre-formatted. */
+export interface ReportMetric {
+  readonly label: string
+  readonly value: string
+  readonly kind: ReportMetricKind
+  readonly tone?: ReportTone
+}
+
+/** The severity level of one report row (the leading dot's color). */
+export type ReportLevel = 'high' | 'medium' | 'low'
+
+/** One report row (a risk / todo / advice entry). */
+export interface ReportRow {
+  readonly label: string
+  readonly hint?: string
+  readonly level: ReportLevel
+}
+
+/** The layout variant of one report table column. */
+export type ReportColumnKind = 'text' | 'money' | 'percent' | 'count'
+
+/** The report's optional comparison table. */
+export interface ReportTable {
+  readonly columns: ReadonlyArray<{ label: string; kind?: ReportColumnKind }>
+  /** Rows as wide as `columns` (cell values arrive pre-formatted). */
+  readonly rows: ReadonlyArray<ReadonlyArray<string>>
+}
+
+/** One report action button; the dispatch executor switches on the kind. */
+export type ReportAction =
+  | { readonly kind: 'view'; readonly label: string; readonly route: string }
+  | { readonly kind: 'create-task'; readonly label: string; readonly title: string; readonly suggestion?: string }
+  | { readonly kind: 'send'; readonly label: string; readonly text: string }
+  | { readonly kind: 'link'; readonly label: string; readonly url: string }
+
+/** The report payload: the structured report card (metrics/rows/table/actions). */
+export interface ReportPayload {
+  readonly v: typeof DSH_PROTOCOL_VERSION
+  readonly type: 'report'
+  readonly id: string
+  readonly title: string
+  readonly subtitle?: string
+  /** 1–6 metric cells (the persona contract's self-check bound). */
+  readonly metrics: ReadonlyArray<ReportMetric>
+  /** 0–8 entry rows. */
+  readonly rows?: ReadonlyArray<ReportRow>
+  /** Optional table (columns ≤5, rows ≤10). */
+  readonly table?: ReportTable
+  /** 0–4 action buttons. */
+  readonly actions?: ReadonlyArray<ReportAction>
+}
+
 /** Every wire payload a `dsh` fence can carry. */
 export type DshPayload =
   | AskChoicePayload
@@ -124,6 +182,7 @@ export type DshPayload =
   | FormConfirmPayload
   | RejectFlowPayload
   | SubmitReceiptPayload
+  | ReportPayload
 
 /** One piece of a split message: a narrative run, a valid fence payload, or an unvalidatable dsh fence. */
 export type MessageSegment =
@@ -311,6 +370,154 @@ function parseRejectFlow(obj: Record<string, unknown>): RejectFlowPayload | unde
   return { v: DSH_PROTOCOL_VERSION, type: 'reject_flow', draftId, ...reason === undefined ? {} : { reason } }
 }
 
+/** Validate one report metric cell. */
+function parseReportMetric(raw: unknown): ReportMetric | undefined {
+  if (typeof raw !== 'object' || raw === null) return undefined
+  const metric = raw as Record<string, unknown>
+  const label = requiredText(metric['label'])
+  const value = requiredText(metric['value'])
+  const kind = oneOf(metric['kind'], ['count', 'money', 'percent', 'text'] as const)
+  if (label === undefined || value === undefined || kind === undefined) return undefined
+  const tone = oneOf(metric['tone'], ['positive', 'warning', 'danger'] as const)
+  // A present-but-illegal tone is a violation, not a missing hint to default.
+  if (metric['tone'] !== undefined && tone === undefined) return undefined
+  return { label, value, kind, ...tone === undefined ? {} : { tone } }
+}
+
+/** Validate one report entry row. */
+function parseReportRow(raw: unknown): ReportRow | undefined {
+  if (typeof raw !== 'object' || raw === null) return undefined
+  const row = raw as Record<string, unknown>
+  const label = requiredText(row['label'])
+  const level = oneOf(row['level'], ['high', 'medium', 'low'] as const)
+  if (label === undefined || level === undefined) return undefined
+  const hint = optionalText(row['hint'])
+  return { label, level, ...hint === undefined ? {} : { hint } }
+}
+
+/** Validate the report table: columns ≤5, rows ≤10, every row as wide as the columns. */
+function parseReportTable(value: unknown): ReportTable | undefined {
+  if (typeof value !== 'object' || value === null) return undefined
+  const table = value as Record<string, unknown>
+  if (!Array.isArray(table['columns']) || table['columns'].length === 0 || table['columns'].length > 5) return undefined
+  if (!Array.isArray(table['rows']) || table['rows'].length > 10) return undefined
+  const columns: { label: string; kind?: ReportColumnKind }[] = []
+  for (const raw of table['columns']) {
+    if (typeof raw !== 'object' || raw === null) return undefined
+    const column = raw as Record<string, unknown>
+    const label = requiredText(column['label'])
+    if (label === undefined) return undefined
+    const kind = oneOf(column['kind'], ['text', 'money', 'percent', 'count'] as const)
+    // A present-but-illegal kind is a violation, not a missing hint to default.
+    if (column['kind'] !== undefined && kind === undefined) return undefined
+    columns.push({ label, ...kind === undefined ? {} : { kind } })
+  }
+  const rows: string[][] = []
+  for (const raw of table['rows']) {
+    if (!Array.isArray(raw) || raw.length !== columns.length) return undefined
+    const cells: string[] = []
+    for (const cell of raw) {
+      if (typeof cell !== 'string') return undefined
+      cells.push(cell)
+    }
+    rows.push(cells)
+  }
+  return { columns, rows }
+}
+
+/** Validate one report action by its discriminated kind. */
+function parseReportAction(raw: unknown): ReportAction | undefined {
+  if (typeof raw !== 'object' || raw === null) return undefined
+  const action = raw as Record<string, unknown>
+  const label = requiredText(action['label'])
+  if (label === undefined) return undefined
+  switch (oneOf(action['kind'], ['view', 'create-task', 'send', 'link'] as const)) {
+    case 'view': {
+      const route = requiredText(action['route'])
+      return route === undefined ? undefined : { kind: 'view', label, route }
+    }
+    case 'create-task': {
+      // The real-LLM capture form writes the follow-up instruction into
+      // `text` instead of `title`; fold it back onto the legal shape — the
+      // first 32 code points become the title, the full text the suggestion
+      // (an explicit suggestion still wins). Both absent stays a violation.
+      const text = optionalText(action['text'])
+      const title = requiredText(action['title'])
+        ?? (text === undefined ? undefined : Array.from(text).slice(0, 32).join(''))
+      if (title === undefined) return undefined
+      const suggestion = optionalText(action['suggestion']) ?? text
+      return { kind: 'create-task', label, title, ...suggestion === undefined ? {} : { suggestion } }
+    }
+    case 'send': {
+      const text = requiredText(action['text'])
+      return text === undefined ? undefined : { kind: 'send', label, text }
+    }
+    case 'link': {
+      const url = requiredText(action['url'])
+      return url === undefined ? undefined : { kind: 'link', label, url }
+    }
+    default:
+      return undefined
+  }
+}
+
+/**
+ * Validate a report fence body. The metric/row/table/action ceilings are the
+ * persona contract's self-check bounds: an over-limit card degrades whole
+ * (its original fence stays visible) rather than silently truncating.
+ */
+function parseReport(obj: Record<string, unknown>): ReportPayload | undefined {
+  const id = requiredText(obj['id'])
+  const title = requiredText(obj['title'])
+  if (id === undefined || title === undefined) return undefined
+  if (!Array.isArray(obj['metrics']) || obj['metrics'].length < 1 || obj['metrics'].length > 6) return undefined
+  const metrics: ReportMetric[] = []
+  for (const raw of obj['metrics']) {
+    const metric = parseReportMetric(raw)
+    if (metric === undefined) return undefined
+    metrics.push(metric)
+  }
+  // An explicit null is the model's "left this one out" spelling (the real
+  // capture writes "table": null); treat it as absent, not as a violation.
+  let rows: ReportRow[] | undefined
+  if (obj['rows'] !== undefined && obj['rows'] !== null) {
+    if (!Array.isArray(obj['rows']) || obj['rows'].length > 8) return undefined
+    rows = []
+    for (const raw of obj['rows']) {
+      const row = parseReportRow(raw)
+      if (row === undefined) return undefined
+      rows.push(row)
+    }
+  }
+  let table: ReportTable | undefined
+  if (obj['table'] !== undefined && obj['table'] !== null) {
+    table = parseReportTable(obj['table'])
+    if (table === undefined) return undefined
+  }
+  let actions: ReportAction[] | undefined
+  if (obj['actions'] !== undefined) {
+    if (!Array.isArray(obj['actions']) || obj['actions'].length > 4) return undefined
+    actions = []
+    for (const raw of obj['actions']) {
+      const action = parseReportAction(raw)
+      if (action === undefined) return undefined
+      actions.push(action)
+    }
+  }
+  const subtitle = optionalText(obj['subtitle'])
+  return {
+    v: DSH_PROTOCOL_VERSION,
+    type: 'report',
+    id,
+    title,
+    ...subtitle === undefined ? {} : { subtitle },
+    metrics,
+    ...rows === undefined ? {} : { rows },
+    ...table === undefined ? {} : { table },
+    ...actions === undefined ? {} : { actions },
+  }
+}
+
 /** Validate a submit_receipt fence body. */
 function parseSubmitReceipt(obj: Record<string, unknown>): SubmitReceiptPayload | undefined {
   const draftId = requiredText(obj['draftId'])
@@ -353,6 +560,7 @@ export function parseDshPayload(body: string): DshPayload | undefined {
     case 'form_confirm': return parseFormConfirm(obj)
     case 'reject_flow': return parseRejectFlow(obj)
     case 'submit_receipt': return parseSubmitReceipt(obj)
+    case 'report': return parseReport(obj)
     default: return undefined
   }
 }

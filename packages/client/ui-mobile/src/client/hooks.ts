@@ -67,7 +67,10 @@ export type PollRead<T> =
  * @returns the latest read, refreshed by the timer; `refresh` re-reads now.
  */
 export function usePoll<T>(producer: () => Promise<T>, intervalMs: number, active: boolean): PollRead<T> {
-  const [read, setRead] = useState<PollRead<T>>({ status: 'loading', value: undefined, error: undefined, refresh: () => {} })
+  // One shared refresh closure: the switch below re-binds it onto every
+  // returned read, so the state entries reference the same callable.
+  const refresh = useCallback(() => { setTick(current => current + 1) }, [])
+  const [read, setRead] = useState<PollRead<T>>({ status: 'loading', value: undefined, error: undefined, refresh })
   const producerRef = useRef(producer)
   producerRef.current = producer
   const [tick, setTick] = useState(0)
@@ -78,10 +81,10 @@ export function usePoll<T>(producer: () => Promise<T>, intervalMs: number, activ
     const run = (): void => {
       producerRef.current().then((next) => {
         if (!alive) return
-        setRead({ status: 'ready', value: next, error: undefined, refresh: () => { setTick(current => current + 1) } })
+        setRead({ status: 'ready', value: next, error: undefined, refresh })
       }, (cause: unknown) => {
         if (!alive) return
-        setRead({ status: 'error', value: undefined, error: messageOf(cause), refresh: () => { setTick(current => current + 1) } })
+        setRead({ status: 'error', value: undefined, error: messageOf(cause), refresh })
       }).finally(() => {
         if (alive) timer = window.setTimeout(run, intervalMs)
       })
@@ -92,7 +95,6 @@ export function usePoll<T>(producer: () => Promise<T>, intervalMs: number, activ
       if (timer !== undefined) window.clearTimeout(timer)
     }
   }, [intervalMs, active, tick])
-  const refresh = useCallback(() => { setTick(current => current + 1) }, [])
   switch (read.status) {
     case 'ready':
       return { ...read, refresh }

@@ -1,4 +1,4 @@
-/* Shell: routed body above the two-tab bar. */
+/* Shell: routed body above the four-tab bar (v6 消息/同事/工作台/我的). */
 
 .shell {
   display: flex;
@@ -14,15 +14,30 @@
   flex-direction: column;
 }
 
+/* The v6 tab bar surface: the mock's #tabbar — its own tabbar color (not the
+ * page background), the hairline top line, and the 58px item row. */
 .tabbar {
   flex: none;
-  background: var(--dshm-background);
+  background: var(--dshm-tabbar-bg);
   border-top: 1px solid var(--dshm-border);
 }
 
-.tabbar :global(.adm-tab-bar) {
-  --adm-color-primary: var(--dshm-primary);
-  --adm-color: var(--dshm-muted-foreground);
-  --height: var(--dshm-tabbar-height);
-  background: transparent;
+/* antd-mobile's TabBar row is .adm-tab-bar-wrap (min-height 48px default);
+ * the inactive/active item colors ride the container-level --adm-* mapping. */
+.tabbar :global(.adm-tab-bar-wrap) {
+  min-height: var(--dshm-tabbar-height);
+}
+
+/* The mock's .tab-item typography: 10.5px/600 labels under a 22px icon slot
+ * (the lucide 1.8-stroke glyphs ride the 22px visual grade). */
+.tabbar :global(.adm-tab-bar-item-title) {
+  margin-top: 3px;
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.tabbar :global(.adm-tab-bar-item-icon) :global(svg) {
+  width: 22px;
+  height: 22px;
 }

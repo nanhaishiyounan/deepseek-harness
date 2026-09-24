@@ -1,0 +1,6 @@
+04d dshm-root theme=dark contrast: {"found":true,"parsed":true,"ratio":11.78,"color":"rgb(232, 236, 244)","bg":"rgb(27, 44, 74)","label":"驳回"}
+shot vfy-r1-04d-ghost-contrast-dark.png
+04d-ghost-contrast-dark: PASS — dshm-root=dark ratio=11.78 color=rgb(232, 236, 244) on rgb(27, 44, 74)
+08d switch before: {"found":true,"checked":false,"theme":"light"}
+shot vfy-r1-08d-theme-persist-dark.png
+08d-theme-persist: PASS — click→dark reload→dark

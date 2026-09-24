@@ -10,7 +10,7 @@ import type {
 } from '@deepseek-ai/dsh-host-apiproxy/api'
 import { rpc } from './rpc.ts'
 import type { FoldEvent } from './fold.ts'
-import type { Welcome } from './colleagues.ts'
+import { colleagueOf, type Welcome } from './colleagues.ts'
 
 /** The wire's branded session id; the mobile surface carries plain strings. */
 type SessionIdWire = RequestPayload<'session.history'>['sessionId']
@@ -35,7 +35,7 @@ export interface AiEmployee {
  */
 export async function listAiEmployees(): Promise<AiEmployee[]> {
   const value = await rpc('agentPreset.list', {})
-  return value.presets
+  const rows = value.presets
     .filter((entry: AgentPresetEntry) => entry.broken === undefined)
     .map((entry: AgentPresetEntry) => ({
       id: entry.id,
@@ -45,7 +45,13 @@ export async function listAiEmployees(): Promise<AiEmployee[]> {
       isDefault: entry.isDefault,
       welcome: entry.welcome,
     }))
+  rosterNames.clear()
+  for (const row of rows) rosterNames.set(row.id, row.name)
+  return rows
 }
+
+/** preset id → roster display name (the roster read's cache; the subtitle reads it before the duty table). */
+const rosterNames = new Map<string, string>()
 
 /**
  * Sessions the chats tab lists (newest first).
@@ -164,12 +170,15 @@ export function titleOf(summary: SessionSummary): string {
 }
 
 /**
- * Subtitle of one session summary (AI 同事 or 普通会话).
+ * Subtitle of one session summary: the owning preset's roster name (cached
+ * from the roster read), its colleague-duty line before that read lands, or
+ * the local-session label. A bare preset id never reaches the user.
  * @param summary - the session summary row.
- * @returns the owning preset or the local-session label.
+ * @returns the preset's display subtitle or the local-session label.
  */
 export function subtitleOf(summary: SessionSummary): string {
-  return summary.agentPreset === undefined ? '本地会话' : `AI 同事 · ${summary.agentPreset}`
+  if (summary.agentPreset === undefined) return '本地会话'
+  return rosterNames.get(summary.agentPreset) ?? colleagueOf(summary.agentPreset).duty
 }
 
 /**

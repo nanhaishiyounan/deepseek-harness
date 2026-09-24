@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 /** The v3 scaffolding components: ask bubbles, action badge, phase stamp, three-tier draft, receipt metric card. */
 
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import type { NocobaseFieldView } from '@deepseek-ai/dsh-host-apiproxy/api'
 
 afterEach(cleanup)
 import { ChoiceBubble } from '../src/client/messages/ChoiceBubble.tsx'
@@ -15,6 +16,7 @@ import { DraftCard } from '../src/client/forms/v3/DraftCard.tsx'
 import { ReceiptCard } from '../src/client/forms/v3/ReceiptCard.tsx'
 import type { ChatAsk, ChatFieldAsk } from '../src/client/fold.ts'
 import type { FormDraftPayload, SubmitReceiptPayload } from '../src/client/protocol.ts'
+import type { CollectionFieldMeta } from '../src/client/forms/task-cards.tsx'
 
 /** One ask item helper. */
 function askOf(overrides: Partial<ChatAsk['payload']> = {}, answered?: ChatAsk['answered']): ChatAsk {
@@ -297,6 +299,75 @@ describe('ReceiptCard v3', () => {
     // No hero block renders.
     expect(screen.queryByText('¥6,400')).toBeNull()
   })
+
+  it('renders the ticket strip when the summary carries an id row', () => {
+    render(<ReceiptCard payload={{
+      ...RECEIPT,
+      summary: [...RECEIPT.summary, { label: '入库单号', value: 'IN-2026-0042', kind: 'id' }],
+    }} />)
+    // The id row rides both the metric grid and its ticket strip.
+    expect(screen.getAllByText('入库单号').length).toBeGreaterThan(1)
+    expect(screen.getAllByText('IN-2026-0042').length).toBeGreaterThan(1)
+  })
+
+  it('renders relation fields as the picker trigger on the edit row and the derived face on the derived tier', async () => {
+    // The gateway stub carries the suppliers' option page for the picker and the label reads.
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+      const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
+      const body = JSON.parse((init?.body ?? '{}') as string) as { rpcId?: string }
+      const method = url.replace('/api/', '')
+      const value = method === 'nocobase.list' ? { rows: [{ id: 42, name: '宏发食品' }] } : {}
+      return new Response(JSON.stringify({ rpcId: body.rpcId, result: { ok: true, value } }), { status: 200 })
+    })
+    vi.stubGlobal('fetch', fetchMock)
+    const meta = new Map<string, CollectionFieldMeta>([['hub_po_purchase_orders', new Map<string, NocobaseFieldView>([
+      ['supplier_id', { name: 'supplier_id', type: 'belongsTo', target: 'hub_po_suppliers' }],
+      ['customer_id', { name: 'customer_id', type: 'belongsTo', target: 'crm_customers' }],
+    ])]])
+    const onEdit = vi.fn()
+    const payload: FormDraftPayload = {
+      ...DRAFT,
+      fields: [
+        { name: 'supplier_id', label: '供应商', value: '42', tier: 'required', widget: 'relation' },
+        { name: 'customer_id', label: '客户', value: 'C-9', tier: 'derived', widget: 'relation' },
+      ],
+    }
+    render(
+      <DraftCard
+        payload={payload} values={{ supplier_id: '42', customer_id: 'C-9' }} phase="draft"
+        meta={meta.get('hub_po_purchase_orders')}
+        onEdit={onEdit} onConfirm={() => {}} onReject={() => {}} onRedraft={() => {}} disabled={false}
+      />,
+    )
+    // The required relation renders the picker trigger (not a bare input); the
+    // prefilled id resolves its target-row label over the stubbed read.
+    await waitFor(() => { expect(screen.getByRole('button', { name: '供应商' }).textContent).toContain('宏发食品') })
+    // The derived relation rides the resolved face (a non-numeric value stays the raw text).
+    expect(screen.getByText('C-9')).toBeTruthy()
+    // A relation field with no metadata falls back to the bare input.
+    const bare = render(
+      <DraftCard
+        payload={{ ...payload, fields: [{ name: 'owner_id', label: '经办人', value: '7', tier: 'required', widget: 'relation' }] }}
+        values={{ owner_id: '7' }} phase="draft"
+        onEdit={() => {}} onConfirm={() => {}} onReject={() => {}} onRedraft={() => {}} disabled={false}
+      />,
+    )
+    expect((bare.container.querySelector('input[aria-label="经办人"]') as HTMLInputElement).value).toBe('7')
+    bare.unmount()
+    // Opening the picker and confirming routes the picked id as the edit.
+    fireEvent.click(screen.getByRole('button', { name: '供应商' }))
+    await waitFor(() => { expect(document.querySelector('.adm-picker')).toBeTruthy() })
+    await new Promise((resolve) => { setTimeout(resolve, 30) })
+    fireEvent.click(screen.getByText('确定'))
+    await waitFor(() => { expect(onEdit).toHaveBeenCalledWith('supplier_id', '42') })
+  })
+
+  it('ignores rich taps that did not land on an image', () => {
+    render(<RichContent text="一段普通叙述文字，没有图片。" />)
+    fireEvent.click(screen.getByText('一段普通叙述文字，没有图片。'))
+    // The tap never armed the viewer; the narrative keeps rendering.
+    expect(screen.getByText('一段普通叙述文字，没有图片。')).toBeTruthy()
+  })
 })
 
 describe('colleagues welcome metadata', () => {
@@ -309,8 +380,8 @@ describe('colleagues welcome metadata', () => {
     expect(welcomeOf('unknown-preset', undefined).greeting).toBe('你好，我是 AI 同事')
     expect(colleagueOf('business-advisor').duty).toBe('经营洞察问答（只读）')
     expect(colleagueOf('unknown-preset').acronym).toBe('AI')
-    expect(colleagueColor('mobile-form-assistant')).toBe('#0b5d56')
-    expect(colleagueColor('business-advisor')).toBe('#5c716d')
+    expect(colleagueColor('mobile-form-assistant')).toBe('#2e7cf6')
+    expect(colleagueColor('business-advisor')).toBe('#4f6076')
   })
 })
 

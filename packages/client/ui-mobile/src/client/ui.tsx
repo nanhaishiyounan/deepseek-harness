@@ -1,7 +1,8 @@
 /**
  * Shared mobile UI atoms: the flat stamp avatar, the badge chip, the running
- * spinner row, and the empty/error states (antd-mobile Empty / ErrorBlock on
- * this app's token track). Presentation only; no data paths.
+ * spinner row, the loading skeletons, and the empty/error states (antd-mobile
+ * Empty / ErrorBlock on this app's token track). Presentation only; no data
+ * paths.
  */
 
 import type { JSX, ReactNode } from 'react'
@@ -59,6 +60,44 @@ export function NoticeCard({ kind, text }: { kind: 'empty' | 'error'; text: stri
   return (
     <div className={css.notice} role="empty">
       <ErrorBlock status="empty" title={text} className={css.noticeBlock as string} />
+    </div>
+  )
+}
+
+/**
+ * One skeleton placeholder row (list-shaped loading state): avatar disc plus
+ * two text bars, breathing on the token pulse. Purely visual — the wrapping
+ * page group carries the role="status" announcement.
+ * @returns the skeleton row.
+ */
+export function SkelRow(): JSX.Element {
+  return (
+    <div className={css.skelRow} aria-hidden="true">
+      <span className={css.skelAvatar} />
+      <span className={css.skelTexts}>
+        <span className={css.skelLine} />
+        <span className={css.skelLineShort} />
+      </span>
+    </div>
+  )
+}
+
+/**
+ * One skeleton placeholder card (card-shaped loading state): head row (avatar
+ * disc plus a title bar) over two body bars, breathing on the token pulse.
+ * @returns the skeleton card.
+ */
+export function SkelCard(): JSX.Element {
+  return (
+    <div className={css.skelCard} aria-hidden="true">
+      <span className={css.skelHead}>
+        <span className={css.skelAvatar} />
+        <span className={css.skelTexts}>
+          <span className={css.skelLine} />
+        </span>
+      </span>
+      <span className={css.skelLine} />
+      <span className={css.skelLineShort} />
     </div>
   )
 }

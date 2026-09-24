@@ -28,6 +28,19 @@ export interface Welcome {
   readonly starters: readonly WelcomeStarter[]
 }
 
+/**
+ * The roster page's three capability groups (v6 roster IA, the design's
+ * GROUPS semantics mapped onto the real presets). An empty group renders no
+ * heading; presets the table leaves ungrouped collect under 更多 AI 同事.
+ */
+export type ColleagueGroup = '内容与创意' | '数据与技术' | '职能与效率'
+
+/** The render order of the roster groups (the trailing catch-all is separate). */
+export const COLLEAGUE_GROUPS: readonly ColleagueGroup[] = ['内容与创意', '数据与技术', '职能与效率']
+
+/** The roster presence chip (v6): AI colleagues have no offline hours. */
+export type ColleagueStatus = 'online' | 'busy' | 'meeting'
+
 /** One colleague's presentation metadata (avatar color, duty, welcome). */
 export interface ColleagueVisual {
   /** The avatar stamp color (the flat deep block behind the white acronym). */
@@ -38,6 +51,23 @@ export interface ColleagueVisual {
   readonly duty: string
   /** The new-session welcome metadata. */
   readonly welcome: Welcome
+  /** The roster page's capability group (v6); absent collects under 更多 AI 同事. */
+  readonly group?: ColleagueGroup
+  /** The roster page's skill pills (v6): short capability words off the duty. */
+  readonly skills: readonly string[]
+  /** The roster presence chip (v6); the AI presence is always 在线. */
+  readonly status: ColleagueStatus
+}
+
+/**
+ * The presence chip's label.
+ * @param status - the presence kind.
+ * @returns the chip text (在线/忙碌/会议中).
+ */
+export function statusLabelOf(status: ColleagueStatus): string {
+  if (status === 'busy') return '忙碌'
+  if (status === 'meeting') return '会议中'
+  return '在线'
 }
 
 /** The starters projected from the registry (three cross-form picks). */
@@ -55,29 +85,80 @@ function fillAssistantWelcome(): Welcome {
       registryCapabilityLine(),
       '表单类型我来判断，拿不准会先问你',
       '日期、编号、合计这些我推导，你只定关键项',
+      '风险、汇总、对比类问题我会给结构化报告卡，可一键变成任务跟进',
     ],
     starters: registryStarters(),
   }
 }
 
-/** The preset-id → visual table (unknown presets take the fallback). */
+/** The preset-id → visual table (the four roster presets, 04 §6; unknown presets take the fallback). */
 const COLLEAGUES: Readonly<Record<string, ColleagueVisual>> = {
   'mobile-form-assistant': {
-    color: '#0b5d56',
+    color: '#2e7cf6',
     acronym: '表单',
-    duty: '一句话登记六类业务单据',
+    duty: '单据登记与任务执行',
+    group: '职能与效率',
+    skills: ['单据登记', '字段推导', '报告汇总'],
+    status: 'online',
     welcome: fillAssistantWelcome(),
   },
   'business-advisor': {
-    color: '#5c716d',
+    color: '#4f6076',
     acronym: '参谋',
     duty: '经营洞察问答（只读）',
+    group: '数据与技术',
+    skills: ['经营问答', '风险提示', '采购洞察'],
+    status: 'online',
     welcome: {
       greeting: '我是经营参谋',
-      capabilities: ['问经营数据、风险提示、供应商与采购洞察', '只读不改：结论都注明数据来源'],
+      capabilities: [
+        '问经营数据、风险提示、供应商与采购洞察',
+        '只读不改：结论都注明数据来源',
+        '风险与对比结论给结构化报告卡',
+      ],
       starters: [
         { label: '问经营', send: '本月经营概览和风险提示' },
         { label: '问采购', send: '本月采购额按供应商拆开看' },
+      ],
+    },
+  },
+  'enterprise-data-assistant': {
+    color: '#3d5a80',
+    acronym: '数据',
+    duty: '企业数据问答与统计建议',
+    group: '数据与技术',
+    skills: ['企业档案', '供应链', '统计建议'],
+    status: 'online',
+    welcome: {
+      greeting: '我是企业数据助手',
+      capabilities: [
+        '问企业档案、走访纪要、市场与供应链数据',
+        '统计建议给结构化报告卡',
+        '变更记录经确认后落库',
+      ],
+      starters: [
+        { label: '问企业档案', send: '帮我看一下这家企业的档案要点' },
+        { label: '问供应链', send: '供应链数据里有什么值得关注的' },
+      ],
+    },
+  },
+  'food-compliance-officer': {
+    color: '#7a5c3e',
+    acronym: '合规',
+    duty: '食安法规问答与审核要点',
+    group: '职能与效率',
+    skills: ['法规问答', '编号溯源', '审核清单'],
+    status: 'online',
+    welcome: {
+      greeting: '我是 AI 食安合规官',
+      capabilities: [
+        'GB 2760/GB 14881 等法规问答',
+        '编号引用原文',
+        '输出审核要点清单',
+      ],
+      starters: [
+        { label: '查法规', send: 'GB 2760 里防腐剂的限量怎么看' },
+        { label: '审要点', send: '给我一份供应商资质审核要点清单' },
       ],
     },
   },
@@ -88,6 +169,8 @@ const FALLBACK: ColleagueVisual = {
   color: '#1c2b29',
   acronym: 'AI',
   duty: 'AI 同事',
+  skills: ['AI 同事'],
+  status: 'online',
   welcome: {
     greeting: '你好，我是 AI 同事',
     capabilities: ['有什么需要帮忙的直接说'],
@@ -103,6 +186,26 @@ const FALLBACK: ColleagueVisual = {
 export function colleagueOf(presetId: string | undefined): ColleagueVisual {
   if (presetId === undefined) return FALLBACK
   return COLLEAGUES[presetId] ?? FALLBACK
+}
+
+/**
+ * The roster render bands (v6): the three capability groups in order, then
+ * the 更多 AI 同事 catch-all for visuals the table left ungrouped. Empty
+ * bands drop out (the design's renderRoster: no heading without items).
+ * @param entries - the roster rows paired with their visual metadata.
+ * @returns the named bands that hold at least one row.
+ */
+export function rosterBandsOf<T extends { readonly id: string; readonly visual: ColleagueVisual }>(
+  entries: readonly T[],
+): ReadonlyArray<{ readonly title: string; readonly entries: readonly T[] }> {
+  const bands: { title: string; entries: T[] }[] = COLLEAGUE_GROUPS.map(group => ({
+    title: group,
+    entries: entries.filter(entry => entry.visual.group === group),
+  }))
+  const grouped = new Set(entries.filter(entry => entry.visual.group !== undefined).map(entry => entry.id))
+  const rest = entries.filter(entry => !grouped.has(entry.id))
+  if (rest.length > 0) bands.push({ title: '更多 AI 同事', entries: rest })
+  return bands.filter(band => band.entries.length > 0)
 }
 
 /**
