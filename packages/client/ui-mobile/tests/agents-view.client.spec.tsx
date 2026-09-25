@@ -89,11 +89,11 @@ describe('AgentsView', () => {
     })
     render(<AgentsView />)
     await waitFor(() => { expect(screen.getByText('智能填表助手')).toBeTruthy() })
-    fireEvent.change(screen.getByLabelText('搜索 AI 同事'), { target: { value: '经营' } })
+    fireEvent.change(screen.getByPlaceholderText('搜索姓名 / 职能 / 技能'), { target: { value: '经营' } })
     expect(screen.getByText('经营参谋')).toBeTruthy()
     expect(screen.queryByText('智能填表助手')).toBeNull()
     // A needle matching nothing shows the miss note.
-    fireEvent.change(screen.getByLabelText('搜索 AI 同事'), { target: { value: '不存在的技能' } })
+    fireEvent.change(screen.getByPlaceholderText('搜索姓名 / 职能 / 技能'), { target: { value: '不存在的技能' } })
     await waitFor(() => { expect(screen.getByText('没有找到匹配的同事')).toBeTruthy() })
   })
 
@@ -172,7 +172,7 @@ describe('AgentsView', () => {
     expect(screen.getByText('专用链路审计')).toBeTruthy()
     expect(screen.queryByText('企业档案')).toBeNull()
     // The duty word still matches through the local search.
-    fireEvent.change(screen.getByLabelText('搜索 AI 同事'), { target: { value: '审计' } })
+    fireEvent.change(screen.getByPlaceholderText('搜索姓名 / 职能 / 技能'), { target: { value: '审计' } })
     await waitFor(() => { expect(screen.getByText('定制审计员')).toBeTruthy() })
     expect(screen.queryByText('智能填表助手')).toBeNull()
   })

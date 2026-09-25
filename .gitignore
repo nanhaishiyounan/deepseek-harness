@@ -64,3 +64,4 @@ screenshots/
 examples/kb-agent/demos/**/*-backup.sqlite
 research/**/sources/*
 !research/**/sources/sources.md
+plans/

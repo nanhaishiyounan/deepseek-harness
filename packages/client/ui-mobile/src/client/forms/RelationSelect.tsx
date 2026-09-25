@@ -10,6 +10,7 @@
 import { useEffect, useState, type CSSProperties, type JSX } from 'react'
 import { Picker } from 'antd-mobile'
 import type { NocobaseRowView } from '@deepseek-ai/dsh-host-apiproxy/api'
+import { portalContainer } from '../portal.ts'
 import { relationLabelColumn } from '../fieldControls.ts'
 import { rpc } from '../rpc.ts'
 import { useRelationLabel } from './relation-label.ts'
@@ -67,6 +68,7 @@ export function RelationSelect(props: RelationSelectProps): JSX.Element {
   return (
     <Picker
       columns={[options ?? []]}
+      getContainer={portalContainer}
       value={[value]}
       aria-label={ariaLabel}
       onConfirm={(choice) => {

@@ -1,0 +1,37 @@
+{
+  "capturedAt": "2026-09-25T07:24:43.561Z",
+  "base": "http://127.0.0.1:3080",
+  "evidence": {
+    "statCellRule": "1px solid rgb(232, 237, 244)",
+    "statValueFs": "22px",
+    "statLabelColor": "rgb(117, 129, 153)",
+    "statsShadow": "rgba(23, 43, 77, 0.07) 0px 6px 24px 0px",
+    "quickCols": "85.5px 85.5px 85.5px 85.5px",
+    "rosterNames": [
+      {
+        "text": "AI 食安合规官",
+        "clipped": false
+      },
+      {
+        "text": "企业数据助手",
+        "clipped": false
+      },
+      {
+        "text": "智能填表助手",
+        "clipped": false
+      },
+      {
+        "text": "经营参谋",
+        "clipped": false
+      },
+      {
+        "text": "AI 营销洞察主管",
+        "clipped": false
+      }
+    ],
+    "recentShadow": "rgba(23, 43, 77, 0.07) 0px 6px 24px 0px",
+    "badge": {
+      "w": 8
+    }
+  }
+}

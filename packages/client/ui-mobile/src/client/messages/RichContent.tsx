@@ -10,12 +10,14 @@
  * fallback, a toast either way — copying never touches the session log). The
  * protocol fences were split out upstream — what arrives here is
  * people-language text plus genuine code. An inline image opens the antd
- * ImageViewer fullscreen.
+ * ImageViewer fullscreen, mounted through the shell's portal host so the
+ * desktop ≥720px mask stays inside the 430px bezel.
  */
 
 import { useMemo, useRef, useState, type JSX } from 'react'
-import { ImageViewer, Toast } from 'antd-mobile'
+import { Button, ImageViewer, Toast } from 'antd-mobile'
 import { Copy } from 'lucide-react'
+import { portalContainer } from '../portal.ts'
 import { renderMarkdown, sanitizeBizText, splitCodeBlocks, splitRichBlocks } from './rich.ts'
 import css from './messages.module.css'
 
@@ -68,10 +70,17 @@ function CodePlate({ lang, code }: { readonly lang: string; readonly code: strin
     <div className={css.codeBox} data-testid="code-box">
       <div className={css.codeHead}>
         <span className={css.codeLang}>{lang}</span>
-        <button type="button" className={css.copyBtn} aria-label="复制代码" onClick={() => { copyCode(code) }}>
+        <Button
+          type="button"
+          size="mini"
+          fill="none"
+          className={css.copyBtn}
+          aria-label="复制代码"
+          onClick={() => { copyCode(code) }}
+        >
           <Copy size={13} strokeWidth={1.8} aria-hidden="true" />
           复制
-        </button>
+        </Button>
       </div>
       <pre className={css.codeBody}>{code}</pre>
     </div>
@@ -128,6 +137,7 @@ export function RichContent({ text }: RichContentProps): JSX.Element {
         <ImageViewer.Multi
           images={viewer.images}
           defaultIndex={viewer.index}
+          getContainer={portalContainer}
           onClose={closeViewer}
         />
       )}

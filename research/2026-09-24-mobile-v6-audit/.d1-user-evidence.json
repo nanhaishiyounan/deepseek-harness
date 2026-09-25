@@ -1,0 +1,170 @@
+{
+  "capturedAt": "2026-09-25T03:03:15.935Z",
+  "base": "http://127.0.0.1:3080",
+  "evidence": {
+    "home": {
+      "roster": {
+        "count": 38,
+        "widths": [
+          "64px",
+          "64px",
+          "64px",
+          "64px",
+          "64px"
+        ],
+        "truncated": [
+          {
+            "text": "AI 食安合规官",
+            "clientW": 64,
+            "scrollW": 75,
+            "clipped": true
+          },
+          {
+            "text": "企业数据助手",
+            "clientW": 64,
+            "scrollW": 72,
+            "clipped": true
+          },
+          {
+            "text": "智能填表助手",
+            "clientW": 64,
+            "scrollW": 72,
+            "clipped": true
+          },
+          {
+            "text": "经营参谋",
+            "clientW": 48,
+            "scrollW": 48,
+            "clipped": false
+          },
+          {
+            "text": "AI 营销洞察主管",
+            "clientW": 64,
+            "scrollW": 87,
+            "clipped": true
+          }
+        ],
+        "cardW": 72
+      },
+      "statsCard": {
+        "shadow": "none",
+        "border": "1px rgb(232, 237, 244)"
+      },
+      "statValue": {
+        "fs": "20px",
+        "fw": "600"
+      },
+      "quickRow": {
+        "flexWrap": "wrap",
+        "h": 36,
+        "chips": [
+          102,
+          66,
+          78,
+          85
+        ]
+      },
+      "recentBadge": {
+        "w": 10,
+        "h": 10,
+        "bg": "rgb(229, 72, 77)"
+      },
+      "recentList": {
+        "shadow": "none"
+      }
+    },
+    "sheetOpenAttempt": "clicked",
+    "sheet390": {
+      "viewport": {
+        "w": 390,
+        "h": 844
+      },
+      "sheetFound": true,
+      "sheet": {
+        "top": 319,
+        "bottom": 844,
+        "height": 525,
+        "overflowsViewport": false
+      },
+      "popup": {
+        "scrollHeight": 525,
+        "clientHeight": 525,
+        "clipped": false
+      },
+      "titleInput": {
+        "border": "1px solid",
+        "radius": "10px",
+        "bg": "rgb(255, 255, 255)",
+        "h": 44
+      },
+      "pickerRows": [
+        {
+          "border": "1px solid rgba(232, 237, 244, 0.6)",
+          "top": "2px",
+          "h": 44
+        },
+        {
+          "border": "1px solid rgba(232, 237, 244, 0.6)",
+          "top": "2px",
+          "h": 44
+        }
+      ],
+      "sourceStrip": {
+        "whiteSpace": "normal",
+        "overflow": "visible",
+        "lines": 3
+      },
+      "suggestion": {
+        "bg": "rgb(247, 249, 253)",
+        "radius": "10px",
+        "labelFs": "11px"
+      }
+    },
+    "sheet375": {
+      "viewport": {
+        "w": 375,
+        "h": 667
+      },
+      "sheetFound": true,
+      "sheet": {
+        "top": 142,
+        "bottom": 667,
+        "height": 525,
+        "overflowsViewport": false
+      },
+      "popup": {
+        "scrollHeight": 525,
+        "clientHeight": 525,
+        "clipped": false
+      },
+      "titleInput": {
+        "border": "1px solid",
+        "radius": "10px",
+        "bg": "rgb(255, 255, 255)",
+        "h": 44
+      },
+      "pickerRows": [
+        {
+          "border": "1px solid rgba(232, 237, 244, 0.6)",
+          "top": "2px",
+          "h": 44
+        },
+        {
+          "border": "1px solid rgba(232, 237, 244, 0.6)",
+          "top": "2px",
+          "h": 44
+        }
+      ],
+      "sourceStrip": {
+        "whiteSpace": "normal",
+        "overflow": "visible",
+        "lines": 3
+      },
+      "suggestion": {
+        "bg": "rgb(247, 249, 253)",
+        "radius": "10px",
+        "labelFs": "11px"
+      }
+    }
+  }
+}

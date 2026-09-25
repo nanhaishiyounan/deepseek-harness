@@ -1,0 +1,9 @@
+{
+  "capturedAt": "2026-09-24T16:40:19.868Z",
+  "base": "http://127.0.0.1:3080",
+  "evidence": [
+    "11 toast light: {\"toast\":{\"background-color\":\"rgba(24, 32, 47, 0.92)\",\"border-radius\":\"999px\",\"bottom\":\"110px\",\"color\":\"rgb(255, 255, 255)\",\"__rect\":{\"x\":97.5,\"y\":677,\"width\":195,\"height\":57,\"top\":677,\"right\":292.5,\"bottom\":734,\"left\":97.5}}}",
+    "14 toast dark: {\"toast\":{\"background-color\":\"rgba(232, 236, 244, 0.92)\",\"color\":\"rgb(24, 32, 47)\",\"border-radius\":\"999px\",\"bottom\":\"110px\",\"__rect\":{\"x\":97.5,\"y\":677,\"width\":195,\"height\":57,\"top\":677,\"right\":292.5,\"bottom\":734,\"left\":97.5}}}",
+    "32 login CTA: {\"cta\":{\"background-color\":\"rgb(46, 124, 246)\",\"color\":\"rgb(255, 255, 255)\",\"border-radius\":\"10px\",\"__rect\":{\"x\":41,\"y\":487,\"width\":308,\"height\":49.1875,\"top\":487,\"right\":349,\"bottom\":536.1875,\"left\":41}}}"
+  ]
+}

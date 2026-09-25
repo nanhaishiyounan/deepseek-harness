@@ -1,0 +1,19 @@
+{
+  "capturedAt": "2026-09-24T13:46:34.921Z",
+  "base": "http://127.0.0.1:3080",
+  "evidence": [
+    "report card with task action present: false",
+    "taskform-light layers: {\"popupBody\":null,\"mask\":null,\"sheetTitle\":null,\"fieldInput\":null,\"sheetSubmit\":null,\"bodyVars\":{\"--adm-color-primary\":\"#1677ff\",\"--adm-color-background\":\"#ffffff\",\"--dshm-card\":\"\",\"--dshm-primary\":\"\"},\"sheetBackgroundChain\":null}",
+    "picker probe: null",
+    "picker confirm: null",
+    "switch checked: null",
+    "field error: null",
+    "toast: null",
+    "taskform-dark layers: {\"popupBody\":null,\"mask\":null,\"sheetTitle\":null,\"fieldInput\":null,\"sheetSubmit\":null,\"bodyVars\":{\"--adm-color-primary\":\"#1677ff\",\"--adm-color-background\":\"#ffffff\",\"--dshm-card\":\"\",\"--dshm-primary\":\"\"},\"sheetBackgroundChain\":null}",
+    "dark picker: null",
+    "dark picker header: null",
+    "dark switch: null",
+    "newchat sheet: {\"background-color\":\"rgba(0, 0, 0, 0)\",\"border-top-left-radius\":\"0px\",\"__rect\":{\"x\":0,\"y\":337.609375,\"width\":390,\"height\":506.390625,\"top\":337.609375,\"right\":390,\"bottom\":844,\"left\":0}}",
+    "dialog: {\"body\":{\"background-color\":\"rgb(255, 255, 255)\",\"border-radius\":\"8px\",\"__rect\":{\"x\":55,\"y\":331,\"width\":280,\"height\":182,\"top\":331,\"right\":335,\"bottom\":513,\"left\":55}},\"title\":{\"color\":\"rgb(51, 51, 51)\",\"font-size\":\"18px\",\"__rect\":{\"x\":55,\"y\":351,\"width\":280,\"height\":25,\"top\":351,\"right\":335,\"bottom\":376,\"left\":55}},\"confirm\":{\"color\":\"rgb(22, 119, 255)\",\"background-color\":\"rgba(0, 0, 0, 0)\",\"__rect\":{\"x\":55,\"y\":468,\"width\":140.5,\"height\":45,\"top\":468,\"right\":195.5,\"bottom\":513,\"left\":55}}}"
+  ]
+}

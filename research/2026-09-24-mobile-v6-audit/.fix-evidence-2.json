@@ -1,0 +1,9 @@
+{
+  "capturedAt": "2026-09-24T16:28:07.554Z",
+  "base": "http://127.0.0.1:3080",
+  "evidence": [
+    "17 date picker light: {\"sheet\":{\"background-color\":\"rgb(255, 255, 255)\",\"border-top-left-radius\":\"16px\",\"border-top-right-radius\":\"16px\",\"__rect\":{\"x\":0,\"y\":319,\"width\":390,\"height\":525,\"top\":319,\"right\":390,\"bottom\":844,\"left\":0}},\"centerBody\":null,\"popupCount\":2}",
+    "32 login CTA (dialog cleared=true): {\"cta\":null}",
+    "09 clear dialog dark (up=true): {\"body\":{\"background-color\":\"rgb(26, 33, 45)\",\"__rect\":{\"x\":55,\"y\":331,\"width\":280,\"height\":182,\"top\":331,\"right\":335,\"bottom\":513,\"left\":55}},\"content\":{\"color\":\"rgb(232, 236, 244)\",\"__rect\":{\"x\":55,\"y\":384,\"width\":280,\"height\":83,\"top\":384,\"right\":335,\"bottom\":467,\"left\":55}},\"title\":{\"color\":\"rgb(232, 236, 244)\",\"__rect\":{\"x\":55,\"y\":351,\"width\":280,\"height\":25,\"top\":351,\"right\":335,\"bottom\":376,\"left\":55}},\"confirm\":{\"color\":\"rgb(46, 124, 246)\",\"__rect\":{\"x\":195.5,\"y\":468,\"width\":139.5,\"height\":45,\"top\":468,\"right\":335,\"bottom\":513,\"left\":195.5}}}"
+  ]
+}

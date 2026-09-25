@@ -14,6 +14,13 @@
   flex-direction: column;
 }
 
+/* The shell-scoped mount point for antd-mobile portals (Popup/Picker/Dialog);
+ * contents-only so it adds no box — the fixed layers position against the
+ * shell root (translateZ on desktop) and inherit the .dshm-root tokens. */
+.portalHost {
+  display: contents;
+}
+
 /* The v6 tab bar surface: the mock's #tabbar — its own tabbar color (not the
  * page background), the hairline top line, and the 58px item row. */
 .tabbar {

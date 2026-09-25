@@ -31,6 +31,7 @@
   height: var(--dshm-touch);
   margin-left: -10px;
   border-radius: 50%;
+  background: none;
   color: var(--dshm-foreground);
 }
 

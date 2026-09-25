@@ -1,18 +1,19 @@
 /**
- * The work tab (v6「工作台」, the design's page-tools over the v5 ledger): the
- * page header with the tasks/files entries, the colleagues' tool grid (one
- * card per roster preset — the avatar-colored icon block, the duty
+ * The work tab (v6「工作台」, the ledger first over the design's page-tools):
+ * the page header with the tasks/files entries, the four-status capsule tabs
+ * with live counts, the work cards (28px work stamp, ledger meta line,
+ * source-chat back-link, demo tag, and the per-status quick action row — the
+ * list is the quick console, flipping states in place with a toast), the
+ * empty state's route to the agents page, and then the colleagues' tool grid
+ * (one card per roster preset — the avatar-colored icon block, the duty
  * description, and 去聊聊 starting that colleague's chat with its first
- * starter message over the real createSession + promptSession path), then the
- * four-status capsule tabs with live counts, the work cards (28px work stamp,
- * ledger meta line, source-chat back-link, demo tag, and the per-status
- * quick action row — the list is the quick console, flipping states in place
- * with a toast), and the empty state's route to the agents page. Work data
+ * starter message over the real createSession + promptSession path) below the
+ * fold. The page scrolls as a whole so the ledger reads on entry. Work data
  * derives from the workStore through useSyncExternalStore.
  */
 
 import { useMemo, useRef, useState, useSyncExternalStore, type JSX } from 'react'
-import { CapsuleTabs, DotLoading, ErrorBlock, Toast } from 'antd-mobile'
+import { Button, CapsuleTabs, DotLoading, ErrorBlock, Tag, Toast } from 'antd-mobile'
 import { Bot, ChevronRight, ClipboardList, Database, LineChart, ShieldCheck } from 'lucide-react'
 import { buildReworkMessage, startWorkExecution } from '../actions.ts'
 import { colleagueOf, welcomeOf } from '../colleagues.ts'
@@ -137,10 +138,104 @@ export function WorkView(): JSX.Element {
       <header className={css.workHeader}>
         <h1 className={css.workTitle}>工作</h1>
         <div className={css.workEntries}>
-          <button type="button" className={css.entryLink} onClick={() => { navigate('#/tasks') }}>任务</button>
-          <button type="button" className={css.entryLink} onClick={() => { navigate('#/files') }}>文件</button>
+          <Button type="button" fill="outline" size="small" className={css.entryLink} style={{ '--border-color': 'var(--dshm-border)' }} onClick={() => { navigate('#/tasks') }}>任务</Button>
+          <Button type="button" fill="outline" size="small" className={css.entryLink} style={{ '--border-color': 'var(--dshm-border)' }} onClick={() => { navigate('#/files') }}>文件</Button>
         </div>
       </header>
+      <CapsuleTabs
+        activeKey={tab}
+        onChange={(key) => { selectTab(key as WorkStatus) }}
+        className={css.statusTabs as string}
+      >
+        {STATUS_TABS.map(entry => (
+          <CapsuleTabs.Tab
+            key={entry.status}
+            title={`${entry.label} ${String(byStatus(store.items, entry.status).length)}`}
+          />
+        ))}
+      </CapsuleTabs>
+      <section className={css.workList} aria-label="工作列表">
+        {rows.length === 0 && (
+          <div className={css.emptyWrap}>
+            <ErrorBlock status="empty" title="这个状态还没有工作" description="去聊天里让 AI 同事帮你处理" />
+            <Button
+              type="button"
+              fill="outline"
+              size="small"
+              className={css.actionSecondary}
+              style={{ '--border-color': 'var(--dshm-border)' }}
+              onClick={() => { navigate('#/agents') }}
+            >
+              去找 AI 同事
+            </Button>
+          </div>
+        )}
+        {rows.map(item => (
+          <article key={item.id} className={css.workCard} data-testid="work-card">
+            <div className={css.cardHeadRow}>
+              <button
+                type="button"
+                className={css.cardHeadButton}
+                aria-label={`打开 ${item.title}`}
+                onClick={() => { navigate(`#/work/${item.id}`) }}
+              >
+                <WorkStamp status={item.status} size="sm" />
+                <span className={css.cardTitle}>{item.title}</span>
+              </button>
+              {item.demo && <Tag className={css.cardDemoTag as string} style={{ '--background-color': 'transparent', '--text-color': 'var(--dshm-muted-foreground)', '--border-color': 'var(--dshm-border)' }}>示例</Tag>}
+            </div>
+            <div className={css.cardMeta}>
+              <span>负责人 {item.owner}</span>
+              {item.due !== undefined && <span>截止 {item.due}</span>}
+              {item.sourceSessionId !== undefined && (
+                <Button
+                  type="button"
+                  size="mini"
+                  fill="none"
+                  className={css.sourceBadge}
+                  onClick={() => { navigate(`#/chat/${item.sourceSessionId}`) }}
+                >
+                  来自对话 <ChevronRight size={10} aria-hidden="true" />
+                </Button>
+              )}
+            </div>
+            {item.status === 'todo' && (
+              <div className={css.cardActions}>
+                <Button type="button" color="primary" size="small" className={css.actionPrimary} onClick={() => { start(item) }}>开始执行</Button>
+              </div>
+            )}
+            {item.status === 'doing' && (
+              <div className={css.cardActions}>
+                <span className={css.doingNote}><DotLoading color="currentColor" /> AI 同事执行中</span>
+                <Button
+                  type="button"
+                  fill="outline"
+                  size="small"
+                  className={css.actionSecondary}
+                  style={{ '--border-color': 'var(--dshm-border)' }}
+                  onClick={() => { navigate(`#/work/${item.id}`) }}
+                >
+                  查看进度
+                </Button>
+              </div>
+            )}
+            {item.status === 'review' && (
+              <div className={css.cardActions}>
+                <Button type="button" fill="outline" size="small" className={css.actionSecondary} style={{ '--border-color': 'var(--dshm-border)' }} onClick={() => { reject(item) }}>打回</Button>
+                <Button type="button" color="primary" size="small" className={css.actionPrimary} onClick={() => { confirm(item) }}>确认完成</Button>
+              </div>
+            )}
+            {item.status === 'done' && (
+              <div className={css.cardActions}>
+                <span className={css.doneSummary}>{item.result?.summary ?? '已完成'}</span>
+                <Button type="button" color="primary" fill="none" size="small" className={css.actionLink} onClick={() => { navigate(`#/work/${item.id}`) }}>
+                  查看结果
+                </Button>
+              </div>
+            )}
+          </article>
+        ))}
+      </section>
       {tools.length > 0 && (
         <section className={css.toolsGrid} aria-label="AI 同事工具">
           {tools.map(tool => (
@@ -160,84 +255,6 @@ export function WorkView(): JSX.Element {
           ))}
         </section>
       )}
-      <CapsuleTabs
-        activeKey={tab}
-        onChange={(key) => { selectTab(key as WorkStatus) }}
-        className={css.statusTabs as string}
-      >
-        {STATUS_TABS.map(entry => (
-          <CapsuleTabs.Tab
-            key={entry.status}
-            title={`${entry.label} ${String(byStatus(store.items, entry.status).length)}`}
-          />
-        ))}
-      </CapsuleTabs>
-      <section className={css.workList} aria-label="工作列表">
-        {rows.length === 0 && (
-          <div className={css.emptyWrap}>
-            <ErrorBlock status="empty" title="这个状态还没有工作" description="去聊天里让 AI 同事帮你处理" />
-            <button type="button" className={css.actionSecondary} onClick={() => { navigate('#/agents') }}>
-              去找 AI 同事
-            </button>
-          </div>
-        )}
-        {rows.map(item => (
-          <article key={item.id} className={css.workCard} data-testid="work-card">
-            <div className={css.cardHeadRow}>
-              <button
-                type="button"
-                className={css.cardHeadButton}
-                aria-label={`打开 ${item.title}`}
-                onClick={() => { navigate(`#/work/${item.id}`) }}
-              >
-                <WorkStamp status={item.status} size="sm" />
-                <span className={css.cardTitle}>{item.title}</span>
-              </button>
-              {item.demo && <span className={css.cardDemoTag}>示例</span>}
-            </div>
-            <div className={css.cardMeta}>
-              <span>负责人 {item.owner}</span>
-              {item.due !== undefined && <span>截止 {item.due}</span>}
-              {item.sourceSessionId !== undefined && (
-                <button
-                  type="button"
-                  className={css.sourceBadge}
-                  onClick={() => { navigate(`#/chat/${item.sourceSessionId}`) }}
-                >
-                  来自对话 <ChevronRight size={10} aria-hidden="true" />
-                </button>
-              )}
-            </div>
-            {item.status === 'todo' && (
-              <div className={css.cardActions}>
-                <button type="button" className={css.actionPrimary} onClick={() => { start(item) }}>开始执行</button>
-              </div>
-            )}
-            {item.status === 'doing' && (
-              <div className={css.cardActions}>
-                <span className={css.doingNote}><DotLoading color="currentColor" /> AI 同事执行中</span>
-                <button type="button" className={css.actionSecondary} onClick={() => { navigate(`#/work/${item.id}`) }}>
-                  查看进度
-                </button>
-              </div>
-            )}
-            {item.status === 'review' && (
-              <div className={css.cardActions}>
-                <button type="button" className={css.actionSecondary} onClick={() => { reject(item) }}>打回</button>
-                <button type="button" className={css.actionPrimary} onClick={() => { confirm(item) }}>确认完成</button>
-              </div>
-            )}
-            {item.status === 'done' && (
-              <div className={css.cardActions}>
-                <span className={css.doneSummary}>{item.result?.summary ?? '已完成'}</span>
-                <button type="button" className={css.actionLink} onClick={() => { navigate(`#/work/${item.id}`) }}>
-                  查看结果
-                </button>
-              </div>
-            )}
-          </article>
-        ))}
-      </section>
     </div>
   )
 }

@@ -1,0 +1,18 @@
+{
+  "capturedAt": "2026-09-24T14:42:18.632Z",
+  "base": "http://127.0.0.1:3080",
+  "evidence": [
+    "work detail opened: false",
+    "detail hash: #/work",
+    "workdetail: {\"progressFill\":null,\"track\":null,\"stepRunning\":null,\"stepDone\":null,\"timeline\":null,\"stamp\":null}",
+    "capsule tabs active: {\"capsuleActive\":null,\"capsuleWrap\":{\"--adm-color-primary\":\"#2e7cf6\",\"__rect\":{\"x\":0,\"y\":671,\"width\":390,\"height\":63.5,\"top\":671,\"right\":390,\"bottom\":734.5,\"left\":0}}}",
+    "ptr: {\"head\":null}",
+    "swipe actions: {\"action\":null}",
+    "desktop taskform opened: false",
+    "desktop popup rects: {\"root\":{\"x\":425,\"y\":14,\"width\":430,\"height\":804,\"top\":14,\"right\":855,\"bottom\":818,\"left\":425}}",
+    "desktop dialog up: true",
+    "desktop dialog rects: {\"rootLeft\":425,\"rootWidth\":430,\"dialog\":{\"x\":0,\"y\":846,\"width\":0,\"height\":0,\"top\":846,\"right\":0,\"bottom\":846,\"left\":0}}",
+    "logout dialog: {\"body\":{\"background-color\":\"rgb(255, 255, 255)\",\"border-radius\":\"8px\",\"__rect\":{\"x\":55,\"y\":341.5,\"width\":280,\"height\":161,\"top\":341.5,\"right\":335,\"bottom\":502.5,\"left\":55}},\"confirm\":{\"color\":\"rgb(22, 119, 255)\",\"__rect\":{\"x\":195.5,\"y\":457.5,\"width\":139.5,\"height\":45,\"top\":457.5,\"right\":335,\"bottom\":502.5,\"left\":195.5}}}",
+    "login dark: {\"root\":{\"background-color\":\"rgb(14, 19, 27)\",\"__rect\":{\"x\":0,\"y\":0,\"width\":390,\"height\":844,\"top\":0,\"right\":390,\"bottom\":844,\"left\":0}},\"input\":{\"background-color\":\"rgba(0, 0, 0, 0)\",\"border-color\":\"rgb(232, 236, 244)\",\"color\":\"rgb(232, 236, 244)\",\"__rect\":{\"x\":41,\"y\":359,\"width\":308,\"height\":24,\"top\":359,\"right\":349,\"bottom\":383,\"left\":41}}}"
+  ]
+}

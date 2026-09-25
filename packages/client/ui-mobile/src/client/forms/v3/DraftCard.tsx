@@ -10,7 +10,7 @@
  */
 
 import { useState, type JSX } from 'react'
-import { Button, Collapse } from 'antd-mobile'
+import { Button, Collapse, Input } from 'antd-mobile'
 import type { CardPhase } from '../../cardState.ts'
 import type { NocobaseFieldView } from '@deepseek-ai/dsh-host-apiproxy/api'
 import { fieldControlOf } from '../../fieldControls.ts'
@@ -187,13 +187,14 @@ function EditableValue(
       )
     }
   }
+  // antd-mobile Input: the enclosing fieldRow label names the control (the
+  // component's prop face does not carry aria-label through to the element).
   return (
-    <input
+    <Input
       className={css.fieldInput}
-      aria-label={field.label}
       value={value}
       disabled={disabled}
-      onChange={(event) => { onEdit(field.name, event.target.value) }}
+      onChange={(next) => { onEdit(field.name, next) }}
     />
   )
 }

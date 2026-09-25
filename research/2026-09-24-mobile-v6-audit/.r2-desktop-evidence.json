@@ -1,0 +1,12 @@
+{
+  "capturedAt": "2026-09-24T18:19:24.479Z",
+  "base": "http://127.0.0.1:3080",
+  "evidence": [
+    "desktop root rect: {\"__class\":\"dshm-root\",\"__rect\":{\"x\":425,\"y\":14,\"width\":430,\"height\":772,\"top\":14,\"right\":855,\"bottom\":786,\"left\":425}}",
+    "narrative images present: 0",
+    "injected arm img: false",
+    "viewer opened: false",
+    "imageviewer containment: {\"ok\":false,\"reason\":\"missing root or mask\"}",
+    "console errors/exceptions: 0"
+  ]
+}

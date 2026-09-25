@@ -10,6 +10,7 @@ import { useEffect, useMemo, useState, type JSX } from 'react'
 import type { NocobaseFieldView } from '@deepseek-ai/dsh-host-apiproxy/api'
 import { Button, Dialog, Steps } from 'antd-mobile'
 import { CheckCircle2, CircleX, FilePenLine } from 'lucide-react'
+import { portalContainer } from '../portal.ts'
 import type { FormDraft, PushReceipt } from '../form-draft.ts'
 import { fieldControlOf, type FieldControlSpec } from '../fieldControls.ts'
 import { rpc } from '../rpc.ts'
@@ -150,6 +151,7 @@ export function ReviewCard(
       </footer>
       <Dialog
         visible={confirmOpen}
+        getContainer={portalContainer}
         title="确认提交"
         content={`即将写入业务表 ${draft.collection}，提交后由 AI 同事执行落库并回传行号。`}
         closeOnMaskClick

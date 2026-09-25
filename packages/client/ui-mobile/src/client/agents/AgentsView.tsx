@@ -11,8 +11,7 @@
  */
 
 import { useMemo, useRef, useState, type JSX } from 'react'
-import { DotLoading, Toast } from 'antd-mobile'
-import { Search } from 'lucide-react'
+import { Badge, DotLoading, SearchBar, Tag, Toast } from 'antd-mobile'
 import { colleagueOf, rosterBandsOf, statusLabelOf, type ColleagueVisual } from '../colleagues.ts'
 import { messageOf, useAsync } from '../hooks.ts'
 import { navigate } from '../router.ts'
@@ -20,6 +19,24 @@ import { createSession, listAiEmployees } from '../sessionsService.ts'
 import { NoticeCard, SkelRow } from '../ui.tsx'
 import { Avatar } from '../ui.tsx'
 import css from './agents.module.css'
+
+/** The presence dot's color per status (the antd Badge dial). */
+const DOT_COLORS: Record<ColleagueVisual['status'], string> = {
+  online: 'var(--dshm-success)',
+  busy: 'var(--dshm-warning)',
+  meeting: 'var(--dshm-brand2)',
+}
+
+/**
+ * The presence chip's face per status: Tag owns its colors through inline
+ * CSS variables (a class declaration would lose to the component's own
+ * inline defaults), so the quiet capsule recolors through these dials.
+ */
+const CHIP_FACES: Record<ColleagueVisual['status'], { '--background-color': string; '--text-color': string; '--border-color': string }> = {
+  online: { '--background-color': 'var(--dshm-muted)', '--text-color': 'var(--dshm-success)', '--border-color': 'var(--dshm-border)' },
+  busy: { '--background-color': 'var(--dshm-muted)', '--text-color': 'var(--dshm-warning)', '--border-color': 'var(--dshm-border)' },
+  meeting: { '--background-color': 'var(--dshm-muted)', '--text-color': 'var(--dshm-brand2)', '--border-color': 'var(--dshm-border)' },
+}
 
 /** The agents tab. */
 export function AgentsView(): JSX.Element {
@@ -80,17 +97,12 @@ export function AgentsView(): JSX.Element {
         <h1 className={css.headerTitle}>AI 同事</h1>
       </header>
       <div className={css.searchWrap}>
-        <div className={css.searchBox}>
-          <Search size={17} strokeWidth={1.8} aria-hidden="true" />
-          <input
-            className={css.searchInput}
-            type="text"
-            value={keyword}
-            aria-label="搜索 AI 同事"
-            placeholder="搜索姓名 / 职能 / 技能"
-            onChange={(event) => { setKeyword(event.target.value) }}
-          />
-        </div>
+        <SearchBar
+          className={css.searchBox}
+          value={keyword}
+          placeholder="搜索姓名 / 职能 / 技能"
+          onChange={setKeyword}
+        />
       </div>
       <section className={css.list} aria-label="AI 同事目录">
         {roster.status === 'loading' && (
@@ -121,8 +133,9 @@ export function AgentsView(): JSX.Element {
                   onClick={() => { start(row.id) }}
                 >
                   <span className={css.rosterAva}>
-                    <Avatar background={visual.color} acronym={visual.acronym} size={42} />
-                    <span className={`${css.avaDot} ${css[`dot_${visual.status}`]}`} aria-hidden="true" />
+                    <Badge color={DOT_COLORS[visual.status]} content={Badge.dot} className={css.avaDot as string}>
+                      <Avatar background={visual.color} acronym={visual.acronym} size={42} />
+                    </Badge>
                   </span>
                   <span className={css.rosterInfo}>
                     <span className={css.rosterNameRow}>
@@ -134,7 +147,19 @@ export function AgentsView(): JSX.Element {
                     {row.description !== '' && <span className={css.rosterTag}>{duty}</span>}
                     {visual.skills.length > 0 && (
                       <span className={css.skillPills}>
-                        {visual.skills.map(skill => <span key={skill} className={css.skillPill}>{skill}</span>)}
+                        {visual.skills.map(skill => (
+                          <Tag
+                            key={skill}
+                            className={css.skillPill as string}
+                            style={{
+                              '--background-color': 'var(--dshm-primary-soft)',
+                              '--text-color': 'var(--dshm-on-soft)',
+                              '--border-color': 'transparent',
+                            }}
+                          >
+                            {skill}
+                          </Tag>
+                        ))}
                       </span>
                     )}
                     {startingId === row.id && (
@@ -143,7 +168,9 @@ export function AgentsView(): JSX.Element {
                       </span>
                     )}
                   </span>
-                  <span className={`${css.statusChip} ${css[`chip_${visual.status}`]}`}>{statusLabel}</span>
+                  <Tag className={css.statusChip as string} style={CHIP_FACES[visual.status]}>
+                    {statusLabel}
+                  </Tag>
                 </button>
               )
             })}

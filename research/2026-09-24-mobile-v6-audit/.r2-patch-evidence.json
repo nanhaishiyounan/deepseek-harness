@@ -1,0 +1,16 @@
+{
+  "capturedAt": "2026-09-24T18:19:01.425Z",
+  "base": "http://127.0.0.1:3080",
+  "evidence": [
+    "dark login ok",
+    "[dark] cardHeadButton (进行中): null",
+    "[dark] work-doing UA-leaks: []",
+    "[dark] code-box chat index: -1",
+    "askChip picked/plain (dark): {\"picked\":{\"__class\":\"_askChip_1efbw_448 _askSelected_1efbw_404\",\"color\":\"rgb(232, 236, 244)\",\"background-color\":\"rgb(27, 44, 74)\",\"border-color\":\"rgb(46, 124, 246)\",\"__rect\":{\"x\":67,\"y\":595.96875,\"width\":297,\"height\":40,\"top\":595.96875,\"right\":364,\"bottom\":635.96875,\"left\":67}},\"plain\":{\"__class\":\"_askChip_1efbw_448 \",\"color\":\"rgb(232, 236, 244)\",\"background-color\":\"rgb(26, 33, 45)\",\"border-color\":\"rgba(46, 124, 246, 0.35)\",\"__rect\":{\"x\":67,\"y\":643.96875,\"width\":297,\"height\":40,\"top\":643.96875,\"right\":364,\"bottom\":683.96875,\"left\":67}}}",
+    "light login ok",
+    "[light] cardHeadButton (进行中): null",
+    "[light] work-doing UA-leaks: []",
+    "[light] code-box chat index: -1",
+    "console errors/exceptions: 0"
+  ]
+}

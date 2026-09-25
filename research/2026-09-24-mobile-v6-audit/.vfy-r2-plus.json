@@ -1,0 +1,8 @@
+{
+  "capturedAt": "2026-09-24T19:05:36.444Z",
+  "base": "http://127.0.0.1:3080",
+  "evidence": [
+    "[light] composer plusBtn: {\"cls\":\"_plus_1efbw_22\",\"bg\":\"rgb(46, 124, 246)\",\"color\":\"rgb(255, 255, 255)\",\"border\":\"rgb(0, 0, 0)\"}",
+    "[dark] composer plusBtn: {\"cls\":\"_plusBtn_1ih33_503 \",\"bg\":\"rgba(0, 0, 0, 0)\",\"color\":\"rgb(140, 150, 170)\",\"border\":\"rgb(0, 0, 0)\"}"
+  ]
+}

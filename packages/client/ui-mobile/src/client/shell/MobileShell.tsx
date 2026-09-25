@@ -12,6 +12,7 @@ import { useEffect, type JSX } from 'react'
 import { SafeArea, TabBar } from 'antd-mobile'
 import { LayoutGrid, MessageSquare, User, Users } from 'lucide-react'
 import { seedDemoData } from '../demoSeed.ts'
+import { setPortalHost } from '../portal.ts'
 import type { MobileIdentity } from '../auth.ts'
 import { navigate, useRoute } from '../router.ts'
 import { AgentsView } from '../agents/AgentsView.tsx'
@@ -71,6 +72,7 @@ export function MobileShell({ identity, dark, onDarkChange, onLogout }: MobileSh
           <ProfileView identity={identity} dark={dark} onDarkChange={onDarkChange} onLogout={onLogout} />
         )}
       </main>
+      <div className={css.portalHost} ref={setPortalHost} />
       {chrome && (
         <nav className={css.tabbar} aria-label="底部导航">
           <TabBar

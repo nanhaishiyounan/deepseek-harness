@@ -9,6 +9,7 @@
 import { useCallback, useEffect, useState, type JSX } from 'react'
 import { Popup } from 'antd-mobile'
 import { Search, X } from 'lucide-react'
+import { portalContainer } from '../portal.ts'
 import type { KgEvidenceQuery } from '../fold.ts'
 import { rpc } from '../rpc.ts'
 import { messageOf } from '../hooks.ts'
@@ -56,6 +57,7 @@ export function KgEvidenceSection({ queries }: KgEvidenceSectionProps): JSX.Elem
         visible={open}
         onMaskClick={close}
         destroyOnClose
+        getContainer={portalContainer}
         bodyClassName={css.sheetBody as string}
         className={css.sheetWrap as string}
       >

@@ -9,6 +9,7 @@
 import { type JSX } from 'react'
 import { DatePicker, Input, Picker, Stepper, Switch, TextArea } from 'antd-mobile'
 import type { FieldControlSpec } from '../fieldControls.ts'
+import { portalContainer } from '../portal.ts'
 import { RelationSelect } from './RelationSelect.tsx'
 import css from './field-widget.module.css'
 
@@ -67,6 +68,7 @@ export function FieldWidget({ spec, value, locked, onChange }: FieldWidgetProps)
           <span className={css.label}>{spec.label}</span>
           <DatePicker
             value={parseDate(value)}
+            getContainer={portalContainer}
             precision="day"
             aria-label={spec.label}
             onConfirm={(date) => { onChange(formatDate(date)) }}
@@ -85,6 +87,7 @@ export function FieldWidget({ spec, value, locked, onChange }: FieldWidgetProps)
           <span className={css.label}>{spec.label}</span>
           <Picker
             columns={[spec.options.map(option => ({ value: option, label: option }))]}
+            getContainer={portalContainer}
             value={[value]}
             aria-label={spec.label}
             onConfirm={(choice) => { onChange(confirmedValue(choice, value)) }}

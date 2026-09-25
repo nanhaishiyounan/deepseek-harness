@@ -1,0 +1,11 @@
+{
+  "capturedAt": "2026-09-24T14:51:54.221Z",
+  "base": "http://127.0.0.1:3080",
+  "evidence": [
+    "report card: {\"card\":{\"background-color\":\"rgb(247, 249, 253)\",\"border-color\":\"rgb(232, 237, 244)\",\"border-radius\":\"13px\",\"box-shadow\":\"none\",\"__rect\":{\"x\":53,\"y\":202.96875,\"width\":325,\"height\":378,\"top\":202.96875,\"right\":378,\"bottom\":580.96875,\"left\":53}},\"stamp\":{\"border-color\":\"rgb(46, 124, 246)\",\"color\":\"rgb(29, 95, 214)\",\"background-color\":\"rgb(234, 242, 255)\",\"__rect\":{\"x\":336,\"y\":215.96875,\"width\":28,\"height\":28,\"top\":215.96875,\"right\":364,\"bottom\":243.96875,\"left\":336}},\"primaryBtn\":{\"__rect\":{\"x\":67,\"y\":531.96875,\"width\":96,\"height\":36,\"top\":531.96875,\"right\":163,\"bottom\":567.96875,\"left\":67}},\"allButtons\":[{\"text\":\"追问缓解建议\",\"bg\":\"rgba(0, 0, 0, 0)\",\"color\":\"rgb(24, 32, 47)\"},{\"text\":\"创建处理任务\",\"bg\":\"rgba(0, 0, 0, 0)\",\"color\":\"rgb(24, 32, 47)\"}]}",
+    "fill assistant opened: true",
+    "form message sent: ok",
+    "form flow dom: {\"hasDraftCard\":false,\"hasFieldAsk\":17,\"bodySample\":\"表单\\n新会话\\n智能填表助手\\n今天\\n登记一条采购入库单，供应商鲜丰冷链，金额3800元\\n表单\\nAI\\n\\n\\\"采购入库单\\\"在我们这边对应两张不同的单据，先确认一下您想登记哪一种。\\n\\n「采购入库单」在我们系统里对应两张不同的单据，您想登记的是哪一种？\\n\\n采购单\\n与供应商签订进货约定，记录品名/数量/单价\\n入库单\\n到货收货、上架入库，记录来源单据与品名\\n自己打字说明\"}",
+    "home: {\"header\":null,\"tabbar\":{\"background-color\":\"rgb(255, 255, 255)\",\"__rect\":{\"x\":0,\"y\":785,\"width\":390,\"height\":59,\"top\":785,\"right\":390,\"bottom\":844,\"left\":0}},\"tabbarActive\":{\"color\":\"rgb(46, 124, 246)\",\"__rect\":{\"x\":38.25,\"y\":822.203125,\"width\":21,\"height\":12.59375,\"top\":822.203125,\"right\":59.25,\"bottom\":834.796875,\"left\":38.25}}}"
+  ]
+}

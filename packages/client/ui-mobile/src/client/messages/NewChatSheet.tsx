@@ -7,8 +7,9 @@
  */
 
 import { useEffect, useMemo, useState, type JSX } from 'react'
-import { Popup, Toast } from 'antd-mobile'
+import { Popup, Tag, Toast } from 'antd-mobile'
 import { X } from 'lucide-react'
+import { portalContainer } from '../portal.ts'
 import { navigate } from '../router.ts'
 import { useAsync } from '../hooks.ts'
 import { Avatar } from '../ui.tsx'
@@ -71,6 +72,7 @@ export function NewChatSheet({ visible, onClose }: NewChatSheetProps): JSX.Eleme
       visible={visible}
       onMaskClick={onClose}
       destroyOnClose
+      getContainer={portalContainer}
       bodyClassName={css.sheetBody as string}
       className={css.sheetWrap as string}
     >
@@ -99,10 +101,16 @@ export function NewChatSheet({ visible, onClose }: NewChatSheetProps): JSX.Eleme
                     {formChips.length > 0 && (
                       <span className={css.rosterChips}>
                         {/* The chips ride inside the row button (their start
-                            action is the row's own), so they render as plain
-                            spans — a nested button would be invalid HTML. */}
+                            action is the row's own), so they render as display
+                            Tags — a nested button would be invalid HTML. */}
                         {formChips.map(chip => (
-                          <span key={chip} className={css.rosterChip}>{chip}</span>
+                          <Tag
+                            key={chip}
+                            className={css.rosterChip as string}
+                            style={{ '--background-color': 'var(--dshm-primary-soft)', '--text-color': 'var(--dshm-primary)', '--border-color': 'transparent' }}
+                          >
+                            {chip}
+                          </Tag>
                         ))}
                       </span>
                     )}

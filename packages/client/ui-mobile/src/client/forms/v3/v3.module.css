@@ -233,7 +233,11 @@
   text-align: right;
 }
 
-.fieldInput {
+/* The boxed field input: antd-mobile Input — the boxed face rides on the
+   wrapper (this class); the element inherits the fill through the dials. */
+.fieldInput:global(.adm-input) {
+  --font-size: 14px;
+  --color: var(--dshm-foreground);
   flex: 1;
   max-width: 180px;
   height: 36px;
@@ -243,12 +247,10 @@
   border: 1px solid var(--dshm-border);
   border-radius: var(--dshm-radius);
   background: var(--dshm-card);
-  color: var(--dshm-foreground);
   box-sizing: border-box;
 }
 
-.fieldInput:focus {
-  outline: none;
+.fieldInput:global(.adm-input):focus-within {
   border: 2px solid var(--dshm-primary);
   padding: 0 9px;
 }
@@ -279,6 +281,8 @@
   width: 100%;
   padding: 0;
   text-align: left;
+  background: none;
+  color: var(--dshm-foreground);
 }
 
 .derivedRow:active {

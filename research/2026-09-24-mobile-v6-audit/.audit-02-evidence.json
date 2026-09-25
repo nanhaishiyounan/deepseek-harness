@@ -1,0 +1,16 @@
+{
+  "capturedAt": "2026-09-24T14:11:49.210Z",
+  "base": "http://127.0.0.1:3080",
+  "evidence": [
+    "quick panel open: true",
+    "quick panel: {\"panel\":{\"background-color\":\"rgb(255, 255, 255)\",\"border-radius\":\"18px 18px 0px 0px\",\"box-shadow\":\"rgba(23, 43, 77, 0.12) 0px -8px 30px 0px\",\"__rect\":{\"x\":0,\"y\":564,\"width\":390,\"height\":212,\"top\":564,\"right\":390,\"bottom\":776,\"left\":0}},\"toolBtn\":{\"background-color\":\"rgba(0, 0, 0, 0)\",\"color\":\"rgb(24, 32, 47)\",\"border-radius\":\"12px\",\"__rect\":{\"x\":16,\"y\":607,\"width\":174.5,\"height\":46,\"top\":607,\"right\":190.5,\"bottom\":653,\"left\":16}}}",
+    "light toast: {\"main\":{\"background-color\":\"rgba(0, 0, 0, 0.7)\",\"border-radius\":\"8px\",\"color\":\"rgb(255, 255, 255)\",\"font-size\":\"15px\",\"max-width\":\"204px\",\"__rect\":{\"x\":93,\"y\":387.5,\"width\":204,\"height\":69,\"top\":387.5,\"right\":297,\"bottom\":456.5,\"left\":93}},\"inRoot\":false}",
+    "datepicker: {\"header\":null,\"confirm\":null,\"body\":null}",
+    "portal switch checkbox (in TaskFormModal): null",
+    "in-root switch checkbox (profile 通知): {\"background-color\":\"rgb(46, 124, 246)\",\"__rect\":{\"x\":320,\"y\":645.5,\"width\":46,\"height\":27,\"top\":645.5,\"right\":366,\"bottom\":672.5,\"left\":320}}",
+    "dark quick panel: {\"panel\":{\"background-color\":\"rgb(19, 25, 36)\",\"__rect\":{\"x\":0,\"y\":564,\"width\":390,\"height\":212,\"top\":564,\"right\":390,\"bottom\":776,\"left\":0}},\"toolBtn\":{\"background-color\":\"rgba(0, 0, 0, 0)\",\"color\":\"rgb(232, 236, 244)\",\"__rect\":{\"x\":16,\"y\":607,\"width\":174.5,\"height\":46,\"top\":607,\"right\":190.5,\"bottom\":653,\"left\":16}}}",
+    "dark toast: {\"background-color\":\"rgba(0, 0, 0, 0.7)\",\"color\":\"rgb(255, 255, 255)\",\"__rect\":{\"x\":93,\"y\":387.5,\"width\":204,\"height\":69,\"top\":387.5,\"right\":297,\"bottom\":456.5,\"left\":93}}",
+    "images in chat flow: 0",
+    "skeleton: null"
+  ]
+}

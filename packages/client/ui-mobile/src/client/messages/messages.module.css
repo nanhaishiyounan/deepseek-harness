@@ -81,6 +81,7 @@
   text-align: left;
   background: var(--dshm-card);
   border-bottom: 1px solid var(--dshm-stroke-soft);
+  color: var(--dshm-foreground);
 }
 
 .sessionRow:active {
@@ -283,37 +284,17 @@
   gap: 8px;
 }
 
-/* The starter chips (the design's .chip): 44px pick capsules — brand text on
-    the card face behind the 35%-brand rim, pressed scale. */
-.starter {
-  min-height: var(--dshm-touch);
-  padding: 0 16px;
+/* The starter chips (the design's .chip): antd-mobile Buttons in the
+     primary-outline slot (the brand rim rides an inline variable in
+     WelcomeCard.tsx) — 44px capsules. */
+.starter:global(.adm-button) {
+  --border-radius: 999px;
+  height: var(--dshm-touch);
+  padding-block: 0;
+  padding-inline: 16px;
   font-size: 14px;
-  line-height: 1.2;
   font-weight: 600;
-  border: 1px solid rgba(46, 124, 246, 0.35);
-  border-radius: 999px;
-  background: var(--dshm-card);
   box-shadow: 0 2px 6px rgba(46, 124, 246, 0.08);
-  color: var(--dshm-primary);
-  display: inline-flex;
-  align-items: center;
-  transition: transform 120ms ease-out, background-color 120ms ease-out;
-}
-
-.starter:active {
-  transform: scale(0.95);
-  background: var(--dshm-primary-soft);
-}
-
-.starter:disabled {
-  opacity: 0.5;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .starter {
-    transition: none;
-  }
 }
 
 /* ask bubbles (v6, the design's .notice form): the three pick forms with the
@@ -375,6 +356,7 @@
   border: 1px solid var(--dshm-border);
   border-radius: var(--dshm-radius);
   box-shadow: var(--dshm-shadow-card);
+  color: var(--dshm-foreground);
   transition: background-color 120ms ease-out, border-color 120ms ease-out, color 120ms ease-out;
 }
 
@@ -449,7 +431,9 @@
   gap: 8px;
 }
 
-/* The ask picks ride the quick-chip form (44px capsule, brand rim). */
+/* The ask picks ride the quick-chip form (44px capsule, brand rim). The chip
+     face takes on-soft, not primary: on the dark card track brand reads 4.1:1
+     (the ghost-button precedent, v3.module.css). */
 .askChip {
   display: inline-flex;
   align-items: center;
@@ -461,7 +445,7 @@
   border: 1px solid rgba(46, 124, 246, 0.35);
   border-radius: 999px;
   background: var(--dshm-card);
-  color: var(--dshm-primary);
+  color: var(--dshm-on-soft);
   transition: transform 120ms ease-out, background-color 120ms ease-out, color 120ms ease-out;
 }
 
@@ -505,20 +489,32 @@
   color: var(--dshm-on-primary);
 }
 
+/* The picked chip keeps its chip scale: brand-soft fill under the solid brand
+    rim (the design's chip:active form) — a shade change, not the ink face the
+    picked askCard carries. */
+.askChip.askSelected {
+  background: var(--dshm-primary-soft);
+  border-color: var(--dshm-primary);
+  color: var(--dshm-on-soft);
+}
+
+.askChip.askSelected .askChipHint {
+  color: var(--dshm-on-soft);
+  opacity: 1;
+}
+
 .askSelected .askCardHint,
 .askSelected .askChipHint {
   color: var(--dshm-on-primary);
   opacity: 0.8;
 }
 
-.askFree {
+/* The free-text escape arm: the antd none-fill link word. */
+.askFree:global(.adm-button) {
   align-self: flex-start;
   padding: 0;
   font-size: 13px;
-  line-height: 20px;
   color: var(--dshm-muted-foreground);
-  background: none;
-  border: none;
   text-decoration: underline;
 }
 
@@ -530,6 +526,8 @@
   color: var(--dshm-muted-foreground);
 }
 
+/* The receipt capsule (antd Tag; the tone washes ride inline variables in
+   ActionBadge.tsx): this class keeps the layout and the 12px scale. */
 .actionBadge {
   display: inline-flex;
   align-items: center;
@@ -539,14 +537,6 @@
   padding: 0 12px;
   font-size: 12px;
   line-height: 16px;
-  border-radius: 999px;
-  background: var(--dshm-primary-10);
-  color: var(--dshm-on-soft);
-}
-
-.actionBadgeReject {
-  background: var(--dshm-destructive-10);
-  color: var(--dshm-destructive);
 }
 
 /* Rich narrative (03 §4.5): the sanitized markdown ticket face. */
@@ -704,20 +694,16 @@
   text-transform: lowercase;
 }
 
-.copyBtn {
+/* The copy entry: the antd mini none-fill word on the code plate's chrome. */
+.copyBtn:global(.adm-button) {
+  --border-radius: 7px;
+  --text-color: #c7d3e6;
   display: inline-flex;
   align-items: center;
   gap: 4px;
   padding: 3px 8px;
-  border-radius: 7px;
   font-size: 11.5px;
   line-height: 16px;
-  color: #c7d3e6;
-  transition: background-color 150ms ease-out;
-}
-
-.copyBtn:active {
-  background: rgba(255, 255, 255, 0.1);
 }
 
 .codeBody {
@@ -981,7 +967,9 @@
   color: var(--dshm-muted-foreground);
 }
 
-/* The action row: primary solid ink-teal, secondary rimmed ghost. */
+/* The action row: antd-mobile Buttons — the primary arm rides the brand solid
+   slot, the ghost arm the solid slot recolored to brand-on-brand-soft through
+   its inline CSS-variable dials. */
 .reportActions {
   display: flex;
   flex-wrap: wrap;
@@ -989,31 +977,17 @@
   margin-top: 0;
 }
 
-.reportPrimary {
+/* The shared 36px pill-grade sizing both arms keep. */
+.reportPrimary:global(.adm-button),
+.reportSecondary:global(.adm-button) {
   height: var(--dshm-touch-sm);
-  padding: 0 16px;
-  border: none;
-  border-radius: var(--dshm-radius);
-  background: var(--dshm-primary);
-  color: var(--dshm-on-primary);
-  font-size: 13px;
+  padding-block: 0;
+  padding-inline: 15px;
   font-weight: 600;
 }
 
-.reportPrimary:active {
-  background: var(--dshm-primary-press);
-}
-
-/* The ghost arm (the design's .r-btn.ghost): brand on brand-soft. */
-.reportSecondary {
-  height: var(--dshm-touch-sm);
-  padding: 0 15px;
-  border: none;
-  border-radius: 11px;
-  background: var(--dshm-primary-soft);
-  color: var(--dshm-on-soft);
-  font-size: 13px;
-  font-weight: 650;
+.reportPrimary:global(.adm-button) {
+  --border-radius: var(--dshm-radius);
 }
 
 /* ---- Demo typing indicator (03 §8-6): three breathing stamp dots. ---- */

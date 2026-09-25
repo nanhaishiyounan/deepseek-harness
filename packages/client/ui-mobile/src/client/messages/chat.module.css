@@ -74,6 +74,13 @@
   padding: 14px 12px 16px;
 }
 
+/* The quick panel overlays the flow bottom (absolute over the composer);
+ * open, the flow gains bottom padding so the last chat line scrolls clear
+ * of it. */
+.flowPanelOpen {
+  padding-bottom: 216px;
+}
+
 /* The one entrance motion (the design's msgIn .28s): a new flow row settles
     up into place; CSS animations run at insertion, so only genuinely new
     items move. */
@@ -449,6 +456,7 @@
   min-height: 46px;
   border-radius: 12px;
   border: 1px solid var(--dshm-border);
+  background: none;
   color: var(--dshm-muted-foreground);
   font-size: 12.5px;
   line-height: 16px;
@@ -469,20 +477,16 @@
   display: none;
 }
 
-.chip {
+/* The composer's candidate chips: antd-mobile Buttons in the primary-outline
+   slot (the card face and brand rim ride inline variables in ChatView.tsx);
+   this class keeps the 36px capsule sizing. */
+.chip:global(.adm-button) {
+  --border-radius: 999px;
   flex: none;
   height: var(--dshm-touch-sm);
-  padding: 0 12px;
+  padding-block: 0;
+  padding-inline: 12px;
   font-size: 12px;
-  line-height: 26px;
-  color: var(--dshm-primary);
-  background: var(--dshm-card);
-  border: 1px solid rgba(46, 124, 246, 0.35);
-  border-radius: 999px;
-}
-
-.chip:disabled {
-  opacity: 0.5;
 }
 
 .inputRow {
@@ -499,6 +503,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  background: none;
   color: var(--dshm-muted-foreground);
   flex: none;
   transition: background-color 150ms ease-out, color 150ms ease-out;

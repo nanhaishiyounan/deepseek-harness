@@ -1,0 +1,10 @@
+{
+  "capturedAt": "2026-09-24T18:53:08.884Z",
+  "base": "http://127.0.0.1:3080",
+  "evidence": [
+    "dark logout dialog (clicked=true shown=true): {\"1677\":[],\"body\":{\"__class\":\"adm-center-popup-body adm-dialog-body\",\"background-color\":\"rgb(26, 33, 45)\",\"border-radius\":\"16px\",\"__rect\":{\"x\":55,\"y\":341.5,\"width\":280,\"height\":161,\"top\":341.5,\"right\":335,\"bottom\":502.5,\"left\":55}},\"content\":{\"__class\":\"adm-dialog-content\",\"color\":\"rgb(232, 236, 244)\",\"__rect\":{\"x\":55,\"y\":394.5,\"width\":280,\"height\":62,\"top\":394.5,\"right\":335,\"bottom\":456.5,\"left\":55}},\"confirm\":{\"__class\":\"adm-button adm-button-primary adm-button-block adm-button-fill-none adm-button-s\",\"color\":\"rgb(46, 124, 246)\",\"__rect\":{\"x\":55,\"y\":457.5,\"width\":140.5,\"height\":45,\"top\":457.5,\"right\":195.5,\"bottom\":502.5,\"left\":55}},\"mount\":{\"inRoot\":true,\"visible\":false}}",
+    "theme flip via switch (clicked): {\"html\":\"light\",\"stored\":null}",
+    "taskform after flip (html=light): {\"1677\":[],\"body\":{\"__class\":\"adm-popup-body _sheetBody_1wiw8_750 adm-popup-body-position-bottom\",\"background-color\":\"rgb(255, 255, 255)\",\"border-top-left-radius\":\"16px\",\"__rect\":{\"x\":0,\"y\":319,\"width\":390,\"height\":525,\"top\":319,\"right\":390,\"bottom\":844,\"left\":0}},\"title\":{\"__class\":\"_sheetTitle_1wiw8_770\",\"color\":\"rgb(24, 32, 47)\",\"__rect\":{\"x\":16,\"y\":341,\"width\":102,\"height\":24,\"top\":341,\"right\":118,\"bottom\":365,\"left\":16}}}",
+    "console errors/exceptions: 0"
+  ]
+}

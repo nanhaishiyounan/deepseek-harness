@@ -1,40 +1,15 @@
-/* Shared atoms: badges, running row, notices. */
+/* Shared atoms: tag badges (antd Tag on the token track), running row,
+   notices, and the stamp avatar's typographic track. */
 
+/* The pill badge: antd-mobile Tag; the token tone rides inline CSS variables
+   (ui.tsx TONE_FACES — a class declaration would lose to the component's own
+   inline defaults), this class keeps only the 10px type scale and pad. */
 .badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  border-radius: 999px;
+  --border-radius: 999px;
   font-size: 10px;
   line-height: 1;
   padding: 3px 6px;
   font-weight: 500;
-  white-space: nowrap;
-}
-
-.badge.primary {
-  background: var(--dshm-primary-10);
-  color: var(--dshm-primary);
-}
-
-.badge.success {
-  background: var(--dshm-success-10);
-  color: var(--dshm-success);
-}
-
-.badge.warning {
-  background: var(--dshm-warning-10);
-  color: var(--dshm-warning);
-}
-
-.badge.muted {
-  background: var(--dshm-muted);
-  color: var(--dshm-muted-foreground);
-}
-
-.badge.destructive {
-  background: var(--dshm-destructive-10);
-  color: var(--dshm-destructive);
 }
 
 .runningRow {
@@ -76,9 +51,10 @@
   user-select: none;
 }
 
-/* Skeleton placeholders (loading states): purely visual blocks breathing on
- * the global dshm-skel-pulse keyframe (tokens.css). The wrapping page group
- * carries role="status"; these blocks stay aria-hidden. */
+/* Skeleton placeholders (loading states): antd-mobile Skeleton blocks on the
+ * layout classes below; only the track sizing and the ink wash override the
+ * component defaults. The wrapping page group carries role="status"; these
+ * blocks stay aria-hidden. */
 
 .skelRow {
   display: flex;
@@ -107,43 +83,30 @@
   gap: 10px;
 }
 
+/* The 44px avatar disc and the text bars ride antd's shimmer on the token
+   ink wash. */
 .skelAvatar {
+  --width: 44px;
+  --height: 44px;
+  --border-radius: 50%;
   flex: none;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: var(--dshm-muted);
-  animation: dshm-skel-pulse 1.2s ease-in-out infinite;
+  background-color: var(--dshm-muted);
 }
 
 .skelTexts {
   flex: 1;
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
 }
 
-.skelLine {
-  height: 12px;
-  border-radius: 6px;
-  background: var(--dshm-muted);
-  animation: dshm-skel-pulse 1.2s ease-in-out infinite;
+.skelTitle {
+  --width: 45%;
+  --height: 18px;
+  --border-radius: 6px;
+  background-color: var(--dshm-muted);
 }
 
-.skelLineShort {
-  width: 50%;
-  height: 10px;
-  border-radius: 5px;
-  background: var(--dshm-muted);
-  animation: dshm-skel-pulse 1.2s ease-in-out infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .skelAvatar,
-  .skelLine,
-  .skelLineShort {
-    animation: none;
-    opacity: 0.6;
-  }
+.skelParagraph {
+  --height: 18px;
+  --border-radius: 6px;
+  background-color: var(--dshm-muted);
 }

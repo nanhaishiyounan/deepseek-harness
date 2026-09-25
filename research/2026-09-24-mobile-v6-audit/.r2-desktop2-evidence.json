@@ -1,0 +1,9 @@
+{
+  "capturedAt": "2026-09-24T18:24:59.808Z",
+  "base": "http://127.0.0.1:3080",
+  "evidence": [
+    "desktop root rect: {\"__class\":\"dshm-root\",\"__rect\":{\"x\":425,\"y\":14,\"width\":430,\"height\":772,\"top\":14,\"right\":855,\"bottom\":786,\"left\":425}}",
+    "taskform containment: {\"ok\":true,\"root\":{\"left\":425,\"right\":855,\"top\":14,\"bottom\":786},\"mask\":{\"left\":425,\"right\":855,\"top\":14,\"bottom\":786},\"mountInRoot\":true}",
+    "console errors/exceptions: 0"
+  ]
+}

@@ -68,33 +68,29 @@
   flex: 1;
   min-width: 0;
   text-align: left;
+  background: none;
+  color: var(--dshm-foreground);
 }
 
-/* The 24px type badge: soft fill, the type's lead character. */
+/* The 24px type badge: antd Tag (the soft fill rides inline dials in
+   FilesView.tsx); this class keeps the square scale. */
 .typeBadge {
+  --border-radius: 6px;
   flex: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   width: 24px;
   height: 24px;
-  border-radius: 6px;
-  background: var(--dshm-primary-soft);
-  color: var(--dshm-on-soft);
+  padding: 0;
   font-size: 12px;
   font-weight: 600;
 }
 
-/* The row's origin badge: marks AI-generated files inside the recent window. */
+/* The row's origin badge: antd Tag (the brand wash rides inline dials in
+   FilesView.tsx) marking AI-generated files inside the recent window. */
 .originBadge {
+  --border-radius: 999px;
   flex: none;
-  display: inline-flex;
-  align-items: center;
   height: 18px;
   padding: 0 6px;
-  border-radius: 999px;
-  background: var(--dshm-primary-10);
-  color: var(--dshm-on-soft);
   font-size: 10px;
   line-height: 1;
   font-weight: 600;
@@ -139,24 +135,20 @@
   color: var(--dshm-muted-foreground);
 }
 
-.fileMetaLink {
-  border: none;
-  background: none;
+/* The meta's link word: the antd mini none-fill brand word. */
+.fileMetaLink:global(.adm-button) {
   padding: 0;
   font-size: 11px;
   line-height: 16px;
   font-weight: 600;
-  color: var(--dshm-primary);
 }
 
+/* The demo tag: antd Tag recolored through its inline dials in FilesView.tsx. */
 .demoTag {
+  --border-radius: 999px;
   flex: none;
   font-size: 10px;
   line-height: 14px;
-  padding: 0 6px;
-  border: 1px solid var(--dshm-border);
-  border-radius: 999px;
-  color: var(--dshm-muted-foreground);
 }
 
 /* The inline read-only ReportCard preview under an expanded row. */

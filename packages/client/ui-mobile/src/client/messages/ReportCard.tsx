@@ -11,6 +11,7 @@
  */
 
 import type { JSX } from 'react'
+import { Button } from 'antd-mobile'
 import type { ReportAction, ReportPayload } from '../protocol.ts'
 import css from './messages.module.css'
 
@@ -141,14 +142,25 @@ export function ReportCard({ payload, onAction }: ReportCardProps): JSX.Element 
       {onAction !== undefined && actionRow.length > 0 && (
         <div className={css.reportActions}>
           {actionRow.map((action, index) => (
-            <button
+            <Button
               key={`${action.kind}-${action.label}`}
               type="button"
+              color="primary"
+              fill="solid"
+              size="small"
               className={index === primaryIndex ? css.reportPrimary : css.reportSecondary}
+              style={index === primaryIndex
+                ? undefined
+                : {
+                  '--background-color': 'var(--dshm-primary-soft)',
+                  '--text-color': 'var(--dshm-on-soft)',
+                  '--border-color': 'transparent',
+                  '--border-radius': '11px',
+                }}
               onClick={() => { onAction(action) }}
             >
               {action.label}
-            </button>
+            </Button>
           ))}
         </div>
       )}

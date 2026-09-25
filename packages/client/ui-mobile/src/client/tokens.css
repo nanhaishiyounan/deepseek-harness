@@ -2,14 +2,18 @@
  * Mobile v6 token set: the「AI 同事」design direction (plans/2026-09-23
  * mobile-v6-uidesign B1) — brand blue #2E7CF6 with the #22B8E8 gradient partner
  * on mist-blue surfaces, white cards, and pass/hold/reject semantics carried
- * over from the ledger era. Light and dark are two whole tracks swapped on
- * .dshm-root[data-theme]; antd-mobile reads the same names through var()
+ * over from the ledger era. Light and dark are two whole tracks declared on
+ * both `.dshm-root` and `html[data-theme]`: antd-mobile renders Popup/Picker/
+ * Dialog/Toast portals into `document.body`, outside `.dshm-root`, so the html
+ * twin (specificity (0,1,1), beating antd's `:root` defaults) keeps every
+ * portal on the same track. antd-mobile reads the same names through var()
  * references, so its components follow the track without per-theme overrides.
  * The root also draws the 430px phone shell: fluid full-width below 720px, a
  * centered rounded bezel with an outer shadow on desktop.
  */
 
-.dshm-root {
+.dshm-root,
+html[data-theme='light'] {
   /* Brand axis */
   --dshm-primary: #2e7cf6;          /* 品牌蓝 brand */
   --dshm-on-primary: #ffffff;       /* selected-state foreground (brand is track-constant) */
@@ -81,8 +85,11 @@
   --dshm-ease-slide: cubic-bezier(0.2, 0.8, 0.2, 1);   /* overshoot-free decaying push */
   --dshm-ease-stamp: cubic-bezier(0.2, 1.4, 0.4, 1);   /* stamping curve */
 
-  /* antd-mobile theme mapping: same container, var()-linked so both tracks and
-     every adm- component follow without extra work. */
+  /* antd-mobile theme mapping: same declaration as the tokens, so both mount
+     points (root and html twin) carry it and every adm- component — portal or
+     not — follows the track. --adm-radius-* are antd-mobile's real radius
+     dials; --adm-center-popup-border-radius covers Picker/DatePicker/Dialog/
+     Modal panels. */
   --adm-color-primary: var(--dshm-primary);
   --adm-color-success: var(--dshm-success);
   --adm-color-warning: var(--dshm-warning);
@@ -95,29 +102,14 @@
   --adm-color-background: var(--dshm-card);
   --adm-color-background-body: var(--dshm-background);
   --adm-font-family: var(--dshm-font-sans);
-  --adm-border-radius-m: var(--dshm-radius);
-  --adm-border-radius-l: var(--dshm-radius-lg);
-
-  box-sizing: border-box;
-  /* The host page sets viewport-fit=cover; the root clears the notch / status
-     bar for every page (each surface owns its own bottom inset). */
-  padding-top: env(safe-area-inset-top);
-  font-family: var(--dshm-font-sans);
-  font-size: 16px;
-  line-height: 1.5;
-  font-variant-numeric: tabular-nums;
-  color: var(--dshm-foreground);
-  background: var(--dshm-background);
-  -webkit-font-smoothing: antialiased;
-  /* The 430px phone shell: fluid (full width) under 720px, centered with a
-     halo otherwise; the login gate and the shell ride the same form. */
-  height: 100%;
-  max-width: 430px;
-  margin: 0 auto;
-  box-shadow: var(--dshm-shell-shadow);
+  --adm-radius-s: var(--dshm-radius-corner);
+  --adm-radius-m: var(--dshm-radius);
+  --adm-radius-l: var(--dshm-radius-lg);
+  --adm-center-popup-border-radius: var(--dshm-radius-lg);
 }
 
-.dshm-root[data-theme='dark'] {
+.dshm-root[data-theme='dark'],
+html[data-theme='dark'] {
   --dshm-primary-10: rgba(46, 124, 246, 0.16);
   --dshm-primary-soft: #1b2c4a;
   --dshm-foreground: #e8ecf4;
@@ -152,14 +144,38 @@
   --dshm-shell-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
 }
 
+.dshm-root {
+  box-sizing: border-box;
+  /* The host page sets viewport-fit=cover; the root clears the notch / status
+     bar for every page (each surface owns its own bottom inset). */
+  padding-top: env(safe-area-inset-top);
+  font-family: var(--dshm-font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+  color: var(--dshm-foreground);
+  background: var(--dshm-background);
+  -webkit-font-smoothing: antialiased;
+  /* The 430px phone shell: fluid (full width) under 720px, centered with a
+     halo otherwise; the login gate and the shell ride the same form. */
+  height: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+  box-shadow: var(--dshm-shell-shadow);
+}
+
 /* The desktop phone-shell form (the design's @media ≥720px): a floating
- * rounded bezel with breathing room, matching #app in the v6 mock. */
+ * rounded bezel with breathing room, matching #app in the v6 mock. The
+ * translateZ turns the shell into the containing block for the fixed-position
+ * portal layers (antd-mobile Popup/Dialog/Picker mount inside the shell via
+ * the portal host), so they stay within the 430px bezel on desktop. */
 @media (min-width: 720px) {
   .dshm-root {
     margin: 14px auto;
     height: calc(100% - 28px);
     border-radius: 24px;
     overflow: hidden;
+    transform: translateZ(0);
   }
 }
 
@@ -169,7 +185,10 @@
   box-sizing: border-box;
 }
 
-.dshm-root button {
+/* Only class-less native buttons take the reset; every styled button (CSS
+ * module classes, antd's .adm-button) owns its own background/padding, which
+ * a bare `button` selector at (0,1,1) would out-cascade at (0,1,0). */
+.dshm-root button:not([class]) {
   font: inherit;
   border: none;
   cursor: pointer;
@@ -186,7 +205,7 @@
 
 /* Host document plumbing: the mobile page fills the viewport (and the preview
  * iframe's bezel) without default margins; the body carries the desk surface
- * behind the 430px shell, so App mirrors the theme onto it. */
+ * behind the 430px shell, so App mirrors the theme onto html and body. */
 html,
 body {
   height: 100%;
@@ -205,15 +224,41 @@ body[data-theme='dark'] {
   height: 100%;
 }
 
-/* The loading-skeleton breathing pulse, shared by every module's skeleton
- * placeholders (the keyframe stays global; CSS Modules keep foreign animation
- * names verbatim). */
-@keyframes dshm-skel-pulse {
-  0%,
-  100% {
-    opacity: 0.45;
-  }
-  50% {
-    opacity: 0.9;
-  }
+/* Portal skins (antd-mobile layers mount inside the shell's portal host or,
+ * unconfigured, at body — both under the html token twin): the mask at the
+ * design's 0.5 black (antd's 0.55 rides an inline style, so !important), and
+ * the toast as the mock's #toast capsule — bottom:110px, 999px pill, ink
+ * plate in light and the inverted porcelain plate in dark. */
+.adm-mask {
+  background: rgba(0, 0, 0, 0.5) !important;
+}
+
+/* The Picker/DatePicker panel corners: antd-mobile hard-codes 8px on
+ * `.adm-picker-popup .adm-popup-body` (no --adm-* dial reaches it), so the
+ * sheet-grade 16px rides an explicit same-specificity override that wins on
+ * load order; the date-picker alias covers any future split class name. */
+.adm-picker-popup .adm-popup-body,
+.adm-date-picker-popup .adm-popup-body {
+  border-radius: var(--dshm-radius-lg) var(--dshm-radius-lg) 0 0;
+}
+
+.adm-toast-mask .adm-toast-main {
+  /* antd positions this inline-block with an inline top and translateY(-50%);
+   * the capsule anchors to the wrap's bottom edge instead. */
+  position: absolute;
+  top: auto !important;
+  left: 50%;
+  bottom: 110px;
+  transform: translateX(-50%);
+  max-width: 86%;
+  padding: 9px 16px;
+  font-size: 13px;
+  border-radius: 999px;
+  background: rgba(24, 32, 47, 0.92);
+  color: #ffffff;
+}
+
+html[data-theme='dark'] .adm-toast-mask .adm-toast-main {
+  background: rgba(232, 236, 244, 0.92);
+  color: #18202f;
 }

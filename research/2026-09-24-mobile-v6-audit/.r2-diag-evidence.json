@@ -1,0 +1,22 @@
+{
+  "capturedAt": "2026-09-24T18:20:56.468Z",
+  "base": "http://127.0.0.1:3080",
+  "evidence": [
+    "work tabs dom: [{\"tag\":\"DIV\",\"cls\":\"adm-capsule-tabs _statusTabs_1wiw8_198\",\"text\":\"待处理 0进行中 1待确\"},{\"tag\":\"DIV\",\"cls\":\"adm-capsule-tabs-header\",\"text\":\"待处理 0进行中 1待确\"},{\"tag\":\"DIV\",\"cls\":\"adm-capsule-tabs-tab-list\",\"text\":\"待处理 0进行中 1待确\"},{\"tag\":\"DIV\",\"cls\":\"adm-capsule-tabs-tab-wrapper\",\"text\":\"待处理 0\"},{\"tag\":\"DIV\",\"cls\":\"adm-capsule-tabs-tab adm-capsule-tabs-tab-active\",\"text\":\"待处理 0\"},{\"tag\":\"DIV\",\"cls\":\"adm-capsule-tabs-tab-wrapper\",\"text\":\"进行中 1\"},{\"tag\":\"DIV\",\"cls\":\"adm-capsule-tabs-tab\",\"text\":\"进行中 1\"},{\"tag\":\"DIV\",\"cls\":\"adm-capsule-tabs-tab-wrapper\",\"text\":\"待确认 1\"},{\"tag\":\"DIV\",\"cls\":\"adm-capsule-tabs-tab\",\"text\":\"待确认 1\"},{\"tag\":\"DIV\",\"cls\":\"adm-capsule-tabs-tab-wrapper\",\"text\":\"已完成 1\"},{\"tag\":\"DIV\",\"cls\":\"adm-capsule-tabs-tab\",\"text\":\"已完成 1\"}]",
+    "after 进行中 click: cardHead=0 bodyHead=\"工作\\n任务\\n文件\\n待处理 0\\n进行中 1\\n待确认 1\\n已完成 1\\n这个状态还没有工作\\n去聊天里让 AI 同事帮你处理\\n去找 AI 同事\\nAI 食安合规官\\n食品安全合规问答：依据知识库中的 GB 2760/GB 14881 等法规标准作答，编号引用原文，输出审核要点清单；仅检索类工具，无破坏性操作。\\n去聊聊\\n企业数据助手\\n企业内部数据问答、业务记录读写与统计建议：覆盖市场洞察、工艺、食安、成本测算、供应链五类需求，引用企业档案与走访纪要，\"",
+    "after 待确认 click: cardHead=0",
+    "after 待处理 click: cardHead=0",
+    "chat[0] \"表单登记一条采购入库单，供应商02:\": {\"rich\":0,\"code\":0,\"img\":0,\"ask\":3}",
+    "chat[1] \"表单你好01:25你好！今天有什么需\": {\"rich\":0,\"code\":0,\"img\":0,\"ask\":0}",
+    "chat[2] \"表单鲜丰冷链箱登记昨天我：已创建处理\": {\"rich\":0,\"code\":0,\"img\":0,\"ask\":1}",
+    "chat[3] \"合规GB 2760 里防腐剂的限量怎\": {\"rich\":0,\"code\":0,\"img\":0,\"ask\":0}",
+    "chat[4] \"表单新会话昨天单据登记与任务执行表单\": {\"rich\":0,\"code\":0,\"img\":0,\"ask\":0}",
+    "chat[5] \"表单查看本月采购情况昨天报告：本月采\": {\"rich\":0,\"code\":0,\"img\":0,\"ask\":0}",
+    "chat[6] \"表单新会话昨天单据登记与任务执行表单\": {\"rich\":0,\"code\":0,\"img\":0,\"ask\":0}",
+    "chat[7] \"表单本月采购情况分析昨天报告：本月采\": {\"rich\":0,\"code\":0,\"img\":0,\"ask\":0}",
+    "chat[8] \"表单新会话昨天单据登记与任务执行表单\": {\"rich\":0,\"code\":0,\"img\":0,\"ask\":0}",
+    "chat[9] \"表单新会话昨天单据登记与任务执行表单\": {\"rich\":0,\"code\":0,\"img\":0,\"ask\":0}",
+    "chat[10] \"数据帮我看下这个月的采购情况昨天本月\": {\"rich\":0,\"code\":0,\"img\":0,\"ask\":0}",
+    "chat[11] \"数据帮我看下这个月的采购情况昨天本月\": {\"rich\":0,\"code\":0,\"img\":0,\"ask\":0}"
+  ]
+}

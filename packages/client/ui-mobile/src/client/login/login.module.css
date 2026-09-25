@@ -103,20 +103,15 @@
   gap: 10px;
 }
 
-.codeButton {
+/* The code arm: antd-mobile Button (the brand-soft face rides inline
+   variables in LoginView.tsx; the disabled dim is the component's own
+   opacity face) matching the input row's 48px height. */
+.codeButton:global(.adm-button) {
   flex: none;
   height: 48px;
-  padding: 0 12px;
+  padding-block: 0;
+  padding-inline: 12px;
   font-size: 13px;
-  color: var(--dshm-primary);
-  border: 1px solid var(--dshm-primary-10);
-  border-radius: var(--dshm-radius);
-  background: var(--dshm-primary-soft);
-}
-
-.codeButton:disabled {
-  color: var(--dshm-muted-foreground);
-  background: var(--dshm-muted);
 }
 
 .error {

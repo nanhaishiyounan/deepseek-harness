@@ -1,0 +1,14 @@
+{
+  "capturedAt": "2026-09-24T18:54:03.663Z",
+  "base": "http://127.0.0.1:3080",
+  "evidence": [
+    "desktop login ok; viewport 1280x900",
+    "report chat hash: #/chat/session-v6-b3-rich",
+    "desktop taskform containment: {\"shell\":{\"left\":425,\"right\":855,\"top\":14,\"bottom\":886,\"w\":430},\"layers\":[{\"cls\":\"adm-mask\",\"left\":425,\"right\":855,\"top\":14,\"bottom\":886,\"inside\":true},{\"cls\":\"adm-popup-body _sheetBody_1wiw8_750 adm-popup-bo\",\"left\":425,\"right\":855,\"top\":381,\"bottom\":886,\"inside\":true}]}",
+    "desktop taskform radius/bg: {\"__class\":\"adm-popup-body _sheetBody_1wiw8_750 adm-popup-body-position-bottom\",\"border-top-left-radius\":\"16px\",\"background-color\":\"rgb(255, 255, 255)\",\"__rect\":{\"x\":425,\"y\":381,\"width\":430,\"height\":505,\"top\":381,\"right\":855,\"bottom\":886,\"left\":425}}",
+    "desktop picker containment: {\"shell\":{\"left\":425,\"right\":855,\"top\":14,\"bottom\":886,\"w\":430},\"layers\":[{\"cls\":\"adm-mask\",\"left\":425,\"right\":855,\"top\":14,\"bottom\":886,\"inside\":true},{\"cls\":\"adm-popup-body _sheetBody_1wiw8_750 adm-popup-bo\",\"left\":425,\"right\":855,\"top\":381,\"bottom\":886,\"inside\":true},{\"cls\":\"adm-mask\",\"left\":425,\"right\":855,\"top\":14,\"bottom\":886,\"inside\":true},{\"cls\":\"adm-popup-body adm-popup-body-position-bottom\",\"left\":425,\"right\":855,\"top\":586,\"bottom\":886,\"inside\":true}]}",
+    "desktop picker radius: {\"__class\":\"adm-popup-body adm-popup-body-position-bottom\",\"border-radius\":\"16px 16px 0px 0px\",\"background-color\":\"rgb(255, 255, 255)\",\"__rect\":{\"x\":425,\"y\":586,\"width\":430,\"height\":300,\"top\":586,\"right\":855,\"bottom\":886,\"left\":425}}",
+    "desktop dialog containment: {\"shell\":{\"left\":425,\"right\":855,\"top\":0,\"bottom\":872,\"w\":430},\"layers\":[{\"cls\":\"adm-mask adm-center-popup-mask\",\"left\":425,\"right\":855,\"top\":0,\"bottom\":872,\"inside\":true}]}",
+    "console errors/exceptions: 0"
+  ]
+}

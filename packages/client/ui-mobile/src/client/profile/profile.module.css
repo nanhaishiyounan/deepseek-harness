@@ -123,6 +123,7 @@
   border-radius: var(--dshm-radius-lg);
   box-shadow: var(--dshm-shadow-card);
   text-align: left;
+  color: var(--dshm-foreground);
   flex: none;
 }
 
@@ -193,6 +194,8 @@
   min-height: 40px;
   padding: 4px 0;
   text-align: left;
+  background: none;
+  color: var(--dshm-foreground);
   border-bottom: 1px solid var(--dshm-stroke-soft);
 }
 
@@ -241,19 +244,13 @@
   flex: none;
 }
 
-.shortcut {
+/* The quick-start shortcut: antd-mobile Button (the washed capsule face
+   rides inline variables in ProfileView.tsx); this class keeps the 36px size. */
+.shortcut:global(.adm-button) {
   height: var(--dshm-touch-sm);
-  padding: 0 14px;
+  padding-block: 0;
+  padding-inline: 14px;
   font-size: 12px;
-  line-height: 34px;
-  border: none;
-  border-radius: 999px;
-  background: var(--dshm-primary-soft);
-  color: var(--dshm-primary);
-}
-
-.shortcut:disabled {
-  opacity: 0.5;
 }
 
 /* The settings band (the design's .set-group): the group title over one card
@@ -294,20 +291,19 @@
   --checked-color: var(--dshm-primary);
 }
 
-/* The destructive logout block stands alone, off the settings group. */
-.logout {
+/* The destructive logout block stands alone, off the settings group: the
+   antd Button (the destructive wash rides inline variables in
+   ProfileView.tsx) keeps the 44px band and the icon gap. */
+.logout:global(.adm-button) {
+  --border-radius: var(--dshm-radius-lg);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   margin: 4px 12px 0;
   height: 44px;
-  font-size: 14px;
+  padding-block: 0;
   font-weight: 500;
-  color: var(--dshm-destructive);
-  background: var(--dshm-destructive-10);
-  border: none;
-  border-radius: var(--dshm-radius-lg);
   flex: none;
 }
 

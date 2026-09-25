@@ -2,7 +2,7 @@
 
 Status: implemented
 
-English
+English | [中文](2026-09-23-mobile-v6-uidesign-r1-fixes.zh.md)
 
 ## Problem
 

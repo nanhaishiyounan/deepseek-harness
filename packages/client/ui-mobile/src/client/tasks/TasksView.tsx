@@ -7,7 +7,7 @@
  */
 
 import { useMemo, useState, useSyncExternalStore, type JSX } from 'react'
-import { CapsuleTabs, ErrorBlock } from 'antd-mobile'
+import { Button, CapsuleTabs, ErrorBlock, Tag } from 'antd-mobile'
 import { goBackOr, navigate } from '../router.ts'
 import { PageNav } from '../PageNav.tsx'
 import { myTasks, subscribeWork, teamTasks, workSnapshot, type WorkItem } from '../workStore.ts'
@@ -61,9 +61,16 @@ export function TasksView({ identityName }: TasksViewProps): JSX.Element {
         {rows.length === 0 && (
           <div className={css.emptyWrap}>
             <ErrorBlock status="empty" title={tab === 'mine' ? '还没有你的任务' : '团队还没有任务'} />
-            <button type="button" className={css.emptyCta} onClick={() => { navigate('#/chats') }}>
+            <Button
+              type="button"
+              fill="outline"
+              size="small"
+              className={css.emptyCta}
+              style={{ '--border-color': 'var(--dshm-border)' }}
+              onClick={() => { navigate('#/chats') }}
+            >
               去对话里让 AI 同事派个活
-            </button>
+            </Button>
           </div>
         )}
         {rows.length > 0 && (
@@ -80,7 +87,7 @@ export function TasksView({ identityName }: TasksViewProps): JSX.Element {
                 >
                   <span className={statusDotClass(item.status)} aria-hidden="true" />
                   <span className={css.taskTitle}>{item.title}</span>
-                  {item.demo && <span className={css.demoTag}>示例</span>}
+                  {item.demo && <Tag className={css.demoTag as string} style={{ '--background-color': 'transparent', '--text-color': 'var(--dshm-muted-foreground)', '--border-color': 'var(--dshm-border)' }}>示例</Tag>}
                   {tab === 'team' && <span className={css.taskOwner}>{item.owner}</span>}
                   {due !== undefined && (
                     <span className={`${css.taskDue} ${due.soon ? css.dueSoon : ''}`}>{due.text}</span>

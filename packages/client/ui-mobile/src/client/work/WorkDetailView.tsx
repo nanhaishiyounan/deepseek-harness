@@ -11,8 +11,9 @@
  */
 
 import { useEffect, useMemo, useState, useSyncExternalStore, type JSX } from 'react'
-import { Modal, TextArea, Toast } from 'antd-mobile'
+import { Button, Modal, ProgressBar, TextArea, Toast } from 'antd-mobile'
 import { Check } from 'lucide-react'
+import { portalContainer } from '../portal.ts'
 import { buildExecDirectiveMessage, buildReworkMessage, buildWorkDoneMessage, startWorkExecution } from '../actions.ts'
 import { PageNav } from '../PageNav.tsx'
 import { messageOf } from '../hooks.ts'
@@ -210,13 +211,16 @@ export function WorkDetailView({ workId }: WorkDetailViewProps): JSX.Element {
             ? <blockquote className={css.quote}>{item.suggestion}</blockquote>
             : <p className={css.quoteEmpty}>创建时未附 AI 建议</p>}
           {item.sourceSessionId !== undefined && (
-            <button
+            <Button
               type="button"
+              color="primary"
+              fill="none"
+              size="small"
               className={css.sourceLink}
               onClick={() => { navigate(`#/chat/${item.sourceSessionId}`) }}
             >
               回到源对话 ›
-            </button>
+            </Button>
           )}
         </section>
 
@@ -233,12 +237,11 @@ export function WorkDetailView({ workId }: WorkDetailViewProps): JSX.Element {
                 执行进度
                 <em className={css.progressNum}>{`${String(timeline.steps.filter(step => step.state === 'done').length)}/${String(timeline.steps.length)}`}</em>
               </span>
-              <span className={css.progressTrack}>
-                <span
-                  className={css.progressFill}
-                  style={{ width: `${String(Math.round(timeline.steps.filter(step => step.state === 'done').length / timeline.steps.length * 100))}%` }}
-                />
-              </span>
+              <ProgressBar
+                percent={Math.round(timeline.steps.filter(step => step.state === 'done').length / timeline.steps.length * 100)}
+                className={css.progressTrack as string}
+                style={{ '--fill-color': 'var(--dshm-user-grad)' }}
+              />
             </div>
           )}
           <div className={css.timeline}>
@@ -276,13 +279,16 @@ export function WorkDetailView({ workId }: WorkDetailViewProps): JSX.Element {
             </span>
             {item.artifact !== undefined && (
               <>
-                <button
+                <Button
                   type="button"
+                  color="primary"
+                  fill="none"
+                  size="small"
                   className={css.resultLink}
                   onClick={() => { setArtifactOpen(open => !open) }}
                 >
                   {artifactOpen ? '收起报告' : '查看完整报告 ›'}
-                </button>
+                </Button>
                 {artifactOpen && <ReportCard payload={item.artifact} />}
               </>
             )}
@@ -292,44 +298,50 @@ export function WorkDetailView({ workId }: WorkDetailViewProps): JSX.Element {
 
       <div className={css.detailActions}>
         {item.status === 'todo' && (
-          <button type="button" className={css.actionPrimary} onClick={onStart}>开始执行</button>
+          <Button type="button" color="primary" size="small" className={css.actionPrimary} onClick={onStart}>开始执行</Button>
         )}
         {item.status === 'doing' && (
           <>
             <span className={css.doingNote}>AI 同事执行中…</span>
             {execChatId !== undefined && (
-              <button
+              <Button
                 type="button"
+                fill="outline"
+                size="small"
                 className={css.actionSecondary}
+                style={{ '--border-color': 'var(--dshm-border)' }}
                 onClick={() => { navigate(`#/chat/${execChatId}`) }}
               >
                 查看执行会话
-              </button>
+              </Button>
             )}
-            <button type="button" className={css.actionSecondary} onClick={onRequeue}>重新执行</button>
-            <button type="button" className={css.actionPrimary} onClick={onManualDone}>手动完成</button>
+            <Button type="button" fill="outline" size="small" className={css.actionSecondary} style={{ '--border-color': 'var(--dshm-border)' }} onClick={onRequeue}>重新执行</Button>
+            <Button type="button" color="primary" size="small" className={css.actionPrimary} onClick={onManualDone}>手动完成</Button>
           </>
         )}
         {item.status === 'review' && (
           <>
-            <button type="button" className={css.actionSecondary} onClick={() => { setReworkOpen(true) }}>打回修改</button>
-            <button type="button" className={css.actionPrimary} onClick={onConfirm}>确认完成</button>
+            <Button type="button" fill="outline" size="small" className={css.actionSecondary} style={{ '--border-color': 'var(--dshm-border)' }} onClick={() => { setReworkOpen(true) }}>打回修改</Button>
+            <Button type="button" color="primary" size="small" className={css.actionPrimary} onClick={onConfirm}>确认完成</Button>
           </>
         )}
         {item.status === 'done' && sourceChatId !== undefined && (
-          <button
+          <Button
             type="button"
+            color="primary"
+            size="small"
             className={css.actionPrimary}
             onClick={() => { navigate(`#/chat/${sourceChatId}`) }}
           >
             回到聊天
-          </button>
+          </Button>
         )}
       </div>
 
       <Modal
         visible={reworkOpen}
         title="打回该工作"
+        getContainer={portalContainer}
         onClose={closeReworkDialog}
         content={(
           <TextArea

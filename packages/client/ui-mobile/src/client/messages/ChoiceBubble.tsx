@@ -9,6 +9,7 @@
  */
 
 import type { JSX } from 'react'
+import { Button } from 'antd-mobile'
 import { Check, Info } from 'lucide-react'
 import type { ChatAsk } from '../fold.ts'
 import { answerTextOf } from '../protocol.ts'
@@ -106,7 +107,9 @@ export function ChoiceBubble({ ask, onSend, onFreeText, disabled }: ChoiceBubble
         </div>
       )}
       {payload.allowFreeText && !settled && (
-        <button type="button" className={css.askFree} onClick={onFreeText}>自己打字说明</button>
+        <Button type="button" fill="none" size="small" className={css.askFree} onClick={onFreeText}>
+          自己打字说明
+        </Button>
       )}
     </div>
   )

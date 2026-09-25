@@ -344,7 +344,8 @@ describe('ReceiptCard v3', () => {
     await waitFor(() => { expect(screen.getByRole('button', { name: '供应商' }).textContent).toContain('宏发食品') })
     // The derived relation rides the resolved face (a non-numeric value stays the raw text).
     expect(screen.getByText('C-9')).toBeTruthy()
-    // A relation field with no metadata falls back to the bare input.
+    // A relation field with no metadata falls back to the bare input (the
+    // enclosing field-row label names the antd Input's element).
     const bare = render(
       <DraftCard
         payload={{ ...payload, fields: [{ name: 'owner_id', label: '经办人', value: '7', tier: 'required', widget: 'relation' }] }}
@@ -352,7 +353,7 @@ describe('ReceiptCard v3', () => {
         onEdit={() => {}} onConfirm={() => {}} onReject={() => {}} onRedraft={() => {}} disabled={false}
       />,
     )
-    expect((bare.container.querySelector('input[aria-label="经办人"]') as HTMLInputElement).value).toBe('7')
+    expect((bare.container.querySelector('label .adm-input-element') as HTMLInputElement).value).toBe('7')
     bare.unmount()
     // Opening the picker and confirming routes the picked id as the edit.
     fireEvent.click(screen.getByRole('button', { name: '供应商' }))

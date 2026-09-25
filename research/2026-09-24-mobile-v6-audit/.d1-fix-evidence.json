@@ -1,0 +1,201 @@
+{
+  "capturedAt": "2026-09-25T04:44:40.335Z",
+  "base": "http://127.0.0.1:3080",
+  "evidence": {
+    "home": {
+      "roster": {
+        "count": 38,
+        "truncated": [
+          {
+            "text": "AI 食安合规官",
+            "clamp": "2",
+            "clipped": false,
+            "lines": 2
+          },
+          {
+            "text": "企业数据助手",
+            "clamp": "2",
+            "clipped": false,
+            "lines": 2
+          },
+          {
+            "text": "智能填表助手",
+            "clamp": "2",
+            "clipped": false,
+            "lines": 2
+          },
+          {
+            "text": "经营参谋",
+            "clamp": "2",
+            "clipped": false,
+            "lines": 1
+          },
+          {
+            "text": "AI 营销洞察主管",
+            "clamp": "2",
+            "clipped": false,
+            "lines": 2
+          }
+        ],
+        "cardW": 76
+      },
+      "statsCard": {
+        "shadow": "rgba(23, 43, 77, 0.07) 0px 6px 24px 0px"
+      },
+      "statValue": {
+        "fs": "22px"
+      },
+      "statLabel": {
+        "color": "rgb(117, 129, 153)"
+      },
+      "quickRow": {
+        "display": "grid",
+        "cols": "85.5px 85.5px 85.5px 85.5px",
+        "chips": [
+          86,
+          86,
+          86,
+          86
+        ]
+      },
+      "recentBadge": {
+        "w": 8,
+        "h": 8
+      },
+      "recentList": {
+        "shadow": "rgba(23, 43, 77, 0.07) 0px 6px 24px 0px"
+      },
+      "recentRow": {
+        "minH": "64px",
+        "pad": "10px 12px"
+      },
+      "recentRowDivider": "1px rgba(232, 237, 244, 0.6)"
+    },
+    "sheet390": {
+      "viewport": {
+        "w": 390,
+        "h": 844
+      },
+      "sheetFound": true,
+      "sheet": {
+        "top": 346,
+        "bottom": 844,
+        "height": 498,
+        "overflowsViewport": false
+      },
+      "popup": {
+        "scrollHeight": 498,
+        "clientHeight": 498
+      },
+      "scroller": {
+        "scrollH": 379,
+        "clientH": 379,
+        "scrolls": false,
+        "overflowY": "auto"
+      },
+      "actions": {
+        "top": 777,
+        "visible": true,
+        "borderTop": "1px"
+      },
+      "titleInput": {
+        "border": "1px solid",
+        "radius": "10px",
+        "h": 44
+      },
+      "pickerRows": [
+        {
+          "border": "1px/1px solid",
+          "radius": "10px",
+          "h": 44
+        },
+        {
+          "border": "1px/1px solid",
+          "radius": "10px",
+          "h": 44
+        }
+      ],
+      "pickerClear": {
+        "w": 28,
+        "h": 28,
+        "bg": "rgb(247, 249, 253)",
+        "color": "rgb(117, 129, 153)"
+      },
+      "pickerChevron": {
+        "color": "rgb(117, 129, 153)"
+      },
+      "sourceStrip": {
+        "clamp": "2",
+        "lines": 2,
+        "text": "来自：跟进鲜丰冷链箱交期"
+      },
+      "suggestion": {
+        "bg": "rgb(247, 249, 253)",
+        "leftBar": "3px rgb(46, 124, 246)"
+      }
+    },
+    "sheet375": {
+      "viewport": {
+        "w": 375,
+        "h": 667
+      },
+      "sheetFound": true,
+      "sheet": {
+        "top": 169,
+        "bottom": 667,
+        "height": 498,
+        "overflowsViewport": false
+      },
+      "popup": {
+        "scrollHeight": 498,
+        "clientHeight": 498
+      },
+      "scroller": {
+        "scrollH": 379,
+        "clientH": 379,
+        "scrolls": false,
+        "overflowY": "auto"
+      },
+      "actions": {
+        "top": 600,
+        "visible": true,
+        "borderTop": "1px"
+      },
+      "titleInput": {
+        "border": "1px solid",
+        "radius": "10px",
+        "h": 44
+      },
+      "pickerRows": [
+        {
+          "border": "1px/1px solid",
+          "radius": "10px",
+          "h": 44
+        },
+        {
+          "border": "1px/1px solid",
+          "radius": "10px",
+          "h": 44
+        }
+      ],
+      "pickerClear": {
+        "w": 28,
+        "h": 28,
+        "bg": "rgb(247, 249, 253)",
+        "color": "rgb(117, 129, 153)"
+      },
+      "pickerChevron": {
+        "color": "rgb(117, 129, 153)"
+      },
+      "sourceStrip": {
+        "clamp": "2",
+        "lines": 2,
+        "text": "来自：跟进鲜丰冷链箱交期"
+      },
+      "suggestion": {
+        "bg": "rgb(247, 249, 253)",
+        "leftBar": "3px rgb(46, 124, 246)"
+      }
+    }
+  }
+}

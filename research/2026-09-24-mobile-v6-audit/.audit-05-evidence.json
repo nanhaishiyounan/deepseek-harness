@@ -1,0 +1,18 @@
+{
+  "capturedAt": "2026-09-24T14:48:51.146Z",
+  "base": "http://127.0.0.1:3080",
+  "evidence": [
+    "empty state: {\"errorBlock\":{\"--adm-color-primary\":\"#2e7cf6\",\"background-color\":\"rgba(0, 0, 0, 0)\",\"__rect\":{\"x\":12,\"y\":784.5,\"width\":366,\"height\":157.796875,\"top\":784.5,\"right\":378,\"bottom\":942.296875,\"left\":12}},\"emptyText\":\"这个状态还没有工作\\n去聊天里让 AI 同事帮你处理\\n去找 AI 同事\"}",
+    "capsule active: {\"background-color\":\"rgb(46, 124, 246)\",\"color\":\"rgb(255, 255, 255)\",\"__rect\":{\"x\":24,\"y\":683,\"width\":98.203125,\"height\":38.5,\"top\":683,\"right\":122.203125,\"bottom\":721.5,\"left\":24}}",
+    "detail via doing tab: true",
+    "detail hash: #/work/w_mufnbeuugq8s",
+    "workdetail probes: {\"fill\":{\"background-image\":\"linear-gradient(135deg, rgb(46, 124, 246), rgb(34, 184, 232))\",\"transition-duration\":\"0.8s\",\"transition-timing-function\":\"cubic-bezier(0.22, 0.9, 0.35, 1)\",\"__rect\":{\"x\":41,\"y\":413,\"width\":154,\"height\":8,\"top\":413,\"right\":195,\"bottom\":421,\"left\":41}},\"track\":{\"background-color\":\"rgb(232, 237, 244)\",\"height\":\"8px\",\"border-radius\":\"999px\",\"__rect\":{\"x\":41,\"y\":413,\"width\":308,\"height\":8,\"top\":413,\"right\":349,\"bottom\":421,\"left\":41}},\"running\":{\"border-color\":\"rgb(46, 124, 246)\",\"background-color\":\"rgb(255, 255, 255)\",\"box-shadow\":\"rgba(46, 124, 246, 0.1) 0px 0px 0px 3px\",\"__rect\":{\"x\":91,\"y\":478,\"width\":10,\"height\":10,\"top\":478,\"right\":101,\"bottom\":488,\"left\":91}},\"done\":{\"background-color\":\"rgb(24, 160, 88)\",\"box-shadow\":\"rgba(24, 160, 88, 0.12) 0px 0px 0px 3px\",\"__rect\":{\"x\":91,\"y\":444,\"width\":10,\"height\":10,\"top\":444,\"right\":101,\"bottom\":454,\"left\":91}},\"demoBanner\":{\"background-color\":\"rgba(46, 124, 246, 0.1)\",\"color\":\"rgb(29, 95, 214)\",\"__rect\":{\"x\":0,\"y\":52,\"width\":390,\"height\":30,\"top\":52,\"right\":390,\"bottom\":82,\"left\":0}}}",
+    "dark workdetail: {\"running\":{\"border-color\":\"rgb(46, 124, 246)\",\"background-color\":\"rgb(26, 33, 45)\",\"__rect\":{\"x\":91,\"y\":478,\"width\":10,\"height\":10,\"top\":478,\"right\":101,\"bottom\":488,\"left\":91}},\"actions\":{\"background-color\":\"rgb(26, 33, 45)\",\"border-top-color\":\"rgb(37, 46, 62)\",\"__rect\":{\"x\":0,\"y\":787,\"width\":390,\"height\":57,\"top\":787,\"right\":390,\"bottom\":844,\"left\":0}}}",
+    "report hash: #/chat/session-v6-b3-rich",
+    "desktop overflow: {\"root\":{\"left\":425,\"width\":430},\"popup\":{\"left\":0,\"width\":1280,\"top\":347,\"bottom\":832},\"mask\":{\"width\":1280,\"height\":832}}",
+    "desktop newchat: {\"rootWidth\":430,\"popupWidth\":1280,\"popupLeft\":0}",
+    "searchbar: {\"background-color\":\"rgb(21, 27, 38)\",\"border-radius\":\"10px\",\"__rect\":{\"x\":12,\"y\":60,\"width\":366,\"height\":36,\"top\":60,\"right\":378,\"bottom\":96,\"left\":12}}",
+    "ptr head: {\"color\":\"rgb(140, 150, 170)\",\"font-size\":\"16px\",\"__rect\":{\"x\":0,\"y\":129,\"width\":390,\"height\":40,\"top\":129,\"right\":390,\"bottom\":169,\"left\":0}}",
+    "swipe: {\"action\":null,\"count\":0}"
+  ]
+}

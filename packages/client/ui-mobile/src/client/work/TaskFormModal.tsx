@@ -10,8 +10,9 @@
  */
 
 import { useEffect, useMemo, useState, type JSX } from 'react'
-import { DatePicker, Picker, Popup, Switch, Toast } from 'antd-mobile'
+import { Button, DatePicker, Input, Picker, Popup, Switch, Toast } from 'antd-mobile'
 import { ChevronRight, X } from 'lucide-react'
+import { portalContainer } from '../portal.ts'
 import { buildTaskCreatedMessage, startWorkExecution } from '../actions.ts'
 import { TEAM_MEMBERS } from '../demoSeed.ts'
 import { navigate } from '../router.ts'
@@ -143,6 +144,7 @@ export function TaskFormModal(
       visible={visible}
       onMaskClick={onClose}
       destroyOnClose
+      getContainer={portalContainer}
       bodyClassName={css.sheetBody as string}
     >
       <div className={css.sheet} aria-label="创建处理任务">
@@ -152,88 +154,96 @@ export function TaskFormModal(
             <X size={18} aria-hidden="true" />
           </button>
         </header>
-        {prefill !== undefined && (
-          <div className={css.sourceStrip}>来自：{prefill.title}{prefill.suggestion !== undefined ? `（${prefill.suggestion}）` : ''}</div>
-        )}
-        <label className={css.fieldLabel} htmlFor="task-title">任务标题</label>
-        <input
-          id="task-title"
-          className={`${css.fieldInput} ${titleError !== undefined ? css.fieldInvalid : ''}`}
-          value={title}
-          placeholder="要跟进的事，如：接口联调延期处理"
-          onChange={(event) => {
-            setTitle(event.target.value)
-            setTitleError(undefined)
-          }}
-        />
-        {titleError !== undefined && <p className={css.fieldError}>{titleError}</p>}
-        <button type="button" className={css.pickerRow} onClick={() => { setOwnerPickerOpen(true) }}>
-          <span className={css.pickerLabel}>负责人</span>
-          <span className={css.pickerValue}>
-            {ownerFace}
-            <ChevronRight size={14} aria-hidden="true" />
-          </span>
-        </button>
-        <Picker
-          columns={ownerColumns}
-          visible={ownerPickerOpen}
-          onClose={() => { setOwnerPickerOpen(false) }}
-          onConfirm={(value) => {
-            /* v8 ignore next -- the single owner column always confirms a picked value. */
-            setOwner(String(value[0] ?? identityName))
-          }}
-          value={[owner]}
-        />
-        <button type="button" className={css.pickerRow} onClick={() => { setDuePickerOpen(true) }}>
-          <span className={css.pickerLabel}>截止时间</span>
-          <span className={css.pickerValue}>
-            {dueLabel(dueDate === undefined ? undefined : dueOf(dueDate))}
-            {dueDate !== undefined && (
-              <span
-                role="button"
-                tabIndex={0}
-                aria-label="清除截止时间"
-                className={css.pickerValue}
-                onClick={(event) => { event.stopPropagation(); setDueDate(undefined) }}
-                onKeyDown={(event) => { if (event.key === 'Enter') { event.stopPropagation(); setDueDate(undefined) } }}
-              >
-                <X size={14} aria-hidden="true" />
-              </span>
-            )}
-            <ChevronRight size={14} aria-hidden="true" />
-          </span>
-        </button>
-        <DatePicker
-          visible={duePickerOpen}
-          onClose={() => { setDuePickerOpen(false) }}
-          onConfirm={(date) => { setDueDate(date) }}
-          value={dueDate}
-          precision="day"
-          min={new Date(Date.now() - 86_400_000)}
-        />
-        {prefill?.suggestion !== undefined && prefill.suggestion.trim() !== '' && (
-          <div className={css.suggestionBlock}>
-            <span className={css.suggestionLabel}>AI 建议</span>
-            <p className={css.suggestionText}>{prefill.suggestion}</p>
+        <div className={css.sheetScroller}>
+          {prefill !== undefined && <div className={css.sourceStrip}>来自：{prefill.title}</div>}
+          <div className={css.fieldGroup}>
+            <label className={css.fieldLabel} htmlFor="task-title">任务标题</label>
+            <Input
+              id="task-title"
+              clearable
+              className={`${css.fieldInput} ${titleError !== undefined ? css.fieldInvalid : ''}`}
+              value={title}
+              placeholder="要跟进的事，如：接口联调延期处理"
+              onChange={(next) => {
+                setTitle(next)
+                setTitleError(undefined)
+              }}
+            />
+            {titleError !== undefined && <p className={css.fieldError}>{titleError}</p>}
           </div>
-        )}
-        <div className={css.switchRow}>
-          <span className={css.switchTexts}>
-            <span className={css.switchTitle}>立即执行</span>
-            <span className={css.switchHint}>创建后直接交给 AI 同事开始执行</span>
-          </span>
-          <Switch checked={runNow} aria-label="立即执行" onChange={setRunNow} />
+          <button type="button" className={css.pickerRow} onClick={() => { setOwnerPickerOpen(true) }}>
+            <span className={css.pickerLabel}>负责人</span>
+            <span className={css.pickerValue}>
+              {ownerFace}
+              <ChevronRight size={14} className={css.pickerChevron} aria-hidden="true" />
+            </span>
+          </button>
+          <Picker
+            columns={ownerColumns}
+            visible={ownerPickerOpen}
+            getContainer={portalContainer}
+            onClose={() => { setOwnerPickerOpen(false) }}
+            onConfirm={(value) => {
+              /* v8 ignore next -- the single owner column always confirms a picked value. */
+              setOwner(String(value[0] ?? identityName))
+            }}
+            value={[owner]}
+          />
+          <button type="button" className={css.pickerRow} onClick={() => { setDuePickerOpen(true) }}>
+            <span className={css.pickerLabel}>截止时间</span>
+            <span className={css.pickerValue}>
+              {dueLabel(dueDate === undefined ? undefined : dueOf(dueDate))}
+              {dueDate !== undefined && (
+                <span
+                  role="button"
+                  tabIndex={0}
+                  aria-label="清除截止时间"
+                  className={css.pickerClear}
+                  onClick={(event) => { event.stopPropagation(); setDueDate(undefined) }}
+                  onKeyDown={(event) => { if (event.key === 'Enter') { event.stopPropagation(); setDueDate(undefined) } }}
+                >
+                  <X size={14} aria-hidden="true" />
+                </span>
+              )}
+              <ChevronRight size={14} className={css.pickerChevron} aria-hidden="true" />
+            </span>
+          </button>
+          <DatePicker
+            visible={duePickerOpen}
+            getContainer={portalContainer}
+            onClose={() => { setDuePickerOpen(false) }}
+            onConfirm={(date) => { setDueDate(date) }}
+            value={dueDate}
+            precision="day"
+            min={new Date(Date.now() - 86_400_000)}
+          />
+          {prefill?.suggestion !== undefined && prefill.suggestion.trim() !== '' && (
+            <div className={css.suggestionBlock}>
+              <span className={css.suggestionLabel}>AI 建议</span>
+              <p className={css.suggestionText}>{prefill.suggestion}</p>
+            </div>
+          )}
+          <div className={css.switchRow}>
+            <span className={css.switchTexts}>
+              <span className={css.switchTitle}>立即执行</span>
+              <span className={css.switchHint}>创建后直接交给 AI 同事开始执行</span>
+            </span>
+            <Switch checked={runNow} aria-label="立即执行" onChange={setRunNow} />
+          </div>
         </div>
         <div className={css.sheetActions}>
-          <button type="button" className={css.sheetCancel} disabled={submitting} onClick={onClose}>取消</button>
-          <button
+          <Button type="button" size="large" fill="outline" className={css.sheetCancel} style={{ '--border-color': 'var(--dshm-muted-foreground)' }} disabled={submitting} onClick={onClose}>取消</Button>
+          <Button
             type="button"
+            size="large"
+            color="primary"
             className={css.sheetSubmit}
-            disabled={submitting}
+            loading={submitting}
+            loadingText="创建中…"
             onClick={() => { void submit() }}
           >
-            {submitting ? '创建中…' : '创建任务'}
-          </button>
+            创建任务
+          </Button>
         </div>
       </div>
     </Popup>

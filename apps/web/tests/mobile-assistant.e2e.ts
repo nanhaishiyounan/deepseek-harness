@@ -229,8 +229,9 @@ describe('mobile v3+v5 assistant (seeded sessions → fork pick + draft + confir
     expect(tiers).toContain('系统生成（1）')
     expect(tiers).toContain('今天')
     expect(tiers).toContain('200×32')
-    // Field-level edit before deciding: the required quantity.
-    await card.locator('input[aria-label="数量"]').fill('260')
+    // Field-level edit before deciding: the required quantity (the antd Input
+    // names itself through the enclosing field-row label).
+    await card.getByLabel('数量').fill('260')
     await card.getByRole('button', { name: '确认写入' }).click()
     // The action rides the wire as 确认写入 + the form_confirm fence (E1).
     await expect.poll(

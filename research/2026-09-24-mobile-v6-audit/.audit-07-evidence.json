@@ -1,0 +1,10 @@
+{
+  "capturedAt": "2026-09-24T14:58:54.667Z",
+  "base": "http://127.0.0.1:3080",
+  "evidence": [
+    "login cta: {\"classList\":[\"adm-button\",\"adm-button-primary\",\"adm-button-block\",\"adm-button-disabled\",\"adm-button-large\",\"adm-button-shape-default\",\"_submit_sgjvk_129\"],\"bg\":\"rgba(0, 0, 0, 0)\",\"color\":\"rgb(24, 32, 47)\",\"radius\":\"10px\"}",
+    "work action btns: [{\"text\":\"打回\",\"classList\":[],\"bg\":\"rgba(0, 0, 0, 0)\",\"color\":\"rgb(24, 32, 47)\"},{\"text\":\"确认完成\",\"classList\":[],\"bg\":\"rgba(0, 0, 0, 0)\",\"color\":\"rgb(24, 32, 47)\"}]",
+    "report btns: [{\"text\":\"追问缓解建议\",\"classList\":[\"_reportSecondary_10ex7_1008\"],\"bg\":\"rgba(0, 0, 0, 0)\",\"color\":\"rgb(24, 32, 47)\",\"match\":\"reset-matches\"},{\"text\":\"创建处理任务\",\"classList\":[\"_reportPrimary_10ex7_992\"],\"bg\":\"rgba(0, 0, 0, 0)\",\"color\":\"rgb(24, 32, 47)\",\"match\":\"reset-matches\"}]",
+    "reset rule: {\"found\":true,\"css\":\".dshm-root button { font: inherit; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; cursor: pointer; background: none; padding: 0px; color: inherit; }\"}"
+  ]
+}

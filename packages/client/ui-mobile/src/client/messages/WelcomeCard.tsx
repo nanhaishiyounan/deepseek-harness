@@ -7,6 +7,7 @@
  */
 
 import type { JSX } from 'react'
+import { Button } from 'antd-mobile'
 import type { Welcome } from '../colleagues.ts'
 import css from './messages.module.css'
 
@@ -36,15 +37,18 @@ export function WelcomeCard({ welcome, onSend, disabled }: WelcomeCardProps): JS
       {welcome.starters.length > 0 && (
         <div className={css.welcomeStarters}>
           {welcome.starters.map(starter => (
-            <button
+            <Button
               key={starter.label}
               type="button"
+              color="primary"
+              fill="outline"
               className={css.starter}
+              style={{ '--border-color': 'rgba(46, 124, 246, 0.35)' }}
               disabled={disabled}
               onClick={() => { onSend(starter.send) }}
             >
               {starter.label}
-            </button>
+            </Button>
           ))}
         </div>
       )}

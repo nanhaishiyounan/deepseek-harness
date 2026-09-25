@@ -1,0 +1,12 @@
+{
+  "capturedAt": "2026-09-24T17:24:58.173Z",
+  "base": "http://127.0.0.1:3080",
+  "evidence": [
+    "root rect: {\"x\":425,\"y\":14,\"width\":430,\"height\":772,\"top\":14,\"right\":855,\"bottom\":786,\"left\":425}",
+    "#30 dialog: {\"wrap\":{\"__class\":\"adm-center-popup-wrap\",\"__rect\":{\"x\":500,\"y\":319.5,\"width\":280,\"height\":161,\"top\":319.5,\"right\":780,\"bottom\":480.5,\"left\":500}},\"mask\":{\"__class\":\"adm-mask adm-center-popup-mask\",\"__rect\":{\"x\":425,\"y\":14,\"width\":430,\"height\":772,\"top\":14,\"right\":855,\"bottom\":786,\"left\":425}},\"bodyBg\":{\"__class\":\"adm-center-popup-body adm-dialog-body\",\"background-color\":\"rgb(255, 255, 255)\",\"border-radius\":\"16px\",\"__rect\":{\"x\":500,\"y\":319.5,\"width\":280,\"height\":161,\"top\":319.5,\"right\":780,\"bottom\":480.5,\"left\":500}}}",
+    "#37 taskform: {\"body\":{\"__class\":\"adm-popup-body _sheetBody_1ng6o_747 adm-popup-body-position-bottom\",\"__rect\":{\"x\":425,\"y\":281,\"width\":430,\"height\":505,\"top\":281,\"right\":855,\"bottom\":786,\"left\":425},\"background-color\":\"rgb(255, 255, 255)\",\"border-top-left-radius\":\"16px\"},\"mask\":{\"__class\":\"adm-mask adm-center-popup-mask\",\"__rect\":{\"x\":425,\"y\":14,\"width\":430,\"height\":772,\"top\":14,\"right\":855,\"bottom\":786,\"left\":425}},\"toast1677\":[]}",
+    "#38 newchat: {\"body\":{\"__class\":\"adm-popup-body _sheetBody_oz7jq_8 adm-popup-body-position-bottom\",\"__rect\":{\"x\":425,\"y\":306,\"width\":430,\"height\":480,\"top\":306,\"right\":855,\"bottom\":786,\"left\":425},\"background-color\":\"rgb(255, 255, 255)\"},\"mask\":{\"__class\":\"adm-mask adm-center-popup-mask\",\"__rect\":{\"x\":425,\"y\":14,\"width\":430,\"height\":772,\"top\":14,\"right\":855,\"bottom\":786,\"left\":425}}}",
+    "desktop picker: {\"body\":{\"__class\":\"adm-popup-body adm-popup-body-position-bottom\",\"__rect\":{\"x\":425,\"y\":486,\"width\":430,\"height\":300,\"top\":486,\"right\":855,\"bottom\":786,\"left\":425},\"background-color\":\"rgb(255, 255, 255)\"}}",
+    "desktop console errors: 0"
+  ]
+}

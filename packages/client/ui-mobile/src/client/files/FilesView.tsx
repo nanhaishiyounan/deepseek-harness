@@ -11,6 +11,7 @@
  */
 
 import { useMemo, useState, useSyncExternalStore, type JSX } from 'react'
+import { Button, Tag } from 'antd-mobile'
 import { Star } from 'lucide-react'
 import { goBackOr, navigate } from '../router.ts'
 import { PageNav } from '../PageNav.tsx'
@@ -61,11 +62,32 @@ export function FilesView(): JSX.Element {
           aria-label={`打开 ${row.title}`}
           onClick={() => { openSource(row) }}
         >
-          <span className={css.typeBadge} aria-hidden="true">报</span>
+          <Tag
+            className={css.typeBadge as string}
+            style={{ '--background-color': 'var(--dshm-primary-soft)', '--text-color': 'var(--dshm-on-soft)', '--border-color': 'transparent' }}
+            aria-hidden="true"
+          >
+            报
+          </Tag>
           {/* oxlint-disable-next-line typescript/no-unnecessary-condition -- the origin union widens with future file sources. */}
-          {row.origin === 'ai' && <span className={css.originBadge} aria-hidden="true">AI</span>}
+          {row.origin === 'ai' && (
+            <Tag
+              className={css.originBadge as string}
+              style={{ '--background-color': 'var(--dshm-primary-10)', '--text-color': 'var(--dshm-on-soft)', '--border-color': 'transparent' }}
+              aria-hidden="true"
+            >
+              AI
+            </Tag>
+          )}
           <span className={css.fileName}>{row.title}</span>
-          {row.demo && <span className={css.demoTag}>示例</span>}
+          {row.demo && (
+            <Tag
+              className={css.demoTag as string}
+              style={{ '--background-color': 'transparent', '--text-color': 'var(--dshm-muted-foreground)', '--border-color': 'var(--dshm-border)' }}
+            >
+              示例
+            </Tag>
+          )}
         </button>
         {star && (
           <span
@@ -84,20 +106,23 @@ export function FilesView(): JSX.Element {
         {row.subtitle !== undefined && <span>{row.subtitle}</span>}
         <span>{new Date(row.createdAt).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })}</span>
         {row.sourceSessionId !== undefined && (
-          <button type="button" className={css.fileMetaLink} onClick={() => { openSource(row) }}>
+          <Button type="button" color="primary" fill="none" size="mini" className={css.fileMetaLink} onClick={() => { openSource(row) }}>
             去源对话
-          </button>
+          </Button>
         )}
       </span>
       {row.artifact !== undefined && (
         <>
-          <button
+          <Button
             type="button"
+            color="primary"
+            fill="none"
+            size="mini"
             className={css.fileMetaLink}
             onClick={() => { setPreviewId(current => current === `${section}:${row.id}` ? undefined : `${section}:${row.id}`) }}
           >
             {previewId === `${section}:${row.id}` ? '收起报告' : '查看报告'}
-          </button>
+          </Button>
           {previewId === `${section}:${row.id}` && (
             <div className={css.preview}>
               <ReportCard payload={row.artifact} />

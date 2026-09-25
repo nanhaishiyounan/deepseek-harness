@@ -1,0 +1,22 @@
+{
+  "capturedAt": "2026-09-24T16:24:03.905Z",
+  "base": "http://127.0.0.1:3080",
+  "evidence": [
+    "44 home quick buttons: {\"chip\":{\"background-color\":\"rgb(234, 242, 255)\",\"border-radius\":\"999px\",\"border-top-left-radius\":\"999px\",\"color\":\"rgb(29, 95, 214)\",\"__rect\":{\"x\":12,\"y\":255.6875,\"width\":100,\"height\":36,\"top\":255.6875,\"right\":112,\"bottom\":291.6875,\"left\":12}}}",
+    "41 report actions: [{\"text\":\"追问缓解建议\",\"bg\":\"rgb(234, 242, 255)\",\"color\":\"rgb(29, 95, 214)\",\"radius\":\"11px\"},{\"text\":\"创建处理任务\",\"bg\":\"rgb(46, 124, 246)\",\"color\":\"rgb(255, 255, 255)\",\"radius\":\"10px\"}]",
+    "01 taskform light: {\"body\":{\"background-color\":\"rgb(255, 255, 255)\",\"border-top-left-radius\":\"16px\",\"border-top-right-radius\":\"16px\",\"__rect\":{\"x\":0,\"y\":319,\"width\":390,\"height\":525,\"top\":319,\"right\":390,\"bottom\":844,\"left\":0}},\"mask\":{\"background-color\":\"rgba(0, 0, 0, 0.5)\",\"__rect\":{\"x\":0,\"y\":0,\"width\":390,\"height\":844,\"top\":0,\"right\":390,\"bottom\":844,\"left\":0}},\"hostParent\":true}",
+    "02 owner picker light: {\"panel\":null,\"confirm\":{\"color\":\"rgb(46, 124, 246)\",\"__rect\":{\"x\":4,\"y\":548,\"width\":46,\"height\":38.5,\"top\":548,\"right\":50,\"bottom\":586.5,\"left\":4}},\"primary1677\":[]}",
+    "17 date picker light: {\"panel\":null}",
+    "08 newchat light: {\"body\":{\"background-color\":\"rgb(255, 255, 255)\",\"border-top-left-radius\":\"16px\",\"__rect\":{\"x\":0,\"y\":337.609375,\"width\":390,\"height\":506.390625,\"top\":337.609375,\"right\":390,\"bottom\":844,\"left\":0}}}",
+    "31 logout dialog light: {\"body\":{\"background-color\":\"rgb(255, 255, 255)\",\"__rect\":{\"x\":55,\"y\":341.5,\"width\":280,\"height\":161,\"top\":341.5,\"right\":335,\"bottom\":502.5,\"left\":55}},\"wrap\":{\"border-radius\":\"0px\",\"__rect\":{\"x\":55,\"y\":341.5,\"width\":280,\"height\":161,\"top\":341.5,\"right\":335,\"bottom\":502.5,\"left\":55}},\"confirm\":{\"color\":\"rgb(46, 124, 246)\",\"__rect\":{\"x\":55,\"y\":457.5,\"width\":140.5,\"height\":45,\"top\":457.5,\"right\":195.5,\"bottom\":502.5,\"left\":55}},\"primary1677\":[]}",
+    "32 login CTA: {\"cta\":{\"background-color\":\"rgba(0, 0, 0, 0)\",\"border-radius\":\"0px\",\"border-top-left-radius\":\"0px\",\"color\":\"rgb(46, 124, 246)\",\"__rect\":{\"x\":55,\"y\":457.5,\"width\":140.5,\"height\":45,\"top\":457.5,\"right\":195.5,\"bottom\":502.5,\"left\":55}}}",
+    "06 taskform dark: {\"body\":{\"background-color\":\"rgb(26, 33, 45)\",\"border-top-left-radius\":\"16px\",\"__rect\":{\"x\":0,\"y\":319,\"width\":390,\"height\":525,\"top\":319,\"right\":390,\"bottom\":844,\"left\":0}},\"title\":{\"color\":\"rgb(232, 236, 244)\",\"__rect\":{\"x\":16,\"y\":341,\"width\":102,\"height\":24,\"top\":341,\"right\":118,\"bottom\":365,\"left\":16}},\"primary1677\":[]}",
+    "07 owner picker dark: {\"panel\":null,\"confirm\":{\"color\":\"rgb(46, 124, 246)\",\"__rect\":{\"x\":4,\"y\":548,\"width\":46,\"height\":38.5,\"top\":548,\"right\":50,\"bottom\":586.5,\"left\":4}}}",
+    "09 clear dialog dark: {\"body\":null,\"content\":null,\"primary1677\":[]}",
+    "08 newchat dark: {\"body\":{\"background-color\":\"rgb(26, 33, 45)\",\"__rect\":{\"x\":0,\"y\":337.609375,\"width\":390,\"height\":506.390625,\"top\":337.609375,\"right\":390,\"bottom\":844,\"left\":0}}}",
+    "34 work first screen: {\"tabsRect\":{\"__rect\":{\"x\":0,\"y\":52,\"width\":390,\"height\":69.5,\"top\":52,\"right\":390,\"bottom\":121.5,\"left\":0}},\"listFirstCardTop\":{\"listTop\":121.5,\"gridTop\":371.296875}}",
+    "30 desktop dialog: {\"wrap\":{\"__rect\":{\"x\":500,\"y\":319.5,\"width\":280,\"height\":161,\"top\":319.5,\"right\":780,\"bottom\":480.5,\"left\":500}},\"mask\":{\"__rect\":{\"x\":425,\"y\":14,\"width\":430,\"height\":772,\"top\":14,\"right\":855,\"bottom\":786,\"left\":425}},\"rootRect\":{\"__rect\":{\"x\":425,\"y\":14,\"width\":430,\"height\":772,\"top\":14,\"right\":855,\"bottom\":786,\"left\":425}}}",
+    "37 desktop taskform: {\"body\":{\"__rect\":{\"x\":425,\"y\":281,\"width\":430,\"height\":505,\"top\":281,\"right\":855,\"bottom\":786,\"left\":425},\"background-color\":\"rgb(255, 255, 255)\"},\"rootRect\":{\"__rect\":{\"x\":425,\"y\":14,\"width\":430,\"height\":772,\"top\":14,\"right\":855,\"bottom\":786,\"left\":425}}}",
+    "38 desktop newchat: {\"body\":{\"__rect\":{\"x\":425,\"y\":306,\"width\":430,\"height\":480,\"top\":306,\"right\":855,\"bottom\":786,\"left\":425}}}"
+  ]
+}

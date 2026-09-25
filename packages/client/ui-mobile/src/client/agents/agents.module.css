@@ -36,31 +36,18 @@
   flex: none;
 }
 
-/* The design's .search-box: card face, hairline border, the 17px glyph. */
+/* The design's .search-box: the antd SearchBar on the card face (the same
+   dial set the chats layer's search rides). */
 .searchBox {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border: 1px solid var(--dshm-border);
-  border-radius: 14px;
-  background: var(--dshm-card);
-  color: var(--dshm-muted-foreground);
+  --height: var(--dshm-touch);
+  --border-radius: 14px;
+  --background: var(--dshm-card);
+  --placeholder-color: var(--dshm-muted-foreground);
 }
 
-.searchInput {
-  flex: 1;
-  min-width: 0;
-  border: none;
-  outline: none;
-  background: none;
+.searchBox :global(.adm-search-bar-input) {
   font-size: 15px;
-  line-height: 22px;
   color: var(--dshm-foreground);
-}
-
-.searchInput::placeholder {
-  color: var(--dshm-muted-foreground);
 }
 
 .list {
@@ -95,6 +82,8 @@
   gap: 12px;
   padding: 12px 10px;
   border-radius: var(--dshm-radius-lg);
+  background: none;
+  color: var(--dshm-foreground);
   text-align: left;
 }
 
@@ -103,32 +92,20 @@
 }
 
 .rosterAva {
-  position: relative;
   display: inline-flex;
   flex: none;
 }
 
-/* The presence dot (the design's .ava-dot): 11px on the avatar's lower right. */
-.avaDot {
-  position: absolute;
-  right: -1px;
-  bottom: -1px;
+/* The presence dot (the design's .ava-dot): the wrapped antd Badge parked on
+   the avatar's lower right with the card rim. */
+.avaDot:global(.adm-badge-dot) {
+  --right: -4px;
+  --top: 100%;
   width: 11px;
   height: 11px;
-  border-radius: 50%;
+  min-width: 11px;
   border: 2px solid var(--dshm-card);
-}
-
-.dot_online {
-  background: var(--dshm-success);
-}
-
-.dot_busy {
-  background: var(--dshm-warning);
-}
-
-.dot_meeting {
-  background: var(--dshm-brand2);
+  box-sizing: border-box;
 }
 
 .rosterInfo {
@@ -176,7 +153,8 @@
   white-space: nowrap;
 }
 
-/* The design's .skill-pill: 11px brand on brand-soft, full-round. */
+/* The design's .skill-pill: antd Tag (the brand-soft face rides inline dials
+   in AgentsView.tsx) at the 11px scale. */
 .skillPills {
   display: flex;
   flex-wrap: wrap;
@@ -185,37 +163,19 @@
 }
 
 .skillPill {
+  --border-radius: 999px;
   font-size: 11px;
   line-height: 16px;
   font-weight: 600;
-  padding: 2px 9px;
-  border-radius: 999px;
-  background: var(--dshm-primary-soft);
-  color: var(--dshm-on-soft);
 }
 
-/* The design's .status-chip: the quiet capsule colored by presence. */
+/* The design's .status-chip: antd Tag (the per-presence color rides inline
+   dials in AgentsView.tsx) as the quiet capsule. */
 .statusChip {
+  --border-radius: 999px;
   flex: none;
   font-size: 11px;
   line-height: 16px;
-  padding: 3px 9px;
-  border-radius: 999px;
-  border: 1px solid var(--dshm-border);
-  background: var(--dshm-muted);
-  color: var(--dshm-muted-foreground);
-}
-
-.chip_online {
-  color: var(--dshm-success);
-}
-
-.chip_busy {
-  color: var(--dshm-warning);
-}
-
-.chip_meeting {
-  color: var(--dshm-brand2);
 }
 
 /* The busy mark while a colleague's session is being created. */

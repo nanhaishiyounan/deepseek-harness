@@ -2,8 +2,9 @@
  * The mobile application tree: identity gate → four-tab shell with the hash
  * router and the persisted theme. Route rendering stays in the shell so every
  * view module stays pure presentation over its own data hooks; the root also
- * mirrors the theme onto the host body so the 430px phone shell sits on the
- * right desk color in both tracks.
+ * mirrors the theme onto the host html and body — html carries the token
+ * twin antd-mobile body portals read, body carries the desk color behind the
+ * 430px shell.
  */
 
 import { useEffect, useState, type JSX } from 'react'
@@ -24,6 +25,7 @@ export function App(): JSX.Element {
   const [identity, setIdentity] = useState<MobileIdentity | undefined>(() => loadIdentity())
   const [dark, setDark] = useState<boolean>(() => loadTheme())
   useEffect(() => {
+    document.documentElement.dataset.theme = dark ? 'dark' : 'light'
     document.body.dataset.theme = dark ? 'dark' : 'light'
   }, [dark])
   const applyDark = (next: boolean): void => {

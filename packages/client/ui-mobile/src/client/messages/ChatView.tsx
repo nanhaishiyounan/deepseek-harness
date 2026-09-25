@@ -14,7 +14,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, type JSX } from 'react'
-import { SpinLoading, TextArea, Toast, type TextAreaRef } from 'antd-mobile'
+import { Button, SpinLoading, TextArea, Toast, type TextAreaRef } from 'antd-mobile'
 import { BarChart3, CalendarClock, Check, ClipboardCheck, FileText, Mic, Paperclip, PenLine, Plus, Search, Send, Smile, Square, X } from 'lucide-react'
 import type { NocobaseFieldView, SessionSummary } from '@deepseek-ai/dsh-host-apiproxy/api'
 import { Avatar, NoticeCard, RunningRow } from '../ui.tsx'
@@ -413,7 +413,7 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
       />
 
       <div
-        className={css.flow}
+        className={panelOpen ? `${css.flow} ${css.flowPanelOpen}` : css.flow}
         ref={flowRef}
         onScroll={(event) => {
           const flow = event.currentTarget
@@ -513,15 +513,19 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
         {chips.length > 0 && (
           <div className={css.chipRow}>
             {chips.map(text => (
-              <button
+              <Button
                 key={text}
                 type="button"
+                color="primary"
+                fill="outline"
+                size="small"
                 className={css.chip}
+                style={{ '--background-color': 'var(--dshm-card)', '--border-color': 'rgba(46, 124, 246, 0.35)' }}
                 disabled={sending || folded.running}
                 onClick={() => { void send(text) }}
               >
                 {text}
-              </button>
+              </Button>
             ))}
           </div>
         )}

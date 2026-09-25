@@ -12,8 +12,9 @@
  */
 
 import { useEffect, useMemo, useState, useSyncExternalStore, type JSX } from 'react'
-import { Dialog, List, Switch, Toast } from 'antd-mobile'
+import { Button, Dialog, List, Switch, Toast } from 'antd-mobile'
 import { Bell, Bot, Database, Info, LogOut, Moon, Trash2 } from 'lucide-react'
+import { portalContainer } from '../portal.ts'
 import type { MobileIdentity } from '../auth.ts'
 import { Avatar } from '../ui.tsx'
 import { navigate } from '../router.ts'
@@ -127,6 +128,7 @@ export function ProfileView({ identity, dark, onDarkChange, onLogout }: ProfileV
       content: '退出后需要重新验证手机号；会话与业务数据保留在服务端。',
       confirmText: '退出',
       cancelText: '取消',
+      getContainer: portalContainer,
       onConfirm: onLogout,
     })
   }
@@ -201,15 +203,24 @@ export function ProfileView({ identity, dark, onDarkChange, onLogout }: ProfileV
 
       <section className={css.shortcuts} aria-label="常用操作">
         {SHORTCUTS.map(shortcut => (
-          <button
+          <Button
             key={shortcut.label}
             type="button"
+            color="primary"
+            fill="solid"
+            size="small"
             className={css.shortcut}
+            style={{
+              '--background-color': 'var(--dshm-primary-soft)',
+              '--text-color': 'var(--dshm-primary)',
+              '--border-color': 'transparent',
+              '--border-radius': '999px',
+            }}
             disabled={starting}
             onClick={() => { void startShortcut(shortcut.preset) }}
           >
             {shortcut.label}
-          </button>
+          </Button>
         ))}
       </section>
 
@@ -260,6 +271,7 @@ export function ProfileView({ identity, dark, onDarkChange, onLogout }: ProfileV
                 content: '将删除全部带「示例」标记的工作与文件；真实数据不受影响，示例可重新生成。',
                 confirmText: '清除',
                 cancelText: '取消',
+                getContainer: portalContainer,
                 onConfirm: () => {
                   clearDemoData()
                   Toast.show({ content: '演示数据已清除，重新进入应用可再次生成' })
@@ -272,7 +284,7 @@ export function ProfileView({ identity, dark, onDarkChange, onLogout }: ProfileV
             title="数据"
             description="会话与业务数据存储于服务端，与 PC 工作台同库；本机仅保留主题与输入中的草稿。"
             onClick={() => {
-              void Dialog.alert({ title: '数据', content: '会话与业务数据存储于服务端，与 PC 工作台同库；本机仅保留主题与输入中的草稿。', confirmText: '知道了' })
+              void Dialog.alert({ title: '数据', content: '会话与业务数据存储于服务端，与 PC 工作台同库；本机仅保留主题与输入中的草稿。', confirmText: '知道了', getContainer: portalContainer })
             }}
           />
           <List.Item
@@ -280,16 +292,28 @@ export function ProfileView({ identity, dark, onDarkChange, onLogout }: ProfileV
             title="关于"
             extra={APP_VERSION}
             onClick={() => {
-              void Dialog.alert({ title: '关于', content: `食链通移动端 ${APP_VERSION} · DeepSeek Harness`, confirmText: '知道了' })
+              void Dialog.alert({ title: '关于', content: `食链通移动端 ${APP_VERSION} · DeepSeek Harness`, confirmText: '知道了', getContainer: portalContainer })
             }}
           />
         </List>
       </section>
 
-      <button type="button" className={css.logout} onClick={confirmLogout}>
+      <Button
+        type="button"
+        color="danger"
+        fill="solid"
+        size="large"
+        className={css.logout}
+        style={{
+          '--background-color': 'var(--dshm-destructive-10)',
+          '--text-color': 'var(--dshm-destructive)',
+          '--border-color': 'transparent',
+        }}
+        onClick={confirmLogout}
+      >
         <LogOut size={16} aria-hidden="true" />
         退出登录
-      </button>
+      </Button>
 
       <footer className={css.disclaimerNote}>DeepSeek Harness 移动端 · NocoBase 业务系统的 AI 员工入口</footer>
     </div>

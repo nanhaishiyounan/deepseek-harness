@@ -12,7 +12,7 @@
  */
 
 import { useEffect, useMemo, useState, useSyncExternalStore, type JSX } from 'react'
-import { Toast } from 'antd-mobile'
+import { Badge, Button, Skeleton, Toast } from 'antd-mobile'
 import { Search } from 'lucide-react'
 import type { SessionSummary } from '@deepseek-ai/dsh-host-apiproxy/api'
 import { Avatar, SkelRow } from '../ui.tsx'
@@ -162,42 +162,51 @@ export function HomeView({ identityName }: HomeViewProps): JSX.Element {
 
       <div className={css.quickRow}>
         {QUICK_CHIPS.map(chip => (
-          <button
+          <Button
             key={chip.label}
             type="button"
+            color="primary"
+            fill="solid"
+            size="small"
             className={css.quickChip}
+            style={{
+              '--background-color': 'var(--dshm-primary-soft)',
+              '--text-color': 'var(--dshm-on-soft)',
+              '--border-color': 'transparent',
+              '--border-radius': '999px',
+            }}
             onClick={() => { chip.run(() => { setSheetOpen(true) }) }}
           >
             {chip.label}
-          </button>
+          </Button>
         ))}
       </div>
 
       <div className={css.sectionRow}>
         <h2 className={css.sectionTitle}>AI 同事</h2>
-        <button type="button" className={css.sectionLink} onClick={() => { navigate('#/agents') }}>查看全部 ›</button>
+        <Button type="button" fill="none" size="small" className={css.sectionLink} onClick={() => { navigate('#/agents') }}>查看全部 ›</Button>
       </div>
       <div className={css.rosterScroller} aria-label="AI 同事">
         {roster.status === 'loading' && (
           <div className={css.rosterSkelGroup} role="status" aria-label="正在加载 AI 同事">
             <span className={css.rosterSkel} aria-hidden="true">
-              <span className={css.rosterSkelStamp} />
-              <span className={css.rosterSkelName} />
+              <Skeleton animated className={css.rosterSkelStamp as string} />
+              <Skeleton animated className={css.rosterSkelName as string} />
             </span>
             <span className={css.rosterSkel} aria-hidden="true">
-              <span className={css.rosterSkelStamp} />
-              <span className={css.rosterSkelName} />
+              <Skeleton animated className={css.rosterSkelStamp as string} />
+              <Skeleton animated className={css.rosterSkelName as string} />
             </span>
             <span className={css.rosterSkel} aria-hidden="true">
-              <span className={css.rosterSkelStamp} />
-              <span className={css.rosterSkelName} />
+              <Skeleton animated className={css.rosterSkelStamp as string} />
+              <Skeleton animated className={css.rosterSkelName as string} />
             </span>
           </div>
         )}
         {roster.status === 'error' && (
           <span className={css.rosterEmpty} role="alert">
             同事目录加载失败：{roster.error}
-            <button type="button" className={css.retryLink} onClick={roster.refresh}>重试</button>
+            <Button type="button" fill="none" size="small" className={css.retryLink} onClick={roster.refresh}>重试</Button>
           </span>
         )}
         {(roster.value ?? []).map((employee) => {
@@ -211,8 +220,9 @@ export function HomeView({ identityName }: HomeViewProps): JSX.Element {
               onClick={() => { void startChat(employee.id) }}
             >
               <span className={css.rosterAva}>
-                <Avatar background={visual.color} acronym={visual.acronym} size={42} />
-                <span className={css.rosterAvaDot} aria-hidden="true" />
+                <Badge color="var(--dshm-success)" content={Badge.dot} className={css.rosterAvaDot as string}>
+                  <Avatar background={visual.color} acronym={visual.acronym} size={42} />
+                </Badge>
               </span>
               <span className={css.rosterName}>{employee.name}</span>
             </button>
@@ -225,7 +235,7 @@ export function HomeView({ identityName }: HomeViewProps): JSX.Element {
 
       <div className={css.sectionRow}>
         <h2 className={css.sectionTitle}>最近对话</h2>
-        <button type="button" className={css.sectionLink} onClick={() => { navigate('#/chats') }}>查看全部 ›</button>
+        <Button type="button" fill="none" size="small" className={css.sectionLink} onClick={() => { navigate('#/chats') }}>查看全部 ›</Button>
       </div>
       {sessions.status === 'loading'
         ? (
@@ -238,7 +248,7 @@ export function HomeView({ identityName }: HomeViewProps): JSX.Element {
           ? (
             <div className={css.recentEmpty} role="alert">
               最近对话加载失败：{sessions.error}
-              <button type="button" className={css.retryLink} onClick={sessions.refresh}>重试</button>
+              <Button type="button" fill="none" size="small" className={css.retryLink} onClick={sessions.refresh}>重试</Button>
             </div>
           )
           : recentRows.length === 0
@@ -253,14 +263,23 @@ export function HomeView({ identityName }: HomeViewProps): JSX.Element {
                   return (
                     <button key={summary.sessionId} type="button" className={css.recentRow} onClick={() => { openSession(summary) }}>
                       <span className={css.recentAva}>
-                        <Avatar background={colleagueColor(preset)} acronym={visual.acronym} size={42} />
-                        {preset !== undefined && <span className={css.recentAvaDot} aria-hidden="true" />}
+                        {preset !== undefined
+                          ? (
+                            <Badge color="var(--dshm-success)" content={Badge.dot} className={css.recentAvaDot as string}>
+                              <Avatar background={colleagueColor(preset)} acronym={visual.acronym} size={42} />
+                            </Badge>
+                          )
+                          : <Avatar background={colleagueColor(preset)} acronym={visual.acronym} size={42} />}
                       </span>
                       <span className={css.recentMain}>
                         <span className={css.recentTop}>
                           <span className={css.recentTitle}>{titleOf(summary)}</span>
                           <span className={css.recentTime}>{relativeTimeOf(summary.updatedAt)}</span>
-                          {unread && <span className={css.recentBadge} aria-label="有新消息" />}
+                          {unread && (
+                            <span className={css.recentBadge} aria-label="有新消息">
+                              <Badge color="var(--dshm-destructive)" content={Badge.dot} />
+                            </span>
+                          )}
                         </span>
                         <span className={css.recentSummary}>{subtitle}</span>
                       </span>

@@ -40,7 +40,7 @@
   margin: 5px 0 0;
   font-size: 14px;
   line-height: 1.55;
-  opacity: 0.92;
+  opacity: 0.95;
 }
 
 /* ---- Search-box entry (the design's .search-box): a card-faced affordance
@@ -77,7 +77,9 @@
   background: var(--dshm-card);
   border: 1px solid var(--dshm-border);
   border-radius: 14px;
+  box-shadow: var(--dshm-shadow-card);
   text-align: left;
+  color: var(--dshm-foreground);
 }
 
 .statsCard:active {
@@ -92,24 +94,32 @@
   color: var(--dshm-muted-foreground);
 }
 
+/* The four counts sit as a ruled ledger row: hairline column dividers, the
+    number dominant at 22px, the label quietly muted below it. */
 .statsGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
 }
 
 .statCell {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 3px;
   min-width: 0;
+  padding: 0 6px;
+}
+
+.statCell + .statCell {
+  /* The ledger column rule reads as a visible hairline, not the alpha wash
+     the in-card row dividers use. */
+  border-left: 1px solid var(--dshm-border);
 }
 
 .statValue {
   font-family: var(--dshm-font-num);
   font-variant-numeric: tabular-nums;
-  font-size: 20px;
-  line-height: 26px;
+  font-size: 22px;
+  line-height: 28px;
   font-weight: 600;
   color: var(--dshm-foreground);
 }
@@ -133,7 +143,7 @@
 .statLabel {
   font-size: 11px;
   line-height: 16px;
-  color: var(--dshm-foreground);
+  color: var(--dshm-muted-foreground);
 }
 
 /* ---- Section head rows (13/600 sub + 12 link). ---- */
@@ -153,38 +163,33 @@
   color: var(--dshm-muted-foreground);
 }
 
-.sectionLink {
+/* The section's trailing link word: the antd none-fill brand word. */
+.sectionLink:global(.adm-button) {
+  padding: 0;
   font-size: 12px;
   line-height: 18px;
   font-weight: 600;
-  color: var(--dshm-primary);
 }
 
 /* ---- Quick-task starter chips (h36 全圆角, brand-soft fill). ---- */
 
+/* Four equal capsules on one ruled row — equal widths, never a wrap. */
 .quickRow {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: 8px;
 }
 
-.quickChip {
+/* The quick-task chips: antd-mobile Buttons (the brand-soft capsule face
+    rides inline variables in HomeView.tsx); this class keeps the 36px size. */
+.quickChip:global(.adm-button) {
+  width: 100%;
   height: var(--dshm-touch-sm);
-  padding: 0 14px;
+  padding-block: 0;
+  padding-inline: 4px;
   font-size: 12px;
-  line-height: 34px;
-  border: none;
-  border-radius: 999px;
-  background: var(--dshm-primary-soft);
-  color: var(--dshm-on-soft);
-}
-
-.quickChip:active {
-  opacity: 0.75;
-}
-
-.quickChip:disabled {
-  opacity: 0.5;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 /* ---- Colleagues' avatar rail (the design's .ava form, w72). ---- */
@@ -196,8 +201,8 @@
   -webkit-overflow-scrolling: touch;
   padding: 0 2px;
   /* The right-edge fade keeps the horizontal overflow discoverable. */
-  mask-image: linear-gradient(to right, #000 calc(100% - 18px), transparent);
-  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 18px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 26px), transparent);
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 26px), transparent);
 }
 
 .rosterCard {
@@ -206,45 +211,51 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  width: 72px;
-  padding: 8px 0;
+  width: 76px;
+  padding: 9px 0;
   flex: none;
   background: var(--dshm-card);
   border: 1px solid var(--dshm-border);
   border-radius: 14px;
+  color: var(--dshm-foreground);
 }
 
 .rosterCard:active {
   background: var(--dshm-muted);
 }
 
-/* The 42px avatar with its presence dot (AI colleagues stay 在线). */
+/* The 42px avatar wrapped by its antd Badge presence dot. */
 .rosterAva {
-  position: relative;
   display: inline-flex;
   flex: none;
 }
 
-.rosterAvaDot {
-  position: absolute;
-  right: -1px;
-  bottom: -1px;
+/* The wrapped dot parks on the avatar's lower right with the card rim. */
+.rosterAvaDot:global(.adm-badge-dot) {
+  --right: -4px;
+  --top: 100%;
   width: 11px;
   height: 11px;
-  border-radius: 50%;
+  min-width: 11px;
   border: 2px solid var(--dshm-card);
-  background: var(--dshm-success);
+  box-sizing: border-box;
 }
 
+/* Two centered lines carry the roster's real names (AI 食安合规官 and longer)
+    in full instead of the ellipsis clip a single 64px line forced. */
 .rosterName {
-  font-size: 12px;
-  line-height: 16px;
+  font-size: 11.5px;
+  line-height: 15px;
+  /* Short viewports collapse the unclamped natural height to 2px; two
+      15px lines are the card's stable floor. */
+  min-height: 30px;
   font-weight: 500;
   color: var(--dshm-foreground);
-  max-width: 64px;
+  max-width: 68px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .rosterEmpty {
@@ -254,8 +265,8 @@
   color: var(--dshm-muted-foreground);
 }
 
-/* The roster's loading placeholders: the avatar-card silhouette breathing
- * on the token pulse. */
+/* The roster's loading placeholders: the avatar-card silhouette on antd
+ * Skeleton's shimmer. */
 .rosterSkelGroup {
   display: flex;
   gap: 8px;
@@ -267,8 +278,8 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  width: 72px;
-  padding: 8px 0;
+  width: 76px;
+  padding: 9px 0;
   flex: none;
   background: var(--dshm-card);
   border: 1px solid var(--dshm-border);
@@ -276,24 +287,23 @@
 }
 
 .rosterSkelStamp {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: var(--dshm-muted);
-  animation: dshm-skel-pulse 1.2s ease-in-out infinite;
+  --width: 42px;
+  --height: 42px;
+  --border-radius: 50%;
+  flex: none;
+  background-color: var(--dshm-muted);
 }
 
 .rosterSkelName {
-  width: 44px;
-  height: 10px;
-  border-radius: 5px;
-  background: var(--dshm-muted);
-  animation: dshm-skel-pulse 1.2s ease-in-out infinite;
+  --width: 44px;
+  --height: 10px;
+  --border-radius: 5px;
+  background-color: var(--dshm-muted);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .rosterSkelStamp,
-  .rosterSkelName {
+  .rosterSkelStamp:global(.adm-skeleton-animated),
+  .rosterSkelName:global(.adm-skeleton-animated) {
     animation: none;
     opacity: 0.6;
   }
@@ -307,6 +317,7 @@
   background: var(--dshm-card);
   border: 1px solid var(--dshm-border);
   border-radius: var(--dshm-radius-lg);
+  box-shadow: var(--dshm-shadow-card);
   overflow: hidden;
 }
 
@@ -314,31 +325,36 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 9px 10px;
-  min-height: 62px;
+  padding: 10px 12px;
+  min-height: 64px;
   text-align: left;
+  background: none;
+  color: var(--dshm-foreground);
+}
+
+.recentRow + .recentRow {
+  border-top: 1px solid var(--dshm-stroke-soft);
 }
 
 .recentRow:active {
   background: var(--dshm-muted);
 }
 
-/* The 42px avatar with the presence dot (AI-colleague sessions only). */
+/* The 42px avatar wrapped by its antd Badge presence dot (AI-colleague
+   sessions only). */
 .recentAva {
-  position: relative;
   display: inline-flex;
   flex: none;
 }
 
-.recentAvaDot {
-  position: absolute;
-  right: -1px;
-  bottom: -1px;
+.recentAvaDot:global(.adm-badge-dot) {
+  --right: -4px;
+  --top: 100%;
   width: 11px;
   height: 11px;
-  border-radius: 50%;
+  min-width: 11px;
   border: 2px solid var(--dshm-card);
-  background: var(--dshm-success);
+  box-sizing: border-box;
 }
 
 .recentMain {
@@ -383,15 +399,15 @@
 }
 
 /* The unread dot badge (the draftStore watermark's boolean face), riding the
-   top row beside the time like the design's .conv-badge. */
+    top row beside the time like the design's .conv-badge. */
 .recentBadge {
   flex: none;
   align-self: center;
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 999px;
   background: var(--dshm-destructive);
-  margin-left: 6px;
+  margin-left: 4px;
 }
 
 .recentEmpty {
@@ -401,10 +417,12 @@
   color: var(--dshm-muted-foreground);
 }
 
-/* The error strip's retry entry: the brand link word after the failure text. */
-.retryLink {
+/* The error strip's retry entry: the antd none-fill brand word after the
+   failure text. */
+.retryLink:global(.adm-button) {
   margin-left: 8px;
-  color: var(--dshm-primary);
+  padding: 0;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -415,5 +433,6 @@
   background: var(--dshm-card);
   border: 1px solid var(--dshm-border);
   border-radius: var(--dshm-radius-lg);
+  box-shadow: var(--dshm-shadow-card);
   overflow: hidden;
 }

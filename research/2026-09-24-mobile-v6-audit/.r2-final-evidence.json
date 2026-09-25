@@ -1,0 +1,11 @@
+{
+  "capturedAt": "2026-09-24T18:23:59.969Z",
+  "base": "http://127.0.0.1:3080",
+  "evidence": [
+    "[dark] cardHeadButton (进行中): {\"__class\":\"_cardHeadButton_1wiw8_234\",\"color\":\"rgb(232, 236, 244)\",\"background-color\":\"rgba(0, 0, 0, 0)\",\"__rect\":{\"x\":27,\"y\":144.5,\"width\":292,\"height\":34,\"top\":144.5,\"right\":319,\"bottom\":178.5,\"left\":27}}",
+    "[dark] work-doing UA-leaks: []",
+    "[light] cardHeadButton (进行中): {\"__class\":\"_cardHeadButton_1wiw8_234\",\"color\":\"rgb(24, 32, 47)\",\"background-color\":\"rgba(0, 0, 0, 0)\",\"__rect\":{\"x\":27,\"y\":144.5,\"width\":292,\"height\":34,\"top\":144.5,\"right\":319,\"bottom\":178.5,\"left\":27}}",
+    "[light] work-doing UA-leaks: []",
+    "console errors/exceptions: 0"
+  ]
+}

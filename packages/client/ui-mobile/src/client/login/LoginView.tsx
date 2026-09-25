@@ -90,14 +90,23 @@ export function LoginView({ onLoggedIn }: LoginViewProps): JSX.Element {
               placeholder="6 位验证码"
               onChange={(next) => { setCode(next); setError(undefined) }}
             />
-            <button
+            <Button
               type="button"
+              color="primary"
+              fill="solid"
+              size="small"
               className={css.codeButton}
+              style={{
+                '--background-color': 'var(--dshm-primary-soft)',
+                '--text-color': 'var(--dshm-on-soft)',
+                '--border-color': 'transparent',
+                '--border-radius': 'var(--dshm-radius)',
+              }}
               disabled={countdown > 0}
               onClick={startCountdown}
             >
               {countdown > 0 ? `${String(countdown)}s` : '获取'}
-            </button>
+            </Button>
           </span>
         </label>
         {error !== undefined && <p className={css.error} role="alert">{error}</p>}

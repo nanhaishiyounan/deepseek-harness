@@ -1,0 +1,355 @@
+{
+  "arm": "390x844-dark",
+  "url": "http://127.0.0.1:3080/mobile.html",
+  "probe": {
+    "count": 38,
+    "names": [
+      {
+        "text": "AI 食安合规官",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "企业数据助手",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "智能填表助手",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "经营参谋",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "AI 营销洞察主管",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "消费者洞察主管",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "智能品控主管",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "AI 新品研发助手",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "AI 食安服务主管",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "AI 食安巡检员",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "AI 库存与定价管家",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "供应商风险评估员",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "AI 退税管家",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "AI 设备维护主管",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "数据资产入表顾问",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "AI 采销主管",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "AI 海外市场洞察官",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "AI 出海合规官",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "AI 报关物流官",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "AI 供应链金融官",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "AI 渠道匹配官",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "AI 出海项目经理",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "AI 产品研发官",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "AI 自有品牌顾问",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "AI 食安合规官",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "企业数据助手",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "AI 巡检排产员",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "AI 原料行情分析师",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "AI 质量成本分析师",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "AI 冷链管理主管",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "AI 标签合规审查员",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "AI 供应商开发专员",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "AI 电商运营主管",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "AI ESG 报告助理",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "标准模式",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "PTC 模式",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "极简模式",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      },
+      {
+        "text": "创造模式",
+        "rectH": 30,
+        "clientH": 30,
+        "scrollH": 30,
+        "truncated": false,
+        "visible": true
+      }
+    ],
+    "cardHs": [
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98,
+      98
+    ],
+    "bodyBg": "rgb(10, 14, 21)",
+    "scheme": "dark"
+  }
+}
