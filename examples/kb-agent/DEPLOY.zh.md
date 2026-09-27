@@ -75,7 +75,7 @@ headless profile 从 argv 取任务，单次任务天然映射到 `systemd-run -
 
 ### 夜间任务（制造业链路，可选，W2-B7）
 
-审批引擎 `approval-engine.mts --serve` 可内置夜间链（ROP 补货扫描 → MRP 日结 →〔月末〕月度收发存快照 → KPI 物化；季初日追加供应商绩效计分），替代外部 cron 逐动词 curl。默认关闭——不带 env 启动时与外部 cron 形态完全一致（零漂移），四动词手动 curl 路径永久保留：
+审批引擎 `approval-engine.mts --serve` 可内置夜间链（ROP 补货扫描 → MRP 日结 →〔月末〕月度收发存快照 → KPI 物化；季初月每日幂等重算追加供应商绩效计分），替代外部 cron 逐动词 curl。默认关闭——不带 env 启动时与外部 cron 形态完全一致（零漂移），四动词手动 curl 路径永久保留：
 
 ```ini
 # 追加到 [Service] 段（.env 里写三行 EnvironmentFile 亦可）

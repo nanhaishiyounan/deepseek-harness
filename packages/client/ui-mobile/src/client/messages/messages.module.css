@@ -824,10 +824,13 @@
   font-weight: 600;
 }
 
-/* Metrics: the muted three-column grid; a fourth cell wraps to a second row. */
+/* Metrics: the muted grid; a fourth cell wraps to a second row, and a
+   375px viewport drops to two columns so a full money figure (¥280,820)
+   never clips — min() caps the track at the container when one column
+   alone would overflow. */
 .reportMetrics {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(min(112px, 100%), 1fr));
   gap: 8px;
 }
 
@@ -845,7 +848,8 @@
 .metricMiniValue {
   font-family: var(--dshm-font-num);
   font-variant-numeric: tabular-nums;
-  font-size: 20px;
+  /* Shrinks with the viewport so an 8-char money value stays whole below 400px. */
+  font-size: clamp(16px, 4.8vw, 20px);
   line-height: 26px;
   font-weight: 600;
   color: var(--dshm-foreground);

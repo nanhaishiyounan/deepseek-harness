@@ -1105,6 +1105,29 @@ export async function selftest(): Promise<void> {
     expect('批次合格率 pending 剔除', lotPass.compute(facts, '2026-09-26').value, 0.6667)
   }
 
+  // ar_balance — the W1 original the W2-B7 mirror copies: approved
+  // so_orders − crm_payments (approved_at/paid_at ≤ 日); an unapproved
+  // order never counts and a future paid_at never nets.
+  {
+    const arFacts = {
+      soOrders: [
+        { amount: 1200, approved_at: '2026-08-10', doc_status: 'approved' },
+        { amount: 880, approved_at: '2026-09-05', doc_status: 'approved' },
+        { amount: 500, approved_at: '2026-09-01', doc_status: 'pending' },
+        { amount: 300, approved_at: '2026-09-20', doc_status: 'approved' },
+      ],
+      payments: [
+        { amount: 880, paid_at: '2026-09-12' },
+        { amount: 880, paid_at: '2027-01-01' },
+      ],
+    } as Pick<KpiFacts, 'soOrders' | 'payments'>
+    const ar = KPI_DEFS.find(def => def.code === 'ar_balance')
+    if (ar === undefined) throw new Error('selftest 失败：ar_balance 定义缺失')
+    expect('ar_balance 镜像口径', ar.compute(arFacts, '2026-09-26').value, 1500)
+    expect('ar_balance 未批准订单不计', ar.compute(arFacts, '2026-08-31').value, 1200)
+    expect('ar_balance 无批准订单月=0 非null', ar.compute({ soOrders: [], payments: [] } as Pick<KpiFacts, 'soOrders' | 'payments'>, '2026-09-26'), { dim: null, value: 0 })
+  }
+
   // W2-B7 ap_balance — the ar_balance mirror: confirmed invoices − approved
   // payments (billed_at/pay_date ≤ 日); unconfirmed invoices never count; a
   // month with no confirmed invoice reads 0, not null.
@@ -1201,7 +1224,7 @@ export async function selftest(): Promise<void> {
   expect('日界：UTC 15:59 = 沪 23:59 → 仍归当日', shanghaiDate(new Date('2026-09-26T15:59:00Z')), '2026-09-26')
   expect('日界：UTC 16:00 = 沪次日 00:00 → 翻日', shanghaiDate(new Date('2026-09-26T16:00:00Z')), '2026-09-27')
 
-  console.log('kpi-run: selftest OK — FPY 工例/OTIF 分子分母/账实相符率/percentile 对齐/呆滞库龄/临期窗口/RTY 连乘/OTD-S/KPI 表形态/批次合格率已判定口径/ap_balance 应付镜像/PRESENT_ONLY 收缩/重放三件套/月末锚点/周转率公式与除零/rowsOf 截断负例/沪日界边界 全部通过')
+  console.log('kpi-run: selftest OK — FPY 工例/OTIF 分子分母/账实相符率/percentile 对齐/呆滞库龄/临期窗口/RTY 连乘/OTD-S/KPI 表形态/批次合格率已判定口径/ar+ap 余额镜像/PRESENT_ONLY 收缩/重放三件套/月末锚点/周转率公式与除零/rowsOf 截断负例/沪日界边界 全部通过')
 }
 
 // ─── CLI ───

@@ -857,10 +857,11 @@ export interface NightlyOutcome { readonly trigger: 'timer' | 'manual'; readonly
 
 /**
  * Run one nightly pass: scan-reorder → run-mrp → (month-end only)
- * snapshot-month → calc-kpi, appending calc-scorecard on a quarter-start
- * day. Every leg is idempotent, a failed leg logs and the next leg still
- * runs, and the pass ends with a one-line summary — the timer and the
- * manual POST /run-nightly share this body verbatim.
+ * snapshot-month → calc-kpi, appending calc-scorecard on every day of a
+ * quarter-start month (each pass recomputes the running quarter
+ * idempotently). Every leg is idempotent, a failed leg logs and the next
+ * leg still runs, and the pass ends with a one-line summary — the timer
+ * and the manual POST /run-nightly share this body verbatim.
  * @param token - the root API token.
  * @param trigger - 'timer' (the armed schedule) or 'manual' (the route).
  * @param plan - the parsed nightly configuration (the timezone anchor).
@@ -1332,7 +1333,26 @@ export async function selftest(): Promise<void> {
   const badExtras = await failureOf(() => loadFlow(io, 'test_bad_extras'))
   if (!badExtras.includes('amount_threshold')) throw new Error(`selftest 失败：非法阈值未 fail-loud（${badExtras}）`)
 
-  console.log('approval-engine: selftest OK — 状态机全序列/金额阈值加签/驳回重提/非法转移/卡口/幂等/锁编辑/供应商准入流/准入卡口/B5阈值配置+多审批人 全部通过')
+  // W2-R1: the nightly env contract stays fail-loud — the three malformed
+  // shapes the deployment doc names, plus the all-absent defaults.
+  {
+    const rejects: ReadonlyArray<[Record<string, string | undefined>, string]> = [
+      [{ W1_NIGHTLY_AT: '25:99' }, 'W1_NIGHTLY_AT'],
+      [{ W1_NIGHTLY_ENABLED: 'abc' }, 'W1_NIGHTLY_ENABLED'],
+      [{ W1_NIGHTLY_TZ: 'Mars/Olympus' }, 'W1_NIGHTLY_TZ'],
+    ]
+    for (const [env, key] of rejects) {
+      try {
+        parseNightlyEnv(env)
+        throw new Error(`parseNightlyEnv 负例 ${key} 未被拒绝`)
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error)
+        if (!message.includes(key)) throw new Error(`selftest 失败：负例 ${key} 报错错位（${message}）`)
+      }
+    }
+    expect('parseNightlyEnv 默认全关', parseNightlyEnv({}), { enabled: false, at: '02:30', tz: 'Asia/Shanghai' })
+  }
+  console.log('approval-engine: selftest OK — 状态机全序列/金额阈值加签/驳回重提/非法转移/卡口/幂等/锁编辑/供应商准入流/准入卡口/B5阈值配置+多审批人/夜间env负例 全部通过')
 }
 
 // ─── CLI ───

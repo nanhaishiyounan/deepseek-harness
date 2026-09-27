@@ -29,10 +29,10 @@ function stateViewOf(state: ApprovalResultPayload['state']): { seal: string; lab
   return view !== undefined ? view : { seal: '草', label: '草稿', chip: chipOf(css.approvalChipDraft) }
 }
 
-/** The state stamp's seal character and chip label per workflow state. */
 /** Narrow one CSS-module class name to a string (the modules' index signature is optional-typed). */
 const chipOf = (name: string | undefined): string => name ?? ''
 
+/** The state stamp's seal character and chip label per workflow state. */
 export const APPROVAL_STATE_VIEW: Readonly<Record<ApprovalResultPayload['state'], { seal: string; label: string; chip: string }>> = {
   draft: { seal: '草', label: '草稿', chip: chipOf(css.approvalChipDraft) },
   pending: { seal: '审', label: '待审批', chip: chipOf(css.approvalChipPending) },

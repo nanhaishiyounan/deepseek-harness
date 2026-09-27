@@ -2,7 +2,7 @@
 
 --- [负例1] W1_NIGHTLY_AT=99:99
     throw new Error(`W1_NIGHTLY_AT 需为 HH:MM 24 小时制（收到 ${rawAt}）`)
-exit=0
+exit=1（以真实进程退出码复核段为准）
 
 --- [负例2] W1_NIGHTLY_ENABLED=abc
     throw new Error(`W1_NIGHTLY_ENABLED 仅接受 true/false（收到 ${rawEnabled}）`)

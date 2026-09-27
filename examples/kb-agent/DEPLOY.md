@@ -75,7 +75,7 @@ One-shot tasks (the headless profile takes the task from argv) map naturally to 
 
 ### Nightly jobs (manufacturing chain, optional, W2-B7)
 
-The approval engine's `--serve` mode can run the nightly chain in-process — ROP scan-reorder → MRP close → (month-end) the monthly ledger snapshot → KPI materialization, with the quarterly supplier scorecard appended on quarter-start days — instead of an external cron curling the four verbs. Off by default: without the env the server behaves exactly as before, and the manual curl routes stay forever.
+The approval engine's `--serve` mode can run the nightly chain in-process — ROP scan-reorder → MRP close → (month-end) the monthly ledger snapshot → KPI materialization, with the quarterly supplier scorecard recomputed idempotently on every day of a quarter-start month — instead of an external cron curling the four verbs. Off by default: without the env the server behaves exactly as before, and the manual curl routes stay forever.
 
 ```ini
 # Append to the [Service] section (or three lines in the .env behind EnvironmentFile)

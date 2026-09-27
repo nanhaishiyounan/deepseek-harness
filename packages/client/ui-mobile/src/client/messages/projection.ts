@@ -60,7 +60,7 @@ export function lastProjectionOf(items: readonly ChatItem[]): string | undefined
     if (item.kind === 'approval') {
       return item.payload.type === 'approval_pending'
         ? `待审批：${item.payload.doc.title}`
-        : `审批${item.payload.state === 'approved' ? '通过' : '已驳回'}：${item.payload.doc.title}`
+        : `审批${item.payload.state === 'approved' ? '通过' : item.payload.state === 'rejected' ? '已驳回' : '中'}：${item.payload.doc.title}`
     }
     if (item.kind === 'task-card') {
       const label = item.payload?.form.label ?? item.draft.title

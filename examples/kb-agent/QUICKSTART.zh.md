@@ -200,7 +200,7 @@ W 轮（B0–B9 十批，`plans/2026-09-25-mfg-closure/`）把平台升级为真
 
 ```sh
 # 路 A（内置定时器，默认关）：env 开关让 approval-engine --serve 自己跑夜间链
-#   腿序 scan-reorder → run-mrp →（月末）月度收发存快照 → calc-kpi，季初追加 calc-scorecard；
+#   腿序 scan-reorder → run-mrp →（月末）月度收发存快照 → calc-kpi，季初月每日幂等重算追加 calc-scorecard；
 #   任一腿失败不阻断后续；POST :13110/run-nightly 随时手动触发一次（不占当日标记）。
 W1_NIGHTLY_ENABLED=true W1_NIGHTLY_AT=02:30 node --import tsx/esm examples/kb-agent/scripts/approval-engine.mts --serve
 

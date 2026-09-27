@@ -31,7 +31,7 @@ Status: implemented
 - `w2-b7-nightly-default-off.txt`——不带 env：80 秒空转零 timer/pass 日志行（唯一 "nightly" 命中是 serving 行列出 POST /run-nightly 路由），kpi_snapshots 2096/8107 与 mrp_suggestions 26 不变；手动 `/calc-kpi` curl 照常 ok（W 轮路径未动）。
 - `w2-b7-nightly-negatives.txt`——`W1_NIGHTLY_AT=99:99`、`W1_NIGHTLY_ENABLED=abc`、`W1_NIGHTLY_TZ=Mars/Olympus` 均在 serve 启动即抛（exit 1），先于任何 NocoBase 调用。
 - `w2-b7-arap-reconcile.txt`——AP 手算（241,880−880=241,000 ✓）、AR 手算含未来 paid_at 排除（280,820−256,000=24,820 ✓）、无 confirmed 发票月读 0 非 null（2026-06-30）、四个明细块行数与 psql 对齐（8/10/5/2）。
-- `w2-b7-setup-verify.txt` + `w2-b7-final-verify.txt`——setup verify 两次 OK（25 码下限、对账页四块 + 两趋势图、镜像 diff 门禁）。
+- `w2-b7-setup-verify.txt` + `w2-b7-final-verify.txt`——两份归档的 verify 实跑（25 码下限、对账页四块 + 两趋势图、镜像 diff 门禁）；第一份带 OK 横幅的 w2-b7 断言清单项。
 - `w2-b7-final-chain.txt`——s1–s9 整链复跑全绿，两道新护栏可见（s3 前轮已判定跳过重判 / s7 前轮已完成 shipped 跳过发货与当日断言），s8 落 26 rows / 25 valued。
 - `w2-b7-final-gates.txt`——`--assert-ledger`（32 组、138 条流水）、`--selftest`（ap_balance 镜像用例）、`--backfill 90` 幂等（两趟均 2077 rows）。
 - `w2-b7-final-w2-capabilities.txt`——W2 六大能力活证据（AQL 135 行 × 3 严格度 / MPS 计划 / 月度台账 2026-08+09 / KPI 91 天 × 25 码 / extras 覆盖 5 流 / kit_policy full_lock 18 + partial_allowed 2 / ap_balance 241,000）。
