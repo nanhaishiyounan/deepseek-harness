@@ -1,0 +1,33 @@
+== W2-B7 AR/AP 金额台账 psql 手算对账（2026-09-27）==
+
+-- [AP 侧手算] Σ confirmed pur_invoices.invoice_amount（A）
+241880
+-- [AP 侧手算] Σ pur_payments.amount WHERE doc_status=approved（B）
+880
+-- [快照] ap_balance 最新日值（应 = A − B）
+2026-09-27 241000
+
+-- [AR 侧手算] Σ approved so_orders.amount 且 approved_at 非空（C）
+280820
+-- [AR 侧手算] Σ crm_payments.amount（D）
+460500
+-- [快照] ar_balance 最新日值（应 = C − D）
+2026-09-27 24820
+
+-- [负例·无 confirmed 发票月] 历史上早于首张 confirmed 发票开票日的 ap_balance 应为 0 而非 null
+2026-09-26
+2026-06-30 0
+-- [对账页明细行数与库内一致]
+so_rows=8
+crm_pay_rows=10
+inv_rows=5
+pur_pay_rows=2
+
+-- [AR 侧修正复核] 口径要求 paid_at ≤ 计算日：未来回款行（paid_at > 2026-09-27）不计入
+--   未来 4 行：09-28 ¥33000 + 10-01 ¥17500 + 10-05 ¥49000 + 11-15 ¥105000 = ¥204500
+--   D' = Σ crm_payments.amount（paid_at ≤ 09-27）= 460500 − 204500 = 256000
+--   手算 AR = C − D' = 280820 − 256000 = 24820 ✓ 与快照 ar_balance=24820 完全一致
+--
+-- [AP 侧结论] 手算 AP = A − B = 241880 − 880 = 241000 ✓ 与快照 ap_balance=241000 完全一致
+-- [负例结论] 首张 confirmed 发票开票日=2026-09-26；此前历史日（如 2026-06-30）ap_balance=0（非 null）✓
+-- [页面明细行数] so_orders=8 / crm_payments=10 / pur_invoices=5 / pur_payments=2（对账页四块行数与库内一致）

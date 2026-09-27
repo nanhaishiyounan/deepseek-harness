@@ -73,6 +73,19 @@ WantedBy=multi-user.target
 
 headless profile 从 argv 取任务，单次任务天然映射到 `systemd-run --unit=kb-task-…` 或 timer 单元；常驻面（Web 工作台，同一组 patch 的 `dsh web`）用同样单元形态换 web 入口。`systemctl enable --now kb-agent` 后用 `journalctl -u kb-agent -f` 验证：fail-loud 的启动诊断会直接打出。
 
+### 夜间任务（制造业链路，可选，W2-B7）
+
+审批引擎 `approval-engine.mts --serve` 可内置夜间链（ROP 补货扫描 → MRP 日结 →〔月末〕月度收发存快照 → KPI 物化；季初日追加供应商绩效计分），替代外部 cron 逐动词 curl。默认关闭——不带 env 启动时与外部 cron 形态完全一致（零漂移），四动词手动 curl 路径永久保留：
+
+```ini
+# 追加到 [Service] 段（.env 里写三行 EnvironmentFile 亦可）
+Environment=W1_NIGHTLY_ENABLED=true   # 默认 false；仅接受 true/false，非法值启动即拒
+Environment=W1_NIGHTLY_AT=02:30       # HH:MM，默认 02:30；非法值启动即拒
+Environment=W1_NIGHTLY_TZ=Asia/Shanghai  # 默认沪时区（与 KPI 沪日界一致）
+```
+
+要点：任一腿失败记日志后继续下一腿（互不阻断）；`POST :13110/run-nightly` 随时手动触发一次（不占当日去重标记）；进程内标记按天去重，重启可能同日补跑一次——各腿均幂等。内置定时器与外部 cron 二选一，勿双跑。macOS 开发环境的 launchd/cron 演示路径见 QUICKSTART「制造业全链闭环」一节。
+
 ## 6. 升级
 
 停服务 → `git fetch && git checkout <tag>` → `pnpm install && pnpm run build` → 起服务。schema 所有权 fail-loud：异版本知识库文件在启动时被拒，报错信息含盘上版本号——恢复对应备份，不要手改文件。

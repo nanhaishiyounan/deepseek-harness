@@ -34,7 +34,12 @@ const KNOWN_ENUMS: Readonly<Record<string, Readonly<Record<string, readonly stri
     status: ['draft', 'sent', 'received', 'cancelled'],
   },
   hub_po_suppliers: {
-    status: ['active', 'inactive'],
+    status: ['待审核', 'active', 'inactive'],
+  },
+  srm_suppliers: {
+    // The SRM eight-state lifecycle (h4's LIFECYCLE options; the admission
+    // flow transitions among the first four).
+    lifecycle_status: ['potential', 'reviewing', 'qualified', 'preferred', 'restricted', 'frozen', 'rejected', 'eliminated'],
   },
   srm_capas: {
     status: ['initiated', 'verifying', 'replied', 'closed'],

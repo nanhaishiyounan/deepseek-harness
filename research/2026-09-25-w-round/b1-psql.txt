@@ -1,0 +1,129 @@
+=== B1 · 建测试单（六笔，PO-B1-* 前缀） ===
+- PO-B1-A → id=30
+- PO-B1-B → id=31
+- PO-B1-C → id=32
+- PO-B1-D → id=33
+- PO-B1-E → id=34
+- PO-B1-F → id=35
+
+=== 序列A · 阈值内一审生效（PO-B1-A ≤ 10万） ===
+approval-engine: submitted — {"doc_type":"hub_po_purchase_orders","doc_id":30,"action":"submit","from_state":"draft","to_state":"pending","from_anchor":0,"to_anchor":0,"attempt_no":1,"effective":false}
+po_number | doc_status
+-----------+------------
+ PO-B1-A   | pending
+(1 row)
+approval-engine: acted — {"doc_type":"hub_po_purchase_orders","doc_id":30,"action":"approve","from_state":"pending","to_state":"approved","from_anchor":0,"to_anchor":1,"attempt_no":1,"effective":true}
+po_number | doc_status | approved_by | approved_at
+-----------+------------+-------------+-------------
+ PO-B1-A   | approved   | admin       | 2026-09-25
+(1 row)
+
+=== 序列B · 金额阈值加签（PO-B1-B = 25万 > 10万） ===
+approval-engine: submitted — {"doc_type":"hub_po_purchase_orders","doc_id":31,"action":"submit","from_state":"draft","to_state":"pending","from_anchor":0,"to_anchor":0,"attempt_no":1,"effective":false}
+approval-engine: acted — {"doc_type":"hub_po_purchase_orders","doc_id":31,"action":"approve","from_state":"pending","to_state":"pending_level2","from_anchor":0,"to_anchor":0,"attempt_no":1,"effective":false}
+po_number |   doc_status
+-----------+----------------
+ PO-B1-B   | pending_level2
+(1 row)
+state      |  status   | user
+----------------+-----------+------
+ pending        | completed | mac
+ pending_level2 | open      | mac
+(2 rows)
+approval-engine: acted — {"doc_type":"hub_po_purchase_orders","doc_id":31,"action":"approve","from_state":"pending_level2","to_state":"approved","from_anchor":0,"to_anchor":1,"attempt_no":1,"effective":true}
+po_number | doc_status | approved_by
+-----------+------------+-------------
+ PO-B1-B   | approved   | admin
+(1 row)
+state      |  status
+----------------+-----------
+ pending        | completed
+ pending_level2 | completed
+(2 rows)
+
+=== 序列C · 驳回重提（PO-B1-C，attempt_no+1 整链重走） ===
+approval-engine: submitted — {"doc_type":"hub_po_purchase_orders","doc_id":32,"action":"submit","from_state":"draft","to_state":"pending","from_anchor":0,"to_anchor":0,"attempt_no":1,"effective":false}
+approval-engine: acted — {"doc_type":"hub_po_purchase_orders","doc_id":32,"action":"reject","from_state":"pending","to_state":"rejected","from_anchor":0,"to_anchor":0,"attempt_no":1,"effective":false}
+po_number | doc_status
+-----------+------------
+ PO-B1-C   | rejected
+(1 row)
+approval-engine: submitted — {"doc_type":"hub_po_purchase_orders","doc_id":32,"action":"resubmit","from_state":"rejected","to_state":"pending","from_anchor":0,"to_anchor":0,"attempt_no":2,"effective":false}
+approval-engine: acted — {"doc_type":"hub_po_purchase_orders","doc_id":32,"action":"approve","from_state":"pending","to_state":"approved","from_anchor":0,"to_anchor":1,"attempt_no":2,"effective":true}
+po_number | doc_status
+-----------+------------
+ PO-B1-C   | approved
+(1 row)
+node_seq | approver  |  action  |          comment           | attempt_no | from_state | to_state | from_anchor | to_anchor | source
+----------+-----------+----------+----------------------------+------------+------------+----------+-------------+-----------+--------
+        1 | chenliqun | submit   |                            |          1 | draft      | pending  | 0           | 0         | engine
+        2 | admin     | reject   | 供应商资质不全，补件后重报 |          1 | pending    | rejected | 0           | 0         | engine
+        3 | chenliqun | resubmit |                            |          2 | rejected   | pending  | 0           | 0         | engine
+        4 | admin     | approve  | 补件齐全，同意             |          2 | pending    | approved | 0           | 1         | engine
+(4 rows)
+
+=== 序列D · 卡口四件套（PO-B1-D：draft 驱动收货被拒，approved 后放行） ===
+— 负例：doc_status=draft 时对 wms_receipts 执行 nb_create（来源单号=PO-B1-D）
+
+Error: 上游单据未生效：采购单 PO-B1-D 的审批状态为「草稿」（doc_status=0），未生效单据不能驱动下游业务；请先提交并通过审批
+approval-engine: submitted — {"doc_type":"hub_po_purchase_orders","doc_id":33,"action":"submit","from_state":"draft","to_state":"pending","from_anchor":0,"to_anchor":0,"attempt_no":1,"effective":false}
+approval-engine: acted — {"doc_type":"hub_po_purchase_orders","doc_id":33,"action":"approve","from_state":"pending","to_state":"approved","from_anchor":0,"to_anchor":1,"attempt_no":1,"effective":true}
+— 正例：approved 后同卡口通过，并真实登记一笔收货
+approval-engine: gate passed
+- 收货行已落库 id=8 (source_no=PO-B1-D)
+receipt_no | source_no | status
+------------+-----------+---------
+ RCV-B1-D-1 | PO-B1-D   | pending
+(1 row)
+
+=== 序列E · 引擎入口（PO-B1-E，CLI = mobile nb_approve 的同一编排与规则） ===
+approval-engine: submitted — {"doc_type":"hub_po_purchase_orders","doc_id":34,"action":"submit","from_state":"draft","to_state":"pending","from_anchor":0,"to_anchor":0,"attempt_no":1,"effective":false}
+approval-engine: acted — {"doc_type":"hub_po_purchase_orders","doc_id":34,"action":"approve","from_state":"pending","to_state":"pending_level2","from_anchor":0,"to_anchor":0,"attempt_no":1,"effective":false}
+node_seq | approver  | action  |   comment    | attempt_no | source
+----------+-----------+---------+--------------+------------+--------
+        1 | chenliqun | submit  |              |          1 | engine
+        2 | admin     | approve | 引擎入口同意 |          1 | engine
+(2 rows)
+
+=== 序列F · 页面入口（PO-B1-F，intent 行 → workflow → 127.0.0.1:13110/act → 引擎） ===
+— 后台启动引擎 serve (:13110)
+approval-engine: submitted — {"doc_type":"hub_po_purchase_orders","doc_id":35,"action":"submit","from_state":"draft","to_state":"pending","from_anchor":0,"to_anchor":0,"attempt_no":1,"effective":false}
+— 在审批中心建 intent 行（source=page，等价页面 Add-new 表单提交）
+- intent 行 id=32，等待 workflow 回调引擎…
+po_number | doc_status | approved_by
+-----------+------------+-------------
+ PO-B1-F   | approved   | admin
+(1 row)
+- intent 行消费情况：剩余 page 行 1（引擎成功后已删除）
+node_seq | approver  | action  |   comment    | attempt_no | source
+----------+-----------+---------+--------------+------------+--------
+        1 | chenliqun | submit  |              |          1 | engine
+        2 | admin     | approve | 页面入口同意 |          1 | page
+(2 rows)
+
+=== 双入口留痕格式对比（E 引擎行 vs F 引擎行，五要素同列同型） ===
+approver | action  |   comment    | attempt_no | from_state |    to_state    | from_anchor | to_anchor | source |  acted_at
+----------+---------+--------------+------------+------------+----------------+-------------+-----------+--------+------------
+ admin    | approve | 引擎入口同意 |          1 | pending    | pending_level2 | 0           | 0         | engine | 2026-09-25
+(1 row)
+approver | action  |   comment    | attempt_no | from_state | to_state | from_anchor | to_anchor | source |  acted_at
+----------+---------+--------------+------------+------------+----------+-------------+-----------+--------+------------
+ admin    | approve | 页面入口同意 |          1 | pending    | approved | 0           | 1         | page   | 2026-09-25
+(1 row)
+
+=== 全序列状态总览 ===
+po_number |   doc_status   | approved_by | total
+-----------+----------------+-------------+--------
+ PO-B1-A   | approved       | admin       |  16000
+ PO-B1-B   | approved       | admin       | 250000
+ PO-B1-C   | approved       | admin       |  88000
+ PO-B1-D   | approved       | admin       |   9000
+ PO-B1-E   | pending_level2 |             | 120000
+ PO-B1-F   | approved       | admin       |  60000
+(6 rows)
+records_total | docs
+---------------+------
+            15 |    6
+(1 row)
+
+B1 sequence: DONE

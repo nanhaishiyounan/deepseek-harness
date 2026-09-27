@@ -1,0 +1,98 @@
+════ W2-B1 · AQL 全量清偿 psql 对照（2026-09-27 09:21:13）════
+
+── 1. 种子完备：135 行 = 15 段 × (normal 75 / tightened 30 / reduced 30)
+ total | normal | tightened | reduced
+-------+--------+-----------+---------
+   135 |     75 |        30 |      30
+(1 row)
+
+── 2. 验收抽查格（281-500×2.5×normal=H/50/3/4；1201-3200×2.5×tightened=K/125/5/6；箭头例 151-280×1.0×normal→H/50/1/2、500001+×1.0×normal=Q/1250/21/22）
+ lot_band  | aql |   rigor   | code |  n   | ac | re
+-----------+-----+-----------+------+------+----+----
+ 1201-3200 | 2.5 | tightened | K    |  125 |  5 |  6
+ 151-280   | 1.0 | normal    | H    |   50 |  1 |  2
+ 151-280   | 2.5 | tightened | G    |   32 |  1 |  2
+ 281-500   | 2.5 | normal    | H    |   50 |  3 |  4
+ 500001+   | 1.0 | normal    | Q    | 1250 | 21 | 22
+ 501-1200  | 1.0 | reduced   | J    |   32 |  1 |  2
+(6 rows)
+
+── 3. W2B1 判定用例（段外解锁 + 放宽表 + 加严表 + rigor 快照）
+       code        | lot_qty | aql_target |   rigor   | aql_code | aql_n | aql_ac | aql_re | result | resubmission
+-------------------+---------+------------+-----------+----------+-------+--------+--------+--------+--------------
+ QI-W2B1-2000A     |    2000 | 2.5        | normal    | K        |   125 |      7 |      8 | passed | f
+ QI-W2B1-2000B     |    2000 | 2.5        | normal    | K        |   125 |      7 |      8 | failed | f
+ QI-W2B1-A01       |     200 | 1.0        | normal    | H        |    50 |      1 |      2 | passed | f
+ QI-W2B1-A02       |     200 | 1.0        | normal    | H        |    50 |      1 |      2 | passed | f
+ QI-W2B1-A03       |     200 | 1.0        | normal    | H        |    50 |      1 |      2 | passed | f
+ QI-W2B1-A04       |     200 | 1.0        | normal    | H        |    50 |      1 |      2 | passed | f
+ QI-W2B1-A05       |     200 | 1.0        | normal    | H        |    50 |      1 |      2 | passed | f
+ QI-W2B1-A06       |     200 | 1.0        | normal    | H        |    50 |      1 |      2 | passed | f
+ QI-W2B1-A07       |     200 | 1.0        | normal    | H        |    50 |      1 |      2 | passed | f
+ QI-W2B1-A08       |     200 | 1.0        | normal    | H        |    50 |      1 |      2 | passed | f
+ QI-W2B1-A09       |     200 | 1.0        | normal    | H        |    50 |      1 |      2 | passed | f
+ QI-W2B1-A10       |     200 | 1.0        | normal    | H        |    50 |      1 |      2 | passed | f
+ QI-W2B1-A11       |     200 | 1.0        | normal    | H        |    50 |      1 |      2 | failed | f
+ QI-W2B1-A12       |     200 | 1.0        | normal    | H        |    50 |      1 |      2 | passed | f
+ QI-W2B1-A13       |     200 | 1.0        | normal    | H        |    50 |      1 |      2 | passed | f
+ QI-W2B1-A14       |     200 | 1.0        | normal    | H        |    50 |      1 |      2 | passed | f
+ QI-W2B1-A15       |     200 | 1.0        | normal    | H        |    50 |      1 |      2 | passed | f
+ QI-W2B1-A16       |     200 | 1.0        | normal    | H        |    50 |      1 |      2 | passed | f
+ QI-W2B1-A17       |     200 | 1.0        | normal    | H        |    50 |      1 |      2 | passed | f
+ QI-W2B1-A18       |     200 | 1.0        | normal    | H        |    50 |      1 |      2 | passed | f
+ QI-W2B1-A19       |     200 | 1.0        | normal    | H        |    50 |      1 |      2 | passed | f
+ QI-W2B1-A20       |     200 | 1.0        | normal    | H        |    50 |      1 |      2 | passed | f
+ QI-W2B1-A21       |     200 | 1.0        | normal    | H        |    50 |      1 |      2 | passed | f
+ QI-W2B1-A22       |     200 | 1.0        | normal    | H        |    50 |      1 |      2 | passed | f
+ QI-W2B1-A23       |     200 | 1.0        | normal    | H        |    50 |      1 |      2 | passed | f
+ QI-W2B1-A24       |     200 | 1.0        | normal    | H        |    50 |      1 |      2 | passed | f
+ QI-W2B1-A25       |     200 | 1.0        | normal    | H        |    50 |      1 |      2 | passed | f
+ QI-W2B1-A26       |     200 | 1.0        | normal    | H        |    50 |      1 |      2 | passed | f
+ QI-W2B1-A27-RESUB |     200 | 1.0        | normal    | H        |    50 |      1 |      2 | failed | t
+ QI-W2B1-A28       |     200 | 1.0        | reduced   | J        |    32 |      1 |      2 | failed | f
+ QI-W2B1-B01       |     200 | 2.5        | normal    | G        |    32 |      2 |      3 | passed | f
+ QI-W2B1-B02       |     200 | 2.5        | normal    | G        |    32 |      2 |      3 | failed | f
+ QI-W2B1-B03       |     200 | 2.5        | normal    | G        |    32 |      2 |      3 | passed | f
+ QI-W2B1-B04       |     200 | 2.5        | normal    | G        |    32 |      2 |      3 | passed | f
+ QI-W2B1-B05       |     200 | 2.5        | normal    | G        |    32 |      2 |      3 | failed | f
+ QI-W2B1-B06       |     200 | 2.5        | tightened | G        |    32 |      1 |      2 | failed | f
+ QI-W2B1-B07       |     200 | 2.5        | tightened | G        |    32 |      1 |      2 | failed | f
+ QI-W2B1-B08       |     200 | 2.5        | tightened | G        |    32 |      1 |      2 | failed | f
+ QI-W2B1-B09       |     200 | 2.5        | tightened | G        |    32 |      1 |      2 | failed | f
+ QI-W2B1-B10       |     200 | 2.5        | tightened | G        |    32 |      1 |      2 | failed | f
+(40 rows)
+
+── 4. 负例四单：fail-loud 后保持 pending（无判定残留）
+       code       | lot_qty | result  | status
+------------------+---------+---------+---------
+ QI-W2B1-NEG-FULL |       3 | pending | pending
+ QI-W2B1-NEG-N1   |       1 | pending | pending
+ QI-W2B1-NEG-SUSP |     200 | pending | pending
+ QI-W2B1-NEG-T065 |    2000 | pending | pending
+(4 rows)
+
+── 5. 供应商四态终态（SUP-008 放宽往返回 normal/score=0；SUP-009 停检后恢复 tightened）
+  code   | iqc_level | switch_score | reject_streak
+---------+-----------+--------------+---------------
+ SUP-001 | normal    |              |             0
+ SUP-003 | tightened |              |
+ SUP-006 | suspended |              |
+ SUP-008 | normal    |            0 |             3
+ SUP-009 | tightened |            0 |             0
+(5 rows)
+
+── 6. B8 零回归：历史判定行 single-shot 原值 + B9 两行 (J/80/5/6) 与新表一致
+     code     | lot_qty | aql_code | aql_n | aql_ac | aql_re |   result
+--------------+---------+----------+-------+--------+--------+------------
+ QI-2026-0001 |     200 | G        |    32 |      2 |      3 | passed
+ QI-2026-0002 |     200 | G        |    32 |      2 |      3 | passed
+ QI-2026-0003 |     200 | G        |    32 |      2 |      3 | passed
+ QI-2026-0004 |     200 | G        |    32 |      2 |      3 | failed
+ QI-2026-0005 |     200 | G        |    32 |      2 |      3 | concession
+ QI-2026-0006 |     200 | G        |    32 |      1 |      2 | failed
+ QI-2026-0007 |     200 | G        |    32 |      1 |      2 | failed
+ QI-2026-0008 |    1000 |          |       |        |        | pending
+ QI-2026-0009 |   23706 |          |       |        |        | pending
+ QI-B9F-0001  |    1000 | J        |    80 |      5 |      6 | passed
+ QI-B9F-OQC1  |    1200 | J        |    80 |      5 |      6 | passed
+(11 rows)

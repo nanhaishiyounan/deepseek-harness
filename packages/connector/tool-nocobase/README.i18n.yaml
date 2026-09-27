@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/connector/tool-nocobase/README.md
-README.md: 31b0240463e010273c062eb0e0ab2ed7ff96a950
-README.zh.md: 506d2484d03f8519208349c2ffcbff66e324f2df
+README.md: 85f558a025b2f12d7c055e4b27d3e41784c1c7b4
+README.zh.md: 576faffd018628a44c0325f1d453963d7d58af83

@@ -178,6 +178,38 @@ pnpm exec vitest run --config vitest.e2e.config.ts examples/kb-agent/tests/nocob
 
 **多租户映射（MVP 形态）**：四级租户（平台/运营商/企业/用户）映射到 NocoBase 的 roles + departments 树 + 行级 scope——平台=superuser 角色、运营商=每运营主体一个 role、企业=department 节点（collections 行按 department scope 隔离）、用户=部门成员。本示例是 MVP 单租户：一个 root 角色 API key 服务全部连接器与订单读写（与 `kbWriteEnabled`/`ordersEnabled` 的单租户盘级访问控制同立场，见 [DEPLOY.zh.md](DEPLOY.zh.md) §3），不做行级隔离；多租户接入时按上述映射在 NocoBase 建 roles/departments 并为每个租户签发绑定 role 的 key，DSH 侧把 `DSH_KB_TENANT` 与 key 一并按租户部署。
 
+## 制造业全链闭环：W 轮 9 步剧本（供应商→采购→质量→生产→销售→结算→看板→审计）
+
+W 轮（B0–B9 十批，`plans/2026-09-25-mfg-closure/`）把平台升级为真实制造业闭环：通用审批引擎五表（`wfl_*`，双端同一入口）、采购全链（PR→RFQ→比价→PO→收货→IQC/AQL→入库→发票三方匹配→付款）、库存实务（移库/预留/ROP/盘点，`stock==Σmovements` 恒成立）、生产闭环（BOM/FCS 排产/齐套硬预留/领退料/报工/OQC/完工入库）、销售→MRP 联动（计划单 mobile 确认卡转单）、质量四路处置与供应商绩效、以及 B9 的真实数据看板（`kpi_snapshots` T+1 快照 + 90 天回算，四类看板页全部由真实单据聚合，每项 KPI 带 psql 口径）。
+
+交付演示按 9 步走（真实服务、真实 key、双端取证；完整证据与逐步 psql 断言见 `research/2026-09-25-w-round/`）：
+
+```
+① 供应商：mobile 对话「登记一家新供应商：禾创源…」→ 草稿卡确认 → SUP-2026-1300 落库（potential）→ 准入审批 qualified
+② 采购：mobile 建 PR（PR-B9F-0001）→ 审批 → RFQ 发三家 → 比价（最低价中标）→ PO 审批 approved
+③ 收货质量：mobile 收货单挂 PO → 过账上待检区 → IQC 抽检（AQL 查表 J/80，d=2≤Ac5 → passed）→ 放行转合格库（批次四日期）
+④ 销售：mobile 建销售订单（SO-B9F-0001）→ 审批 approved → 生效即成品预留
+⑤ 计划：MRP 日结 → mobile 问「有什么计划建议」→ 计划卡 → 确认转单 MO（带 driver 链回 SO）
+⑥ 生产：MO 审批 → 下达 → 排产 Preview/Apply → 齐套（组件硬预留）→ 领料 → 报工×3 → 完工 → OQC → 放行入库
+⑦ 结算：SO 发货（shipped_at 回写）→ 发票三方匹配 confirmed → 付款审批 approved
+⑧ 看板：KPI 快照重算 → psql 手算对账（OTIF/一次合格率/账实相符率逐项一致）→ 四类看板页真实图表
+⑨ 审计：任一 PO/MO 双向追溯（`kpi-run.mts --trace po=<PO> mo=<MO>`，19/19 链路闭合：PO↑PR/RFQ/报价 ↓收货/IQC/批次/发票/付款；MO↑BOM/建议/SO ↓领料/报工/完工 + 批次三级追溯 成品→组件→供应商）
+```
+
+日常操作：mobile 端对话登记/审批/查 KPI（「这周 OTIF 多少」出报告卡）；平台侧各域页面照常使用。夜间任务（W2-B7 起两条路，二选一勿双跑）——
+
+```sh
+# 路 A（内置定时器，默认关）：env 开关让 approval-engine --serve 自己跑夜间链
+#   腿序 scan-reorder → run-mrp →（月末）月度收发存快照 → calc-kpi，季初追加 calc-scorecard；
+#   任一腿失败不阻断后续；POST :13110/run-nightly 随时手动触发一次（不占当日标记）。
+W1_NIGHTLY_ENABLED=true W1_NIGHTLY_AT=02:30 node --import tsx/esm examples/kb-agent/scripts/approval-engine.mts --serve
+
+# 路 B（W 轮形态，外部 cron 逐动词 curl；不带 env 起 serve 时与之完全一致，零漂移）：
+node --import tsx/esm examples/kb-agent/scripts/kpi-run.mts --calc-kpi     # 或 POST :13110/calc-kpi
+node --import tsx/esm examples/kb-agent/scripts/kpi-run.mts --selftest    # 纯公式断言
+node --import tsx/esm examples/kb-agent/scripts/kpi-run.mts --trace po=PO-B9F-0001 mo=MO-2026-0009
+```
+
 ## 供应链双系统：SRM + WMS 完整闭环（H 轮）
 
 五大企业系统（CRM ERP/MES/WMS/PLM/SRM）走「类似 admin、可 UI 配置」的单 NocoBase 应用路线，每系统一个菜单组、v2 flowPage 形态、工厂脚本幂等建成。H 轮交付**共享地基 + SRM + WMS 两个完整闭环**；PLM（含酱油山梨酸钾 GB2760 硬阻断场景）/MES/ERP+CRM 升级按 I/J/K 轮路线图分期（`plans/acceptance-fixes-2026-09-15-h/04-roadmap-five-systems.md`），未建系统的菜单组不出现。

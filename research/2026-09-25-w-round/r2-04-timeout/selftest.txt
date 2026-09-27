@@ -1,0 +1,1 @@
+kpi-run: selftest OK — FPY 工例/OTIF 分子分母/账实相符率/percentile 对齐/呆滞库龄/临期窗口/RTY 连乘/OTD-S/KPI 表形态/批次合格率已判定口径/PRESENT_ONLY 三码/rowsOf 截断负例/沪日界边界 全部通过

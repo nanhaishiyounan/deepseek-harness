@@ -1,0 +1,4 @@
+w2-b5: RFQ CLI ① --send-rfq 幂等重放（already closed kept）
+nocobase-w3: rfq RFQ-B5-CLI already awarded (PO PO-2026-0004 kept)
+w2-b5: RFQ CLI ② --award-rfq --quote 9 ✓ sent → closed + PO PO-2026-0004（¥250 = 指定报价 ¥2.5×100）
+w2-b5: RFQ CLI all OK

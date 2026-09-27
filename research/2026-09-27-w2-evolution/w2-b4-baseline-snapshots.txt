@@ -1,0 +1,2007 @@
+ar_balance	2026-06-29		0
+ar_balance	2026-06-30		0
+ar_balance	2026-07-01		0
+ar_balance	2026-07-02		0
+ar_balance	2026-07-03		0
+ar_balance	2026-07-04		0
+ar_balance	2026-07-05		0
+ar_balance	2026-07-06		0
+ar_balance	2026-07-07		0
+ar_balance	2026-07-08		0
+ar_balance	2026-07-09		0
+ar_balance	2026-07-10		0
+ar_balance	2026-07-11		0
+ar_balance	2026-07-12		0
+ar_balance	2026-07-13		0
+ar_balance	2026-07-14		0
+ar_balance	2026-07-15		0
+ar_balance	2026-07-16		0
+ar_balance	2026-07-17		0
+ar_balance	2026-07-18		0
+ar_balance	2026-07-19		0
+ar_balance	2026-07-20		0
+ar_balance	2026-07-21		0
+ar_balance	2026-07-22		0
+ar_balance	2026-07-23		0
+ar_balance	2026-07-24		0
+ar_balance	2026-07-25		0
+ar_balance	2026-07-26		0
+ar_balance	2026-07-27		0
+ar_balance	2026-07-28		0
+ar_balance	2026-07-29		0
+ar_balance	2026-07-30		0
+ar_balance	2026-07-31		0
+ar_balance	2026-08-01		0
+ar_balance	2026-08-02		0
+ar_balance	2026-08-03		0
+ar_balance	2026-08-04		0
+ar_balance	2026-08-05		0
+ar_balance	2026-08-06		0
+ar_balance	2026-08-07		0
+ar_balance	2026-08-08		0
+ar_balance	2026-08-09		0
+ar_balance	2026-08-10		0
+ar_balance	2026-08-11		0
+ar_balance	2026-08-12		0
+ar_balance	2026-08-13		0
+ar_balance	2026-08-14		0
+ar_balance	2026-08-15		0
+ar_balance	2026-08-16		0
+ar_balance	2026-08-17		0
+ar_balance	2026-08-18		0
+ar_balance	2026-08-19		0
+ar_balance	2026-08-20		-45600
+ar_balance	2026-08-21		-45600
+ar_balance	2026-08-22		-45600
+ar_balance	2026-08-23		-45600
+ar_balance	2026-08-24		-45600
+ar_balance	2026-08-25		-90600
+ar_balance	2026-08-26		-90600
+ar_balance	2026-08-27		-90600
+ar_balance	2026-08-28		-90600
+ar_balance	2026-08-29		-90600
+ar_balance	2026-08-30		-90600
+ar_balance	2026-08-31		-90600
+ar_balance	2026-09-01		-90600
+ar_balance	2026-09-02		-116600
+ar_balance	2026-09-03		-116600
+ar_balance	2026-09-04		-116600
+ar_balance	2026-09-05		-116600
+ar_balance	2026-09-06		-116600
+ar_balance	2026-09-07		-116600
+ar_balance	2026-09-08		-116600
+ar_balance	2026-09-09		-116600
+ar_balance	2026-09-10		-191600
+ar_balance	2026-09-11		-191600
+ar_balance	2026-09-12		-191600
+ar_balance	2026-09-13		-191600
+ar_balance	2026-09-14		-191600
+ar_balance	2026-09-15		-225600
+ar_balance	2026-09-16		-225600
+ar_balance	2026-09-17		-225600
+ar_balance	2026-09-18		-225600
+ar_balance	2026-09-19		-225600
+ar_balance	2026-09-20		-256000
+ar_balance	2026-09-21		-256000
+ar_balance	2026-09-22		-256000
+ar_balance	2026-09-23		-256000
+ar_balance	2026-09-24		-256000
+ar_balance	2026-09-25		-256000
+ar_balance	2026-09-26		24820
+ar_balance	2026-09-27		24820
+capacity_util	2026-06-29		0
+capacity_util	2026-06-30		0
+capacity_util	2026-07-01		0
+capacity_util	2026-07-02		0
+capacity_util	2026-07-03		0
+capacity_util	2026-07-04		0
+capacity_util	2026-07-05		0
+capacity_util	2026-07-06		0
+capacity_util	2026-07-07		0
+capacity_util	2026-07-08		0
+capacity_util	2026-07-09		0
+capacity_util	2026-07-10		0
+capacity_util	2026-07-11		0
+capacity_util	2026-07-12		0
+capacity_util	2026-07-13		0
+capacity_util	2026-07-14		0
+capacity_util	2026-07-15		0
+capacity_util	2026-07-16		0
+capacity_util	2026-07-17		0
+capacity_util	2026-07-18		0
+capacity_util	2026-07-19		0
+capacity_util	2026-07-20		0
+capacity_util	2026-07-21		0
+capacity_util	2026-07-22		0
+capacity_util	2026-07-23		0
+capacity_util	2026-07-24		0
+capacity_util	2026-07-25		0
+capacity_util	2026-07-26		0
+capacity_util	2026-07-27		0
+capacity_util	2026-07-28		0
+capacity_util	2026-07-29		0
+capacity_util	2026-07-30		0
+capacity_util	2026-07-31		0
+capacity_util	2026-08-01		0
+capacity_util	2026-08-02		0
+capacity_util	2026-08-03		0
+capacity_util	2026-08-04		0
+capacity_util	2026-08-05		0
+capacity_util	2026-08-06		0
+capacity_util	2026-08-07		0
+capacity_util	2026-08-08		0
+capacity_util	2026-08-09		0
+capacity_util	2026-08-10		0
+capacity_util	2026-08-11		0
+capacity_util	2026-08-12		0
+capacity_util	2026-08-13		0
+capacity_util	2026-08-14		0
+capacity_util	2026-08-15		0
+capacity_util	2026-08-16		0
+capacity_util	2026-08-17		0
+capacity_util	2026-08-18		0
+capacity_util	2026-08-19		0
+capacity_util	2026-08-20		0
+capacity_util	2026-08-21		0
+capacity_util	2026-08-22		0
+capacity_util	2026-08-23		0
+capacity_util	2026-08-24		0
+capacity_util	2026-08-25		0
+capacity_util	2026-08-26		0
+capacity_util	2026-08-27		0
+capacity_util	2026-08-28		0
+capacity_util	2026-08-29		0
+capacity_util	2026-08-30		0
+capacity_util	2026-08-31		0
+capacity_util	2026-09-01		0
+capacity_util	2026-09-02		0
+capacity_util	2026-09-03		0
+capacity_util	2026-09-04		0
+capacity_util	2026-09-05		0
+capacity_util	2026-09-06		0
+capacity_util	2026-09-07		0
+capacity_util	2026-09-08		0
+capacity_util	2026-09-09		0
+capacity_util	2026-09-10		0
+capacity_util	2026-09-11		0
+capacity_util	2026-09-12		0
+capacity_util	2026-09-13		0
+capacity_util	2026-09-14		0
+capacity_util	2026-09-15		0
+capacity_util	2026-09-16		0
+capacity_util	2026-09-17		0
+capacity_util	2026-09-18		0
+capacity_util	2026-09-19		0
+capacity_util	2026-09-20		0
+capacity_util	2026-09-21		0
+capacity_util	2026-09-22		0
+capacity_util	2026-09-23		0
+capacity_util	2026-09-24		0
+capacity_util	2026-09-25		0
+capacity_util	2026-09-26		0.0797
+capacity_util	2026-09-27		0.0768
+capital_occupied	2026-06-29
+capital_occupied	2026-06-30
+capital_occupied	2026-07-01
+capital_occupied	2026-07-02
+capital_occupied	2026-07-03
+capital_occupied	2026-07-04
+capital_occupied	2026-07-05
+capital_occupied	2026-07-06
+capital_occupied	2026-07-07
+capital_occupied	2026-07-08
+capital_occupied	2026-07-09
+capital_occupied	2026-07-10
+capital_occupied	2026-07-11
+capital_occupied	2026-07-12
+capital_occupied	2026-07-13
+capital_occupied	2026-07-14
+capital_occupied	2026-07-15
+capital_occupied	2026-07-16
+capital_occupied	2026-07-17
+capital_occupied	2026-07-18
+capital_occupied	2026-07-19
+capital_occupied	2026-07-20
+capital_occupied	2026-07-21
+capital_occupied	2026-07-22
+capital_occupied	2026-07-23
+capital_occupied	2026-07-24
+capital_occupied	2026-07-25
+capital_occupied	2026-07-26
+capital_occupied	2026-07-27
+capital_occupied	2026-07-28
+capital_occupied	2026-07-29
+capital_occupied	2026-07-30
+capital_occupied	2026-07-31
+capital_occupied	2026-08-01
+capital_occupied	2026-08-02
+capital_occupied	2026-08-03
+capital_occupied	2026-08-04
+capital_occupied	2026-08-05
+capital_occupied	2026-08-06
+capital_occupied	2026-08-07
+capital_occupied	2026-08-08
+capital_occupied	2026-08-09
+capital_occupied	2026-08-10
+capital_occupied	2026-08-11
+capital_occupied	2026-08-12
+capital_occupied	2026-08-13
+capital_occupied	2026-08-14
+capital_occupied	2026-08-15
+capital_occupied	2026-08-16
+capital_occupied	2026-08-17
+capital_occupied	2026-08-18
+capital_occupied	2026-08-19
+capital_occupied	2026-08-20
+capital_occupied	2026-08-21
+capital_occupied	2026-08-22
+capital_occupied	2026-08-23
+capital_occupied	2026-08-24
+capital_occupied	2026-08-25
+capital_occupied	2026-08-26
+capital_occupied	2026-08-27
+capital_occupied	2026-08-28
+capital_occupied	2026-08-29
+capital_occupied	2026-08-30
+capital_occupied	2026-08-31
+capital_occupied	2026-09-01
+capital_occupied	2026-09-02
+capital_occupied	2026-09-03
+capital_occupied	2026-09-04
+capital_occupied	2026-09-05
+capital_occupied	2026-09-06
+capital_occupied	2026-09-07
+capital_occupied	2026-09-08
+capital_occupied	2026-09-09
+capital_occupied	2026-09-10
+capital_occupied	2026-09-11
+capital_occupied	2026-09-12
+capital_occupied	2026-09-13
+capital_occupied	2026-09-14
+capital_occupied	2026-09-15
+capital_occupied	2026-09-16
+capital_occupied	2026-09-17
+capital_occupied	2026-09-18
+capital_occupied	2026-09-19
+capital_occupied	2026-09-20
+capital_occupied	2026-09-21
+capital_occupied	2026-09-22
+capital_occupied	2026-09-23
+capital_occupied	2026-09-24
+capital_occupied	2026-09-25
+capital_occupied	2026-09-26
+capital_occupied	2026-09-27		5225421.3
+collection_rate	2026-06-29
+collection_rate	2026-06-30
+collection_rate	2026-07-01
+collection_rate	2026-07-02
+collection_rate	2026-07-03
+collection_rate	2026-07-04
+collection_rate	2026-07-05
+collection_rate	2026-07-06
+collection_rate	2026-07-07
+collection_rate	2026-07-08
+collection_rate	2026-07-09
+collection_rate	2026-07-10
+collection_rate	2026-07-11
+collection_rate	2026-07-12
+collection_rate	2026-07-13
+collection_rate	2026-07-14
+collection_rate	2026-07-15
+collection_rate	2026-07-16
+collection_rate	2026-07-17
+collection_rate	2026-07-18
+collection_rate	2026-07-19
+collection_rate	2026-07-20
+collection_rate	2026-07-21
+collection_rate	2026-07-22
+collection_rate	2026-07-23
+collection_rate	2026-07-24
+collection_rate	2026-07-25
+collection_rate	2026-07-26
+collection_rate	2026-07-27
+collection_rate	2026-07-28
+collection_rate	2026-07-29
+collection_rate	2026-07-30
+collection_rate	2026-07-31
+collection_rate	2026-08-01
+collection_rate	2026-08-02
+collection_rate	2026-08-03
+collection_rate	2026-08-04
+collection_rate	2026-08-05
+collection_rate	2026-08-06
+collection_rate	2026-08-07
+collection_rate	2026-08-08
+collection_rate	2026-08-09
+collection_rate	2026-08-10
+collection_rate	2026-08-11
+collection_rate	2026-08-12
+collection_rate	2026-08-13
+collection_rate	2026-08-14
+collection_rate	2026-08-15
+collection_rate	2026-08-16
+collection_rate	2026-08-17
+collection_rate	2026-08-18
+collection_rate	2026-08-19
+collection_rate	2026-08-20
+collection_rate	2026-08-21
+collection_rate	2026-08-22
+collection_rate	2026-08-23
+collection_rate	2026-08-24
+collection_rate	2026-08-25
+collection_rate	2026-08-26
+collection_rate	2026-08-27
+collection_rate	2026-08-28
+collection_rate	2026-08-29
+collection_rate	2026-08-30
+collection_rate	2026-08-31
+collection_rate	2026-09-01
+collection_rate	2026-09-02
+collection_rate	2026-09-03
+collection_rate	2026-09-04
+collection_rate	2026-09-05
+collection_rate	2026-09-06
+collection_rate	2026-09-07
+collection_rate	2026-09-08
+collection_rate	2026-09-09
+collection_rate	2026-09-10
+collection_rate	2026-09-11
+collection_rate	2026-09-12
+collection_rate	2026-09-13
+collection_rate	2026-09-14
+collection_rate	2026-09-15
+collection_rate	2026-09-16
+collection_rate	2026-09-17
+collection_rate	2026-09-18
+collection_rate	2026-09-19
+collection_rate	2026-09-20
+collection_rate	2026-09-21
+collection_rate	2026-09-22
+collection_rate	2026-09-23
+collection_rate	2026-09-24
+collection_rate	2026-09-25
+collection_rate	2026-09-26
+collection_rate	2026-09-27
+count_accuracy	2026-06-29		0.9927
+count_accuracy	2026-06-30
+count_accuracy	2026-07-01
+count_accuracy	2026-07-02
+count_accuracy	2026-07-03
+count_accuracy	2026-07-04
+count_accuracy	2026-07-05
+count_accuracy	2026-07-06
+count_accuracy	2026-07-07
+count_accuracy	2026-07-08
+count_accuracy	2026-07-09
+count_accuracy	2026-07-10
+count_accuracy	2026-07-11
+count_accuracy	2026-07-12
+count_accuracy	2026-07-13
+count_accuracy	2026-07-14
+count_accuracy	2026-07-15
+count_accuracy	2026-07-16
+count_accuracy	2026-07-17
+count_accuracy	2026-07-18
+count_accuracy	2026-07-19
+count_accuracy	2026-07-20
+count_accuracy	2026-07-21
+count_accuracy	2026-07-22
+count_accuracy	2026-07-23
+count_accuracy	2026-07-24
+count_accuracy	2026-07-25
+count_accuracy	2026-07-26
+count_accuracy	2026-07-27
+count_accuracy	2026-07-28
+count_accuracy	2026-07-29
+count_accuracy	2026-07-30
+count_accuracy	2026-07-31
+count_accuracy	2026-08-01
+count_accuracy	2026-08-02
+count_accuracy	2026-08-03
+count_accuracy	2026-08-04
+count_accuracy	2026-08-05
+count_accuracy	2026-08-06
+count_accuracy	2026-08-07
+count_accuracy	2026-08-08
+count_accuracy	2026-08-09
+count_accuracy	2026-08-10
+count_accuracy	2026-08-11
+count_accuracy	2026-08-12
+count_accuracy	2026-08-13
+count_accuracy	2026-08-14
+count_accuracy	2026-08-15
+count_accuracy	2026-08-16
+count_accuracy	2026-08-17
+count_accuracy	2026-08-18
+count_accuracy	2026-08-19
+count_accuracy	2026-08-20
+count_accuracy	2026-08-21
+count_accuracy	2026-08-22
+count_accuracy	2026-08-23
+count_accuracy	2026-08-24
+count_accuracy	2026-08-25
+count_accuracy	2026-08-26
+count_accuracy	2026-08-27
+count_accuracy	2026-08-28
+count_accuracy	2026-08-29
+count_accuracy	2026-08-30
+count_accuracy	2026-08-31
+count_accuracy	2026-09-01
+count_accuracy	2026-09-02
+count_accuracy	2026-09-03
+count_accuracy	2026-09-04
+count_accuracy	2026-09-05
+count_accuracy	2026-09-06		0
+count_accuracy	2026-09-07		0
+count_accuracy	2026-09-08		0
+count_accuracy	2026-09-09		0
+count_accuracy	2026-09-10		0
+count_accuracy	2026-09-11		0
+count_accuracy	2026-09-12		0
+count_accuracy	2026-09-13		0
+count_accuracy	2026-09-14		0
+count_accuracy	2026-09-15		0.9198
+count_accuracy	2026-09-16		0.9198
+count_accuracy	2026-09-17		0.9198
+count_accuracy	2026-09-18		0.9198
+count_accuracy	2026-09-19		0.9198
+count_accuracy	2026-09-20		0.9198
+count_accuracy	2026-09-21		0.9198
+count_accuracy	2026-09-22		0.9198
+count_accuracy	2026-09-23		0.9198
+count_accuracy	2026-09-24		0.9198
+count_accuracy	2026-09-25		0.9198
+count_accuracy	2026-09-26		0.9825
+count_accuracy	2026-09-27		0.9825
+dead_stock_ratio	2026-06-29		0
+dead_stock_ratio	2026-06-30		0
+dead_stock_ratio	2026-07-01		0
+dead_stock_ratio	2026-07-02		0
+dead_stock_ratio	2026-07-03		0
+dead_stock_ratio	2026-07-04		0
+dead_stock_ratio	2026-07-05		0
+dead_stock_ratio	2026-07-06		0
+dead_stock_ratio	2026-07-07		0
+dead_stock_ratio	2026-07-08		0
+dead_stock_ratio	2026-07-09		0
+dead_stock_ratio	2026-07-10		0
+dead_stock_ratio	2026-07-11		0
+dead_stock_ratio	2026-07-12		0
+dead_stock_ratio	2026-07-13		0
+dead_stock_ratio	2026-07-14		0
+dead_stock_ratio	2026-07-15		0
+dead_stock_ratio	2026-07-16		0
+dead_stock_ratio	2026-07-17		0
+dead_stock_ratio	2026-07-18		0
+dead_stock_ratio	2026-07-19		0
+dead_stock_ratio	2026-07-20		0
+dead_stock_ratio	2026-07-21		0
+dead_stock_ratio	2026-07-22		0
+dead_stock_ratio	2026-07-23		0
+dead_stock_ratio	2026-07-24		0
+dead_stock_ratio	2026-07-25		0
+dead_stock_ratio	2026-07-26		0
+dead_stock_ratio	2026-07-27		0
+dead_stock_ratio	2026-07-28		0
+dead_stock_ratio	2026-07-29		0
+dead_stock_ratio	2026-07-30		0
+dead_stock_ratio	2026-07-31		0
+dead_stock_ratio	2026-08-01		0
+dead_stock_ratio	2026-08-02		0
+dead_stock_ratio	2026-08-03		0
+dead_stock_ratio	2026-08-04		0
+dead_stock_ratio	2026-08-05		0
+dead_stock_ratio	2026-08-06		0
+dead_stock_ratio	2026-08-07		0
+dead_stock_ratio	2026-08-08		0
+dead_stock_ratio	2026-08-09		0
+dead_stock_ratio	2026-08-10		0
+dead_stock_ratio	2026-08-11		0
+dead_stock_ratio	2026-08-12		0
+dead_stock_ratio	2026-08-13		0
+dead_stock_ratio	2026-08-14		0
+dead_stock_ratio	2026-08-15		0
+dead_stock_ratio	2026-08-16		0
+dead_stock_ratio	2026-08-17		0
+dead_stock_ratio	2026-08-18		0
+dead_stock_ratio	2026-08-19		0
+dead_stock_ratio	2026-08-20		0
+dead_stock_ratio	2026-08-21		0
+dead_stock_ratio	2026-08-22		0
+dead_stock_ratio	2026-08-23		0
+dead_stock_ratio	2026-08-24		0
+dead_stock_ratio	2026-08-25		0
+dead_stock_ratio	2026-08-26		0
+dead_stock_ratio	2026-08-27		0
+dead_stock_ratio	2026-08-28		0
+dead_stock_ratio	2026-08-29		0
+dead_stock_ratio	2026-08-30		0
+dead_stock_ratio	2026-08-31		0
+dead_stock_ratio	2026-09-01		0
+dead_stock_ratio	2026-09-02		0
+dead_stock_ratio	2026-09-03		0
+dead_stock_ratio	2026-09-04		0
+dead_stock_ratio	2026-09-05		0
+dead_stock_ratio	2026-09-06		0
+dead_stock_ratio	2026-09-07		0
+dead_stock_ratio	2026-09-08		0
+dead_stock_ratio	2026-09-09		0
+dead_stock_ratio	2026-09-10		0
+dead_stock_ratio	2026-09-11		0
+dead_stock_ratio	2026-09-12		0
+dead_stock_ratio	2026-09-13		0
+dead_stock_ratio	2026-09-14		0
+dead_stock_ratio	2026-09-15		0
+dead_stock_ratio	2026-09-16		0
+dead_stock_ratio	2026-09-17		0
+dead_stock_ratio	2026-09-18		0
+dead_stock_ratio	2026-09-19		0
+dead_stock_ratio	2026-09-20		0
+dead_stock_ratio	2026-09-21		0
+dead_stock_ratio	2026-09-22		0
+dead_stock_ratio	2026-09-23		0
+dead_stock_ratio	2026-09-24		0
+dead_stock_ratio	2026-09-25		0
+dead_stock_ratio	2026-09-26		0
+dead_stock_ratio	2026-09-27		0
+expiry_alerts	2026-06-29		0
+expiry_alerts	2026-06-30		0
+expiry_alerts	2026-07-01		0
+expiry_alerts	2026-07-02		0
+expiry_alerts	2026-07-03		0
+expiry_alerts	2026-07-04		0
+expiry_alerts	2026-07-05		0
+expiry_alerts	2026-07-06		0
+expiry_alerts	2026-07-07		0
+expiry_alerts	2026-07-08		0
+expiry_alerts	2026-07-09		0
+expiry_alerts	2026-07-10		0
+expiry_alerts	2026-07-11		0
+expiry_alerts	2026-07-12		0
+expiry_alerts	2026-07-13		0
+expiry_alerts	2026-07-14		0
+expiry_alerts	2026-07-15		0
+expiry_alerts	2026-07-16		0
+expiry_alerts	2026-07-17		0
+expiry_alerts	2026-07-18		0
+expiry_alerts	2026-07-19		0
+expiry_alerts	2026-07-20		0
+expiry_alerts	2026-07-21		0
+expiry_alerts	2026-07-22		0
+expiry_alerts	2026-07-23		0
+expiry_alerts	2026-07-24		0
+expiry_alerts	2026-07-25		0
+expiry_alerts	2026-07-26		0
+expiry_alerts	2026-07-27		0
+expiry_alerts	2026-07-28		0
+expiry_alerts	2026-07-29		0
+expiry_alerts	2026-07-30		0
+expiry_alerts	2026-07-31		0
+expiry_alerts	2026-08-01		0
+expiry_alerts	2026-08-02		0
+expiry_alerts	2026-08-03		0
+expiry_alerts	2026-08-04		0
+expiry_alerts	2026-08-05		0
+expiry_alerts	2026-08-06		0
+expiry_alerts	2026-08-07		0
+expiry_alerts	2026-08-08		0
+expiry_alerts	2026-08-09		0
+expiry_alerts	2026-08-10		0
+expiry_alerts	2026-08-11		0
+expiry_alerts	2026-08-12		0
+expiry_alerts	2026-08-13		0
+expiry_alerts	2026-08-14		0
+expiry_alerts	2026-08-15		0
+expiry_alerts	2026-08-16		0
+expiry_alerts	2026-08-17		0
+expiry_alerts	2026-08-18		0
+expiry_alerts	2026-08-19		0
+expiry_alerts	2026-08-20		0
+expiry_alerts	2026-08-21		0
+expiry_alerts	2026-08-22		0
+expiry_alerts	2026-08-23		0
+expiry_alerts	2026-08-24		0
+expiry_alerts	2026-08-25		0
+expiry_alerts	2026-08-26		0
+expiry_alerts	2026-08-27		0
+expiry_alerts	2026-08-28		0
+expiry_alerts	2026-08-29		0
+expiry_alerts	2026-08-30		0
+expiry_alerts	2026-08-31		0
+expiry_alerts	2026-09-01		0
+expiry_alerts	2026-09-02		0
+expiry_alerts	2026-09-03		0
+expiry_alerts	2026-09-04		0
+expiry_alerts	2026-09-05		0
+expiry_alerts	2026-09-06		0
+expiry_alerts	2026-09-07		0
+expiry_alerts	2026-09-08		0
+expiry_alerts	2026-09-09		0
+expiry_alerts	2026-09-10		1
+expiry_alerts	2026-09-11		1
+expiry_alerts	2026-09-12		1
+expiry_alerts	2026-09-13		1
+expiry_alerts	2026-09-14		1
+expiry_alerts	2026-09-15		1
+expiry_alerts	2026-09-16		1
+expiry_alerts	2026-09-17		1
+expiry_alerts	2026-09-18		1
+expiry_alerts	2026-09-19		1
+expiry_alerts	2026-09-20		1
+expiry_alerts	2026-09-21		1
+expiry_alerts	2026-09-22		1
+expiry_alerts	2026-09-23		1
+expiry_alerts	2026-09-24		2
+expiry_alerts	2026-09-25		2
+expiry_alerts	2026-09-26		2
+expiry_alerts	2026-09-27		2
+fpy	2026-06-29
+fpy	2026-06-30
+fpy	2026-07-01
+fpy	2026-07-02
+fpy	2026-07-03
+fpy	2026-07-04
+fpy	2026-07-05
+fpy	2026-07-06
+fpy	2026-07-07
+fpy	2026-07-08
+fpy	2026-07-09
+fpy	2026-07-10
+fpy	2026-07-11
+fpy	2026-07-12
+fpy	2026-07-13
+fpy	2026-07-14
+fpy	2026-07-15
+fpy	2026-07-16
+fpy	2026-07-17
+fpy	2026-07-18
+fpy	2026-07-19
+fpy	2026-07-20
+fpy	2026-07-21
+fpy	2026-07-22
+fpy	2026-07-23
+fpy	2026-07-24
+fpy	2026-07-25
+fpy	2026-07-26
+fpy	2026-07-27
+fpy	2026-07-28
+fpy	2026-07-29
+fpy	2026-07-30
+fpy	2026-07-31
+fpy	2026-08-01
+fpy	2026-08-02
+fpy	2026-08-03
+fpy	2026-08-04
+fpy	2026-08-05
+fpy	2026-08-06
+fpy	2026-08-07
+fpy	2026-08-08
+fpy	2026-08-09
+fpy	2026-08-10
+fpy	2026-08-11
+fpy	2026-08-12
+fpy	2026-08-13
+fpy	2026-08-14
+fpy	2026-08-15
+fpy	2026-08-16
+fpy	2026-08-17
+fpy	2026-08-18
+fpy	2026-08-19
+fpy	2026-08-20
+fpy	2026-08-21
+fpy	2026-08-22
+fpy	2026-08-23
+fpy	2026-08-24
+fpy	2026-08-25
+fpy	2026-08-26
+fpy	2026-08-27
+fpy	2026-08-28
+fpy	2026-08-29
+fpy	2026-08-30
+fpy	2026-08-31
+fpy	2026-09-01
+fpy	2026-09-02
+fpy	2026-09-03
+fpy	2026-09-04
+fpy	2026-09-05
+fpy	2026-09-06
+fpy	2026-09-07
+fpy	2026-09-08
+fpy	2026-09-09
+fpy	2026-09-10
+fpy	2026-09-11
+fpy	2026-09-12
+fpy	2026-09-13
+fpy	2026-09-14
+fpy	2026-09-15
+fpy	2026-09-16
+fpy	2026-09-17
+fpy	2026-09-18
+fpy	2026-09-19
+fpy	2026-09-20
+fpy	2026-09-21
+fpy	2026-09-22
+fpy	2026-09-23
+fpy	2026-09-24
+fpy	2026-09-25
+fpy	2026-09-26		0.9972
+fpy	2026-09-27		0.9972
+gross_margin	2026-06-29
+gross_margin	2026-06-30
+gross_margin	2026-07-01
+gross_margin	2026-07-02
+gross_margin	2026-07-03
+gross_margin	2026-07-04
+gross_margin	2026-07-05
+gross_margin	2026-07-06
+gross_margin	2026-07-07
+gross_margin	2026-07-08
+gross_margin	2026-07-09
+gross_margin	2026-07-10
+gross_margin	2026-07-11
+gross_margin	2026-07-12
+gross_margin	2026-07-13
+gross_margin	2026-07-14
+gross_margin	2026-07-15
+gross_margin	2026-07-16
+gross_margin	2026-07-17
+gross_margin	2026-07-18
+gross_margin	2026-07-19
+gross_margin	2026-07-20
+gross_margin	2026-07-21
+gross_margin	2026-07-22
+gross_margin	2026-07-23
+gross_margin	2026-07-24
+gross_margin	2026-07-25
+gross_margin	2026-07-26
+gross_margin	2026-07-27
+gross_margin	2026-07-28
+gross_margin	2026-07-29
+gross_margin	2026-07-30
+gross_margin	2026-07-31
+gross_margin	2026-08-01
+gross_margin	2026-08-02
+gross_margin	2026-08-03
+gross_margin	2026-08-04
+gross_margin	2026-08-05
+gross_margin	2026-08-06
+gross_margin	2026-08-07
+gross_margin	2026-08-08
+gross_margin	2026-08-09
+gross_margin	2026-08-10
+gross_margin	2026-08-11
+gross_margin	2026-08-12
+gross_margin	2026-08-13
+gross_margin	2026-08-14
+gross_margin	2026-08-15
+gross_margin	2026-08-16
+gross_margin	2026-08-17
+gross_margin	2026-08-18
+gross_margin	2026-08-19
+gross_margin	2026-08-20
+gross_margin	2026-08-21
+gross_margin	2026-08-22
+gross_margin	2026-08-23
+gross_margin	2026-08-24
+gross_margin	2026-08-25
+gross_margin	2026-08-26
+gross_margin	2026-08-27
+gross_margin	2026-08-28
+gross_margin	2026-08-29
+gross_margin	2026-08-30
+gross_margin	2026-08-31
+gross_margin	2026-09-01
+gross_margin	2026-09-02
+gross_margin	2026-09-03
+gross_margin	2026-09-04
+gross_margin	2026-09-05
+gross_margin	2026-09-06
+gross_margin	2026-09-07
+gross_margin	2026-09-08
+gross_margin	2026-09-09
+gross_margin	2026-09-10
+gross_margin	2026-09-11
+gross_margin	2026-09-12
+gross_margin	2026-09-13
+gross_margin	2026-09-14
+gross_margin	2026-09-15
+gross_margin	2026-09-16
+gross_margin	2026-09-17
+gross_margin	2026-09-18
+gross_margin	2026-09-19
+gross_margin	2026-09-20
+gross_margin	2026-09-21
+gross_margin	2026-09-22
+gross_margin	2026-09-23
+gross_margin	2026-09-24
+gross_margin	2026-09-25
+gross_margin	2026-09-26		-0.7279
+gross_margin	2026-09-27		-0.7279
+inbound_lines	2026-06-29
+inbound_lines	2026-06-30
+inbound_lines	2026-07-01
+inbound_lines	2026-07-02
+inbound_lines	2026-07-03
+inbound_lines	2026-07-04
+inbound_lines	2026-07-05
+inbound_lines	2026-07-06
+inbound_lines	2026-07-07
+inbound_lines	2026-07-08
+inbound_lines	2026-07-09
+inbound_lines	2026-07-10
+inbound_lines	2026-07-11
+inbound_lines	2026-07-12
+inbound_lines	2026-07-13
+inbound_lines	2026-07-14
+inbound_lines	2026-07-15
+inbound_lines	2026-07-16
+inbound_lines	2026-07-17
+inbound_lines	2026-07-18
+inbound_lines	2026-07-19
+inbound_lines	2026-07-20
+inbound_lines	2026-07-21
+inbound_lines	2026-07-22
+inbound_lines	2026-07-23
+inbound_lines	2026-07-24
+inbound_lines	2026-07-25
+inbound_lines	2026-07-26
+inbound_lines	2026-07-27
+inbound_lines	2026-07-28
+inbound_lines	2026-07-29
+inbound_lines	2026-07-30
+inbound_lines	2026-07-31
+inbound_lines	2026-08-01
+inbound_lines	2026-08-02
+inbound_lines	2026-08-03
+inbound_lines	2026-08-04
+inbound_lines	2026-08-05
+inbound_lines	2026-08-06
+inbound_lines	2026-08-07
+inbound_lines	2026-08-08
+inbound_lines	2026-08-09
+inbound_lines	2026-08-10
+inbound_lines	2026-08-11
+inbound_lines	2026-08-12
+inbound_lines	2026-08-13
+inbound_lines	2026-08-14
+inbound_lines	2026-08-15
+inbound_lines	2026-08-16
+inbound_lines	2026-08-17
+inbound_lines	2026-08-18
+inbound_lines	2026-08-19
+inbound_lines	2026-08-20
+inbound_lines	2026-08-21
+inbound_lines	2026-08-22
+inbound_lines	2026-08-23
+inbound_lines	2026-08-24
+inbound_lines	2026-08-25
+inbound_lines	2026-08-26
+inbound_lines	2026-08-27
+inbound_lines	2026-08-28
+inbound_lines	2026-08-29
+inbound_lines	2026-08-30
+inbound_lines	2026-08-31
+inbound_lines	2026-09-01
+inbound_lines	2026-09-02
+inbound_lines	2026-09-03
+inbound_lines	2026-09-04
+inbound_lines	2026-09-05
+inbound_lines	2026-09-06
+inbound_lines	2026-09-07
+inbound_lines	2026-09-08
+inbound_lines	2026-09-09
+inbound_lines	2026-09-10
+inbound_lines	2026-09-11
+inbound_lines	2026-09-12
+inbound_lines	2026-09-13
+inbound_lines	2026-09-14
+inbound_lines	2026-09-15
+inbound_lines	2026-09-16
+inbound_lines	2026-09-17
+inbound_lines	2026-09-18
+inbound_lines	2026-09-19
+inbound_lines	2026-09-20
+inbound_lines	2026-09-21
+inbound_lines	2026-09-22
+inbound_lines	2026-09-23
+inbound_lines	2026-09-24
+inbound_lines	2026-09-25
+inbound_lines	2026-09-26
+inbound_lines	2026-09-27		1
+lot_pass_rate	2026-06-29
+lot_pass_rate	2026-06-30
+lot_pass_rate	2026-07-01
+lot_pass_rate	2026-07-02
+lot_pass_rate	2026-07-03
+lot_pass_rate	2026-07-04
+lot_pass_rate	2026-07-05
+lot_pass_rate	2026-07-06
+lot_pass_rate	2026-07-07
+lot_pass_rate	2026-07-08
+lot_pass_rate	2026-07-09
+lot_pass_rate	2026-07-10
+lot_pass_rate	2026-07-11
+lot_pass_rate	2026-07-12
+lot_pass_rate	2026-07-13
+lot_pass_rate	2026-07-14
+lot_pass_rate	2026-07-15
+lot_pass_rate	2026-07-16
+lot_pass_rate	2026-07-17
+lot_pass_rate	2026-07-18
+lot_pass_rate	2026-07-19
+lot_pass_rate	2026-07-20
+lot_pass_rate	2026-07-21
+lot_pass_rate	2026-07-22
+lot_pass_rate	2026-07-23
+lot_pass_rate	2026-07-24
+lot_pass_rate	2026-07-25
+lot_pass_rate	2026-07-26
+lot_pass_rate	2026-07-27
+lot_pass_rate	2026-07-28
+lot_pass_rate	2026-07-29
+lot_pass_rate	2026-07-30
+lot_pass_rate	2026-07-31
+lot_pass_rate	2026-08-01
+lot_pass_rate	2026-08-02
+lot_pass_rate	2026-08-03
+lot_pass_rate	2026-08-04
+lot_pass_rate	2026-08-05
+lot_pass_rate	2026-08-06
+lot_pass_rate	2026-08-07
+lot_pass_rate	2026-08-08
+lot_pass_rate	2026-08-09
+lot_pass_rate	2026-08-10
+lot_pass_rate	2026-08-11
+lot_pass_rate	2026-08-12
+lot_pass_rate	2026-08-13
+lot_pass_rate	2026-08-14
+lot_pass_rate	2026-08-15
+lot_pass_rate	2026-08-16
+lot_pass_rate	2026-08-17
+lot_pass_rate	2026-08-18
+lot_pass_rate	2026-08-19
+lot_pass_rate	2026-08-20
+lot_pass_rate	2026-08-21
+lot_pass_rate	2026-08-22
+lot_pass_rate	2026-08-23
+lot_pass_rate	2026-08-24
+lot_pass_rate	2026-08-25
+lot_pass_rate	2026-08-26
+lot_pass_rate	2026-08-27
+lot_pass_rate	2026-08-28
+lot_pass_rate	2026-08-29
+lot_pass_rate	2026-08-30
+lot_pass_rate	2026-08-31
+lot_pass_rate	2026-09-01
+lot_pass_rate	2026-09-02
+lot_pass_rate	2026-09-03
+lot_pass_rate	2026-09-04
+lot_pass_rate	2026-09-05
+lot_pass_rate	2026-09-06
+lot_pass_rate	2026-09-07
+lot_pass_rate	2026-09-08
+lot_pass_rate	2026-09-09
+lot_pass_rate	2026-09-10
+lot_pass_rate	2026-09-11
+lot_pass_rate	2026-09-12
+lot_pass_rate	2026-09-13
+lot_pass_rate	2026-09-14
+lot_pass_rate	2026-09-15
+lot_pass_rate	2026-09-16
+lot_pass_rate	2026-09-17
+lot_pass_rate	2026-09-18
+lot_pass_rate	2026-09-19
+lot_pass_rate	2026-09-20
+lot_pass_rate	2026-09-21
+lot_pass_rate	2026-09-22
+lot_pass_rate	2026-09-23
+lot_pass_rate	2026-09-24
+lot_pass_rate	2026-09-25
+lot_pass_rate	2026-09-26		1
+lot_pass_rate	2026-09-27		1
+on_hand_qty	2026-06-29
+on_hand_qty	2026-06-30
+on_hand_qty	2026-07-01
+on_hand_qty	2026-07-02
+on_hand_qty	2026-07-03
+on_hand_qty	2026-07-04
+on_hand_qty	2026-07-05
+on_hand_qty	2026-07-06
+on_hand_qty	2026-07-07
+on_hand_qty	2026-07-08
+on_hand_qty	2026-07-09
+on_hand_qty	2026-07-10
+on_hand_qty	2026-07-11
+on_hand_qty	2026-07-12
+on_hand_qty	2026-07-13
+on_hand_qty	2026-07-14
+on_hand_qty	2026-07-15
+on_hand_qty	2026-07-16
+on_hand_qty	2026-07-17
+on_hand_qty	2026-07-18
+on_hand_qty	2026-07-19
+on_hand_qty	2026-07-20
+on_hand_qty	2026-07-21
+on_hand_qty	2026-07-22
+on_hand_qty	2026-07-23
+on_hand_qty	2026-07-24
+on_hand_qty	2026-07-25
+on_hand_qty	2026-07-26
+on_hand_qty	2026-07-27
+on_hand_qty	2026-07-28
+on_hand_qty	2026-07-29
+on_hand_qty	2026-07-30
+on_hand_qty	2026-07-31
+on_hand_qty	2026-08-01
+on_hand_qty	2026-08-02
+on_hand_qty	2026-08-03
+on_hand_qty	2026-08-04
+on_hand_qty	2026-08-05
+on_hand_qty	2026-08-06
+on_hand_qty	2026-08-07
+on_hand_qty	2026-08-08
+on_hand_qty	2026-08-09
+on_hand_qty	2026-08-10
+on_hand_qty	2026-08-11
+on_hand_qty	2026-08-12
+on_hand_qty	2026-08-13
+on_hand_qty	2026-08-14
+on_hand_qty	2026-08-15
+on_hand_qty	2026-08-16
+on_hand_qty	2026-08-17
+on_hand_qty	2026-08-18
+on_hand_qty	2026-08-19
+on_hand_qty	2026-08-20
+on_hand_qty	2026-08-21
+on_hand_qty	2026-08-22
+on_hand_qty	2026-08-23
+on_hand_qty	2026-08-24
+on_hand_qty	2026-08-25
+on_hand_qty	2026-08-26
+on_hand_qty	2026-08-27
+on_hand_qty	2026-08-28
+on_hand_qty	2026-08-29
+on_hand_qty	2026-08-30
+on_hand_qty	2026-08-31
+on_hand_qty	2026-09-01
+on_hand_qty	2026-09-02
+on_hand_qty	2026-09-03
+on_hand_qty	2026-09-04
+on_hand_qty	2026-09-05
+on_hand_qty	2026-09-06
+on_hand_qty	2026-09-07
+on_hand_qty	2026-09-08
+on_hand_qty	2026-09-09
+on_hand_qty	2026-09-10
+on_hand_qty	2026-09-11
+on_hand_qty	2026-09-12
+on_hand_qty	2026-09-13
+on_hand_qty	2026-09-14
+on_hand_qty	2026-09-15
+on_hand_qty	2026-09-16
+on_hand_qty	2026-09-17
+on_hand_qty	2026-09-18
+on_hand_qty	2026-09-19
+on_hand_qty	2026-09-20
+on_hand_qty	2026-09-21
+on_hand_qty	2026-09-22
+on_hand_qty	2026-09-23
+on_hand_qty	2026-09-24
+on_hand_qty	2026-09-25
+on_hand_qty	2026-09-26
+on_hand_qty	2026-09-27		156898
+otd_supplier	2026-06-29
+otd_supplier	2026-06-30
+otd_supplier	2026-07-01
+otd_supplier	2026-07-02
+otd_supplier	2026-07-03
+otd_supplier	2026-07-04
+otd_supplier	2026-07-05
+otd_supplier	2026-07-06
+otd_supplier	2026-07-07
+otd_supplier	2026-07-08
+otd_supplier	2026-07-09
+otd_supplier	2026-07-10
+otd_supplier	2026-07-11
+otd_supplier	2026-07-12
+otd_supplier	2026-07-13
+otd_supplier	2026-07-14
+otd_supplier	2026-07-15
+otd_supplier	2026-07-16
+otd_supplier	2026-07-17
+otd_supplier	2026-07-18
+otd_supplier	2026-07-19
+otd_supplier	2026-07-20
+otd_supplier	2026-07-21
+otd_supplier	2026-07-22
+otd_supplier	2026-07-23
+otd_supplier	2026-07-24
+otd_supplier	2026-07-25
+otd_supplier	2026-07-26
+otd_supplier	2026-07-27
+otd_supplier	2026-07-28
+otd_supplier	2026-07-29
+otd_supplier	2026-07-30
+otd_supplier	2026-07-31
+otd_supplier	2026-08-01
+otd_supplier	2026-08-02
+otd_supplier	2026-08-03
+otd_supplier	2026-08-04
+otd_supplier	2026-08-05
+otd_supplier	2026-08-06
+otd_supplier	2026-08-07
+otd_supplier	2026-08-08
+otd_supplier	2026-08-09
+otd_supplier	2026-08-10
+otd_supplier	2026-08-11
+otd_supplier	2026-08-12
+otd_supplier	2026-08-13
+otd_supplier	2026-08-14
+otd_supplier	2026-08-15
+otd_supplier	2026-08-16
+otd_supplier	2026-08-17
+otd_supplier	2026-08-18
+otd_supplier	2026-08-19
+otd_supplier	2026-08-20
+otd_supplier	2026-08-21
+otd_supplier	2026-08-22
+otd_supplier	2026-08-23
+otd_supplier	2026-08-24
+otd_supplier	2026-08-25
+otd_supplier	2026-08-26
+otd_supplier	2026-08-27
+otd_supplier	2026-08-28
+otd_supplier	2026-08-29
+otd_supplier	2026-08-30
+otd_supplier	2026-08-31
+otd_supplier	2026-09-01
+otd_supplier	2026-09-02
+otd_supplier	2026-09-03
+otd_supplier	2026-09-04
+otd_supplier	2026-09-05
+otd_supplier	2026-09-06
+otd_supplier	2026-09-07
+otd_supplier	2026-09-08
+otd_supplier	2026-09-09
+otd_supplier	2026-09-10
+otd_supplier	2026-09-11
+otd_supplier	2026-09-12
+otd_supplier	2026-09-13
+otd_supplier	2026-09-14
+otd_supplier	2026-09-15
+otd_supplier	2026-09-16
+otd_supplier	2026-09-17
+otd_supplier	2026-09-18
+otd_supplier	2026-09-19
+otd_supplier	2026-09-20
+otd_supplier	2026-09-21
+otd_supplier	2026-09-22
+otd_supplier	2026-09-23
+otd_supplier	2026-09-24
+otd_supplier	2026-09-25
+otd_supplier	2026-09-26	味之源调味食品股份有限公司	1
+otd_supplier	2026-09-26	珠海鲜丰水产科技有限公司	1
+otd_supplier	2026-09-26		1
+otd_supplier	2026-09-27	东港丰泽果蔬专业合作社	1
+otd_supplier	2026-09-27	味之源调味食品股份有限公司	1
+otd_supplier	2026-09-27	珠海鲜丰水产科技有限公司	1
+otd_supplier	2026-09-27		1
+otif	2026-06-29
+otif	2026-06-30
+otif	2026-07-01
+otif	2026-07-02
+otif	2026-07-03
+otif	2026-07-04
+otif	2026-07-05
+otif	2026-07-06
+otif	2026-07-07
+otif	2026-07-08
+otif	2026-07-09
+otif	2026-07-10
+otif	2026-07-11
+otif	2026-07-12
+otif	2026-07-13
+otif	2026-07-14
+otif	2026-07-15
+otif	2026-07-16
+otif	2026-07-17
+otif	2026-07-18
+otif	2026-07-19
+otif	2026-07-20
+otif	2026-07-21
+otif	2026-07-22
+otif	2026-07-23
+otif	2026-07-24
+otif	2026-07-25
+otif	2026-07-26
+otif	2026-07-27
+otif	2026-07-28
+otif	2026-07-29
+otif	2026-07-30
+otif	2026-07-31
+otif	2026-08-01
+otif	2026-08-02
+otif	2026-08-03
+otif	2026-08-04
+otif	2026-08-05
+otif	2026-08-06
+otif	2026-08-07
+otif	2026-08-08
+otif	2026-08-09
+otif	2026-08-10
+otif	2026-08-11
+otif	2026-08-12
+otif	2026-08-13
+otif	2026-08-14
+otif	2026-08-15
+otif	2026-08-16
+otif	2026-08-17
+otif	2026-08-18
+otif	2026-08-19
+otif	2026-08-20
+otif	2026-08-21
+otif	2026-08-22
+otif	2026-08-23
+otif	2026-08-24
+otif	2026-08-25
+otif	2026-08-26
+otif	2026-08-27
+otif	2026-08-28
+otif	2026-08-29
+otif	2026-08-30
+otif	2026-08-31
+otif	2026-09-01
+otif	2026-09-02
+otif	2026-09-03
+otif	2026-09-04
+otif	2026-09-05
+otif	2026-09-06
+otif	2026-09-07
+otif	2026-09-08
+otif	2026-09-09
+otif	2026-09-10
+otif	2026-09-11
+otif	2026-09-12
+otif	2026-09-13
+otif	2026-09-14
+otif	2026-09-15
+otif	2026-09-16
+otif	2026-09-17
+otif	2026-09-18
+otif	2026-09-19
+otif	2026-09-20
+otif	2026-09-21
+otif	2026-09-22
+otif	2026-09-23
+otif	2026-09-24
+otif	2026-09-25
+otif	2026-09-26		0.6667
+otif	2026-09-27		0.3333
+pending_approvals	2026-06-29
+pending_approvals	2026-06-30
+pending_approvals	2026-07-01
+pending_approvals	2026-07-02
+pending_approvals	2026-07-03
+pending_approvals	2026-07-04
+pending_approvals	2026-07-05
+pending_approvals	2026-07-06
+pending_approvals	2026-07-07
+pending_approvals	2026-07-08
+pending_approvals	2026-07-09
+pending_approvals	2026-07-10
+pending_approvals	2026-07-11
+pending_approvals	2026-07-12
+pending_approvals	2026-07-13
+pending_approvals	2026-07-14
+pending_approvals	2026-07-15
+pending_approvals	2026-07-16
+pending_approvals	2026-07-17
+pending_approvals	2026-07-18
+pending_approvals	2026-07-19
+pending_approvals	2026-07-20
+pending_approvals	2026-07-21
+pending_approvals	2026-07-22
+pending_approvals	2026-07-23
+pending_approvals	2026-07-24
+pending_approvals	2026-07-25
+pending_approvals	2026-07-26
+pending_approvals	2026-07-27
+pending_approvals	2026-07-28
+pending_approvals	2026-07-29
+pending_approvals	2026-07-30
+pending_approvals	2026-07-31
+pending_approvals	2026-08-01
+pending_approvals	2026-08-02
+pending_approvals	2026-08-03
+pending_approvals	2026-08-04
+pending_approvals	2026-08-05
+pending_approvals	2026-08-06
+pending_approvals	2026-08-07
+pending_approvals	2026-08-08
+pending_approvals	2026-08-09
+pending_approvals	2026-08-10
+pending_approvals	2026-08-11
+pending_approvals	2026-08-12
+pending_approvals	2026-08-13
+pending_approvals	2026-08-14
+pending_approvals	2026-08-15
+pending_approvals	2026-08-16
+pending_approvals	2026-08-17
+pending_approvals	2026-08-18
+pending_approvals	2026-08-19
+pending_approvals	2026-08-20
+pending_approvals	2026-08-21
+pending_approvals	2026-08-22
+pending_approvals	2026-08-23
+pending_approvals	2026-08-24
+pending_approvals	2026-08-25
+pending_approvals	2026-08-26
+pending_approvals	2026-08-27
+pending_approvals	2026-08-28
+pending_approvals	2026-08-29
+pending_approvals	2026-08-30
+pending_approvals	2026-08-31
+pending_approvals	2026-09-01
+pending_approvals	2026-09-02
+pending_approvals	2026-09-03
+pending_approvals	2026-09-04
+pending_approvals	2026-09-05
+pending_approvals	2026-09-06
+pending_approvals	2026-09-07
+pending_approvals	2026-09-08
+pending_approvals	2026-09-09
+pending_approvals	2026-09-10
+pending_approvals	2026-09-11
+pending_approvals	2026-09-12
+pending_approvals	2026-09-13
+pending_approvals	2026-09-14
+pending_approvals	2026-09-15
+pending_approvals	2026-09-16
+pending_approvals	2026-09-17
+pending_approvals	2026-09-18
+pending_approvals	2026-09-19
+pending_approvals	2026-09-20
+pending_approvals	2026-09-21
+pending_approvals	2026-09-22
+pending_approvals	2026-09-23
+pending_approvals	2026-09-24
+pending_approvals	2026-09-25
+pending_approvals	2026-09-26
+pending_approvals	2026-09-27		0
+po_lead_p50	2026-06-29
+po_lead_p50	2026-06-30
+po_lead_p50	2026-07-01
+po_lead_p50	2026-07-02
+po_lead_p50	2026-07-03
+po_lead_p50	2026-07-04
+po_lead_p50	2026-07-05
+po_lead_p50	2026-07-06
+po_lead_p50	2026-07-07
+po_lead_p50	2026-07-08
+po_lead_p50	2026-07-09
+po_lead_p50	2026-07-10
+po_lead_p50	2026-07-11
+po_lead_p50	2026-07-12
+po_lead_p50	2026-07-13
+po_lead_p50	2026-07-14
+po_lead_p50	2026-07-15
+po_lead_p50	2026-07-16
+po_lead_p50	2026-07-17
+po_lead_p50	2026-07-18
+po_lead_p50	2026-07-19
+po_lead_p50	2026-07-20
+po_lead_p50	2026-07-21
+po_lead_p50	2026-07-22
+po_lead_p50	2026-07-23
+po_lead_p50	2026-07-24
+po_lead_p50	2026-07-25
+po_lead_p50	2026-07-26
+po_lead_p50	2026-07-27
+po_lead_p50	2026-07-28
+po_lead_p50	2026-07-29
+po_lead_p50	2026-07-30
+po_lead_p50	2026-07-31
+po_lead_p50	2026-08-01
+po_lead_p50	2026-08-02
+po_lead_p50	2026-08-03
+po_lead_p50	2026-08-04
+po_lead_p50	2026-08-05
+po_lead_p50	2026-08-06
+po_lead_p50	2026-08-07
+po_lead_p50	2026-08-08
+po_lead_p50	2026-08-09
+po_lead_p50	2026-08-10
+po_lead_p50	2026-08-11
+po_lead_p50	2026-08-12
+po_lead_p50	2026-08-13
+po_lead_p50	2026-08-14
+po_lead_p50	2026-08-15
+po_lead_p50	2026-08-16
+po_lead_p50	2026-08-17
+po_lead_p50	2026-08-18
+po_lead_p50	2026-08-19
+po_lead_p50	2026-08-20
+po_lead_p50	2026-08-21
+po_lead_p50	2026-08-22
+po_lead_p50	2026-08-23
+po_lead_p50	2026-08-24
+po_lead_p50	2026-08-25
+po_lead_p50	2026-08-26
+po_lead_p50	2026-08-27
+po_lead_p50	2026-08-28
+po_lead_p50	2026-08-29
+po_lead_p50	2026-08-30
+po_lead_p50	2026-08-31
+po_lead_p50	2026-09-01
+po_lead_p50	2026-09-02
+po_lead_p50	2026-09-03
+po_lead_p50	2026-09-04
+po_lead_p50	2026-09-05
+po_lead_p50	2026-09-06
+po_lead_p50	2026-09-07
+po_lead_p50	2026-09-08
+po_lead_p50	2026-09-09
+po_lead_p50	2026-09-10
+po_lead_p50	2026-09-11
+po_lead_p50	2026-09-12
+po_lead_p50	2026-09-13
+po_lead_p50	2026-09-14
+po_lead_p50	2026-09-15
+po_lead_p50	2026-09-16
+po_lead_p50	2026-09-17
+po_lead_p50	2026-09-18
+po_lead_p50	2026-09-19
+po_lead_p50	2026-09-20
+po_lead_p50	2026-09-21
+po_lead_p50	2026-09-22
+po_lead_p50	2026-09-23
+po_lead_p50	2026-09-24
+po_lead_p50	2026-09-25
+po_lead_p50	2026-09-26		0
+po_lead_p50	2026-09-27		0
+po_lead_p90	2026-06-29
+po_lead_p90	2026-06-30
+po_lead_p90	2026-07-01
+po_lead_p90	2026-07-02
+po_lead_p90	2026-07-03
+po_lead_p90	2026-07-04
+po_lead_p90	2026-07-05
+po_lead_p90	2026-07-06
+po_lead_p90	2026-07-07
+po_lead_p90	2026-07-08
+po_lead_p90	2026-07-09
+po_lead_p90	2026-07-10
+po_lead_p90	2026-07-11
+po_lead_p90	2026-07-12
+po_lead_p90	2026-07-13
+po_lead_p90	2026-07-14
+po_lead_p90	2026-07-15
+po_lead_p90	2026-07-16
+po_lead_p90	2026-07-17
+po_lead_p90	2026-07-18
+po_lead_p90	2026-07-19
+po_lead_p90	2026-07-20
+po_lead_p90	2026-07-21
+po_lead_p90	2026-07-22
+po_lead_p90	2026-07-23
+po_lead_p90	2026-07-24
+po_lead_p90	2026-07-25
+po_lead_p90	2026-07-26
+po_lead_p90	2026-07-27
+po_lead_p90	2026-07-28
+po_lead_p90	2026-07-29
+po_lead_p90	2026-07-30
+po_lead_p90	2026-07-31
+po_lead_p90	2026-08-01
+po_lead_p90	2026-08-02
+po_lead_p90	2026-08-03
+po_lead_p90	2026-08-04
+po_lead_p90	2026-08-05
+po_lead_p90	2026-08-06
+po_lead_p90	2026-08-07
+po_lead_p90	2026-08-08
+po_lead_p90	2026-08-09
+po_lead_p90	2026-08-10
+po_lead_p90	2026-08-11
+po_lead_p90	2026-08-12
+po_lead_p90	2026-08-13
+po_lead_p90	2026-08-14
+po_lead_p90	2026-08-15
+po_lead_p90	2026-08-16
+po_lead_p90	2026-08-17
+po_lead_p90	2026-08-18
+po_lead_p90	2026-08-19
+po_lead_p90	2026-08-20
+po_lead_p90	2026-08-21
+po_lead_p90	2026-08-22
+po_lead_p90	2026-08-23
+po_lead_p90	2026-08-24
+po_lead_p90	2026-08-25
+po_lead_p90	2026-08-26
+po_lead_p90	2026-08-27
+po_lead_p90	2026-08-28
+po_lead_p90	2026-08-29
+po_lead_p90	2026-08-30
+po_lead_p90	2026-08-31
+po_lead_p90	2026-09-01
+po_lead_p90	2026-09-02
+po_lead_p90	2026-09-03
+po_lead_p90	2026-09-04
+po_lead_p90	2026-09-05
+po_lead_p90	2026-09-06
+po_lead_p90	2026-09-07
+po_lead_p90	2026-09-08
+po_lead_p90	2026-09-09
+po_lead_p90	2026-09-10
+po_lead_p90	2026-09-11
+po_lead_p90	2026-09-12
+po_lead_p90	2026-09-13
+po_lead_p90	2026-09-14
+po_lead_p90	2026-09-15
+po_lead_p90	2026-09-16
+po_lead_p90	2026-09-17
+po_lead_p90	2026-09-18
+po_lead_p90	2026-09-19
+po_lead_p90	2026-09-20
+po_lead_p90	2026-09-21
+po_lead_p90	2026-09-22
+po_lead_p90	2026-09-23
+po_lead_p90	2026-09-24
+po_lead_p90	2026-09-25
+po_lead_p90	2026-09-26		0
+po_lead_p90	2026-09-27		0.8
+revenue_monthly	2026-06-29		0
+revenue_monthly	2026-06-30		0
+revenue_monthly	2026-07-01		0
+revenue_monthly	2026-07-02		0
+revenue_monthly	2026-07-03		0
+revenue_monthly	2026-07-04		0
+revenue_monthly	2026-07-05		0
+revenue_monthly	2026-07-06		0
+revenue_monthly	2026-07-07		0
+revenue_monthly	2026-07-08		0
+revenue_monthly	2026-07-09		0
+revenue_monthly	2026-07-10		0
+revenue_monthly	2026-07-11		0
+revenue_monthly	2026-07-12		0
+revenue_monthly	2026-07-13		0
+revenue_monthly	2026-07-14		0
+revenue_monthly	2026-07-15		0
+revenue_monthly	2026-07-16		0
+revenue_monthly	2026-07-17		0
+revenue_monthly	2026-07-18		0
+revenue_monthly	2026-07-19		0
+revenue_monthly	2026-07-20		0
+revenue_monthly	2026-07-21		0
+revenue_monthly	2026-07-22		0
+revenue_monthly	2026-07-23		0
+revenue_monthly	2026-07-24		0
+revenue_monthly	2026-07-25		0
+revenue_monthly	2026-07-26		0
+revenue_monthly	2026-07-27		0
+revenue_monthly	2026-07-28		0
+revenue_monthly	2026-07-29		0
+revenue_monthly	2026-07-30		0
+revenue_monthly	2026-07-31		0
+revenue_monthly	2026-08-01		0
+revenue_monthly	2026-08-02		0
+revenue_monthly	2026-08-03		0
+revenue_monthly	2026-08-04		0
+revenue_monthly	2026-08-05		0
+revenue_monthly	2026-08-06		0
+revenue_monthly	2026-08-07		0
+revenue_monthly	2026-08-08		0
+revenue_monthly	2026-08-09		0
+revenue_monthly	2026-08-10		0
+revenue_monthly	2026-08-11		0
+revenue_monthly	2026-08-12		0
+revenue_monthly	2026-08-13		0
+revenue_monthly	2026-08-14		0
+revenue_monthly	2026-08-15		0
+revenue_monthly	2026-08-16		0
+revenue_monthly	2026-08-17		0
+revenue_monthly	2026-08-18		0
+revenue_monthly	2026-08-19		0
+revenue_monthly	2026-08-20		0
+revenue_monthly	2026-08-21		0
+revenue_monthly	2026-08-22		0
+revenue_monthly	2026-08-23		0
+revenue_monthly	2026-08-24		0
+revenue_monthly	2026-08-25		0
+revenue_monthly	2026-08-26		0
+revenue_monthly	2026-08-27		0
+revenue_monthly	2026-08-28		0
+revenue_monthly	2026-08-29		0
+revenue_monthly	2026-08-30		0
+revenue_monthly	2026-08-31		0
+revenue_monthly	2026-09-01		0
+revenue_monthly	2026-09-02		0
+revenue_monthly	2026-09-03		0
+revenue_monthly	2026-09-04		0
+revenue_monthly	2026-09-05		0
+revenue_monthly	2026-09-06		0
+revenue_monthly	2026-09-07		0
+revenue_monthly	2026-09-08		0
+revenue_monthly	2026-09-09		0
+revenue_monthly	2026-09-10		0
+revenue_monthly	2026-09-11		0
+revenue_monthly	2026-09-12		0
+revenue_monthly	2026-09-13		0
+revenue_monthly	2026-09-14		0
+revenue_monthly	2026-09-15		0
+revenue_monthly	2026-09-16		0
+revenue_monthly	2026-09-17		0
+revenue_monthly	2026-09-18		0
+revenue_monthly	2026-09-19		0
+revenue_monthly	2026-09-20		0
+revenue_monthly	2026-09-21		0
+revenue_monthly	2026-09-22		0
+revenue_monthly	2026-09-23		0
+revenue_monthly	2026-09-24		0
+revenue_monthly	2026-09-25		0
+revenue_monthly	2026-09-26		280820
+revenue_monthly	2026-09-27		280820
+rty	2026-06-29
+rty	2026-06-30
+rty	2026-07-01
+rty	2026-07-02
+rty	2026-07-03
+rty	2026-07-04
+rty	2026-07-05
+rty	2026-07-06
+rty	2026-07-07
+rty	2026-07-08
+rty	2026-07-09
+rty	2026-07-10
+rty	2026-07-11
+rty	2026-07-12
+rty	2026-07-13
+rty	2026-07-14
+rty	2026-07-15
+rty	2026-07-16
+rty	2026-07-17
+rty	2026-07-18
+rty	2026-07-19
+rty	2026-07-20
+rty	2026-07-21
+rty	2026-07-22
+rty	2026-07-23
+rty	2026-07-24
+rty	2026-07-25
+rty	2026-07-26
+rty	2026-07-27
+rty	2026-07-28
+rty	2026-07-29
+rty	2026-07-30
+rty	2026-07-31
+rty	2026-08-01
+rty	2026-08-02
+rty	2026-08-03
+rty	2026-08-04
+rty	2026-08-05
+rty	2026-08-06
+rty	2026-08-07
+rty	2026-08-08
+rty	2026-08-09
+rty	2026-08-10
+rty	2026-08-11
+rty	2026-08-12
+rty	2026-08-13
+rty	2026-08-14
+rty	2026-08-15
+rty	2026-08-16
+rty	2026-08-17
+rty	2026-08-18
+rty	2026-08-19
+rty	2026-08-20
+rty	2026-08-21
+rty	2026-08-22
+rty	2026-08-23
+rty	2026-08-24
+rty	2026-08-25
+rty	2026-08-26
+rty	2026-08-27
+rty	2026-08-28
+rty	2026-08-29
+rty	2026-08-30
+rty	2026-08-31
+rty	2026-09-01
+rty	2026-09-02
+rty	2026-09-03
+rty	2026-09-04
+rty	2026-09-05
+rty	2026-09-06
+rty	2026-09-07
+rty	2026-09-08
+rty	2026-09-09
+rty	2026-09-10
+rty	2026-09-11
+rty	2026-09-12
+rty	2026-09-13
+rty	2026-09-14
+rty	2026-09-15
+rty	2026-09-16
+rty	2026-09-17
+rty	2026-09-18
+rty	2026-09-19
+rty	2026-09-20
+rty	2026-09-21
+rty	2026-09-22
+rty	2026-09-23
+rty	2026-09-24
+rty	2026-09-25
+rty	2026-09-26		0.9916
+rty	2026-09-27		0.9916
+schedule_hit	2026-06-29
+schedule_hit	2026-06-30
+schedule_hit	2026-07-01
+schedule_hit	2026-07-02
+schedule_hit	2026-07-03
+schedule_hit	2026-07-04
+schedule_hit	2026-07-05
+schedule_hit	2026-07-06
+schedule_hit	2026-07-07
+schedule_hit	2026-07-08
+schedule_hit	2026-07-09
+schedule_hit	2026-07-10
+schedule_hit	2026-07-11
+schedule_hit	2026-07-12
+schedule_hit	2026-07-13
+schedule_hit	2026-07-14
+schedule_hit	2026-07-15
+schedule_hit	2026-07-16
+schedule_hit	2026-07-17
+schedule_hit	2026-07-18
+schedule_hit	2026-07-19
+schedule_hit	2026-07-20
+schedule_hit	2026-07-21
+schedule_hit	2026-07-22
+schedule_hit	2026-07-23
+schedule_hit	2026-07-24
+schedule_hit	2026-07-25
+schedule_hit	2026-07-26
+schedule_hit	2026-07-27
+schedule_hit	2026-07-28
+schedule_hit	2026-07-29
+schedule_hit	2026-07-30
+schedule_hit	2026-07-31
+schedule_hit	2026-08-01
+schedule_hit	2026-08-02
+schedule_hit	2026-08-03
+schedule_hit	2026-08-04
+schedule_hit	2026-08-05
+schedule_hit	2026-08-06
+schedule_hit	2026-08-07
+schedule_hit	2026-08-08
+schedule_hit	2026-08-09
+schedule_hit	2026-08-10
+schedule_hit	2026-08-11
+schedule_hit	2026-08-12
+schedule_hit	2026-08-13
+schedule_hit	2026-08-14
+schedule_hit	2026-08-15
+schedule_hit	2026-08-16
+schedule_hit	2026-08-17
+schedule_hit	2026-08-18
+schedule_hit	2026-08-19
+schedule_hit	2026-08-20
+schedule_hit	2026-08-21
+schedule_hit	2026-08-22
+schedule_hit	2026-08-23
+schedule_hit	2026-08-24
+schedule_hit	2026-08-25
+schedule_hit	2026-08-26
+schedule_hit	2026-08-27
+schedule_hit	2026-08-28
+schedule_hit	2026-08-29
+schedule_hit	2026-08-30
+schedule_hit	2026-08-31
+schedule_hit	2026-09-01
+schedule_hit	2026-09-02
+schedule_hit	2026-09-03
+schedule_hit	2026-09-04
+schedule_hit	2026-09-05
+schedule_hit	2026-09-06
+schedule_hit	2026-09-07
+schedule_hit	2026-09-08
+schedule_hit	2026-09-09
+schedule_hit	2026-09-10
+schedule_hit	2026-09-11
+schedule_hit	2026-09-12
+schedule_hit	2026-09-13
+schedule_hit	2026-09-14
+schedule_hit	2026-09-15
+schedule_hit	2026-09-16
+schedule_hit	2026-09-17
+schedule_hit	2026-09-18
+schedule_hit	2026-09-19
+schedule_hit	2026-09-20
+schedule_hit	2026-09-21
+schedule_hit	2026-09-22
+schedule_hit	2026-09-23
+schedule_hit	2026-09-24
+schedule_hit	2026-09-25
+schedule_hit	2026-09-26		1
+schedule_hit	2026-09-27		1
+shortage_alerts	2026-06-29
+shortage_alerts	2026-06-30
+shortage_alerts	2026-07-01
+shortage_alerts	2026-07-02
+shortage_alerts	2026-07-03
+shortage_alerts	2026-07-04
+shortage_alerts	2026-07-05
+shortage_alerts	2026-07-06
+shortage_alerts	2026-07-07
+shortage_alerts	2026-07-08
+shortage_alerts	2026-07-09
+shortage_alerts	2026-07-10
+shortage_alerts	2026-07-11
+shortage_alerts	2026-07-12
+shortage_alerts	2026-07-13
+shortage_alerts	2026-07-14
+shortage_alerts	2026-07-15
+shortage_alerts	2026-07-16
+shortage_alerts	2026-07-17
+shortage_alerts	2026-07-18
+shortage_alerts	2026-07-19
+shortage_alerts	2026-07-20
+shortage_alerts	2026-07-21
+shortage_alerts	2026-07-22
+shortage_alerts	2026-07-23
+shortage_alerts	2026-07-24
+shortage_alerts	2026-07-25
+shortage_alerts	2026-07-26
+shortage_alerts	2026-07-27
+shortage_alerts	2026-07-28
+shortage_alerts	2026-07-29
+shortage_alerts	2026-07-30
+shortage_alerts	2026-07-31
+shortage_alerts	2026-08-01
+shortage_alerts	2026-08-02
+shortage_alerts	2026-08-03
+shortage_alerts	2026-08-04
+shortage_alerts	2026-08-05
+shortage_alerts	2026-08-06
+shortage_alerts	2026-08-07
+shortage_alerts	2026-08-08
+shortage_alerts	2026-08-09
+shortage_alerts	2026-08-10
+shortage_alerts	2026-08-11
+shortage_alerts	2026-08-12
+shortage_alerts	2026-08-13
+shortage_alerts	2026-08-14
+shortage_alerts	2026-08-15
+shortage_alerts	2026-08-16
+shortage_alerts	2026-08-17
+shortage_alerts	2026-08-18
+shortage_alerts	2026-08-19
+shortage_alerts	2026-08-20
+shortage_alerts	2026-08-21
+shortage_alerts	2026-08-22
+shortage_alerts	2026-08-23
+shortage_alerts	2026-08-24
+shortage_alerts	2026-08-25
+shortage_alerts	2026-08-26
+shortage_alerts	2026-08-27
+shortage_alerts	2026-08-28
+shortage_alerts	2026-08-29
+shortage_alerts	2026-08-30
+shortage_alerts	2026-08-31
+shortage_alerts	2026-09-01
+shortage_alerts	2026-09-02
+shortage_alerts	2026-09-03
+shortage_alerts	2026-09-04
+shortage_alerts	2026-09-05
+shortage_alerts	2026-09-06
+shortage_alerts	2026-09-07
+shortage_alerts	2026-09-08
+shortage_alerts	2026-09-09
+shortage_alerts	2026-09-10
+shortage_alerts	2026-09-11
+shortage_alerts	2026-09-12
+shortage_alerts	2026-09-13
+shortage_alerts	2026-09-14
+shortage_alerts	2026-09-15
+shortage_alerts	2026-09-16
+shortage_alerts	2026-09-17
+shortage_alerts	2026-09-18
+shortage_alerts	2026-09-19
+shortage_alerts	2026-09-20
+shortage_alerts	2026-09-21
+shortage_alerts	2026-09-22
+shortage_alerts	2026-09-23
+shortage_alerts	2026-09-24
+shortage_alerts	2026-09-25
+shortage_alerts	2026-09-26
+shortage_alerts	2026-09-27		1
+wip_qty	2026-06-29
+wip_qty	2026-06-30
+wip_qty	2026-07-01
+wip_qty	2026-07-02
+wip_qty	2026-07-03
+wip_qty	2026-07-04
+wip_qty	2026-07-05
+wip_qty	2026-07-06
+wip_qty	2026-07-07
+wip_qty	2026-07-08
+wip_qty	2026-07-09
+wip_qty	2026-07-10
+wip_qty	2026-07-11
+wip_qty	2026-07-12
+wip_qty	2026-07-13
+wip_qty	2026-07-14
+wip_qty	2026-07-15
+wip_qty	2026-07-16
+wip_qty	2026-07-17
+wip_qty	2026-07-18
+wip_qty	2026-07-19
+wip_qty	2026-07-20
+wip_qty	2026-07-21
+wip_qty	2026-07-22
+wip_qty	2026-07-23
+wip_qty	2026-07-24
+wip_qty	2026-07-25
+wip_qty	2026-07-26
+wip_qty	2026-07-27
+wip_qty	2026-07-28
+wip_qty	2026-07-29
+wip_qty	2026-07-30
+wip_qty	2026-07-31
+wip_qty	2026-08-01
+wip_qty	2026-08-02
+wip_qty	2026-08-03
+wip_qty	2026-08-04
+wip_qty	2026-08-05
+wip_qty	2026-08-06
+wip_qty	2026-08-07
+wip_qty	2026-08-08
+wip_qty	2026-08-09
+wip_qty	2026-08-10
+wip_qty	2026-08-11
+wip_qty	2026-08-12
+wip_qty	2026-08-13
+wip_qty	2026-08-14
+wip_qty	2026-08-15
+wip_qty	2026-08-16
+wip_qty	2026-08-17
+wip_qty	2026-08-18
+wip_qty	2026-08-19
+wip_qty	2026-08-20
+wip_qty	2026-08-21
+wip_qty	2026-08-22
+wip_qty	2026-08-23
+wip_qty	2026-08-24
+wip_qty	2026-08-25
+wip_qty	2026-08-26
+wip_qty	2026-08-27
+wip_qty	2026-08-28
+wip_qty	2026-08-29
+wip_qty	2026-08-30
+wip_qty	2026-08-31
+wip_qty	2026-09-01
+wip_qty	2026-09-02
+wip_qty	2026-09-03
+wip_qty	2026-09-04
+wip_qty	2026-09-05
+wip_qty	2026-09-06
+wip_qty	2026-09-07
+wip_qty	2026-09-08
+wip_qty	2026-09-09
+wip_qty	2026-09-10
+wip_qty	2026-09-11
+wip_qty	2026-09-12
+wip_qty	2026-09-13
+wip_qty	2026-09-14
+wip_qty	2026-09-15
+wip_qty	2026-09-16
+wip_qty	2026-09-17
+wip_qty	2026-09-18
+wip_qty	2026-09-19
+wip_qty	2026-09-20
+wip_qty	2026-09-21
+wip_qty	2026-09-22
+wip_qty	2026-09-23
+wip_qty	2026-09-24
+wip_qty	2026-09-25
+wip_qty	2026-09-26
+wip_qty	2026-09-27		16000

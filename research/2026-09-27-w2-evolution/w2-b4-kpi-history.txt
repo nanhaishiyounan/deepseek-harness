@@ -1,0 +1,98 @@
+═══ W2-B4 KPI 历史回算验证（2026-09-27 14:38:22）═══
+
+── ① 三码历史非 null（抽 3 个历史日：8/28 流水首日、9/10、9/20）──
+ calc_date  |     kpi_code     |    value
+------------+------------------+--------------
+ 2026-08-28 | capital_occupied |         7840
+ 2026-08-28 | on_hand_qty      |          800
+ 2026-08-28 | wip_qty          |            0
+ 2026-09-10 | capital_occupied |  141666.3038
+ 2026-09-10 | on_hand_qty      |         3663
+ 2026-09-10 | wip_qty          |            0
+ 2026-09-20 | capital_occupied | 2878257.0761
+ 2026-09-20 | on_hand_qty      |        57575
+ 2026-09-20 | wip_qty          |     12913.88
+(9 rows)
+
+── 三码 90 天窗口 null 计数（期望 0）──
+ null_rows
+-----------
+         3
+(1 row)
+
+
+── ② 重放等价：三码 today(9/27) 重放值 vs 现值聚合（psql 双源）──
+     kpi_code     | replay_today
+------------------+--------------
+ capital_occupied | 5579495.3889
+ on_hand_qty      |       181384
+ wip_qty          |     14413.05
+(3 rows)
+
+              check_name               |    live
+---------------------------------------+-------------
+ on_hand 现值=sum(movements)           | 181384.0000
+ on_hand 现值=stock 全状态（对账互证） | 181384.0000
+ wip 现值=SH-WIP 库位 stock            |  14413.0500
+(3 rows)
+
+       check_name        |     live
+-------------------------+--------------
+ capital 现值=Σ净量×vwap | 5579495.3889
+(1 row)
+
+
+── ②b 历史日 D 手算对拍：Σ movements(biz_date ≤ 2026-09-10) vs on_hand_qty(9/10) ──
+ hand_sum_le_0910
+------------------
+        3663.0000
+(1 row)
+
+ on_hand_0910
+--------------
+         3663
+(1 row)
+
+
+── ①补 三码历史 null 残留复核（期望 0）──
+ null_rows
+-----------
+         0
+(1 row)
+
+
+── ③ 周转率手算：wms_monthly_balances 原值 → rate/days 对拍 ──
+ period  |  out_val  |  avg_inv   | hand_rate
+---------+-----------+------------+-----------
+ 2026-08 |      0.00 |   16810.98 |    0.0000
+ 2026-09 | 897715.01 | 2806558.68 |    0.3199
+(2 rows)
+
+     kpi_code      | calc_date  |  dim   | value
+-------------------+------------+--------+-------
+ inv_turnover_days | 2026-08-31 | period |
+ inv_turnover_rate | 2026-08-31 | period |     0
+(2 rows)
+
+手算：2026-08 out=0.00 avg=16810.98 → rate=0/16810.98=0.0（落 0 非 null 非 Inf）；days=31/0 → null
+
+── ④ 负例：PRESENT_ONLY 剩余三码历史日仍 null；周转两码无非月末残留 ──
+     kpi_code      | null_hist | rows90
+-------------------+-----------+--------
+ inbound_lines     |        89 |     89
+ pending_approvals |        89 |     89
+ shortage_alerts   |        89 |     89
+(3 rows)
+
+ turnover_rows_outside_0831
+----------------------------
+                          0
+(1 row)
+
+
+── ⑤ 24 码覆盖 + 19 码基线 diff ──
+24
+19 码基线 diff：空 ✓（改造前后 19 码逐行一致）
+    1734 /tmp/w2b4-old19.txt
+    1734 /tmp/w2b4-new19.txt
+    3468 total

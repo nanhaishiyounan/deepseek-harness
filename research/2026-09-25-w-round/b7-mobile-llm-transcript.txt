@@ -1,0 +1,41 @@
+events: 258
+tool/call: nb_collections "{}"
+tool/call: nb_list "{\"collection\": \"mrp_suggestions\", \"filter\": [{\"field\": \"status\", \"op\": \"eq\", \"value\": \"open\"}], \"page_size\": 20, \"sort\": [\"suggest_date\"]}"
+tool/call: nb_get "{\"collection\": \"hub_inv_products\", \"id\": 9}"
+--- assistant text ---
+当前有一条待确认的 MRP 建议，是采购申请。
+
+```dsh
+{"v":3,"type":"plan_suggest","id":"pl_1","suggestionId":"1","planType":"PR","product":"NFC 鲜榨橙汁 1L","qty":"67","suggestDate":"2026-10-01","driverSo":"SO-2026-0001","needDate":"2026-10-06"}
+```
+tool/call: nb_get "{\"collection\": \"mrp_suggestions\", \"id\": 1}"
+tool/call: nb_list "{\"collection\": \"pur_requests\", \"filter\": [{\"field\": \"code\", \"op\": \"includes\", \"value\": \"PR-2026-\"}], \"page_size\": 20, \"sort\": [\"-code\"], \"fields\": [\"code\"]}"
+tool/call: nb_create "{\"collection\": \"pur_requests\", \"values\": {\"code\": \"PR-2026-0003\", \"requester\": \"admin\", \"department\": \"计划物控\", \"need_date\": \"2026-10-06\", \"reason\": \"MRP 自动建议补货：驱动销售订单 SO-2026-0001，BOM 展开第 0 层\", \"total_est\": \"1474\", \"doc_status\":
+tool/call: nb_create "{\"collection\": \"pur_request_lines\", \"values\": {\"request_id\": \"3\", \"product_id\": \"9\", \"qty\": \"67\"}}"
+tool/call: nb_update "{\"collection\": \"mrp_suggestions\", \"id\": 1, \"values\": {\"status\": \"converted\", \"converted_doc_type\": \"pur_requests\", \"converted_doc_id\": \"3\", \"converted_doc_code\": \"PR-2026-0003\", \"converted_by\": \"admin\", \"converted_at\": \"2026-09-
+--- assistant text ---
+NFC 鲜榨橙汁 1L 已按 MRP 建议转成采购申请，预估总额 1,474 元，需要时可送去审批。
+
+```dsh
+{"v":3,"type":"plan_result","planId":"pl_1","suggestionId":"1","planType":"PR","product":"NFC 鲜榨橙汁 1L","outcome":"converted","docCode":"PR-2026-0003","state":"draft","by":"admin"}
+```
+══ 会话元信息 ══
+sessionId: session-9bd7f5b8-121e-4952-916b-8fd6e583206c
+preset: mobile-form-assistant（真实 LLM，走 :3080 网关 session.prompt 全管道）
+段1：MRP 建议查询 → nb_collections/nb_list(status=open)/nb_get → plan_suggest 围栏（PR 橙汁×67，driver SO-2026-0001）
+段2：plan_confirm 围栏 → nb_get 校验 open → nb_list 查重编号 → nb_create pur_requests(PR-2026-0003 draft) + pur_request_lines → nb_update suggestion=converted → plan_result 围栏
+--- assistant text ---
+字段齐了，按 2000 × 9.8 = 19,600 元，下方是草稿，确认后落库。
+
+```dsh
+{"v":3,"type":"form_draft","draftId":"d_2026-09-26_2","revision":1,"form":{"collection":"so_orders","label":"销售订单"},"title":"销售订单 SO-2026-0004（漯河宏发食品有限公司）","fields":[{"name":"code","label":"销售订单号","value":"","tier":"system","rationale":"落库后生成 SO-YYYY-NNNN 递增（现有最大 SO-2026-0003，预计 SO-2026-0004）","widget":"text"},{"name":"customer_id","label":"客户","value":"漯河宏发食品有限公司","tier":"required","widget":"relation"},{"name":"need_date","label":"交货日期","value":"2026-10-20","tier":"required","widget":"date"},{"name":"amount","label":"合计金额","value":"19600","tier":"derived","rationale":"2000 × 9.8 = 19,600 元","widget":"text"},{"name":"doc_status","label":"审批状态","value":"draft","tier":"derived","rationale":"新建草稿，待提交审批生效；金额 19,600 元未超 10 万，正常一级审批","widget":"text"},{"name":"shipping_status","label":"发货状态","value":"none","tier":"derived","rationale":"审批生效后才启动发运","widget":"text"},{"name":"note","label":"备注","value":"海苔芝士米果 80g ×2000 袋 ×9.8，2026-10-20 交货","tier":"derived","widget":"text"}]}
+```
+tool/call: nb_create "{\"collection\": \"so_orders\", \"values\": {\"code\": \"SO-2026-0004\", \"customer_id\": \"1\", \"need_date\": \"2026-10-20\", \"amount\": \"19600\", \"doc_status\": \"draft\", \"shipping_status\": \"none\", \"note\": \"海苔芝士米果 80g ×2000 袋 ×9.8，2026-10-20 交货\
+tool/call: nb_create "{\"collection\": \"so_order_lines\", \"values\": {\"order_id\": \"4\", \"product_id\": \"10\", \"qty\": \"2000\", \"unit_price\": \"9.8\"}}"
+--- assistant text ---
+销售订单 SO-2026-0004 已落库，海苔芝士米果 80g ×2000 袋的明细也写好了。要送去审批就告诉我一声。
+
+```dsh
+{"v":3,"type":"submit_receipt","draftId":"d_2026-09-26_2","form":{"collection":"so_orders","label":"销售订单"},"rowId":"4","summary":[{"label":"合计金额","value":"¥19,600","kind":"money"},{"label":"日期","value":"2026-09-26","kind":"date"},{"label":"单号","value":"SO-2026-0004","kind":"id"}]}
+```
+段3：SO 登记 →「帮我登记一张销售订单：客户漯河宏发，米果 2000 袋…」→ nb_list(crm_customers/hub_inv_products/so_orders 编号段) → form_draft 草稿卡（so_orders，金额 19600 推导、doc_status draft、shipping none）→ form_confirm → nb_create so_orders(SO-2026-0004 draft) + so_order_lines(×2000@9.8) → submit_receipt 回执（¥19,600 / SO-2026-0004）

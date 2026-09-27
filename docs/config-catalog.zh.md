@@ -3391,6 +3391,8 @@ export interface Config {
   reads?: boolean
   /** Register `nb_create`/`nb_update`. Defaults to true. */
   writes?: boolean
+  /** Register `nb_approve` (the approval engine driver). Defaults to true. */
+  approvals?: boolean
   /**
    * NocoBase server origin (for example `http://127.0.0.1:13000`). Omitted =
    * the `NOCOBASE_BASE_URL` environment variable; neither present degrades

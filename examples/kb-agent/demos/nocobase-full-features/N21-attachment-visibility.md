@@ -27,7 +27,7 @@
 
 N21PROBE-PDF-7Q4Z
 ```
-- 请求日志锚点（[platform/nocobase/storage/logs/main/request_2026-09-10.log](../../../../platform/nocobase/storage/logs/main/request_2026-09-10.log)）：
+- 请求日志锚点（`platform/nocobase/storage/logs/main/request_2026-09-10.log`（运行时产物，已随日志轮转清理））：
   - sendMessages 响应：ts=2026-09-10 22:36:15 reqId=d3aaf8a2-1f56-47ef-af23-c8f7d091e027 status=200 cost=4053ms；action 携带 attachments 记录 filename=n21-probe-fyio88.pdf mimetype=application/pdf extname=.pdf size=1168 —— mimetype/extname 即 [provider.parseAttachment](../../../../platform/nocobase/packages/plugins/@nocobase/plugin-ai/src/server/llm-providers/provider.ts) 分流的确定性输入（image/* → image_url data URI；application/pdf → OpenAI 专有 file part；SUPPORTED_DOCUMENT_EXTNAMES → worker 解析为 <parsed_document>）。
   - aiFiles:create 响应：ts=2026-09-10 22:36:11 reqId=488891d1-10ed-4018-bc87-4fa2ddc830c6 status=200
 - 清理：会话 destroyed；上传文件 destroyed
@@ -43,7 +43,7 @@ N21PROBE-PDF-7Q4Z
 
 N21PROBE-DOCX-K9MT
 ```
-- 请求日志锚点（[platform/nocobase/storage/logs/main/request_2026-09-10.log](../../../../platform/nocobase/storage/logs/main/request_2026-09-10.log)）：
+- 请求日志锚点（`platform/nocobase/storage/logs/main/request_2026-09-10.log`（运行时产物，已随日志轮转清理））：
   - sendMessages 响应：ts=2026-09-10 22:36:24 reqId=b8e8135f-bdd7-4e4a-94dc-eb8a8ad520e5 status=200 cost=5826ms；action 携带 attachments 记录 filename=n21-probe-8cjmko.docx mimetype=application/vnd.openxmlformats-officedocument.wordprocessingml.document extname=.docx size=1123 —— mimetype/extname 即 [provider.parseAttachment](../../../../platform/nocobase/packages/plugins/@nocobase/plugin-ai/src/server/llm-providers/provider.ts) 分流的确定性输入（image/* → image_url data URI；application/pdf → OpenAI 专有 file part；SUPPORTED_DOCUMENT_EXTNAMES → worker 解析为 <parsed_document>）。
   - aiFiles:create 响应：ts=2026-09-10 22:36:19 reqId=9249ab01-480d-4b14-b9e9-2193c697ec7d status=200
 - 清理：会话 destroyed；上传文件 destroyed
@@ -59,7 +59,7 @@ N21PROBE-DOCX-K9MT
 
 N21PROBE-XLSX-R2VW
 ```
-- 请求日志锚点（[platform/nocobase/storage/logs/main/request_2026-09-10.log](../../../../platform/nocobase/storage/logs/main/request_2026-09-10.log)）：
+- 请求日志锚点（`platform/nocobase/storage/logs/main/request_2026-09-10.log`（运行时产物，已随日志轮转清理））：
   - sendMessages 响应：ts=2026-09-10 22:36:33 reqId=e1f8286e-66ab-4655-9840-e67dc90805f2 status=200 cost=5257ms；action 携带 attachments 记录 filename=n21-probe-tgkxp5.xlsx mimetype=application/vnd.openxmlformats-officedocument.spreadsheetml.sheet extname=.xlsx size=6472 —— mimetype/extname 即 [provider.parseAttachment](../../../../platform/nocobase/packages/plugins/@nocobase/plugin-ai/src/server/llm-providers/provider.ts) 分流的确定性输入（image/* → image_url data URI；application/pdf → OpenAI 专有 file part；SUPPORTED_DOCUMENT_EXTNAMES → worker 解析为 <parsed_document>）。
   - aiFiles:create 响应：ts=2026-09-10 22:36:28 reqId=14954ee2-e4fa-4115-9050-287261cc0f2c status=200
 - 清理：会话 destroyed；上传文件 destroyed
@@ -75,7 +75,7 @@ N21PROBE-XLSX-R2VW
 
 N21PROBE-MD-H8DY
 ```
-- 请求日志锚点（[platform/nocobase/storage/logs/main/request_2026-09-10.log](../../../../platform/nocobase/storage/logs/main/request_2026-09-10.log)）：
+- 请求日志锚点（`platform/nocobase/storage/logs/main/request_2026-09-10.log`（运行时产物，已随日志轮转清理））：
   - sendMessages 响应：ts=2026-09-10 22:36:40 reqId=b9d832b2-bc72-42e1-b0a8-523f139509a3 status=200 cost=3900ms；action 携带 attachments 记录 filename=n21-probe-b9spdq.md mimetype=text/markdown extname=.md size=139 —— mimetype/extname 即 [provider.parseAttachment](../../../../platform/nocobase/packages/plugins/@nocobase/plugin-ai/src/server/llm-providers/provider.ts) 分流的确定性输入（image/* → image_url data URI；application/pdf → OpenAI 专有 file part；SUPPORTED_DOCUMENT_EXTNAMES → worker 解析为 <parsed_document>）。
   - aiFiles:create 响应：ts=2026-09-10 22:36:36 reqId=1a689b90-241e-48b6-81ef-aa940dd242d5 status=200
 - 清理：会话 destroyed；上传文件 destroyed
@@ -92,7 +92,7 @@ N21PROBE-MD-H8DY
 N21PROBE-PNG-TECH
 ```
 - 判定注记：模型转写存在位图字形偏差（容差≤2 判可见）
-- 请求日志锚点（[platform/nocobase/storage/logs/main/request_2026-09-10.log](../../../../platform/nocobase/storage/logs/main/request_2026-09-10.log)）：
+- 请求日志锚点（`platform/nocobase/storage/logs/main/request_2026-09-10.log`（运行时产物，已随日志轮转清理））：
   - sendMessages 响应：ts=2026-09-10 22:36:46 reqId=d96c0943-3c49-4963-b36b-82b1748e93ad status=200 cost=2073ms；action 携带 attachments 记录 filename=n21-probe-5qr2vo.png mimetype=image/png extname=.png size=435 —— mimetype/extname 即 [provider.parseAttachment](../../../../platform/nocobase/packages/plugins/@nocobase/plugin-ai/src/server/llm-providers/provider.ts) 分流的确定性输入（image/* → image_url data URI；application/pdf → OpenAI 专有 file part；SUPPORTED_DOCUMENT_EXTNAMES → worker 解析为 <parsed_document>）。
   - aiFiles:create 响应：ts=2026-09-10 22:36:44 reqId=0293b6fc-28d3-4762-911d-739ae797561a status=200
 - 清理：会话 destroyed；上传文件 destroyed

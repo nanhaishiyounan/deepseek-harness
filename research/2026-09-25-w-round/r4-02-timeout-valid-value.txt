@@ -1,0 +1,53 @@
+# R4 Minor 2 — NOCOBASE_TIMEOUT_MS 合法值正常启动活体取证（2026-09-26）
+
+补录背景：r3-00-summary.md #9 声称「150 合法值活体证据」，但 r3-04-minors/timeout-validation.txt
+仅含 abc/-5/0 三负例。本文件为 R4 补录的正例活体证据（任务优先路线 a：实跑取证）。
+
+校验点：examples/kb-agent/scripts/nocobase-flow-page-lib.mts 第 43-45 行（import 时校验，
+非正整数毫秒抛「NOCOBASE_TIMEOUT_MS 必须为正整数毫秒…」）。
+命令：node --import tsx/esm examples/kb-agent/scripts/setup-nocobase.mts verify（仓库根）。
+
+== 正例 1：NOCOBASE_TIMEOUT_MS=300000（合法非默认大值） ==
+
+$ NOCOBASE_TIMEOUT_MS=300000 node --import tsx/esm \
+    examples/kb-agent/scripts/setup-nocobase.mts verify
+(node:37660) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+setup-nocobase verify: OK — full UI + collections + attachment field + seed + workflow chain
++ AI workbench + row floors + m2o fieldNames + n18ai- form AI buttons + portals + portal list
+probes + ai-proxy + API key + kg graph + h4 SRM (pages/group/floors/food columns) + h5 WMS
+(pages/group/floors/bin-map JSBlock) + w1 approval (wfl collections/审批中心 page/flow
+config/gate/doc_status column) + w2 supplier single-source (admission flow/AVL gate/h4 workflow
+retired/seed untouched/采购联系人 retitle) + w3 procurement (pur collections/采购管理 7
+pages/gates/flows/receipt columns/待检区) + b4 inventory (reservations/reorder collections/3
+pages/planning columns/virtual zones/count-workflow request leg/bypass guards/ledger balance)
++ w5 mfg (mfg collections/生产制造 5 pages/MO flow/BOM gate/seed floors) + b6 mfg-exec (4
+execution collections/5 pages/mfg_orders columns+terminals/WIP zone/movement legs/seed
+floors/MO-0003 draft) + b7 sales-mrp (so collections/销售管理 3 pages/SO flow/gates/MRP
+workflow/driver columns/SHIPMENT_SO leg/seed floors) + b8 quality (qm collections/质量管理 5
+pages/AQL measured-array seeds/additive columns/RETURN_VENDOR+SCRAP legs/concession flow/
+disposal reconciliation) + b9 dashboards (kpi_snapshots/so_orders.shipped_at/经营分析 4 pages/
+8 kpi charts + supplier radar/90-day backfill floor) all verified
+exit: 0
+
+== 正例 2：NOCOBASE_TIMEOUT_MS=150（summary #9 原文点名的合法小值） ==
+
+$ NOCOBASE_TIMEOUT_MS=150 node --import tsx/esm \
+    examples/kb-agent/scripts/setup-nocobase.mts verify
+(node:37720) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+setup-nocobase verify: OK — full UI + collections + …（输出与正例 1 完全一致的 all verified 全绿清单）
+exit: 0
+grep '必须为正整数毫秒' 计数: 0（无校验错）
+grep 'all verified' 计数: 1
+
+结论：150 与 300000 均通过 import 校验并完成 setup-nocobase.mts verify 全链检查
+（本地 127.0.0.1 回环下 150ms 亦足够，未触发业务 TimeoutError）。合法正整数毫秒值
+正常启动的活体证据成立；负例（abc/-5/0 抛校验错）见 r3-04-minors/timeout-validation.txt。
+
+== 重启后存活确认（Minor 1 收尾） ==
+
+$ curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:3080/mobile
+200
+
+（本段仅单次 curl 200；PID/lstart 与多次 200 带时间戳的物理证据链见 r4-03-liveness-post-restart.txt。）

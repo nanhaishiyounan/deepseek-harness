@@ -1,0 +1,2 @@
+nocobase-w9: rollback done — pages/group/charts (88 models)/kpi_snapshots removed; so_orders.shipped_at kept
+nocobase-w9: done (rollback)

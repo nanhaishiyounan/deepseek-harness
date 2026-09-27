@@ -1,0 +1,9 @@
+== W2-B7 默认关零漂移（2026-09-27 19:17:15，无 env，端口 13120）==
+baseline kpi_snapshots(count/max_id)=2096/8107 mrp_suggestions=26
+approval-engine: serving on http://127.0.0.1:13120 (POST /act, POST /submit, POST /post-count-adjust, POST /scan-reorder, POST /calc-scorecard, POST /run-mrp, POST /calc-kpi, POST /run-nightly, POST /confirm-suggestion, GET /todos, GET /healthz)
+nightly-mentions=1
+after 80s idle: kpi=2096/8107 mrp_suggestions=26 (expect unchanged)
+--- manual curl /calc-kpi (W-round path still alive):
+{"ok":true,"result":{"date":"2026-09-27","rows":26,"valued":25}}
+serve-13120 DOWN
+-- note: the single "nightly" hit is the serving line listing the POST /run-nightly route (a route name, not a timer log line)

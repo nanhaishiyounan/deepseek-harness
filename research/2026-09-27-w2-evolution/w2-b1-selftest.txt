@@ -1,0 +1,19 @@
+nocobase-w8: [selftest] ✓ 批量 200 × AQL 1.0 → H/n50/Ac1/Re2
+nocobase-w8: [selftest] ✓ 批量 150 × AQL 1.0 → E/n13/Ac0/Re1
+nocobase-w8: [selftest] ✓ 批量 2000 × AQL 2.5 → K/n125/Ac7/Re8
+nocobase-w8: [selftest] ✓ 批量 90 × AQL 0.65 → F/n20/Ac0/Re1
+nocobase-w8: [selftest] ✓ 批量 600000 × AQL 2.5 → N/n500/Ac21/Re22
+nocobase-w8: [selftest] ✓ 种子 135 行 = 15 段 × (normal 75 / tightened 30 / reduced 30)
+nocobase-w8: [selftest] ✓ 281-500 × 2.5 × normal = H/n50/Ac3/Re4
+nocobase-w8: [selftest] ✓ 151-280 × 2.5 × normal = G/n32/Ac2/Re3
+nocobase-w8: [selftest] ✓ 1201-3200 × 2.5 × tightened = K/n125/Ac5/Re6
+nocobase-w8: [selftest] ✓ 151-280 × 2.5 × tightened = G/n32/Ac1/Re2
+nocobase-w8: [selftest] ✓ 501-1200 × 1.0 × reduced = J/n32/Ac1/Re2
+nocobase-w8: [selftest] ✓ 500001+ × 1.0 × normal = Q/n1250/Ac21/Re22
+nocobase-w8: [selftest] ✓ 2-8 × 2.5 × reduced = C/n2/Ac0/Re1
+nocobase-w8: [selftest] 全部对拍 PASS
+
+对拍 135 格，失败 0 格
+W2-B1 全量 135 格对拍 PASS
+
+（全量 135 格期望矩阵来源：交叉报告 §3.3 逐格实测；1.0/2.5/4.0 列与主报告一致，0.65×281-500 与 1.5 列为两源分歧裁定列——结构规律见 Agent Note）

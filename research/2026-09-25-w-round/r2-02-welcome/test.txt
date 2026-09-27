@@ -1,0 +1,9 @@
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m13 passed[39m[22m[90m (13)[39m
+[2m   Start at [22m 03:47:56
+[2m   Duration [22m 4.82s[2m (transform 1.20s, setup 1.27s, import 77ms, tests 31ms, environment 2.88s)[22m
+
+preset.yml line: 说一句话就能登记：采购单、请购单、收货单、供应商登记、质检登记、入库单、出库单、回款记录、移库申请、预留登记、BOM 登记、生产订单、领料登记、报工登记、完工登记、销售订单
+form count: 16
+mirror identical: true

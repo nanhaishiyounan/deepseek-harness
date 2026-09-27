@@ -1,0 +1,25 @@
+═══ W2-B4 门禁链（2026-09-27 14:40:14）═══
+── kpi-run --reconcile ──
+kpi-run: [reconcile] otif @ 2026-09-27 = 0.3333
+kpi-run: [reconcile] 口径：count(*) FILTER (WHERE shipping_status='shipped' AND shipped_at <= need_date) ÷ count(*) FROM so_orders WHERE doc_status='approved' AND need_date IS NOT NULL（approved_at/shipped_at ≤ 日）
+kpi-run: [reconcile] fpy @ 2026-09-27 = 0.9972
+kpi-run: [reconcile] 口径：SELECT sum(qty_good)::float / sum(qty_good + qty_scrap) FROM mfg_job_reports WHERE status='posted' AND report_date <= :d
+kpi-run: [reconcile] count_accuracy @ 2026-09-27 = 0.9825
+kpi-run: [reconcile] 口径：1 − Σ|counted_qty − snapshot_qty| ÷ Σsnapshot_qty FROM wms_counts WHERE counted_qty IS NOT NULL（盘点日 W2-B3 起取 biz_date 列，CNT-YYYYMMDD 编码解析降级为列缺失兜底）
+── kpi-run --selftest ──
+kpi-run: selftest OK — FPY 工例/OTIF 分子分母/账实相符率/percentile 对齐/呆滞库龄/临期窗口/RTY 连乘/OTD-S/KPI 表形态/批次合格率已判定口径/PRESENT_ONLY 收缩/重放三件套/月末锚点/周转率公式与除零/rowsOf 截断负例/沪日界边界 全部通过
+── setup-nocobase verify ──
+(node:20801) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+setup-nocobase verify: OK — full UI + collections + attachment field + seed + workflow chain + AI workbench + row floors + m2o fieldNames + n18ai- form AI buttons + portals + portal list probes + ai-proxy + API key + kg graph + h4 SRM (pages/group/floors/food columns) + h5 WMS (pages/group/floors/bin-map JSBlock) + w1 approval (wfl collections/审批中心 page/flow config/gate/doc_status column) + w2 supplier single-source (admission flow/AVL gate/h4 workflow retired/seed untouched/采购联系人 retitle) + w3 procurement (pur collections/采购管理 7 pages/gates/flows/receipt columns/待检区) + b4 inventory (reservations/reorder collections/3 pages/planning columns/virtual zones/count-workflow request leg/bypass guards/ledger balance) + w5 mfg (mfg collections/生产制造 5 pages/MO flow/BOM gate/seed floors) + b6 mfg-exec (4 execution collections/5 pages/mfg_orders columns+terminals/WIP zone/movement legs/seed floors/MO-0003 draft) + b7 sales-mrp (so collections/销售管理 3 pages/SO flow/gates/MRP workflow/driver columns/SHIPMENT_SO leg/seed floors) + b8 quality (qm collections/质量管理 5 pages/AQL full-table 135-row seeds (W2-B1)/additive columns/RETURN_VENDOR+SCRAP legs/concession flow/disposal reconciliation) + b9 dashboards (kpi_snapshots/so_orders.shipped_at/经营分析 4 pages/8 kpi charts + supplier radar/90-day backfill floor) + w2-b2 MPS (mps collections/主生产计划 page/mps flow/back-link column/seeds/covered-exclusivity invariant) + w2-b3 biz-date (movements/counts biz_date 100% coverage/appendMovement convergence/monthly balances reconcile/月度收发存 page) all verified
+── b9-final-chain s9 ──
+b9-chain: [s9] ⑨a wfl 留痕 ✓ PO×2 MO×2（一审单=提交+生效两行；B9 七单家族合计 16 行，逐单齐全）
+b9-chain: [s9] ⑨b movements 勾稽 ✓ 7 条，五类库存事件齐（PUTAWAY、MOVE、ISSUE_WIP、RECEIPT_MFG、SHIPMENT_SO）
+── assert-ledger ──
+nocobase-h5: ledger balanced — stock == Σmovements per (product, lot)，32 组，132 条流水
+── assert-monthly（月度台账对账）──
+nocobase-h5: [snapshot] 对账 ✓ 19 行快照 == 流水重放（期初/收/发/期末 + 连续性 bal(t)==opening(t+1)）
+
+── 终局复核（2026-09-27 15:24:00）──
+kpi-run: selftest OK — FPY 工例/OTIF 分子分母/账实相符率/percentile 对齐/呆滞库龄/临期窗口/RTY 连乘/OTD-S/KPI 表形态/批次合格率已判定口径/PRESENT_ONLY 收缩/重放三件套/月末锚点/周转率公式与除零/rowsOf 截断负例/沪日界边界 全部通过
+nocobase-w9: verify OK — 4 dashboards + charts + collection + shipped_at + 2006 snapshot rows over 91 date(s)

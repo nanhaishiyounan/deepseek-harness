@@ -1,0 +1,14 @@
+{
+  "capturedAt": "2026-09-26T12:27:08.468Z",
+  "base": "http://127.0.0.1:3080",
+  "evidence": [
+    "admin sign-in submitted",
+    "admin menu shows 质量管理: true",
+    "admin 质检单 captured",
+    "admin 处置看板 captured",
+    "admin 季度绩效物化 captured",
+    "chat entered via roster: 找 智能填表助手",
+    "mobile AQL 判定卡出现: true",
+    "mobile 质检查询卡出现: true"
+  ]
+}

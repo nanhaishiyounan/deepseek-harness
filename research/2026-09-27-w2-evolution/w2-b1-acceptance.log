@@ -1,0 +1,34 @@
+w2b1: ══ W2-B1 验收剧本（箭头五例 / 段外解锁 / 四负例 / 转移得分与放宽往返 / 加严累计停检与恢复 / B8 零回归）══
+w2b1: ✓ 段外解锁：2000 × 2.5 × normal，d=7 → passed（K/125/Ac7/Re8）
+w2b1: ✓ 段外解锁：d=8 ≥ Re8 → failed
+w2b1: ✓ 判定行 rigor 快照 = normal
+w2b1: [负例 ✓] --inspect QI-W2B1-NEG-T065 --defects 0,0,1 --inspector w2b1验收 --aql 0.65 → 查表未命中
+w2b1: [负例 ✓] --inspect QI-W2B1-NEG-SUSP --defects 0,0,1 --inspector w2b1验收 --aql 2.5 → 已停检
+w2b1: [负例 ✓] --inspect QI-W2B1-NEG-FULL --defects 0,0,0 --inspector w2b1验收 --aql 0.65 → 转全检
+w2b1: [负例 ✓] --inspect QI-W2B1-NEG-N1 --defects 0,0,0 --inspector w2b1验收 --aql 2.5 → 不在
+w2b1: ✓ 四负例全部 fail-loud 且无判定残留行
+w2b1: ✓ 转移得分：Ac=0/1 档接收 10 批 → score=20（+2/批）
+w2b1: ✓ 转移得分负例：1 批拒收 → score 清零（且 4 过 1 拒不触发加严）
+w2b1: ✓ 转移得分：再接收 15 批 → score=30（放宽门槛）
+w2b1: ✓ 再提交批拒收不进计数器：score 保持 30（9.3.1 不考虑再提交批）
+w2b1: ✓ 再提交批标记落列（qm_inspections.resubmission=true）
+w2b1: [负例 ✓] --iqc-relax SUP-001 → 转移得分
+w2b1: ✓ --iqc-relax 放行：normal → relaxed，score 清零（离开正常）
+w2b1: ✓ 放宽态查放宽表：J/32/Ac1/Re2
+w2b1: ✓ 放宽→正常：1 批不接收自动回 normal（9.3.4），score 清零
+w2b1: ✓ 正常→加严：初次检验 5 批 2 拒（9.3.1，W 轮行为零回归）
+w2b1: ✓ 加严→停检：加严下累计 5 批不接收（9.4 累计口径）
+w2b1: ✓ 加严态查真加严表：G/32/Ac1/Re2（非降档近似）
+w2b1: [负例 ✓] --inspect QI-W2B1-B11 --defects 0,0,1 --inspector w2b1验收 --aql 2.5 → 已停检
+w2b1: ✓ --iqc-resume：suspended → tightened（恢复从加严开始，9.4）
+w2b1: [负例 ✓] --iqc-resume SUP-008 → 仅 suspended
+w2b1: ✓ B8 零回归：QI-2026-0001 保持 passed（G/32/Ac2/Re3，重灌不回写历史缓存列）
+w2b1: ✓ B8 零回归：QI-2026-0002 保持 passed（G/32/Ac2/Re3，重灌不回写历史缓存列）
+w2b1: ✓ B8 零回归：QI-2026-0003 保持 passed（G/32/Ac2/Re3，重灌不回写历史缓存列）
+w2b1: ✓ B8 零回归：QI-2026-0004 保持 failed（G/32/Ac2/Re3，重灌不回写历史缓存列）
+w2b1: ✓ B8 零回归：QI-2026-0005 保持 concession（G/32/Ac2/Re3，重灌不回写历史缓存列）
+w2b1: ✓ B8 零回归：QI-2026-0006 保持 failed（G/32/Ac1/Re2，重灌不回写历史缓存列）
+w2b1: ✓ B8 零回归：QI-2026-0007 保持 failed（G/32/Ac1/Re2，重灌不回写历史缓存列）
+w2b1: ✓ B8 零回归：151-280 × 2.5 × normal = G/32/Ac2/Re3 在库
+w2b1: done — 箭头五例/段外解锁/四负例/转移得分与放宽往返/加严累计停检与恢复/B8 零回归 全通
+w2b1: 外部门禁另跑：b9-final-chain --stage s3/s6/s8 + w8 --demo-chain + setup verify + --assert-ledger

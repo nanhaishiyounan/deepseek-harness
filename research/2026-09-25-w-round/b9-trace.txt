@@ -1,0 +1,20 @@
+kpi-run: [trace] ✓ PO PO-B9F-0001 → RFQ RFQ-B9F-0001（doc_status=approved）
+kpi-run: [trace] ✓ RFQ RFQ-B9F-0001 → PR PR-B9F-0001
+kpi-run: [trace] ✓ RFQ RFQ-B9F-0001 报价 3 条（比价链）
+kpi-run: [trace] ✓ PO PO-B9F-0001 → 收货 1 单（RCV-B9F-0001）
+kpi-run: [trace] ✓ 收货 RCV-B9F-0001 → IQC 2 单（判定 pending/passed）
+kpi-run: [trace] ✓ 收货 RCV-B9F-0001 → 批次 RM-SNA-20260926-01（四日期 2026-09-26/2027-09-26）
+kpi-run: [trace] ✓ 收货流水勾稽：3 条 movement 挂 PO 链单据号
+kpi-run: [trace] ✓ PO PO-B9F-0001 → 发票 1 张（匹配 confirmed）
+kpi-run: [trace] ✓ 发票 INV-B9F-0001 → 付款 1 笔（PAY-B9F-0001/approved）
+kpi-run: [trace] ✓ PO PO-B9F-0001 供应商 珠海鲜丰水产科技有限公司（lifecycle=qualified）
+kpi-run: [trace] ✓ MO MO-2026-0009 → BOM BOM-0002（active）
+kpi-run: [trace] ✓ MO MO-2026-0009 → MRP 建议 #6（status=converted）
+kpi-run: [trace] ✓ 建议 #6 → 驱动 SO SO-B9F-0001（approved）
+kpi-run: [trace] ✓ MO MO-2026-0009 → 领料 2 单（MI-B9F-0001、MI-B9F-0002）
+kpi-run: [trace] ✓ MO MO-2026-0009 → 报工 4 单（合格 Σ71018）
+kpi-run: [trace] ✓ MO MO-2026-0009 → 完工 1 单
+kpi-run: [trace] ✓ 完工 → 成品批次 MFG-20260926-04（1 条批次档案）
+kpi-run: [trace] ✓ 成品批次 MFG-20260926-04 → 组件批次 2 个（领料 ISSUE_WIP 流水批次回链）
+kpi-run: [trace] ✓ 组件批次 → 供应商 1 家（山东鲁丰食品配料有限公司）三级追溯链闭合
+kpi-run: [trace] PASS — 19/19 链路闭合

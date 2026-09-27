@@ -1,0 +1,25 @@
+=== R2-01: N21 dangling-bracket precise fix ===
+date: 2026-09-26T19:30:57Z
+
+## 1. before-fix scan (improved scanner: strips fences + inline code spans)
+files: six B9-touched W3-W8 notes (b3/b4/b5/w6/b7/w8 md+zh) + N21 demo pair + w1/w9/w9-r1/b2 notes
+hits: [level2] x2 in b5 note (md:23, zh:23); [platform/.../request_2026-09-10.log] x10 in N21 demo pair (5+5) = 12 total
+
+## 2. after-fix scan (same command, expect CLEAN)
+CLEAN: no dangling brackets
+
+## 3. diff of touched files
+-- 请求日志锚点（[platform/nocobase/storage/logs/main/request_2026-09-10.log](../../../../platform/nocobase/storage/logs/main/request_2026-09-10.log)）：
++- 请求日志锚点（`platform/nocobase/storage/logs/main/request_2026-09-10.log`（运行时产物，已随日志轮转清理））：
+-- 请求日志锚点（[platform/nocobase/storage/logs/main/request_2026-09-10.log](../../../../platform/nocobase/storage/logs/main/request_2026-09-10.log)）：
++- 请求日志锚点（`platform/nocobase/storage/logs/main/request_2026-09-10.log`（运行时产物，已随日志轮转清理））：
+-- 请求日志锚点（[platform/nocobase/storage/logs/main/request_2026-09-10.log](../../../../platform/nocobase/storage/logs/main/request_2026-09-10.log)）：
++- 请求日志锚点（`platform/nocobase/storage/logs/main/request_2026-09-10.log`（运行时产物，已随日志轮转清理））：
+-- 请求日志锚点（[platform/nocobase/storage/logs/main/request_2026-09-10.log](../../../../platform/nocobase/storage/logs/main/request_2026-09-10.log)）：
++- 请求日志锚点（`platform/nocobase/storage/logs/main/request_2026-09-10.log`（运行时产物，已随日志轮转清理））：
+-- 请求日志锚点（[platform/nocobase/storage/logs/main/request_2026-09-10.log](../../../../platform/nocobase/storage/logs/main/request_2026-09-10.log)）：
++- 请求日志锚点（`platform/nocobase/storage/logs/main/request_2026-09-10.log`（运行时产物，已随日志轮转清理））：
+-- 请求日志锚点（[platform/nocobase/storage/logs/main/request_2026-09-10.log](../../../../platform/nocobase/storage/logs/main/request_2026-09-10.log)）：
++- 请求日志锚点（`platform/nocobase/storage/logs/main/request_2026-09-10.log`（运行时产物，已随日志轮转清理））：
+
+## 4. note gates

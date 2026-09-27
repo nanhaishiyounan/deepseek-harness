@@ -34,6 +34,11 @@ const META: readonly import('@deepseek-ai/dsh-connector-nocobase').NocoBaseColle
     { name: 'status', type: 'string', title: '状态' },
     { name: 'amount', type: 'float', title: '金额' },
   ] },
+  { name: 'pur_orders', title: '采购单', filterTargetKey: 'id', fields: [
+    { name: 'id', type: 'bigInt' },
+    { name: 'code', type: 'string', title: '订单号' },
+    { name: 'doc_status', type: 'string', title: '审批状态' },
+  ] },
   { name: 'auditLog', title: '审计日志', hidden: true, fields: [{ name: 'id', type: 'bigInt' }] },
 ]
 
@@ -53,6 +58,10 @@ async function bootMock(): Promise<MockServer> {
       { id: 11, orderNo: 'ORD-1', status: 'pending', amount: 100 },
       { id: 12, orderNo: 'ORD-2', status: 'shipped', amount: 250 },
       { id: 13, orderNo: 'ORD-3', status: 'pending', amount: 400 },
+    ]],
+    ['pur_orders', [
+      { id: 21, code: 'PO-2026-0001', doc_status: 'approved' },
+      { id: 22, code: 'PO-2026-0002', doc_status: 'draft' },
     ]],
   ])
   let idSeq = 100
@@ -222,11 +231,12 @@ describe('nb_collections', () => {
     expect(result.value).toMatchObject({ collections: [
       { name: 'experts', title: '专家' },
       { name: 'orders', title: '订单' },
+      { name: 'pur_orders', title: '采购单' },
     ] })
-    expect(result.meta).toEqual({ collections: 2 })
+    expect(result.meta).toEqual({ collections: 3 })
     const hidden = await execute('nb_collections', { include_hidden: true })
     expect(hidden.text).toContain('auditLog')
-    expect(hidden.meta).toEqual({ collections: 3 })
+    expect(hidden.meta).toEqual({ collections: 4 })
   })
 
   it('rejects a model-supplied tenant', async () => {
@@ -357,6 +367,28 @@ describe('nb_create', () => {
     const tenant = await execute('nb_create', { collection: 'orders', values: { orderNo: 'X' }, tenant: 'evil' })
     expect(tenant.isError).toBe(true)
   })
+
+  it('refuses a duplicate code on a guarded collection before anything is written (B5 #1 anti-collision)', async () => {
+    const { execute, mock } = await mount()
+    const result = await execute('nb_create', { collection: 'pur_orders', values: { code: 'PO-2026-0002', doc_status: 'draft' } })
+    expect(result.isError).toBe(true)
+    expect(result.text).toContain('单据编号撞号：pur_orders 已存在 code=PO-2026-0002（第 22 行）')
+    // Nothing landed: the row count and the create wire call both prove it.
+    expect(mock!.rows.get('pur_orders')).toHaveLength(2)
+    expect(mock!.served.some(call => call.path === '/api/pur_orders:create')).toBe(false)
+  })
+
+  it('lands a free code on a guarded collection and leaves unguarded collections untouched', async () => {
+    const { execute, mock } = await mount()
+    const free = await execute('nb_create', { collection: 'pur_orders', values: { code: 'PO-2026-0003', doc_status: 'draft' } })
+    expect(free.isError).toBe(false)
+    expect(mock!.rows.get('pur_orders')).toHaveLength(3)
+    // A row without a code passes the guard without a lookup wire call.
+    const servedBefore = mock!.served.length
+    const noCode = await execute('nb_create', { collection: 'pur_orders', values: { doc_status: 'draft' } })
+    expect(noCode.isError).toBe(false)
+    expect(mock!.served.slice(servedBefore).some(call => call.path === '/api/pur_orders:list')).toBe(false)
+  })
 })
 
 describe('nb_update', () => {
@@ -393,6 +425,37 @@ describe('nb_update', () => {
     expect(withId.text).toContain('must not carry an id')
     const tenant = await execute('nb_update', { collection: 'orders', id: 11, values: { status: 'x' }, tenant: 'evil' })
     expect(tenant.isError).toBe(true)
+  })
+
+  it('refuses a code-changing patch that collides with another row (R3 #1: the update side door is closed)', async () => {
+    const { execute, mock } = await mount()
+    // Row 21 (approved) holds PO-2026-0001; drafting row 22 cannot take it.
+    const result = await execute('nb_update', { collection: 'pur_orders', id: 22, values: { code: 'PO-2026-0001' } })
+    expect(result.isError).toBe(true)
+    expect(result.text).toContain('单据编号撞号：pur_orders 已存在 code=PO-2026-0001（第 21 行）')
+    // Refused before the write: no update wire call, row 22 keeps its number.
+    expect(mock!.served.some(call => call.path === '/api/pur_orders:update')).toBe(false)
+    expect(mock!.rows.get('pur_orders')?.find(row => row.id === 22)).toMatchObject({ code: 'PO-2026-0002' })
+  })
+
+  it('lets a code-changing patch land a free number and re-entering the row\'s own number (excludeId)', async () => {
+    const { execute, mock } = await mount()
+    const freed = await execute('nb_update', { collection: 'pur_orders', id: 22, values: { code: 'PO-2026-0009' } })
+    expect(freed.isError).toBe(false)
+    expect(mock!.rows.get('pur_orders')?.find(row => row.id === 22)).toMatchObject({ code: 'PO-2026-0009' })
+    // Re-entering the row's own number is not a collision — the guard's
+    // excludeId exempts the row itself.
+    const kept = await execute('nb_update', { collection: 'pur_orders', id: 22, values: { code: 'PO-2026-0009' } })
+    expect(kept.isError).toBe(false)
+  })
+
+  it('leaves patches without a guarded number column untouched by the lookup', async () => {
+    const { execute, mock } = await mount()
+    const servedBefore = mock!.served.length
+    const result = await execute('nb_update', { collection: 'pur_orders', id: 22, values: { doc_status: 'approved' } })
+    expect(result.isError).toBe(false)
+    expect(mock!.rows.get('pur_orders')?.find(row => row.id === 22)).toMatchObject({ doc_status: 'approved' })
+    expect(mock!.served.slice(servedBefore).some(call => call.path === '/api/pur_orders:list' && call.query.get('filter')?.includes('code'))).toBe(false)
   })
 })
 

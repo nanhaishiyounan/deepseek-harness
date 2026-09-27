@@ -208,5 +208,20 @@
       }
     ],
     "destroyedId": 386332346417157
+  },
+  {
+    "title": "采购供应商",
+    "parentId": 388679734198272,
+    "icon": "ShopOutlined",
+    "sort": 1,
+    "schemaUid": "u63favrn9z7",
+    "tabs": [
+      {
+        "schemaUid": "l5o16aqwgvy",
+        "tabSchemaName": "s82qk6ubiyd",
+        "sort": 1
+      }
+    ],
+    "destroyedId": 388679734198274
   }
 ]

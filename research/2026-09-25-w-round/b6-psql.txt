@@ -1,0 +1,58 @@
+== 1 齐套硬预留（MO-1 consumed×4 + MO-2 partial reserved×2）==
+RESV RSV-MO-MO-2026-0001-01 | MO-2026-0001 | p30 | qty=758.88 | consumed
+RESV RSV-MO-MO-2026-0001-02 | MO-2026-0001 | p31 | qty=37.08 | consumed
+RESV RSV-MO-MO-2026-0001-03 | MO-2026-0001 | p32 | qty=97.92 | consumed
+RESV RSV-MO-MO-2026-0001-04 | MO-2026-0001 | p33 | qty=12120 | consumed
+RESV RSV-MO-MO-2026-0002-02 | MO-2026-0002 | p35 | qty=3460.8 | reserved
+RESV RSV-MO-MO-2026-0002-04 | MO-2026-0002 | p37 | qty=16160 | reserved
+MO-1 reservation_state=assigned kit_json_len=444
+MO-2 reservation_state=partial
+MO-2 缺料清单: {"state":"partial","checked_at":"2026-09-26","rows":[{"sku":"RM-DMP-SKN","name":"速冻水饺皮 10kg","demand":2937.6,"available":1500,"shortfall":1437.6,"eta":null},{"sku":"RM-DMP-PRK","name":"冷鲜猪后腿肉馅 20kg","demand":3460.8,"available":4000,"shortfall":0,"eta":null},{"sku":"RM-DMP-VEG","name":"速冻荠菜 10kg","demand":1497.6,"available":800,"shortfall":697.6,"eta":null},{"sku":"RM-DMP-PKG","name":"速冻水饺包装盒","demand":16160,"available":20000,"shortfall":0,"eta":null}]}
+== 2 领料出库流水 + 消耗预留 + WIP 线边 ==
+MOVE ISSUE_WIP | MI-2026-0001 | p30 | qty=-758.88
+MOVE ISSUE_WIP | MI-2026-0001 | p30 | qty=758.88
+MOVE ISSUE_WIP | MI-2026-0002 | p31 | qty=-37.08
+MOVE ISSUE_WIP | MI-2026-0002 | p31 | qty=37.08
+MOVE ISSUE_WIP | MI-2026-0003 | p32 | qty=-97.92
+MOVE ISSUE_WIP | MI-2026-0003 | p32 | qty=97.92
+MOVE ISSUE_WIP | MI-2026-0004 | p33 | qty=-12120
+MOVE ISSUE_WIP | MI-2026-0004 | p33 | qty=12120
+ISSUE MI-2026-0001 | qty=758.88 | posted
+ISSUE MI-2026-0002 | qty=37.08 | posted
+ISSUE MI-2026-0003 | qty=97.92 | posted
+ISSUE MI-2026-0004 | qty=12120 | posted
+ISSUE MI-2026-0005 | qty=100 | draft
+ISSUE MI-2026-0006 | qty=3000 | draft
+WIP stock: p32 | oh=97.92 | good
+WIP stock: p33 | oh=12020 | good
+WIP stock: p30 | oh=758.88 | good
+WIP stock: p31 | oh=37.08 | good
+== 3 退料回库（流水负向）==
+MOVE RETURN_WIP | MR-2026-0001 | qty=-100
+MOVE RETURN_WIP | MR-2026-0001 | qty=100
+RETURN MR-2026-0001 | qty=100 | posted
+== 4 报工推进 ==
+RPT JR-2026-0001 | seq=1 | good=12000 scrap=0 | dur=240 | posted
+RPT JR-2026-0002 | seq=2 | good=11800 scrap=200 | dur=300 | posted
+RPT JR-2026-0003 | seq=3 | good=12000 scrap=0 | dur=180 | posted
+OP seq=1 | done
+OP seq=2 | done
+OP seq=3 | done
+== 5 完工入库（待检→放行）==
+MC MC-2026-0001 | qty=12000 | lot=MFG-20260926-03 | oqc=passed | posted
+
+LOT MFG-20260926-03 | qualified | prod=2026-09-26 exp=2027-06-23 rem=2027-05-24 alert=2027-04-24
+RECEIPT_MFG moves: 1
+== 6 成本双列三列 ==
+MO-1 std=209798.2 actual=210386.2 variance=588 | 三量 12000→11900.99→12000 | completed
+== 7 卡口负例留痕（负例单据保持 draft 未过账）==
+NEG MI-2026-0006 | qty=3000 | draft
+NEG MI-2026-0005 | qty=100 | draft
+NEG MC-2026-0002 | qty=13000 | draft
+== 8 对账：stock == Σmovements per (product, lot) ==
+LEDGER BALANCED ✓
+== 9 MO-0003 仍 draft（复用位）==
+MO-3 MO-2026-0003 | draft
+mobile报工行: JR-2026-0004 | seq=1 | good=500 | dur=45 | draft | admin
+== mobile 登记行过账负例（MO-0002 partial 未开工）: --post-report JR-2026-0004 → 报工被拒（需已领料开工 in_progress）==
+nocobase-h5: ledger balanced — stock == Σmovements per (product, lot)，22 组，86 条流水

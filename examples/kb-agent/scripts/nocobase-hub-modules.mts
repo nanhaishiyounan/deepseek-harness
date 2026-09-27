@@ -320,6 +320,9 @@ const PORTAL_DOMAIN_COLLECTIONS: ReadonlyArray<{ name: string; title: string; fi
   },
 ]
 const PO_STATUSES = options([['draft', '草稿', 'default'], ['sent', '已发出', 'blue'], ['received', '已到货', 'green'], ['cancelled', '已取消', 'red']])
+// B0: 待审核's value is the literal mobile writes (agent preset status=待审核),
+// so existing rows match the enum and the v2 column filter lists them.
+const PO_SUPPLIER_STATUS = options([['待审核', '待审核', 'orange'], ['active', '合作中', 'green'], ['inactive', '停用', 'default']])
 
 /**
  * D1: collections whole tables the portal reads but the seed never created
@@ -345,7 +348,7 @@ const D1_PORTAL_COLLECTIONS: ReadonlyArray<{ name: string; title: string; fields
   {
     name: 'hub_po_suppliers', title: '采购供应商', fields: [
       input('name', '供应商'), input('email', '邮箱'), input('contact_name', '联系人'),
-      integer('rating', '评分'), select('status', '状态', options([['active', '合作中', 'green'], ['inactive', '停用', 'default']])),
+      integer('rating', '评分'), select('status', '状态', PO_SUPPLIER_STATUS),
     ],
   },
   {
@@ -397,6 +400,12 @@ const MENU: ReadonlyArray<{ group: string | null; groupIcon?: string; pages: Rea
   {
     group: '基础数据', groupIcon: 'BookOutlined',
     pages: [{ title: '分类维护', icon: 'TableOutlined' }],
+  },
+  {
+    // B0: the procurement group hosts the hub_po_* read views (the mobile
+    // form-assistant writes this table); B3's PR/PO pages land here too.
+    group: '采购', groupIcon: 'ShoppingCartOutlined',
+    pages: [{ title: '采购供应商', icon: 'ShopOutlined' }],
   },
 ]
 
@@ -917,6 +926,10 @@ const PAGE_BLOCKS: ReadonlyArray<{ page: string; blocks: ReadonlyArray<BlockSpec
       { kind: 'table', collection: 'hub_md_product_categories', columns: ['name', 'code', 'is_active'] },
     ],
   },
+  // B0: the hub_po_suppliers read view (columns limited to the columns the
+  // table actually carries — supplier_code exists only as a draft-card
+  // display field and never persists).
+  { page: '采购供应商', blocks: [{ kind: 'table', collection: 'hub_po_suppliers', columns: ['name', 'contact_name', 'email', 'rating', 'status'] }] },
 ]
 
 async function ensureBlocks(token: string, pageByUrl: Map<string, string>): Promise<void> {
@@ -1135,7 +1148,10 @@ async function ensurePortalFields(token: string, usersByNickname: Map<string, nu
  * options or seeded row values — a filter then at least lists every value
  * the portal offers.
  */
-const ENUM_ALIGNMENTS: ReadonlyArray<{ collection: string; field: string; values: ReadonlyArray<{ value: string; label: string }> }> = [
+const ENUM_ALIGNMENTS: ReadonlyArray<{ collection: string; field: string; values: ReadonlyArray<{ value: string; label: string; color?: string }> }> = [
+  // B0: existing installs carry hub_po_suppliers rows with status=待审核
+  // written by the mobile form-assistant before this enum grew the option.
+  { collection: 'hub_po_suppliers', field: 'status', values: [{ value: '待审核', label: '待审核', color: 'orange' }] },
   { collection: 'hub_as_maintenance', field: 'type', values: [{ value: 'Preventive', label: 'Preventive' }, { value: 'Corrective', label: 'Corrective' }, { value: 'Inspection', label: 'Inspection' }] },
   { collection: 'hub_as_maintenance', field: 'status', values: [{ value: 'Scheduled', label: 'Scheduled' }, { value: 'In progress', label: 'In progress' }, { value: 'Done', label: 'Done' }] },
   { collection: 'hub_pj_tasks', field: 'priority', values: [{ value: 'med', label: 'Med' }] },

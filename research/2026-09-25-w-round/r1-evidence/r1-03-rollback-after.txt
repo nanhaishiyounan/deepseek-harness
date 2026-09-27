@@ -1,0 +1,13 @@
+=== rollback 后状态（2026-09-27 02:09:09）===
+w9kpi-prefixed models remaining: 0
+ChartBlockModel remaining (all batches): 6
+TableBlockModel w9kpi-prefixed remaining: 0
+TableColumnModel w9kpi-prefixed remaining: 0
+RootPageModel w9kpi-prefixed remaining: 0
+BlockGridModel w9kpi-prefixed remaining: 0
+RefreshActionModel w9kpi-prefixed remaining: 0
+RouteModel w9kpi remaining: 0
+经营分析 group remaining: 0
+四页 flowPage remaining: []
+kpi_snapshots collection HTTP: 200
+kpi_snapshots collection after fixed destroy: HTTP 200

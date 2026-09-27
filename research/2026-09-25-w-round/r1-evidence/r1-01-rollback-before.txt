@@ -1,0 +1,10 @@
+=== rollback 前状态（2026-09-27 02:04:44）===
+Traceback (most recent call last):
+  File "<string>", line 8, in <module>
+  File "<string>", line 8, in <setcomp>
+KeyError: 'use'
+w9kpi-prefixed models: 88
+ChartBlockModel total: 15
+经营分析 group: 1
+四页 flowPage: ['经营看板', '供应链看板', '生产看板', '库存看板']
+kpi_snapshots collection exists: True

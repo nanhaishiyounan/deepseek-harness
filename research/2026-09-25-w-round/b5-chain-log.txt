@@ -1,0 +1,19 @@
+nocobase-w5: [chain] ══ 生产计划链演示（建 MO 卡口 → 审批 → 下达 → 排产 → 冲突排队 → 冻结/重排 → 后推）══
+nocobase-w5: [chain] 卡口负例 ✓ 对退役 BOM 建生产订单 → 卡口未通过：BOM 1 的 bom_status 为「retired」(retired)，不在要求集合 active(active) 内；请先完成上游单据要求的状态再驱动下游业务
+nocobase-w5: [chain] MO-2026-0001 preview planned_start=2026-09-26
+nocobase-w5: [chain] MO-2026-0001 already applied (kept)
+nocobase-w5: [chain] MO-2026-0002 already applied (kept)
+nocobase-w5: [chain] MO-1 排程：1@WC-ASSY 2026-09-26 (193分) → 2@WC-ASSY 2026-09-26 (197分) → 3@WC-PACK 2026-09-26 (189分)
+nocobase-w5: [chain] MO-2 排程：1@WC-ASSY 2026-09-28 (213分) → 2@WC-ASSY 2026-09-28 (298分) → 3@WC-PACK 2026-09-28 (285分)（同 WC 冲突排队顺延）
+nocobase-w5: [chain] 卡口负例 ✓ 已排 MO 重复 apply 被拒（冻结语义）
+nocobase-w5: [chain] MO-2026-0001 void → 重排完成（改期重算）
+nocobase-w5: [chain] 后推负向告警 ✓（最晚开工早于今天——建议改期/拆单/外协）
+nocobase-w5: [chain] ══ 终态 ══
+nocobase-w5: [chain] MO-1: doc_status=released released_at=2026-09-26 planned=2026-09-26→2026-09-26 reservation_state=none
+nocobase-w5: [chain] MO-2: doc_status=released released_at=2026-09-26 planned=2026-09-28→2026-09-28 need_date=2026-10-25
+nocobase-w5: [chain] done — 全链（含卡口负例×3、两级审批、冲突排队、冻结/重排、后推告警）走通
+mfg-schedule: [selftest] ① 超载告警 ✓ 2026-09-26 600分 → 工序超出 WC-A 单日产能（需 600 分 > 容量 480 分；不跨天约束——建议拆单或外协…
+mfg-schedule: [selftest] ② 替代 WC 切换 ✓ 主 WC 满载 → WC-B @ 2026-09-26
+mfg-schedule: [selftest] ③ 不跨天 + 冲突排队 ✓ 2026-09-26 → 2026-09-29 → 2026-09-30（周日与节假日 2026-09-28 顺延）
+mfg-schedule: [selftest] ④ 后推负向告警 ✓ 最晚开工 2026-09-24 < 今天 2026-09-26（slack -2 天）
+mfg-schedule: selftest OK — 超载告警 / 替代 WC 切换 / 不跨天 / 后推负向 四断言全绿

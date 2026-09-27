@@ -1,0 +1,3 @@
+verify-agent-note-format: 710 Agent Note(s) checked, all conform to .agents/notes/README.md § The file format.
+verify-agent-note-classification: 710 Agent Note(s) checked, structure consistent.
+verify-translation-pairing: 1159 pair(s) checked across all in-scope documentation, all consistent.

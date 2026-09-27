@@ -1,0 +1,3 @@
+════ W2-B1 外部门禁（2026-09-27 09:21:34）════
+── b9-final-chain --stage s3（重放既有 single-shot 限制：QI-B9F-0001 已判定——W 轮同款行为，行值对照走 w2-b1-aql-cases.txt §6）
+── s6/s8 PASS；demo-chain replay verified；--assert-ledger 绿（31 组 127 条流水）；setup verify OK（unique-indexes 先补跑）

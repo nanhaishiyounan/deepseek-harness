@@ -1,0 +1,26 @@
+B8 AQL 判定用例表（GB/T 2828.1 ≡ ANSI/ASQ Z1.4，一般水平 II，单次正常；SQC Online 实跑取证，D 组底稿 D1b）
+====================================================================================
+
+种子数组（qm_aql_plans，9 档实测）：
+  批量段     字码  n   AQL1.0   AQL2.5   AQL4.0
+  151-280   G    32   1/2      2/3      3/4
+  281-500   H    50   1/2      3/4      5/6
+  501-1200  J    80   2/3      5/6      7/8
+
+实跑判定（psql 只读复核见 b8-psql.txt 第 1 段）：
+  检验单        批量  AQL档(判定用)      n   Ac  Re  d   严格度      判定        复核
+  QI-2026-0001  200   2.5                 32   2   3   2   normal     passed     d=2 ≤ Ac=2 ✓（09-b8 验收 checkbox 1 正例）
+  QI-2026-0002  200   2.5                 32   2   3   2   normal     passed
+  QI-2026-0003  200   2.5                 32   2   3   2   normal     passed
+  QI-2026-0004  200   2.5                 32   2   3   3   normal     failed     d=3 ≥ Re=3 ✓（验收 checkbox 1 负例）
+  QI-2026-0005  200   2.5                 32   2   3   3   normal     failed→concession（让步处置改判）
+  QI-2026-0006  200   1.0（降档）         32   1   2   2   tightened  failed     加严=严一档查行 ✓（验收 checkbox 2「新检验单 Ac 自动降档」）
+  QI-2026-0007  200   1.0（降档）         32   1   2   3   tightened  failed
+
+切换规则实跑（验收 checkbox 2）：
+  连续判定序列（SUP-004 味之源）：pass, pass, pass, fail, fail → 最近 5 批 2 拒
+  → srm_suppliers.iqc_level: normal → tightened（引擎 inspect 时自动切换）
+  → reject_streak=3；之后每张新检验单查表自动用 AQL 1.0 数组（Ac1/Re2）
+
+严格度两维正交说明：「正常/加严/放宽」与检验水平「I/II/III」是两个维度；本批
+只落 normal/tightened 两态（放宽与停检未落——企业版口径，取舍见 Agent Note）。

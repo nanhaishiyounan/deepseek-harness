@@ -1,0 +1,7 @@
+(Use `node --trace-warnings ...` to show where the warning was created)
+setup-nocobase: unique doc-number index ux_pur_orders_code ensured
+setup-nocobase: unique doc-number index ux_pur_requests_code ensured
+setup-nocobase: unique doc-number index ux_so_orders_code ensured
+setup-nocobase: unique doc-number index ux_mfg_orders_code ensured
+setup-nocobase: unique doc-number index ux_wms_receipts_receipt_no ensured
+setup-nocobase: unique doc-number index ux_srm_suppliers_code ensured

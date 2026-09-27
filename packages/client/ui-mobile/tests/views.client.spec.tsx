@@ -491,8 +491,8 @@ describe('mobile new-chat sheet', () => {
       rosterRows.findIndex(text => text?.includes('裸岗')),
     )
     expect(screen.getByText('采购单')).toBeTruthy()
-    expect(screen.getByText('供应商登记')).toBeTruthy()
-    expect(screen.getByText('质检记录')).toBeTruthy()
+    expect(screen.getByText('请购单')).toBeTruthy()
+    expect(screen.getByText('收货单')).toBeTruthy()
     expect(screen.getByText('单据登记与任务执行')).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: /智能填表助手/ }))
     await waitFor(() => { expect(location.hash).toBe('#/chat/bound:mobile-form-assistant') })
@@ -943,7 +943,6 @@ describe('mobile chat view', () => {
     Object.assign(navigator, { clipboard: { writeText: vi.fn(() => Promise.reject(new Error('denied'))) } })
     const exec = vi.fn(() => true)
     // execCommand is the legacy copy lane under test (the production source keeps the same waiver).
-    // oxlint-disable-next-line no-deprecated
     document.execCommand = exec
     try {
       stubGateway({
@@ -956,7 +955,6 @@ describe('mobile chat view', () => {
       await waitFor(() => { expect(exec).toHaveBeenCalledWith('copy') })
       await waitFor(() => { expect(document.querySelector('.adm-toast-main')?.textContent ?? '').toContain('已复制') })
     } finally {
-      // oxlint-disable-next-line no-deprecated
       delete (document as Partial<Document> & { execCommand?: unknown }).execCommand
     }
   })
@@ -1524,7 +1522,7 @@ describe('mobile UI atoms children slot', () => {
 })
 
 const v3AskFence = '```dsh\n{"v":3,"type":"ask_choice","id":"c1","mode":"single","variant":"cards","question":"这笔要登记成什么单据？","options":[{"label":"采购单","value":"hub_po","send":"是采购单，我们从鲜丰买进"},{"label":"出库单","value":"hub_out"}],"allowFreeText":true}\n```'
-const v3DraftFence = '```dsh\n{"v":3,"type":"form_draft","draftId":"d_1","revision":1,"form":{"collection":"hub_po_purchase_orders","label":"采购单"},"title":"鲜丰采购","fields":[{"name":"quantity","label":"数量","value":null,"tier":"required","widget":"number"},{"name":"order_date","label":"日期","value":"2026-09-21","tier":"derived","rationale":"今天","widget":"date"}]}\n```'
+const v3DraftFence = '```dsh\n{"v":3,"type":"form_draft","draftId":"d_1","revision":1,"form":{"collection":"pur_orders","label":"采购单"},"title":"鲜丰采购","fields":[{"name":"quantity","label":"数量","value":null,"tier":"required","widget":"number"},{"name":"order_date","label":"日期","value":"2026-09-21","tier":"derived","rationale":"今天","widget":"date"}]}\n```'
 const v3ConfirmUserMessage = '确认写入\n```dsh\n{"v":3,"type":"form_confirm","draftId":"d_1","revision":1,"form":{"collection":"hub_po_purchase_orders","label":"采购单"},"fields":[{"name":"quantity","label":"数量","value":"200"}]}\n```'
 const v3DraftFenceRev2 = '```dsh\n{"v":3,"type":"form_draft","draftId":"d_1","revision":2,"form":{"collection":"hub_po_purchase_orders","label":"采购单"},"title":"鲜丰采购改","fields":[{"name":"quantity","label":"数量","value":"300","tier":"required","widget":"number"}]}\n```'
 const v3ReceiptFence = '```dsh\n{"v":3,"type":"submit_receipt","draftId":"d_1","form":{"collection":"hub_po_purchase_orders","label":"采购单"},"rowId":"1042","summary":[{"label":"合计金额","value":"¥6,400","kind":"money"}]}\n```'
@@ -1816,12 +1814,12 @@ describe('mobile chat view (D2 acceptance fixes)', () => {
   })
 
   it('fills the blank system number and sends it through the confirm', async () => {
-    const draftWithBlankNumber = '```dsh\n{"v":3,"type":"form_draft","draftId":"d_sys","revision":1,"form":{"collection":"hub_po_purchase_orders","label":"采购单"},"title":"鲜丰采购","fields":[{"name":"quantity","label":"数量","value":"200","tier":"required","widget":"number"},{"name":"order_date","label":"日期","value":"2026-09-21","tier":"derived","rationale":"今天","widget":"date"},{"name":"po_number","label":"单号","value":"","tier":"system","widget":"text"}]}\n```'
+    const draftWithBlankNumber = '```dsh\n{"v":3,"type":"form_draft","draftId":"d_sys","revision":1,"form":{"collection":"pur_orders","label":"采购单"},"title":"鲜丰采购","fields":[{"name":"quantity","label":"数量","value":"200","tier":"required","widget":"number"},{"name":"order_date","label":"日期","value":"2026-09-21","tier":"derived","rationale":"今天","widget":"date"},{"name":"code","label":"订单号","value":"","tier":"system","widget":"text"}]}\n```'
     stubGateway({
       'session.list': { items: [] },
       'session.history': { events: [{ event: assistantMessage(1, `草稿：\n${draftWithBlankNumber}`) }] },
       'nocobase.listMeta': { collections: [] },
-      'nocobase.list': { rows: [{ po_number: 'PO-2026-0007' }] },
+      'nocobase.list': { rows: [{ code: 'PO-2026-0007' }] },
       'session.prompt': {},
     })
     render(<ChatView sessionId="session-12" />)
@@ -1839,7 +1837,7 @@ describe('mobile chat view (D2 acceptance fixes)', () => {
         fields: { name: string; value: string }[]
       }
       const byName = new Map(fence.fields.map(field => [field.name, field.value]))
-      expect(byName.get('po_number')).toBe('PO-2026-0008')
+      expect(byName.get('code')).toBe('PO-2026-0008')
       expect(byName.get('order_date')).toBe(todayOf())
     })
   })

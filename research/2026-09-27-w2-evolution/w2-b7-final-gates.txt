@@ -1,0 +1,9 @@
+== W2-B7 收官门禁（2026-09-27 19:20:18）==
+--- [gate1] nocobase-h5-wms --assert-ledger
+nocobase-h5: ledger balanced — stock == Σmovements per (product, lot)，32 组，138 条流水
+--- [gate2] kpi-run --selftest
+kpi-run: selftest OK — FPY 工例/OTIF 分子分母/账实相符率/percentile 对齐/呆滞库龄/临期窗口/RTY 连乘/OTD-S/KPI 表形态/批次合格率已判定口径/ap_balance 应付镜像/PRESENT_ONLY 收缩/重放三件套/月末锚点/周转率公式与除零/rowsOf 截断负例/沪日界边界 全部通过
+--- [gate3] kpi-run --backfill 90 幂等复跑
+kpi-run: backfill 90d（2026-06-30..2026-09-27）— 2077 rows
+--- [gate4] vitest tool-nocobase + ui-mobile: 39 files / 677 tests passed (2026-09-27 19:51)
+--- [gate5] pnpm run typecheck: OK (contracts-ready, no errors)

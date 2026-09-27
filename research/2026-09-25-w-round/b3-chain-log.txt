@@ -1,0 +1,22 @@
+nocobase-w3: [chain] ══ 采购全链演示（PR→RFQ→比价→PO→收货→IQC→入库→发票→匹配→付款）══
+nocobase-w3: [chain] 卡口负例 ✓ 对草稿 PR 建 RFQ → 上游单据未生效：采购申请 2 的审批状态为「草稿」（doc_status=0），未生效单据不能驱动下游业务；请先提交并通过审批
+nocobase-w3: rfq RFQ-2026-0001 already closed (kept)
+nocobase-w3: rfq RFQ-2026-0001 already awarded (PO PO-2026-0003 kept)
+nocobase-w3: [chain] 卡口负例 ✓ 对草稿 PO 建收货单 → 上游单据未生效：采购订单 2 的审批状态为「草稿」（doc_status=0），未生效单据不能驱动下游业务；请先提交并通过审批
+nocobase-w3: [chain] 收货单 RCV-W3-CHAIN-1 过卡口（PO approved）✓
+nocobase-h5: receipt RCV-W3-CHAIN-1 already closed (kept; posting is single-shot)
+nocobase-w3: [chain] 卡口负例 ✓ IQC 未放行拒入库（RCV-B3-DEMO-1）→ Error: IQC 未放行不能过账入库：入库单 RCV-B3-DEMO-1 的检验状态为「pending」，需先 --iqc RCV-B3-DEMO-1 pass（或 not_r
+nocobase-h5: receipt RCV-W3-CHAIN-1 iqc_status=passed (kept; verdict is single-shot)
+nocobase-h5: receipt RCV-W3-CHAIN-1 already closed (kept; release is single-shot)
+nocobase-h5: receipt RCV-W3-CHAIN-2 already closed (kept; posting is single-shot)
+nocobase-h5: receipt RCV-W3-CHAIN-2 already closed (kept; release is single-shot)
+nocobase-w3: invoice INV-2026-0001 already confirmed (kept; was matched)
+nocobase-w3: invoice INV-2026-0001 already confirmed (kept)
+nocobase-w3: invoice INV-2026-0002 already confirmed (kept; was exception)
+nocobase-w3: [chain] 卡口负例④跳过（发票已人工确认放行；首跑已验证）
+nocobase-w3: invoice INV-2026-0002 already confirmed (kept)
+nocobase-w3: payment PAY-2026-0001 already paid (kept)
+nocobase-w3: [chain] ══ 三轴终态 ══
+nocobase-w3: [chain] PO PO-2026-0003: doc_status=approved receiving_status=received invoice_status=invoiced
+nocobase-w3: [chain] PR PR-2026-0001: converted · RFQ RFQ-2026-0001: closed
+nocobase-w3: [chain] done — 全链（含卡口负例×3、容差正反例、两级审批）走通

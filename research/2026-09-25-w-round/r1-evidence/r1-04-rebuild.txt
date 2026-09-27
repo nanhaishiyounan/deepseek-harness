@@ -1,0 +1,18 @@
+nocobase-w9: collection kpi_snapshots created
+nocobase-w9: so_orders.shipped_at exists (kept)
+nocobase-w9: read-only guard — admin→kpi_snapshots narrowed to read-only (update/create/destroy off)
+nocobase-w9: menu group "经营分析" created
+nocobase-w9: v2 page "经营看板" created (/admin/w9kpigq4i1u0qxlj) with 1 table block(s)
+nocobase-w9: v2 page "供应链看板" created (/admin/w9kpirz7uetmbmn) with 1 table block(s)
+nocobase-w9: v2 page "生产看板" created (/admin/w9kpihip2blapqs) with 1 table block(s)
+nocobase-w9: v2 page "库存看板" created (/admin/w9kpispw76gyrqmo) with 2 table block(s)
+nocobase-w9: chart "毛利率趋势" created on 经营看板 (uid 13vx6godo3n)
+nocobase-w9: chart "当月收入 vs 应收余额" created on 经营看板 (uid 6rd3vn9knt1)
+nocobase-w9: chart "OTIF 趋势" created on 供应链看板 (uid g74k3o25lt7)
+nocobase-w9: chart "供应商准时到货率对比" created on 供应链看板 (uid l9bdn3o7yrl)
+nocobase-w9: chart "供应商绩效雷达（五维）" created on 供应链看板 (uid l3n6be4qqj2)
+nocobase-w9: chart "一次合格率趋势" created on 生产看板 (uid 6abpc8qpqr0)
+nocobase-w9: chart "合格率 × 计划达成对比" created on 生产看板 (uid irscnqqt2sm)
+nocobase-w9: chart "库存资金占用趋势" created on 库存看板 (uid cyjvrweycra)
+nocobase-w9: chart "呆滞占比 × 账实相符率" created on 库存看板 (uid rl4jowhug1j)
+nocobase-w9: done (collections + shipped_at + 4 dashboards + charts; run kpi-run.mts --calc-kpi to materialize, then setup-nocobase.mts verify)

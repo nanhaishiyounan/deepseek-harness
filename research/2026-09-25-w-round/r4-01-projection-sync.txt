@@ -1,0 +1,38 @@
+# R4 Minor 1 — .dsh 部署投影 sixteen-form 头注释同步（2026-09-26）
+
+源文件:   examples/kb-agent/agent-presets/mobile-form-assistant/agent.cordis.yml
+投影文件: examples/kb-agent/.dsh/.agent-presets/mobile-form-assistant/agent.cordis.yml
+
+## 修复前全量 diff（118 行，唯一漂移 = 第 3 行头注释；persona 正文无漂移）
+
+$ diff examples/kb-agent/agent-presets/mobile-form-assistant/agent.cordis.yml \
+       examples/kb-agent/.dsh/.agent-presets/mobile-form-assistant/agent.cordis.yml
+3c3
+< # ask-everything flow: the sixteen-form registry below drives intent matching,
+---
+> # ask-everything flow: the fifteen-form registry below drives intent matching,
+
+## 修复（投影第 3 行 fifteen-form -> sixteen-form，单行）
+
+## 修复后全量 diff 复核
+
+$ diff examples/kb-agent/agent-presets/mobile-form-assistant/agent.cordis.yml \
+       examples/kb-agent/.dsh/.agent-presets/mobile-form-assistant/agent.cordis.yml && echo IDENTICAL
+IDENTICAL
+
+## 重启生效
+
+旧进程 PID 8729/8731（pnpm dsh web --patch examples/kb-agent/cordis.patch.yml --no-open，9:25PM 起）
+kill 后同命令重启（server 进程 PID 37891）。
+生效时序：投影 mtime Sep 27 06:52:31 < server lstart Sep 27 06:55:06（加载的是 sixteen 版投影）。
+/mobile HTTP 200 复验记录见 r4-02（存活确认段）。
+
+## 勘误（R5，2026-09-27）：上行「加载的是 sixteen 版投影」不成立
+
+投影 .dsh/.agent-presets/mobile-form-assistant/ 是被 first-root-wins 遮蔽的副本，运行时不加载：
+- packages/preset/agent-presets/src/discovery.ts:177 — discoverPresets 按 id first-root-wins；
+- examples/kb-agent/cordis.patch.yml:387 — agent-presets roots 将源目录 examples/kb-agent/agent-presets
+  排在 shipped root 之前，mobile-form-assistant persona 运行时由源文件供给。
+
+推论：投影单行同步是文件一致性卫生；重启并非生效必要条件，「重启生效」一节的时序因果不成立。
+重启进程存活的物理证据链见 r4-03-liveness-post-restart.txt。

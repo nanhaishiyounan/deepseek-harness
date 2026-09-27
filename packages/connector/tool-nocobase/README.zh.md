@@ -2,7 +2,7 @@
 
 [English](README.md) | 中文
 
-面向模型的 NocoBase 业务工具：`nb_collections`（schema 发现）、`nb_list`/`nb_get`（行读取）与 `nb_create`/`nb_update`（确认式写入），全部构建在共享的 [`NocoBaseClient`](../connector-nocobase/README.zh.md) 之上。
+面向模型的 NocoBase 业务工具：`nb_collections`（schema 发现）、`nb_list`/`nb_get`（行读取）、`nb_create`/`nb_update`（确认式写入）与 `nb_approve`（通用审批引擎驱动），全部构建在共享的 [`NocoBaseClient`](../connector-nocobase/README.zh.md) 之上。
 
 ## 工具面
 
@@ -10,11 +10,14 @@
 - **`nb_list`** — 按受限筛选词汇（`{field, op: eq|in|gt|lt, value}` 条件，`match: and|or` 连接）查询一个集合的行，支持排序（`-` 前缀 = 降序）、字段投影与有界分页（`page_size` ≤ 100）。
 - **`nb_get`** — 按 collection + id 读单行；确认流程要求的变更前读取。
 - **`nb_create`** — 落一行新记录；回执带服务端分配的 id 与存储行。
-- **`nb_update`** — 先读当前行，只改点名字段，回执带逐字段改前→改后对比与存储行。
+- **`nb_update`** — 先读当前行，只改点名字段，回执带逐字段改前→改后对比与存储行。挂激活审批流的单据在锁定态（审批中/二级审批中/已生效/已作废）拒绝直接编辑。
+- **`nb_approve`** — 驱动一张单据走审批引擎（submit / approve / reject / void；对已驳回单据 submit 即重提，轮次+1；供应商准入流走生命周期词表 potential → reviewing → qualified）。回执回显状态转移、锚点对、轮次与是否生效。`nb_create` 先跑下游卡口：doc_status 卡口拒绝引用未 `approved` 上游单据的行（「未生效」），生命周期卡口（供应商 AVL 规则）拒绝向 `lifecycle_status` 不在配置集合（qualified,preferred）内的供应商下采购单（「未准入/不合格供方」），全部 fail-loud。
 
 ## 确认式变更契约
 
-对话内确认承载在系统提示指引里，而非工具状态：agent 必须先呈现拟变更（nb_create 的完整新行；nb_update 基于 `nb_get` 的逐字段改前→改后对比），获得用户明确同意后才调用写工具。工具本身不带 UI 确认状态——由 persona 驱动 预览 → 同意 → 回执 的流程，回执让对话能复述实际落库的内容。
+对话内确认承载在系统提示指引里，而非工具状态：agent 必须先呈现拟变更（nb_create 的完整新行；nb_update 基于 `nb_get` 的逐字段改前→改后对比；nb_approve 的单据摘要与拟执行动作），获得用户明确同意后才调用写工具。工具本身不带 UI 确认状态——由 persona 驱动 预览 → 同意 → 回执 的流程，回执让对话能复述实际落库的内容。
+
+审批规则（状态词表、doc_status 锚点、含金额阈值路由的转移表、卡口拒绝文案）全部在 [`src/approval-rules.ts`](src/approval-rules.ts)——脚本引擎（`examples/kb-agent/scripts/approval-engine.mts`，NocoBase workflow 回调入口）与本工具共用的唯一代码真源，两个入口在规则上不可能漂移。每次动作向 `wfl_approval_records` 追加一行（谁/何时/动作/意见/轮次 五要素）；未建 `wfl_*` 集合的部署保持引擎接入前的写行为（卡口与锁探测对 404 视为空）。 W2-B5 起两级金额阈值走流配置行的 extras（`amount_threshold`，由 `thresholdOf` 解析、缺键回退 `DEFAULT_AMOUNT_THRESHOLD`），approver_map 的角色值可写多用户（或签，每人一行待办）。
 
 ## 配置
 
@@ -26,6 +29,7 @@
     apiKeyEnv: NOCOBASE_API_KEY       # credential reference, defaults to this name
     readTimeoutMs: 10000               # nb_collections/nb_list/nb_get budgets
     writeTimeoutMs: 60000              # nb_create/nb_update budgets (update runs get+write)
+    approvals: true                    # register nb_approve (default true)
 ```
 
 凭据先走 credentials 缝，再走受信任的启动环境。凭据缺失时工具照常注册——每次调用以结构化的无凭据拒绝失败（本套件文档化的降级模式），而不是让组合失败。租户绝不是模型输入：每个工具拒绝 `tenant` 实参；客户端所用服务账号即权限边界。

@@ -94,6 +94,8 @@ const RATING = opts([['A', 'A级', 'green'], ['B', 'B级', 'blue'], ['C', 'C级'
 const RATING_CHANGE = opts([['up', '上升', 'green'], ['flat', '持平', 'blue'], ['down', '下降', 'red']])
 const PERIODS = opts([
   ['2025Q3', '2025Q3', 'default'], ['2025Q4', '2025Q4', 'default'], ['2026Q1', '2026Q1', 'default'], ['2026Q2', '2026Q2', 'default'],
+  // B8: the live quarter the scorecard materializer writes (nocobase-w8 chain).
+  ['2026Q3', '2026Q3', 'default'],
 ])
 const TEMP_ZONE = opts([['ambient', '常温', 'default'], ['chilled', '冷藏', 'blue'], ['frozen', '冷冻', 'cyan']])
 const ALLERGENS = opts([
@@ -400,6 +402,12 @@ const FOUNDATION_FIELDS: ReadonlyArray<{ field: object, probe: string }> = [
   { field: multipleSelect('allergens', '致敏原', ALLERGENS), probe: 'allergens' },
 ]
 
+// W2-B1: the GB/T 2828.1—2012 转移得分列（正常检验起算、逐批 +3/+2/清零，
+// ≥30 才允许 --iqc-relax 放宽；写入方是 h5 的 inspectInspection 状态机）。
+const SUPPLIER_ADDITIVE_FIELDS: ReadonlyArray<{ field: object, probe: string }> = [
+  { field: integer('switch_score', '转移得分'), probe: 'switch_score' },
+]
+
 async function ensureFoundationColumns(token: string): Promise<void> {
   let added = 0
   for (const spec of FOUNDATION_FIELDS) {
@@ -408,6 +416,14 @@ async function ensureFoundationColumns(token: string): Promise<void> {
     added += 1
   }
   console.log(`nocobase-h4: hub_inv_products food columns ${added > 0 ? `${added} added` : 'already in place (kept)'}`)
+}
+
+async function ensureSupplierAdditiveColumns(token: string): Promise<void> {
+  for (const spec of SUPPLIER_ADDITIVE_FIELDS) {
+    if (await hasField(token, 'srm_suppliers', spec.probe)) continue
+    await dataOf(token, 'POST', '/api/collections/srm_suppliers/fields:create', spec.field)
+    console.log(`nocobase-h4: srm_suppliers.${spec.probe} added`)
+  }
 }
 
 async function ensureCollections(token: string): Promise<void> {
@@ -1257,12 +1273,23 @@ async function main(): Promise<void> {
     console.log('nocobase-h4: done (rollback)')
     return
   }
+  const scorecardIndex = args.indexOf('--calc-scorecard')
+  if (scorecardIndex >= 0) {
+    // B8: the quarterly scorecard materializer lives in the h5 engine
+    // (qm_inspections + receipts + PO lines + CAPAs are engine-owned reads).
+    const { calcScorecard } = await import('./nocobase-h5-wms.mts')
+    const now = new Date()
+    const defaultPeriod = `${String(now.getFullYear())}Q${String(Math.floor(now.getMonth() / 3) + 1)}`
+    await calcScorecard(token, String(args[scorecardIndex + 1] ?? defaultPeriod))
+    return
+  }
   const onlyIndex = args.indexOf('--only')
   const only = onlyIndex >= 0 ? args[onlyIndex + 1] : undefined
   const pages = only === undefined ? PAGES : PAGES.filter(spec => spec.title === only)
   if (pages.length === 0) throw new Error(`--only "${only}" matches no H4 page (${PAGES.map(spec => spec.title).join(' / ')})`)
 
   await ensureFoundationColumns(token)
+  await ensureSupplierAdditiveColumns(token)
   await ensureCollections(token)
   // Seeds BEFORE workflows: first-run creates then never queue approval
   // tasks for seed rows; replays create nothing (business-key upserts).

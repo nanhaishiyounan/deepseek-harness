@@ -1,0 +1,9 @@
+== NOCOBASE_TIMEOUT_MS=abc ==
+  throw new Error(`NOCOBASE_TIMEOUT_MS 必须为正整数毫秒，当前值 ${process.env.NOCOBASE_TIMEOUT_MS ?? '(未设置，默认 30000)'}（解析为 ${rawTimeoutMs}）`)
+Error: NOCOBASE_TIMEOUT_MS 必须为正整数毫秒，当前值 abc（解析为 NaN）
+== NOCOBASE_TIMEOUT_MS=-5 ==
+  throw new Error(`NOCOBASE_TIMEOUT_MS 必须为正整数毫秒，当前值 ${process.env.NOCOBASE_TIMEOUT_MS ?? '(未设置，默认 30000)'}（解析为 ${rawTimeoutMs}）`)
+Error: NOCOBASE_TIMEOUT_MS 必须为正整数毫秒，当前值 -5（解析为 -5）
+== NOCOBASE_TIMEOUT_MS=0 ==
+  throw new Error(`NOCOBASE_TIMEOUT_MS 必须为正整数毫秒，当前值 ${process.env.NOCOBASE_TIMEOUT_MS ?? '(未设置，默认 30000)'}（解析为 ${rawTimeoutMs}）`)
+Error: NOCOBASE_TIMEOUT_MS 必须为正整数毫秒，当前值 0（解析为 0）

@@ -52,6 +52,16 @@ describe('foldHistory', () => {
     expect(tool.label).toBe('unknown_tool')
   })
 
+  it('labels a kpi_snapshots nb_list as the 看板指标 status line (B9)', () => {
+    const folded = foldHistory([
+      event('tool/call', { callId: 'k1', name: 'nb_list', arguments: '{"collection":"kpi_snapshots","filter":{"kpi_code":"otif"},"sort":["-calc_date"],"pageSize":8}' }, 0),
+      event('tool/call', { callId: 'k2', name: 'nb_list', arguments: '{"collection":"pur_orders","pageSize":5}' }, 1),
+      event('tool/call', { callId: 'k3', name: 'nb_list', arguments: 'not json' }, 2),
+    ])
+    const labels = folded.items.map(item => item.kind === 'tool' ? item.label : '')
+    expect(labels).toEqual(['查询看板指标', '查询业务记录', '查询业务记录'])
+  })
+
   it('collects the KG walks from kg tool calls, deduplicated', () => {
     const folded = foldHistory([
       event('tool/call', { turn: 1, step: 1, callId: 'a', name: 'kg_subgraph', arguments: '{"seeds":["宏发食品"],"hops":1}' }, 0),

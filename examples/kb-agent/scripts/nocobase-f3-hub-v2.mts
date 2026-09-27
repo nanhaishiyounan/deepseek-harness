@@ -1,10 +1,12 @@
 /**
  * F3: v2 flowPage upgrades for the remaining Hub/HR/master-data pages —
- * 知识文章 / 维保记录 / 部门 / 请假审批 / 供应商 (plain tables) plus the two
- * composite pages 工作台 (two TableBlocks: hub_pj_tasks + hub_tk_tickets)
- * and 分类维护 (four TableBlocks over hub_md_* — the v1 page was already a
- * single page with four stacked table blocks, so the v2 shape is the same
- * information architecture; the A-route "four tabs" read was wrong).
+ * 知识文章 / 维保记录 / 部门 / 请假审批 / 供应商 / 采购供应商 (plain tables)
+ * plus the two composite pages 工作台 (two TableBlocks: hub_pj_tasks +
+ * hub_tk_tickets) and 分类维护 (four TableBlocks over hub_md_* — the v1 page
+ * was already a single page with four stacked table blocks, so the v2 shape
+ * is the same information architecture; the A-route "four tabs" read was
+ * wrong). B0 added 采购供应商 as the hub_po_suppliers read view (the mobile
+ * form-assistant's registration target) under the new 采购 menu group.
  *
  * Composite-page shape: one flowPage whose BlockGrid carries one
  * TableBlockModel per collection, each with its own AddNew → ChildPage →
@@ -85,6 +87,12 @@ const VENDOR_CATEGORY = [
 const VENDOR_STATUS = [
   { value: 'active', label: '合作中', color: 'green' }, { value: 'inactive', label: '停用', color: 'default' },
 ]
+// B0: 待审核's value is the literal the mobile form-assistant writes, so
+// seeded mobile rows match the enum and render the amber tag.
+const PO_SUPPLIER_STATUS = [
+  { value: '待审核', label: '待审核', color: 'orange' },
+  { value: 'active', label: '合作中', color: 'green' }, { value: 'inactive', label: '停用', color: 'default' },
+]
 const LEAVE_TYPE = [
   { value: 'annual', label: '年假', color: 'blue' }, { value: 'sick', label: '病假', color: 'red' },
   { value: 'personal', label: '事假', color: 'orange' },
@@ -118,10 +126,12 @@ const CATEGORY_FIELDS: ReadonlyArray<FieldSpec> = [
 ]
 
 /**
- * The seven pages. Plain pages carry one block; the composites stack blocks
+ * The eight pages. Plain pages carry one block; the composites stack blocks
  * in the v1 order. Column sets cover every v1-visible field; the 供应商 form
  * covers the full fields table, which is a superset of the hand-configured
- * Add-new drawer's field set (name/contact/category/status).
+ * Add-new drawer's field set (name/contact/category/status). 采购供应商's
+ * columns stay within hub_po_suppliers' actual columns (supplier_code is a
+ * draft-card display field only — the mobile preset never persists it).
  */
 const HUB_PAGES: ReadonlyArray<V2PageSpec> = [
   {
@@ -200,6 +210,26 @@ const HUB_PAGES: ReadonlyArray<V2PageSpec> = [
         { name: 'contact', title: '联系方式', kind: 'input' },
         { name: 'category', title: '类别', kind: 'select', options: VENDOR_CATEGORY },
         { name: 'status', title: '状态', kind: 'select', options: VENDOR_STATUS },
+      ],
+    }],
+  },
+  {
+    title: '采购供应商',
+    blocks: [{
+      collection: 'hub_po_suppliers',
+      columns: [
+        { name: 'name', title: '供应商', kind: 'input' },
+        { name: 'contact_name', title: '联系人', kind: 'input' },
+        { name: 'email', title: '邮箱', kind: 'input' },
+        { name: 'rating', title: '评分', kind: 'number' },
+        { name: 'status', title: '状态', kind: 'select', options: PO_SUPPLIER_STATUS },
+      ],
+      formFields: [
+        { name: 'name', title: '供应商', kind: 'input', required: true },
+        { name: 'contact_name', title: '联系人', kind: 'input', required: true },
+        { name: 'email', title: '邮箱', kind: 'input' },
+        { name: 'rating', title: '评分', kind: 'number' },
+        { name: 'status', title: '状态', kind: 'select', options: PO_SUPPLIER_STATUS },
       ],
     }],
   },

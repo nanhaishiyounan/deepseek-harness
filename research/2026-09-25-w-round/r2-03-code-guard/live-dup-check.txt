@@ -1,0 +1,9 @@
+== R2-03 live duplicate-code check across the six guarded collections ==
+== number columns verified live: 5x code + wms_receipts.receipt_no (CODE_UNIQUENESS_COLUMNS) ==
+pur_orders (code): rows_with_number=5 duplicate_numbers=0
+pur_requests (code): rows_with_number=4 duplicate_numbers=0
+so_orders (code): rows_with_number=5 duplicate_numbers=0
+mfg_orders (code): rows_with_number=10 duplicate_numbers=0
+wms_receipts (receipt_no): rows_with_number=19 duplicate_numbers=0
+srm_suppliers (code): rows_with_number=17 duplicate_numbers=0
+== verdict: engine-side guard is safe to enable (no pre-existing duplicates) when all duplicate_numbers=0 ==

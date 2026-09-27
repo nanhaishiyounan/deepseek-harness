@@ -1,0 +1,23 @@
+R1 四页混板 filter/sort 网络面板证据（DevTools performance.getEntriesByType('resource') 原样摘录，2026-09-26）
+
+经营看板 /admin/w9kpi7zv98whvfpv
+  GET /nocobase/api/kpi_snapshots:list?filter={"$and":[{"$and":[{"board":{"$eq":"business"}}]}]}&sort[]=-calc_date&page=1&pageSize=20&tree=false
+  首屏行组=2026-09-26（今日），仅 business 板 5 指标（待审批数/当月确认收入/毛利率/回款率/应收余额）
+
+供应链看板 /admin/w9kpijpea6p6exnm
+  GET /nocobase/api/kpi_snapshots:list?filter={"$and":[{"$and":[{"board":{"$eq":"supply"}}]}]}&sort[]=-calc_date&page=1&pageSize=20&tree=false
+  首屏行组=2026-09-26（今日），仅 supply 板指标（OTIF/供应商准时到货率…）
+
+生产看板 /admin/w9kpi2zwcgsapdup
+  GET /nocobase/api/kpi_snapshots:list?filter={"$and":[{"$and":[{"board":{"$eq":"production"}}]}]}&sort[]=-calc_date&page=1&pageSize=20&tree=false
+  首屏行组=2026-09-26（今日），仅 production 板指标（产能利用率/一次合格率…）
+
+库存看板 /admin/w9kpiatwzi4gjbff
+  GET /nocobase/api/kpi_snapshots:list?filter={"$and":[{"$and":[{"board":{"$eq":"inventory"}}]}]}&sort[]=-calc_date&page=1&pageSize=20&tree=false
+  GET /nocobase/api/wms_lots:list?appends[]=product&page=1&pageSize=20&tree=false
+  首屏行组=2026-09-26（今日），仅 inventory 板指标（呆滞占比/临期预警/账实相符率…）+ 批次效期台账
+
+结论：R1 前 GET /api/kpi_snapshots:list 无 filter 参数、四页同显全集、首屏为最旧回算日；
+R1 后四页请求各自携带 board $eq filter 与 sort[]=-calc_date，首屏即今日真实值子集。
+wire = stepParams.tableSettings.dataScope.filter（三段式）+ stepParams.tableSettings.defaultSorting（calc_date desc），
+经 tableSettings flow 在 beforeRender 重放 dataScope/sortingRule action 生效（resourceSettings.init.filter 为死线，已弃）。

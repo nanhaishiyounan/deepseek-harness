@@ -1,0 +1,7 @@
+signed in as admin@nocobase.com
+duplicating pur_orders code=PO-2026-0001 (row 1)
+duplicate create -> HTTP 400 (expected non-2xx)
+  body: {"errors":[{"message":"订单号 already exists"}]}
+empty-number create -> HTTP 200 (partial predicate legal)
+probe row 8 destroyed -> HTTP 200
+VERDICT: duplicate code rejected at the DB layer; empty numbers legal; probe cleaned up

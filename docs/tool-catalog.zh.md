@@ -22,7 +22,7 @@
 | `@deepseek-ai/dsh-tool-kb` | `kb_ingest`, `kb_ingest_url`, `kb_search`, `kb_stats`, `kg_query`, `kg_schema`, `kg_subgraph` | `ctx.tools`、`ctx.kb`、`ctx.fs`、`ctx.systemPrompt` | `tool/call`、`tool/result` | - | kb_search、kb_ingest、kb_ingest_url 与 kb_stats 在无可用 store 时保持可见并在执行时以结构化错误失败；四者都在部署绑定租户下运行（模型从不提供租户），检索结果带编号引用，降级 text-only 模式在每次检索结果中可观测。 |
 | `@deepseek-ai/dsh-tool-lakehouse` | `lakehouse_query`, `lakehouse_tables` | `ctx.tools`, `ctx.lakehouse`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | lakehouse_tables 与 lakehouse_query 在无可用引擎时保持可见并在执行时以结构化错误失败（表清单仍可应答）；两者都运行在部署侧绑定租户下（模型永不提供租户），查询结果是带截断标记的封顶行集，渲染文本携带来源表溯源行。 |
 | `@deepseek-ai/dsh-tool-connector` | `assets_browse`, `connector_discover`, `connector_fetch`, `connector_transfer`, `order_create`, `order_status` | `ctx.tools`, `ctx.connector`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | connector_discover、connector_fetch 与 connector_transfer 都运行在部署侧绑定租户下（模型永不提供租户）；发现以携带 provider 与 dataset id 的分组清单作答，预览有上限（8 行 / 400 字符），传输渲染落地回执——含 catalog 传输记录 id 与下一步指引（对命名表用 lakehouse_query，或带引用的 kb_search）；assets_browse 只读浏览资产目录（list/detail/stats）。 |
-| `@deepseek-ai/dsh-tool-nocobase` | `nb_collections`, `nb_create`, `nb_get`, `nb_list`, `nb_update` | `ctx.tools`、`ctx.systemPrompt` | `tool/call`、`tool/result` | - | nb_collections、nb_list、nb_get、nb_create 与 nb_update 以服务账号对话部署的 NocoBase（模型永不提供租户）；筛选词汇为封闭集（eq/in/gt/lt 加单一 and/or 连接），写工具承载确认式变更契约——系统提示指引要求先呈现预览 / 改前→改后对比并取得用户明确同意才运行 nb_create/nb_update，其回执复述落地 id 或逐字段 diff。 |
+| `@deepseek-ai/dsh-tool-nocobase` | `nb_approve`, `nb_collections`, `nb_create`, `nb_get`, `nb_list`, `nb_update` | `ctx.tools`、`ctx.systemPrompt` | `tool/call`、`tool/result` | - | nb_collections、nb_list、nb_get、nb_create 与 nb_update 以服务账号对话部署的 NocoBase（模型永不提供租户）；筛选词汇为封闭集（eq/in/gt/lt 加单一 and/or 连接），写工具承载确认式变更契约——系统提示指引要求先呈现预览 / 改前→改后对比并取得用户明确同意才运行 nb_create/nb_update，其回执复述落地 id 或逐字段 diff；nb_approve 驱动通用审批引擎（提交/同意/驳回/作废），回执回显状态转移、锚点对、轮次与是否生效。 |
 | `@deepseek-ai/dsh-tool-ask-user` | `ask_user_question` | `ctx.tools`、`ctx.userQuestions` | `tool/call`、`tool/result after a UI/provider answers the question` | - | ask_user_question 会暂停工具调用，直到当前 UI 提供方返回人类答案。 |
 | `@deepseek-ai/dsh-tool-view-actions` | `switch_view`, `view_apply`, `view_state_get` | `ctx.tools`, `ctx.viewActions`, `ctx.viewState` | `tool/call`, `tool/result` | - | switch_view、view_apply 与 view_state_get 指挥浏览器工作台视图；视图操控是可逆 UI 状态、不带审批（破坏性写仍走 nb_* 确认契约），动作对照浏览器上报目录校验，浏览器不可达时以可读错误失败而不是挂起。 |
 | `@deepseek-ai/dsh-tools` | `run_code` | `ctx.tools`、`ctx.codeRuntime (execution time)`、`ctx.systemPrompt` | `tool/call`、`one tool/code-dispatch-start + tool/code-dispatch pair per bridged sub-call`、`tool/result` | - | 在 `mode: code`／`mode: both` 下，它由工具注册表所有，作为可过滤能力层之外的保留传输机制（参见 Code Mode Agent Note）。在 `code` 下，它是注册表对协议格式（wire format）的唯一贡献；其他可见能力在使用已加载运行时语言生成的 SDK 章节中声明。程序通过 binding 调用这些能力，调用按照原生并发约定调度：启动顺序和策略遵循提交顺序，并发安全的函数体最多重叠执行 `maxParallelSubCalls` 个。调用会重新进入完整且受守卫保护的工具流水线，并将每个嵌套执行关联到此外层结果。 |
@@ -475,6 +475,45 @@ Source: [`packages/connector/tool-connector/src/index.ts`](../packages/connector
 <a id="deepseek-aidsh-tool-nocobase"></a>
 
 ## `@deepseek-ai/dsh-tool-nocobase`
+
+### `nb_approve`
+
+驱动一张单据走通用审批引擎（submit/approve/reject/void）。确认式变更契约：先呈现单据与拟执行动作，取得用户明确同意后才调用。返回转移回执（原/新状态、锚点、轮次、是否生效）。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "doc_type": {
+      "type": "string",
+      "description": "Document collection name (e.g. hub_po_purchase_orders)."
+    },
+    "doc_id": {
+      "type": "number",
+      "description": "The document row's primary-key id."
+    },
+    "action": {
+      "type": "string",
+      "description": "One of submit | approve | reject | void. submit on a rejected document resubmits it (attempt +1)."
+    },
+    "comment": {
+      "type": "string",
+      "description": "The actor's remark recorded in the audit trail (rejects read best with one)."
+    },
+    "approver": {
+      "type": "string",
+      "description": "The acting user's name for the audit record; defaults to admin."
+    }
+  },
+  "required": [
+    "doc_type",
+    "doc_id",
+    "action"
+  ]
+}
+```
+
+Source: [`packages/connector/tool-nocobase/src/index.ts`](../packages/connector/tool-nocobase/src/index.ts)
 
 ### `nb_collections`
 

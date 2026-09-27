@@ -1,0 +1,30 @@
+== B0 psql 只读实查（2026-09-26 02:48，验收 §2）==
+$ psql postgresql://nocobase:nocobase@localhost:5432/nocobase -c "SELECT id,name,status FROM hub_po_suppliers ORDER BY id;"
+ id |         name         |  status
+----+----------------------+----------
+  1 | 环俄物流集团         | active
+  2 | 环球商标代理事务所   | active
+  3 | SGS 认证服务（上海） | active
+  4 | 速达冷链设备         | active
+  5 | 中译翻译社           | inactive
+  6 | 宏发食品             | active
+  7 | 鲜丰                 | 待审核
+  8 | 鲜丰                 | 待审核
+  9 | 三味食品             | 待审核
+ 10 | 李贺                 | 待审核
+ 11 | B0测试食品           | 待审核
+(11 rows)
+
+
+$ SELECT count(*) FROM "desktopRoutes" WHERE type='flowPage';  # v2 页计数 43→44
+    44
+
+
+$ status 字段 uiSchema.enum（API fields:list 实测）
+[{"value":"active","label":"合作中","color":"green"},{"value":"inactive","label":"停用","color":"default"},{"value":"待审核","label":"待审核","color":"orange"}]
+
+== mobile 回归后新增行（§4 验收）==
+ id |    name    | contact_name | status
+----+------------+--------------+--------
+ 11 | B0测试食品 | 王版本       | 待审核
+(1 row)

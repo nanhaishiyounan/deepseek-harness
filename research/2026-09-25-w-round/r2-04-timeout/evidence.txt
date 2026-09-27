@@ -1,0 +1,3 @@
+requestTimeoutMs=150 elapsed=223ms
+refusal: GET /api/hang -> timed out after 150ms (set NOCOBASE_TIMEOUT_MS to override)
+R2-04 timeout path OK: hung endpoint aborted at 150ms with the named refusal

@@ -1,0 +1,50 @@
+{
+  "mo": "MO-2026-0001",
+  "bom": "BOM-0002",
+  "product_id": 10,
+  "qty": 12000,
+  "direction": "forward",
+  "start_from": "2026-09-26",
+  "planned_start": "2026-09-26",
+  "planned_end": "2026-09-26",
+  "operations": [
+    {
+      "seq": 1,
+      "name": "混合搅拌",
+      "workcenter_id": 1,
+      "workcenter_code": "WC-ASSY",
+      "planned_date": "2026-09-26",
+      "planned_min": 193,
+      "used_alt": false,
+      "queued_days": 0,
+      "overload": false,
+      "note": ""
+    },
+    {
+      "seq": 2,
+      "name": "烘焙膨化",
+      "workcenter_id": 1,
+      "workcenter_code": "WC-ASSY",
+      "planned_date": "2026-09-26",
+      "planned_min": 197,
+      "used_alt": false,
+      "queued_days": 0,
+      "overload": false,
+      "note": ""
+    },
+    {
+      "seq": 3,
+      "name": "调味包装",
+      "workcenter_id": 2,
+      "workcenter_code": "WC-PACK",
+      "planned_date": "2026-09-26",
+      "planned_min": 189,
+      "used_alt": false,
+      "queued_days": 0,
+      "overload": false,
+      "note": ""
+    }
+  ],
+  "warnings": [],
+  "generated_at": "2026-09-26"
+}

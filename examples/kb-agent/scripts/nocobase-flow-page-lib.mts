@@ -39,11 +39,24 @@ const baseUrl = process.env.NOCOBASE_BASE_URL ?? 'http://127.0.0.1:13000'
 const rootEmail = process.env.NOCOBASE_ROOT_EMAIL ?? 'admin@nocobase.com'
 const rootPassword = process.env.NOCOBASE_ROOT_PASSWORD ?? 'admin123'
 
+/** Per-request timeout; a hung NocoBase or proxy must abort, not hang the script forever. Override: NOCOBASE_TIMEOUT_MS (positive integer milliseconds). */
+const rawTimeoutMs = Number(process.env.NOCOBASE_TIMEOUT_MS ?? 30_000)
+if (!Number.isInteger(rawTimeoutMs) || rawTimeoutMs <= 0) {
+  throw new Error(`NOCOBASE_TIMEOUT_MS 必须为正整数毫秒，当前值 ${process.env.NOCOBASE_TIMEOUT_MS ?? '(未设置，默认 30000)'}（解析为 ${rawTimeoutMs}）`)
+}
+export const requestTimeoutMs = rawTimeoutMs
+
 export async function call(token: string, method: 'GET' | 'POST' | 'DELETE', path: string, body?: unknown): Promise<any> {
   const response = await fetch(`${baseUrl}${path}`, {
     method,
     headers: { authorization: `Bearer ${token}`, ...(body === undefined ? {} : { 'content-type': 'application/json' }) },
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+    signal: AbortSignal.timeout(requestTimeoutMs),
+  }).catch((error: unknown) => {
+    if (error instanceof Error && error.name === 'TimeoutError') {
+      throw new Error(`${method} ${path} -> timed out after ${requestTimeoutMs}ms (set NOCOBASE_TIMEOUT_MS to override)`)
+    }
+    throw error
   })
   const payload = await response.json().catch(() => null)
   if (!response.ok) {
@@ -90,7 +103,7 @@ export async function signInWithRetry(attempts = 4): Promise<string> {
  * sweep silently miss rows. Raise pageSize here when the catalog grows.
  */
 export async function listFlowModels(token: string, label: string): Promise<FlowModelRow[]> {
-  const pageSize = 2000
+  const pageSize = 6000
   const payload = await call(token, 'GET', `/api/flowModels:list?pageSize=${pageSize}`)
   const rows = (payload?.data ?? null) as FlowModelRow[] | null
   if (rows === null) return []

@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-09-27-w2b7-ops-closure-nightly-ap-balance.md
+2026-09-27-w2b7-ops-closure-nightly-ap-balance.md: cc00f71e5dfa18d74911420f2511a214323f0e9b
+2026-09-27-w2b7-ops-closure-nightly-ap-balance.zh.md: 160c38e96a6c3ab98773d088a11047dbb8341b9e

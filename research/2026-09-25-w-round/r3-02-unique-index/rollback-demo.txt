@@ -1,0 +1,21 @@
+== before: index present, duplicate refused ==
+index ux_srm_suppliers_code: ux_srm_suppliers_code
+probe #1 -> HTTP 200
+probe #2 (duplicate) -> HTTP 400 (refused by the index)
+== rollback: DROP INDEX restores duplicate-write freedom ==
+DROP INDEX
+probe #3 (duplicate, index dropped) -> HTTP 200 (duplicate landed — rollback effective)
+== cleanup + rebuild: unique-indexes step re-runs idempotently ==
+destroyed probe row 19 -> HTTP 200
+destroyed probe row 21 -> HTTP 200
+setup-nocobase: unique doc-number index ux_pur_orders_code ensured
+setup-nocobase: unique doc-number index ux_pur_requests_code ensured
+setup-nocobase: unique doc-number index ux_so_orders_code ensured
+setup-nocobase: unique doc-number index ux_mfg_orders_code ensured
+setup-nocobase: unique doc-number index ux_wms_receipts_receipt_no ensured
+setup-nocobase: unique doc-number index ux_srm_suppliers_code ensured
+== after rebuild: duplicate refused again ==
+probe #4 -> HTTP 200
+probe #5 (duplicate, index rebuilt) -> HTTP 400 (refused again)
+probe rows destroyed (3 total)
+VERDICT: rollback (DROP INDEX) is immediate and data-free; the unique-indexes step rebuilds idempotently

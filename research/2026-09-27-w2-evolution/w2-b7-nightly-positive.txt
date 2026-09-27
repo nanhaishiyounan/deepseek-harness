@@ -1,0 +1,20 @@
+== W2-B7 夜间定时器正例（2026-09-27 19:13:40，W1_NIGHTLY_AT=��端口 13119）==
+approval-engine: serving on http://127.0.0.1:13119 (POST /act, POST /submit, POST /post-count-adjust, POST /scan-reorder, POST /calc-scorecard, POST /run-mrp, POST /calc-kpi, POST /run-nightly, POST /confirm-suggestion, GET /todos, GET /healthz)
+approval-engine: nightly timer armed — daily at 19:15 Asia/Shanghai（legs：scan-reorder → run-mrp → 月末 snapshot-month → calc-kpi，季初追加 calc-scorecard；marker 为进程内存，重启可能同日补跑——各腿均幂等）
+approval-engine: nightly pass start (trigger=timer, 2026-09-27 19:15 Asia/Shanghai, legs=scan-reorder → run-mrp → calc-kpi)
+nocobase-h5: scan-reorder done — 0 open suggestion(s) created, 1 refreshed, 6 policy product(s) scanned
+approval-engine: nightly leg scan-reorder ok — created=0
+mrp-run: close MRP-20260927-123 — 8 snapshot row(s), 3 live suggestion(s) (0 new), 0 stale closed
+approval-engine: nightly leg run-mrp ok — run_id=MRP-20260927-123 snapshots=8
+approval-engine: nightly leg calc-kpi ok — date=2026-09-27 rows=26 valued=25
+approval-engine: nightly pass done (trigger=timer, 2026-09-27) — 3/3 legs ok
+--- manual POST /run-nightly at 19:16:34
+approval-engine: nightly pass start (trigger=manual, 2026-09-27 19:16 Asia/Shanghai, legs=scan-reorder → run-mrp → calc-kpi)
+nocobase-h5: scan-reorder done — 0 open suggestion(s) created, 1 refreshed, 6 policy product(s) scanned
+approval-engine: nightly leg scan-reorder ok — created=0
+mrp-run: close MRP-20260927-131 — 8 snapshot row(s), 3 live suggestion(s) (0 new), 0 stale closed
+approval-engine: nightly leg run-mrp ok — run_id=MRP-20260927-131 snapshots=8
+approval-engine: nightly leg calc-kpi ok — date=2026-09-27 rows=26 valued=25
+approval-engine: nightly pass done (trigger=manual, 2026-09-27) — 3/3 legs ok
+manual ok= True steps= [('scan-reorder', True), ('run-mrp', True), ('calc-kpi', True)]
+ap=241000 ar=24820 rows_today=26

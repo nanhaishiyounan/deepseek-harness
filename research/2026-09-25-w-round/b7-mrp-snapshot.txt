@@ -1,0 +1,62 @@
+════ B7 psql 只读对账归档（2026-09-26 18:16:05）═══
+
+── 1. MRP 快照六项复算（net == gross+safety−on_hand−inbound−wip+reserved，抽全部行）──
+     run_id      |     sku     |  gross   | safety | on_hand | inbound |  wip  | reserved |    net    |     recomputed      |  diff
+-----------------+-------------+----------+--------+---------+---------+-------+----------+-----------+---------------------+--------
+ MRP-20260926-17 | FD-BEV-1000 |       60 |     40 |      40 |       0 |     0 |        7 |        67 |                  67 | 0.0000
+ MRP-20260926-17 | FD-FRZ-450  |      300 |     60 |     210 |       0 | 16000 |        0 |    -15850 |              -15850 | 0.0000
+ MRP-20260926-17 | FD-SNA-080  |    20000 |     50 |   12344 |       0 |     0 |        0 |      7706 |                7706 | 0.0000
+ MRP-20260926-17 | RM-SNA-CHE  |   62.881 |      0 |     150 |       0 |     0 |        0 |   -87.119 |             -87.119 | 0.0000
+ MRP-20260926-17 | RM-SNA-HAI  |  23.8115 |      0 |      60 |       0 |     0 |        0 |  -36.1885 | -36.188500000000005 | 0.0000
+ MRP-20260926-17 | RM-SNA-MIFU | 487.3274 |      0 |     900 |       0 |     0 |        0 | -412.6726 |           -412.6726 | 0.0000
+ MRP-20260926-17 | RM-SNA-PKG  |  7783.06 |      0 |   15000 |       0 |     0 |        0 |  -7216.94 |            -7216.94 | 0.0000
+(7 rows)
+
+手算样例（FD-SNA-080 层0）：20000(毛=SO-2 米果，draft SO-3 的 150 未混入) + 50(安全) − 12344(现有) − 0(在途) − 0(在制) + 0(预留) = 7706 ✓
+
+── 2. 日结快照留存（run 计数，可追溯）──
+
+── 3. 建议与转单链（driver 链回 SO；converted 防重复）──
+ id | plan_type |     sku     | qty  | driver_so_id |  status   | converted_doc_type | converted_doc_id | converted_doc_code | converted_by
+----+-----------+-------------+------+--------------+-----------+--------------------+------------------+--------------------+--------------
+  4 | MO        | FD-SNA-080  | 7706 | SO-2026-0002 | converted | mfg_orders         |                7 | MO-2026-0007       | 计划员甲
+  3 | MO        | FD-SNA-080  | 7706 | SO-2026-0002 | converted | mfg_orders         |                6 | MO-2026-0006       | 计划员甲
+  2 | MO        | FD-SNA-080  | 7706 | SO-2026-0002 | converted | mfg_orders         |                5 | MO-2026-0005       | 计划员甲
+  1 | PR        | FD-BEV-1000 |   67 | SO-2026-0001 | open      |                    |                  |                    |
+(4 rows)
+
+     code     | doc_status | driver_suggestion_id | driver_so_code
+--------------+------------+----------------------+----------------
+ MO-2026-0004 | approved   |                    2 | SO-2026-0002
+ MO-2026-0005 | approved   |                    2 | SO-2026-0002
+ MO-2026-0006 | approved   |                    3 | SO-2026-0002
+ MO-2026-0007 | approved   |                    4 | SO-2026-0002
+(4 rows)
+
+
+── 4. SO 状态机 + 交付进度 + 预留链 ──
+     code     | doc_status | shipping_status | amount | approved_by
+--------------+------------+-----------------+--------+-------------
+ SO-2026-0001 | approved   | shipped         |   2420 | admin
+ SO-2026-0002 | approved   | none            | 200000 | admin
+ SO-2026-0003 | draft      | none            |   1470 |
+(3 rows)
+
+ order_id |     sku     |  qty  | qty_shipped
+----------+-------------+-------+-------------
+        1 | FD-BEV-1000 |    60 |          60
+        1 | FD-SOY-500  |    50 |          50
+        2 | FD-SNA-080  | 20000 |           0
+        2 | FD-FRZ-450  |   300 |           0
+        3 | FD-SNA-080  |   150 |           0
+(5 rows)
+
+ ref_type |    ref_id    |  status  | qty
+----------+--------------+----------+-----
+ SO       | SO-2026-0001 | consumed |  60
+ SO       | SO-2026-0001 | consumed |  50
+ SO       | SO-2026-0001 | released |   7
+ SO       | SO-2026-0001 | consumed |  50
+ SO       | SO-2026-0001 | released |   7
+ SO       | SO-2026-0001 | consumed |  60
+(6 rows)

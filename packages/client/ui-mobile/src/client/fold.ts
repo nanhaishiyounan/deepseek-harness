@@ -15,11 +15,17 @@ import {
   answerTextOf,
   splitMessage,
   type MessageSegment,
+  type ApprovalConfirmPayload,
+  type ApprovalPendingPayload,
+  type ApprovalResultPayload,
   type AskChoicePayload,
   type AskFieldPayload,
   type FormConfirmPayload,
   type FormDraftPayload,
   type RejectFlowPayload,
+  type PlanConfirmPayload,
+  type PlanResultPayload,
+  type PlanSuggestPayload,
   type ReportPayload,
   type SubmitReceiptPayload,
 } from './protocol.ts'
@@ -81,18 +87,26 @@ export interface ChatFieldAsk {
   answered?: { selected?: string }
 }
 
-/** One user action message (确认写入 / 驳回), fenced in v3 or prefix-parsed in v2. */
+/** One user action message (确认写入 / 驳回 / 同意·驳回审批), fenced in v3 or prefix-parsed in v2. */
 export interface ChatAction {
   readonly kind: 'action'
   readonly seq: number
   readonly time: number
   readonly action: 'confirm' | 'reject'
-  /** The human-readable line ("确认写入" / "驳回" / the v2 protocol text). */
+  /** The human-readable line ("确认写入" / "驳回" / "同意" / the v2 protocol text). */
   readonly text: string
   /** The v3 fence payload when the action rode one. */
-  readonly payload?: FormConfirmPayload | RejectFlowPayload
+  readonly payload?: FormConfirmPayload | RejectFlowPayload | ApprovalConfirmPayload | PlanConfirmPayload
   /** The v2 confirm-push parse when the action rode the legacy prefix. */
   readonly legacy?: ConfirmPush
+}
+
+/** One approval card: an open todo (pending, actionable) or the post-act outcome (read-only). */
+export interface ChatApproval {
+  readonly kind: 'approval'
+  readonly seq: number
+  readonly time: number
+  readonly payload: ApprovalPendingPayload | ApprovalResultPayload
 }
 
 /** One submit_receipt fence: the landing-row receipt card. */
@@ -120,9 +134,18 @@ export interface ChatDegradedNotice {
   readonly text: string
 }
 
+/** One MRP plan card: a pending suggestion or its post-confirm outcome (B7). */
+export interface ChatPlanCard {
+  readonly kind: 'plan'
+  readonly seq: number
+  readonly time: number
+  readonly payload: PlanSuggestPayload | PlanResultPayload
+}
+
 /** The chat surface's item union in seq order. */
 export type ChatItem =
-  | ChatTextMessage | ChatToolRow | ChatTaskCard | ChatAsk | ChatFieldAsk | ChatAction | ChatReceipt | ChatReport | ChatDegradedNotice
+  | ChatTextMessage | ChatToolRow | ChatTaskCard | ChatAsk | ChatFieldAsk
+  | ChatAction | ChatReceipt | ChatReport | ChatApproval | ChatPlanCard | ChatDegradedNotice
 
 /** A KG walk the assistant performed, kept for the evidence cards. */
 export type KgEvidenceQuery =
@@ -164,6 +187,27 @@ function protocolToolLabel(name: string): string | undefined {
   return PROTOCOL_TOOL_LABELS[name]
 }
 
+/**
+ * The KPI-lookup projection (B9): an nb_list aimed at kpi_snapshots renders
+ * as the 看板指标 status line — the dashboard's mobile cockpit entry reads
+ * the same materialized rows the admin charts draw from.
+ * @param name - the tool-call name.
+ * @param rawArguments - the call's raw argument string.
+ * @returns the override label, or undefined when the call is not a KPI lookup.
+ */
+function kpiLookupLabel(name: string, rawArguments: unknown): string | undefined {
+  if (name !== 'nb_list' || typeof rawArguments !== 'string') return undefined
+  try {
+    const args = JSON.parse(rawArguments) as { collection?: unknown }
+    return args.collection === 'kpi_snapshots' ? '查询看板指标' : undefined
+  } catch {
+    // Swallows only JSON.parse's SyntaxError on a non-JSON argument string:
+    // the string came from the untyped tool-call wire, so malformed JSON is
+    // an expected shape and the only correct reading is "not a KPI lookup".
+    return undefined
+  }
+}
+
 /** Chinese label for a tool name (the fold's presentation vocabulary). */
 const TOOL_LABELS: Readonly<Record<string, string>> = {
   nb_collections: '读取业务表结构',
@@ -171,6 +215,7 @@ const TOOL_LABELS: Readonly<Record<string, string>> = {
   nb_get: '读取业务行',
   nb_create: '写入业务记录',
   nb_update: '更新业务记录',
+  nb_approve: '审批操作',
   kb_search: '检索知识库',
   lakehouse_tables: '数仓表清单',
   lakehouse_query: '数仓查询',
@@ -275,9 +320,19 @@ function foldAssistantText(text: string, seq: number, time: number, items: ChatI
         break
       case 'form_confirm':
       case 'reject_flow':
+      case 'approval_confirm':
+      case 'plan_confirm':
         // User-action fences never render from an assistant message; a model
         // emitting one is violating the contract, and dropping the payload
         // keeps the replay honest.
+        break
+      case 'approval_pending':
+      case 'approval_result':
+        items.push({ kind: 'approval', seq: itemSeq, time, payload })
+        break
+      case 'plan_suggest':
+      case 'plan_result':
+        items.push({ kind: 'plan', seq: itemSeq, time, payload })
         break
     }
   })
@@ -293,10 +348,10 @@ function actionLineOf(action: 'confirm' | 'reject', segments: readonly MessageSe
 /** Fold one user message: fenced/prefixed actions collapse, the rest bubbles. */
 function foldUserText(text: string, seq: number, time: number, items: ChatItem[]): void {
   const { segments } = splitMessage(text)
-  const fence = segments.find((segment): segment is { kind: 'dsh'; payload: FormConfirmPayload | RejectFlowPayload } =>
-    segment.kind === 'dsh' && (segment.payload.type === 'form_confirm' || segment.payload.type === 'reject_flow'))
+  const fence = segments.find((segment): segment is { kind: 'dsh'; payload: FormConfirmPayload | RejectFlowPayload | ApprovalConfirmPayload | PlanConfirmPayload } =>
+    segment.kind === 'dsh' && (segment.payload.type === 'form_confirm' || segment.payload.type === 'reject_flow' || segment.payload.type === 'approval_confirm' || segment.payload.type === 'plan_confirm'))
   if (fence !== undefined) {
-    const action = fence.payload.type === 'form_confirm' ? 'confirm' : 'reject'
+    const action = fence.payload.type === 'reject_flow' || fence.payload.type === 'approval_confirm' && fence.payload.action === 'reject' || fence.payload.type === 'plan_confirm' && fence.payload.action === 'dismiss' ? 'reject' : 'confirm'
     items.push({
       kind: 'action',
       seq,
@@ -399,12 +454,13 @@ export function foldHistory(events: readonly FoldEvent[]): FoldedTurn {
         const data = event.data as { callId?: unknown; name?: unknown; arguments?: unknown }
         const name = typeof data.name === 'string' ? data.name : 'tool'
         const protocolLabel = protocolToolLabel(name)
+        const kpiLabel = kpiLookupLabel(name, data.arguments)
         const row: ChatToolRow = {
           kind: 'tool',
           seq: event.seq,
           time: event.time,
           name,
-          label: protocolLabel ?? TOOL_LABELS[name] ?? name,
+          label: protocolLabel ?? kpiLabel ?? TOOL_LABELS[name] ?? name,
           state: 'running',
           ...(protocolLabel !== undefined ? { protocol: true } : {}),
         }

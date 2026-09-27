@@ -1,0 +1,39 @@
+# Agent Note: W2-B1 AQL full settlement — the GB/T 2828.1—2012 master grid, arrow resolution, and the four-state switch machine
+
+Status: implemented
+
+English | [中文](2026-09-27-w2b1-aql-full-table.zh.md)
+
+## Problem
+
+B8 shipped AQL sampling with only three measured lot bands (151-280 / 281-500 / 501-1200 × rungs 1.0/2.5/4.0) and a two-state switch: everything else fail-louded at lookup, and "tightened" was approximated by reading the next-stricter rung's **normal** row. W2-B1 ([01-b1-aql-full-table.md](../../../../plans/2026-09-27-w2-evolution/01-b1-aql-full-table.md)) replaces this with the full GB/T 2828.1—2012 level-II system: 15 lot bands × (normal 5 rungs + tightened 2 + reduced 2) = 135 seeded rows, arrow-rule resolution against the raw master grid, and a four-state rigor machine (normal / tightened / reduced / suspended) with the transfer-score mechanism (clause 9.3.3.2) and the cumulative-5-rejection stop (clause 9.4).
+
+## Decision
+
+**Store the raw grid + a pure `resolvePlan`, never pre-digested rows.** `PLAN_GRIDS` in [nocobase-w8-quality.mts](../../../../examples/kb-agent/scripts/nocobase-w8-quality.mts) holds every (rigor × AQL × code) cell as either a numeric `{ac, re}` cell or an arrow cell (`+1` down / `-1` up along `CODE_SEQ`); `resolvePlan` slides to the first numeric cell and takes **the new code's n** with the target cell's Ac/Re (clause 10.3). Seeded rows are its evaluated output over `LOT_BANDS`. `--selftest` pins the five research-report cross-check cases (200/150/2000/90/600000) plus the 135-row distribution; a one-off 135-cell matrix check (expectations transcribed from the research reports) also passed 0-failure before seeding.
+
+**Dual-source adjudication on the two disputed regions.** The two W2 research reports agree everywhere except the normal-table 1.5 column (rows 51-90 through 35001-150000) and 0.65 × 281-500; the primary report's 1.5 column has no 0/1 origin cell and places 1.5's 1/2 rung *above* 2.5's — mathematically impossible for any legal grid. The cross-validation report's cell-by-cell measured matrix (plus its arrow-ownership table, 100% closed loop) satisfies all three structural laws (every column's numeric band starts at 0/1; smaller AQL ⇒ same-rung cells sit lower; n×AQL% ≈ Ac expectation), so those cells follow it. The primary report's reduced 2.5 × 151-280 gap is filled with the cross-report's measured 13,1,2. Record stands until a text-layer正版 PDF allows the 5-10-cell re-check the PLAN risk table already mandates.
+
+**Tightened now reads the true tightened table.** The B8 "rung-down" approximation is deleted; lookup key widened to the (lot_band, aql, rigor) triple. The luck of the draw: 151-280 × 2.5 tightened is genuinely (G,32,1,2) — identical Ac/Re to the old approximation — so the W-round demo-chain assertions survive unchanged; 151-280 × 1.0 normal, however, moves from the old measured (32,1,2) to the arrow-resolved (H,50,1,2). Historical verdict rows keep their cached columns (single-shot; a switch never rewrites past verdicts).
+
+**Four states per the 2012 text, not the folklore.** Stop = cumulative 5 rejections *while on tightened* (9.4; "10 consecutive batches" is GB 2828-87 heritage). Normal→reduced requires transfer score ≥30 (the limit-number table does not exist in this edition). Transfer score: accepted lots on the Ac=0/1 rungs score +2, rejected lots reset to 0; Ac≥2 rungs score +3 only if the lot would still be accepted under the next-stricter rung's *normal* plan (chain 4.0→2.5→1.5→1.0→0.65). 0.65 is the strictest seeded rung — its +3 leg is unreachable and conservatively degrades to +2 (open point; recorded here). Leaving normal zeroes the score. The h4 enum (`relaxed/normal/tightened/suspended`) stays authoritative on `srm_suppliers.iqc_level`; the master-table vocabulary (`reduced`) maps at the engine boundary.
+
+**Resubmission lots and the tightened cumulative counter.** `--resubmission` marks the verdict row (`qm_inspections.resubmission`) and skips every counter (9.3.1: resubmitted lots never enter the switching statistics — proven in the acceptance play: a *rejected* resubmission lot leaves score=30 intact). The "zero on entering tightened" semantics is implemented by walking the supplier's closed verdicts newest-first and stopping at the first row whose `rigor` snapshot (a new additive column) is not tightened — a normal-rigor verdict breaks the chain, which is exactly "reset when back to normal".
+
+**Idempotent reseed destroys before creating.** The old 151-280 × 1.0 row contradicts the true table, so `seedAqlPlans` destroys all rows then creates the 135. Additive columns for pre-existing collections must ride the probe-based `ADDITIVE_COLUMNS` channel: `COLLECTIONS[].fields` only applies at first collection create — the first deploy pass silently left `qm_aql_plans.rigor` null because the create payload dropped the unknown field (caught by the psql distribution assertion, fixed by adding the probe entry). Kept v2 pages don't re-render from `PAGES`, so `appendColumnIfMissing` appends the rigor table column to the live AQL and inspection pages (idempotent by dataIndex).
+
+## Alternatives considered
+
+- **Chinese re-transcription sources for the master grid** — refused (PLAN D1): both W2 research reports proved them wholesale stale-table substitutions, and the primary report's own 1.5-column layout violates the three structural laws; seeding from it would have baked impossible cells into `qm_aql_plans`.
+- **Pre-digested 135 result rows instead of the raw grid + `resolvePlan`** — refused: arrow cells carry clause-10.3 semantics (slide, then take the new code's n with the target cell's Ac/Re); a result-only table cannot re-derive a moved n and locks future re-reads of the standard text out.
+- **The GB 2828-87 stop rule (10 consecutive rejections)** — refused: clause 9.4 of the 2012 edition replaces it with cumulative-5-rejections *while on tightened*; keeping the folklore would stop suppliers the current standard keeps running.
+- **The limit-number table for normal→reduced** — refused: the 2012 edition deleted it; the switch rides the transfer score (≥30) alone, so no bound table was seeded.
+- **Keeping the B8 rung-down approximation as the tightened fallback** — deleted rather than kept: with the true tightened table seeded, a fallback leg is unreachable dead code and a second truth source for the same (band, rung) cell.
+
+## Consequences
+
+`qm_aql_plans` is now the complete 15-band × three-rigor lookup (135 rows; setup verify asserts 135/75/30/30 plus spot cells); `inspectInspection` refuses suspended suppliers at the entrance, converts n≥N to a fail-loud 100%-inspection instruction, and fail-louds unseeded (rigor × rung) combinations instead of guessing. `--iqc-resume` / `--iqc-relax` carry the authority-approval legs as explicit CLI actions (relax gates on score≥30). SUP-008/SUP-009 are the dedicated four-state demo suppliers (their states are reproducible via `research/2026-09-27-w2-evolution/w2-b1-acceptance.mts --reset`). The b9 s3 replay limitation (single-shot refusal without a skip branch — s6 has one) is pre-existing W-round behavior, not a regression; zero-regression there is covered by row-value comparison (QI-B9F-0001/OQC1 both read J/80/5/6, matching the reseeded table).
+
+## Acceptance evidence
+
+`research/2026-09-27-w2-evolution/`: `w2-b1-aql-cases.txt` (psql seed distribution, spot cells, verdict cases, supplier terminal states, B8 history), `w2-b1-selftest.txt` (five arrow cases + 135-cell matrix check), `w2-b1-acceptance.log` (+ `.mts`, the replayable driver), `w2-b1-gates.log` (s6/s8, demo-chain replay, ledger, setup verify), and three PNGs (admin AQL 135-row page with the rigor column, inspections page with verdict-rigor snapshots, mobile AI round answering 1201-3200 × 2.5 in both rigor bands from live data).

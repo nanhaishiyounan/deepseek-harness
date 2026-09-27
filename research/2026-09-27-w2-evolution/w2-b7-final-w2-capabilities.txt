@@ -1,0 +1,25 @@
+== W2 六大新能力链上实证（2026-09-27 收官）==
+-- [B1 AQL 全表] qm_aql_plans 行数（15 段 × 3 严格度）
+135 rows, rigor=normal,reduced,tightened
+-- [B2 MPS] mps_plans 行数与状态
+1 plans, statuses=void
+-- [B3 月度台账] wms_monthly_balances 覆盖月
+2026-08,2026-09 × 19 rows
+-- [B4 KPI 历史] kpi_snapshots 覆盖（天数 × 码数，含 ap_balance/ar_balance 折线源）
+91 days × 25 codes
+-- [B5 配置化] wfl_flow_configs.extras 已配置的流
+hub_po_purchase_orders → {"approved_by_field":"approved_by","approved_at_field":"approved_at"}
+srm_suppliers → {"approved_at_field":"admitted_at"}
+pur_requests → {"approved_by_field":"approved_by","approved_at_field":"approved_at"}
+pur_rfqs → {"approved_by_field":"approved_by","approved_at_field":"approved_at"}
+pur_payments → {"approved_by_field":"approved_by","approved_at_field":"approved_at","am
+mfg_orders → {"approved_by_field":"approved_by","approved_at_field":"approved_at","am
+so_orders → {"approved_by_field":"approved_by","approved_at_field":"approved_at","am
+qm_nc_dispositions → {"approved_by_field":"approved_by","approved_at_field":"approved_at"}
+mps_plans → {"approved_by_field":"approved_by","approved_at_field":"approved_at"}
+pur_orders → {"approved_by_field":"approved_by","approved_at_field":"approved_at","am
+-- [B6 执行策略] mfg_orders.kit_policy 分布
+full_lock → 18
+partial_allowed → 2
+-- [B7] ap_balance 当日快照 + 定时器日志链 + 对账页（见 w2-b7-nightly-positive.txt / w2-b7-arap-reconcile.txt / w2-b7-arap-page.png）
+ap_balance 2026-09-27 = 241000

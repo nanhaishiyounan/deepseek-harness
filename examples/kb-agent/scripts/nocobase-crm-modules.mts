@@ -362,7 +362,7 @@ const BLOCKS: ReadonlyArray<{ page: string; collection: string; spec: BlockSpec 
   { page: '联系人', collection: 'crm_contacts', spec: { kind: 'table', columns: ['full_name', 'customer', 'job_title', 'phone', 'email'] } },
   { page: '产品与服务', collection: 'crm_products', spec: { kind: 'table', columns: ['name', 'category', 'pricing_mode', 'base_price', 'unit'] } },
   { page: '订单', collection: 'crm_deals', spec: { kind: 'table', columns: ['name', 'customer', 'deadline', 'amount', 'status', 'owner'] } },
-  { page: '报价单', collection: 'crm_quotes', spec: { kind: 'table', columns: ['quote_no', 'valid_until', 'customer', 'deal', 'total_amount', 'status'] } },
+  { page: '报价单', collection: 'crm_quotes', spec: { kind: 'table', columns: ['quote_no', 'valid_until', 'customer', 'deal', 'total_amount', 'version', 'is_current', 'status'] } },
   { page: '回款', collection: 'crm_payments', spec: { kind: 'table', columns: ['customer', 'deal', 'amount', 'method', 'paid_at', 'status'] } },
   { page: '发票', collection: 'crm_invoices', spec: { kind: 'table', columns: ['invoice_no', 'customer', 'deal', 'amount', 'issued_at', 'status'] } },
   // 'type' collides with the JSON-Schema keyword when used as a column node
@@ -703,8 +703,60 @@ async function ensurePortalFields(token: string): Promise<void> {
   console.log(`nocobase-crm: portal alignment fields ${added.length > 0 ? added.join(', ') : 'all present (kept)'}`)
 }
 
+
+// ─── B7: the quote revision (报价版本) ───
+
+/**
+ * Revise one quote: copy the row as version+1, back-fill root_quote_id (the
+ * original root on descendants, itself on the first revision), flip
+ * is_current (旧 false 新 true), and stamp the revision note. The fields
+ * exist since the portal alignment (root_quote_id / version / is_current);
+ * this is the logic that was missing.
+ * @param token - the root API token.
+ * @param quoteId - the crm_quotes row id to revise from.
+ * @param note - the revision remark.
+ * @returns the new version row's id and version.
+ */
+export async function reviseQuote(token: string, quoteId: number, note: string): Promise<{ id: number, version: number }> {
+  const rows = await dataOf(token, 'GET', `/api/crm_quotes:list?pageSize=500`) as Array<Record<string, any>> | null ?? []
+  const quote = rows.find(row => Number(row.id) === quoteId)
+  if (quote === undefined) throw new Error(`报价 #${String(quoteId)} 不存在（crm_quotes）`)
+  if (quote.is_current !== true) {
+    throw new Error(`报价 #${String(quoteId)} 不是当前版本（is_current=false）——只能从当前版本修订`)
+  }
+  const rootId = quote.root_quote_id === null || quote.root_quote_id === undefined ? Number(quote.id) : Number(quote.root_quote_id)
+  const version = Number(quote.version ?? 1) + 1
+  const created = await dataOf(token, 'POST', '/api/crm_quotes:create', {
+    quote_no: quote.quote_no ?? quote.quote_number ?? null,
+    valid_until: quote.valid_until ?? null,
+    total_amount: quote.total_amount ?? quote.total ?? null,
+    status: quote.status ?? null,
+    pricing_mode: quote.pricing_mode ?? null,
+    revision_note: note,
+    version, root_quote_id: rootId, is_current: true,
+    ...(quote.customer_id === null || quote.customer_id === undefined ? {} : { customer: { id: Number(quote.customer_id) } }),
+    ...(quote.deal_id === null || quote.deal_id === undefined ? {} : { deal: { id: Number(quote.deal_id) } }),
+  }) as Record<string, any>
+  await dataOf(token, 'POST', `/api/crm_quotes:update?filterByTk=${quote.id}`, { is_current: false })
+  console.log(`nocobase-crm: quote #${String(quoteId)} revised → #${String(created.id)} (version ${String(version)}, root #${String(rootId)}；旧版 is_current=false)`)
+  return { id: Number(created.id), version }
+}
+
 async function main(): Promise<void> {
+  const args = process.argv.slice(2)
   const token = await signIn()
+  const reviseIndex = args.indexOf('--revise-quote')
+  if (reviseIndex >= 0) {
+    await reviseQuote(token, Number(args[reviseIndex + 1]), args.slice(reviseIndex + 2).join(' ') || 'B7 修订（销售→MRP 链演示）')
+    return
+  }
+  if (args.includes('--revise-quote-current')) {
+    const rows = await dataOf(token, 'GET', '/api/crm_quotes:list?pageSize=500') as Array<Record<string, any>> | null ?? []
+    const current = rows.find(row => row.is_current === true) ?? rows[0]
+    if (current === undefined) throw new Error('crm_quotes 无可修订行（先跑主流程种子）')
+    await reviseQuote(token, Number(current.id), 'B7 修订（销售→MRP 链演示）')
+    return
+  }
   await ensureCollections(token)
   const fixtures = JSON.parse(readFileSync(fixturePath, 'utf8'))
   await seed(token, fixtures)

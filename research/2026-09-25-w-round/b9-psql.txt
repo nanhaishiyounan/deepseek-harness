@@ -1,0 +1,42 @@
+# B9 · 9 步端到端剧本 psql 断言汇总（2026-09-26，全部只读实查）
+
+## ① 供应商准入（mobile 登记 SUP-2026-1300 → 准入 qualified）
+srm_suppliers: SUP-2026-1300 禾创源食品原料有限公司 → qualified（admitted_at=2026-09-26，wfl 留痕 4 行）
+
+## ② 采购链（PR → RFQ → 3 报价 → 比价 → PO approved）
+PR=approved → RFQ=RFQ-B9F-0001/approved → 报价×3 → PO=PO-B9F-0001/approved（珠海鲜丰水产科技有限公司，¥880）
+
+## ③ 收货质量（待检 → AQL J/80 d=2≤Ac5 passed → 放行 → 批次四日期）
+收货 RCV-B9F-0001 closed/passed；IQC QI-B9F-0001 n=80 Ac=5 Re=6 d=2 → passed；批次 RM-SNA-20260926-01 qualified（2026-09-26/2027-07-28/2027-09-26/2027-08-27）
+
+## ④ 销售链（SO 审批 approved + 生效即预留）
+SO=approved/shipped（approved_by=admin）；预留行=1
+
+## ⑤ MRP 日结 + mobile 计划卡确认转单（建议→MO→SO 双向链）
+建议 #6 converted → MO-2026-0009（驱动 SO-B9F-0001）
+
+## ⑥ 生产链（审批→release→排产 apply→齐套→领料→报工→完工→OQC→放行）
+MO-2026-0009: completed，齐套=assigned，三量 23706→0→23706，actual_cost=274833.93；成品批次 MFG-20260926-04 oqc=passed；工序=1:done, 2:done, 3:done
+
+## ⑦ 结算（SO 发货 shipped_at 回写 + 发票三方匹配 confirmed + 付款 approved）
+SO shipped_at=2026-09-26
+INV=INV-B9F-0001/confirmed（差 三方匹配：开票 1000/1000（ok）；金额 ¥880 vs 订单 ¥880，差 ¥0.00（容差 ¥0.05，ok）；人工确认放行（2026-09-26））→ PAY=PAY-B9F-0001/approved
+
+## ⑧ KPI 快照（90 天回算连续 + 当日 23 行；三项对账见 b9-kpi-reconcile.txt）
+kpi_snapshots: 1982 行 / 90 天 / 22 个编码（2026-06-29..2026-09-26，valued 824）
+
+## ⑨ 审计追溯（wfl 七单家族留痕 + movements 五类事件 + 批次三级追溯，trace 全文见 b9-trace.txt）
+wfl 留痕：hub_po_purchase_orders、mfg_orders、pur_orders、pur_payments、pur_requests、pur_rfqs、qm_nc_dispositions、so_orders、srm_suppliers（全库 78 行，B9 七单家族 16 行）
+批次三级追溯：成品 MFG-20260926-04 → 组件 RM-260920-M1 → 供应商 山东鲁丰食品配料有限公司
+库存账实（stock==Σmovements 由 h5 --assert-ledger 引擎断言，B9 链 7 条 movement 五类事件齐）: 127 条 movement（全库）
+
+## MRP 快照六项复算（run MRP-20260926-42，net = gross+safety−on_hand−inbound−wip+reserved）
+FD-FRZ-450: 300+60−210−0−16000+0 = -15850 ✓
+FD-SNA-080: 28000+50−12344−0−0+8000 = 23706 ✓
+RM-SNA-CHE: 193.441+0−150−0−0+0 = 43.441 ✓
+RM-SNA-HAI: 73.2515+0−60−0−0+0 = 13.2515 ✓
+RM-SNA-MIFU: 1499.1674+0−900−0−0+0 = 599.1674 ✓
+RM-SNA-PKG: 23943.06+0−16000−0−0+0 = 7943.06 ✓
+
+## 库存总账（stock == Σmovements，引擎 --assert-ledger）
+nocobase-h5: ledger balanced — stock == Σmovements per (product, lot)，31 组，127 条流水

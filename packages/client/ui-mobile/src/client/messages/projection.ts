@@ -57,6 +57,11 @@ export function lastProjectionOf(items: readonly ChatItem[]): string | undefined
     if (item.kind === 'report') {
       return `报告：${item.payload.title}`
     }
+    if (item.kind === 'approval') {
+      return item.payload.type === 'approval_pending'
+        ? `待审批：${item.payload.doc.title}`
+        : `审批${item.payload.state === 'approved' ? '通过' : '已驳回'}：${item.payload.doc.title}`
+    }
     if (item.kind === 'task-card') {
       const label = item.payload?.form.label ?? item.draft.title
       return item.payload !== undefined ? `正在确认${label}草稿` : `${label}草稿待确认`
@@ -68,6 +73,11 @@ export function lastProjectionOf(items: readonly ChatItem[]): string | undefined
     }
     if (item.kind === 'action') {
       return item.action === 'confirm' ? '确认写入，等待落库' : '已驳回'
+    }
+    if (item.kind === 'plan') {
+      return item.payload.type === 'plan_suggest'
+        ? `计划建议：${clip(item.payload.product, 12)}`
+        : item.payload.outcome === 'converted' ? `已转单：${clip(item.payload.product, 12)}` : `已忽略：${clip(item.payload.product, 12)}`
     }
     // The remaining kind is text.
     return item.role === 'user' ? `我：${clip(item.text, 20)}` : clip(item.text, CLIP)

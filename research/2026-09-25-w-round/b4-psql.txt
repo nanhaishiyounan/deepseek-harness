@@ -1,0 +1,60 @@
+── 1) 移库：TRF-B4-DEMO-1 的 ±MOVE 流水对（源 −60 / 目标 +60，净 0 不破批次恒等式）
+    doc_no     | move_type |  from_bin  |   to_bin   | qty
+---------------+-----------+------------+------------+-----
+ TRF-B4-DEMO-1 | MOVE      | SH-A-01-02 |            | -60
+ TRF-B4-DEMO-1 | MOVE      |            | SH-A-01-05 |  60
+(2 rows)
+
+── 1b) 移库守卫负例单（待检 hold 禁移，状态仍 draft 未过账）
+  transfer_no  |  status   | transfer_mode
+---------------+-----------+---------------
+ TRF-B4-DEMO-1 | completed | one_step
+ TRF-B4-DEMO-2 | draft     | one_step
+(2 rows)
+
+── 2) 预留两段式：reserved→released / reserved→consumed + released_at 落值
+     code      | ref_type |    ref_id    |  status  | qty | released_at |    sku
+---------------+----------+--------------+----------+-----+-------------+------------
+ RSV-B4-DEMO-1 | MO       | MO-2026-0001 | released | 100 | 2026-09-26  | FD-SOY-500
+ RSV-B4-DEMO-3 | MO       | MO-2026-0002 | consumed |  40 |             | FD-SOY-500
+(2 rows)
+
+── 3) ROP：补货建议 open 行（FD-BEV-1000 ATP 70 ≤ ROP 120 → 建议 480）
+ id |     sku     | reorder_point | lot_size | on_hand_atp | min | suggest_qty | status | suggested_at
+----+-------------+---------------+----------+-------------+-----+-------------+--------+--------------
+  1 | FD-BEV-1000 |           120 |      240 |          70 | 120 |         480 | open   | 2026-09-26
+(1 row)
+
+── 4) 盘点差异回写：CNT-B4-WF-* 的 COUNT_ADJUST 流水（对手 SH-ADJ）+ 状态 done
+        doc_no        |  move_type   | qty |    to_bin    |   from_bin
+----------------------+--------------+-----+--------------+--------------
+ CNT-20260926-0010001 | COUNT_ADJUST |  -5 | SH-ADJ-01-01 | SH-A-01-01
+ CNT-B4-WF-908301     | COUNT_ADJUST |   3 | GZ-A-01-02   | SH-ADJ-01-01
+ CNT-B4-WF-856231     | COUNT_ADJUST |   3 | GZ-A-01-02   | SH-ADJ-01-01
+(3 rows)
+
+       count_no       | snapshot_qty | counted_qty | difference | status
+----------------------+--------------+-------------+------------+--------
+ CNT-20260926-0010001 |          480 |         475 |         -5 | done
+ CNT-B4-WF-856231     |          410 |         413 |          3 | done
+ CNT-B4-WF-908301     |          410 |         413 |          3 | done
+(3 rows)
+
+── 5) 对账恒等式：per (product, lot) stock Σ == movements Σ（0 行漂移 = 绿）
+ product_id | lot_id | stock_sum | movement_sum | drift
+------------+--------+-----------+--------------+-------
+(0 rows)
+
+── 6) 旁路守卫：admin→wms_stock / wms_movements 显式只读授权（rolesResources）
+ roleName |  collection   | usingActionsConfig |   granted_actions
+----------+---------------+--------------------+----------------------
+ admin    | wms_movements | t                  | view,list,get,export
+ admin    | wms_stock     | t                  | export,view,list,get
+(2 rows)
+
+── 7) 虚拟库位：SH-ADJ（差异对手）/ SH-TR（在途）种子在位
+  zone  |     bin      |          sku_summary
+--------+--------------+--------------------------------
+ SH-ADJ | SH-ADJ-01-01 | 差异调整对手库位（不落库存行）
+ SH-TR  | SH-TR-01-01  | 两步移库在途库位（中转）
+(2 rows)

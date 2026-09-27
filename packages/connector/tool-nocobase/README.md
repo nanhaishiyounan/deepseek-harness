@@ -2,7 +2,7 @@
 
 English | [中文](README.zh.md)
 
-Model-facing NocoBase business tools: `nb_collections` (schema discovery), `nb_list`/`nb_get` (row reads), and `nb_create`/`nb_update` (confirmed-change writes) over the shared [`NocoBaseClient`](../connector-nocobase/README.md).
+Model-facing NocoBase business tools: `nb_collections` (schema discovery), `nb_list`/`nb_get` (row reads), `nb_create`/`nb_update` (confirmed-change writes), and `nb_approve` (the general approval engine driver) over the shared [`NocoBaseClient`](../connector-nocobase/README.md).
 
 ## Tool surface
 
@@ -10,11 +10,14 @@ Model-facing NocoBase business tools: `nb_collections` (schema discovery), `nb_l
 - **`nb_list`** — queries one collection's rows with the restricted filter vocabulary (`{field, op: eq|in|gt|lt, value}` conditions joined by `match: and|or`), sorting (`-` prefix = descending), field projection, and bounded paging (`page_size` ≤ 100).
 - **`nb_get`** — reads one row by collection and id; the pre-change read the confirmation flow mandates.
 - **`nb_create`** — lands one new row; answers the receipt with the server-assigned id and the stored row.
-- **`nb_update`** — reads the row first, changes exactly the named fields, and answers the before→after diff receipt plus the stored row.
+- **`nb_update`** — reads the row first, changes exactly the named fields, and answers the before→after diff receipt plus the stored row. Documents under an active approval flow refuse edits while locked (pending, level-2, approved, void).
+- **`nb_approve`** — drives one document through the approval engine (submit / approve / reject / void; submit on a rejected document resubmits with attempt+1; a supplier-admission flow rides the lifecycle vocabulary potential → reviewing → qualified). The receipt echoes the state transition, the anchor pair, the attempt round, and whether the document became effective. `nb_create` runs the downstream gates first: a doc_status gate refuses a row whose upstream document is not `approved` (the 未生效 refusal), and a lifecycle gate (the supplier AVL rule) refuses a purchase order whose supplier's `lifecycle_status` is outside the configured set (qualified,preferred — the 未准入/不合格供方 refusal).
 
 ## Confirmed-change contract
 
-The in-conversation confirmation lives in the system-prompt guidance, not in tool state: the agent must present the planned change (nb_create's full new row; nb_update's field-by-field before→after diff over an `nb_get`) and only call the write tool after the user's explicit go-ahead. The tools themselves carry no UI confirmation state — the persona drives the preview → go-ahead → receipt flow, and the receipts let the conversation echo exactly what landed.
+The in-conversation confirmation lives in the system-prompt guidance, not in tool state: the agent must present the planned change (nb_create's full new row; nb_update's field-by-field before→after diff over an `nb_get`; nb_approve's document and pending action) and only call the write tool after the user's explicit go-ahead. The tools themselves carry no UI confirmation state — the persona drives the preview → go-ahead → receipt flow, and the receipts let the conversation echo exactly what landed.
+
+The approval rules (the state vocabulary, the doc_status anchors, the transition table with the amount-threshold routing, the gate refusal texts) live in [`src/approval-rules.ts`](src/approval-rules.ts) — the single code source of truth the script engine (`examples/kb-agent/scripts/approval-engine.mts`, the NocoBase workflow callback entry) and this tool both import, so the two entry points cannot drift on rules. Every act appends one `wfl_approval_records` row (who / when / action / comment / attempt — the five audit elements); deployments whose NocoBase has no `wfl_*` collections keep the pre-engine write behavior (the gate and lock probes answer empty on a 404). Since W2-B5 the two-level amount threshold rides the flow config's extras (`amount_threshold`, resolved by `thresholdOf` with `DEFAULT_AMOUNT_THRESHOLD` as the missing-key fallback), and a role's approver_map value may name several users (OR-sign-off, one todo row each).
 
 ## Configuration
 
@@ -26,6 +29,7 @@ The in-conversation confirmation lives in the system-prompt guidance, not in too
     apiKeyEnv: NOCOBASE_API_KEY       # credential reference, defaults to this name
     readTimeoutMs: 10000               # nb_collections/nb_list/nb_get budgets
     writeTimeoutMs: 60000              # nb_create/nb_update budgets (update runs get+write)
+    approvals: true                    # register nb_approve (default true)
 ```
 
 Credentials resolve through the credentials seam first, then the trusted launch environment. Missing credentials register the tools anyway — every call then fails with the structured no-credentials refusal (the suite's documented degraded mode) instead of failing the composition. The tenant is never model input: every tool rejects a `tenant` argument; the service account the client runs under is the permission boundary.

@@ -1,0 +1,10 @@
+approval-engine: pilot flow seeded for hub_po_purchase_orders (approvers {"manager":"admin","gm":"admin"})
+approval-engine: flow hub_po_purchase_orders extras has no amount_threshold; defaulting to 100000
+approval-engine: admission flow seeded for srm_suppliers (approvers {"srm_manager":"admin"})
+approval-engine: flow srm_suppliers extras has no amount_threshold; defaulting to 100000
+approval-engine: doc flow seeded for test_b5_orders (B5阈值配置流; amount routing amount; threshold 200000; approvers {"manager":["admin","quality_lead"],"gm":"admin"})
+approval-engine: flow config for test_b5_orders exists (kept)
+approval-engine: flow config for test_b5_orders exists (1 change(s) repaired, config_note audited)
+approval-engine: doc flow seeded for test_ghost_flow (幽灵审批人流; amount routing off; threshold 100000; approvers {"manager":"ghost","gm":"admin"})
+approval-engine: flow test_ghost_flow extras has no amount_threshold; defaulting to 100000
+approval-engine: selftest OK — 状态机全序列/金额阈值加签/驳回重提/非法转移/卡口/幂等/锁编辑/供应商准入流/准入卡口/B5阈值配置+多审批人 全部通过

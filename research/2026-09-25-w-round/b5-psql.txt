@@ -1,0 +1,93 @@
+══ 1. BOM 版本生效（版本切换不删旧版）══
+   code   | version | is_default | bom_status |                   remark
+----------+---------+------------+------------+--------------------------------------------
+ BOM-0001 |       1 | f          | retired    | 米果 v1（2026 春季配方；已退役，保留审计）
+ BOM-0002 |       2 | t          | active     | 米果 v2（芝士加量 8%；当前默认）
+ BOM-0003 |       1 | t          | active     | 速冻水饺 v1（荠菜猪肉馅）
+(3 rows)
+
+══ 2. BOM 组件/工序行（4 组件 + 3 工序 × 2 active BOM）══
+   code   | qty_per_unit | scrap_pct | uom |     sku
+----------+--------------+-----------+-----+-------------
+ BOM-0002 |        0.008 |         2 | kg  | RM-SNA-CHE
+ BOM-0002 |        0.003 |         3 | kg  | RM-SNA-HAI
+ BOM-0002 |        0.062 |         2 | kg  | RM-SNA-MIFU
+ BOM-0002 |            1 |         1 | 个  | RM-SNA-PKG
+ BOM-0003 |            1 |         1 | 个  | RM-DMP-PKG
+ BOM-0003 |         0.21 |         3 | kg  | RM-DMP-PRK
+ BOM-0003 |         0.18 |         2 | kg  | RM-DMP-SKN
+ BOM-0003 |         0.09 |         4 | kg  | RM-DMP-VEG
+(8 rows)
+
+   code   | seq |   name   |   wc    | setup_min | run_min | batch_size | alt_wc
+----------+-----+----------+---------+-----------+---------+------------+---------
+ BOM-0002 |   1 | 混合搅拌 | WC-ASSY |        60 |       5 |        500 |
+ BOM-0002 |   2 | 烘焙膨化 | WC-ASSY |        90 |       8 |       1000 |
+ BOM-0002 |   3 | 调味包装 | WC-PACK |        45 |       3 |        250 | WC-ASSY
+ BOM-0003 |   1 | 和馅     | WC-ASSY |        80 |       6 |        800 |
+ BOM-0003 |   2 | 成型速冻 | WC-ASSY |       120 |      10 |       1000 |
+ BOM-0003 |   3 | 内包装   | WC-PACK |        45 |       3 |        200 | WC-ASSY
+(6 rows)
+
+══ 3. MO 审批全序列（wfl_approval_records：单轮 + 两级加签）══
+ doc_id |     code     | node_seq | approver | action  |   from_state   |    to_state    | attempt_no |  acted_at
+--------+--------------+----------+----------+---------+----------------+----------------+------------+------------
+      1 | MO-2026-0001 |        1 | 陈立群   | submit  | draft          | pending        |          1 | 2026-09-26
+      1 | MO-2026-0001 |        2 | admin    | approve | pending        | approved       |          1 | 2026-09-26
+      2 | MO-2026-0002 |        1 | 李贺     | submit  | draft          | pending        |          1 | 2026-09-26
+      2 | MO-2026-0002 |        2 | admin    | approve | pending        | pending_level2 |          1 | 2026-09-26
+      2 | MO-2026-0002 |        3 | admin    | approve | pending_level2 | approved       |          1 | 2026-09-26
+(5 rows)
+
+══ 4. approved≠released 两态分离（released_at 回写 + 正交 reservation_state）══
+     code     |  qty  | estimated_cost | doc_status | reservation_state | released_at | planned_start | planned_end | need_date
+--------------+-------+----------------+------------+-------------------+-------------+---------------+-------------+------------
+ MO-2026-0001 | 12000 |          78000 | released   | none              | 2026-09-26  | 2026-09-26    | 2026-09-26  | 2026-10-20
+ MO-2026-0002 | 16000 |         224000 | released   | none              | 2026-09-26  | 2026-09-28    | 2026-09-28  | 2026-10-25
+(2 rows)
+
+══ 5. released 排产结果（同工序同日不跨天 + 产能占用）══
+     code     | seq |   name   |   wc    | planned_date | planned_min | status
+--------------+-----+----------+---------+--------------+-------------+---------
+ MO-2026-0001 |   1 | 混合搅拌 | WC-ASSY | 2026-09-26   |         193 | planned
+ MO-2026-0001 |   2 | 烘焙膨化 | WC-ASSY | 2026-09-26   |         197 | planned
+ MO-2026-0001 |   3 | 调味包装 | WC-PACK | 2026-09-26   |         189 | planned
+ MO-2026-0002 |   1 | 和馅     | WC-ASSY | 2026-09-28   |         213 | planned
+ MO-2026-0002 |   2 | 成型速冻 | WC-ASSY | 2026-09-28   |         298 | planned
+ MO-2026-0002 |   3 | 内包装   | WC-PACK | 2026-09-28   |         285 | planned
+(6 rows)
+
+══ 6. 冲突排队：两 MO 同抢 WC-ASSY 的日桶占用与顺延对比 ══
+ERROR:  column w.working_hours_capacity_min does not exist
+LINE 1: ... o.planned_date, SUM(o.planned_min) AS load_min, (w.working_...
+                                                             ^
+HINT:  Perhaps you meant to reference the column "c.working_hours_capacity_min".
+     code     |                              route
+--------------+-----------------------------------------------------------------
+ MO-2026-0001 | 2026-09-26(WC-ASSY) → 2026-09-26(WC-ASSY) → 2026-09-26(WC-PACK)
+ MO-2026-0002 | 2026-09-28(WC-ASSY) → 2026-09-28(WC-ASSY) → 2026-09-28(WC-PACK)
+(2 rows)
+
+══ 7. 工作中心 + 节假日日历 ══
+  code   |    name    | capacity_parallel | efficiency_pct | working_hours | holiday_calendar_id | status
+---------+------------+-------------------+----------------+---------------+---------------------+--------
+ WC-ASSY | 混合成型线 |                 1 |             90 | 08:00-17:00   | CN-2026             | active
+ WC-PACK | 包装线     |                 1 |            100 | 08:00-17:00   | CN-2026             | active
+(2 rows)
+
+ holiday_rows | first_holiday | last_holiday
+--------------+---------------+--------------
+            9 | 2026-10-01    | 2027-01-01
+(1 row)
+
+══ 8. gate 卡口行（无有效 BOM 不能建 MO）══
+ downstream_collection | upstream_collection | upstream_field | upstream_state_field | required_status
+-----------------------+---------------------+----------------+----------------------+-----------------
+ mfg_orders            | mfg_boms            | bom_id         | bom_status           | active
+(1 row)
+
+══ 9. 审批流配置（金额阈值 estimated_cost）══
+  doc_type  |    title     | state_field | is_active |                                                extras
+------------+--------------+-------------+-----------+-------------------------------------------------------------------------------------------------------
+ mfg_orders | 生产订单审批 | doc_status  | t         | {"approved_by_field":"approved_by","approved_at_field":"approved_at","amount_field":"estimated_cost"}
+(1 row)

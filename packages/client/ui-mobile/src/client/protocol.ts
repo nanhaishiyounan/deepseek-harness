@@ -1,10 +1,11 @@
 /**
  * The v3 structured message protocol: the `dsh` fenced payloads that ride
  * assistant messages (ask_choice / ask_field / form_draft / submit_receipt /
- * report) and user action messages (form_confirm / reject_flow). This module
- * owns the wire shapes' validation and the narrative/fence splitting every
- * fold consumer rides; an invalid or unknown fence degrades to ordinary text
- * instead of breaking the chat flow. No React imports.
+ * report / approval_pending / approval_result) and user action messages
+ * (form_confirm / reject_flow / approval_confirm). This module owns the wire
+ * shapes' validation and the narrative/fence splitting every fold consumer
+ * rides; an invalid or unknown fence degrades to ordinary text instead of
+ * breaking the chat flow. No React imports.
  */
 
 import { stripJsonComments } from './form-draft.ts'
@@ -157,6 +158,50 @@ export type ReportAction =
   | { readonly kind: 'send'; readonly label: string; readonly text: string }
   | { readonly kind: 'link'; readonly label: string; readonly url: string }
 
+/** The approval document reference every approval payload shares. */
+export interface ApprovalDocRef {
+  readonly collection: string
+  readonly label: string
+  readonly docId: string
+  readonly title: string
+}
+
+/** The approval_pending payload: one open approval todo rendered as the approval card. */
+export interface ApprovalPendingPayload {
+  readonly v: typeof DSH_PROTOCOL_VERSION
+  readonly type: 'approval_pending'
+  readonly id: string
+  readonly doc: ApprovalDocRef
+  readonly applicant?: string
+  readonly node?: string
+  readonly attempt?: string
+  readonly summary: ReadonlyArray<{ label: string; value: string; kind: ReceiptSummaryKind }>
+}
+
+/** The approval_confirm payload: the user's 同意/驳回 action message. */
+export interface ApprovalConfirmPayload {
+  readonly v: typeof DSH_PROTOCOL_VERSION
+  readonly type: 'approval_confirm'
+  readonly approvalId: string
+  readonly doc: { collection: string; label: string; docId: string }
+  readonly action: 'approve' | 'reject'
+  readonly comment?: string
+}
+
+/** The approval_result payload: the post-act outcome card (state read back from the real row). */
+export interface ApprovalResultPayload {
+  readonly v: typeof DSH_PROTOCOL_VERSION
+  readonly type: 'approval_result'
+  readonly approvalId: string
+  readonly doc: ApprovalDocRef
+  readonly action: 'approve' | 'reject'
+  /** The landed state — the six doc_status states or the four supplier-admission states (rejected is shared). */
+  readonly state: 'draft' | 'pending' | 'pending_level2' | 'approved' | 'rejected' | 'void' | 'potential' | 'reviewing' | 'qualified'
+  readonly by: string
+  readonly comment?: string
+  readonly at?: string
+}
+
 /** The report payload: the structured report card (metrics/rows/table/actions). */
 export interface ReportPayload {
   readonly v: typeof DSH_PROTOCOL_VERSION
@@ -174,6 +219,46 @@ export interface ReportPayload {
   readonly actions?: ReadonlyArray<ReportAction>
 }
 
+/** The plan_suggest payload: one open MRP suggestion rendered as the plan card (ERPNext's 计划单人工确认). */
+export interface PlanSuggestPayload {
+  readonly v: typeof DSH_PROTOCOL_VERSION
+  readonly type: 'plan_suggest'
+  readonly id: string
+  /** The mrp_suggestions row id the confirm action carries back. */
+  readonly suggestionId: string
+  readonly planType: 'MO' | 'PR'
+  readonly product: string
+  readonly qty: string
+  readonly suggestDate?: string
+  readonly driverSo?: string
+  readonly needDate?: string
+}
+
+/** The plan_result payload: the post-confirm outcome card (converted doc back-reference or the dismissal). */
+export interface PlanResultPayload {
+  readonly v: typeof DSH_PROTOCOL_VERSION
+  readonly type: 'plan_result'
+  readonly planId: string
+  readonly suggestionId: string
+  readonly planType: 'MO' | 'PR'
+  readonly product: string
+  readonly outcome: 'converted' | 'dismissed'
+  readonly docCode?: string
+  readonly state?: string
+  readonly by?: string
+}
+
+/** The plan_confirm payload: the user's 确认转单/忽略 action message. */
+export interface PlanConfirmPayload {
+  readonly v: typeof DSH_PROTOCOL_VERSION
+  readonly type: 'plan_confirm'
+  readonly planId: string
+  readonly suggestionId: string
+  readonly action: 'confirm' | 'dismiss'
+  readonly planType: 'MO' | 'PR'
+  readonly product: string
+}
+
 /** Every wire payload a `dsh` fence can carry. */
 export type DshPayload =
   | AskChoicePayload
@@ -183,6 +268,12 @@ export type DshPayload =
   | RejectFlowPayload
   | SubmitReceiptPayload
   | ReportPayload
+  | ApprovalPendingPayload
+  | ApprovalConfirmPayload
+  | ApprovalResultPayload
+  | PlanSuggestPayload
+  | PlanResultPayload
+  | PlanConfirmPayload
 
 /** One piece of a split message: a narrative run, a valid fence payload, or an unvalidatable dsh fence. */
 export type MessageSegment =
@@ -518,6 +609,115 @@ function parseReport(obj: Record<string, unknown>): ReportPayload | undefined {
   }
 }
 
+/** The minimal {collection,label,docId} reference of an approval_confirm doc. */
+type ApprovalDocRefLite = { collection: string; label: string; docId: string }
+
+/** The approval document reference validator ({collection,label,docId[,title]}). */
+function approvalDocOf(value: unknown, requireTitle: boolean): ApprovalDocRef | ApprovalDocRefLite | undefined {
+  if (typeof value !== 'object' || value === null) return undefined
+  const doc = value as Record<string, unknown>
+  const collection = requiredText(doc['collection'])
+  const label = requiredText(doc['label'])
+  const docId = requiredText(doc['docId'])
+  if (collection === undefined || label === undefined || docId === undefined) return undefined
+  if (requireTitle) {
+    const title = requiredText(doc['title'])
+    if (title === undefined) return undefined
+    return { collection, label, docId, title }
+  }
+  return { collection, label, docId }
+}
+
+/** Validate one approval summary row (the receipt's summary shape). */
+function approvalSummaryOf(value: unknown): ReadonlyArray<{ label: string; value: string; kind: ReceiptSummaryKind }> | undefined {
+  if (!Array.isArray(value)) return undefined
+  const rows: { label: string; value: string; kind: ReceiptSummaryKind }[] = []
+  for (const raw of value) {
+    if (typeof raw !== 'object' || raw === null) return undefined
+    const row = raw as Record<string, unknown>
+    const label = requiredText(row['label'])
+    const cell = requiredText(row['value'])
+    const kind = oneOf(row['kind'], ['money', 'date', 'id', 'count', 'text'] as const)
+    if (label === undefined || cell === undefined || kind === undefined) return undefined
+    rows.push({ label, value: cell, kind })
+  }
+  return rows.length === 0 ? undefined : rows
+}
+
+/** Validate an approval_pending fence body. */
+function parseApprovalPending(obj: Record<string, unknown>): ApprovalPendingPayload | undefined {
+  const id = requiredText(obj['id'])
+  const doc = approvalDocOf(obj['doc'], true)
+  if (id === undefined || doc === undefined) return undefined
+  const summary = approvalSummaryOf(obj['summary'])
+  if (summary === undefined) return undefined
+  const applicant = optionalText(obj['applicant'])
+  const node = optionalText(obj['node'])
+  const attempt = optionalText(obj['attempt'])
+  return {
+    v: DSH_PROTOCOL_VERSION,
+    type: 'approval_pending',
+    id,
+    doc: doc as ApprovalDocRef,
+    ...applicant === undefined ? {} : { applicant },
+    ...node === undefined ? {} : { node },
+    ...attempt === undefined ? {} : { attempt },
+    summary,
+  }
+}
+
+/** Validate an approval_confirm fence body. */
+function parseApprovalConfirm(obj: Record<string, unknown>): ApprovalConfirmPayload | undefined {
+  const approvalId = requiredText(obj['approvalId'])
+  const doc = approvalDocOf(obj['doc'], false)
+  if (approvalId === undefined || doc === undefined) return undefined
+  const action = oneOf(obj['action'], ['approve', 'reject'] as const)
+  if (action === undefined) return undefined
+  const comment = optionalText(obj['comment'])
+  return { v: DSH_PROTOCOL_VERSION, type: 'approval_confirm', approvalId, doc, action, ...comment === undefined ? {} : { comment } }
+}
+
+/**
+ * Normalize one Chinese state spelling onto the wire's English enum (the
+ * model writes the state word bilingually; the closed set covers the six
+ * doc_status states and the four supplier-admission states — anything else
+ * still fails validation).
+ */
+function normalizeApprovalState(value: unknown): ApprovalResultPayload['state'] | undefined {
+  if (typeof value !== 'string') return undefined
+  const chinese: Readonly<Record<string, ApprovalResultPayload['state']>> = {
+    草稿: 'draft', 待审批: 'pending', 二级审批中: 'pending_level2',
+    已生效: 'approved', 已驳回: 'rejected', 已作废: 'void',
+    潜在: 'potential', 准入评审中: 'reviewing', 合格: 'qualified',
+  }
+  return oneOf(value, ['draft', 'pending', 'pending_level2', 'approved', 'rejected', 'void', 'potential', 'reviewing', 'qualified'] as const)
+    ?? chinese[value]
+}
+
+/** Validate an approval_result fence body. */
+function parseApprovalResult(obj: Record<string, unknown>): ApprovalResultPayload | undefined {
+  const approvalId = requiredText(obj['approvalId'])
+  const doc = approvalDocOf(obj['doc'], true)
+  if (approvalId === undefined || doc === undefined) return undefined
+  const action = oneOf(obj['action'], ['approve', 'reject'] as const)
+  const state = normalizeApprovalState(obj['state'])
+  const by = requiredText(obj['by'])
+  if (action === undefined || state === undefined || by === undefined) return undefined
+  const comment = optionalText(obj['comment'])
+  const at = optionalText(obj['at'])
+  return {
+    v: DSH_PROTOCOL_VERSION,
+    type: 'approval_result',
+    approvalId,
+    doc: doc as ApprovalDocRef,
+    action,
+    state,
+    by,
+    ...comment === undefined ? {} : { comment },
+    ...at === undefined ? {} : { at },
+  }
+}
+
 /** Validate a submit_receipt fence body. */
 function parseSubmitReceipt(obj: Record<string, unknown>): SubmitReceiptPayload | undefined {
   const draftId = requiredText(obj['draftId'])
@@ -536,6 +736,74 @@ function parseSubmitReceipt(obj: Record<string, unknown>): SubmitReceiptPayload 
     summary.push({ label, value, kind })
   }
   return { v: DSH_PROTOCOL_VERSION, type: 'submit_receipt', draftId, form, rowId, summary }
+}
+
+/** Validate a plan_suggest fence body. */
+function parsePlanSuggest(obj: Record<string, unknown>): PlanSuggestPayload | undefined {
+  const id = requiredText(obj['id'])
+  const suggestionId = requiredText(obj['suggestionId'])
+  const planType = oneOf(obj['planType'], ['MO', 'PR'] as const)
+  const product = requiredText(obj['product'])
+  const qty = requiredText(obj['qty'])
+  if (id === undefined || suggestionId === undefined || planType === undefined || product === undefined || qty === undefined) {
+    return undefined
+  }
+  const suggestDate = optionalText(obj['suggestDate'])
+  const driverSo = optionalText(obj['driverSo'])
+  const needDate = optionalText(obj['needDate'])
+  return {
+    v: DSH_PROTOCOL_VERSION, type: 'plan_suggest', id, suggestionId, planType, product, qty,
+    ...suggestDate === undefined ? {} : { suggestDate },
+    ...driverSo === undefined ? {} : { driverSo },
+    ...needDate === undefined ? {} : { needDate },
+  }
+}
+
+/** Validate a plan_result fence body. */
+function parsePlanResult(obj: Record<string, unknown>): PlanResultPayload | undefined {
+  const planId = requiredText(obj['planId'])
+  const suggestionId = requiredText(obj['suggestionId'])
+  const planType = oneOf(obj['planType'], ['MO', 'PR'] as const)
+  const product = requiredText(obj['product'])
+  const outcome = oneOf(obj['outcome'], ['converted', 'dismissed'] as const)
+  if (planId === undefined || suggestionId === undefined || planType === undefined || product === undefined || outcome === undefined) {
+    return undefined
+  }
+  const docCode = optionalText(obj['docCode'])
+  const state = optionalText(obj['state'])
+  const by = optionalText(obj['by'])
+  return {
+    v: DSH_PROTOCOL_VERSION, type: 'plan_result', planId, suggestionId, planType, product, outcome,
+    ...docCode === undefined ? {} : { docCode },
+    ...state === undefined ? {} : { state },
+    ...by === undefined ? {} : { by },
+  }
+}
+
+/** Validate a plan_confirm fence body. */
+function parsePlanConfirm(obj: Record<string, unknown>): PlanConfirmPayload | undefined {
+  const planId = requiredText(obj['planId'])
+  const suggestionId = requiredText(obj['suggestionId'])
+  const action = oneOf(obj['action'], ['confirm', 'dismiss'] as const)
+  const planType = oneOf(obj['planType'], ['MO', 'PR'] as const)
+  const product = requiredText(obj['product'])
+  if (planId === undefined || suggestionId === undefined || action === undefined || planType === undefined || product === undefined) {
+    return undefined
+  }
+  return { v: DSH_PROTOCOL_VERSION, type: 'plan_confirm', planId, suggestionId, action, planType, product }
+}
+
+/**
+ * Build the plan_confirm user message a plan card's button sends.
+ * @param payload - the plan_suggest card's payload.
+ * @param action - the user's chosen action.
+ * @returns the serialized user message.
+ */
+export function buildPlanConfirmMessage(payload: PlanSuggestPayload, action: 'confirm' | 'dismiss'): PlanConfirmPayload {
+  return {
+    v: payload.v, type: 'plan_confirm', planId: payload.id, suggestionId: payload.suggestionId,
+    action, planType: payload.planType, product: payload.product,
+  }
 }
 
 /**
@@ -561,6 +829,12 @@ export function parseDshPayload(body: string): DshPayload | undefined {
     case 'reject_flow': return parseRejectFlow(obj)
     case 'submit_receipt': return parseSubmitReceipt(obj)
     case 'report': return parseReport(obj)
+    case 'approval_pending': return parseApprovalPending(obj)
+    case 'approval_confirm': return parseApprovalConfirm(obj)
+    case 'approval_result': return parseApprovalResult(obj)
+    case 'plan_suggest': return parsePlanSuggest(obj)
+    case 'plan_result': return parsePlanResult(obj)
+    case 'plan_confirm': return parsePlanConfirm(obj)
     default: return undefined
   }
 }
@@ -630,4 +904,15 @@ export function buildConfirmMessage(payload: FormConfirmPayload): string {
 export function buildRejectMessage(payload: RejectFlowPayload): string {
   const json = JSON.stringify(payload)
   return `驳回\n\`\`\`dsh\n${json}\n\`\`\``
+}
+
+/**
+ * Serialize one approval_confirm payload as the user message the approval
+ * card sends: the human-readable 同意/驳回 plus the fence the fold replays.
+ * @param payload - the approval action (comment optional).
+ * @returns the message text.
+ */
+export function buildApprovalConfirmMessage(payload: ApprovalConfirmPayload): string {
+  const json = JSON.stringify(payload)
+  return `${payload.action === 'approve' ? '同意' : '驳回'}\n\`\`\`dsh\n${json}\n\`\`\``
 }

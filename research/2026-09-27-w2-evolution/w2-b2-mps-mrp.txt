@@ -1,0 +1,44 @@
+== W2-B2 MPS+MRP psql 对照证据（2026-09-27 10:40:25）==
+
+-- 1. max 合并两例（mps_plan_items，FRZ 期2 / BEV 期1）
+     sku     | period  | forecast_qty | so_open_qty | planned_qty |  driver
+-------------+---------+--------------+-------------+-------------+----------
+ FD-BEV-1000 | 2026-10 |          500 |           0 |         500 | forecast
+ FD-FRZ-450  | 2026-11 |          400 |           0 |         400 | forecast
+ FD-SNA-080  | 2026-10 |         5000 |       20000 |       20000 | so
+ FD-SNA-080  | 2026-11 |         6000 |           0 |        6000 | forecast
+ FD-SNA-080  | 2026-12 |         4000 |           0 |        4000 | forecast
+(5 rows)
+
+-- 手算：BEV 期1 max(300,500)=500 driver=forecast；FRZ 期2 max(700,400)=700 driver=so
+
+-- 2. 互斥日结 run（M5 的 MRP-20260927-81）：covered 全 mps: 驱动 + gross 恒等 + 未覆盖 SOY 直纳照旧
+     sku     | gross |  net   | need_date  |     driver_so     | bom_level
+-------------+-------+--------+------------+-------------------+-----------
+ FD-BEV-1000 |   500 |    460 | 2026-10-15 | mps:MPS-202610-01 |         0
+ FD-FRZ-450  |   700 | -15450 | 2026-11-15 | mps:MPS-202610-01 |         0
+ FD-SNA-080  | 30000 |  25706 | 2026-10-15 | mps:MPS-202610-01 |         0
+ FD-SOY-500  |  3000 |    665 | 2026-12-05 | SO-2026-0093      |         0
+(4 rows)
+
+-- 3. 确认转单回链（M8）：建议 mps_plan 回链 + MO driver_so_code
+ id | plan_type |  qty  |   driver_so_id    |   mps_plan    |  status   | converted_doc_code
+----+-----------+-------+-------------------+---------------+-----------+--------------------
+ 20 | MO        | 25706 | mps:MPS-202610-01 | MPS-202610-01 | converted | MO-2026-0011
+ 16 | MO        | 25706 | mps:MPS-202610-01 | MPS-202610-01 | converted | MO-2026-0010
+(2 rows)
+
+     code     | driver_suggestion_id |  driver_so_code   | doc_status
+--------------+----------------------+-------------------+------------
+ MO-2026-0011 |                   20 | mps:MPS-202610-01 | draft
+ MO-2026-0010 |                   16 | mps:MPS-202610-01 | draft
+(2 rows)
+
+-- 4. 零漂移终验（M9 的 MRP-20260927-97）vs 批前基线
+   diff: IDENTICAL（逐行一致）
+
+-- 5. 120 天窗 run（M6 的 MRP-20260927-89）：SOY 远期 PR 建议
+ id | plan_type | qty | need_date  | driver_so_id
+----+-----------+-----+------------+--------------
+ 22 | PR        | 665 | 2026-12-05 | SO-2026-0093
+(1 row)

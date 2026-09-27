@@ -1,0 +1,74 @@
+nocobase-w8: [chain] ══ 质量域演示（PO→收货→挂点IQC→AQL判定→放行卡口→退货/让步处置→5批2拒加严→绩效物化→AVL四联查）══
+nocobase-w8: [chain] PO-W8-QC-01 approved（expected_date+2d 喂 OTD-S）
+nocobase-h5: lot W8-QC-A created (shelf-life 540d; 隔离待检)
+nocobase-h5: putaway quarantined to bin SH-Q-02-01 (待检区 IQC)
+nocobase-h5: pur_orders #5 receiving_status=none (Σreceived 0/0)
+nocobase-h5: receipt RCV-W8-QC-01 posted — stock +200 (待检区 hold), movement appended
+nocobase-h5: IQC 检验单 QI-2026-0001 挂点建单（RCV-W8-QC-01，批量 200）
+nocobase-w8: [chain] 卡口负例 ✓ IQC 未放行禁过账入库 → Error: IQC 未放行不能过账入库：入库单 RCV-W8-QC-01 的检验状态为「pending」，需先 --iqc RCV-W8-QC-01 pass（或 not_required 免检）
+nocobase-h5: inspection QI-2026-0001 → passed（批量 200=151-280/G，AQL 2.5，n=32 Ac=2 Re=3，d=2）
+nocobase-w8: [chain] RCV-W8-QC-01 → QI-2026-0001 passed（Ac2/Re3）✓
+nocobase-h5: lot W8-QC-B created (shelf-life 540d; 隔离待检)
+nocobase-h5: putaway quarantined to bin SH-Q-02-01 (待检区 IQC)
+nocobase-h5: pur_orders #5 receiving_status=none (Σreceived 0/0)
+nocobase-h5: receipt RCV-W8-QC-02 posted — stock +200 (待检区 hold), movement appended
+nocobase-h5: IQC 检验单 QI-2026-0002 挂点建单（RCV-W8-QC-02，批量 200）
+nocobase-h5: inspection QI-2026-0002 → passed（批量 200=151-280/G，AQL 2.5，n=32 Ac=2 Re=3，d=2）
+nocobase-w8: [chain] RCV-W8-QC-02 → QI-2026-0002 passed（Ac2/Re3）✓
+nocobase-h5: lot W8-QC-C created (shelf-life 540d; 隔离待检)
+nocobase-h5: putaway quarantined to bin SH-Q-02-01 (待检区 IQC)
+nocobase-h5: pur_orders #5 receiving_status=none (Σreceived 0/0)
+nocobase-h5: receipt RCV-W8-QC-03 posted — stock +200 (待检区 hold), movement appended
+nocobase-h5: IQC 检验单 QI-2026-0003 挂点建单（RCV-W8-QC-03，批量 200）
+nocobase-h5: inspection QI-2026-0003 → passed（批量 200=151-280/G，AQL 2.5，n=32 Ac=2 Re=3，d=2）
+nocobase-w8: [chain] RCV-W8-QC-03 → QI-2026-0003 passed（Ac2/Re3）✓
+nocobase-h5: lot W8-QC-D created (shelf-life 540d; 隔离待检)
+nocobase-h5: putaway quarantined to bin SH-Q-02-01 (待检区 IQC)
+nocobase-h5: pur_orders #5 receiving_status=none (Σreceived 0/0)
+nocobase-h5: receipt RCV-W8-QC-04 posted — stock +200 (待检区 hold), movement appended
+nocobase-h5: IQC 检验单 QI-2026-0004 挂点建单（RCV-W8-QC-04，批量 200）
+nocobase-h5: CAPA 草稿「检验不合格·QI-2026-0004」已发起（srm_capas.inspection_code 关联）
+nocobase-h5: inspection QI-2026-0004 → failed（批量 200=151-280/G，AQL 2.5，n=32 Ac=2 Re=3，d=3）
+nocobase-w8: [chain] RCV-W8-QC-04 → QI-2026-0004 failed（Ac2/Re3）✓
+nocobase-h5: lot W8-QC-E created (shelf-life 540d; 隔离待检)
+nocobase-h5: putaway quarantined to bin SH-Q-02-01 (待检区 IQC)
+nocobase-h5: pur_orders #5 receiving_status=none (Σreceived 0/0)
+nocobase-h5: receipt RCV-W8-QC-05 posted — stock +200 (待检区 hold), movement appended
+nocobase-h5: IQC 检验单 QI-2026-0005 挂点建单（RCV-W8-QC-05，批量 200）
+nocobase-h5: CAPA 草稿「检验不合格·QI-2026-0005」已发起（srm_capas.inspection_code 关联）
+nocobase-h5: 供应商 #4 IQC 严格度切换 normal → tightened（最近 5 批 2 拒）
+nocobase-h5: inspection QI-2026-0005 → failed（批量 200=151-280/G，AQL 2.5，n=32 Ac=2 Re=3，d=3）
+nocobase-w8: [chain] RCV-W8-QC-05 → QI-2026-0005 failed（Ac2/Re3）✓
+nocobase-h5: lot W8-QC-F created (shelf-life 540d; 隔离待检)
+nocobase-h5: putaway quarantined to bin SH-Q-02-01 (待检区 IQC)
+nocobase-h5: pur_orders #5 receiving_status=none (Σreceived 0/0)
+nocobase-h5: receipt RCV-W8-QC-06 posted — stock +200 (待检区 hold), movement appended
+nocobase-h5: IQC 检验单 QI-2026-0006 挂点建单（RCV-W8-QC-06，批量 200）
+nocobase-h5: CAPA 草稿「检验不合格·QI-2026-0006」已发起（srm_capas.inspection_code 关联）
+nocobase-h5: inspection QI-2026-0006 → failed（批量 200=151-280/G，AQL 1.0（加严降档），n=32 Ac=1 Re=2，d=2）
+nocobase-w8: [chain] RCV-W8-QC-06 → QI-2026-0006 failed（Ac1/Re2）✓
+nocobase-w8: [chain] AQL 判定数组断言 ✓（d=2→passed Ac2/Re3；d=3→failed；加严降档 Ac1/Re2）
+nocobase-w8: [chain] 切换断言 ✓ SUP-004 → tightened（reject_streak=3）
+nocobase-h5: receipt RCV-W8-QC-01 released — lot→qualified, stock hold→good via bin SH-A-02-01, ±MOVE pair appended, receipt closed
+nocobase-w8: [chain] IQC 放行 ✓ 待检 → 合格区（hold→good）
+nocobase-h5: NC 处置单 QM-NC-2026-0001（return）draft 已建（检验单 QI-2026-0004）
+Warning: Detected unsettled top-level await at /Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/nocobase-h5-wms.mts:3538
+  await main()
+  ^
+
+
+
+
+/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/nocobase-w8-quality.mts:602
+  if (result.status !== 0) throw new Error(`${script} ${args.join(' ')} failed (exit ${String(result.status)})`)
+                                 ^
+
+
+Error: nocobase-h5-wms.mts --dispose QM-NC-2026-0001 failed (exit 13)
+    at runScript (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/nocobase-w8-quality.mts:602:34)
+    at demoChain (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/nocobase-w8-quality.mts:752:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async main (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/nocobase-w8-quality.mts:863:5)
+    at async <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/nocobase-w8-quality.mts:882:3)
+
+Node.js v22.19.0

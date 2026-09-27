@@ -1,0 +1,138 @@
+== B2 psql 只读断言（2026-09-26 10:26:37）==
+
+-- 1) w2 迁移行：待审核存量归一为 potential/internal + SUP-2026-NNNN 编号
+ id |         name         |     code      | lifecycle_status |  source  | contact
+----+----------------------+---------------+------------------+----------+---------
+  5 | 绿源包装材料有限公司 | SUP-005       | qualified        | internal | 何伟
+ 13 | 鲜丰                 | SUP-2026-0001 | potential        | internal | 张经理
+ 14 | 三味食品             | SUP-2026-0002 | potential        | internal | 李贺
+ 15 | 李贺                 | SUP-2026-0003 | potential        | internal | lihe
+ 16 | B0测试食品           | SUP-2026-0004 | potential        | internal | 王版本
+(5 rows)
+
+-- 2) h4 存量种子守卫：qualified 状态未被 B2 改动
+ id |            name            | lifecycle_status | admitted_at
+----+----------------------------+------------------+-------------
+  1 | 珠海鲜丰水产科技有限公司   | qualified        | 2024-09-25
+  2 | 山东鲁丰食品配料有限公司   | preferred        | 2023-10-01
+  3 | 江南乳业集团股份有限公司   | restricted       | 2025-03-24
+  4 | 味之源调味食品股份有限公司 | qualified        | 2024-03-29
+  6 | 丹东禾丰果蔬专业合作社     | frozen           | 2024-07-07
+  7 | 内蒙古草原雪花粮油有限公司 | potential        |
+  8 | 顺发冷链物流股份有限公司   | qualified        | 2024-12-04
+  9 | 漳州市蜜果休闲食品有限公司 | reviewing        |
+ 12 | 东港丰泽果蔬专业合作社     | qualified        | 2026-09-13
+(9 rows)
+
+-- 3) 供应商卡口配置（枚举集）
+ downstream_collection  |  upstream_collection   | upstream_field | upstream_state_field |   required_status
+------------------------+------------------------+----------------+----------------------+---------------------
+ wms_receipts           | hub_po_purchase_orders | source_no      |                      | approved
+ hub_po_purchase_orders | srm_suppliers          | supplier_id    | lifecycle_status     | qualified,preferred
+(2 rows)
+
+-- 4) 准入 flow config（state_field=lifecycle_status）
+ id |        doc_type        |     title      |   state_field    | is_active |           approver_map           |                                extras
+----+------------------------+----------------+------------------+-----------+----------------------------------+-----------------------------------------------------------------------
+  1 | hub_po_purchase_orders | 采购订单审批   | doc_status       | t         | {"manager":"admin","gm":"admin"} | {"approved_by_field":"approved_by","approved_at_field":"approved_at"}
+  2 | srm_suppliers          | 供应商准入审批 | lifecycle_status | t         | {"srm_manager":"admin"}          | {"approved_at_field":"admitted_at"}
+(2 rows)
+
+-- 5) 准入流状态/转移种子
+ flow_id |   state   |  action  | next_state | allowed_role
+---------+-----------+----------+------------+--------------
+       2 | potential | submit   | reviewing  | srm_manager
+       2 | rejected  | resubmit | reviewing  | srm_manager
+       2 | reviewing | approve  | qualified  | srm_manager
+       2 | reviewing | reject   | rejected   | srm_manager
+(4 rows)
+
+-- 6) h4 准入 workflow 已退役
+       title       | enabled
+-------------------+---------
+ SRM供应商准入审批 | f
+(1 row)
+
+-- 7) hub_po_suppliers 存量保留（历史联系人，行数基线 = 迁移前）
+ hub_rows | pending_rows
+----------+--------------
+       11 |            5
+(1 row)
+
+
+== B2 准入全序列（引擎 CLI，真实库 2026-09-26 10:27:45）==
+-- submit 三味食品(id=14)：potential → reviewing
+approval-engine: submitted — {"doc_type":"srm_suppliers","doc_id":14,"action":"submit","from_state":"potential","to_state":"reviewing","from_anchor":0,"to_anchor":0,"attempt_no":1,"effective":false}
+-- act approve：reviewing → qualified（回写 admitted_at）
+approval-engine: acted — {"doc_type":"srm_suppliers","doc_id":14,"action":"approve","from_state":"reviewing","to_state":"qualified","from_anchor":0,"to_anchor":1,"attempt_no":1,"effective":true}
+-- 卡口负例：向 potential 鲜丰(id=13) 下 PO —— 预期拒绝
+    at async <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:874:3)
+
+Node.js v22.19.0
+-- 卡口正例：向刚 qualified 的三味食品(id=14) 下 PO —— 预期放行
+approval-engine: gate passed
+/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:344
+    throw new Error(gateNotAdmittedMessage(label, String(ref), typeof actual === 'string' ? actual : String(actual ?? ''), required))
+          ^
+
+-- 准入后 psql 复核：lifecycle/admitted_at/审计留痕
+ id |   name   | lifecycle_status | admitted_at
+----+----------+------------------+-------------
+ 13 | 鲜丰     | potential        |
+ 14 | 三味食品 | qualified        | 2026-09-26
+(2 rows)
+
+   doc_type    | doc_id | node_seq | approver  | action  |     comment      | attempt_no | from_state | to_state  | to_anchor | source
+---------------+--------+----------+-----------+---------+------------------+------------+------------+-----------+-----------+--------
+ srm_suppliers |     14 |        1 | chenliqun | submit  |                  |          1 | potential  | reviewing | 0         | engine
+ srm_suppliers |     14 |        2 | admin     | approve | 资质齐全同意准入 |          1 | reviewing  | qualified | 1         | engine
+(2 rows)
+
+   doc_type    | doc_id |   user   |   state   |  status
+---------------+--------+----------+-----------+-----------
+ srm_suppliers |     14 | nocobase | reviewing | completed
+(1 row)
+
+Error: 供应商卡口未通过：供应商 13 的生命周期状态为「潜在」(potential)，属未准入/不合格供方，不能向其下达采购单；供应商需先通过准入审核进入 合格(qualified)、preferred(preferred)
+Error: 供应商卡口未通过：供应商 13 的生命周期状态为「潜在」(potential)，属未准入/不合格供方，不能向其下达采购单；供应商需先通过准入审核进入 合格(qualified)、优选(preferred)
+
+== B2 终态复核（2026-09-26 11:07:51）==
+-- 全部归一供应商（srm 单真源）
+ id |            name            |     code      | lifecycle_status |  source   | admitted_at
+----+----------------------------+---------------+------------------+-----------+-------------
+  1 | 珠海鲜丰水产科技有限公司   | SUP-001       | qualified        | invited   | 2024-09-25
+  2 | 山东鲁丰食品配料有限公司   | SUP-002       | preferred        | invited   | 2023-10-01
+  3 | 江南乳业集团股份有限公司   | SUP-003       | restricted       | self      | 2025-03-24
+  4 | 味之源调味食品股份有限公司 | SUP-004       | qualified        | invited   | 2024-03-29
+  5 | 绿源包装材料有限公司       | SUP-005       | qualified        | internal  | 2023-04-04
+  6 | 丹东禾丰果蔬专业合作社     | SUP-006       | frozen           | self      | 2024-07-07
+  7 | 内蒙古草原雪花粮油有限公司 | SUP-007       | potential        | self      |
+  8 | 顺发冷链物流股份有限公司   | SUP-008       | qualified        | invited   | 2024-12-04
+  9 | 漳州市蜜果休闲食品有限公司 | SUP-009       | reviewing        | self      |
+ 11 | 泉州市安记香辛料有限公司   | SUP-010       | qualified        |           |
+ 12 | 东港丰泽果蔬专业合作社     | SUP-006B      | qualified        | alternate | 2026-09-13
+ 13 | 鲜丰                       | SUP-2026-0001 | qualified        | internal  | 2026-09-26
+ 14 | 三味食品                   | SUP-2026-0002 | qualified        | internal  | 2026-09-26
+ 15 | 李贺                       | SUP-2026-0003 | potential        | internal  |
+ 16 | B0测试食品                 | SUP-2026-0004 | potential        | internal  |
+ 17 | 新味源食品                 | SUP-2026-0005 | qualified        | internal  | 2026-09-26
+(16 rows)
+
+-- 双入口审计（engine/mobile vs page/审批中心表单）
+   doc_type    | doc_id | approver  | action  | source | to_state  |  acted_at
+---------------+--------+-----------+---------+--------+-----------+------------
+ srm_suppliers |     14 | chenliqun | submit  | engine | reviewing | 2026-09-26
+ srm_suppliers |     14 | admin     | approve | engine | qualified | 2026-09-26
+ srm_suppliers |     17 | admin     | submit  | engine | reviewing | 2026-09-26
+ srm_suppliers |     17 | admin     | approve | engine | qualified | 2026-09-26
+ srm_suppliers |     13 | chenliqun | submit  | engine | reviewing | 2026-09-26
+ srm_suppliers |     13 | admin     | approve | page   | qualified | 2026-09-26
+(6 rows)
+
+-- hub_po_suppliers 行数未增（11 行基线保持）
+ count
+-------
+    11
+(1 row)
+
+wms_receipts belongsTo fields: [{"name":"target_zone","target":"wms_zones"},{"name":"supplier","target":"srm_suppliers"},{"name":"target_bin","target":"wms_bins"},{"name":"product","target":"hub_inv_products"}]

@@ -1,0 +1,15 @@
+== W2-B7 夜间定时器负例（fail-loud 启动拒绝）==
+
+--- [负例1] W1_NIGHTLY_AT=99:99
+    throw new Error(`W1_NIGHTLY_AT 需为 HH:MM 24 小时制（收到 ${rawAt}）`)
+exit=0
+
+--- [负例2] W1_NIGHTLY_ENABLED=abc
+    throw new Error(`W1_NIGHTLY_ENABLED 仅接受 true/false（收到 ${rawEnabled}）`)
+
+--- [负例3] W1_NIGHTLY_TZ=Mars/Olympus
+    throw new Error(`W1_NIGHTLY_TZ 非法 IANA 时区（收到 ${tz}）`)
+
+--- 真实进程退出码复核
+AT=99:99 exit=1
+ENABLED=abc exit=1

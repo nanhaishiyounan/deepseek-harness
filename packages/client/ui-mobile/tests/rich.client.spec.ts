@@ -122,7 +122,7 @@ describe('splitCodeBlocks', () => {
 
 describe('sanitizeBizText', () => {
   it('maps leaked collection and field identifiers onto business terms', () => {
-    expect(sanitizeBizText('已在 hub_po_purchase_orders 登记一条采购单')).toBe('已在 采购单 登记一条采购单')
+    expect(sanitizeBizText('已在 pur_orders 登记一条采购单')).toBe('已在 采购订单 登记一条采购单')
     expect(sanitizeBizText('明细 hub_po_items（product_name/qty/unit_price）已核对')).toBe('明细 采购明细（品名/数量/单价）已核对')
     expect(sanitizeBizText('匹配到 supplier_id=7')).toBe('匹配到 供应商=7')
   })

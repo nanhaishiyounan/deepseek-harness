@@ -42,6 +42,8 @@ import { WelcomeCard } from './WelcomeCard.tsx'
 import { ChoiceBubble } from './ChoiceBubble.tsx'
 import { FieldAskBubble } from './FieldAskBubble.tsx'
 import { ActionBadge } from './ActionBadge.tsx'
+import { ApprovalCard } from './ApprovalCard.tsx'
+import { PlanCard } from './PlanCard.tsx'
 import { ReportCard } from './ReportCard.tsx'
 import { RichContent } from './RichContent.tsx'
 import { NewChatSheet } from './NewChatSheet.tsx'
@@ -722,10 +724,13 @@ function FlowItem(
   }
   if (item.kind === 'action') {
     const formLabel = item.payload?.type === 'form_confirm' ? item.payload.form.label : undefined
+    const approvalText = item.payload?.type === 'approval_confirm'
+      ? `${item.payload.action === 'approve' ? '你同意了' : '你驳回了'}这张${item.payload.doc.label}`
+      : undefined
     return (
       <>
         {separator}
-        <ActionBadge action={item.action} formLabel={formLabel} />
+        <ActionBadge action={item.action} formLabel={formLabel} text={approvalText} />
       </>
     )
   }
@@ -756,6 +761,26 @@ function FlowItem(
         {separator}
         {aiRow(
           <ReportCard payload={item.payload} onAction={(action) => { props.onReportAction(action, item.seq) }} />,
+        )}
+      </>
+    )
+  }
+  if (item.kind === 'approval') {
+    return (
+      <>
+        {separator}
+        {aiRow(
+          <ApprovalCard payload={item.payload} onSend={props.onSend} disabled={props.sending} />,
+        )}
+      </>
+    )
+  }
+  if (item.kind === 'plan') {
+    return (
+      <>
+        {separator}
+        {aiRow(
+          <PlanCard payload={item.payload} onSend={props.onSend} disabled={props.sending} />,
         )}
       </>
     )

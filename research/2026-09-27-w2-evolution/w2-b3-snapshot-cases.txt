@@ -1,0 +1,39 @@
+=== W2-B3 手算对账示例 1: product 8 × 2026-08（首月, opening 应=全量重放净额=0）===
+ product |    sku     | 手算_期初 | 手算_收 | 手算_发 | 手算_期末
+---------+------------+-----------+---------+---------+-----------
+       8 | FD-SOY-500 |         0 |     520 |       0 |       520
+(1 row)
+
+ period  | 快照_期初 | 快照_收 | 快照_发 | 快照_期末 | snapshot_date
+---------+-----------+---------+---------+-----------+---------------
+ 2026-08 |         0 |     520 |       0 |       520 | 2026-09-27
+(1 row)
+
+=== W2-B3 手算对账示例 2: product 8 × 2026-09（期初=上期期末 520；期初+收−发=期末 全链）===
+ product | 手算_期初 | 手算_收 | 手算_发 | 手算_期末
+---------+-----------+---------+---------+-----------
+       8 |       520 |    5740 |    3325 |      2935
+(1 row)
+
+ERROR:  function round(double precision, integer) does not exist
+LINE 1: ...d, b.opening_qty, b.in_qty, b.out_qty, b.bal_qty, round(b.op...
+                                                             ^
+HINT:  No function matches the given name and argument types. You might need to add explicit type casts.
+=== W2-B3 手算对账示例 3: 逐 move_type 分类聚合（product 1 × 2026-09，收=正腿/发=负腿）===
+ move_type | 类别 | 合计 | 行数
+-----------+------+------+------
+ ADJUST    | f    | -200 |    1
+ PUTAWAY   | t    |  200 |    1
+ RECEIPT   | t    |  200 |    1
+ SHIP      | f    |  -25 |    1
+(4 rows)
+
+ period  | opening_qty | in_qty | out_qty | bal_qty | 恒等式验算 | 相等
+---------+-------------+--------+---------+---------+------------+------
+ 2026-09 |         520 |   5740 |    3325 |    2935 |       2935 | t
+(1 row)
+
+ 恒等式不满足行数 | 总行数
+------------------+--------
+                1 |     19
+(1 row)

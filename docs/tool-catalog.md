@@ -18,7 +18,7 @@ This table connects model-visible tool names to the plugin package and service s
 | `@deepseek-ai/dsh-tool-kb` | `kb_ingest`, `kb_ingest_url`, `kb_search`, `kb_stats`, `kg_query`, `kg_schema`, `kg_subgraph` | `ctx.tools`, `ctx.kb`, `ctx.fs`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | kb_search, kb_ingest, kb_ingest_url, and kb_stats stay visible without a usable store and fail with a structured error at execution time; all four run under the deployment-bound tenant (the model never supplies one), retrieval results carry numbered citations, and the degraded text-only mode is observable in every search result. |
 | `@deepseek-ai/dsh-tool-lakehouse` | `lakehouse_query`, `lakehouse_tables` | `ctx.tools`, `ctx.lakehouse`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | lakehouse_tables and lakehouse_query stay visible without a usable engine and fail with a structured error at execution time (the catalog listing keeps answering); both run under the deployment-bound tenant (the model never supplies one), query results are capped rows with a truncation marker, and the rendered text carries the source-table attribution line. |
 | `@deepseek-ai/dsh-tool-connector` | `assets_browse`, `connector_discover`, `connector_fetch`, `connector_transfer`, `order_create`, `order_status` | `ctx.tools`, `ctx.connector`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | connector_discover, connector_fetch, and connector_transfer run under the deployment-bound tenant (the model never supplies one); discovery answers with a grouped listing carrying provider and dataset ids, previews are capped (8 rows / 400 characters), and transfers render the landing receipt with the catalog transfer-record id and the next-step guidance (lakehouse_query over the named table, or kb_search with citations). |
-| `@deepseek-ai/dsh-tool-nocobase` | `nb_collections`, `nb_create`, `nb_get`, `nb_list`, `nb_update` | `ctx.tools`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | nb_collections, nb_list, nb_get, nb_create, and nb_update speak to the deployment's NocoBase under a service account (the model never supplies a tenant); the filter vocabulary is closed (eq/in/gt/lt joined by one and/or), and the write tools carry the confirmed-change contract — the system-prompt guidance demands the presented preview / before→after diff and the user's explicit go-ahead before nb_create/nb_update run, and their receipts echo the landing id or the field-by-field diff. |
+| `@deepseek-ai/dsh-tool-nocobase` | `nb_approve`, `nb_collections`, `nb_create`, `nb_get`, `nb_list`, `nb_update` | `ctx.tools`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | nb_collections, nb_list, nb_get, nb_create, and nb_update speak to the deployment's NocoBase under a service account (the model never supplies a tenant); the filter vocabulary is closed (eq/in/gt/lt joined by one and/or), and the write tools carry the confirmed-change contract — the system-prompt guidance demands the presented preview / before→after diff and the user's explicit go-ahead before nb_create/nb_update run, and their receipts echo the landing id or the field-by-field diff. |
 | `@deepseek-ai/dsh-tool-ask-user` | `ask_user_question` | `ctx.tools`, `ctx.userQuestions` | `tool/call`, `tool/result after a UI/provider answers the question` | - | ask_user_question pauses the tool call until the active UI provider returns a human answer. |
 | `@deepseek-ai/dsh-tool-view-actions` | `switch_view`, `view_apply`, `view_state_get` | `ctx.tools`, `ctx.viewActions`, `ctx.viewState` | `tool/call`, `tool/result` | - | switch_view, view_apply, and view_state_get steer the browser workbench view; view manipulation is reversible UI state and carries no approval (destructive writes stay on the nb_* confirmation contract), actions are validated against the browser-reported catalog, and an unreachable browser fails with a readable error instead of a hang. |
 | `@deepseek-ai/dsh-tools` | `run_code` | `ctx.tools`, `ctx.codeRuntime (execution time)`, `ctx.systemPrompt` | `tool/call`, `one tool/code-dispatch-start + tool/code-dispatch pair per bridged sub-call`, `tool/result` | - | Owned by the tool registry as a reserved transport outside filterable capability layers under `mode: code` / `mode: both` (see the Code Mode Agent Note). Under `code` it is the registry's only wire contribution; the other visible capabilities are declared in a generated SDK section in the loaded runtime's language, and a program calls them through bindings scheduled under the native concurrency contract (submission-ordered starts and policy; concurrency-safe bodies overlap up to `maxParallelSubCalls`) that re-enter the complete guarded tool pipeline and link each nested execution to this outer result. |
@@ -470,6 +470,45 @@ connector_discover, connector_fetch, and connector_transfer run under the deploy
 <a id="deepseek-aidsh-tool-nocobase"></a>
 
 ## `@deepseek-ai/dsh-tool-nocobase`
+
+### `nb_approve`
+
+Drive one document through the approval engine (submit/approve/reject/void). Confirmed-change contract: present the document and action, get the user's explicit go-ahead BEFORE calling. Returns the transition receipt (from/to state, anchors, attempt round, effectiveness).
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "doc_type": {
+      "type": "string",
+      "description": "Document collection name (e.g. hub_po_purchase_orders)."
+    },
+    "doc_id": {
+      "type": "number",
+      "description": "The document row's primary-key id."
+    },
+    "action": {
+      "type": "string",
+      "description": "One of submit | approve | reject | void. submit on a rejected document resubmits it (attempt +1)."
+    },
+    "comment": {
+      "type": "string",
+      "description": "The actor's remark recorded in the audit trail (rejects read best with one)."
+    },
+    "approver": {
+      "type": "string",
+      "description": "The acting user's name for the audit record; defaults to admin."
+    }
+  },
+  "required": [
+    "doc_type",
+    "doc_id",
+    "action"
+  ]
+}
+```
+
+Source: [`packages/connector/tool-nocobase/src/index.ts`](../packages/connector/tool-nocobase/src/index.ts)
 
 ### `nb_collections`
 

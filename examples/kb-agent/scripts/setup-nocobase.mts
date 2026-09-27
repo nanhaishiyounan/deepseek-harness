@@ -743,9 +743,17 @@ async function stepVerify(): Promise<void> {
   const missingV2Crm = ['产品与服务', '回款', '发票', '客户仪表盘', '销售仪表盘'].filter(title => !v2Titles.has(title))
   if (missingV2Crm.length > 0) failures.push(`v2 CRM flowPages missing: ${missingV2Crm.join(', ')} (run nocobase-f2-crm-v2.mts)`)
   // F3: the Hub/HR/master-data pages, including the two composite pages
-  // (工作台 = two stacked table blocks, 分类维护 = four).
-  const missingV2Hub = ['知识文章', '维保记录', '部门', '请假审批', '供应商', '工作台', '分类维护'].filter(title => !v2Titles.has(title))
-  if (missingV2Hub.length > 0) failures.push(`v2 Hub flowPages missing: ${missingV2Hub.join(', ')} (run nocobase-f3-hub-v2.mts)`)
+  // (工作台 = two stacked table blocks, 分类维护 = four) and the B0
+  // hub_po_suppliers read view under the 采购 group.
+  const missingV2Hub = ['知识文章', '维保记录', '部门', '请假审批', '供应商', '采购联系人（历史）', '工作台', '分类维护'].filter(title => !v2Titles.has(title))
+  if (missingV2Hub.length > 0) failures.push(`v2 Hub flowPages missing: ${missingV2Hub.join(', ')} (run nocobase-f3-hub-v2.mts then nocobase-w2-supplier.mts; B2 retitled 采购供应商 → 采购联系人（历史）)`)
+  // B0: the mobile form-assistant writes hub_po_suppliers with status=待审核;
+  // the enum must carry that literal or the v2 column filter swallows the rows.
+  {
+    const supplierStatus = await call(token, 'GET', `/api/fields:list?filter=${encodeURIComponent(JSON.stringify({ collectionName: { $eq: 'hub_po_suppliers' }, name: { $eq: 'status' } }))}&pageSize=5`) as { data?: Array<{ uiSchema?: { enum?: Array<{ value?: string }> } }> }
+    const values = (supplierStatus?.data?.[0]?.uiSchema?.enum ?? []).map(option => option.value)
+    if (!values.includes('待审核')) failures.push(`hub_po_suppliers.status enum lacks 待审核 (${JSON.stringify(values)}); re-run nocobase-hub-modules.mts so the enum alignment appends it`)
+  }
   // H4: the SRM pages under the 供应链 group (six table/chart pages + the
   // CAPA kanban + the admission second view).
   const missingV2H4 = ['供应商档案', '供应商准入', '证照效期预警', '审核检查表', '审核评分录入', '绩效评分卡', '供应商绩效雷达', '整改跟踪'].filter(title => !v2Titles.has(title))
@@ -758,9 +766,623 @@ async function stepVerify(): Promise<void> {
   if (missingV2H5.length > 0) failures.push(`v2 WMS flowPages missing: ${missingV2H5.join(', ')} (run nocobase-h5-wms.mts)`)
   const wmsGroupRoutes = await call(token, 'GET', `/api/desktopRoutes:list?filter=${encodeURIComponent(JSON.stringify({ title: { $eq: '仓储管理' }, type: { $eq: 'group' } }))}&pageSize=1`) as { data?: Array<{ id: number }> }
   if ((wmsGroupRoutes?.data?.length ?? 0) === 0) failures.push('仓储管理 menu group missing (run nocobase-h5-wms.mts)')
-  const flowModels = await call(token, 'GET', '/api/flowModels:list?pageSize=2000') as { data?: Array<{ use?: string, uid?: string }>, meta?: { total?: number } }
+  // W1: the approval engine's NocoBase side — the six wfl_* collections, the
+  // 审批中心 page under 协同办公, the activated pilot flow config, and the
+  // receipts→purchase-order gate.
+  for (const wflCollection of ['wfl_flow_configs', 'wfl_flow_states', 'wfl_flow_transitions', 'wfl_approval_records', 'wfl_approval_todos', 'wfl_gate_configs']) {
+    const row = await dataOf(token, 'GET', `/api/collections/${wflCollection}`)
+    if (row === null) failures.push(`wfl collection ${wflCollection} missing (run nocobase-w1-approval.mts)`)
+  }
+  const missingV2W1 = ['审批中心'].filter(title => !v2Titles.has(title))
+  if (missingV2W1.length > 0) failures.push(`v2 approval flowPages missing: ${missingV2W1.join(', ')} (run nocobase-w1-approval.mts)`)
+  const w1GroupRoutes = await call(token, 'GET', `/api/desktopRoutes:list?filter=${encodeURIComponent(JSON.stringify({ title: { $eq: '协同办公' }, type: { $eq: 'group' } }))}&pageSize=1`) as { data?: Array<{ id: number }> }
+  if ((w1GroupRoutes?.data?.length ?? 0) === 0) failures.push('协同办公 menu group missing (run nocobase-w1-approval.mts)')
+  {
+    const flowConfigs = await call(token, 'GET', `/api/wfl_flow_configs:list?filter=${encodeURIComponent(JSON.stringify({ doc_type: { $eq: 'hub_po_purchase_orders' }, is_active: true }))}&pageSize=5`) as { data?: Array<{ state_field?: string }> }
+    if ((flowConfigs?.data?.length ?? 0) === 0) failures.push('hub_po_purchase_orders has no active approval flow config (run nocobase-w1-approval.mts / approval-engine.mts --seed-flow)')
+    const gates = await call(token, 'GET', `/api/wfl_gate_configs:list?filter=${encodeURIComponent(JSON.stringify({ downstream_collection: { $eq: 'wms_receipts' } }))}&pageSize=5`) as { data?: unknown[] }
+    if ((gates?.data?.length ?? 0) === 0) failures.push('wms_receipts→hub_po_purchase_orders gate config missing (run nocobase-w1-approval.mts)')
+    const poFields = await call(token, 'GET', `/api/fields:list?filter=${encodeURIComponent(JSON.stringify({ collectionName: { $eq: 'hub_po_purchase_orders' }, name: { $eq: 'doc_status' } }))}&pageSize=5`) as { data?: unknown[] }
+    if ((poFields?.data?.length ?? 0) === 0) failures.push('hub_po_purchase_orders.doc_status missing (run nocobase-w1-approval.mts)')
+  }
+  // B2: the supplier single source — the admission flow over srm_suppliers,
+  // the AVL gate on purchase-order creation, the h4 create-triggered workflow
+  // retired, and the h4 seed rows untouched by the lifecycle change.
+  {
+    const admissionConfigs = await call(token, 'GET', `/api/wfl_flow_configs:list?filter=${encodeURIComponent(JSON.stringify({ doc_type: { $eq: 'srm_suppliers' }, is_active: true }))}&pageSize=5`) as { data?: Array<{ state_field?: string }> }
+    if ((admissionConfigs?.data?.length ?? 0) === 0) failures.push('srm_suppliers has no active admission flow config (run nocobase-w2-supplier.mts)')
+    else if (admissionConfigs?.data?.[0]?.state_field !== 'lifecycle_status') failures.push('srm_suppliers admission flow must ride state_field=lifecycle_status (run nocobase-w2-supplier.mts)')
+    const supplierGates = await call(token, 'GET', `/api/wfl_gate_configs:list?filter=${encodeURIComponent(JSON.stringify({ downstream_collection: { $eq: 'hub_po_purchase_orders' }, upstream_collection: { $eq: 'srm_suppliers' } }))}&pageSize=5`) as { data?: Array<{ upstream_state_field?: string | null, required_status?: string | null }> }
+    const supplierGate = supplierGates?.data?.[0]
+    if (supplierGate === undefined) failures.push('hub_po_purchase_orders→srm_suppliers supplier gate missing (run nocobase-w2-supplier.mts)')
+    else if (supplierGate.upstream_state_field !== 'lifecycle_status' || supplierGate.required_status !== 'qualified,preferred') {
+      failures.push('the supplier gate must read lifecycle_status ∈ qualified,preferred (run nocobase-w2-supplier.mts)')
+    }
+    const h4Workflows = await call(token, 'GET', `/api/workflows:list?filter=${encodeURIComponent(JSON.stringify({ title: { $eq: 'SRM供应商准入审批' } }))}&pageSize=5`) as { data?: Array<{ enabled?: boolean }> }
+    if ((h4Workflows?.data?.length ?? 0) > 0 && h4Workflows?.data?.[0]?.enabled !== false) {
+      failures.push('the h4 SRM供应商准入审批 workflow must be disabled (the wfl engine owns the admission lifecycle; run nocobase-w2-supplier.mts)')
+    }
+    const seeded = await call(token, 'GET', `/api/srm_suppliers:list?filter=${encodeURIComponent(JSON.stringify({ name: { $eq: '珠海鲜丰水产科技有限公司' } }))}&pageSize=5`) as { data?: Array<{ lifecycle_status?: string }> }
+    if ((seeded?.data?.length ?? 0) === 0 || seeded?.data?.[0]?.lifecycle_status !== 'qualified') {
+      failures.push('the h4 seed supplier 珠海鲜丰水产科技有限公司 must stay qualified (lifecycle untouched by the B2 change; run the all chain)')
+    }
+  }
+  // B3: the procurement full chain — nine pur_* collections, the 采购管理
+  // seven pages + group, the six gate rows, the four flow configs, the
+  // wms_receipts PO/IQC columns, and the 待检区 seed.
+  {
+    for (const purCollection of ['pur_requests', 'pur_request_lines', 'pur_rfqs', 'pur_rfq_suppliers', 'pur_quotes', 'pur_orders', 'pur_order_lines', 'pur_invoices', 'pur_payments']) {
+      const row = await dataOf(token, 'GET', `/api/collections/${purCollection}`)
+      if (row === null) failures.push(`pur collection ${purCollection} missing (run nocobase-w3-procurement.mts)`)
+    }
+    const purRoutes = await call(token, 'GET', '/api/desktopRoutes:list?pageSize=200') as { data?: Array<{ title?: string | null, type?: string }> }
+    const purTitles = new Set((purRoutes?.data ?? []).map(row => row.title ?? ''))
+    const missingPur = ['采购申请', '询价管理', '供应商报价', '比价表', '采购订单', '发票匹配', '付款申请'].filter(title => !purTitles.has(title))
+    if (missingPur.length > 0) failures.push(`采购域 flowPages missing: ${missingPur.join(', ')} (run nocobase-w3-procurement.mts)`)
+    if (!purTitles.has('采购管理')) failures.push('采购管理 menu group missing (run nocobase-w3-procurement.mts)')
+    const gatePairs: ReadonlyArray<[string, string, string]> = [
+      ['pur_rfqs', 'pur_requests', 'pr_id'],
+      ['pur_orders', 'srm_suppliers', 'supplier_id'],
+      ['pur_orders', 'pur_rfqs', 'rfq_id'],
+      ['pur_invoices', 'pur_orders', 'po_id'],
+      ['pur_payments', 'pur_invoices', 'invoice_id'],
+      ['wms_receipts', 'pur_orders', 'po_id'],
+    ]
+    const gateRows = (await dataOf(token, 'GET', '/api/wfl_gate_configs:list?pageSize=100')) as Array<Record<string, any>> ?? []
+    for (const [downstream, upstream, field] of gatePairs) {
+      if (!gateRows.some(gate => gate.downstream_collection === downstream && gate.upstream_collection === upstream && gate.upstream_field === field)) {
+        failures.push(`gate ${downstream}→${upstream} (${field}) missing (run nocobase-w3-procurement.mts)`)
+      }
+    }
+    const invoiceGate = gateRows.find(gate => gate.downstream_collection === 'pur_payments' && gate.upstream_collection === 'pur_invoices')
+    if (invoiceGate !== undefined && (invoiceGate.upstream_state_field !== 'match_result' || invoiceGate.required_status !== 'confirmed')) {
+      failures.push('the pur_payments→pur_invoices gate must read match_result=confirmed (run nocobase-w3-procurement.mts)')
+    }
+    for (const purDocType of ['pur_requests', 'pur_rfqs', 'pur_orders', 'pur_payments']) {
+      const purFlows = await call(token, 'GET', `/api/wfl_flow_configs:list?filter=${encodeURIComponent(JSON.stringify({ doc_type: { $eq: purDocType }, is_active: true }))}&pageSize=5`) as { data?: unknown[] }
+      if ((purFlows?.data?.length ?? 0) === 0) failures.push(`${purDocType} has no active flow config (run nocobase-w3-procurement.mts)`)
+    }
+    const receiptCols = await call(token, 'GET', `/api/fields:list?filter=${encodeURIComponent(JSON.stringify({ collectionName: { $eq: 'wms_receipts' } }))}&pageSize=200`) as { data?: Array<{ name?: string }> }
+    const receiptColNames = new Set((receiptCols?.data ?? []).map(field => field.name))
+    for (const receiptCol of ['po_id', 'iqc_status']) {
+      if (!receiptColNames.has(receiptCol)) failures.push(`wms_receipts.${receiptCol} missing (run nocobase-w3-procurement.mts)`)
+    }
+    const quarantine = await call(token, 'GET', `/api/wms_zones:list?filter=${encodeURIComponent(JSON.stringify({ code: { $eq: 'SH-Q' } }))}&pageSize=5`) as { data?: unknown[] }
+    if ((quarantine?.data?.length ?? 0) === 0) failures.push('IQC 待检区 SH-Q missing (run nocobase-h5-wms.mts then nocobase-w3-procurement.mts)')
+    // W2-B5: approval config — the pur_orders flow rides its extras
+    // (amount_threshold 200000, invoice_match_tolerance 0.1, the
+    // two-person manager tier) with the config_note audit column and the
+    // demo pair's todo expansion; so_orders stays on the default threshold
+    // (no key — the W-round fallback).
+    {
+      const w2b5Flows = (await dataOf(token, 'GET', '/api/wfl_flow_configs:list?pageSize=100')) as Array<Record<string, any>> | null ?? []
+      const purFlow = w2b5Flows.find(row => row.doc_type === 'pur_orders' && row.is_active === true)
+      if (purFlow === undefined) failures.push('pur_orders active flow missing (W2-B5; run nocobase-w3-procurement.mts)')
+      else {
+        const extras = JSON.parse(String(purFlow.extras ?? '{}')) as Record<string, unknown>
+        if (extras['amount_threshold'] !== 200_000) failures.push(`pur_orders extras.amount_threshold ${JSON.stringify(extras['amount_threshold'])} ≠ 200000 (W2-B5)`)
+        if (extras['invoice_match_tolerance'] !== 0.1) failures.push(`pur_orders extras.invoice_match_tolerance ${JSON.stringify(extras['invoice_match_tolerance'])} ≠ 0.1 (W2-B5)`)
+        const approverMap = JSON.parse(String(purFlow.approver_map ?? '{}')) as Record<string, unknown>
+        const manager = approverMap['manager']
+        if (!Array.isArray(manager) || !manager.includes('quality_lead')) failures.push('pur_orders approver_map.manager must be array-form with quality_lead (W2-B5)')
+        if (typeof purFlow.config_note !== 'string' || !purFlow.config_note.includes('w2b5')) failures.push('pur_orders config_note audit trail missing (W2-B5)')
+      }
+      const soFlow = w2b5Flows.find(row => row.doc_type === 'so_orders' && row.is_active === true)
+      if (soFlow !== undefined) {
+        const soExtras = JSON.parse(String(soFlow.extras ?? '{}')) as Record<string, unknown>
+        if (soExtras['amount_threshold'] !== undefined) failures.push('so_orders extras must carry no amount_threshold (default 100000 fallback; W2-B5)')
+      }
+      const w2b5Users = (await dataOf(token, 'GET', '/api/users:list?pageSize=200')) as Array<Record<string, any>> | null ?? []
+      if (!w2b5Users.some(row => row.username === 'quality_lead')) failures.push('quality_lead demo approver user missing (W2-B5; run nocobase-w3-procurement.mts)')
+      const w2b5Pos = (await dataOf(token, 'GET', '/api/pur_orders:list?pageSize=500')) as Array<Record<string, any>> | null ?? []
+      const demoSmall = w2b5Pos.find(row => row.code === 'PO-B5-A')
+      const demoLarge = w2b5Pos.find(row => row.code === 'PO-B5-B')
+      const demoWitness = w2b5Pos.find(row => row.code === 'PO-B5-C')
+      if (demoSmall?.doc_status !== 'approved') failures.push(`PO-B5-A must sit approved (got ${String(demoSmall?.doc_status)}; W2-B5 150k one-round demo)`)
+      if (demoLarge?.doc_status !== 'approved') failures.push(`PO-B5-B must sit approved (got ${String(demoLarge?.doc_status)}; W2-B5 250k two-round demo)`)
+      if (demoWitness?.doc_status !== 'approved') failures.push(`PO-B5-C must sit approved (got ${String(demoWitness?.doc_status)}; W2-B5 todo-expansion witness)`)
+      const w2b5Todos = (await dataOf(token, 'GET', '/api/wfl_approval_todos:list?pageSize=500')) as Array<Record<string, any>> | null ?? []
+      const witnessTodos = w2b5Todos.filter(row => row.doc_type === 'pur_orders' && String(row.doc_id) === String(demoWitness?.id))
+      if (witnessTodos.length !== 2 || !witnessTodos.every(row => row.status === 'completed') || !witnessTodos.some(row => row.user === 'quality_lead') || !witnessTodos.some(row => row.user === 'admin')) {
+        failures.push(`PO-B5-C todos must be the two-person expansion (admin+quality_lead) completed (${JSON.stringify(witnessTodos.map(row => [row.user, row.status]))}; W2-B5)`)
+      }
+      const w2b5Records = (await dataOf(token, 'GET', '/api/wfl_approval_records:list?pageSize=500')) as Array<Record<string, any>> | null ?? []
+      if (!w2b5Records.some(row => row.doc_type === 'pur_orders' && String(row.doc_id) === String(demoSmall?.id) && row.approver === 'quality_lead' && row.to_state === 'approved')) {
+        failures.push('PO-B5-A records must carry quality_lead one-round approval (W2-B5)')
+      }
+      if (!w2b5Records.some(row => row.doc_type === 'pur_orders' && String(row.doc_id) === String(demoLarge?.id) && row.to_state === 'pending_level2')) {
+        failures.push('PO-B5-B records must carry the pending_level2 route (W2-B5)')
+      }
+    }
+    // W2-B6: the execution-policy batch — the two MO-level policy columns
+    // with the W-round defaults (full_lock / 0, never NULL), the
+    // reservation_state enum growth (partial_allowed), and the two engine
+    // selftests green (split-suggestion card + policy pure layer).
+    {
+      const w2b6Fields = await call(token, 'GET', `/api/fields:list?filter=${encodeURIComponent(JSON.stringify({ collectionName: { $eq: 'mfg_orders' } }))}&pageSize=200`) as { data?: Array<{ name?: string, uiSchema?: { enum?: Array<{ value?: string }> } }> }
+      const w2b6ByName = new Map((w2b6Fields?.data ?? []).map(field => [field.name, field]))
+      for (const w2b6Column of ['kit_policy', 'overissue_ratio']) {
+        if (!w2b6ByName.has(w2b6Column)) failures.push(`mfg_orders.${w2b6Column} missing (W2-B6; run nocobase-w6-mfg-exec.mts)`)
+      }
+      const kitEnum = w2b6ByName.get('kit_policy')?.uiSchema?.enum ?? []
+      for (const policyValue of ['full_lock', 'partial_allowed']) {
+        if (!kitEnum.some(option => option.value === policyValue)) failures.push(`mfg_orders.kit_policy enum must carry ${policyValue} (W2-B6)`)
+      }
+      const axisEnum = w2b6ByName.get('reservation_state')?.uiSchema?.enum ?? []
+      if (!axisEnum.some(option => option.value === 'partial_allowed')) failures.push('mfg_orders.reservation_state enum must carry partial_allowed (W2-B6; run nocobase-w6-mfg-exec.mts)')
+      // A NULL policy/ratio is the compliant default (the engine's fallback:
+      // full_lock / 0 — mrp-run mints MOs without the columns); the gate
+      // refuses every non-null value outside the closed legal domain.
+      const w2b6Mos = (await dataOf(token, 'GET', '/api/mfg_orders:list?pageSize=500') as Array<Record<string, any>> | null) ?? []
+      for (const mo of w2b6Mos) {
+        const policy = mo.kit_policy
+        if (policy !== null && policy !== undefined && String(policy) !== '' && policy !== 'full_lock' && policy !== 'partial_allowed') {
+          failures.push(`mfg_orders ${String(mo.code)} kit_policy must sit full_lock|partial_allowed|NULL(default), got ${JSON.stringify(policy)} (W2-B6)`)
+        }
+        const rawRatio = mo.overissue_ratio
+        if (rawRatio !== null && rawRatio !== undefined && String(rawRatio) !== '') {
+          const ratio = Number(rawRatio)
+          if (!Number.isFinite(ratio) || ratio < 0) {
+            failures.push(`mfg_orders ${String(mo.code)} overissue_ratio must be a finite ≥0 number (or NULL=0), got ${JSON.stringify(rawRatio)} (W2-B6)`)
+          }
+        }
+      }
+      for (const [w2b6Script, w2b6Verb] of [['mfg-schedule.mts', '--selftest'], ['nocobase-h5-wms.mts', '--selftest-b6']] as const) {
+        const selftest = spawnSync('node', ['--import', 'tsx/esm', join(repoRoot, 'examples/kb-agent/scripts', w2b6Script), w2b6Verb], { encoding: 'utf8', cwd: repoRoot })
+        if (selftest.status !== 0) {
+          failures.push(`${w2b6Script} ${w2b6Verb} failed (W2-B6):\n${(selftest.stdout ?? '') + (selftest.stderr ?? '')}`.slice(0, 600))
+        }
+      }
+    }
+    // B4: the inventory practice extension — the reservation/suggestion
+    // collections, the three new pages, the planning columns, the virtual
+    // zones, the count workflow's engine-callback leg, the bypass-guard rows,
+    // and the stock == Σmovements ledger gate (any bypass write turns it red).
+    {
+      for (const b4Collection of ['wms_reservations', 'wms_reorder_suggestions']) {
+        const row = await dataOf(token, 'GET', `/api/collections/${b4Collection}`)
+        if (row === null) failures.push(`B4 collection ${b4Collection} missing (run nocobase-h5-wms.mts)`)
+      }
+      const b4Routes = await call(token, 'GET', '/api/desktopRoutes:list?pageSize=200') as { data?: Array<{ title?: string | null }> }
+      const b4Titles = new Set((b4Routes?.data ?? []).map(row => row.title ?? ''))
+      const missingB4 = ['预留管理', '补货预警', '盘点计划'].filter(title => !b4Titles.has(title))
+      if (missingB4.length > 0) failures.push(`B4 WMS flowPages missing: ${missingB4.join(', ')} (run nocobase-h5-wms.mts)`)
+      const productFieldsB4 = await call(token, 'GET', `/api/fields:list?filter=${encodeURIComponent(JSON.stringify({ collectionName: { $eq: 'hub_inv_products' } }))}&pageSize=200`) as { data?: Array<{ name?: string }> }
+      const productFieldNamesB4 = new Set((productFieldsB4?.data ?? []).map(field => field.name))
+      for (const column of ['abc_class', 'reorder_point', 'safety_stock', 'lot_size', 'lead_time_days', 'avg_daily_use']) {
+        if (!productFieldNamesB4.has(column)) failures.push(`hub_inv_products.${column} missing (run nocobase-h5-wms.mts for the B4 ROP/ABC columns)`)
+      }
+      const countFieldsB4 = await call(token, 'GET', `/api/fields:list?filter=${encodeURIComponent(JSON.stringify({ collectionName: { $eq: 'wms_counts' } }))}&pageSize=200`) as { data?: Array<{ name?: string }> }
+      if (!(new Set((countFieldsB4?.data ?? []).map(field => field.name))).has('abc_class')) failures.push('wms_counts.abc_class missing (run nocobase-h5-wms.mts)')
+      const transferFieldsB4 = await call(token, 'GET', `/api/fields:list?filter=${encodeURIComponent(JSON.stringify({ collectionName: { $eq: 'wms_transfers' } }))}&pageSize=200`) as { data?: Array<{ name?: string }> }
+      if (!(new Set((transferFieldsB4?.data ?? []).map(field => field.name))).has('transfer_mode')) failures.push('wms_transfers.transfer_mode missing (run nocobase-h5-wms.mts)')
+      for (const virtualZone of ['SH-ADJ', 'SH-TR']) {
+        const zone = await call(token, 'GET', `/api/wms_zones:list?filter=${encodeURIComponent(JSON.stringify({ code: { $eq: virtualZone } }))}&pageSize=5`) as { data?: unknown[] }
+        if ((zone?.data?.length ?? 0) === 0) failures.push(`B4 virtual zone ${virtualZone} missing (run nocobase-h5-wms.mts)`)
+      }
+      // The count workflow must carry the B4 request leg (manual → condition →
+      // request engine callback → update done) — the pre-B4 shape silently
+      // skipped the engine write-back.
+      const countWorkflows = await call(token, 'GET', `/api/workflows:list?filter=${encodeURIComponent(JSON.stringify({ title: { $eq: 'WMS盘点差异调整审批' } }))}&pageSize=5`) as { data?: Array<{ id?: number }> }
+      const countWorkflowId = countWorkflows?.data?.[0]?.id
+      if (countWorkflowId === undefined) {
+        failures.push('WMS盘点差异调整审批 workflow missing (run nocobase-h5-wms.mts)')
+      } else {
+        const nodes = (await dataOf(token, 'GET', `/api/flow_nodes:list?filter=${encodeURIComponent(JSON.stringify({ workflowId: { $eq: countWorkflowId } }))}&pageSize=50`)) as Array<{ type?: string, title?: string }> | null
+        const requestNode = (nodes ?? []).find(node => node.type === 'request')
+        if (requestNode === undefined) failures.push('WMS盘点差异调整审批 lacks the B4 request node (run nocobase-h5-wms.mts to rebuild with the engine callback leg)')
+      }
+      // The bypass guard: admin→wms_stock / wms_movements narrowed to the
+      // explicit read-only actions (the runtime 403 lives in the demo chain).
+      const guardRows = (await dataOf(token, 'GET', `/api/rolesResources:list?pageSize=100&filter=${encodeURIComponent(JSON.stringify({ roleName: { $eq: 'admin' }, name: { $in: ['wms_stock', 'wms_movements'] } }))}`)) as Array<Record<string, any>> | null
+      for (const collection of ['wms_stock', 'wms_movements']) {
+        const row = (guardRows ?? []).find(candidate => candidate.name === collection)
+        if (row === undefined || row.usingActionsConfig !== true) {
+          failures.push(`bypass guard admin→${collection} missing (run nocobase-h5-wms.mts; stock writes must stay engine-only)`)
+        }
+      }
+      // The ledger gate: per (product, lot), Σ stock.qty_on_hand == Σ movements.qty.
+      {
+        const stocks = (await dataOf(token, 'GET', '/api/wms_stock:list?pageSize=500')) as Array<Record<string, any>> | null
+        const movements = (await dataOf(token, 'GET', '/api/wms_movements:list?pageSize=1000')) as Array<Record<string, any>> | null
+        const stockSums = new Map<string, number>()
+        for (const row of stocks ?? []) {
+          const key = `${String(row.product_id)}:${String(row.lot_id)}`
+          stockSums.set(key, (stockSums.get(key) ?? 0) + Number(row.qty_on_hand ?? 0))
+        }
+        const ledgerSums = new Map<string, number>()
+        for (const row of movements ?? []) {
+          const key = `${String(row.product_id)}:${String(row.lot_id)}`
+          ledgerSums.set(key, (ledgerSums.get(key) ?? 0) + Number(row.qty ?? 0))
+        }
+        const drift: string[] = []
+        for (const [key, sum] of stockSums) {
+          if (Math.abs(sum - (ledgerSums.get(key) ?? 0)) > 0.01) drift.push(`${key}: stock ${String(sum)} vs ledger ${String(ledgerSums.get(key) ?? 0)}`)
+        }
+        for (const [key, sum] of ledgerSums) {
+          if (!stockSums.has(key) && Math.abs(sum) > 0.01) drift.push(`${key}: ledger ${String(sum)} with no stock row`)
+        }
+        if (drift.length > 0) failures.push(`wms_stock != Σwms_movements (bypass write suspected; run nocobase-h5-wms.mts --rebalance only after auditing): ${drift.slice(0, 4).join('; ')}`)
+      }
+      // W2-B3: the business-date coverage gate — every movements/counts row
+      // carries biz_date (the backfill settles stock, the appendMovement
+      // helper keeps new rows covered; a bypass create turns this red) — and
+      // the monthly-balance snapshot exists and reconciles against a fresh
+      // ledger replay (期初+收−发=期末 + continuity), per the batch contract.
+      {
+        const movements = (await dataOf(token, 'GET', '/api/wms_movements:list?pageSize=1000')) as Array<Record<string, any>> | null
+        const counts = (await dataOf(token, 'GET', '/api/wms_counts:list?pageSize=500')) as Array<Record<string, any>> | null
+        const nullMoves = (movements ?? []).filter(row => String(row.biz_date ?? '') === '')
+        const nullCounts = (counts ?? []).filter(row => String(row.biz_date ?? '') === '')
+        if (nullMoves.length > 0) failures.push(`wms_movements.biz_date NULL on ${String(nullMoves.length)} row(s) (run nocobase-h5-wms.mts --backfill-dates; direct creates bypassing appendMovement are forbidden): ${nullMoves.slice(0, 3).map(row => String(row.doc_no)).join(', ')}`)
+        if (nullCounts.length > 0) failures.push(`wms_counts.biz_date NULL on ${String(nullCounts.length)} row(s) (run nocobase-h5-wms.mts --backfill-dates)`)
+        const balances = (await dataOf(token, 'GET', '/api/wms_monthly_balances:list?pageSize=1000')) as Array<Record<string, any>> | null
+        if ((balances ?? []).length === 0) {
+          failures.push('wms_monthly_balances empty (run nocobase-h5-wms.mts --snapshot-month all)')
+        } else {
+          const replayed = new Map<string, { opening: number, inQty: number, outQty: number, bal: number }>()
+          for (const row of movements ?? []) {
+            const date = String(row.biz_date ?? '')
+            if (date === '') continue
+            const key = `${String(row.product_id)}:${date.slice(0, 7)}`
+            if (!replayed.has(key)) replayed.set(key, { opening: 0, inQty: 0, outQty: 0, bal: 0 })
+          }
+          for (const row of movements ?? []) {
+            const date = String(row.biz_date ?? '')
+            if (date === '') continue
+            const qty = Number(row.qty ?? 0)
+            for (const [key, bucket] of replayed) {
+              const [productId, period] = key.split(':')
+              if (String(row.product_id) !== productId) continue
+              if (date.slice(0, 7) < period) bucket.opening += qty
+              if (date.slice(0, 7) === period) {
+                if (qty >= 0) bucket.inQty += qty
+                else bucket.outQty -= qty
+              }
+            }
+          }
+          for (const bucket of replayed.values()) bucket.bal = bucket.opening + bucket.inQty - bucket.outQty
+          const balanceDrift: string[] = []
+          for (const row of balances ?? []) {
+            const key = `${String(row.product_id)}:${String(row.period)}`
+            const bucket = replayed.get(key)
+            if (bucket === undefined) {
+              balanceDrift.push(`${key}: snapshot row with no replayable ledger`)
+              continue
+            }
+            if (Math.abs(Number(row.bal_qty) - bucket.bal) > 0.01 || Math.abs(Number(row.in_qty) - bucket.inQty) > 0.01
+              || Math.abs(Number(row.out_qty) - bucket.outQty) > 0.01 || Math.abs(Number(row.opening_qty) - bucket.opening) > 0.01) {
+              balanceDrift.push(`${key}: snapshot ${String(row.opening_qty)}/${String(row.in_qty)}/${String(row.out_qty)}/${String(row.bal_qty)} != replay ${String(bucket.opening)}/${String(bucket.inQty)}/${String(bucket.outQty)}/${String(bucket.bal)}`)
+            }
+          }
+          const byProduct = new Map<number, Array<{ period: string, bal: number, opening: number }>>()
+          for (const row of balances ?? []) {
+            const productId = Number(row.product_id)
+            if (!byProduct.has(productId)) byProduct.set(productId, [])
+            byProduct.get(productId)!.push({ period: String(row.period), bal: Number(row.bal_qty), opening: Number(row.opening_qty) })
+          }
+          for (const [productId, list] of byProduct) {
+            const ordered = list.sort((a, b) => a.period.localeCompare(b.period))
+            for (let index = 1; index < ordered.length; index += 1) {
+              if (Math.abs(ordered[index - 1]!.bal - ordered[index]!.opening) > 0.01) {
+                balanceDrift.push(`product ${String(productId)}: ${ordered[index - 1]!.period} bal ${String(ordered[index - 1]!.bal)} != ${ordered[index]!.period} opening ${String(ordered[index]!.opening)}`)
+              }
+            }
+          }
+          if (balanceDrift.length > 0) failures.push(`wms_monthly_balances != ledger replay (run nocobase-h5-wms.mts --recalc): ${balanceDrift.slice(0, 4).join('; ')}`)
+        }
+      }
+    }
+    const purFloor = async (collection: string, floor: number): Promise<string | null> => {
+      const rows = await call(token, 'GET', `/api/${collection}:list?pageSize=1`) as { meta?: { count?: number } } | null
+      return (rows?.meta?.count ?? 0) >= floor ? null : `${collection} has ${String(rows?.meta?.count ?? 0)} rows (< ${String(floor)})`
+    }
+    for (const [collection, floor] of [['pur_requests', 2], ['pur_rfqs', 1], ['pur_quotes', 3], ['pur_orders', 3]] as const) {
+      const failure = await purFloor(collection, floor)
+      if (failure !== null) failures.push(`${failure}; run the all chain so nocobase-w3-procurement.mts (and its demo chain) seeds`)
+    }
+    // B5: the manufacturing planning domain — the seven mfg_* collections, the
+    // 生产制造 menu group + five pages, the mfg_orders approval flow (amount
+    // routing on estimated_cost), the BOM gate, and the seed floors (versioned
+    // BOMs, operations, components, calendar, MOs).
+    {
+      for (const b5Collection of ['mfg_boms', 'mfg_bom_lines', 'mfg_bom_operations', 'mfg_work_centers', 'mfg_holidays', 'mfg_orders', 'mfg_order_operations']) {
+        const row = await dataOf(token, 'GET', `/api/collections/${b5Collection}`)
+        if (row === null) failures.push(`B5 collection ${b5Collection} missing (run nocobase-w5-mfg.mts)`)
+      }
+      const b5Routes = await call(token, 'GET', '/api/desktopRoutes:list?pageSize=200') as { data?: Array<{ title?: string | null }> }
+      const b5Titles = new Set((b5Routes?.data ?? []).map(row => row.title ?? ''))
+      const missingB5 = ['BOM 管理', 'BOM 工序', '工作中心', '生产订单', '排产看板'].filter(title => !b5Titles.has(title))
+      if (missingB5.length > 0) failures.push(`B5 生产域 flowPages missing: ${missingB5.join(', ')} (run nocobase-w5-mfg.mts)`)
+      if (!b5Titles.has('生产制造')) failures.push('生产制造 menu group missing (run nocobase-w5-mfg.mts)')
+      const b5Flows = (await dataOf(token, 'GET', '/api/wfl_flow_configs:list?pageSize=50')) as Array<Record<string, any>> | null
+      if (!(b5Flows ?? []).some(row => row.doc_type === 'mfg_orders' && row.is_active === true)) failures.push('mfg_orders flow config missing (run nocobase-w5-mfg.mts)')
+      const b5Gates = (await dataOf(token, 'GET', '/api/wfl_gate_configs:list?pageSize=100')) as Array<Record<string, any>> | null
+      if (!(b5Gates ?? []).some(row => row.downstream_collection === 'mfg_orders' && row.upstream_collection === 'mfg_boms' && row.upstream_state_field === 'bom_status' && row.required_status === 'active')) {
+        failures.push('the mfg_orders→mfg_boms gate (bom_status=active) missing (run nocobase-w5-mfg.mts)')
+      }
+      const b5Boms = (await dataOf(token, 'GET', '/api/mfg_boms:list?pageSize=50')) as Array<Record<string, any>> | null
+      if (!(b5Boms ?? []).some(row => row.code === 'BOM-0001' && row.bom_status === 'retired')) failures.push('BOM-0001 retired version row missing (版本切换不删旧版; run nocobase-w5-mfg.mts)')
+      for (const [collection, floor] of [['mfg_bom_lines', 8], ['mfg_bom_operations', 6], ['mfg_work_centers', 2], ['mfg_holidays', 9], ['mfg_orders', 2]] as const) {
+        const failure = await purFloor(collection, floor)
+        if (failure !== null) failures.push(`${failure}; run nocobase-w5-mfg.mts (and its demo chain) seeds`)
+      }
+    }
+    // B6: the manufacturing-execution domain — the four execution
+    // collections, the five pages (领料/退料/报工/完工 + MO 执行视图), the
+    // mfg_orders execution columns and the doc_status terminals, the WIP
+    // virtual zone + the three movement legs, and the draft seed floor.
+    {
+      for (const b6Collection of ['mfg_material_issues', 'mfg_material_returns', 'mfg_job_reports', 'mfg_completions']) {
+        const row = await dataOf(token, 'GET', `/api/collections/${b6Collection}`)
+        if (row === null) failures.push(`B6 collection ${b6Collection} missing (run nocobase-w6-mfg-exec.mts)`)
+      }
+      const b6Routes = await call(token, 'GET', '/api/desktopRoutes:list?pageSize=200') as { data?: Array<{ title?: string | null }> }
+      const b6Titles = new Set((b6Routes?.data ?? []).map(row => row.title ?? ''))
+      const missingB6 = ['领料单', '退料单', '报工记录', '完工单', 'MO 执行视图'].filter(title => !b6Titles.has(title))
+      if (missingB6.length > 0) failures.push(`B6 生产执行 flowPages missing: ${missingB6.join(', ')} (run nocobase-w6-mfg-exec.mts)`)
+      const b6MoFields = await call(token, 'GET', `/api/fields:list?filter=${encodeURIComponent(JSON.stringify({ collectionName: { $eq: 'mfg_orders' } }))}&pageSize=200`) as { data?: Array<{ name?: string }> }
+      const b6MoFieldNames = new Set((b6MoFields?.data ?? []).map(field => field.name))
+      for (const column of ['qty_transferred', 'qty_consumed', 'actual_cost', 'cost_variance', 'kit_data']) {
+        if (!b6MoFieldNames.has(column)) failures.push(`mfg_orders.${column} missing (run nocobase-w6-mfg-exec.mts for the B6 execution columns)`)
+      }
+      const b6StatusField = await call(token, 'GET', `/api/fields:list?filter=${encodeURIComponent(JSON.stringify({ collectionName: { $eq: 'mfg_orders' }, name: { $eq: 'doc_status' } }))}&pageSize=1`) as { data?: Array<{ uiSchema?: { enum?: Array<{ value?: string }> } }> }
+      const b6Stored = b6StatusField?.data?.[0]?.uiSchema?.enum ?? []
+      for (const value of ['in_progress', 'completed']) {
+        if (!b6Stored.some(option => option.value === value)) failures.push(`mfg_orders.doc_status enum lacks ${value} (run nocobase-w6-mfg-exec.mts)`)
+      }
+      const b6MoveField = await call(token, 'GET', `/api/fields:list?filter=${encodeURIComponent(JSON.stringify({ collectionName: { $eq: 'wms_movements' }, name: { $eq: 'move_type' } }))}&pageSize=1`) as { data?: Array<{ uiSchema?: { enum?: Array<{ value?: string }> } }> }
+      const b6MoveEnum = b6MoveField?.data?.[0]?.uiSchema?.enum ?? []
+      for (const leg of ['ISSUE_WIP', 'RETURN_WIP', 'RECEIPT_MFG']) {
+        if (!b6MoveEnum.some(option => option.value === leg)) failures.push(`wms_movements.move_type enum lacks ${leg} (run nocobase-h5-wms.mts for the B6 legs)`)
+      }
+      const b6Bins = await call(token, 'GET', `/api/wms_bins:list?filter=${encodeURIComponent(JSON.stringify({ code: { $eq: 'SH-WIP-01-01' } }))}&pageSize=1`) as { data?: Array<{ id?: number }> }
+      if ((b6Bins?.data?.length ?? 0) === 0) failures.push('WIP 线边库位 SH-WIP-01-01 missing (run nocobase-h5-wms.mts for the B6 virtual zone)')
+      for (const [collection, floor] of [['mfg_material_issues', 4], ['mfg_material_returns', 1], ['mfg_job_reports', 3], ['mfg_completions', 1]] as const) {
+        const failure = await purFloor(collection, floor)
+        if (failure !== null) failures.push(`${failure}; run nocobase-w6-mfg-exec.mts seeds`)
+      }
+      const b6Mo3 = (await dataOf(token, 'GET', `/api/mfg_orders:list?filter=${encodeURIComponent(JSON.stringify({ code: { $eq: 'MO-2026-0003' } }))}&pageSize=1`) as Array<{ doc_status?: string }> | null)?.[0]
+      if (b6Mo3 !== undefined && String(b6Mo3.doc_status) !== 'draft') failures.push(`MO-2026-0003 must stay draft（B6 复用走全链；当前 ${String(b6Mo3.doc_status)}）`)
+    }
+    // B7: the sales→MRP domain — the five collections, the three pages, the
+    // 销售管理 group, the so_orders flow, the three gates, the confirm
+    // workflow, the driver columns, the SHIPMENT_SO leg, and the seed floor.
+    {
+      for (const b7Collection of ['so_orders', 'so_order_lines', 'mrp_suggestions', 'mrp_snapshots', 'mrp_confirm_intents']) {
+        const row = await dataOf(token, 'GET', `/api/collections/${b7Collection}`)
+        if (row === null) failures.push(`B7 collection ${b7Collection} missing (run nocobase-w7-mrp.mts)`)
+      }
+      const b7Routes = await call(token, 'GET', '/api/desktopRoutes:list?pageSize=200') as { data?: Array<{ title?: string | null }> }
+      const b7Titles = new Set((b7Routes?.data ?? []).map(row => row.title ?? ''))
+      const missingB7 = ['销售订单', '计划工作台', 'MRP 快照'].filter(title => !b7Titles.has(title))
+      if (missingB7.length > 0) failures.push(`B7 销售域 flowPages missing: ${missingB7.join(', ')} (run nocobase-w7-mrp.mts)`)
+      if (!b7Titles.has('销售管理')) failures.push('销售管理 menu group missing (run nocobase-w7-mrp.mts)')
+      const b7Flows = await call(token, 'GET', '/api/wfl_flow_configs:list?pageSize=100') as { data?: Array<{ doc_type?: string, is_active?: boolean }> }
+      if (!(b7Flows?.data ?? []).some(row => row.doc_type === 'so_orders' && row.is_active === true)) failures.push('so_orders flow config missing (run nocobase-w7-mrp.mts)')
+      const b7Gates = await call(token, 'GET', '/api/wfl_gate_configs:list?pageSize=200') as { data?: Array<{ downstream_collection?: string, upstream_collection?: string, upstream_field?: string, required_status?: string }> }
+      const b7GateRows = b7Gates?.data ?? []
+      for (const [downstream, upstream, field, required] of [
+        ['mrp_suggestions', 'so_orders', 'driver_so_id', 'approved'],
+        ['mfg_orders', 'mrp_suggestions', 'driver_suggestion_id', 'open'],
+        ['pur_requests', 'mrp_suggestions', 'driver_suggestion_id', 'open'],
+      ] as const) {
+        const gate = b7GateRows.find(row => row.downstream_collection === downstream && row.upstream_collection === upstream && row.upstream_field === field)
+        if (gate === undefined) failures.push(`B7 gate ${downstream}→${upstream} (${field}) missing (run nocobase-w7-mrp.mts)`)
+        else if (String(gate.required_status ?? '') !== required) failures.push(`B7 gate ${downstream}→${upstream} must read ${required} (run nocobase-w7-mrp.mts to repair)`)
+      }
+      const b7Workflows = await call(token, 'GET', `/api/workflows:list?filter=${encodeURIComponent(JSON.stringify({ title: { $eq: 'MRP 计划单确认' } }))}&pageSize=5`) as { data?: Array<{ id?: number }> }
+      if ((b7Workflows?.data?.length ?? 0) === 0) failures.push('MRP 计划单确认 workflow missing (run nocobase-w7-mrp.mts)')
+      const b7MoFields = await call(token, 'GET', `/api/fields:list?filter=${encodeURIComponent(JSON.stringify({ collectionName: { $eq: 'mfg_orders' } }))}&pageSize=200`) as { data?: Array<{ name?: string }> }
+      if (!(new Set((b7MoFields?.data ?? []).map(field => field.name))).has('driver_suggestion_id')) failures.push('mfg_orders.driver_suggestion_id missing (run nocobase-w7-mrp.mts)')
+      const b7PrFields = await call(token, 'GET', `/api/fields:list?filter=${encodeURIComponent(JSON.stringify({ collectionName: { $eq: 'pur_requests' } }))}&pageSize=200`) as { data?: Array<{ name?: string }> }
+      if (!(new Set((b7PrFields?.data ?? []).map(field => field.name))).has('driver_suggestion_id')) failures.push('pur_requests.driver_suggestion_id missing (run nocobase-w7-mrp.mts)')
+      const b7MoveField = await call(token, 'GET', `/api/fields:list?filter=${encodeURIComponent(JSON.stringify({ collectionName: { $eq: 'wms_movements' }, name: { $eq: 'move_type' } }))}&pageSize=1`) as { data?: Array<{ uiSchema?: { enum?: Array<{ value?: string }> } }> }
+      if (!(b7MoveField?.data?.[0]?.uiSchema?.enum ?? []).some(option => option.value === 'SHIPMENT_SO')) failures.push('wms_movements.move_type enum lacks SHIPMENT_SO (run nocobase-w7-mrp.mts)')
+      const b7QuoteFields = await call(token, 'GET', `/api/fields:list?filter=${encodeURIComponent(JSON.stringify({ collectionName: { $eq: 'crm_quotes' }, name: { $eq: 'version' } }))}&pageSize=1`) as { data?: Array<{ name?: string }> }
+      if ((b7QuoteFields?.data?.length ?? 0) === 0) failures.push('crm_quotes.version missing (run nocobase-crm-modules.mts)')
+      for (const [collection, floor] of [['so_orders', 3], ['so_order_lines', 4]] as const) {
+        const failure = await purFloor(collection, floor)
+        if (failure !== null) failures.push(`${failure}; run nocobase-w7-mrp.mts seeds`)
+      }
+      const b7So3 = (await dataOf(token, 'GET', `/api/so_orders:list?filter=${encodeURIComponent(JSON.stringify({ code: { $eq: 'SO-2026-0003' } }))}&pageSize=1`) as Array<{ doc_status?: string }> | null)?.[0]
+      if (b7So3 !== undefined && String(b7So3.doc_status) !== 'draft') failures.push(`SO-2026-0003 must stay draft（卡口负例素材；当前 ${String(b7So3.doc_status)}）`)
+    }
+    // B8: the quality domain — qm collections, the 质量管理 five pages, the
+    // AQL full-table seeds (W2-B1: 135 rows × rigor), the additive columns (switch counter / CAPA
+    // link / rework source / concession flag / OTD dates), the two
+    // disposition movement legs, and the concession approval flow. The
+    // three-way reconciliation (failed inspection + approved disposition +
+    // RETURN_VENDOR movement) runs inside nocobase-w8-quality.mts
+    // --demo-chain; verify asserts the reverse direction only when
+    // disposition legs exist (the chain is not part of the all replay).
+    {
+      for (const b8Collection of ['qm_inspections', 'qm_inspection_readings', 'qm_aql_plans', 'qm_nc_dispositions']) {
+        const row = await dataOf(token, 'GET', `/api/collections/${b8Collection}`)
+        if (row === null) failures.push(`B8 collection ${b8Collection} missing (run nocobase-w8-quality.mts)`)
+      }
+      const b8Routes = await call(token, 'GET', '/api/desktopRoutes:list?pageSize=200') as { data?: Array<{ title?: string | null }> }
+      const b8Titles = new Set((b8Routes?.data ?? []).map(row => row.title ?? ''))
+      const missingB8 = ['质检单', '检验读数', '处置看板', 'AQL抽样方案', '季度绩效物化'].filter(title => !b8Titles.has(title))
+      if (missingB8.length > 0) failures.push(`B8 质量域 flowPages missing: ${missingB8.join(', ')} (run nocobase-w8-quality.mts)`)
+      if (!b8Titles.has('质量管理')) failures.push('质量管理 menu group missing (run nocobase-w8-quality.mts)')
+      // W2-B1: the full-table reseed — 135 rows = 15 bands × (normal 5 rungs +
+      // tightened 2 + reduced 2), with the acceptance spot cells.
+      const b8Aql = (await dataOf(token, 'GET', '/api/qm_aql_plans:list?pageSize=200') as Array<Record<string, any>> | null) ?? []
+      const byRigor = b8Aql.reduce<Record<string, number>>((acc, row) => { const key = String(row.rigor ?? 'normal'); acc[key] = (acc[key] ?? 0) + 1; return acc }, {})
+      if (b8Aql.length !== 135 || byRigor.normal !== 75 || byRigor.tightened !== 30 || byRigor.reduced !== 30) {
+        failures.push(`qm_aql_plans full-table seed must read 135 rows (normal 75 / tightened 30 / reduced 30); got ${b8Aql.length} (${String(byRigor.normal ?? 0)}/${String(byRigor.tightened ?? 0)}/${String(byRigor.reduced ?? 0)}) — run nocobase-w8-quality.mts`)
+      }
+      const aqlCell = (band: string, aql: string, rigor: string): { n?: unknown, ac?: unknown, re?: unknown } | undefined => b8Aql.find(row => String(row.lot_band) === band && String(row.aql) === aql && String(row.rigor ?? 'normal') === rigor)
+      const gPlan = aqlCell('151-280', '2.5', 'normal')
+      if (gPlan === undefined || Number(gPlan.n) !== 32 || Number(gPlan.ac) !== 2 || Number(gPlan.re) !== 3) {
+        failures.push('qm_aql_plans G/2.5 normal array must read n=32 Ac=2 Re=3 (GB/T 2828.1 level II; run nocobase-w8-quality.mts)')
+      }
+      const hPlan = aqlCell('281-500', '2.5', 'normal')
+      if (hPlan === undefined || Number(hPlan.n) !== 50 || Number(hPlan.ac) !== 3 || Number(hPlan.re) !== 4) {
+        failures.push('qm_aql_plans 281-500 × 2.5 × normal must read n=50 Ac=3 Re=4 (W2-B1; run nocobase-w8-quality.mts)')
+      }
+      const kTight = aqlCell('1201-3200', '2.5', 'tightened')
+      if (kTight === undefined || Number(kTight.n) !== 125 || Number(kTight.ac) !== 5 || Number(kTight.re) !== 6) {
+        failures.push('qm_aql_plans 1201-3200 × 2.5 × tightened must read n=125 Ac=5 Re=6 (W2-B1 true tightened table; run nocobase-w8-quality.mts)')
+      }
+      if (!b8Aql.some(row => String(row.lot_band) === '500001+' && String(row.aql) === '1.0' && String(row.rigor ?? 'normal') === 'normal' && Number(row.n) === 1250 && Number(row.ac) === 21)) {
+        failures.push('qm_aql_plans 500001+ × 1.0 × normal row missing (n=1250 Ac=21; run nocobase-w8-quality.mts)')
+      }
+      for (const [collection, column] of [
+        ['srm_suppliers', 'reject_streak'], ['srm_suppliers', 'switch_score'],
+        ['qm_inspections', 'rigor'], ['qm_inspections', 'resubmission'],
+        ['srm_capas', 'inspection_code'], ['mfg_orders', 'source'],
+        ['wms_lots', 'concession_flag'], ['wms_receipts', 'received_at'], ['pur_orders', 'expected_date'],
+      ] as const) {
+        const fields = await call(token, 'GET', `/api/fields:list?filter=${encodeURIComponent(JSON.stringify({ collectionName: { $eq: collection } }))}&pageSize=300`) as { data?: Array<{ name?: string }> }
+        if (!(new Set((fields?.data ?? []).map(field => field.name))).has(column)) failures.push(`${collection}.${column} missing (run nocobase-w8-quality.mts)`)
+      }
+      const b8MoveField = await call(token, 'GET', `/api/fields:list?filter=${encodeURIComponent(JSON.stringify({ collectionName: { $eq: 'wms_movements' }, name: { $eq: 'move_type' } }))}&pageSize=1`) as { data?: Array<{ uiSchema?: { enum?: Array<{ value?: string }> } }> }
+      const b8MoveEnum = b8MoveField?.data?.[0]?.uiSchema?.enum ?? []
+      if (!b8MoveEnum.some(option => option.value === 'RETURN_VENDOR')) failures.push('wms_movements.move_type enum lacks RETURN_VENDOR (run nocobase-h5-wms.mts)')
+      if (!b8MoveEnum.some(option => option.value === 'SCRAP')) failures.push('wms_movements.move_type enum lacks SCRAP (run nocobase-h5-wms.mts)')
+      const b8Flows = await call(token, 'GET', '/api/wfl_flow_configs:list?pageSize=100') as { data?: Array<{ doc_type?: string, is_active?: boolean }> }
+      if (!(b8Flows?.data ?? []).some(row => row.doc_type === 'qm_nc_dispositions' && row.is_active === true)) failures.push('qm_nc_dispositions flow config missing (run nocobase-w8-quality.mts)')
+      // Reverse reconciliation: every RETURN_VENDOR / SCRAP leg must point at
+      // an approved + closed disposition row of the same code.
+      const b8Dispositions = (await dataOf(token, 'GET', '/api/qm_nc_dispositions:list?pageSize=200') as Array<Record<string, any>> | null) ?? []
+      const b8DisposalLegs = (await dataOf(token, 'GET', '/api/wms_movements:list?pageSize=500&filter=' + encodeURIComponent(JSON.stringify({ move_type: { $in: ['RETURN_VENDOR', 'SCRAP'] } }))) as Array<Record<string, any>> | null) ?? []
+      for (const leg of b8DisposalLegs) {
+        const nc = b8Dispositions.find(row => String(row.code) === String(leg.doc_no))
+        if (nc === undefined || String(nc.doc_status) !== 'approved' || String(nc.status) !== 'closed') {
+          failures.push(`disposition leg ${String(leg.move_type)} ${String(leg.doc_no)} lacks an approved+closed QM-NC row (三方勾稽; run nocobase-w8-quality.mts --demo-chain)`)
+        }
+      }
+    }
+    // W2-B2: the MPS layer — the two collections, the 主生产计划 page, the
+    // mps_plans flow, the suggestion back-link column, the demo seeds, and
+    // the historical covered-exclusivity invariant (any run carrying an
+    // mps:-driven level-0 row must carry mps: exclusively for that item —
+    // a mixed run means SO+MPS double-counted).
+    {
+      for (const w2b2Collection of ['mps_plans', 'mps_plan_items']) {
+        if (await dataOf(token, 'GET', `/api/collections/${w2b2Collection}`) === null) failures.push(`W2-B2 collection ${w2b2Collection} missing (run nocobase-w7-mrp.mts)`)
+      }
+      const w2b2Routes = await call(token, 'GET', '/api/desktopRoutes:list?pageSize=200') as { data?: Array<{ title?: string | null }> }
+      if (!(new Set((w2b2Routes?.data ?? []).map(row => row.title ?? ''))).has('主生产计划')) failures.push('主生产计划 flowPage missing (run nocobase-w7-mrp.mts)')
+      const w2b2Flows = await call(token, 'GET', '/api/wfl_flow_configs:list?pageSize=100') as { data?: Array<{ doc_type?: string, is_active?: boolean }> }
+      if (!(w2b2Flows?.data ?? []).some(row => row.doc_type === 'mps_plans' && row.is_active === true)) failures.push('mps_plans flow config missing (run nocobase-w7-mrp.mts)')
+      const w2b2SuggestFields = await call(token, 'GET', `/api/fields:list?filter=${encodeURIComponent(JSON.stringify({ collectionName: { $eq: 'mrp_suggestions' } }))}&pageSize=200`) as { data?: Array<{ name?: string }> }
+      if (!(new Set((w2b2SuggestFields?.data ?? []).map(field => field.name))).has('mps_plan')) failures.push('mrp_suggestions.mps_plan missing (run nocobase-w7-mrp.mts)')
+      const w2b2Plans = (await dataOf(token, 'GET', '/api/mps_plans:list?pageSize=100') as Array<Record<string, any>> | null) ?? []
+      const now = new Date()
+      const nextMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1)).toISOString().slice(0, 7)
+      const w2b2Plan = w2b2Plans.find(row => String(row.code ?? '') === `MPS-${nextMonth.replace('-', '')}-01`)
+      if (w2b2Plan === undefined) failures.push(`W2-B2 seed MPS plan MPS-${nextMonth.replace('-', '')}-01 missing (run nocobase-w7-mrp.mts)`)
+      else {
+        const w2b2Items = (await dataOf(token, 'GET', `/api/mps_plan_items:list?filter=${encodeURIComponent(JSON.stringify({ plan_id: { $eq: w2b2Plan.id } }))}&pageSize=100`) as Array<Record<string, any>> | null) ?? []
+        if (w2b2Items.length < 5) failures.push(`W2-B2 mps_plan_items rows < 5 (${String(w2b2Items.length)}; run nocobase-w7-mrp.mts)`)
+        if (w2b2Items.some(row => row.planned_qty === null || row.planned_qty === undefined)) failures.push('W2-B2 mps_plan_items carries never-recalculated row(s) (planned_qty null; run nocobase-w7-mrp.mts recalc)')
+      }
+      const w2b2Sos = (await dataOf(token, 'GET', '/api/so_orders:list?pageSize=200') as Array<Record<string, any>> | null) ?? []
+      for (const w2b2SoCode of ['SO-2026-0091', 'SO-2026-0092', 'SO-2026-0093']) {
+        if (!w2b2Sos.some(row => String(row.code ?? '') === w2b2SoCode)) failures.push(`W2-B2 seed ${w2b2SoCode} missing (run nocobase-w7-mrp.mts)`)
+      }
+      const w2b2Snapshots = (await dataOf(token, 'GET', '/api/mrp_snapshots:list?pageSize=500') as Array<Record<string, any>> | null) ?? []
+      const w2b2MpsByRun = new Map<string, Set<string>>()
+      for (const mpsRow of w2b2Snapshots.filter(row => Number(row.bom_level) === 0 && String(row.driver_so ?? '').startsWith('mps:'))) {
+        w2b2MpsByRun.set(String(mpsRow.run_id), (w2b2MpsByRun.get(String(mpsRow.run_id)) ?? new Set<string>()).add(String(mpsRow.product_id)))
+      }
+      for (const [w2b2RunId, w2b2Products] of w2b2MpsByRun) {
+        for (const otherRow of w2b2Snapshots.filter(row => String(row.run_id) === w2b2RunId && Number(row.bom_level) === 0 && !String(row.driver_so ?? '').startsWith('mps:'))) {
+          if (w2b2Products.has(String(otherRow.product_id))) failures.push(`W2-B2 covered-exclusivity violated in run ${w2b2RunId}: item #${String(otherRow.product_id)} carries both mps: and ${String(otherRow.driver_so)} drivers`)
+        }
+      }
+    }
+    // B9: the real-data dashboards — the kpi_snapshots collection, the
+    // shipped_at OTIF anchor, the 经营分析 group + four dashboard pages,
+    // the chart floors (every chart reads kpi_snapshots directly; the
+    // supply radar reads srm_score_cards), and the 90-day backfill floor
+    // (PLAN D9: one row per code per day).
+    {
+      if (await dataOf(token, 'GET', '/api/collections/kpi_snapshots') === null) failures.push('kpi_snapshots collection missing (run nocobase-w9-dashboards.mts)')
+      const shippedAtField = await call(token, 'GET', `/api/fields:list?filter=${encodeURIComponent(JSON.stringify({ collectionName: { $eq: 'so_orders' }, name: { $eq: 'shipped_at' } }))}&pageSize=1`) as { data?: unknown[] }
+      if ((shippedAtField?.data ?? []).length === 0) failures.push('so_orders.shipped_at missing (run nocobase-w9-dashboards.mts)')
+      const b9Routes = await call(token, 'GET', '/api/desktopRoutes:list?pageSize=200') as { data?: Array<Record<string, any>> }
+      const b9Titles = new Set((b9Routes?.data ?? []).map(row => String(row?.title ?? '')))
+      const missingB9 = ['经营看板', '供应链看板', '生产看板', '库存看板', '应收应付对账'].filter(title => !b9Titles.has(title))
+      if (missingB9.length > 0) failures.push(`B9 经营分析 flowPages missing: ${missingB9.join(', ')} (run nocobase-w9-dashboards.mts)`)
+      if (!b9Titles.has('经营分析')) failures.push('经营分析 menu group missing (run nocobase-w9-dashboards.mts)')
+      const b9ChartRows = (await call(token, 'GET', '/api/flowModels:list?pageSize=6000') as { data?: Array<Record<string, any>> }).data ?? []
+      const b9Charts = b9ChartRows.filter(row => row?.use === 'ChartBlockModel')
+      const queryOf = (row: Record<string, any>): any => row?.stepParams?.chartSettings?.configure?.query ?? {}
+      const kpiCharts = b9Charts.filter(row => queryOf(row)?.resource?.collectionName === 'kpi_snapshots'
+        || (Array.isArray(queryOf(row)?.collectionPath) && queryOf(row).collectionPath.join('.') === 'main.kpi_snapshots'))
+      if (kpiCharts.length < 11) failures.push(`kpi_snapshots ChartBlockModel count ${String(kpiCharts.length)} < 11 (run nocobase-w9-dashboards.mts; W2-B4 added the turnover chart, W2-B7 the AR/AP trends)`)
+      const b9Radar = b9Charts.filter(row => ['q', 'd', 'p', 's', 'c'].every(alias =>
+        (Array.isArray(queryOf(row)?.measures) ? queryOf(row).measures : []).some((measure: any) => String(measure?.alias ?? '') === alias)))
+      if (b9Radar.length < 1) failures.push('the supplier-performance radar chart missing (run nocobase-w9-dashboards.mts)')
+      const b9Snapshots = (await dataOf(token, 'GET', '/api/kpi_snapshots:list?pageSize=4000') as Array<Record<string, any>> | null) ?? []
+      const b9Dates = new Set(b9Snapshots.map(row => String(row.calc_date ?? '')))
+      const b9Codes = new Set(b9Snapshots.map(row => String(row.kpi_code ?? '')))
+      if (b9Dates.size < 90) failures.push(`kpi_snapshots covers only ${String(b9Dates.size)} dates (< 90; run kpi-run.mts --backfill 90)`)
+      if (b9Codes.size < 25) failures.push(`kpi_snapshots covers only ${String(b9Codes.size)} codes (< 25; run kpi-run.mts --calc-kpi — W2-B7 raised 24 to 25 with ap_balance)`)
+      // W2-B7: the AR/AP reconciliation page — two balance-trend charts plus
+      // the four read-only ledger blocks under its own grid.
+      const reconPage = (b9Routes?.data ?? []).find(row => row?.title === '应收应付对账' && row?.type === 'flowPage')
+      if (reconPage === undefined) {
+        failures.push('应收应付对账 flowPage missing (run nocobase-w9-dashboards.mts)')
+      } else {
+        const reconTab = (b9Routes?.data ?? []).find(row => Number(row?.parentId) === Number(reconPage.id) && row?.type === 'tabs')
+        const reconGrid = reconTab?.schemaUid == null ? null : await dataOf(token, 'GET', `/api/flowModels:findOne?parentId=${String(reconTab.schemaUid)}&subKey=grid`) as { uid?: string } | null
+        if (reconGrid?.uid == null) {
+          failures.push('应收应付对账 grid missing (run nocobase-w9-dashboards.mts)')
+        } else {
+          const under = b9ChartRows.filter(row => String(row?.parentId ?? '') === String(reconGrid.uid))
+          const reconTables = new Set(under.filter(row => row?.use === 'TableBlockModel').map(row => String(row?.stepParams?.resourceSettings?.init?.collectionName ?? '')))
+          for (const collection of ['so_orders', 'crm_payments', 'pur_invoices', 'pur_payments']) {
+            if (!reconTables.has(collection)) failures.push(`应收应付对账 detail block on ${collection} missing (run nocobase-w9-dashboards.mts)`)
+          }
+          // The chart filter lands server-canonicalized ({logic, items:[{path,
+          // operator, value}]}), so read a key the same way w9's
+          // chartFilterValue does — a bare filter.kpi_code read misses it.
+          const reconFilterValue = (row: Record<string, any>, key: string): unknown => {
+            const filter = queryOf(row)?.filter
+            if (filter === null || typeof filter !== 'object') return undefined
+            const flat = filter as { items?: Array<{ path?: unknown, value?: unknown }>, [key: string]: unknown }
+            if (Array.isArray(flat.items)) {
+              for (const item of flat.items) {
+                const path = Array.isArray(item.path) ? item.path[item.path.length - 1] : item.path
+                if (String(path) === key) return item.value
+              }
+              return undefined
+            }
+            return flat[key]
+          }
+          const reconChartCodes = new Set(under.filter(row => row?.use === 'ChartBlockModel').map(row => String(reconFilterValue(row, 'kpi_code') ?? '')))
+          for (const code of ['ar_balance', 'ap_balance']) {
+            if (!reconChartCodes.has(code)) failures.push(`应收应付对账 ${code} trend chart missing (run nocobase-w9-dashboards.mts)`)
+          }
+        }
+      }
+    }
+    // W2-B7: the two persona sources and their .dsh mirrors must stay
+    // byte-identical (the R4 r4-01 convention, now wired as a gate).
+    {
+      for (const preset of ['business-advisor', 'mobile-form-assistant'] as const) {
+        const source = readFileSync(join(repoRoot, 'examples/kb-agent/agent-presets', preset, 'agent.cordis.yml'), 'utf8')
+        const mirror = readFileSync(join(repoRoot, 'examples/kb-agent/.dsh/.agent-presets', preset, 'agent.cordis.yml'), 'utf8')
+        if (source !== mirror) failures.push(`${preset} persona source and .dsh mirror differ (edit both files together; diff to inspect)`)
+      }
+    }
+  }
+  // R3: every guarded doc-number column carries its partial unique index
+  // (the tool-side anti-collision preflight's database backstop).
+  const guardedIndexNames = ['ux_pur_orders_code', 'ux_pur_requests_code', 'ux_so_orders_code', 'ux_mfg_orders_code', 'ux_wms_receipts_receipt_no', 'ux_srm_suppliers_code']
+  const guardedIndexes = spawnSync('psql', ['-U', process.env.USER ?? 'mac', '-d', 'nocobase', '-t', '-A', '-c',
+    `SELECT indexname FROM pg_indexes WHERE indexname IN (${guardedIndexNames.map(name => `'${name}'`).join(', ')})`], { encoding: 'utf8' })
+  if (guardedIndexes.status !== 0 || (guardedIndexes.stdout ?? '').trim().split('\n').filter(line => line.length > 0).length !== guardedIndexNames.length) {
+    failures.push('guarded doc-number unique indexes incomplete (run "setup-nocobase.mts unique-indexes")')
+  }
+  const flowModels = await call(token, 'GET', '/api/flowModels:list?pageSize=6000') as { data?: Array<{ use?: string, uid?: string }>, meta?: { total?: number } }
   const flowModelRows = flowModels?.data ?? []
-  if (typeof flowModels?.meta?.total === 'number' ? flowModels.meta.total > flowModelRows.length : flowModelRows.length === 2000) {
+  if (typeof flowModels?.meta?.total === 'number' ? flowModels.meta.total > flowModelRows.length : flowModelRows.length === 6000) {
     failures.push(`flowModels:list may be truncated (${flowModelRows.length} rows); raise the verify pageSize`)
   }
   const modelCount = (use: string) => flowModelRows.filter(row => row.use === use).length
@@ -782,8 +1404,13 @@ async function stepVerify(): Promise<void> {
   // +2 = the F1 kanban/calendar Add-new popups; +5 = the F2 CRM pages; +7 =
   // the F3 pages (2 Add-new popups on 工作台, 4 on 分类维护); +8 = the H4 SRM
   // pages; +9 = the H5 WMS pages (仓库库区/库位平面图/入库单/出库单/库存查询/
-  // 批次主数据/盘点管理/移库管理/库存流水).
-  if (n18Buttons.length < 42) failures.push(`n18ai- AIEmployeeButtonModel count ${n18Buttons.length} < 42 (form AI fill buttons missing; run nocobase-n18-form-ai.mts after the f1/f2/f3/h4/h5 seeds)`)
+  // 批次主数据/盘点管理/移库管理/库存流水); +1 = the B0 采购供应商 page; +1 =
+  // the W1 审批中心 intent Add-new form.
+  // 53 = the W3 采购管理 nine popup forms (PR×2/RFQ×2/报价/PO×2/发票/付款) join.
+  // 56 = the B4 仓储 trio (预留管理/补货预警/盘点计划) joins.
+  // 62 = the B5 生产制造 six popup forms (BOM 头/组件行/工序/工作中心/节假日/MO) join.
+  // 66 = the B6 生产执行 four popup forms (领料单/退料单/报工记录/完工单) join.
+  if (n18Buttons.length < 80) failures.push(`n18ai- AIEmployeeButtonModel count ${n18Buttons.length} < 80 (form AI fill buttons missing; run nocobase-n18-form-ai.mts after the f1/f2/f3/h4/h5/w1-w3/b4/w5/w6/w8 seeds)`)
   // H5: the bin-map custom block rides the JSBlockModel authoring channel —
   // exactly one on the 库位平面图 grid.
   if (modelCount('JSBlockModel') < 1) failures.push('JSBlockModel missing (run nocobase-h5-wms.mts for the 库位平面图 map block)')
@@ -833,9 +1460,9 @@ async function stepVerify(): Promise<void> {
   // four-date model, the stock/movement pair balanced by the opening
   // alignment, and the documents across states).
   for (const [collection, floor] of [
-    ['wms_zones', 6], ['wms_bins', 72], ['wms_lots', 12], ['wms_stock', 9],
+    ['wms_zones', 8], ['wms_bins', 86], ['wms_lots', 12], ['wms_stock', 9],
     ['wms_movements', 39], ['wms_receipts', 5], ['wms_shipments', 5],
-    ['wms_transfers', 2], ['wms_counts', 3],
+    ['wms_transfers', 2], ['wms_counts', 3], ['wms_monthly_balances', 2],
   ] as const) {
     const failure = await rowFloor(collection, floor)
     if (failure !== null) failures.push(`${failure}; run nocobase-h5-wms.mts so the WMS domain seeds`)
@@ -1106,7 +1733,7 @@ async function stepVerify(): Promise<void> {
     process.exitCode = 1
     return
   }
-  console.log('setup-nocobase verify: OK — full UI + collections + attachment field + seed + workflow chain + AI workbench + row floors + m2o fieldNames + n18ai- form AI buttons + portals + portal list probes + ai-proxy + API key + kg graph + h4 SRM (pages/group/floors/food columns) + h5 WMS (pages/group/floors/bin-map JSBlock) all verified')
+  console.log('setup-nocobase verify: OK — full UI + collections + attachment field + seed + workflow chain + AI workbench + row floors + m2o fieldNames + n18ai- form AI buttons + portals + portal list probes + ai-proxy + API key + kg graph + h4 SRM (pages/group/floors/food columns) + h5 WMS (pages/group/floors/bin-map JSBlock) + w1 approval (wfl collections/审批中心 page/flow config/gate/doc_status column) + w2 supplier single-source (admission flow/AVL gate/h4 workflow retired/seed untouched/采购联系人 retitle) + w3 procurement (pur collections/采购管理 7 pages/gates/flows/receipt columns/待检区) + b4 inventory (reservations/reorder collections/3 pages/planning columns/virtual zones/count-workflow request leg/bypass guards/ledger balance) + w5 mfg (mfg collections/生产制造 5 pages/MO flow/BOM gate/seed floors) + b6 mfg-exec (4 execution collections/5 pages/mfg_orders columns+terminals/WIP zone/movement legs/seed floors/MO-0003 draft) + b7 sales-mrp (so collections/销售管理 3 pages/SO flow/gates/MRP workflow/driver columns/SHIPMENT_SO leg/seed floors) + b8 quality (qm collections/质量管理 5 pages/AQL full-table 135-row seeds (W2-B1)/additive columns/RETURN_VENDOR+SCRAP legs/concession flow/disposal reconciliation) + b9 dashboards (kpi_snapshots/so_orders.shipped_at/经营分析 4 pages/9 kpi charts + supplier radar/90-day backfill floor) + w2-b2 MPS (mps collections/主生产计划 page/mps flow/back-link column/seeds/covered-exclusivity invariant) + w2-b3 biz-date (movements/counts biz_date 100% coverage/appendMovement convergence/monthly balances reconcile/月度收发存 page) + w2-b5 approval-config (pur_orders extras threshold/tolerance, array approver_map, config_note audit, demo trio records/todos, so_orders default fallback, quality_lead user) all verified')
 }
 
 /** Upsert the two NocoBase lines in the repository root .env, preserving the rest. */
@@ -1179,6 +1806,42 @@ function stepNormalizeFkColumns(): void {
   console.log(`setup-nocobase: FK bigint normalization ${statements.length > 0 ? `widened ${statements.length} column(s)` : 'already bigint (kept)'}`)
 }
 
+/**
+ * The guarded document-number columns' database backstop (W-round R3): the
+ * write tools' preflight (enforceCodeUniqueness in dsh-tool-nocobase) is a
+ * list→write TOCTOU, so a partial unique index per guarded column is the
+ * authoritative guard behind it. The partial predicate (non-empty values
+ * only) matches the tool guard's semantics — rows without a number never
+ * collide, so unnumbered drafts stay legal. Idempotent: a duplicate preflight
+ * runs first so a dirty table fails loudly with a count instead of a
+ * CREATE INDEX constraint error, and IF NOT EXISTS keeps re-runs settled.
+ * Rollback: DROP INDEX IF EXISTS ux_<table>_<column> per pair (no data
+ * changes; the tool-side guard keeps enforcing after the drop).
+ */
+function stepUniqueDocIndexes(): void {
+  const pairs: Array<[table: string, column: string]> = [
+    ['pur_orders', 'code'],
+    ['pur_requests', 'code'],
+    ['so_orders', 'code'],
+    ['mfg_orders', 'code'],
+    ['wms_receipts', 'receipt_no'],
+    ['srm_suppliers', 'code'],
+  ]
+  for (const [table, column] of pairs) {
+    const dup = spawnSync('psql', ['-U', process.env.USER ?? 'mac', '-d', 'nocobase', '-t', '-A', '-c',
+      `SELECT count(*) FROM (SELECT ${column} FROM ${table} WHERE ${column} IS NOT NULL AND ${column} <> '' GROUP BY ${column} HAVING count(*) > 1) d`], { encoding: 'utf8' })
+    if (dup.status !== 0) throw new Error(`unique-index duplicate preflight failed (${table}.${column}): ${dup.stderr}`)
+    if ((dup.stdout ?? '').trim() !== '0') {
+      throw new Error(`${table}.${column} already holds duplicate numbers (${(dup.stdout ?? '').trim()} groups); resolve them before the unique index lands`)
+    }
+    const index = `ux_${table}_${column}`
+    const created = spawnSync('psql', ['-U', process.env.USER ?? 'mac', '-d', 'nocobase', '-c',
+      `CREATE UNIQUE INDEX IF NOT EXISTS ${index} ON ${table} (${column}) WHERE ${column} IS NOT NULL AND ${column} <> ''`], { encoding: 'utf8' })
+    if (created.status !== 0) throw new Error(`unique index ${index} failed: ${created.stderr}`)
+    console.log(`setup-nocobase: unique doc-number index ${index} ensured`)
+  }
+}
+
 async function stepReset(): Promise<void> {
   await warnLiveDshWebGateways()
   await stepStop()
@@ -1206,6 +1869,7 @@ async function main(): Promise<void> {
       throw new Error('ai-proxy needs "start" or "stop"')
     }
     case 'verify': return void await stepVerify()
+    case 'unique-indexes': return void stepUniqueDocIndexes()
     case 'stop': return void await stepStop()
     case 'reset': return void await stepReset()
     case 'all':
@@ -1224,17 +1888,35 @@ async function main(): Promise<void> {
       for (const script of [
         'nocobase-crm-modules.mts', 'nocobase-hub-modules.mts',
         'nocobase-n13-rebuild.mts', 'nocobase-n13-seed.mts', 'nocobase-n14-fix.mts',
-        'nocobase-n17-alignment.mts', 'nocobase-e1-pj-v2.mts', 'nocobase-f1-view-v2.mts', 'nocobase-f2-crm-v2.mts', 'nocobase-f3-hub-v2.mts', 'nocobase-h4-srm.mts', 'nocobase-h5-wms.mts', 'nocobase-n18-form-ai.mts', 'nocobase-n25-brand.mts',
+        'nocobase-n17-alignment.mts', 'nocobase-e1-pj-v2.mts', 'nocobase-f1-view-v2.mts', 'nocobase-f2-crm-v2.mts', 'nocobase-f3-hub-v2.mts', 'nocobase-h4-srm.mts', 'nocobase-h5-wms.mts', 'nocobase-w1-approval.mts', 'nocobase-w2-supplier.mts', 'nocobase-w3-procurement.mts', 'nocobase-w5-mfg.mts', 'nocobase-w6-mfg-exec.mts', 'nocobase-w7-mrp.mts', 'nocobase-w8-quality.mts', 'nocobase-w9-dashboards.mts', 'nocobase-n18-form-ai.mts', 'nocobase-n25-brand.mts',
         'nocobase-f4-charts.mts',
       ]) {
         if (!run('node', ['--import', 'tsx/esm', join(repoRoot, 'examples/kb-agent/scripts', script)])) {
           throw new Error(`${script} failed during the all chain`)
         }
       }
+      // W2-B3: settle every movement's business date (the module scripts
+      // above append new rows through the appendMovement helper; this pass
+      // backfills any stragglers and asserts zero NULL), then materialize
+      // the monthly-balance snapshots from the ledger's earliest month.
+      if (!run('node', ['--import', 'tsx/esm', join(repoRoot, 'examples/kb-agent/scripts/nocobase-h5-wms.mts'), '--backfill-dates'])) {
+        throw new Error('nocobase-h5-wms.mts --backfill-dates failed during the all chain')
+      }
+      if (!run('node', ['--import', 'tsx/esm', join(repoRoot, 'examples/kb-agent/scripts/nocobase-h5-wms.mts'), '--snapshot-month', 'all'])) {
+        throw new Error('nocobase-h5-wms.mts --snapshot-month all failed during the all chain')
+      }
+      // B9: materialize the KPI snapshots (the nightly /calc-kpi cron body;
+      // the 90-day backfill replays idempotently — a settled day upserts).
+      if (!run('node', ['--import', 'tsx/esm', join(repoRoot, 'examples/kb-agent/scripts/kpi-run.mts'), '--backfill', '90'])) {
+        throw new Error('kpi-run.mts --backfill 90 failed during the all chain')
+      }
       // The module scripts above leave id-reference columns as NocoBase
       // integer fields; align them with the bigint primary keys they point
       // at (D7, idempotent).
       stepNormalizeFkColumns()
+      // R3: the doc-number partial unique indexes behind the tool-side
+      // anti-collision preflight (idempotent; verify asserts them).
+      stepUniqueDocIndexes()
       // The DSH-side data plane (connector-files + lakehouse + market + the
       // knowledge graph + the KB corpus): one child replay, its own steps
       // probe watermarks so a settled world stays all-kept.

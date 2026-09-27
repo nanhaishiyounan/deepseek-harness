@@ -22,7 +22,7 @@ export interface WelcomeStarter {
 export interface Welcome {
   /** One-line identity (the welcome card's title). */
   readonly greeting: string
-  /** Capability lines (2-4). */
+  /** Capability lines (2-5). */
   readonly capabilities: readonly string[]
   /** Starter chips; picking one sends it as the user's own message. */
   readonly starters: readonly WelcomeStarter[]
@@ -77,7 +77,11 @@ function registryStarters(): WelcomeStarter[] {
   return picks.map(entry => ({ label: `登记一条${entry.bizName}`, send: `帮我登记一条${entry.bizName}` }))
 }
 
-/** The fill assistant's welcome, projected from the form registry. */
+/**
+ * The fill assistant's welcome, projected from the form registry. The
+ * capability lines mirror the published preset.yml welcome block verbatim
+ * (that block wins on the wire; this fallback serves local sessions).
+ */
 function fillAssistantWelcome(): Welcome {
   return {
     greeting: '我是智能填表助手',
@@ -86,6 +90,7 @@ function fillAssistantWelcome(): Welcome {
       '表单类型我来判断，拿不准会先问你',
       '日期、编号、合计这些我推导，你只定关键项',
       '风险、汇总、对比类问题我会给结构化报告卡，可一键变成任务跟进',
+      '查库存、看补货预警、报盘点实盘，一句话出报告卡',
     ],
     starters: registryStarters(),
   }

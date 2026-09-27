@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-09-26-b7-sales-mrp-engine.md
+2026-09-26-b7-sales-mrp-engine.md: 371b83002128a8172f0b8ebef775897ad19821fe
+2026-09-26-b7-sales-mrp-engine.zh.md: 0277fce10a7a84fbaaef24881be10cbdeedd0b48

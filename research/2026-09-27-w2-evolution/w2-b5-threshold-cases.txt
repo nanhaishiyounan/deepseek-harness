@@ -1,0 +1,163 @@
+═══ W2-B5 手算对拍 · 1. pur_orders 流配置（extras 阈值/容差 + 多审批人数组 + config_note 审计）═══
+  doc_type  |    title     |                                                                        extras                                                                         |                   approver_map                    |                                                                                                                                               config_note
+------------+--------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ pur_orders | 采购订单审批 | {"approved_by_field":"approved_by","approved_at_field":"approved_at","amount_field":"amount","amount_threshold":200000,"invoice_match_tolerance":0.1} | {"manager":["admin","quality_lead"],"gm":"admin"} | 2026-09-27T07:58:36.702Z w2b5 seedDocFlow: transition#31 condition "amount <= 100000"→"amount <= 200000"; extras.amount_threshold null→200000; extras.invoice_match_tolerance null→0.1; approver_map {"manager":"admin","gm":"admin"}→{"manager":["admin","quality_lead"],"gm":"admin"} (operator=admin)
+(1 row)
+
+
+═══ 2. pur_orders 转移条件串（阈值字面量 200000）═══
+     state      | action  |   next_state   | allowed_role |  condition_expr
+----------------+---------+----------------+--------------+------------------
+ pending        | approve | approved       | manager      | amount <= 200000
+ pending        | approve | pending_level2 | manager      |
+ pending_level2 | approve | approved       | gm           |
+(3 rows)
+
+手算：条件串为 amount <= 200000 ⇒ PO ¥150,000 一审生效（无 gm 节点）；PO ¥250,000 加签 gm
+
+═══ 3. PO-B5-A（¥150,000）节点轨迹 — 期望 draft→pending→approved 两步、无 pending_level2 ═══
+ node_seq |   approver   | action  | from_state | to_state | attempt_no |              comment
+----------+--------------+---------+------------+----------+------------+------------------------------------
+        1 | 陈立群       | submit  | draft      | pending  |          1 |
+        2 | quality_lead | approve | pending    | approved |          1 | W2-B5：15 万 ≤ 20 万阈值，一审生效
+(2 rows)
+
+
+═══ 4. PO-B5-B（¥250,000）节点轨迹 — 期望 draft→pending→pending_level2→approved 三步 ═══
+ node_seq |   approver   | action  |   from_state   |    to_state    | attempt_no |             comment
+----------+--------------+---------+----------------+----------------+------------+----------------------------------
+        1 | 陈立群       | submit  | draft          | pending        |          1 |
+        2 | quality_lead | approve | pending        | pending_level2 |          1 | W2-B5：25 万超阈值，报总经理加签
+        3 | admin        | approve | pending_level2 | approved       |          1 | W2-B5：总经理签核通过
+(3 rows)
+
+
+═══ 5. 多审批人 todos 展开 — PO-B5-A 两行（admin+quality_lead），任一人 act 后均作废 ═══
+ user | state | status | due_date
+------+-------+--------+----------
+(0 rows)
+
+
+═══ 6. 缺省回退流 so_orders — extras 无 amount_threshold 键，条件仍 100000 现值（W 轮口径）═══
+ doc_type  |                                            extras
+-----------+-----------------------------------------------------------------------------------------------
+ so_orders | {"approved_by_field":"approved_by","approved_at_field":"approved_at","amount_field":"amount"}
+(1 row)
+
+  state  | next_state |  condition_expr
+---------+------------+------------------
+ pending | approved   | amount <= 100000
+(1 row)
+
+
+═══ 7. 其余流缺省检查（pur_payments/pur_requests/pur_rfqs 均无 amount_threshold 键）═══
+        doc_type        |                                            extras
+------------------------+-----------------------------------------------------------------------------------------------
+ hub_po_purchase_orders | {"approved_by_field":"approved_by","approved_at_field":"approved_at"}
+ pur_payments           | {"approved_by_field":"approved_by","approved_at_field":"approved_at","amount_field":"amount"}
+ pur_requests           | {"approved_by_field":"approved_by","approved_at_field":"approved_at"}
+ pur_rfqs               | {"approved_by_field":"approved_by","approved_at_field":"approved_at"}
+(4 rows)
+
+
+═══ 5b. todos 展开实证（驳回→重提重演，补首跑中断缺失的两行展开）═══
+/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:305
+    throw new Error(vocab.illegalMessage(state, action))
+          ^
+
+
+Error: 非法审批转移：单据当前状态「已生效」(approved) 不支持动作「驳回」(reject)
+    at act (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:305:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async main (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:1213:20)
+    at async <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:1243:3)
+
+Node.js v22.19.0
+/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:262
+    throw new Error(vocab.illegalMessage(state, action))
+          ^
+
+
+Error: 非法审批转移：单据当前状态「已生效」(approved) 不支持动作「重新提交」(resubmit)
+    at submitForApproval (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:262:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async main (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:1206:20)
+    at async <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:1243:3)
+
+Node.js v22.19.0
+ user | state | status
+------+-------+--------
+(0 rows)
+
+/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:305
+    throw new Error(vocab.illegalMessage(state, action))
+          ^
+
+
+Error: 非法审批转移：单据当前状态「已生效」(approved) 不支持动作「同意」(approve)
+    at act (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:305:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async main (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:1213:20)
+    at async <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:1243:3)
+
+Node.js v22.19.0
+ user | state | status
+------+-------+--------
+(0 rows)
+
+ node_seq |   approver   | action  | from_state | to_state | attempt_no
+----------+--------------+---------+------------+----------+------------
+        1 | 陈立群       | submit  | draft      | pending  |          1
+        2 | quality_lead | approve | pending    | approved |          1
+(2 rows)
+
+
+═══ 5c. todos 展开实证（PO-B5-C witness：两行 admin+quality_lead，均 completed）═══
+     user     |  state  |  status   |  due_date
+--------------+---------+-----------+------------
+ admin        | pending | completed | 2026-09-29
+ quality_lead | pending | completed | 2026-09-29
+(2 rows)
+
+ node_seq |   approver   | action  | from_state | to_state
+----------+--------------+---------+------------+----------
+        1 | 陈立群       | submit  | draft      | pending
+        2 | quality_lead | approve | pending    | approved
+(2 rows)
+
+
+═══ 8. pur_payments 缺省阈值复核（s7 相关面：付款一审、条件 100000 现值）═══
+  state  | action  | next_state |  condition_expr
+---------+---------+------------+------------------
+ pending | approve | approved   | amount <= 100000
+(1 row)
+
+     code      | amount | doc_status
+---------------+--------+------------
+ PAY-2026-0001 | 120000 | paid
+ PAY-B9F-0001  |    880 | approved
+(2 rows)
+
+
+═══ 9. s2 复跑轨迹（PO-B9F-0001 ¥880 一审——W 轮缺省口径零回归）═══
+ node_seq | approver | action  | from_state | to_state
+----------+----------+---------+------------+----------
+        1 | 采购员乙 | submit  | draft      | pending
+        2 | admin    | approve | pending    | approved
+(2 rows)
+
+
+═══ 5d. 活待办展开（PO-B5-D witness：两行 open，admin+quality_lead）═══
+     user     |  state  | status |  due_date
+--------------+---------+--------+------------
+ admin        | pending | open   | 2026-09-29
+ quality_lead | pending | open   | 2026-09-29
+(2 rows)
+
+  code   | amount | doc_status
+---------+--------+------------
+ PO-B5-A | 150000 | approved
+ PO-B5-B | 250000 | approved
+ PO-B5-C | 150000 | approved
+ PO-B5-D | 150000 | pending
+(4 rows)

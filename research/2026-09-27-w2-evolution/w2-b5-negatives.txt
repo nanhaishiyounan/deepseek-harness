@@ -1,0 +1,7 @@
+nocobase-w3: invoice INV-2026-B5TOL-A already exception (kept; re-match after a draft reset)
+w2-b5: 容差对拍 A ✓ 0.05 口径差 ¥0.08 → exception（INV-2026-B5TOL-A #6）
+nocobase-w3: invoice INV-2026-B5TOL-B already matched (kept; re-match after a draft reset)
+w2-b5: 容差对拍 B ✓ 0.10 口径差 ¥0.08 → matched（INV-2026-B5TOL-B）
+w2-b5: 幽灵审批人负例 ✓ fail-loud「不存在的用户：ghost」+ 零残留（map 已还原、PO-B5-G 已删）
+w2-b5: 非法阈值负例 ✓ fail-loud「extras.amount_threshold 非法："abc"」+ extras 已还原为种子值
+w2-b5: negatives + tolerance pair all OK

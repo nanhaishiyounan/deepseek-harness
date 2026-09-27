@@ -1,0 +1,48 @@
+w2-b6: ✓ 缺省零漂移前置：既有 13 个 MO 均 full_lock/0（w2b6 回填后；演示行另计）
+w2-b6: ✓ 素材：RM-DMP-PKG 产品行存在
+w2-b6: ✓ 素材：无可用库存的缺料组件（SKU-FZ-0002）存在
+w2-b6: ✓ 素材：480 分钟演示工作中心 WC-W2B6（08:00-16:00）
+w2-b6: ✓ 演示 BOM ×3 active
+w2-b6: 演示 MO ×6 就位（00A/00B/01/02/03 full — 05 approved）
+nocobase-h5: reservation RSV-MO-MO-W2B6-00A-01 already exists (released; kept)
+nocobase-h5: kit MO-W2B6-00A → partial（缺口：SKU-FZ-0002 短 100）
+w2-b6: ✓ 缺省零漂移 ①：full_lock MO 齐套 → partial（阻断，W 轮语义）
+w2-b6: ✓ 缺省零漂移 ①b：reservation_state 落 partial
+w2-b6: ✓ 缺省零漂移 ②：partial MO 领料被拒（需先齐套 assigned） → 领料被拒：MO MO-W2B6-00A 齐套状态为 partial——需先齐套（assigned）才能领料
+nocobase-h5: reservation RSV-MO-MO-W2B6-00B-01 already exists (consumed; kept)
+nocobase-h5: kit MO-W2B6-00B → assigned
+w2-b6: ✓ 缺省零漂移 ③：full_lock 全齐 MO → assigned + 预留 100
+w2-b6: ✓ 缺省零漂移 ③b：预留量恰 100（1×1.00×100；consumed）
+w2-b6: ✓ 缺省零漂移 ④：assigned 领 100 posted（W 轮正例）
+w2-b6: ✓ 缺省零漂移 ④b：±ISSUE_WIP 流水对（−100/+100）
+w2-b6: ✓ 缺省零漂移 ⑤（前轮已验：ratio=0 单笔 101 拒——超 1 即拒，拒后行保持 draft）
+nocobase-h5: reservation RSV-MO-MO-W2B6-01-01 already exists (consumed; kept)
+nocobase-h5: kit MO-W2B6-01 → partial_allowed（部分投料已预留：缺口 SKU-FZ-0002 短 100 挂 ETA，已齐组件照常领料）
+w2-b6: ✓ 部分投料 ①：partial_allowed MO 齐套 → partial_allowed（非阻断新态）
+w2-b6: ✓ 部分投料 ①b：reservation_state 落 partial_allowed
+w2-b6: ✓ 部分投料 ①c：kit_data 带 state+policy
+w2-b6: ✓ 部分投料 ①d：缺料阶梯保留（SKU-FZ-0002 短 100 挂 ETA 列）
+w2-b6: ✓ 部分投料 ②：已齐组件（PKG）照常落硬预留 100（consumed）
+w2-b6: ✓ 部分投料 ③：领已齐组件成功（门禁放行 partial_allowed）
+w2-b6: ✓ 部分投料 ③b：预留 consumed
+w2-b6: ✓ 部分投料 ③c：movements ISSUE_WIP ±对
+w2-b6: ✓ 部分投料 ④：领未齐组件拒（无有效预留——未齐组件本就无预留） → 领料被拒：MO MO-W2B6-01 组件 #2 无有效预留（可能已被领完）
+nocobase-h5: reservation RSV-MO-MO-W2B6-02-01 already exists (consumed; kept)
+nocobase-h5: kit MO-W2B6-02 → assigned
+w2-b6: ✓ 超领手算 ①：MO-02 齐套 assigned + 预留 100
+w2-b6: ✓ 超领手算 ①b：预留量恰 100（100×1.05=105 的基数；consumed）
+w2-b6: ✓ 超领手算 ②（前轮）：105 已过 + note 记超领 5（overissue_ratio 0.05）
+w2-b6: ✓ 超领手算 ③（前轮）：106 单无 posted 残留
+w2-b6: ✓ 超领手算（前轮已验：单笔 106 拒 / 105 过 / note 超领 5——预留已消耗，跳过重验）
+w2-b6: ✓ 状态门禁 ①：partial_allowed 但 approved 未 released → 齐套拒 → 齐套被拒：MO MO-W2B6-03 状态为 approved——需先审批通过并下达（released）后才能齐套
+w2-b6: ✓ 状态门禁 ②：partial_allowed 但未 released → 领料拒（MO_EXECUTING_STATES 不因策略放宽） → 领料被拒：MO MO-W2B6-03 状态为 approved——未下达（released）不能领料
+w2-b6: ✓ 负数比例：引擎读值 fail loud（超领比例非法） → MO MO-W2B6-04 的超领比例非法（-0.1）——须为 ≥0 的比例小数（如 0.05=允许超领 5%）；修正 mfg_orders.overissue_ratio
+w2-b6: ✓ 负数比例：负例行销毁（verify 默认值断言保持全绿）
+w2-b6: ✓ 拆单建议卡 ①：--preview --save 运行成功
+w2-b6: ✓ 拆单建议卡 ②：overload 行标记
+w2-b6: ✓ 拆单建议卡 ③：1200 分需求 / 480 分产能
+w2-b6: ✓ 拆单建议卡 ④：建议拆 3 份 × 432 分/份（ceil(1200/432)=3）
+w2-b6: ✓ 拆单建议卡 ⑤：note 人话版完整（拆 3 份 × 432）
+w2-b6: ✓ 拆单建议卡 ⑥：preview_data 落库（mobile 读侧可见）
+w2-b6: ✓ 账本对账：--assert-ledger 绿（stock == Σmovements）
+w2-b6: kit-cases 全链 ✓ — 缺省零漂移×5 / 部分投料×4 / 超领手算 105过106拒×3 / 状态门禁×2 / 负数比例 fail-loud / 拆单建议卡×6 / 账本绿

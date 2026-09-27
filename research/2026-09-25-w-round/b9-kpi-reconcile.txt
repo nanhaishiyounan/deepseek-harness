@@ -1,0 +1,35 @@
+# B9 · 三项 KPI psql 手算对账（引擎快照值 vs psql 直算，2026-09-26）
+
+## otif 快照值 = 0.6667
+## fpy 快照值 = 0.9972
+## count_accuracy 快照值 = 0.9825
+
+## OTIF 手算（分母=approved 且 need_date 非空；分子=shipped 且 shipped_at<=need_date）
+     code     | shipping_status | need_date  | shipped_at | on_time
+--------------+-----------------+------------+------------+---------
+ SO-2026-0002 | none            | 2026-10-17 |            | f
+ SO-2026-0001 | shipped         | 2026-10-06 | 2026-09-26 | t
+ SO-B9F-0001  | shipped         | 2026-10-16 | 2026-09-26 | t
+(3 rows)
+
+OTIF psql = 2 / 3 = 0.6667
+
+## FPY 手算（Σqty_good / Σ(qty_good+qty_scrap)，posted）
+FPY psql = 106818 / 107118 = 0.9972
+               ^
+
+## 账实相符率 手算（1 − Σ|差异| / Σ账面；counted 非空行；count_no 无 CNT-YYYYMMDD 段的行=盘点日不可解析，引擎口径计入——与 kpi-run countDateOf='' <= 任意日 一致）
+       count_no       | snapshot_qty | counted_qty | drift
+----------------------+--------------+-------------+-------
+ CNT-20260915-003     |          175 |         172 |     3
+ CNT-20260906-001     |           12 |           0 |    12
+ CNT-20260926-0010001 |          480 |         475 |     5
+ CNT-B4-WF-908301     |          410 |         413 |     3
+ CNT-B4-WF-856231     |          410 |         413 |     3
+(5 rows)
+
+
+## 结论：三项 psql 手算值与 kpi_snapshots 快照值逐一相等（0.6667 / 0.9972 / 0.9825）——对账一致。
+count_accuracy psql = 1 − 26 / 1487 = 0.9825
+
+## 结论：三项 psql 手算值与 kpi_snapshots 快照值逐一相等（OTIF 0.6667 / FPY 0.9972 / 账实相符率 0.9825）——对账一致。

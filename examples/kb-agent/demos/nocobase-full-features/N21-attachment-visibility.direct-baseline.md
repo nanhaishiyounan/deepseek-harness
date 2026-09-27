@@ -30,7 +30,7 @@ I don't have any tool to read PDF attachments, and I don't see any attachment in
 </think>
 看不到附件。
 ```
-- 请求日志锚点（[platform/nocobase/storage/logs/main/request_2026-09-10.log](../../../../platform/nocobase/storage/logs/main/request_2026-09-10.log)）：
+- 请求日志锚点（`platform/nocobase/storage/logs/main/request_2026-09-10.log`（运行时产物，已随日志轮转清理））：
   - sendMessages 响应：ts=2026-09-10 16:10:57 reqId=d04b7484-adf1-4572-b9a8-537738406968 status=200 cost=2695ms；action 携带 attachments 记录 filename=n21-probe-arp7n0.pdf mimetype=application/pdf extname=.pdf size=1167 —— mimetype/extname 即 [provider.parseAttachment](../../../../platform/nocobase/packages/plugins/@nocobase/plugin-ai/src/server/llm-providers/provider.ts) 分流的确定性输入（image/* → image_url data URI；application/pdf → OpenAI 专有 file part；SUPPORTED_DOCUMENT_EXTNAMES → worker 解析为 <parsed_document>）。
   - aiFiles:create 响应：ts=2026-09-10 16:10:54 reqId=87b0b477-bc8f-449f-b986-e571e727a6c7 status=200
 - 清理：会话 destroyed；上传文件 destroyed
@@ -52,7 +52,7 @@ The user wants only this marker string. Let me output it exactly.</think>
 
 N21PROBE-DOCX-K9MT
 ```
-- 请求日志锚点（[platform/nocobase/storage/logs/main/request_2026-09-10.log](../../../../platform/nocobase/storage/logs/main/request_2026-09-10.log)）：
+- 请求日志锚点（`platform/nocobase/storage/logs/main/request_2026-09-10.log`（运行时产物，已随日志轮转清理））：
   - sendMessages 响应：ts=2026-09-10 16:11:07 reqId=8b32b4fb-eaeb-43a2-b3cb-087f90843157 status=200 cost=5130ms；action 携带 attachments 记录 filename=n21-probe-icv5f6.docx mimetype=application/vnd.openxmlformats-officedocument.wordprocessingml.document extname=.docx size=1123 —— mimetype/extname 即 [provider.parseAttachment](../../../../platform/nocobase/packages/plugins/@nocobase/plugin-ai/src/server/llm-providers/provider.ts) 分流的确定性输入（image/* → image_url data URI；application/pdf → OpenAI 专有 file part；SUPPORTED_DOCUMENT_EXTNAMES → worker 解析为 <parsed_document>）。
   - aiFiles:create 响应：ts=2026-09-10 16:11:02 reqId=30f247d6-2ea8-4649-9543-23bc6f567ffa status=200
 - 清理：会话 destroyed；上传文件 destroyed
@@ -76,7 +76,7 @@ The marker string is `N21PROBE-XLSX-R2VW`. The user wants me to output only this
 
 N21PROBE-XLSX-R2VW
 ```
-- 请求日志锚点（[platform/nocobase/storage/logs/main/request_2026-09-10.log](../../../../platform/nocobase/storage/logs/main/request_2026-09-10.log)）：
+- 请求日志锚点（`platform/nocobase/storage/logs/main/request_2026-09-10.log`（运行时产物，已随日志轮转清理））：
   - sendMessages 响应：ts=2026-09-10 16:11:19 reqId=0bd5596c-cd04-46bc-8c36-94c9b7480261 status=200 cost=7780ms；action 携带 attachments 记录 filename=n21-probe-mti8go.xlsx mimetype=application/vnd.openxmlformats-officedocument.spreadsheetml.sheet extname=.xlsx size=6471 —— mimetype/extname 即 [provider.parseAttachment](../../../../platform/nocobase/packages/plugins/@nocobase/plugin-ai/src/server/llm-providers/provider.ts) 分流的确定性输入（image/* → image_url data URI；application/pdf → OpenAI 专有 file part；SUPPORTED_DOCUMENT_EXTNAMES → worker 解析为 <parsed_document>）。
   - aiFiles:create 响应：ts=2026-09-10 16:11:11 reqId=599dd29b-51c6-4a0e-a066-603197e707bf status=200
 - 清理：会话 destroyed；上传文件 destroyed
@@ -96,7 +96,7 @@ The user wants me to output only thismarker string.</think>
 
 N21PROBE-MD-H8DY
 ```
-- 请求日志锚点（[platform/nocobase/storage/logs/main/request_2026-09-10.log](../../../../platform/nocobase/storage/logs/main/request_2026-09-10.log)）：
+- 请求日志锚点（`platform/nocobase/storage/logs/main/request_2026-09-10.log`（运行时产物，已随日志轮转清理））：
   - sendMessages 响应：ts=2026-09-10 16:11:26 reqId=8e03d4e7-a825-469a-b582-0f5c01579663 status=200 cost=3059ms；action 携带 attachments 记录 filename=n21-probe-epocqj.md mimetype=text/markdown extname=.md size=139 —— mimetype/extname 即 [provider.parseAttachment](../../../../platform/nocobase/packages/plugins/@nocobase/plugin-ai/src/server/llm-providers/provider.ts) 分流的确定性输入（image/* → image_url data URI；application/pdf → OpenAI 专有 file part；SUPPORTED_DOCUMENT_EXTNAMES → worker 解析为 <parsed_document>）。
   - aiFiles:create 响应：ts=2026-09-10 16:11:23 reqId=18bb1395-98eb-4315-9242-e2c856c2fe53 status=200
 - 清理：会话 destroyed；上传文件 destroyed
@@ -115,7 +115,7 @@ I should look at what's visible in the image and transcribe it accurately.</thin
 N21PROBE-PNG-T5CH
 ```
 - 判定注记：模型转写存在位图字形偏差（容差≤2 判可见）
-- 请求日志锚点（[platform/nocobase/storage/logs/main/request_2026-09-10.log](../../../../platform/nocobase/storage/logs/main/request_2026-09-10.log)）：
+- 请求日志锚点（`platform/nocobase/storage/logs/main/request_2026-09-10.log`（运行时产物，已随日志轮转清理））：
   - sendMessages 响应：ts=2026-09-10 16:11:37 reqId=c742a6f3-3dbc-44b7-8e70-08e62c6f8640 status=200 cost=6678ms；action 携带 attachments 记录 filename=n21-probe-d0iy3n.png mimetype=image/png extname=.png size=435 —— mimetype/extname 即 [provider.parseAttachment](../../../../platform/nocobase/packages/plugins/@nocobase/plugin-ai/src/server/llm-providers/provider.ts) 分流的确定性输入（image/* → image_url data URI；application/pdf → OpenAI 专有 file part；SUPPORTED_DOCUMENT_EXTNAMES → worker 解析为 <parsed_document>）。
   - aiFiles:create 响应：ts=2026-09-10 16:11:31 reqId=8b0db842-bd71-4205-8dac-4e689ea102ba status=200
 - 清理：会话 destroyed；上传文件 destroyed

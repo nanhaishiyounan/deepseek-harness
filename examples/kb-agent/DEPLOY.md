@@ -73,6 +73,19 @@ WantedBy=multi-user.target
 
 One-shot tasks (the headless profile takes the task from argv) map naturally to `systemd-run --unit=kb-task-…` or a timer unit; long-running surfaces (the web workbench, `dsh web` with the same patches) use the same unit shape with the web bin. Verify after `systemctl enable --now kb-agent`: `journalctl -u kb-agent -f` shows the fail-loud boot diagnostics.
 
+### Nightly jobs (manufacturing chain, optional, W2-B7)
+
+The approval engine's `--serve` mode can run the nightly chain in-process — ROP scan-reorder → MRP close → (month-end) the monthly ledger snapshot → KPI materialization, with the quarterly supplier scorecard appended on quarter-start days — instead of an external cron curling the four verbs. Off by default: without the env the server behaves exactly as before, and the manual curl routes stay forever.
+
+```ini
+# Append to the [Service] section (or three lines in the .env behind EnvironmentFile)
+Environment=W1_NIGHTLY_ENABLED=true      # default false; strictly true/false, anything else fails at boot
+Environment=W1_NIGHTLY_AT=02:30          # HH:MM, default 02:30; a malformed value fails at boot
+Environment=W1_NIGHTLY_TZ=Asia/Shanghai  # default (matches the KPI Shanghai day boundary)
+```
+
+A failed leg logs and the next leg still runs (legs never block each other); `POST :13110/run-nightly` triggers one manual pass at any time (it never marks the day); the in-process marker dedupes per day, and a restart may replay the same day — every leg is idempotent. Pick one scheduler — the built-in timer or your cron curling the four verbs — never both. The macOS launchd/cron demo path lives in the QUICKSTART manufacturing-chain section.
+
 ## 6. Upgrades
 
 Stop the service, `git fetch && git checkout <tag>`, `pnpm install && pnpm run build`, start the service. Schema ownership is fail-loud: a knowledge-base file written by a different schema version is rejected at boot with the on-disk version in the message — restore that backup rather than hand-editing the file.

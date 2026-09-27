@@ -1,15 +1,16 @@
 /**
  * Model-facing NocoBase business tools: `nb_collections` (schema discovery),
- * `nb_list`/`nb_get` (reads), and `nb_create`/`nb_update` (writes with the
- * in-conversation confirmation contract). The plugin resolves the deployment's
- * service-account credentials once at load (credentials seam first, then the
- * trusted launch environment) and builds one REST client every tool shares.
- * Missing credentials register the tools anyway — an enabled tool that fails
- * with a structured error at execution time is the suite's documented
- * degraded mode — instead of failing the composition; a changed key needs a
- * composition reload. The tenant is never model input: every tool rejects a
- * `tenant` argument, and the service account the client runs under is the
- * permission boundary.
+ * `nb_list`/`nb_get` (reads), `nb_create`/`nb_update` (writes with the
+ * in-conversation confirmation contract, the downstream approval gate, and
+ * the edit lock), and `nb_approve` (the general approval engine driver). The
+ * plugin resolves the deployment's service-account credentials once at load
+ * (credentials seam first, then the trusted launch environment) and builds
+ * one REST client every tool shares. Missing credentials register the tools
+ * anyway — an enabled tool that fails with a structured error at execution
+ * time is the suite's documented degraded mode — instead of failing the
+ * composition; a changed key needs a composition reload. The tenant is never
+ * model input: every tool rejects a `tenant` argument, and the service
+ * account the client runs under is the permission boundary.
  * @module @deepseek-ai/dsh-tool-nocobase
  */
 
@@ -19,7 +20,7 @@ import { credentialRef } from '@deepseek-ai/dsh-credentials'
 import { launchEnvironmentOf } from '@deepseek-ai/dsh-launch-environment'
 import { NocoBaseClient, DEFAULT_NOCOBASE_TIMEOUT_MS } from '@deepseek-ai/dsh-connector-nocobase'
 import { applyNbCollectionsTool, applyNbGetTool, applyNbListTool } from './read.ts'
-import { applyNbCreateTool, applyNbUpdateTool } from './write.ts'
+import { applyNbApproveTool, applyNbCreateTool, applyNbUpdateTool } from './write.ts'
 
 /** Cordis plugin name used by loader diagnostics. */
 export const name = 'tool-nocobase'
@@ -69,18 +70,51 @@ export type {
 } from './read.ts'
 export {
   fieldChangesOf,
+  formatNbApproveOutput,
   formatNbCreateOutput,
   formatNbUpdateOutput,
+  nbApproveEngine,
+  parseNbApproveArgs,
   parseNbCreateArgs,
   parseNbUpdateArgs,
 } from './write.ts'
 export type {
   FieldChangeView,
+  NbApproveArgs,
+  NbApproveToolValue,
   NbCreateArgs,
   NbCreateToolValue,
   NbUpdateArgs,
   NbUpdateToolValue,
 } from './write.ts'
+export {
+  ADMISSION_EFFECTIVE_STATE,
+  DEFAULT_AMOUNT_THRESHOLD,
+  DOC_FLOW_VOCABULARY,
+  DOC_STATUS_ANCHORS,
+  EDIT_LOCKED_STATES,
+  STATE_LABELS,
+  SUPPLIER_ADMISSION_ANCHORS,
+  SUPPLIER_ADMISSION_LABELS,
+  SUPPLIER_ADMISSION_STATE_FIELD,
+  SUPPLIER_ADMISSION_STATES,
+  WORKFLOW_STATES,
+  approversOfRole,
+  conditionApplies,
+  flowStateLabel,
+  gateNotAdmittedMessage,
+  gateNotEffectiveMessage,
+  isEffectiveState,
+  isSupplierAdmissionState,
+  isWorkflowState,
+  illegalTransitionMessage,
+  nextAdmissionStateOf,
+  nextStateOf,
+  parseRequiredStatuses,
+  thresholdOf,
+  vocabularyForStateField,
+} from './approval-rules.ts'
+export type { ApprovalAction, FlowVocabulary, SupplierAdmissionState, ThresholdExtras, WorkflowState } from './approval-rules.ts'
 
 /** Plugin config: which nb_* tools to register, the credential references, and per-tool budgets. */
 export interface Config {
@@ -90,6 +124,8 @@ export interface Config {
   reads?: boolean
   /** Register `nb_create`/`nb_update`. Defaults to true. */
   writes?: boolean
+  /** Register `nb_approve` (the approval engine driver). Defaults to true. */
+  approvals?: boolean
   /**
    * NocoBase server origin (for example `http://127.0.0.1:13000`). Omitted =
    * the `NOCOBASE_BASE_URL` environment variable; neither present degrades
@@ -110,6 +146,7 @@ export const Config: z<Config> = z.object({
   collections: z.boolean().default(true),
   reads: z.boolean().default(true),
   writes: z.boolean().default(true),
+  approvals: z.boolean().default(true),
   baseUrl: z.string(),
   apiKeyEnv: z.string().role('credential-ref').default(DEFAULT_API_KEY_ENV),
   timeoutMs: z.number().step(1).min(1).default(DEFAULT_NOCOBASE_TIMEOUT_MS),
@@ -164,5 +201,8 @@ export async function apply(ctx: Context, config: Config): Promise<void> {
   if (resolved.writes) {
     applyNbCreateTool(ctx, client, resolved.writeTimeoutMs)
     applyNbUpdateTool(ctx, client, resolved.writeTimeoutMs)
+  }
+  if (resolved.approvals) {
+    applyNbApproveTool(ctx, client, resolved.writeTimeoutMs)
   }
 }

@@ -1,0 +1,40 @@
+=== W2-B3 回填前对账基线 2026-09-27 13:14:24 ===
+nocobase-h5: ledger balanced — stock == Σmovements per (product, lot)，31 组，127 条流水
+=== W2-B3 回填后对账 2026-09-27 13:16:28 ===
+nocobase-h5: ledger balanced — stock == Σmovements per (product, lot)，31 组，127 条流水
+
+=== W2-B3 快照生成 --snapshot-month all ===
+nocobase-h5: [snapshot] 2026-08 — 2 product 行（destroy-create 幂等，snapshot_date=2026-09-27）
+nocobase-h5: [snapshot] 2026-09 — 17 product 行（destroy-create 幂等，snapshot_date=2026-09-27）
+nocobase-h5: [snapshot] 对账 ✓ 19 行快照 == 流水重放（期初/收/发/期末 + 连续性 bal(t)==opening(t+1)）
+
+=== W2-B3 --recalc 幂等重算 ===
+nocobase-h5: [snapshot] 2026-08 — 2 product 行（destroy-create 幂等，snapshot_date=2026-09-27）
+nocobase-h5: [snapshot] 对账 ✓ 19 行快照 == 流水重放（期初/收/发/期末 + 连续性 bal(t)==opening(t+1)）
+nocobase-h5: [snapshot] 2026-09 — 17 product 行（destroy-create 幂等，snapshot_date=2026-09-27）
+nocobase-h5: [snapshot] 对账 ✓ 19 行快照 == 流水重放（期初/收/发/期末 + 连续性 bal(t)==opening(t+1)）
+nocobase-h5: [snapshot] 对账 ✓ 19 行快照 == 流水重放（期初/收/发/期末 + 连续性 bal(t)==opening(t+1)）
+重算后行数: 19
+/bin/sh: command substitution: line 0: syntax error near unexpected token `('
+/bin/sh: command substitution: line 0: `$PSQL -c \"SELECT md5(string_agg(id||':'||period||':'||product_id||':'||opening_qty||':'||in_qty||':'||out_qty||':'||bal_qty, ',' ORDER BY id)) FROM wms_monthly_balances\"'
+重算后SHA:
+
+=== W2-B3 幂等重算/污染恢复/负例（2026-09-27 13:20:49）===
+- --recalc 两轮输出 diff 为空（qty 轨 /tmp/snap1 vs snap2、val 轨 /tmp/val1 vs val2 逐行一致）
+- UPDATE bal_qty/in_qty +999 → --recalc 恢复正确值（assertMonthlyBalances 绿）
+- UPDATE bal_val=123456.78 → --recalc 恢复（diff 空）
+- --snapshot-month 2099-13 → exit 1（月份格式应为 YYYY-MM 或 all）fail-loud
+
+=== W2-B3 过账后（PUTAWAY/MOVE±/ADJUST± 新行 biz_date=今日）快照刷新 + 对账 ===
+nocobase-h5: [snapshot] 2026-08 — 2 product 行（destroy-create 幂等，snapshot_date=2026-09-27）
+nocobase-h5: [snapshot] 2026-09 — 17 product 行（destroy-create 幂等，snapshot_date=2026-09-27）
+nocobase-h5: [snapshot] 对账 ✓ 19 行快照 == 流水重放（期初/收/发/期末 + 连续性 bal(t)==opening(t+1)）
+nocobase-h5: ledger balanced — stock == Σmovements per (product, lot)，32 组，132 条流水
+
+=== W2-B3 负例2：旁路直 create（无 biz_date）→ verify 收敛断言红 ===
+INSERT BYPASS-B3-NEG-1（qty=0 不破 Σ==stock，仅 biz_date NULL）→ verify: wms_movements.biz_date NULL on 1 row(s) ... direct creates bypassing appendMovement are forbidden: BYPASS-B3-NEG-1 → 红 complied
+DELETE 恢复 → verify: OK all verified
+
+=== W2-B3 零回归 ===
+- 9 步链 s4 PASS（销售链✓）；s3 失败=存量重放护栏缺失（git stash 掉 B3 全部改动后同样失败「检验单 QI-B9F-0001 已判定 single-shot」，与 B3 无关，遗留给 B7 全链复跑时补护栏）
+- kpi-run --backfill 90 → 1985 rows，91 dates × 22 codes；count_accuracy 2026-09-27=0.9825（列口径与编码口径 diff=0 行，数值连续）

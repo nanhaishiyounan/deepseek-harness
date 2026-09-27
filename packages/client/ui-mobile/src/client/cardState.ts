@@ -72,9 +72,10 @@ export function deriveCardStates(items: readonly ChatItem[]): Map<number, Derive
       if (item.payload !== undefined) {
         if (item.payload.type === 'form_confirm') {
           settleConfirm(states, cursors, item.payload.draftId, item.payload.revision, fieldsRecordOf(item.payload.fields))
-        } else {
+        } else if (item.payload.type === 'reject_flow') {
           settleReject(states, cursors, item.payload.draftId)
         }
+        // approval_confirm actions settle no draft card (the approval card is its own surface).
         continue
       }
       if (item.legacy !== undefined) {

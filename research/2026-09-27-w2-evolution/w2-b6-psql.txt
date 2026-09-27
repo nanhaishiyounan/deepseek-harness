@@ -1,0 +1,100 @@
+── 1) MO 策略列全景（演示 MO 的 kit_policy/overissue_ratio + 既有 MO 缺省 full_lock/0）
+     code     | doc_status  |   kit_policy    | overissue_ratio | reservation_state
+--------------+-------------+-----------------+-----------------+-------------------
+ MO-2026-0001 | completed   | full_lock       |               0 | assigned
+ MO-2026-0002 | released    | full_lock       |               0 | partial
+ MO-2026-0003 | draft       | full_lock       |               0 | none
+ MO-2026-0004 | approved    | full_lock       |               0 | none
+ MO-2026-0005 | approved    | full_lock       |               0 | none
+ MO-2026-0006 | approved    | full_lock       |               0 | none
+ MO-2026-0007 | approved    | full_lock       |               0 | none
+ MO-2026-0008 | approved    | full_lock       |               0 | none
+ MO-2026-0009 | completed   | full_lock       |               0 | assigned
+ MO-2026-0010 | draft       | full_lock       |               0 | none
+ MO-2026-0011 | draft       | full_lock       |               0 | none
+ MO-2026-0012 | approved    | full_lock       |               0 | none
+ MO-W2B6-00A  | released    | full_lock       |               0 | partial
+ MO-W2B6-00B  | in_progress | full_lock       |               0 | assigned
+ MO-W2B6-00B2 | released    | full_lock       |               0 | assigned
+ MO-W2B6-01   | in_progress | partial_allowed |               0 | partial_allowed
+ MO-W2B6-02   | in_progress | full_lock       |            0.05 | assigned
+ MO-W2B6-03   | approved    | partial_allowed |               0 |
+ MO-W2B6-05   | approved    | full_lock       |               0 |
+(19 rows)
+
+── 2) 部分投料三段之一：MO-W2B6-01 落 partial_allowed（非阻断新态）+ kit_data 阶梯（state+policy+缺料行 shortfall=100）
+    code    | reservation_state |    kit_state    |   kit_policy
+------------+-------------------+-----------------+-----------------
+ MO-W2B6-01 | partial_allowed   | partial_allowed | partial_allowed
+(1 row)
+
+                                                shortage_ladder
+----------------------------------------------------------------------------------------------------------------
+ {"eta": null, "sku": "SKU-FZ-0002", "name": "速冻玉米粒 1kg", "demand": 100, "available": 0, "shortfall": 100}
+(1 row)
+
+── 3) 部分投料三段之二：领已齐组件 posted（±ISSUE_WIP 对）+ 预留 consumed
+    code     | status |     sku     | qty |               note
+-------------+--------+-------------+-----+-----------------------------------
+ MI-W2B6-007 | posted | RM-DMP-PKG  | 100 | 部分投料正例：已齐组件 PKG 领 100
+ MI-W2B6-008 | draft  | SKU-FZ-0002 | 100 | 部分投料负例：未齐组件无预留
+(2 rows)
+
+   doc_no    | move_type | qty
+-------------+-----------+------
+ MI-W2B6-007 | ISSUE_WIP | -100
+ MI-W2B6-007 | ISSUE_WIP |  100
+(2 rows)
+
+         code         |   ref_id   |  status  | qty
+----------------------+------------+----------+-----
+ RSV-MO-MO-W2B6-01-01 | MO-W2B6-01 | consumed | 100
+(1 row)
+
+── 4) 超领比例手算：预留 100 × (1+0.05)=105 —— 105 过（note 记超领 5）、106 无 posted 残留
+    code     | status | qty |                                note
+-------------+--------+-----+---------------------------------------------------------------------
+ MI-W2B6-004 | posted | 105 | 超领手算：领 105（100×1.05 上限内）；超领 5（overissue_ratio 0.05）
+ MI-W2B6-005 | draft  |   1 | 超领手算：累计 106 拒
+(2 rows)
+
+ refused_row_must_be_zero
+--------------------------
+                        0
+(1 row)
+
+── 5) 缺省零漂移：full_lock partial 领料被拒（00A 行仍 draft）；ratio=0 超 1 即拒（00B2 行仍 draft）
+    code     | status | qty |                        note
+-------------+--------+-----+----------------------------------------------------
+ MI-W2B6-001 | draft  | 100 | 负例素材：full_lock partial 领料被拒
+ MI-W2B6-010 | draft  | 101 | 缺省回归：ratio=0 单笔 101 > 预留 100（超 1 即拒）
+(2 rows)
+
+── 6) 状态门禁：MO-W2B6-03（partial_allowed 但 approved 未 released）—— 无预留无领料
+    code    | doc_status |   kit_policy    | reservation_state
+------------+------------+-----------------+-------------------
+ MO-W2B6-03 | approved   | partial_allowed |
+(1 row)
+
+ mo03_posted_must_be_zero
+--------------------------
+                        0
+(1 row)
+
+── 7) 拆单建议卡：MO-W2B6-05 preview_data 结构化对象（3 份 × 432 分）+ 排产看板口径
+                                                                                                                                     split_card
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ {"kind": "split_suggestion", "note": "工序超出 WC-W2B6 单日产能（需 1200 分 > 容量 480 分；不跨天约束——建议拆单：拆 3 份×每份 ≤432 分钟（预留 10% 余量），或外协）", "minutes": 1200, "capacity": 480, "earliestStart": "2026-09-28", "perSplitMinutes": 432, "suggestedSplits": 3}
+(1 row)
+
+  code   | working_hours
+---------+---------------
+ WC-W2B6 | 08:00-16:00
+(1 row)
+
+── 8) 对账门禁基线（配合 --assert-ledger）：每 (product,lot) stock == Σmovements
+ product_id | lot_id | stock_sum | move_sum
+------------+--------+-----------+----------
+(0 rows)
+
+(空结果 = 对账平衡)
