@@ -1,6 +1,6 @@
 # W2 轮交付总表（制造业演进清偿 · B1–B7 收官）
 
-> 输入 = [W 轮 99 文档 14 项演进清单](../2026-09-25-w-round/99-w-round-deliverables.md)；批次规格 [`plans/2026-09-27-w2-evolution/`](../../plans/2026-09-27-w2-evolution/PLAN.md)。本批收官日 2026-09-27：9 步链 s1–s9 全量复跑一次全 PASS（含 s3 已判定跳过护栏与 s7 已终态幂等处置，见 [`w2-b7-final-chain.txt`](w2-b7-final-chain.txt)）。
+> 输入 = [W 轮 99 文档 14 项演进清单](../2026-09-25-w-round/99-w-round-deliverables.md)；批次规格 plans/2026-09-27-w2-evolution/PLAN.md（未入库工作副本）。本批收官日 2026-09-27：9 步链 s1–s9 全量复跑一次全 PASS（含 s3 已判定跳过护栏与 s7 已终态幂等处置，见 [`w2-b7-final-chain.txt`](w2-b7-final-chain.txt)）。
 
 ## 一、14 项遗留逐项处置结论
 
@@ -57,10 +57,19 @@
 | 1 | `hub_po_suppliers` 旧表观察期（W 轮 #2 顺延） | 观察期至 2026-12（归一后一季） | 到期归档（`--rollback` 前缀式清理 + note） |
 | 2 | OEE 物化前置——停机/节拍数据源缺位（W 轮 #9 顺延） | 需先建 `mfg_downtime_records` 类采集面 | 数据源落地后按 availability×performance×quality 立项 |
 | 3 | 总账/凭证（W 轮 #14 拒绝部分顺延） | D11 合同边界，企业版范围 | 商业化需要时另行立项（会计期间/科目表/凭证分录） |
-| 4 | MPS 计划行当前 1 行且 void（B2 验证后释放） | 数据形态非缺陷——MPS 引擎与互斥已实证 | 商业化演示前重灌一组活跃 MPS 行走完整确认链 |
+| 4 | MPS 计划行当前 1 行且 void（B2 验证后释放）——**已清偿（R2）** | R2 重灌活跃行停在 approved：plan + 5 item 行 + 对拍 SO ×3 全 approved，covered 互斥两个 run 复验（mps: 驱动 + SOY 直纳 + 无 SO+MPS 双计） | [`w2-r2-mps-reseed.mts`](w2-r2-mps-reseed.mts)、[`w2-r2-mps-reseed.txt`](w2-r2-mps-reseed.txt)、[`w2-r2-verify-ledger.txt`](w2-r2-verify-ledger.txt) |
 | 5 | KPI 成本类口径为现值移动加权（capital_occupied/周转两码） | 已在快照 note 声明口径（非期间加权） | 若需期间成本，等成本归集（#3）一并立项 |
 | 6 | 夜间定时器 marker 为进程内存（重启同日补跑一次） | 设计取舍（各腿幂等，补跑无害，note 留档） | 多实例部署时再引分布式锁 |
 
 ## 五、Agent Note 索引（W2）
 
 - [B2 MPS](../../.agents/notes/implemented/feature/2026-09-27-w2b2-mps-master-schedule.md) · [B4 KPI 历史回放](../../.agents/notes/implemented/feature/2026-09-27-w2b4-kpi-history-replay.md) · [B7 运维收官](../../.agents/notes/implemented/feature/2026-09-27-w2b7-ops-closure-nightly-ap-balance.md)（B1/B3/B5/B6 的决策记录在各自批次文档与 `w2-bN-*` 证据内）
+
+## 六、R2 微批次收口（2026-09-27，W2 终验 PASS_WITH_DEBT 残留清偿）
+
+| 项 | 结果 | 证据 |
+|---|---|---|
+| MPS 演示行重灌（遗留 #4） | **活跃形态就位**：`MPS-202610-01` approved（5 item 行：SNA×3 期 + BEV + FRZ）+ 对拍 SO-2026-0091/0092/0093 approved；M0 自愈→M1 draft 卡口→M2 对拍 SO 生效→M3 max 合并对拍→M4 批准锁定→M5 互斥日结，停在 approved（无 JIT 窗覆盖/确认转单/void 复原）；CLI `--run-mrp` 复跑互斥仍立 | [`w2-r2-mps-reseed.mts`](w2-r2-mps-reseed.mts)、[`w2-r2-mps-reseed.txt`](w2-r2-mps-reseed.txt) |
+| 9 步链二轮 diff | **零实质差异**：规范化（抹 run_id/时刻）后 diff 为空；关键集合行数/状态两轮一致（snapshots 8、open 建议 3、KPI 26/25、wfl 家族 16、movements 7） | [`w2-r2-chain-second-round-diff.txt`](w2-r2-chain-second-round-diff.txt) |
+| plans/ 链接腐烂 | **交付面死链清零**：QUICKSTART 两处 markdown 死链降级纯文本、W 轮叙述移除 plans 括号引用（正引入口 `research/2026-09-25-w-round/`）；scripts JSDoc 13 处与 WEBSITE 引文为非链接溯源，保留 | [`w2-r2-plans-links-audit.txt`](w2-r2-plans-links-audit.txt) |
+| setup verify + 台账（重灌后） | verify 全绿（含 covered-exclusivity 不变量探针）；`--assert-ledger` 32 组 138 条流水 stock==Σmovements | [`w2-r2-verify-ledger.txt`](w2-r2-verify-ledger.txt) |

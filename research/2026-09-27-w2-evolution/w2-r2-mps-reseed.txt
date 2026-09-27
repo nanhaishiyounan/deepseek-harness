@@ -1,0 +1,31 @@
+w2-r2-mps-reseed: ══ 重灌活跃 MPS 行（MPS-202610-01：自愈→draft卡口→对拍SO生效→max合并→批准锁定→互斥日结，停在 approved）══
+w2-r2-mps-reseed: M0 MPS-202610-01 void→draft（自愈）
+w2-r2-mps-reseed: M0 SO-2026-0091 void→draft（自愈）
+w2-r2-mps-reseed: M0 SO-2026-0092 void→draft（自愈）
+w2-r2-mps-reseed: M0 SO-2026-0093 void→draft（自愈）
+mrp-run: close MRP-20260927-171 — 8 snapshot row(s), 3 live suggestion(s) (0 new), 0 stale closed
+w2-r2-mps-reseed: M1 draft 卡口 ✓ MRP-20260927-171 无 mps: 驱动行
+approval-engine: flow so_orders extras has no amount_threshold; defaulting to 100000
+w2-r2-mps-reseed: M2 对拍 SO ×3 approved ✓（引擎 submit→approve）
+mrp-run: MPS MPS-202610-01 recalc — 5 row(s): FD-SNA-080@2026-10 max(20000,5000)=20000(so)；FD-SNA-080@2026-11 max(0,6000)=6000(forecast)；FD-SNA-080@2026-12 max(0,4000)=4000(forecast)；FD-BEV-1000@2026-10 max(300,500)=500(forecast)；FD-FRZ-450@2026-11 max(700,400)=700(so)
+w2-r2-mps-reseed: M3 max 合并对拍 ✓ BEV max(300,500)=500（forecast）；FRZ 期2 max(700,400)=700（so）
+approval-engine: flow mps_plans extras has no amount_threshold; defaulting to 100000
+mrp-run: MPS MPS-202610-01 recalc — 5 row(s): FD-SNA-080@2026-10 max(20000,5000)=20000(so)；FD-SNA-080@2026-11 max(0,6000)=6000(forecast)；FD-SNA-080@2026-12 max(0,4000)=4000(forecast)；FD-BEV-1000@2026-10 max(300,500)=500(forecast)；FD-FRZ-450@2026-11 max(700,400)=700(so)
+w2-r2-mps-reseed: M4 MPS 批准 ✓ MPS-202610-01 approved（生效钩子锁定 + recalc 重算基线）
+mrp-run: MPS MPS-202610-01 covers 3 item(s) — SO direct feed excluded, planned rows in
+mrp-run: close MRP-20260927-179 — 10 snapshot row(s), 4 live suggestion(s) (2 new), 1 stale closed
+w2-r2-mps-reseed: M5 互斥日结 ✓ MRP-20260927-179：covered 3 item 全 mps: 驱动；SNA gross=30000=Σplanned 30000；SOY 直纳照旧且窗外无建议；无 SO+MPS 双计
+mrp-run: MPS MPS-202610-01 covers 3 item(s) — SO direct feed excluded, planned rows in
+mrp-run: close MRP-20260927-189 — 10 snapshot row(s), 4 live suggestion(s) (0 new), 0 stale closed
+w2-r2-mps-reseed: M6' CLI --run-mrp 复跑 ✓ MRP-20260927-189 互斥仍成立（covered mps: 驱动 + SOY 直纳 + 无双计）
+w2-r2-mps-reseed: ══ 终态（活跃演示形态）══
+w2-r2-mps-reseed: plan MPS-202610-01 doc_status=approved approved_by=admin
+w2-r2-mps-reseed: item FD-SNA-080 2026-10 forecast=5000 so_open=20000 planned=20000 driver=so
+w2-r2-mps-reseed: item FD-SNA-080 2026-11 forecast=6000 so_open=0 planned=6000 driver=forecast
+w2-r2-mps-reseed: item FD-SNA-080 2026-12 forecast=4000 so_open=0 planned=4000 driver=forecast
+w2-r2-mps-reseed: item FD-BEV-1000 2026-10 forecast=500 so_open=300 planned=500 driver=forecast
+w2-r2-mps-reseed: item FD-FRZ-450 2026-11 forecast=400 so_open=700 planned=700 driver=so
+w2-r2-mps-reseed: SO-2026-0091 doc_status=approved
+w2-r2-mps-reseed: SO-2026-0092 doc_status=approved
+w2-r2-mps-reseed: SO-2026-0093 doc_status=approved
+w2-r2-mps-reseed: done — 活跃 MPS 行重灌完成，停在 approved（无 JIT 窗覆盖 / 无确认转单 / 无 void 复原）

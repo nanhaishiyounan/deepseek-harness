@@ -141,7 +141,7 @@ pnpm exec vitest run --config vitest.e2e.config.ts examples/kb-agent/tests/exper
 - **AI 雇员对话附件与图片（上传即模型可见）**：任一 AI 雇员聊天输入框用回形针/拖拽/粘贴上传附件后直接提问——pdf/docx/xlsx/md 的文本内容与图片都会进入模型请求，模型能复述附件文字、描述图片内容。其中 pdf 依赖本地附件代理（`ai-proxy`，随 `all` 链自动启动）：代理把 llmService 指向的 `http://127.0.0.1:13100/v1` 请求里的 PDF file part 解析为文本注入，并默认过滤模型回复内联的 `<think>` 推理链（最终用户看不到推理过程，仅见正文）。代理启停：`ai-proxy start` / `ai-proxy stop`（stop 自动把 llmService 回切直连）；只想恢复 think 回显：`ai-proxy stop` 后 `N22_FILTER_THINK=0 ai-proxy start`，再不带该变量重启即恢复过滤。verify 会断言代理健康与 baseURL 指向。
 - **Portal AI 智能员工（两套挂载体系）**：① admin 侧 n18 脚本挂载（11 个 v2 新建表单抽屉：CRM 的商机/客户/联系人/报价/线索，Hub 的工单/资产/员工，项目管理三页的 E1 弹窗）——dex 头像按钮 → 中文描述意图 → formFiller 流式填充；② **Portal 前端 ai-employee-fill 挂载（G7 后 11 个 formId）**：CRM Portal 内商机（crm-deal-create）、线索（crm-lead-create）、项目（hub-project-create）、任务（hub-task-create）、报销（hub-expense-create）、工单（crm-helpdesk-ticket-create）、资产（crm-asset-create）、知识文章（crm-kb-article-create）、员工（crm-hr-employee-create）、库存商品（crm-inv-product-create）、采购单（crm-po-create）——同样的 dex 面板与流式填充，提交直连 `crm_*`/`hub_*` 表落库。两套互不相干：n18 管 admin v2 页，ai-employee-fill 管 Portal 前端表单。
 - **已知边界**：图片单张 ≤10MB（JPEG/PNG/GIF/WEBP），超大图上传时前端显式报错、不会静默丢图；MiniMax-M3 推理延迟在 40~240 秒间波动（表单填充与长问答都需等待模型思考，流式输出期间有逐字反馈）；PDF 走文本层解析，扫描件/纯图片 PDF 无法提取内容，代理会显式报错而不是让模型猜。Portal 库存/销售/财务/帮助台四域表（`hub_inv_*`/`hub_sales_*`/`hub_hd_*`/`hub_fin_*`）由种子链幂等补建并回填演示数据（2026-09-12 起，verify 断言 list/sort/append 全 200）。`users` 表含演示行：四位历史人名（陈立群/王一帆/林静怡/赵晓芳）与九位 AI 员工（阿特拉斯/达拉/得克斯等）均无密码、不可登录，任务/项目负责人下拉即取自该表（2026-09-12 起）；「我的任务」按登录者过滤，AI 员工不登录 Portal，该页只对人类有意义。hub_/crm_ 表的 id 引用列（`*_id`/`*Id`）由 `all` 链统一拓宽为 bigint，与 bigint 主键对齐（幂等：仅 integer 列触发 ALTER）。
-- **商业版边界**：AI 知识库（RAG）、审批/子流程/Webhook workflow 节点、审计日志等商业插件未装，替代路径已在上文（DSH 知识库、manual+condition+request 节点链），明细清单见 [plans/nocobase-full-features/PLAN.md](../../plans/nocobase-full-features/PLAN.md) §4。
+- **商业版边界**：AI 知识库（RAG）、审批/子流程/Webhook workflow 节点、审计日志等商业插件未装，替代路径已在上文（DSH 知识库、manual+condition+request 节点链），明细清单见 plans/nocobase-full-features/PLAN.md §4。
 - **品牌白标（N25 + C6）**：admin 侧栏 logo、登录页标题、浏览器标题后缀与站名走 `systemSettings`（`DSH食品业务平台` + DSH 自研 logo，真源 [workspace/assets/brand/](workspace/assets/brand/)；logo.url 存网关形路径 `/nocobase/dsh-brand-logo.svg`——用户真实入口是 :3080 同源代理，代理剥前缀后落到 client dist 根；:13000 直连是调试入口，读该前缀路径会落到 SPA HTML 兜底）；favicon 与 `nocobase.png` 兜底由品牌脚本在 `yarn build` 之后按字节比对覆盖（重建会还原官方资源，`all` 链内置重放自愈）；favicon 品牌源派生自 [dsh-favicon.svg](workspace/assets/brand/dsh-favicon.svg)（16/32/48 帧 ICO），verify 对其做上游默认摘要黑名单校验、并在 dsh web 网关存活时断言 `:3080` 三路径（`/nocobase/favicon.ico` 与 `/nocobase/dist/{crm,hub}/favicon.ico`）字节等于品牌源——上游默认图标会被显式拒绝。Portal 面（favicon/明暗 logo-mark/入口标题）由部署脚本在每次构建后覆盖为 DSH 品牌并 fail-loud 校验注入标记，运行时标题由 Portal 源码的 `appName` 承载。改品牌素材后重跑 `node --import tsx/esm examples/kb-agent/scripts/nocobase-n25-brand.mts`；改 Portal 品牌/前缀行为需重跑 `node --import tsx/esm examples/kb-agent/scripts/nocobase-portal-deploy.mts`（注入 `NOCOBASE_PORTAL_BASE` + `NOCOBASE_API_URL` 运行时定义——悬浮 AI 员工图标与 Portal API 探活依赖它们；:3080 网关的 `/nocobase` 代理会把两个根绝对值重写为代理前缀，Portal 经 `/nocobase/dist/{crm,hub}/` 可完整使用）。**许可合规边界**：NocoBase LICENSE §5.2 规定 OSS 版仅"页面左上角主 LOGO"允许更换，footer "Powered by NocoBase" 与其余品牌位**必须保留**（2026-09-12 运行时核实：上游 v2.2.6 登录页默认渲染该 footer，本部署未移除），Portal fork 文案（原 "Salesroom CRM"/"All in one"/displayName "CRM DEMO"）已于 2026-09-12 源码级统一替换为 DSH食品业务平台（portals 是自有 fork 应用模板，核心 MANIFEST 零涉及；displayName 经 vite define 进 bundle，post-build 替换不可达，必须源码改）；根路径 /favicon.ico 由品牌脚本覆盖到 client dist 根（admin 入口无 favicon link，浏览器回退请求 origin 根）。
 
 ```sh
@@ -180,7 +180,7 @@ pnpm exec vitest run --config vitest.e2e.config.ts examples/kb-agent/tests/nocob
 
 ## 制造业全链闭环：W 轮 9 步剧本（供应商→采购→质量→生产→销售→结算→看板→审计）
 
-W 轮（B0–B9 十批，`plans/2026-09-25-mfg-closure/`）把平台升级为真实制造业闭环：通用审批引擎五表（`wfl_*`，双端同一入口）、采购全链（PR→RFQ→比价→PO→收货→IQC/AQL→入库→发票三方匹配→付款）、库存实务（移库/预留/ROP/盘点，`stock==Σmovements` 恒成立）、生产闭环（BOM/FCS 排产/齐套硬预留/领退料/报工/OQC/完工入库）、销售→MRP 联动（计划单 mobile 确认卡转单）、质量四路处置与供应商绩效、以及 B9 的真实数据看板（`kpi_snapshots` T+1 快照 + 90 天回算，四类看板页全部由真实单据聚合，每项 KPI 带 psql 口径）。
+W 轮（B0–B9 十批）把平台升级为真实制造业闭环：通用审批引擎五表（`wfl_*`，双端同一入口）、采购全链（PR→RFQ→比价→PO→收货→IQC/AQL→入库→发票三方匹配→付款）、库存实务（移库/预留/ROP/盘点，`stock==Σmovements` 恒成立）、生产闭环（BOM/FCS 排产/齐套硬预留/领退料/报工/OQC/完工入库）、销售→MRP 联动（计划单 mobile 确认卡转单）、质量四路处置与供应商绩效、以及 B9 的真实数据看板（`kpi_snapshots` T+1 快照 + 90 天回算，四类看板页全部由真实单据聚合，每项 KPI 带 psql 口径）。
 
 交付演示按 9 步走（真实服务、真实 key、双端取证；完整证据与逐步 psql 断言见 `research/2026-09-25-w-round/`）：
 
@@ -327,7 +327,7 @@ MCP 通道对照评估结论（REST 窄面保持主通道）见 Agent Note `2026
 - **视图内问数**：「查宏发食品供货的所有产品」经短语查询在画布上直接渲染结果子图，回答与画面一致。
 - **降级有兜底**：页面不可达或动作超出白名单时工具明确报错（30 秒超时/未知动作），助手自动改用数据面工具（kg_query、nb_list 等）作答并给出手动操作参数。
 
-助手侧的三件工具：`switch_view`（切页签）、`view_apply`（执行页面动作，动作白名单与 30 秒超时保护）、`view_state_get`（回读当前视图状态确认生效）。kb、场景、连接器 tab 的操控动作与显式 @ 引用、文档型 patch（`apply_view_patch`）留待 K/L 轮分期（清单见 [plans/handoff-2026-09-15.zh.md](../../plans/handoff-2026-09-15.zh.md)）。
+助手侧的三件工具：`switch_view`（切页签）、`view_apply`（执行页面动作，动作白名单与 30 秒超时保护）、`view_state_get`（回读当前视图状态确认生效）。kb、场景、连接器 tab 的操控动作与显式 @ 引用、文档型 patch（`apply_view_patch`）留待 K/L 轮分期（清单见 plans/handoff-2026-09-15.zh.md）。
 
 首屏是经营概览首页：顶部 KPI 带直读湖仓关键数（零依赖数字卡），下方最近交付轨列出最新订单交付物；场景门户的 30 张场景卡按市场洞察、工艺等八类分组（点击卡片经确认框后以该角色开新会话，见"换角色"节），点 ★ 把常用场景置顶进前列，示例问题点击填入输入框。
 

@@ -1,0 +1,27 @@
+== W2-R2 · plans/ 链接腐烂排查与处置（W2 终验 out-of-scope 清偿）==
+排查日: 2026-09-27 · 排查命令: grep -rnE "]\([^)]*plans/" docs/ examples/ + grep -rn "plans/2026" docs/ examples/
+
+① 分类结果
+A. 真 markdown 相对链接指向未入库 plans/（死链，clone 后不可达）—— 2 处，均已处置：
+   - QUICKSTART.zh.md:144 [plans/nocobase-full-features/PLAN.md](../../plans/nocobase-full-features/PLAN.md)
+     → 降级为纯文本路径「plans/nocobase-full-features/PLAN.md §4」（信息保留，死链消除）
+   - QUICKSTART.zh.md:330 [plans/handoff-2026-09-15.zh.md](../../plans/handoff-2026-09-15.zh.md)
+     → 降级为纯文本路径「plans/handoff-2026-09-15.zh.md」
+B. 交付叙述中的 plans/ 行内路径引用 —— 2 处（183 为 grep plans/2026 命中；215 为补充扫描 grep "plans/" 命中），处置如下：
+   - QUICKSTART.zh.md:183 `plans/2026-09-25-mfg-closure/`（W 轮十批剧本目录）
+     → 移除该括号引用（同段下一句已有入库证据指引「research/2026-09-25-w-round/」，剧本能力全集叙述保留正文）
+   - QUICKSTART.zh.md:215 `plans/acceptance-fixes-2026-09-15-h/04-roadmap-five-systems.md`（I/J/K 路线图）
+     → 保留：行内代码非链接（不渲染为可点击死链），属路线图分期出处标注
+C. 源码头注释设计溯源 —— scripts/*.mts 头 JSDoc 13 处（12 个脚本，w6 两处；plans/2026-09-25-mfg-closure/02~10 等）
+     → 保留：内部设计溯源非交付链接，plans/ 在开发工作副本恒存在（.gitignore:67 仅影响 clone 分发）
+D. 项目计划叙述文本 —— WEBSITE.md:5 / WEBSITE.zh.md:5（plans/food-kb-agent-plan.md §四.5 引文）
+     → 保留：引文出处标注非链接，且不含 plans/2026 模式
+E. docs/ 目录 —— 零命中
+
+② 处置后复核（2026-09-27）
+链接形式残留: (零命中)
+plans/2026 命中（处置前 14 处 = scripts JSDoc 13 处 + QUICKSTART:183；183 移除后实测 13 处，全部为 scripts JSDoc，与预期一致；QUICKSTART:215 路径前缀为 plans/acceptance-fixes- 不属本模式，单列于 B 类）
+
+结论: 仓内交付面（docs/ + examples/*.md）已无指向未入库 plans/ 的相对链接；残留命中均为
+非链接形态（行内代码/源码注释）且各有保留理由。W 轮交付证据的正引入口：
+research/2026-09-25-w-round/（W 轮）与 research/2026-09-27-w2-evolution/99-w2-deliverables.md（W2 总表）。
