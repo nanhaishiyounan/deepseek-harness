@@ -1,0 +1,55 @@
+=== W3-R1 分批收货三段 psql 对拍（2026-09-28 16:38:59）===
+--- 段1 首收 300 后 ---
+  code   | receiving_status | qty  | qty_received
+---------+------------------+------+--------------
+ PO-B5-C | partial          | 1000 |          300
+(1 row)
+
+     receipt_no     |  lot_no   | qty | status | iqc_status
+--------------------+-----------+-----+--------+------------
+ RCV-TERM-2026-0005 | R1W3R1-01 | 300 | posted | pending
+(1 row)
+
+     code     | insp_type |       ref_no       | result  | status  | lot_qty
+--------------+-----------+--------------------+---------+---------+---------
+ QI-2026-0016 | IQC       | RCV-TERM-2026-0005 | pending | pending |     300
+(1 row)
+
+
+--- 段2+3 续收 700 → 收齐（playwright UI 动线 + 引擎日志对拍）---
+  code   | receiving_status | qty  | qty_received
+---------+------------------+------+--------------
+ PO-B5-C | received         | 1000 |         1000
+(1 row)
+
+     receipt_no     |  lot_no   | qty | status | iqc_status
+--------------------+-----------+-----+--------+------------
+ RCV-TERM-2026-0005 | R1W3R1-01 | 300 | posted | pending
+ RCV-TERM-2026-0006 | R1W3R1-02 | 700 | posted | pending
+(2 rows)
+
+     code     | insp_type |       ref_no       | result  | status  | lot_qty
+--------------+-----------+--------------------+---------+---------+---------
+ QI-2026-0016 | IQC       | RCV-TERM-2026-0005 | pending | pending |     300
+ QI-2026-0017 | IQC       | RCV-TERM-2026-0006 | pending | pending |     700
+(2 rows)
+
+       ref_no       | cnt
+--------------------+-----
+ RCV-TERM-2026-0002 |   2
+ RCV-B9F-0001       |   2
+ RCV-TERM-2026-0004 |   2
+ RCV-TERM-2026-0003 |   2
+(4 rows)
+
+ move_type |       doc_no       |  qty
+-----------+--------------------+-------
+ PUTAWAY   | RCV-TERM-2026-0001 |   120
+ PUTAWAY   | RCV-TERM-2026-0002 |  1000
+ PUTAWAY   | RCV-TERM-2026-0003 |   200
+ MOVE      | RCV-TERM-2026-0002 | -1000
+ MOVE      | RCV-TERM-2026-0002 |  1000
+ PUTAWAY   | RCV-TERM-2026-0004 |    10
+ PUTAWAY   | RCV-TERM-2026-0005 |   300
+ PUTAWAY   | RCV-TERM-2026-0006 |   700
+(8 rows)

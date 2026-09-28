@@ -38,6 +38,29 @@
 const params = new URLSearchParams(location.search)
 const base = new URL('..', location.href).href.replace(/\/$/, '') // serve root (:13110)
 
+// strict 档 token：URL ?token= 传入即记住（localStorage），之后免带；服务端
+// 同时守卫本页与 terminal.css，故样式表 href 一并补 token query。
+const TOKEN_KEY = 'w3-terminal-token'
+const urlToken = params.get('token')
+if (urlToken !== null && urlToken !== '') {
+  try { localStorage.setItem(TOKEN_KEY, urlToken) } catch (err) { /* 隐私模式：URL 每次带 ?token= 即可 */ }
+}
+const terminalToken = urlToken !== null && urlToken !== ''
+  ? urlToken
+  : (() => { try { const stored = localStorage.getItem(TOKEN_KEY); return stored === null || stored === '' ? null : stored } catch (err) { return null } })()
+if (terminalToken !== null) {
+  const link = document.querySelector('link[rel="stylesheet"]')
+  if (link !== null && !link.href.includes('token=')) link.href = `terminal.css?token=${encodeURIComponent(terminalToken)}`
+}
+
+/** DB/服务端字段进 innerHTML 前的 HTML 转义（XSS 面收口）。实体串拆开
+ *  拼接：整串实体写在源文件里会在落盘时被解码回字面字符。 */
+function esc(value) {
+  const amp = '\u0026'
+  const map = { '&': amp + 'amp;', '<': amp + 'lt;', '>': amp + 'gt;', '"': amp + 'quot;', "'": amp + '#39;' }
+  return String(value).replace(/[&<>"']/g, ch => map[ch])
+}
+
 const state = { cards: [], submitting: false }
 
 const operatorEl = document.getElementById('operator')
@@ -49,8 +72,20 @@ function note(html, kind) {
   document.getElementById('note').innerHTML = html === '' ? '' : `<div class="note ${kind}">${html}</div>`
 }
 
-async function api(path, options) {
-  const response = await fetch(`${base}${path}`, options)
+async function api(path, options = {}) {
+  const headers = { ...(options.headers ?? {}) }
+  if (terminalToken !== null) headers['x-terminal-token'] = terminalToken
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), 15000)
+  let response
+  try {
+    response = await fetch(`${base}${path}`, { ...options, headers, signal: controller.signal })
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') throw new Error('请求超时（15s）——服务不可达或过载，稍后重试')
+    throw error
+  } finally {
+    clearTimeout(timer)
+  }
   const payload = await response.json().catch(() => ({}))
   if (!response.ok || payload.ok === false) {
     throw new Error(payload.error || `HTTP ${response.status}`)
@@ -77,16 +112,16 @@ function renderQueue() {
     el.dataset.moId = String(card.mo.id)
     el.innerHTML = `
       <div class="card-head">
-        <span class="code">${card.mo.code}</span>
-        <span class="meta">${card.mo.product} · 计划 ${card.mo.qty}</span>
+        <span class="code">${esc(card.mo.code)}</span>
+        <span class="meta">${esc(card.mo.product)} · 计划 ${card.mo.qty}</span>
         <span class="badge green">${doneOps}/${totalOps} 工序</span>
       </div>
       <div class="card-body">
         <div class="progress"><span style="width:${String(reported)}%"></span></div>
         ${card.operations.map(op => `
           <div class="row">
-            <span class="fill">工序${String(op.seq)} ${op.name} · ${op.workcenter}</span>
-            <span>${statusLabel[op.status] || op.status} · 已报 ${String(op.reported)}/${String(card.mo.qty)}</span>
+            <span class="fill">工序${String(op.seq)} ${esc(op.name)} · ${esc(op.workcenter)}</span>
+            <span>${statusLabel[op.status] || esc(op.status)} · 已报 ${String(op.reported)}/${String(card.mo.qty)}</span>
           </div>`).join('')}
       </div>
       <div class="card-foot">${openable
@@ -106,7 +141,7 @@ function openSheet(card) {
   body.innerHTML = `
     <div class="field"><label>报工工序</label>
       <select id="op-sel" style="width:100%;min-height:52px;font-size:18px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);padding:0 12px;">
-        ${operations.map(op => `<option value="${String(op.seq)}" data-remaining="${String(op.remaining)}">工序${String(op.seq)} ${op.name}（剩 ${String(op.remaining)} 未报）</option>`).join('')}
+        ${operations.map(op => `<option value="${String(op.seq)}" data-remaining="${String(op.remaining)}">工序${String(op.seq)} ${esc(op.name)}（剩 ${String(op.remaining)} 未报）</option>`).join('')}
       </select>
     </div>
     <div class="field"><label>完成数（合格）</label><input type="number" id="qty-good" min="0" step="1" value="0" inputmode="numeric"></div>
@@ -161,12 +196,12 @@ function openSheet(card) {
         }),
       })
       closeSheet()
-      note(`<b>报工成功 ${payload.code}</b>工序 ${String(payload.op_seq)} → ${String(payload.op_status)}；待求数 ${String(payload.pending_carried)} 结转下循环${body.querySelector('#send-qc').checked ? '；已挂 IPQC 待检单' : ''}`, 'ok')
+      note(`<b>报工成功 ${esc(payload.code)}</b>工序 ${String(payload.op_seq)} → ${esc(payload.op_status)}；待求数 ${String(payload.pending_carried)} 结转下循环${body.querySelector('#send-qc').checked ? '；已挂 IPQC 待检单' : ''}`, 'ok')
       const el = document.querySelector(`[data-mo-id="${String(card.mo.id)}"]`)
       if (el) el.classList.add('just-done')
       setTimeout(load, 900)
     } catch (error) {
-      note(`<b>报工被拒</b>${error.message}`, 'bad')
+      note(`<b>报工被拒</b>${esc(error.message)}`, 'bad')
       submit.textContent = '提交报工'
       state.submitting = false
       update()
@@ -187,7 +222,7 @@ async function load() {
     renderQueue()
   } catch (error) {
     document.getElementById('queue').innerHTML = '<div class="empty">队列加载失败</div>'
-    note(`<b>加载失败</b>${error.message}`, 'bad')
+    note(`<b>加载失败</b>${esc(error.message)}`, 'bad')
   }
 }
 

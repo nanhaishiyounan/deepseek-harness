@@ -356,9 +356,13 @@ console.log('=== J5 仓管旅程完成（扫码收货→待检→库存→台账
 // C 单独立 lot 走 UI 打分（7 major ≥ Re6 → Rejected → 处置链）。
 const receiptA = (await rowsOf('wms_receipts')).filter(r => String(r.note ?? '').includes(CODES.po))[0]
 if (!receiptA) throw new Error('J4: J5 收货单缺失（先走 J5）')
-const qiA = 'QI-B7J4-A'
+// W3-R1 同口径查重：IQC 幂等键是 (insp_type, ref_no)（挂点
+// ensureQualityInspectionFor）；按自造 code 查重会与挂点 anchor 单双单。
+// 先复用挂点已建的同 ref_no 单，没有才自建取证单。
+const anchorA = (await rowsOf('qm_inspections')).find(r => r.insp_type === 'IQC' && r.ref_no === String(receiptA.receipt_no))
+let qiA = anchorA ? String(anchorA.code) : 'QI-B7J4-A'
 const qiB = 'QI-B7J4-B'
-if (!(await rowsOf('qm_inspections')).some(r => r.code === qiA)) {
+if (!anchorA) {
   await io.create('qm_inspections', {
     code: qiA, insp_type: 'IQC', ref_type: 'receipt', ref_no: String(receiptA.receipt_no),
     product_id: Number(receiptA.product_id), supplier_id: Number(po.supplier_id),

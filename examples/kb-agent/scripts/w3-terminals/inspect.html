@@ -40,6 +40,29 @@
 const params = new URLSearchParams(location.search)
 const base = new URL('..', location.href).href.replace(/\/$/, '')
 
+// strict 档 token：URL ?token= 传入即记住（localStorage），之后免带；服务端
+// 同时守卫本页与 terminal.css，故样式表 href 一并补 token query。
+const TOKEN_KEY = 'w3-terminal-token'
+const urlToken = params.get('token')
+if (urlToken !== null && urlToken !== '') {
+  try { localStorage.setItem(TOKEN_KEY, urlToken) } catch (err) { /* 隐私模式：URL 每次带 ?token= 即可 */ }
+}
+const terminalToken = urlToken !== null && urlToken !== ''
+  ? urlToken
+  : (() => { try { const stored = localStorage.getItem(TOKEN_KEY); return stored === null || stored === '' ? null : stored } catch (err) { return null } })()
+if (terminalToken !== null) {
+  const link = document.querySelector('link[rel="stylesheet"]')
+  if (link !== null && !link.href.includes('token=')) link.href = `terminal.css?token=${encodeURIComponent(terminalToken)}`
+}
+
+/** DB/服务端字段进 innerHTML 前的 HTML 转义（XSS 面收口）。实体串拆开
+ *  拼接：整串实体写在源文件里会在落盘时被解码回字面字符。 */
+function esc(value) {
+  const amp = '\u0026'
+  const map = { '&': amp + 'amp;', '<': amp + 'lt;', '>': amp + 'gt;', '"': amp + 'quot;', "'": amp + '#39;' }
+  return String(value).replace(/[&<>"']/g, ch => map[ch])
+}
+
 const state = { cards: [], submitting: false }
 
 const operatorEl = document.getElementById('operator')
@@ -51,8 +74,20 @@ function note(html, kind) {
   document.getElementById('note').innerHTML = html === '' ? '' : `<div class="note ${kind}">${html}</div>`
 }
 
-async function api(path, options) {
-  const response = await fetch(`${base}${path}`, options)
+async function api(path, options = {}) {
+  const headers = { ...(options.headers ?? {}) }
+  if (terminalToken !== null) headers['x-terminal-token'] = terminalToken
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), 15000)
+  let response
+  try {
+    response = await fetch(`${base}${path}`, { ...options, headers, signal: controller.signal })
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') throw new Error('请求超时（15s）——服务不可达或过载，稍后重试')
+    throw error
+  } finally {
+    clearTimeout(timer)
+  }
   const payload = await response.json().catch(() => ({}))
   if (!response.ok || payload.ok === false) {
     throw new Error(payload.error || `HTTP ${response.status}`)
@@ -84,12 +119,12 @@ function renderQueue() {
     el.dataset.code = card.code
     el.innerHTML = `
       <div class="card-head">
-        <span class="code">${card.code}</span>
-        <span class="meta">${typeLabel[card.insp_type] || card.insp_type} · ${card.product}${card.supplier ? ' · ' + card.supplier : ''}</span>
+        <span class="code">${esc(card.code)}</span>
+        <span class="meta">${typeLabel[card.insp_type] || esc(card.insp_type)} · ${esc(card.product)}${card.supplier ? ' · ' + esc(card.supplier) : ''}</span>
         <span class="badge orange">待检</span>
       </div>
       <div class="card-body">
-        <div class="row"><span class="fill">来源 ${card.ref_no || '—'} · 批次 ${card.lot_no || '—'}</span><span>批量 ${String(card.lot_qty)}</span></div>
+        <div class="row"><span class="fill">来源 ${card.ref_no ? esc(card.ref_no) : '—'} · 批次 ${card.lot_no ? esc(card.lot_no) : '—'}</span><span>批量 ${String(card.lot_qty)}</span></div>
       </div>
       <div class="card-foot"><button class="btn primary block">逐项打分</button></div>`
     el.querySelector('button').addEventListener('click', () => openSheet(card))
@@ -148,10 +183,10 @@ function openSheet(card) {
       el.className = 'reading'
       el.innerHTML = `
         <div class="head">
-          <span class="name">${row.parameter}</span>
+          <span class="name">${esc(row.parameter)}</span>
           <span class="spec">${numeric
             ? `规格 <span class="spec-value">${row.spec_min === null ? '−∞' : String(row.spec_min)} ~ ${row.spec_max === null ? '+∞' : String(row.spec_max)}</span>`
-            : `<span class="spec-value">${row.criteria || '感官判定'}</span>`}</span>
+            : `<span class="spec-value">${row.criteria ? esc(row.criteria) : '感官判定'}</span>`}</span>
           <span class="verdict ${pass === null ? 'pending' : pass ? 'pass' : 'fail'}">${pass === null ? '未判' : pass ? 'Accepted' : 'Rejected'}</span>
         </div>
         <div class="input-line">
@@ -239,12 +274,12 @@ function openSheet(card) {
       })
       document.getElementById('sheet').classList.remove('open')
       const verdict = payload.verdict
-      note(`<b>判定完成 ${card.code}</b>引擎 AQL ${String(verdict.aqlUsed)}（${String(verdict.rigor)}）n=${String(verdict.n)} Ac=${String(verdict.ac)} Re=${String(verdict.re)} · d=${String(verdict.d)} → <span style="font-size:18px">${verdict.result === 'passed' ? '接收 Accepted' : '拒收 Rejected'}</span>${verdict.result === 'failed' ? '（已发起 CAPA 处置草案）' : ''}`, verdict.result === 'passed' ? 'ok' : 'bad')
+      note(`<b>判定完成 ${esc(card.code)}</b>引擎 AQL ${String(verdict.aqlUsed)}（${String(verdict.rigor)}）n=${String(verdict.n)} Ac=${String(verdict.ac)} Re=${String(verdict.re)} · d=${String(verdict.d)} → <span style="font-size:18px">${verdict.result === 'passed' ? '接收 Accepted' : '拒收 Rejected'}</span>${verdict.result === 'failed' ? '（已发起 CAPA 处置草案）' : ''}`, verdict.result === 'passed' ? 'ok' : 'bad')
       const el = document.querySelector(`[data-code="${card.code}"]`)
       if (el) el.classList.add('just-done')
       setTimeout(load, 900)
     } catch (error) {
-      note(`<b>判定被拒</b>${error.message}`, 'bad')
+      note(`<b>判定被拒</b>${esc(error.message)}`, 'bad')
       submit.textContent = '提交判定（引擎 AQL）'
       state.submitting = false
       renderRows()
@@ -262,7 +297,7 @@ async function load() {
     renderQueue()
   } catch (error) {
     document.getElementById('queue').innerHTML = '<div class="empty">队列加载失败</div>'
-    note(`<b>加载失败</b>${error.message}`, 'bad')
+    note(`<b>加载失败</b>${esc(error.message)}`, 'bad')
   }
 }
 

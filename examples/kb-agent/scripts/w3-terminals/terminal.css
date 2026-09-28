@@ -246,6 +246,20 @@ html, body {
 }
 .critical-toggle input { width: 22px; height: 22px; accent-color: var(--bad); }
 
+/* ── receive-line skip toggle (分批到货：已收齐行默认勾选跳过并置灰) ── */
+.skip-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-dim);
+  white-space: nowrap;
+}
+.skip-toggle input { width: 20px; height: 20px; accent-color: var(--warn); }
+.reading.skipped { opacity: 0.5; }
+.reading.skipped .head .name { text-decoration: line-through; }
+
 /* ── banners ── */
 .note {
   border-radius: 12px;

@@ -16,6 +16,8 @@ Status: implemented
 - **读数判定按行分型**：数值行（任一规格界有限）自动判 actual ∈ [spec_min, spec_max]，缺 actual 拒绝；非数值行用大按钮 pass/fail，沉默拒绝。fail 行勾「严重」计 critical（0 收 1 拒），否则 major——`defectsFromReadings` 折叠后交给 `inspectInspection`，AQL 判定权仍在引擎单一处。
 - **超收卡口由端点持有**：postReceipt/updatePoReceiving 没有超收检查，`validateReceiveLines` 在建任何行之前拒绝错品行、空批次、非正数量、以及把 PO 行推过 订购 − 已收 的行。
 - **鉴权 = token + 部门围栏**：`W3_TERMINAL_TOKEN`（header `x-terminal-token` 或 query `token`；未设 = 宽松演示档，响应头 `x-terminal-auth: strict|lenient-demo` 标明——生产必须设置）+ B5 部门表围栏各端操作员（report→生产车间、inspect→质检部、receive→仓储部；跨部门 403，admin 放行）。`W3_TERMINAL_ENABLED=false` 整组路由摘除，引擎零变化（缺省零漂移：端点不调用就不写）。
+- **strict 档 token 页面侧接线（W3-R1）**：各页读 `?token=`（存 localStorage `w3-terminal-token`，此后每次 `api()` 以 `x-terminal-token` 头重发）并给样式表 href 补 token query——`checkTerminalToken` 对页面与 `terminal.css` 一并守卫，strict 下不带 token 的 CSS 链接会 401。`api()` 同时带 15 秒 AbortController 超时；DB 来源字段进任何 innerHTML 前过 `esc()` 助手。
+- **分批到货行级出口（W3-R1）**：已收齐的收货行在跳过开关里默认勾选并置灰，提交体只携带未跳过且有余量的行；全跳过提交在页面侧拒绝。`validateReceiveLines` 不动——对 0 量行 fail-loud 仍是服务端契约，出口留在 UI。
 
 ## 结果
 
@@ -37,6 +39,10 @@ Status: implemented
 - 打分单的读数输入需要 `step="any"`——Chrome 在默认整数步长下会把小数读数（6.2 → 6）取整，悄悄改变被判定值。
 - 顺路修复两处既有数据故障（证据文件内留痕）：B5 旅程行 `QM-W3B5-JOURNEY-2026-09-28` 带集合枚举外的 `status='open'`（破坏 B3 看板分布断言）→ `pending`；MO-2026-0002 的陈旧预留 `RSV-MO-MO-2026-0002-04` 指向已删除的库存行（bin 89）阻断齐套检查 → 释放，随后缺料组件经引擎正门（`--post-adjust`）回补、重算齐套到 assigned，领料才开工 MO。
 - setup-nocobase verify 只在 :13110 活着时探测端点（healthz → /report-job 一个 400 负例 + 一个跨部门 403 围栏）；否则打印提示而不失败——终端页本来就需要 serve 在跑。
+- **内嵌脚本里的 HTML 实体在落盘时被解码**——首版 `esc()` 写 `'&'` 式字面量，到磁盘成了 `&`/`'`（`'''` 三连抛 `SyntaxError: Invalid or unexpected token`，整页脚本失效）。上线版以拼接构造实体（`amp + 'amp;'`，`amp = '\u0026'`）；现在供页前用提取脚本 + `new Function()` 对三页做语法校验。
+- **psql DELETE 必须按业务列断言，不能凭记住的 id**——R1 清理按更早快照的 id（8/13/14/15）删，只命中 id 8，还误删了 `QI-W2B1-NEG-T065`（id 15，W2-B1 负例种子行）；已按 `ensureDoc` 模板同 id 恢复，真孤儿是 62/63/72。按（`ref_no`、`result='pending'`、note 前缀）断言不会漂。
+- **postReceipt 写 movements 不写月度快照**——终端收货后 `setup verify` 的台账重放与 `wms_monthly_balances` 出现偏差，直到跑 `nocobase-h5-wms.mts --recalc`（verify 自己指明了这条路径）；B7 时代的 10 件差与 R1 的 1000 件分批差一次 recalc 全消。
+- **IQC 双单的根因在旅程侧建单键**：`/receive-goods` 本就走 `postReceipt → ensureQualityInspectionFor`（按 `(insp_type, ref_no)` 幂等）；双单来自旅程脚本把建单前查重键在自己造的 `code` 上，对已有挂点单的收货再建第二张 IQC。四张孤儿 pending anchor 已删，旅程查重改为复用 anchor 行，R1 分批收货证明每张新收货单恰一张 IQC（QI-2026-0016/0017）。
 
 ## 证据
 
@@ -47,3 +53,4 @@ Status: implemented
 - `w3-b6-receive-01-queue.png … 03-posted.png`——仓管旅程：带 `# 行数` 徽标的 PO 卡、扫码面板（lot 聚焦 + ±1/±10 步进 + 预填剩余 120）、过账成功横幅与待检区隔离提示。
 - `w3-b6-iframe-nocobase.png`——NocoBase（:3080/nocobase）内「车间终端」flowPage 经 iframe 块渲染 :13110 终端页。
 - 门禁：`approval-engine --selftest`（含终端校验用例）、`nocobase-w3-views --assert`（终端 iframe + URL 钉住）、`setup-nocobase.mts verify`（三页 + 端点冒烟）、`--assert-ledger`（33 组 145 条流水平衡）、9 步链 s4/s5/s6 绿。
+- W3-R1 加固：`w3-r1-strict-matrix.txt`（无/错 token 对三队列、页面、CSS、POST 动词全 401；对 token 200 + `x-terminal-auth: strict`）、`w3-r1-strict-{report,inspect,receive}.png`（strict 页经 `?token=` 存活）、`w3-r1-partial-receive.txt`（300 → partial → +700 → received，两张 IQC anchor 各一张）、`w3-r1-receive-skip-greyed.png` / `w3-r1-receive-skip-empty-submit.png` / `w3-r1-receive-queue-after-received.png`（跳过开关三态）、`w3-r1-iqc-dup-cleanup.txt`（孤儿删除 + 误删修正全程）、`w3-r1-gates.txt`（recalc 后 verify 绿、台账 39 组 192 条、宽松档冒烟）。

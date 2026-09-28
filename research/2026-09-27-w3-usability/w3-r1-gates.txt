@@ -1,0 +1,31 @@
+=== W3-R1 门禁（2026-09-28 16:43:28）===
+--- setup-nocobase.mts verify ---
+(node:19449) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+assert: 部门树 10 名 · 挂接 11 行 · quality_lead 主部门同步 ✓
+setup-nocobase verify: w3b6 serve smoke — /report-job negative refused ✓ (HTTP 400)
+setup-nocobase verify: w3b6 serve smoke — cross-department 403 fence ✓
+setup-nocobase verify: FAILED
+  - wms_monthly_balances != ledger replay (run nocobase-h5-wms.mts --recalc): 8:2026-09: snapshot 520/5920/3325/3115 != replay 520/6920/3325/4115; 1:2026-09: snapshot 0/2400/1225/1175 != replay 0/2410/1225/1185
+verify exit=1
+
+--- nocobase-h5-wms.mts --assert-ledger ---
+nocobase-h5: ledger balanced — stock == Σmovements per (product, lot)，39 组，192 条流水
+ledger exit=0
+--- 重算月度快照（postReceipt 写 movements 不写快照；recalc 是 verify 指定路径）---
+nocobase-h5: [snapshot] 2026-08 — 2 product 行（destroy-create 幂等，snapshot_date=2026-09-28）
+nocobase-h5: [snapshot] 2026-09 — 18 product 行（destroy-create 幂等，snapshot_date=2026-09-28）
+nocobase-h5: [snapshot] 对账 ✓ 20 行快照 == 流水重放（期初/收/发/期末 + 连续性 bal(t)==opening(t+1)）
+
+--- 复跑 setup-nocobase.mts verify ---
+(node:19547) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+assert: 部门树 10 名 · 挂接 11 行 · quality_lead 主部门同步 ✓
+setup-nocobase verify: w3b6 serve smoke — /report-job negative refused ✓ (HTTP 400)
+setup-nocobase verify: w3b6 serve smoke — cross-department 403 fence ✓
+setup-nocobase verify: OK — full UI + collections + attachment field + seed + workflow chain + AI workbench + row floors + m2o fieldNames + n18ai- form AI buttons + portals + portal list probes + ai-proxy + API key + kg graph + h4 SRM (pages/group/floors/food columns) + h5 WMS (pages/group/floors/bin-map JSBlock) + w1 approval (wfl collections/审批中心 page/flow config/gate/doc_status column) + w2 supplier single-source (admission flow/AVL gate/h4 workflow retired/seed untouched/采购联系人 retitle) + w3 procurement (pur collections/采购管理 7 pages/gates/flows/receipt columns/待检区) + b4 inventory (reservations/reorder collections/3 pages/planning columns/virtual zones/count-workflow request leg/bypass guards/ledger balance) + w5 mfg (mfg collections/生产制造 5 pages/MO flow/BOM gate/seed floors) + b6 mfg-exec (4 execution collections/5 pages/mfg_orders columns+terminals/WIP zone/movement legs/seed floors/MO-0003 draft) + b7 sales-mrp (so collections/销售管理 3 pages/SO flow/gates/MRP workflow/driver columns/SHIPMENT_SO leg/seed floors) + b8 quality (qm collections/质量管理 5 pages/AQL full-table 135-row seeds (W2-B1)/additive columns/RETURN_VENDOR+SCRAP legs/concession flow/disposal reconciliation) + b9 dashboards (kpi_snapshots/so_orders.shipped_at/经营分析 4 pages/9 kpi charts + supplier radar/90-day backfill floor) + w2-b2 MPS (mps collections/主生产计划 page/mps flow/back-link column/seeds/covered-exclusivity invariant) + w2-b3 biz-date (movements/counts biz_date 100% coverage/appendMovement convergence/monthly balances reconcile/月度收发存 page) + w2-b5 approval-config (pur_orders extras threshold/tolerance, array approver_map, config_note audit, demo trio records/todos, so_orders default fallback, quality_lead user) + w2-b7 ops closure (kpi_snapshots 25-code floor with ap_balance/应收应付对账 page four ledger blocks + ar/ap trend charts/persona sources + .dsh mirrors) + w3 usability (b1 row-detail drawers + member ACL floors/b2 subtables + guarded actions + approval jumps/b3 four read-only kanbans + 排产甘特 v1 gantt + dual-block calendars + drawer record-scoping/b4 审批流配置中心 (SVG 状态图 + wfl 四表 row Edit + admin+root-only menu + config_note required + consistency probe + 部门形态审批人校验)/b5 组织权限 (departments 树 + 挂接 + 组织架构页 + 权限矩阵页 admin-only + member 动作矩阵 + approver_map 部门路由 qm_nc_dispositions 见证 + 员工页 org_dept 列)/b6 操作者终端 (三页 iframe + serve 动词端点 fail-loud 冒烟 + 部门围栏 403)) all verified
+verify exit=0
+--- 三终端 lenient 冒烟（无 token 200 + 队列 JSON ok）---
+GET /terminal/report [lenient 无 token] -> 200  {"ok":true,"operator":"admin","cards":[{"mo":{"id":2,"code":
+GET /terminal/inspect [lenient 无 token] -> 200  {"ok":true,"operator":"admin","cards":[{"id":10,"code":"QI-2
+GET /terminal/receive [lenient 无 token] -> 200  {"ok":true,"operator":"admin","cards":[{"po":{"id":5,"code":

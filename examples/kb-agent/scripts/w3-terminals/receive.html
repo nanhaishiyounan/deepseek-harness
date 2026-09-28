@@ -31,6 +31,29 @@
 const params = new URLSearchParams(location.search)
 const base = new URL('..', location.href).href.replace(/\/$/, '')
 
+// strict 档 token：URL ?token= 传入即记住（localStorage），之后免带；服务端
+// 同时守卫本页与 terminal.css，故样式表 href 一并补 token query。
+const TOKEN_KEY = 'w3-terminal-token'
+const urlToken = params.get('token')
+if (urlToken !== null && urlToken !== '') {
+  try { localStorage.setItem(TOKEN_KEY, urlToken) } catch (err) { /* 隐私模式：URL 每次带 ?token= 即可 */ }
+}
+const terminalToken = urlToken !== null && urlToken !== ''
+  ? urlToken
+  : (() => { try { const stored = localStorage.getItem(TOKEN_KEY); return stored === null || stored === '' ? null : stored } catch (err) { return null } })()
+if (terminalToken !== null) {
+  const link = document.querySelector('link[rel="stylesheet"]')
+  if (link !== null && !link.href.includes('token=')) link.href = `terminal.css?token=${encodeURIComponent(terminalToken)}`
+}
+
+/** DB/服务端字段进 innerHTML 前的 HTML 转义（XSS 面收口）。实体串拆开
+ *  拼接：整串实体写在源文件里会在落盘时被解码回字面字符。 */
+function esc(value) {
+  const amp = '\u0026'
+  const map = { '&': amp + 'amp;', '<': amp + 'lt;', '>': amp + 'gt;', '"': amp + 'quot;', "'": amp + '#39;' }
+  return String(value).replace(/[&<>"']/g, ch => map[ch])
+}
+
 const state = { cards: [], submitting: false }
 
 const operatorEl = document.getElementById('operator')
@@ -42,8 +65,20 @@ function note(html, kind) {
   document.getElementById('note').innerHTML = html === '' ? '' : `<div class="note ${kind}">${html}</div>`
 }
 
-async function api(path, options) {
-  const response = await fetch(`${base}${path}`, options)
+async function api(path, options = {}) {
+  const headers = { ...(options.headers ?? {}) }
+  if (terminalToken !== null) headers['x-terminal-token'] = terminalToken
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), 15000)
+  let response
+  try {
+    response = await fetch(`${base}${path}`, { ...options, headers, signal: controller.signal })
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') throw new Error('请求超时（15s）——服务不可达或过载，稍后重试')
+    throw error
+  } finally {
+    clearTimeout(timer)
+  }
   const payload = await response.json().catch(() => ({}))
   if (!response.ok || payload.ok === false) {
     throw new Error(payload.error || `HTTP ${response.status}`)
@@ -53,9 +88,12 @@ async function api(path, options) {
 
 const receivingLabel = { none: '未收货', partial: '部分收货', received: '已收齐' }
 
-/** Per-line receive state: lot + qty (start at the outstanding remainder). */
+/** Per-line receive state: lot + qty (start at the outstanding remainder) plus
+ * the line-level skip toggle — fully-received lines start checked and greyed so
+ * a partial arrival submits only the lines with headroom (分批到货). */
 function lineState(line) {
-  return { product_id: line.product_id, product: line.product, lot_no: '', qty: Math.max(0, Math.round((line.qty - line.qty_received) * 100) / 100) }
+  const remaining = Math.max(0, Math.round((line.qty - line.qty_received) * 100) / 100)
+  return { product_id: line.product_id, product: line.product, lot_no: '', qty: remaining, remaining, skip: remaining <= 0 }
 }
 
 function renderQueue() {
@@ -72,13 +110,13 @@ function renderQueue() {
     el.dataset.poId = String(card.po.id)
     el.innerHTML = `
       <div class="card-head">
-        <span class="code">${card.po.code}</span>
-        <span class="meta">${card.po.supplier} · 承诺到货 ${String(card.po.expected_date || '—')}</span>
+        <span class="code">${esc(card.po.code)}</span>
+        <span class="meta">${esc(card.po.supplier)} · 承诺到货 ${String(card.po.expected_date || '—')}</span>
         <span class="badge">#${String(card.outstanding)} 行</span>
       </div>
       <div class="card-body">
-        <div class="row"><span class="fill">${receivingLabel[card.po.receiving_status] || card.po.receiving_status}</span></div>
-        ${card.lines.map(line => `<div class="row"><span class="fill">${line.product}</span><span>订购 ${String(line.qty)} · 已收 ${String(line.qty_received)}</span></div>`).join('')}
+        <div class="row"><span class="fill">${receivingLabel[card.po.receiving_status] || esc(card.po.receiving_status)}</span></div>
+        ${card.lines.map(line => `<div class="row"><span class="fill">${esc(line.product)}</span><span>订购 ${String(line.qty)} · 已收 ${String(line.qty_received)}</span></div>`).join('')}
       </div>
       <div class="card-foot">
         <button class="btn primary block">进入收货</button>
@@ -106,18 +144,22 @@ function togglePanel(el, card, lines) {
       linesEl.innerHTML = ''
       for (const line of lines) {
         const row = document.createElement('div')
-        row.className = 'reading'
+        row.className = `reading${line.skip ? ' skipped' : ''}`
+        const disabled = line.skip ? ' disabled' : ''
         row.innerHTML = `
-          <div class="head"><span class="name">${line.product}</span><span class="spec">本次收货数量</span></div>
+          <div class="head">
+            <span class="name">${esc(line.product)} · 余量 ${String(line.remaining)}</span>
+            <label class="skip-toggle"><input type="checkbox" data-product="${String(line.product_id)}" data-kind="skip"${line.skip ? ' checked' : ''}${line.remaining <= 0 ? ' disabled' : ''}> ${line.remaining <= 0 ? '已收齐——默认跳过' : '跳过本行'}</label>
+          </div>
           <div class="input-line">
-            <input type="text" placeholder="扫码/键入批次号 lot" data-product="${String(line.product_id)}" data-kind="lot" value="${line.lot_no}" style="flex:1;min-height:48px;font-size:16px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:0 12px;">
+            <input type="text" placeholder="扫码/键入批次号 lot" data-product="${String(line.product_id)}" data-kind="lot" value="${esc(line.lot_no)}"${disabled} style="flex:1;min-height:48px;font-size:16px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:0 12px;">
           </div>
           <div class="step" style="margin-top:8px">
-            <button class="btn" data-product="${String(line.product_id)}" data-step="-10">−10</button>
-            <button class="btn" data-product="${String(line.product_id)}" data-step="-1">−1</button>
-            <input type="number" min="0" step="1" data-product="${String(line.product_id)}" data-kind="qty" value="${String(line.qty)}">
-            <button class="btn" data-product="${String(line.product_id)}" data-step="1">+1</button>
-            <button class="btn" data-product="${String(line.product_id)}" data-step="10">+10</button>
+            <button class="btn" data-product="${String(line.product_id)}" data-step="-10"${disabled}>−10</button>
+            <button class="btn" data-product="${String(line.product_id)}" data-step="-1"${disabled}>−1</button>
+            <input type="number" min="0" step="1" data-product="${String(line.product_id)}" data-kind="qty" value="${String(line.qty)}"${disabled}>
+            <button class="btn" data-product="${String(line.product_id)}" data-step="1"${disabled}>+1</button>
+            <button class="btn" data-product="${String(line.product_id)}" data-step="10"${disabled}>+10</button>
           </div>`
         linesEl.appendChild(row)
       }
@@ -130,9 +172,17 @@ function togglePanel(el, card, lines) {
       if (target.dataset.kind === 'lot') line.lot_no = target.value.trim()
       else if (target.dataset.kind === 'qty') line.qty = Math.max(0, Number(target.value || 0))
     })
+    linesEl.addEventListener('change', (event) => {
+      const target = event.target
+      if (target.dataset.kind !== 'skip') return
+      const line = lines.find(row => String(row.product_id) === target.dataset.product)
+      if (line === undefined) return
+      line.skip = target.checked
+      renderLines()
+    })
     linesEl.addEventListener('click', (event) => {
       const target = event.target.closest('button[data-step]')
-      if (target === null) return
+      if (target === null || target.disabled) return
       const line = lines.find(row => String(row.product_id) === target.dataset.product)
       if (line === undefined) return
       line.qty = Math.max(0, line.qty + Number(target.dataset.step))
@@ -144,6 +194,13 @@ function togglePanel(el, card, lines) {
     panel.querySelector('[data-act="verify"]').addEventListener('click', async (event) => {
       const button = event.currentTarget
       if (state.submitting) return
+      // 分批到货：跳过行（已收齐默认勾选、或仓管手动勾选）不进提交体——
+      // 服务端 validateReceiveLines 对 0 量行 fail-loud，行级出口留在 UI 侧。
+      const submitLines = lines.filter(line => !line.skip && line.qty > 0)
+      if (submitLines.length === 0) {
+        note('<b>没有可提交的收货行</b>各行已收齐或已勾选「跳过本行」——取消勾选，或等下一批到货再续收', 'bad')
+        return
+      }
       state.submitting = true
       button.disabled = true
       button.textContent = '过账中…'
@@ -154,15 +211,15 @@ function togglePanel(el, card, lines) {
           body: JSON.stringify({
             operator: operatorEl.value,
             po_id: card.po.id,
-            lines: lines.map(line => ({ product_id: line.product_id, lot_no: line.lot_no, qty: line.qty })),
+            lines: submitLines.map(line => ({ product_id: line.product_id, lot_no: line.lot_no, qty: line.qty })),
           }),
         })
-        note(`<b>收货完成 ${payload.po_code}</b>${payload.receipts.map(receipt => `${receipt.receipt_no}（${String(receipt.qty)}）`).join('、')} · ${payload.quarantine_note}`, 'ok')
+        note(`<b>收货完成 ${esc(payload.po_code)}</b>${payload.receipts.map(receipt => `${esc(receipt.receipt_no)}（${String(receipt.qty)}）`).join('、')} · ${esc(payload.quarantine_note)}`, 'ok')
         el.classList.add('just-done')
         state.submitting = false
         setTimeout(load, 900)
       } catch (error) {
-        note(`<b>收货被拒</b>${error.message}`, 'bad')
+        note(`<b>收货被拒</b>${esc(error.message)}`, 'bad')
         button.disabled = false
         button.textContent = '验证收货'
         state.submitting = false
@@ -185,7 +242,7 @@ async function load() {
     renderQueue()
   } catch (error) {
     document.getElementById('queue').innerHTML = '<div class="empty">队列加载失败</div>'
-    note(`<b>加载失败</b>${error.message}`, 'bad')
+    note(`<b>加载失败</b>${esc(error.message)}`, 'bad')
   }
 }
 

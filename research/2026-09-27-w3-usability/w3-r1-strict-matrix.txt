@@ -1,0 +1,37 @@
+=== W3-R1 strict-token 矩阵（2026-09-28 16:21:45，W3_TERMINAL_TOKEN=test123，档位 strict）===
+
+--- 三终端卡片队列 GET /terminal/{report,inspect,receive}：无/错/对 token ---
+GET /terminal/report?operator=admin  [无 token]       -> 401
+GET /terminal/report?operator=admin  [错 token wrong] -> 401
+GET /terminal/report?operator=admin  [对 token header] -> 200  (x-terminal-auth: strict)
+GET /terminal/inspect?operator=admin  [无 token]      -> 401
+GET /terminal/inspect?operator=admin  [错 token wrong] -> 401
+GET /terminal/inspect?operator=admin  [对 token header] -> 200  (x-terminal-auth: strict)
+GET /terminal/receive?operator=admin  [无 token]      -> 401
+GET /terminal/receive?operator=admin  [错 token wrong] -> 401
+GET /terminal/receive?operator=admin  [对 token header] -> 200  (x-terminal-auth: strict)
+
+--- query token（页面 CSS href 与 URL 直开路径）---
+GET /terminal/receive?token=test123 [query 对]        -> 200  (x-terminal-auth: strict)
+GET /terminal/receive?token=wrong   [query 错]        -> 401
+
+--- 静态触屏页 GET /terminals/*.html：无 token vs ?token= ---
+GET /terminals/report.html              [无 token]    -> 401
+GET /terminals/report.html?token=test123 [对 token]   -> 200  (x-terminal-auth: strict)
+GET /terminals/inspect.html              [无 token]   -> 401
+GET /terminals/inspect.html?token=test123 [对 token]  -> 200  (x-terminal-auth: strict)
+GET /terminals/receive.html              [无 token]   -> 401
+GET /terminals/receive.html?token=test123 [对 token]  -> 200  (x-terminal-auth: strict)
+GET /terminals/terminal.css             [无 token]    -> 401
+GET /terminals/terminal.css?token=test123 [对 token]  -> 200  (x-terminal-auth: strict)
+
+--- 写路径 POST 守卫（无/错 token 401；对 token 到业务校验）---
+POST /receive-goods [无 token]                        -> 401
+POST /receive-goods [错 token]                        -> 401
+POST /report-job   [无 token]                         -> 401
+POST /inspect-submit [错 token]                       -> 401
+
+--- 对 token POST 到达业务校验面（非 401 即守卫放行）---
+{"ok":false,"error":"找不到PO（code= / id=NaN）"}
+
+=== 矩阵结束（期望：无/错 token 全 401；对 token 页面/队列/样式 200 且 x-terminal-auth: strict）===

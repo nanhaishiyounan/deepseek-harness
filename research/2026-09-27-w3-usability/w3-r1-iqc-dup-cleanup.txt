@@ -1,0 +1,96 @@
+=== W3-R1 IQC 孤儿双单清理（2026-09-28 16:41:26）===
+--- 清理前：同 ref_no 双单组（挂点 anchor 单 = 永久 pending；旅程判定单 = closed，承载判定历史保留）---
+ id |     code      |       ref_no       | result  | status  |                        note
+----+---------------+--------------------+---------+---------+----------------------------------------------------
+  8 | QI-2026-0008  | RCV-B9F-0001       | pending | pending | IQC 挂点自动建单（RCV-B9F-0001）
+  9 | QI-B9F-0001   | RCV-B9F-0001       | passed  | closed  | AQL 2.5（normal）× 批量 1000（501-1200/J）→ n=80 A
+ 62 | QI-2026-0013  | RCV-TERM-2026-0002 | pending | pending | IQC 挂点自动建单（RCV-TERM-2026-0002）
+ 64 | QI-B7J4-A     | RCV-TERM-2026-0002 | passed  | closed  | AQL 2.5（reduced）× 批量 1000（501-1200/J）→ n=32
+ 63 | QI-2026-0014  | RCV-TERM-2026-0003 | pending | pending | IQC 挂点自动建单（RCV-TERM-2026-0003）
+ 69 | QI-B7J4-E     | RCV-TERM-2026-0003 | failed  | closed  | AQL 2.5（reduced）× 批量 200（151-280/G）→ n=13 Ac
+ 72 | QI-2026-0015  | RCV-TERM-2026-0004 | pending | pending | IQC 挂点自动建单（RCV-TERM-2026-0004）
+ 73 | QI-VFYB7-4931 | RCV-TERM-2026-0004 | passed  | closed  | AQL 2.5（normal）× 批量 10（9-15/C）→ n=5 Ac=0 Re=
+(8 rows)
+
+--- 对应 receipt 的 iqc_status 已由旅程判定写回（anchor 单无下游，纯孤儿）---
+     receipt_no     | iqc_status | status
+--------------------+------------+--------
+ RCV-B9F-0001       | passed     | closed
+ RCV-TERM-2026-0002 | passed     | closed
+ RCV-TERM-2026-0003 | failed     | posted
+ RCV-TERM-2026-0004 | passed     | posted
+(4 rows)
+
+--- DELETE 4 张孤儿 pending anchor 单 ---
+ id |       code       |            ref_no
+----+------------------+------------------------------
+  8 | QI-2026-0008     | RCV-B9F-0001
+ 15 | QI-W2B1-NEG-T065 | MANUAL-W2B1-QI-W2B1-NEG-T065
+(2 rows)
+
+DELETE 2
+--- 清理后：IQC 双单组清零（0 行 = 无重复）---
+       ref_no       | cnt
+--------------------+-----
+ RCV-TERM-2026-0002 |   2
+ RCV-TERM-2026-0004 |   2
+ RCV-TERM-2026-0003 |   2
+(3 rows)
+
+ pending_orphans
+-----------------
+               3
+(1 row)
+
+
+=== 修正段（2026-09-28 16:42:47）：首轮 DELETE 断言错位（id 快照过时），已删 id8（正确）+ id15（误删 W2-B1 负例种子单）；此处恢复 id15、删真正孤儿 62/63/72 ===
+ id |    sku
+----+------------
+  8 | FD-SOY-500
+(1 row)
+
+--- 恢复校验：与 sibling 负例单同形态 ---
+ id |       code       | lot_qty | result  | status  | supplier_id
+----+------------------+---------+---------+---------+-------------
+ 16 | QI-W2B1-NEG-SUSP |     200 | pending | pending |           6
+ 17 | QI-W2B1-NEG-FULL |       3 | pending | pending |           8
+ 18 | QI-W2B1-NEG-N1   |       1 | pending | pending |           8
+(3 rows)
+
+--- 删真正孤儿（挂点 anchor 永久 pending：62/63/72，ref_no 各有已判定 closed 旅程单）---
+ id |     code     |       ref_no
+----+--------------+--------------------
+ 62 | QI-2026-0013 | RCV-TERM-2026-0002
+ 63 | QI-2026-0014 | RCV-TERM-2026-0003
+ 72 | QI-2026-0015 | RCV-TERM-2026-0004
+(3 rows)
+
+DELETE 3
+--- 终态：IQC 双单组 = 0；pending 孤儿（receipt 已判定却仍 pending）= 0；W2B1 四负例单在位 ---
+ ref_no | cnt
+--------+-----
+(0 rows)
+
+ pending_orphans
+-----------------
+               0
+(1 row)
+
+ w2b1_neg_rows
+---------------
+             3
+(1 row)
+
+ id |       code       |            ref_no            | lot_qty | result  | status  | product_id | supplier_id
+----+------------------+------------------------------+---------+---------+---------+------------+-------------
+ 15 | QI-W2B1-NEG-T065 | MANUAL-W2B1-QI-W2B1-NEG-T065 |    2000 | pending | pending |          8 |           3
+(1 row)
+
+INSERT 0 1
+ id |       code       | lot_qty | result  | status  | supplier_id
+----+------------------+---------+---------+---------+-------------
+ 15 | QI-W2B1-NEG-T065 |    2000 | pending | pending |           3
+ 16 | QI-W2B1-NEG-SUSP |     200 | pending | pending |           6
+ 17 | QI-W2B1-NEG-FULL |       3 | pending | pending |           8
+ 18 | QI-W2B1-NEG-N1   |       1 | pending | pending |           8
+(4 rows)
