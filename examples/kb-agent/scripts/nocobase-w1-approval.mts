@@ -34,7 +34,17 @@
  *   node --import tsx/esm examples/kb-agent/scripts/nocobase-w1-approval.mts
  *   node --import tsx/esm examples/kb-agent/scripts/nocobase-w1-approval.mts --rollback
  */
-import { call, dataOf, listFlowModels, listRoutes, signInWithRetry, withN17Prefix } from './nocobase-flow-page-lib.mts'
+import {
+  APPROVAL_JUMP_ROUTES,
+  call,
+  dataOf,
+  ensureTableRowDetail,
+  listFlowModels,
+  listRoutes,
+  saveRowJumpAction,
+  signInWithRetry,
+  withN17Prefix,
+} from './nocobase-flow-page-lib.mts'
 import { seedFlow } from './approval-engine.mts'
 
 type RouteRow = import('./nocobase-flow-page-lib.mts').RouteRow
@@ -405,6 +415,13 @@ async function ensureApprovalCenter(token: string, groupId: number): Promise<voi
         props: { title: '', icon: 'ReloadOutlined' },
         stepParams: { buttonSettings: { general: { title: '', icon: 'ReloadOutlined' } } },
       })
+      // W3-B1: row-detail triple on every fresh table (P0 root cause ① fix).
+      await ensureTableRowDetail(token, tableUid, {
+        collection: block.collection,
+        fields: block.columns.map(column => ({ fieldPath: column.name, modelUse: displayModelFor(column.kind), ...(column.options === undefined || column.options.length === 0 ? {} : { options: column.options }) })),
+        tabTitle: '详情',
+        actionsColumnSortIndex: block.columns.length + 1,
+      })
       continue
     }
     // The intent block: Add-new writes a wfl_approval_records page row the workflow forwards to the engine.
@@ -441,6 +458,13 @@ async function ensureApprovalCenter(token: string, groupId: number): Promise<voi
       props: { title: '', icon: 'ReloadOutlined' },
       stepParams: { buttonSettings: { general: { title: '', icon: 'ReloadOutlined' } } },
     })
+    // W3-B1: row-detail triple on every fresh table (P0 root cause ① fix).
+    await ensureTableRowDetail(token, tableUid, {
+      collection: block.collection,
+      fields: block.columns.map(column => ({ fieldPath: column.name, modelUse: displayModelFor(column.kind), ...(column.options === undefined || column.options.length === 0 ? {} : { options: column.options }) })),
+      tabTitle: '详情',
+      actionsColumnSortIndex: block.columns.length + 1,
+    })
   }
   console.log(`nocobase-w1: v2 page "${PAGE_TITLE}" created (/admin/${routeUid}) with ${blocks.length} table block(s) + intent Add-new`)
 }
@@ -464,6 +488,49 @@ async function ensureIntentDefaults(token: string): Promise<void> {
     }
   }
   console.log(`nocobase-w1: intent form fields ${formItems.length}, submit actions ${submit > 0 ? `${submit} added` : 'already in place (kept)'}`)
+}
+
+/**
+ * W3-B2: the「前往单据」jump on the todo table's actions column (the todo
+ * drawer already shows doc_type/doc_id via the B1 row detail; this is the
+ * one-click side). Idempotent on the w3b2ja prefix — the heal pass and this
+ * guard agree, so neither doubles the button.
+ */
+async function ensureTodoJumpLinks(token: string): Promise<void> {
+  const rows = await listModels(token)
+  const todoTables = rows.filter(row => row?.use === 'TableBlockModel'
+    && String(row.uid ?? '').startsWith('w1w1')
+    && row?.stepParams?.resourceSettings?.init?.collectionName === 'wfl_approval_todos')
+  for (const table of todoTables) {
+    // The block's resourceSettings.init.filter (status=open) never reached
+    // the list request — the w9 tableSettings.dataScope wire is the one the
+    // runtime replays (found live during W3-B2: the "我的待办（status=open）"
+    // heading was showing completed rows too).
+    const currentScope = (table?.stepParams?.tableSettings as { dataScope?: { filter?: { items?: unknown[] } } } | undefined)?.dataScope
+    const scopePinned = currentScope?.filter?.items?.some((item: any) => item?.path === 'status' && item?.value === 'open') ?? false
+    if (!scopePinned) {
+      await dataOf(token, 'POST', '/api/flowModels:save', {
+        uid: table.uid, use: 'TableBlockModel',
+        stepParams: {
+          ...table.stepParams,
+          tableSettings: {
+            ...(table?.stepParams?.tableSettings ?? {}),
+            dataScope: { filter: { logic: '$and', items: [{ path: 'status', operator: '$eq', value: 'open' }] } },
+          },
+        },
+      })
+      console.log('nocobase-w1: todo table dataScope pinned to status=open (resourceSettings.init.filter never replayed)')
+    }
+    const column = rows.find(row => row?.use === 'TableActionsColumnModel' && String(row.parentId ?? '') === String(table.uid))
+    if (column === undefined) continue
+    const actions = rows.filter(row => row?.subKey === 'actions' && String(row.parentId ?? '') === String(column.uid))
+    if (actions.some(row => String(row.uid ?? '').startsWith('w3b2ja'))) {
+      console.log('nocobase-w1: todo 前往单据 jump exists (kept)')
+      continue
+    }
+    await saveRowJumpAction(token, String(column.uid), { title: '前往单据', docTypeMap: { ...APPROVAL_JUMP_ROUTES }, docType: null, sortIndex: 5 })
+    console.log('nocobase-w1: todo 前往单据 jump added')
+  }
 }
 
 async function rollback(token: string): Promise<void> {
@@ -527,6 +594,7 @@ async function main(): Promise<void> {
   const group = await ensureMenuGroup(token)
   await ensureApprovalCenter(token, group.id)
   await ensureIntentDefaults(token)
+  await ensureTodoJumpLinks(token)
   console.log('nocobase-w1: done')
 }
 

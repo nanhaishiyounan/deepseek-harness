@@ -34,7 +34,7 @@
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
-  batchScopedRows, call, dataOf, listFlowModels, listRoutes, loadRollbackRecords,
+  batchScopedRows, call, dataOf, ensureTableRowDetail, listFlowModels, listRoutes, loadRollbackRecords,
   signInWithRetry, withN17Prefix, writeRollbackRecord,
 } from './nocobase-flow-page-lib.mts'
 
@@ -540,6 +540,13 @@ async function ensureV2HubPage(token: string, spec: V2PageSpec): Promise<void> {
       uid: withN17Prefix('n17f3', 'rf'), parentId: tableUid, subKey: 'actions', subType: 'array', sortIndex: 2, use: 'RefreshActionModel',
       props: { title: '', icon: 'ReloadOutlined' },
       stepParams: { buttonSettings: { general: { title: '', icon: 'ReloadOutlined' } } },
+    })
+    // W3-B1: row-detail triple on every fresh table (P0 root cause ① fix).
+    await ensureTableRowDetail(token, tableUid, {
+      collection: block.collection,
+      fields: block.columns.map(column => ({ fieldPath: column.name, modelUse: displayModelFor(column.kind), ...(column.options === undefined || column.options.length === 0 ? {} : { options: column.options }) })),
+      tabTitle: '详情',
+      actionsColumnSortIndex: block.columns.length + 1,
     })
   }
   console.log(`nocobase-f3: v2 page "${spec.title}" created (/admin/${routeUid}) with ${spec.blocks.length} block(s) + Add new + floating ball`)

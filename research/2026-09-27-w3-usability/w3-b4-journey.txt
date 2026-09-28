@@ -1,0 +1,35 @@
+=== W3-B4 编辑旅程（REST 直写 = EditFormModel 提交通道）2026-09-28 01:19:15 ===
+✓ pur_orders 起点阈值 — 实际 200000
+✓ pur_orders 待同步条件行数 — 实际 1
+✓ pur_orders extras 已改 150000 — 实际 150000
+✓ pur_orders 审计行含 200000→150000 — 实际 true
+✓ 两处同写后探针绿 — 实际 0
+✓ 18万 PO 提交后状态 — 实际 "pending"
+✓ 18万 PO 一审路由（150k 阈值下走二级） — 实际 "pending_level2"
+✓ PO 行 doc_status 已是二级审批中 — 实际 "pending_level2"
+✓ 二级待办已开给 gm(admin) — 实际 ["admin"]
+✓ so_orders 起点无阈值键（默认10万） — 实际 undefined
+✓ so_orders 配置后探针绿 — 实际 0
+✓ 55万 SO 一审路由（500k 阈值下走二级） — 实际 "pending_level2"
+✓ SO 行 doc_status 已是二级审批中 — 实际 "pending_level2"
+✓ 复原后探针绿 — 实际 0
+✓ pur_orders 阈值回到 200000 — 实际 200000
+✓ pur_orders 容差未漂移 — 实际 0.1
+✓ so_orders 阈值键已移除（默认10万） — 实际 undefined
+✓ 审计链行数（pur_orders ≥4：w2b5连写×1 + 配置中心追加×3+） — 实际 true
+✓ 审计链含本次复原行 — 实际 true
+✓ 审计链含 so_orders 键移除行 — 实际 true
+
+=== 旅程终点各流快照（psql 对拍源）===
+#1 hub_po_purchase_orders threshold=(默认100000) tolerance=- noteLines=1
+#2 srm_suppliers threshold=(默认100000) tolerance=- noteLines=1
+#3 pur_requests threshold=(默认100000) tolerance=- noteLines=1
+#4 pur_rfqs threshold=(默认100000) tolerance=- noteLines=1
+#5 pur_orders threshold=200000 tolerance=0.1 noteLines=6
+#6 pur_payments threshold=(默认100000) tolerance=- noteLines=1
+#7 mfg_orders threshold=(默认100000) tolerance=- noteLines=1
+#10 so_orders threshold=(默认100000) tolerance=- noteLines=5
+#11 qm_nc_dispositions threshold=(默认100000) tolerance=- noteLines=1
+#12 mps_plans threshold=(默认100000) tolerance=- noteLines=1
+
+W3-B4 编辑旅程全绿：阈值下调走二级 / 阈值配置走二级 / 探针全程绿 / 复原零漂移 / 审计链完整

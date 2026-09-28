@@ -1,0 +1,41 @@
+=== W3-B6 endpoint smoke ===
+2026-09-28 13:10:58 +0800
+--- 1. static page (report.html) ---
+HTTP/1.1 200 OK
+content-type: text/html; charset=utf-8
+x-terminal-auth: lenient-demo
+Date: Mon, 28 Sep 2026 05:10:58 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Transfer-Encoding: chunked
+
+--- 2. terminal css ---
+http:200 bytes:7768
+--- 3. GET /terminal/report?operator=linjingyi (生产车间) ---
+{"ok":true,"operator":"linjingyi","cards":[{"mo":{"id":15,"code":"MO-W2B6-00B","qty":100,"product":"海苔芝士米果 80g","need_date":"2026-09-27"},"operations":[]},{"mo":{"id":16,"code":"MO-W2B6-01","qty":100,"product":"海苔芝士米果 80g","need_date":"2026-09-27"},"operations":[]},{"mo":{"id":17,"code":"MO-W2B6-02","qty":100,"product":"海苔芝士米果 80g","need_date":"2026-09-27"},"operations":[]}]}
+x-terminal-auth: lenient-demo
+--- 4. GET /terminal/report?operator=quality_lead → 403 跨部门 ---
+{"ok":false,"error":"操作员 quality_lead 不属于生产车间（终端 report 的部门围栏；B5 部门表无此挂接）"}
+http:403
+--- 5. GET /terminal/inspect?operator=quality_lead (质检部) ---
+{"ok":true,"operator":"quality_lead","cards":[{"id":8,"code":"QI-2026-0008","insp_type":"IQC","ref_type":"receipt","ref_no":"RCV-B9F-0001","product":"米果复合包装袋","supplier":"珠海鲜丰水产科技有限公司","lot_no":"RM-SNA-20260926-01","lot_qty":1000},{"id":10,"code":"QI-2026-0009","insp_type":"OQC","ref_type":"completion","ref_no":"MC-B9F-0001","product":"海苔芝士米果 80g","supplier":null,"lot_no":"MFG-20260926-04","lot_qty":23706},{"id":15,"code":"QI-W2B1-NEG-T065","insp
+--- 6. GET /terminal/inspect?operator=linjingyi → 403 跨部门 ---
+{"ok":false,"error":"操作员 linjingyi 不属于质检部（终端 inspect 的部门围栏；B5 部门表无此挂接）"}
+http:403
+--- 7. GET /terminal/receive?operator=b4guard (仓储部) ---
+{"ok":true,"operator":"b4guard","cards":[{"po":{"id":1,"code":"PO-2026-0001","supplier":"东港丰泽果蔬专业合作社","expected_date":null,"receiving_status":"partial"},"lines":[{"product_id":8,"product":"古法酿造酱油 500ml（酿造型）","qty":300,"qty_received":180}],"outstanding":1},{"po":{"id":5,"code":"PO-W8-QC-01","supplier":"味之源调味食品股份有限公司","expected_date":"2026-09-28","receiving_status":"none"},"lines":[],"outstanding":0},{"po":{"id":13,"code":"PO-B5
+--- 8. GET /terminal/receive?operator=qc_inspector → 403 跨部门 ---
+{"ok":false,"error":"操作员 qc_inspector 不属于仓储部（终端 receive 的部门围栏；B5 部门表无此挂接）"}
+http:403
+--- 9. POST /report-job 三数不等式负例（等式不闭合）→ 400 ---
+{"ok":false,"error":"报工被拒：MO MO-2026-0001 状态为 completed——需已领料开工（in_progress）才能报工"}
+http:400
+--- 10. POST /inspect-submit 重判负例（已判定单 single-shot 拒绝）---
+{"ok":false,"error":"检验单 QI-2026-0011 已判定（result=failed；判定 single-shot，重判走再提交批流程）"}
+http:400
+--- 11. POST /receive-goods 超收负例（PO-2026-0001 已收180+本次超余量）---
+{"ok":false,"error":"超收被拒：物料 #8 本单可收 120（订购 300 − 已收 180），本次 500 超出"}
+http:400
+--- 12. POST /receive-goods 错品负例（product 不在 PO 行）---
+{"ok":false,"error":"收货被拒：物料 #99 不在本 PO 的订单行内（错品收货）"}
+http:400

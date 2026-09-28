@@ -1,0 +1,56 @@
+=== W3-B7 五角色旅程 · 链二（J2→J3 计划制造闭环）2026-09-28 06:55:13 ===
+j2-data: 活跃 MPS MPS-202610-01（approved，item 行 5）
+mrp-run: MPS MPS-202610-01 covers 3 item(s) — SO direct feed excluded, planned rows in
+mrp-run: close MRP-20260928-61 — 4 snapshot row(s), 1 live suggestion(s) (1 new), 0 stale closed
+j2-data: MRP 日结 MRP-20260928-61（snapshots=4）
+mrp-run: suggestion #40 → PR PR-2026-0009 (draft, ×460)
+j2-data: 建议#40 确认 → MO-2026-0014 draft
+j2-data: MO MO-2026-0014 qty=23606 state=in_progress
+✓ J2 MO 审批后状态 — 实际 true
+✓ J2 排产工序已生成 — 实际 true
+j2-data: 排产 3 工序（1:混合搅拌@2026-10-09 | 2:烘焙膨化@2026-10-10 | 3:调味包装@2026-10-10）
+✓ J2 MPS drawer 含计划行 — 实际 true
+✓ J2 MRP 快照页有行 — 实际 true
+✓ J2 生产订单看板含该 MO 卡 — 实际 true
+j2-3 列对拍 草稿: 看板 4 vs SQL 4
+✓ J2 看板列「草稿」计数 = SQL — 实际 4
+j2-3 列对拍 已生效: 看板 7 vs SQL 7
+✓ J2 看板列「已生效」计数 = SQL — 实际 7
+j2-3 列对拍 已下达: 看板 4 vs SQL 4
+✓ J2 看板列「已下达」计数 = SQL — 实际 4
+j2-3 列对拍 执行中: 看板 5 vs SQL 5
+✓ J2 看板列「执行中」计数 = SQL — 实际 5
+j2-3 列对拍 已完工: 看板 2 vs SQL 2
+✓ J2 看板列「已完工」计数 = SQL — 实际 2
+✓ J2 MRP 快照行 ≥1 — 实际 true
+✓ J2 MO qty > 0 — 实际 true
+✓ J2 甘特工序条 = FCS 排产结果 — 实际 true
+=== J2 计划员旅程完成（MPS 子表→MRP→MO→看板→甘特→建议卡）===
+j3-data: 组件回补 RM-SNA-MIFU → 1693
+j3-data: 组件回补 RM-SNA-HAI → 273
+j3-data: 组件回补 RM-SNA-CHE → 393
+j3-data: 组件回补 RM-SNA-PKG → 24043
+✓ J3 齐套 assigned — 实际 "assigned"
+j3-data: 领料 MI-B7J2-0014-01 posted
+j3-data: 领料 MI-B7J2-0014-02 posted
+j3-data: 领料 MI-B7J2-0014-03 posted
+j3-data: 领料 MI-B7J2-0014-04 posted
+j3-data: MO MO-2026-0014 状态 in_progress（领料开工后应为 in_progress）
+✓ J3 MO 已开工（in_progress/completed） — 实际 true
+✓ J3 MO drawer 非空 — 实际 true
+j3-3: 报工弹层 海苔芝士米果 80g · 计划数量 23606
+j3-4: 等式显示 23606 + 0 + 0 = 23606 = 本循环计划数 23606
+✓ J3 mfg_job_reports 已落库 — 实际 true
+j3-eq: 工序1 已报 23606 / 计划 23606（三数等式由端点强校验，超报 fail-loud）
+j3-eq: 工序2 已报 23606 / 计划 23606（三数等式由端点强校验，超报 fail-loud）
+j3-eq: 工序3 已报 23606 / 计划 23606（三数等式由端点强校验，超报 fail-loud）
+✓ J3 MO 状态推进（引擎动词结果） — 实际 true
+j3-data: 报工 JR-B7J2-0014-01 → Node.js v22.19.0
+j3-data: 报工 JR-B7J2-0014-02 → Node.js v22.19.0
+j3-data: 报工 JR-B7J2-0014-03 → Node.js v22.19.0
+j3-data: OQC 前轮已判定
+✓ J3 MO 终态 completed — 实际 true
+✓ J3 完工单 OQC 放行 — 实际 true
+✓ J3 完工单页含 MC-B7J2 — 实际 true
+
+=== 链二断言汇总：ALL PASS ===

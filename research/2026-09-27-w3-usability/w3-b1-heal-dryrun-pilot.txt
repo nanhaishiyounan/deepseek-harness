@@ -1,0 +1,6 @@
+w3-heal: plan — 2 table wire(s), 0 card drawer(s), 2 skipped
+  skip: h4srmcva4yz25hl7d2u KanbanCardViewActionModel (card drawer field source missing)
+  skip: w8qmcva4nv58a6srdf KanbanCardViewActionModel (card drawer field source missing)
+  wire: pur_order_lines w3purtb7cbe8io87q — add triple, 5 fields [order, product, qty, unit_price, qty_received]
+  wire: pur_orders w3purtbdiokanwbk26 — add triple, 8 fields [code, supplier, rfq, amount, need_date, doc_status, receiving_status, invoice_status]
+w3-heal: dry-run complete (nothing written)

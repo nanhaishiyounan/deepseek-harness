@@ -1,0 +1,86 @@
+=== W3-B6 psql 对拍（引擎流水行级证明）===
+2026-09-28 13:44:10 +0800
+--- 1. 报工行 JR-2026-0005（合格9000+损失1000=输入；待求6000记 remark）---
+     code     | mo_id | op_seq | qty_good | qty_scrap | duration_min | operator  | qc_status | status |                           remark
+--------------+-------+--------+----------+-----------+--------------+-----------+-----------+--------+-------------------------------------------------------------
+ JR-2026-0005 |     2 |      1 |     9000 |      1000 |          240 | linjingyi | failed    | posted | W3-B6 报工终端；待求数 6000（本循环未完成部分，下循环续报）
+(1 row)
+
+--- 三数等式对拍：9000(完成)+6000(待求,remark)+1000(损失)=16000(本循环计划=16000-0已报) ✓ ---
+--- 2. 工序推进：mfg_order_operations 工序1 planned→started ---
+ seq |   name   | status
+-----+----------+---------
+   1 | 和馅     | started
+   2 | 成型速冻 | planned
+   3 | 内包装   | planned
+(3 rows)
+
+--- 3. 检验读数行 QI-2026-0011（3行：水分fail严重/外观pass/中心温度pass）---
+  parameter  | spec_min | spec_max | actual | pass
+-------------+----------+----------+--------+------
+ 水分(%)     |        0 |        5 |      6 | f
+ 感官·外观   |          |          |        | t
+ 中心温度(℃) |        0 |      100 |     18 | t
+(3 rows)
+
+--- 4. 检验判定行 QI-2026-0011（defect_critical=1→failed；AQL 缓存列）---
+     code     | defect_critical | defect_major | defect_minor | result | aql_target | aql_n | aql_ac | aql_re | rigor  |  inspector   | status
+--------------+-----------------+--------------+--------------+--------+------------+-------+--------+--------+--------+--------------+--------
+ QI-2026-0011 |               1 |            0 |            0 | failed | 2.5        |   200 |     10 |     11 | normal | quality_lead | closed
+(1 row)
+
+--- 5. 判定回写锚点：报工单 qc_status=failed + CAPA 草稿 ---
+     code     | qc_status
+--------------+-----------
+ JR-2026-0005 | failed
+(1 row)
+
+          title          |  status   | inspection_code
+-------------------------+-----------+-----------------
+ 检验不合格·QI-2026-0011 | initiated | QI-2026-0011
+(1 row)
+
+--- 6. 收货行 RCV-TERM-2026-0001（qty120 posted iqc pending 待检）---
+     receipt_no     | receipt_type | po_id |     lot_no      | qty | status | iqc_status |                      note
+--------------------+--------------+-------+-----------------+-----+--------+------------+------------------------------------------------
+ RCV-TERM-2026-0001 | purchase     |     1 | SOY-W3B6-0928-A | 120 | posted | pending    | W3-B6 收货终端（PO-2026-0001；操作员 b4guard）
+(1 row)
+
+--- 7. PO 收货轴：300/300 received ---
+     code     | receiving_status | qty | qty_received
+--------------+------------------+-----+--------------
+ PO-2026-0001 | received         | 300 |          300
+(1 row)
+
+--- 8. 台账：PUTAWAY movement + 待检区 hold stock + lot 隔离 ---
+ move_type |       doc_no       | qty |                       note
+-----------+--------------------+-----+--------------------------------------------------
+ PUTAWAY   | RCV-TERM-2026-0001 | 120 | 收货上架过账（PO 来源→待检区，IQC 放行后转合格）
+(1 row)
+
+ qty_on_hand | status |    bin     | zone
+-------------+--------+------------+------
+         120 | hold   | SH-Q-02-01 | SH-Q
+(1 row)
+
+     lot_no      |   status
+-----------------+-------------
+ SOY-W3B6-0928-A | quarantined
+(1 row)
+
+--- 9. IQC 挂点单 QI-2026-0012（收货→质检下一环）---
+     code     | insp_type |       ref_no       | lot_qty | result  | status
+--------------+-----------+--------------------+---------+---------+---------
+ QI-2026-0012 | IQC       | RCV-TERM-2026-0001 |     120 | pending | pending
+(1 row)
+
+--- 10. 本批数据修复留痕：B5旅程行非法枚举 status=open→pending；坏预留 #8 released ---
+            code            | status
+----------------------------+---------
+ QM-W3B5-JOURNEY-2026-09-28 | pending
+(1 row)
+
+          code          |  status
+------------------------+----------
+ RSV-MO-MO-2026-0002-04 | released
+(1 row)

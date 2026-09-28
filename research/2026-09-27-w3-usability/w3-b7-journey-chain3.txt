@@ -1,0 +1,22 @@
+=== W3-B7 五角色旅程 · 链三（J6 治理 + J7 member 抽查）2026-09-28 07:01:31 ===
+✓ J6 配置中心渲染 SVG 状态图 — 实际 true
+✓ J6 阈值已改 250000 — 实际 250000
+✓ J6 config_note 留痕 — 实际 true
+j6-2: 改流 200000 → 250000（extras + 转移条件两处同写）
+✓ J6 改流后一致性探针 0 问题 — 实际 0
+✓ J6 阈值复原 — 实际 200000
+✓ J6 权限矩阵渲染 — 实际 true
+✓ J6 组织架构含部门树 — 实际 true
+✓ J6 wfl 流配置完整（≥6 流） — 实际 true
+✓ J6 config_note 双向留痕（改+复原） — 实际 true
+=== J6 管理员旅程完成（配置中心改流→矩阵→组织架构）===
+j7-1: member 采购订单页行数 22
+✓ J7 member 行详情 drawer 可见（B1 ACL） — 实际 true
+✓ J7 member 看板可见 — 实际 true
+✓ J7 member 审批流配置不可达（404/空） — 实际 true
+✓ J7 member 有集合 view 授权（≥1） — 实际 true
+✓ J7 member 直写 wfl 配置被拒（403/400） — 实际 true
+j7-psql面: member 授权集合 83 个（pur_orders 在 / mfg_orders 在），写探针 http=403
+=== J7 member 抽查完成（行详情可见 / 看板只读 / 配置不可达）===
+
+=== 链三断言汇总：ALL PASS ===

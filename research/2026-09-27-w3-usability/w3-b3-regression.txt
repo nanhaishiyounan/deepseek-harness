@@ -1,0 +1,20 @@
+# W3-B3 零回归批次输出（2026-09-28）
+
+== assert-ledger ==
+nocobase-h5: ledger balanced — stock == Σmovements per (product, lot)，32 组，138 条流水
+
+== b9-final-chain s1 ==
+b9-chain: [s1] ① 供应商准入 ✓ qualified（wfl 留痕 4 行）
+== b9-final-chain s4 ==
+mrp-run: SO SO-B9F-0001 预留 → FD-SNA-080 欠 0（已有 0）+0
+b9-chain: [s4] ④ 销售链 ✓ SO 两级审批 approved + 生效即预留（FD-SNA-080+0，足额）
+== b9-final-chain s5 ==
+mrp-run: close MRP-20260928-01 — 10 snapshot row(s), 4 live suggestion(s) (0 new), 0 stale closed
+b9-chain: [s5] ⑤ MRP 日结 ✓ MRP-20260928-01（snapshots=10，open 建议=4，MO 建议 #33 待 mobile 确认）
+
+== P0 wire 探针 (.analyze.mjs) ==
+pages=80 tableRows=99 addNewOk=77 addNewMissing=0 anomalies=0
+drawer probes: [{"use":"KanbanCardViewActionModel","uid":"h4srmcva4yz25hl7d2u","prefix":"h4srm","pageSubtree":"present"},{"use":"KanbanCardViewActionModel","uid":"n17f1cvafost1zyzyfp","prefix":"n17f1","pageSubtree":"present"},{"use":"CalendarEventViewActionModel","uid":"n17f1evabaj8kddu7w","prefix":"n17f1","pageSubtree":"present"},{"use":"KanbanCardViewActionModel","uid":"w8qmcva4nv58a6srdf","prefix":"w8qmc","pageSubtree":"present"}]
+
+== capas/dispositions 自由态拖拽回归（--assert 断言） ==
+nocobase-w3-views: --assert OK (column distributions + read-only negatives + gantt source + calendar events)

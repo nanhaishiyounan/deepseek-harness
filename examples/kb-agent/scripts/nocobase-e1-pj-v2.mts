@@ -38,6 +38,7 @@
  */
 import { readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
+import { ensureTableRowDetail } from './nocobase-flow-page-lib.mts'
 import { fileURLToPath } from 'node:url'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -460,6 +461,15 @@ async function ensureV2TablePage(token: string, spec: V2PageSpec): Promise<void>
     uid: `n17e1rf${nodeKey()}`, parentId: tableUid, subKey: 'actions', subType: 'array', sortIndex: 2, use: 'RefreshActionModel',
     props: { title: '', icon: 'ReloadOutlined' },
     stepParams: { buttonSettings: { general: { title: '', icon: 'ReloadOutlined' } } },
+  })
+  // W3-B1: the row-detail triple (actions column + view action + persisted
+  // drawer subtree) rides every fresh table — the factory must never again
+  // ship an action-less table (P0 root cause ①).
+  await ensureTableRowDetail(token, tableUid, {
+    collection: spec.collection,
+    fields: spec.columns.map(column => ({ fieldPath: column.name, modelUse: displayModelFor(column.kind), ...(column.options === undefined ? {} : { options: column.options }) })),
+    tabTitle: '详情',
+    actionsColumnSortIndex: spec.columns.length + 1,
   })
   console.log(`nocobase-e1: v2 page "${spec.title}" created (${baseUrl}/admin/${routeUid}) with Add new + floating ball`)
 }

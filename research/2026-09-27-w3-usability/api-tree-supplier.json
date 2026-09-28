@@ -1,0 +1,861 @@
+{
+  "fetchedAt": "2026-09-28T07:15:34.386Z",
+  "label": "供应链组「供应商档案」页 (h4srm) first TableBlockModel",
+  "targetUid": "h4srmtbdik1s6tqzo8",
+  "collection": "srm_suppliers",
+  "findOneFilterByTk": {
+    "httpStatus": 200
+  },
+  "assembledFromFlat": {
+    "uid": "h4srmtbdik1s6tqzo8",
+    "name": "h4srmtbdik1s6tqzo8",
+    "use": "TableBlockModel",
+    "parentId": "h4srmg32d0erhbiu2",
+    "subKey": "items",
+    "subType": "array",
+    "sortIndex": 1,
+    "props": {},
+    "stepParams": {
+      "resourceSettings": {
+        "init": {
+          "dataSourceKey": "main",
+          "collectionName": "srm_suppliers"
+        }
+      }
+    },
+    "subModels": {
+      "columns": [
+        {
+          "uid": "h4srmc8dtj8nusq6b",
+          "name": "h4srmc8dtj8nusq6b",
+          "use": "TableColumnModel",
+          "parentId": "h4srmtbdik1s6tqzo8",
+          "subKey": "columns",
+          "subType": "array",
+          "sortIndex": 1,
+          "stepParams": {
+            "fieldSettings": {
+              "init": {
+                "dataSourceKey": "main",
+                "collectionName": "srm_suppliers",
+                "fieldPath": "name"
+              }
+            },
+            "tableColumnSettings": {
+              "model": {
+                "use": "DisplayTextFieldModel"
+              }
+            }
+          },
+          "props": {
+            "title": "供应商名称",
+            "dataIndex": "name",
+            "width": 150,
+            "editable": false,
+            "sorter": false,
+            "fixed": "none"
+          },
+          "subModels": {
+            "field": [
+              {
+                "uid": "h4srmc8dtj8nusq6bf",
+                "name": "h4srmc8dtj8nusq6bf",
+                "use": "DisplayTextFieldModel",
+                "parentId": "h4srmc8dtj8nusq6b",
+                "subKey": "field",
+                "subType": "object",
+                "sortIndex": 0,
+                "stepParams": {
+                  "popupSettings": {
+                    "openView": {
+                      "collectionName": "srm_suppliers",
+                      "dataSourceKey": "main"
+                    }
+                  }
+                },
+                "props": {
+                  "displayStyle": "text",
+                  "overflowMode": "ellipsis",
+                  "clickToOpen": false,
+                  "displayCopyButton": false
+                },
+                "subModels": {}
+              }
+            ]
+          }
+        },
+        {
+          "uid": "h4srmcoxb8t672wfl",
+          "name": "h4srmcoxb8t672wfl",
+          "use": "TableColumnModel",
+          "parentId": "h4srmtbdik1s6tqzo8",
+          "subKey": "columns",
+          "subType": "array",
+          "sortIndex": 2,
+          "stepParams": {
+            "fieldSettings": {
+              "init": {
+                "dataSourceKey": "main",
+                "collectionName": "srm_suppliers",
+                "fieldPath": "category"
+              }
+            },
+            "tableColumnSettings": {
+              "model": {
+                "use": "DisplayEnumFieldModel"
+              }
+            }
+          },
+          "props": {
+            "title": "类别",
+            "dataIndex": "category",
+            "width": 150,
+            "editable": false,
+            "sorter": false,
+            "fixed": "none",
+            "options": [
+              {
+                "value": "raw",
+                "label": "原料",
+                "color": "blue"
+              },
+              {
+                "value": "packaging",
+                "label": "包材",
+                "color": "cyan"
+              },
+              {
+                "value": "service",
+                "label": "服务",
+                "color": "purple"
+              },
+              {
+                "value": "aux",
+                "label": "辅料",
+                "color": "green"
+              }
+            ]
+          },
+          "subModels": {
+            "field": [
+              {
+                "uid": "h4srmcoxb8t672wflf",
+                "name": "h4srmcoxb8t672wflf",
+                "use": "DisplayEnumFieldModel",
+                "parentId": "h4srmcoxb8t672wfl",
+                "subKey": "field",
+                "subType": "object",
+                "sortIndex": 0,
+                "stepParams": {
+                  "popupSettings": {
+                    "openView": {
+                      "collectionName": "srm_suppliers",
+                      "dataSourceKey": "main"
+                    }
+                  }
+                },
+                "props": {
+                  "displayStyle": "text",
+                  "overflowMode": "ellipsis",
+                  "clickToOpen": false,
+                  "displayCopyButton": false,
+                  "options": [
+                    {
+                      "value": "raw",
+                      "label": "原料",
+                      "color": "blue"
+                    },
+                    {
+                      "value": "packaging",
+                      "label": "包材",
+                      "color": "cyan"
+                    },
+                    {
+                      "value": "service",
+                      "label": "服务",
+                      "color": "purple"
+                    },
+                    {
+                      "value": "aux",
+                      "label": "辅料",
+                      "color": "green"
+                    }
+                  ]
+                },
+                "subModels": {}
+              }
+            ]
+          }
+        },
+        {
+          "uid": "h4srmc1egqva7mv1w",
+          "name": "h4srmc1egqva7mv1w",
+          "use": "TableColumnModel",
+          "parentId": "h4srmtbdik1s6tqzo8",
+          "subKey": "columns",
+          "subType": "array",
+          "sortIndex": 3,
+          "stepParams": {
+            "fieldSettings": {
+              "init": {
+                "dataSourceKey": "main",
+                "collectionName": "srm_suppliers",
+                "fieldPath": "lifecycle_status"
+              }
+            },
+            "tableColumnSettings": {
+              "model": {
+                "use": "DisplayEnumFieldModel"
+              }
+            }
+          },
+          "props": {
+            "title": "生命周期状态",
+            "dataIndex": "lifecycle_status",
+            "width": 150,
+            "editable": false,
+            "sorter": false,
+            "fixed": "none",
+            "options": [
+              {
+                "value": "potential",
+                "label": "潜在",
+                "color": "default"
+              },
+              {
+                "value": "reviewing",
+                "label": "准入评审中",
+                "color": "blue"
+              },
+              {
+                "value": "qualified",
+                "label": "合格",
+                "color": "green"
+              },
+              {
+                "value": "preferred",
+                "label": "优选",
+                "color": "cyan"
+              },
+              {
+                "value": "restricted",
+                "label": "受限",
+                "color": "orange"
+              },
+              {
+                "value": "frozen",
+                "label": "冻结",
+                "color": "red"
+              },
+              {
+                "value": "rejected",
+                "label": "已拒绝",
+                "color": "red"
+              },
+              {
+                "value": "eliminated",
+                "label": "淘汰",
+                "color": "default"
+              }
+            ]
+          },
+          "subModels": {
+            "field": [
+              {
+                "uid": "h4srmc1egqva7mv1wf",
+                "name": "h4srmc1egqva7mv1wf",
+                "use": "DisplayEnumFieldModel",
+                "parentId": "h4srmc1egqva7mv1w",
+                "subKey": "field",
+                "subType": "object",
+                "sortIndex": 0,
+                "stepParams": {
+                  "popupSettings": {
+                    "openView": {
+                      "collectionName": "srm_suppliers",
+                      "dataSourceKey": "main"
+                    }
+                  }
+                },
+                "props": {
+                  "displayStyle": "text",
+                  "overflowMode": "ellipsis",
+                  "clickToOpen": false,
+                  "displayCopyButton": false,
+                  "options": [
+                    {
+                      "value": "potential",
+                      "label": "潜在",
+                      "color": "default"
+                    },
+                    {
+                      "value": "reviewing",
+                      "label": "准入评审中",
+                      "color": "blue"
+                    },
+                    {
+                      "value": "qualified",
+                      "label": "合格",
+                      "color": "green"
+                    },
+                    {
+                      "value": "preferred",
+                      "label": "优选",
+                      "color": "cyan"
+                    },
+                    {
+                      "value": "restricted",
+                      "label": "受限",
+                      "color": "orange"
+                    },
+                    {
+                      "value": "frozen",
+                      "label": "冻结",
+                      "color": "red"
+                    },
+                    {
+                      "value": "rejected",
+                      "label": "已拒绝",
+                      "color": "red"
+                    },
+                    {
+                      "value": "eliminated",
+                      "label": "淘汰",
+                      "color": "default"
+                    }
+                  ]
+                },
+                "subModels": {}
+              }
+            ]
+          }
+        },
+        {
+          "uid": "h4srmcxfztdohvhzg",
+          "name": "h4srmcxfztdohvhzg",
+          "use": "TableColumnModel",
+          "parentId": "h4srmtbdik1s6tqzo8",
+          "subKey": "columns",
+          "subType": "array",
+          "sortIndex": 4,
+          "stepParams": {
+            "fieldSettings": {
+              "init": {
+                "dataSourceKey": "main",
+                "collectionName": "srm_suppliers",
+                "fieldPath": "regulatory_risk"
+              }
+            },
+            "tableColumnSettings": {
+              "model": {
+                "use": "DisplayEnumFieldModel"
+              }
+            }
+          },
+          "props": {
+            "title": "监管风险",
+            "dataIndex": "regulatory_risk",
+            "width": 150,
+            "editable": false,
+            "sorter": false,
+            "fixed": "none",
+            "options": [
+              {
+                "value": "A",
+                "label": "A级(低)",
+                "color": "green"
+              },
+              {
+                "value": "B",
+                "label": "B级(中)",
+                "color": "blue"
+              },
+              {
+                "value": "C",
+                "label": "C级(较高)",
+                "color": "orange"
+              },
+              {
+                "value": "D",
+                "label": "D级(高)",
+                "color": "red"
+              }
+            ]
+          },
+          "subModels": {
+            "field": [
+              {
+                "uid": "h4srmcxfztdohvhzgf",
+                "name": "h4srmcxfztdohvhzgf",
+                "use": "DisplayEnumFieldModel",
+                "parentId": "h4srmcxfztdohvhzg",
+                "subKey": "field",
+                "subType": "object",
+                "sortIndex": 0,
+                "stepParams": {
+                  "popupSettings": {
+                    "openView": {
+                      "collectionName": "srm_suppliers",
+                      "dataSourceKey": "main"
+                    }
+                  }
+                },
+                "props": {
+                  "displayStyle": "text",
+                  "overflowMode": "ellipsis",
+                  "clickToOpen": false,
+                  "displayCopyButton": false,
+                  "options": [
+                    {
+                      "value": "A",
+                      "label": "A级(低)",
+                      "color": "green"
+                    },
+                    {
+                      "value": "B",
+                      "label": "B级(中)",
+                      "color": "blue"
+                    },
+                    {
+                      "value": "C",
+                      "label": "C级(较高)",
+                      "color": "orange"
+                    },
+                    {
+                      "value": "D",
+                      "label": "D级(高)",
+                      "color": "red"
+                    }
+                  ]
+                },
+                "subModels": {}
+              }
+            ]
+          }
+        },
+        {
+          "uid": "h4srmcwvfp9ty9qyl",
+          "name": "h4srmcwvfp9ty9qyl",
+          "use": "TableColumnModel",
+          "parentId": "h4srmtbdik1s6tqzo8",
+          "subKey": "columns",
+          "subType": "array",
+          "sortIndex": 5,
+          "stepParams": {
+            "fieldSettings": {
+              "init": {
+                "dataSourceKey": "main",
+                "collectionName": "srm_suppliers",
+                "fieldPath": "audit_grade"
+              }
+            },
+            "tableColumnSettings": {
+              "model": {
+                "use": "DisplayEnumFieldModel"
+              }
+            }
+          },
+          "props": {
+            "title": "审核评级",
+            "dataIndex": "audit_grade",
+            "width": 150,
+            "editable": false,
+            "sorter": false,
+            "fixed": "none",
+            "options": [
+              {
+                "value": "A",
+                "label": "A级",
+                "color": "green"
+              },
+              {
+                "value": "B",
+                "label": "B级",
+                "color": "blue"
+              },
+              {
+                "value": "C",
+                "label": "C级",
+                "color": "orange"
+              },
+              {
+                "value": "D",
+                "label": "D级",
+                "color": "red"
+              },
+              {
+                "value": "E",
+                "label": "E级",
+                "color": "default"
+              }
+            ]
+          },
+          "subModels": {
+            "field": [
+              {
+                "uid": "h4srmcwvfp9ty9qylf",
+                "name": "h4srmcwvfp9ty9qylf",
+                "use": "DisplayEnumFieldModel",
+                "parentId": "h4srmcwvfp9ty9qyl",
+                "subKey": "field",
+                "subType": "object",
+                "sortIndex": 0,
+                "stepParams": {
+                  "popupSettings": {
+                    "openView": {
+                      "collectionName": "srm_suppliers",
+                      "dataSourceKey": "main"
+                    }
+                  }
+                },
+                "props": {
+                  "displayStyle": "text",
+                  "overflowMode": "ellipsis",
+                  "clickToOpen": false,
+                  "displayCopyButton": false,
+                  "options": [
+                    {
+                      "value": "A",
+                      "label": "A级",
+                      "color": "green"
+                    },
+                    {
+                      "value": "B",
+                      "label": "B级",
+                      "color": "blue"
+                    },
+                    {
+                      "value": "C",
+                      "label": "C级",
+                      "color": "orange"
+                    },
+                    {
+                      "value": "D",
+                      "label": "D级",
+                      "color": "red"
+                    },
+                    {
+                      "value": "E",
+                      "label": "E级",
+                      "color": "default"
+                    }
+                  ]
+                },
+                "subModels": {}
+              }
+            ]
+          }
+        },
+        {
+          "uid": "h4srmcuz1svan4c6",
+          "name": "h4srmcuz1svan4c6",
+          "use": "TableColumnModel",
+          "parentId": "h4srmtbdik1s6tqzo8",
+          "subKey": "columns",
+          "subType": "array",
+          "sortIndex": 6,
+          "stepParams": {
+            "fieldSettings": {
+              "init": {
+                "dataSourceKey": "main",
+                "collectionName": "srm_suppliers",
+                "fieldPath": "iqc_level"
+              }
+            },
+            "tableColumnSettings": {
+              "model": {
+                "use": "DisplayEnumFieldModel"
+              }
+            }
+          },
+          "props": {
+            "title": "IQC严格度",
+            "dataIndex": "iqc_level",
+            "width": 150,
+            "editable": false,
+            "sorter": false,
+            "fixed": "none",
+            "options": [
+              {
+                "value": "relaxed",
+                "label": "放宽",
+                "color": "green"
+              },
+              {
+                "value": "normal",
+                "label": "正常",
+                "color": "blue"
+              },
+              {
+                "value": "tightened",
+                "label": "加严",
+                "color": "orange"
+              },
+              {
+                "value": "suspended",
+                "label": "暂停",
+                "color": "red"
+              }
+            ]
+          },
+          "subModels": {
+            "field": [
+              {
+                "uid": "h4srmcuz1svan4c6f",
+                "name": "h4srmcuz1svan4c6f",
+                "use": "DisplayEnumFieldModel",
+                "parentId": "h4srmcuz1svan4c6",
+                "subKey": "field",
+                "subType": "object",
+                "sortIndex": 0,
+                "stepParams": {
+                  "popupSettings": {
+                    "openView": {
+                      "collectionName": "srm_suppliers",
+                      "dataSourceKey": "main"
+                    }
+                  }
+                },
+                "props": {
+                  "displayStyle": "text",
+                  "overflowMode": "ellipsis",
+                  "clickToOpen": false,
+                  "displayCopyButton": false,
+                  "options": [
+                    {
+                      "value": "relaxed",
+                      "label": "放宽",
+                      "color": "green"
+                    },
+                    {
+                      "value": "normal",
+                      "label": "正常",
+                      "color": "blue"
+                    },
+                    {
+                      "value": "tightened",
+                      "label": "加严",
+                      "color": "orange"
+                    },
+                    {
+                      "value": "suspended",
+                      "label": "暂停",
+                      "color": "red"
+                    }
+                  ]
+                },
+                "subModels": {}
+              }
+            ]
+          }
+        },
+        {
+          "uid": "h4srmcqmyuuw3w2h",
+          "name": "h4srmcqmyuuw3w2h",
+          "use": "TableColumnModel",
+          "parentId": "h4srmtbdik1s6tqzo8",
+          "subKey": "columns",
+          "subType": "array",
+          "sortIndex": 7,
+          "stepParams": {
+            "fieldSettings": {
+              "init": {
+                "dataSourceKey": "main",
+                "collectionName": "srm_suppliers",
+                "fieldPath": "is_blacklisted"
+              }
+            },
+            "tableColumnSettings": {
+              "model": {
+                "use": "DisplayCheckboxFieldModel"
+              }
+            }
+          },
+          "props": {
+            "title": "黑名单",
+            "dataIndex": "is_blacklisted",
+            "width": 150,
+            "editable": false,
+            "sorter": false,
+            "fixed": "none"
+          },
+          "subModels": {
+            "field": [
+              {
+                "uid": "h4srmcqmyuuw3w2hf",
+                "name": "h4srmcqmyuuw3w2hf",
+                "use": "DisplayCheckboxFieldModel",
+                "parentId": "h4srmcqmyuuw3w2h",
+                "subKey": "field",
+                "subType": "object",
+                "sortIndex": 0,
+                "stepParams": {
+                  "popupSettings": {
+                    "openView": {
+                      "collectionName": "srm_suppliers",
+                      "dataSourceKey": "main"
+                    }
+                  }
+                },
+                "props": {
+                  "displayStyle": "text",
+                  "overflowMode": "ellipsis",
+                  "clickToOpen": false,
+                  "displayCopyButton": false
+                },
+                "subModels": {}
+              }
+            ]
+          }
+        }
+      ],
+      "actions": [
+        {
+          "uid": "h4srmfaxqfxao7567",
+          "name": "h4srmfaxqfxao7567",
+          "parentId": "h4srmtbdik1s6tqzo8",
+          "subKey": "actions",
+          "subType": "array",
+          "sortIndex": 1,
+          "use": "FilterActionModel",
+          "props": {},
+          "stepParams": {
+            "buttonSettings": {
+              "general": {
+                "title": "{{t(\"Filter\")}}"
+              }
+            }
+          },
+          "subModels": {}
+        },
+        {
+          "uid": "h4srmaniywwlmn0k1s",
+          "name": "h4srmaniywwlmn0k1s",
+          "parentId": "h4srmtbdik1s6tqzo8",
+          "subKey": "actions",
+          "subType": "array",
+          "sortIndex": 2,
+          "use": "AddNewActionModel",
+          "props": {},
+          "stepParams": {
+            "popupSettings": {
+              "openView": {
+                "collectionName": "srm_suppliers",
+                "dataSourceKey": "main"
+              }
+            }
+          },
+          "subModels": {}
+        },
+        {
+          "uid": "h4srmrfs32eue2vo1l",
+          "name": "h4srmrfs32eue2vo1l",
+          "parentId": "h4srmtbdik1s6tqzo8",
+          "subKey": "actions",
+          "subType": "array",
+          "sortIndex": 3,
+          "use": "RefreshActionModel",
+          "props": {
+            "title": "",
+            "icon": "ReloadOutlined"
+          },
+          "stepParams": {
+            "buttonSettings": {
+              "general": {
+                "title": "",
+                "icon": "ReloadOutlined"
+              }
+            }
+          },
+          "subModels": {}
+        }
+      ]
+    }
+  },
+  "filterByTkReturnedSubtree": false,
+  "layerProbes": {
+    "columns": {
+      "httpStatus": 200,
+      "data": {
+        "use": "TableColumnModel",
+        "parentId": "h4srmtbdik1s6tqzo8",
+        "subKey": "columns",
+        "subType": "array",
+        "sortIndex": 1,
+        "stepParams": {
+          "fieldSettings": {
+            "init": {
+              "dataSourceKey": "main",
+              "collectionName": "srm_suppliers",
+              "fieldPath": "name"
+            }
+          },
+          "tableColumnSettings": {
+            "model": {
+              "use": "DisplayTextFieldModel"
+            }
+          }
+        },
+        "props": {
+          "title": "供应商名称",
+          "dataIndex": "name",
+          "width": 150,
+          "editable": false,
+          "sorter": false,
+          "fixed": "none"
+        },
+        "uid": "h4srmc8dtj8nusq6b",
+        "subModels": {
+          "field": {
+            "use": "DisplayTextFieldModel",
+            "parentId": "h4srmc8dtj8nusq6b",
+            "subKey": "field",
+            "subType": "object",
+            "sortIndex": 1,
+            "stepParams": {
+              "popupSettings": {
+                "openView": {
+                  "collectionName": "srm_suppliers",
+                  "dataSourceKey": "main"
+                }
+              }
+            },
+            "props": {
+              "displayStyle": "text",
+              "overflowMode": "ellipsis",
+              "clickToOpen": false,
+              "displayCopyButton": false
+            },
+            "uid": "h4srmc8dtj8nusq6bf",
+            "parent": "h4srmc8dtj8nusq6b"
+          }
+        },
+        "parent": "h4srmtbdik1s6tqzo8"
+      }
+    },
+    "actions": {
+      "httpStatus": 200,
+      "data": {
+        "parentId": "h4srmtbdik1s6tqzo8",
+        "subKey": "actions",
+        "subType": "array",
+        "sortIndex": 1,
+        "use": "FilterActionModel",
+        "props": {},
+        "stepParams": {
+          "buttonSettings": {
+            "general": {
+              "title": "{{t(\"Filter\")}}"
+            }
+          }
+        },
+        "uid": "h4srmfaxqfxao7567",
+        "parent": "h4srmtbdik1s6tqzo8"
+      }
+    },
+    "page": {
+      "httpStatus": 204,
+      "data": null
+    }
+  }
+}

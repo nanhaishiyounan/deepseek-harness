@@ -1,0 +1,41 @@
+{
+  "fetchedAt": "2026-09-27T14:37:27.812Z",
+  "base": "http://127.0.0.1:13000",
+  "collections": {
+    "crm_suppliers": {
+      "httpStatus": 404,
+      "total": null,
+      "firstRow": null,
+      "note": "non-JSON body: Not Found"
+    },
+    "hub_pj_projects": {
+      "httpStatus": 200,
+      "total": null,
+      "firstRow": {
+        "id": 1,
+        "name": "对俄出口合规体系搭建",
+        "status": "in_progress"
+      },
+      "note": "other fields truncated per task scope"
+    },
+    "hub_pj_tasks": {
+      "httpStatus": 200,
+      "total": null,
+      "firstRow": {
+        "id": 1,
+        "title": "海外仓切换方案初稿",
+        "status": "in_progress"
+      },
+      "note": "other fields truncated per task scope"
+    },
+    "srm_suppliers": {
+      "httpStatus": 200,
+      "total": null,
+      "firstRow": {
+        "id": 1,
+        "name": "珠海鲜丰水产科技有限公司"
+      },
+      "note": "other fields truncated per task scope"
+    }
+  }
+}

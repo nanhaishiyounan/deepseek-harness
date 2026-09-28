@@ -1,0 +1,3 @@
+w3-heal: plan — 0 table wire(s), 0 card drawer(s), 95 skipped
+  skip: h4srmtb3at0gshbtl4 srm_certificates (healthy row actions kept)
+  skip: h4srmtb6u00mxwn0ft srm_audit_records (healthy row actions kept)

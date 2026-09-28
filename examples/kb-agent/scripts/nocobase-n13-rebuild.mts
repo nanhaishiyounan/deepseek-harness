@@ -23,6 +23,7 @@
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
+import { ensureTableRowDetail } from './nocobase-flow-page-lib.mts'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const baseUrl = process.env.NOCOBASE_BASE_URL ?? 'http://127.0.0.1:13000'
@@ -183,6 +184,17 @@ async function ensureAiWorkbench(token: string): Promise<void> {
   await column('n13wkt', 'title', '工单标题', 'DisplayTextFieldModel', 1)
   await column('n13wks', 'status', '状态', 'DisplayEnumFieldModel', 2, ticketStatus)
   await column('n13wkp', 'priority', '优先级', 'DisplayEnumFieldModel', 3, ticketPriority)
+  // W3-B1: row-detail triple on the fresh tickets table (P0 root cause ① fix).
+  await ensureTableRowDetail(token, tableUid, {
+    collection: 'hub_tk_tickets',
+    fields: [
+      { fieldPath: 'title', modelUse: 'DisplayTextFieldModel' },
+      { fieldPath: 'status', modelUse: 'DisplayEnumFieldModel', options: ticketStatus },
+      { fieldPath: 'priority', modelUse: 'DisplayEnumFieldModel', options: ticketPriority },
+    ],
+    tabTitle: '详情',
+    actionsColumnSortIndex: 4,
+  })
   console.log('nocobase-n13: AI workbench flow layout created (chat box + tickets table + floating ball)')
 }
 

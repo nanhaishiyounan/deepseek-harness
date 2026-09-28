@@ -1,0 +1,60 @@
+# W3-B3 psql 对拍证据（PG localhost:5432/nocobase，2026-09-28）
+
+== 看板列分布（四对象 × 状态）==
+     board      |     col     | count
+----------------+-------------+-------
+ mfg_orders     | approved    |     7
+ mfg_orders     | completed   |     2
+ mfg_orders     | draft       |     4
+ mfg_orders     | in_progress |     3
+ mfg_orders     | released    |     4
+ pur_orders     | approved    |     7
+ pur_orders     | draft       |     3
+ pur_orders     | pending     |     1
+ qm_inspections | closed      |    49
+ qm_inspections | pending     |     8
+ so_orders      | approved    |     6
+ so_orders      | draft       |     2
+(12 rows)
+
+== UI 对拍（生产订单看板截图 w3-b3-kanban-mfg.png）：草稿4/已生效7/已下达4/执行中3/已完工2 其余0 ==
+== UI 对拍（采购看板 w3-b3-kanban-pur.png）：草稿3/待审批1/已生效7 其余0 ==
+== UI 对拍（销售看板 w3-b3-kanban-so.png）：草稿2/已生效6 其余0 ==
+== UI 对拍（质检看板 w3-b3-kanban-qm.png）：待检8/已判定49/草稿0 ==
+
+== 排产甘特数据源（mfg_order_operations × planned_date）==
+ planned_date | bars |                                 ops
+--------------+------+---------------------------------------------------------------------
+ 2026-09-26   |    3 | 混合搅拌@WC-ASSY / 烘焙膨化@WC-ASSY / 调味包装@WC-PACK
+ 2026-09-28   |    4 | 超长杀菌@WC-W2B6 / 和馅@WC-ASSY / 成型速冻@WC-ASSY / 内包装@WC-PACK
+ 2026-09-29   |    1 | 混合搅拌@WC-ASSY
+ 2026-09-30   |    2 | 烘焙膨化@WC-ASSY / 调味包装@WC-PACK
+(4 rows)
+
+== UI 对拍（w3-b3-gantt.png 视觉读数）：09-26=3条 / 09-28=4条 / 09-29=1条 / 09-30=2条，合计10 —— 与上表逐日一致 ==
+
+== 工序日期与 FCS 排产一致性（MO-2026-0002 旅程锚点）==
+     code     | planned_start | planned_end | seq |   name   | planned_date
+--------------+---------------+-------------+-----+----------+--------------
+ MO-2026-0002 | 2026-09-28    | 2026-09-28  |   1 | 和馅     | 2026-09-28
+ MO-2026-0002 | 2026-09-28    | 2026-09-28  |   2 | 成型速冻 | 2026-09-28
+ MO-2026-0002 | 2026-09-28    | 2026-09-28  |   3 | 内包装   | 2026-09-28
+(3 rows)
+
+== drawer 子表读数（w3-b3-journey-2-mo-drawer.png）：和馅/成型速冻/内包装 均 2026-09-28 WC-ASSY/WC-ASSY/WC-PACK —— 与上表一致；工作中心显示 workcenter 关联记录的 name（WC-ASSY 等），中文列名在 mfg_work_centers 另一列 ==
+
+== 日历事件数对拍 ==
+                     src                      | count
+----------------------------------------------+-------
+ 交期日历/so_orders(need_date)                |     8
+ 交期日历/pur_orders(need_date)               |    10
+   其中 PO 未完成(receiving_status<>received) |     8
+   其中 SO 未发运(shipping_status<>shipped)   |     6
+ 计划日历/mps_plans(period_from)              |     1
+ 计划日历/mrp_suggestions(suggest_date)       |    34
+(6 rows)
+
+== UI 对拍（w3-b3-calendar-delivery.png / w3-b3-calendar-plan.png）：事件点开 drawer 非空见 w3-b3-calendar-delivery-event-drawer.png ==
+
+== 只读负例：collection:move 通道 ==
+四集合无 sort 字段（--assert 探针：pur_orders/mfg_orders/so_orders/qm_inspections :move 调用全部被拒，见 w3-b3-assert.txt）；w3b3 看板 dragEnabled:false + 无 AddNew/quickCreate（verify 断言）==

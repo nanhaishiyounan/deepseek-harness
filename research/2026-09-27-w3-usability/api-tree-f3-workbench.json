@@ -1,0 +1,1224 @@
+{
+  "fetchedAt": "2026-09-28T07:15:34.463Z",
+  "label": "「工作台」页 (n17f3) first TableBlockModel",
+  "targetUid": "n17f3tbkvdfcxrb8y8",
+  "collection": "hub_pj_tasks",
+  "findOneFilterByTk": {
+    "httpStatus": 200
+  },
+  "assembledFromFlat": {
+    "uid": "n17f3tbkvdfcxrb8y8",
+    "name": "n17f3tbkvdfcxrb8y8",
+    "use": "TableBlockModel",
+    "parentId": "n17f3gypjyk1ze2q",
+    "subKey": "items",
+    "subType": "array",
+    "sortIndex": 1,
+    "props": {
+      "title": "我的任务"
+    },
+    "stepParams": {
+      "resourceSettings": {
+        "init": {
+          "dataSourceKey": "main",
+          "collectionName": "hub_pj_tasks"
+        }
+      }
+    },
+    "subModels": {
+      "actions": [
+        {
+          "uid": "n17f3an9s341plk72g",
+          "name": "n17f3an9s341plk72g",
+          "parentId": "n17f3tbkvdfcxrb8y8",
+          "subKey": "actions",
+          "subType": "array",
+          "sortIndex": 1,
+          "use": "AddNewActionModel",
+          "props": {},
+          "stepParams": {
+            "popupSettings": {
+              "openView": {
+                "collectionName": "hub_pj_tasks",
+                "dataSourceKey": "main"
+              }
+            }
+          },
+          "subModels": {}
+        },
+        {
+          "uid": "n17f3rfmagty2qfzm",
+          "name": "n17f3rfmagty2qfzm",
+          "parentId": "n17f3tbkvdfcxrb8y8",
+          "subKey": "actions",
+          "subType": "array",
+          "sortIndex": 2,
+          "use": "RefreshActionModel",
+          "props": {
+            "title": "",
+            "icon": "ReloadOutlined"
+          },
+          "stepParams": {
+            "buttonSettings": {
+              "general": {
+                "title": "",
+                "icon": "ReloadOutlined"
+              }
+            }
+          },
+          "subModels": {}
+        }
+      ],
+      "columns": [
+        {
+          "uid": "n17f3cihraj7frzt",
+          "name": "n17f3cihraj7frzt",
+          "use": "TableColumnModel",
+          "parentId": "n17f3tbkvdfcxrb8y8",
+          "subKey": "columns",
+          "subType": "array",
+          "sortIndex": 1,
+          "stepParams": {
+            "fieldSettings": {
+              "init": {
+                "dataSourceKey": "main",
+                "collectionName": "hub_pj_tasks",
+                "fieldPath": "title"
+              }
+            },
+            "tableColumnSettings": {
+              "model": {
+                "use": "DisplayTextFieldModel"
+              }
+            }
+          },
+          "props": {
+            "title": "任务标题",
+            "dataIndex": "title",
+            "width": 150,
+            "editable": false,
+            "sorter": false,
+            "fixed": "none"
+          },
+          "subModels": {
+            "field": [
+              {
+                "uid": "n17f3cihraj7frztf",
+                "name": "n17f3cihraj7frztf",
+                "use": "DisplayTextFieldModel",
+                "parentId": "n17f3cihraj7frzt",
+                "subKey": "field",
+                "subType": "object",
+                "sortIndex": 0,
+                "stepParams": {
+                  "popupSettings": {
+                    "openView": {
+                      "collectionName": "hub_pj_tasks",
+                      "dataSourceKey": "main"
+                    }
+                  }
+                },
+                "props": {
+                  "displayStyle": "text",
+                  "overflowMode": "ellipsis",
+                  "clickToOpen": false,
+                  "displayCopyButton": false
+                },
+                "subModels": {}
+              }
+            ]
+          }
+        },
+        {
+          "uid": "n17f3c90529vgo4mc",
+          "name": "n17f3c90529vgo4mc",
+          "use": "TableColumnModel",
+          "parentId": "n17f3tbkvdfcxrb8y8",
+          "subKey": "columns",
+          "subType": "array",
+          "sortIndex": 2,
+          "stepParams": {
+            "fieldSettings": {
+              "init": {
+                "dataSourceKey": "main",
+                "collectionName": "hub_pj_tasks",
+                "fieldPath": "project"
+              }
+            },
+            "tableColumnSettings": {
+              "model": {
+                "use": "DisplayTextFieldModel"
+              }
+            }
+          },
+          "props": {
+            "title": "所属项目",
+            "dataIndex": "project",
+            "width": 150,
+            "editable": false,
+            "sorter": false,
+            "fixed": "none"
+          },
+          "subModels": {
+            "field": [
+              {
+                "uid": "n17f3c90529vgo4mcf",
+                "name": "n17f3c90529vgo4mcf",
+                "use": "DisplayTextFieldModel",
+                "parentId": "n17f3c90529vgo4mc",
+                "subKey": "field",
+                "subType": "object",
+                "sortIndex": 0,
+                "stepParams": {
+                  "popupSettings": {
+                    "openView": {
+                      "collectionName": "hub_pj_tasks",
+                      "dataSourceKey": "main"
+                    }
+                  }
+                },
+                "props": {
+                  "displayStyle": "text",
+                  "overflowMode": "ellipsis",
+                  "clickToOpen": false,
+                  "displayCopyButton": false
+                },
+                "subModels": {}
+              }
+            ]
+          }
+        },
+        {
+          "uid": "n17f3cpusigf0b6n",
+          "name": "n17f3cpusigf0b6n",
+          "use": "TableColumnModel",
+          "parentId": "n17f3tbkvdfcxrb8y8",
+          "subKey": "columns",
+          "subType": "array",
+          "sortIndex": 3,
+          "stepParams": {
+            "fieldSettings": {
+              "init": {
+                "dataSourceKey": "main",
+                "collectionName": "hub_pj_tasks",
+                "fieldPath": "assignee"
+              }
+            },
+            "tableColumnSettings": {
+              "model": {
+                "use": "DisplayTextFieldModel"
+              }
+            }
+          },
+          "props": {
+            "title": "负责人",
+            "dataIndex": "assignee",
+            "width": 150,
+            "editable": false,
+            "sorter": false,
+            "fixed": "none"
+          },
+          "subModels": {
+            "field": [
+              {
+                "uid": "n17f3cpusigf0b6nf",
+                "name": "n17f3cpusigf0b6nf",
+                "use": "DisplayTextFieldModel",
+                "parentId": "n17f3cpusigf0b6n",
+                "subKey": "field",
+                "subType": "object",
+                "sortIndex": 0,
+                "stepParams": {
+                  "popupSettings": {
+                    "openView": {
+                      "collectionName": "hub_pj_tasks",
+                      "dataSourceKey": "main"
+                    }
+                  }
+                },
+                "props": {
+                  "displayStyle": "text",
+                  "overflowMode": "ellipsis",
+                  "clickToOpen": false,
+                  "displayCopyButton": false
+                },
+                "subModels": {}
+              }
+            ]
+          }
+        },
+        {
+          "uid": "n17f3csr6ce5fcp4l",
+          "name": "n17f3csr6ce5fcp4l",
+          "use": "TableColumnModel",
+          "parentId": "n17f3tbkvdfcxrb8y8",
+          "subKey": "columns",
+          "subType": "array",
+          "sortIndex": 4,
+          "stepParams": {
+            "fieldSettings": {
+              "init": {
+                "dataSourceKey": "main",
+                "collectionName": "hub_pj_tasks",
+                "fieldPath": "status"
+              }
+            },
+            "tableColumnSettings": {
+              "model": {
+                "use": "DisplayEnumFieldModel"
+              }
+            }
+          },
+          "props": {
+            "title": "状态",
+            "dataIndex": "status",
+            "width": 150,
+            "editable": false,
+            "sorter": false,
+            "fixed": "none",
+            "options": [
+              {
+                "value": "backlog",
+                "label": "待规划",
+                "color": "default"
+              },
+              {
+                "value": "todo",
+                "label": "待处理",
+                "color": "blue"
+              },
+              {
+                "value": "in_progress",
+                "label": "进行中",
+                "color": "cyan"
+              },
+              {
+                "value": "review",
+                "label": "评审中",
+                "color": "purple"
+              },
+              {
+                "value": "done",
+                "label": "已完成",
+                "color": "green"
+              },
+              {
+                "value": "blocked",
+                "label": "受阻",
+                "color": "red"
+              },
+              {
+                "value": "cancelled",
+                "label": "已取消",
+                "color": "default"
+              }
+            ]
+          },
+          "subModels": {
+            "field": [
+              {
+                "uid": "n17f3csr6ce5fcp4lf",
+                "name": "n17f3csr6ce5fcp4lf",
+                "use": "DisplayEnumFieldModel",
+                "parentId": "n17f3csr6ce5fcp4l",
+                "subKey": "field",
+                "subType": "object",
+                "sortIndex": 0,
+                "stepParams": {
+                  "popupSettings": {
+                    "openView": {
+                      "collectionName": "hub_pj_tasks",
+                      "dataSourceKey": "main"
+                    }
+                  }
+                },
+                "props": {
+                  "displayStyle": "text",
+                  "overflowMode": "ellipsis",
+                  "clickToOpen": false,
+                  "displayCopyButton": false,
+                  "options": [
+                    {
+                      "value": "backlog",
+                      "label": "待规划",
+                      "color": "default"
+                    },
+                    {
+                      "value": "todo",
+                      "label": "待处理",
+                      "color": "blue"
+                    },
+                    {
+                      "value": "in_progress",
+                      "label": "进行中",
+                      "color": "cyan"
+                    },
+                    {
+                      "value": "review",
+                      "label": "评审中",
+                      "color": "purple"
+                    },
+                    {
+                      "value": "done",
+                      "label": "已完成",
+                      "color": "green"
+                    },
+                    {
+                      "value": "blocked",
+                      "label": "受阻",
+                      "color": "red"
+                    },
+                    {
+                      "value": "cancelled",
+                      "label": "已取消",
+                      "color": "default"
+                    }
+                  ]
+                },
+                "subModels": {}
+              }
+            ]
+          }
+        },
+        {
+          "uid": "n17f3cwgzagd4r1rj",
+          "name": "n17f3cwgzagd4r1rj",
+          "use": "TableColumnModel",
+          "parentId": "n17f3tbkvdfcxrb8y8",
+          "subKey": "columns",
+          "subType": "array",
+          "sortIndex": 5,
+          "stepParams": {
+            "fieldSettings": {
+              "init": {
+                "dataSourceKey": "main",
+                "collectionName": "hub_pj_tasks",
+                "fieldPath": "priority"
+              }
+            },
+            "tableColumnSettings": {
+              "model": {
+                "use": "DisplayEnumFieldModel"
+              }
+            }
+          },
+          "props": {
+            "title": "优先级",
+            "dataIndex": "priority",
+            "width": 150,
+            "editable": false,
+            "sorter": false,
+            "fixed": "none",
+            "options": [
+              {
+                "value": "low",
+                "label": "低",
+                "color": "default"
+              },
+              {
+                "value": "medium",
+                "label": "中",
+                "color": "blue"
+              },
+              {
+                "value": "high",
+                "label": "高",
+                "color": "orange"
+              },
+              {
+                "value": "urgent",
+                "label": "紧急",
+                "color": "red"
+              }
+            ]
+          },
+          "subModels": {
+            "field": [
+              {
+                "uid": "n17f3cwgzagd4r1rjf",
+                "name": "n17f3cwgzagd4r1rjf",
+                "use": "DisplayEnumFieldModel",
+                "parentId": "n17f3cwgzagd4r1rj",
+                "subKey": "field",
+                "subType": "object",
+                "sortIndex": 0,
+                "stepParams": {
+                  "popupSettings": {
+                    "openView": {
+                      "collectionName": "hub_pj_tasks",
+                      "dataSourceKey": "main"
+                    }
+                  }
+                },
+                "props": {
+                  "displayStyle": "text",
+                  "overflowMode": "ellipsis",
+                  "clickToOpen": false,
+                  "displayCopyButton": false,
+                  "options": [
+                    {
+                      "value": "low",
+                      "label": "低",
+                      "color": "default"
+                    },
+                    {
+                      "value": "medium",
+                      "label": "中",
+                      "color": "blue"
+                    },
+                    {
+                      "value": "high",
+                      "label": "高",
+                      "color": "orange"
+                    },
+                    {
+                      "value": "urgent",
+                      "label": "紧急",
+                      "color": "red"
+                    }
+                  ]
+                },
+                "subModels": {}
+              }
+            ]
+          }
+        },
+        {
+          "uid": "n17f3cc2qhkcck1gf",
+          "name": "n17f3cc2qhkcck1gf",
+          "use": "TableColumnModel",
+          "parentId": "n17f3tbkvdfcxrb8y8",
+          "subKey": "columns",
+          "subType": "array",
+          "sortIndex": 6,
+          "stepParams": {
+            "fieldSettings": {
+              "init": {
+                "dataSourceKey": "main",
+                "collectionName": "hub_pj_tasks",
+                "fieldPath": "due_at"
+              }
+            },
+            "tableColumnSettings": {
+              "model": {
+                "use": "DisplayDateTimeFieldModel"
+              }
+            }
+          },
+          "props": {
+            "title": "截止日期",
+            "dataIndex": "due_at",
+            "width": 150,
+            "editable": false,
+            "sorter": false,
+            "fixed": "none"
+          },
+          "subModels": {
+            "field": [
+              {
+                "uid": "n17f3cc2qhkcck1gff",
+                "name": "n17f3cc2qhkcck1gff",
+                "use": "DisplayDateTimeFieldModel",
+                "parentId": "n17f3cc2qhkcck1gf",
+                "subKey": "field",
+                "subType": "object",
+                "sortIndex": 0,
+                "stepParams": {
+                  "popupSettings": {
+                    "openView": {
+                      "collectionName": "hub_pj_tasks",
+                      "dataSourceKey": "main"
+                    }
+                  }
+                },
+                "props": {
+                  "displayStyle": "text",
+                  "overflowMode": "ellipsis",
+                  "clickToOpen": false,
+                  "displayCopyButton": false
+                },
+                "subModels": {}
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "filterByTkReturnedSubtree": false,
+  "layerProbes": {
+    "columns": {
+      "httpStatus": 200,
+      "data": {
+        "use": "TableColumnModel",
+        "parentId": "n17f3tbkvdfcxrb8y8",
+        "subKey": "columns",
+        "subType": "array",
+        "sortIndex": 1,
+        "stepParams": {
+          "fieldSettings": {
+            "init": {
+              "dataSourceKey": "main",
+              "collectionName": "hub_pj_tasks",
+              "fieldPath": "title"
+            }
+          },
+          "tableColumnSettings": {
+            "model": {
+              "use": "DisplayTextFieldModel"
+            }
+          }
+        },
+        "props": {
+          "title": "任务标题",
+          "dataIndex": "title",
+          "width": 150,
+          "editable": false,
+          "sorter": false,
+          "fixed": "none"
+        },
+        "uid": "n17f3cihraj7frzt",
+        "subModels": {
+          "field": {
+            "use": "DisplayTextFieldModel",
+            "parentId": "n17f3cihraj7frzt",
+            "subKey": "field",
+            "subType": "object",
+            "sortIndex": 1,
+            "stepParams": {
+              "popupSettings": {
+                "openView": {
+                  "collectionName": "hub_pj_tasks",
+                  "dataSourceKey": "main"
+                }
+              }
+            },
+            "props": {
+              "displayStyle": "text",
+              "overflowMode": "ellipsis",
+              "clickToOpen": false,
+              "displayCopyButton": false
+            },
+            "uid": "n17f3cihraj7frztf",
+            "parent": "n17f3cihraj7frzt"
+          }
+        },
+        "parent": "n17f3tbkvdfcxrb8y8"
+      }
+    },
+    "actions": {
+      "httpStatus": 200,
+      "data": {
+        "parentId": "n17f3tbkvdfcxrb8y8",
+        "subKey": "actions",
+        "subType": "array",
+        "sortIndex": 1,
+        "use": "AddNewActionModel",
+        "props": {},
+        "stepParams": {
+          "popupSettings": {
+            "openView": {
+              "collectionName": "hub_pj_tasks",
+              "dataSourceKey": "main"
+            }
+          }
+        },
+        "uid": "n17f3an9s341plk72g",
+        "subModels": {
+          "page": {
+            "use": "ChildPageModel",
+            "subKey": "page",
+            "subType": "object",
+            "sortIndex": 1,
+            "props": {},
+            "stepParams": {
+              "pageSettings": {
+                "general": {
+                  "displayTitle": false,
+                  "enableTabs": true
+                }
+              }
+            },
+            "uid": "459h4texhsa",
+            "subModels": {
+              "tabs": [
+                {
+                  "use": "ChildPageTabModel",
+                  "subKey": "tabs",
+                  "subType": "array",
+                  "sortIndex": 1,
+                  "props": {},
+                  "stepParams": {
+                    "pageTabSettings": {
+                      "tab": {
+                        "title": "{{t(\"Add new\")}}"
+                      }
+                    }
+                  },
+                  "uid": "nnhu0um25gn",
+                  "subModels": {
+                    "grid": {
+                      "use": "BlockGridModel",
+                      "subKey": "grid",
+                      "subType": "object",
+                      "sortIndex": 1,
+                      "props": {},
+                      "uid": "vsvwswxy41y",
+                      "subModels": {
+                        "items": [
+                          {
+                            "use": "CreateFormModel",
+                            "subKey": "items",
+                            "subType": "array",
+                            "sortIndex": 1,
+                            "props": {},
+                            "stepParams": {
+                              "resourceSettings": {
+                                "init": {
+                                  "dataSourceKey": "main",
+                                  "collectionName": "hub_pj_tasks"
+                                }
+                              }
+                            },
+                            "uid": "5fsocrqwkej",
+                            "subModels": {
+                              "actions": [
+                                {
+                                  "parentId": "5fsocrqwkej",
+                                  "subKey": "actions",
+                                  "subType": "array",
+                                  "sortIndex": 1,
+                                  "use": "FormSubmitActionModel",
+                                  "props": {},
+                                  "stepParams": {},
+                                  "uid": "submit-5fsocrqwkej",
+                                  "parent": "5fsocrqwkej"
+                                },
+                                {
+                                  "parentId": "5fsocrqwkej",
+                                  "subKey": "actions",
+                                  "subType": "array",
+                                  "sortIndex": 2,
+                                  "use": "AIEmployeeButtonModel",
+                                  "props": {
+                                    "aiEmployee": {
+                                      "username": "dex"
+                                    },
+                                    "context": {
+                                      "workContext": [
+                                        {
+                                          "type": "flow-model",
+                                          "uid": "5fsocrqwkej"
+                                        }
+                                      ]
+                                    },
+                                    "style": {
+                                      "mask": false,
+                                      "size": 40
+                                    },
+                                    "auto": false
+                                  },
+                                  "uid": "n18ai-5fsocrqwkej",
+                                  "parent": "5fsocrqwkej"
+                                },
+                                {
+                                  "parentId": "5fsocrqwkej",
+                                  "subKey": "actions",
+                                  "subType": "array",
+                                  "sortIndex": 3,
+                                  "use": "FormSubmitActionModel",
+                                  "props": {},
+                                  "stepParams": {},
+                                  "uid": "n17sb-5fsocrqwkej",
+                                  "parent": "5fsocrqwkej"
+                                }
+                              ],
+                              "grid": {
+                                "use": "FormGridModel",
+                                "subKey": "grid",
+                                "subType": "object",
+                                "sortIndex": 1,
+                                "props": {
+                                  "layout": {
+                                    "version": 2,
+                                    "rows": [
+                                      {
+                                        "id": "r0",
+                                        "cells": [
+                                          {
+                                            "id": "r0:cell:0",
+                                            "items": [
+                                              "n17f3i0yfoybwtduk"
+                                            ]
+                                          }
+                                        ],
+                                        "sizes": [
+                                          24
+                                        ]
+                                      },
+                                      {
+                                        "id": "r1",
+                                        "cells": [
+                                          {
+                                            "id": "r1:cell:0",
+                                            "items": [
+                                              "n17f3iocrvzql7c2"
+                                            ]
+                                          }
+                                        ],
+                                        "sizes": [
+                                          24
+                                        ]
+                                      },
+                                      {
+                                        "id": "r2",
+                                        "cells": [
+                                          {
+                                            "id": "r2:cell:0",
+                                            "items": [
+                                              "n17f3i2f9kayrq2ks"
+                                            ]
+                                          }
+                                        ],
+                                        "sizes": [
+                                          24
+                                        ]
+                                      },
+                                      {
+                                        "id": "r3",
+                                        "cells": [
+                                          {
+                                            "id": "r3:cell:0",
+                                            "items": [
+                                              "n17f3ik8bf1iwbgz"
+                                            ]
+                                          }
+                                        ],
+                                        "sizes": [
+                                          24
+                                        ]
+                                      },
+                                      {
+                                        "id": "r4",
+                                        "cells": [
+                                          {
+                                            "id": "r4:cell:0",
+                                            "items": [
+                                              "n17f3itkfmz2429qd"
+                                            ]
+                                          }
+                                        ],
+                                        "sizes": [
+                                          24
+                                        ]
+                                      },
+                                      {
+                                        "id": "r5",
+                                        "cells": [
+                                          {
+                                            "id": "r5:cell:0",
+                                            "items": [
+                                              "n17f3iikzzgro3igs"
+                                            ]
+                                          }
+                                        ],
+                                        "sizes": [
+                                          24
+                                        ]
+                                      }
+                                    ],
+                                    "rowGap": 0,
+                                    "colGap": 16,
+                                    "sizes": {},
+                                    "rowOrder": [
+                                      "r0",
+                                      "r1",
+                                      "r2",
+                                      "r3",
+                                      "r4",
+                                      "r5"
+                                    ]
+                                  }
+                                },
+                                "stepParams": {
+                                  "gridSettings": {
+                                    "grid": {
+                                      "layout": {
+                                        "version": 2,
+                                        "rows": [
+                                          {
+                                            "id": "r0",
+                                            "cells": [
+                                              {
+                                                "id": "r0:cell:0",
+                                                "items": [
+                                                  "n17f3i0yfoybwtduk"
+                                                ]
+                                              }
+                                            ],
+                                            "sizes": [
+                                              24
+                                            ]
+                                          },
+                                          {
+                                            "id": "r1",
+                                            "cells": [
+                                              {
+                                                "id": "r1:cell:0",
+                                                "items": [
+                                                  "n17f3iocrvzql7c2"
+                                                ]
+                                              }
+                                            ],
+                                            "sizes": [
+                                              24
+                                            ]
+                                          },
+                                          {
+                                            "id": "r2",
+                                            "cells": [
+                                              {
+                                                "id": "r2:cell:0",
+                                                "items": [
+                                                  "n17f3i2f9kayrq2ks"
+                                                ]
+                                              }
+                                            ],
+                                            "sizes": [
+                                              24
+                                            ]
+                                          },
+                                          {
+                                            "id": "r3",
+                                            "cells": [
+                                              {
+                                                "id": "r3:cell:0",
+                                                "items": [
+                                                  "n17f3ik8bf1iwbgz"
+                                                ]
+                                              }
+                                            ],
+                                            "sizes": [
+                                              24
+                                            ]
+                                          },
+                                          {
+                                            "id": "r4",
+                                            "cells": [
+                                              {
+                                                "id": "r4:cell:0",
+                                                "items": [
+                                                  "n17f3itkfmz2429qd"
+                                                ]
+                                              }
+                                            ],
+                                            "sizes": [
+                                              24
+                                            ]
+                                          },
+                                          {
+                                            "id": "r5",
+                                            "cells": [
+                                              {
+                                                "id": "r5:cell:0",
+                                                "items": [
+                                                  "n17f3iikzzgro3igs"
+                                                ]
+                                              }
+                                            ],
+                                            "sizes": [
+                                              24
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  }
+                                },
+                                "uid": "epiexfval3s",
+                                "subModels": {
+                                  "items": [
+                                    {
+                                      "use": "FormItemModel",
+                                      "subKey": "items",
+                                      "subType": "array",
+                                      "sortIndex": 1,
+                                      "props": {
+                                        "required": true
+                                      },
+                                      "stepParams": {
+                                        "fieldSettings": {
+                                          "init": {
+                                            "dataSourceKey": "main",
+                                            "collectionName": "hub_pj_tasks",
+                                            "fieldPath": "title"
+                                          }
+                                        }
+                                      },
+                                      "uid": "n17f3i0yfoybwtduk",
+                                      "subModels": {
+                                        "field": {
+                                          "use": "InputFieldModel",
+                                          "subKey": "field",
+                                          "subType": "object",
+                                          "sortIndex": 1,
+                                          "props": {},
+                                          "uid": "4sq179j0wi0",
+                                          "parent": "n17f3i0yfoybwtduk",
+                                          "parentId": "n17f3i0yfoybwtduk"
+                                        }
+                                      },
+                                      "parent": "epiexfval3s",
+                                      "parentId": "epiexfval3s"
+                                    },
+                                    {
+                                      "use": "FormItemModel",
+                                      "subKey": "items",
+                                      "subType": "array",
+                                      "sortIndex": 2,
+                                      "props": {},
+                                      "stepParams": {
+                                        "fieldSettings": {
+                                          "init": {
+                                            "dataSourceKey": "main",
+                                            "collectionName": "hub_pj_tasks",
+                                            "fieldPath": "project"
+                                          }
+                                        }
+                                      },
+                                      "uid": "n17f3iocrvzql7c2",
+                                      "subModels": {
+                                        "field": {
+                                          "use": "RecordSelectFieldModel",
+                                          "subKey": "field",
+                                          "subType": "object",
+                                          "sortIndex": 1,
+                                          "props": {},
+                                          "uid": "yzgm0n4zof7",
+                                          "parent": "n17f3iocrvzql7c2",
+                                          "parentId": "n17f3iocrvzql7c2"
+                                        }
+                                      },
+                                      "parent": "epiexfval3s",
+                                      "parentId": "epiexfval3s"
+                                    },
+                                    {
+                                      "use": "FormItemModel",
+                                      "subKey": "items",
+                                      "subType": "array",
+                                      "sortIndex": 3,
+                                      "props": {},
+                                      "stepParams": {
+                                        "fieldSettings": {
+                                          "init": {
+                                            "dataSourceKey": "main",
+                                            "collectionName": "hub_pj_tasks",
+                                            "fieldPath": "assignee"
+                                          }
+                                        }
+                                      },
+                                      "uid": "n17f3i2f9kayrq2ks",
+                                      "subModels": {
+                                        "field": {
+                                          "use": "RecordSelectFieldModel",
+                                          "subKey": "field",
+                                          "subType": "object",
+                                          "sortIndex": 1,
+                                          "props": {},
+                                          "uid": "1xgysv3wz5u",
+                                          "parent": "n17f3i2f9kayrq2ks",
+                                          "parentId": "n17f3i2f9kayrq2ks"
+                                        }
+                                      },
+                                      "parent": "epiexfval3s",
+                                      "parentId": "epiexfval3s"
+                                    },
+                                    {
+                                      "use": "FormItemModel",
+                                      "subKey": "items",
+                                      "subType": "array",
+                                      "sortIndex": 4,
+                                      "props": {},
+                                      "stepParams": {
+                                        "fieldSettings": {
+                                          "init": {
+                                            "dataSourceKey": "main",
+                                            "collectionName": "hub_pj_tasks",
+                                            "fieldPath": "status"
+                                          }
+                                        }
+                                      },
+                                      "uid": "n17f3ik8bf1iwbgz",
+                                      "subModels": {
+                                        "field": {
+                                          "use": "SelectFieldModel",
+                                          "subKey": "field",
+                                          "subType": "object",
+                                          "sortIndex": 1,
+                                          "props": {
+                                            "allowClear": true,
+                                            "options": [
+                                              {
+                                                "value": "backlog",
+                                                "label": "待规划",
+                                                "color": "default"
+                                              },
+                                              {
+                                                "value": "todo",
+                                                "label": "待处理",
+                                                "color": "blue"
+                                              },
+                                              {
+                                                "value": "in_progress",
+                                                "label": "进行中",
+                                                "color": "cyan"
+                                              },
+                                              {
+                                                "value": "review",
+                                                "label": "评审中",
+                                                "color": "purple"
+                                              },
+                                              {
+                                                "value": "done",
+                                                "label": "已完成",
+                                                "color": "green"
+                                              },
+                                              {
+                                                "value": "blocked",
+                                                "label": "受阻",
+                                                "color": "red"
+                                              },
+                                              {
+                                                "value": "cancelled",
+                                                "label": "已取消",
+                                                "color": "default"
+                                              }
+                                            ]
+                                          },
+                                          "uid": "z72mcmg90ve",
+                                          "parent": "n17f3ik8bf1iwbgz",
+                                          "parentId": "n17f3ik8bf1iwbgz"
+                                        }
+                                      },
+                                      "parent": "epiexfval3s",
+                                      "parentId": "epiexfval3s"
+                                    },
+                                    {
+                                      "use": "FormItemModel",
+                                      "subKey": "items",
+                                      "subType": "array",
+                                      "sortIndex": 5,
+                                      "props": {},
+                                      "stepParams": {
+                                        "fieldSettings": {
+                                          "init": {
+                                            "dataSourceKey": "main",
+                                            "collectionName": "hub_pj_tasks",
+                                            "fieldPath": "priority"
+                                          }
+                                        }
+                                      },
+                                      "uid": "n17f3itkfmz2429qd",
+                                      "subModels": {
+                                        "field": {
+                                          "use": "SelectFieldModel",
+                                          "subKey": "field",
+                                          "subType": "object",
+                                          "sortIndex": 1,
+                                          "props": {
+                                            "allowClear": true,
+                                            "options": [
+                                              {
+                                                "value": "low",
+                                                "label": "低",
+                                                "color": "default"
+                                              },
+                                              {
+                                                "value": "medium",
+                                                "label": "中",
+                                                "color": "blue"
+                                              },
+                                              {
+                                                "value": "high",
+                                                "label": "高",
+                                                "color": "orange"
+                                              },
+                                              {
+                                                "value": "urgent",
+                                                "label": "紧急",
+                                                "color": "red"
+                                              }
+                                            ]
+                                          },
+                                          "uid": "85qlai4w14v",
+                                          "parent": "n17f3itkfmz2429qd",
+                                          "parentId": "n17f3itkfmz2429qd"
+                                        }
+                                      },
+                                      "parent": "epiexfval3s",
+                                      "parentId": "epiexfval3s"
+                                    },
+                                    {
+                                      "use": "FormItemModel",
+                                      "subKey": "items",
+                                      "subType": "array",
+                                      "sortIndex": 6,
+                                      "props": {},
+                                      "stepParams": {
+                                        "fieldSettings": {
+                                          "init": {
+                                            "dataSourceKey": "main",
+                                            "collectionName": "hub_pj_tasks",
+                                            "fieldPath": "due_at"
+                                          }
+                                        }
+                                      },
+                                      "uid": "n17f3iikzzgro3igs",
+                                      "subModels": {
+                                        "field": {
+                                          "use": "DateOnlyFieldModel",
+                                          "subKey": "field",
+                                          "subType": "object",
+                                          "sortIndex": 1,
+                                          "props": {},
+                                          "uid": "n4n6wrqd97y",
+                                          "parent": "n17f3iikzzgro3igs",
+                                          "parentId": "n17f3iikzzgro3igs"
+                                        }
+                                      },
+                                      "parent": "epiexfval3s",
+                                      "parentId": "epiexfval3s"
+                                    }
+                                  ]
+                                },
+                                "parent": "5fsocrqwkej",
+                                "parentId": "5fsocrqwkej"
+                              }
+                            },
+                            "parent": "vsvwswxy41y",
+                            "parentId": "vsvwswxy41y"
+                          }
+                        ]
+                      },
+                      "parent": "nnhu0um25gn",
+                      "parentId": "nnhu0um25gn"
+                    }
+                  },
+                  "parent": "459h4texhsa",
+                  "parentId": "459h4texhsa"
+                }
+              ]
+            },
+            "parent": "n17f3an9s341plk72g",
+            "parentId": "n17f3an9s341plk72g"
+          }
+        },
+        "parent": "n17f3tbkvdfcxrb8y8"
+      }
+    },
+    "page": {
+      "httpStatus": 204,
+      "data": null
+    }
+  }
+}

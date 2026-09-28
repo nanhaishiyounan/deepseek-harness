@@ -1,0 +1,32 @@
+# Agent Note: W3-B1 row-detail factory, the 95-block heal, and the member view ACL field-list trap
+
+Status: implemented
+
+English | [中文](2026-09-27-w3b1-row-detail-factory-heal-member-acl.zh.md)
+
+## Problem
+
+The user reported 「表格里的主体，点击详情没有任何显示？？？？？」 on a system to be delivered for real use, not a demo. The P0 forensics report (research/2026-09-27-w3-usability/01-p0-row-detail-diagnosis.md) pinned three root causes: ① the 13 v2 factory scripts replicate the E1 table template whose action bar is AddNew+Refresh only — 94 of 95 table blocks had zero row actions across 78 of 80 pages; ② the one hand-built actions column (项目 page) carried a pointer-only ViewActionModel (`subModels: {}`, openView missing `mode`/`pageModelClass`/`filterByTk`) so its drawer opened empty, and two kanban card drawers (h4srm 整改跟踪, w8qm 处置看板) had no persisted page subtree (204); ③ member's `view:own` strategy left even the fixed actions invisible to real operators.
+
+## Decision
+
+**Row details ship through a shared factory extension, not a channel migration (D1).** `nocobase-flow-page-lib.mts` gained `drawerPageTreeFor` (f1's production-proven drawer template parameterized: ChildPageModel → ChildPageTabModel → BlockGridModel → DetailsBlockModel → DetailsGridModel → DetailsItemModel×N → per-field display model), `rowDetailOpenView` (the six-key openView payload including `filterByTk: '{{ctx.record.id}}'`), `saveRowViewAction`, and `ensureTableRowDetail` (trailing TableActionsColumnModel + view action + persisted drawer subtree). The flowSurfaces authoring channel auto-wires actions on table create, but migrating the 13 scripts to it means rewriting every page's channel — dual-channel drift risk exceeds the benefit. All 14 factory scripts (e1/f2/f3/h4/h5/n13/n17/w1/w3/w5/w6/w7/w8/w9) call the factory on every fresh table (and h4/w8 kanban branches persist card drawer subtrees), so a page rebuild can never re-ship an action-less table.
+
+**The load-only contract is three layers, asserted as one unit (D2).** A working row drawer requires the action node, the full openView payload, AND the persisted page subtree; any missing layer reproduces the empty drawer (the client never synthesizes a default page for record-scoped drawers). `w3-heal-row-details.mts` heals by this contract: for every TableBlockModel it mirrors the table's own columns into the drawer fields (same fieldPath, same display model, same enum options), repairs existing-but-broken actions by destroy-and-rewrite (the 项目 page), backfills kanban/calendar card drawers by walking the persisted layers (card item → grid layout rows → per-item field), and is idempotent (a healthy actions column is kept; the second run plans zero changes). All created nodes carry the `w3b1` uid prefix — `--rollback w3b1` destroyed 38 pilot rows children-first and the probe returned to the P0 baseline before the full run.
+
+**Member view ACL needs an explicit full field list — `fields:null` is a server/client semantic split (the batch's live discovery).** Granting member `view/list/get` through `rolesResources:create` persists actions with `fields: []`, an empty whitelist that strips every business column (the drawer shows the row id only). Setting `fields: null` server-side returns full rows — the API layer looks fixed — but the client renderer reads the `roles:check` snapshot and treats `fields: null` as "no fields allowed", silently skipping the DetailsBlock: the drawer stays empty with data flowing and zero HTTP errors. Only an explicit per-collection field list (fetched from `fields:list`) passes both sides. The ACL reload rides `rolesResourcesActions:update`'s `afterUpdateWithAssociations` hook, so raw SQL fixes never take effect on the running process. member's strategy was upgraded `view:own → view` per the plan's pre-authorized fallback (operators must see business rows; no write action was granted — approval writes still flow through the engine's root-token verbs).
+
+## Consequences
+
+Every table block now wires row details (95/95 actions columns, 95 view actions, zero missing drawer subtrees, AddNew popups 100% intact), the three broken links are gone (项目 page view drawer renders 10 fields; both kanban card drawers render), and member users open the same drawers admin does (quality_lead: PO-2026-0001 and QI-2026-0001 drawers render identical content to admin, flipping the P0 §1.4 zero-visibility baseline). `setup-nocobase.mts verify` asserts the contract (actions-column coverage, per-action drawer-subtree probes over all view/card actions, member grants ≥70 rows, no member action row without an explicit field list) so a future factory or heal regression fails loudly. `heal` re-runs repair the field lists for collections that gained fields, which doubles as the ACL refresh path.
+
+## Alternatives considered
+
+- **Migrating the 13 scripts to the flowSurfaces authoring channel** (it auto-wires actions) — rewrites every page's authoring path and leaves two channels drifting; the shared factory keeps one template every script already shares.
+- **Per-page manual repair of the 78 pages** — guaranteed drift across 13 same-shaped factories; the heal scans by contract, not by page list.
+- **Leaving member at `view:own` and granting only actions** — the plan's own warning: admin fixed, member still blind; the pre-authorized strategy upgrade plus explicit field lists is the complete fix.
+- **Raw SQL to fix the fields whitelist** — invisible to the in-memory ACL; the API touch is the only path that reloads live.
+
+## Verification
+
+Dry-run plan (95 wires + 2 card drawers, `w3-b1-heal-dryrun.txt`) → pilot heal on 采购订单 → live drawer open (PO-2026-0001, 8 field nodes, `w3-b1-pilot-po-drawer.png`) → rollback drill (38 rows destroyed, probe back to baseline, `w3-b1-rollback-drill.txt`) → full heal + probe (`w3-b1-heal-run.txt`: TableActionsColumnModel 95, viewAction page missing 0, addNew missing 0) → idempotent second run (0 changes) → five-domain drawer journeys (采购/生产/质量/仓储/销售 + 项目 repair, `w3-b1-{pur,mfg,qm,wms,so,pj}-*-drawer.png`) → kanban card drawers (`w3-b1-kanban-{srm,qm}-*.png`) → member perspective flip (quality_lead on pur_orders and qm_inspections, `w3-b1-member-*.png`) → psql row-level cross-check (`w3-b1-psql.txt`) → drawer-only latency 786ms on the 13-field MO page (`w3-b1-perf-mo-drawer.txt`) → `setup-nocobase.mts verify` OK with the new assertions → 9-chain s1/s2/s9 PASS + `--assert-ledger` balanced; esbuild syntax check green on all 16 touched scripts.

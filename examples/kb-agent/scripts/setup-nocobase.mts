@@ -51,6 +51,8 @@ import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { BRAND_TITLE } from './dsh-brand.mts'
 import { resolveEnv } from './resolve-env.ts'
+import { assertWflConsistency } from './nocobase-w3-approval-visual.mts'
+import { collectOrgAclFailures } from './nocobase-w3-org-acl.mts'
 import { withResilience } from './resilience.ts'
 import type { ResilienceOptions } from './resilience.ts'
 
@@ -1309,7 +1311,7 @@ async function stepVerify(): Promise<void> {
       const missingB9 = ['经营看板', '供应链看板', '生产看板', '库存看板', '应收应付对账'].filter(title => !b9Titles.has(title))
       if (missingB9.length > 0) failures.push(`B9 经营分析 flowPages missing: ${missingB9.join(', ')} (run nocobase-w9-dashboards.mts)`)
       if (!b9Titles.has('经营分析')) failures.push('经营分析 menu group missing (run nocobase-w9-dashboards.mts)')
-      const b9ChartRows = (await call(token, 'GET', '/api/flowModels:list?pageSize=6000') as { data?: Array<Record<string, any>> }).data ?? []
+      const b9ChartRows = (await call(token, 'GET', '/api/flowModels:list?pageSize=12000') as { data?: Array<Record<string, any>> }).data ?? []
       const b9Charts = b9ChartRows.filter(row => row?.use === 'ChartBlockModel')
       const queryOf = (row: Record<string, any>): any => row?.stepParams?.chartSettings?.configure?.query ?? {}
       const kpiCharts = b9Charts.filter(row => queryOf(row)?.resource?.collectionName === 'kpi_snapshots'
@@ -1380,14 +1382,306 @@ async function stepVerify(): Promise<void> {
   if (guardedIndexes.status !== 0 || (guardedIndexes.stdout ?? '').trim().split('\n').filter(line => line.length > 0).length !== guardedIndexNames.length) {
     failures.push('guarded doc-number unique indexes incomplete (run "setup-nocobase.mts unique-indexes")')
   }
-  const flowModels = await call(token, 'GET', '/api/flowModels:list?pageSize=6000') as { data?: Array<{ use?: string, uid?: string }>, meta?: { total?: number } }
+  const flowModels = await call(token, 'GET', '/api/flowModels:list?pageSize=12000') as { data?: Array<{ use?: string, uid?: string, parentId?: string, stepParams?: Record<string, any> }>, meta?: { total?: number } }
   const flowModelRows = flowModels?.data ?? []
-  if (typeof flowModels?.meta?.total === 'number' ? flowModels.meta.total > flowModelRows.length : flowModelRows.length === 6000) {
+  if (typeof flowModels?.meta?.total === 'number' ? flowModels.meta.total > flowModelRows.length : flowModelRows.length === 12000) {
     failures.push(`flowModels:list may be truncated (${flowModelRows.length} rows); raise the verify pageSize`)
   }
   const modelCount = (use: string) => flowModelRows.filter(row => row.use === use).length
   if (modelCount('AddNewActionModel') < 8) failures.push('AddNewActionModel count < 8 (v2 table action bars incomplete)')
   if (modelCount('FormSubmitActionModel') < 8) failures.push('FormSubmitActionModel count < 8 (Add-new popups cannot submit)')
+  // W3-B1: every table block carries a row-detail actions column and every
+  // view action (table rows + kanban/calendar cards) resolves a persisted
+  // page subtree — the load-only contract whose absence was the P0 "drawer
+  // opens empty" root cause. AddNew popups must stay 100% online too. The
+  // W3-B2 drawer-embedded subtable blocks (w3b2stb) carry their actions
+  // column inside the nested tree, so they are out of this flat coverage
+  // check (they get their own association assertion below).
+  const tableBlocks = flowModelRows.filter(row => row.use === 'TableBlockModel' && !row.uid?.startsWith('w3b2stb'))
+  const actionsColumns = flowModelRows.filter(row => row.use === 'TableActionsColumnModel')
+  if (actionsColumns.length < tableBlocks.length) {
+    failures.push(`TableActionsColumnModel ${actionsColumns.length} < TableBlockModel ${tableBlocks.length} (run w3-heal-row-details.mts to wire row-detail drawers)`)
+  }
+  const viewActions = flowModelRows.filter(row => row.use === 'ViewActionModel' || row.use === 'KanbanCardViewActionModel' || row.use === 'CalendarEventViewActionModel')
+  let drawerSubtreesMissing = 0
+  for (const action of viewActions) {
+    const page = await dataOf(token, 'GET', `/api/flowModels:findOne?parentId=${encodeURIComponent(String(action.uid ?? ''))}&subKey=page`)
+    if (page?.uid == null) drawerSubtreesMissing += 1
+  }
+  if (drawerSubtreesMissing > 0) failures.push(`${drawerSubtreesMissing} view action(s) have no persisted drawer page subtree (run w3-heal-row-details.mts)`)
+  const memberGrants = (await dataOf(token, 'GET', `/api/rolesResources:list?pageSize=200&filter=${encodeURIComponent(JSON.stringify({ roleName: { $eq: 'member' } }))}`)) as Array<{ name?: string }> | null
+  if ((memberGrants ?? []).length < 70) failures.push(`member rolesResources rows ${(memberGrants ?? []).length} < 70 (run w3-heal-row-details.mts to grant member view ACL)`)
+  const memberActionSample = (await dataOf(token, 'GET', `/api/rolesResourcesActions:list?pageSize=300`)) as Array<{ fields?: unknown, rolesResourceId?: number }> | null
+  const memberGrantIds = new Set((memberGrants ?? []).map(row => (row as { id?: number }).id))
+  const nakedMemberActions = (memberActionSample ?? []).filter(row => memberGrantIds.has(row.rolesResourceId) && !(Array.isArray(row.fields) && row.fields.length > 0))
+  if (nakedMemberActions.length > 0) failures.push(`${nakedMemberActions.length} member action row(s) lack explicit field lists (fields=[] or null strips columns / skips drawer render — run w3-heal-row-details.mts ACL pass)`)
+  // W3-B2: the 12 association-bound subtable blocks exist, guarded Edits
+  // exclude engine-state fields, engine collections carry no Delete, and the
+  // two-way approval jump is wired (todo 前往单据 + engine rows 审批进度).
+  const subtableAssociations = [
+    'pur_orders.order_lines', 'pur_requests.request_lines', 'pur_rfqs.rfq_suppliers', 'pur_rfqs.quotes',
+    'so_orders.order_lines', 'mps_plans.plan_items', 'mfg_boms.bom_lines', 'mfg_boms.bom_operations',
+    'qm_inspections.inspection_readings', 'srm_suppliers.certificates', 'srm_suppliers.audit_records', 'srm_suppliers.score_cards',
+  ]
+  const subtableBlocks = flowModelRows.filter(row => row.use === 'TableBlockModel' && row.uid?.startsWith('w3b2stb'))
+  for (const association of subtableAssociations) {
+    if (!subtableBlocks.some(row => row.stepParams?.resourceSettings?.init?.associationName === association)) {
+      failures.push(`subtable block ${association} missing (run w3-heal-row-details.mts B2 pass)`)
+    }
+  }
+  const collectFieldPaths = (node: any, into: Set<string> = new Set()): Set<string> => {
+    if (Array.isArray(node)) { for (const item of node) collectFieldPaths(item, into); return into }
+    if (node === null || typeof node !== 'object') return into
+    const path = node?.stepParams?.fieldSettings?.init?.fieldPath
+    if (typeof path === 'string' && node?.use === 'FormItemModel') into.add(path)
+    if (node?.subModels) collectFieldPaths(node.subModels, into)
+    return into
+  }
+  const engineStateSample: ReadonlyArray<[string, string[]]> = [
+    ['pur_orders', ['doc_status', 'invoice_status', 'receiving_status', 'approved_by', 'approved_at']],
+    ['qm_inspections', ['status', 'result']],
+    ['mfg_orders', ['doc_status']],
+  ]
+  for (const editAction of flowModelRows.filter(row => row.use === 'EditActionModel' && row.uid?.startsWith('w3b2ea'))) {
+    const pageTree = await dataOf(token, 'GET', `/api/flowModels:findOne?parentId=${encodeURIComponent(String(editAction.uid))}&subKey=page`)
+    const fieldPaths = collectFieldPaths(pageTree)
+    for (const [collection, banned] of engineStateSample) {
+      const column = flowModelRows.find(row => row.use === 'TableActionsColumnModel' && String(row.parentId ?? '') === String(editAction.parentId))
+      const table = column === undefined ? undefined : flowModelRows.find(row => row.uid === column.parentId)
+      if (table?.stepParams?.resourceSettings?.init?.collectionName !== collection) continue
+      const leaked = [...fieldPaths].filter(path => banned.includes(path))
+      if (leaked.length > 0) failures.push(`guarded Edit on ${collection} leaks engine-state fields: ${leaked.join(',')} (invariant 1 — rerun w3-heal-row-details.mts B2 pass)`)
+    }
+  }
+  const engineNoDelete = ['pur_orders', 'so_orders', 'mfg_orders', 'qm_inspections', 'wms_receipts', 'wms_counts', 'srm_suppliers']
+  for (const collection of engineNoDelete) {
+    for (const table of flowModelRows.filter(row => row.use === 'TableBlockModel' && row.stepParams?.resourceSettings?.init?.collectionName === collection)) {
+      const column = flowModelRows.find(row => row.use === 'TableActionsColumnModel' && String(row.parentId ?? '') === String(table.uid))
+      if (column === undefined) continue
+      const hasDelete = flowModelRows.some(row => row.use === 'DeleteActionModel' && String(row.parentId ?? '') === String(column.uid))
+      if (hasDelete) failures.push(`${collection} carries a row Delete action (engine-governed documents never get one — invariant 1)`)
+    }
+  }
+  const todoTables = flowModelRows.filter(row => row.use === 'TableBlockModel' && row.stepParams?.resourceSettings?.init?.collectionName === 'wfl_approval_todos')
+  if (todoTables.length > 0) {
+    const todoJumps = flowModelRows.filter(row => row.use === 'JSRecordActionModel' && row.uid?.startsWith('w3b2ja')
+      && todoTables.some(table => {
+        const column = flowModelRows.find(col => col.use === 'TableActionsColumnModel' && String(col.parentId ?? '') === String(table.uid))
+        return column !== undefined && String(row.parentId ?? '') === String(column.uid)
+      }))
+    if (todoJumps.length === 0) failures.push('wfl_approval_todos rows lack the 前往单据 jump (run w3-heal-row-details.mts B2 pass / nocobase-w1-approval.mts)')
+  }
+  if (flowModelRows.filter(row => row.use === 'JSRecordActionModel' && row.uid?.startsWith('w3b2ja')).length < 10) {
+    failures.push('business-row 审批进度 jumps missing (run w3-heal-row-details.mts B2 pass)')
+  }
+  // W3-B3: read-only multi-view surfaces — four engine-object kanbans
+  // (dragEnabled:false, no create paths), the v1 scheduling gantt, and the
+  // two dual-block calendars. Every drawer must also be record-scoped: the
+  // DetailsBlock init carries the filterByTk key or the drawer renders the
+  // collection's first record (the rescope defect found in the B3 journey).
+  const b3Routes = (await dataOf(token, 'GET', `/api/desktopRoutes:list?pageSize=400`)) as Array<{ title?: string, type?: string, schemaUid?: string }>
+  const b3Boards: ReadonlyArray<[string, string]> = [['采购看板', 'pur_orders'], ['生产订单看板', 'mfg_orders'], ['销售看板', 'so_orders'], ['质检看板', 'qm_inspections']]
+  for (const [title, collection] of b3Boards) {
+    const routeRow = b3Routes.find(row => row.title === title && row.type === 'flowPage')
+    if (routeRow === undefined) failures.push(`${title} flowPage route missing (run nocobase-w3-views.mts)`)
+    const board = flowModelRows.find(row => row.use === 'KanbanBlockModel' && String(row.uid ?? '').startsWith('w3b3')
+      && row.stepParams?.resourceSettings?.init?.collectionName === collection)
+    if (board === undefined) {
+      failures.push(`${title}: w3b3 KanbanBlockModel missing (run nocobase-w3-views.mts)`)
+      continue
+    }
+    if (board.props?.dragEnabled !== false) failures.push(`${title}: dragEnabled is not false (D4 read-only violation)`)
+    const boardUid = String(board.uid ?? '')
+    for (const child of flowModelRows.filter(row => String(row.parentId ?? '') === boardUid)) {
+      if (child.use === 'AddNewActionModel' || child.use === 'KanbanQuickCreateActionModel') {
+        failures.push(`${title}: read-only board carries ${String(child.use)} (engine verbs only)`)
+      }
+    }
+  }
+  // Every kanban on an engine-governed collection is read-only, any prefix.
+  for (const row of flowModelRows.filter(candidate => candidate.use === 'KanbanBlockModel'
+    && ['pur_orders', 'mfg_orders', 'so_orders', 'qm_inspections'].includes(String(candidate.stepParams?.resourceSettings?.init?.collectionName ?? '')))) {
+    if (row.props?.dragEnabled !== false) failures.push(`engine-collection kanban ${String(row.uid)} is drag-enabled (D4)`)
+  }
+  // Free-state boards keep their drag (the B1-fixed capas/dispositions pair).
+  for (const collection of ['srm_capas', 'qm_nc_dispositions']) {
+    const board = flowModelRows.find(row => row.use === 'KanbanBlockModel'
+      && String(row.stepParams?.resourceSettings?.init?.collectionName ?? '') === collection)
+    if (board !== undefined && board.props?.dragEnabled !== true) failures.push(`free-state kanban ${collection} lost dragEnabled:true (regression)`)
+  }
+  // Drawers are record-scoped: the persisted page tree's DetailsBlock init
+  // carries filterByTk (MultiRecordResource fallback = first-record defect).
+  const b3ViewActions = flowModelRows.filter(row => (row.use === 'ViewActionModel' || row.use === 'KanbanCardViewActionModel' || row.use === 'CalendarEventViewActionModel'))
+  let unscopedDrawers = 0
+  const drawerScoped = (node: unknown): boolean => {
+    if (Array.isArray(node)) return node.every(drawerScoped)
+    if (node === null || typeof node !== 'object') return true
+    const row = node as Record<string, any>
+    if (row.use === 'DetailsBlockModel') return typeof row?.stepParams?.resourceSettings?.init?.filterByTk === 'string'
+    if (row.use === 'EditFormModel') return true
+    if (row.subModels) return drawerScoped(row.subModels)
+    return true
+  }
+  for (const action of b3ViewActions) {
+    const page = await dataOf(token, 'GET', `/api/flowModels:findOne?parentId=${encodeURIComponent(String(action.uid ?? ''))}&subKey=page`)
+    if (page?.uid != null && !drawerScoped(page)) unscopedDrawers += 1
+  }
+  if (unscopedDrawers > 0) failures.push(`${unscopedDrawers} drawer(s) render the collection's first record (DetailsBlock init lacks filterByTk — run w3-heal-row-details.mts rescope pass)`)
+  // The v1 scheduling gantt: route + uiSchemas carry the read-only
+  // GanttBlockProvider over mfg_order_operations planned_date.
+  const ganttRoute = b3Routes.find(row => row.title === '排产甘特' && row.type === 'page')
+  if (ganttRoute?.schemaUid == null) {
+    failures.push('排产甘特 v1 page route/schemaUid missing (run nocobase-w3-views.mts)')
+  } else {
+    const ganttTree = await dataOf(token, 'GET', `/api/uiSchemas:getJsonSchema/${ganttRoute.schemaUid}`)
+    const findGanttDecorator = (node: unknown): Record<string, any> | undefined => {
+      if (node === null || typeof node !== 'object') return undefined
+      const row = node as Record<string, any>
+      if (row['x-decorator'] === 'GanttBlockProvider') return row
+      for (const child of Object.values(row.properties ?? {})) {
+        const found = findGanttDecorator(child)
+        if (found !== undefined) return found
+      }
+      return undefined
+    }
+    const decorator = findGanttDecorator(ganttTree)
+    if (decorator === undefined) {
+      failures.push('排产甘特 uiSchemas carries no GanttBlockProvider')
+    } else {
+      const fieldNames = decorator['x-decorator-props']?.fieldNames ?? {}
+      if (fieldNames.start !== 'planned_date' || fieldNames.end !== 'planned_date' || fieldNames.title !== 'name') {
+        failures.push(`排产甘特 fieldNames wrong: ${JSON.stringify(fieldNames)}`)
+      }
+      if (decorator['x-decorator-props']?.enableDragToReschedule !== false) failures.push('排产甘特 enableDragToReschedule !== false (D5 read-only violation)')
+    }
+  }
+  // Dual-block calendars: two w3b3 CalendarBlockModel rows per page, quick-create off.
+  const b3Calendars: ReadonlyArray<[string, string]> = [['交期日历', 'so_orders'], ['交期日历', 'pur_orders'], ['计划日历', 'mps_plans'], ['计划日历', 'mrp_suggestions']]
+  for (const [title, collection] of b3Calendars) {
+    const routeRow = b3Routes.find(row => row.title === title && row.type === 'flowPage')
+    if (routeRow === undefined) failures.push(`${title} flowPage route missing (run nocobase-w3-views.mts)`)
+    const block = flowModelRows.find(row => row.use === 'CalendarBlockModel' && String(row.uid ?? '').startsWith('w3b3')
+      && row.stepParams?.resourceSettings?.init?.collectionName === collection)
+    if (block === undefined) {
+      failures.push(`${title}: w3b3 CalendarBlockModel on ${collection} missing (run nocobase-w3-views.mts)`)
+      continue
+    }
+    if (block.props?.enableQuickCreateEvent !== false) failures.push(`${collection} calendar allows quick-create events (read-only violation)`)
+  }
+  // The B3 views read three collections member had no prior grant for.
+  const memberGrantNames = new Set(((await dataOf(token, 'GET', `/api/rolesResources:list?pageSize=200&filter=${encodeURIComponent(JSON.stringify({ roleName: { $eq: 'member' } }))}`)) ?? []).map((row: { name?: string }) => String(row.name ?? '')))
+  for (const collection of ['mfg_order_operations', 'mps_plans', 'mrp_suggestions']) {
+    if (!memberGrantNames.has(collection)) failures.push(`member view grant missing on ${collection} (run nocobase-w3-views.mts ACL pass)`)
+  }
+  // W3-B4: the approval-flow configuration center — the flowPage exists with
+  // its admin+root-only menu binding (member dropped), the four wfl config
+  // tables carry w3b4 row-Edit actions, the configs edit form marks
+  // config_note required, member holds view-only grants on the config
+  // collections, and the consistency probe (the same fail-loud 口径 the CLI
+  // runs) is green.
+  {
+    const b4Page = b3Routes.find(row => row.title === '审批流配置' && row.type === 'flowPage')
+    if (b4Page === undefined) {
+      failures.push('审批流配置 flowPage route missing (run nocobase-w3-approval-visual.mts)')
+    } else {
+      const bindings = (await dataOf(token, 'GET', `/api/rolesDesktopRoutes:list?pageSize=100&filter=${encodeURIComponent(JSON.stringify({ desktopRouteId: { $eq: b4Page.id } }))}`)) as Array<{ roleName?: string }> | null
+      const roles = (bindings ?? []).map(row => String(row.roleName ?? ''))
+      if (roles.includes('member')) failures.push('审批流配置 menu still binds member (admin-only violation)')
+      if (!roles.includes('admin') || !roles.includes('root')) failures.push(`审批流配置 menu bindings incomplete: ${roles.join(',') || '(none)'} (want admin+root)`)
+      const tab = b3Routes.find(row => row.type === 'tabs' && row.parentId === b4Page.id)
+      if (tab?.schemaUid != null) {
+        const b4Grid = await dataOf(token, 'GET', `/api/flowModels:findOne?parentId=${tab.schemaUid}&subKey=grid`) as { uid?: string } | null
+        const b4Map = b4Grid?.uid == null ? undefined : flowModelRows.find(row => row.use === 'JSBlockModel' && String(row.parentId ?? '') === String(b4Grid.uid))
+        if (b4Map === undefined) failures.push('审批流配置 SVG 状态图 JSBlock missing (run nocobase-w3-approval-visual.mts)')
+        else if (!String(b4Map.stepParams?.jsSettings?.runJs?.code ?? '').includes('wfl_flow_transitions')) failures.push('审批流配置 JSBlock code does not read the wfl trio')
+      }
+    }
+    for (const collection of ['wfl_flow_configs', 'wfl_flow_states', 'wfl_flow_transitions', 'wfl_gate_configs']) {
+      const table = flowModelRows.find(row => row.use === 'TableBlockModel' && String(row.uid ?? '').startsWith('w3b4')
+        && String(row.stepParams?.resourceSettings?.init?.collectionName ?? '') === collection)
+      if (table === undefined) {
+        failures.push(`w3b4 config table on ${collection} missing (run nocobase-w3-approval-visual.mts)`)
+        continue
+      }
+      const column = flowModelRows.find(row => row.use === 'TableActionsColumnModel' && String(row.parentId ?? '') === String(table.uid))
+      const hasEdit = column !== undefined && flowModelRows.some(row => row.use === 'EditActionModel' && String(row.uid ?? '').startsWith('w3b4') && String(row.parentId ?? '') === String(column.uid))
+      if (!hasEdit) failures.push(`${collection} rows lack the w3b4 Edit action`)
+    }
+    const configEdits = flowModelRows.filter(row => row.use === 'EditActionModel' && String(row.uid ?? '').startsWith('w3b4')
+      && String(row.stepParams?.popupSettings?.openView?.collectionName ?? '') === 'wfl_flow_configs')
+    if (configEdits.length === 0) {
+      failures.push('wfl_flow_configs row Edit action missing (config_note required form)')
+    } else {
+      const pageTree = await dataOf(token, 'GET', `/api/flowModels:findOne?parentId=${encodeURIComponent(String(configEdits[0]?.uid ?? ''))}&subKey=page`)
+      const flat = JSON.stringify(pageTree ?? {})
+      if (!flat.includes('"config_note"') || !flat.includes('"required":true')) failures.push('wfl_flow_configs edit form does not mark config_note required')
+    }
+    for (const collection of ['wfl_flow_configs', 'wfl_flow_states', 'wfl_flow_transitions', 'wfl_gate_configs']) {
+      if (!memberGrantNames.has(collection)) failures.push(`member view-only grant missing on ${collection} (run nocobase-w3-approval-visual.mts ACL pass)`)
+    }
+    const wflConsistency = await assertWflConsistency(token)
+    for (const failure of wflConsistency) failures.push(`wfl 探针：${failure}`)
+  }
+  // W3-B5: the organization & permission surface — one imported 口径 with the
+  // org-acl script's --assert (department tree/affiliations对拍, the 组织架构
+  // and 权限矩阵 pages' wires, the admin-only matrix menu, member's action
+  // matrix, the dept-routed qm_nc_dispositions witness, and the B4
+  // consistency probe with department-form awareness).
+  {
+    const orgFailures = await collectOrgAclFailures(token)
+    for (const failure of orgFailures) failures.push(`w3b5 组织权限：${failure}`)
+  }
+  // W3-B6: the operator terminals — three flowPages carry engine-serve
+  // iframes, and the serve verbs refuse their signature negatives live.
+  {
+    const terminalSpecs = [
+      { title: '车间终端', page: 'report', operator: 'linjingyi', stranger: 'quality_lead' },
+      { title: '质检工作台', page: 'inspect', operator: 'quality_lead', stranger: 'linjingyi' },
+      { title: '收货终端', page: 'receive', operator: 'b4guard', stranger: 'qc_inspector' },
+    ] as const
+    const routesList = await call(token, 'GET', '/api/desktopRoutes:list?pageSize=400') as { data?: Array<{ title?: string, type?: string, schemaUid?: string, id?: number, parentId?: number }> }
+    const routeRows = routesList?.data ?? []
+    const modelsAll = (flowModels?.data ?? []) as Array<{ use?: string, uid?: string, parentId?: string, props?: { url?: string } }>
+    for (const spec of terminalSpecs) {
+      const flow = routeRows.find(row => row.title === spec.title && row.type === 'flowPage')
+      if (flow === undefined) {
+        failures.push(`w3b6 终端：flowPage「${spec.title}」missing (run nocobase-w3-views.mts)`)
+        continue
+      }
+      const tab = routeRows.find(row => row.type === 'tabs' && row.parentId === flow.id)
+      if (tab?.schemaUid == null) {
+        failures.push(`w3b6 终端：「${spec.title}」tabs grid row missing`)
+        continue
+      }
+      const grid = await call(token, 'GET', `/api/flowModels:findOne?parentId=${tab.schemaUid}&subKey=grid`) as { data?: { uid?: string } } | null
+      const gridUid = grid?.data?.uid
+      const iframe = modelsAll.find(row => row.use === 'IframeBlockModel' && row.parentId === gridUid)
+      if (iframe === undefined) {
+        failures.push(`w3b6 终端：「${spec.title}」IframeBlockModel missing under grid ${String(gridUid)}`)
+      } else if (!String(iframe.props?.url ?? '').includes(`/terminals/${spec.page}.html`)) {
+        failures.push(`w3b6 终端：「${spec.title}」iframe url ${JSON.stringify(String(iframe.props?.url ?? ''))} 不指向 /terminals/${spec.page}.html`)
+      }
+    }
+    // The serve smoke (negative pair): only when approval-engine --serve is
+    // live on :13110 — otherwise a hint (the pages need it running anyway).
+    try {
+      const healthz = await fetch('http://127.0.0.1:13110/healthz', { signal: AbortSignal.timeout(2000) })
+      if (healthz.ok) {
+        const equation = await fetch('http://127.0.0.1:13110/report-job', {
+          method: 'POST', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ operator: 'linjingyi', mo_code: 'MO-0000-NOSUCH', op_seq: 1, qty_good: 1, qty_pending: 0, qty_scrap: 0 }),
+          signal: AbortSignal.timeout(8000),
+        })
+        if (equation.ok) failures.push('w3b6 终端：/report-job 对不存在的 MO 未拒绝（fail-loud 缺失）')
+        else console.log(`setup-nocobase verify: w3b6 serve smoke — /report-job negative refused ✓ (HTTP ${String(equation.status)})`)
+        const fence = await fetch(`http://127.0.0.1:13110/terminal/inspect?operator=linjingyi`, { signal: AbortSignal.timeout(8000) })
+        if (fence.status !== 403) failures.push(`w3b6 终端：部门围栏负例期望 403，实际 ${String(fence.status)}`)
+        else console.log('setup-nocobase verify: w3b6 serve smoke — cross-department 403 fence ✓')
+      }
+    } catch {
+      console.log('setup-nocobase verify: no live approval-engine :13110; the w3b6 endpoint smoke was not probed (start the serve and rerun verify for the verb negatives)')
+    }
+  }
   // N18: every Add-new popup carries the in-form AI fill button (the official
   // AIEmployeeButtonModel on CreateFormModel.actions). Counting only the
   // deterministic `n18ai-` uid prefix keeps foreign AIEmployeeButtonModel rows
@@ -1410,7 +1704,9 @@ async function stepVerify(): Promise<void> {
   // 56 = the B4 仓储 trio (预留管理/补货预警/盘点计划) joins.
   // 62 = the B5 生产制造 six popup forms (BOM 头/组件行/工序/工作中心/节假日/MO) join.
   // 66 = the B6 生产执行 four popup forms (领料单/退料单/报工记录/完工单) join.
-  if (n18Buttons.length < 80) failures.push(`n18ai- AIEmployeeButtonModel count ${n18Buttons.length} < 80 (form AI fill buttons missing; run nocobase-n18-form-ai.mts after the f1/f2/f3/h4/h5/w1-w3/b4/w5/w6/w8 seeds)`)
+  // 82 = the W3-B4 审批流配置 flow_configs Add-new form + one prior
+  // orphan-covered form join (n18's catalog pageSize rose 6000→12000 the same batch).
+  if (n18Buttons.length < 82) failures.push(`n18ai- AIEmployeeButtonModel count ${n18Buttons.length} < 82 (form AI fill buttons missing; run nocobase-n18-form-ai.mts after the f1/f2/f3/h4/h5/w1-w3/b4/w5/w6/w8/w3b4 seeds)`)
   // H5: the bin-map custom block rides the JSBlockModel authoring channel —
   // exactly one on the 库位平面图 grid.
   if (modelCount('JSBlockModel') < 1) failures.push('JSBlockModel missing (run nocobase-h5-wms.mts for the 库位平面图 map block)')
@@ -1733,7 +2029,7 @@ async function stepVerify(): Promise<void> {
     process.exitCode = 1
     return
   }
-  console.log('setup-nocobase verify: OK — full UI + collections + attachment field + seed + workflow chain + AI workbench + row floors + m2o fieldNames + n18ai- form AI buttons + portals + portal list probes + ai-proxy + API key + kg graph + h4 SRM (pages/group/floors/food columns) + h5 WMS (pages/group/floors/bin-map JSBlock) + w1 approval (wfl collections/审批中心 page/flow config/gate/doc_status column) + w2 supplier single-source (admission flow/AVL gate/h4 workflow retired/seed untouched/采购联系人 retitle) + w3 procurement (pur collections/采购管理 7 pages/gates/flows/receipt columns/待检区) + b4 inventory (reservations/reorder collections/3 pages/planning columns/virtual zones/count-workflow request leg/bypass guards/ledger balance) + w5 mfg (mfg collections/生产制造 5 pages/MO flow/BOM gate/seed floors) + b6 mfg-exec (4 execution collections/5 pages/mfg_orders columns+terminals/WIP zone/movement legs/seed floors/MO-0003 draft) + b7 sales-mrp (so collections/销售管理 3 pages/SO flow/gates/MRP workflow/driver columns/SHIPMENT_SO leg/seed floors) + b8 quality (qm collections/质量管理 5 pages/AQL full-table 135-row seeds (W2-B1)/additive columns/RETURN_VENDOR+SCRAP legs/concession flow/disposal reconciliation) + b9 dashboards (kpi_snapshots/so_orders.shipped_at/经营分析 4 pages/9 kpi charts + supplier radar/90-day backfill floor) + w2-b2 MPS (mps collections/主生产计划 page/mps flow/back-link column/seeds/covered-exclusivity invariant) + w2-b3 biz-date (movements/counts biz_date 100% coverage/appendMovement convergence/monthly balances reconcile/月度收发存 page) + w2-b5 approval-config (pur_orders extras threshold/tolerance, array approver_map, config_note audit, demo trio records/todos, so_orders default fallback, quality_lead user) + w2-b7 ops closure (kpi_snapshots 25-code floor with ap_balance/应收应付对账 page four ledger blocks + ar/ap trend charts/persona sources + .dsh mirrors) all verified')
+  console.log('setup-nocobase verify: OK — full UI + collections + attachment field + seed + workflow chain + AI workbench + row floors + m2o fieldNames + n18ai- form AI buttons + portals + portal list probes + ai-proxy + API key + kg graph + h4 SRM (pages/group/floors/food columns) + h5 WMS (pages/group/floors/bin-map JSBlock) + w1 approval (wfl collections/审批中心 page/flow config/gate/doc_status column) + w2 supplier single-source (admission flow/AVL gate/h4 workflow retired/seed untouched/采购联系人 retitle) + w3 procurement (pur collections/采购管理 7 pages/gates/flows/receipt columns/待检区) + b4 inventory (reservations/reorder collections/3 pages/planning columns/virtual zones/count-workflow request leg/bypass guards/ledger balance) + w5 mfg (mfg collections/生产制造 5 pages/MO flow/BOM gate/seed floors) + b6 mfg-exec (4 execution collections/5 pages/mfg_orders columns+terminals/WIP zone/movement legs/seed floors/MO-0003 draft) + b7 sales-mrp (so collections/销售管理 3 pages/SO flow/gates/MRP workflow/driver columns/SHIPMENT_SO leg/seed floors) + b8 quality (qm collections/质量管理 5 pages/AQL full-table 135-row seeds (W2-B1)/additive columns/RETURN_VENDOR+SCRAP legs/concession flow/disposal reconciliation) + b9 dashboards (kpi_snapshots/so_orders.shipped_at/经营分析 4 pages/9 kpi charts + supplier radar/90-day backfill floor) + w2-b2 MPS (mps collections/主生产计划 page/mps flow/back-link column/seeds/covered-exclusivity invariant) + w2-b3 biz-date (movements/counts biz_date 100% coverage/appendMovement convergence/monthly balances reconcile/月度收发存 page) + w2-b5 approval-config (pur_orders extras threshold/tolerance, array approver_map, config_note audit, demo trio records/todos, so_orders default fallback, quality_lead user) + w2-b7 ops closure (kpi_snapshots 25-code floor with ap_balance/应收应付对账 page four ledger blocks + ar/ap trend charts/persona sources + .dsh mirrors) + w3 usability (b1 row-detail drawers + member ACL floors/b2 subtables + guarded actions + approval jumps/b3 four read-only kanbans + 排产甘特 v1 gantt + dual-block calendars + drawer record-scoping/b4 审批流配置中心 (SVG 状态图 + wfl 四表 row Edit + admin+root-only menu + config_note required + consistency probe + 部门形态审批人校验)/b5 组织权限 (departments 树 + 挂接 + 组织架构页 + 权限矩阵页 admin-only + member 动作矩阵 + approver_map 部门路由 qm_nc_dispositions 见证 + 员工页 org_dept 列)/b6 操作者终端 (三页 iframe + serve 动词端点 fail-loud 冒烟 + 部门围栏 403)) all verified')
 }
 
 /** Upsert the two NocoBase lines in the repository root .env, preserving the rest. */

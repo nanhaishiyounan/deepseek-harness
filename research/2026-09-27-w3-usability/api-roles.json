@@ -1,0 +1,82 @@
+{
+  "fetchedAt": "2026-09-27T14:37:27.865Z",
+  "base": "http://127.0.0.1:13000",
+  "meta": {
+    "count": 3,
+    "page": 1,
+    "pageSize": 100,
+    "totalPage": 1
+  },
+  "data": [
+    {
+      "createdAt": "2026-09-12T19:28:20.719Z",
+      "updatedAt": "2026-09-12T19:28:21.430Z",
+      "name": "admin",
+      "title": "{{t(\"Admin\")}}",
+      "description": null,
+      "strategy": {
+        "actions": [
+          "create",
+          "view",
+          "update",
+          "destroy",
+          "export",
+          "importXlsx"
+        ]
+      },
+      "default": false,
+      "hidden": false,
+      "allowConfigure": true,
+      "allowNewMenu": true,
+      "snippets": [
+        "pm",
+        "pm.*",
+        "ui.*"
+      ],
+      "allowNewMobileMenu": true,
+      "allowNewAiEmployee": true
+    },
+    {
+      "createdAt": "2026-09-12T19:28:20.728Z",
+      "updatedAt": "2026-09-12T19:28:20.728Z",
+      "name": "member",
+      "title": "{{t(\"Member\")}}",
+      "description": null,
+      "strategy": {
+        "actions": [
+          "view:own"
+        ]
+      },
+      "default": true,
+      "hidden": false,
+      "allowConfigure": null,
+      "allowNewMenu": true,
+      "snippets": [
+        "!pm",
+        "!pm.*",
+        "!ui.*"
+      ],
+      "allowNewMobileMenu": true,
+      "allowNewAiEmployee": true
+    },
+    {
+      "createdAt": "2026-09-12T19:28:20.705Z",
+      "updatedAt": "2026-09-12T19:28:20.705Z",
+      "name": "root",
+      "title": "{{t(\"Root\")}}",
+      "description": null,
+      "strategy": null,
+      "default": false,
+      "hidden": true,
+      "allowConfigure": null,
+      "allowNewMenu": false,
+      "snippets": [
+        "pm",
+        "pm.*",
+        "ui.*"
+      ],
+      "allowNewMobileMenu": false,
+      "allowNewAiEmployee": true
+    }
+  ]
+}

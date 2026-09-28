@@ -1,0 +1,150 @@
+{
+  "fetchedAt": "2026-09-27T14:37:27.917Z",
+  "base": "http://127.0.0.1:13000",
+  "meta": {
+    "count": 17,
+    "page": 1,
+    "pageSize": 100,
+    "totalPage": 1
+  },
+  "data": [
+    {
+      "id": 1,
+      "nickname": "Super Admin",
+      "username": "nocobase",
+      "roles": [
+        "member",
+        "root",
+        "admin"
+      ]
+    },
+    {
+      "id": 2,
+      "nickname": "陈立群",
+      "username": "chenliqun",
+      "roles": [
+        "member"
+      ]
+    },
+    {
+      "id": 3,
+      "nickname": "王一帆",
+      "username": "wangyifan",
+      "roles": [
+        "member"
+      ]
+    },
+    {
+      "id": 4,
+      "nickname": "林静怡",
+      "username": "linjingyi",
+      "roles": [
+        "member"
+      ]
+    },
+    {
+      "id": 5,
+      "nickname": "赵晓芳",
+      "username": "zhaoxiaofang",
+      "roles": [
+        "member"
+      ]
+    },
+    {
+      "id": 6,
+      "nickname": "阿特拉斯",
+      "username": "atlas",
+      "roles": [
+        "member"
+      ]
+    },
+    {
+      "id": 7,
+      "nickname": "达拉",
+      "username": "dara",
+      "roles": [
+        "member"
+      ]
+    },
+    {
+      "id": 8,
+      "nickname": "得克斯",
+      "username": "dex",
+      "roles": [
+        "member"
+      ]
+    },
+    {
+      "id": 9,
+      "nickname": "埃利斯",
+      "username": "ellis",
+      "roles": [
+        "member"
+      ]
+    },
+    {
+      "id": 10,
+      "nickname": "莱克茜",
+      "username": "lexi",
+      "roles": [
+        "member"
+      ]
+    },
+    {
+      "id": 11,
+      "nickname": "丽娜",
+      "username": "lina",
+      "roles": [
+        "member"
+      ]
+    },
+    {
+      "id": 12,
+      "nickname": "内森",
+      "username": "nathan",
+      "roles": [
+        "member"
+      ]
+    },
+    {
+      "id": 13,
+      "nickname": "薇拉",
+      "username": "vera",
+      "roles": [
+        "member"
+      ]
+    },
+    {
+      "id": 14,
+      "nickname": "维兹",
+      "username": "viz",
+      "roles": [
+        "member"
+      ]
+    },
+    {
+      "id": 15,
+      "nickname": "B4 守卫测试",
+      "username": "b4guard",
+      "roles": [
+        "admin"
+      ]
+    },
+    {
+      "id": 16,
+      "nickname": "质量主管",
+      "username": "quality_lead",
+      "roles": [
+        "member"
+      ]
+    },
+    {
+      "id": 17,
+      "nickname": "管理员（审批演示）",
+      "username": "admin",
+      "roles": [
+        "member"
+      ]
+    }
+  ]
+}

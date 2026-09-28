@@ -39,7 +39,7 @@
 import { spawnSync } from 'node:child_process'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { call, dataOf, listFlowModels, listRoutes, signInWithRetry, withN17Prefix } from './nocobase-flow-page-lib.mts'
+import { call, dataOf, ensureTableRowDetail, listFlowModels, listRoutes, signInWithRetry, withN17Prefix } from './nocobase-flow-page-lib.mts'
 import { act, enforceGates, seedDocFlow, submitForApproval, type NocoIO } from './approval-engine.mts'
 
 type RouteRow = import('./nocobase-flow-page-lib.mts').RouteRow
@@ -729,6 +729,13 @@ async function ensureV2Page(token: string, spec: PageSpec, groupId: number, sort
         props: { title: '', icon: 'ReloadOutlined' },
         stepParams: { buttonSettings: { general: { title: '', icon: 'ReloadOutlined' } } },
       })
+      // W3-B1: row-detail triple on every fresh table (P0 root cause ① fix).
+      await ensureTableRowDetail(token, tableUid, {
+        collection: block.collection,
+        fields: block.columns.map(column => ({ fieldPath: column.name, modelUse: displayModelFor(column.kind), ...(column.options === undefined || column.options.length === 0 ? {} : { options: column.options }) })),
+        tabTitle: '详情',
+        actionsColumnSortIndex: block.columns.length + 1,
+      })
       continue
     }
     await save({
@@ -768,6 +775,13 @@ async function ensureV2Page(token: string, spec: PageSpec, groupId: number, sort
       uid: withN17Prefix('w5mfg', 'rf'), parentId: tableUid, subKey: 'actions', subType: 'array', sortIndex: 3, use: 'RefreshActionModel',
       props: { title: '', icon: 'ReloadOutlined' },
       stepParams: { buttonSettings: { general: { title: '', icon: 'ReloadOutlined' } } },
+    })
+    // W3-B1: row-detail triple on every fresh table (P0 root cause ① fix).
+    await ensureTableRowDetail(token, tableUid, {
+      collection: block.collection,
+      fields: block.columns.map(column => ({ fieldPath: column.name, modelUse: displayModelFor(column.kind), ...(column.options === undefined || column.options.length === 0 ? {} : { options: column.options }) })),
+      tabTitle: '详情',
+      actionsColumnSortIndex: block.columns.length + 1,
     })
   }
   console.log(`nocobase-w5: v2 page "${spec.title}" created (/admin/${routeUid}) with ${spec.blocks.length} block(s)`)

@@ -28,7 +28,7 @@
  *   node --import tsx/esm examples/kb-agent/scripts/nocobase-w9-dashboards.mts
  *   node --import tsx/esm examples/kb-agent/scripts/nocobase-w9-dashboards.mts --rollback
  */
-import { batchScopedRows, blockOwnedByPage, call, dataOf, gridOwnerRoutes, listFlowModels, listRoutes, signInWithRetry, withN17Prefix } from './nocobase-flow-page-lib.mts'
+import { batchScopedRows, blockOwnedByPage, call, dataOf, ensureTableRowDetail, gridOwnerRoutes, listFlowModels, listRoutes, signInWithRetry, withN17Prefix } from './nocobase-flow-page-lib.mts'
 
 type RouteRow = import('./nocobase-flow-page-lib.mts').RouteRow
 type FlowModelRow = import('./nocobase-flow-page-lib.mts').FlowModelRow
@@ -412,6 +412,13 @@ async function ensureV2Page(token: string, spec: PageSpec, groupId: number, sort
       uid: withN17Prefix('w9kpi', 'rf'), parentId: tableUid, subKey: 'actions', subType: 'array', sortIndex: 2, use: 'RefreshActionModel',
       props: { title: '', icon: 'ReloadOutlined' },
       stepParams: { buttonSettings: { general: { title: '', icon: 'ReloadOutlined' } } },
+    })
+    // W3-B1: row-detail triple on every fresh table (P0 root cause ① fix).
+    await ensureTableRowDetail(token, tableUid, {
+      collection: block.collection,
+      fields: block.columns.map(column => ({ fieldPath: column.name, modelUse: displayModelFor(column.kind), ...(column.options === undefined || column.options.length === 0 ? {} : { options: column.options }) })),
+      tabTitle: '详情',
+      actionsColumnSortIndex: block.columns.length + 1,
     })
   }
   console.log(`nocobase-w9: v2 page "${spec.title}" created (/admin/${routeUid}) with ${spec.blocks.length} table block(s)`)

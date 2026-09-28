@@ -75,7 +75,7 @@
 import { spawnSync } from 'node:child_process'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { call, dataOf, listFlowModels, listRoutes, signInWithRetry, withN17Prefix } from './nocobase-flow-page-lib.mts'
+import { call, dataOf, ensureTableRowDetail, listFlowModels, listRoutes, signInWithRetry, withN17Prefix } from './nocobase-flow-page-lib.mts'
 import { LOT_BANDS } from './nocobase-w8-quality.mts'
 
 type RouteRow = import('./nocobase-flow-page-lib.mts').RouteRow
@@ -1357,6 +1357,13 @@ async function ensureV2Page(token: string, spec: TablePageSpec, groupId: number,
     use: 'RefreshActionModel', props: { title: '', icon: 'ReloadOutlined' },
     stepParams: { buttonSettings: { general: { title: '', icon: 'ReloadOutlined' } } },
   })
+  // W3-B1: row-detail triple on every fresh table (P0 root cause ① fix).
+  await ensureTableRowDetail(token, tableUid, {
+    collection: spec.collection,
+    fields: spec.columns.map(column => ({ fieldPath: column.name, modelUse: displayModelFor(column.kind), ...(column.options === undefined ? {} : { options: column.options }) })),
+    tabTitle: '详情',
+    actionsColumnSortIndex: spec.columns.length + 1,
+  })
   console.log(`nocobase-h5: v2 page "${spec.title}" created (/admin/${routeUid})`)
 }
 
@@ -1548,7 +1555,8 @@ async function postShipment(token: string, shipmentNo: string): Promise<void> {
   console.log(`nocobase-h5: shipment ${shipmentNo} posted — stock -${qty}, movement appended`)
 }
 
-async function postReceipt(token: string, receiptNo: string): Promise<void> {
+/** B3/W3-B6: post one receipt (the WMS putaway verb) — exported for the terminal endpoint. */
+export async function postReceipt(token: string, receiptNo: string): Promise<void> {
   const receipts = await rowsOf(token, 'wms_receipts')
   const receipt = receipts.find(row => row.receipt_no === receiptNo)
   if (receipt === undefined) throw new Error(`no receipt ${receiptNo}`)
@@ -2645,9 +2653,14 @@ export async function availabilityCheck(token: string, moCode: string): Promise<
     throw new Error(`齐套被拒：MO ${moCode} 状态为 ${String(mo.doc_status)}——需先审批通过并下达（released）后才能齐套`)
   }
   // Re-entry after a top-up: release this MO's earlier partial picks so the
-  // recompute re-picks FEFO against the grown pool.
-  for (const reservation of (await rowsOf(token, 'wms_reservations')).filter(row => row.ref_type === 'MO' && row.ref_id === moCode && row.status === 'reserved')) {
-    await releaseReservation(token, String(reservation.code))
+  // recompute re-picks FEFO against the grown pool. A released row must be
+  // destroyed as well — reserve() is code-idempotent and keeps an existing
+  // row as-is, so a leftover released row would block the re-pick forever
+  // (the kit reads assigned while post-issue finds no reserved rows — the
+  // W3-B7 journey hit exactly that deadlock).
+  for (const reservation of (await rowsOf(token, 'wms_reservations')).filter(row => row.ref_type === 'MO' && row.ref_id === moCode)) {
+    if (reservation.status === 'reserved') await releaseReservation(token, String(reservation.code))
+    if (reservation.status === 'released') await dataOf(token, 'POST', `/api/wms_reservations:destroy?filterByTk=${String(reservation.id)}`)
   }
   const demands = await moComponentDemands(token, mo)
   const stocks = await rowsOf(token, 'wms_stock', 500)

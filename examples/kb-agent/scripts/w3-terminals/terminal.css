@@ -1,0 +1,270 @@
+/* W3-B6 operator terminals — the shared touch skin (Odoo Shop Floor / Odoo
+ * Barcode form language): card queues, big primary buttons (≥44px targets,
+ * WCAG-AA contrast), no framework. One file for all three pages. */
+
+:root {
+  --bg: #101418;
+  --surface: #1a2129;
+  --surface-2: #222c37;
+  --line: #32404f;
+  --ink: #f2f6fa;
+  --ink-dim: #a7b6c4;
+  --primary: #1677ff;
+  --primary-ink: #ffffff;
+  --ok: #52c41a;
+  --ok-ink: #08290c;
+  --bad: #ff4d4f;
+  --bad-ink: #ffffff;
+  --warn: #faad14;
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.term-shell { max-width: 720px; margin: 0 auto; padding: 12px 12px 40px; }
+
+/* ── top bar: who is operating + refresh ── */
+.term-top {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  margin: -12px -12px 12px;
+  background: rgba(16, 20, 24, 0.96);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(6px);
+}
+.term-top .title { font-size: 19px; font-weight: 700; flex: 1; min-width: 0; }
+.term-top .who {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--ink-dim);
+}
+.term-top .who select, .term-top .who input {
+  min-height: 44px;
+  min-width: 132px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink);
+  font-size: 16px;
+  padding: 0 10px;
+}
+
+/* ── card queue ── */
+.queue { display: grid; gap: 12px; }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.card.done { opacity: 0.45; }
+.card-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 12px 14px 6px;
+}
+.card-head .code { font-size: 18px; font-weight: 700; letter-spacing: 0.02em; }
+.card-head .meta { color: var(--ink-dim); font-size: 13px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.badge {
+  flex: none;
+  min-width: 30px;
+  text-align: center;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 13px;
+  font-weight: 700;
+  background: var(--primary);
+  color: var(--primary-ink);
+}
+.badge.green { background: var(--ok); color: var(--ok-ink); }
+.badge.orange { background: var(--warn); color: #402c00; }
+.card-body { padding: 0 14px 10px; color: var(--ink-dim); font-size: 14px; }
+.card-body .row { display: flex; gap: 8px; align-items: center; padding: 3px 0; }
+.card-body .row .fill { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.progress {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  overflow: hidden;
+  margin: 6px 0 2px;
+}
+.progress > span { display: block; height: 100%; background: var(--ok); border-radius: inherit; }
+
+/* ── big buttons ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 56px;
+  padding: 10px 22px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink);
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+}
+.btn:active { transform: scale(0.98); }
+.btn.primary { background: var(--primary); border-color: var(--primary); color: var(--primary-ink); }
+.btn.ok { background: var(--ok); border-color: var(--ok); color: var(--ok-ink); }
+.btn.bad { background: var(--bad); border-color: var(--bad); color: var(--bad-ink); }
+.btn.block { display: flex; width: 100%; }
+.btn.small { min-height: 44px; font-size: 15px; padding: 8px 14px; border-radius: 10px; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.card-foot { display: flex; gap: 10px; padding: 10px 14px 14px; }
+
+/* ── step buttons (Odoo Barcode ±10 / +1 stepper) ── */
+.step { display: flex; align-items: center; gap: 10px; }
+.step .btn { min-width: 64px; min-height: 48px; font-size: 17px; padding: 8px 0; }
+.step input {
+  width: 108px;
+  min-height: 48px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink);
+}
+
+/* ── sheet (the report dialog / scoring panel) ── */
+.sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: none;
+  background: rgba(6, 9, 12, 0.72);
+}
+.sheet.open { display: block; }
+.sheet .panel {
+  max-width: 560px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  margin: 20px auto;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 16px;
+}
+.sheet h2 { margin: 0 0 4px; font-size: 20px; }
+.sheet .sub { color: var(--ink-dim); font-size: 14px; margin: 0 0 12px; }
+
+.field { margin: 12px 0; }
+.field label { display: block; font-size: 14px; color: var(--ink-dim); margin-bottom: 6px; }
+.field input[type="number"], .field input[type="text"] {
+  width: 100%;
+  min-height: 52px;
+  font-size: 20px;
+  font-weight: 700;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink);
+  padding: 0 14px;
+}
+.equation {
+  margin: 12px 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.equation.ok { color: var(--ok); }
+.equation.bad { color: var(--bad); }
+
+/* ── inspection rows ── */
+.reading {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin: 10px 0;
+  background: var(--surface-2);
+}
+.reading .head { display: flex; gap: 8px; align-items: baseline; }
+.reading .head .name { font-size: 17px; font-weight: 700; flex: 1; }
+.reading .head .spec { color: var(--ink-dim); font-size: 13px; }
+.reading .spec-value { color: var(--warn); }
+.reading .input-line { display: flex; gap: 10px; align-items: center; margin-top: 8px; }
+.reading .input-line input {
+  flex: 1;
+  min-height: 48px;
+  font-size: 19px;
+  font-weight: 700;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--ink);
+  padding: 0 12px;
+}
+.verdict {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 88px;
+  min-height: 48px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 800;
+}
+.verdict.pending { background: var(--surface); color: var(--ink-dim); border: 1px dashed var(--line); }
+.verdict.pass { background: var(--ok); color: var(--ok-ink); }
+.verdict.fail { background: var(--bad); color: var(--bad-ink); }
+.critical-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--ink-dim);
+}
+.critical-toggle input { width: 22px; height: 22px; accent-color: var(--bad); }
+
+/* ── banners ── */
+.note {
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 15px;
+  margin: 12px 0;
+}
+.note.ok { background: rgba(82, 196, 26, 0.14); color: #95de64; border: 1px solid rgba(82, 196, 26, 0.4); }
+.note.bad { background: rgba(255, 77, 79, 0.14); color: #ff9c9d; border: 1px solid rgba(255, 77, 79, 0.4); }
+.note.info { background: rgba(22, 119, 255, 0.14); color: #85b8ff; border: 1px solid rgba(22, 119, 255, 0.4); }
+.note b { display: block; margin-bottom: 2px; }
+
+.empty {
+  text-align: center;
+  color: var(--ink-dim);
+  padding: 40px 10px;
+  font-size: 16px;
+}
+
+/* fade-out for finished cards (Odoo shop-floor card completion) */
+@keyframes card-done { to { opacity: 0.45; transform: scale(0.98); } }
+.card.just-done { animation: card-done 0.45s ease forwards; }

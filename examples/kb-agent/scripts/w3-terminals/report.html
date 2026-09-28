@@ -1,0 +1,197 @@
+<!doctype html>
+<!-- W3-B6 报工终端（车间触屏形态，Odoo Shop Floor 语言）：MO 卡队列 → 大按钮
+     报工（完成/待求/损失三数 + 实时等式钳制）→ POST /report-job（引擎唯一写路径）。
+     操作工经 URL ?operator= 传入（部门围栏在生产车间侧校验）。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>车间报工终端</title>
+<link rel="stylesheet" href="terminal.css">
+</head>
+<body>
+<div class="term-shell">
+  <div class="term-top">
+    <div class="title">车间报工终端</div>
+    <div class="who">操作工
+      <select id="operator">
+        <option value="linjingyi">林静怡（生产车间）</option>
+        <option value="admin">admin（管理员）</option>
+      </select>
+    </div>
+    <button class="btn small" id="refresh">刷新</button>
+  </div>
+  <div id="note"></div>
+  <div class="queue" id="queue"><div class="empty">加载中…</div></div>
+</div>
+
+<div class="sheet" id="sheet">
+  <div class="panel">
+    <h2 id="sheet-title">报工</h2>
+    <p class="sub" id="sheet-sub"></p>
+    <div id="sheet-body"></div>
+  </div>
+</div>
+
+<script>
+'use strict'
+const params = new URLSearchParams(location.search)
+const base = new URL('..', location.href).href.replace(/\/$/, '') // serve root (:13110)
+
+const state = { cards: [], submitting: false }
+
+const operatorEl = document.getElementById('operator')
+operatorEl.value = params.get('operator') || 'linjingyi'
+operatorEl.addEventListener('change', load)
+document.getElementById('refresh').addEventListener('click', load)
+
+function note(html, kind) {
+  document.getElementById('note').innerHTML = html === '' ? '' : `<div class="note ${kind}">${html}</div>`
+}
+
+async function api(path, options) {
+  const response = await fetch(`${base}${path}`, options)
+  const payload = await response.json().catch(() => ({}))
+  if (!response.ok || payload.ok === false) {
+    throw new Error(payload.error || `HTTP ${response.status}`)
+  }
+  return payload
+}
+
+const statusLabel = { planned: '已计划', started: '已开工', done: '已完成' }
+
+function renderQueue() {
+  const queue = document.getElementById('queue')
+  if (state.cards.length === 0) {
+    queue.innerHTML = '<div class="empty">当前没有执行中的 MO——领料开工后这里出现卡片</div>'
+    return
+  }
+  queue.innerHTML = ''
+  for (const card of state.cards) {
+    const openable = card.operations.length > 0
+    const doneOps = card.operations.filter(op => op.status === 'done').length
+    const totalOps = card.operations.length
+    const reported = Math.min(100, Math.round((card.operations.reduce((sum, op) => sum + op.reported, 0) / Math.max(1, totalOps * card.mo.qty)) * 100))
+    const el = document.createElement('div')
+    el.className = 'card'
+    el.dataset.moId = String(card.mo.id)
+    el.innerHTML = `
+      <div class="card-head">
+        <span class="code">${card.mo.code}</span>
+        <span class="meta">${card.mo.product} · 计划 ${card.mo.qty}</span>
+        <span class="badge green">${doneOps}/${totalOps} 工序</span>
+      </div>
+      <div class="card-body">
+        <div class="progress"><span style="width:${String(reported)}%"></span></div>
+        ${card.operations.map(op => `
+          <div class="row">
+            <span class="fill">工序${String(op.seq)} ${op.name} · ${op.workcenter}</span>
+            <span>${statusLabel[op.status] || op.status} · 已报 ${String(op.reported)}/${String(card.mo.qty)}</span>
+          </div>`).join('')}
+      </div>
+      <div class="card-foot">${openable
+        ? '<button class="btn primary block">报工</button>'
+        : '<button class="btn block" disabled>未排产——先排产（mfg-schedule）再报工</button>'}</div>`
+    if (openable) el.querySelector('button').addEventListener('click', () => openSheet(card))
+    queue.appendChild(el)
+  }
+}
+
+function openSheet(card) {
+  const open = card.operations.filter(op => op.status !== 'done')
+  const operations = open.length > 0 ? open : card.operations
+  const body = document.getElementById('sheet-body')
+  document.getElementById('sheet-title').textContent = `${card.mo.code} 报工`
+  document.getElementById('sheet-sub').textContent = `${card.mo.product} · 计划数量 ${String(card.mo.qty)}`
+  body.innerHTML = `
+    <div class="field"><label>报工工序</label>
+      <select id="op-sel" style="width:100%;min-height:52px;font-size:18px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);padding:0 12px;">
+        ${operations.map(op => `<option value="${String(op.seq)}" data-remaining="${String(op.remaining)}">工序${String(op.seq)} ${op.name}（剩 ${String(op.remaining)} 未报）</option>`).join('')}
+      </select>
+    </div>
+    <div class="field"><label>完成数（合格）</label><input type="number" id="qty-good" min="0" step="1" value="0" inputmode="numeric"></div>
+    <div class="field"><label>待求数（本循环未完成，下循环续报）</label><input type="number" id="qty-pending" min="0" step="1" value="0" inputmode="numeric"></div>
+    <div class="field"><label>损失数（不合格/废品）</label><input type="number" id="qty-scrap" min="0" step="1" value="0" inputmode="numeric"></div>
+    <div class="equation" id="equation"></div>
+    <div class="field"><label>实际工时（分钟，可选）</label><input type="number" id="duration" min="0" step="10" value="0" inputmode="numeric"></div>
+    <label class="critical-toggle"><input type="checkbox" id="send-qc"> 本批报工送 IPQC 检验（qc_status=pending）</label>
+    <div class="card-foot" style="padding:14px 0 0">
+      <button class="btn block" id="sheet-cancel">取消</button>
+      <button class="btn primary block" id="sheet-submit" disabled>提交报工</button>
+    </div>`
+  document.getElementById('sheet').classList.add('open')
+
+  const good = body.querySelector('#qty-good')
+  const pending = body.querySelector('#qty-pending')
+  const scrap = body.querySelector('#qty-scrap')
+  const opSel = body.querySelector('#op-sel')
+  const equation = body.querySelector('#equation')
+  const submit = body.querySelector('#sheet-submit')
+  const update = () => {
+    const remaining = Number(opSel.selectedOptions[0].dataset.remaining)
+    const sum = Number(good.value || 0) + Number(pending.value || 0) + Number(scrap.value || 0)
+    const ok = sum === remaining && Number(good.value || 0) >= 0 && Number(pending.value || 0) >= 0 && Number(scrap.value || 0) >= 0
+    equation.className = `equation ${sum === remaining ? 'ok' : 'bad'}`
+    equation.innerHTML = `${good.value || '0'} + ${pending.value || '0'} + ${scrap.value || '0'} = ${String(sum)} <span style="font-size:20px">${sum === remaining ? '=' : '≠'}</span> 本循环计划数 ${String(remaining)}${sum === remaining ? '' : '（数量必须全部交代去向）'}`
+    submit.disabled = !ok || state.submitting
+  }
+  for (const input of [good, pending, scrap]) input.addEventListener('input', update)
+  opSel.addEventListener('change', update)
+  update()
+
+  body.querySelector('#sheet-cancel').addEventListener('click', closeSheet)
+  submit.addEventListener('click', async () => {
+    if (state.submitting) return
+    state.submitting = true
+    submit.disabled = true
+    submit.textContent = '提交中…'
+    try {
+      const payload = await api('/report-job', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          operator: operatorEl.value,
+          mo_id: card.mo.id,
+          op_seq: Number(opSel.value),
+          qty_good: Number(good.value || 0),
+          qty_pending: Number(pending.value || 0),
+          qty_scrap: Number(scrap.value || 0),
+          duration_min: Number(body.querySelector('#duration').value || 0),
+          send_qc: body.querySelector('#send-qc').checked,
+        }),
+      })
+      closeSheet()
+      note(`<b>报工成功 ${payload.code}</b>工序 ${String(payload.op_seq)} → ${String(payload.op_status)}；待求数 ${String(payload.pending_carried)} 结转下循环${body.querySelector('#send-qc').checked ? '；已挂 IPQC 待检单' : ''}`, 'ok')
+      const el = document.querySelector(`[data-mo-id="${String(card.mo.id)}"]`)
+      if (el) el.classList.add('just-done')
+      setTimeout(load, 900)
+    } catch (error) {
+      note(`<b>报工被拒</b>${error.message}`, 'bad')
+      submit.textContent = '提交报工'
+      state.submitting = false
+      update()
+    }
+  })
+}
+
+function closeSheet() {
+  document.getElementById('sheet').classList.remove('open')
+  state.submitting = false
+}
+
+async function load() {
+  note('', 'info')
+  try {
+    const payload = await api(`/terminal/report?operator=${encodeURIComponent(operatorEl.value)}`)
+    state.cards = payload.cards
+    renderQueue()
+  } catch (error) {
+    document.getElementById('queue').innerHTML = '<div class="empty">队列加载失败</div>'
+    note(`<b>加载失败</b>${error.message}`, 'bad')
+  }
+}
+
+load()
+</script>
+</body>
+</html>

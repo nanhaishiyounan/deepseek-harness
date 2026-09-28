@@ -1,0 +1,68 @@
+{
+  "fetchedAt": "2026-09-27T14:37:46.782Z",
+  "account": "quality_lead",
+  "note": "member token (from nocobase-w3-procurement.mts quality_lead/Quality#2026); e1 project TableBlock probes + visibility of actions-column/view-action vs admin",
+  "probes": {
+    "filterByTk": {
+      "httpStatus": 200,
+      "data": null
+    },
+    "columnsFirst": {
+      "httpStatus": 200,
+      "firstChildUse": "TableColumnModel"
+    },
+    "actionsFirst": {
+      "httpStatus": 200,
+      "firstChildUse": "AddNewActionModel"
+    }
+  },
+  "visibility": {
+    "method": "GET /api/flowModels:list?filter={\"uid\":\"7f14173465d\"} (the sole ViewActionModel row, e1 actions column)",
+    "admin": {
+      "rows": 1
+    },
+    "member": {
+      "rows": 0
+    },
+    "rolesStrategyVerbatim": {
+      "admin": {
+        "snippets": [
+          "pm",
+          "pm.*",
+          "ui.*"
+        ],
+        "strategy": {
+          "actions": [
+            "create",
+            "view",
+            "update",
+            "destroy",
+            "export",
+            "importXlsx"
+          ]
+        }
+      },
+      "member": {
+        "snippets": [
+          "!pm",
+          "!pm.*",
+          "!ui.*"
+        ],
+        "strategy": {
+          "actions": [
+            "view:own"
+          ]
+        }
+      },
+      "root": {
+        "snippets": [
+          "pm",
+          "pm.*",
+          "ui.*"
+        ],
+        "strategy": null
+      }
+    },
+    "conclusion": "member (quality_lead) cannot see the e1 ViewActionModel row that admin sees — ACL-layer row-visibility difference confirmed; findOne?filterByTk returns {} for both (endpoint does not hydrate single nodes)"
+  }
+}

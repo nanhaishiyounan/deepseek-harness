@@ -529,7 +529,11 @@ function drawerPageTree(actionUid: string): Record<string, unknown> {
               items: [{
                 use: 'DetailsBlockModel', subKey: 'items', subType: 'array', sortIndex: 1, props: {},
                 stepParams: {
-                  resourceSettings: { init: { dataSourceKey: 'main', collectionName: collection } },
+                  // filterByTk scopes the drawer to the clicked card/event —
+                  // without it the block renders the collection's first record
+                  // (the W3-B3 unscoped-drawer finding; live trees rebuild on
+                  // the next f1 re-run that rewrites the drawer subtree).
+                  resourceSettings: { init: { dataSourceKey: 'main', collectionName: collection, filterByTk: '{{ctx.view.inputArgs.filterByTk}}' } },
                   detailsSettings: { layout: { layout: 'vertical', colon: true } },
                 },
                 subModels: {

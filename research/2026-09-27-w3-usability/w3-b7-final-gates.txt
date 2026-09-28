@@ -1,0 +1,11 @@
+=== W3-B7 收官门禁 gates（2026-09-28 15:11:48）===
+--- assert-ledger（Σmovements==stock）---
+nocobase-h5: ledger balanced — stock == Σmovements per (product, lot)，36 组，189 条流水
+--- approval-engine --selftest ---
+approval-engine: selftest OK — 状态机全序列/金额阈值加签/驳回重提/非法转移/卡口/幂等/锁编辑/供应商准入流/准入卡口/B5阈值配置+多审批人/W3-B5部门路由(全员展开/混合并集/幽灵部门/空部门/坏形态/纯用户名零漂移)/夜间env负例/W3-B6终端校验(三数等式/读数判定/缺陷汇总/收货卡口) 全部通过
+--- kpi-run --selftest ---
+kpi-run: selftest OK — FPY 工例/OTIF 分子分母/账实相符率/percentile 对齐/呆滞库龄/临期窗口/RTY 连乘/OTD-S/KPI 表形态/批次合格率已判定口径/ar+ap 余额镜像/PRESENT_ONLY 收缩/重放三件套/月末锚点/周转率公式与除零/rowsOf 截断负例/沪日界边界 全部通过
+--- backfill 90 第一趟 ---
+kpi-run: backfill 90d（2026-07-01..2026-09-28）— 2081 rows
+--- backfill 90 第二趟（幂等对拍）---
+kpi-run: backfill 90d（2026-07-01..2026-09-28）— 2081 rows

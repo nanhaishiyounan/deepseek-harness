@@ -1,0 +1,38 @@
+ flow_id |  doc_type  |     state      | doc_status_anchor
+---------+------------+----------------+-------------------
+       5 | pur_orders | draft          | 0
+       5 | pur_orders | pending        | 0
+       5 | pur_orders | pending_level2 | 0
+       5 | pur_orders | approved       | 1
+       5 | pur_orders | rejected       | 0
+       5 | pur_orders | void           | 2
+(6 rows)
+
+     state      |  action  |   next_state   | allowed_role |       cond
+----------------+----------+----------------+--------------+------------------
+ draft          | submit   | pending        | manager      |
+ rejected       | resubmit | pending        | manager      |
+ pending        | approve  | approved       | manager      | amount <= 200000
+ pending        | approve  | pending_level2 | manager      |
+ pending_level2 | approve  | approved       | gm           |
+ pending        | reject   | rejected       | manager      |
+ pending_level2 | reject   | rejected       | gm           |
+ approved       | void     | void           | manager      |
+(8 rows)
+
+ERROR:  column "doc_type" does not exist
+LINE 1: SELECT doc_type, count(*) AS states FROM wfl_flow_states GRO...
+               ^
+ id |        doc_type        |                                        extras_head                                         | note_len | is_active
+----+------------------------+--------------------------------------------------------------------------------------------+----------+-----------
+  1 | hub_po_purchase_orders | {"approved_by_field":"approved_by","approved_at_field":"approved_at"}                      |      123 | t
+  2 | srm_suppliers          | {"approved_at_field":"admitted_at"}                                                        |      123 | t
+  3 | pur_requests           | {"approved_by_field":"approved_by","approved_at_field":"approved_at"}                      |      123 | t
+  4 | pur_rfqs               | {"approved_by_field":"approved_by","approved_at_field":"approved_at"}                      |      123 | t
+  5 | pur_orders             | {"approved_by_field":"approved_by","approved_at_field":"approved_at","amount_field":"amoun |     1333 | t
+  6 | pur_payments           | {"approved_by_field":"approved_by","approved_at_field":"approved_at","amount_field":"amoun |      123 | t
+  7 | mfg_orders             | {"approved_by_field":"approved_by","approved_at_field":"approved_at","amount_field":"estim |      123 | t
+ 10 | so_orders              | {"approved_by_field":"approved_by","approved_at_field":"approved_at","amount_field":"amoun |      543 | t
+ 11 | qm_nc_dispositions     | {"approved_by_field":"approved_by","approved_at_field":"approved_at"}                      |      123 | t
+ 12 | mps_plans              | {"approved_by_field":"approved_by","approved_at_field":"approved_at"}                      |      123 | t
+(10 rows)

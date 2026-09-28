@@ -1,0 +1,5 @@
+bom_first:|1|0|0
+insp_56_readings:|3
+supplier_first:|1|2|6|4
+po_first:|1|1
+insp_58_readings:|2

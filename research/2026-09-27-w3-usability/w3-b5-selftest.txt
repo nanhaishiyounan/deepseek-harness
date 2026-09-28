@@ -1,0 +1,29 @@
+# W3-B5 final gates — 2026-09-28T04:44:41Z
+
+── approval-engine --selftest ──
+approval-engine: selftest OK — 状态机全序列/金额阈值加签/驳回重提/非法转移/卡口/幂等/锁编辑/供应商准入流/准入卡口/B5阈值配置+多审批人/W3-B5部门路由(全员展开/混合并集/幽灵部门/空部门/坏形态/纯用户名零漂移)/夜间env负例 全部通过
+
+── live --probe-dept-routing ──
+probe-dept-routing: 幽灵部门 → submit 拒绝 ✓（审批流「qm_nc_dispositions」角色 manager 引用不存在的部门「幽灵部」（departments 表无此名称））；待办 0 行 ✓
+probe-dept-routing: 空部门（储备人才池） → submit 拒绝 ✓（审批流「qm_nc_dispositions」角色 manager 的部门「储备人才池」没有成员（departmentsUsers 无挂接用户），无法展开审批待）；待办 0 行 ✓
+probe-dept-routing: approver_map 已恢复（config_note 留痕），负例草稿已清理
+nocobase-w3-org-acl: --probe-dept-routing OK
+
+── live --probe-acl-flip ──
+probe-acl-flip: 矩阵收窄 (admin, wms_counts) 无 update → b4guard update → HTTP 403 ✓
+probe-acl-flip: 动作补齐 + 写穿触发（全动作面恢复）→ b4guard update → HTTP 200 ✓（空 body 零写入）
+probe-acl-flip: 窄化行已销毁（库内无 (admin, wms_counts) 残留）
+probe-acl-flip: 质检旅程单 QM-W3B5-JOURNEY-2026-09-28 已存在（重放跳过）
+nocobase-w3-org-acl: --probe-acl-flip OK
+
+── live --assert ──
+assert: 部门树 10 名 · 挂接 11 行 · quality_lead 主部门同步 ✓
+nocobase-w3-org-acl: --assert OK (部门树/挂接对拍 + 双页 wires + admin-only 矩阵菜单 + member 矩阵 + 部门路由 witness + 一致性探针)
+
+── setup-nocobase verify ──
+setup-nocobase verify: OK — full UI + collections + attachment field + seed + workflow chain + AI workbench + row floors + m2o fieldNames + n18ai- form AI buttons + portals + portal list probes + ai-proxy + API key + kg graph + h4 SRM (pages/group/floors/food columns) + h5 WMS (pages/group/floors/bin-map JSBlock) + w1 approval (wfl collections/审批中心 page/flow config/gate/doc_status column
+
+── b9 s1/s2 + assert-ledger ──
+b9-chain: [s1] ① 供应商准入 ✓ qualified（wfl 留痕 4 行）
+b9-chain: [s2] ② 采购链 ✓ PR→RFQ→3报价→比价→PO approved（wfl PO 留痕 2 行）
+nocobase-h5: ledger balanced — stock == Σmovements per (product, lot)，32 组，138 条流水

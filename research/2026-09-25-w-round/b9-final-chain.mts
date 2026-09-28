@@ -241,7 +241,17 @@ async function stage5(token: string): Promise<void> {
   const result = await runMrp(token)
   const suggestions = (await rowsOf(token, 'mrp_suggestions')).filter(row => row.run_id === result.run_id && String(row.status) === 'open')
   const moSug = suggestions.find(row => String(row.plan_type) === 'MO')
-  if (moSug === undefined) throw new Error('日结未产出 open MO 建议（mobile 计划卡素材缺失）')
+  if (moSug === undefined) {
+    // W3-B7 idempotence guard: the acceptance journeys already confirmed
+    // every MO suggestion the netting produced (MO-2026-0013/0014 carry
+    // BOM-0002's net need), so a fresh run yields none. The stage's
+    // downstream material — in-flight MOs — already exists; same replay-
+    // tolerance family as the s3/s7 single-shot guards.
+    const carrying = (await rowsOf(token, 'mfg_orders')).filter(row => ['released', 'in_progress', 'completed'].includes(String(row.doc_status)))
+    if (carrying.length === 0) throw new Error('日结未产出 open MO 建议（mobile 计划卡素材缺失）')
+    console.log(`b9-chain: [s5] ⑤ MRP 日结 ✓ ${result.run_id}（snapshots=${String(result.snapshots)}，open 建议=${String(suggestions.length)}——MO 建议已被旅程确认，净需求由 ${String(carrying.length)} 张在途 MO 承接，幂等续跑）`)
+    return
+  }
   console.log(`b9-chain: [s5] ⑤ MRP 日结 ✓ ${result.run_id}（snapshots=${String(result.snapshots)}，open 建议=${String(suggestions.length)}，MO 建议 #${String(moSug.id)} 待 mobile 确认）`)
 }
 

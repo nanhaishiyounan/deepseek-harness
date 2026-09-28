@@ -43,10 +43,35 @@
  * scan-reorder → run-mrp → (month-end only) snapshot-month → calc-kpi, and
  * a quarter-start day appends calc-scorecard; a failed leg logs and the
  * next leg still runs (legs never block each other).
+ *
+ * W3-B5 adds department routing for approver_map entries: a role value may
+ * be `{type:'department', value:'<部门名>'}` (plugin-departments), which
+ * openTodo expands to that department's member usernames through
+ * departmentsUsers — the OR-sign-off semantics carry over unchanged. A map
+ * with no department entry takes the byte-identical pure path (缺省零漂移);
+ * an unknown or member-less department fails loud. The nb_approve tool path
+ * resolves pure maps only — a department entry fails loud there, so route
+ * department forms to document types the pages/CLI drive.
+ *
+ * W3-B6 adds the operator-terminal surface on --serve (D9): three narrow
+ * business verbs — POST /report-job (报工: 完成+待求+损失=本循环计划数,
+ * ERPNext complete_job_card clamp), POST /inspect-submit (逐项打分 →
+ * readings rows + inspectInspection), POST /receive-goods (按单收货 →
+ * enforceGates + 超收/错品 refusal + postReceipt) — plus their card-list
+ * GETs (/terminal/report|inspect|receive) and the static touch pages under
+ * /terminals/*. Every write calls the existing engine functions (no second
+ * implementation); UI-side checks are experience only. Auth: env token
+ * W3_TERMINAL_TOKEN (header x-terminal-token or query token) + the B5
+ * department tables gate each surface's operator (生产车间/质检部/仓储部);
+ * unset token = lenient demo (production must set it). W3_TERMINAL_ENABLED=
+ * false removes the routes entirely (缺省零漂移: the engine never starts a
+ * write unless an endpoint is called).
  */
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http'
+import { readFile } from 'node:fs/promises'
+import { fileURLToPath } from 'node:url'
 import { call, dataOf, signInWithRetry } from './nocobase-flow-page-lib.mts'
-import { calcScorecard, postCountAdjust, scanReorder, snapshotMonthlyBalances } from './nocobase-h5-wms.mts'
+import { calcScorecard, inspectInspection, postCountAdjust, postJobReport, postReceipt, scanReorder, snapshotMonthlyBalances } from './nocobase-h5-wms.mts'
 import {
   AMOUNT_FIELD,
   DEFAULT_AMOUNT_THRESHOLD,
@@ -90,12 +115,24 @@ export interface NocoIO {
   destroy(collection: string, id: number): Promise<void>
 }
 
+/** One approver_map department entry (W3-B5 D8): the role routes to every user attached to the named plugin-departments department. */
+export interface DepartmentApprover {
+  readonly type: 'department'
+  readonly value: string
+}
+
+/** Every value an approver_map entry may carry: one username, the department form, or an array mixing both. */
+export type ApproverMapValue = string | DepartmentApprover | ReadonlyArray<string | DepartmentApprover>
+
+/** A parsed wfl_flow_configs.approver_map (W3-B5: department entries join the username forms). */
+export type ApproverMap = Record<string, ApproverMapValue>
+
 /** One wfl_flow_configs row (the engine's resolved configuration). */
 export interface FlowConfig {
   readonly id: number
   readonly doc_type: string
   readonly state_field: string
-  readonly approver_map: Record<string, string | string[]>
+  readonly approver_map: ApproverMap
   readonly extras: { approved_by_field?: string, approved_at_field?: string, amount_field?: string, amount_threshold?: number, invoice_match_tolerance?: number } | null
   /** The document column the amount-threshold routing reads (extras.amount_field, default total). */
   readonly amount_field: string
@@ -147,7 +184,7 @@ export async function loadFlow(io: NocoIO, docType: string): Promise<FlowConfig>
     throw new Error(`${docType} 存在 ${rows.length} 条激活审批流配置（激活互斥被破坏）；检查 wfl_flow_configs`)
   }
   const row = rows[0]
-  const approverMap = parseJsonColumn<Record<string, string | string[]>>(row.approver_map, 'approver_map', `审批流 #${row.id}`)
+  const approverMap = parseJsonColumn<ApproverMap>(row.approver_map, 'approver_map', `审批流 #${row.id}`)
   const extras = parseJsonColumn<FlowConfig['extras']>(row.extras, 'extras', `审批流 #${row.id}`)
   const threshold = thresholdOf(extras)
   if (extras === null || extras.amount_threshold === undefined) {
@@ -229,11 +266,80 @@ async function closeTodos(io: NocoIO, docType: string, docId: number, state: str
   return todos.length
 }
 
+/** Whether one raw approver_map entry is the department form (a `{type:'department'}` object with a non-empty title). */
+function isDepartmentRef(raw: unknown): raw is DepartmentApprover {
+  if (typeof raw !== 'object' || raw === null) return false
+  const record = raw as Record<string, unknown>
+  return record['type'] === 'department' && typeof record['value'] === 'string' && record['value'].trim() !== ''
+}
+
+/**
+ * Resolve one department's member usernames (the W3-B5 routing expansion):
+ * the departmentsUsers rows carry userIds, mapped through the users table so
+ * todo rows land as usernames. A department that exists but has no members
+ * fails loud — an approval tier nobody can act on is a configuration error,
+ * not a policy. Duplicate usernames collapse (map order kept).
+ * @param io - the data access to run over.
+ * @param deptTitle - the department title the approver_map entry names.
+ * @param context - the fail-loud message prefix (flow and role).
+ * @returns the department's member usernames.
+ */
+async function departmentUsernames(io: NocoIO, deptTitle: string, context: string): Promise<readonly string[]> {
+  const departments = await io.list('departments', {})
+  const department = departments.find(row => String(row.title ?? '') === deptTitle)
+  if (department === undefined) {
+    throw new Error(`${context} 引用不存在的部门「${deptTitle}」（departments 表无此名称）`)
+  }
+  const users = await io.list('users', {})
+  const usernameOf = new Map(users.map(row => [String(row.id), String(row.username ?? '')]))
+  const links = await io.list('departmentsUsers', {})
+  const members = links
+    .filter(row => String(row.departmentId ?? '') === String(department.id))
+    .map(row => usernameOf.get(String(row.userId ?? '')) ?? '')
+    .filter(username => username !== '')
+  if (members.length === 0) {
+    throw new Error(`${context} 的部门「${deptTitle}」没有成员（departmentsUsers 无挂接用户），无法展开审批待办`)
+  }
+  return [...new Set(members)]
+}
+
+/**
+ * Resolve one role's approver usernames, expanding department entries
+ * (W3-B5 D8): `{type:'department', value:'质检部'}` becomes the department's
+ * member usernames and mixes freely with plain usernames. A role value with
+ * no department entry delegates to the shared pure resolver with the same
+ * map and arguments as W2 — the pure path is byte-identical (缺省零漂移).
+ * @param io - the data access to run over.
+ * @param flow - the resolved flow configuration.
+ * @param role - the transition's allowed_role the todo expansion reads.
+ * @returns the role's approver usernames.
+ */
+async function resolveApproversOfRole(io: NocoIO, flow: FlowConfig, role: string): Promise<readonly string[]> {
+  const raw = flow.approver_map[role]
+  const entries = raw === undefined || raw === null ? [] : Array.isArray(raw) ? raw : [raw]
+  if (entries.length === 0 || !entries.some(isDepartmentRef)) {
+    return approversOfRole(flow.approver_map, role)
+  }
+  const context = `审批流「${flow.doc_type}」角色 ${role}`
+  const users: string[] = []
+  for (const entry of entries) {
+    if (isDepartmentRef(entry)) {
+      users.push(...await departmentUsernames(io, entry.value, context))
+    } else if (typeof entry === 'string' && entry.trim() !== '') {
+      users.push(entry.trim())
+    } else {
+      throw new Error(`审批流角色 ${role} 的 approver_map 值非法：${JSON.stringify(raw)}（应为用户名、{"type":"department","value":"部门名"} 或二者的数组）`)
+    }
+  }
+  return [...new Set(users)]
+}
+
 /**
  * Create the open todo rows for a state that waits on one role. The role's
- * approver_map value may name several users (an array): each expands to one
- * todo row, and any one of them acting completes the whole tier — the
- * OR-sign-off contract (counter-sign belongs to the enterprise edition).
+ * approver_map value may name several users (an array) or a department
+ * (W3-B5): each resolved user expands to one todo row, and any one of them
+ * acting completes the whole tier — the OR-sign-off contract (counter-sign
+ * belongs to the enterprise edition).
  */
 async function openTodo(io: NocoIO, flow: FlowConfig, docType: string, docId: number, state: string): Promise<readonly string[]> {
   const transitions = await io.list('wfl_flow_transitions', { flow_id: flow.id, state })
@@ -241,7 +347,7 @@ async function openTodo(io: NocoIO, flow: FlowConfig, docType: string, docId: nu
   if (leaving === undefined) {
     throw new Error(`审批流「${flow.doc_type}」缺 ${state} 状态的 approve 转移（wfl_flow_transitions）；配置不完整`)
   }
-  const users = approversOfRole(flow.approver_map, String(leaving.allowed_role ?? ''))
+  const users = await resolveApproversOfRole(io, flow, String(leaving.allowed_role ?? ''))
   await assertApproversExist(io, flow, users)
   const due = new Date(Date.now() + 2 * 24 * 3600 * 1000).toISOString().slice(0, 10)
   for (const user of users) {
@@ -622,13 +728,14 @@ export async function seedMpsFlow(io: NocoIO): Promise<void> {
  * @param options - amountField names the column the threshold routes on
  * (omitted = no amount routing: the document type carries no amount column,
  * so approvals land in one round); approverMap defaults to the single-admin
- * pilot (a role value may be one username or an array — any one may act);
+ * pilot (a role value may be one username, an array — any one may act — or
+ * the W3-B5 department form {type:'department', value:'部门名'});
  * amountThreshold and invoiceMatchTolerance seed their extras keys when given
  * (omitted leaves an existing flow's keys untouched).
  */
 export async function seedDocFlow(io: NocoIO, docType: string, title: string, options: {
   amountField?: string,
-  approverMap?: Record<string, string | string[]>,
+  approverMap?: ApproverMap,
   /** The two-level threshold this flow seeds (extras.amount_threshold + the transition condition literal). */
   amountThreshold?: number,
   /** The three-way-match tolerance seeded onto the flow extras (the pur_orders demo writes 0.1). */
@@ -794,10 +901,245 @@ async function readBody(request: IncomingMessage): Promise<Record<string, unknow
   return JSON.parse(text) as Record<string, unknown>
 }
 
-/** One JSON response write. */
-function writeJson(response: ServerResponse, status: number, body: unknown): void {
-  response.writeHead(status, { 'content-type': 'application/json' })
+/** One JSON response write (optional extra headers, e.g. the terminal-auth marker). */
+function writeJson(response: ServerResponse, status: number, body: unknown, headers: Record<string, string> = {}): void {
+  response.writeHead(status, { 'content-type': 'application/json', ...headers })
   response.end(JSON.stringify(body))
+}
+
+// ─── W3-B6: the operator-terminal verbs (pure validation + HTTP glue) ───
+
+/** An endpoint failure that carries its own HTTP status (401/403/404). */
+class HttpError extends Error {
+  constructor(readonly status: number, message: string) {
+    super(message)
+  }
+}
+
+/** One inspection reading row the terminal submits (qm_inspection_readings shape plus the UI-only critical flag). */
+export interface TerminalReading {
+  readonly parameter: string
+  readonly spec_min?: number | null
+  readonly spec_max?: number | null
+  readonly criteria?: string | null
+  readonly actual?: number | null
+  /** Non-numeric rows carry the inspector's pass/fail big-button verdict; numeric rows ignore it. */
+  readonly pass?: boolean | null
+  /** UI-only: a failed row counted as a critical defect (0 收 1 拒) instead of major. */
+  readonly critical?: boolean | null
+}
+
+/**
+ * The report-job equation clamp (ERPNext complete_job_card): every unit of
+ * this cycle's plan must be accounted for — 完成 + 待求 + 损失 = 本循环计划数,
+ * where 本循环计划数 = MO qty − reported so far. qty_pending stays out of the
+ * engine's cumulative columns (it is the not-yet-finished remainder the next
+ * cycle reports); the equation therefore also proves qty_good + qty_scrap
+ * fits the engine's per-operation cumulative ceiling.
+ * @param moQty - the MO's planned quantity.
+ * @param reportedSoFar - Σ(qty_good + qty_scrap) of this operation's posted reports.
+ * @returns the cycle plan the three numbers must sum to.
+ */
+export function validateReportEquation(moQty: number, reportedSoFar: number, qtyGood: number, qtyPending: number, qtyScrap: number): { planForCycle: number } {
+  for (const [name, value] of [['qty_good', qtyGood], ['qty_pending', qtyPending], ['qty_scrap', qtyScrap]] as const) {
+    if (!Number.isFinite(value) || value < 0) {
+      throw new Error(`报工被拒：${name} 需要不小于 0 的数（收到 ${String(value)}）`)
+    }
+  }
+  const planForCycle = Number((moQty - reportedSoFar).toFixed(6))
+  if (planForCycle <= 1e-9) {
+    throw new Error(`报工被拒：本循环计划数已报满（计划 ${String(moQty)}，已报 ${String(reportedSoFar)}）——无剩余可报`)
+  }
+  const sum = qtyGood + qtyPending + qtyScrap
+  if (Math.abs(sum - planForCycle) > 1e-9) {
+    throw new Error(`三数等式被拒：完成 ${String(qtyGood)} + 待求 ${String(qtyPending)} + 损失 ${String(qtyScrap)} = ${String(sum)} ≠ 本循环计划数 ${String(planForCycle)}（数量必须全部交代去向）`)
+  }
+  return { planForCycle }
+}
+
+/** A numeric reading row: at least one spec bound is a finite number. A null
+ * bound is absent, not zero — Number(null) === 0 would silently turn sensory
+ * rows (both bounds null) into numeric rows judged 0 ∈ [0, 0] = pass and flip
+ * an inspector's explicit 不合格 into Accepted. */
+const isNumericRow = (row: TerminalReading): boolean =>
+  typeof row.spec_min === 'number' || typeof row.spec_max === 'number'
+
+/**
+ * Judge one reading row: numeric rows auto-judge actual against
+ * [spec_min, spec_max] (ERPNext reading formula; an absent bound is open),
+ * non-numeric rows take the inspector's explicit pass. Fails loud when a
+ * numeric row lacks its reading or a non-numeric row lacks a verdict.
+ * @param row - the terminal's reading input.
+ * @returns the row's judged pass flag.
+ */
+export function judgeReading(row: TerminalReading): boolean {
+  if (isNumericRow(row)) {
+    if (row.actual === null || !Number.isFinite(Number(row.actual))) {
+      throw new Error(`检验行「${row.parameter}」带规格上下限但缺实测读数（数值行必须录 actual）`)
+    }
+    const actual = Number(row.actual)
+    const min = typeof row.spec_min === 'number' ? row.spec_min : -Infinity
+    const max = typeof row.spec_max === 'number' ? row.spec_max : Infinity
+    return actual >= min && actual <= max
+  }
+  if (typeof row.pass !== 'boolean') {
+    throw new Error(`检验行「${row.parameter}」无规格区间，需大按钮给出 pass/fail 判定`)
+  }
+  return row.pass
+}
+
+/** The three-severity defect counts inspectInspection takes. */
+export interface DefectCounts {
+  readonly critical: number
+  readonly major: number
+  readonly minor: number
+}
+
+/**
+ * Fold judged readings into the AQL defect counts: every failed row counts
+ * as one defect — critical when the UI flagged it (严重 0 收 1 拒), major
+ * otherwise (the food-line default; minor stays a manual entry path).
+ * @param rows - the terminal's reading inputs.
+ * @returns the counts plus each row's judged pass for row-level persistence.
+ */
+export function defectsFromReadings(rows: ReadonlyArray<TerminalReading>): { defects: DefectCounts, judged: Array<{ row: TerminalReading, pass: boolean }> } {
+  let critical = 0
+  let major = 0
+  const judged = rows.map(row => {
+    const pass = judgeReading(row)
+    if (!pass && row.critical === true) critical += 1
+    else if (!pass) major += 1
+    return { row, pass }
+  })
+  return { defects: { critical, major, minor: 0 }, judged }
+}
+
+/** One receive line the terminal submits (扫码/键入 lot + 数量). */
+export interface ReceiveLine {
+  readonly product_id: number
+  readonly lot_no: string
+  readonly qty: number
+}
+
+/**
+ * The receive-goods line clamp: every line's product must be an ordered PO
+ * line, quantities must be positive finite numbers, and no line may push
+ * its PO line past 订购量 − 已收 (超收 fail-loud — the posting engine itself
+ * has no over-receipt guard, so the endpoint owns this entrance check).
+ * @param poLines - the PO's lines ({product_id, qty, qty_received}).
+ * @param lines - the terminal's receive lines.
+ */
+export function validateReceiveLines(poLines: ReadonlyArray<{ product_id: number, qty: number, qty_received: number }>, lines: ReadonlyArray<ReceiveLine>): void {
+  if (lines.length === 0) throw new Error('收货被拒：至少一行扫码明细')
+  const incoming = new Map<number, number>()
+  for (const line of lines) {
+    if (!Number.isInteger(line.product_id) || line.product_id < 1) {
+      throw new Error(`收货被拒：行物料 id 非法（${String(line.product_id)}）`)
+    }
+    if (typeof line.lot_no !== 'string' || line.lot_no.trim() === '') {
+      throw new Error(`收货被拒：物料 #${String(line.product_id)} 缺批次号（扫码或键入 lot）`)
+    }
+    if (!Number.isFinite(line.qty) || line.qty <= 0) {
+      throw new Error(`收货被拒：物料 #${String(line.product_id)} 数量需大于 0（收到 ${String(line.qty)}）`)
+    }
+    const ordered = poLines.find(poLine => Number(poLine.product_id) === line.product_id)
+    if (ordered === undefined) {
+      throw new Error(`收货被拒：物料 #${String(line.product_id)} 不在本 PO 的订单行内（错品收货）`)
+    }
+    incoming.set(line.product_id, (incoming.get(line.product_id) ?? 0) + line.qty)
+  }
+  for (const [productId, qty] of incoming) {
+    const ordered = poLines.find(poLine => Number(poLine.product_id) === productId)
+    const ceiling = Number(ordered?.qty ?? 0) - Number(ordered?.qty_received ?? 0)
+    if (qty > ceiling + 1e-9) {
+      throw new Error(`超收被拒：物料 #${String(productId)} 本单可收 ${String(ceiling)}（订购 ${String(ordered?.qty)} − 已收 ${String(ordered?.qty_received)}），本次 ${String(qty)} 超出`)
+    }
+  }
+}
+
+/**
+ * Resolve one document row by business code first, row id second (the
+ * terminals' inputs accept either).
+ * @param io - the data access to run over.
+ * @param collection - the document's collection.
+ * @param code - the business code (blank = fall through to id).
+ * @param id - the row id.
+ * @param label - the document's label for error messages.
+ */
+async function resolveOrderByCode(io: NocoIO, collection: string, code: string, id: number, label: string): Promise<Record<string, any>> {
+  const trimmed = typeof code === 'string' ? code.trim() : ''
+  const row = trimmed !== ''
+    ? (await io.list(collection)).find(item => String(item.code) === trimmed)
+    : Number.isInteger(id) && id >= 1 ? await io.get(collection, id) : undefined
+  if (row === undefined) throw new Error(`找不到${label}（code=${trimmed} / id=${String(id)}）`)
+  return row
+}
+
+/**
+ * Mint the next `<PREFIX>-<year>-<NNNN>` code by scanning the collection's
+ * live rows (unique-index safe: collisions throw on insert anyway).
+ * @param io - the data access to run over.
+ * @param collection - the collection whose codes are scanned.
+ * @param prefix - the code prefix (JR / RCV-TERM).
+ */
+async function nextDocCode(io: NocoIO, collection: string, prefix: string, codeField: 'code' | 'receipt_no' = 'code'): Promise<string> {
+  const year = new Date().getFullYear()
+  const stem = `${prefix}-${year}-`
+  const max = (await io.list(collection)).reduce((best, row) => {
+    const code = String(row[codeField] ?? '')
+    return code.startsWith(stem) ? Math.max(best, Number(code.slice(stem.length)) || 0) : best
+  }, 0)
+  return `${stem}${String(max + 1).padStart(4, '0')}`
+}
+
+/** The department each terminal surface is fenced to (B5 tables gate the operator). */
+const TERMINAL_DEPARTMENTS: Readonly<Record<'report' | 'inspect' | 'receive', string>> = {
+  report: '生产车间',
+  inspect: '质检部',
+  receive: '仓储部',
+}
+
+/**
+ * Resolve and fence one terminal operator: the username must be a member of
+ * the surface's department (plugin-departments tables), admin bypasses. A
+ * wrong-department operator is a 403 (they cannot see the other surfaces'
+ * queues), an unknown department fails loud as a seed problem.
+ * @param io - the data access to run over.
+ * @param operator - the requested username (blank → admin).
+ * @param surface - the terminal the request targets.
+ * @returns the fenced username.
+ */
+async function terminalOperator(io: NocoIO, operator: unknown, surface: 'report' | 'inspect' | 'receive'): Promise<string> {
+  const name = typeof operator === 'string' && operator !== '' ? operator : 'admin'
+  if (name === 'admin') return name
+  const members = await departmentUsernames(io, TERMINAL_DEPARTMENTS[surface], `终端 ${surface}`)
+  if (!members.includes(name)) {
+    throw new HttpError(403, `操作员 ${name} 不属于${TERMINAL_DEPARTMENTS[surface]}（终端 ${surface} 的部门围栏；B5 部门表无此挂接）`)
+  }
+  return name
+}
+
+/**
+ * The static touch pages' guard: with W3_TERMINAL_TOKEN set every terminal
+ * route (pages included) must present it (header x-terminal-token or query
+ * token); unset means the lenient local-demo档 (the response marker says so —
+ * a production deployment must set the env).
+ */
+function checkTerminalToken(request: IncomingMessage, url: URL): void {
+  if (process.env['W3_TERMINAL_TOKEN'] === undefined || process.env['W3_TERMINAL_TOKEN'] === '') return
+  const header = request.headers['x-terminal-token']
+  const presented = (Array.isArray(header) ? header[0] : header) ?? url.searchParams.get('token') ?? ''
+  if (presented !== process.env['W3_TERMINAL_TOKEN']) {
+    throw new HttpError(401, '终端端点需要 token（W3_TERMINAL_TOKEN 已配置：header x-terminal-token 或 query token）')
+  }
+}
+
+/** The static-page whitelist (files served from scripts/w3-terminals/). */
+const TERMINAL_STATIC_FILES: Readonly<Record<string, string>> = {
+  'report.html': 'text/html; charset=utf-8',
+  'inspect.html': 'text/html; charset=utf-8',
+  'receive.html': 'text/html; charset=utf-8',
+  'terminal.css': 'text/css; charset=utf-8',
 }
 
 // ─── W2-B7: the built-in nightly timer (default off) ───
@@ -1025,6 +1367,184 @@ export async function serve(port = 13_110): Promise<void> {
           }
           return writeJson(response, 200, { ok: true, suggestion_id: suggestionId, action })
         }
+        // W3-B6: the operator terminals — static touch pages, card queues,
+        // and the three narrow verbs (every write rides the engine functions).
+        if (url.pathname.startsWith('/terminals/') || url.pathname.startsWith('/terminal/') || url.pathname === '/report-job' || url.pathname === '/inspect-submit' || url.pathname === '/receive-goods') {
+          if ((process.env['W3_TERMINAL_ENABLED'] ?? 'true') === 'false') {
+            throw new HttpError(404, '终端端点已关闭（W3_TERMINAL_ENABLED=false）；引擎其余路由不受影响')
+          }
+          checkTerminalToken(request, url)
+          const marker = { 'x-terminal-auth': process.env['W3_TERMINAL_TOKEN'] !== undefined && process.env['W3_TERMINAL_TOKEN'] !== '' ? 'strict' : 'lenient-demo' }
+          if (request.method === 'GET' && url.pathname.startsWith('/terminals/')) {
+            const name = url.pathname.slice('/terminals/'.length)
+            const contentType = TERMINAL_STATIC_FILES[name]
+            if (contentType === undefined) throw new HttpError(404, `no terminal page ${url.pathname}`)
+            const body = await readFile(fileURLToPath(new URL(`./w3-terminals/${name}`, import.meta.url)))
+            response.writeHead(200, { 'content-type': contentType, ...marker })
+            response.end(body)
+            return
+          }
+          if (request.method === 'GET' && url.pathname === '/terminal/report') {
+            const operator = await terminalOperator(io, url.searchParams.get('operator'), 'report')
+            const mos = await io.list('mfg_orders', { doc_status: 'in_progress' })
+            const operations = await io.list('mfg_order_operations')
+            const posted = await io.list('mfg_job_reports', { status: 'posted' })
+            const productName = new Map((await io.list('hub_inv_products')).map(row => [Number(row.id), String(row.name ?? row.title ?? row.code ?? `#${String(row.id)}`)]))
+            const centerName = new Map((await io.list('mfg_work_centers')).map(row => [Number(row.id), String(row.name ?? `#${String(row.id)}`)]))
+            const cards = mos.map(mo => {
+              const moId = Number(mo.id)
+              const ops = operations.filter(row => Number(row.order_id) === moId).sort((a, b) => Number(a.seq) - Number(b.seq))
+              return {
+                mo: { id: moId, code: String(mo.code), qty: Number(mo.qty), product: productName.get(Number(mo.product_id)) ?? `#${String(mo.product_id)}`, need_date: mo.need_date ?? null },
+                operations: ops.map(op => {
+                  const seq = Number(op.seq)
+                  const reported = posted
+                    .filter(row => Number(row.mo_id) === moId && Number(row.op_seq) === seq)
+                    .reduce((sum, row) => sum + Number(row.qty_good ?? 0) + Number(row.qty_scrap ?? 0), 0)
+                  return {
+                    seq, name: String(op.name ?? ''), workcenter: centerName.get(Number(op.workcenter_id)) ?? `#${String(op.workcenter_id)}`,
+                    planned_date: op.planned_date ?? null, planned_min: Number(op.planned_min ?? 0), status: String(op.status ?? 'planned'),
+                    reported, remaining: Number(mo.qty) - reported,
+                  }
+                }),
+              }
+            })
+            return writeJson(response, 200, { ok: true, operator, cards }, marker)
+          }
+          if (request.method === 'GET' && url.pathname === '/terminal/inspect') {
+            const operator = await terminalOperator(io, url.searchParams.get('operator'), 'inspect')
+            const productName = new Map((await io.list('hub_inv_products')).map(row => [Number(row.id), String(row.name ?? row.title ?? row.code ?? `#${String(row.id)}`)]))
+            const supplierName = new Map((await io.list('srm_suppliers')).map(row => [Number(row.id), String(row.name ?? row.code ?? `#${String(row.id)}`)]))
+            const cards = (await io.list('qm_inspections', { status: 'pending' })).map(row => ({
+              id: Number(row.id), code: String(row.code), insp_type: String(row.insp_type ?? ''), ref_type: String(row.ref_type ?? ''), ref_no: String(row.ref_no ?? ''),
+              product: productName.get(Number(row.product_id)) ?? `#${String(row.product_id)}`,
+              supplier: row.supplier_id === null || row.supplier_id === undefined ? null : supplierName.get(Number(row.supplier_id)) ?? `#${String(row.supplier_id)}`,
+              lot_no: String(row.lot_no ?? ''), lot_qty: Number(row.lot_qty ?? 0),
+            }))
+            return writeJson(response, 200, { ok: true, operator, cards }, marker)
+          }
+          if (request.method === 'GET' && url.pathname === '/terminal/receive') {
+            const operator = await terminalOperator(io, url.searchParams.get('operator'), 'receive')
+            const productName = new Map((await io.list('hub_inv_products')).map(row => [Number(row.id), String(row.name ?? row.title ?? row.code ?? `#${String(row.id)}`)]))
+            const supplierName = new Map((await io.list('srm_suppliers')).map(row => [Number(row.id), String(row.name ?? row.code ?? `#${String(row.id)}`)]))
+            const lines = await io.list('pur_order_lines')
+            const cards = (await io.list('pur_orders', { doc_status: 'approved' }))
+              .filter(po => String(po.receiving_status ?? 'none') !== 'received')
+              .map(po => {
+                const poLines = lines.filter(line => Number(line.order_id) === Number(po.id)).map(line => ({
+                  product_id: Number(line.product_id), product: productName.get(Number(line.product_id)) ?? `#${String(line.product_id)}`,
+                  qty: Number(line.qty), qty_received: Number(line.qty_received ?? 0),
+                }))
+                return {
+                  po: { id: Number(po.id), code: String(po.code), supplier: supplierName.get(Number(po.supplier_id)) ?? `#${String(po.supplier_id)}`, expected_date: po.expected_date ?? null, receiving_status: String(po.receiving_status ?? 'none') },
+                  lines: poLines, outstanding: poLines.filter(line => line.qty_received + 1e-9 < line.qty).length,
+                }
+              })
+            return writeJson(response, 200, { ok: true, operator, cards }, marker)
+          }
+          if (request.method === 'POST' && url.pathname === '/report-job') {
+            const body = await readBody(request)
+            const operator = await terminalOperator(io, body['operator'], 'report')
+            const moRow = await resolveOrderByCode(io, 'mfg_orders', body['mo_code'], Number(body['mo_id']), 'MO')
+            if (String(moRow.doc_status) !== 'in_progress') {
+              throw new Error(`报工被拒：MO ${String(moRow.code)} 状态为 ${String(moRow.doc_status)}——需已领料开工（in_progress）才能报工`)
+            }
+            const opSeq = Number(body['op_seq'])
+            const operation = (await io.list('mfg_order_operations')).find(row => Number(row.order_id) === Number(moRow.id) && Number(row.seq) === opSeq)
+            if (operation === undefined) throw new Error(`报工被拒：MO ${String(moRow.code)} 无工序 seq=${String(opSeq)}（先排产）`)
+            const reportedSoFar = (await io.list('mfg_job_reports', { mo_id: Number(moRow.id), status: 'posted' }))
+              .filter(row => Number(row.op_seq) === opSeq)
+              .reduce((sum, row) => sum + Number(row.qty_good ?? 0) + Number(row.qty_scrap ?? 0), 0)
+            const qtyGood = Number(body['qty_good'])
+            const qtyPending = Number(body['qty_pending'])
+            const qtyScrap = Number(body['qty_scrap'])
+            const { planForCycle } = validateReportEquation(Number(moRow.qty), reportedSoFar, qtyGood, qtyPending, qtyScrap)
+            const code = await nextDocCode(io, 'mfg_job_reports', 'JR')
+            const durationMin = Number(body['duration_min'])
+            await io.create('mfg_job_reports', {
+              code, mo: { id: Number(moRow.id) }, op_seq: opSeq, report_date: today(),
+              qty_good: qtyGood, qty_scrap: qtyScrap,
+              duration_min: Number.isFinite(durationMin) && durationMin > 0 ? Math.round(durationMin) : 0,
+              operator, qc_status: body['send_qc'] === true ? 'pending' : '',
+              status: 'draft', remark: `W3-B6 报工终端；待求数 ${String(qtyPending)}（本循环未完成部分，下循环续报）`,
+            })
+            await postJobReport(wmsToken, code)
+            const opNow = (await io.list('mfg_order_operations')).find(row => Number(row.order_id) === Number(moRow.id) && Number(row.seq) === opSeq)
+            return writeJson(response, 200, { ok: true, code, mo_code: String(moRow.code), op_seq: opSeq, op_status: String(opNow?.status ?? ''), plan_for_cycle: planForCycle, pending_carried: qtyPending }, marker)
+          }
+          if (request.method === 'POST' && url.pathname === '/inspect-submit') {
+            const body = await readBody(request)
+            const operator = await terminalOperator(io, body['operator'], 'inspect')
+            const code = typeof body['code'] === 'string' && body['code'] !== '' ? body['code'] : ''
+            if (code === '') throw new Error('需要检验单号 code')
+            const inspection = (await io.list('qm_inspections')).find(row => String(row.code) === code)
+            if (inspection === undefined) throw new Error(`找不到检验单 ${code}`)
+            if (String(inspection.result) !== 'pending') {
+              throw new Error(`检验单 ${code} 已判定（result=${String(inspection.result)}；判定 single-shot，重判走再提交批流程）`)
+            }
+            const rawReadings = Array.isArray(body['readings']) ? body['readings'] as Array<Record<string, unknown>> : []
+            if (rawReadings.length === 0) throw new Error('逐项打分被拒：至少一行检验读数')
+            const readings = rawReadings.map(raw => ({
+              parameter: String(raw['parameter'] ?? ''),
+              spec_min: raw['spec_min'] === null || raw['spec_min'] === undefined || raw['spec_min'] === '' ? null : Number(raw['spec_min']),
+              spec_max: raw['spec_max'] === null || raw['spec_max'] === undefined || raw['spec_max'] === '' ? null : Number(raw['spec_max']),
+              criteria: raw['criteria'] === null || raw['criteria'] === undefined || raw['criteria'] === '' ? null : String(raw['criteria']),
+              actual: raw['actual'] === null || raw['actual'] === undefined || raw['actual'] === '' ? null : Number(raw['actual']),
+              pass: raw['pass'] === true ? true : raw['pass'] === false ? false : null,
+              critical: raw['critical'] === true,
+            } as TerminalReading))
+            for (const row of readings) {
+              if (row.parameter === '') throw new Error('检验行缺参数名（parameter）')
+            }
+            const { defects, judged } = defectsFromReadings(readings)
+            // Readings persist first, the verdict second; a failed verdict
+            // removes the rows it just wrote (库内无残留).
+            const created: number[] = []
+            try {
+              for (const { row, pass } of judged) {
+                const written = await io.create('qm_inspection_readings', {
+                  inspection: { id: Number(inspection.id) }, parameter: row.parameter,
+                  spec_min: row.spec_min, spec_max: row.spec_max, criteria: row.criteria, actual: row.actual, pass,
+                })
+                created.push(Number(written.id))
+              }
+              const aql = typeof body['aql'] === 'string' && body['aql'] !== '' ? body['aql'] : '2.5'
+              const verdict = await inspectInspection(wmsToken, code, defects, operator, aql)
+              return writeJson(response, 200, { ok: true, code, defects, readings_written: created.length, verdict }, marker)
+            } catch (error) {
+              for (const id of created) await io.destroy('qm_inspection_readings', id).catch(() => undefined)
+              throw error
+            }
+          }
+          if (request.method === 'POST' && url.pathname === '/receive-goods') {
+            const body = await readBody(request)
+            const operator = await terminalOperator(io, body['operator'], 'receive')
+            const poRow = await resolveOrderByCode(io, 'pur_orders', typeof body['po_code'] === 'string' ? body['po_code'] : '', Number(body['po_id']), 'PO')
+            // The PO-effectiveness gate (wfl_gate_configs: wms_receipts→pur_orders).
+            await enforceGates(io, 'wms_receipts', { po_id: Number(poRow.id) })
+            const poLines = (await io.list('pur_order_lines'))
+              .filter(line => Number(line.order_id) === Number(poRow.id))
+              .map(line => ({ product_id: Number(line.product_id), qty: Number(line.qty), qty_received: Number(line.qty_received ?? 0) }))
+            const lines = (Array.isArray(body['lines']) ? body['lines'] as Array<Record<string, unknown>> : []).map(raw => ({
+              product_id: Number(raw['product_id']), lot_no: String(raw['lot_no'] ?? ''), qty: Number(raw['qty']),
+            }))
+            validateReceiveLines(poLines, lines)
+            const receipts: Array<{ receipt_no: string, product_id: number, lot_no: string, qty: number }> = []
+            for (const line of lines) {
+              const receiptNo = await nextDocCode(io, 'wms_receipts', 'RCV-TERM', 'receipt_no')
+              await io.create('wms_receipts', {
+                receipt_no: receiptNo, receipt_type: 'purchase',
+                supplier: { id: Number(poRow.supplier_id) }, po: { id: Number(poRow.id) }, product: { id: line.product_id },
+                lot_no: line.lot_no, qty: line.qty, status: 'pending', iqc_status: 'pending',
+                note: `W3-B6 收货终端（${String(poRow.code)}；操作员 ${operator}）`,
+              })
+              await postReceipt(wmsToken, receiptNo)
+              receipts.push({ receipt_no: receiptNo, product_id: line.product_id, lot_no: line.lot_no, qty: line.qty })
+            }
+            return writeJson(response, 200, { ok: true, po_code: String(poRow.code), receipts, quarantine_note: 'PO 来源收货已入待检区（lot 隔离 hold）——IQC 判定通过后放行转合格' }, marker)
+          }
+          throw new HttpError(404, `no terminal route ${request.method} ${url.pathname}`)
+        }
         if (request.method === 'POST' && (url.pathname === '/act' || url.pathname === '/submit')) {
           const body = await readBody(request)
           const docType = typeof body['doc_type'] === 'string' ? body['doc_type'] : ''
@@ -1065,12 +1585,13 @@ export async function serve(port = 13_110): Promise<void> {
         }
         writeJson(response, 404, { ok: false, error: `no route ${request.method} ${url.pathname}` })
       } catch (error) {
-        writeJson(response, 400, { ok: false, error: error instanceof Error ? error.message : String(error) })
+        writeJson(response, error instanceof HttpError ? error.status : 400, { ok: false, error: error instanceof Error ? error.message : String(error) })
       }
     })()
   })
   await new Promise<void>(resolve => server.listen(port, '127.0.0.1', resolve))
   console.log(`approval-engine: serving on http://127.0.0.1:${port} (POST /act, POST /submit, POST /post-count-adjust, POST /scan-reorder, POST /calc-scorecard, POST /run-mrp, POST /calc-kpi, POST /run-nightly, POST /confirm-suggestion, GET /todos, GET /healthz)`)
+  console.log(`approval-engine: W3-B6 terminals on :${String(port)} — GET /terminals/{report,inspect,receive}.html + terminal.css; GET /terminal/{report,inspect,receive}; POST /report-job, /inspect-submit, /receive-goods (enabled=${String((process.env['W3_TERMINAL_ENABLED'] ?? 'true') !== 'false')}, token=${String(process.env['W3_TERMINAL_TOKEN'] !== undefined && process.env['W3_TERMINAL_TOKEN'] !== '' ? 'strict' : 'lenient-demo（生产必须设 W3_TERMINAL_TOKEN）')})`)
   // W2-B7: the built-in nightly timer — armed only on the env opt-in, fully
   // silent otherwise (zero drift from the W-round external-cron form). The
   // per-minute check fires when the local wall clock has passed the target
@@ -1333,6 +1854,81 @@ export async function selftest(): Promise<void> {
   const badExtras = await failureOf(() => loadFlow(io, 'test_bad_extras'))
   if (!badExtras.includes('amount_threshold')) throw new Error(`selftest 失败：非法阈值未 fail-loud（${badExtras}）`)
 
+  // W3-B5: department routing — {type:'department', value} expands to the
+  // department's member usernames (质检部 = quality_lead + admin), the mixed
+  // username+department entry unions both sides, unknown and member-less
+  // departments fail loud before any todo lands, and a pure-username map
+  // expands exactly as W2 did (缺省零漂移).
+  {
+    const qcDept = await io.create('departments', { title: '质检部' })
+    await io.create('departments', { title: '储备人才池' })
+    const qcUsers = (await io.list('users', {})).filter(row => row.username === 'quality_lead' || row.username === 'admin')
+    for (const user of qcUsers) {
+      await io.create('departmentsUsers', { departmentId: qcDept.id, userId: user.id })
+    }
+    expect('部门成员数', qcUsers.length, 2)
+    await seedDocFlow(io, 'test_dept_flow', '部门路由流', {
+      approverMap: { manager: { type: 'department', value: '质检部' }, gm: 'admin' },
+    })
+    const deptDoc = await io.create('test_dept_flow', { code: 'NC-W3B5-1', doc_status: 'draft' })
+    await submitForApproval(io, 'test_dept_flow', Number(deptDoc.id), '陈立群')
+    const deptTodos = (await io.list('wfl_approval_todos', { doc_id: Number(deptDoc.id), status: 'open' }))
+      .map(row => String(row.user)).sort()
+    expect('部门展开全员待办', deptTodos, ['admin', 'quality_lead'])
+    result = await act(io, 'test_dept_flow', Number(deptDoc.id), 'approve', 'quality_lead', '质检部任一人可审')
+    expect('部门路由一审生效', result.to_state, 'approved')
+    const deptTodosAfter = await io.list('wfl_approval_todos', { doc_id: Number(deptDoc.id) })
+    expect('部门路由任一人 act 全档作废', deptTodosAfter.every(row => row.status === 'completed'), true)
+    // Mixed entry: a username beside the department form unions both sides.
+    await seedDocFlow(io, 'test_mixed_flow', '混合路由流', {
+      approverMap: { manager: ['quality_lead', { type: 'department', value: '质检部' }], gm: 'admin' },
+    })
+    const mixedDoc = await io.create('test_mixed_flow', { code: 'NC-W3B5-2', doc_status: 'draft' })
+    await submitForApproval(io, 'test_mixed_flow', Number(mixedDoc.id), '陈立群')
+    const mixedTodos = (await io.list('wfl_approval_todos', { doc_id: Number(mixedDoc.id), status: 'open' }))
+      .map(row => String(row.user)).sort()
+    expect('混合条目并集去重', mixedTodos, ['admin', 'quality_lead'])
+    await act(io, 'test_mixed_flow', Number(mixedDoc.id), 'approve', 'admin', '混合档清尾')
+    // Negative: an unknown department fails loud at submit, zero todos, doc stays draft.
+    await seedDocFlow(io, 'test_ghost_dept_flow', '幽灵部门流', {
+      approverMap: { manager: { type: 'department', value: '幽灵部' }, gm: 'admin' },
+    })
+    const ghostDeptDoc = await io.create('test_ghost_dept_flow', { code: 'NC-GHOST-1', doc_status: 'draft' })
+    const ghostDept = await failureOf(() => submitForApproval(io, 'test_ghost_dept_flow', Number(ghostDeptDoc.id), '陈立群'))
+    if (!ghostDept.includes('不存在的部门')) throw new Error(`selftest 失败：幽灵部门未拦截（${ghostDept}）`)
+    expect('幽灵部门零待办', (await io.list('wfl_approval_todos', { doc_id: Number(ghostDeptDoc.id) })).length, 0)
+    // The state write precedes todo expansion (the W2 ghost-user semantics);
+    // the refusal lands as pending-with-zero-todos, not a reverted draft.
+    expect('幽灵部门单据停提交态', (await io.get('test_ghost_dept_flow', Number(ghostDeptDoc.id)))?.doc_status, 'pending')
+    // Negative: a member-less department fails loud (储备人才池 has no departmentsUsers rows).
+    await seedDocFlow(io, 'test_empty_dept_flow', '空部门流', {
+      approverMap: { manager: { type: 'department', value: '储备人才池' }, gm: 'admin' },
+    })
+    const emptyDeptDoc = await io.create('test_empty_dept_flow', { code: 'NC-EMPTY-1', doc_status: 'draft' })
+    const emptyDept = await failureOf(() => submitForApproval(io, 'test_empty_dept_flow', Number(emptyDeptDoc.id), '陈立群'))
+    if (!emptyDept.includes('没有成员')) throw new Error(`selftest 失败：空部门未拦截（${emptyDept}）`)
+    expect('空部门零待办', (await io.list('wfl_approval_todos', { doc_id: Number(emptyDeptDoc.id) })).length, 0)
+    // Negative: a malformed department object (no value) fails loud at submit.
+    await seedDocFlow(io, 'test_bad_dept_flow', '坏部门流', {
+      approverMap: { manager: [{ type: 'department' }], gm: 'admin' } as unknown as ApproverMap,
+    })
+    const badDeptDoc = await io.create('test_bad_dept_flow', { code: 'NC-BAD-1', doc_status: 'draft' })
+    const badDept = await failureOf(() => submitForApproval(io, 'test_bad_dept_flow', Number(badDeptDoc.id), '陈立群'))
+    if (!badDept.includes('值非法')) throw new Error(`selftest 失败：坏部门形态未拦截（${badDept}）`)
+    // 缺省零漂移: a pure-username array map expands to exactly the W2 shape —
+    // the same rows, the same order-insensitive set, the same one-row-per-user.
+    await seedDocFlow(io, 'test_pure_flow', '纯用户名流', {
+      approverMap: { manager: ['admin', 'quality_lead'], gm: 'admin' },
+    })
+    const pureDoc = await io.create('test_pure_flow', { code: 'PO-PURE-1', amount: 1, doc_status: 'draft' })
+    await submitForApproval(io, 'test_pure_flow', Number(pureDoc.id), '陈立群')
+    const pureTodos = (await io.list('wfl_approval_todos', { doc_id: Number(pureDoc.id), status: 'open' }))
+      .map(row => String(row.user)).sort()
+    expect('纯用户名零漂移', pureTodos, ['admin', 'quality_lead'])
+    expect('纯用户名逐人一行', (await io.list('wfl_approval_todos', { doc_id: Number(pureDoc.id), status: 'open' })).length, 2)
+    await act(io, 'test_pure_flow', Number(pureDoc.id), 'approve', 'admin', '纯用户名路径清尾')
+  }
+
   // W2-R1: the nightly env contract stays fail-loud — the three malformed
   // shapes the deployment doc names, plus the all-absent defaults.
   {
@@ -1352,7 +1948,54 @@ export async function selftest(): Promise<void> {
     }
     expect('parseNightlyEnv 默认全关', parseNightlyEnv({}), { enabled: false, at: '02:30', tz: 'Asia/Shanghai' })
   }
-  console.log('approval-engine: selftest OK — 状态机全序列/金额阈值加签/驳回重提/非法转移/卡口/幂等/锁编辑/供应商准入流/准入卡口/B5阈值配置+多审批人/夜间env负例 全部通过')
+
+  // W3-B6: the operator-terminal validation layer (pure functions the
+  // endpoints call — equation clamp, reading judgement, receive clamps).
+  {
+    // The report equation: 完成 + 待求 + 损失 = 本循环计划数.
+    expect('三数等式正例', validateReportEquation(1_000, 400, 400, 150, 50), { planForCycle: 600 })
+    const equationReject = await failureOf(() => validateReportEquation(1_000, 400, 400, 100, 50))
+    if (!equationReject.includes('三数等式被拒')) throw new Error(`selftest 失败：等式不闭合未拦截（${equationReject}）`)
+    const negativeReject = await failureOf(() => validateReportEquation(1_000, 400, -1, 601, 0))
+    if (!negativeReject.includes('不小于 0')) throw new Error(`selftest 失败：负数量未拦截（${negativeReject}）`)
+    const exhaustedReject = await failureOf(() => validateReportEquation(1_000, 1_000, 0, 0, 0))
+    if (!exhaustedReject.includes('已报满')) throw new Error(`selftest 失败：报满后继续报未拦截（${exhaustedReject}）`)
+
+    // Reading judgement: numeric rows auto-judge against [min, max].
+    expect('数值行区间内', judgeReading({ parameter: '水分(%)', spec_min: 0, spec_max: 5, actual: 3.2 }), true)
+    expect('数值行超上限', judgeReading({ parameter: '水分(%)', spec_min: 0, spec_max: 5, actual: 5.1 }), false)
+    expect('数值行低于下限', judgeReading({ parameter: '重量(g)', spec_min: 95, spec_max: null, actual: 90 }), false)
+    expect('非数值行人工判定', judgeReading({ parameter: '外观', criteria: '无破损', pass: false }), false)
+    const missingActual = await failureOf(() => judgeReading({ parameter: '水分(%)', spec_min: 0, spec_max: 5 }))
+    if (!missingActual.includes('缺实测读数')) throw new Error(`selftest 失败：数值行缺读数未拦截（${missingActual}）`)
+    const missingVerdict = await failureOf(() => judgeReading({ parameter: '外观', criteria: '无破损' }))
+    if (!missingVerdict.includes('大按钮')) throw new Error(`selftest 失败：非数值行缺判定未拦截（${missingVerdict}）`)
+
+    // Defect folding: one over-limit row flagged critical + one judged fail → critical 1 / major 1.
+    const folded = defectsFromReadings([
+      { parameter: '菌落总数', spec_min: 0, spec_max: 1000, actual: 2400, critical: true },
+      { parameter: '外观', criteria: '无破损', pass: false },
+      { parameter: '水分(%)', spec_min: 0, spec_max: 5, actual: 4.1 },
+    ])
+    expect('缺陷汇总（严重1+主要1+次要0）', folded.defects, { critical: 1, major: 1, minor: 0 })
+    expect('行级判定序列', folded.judged.map(entry => entry.pass), [false, false, true])
+
+    // Receive clamps: wrong product, over-receipt, blank lot, zero qty.
+    const poLines = [
+      { product_id: 11, qty: 800, qty_received: 500 },
+      { product_id: 12, qty: 200, qty_received: 0 },
+    ]
+    validateReceiveLines(poLines, [{ product_id: 11, lot_no: 'L-1', qty: 300 }])
+    const wrongProduct = await failureOf(() => validateReceiveLines(poLines, [{ product_id: 99, lot_no: 'L-9', qty: 1 }]))
+    if (!wrongProduct.includes('不在本 PO')) throw new Error(`selftest 失败：错品收货未拦截（${wrongProduct}）`)
+    const overReceive = await failureOf(() => validateReceiveLines(poLines, [{ product_id: 11, lot_no: 'L-1', qty: 301 }]))
+    if (!overReceive.includes('超收被拒')) throw new Error(`selftest 失败：超收未拦截（${overReceive}）`)
+    const blankLot = await failureOf(() => validateReceiveLines(poLines, [{ product_id: 12, lot_no: ' ', qty: 10 }]))
+    if (!blankLot.includes('缺批次号')) throw new Error(`selftest 失败：空批次未拦截（${blankLot}）`)
+    const zeroQty = await failureOf(() => validateReceiveLines(poLines, [{ product_id: 12, lot_no: 'L-2', qty: 0 }]))
+    if (!zeroQty.includes('大于 0')) throw new Error(`selftest 失败：零数量未拦截（${zeroQty}）`)
+  }
+  console.log('approval-engine: selftest OK — 状态机全序列/金额阈值加签/驳回重提/非法转移/卡口/幂等/锁编辑/供应商准入流/准入卡口/B5阈值配置+多审批人/W3-B5部门路由(全员展开/混合并集/幽灵部门/空部门/坏形态/纯用户名零漂移)/夜间env负例/W3-B6终端校验(三数等式/读数判定/缺陷汇总/收货卡口) 全部通过')
 }
 
 // ─── CLI ───

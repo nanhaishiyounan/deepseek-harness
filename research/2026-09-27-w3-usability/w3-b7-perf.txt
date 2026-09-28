@@ -1,0 +1,9 @@
+=== W3-B7 性能抽查（2026-09-28 07:16:29，预算 <5000ms/页）===
+✗ drawer（采购订单 行详情） — 8618ms
+✓ kanban（生产订单看板） — 4958ms
+✓ gantt（排产甘特 v1） — 4460ms
+✓ terminal（车间终端 iframe） — 4339ms
+=== 性能抽查：1 页超时 ===
+cold-boot(warm-up page) 5820ms
+warm drawer(采购订单 行详情) 6729ms
+drawer-open 1496ms

@@ -1,0 +1,8 @@
+=== W3-B7 全库 wire 健康探针（2026-09-28 15:15:34）===
+--- .trees.mjs ---
+api-tree-e1-project.json: uid=n17e1tbm7n1eyuuigg subtree=true bytes=12654
+api-tree-supplier.json: uid=h4srmtbdik1s6tqzo8 subtree=true bytes=9800
+api-tree-f3-workbench.json: uid=n17f3tbkvdfcxrb8y8 subtree=true bytes=7209
+--- .analyze.mjs ---
+pages=80 tableRows=99 addNewOk=77 addNewMissing=0 anomalies=0
+drawer probes: [{"use":"KanbanCardViewActionModel","uid":"h4srmcva4yz25hl7d2u","prefix":"h4srm","pageSubtree":"present"},{"use":"KanbanCardViewActionModel","uid":"n17f1cvafost1zyzyfp","prefix":"n17f1","pageSubtree":"present"},{"use":"CalendarEventViewActionModel","uid":"n17f1evabaj8kddu7w","prefix":"n17f1","pageSubtree":"present"},{"use":"KanbanCardViewActionModel","uid":"w8qmcva4nv58a6srdf","prefix":"w8qmc","pageSubtree":"present"}]

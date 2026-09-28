@@ -1,0 +1,15 @@
+w3-heal: plan — 0 table wire(s), 0 card drawer(s), 2 skipped
+  skip: w3purtb7cbe8io87q pur_order_lines (healthy row actions kept)
+  skip: w3purtbdiokanwbk26 pur_orders (healthy row actions kept)
+w3-heal B2: relation pur_orders.order_lines (fk order_id) exists (kept)
+w3-heal B2: pur_orders w3purtbdiokanwbk26 drawer rewritten — Details (8 fields) + subtables [pur_orders.order_lines]
+w3-heal B2: guarded Edit on pur_orders w3purtbdiokanwbk26 (8 fields; state excluded: invoice_status,receiving_status,doc_status)
+w3-heal B2: 审批进度 jump on pur_orders w3purtbdiokanwbk26
+w3-heal: member view ACL — rows in place, 6 action row(s) set to explicit full field lists
+w3-heal B2: seeded 3 reading row(s) onto QI-W2B1-B10 (id 56)
+w3-heal B2: seeded 2 reading row(s) onto QI-2026-0010 (id 58)
+w3-heal: member view ACL — rows in place
+w3-heal: probe summary after heal
+  TableBlockModel=96 TableActionsColumnModel=96 ViewActionModel=96 AddNewActionModel=81
+  viewAction page subtree missing=0 addNew page subtree missing=0 card/event page subtree missing=0
+  table blocks without an actions column=1 (w3b2stbpr184hs1yke:pur_order_lines)

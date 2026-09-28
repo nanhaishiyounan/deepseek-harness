@@ -1,0 +1,195 @@
+<!doctype html>
+<!-- W3-B6 收货终端（Odoo Barcode 语言）：待收货 PO 卡（#待处理徽标）→ 行级
+     扫码/键入 lot + 数量步进（+1/+10/−10/铅笔改量）→【验证收货】一次完结 →
+     POST /receive-goods（PO 生效卡口 + 超收/错品 fail-loud + postReceipt 过账
+     → 待检区隔离提示）。操作工经 URL ?operator= 传入（部门围栏在仓储部侧校验）。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>收货终端</title>
+<link rel="stylesheet" href="terminal.css">
+</head>
+<body>
+<div class="term-shell">
+  <div class="term-top">
+    <div class="title">收货终端</div>
+    <div class="who">仓管员
+      <select id="operator">
+        <option value="b4guard">b4guard（仓储部）</option>
+        <option value="admin">admin（管理员）</option>
+      </select>
+    </div>
+    <button class="btn small" id="refresh">刷新</button>
+  </div>
+  <div id="note"></div>
+  <div class="queue" id="queue"><div class="empty">加载中…</div></div>
+</div>
+
+<script>
+'use strict'
+const params = new URLSearchParams(location.search)
+const base = new URL('..', location.href).href.replace(/\/$/, '')
+
+const state = { cards: [], submitting: false }
+
+const operatorEl = document.getElementById('operator')
+operatorEl.value = params.get('operator') || 'b4guard'
+operatorEl.addEventListener('change', load)
+document.getElementById('refresh').addEventListener('click', load)
+
+function note(html, kind) {
+  document.getElementById('note').innerHTML = html === '' ? '' : `<div class="note ${kind}">${html}</div>`
+}
+
+async function api(path, options) {
+  const response = await fetch(`${base}${path}`, options)
+  const payload = await response.json().catch(() => ({}))
+  if (!response.ok || payload.ok === false) {
+    throw new Error(payload.error || `HTTP ${response.status}`)
+  }
+  return payload
+}
+
+const receivingLabel = { none: '未收货', partial: '部分收货', received: '已收齐' }
+
+/** Per-line receive state: lot + qty (start at the outstanding remainder). */
+function lineState(line) {
+  return { product_id: line.product_id, product: line.product, lot_no: '', qty: Math.max(0, Math.round((line.qty - line.qty_received) * 100) / 100) }
+}
+
+function renderQueue() {
+  const queue = document.getElementById('queue')
+  if (state.cards.length === 0) {
+    queue.innerHTML = '<div class="empty">当前没有待收货的生效 PO</div>'
+    return
+  }
+  queue.innerHTML = ''
+  for (const card of state.cards) {
+    const lines = card.lines.map(lineState)
+    const el = document.createElement('div')
+    el.className = 'card'
+    el.dataset.poId = String(card.po.id)
+    el.innerHTML = `
+      <div class="card-head">
+        <span class="code">${card.po.code}</span>
+        <span class="meta">${card.po.supplier} · 承诺到货 ${String(card.po.expected_date || '—')}</span>
+        <span class="badge">#${String(card.outstanding)} 行</span>
+      </div>
+      <div class="card-body">
+        <div class="row"><span class="fill">${receivingLabel[card.po.receiving_status] || card.po.receiving_status}</span></div>
+        ${card.lines.map(line => `<div class="row"><span class="fill">${line.product}</span><span>订购 ${String(line.qty)} · 已收 ${String(line.qty_received)}</span></div>`).join('')}
+      </div>
+      <div class="card-foot">
+        <button class="btn primary block">进入收货</button>
+      </div>
+      <div class="receive-panel" style="display:none;padding:0 14px 14px"></div>`
+    el.querySelector('.btn').addEventListener('click', () => togglePanel(el, card, lines))
+    queue.appendChild(el)
+  }
+}
+
+function togglePanel(el, card, lines) {
+  const panel = el.querySelector('.receive-panel')
+  if (panel.style.display === 'none') {
+    panel.style.display = 'block'
+    panel.innerHTML = `
+      <div class="note info"><b>扫码收货</b>USB 扫码枪在批次框键入 lot 回车即录；数量可步进或直接改。</div>
+      <div class="lines"></div>
+      <div class="card-foot" style="padding:10px 0 0">
+        <button class="btn block" data-act="close">收起</button>
+        <button class="btn primary block" data-act="verify">验证收货</button>
+      </div>`
+    const linesEl = panel.querySelector('.lines')
+
+    const renderLines = () => {
+      linesEl.innerHTML = ''
+      for (const line of lines) {
+        const row = document.createElement('div')
+        row.className = 'reading'
+        row.innerHTML = `
+          <div class="head"><span class="name">${line.product}</span><span class="spec">本次收货数量</span></div>
+          <div class="input-line">
+            <input type="text" placeholder="扫码/键入批次号 lot" data-product="${String(line.product_id)}" data-kind="lot" value="${line.lot_no}" style="flex:1;min-height:48px;font-size:16px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:0 12px;">
+          </div>
+          <div class="step" style="margin-top:8px">
+            <button class="btn" data-product="${String(line.product_id)}" data-step="-10">−10</button>
+            <button class="btn" data-product="${String(line.product_id)}" data-step="-1">−1</button>
+            <input type="number" min="0" step="1" data-product="${String(line.product_id)}" data-kind="qty" value="${String(line.qty)}">
+            <button class="btn" data-product="${String(line.product_id)}" data-step="1">+1</button>
+            <button class="btn" data-product="${String(line.product_id)}" data-step="10">+10</button>
+          </div>`
+        linesEl.appendChild(row)
+      }
+    }
+
+    linesEl.addEventListener('input', (event) => {
+      const target = event.target
+      const line = lines.find(row => String(row.product_id) === target.dataset.product)
+      if (line === undefined) return
+      if (target.dataset.kind === 'lot') line.lot_no = target.value.trim()
+      else if (target.dataset.kind === 'qty') line.qty = Math.max(0, Number(target.value || 0))
+    })
+    linesEl.addEventListener('click', (event) => {
+      const target = event.target.closest('button[data-step]')
+      if (target === null) return
+      const line = lines.find(row => String(row.product_id) === target.dataset.product)
+      if (line === undefined) return
+      line.qty = Math.max(0, line.qty + Number(target.dataset.step))
+      const input = linesEl.querySelector(`input[data-product="${String(line.product_id)}"][data-kind="qty"]`)
+      if (input !== null) input.value = String(line.qty)
+    })
+
+    panel.querySelector('[data-act="close"]').addEventListener('click', () => { panel.style.display = 'none' })
+    panel.querySelector('[data-act="verify"]').addEventListener('click', async (event) => {
+      const button = event.currentTarget
+      if (state.submitting) return
+      state.submitting = true
+      button.disabled = true
+      button.textContent = '过账中…'
+      try {
+        const payload = await api('/receive-goods', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            operator: operatorEl.value,
+            po_id: card.po.id,
+            lines: lines.map(line => ({ product_id: line.product_id, lot_no: line.lot_no, qty: line.qty })),
+          }),
+        })
+        note(`<b>收货完成 ${payload.po_code}</b>${payload.receipts.map(receipt => `${receipt.receipt_no}（${String(receipt.qty)}）`).join('、')} · ${payload.quarantine_note}`, 'ok')
+        el.classList.add('just-done')
+        state.submitting = false
+        setTimeout(load, 900)
+      } catch (error) {
+        note(`<b>收货被拒</b>${error.message}`, 'bad')
+        button.disabled = false
+        button.textContent = '验证收货'
+        state.submitting = false
+      }
+    })
+
+    renderLines()
+    const firstLot = panel.querySelector('input[data-kind="lot"]')
+    if (firstLot !== null) firstLot.focus()
+  } else {
+    panel.style.display = 'none'
+  }
+}
+
+async function load() {
+  note('', 'info')
+  try {
+    const payload = await api(`/terminal/receive?operator=${encodeURIComponent(operatorEl.value)}`)
+    state.cards = payload.cards
+    renderQueue()
+  } catch (error) {
+    document.getElementById('queue').innerHTML = '<div class="empty">队列加载失败</div>'
+    note(`<b>加载失败</b>${error.message}`, 'bad')
+  }
+}
+
+load()
+</script>
+</body>
+</html>

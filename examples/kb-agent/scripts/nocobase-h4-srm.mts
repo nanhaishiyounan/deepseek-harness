@@ -37,7 +37,7 @@
  *   node --import tsx/esm examples/kb-agent/scripts/nocobase-h4-srm.mts --rollback
  *   node --import tsx/esm examples/kb-agent/scripts/nocobase-h4-srm.mts --only 供应商档案
  */
-import { call, dataOf, listFlowModels, listRoutes, signInWithRetry, withN17Prefix } from './nocobase-flow-page-lib.mts'
+import { call, dataOf, drawerPageTreeFor, ensureTableRowDetail, listFlowModels, listRoutes, signInWithRetry, withN17Prefix } from './nocobase-flow-page-lib.mts'
 
 type RouteRow = import('./nocobase-flow-page-lib.mts').RouteRow
 type FlowModelRow = import('./nocobase-flow-page-lib.mts').FlowModelRow
@@ -1061,15 +1061,31 @@ async function ensureV2Page(token: string, spec: TablePageSpec | KanbanPageSpec,
 
   if (spec.kind === 'kanban') {
     const openView = { mode: 'drawer', size: 'medium', pageModelClass: 'ChildPageModel', collectionName: spec.collection, dataSourceKey: 'main' }
+    const cardViewUid = withN17Prefix('h4srm', 'cva')
     await save({
-      uid: withN17Prefix('h4srm', 'cva'), parentId: mainUid, subKey: 'cardViewAction', subType: 'object', sortIndex: 1,
+      uid: cardViewUid, parentId: mainUid, subKey: 'cardViewAction', subType: 'object', sortIndex: 1,
       use: 'KanbanCardViewActionModel', props: {}, stepParams: { popupSettings: { openView } },
     })
+    // W3-B1: kanban card drawers need the persisted page subtree too (the
+    // load-only contract — the h4 整改跟踪 card drawer was a P0 ③-class hole).
+    await dataOf(token, 'POST', '/api/flowModels:save', drawerPageTreeFor(cardViewUid, {
+      collection: spec.collection,
+      fields: spec.cardFields.map(field => ({ fieldPath: field.name, modelUse: displayModelFor(field.kind), ...(field.options === undefined ? {} : { options: field.options }) })),
+      tabTitle: '详情',
+    }))
     await save({
       uid: withN17Prefix('h4srm', 'qca'), parentId: mainUid, subKey: 'quickCreateAction', subType: 'object', sortIndex: 1,
       use: 'KanbanQuickCreateActionModel', props: {}, stepParams: { popupSettings: { openView } },
     })
     await save({ uid: withN17Prefix('h4srm', 'ci'), parentId: mainUid, ...kanbanCard(spec.collection, spec.cardFields) })
+  } else {
+    // W3-B1: row-detail triple on every fresh table (P0 root cause ① fix).
+    await ensureTableRowDetail(token, mainUid, {
+      collection: spec.collection,
+      fields: spec.columns.map(column => ({ fieldPath: column.name, modelUse: displayModelFor(column.kind), ...(column.options === undefined ? {} : { options: column.options }) })),
+      tabTitle: '详情',
+      actionsColumnSortIndex: spec.columns.length + 1,
+    })
   }
   console.log(`nocobase-h4: v2 page "${spec.title}" created (/admin/${routeUid})`)
 }

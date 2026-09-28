@@ -71,9 +71,9 @@ async function ensureFormAIButtons(token: string): Promise<void> {
   // below delete the buttons of perfectly live forms (F3 once pushed the
   // catalog past 1000 rows and five real buttons were swept before this
   // guard existed).
-  // B8 pushed the model tree past 3000 rows; keep headroom over the verify
-  // gate's 6000-row listing.
-  const pageSize = 6000
+  // B8 pushed the model tree past 3000 rows; W3-B4 pushed it past 6000 — the
+  // lib listFlowModels and the verify gate both list at 12000 now.
+  const pageSize = 12000
   const catalog = await call(token, 'GET', `/api/flowModels:list?pageSize=${pageSize}`)
   const rows = (catalog?.data ?? null) as Array<Record<string, any>> | null
   const total = catalog?.meta?.total

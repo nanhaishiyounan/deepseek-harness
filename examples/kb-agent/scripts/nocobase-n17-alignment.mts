@@ -12,6 +12,7 @@
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { spawnSync } from 'node:child_process'
+import { ensureTableRowDetail } from './nocobase-flow-page-lib.mts'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const baseUrl = process.env.NOCOBASE_BASE_URL ?? 'http://127.0.0.1:13000'
@@ -517,6 +518,13 @@ async function ensureV2TablePage(token: string, spec: V2PageSpec): Promise<void>
     uid: `n17rf${nodeKey()}`, parentId: tableUid, subKey: 'actions', subType: 'array', sortIndex: 2, use: 'RefreshActionModel',
     props: { title: '', icon: 'ReloadOutlined' },
     stepParams: { buttonSettings: { general: { title: '', icon: 'ReloadOutlined' } } },
+  })
+  // W3-B1: row-detail triple on every fresh table (P0 root cause ① fix).
+  await ensureTableRowDetail(token, tableUid, {
+    collection: spec.collection,
+    fields: spec.columns.map(column => ({ fieldPath: column.name, modelUse: displayModelFor(column.kind), ...(column.options === undefined ? {} : { options: column.options }) })),
+    tabTitle: '详情',
+    actionsColumnSortIndex: spec.columns.length + 1,
   })
   console.log(`nocobase-n17: v2 page "${spec.title}" created (${baseUrl}/admin/${routeUid}) with Add new + floating ball`)
 }

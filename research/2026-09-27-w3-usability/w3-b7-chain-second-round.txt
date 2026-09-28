@@ -1,0 +1,29 @@
+=== W3-B7 零回归 9 步链 · 第二轮全量幂等（2026-09-28 15:10:28）===
+=== s1 (15:10:28) ===
+b9-chain: [s1] ① 供应商准入 ✓ qualified（wfl 留痕 4 行）
+=== s2 (15:10:29) ===
+b9-chain: [s2] RFQ 三家报价就位（0.92/0.88/0.95）
+b9-chain: [s2] ② 采购链 ✓ PR→RFQ→3报价→比价→PO approved（wfl PO 留痕 2 行）
+=== s3 (15:10:30) ===
+b9-chain: [s3] IQC QI-B9F-0001 前轮已判定 passed（single-shot，跳过重判）
+b9-chain: [s3] ③ 收货质量链 ✓ 待检→IQC(AQL d=2≤Ac passed)→放行→合格库（批次 RM-SNA-20260926-01 四日期齐）
+=== s4 (15:10:31) ===
+mrp-run: SO SO-B9F-0001 预留 → FD-SNA-080 欠 0（已有 0）+0
+b9-chain: [s4] ④ 销售链 ✓ SO 两级审批 approved + 生效即预留（FD-SNA-080+0，足额）
+=== s5 (15:10:32) ===
+mrp-run: MPS MPS-202610-01 covers 3 item(s) — SO direct feed excluded, planned rows in
+mrp-run: close MRP-20260928-73 — 4 snapshot row(s), 1 live suggestion(s) (0 new), 0 stale closed
+b9-chain: [s5] ⑤ MRP 日结 ✓ MRP-20260928-73（snapshots=4，open 建议=1——MO 建议已被旅程确认，净需求由 11 张在途 MO 承接，幂等续跑）
+=== s6 (15:10:33) ===
+b9-chain: [s6] 排产已存在（3 工序，幂等跳过）
+b9-chain: [s6] MO 已 completed（齐套/领料/报工/完工 前轮已落地，幂等续跑 OQC 尾段）
+b9-chain: [s6] OQC 前轮已判定 passed（single-shot，跳过）
+b9-chain: [s6] ⑥ 生产链 ✓ MO-2026-0009 completed（齐套→领料×2→报工×3→完工→OQC passed→放行；成品批次 MFG-20260926-04）
+=== s7 (15:10:35) ===
+b9-chain: [s7] SO 发货前轮已完成 shipped（shipped_at=2026-09-26，跳过发货与当日断言）
+b9-chain: [s7] ⑦ 结算链 ✓ 发票匹配 confirmed → 付款 approved（三方：PO ¥880 = 发票 ¥880 = 收货 1000）
+=== s8 (15:10:36) ===
+b9-chain: [s8] ⑧ KPI 快照重算 ✓ 2026-09-28 27 rows（26 valued）
+=== s9 (15:10:40) ===
+b9-chain: [s9] ⑨a wfl 留痕 ✓ PO×2 MO×2（一审单=提交+生效两行；B9 七单家族合计 16 行，逐单齐全）
+b9-chain: [s9] ⑨b movements 勾稽 ✓ 7 条，五类库存事件齐（PUTAWAY、MOVE、ISSUE_WIP、RECEIPT_MFG、SHIPMENT_SO）

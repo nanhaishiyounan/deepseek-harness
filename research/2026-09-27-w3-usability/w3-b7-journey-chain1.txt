@@ -1,0 +1,59 @@
+=== W3-B7 五角色旅程 · 链一（J1→J5→J4 采购收货质检闭环）2026-09-28 06:32:24 ===
+✓ J1 PR 审批后状态 — 实际 "approved"
+✓ J1 RFQ 审批后状态 — 实际 "approved"
+j1-data: RFQ 三家报价就位（1.10 / 0.98 / 1.25 — 第二家最低价中标）
+j1-handoff: PO 已处于 approved（复跑幂等，跳过提交）
+j1-1: 待办首行文本 1
+
+pur_orders
+
+25
+
+admin
+
+待审批
+
+2026-09-29
+
+待办
+
+查看
+前往单据
+
+✓ J1 审批中心含 PO 待办行 — 实际 true
+j1-2: PO 当前 approved（复跑幂等，一审分支跳过）
+✓ J1 PO 终态 — 实际 "approved"
+j1-3: 审批中心前往单据 → http://127.0.0.1:3080/nocobase/admin/w3puryzkva06iuhh?from=w3b2&doc_type=pur_orders&doc_id=25
+✓ J1 RFQ drawer 含状态与标题 — 实际 true
+✓ J1 RFQ drawer 子表行（报价） — 实际 true
+✓ J1 订单行金额合计 = 表头金额（手算对拍） — 实际 238000
+✓ J1 PO 行数 — 实际 2
+✓ J1 交期日历含该 PO 事件 — 实际 true
+j1-wfl: 留痕 3 行（submit/一审/二审）
+✓ J1 wfl 留痕 ≥3 行（两级审批） — 实际 true
+✓ J1 待办全闭环（open=0） — 实际 0
+=== J1 采购员旅程完成（审批轨迹 + 子表比价 + 金额对拍 + 日历跟踪）===
+j5-2: PO 已在前轮收满（received）——队列无卡属幂等复跑，收货交互截图沿用首轮 w3-b7-journey-j5-3/4
+✓ J5 收货单已建（挂 PO-B7J1） — 实际 true
+✓ J5 收货单 iqc 状态全部由质检闭环驱动 — 实际 true
+j5-psql面: 挂PO收货单 RCV-TERM-2026-0002:passed,RCV-TERM-2026-0003:failed，movements 关联行 4
+✓ J5 月度台账有数据行 — 实际 true
+✓ J5 盘点 drawer 非空 — 实际 true
+=== J5 仓管旅程完成（扫码收货→待检→库存→台账→盘点）===
+j4-2: QI-B7J4-D 已判定（failed）——UI 打分交互截图沿用首轮，复跑走库内断言
+✓ J4 A 单 result=passed — 实际 "passed"
+✓ J4 A 读数行落库 — 实际 true
+✓ J4 A 行级判定与 min/max 一致 — 实际 true
+j4-release: nocobase-h5: receipt RCV-TERM-2026-0002 already closed (kept; release is single-shot)
+✓ J4 A 收货单放行后 iqc_status=passed — 实际 "passed"
+✓ J4 C 单 result=failed（7 major ≥ Re6） — 实际 "failed"
+✓ J4 C 读数 7 行 — 实际 7
+✓ J4 C 行级全红（超限） — 实际 true
+j4-B: B 单 result=passed（d=5=Ac5 临界接收，AQL 边界行为留证）
+✓ J4 B 单 result=passed（临界接收） — 实际 "passed"
+j4-5: 处置单 QM-NC-2026-0006
+✓ J4 处置单 action=return — 实际 "return"
+✓ J4 处置单已闭环 — 实际 "closed"
+=== J4 质检员旅程完成（队列→打分→总判→放行/处置）===
+
+=== 链一断言汇总：ALL PASS ===

@@ -1,0 +1,4 @@
+w3-heal: probe summary after heal
+  TableBlockModel=95 TableActionsColumnModel=111 ViewActionModel=111 AddNewActionModel=81
+  viewAction page subtree missing=0 addNew page subtree missing=0 card/event page subtree missing=0
+  table blocks without an actions column=0

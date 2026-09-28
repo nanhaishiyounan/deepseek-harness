@@ -1,0 +1,51 @@
+# Agent Note: W3-B4 approval-flow configuration center (SVG state map + wfl table editing + fail-loud consistency probe)
+
+Status: implemented
+
+English | [中文](2026-09-27-w3-b4-approval-config-center.zh.md)
+
+## Problem
+
+User feedback:「审批流起码得有可视化配置界面吧」. The wfl six-table configuration plane (flow_configs/states/transitions/approval_records/approval_todos/gate_configs, with W2-B5's extras `amount_threshold`/`invoice_match_tolerance`/array `approver_map`) was editable only through psql or seed scripts — an administrator could neither see what a flow looks like nor change thresholds, approvers, or transition conditions, and direct writes risked engine inconsistency (PLAN risk ③: orphan transitions, double activation, threshold drift between `extras` and the seeded condition literal).
+
+## Decision
+
+- **JSBlock SVG state map renders the wfl trio read-only; the editing surface is plain-collection row forms.** The「审批流配置」page (协同办公 group, w3b4 prefix) stacks four config tables — flow_configs (with Add-new), flow_states, flow_transitions, gate_configs — each with the B1 row-detail drawer plus a w3b4 `EditActionModel` popup, then a JSBlock that reads `wfl_flow_configs`/`flow_states`/`flow_transitions` through three `ctx.makeResource('MultiRecordResource')` instances (the runjs allowlist vocabulary; the h5 bin-map precedent) and renders one `<details>` per flow: header summary (title/doc_type/active/threshold/tolerance/approver map), BFS-layered SVG nodes (state + anchor + edit role), and edges labeled `动作·角色｜条件`. No second workflow engine and no drag-editing (the Frappe BETA builder is direction evidence only); every edit writes rows the engine already consumes.
+- **The audit contract is `config_note`, required at the form layer and asserted by the probe.** The flow_configs edit form marks config_note `required: true` (FormItemModel props) with a description instructing operator/when/old→new; an empty-note submit is refused client-side (verified live: the whole submit was rejected and the row stayed untouched). Transitions/states/gates edits ride their own rows — their audit story is the probe's alignment assertions plus the flow row's note (adding per-table audit columns is W4 scope).
+- **The consistency probe is one exported function, fail-loud on every active flow.** `assertWflConsistency` (in nocobase-w3-approval-visual.mts, imported by setup-nocobase verify) asserts: activation exclusivity per doc_type, no orphan transitions (state/next_state must exist in the flow's states), an anchor=1 state reachable from the entry states, every approver_map username in users, extras valid JSON with a positive amount_threshold, non-empty config_note, and every `<= N` condition literal equal to `thresholdOf(extras)` (the W2-B5 alignment semantics — the runtime routes on `flow.threshold` from extras while act() cross-matches the transition condition, so the two faces must not drift). Inactive draft flows are exempt from structural assertions: activation is the admin's explicit switch and loadFlow only reads active rows. The CLI twin `--check-consistency` prints the per-flow table and exits non-zero on any failure; the probe itself never writes.
+- **Editing `amount_threshold` is a two-place edit by design.** The extras description says so; the probe's threshold-literal assertion catches a half-done edit. A hand-edit that moves only extras does not break the running engine (act() routes on the resolved threshold and the conditionless level-2 transition still matches) — the red probe is the guardrail that forces the condition literal to follow.
+- **Menu ACL is admin+root via explicit rolesDesktopRoutes bindings; data ACL is member view-only.** `desktopRoutes:listAccessible` intersects the page's bound roles with the user's roles — there is no super-user bypass (verified live: the root account saw the page only after a root binding row existed; a stale `nb_role_main=member` cookie had pinned the earlier browser session to the member view). The build binds admin+root and destroys the auto-created member row; member separately gains view/list/get with full field lists on the four config collections so a future menu share opens read-only, while writes stay 403 (probed live with quality_lead).
+- **Legacy audit backfill:** nine pre-W2-B5 seed flows carried empty config_note; the build appends one explicit baseline-backfill line to each (marked as backfill, never as an edit) so the probe's non-empty assertion holds from a clean slate.
+
+## Consequences
+
+- Administrators see every active flow's shape and summary (threshold, tolerance, approver tiers) without psql, and the two-place threshold edit is enforceable rather than tribal knowledge.
+- The probe gives PLAN risk ③ a single fail-loud instrument that verify runs on every batch, so a drifted wfl configuration cannot ride along unnoticed; inactive drafts stay legal until activated.
+- setup-nocobase now imports a business script (nocobase-w3-approval-visual.mts) for the shared probe — one consistency 口径 instead of a verify-local reimplementation; the script keeps its invokedDirectly guard so the import is side-effect-free.
+- The n18 catalog and orphan sweep absorbed one more form; its count floor moved with evidence (82).
+
+## Notes (pitfalls found live)
+
+- **The runjs authoring pipeline HTML-decodes code before parsing it.** A bare `"""` inside a JS string literal decodes into a quote and breaks the string boundary — `runjs-syntax-invalid "Unterminated string constant (1:115)"` — while `&/</>` survive because they decode to non-quote characters. The JSBlock esc() builds every entity as `"&" + "amp;"`-style concatenation: no complete entity sequence exists for the decoder to rewrite, and the runtime output stays correct either way. The separate `runjs-render-required` rule statically requires a `ctx.render` call.
+- **`rolesDesktopRoutes` has a composite primary key (desktopRouteId, roleName) — no row id.** Destroying the member binding by `filterByTk=row.id` is a silent no-op (id is undefined); the working path is destroy-by-filter.
+- **A flowPage's tabs route row stores the grid's PARENT uid, not the grid uid.** Returning `tab.schemaUid` as "the grid uid" (the shape B3's `gridUidOfExistingPage` still carries) makes any later block-idempotence check compare against the wrong parent and mint duplicates — resolve the grid through `flowModels:findOne?parentId=<tab.schemaUid>&subKey=grid`.
+- **No `TextAreaFieldModel` exists in the client registry** ("Model class not found"): the multiline rendering comes from the field's own uiSchema (`Input.TextArea`), so the edit model is `InputFieldModel`.
+- **`flowSurfaces:addBlock` settings accept only code/version/showBlockCard** — any extra key (a block title) fails authoring validation.
+- **The n18 catalog pageSize (6000) fell behind the flowModels growth this batch pushed past it**; it now lists at 12000 like lib/verify, and its orphan sweep required one re-run after this batch's rollback/rebuild cycle left a dangling button (count converged 80→81→82).
+- **Browser automation cannot inject values into the rendered multiline edit field** (the fill tool's value never entered the React form state; manual typing works — the note field did submit). The journey's threshold edits therefore rode the same REST endpoint the EditFormModel submits (`wfl_flow_configs:update`), which is the D6 write path verbatim; the browser evidence covers the form surface, the required refusal, and the map refresh.
+
+## Alternatives considered
+
+**Render through the NocoBase workflow plugin as a second engine.** Rejected (PLAN D6): it would fork the state machine the wfl tables already own; the JSBlock + plain-form channel keeps one data plane.
+
+**A save-time server hook that rejects bad edits before they land.** Rejected for this batch: the collection REST write path has no in-request validation seam short of a custom plugin, and the workflow callback fires post-commit. The probe-after-save contract plus the form-level required note covers the same invariants fail-loud at verify time.
+
+**Menu visibility for member with read-only tables.** The batch doc offered both readings; the shipped choice follows the task brief's「仅 admin 可见」plus the data-plane member view grants, so sharing the menu later is a one-line binding without touching permissions.
+
+## Verification
+
+- Graph-vs-table对拍: the map's data source is the same list API; `--assert` prints per-flow node/edge counts (pur_orders 6 nodes/8 edges) that match the psql twin in [w3-b4-psql.txt](../../../../../research/2026-09-27-w3-usability/w3-b4-psql.txt).
+- Edit journey ([w3-b4-journey.txt](../../../../../research/2026-09-27-w3-usability/w3-b4-journey.txt)): pur_orders 200000→150000 (extras + condition literal + audit line) → probe green → a fresh ¥180,000 PO submits and its first approval routes to `pending_level2` with the gm todo open; so_orders configured 500000 → a fresh ¥550,000 SO routes to `pending_level2`; both restored to baseline (pur_orders 200000/tolerance 0.1, so_orders key removed) with probe green throughout and audit lines appended each way.
+- Negative probes ×4 ([w3-b4-consistency.txt](../../../../../research/2026-09-27-w3-usability/w3-b4-consistency.txt)): orphan transition, empty config_note (API twin of the form refusal), double activation, and threshold drift each turn the probe red with the expected message, and each cleanup leaves zero residue with the probe green.
+- ACL dual view: admin sees the menu item and full edit actions ([w3-b4-map-page.png](../../../../../research/2026-09-27-w3-usability/w3-b4-map-page.png)); member (quality_lead) sees no menu item and the direct URL answers 404 ([w3-b4-member-url-404.png](../../../../../research/2026-09-27-w3-usability/w3-b4-member-url-404.png)); member API write probes return 403 while the read-only list returns 200.
+- Zero regression: `setup-nocobase.mts verify` green (including the new B4 block: route + bindings + JSBlock code + four tables + edit forms + required config_note + member grants + the imported probe), b9 chain s2 green, `--assert-ledger` balanced (32 groups/138 movements), approval-engine `--selftest` green (engine untouched — zero code changes to approval-engine.mts).

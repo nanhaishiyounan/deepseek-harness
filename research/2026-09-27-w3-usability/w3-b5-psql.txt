@@ -1,0 +1,95 @@
+## 1. 部门树（departments：根 + 8 业务部门，title/"parentId" 对拍种子）
+       id        |     title     |    parentId     | isLeaf
+-----------------+---------------+-----------------+--------
+ 389099101683712 | 新源食品集团  |                 | t
+ 389099101683713 | 采购部        | 389099101683712 | t
+ 389099103780864 | 计划部（PMC） | 389099101683712 | t
+ 389099103780865 | 生产车间      | 389099101683712 | t
+ 389099103780866 | 质检部        | 389099101683712 | t
+ 389099103780867 | 仓储部        | 389099101683712 | t
+ 389099103780868 | 销售部        | 389099101683712 | t
+ 389099103780869 | 行政人事部    | 389099101683712 | t
+ 389099103780870 | 储备人才池    | 389099101683712 | t
+(9 rows)
+
+## 2. 部门成员挂接（departmentsUsers ⋈ users ⋈ departments——对拍 DEPT_MEMBERS）
+     dept      |   username   |      nickname      | isOwner
+---------------+--------------+--------------------+---------
+               | zhaoxiaofang | 赵晓芳             | f
+               | zhaoxiaofang | 赵晓芳             | f
+ 采购部        | admin        | 管理员（审批演示） | f
+ 采购部        | chenliqun    | 陈立群             | f
+ 计划部（PMC） | wangyifan    | 王一帆             | f
+ 生产车间      | linjingyi    | 林静怡             | f
+ 质检部        | qc_inspector | 质检员·王倩        | f
+ 质检部        | quality_lead | 质量主管           | f
+ 仓储部        | b4guard      | B4 守卫测试        | f
+ 销售部        | zhaoxiaofang | 赵晓芳             | f
+ 行政人事部    | nocobase     | Super Admin        | f
+(11 rows)
+
+## 3. 主部门同步（users.mainDepartmentId ↔ 部门）
+   username   | main_dept
+--------------+-----------
+ b4guard      | 仓储部
+ chenliqun    | 采购部
+ qc_inspector | 质检部
+ quality_lead | 质检部
+(4 rows)
+
+## 4. approver_map 部门形态（qm_nc_dispositions 流头 + config_note 留痕行数）
+ id |      doc_type      |                          approver_map                           | note_lines
+----+--------------------+-----------------------------------------------------------------+------------
+ 11 | qm_nc_dispositions | {"manager":{"type":"department","value":"质检部"},"gm":"admin"} |          5
+(1 row)
+
+## 5. 部门路由见证（witness todos = 质检部全员 且任一人 act 后全部 completed）
+ doc_id |          code           |     user     |  status
+--------+-------------------------+--------------+-----------
+      6 | NC-W3B5-DEPT-2026-09-28 | qc_inspector | completed
+      6 | NC-W3B5-DEPT-2026-09-28 | quality_lead | completed
+(2 rows)
+
+## 6. 负例零残留（NC-W3B5-NEG* 草稿已清理 / 该单据类型零 open 待办）
+ neg_docs
+----------
+        0
+(1 row)
+
+ open_orphan_todos
+-------------------
+                 0
+(1 row)
+
+## 7. member 动作矩阵（rolesResources ⋈ rolesResourcesActions——create/update 面）
+       collection       |           actions
+------------------------+-----------------------------
+ pur_orders             | create,get,list,update,view
+ qm_inspection_readings | create,get,list,update,view
+ qm_inspections         | create,get,list,update,view
+ wfl_approval_todos     | get,list,update,view
+ wms_counts             | create,get,list,update,view
+(5 rows)
+
+## 8. 403 翻转零残留（(admin, wms_counts) 特定资源行不存在——策略面）
+ admin_wms_counts_rows
+-----------------------
+                     0
+(1 row)
+
+## 9. member 旅程终局（QM-W3B5-JOURNEY* 落库；建单人证据 = w3-b5-selftest.txt 的 quality_lead token →HTTP 200 探针行）
+            code            | insp_type | status
+----------------------------+-----------+--------
+ QM-W3B5-JOURNEY-2026-09-28 | incoming  | open
+(1 row)
+
+## 10. 员工花名册 org_dept 回填（hub_hr_employees ⋈ departments）
+  name  |   org_dept
+--------+---------------
+ 陈立群 | 采购部
+ 赵晓芳 | 销售部
+ 王一帆 | 计划部（PMC）
+ 林静怡 | 生产车间
+ 刘一诺 | 行政人事部
+ 周子墨 | 质检部
+(6 rows)

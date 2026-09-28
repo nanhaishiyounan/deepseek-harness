@@ -1,0 +1,272 @@
+<!doctype html>
+<!-- W3-B6 质检工作台（ERPNext Quality Inspection readings 语言）：待检卡队列 →
+     逐项打分单（读数输入 × 规格上下限 × 行级自动判定色）→ 总判大按钮 →
+     POST /inspect-submit（readings 落库 + inspectInspection AQL 判定，single-shot）。
+     操作工经 URL ?operator= 传入（部门围栏在质检部侧校验）。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>质检工作台</title>
+<link rel="stylesheet" href="terminal.css">
+</head>
+<body>
+<div class="term-shell">
+  <div class="term-top">
+    <div class="title">质检工作台</div>
+    <div class="who">检验员
+      <select id="operator">
+        <option value="quality_lead">quality_lead（质量主管）</option>
+        <option value="qc_inspector">qc_inspector（质检员）</option>
+        <option value="admin">admin（管理员）</option>
+      </select>
+    </div>
+    <button class="btn small" id="refresh">刷新</button>
+  </div>
+  <div id="note"></div>
+  <div class="queue" id="queue"><div class="empty">加载中…</div></div>
+</div>
+
+<div class="sheet" id="sheet">
+  <div class="panel">
+    <h2 id="sheet-title">逐项打分</h2>
+    <p class="sub" id="sheet-sub"></p>
+    <div id="sheet-body"></div>
+  </div>
+</div>
+
+<script>
+'use strict'
+const params = new URLSearchParams(location.search)
+const base = new URL('..', location.href).href.replace(/\/$/, '')
+
+const state = { cards: [], submitting: false }
+
+const operatorEl = document.getElementById('operator')
+operatorEl.value = params.get('operator') || 'quality_lead'
+operatorEl.addEventListener('change', load)
+document.getElementById('refresh').addEventListener('click', load)
+
+function note(html, kind) {
+  document.getElementById('note').innerHTML = html === '' ? '' : `<div class="note ${kind}">${html}</div>`
+}
+
+async function api(path, options) {
+  const response = await fetch(`${base}${path}`, options)
+  const payload = await response.json().catch(() => ({}))
+  if (!response.ok || payload.ok === false) {
+    throw new Error(payload.error || `HTTP ${response.status}`)
+  }
+  return payload
+}
+
+const typeLabel = { IQC: '来料检验', IPQC: '制程检验', OQC: '出货检验' }
+
+/** The food-line default parameter template the scoring sheet opens with
+ * (numeric rows auto-judge; sensory rows take the pass/fail big buttons). */
+function defaultReadings(card) {
+  return [
+    { parameter: '水分(%)', spec_min: 0, spec_max: 5, criteria: '', actual: null },
+    { parameter: '感官·外观', spec_min: null, spec_max: null, criteria: '色泽正常、无破损无异物', actual: null },
+  ]
+}
+
+function renderQueue() {
+  const queue = document.getElementById('queue')
+  if (state.cards.length === 0) {
+    queue.innerHTML = '<div class="empty">当前没有待检单——收货/报工/完工过账后自动挂单</div>'
+    return
+  }
+  queue.innerHTML = ''
+  for (const card of state.cards) {
+    const el = document.createElement('div')
+    el.className = 'card'
+    el.dataset.code = card.code
+    el.innerHTML = `
+      <div class="card-head">
+        <span class="code">${card.code}</span>
+        <span class="meta">${typeLabel[card.insp_type] || card.insp_type} · ${card.product}${card.supplier ? ' · ' + card.supplier : ''}</span>
+        <span class="badge orange">待检</span>
+      </div>
+      <div class="card-body">
+        <div class="row"><span class="fill">来源 ${card.ref_no || '—'} · 批次 ${card.lot_no || '—'}</span><span>批量 ${String(card.lot_qty)}</span></div>
+      </div>
+      <div class="card-foot"><button class="btn primary block">逐项打分</button></div>`
+    el.querySelector('button').addEventListener('click', () => openSheet(card))
+    queue.appendChild(el)
+  }
+}
+
+function openSheet(card) {
+  const body = document.getElementById('sheet-body')
+  document.getElementById('sheet-title').textContent = `${card.code} 逐项打分`
+  document.getElementById('sheet-sub').textContent = `${typeLabel[card.insp_type] || card.insp_type} · ${card.product} · 批量 ${String(card.lot_qty)}（AQL 判定由引擎完成，人工复核）`
+
+  const rows = defaultReadings(card).map(row => ({ ...row, critical: false, manual: null }))
+
+  body.innerHTML = `
+    <div id="readings"></div>
+    <div class="field"><label>加检验项（参数名）</label>
+      <div style="display:flex;gap:10px">
+        <input type="text" id="new-param" placeholder="如 菌落总数(CFU/g)" style="flex:1">
+        <button class="btn small" id="add-numeric">+ 数值项</button>
+        <button class="btn small" id="add-sensory">+ 感官项</button>
+      </div>
+    </div>
+    <div class="field"><label>AQL 档（默认 2.5，食品常用）</label>
+      <select id="aql" style="width:100%;min-height:52px;font-size:18px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);padding:0 12px;">
+        ${['0.65', '1.0', '1.5', '2.5', '4.0'].map(v => `<option value="${v}"${v === '2.5' ? ' selected' : ''}>${v}</option>`).join('')}
+      </select>
+    </div>
+    <div class="equation" id="summary"></div>
+    <div class="card-foot" style="padding:14px 0 0">
+      <button class="btn block" id="sheet-cancel">取消</button>
+      <button class="btn primary block" id="sheet-submit">提交判定（引擎 AQL）</button>
+    </div>`
+  document.getElementById('sheet').classList.add('open')
+
+  const readingsEl = body.querySelector('#readings')
+  const summary = body.querySelector('#summary')
+  const submit = body.querySelector('#sheet-submit')
+
+  const judgeRow = (row) => {
+    if (row.spec_min !== null || row.spec_max !== null) {
+      if (row.actual === null) return null
+      const min = row.spec_min === null ? -Infinity : row.spec_min
+      const max = row.spec_max === null ? Infinity : row.spec_max
+      return row.actual >= min && row.actual <= max
+    }
+    return row.manual
+  }
+
+  function renderRows() {
+    readingsEl.innerHTML = ''
+    rows.forEach((row, index) => {
+      const numeric = row.spec_min !== null || row.spec_max !== null
+      const pass = judgeRow(row)
+      const el = document.createElement('div')
+      el.className = 'reading'
+      el.innerHTML = `
+        <div class="head">
+          <span class="name">${row.parameter}</span>
+          <span class="spec">${numeric
+            ? `规格 <span class="spec-value">${row.spec_min === null ? '−∞' : String(row.spec_min)} ~ ${row.spec_max === null ? '+∞' : String(row.spec_max)}</span>`
+            : `<span class="spec-value">${row.criteria || '感官判定'}</span>`}</span>
+          <span class="verdict ${pass === null ? 'pending' : pass ? 'pass' : 'fail'}">${pass === null ? '未判' : pass ? 'Accepted' : 'Rejected'}</span>
+        </div>
+        <div class="input-line">
+          ${numeric ? `<input type="number" inputmode="decimal" step="any" placeholder="实测读数" data-index="${String(index)}" data-kind="actual" value="${row.actual === null ? '' : String(row.actual)}">` : ''}
+          ${numeric ? '' : `
+            <button class="btn ok small" style="flex:1" data-index="${String(index)}" data-kind="pass">合格</button>
+            <button class="btn bad small" style="flex:1" data-index="${String(index)}" data-kind="fail">不合格</button>`}
+          <button class="btn small" data-index="${String(index)}" data-kind="remove">移除</button>
+        </div>
+        ${pass === false ? `<label class="critical-toggle"><input type="checkbox" data-index="${String(index)}" data-kind="critical"${row.critical ? ' checked' : ''}> 记为严重缺陷（0 收 1 拒）</label>` : ''}`
+      readingsEl.appendChild(el)
+    })
+    const judged = rows.map(judgeRow)
+    const pendingCount = judged.filter(value => value === null).length
+    const failCount = judged.filter(value => value === false).length
+    const criticalCount = rows.filter((row, index) => judged[index] === false && row.critical).length
+    summary.className = 'equation'
+    summary.innerHTML = `已判 ${String(judged.length - pendingCount)}/${String(rows.length)} · 不合格 ${String(failCount)}（严重 ${String(criticalCount)}）${pendingCount > 0 ? ` · 还有 ${String(pendingCount)} 行未判` : ' · 可提交'}`
+    submit.disabled = pendingCount > 0 || rows.length === 0 || state.submitting
+  }
+
+  readingsEl.addEventListener('input', (event) => {
+    const target = event.target
+    const index = Number(target.dataset.index)
+    if (target.dataset.kind === 'actual') {
+      rows[index].actual = target.value === '' ? null : Number(target.value)
+      renderRows()
+    }
+  })
+  readingsEl.addEventListener('click', (event) => {
+    const target = event.target.closest('button, input[type="checkbox"]')
+    if (target === null) return
+    const index = Number(target.dataset.index)
+    if (target.dataset.kind === 'pass') rows[index].manual = true
+    else if (target.dataset.kind === 'fail') rows[index].manual = false
+    else if (target.dataset.kind === 'remove') rows.splice(index, 1)
+    else if (target.dataset.kind === 'critical') return // change handler below
+    renderRows()
+  })
+  readingsEl.addEventListener('change', (event) => {
+    const target = event.target
+    if (target.dataset.kind !== 'critical') return
+    rows[Number(target.dataset.index)].critical = target.checked
+  })
+  body.querySelector('#add-numeric').addEventListener('click', () => {
+    const name = body.querySelector('#new-param').value.trim()
+    if (name === '') { note('<b>先填参数名</b>', 'bad'); return }
+    rows.push({ parameter: name, spec_min: 0, spec_max: 100, criteria: '', actual: null, critical: false, manual: null })
+    renderRows()
+  })
+  body.querySelector('#add-sensory').addEventListener('click', () => {
+    const name = body.querySelector('#new-param').value.trim()
+    if (name === '') { note('<b>先填参数名</b>', 'bad'); return }
+    rows.push({ parameter: name, spec_min: null, spec_max: null, criteria: '感官判定（合格/不合格大按钮）', actual: null, critical: false, manual: null })
+    renderRows()
+  })
+
+  body.querySelector('#sheet-cancel').addEventListener('click', () => {
+    document.getElementById('sheet').classList.remove('open')
+    state.submitting = false
+  })
+  submit.addEventListener('click', async () => {
+    if (state.submitting) return
+    state.submitting = true
+    submit.disabled = true
+    submit.textContent = '判定中…'
+    try {
+      const payload = await api('/inspect-submit', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          operator: operatorEl.value,
+          code: card.code,
+          aql: body.querySelector('#aql').value,
+          readings: rows.map(row => ({
+            parameter: row.parameter,
+            spec_min: row.spec_min,
+            spec_max: row.spec_max,
+            criteria: row.criteria || null,
+            actual: row.actual,
+            pass: row.spec_min === null && row.spec_max === null ? row.manual : undefined,
+            critical: judgeRow(row) === false ? row.critical : false,
+          })),
+        }),
+      })
+      document.getElementById('sheet').classList.remove('open')
+      const verdict = payload.verdict
+      note(`<b>判定完成 ${card.code}</b>引擎 AQL ${String(verdict.aqlUsed)}（${String(verdict.rigor)}）n=${String(verdict.n)} Ac=${String(verdict.ac)} Re=${String(verdict.re)} · d=${String(verdict.d)} → <span style="font-size:18px">${verdict.result === 'passed' ? '接收 Accepted' : '拒收 Rejected'}</span>${verdict.result === 'failed' ? '（已发起 CAPA 处置草案）' : ''}`, verdict.result === 'passed' ? 'ok' : 'bad')
+      const el = document.querySelector(`[data-code="${card.code}"]`)
+      if (el) el.classList.add('just-done')
+      setTimeout(load, 900)
+    } catch (error) {
+      note(`<b>判定被拒</b>${error.message}`, 'bad')
+      submit.textContent = '提交判定（引擎 AQL）'
+      state.submitting = false
+      renderRows()
+    }
+  })
+
+  renderRows()
+}
+
+async function load() {
+  note('', 'info')
+  try {
+    const payload = await api(`/terminal/inspect?operator=${encodeURIComponent(operatorEl.value)}`)
+    state.cards = payload.cards
+    renderQueue()
+  } catch (error) {
+    document.getElementById('queue').innerHTML = '<div class="empty">队列加载失败</div>'
+    note(`<b>加载失败</b>${error.message}`, 'bad')
+  }
+}
+
+load()
+</script>
+</body>
+</html>

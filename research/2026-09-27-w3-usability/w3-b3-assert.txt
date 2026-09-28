@@ -1,0 +1,14 @@
+assert: 采购看板 (pur_orders.doc_status) — approved=7 draft=3 pending=1
+assert: 生产订单看板 (mfg_orders.doc_status) — completed=2 released=4 draft=4 approved=7 in_progress=3
+assert: 销售看板 (so_orders.doc_status) — approved=6 draft=2
+assert: 质检看板 (qm_inspections.status) — closed=49 pending=8
+assert: pur_orders:move refused ✓ (POST /api/pur_orders:move?filterByTk=1&field=doc_status&targetGroup=draft -> HTT)
+assert: mfg_orders:move refused ✓ (POST /api/mfg_orders:move?filterByTk=1&field=doc_status&targetGroup=draft -> HTT)
+assert: so_orders:move refused ✓ (POST /api/so_orders:move?filterByTk=1&field=doc_status&targetGroup=draft -> HTTP)
+assert: qm_inspections:move refused ✓ (POST /api/qm_inspections:move?filterByTk=1&field=doc_status&targetGroup=draft ->)
+assert: 排产甘特 data source mfg_order_operations(planned_date≠null) = 10 row(s); first bar "2026-09-28"
+assert: 交期日历/so_orders events(need_date≠null) = 8
+assert: 交期日历/pur_orders events(need_date≠null) = 10
+assert: 计划日历/mps_plans events(period_from≠null) = 1
+assert: 计划日历/mrp_suggestions events(suggest_date≠null) = 34
+nocobase-w3-views: --assert OK (column distributions + read-only negatives + gantt source + calendar events)

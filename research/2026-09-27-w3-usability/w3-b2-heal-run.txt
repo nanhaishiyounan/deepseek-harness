@@ -1,0 +1,171 @@
+w3-heal: plan — 0 table wire(s), 0 card drawer(s), 96 skipped
+  skip: h4srmtb3at0gshbtl4 srm_certificates (healthy row actions kept)
+  skip: h4srmtb6u00mxwn0ft srm_audit_records (healthy row actions kept)
+  skip: h4srmtb9ywz88zr6e srm_audit_checklists (healthy row actions kept)
+  skip: h4srmtbda2edqhlrfd srm_suppliers (healthy row actions kept)
+  skip: h4srmtbdik1s6tqzo8 srm_suppliers (healthy row actions kept)
+  skip: h4srmtbixb0l1rvxva srm_score_cards (healthy row actions kept)
+  skip: h4srmtboyp2ghlpauo srm_score_cards (healthy row actions kept)
+  skip: h5wmstb0i9fu0mimxr wms_monthly_balances (healthy row actions kept)
+  skip: h5wmstb2e3waufx315 wms_reorder_suggestions (healthy row actions kept)
+  skip: h5wmstb2m2e2bkhr94 wms_bins (healthy row actions kept)
+  skip: h5wmstb38h56nznx1p wms_reservations (healthy row actions kept)
+  skip: h5wmstb550jca03ieg hub_inv_products (healthy row actions kept)
+  skip: h5wmstb921q8wfc0lr wms_receipts (healthy row actions kept)
+  skip: h5wmstbdyyhoi6yihf wms_transfers (healthy row actions kept)
+  skip: h5wmstbfwf0ud4zh5s wms_lots (healthy row actions kept)
+  skip: h5wmstbhehpt666q4c wms_movements (healthy row actions kept)
+  skip: h5wmstbihpuorypu3 wms_shipments (healthy row actions kept)
+  skip: h5wmstbk7xmgdtscsf wms_stock (healthy row actions kept)
+  skip: h5wmstbpwsa5l74u7q wms_zones (healthy row actions kept)
+  skip: h5wmstbzb9ip0icq5 wms_counts (healthy row actions kept)
+  skip: n13tbqbw50631n7n hub_tk_tickets (healthy row actions kept)
+  skip: n17e1tb3ol4nd78jmu hub_pj_milestones (healthy row actions kept)
+  skip: n17e1tbm7n1eyuuigg hub_pj_projects (healthy row actions kept)
+  skip: n17e1tbxmizyerhpu hub_pj_tasks (healthy row actions kept)
+  skip: n17f2tb14n3zyzvjii crm_payments (healthy row actions kept)
+  skip: n17f2tb77b4slryit4 crm_customers (healthy row actions kept)
+  skip: n17f2tba3iz92gm69n crm_products (healthy row actions kept)
+  skip: n17f2tbrr8bxi6ohc9 crm_invoices (healthy row actions kept)
+  skip: n17f2tburw0ofbfgd crm_payments (healthy row actions kept)
+  skip: n17f3tb9uah2x064t hub_as_vendors (healthy row actions kept)
+  skip: n17f3tb9vefiipgzxt hub_md_customer_categories (healthy row actions kept)
+  skip: n17f3tbb223iqhggew hub_md_asset_categories (healthy row actions kept)
+  skip: n17f3tbftlhga9exqs hub_po_suppliers (healthy row actions kept)
+  skip: n17f3tbi6ly48rsjb hub_md_product_categories (healthy row actions kept)
+  skip: n17f3tbkvdfcxrb8y8 hub_pj_tasks (healthy row actions kept)
+  skip: n17f3tbm8npgd23qtj hub_kb_articles (healthy row actions kept)
+  skip: n17f3tbmxskqdpv5l hub_hr_departments (healthy row actions kept)
+  skip: n17f3tbpxyy9etfpr hub_md_ticket_categories (healthy row actions kept)
+  skip: n17f3tbr352qqahds hub_hr_leave_requests (healthy row actions kept)
+  skip: n17f3tbx66zdixflzj hub_tk_tickets (healthy row actions kept)
+  skip: n17f3tbyjrzhkyijn hub_as_maintenance (healthy row actions kept)
+  skip: n17tb34ir6hawk2h crm_leads (healthy row actions kept)
+  skip: n17tbc55f9eivj9 hub_hr_employees (healthy row actions kept)
+  skip: n17tbcdlj6fd8nd hub_tk_tickets (healthy row actions kept)
+  skip: n17tbe5sj8dsvieh crm_deals (healthy row actions kept)
+  skip: n17tbgfz3oq90r98 crm_customers (healthy row actions kept)
+  skip: n17tbgrzqc88xbuu crm_quotes (healthy row actions kept)
+  skip: n17tbldvqz31qpl hub_as_assets (healthy row actions kept)
+  skip: n17tbmigqv76d79 crm_contacts (healthy row actions kept)
+  skip: w1w1tb7jy6i6hwfhb wfl_approval_todos (healthy row actions kept)
+  skip: w1w1tbhl5zlhcawov wfl_approval_records (healthy row actions kept)
+  skip: w3b2stbkbxwf0rqm3l pur_order_lines (no readable columns to mirror)
+  skip: w3purtb00igjfhy3j4 pur_rfq_suppliers (healthy row actions kept)
+  skip: w3purtb0tfn74ekqmk pur_quotes (healthy row actions kept)
+  skip: w3purtb5z0wo4r5dp5 pur_invoices (healthy row actions kept)
+  skip: w3purtb66u9igtz1oa pur_request_lines (healthy row actions kept)
+  skip: w3purtb74cotuhilze pur_quotes (healthy row actions kept)
+  skip: w3purtb7cbe8io87q pur_order_lines (healthy row actions kept)
+  skip: w3purtbdiokanwbk26 pur_orders (healthy row actions kept)
+  skip: w3purtbm04ibq6yp3 pur_requests (healthy row actions kept)
+  skip: w3purtbqcqfvofteag pur_rfqs (healthy row actions kept)
+  skip: w3purtbspmqisz8l9g pur_payments (healthy row actions kept)
+  skip: w3purtbtgdp4j0kfcn pur_quotes (healthy row actions kept)
+  skip: w5mfgtb1m8s5irsi4v mfg_orders (healthy row actions kept)
+  skip: w5mfgtb2v6xjqd91ys mfg_holidays (healthy row actions kept)
+  skip: w5mfgtb6dep443kfo mfg_boms (healthy row actions kept)
+  skip: w5mfgtb7ed074yc70o mfg_order_operations (healthy row actions kept)
+  skip: w5mfgtba6hxd9np7ut mfg_work_centers (healthy row actions kept)
+  skip: w5mfgtbagkkwfyc6sb mfg_bom_operations (healthy row actions kept)
+  skip: w5mfgtbyc7ejs0st2l mfg_bom_lines (healthy row actions kept)
+  skip: w6mfgtb12vftf7fcep mfg_material_issues (healthy row actions kept)
+  skip: w6mfgtb6mpgyk7jf4d mfg_orders (healthy row actions kept)
+  skip: w6mfgtbctiwjbo5kd5 mfg_material_returns (healthy row actions kept)
+  skip: w6mfgtbieyb80jzjeh mfg_completions (healthy row actions kept)
+  skip: w6mfgtbq63pu6zaws7 mfg_job_reports (healthy row actions kept)
+  skip: w6mfgtbv0oi3vunpgi mfg_order_operations (healthy row actions kept)
+  skip: w7mrptb0247ahgdnr0 so_order_lines (healthy row actions kept)
+  skip: w7mrptb0q7c3czeasm mps_plan_items (healthy row actions kept)
+  skip: w7mrptb6y2yt7r2gvo mrp_snapshots (healthy row actions kept)
+  skip: w7mrptb98bm70ncq4m mrp_confirm_intents (healthy row actions kept)
+  skip: w7mrptbnst9mwd5hg so_orders (healthy row actions kept)
+  skip: w7mrptbo2j52gvd2f mrp_suggestions (healthy row actions kept)
+  skip: w7mrptbt9wdzganm5 mps_plans (healthy row actions kept)
+  skip: w8qmtb1mz41nwilde qm_inspections (healthy row actions kept)
+  skip: w8qmtb234wjb1k77c srm_score_cards (healthy row actions kept)
+  skip: w8qmtbqf4l59f6e1h qm_inspection_readings (healthy row actions kept)
+  skip: w8qmtbxht6tnj7ssk qm_aql_plans (healthy row actions kept)
+  skip: w9kpitb8xk3drbk2g6 kpi_snapshots (healthy row actions kept)
+  skip: w9kpitb9thyzhbnxkj pur_invoices (healthy row actions kept)
+  skip: w9kpitba5p0ben50qc pur_payments (healthy row actions kept)
+  skip: w9kpitbf5irc6g0owe so_orders (healthy row actions kept)
+  skip: w9kpitbnba0vu68fq kpi_snapshots (healthy row actions kept)
+  skip: w9kpitbsbcw4wjtfak wms_lots (healthy row actions kept)
+  skip: w9kpitbx7qr8p6h83l crm_payments (healthy row actions kept)
+  skip: w9kpitbyr9acjli3zi kpi_snapshots (healthy row actions kept)
+  skip: w9kpitbzizoqvkhb5 kpi_snapshots (healthy row actions kept)
+w3-heal B2: relation pur_orders.order_lines (fk order_id) exists (kept)
+w3-heal B2: relation pur_requests.request_lines (fk request_id) created
+w3-heal B2: relation pur_rfqs.rfq_suppliers (fk rfq_id) created
+w3-heal B2: relation pur_rfqs.quotes (fk rfq_id) created
+w3-heal B2: relation so_orders.order_lines (fk order_id) created
+w3-heal B2: relation mps_plans.plan_items (fk plan_id) created
+w3-heal B2: relation mfg_boms.bom_lines (fk bom_id) created
+w3-heal B2: relation mfg_boms.bom_operations (fk bom_id) created
+w3-heal B2: relation qm_inspections.inspection_readings (fk inspection_id) created
+w3-heal B2: relation srm_suppliers.certificates (fk supplier_id) created
+w3-heal B2: relation srm_suppliers.audit_records (fk supplier_id) created
+w3-heal B2: relation srm_suppliers.score_cards (fk supplier_id) created
+w3-heal B2: pur_orders w3purtbdiokanwbk26 drawer rewritten — Details (8 fields) + subtables [pur_orders.order_lines]
+w3-heal B2: pur_requests w3purtbm04ibq6yp3 drawer rewritten — Details (6 fields) + subtables [pur_requests.request_lines]
+w3-heal B2: pur_rfqs w3purtbqcqfvofteag drawer rewritten — Details (4 fields) + subtables [pur_rfqs.rfq_suppliers, pur_rfqs.quotes]
+w3-heal B2: so_orders w7mrptbnst9mwd5hg drawer rewritten — Details (8 fields) + subtables [so_orders.order_lines]
+w3-heal B2: so_orders w9kpitbf5irc6g0owe drawer rewritten — Details (5 fields) + subtables [so_orders.order_lines]
+w3-heal B2: mps_plans w7mrptbt9wdzganm5 drawer rewritten — Details (7 fields) + subtables [mps_plans.plan_items]
+w3-heal B2: mfg_boms w5mfgtb6dep443kfo drawer rewritten — Details (6 fields) + subtables [mfg_boms.bom_lines, mfg_boms.bom_operations]
+w3-heal B2: qm_inspections w8qmtb1mz41nwilde drawer rewritten — Details (16 fields) + subtables [qm_inspections.inspection_readings]
+w3-heal B2: srm_suppliers h4srmtbda2edqhlrfd drawer rewritten — Details (5 fields) + subtables [srm_suppliers.certificates, srm_suppliers.audit_records, srm_suppliers.score_cards]
+w3-heal B2: srm_suppliers h4srmtbdik1s6tqzo8 drawer rewritten — Details (7 fields) + subtables [srm_suppliers.certificates, srm_suppliers.audit_records, srm_suppliers.score_cards]
+w3-heal B2: guarded Edit on pur_orders w3purtbdiokanwbk26 exists (kept)
+w3-heal B2: guarded Edit on pur_requests w3purtbm04ibq6yp3 (8 fields; state excluded: doc_status)
+w3-heal B2: guarded Edit on pur_rfqs w3purtbqcqfvofteag (2 fields; state excluded: doc_status)
+w3-heal B2: guarded Edit on so_orders w7mrptbnst9mwd5hg (5 fields; state excluded: approved_at,approved_by,shipping_status,doc_status)
+w3-heal B2: guarded Edit on so_orders w9kpitbf5irc6g0owe (5 fields; state excluded: approved_at,approved_by,shipping_status,doc_status)
+w3-heal B2: guarded Edit on mps_plans w7mrptbt9wdzganm5 (4 fields; state excluded: approved_by,doc_status,approved_at)
+w3-heal B2: guarded Edit on mfg_boms w5mfgtb6dep443kfo (4 fields; state excluded: bom_status)
+w3-heal B2: guarded Edit on mfg_orders w5mfgtb1m8s5irsi4v (22 fields; state excluded: doc_status)
+w3-heal B2: guarded Edit on mfg_orders w6mfgtb6mpgyk7jf4d (22 fields; state excluded: doc_status)
+w3-heal B2: guarded Edit on qm_inspections w8qmtb1mz41nwilde (21 fields; state excluded: result,status)
+w3-heal B2: guarded Edit on wms_receipts h5wmstb921q8wfc0lr (8 fields; state excluded: status,iqc_status)
+w3-heal B2: guarded Edit on wms_shipments h5wmstbihpuorypu3 (4 fields; state excluded: status)
+w3-heal B2: guarded Edit on wms_counts h5wmstbzb9ip0icq5 (8 fields; state excluded: status)
+w3-heal B2: guarded Edit on mfg_material_issues w6mfgtb12vftf7fcep (4 fields; state excluded: status)
+w3-heal B2: guarded Edit on srm_suppliers h4srmtbda2edqhlrfd (11 fields; state excluded: audit_grade,lifecycle_status,reject_streak,switch_score,blacklist_reason,is_blacklisted,iqc_level)
+w3-heal B2: guarded Edit on srm_suppliers h4srmtbdik1s6tqzo8 (11 fields; state excluded: audit_grade,lifecycle_status,reject_streak,switch_score,blacklist_reason,is_blacklisted,iqc_level)
+w3-heal B2: confirm-gated Delete on hub_pj_tasks n17e1tbxmizyerhpu
+w3-heal B2: confirm-gated Delete on hub_pj_tasks n17f3tbkvdfcxrb8y8
+w3-heal B2: confirm-gated Delete on hub_pj_milestones n17e1tb3ol4nd78jmu
+w3-heal B2: confirm-gated Delete on hub_kb_articles n17f3tbm8npgd23qtj
+w3-heal B2: confirm-gated Delete on crm_contacts n17tbmigqv76d79
+w3-heal B2: confirm-gated Delete on hub_as_maintenance n17f3tbyjrzhkyijn
+w3-heal B2: 审批进度 jump on pur_requests w3purtbm04ibq6yp3
+w3-heal B2: 审批进度 jump on pur_rfqs w3purtbqcqfvofteag
+w3-heal B2: 审批进度 jump on pur_payments w3purtbspmqisz8l9g
+w3-heal B2: 审批进度 jump on pur_payments w9kpitba5p0ben50qc
+w3-heal B2: 审批进度 jump on so_orders w7mrptbnst9mwd5hg
+w3-heal B2: 审批进度 jump on so_orders w9kpitbf5irc6g0owe
+w3-heal B2: 审批进度 jump on mps_plans w7mrptbt9wdzganm5
+w3-heal B2: 审批进度 jump on mfg_orders w5mfgtb1m8s5irsi4v
+w3-heal B2: 审批进度 jump on mfg_orders w6mfgtb6mpgyk7jf4d
+w3-heal B2: 审批进度 jump on srm_suppliers h4srmtbda2edqhlrfd
+w3-heal B2: 审批进度 jump on srm_suppliers h4srmtbdik1s6tqzo8
+w3-heal B2: 审批进度 jump on wms_counts h5wmstbzb9ip0icq5
+w3-heal B2: 审批进度 jump on qm_inspections w8qmtb1mz41nwilde
+w3-heal: member view ACL — rows in place, 54 action row(s) set to explicit full field lists
+w3-heal B2: QI-W2B1-B10 (id 56) already carries 3 reading row(s) (kept)
+w3-heal B2: QI-2026-0010 (id 58) already carries 2 reading row(s) (kept)
+w3-heal: member view ACL — rows in place
+w3-heal: probe summary after heal
+/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/nocobase-flow-page-lib.mts:112
+    throw new Error(`flowModels:list returned ${rows.length} of ${total} rows (pageSize=${pageSize}); raise the page size or paginate before running ${label}`)
+          ^
+
+
+Error: flowModels:list returned 6000 of undefined rows (pageSize=6000); raise the page size or paginate before running w3-heal-row-details (probe)
+    at listFlowModels (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/nocobase-flow-page-lib.mts:112:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async probeSummary (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/w3-heal-row-details.mts:613:16)
+    at async <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/w3-heal-row-details.mts:715:20)
+
+Node.js v22.19.0

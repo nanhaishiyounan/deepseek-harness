@@ -16,7 +16,7 @@
  */
 import { readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 const baseUrl = process.env.NOCOBASE_BASE_URL ?? 'http://127.0.0.1:13000'
@@ -826,12 +826,26 @@ function calendarBlock(collection: string, startField: string, titleField: strin
   }
 }
 
-function ganttBlock(collection: string, startField: string, endField: string, titleField: string): Record<string, unknown> {
+export function ganttBlock(
+  collection: string,
+  startField: string,
+  endField: string,
+  titleField: string,
+  opts: { enableDragToReschedule?: boolean } = {},
+): Record<string, unknown> {
   return {
     _isJSONSchemaObject: true, version: '2.0', type: 'void',
     'x-acl-action': `${collection}:list`,
     'x-decorator': 'GanttBlockProvider',
-    'x-decorator-props': { collection, dataSource: 'main', action: 'list', fieldNames: { id: 'id', start: startField, end: endField, title: titleField, range: 'day' }, params: { paginate: false } },
+    // W3-B3: opts.enableDragToReschedule:false ships the read-only scheduling
+    // gantt (FCS keeps sole reschedule ownership); the default stays the
+    // plugin's drag-enabled behavior so the hub 任务甘特 page is unchanged.
+    'x-decorator-props': {
+      collection, dataSource: 'main', action: 'list',
+      fieldNames: { id: 'id', start: startField, end: endField, title: titleField, range: 'day' },
+      params: { paginate: false },
+      ...(opts.enableDragToReschedule === undefined ? {} : { enableDragToReschedule: opts.enableDragToReschedule }),
+    },
     'x-designer': 'Gantt.Designer', 'x-component': 'CardItem',
     properties: {
       [nodeKey()]: {
@@ -1217,4 +1231,7 @@ async function main(): Promise<void> {
   console.log('nocobase-hub: done')
 }
 
-await main()
+// W3-B3: importing ganttBlock from another script must not run the hub
+// build; only a direct invocation does.
+const invokedDirectly = process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href
+if (invokedDirectly) await main()
