@@ -1,0 +1,14 @@
+J1 财务-发票匹配 @ 2026-09-28T17:23:52.338Z
+  psql 发票金额合计 = 481880.16000000003 ¥
+  psql 匹配异常数   = 1
+  psql 发票总数     = 5
+  卡上口径文字与截图 w4-b3-journey-finance-invoice.png 对拍（人工判读）
+J2 仓管-库存查询 @ 2026-09-28T17:24:04.775Z
+  psql 库存总件数 = 397400
+  psql 可用量合计 = 397155
+  psql 占用件数   = 195
+  空态筛选: 下拉选项 ["所有","任意"] → 选中「任意」(无库存行)
+  空态筛选后: emptyTable=false hint/重置可见=true（w4-b3-journey-stock-empty.png）
+J2b 请假审批空态: 选项 ["待审批","已批准","已驳回"] →「已驳回」 emptyTable=false（w4-b3-journey-leave-empty.png）
+抽查: 质检单/处置看板(kanban)/生产订单/供应商档案(L2) 各截图；经营看板 canvas=2
+  空态补拍: 已驳回+提交后 rows=1 noData=true（w4-b3-journey-leave-empty.png 更新）

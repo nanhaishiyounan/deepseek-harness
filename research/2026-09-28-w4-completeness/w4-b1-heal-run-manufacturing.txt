@@ -1,0 +1,4 @@
+# w4-b1 heal run manufacturing @ 2026-09-28T11:43:29.726Z
+page 生产制造/MO 执行视图
+  filterForm mfg_orders uid=t700wp5fypk fields=[doc_status,product]
+pages=10

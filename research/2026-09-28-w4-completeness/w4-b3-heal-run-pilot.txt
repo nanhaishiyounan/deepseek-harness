@@ -1,0 +1,11 @@
+# w4-b3 heal run @ 2026-09-28T16:48:16.771Z
+card "采购订单/待审批" exists (kept)
+card "采购订单/本月审批通过" exists (kept)
+card "采购订单/金额合计" exists (kept)
+card "采购订单/订单总数" exists (kept)
+hint "采购订单" exists (kept)
+seat "采购订单": hint + 4 cards moved to grid top (rows rewrite)
+iframe "车间终端" already at http://127.0.0.1:13110/terminals/report.html?operator=linjingyi
+iframe "质检工作台" already at http://127.0.0.1:13110/terminals/inspect.html?operator=quality_lead
+iframe "收货终端" already at http://127.0.0.1:13110/terminals/receive.html?operator=b4guard
+terminal base = http://127.0.0.1:13110 (default; set W3_TERMINAL_BASE to override)

@@ -1,0 +1,22 @@
+page 项目管理/任务列表
+  sort hub_pj_tasks <- ["-due_date"]
+  rel hub_pj_tasks.project
+  rel hub_pj_tasks.assignee
+  recolor hub_pj_tasks.priority
+  date hub_pj_tasks.due_at
+  date hub_pj_tasks.plan_start
+  date hub_pj_tasks.plan_end
+  filterForm hub_pj_tasks fields=[status,project]
+page 采购管理/采购订单
+  sort pur_orders <- ["-id"]
+  rel pur_orders.supplier
+  rel pur_orders.rfq
+  number pur_orders.amount
+  date pur_orders.need_date
+  sort pur_order_lines <- ["-id"]
+  rel pur_order_lines.order
+  rel pur_order_lines.product
+  number pur_order_lines.qty
+  number pur_order_lines.unit_price
+  number pur_order_lines.qty_received
+dry-run pilot: pages=2 sort=3 number=4 date=4 rel=6 enumize=0 recolor=1 filterForm=1

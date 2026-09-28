@@ -183,7 +183,7 @@ const MENU: ReadonlyArray<{ group: string; groupIcon: string; pages: ReadonlyArr
     ],
   },
   {
-    group: '销售流程', groupIcon: 'DollarOutlined',
+    group: '销售管理', groupIcon: 'ShopOutlined',
     pages: [
       { title: '订单', icon: 'ProfileOutlined' },
       { title: '报价单', icon: 'FileTextOutlined' },

@@ -1,0 +1,153 @@
+{
+ "batch": "W4-B4",
+ "writtenAt": "2026-09-28T18:43:14.761Z",
+ "v1Pages": [
+  {
+   "page": "任务甘特",
+   "schemaUid": "zs3oqvlgqq0",
+   "verdict": "保留",
+   "reason": "v2 无甘特块等价物（W3 D5：Gantt 仅 v1 通道）；hub_pj_tasks 数据被任务列表/看板/日历与甘特四视图共用",
+   "migration": "无结构改动；B5 归组项目管理组内排序"
+  },
+  {
+   "page": "排产甘特",
+   "schemaUid": "96yet9a0x45",
+   "verdict": "保留",
+   "reason": "甘特=时间轴视图（mfg_order_operations），与表格形态的排程明细职能互补非重复",
+   "migration": "无结构改动；同组「排产看板」改名「排程明细」完成分工消歧"
+  },
+  {
+   "page": "应用中心",
+   "schemaUid": "c9c6wzppejk",
+   "verdict": "保留 + 归组",
+   "reason": "app-hub 聚合页在线可用；顶级散页治理（N4）；与分类维护同入基础数据组（基础配置语义）",
+   "migration": "desktopRoutes:update parentId → 基础数据组（B4 执行）"
+  }
+ ],
+ "retired": [
+  {
+   "title": "采购联系人（历史）",
+   "schemaUid": "n17f3gnpjv8rfd85",
+   "expectedTabs": 1,
+   "collections": [
+    {
+     "name": "hub_po_suppliers",
+     "csv": "w4-b4-retired-po-suppliers.csv"
+    }
+   ],
+   "verdict": "退役",
+   "reason": "功能死页：名称自带「历史」、与采购管理组平行、无筛选无编辑零动线价值；真实供应商主数据在 srm_suppliers 域（w2 已归一）"
+  },
+  {
+   "title": "工作台",
+   "schemaUid": "n17f34fr9khfzdhq",
+   "expectedTabs": 1,
+   "collections": [
+    {
+     "name": "hub_pj_tasks",
+     "csv": "w4-b4-retired-workbench-tasks.csv"
+    },
+    {
+     "name": "hub_tk_tickets",
+     "csv": "w4-b4-retired-workbench-tickets.csv"
+    }
+   ],
+   "verdict": "退役",
+   "reason": "hub 时代聚合页（tasks+tickets 双表堆叠）：与「AI 工作台」（AI 入口）、「工单」（业务列表）三重叠且无独有职能；hub_pj_tasks×2 / hub_tk_tickets×3 两组重复页随本项消解"
+  }
+ ],
+ "renames": [
+  {
+   "from": "排产看板",
+   "to": "排程明细",
+   "schemaUid": "w5mfgp352sily7f",
+   "reason": "与 v1 排产甘特分工消歧：甘特=时间轴、明细=表格清单",
+   "applied": true
+  },
+  {
+   "from": "AQL抽样方案",
+   "to": "AQL 抽样方案",
+   "schemaUid": "w8qm15rxe53v8hh",
+   "reason": "N-3' 术语空格规范（对齐 MO 执行视图基准格式）",
+   "applied": true
+  },
+  {
+   "from": "MO执行视图",
+   "to": "MO 执行视图",
+   "schemaUid": "w6mfgmct2tf2braf",
+   "reason": "N-3' 术语空格规范（基线已达标则幂等跳过）",
+   "applied": true
+  },
+  {
+   "from": "MRP快照",
+   "to": "MRP 快照",
+   "schemaUid": "w7mrpowj6l93nn0a",
+   "reason": "N-3' 术语空格规范（基线已达标则幂等跳过）",
+   "applied": true
+  }
+ ],
+ "move": {
+  "title": "应用中心",
+  "schemaUid": "c9c6wzppejk",
+  "groupTitle": "基础数据",
+  "reason": "顶级散页归组（N4）；app-hub 聚合页与分类维护同组（基础配置语义）",
+  "applied": true
+ },
+ "duplicateGroups": [
+  {
+   "group": "kpi_snapshots×4（经营/供应链/库存/生产看板）",
+   "verdict": "保留",
+   "reason": "设计使然：四页各按 kpi_code 子集出图（w9 工厂）；B3 已补图表标题定位差异"
+  },
+  {
+   "group": "crm_payments×3（回款/销售仪表盘/应收应付对账）",
+   "verdict": "保留",
+   "reason": "列表明细/图表聚合/余额勾稽三种职能；B3 说明块已标注口径"
+  },
+  {
+   "group": "srm_score_cards×3（评分卡/绩效雷达/季度物化）",
+   "verdict": "保留",
+   "reason": "表格录入/图表分析/物化快照三职能"
+  },
+  {
+   "group": "hub_tk_tickets×3（AI 工作台/工单/工作台）",
+   "verdict": "退役「工作台」",
+   "reason": "三重叠零独有职能；AI 工作台保留（AI 入口）、工单保留（业务列表）"
+  },
+  {
+   "group": "hub_pj_tasks×2（任务列表/工作台）",
+   "verdict": "随 hub_tk_tickets 项消解",
+   "reason": "工作台退役后任务列表唯一化"
+  },
+  {
+   "group": "crm_customers×2（客户/客户仪表盘）",
+   "verdict": "保留",
+   "reason": "明细 vs 图表聚合；B3 说明块消歧"
+  },
+  {
+   "group": "srm_suppliers×2（供应商档案/准入）",
+   "verdict": "保留",
+   "reason": "档案=主数据、准入=流程页（不同集合语义，盘点归组口径）"
+  },
+  {
+   "group": "wms_lots×2 / pur_quotes×2 / pur_invoices×2 / mfg_orders×2 / mfg_order_operations×2 / so_orders×2",
+   "verdict": "保留",
+   "reason": "均为「主列表 + W3 看板/子表视图」形态分工（W3 结论：多视图并存是分层形态体系）"
+  }
+ ],
+ "namingChecks": [
+  {
+   "domain": "维保/资产域",
+   "pages": [
+    "资产台账",
+    "维保记录",
+    "供应商（资产组）"
+   ],
+   "result": "核对无改动项：名称为中文名词短语、无术语空格/英文混排问题；资产组三重供应商归组属 B5 菜单 IA（D8），非命名缺陷"
+  }
+ ],
+ "ledger": {
+  "file": "w4-b4-destroy-ledger.json",
+  "entries": 0
+ }
+}

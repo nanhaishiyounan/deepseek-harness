@@ -1,0 +1,7 @@
+# w4-b4 routes before/after diff（before 基线 = 盘点快照 api-desktopRoutes.json 206 行，B1–B3 未动路由；after = w4-b4-routes-after.json）
+before total = 206  after total = 202
+removed (4): ['flowPage:工作台', 'tabs:', 'flowPage:采购联系人（历史）', 'tabs:']
+added (0): []
+retitled (2): ['排产看板 → 排程明细', 'AQL抽样方案 → AQL 抽样方案']
+moved (1): ['应用中心: parentId None → 386332346417155']
+# 无 404 断链：retired 页无入口引用（w4-heal-b4.mts 外部引用对账 fail-loud 通过）；被删行仅 2 flowPage + 2 tabs，全部子行随页清（children 对账 = after 中 tabs.parentId 全部指向存活 flowPage/page，孤儿 0）

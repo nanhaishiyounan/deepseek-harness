@@ -1,0 +1,6 @@
+Error: POST /api/flowSurfaces:updateSettings -> HTTP 400: {"errors":[{"message":"flowSurfaces updateSettings requires target.uid","type":"bad_request","code":"FLOW_SURFACE_BAD_REQUEST","status":400}]}
+    at call (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/nocobase-flow-page-lib.mts:63:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async dataOf (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/nocobase-flow-page-lib.mts:69:19)
+    at async rollback (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/w4-heal-b1.mts:529:7)
+    at async main (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/w4-heal-b1.mts:696:17)

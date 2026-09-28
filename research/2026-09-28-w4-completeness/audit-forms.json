@@ -1,0 +1,6407 @@
+{
+  "generatedFrom": [
+    "api-desktopRoutes.json",
+    "api-flowModels-flat.json",
+    "api-collection-fields.json"
+  ],
+  "grids": [
+    {
+      "uid": "09bvmy",
+      "rows": 5,
+      "allSingleCol": false,
+      "collections": [
+        "hub_hr_employees"
+      ],
+      "fieldCount": 5,
+      "requiredCount": 5,
+      "fields": [
+        {
+          "fieldPath": "name",
+          "collectionName": "hub_hr_employees",
+          "required": true
+        },
+        {
+          "fieldPath": "employee_no",
+          "collectionName": "hub_hr_employees",
+          "required": true
+        },
+        {
+          "fieldPath": "title",
+          "collectionName": "hub_hr_employees",
+          "required": true
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "hub_hr_employees",
+          "required": true
+        },
+        {
+          "fieldPath": "phone",
+          "collectionName": "hub_hr_employees",
+          "required": true
+        }
+      ]
+    },
+    {
+      "uid": "0eomzc",
+      "rows": 4,
+      "allSingleCol": false,
+      "collections": [
+        "crm_payments"
+      ],
+      "fieldCount": 4,
+      "requiredCount": 0,
+      "fields": [
+        {
+          "fieldPath": "paid_at",
+          "collectionName": "crm_payments",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "crm_payments",
+          "required": false
+        },
+        {
+          "fieldPath": "amount",
+          "collectionName": "crm_payments",
+          "required": false
+        },
+        {
+          "fieldPath": "method",
+          "collectionName": "crm_payments",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "0ggemn",
+      "rows": 7,
+      "allSingleCol": false,
+      "collections": [
+        "hub_hr_leave_requests"
+      ],
+      "fieldCount": 9,
+      "requiredCount": 0,
+      "fields": [
+        {
+          "fieldPath": "start_at",
+          "collectionName": "hub_hr_leave_requests",
+          "required": false
+        },
+        {
+          "fieldPath": "approved_at",
+          "collectionName": "hub_hr_leave_requests",
+          "required": false
+        },
+        {
+          "fieldPath": "end_at",
+          "collectionName": "hub_hr_leave_requests",
+          "required": false
+        },
+        {
+          "fieldPath": "start_date",
+          "collectionName": "hub_hr_leave_requests",
+          "required": false
+        },
+        {
+          "fieldPath": "end_date",
+          "collectionName": "hub_hr_leave_requests",
+          "required": false
+        },
+        {
+          "fieldPath": "type",
+          "collectionName": "hub_hr_leave_requests",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "hub_hr_leave_requests",
+          "required": false
+        },
+        {
+          "fieldPath": "days",
+          "collectionName": "hub_hr_leave_requests",
+          "required": false
+        },
+        {
+          "fieldPath": "reason",
+          "collectionName": "hub_hr_leave_requests",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "0np12o",
+      "rows": 9,
+      "allSingleCol": false,
+      "collections": [
+        "wms_receipts"
+      ],
+      "fieldCount": 11,
+      "requiredCount": 4,
+      "fields": [
+        {
+          "fieldPath": "receipt_no",
+          "collectionName": "wms_receipts",
+          "required": true
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "wms_receipts",
+          "required": false
+        },
+        {
+          "fieldPath": "supplier",
+          "collectionName": "wms_receipts",
+          "required": true
+        },
+        {
+          "fieldPath": "product",
+          "collectionName": "wms_receipts",
+          "required": true
+        },
+        {
+          "fieldPath": "target_zone",
+          "collectionName": "wms_receipts",
+          "required": false
+        },
+        {
+          "fieldPath": "target_bin",
+          "collectionName": "wms_receipts",
+          "required": false
+        },
+        {
+          "fieldPath": "qty",
+          "collectionName": "wms_receipts",
+          "required": true
+        },
+        {
+          "fieldPath": "receipt_type",
+          "collectionName": "wms_receipts",
+          "required": false
+        },
+        {
+          "fieldPath": "source_no",
+          "collectionName": "wms_receipts",
+          "required": false
+        },
+        {
+          "fieldPath": "lot_no",
+          "collectionName": "wms_receipts",
+          "required": false
+        },
+        {
+          "fieldPath": "note",
+          "collectionName": "wms_receipts",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "1053ql",
+      "rows": 7,
+      "allSingleCol": false,
+      "collections": [
+        "mfg_completions"
+      ],
+      "fieldCount": 7,
+      "requiredCount": 3,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "mfg_completions",
+          "required": true
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "mfg_completions",
+          "required": false
+        },
+        {
+          "fieldPath": "qty",
+          "collectionName": "mfg_completions",
+          "required": true
+        },
+        {
+          "fieldPath": "mo",
+          "collectionName": "mfg_completions",
+          "required": true
+        },
+        {
+          "fieldPath": "lot_no",
+          "collectionName": "mfg_completions",
+          "required": false
+        },
+        {
+          "fieldPath": "oqc_status",
+          "collectionName": "mfg_completions",
+          "required": false
+        },
+        {
+          "fieldPath": "note",
+          "collectionName": "mfg_completions",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "17twv8",
+      "rows": 5,
+      "allSingleCol": false,
+      "collections": [
+        "mps_plans"
+      ],
+      "fieldCount": 5,
+      "requiredCount": 3,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "mps_plans",
+          "required": true
+        },
+        {
+          "fieldPath": "doc_status",
+          "collectionName": "mps_plans",
+          "required": false
+        },
+        {
+          "fieldPath": "period_from",
+          "collectionName": "mps_plans",
+          "required": true
+        },
+        {
+          "fieldPath": "period_to",
+          "collectionName": "mps_plans",
+          "required": true
+        },
+        {
+          "fieldPath": "note",
+          "collectionName": "mps_plans",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "1m0f35",
+      "rows": 8,
+      "allSingleCol": false,
+      "collections": [
+        "srm_capas"
+      ],
+      "fieldCount": 8,
+      "requiredCount": 3,
+      "fields": [
+        {
+          "fieldPath": "title",
+          "collectionName": "srm_capas",
+          "required": true
+        },
+        {
+          "fieldPath": "due_date",
+          "collectionName": "srm_capas",
+          "required": true
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "srm_capas",
+          "required": false
+        },
+        {
+          "fieldPath": "supplier",
+          "collectionName": "srm_capas",
+          "required": true
+        },
+        {
+          "fieldPath": "source",
+          "collectionName": "srm_capas",
+          "required": false
+        },
+        {
+          "fieldPath": "measure",
+          "collectionName": "srm_capas",
+          "required": false
+        },
+        {
+          "fieldPath": "owner",
+          "collectionName": "srm_capas",
+          "required": false
+        },
+        {
+          "fieldPath": "description",
+          "collectionName": "srm_capas",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "1oiw3j",
+      "rows": 7,
+      "allSingleCol": false,
+      "collections": [
+        "hub_pj_tasks"
+      ],
+      "fieldCount": 8,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "title",
+          "collectionName": "hub_pj_tasks",
+          "required": true
+        },
+        {
+          "fieldPath": "due_at",
+          "collectionName": "hub_pj_tasks",
+          "required": false
+        },
+        {
+          "fieldPath": "priority",
+          "collectionName": "hub_pj_tasks",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "hub_pj_tasks",
+          "required": false
+        },
+        {
+          "fieldPath": "project",
+          "collectionName": "hub_pj_tasks",
+          "required": true
+        },
+        {
+          "fieldPath": "assignee",
+          "collectionName": "hub_pj_tasks",
+          "required": false
+        },
+        {
+          "fieldPath": "plan_start",
+          "collectionName": "hub_pj_tasks",
+          "required": false
+        },
+        {
+          "fieldPath": "plan_end",
+          "collectionName": "hub_pj_tasks",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "1x1xbi",
+      "rows": 4,
+      "allSingleCol": false,
+      "collections": [
+        "srm_audit_checklists"
+      ],
+      "fieldCount": 5,
+      "requiredCount": 0,
+      "fields": [
+        {
+          "fieldPath": "weight",
+          "collectionName": "srm_audit_checklists",
+          "required": false
+        },
+        {
+          "fieldPath": "group",
+          "collectionName": "srm_audit_checklists",
+          "required": false
+        },
+        {
+          "fieldPath": "template",
+          "collectionName": "srm_audit_checklists",
+          "required": false
+        },
+        {
+          "fieldPath": "item",
+          "collectionName": "srm_audit_checklists",
+          "required": false
+        },
+        {
+          "fieldPath": "is_critical",
+          "collectionName": "srm_audit_checklists",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "2mwu8g",
+      "rows": 7,
+      "allSingleCol": true,
+      "collections": [
+        "wfl_gate_configs"
+      ],
+      "fieldCount": 7,
+      "requiredCount": 0,
+      "fields": [
+        {
+          "fieldPath": "downstream_collection",
+          "collectionName": "wfl_gate_configs",
+          "required": false
+        },
+        {
+          "fieldPath": "upstream_collection",
+          "collectionName": "wfl_gate_configs",
+          "required": false
+        },
+        {
+          "fieldPath": "upstream_field",
+          "collectionName": "wfl_gate_configs",
+          "required": false
+        },
+        {
+          "fieldPath": "upstream_ref_field",
+          "collectionName": "wfl_gate_configs",
+          "required": false
+        },
+        {
+          "fieldPath": "upstream_label",
+          "collectionName": "wfl_gate_configs",
+          "required": false
+        },
+        {
+          "fieldPath": "upstream_state_field",
+          "collectionName": "wfl_gate_configs",
+          "required": false
+        },
+        {
+          "fieldPath": "required_status",
+          "collectionName": "wfl_gate_configs",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "2yq5jv",
+      "rows": 7,
+      "allSingleCol": false,
+      "collections": [
+        "mfg_material_returns"
+      ],
+      "fieldCount": 8,
+      "requiredCount": 3,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "mfg_material_returns",
+          "required": true
+        },
+        {
+          "fieldPath": "return_date",
+          "collectionName": "mfg_material_returns",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "mfg_material_returns",
+          "required": false
+        },
+        {
+          "fieldPath": "product",
+          "collectionName": "mfg_material_returns",
+          "required": true
+        },
+        {
+          "fieldPath": "lot",
+          "collectionName": "mfg_material_returns",
+          "required": false
+        },
+        {
+          "fieldPath": "qty",
+          "collectionName": "mfg_material_returns",
+          "required": false
+        },
+        {
+          "fieldPath": "mo",
+          "collectionName": "mfg_material_returns",
+          "required": true
+        },
+        {
+          "fieldPath": "note",
+          "collectionName": "mfg_material_returns",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "395u7x",
+      "rows": 7,
+      "allSingleCol": true,
+      "collections": [
+        "wms_reorder_suggestions"
+      ],
+      "fieldCount": 7,
+      "requiredCount": 1,
+      "fields": [
+        {
+          "fieldPath": "product",
+          "collectionName": "wms_reorder_suggestions",
+          "required": true
+        },
+        {
+          "fieldPath": "on_hand_atp",
+          "collectionName": "wms_reorder_suggestions",
+          "required": false
+        },
+        {
+          "fieldPath": "min",
+          "collectionName": "wms_reorder_suggestions",
+          "required": false
+        },
+        {
+          "fieldPath": "suggest_qty",
+          "collectionName": "wms_reorder_suggestions",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "wms_reorder_suggestions",
+          "required": false
+        },
+        {
+          "fieldPath": "suggested_at",
+          "collectionName": "wms_reorder_suggestions",
+          "required": false
+        },
+        {
+          "fieldPath": "note",
+          "collectionName": "wms_reorder_suggestions",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "3fw831",
+      "rows": 2,
+      "allSingleCol": false,
+      "collections": [
+        "hub_md_ticket_categories"
+      ],
+      "fieldCount": 3,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "hub_md_ticket_categories",
+          "required": true
+        },
+        {
+          "fieldPath": "name",
+          "collectionName": "hub_md_ticket_categories",
+          "required": true
+        },
+        {
+          "fieldPath": "is_active",
+          "collectionName": "hub_md_ticket_categories",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "3in60a",
+      "rows": 4,
+      "allSingleCol": false,
+      "collections": [
+        "crm_payments"
+      ],
+      "fieldCount": 4,
+      "requiredCount": 0,
+      "fields": [
+        {
+          "fieldPath": "paid_at",
+          "collectionName": "crm_payments",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "crm_payments",
+          "required": false
+        },
+        {
+          "fieldPath": "amount",
+          "collectionName": "crm_payments",
+          "required": false
+        },
+        {
+          "fieldPath": "method",
+          "collectionName": "crm_payments",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "3q53gu",
+      "rows": 6,
+      "allSingleCol": false,
+      "collections": [
+        "crm_customers"
+      ],
+      "fieldCount": 6,
+      "requiredCount": 5,
+      "fields": [
+        {
+          "fieldPath": "name",
+          "collectionName": "crm_customers",
+          "required": true
+        },
+        {
+          "fieldPath": "type",
+          "collectionName": "crm_customers",
+          "required": true
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "crm_customers",
+          "required": false
+        },
+        {
+          "fieldPath": "industry",
+          "collectionName": "crm_customers",
+          "required": true
+        },
+        {
+          "fieldPath": "country",
+          "collectionName": "crm_customers",
+          "required": true
+        },
+        {
+          "fieldPath": "level",
+          "collectionName": "crm_customers",
+          "required": true
+        }
+      ]
+    },
+    {
+      "uid": "4d0fd0",
+      "rows": 7,
+      "allSingleCol": false,
+      "collections": [
+        "pur_invoices"
+      ],
+      "fieldCount": 8,
+      "requiredCount": 3,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "pur_invoices",
+          "required": true
+        },
+        {
+          "fieldPath": "invoice_no",
+          "collectionName": "pur_invoices",
+          "required": true
+        },
+        {
+          "fieldPath": "billed_at",
+          "collectionName": "pur_invoices",
+          "required": false
+        },
+        {
+          "fieldPath": "invoice_amount",
+          "collectionName": "pur_invoices",
+          "required": false
+        },
+        {
+          "fieldPath": "po",
+          "collectionName": "pur_invoices",
+          "required": true
+        },
+        {
+          "fieldPath": "qty_billed",
+          "collectionName": "pur_invoices",
+          "required": false
+        },
+        {
+          "fieldPath": "match_result",
+          "collectionName": "pur_invoices",
+          "required": false
+        },
+        {
+          "fieldPath": "match_note",
+          "collectionName": "pur_invoices",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "4mbay3",
+      "rows": 9,
+      "allSingleCol": false,
+      "collections": [
+        "qm_inspections"
+      ],
+      "fieldCount": 10,
+      "requiredCount": 3,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "qm_inspections",
+          "required": true
+        },
+        {
+          "fieldPath": "supplier",
+          "collectionName": "qm_inspections",
+          "required": true
+        },
+        {
+          "fieldPath": "product",
+          "collectionName": "qm_inspections",
+          "required": false
+        },
+        {
+          "fieldPath": "insp_type",
+          "collectionName": "qm_inspections",
+          "required": true
+        },
+        {
+          "fieldPath": "ref_type",
+          "collectionName": "qm_inspections",
+          "required": false
+        },
+        {
+          "fieldPath": "ref_no",
+          "collectionName": "qm_inspections",
+          "required": false
+        },
+        {
+          "fieldPath": "lot_no",
+          "collectionName": "qm_inspections",
+          "required": false
+        },
+        {
+          "fieldPath": "lot_qty",
+          "collectionName": "qm_inspections",
+          "required": false
+        },
+        {
+          "fieldPath": "inspector",
+          "collectionName": "qm_inspections",
+          "required": false
+        },
+        {
+          "fieldPath": "note",
+          "collectionName": "qm_inspections",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "4rvgle",
+      "rows": 6,
+      "allSingleCol": true,
+      "collections": [
+        "wfl_flow_states"
+      ],
+      "fieldCount": 6,
+      "requiredCount": 0,
+      "fields": [
+        {
+          "fieldPath": "flow_id",
+          "collectionName": "wfl_flow_states",
+          "required": false
+        },
+        {
+          "fieldPath": "state",
+          "collectionName": "wfl_flow_states",
+          "required": false
+        },
+        {
+          "fieldPath": "doc_status_anchor",
+          "collectionName": "wfl_flow_states",
+          "required": false
+        },
+        {
+          "fieldPath": "allow_edit_role",
+          "collectionName": "wfl_flow_states",
+          "required": false
+        },
+        {
+          "fieldPath": "update_field",
+          "collectionName": "wfl_flow_states",
+          "required": false
+        },
+        {
+          "fieldPath": "update_value",
+          "collectionName": "wfl_flow_states",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "52nsgh",
+      "rows": 5,
+      "allSingleCol": false,
+      "collections": [
+        "mps_plans"
+      ],
+      "fieldCount": 4,
+      "requiredCount": 1,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "mps_plans",
+          "required": true
+        },
+        {
+          "fieldPath": "period_from",
+          "collectionName": "mps_plans",
+          "required": false
+        },
+        {
+          "fieldPath": "period_to",
+          "collectionName": "mps_plans",
+          "required": false
+        },
+        {
+          "fieldPath": "note",
+          "collectionName": "mps_plans",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "5rkjdz",
+      "rows": 5,
+      "allSingleCol": false,
+      "collections": [
+        "pur_order_lines"
+      ],
+      "fieldCount": 5,
+      "requiredCount": 3,
+      "fields": [
+        {
+          "fieldPath": "product",
+          "collectionName": "pur_order_lines",
+          "required": true
+        },
+        {
+          "fieldPath": "qty",
+          "collectionName": "pur_order_lines",
+          "required": true
+        },
+        {
+          "fieldPath": "unit_price",
+          "collectionName": "pur_order_lines",
+          "required": false
+        },
+        {
+          "fieldPath": "order",
+          "collectionName": "pur_order_lines",
+          "required": true
+        },
+        {
+          "fieldPath": "qty_received",
+          "collectionName": "pur_order_lines",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "5w2j4i",
+      "rows": 8,
+      "allSingleCol": false,
+      "collections": [
+        "wms_stock"
+      ],
+      "fieldCount": 8,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "status",
+          "collectionName": "wms_stock",
+          "required": false
+        },
+        {
+          "fieldPath": "product",
+          "collectionName": "wms_stock",
+          "required": true
+        },
+        {
+          "fieldPath": "bin",
+          "collectionName": "wms_stock",
+          "required": true
+        },
+        {
+          "fieldPath": "lot",
+          "collectionName": "wms_stock",
+          "required": false
+        },
+        {
+          "fieldPath": "qty_on_hand",
+          "collectionName": "wms_stock",
+          "required": false
+        },
+        {
+          "fieldPath": "qty_allocated",
+          "collectionName": "wms_stock",
+          "required": false
+        },
+        {
+          "fieldPath": "qty_locked",
+          "collectionName": "wms_stock",
+          "required": false
+        },
+        {
+          "fieldPath": "qty_available",
+          "collectionName": "wms_stock",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "61ap6a",
+      "rows": 5,
+      "allSingleCol": false,
+      "collections": [
+        "hub_as_vendors"
+      ],
+      "fieldCount": 4,
+      "requiredCount": 3,
+      "fields": [
+        {
+          "fieldPath": "name",
+          "collectionName": "hub_as_vendors",
+          "required": true
+        },
+        {
+          "fieldPath": "category",
+          "collectionName": "hub_as_vendors",
+          "required": true
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "hub_as_vendors",
+          "required": false
+        },
+        {
+          "fieldPath": "contact",
+          "collectionName": "hub_as_vendors",
+          "required": true
+        }
+      ]
+    },
+    {
+      "uid": "6essgo",
+      "rows": 2,
+      "allSingleCol": false,
+      "collections": [
+        "hub_md_asset_categories"
+      ],
+      "fieldCount": 3,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "hub_md_asset_categories",
+          "required": true
+        },
+        {
+          "fieldPath": "name",
+          "collectionName": "hub_md_asset_categories",
+          "required": true
+        },
+        {
+          "fieldPath": "is_active",
+          "collectionName": "hub_md_asset_categories",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "7rne95",
+      "rows": 6,
+      "allSingleCol": false,
+      "collections": [
+        "crm_customers"
+      ],
+      "fieldCount": 7,
+      "requiredCount": 5,
+      "fields": [
+        {
+          "fieldPath": "name",
+          "collectionName": "crm_customers",
+          "required": true
+        },
+        {
+          "fieldPath": "type",
+          "collectionName": "crm_customers",
+          "required": true
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "crm_customers",
+          "required": false
+        },
+        {
+          "fieldPath": "country",
+          "collectionName": "crm_customers",
+          "required": true
+        },
+        {
+          "fieldPath": "company_name",
+          "collectionName": "crm_customers",
+          "required": false
+        },
+        {
+          "fieldPath": "industry",
+          "collectionName": "crm_customers",
+          "required": true
+        },
+        {
+          "fieldPath": "level",
+          "collectionName": "crm_customers",
+          "required": true
+        }
+      ]
+    },
+    {
+      "uid": "7w13qv",
+      "rows": 5,
+      "allSingleCol": false,
+      "collections": [
+        "crm_leads"
+      ],
+      "fieldCount": 5,
+      "requiredCount": 1,
+      "fields": [
+        {
+          "fieldPath": "name",
+          "collectionName": "crm_leads",
+          "required": true
+        },
+        {
+          "fieldPath": "expected_amount",
+          "collectionName": "crm_leads",
+          "required": false
+        },
+        {
+          "fieldPath": "company",
+          "collectionName": "crm_leads",
+          "required": false
+        },
+        {
+          "fieldPath": "stage",
+          "collectionName": "crm_leads",
+          "required": false
+        },
+        {
+          "fieldPath": "owner",
+          "collectionName": "crm_leads",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "81t3ox",
+      "rows": 9,
+      "allSingleCol": false,
+      "collections": [
+        "pur_quotes"
+      ],
+      "fieldCount": 9,
+      "requiredCount": 3,
+      "fields": [
+        {
+          "fieldPath": "status",
+          "collectionName": "pur_quotes",
+          "required": false
+        },
+        {
+          "fieldPath": "supplier",
+          "collectionName": "pur_quotes",
+          "required": true
+        },
+        {
+          "fieldPath": "product",
+          "collectionName": "pur_quotes",
+          "required": false
+        },
+        {
+          "fieldPath": "qty",
+          "collectionName": "pur_quotes",
+          "required": true
+        },
+        {
+          "fieldPath": "unit_price",
+          "collectionName": "pur_quotes",
+          "required": false
+        },
+        {
+          "fieldPath": "rfq",
+          "collectionName": "pur_quotes",
+          "required": true
+        },
+        {
+          "fieldPath": "lead_time_days",
+          "collectionName": "pur_quotes",
+          "required": false
+        },
+        {
+          "fieldPath": "valid_until",
+          "collectionName": "pur_quotes",
+          "required": false
+        },
+        {
+          "fieldPath": "is_won",
+          "collectionName": "pur_quotes",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "85su0i",
+      "rows": 5,
+      "allSingleCol": false,
+      "collections": [
+        "mps_plan_items"
+      ],
+      "fieldCount": 5,
+      "requiredCount": 4,
+      "fields": [
+        {
+          "fieldPath": "product",
+          "collectionName": "mps_plan_items",
+          "required": true
+        },
+        {
+          "fieldPath": "plan",
+          "collectionName": "mps_plan_items",
+          "required": true
+        },
+        {
+          "fieldPath": "period",
+          "collectionName": "mps_plan_items",
+          "required": true
+        },
+        {
+          "fieldPath": "forecast_qty",
+          "collectionName": "mps_plan_items",
+          "required": true
+        },
+        {
+          "fieldPath": "note",
+          "collectionName": "mps_plan_items",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "87erb4",
+      "rows": 11,
+      "allSingleCol": false,
+      "collections": [
+        "hub_inv_products"
+      ],
+      "fieldCount": 17,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "name",
+          "collectionName": "hub_inv_products",
+          "required": true
+        },
+        {
+          "fieldPath": "category",
+          "collectionName": "hub_inv_products",
+          "required": true
+        },
+        {
+          "fieldPath": "abc_class",
+          "collectionName": "hub_inv_products",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "hub_inv_products",
+          "required": false
+        },
+        {
+          "fieldPath": "unit_price",
+          "collectionName": "hub_inv_products",
+          "required": false
+        },
+        {
+          "fieldPath": "avg_daily_use",
+          "collectionName": "hub_inv_products",
+          "required": false
+        },
+        {
+          "fieldPath": "gb2760_category",
+          "collectionName": "hub_inv_products",
+          "required": false
+        },
+        {
+          "fieldPath": "shelf_life_days",
+          "collectionName": "hub_inv_products",
+          "required": false
+        },
+        {
+          "fieldPath": "lot_size",
+          "collectionName": "hub_inv_products",
+          "required": false
+        },
+        {
+          "fieldPath": "sku",
+          "collectionName": "hub_inv_products",
+          "required": false
+        },
+        {
+          "fieldPath": "temp_zone",
+          "collectionName": "hub_inv_products",
+          "required": false
+        },
+        {
+          "fieldPath": "storage_conditions",
+          "collectionName": "hub_inv_products",
+          "required": false
+        },
+        {
+          "fieldPath": "allergens",
+          "collectionName": "hub_inv_products",
+          "required": false
+        },
+        {
+          "fieldPath": "reorder_level",
+          "collectionName": "hub_inv_products",
+          "required": false
+        },
+        {
+          "fieldPath": "lead_time_days",
+          "collectionName": "hub_inv_products",
+          "required": false
+        },
+        {
+          "fieldPath": "safety_stock",
+          "collectionName": "hub_inv_products",
+          "required": false
+        },
+        {
+          "fieldPath": "reorder_point",
+          "collectionName": "hub_inv_products",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "8riln3",
+      "rows": 9,
+      "allSingleCol": false,
+      "collections": [
+        "srm_audit_records"
+      ],
+      "fieldCount": 10,
+      "requiredCount": 1,
+      "fields": [
+        {
+          "fieldPath": "audit_date",
+          "collectionName": "srm_audit_records",
+          "required": false
+        },
+        {
+          "fieldPath": "supplier",
+          "collectionName": "srm_audit_records",
+          "required": true
+        },
+        {
+          "fieldPath": "total_score",
+          "collectionName": "srm_audit_records",
+          "required": false
+        },
+        {
+          "fieldPath": "checklist_template",
+          "collectionName": "srm_audit_records",
+          "required": false
+        },
+        {
+          "fieldPath": "auditor",
+          "collectionName": "srm_audit_records",
+          "required": false
+        },
+        {
+          "fieldPath": "score_quality",
+          "collectionName": "srm_audit_records",
+          "required": false
+        },
+        {
+          "fieldPath": "score_system",
+          "collectionName": "srm_audit_records",
+          "required": false
+        },
+        {
+          "fieldPath": "score_compliance",
+          "collectionName": "srm_audit_records",
+          "required": false
+        },
+        {
+          "fieldPath": "grade",
+          "collectionName": "srm_audit_records",
+          "required": false
+        },
+        {
+          "fieldPath": "nonconformities",
+          "collectionName": "srm_audit_records",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "8ve7wb",
+      "rows": 7,
+      "allSingleCol": false,
+      "collections": [
+        "hub_as_maintenance"
+      ],
+      "fieldCount": 6,
+      "requiredCount": 1,
+      "fields": [
+        {
+          "fieldPath": "scheduled_at",
+          "collectionName": "hub_as_maintenance",
+          "required": false
+        },
+        {
+          "fieldPath": "type",
+          "collectionName": "hub_as_maintenance",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "hub_as_maintenance",
+          "required": false
+        },
+        {
+          "fieldPath": "vendor",
+          "collectionName": "hub_as_maintenance",
+          "required": true
+        },
+        {
+          "fieldPath": "cost",
+          "collectionName": "hub_as_maintenance",
+          "required": false
+        },
+        {
+          "fieldPath": "asset",
+          "collectionName": "hub_as_maintenance",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "94bgqe",
+      "rows": 6,
+      "allSingleCol": false,
+      "collections": [
+        "crm_deals"
+      ],
+      "fieldCount": 8,
+      "requiredCount": 1,
+      "fields": [
+        {
+          "fieldPath": "name",
+          "collectionName": "crm_deals",
+          "required": true
+        },
+        {
+          "fieldPath": "closed_date",
+          "collectionName": "crm_deals",
+          "required": false
+        },
+        {
+          "fieldPath": "expected_close_date",
+          "collectionName": "crm_deals",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "crm_deals",
+          "required": false
+        },
+        {
+          "fieldPath": "amount",
+          "collectionName": "crm_deals",
+          "required": false
+        },
+        {
+          "fieldPath": "stage",
+          "collectionName": "crm_deals",
+          "required": false
+        },
+        {
+          "fieldPath": "owner",
+          "collectionName": "crm_deals",
+          "required": false
+        },
+        {
+          "fieldPath": "deadline",
+          "collectionName": "crm_deals",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "94yikt",
+      "rows": 6,
+      "allSingleCol": false,
+      "collections": [
+        "srm_score_cards"
+      ],
+      "fieldCount": 10,
+      "requiredCount": 0,
+      "fields": [
+        {
+          "fieldPath": "score_price",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "total_score",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "score_delivery",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "score_service",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "score_compliance",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "rating_change",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "rating",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "period",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "supplier_id",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "score_quality",
+          "collectionName": "srm_score_cards",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "a48so0",
+      "rows": 6,
+      "allSingleCol": false,
+      "collections": [
+        "mfg_boms"
+      ],
+      "fieldCount": 6,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "mfg_boms",
+          "required": true
+        },
+        {
+          "fieldPath": "product",
+          "collectionName": "mfg_boms",
+          "required": true
+        },
+        {
+          "fieldPath": "version",
+          "collectionName": "mfg_boms",
+          "required": false
+        },
+        {
+          "fieldPath": "is_default",
+          "collectionName": "mfg_boms",
+          "required": false
+        },
+        {
+          "fieldPath": "bom_status",
+          "collectionName": "mfg_boms",
+          "required": false
+        },
+        {
+          "fieldPath": "remark",
+          "collectionName": "mfg_boms",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "an3g1g",
+      "rows": 7,
+      "allSingleCol": false,
+      "collections": [
+        "crm_invoices"
+      ],
+      "fieldCount": 6,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "invoice_no",
+          "collectionName": "crm_invoices",
+          "required": true
+        },
+        {
+          "fieldPath": "issued_at",
+          "collectionName": "crm_invoices",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "crm_invoices",
+          "required": false
+        },
+        {
+          "fieldPath": "customer",
+          "collectionName": "crm_invoices",
+          "required": true
+        },
+        {
+          "fieldPath": "amount",
+          "collectionName": "crm_invoices",
+          "required": false
+        },
+        {
+          "fieldPath": "deal",
+          "collectionName": "crm_invoices",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "aodc3y",
+      "rows": 7,
+      "allSingleCol": false,
+      "collections": [
+        "hub_pj_projects"
+      ],
+      "fieldCount": 10,
+      "requiredCount": 1,
+      "fields": [
+        {
+          "fieldPath": "name",
+          "collectionName": "hub_pj_projects",
+          "required": true
+        },
+        {
+          "fieldPath": "planned_end_date",
+          "collectionName": "hub_pj_projects",
+          "required": false
+        },
+        {
+          "fieldPath": "start_date",
+          "collectionName": "hub_pj_projects",
+          "required": false
+        },
+        {
+          "fieldPath": "due_date",
+          "collectionName": "hub_pj_projects",
+          "required": false
+        },
+        {
+          "fieldPath": "priority",
+          "collectionName": "hub_pj_projects",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "hub_pj_projects",
+          "required": false
+        },
+        {
+          "fieldPath": "customer",
+          "collectionName": "hub_pj_projects",
+          "required": false
+        },
+        {
+          "fieldPath": "no",
+          "collectionName": "hub_pj_projects",
+          "required": false
+        },
+        {
+          "fieldPath": "owner",
+          "collectionName": "hub_pj_projects",
+          "required": false
+        },
+        {
+          "fieldPath": "progress",
+          "collectionName": "hub_pj_projects",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "aq29l1",
+      "rows": 5,
+      "allSingleCol": false,
+      "collections": [
+        "wms_bins"
+      ],
+      "fieldCount": 5,
+      "requiredCount": 1,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "wms_bins",
+          "required": true
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "wms_bins",
+          "required": false
+        },
+        {
+          "fieldPath": "zone",
+          "collectionName": "wms_bins",
+          "required": false
+        },
+        {
+          "fieldPath": "capacity",
+          "collectionName": "wms_bins",
+          "required": false
+        },
+        {
+          "fieldPath": "sku_summary",
+          "collectionName": "wms_bins",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "ax4f99",
+      "rows": 7,
+      "allSingleCol": false,
+      "collections": [
+        "mfg_bom_operations"
+      ],
+      "fieldCount": 8,
+      "requiredCount": 4,
+      "fields": [
+        {
+          "fieldPath": "name",
+          "collectionName": "mfg_bom_operations",
+          "required": true
+        },
+        {
+          "fieldPath": "bom",
+          "collectionName": "mfg_bom_operations",
+          "required": true
+        },
+        {
+          "fieldPath": "seq",
+          "collectionName": "mfg_bom_operations",
+          "required": true
+        },
+        {
+          "fieldPath": "workcenter",
+          "collectionName": "mfg_bom_operations",
+          "required": true
+        },
+        {
+          "fieldPath": "setup_min",
+          "collectionName": "mfg_bom_operations",
+          "required": false
+        },
+        {
+          "fieldPath": "run_min",
+          "collectionName": "mfg_bom_operations",
+          "required": false
+        },
+        {
+          "fieldPath": "batch_size",
+          "collectionName": "mfg_bom_operations",
+          "required": false
+        },
+        {
+          "fieldPath": "alt_workcenter",
+          "collectionName": "mfg_bom_operations",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "b2zwvo",
+      "rows": 7,
+      "allSingleCol": true,
+      "collections": [
+        "wfl_flow_transitions"
+      ],
+      "fieldCount": 7,
+      "requiredCount": 0,
+      "fields": [
+        {
+          "fieldPath": "flow_id",
+          "collectionName": "wfl_flow_transitions",
+          "required": false
+        },
+        {
+          "fieldPath": "state",
+          "collectionName": "wfl_flow_transitions",
+          "required": false
+        },
+        {
+          "fieldPath": "action",
+          "collectionName": "wfl_flow_transitions",
+          "required": false
+        },
+        {
+          "fieldPath": "next_state",
+          "collectionName": "wfl_flow_transitions",
+          "required": false
+        },
+        {
+          "fieldPath": "allowed_role",
+          "collectionName": "wfl_flow_transitions",
+          "required": false
+        },
+        {
+          "fieldPath": "condition_expr",
+          "collectionName": "wfl_flow_transitions",
+          "required": false
+        },
+        {
+          "fieldPath": "allow_self_approval",
+          "collectionName": "wfl_flow_transitions",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "brxmsb",
+      "rows": 9,
+      "allSingleCol": false,
+      "collections": [
+        "srm_suppliers"
+      ],
+      "fieldCount": 14,
+      "requiredCount": 8,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "srm_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "name",
+          "collectionName": "srm_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "uscc",
+          "collectionName": "srm_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "admitted_at",
+          "collectionName": "srm_suppliers",
+          "required": false
+        },
+        {
+          "fieldPath": "category",
+          "collectionName": "srm_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "lifecycle_status",
+          "collectionName": "srm_suppliers",
+          "required": false
+        },
+        {
+          "fieldPath": "contact",
+          "collectionName": "srm_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "source",
+          "collectionName": "srm_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "phone",
+          "collectionName": "srm_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "region",
+          "collectionName": "srm_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "regulatory_risk",
+          "collectionName": "srm_suppliers",
+          "required": false
+        },
+        {
+          "fieldPath": "audit_grade",
+          "collectionName": "srm_suppliers",
+          "required": false
+        },
+        {
+          "fieldPath": "iqc_level",
+          "collectionName": "srm_suppliers",
+          "required": false
+        },
+        {
+          "fieldPath": "note",
+          "collectionName": "srm_suppliers",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "bzi6b6",
+      "rows": 7,
+      "allSingleCol": false,
+      "collections": [
+        "srm_score_cards"
+      ],
+      "fieldCount": 8,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "supplier",
+          "collectionName": "srm_score_cards",
+          "required": true
+        },
+        {
+          "fieldPath": "score_price",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "total_score",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "period",
+          "collectionName": "srm_score_cards",
+          "required": true
+        },
+        {
+          "fieldPath": "score_quality",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "score_delivery",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "score_service",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "rating",
+          "collectionName": "srm_score_cards",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "c0eucs",
+      "rows": 5,
+      "allSingleCol": false,
+      "collections": [
+        "hub_kb_articles"
+      ],
+      "fieldCount": 5,
+      "requiredCount": 1,
+      "fields": [
+        {
+          "fieldPath": "title",
+          "collectionName": "hub_kb_articles",
+          "required": true
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "hub_kb_articles",
+          "required": false
+        },
+        {
+          "fieldPath": "category_text",
+          "collectionName": "hub_kb_articles",
+          "required": false
+        },
+        {
+          "fieldPath": "category_id",
+          "collectionName": "hub_kb_articles",
+          "required": false
+        },
+        {
+          "fieldPath": "views",
+          "collectionName": "hub_kb_articles",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "c7w5a7",
+      "rows": 3,
+      "allSingleCol": true,
+      "collections": [
+        "hub_md_product_categories"
+      ],
+      "fieldCount": 3,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "name",
+          "collectionName": "hub_md_product_categories",
+          "required": true
+        },
+        {
+          "fieldPath": "code",
+          "collectionName": "hub_md_product_categories",
+          "required": true
+        },
+        {
+          "fieldPath": "is_active",
+          "collectionName": "hub_md_product_categories",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "ce10sk",
+      "rows": 5,
+      "allSingleCol": false,
+      "collections": [
+        "hub_pj_milestones"
+      ],
+      "fieldCount": 6,
+      "requiredCount": 1,
+      "fields": [
+        {
+          "fieldPath": "name",
+          "collectionName": "hub_pj_milestones",
+          "required": true
+        },
+        {
+          "fieldPath": "due_date",
+          "collectionName": "hub_pj_milestones",
+          "required": false
+        },
+        {
+          "fieldPath": "due_at",
+          "collectionName": "hub_pj_milestones",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "hub_pj_milestones",
+          "required": false
+        },
+        {
+          "fieldPath": "done",
+          "collectionName": "hub_pj_milestones",
+          "required": false
+        },
+        {
+          "fieldPath": "hub_pj_ms_project_id",
+          "collectionName": "hub_pj_milestones",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "cf4elm",
+      "rows": 7,
+      "allSingleCol": false,
+      "collections": [
+        "crm_payments"
+      ],
+      "fieldCount": 6,
+      "requiredCount": 1,
+      "fields": [
+        {
+          "fieldPath": "paid_at",
+          "collectionName": "crm_payments",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "crm_payments",
+          "required": false
+        },
+        {
+          "fieldPath": "customer",
+          "collectionName": "crm_payments",
+          "required": true
+        },
+        {
+          "fieldPath": "amount",
+          "collectionName": "crm_payments",
+          "required": false
+        },
+        {
+          "fieldPath": "deal",
+          "collectionName": "crm_payments",
+          "required": false
+        },
+        {
+          "fieldPath": "method",
+          "collectionName": "crm_payments",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "coiged",
+      "rows": 1,
+      "allSingleCol": true,
+      "collections": [
+        "users"
+      ],
+      "fieldCount": 1,
+      "requiredCount": 0,
+      "fields": [
+        {
+          "fieldPath": "nickname",
+          "collectionName": "users",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "cygp8e",
+      "rows": 7,
+      "allSingleCol": false,
+      "collections": [
+        "mfg_work_centers"
+      ],
+      "fieldCount": 8,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "mfg_work_centers",
+          "required": true
+        },
+        {
+          "fieldPath": "name",
+          "collectionName": "mfg_work_centers",
+          "required": true
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "mfg_work_centers",
+          "required": false
+        },
+        {
+          "fieldPath": "cost_per_hour",
+          "collectionName": "mfg_work_centers",
+          "required": false
+        },
+        {
+          "fieldPath": "capacity_parallel",
+          "collectionName": "mfg_work_centers",
+          "required": false
+        },
+        {
+          "fieldPath": "efficiency_pct",
+          "collectionName": "mfg_work_centers",
+          "required": false
+        },
+        {
+          "fieldPath": "working_hours",
+          "collectionName": "mfg_work_centers",
+          "required": false
+        },
+        {
+          "fieldPath": "holiday_calendar_id",
+          "collectionName": "mfg_work_centers",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "d1xafv",
+      "rows": 4,
+      "allSingleCol": false,
+      "collections": [
+        "pur_rfqs"
+      ],
+      "fieldCount": 4,
+      "requiredCount": 1,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "pur_rfqs",
+          "required": true
+        },
+        {
+          "fieldPath": "doc_status",
+          "collectionName": "pur_rfqs",
+          "required": false
+        },
+        {
+          "fieldPath": "pr",
+          "collectionName": "pur_rfqs",
+          "required": false
+        },
+        {
+          "fieldPath": "deadline",
+          "collectionName": "pur_rfqs",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "d4210h",
+      "rows": 6,
+      "allSingleCol": false,
+      "collections": [
+        "crm_products"
+      ],
+      "fieldCount": 8,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "name",
+          "collectionName": "crm_products",
+          "required": true
+        },
+        {
+          "fieldPath": "category",
+          "collectionName": "crm_products",
+          "required": true
+        },
+        {
+          "fieldPath": "unit",
+          "collectionName": "crm_products",
+          "required": false
+        },
+        {
+          "fieldPath": "unit_price",
+          "collectionName": "crm_products",
+          "required": false
+        },
+        {
+          "fieldPath": "base_price",
+          "collectionName": "crm_products",
+          "required": false
+        },
+        {
+          "fieldPath": "active",
+          "collectionName": "crm_products",
+          "required": false
+        },
+        {
+          "fieldPath": "sku",
+          "collectionName": "crm_products",
+          "required": false
+        },
+        {
+          "fieldPath": "pricing_mode",
+          "collectionName": "crm_products",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "dui5ip",
+      "rows": 5,
+      "allSingleCol": false,
+      "collections": [
+        "so_orders"
+      ],
+      "fieldCount": 5,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "so_orders",
+          "required": true
+        },
+        {
+          "fieldPath": "need_date",
+          "collectionName": "so_orders",
+          "required": true
+        },
+        {
+          "fieldPath": "shipped_at",
+          "collectionName": "so_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "amount",
+          "collectionName": "so_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "note",
+          "collectionName": "so_orders",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "en6fa4",
+      "rows": 5,
+      "allSingleCol": false,
+      "collections": [
+        "crm_contacts"
+      ],
+      "fieldCount": 5,
+      "requiredCount": 1,
+      "fields": [
+        {
+          "fieldPath": "status",
+          "collectionName": "crm_contacts",
+          "required": false
+        },
+        {
+          "fieldPath": "full_name",
+          "collectionName": "crm_contacts",
+          "required": false
+        },
+        {
+          "fieldPath": "job_title",
+          "collectionName": "crm_contacts",
+          "required": false
+        },
+        {
+          "fieldPath": "email",
+          "collectionName": "crm_contacts",
+          "required": false
+        },
+        {
+          "fieldPath": "phone",
+          "collectionName": "crm_contacts",
+          "required": true
+        }
+      ]
+    },
+    {
+      "uid": "eomkcb",
+      "rows": 7,
+      "allSingleCol": false,
+      "collections": [
+        "wms_lots"
+      ],
+      "fieldCount": 8,
+      "requiredCount": 1,
+      "fields": [
+        {
+          "fieldPath": "production_date",
+          "collectionName": "wms_lots",
+          "required": false
+        },
+        {
+          "fieldPath": "expiry_date",
+          "collectionName": "wms_lots",
+          "required": false
+        },
+        {
+          "fieldPath": "removal_date",
+          "collectionName": "wms_lots",
+          "required": false
+        },
+        {
+          "fieldPath": "alert_date",
+          "collectionName": "wms_lots",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "wms_lots",
+          "required": false
+        },
+        {
+          "fieldPath": "supplier",
+          "collectionName": "wms_lots",
+          "required": false
+        },
+        {
+          "fieldPath": "product",
+          "collectionName": "wms_lots",
+          "required": false
+        },
+        {
+          "fieldPath": "lot_no",
+          "collectionName": "wms_lots",
+          "required": true
+        }
+      ]
+    },
+    {
+      "uid": "esio11",
+      "rows": 3,
+      "allSingleCol": true,
+      "collections": [
+        "hub_md_ticket_categories"
+      ],
+      "fieldCount": 3,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "name",
+          "collectionName": "hub_md_ticket_categories",
+          "required": true
+        },
+        {
+          "fieldPath": "code",
+          "collectionName": "hub_md_ticket_categories",
+          "required": true
+        },
+        {
+          "fieldPath": "is_active",
+          "collectionName": "hub_md_ticket_categories",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "fkht5g",
+      "rows": 5,
+      "allSingleCol": false,
+      "collections": [
+        "hub_as_vendors"
+      ],
+      "fieldCount": 4,
+      "requiredCount": 3,
+      "fields": [
+        {
+          "fieldPath": "name",
+          "collectionName": "hub_as_vendors",
+          "required": true
+        },
+        {
+          "fieldPath": "category",
+          "collectionName": "hub_as_vendors",
+          "required": true
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "hub_as_vendors",
+          "required": false
+        },
+        {
+          "fieldPath": "contact",
+          "collectionName": "hub_as_vendors",
+          "required": true
+        }
+      ]
+    },
+    {
+      "uid": "ft6zyn",
+      "rows": 3,
+      "allSingleCol": true,
+      "collections": [
+        "hub_kb_articles"
+      ],
+      "fieldCount": 3,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "title",
+          "collectionName": "hub_kb_articles",
+          "required": true
+        },
+        {
+          "fieldPath": "category",
+          "collectionName": "hub_kb_articles",
+          "required": true
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "hub_kb_articles",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "g2th54",
+      "rows": 5,
+      "allSingleCol": false,
+      "collections": [
+        "mfg_boms"
+      ],
+      "fieldCount": 4,
+      "requiredCount": 1,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "mfg_boms",
+          "required": true
+        },
+        {
+          "fieldPath": "is_default",
+          "collectionName": "mfg_boms",
+          "required": false
+        },
+        {
+          "fieldPath": "version",
+          "collectionName": "mfg_boms",
+          "required": false
+        },
+        {
+          "fieldPath": "remark",
+          "collectionName": "mfg_boms",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "g5hp2c",
+      "rows": 7,
+      "allSingleCol": true,
+      "collections": [
+        "wfl_flow_configs"
+      ],
+      "fieldCount": 7,
+      "requiredCount": 3,
+      "fields": [
+        {
+          "fieldPath": "doc_type",
+          "collectionName": "wfl_flow_configs",
+          "required": true
+        },
+        {
+          "fieldPath": "title",
+          "collectionName": "wfl_flow_configs",
+          "required": true
+        },
+        {
+          "fieldPath": "state_field",
+          "collectionName": "wfl_flow_configs",
+          "required": false
+        },
+        {
+          "fieldPath": "approver_map",
+          "collectionName": "wfl_flow_configs",
+          "required": false
+        },
+        {
+          "fieldPath": "extras",
+          "collectionName": "wfl_flow_configs",
+          "required": false
+        },
+        {
+          "fieldPath": "is_active",
+          "collectionName": "wfl_flow_configs",
+          "required": false
+        },
+        {
+          "fieldPath": "config_note",
+          "collectionName": "wfl_flow_configs",
+          "required": true
+        }
+      ]
+    },
+    {
+      "uid": "gfive1",
+      "rows": 7,
+      "allSingleCol": false,
+      "collections": [
+        "wms_reservations"
+      ],
+      "fieldCount": 8,
+      "requiredCount": 5,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "wms_reservations",
+          "required": true
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "wms_reservations",
+          "required": false
+        },
+        {
+          "fieldPath": "product",
+          "collectionName": "wms_reservations",
+          "required": true
+        },
+        {
+          "fieldPath": "lot",
+          "collectionName": "wms_reservations",
+          "required": false
+        },
+        {
+          "fieldPath": "bin",
+          "collectionName": "wms_reservations",
+          "required": true
+        },
+        {
+          "fieldPath": "qty",
+          "collectionName": "wms_reservations",
+          "required": true
+        },
+        {
+          "fieldPath": "ref_type",
+          "collectionName": "wms_reservations",
+          "required": false
+        },
+        {
+          "fieldPath": "ref_id",
+          "collectionName": "wms_reservations",
+          "required": true
+        }
+      ]
+    },
+    {
+      "uid": "gi584m",
+      "rows": 8,
+      "allSingleCol": false,
+      "collections": [
+        "hub_tk_tickets"
+      ],
+      "fieldCount": 8,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "title",
+          "collectionName": "hub_tk_tickets",
+          "required": true
+        },
+        {
+          "fieldPath": "planned_resolve_at",
+          "collectionName": "hub_tk_tickets",
+          "required": false
+        },
+        {
+          "fieldPath": "category",
+          "collectionName": "hub_tk_tickets",
+          "required": false
+        },
+        {
+          "fieldPath": "priority",
+          "collectionName": "hub_tk_tickets",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "hub_tk_tickets",
+          "required": false
+        },
+        {
+          "fieldPath": "assignee",
+          "collectionName": "hub_tk_tickets",
+          "required": false
+        },
+        {
+          "fieldPath": "customer",
+          "collectionName": "hub_tk_tickets",
+          "required": true
+        },
+        {
+          "fieldPath": "is_overdue",
+          "collectionName": "hub_tk_tickets",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "gqmoad",
+      "rows": 9,
+      "allSingleCol": false,
+      "collections": [
+        "srm_suppliers"
+      ],
+      "fieldCount": 14,
+      "requiredCount": 8,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "srm_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "name",
+          "collectionName": "srm_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "uscc",
+          "collectionName": "srm_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "admitted_at",
+          "collectionName": "srm_suppliers",
+          "required": false
+        },
+        {
+          "fieldPath": "category",
+          "collectionName": "srm_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "lifecycle_status",
+          "collectionName": "srm_suppliers",
+          "required": false
+        },
+        {
+          "fieldPath": "contact",
+          "collectionName": "srm_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "source",
+          "collectionName": "srm_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "phone",
+          "collectionName": "srm_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "region",
+          "collectionName": "srm_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "regulatory_risk",
+          "collectionName": "srm_suppliers",
+          "required": false
+        },
+        {
+          "fieldPath": "audit_grade",
+          "collectionName": "srm_suppliers",
+          "required": false
+        },
+        {
+          "fieldPath": "iqc_level",
+          "collectionName": "srm_suppliers",
+          "required": false
+        },
+        {
+          "fieldPath": "note",
+          "collectionName": "srm_suppliers",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "gskig0",
+      "rows": 6,
+      "allSingleCol": false,
+      "collections": [
+        "crm_customers"
+      ],
+      "fieldCount": 6,
+      "requiredCount": 5,
+      "fields": [
+        {
+          "fieldPath": "name",
+          "collectionName": "crm_customers",
+          "required": true
+        },
+        {
+          "fieldPath": "type",
+          "collectionName": "crm_customers",
+          "required": true
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "crm_customers",
+          "required": false
+        },
+        {
+          "fieldPath": "industry",
+          "collectionName": "crm_customers",
+          "required": true
+        },
+        {
+          "fieldPath": "country",
+          "collectionName": "crm_customers",
+          "required": true
+        },
+        {
+          "fieldPath": "level",
+          "collectionName": "crm_customers",
+          "required": true
+        }
+      ]
+    },
+    {
+      "uid": "h0u7cj",
+      "rows": 2,
+      "allSingleCol": false,
+      "collections": [
+        "hub_md_customer_categories"
+      ],
+      "fieldCount": 3,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "hub_md_customer_categories",
+          "required": true
+        },
+        {
+          "fieldPath": "name",
+          "collectionName": "hub_md_customer_categories",
+          "required": true
+        },
+        {
+          "fieldPath": "is_active",
+          "collectionName": "hub_md_customer_categories",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "hfs210",
+      "rows": 6,
+      "allSingleCol": true,
+      "collections": [
+        "wfl_approval_records"
+      ],
+      "fieldCount": 6,
+      "requiredCount": 4,
+      "fields": [
+        {
+          "fieldPath": "doc_type",
+          "collectionName": "wfl_approval_records",
+          "required": true
+        },
+        {
+          "fieldPath": "doc_id",
+          "collectionName": "wfl_approval_records",
+          "required": true
+        },
+        {
+          "fieldPath": "action",
+          "collectionName": "wfl_approval_records",
+          "required": true
+        },
+        {
+          "fieldPath": "approver",
+          "collectionName": "wfl_approval_records",
+          "required": false
+        },
+        {
+          "fieldPath": "comment",
+          "collectionName": "wfl_approval_records",
+          "required": false
+        },
+        {
+          "fieldPath": "source",
+          "collectionName": "wfl_approval_records",
+          "required": true
+        }
+      ]
+    },
+    {
+      "uid": "hnnh4o",
+      "rows": 4,
+      "allSingleCol": true,
+      "collections": [
+        "mrp_confirm_intents"
+      ],
+      "fieldCount": 4,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "suggestion_id",
+          "collectionName": "mrp_confirm_intents",
+          "required": true
+        },
+        {
+          "fieldPath": "action",
+          "collectionName": "mrp_confirm_intents",
+          "required": true
+        },
+        {
+          "fieldPath": "operator",
+          "collectionName": "mrp_confirm_intents",
+          "required": false
+        },
+        {
+          "fieldPath": "note",
+          "collectionName": "mrp_confirm_intents",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "hu3tdz",
+      "rows": 4,
+      "allSingleCol": false,
+      "collections": [
+        "hub_hr_departments"
+      ],
+      "fieldCount": 4,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "hub_hr_departments",
+          "required": true
+        },
+        {
+          "fieldPath": "name",
+          "collectionName": "hub_hr_departments",
+          "required": true
+        },
+        {
+          "fieldPath": "manager",
+          "collectionName": "hub_hr_departments",
+          "required": false
+        },
+        {
+          "fieldPath": "headcount",
+          "collectionName": "hub_hr_departments",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "i5gygr",
+      "rows": 6,
+      "allSingleCol": false,
+      "collections": [
+        "wms_shipments"
+      ],
+      "fieldCount": 4,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "shipment_no",
+          "collectionName": "wms_shipments",
+          "required": true
+        },
+        {
+          "fieldPath": "qty",
+          "collectionName": "wms_shipments",
+          "required": true
+        },
+        {
+          "fieldPath": "shipment_type",
+          "collectionName": "wms_shipments",
+          "required": false
+        },
+        {
+          "fieldPath": "note",
+          "collectionName": "wms_shipments",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "icppz2",
+      "rows": 7,
+      "allSingleCol": false,
+      "collections": [
+        "hub_as_assets"
+      ],
+      "fieldCount": 9,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "name",
+          "collectionName": "hub_as_assets",
+          "required": true
+        },
+        {
+          "fieldPath": "purchase_date",
+          "collectionName": "hub_as_assets",
+          "required": false
+        },
+        {
+          "fieldPath": "category",
+          "collectionName": "hub_as_assets",
+          "required": true
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "hub_as_assets",
+          "required": false
+        },
+        {
+          "fieldPath": "value",
+          "collectionName": "hub_as_assets",
+          "required": false
+        },
+        {
+          "fieldPath": "no",
+          "collectionName": "hub_as_assets",
+          "required": false
+        },
+        {
+          "fieldPath": "warranty_until",
+          "collectionName": "hub_as_assets",
+          "required": false
+        },
+        {
+          "fieldPath": "tag",
+          "collectionName": "hub_as_assets",
+          "required": false
+        },
+        {
+          "fieldPath": "brand",
+          "collectionName": "hub_as_assets",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "ixhbr2",
+      "rows": 2,
+      "allSingleCol": true,
+      "collections": [
+        "pur_rfqs"
+      ],
+      "fieldCount": 2,
+      "requiredCount": 1,
+      "fields": [
+        {
+          "fieldPath": "deadline",
+          "collectionName": "pur_rfqs",
+          "required": false
+        },
+        {
+          "fieldPath": "code",
+          "collectionName": "pur_rfqs",
+          "required": true
+        }
+      ]
+    },
+    {
+      "uid": "j4194l",
+      "rows": 8,
+      "allSingleCol": false,
+      "collections": [
+        "srm_score_cards"
+      ],
+      "fieldCount": 10,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "supplier",
+          "collectionName": "srm_score_cards",
+          "required": true
+        },
+        {
+          "fieldPath": "score_price",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "total_score",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "period",
+          "collectionName": "srm_score_cards",
+          "required": true
+        },
+        {
+          "fieldPath": "score_quality",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "score_delivery",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "score_service",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "score_compliance",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "rating",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "rating_change",
+          "collectionName": "srm_score_cards",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "jcq1cw",
+      "rows": 4,
+      "allSingleCol": false,
+      "collections": [
+        "mfg_material_issues"
+      ],
+      "fieldCount": 4,
+      "requiredCount": 1,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "mfg_material_issues",
+          "required": true
+        },
+        {
+          "fieldPath": "issue_date",
+          "collectionName": "mfg_material_issues",
+          "required": false
+        },
+        {
+          "fieldPath": "qty",
+          "collectionName": "mfg_material_issues",
+          "required": false
+        },
+        {
+          "fieldPath": "note",
+          "collectionName": "mfg_material_issues",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "jen8ne",
+      "rows": 5,
+      "allSingleCol": false,
+      "collections": [
+        "crm_products"
+      ],
+      "fieldCount": 5,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "name",
+          "collectionName": "crm_products",
+          "required": true
+        },
+        {
+          "fieldPath": "category",
+          "collectionName": "crm_products",
+          "required": true
+        },
+        {
+          "fieldPath": "unit",
+          "collectionName": "crm_products",
+          "required": false
+        },
+        {
+          "fieldPath": "base_price",
+          "collectionName": "crm_products",
+          "required": false
+        },
+        {
+          "fieldPath": "pricing_mode",
+          "collectionName": "crm_products",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "jjnsbu",
+      "rows": 8,
+      "allSingleCol": false,
+      "collections": [
+        "so_orders"
+      ],
+      "fieldCount": 8,
+      "requiredCount": 3,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "so_orders",
+          "required": true
+        },
+        {
+          "fieldPath": "need_date",
+          "collectionName": "so_orders",
+          "required": true
+        },
+        {
+          "fieldPath": "doc_status",
+          "collectionName": "so_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "customer",
+          "collectionName": "so_orders",
+          "required": true
+        },
+        {
+          "fieldPath": "amount",
+          "collectionName": "so_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "deal",
+          "collectionName": "so_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "shipping_status",
+          "collectionName": "so_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "note",
+          "collectionName": "so_orders",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "ju1t6h",
+      "rows": 5,
+      "allSingleCol": false,
+      "collections": [
+        "hub_pj_milestones"
+      ],
+      "fieldCount": 5,
+      "requiredCount": 1,
+      "fields": [
+        {
+          "fieldPath": "name",
+          "collectionName": "hub_pj_milestones",
+          "required": true
+        },
+        {
+          "fieldPath": "due_at",
+          "collectionName": "hub_pj_milestones",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "hub_pj_milestones",
+          "required": false
+        },
+        {
+          "fieldPath": "project",
+          "collectionName": "hub_pj_milestones",
+          "required": false
+        },
+        {
+          "fieldPath": "done",
+          "collectionName": "hub_pj_milestones",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "kfpliz",
+      "rows": 4,
+      "allSingleCol": false,
+      "collections": [
+        "so_order_lines"
+      ],
+      "fieldCount": 4,
+      "requiredCount": 3,
+      "fields": [
+        {
+          "fieldPath": "product",
+          "collectionName": "so_order_lines",
+          "required": true
+        },
+        {
+          "fieldPath": "qty",
+          "collectionName": "so_order_lines",
+          "required": true
+        },
+        {
+          "fieldPath": "unit_price",
+          "collectionName": "so_order_lines",
+          "required": false
+        },
+        {
+          "fieldPath": "order",
+          "collectionName": "so_order_lines",
+          "required": true
+        }
+      ]
+    },
+    {
+      "uid": "khosql",
+      "rows": 5,
+      "allSingleCol": true,
+      "collections": [
+        "wfl_flow_configs"
+      ],
+      "fieldCount": 5,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "title",
+          "collectionName": "wfl_flow_configs",
+          "required": true
+        },
+        {
+          "fieldPath": "is_active",
+          "collectionName": "wfl_flow_configs",
+          "required": false
+        },
+        {
+          "fieldPath": "approver_map",
+          "collectionName": "wfl_flow_configs",
+          "required": false
+        },
+        {
+          "fieldPath": "extras",
+          "collectionName": "wfl_flow_configs",
+          "required": false
+        },
+        {
+          "fieldPath": "config_note",
+          "collectionName": "wfl_flow_configs",
+          "required": true
+        }
+      ]
+    },
+    {
+      "uid": "kmn1k0",
+      "rows": 3,
+      "allSingleCol": true,
+      "collections": [
+        "pur_rfq_suppliers"
+      ],
+      "fieldCount": 3,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "rfq",
+          "collectionName": "pur_rfq_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "supplier",
+          "collectionName": "pur_rfq_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "sent_at",
+          "collectionName": "pur_rfq_suppliers",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "koanv2",
+      "rows": 8,
+      "allSingleCol": false,
+      "collections": [
+        "wms_receipts"
+      ],
+      "fieldCount": 8,
+      "requiredCount": 3,
+      "fields": [
+        {
+          "fieldPath": "receipt_no",
+          "collectionName": "wms_receipts",
+          "required": true
+        },
+        {
+          "fieldPath": "received_at",
+          "collectionName": "wms_receipts",
+          "required": true
+        },
+        {
+          "fieldPath": "qty",
+          "collectionName": "wms_receipts",
+          "required": true
+        },
+        {
+          "fieldPath": "po_id",
+          "collectionName": "wms_receipts",
+          "required": false
+        },
+        {
+          "fieldPath": "lot_no",
+          "collectionName": "wms_receipts",
+          "required": false
+        },
+        {
+          "fieldPath": "source_no",
+          "collectionName": "wms_receipts",
+          "required": false
+        },
+        {
+          "fieldPath": "receipt_type",
+          "collectionName": "wms_receipts",
+          "required": false
+        },
+        {
+          "fieldPath": "note",
+          "collectionName": "wms_receipts",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "ktznhh",
+      "rows": 7,
+      "allSingleCol": false,
+      "collections": [
+        "crm_payments"
+      ],
+      "fieldCount": 6,
+      "requiredCount": 1,
+      "fields": [
+        {
+          "fieldPath": "paid_at",
+          "collectionName": "crm_payments",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "crm_payments",
+          "required": false
+        },
+        {
+          "fieldPath": "customer",
+          "collectionName": "crm_payments",
+          "required": true
+        },
+        {
+          "fieldPath": "amount",
+          "collectionName": "crm_payments",
+          "required": false
+        },
+        {
+          "fieldPath": "deal",
+          "collectionName": "crm_payments",
+          "required": false
+        },
+        {
+          "fieldPath": "method",
+          "collectionName": "crm_payments",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "kyf58k",
+      "rows": 5,
+      "allSingleCol": false,
+      "collections": [
+        "crm_invoices"
+      ],
+      "fieldCount": 4,
+      "requiredCount": 1,
+      "fields": [
+        {
+          "fieldPath": "invoice_no",
+          "collectionName": "crm_invoices",
+          "required": true
+        },
+        {
+          "fieldPath": "issued_at",
+          "collectionName": "crm_invoices",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "crm_invoices",
+          "required": false
+        },
+        {
+          "fieldPath": "amount",
+          "collectionName": "crm_invoices",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "lx3ep9",
+      "rows": 8,
+      "allSingleCol": false,
+      "collections": [
+        "hub_tk_tickets"
+      ],
+      "fieldCount": 8,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "title",
+          "collectionName": "hub_tk_tickets",
+          "required": true
+        },
+        {
+          "fieldPath": "planned_resolve_at",
+          "collectionName": "hub_tk_tickets",
+          "required": false
+        },
+        {
+          "fieldPath": "category",
+          "collectionName": "hub_tk_tickets",
+          "required": false
+        },
+        {
+          "fieldPath": "priority",
+          "collectionName": "hub_tk_tickets",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "hub_tk_tickets",
+          "required": false
+        },
+        {
+          "fieldPath": "assignee",
+          "collectionName": "hub_tk_tickets",
+          "required": false
+        },
+        {
+          "fieldPath": "customer",
+          "collectionName": "hub_tk_tickets",
+          "required": true
+        },
+        {
+          "fieldPath": "is_overdue",
+          "collectionName": "hub_tk_tickets",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "m69s30",
+      "rows": 7,
+      "allSingleCol": false,
+      "collections": [
+        "wms_counts"
+      ],
+      "fieldCount": 8,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "count_no",
+          "collectionName": "wms_counts",
+          "required": true
+        },
+        {
+          "fieldPath": "biz_date",
+          "collectionName": "wms_counts",
+          "required": true
+        },
+        {
+          "fieldPath": "abc_class",
+          "collectionName": "wms_counts",
+          "required": false
+        },
+        {
+          "fieldPath": "count_type",
+          "collectionName": "wms_counts",
+          "required": false
+        },
+        {
+          "fieldPath": "difference",
+          "collectionName": "wms_counts",
+          "required": false
+        },
+        {
+          "fieldPath": "snapshot_qty",
+          "collectionName": "wms_counts",
+          "required": false
+        },
+        {
+          "fieldPath": "counted_qty",
+          "collectionName": "wms_counts",
+          "required": false
+        },
+        {
+          "fieldPath": "note",
+          "collectionName": "wms_counts",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "m7hgbs",
+      "rows": 7,
+      "allSingleCol": false,
+      "collections": [
+        "mfg_material_issues"
+      ],
+      "fieldCount": 8,
+      "requiredCount": 3,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "mfg_material_issues",
+          "required": true
+        },
+        {
+          "fieldPath": "issue_date",
+          "collectionName": "mfg_material_issues",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "mfg_material_issues",
+          "required": false
+        },
+        {
+          "fieldPath": "product",
+          "collectionName": "mfg_material_issues",
+          "required": true
+        },
+        {
+          "fieldPath": "lot",
+          "collectionName": "mfg_material_issues",
+          "required": false
+        },
+        {
+          "fieldPath": "qty",
+          "collectionName": "mfg_material_issues",
+          "required": false
+        },
+        {
+          "fieldPath": "mo",
+          "collectionName": "mfg_material_issues",
+          "required": true
+        },
+        {
+          "fieldPath": "note",
+          "collectionName": "mfg_material_issues",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "mi0h0h",
+      "rows": 8,
+      "allSingleCol": false,
+      "collections": [
+        "wms_transfers"
+      ],
+      "fieldCount": 8,
+      "requiredCount": 3,
+      "fields": [
+        {
+          "fieldPath": "transfer_no",
+          "collectionName": "wms_transfers",
+          "required": true
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "wms_transfers",
+          "required": false
+        },
+        {
+          "fieldPath": "product",
+          "collectionName": "wms_transfers",
+          "required": true
+        },
+        {
+          "fieldPath": "lot",
+          "collectionName": "wms_transfers",
+          "required": false
+        },
+        {
+          "fieldPath": "qty",
+          "collectionName": "wms_transfers",
+          "required": true
+        },
+        {
+          "fieldPath": "from_bin",
+          "collectionName": "wms_transfers",
+          "required": false
+        },
+        {
+          "fieldPath": "to_bin",
+          "collectionName": "wms_transfers",
+          "required": false
+        },
+        {
+          "fieldPath": "reason",
+          "collectionName": "wms_transfers",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "mljbri",
+      "rows": 4,
+      "allSingleCol": false,
+      "collections": [
+        "hub_hr_departments"
+      ],
+      "fieldCount": 4,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "hub_hr_departments",
+          "required": true
+        },
+        {
+          "fieldPath": "name",
+          "collectionName": "hub_hr_departments",
+          "required": true
+        },
+        {
+          "fieldPath": "headcount",
+          "collectionName": "hub_hr_departments",
+          "required": false
+        },
+        {
+          "fieldPath": "manager",
+          "collectionName": "hub_hr_departments",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "mouxq6",
+      "rows": 3,
+      "allSingleCol": true,
+      "collections": [
+        "hub_md_customer_categories"
+      ],
+      "fieldCount": 3,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "name",
+          "collectionName": "hub_md_customer_categories",
+          "required": true
+        },
+        {
+          "fieldPath": "code",
+          "collectionName": "hub_md_customer_categories",
+          "required": true
+        },
+        {
+          "fieldPath": "is_active",
+          "collectionName": "hub_md_customer_categories",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "mruipo",
+      "rows": 8,
+      "allSingleCol": false,
+      "collections": [
+        "crm_quotes"
+      ],
+      "fieldCount": 11,
+      "requiredCount": 1,
+      "fields": [
+        {
+          "fieldPath": "quote_no",
+          "collectionName": "crm_quotes",
+          "required": true
+        },
+        {
+          "fieldPath": "issue_date",
+          "collectionName": "crm_quotes",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "crm_quotes",
+          "required": false
+        },
+        {
+          "fieldPath": "total",
+          "collectionName": "crm_quotes",
+          "required": false
+        },
+        {
+          "fieldPath": "total_amount",
+          "collectionName": "crm_quotes",
+          "required": false
+        },
+        {
+          "fieldPath": "root_quote_id",
+          "collectionName": "crm_quotes",
+          "required": false
+        },
+        {
+          "fieldPath": "quote_number",
+          "collectionName": "crm_quotes",
+          "required": false
+        },
+        {
+          "fieldPath": "is_current",
+          "collectionName": "crm_quotes",
+          "required": false
+        },
+        {
+          "fieldPath": "valid_until",
+          "collectionName": "crm_quotes",
+          "required": false
+        },
+        {
+          "fieldPath": "version",
+          "collectionName": "crm_quotes",
+          "required": false
+        },
+        {
+          "fieldPath": "revision_note",
+          "collectionName": "crm_quotes",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "msxi10",
+      "rows": 4,
+      "allSingleCol": false,
+      "collections": [
+        "crm_payments"
+      ],
+      "fieldCount": 4,
+      "requiredCount": 0,
+      "fields": [
+        {
+          "fieldPath": "paid_at",
+          "collectionName": "crm_payments",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "crm_payments",
+          "required": false
+        },
+        {
+          "fieldPath": "amount",
+          "collectionName": "crm_payments",
+          "required": false
+        },
+        {
+          "fieldPath": "method",
+          "collectionName": "crm_payments",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "n7ce8s",
+      "rows": 7,
+      "allSingleCol": false,
+      "collections": [
+        "hub_hr_employees"
+      ],
+      "fieldCount": 9,
+      "requiredCount": 5,
+      "fields": [
+        {
+          "fieldPath": "employee_no",
+          "collectionName": "hub_hr_employees",
+          "required": true
+        },
+        {
+          "fieldPath": "name",
+          "collectionName": "hub_hr_employees",
+          "required": true
+        },
+        {
+          "fieldPath": "title",
+          "collectionName": "hub_hr_employees",
+          "required": true
+        },
+        {
+          "fieldPath": "hire_date",
+          "collectionName": "hub_hr_employees",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "hub_hr_employees",
+          "required": true
+        },
+        {
+          "fieldPath": "phone",
+          "collectionName": "hub_hr_employees",
+          "required": true
+        },
+        {
+          "fieldPath": "email",
+          "collectionName": "hub_hr_employees",
+          "required": false
+        },
+        {
+          "fieldPath": "org_dept_id",
+          "collectionName": "hub_hr_employees",
+          "required": false
+        },
+        {
+          "fieldPath": "job_title",
+          "collectionName": "hub_hr_employees",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "ntusf9",
+      "rows": 6,
+      "allSingleCol": false,
+      "collections": [
+        "crm_contacts"
+      ],
+      "fieldCount": 7,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "name",
+          "collectionName": "crm_contacts",
+          "required": true
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "crm_contacts",
+          "required": false
+        },
+        {
+          "fieldPath": "phone",
+          "collectionName": "crm_contacts",
+          "required": true
+        },
+        {
+          "fieldPath": "full_name",
+          "collectionName": "crm_contacts",
+          "required": false
+        },
+        {
+          "fieldPath": "email",
+          "collectionName": "crm_contacts",
+          "required": false
+        },
+        {
+          "fieldPath": "is_primary",
+          "collectionName": "crm_contacts",
+          "required": false
+        },
+        {
+          "fieldPath": "job_title",
+          "collectionName": "crm_contacts",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "nyda2d",
+      "rows": 15,
+      "allSingleCol": false,
+      "collections": [
+        "mfg_orders"
+      ],
+      "fieldCount": 22,
+      "requiredCount": 4,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "mfg_orders",
+          "required": true
+        },
+        {
+          "fieldPath": "need_date",
+          "collectionName": "mfg_orders",
+          "required": true
+        },
+        {
+          "fieldPath": "released_at",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "approved_at",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "qty",
+          "collectionName": "mfg_orders",
+          "required": true
+        },
+        {
+          "fieldPath": "estimated_cost",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "actual_cost",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "cost_variance",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "std_cost",
+          "collectionName": "mfg_orders",
+          "required": true
+        },
+        {
+          "fieldPath": "kit_data",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "driver_so_code",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "qty_transferred",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "driver_suggestion_id",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "overissue_ratio",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "preview_data",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "planned_end",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "reservation_state",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "approved_by",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "kit_policy",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "source",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "qty_consumed",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "planned_start",
+          "collectionName": "mfg_orders",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "og3b30",
+      "rows": 4,
+      "allSingleCol": false,
+      "collections": [
+        "crm_deals"
+      ],
+      "fieldCount": 4,
+      "requiredCount": 1,
+      "fields": [
+        {
+          "fieldPath": "name",
+          "collectionName": "crm_deals",
+          "required": true
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "crm_deals",
+          "required": false
+        },
+        {
+          "fieldPath": "amount",
+          "collectionName": "crm_deals",
+          "required": false
+        },
+        {
+          "fieldPath": "owner",
+          "collectionName": "crm_deals",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "on6pko",
+      "rows": 8,
+      "allSingleCol": false,
+      "collections": [
+        "srm_audit_records"
+      ],
+      "fieldCount": 10,
+      "requiredCount": 0,
+      "fields": [
+        {
+          "fieldPath": "audit_date",
+          "collectionName": "srm_audit_records",
+          "required": false
+        },
+        {
+          "fieldPath": "total_score",
+          "collectionName": "srm_audit_records",
+          "required": false
+        },
+        {
+          "fieldPath": "score_system",
+          "collectionName": "srm_audit_records",
+          "required": false
+        },
+        {
+          "fieldPath": "checklist_template",
+          "collectionName": "srm_audit_records",
+          "required": false
+        },
+        {
+          "fieldPath": "grade",
+          "collectionName": "srm_audit_records",
+          "required": false
+        },
+        {
+          "fieldPath": "nonconformities",
+          "collectionName": "srm_audit_records",
+          "required": false
+        },
+        {
+          "fieldPath": "supplier_id",
+          "collectionName": "srm_audit_records",
+          "required": false
+        },
+        {
+          "fieldPath": "score_quality",
+          "collectionName": "srm_audit_records",
+          "required": false
+        },
+        {
+          "fieldPath": "score_compliance",
+          "collectionName": "srm_audit_records",
+          "required": false
+        },
+        {
+          "fieldPath": "auditor",
+          "collectionName": "srm_audit_records",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "ooa5e6",
+      "rows": 4,
+      "allSingleCol": false,
+      "collections": [
+        "mfg_bom_lines"
+      ],
+      "fieldCount": 5,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "bom",
+          "collectionName": "mfg_bom_lines",
+          "required": true
+        },
+        {
+          "fieldPath": "product",
+          "collectionName": "mfg_bom_lines",
+          "required": true
+        },
+        {
+          "fieldPath": "uom",
+          "collectionName": "mfg_bom_lines",
+          "required": false
+        },
+        {
+          "fieldPath": "qty_per_unit",
+          "collectionName": "mfg_bom_lines",
+          "required": false
+        },
+        {
+          "fieldPath": "scrap_pct",
+          "collectionName": "mfg_bom_lines",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "opod1m",
+      "rows": 5,
+      "allSingleCol": false,
+      "collections": [
+        "pur_request_lines"
+      ],
+      "fieldCount": 5,
+      "requiredCount": 4,
+      "fields": [
+        {
+          "fieldPath": "product",
+          "collectionName": "pur_request_lines",
+          "required": true
+        },
+        {
+          "fieldPath": "qty",
+          "collectionName": "pur_request_lines",
+          "required": true
+        },
+        {
+          "fieldPath": "uom",
+          "collectionName": "pur_request_lines",
+          "required": true
+        },
+        {
+          "fieldPath": "est_price",
+          "collectionName": "pur_request_lines",
+          "required": false
+        },
+        {
+          "fieldPath": "request",
+          "collectionName": "pur_request_lines",
+          "required": true
+        }
+      ]
+    },
+    {
+      "uid": "oucd3m",
+      "rows": 8,
+      "allSingleCol": false,
+      "collections": [
+        "wms_movements"
+      ],
+      "fieldCount": 8,
+      "requiredCount": 3,
+      "fields": [
+        {
+          "fieldPath": "doc_no",
+          "collectionName": "wms_movements",
+          "required": true
+        },
+        {
+          "fieldPath": "product",
+          "collectionName": "wms_movements",
+          "required": true
+        },
+        {
+          "fieldPath": "lot",
+          "collectionName": "wms_movements",
+          "required": false
+        },
+        {
+          "fieldPath": "qty",
+          "collectionName": "wms_movements",
+          "required": true
+        },
+        {
+          "fieldPath": "move_type",
+          "collectionName": "wms_movements",
+          "required": false
+        },
+        {
+          "fieldPath": "from_bin",
+          "collectionName": "wms_movements",
+          "required": false
+        },
+        {
+          "fieldPath": "to_bin",
+          "collectionName": "wms_movements",
+          "required": false
+        },
+        {
+          "fieldPath": "note",
+          "collectionName": "wms_movements",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "pbz3tn",
+      "rows": 2,
+      "allSingleCol": true,
+      "collections": [
+        "departments"
+      ],
+      "fieldCount": 2,
+      "requiredCount": 1,
+      "fields": [
+        {
+          "fieldPath": "title",
+          "collectionName": "departments",
+          "required": true
+        },
+        {
+          "fieldPath": "parentId",
+          "collectionName": "departments",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "pg7bv9",
+      "rows": 7,
+      "allSingleCol": false,
+      "collections": [
+        "hub_pj_tasks"
+      ],
+      "fieldCount": 8,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "title",
+          "collectionName": "hub_pj_tasks",
+          "required": true
+        },
+        {
+          "fieldPath": "due_at",
+          "collectionName": "hub_pj_tasks",
+          "required": false
+        },
+        {
+          "fieldPath": "priority",
+          "collectionName": "hub_pj_tasks",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "hub_pj_tasks",
+          "required": false
+        },
+        {
+          "fieldPath": "project",
+          "collectionName": "hub_pj_tasks",
+          "required": true
+        },
+        {
+          "fieldPath": "assignee",
+          "collectionName": "hub_pj_tasks",
+          "required": false
+        },
+        {
+          "fieldPath": "plan_start",
+          "collectionName": "hub_pj_tasks",
+          "required": false
+        },
+        {
+          "fieldPath": "plan_end",
+          "collectionName": "hub_pj_tasks",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "poi755",
+      "rows": 8,
+      "allSingleCol": false,
+      "collections": [
+        "srm_suppliers"
+      ],
+      "fieldCount": 11,
+      "requiredCount": 8,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "srm_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "name",
+          "collectionName": "srm_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "uscc",
+          "collectionName": "srm_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "admitted_at",
+          "collectionName": "srm_suppliers",
+          "required": false
+        },
+        {
+          "fieldPath": "category",
+          "collectionName": "srm_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "contact",
+          "collectionName": "srm_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "region",
+          "collectionName": "srm_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "source",
+          "collectionName": "srm_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "phone",
+          "collectionName": "srm_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "regulatory_risk",
+          "collectionName": "srm_suppliers",
+          "required": false
+        },
+        {
+          "fieldPath": "note",
+          "collectionName": "srm_suppliers",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "pp1aao",
+      "rows": 8,
+      "allSingleCol": false,
+      "collections": [
+        "srm_suppliers"
+      ],
+      "fieldCount": 11,
+      "requiredCount": 8,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "srm_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "name",
+          "collectionName": "srm_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "uscc",
+          "collectionName": "srm_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "admitted_at",
+          "collectionName": "srm_suppliers",
+          "required": false
+        },
+        {
+          "fieldPath": "category",
+          "collectionName": "srm_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "contact",
+          "collectionName": "srm_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "region",
+          "collectionName": "srm_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "source",
+          "collectionName": "srm_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "phone",
+          "collectionName": "srm_suppliers",
+          "required": true
+        },
+        {
+          "fieldPath": "regulatory_risk",
+          "collectionName": "srm_suppliers",
+          "required": false
+        },
+        {
+          "fieldPath": "note",
+          "collectionName": "srm_suppliers",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "prnj58",
+      "rows": 7,
+      "allSingleCol": false,
+      "collections": [
+        "hub_hr_leave_requests"
+      ],
+      "fieldCount": 7,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "start_at",
+          "collectionName": "hub_hr_leave_requests",
+          "required": false
+        },
+        {
+          "fieldPath": "end_at",
+          "collectionName": "hub_hr_leave_requests",
+          "required": false
+        },
+        {
+          "fieldPath": "type",
+          "collectionName": "hub_hr_leave_requests",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "hub_hr_leave_requests",
+          "required": false
+        },
+        {
+          "fieldPath": "employee",
+          "collectionName": "hub_hr_leave_requests",
+          "required": true
+        },
+        {
+          "fieldPath": "days",
+          "collectionName": "hub_hr_leave_requests",
+          "required": false
+        },
+        {
+          "fieldPath": "reason",
+          "collectionName": "hub_hr_leave_requests",
+          "required": true
+        }
+      ]
+    },
+    {
+      "uid": "q913cb",
+      "rows": 5,
+      "allSingleCol": false,
+      "collections": [
+        "so_orders"
+      ],
+      "fieldCount": 5,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "so_orders",
+          "required": true
+        },
+        {
+          "fieldPath": "need_date",
+          "collectionName": "so_orders",
+          "required": true
+        },
+        {
+          "fieldPath": "shipped_at",
+          "collectionName": "so_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "amount",
+          "collectionName": "so_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "note",
+          "collectionName": "so_orders",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "qwhxud",
+      "rows": 3,
+      "allSingleCol": true,
+      "collections": [
+        "hub_md_asset_categories"
+      ],
+      "fieldCount": 3,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "name",
+          "collectionName": "hub_md_asset_categories",
+          "required": true
+        },
+        {
+          "fieldPath": "code",
+          "collectionName": "hub_md_asset_categories",
+          "required": true
+        },
+        {
+          "fieldPath": "is_active",
+          "collectionName": "hub_md_asset_categories",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "r2g2yo",
+      "rows": 8,
+      "allSingleCol": false,
+      "collections": [
+        "wms_shipments"
+      ],
+      "fieldCount": 8,
+      "requiredCount": 3,
+      "fields": [
+        {
+          "fieldPath": "shipment_no",
+          "collectionName": "wms_shipments",
+          "required": true
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "wms_shipments",
+          "required": false
+        },
+        {
+          "fieldPath": "product",
+          "collectionName": "wms_shipments",
+          "required": true
+        },
+        {
+          "fieldPath": "lot",
+          "collectionName": "wms_shipments",
+          "required": false
+        },
+        {
+          "fieldPath": "qty",
+          "collectionName": "wms_shipments",
+          "required": true
+        },
+        {
+          "fieldPath": "shipment_type",
+          "collectionName": "wms_shipments",
+          "required": false
+        },
+        {
+          "fieldPath": "from_bin",
+          "collectionName": "wms_shipments",
+          "required": false
+        },
+        {
+          "fieldPath": "note",
+          "collectionName": "wms_shipments",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "r3b19r",
+      "rows": 8,
+      "allSingleCol": false,
+      "collections": [
+        "hub_pj_tasks"
+      ],
+      "fieldCount": 10,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "title",
+          "collectionName": "hub_pj_tasks",
+          "required": true
+        },
+        {
+          "fieldPath": "due_at",
+          "collectionName": "hub_pj_tasks",
+          "required": false
+        },
+        {
+          "fieldPath": "due_date",
+          "collectionName": "hub_pj_tasks",
+          "required": true
+        },
+        {
+          "fieldPath": "priority",
+          "collectionName": "hub_pj_tasks",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "hub_pj_tasks",
+          "required": false
+        },
+        {
+          "fieldPath": "hub_pj_task_assignee_id",
+          "collectionName": "hub_pj_tasks",
+          "required": false
+        },
+        {
+          "fieldPath": "plan_end",
+          "collectionName": "hub_pj_tasks",
+          "required": false
+        },
+        {
+          "fieldPath": "plan_start",
+          "collectionName": "hub_pj_tasks",
+          "required": false
+        },
+        {
+          "fieldPath": "hub_pj_task_project_id",
+          "collectionName": "hub_pj_tasks",
+          "required": false
+        },
+        {
+          "fieldPath": "assignee_text",
+          "collectionName": "hub_pj_tasks",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "riezbp",
+      "rows": 4,
+      "allSingleCol": false,
+      "collections": [
+        "srm_audit_checklists"
+      ],
+      "fieldCount": 5,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "template",
+          "collectionName": "srm_audit_checklists",
+          "required": true
+        },
+        {
+          "fieldPath": "group",
+          "collectionName": "srm_audit_checklists",
+          "required": false
+        },
+        {
+          "fieldPath": "item",
+          "collectionName": "srm_audit_checklists",
+          "required": true
+        },
+        {
+          "fieldPath": "weight",
+          "collectionName": "srm_audit_checklists",
+          "required": false
+        },
+        {
+          "fieldPath": "is_critical",
+          "collectionName": "srm_audit_checklists",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "rl1k5g",
+      "rows": 6,
+      "allSingleCol": false,
+      "collections": [
+        "hub_inv_products"
+      ],
+      "fieldCount": 8,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "name",
+          "collectionName": "hub_inv_products",
+          "required": true
+        },
+        {
+          "fieldPath": "abc_class",
+          "collectionName": "hub_inv_products",
+          "required": false
+        },
+        {
+          "fieldPath": "sku",
+          "collectionName": "hub_inv_products",
+          "required": true
+        },
+        {
+          "fieldPath": "reorder_point",
+          "collectionName": "hub_inv_products",
+          "required": false
+        },
+        {
+          "fieldPath": "safety_stock",
+          "collectionName": "hub_inv_products",
+          "required": false
+        },
+        {
+          "fieldPath": "lot_size",
+          "collectionName": "hub_inv_products",
+          "required": false
+        },
+        {
+          "fieldPath": "lead_time_days",
+          "collectionName": "hub_inv_products",
+          "required": false
+        },
+        {
+          "fieldPath": "avg_daily_use",
+          "collectionName": "hub_inv_products",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "s4tqwd",
+      "rows": 13,
+      "allSingleCol": false,
+      "collections": [
+        "qm_inspections"
+      ],
+      "fieldCount": 21,
+      "requiredCount": 1,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "qm_inspections",
+          "required": true
+        },
+        {
+          "fieldPath": "inspected_at",
+          "collectionName": "qm_inspections",
+          "required": false
+        },
+        {
+          "fieldPath": "defect_minor",
+          "collectionName": "qm_inspections",
+          "required": false
+        },
+        {
+          "fieldPath": "resubmission",
+          "collectionName": "qm_inspections",
+          "required": false
+        },
+        {
+          "fieldPath": "ref_type",
+          "collectionName": "qm_inspections",
+          "required": false
+        },
+        {
+          "fieldPath": "ref_no",
+          "collectionName": "qm_inspections",
+          "required": false
+        },
+        {
+          "fieldPath": "aql_code",
+          "collectionName": "qm_inspections",
+          "required": false
+        },
+        {
+          "fieldPath": "ref_id",
+          "collectionName": "qm_inspections",
+          "required": false
+        },
+        {
+          "fieldPath": "lot_qty",
+          "collectionName": "qm_inspections",
+          "required": false
+        },
+        {
+          "fieldPath": "aql_ac",
+          "collectionName": "qm_inspections",
+          "required": false
+        },
+        {
+          "fieldPath": "rigor",
+          "collectionName": "qm_inspections",
+          "required": false
+        },
+        {
+          "fieldPath": "insp_type",
+          "collectionName": "qm_inspections",
+          "required": false
+        },
+        {
+          "fieldPath": "defect_major",
+          "collectionName": "qm_inspections",
+          "required": false
+        },
+        {
+          "fieldPath": "inspector",
+          "collectionName": "qm_inspections",
+          "required": false
+        },
+        {
+          "fieldPath": "aql_n",
+          "collectionName": "qm_inspections",
+          "required": false
+        },
+        {
+          "fieldPath": "defect_critical",
+          "collectionName": "qm_inspections",
+          "required": false
+        },
+        {
+          "fieldPath": "lot_no",
+          "collectionName": "qm_inspections",
+          "required": false
+        },
+        {
+          "fieldPath": "sample_qty",
+          "collectionName": "qm_inspections",
+          "required": false
+        },
+        {
+          "fieldPath": "aql_re",
+          "collectionName": "qm_inspections",
+          "required": false
+        },
+        {
+          "fieldPath": "aql_target",
+          "collectionName": "qm_inspections",
+          "required": false
+        },
+        {
+          "fieldPath": "note",
+          "collectionName": "qm_inspections",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "sudv9m",
+      "rows": 5,
+      "allSingleCol": false,
+      "collections": [
+        "qm_inspection_readings"
+      ],
+      "fieldCount": 7,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "inspection",
+          "collectionName": "qm_inspection_readings",
+          "required": true
+        },
+        {
+          "fieldPath": "parameter",
+          "collectionName": "qm_inspection_readings",
+          "required": true
+        },
+        {
+          "fieldPath": "spec_min",
+          "collectionName": "qm_inspection_readings",
+          "required": false
+        },
+        {
+          "fieldPath": "spec_max",
+          "collectionName": "qm_inspection_readings",
+          "required": false
+        },
+        {
+          "fieldPath": "criteria",
+          "collectionName": "qm_inspection_readings",
+          "required": false
+        },
+        {
+          "fieldPath": "actual",
+          "collectionName": "qm_inspection_readings",
+          "required": false
+        },
+        {
+          "fieldPath": "pass",
+          "collectionName": "qm_inspection_readings",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "sx9s2w",
+      "rows": 2,
+      "allSingleCol": false,
+      "collections": [
+        "hub_md_product_categories"
+      ],
+      "fieldCount": 3,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "hub_md_product_categories",
+          "required": true
+        },
+        {
+          "fieldPath": "name",
+          "collectionName": "hub_md_product_categories",
+          "required": true
+        },
+        {
+          "fieldPath": "is_active",
+          "collectionName": "hub_md_product_categories",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "sxfwd2",
+      "rows": 6,
+      "allSingleCol": false,
+      "collections": [
+        "pur_payments"
+      ],
+      "fieldCount": 6,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "pur_payments",
+          "required": true
+        },
+        {
+          "fieldPath": "pay_date",
+          "collectionName": "pur_payments",
+          "required": false
+        },
+        {
+          "fieldPath": "doc_status",
+          "collectionName": "pur_payments",
+          "required": false
+        },
+        {
+          "fieldPath": "amount",
+          "collectionName": "pur_payments",
+          "required": false
+        },
+        {
+          "fieldPath": "invoice",
+          "collectionName": "pur_payments",
+          "required": true
+        },
+        {
+          "fieldPath": "pay_method",
+          "collectionName": "pur_payments",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "t8t4ln",
+      "rows": 7,
+      "allSingleCol": false,
+      "collections": [
+        "hub_pj_projects"
+      ],
+      "fieldCount": 9,
+      "requiredCount": 1,
+      "fields": [
+        {
+          "fieldPath": "name",
+          "collectionName": "hub_pj_projects",
+          "required": true
+        },
+        {
+          "fieldPath": "planned_end_date",
+          "collectionName": "hub_pj_projects",
+          "required": false
+        },
+        {
+          "fieldPath": "start_date",
+          "collectionName": "hub_pj_projects",
+          "required": false
+        },
+        {
+          "fieldPath": "due_date",
+          "collectionName": "hub_pj_projects",
+          "required": false
+        },
+        {
+          "fieldPath": "priority",
+          "collectionName": "hub_pj_projects",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "hub_pj_projects",
+          "required": false
+        },
+        {
+          "fieldPath": "customer",
+          "collectionName": "hub_pj_projects",
+          "required": false
+        },
+        {
+          "fieldPath": "progress",
+          "collectionName": "hub_pj_projects",
+          "required": false
+        },
+        {
+          "fieldPath": "no",
+          "collectionName": "hub_pj_projects",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "tstnqa",
+      "rows": 2,
+      "allSingleCol": true,
+      "collections": [
+        "departments"
+      ],
+      "fieldCount": 2,
+      "requiredCount": 1,
+      "fields": [
+        {
+          "fieldPath": "title",
+          "collectionName": "departments",
+          "required": true
+        },
+        {
+          "fieldPath": "parentId",
+          "collectionName": "departments",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "uabrqj",
+      "rows": 8,
+      "allSingleCol": true,
+      "collections": [
+        "qm_aql_plans"
+      ],
+      "fieldCount": 8,
+      "requiredCount": 7,
+      "fields": [
+        {
+          "fieldPath": "lot_band",
+          "collectionName": "qm_aql_plans",
+          "required": true
+        },
+        {
+          "fieldPath": "level",
+          "collectionName": "qm_aql_plans",
+          "required": true
+        },
+        {
+          "fieldPath": "code",
+          "collectionName": "qm_aql_plans",
+          "required": true
+        },
+        {
+          "fieldPath": "n",
+          "collectionName": "qm_aql_plans",
+          "required": true
+        },
+        {
+          "fieldPath": "severity",
+          "collectionName": "qm_aql_plans",
+          "required": false
+        },
+        {
+          "fieldPath": "aql",
+          "collectionName": "qm_aql_plans",
+          "required": true
+        },
+        {
+          "fieldPath": "ac",
+          "collectionName": "qm_aql_plans",
+          "required": true
+        },
+        {
+          "fieldPath": "re",
+          "collectionName": "qm_aql_plans",
+          "required": true
+        }
+      ]
+    },
+    {
+      "uid": "upnbe1",
+      "rows": 6,
+      "allSingleCol": false,
+      "collections": [
+        "pur_orders"
+      ],
+      "fieldCount": 6,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "pur_orders",
+          "required": true
+        },
+        {
+          "fieldPath": "need_date",
+          "collectionName": "pur_orders",
+          "required": true
+        },
+        {
+          "fieldPath": "expected_date",
+          "collectionName": "pur_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "amount",
+          "collectionName": "pur_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "currency",
+          "collectionName": "pur_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "compare_note",
+          "collectionName": "pur_orders",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "uq204v",
+      "rows": 8,
+      "allSingleCol": false,
+      "collections": [
+        "pur_requests"
+      ],
+      "fieldCount": 7,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "pur_requests",
+          "required": true
+        },
+        {
+          "fieldPath": "need_date",
+          "collectionName": "pur_requests",
+          "required": true
+        },
+        {
+          "fieldPath": "doc_status",
+          "collectionName": "pur_requests",
+          "required": false
+        },
+        {
+          "fieldPath": "department",
+          "collectionName": "pur_requests",
+          "required": false
+        },
+        {
+          "fieldPath": "total_est",
+          "collectionName": "pur_requests",
+          "required": false
+        },
+        {
+          "fieldPath": "requester",
+          "collectionName": "pur_requests",
+          "required": false
+        },
+        {
+          "fieldPath": "reason",
+          "collectionName": "pur_requests",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "usjhb0",
+      "rows": 6,
+      "allSingleCol": false,
+      "collections": [
+        "wms_monthly_balances"
+      ],
+      "fieldCount": 7,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "product",
+          "collectionName": "wms_monthly_balances",
+          "required": true
+        },
+        {
+          "fieldPath": "period",
+          "collectionName": "wms_monthly_balances",
+          "required": true
+        },
+        {
+          "fieldPath": "opening_qty",
+          "collectionName": "wms_monthly_balances",
+          "required": false
+        },
+        {
+          "fieldPath": "in_qty",
+          "collectionName": "wms_monthly_balances",
+          "required": false
+        },
+        {
+          "fieldPath": "out_qty",
+          "collectionName": "wms_monthly_balances",
+          "required": false
+        },
+        {
+          "fieldPath": "bal_qty",
+          "collectionName": "wms_monthly_balances",
+          "required": false
+        },
+        {
+          "fieldPath": "note",
+          "collectionName": "wms_monthly_balances",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "uv4209",
+      "rows": 7,
+      "allSingleCol": false,
+      "collections": [
+        "hub_pj_tasks"
+      ],
+      "fieldCount": 8,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "title",
+          "collectionName": "hub_pj_tasks",
+          "required": true
+        },
+        {
+          "fieldPath": "due_at",
+          "collectionName": "hub_pj_tasks",
+          "required": false
+        },
+        {
+          "fieldPath": "priority",
+          "collectionName": "hub_pj_tasks",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "hub_pj_tasks",
+          "required": false
+        },
+        {
+          "fieldPath": "project",
+          "collectionName": "hub_pj_tasks",
+          "required": true
+        },
+        {
+          "fieldPath": "assignee",
+          "collectionName": "hub_pj_tasks",
+          "required": false
+        },
+        {
+          "fieldPath": "plan_start",
+          "collectionName": "hub_pj_tasks",
+          "required": false
+        },
+        {
+          "fieldPath": "plan_end",
+          "collectionName": "hub_pj_tasks",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "v1cvhs",
+      "rows": 5,
+      "allSingleCol": false,
+      "collections": [
+        "wms_zones"
+      ],
+      "fieldCount": 5,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "wms_zones",
+          "required": true
+        },
+        {
+          "fieldPath": "name",
+          "collectionName": "wms_zones",
+          "required": true
+        },
+        {
+          "fieldPath": "warehouse",
+          "collectionName": "wms_zones",
+          "required": false
+        },
+        {
+          "fieldPath": "temp_zone",
+          "collectionName": "wms_zones",
+          "required": false
+        },
+        {
+          "fieldPath": "note",
+          "collectionName": "wms_zones",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "v54x5u",
+      "rows": 8,
+      "allSingleCol": false,
+      "collections": [
+        "pur_requests"
+      ],
+      "fieldCount": 8,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "pur_requests",
+          "required": true
+        },
+        {
+          "fieldPath": "need_date",
+          "collectionName": "pur_requests",
+          "required": true
+        },
+        {
+          "fieldPath": "department",
+          "collectionName": "pur_requests",
+          "required": false
+        },
+        {
+          "fieldPath": "total_est",
+          "collectionName": "pur_requests",
+          "required": false
+        },
+        {
+          "fieldPath": "requester",
+          "collectionName": "pur_requests",
+          "required": false
+        },
+        {
+          "fieldPath": "driver_suggestion_id",
+          "collectionName": "pur_requests",
+          "required": false
+        },
+        {
+          "fieldPath": "driver_so_code",
+          "collectionName": "pur_requests",
+          "required": false
+        },
+        {
+          "fieldPath": "reason",
+          "collectionName": "pur_requests",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "vi8919",
+      "rows": 6,
+      "allSingleCol": false,
+      "collections": [
+        "srm_score_cards"
+      ],
+      "fieldCount": 10,
+      "requiredCount": 0,
+      "fields": [
+        {
+          "fieldPath": "score_price",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "total_score",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "score_delivery",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "score_service",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "score_compliance",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "rating_change",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "rating",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "period",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "supplier_id",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "score_quality",
+          "collectionName": "srm_score_cards",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "wruvgy",
+      "rows": 7,
+      "allSingleCol": false,
+      "collections": [
+        "crm_leads"
+      ],
+      "fieldCount": 9,
+      "requiredCount": 1,
+      "fields": [
+        {
+          "fieldPath": "name",
+          "collectionName": "crm_leads",
+          "required": true
+        },
+        {
+          "fieldPath": "expected_close_date",
+          "collectionName": "crm_leads",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "crm_leads",
+          "required": false
+        },
+        {
+          "fieldPath": "expected_amount",
+          "collectionName": "crm_leads",
+          "required": false
+        },
+        {
+          "fieldPath": "score",
+          "collectionName": "crm_leads",
+          "required": false
+        },
+        {
+          "fieldPath": "owner",
+          "collectionName": "crm_leads",
+          "required": false
+        },
+        {
+          "fieldPath": "company",
+          "collectionName": "crm_leads",
+          "required": false
+        },
+        {
+          "fieldPath": "stage",
+          "collectionName": "crm_leads",
+          "required": false
+        },
+        {
+          "fieldPath": "source",
+          "collectionName": "crm_leads",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "wx3j8s",
+      "rows": 8,
+      "allSingleCol": false,
+      "collections": [
+        "mfg_job_reports"
+      ],
+      "fieldCount": 11,
+      "requiredCount": 3,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "mfg_job_reports",
+          "required": true
+        },
+        {
+          "fieldPath": "report_date",
+          "collectionName": "mfg_job_reports",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "mfg_job_reports",
+          "required": false
+        },
+        {
+          "fieldPath": "mo",
+          "collectionName": "mfg_job_reports",
+          "required": true
+        },
+        {
+          "fieldPath": "op_seq",
+          "collectionName": "mfg_job_reports",
+          "required": true
+        },
+        {
+          "fieldPath": "qty_good",
+          "collectionName": "mfg_job_reports",
+          "required": false
+        },
+        {
+          "fieldPath": "qty_scrap",
+          "collectionName": "mfg_job_reports",
+          "required": false
+        },
+        {
+          "fieldPath": "duration_min",
+          "collectionName": "mfg_job_reports",
+          "required": false
+        },
+        {
+          "fieldPath": "operator",
+          "collectionName": "mfg_job_reports",
+          "required": false
+        },
+        {
+          "fieldPath": "qc_status",
+          "collectionName": "mfg_job_reports",
+          "required": false
+        },
+        {
+          "fieldPath": "remark",
+          "collectionName": "mfg_job_reports",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "wx7qxj",
+      "rows": 5,
+      "allSingleCol": false,
+      "collections": [
+        "hub_tk_tickets"
+      ],
+      "fieldCount": 6,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "title",
+          "collectionName": "hub_tk_tickets",
+          "required": true
+        },
+        {
+          "fieldPath": "priority",
+          "collectionName": "hub_tk_tickets",
+          "required": false
+        },
+        {
+          "fieldPath": "category",
+          "collectionName": "hub_tk_tickets",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "hub_tk_tickets",
+          "required": false
+        },
+        {
+          "fieldPath": "customer",
+          "collectionName": "hub_tk_tickets",
+          "required": true
+        },
+        {
+          "fieldPath": "assignee",
+          "collectionName": "hub_tk_tickets",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "x31wcf",
+      "rows": 7,
+      "allSingleCol": false,
+      "collections": [
+        "srm_score_cards"
+      ],
+      "fieldCount": 9,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "supplier",
+          "collectionName": "srm_score_cards",
+          "required": true
+        },
+        {
+          "fieldPath": "score_price",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "total_score",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "period",
+          "collectionName": "srm_score_cards",
+          "required": true
+        },
+        {
+          "fieldPath": "score_quality",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "score_delivery",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "score_service",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "score_compliance",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "rating",
+          "collectionName": "srm_score_cards",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "x6qwaj",
+      "rows": 9,
+      "allSingleCol": false,
+      "collections": [
+        "hub_as_maintenance"
+      ],
+      "fieldCount": 10,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "title",
+          "collectionName": "hub_as_maintenance",
+          "required": true
+        },
+        {
+          "fieldPath": "scheduled_date",
+          "collectionName": "hub_as_maintenance",
+          "required": false
+        },
+        {
+          "fieldPath": "completed_date",
+          "collectionName": "hub_as_maintenance",
+          "required": false
+        },
+        {
+          "fieldPath": "scheduled_at",
+          "collectionName": "hub_as_maintenance",
+          "required": false
+        },
+        {
+          "fieldPath": "type",
+          "collectionName": "hub_as_maintenance",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "hub_as_maintenance",
+          "required": false
+        },
+        {
+          "fieldPath": "vendor",
+          "collectionName": "hub_as_maintenance",
+          "required": true
+        },
+        {
+          "fieldPath": "cost",
+          "collectionName": "hub_as_maintenance",
+          "required": false
+        },
+        {
+          "fieldPath": "notes",
+          "collectionName": "hub_as_maintenance",
+          "required": false
+        },
+        {
+          "fieldPath": "assetId",
+          "collectionName": "hub_as_maintenance",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "x9y0nw",
+      "rows": 3,
+      "allSingleCol": true,
+      "collections": [
+        "mfg_holidays"
+      ],
+      "fieldCount": 3,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "date",
+          "collectionName": "mfg_holidays",
+          "required": true
+        },
+        {
+          "fieldPath": "name",
+          "collectionName": "mfg_holidays",
+          "required": true
+        },
+        {
+          "fieldPath": "calendar",
+          "collectionName": "mfg_holidays",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "xiqhq0",
+      "rows": 7,
+      "allSingleCol": false,
+      "collections": [
+        "qm_nc_dispositions"
+      ],
+      "fieldCount": 8,
+      "requiredCount": 3,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "qm_nc_dispositions",
+          "required": true
+        },
+        {
+          "fieldPath": "doc_status",
+          "collectionName": "qm_nc_dispositions",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "qm_nc_dispositions",
+          "required": false
+        },
+        {
+          "fieldPath": "inspection",
+          "collectionName": "qm_nc_dispositions",
+          "required": true
+        },
+        {
+          "fieldPath": "action",
+          "collectionName": "qm_nc_dispositions",
+          "required": true
+        },
+        {
+          "fieldPath": "approver",
+          "collectionName": "qm_nc_dispositions",
+          "required": false
+        },
+        {
+          "fieldPath": "reason",
+          "collectionName": "qm_nc_dispositions",
+          "required": false
+        },
+        {
+          "fieldPath": "deviation_note",
+          "collectionName": "qm_nc_dispositions",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "xjub6h",
+      "rows": 9,
+      "allSingleCol": false,
+      "collections": [
+        "mfg_orders"
+      ],
+      "fieldCount": 9,
+      "requiredCount": 6,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "mfg_orders",
+          "required": true
+        },
+        {
+          "fieldPath": "need_date",
+          "collectionName": "mfg_orders",
+          "required": true
+        },
+        {
+          "fieldPath": "doc_status",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "product",
+          "collectionName": "mfg_orders",
+          "required": true
+        },
+        {
+          "fieldPath": "bom",
+          "collectionName": "mfg_orders",
+          "required": true
+        },
+        {
+          "fieldPath": "qty",
+          "collectionName": "mfg_orders",
+          "required": true
+        },
+        {
+          "fieldPath": "std_cost",
+          "collectionName": "mfg_orders",
+          "required": true
+        },
+        {
+          "fieldPath": "estimated_cost",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "reservation_state",
+          "collectionName": "mfg_orders",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "xogtzx",
+      "rows": 6,
+      "allSingleCol": false,
+      "collections": [
+        "crm_customers"
+      ],
+      "fieldCount": 7,
+      "requiredCount": 5,
+      "fields": [
+        {
+          "fieldPath": "name",
+          "collectionName": "crm_customers",
+          "required": true
+        },
+        {
+          "fieldPath": "type",
+          "collectionName": "crm_customers",
+          "required": true
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "crm_customers",
+          "required": false
+        },
+        {
+          "fieldPath": "country",
+          "collectionName": "crm_customers",
+          "required": true
+        },
+        {
+          "fieldPath": "company_name",
+          "collectionName": "crm_customers",
+          "required": false
+        },
+        {
+          "fieldPath": "industry",
+          "collectionName": "crm_customers",
+          "required": true
+        },
+        {
+          "fieldPath": "level",
+          "collectionName": "crm_customers",
+          "required": true
+        }
+      ]
+    },
+    {
+      "uid": "xpeuw2",
+      "rows": 6,
+      "allSingleCol": false,
+      "collections": [
+        "srm_score_cards"
+      ],
+      "fieldCount": 10,
+      "requiredCount": 0,
+      "fields": [
+        {
+          "fieldPath": "score_price",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "total_score",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "score_delivery",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "score_service",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "score_compliance",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "rating_change",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "rating",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "period",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "supplier_id",
+          "collectionName": "srm_score_cards",
+          "required": false
+        },
+        {
+          "fieldPath": "score_quality",
+          "collectionName": "srm_score_cards",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "xuv5np",
+      "rows": 6,
+      "allSingleCol": false,
+      "collections": [
+        "srm_certificates"
+      ],
+      "fieldCount": 7,
+      "requiredCount": 0,
+      "fields": [
+        {
+          "fieldPath": "issued_at",
+          "collectionName": "srm_certificates",
+          "required": false
+        },
+        {
+          "fieldPath": "expires_at",
+          "collectionName": "srm_certificates",
+          "required": false
+        },
+        {
+          "fieldPath": "issuer",
+          "collectionName": "srm_certificates",
+          "required": false
+        },
+        {
+          "fieldPath": "warn_status",
+          "collectionName": "srm_certificates",
+          "required": false
+        },
+        {
+          "fieldPath": "cert_no",
+          "collectionName": "srm_certificates",
+          "required": false
+        },
+        {
+          "fieldPath": "cert_type",
+          "collectionName": "srm_certificates",
+          "required": false
+        },
+        {
+          "fieldPath": "supplier_id",
+          "collectionName": "srm_certificates",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "y7p33m",
+      "rows": 5,
+      "allSingleCol": false,
+      "collections": [
+        "hub_as_assets"
+      ],
+      "fieldCount": 5,
+      "requiredCount": 2,
+      "fields": [
+        {
+          "fieldPath": "name",
+          "collectionName": "hub_as_assets",
+          "required": true
+        },
+        {
+          "fieldPath": "category",
+          "collectionName": "hub_as_assets",
+          "required": true
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "hub_as_assets",
+          "required": false
+        },
+        {
+          "fieldPath": "no",
+          "collectionName": "hub_as_assets",
+          "required": false
+        },
+        {
+          "fieldPath": "brand",
+          "collectionName": "hub_as_assets",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "y80aro",
+      "rows": 3,
+      "allSingleCol": true,
+      "collections": [
+        "crm_quotes"
+      ],
+      "fieldCount": 3,
+      "requiredCount": 1,
+      "fields": [
+        {
+          "fieldPath": "quote_no",
+          "collectionName": "crm_quotes",
+          "required": true
+        },
+        {
+          "fieldPath": "total_amount",
+          "collectionName": "crm_quotes",
+          "required": false
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "crm_quotes",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "yegyih",
+      "rows": 9,
+      "allSingleCol": false,
+      "collections": [
+        "pur_orders"
+      ],
+      "fieldCount": 10,
+      "requiredCount": 3,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "pur_orders",
+          "required": true
+        },
+        {
+          "fieldPath": "need_date",
+          "collectionName": "pur_orders",
+          "required": true
+        },
+        {
+          "fieldPath": "doc_status",
+          "collectionName": "pur_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "supplier",
+          "collectionName": "pur_orders",
+          "required": true
+        },
+        {
+          "fieldPath": "amount",
+          "collectionName": "pur_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "currency",
+          "collectionName": "pur_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "rfq",
+          "collectionName": "pur_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "receiving_status",
+          "collectionName": "pur_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "invoice_status",
+          "collectionName": "pur_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "compare_note",
+          "collectionName": "pur_orders",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "yn5xe6",
+      "rows": 15,
+      "allSingleCol": false,
+      "collections": [
+        "mfg_orders"
+      ],
+      "fieldCount": 22,
+      "requiredCount": 4,
+      "fields": [
+        {
+          "fieldPath": "code",
+          "collectionName": "mfg_orders",
+          "required": true
+        },
+        {
+          "fieldPath": "need_date",
+          "collectionName": "mfg_orders",
+          "required": true
+        },
+        {
+          "fieldPath": "released_at",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "approved_at",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "qty",
+          "collectionName": "mfg_orders",
+          "required": true
+        },
+        {
+          "fieldPath": "estimated_cost",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "actual_cost",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "cost_variance",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "std_cost",
+          "collectionName": "mfg_orders",
+          "required": true
+        },
+        {
+          "fieldPath": "kit_data",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "driver_so_code",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "qty_transferred",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "driver_suggestion_id",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "overissue_ratio",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "preview_data",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "planned_end",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "reservation_state",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "approved_by",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "kit_policy",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "source",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "qty_consumed",
+          "collectionName": "mfg_orders",
+          "required": false
+        },
+        {
+          "fieldPath": "planned_start",
+          "collectionName": "mfg_orders",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "yzxi06",
+      "rows": 7,
+      "allSingleCol": false,
+      "collections": [
+        "srm_certificates"
+      ],
+      "fieldCount": 7,
+      "requiredCount": 3,
+      "fields": [
+        {
+          "fieldPath": "issued_at",
+          "collectionName": "srm_certificates",
+          "required": false
+        },
+        {
+          "fieldPath": "expires_at",
+          "collectionName": "srm_certificates",
+          "required": false
+        },
+        {
+          "fieldPath": "supplier",
+          "collectionName": "srm_certificates",
+          "required": true
+        },
+        {
+          "fieldPath": "cert_type",
+          "collectionName": "srm_certificates",
+          "required": true
+        },
+        {
+          "fieldPath": "cert_no",
+          "collectionName": "srm_certificates",
+          "required": true
+        },
+        {
+          "fieldPath": "issuer",
+          "collectionName": "srm_certificates",
+          "required": false
+        },
+        {
+          "fieldPath": "warn_status",
+          "collectionName": "srm_certificates",
+          "required": false
+        }
+      ]
+    },
+    {
+      "uid": "ze2j6g",
+      "rows": 9,
+      "allSingleCol": false,
+      "collections": [
+        "wms_counts"
+      ],
+      "fieldCount": 11,
+      "requiredCount": 4,
+      "fields": [
+        {
+          "fieldPath": "count_no",
+          "collectionName": "wms_counts",
+          "required": true
+        },
+        {
+          "fieldPath": "status",
+          "collectionName": "wms_counts",
+          "required": false
+        },
+        {
+          "fieldPath": "zone",
+          "collectionName": "wms_counts",
+          "required": true
+        },
+        {
+          "fieldPath": "bin",
+          "collectionName": "wms_counts",
+          "required": true
+        },
+        {
+          "fieldPath": "product",
+          "collectionName": "wms_counts",
+          "required": true
+        },
+        {
+          "fieldPath": "lot",
+          "collectionName": "wms_counts",
+          "required": false
+        },
+        {
+          "fieldPath": "count_type",
+          "collectionName": "wms_counts",
+          "required": false
+        },
+        {
+          "fieldPath": "snapshot_qty",
+          "collectionName": "wms_counts",
+          "required": false
+        },
+        {
+          "fieldPath": "counted_qty",
+          "collectionName": "wms_counts",
+          "required": false
+        },
+        {
+          "fieldPath": "difference",
+          "collectionName": "wms_counts",
+          "required": false
+        },
+        {
+          "fieldPath": "note",
+          "collectionName": "wms_counts",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "fieldModelStats": {
+    "nonDisplayFieldModels": 1013,
+    "placeholder": 299,
+    "defaultValue": 0,
+    "emptyProps": 482
+  }
+}

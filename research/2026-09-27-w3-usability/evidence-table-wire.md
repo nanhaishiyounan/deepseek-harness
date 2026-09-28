@@ -13,8 +13,8 @@
 | page | collection | block (Table unless noted) | actionsCol? | actions uses | view/edit/delete actions | addNew | addNew popup subtree |
 |---|---|---|---|---|---|---|---|
 | AI 工作台 [n13ai] | hub_tk_tickets | +AIChatBoxBlockModel | no | (none) | no | no | n/a |
-| 工作台 [n17f3] | hub_pj_tasks | table | no | AddNewActionModel, RefreshActionModel | no | n17f3an9s341plk72g | n17f3an9s341plk72g:yes |
-| 工作台 [n17f3] | hub_tk_tickets | table | no | AddNewActionModel, RefreshActionModel | no | n17f3anq7z3u29p6we | n17f3anq7z3u29p6we:yes |
+| 工作台 [n17f3] | hub_pj_tasks | table | no | AddNewActionModel, RefreshActionModel | no | n17f3an9s341plk72g | n17f3an9s341plk72g:MISSING |
+| 工作台 [n17f3] | hub_tk_tickets | table | no | AddNewActionModel, RefreshActionModel | no | n17f3anq7z3u29p6we | n17f3anq7z3u29p6we:MISSING |
 | 客户 [n17sy] | crm_customers | table | no | AddNewActionModel, RefreshActionModel | no | n17an3pzasuzakqa | n17an3pzasuzakqa:yes |
 | 销售线索 [n17rw] | crm_leads | table | no | AddNewActionModel, RefreshActionModel | no | n17an0vjd9gwrc3c | n17an0vjd9gwrc3c:yes |
 | 联系人 [n17c3] | crm_contacts | table | no | AddNewActionModel, RefreshActionModel | no | n17anojyqup3vyyq | n17anojyqup3vyyq:yes |
@@ -82,7 +82,7 @@
 | 资产台账 [n17wr] | hub_as_assets | table | no | AddNewActionModel, RefreshActionModel | no | n17an3n7pyb0h14s | n17an3n7pyb0h14s:yes |
 | 维保记录 [n17f3] | hub_as_maintenance | table | no | AddNewActionModel, RefreshActionModel | no | n17f3angt3kl86d78 | n17f3angt3kl86d78:yes |
 | 供应商 [n17f3] | hub_as_vendors | table | no | AddNewActionModel, RefreshActionModel | no | n17f3ant0f919x4g5 | n17f3ant0f919x4g5:yes |
-| 采购联系人（历史） [n17f3] | hub_po_suppliers | table | no | AddNewActionModel, RefreshActionModel | no | n17f3anbi2us8re4au | n17f3anbi2us8re4au:yes |
+| 采购联系人（历史） [n17f3] | hub_po_suppliers | table | no | AddNewActionModel, RefreshActionModel | no | n17f3anbi2us8re4au | n17f3anbi2us8re4au:MISSING |
 | 采购申请 [w3pur] | pur_request_lines | table | no | AddNewActionModel, FilterActionModel, RefreshActionModel | no | w3puranqszms4p4i3a | w3puranqszms4p4i3a:yes |
 | 采购申请 [w3pur] | pur_requests | table | no | AddNewActionModel, FilterActionModel, RefreshActionModel | no | w3purannmd3quuhtgc | w3purannmd3quuhtgc:yes |
 | 询价管理 [w3pur] | pur_rfq_suppliers | table | no | AddNewActionModel, FilterActionModel, RefreshActionModel | no | w3puranoxm7hwf7rzs | w3puranoxm7hwf7rzs:yes |
@@ -112,7 +112,7 @@
 | 任务看板 [n17f1] | (no table block) | +KanbanBlockModel(hub_pj_tasks) | n/a | n/a | n/a | n/a | n/a |
 | 任务日历 [n17f1] | (no table block) | +CalendarBlockModel(hub_pj_tasks) | n/a | n/a | n/a | n/a | n/a |
 
-AddNew popup subtrees: present=77, missing=0
+AddNew popup subtrees: present=74, missing=3
 
 ## (c) global action-model stats (all 3700 flowModel rows)
 

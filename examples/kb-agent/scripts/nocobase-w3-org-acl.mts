@@ -66,8 +66,8 @@ const withW3b5Prefix = (tag: string): string => withN17Prefix('w3b5', tag)
 
 const ORG_PAGE_TITLE = '组织架构'
 const MATRIX_PAGE_TITLE = '权限矩阵'
-const ORG_GROUP = '人事管理'
-const MATRIX_GROUP = '协同办公'
+const ORG_GROUP = '组织与系统'
+const MATRIX_GROUP = '项目与协同'
 /**
  * The department-routed flow: w8's amount-less concession flow — b9's 9-step
  * chain and setup verify pin no approver_map on it, and 质检部 approving

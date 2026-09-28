@@ -1,0 +1,63 @@
+# w4-b2 heal run crm @ 2026-09-28T15:32:39.275Z
+form crm_payments/edit[3in60a]
+  fieldProps +1 (amount:placeholder)
+  layout twoCol [基本信息×2 | 财务与备注×2]
+form crm_customers/create[3q53gu]
+  required +5 (name,type,industry,country,level)
+  fieldProps +1 (status:options)
+  layout twoCol [基本信息×3 | 属性与联系×3]
+  assignRules +1 (status=active)
+form crm_leads/create[7w13qv]
+  required +1 (name)
+  fieldProps +2 (stage:options, expected_amount:placeholder)
+  layout twoCol [基本信息×1 | 属性与联系×4]
+  assignRules +1 (stage=new)
+form crm_invoices/create[an3g1g]
+  required +1 (customer)
+  fieldProps +2 (invoice_no:placeholder, amount:placeholder)
+  layout twoCol [基本信息×3 | 交易对手与交付×1 | 财务与备注×2]
+  assignRules +2 (issued_at={{ctx.date.preset.today}}, status=draft)
+form crm_payments/create[cf4elm]
+  required +1 (customer)
+  fieldProps +2 (amount:placeholder, status:options)
+  layout twoCol [基本信息×2 | 交易对手与交付×1 | 财务与备注×3]
+  assignRules +1 (status=pending)
+form crm_contacts/create[en6fa4]
+  required +1 (phone)
+  fieldProps +3 (email:placeholder, phone:placeholder, status:options)
+  layout twoCol [基本信息×1 | 属性与联系×4]
+  assignRules +1 (status=active)
+form crm_customers/create[gskig0]
+  required +4 (type,industry,country,level)
+  fieldProps +1 (status:options)
+  layout twoCol [基本信息×3 | 属性与联系×3]
+  assignRules +1 (status=active)
+form crm_products/create[jen8ne]
+  required +1 (category)
+  fieldProps +1 (base_price:placeholder)
+  layout twoCol [基本信息×2 | 属性与联系×3]
+form crm_payments/create[ktznhh]
+  required +1 (customer)
+  fieldProps +2 (amount:placeholder, status:options)
+  layout twoCol [基本信息×2 | 交易对手与交付×1 | 财务与备注×3]
+  assignRules +1 (status=pending)
+form crm_deals/create[og3b30]
+  required +1 (name)
+  fieldProps +2 (amount:placeholder, status:options)
+  layout twoCol [基本信息×2 | 财务与备注×2]
+  assignRules +1 (status=pending)
+form crm_quotes/create[y80aro]
+  required +1 (quote_no)
+  fieldProps +3 (quote_no:placeholder, total_amount:placeholder, status:options)
+  assignRules +1 (status=draft)
+page CRM 客户/客户 crm_customers +Edit(2col,required) +Delete(confirm)
+page CRM 客户/销售线索 crm_leads +Edit(2col,required) +Delete(confirm)
+page CRM 客户/联系人 crm_contacts +Edit(2col,required)
+page 销售流程/订单 crm_deals +Edit(2col,required) +Delete(confirm)
+page 销售流程/报价单 crm_quotes +Edit(2col,required) +Delete(confirm)
+page CRM 客户/产品与服务 crm_products +Edit(2col,required) +Delete(confirm)
+page 销售流程/回款 crm_payments +Edit(2col,required) +Delete(confirm)
+page 销售流程/发票 crm_invoices +Edit(2col,required) +Delete(confirm)
+page CRM 客户/客户仪表盘 crm_customers +Edit(2col,required) +Delete(confirm)
+page 销售流程/销售仪表盘 crm_payments +Edit(2col,required) +Delete(confirm)
+counts: {"layoutWritten":10,"itemProps":17,"fieldProps":20,"dividers":23,"assignRules":9,"submitActions":0,"editActions":10,"deleteActions":9}

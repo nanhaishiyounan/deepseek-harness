@@ -1,0 +1,23 @@
+{
+  "generatedAt": "2026-09-28T20:22:22.831Z",
+  "grids": 136,
+  "singleColEligible": 0,
+  "requiredCount": 308,
+  "placeholderCount": 299,
+  "assignRuleGrids": 61,
+  "pagesWithEdit": 48,
+  "configExempt": [
+    "hub_md_asset_categories",
+    "hub_md_customer_categories",
+    "hub_md_product_categories",
+    "hub_md_ticket_categories",
+    "mrp_confirm_intents",
+    "qm_aql_plans",
+    "wfl_approval_records",
+    "wfl_flow_configs",
+    "wfl_flow_states",
+    "wfl_flow_transitions",
+    "wfl_gate_configs",
+    "wms_reorder_suggestions"
+  ]
+}

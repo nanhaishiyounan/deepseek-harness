@@ -1,0 +1,23 @@
+# w4-b3 psql 对拍 @ 2026-09-28T16:55:57.203Z（月窗口 2026-09-01）
+采购订单 | 待审批 | SELECT COALESCE(COUNT(*), 0) FROM pur_orders WHERE doc_status IN ('pending', 'pending_level2'); | 期望=3
+采购订单 | 本月审批通过 | SELECT COALESCE(COUNT(*), 0) FROM pur_orders WHERE approved_at >= '2026-09-01'; | 期望=10
+采购订单 | 金额合计 | SELECT COALESCE(SUM(amount), 0) FROM pur_orders; | 期望=1474740
+采购订单 | 订单总数 | SELECT COALESCE(COUNT(*), 0) FROM pur_orders; | 期望=22
+生产订单 | 执行中订单 | SELECT COALESCE(COUNT(*), 0) FROM mfg_orders WHERE doc_status IN ('released', 'in_progress'); | 期望=8
+生产订单 | 已完工订单 | SELECT COALESCE(COUNT(*), 0) FROM mfg_orders WHERE doc_status = 'completed'; | 期望=3
+生产订单 | 已齐套订单 | SELECT COALESCE(COUNT(*), 0) FROM mfg_orders WHERE reservation_state = 'assigned'; | 期望=8
+生产订单 | 订单总数 | SELECT COALESCE(COUNT(*), 0) FROM mfg_orders; | 期望=22
+销售订单 | 待审批 | SELECT COALESCE(COUNT(*), 0) FROM so_orders WHERE doc_status IN ('pending', 'pending_level2'); | 期望=2
+销售订单 | 本月审批通过 | SELECT COALESCE(COUNT(*), 0) FROM so_orders WHERE approved_at >= '2026-09-01'; | 期望=6
+销售订单 | 金额合计 | SELECT COALESCE(SUM(amount), 0) FROM so_orders; | 期望=1401890
+销售订单 | 已发货订单 | SELECT COALESCE(COUNT(*), 0) FROM so_orders WHERE shipping_status = 'shipped'; | 期望=2
+入库单 | 本月入库单 | SELECT COALESCE(COUNT(*), 0) FROM wms_receipts WHERE received_at >= '2026-09-01'; | 期望=26
+入库单 | 待检数 | SELECT COALESCE(COUNT(*), 0) FROM wms_receipts WHERE iqc_status = 'pending'; | 期望=16
+入库单 | 入库总量 | SELECT COALESCE(SUM(qty), 0) FROM wms_receipts; | 期望=7327
+质检单 | 待检数 | SELECT COALESCE(COUNT(*), 0) FROM qm_inspections WHERE status = 'pending'; | 期望=22
+质检单 | 合格数 | SELECT COALESCE(COUNT(*), 0) FROM qm_inspections WHERE result = 'passed'; | 期望=40
+质检单 | 不合格数 | SELECT COALESCE(COUNT(*), 0) FROM qm_inspections WHERE result = 'failed'; | 期望=18
+库存查询 | 库存总件数 | SELECT COALESCE(SUM(qty_on_hand), 0) FROM wms_stock; | 期望=397400
+库存查询 | 可用量合计 | SELECT COALESCE(SUM(qty_available), 0) FROM wms_stock; | 期望=397155
+库存查询 | 占用件数 | SELECT COALESCE(SUM(qty_allocated), 0) FROM wms_stock; | 期望=195
+# psql 对拍：6 页全量卡 SQL 可执行（数值与页面截图人工对拍）

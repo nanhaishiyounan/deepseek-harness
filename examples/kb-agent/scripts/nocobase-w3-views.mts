@@ -146,7 +146,7 @@ const KANBAN_BOARDS: ReadonlyArray<KanbanBoardSpec> = [
     // Title distinct from B9 经营分析's 生产看板 KPI dashboard — the first
     // build's title collision made --rollback destroy B9's page by title
     // match (routes are cascade-deleted with their flowModels trees).
-    title: '生产订单看板', icon: 'ToolOutlined', menuGroup: '生产制造',
+    title: '生产订单看板', icon: 'ToolOutlined', menuGroup: '生产与计划',
     collection: 'mfg_orders', groupField: 'doc_status', groupOptions: MFG_DOC_STATUS,
     cardFields: [
       { name: 'code', title: '订单号', kind: 'input' },
@@ -271,7 +271,7 @@ const CALENDAR_PAGES: ReadonlyArray<CalendarPageSpec> = [
   },
 ]
 
-const GANTT_PAGE = { title: '排产甘特', icon: 'FieldTimeOutlined', menuGroup: '生产制造', collection: 'mfg_order_operations' } as const
+const GANTT_PAGE = { title: '排产甘特', icon: 'FieldTimeOutlined', menuGroup: '生产与计划', collection: 'mfg_order_operations' } as const
 
 // ─── W3-B6: the three operator-terminal iframe pages ───
 
@@ -285,13 +285,18 @@ type TerminalPageSpec = {
 }
 
 const TERMINAL_PAGES: ReadonlyArray<TerminalPageSpec> = [
-  { title: '车间终端', icon: 'ToolOutlined', menuGroup: '生产制造', page: 'report', operator: 'linjingyi' },
+  { title: '车间终端', icon: 'ToolOutlined', menuGroup: '生产与计划', page: 'report', operator: 'linjingyi' },
   { title: '质检工作台', icon: 'AuditOutlined', menuGroup: '质量管理', page: 'inspect', operator: 'quality_lead' },
   { title: '收货终端', icon: 'DatabaseOutlined', menuGroup: '仓储管理', page: 'receive', operator: 'b4guard' },
 ]
 
-/** The engine-serve origin the terminal iframes point at (approval-engine --serve). */
-const TERMINAL_SERVE_ORIGIN = process.env['W3_TERMINAL_ORIGIN'] ?? 'http://127.0.0.1:13110'
+/**
+ * The engine-serve origin the terminal iframes point at (approval-engine
+ * --serve). W4-B3 (D10) made W3_TERMINAL_BASE the canonical override; the
+ * older W3_TERMINAL_ORIGIN still wins over the built-in default so existing
+ * deployments keep working.
+ */
+const TERMINAL_SERVE_ORIGIN = process.env['W3_TERMINAL_BASE'] ?? process.env['W3_TERMINAL_ORIGIN'] ?? 'http://127.0.0.1:13110'
 
 const terminalUrl = (spec: TerminalPageSpec): string =>
   `${TERMINAL_SERVE_ORIGIN}/terminals/${spec.page}.html?operator=${spec.operator}`
@@ -846,7 +851,7 @@ async function main(): Promise<void> {
   // batch registered (B2's SUBTABLE_SPECS has no mfg_orders entry).
   await ensureParentHasMany(token, 'mfg_orders', 'order_operations', 'mfg_order_operations', 'order_id')
   const groups = new Map<string, number>()
-  for (const title of ['采购管理', '生产制造', '销售管理', '质量管理', '仓储管理']) {
+  for (const title of ['采购管理', '生产与计划', '销售管理', '质量管理', '仓储管理']) {
     groups.set(title, await menuGroupId(token, title))
   }
   for (const spec of KANBAN_BOARDS) {

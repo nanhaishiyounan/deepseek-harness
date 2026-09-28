@@ -1,0 +1,4 @@
+# w4-b1 heal run all @ 2026-09-28T20:09:44.497Z
+page 销售管理/销售仪表盘
+  filterForm crm_payments uid=bx1gtjpy7w7 fields=[status,customer]
+pages=76

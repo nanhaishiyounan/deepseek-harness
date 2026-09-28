@@ -1,0 +1,67 @@
+# w4-b2 heal run manufacturing @ 2026-09-28T15:31:32.149Z
+form mfg_completions/create[1053ql]
+  +FormSubmitAction (was missing — F-10' negative channel)
+  required +1 (qty)
+  fieldProps +4 (code:placeholder, qty:placeholder, lot_no:placeholder, oqc_status:options)
+  layout twoCol [基本信息×2 | 交易对手与交付×1 | 财务与备注×4]
+  assignRules +2 (status=draft, qty=0)
+form mfg_material_returns/create[2yq5jv]
+  +FormSubmitAction (was missing — F-10' negative channel)
+  fieldProps +2 (code:placeholder, qty:placeholder)
+  layout twoCol [基本信息×3 | 属性与联系×5]
+  assignRules +2 (status=draft, qty=0)
+form mfg_boms/create[a48so0]
+  +FormSubmitAction (was missing — F-10' negative channel)
+  fieldProps +2 (code:placeholder, bom_status:options)
+  layout twoCol [基本信息×1 | 属性与联系×5]
+  assignRules +1 (is_default=true)
+form mfg_bom_operations/create[ax4f99]
+  +FormSubmitAction (was missing — F-10' negative channel)
+  layout twoCol [基本信息×1 | 属性与联系×7]
+form mfg_work_centers/create[cygp8e]
+  +FormSubmitAction (was missing — F-10' negative channel)
+  fieldProps +3 (code:placeholder, cost_per_hour:placeholder, status:options)
+  layout twoCol [基本信息×3 | 属性与联系×5]
+  assignRules +1 (status=active)
+form mfg_boms/edit[g2th54]
+  required +1 (code)
+  fieldProps +1 (code:placeholder)
+  layout twoCol [基本信息×1 | 属性与联系×3]
+form mfg_material_issues/edit[jcq1cw]
+  required +1 (code)
+  fieldProps +2 (qty:placeholder, code:placeholder)
+  layout twoCol [基本信息×2 | 属性与联系×2]
+form mfg_material_issues/create[m7hgbs]
+  +FormSubmitAction (was missing — F-10' negative channel)
+  fieldProps +2 (code:placeholder, qty:placeholder)
+  layout twoCol [基本信息×3 | 属性与联系×5]
+  assignRules +2 (status=draft, qty=0)
+form mfg_orders/edit[nyda2d]
+  required +4 (code,need_date,qty,std_cost)
+  fieldProps +9 (code:placeholder, estimated_cost:placeholder, driver_so_code:placeholder, qty_transferred:placeholder, actual_cost:placeholder, qty:placeholder, cost_variance:placeholder, qty_consumed:placeholder, std_cost:placeholder)
+  layout twoCol [基本信息×4 | 交易对手与交付×1 | 财务与备注×17]
+form mfg_bom_lines/create[ooa5e6]
+  +FormSubmitAction (was missing — F-10' negative channel)
+  fieldProps +1 (qty_per_unit:placeholder)
+  layout twoCol [属性与联系×5]
+form mfg_job_reports/create[wx3j8s]
+  +FormSubmitAction (was missing — F-10' negative channel)
+  fieldProps +4 (code:placeholder, qty_good:placeholder, qty_scrap:placeholder, qc_status:options)
+  layout twoCol [基本信息×3 | 财务与备注×8]
+  assignRules +1 (status=draft)
+form mfg_holidays/create[x9y0nw]
+  +FormSubmitAction (was missing — F-10' negative channel)
+  required +1 (name)
+form mfg_orders/create[xjub6h]
+  +FormSubmitAction (was missing — F-10' negative channel)
+  required +2 (need_date,std_cost)
+  fieldProps +6 (code:placeholder, qty:placeholder, std_cost:placeholder, estimated_cost:placeholder, doc_status:options, reservation_state:options)
+  layout twoCol [基本信息×3 | 交易对手与交付×3 | 财务与备注×3]
+  assignRules +3 (need_date={{ctx.date.preset.today}}, doc_status=draft, qty=0)
+form mfg_orders/edit[yn5xe6]
+  required +4 (code,need_date,qty,std_cost)
+  fieldProps +9 (code:placeholder, estimated_cost:placeholder, driver_so_code:placeholder, qty_transferred:placeholder, actual_cost:placeholder, qty:placeholder, cost_variance:placeholder, qty_consumed:placeholder, std_cost:placeholder)
+  layout twoCol [基本信息×4 | 交易对手与交付×1 | 财务与备注×17]
+format sweep (non-form date fields)
+  DateOnlyFieldModel w4b2effl <- YYYY-MM-DD
+counts: {"layoutWritten":13,"itemProps":14,"fieldProps":46,"dividers":29,"assignRules":7,"submitActions":10,"editActions":0,"deleteActions":0}

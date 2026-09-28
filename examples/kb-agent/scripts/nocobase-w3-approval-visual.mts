@@ -57,7 +57,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 /** uid for W3-B4 rows; the `w3b4` prefix is the --rollback w3b4 anchor. */
 const withW3b4Prefix = (tag: string): string => withN17Prefix('w3b4', tag)
 
-const MENU_GROUP = '协同办公'
+const MENU_GROUP = '项目与协同'
 const PAGE_TITLE = '审批流配置'
 /** The flow whose <details> section renders expanded by default (the journey's主角). */
 const DEFAULT_OPEN_DOC_TYPE = 'pur_orders'

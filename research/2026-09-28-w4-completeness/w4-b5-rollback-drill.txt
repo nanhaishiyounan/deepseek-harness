@@ -1,0 +1,6 @@
+# w4-b5 rollback drill @ 2026-09-28T19:35:40.477Z
+before: 主生产计划 parent=388774219284480 sort=17 (生产与计划=388774219284480, 销售管理=388796826583042)
+reverse: parentId → 388796826583042 sort→10（parentId 变更触发 append-to-end：sort 被重算为组尾——回滚协议必须 parentId/sort 分步） ✓
+restore: parentId → 388774219284480 sort=17 ✓（B5 终态复原）
+zero-drift: routes 198→198 全字段一致 = ✓
+结论：desktopRoutes:update 反向 movePage 可单组回滚；parentId 与 sort 必须分步回写（单步会被 append-to-end 重算）；全部原值在 w4-b5-routes-before.json。

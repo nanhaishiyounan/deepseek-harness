@@ -1,0 +1,7 @@
+quote form audit: {"dividers":["基本信息","交易对手与交付","财务与备注"],"required":3,"pairs":6,"qtyShown":"0"}
+quote negative: validationErrors=2
+psql quote row: 17 | 100 |       12.5 | draft
+task edit audit: {"fields":10,"pairs":8,"dividers":["基本信息","财务与备注"]}
+task edit round-trip: Med -> 低 -> reopened=低
+task delete negative: confirmVisible=1 rowsBefore=20 rowsAfter=20
+W4-B2 journeys: ALL LEGS GREEN

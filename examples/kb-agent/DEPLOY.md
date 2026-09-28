@@ -28,6 +28,7 @@ MINIMAX_API_KEY=sk-...
 # Optional overrides:
 # DSH_KB_TENANT=my-company        # tenant binding for tools/presets/workbench (default demo-food-co)
 # MINIMAX_BASE_URL=https://api.minimaxi.com/v1
+# W3_TERMINAL_BASE=http://lan-host:13110  # origin for the three operator-terminal page iframes (default http://127.0.0.1:13110; re-run w4-heal-b3.mts --iframe after changing it)
 ```
 
 `DSH_KB_TENANT` is the single source of truth for the tenant: `cordis.patch.yml` reads it for `tool-kb`'s `tenant`, the preset rows, and the api-gateway's `kbTenant` (all three fall back to `demo-food-co` when unset). One deployment = one tenant; a second company gets a second deployment with its own data directory.

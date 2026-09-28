@@ -608,9 +608,9 @@ function editPageTreeFor(actionUid: string, spec: { collection: string, fields: 
 export async function saveRowEditAction(
   token: string,
   actionsColumnUid: string,
-  spec: { collection: string, fields: ReadonlyArray<EditFieldSpec> },
+  spec: { collection: string, fields: ReadonlyArray<EditFieldSpec>, uidPrefix?: (tag: string) => string },
 ): Promise<string> {
-  const actionUid = withW3b2Prefix('ea')
+  const actionUid = (spec.uidPrefix ?? withW3b2Prefix)('ea')
   await dataOf(token, 'POST', '/api/flowModels:save', {
     uid: actionUid, parentId: actionsColumnUid, subKey: 'actions', subType: 'array', sortIndex: 2,
     use: 'EditActionModel', props: { title: '编辑' },
@@ -634,8 +634,13 @@ export async function saveRowEditAction(
  * @param title button label (defaults to 删除)
  * @returns the new delete action uid
  */
-export async function saveRowDeleteAction(token: string, actionsColumnUid: string, title = '删除'): Promise<string> {
-  const actionUid = withW3b2Prefix('da')
+export async function saveRowDeleteAction(
+  token: string,
+  actionsColumnUid: string,
+  title = '删除',
+  uidPrefix: (tag: string) => string = withW3b2Prefix,
+): Promise<string> {
+  const actionUid = uidPrefix('da')
   await dataOf(token, 'POST', '/api/flowModels:save', {
     uid: actionUid, parentId: actionsColumnUid, subKey: 'actions', subType: 'array', sortIndex: 3,
     use: 'DeleteActionModel', props: { title },
@@ -708,6 +713,274 @@ export async function saveRowJumpAction(
  * @param foreignKey the FK column on the child (already in the database)
  * @returns whether the field was created on this call
  */
+// ─── W4-B1 table-standards heal (five factory functions) ───
+
+/** uid for W4-B1 nodes (FilterForm subtrees, rebound display fields); the `w4b1` prefix is the rollback anchor. */
+export const withW4b1Prefix = (tag: string): string => `w4b1${tag}${nodeKey()}`
+
+/** One colored-tag option for a select column, the w3-views PUR_DOC_STATUS shape. */
+export type StatusColumnOption = { value: string, label: string, color: string }
+
+/**
+ * Normalize `[value, label, color]` triples into DisplayEnumFieldModel
+ * props.options entries (the only shape the colored-tag renderer reads).
+ */
+export function statusColumnOptions(defs: ReadonlyArray<[string, string, string]>): StatusColumnOption[] {
+  return defs.map(([value, label, color]) => ({ value, label, color }))
+}
+
+/** Column numeric kinds: money (¥ + 2 decimals), qty (0 decimals), plain (2 decimals, no prefix). */
+export type NumberColumnKind = 'money' | 'qty' | 'plain'
+
+/**
+ * DisplayNumberFieldModel props for one numeric column. `separator` drives the
+ * thousand-grouping render (DisplayNumberFieldModel.tsx:141); `numberStep`
+ * fixes the decimal places; `addonBefore` renders the currency prefix.
+ */
+export function numberColumnProps(kind: NumberColumnKind): Record<string, unknown> {
+  if (kind === 'money') return { separator: '0,0.00', numberStep: 2, addonBefore: '¥' }
+  if (kind === 'qty') return { separator: '0,0' }
+  return { separator: '0,0.00', numberStep: 2 }
+}
+
+/**
+ * DisplayDateTimeFieldModel props: `format` is the resolved render format key
+ * (resolveDisplayDateTimeFormat honors an explicit value).
+ */
+export function dateColumnProps(kind: 'date' | 'datetime'): { format: string } {
+  return { format: kind === 'date' ? 'YYYY-MM-DD' : 'YYYY-MM-DD HH:mm' }
+}
+
+/**
+ * Write a table block's default sort — three redundant, idempotent homes,
+ * because the v2 client never applies a persisted sort to the initial list
+ * request (verified live: neither props.globalSort, nor the sorted column's
+ * antd defaultSortOrder, nor resourceSettings.init.params.sort reaches the
+ * first :list query; the official Default-sorting settings panel behaves the
+ * same — its value only kicks in on the next interaction via
+ * TableBlockModel.tsx:1042-1049):
+ * 1. props.globalSort — the interaction fallback the table reads back;
+ * 2. resourceSettings.init.params.sort — the server-side semantic marker;
+ * 3. the sorted column's sorter/defaultSortOrder — the visible column-header
+ *    arrow (T-5' evidence) and the click-to-sort entry.
+ * Entries follow the NocoBase sort convention: `['-doc_date']` = desc.
+ *
+ * @param token root auth token
+ * @param tableUid the TableBlockModel uid
+ * @param sort sort entries, e.g. ['-doc_date']
+ * @param sortColumnUid the TableColumnModel uid of the sort field (skipped when null)
+ */
+export async function applyTableDefaultSort(
+  token: string,
+  tableUid: string,
+  sort: string[],
+  sortColumnUid: string | null,
+): Promise<void> {
+  const current = await dataOf(token, 'GET', `/api/flowSurfaces:get?uid=${encodeURIComponent(tableUid)}`)
+  const row = current?.tree ?? {}
+  const before = (row.props ?? {}) as Record<string, unknown>
+  const initBefore = ((row.stepParams ?? {}).resourceSettings ?? {}).init as Record<string, unknown> | undefined
+  const init = { ...(initBefore ?? {}), params: { ...((initBefore ?? {}).params ?? {}), sort } }
+  await dataOf(token, 'POST', '/api/flowModels:save', {
+    uid: tableUid,
+    ...(row.parentId === undefined ? {} : { parentId: row.parentId }),
+    ...(row.subKey === undefined ? {} : { subKey: row.subKey }),
+    props: { ...before, globalSort: sort },
+    stepParams: { resourceSettings: { init } },
+  })
+  if (sortColumnUid !== null) {
+    const order = sort.some(entry => entry.startsWith('-')) ? 'descend' : 'ascend'
+    const column = await dataOf(token, 'GET', `/api/flowSurfaces:get?uid=${encodeURIComponent(sortColumnUid)}`)
+    const columnRow = column?.tree ?? {}
+    const columnBefore = (columnRow.props ?? {}) as Record<string, unknown>
+    await dataOf(token, 'POST', '/api/flowModels:save', {
+      uid: sortColumnUid,
+      ...(columnRow.parentId === undefined ? {} : { parentId: columnRow.parentId }),
+      ...(columnRow.subKey === undefined ? {} : { subKey: columnRow.subKey }),
+      props: { ...columnBefore, sorter: true, defaultSortOrder: order },
+    })
+  }
+}
+
+/**
+ * Merge display props onto one column's field submodel (separator/format/
+ * options). The updateSettings props domain rejects these render keys, so the
+ * write rides flowModels:save with the node's current props read back and
+ * merged — no sibling key is dropped.
+ */
+export async function applyColumnDisplayProps(
+  token: string,
+  fieldUid: string,
+  props: Record<string, unknown>,
+): Promise<void> {
+  const current = await dataOf(token, 'GET', `/api/flowSurfaces:get?uid=${encodeURIComponent(fieldUid)}`)
+  const row = current?.tree ?? {}
+  const before = (row.props ?? {}) as Record<string, unknown>
+  await dataOf(token, 'POST', '/api/flowModels:save', {
+    uid: fieldUid,
+    ...(row.parentId === undefined ? {} : { parentId: row.parentId }),
+    ...(row.subKey === undefined ? {} : { subKey: row.subKey }),
+    props: { ...before, ...props },
+  })
+}
+
+/** The rebuilt field submodel under a table column after a display-model swap. */
+export type ColumnFieldRebuild = {
+  uid: string
+  use: string
+  props: Record<string, unknown>
+  stepParams: Record<string, unknown>
+}
+
+/**
+ * Swap a column's field submodel (the titleField.tsx:76-110 beforeParamsSave
+ * mechanism, scripted): destroy the old field node(s) first, save the new one
+ * with the same parent/subKey, and rewrite the column's model metadata via
+ * updateSettings. The destroy step is what makes the swap idempotent — without
+ * it each re-run stacks another field submodel under the column. The column
+ * node's own props (width/fixed/sorter) are never touched, so a swap cannot
+ * drop them.
+ *
+ * @param token root auth token
+ * @param columnUid the TableColumnModel uid
+ * @param oldFieldUids the column's current field subnode uids to destroy (the swap must leave exactly one)
+ * @param columnStepParams the new column stepParams to merge (e.g. tableColumnSettings.model/fieldNames)
+ * @param rebuild the replacement field submodel (use/props/stepParams); uid gets the w4b1 prefix
+ * @returns the new field uid
+ */
+export async function rebuildColumnField(
+  token: string,
+  columnUid: string,
+  oldFieldUids: ReadonlyArray<string>,
+  columnStepParams: Record<string, unknown>,
+  rebuild: Omit<ColumnFieldRebuild, 'uid'>,
+): Promise<string> {
+  for (const oldUid of oldFieldUids) {
+    await call(token, 'POST', `/api/flowModels:destroy?filterByTk=${encodeURIComponent(oldUid)}`)
+  }
+  const fieldUid = withW4b1Prefix('cf')
+  await dataOf(token, 'POST', '/api/flowModels:save', {
+    uid: fieldUid, parentId: columnUid, subKey: 'field', subType: 'object', sortIndex: 0,
+    use: rebuild.use, props: rebuild.props, stepParams: rebuild.stepParams,
+  })
+  await dataOf(token, 'POST', '/api/flowSurfaces:updateSettings', {
+    target: { uid: columnUid }, stepParams: columnStepParams,
+  })
+  return fieldUid
+}
+
+/**
+ * Rebind an association column to render the target collection's title field
+ * (DisplayTitleFieldModel + props.titleField; renders Typography.Text of
+ * `record[assoc][titleField]` instead of the bare FK id).
+ *
+ * @param token root auth token
+ * @param columnUid the TableColumnModel uid of the association column
+ * @param spec target collection, its title field, and the display props
+ */
+export async function rebindColumnTitleField(
+  token: string,
+  columnUid: string,
+  oldFieldUids: ReadonlyArray<string>,
+  spec: { targetCollection: string, titleField: string },
+): Promise<string> {
+  return rebuildColumnField(token, columnUid, oldFieldUids, {
+    tableColumnSettings: { model: { use: 'DisplayTitleFieldModel' }, fieldNames: { label: spec.titleField } },
+  }, {
+    use: 'DisplayTitleFieldModel',
+    props: {
+      displayStyle: 'text', overflowMode: 'ellipsis', clickToOpen: true, displayCopyButton: false,
+      titleField: spec.titleField, fieldNames: { label: spec.titleField },
+    },
+    stepParams: {
+      fieldSettings: { init: { dataSourceKey: 'main', collectionName: spec.targetCollection, fieldPath: spec.titleField } },
+      popupSettings: { openView: { collectionName: spec.targetCollection, dataSourceKey: 'main' } },
+    },
+  })
+}
+
+/**
+ * Convert a bare-text select column into a colored enum column
+ * (DisplayEnumFieldModel + props.options). Only valid when the underlying
+ * collection field's interface is select — the caller checks (invariant 3).
+ *
+ * @param token root auth token
+ * @param columnUid the TableColumnModel uid
+ * @param options full value coverage with label + color
+ * @param spec collection + fieldPath for the field metadata
+ */
+export async function enumizeColumn(
+  token: string,
+  columnUid: string,
+  oldFieldUids: ReadonlyArray<string>,
+  options: ReadonlyArray<StatusColumnOption>,
+  spec: { collection: string, fieldPath: string },
+): Promise<string> {
+  return rebuildColumnField(token, columnUid, oldFieldUids, {
+    tableColumnSettings: { model: { use: 'DisplayEnumFieldModel' } },
+  }, {
+    use: 'DisplayEnumFieldModel',
+    props: { options: [...options] },
+    stepParams: {
+      fieldSettings: { init: { dataSourceKey: 'main', collectionName: spec.collection, fieldPath: spec.fieldPath } },
+      popupSettings: { openView: { collectionName: spec.collection, dataSourceKey: 'main' } },
+    },
+  })
+}
+
+/** One filter field spec: the collection fieldPath, the optional input operator, and — for association fields — the target collection whose record-select popup needs collection-level fieldGroups. */
+export type FilterFieldSpec = { fieldPath: string, operator?: string, popupTarget?: { collection: string, fields: string[] } }
+
+/**
+ * Ensure a page-level FilterForm block on a grid (W4 first use of the
+ * server-side channel): flowSurfaces:addBlock 'filterForm' → per-field addField
+ * (defaultTargetUid binds the grid's filterManager connection server-side) →
+ * addAction 'reset' + 'submit' (T-2': visible, never hidden defaults). No
+ * defaultValues are written — invariant 5.
+ *
+ * @param token root auth token
+ * @param spec grid/table/collection plus the filter fields; tableUid is the default filter target
+ * @returns the FilterFormBlockModel uid
+ */
+export async function ensureFilterForm(
+  token: string,
+  spec: {
+    gridUid: string
+    tableUid: string
+    collection: string
+    fields: ReadonlyArray<FilterFieldSpec>
+  },
+): Promise<string> {
+  // fields ride the addBlock payload: the server then both creates the field
+  // items and wires the grid.filterManager connections for the grid's data
+  // blocks — a follow-up addField per field would duplicate the item and the
+  // connection (verified live on the pilot page).
+  // association filter fields open a generated record-select popup; the server
+  // requires collection-level fieldGroups for those popup collections
+  const popupTargets = spec.fields.flatMap(field => field.popupTarget === undefined ? [] : [field.popupTarget])
+  const defaults = popupTargets.length === 0 ? {} : {
+    defaults: {
+      collections: Object.fromEntries(popupTargets.map(target => [target.collection, {
+        fieldGroups: [{ key: 'basic', title: '基本信息', fields: target.fields }],
+      }])),
+    },
+  }
+  // object-form fields carry defaultTargetUid: grids with multiple data blocks
+  // (比价表 has two pur_quotes tables) reject bare field strings
+  const created = await dataOf(token, 'POST', '/api/flowSurfaces:addBlock', {
+    target: { uid: spec.gridUid },
+    type: 'filterForm',
+    resourceInit: { dataSourceKey: 'main', collectionName: spec.collection },
+    fields: spec.fields.map(field => ({ fieldPath: field.fieldPath, defaultTargetUid: spec.tableUid })),
+    ...defaults,
+  })
+  const filterFormUid = String(created?.uid ?? '')
+  if (filterFormUid === '') throw new Error(`addBlock filterForm on grid ${spec.gridUid} returned no uid`)
+  await dataOf(token, 'POST', '/api/flowSurfaces:addAction', { target: { uid: filterFormUid }, type: 'reset' })
+  await dataOf(token, 'POST', '/api/flowSurfaces:addAction', { target: { uid: filterFormUid }, type: 'submit' })
+  return filterFormUid
+}
+
 export async function ensureParentHasMany(
   token: string,
   parent: string,
@@ -724,4 +997,337 @@ export async function ensureParentHasMany(
     uiSchema: { type: 'array', 'x-component': 'AssociationField', title: field, 'x-component-props': { multiple: true, fieldNames: { label: 'id', value: 'id' } } },
   })
   return true
+}
+
+// ─── W4-B2 form-standards heal (three factory functions) ───
+
+/** uid for W4-B2 nodes (divider items, edit/delete actions); the `w4b2` prefix is the rollback anchor. */
+export const withW4b2Prefix = (tag: string): string => `w4b2${tag}${nodeKey()}`
+
+/**
+ * FormItemModel/field-model props for one form field (F-3'/F-9'): `required`
+ * also emits the rules entry the antd validator reads (actions/required.tsx
+ * semantics — collection-level joi required would make the marker redundant,
+ * but the UI marker alone does not block submit without the rule).
+ */
+export function formItemExtras(opts: {
+  required?: boolean
+  message?: string
+  placeholder?: string
+  description?: string
+  tooltip?: string
+}): { props: Record<string, unknown>, rules?: Array<Record<string, unknown>> } {
+  const props: Record<string, unknown> = {}
+  if (opts.placeholder !== undefined) props.placeholder = opts.placeholder
+  if (opts.description !== undefined) props.extra = opts.description
+  if (opts.tooltip !== undefined) props.tooltip = opts.tooltip
+  if (opts.required !== undefined) props.required = opts.required
+  const rules = opts.required === true
+    ? [{ required: true, message: opts.message ?? '该字段为必填项' }]
+    : undefined
+  return rules === undefined ? { props } : { props, rules }
+}
+
+/**
+ * GridLayoutV2 rows for a sectioned two-column form (F-1'): each spec emits a
+ * full-width divider row first (when `dividerUid` is given), then pairs its
+ * field items into [12,12] rows (a trailing lone item keeps a [12] cell so the
+ * column rhythm is stable). Mirrors the DetailsGrid layout contract
+ * (FormGridModel.tsx:23-29) — the grid renders from `layout.rows`, so the
+ * FormItemModel rows themselves never move.
+ */
+export function formTwoColumnLayout(
+  sections: ReadonlyArray<{ dividerUid?: string, itemUids: ReadonlyArray<string> }>,
+): { layout: { version: 2, rows: Array<Record<string, unknown>>, rowOrder: string[], rowGap: number, colGap: number } } {
+  const rows: Array<Record<string, unknown>> = []
+  for (const section of sections) {
+    if (section.dividerUid !== undefined) {
+      const id = `sec${rows.length}`
+      rows.push({ id, cells: [{ id: `${id}:cell:0`, items: [section.dividerUid] }], sizes: [24] })
+    }
+    for (let index = 0; index < section.itemUids.length; index += 2) {
+      const id = `r${rows.length}`
+      const pair = section.itemUids.slice(index, index + 2)
+      rows.push({
+        id,
+        cells: pair.map((uid, cell) => ({ id: `${id}:cell:${cell}`, items: [uid] })),
+        sizes: pair.length === 2 ? [12, 12] : [12],
+      })
+    }
+  }
+  return { layout: { version: 2, rows, rowOrder: rows.map(row => String(row.id)), rowGap: 0, colGap: 16 } }
+}
+
+/** One form-level default rule (F-6'): `value` is a literal or a `{{ctx.date.*}}` / `{{ctx.user.id}}` template expression. */
+export type FormAssignRule = { targetPath: string, value: unknown, mode?: 'default' | 'assign' | 'override' }
+
+/**
+ * Write a form's level default values (F-6') onto the FormGridModel row's
+ * delegated `stepParams.formModelSettings.assignRules` (FormBlockModel
+ * GRID_DELEGATED_STEP_KEYS — the grid stores what the form block reads back).
+ * `mode: 'default'` only fills empty values, so Edit forms keep existing row
+ * values. Rules with the same targetPath are replaced; others are kept
+ * (idempotent re-runs converge).
+ *
+ * @param token root auth token
+ * @param formGridUid the FormGridModel uid (not the form block's)
+ * @param rules targetPath + value pairs
+ */
+export async function assignFormDefaults(token: string, formGridUid: string, rules: ReadonlyArray<FormAssignRule>): Promise<void> {
+  const current = await dataOf(token, 'GET', `/api/flowSurfaces:get?uid=${encodeURIComponent(formGridUid)}`)
+  const row = current?.tree ?? {}
+  const stepParamsBefore = (row.stepParams ?? {}) as Record<string, unknown>
+  const existing = Array.isArray((stepParamsBefore.formModelSettings as Record<string, any> | undefined)?.assignRules?.value)
+    ? [...((stepParamsBefore.formModelSettings as any).assignRules.value as Array<Record<string, unknown>>)]
+    : []
+  const next = existing.filter(entry => !rules.some(rule => rule.targetPath === entry.targetPath))
+  next.push(...rules.map((rule, index) => ({
+    key: `w4b2-${rule.targetPath}-${index}`,
+    enable: true,
+    targetPath: rule.targetPath,
+    mode: rule.mode ?? 'default',
+    value: rule.value,
+  })))
+  await dataOf(token, 'POST', '/api/flowModels:save', {
+    uid: formGridUid,
+    ...(row.parentId === undefined ? {} : { parentId: row.parentId }),
+    ...(row.subKey === undefined ? {} : { subKey: row.subKey }),
+    // flowModels:save replaces stepParams wholesale; spread stepParamsBefore
+    // so sibling keys (gridSettings from the B2 layout pass) survive.
+    stepParams: { ...stepParamsBefore, formModelSettings: { assignRules: { value: next } } },
+  })
+}
+
+/**
+ * Read-merge-save one flowModels node's props (B1's applyColumnDisplayProps
+ * generalized to any node — form items and field submodels ride it for
+ * required/placeholder/options writes). No sibling key is dropped.
+ *
+ * @param token root auth token
+ * @param uid the node uid
+ * @param props the props keys to merge in
+ */
+export async function mergeNodeProps(token: string, uid: string, props: Record<string, unknown>): Promise<void> {
+  const current = await dataOf(token, 'GET', `/api/flowSurfaces:get?uid=${encodeURIComponent(uid)}`)
+  const row = current?.tree ?? {}
+  const before = (row.props ?? {}) as Record<string, unknown>
+  await dataOf(token, 'POST', '/api/flowModels:save', {
+    uid,
+    ...(row.parentId === undefined ? {} : { parentId: row.parentId }),
+    ...(row.subKey === undefined ? {} : { subKey: row.subKey }),
+    props: { ...before, ...props },
+  })
+}
+
+// ─── W4-B3 page-level heal (metric charts + markdown hints) ───
+
+/** uid for W4-B3 nodes; `w4b3` is the rollback/identity marker (see {@link W4B3_MARKER}). */
+export const withW4b3Prefix = (tag: string): string => `w4b3${tag}${nodeKey()}`
+
+/**
+ * The batch-identity marker embedded in every B3-created artifact. addBlock
+ * mints server-side uids the script cannot prefix, so blocks carry the marker
+ * inside their own content instead: chart blocks in the first line of the
+ * custom raw option, markdown blocks in a trailing HTML comment (invisible in
+ * rendered markdown). Rollback and idempotence both match on it.
+ */
+export const W4B3_MARKER = 'w4b3'
+
+/**
+ * The single-value stat card's raw ECharts option (D3: ChartBlockModel
+ * single-measure aggregation + visual.mode='custom'). Renders the card title,
+ * the big number, and the 口径 footnote (P-2' — the card never follows the
+ * page filter, so the footnote states its own scope in plain words). The
+ * first line carries {@link W4B3_MARKER} for batch identification.
+ *
+ * @param spec aggregation alias to read, unit strings, title and footnote texts
+ */
+export function statCardRaw(spec: {
+  alias: string
+  title: string
+  footnote: string
+  unitPrefix?: string
+  unitSuffix?: string
+  decimals?: number
+}): string {
+  return [
+    `/* ${W4B3_MARKER} statcard */`,
+    `const v = ((ctx.data.objects || [])[0] || {})['${spec.alias}'];`,
+    'const n = Number(v == null ? 0 : v);',
+    `const fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: ${spec.decimals ?? 2} });`,
+    `const text = '${spec.unitPrefix ?? ''}' + (isFinite(n) ? fmt(n) : '0') + '${spec.unitSuffix ?? ''}';`,
+    'return {',
+    '  graphic: { elements: [',
+    `    { type: 'text', left: 16, top: 12, style: { text: ${JSON.stringify(spec.title)}, fontSize: 13, fontWeight: 500, fill: '#6b7280' } },`,
+    `    { type: 'text', left: 16, top: 36, style: { text: text, fontSize: 34, fontWeight: 700, fill: '#1d4ed8' } },`,
+    `    { type: 'text', left: 16, bottom: 8, style: { text: ${JSON.stringify(spec.footnote)}, fontSize: 11, fill: '#9ca3af' } },`,
+    '  ] },',
+    '};',
+  ].join('\n')
+}
+
+/**
+ * One single-value metric card on a page grid: addBlock type 'chart' with a
+ * builder query of exactly one measure (no dimensions → one aggregated row)
+ * and the custom raw visual ({@link statCardRaw}), then the block title and
+ * the sortIndex that seats it above the page's existing blocks. Idempotence
+ * and rollback live in the heal script (it matches blocks by
+ * {@link W4B3_MARKER} + props.title under the grid).
+ *
+ * @param token root auth token
+ * @param spec collection, one measure, optional filter, card texts, and the sortIndex for grid placement
+ * @returns the created ChartBlockModel uid
+ */
+export async function metricChart(
+  token: string,
+  spec: {
+    gridUid: string
+    title: string
+    collection: string
+    measure: { field: string, aggregation: 'count' | 'sum' | 'avg', alias: string }
+    filter?: Record<string, unknown>
+    footnote: string
+    unitPrefix?: string
+    unitSuffix?: string
+    decimals?: number
+    sortIndex?: number
+  },
+): Promise<string> {
+  // Direct flowModels:save, not flowSurfaces:addBlock: the authoring channel
+  // re-validates every inline popup on the surface, and a kanban block's
+  // cardViewAction popup (missing collection fieldGroups) fails that check
+  // even though the new chart has nothing to do with it (处置看板 case). The
+  // saved row must carry the server-canonicalized shapes the renderer and the
+  // query runner read back: query.collectionPath (a raw `resource` object is
+  // ignored — the block then renders the 请配置图表 placeholder), the
+  // {logic, items} filter triple form, `name` mirroring the uid, and a
+  // sortIndex. A load-only single-row write is the complete subtree a chart
+  // block needs.
+  const uid = withW4b3Prefix('sc')
+  const filter = spec.filter === undefined ? undefined : {
+    logic: '$and',
+    items: Object.entries(spec.filter).flatMap(([path, raw]) => {
+      if (raw !== null && typeof raw === 'object' && !Array.isArray(raw)) {
+        return Object.entries(raw as Record<string, unknown>).map(([operator, value]) => ({ path, operator, value }))
+      }
+      return [{ path, operator: '$eq', value: raw }]
+    }),
+  }
+  await dataOf(token, 'POST', '/api/flowModels:save', {
+    uid, name: uid, parentId: spec.gridUid, subKey: 'items', subType: 'array',
+    ...(spec.sortIndex === undefined ? {} : { sortIndex: spec.sortIndex }),
+    use: 'ChartBlockModel', decoratorProps: {},
+    props: { title: spec.title },
+    stepParams: {
+      chartSettings: {
+        configure: {
+          query: {
+            mode: 'builder',
+            collectionPath: ['main', spec.collection],
+            measures: [{ field: spec.measure.field, aggregation: spec.measure.aggregation, alias: spec.measure.alias }],
+            ...(filter === undefined ? {} : { filter }),
+          },
+          chart: {
+            option: {
+              mode: 'custom',
+              raw: statCardRaw({
+                alias: spec.measure.alias, title: spec.title, footnote: spec.footnote,
+                ...(spec.unitPrefix === undefined ? {} : { unitPrefix: spec.unitPrefix }),
+                ...(spec.unitSuffix === undefined ? {} : { unitSuffix: spec.unitSuffix }),
+                ...(spec.decimals === undefined ? {} : { decimals: spec.decimals }),
+              }),
+            },
+          },
+        },
+      },
+    },
+    popup: { mode: 'local' },
+  })
+  return uid
+}
+
+/**
+ * One markdown hint block on a page grid (P-4'/P-5': one-sentence purpose +
+ * the empty-list guidance D9 settles on). The trailing HTML comment carries
+ * {@link W4B3_MARKER}; it is invisible in rendered markdown.
+ *
+ * @param token root auth token
+ * @param spec markdown content and the sortIndex seating it at the page top
+ * @returns the created MarkdownBlockModel uid
+ */
+export async function ensureMarkdownHint(
+  token: string,
+  spec: { gridUid: string, content: string, sortIndex?: number },
+): Promise<string> {
+  // Same direct-save channel as metricChart (authoring-channel independence;
+  // the w4b3-prefixed uid makes the block prefix-rollback-able too). The
+  // renderer reads the markdown from stepParams.markdownBlockSettings
+  // .editMarkdown.content (props.content alone shows the demo placeholder),
+  // and `name`/sortIndex mirror what addBlock writes.
+  const uid = withW4b3Prefix('md')
+  const content = `${spec.content}\n<!--${W4B3_MARKER}-->`
+  await dataOf(token, 'POST', '/api/flowModels:save', {
+    uid, name: uid, parentId: spec.gridUid, subKey: 'items', subType: 'array',
+    ...(spec.sortIndex === undefined ? {} : { sortIndex: spec.sortIndex }),
+    use: 'MarkdownBlockModel', decoratorProps: {},
+    props: { content },
+    stepParams: { markdownBlockSettings: { editMarkdown: { content } } },
+    popup: { mode: 'local' },
+  })
+  return uid
+}
+
+/**
+ * Seat the B3 blocks at the top of a page grid: the hint on its own full-width
+ * row, the stat cards side by side on one row beneath it, every pre-existing
+ * row kept below in its original order. The grid renders from the legacy
+ * rows/sizes/rowOrder maps (`stepParams.gridSettings.grid`, mirrored in
+ * props) — sortIndex on items does not move blocks, and addBlock always
+ * appends `appendRowN` at the tail, so the heal must rewrite the maps
+ * itself. Re-running is convergent: the moved uids are stripped from their
+ * old cells first, rows left empty are dropped, then the two w4b3 rows are
+ * rebuilt at the head of rowOrder.
+ *
+ * @param token root auth token
+ * @param gridUid the page's BlockGridModel uid
+ * @param spec the hint block uid (null when the page has no hint) and the card uids in display order
+ */
+export async function seatGridTopBlocks(
+  token: string,
+  gridUid: string,
+  spec: { hintUid: string | null, cardUids: ReadonlyArray<string> },
+): Promise<void> {
+  const HINT_ROW = 'w4b3hintRow'
+  const CARDS_ROW = 'w4b3cardsRow'
+  const current = await dataOf(token, 'GET', `/api/flowSurfaces:get?uid=${encodeURIComponent(gridUid)}`)
+  const row = current?.tree ?? {}
+  const grid = ((row.stepParams ?? {}).gridSettings ?? {}).grid ?? {}
+  const mine = new Set([...(spec.hintUid === null ? [] : [spec.hintUid]), ...spec.cardUids])
+  const rows: Record<string, unknown> = {}
+  const sizes: Record<string, unknown> = {}
+  for (const [key, cells] of Object.entries(grid.rows ?? {})) {
+    if (key === HINT_ROW || key === CARDS_ROW) continue
+    const kept = (Array.isArray(cells) ? cells : []).map(cell => (Array.isArray(cell) ? cell.filter(uid => !mine.has(String(uid))) : [])).filter(cell => cell.length > 0)
+    if (kept.length === 0) continue
+    rows[key] = kept
+    sizes[key] = (grid.sizes ?? {})[key] ?? kept.map(() => 24)
+  }
+  if (spec.hintUid !== null) {
+    rows[HINT_ROW] = [[spec.hintUid]]
+    sizes[HINT_ROW] = [24]
+  }
+  if (spec.cardUids.length > 0) {
+    rows[CARDS_ROW] = spec.cardUids.map(uid => [uid])
+    const n = spec.cardUids.length
+    const base = Math.floor(24 / n)
+    sizes[CARDS_ROW] = Array.from({ length: n }, (_, index) => (index === 0 ? 24 - base * (n - 1) : base))
+  }
+  const rowOrder = [...(spec.hintUid !== null ? [HINT_ROW] : []), ...(spec.cardUids.length > 0 ? [CARDS_ROW] : []), ...Object.keys(rows).filter(key => key !== HINT_ROW && key !== CARDS_ROW)]
+  await dataOf(token, 'POST', '/api/flowModels:save', {
+    uid: gridUid,
+    ...(row.parentId === undefined ? {} : { parentId: row.parentId }),
+    ...(row.subKey === undefined ? {} : { subKey: row.subKey }),
+    props: { ...(row.props ?? {}), rows, sizes, rowOrder },
+    stepParams: { gridSettings: { grid: { rows, sizes, rowOrder } } },
+  })
 }

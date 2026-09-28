@@ -1,0 +1,41 @@
+=== s2 ===
+b9-chain: [s2] RFQ 三家报价就位（0.92/0.88/0.95）
+b9-chain: [s2] ② 采购链 ✓ PR→RFQ→3报价→比价→PO approved（wfl PO 留痕 2 行）
+s2-exit=0
+=== s3 ===
+b9-chain: [s3] IQC QI-B9F-0001 前轮已判定 passed（single-shot，跳过重判）
+b9-chain: [s3] ③ 收货质量链 ✓ 待检→IQC(AQL d=2≤Ac passed)→放行→合格库（批次 RM-SNA-20260926-01 四日期齐）
+s3-exit=0
+=== s4 ===
+mrp-run: SO SO-B9F-0001 预留 → FD-SNA-080 欠 0（已有 0）+0
+b9-chain: [s4] ④ 销售链 ✓ SO 两级审批 approved + 生效即预留（FD-SNA-080+0，足额）
+s4-exit=0
+=== s5 ===
+mrp-run: MPS MPS-202610-01 covers 3 item(s) — SO direct feed excluded, planned rows in
+mrp-run: close MRP-20260928-85 — 4 snapshot row(s), 1 live suggestion(s) (0 new), 0 stale closed
+b9-chain: [s5] ⑤ MRP 日结 ✓ MRP-20260928-85（snapshots=4，open 建议=1——MO 建议已被旅程确认，净需求由 11 张在途 MO 承接，幂等续跑）
+s5-exit=0
+=== s6 ===
+b9-chain: [s6] MO 已 completed（齐套/领料/报工/完工 前轮已落地，幂等续跑 OQC 尾段）
+b9-chain: [s6] OQC 前轮已判定 passed（single-shot，跳过）
+b9-chain: [s6] ⑥ 生产链 ✓ MO-2026-0009 completed（齐套→领料×2→报工×3→完工→OQC passed→放行；成品批次 MFG-20260926-04）
+s6-exit=0
+=== s7 ===
+b9-chain: [s7] SO 发货前轮已完成 shipped（shipped_at=2026-09-26，跳过发货与当日断言）
+b9-chain: [s7] ⑦ 结算链 ✓ 发票匹配 confirmed → 付款 approved（三方：PO ¥880 = 发票 ¥880 = 收货 1000）
+s7-exit=0
+=== s8 ===
+b9-chain: [s8] ⑧ KPI 快照重算 ✓ 2026-09-28 27 rows（23 valued）
+s8-exit=0
+=== s9 ===
+b9-chain: [s9] ⑨a wfl 留痕 ✓ PO×2 MO×2（一审单=提交+生效两行；B9 七单家族合计 16 行，逐单齐全）
+b9-chain: [s9] ⑨b movements 勾稽 ✓ 7 条，五类库存事件齐（PUTAWAY、MOVE、ISSUE_WIP、RECEIPT_MFG、SHIPMENT_SO）
+s9-exit=0
+=== 终验门禁汇总（B6） ===
+[verify] setup-nocobase.mts verify → exit 0：w4b1~w4b5 五族断言 + W/W2/W3 全部历史断言全绿（w4-b6-verify.txt 留档）
+[trees] .trees.mjs + .analyze.mjs → pages=80 tableRows=99 anomalies=0
+[ledger] nocobase-h5-wms.mts --assert-ledger → 49 组 203 条流水 balanced
+[selftest] approval-engine --selftest → OK（状态机全序列…部门路由…终端校验全过）
+[selftest] kpi-run --selftest → OK（FPY/OTIF/账实相符率…沪日界边界全过）
+[audit] .audit-fetch.mjs + .audit-analyze.mjs → after 全指标（21/21 PASS，w4-b6-baseline-after.txt）
+[drill] 回归拦截力演练 → A/B 双轮红→恢复→绿（w4-b6-regression-drill.txt，含 B2 stepParams 覆盖缺陷的发现与根治）

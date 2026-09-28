@@ -1,0 +1,527 @@
+{
+  "generatedAt": "2026-09-28T19:56:30.225Z",
+  "probeInputs": {
+    "fetchedAt": {
+      "desktopRoutes": "2026-09-28T19:45:56.466Z",
+      "flowModels": "2026-09-28T19:45:59.933Z",
+      "collectionFields": "2026-09-28T19:46:00.516Z"
+    },
+    "analyzedAt": "2026-09-28T19:46:00.946Z",
+    "sha256": {
+      "api-desktopRoutes.json": "ec66fcbea397705508a56e9108bc78a715a1c27204d96da9fe41ad6d8803fd62",
+      "api-flowModels-flat.json": "bd1cca69ee1fa7f54f78d281230b81eca22738498dca3c2bc28b27401dbdd429",
+      "api-collection-fields.json": "c202a50c5c37ec1d3538929402b3c2e74ed71fc60c7f4e835e5ac3ee57ef8379"
+    },
+    "rows": {
+      "desktopRoutes": 198,
+      "flowModels": 8520,
+      "collectionFields": 1007,
+      "routeTypeCounts": {
+        "group": 12,
+        "page": 3,
+        "tabs": 93,
+        "flowPage": 90
+      },
+      "relationCollections": 81,
+      "relationFields": 171
+    }
+  },
+  "rows": [
+    {
+      "item": "表单单列堆砌（L1/L2）",
+      "before": "105/105",
+      "after": "21/136",
+      "target": "L1/L2 0 单列（L3/小表单豁免）",
+      "verdict": "PASS",
+      "note": "豁免交叉验证见下"
+    },
+    {
+      "item": "表单必填率",
+      "before": "17.7%（128/725）",
+      "after": "32.4%（308/952）",
+      "target": "≥260 字段",
+      "verdict": "PASS",
+      "note": ""
+    },
+    {
+      "item": "placeholder 覆盖",
+      "before": "0",
+      "after": "299",
+      "target": "格式类字段全覆盖（B2 断言 floor）",
+      "verdict": "PASS",
+      "note": "w4b2 断言固化"
+    },
+    {
+      "item": "默认值（assignRules 表单级）",
+      "before": "0",
+      "after": "61/136",
+      "target": "可默认 create 表单 100%（B2 断言）",
+      "verdict": "PASS",
+      "note": "D4：默认值走 assignRules，字段 props 口径恒 0"
+    },
+    {
+      "item": "表格无筛选（页）",
+      "before": "37/78",
+      "after": "0",
+      "target": "0",
+      "verdict": "PASS",
+      "note": ""
+    },
+    {
+      "item": "无默认排序（页）",
+      "before": "78/78",
+      "after": "0",
+      "target": "0",
+      "verdict": "PASS",
+      "note": ""
+    },
+    {
+      "item": "金额列无格式化",
+      "before": "150/150",
+      "after": "0/144",
+      "target": "0",
+      "verdict": "PASS",
+      "note": ""
+    },
+    {
+      "item": "日期列无格式化",
+      "before": "—",
+      "after": "0/63",
+      "target": "0",
+      "verdict": "PASS",
+      "note": ""
+    },
+    {
+      "item": "关联列空/裸 ID",
+      "before": "100 列/51 页",
+      "after": "0/99 列（50 页）",
+      "target": "0",
+      "verdict": "PASS",
+      "note": ""
+    },
+    {
+      "item": "状态列裸 Text",
+      "before": "14+2 列",
+      "after": "0",
+      "target": "0",
+      "verdict": "PASS",
+      "note": ""
+    },
+    {
+      "item": "状态枚举无彩标",
+      "before": "—",
+      "after": "0",
+      "target": "0",
+      "verdict": "PASS",
+      "note": ""
+    },
+    {
+      "item": "单列豁免台账（config/小表单）",
+      "before": "—",
+      "after": "21/21 合规",
+      "target": "全部命中豁免",
+      "verdict": "PASS",
+      "note": "CONFIG_DATA/_categories/＜4字段"
+    },
+    {
+      "item": "统计卡分级覆盖",
+      "before": "67/78 无卡",
+      "after": "L1/L2 缺卡 0；无卡页 17 全为 L3/L4=true",
+      "target": "L1/L2 全覆盖",
+      "verdict": "PASS",
+      "note": "AI 工作台[L4]、分类维护[L3]、审核检查表[L3]、移库管理[L3]、库存流水[L3]、预留管理[L3]、补货预警[L3]、盘点计划[L3]、排程明细[L4]、MO 执行视图[L3]、计划工作台[L4]、MRP 快照[L3]、检验读数[L3]、AQL 抽样方案[L3]、季度绩效物化[L3]、主生产计划[L3]、月度收发存[L3]"
+    },
+    {
+      "item": "图表无标题",
+      "before": "18/18",
+      "after": "0/148",
+      "target": "0",
+      "verdict": "PASS",
+      "note": ""
+    },
+    {
+      "item": "Edit 覆盖（白名单域）",
+      "before": "75/92 页无 Edit",
+      "after": "无 Edit 42 页，其中白名单域缺口 0",
+      "target": "白名单域 0 缺口（D5 引擎域只读豁免）",
+      "verdict": "PASS",
+      "note": ""
+    },
+    {
+      "item": "菜单组数",
+      "before": "16 组（N1–N8）",
+      "after": "12 组",
+      "target": "12",
+      "verdict": "PASS",
+      "note": ""
+    },
+    {
+      "item": "空组/重复组",
+      "before": "双采购/双销售等",
+      "after": "空组 0，重复组名 0",
+      "target": "0",
+      "verdict": "PASS",
+      "note": ""
+    },
+    {
+      "item": "组 icon 空格/重复",
+      "before": "前导空格+3 重复",
+      "after": "异常 0",
+      "target": "0",
+      "verdict": "PASS",
+      "note": ""
+    },
+    {
+      "item": "死页",
+      "before": "1（采购联系人历史）",
+      "after": "复活 0",
+      "target": "0（CSV 留档在案）",
+      "verdict": "PASS",
+      "note": ""
+    },
+    {
+      "item": "集合重复页（B4 裁决台账）",
+      "before": "13 组",
+      "after": "13 组（w4-b4-verdicts.json 台账裁决）",
+      "target": "逐组裁决留档",
+      "verdict": "PASS",
+      "note": "列表页 vs 看板/报表/引用页是刻意分工，非死重复"
+    }
+  ],
+  "exemptionDetails": {
+    "singleColGrids": [
+      {
+        "uid": "2mwu8g",
+        "collections": [
+          "wfl_gate_configs"
+        ],
+        "fields": 7,
+        "exempt": true
+      },
+      {
+        "uid": "395u7x",
+        "collections": [
+          "wms_reorder_suggestions"
+        ],
+        "fields": 7,
+        "exempt": true
+      },
+      {
+        "uid": "4rvgle",
+        "collections": [
+          "wfl_flow_states"
+        ],
+        "fields": 6,
+        "exempt": true
+      },
+      {
+        "uid": "b2zwvo",
+        "collections": [
+          "wfl_flow_transitions"
+        ],
+        "fields": 7,
+        "exempt": true
+      },
+      {
+        "uid": "c7w5a7",
+        "collections": [
+          "hub_md_product_categories"
+        ],
+        "fields": 3,
+        "exempt": true
+      },
+      {
+        "uid": "coiged",
+        "collections": [
+          "users"
+        ],
+        "fields": 1,
+        "exempt": true
+      },
+      {
+        "uid": "esio11",
+        "collections": [
+          "hub_md_ticket_categories"
+        ],
+        "fields": 3,
+        "exempt": true
+      },
+      {
+        "uid": "ft6zyn",
+        "collections": [
+          "hub_kb_articles"
+        ],
+        "fields": 3,
+        "exempt": true
+      },
+      {
+        "uid": "g5hp2c",
+        "collections": [
+          "wfl_flow_configs"
+        ],
+        "fields": 7,
+        "exempt": true
+      },
+      {
+        "uid": "hfs210",
+        "collections": [
+          "wfl_approval_records"
+        ],
+        "fields": 6,
+        "exempt": true
+      },
+      {
+        "uid": "hnnh4o",
+        "collections": [
+          "mrp_confirm_intents"
+        ],
+        "fields": 4,
+        "exempt": true
+      },
+      {
+        "uid": "ixhbr2",
+        "collections": [
+          "pur_rfqs"
+        ],
+        "fields": 2,
+        "exempt": true
+      },
+      {
+        "uid": "khosql",
+        "collections": [
+          "wfl_flow_configs"
+        ],
+        "fields": 5,
+        "exempt": true
+      },
+      {
+        "uid": "kmn1k0",
+        "collections": [
+          "pur_rfq_suppliers"
+        ],
+        "fields": 3,
+        "exempt": true
+      },
+      {
+        "uid": "mouxq6",
+        "collections": [
+          "hub_md_customer_categories"
+        ],
+        "fields": 3,
+        "exempt": true
+      },
+      {
+        "uid": "pbz3tn",
+        "collections": [
+          "departments"
+        ],
+        "fields": 2,
+        "exempt": true
+      },
+      {
+        "uid": "qwhxud",
+        "collections": [
+          "hub_md_asset_categories"
+        ],
+        "fields": 3,
+        "exempt": true
+      },
+      {
+        "uid": "tstnqa",
+        "collections": [
+          "departments"
+        ],
+        "fields": 2,
+        "exempt": true
+      },
+      {
+        "uid": "uabrqj",
+        "collections": [
+          "qm_aql_plans"
+        ],
+        "fields": 8,
+        "exempt": true
+      },
+      {
+        "uid": "x9y0nw",
+        "collections": [
+          "mfg_holidays"
+        ],
+        "fields": 3,
+        "exempt": true
+      },
+      {
+        "uid": "y80aro",
+        "collections": [
+          "crm_quotes"
+        ],
+        "fields": 3,
+        "exempt": true
+      }
+    ],
+    "noStatsPages": [
+      {
+        "title": "AI 工作台",
+        "uid": "n13ai2",
+        "level": "L4"
+      },
+      {
+        "title": "分类维护",
+        "uid": "n17f3r",
+        "level": "L3"
+      },
+      {
+        "title": "审核检查表",
+        "uid": "h4srmu",
+        "level": "L3"
+      },
+      {
+        "title": "移库管理",
+        "uid": "h5wmsp",
+        "level": "L3"
+      },
+      {
+        "title": "库存流水",
+        "uid": "h5wms9",
+        "level": "L3"
+      },
+      {
+        "title": "预留管理",
+        "uid": "h5wms9",
+        "level": "L3"
+      },
+      {
+        "title": "补货预警",
+        "uid": "h5wmst",
+        "level": "L3"
+      },
+      {
+        "title": "盘点计划",
+        "uid": "h5wmsd",
+        "level": "L3"
+      },
+      {
+        "title": "排程明细",
+        "uid": "w5mfgp",
+        "level": "L4"
+      },
+      {
+        "title": "MO 执行视图",
+        "uid": "w6mfgm",
+        "level": "L3"
+      },
+      {
+        "title": "计划工作台",
+        "uid": "w7mrph",
+        "level": "L4"
+      },
+      {
+        "title": "MRP 快照",
+        "uid": "w7mrpo",
+        "level": "L3"
+      },
+      {
+        "title": "检验读数",
+        "uid": "w8qmg3",
+        "level": "L3"
+      },
+      {
+        "title": "AQL 抽样方案",
+        "uid": "w8qm15",
+        "level": "L3"
+      },
+      {
+        "title": "季度绩效物化",
+        "uid": "w8qm8s",
+        "level": "L3"
+      },
+      {
+        "title": "主生产计划",
+        "uid": "w7mrpy",
+        "level": "L3"
+      },
+      {
+        "title": "月度收发存",
+        "uid": "h5wmsl",
+        "level": "L3"
+      }
+    ],
+    "noEditPageCount": 42,
+    "whitelistNoEdit": [],
+    "groups": [
+      {
+        "title": "CRM 客户",
+        "icon": "UserOutlined",
+        "children": 5,
+        "sort": 11
+      },
+      {
+        "title": "项目与协同",
+        "icon": "ProjectOutlined",
+        "children": 10,
+        "sort": 8
+      },
+      {
+        "title": "资产管理",
+        "icon": "HddOutlined",
+        "children": 3,
+        "sort": 12
+      },
+      {
+        "title": "组织与系统",
+        "icon": "UsergroupAddOutlined",
+        "children": 5,
+        "sort": 9
+      },
+      {
+        "title": "基础数据",
+        "icon": "BookOutlined",
+        "children": 2,
+        "sort": 10
+      },
+      {
+        "title": "供应链",
+        "icon": "ClusterOutlined",
+        "children": 8,
+        "sort": 6
+      },
+      {
+        "title": "仓储管理",
+        "icon": "DatabaseOutlined",
+        "children": 14,
+        "sort": 5
+      },
+      {
+        "title": "采购管理",
+        "icon": "ShoppingOutlined",
+        "children": 8,
+        "sort": 1
+      },
+      {
+        "title": "生产与计划",
+        "icon": "ExperimentOutlined",
+        "children": 16,
+        "sort": 3
+      },
+      {
+        "title": "销售管理",
+        "icon": "ShopOutlined",
+        "children": 9,
+        "sort": 2
+      },
+      {
+        "title": "质量管理",
+        "icon": "SafetyCertificateOutlined",
+        "children": 7,
+        "sort": 4
+      },
+      {
+        "title": "经营分析",
+        "icon": "LineChartOutlined",
+        "children": 5,
+        "sort": 7
+      }
+    ]
+  },
+  "defects": []
+}

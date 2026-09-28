@@ -1,0 +1,12 @@
+id,name,email,contact_name,rating,status
+1,环俄物流集团,ops@ru-trans.example,伊万诺夫,4,active
+2,环球商标代理事务所,ip@global-brand.example,吴敏,5,active
+3,SGS 认证服务（上海）,cn.crm@sgs.example,李静,5,active
+4,速达冷链设备,sales@suda-cold.example,王强,3,active
+5,中译翻译社,pm@zhongyi.example,赵蕾,4,inactive
+6,宏发食品,zhangsan@hongfa.example,张三,5,active
+7,鲜丰,ops@xianfeng.example,张经理,,待审核
+8,鲜丰,ops@xianfeng.example,张经理,,待审核
+9,三味食品,,李贺,,待审核
+10,李贺,"",lihe,,待审核
+11,B0测试食品,,王版本,,待审核

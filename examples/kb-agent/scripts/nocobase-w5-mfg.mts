@@ -168,7 +168,7 @@ const GATES: ReadonlyArray<Record<string, unknown>> = [
   { downstream_collection: 'mfg_orders', upstream_collection: 'mfg_boms', upstream_field: 'bom_id', upstream_ref_field: null, upstream_label: 'BOM', upstream_state_field: 'bom_status', required_status: 'active' },
 ]
 
-const MENU_GROUP = { title: '生产制造', icon: 'ExperimentOutlined' }
+const MENU_GROUP = { title: '生产与计划', icon: 'ExperimentOutlined' }
 
 // ─── REST helpers ───
 

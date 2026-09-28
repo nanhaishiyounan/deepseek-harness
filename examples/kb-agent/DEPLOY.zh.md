@@ -28,6 +28,7 @@ MINIMAX_API_KEY=sk-...
 # 可选覆盖：
 # DSH_KB_TENANT=my-company        # 工具/预设/工作台的租户绑定（默认 demo-food-co）
 # MINIMAX_BASE_URL=https://api.minimaxi.com/v1
+# W3_TERMINAL_BASE=http://内网主机:13110  # 三个操作者终端页 iframe 的引擎服务源（默认 http://127.0.0.1:13110；改后重跑 w4-heal-b3.mts --iframe 生效）
 ```
 
 `DSH_KB_TENANT` 是租户的单一事实源：`cordis.patch.yml` 用它读取 `tool-kb` 的 `tenant`、预设行与 api-gateway 的 `kbTenant`（三处未设置时都回落 `demo-food-co`）。一个部署 = 一个租户；第二家企业起第二个部署、独立数据目录。

@@ -1,0 +1,181 @@
+{
+  "fetchedAt": "2026-09-28T19:46:00.074Z",
+  "base": "http://127.0.0.1:13000",
+  "note": "desktopRoutes type=page title=\"应用中心\"",
+  "meta": {
+    "endpoint": "http://127.0.0.1:13000/api/uiSchemas:getProperties?resourceIndex=c9c6wzppejk",
+    "routeId": 386627415834624
+  },
+  "data": {
+    "type": "void",
+    "properties": {
+      "iqnakcun46q": {
+        "type": "void",
+        "x-component": "Grid",
+        "x-initializer": "page:addBlock",
+        "properties": {
+          "7ddpktds4h6": {
+            "type": "void",
+            "x-component": "Grid.Row",
+            "properties": {
+              "4vgf0ubk76b": {
+                "type": "void",
+                "x-component": "Grid.Col",
+                "properties": {
+                  "fxo6wqwsah": {
+                    "type": "void",
+                    "x-settings": "blockSettings:markdown",
+                    "x-decorator": "CardItem",
+                    "x-decorator-props": {
+                      "name": "markdown",
+                      "engine": "handlebars"
+                    },
+                    "x-component": "Markdown.Void",
+                    "x-editable": false,
+                    "x-component-props": {
+                      "content": "### 🤖 [AI 工作台](http://127.0.0.1:13000/admin/sdia2fwjc22)\n\nAI 员工对话（Atlas 团队）与工单速览\n\n[打开应用 →](http://127.0.0.1:13000/admin/sdia2fwjc22)"
+                    },
+                    "x-uid": "pp808d3u2y8",
+                    "x-async": false,
+                    "x-index": 1
+                  }
+                },
+                "x-uid": "tfitaku827t",
+                "x-async": false,
+                "x-index": 1
+              },
+              "074xkobsj15": {
+                "type": "void",
+                "x-component": "Grid.Col",
+                "properties": {
+                  "l5lclk3rshk": {
+                    "type": "void",
+                    "x-settings": "blockSettings:markdown",
+                    "x-decorator": "CardItem",
+                    "x-decorator-props": {
+                      "name": "markdown",
+                      "engine": "handlebars"
+                    },
+                    "x-component": "Markdown.Void",
+                    "x-editable": false,
+                    "x-component-props": {
+                      "content": "### 🧠 [DeepSeek Harness](http://127.0.0.1:3080/)\n\nKB 智能体与食品行业知识库\n\n[打开应用 →](http://127.0.0.1:3080/)"
+                    },
+                    "x-uid": "fakqcmyam7h",
+                    "x-async": false,
+                    "x-index": 1
+                  }
+                },
+                "x-uid": "07ijcetwgje",
+                "x-async": false,
+                "x-index": 2
+              }
+            },
+            "x-uid": "79jkbcuwn25",
+            "x-async": false,
+            "x-index": 1
+          },
+          "d43hx6v945y": {
+            "type": "void",
+            "x-component": "Grid.Row",
+            "properties": {
+              "l3gv675rv4o": {
+                "type": "void",
+                "x-component": "Grid.Col",
+                "properties": {
+                  "wzpjt3z75y": {
+                    "type": "void",
+                    "x-settings": "blockSettings:markdown",
+                    "x-decorator": "CardItem",
+                    "x-decorator-props": {
+                      "name": "markdown",
+                      "engine": "handlebars"
+                    },
+                    "x-component": "Markdown.Void",
+                    "x-editable": false,
+                    "x-component-props": {
+                      "content": "### 🛒 [CRM Portal（主要入口）](http://127.0.0.1:13000/dist/crm/)\n\n九域合一：销售/项目/人事/库存/采购/财务/客服/资产/知识库全部并入本门户，含全域 AI 化表单与仪表式首页\n\n[打开应用 →](http://127.0.0.1:13000/dist/crm/)"
+                    },
+                    "x-uid": "kie8yo8zlzg",
+                    "x-async": false,
+                    "x-index": 1
+                  }
+                },
+                "x-uid": "5y0c5639a0g",
+                "x-async": false,
+                "x-index": 1
+              },
+              "6p5ia4zs8v": {
+                "type": "void",
+                "x-component": "Grid.Col",
+                "properties": {
+                  "bin2mvilz6g": {
+                    "type": "void",
+                    "x-settings": "blockSettings:markdown",
+                    "x-decorator": "CardItem",
+                    "x-decorator-props": {
+                      "name": "markdown",
+                      "engine": "handlebars"
+                    },
+                    "x-component": "Markdown.Void",
+                    "x-editable": false,
+                    "x-component-props": {
+                      "content": "### 🎧 [Hub Portal（模板参考）](http://127.0.0.1:13000/dist/hub/)\n\n功能已全部并入 CRM Portal；保留作官方模板参考，数据与 CRM 同源\n\n[打开应用 →](http://127.0.0.1:13000/dist/hub/)"
+                    },
+                    "x-uid": "5ud5c80vrjv",
+                    "x-async": false,
+                    "x-index": 1
+                  }
+                },
+                "x-uid": "q9x2ogjk2wl",
+                "x-async": false,
+                "x-index": 2
+              }
+            },
+            "x-uid": "4nwkfk6aja5",
+            "x-async": false,
+            "x-index": 2
+          },
+          "q20r567fe32": {
+            "type": "void",
+            "x-component": "Grid.Row",
+            "properties": {
+              "lldll890l6d": {
+                "type": "void",
+                "x-component": "Grid.Col",
+                "properties": {
+                  "1qwf1ev09qq": {
+                    "type": "void",
+                    "x-settings": "blockSettings:markdown",
+                    "x-decorator": "CardItem",
+                    "x-decorator-props": {
+                      "name": "markdown",
+                      "engine": "handlebars"
+                    },
+                    "x-component": "Markdown.Void",
+                    "x-editable": false,
+                    "x-component-props": {
+                      "content": "## 📦 应用中心\n\n每个应用都是独立入口，点击卡片直达。业务后台从左侧菜单进入各模块。"
+                    },
+                    "x-uid": "nvw7hzu5y2b",
+                    "x-async": false,
+                    "x-index": 1
+                  }
+                },
+                "x-uid": "f5g3l08sfne",
+                "x-async": false,
+                "x-index": 1
+              }
+            },
+            "x-uid": "a6v33jki4it",
+            "x-async": false,
+            "x-index": 3
+          }
+        },
+        "x-uid": "nvt8vt4luw3",
+        "x-async": false,
+        "x-index": 1
+      }
+    }
+  }
+}

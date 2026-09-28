@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-09-28T07:15:34.300Z",
+  "fetchedAt": "2026-09-28T21:02:01.369Z",
   "label": "项目管理组「项目」页 (n17e1) TableBlockModel",
   "targetUid": "n17e1tbm7n1eyuuigg",
   "collection": null,
@@ -943,9 +943,11 @@
           "dataIndex": "name",
           "width": 150,
           "editable": false,
-          "sorter": false,
-          "fixed": "none"
+          "sorter": true,
+          "fixed": "none",
+          "defaultSortOrder": "ascend"
         },
+        "parent": "n17e1tbm7n1eyuuigg",
         "uid": "n17e1cvdy6runm5pd",
         "subModels": {
           "field": {
@@ -971,8 +973,7 @@
             "uid": "n17e1cvdy6runm5pdf",
             "parent": "n17e1cvdy6runm5pd"
           }
-        },
-        "parent": "n17e1tbm7n1eyuuigg"
+        }
       }
     },
     "actions": {
@@ -1061,12 +1062,12 @@
                                     "version": 2,
                                     "rows": [
                                       {
-                                        "id": "r0",
+                                        "id": "sec0",
                                         "cells": [
                                           {
-                                            "id": "r0:cell:0",
+                                            "id": "sec0:cell:0",
                                             "items": [
-                                              "n17e1iheupmtlsyk"
+                                              "w4b2dvca1b5bcwyls"
                                             ]
                                           }
                                         ],
@@ -1080,12 +1081,19 @@
                                           {
                                             "id": "r1:cell:0",
                                             "items": [
-                                              "n17e1if4pdq2q804t"
+                                              "n17e1iheupmtlsyk"
+                                            ]
+                                          },
+                                          {
+                                            "id": "r1:cell:1",
+                                            "items": [
+                                              "n17e1i6qvbbxfe5ah"
                                             ]
                                           }
                                         ],
                                         "sizes": [
-                                          24
+                                          12,
+                                          12
                                         ]
                                       },
                                       {
@@ -1094,12 +1102,19 @@
                                           {
                                             "id": "r2:cell:0",
                                             "items": [
-                                              "n17e1i2nstfpj6tpr"
+                                              "n17e1i49dkuhus7cv"
+                                            ]
+                                          },
+                                          {
+                                            "id": "r2:cell:1",
+                                            "items": [
+                                              "n17e1i33b7xosy2cj"
                                             ]
                                           }
                                         ],
                                         "sizes": [
-                                          24
+                                          12,
+                                          12
                                         ]
                                       },
                                       {
@@ -1108,21 +1123,28 @@
                                           {
                                             "id": "r3:cell:0",
                                             "items": [
-                                              "n17e1i9qb3i3e65zn"
+                                              "n17e1ifrlsbm9y3mq"
+                                            ]
+                                          },
+                                          {
+                                            "id": "r3:cell:1",
+                                            "items": [
+                                              "n17e1iin72o6ztjxe"
                                             ]
                                           }
                                         ],
                                         "sizes": [
-                                          24
+                                          12,
+                                          12
                                         ]
                                       },
                                       {
-                                        "id": "r4",
+                                        "id": "sec4",
                                         "cells": [
                                           {
-                                            "id": "r4:cell:0",
+                                            "id": "sec4:cell:0",
                                             "items": [
-                                              "n17e1iin72o6ztjxe"
+                                              "w4b2dvw7h25keic6f"
                                             ]
                                           }
                                         ],
@@ -1136,12 +1158,19 @@
                                           {
                                             "id": "r5:cell:0",
                                             "items": [
-                                              "n17e1irlnhuryj69g"
+                                              "n17e1i2nstfpj6tpr"
+                                            ]
+                                          },
+                                          {
+                                            "id": "r5:cell:1",
+                                            "items": [
+                                              "n17e1if4pdq2q804t"
                                             ]
                                           }
                                         ],
                                         "sizes": [
-                                          24
+                                          12,
+                                          12
                                         ]
                                       },
                                       {
@@ -1150,225 +1179,59 @@
                                           {
                                             "id": "r6:cell:0",
                                             "items": [
-                                              "n17e1ifrlsbm9y3mq"
+                                              "n17e1i9qb3i3e65zn"
                                             ]
-                                          }
-                                        ],
-                                        "sizes": [
-                                          24
-                                        ]
-                                      },
-                                      {
-                                        "id": "r7",
-                                        "cells": [
+                                          },
                                           {
-                                            "id": "r7:cell:0",
+                                            "id": "r6:cell:1",
                                             "items": [
-                                              "n17e1i6qvbbxfe5ah"
+                                              "n17e1irlnhuryj69g"
                                             ]
                                           }
                                         ],
                                         "sizes": [
-                                          24
-                                        ]
-                                      },
-                                      {
-                                        "id": "r8",
-                                        "cells": [
-                                          {
-                                            "id": "r8:cell:0",
-                                            "items": [
-                                              "n17e1i49dkuhus7cv"
-                                            ]
-                                          }
-                                        ],
-                                        "sizes": [
-                                          24
-                                        ]
-                                      },
-                                      {
-                                        "id": "r9",
-                                        "cells": [
-                                          {
-                                            "id": "r9:cell:0",
-                                            "items": [
-                                              "n17e1i33b7xosy2cj"
-                                            ]
-                                          }
-                                        ],
-                                        "sizes": [
-                                          24
+                                          12,
+                                          12
                                         ]
                                       }
                                     ],
-                                    "rowGap": 0,
-                                    "colGap": 16,
-                                    "sizes": {},
                                     "rowOrder": [
-                                      "r0",
+                                      "sec0",
                                       "r1",
                                       "r2",
                                       "r3",
-                                      "r4",
+                                      "sec4",
                                       "r5",
-                                      "r6",
-                                      "r7",
-                                      "r8",
-                                      "r9"
-                                    ]
+                                      "r6"
+                                    ],
+                                    "rowGap": 0,
+                                    "colGap": 16
                                   }
                                 },
                                 "stepParams": {
-                                  "gridSettings": {
-                                    "grid": {
-                                      "layout": {
-                                        "version": 2,
-                                        "rows": [
-                                          {
-                                            "id": "r0",
-                                            "cells": [
-                                              {
-                                                "id": "r0:cell:0",
-                                                "items": [
-                                                  "n17e1iheupmtlsyk"
-                                                ]
-                                              }
-                                            ],
-                                            "sizes": [
-                                              24
-                                            ]
-                                          },
-                                          {
-                                            "id": "r1",
-                                            "cells": [
-                                              {
-                                                "id": "r1:cell:0",
-                                                "items": [
-                                                  "n17e1if4pdq2q804t"
-                                                ]
-                                              }
-                                            ],
-                                            "sizes": [
-                                              24
-                                            ]
-                                          },
-                                          {
-                                            "id": "r2",
-                                            "cells": [
-                                              {
-                                                "id": "r2:cell:0",
-                                                "items": [
-                                                  "n17e1i2nstfpj6tpr"
-                                                ]
-                                              }
-                                            ],
-                                            "sizes": [
-                                              24
-                                            ]
-                                          },
-                                          {
-                                            "id": "r3",
-                                            "cells": [
-                                              {
-                                                "id": "r3:cell:0",
-                                                "items": [
-                                                  "n17e1i9qb3i3e65zn"
-                                                ]
-                                              }
-                                            ],
-                                            "sizes": [
-                                              24
-                                            ]
-                                          },
-                                          {
-                                            "id": "r4",
-                                            "cells": [
-                                              {
-                                                "id": "r4:cell:0",
-                                                "items": [
-                                                  "n17e1iin72o6ztjxe"
-                                                ]
-                                              }
-                                            ],
-                                            "sizes": [
-                                              24
-                                            ]
-                                          },
-                                          {
-                                            "id": "r5",
-                                            "cells": [
-                                              {
-                                                "id": "r5:cell:0",
-                                                "items": [
-                                                  "n17e1irlnhuryj69g"
-                                                ]
-                                              }
-                                            ],
-                                            "sizes": [
-                                              24
-                                            ]
-                                          },
-                                          {
-                                            "id": "r6",
-                                            "cells": [
-                                              {
-                                                "id": "r6:cell:0",
-                                                "items": [
-                                                  "n17e1ifrlsbm9y3mq"
-                                                ]
-                                              }
-                                            ],
-                                            "sizes": [
-                                              24
-                                            ]
-                                          },
-                                          {
-                                            "id": "r7",
-                                            "cells": [
-                                              {
-                                                "id": "r7:cell:0",
-                                                "items": [
-                                                  "n17e1i6qvbbxfe5ah"
-                                                ]
-                                              }
-                                            ],
-                                            "sizes": [
-                                              24
-                                            ]
-                                          },
-                                          {
-                                            "id": "r8",
-                                            "cells": [
-                                              {
-                                                "id": "r8:cell:0",
-                                                "items": [
-                                                  "n17e1i49dkuhus7cv"
-                                                ]
-                                              }
-                                            ],
-                                            "sizes": [
-                                              24
-                                            ]
-                                          },
-                                          {
-                                            "id": "r9",
-                                            "cells": [
-                                              {
-                                                "id": "r9:cell:0",
-                                                "items": [
-                                                  "n17e1i33b7xosy2cj"
-                                                ]
-                                              }
-                                            ],
-                                            "sizes": [
-                                              24
-                                            ]
-                                          }
-                                        ]
-                                      }
+                                  "formModelSettings": {
+                                    "assignRules": {
+                                      "value": [
+                                        {
+                                          "key": "w4b2-status-0",
+                                          "enable": true,
+                                          "targetPath": "status",
+                                          "mode": "default",
+                                          "value": "active"
+                                        },
+                                        {
+                                          "key": "w4b2-owner-1",
+                                          "enable": true,
+                                          "targetPath": "owner",
+                                          "mode": "default",
+                                          "value": "{{ctx.user.id}}"
+                                        }
+                                      ]
                                     }
                                   }
                                 },
+                                "parentId": "zw2ww6vgz9z",
+                                "parent": "zw2ww6vgz9z",
                                 "uid": "aodc3yvsv81",
                                 "subModels": {
                                   "items": [
@@ -1530,12 +1393,12 @@
                                               },
                                               {
                                                 "value": "in_progress",
-                                                "label": "进行中",
-                                                "color": "cyan"
+                                                "label": "执行中",
+                                                "color": "orange"
                                               },
                                               {
                                                 "value": "blocked",
-                                                "label": "受阻",
+                                                "label": "冻结",
                                                 "color": "red"
                                               },
                                               {
@@ -1546,13 +1409,28 @@
                                               {
                                                 "value": "archived",
                                                 "label": "已归档",
-                                                "color": "default"
+                                                "color": "blue"
+                                              },
+                                              {
+                                                "value": "active",
+                                                "label": "生效",
+                                                "color": "green"
+                                              },
+                                              {
+                                                "value": "done",
+                                                "label": "已完成",
+                                                "color": "green"
+                                              },
+                                              {
+                                                "value": "on_hold",
+                                                "label": "On hold",
+                                                "color": "blue"
                                               }
                                             ]
                                           },
-                                          "uid": "fuoh14gj1ia",
+                                          "parentId": "n17e1iin72o6ztjxe",
                                           "parent": "n17e1iin72o6ztjxe",
-                                          "parentId": "n17e1iin72o6ztjxe"
+                                          "uid": "fuoh14gj1ia"
                                         }
                                       },
                                       "parent": "aodc3yvsv81",
@@ -1666,10 +1544,12 @@
                                           "subKey": "field",
                                           "subType": "object",
                                           "sortIndex": 1,
-                                          "props": {},
-                                          "uid": "h0vh969w17h",
+                                          "props": {
+                                            "placeholder": "YYYY-MM-DD"
+                                          },
+                                          "parentId": "n17e1i6qvbbxfe5ah",
                                           "parent": "n17e1i6qvbbxfe5ah",
-                                          "parentId": "n17e1i6qvbbxfe5ah"
+                                          "uid": "h0vh969w17h"
                                         }
                                       },
                                       "parent": "aodc3yvsv81",
@@ -1697,10 +1577,12 @@
                                           "subKey": "field",
                                           "subType": "object",
                                           "sortIndex": 1,
-                                          "props": {},
-                                          "uid": "34s730cxtsu",
+                                          "props": {
+                                            "placeholder": "YYYY-MM-DD"
+                                          },
+                                          "parentId": "n17e1i49dkuhus7cv",
                                           "parent": "n17e1i49dkuhus7cv",
-                                          "parentId": "n17e1i49dkuhus7cv"
+                                          "uid": "34s730cxtsu"
                                         }
                                       },
                                       "parent": "aodc3yvsv81",
@@ -1728,19 +1610,61 @@
                                           "subKey": "field",
                                           "subType": "object",
                                           "sortIndex": 1,
-                                          "props": {},
-                                          "uid": "hx74suvg91m",
+                                          "props": {
+                                            "placeholder": "YYYY-MM-DD"
+                                          },
+                                          "parentId": "n17e1i33b7xosy2cj",
                                           "parent": "n17e1i33b7xosy2cj",
-                                          "parentId": "n17e1i33b7xosy2cj"
+                                          "uid": "hx74suvg91m"
                                         }
                                       },
                                       "parent": "aodc3yvsv81",
                                       "parentId": "aodc3yvsv81"
+                                    },
+                                    {
+                                      "parentId": "aodc3yvsv81",
+                                      "subKey": "items",
+                                      "subType": "array",
+                                      "sortIndex": 11,
+                                      "use": "DividerItemModel",
+                                      "props": {
+                                        "label": "基本信息",
+                                        "orientation": "left"
+                                      },
+                                      "stepParams": {
+                                        "markdownItemSetting": {
+                                          "title": {
+                                            "label": "基本信息",
+                                            "orientation": "left"
+                                          }
+                                        }
+                                      },
+                                      "uid": "w4b2dvca1b5bcwyls",
+                                      "parent": "aodc3yvsv81"
+                                    },
+                                    {
+                                      "parentId": "aodc3yvsv81",
+                                      "subKey": "items",
+                                      "subType": "array",
+                                      "sortIndex": 12,
+                                      "use": "DividerItemModel",
+                                      "props": {
+                                        "label": "属性与联系",
+                                        "orientation": "left"
+                                      },
+                                      "stepParams": {
+                                        "markdownItemSetting": {
+                                          "title": {
+                                            "label": "属性与联系",
+                                            "orientation": "left"
+                                          }
+                                        }
+                                      },
+                                      "uid": "w4b2dvw7h25keic6f",
+                                      "parent": "aodc3yvsv81"
                                     }
                                   ]
-                                },
-                                "parent": "zw2ww6vgz9z",
-                                "parentId": "zw2ww6vgz9z"
+                                }
                               },
                               "actions": [
                                 {

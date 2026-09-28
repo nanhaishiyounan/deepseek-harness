@@ -296,7 +296,7 @@ const INTENT_FORM_FIELDS: ReadonlyArray<FieldSpec> = [
   { name: 'source', title: '入口', kind: 'select', options: opts([['page', '页面操作', 'purple']]), required: true },
 ]
 
-const MENU_GROUP = { title: '协同办公', icon: 'TeamOutlined' }
+const MENU_GROUP = { title: '项目与协同', icon: 'ProjectOutlined' }
 const PAGE_TITLE = '审批中心'
 
 function formGrid(collection: string, fields: ReadonlyArray<FieldSpec>): Record<string, unknown> {

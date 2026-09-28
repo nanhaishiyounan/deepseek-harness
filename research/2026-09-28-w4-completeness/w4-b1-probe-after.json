@@ -1,0 +1,119 @@
+{
+  "pages": 92,
+  "pagesWithTable": 78,
+  "totalTableBlocks": 101,
+  "tablesNoFilter_pages": 0,
+  "tablesNoFilter_blocks": 15,
+  "pagesNoSort": 0,
+  "pagesKanban": 7,
+  "pagesCalendar": 3,
+  "pagesChart": 8,
+  "pagesJS": 4,
+  "pagesIframe": 3,
+  "pagesAIChat": 1,
+  "pagesNoAddNew": 20,
+  "pagesNoEdit": 74,
+  "pagesNoDelete": 85,
+  "moneyCols": 145,
+  "moneyNoFmt": 0,
+  "dateCols": 65,
+  "dateNoFmt": 0,
+  "relNoTitle": 0,
+  "statusBareText": 0,
+  "statusNoColor": 0,
+  "filterFormBlocks": 38,
+  "relCols": 101,
+  "pagesWithRelCol": 51,
+  "pagesNoStats": 67,
+  "grids": 105,
+  "gridsSingleCol": 105,
+  "formFields": 725,
+  "formRequired": 128,
+  "placeholder": 0,
+  "defaultValue": 0,
+  "fieldEmptyProps": 608,
+  "duplicateCollectionGroups": [
+    {
+      "collection": "kpi_snapshots",
+      "pages": 4
+    },
+    {
+      "collection": "crm_payments",
+      "pages": 3
+    },
+    {
+      "collection": "hub_tk_tickets",
+      "pages": 3
+    },
+    {
+      "collection": "srm_score_cards",
+      "pages": 3
+    },
+    {
+      "collection": "crm_customers",
+      "pages": 2
+    },
+    {
+      "collection": "hub_pj_tasks",
+      "pages": 2
+    },
+    {
+      "collection": "mfg_order_operations",
+      "pages": 2
+    },
+    {
+      "collection": "mfg_orders",
+      "pages": 2
+    },
+    {
+      "collection": "pur_invoices",
+      "pages": 2
+    },
+    {
+      "collection": "pur_payments",
+      "pages": 2
+    },
+    {
+      "collection": "pur_quotes",
+      "pages": 2
+    },
+    {
+      "collection": "so_orders",
+      "pages": 2
+    },
+    {
+      "collection": "srm_suppliers",
+      "pages": 2
+    },
+    {
+      "collection": "wms_lots",
+      "pages": 2
+    }
+  ],
+  "inputs": {
+    "fetchedAt": {
+      "desktopRoutes": "2026-09-28T12:23:53.454Z",
+      "flowModels": "2026-09-28T12:23:55.521Z",
+      "collectionFields": "2026-09-28T12:23:56.049Z"
+    },
+    "analyzedAt": "2026-09-28T12:23:56.487Z",
+    "sha256": {
+      "api-desktopRoutes.json": "06e64a5ce6ebc7084517a43d67f602e4dd43882fbae909393354c683ce345ad2",
+      "api-flowModels-flat.json": "148864081f02d7d817fa2aa976175b70a0e2ac0cf2b43f4eaa251a7f44418223",
+      "api-collection-fields.json": "8729afcdd17642fb2e27065d55b8a28c6bc7c3653bc376aeb7eb96a4d452228e"
+    },
+    "rows": {
+      "desktopRoutes": 206,
+      "flowModels": 7504,
+      "collectionFields": 1007,
+      "routeTypeCounts": {
+        "group": 16,
+        "page": 3,
+        "tabs": 95,
+        "flowPage": 92
+      },
+      "relationCollections": 81,
+      "relationFields": 171
+    }
+  }
+}

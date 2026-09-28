@@ -1,0 +1,20 @@
+# w4-b6 journey psql 对拍汇总 @ 2026-09-28T21:45:35.325Z
+任务列表 | 筛选进行中 | SELECT COUNT(*) FROM hub_pj_tasks WHERE status='in_progress'; | 5 | 页面行数对拍见 journey.txt J1-2f
+任务列表 | 筛选待办 | SELECT COUNT(*) FROM hub_pj_tasks WHERE status='todo'; | 5 | J1-2f 切换腿
+任务列表 | 全量 | SELECT COUNT(*) FROM hub_pj_tasks; | 20 | J1-3f 重置腿
+采购订单 | 待审批 | SELECT COUNT(*) FROM pur_orders WHERE doc_status IN ('pending','pending_level2'); | 3 | 卡1 视觉对拍 j1-1
+采购订单 | 本月通过 | SELECT COUNT(*) FROM pur_orders WHERE approved_at >= '2026-09-01'; | 10 | 卡2
+采购订单 | 金额合计 | SELECT SUM(amount) FROM pur_orders; | 1474740 | 卡3
+采购订单 | 订单总数 | SELECT COUNT(*) FROM pur_orders; | 23 | 卡4（含旅程新建草稿单）
+主生产计划 | 同序首行 | SELECT code FROM mps_plans ORDER BY id ASC LIMIT 1; | MPS-202610-01 | J2-1 页首行一致
+生产订单 | 关联产品名 | SELECT p.name FROM mfg_orders m JOIN hub_inv_products p ON p.id=m.product_id LIMIT 1; | 速冻荠菜猪肉水饺 450g | J3-1 首行含该产品名
+质检单 | 待检 | SELECT COUNT(*) FROM qm_inspections WHERE status='pending'; | 22 | J4 卡
+质检单 | 合格 | SELECT COUNT(*) FROM qm_inspections WHERE result='passed'; | 40 | J4 卡
+库存查询 | 总件数 | SELECT SUM(qty_on_hand) FROM wms_stock; | 397,400 | J5 卡（视觉对拍 j5-1）
+库存查询 | 可用量 | SELECT SUM(qty_available) FROM wms_stock; | 397,155 | J5 卡
+库存查询 | 占用 | SELECT SUM(qty_allocated) FROM wms_stock; | 195 | J5 卡
+应收应付 | 应收(so_orders) | SELECT SUM(amount) FROM so_orders; | 1401890 | J7 卡（视觉对拍 j7-1）
+应收应付 | 应付(pur_orders) | SELECT SUM(amount) FROM pur_orders; | 1474740 | J7 卡
+员工 | Edit 往返 | SELECT phone FROM hub_hr_employees WHERE id=1; | 13800000001 | J8-3c 13800000001→13900000001→13800000001 闭环
+员工 | 删除负例 | SELECT COUNT(*) FROM hub_hr_employees; | 6 | J8-5 取消后计数不变
+报价单 | 落库腿 | SELECT quote_no,status FROM crm_quotes ORDER BY id DESC LIMIT 1; | QT-J6-150802|draft | J6 腿（n17 老页 3 字段小表单——见交付文档豁免说明）

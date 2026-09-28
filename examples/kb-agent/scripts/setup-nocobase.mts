@@ -744,11 +744,11 @@ async function stepVerify(): Promise<void> {
   // pages despite the name; both menu entries stay — see QUICKSTART).
   const missingV2Crm = ['产品与服务', '回款', '发票', '客户仪表盘', '销售仪表盘'].filter(title => !v2Titles.has(title))
   if (missingV2Crm.length > 0) failures.push(`v2 CRM flowPages missing: ${missingV2Crm.join(', ')} (run nocobase-f2-crm-v2.mts)`)
-  // F3: the Hub/HR/master-data pages, including the two composite pages
-  // (工作台 = two stacked table blocks, 分类维护 = four) and the B0
-  // hub_po_suppliers read view under the 采购 group.
-  const missingV2Hub = ['知识文章', '维保记录', '部门', '请假审批', '供应商', '采购联系人（历史）', '工作台', '分类维护'].filter(title => !v2Titles.has(title))
-  if (missingV2Hub.length > 0) failures.push(`v2 Hub flowPages missing: ${missingV2Hub.join(', ')} (run nocobase-f3-hub-v2.mts then nocobase-w2-supplier.mts; B2 retitled 采购供应商 → 采购联系人（历史）)`)
+  // F3: the Hub/HR/master-data pages, including the 分类维护 composite (four
+  // stacked tables). 工作台 and 采购联系人（历史） were retired by W4-B4 (duplicate
+  // aggregate + dead page, data archived to CSV) and must stay gone.
+  const missingV2Hub = ['知识文章', '维保记录', '部门', '请假审批', '维保服务商', '分类维护'].filter(title => !v2Titles.has(title))
+  if (missingV2Hub.length > 0) failures.push(`v2 Hub flowPages missing: ${missingV2Hub.join(', ')} (run nocobase-f3-hub-v2.mts then nocobase-w2-supplier.mts; 供应商 was renamed 维保服务商 by W4-B5)`)
   // B0: the mobile form-assistant writes hub_po_suppliers with status=待审核;
   // the enum must carry that literal or the v2 column filter swallows the rows.
   {
@@ -777,8 +777,8 @@ async function stepVerify(): Promise<void> {
   }
   const missingV2W1 = ['审批中心'].filter(title => !v2Titles.has(title))
   if (missingV2W1.length > 0) failures.push(`v2 approval flowPages missing: ${missingV2W1.join(', ')} (run nocobase-w1-approval.mts)`)
-  const w1GroupRoutes = await call(token, 'GET', `/api/desktopRoutes:list?filter=${encodeURIComponent(JSON.stringify({ title: { $eq: '协同办公' }, type: { $eq: 'group' } }))}&pageSize=1`) as { data?: Array<{ id: number }> }
-  if ((w1GroupRoutes?.data?.length ?? 0) === 0) failures.push('协同办公 menu group missing (run nocobase-w1-approval.mts)')
+  const w1GroupRoutes = await call(token, 'GET', `/api/desktopRoutes:list?filter=${encodeURIComponent(JSON.stringify({ title: { $eq: '项目与协同' }, type: { $eq: 'group' } }))}&pageSize=1`) as { data?: Array<{ id: number }> }
+  if ((w1GroupRoutes?.data?.length ?? 0) === 0) failures.push('项目与协同 menu group missing (协同办公 was merged by W4-B5; run nocobase-w1-approval.mts)')
   {
     const flowConfigs = await call(token, 'GET', `/api/wfl_flow_configs:list?filter=${encodeURIComponent(JSON.stringify({ doc_type: { $eq: 'hub_po_purchase_orders' }, is_active: true }))}&pageSize=5`) as { data?: Array<{ state_field?: string }> }
     if ((flowConfigs?.data?.length ?? 0) === 0) failures.push('hub_po_purchase_orders has no active approval flow config (run nocobase-w1-approval.mts / approval-engine.mts --seed-flow)')
@@ -1094,9 +1094,9 @@ async function stepVerify(): Promise<void> {
       }
       const b5Routes = await call(token, 'GET', '/api/desktopRoutes:list?pageSize=200') as { data?: Array<{ title?: string | null }> }
       const b5Titles = new Set((b5Routes?.data ?? []).map(row => row.title ?? ''))
-      const missingB5 = ['BOM 管理', 'BOM 工序', '工作中心', '生产订单', '排产看板'].filter(title => !b5Titles.has(title))
+      const missingB5 = ['BOM 管理', 'BOM 工序', '工作中心', '生产订单', '排程明细'].filter(title => !b5Titles.has(title))
       if (missingB5.length > 0) failures.push(`B5 生产域 flowPages missing: ${missingB5.join(', ')} (run nocobase-w5-mfg.mts)`)
-      if (!b5Titles.has('生产制造')) failures.push('生产制造 menu group missing (run nocobase-w5-mfg.mts)')
+      if (!b5Titles.has('生产与计划')) failures.push('生产与计划 menu group missing (生产制造 was renamed by W4-B5; run nocobase-w5-mfg.mts)')
       const b5Flows = (await dataOf(token, 'GET', '/api/wfl_flow_configs:list?pageSize=50')) as Array<Record<string, any>> | null
       if (!(b5Flows ?? []).some(row => row.doc_type === 'mfg_orders' && row.is_active === true)) failures.push('mfg_orders flow config missing (run nocobase-w5-mfg.mts)')
       const b5Gates = (await dataOf(token, 'GET', '/api/wfl_gate_configs:list?pageSize=100')) as Array<Record<string, any>> | null
@@ -1205,7 +1205,7 @@ async function stepVerify(): Promise<void> {
       }
       const b8Routes = await call(token, 'GET', '/api/desktopRoutes:list?pageSize=200') as { data?: Array<{ title?: string | null }> }
       const b8Titles = new Set((b8Routes?.data ?? []).map(row => row.title ?? ''))
-      const missingB8 = ['质检单', '检验读数', '处置看板', 'AQL抽样方案', '季度绩效物化'].filter(title => !b8Titles.has(title))
+      const missingB8 = ['质检单', '检验读数', '处置看板', 'AQL 抽样方案', '季度绩效物化'].filter(title => !b8Titles.has(title))
       if (missingB8.length > 0) failures.push(`B8 质量域 flowPages missing: ${missingB8.join(', ')} (run nocobase-w8-quality.mts)`)
       if (!b8Titles.has('质量管理')) failures.push('质量管理 menu group missing (run nocobase-w8-quality.mts)')
       // W2-B1: the full-table reseed — 135 rows = 15 bands × (normal 5 rungs +
@@ -1706,7 +1706,9 @@ async function stepVerify(): Promise<void> {
   // 66 = the B6 生产执行 four popup forms (领料单/退料单/报工记录/完工单) join.
   // 82 = the W3-B4 审批流配置 flow_configs Add-new form + one prior
   // orphan-covered form join (n18's catalog pageSize rose 6000→12000 the same batch).
-  if (n18Buttons.length < 82) failures.push(`n18ai- AIEmployeeButtonModel count ${n18Buttons.length} < 82 (form AI fill buttons missing; run nocobase-n18-form-ai.mts after the f1/f2/f3/h4/h5/w1-w3/b4/w5/w6/w8/w3b4 seeds)`)
+  // 79 = 82 − 3: W4-B4 retired 工作台 (two Add-new popups) and 采购联系人（历史）
+  // (one Add-new popup); desktopRoutes:destroy cascaded their AI buttons away.
+  if (n18Buttons.length < 79) failures.push(`n18ai- AIEmployeeButtonModel count ${n18Buttons.length} < 79 (form AI fill buttons missing; run nocobase-n18-form-ai.mts after the f1/f2/f3/h4/h5/w1-w3/b4/w5/w6/w8/w3b4 seeds)`)
   // H5: the bin-map custom block rides the JSBlockModel authoring channel —
   // exactly one on the 库位平面图 grid.
   if (modelCount('JSBlockModel') < 1) failures.push('JSBlockModel missing (run nocobase-h5-wms.mts for the 库位平面图 map block)')
@@ -2024,12 +2026,78 @@ async function stepVerify(): Promise<void> {
   } else {
     failures.push('NOCOBASE_API_KEY not in the environment nor the repository root .env; run init to issue one')
   }
+  // W4-B1 table-standards heal: five defect counters must stay at zero
+  // platform-wide (sort/filter/money+date format/association titleField/status
+  // color) over the 78-page/101-table audit basis. The precise field-metadata
+  // semantics live in w4-heal-b1.mts --assert; the block-count floor is
+  // asserted locally.
+  {
+    const assertRun = spawnSync(process.execPath, ['--import', 'tsx/esm', 'examples/kb-agent/scripts/w4-heal-b1.mts', '--assert'], { encoding: 'utf8', timeout: 240_000 })
+    if (assertRun.status !== 0) {
+      failures.push(`w4b1 table-standards assert failed:\n${(assertRun.stdout ?? '') + (assertRun.stderr ?? '')}`.trim())
+    } else {
+      console.log(`setup-nocobase verify: w4b1 table standards — ${(assertRun.stdout ?? '').split('\n').filter(l => l.includes('assert:')).pop() ?? 'ok'} ✓`)
+    }
+  }
+  // W4-B2 form-standards heal: single-column L1/L2 forms cleared, required /
+  // placeholder / assignRules floors met, Edit coverage ≥44 pages, and the
+  // engine-governed domains stay read-only (D5). The precise semantics live
+  // in w4-heal-b2.mts --assert.
+  {
+    const assertRun = spawnSync(process.execPath, ['--import', 'tsx/esm', 'examples/kb-agent/scripts/w4-heal-b2.mts', '--assert'], { encoding: 'utf8', timeout: 240_000 })
+    if (assertRun.status !== 0) {
+      failures.push(`w4b2 form-standards assert failed:\n${(assertRun.stdout ?? '') + (assertRun.stderr ?? '')}`.trim())
+    } else {
+      console.log(`setup-nocobase verify: w4b2 form standards — ${(assertRun.stdout ?? '').split('\n').filter(l => l.includes('assert:')).pop() ?? 'ok'} ✓`)
+    }
+  }
+  // W4-B3 page-level heal: L1 stat cards (≥3/page over the 30-page 台账),
+  // L2 counting cards (≥1), markdown hints on every L1 page, chart titles
+  // 100% (the 18 pre-existing blocks + every stat card), and the three
+  // terminal iframes pinned at W3_TERMINAL_BASE. The precise semantics live
+  // in w4-heal-b3.mts --assert.
+  {
+    const assertRun = spawnSync(process.execPath, ['--import', 'tsx/esm', 'examples/kb-agent/scripts/w4-heal-b3.mts', '--assert'], { encoding: 'utf8', timeout: 240_000 })
+    if (assertRun.status !== 0) {
+      failures.push(`w4b3 page-level assert failed:\n${(assertRun.stdout ?? '') + (assertRun.stderr ?? '')}`.trim())
+    } else {
+      console.log(`setup-nocobase verify: w4b3 page level — ${(assertRun.stdout ?? '').split('\n').filter(l => l.includes('assert:')).pop() ?? 'ok'} ✓`)
+    }
+  }
+  // W4-B4 structure governance: 采购联系人（历史） and 工作台 stay retired
+  // (routes 206→202, tabs rows destroyed before the page rows — the N14
+  // cascade lesson), the renames 排程明细/AQL 抽样方案/MO 执行视图/MRP 快照
+  // hold, and 应用中心 sits under 基础数据 with the CSV archives reconciled.
+  // The B5 baseline applies: the four emptied groups are gone (routes 198).
+  // The precise semantics live in w4-heal-b4.mts --assert.
+  {
+    const assertRun = spawnSync(process.execPath, ['--import', 'tsx/esm', 'examples/kb-agent/scripts/w4-heal-b4.mts', '--assert'], { encoding: 'utf8', timeout: 240_000 })
+    if (assertRun.status !== 0) {
+      failures.push(`w4b4 structure assert failed:\n${(assertRun.stdout ?? '') + (assertRun.stderr ?? '')}`.trim())
+    } else {
+      console.log(`setup-nocobase verify: w4b4 structure — ${(assertRun.stdout ?? '').split('\n').filter(l => l.includes('assert:')).pop() ?? 'ok'} ✓`)
+    }
+  }
+  // W4-B5 menu IA consolidation: 16 groups → 12 (migrate-first destroys of
+  // 采购/销售流程/协同办公/工单中心, the planning trio into 生产与计划, the
+  // dual-channel rename 维保服务商, group sort 1–12 + icon uniqueness, the
+  // top-level AI 工作台 as entry 0, all 93 pages resolving, and the member
+  // ACL bindings intact after the moves). The precise semantics live in
+  // w4-heal-b5.mts --assert.
+  {
+    const assertRun = spawnSync(process.execPath, ['--import', 'tsx/esm', 'examples/kb-agent/scripts/w4-heal-b5.mts', '--assert'], { encoding: 'utf8', timeout: 240_000 })
+    if (assertRun.status !== 0) {
+      failures.push(`w4b5 menu-IA assert failed:\n${(assertRun.stdout ?? '') + (assertRun.stderr ?? '')}`.trim())
+    } else {
+      console.log(`setup-nocobase verify: w4b5 menu IA — ${(assertRun.stdout ?? '').split('\n').filter(l => l.includes('assert:')).pop() ?? 'ok'} ✓`)
+    }
+  }
   if (failures.length > 0) {
     console.error(`setup-nocobase verify: FAILED\n  - ${failures.join('\n  - ')}`)
     process.exitCode = 1
     return
   }
-  console.log('setup-nocobase verify: OK — full UI + collections + attachment field + seed + workflow chain + AI workbench + row floors + m2o fieldNames + n18ai- form AI buttons + portals + portal list probes + ai-proxy + API key + kg graph + h4 SRM (pages/group/floors/food columns) + h5 WMS (pages/group/floors/bin-map JSBlock) + w1 approval (wfl collections/审批中心 page/flow config/gate/doc_status column) + w2 supplier single-source (admission flow/AVL gate/h4 workflow retired/seed untouched/采购联系人 retitle) + w3 procurement (pur collections/采购管理 7 pages/gates/flows/receipt columns/待检区) + b4 inventory (reservations/reorder collections/3 pages/planning columns/virtual zones/count-workflow request leg/bypass guards/ledger balance) + w5 mfg (mfg collections/生产制造 5 pages/MO flow/BOM gate/seed floors) + b6 mfg-exec (4 execution collections/5 pages/mfg_orders columns+terminals/WIP zone/movement legs/seed floors/MO-0003 draft) + b7 sales-mrp (so collections/销售管理 3 pages/SO flow/gates/MRP workflow/driver columns/SHIPMENT_SO leg/seed floors) + b8 quality (qm collections/质量管理 5 pages/AQL full-table 135-row seeds (W2-B1)/additive columns/RETURN_VENDOR+SCRAP legs/concession flow/disposal reconciliation) + b9 dashboards (kpi_snapshots/so_orders.shipped_at/经营分析 4 pages/9 kpi charts + supplier radar/90-day backfill floor) + w2-b2 MPS (mps collections/主生产计划 page/mps flow/back-link column/seeds/covered-exclusivity invariant) + w2-b3 biz-date (movements/counts biz_date 100% coverage/appendMovement convergence/monthly balances reconcile/月度收发存 page) + w2-b5 approval-config (pur_orders extras threshold/tolerance, array approver_map, config_note audit, demo trio records/todos, so_orders default fallback, quality_lead user) + w2-b7 ops closure (kpi_snapshots 25-code floor with ap_balance/应收应付对账 page four ledger blocks + ar/ap trend charts/persona sources + .dsh mirrors) + w3 usability (b1 row-detail drawers + member ACL floors/b2 subtables + guarded actions + approval jumps/b3 four read-only kanbans + 排产甘特 v1 gantt + dual-block calendars + drawer record-scoping/b4 审批流配置中心 (SVG 状态图 + wfl 四表 row Edit + admin+root-only menu + config_note required + consistency probe + 部门形态审批人校验)/b5 组织权限 (departments 树 + 挂接 + 组织架构页 + 权限矩阵页 admin-only + member 动作矩阵 + approver_map 部门路由 qm_nc_dispositions 见证 + 员工页 org_dept 列)/b6 操作者终端 (三页 iframe + serve 动词端点 fail-loud 冒烟 + 部门围栏 403)) all verified')
+  console.log('setup-nocobase verify: OK — full UI + collections + attachment field + seed + workflow chain + AI workbench + row floors + m2o fieldNames + n18ai- form AI buttons + portals + portal list probes + ai-proxy + API key + kg graph + h4 SRM (pages/group/floors/food columns) + h5 WMS (pages/group/floors/bin-map JSBlock) + w1 approval (wfl collections/审批中心 page/flow config/gate/doc_status column) + w2 supplier single-source (admission flow/AVL gate/h4 workflow retired/seed untouched/采购联系人 retitle) + w3 procurement (pur collections/采购管理 7 pages/gates/flows/receipt columns/待检区) + b4 inventory (reservations/reorder collections/3 pages/planning columns/virtual zones/count-workflow request leg/bypass guards/ledger balance) + w5 mfg (mfg collections/生产制造 5 pages/MO flow/BOM gate/seed floors) + b6 mfg-exec (4 execution collections/5 pages/mfg_orders columns+terminals/WIP zone/movement legs/seed floors/MO-0003 draft) + b7 sales-mrp (so collections/销售管理 3 pages/SO flow/gates/MRP workflow/driver columns/SHIPMENT_SO leg/seed floors) + b8 quality (qm collections/质量管理 5 pages/AQL full-table 135-row seeds (W2-B1)/additive columns/RETURN_VENDOR+SCRAP legs/concession flow/disposal reconciliation) + b9 dashboards (kpi_snapshots/so_orders.shipped_at/经营分析 4 pages/9 kpi charts + supplier radar/90-day backfill floor) + w2-b2 MPS (mps collections/主生产计划 page/mps flow/back-link column/seeds/covered-exclusivity invariant) + w2-b3 biz-date (movements/counts biz_date 100% coverage/appendMovement convergence/monthly balances reconcile/月度收发存 page) + w2-b5 approval-config (pur_orders extras threshold/tolerance, array approver_map, config_note audit, demo trio records/todos, so_orders default fallback, quality_lead user) + w2-b7 ops closure (kpi_snapshots 25-code floor with ap_balance/应收应付对账 page four ledger blocks + ar/ap trend charts/persona sources + .dsh mirrors) + w3 usability (b1 row-detail drawers + member ACL floors/b2 subtables + guarded actions + approval jumps/b3 four read-only kanbans + 排产甘特 v1 gantt + dual-block calendars + drawer record-scoping/b4 审批流配置中心 (SVG 状态图 + wfl 四表 row Edit + admin+root-only menu + config_note required + consistency probe + 部门形态审批人校验)/b5 组织权限 (departments 树 + 挂接 + 组织架构页 + 权限矩阵页 admin-only + member 动作矩阵 + approver_map 部门路由 qm_nc_dispositions 见证 + 员工页 org_dept 列)/b6 操作者终端 (三页 iframe + serve 动词端点 fail-loud 冒烟 + 部门围栏 403)) + w4 completeness (b1 table standards 五指标归零/b2 form standards 五指标达标/b3 page level: L1 30页统计卡≥3 + L2 20页计数卡 + 30 说明块 + 图表标题 100% + 终端 iframe W3_TERMINAL_BASE/b4 structure: 采购联系人（历史）+工作台 2 页退役（tabs 先删 N14）+ 排程明细/AQL 抽样方案 4 改名 + 应用中心归组基础数据 + routes 198 零孤儿/b5 menu IA: 16→12 组（先迁后删 采购/销售流程/协同办公/工单中心 + 计划三页入生产与计划 + 权限矩阵入组织与系统 + 维保服务商双通道改名 + 组 sort1-12 icon 唯一 + 顶级 AI 工作台 + 93 页可达 + member ACL 零回归) all verified')
 }
 
 /** Upsert the two NocoBase lines in the repository root .env, preserving the rest. */

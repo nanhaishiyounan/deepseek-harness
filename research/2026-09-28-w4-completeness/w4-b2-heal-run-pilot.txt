@@ -1,0 +1,25 @@
+# w4-b2 heal run pilot @ 2026-09-28T15:30:46.628Z
+form srm_suppliers/create[brxmsb]
+  required +7 (code,uscc,category,source,contact,phone,region)
+  fieldProps +4 (code:placeholder, lifecycle_status:options, phone:placeholder, admitted_at:placeholder)
+  layout twoCol [基本信息×6 | 属性与联系×8]
+  assignRules +1 (lifecycle_status=potential)
+form srm_suppliers/create[gqmoad]
+  required +7 (code,uscc,category,source,contact,phone,region)
+  fieldProps +4 (code:placeholder, lifecycle_status:options, phone:placeholder, admitted_at:placeholder)
+  layout twoCol [基本信息×6 | 属性与联系×8]
+  assignRules +1 (lifecycle_status=potential)
+form srm_suppliers/edit[poi755]
+  required +8 (region,source,name,contact,uscc,phone,category,code)
+  fieldProps +3 (admitted_at:placeholder, phone:placeholder, code:placeholder)
+  layout twoCol [基本信息×5 | 属性与联系×6]
+form srm_suppliers/edit[pp1aao]
+  required +8 (region,source,name,contact,uscc,phone,category,code)
+  fieldProps +3 (admitted_at:placeholder, phone:placeholder, code:placeholder)
+  layout twoCol [基本信息×5 | 属性与联系×6]
+format sweep (non-form date fields)
+  DateOnlyFieldModel 2ixcdozg <- YYYY-MM-DD
+  DateOnlyFieldModel 8li21hio <- YYYY-MM-DD
+  DateOnlyFieldModel j5tcxy6j <- YYYY-MM-DD
+  DateOnlyFieldModel re58iu9i <- YYYY-MM-DD
+counts: {"layoutWritten":4,"itemProps":30,"fieldProps":18,"dividers":8,"assignRules":2,"submitActions":0,"editActions":0,"deleteActions":0}

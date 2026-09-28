@@ -1,0 +1,656 @@
+{
+  "generatedAt": "2026-09-28T17:41:25.445Z",
+  "monthWindow": "2026-09-01",
+  "counts": {
+    "L1": 30,
+    "L2": 20,
+    "L3": 20,
+    "L4": 22
+  },
+  "pages": [
+    {
+      "title": "BOM 管理",
+      "uid": "w5mfga37ztlt6orc",
+      "level": "L1",
+      "statCards": 3,
+      "hintBlock": 1
+    },
+    {
+      "title": "付款申请",
+      "uid": "w3pur3an4pwnr1eo",
+      "level": "L1",
+      "statCards": 3,
+      "hintBlock": 1
+    },
+    {
+      "title": "任务列表",
+      "uid": "n17e11csgtbr0w3x",
+      "level": "L1",
+      "statCards": 3,
+      "hintBlock": 1
+    },
+    {
+      "title": "供应商报价",
+      "uid": "w3pur9w1c3yg3rjd",
+      "level": "L1",
+      "statCards": 3,
+      "hintBlock": 1
+    },
+    {
+      "title": "入库单",
+      "uid": "h5wmsrh8ls7pkv5i",
+      "level": "L1",
+      "statCards": 3,
+      "hintBlock": 1
+    },
+    {
+      "title": "出库单",
+      "uid": "h5wmsvwkqjiiaxdj",
+      "level": "L1",
+      "statCards": 3,
+      "hintBlock": 1
+    },
+    {
+      "title": "发票",
+      "uid": "n17f2utwb01mi3ha",
+      "level": "L1",
+      "statCards": 3,
+      "hintBlock": 1
+    },
+    {
+      "title": "发票匹配",
+      "uid": "w3pur45681oxtcsi",
+      "level": "L1",
+      "statCards": 3,
+      "hintBlock": 1
+    },
+    {
+      "title": "回款",
+      "uid": "n17f2c15ji684n8g",
+      "level": "L1",
+      "statCards": 3,
+      "hintBlock": 1
+    },
+    {
+      "title": "处置看板",
+      "uid": "w8qm472nluqt32x",
+      "level": "L1",
+      "statCards": 3,
+      "hintBlock": 1
+    },
+    {
+      "title": "完工单",
+      "uid": "w6mfgp1rrz08ffa",
+      "level": "L1",
+      "statCards": 3,
+      "hintBlock": 1
+    },
+    {
+      "title": "审批中心",
+      "uid": "w1w167h6joi0ck6",
+      "level": "L1",
+      "statCards": 3,
+      "hintBlock": 1
+    },
+    {
+      "title": "工单",
+      "uid": "n17etqhllqqa28",
+      "level": "L1",
+      "statCards": 3,
+      "hintBlock": 1
+    },
+    {
+      "title": "库存查询",
+      "uid": "h5wms9v2hly0cg6j",
+      "level": "L1",
+      "statCards": 3,
+      "hintBlock": 1
+    },
+    {
+      "title": "报价单",
+      "uid": "n17v6xfvzxoj0f",
+      "level": "L1",
+      "statCards": 3,
+      "hintBlock": 1
+    },
+    {
+      "title": "报工记录",
+      "uid": "w6mfglmxq9mhbkur",
+      "level": "L1",
+      "statCards": 3,
+      "hintBlock": 1
+    },
+    {
+      "title": "比价表",
+      "uid": "w3purb7o0r3yqi45",
+      "level": "L1",
+      "statCards": 3,
+      "hintBlock": 1
+    },
+    {
+      "title": "生产订单",
+      "uid": "w5mfgntyu7wy20a",
+      "level": "L1",
+      "statCards": 4,
+      "hintBlock": 1
+    },
+    {
+      "title": "盘点管理",
+      "uid": "h5wms2hmkvlfsmtf",
+      "level": "L1",
+      "statCards": 3,
+      "hintBlock": 1
+    },
+    {
+      "title": "维保记录",
+      "uid": "n17f34o4bhrzg1w",
+      "level": "L1",
+      "statCards": 3,
+      "hintBlock": 1
+    },
+    {
+      "title": "订单",
+      "uid": "n17vu68623sj9i",
+      "level": "L1",
+      "statCards": 3,
+      "hintBlock": 1
+    },
+    {
+      "title": "询价管理",
+      "uid": "w3purlvif0v23bun",
+      "level": "L1",
+      "statCards": 3,
+      "hintBlock": 1
+    },
+    {
+      "title": "请假审批",
+      "uid": "n17f3wqpzee9wo2g",
+      "level": "L1",
+      "statCards": 3,
+      "hintBlock": 1
+    },
+    {
+      "title": "质检单",
+      "uid": "w8qmjvyv8p5j7j",
+      "level": "L1",
+      "statCards": 3,
+      "hintBlock": 1
+    },
+    {
+      "title": "退料单",
+      "uid": "w6mfg1zez6dqkcgh",
+      "level": "L1",
+      "statCards": 3,
+      "hintBlock": 1
+    },
+    {
+      "title": "采购申请",
+      "uid": "w3pura0kyqfx4f9",
+      "level": "L1",
+      "statCards": 4,
+      "hintBlock": 1
+    },
+    {
+      "title": "采购订单",
+      "uid": "w3puryzkva06iuhh",
+      "level": "L1",
+      "statCards": 4,
+      "hintBlock": 1
+    },
+    {
+      "title": "销售订单",
+      "uid": "w7mrp4w590rm0ws8",
+      "level": "L1",
+      "statCards": 4,
+      "hintBlock": 1
+    },
+    {
+      "title": "项目",
+      "uid": "n17e1c4638iazhx",
+      "level": "L1",
+      "statCards": 3,
+      "hintBlock": 1
+    },
+    {
+      "title": "领料单",
+      "uid": "w6mfgsp029qziym",
+      "level": "L1",
+      "statCards": 3,
+      "hintBlock": 1
+    },
+    {
+      "title": "BOM 工序",
+      "uid": "w5mfgkkvs7a4ijya",
+      "level": "L2",
+      "statCards": 2,
+      "hintBlock": 0
+    },
+    {
+      "title": "产品与服务",
+      "uid": "n17f2wwpqs60dtk",
+      "level": "L2",
+      "statCards": 2,
+      "hintBlock": 0
+    },
+    {
+      "title": "仓库库区",
+      "uid": "h5wms50cuimohzz7",
+      "level": "L2",
+      "statCards": 1,
+      "hintBlock": 0
+    },
+    {
+      "title": "供应商",
+      "uid": "n17f3t3gtwv502s",
+      "level": "L2",
+      "statCards": 1,
+      "hintBlock": 0
+    },
+    {
+      "title": "供应商准入",
+      "uid": "h4srm6hfqnpnrqu5",
+      "level": "L2",
+      "statCards": 2,
+      "hintBlock": 0
+    },
+    {
+      "title": "供应商档案",
+      "uid": "h4srm2u9xiqx09jb",
+      "level": "L2",
+      "statCards": 2,
+      "hintBlock": 0
+    },
+    {
+      "title": "员工",
+      "uid": "n17lhe5qyxu1g",
+      "level": "L2",
+      "statCards": 2,
+      "hintBlock": 0
+    },
+    {
+      "title": "审核评分录入",
+      "uid": "h4srmflpebqkuz",
+      "level": "L2",
+      "statCards": 2,
+      "hintBlock": 0
+    },
+    {
+      "title": "客户",
+      "uid": "n17sys042q2lz",
+      "level": "L2",
+      "statCards": 2,
+      "hintBlock": 0
+    },
+    {
+      "title": "工作中心",
+      "uid": "w5mfg3eil2n4n0kr",
+      "level": "L2",
+      "statCards": 2,
+      "hintBlock": 0
+    },
+    {
+      "title": "库位平面图",
+      "uid": "h5wms1nju21hb5c8",
+      "level": "L2",
+      "statCards": 2,
+      "hintBlock": 0
+    },
+    {
+      "title": "批次主数据",
+      "uid": "h5wmsgd4pntmwvg",
+      "level": "L2",
+      "statCards": 2,
+      "hintBlock": 0
+    },
+    {
+      "title": "知识文章",
+      "uid": "n17f38lga4ln4s65",
+      "level": "L2",
+      "statCards": 2,
+      "hintBlock": 0
+    },
+    {
+      "title": "绩效评分卡",
+      "uid": "h4srms4w5viez9zp",
+      "level": "L2",
+      "statCards": 2,
+      "hintBlock": 0
+    },
+    {
+      "title": "联系人",
+      "uid": "n17c3lkyg9zjd6",
+      "level": "L2",
+      "statCards": 1,
+      "hintBlock": 0
+    },
+    {
+      "title": "证照效期预警",
+      "uid": "h4srmjjlvbjei4fd",
+      "level": "L2",
+      "statCards": 2,
+      "hintBlock": 0
+    },
+    {
+      "title": "资产台账",
+      "uid": "n17wr2jbz8fl2i",
+      "level": "L2",
+      "statCards": 2,
+      "hintBlock": 0
+    },
+    {
+      "title": "部门",
+      "uid": "n17f3er0aw80yc8i",
+      "level": "L2",
+      "statCards": 1,
+      "hintBlock": 0
+    },
+    {
+      "title": "里程碑",
+      "uid": "n17e12p5eoxa8l6",
+      "level": "L2",
+      "statCards": 2,
+      "hintBlock": 0
+    },
+    {
+      "title": "销售线索",
+      "uid": "n17rwc527ujwt",
+      "level": "L2",
+      "statCards": 2,
+      "hintBlock": 0
+    },
+    {
+      "title": "AQL抽样方案",
+      "uid": "w8qm15rxe53v8hh",
+      "level": "L3",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "MO 执行视图",
+      "uid": "w6mfgmct2tf2braf",
+      "level": "L3",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "MRP 快照",
+      "uid": "w7mrpowj6l93nn0a",
+      "level": "L3",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "主生产计划",
+      "uid": "w7mrpyru4s708nwn",
+      "level": "L3",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "分类维护",
+      "uid": "n17f3rnd403uzlkc",
+      "level": "L3",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "季度绩效物化",
+      "uid": "w8qm8sx2tj9j0kb",
+      "level": "L3",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "审批流配置",
+      "uid": "w3b4u2r9nnjqvi",
+      "level": "L3",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "审核检查表",
+      "uid": "h4srmuvf86en2kn",
+      "level": "L3",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "库存流水",
+      "uid": "h5wms9srcrn5fhiq",
+      "level": "L3",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "应收应付对账",
+      "uid": "w9kpisldougonly",
+      "level": "L3",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "整改跟踪",
+      "uid": "h4srm25tmro1wjuw",
+      "level": "L3",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "月度收发存",
+      "uid": "h5wmslacezwb94s",
+      "level": "L3",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "权限矩阵",
+      "uid": "w3b5m8kwiakieq",
+      "level": "L3",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "检验读数",
+      "uid": "w8qmg3yelbk0rzm",
+      "level": "L3",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "盘点计划",
+      "uid": "h5wmsddav9gkxtl",
+      "level": "L3",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "移库管理",
+      "uid": "h5wmspyqfovkqjff",
+      "level": "L3",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "组织架构",
+      "uid": "w3b57ix4086om95",
+      "level": "L3",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "补货预警",
+      "uid": "h5wmstw8iug4upxs",
+      "level": "L3",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "采购联系人（历史）",
+      "uid": "n17f3gnpjv8rfd85",
+      "level": "L3",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "预留管理",
+      "uid": "h5wms9zlhetpzwl",
+      "level": "L3",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "AI 工作台",
+      "uid": "n13ai2efgqippp44",
+      "level": "L4",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "交期日历",
+      "uid": "w3b3x8ymuxey8q",
+      "level": "L4",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "任务日历",
+      "uid": "n17f1ns70eshqwy",
+      "level": "L4",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "任务看板",
+      "uid": "n17f12u108kzzyk1",
+      "level": "L4",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "供应商绩效雷达",
+      "uid": "h4srmaf4rurtt17p",
+      "level": "L4",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "供应链看板",
+      "uid": "w9kpijpea6p6exnm",
+      "level": "L4",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "客户仪表盘",
+      "uid": "n17f2jumvap76nm8",
+      "level": "L4",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "工作台",
+      "uid": "n17f34fr9khfzdhq",
+      "level": "L4",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "库存看板",
+      "uid": "w9kpiatwzi4gjbff",
+      "level": "L4",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "排产看板",
+      "uid": "w5mfgp352sily7f",
+      "level": "L4",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "收货终端",
+      "uid": "w3b66yns80jnq92",
+      "level": "L4",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "生产看板",
+      "uid": "w9kpirvxmfx12l2i",
+      "level": "L4",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "生产订单看板",
+      "uid": "w3b39xulomz8jj",
+      "level": "L4",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "经营看板",
+      "uid": "w9kpi7zv98whvfpv",
+      "level": "L4",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "计划工作台",
+      "uid": "w7mrphtm8t9tzlk8",
+      "level": "L4",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "计划日历",
+      "uid": "w3b3ass8lwvxiy",
+      "level": "L4",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "质检工作台",
+      "uid": "w3b6nour73ecwgb",
+      "level": "L4",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "质检看板",
+      "uid": "w3b3uw3d0mrz1b",
+      "level": "L4",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "车间终端",
+      "uid": "w3b6guuruqly03t",
+      "level": "L4",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "采购看板",
+      "uid": "w3b3x35bfqctwkn",
+      "level": "L4",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "销售仪表盘",
+      "uid": "n17f2y9wfrggxyo",
+      "level": "L4",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
+      "title": "销售看板",
+      "uid": "w3b3utj5a15khmq",
+      "level": "L4",
+      "statCards": 0,
+      "hintBlock": 0
+    }
+  ]
+}

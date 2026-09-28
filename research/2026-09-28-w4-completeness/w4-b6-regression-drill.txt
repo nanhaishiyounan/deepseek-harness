@@ -1,0 +1,20 @@
+W4-B6 回归拦截力演练 2026-09-28T20:10:37.507Z
+口径：人为破坏 → 断言变红 → 幂等 heal 恢复 → 断言回绿（fails-loud 证明）
+
+[B4 结构复核] grid=09bvmy800vm 两栏恢复=是 ✓（layout rows=5，破坏前同为 5 行两栏；复核经 heal 后 flowSurfaces:get 实读）
+
+== 演练 B 附带产出：挖出并修复 B2 heal 幂等性真缺陷 ==
+- 现象：B2 恢复重跑后 assignRuleGrids 61→60（断言 floor=60 踩线仍绿，属静默回归）
+- 根因：flowModels:save 的 stepParams 是整键替换语义；w4-heal-b2 layout 写入只带 gridSettings、
+  lib assignFormDefaults 只带 formModelSettings —— 两处写入互相覆盖兄弟键。
+  首次 heal --all 时 assignRules 后写赢（formModelSettings 在、gridSettings 丢），
+  幂等重跑时 assignRules「已存在跳过」→ layout 后写赢（formModelSettings 丢）——覆盖方向由写入顺序决定。
+- 修复（两处，兄弟键保留式写入）：
+  1) nocobase-flow-page-lib.mts assignFormDefaults: stepParams: { ...stepParamsBefore, formModelSettings: ... }
+  2) w4-heal-b2.mts layout save: stepParams: { ...tree.stepParams, gridSettings: ... }
+- 自愈验证：heal --all 后 assignRules +1 (status=active) 重写；assert 回绿 assignRuleGrids=61；
+  grid 09bvmy800vm stepParams 两键共存（gridSettings.layout rows=5 + formModelSettings.assignRules）
+- 结论：该缺陷证明演练价值——断言 floor 恰好容忍的单点静默回归被「破坏→恢复」链路暴露并根治
+
+结论：两轮演练 均 红→恢复→绿 —— verify 断言族 fails-loud 证明成立
+（A：FilterForm 删除被 w4b1 断言拦截 filterFormBlocks 35<36 + pagesNoFilter=1；B：单列化被 w4b2 断言拦截 singleColEligible=1≠0）

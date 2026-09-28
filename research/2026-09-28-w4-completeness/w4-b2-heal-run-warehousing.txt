@@ -1,0 +1,71 @@
+# w4-b2 heal run warehousing @ 2026-09-28T15:31:58.951Z
+form wms_receipts/create[0np12o]
+  required +3 (supplier,product,qty)
+  fieldProps +5 (receipt_no:placeholder, source_no:placeholder, lot_no:placeholder, qty:placeholder, status:options)
+  layout twoCol [基本信息×2 | 交易对手与交付×5 | 财务与备注×4]
+  assignRules +2 (status=draft, qty=0)
+form wms_reorder_suggestions/create[395u7x]
+  fieldProps +2 (suggest_qty:placeholder, status:options)
+  assignRules +1 (status=open)
+form wms_stock/create[5w2j4i]
+  required +2 (product,bin)
+  fieldProps +4 (qty_on_hand:placeholder, qty_allocated:placeholder, qty_locked:placeholder, qty_available:placeholder)
+  layout twoCol [基本信息×1 | 交易对手与交付×3 | 财务与备注×4]
+  assignRules +1 (status=good)
+form wms_bins/create[aq29l1]
+  fieldProps +1 (code:placeholder)
+  layout twoCol [基本信息×2 | 属性与联系×3]
+  assignRules +1 (status=idle)
+form wms_lots/create[eomkcb]
+  fieldProps +2 (lot_no:placeholder, status:options)
+  layout twoCol [基本信息×5 | 属性与联系×3]
+  assignRules +1 (status=qualified)
+form wms_reservations/create[gfive1]
+  required +2 (bin,qty)
+  fieldProps +3 (code:placeholder, qty:placeholder, status:options)
+  layout twoCol [基本信息×2 | 交易对手与交付×4 | 财务与备注×2]
+  assignRules +2 (status=reserved, qty=0)
+form wms_shipments/edit[i5gygr]
+  required +2 (shipment_no,qty)
+  fieldProps +2 (shipment_no:placeholder, qty:placeholder)
+  layout twoCol [基本信息×1 | 交易对手与交付×1 | 财务与备注×2]
+form wms_receipts/edit[koanv2]
+  required +3 (qty,receipt_no,received_at)
+  fieldProps +4 (qty:placeholder, receipt_no:placeholder, lot_no:placeholder, source_no:placeholder)
+  layout twoCol [基本信息×2 | 交易对手与交付×1 | 财务与备注×5]
+form wms_counts/edit[m69s30]
+  required +2 (count_no,biz_date)
+  fieldProps +3 (count_no:placeholder, snapshot_qty:placeholder, counted_qty:placeholder)
+  layout twoCol [基本信息×3 | 财务与备注×5]
+form wms_transfers/create[mi0h0h]
+  required +2 (product,qty)
+  fieldProps +3 (transfer_no:placeholder, qty:placeholder, status:options)
+  layout twoCol [基本信息×2 | 交易对手与交付×3 | 财务与备注×3]
+  assignRules +2 (status=draft, qty=0)
+form wms_movements/create[oucd3m]
+  required +2 (product,qty)
+  fieldProps +3 (move_type:options, doc_no:placeholder, qty:placeholder)
+  layout twoCol [基本信息×1 | 交易对手与交付×3 | 财务与备注×4]
+  assignRules +1 (qty=0)
+form wms_shipments/create[r2g2yo]
+  required +2 (product,qty)
+  fieldProps +3 (shipment_no:placeholder, qty:placeholder, status:options)
+  layout twoCol [基本信息×2 | 交易对手与交付×3 | 财务与备注×3]
+  assignRules +2 (status=draft, qty=0)
+form hub_inv_products/create[rl1k5g]
+  required +1 (name)
+  fieldProps +1 (sku:placeholder)
+  layout twoCol [基本信息×2 | 属性与联系×6]
+form wms_monthly_balances/create[usjhb0]
+  fieldProps +4 (opening_qty:placeholder, in_qty:placeholder, out_qty:placeholder, bal_qty:placeholder)
+  layout twoCol [交易对手与交付×1 | 财务与备注×6]
+form wms_zones/create[v1cvhs]
+  fieldProps +1 (code:placeholder)
+  layout twoCol [基本信息×2 | 属性与联系×3]
+form wms_counts/create[ze2j6g]
+  required +3 (zone,bin,product)
+  fieldProps +4 (count_no:placeholder, snapshot_qty:placeholder, counted_qty:placeholder, status:options)
+  layout twoCol [基本信息×2 | 交易对手与交付×4 | 财务与备注×5]
+  assignRules +1 (status=planned)
+page 仓储管理/盘点计划 hub_inv_products +Edit(2col,required) +Delete(confirm)
+counts: {"layoutWritten":15,"itemProps":24,"fieldProps":45,"dividers":39,"assignRules":10,"submitActions":0,"editActions":1,"deleteActions":1}

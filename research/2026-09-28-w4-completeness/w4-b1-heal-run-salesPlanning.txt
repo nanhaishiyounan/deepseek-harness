@@ -1,0 +1,27 @@
+# w4-b1 heal run salesPlanning @ 2026-09-28T11:43:33.708Z
+page 销售管理/计划工作台
+  filterForm mrp_suggestions uid=5o3rexnb98q fields=[status,product,plan_type]
+page 销售管理/MRP 快照
+  sort mrp_snapshots <- ["-id"]
+  filterForm mrp_snapshots uid=il05cryv1j3 fields=[product]
+page 销售管理/主生产计划
+  sort mps_plans <- ["-id"]
+  sort mps_plan_items <- ["-id"]
+  rel mps_plan_items.plan -> mps_plans.code
+  rel mps_plan_items.product -> hub_inv_products.name
+page 经营分析/应收应付对账
+  sort so_orders <- ["-id"]
+  enumize so_orders.doc_status (6 options)
+  enumize so_orders.shipping_status (3 options)
+  sort crm_payments <- ["-id"]
+  rel crm_payments.customer -> crm_customers.name
+  enumize crm_payments.method (3 options)
+  enumize crm_payments.status (2 options)
+  sort pur_invoices <- ["-id"]
+  rel pur_invoices.po -> pur_orders.code
+  enumize pur_invoices.match_result (5 options)
+  sort pur_payments <- ["-id"]
+  rel pur_payments.invoice -> pur_invoices.code
+  enumize pur_payments.doc_status (7 options)
+  filterForm so_orders uid=pk877uqy410 fields=[doc_status,customer]
+pages=5

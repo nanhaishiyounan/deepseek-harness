@@ -1,0 +1,11 @@
+# w4-b1 heal run quality @ 2026-09-28T11:44:04.583Z
+page 质量管理/质检单
+  sort qm_inspections <- ["-id"]
+  rel qm_inspections.product -> hub_inv_products.name
+  rel qm_inspections.supplier -> srm_suppliers.name
+page 质量管理/检验读数
+  sort qm_inspection_readings <- ["-id"]
+  rel qm_inspection_readings.inspection -> qm_inspections.code
+page 质量管理/AQL抽样方案
+  sort qm_aql_plans <- ["id"]
+pages=3

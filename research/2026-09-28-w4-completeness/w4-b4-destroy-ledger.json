@@ -1,0 +1,132 @@
+{
+ "entries": [
+  {
+   "title": "采购联系人（历史）",
+   "schemaUid": "n17f3gnpjv8rfd85",
+   "destroyedAt": "2026-09-28T18:26:03.796Z",
+   "flowPageRow": {
+    "createdAt": "2026-09-25T18:29:11.210Z",
+    "updatedAt": "2026-09-26T02:21:02.384Z",
+    "id": 388679759364096,
+    "parentId": 388679734198272,
+    "title": "采购联系人（历史）",
+    "tooltip": null,
+    "icon": "ShopOutlined",
+    "schemaUid": "n17f3gnpjv8rfd85",
+    "menuSchemaUid": null,
+    "tabSchemaName": null,
+    "type": "flowPage",
+    "options": null,
+    "sort": 1,
+    "hideInMenu": null,
+    "enableTabs": null,
+    "enableHeader": null,
+    "displayTitle": null,
+    "hidden": null,
+    "createdById": 1,
+    "updatedById": 1
+   },
+   "tabsRows": [
+    {
+     "createdAt": "2026-09-25T18:29:11.283Z",
+     "updatedAt": "2026-09-25T18:29:11.283Z",
+     "id": 388679759364097,
+     "parentId": 388679759364096,
+     "title": "",
+     "tooltip": null,
+     "icon": null,
+     "schemaUid": "n17f3tcqe1x2o2xb",
+     "menuSchemaUid": null,
+     "tabSchemaName": "n17f3tsq2zenlssji",
+     "type": "tabs",
+     "options": null,
+     "sort": 1,
+     "hideInMenu": null,
+     "enableTabs": null,
+     "enableHeader": null,
+     "displayTitle": null,
+     "hidden": null,
+     "createdById": 1,
+     "updatedById": 1
+    }
+   ],
+   "flowModelsSubtreeCount": 21,
+   "csvArchives": [
+    {
+     "collection": "hub_po_suppliers",
+     "file": "w4-b4-retired-po-suppliers.csv",
+     "dataRows": 11,
+     "psqlCount": 11
+    }
+   ],
+   "note": "回滚 = 重放 nocobase-f3-hub-v2.mts（在旧标题下重建页与块）→ nocobase-w2-supplier.mts（retitle 采购联系人）；集合数据未动（只读留档）"
+  },
+  {
+   "title": "工作台",
+   "schemaUid": "n17f34fr9khfzdhq",
+   "destroyedAt": "2026-09-28T18:26:04.599Z",
+   "flowPageRow": {
+    "createdAt": "2026-09-13T07:44:15.905Z",
+    "updatedAt": "2026-09-13T07:44:15.905Z",
+    "id": 386424279793664,
+    "parentId": null,
+    "title": "工作台",
+    "tooltip": null,
+    "icon": "DashboardOutlined",
+    "schemaUid": "n17f34fr9khfzdhq",
+    "menuSchemaUid": null,
+    "tabSchemaName": null,
+    "type": "flowPage",
+    "options": null,
+    "sort": 7,
+    "hideInMenu": null,
+    "enableTabs": null,
+    "enableHeader": null,
+    "displayTitle": null,
+    "hidden": null,
+    "createdById": 1,
+    "updatedById": 1
+   },
+   "tabsRows": [
+    {
+     "createdAt": "2026-09-13T07:44:15.983Z",
+     "updatedAt": "2026-09-13T07:44:15.983Z",
+     "id": 386424279793665,
+     "parentId": 386424279793664,
+     "title": "",
+     "tooltip": null,
+     "icon": null,
+     "schemaUid": "n17f3todkslgl7xr",
+     "menuSchemaUid": null,
+     "tabSchemaName": "n17f3tsxktxgdtktc",
+     "type": "tabs",
+     "options": null,
+     "sort": 1,
+     "hideInMenu": null,
+     "enableTabs": null,
+     "enableHeader": null,
+     "displayTitle": null,
+     "hidden": null,
+     "createdById": 1,
+     "updatedById": 1
+    }
+   ],
+   "flowModelsSubtreeCount": 45,
+   "csvArchives": [
+    {
+     "collection": "hub_pj_tasks",
+     "file": "w4-b4-retired-workbench-tasks.csv",
+     "dataRows": 20,
+     "psqlCount": 20
+    },
+    {
+     "collection": "hub_tk_tickets",
+     "file": "w4-b4-retired-workbench-tickets.csv",
+     "dataRows": 40,
+     "psqlCount": 40
+    }
+   ],
+   "note": "回滚 = 重放 nocobase-f3-hub-v2.mts（在旧标题下重建页与块）→ nocobase-w2-supplier.mts（retitle 采购联系人）；集合数据未动（只读留档）"
+  }
+ ]
+}

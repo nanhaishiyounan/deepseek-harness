@@ -1,0 +1,11 @@
+supplier form audit: {"dividers":["基本信息","属性与联系"],"required":["供应商编码","供应商名称","统一社会信用代码","类别","联系人","来源","联系电话","所在地区"],"pairs":14,"lifecycle":true,"placeholders":["如 PO-20261001-001","YYYY-MM-DD","11 位手机号"]}
+supplier negative: validationErrors=8 rowsBefore=27 rowsAfter=27
+supplier psql-api row: {"id":43,"code":"SUP-muleiiy0","lifecycle_status":"potential"}
+po form audit: {"dividers":["基本信息","交易对手与交付","财务与备注"],"docStatusText":"审批状态:草稿","needDateValue":"2026-09-28","placeholders":["如 PO-20261001-001","YYYY-MM-DD","两位小数"]}
+po negative: validationErrors=3 dateCleared=true
+member supplier view: addVisible=false rows=21 headers=8
+h5 fresh-context count headers (10): 盘点单号,盘点类型,库位,物料,批次,账面快照,实盘数,差异,状态,操作
+h5 fresh-context stock headers (10): 物料,库位,批次,库存状态,现有数量,已分配,锁定数量,可用数量,乐观锁版本,操作
+psql supplier row: SUP-muleiiy0 | potential
+psql assignRules grids: 3
+W4-B2 pilot: ALL LEGS GREEN

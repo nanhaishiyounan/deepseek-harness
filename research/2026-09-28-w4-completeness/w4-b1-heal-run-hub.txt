@@ -1,0 +1,112 @@
+# w4-b1 heal run hub @ 2026-09-28T11:49:26.152Z
+page /AI 工作台
+  recolor hub_tk_tickets.status
+page CRM 客户/客户
+  recolor crm_customers.status
+page CRM 客户/销售线索
+  recolor crm_leads.stage
+page CRM 客户/联系人
+  recolor crm_contacts.status
+page 销售流程/订单
+  recolor crm_deals.status
+page 销售流程/报价单
+  recolor crm_quotes.status
+page 工单中心/工单
+  recolor hub_tk_tickets.status
+page 资产管理/资产台账
+  recolor hub_as_assets.status
+page 人事管理/员工
+  recolor hub_hr_employees.status
+page 项目管理/项目
+  recolor hub_pj_projects.status
+page 项目管理/任务列表
+  recolor hub_pj_tasks.status
+page 项目管理/里程碑
+  recolor hub_pj_milestones.status
+page /工作台
+  recolor hub_pj_tasks.status
+  recolor hub_tk_tickets.status
+page 资产管理/维保记录
+  recolor hub_as_maintenance.type
+  recolor hub_as_maintenance.status
+page 人事管理/请假审批
+  recolor hub_hr_leave_requests.status
+page 资产管理/供应商
+  recolor hub_as_vendors.status
+page 销售流程/回款
+  recolor crm_payments.status
+page CRM 客户/客户仪表盘
+  recolor crm_customers.status
+page 销售流程/销售仪表盘
+  recolor crm_payments.status
+page 供应链/供应商档案
+  recolor srm_suppliers.lifecycle_status
+page 供应链/供应商准入
+  recolor srm_suppliers.lifecycle_status
+page 仓储管理/入库单
+  recolor wms_receipts.status
+page 仓储管理/出库单
+  recolor wms_shipments.status
+page 仓储管理/盘点管理
+  recolor wms_counts.status
+page 仓储管理/移库管理
+  recolor wms_transfers.status
+page 采购/采购联系人（历史）
+  recolor hub_po_suppliers.status
+page 协同办公/审批中心
+  recolor wfl_approval_todos.state
+  recolor wfl_approval_todos.status
+  recolor wfl_approval_records.action
+  recolor wfl_approval_records.to_state
+page 采购管理/采购申请
+  recolor pur_requests.doc_status
+page 采购管理/询价管理
+  recolor pur_rfqs.doc_status
+page 采购管理/供应商报价
+  recolor pur_quotes.status
+page 采购管理/比价表
+  recolor pur_quotes.status
+page 采购管理/采购订单
+  recolor pur_orders.doc_status
+page 采购管理/发票匹配
+  recolor pur_invoices.match_result
+page 采购管理/付款申请
+  recolor pur_payments.doc_status
+page 仓储管理/预留管理
+  recolor wms_reservations.status
+page 仓储管理/补货预警
+  recolor wms_reorder_suggestions.status
+page 生产制造/BOM 管理
+  recolor mfg_boms.bom_status
+page 生产制造/工作中心
+  recolor mfg_work_centers.status
+page 生产制造/生产订单
+  recolor mfg_orders.doc_status
+page 生产制造/排产看板
+  recolor mfg_order_operations.status
+page 生产制造/报工记录
+  recolor mfg_job_reports.qc_status
+page 生产制造/完工单
+  recolor mfg_completions.oqc_status
+page 生产制造/MO 执行视图
+  recolor mfg_orders.doc_status
+  recolor mfg_order_operations.status
+page 销售管理/销售订单
+  recolor so_orders.doc_status
+page 销售管理/计划工作台
+  recolor mrp_suggestions.status
+page 质量管理/质检单
+  recolor qm_inspections.result
+page 销售管理/主生产计划
+  recolor mps_plans.doc_status
+page 经营分析/应收应付对账
+  recolor so_orders.doc_status
+  recolor crm_payments.status
+  recolor pur_invoices.match_result
+  recolor pur_payments.doc_status
+page 协同办公/审批流配置
+  recolor wfl_flow_states.state
+  recolor wfl_flow_transitions.state
+  recolor wfl_flow_transitions.action
+  recolor wfl_flow_transitions.next_state
+pages=78

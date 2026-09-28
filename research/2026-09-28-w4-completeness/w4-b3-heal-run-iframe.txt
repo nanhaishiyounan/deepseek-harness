@@ -1,0 +1,5 @@
+# w4-b3 heal run @ 2026-09-28T16:57:50.527Z
+iframe "车间终端" rebased http://127.0.0.1:9999/terminals/report.html?operator=linjingyi -> http://127.0.0.1:13110/terminals/report.html?operator=linjingyi
+iframe "质检工作台" rebased http://127.0.0.1:9999/terminals/inspect.html?operator=quality_lead -> http://127.0.0.1:13110/terminals/inspect.html?operator=quality_lead
+iframe "收货终端" rebased http://127.0.0.1:9999/terminals/receive.html?operator=b4guard -> http://127.0.0.1:13110/terminals/receive.html?operator=b4guard
+terminal base = http://127.0.0.1:13110 (default; set W3_TERMINAL_BASE to override)

@@ -1,0 +1,22 @@
+# w4-b2 heal run quality @ 2026-09-28T15:32:16.171Z
+form qm_inspections/create[4mbay3]
+  +FormSubmitAction (was missing — F-10' negative channel)
+  required +1 (supplier)
+  fieldProps +4 (code:placeholder, ref_no:placeholder, lot_no:placeholder, lot_qty:placeholder)
+  layout twoCol [基本信息×1 | 交易对手与交付×2 | 财务与备注×7]
+form qm_inspections/edit[s4tqwd]
+  required +1 (code)
+  fieldProps +6 (ref_no:placeholder, aql_code:placeholder, code:placeholder, lot_qty:placeholder, lot_no:placeholder, sample_qty:placeholder)
+  layout twoCol [基本信息×2 | 财务与备注×19]
+form qm_inspection_readings/create[sudv9m]
+  +FormSubmitAction (was missing — F-10' negative channel)
+  layout twoCol [财务与备注×7]
+form qm_aql_plans/create[uabrqj]
+  +FormSubmitAction (was missing — F-10' negative channel)
+  fieldProps +1 (code:placeholder)
+form qm_nc_dispositions/create[xiqhq0]
+  +FormSubmitAction (was missing — F-10' negative channel)
+  fieldProps +3 (code:placeholder, doc_status:options, status:options)
+  layout twoCol [基本信息×3 | 财务与备注×5]
+  assignRules +1 (status=open)
+counts: {"layoutWritten":4,"itemProps":2,"fieldProps":14,"dividers":8,"assignRules":1,"submitActions":4,"editActions":0,"deleteActions":0}

@@ -1,0 +1,12 @@
+# w4-b4 idempotent re-run @ 2026-09-28T18:43:11Z（双通道改名后二次 --all：全 skip、removed/added/retitled/moved 全空、202→202）
+retire "采购联系人（历史）": flowPage row not found (already retired) — skip
+retire "工作台": flowPage row not found (already retired) — skip
+# w4-b4 structure governance run @ 2026-09-28T18:43:13.222Z
+snapshot: routes-before 202 rows; retired flowModels subtrees archived
+rename 排产看板→排程明细: already "排程明细" (route + RootPageModel) — skip
+rename AQL抽样方案→AQL 抽样方案: already "AQL 抽样方案" (route + RootPageModel) — skip
+rename MO执行视图→MO 执行视图: already "MO 执行视图" (route + RootPageModel) — skip
+rename MRP快照→MRP 快照: already "MRP 快照" (route + RootPageModel) — skip
+move 应用中心→基础数据: already in group — skip
+after: total 202→202 | removed [] | added [] | retitled [] | moved []
+verdicts: w4-b4-verdicts.json written

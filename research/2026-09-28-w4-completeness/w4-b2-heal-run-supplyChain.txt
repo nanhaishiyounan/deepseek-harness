@@ -1,0 +1,36 @@
+# w4-b2 heal run supplyChain @ 2026-09-28T15:37:07.190Z
+format sweep (non-form date fields)
+  DateOnlyFieldModel w4b2eff2 <- YYYY-MM-DD
+  DateOnlyFieldModel w4b2eff3 <- YYYY-MM-DD
+  DateOnlyFieldModel w4b2eff3 <- YYYY-MM-DD
+  DateOnlyFieldModel w4b2eff4 <- YYYY-MM-DD
+  DateOnlyFieldModel w4b2eff6 <- YYYY-MM-DD
+  DateOnlyFieldModel w4b2eff7 <- YYYY-MM-DD
+  DateOnlyFieldModel w4b2eff9 <- YYYY-MM-DD
+  DateOnlyFieldModel w4b2eff9 <- YYYY-MM-DD
+  DateOnlyFieldModel w4b2effb <- YYYY-MM-DD
+  DateOnlyFieldModel w4b2efff <- YYYY-MM-DD
+  DateOnlyFieldModel w4b2efff <- YYYY-MM-DD
+  DateOnlyFieldModel w4b2effg <- YYYY-MM-DD
+  DateOnlyFieldModel w4b2effi <- YYYY-MM-DD
+  DateOnlyFieldModel w4b2effk <- YYYY-MM-DD
+  DateOnlyFieldModel w4b2effm <- YYYY-MM-DD
+  DateOnlyFieldModel w4b2effn <- YYYY-MM-DD
+  DateOnlyFieldModel w4b2effr <- YYYY-MM-DD
+  DateOnlyFieldModel w4b2effr <- YYYY-MM-DD
+  DateOnlyFieldModel w4b2effs <- YYYY-MM-DD
+  DateOnlyFieldModel w4b2efft <- YYYY-MM-DD
+  DateOnlyFieldModel w4b2efft <- YYYY-MM-DD
+  DateOnlyFieldModel w4b2effu <- YYYY-MM-DD
+  DateOnlyFieldModel w4b2effu <- YYYY-MM-DD
+  DateOnlyFieldModel w4b2effv <- YYYY-MM-DD
+  DateOnlyFieldModel w4b2effv <- YYYY-MM-DD
+  DateOnlyFieldModel w4b2effy <- YYYY-MM-DD
+  DateOnlyFieldModel w4b2effy <- YYYY-MM-DD
+page 供应链/证照效期预警 srm_certificates +Edit(2col,required) +Delete(confirm)
+page 供应链/审核检查表 srm_audit_checklists +Edit(2col,required) +Delete(confirm)
+page 供应链/审核评分录入 srm_audit_records +Edit(2col,required) +Delete(confirm)
+page 供应链/绩效评分卡 srm_score_cards +Edit(2col,required) +Delete(confirm)
+page 供应链/供应商绩效雷达 srm_score_cards +Edit(2col,required) +Delete(confirm)
+page 质量管理/季度绩效物化 srm_score_cards +Edit(2col,required) +Delete(confirm)
+counts: {"layoutWritten":0,"itemProps":0,"fieldProps":27,"dividers":0,"assignRules":0,"submitActions":0,"editActions":6,"deleteActions":6}

@@ -1,0 +1,24 @@
+# w4-b1 heal run supplyChain @ 2026-09-28T11:44:11.714Z
+page 供应链/供应商档案
+  sort srm_suppliers <- ["code"]
+page 供应链/供应商准入
+  sort srm_suppliers <- ["code"]
+page 供应链/证照效期预警
+  sort srm_certificates <- ["-id"]
+  rel srm_certificates.supplier -> srm_suppliers.name
+page 供应链/审核检查表
+  sort srm_audit_checklists <- ["-id"]
+page 供应链/审核评分录入
+  sort srm_audit_records <- ["-id"]
+  rel srm_audit_records.supplier -> srm_suppliers.name
+page 供应链/绩效评分卡
+  sort srm_score_cards <- ["-id"]
+  rel srm_score_cards.supplier -> srm_suppliers.name
+page 供应链/供应商绩效雷达
+  sort srm_score_cards <- ["-id"]
+  rel srm_score_cards.supplier -> srm_suppliers.name
+page 质量管理/季度绩效物化
+  sort srm_score_cards <- ["-id"]
+  rel srm_score_cards.supplier -> srm_suppliers.name
+  enumize srm_score_cards.period (4 options)
+pages=8

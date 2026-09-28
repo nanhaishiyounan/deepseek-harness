@@ -1,0 +1,36 @@
+# w4-b2 heal run salesPlanning @ 2026-09-28T15:31:48.274Z
+form mps_plans/create[17twv8]
+  +FormSubmitAction (was missing — F-10' negative channel)
+  fieldProps +2 (code:placeholder, doc_status:options)
+  layout twoCol [基本信息×2 | 财务与备注×3]
+  assignRules +1 (doc_status=draft)
+form mps_plans/edit[52nsgh]
+  required +1 (code)
+  fieldProps +1 (code:placeholder)
+  layout twoCol [基本信息×1 | 财务与备注×3]
+form mps_plan_items/create[85su0i]
+  +FormSubmitAction (was missing — F-10' negative channel)
+  fieldProps +1 (forecast_qty:placeholder)
+  layout twoCol [交易对手与交付×1 | 财务与备注×4]
+form so_orders/edit[dui5ip]
+  required +2 (need_date,code)
+  fieldProps +2 (code:placeholder, amount:placeholder)
+  layout twoCol [基本信息×3 | 财务与备注×2]
+form mrp_confirm_intents/create[hnnh4o]
+  +FormSubmitAction (was missing — F-10' negative channel)
+form so_orders/create[jjnsbu]
+  +FormSubmitAction (was missing — F-10' negative channel)
+  required +1 (need_date)
+  fieldProps +3 (code:placeholder, amount:placeholder, doc_status:options)
+  layout twoCol [基本信息×3 | 交易对手与交付×1 | 财务与备注×4]
+  assignRules +2 (need_date={{ctx.date.preset.today}}, doc_status=draft)
+form so_order_lines/create[kfpliz]
+  +FormSubmitAction (was missing — F-10' negative channel)
+  fieldProps +2 (qty:placeholder, unit_price:placeholder)
+  layout twoCol [交易对手与交付×2 | 财务与备注×2]
+  assignRules +1 (qty=0)
+form so_orders/edit[q913cb]
+  required +2 (need_date,code)
+  fieldProps +2 (code:placeholder, amount:placeholder)
+  layout twoCol [基本信息×3 | 财务与备注×2]
+counts: {"layoutWritten":7,"itemProps":6,"fieldProps":13,"dividers":15,"assignRules":3,"submitActions":5,"editActions":0,"deleteActions":0}

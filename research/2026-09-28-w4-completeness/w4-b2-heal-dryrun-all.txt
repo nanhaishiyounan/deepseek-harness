@@ -1,0 +1,289 @@
+# w4-b2 heal dry-run all @ 2026-09-28T13:59:40.484Z
+form hub_hr_employees/create[09bvmy]
+  required +5 (name,employee_no,title,phone,status)
+  fieldProps +3 (employee_no:placeholder, phone:placeholder, status:options)
+form wms_receipts/create[0np12o]
+  required +3 (supplier,product,qty)
+  fieldProps +5 (receipt_no:placeholder, source_no:placeholder, lot_no:placeholder, qty:placeholder, status:options)
+form mfg_completions/create[1053ql]
+  required +1 (qty)
+  fieldProps +4 (code:placeholder, qty:placeholder, lot_no:placeholder, oqc_status:options)
+form mps_plans/create[17twv8]
+  fieldProps +4 (code:placeholder, period_from:placeholder, period_to:placeholder, doc_status:options)
+form srm_capas/create[1m0f35]
+  required +2 (supplier,due_date)
+  fieldProps +2 (status:options, due_date:placeholder)
+form hub_pj_tasks/create[1oiw3j]
+  required +1 (project)
+  fieldProps +5 (status:options, priority:options, due_at:placeholder, plan_start:placeholder, plan_end:placeholder)
+form mfg_material_returns/create[2yq5jv]
+  fieldProps +3 (code:placeholder, return_date:placeholder, qty:placeholder)
+form wms_reorder_suggestions/create[395u7x]
+  fieldProps +3 (suggest_qty:placeholder, status:options, suggested_at:placeholder)
+form crm_customers/create[3q53gu]
+  required +5 (name,type,industry,country,level)
+  fieldProps +1 (status:options)
+form pur_invoices/create[4d0fd0]
+  required +1 (invoice_no)
+  fieldProps +6 (code:placeholder, invoice_no:placeholder, invoice_amount:placeholder, qty_billed:placeholder, billed_at:placeholder, match_result:options)
+form qm_inspections/create[4mbay3]
+  required +1 (supplier)
+  fieldProps +4 (code:placeholder, ref_no:placeholder, lot_no:placeholder, lot_qty:placeholder)
+form mps_plans/edit[52nsgh]
+  required +1 (code)
+  fieldProps +3 (period_from:placeholder, period_to:placeholder, code:placeholder)
+form pur_order_lines/create[5rkjdz]
+  required +1 (qty)
+  fieldProps +3 (qty:placeholder, unit_price:placeholder, qty_received:placeholder)
+form wms_stock/create[5w2j4i]
+  required +2 (product,bin)
+  fieldProps +4 (qty_on_hand:placeholder, qty_allocated:placeholder, qty_locked:placeholder, qty_available:placeholder)
+form hub_as_vendors/create[61ap6a]
+  required +2 (contact,category)
+  fieldProps +1 (status:options)
+form crm_leads/create[7w13qv]
+  required +1 (name)
+  fieldProps +2 (stage:options, expected_amount:placeholder)
+form pur_quotes/create[81t3ox]
+  required +1 (qty)
+  fieldProps +4 (qty:placeholder, unit_price:placeholder, valid_until:placeholder, status:options)
+form mps_plan_items/create[85su0i]
+  fieldProps +1 (forecast_qty:placeholder)
+form srm_audit_records/create[8riln3]
+  required +1 (supplier)
+  fieldProps +2 (audit_date:placeholder, total_score:placeholder)
+form hub_as_maintenance/create[8ve7wb]
+  required +1 (vendor)
+  fieldProps +4 (type:options, scheduled_at:placeholder, cost:placeholder, status:options)
+form mfg_boms/create[a48so0]
+  fieldProps +2 (code:placeholder, bom_status:options)
+form crm_invoices/create[an3g1g]
+  required +1 (customer)
+  fieldProps +3 (invoice_no:placeholder, amount:placeholder, issued_at:placeholder)
+form hub_pj_projects/create[aodc3y]
+  fieldProps +4 (status:options, planned_end_date:placeholder, start_date:placeholder, due_date:placeholder)
+form wms_bins/create[aq29l1]
+  fieldProps +1 (code:placeholder)
+form srm_suppliers/create[brxmsb]
+  required +7 (code,uscc,category,source,contact,phone,region)
+  fieldProps +4 (code:placeholder, lifecycle_status:options, phone:placeholder, admitted_at:placeholder)
+form srm_score_cards/create[bzi6b6]
+  fieldProps +2 (score_price:placeholder, total_score:placeholder)
+form hub_md_product_categories/create[c7w5a7]
+  required +1 (code)
+  fieldProps +1 (code:placeholder)
+form crm_payments/create[cf4elm]
+  required +1 (customer)
+  fieldProps +3 (amount:placeholder, paid_at:placeholder, status:options)
+form mfg_work_centers/create[cygp8e]
+  fieldProps +3 (code:placeholder, cost_per_hour:placeholder, status:options)
+form pur_rfqs/create[d1xafv]
+  fieldProps +3 (code:placeholder, deadline:placeholder, doc_status:options)
+form so_orders/edit[dui5ip]
+  required +2 (need_date,code)
+  fieldProps +4 (need_date:placeholder, shipped_at:placeholder, code:placeholder, amount:placeholder)
+form crm_contacts/create[en6fa4]
+  required +1 (phone)
+  fieldProps +3 (email:placeholder, phone:placeholder, status:options)
+form wms_lots/create[eomkcb]
+  fieldProps +6 (lot_no:placeholder, production_date:placeholder, expiry_date:placeholder, removal_date:placeholder, alert_date:placeholder, status:options)
+form hub_pj_tasks/create[epiexf]
+  required +1 (project)
+  fieldProps +3 (status:options, priority:options, due_at:placeholder)
+form hub_md_ticket_categories/create[esio11]
+  required +1 (code)
+  fieldProps +1 (code:placeholder)
+form hub_kb_articles/create[ft6zyn]
+  required +1 (category)
+form mfg_boms/edit[g2th54]
+  required +1 (code)
+  fieldProps +1 (code:placeholder)
+form wms_reservations/create[gfive1]
+  required +2 (bin,qty)
+  fieldProps +3 (code:placeholder, qty:placeholder, status:options)
+form srm_suppliers/create[gqmoad]
+  required +7 (code,uscc,category,source,contact,phone,region)
+  fieldProps +4 (code:placeholder, lifecycle_status:options, phone:placeholder, admitted_at:placeholder)
+form crm_customers/create[gskig0]
+  required +4 (type,industry,country,level)
+  fieldProps +1 (status:options)
+form wfl_approval_records/create[hfs210]
+  fieldProps +2 (action:options, source:options)
+form hub_hr_departments/create[hu3tdz]
+  required +1 (code)
+  fieldProps +1 (code:placeholder)
+form wms_shipments/edit[i5gygr]
+  required +2 (shipment_no,qty)
+  fieldProps +2 (shipment_no:placeholder, qty:placeholder)
+form pur_rfqs/edit[ixhbr2]
+  required +1 (code)
+  fieldProps +2 (deadline:placeholder, code:placeholder)
+form srm_score_cards/create[j4194l]
+  required +1 (supplier)
+  fieldProps +2 (score_price:placeholder, total_score:placeholder)
+form mfg_material_issues/edit[jcq1cw]
+  required +1 (code)
+  fieldProps +3 (issue_date:placeholder, qty:placeholder, code:placeholder)
+form crm_products/create[jen8ne]
+  required +1 (category)
+  fieldProps +1 (base_price:placeholder)
+form so_orders/create[jjnsbu]
+  required +1 (need_date)
+  fieldProps +4 (code:placeholder, need_date:placeholder, amount:placeholder, doc_status:options)
+form hub_pj_milestones/create[ju1t6h]
+  fieldProps +2 (due_at:placeholder, status:options)
+form so_order_lines/create[kfpliz]
+  fieldProps +2 (qty:placeholder, unit_price:placeholder)
+form wfl_flow_configs/edit[khosql]
+  required +1 (title)
+form pur_rfq_suppliers/create[kmn1k0]
+  fieldProps +1 (sent_at:placeholder)
+form hub_po_suppliers/create[knj3kr]
+  fieldProps +2 (email:placeholder, status:options)
+form wms_receipts/edit[koanv2]
+  required +3 (qty,receipt_no,received_at)
+  fieldProps +5 (qty:placeholder, receipt_no:placeholder, received_at:placeholder, lot_no:placeholder, source_no:placeholder)
+form crm_payments/create[ktznhh]
+  required +1 (customer)
+  fieldProps +3 (amount:placeholder, paid_at:placeholder, status:options)
+form wms_counts/edit[m69s30]
+  required +2 (count_no,biz_date)
+  fieldProps +4 (count_no:placeholder, snapshot_qty:placeholder, counted_qty:placeholder, biz_date:placeholder)
+form mfg_material_issues/create[m7hgbs]
+  fieldProps +3 (code:placeholder, issue_date:placeholder, qty:placeholder)
+form wms_transfers/create[mi0h0h]
+  required +2 (product,qty)
+  fieldProps +3 (transfer_no:placeholder, qty:placeholder, status:options)
+form hub_md_customer_categories/create[mouxq6]
+  required +1 (code)
+  fieldProps +1 (code:placeholder)
+form hub_tk_tickets/create[n0p1ob]
+  required +1 (customer)
+  fieldProps +3 (category:options, status:options, planned_resolve_at:placeholder)
+form mfg_orders/edit[nyda2d]
+  required +4 (code,need_date,qty,std_cost)
+  fieldProps +14 (code:placeholder, estimated_cost:placeholder, driver_so_code:placeholder, qty_transferred:placeholder, need_date:placeholder, actual_cost:placeholder, planned_end:placeholder, released_at:placeholder, qty:placeholder, cost_variance:placeholder, qty_consumed:placeholder, std_cost:placeholder, planned_start:placeholder, approved_at:placeholder)
+form crm_deals/create[og3b30]
+  required +1 (name)
+  fieldProps +2 (amount:placeholder, status:options)
+form mfg_bom_lines/create[ooa5e6]
+  fieldProps +1 (qty_per_unit:placeholder)
+form pur_request_lines/create[opod1m]
+  required +2 (qty,uom)
+  fieldProps +2 (qty:placeholder, est_price:placeholder)
+form wms_movements/create[oucd3m]
+  required +2 (product,qty)
+  fieldProps +3 (move_type:options, doc_no:placeholder, qty:placeholder)
+form hub_pj_tasks/create[pg7bv9]
+  required +1 (project)
+  fieldProps +5 (status:options, priority:options, due_at:placeholder, plan_start:placeholder, plan_end:placeholder)
+form srm_suppliers/edit[poi755]
+  required +8 (region,source,name,contact,uscc,phone,category,code)
+  fieldProps +3 (admitted_at:placeholder, phone:placeholder, code:placeholder)
+form srm_suppliers/edit[pp1aao]
+  required +8 (region,source,name,contact,uscc,phone,category,code)
+  fieldProps +3 (admitted_at:placeholder, phone:placeholder, code:placeholder)
+form hub_hr_leave_requests/create[prnj58]
+  fieldProps +3 (start_at:placeholder, end_at:placeholder, status:options)
+form so_orders/edit[q913cb]
+  required +2 (need_date,code)
+  fieldProps +4 (need_date:placeholder, shipped_at:placeholder, code:placeholder, amount:placeholder)
+form hub_md_asset_categories/create[qwhxud]
+  required +1 (code)
+  fieldProps +1 (code:placeholder)
+form wms_shipments/create[r2g2yo]
+  required +2 (product,qty)
+  fieldProps +3 (shipment_no:placeholder, qty:placeholder, status:options)
+form hub_inv_products/create[rl1k5g]
+  required +1 (name)
+  fieldProps +1 (sku:placeholder)
+form qm_inspections/edit[s4tqwd]
+  required +1 (code)
+  fieldProps +7 (ref_no:placeholder, aql_code:placeholder, code:placeholder, lot_qty:placeholder, inspected_at:placeholder, lot_no:placeholder, sample_qty:placeholder)
+form pur_payments/create[sxfwd2]
+  fieldProps +4 (code:placeholder, amount:placeholder, pay_date:placeholder, doc_status:options)
+form qm_aql_plans/create[uabrqj]
+  fieldProps +1 (code:placeholder)
+form pur_orders/edit[upnbe1]
+  required +2 (need_date,code)
+  fieldProps +4 (need_date:placeholder, amount:placeholder, expected_date:placeholder, code:placeholder)
+form pur_requests/create[uq204v]
+  required +1 (need_date)
+  fieldProps +4 (code:placeholder, need_date:placeholder, total_est:placeholder, doc_status:options)
+form wms_monthly_balances/create[usjhb0]
+  fieldProps +4 (opening_qty:placeholder, in_qty:placeholder, out_qty:placeholder, bal_qty:placeholder)
+form hub_pj_tasks/create[uv4209]
+  required +1 (project)
+  fieldProps +5 (status:options, priority:options, due_at:placeholder, plan_start:placeholder, plan_end:placeholder)
+form wms_zones/create[v1cvhs]
+  fieldProps +1 (code:placeholder)
+form pur_requests/edit[v54x5u]
+  required +2 (need_date,code)
+  fieldProps +4 (total_est:placeholder, need_date:placeholder, driver_so_code:placeholder, code:placeholder)
+form mfg_job_reports/create[wx3j8s]
+  fieldProps +5 (code:placeholder, report_date:placeholder, qty_good:placeholder, qty_scrap:placeholder, qc_status:options)
+form hub_tk_tickets/create[wx7qxj]
+  required +2 (title,customer)
+  fieldProps +1 (status:options)
+form srm_score_cards/create[x31wcf]
+  required +1 (supplier)
+  fieldProps +2 (score_price:placeholder, total_score:placeholder)
+form mfg_holidays/create[x9y0nw]
+  required +1 (name)
+  fieldProps +1 (date:placeholder)
+form qm_nc_dispositions/create[xiqhq0]
+  fieldProps +3 (code:placeholder, doc_status:options, status:options)
+form mfg_orders/create[xjub6h]
+  required +2 (need_date,std_cost)
+  fieldProps +7 (code:placeholder, qty:placeholder, need_date:placeholder, std_cost:placeholder, estimated_cost:placeholder, doc_status:options, reservation_state:options)
+form hub_as_assets/create[y7p33m]
+  required +2 (name,category)
+  fieldProps +1 (status:options)
+form crm_quotes/create[y80aro]
+  required +1 (quote_no)
+  fieldProps +3 (quote_no:placeholder, total_amount:placeholder, status:options)
+form pur_orders/create[yegyih]
+  required +1 (need_date)
+  fieldProps +4 (code:placeholder, amount:placeholder, need_date:placeholder, doc_status:options)
+form mfg_orders/edit[yn5xe6]
+  required +4 (code,need_date,qty,std_cost)
+  fieldProps +14 (code:placeholder, estimated_cost:placeholder, driver_so_code:placeholder, qty_transferred:placeholder, need_date:placeholder, actual_cost:placeholder, planned_end:placeholder, released_at:placeholder, qty:placeholder, cost_variance:placeholder, qty_consumed:placeholder, std_cost:placeholder, planned_start:placeholder, approved_at:placeholder)
+form srm_certificates/create[yzxi06]
+  required +1 (supplier)
+  fieldProps +3 (cert_no:placeholder, issued_at:placeholder, expires_at:placeholder)
+form wms_counts/create[ze2j6g]
+  required +3 (zone,bin,product)
+  fieldProps +4 (count_no:placeholder, snapshot_qty:placeholder, counted_qty:placeholder, status:options)
+page /AI 工作台 hub_tk_tickets +Edit(2col,required) +Delete(confirm)
+page CRM 客户/客户 crm_customers +Edit(2col,required) +Delete(confirm)
+page CRM 客户/销售线索 crm_leads +Edit(2col,required) +Delete(confirm)
+page CRM 客户/联系人 crm_contacts +Edit(2col,required)
+page 销售流程/订单 crm_deals +Edit(2col,required) +Delete(confirm)
+page 销售流程/报价单 crm_quotes +Edit(2col,required) +Delete(confirm)
+page 工单中心/工单 hub_tk_tickets +Edit(2col,required) +Delete(confirm)
+page 资产管理/资产台账 hub_as_assets +Edit(2col,required) +Delete(confirm)
+page 人事管理/员工 hub_hr_employees +Edit(2col,required) +Delete(confirm)
+page 项目管理/项目 hub_pj_projects +Edit(2col,required)
+page 项目管理/任务列表 hub_pj_tasks +Edit(2col,required)
+page 项目管理/里程碑 hub_pj_milestones +Edit(2col,required)
+page /工作台 hub_pj_tasks +Edit(2col,required)
+page /工作台 hub_tk_tickets +Edit(2col,required) +Delete(confirm)
+page 工单中心/知识文章 hub_kb_articles +Edit(2col,required)
+page 资产管理/维保记录 hub_as_maintenance +Edit(2col,required)
+page 人事管理/部门 hub_hr_departments +Edit(2col,required) +Delete(confirm)
+page 人事管理/请假审批 hub_hr_leave_requests +Edit(2col,required) +Delete(confirm)
+page 资产管理/供应商 hub_as_vendors +Edit(2col,required) +Delete(confirm)
+page 基础数据/分类维护 hub_md_customer_categories +Edit(2col,required) +Delete(confirm)
+page 基础数据/分类维护 hub_md_asset_categories +Edit(2col,required) +Delete(confirm)
+page 基础数据/分类维护 hub_md_product_categories +Edit(2col,required) +Delete(confirm)
+page 基础数据/分类维护 hub_md_ticket_categories +Edit(2col,required) +Delete(confirm)
+page CRM 客户/产品与服务 crm_products +Edit(2col,required) +Delete(confirm)
+page 销售流程/回款 crm_payments +Edit(2col,required) +Delete(confirm)
+page 销售流程/发票 crm_invoices +Edit(2col,required) +Delete(confirm)
+page CRM 客户/客户仪表盘 crm_customers +Edit(2col,required) +Delete(confirm)
+page 销售流程/销售仪表盘 crm_payments +Edit(2col,required) +Delete(confirm)
+page 仓储管理/盘点计划 hub_inv_products +Edit(2col,required) +Delete(confirm)
+page 经营分析/应收应付对账 crm_payments +Edit(2col,required) +Delete(confirm)
+creates without assignRules (19): qm_inspections{code,insp_type,ref_type,ref_no,product,supplier,lot_no,lot_qty,inspector,note} ; mps_plan_items{plan,product,period,forecast_qty,note} ; mfg_bom_operations{bom,seq,name,workcenter,setup_min,run_min,batch_size,alt_workcenter} ; srm_score_cards{supplier,period,score_quality,score_delivery,score_price,score_service,total_score,rating} ; wfl_approval_records{doc_type,doc_id,action,approver,comment,source} ; mrp_confirm_intents{suggestion_id,action,operator,note} ; hub_hr_departments{name,code,manager,headcount} ; srm_score_cards{supplier,period,score_quality,score_delivery,score_price,score_service,score_compliance,total_score,rating,rating_change} ; crm_products{name,category,pricing_mode,unit,base_price} ; mfg_bom_lines{bom,product,qty_per_unit,scrap_pct,uom} ; departments{title,parentId} ; srm_audit_checklists{template,group,item,weight,is_critical} ; hub_inv_products{sku,name,abc_class,reorder_point,safety_stock,lot_size,lead_time_days,avg_daily_use} ; qm_inspection_readings{inspection,parameter,spec_min,spec_max,criteria,actual,pass} ; qm_aql_plans{lot_band,level,code,n,severity,aql,ac,re} ; wms_monthly_balances{period,product,opening_qty,in_qty,out_qty,bal_qty,note} ; wms_zones{warehouse,code,name,temp_zone,note} ; srm_score_cards{supplier,period,score_quality,score_delivery,score_price,score_service,score_compliance,total_score,rating} ; mfg_holidays{date,name,calendar}
+form kinds: [["create",83],["edit",22]]
+dry-run all: forms=105 layoutTwoCol=84 required+=135 fieldProps+=289 assignRules=64

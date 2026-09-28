@@ -1,0 +1,97 @@
+{
+  "fetchedAt": "2026-09-28T19:46:00.097Z",
+  "base": "http://127.0.0.1:13000",
+  "note": "desktopRoutes type=page title=\"排产甘特\"",
+  "meta": {
+    "endpoint": "http://127.0.0.1:13000/api/uiSchemas:getProperties?resourceIndex=96yet9a0x45",
+    "routeId": 389082590806016
+  },
+  "data": {
+    "type": "void",
+    "properties": {
+      "nk3sn8uj4mo": {
+        "type": "void",
+        "x-component": "Grid",
+        "x-initializer": "page:addBlock",
+        "properties": {
+          "y1xsl83jbu7": {
+            "type": "void",
+            "x-component": "Grid.Row",
+            "properties": {
+              "3wpls9q3zxf": {
+                "type": "void",
+                "x-component": "Grid.Col",
+                "properties": {
+                  "5i95fnzexu": {
+                    "_isJSONSchemaObject": true,
+                    "version": "2.0",
+                    "type": "void",
+                    "x-acl-action": "mfg_order_operations:list",
+                    "x-decorator": "GanttBlockProvider",
+                    "x-decorator-props": {
+                      "collection": "mfg_order_operations",
+                      "dataSource": "main",
+                      "action": "list",
+                      "fieldNames": {
+                        "id": "id",
+                        "start": "planned_date",
+                        "end": "planned_date",
+                        "title": "name",
+                        "range": "day"
+                      },
+                      "params": {
+                        "paginate": false
+                      },
+                      "enableDragToReschedule": false
+                    },
+                    "x-designer": "Gantt.Designer",
+                    "x-component": "CardItem",
+                    "properties": {
+                      "lauhhv0ras": {
+                        "type": "void",
+                        "x-component": "Gantt",
+                        "x-component-props": {
+                          "useProps": "{{ useGanttBlockProps }}"
+                        },
+                        "properties": {
+                          "14z89ih7xsk": {
+                            "type": "void",
+                            "x-component": "ActionBar",
+                            "x-component-props": {
+                              "style": {
+                                "marginBottom": 24
+                              }
+                            },
+                            "x-initializer": "gantt:configureActions",
+                            "x-uid": "ksc08rdc7zg",
+                            "x-async": false,
+                            "x-index": 1
+                          }
+                        },
+                        "x-uid": "it2ggecj166",
+                        "x-async": false,
+                        "x-index": 1
+                      }
+                    },
+                    "x-uid": "tguzrnngaj7",
+                    "x-async": false,
+                    "x-index": 1
+                  }
+                },
+                "x-uid": "dx71m5lcrjo",
+                "x-async": false,
+                "x-index": 1
+              }
+            },
+            "x-uid": "bfm9ivd755m",
+            "x-async": false,
+            "x-index": 1
+          }
+        },
+        "x-uid": "couqnlbzthd",
+        "x-async": false,
+        "x-index": 1
+      }
+    }
+  }
+}

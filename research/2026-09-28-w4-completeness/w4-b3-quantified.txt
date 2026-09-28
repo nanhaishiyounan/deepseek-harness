@@ -1,0 +1,7 @@
+# W4-B3 量化对拍 before→after @ 2026-09-28T17:45:08Z
+统计卡（chart 块页覆盖）: before 8/92 页 → after 58/92 页（pagesChart，.audit-analyze.mjs）
+L1 30/30 页 marker 卡≥3（94 张）· L2 20/20 页 marker 卡≥1（36 张）· 说明块 30 · L3/L4 零新增
+图表标题: before 18/18 空 → after 0 空（全部 ChartBlockModel props.title 非空）
+iframe: 3/3 落 W3_TERMINAL_BASE（默认 13110 零漂移；负例 9999 生效回退可逆）
+回滚演练: 比价表 4 marker 块 destroy → --all 重建 → assert 全绿
+零回归: setup verify 全绿（含 w4b1/w4b2/w4b3）· --assert-ledger 平衡（49组/203流水）· .trees.mjs anomalies=0

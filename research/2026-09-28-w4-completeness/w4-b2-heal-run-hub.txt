@@ -1,0 +1,145 @@
+# w4-b2 heal run hub @ 2026-09-28T15:33:02.081Z
+form hub_hr_employees/create[09bvmy]
+  required +5 (name,employee_no,title,phone,status)
+  fieldProps +3 (employee_no:placeholder, phone:placeholder, status:options)
+  layout twoCol [基本信息×4 | 属性与联系×1]
+  assignRules +1 (status=active)
+form crm_payments/edit[0eomzc]
+  fieldProps +2 (paid_at:placeholder, amount:placeholder)
+  layout twoCol [基本信息×2 | 财务与备注×2]
+form hub_pj_tasks/create[1oiw3j]
+  required +1 (project)
+  fieldProps +2 (status:options, priority:options)
+  layout twoCol [基本信息×4 | 交易对手与交付×2 | 财务与备注×2]
+  assignRules +1 (status=todo)
+form hub_as_vendors/create[61ap6a]
+  required +2 (contact,category)
+  fieldProps +1 (status:options)
+  layout twoCol [基本信息×3 | 属性与联系×1]
+  assignRules +1 (status=active)
+form crm_customers/edit[7rne95]
+  layout twoCol [基本信息×3 | 属性与联系×4]
+form hub_inv_products/edit[87erb4]
+  fieldProps +2 (unit_price:placeholder, sku:placeholder)
+  layout twoCol [基本信息×4 | 属性与联系×13]
+form hub_as_maintenance/create[8ve7wb]
+  required +1 (vendor)
+  fieldProps +3 (type:options, cost:placeholder, status:options)
+  layout twoCol [基本信息×3 | 交易对手与交付×1 | 财务与备注×2]
+  assignRules +1 (status=pending)
+form crm_deals/edit[94bgqe]
+  fieldProps +4 (closed_date:placeholder, expected_close_date:placeholder, amount:placeholder, deadline:placeholder)
+  layout twoCol [基本信息×4 | 财务与备注×4]
+form hub_pj_projects/create[aodc3y]
+  fieldProps +1 (status:options)
+  layout twoCol [基本信息×6 | 属性与联系×4]
+  assignRules +2 (status=active, owner={{ctx.user.id}})
+form hub_md_product_categories/create[c7w5a7]
+  required +1 (code)
+  fieldProps +1 (code:placeholder)
+  assignRules +1 (is_active=true)
+form crm_products/edit[d4210h]
+  fieldProps +3 (unit_price:placeholder, base_price:placeholder, sku:placeholder)
+  layout twoCol [基本信息×2 | 属性与联系×6]
+form hub_pj_tasks/create[epiexf]
+  required +1 (project)
+  fieldProps +2 (status:options, priority:options)
+  layout twoCol [基本信息×4 | 交易对手与交付×2]
+  assignRules +1 (status=todo)
+form hub_md_ticket_categories/create[esio11]
+  required +1 (code)
+  fieldProps +1 (code:placeholder)
+  assignRules +1 (is_active=true)
+form hub_kb_articles/create[ft6zyn]
+  required +1 (category)
+  assignRules +1 (status=draft)
+form wfl_flow_configs/create[g5hp2c]
+  +FormSubmitAction (was missing — F-10' negative channel)
+  assignRules +1 (is_active=true)
+form wfl_approval_records/create[hfs210]
+  fieldProps +2 (action:options, source:options)
+form hub_hr_departments/create[hu3tdz]
+  required +1 (code)
+  fieldProps +1 (code:placeholder)
+  layout twoCol [基本信息×2 | 属性与联系×2]
+form hub_pj_milestones/create[ju1t6h]
+  fieldProps +1 (status:options)
+  layout twoCol [基本信息×3 | 属性与联系×2]
+  assignRules +1 (status=pending)
+form wfl_flow_configs/edit[khosql]
+  required +1 (title)
+form crm_invoices/edit[kyf58k]
+  fieldProps +3 (invoice_no:placeholder, issued_at:placeholder, amount:placeholder)
+  layout twoCol [基本信息×3 | 财务与备注×1]
+form hub_md_customer_categories/create[mouxq6]
+  required +1 (code)
+  fieldProps +1 (code:placeholder)
+  assignRules +1 (is_active=true)
+form crm_quotes/edit[mruipo]
+  fieldProps +5 (quote_no:placeholder, issue_date:placeholder, total:placeholder, total_amount:placeholder, valid_until:placeholder)
+  layout twoCol [基本信息×3 | 财务与备注×8]
+form crm_payments/edit[msxi10]
+  fieldProps +2 (paid_at:placeholder, amount:placeholder)
+  layout twoCol [基本信息×2 | 财务与备注×2]
+form hub_tk_tickets/create[n0p1ob]
+  required +1 (customer)
+  fieldProps +2 (category:options, status:options)
+  layout twoCol [基本信息×5 | 交易对手与交付×2]
+  assignRules +1 (status=new)
+form crm_contacts/edit[ntusf9]
+  fieldProps +2 (phone:placeholder, email:placeholder)
+  layout twoCol [基本信息×2 | 属性与联系×5]
+form departments/create[pbz3tn]
+  +FormSubmitAction (was missing — F-10' negative channel)
+form hub_pj_tasks/create[pg7bv9]
+  required +1 (project)
+  fieldProps +2 (status:options, priority:options)
+  layout twoCol [基本信息×4 | 交易对手与交付×2 | 财务与备注×2]
+  assignRules +1 (status=todo)
+form hub_hr_leave_requests/create[prnj58]
+  fieldProps +1 (status:options)
+  layout twoCol [基本信息×4 | 交易对手与交付×1 | 财务与备注×2]
+  assignRules +1 (status=pending)
+form hub_md_asset_categories/create[qwhxud]
+  required +1 (code)
+  fieldProps +1 (code:placeholder)
+  assignRules +1 (is_active=true)
+form hub_pj_tasks/create[uv4209]
+  required +1 (project)
+  fieldProps +2 (status:options, priority:options)
+  layout twoCol [基本信息×4 | 交易对手与交付×2 | 财务与备注×2]
+  assignRules +1 (status=todo)
+form crm_leads/edit[wruvgy]
+  fieldProps +2 (expected_close_date:placeholder, expected_amount:placeholder)
+  layout twoCol [基本信息×3 | 属性与联系×6]
+form hub_tk_tickets/create[wx7qxj]
+  required +2 (title,customer)
+  fieldProps +1 (status:options)
+  layout twoCol [基本信息×4 | 交易对手与交付×2]
+  assignRules +1 (status=new)
+form crm_customers/edit[xogtzx]
+  layout twoCol [基本信息×3 | 属性与联系×4]
+form hub_as_assets/create[y7p33m]
+  required +2 (name,category)
+  fieldProps +1 (status:options)
+  layout twoCol [基本信息×3 | 属性与联系×2]
+  assignRules +1 (status=in_use)
+page /AI 工作台 hub_tk_tickets +Edit(2col,required) +Delete(confirm)
+page 工单中心/工单 hub_tk_tickets +Edit(2col,required) +Delete(confirm)
+page 资产管理/资产台账 hub_as_assets +Edit(2col,required) +Delete(confirm)
+page 人事管理/员工 hub_hr_employees +Edit(2col,required) +Delete(confirm)
+page 项目管理/项目 hub_pj_projects +Edit(2col,required)
+page 项目管理/任务列表 hub_pj_tasks +Edit(2col,required)
+page 项目管理/里程碑 hub_pj_milestones +Edit(2col,required)
+page /工作台 hub_pj_tasks +Edit(2col,required)
+page /工作台 hub_tk_tickets +Edit(2col,required) +Delete(confirm)
+page 工单中心/知识文章 hub_kb_articles +Edit(2col,required)
+page 资产管理/维保记录 hub_as_maintenance +Edit(2col,required)
+page 人事管理/部门 hub_hr_departments +Edit(2col,required) +Delete(confirm)
+page 人事管理/请假审批 hub_hr_leave_requests +Edit(2col,required) +Delete(confirm)
+page 资产管理/供应商 hub_as_vendors +Edit(2col,required) +Delete(confirm)
+page 基础数据/分类维护 hub_md_customer_categories +Edit(2col,required) +Delete(confirm)
+page 基础数据/分类维护 hub_md_asset_categories +Edit(2col,required) +Delete(confirm)
+page 基础数据/分类维护 hub_md_product_categories +Edit(2col,required) +Delete(confirm)
+page 基础数据/分类维护 hub_md_ticket_categories +Edit(2col,required) +Delete(confirm)
+counts: {"layoutWritten":25,"itemProps":24,"fieldProps":54,"dividers":55,"assignRules":19,"submitActions":2,"editActions":18,"deleteActions":12}

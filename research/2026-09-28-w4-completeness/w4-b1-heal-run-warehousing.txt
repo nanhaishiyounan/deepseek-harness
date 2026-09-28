@@ -1,0 +1,4 @@
+# w4-b1 heal run warehousing @ 2026-09-28T12:23:50.275Z
+page 仓储管理/库存查询
+  rel wms_stock.product -> hub_inv_products.name
+pages=13

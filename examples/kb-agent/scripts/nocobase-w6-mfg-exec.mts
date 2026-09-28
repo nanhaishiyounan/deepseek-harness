@@ -157,7 +157,7 @@ const MO_COLUMNS: ReadonlyArray<{ field: object, enumRewrite?: object }> = [
   { field: { name: 'overissue_ratio', type: 'float', interface: 'number', uiSchema: { type: 'number', 'x-component': 'InputNumber', title: '超领比例(如0.05)', default: 0, 'x-component-props': { min: 0, max: 1, step: 0.01 } } } },
 ]
 
-const MENU_GROUP_TITLE = '生产制造'
+const MENU_GROUP_TITLE = '生产与计划'
 
 // ─── REST helpers ───
 

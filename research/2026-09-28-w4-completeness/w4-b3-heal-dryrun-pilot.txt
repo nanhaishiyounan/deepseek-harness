@@ -1,0 +1,6 @@
+# w4-b3 heal dry-run @ 2026-09-28T16:26:56.739Z
+card "采购订单/待审批" would be created (count(id))
+card "采购订单/本月审批通过" would be created (count(id))
+card "采购订单/金额合计" would be created (sum(amount))
+card "采购订单/订单总数" would be created (count(id))
+hint "采购订单" would be created (sortIndex -5)

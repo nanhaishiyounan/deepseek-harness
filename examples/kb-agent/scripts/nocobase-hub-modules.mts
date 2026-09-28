@@ -375,7 +375,7 @@ const COLLECTIONS: ReadonlyArray<{ name: string; title: string; fields: object[]
 const MENU: ReadonlyArray<{ group: string | null; groupIcon?: string; pages: ReadonlyArray<{ title: string; icon: string }> }> = [
   { group: null, pages: [{ title: '工作台', icon: 'DashboardOutlined' }] },
   {
-    group: '项目管理', groupIcon: 'ProjectOutlined',
+    group: '项目与协同', groupIcon: 'ProjectOutlined',
     pages: [
       { title: '项目', icon: 'ContainerOutlined' },
       { title: '任务看板', icon: 'AppstoreOutlined' },
@@ -386,15 +386,15 @@ const MENU: ReadonlyArray<{ group: string | null; groupIcon?: string; pages: Rea
     ],
   },
   {
-    group: '工单中心', groupIcon: 'CustomerServiceOutlined',
+    group: '项目与协同', groupIcon: 'ProjectOutlined',
     pages: [{ title: '工单', icon: 'MessageOutlined' }, { title: '知识文章', icon: 'ReadOutlined' }],
   },
   {
     group: '资产管理', groupIcon: 'DatabaseOutlined',
-    pages: [{ title: '资产台账', icon: 'HddOutlined' }, { title: '供应商', icon: 'ShopOutlined' }, { title: '维保记录', icon: 'ToolOutlined' }],
+    pages: [{ title: '资产台账', icon: 'HddOutlined' }, { title: '维保服务商', icon: 'ShopOutlined' }, { title: '维保记录', icon: 'ToolOutlined' }],
   },
   {
-    group: '人事管理', groupIcon: 'TeamOutlined',
+    group: '组织与系统', groupIcon: 'UsergroupAddOutlined',
     pages: [{ title: '员工', icon: 'IdcardOutlined' }, { title: '部门', icon: 'ApartmentOutlined' }, { title: '请假审批', icon: 'FileProtectOutlined' }],
   },
   {
@@ -927,7 +927,7 @@ const PAGE_BLOCKS: ReadonlyArray<{ page: string; blocks: ReadonlyArray<BlockSpec
   { page: '工单', blocks: [{ kind: 'table', collection: 'hub_tk_tickets', columns: ['title', 'priority', 'customer', 'category', 'assignee', 'status', 'planned_resolve_at', 'is_overdue'] }] },
   { page: '知识文章', blocks: [{ kind: 'table', collection: 'hub_kb_articles', columns: ['title', 'category', 'status'] }] },
   { page: '资产台账', blocks: [{ kind: 'table', collection: 'hub_as_assets', columns: ['name', 'no', 'category', 'brand', 'status', 'vendor', 'purchase_date', 'warranty_until'] }] },
-  { page: '供应商', blocks: [{ kind: 'table', collection: 'hub_as_vendors', columns: ['name', 'contact', 'category', 'status'] }] },
+  { page: '维保服务商', blocks: [{ kind: 'table', collection: 'hub_as_vendors', columns: ['name', 'contact', 'category', 'status'] }] },
   { page: '维保记录', blocks: [{ kind: 'table', collection: 'hub_as_maintenance', columns: ['asset', 'type', 'scheduled_at', 'vendor', 'cost', 'status'] }] },
   { page: '员工', blocks: [{ kind: 'table', collection: 'hub_hr_employees', columns: ['name', 'employee_no', 'department', 'title', 'phone', 'status'] }] },
   { page: '部门', blocks: [{ kind: 'table', collection: 'hub_hr_departments', columns: ['name', 'code', 'manager', 'headcount'] }] },

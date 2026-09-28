@@ -1,0 +1,20 @@
+# W4-B3 iframe env 负例 @ 2026-09-28T16:57:44Z
+== step1: W3_TERMINAL_BASE=http://127.0.0.1:9999 重跑 --iframe ==
+# w4-b3 heal run @ 2026-09-28T16:57:46.750Z
+iframe "车间终端" rebased http://127.0.0.1:13110/terminals/report.html?operator=linjingyi -> http://127.0.0.1:9999/terminals/report.html?operator=linjingyi
+iframe "质检工作台" rebased http://127.0.0.1:13110/terminals/inspect.html?operator=quality_lead -> http://127.0.0.1:9999/terminals/inspect.html?operator=quality_lead
+iframe "收货终端" rebased http://127.0.0.1:13110/terminals/receive.html?operator=b4guard -> http://127.0.0.1:9999/terminals/receive.html?operator=b4guard
+terminal base = http://127.0.0.1:9999 (W3_TERMINAL_BASE)
+== step2: 读回 url（期望 :9999） ==
+  iframe ge8mglii url=http://127.0.0.1:9999/terminals/report.html?operator=linjingyi
+  iframe h85d1kg9 url=http://127.0.0.1:9999/terminals/inspect.html?operator=quality_lead
+  iframe vfbj3v2y url=http://127.0.0.1:9999/terminals/receive.html?operator=b4guard
+== step3: 不设 env 重跑 --iframe（期望回默认 :13110 零漂移） ==
+# w4-b3 heal run @ 2026-09-28T16:57:50.527Z
+iframe "车间终端" rebased http://127.0.0.1:9999/terminals/report.html?operator=linjingyi -> http://127.0.0.1:13110/terminals/report.html?operator=linjingyi
+iframe "质检工作台" rebased http://127.0.0.1:9999/terminals/inspect.html?operator=quality_lead -> http://127.0.0.1:13110/terminals/inspect.html?operator=quality_lead
+iframe "收货终端" rebased http://127.0.0.1:9999/terminals/receive.html?operator=b4guard -> http://127.0.0.1:13110/terminals/receive.html?operator=b4guard
+terminal base = http://127.0.0.1:13110 (default; set W3_TERMINAL_BASE to override)
+  iframe ge8mglii url=http://127.0.0.1:13110/terminals/report.html?operator=linjingyi
+  iframe h85d1kg9 url=http://127.0.0.1:13110/terminals/inspect.html?operator=quality_lead
+  iframe vfbj3v2y url=http://127.0.0.1:13110/terminals/receive.html?operator=b4guard

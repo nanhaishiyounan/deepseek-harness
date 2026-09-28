@@ -1,0 +1,39 @@
+# w4-b1 heal run crm @ 2026-09-28T11:44:22.752Z
+page CRM 客户/客户
+  sort crm_customers <- ["name"]
+  filterForm crm_customers uid=5rpqtyf0dnp fields=[status,name]
+page CRM 客户/销售线索
+  sort crm_leads <- ["name"]
+  recolor crm_leads.stage
+  filterForm crm_leads uid=4tq1agaiih6 fields=[status,name]
+page CRM 客户/联系人
+  sort crm_contacts <- ["name"]
+  filterForm crm_contacts uid=ch3xrq9zwna fields=[status,name]
+page 销售流程/订单
+  sort crm_deals <- ["-id"]
+  filterForm crm_deals uid=6kgufduk743 fields=[status,customer]
+page 销售流程/报价单
+  sort crm_quotes <- ["-id"]
+  filterForm crm_quotes uid=rb0mdwrxl1x fields=[status,customer]
+page CRM 客户/产品与服务
+  sort crm_products <- ["name"]
+  filterForm crm_products uid=t4j0hgiuhnl fields=[name]
+page 销售流程/回款
+  sort crm_payments <- ["-id"]
+  rel crm_payments.customer -> crm_customers.name
+  rel crm_payments.deal -> crm_deals.name
+  filterForm crm_payments uid=9jh5vvyyyjd fields=[status,customer]
+page 销售流程/发票
+  sort crm_invoices <- ["-id"]
+  rel crm_invoices.customer -> crm_customers.name
+  rel crm_invoices.deal -> crm_deals.name
+  filterForm crm_invoices uid=uvsqjp4exuc fields=[status,customer]
+page CRM 客户/客户仪表盘
+  sort crm_customers <- ["name"]
+  filterForm crm_customers uid=ra8hpwcnl7a fields=[status,name]
+page 销售流程/销售仪表盘
+  sort crm_payments <- ["-id"]
+  rel crm_payments.customer -> crm_customers.name
+  rel crm_payments.deal -> crm_deals.name
+  filterForm crm_payments uid=2l4rtm0wa46 fields=[status,customer]
+pages=10

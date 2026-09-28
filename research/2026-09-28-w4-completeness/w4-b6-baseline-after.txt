@@ -1,0 +1,149 @@
+wrote audit-pages.json
+wrote audit-forms.json
+wrote audit-summary.json
+--- summary ---
+{
+  "pages": 90,
+  "pagesWithTable": 76,
+  "totalTableBlocks": 98,
+  "tablesNoFilter_pages": 0,
+  "tablesNoFilter_blocks": 14,
+  "pagesNoSort": 0,
+  "pagesKanban": 7,
+  "pagesCalendar": 3,
+  "pagesChart": 58,
+  "pagesJS": 4,
+  "pagesIframe": 3,
+  "pagesAIChat": 1,
+  "pagesNoAddNew": 20,
+  "pagesNoEdit": 42,
+  "pagesNoDelete": 59,
+  "moneyCols": 144,
+  "moneyNoFmt": 0,
+  "dateCols": 63,
+  "dateNoFmt": 0,
+  "relNoTitle": 0,
+  "statusBareText": 0,
+  "statusNoColor": 0,
+  "filterFormBlocks": 36,
+  "relCols": 99,
+  "pagesWithRelCol": 50,
+  "pagesNoStats": 17,
+  "grids": 136,
+  "gridsSingleCol": 21,
+  "formFields": 952,
+  "formRequired": 308,
+  "placeholder": 299,
+  "defaultValue": 0,
+  "fieldEmptyProps": 482,
+  "duplicateCollectionGroups": [
+    {
+      "collection": "kpi_snapshots",
+      "pages": 4
+    },
+    {
+      "collection": "crm_payments",
+      "pages": 3
+    },
+    {
+      "collection": "srm_score_cards",
+      "pages": 3
+    },
+    {
+      "collection": "crm_customers",
+      "pages": 2
+    },
+    {
+      "collection": "hub_tk_tickets",
+      "pages": 2
+    },
+    {
+      "collection": "mfg_order_operations",
+      "pages": 2
+    },
+    {
+      "collection": "mfg_orders",
+      "pages": 2
+    },
+    {
+      "collection": "pur_invoices",
+      "pages": 2
+    },
+    {
+      "collection": "pur_payments",
+      "pages": 2
+    },
+    {
+      "collection": "pur_quotes",
+      "pages": 2
+    },
+    {
+      "collection": "so_orders",
+      "pages": 2
+    },
+    {
+      "collection": "srm_suppliers",
+      "pages": 2
+    },
+    {
+      "collection": "wms_lots",
+      "pages": 2
+    }
+  ],
+  "inputs": {
+    "fetchedAt": {
+      "desktopRoutes": "2026-09-28T19:45:56.466Z",
+      "flowModels": "2026-09-28T19:45:59.933Z",
+      "collectionFields": "2026-09-28T19:46:00.516Z"
+    },
+    "analyzedAt": "2026-09-28T19:46:00.946Z",
+    "sha256": {
+      "api-desktopRoutes.json": "ec66fcbea397705508a56e9108bc78a715a1c27204d96da9fe41ad6d8803fd62",
+      "api-flowModels-flat.json": "bd1cca69ee1fa7f54f78d281230b81eca22738498dca3c2bc28b27401dbdd429",
+      "api-collection-fields.json": "c202a50c5c37ec1d3538929402b3c2e74ed71fc60c7f4e835e5ac3ee57ef8379"
+    },
+    "rows": {
+      "desktopRoutes": 198,
+      "flowModels": 8520,
+      "collectionFields": 1007,
+      "routeTypeCounts": {
+        "group": 12,
+        "page": 3,
+        "tabs": 93,
+        "flowPage": 90
+      },
+      "relationCollections": 81,
+      "relationFields": 171
+    }
+  }
+}
+
+
+
+
+## B6 before/after 对拍全表（2026-09-28T19:56:30.225Z）
+
+| 基线项 | before | after | 目标 | 判定 | 备注 |
+| --- | --- | --- | --- | --- | --- |
+| 表单单列堆砌（L1/L2） | 105/105 | 21/136 | L1/L2 0 单列（L3/小表单豁免） | PASS | 豁免交叉验证见下 |
+| 表单必填率 | 17.7%（128/725） | 32.4%（308/952） | ≥260 字段 | PASS |  |
+| placeholder 覆盖 | 0 | 299 | 格式类字段全覆盖（B2 断言 floor） | PASS | w4b2 断言固化 |
+| 默认值（assignRules 表单级） | 0 | 61/136 | 可默认 create 表单 100%（B2 断言） | PASS | D4：默认值走 assignRules，字段 props 口径恒 0 |
+| 表格无筛选（页） | 37/78 | 0 | 0 | PASS |  |
+| 无默认排序（页） | 78/78 | 0 | 0 | PASS |  |
+| 金额列无格式化 | 150/150 | 0/144 | 0 | PASS |  |
+| 日期列无格式化 | — | 0/63 | 0 | PASS |  |
+| 关联列空/裸 ID | 100 列/51 页 | 0/99 列（50 页） | 0 | PASS |  |
+| 状态列裸 Text | 14+2 列 | 0 | 0 | PASS |  |
+| 状态枚举无彩标 | — | 0 | 0 | PASS |  |
+| 单列豁免台账（config/小表单） | — | 21/21 合规 | 全部命中豁免 | PASS | CONFIG_DATA/_categories/＜4字段 |
+| 统计卡分级覆盖 | 67/78 无卡 | L1/L2 缺卡 0；无卡页 17 全为 L3/L4=true | L1/L2 全覆盖 | PASS | AI 工作台[L4]、分类维护[L3]、审核检查表[L3]、移库管理[L3]、库存流水[L3]、预留管理[L3]、补货预警[L3]、盘点计划[L3]、排程明细[L4]、MO 执行视图[L3]、计划工作台[L4]、MRP 快照[L3]、检验读数[L3]、AQL 抽样方案[L3]、季度绩效物化[L3]、主生产计划[L3]、月度收发存[L3] |
+| 图表无标题 | 18/18 | 0/148 | 0 | PASS |  |
+| Edit 覆盖（白名单域） | 75/92 页无 Edit | 无 Edit 42 页，其中白名单域缺口 0 | 白名单域 0 缺口（D5 引擎域只读豁免） | PASS |  |
+| 菜单组数 | 16 组（N1–N8） | 12 组 | 12 | PASS |  |
+| 空组/重复组 | 双采购/双销售等 | 空组 0，重复组名 0 | 0 | PASS |  |
+| 组 icon 空格/重复 | 前导空格+3 重复 | 异常 0 | 0 | PASS |  |
+| 死页 | 1（采购联系人历史） | 复活 0 | 0（CSV 留档在案） | PASS |  |
+| 集合重复页（B4 裁决台账） | 13 组 | 13 组（w4-b4-verdicts.json 台账裁决） | 逐组裁决留档 | PASS | 列表页 vs 看板/报表/引用页是刻意分工，非死重复 |
+
+结论：全部归零/达标（豁免台账在 w4-b6-baseline-after.json）。

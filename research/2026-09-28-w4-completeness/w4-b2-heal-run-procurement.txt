@@ -1,0 +1,57 @@
+# w4-b2 heal run procurement @ 2026-09-28T15:31:19.410Z
+form pur_invoices/create[4d0fd0]
+  +FormSubmitAction (was missing — F-10' negative channel)
+  required +1 (invoice_no)
+  fieldProps +5 (code:placeholder, invoice_no:placeholder, invoice_amount:placeholder, qty_billed:placeholder, match_result:options)
+  layout twoCol [基本信息×3 | 财务与备注×5]
+  assignRules +1 (billed_at={{ctx.date.preset.today}})
+form pur_order_lines/create[5rkjdz]
+  +FormSubmitAction (was missing — F-10' negative channel)
+  required +1 (qty)
+  fieldProps +3 (qty:placeholder, unit_price:placeholder, qty_received:placeholder)
+  layout twoCol [交易对手与交付×2 | 财务与备注×3]
+  assignRules +1 (qty=0)
+form pur_quotes/create[81t3ox]
+  +FormSubmitAction (was missing — F-10' negative channel)
+  required +1 (qty)
+  fieldProps +3 (qty:placeholder, unit_price:placeholder, status:options)
+  layout twoCol [基本信息×1 | 交易对手与交付×3 | 财务与备注×5]
+  assignRules +2 (status=draft, qty=0)
+form pur_rfqs/create[d1xafv]
+  +FormSubmitAction (was missing — F-10' negative channel)
+  fieldProps +2 (code:placeholder, doc_status:options)
+  layout twoCol [基本信息×2 | 财务与备注×2]
+  assignRules +1 (doc_status=draft)
+form pur_rfqs/edit[ixhbr2]
+  required +1 (code)
+  fieldProps +1 (code:placeholder)
+form pur_rfq_suppliers/create[kmn1k0]
+  +FormSubmitAction (was missing — F-10' negative channel)
+  assignRules +1 (sent_at={{ctx.date.preset.today}})
+form hub_po_suppliers/create[knj3kr]
+  fieldProps +2 (email:placeholder, status:options)
+  layout twoCol [基本信息×2 | 属性与联系×3]
+  assignRules +1 (status=active)
+form pur_request_lines/create[opod1m]
+  +FormSubmitAction (was missing — F-10' negative channel)
+  required +2 (qty,uom)
+  fieldProps +2 (qty:placeholder, est_price:placeholder)
+  layout twoCol [交易对手与交付×3 | 财务与备注×2]
+  assignRules +1 (qty=0)
+form pur_payments/create[sxfwd2]
+  +FormSubmitAction (was missing — F-10' negative channel)
+  fieldProps +3 (code:placeholder, amount:placeholder, doc_status:options)
+  layout twoCol [基本信息×3 | 财务与备注×3]
+  assignRules +1 (doc_status=draft)
+form pur_requests/create[uq204v]
+  +FormSubmitAction (was missing — F-10' negative channel)
+  required +1 (need_date)
+  fieldProps +3 (code:placeholder, total_est:placeholder, doc_status:options)
+  layout twoCol [基本信息×3 | 交易对手与交付×1 | 财务与备注×3]
+  assignRules +2 (need_date={{ctx.date.preset.today}}, doc_status=draft)
+form pur_requests/edit[v54x5u]
+  required +2 (need_date,code)
+  fieldProps +3 (total_est:placeholder, driver_so_code:placeholder, code:placeholder)
+  layout twoCol [基本信息×2 | 交易对手与交付×1 | 财务与备注×5]
+page 经营分析/应收应付对账 crm_payments +Edit(2col,required) +Delete(confirm)
+counts: {"layoutWritten":9,"itemProps":9,"fieldProps":27,"dividers":21,"assignRules":9,"submitActions":8,"editActions":1,"deleteActions":1}
