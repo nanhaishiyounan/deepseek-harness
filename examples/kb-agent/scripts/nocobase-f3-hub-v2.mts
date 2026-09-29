@@ -27,6 +27,13 @@
  * n17f3* trees, sweeps orphaned n18ai- buttons, restores recorded rows;
  * truncated trees trigger a full-batch heal).
  *
+ * W5-B0 (BP-20): re-runs must not short-circuit on the W4 end-state —
+ * W4-B5 renamed 供应商 → 维保服务商 (both the route row and the page tree;
+ * the spec title now carries the new name and legacyTitles still resolves
+ * the v1/rollback era), and W4-B4 retired 工作台 + 采购供应商 (flowPage rows
+ * destroyed). A spec with neither a flowPage nor a v1 row under any of its
+ * titles is skipped when W4-B4 retired it, and still fails loud otherwise.
+ *
  * Usage:
  *   node --import tsx/esm examples/kb-agent/scripts/nocobase-f3-hub-v2.mts [--only 供应商]
  *   node --import tsx/esm examples/kb-agent/scripts/nocobase-f3-hub-v2.mts --rollback
@@ -55,8 +62,17 @@ type BlockSpec = {
 
 type V2PageSpec = {
   title: string
+  /** Titles the page may still live under from earlier eras (W4-B5 renamed 供应商 → 维保服务商 after the F3 upgrade). */
+  legacyTitles?: ReadonlyArray<string>
   blocks: BlockSpec[]
 }
+
+/** Every route title one spec may appear under: the current title first, then its legacy titles. */
+const titlesOf = (spec: V2PageSpec): ReadonlyArray<string> =>
+  spec.legacyTitles === undefined ? [spec.title] : [spec.title, ...spec.legacyTitles]
+
+/** Pages W4-B4 retired (工作台 + 采购供应商→采购联系人（历史）) — a re-run skips them instead of failing on the missing v1 row. */
+const RETIRED_BY_W4B4: ReadonlySet<string> = new Set(['工作台', '采购供应商'])
 
 const TASK_STATUS = [
   { value: 'backlog', label: '待规划', color: 'default' }, { value: 'todo', label: '待处理', color: 'blue' },
@@ -196,7 +212,8 @@ const HUB_PAGES: ReadonlyArray<V2PageSpec> = [
     }],
   },
   {
-    title: '供应商',
+    title: '维保服务商',
+    legacyTitles: ['供应商'],
     blocks: [{
       collection: 'hub_as_vendors',
       columns: [
@@ -393,7 +410,7 @@ async function destroyF3Trees(token: string): Promise<void> {
 async function healTruncatedPages(token: string, pages: ReadonlyArray<V2PageSpec>): Promise<boolean> {
   const incomplete: V2PageSpec[] = []
   for (const spec of pages) {
-    const flow = (await listAllRoutes(token)).find(row => row.title === spec.title && row.type === 'flowPage')
+    const flow = (await listAllRoutes(token)).find(row => row.type === 'flowPage' && titlesOf(spec).includes(String(row.title)))
     if (flow !== undefined && !(await v2TreeComplete(token, spec, flow))) incomplete.push(spec)
   }
   if (incomplete.length === 0) return false
@@ -401,11 +418,12 @@ async function healTruncatedPages(token: string, pages: ReadonlyArray<V2PageSpec
   await destroyF3Trees(token)
   const records = loadRecords()
   for (const spec of HUB_PAGES) {
-    await destroyFlowPageRow(token, spec.title)
+    if (RETIRED_BY_W4B4.has(spec.title)) continue
+    for (const title of titlesOf(spec)) await destroyFlowPageRow(token, title)
     const routes = await listAllRoutes(token)
-    const hasV1 = routes.some(row => row.title === spec.title && row.type === 'page')
+    const hasV1 = routes.some(row => row.type === 'page' && titlesOf(spec).includes(String(row.title)))
     if (hasV1) continue
-    const record = records.find(row => row.title === spec.title)
+    const record = records.find(row => titlesOf(spec).includes(row.title))
     if (record === undefined || record.schemaUid === null) {
       throw new Error(`v2 page "${spec.title}" is truncated and no v1 rollback record exists for it; restore from research/f-round-inventory snapshots or re-run the all chain`)
     }
@@ -448,7 +466,7 @@ function formGrid(collection: string, fields: ReadonlyArray<FieldSpec>): Record<
  * the plain F2 shape).
  */
 async function ensureV2HubPage(token: string, spec: V2PageSpec): Promise<void> {
-  const rows = (await listAllRoutes(token)).filter(row => row.title === spec.title)
+  const rows = (await listAllRoutes(token)).filter(row => titlesOf(spec).includes(String(row.title)))
   const flow = rows.find(row => row.type === 'flowPage')
   if (flow !== undefined) {
     if (!(await v2TreeComplete(token, spec, flow))) {
@@ -458,7 +476,13 @@ async function ensureV2HubPage(token: string, spec: V2PageSpec): Promise<void> {
     return
   }
   const v1 = rows.find(row => row.type === 'page')
-  if (v1 === undefined) throw new Error(`page "${spec.title}" not found; run nocobase-hub-modules.mts first`)
+  if (v1 === undefined) {
+    if (RETIRED_BY_W4B4.has(spec.title)) {
+      console.log(`nocobase-f3: page "${spec.title}" retired by W4-B4 and absent — skip (BP-20)`)
+      return
+    }
+    throw new Error(`page "${spec.title}" not found; run nocobase-hub-modules.mts first`)
+  }
   const { parentId, icon, sort, schemaUid } = v1
   const v1Tabs = (await listAllRoutes(token))
     .filter(row => row.parentId === v1.id && row.type === 'tabs')
@@ -620,9 +644,9 @@ async function rollback(token: string): Promise<void> {
   await destroyF3Trees(token)
   let destroyedRoutes = 0
   for (const spec of HUB_PAGES) {
-    const flow = (await listAllRoutes(token)).find(row => row.title === spec.title && row.type === 'flowPage')
+    const flow = (await listAllRoutes(token)).find(row => row.type === 'flowPage' && titlesOf(spec).includes(String(row.title)))
     if (flow === undefined) continue
-    await destroyFlowPageRow(token, spec.title)
+    await destroyFlowPageRow(token, String(flow.title))
     destroyedRoutes += 1
   }
   let restored = 0

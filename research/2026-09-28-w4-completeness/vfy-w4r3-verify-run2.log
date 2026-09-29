@@ -1,0 +1,47 @@
+# member 质检单 page XHR (after) — 34 api calls
+200 GET /api/app:getLang
+200 GET /api/pm:listEnabled
+401 GET /api/auth:check
+200 GET /api/systemSettings:get
+200 POST /api/authenticators:publicList
+200 GET /api/themeConfig:list?sort=id&paginate=false
+200 POST /api/auth:signIn
+200 GET /api/auth:check
+200 POST /api/auth:syncCookies
+200 GET /api/app:getLang?locale=zh-CN
+200 GET /api/pm:listEnabled
+200 GET /api/auth:check
+200 POST /api/auth:syncCookies
+200 GET /api/systemSettings:get
+200 GET /api/themeConfig:list?sort=id&paginate=false
+200 GET /api/blockTemplates:list?filter[configured][$isTruly]=true&filter[type][$ne]=Mobile&paginate=false
+200 GET /api/environmentVariables?paginate=false
+200 GET /api/roles:check
+200 GET /api/desktopRoutes:listAccessible?tree=true&sort=sort&layout=admin-layout-model
+200 GET /api/app:getInfo
+200 GET /api/myInAppMessages:count?filter[status]=unread
+200 POST /api/userWorkflowTasks:listMine?filter=%7B%22type%22:[%22cc%22,%22manual%22]%7D
+200 GET /api/asyncTasks:list?sort=-createdAt
+200 GET /api/uiSchemaTemplates:list?paginate=false
+200 POST /api/dataSources:listEnabled?paginate=false&appends[]=collections
+204 GET /api/flowModels:findOne?uid=admin-layout-model-menu-item-group-388809610821633-menu-item-flowPage-388809612918784
+200 POST /api/collections:listMeta
+204 GET /api/flowModels:findOne?uid=admin-layout-model-menu-item-group-388809610821633
+200 GET /api/flowModels:findOne?parentId=w8qmjvyv8p5j7j&subKey=page
+200 GET /api/flowModels:findOne?parentId=w8qmtaew1jr4xk1r&subKey=grid
+403 POST /api/charts:queryData
+403 POST /api/charts:queryData
+403 POST /api/charts:queryData
+200 GET /api/qm_inspections:list?appends[]=product&appends[]=supplier&page=1&pageSize=20&tree=false
+# rendered table header columns (17): 质检单号 | 检验类型 | 来源类型 | 来源单号 | 物料 | 供应商 | 批量 | 样本量 | AQL档 | n | Ac | Re | 判定结果 | 检验员 | 检验日期 | 判定严格度 | 操作
+# failing requests: 4
+# console errors/warnings (15):
+  warning: [NocoBase] @nocobase/plugin-mobile is deprecated and may be removed in future versions. Please migrate to the new mobile solution.
+  warning: Action 'openView' is already registered. It will be overwritten.
+  error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+  error: J
+  error: Failed to load resource: the server responded with a status of 403 (Forbidden)
+  error: ChartBlockModel init error: No permissions ResponseError: No permissions
+    at n.runAction (http://127.0.0.1:13000/assets/index-6f4405c1.js:3684:53874)
+# sort leg: header sorter widget present=false
+# sort leg: deferred — sorter widget absent under front-end tree cache (0 observed; server tree + source wire verified, see the R1 note)

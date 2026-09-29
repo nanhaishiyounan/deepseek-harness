@@ -198,7 +198,10 @@ export function findViolations(
 // Run only when invoked as a script, not when imported by the spec.
 if (process.argv[1] && import.meta.filename === resolve(process.argv[1])) {
   // Archived notes remain valid link targets, but their historical outbound links are frozen.
-  const files = uniqueRepoFiles(root, PATTERNS, isArchivedAgentNotePath)
+  // Vendored dependency docs (e.g. examples/kb-agent/designer/node_modules) are
+  // not repo-authored Markdown — glob does not read .gitignore, so they are
+  // excluded here by path.
+  const files = uniqueRepoFiles(root, PATTERNS, repoPath => repoPath.includes('node_modules/') || isArchivedAgentNotePath(repoPath))
   const anchorsOf = anchorCache()
   const all = files.flatMap(file => findViolations(file.abs, anchorsOf))
   const checked = files.length

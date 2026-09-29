@@ -1,4 +1,4 @@
-# w4-b5 terminal menu tree @ 2026-09-28T19:36:05.696Z
+# w4-b5 terminal menu tree @ 2026-09-29T06:29:15.747Z
 total routes = 198
 
 [top] AI 工作台 (sort 0 icon RobotOutlined)

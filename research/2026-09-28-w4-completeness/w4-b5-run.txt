@@ -1,4 +1,4 @@
-# w4-b5 menu IA consolidation run @ 2026-09-28T19:36:05.163Z
+# w4-b5 menu IA consolidation run @ 2026-09-29T06:29:15.417Z
 gate: B4 依赖确认 ✓（采购组空/2 退役页不在/应用中心归组）；页面宇宙对账 ✓（93 页含顶级）
 group rename 生产制造→生产与计划: already applied — skip
 group rename 项目管理→项目与协同: already applied — skip
@@ -22,6 +22,8 @@ destroy group「协同办公」: already gone — skip
 destroy group「工单中心」: already gone — skip
 rename 供应商→维保服务商: already applied (route + RootPageModel) — skip
 icon fix 付款申请: already DollarOutlined — skip
-  order 生产与计划[13] 主生产计划: sort 17→13 updated
+  order 项目与协同[1] 任务列表: sort 3→1 updated
+  order 项目与协同[5] 项目: sort 1→5 updated
+top page AI 工作台: sort→0 icon→RobotOutlined updated
 after: total 198→198 | removed [] | retitled [] | parentId moved 0 rows | icon changed 0 rows
 evidence: w4-b5-routes-after.json · w4-b5-menu-tree.txt · w4-b5-role-map.md written

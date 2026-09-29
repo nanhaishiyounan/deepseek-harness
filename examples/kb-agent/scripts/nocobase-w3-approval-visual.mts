@@ -59,6 +59,12 @@ const withW3b4Prefix = (tag: string): string => withN17Prefix('w3b4', tag)
 
 const MENU_GROUP = '项目与协同'
 const PAGE_TITLE = '审批流配置'
+
+/**
+ * The designer embed base (W5-B0): the same env the w3-terminals iframe hosts
+ * rebase on, defaulting to the approval-engine serve origin.
+ */
+const DESIGNER_BASE = process.env.W3_TERMINAL_BASE ?? 'http://127.0.0.1:13110'
 /** The flow whose <details> section renders expanded by default (the journey's主角). */
 const DEFAULT_OPEN_DOC_TYPE = 'pur_orders'
 
@@ -104,21 +110,17 @@ const CONFIG_COLUMNS: ReadonlyArray<FieldSpec> = [
   { name: 'is_active', title: '激活', kind: 'boolean' },
 ]
 
-/** The flow-header edit form (D6 §1: title/is_active/approver_map/extras/config_note; doc_type/state_field stay engine keys). */
+/**
+ * The flow-header edit form (W5-B1: approver_map/extras 的 JSON textarea 编辑
+ * 通道退役——审批人与金额阈值归设计器画布，发布编译单向派生；此处只留
+ * 流程名/激活/留痕)。doc_type/state_field stay engine keys.
+ */
 const CONFIG_EDIT_FIELDS: ReadonlyArray<FieldSpec> = [
   { name: 'title', title: '流程名', kind: 'input' },
   { name: 'is_active', title: '激活（每单据类型仅一条激活行，探针强制互斥）', kind: 'boolean' },
   {
-    name: 'approver_map', title: '审批人映射', kind: 'textarea',
-    description: 'JSON：角色 → 用户名/用户名数组/部门路由 {"type":"department","value":"质检部"}（数组内任一人可审；部门路由按 departmentsUsers 展开全员，W3-B5），如 {"manager":["admin",{"type":"department","value":"质检部"}],"gm":"admin"}——部门名见「组织架构」页',
-  },
-  {
-    name: 'extras', title: '扩展配置', kind: 'textarea',
-    description: 'JSON 键：amount_threshold（两级审批金额阈值）、amount_field（金额列）、invoice_match_tolerance（三方匹配容差）等；改 amount_threshold 后须同步编辑转移条件 amount <= N（一致性探针强制对齐）',
-  },
-  {
     name: 'config_note', title: '配置变更留痕', kind: 'textarea', required: true,
-    description: '必填：写明 操作者/时间/旧值→新值（审计行，如 "operator=admin amount_threshold 200000→150000"）',
+    description: '必填：写明 操作者/时间/旧值→新值（审计行）。审批人映射与金额阈值不再在此手写 JSON——请用页首「审批流设计器」画布编辑并发布（W5-B1 起唯一编辑通道）',
   },
 ]
 
@@ -126,12 +128,10 @@ const CONFIG_CREATE_FIELDS: ReadonlyArray<FieldSpec> = [
   { name: 'doc_type', title: '单据集合（业务表名，如 pur_orders）', kind: 'input', required: true },
   { name: 'title', title: '流程名', kind: 'input', required: true },
   { name: 'state_field', title: '状态字段（缺省 doc_status）', kind: 'input' },
-  { name: 'approver_map', title: '审批人映射', kind: 'textarea', description: CONFIG_EDIT_FIELDS[2].description },
-  { name: 'extras', title: '扩展配置', kind: 'textarea', description: CONFIG_EDIT_FIELDS[3].description },
   { name: 'is_active', title: '激活（新建建议先留空：先跑种子模板补齐状态与转移再激活，探针对激活流全量校验）', kind: 'boolean' },
   {
     name: 'config_note', title: '配置变更留痕', kind: 'textarea', required: true,
-    description: '必填；新建后建议运行 approval-engine.mts 的种子模板（--seed-doc-flow）补齐六状态八转移，再回此页激活',
+    description: '必填；新建后建议运行 approval-engine.mts 的种子模板补齐六状态八转移，审批人/阈值在设计器画布配置后发布（W5-B1 起唯一通道）',
   },
 ]
 
@@ -295,6 +295,40 @@ export const FLOW_MAP_CODE = [
 
 // ─── page assembly ───
 
+// ─── W5-B0: the designer embed (IframeBlockModel onto approval-engine :13110 /designer) ───
+
+/**
+ * Mount the designer embed as the page's leading block — a platform iframe
+ * block (the w3b6 terminal-page precedent; the runjs JSBlock channel strips
+ * <iframe> tags, so mode:url IframeBlockModel is the supported path). The doc
+ * type is switchable inside the designer's own top bar; the embed opens on
+ * the journey's主角 flow.
+ * @param token - root auth token.
+ * @param gridUid - the page grid blocks hang under.
+ */
+async function ensureDesignerEmbed(token: string, gridUid: string): Promise<void> {
+  const rows = await listFlowModels(token, 'w3-approval-visual')
+  const url = `${DESIGNER_BASE}/designer?doc_type=${DEFAULT_OPEN_DOC_TYPE}`
+  const existing = rows.find(row => row.use === 'IframeBlockModel' && String(row.parentId ?? '') === gridUid)
+  if (existing !== undefined) {
+    if (String(existing.props?.url ?? '') === url) {
+      console.log('nocobase-w3-approval-visual: designer-embed IframeBlockModel exists (kept)')
+      return
+    }
+    await dataOf(token, 'POST', '/api/flowModels:save', { uid: existing.uid, props: { url } })
+    console.log('nocobase-w3-approval-visual: designer-embed iframe url refreshed (base or default flow changed)')
+    return
+  }
+  const block = await dataOf(token, 'POST', '/api/flowSurfaces:addBlock', {
+    target: { uid: gridUid },
+    type: 'iframe',
+    settings: { mode: 'url', url, height: 820 },
+  })
+  const blockUid = block?.uid ?? block?.tree?.uid
+  if (typeof blockUid !== 'string') throw new Error(`addBlock returned no uid for the designer embed: ${JSON.stringify(block).slice(0, 200)}`)
+  console.log(`nocobase-w3-approval-visual: designer-embed IframeBlockModel created (uid ${blockUid} → ${url})`)
+}
+
 type TableSpec = {
   heading: string
   collection: string
@@ -304,7 +338,7 @@ type TableSpec = {
 }
 
 const TABLES: ReadonlyArray<TableSpec> = [
-  { heading: '流程配置（流头：阈值/容差/审批人映射；编辑与新建必填 config_note）', collection: 'wfl_flow_configs', columns: CONFIG_COLUMNS, editFields: CONFIG_EDIT_FIELDS, addNew: CONFIG_CREATE_FIELDS },
+  { heading: '流程配置（流头；编辑与新建必填 config_note——审批人/阈值自 W5-B1 起归设计器画布发布派生）', collection: 'wfl_flow_configs', columns: CONFIG_COLUMNS, editFields: CONFIG_EDIT_FIELDS, addNew: CONFIG_CREATE_FIELDS },
   { heading: '状态定义（节点：状态/生效锚点/可编辑角色/生效回写）', collection: 'wfl_flow_states', columns: STATE_COLUMNS, editFields: STATE_COLUMNS },
   { heading: '转移定义（边：当前状态→目标状态，动作/角色/条件表达式）', collection: 'wfl_flow_transitions', columns: TRANSITION_COLUMNS, editFields: TRANSITION_COLUMNS },
   { heading: '卡口配置（未生效上游不得创建下游）', collection: 'wfl_gate_configs', columns: GATE_COLUMNS, editFields: GATE_COLUMNS },
@@ -568,6 +602,60 @@ async function ensureFlowMap(token: string, gridUid: string): Promise<void> {
   const blockUid = block?.uid ?? block?.tree?.uid
   if (typeof blockUid !== 'string') throw new Error(`addBlock returned no uid for the flow map: ${JSON.stringify(block).slice(0, 200)}`)
   console.log(`nocobase-w3-approval-visual: flow-map JSBlock created (uid ${blockUid})`)
+}
+
+// ─── W5-B1: retire the legacy JSON-textarea editing channel ───
+
+/** The config-center form fields the designer now owns (graph → publish compiles them). */
+const DESIGNER_OWNED_FIELDS: ReadonlySet<string> = new Set(['approver_map', 'extras'])
+
+/**
+ * The textarea retirement migration (the B0 note's promised B1 cutover):
+ * destroy every w3b4-prefixed FormItemModel bound to approver_map/extras on
+ * wfl_flow_configs (the row-edit popup and the Add-new form both carried
+ * them), sweep their child field models, and heal each parent FormGridModel's
+ * layout rows so no dangling item uid survives. Idempotent: a page without
+ * the fields reports zero removals.
+ * @param token - a root auth token.
+ */
+async function retireTextareaEditing(token: string): Promise<void> {
+  const models = await listFlowModels(token, 'w3-approval-visual retire')
+  const doomed = models.filter(row => row.use === 'FormItemModel' && String(row.uid ?? '').startsWith('w3b4')
+    && String(row.stepParams?.fieldSettings?.init?.collectionName ?? '') === 'wfl_flow_configs'
+    && DESIGNER_OWNED_FIELDS.has(String(row.stepParams?.fieldSettings?.init?.fieldPath ?? '')))
+  if (doomed.length === 0) {
+    console.log('nocobase-w3-approval-visual: textarea 编辑通道已退役（无 approver_map/extras 表单项残留）')
+    return
+  }
+  const gridUids = new Set(doomed.map(row => String(row.parentId ?? '')))
+  for (const row of doomed) {
+    // The item's child field model (TextareaFieldModel) dies with it — destroy has no cascade.
+    for (const child of models.filter(candidate => String(candidate.parentId ?? '') === String(row.uid))) {
+      await call(token, 'POST', `/api/flowModels:destroy?filterByTk=${encodeURIComponent(String(child.uid))}`).catch(() => undefined)
+    }
+    await call(token, 'POST', `/api/flowModels:destroy?filterByTk=${encodeURIComponent(String(row.uid))}`)
+  }
+  const doomedIds = new Set(doomed.map(row => String(row.uid)))
+  for (const gridUid of gridUids) {
+    const grid = models.find(row => String(row.uid) === gridUid)
+    if (grid === undefined) continue
+    const prune = (rows: unknown): unknown => Array.isArray(rows)
+      ? rows.filter((row): row is Record<string, unknown> => {
+        const cells = Array.isArray((row as Record<string, unknown>)['cells']) ? (row as Record<string, unknown>)['cells'] as Array<Record<string, unknown>> : []
+        return !cells.some(cell => Array.isArray(cell['items']) && (cell['items'] as unknown[]).some(item => doomedIds.has(String(item))))
+      })
+      : rows
+    const layout = grid.props?.layout as Record<string, unknown> | undefined
+    const healed = layout === undefined ? {} : { layout: { ...layout, rows: prune(layout['rows']), rowOrder: prune(layout['rowOrder']) } }
+    const gridSettings = grid.stepParams?.gridSettings as Record<string, unknown> | undefined
+    const healedStepParams = gridSettings === undefined ? {} : { gridSettings: { ...gridSettings, grid: { ...((gridSettings['grid'] as Record<string, unknown>) ?? {}), layout: prune((gridSettings['grid'] as Record<string, unknown>)?.['layout']) } } }
+    await dataOf(token, 'POST', '/api/flowModels:save', {
+      uid: gridUid, use: grid.use, parentId: grid.parentId, subKey: grid.subKey, subType: grid.subType, sortIndex: grid.sortIndex,
+      props: { ...(grid.props ?? {}), ...healed },
+      ...(Object.keys(healedStepParams).length === 0 ? {} : { stepParams: { ...(grid.stepParams ?? {}), ...healedStepParams } }),
+    })
+  }
+  console.log(`nocobase-w3-approval-visual: textarea 编辑通道退役 — 销毁 ${String(doomed.length)} 个 approver_map/extras 表单项，修复 ${String(gridUids.size)} 个表单布局（审批人/阈值归设计器画布发布派生）`)
 }
 
 // ─── ACL ───
@@ -891,6 +979,16 @@ async function assertVisual(token: string): Promise<void> {
       failures.push('flow-map code does not read the wfl trio through makeResource (runjs allowlist)')
     }
   }
+  // W5-B0: the designer embed iframe block leads the page grid.
+  {
+    const grid = page === undefined ? undefined : await dataOf(token, 'GET', `/api/flowModels:findOne?parentId=${String((routes.find(row => row.type === 'tabs' && row.parentId === page.id))?.schemaUid ?? '')}&subKey=grid`) as { uid?: string } | null
+    const embedBlock = grid?.uid == null ? undefined : models.find(row => row.use === 'IframeBlockModel' && String(row.parentId ?? '') === String(grid.uid))
+    if (embedBlock === undefined) {
+      failures.push('designer-embed IframeBlockModel missing under the page grid (run the build)')
+    } else if (!String(embedBlock.props?.url ?? '').includes('/designer?doc_type=')) {
+      failures.push(`designer-embed iframe url does not point at the /designer SPA: ${String(embedBlock.props?.url)}`)
+    }
+  }
   // The configs Add-new form exists and config_note is required in both forms.
   const createForms = models.filter(row => row.use === 'CreateFormModel'
     && String(row.stepParams?.resourceSettings?.init?.collectionName ?? '') === 'wfl_flow_configs')
@@ -905,6 +1003,12 @@ async function assertVisual(token: string): Promise<void> {
       failures.push('wfl_flow_configs edit form does not mark config_note required')
     }
   }
+  // W5-B1: the JSON-textarea editing channel is retired — no w3b4 form may
+  // bind approver_map/extras anymore (the designer canvas owns them).
+  const designerOwned = models.filter(row => row.use === 'FormItemModel' && String(row.uid ?? '').startsWith('w3b4')
+    && String(row.stepParams?.fieldSettings?.init?.collectionName ?? '') === 'wfl_flow_configs'
+    && DESIGNER_OWNED_FIELDS.has(String(row.stepParams?.fieldSettings?.init?.fieldPath ?? '')))
+  if (designerOwned.length > 0) failures.push(`wfl_flow_configs 表单仍绑定设计器专属字段（${designerOwned.map(row => String(row.stepParams?.fieldSettings?.init?.fieldPath)).join('、')}）——跑 build 执行 textarea 退役迁移`)
 
   // 2) graph-data 对拍: per-flow node/edge counts — the map's data source is
   //    the same list API, so this asserts the consumption logic against the
@@ -1006,12 +1110,14 @@ async function main(): Promise<void> {
   if (group === undefined) throw new Error(`menu group "${MENU_GROUP}" not found; run nocobase-w1-approval.mts first`)
   await ensureBaselineAudit(token)
   const { gridUid } = await ensureV2RouteShell(token, PAGE_TITLE, 'ControlOutlined', group.id)
+  await ensureDesignerEmbed(token, gridUid)
   let sortIndex = 1
   for (const table of TABLES) {
     await ensureConfigTable(token, gridUid, table, sortIndex)
     sortIndex += 1
   }
   await ensureFlowMap(token, gridUid)
+  await retireTextareaEditing(token)
   await bindAdminOnlyMenu(token, PAGE_TITLE)
   await grantMemberConfigRead(token)
   console.log('nocobase-w3-approval-visual: done (build)')

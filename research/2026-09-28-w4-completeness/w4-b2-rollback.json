@@ -36785,5 +36785,1022 @@
     "kind": "dividerCreated",
     "uid": "w4b2dvcqdp1zlwx3u",
     "gridUid": "xiqhq0fgi7u"
+  },
+  {
+    "kind": "submitAction",
+    "actionUid": "w4b2fs88zkacfy89d",
+    "formUid": "zncac5nezqn"
+  },
+  {
+    "kind": "fieldProps",
+    "uid": "9bnm5qqn6e5",
+    "before": {},
+    "writtenKeys": [
+      "placeholder"
+    ]
+  },
+  {
+    "kind": "fieldProps",
+    "uid": "xuo7nbtd5ms",
+    "before": {
+      "allowClear": true,
+      "options": [
+        {
+          "value": "pending",
+          "label": "待达成",
+          "color": "blue"
+        },
+        {
+          "value": "reached",
+          "label": "已达成",
+          "color": "green"
+        }
+      ]
+    },
+    "writtenKeys": [
+      "options"
+    ]
+  },
+  {
+    "kind": "gridLayout",
+    "gridUid": "6dc2w34bfxf",
+    "before": {
+      "props": {
+        "layout": {
+          "version": 2,
+          "rows": [
+            {
+              "id": "r0",
+              "cells": [
+                {
+                  "id": "r0:cell:0",
+                  "items": [
+                    "n17e1i27p6bfg0oi3"
+                  ]
+                }
+              ],
+              "sizes": [
+                24
+              ]
+            },
+            {
+              "id": "r1",
+              "cells": [
+                {
+                  "id": "r1:cell:0",
+                  "items": [
+                    "n17e1ii90hznxdl"
+                  ]
+                }
+              ],
+              "sizes": [
+                24
+              ]
+            },
+            {
+              "id": "r2",
+              "cells": [
+                {
+                  "id": "r2:cell:0",
+                  "items": [
+                    "n17e1izb73u4t37m"
+                  ]
+                }
+              ],
+              "sizes": [
+                24
+              ]
+            },
+            {
+              "id": "r3",
+              "cells": [
+                {
+                  "id": "r3:cell:0",
+                  "items": [
+                    "n17e1i2xeecobtfbe"
+                  ]
+                }
+              ],
+              "sizes": [
+                24
+              ]
+            },
+            {
+              "id": "r4",
+              "cells": [
+                {
+                  "id": "r4:cell:0",
+                  "items": [
+                    "n17e1i1wpv0vorsyf"
+                  ]
+                }
+              ],
+              "sizes": [
+                24
+              ]
+            }
+          ],
+          "rowGap": 0,
+          "colGap": 16,
+          "sizes": {},
+          "rowOrder": [
+            "r0",
+            "r1",
+            "r2",
+            "r3",
+            "r4"
+          ]
+        }
+      },
+      "stepParams": {
+        "gridSettings": {
+          "grid": {
+            "layout": {
+              "version": 2,
+              "rows": [
+                {
+                  "id": "r0",
+                  "cells": [
+                    {
+                      "id": "r0:cell:0",
+                      "items": [
+                        "n17e1i27p6bfg0oi3"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    24
+                  ]
+                },
+                {
+                  "id": "r1",
+                  "cells": [
+                    {
+                      "id": "r1:cell:0",
+                      "items": [
+                        "n17e1ii90hznxdl"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    24
+                  ]
+                },
+                {
+                  "id": "r2",
+                  "cells": [
+                    {
+                      "id": "r2:cell:0",
+                      "items": [
+                        "n17e1izb73u4t37m"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    24
+                  ]
+                },
+                {
+                  "id": "r3",
+                  "cells": [
+                    {
+                      "id": "r3:cell:0",
+                      "items": [
+                        "n17e1i2xeecobtfbe"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    24
+                  ]
+                },
+                {
+                  "id": "r4",
+                  "cells": [
+                    {
+                      "id": "r4:cell:0",
+                      "items": [
+                        "n17e1i1wpv0vorsyf"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    24
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "kind": "dividerCreated",
+    "uid": "w4b2dvzsfgbnan0f",
+    "gridUid": "6dc2w34bfxf"
+  },
+  {
+    "kind": "dividerCreated",
+    "uid": "w4b2dv1hwjjyfl6bf",
+    "gridUid": "6dc2w34bfxf"
+  },
+  {
+    "kind": "assignRules",
+    "gridUid": "6dc2w34bfxf",
+    "before": null
+  },
+  {
+    "kind": "itemProps",
+    "uid": "n17e1issr8zztk19",
+    "before": {},
+    "writtenKeys": [
+      "required",
+      "rules"
+    ]
+  },
+  {
+    "kind": "fieldProps",
+    "uid": "le24tb9ma1h",
+    "before": {
+      "allowClear": true,
+      "options": [
+        {
+          "value": "backlog",
+          "label": "待规划",
+          "color": "default"
+        },
+        {
+          "value": "todo",
+          "label": "待处理",
+          "color": "blue"
+        },
+        {
+          "value": "in_progress",
+          "label": "进行中",
+          "color": "cyan"
+        },
+        {
+          "value": "review",
+          "label": "评审中",
+          "color": "purple"
+        },
+        {
+          "value": "done",
+          "label": "已完成",
+          "color": "green"
+        },
+        {
+          "value": "blocked",
+          "label": "受阻",
+          "color": "red"
+        },
+        {
+          "value": "cancelled",
+          "label": "已取消",
+          "color": "default"
+        }
+      ]
+    },
+    "writtenKeys": [
+      "options"
+    ]
+  },
+  {
+    "kind": "fieldProps",
+    "uid": "cdh6hkjuvhx",
+    "before": {
+      "allowClear": true,
+      "options": [
+        {
+          "value": "low",
+          "label": "低",
+          "color": "default"
+        },
+        {
+          "value": "medium",
+          "label": "中",
+          "color": "blue"
+        },
+        {
+          "value": "high",
+          "label": "高",
+          "color": "orange"
+        },
+        {
+          "value": "urgent",
+          "label": "紧急",
+          "color": "red"
+        }
+      ]
+    },
+    "writtenKeys": [
+      "options"
+    ]
+  },
+  {
+    "kind": "fieldProps",
+    "uid": "bxrc016q3mr",
+    "before": {},
+    "writtenKeys": [
+      "placeholder"
+    ]
+  },
+  {
+    "kind": "fieldProps",
+    "uid": "vbsplg0dw3i",
+    "before": {},
+    "writtenKeys": [
+      "placeholder"
+    ]
+  },
+  {
+    "kind": "fieldProps",
+    "uid": "9rlmr6gyvi9",
+    "before": {},
+    "writtenKeys": [
+      "placeholder"
+    ]
+  },
+  {
+    "kind": "gridLayout",
+    "gridUid": "hnv3481hscf",
+    "before": {
+      "props": {
+        "layout": {
+          "version": 2,
+          "rows": [
+            {
+              "id": "r0",
+              "cells": [
+                {
+                  "id": "r0:cell:0",
+                  "items": [
+                    "n17e1i2uujfdi06ir"
+                  ]
+                }
+              ],
+              "sizes": [
+                24
+              ]
+            },
+            {
+              "id": "r1",
+              "cells": [
+                {
+                  "id": "r1:cell:0",
+                  "items": [
+                    "n17e1issr8zztk19"
+                  ]
+                }
+              ],
+              "sizes": [
+                24
+              ]
+            },
+            {
+              "id": "r2",
+              "cells": [
+                {
+                  "id": "r2:cell:0",
+                  "items": [
+                    "n17e1i5isol4fgcj"
+                  ]
+                }
+              ],
+              "sizes": [
+                24
+              ]
+            },
+            {
+              "id": "r3",
+              "cells": [
+                {
+                  "id": "r3:cell:0",
+                  "items": [
+                    "n17e1iw49j5o4f4b"
+                  ]
+                }
+              ],
+              "sizes": [
+                24
+              ]
+            },
+            {
+              "id": "r4",
+              "cells": [
+                {
+                  "id": "r4:cell:0",
+                  "items": [
+                    "n17e1icfgtzwlprmm"
+                  ]
+                }
+              ],
+              "sizes": [
+                24
+              ]
+            },
+            {
+              "id": "r5",
+              "cells": [
+                {
+                  "id": "r5:cell:0",
+                  "items": [
+                    "n17e1iaf1ilo601jd"
+                  ]
+                }
+              ],
+              "sizes": [
+                24
+              ]
+            },
+            {
+              "id": "r6",
+              "cells": [
+                {
+                  "id": "r6:cell:0",
+                  "items": [
+                    "n17e1i4jvxlidx66f"
+                  ]
+                }
+              ],
+              "sizes": [
+                24
+              ]
+            },
+            {
+              "id": "r7",
+              "cells": [
+                {
+                  "id": "r7:cell:0",
+                  "items": [
+                    "n17e1iyjrcri5asom"
+                  ]
+                }
+              ],
+              "sizes": [
+                24
+              ]
+            }
+          ],
+          "rowGap": 0,
+          "colGap": 16,
+          "sizes": {},
+          "rowOrder": [
+            "r0",
+            "r1",
+            "r2",
+            "r3",
+            "r4",
+            "r5",
+            "r6",
+            "r7"
+          ]
+        }
+      },
+      "stepParams": {
+        "gridSettings": {
+          "grid": {
+            "layout": {
+              "version": 2,
+              "rows": [
+                {
+                  "id": "r0",
+                  "cells": [
+                    {
+                      "id": "r0:cell:0",
+                      "items": [
+                        "n17e1i2uujfdi06ir"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    24
+                  ]
+                },
+                {
+                  "id": "r1",
+                  "cells": [
+                    {
+                      "id": "r1:cell:0",
+                      "items": [
+                        "n17e1issr8zztk19"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    24
+                  ]
+                },
+                {
+                  "id": "r2",
+                  "cells": [
+                    {
+                      "id": "r2:cell:0",
+                      "items": [
+                        "n17e1i5isol4fgcj"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    24
+                  ]
+                },
+                {
+                  "id": "r3",
+                  "cells": [
+                    {
+                      "id": "r3:cell:0",
+                      "items": [
+                        "n17e1iw49j5o4f4b"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    24
+                  ]
+                },
+                {
+                  "id": "r4",
+                  "cells": [
+                    {
+                      "id": "r4:cell:0",
+                      "items": [
+                        "n17e1icfgtzwlprmm"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    24
+                  ]
+                },
+                {
+                  "id": "r5",
+                  "cells": [
+                    {
+                      "id": "r5:cell:0",
+                      "items": [
+                        "n17e1iaf1ilo601jd"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    24
+                  ]
+                },
+                {
+                  "id": "r6",
+                  "cells": [
+                    {
+                      "id": "r6:cell:0",
+                      "items": [
+                        "n17e1i4jvxlidx66f"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    24
+                  ]
+                },
+                {
+                  "id": "r7",
+                  "cells": [
+                    {
+                      "id": "r7:cell:0",
+                      "items": [
+                        "n17e1iyjrcri5asom"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    24
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "kind": "dividerCreated",
+    "uid": "w4b2dv8nwho9zmx9m",
+    "gridUid": "hnv3481hscf"
+  },
+  {
+    "kind": "dividerCreated",
+    "uid": "w4b2dvccorhl9escs",
+    "gridUid": "hnv3481hscf"
+  },
+  {
+    "kind": "dividerCreated",
+    "uid": "w4b2dvnmgwwzy5gop",
+    "gridUid": "hnv3481hscf"
+  },
+  {
+    "kind": "assignRules",
+    "gridUid": "hnv3481hscf",
+    "before": null
+  },
+  {
+    "kind": "submitAction",
+    "actionUid": "w4b2fsfnkkpo6xmrv",
+    "formUid": "teq80ca6rpx"
+  },
+  {
+    "kind": "fieldProps",
+    "uid": "xkbwsac0q0h",
+    "before": {
+      "allowClear": true,
+      "options": [
+        {
+          "value": "planning",
+          "label": "规划中",
+          "color": "blue"
+        },
+        {
+          "value": "in_progress",
+          "label": "进行中",
+          "color": "cyan"
+        },
+        {
+          "value": "blocked",
+          "label": "受阻",
+          "color": "red"
+        },
+        {
+          "value": "completed",
+          "label": "已完成",
+          "color": "green"
+        },
+        {
+          "value": "archived",
+          "label": "已归档",
+          "color": "default"
+        }
+      ]
+    },
+    "writtenKeys": [
+      "options"
+    ]
+  },
+  {
+    "kind": "fieldProps",
+    "uid": "eiz2l5j8qz3",
+    "before": {},
+    "writtenKeys": [
+      "placeholder"
+    ]
+  },
+  {
+    "kind": "fieldProps",
+    "uid": "imll4kqzen3",
+    "before": {},
+    "writtenKeys": [
+      "placeholder"
+    ]
+  },
+  {
+    "kind": "fieldProps",
+    "uid": "gw7nu7n1npa",
+    "before": {},
+    "writtenKeys": [
+      "placeholder"
+    ]
+  },
+  {
+    "kind": "gridLayout",
+    "gridUid": "mvf2j45mg2o",
+    "before": {
+      "props": {
+        "layout": {
+          "version": 2,
+          "rows": [
+            {
+              "id": "r0",
+              "cells": [
+                {
+                  "id": "r0:cell:0",
+                  "items": [
+                    "n17e1iqz98m0l0z9p"
+                  ]
+                }
+              ],
+              "sizes": [
+                24
+              ]
+            },
+            {
+              "id": "r1",
+              "cells": [
+                {
+                  "id": "r1:cell:0",
+                  "items": [
+                    "n17e1ini6l2qpcqv"
+                  ]
+                }
+              ],
+              "sizes": [
+                24
+              ]
+            },
+            {
+              "id": "r2",
+              "cells": [
+                {
+                  "id": "r2:cell:0",
+                  "items": [
+                    "n17e1iiz7il7jrtc"
+                  ]
+                }
+              ],
+              "sizes": [
+                24
+              ]
+            },
+            {
+              "id": "r3",
+              "cells": [
+                {
+                  "id": "r3:cell:0",
+                  "items": [
+                    "n17e1i3qgedthryfk"
+                  ]
+                }
+              ],
+              "sizes": [
+                24
+              ]
+            },
+            {
+              "id": "r4",
+              "cells": [
+                {
+                  "id": "r4:cell:0",
+                  "items": [
+                    "n17e1i8dhfmao5u3x"
+                  ]
+                }
+              ],
+              "sizes": [
+                24
+              ]
+            },
+            {
+              "id": "r5",
+              "cells": [
+                {
+                  "id": "r5:cell:0",
+                  "items": [
+                    "n17e1isu4jn5el23b"
+                  ]
+                }
+              ],
+              "sizes": [
+                24
+              ]
+            },
+            {
+              "id": "r6",
+              "cells": [
+                {
+                  "id": "r6:cell:0",
+                  "items": [
+                    "n17e1iamvnevezbx9"
+                  ]
+                }
+              ],
+              "sizes": [
+                24
+              ]
+            },
+            {
+              "id": "r7",
+              "cells": [
+                {
+                  "id": "r7:cell:0",
+                  "items": [
+                    "n17e1imyxeknh43lk"
+                  ]
+                }
+              ],
+              "sizes": [
+                24
+              ]
+            },
+            {
+              "id": "r8",
+              "cells": [
+                {
+                  "id": "r8:cell:0",
+                  "items": [
+                    "n17e1icmicwpj19og"
+                  ]
+                }
+              ],
+              "sizes": [
+                24
+              ]
+            },
+            {
+              "id": "r9",
+              "cells": [
+                {
+                  "id": "r9:cell:0",
+                  "items": [
+                    "n17e1irh39862tgmc"
+                  ]
+                }
+              ],
+              "sizes": [
+                24
+              ]
+            }
+          ],
+          "rowGap": 0,
+          "colGap": 16,
+          "sizes": {},
+          "rowOrder": [
+            "r0",
+            "r1",
+            "r2",
+            "r3",
+            "r4",
+            "r5",
+            "r6",
+            "r7",
+            "r8",
+            "r9"
+          ]
+        }
+      },
+      "stepParams": {
+        "gridSettings": {
+          "grid": {
+            "layout": {
+              "version": 2,
+              "rows": [
+                {
+                  "id": "r0",
+                  "cells": [
+                    {
+                      "id": "r0:cell:0",
+                      "items": [
+                        "n17e1iqz98m0l0z9p"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    24
+                  ]
+                },
+                {
+                  "id": "r1",
+                  "cells": [
+                    {
+                      "id": "r1:cell:0",
+                      "items": [
+                        "n17e1ini6l2qpcqv"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    24
+                  ]
+                },
+                {
+                  "id": "r2",
+                  "cells": [
+                    {
+                      "id": "r2:cell:0",
+                      "items": [
+                        "n17e1iiz7il7jrtc"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    24
+                  ]
+                },
+                {
+                  "id": "r3",
+                  "cells": [
+                    {
+                      "id": "r3:cell:0",
+                      "items": [
+                        "n17e1i3qgedthryfk"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    24
+                  ]
+                },
+                {
+                  "id": "r4",
+                  "cells": [
+                    {
+                      "id": "r4:cell:0",
+                      "items": [
+                        "n17e1i8dhfmao5u3x"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    24
+                  ]
+                },
+                {
+                  "id": "r5",
+                  "cells": [
+                    {
+                      "id": "r5:cell:0",
+                      "items": [
+                        "n17e1isu4jn5el23b"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    24
+                  ]
+                },
+                {
+                  "id": "r6",
+                  "cells": [
+                    {
+                      "id": "r6:cell:0",
+                      "items": [
+                        "n17e1iamvnevezbx9"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    24
+                  ]
+                },
+                {
+                  "id": "r7",
+                  "cells": [
+                    {
+                      "id": "r7:cell:0",
+                      "items": [
+                        "n17e1imyxeknh43lk"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    24
+                  ]
+                },
+                {
+                  "id": "r8",
+                  "cells": [
+                    {
+                      "id": "r8:cell:0",
+                      "items": [
+                        "n17e1icmicwpj19og"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    24
+                  ]
+                },
+                {
+                  "id": "r9",
+                  "cells": [
+                    {
+                      "id": "r9:cell:0",
+                      "items": [
+                        "n17e1irh39862tgmc"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    24
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "kind": "dividerCreated",
+    "uid": "w4b2dvhpabhc6f0tt",
+    "gridUid": "mvf2j45mg2o"
+  },
+  {
+    "kind": "dividerCreated",
+    "uid": "w4b2dvx33d90q66we",
+    "gridUid": "mvf2j45mg2o"
+  },
+  {
+    "kind": "assignRules",
+    "gridUid": "mvf2j45mg2o",
+    "before": null
   }
 ]

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>审批流设计器</title>
+    <!-- Absolute paths: the page is served at both /designer and /designer/..., so a relative ./designer.js would resolve against "/" and 404. -->
+    <link rel="stylesheet" href="/designer/designer.css" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <!-- strict 档 token bootstrap（W3 终端页同款）：URL ?token= 记入 localStorage；
+         bundle 与样式表同受 x-terminal-token 门禁，故 designer.js 的 src 由这里带 token
+         动态注入（auth.ts 加载后再补 designer.css 的 token query）。 -->
+    <script>
+      ;(function () {
+        'use strict'
+        var token = null
+        try {
+          var fromUrl = new URLSearchParams(location.search).get('token')
+          if (fromUrl !== null && fromUrl !== '') {
+            localStorage.setItem('w3-terminal-token', fromUrl)
+            token = fromUrl
+          } else {
+            var stored = localStorage.getItem('w3-terminal-token')
+            token = stored === null || stored === '' ? null : stored
+          }
+        } catch (err) {
+          /* 隐私模式：URL 每次带 ?token= 即可 */
+        }
+        var suffix = token === null ? '' : '?token=' + encodeURIComponent(token)
+        var bundle = document.createElement('script')
+        bundle.src = '/designer/designer.js' + suffix
+        document.body.appendChild(bundle)
+      })()
+    </script>
+  </body>
+</html>

@@ -13492,5 +13492,535 @@
     "kind": "filterForm",
     "gridUid": "n17gksef074rhx",
     "filterFormUid": "hk6dsysht3p"
+  },
+  {
+    "kind": "tableSort",
+    "tableUid": "n17e1tb5qd74moej7r",
+    "before": {
+      "props": {},
+      "stepParams": {
+        "resourceSettings": {
+          "init": {
+            "dataSourceKey": "main",
+            "collectionName": "hub_pj_projects"
+          }
+        }
+      }
+    }
+  },
+  {
+    "kind": "columnStepParams",
+    "columnUid": "n17e1cygpro530sx",
+    "before": {
+      "fieldSettings": {
+        "init": {
+          "dataSourceKey": "main",
+          "collectionName": "hub_pj_projects",
+          "fieldPath": "name"
+        }
+      },
+      "tableColumnSettings": {
+        "model": {
+          "use": "DisplayTextFieldModel"
+        }
+      }
+    }
+  },
+  {
+    "kind": "fieldProps",
+    "fieldUid": "n17e1cygpro530sx",
+    "before": {
+      "title": "项目名称",
+      "dataIndex": "name",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none"
+    },
+    "writtenKeys": [
+      "sorter",
+      "defaultSortOrder"
+    ]
+  },
+  {
+    "kind": "columnFieldSwap",
+    "columnUid": "n17e1cyi6kcwxjzhk",
+    "removedField": {
+      "uid": "n17e1cyi6kcwxjzhkf",
+      "use": "DisplayTextFieldModel",
+      "props": {
+        "displayStyle": "text",
+        "overflowMode": "ellipsis",
+        "clickToOpen": false,
+        "displayCopyButton": false
+      },
+      "stepParams": {
+        "popupSettings": {
+          "openView": {
+            "collectionName": "hub_pj_projects",
+            "dataSourceKey": "main"
+          }
+        }
+      }
+    },
+    "extraRemovedUids": [],
+    "newFieldUid": "w4b1cf2wl5pwq0tv3"
+  },
+  {
+    "kind": "columnStepParams",
+    "columnUid": "n17e1cyi6kcwxjzhk",
+    "before": {
+      "fieldSettings": {
+        "init": {
+          "dataSourceKey": "main",
+          "collectionName": "hub_pj_projects",
+          "fieldPath": "owner"
+        }
+      },
+      "tableColumnSettings": {
+        "model": {
+          "use": "DisplayTextFieldModel"
+        }
+      }
+    }
+  },
+  {
+    "kind": "fieldProps",
+    "fieldUid": "n17e1cp7rwjadr8qbf",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "planning",
+          "label": "规划中",
+          "color": "blue"
+        },
+        {
+          "value": "in_progress",
+          "label": "进行中",
+          "color": "cyan"
+        },
+        {
+          "value": "blocked",
+          "label": "受阻",
+          "color": "red"
+        },
+        {
+          "value": "completed",
+          "label": "已完成",
+          "color": "green"
+        },
+        {
+          "value": "archived",
+          "label": "已归档",
+          "color": "default"
+        }
+      ]
+    },
+    "writtenKeys": [
+      "options"
+    ]
+  },
+  {
+    "kind": "fieldProps",
+    "fieldUid": "n17e1ct50soxobt6f",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false
+    },
+    "writtenKeys": [
+      "separator",
+      "numberStep"
+    ]
+  },
+  {
+    "kind": "fieldProps",
+    "fieldUid": "n17e1c7ckmd4nksbff",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false
+    },
+    "writtenKeys": [
+      "format"
+    ]
+  },
+  {
+    "kind": "filterForm",
+    "gridUid": "n17e1gq68v5w1c6s",
+    "filterFormUid": "ikkjd7fjxsl"
+  },
+  {
+    "kind": "tableSort",
+    "tableUid": "n17e1tbucmoi52pvkh",
+    "before": {
+      "props": {},
+      "stepParams": {
+        "resourceSettings": {
+          "init": {
+            "dataSourceKey": "main",
+            "collectionName": "hub_pj_tasks"
+          }
+        }
+      }
+    }
+  },
+  {
+    "kind": "columnStepParams",
+    "columnUid": "",
+    "before": {}
+  },
+  {
+    "kind": "columnFieldSwap",
+    "columnUid": "n17e1c6f4qkv3u063",
+    "removedField": {
+      "uid": "n17e1c6f4qkv3u063f",
+      "use": "DisplayTextFieldModel",
+      "props": {
+        "displayStyle": "text",
+        "overflowMode": "ellipsis",
+        "clickToOpen": false,
+        "displayCopyButton": false
+      },
+      "stepParams": {
+        "popupSettings": {
+          "openView": {
+            "collectionName": "hub_pj_tasks",
+            "dataSourceKey": "main"
+          }
+        }
+      }
+    },
+    "extraRemovedUids": [],
+    "newFieldUid": "w4b1cffhow74zo4zn"
+  },
+  {
+    "kind": "columnStepParams",
+    "columnUid": "n17e1c6f4qkv3u063",
+    "before": {
+      "fieldSettings": {
+        "init": {
+          "dataSourceKey": "main",
+          "collectionName": "hub_pj_tasks",
+          "fieldPath": "project"
+        }
+      },
+      "tableColumnSettings": {
+        "model": {
+          "use": "DisplayTextFieldModel"
+        }
+      }
+    }
+  },
+  {
+    "kind": "columnFieldSwap",
+    "columnUid": "n17e1cshtqfenvw3f",
+    "removedField": {
+      "uid": "n17e1cshtqfenvw3ff",
+      "use": "DisplayTextFieldModel",
+      "props": {
+        "displayStyle": "text",
+        "overflowMode": "ellipsis",
+        "clickToOpen": false,
+        "displayCopyButton": false
+      },
+      "stepParams": {
+        "popupSettings": {
+          "openView": {
+            "collectionName": "hub_pj_tasks",
+            "dataSourceKey": "main"
+          }
+        }
+      }
+    },
+    "extraRemovedUids": [],
+    "newFieldUid": "w4b1cfcg6dxuk8r8"
+  },
+  {
+    "kind": "columnStepParams",
+    "columnUid": "n17e1cshtqfenvw3f",
+    "before": {
+      "fieldSettings": {
+        "init": {
+          "dataSourceKey": "main",
+          "collectionName": "hub_pj_tasks",
+          "fieldPath": "assignee"
+        }
+      },
+      "tableColumnSettings": {
+        "model": {
+          "use": "DisplayTextFieldModel"
+        }
+      }
+    }
+  },
+  {
+    "kind": "fieldProps",
+    "fieldUid": "n17e1cc88znx9wpzaf",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "backlog",
+          "label": "待规划",
+          "color": "default"
+        },
+        {
+          "value": "todo",
+          "label": "待处理",
+          "color": "blue"
+        },
+        {
+          "value": "in_progress",
+          "label": "进行中",
+          "color": "cyan"
+        },
+        {
+          "value": "review",
+          "label": "评审中",
+          "color": "purple"
+        },
+        {
+          "value": "done",
+          "label": "已完成",
+          "color": "green"
+        },
+        {
+          "value": "blocked",
+          "label": "受阻",
+          "color": "red"
+        },
+        {
+          "value": "cancelled",
+          "label": "已取消",
+          "color": "default"
+        }
+      ]
+    },
+    "writtenKeys": [
+      "options"
+    ]
+  },
+  {
+    "kind": "fieldProps",
+    "fieldUid": "n17e1cinmkcsqw2pqf",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "low",
+          "label": "低",
+          "color": "default"
+        },
+        {
+          "value": "medium",
+          "label": "中",
+          "color": "blue"
+        },
+        {
+          "value": "high",
+          "label": "高",
+          "color": "orange"
+        },
+        {
+          "value": "urgent",
+          "label": "紧急",
+          "color": "red"
+        }
+      ]
+    },
+    "writtenKeys": [
+      "options"
+    ]
+  },
+  {
+    "kind": "fieldProps",
+    "fieldUid": "n17e1c14g2w02urbif",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false
+    },
+    "writtenKeys": [
+      "format"
+    ]
+  },
+  {
+    "kind": "fieldProps",
+    "fieldUid": "n17e1cnevmvzyzvnf",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false
+    },
+    "writtenKeys": [
+      "format"
+    ]
+  },
+  {
+    "kind": "fieldProps",
+    "fieldUid": "n17e1c1zjzj4scfx6f",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false
+    },
+    "writtenKeys": [
+      "format"
+    ]
+  },
+  {
+    "kind": "filterForm",
+    "gridUid": "n17e1gxk8tcc476en",
+    "filterFormUid": "x14cmetc3l1"
+  },
+  {
+    "kind": "tableSort",
+    "tableUid": "n17e1tbiu3zs4u50l",
+    "before": {
+      "props": {},
+      "stepParams": {
+        "resourceSettings": {
+          "init": {
+            "dataSourceKey": "main",
+            "collectionName": "hub_pj_milestones"
+          }
+        }
+      }
+    }
+  },
+  {
+    "kind": "columnStepParams",
+    "columnUid": "n17e1cwf8dvknarr8",
+    "before": {
+      "fieldSettings": {
+        "init": {
+          "dataSourceKey": "main",
+          "collectionName": "hub_pj_milestones",
+          "fieldPath": "name"
+        }
+      },
+      "tableColumnSettings": {
+        "model": {
+          "use": "DisplayTextFieldModel"
+        }
+      }
+    }
+  },
+  {
+    "kind": "fieldProps",
+    "fieldUid": "n17e1cwf8dvknarr8",
+    "before": {
+      "title": "里程碑",
+      "dataIndex": "name",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none"
+    },
+    "writtenKeys": [
+      "sorter",
+      "defaultSortOrder"
+    ]
+  },
+  {
+    "kind": "columnFieldSwap",
+    "columnUid": "n17e1co9d5l2r28u",
+    "removedField": {
+      "uid": "n17e1co9d5l2r28uf",
+      "use": "DisplayTextFieldModel",
+      "props": {
+        "displayStyle": "text",
+        "overflowMode": "ellipsis",
+        "clickToOpen": false,
+        "displayCopyButton": false
+      },
+      "stepParams": {
+        "popupSettings": {
+          "openView": {
+            "collectionName": "hub_pj_milestones",
+            "dataSourceKey": "main"
+          }
+        }
+      }
+    },
+    "extraRemovedUids": [],
+    "newFieldUid": "w4b1cfifnyfv1bln"
+  },
+  {
+    "kind": "columnStepParams",
+    "columnUid": "n17e1co9d5l2r28u",
+    "before": {
+      "fieldSettings": {
+        "init": {
+          "dataSourceKey": "main",
+          "collectionName": "hub_pj_milestones",
+          "fieldPath": "project"
+        }
+      },
+      "tableColumnSettings": {
+        "model": {
+          "use": "DisplayTextFieldModel"
+        }
+      }
+    }
+  },
+  {
+    "kind": "fieldProps",
+    "fieldUid": "n17e1cv8ku57dklpif",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false
+    },
+    "writtenKeys": [
+      "format"
+    ]
+  },
+  {
+    "kind": "fieldProps",
+    "fieldUid": "n17e1cioaziq1goqf",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "pending",
+          "label": "待达成",
+          "color": "blue"
+        },
+        {
+          "value": "reached",
+          "label": "已达成",
+          "color": "green"
+        }
+      ]
+    },
+    "writtenKeys": [
+      "options"
+    ]
+  },
+  {
+    "kind": "filterForm",
+    "gridUid": "n17e1g3xvbq5xncbm",
+    "filterFormUid": "5byh3ga6xcj"
   }
 ]

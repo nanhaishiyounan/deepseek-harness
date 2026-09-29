@@ -53,6 +53,40 @@
  * resolves pure maps only — a department entry fails loud there, so route
  * department forms to document types the pages/CLI drive.
  *
+ * W5-B0 adds the visual-designer surface on --serve: the /designer static
+ * SPA (examples/kb-agent/designer/dist — React18+antd5+@xyflow/react 12),
+ * GET /designer/meta (doc types/users/roles/departments/form-field option
+ * lists), and GET/POST /flow-graph over the new wfl_flow_configs.graph json
+ * column (idempotently added at serve start). B0 persists the editing state
+ * only — the engine still reads its states/transitions rows; publish-time
+ * compilation/derivation and its gates are B1. W5_DESIGNER_ENABLED=false
+ * removes the routes (the token guard rides the W3_TERMINAL_TOKEN regime).
+ * R0 hardens the editing path: POST requires base_version and rejects a
+ * stale base with 409 (optimistic lock), and validateFlowGraph additionally
+ * refuses negative coordinates, over-long or angle-bracket node titles, and
+ * approval nodes with empty assignees.
+ * W5-R1 flips the save to an atomic compare-and-swap over one psql UPDATE
+ * (NocoBase's REST filter update is a find→update pair, not a CAS primitive
+ * — live-concurrency evidence caught it double-writing): the WHERE pins
+ * id + doc_type + graph_version = base_version and zero rows moved answers
+ * 409, with structured serve logs on the success/conflict/error paths,
+ * title trimming on both sides of the wire, {{t(...)}} template-title
+ * resolution in /designer/meta, and non-finite-coordinate rejection.
+ *
+ * W5-B1 adds the publish chain: compileGraphToRows derives
+ * wfl_flow_states/wfl_flow_transitions rows from the stored graph (one-way —
+ * graph stays the editing truth, rows stay the runtime truth), rowsToGraph
+ * reverses existing rows into a graph draft, and assertRowsEquivalent gates
+ * the round trip. POST /flow-graph/publish runs fail-loud gates (orphans,
+ * endpoints, cycles, reachability, condition DSL vs the field vocabulary,
+ * the engine-consumable feature matrix) plus the round-trip gate, then
+ * rewrites the derived rows in ONE data-modifying-CTE statement: every
+ * DELETE/INSERT arm keys off `bumped` (the CAS UPDATE ... RETURNING), so a
+ * lost CAS no-ops the whole publish — a multi-statement string would commit
+ * "UPDATE 0" and still run the DELETEs. The pre-publish rows snapshot into
+ * config_note (replayable rollback anchor); the engine's transition code
+ * never changes.
+ *
  * W3-B6 adds the operator-terminal surface on --serve (D9): three narrow
  * business verbs — POST /report-job (报工: 完成+待求+损失=本循环计划数,
  * ERPNext complete_job_card clamp), POST /inspect-submit (逐项打分 →
@@ -68,6 +102,8 @@
  * write unless an endpoint is called).
  */
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http'
+import { spawnSync } from 'node:child_process'
+import { readFileSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { call, dataOf, signInWithRetry } from './nocobase-flow-page-lib.mts'
@@ -885,6 +921,33 @@ class RestIO implements NocoIO {
 
 const restIO = async (): Promise<RestIO> => new RestIO(await signInWithRetry())
 
+// ─── psql CAS (W5-R1: the flow-graph save bypasses the NocoBase REST update) ───
+
+/**
+ * The psql runner over platform/nocobase/.env credentials (the w4-heal-b4
+ * precedent). NocoBase's REST `:update?filter=` is a find→update-by-pk pair
+ * (packages/core/database/src/repository.ts update()), so two same-instant
+ * conditional updates can both find the old version and both write — the
+ * REST filter is not a compare-and-swap primitive. A single SQL UPDATE is:
+ * PG row-locks the tuple and re-evaluates the WHERE for the second racer,
+ * so exactly one side moves the row.
+ * @returns a runner executing one SQL statement and returning raw stdout.
+ */
+function psqlRunner(): (sql: string) => string {
+  const env = readFileSync(fileURLToPath(new URL('../../../platform/nocobase/.env', import.meta.url)), 'utf8')
+  const envOf = (key: string): string | undefined => env.split('\n').map(line => line.trim()).find(line => line.startsWith(`${key}=`))?.slice(key.length + 1)
+  const base = ['-h', envOf('DB_HOST') ?? 'localhost', '-p', envOf('DB_PORT') ?? '5432', '-U', envOf('DB_USER') ?? 'postgres', '-d', envOf('DB_NAME') ?? 'nocobase', '-t', '-A']
+  const psqlEnv = { ...process.env, PGPASSWORD: envOf('DB_PASSWORD') ?? 'nocobase' }
+  return (sql: string): string => {
+    const run = spawnSync('psql', [...base, '-c', sql], { encoding: 'utf8', env: psqlEnv, timeout: 20_000, maxBuffer: 16 * 1024 * 1024 })
+    if (run.status !== 0) throw new Error(`psql failed: ${sql.slice(0, 120)}…\n${(run.stderr ?? '').slice(0, 300)}`)
+    return run.stdout ?? ''
+  }
+}
+
+/** One SQL single-quoted literal (standard_conforming_strings on — only ' doubles). */
+const sqlLiteral = (value: string): string => `'${value.replaceAll("'", "''")}'`
+
 // ─── HTTP serve (:13110, the workflow request callback target) ───
 
 /** Read one request's JSON body (size-capped). */
@@ -893,7 +956,7 @@ async function readBody(request: IncomingMessage): Promise<Record<string, unknow
   let size = 0
   for await (const chunk of request) {
     size += (chunk as Buffer).length
-    if (size > 100_000) throw new Error('request body too large')
+    if (size > 100_000) throw new Error('请求体超过 100000 字节上限（readBody size cap）')
     chunks.push(chunk as Buffer)
   }
   const text = Buffer.concat(chunks).toString('utf8').trim()
@@ -1130,7 +1193,7 @@ function checkTerminalToken(request: IncomingMessage, url: URL): void {
   const header = request.headers['x-terminal-token']
   const presented = (Array.isArray(header) ? header[0] : header) ?? url.searchParams.get('token') ?? ''
   if (presented !== process.env['W3_TERMINAL_TOKEN']) {
-    throw new HttpError(401, '终端端点需要 token（W3_TERMINAL_TOKEN 已配置：header x-terminal-token 或 query token）')
+    throw new HttpError(401, '终端端点需要 token（W3_TERMINAL_TOKEN 已配置）：header x-terminal-token、query ?token=，或首次经 URL ?token= 注入后由 localStorage 复用')
   }
 }
 
@@ -1140,6 +1203,839 @@ const TERMINAL_STATIC_FILES: Readonly<Record<string, string>> = {
   'inspect.html': 'text/html; charset=utf-8',
   'receive.html': 'text/html; charset=utf-8',
   'terminal.css': 'text/css; charset=utf-8',
+}
+
+// ─── W5-B0: the visual designer surface (graph editing state only) ───
+
+/** The designer SPA's static-file whitelist (files served from ../designer/dist/). */
+const DESIGNER_STATIC_FILES: Readonly<Record<string, string>> = {
+  'index.html': 'text/html; charset=utf-8',
+  'designer.js': 'text/javascript; charset=utf-8',
+  'designer.css': 'text/css; charset=utf-8',
+}
+
+const GRAPH_NODE_KINDS: ReadonlySet<string> = new Set(['start', 'approval', 'cc', 'condition', 'end'])
+/** Node-title ceiling mirrored by the designer SPA's input gate (R0 Important 8). */
+const GRAPH_NODE_TITLE_MAX = 64
+/** System column names excluded from /designer/meta's formFields vocabulary. */
+const GRAPH_SYSTEM_FIELD_NAMES: ReadonlySet<string> = new Set(['id', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy', 'sort'])
+/**
+ * Resolve a NocoBase i18n template title to its readable text (W5-R1): role
+ * and department rows may carry `{{t("Admin")}}` literals that would
+ * otherwise leak straight into the designer's dropdown labels. A template's
+ * inner string wins; a non-template title passes through trimmed; anything
+ * unusable falls back to the caller's fallback.
+ * @param title - the raw column value.
+ * @param fallback - the readable name when the title is empty or malformed.
+ * @returns the display label with no `{{t(` template remaining.
+ */
+function resolveI18nTitle(title: unknown, fallback: string): string {
+  const text = typeof title === 'string' ? title.trim() : ''
+  const match = /^\{\{t\("([^"]+)"\)\}\}$/u.exec(text)
+  if (match !== null && match[1] !== '') return match[1]
+  return text !== '' ? text : fallback
+}
+
+const GRAPH_ASSIGNEE_TYPES: ReadonlySet<string> = new Set(['user', 'role', 'deptLeader', 'supervisorChain', 'formField'])
+const GRAPH_MODES: ReadonlySet<string> = new Set(['sequential', 'countersign', 'or'])
+const GRAPH_EMPTY_POLICIES: ReadonlySet<string> = new Set(['autoPass', 'autoReject', 'transferAdmin', 'assignUser'])
+const GRAPH_CONDITION_OPS: ReadonlySet<string> = new Set(['>', '>=', '<', '<=', '==', '!=', 'contains', 'in'])
+
+/**
+ * Structural validation of a designer graph — the editing state only.
+ * Publish-time gates (orphans, missing end, cycles) are B1; here the bar is
+ * "persistable and re-loadable without distortion": node ids unique, kinds
+ * known, approval/cc/condition payloads shaped (approval assignees
+ * non-empty), titles non-blank after trimming, within 64 chars and free of
+ * angle brackets, positions finite and non-negative, edges reference
+ * existing nodes with no self-loops or duplicates.
+ * @param graph - the decoded graph document from POST /flow-graph.
+ * @returns the readable failure list; empty means the graph may be persisted.
+ */
+export function validateFlowGraph(graph: unknown): string[] {
+  const failures: string[] = []
+  if (typeof graph !== 'object' || graph === null || Array.isArray(graph)) return ['graph 需为对象（version/nodes/edges）']
+  const doc = graph as Record<string, unknown>
+  const nodes = Array.isArray(doc['nodes']) ? doc['nodes'] as unknown[] : null
+  const edges = Array.isArray(doc['edges']) ? doc['edges'] as unknown[] : null
+  if (nodes === null || edges === null) return ['graph.nodes 与 graph.edges 需为数组']
+  if (nodes.length === 0) failures.push('graph.nodes 为空——画布至少需要一个节点')
+  const seenIds = new Set<string>()
+  for (const [index, value] of nodes.entries()) {
+    if (typeof value !== 'object' || value === null) { failures.push(`节点 #${String(index)} 不是对象`); continue }
+    const node = value as Record<string, unknown>
+    if (typeof node['id'] !== 'string' || node['id'] === '') { failures.push(`节点 #${String(index)} 缺 id`); continue }
+    if (seenIds.has(node['id'])) { failures.push(`节点 id 重复：${node['id']}`); continue }
+    seenIds.add(node['id'])
+    const label = `节点「${node['id']}」`
+    const kind = String(node['type'])
+    if (!GRAPH_NODE_KINDS.has(kind)) failures.push(`${label} type 非法：${kind}（仅 start/approval/cc/condition/end）`)
+    const position = node['position']
+    if (typeof position !== 'object' || position === null || typeof (position as Record<string, unknown>)['x'] !== 'number' || typeof (position as Record<string, unknown>)['y'] !== 'number') {
+      failures.push(`${label} 缺 position.x/y 数值坐标`)
+    } else {
+      const x = (position as Record<string, unknown>)['x'] as number
+      const y = (position as Record<string, unknown>)['y'] as number
+      if (!Number.isFinite(x) || !Number.isFinite(y)) {
+        failures.push(`${label} 坐标需为有限数值（x=${String(x)}, y=${String(y)}）——Infinity/NaN 序列化后无法还原画布位置`)
+      } else if (x < 0 || y < 0) {
+        failures.push(`${label} 坐标为负（x=${String(x)}, y=${String(y)}）——画布原点在左上，请把节点拖回画布内再保存`)
+      }
+    }
+    const data = node['data']
+    if (typeof data !== 'object' || data === null) { failures.push(`${label} 缺 data 负载`); continue }
+    const payload = data as Record<string, unknown>
+    if (typeof payload['title'] !== 'string' || payload['title'].trim() === '') failures.push(`${label} 缺名称（data.title 不能为空或纯空白）`)
+    else {
+      const title = payload['title'].trim()
+      if (title.length > GRAPH_NODE_TITLE_MAX) failures.push(`${label} 名称超长：${String(title.length)} 字符（上限 ${String(GRAPH_NODE_TITLE_MAX)}）`)
+      if (title.includes('<') || title.includes('>')) failures.push(`${label} 名称不能包含 < 或 > 字符`)
+    }
+    if (kind === 'approval') {
+      const approval = payload['approval']
+      if (typeof approval !== 'object' || approval === null) failures.push(`${label} 审批节点缺 data.approval`)
+      else {
+        const block = approval as Record<string, unknown>
+        if (!GRAPH_ASSIGNEE_TYPES.has(String(block['assigneeType']))) failures.push(`${label} assigneeType 非法：${String(block['assigneeType'])}`)
+        if (!GRAPH_MODES.has(String(block['mode']))) failures.push(`${label} mode 非法：${String(block['mode'])}`)
+        if (!GRAPH_EMPTY_POLICIES.has(String(block['emptyPolicy']))) failures.push(`${label} emptyPolicy 非法：${String(block['emptyPolicy'])}`)
+        if (!Array.isArray(block['assignees'])) failures.push(`${label} assignees 需为数组`)
+        else if ((block['assignees'] as unknown[]).length === 0) failures.push(`${label} 审批人未配置（assignees 为空）`)
+        else if (!(block['assignees'] as unknown[]).every(entry => typeof entry === 'string' && entry !== '')) failures.push(`${label} assignees 含空项（每项需非空字符串）`)
+      }
+    }
+    if (kind === 'cc') {
+      const cc = payload['cc']
+      if (typeof cc !== 'object' || cc === null || !Array.isArray((cc as Record<string, unknown>)['assignees'])) failures.push(`${label} 抄送节点缺 data.cc.assignees 数组`)
+    }
+    if (kind === 'condition') {
+      const condition = payload['condition']
+      if (typeof condition !== 'object' || condition === null || !Array.isArray((condition as Record<string, unknown>)['rows'])) {
+        failures.push(`${label} 条件节点缺 data.condition.rows 数组`)
+      } else {
+        const block = condition as Record<string, unknown>
+        if (block['join'] !== 'and' && block['join'] !== 'or') failures.push(`${label} join 需为 and/or`)
+        for (const [rowIndex, rowValue] of (block['rows'] as unknown[]).entries()) {
+          if (typeof rowValue !== 'object' || rowValue === null) { failures.push(`${label} 条件行 #${String(rowIndex)} 不是对象`); continue }
+          const row = rowValue as Record<string, unknown>
+          if (typeof row['field'] !== 'string' || row['field'] === '') failures.push(`${label} 条件行 #${String(rowIndex)} 缺字段名`)
+          if (!GRAPH_CONDITION_OPS.has(String(row['op']))) failures.push(`${label} 条件行 #${String(rowIndex)} 操作符非法：${String(row['op'])}`)
+        }
+      }
+    }
+  }
+  const seenEdgeIds = new Set<string>()
+  const seenPairs = new Set<string>()
+  for (const [index, value] of edges.entries()) {
+    if (typeof value !== 'object' || value === null) { failures.push(`连线 #${String(index)} 不是对象`); continue }
+    const edge = value as Record<string, unknown>
+    if (typeof edge['id'] !== 'string' || edge['id'] === '') { failures.push(`连线 #${String(index)} 缺 id`); continue }
+    if (seenEdgeIds.has(edge['id'])) { failures.push(`连线 id 重复：${edge['id']}`); continue }
+    seenEdgeIds.add(edge['id'])
+    const source = String(edge['source'])
+    const target = String(edge['target'])
+    if (!seenIds.has(source)) failures.push(`连线「${edge['id']}」起点节点不存在：${source}`)
+    if (!seenIds.has(target)) failures.push(`连线「${edge['id']}」终点节点不存在：${target}`)
+    if (source === target) failures.push(`连线「${edge['id']}」自环（${source} → ${target}）`)
+    const pair = `${source}\u0000${target}`
+    if (seenPairs.has(pair)) failures.push(`连线「${edge['id']}」重复：${source} → ${target}`)
+    seenPairs.add(pair)
+  }
+  return failures
+}
+
+/**
+ * The persist-time title trim (W5-R1): validateFlowGraph has already refused
+ * whitespace-only titles, so every stored title is its trimmed form —
+ * leading/trailing spaces and tabs (half- and full-width) never reach the
+ * json column, keeping SPA-side trimming and the DB value in lockstep.
+ * @param graph - the validated graph document.
+ * @returns a shallow-copied graph whose node titles are trimmed.
+ */
+function normalizeGraphTitles(graph: Record<string, unknown>): Record<string, unknown> {
+  const nodes = Array.isArray(graph['nodes']) ? graph['nodes'] as unknown[] : []
+  return {
+    ...graph,
+    nodes: nodes.map(value => {
+      if (typeof value !== 'object' || value === null) return value
+      const node = value as Record<string, unknown>
+      const data = node['data']
+      if (typeof data !== 'object' || data === null || typeof (data as Record<string, unknown>)['title'] !== 'string') return node
+      return { ...node, data: { ...(data as Record<string, unknown>), title: String((data as Record<string, unknown>)['title']).trim() } }
+    }),
+  }
+}
+
+// ─── W5-B1: the publish compiler — graph (editing truth) → derived wfl rows ───
+
+/** One derived wfl_flow_states row (engine-consumable; mirrors the seed template). */
+export interface CompiledStateRow {
+  readonly state: string
+  readonly doc_status_anchor: number
+  readonly allow_edit_role: string
+  readonly update_field: string
+  readonly update_value: string
+}
+
+/** One derived wfl_flow_transitions row (the canonical roles are manager/gm/srm_manager, so derived rows byte-match the seed templates). */
+export interface CompiledTransitionRow {
+  readonly state: string
+  readonly action: string
+  readonly next_state: string
+  readonly allowed_role: string
+  readonly condition_expr: string
+  readonly allow_self_approval: boolean
+}
+
+/** The full compile product: derived rows plus the wfl_flow_configs keys the graph owns. */
+export interface CompiledRows {
+  readonly vocabulary: 'doc' | 'admission'
+  readonly states: ReadonlyArray<CompiledStateRow>
+  readonly transitions: ReadonlyArray<CompiledTransitionRow>
+  readonly approverMap: ApproverMap
+  readonly extras: Record<string, unknown>
+  /** Pass-through cc nodes — the graph keeps them; engine runtime cc rows are B2. */
+  readonly ccCount: number
+}
+
+/** What the compiler needs beyond the graph itself (injected so the selftest stays pure). */
+export interface CompileContext {
+  /** The config row's state_field — selects the vocabulary the derived rows must fit. */
+  readonly stateField: string
+  /** The condition-field vocabulary (the /designer/meta formFields list). */
+  readonly formFields: ReadonlyArray<string>
+  /** The live config's extras — engine-owned keys pass through; the graph owns amount_field/amount_threshold. */
+  readonly preserveExtras: Record<string, unknown> | null
+  /** Every known username (the publish-time user-existence gate). */
+  readonly knownUsernames: ReadonlySet<string>
+  /** Resolves one NocoBase role name to its usernames (the publish-time role snapshot). */
+  readonly usersOfRole: (role: string) => Promise<readonly string[]>
+}
+
+/**
+ * The publish-gate families that need no external world (structural +
+ * topology + feature matrix + condition DSL). Resolution-dependent gates
+ * (user existence, role expansion) live in {@link compileGraphToRows}.
+ * @param graph - the stored graph document (graph column).
+ * @param formFields - the condition-field vocabulary.
+ * @returns the readable failure list; empty means the graph passes the pure gates.
+ */
+export function publishGateFailures(graph: unknown, formFields: ReadonlyArray<string>): string[] {
+  const failures = [...validateFlowGraph(graph)]
+  if (failures.length > 0 && (typeof graph !== 'object' || graph === null || Array.isArray((graph as Record<string, unknown>)['nodes']) === false)) return failures
+  const doc = graph as Record<string, unknown>
+  const nodes = (Array.isArray(doc['nodes']) ? doc['nodes'] : []) as Array<Record<string, unknown>>
+  const edges = (Array.isArray(doc['edges']) ? doc['edges'] : []) as Array<Record<string, unknown>>
+  const kindOf = new Map(nodes.map(node => [String(node['id']), String(node['type'])]))
+  const titleOf = (id: string): string => {
+    const node = nodes.find(entry => String(entry['id']) === id)
+    const data = node?.['data'] as Record<string, unknown> | undefined
+    return typeof data?.['title'] === 'string' ? data['title'] : id
+  }
+  const starts = nodes.filter(node => String(node['type']) === 'start')
+  const ends = nodes.filter(node => String(node['type']) === 'end')
+  if (starts.length === 0) failures.push('缺开始节点（graph 需要恰好一个 start）')
+  if (starts.length > 1) failures.push(`存在 ${String(starts.length)} 个开始节点（仅允许一个 start）`)
+  if (ends.length === 0) failures.push('缺结束节点（graph 至少需要一个 end）')
+  const inCount = new Map<string, number>()
+  const outCount = new Map<string, number>()
+  const outTargets = new Map<string, string[]>()
+  for (const edge of edges) {
+    const source = String(edge['source'])
+    const target = String(edge['target'])
+    inCount.set(target, (inCount.get(target) ?? 0) + 1)
+    outCount.set(source, (outCount.get(source) ?? 0) + 1)
+    outTargets.set(source, [...(outTargets.get(source) ?? []), target])
+  }
+  for (const node of nodes) {
+    const id = String(node['id'])
+    if ((inCount.get(id) ?? 0) + (outCount.get(id) ?? 0) === 0) failures.push(`孤立节点：「${titleOf(id)}」（没有任何连线相连）`)
+  }
+  // Cycle first (before degree/unreachable): a back edge reports the loop, not its symptoms.
+  const color = new Map<string, 'gray' | 'black'>()
+  const stack: string[] = []
+  const visit = (id: string): void => {
+    const state = color.get(id)
+    if (state === 'black') return
+    if (state === 'gray') {
+      const loopStart = stack.indexOf(id)
+      const loop = [...(loopStart >= 0 ? stack.slice(loopStart) : []), id].map(entry => `「${titleOf(entry)}」`).join(' → ')
+      failures.push(`存在环：${loop}（审批流不允许循环流转）`)
+      return
+    }
+    color.set(id, 'gray')
+    stack.push(id)
+    for (const next of outTargets.get(id) ?? []) visit(next)
+    stack.pop()
+    color.set(id, 'black')
+  }
+  for (const node of nodes) visit(String(node['id']))
+  // Reachability from start (unreachable nodes can never execute).
+  if (starts.length === 1) {
+    const startId = String(starts[0]?.['id'])
+    const reachable = new Set<string>([startId])
+    const queue = [startId]
+    while (queue.length > 0) {
+      const current = queue.shift() as string
+      for (const next of outTargets.get(current) ?? []) {
+        if (!reachable.has(next)) {
+          reachable.add(next)
+          queue.push(next)
+        }
+      }
+    }
+    for (const node of nodes) {
+      const id = String(node['id'])
+      if (!reachable.has(id)) failures.push(`不可达节点：「${titleOf(id)}」（从开始节点出发无法到达）`)
+    }
+    if ((inCount.get(startId) ?? 0) > 0) failures.push('开始节点不允许有入边')
+  }
+  // Degree contracts per kind (they force the chain/branch shapes the walk assumes).
+  for (const node of nodes) {
+    const id = String(node['id'])
+    const kind = String(node['type'])
+    const label = `「${titleOf(id)}」`
+    const out = outCount.get(id) ?? 0
+    const into = inCount.get(id) ?? 0
+    if (kind === 'start' && out !== 1) failures.push(`开始节点${label}需恰好一条出边（当前 ${String(out)} 条）`)
+    if (kind === 'end' && out > 0) failures.push(`结束节点${label}不允许有出边`)
+    if (kind === 'approval' && out !== 1) failures.push(`审批节点${label}需恰好一条出边（当前 ${String(out)} 条）`)
+    if (kind === 'approval' && into !== 1) failures.push(`审批节点${label}需恰好一条入边（当前 ${String(into)} 条）`)
+    if (kind === 'cc' && out !== 1) failures.push(`抄送节点${label}需恰好一条出边（当前 ${String(out)} 条）`)
+    if (kind === 'cc' && into !== 1) failures.push(`抄送节点${label}需恰好一条入边（当前 ${String(into)} 条）`)
+    if (kind === 'condition' && out !== 2) failures.push(`条件分支${label}需恰好两条出边（当前 ${String(out)} 条）`)
+    if (kind === 'condition' && into !== 1) failures.push(`条件分支${label}需恰好一条入边（当前 ${String(into)} 条）`)
+  }
+  // Feature matrix: what the engine can consume without changes (B1 boundary; the rest is B2).
+  for (const node of nodes) {
+    if (String(node['type']) !== 'approval') continue
+    const label = `审批节点「${titleOf(String(node['id']))}」`
+    const block = (node['data'] as Record<string, unknown>)['approval'] as Record<string, unknown> | undefined
+    if (block === undefined) continue
+    const assigneeType = String(block['assigneeType'])
+    if (assigneeType === 'supervisorChain') failures.push(`${label} 审批人类型「连续多级主管」依赖运行时提交人，引擎 B1 发布链路不支持（B2 启用）；请改用指定成员或角色`)
+    if (assigneeType === 'formField') failures.push(`${label} 审批人类型「表单联系人字段」依赖单据运行时字段，引擎 B1 发布链路不支持（B2 启用）；请改用指定成员或角色`)
+    if (assigneeType === 'deptLeader') failures.push(`${label} 审批人类型「部门主管」的引擎部门路由按全员展开（或签），主管专属语义 B1 不发布（B2 启用）；请改用指定成员或角色`)
+    const mode = String(block['mode'])
+    if (mode === 'sequential') failures.push(`${label} 多人方式「依次审批」需要引擎逐人聚合判定（B2 启用）；B1 仅支持或签（任一人可审）`)
+    if (mode === 'countersign') failures.push(`${label} 多人方式「会签（全过）」需要引擎扇出聚合判定（B2 启用）；B1 仅支持或签（任一人可审）`)
+    const emptyPolicy = String(block['emptyPolicy'])
+    if (emptyPolicy === 'autoPass') failures.push(`${label} 空策略「自动通过」需要引擎跳过语义（B2 启用）；B1 支持自动拒绝/转交管理员`)
+    if (emptyPolicy === 'assignUser') failures.push(`${label} 空策略「指定人员」需要引擎改派语义（B2 启用）；B1 支持自动拒绝/转交管理员`)
+  }
+  // Condition DSL: the engine consumes exactly one numeric > threshold row.
+  for (const node of nodes) {
+    if (String(node['type']) !== 'condition') continue
+    const label = `条件分支「${titleOf(String(node['id']))}」`
+    const condition = (node['data'] as Record<string, unknown>)['condition'] as Record<string, unknown> | undefined
+    if (condition === undefined || !Array.isArray(condition['rows'])) continue
+    const rows = condition['rows'] as Array<Record<string, unknown>>
+    if (rows.length === 0) {
+      failures.push(`${label} 缺条件行（至少一行「字段/操作符/值」）`)
+      continue
+    }
+    if (rows.length > 1) failures.push(`${label} 有 ${String(rows.length)} 行条件——引擎 B1 仅支持单行金额阈值（多行条件在 B2 扩展条件 DSL）`)
+    const row = rows[0] as Record<string, unknown>
+    const field = String(row['field'] ?? '')
+    const op = String(row['op'])
+    const value = String(row['value'] ?? '')
+    if (field === '') failures.push(`${label} 条件行缺字段名`)
+    else if (!/^[A-Za-z_][A-Za-z0-9_]*$/u.test(field)) failures.push(`${label} 条件字段名非法：${field}（需为数据库列名形式的标识符）`)
+    else if (!formFields.includes(field)) failures.push(`${label} 条件字段 ${field} 不在单据字段词表（可在属性面板重新选择字段）`)
+    if (op !== '>') failures.push(`${label} 条件操作符需为 >（引擎两级路由语义：金额超过阈值进二级审批，≤ 阈值一审即生效；其余操作符在 B2 扩展条件 DSL）`)
+    if (!Number.isFinite(Number(value))) failures.push(`${label} 条件值需为有限数字（当前 ${value === '' ? '空' : value}）`)
+  }
+  return failures
+}
+
+/** The doc-vocabulary states template (byte-matches the seedDocFlow rows). */
+const docStateRows = (): ReadonlyArray<CompiledStateRow> =>
+  WORKFLOW_STATES.map(state => ({
+    state,
+    doc_status_anchor: DOC_STATUS_ANCHORS[state],
+    allow_edit_role: state === 'draft' || state === 'rejected' ? 'submitter' : 'manager',
+    update_field: '',
+    update_value: '',
+  }))
+
+/** The doc-vocabulary transitions template: the ≤ literal rides the direct-approve row (the PILOT_TRANSITIONS shape). */
+const docTransitionRows = (amountField: string | null, threshold: number | null): ReadonlyArray<CompiledTransitionRow> => [
+  { state: 'draft', action: 'submit', next_state: 'pending', allowed_role: 'manager', condition_expr: '', allow_self_approval: true },
+  { state: 'rejected', action: 'resubmit', next_state: 'pending', allowed_role: 'manager', condition_expr: '', allow_self_approval: true },
+  { state: 'pending', action: 'approve', next_state: 'approved', allowed_role: 'manager', condition_expr: amountField === null || threshold === null ? '' : `${amountField} <= ${String(threshold)}`, allow_self_approval: true },
+  { state: 'pending', action: 'approve', next_state: 'pending_level2', allowed_role: 'manager', condition_expr: '', allow_self_approval: true },
+  { state: 'pending_level2', action: 'approve', next_state: 'approved', allowed_role: 'gm', condition_expr: '', allow_self_approval: true },
+  { state: 'pending', action: 'reject', next_state: 'rejected', allowed_role: 'manager', condition_expr: '', allow_self_approval: true },
+  { state: 'pending_level2', action: 'reject', next_state: 'rejected', allowed_role: 'gm', condition_expr: '', allow_self_approval: true },
+  { state: 'approved', action: 'void', next_state: 'void', allowed_role: 'manager', condition_expr: '', allow_self_approval: true },
+]
+
+/** The admission-vocabulary states template (byte-matches the seedAdmissionFlow rows). */
+const admissionStateRows = (): ReadonlyArray<CompiledStateRow> =>
+  SUPPLIER_ADMISSION_STATES.map(state => ({
+    state,
+    doc_status_anchor: SUPPLIER_ADMISSION_ANCHORS[state],
+    allow_edit_role: state === 'potential' || state === 'rejected' ? 'submitter' : 'srm_manager',
+    update_field: '',
+    update_value: '',
+  }))
+
+/** The admission-vocabulary transitions template (the ADMISSION_TRANSITIONS shape). */
+const admissionTransitionRows = (): ReadonlyArray<CompiledTransitionRow> => [
+  { state: 'potential', action: 'submit', next_state: 'reviewing', allowed_role: 'srm_manager', condition_expr: '', allow_self_approval: true },
+  { state: 'rejected', action: 'resubmit', next_state: 'reviewing', allowed_role: 'srm_manager', condition_expr: '', allow_self_approval: true },
+  { state: 'reviewing', action: 'approve', next_state: 'qualified', allowed_role: 'srm_manager', condition_expr: '', allow_self_approval: true },
+  { state: 'reviewing', action: 'reject', next_state: 'rejected', allowed_role: 'srm_manager', condition_expr: '', allow_self_approval: true },
+]
+
+/** One resolved approver-map value: a single username stays a string, several become an array (the live forms). */
+const approverValueOf = (users: readonly string[]): ApproverMapValue => users.length === 1 ? users[0] as string : [...users]
+
+/**
+ * Compile one graph into the derived rows the engine consumes — the one-way
+ * publish derivation. The graph's approval chain maps onto the fixed
+ * vocabulary templates (canonical roles manager/gm/srm_manager), the optional
+ * condition node becomes the two-level amount routing (extras.amount_field +
+ * amount_threshold + the ≤ literal), and cc nodes pass through as graph-only.
+ * Every gate failure is collected and reported together (fail loud, readable).
+ * @param graph - the stored graph document (the graph column's decoded value).
+ * @param ctx - the compile context (vocabulary, field vocabulary, extras base, user/role resolution).
+ * @returns the derived rows, or the readable failure list.
+ */
+export async function compileGraphToRows(graph: unknown, ctx: CompileContext): Promise<{ ok: true, rows: CompiledRows } | { ok: false, errors: string[] }> {
+  const failures = publishGateFailures(graph, ctx.formFields)
+  if (failures.length > 0) return { ok: false, errors: failures }
+  const doc = graph as Record<string, unknown>
+  const nodes = (doc['nodes'] as Array<Record<string, unknown>>).map(node => ({
+    id: String(node['id']),
+    kind: String(node['type']),
+    title: String((node['data'] as Record<string, unknown>)['title'] ?? node['id']),
+    data: node['data'] as Record<string, unknown>,
+  }))
+  const edges = (doc['edges'] as Array<Record<string, unknown>>).map(edge => ({ source: String(edge['source']), target: String(edge['target']) }))
+  const byId = new Map(nodes.map(node => [node.id, node]))
+  const outTargets = new Map<string, string[]>()
+  for (const edge of edges) outTargets.set(edge.source, [...(outTargets.get(edge.source) ?? []), edge.target])
+  const onlyOut = (id: string): string => (outTargets.get(id) ?? [])[0] ?? ''
+  /** Follow one out edge collapsing cc pass-throughs (cc has exactly one out; degree gates guaranteed it). */
+  const collapse = (id: string): string => {
+    let cursor = onlyOut(id)
+    while (byId.get(cursor)?.kind === 'cc') cursor = onlyOut(cursor)
+    return cursor
+  }
+  const start = nodes.find(node => node.kind === 'start') as { id: string } | undefined
+  if (start === undefined) return { ok: false, errors: ['缺开始节点'] }
+  // Walk the main chain recording approval/condition tokens (cc collapses, ends terminate).
+  const tokens: Array<{ id: string, kind: 'approval' | 'condition' }> = []
+  let cursor = collapse(start.id)
+  let guard = 0
+  const errors: string[] = []
+  while (byId.get(cursor)?.kind !== 'end') {
+    if (++guard > nodes.length + 1) return { ok: false, errors: ['主链走查越界（环检测遗漏？请报告）', ...errors] }
+    const node = byId.get(cursor)
+    if (node === undefined) return { ok: false, errors: [`主链走到未知节点 ${cursor}`, ...errors] }
+    if (node.kind !== 'approval' && node.kind !== 'condition') {
+      errors.push(`主链上出现非常规节点「${node.title}」（${node.kind}）——开始节点之后应是审批/条件/结束`)
+      break
+    }
+    tokens.push({ id: cursor, kind: node.kind })
+    if (node.kind === 'condition') {
+      const [branchA, branchB] = (outTargets.get(cursor) ?? []).map(target => {
+        let hop = target
+        while (byId.get(hop)?.kind === 'cc') hop = onlyOut(hop)
+        return hop
+      })
+      const kinds = [byId.get(branchA ?? '')?.kind, byId.get(branchB ?? '')?.kind].sort()
+      if (kinds[0] !== 'approval' || kinds[1] !== 'end') {
+        errors.push(`条件分支「${node.title}」的两条分支需分别指向二级审批节点和结束节点（当前指向 ${kinds.join('、')}）`)
+        break
+      }
+      cursor = byId.get(branchA ?? '')?.kind === 'approval' ? branchA as string : branchB as string
+    } else {
+      cursor = collapse(cursor)
+    }
+  }
+  if (errors.length > 0) return { ok: false, errors: [...failures, ...errors] }
+  const approvals = tokens.filter(token => token.kind === 'approval')
+  const conditions = tokens.filter(token => token.kind === 'condition')
+  const sequence = tokens.map(token => token.kind).join(',')
+  if (approvals.length === 0) return { ok: false, errors: [`主链无审批节点（序列 ${sequence}）——至少需要一个审批节点`] }
+  if (approvals.length > 2) return { ok: false, errors: [`主链有 ${String(approvals.length)} 个审批节点——引擎六态词汇表至多支持两级审批（第三级需 B2 引擎扩展）`] }
+  if (conditions.length > 1) return { ok: false, errors: [`主链有 ${String(conditions.length)} 个条件分支——至多一个（多路阈值路由需 B2 扩展）`] }
+  if (conditions.length === 1 && sequence !== 'approval,condition,approval') {
+    return { ok: false, errors: [`条件分支必须位于一级审批与二级审批之间（当前序列 ${sequence}）——条件决定金额超过阈值时进入二级审批`] }
+  }
+  if (conditions.length === 0 && approvals.length === 2 && sequence !== 'approval,approval') {
+    return { ok: false, errors: [`主链序列异常：${sequence}（期望 approval,approval）`] }
+  }
+  if (conditions.length === 0 && approvals.length === 1 && sequence !== 'approval') {
+    return { ok: false, errors: [`主链序列异常：${sequence}（期望 approval）`] }
+  }
+  const vocabulary: 'doc' | 'admission' | null =
+    ctx.stateField === SUPPLIER_ADMISSION_STATE_FIELD ? 'admission' : ctx.stateField === 'doc_status' ? 'doc' : null
+  if (vocabulary === null) {
+    return { ok: false, errors: [`未知状态字段 ${ctx.stateField}——发布仅支持 doc_status（六态）与 lifecycle_status（准入四态）词汇表`] }
+  }
+  if (vocabulary === 'admission' && (approvals.length !== 1 || conditions.length !== 0)) {
+    return { ok: false, errors: ['供应商准入词汇表仅支持单级审批、无条件分支（potential→reviewing→qualified）——多级/条件编排属于单据词汇表'] }
+  }
+  // Resolve each approval node's assignees into the approver_map value.
+  const approverEntries: Array<[string, ApproverMapValue]> = []
+  const roleNames = vocabulary === 'admission' ? ['srm_manager'] : approvals.length === 2 ? ['manager', 'gm'] : ['manager']
+  for (const [index, token] of approvals.entries()) {
+    const node = byId.get(token.id)
+    const block = (node?.data['approval'] ?? {}) as Record<string, unknown>
+    const label = `审批节点「${node?.title ?? token.id}」`
+    const assigneeType = String(block['assigneeType'])
+    const assignees = (Array.isArray(block['assignees']) ? block['assignees'] : []).map(entry => String(entry))
+    if (assigneeType === 'user') {
+      const missing = assignees.filter(user => !ctx.knownUsernames.has(user))
+      if (missing.length > 0) {
+        return { ok: false, errors: [`${label} 引用不存在的用户：${missing.join('、')}（users 表无此用户名；请重新选择审批人）`] }
+      }
+      approverEntries.push([roleNames[index] as string, approverValueOf(assignees)])
+      continue
+    }
+    if (assigneeType === 'role') {
+      const users: string[] = []
+      for (const role of assignees) {
+        const resolved = await ctx.usersOfRole(role)
+        if (resolved.length === 0) {
+          const emptyPolicy = String(block['emptyPolicy'])
+          if (emptyPolicy === 'transferAdmin') {
+            users.push('admin')
+            continue
+          }
+          return { ok: false, errors: [`${label} 的角色「${role}」没有任何成员（发布期角色快照为空；emptyPolicy=${emptyPolicy}——改用「转交管理员」或先给角色挂用户）`] }
+        }
+        users.push(...resolved)
+      }
+      approverEntries.push([roleNames[index] as string, approverValueOf([...new Set(users)])])
+      continue
+    }
+    return { ok: false, errors: [`${label} 审批人类型 ${assigneeType} 不可编译（publishGateFailures 应已拦截）`] }
+  }
+  const approverMap: ApproverMap = Object.fromEntries(approverEntries)
+  // Amount routing: the condition node owns amount_field/amount_threshold; no condition → the keys drop out.
+  const extras: Record<string, unknown> = { ...(ctx.preserveExtras ?? {}) }
+  let amountField: string | null = null
+  let threshold: number | null = null
+  if (conditions.length === 1) {
+    const condition = (byId.get(conditions[0]?.id ?? '')?.data['condition'] ?? {}) as Record<string, unknown>
+    const row = ((condition['rows'] as Array<Record<string, unknown>>) ?? [])[0] as Record<string, unknown> | undefined
+    amountField = String(row?.['field'] ?? '')
+    threshold = Number(row?.['value'])
+    extras.amount_field = amountField
+    extras.amount_threshold = threshold
+  } else {
+    delete extras.amount_field
+    delete extras.amount_threshold
+  }
+  const ccCount = nodes.filter(node => node.kind === 'cc').length
+  if (vocabulary === 'admission') {
+    return {
+      ok: true,
+      rows: {
+        vocabulary,
+        states: admissionStateRows(),
+        transitions: admissionTransitionRows(),
+        approverMap,
+        extras: { ...(ctx.preserveExtras ?? {}) },
+        ccCount,
+      },
+    }
+  }
+  return {
+    ok: true,
+    rows: {
+      vocabulary: 'doc',
+      states: docStateRows(),
+      transitions: docTransitionRows(amountField, threshold),
+      approverMap,
+      extras,
+      ccCount,
+    },
+  }
+}
+
+/** The live-row shape the reverse importer and the equivalence assertion read. */
+export interface LiveFlowRows {
+  readonly stateField: string
+  readonly approverMap: ApproverMap
+  readonly extras: Record<string, unknown> | null
+  readonly states: ReadonlyArray<Record<string, any>>
+  readonly transitions: ReadonlyArray<Record<string, any>>
+}
+
+/** Fixed grid coordinates for imported graphs (round-trip stability; purely cosmetic). */
+const IMPORT_POSITIONS: Readonly<Record<'start' | 'approval_1' | 'condition' | 'approval_2' | 'end', { x: number, y: number }>> = {
+  start: { x: 40, y: 160 },
+  approval_1: { x: 320, y: 160 },
+  condition: { x: 600, y: 60 },
+  approval_2: { x: 880, y: 260 },
+  end: { x: 1160, y: 60 },
+}
+
+/**
+ * The reverse importer: existing wfl states/transitions/approver_map → a
+ * graph draft. The canonical roles map back onto approval nodes (manager →
+ * level 1, gm → level 2, srm_manager → admission), the ≤ literal becomes the
+ * condition node's single `field > threshold` row, and department-form values
+ * import as deptLeader nodes. Used by the publish round-trip gate and the B2
+ * full migration.
+ * @param live - the flow's live rows (config keys + states + transitions).
+ * @returns the graph draft, or the readable failure list when the rows fit no known template.
+ */
+export function rowsToGraph(live: LiveFlowRows): { ok: true, graph: Record<string, unknown> } | { ok: false, errors: string[] } {
+  const errors: string[] = []
+  const transitionOf = (state: string, action: string, nextState?: string): Record<string, any> | undefined =>
+    live.transitions.find(row => String(row.state) === state && String(row.action) === action && (nextState === undefined || String(row.next_state) === nextState))
+  const assigneesOf = (role: string): { assigneeType: string, assignees: string[] } => {
+    const value = live.approverMap[role]
+    const entries = value === undefined || value === null ? [] : Array.isArray(value) ? value : [value]
+    const plain = entries.filter((entry): entry is string => typeof entry === 'string' && entry.trim() !== '')
+    if (plain.length === entries.length && entries.length > 0) return { assigneeType: 'user', assignees: plain }
+    const departments = entries.filter(isDepartmentRef).map(entry => entry.value)
+    if (departments.length === entries.length && entries.length > 0) return { assigneeType: 'deptLeader', assignees: departments }
+    return { assigneeType: 'user', assignees: [] }
+  }
+  const nodes: Array<Record<string, unknown>> = []
+  const edges: Array<Record<string, unknown>> = []
+  const pushNode = (slot: 'start' | 'approval_1' | 'condition' | 'approval_2' | 'end', kind: string, data: Record<string, unknown>): string => {
+    const id = `n_${slot}`
+    nodes.push({ id, type: kind, position: { ...IMPORT_POSITIONS[slot] }, data })
+    return id
+  }
+  const pushEdge = (source: string, target: string): void => {
+    edges.push({ id: `e_${source}_${target}`, source, target })
+  }
+  const approvalDataOf = (resolved: { assigneeType: string, assignees: string[] }, title: string): Record<string, unknown> => ({
+    title,
+    approval: {
+      assigneeType: resolved.assigneeType,
+      assignees: resolved.assignees,
+      mode: 'or',
+      emptyPolicy: resolved.assignees.length === 0 ? 'autoReject' : 'transferAdmin',
+    },
+  })
+  if (live.stateField === SUPPLIER_ADMISSION_STATE_FIELD) {
+    const approve = transitionOf('reviewing', 'approve')
+    if (approve === undefined) return { ok: false, errors: ['无法逆向导入：缺 reviewing×approve 转移（准入流模板不完整）'] }
+    const role = String(approve.allowed_role ?? '')
+    pushNode('start', 'start', { title: '发起人' })
+    pushNode('approval_1', 'approval', approvalDataOf(assigneesOf(role), '准入评审'))
+    pushNode('end', 'end', { title: '结束' })
+    pushEdge('n_start', 'n_approval_1')
+    pushEdge('n_approval_1', 'n_end')
+    return { ok: true, graph: { version: 1, nodes, edges } }
+  }
+  if (live.stateField !== 'doc_status') return { ok: false, errors: [`无法逆向导入：未知状态字段 ${live.stateField}（支持 doc_status 与 ${SUPPLIER_ADMISSION_STATE_FIELD}）`] }
+  const approve1 = transitionOf('pending', 'approve', 'approved') ?? transitionOf('pending', 'approve', 'pending_level2')
+  if (approve1 === undefined) return { ok: false, errors: ['无法逆向导入：缺 pending×approve 转移（六态流模板不完整）'] }
+  const level2 = transitionOf('pending_level2', 'approve', 'approved')
+  const literal = String(approve1.condition_expr ?? '')
+  const thresholdMatch = /^([A-Za-z_][A-Za-z0-9_]*)\s*<=\s*(-?\d+(?:\.\d+)?)$/u.exec(literal.trim())
+  const twoLevel = level2 !== undefined
+  if (!twoLevel && literal.trim() !== '') {
+    errors.push(`无法逆向导入：无二级审批但一级审批带条件「${literal}」（种子模板不会产出此形状）`)
+  }
+  if (thresholdMatch !== null && !twoLevel) {
+    errors.push(`无法逆向导入：条件「${literal}」存在但没有二级审批节点承接（模板不一致）`)
+  }
+  if (twoLevel && thresholdMatch === null && literal.trim() !== '') {
+    errors.push(`无法逆向导入：一级审批条件「${literal}」不是「字段 <= 阈值」形式（编译器仅支持该 DSL）`)
+  }
+  const role2 = level2 === undefined ? '' : String(level2.allowed_role ?? '')
+  pushNode('start', 'start', { title: '发起人' })
+  pushNode('approval_1', 'approval', approvalDataOf(assigneesOf(String(approve1.allowed_role ?? '')), '一级审批'))
+  pushEdge('n_start', 'n_approval_1')
+  let tail = 'n_approval_1'
+  if (thresholdMatch !== null) {
+    const field = thresholdMatch[1] as string
+    const threshold = thresholdMatch[2] as string
+    pushNode('condition', 'condition', { title: '金额条件', condition: { join: 'and', rows: [{ field, op: '>', value: threshold }] } })
+    pushEdge(tail, 'n_condition')
+    tail = 'n_condition'
+  }
+  if (twoLevel) {
+    pushNode('approval_2', 'approval', approvalDataOf(assigneesOf(role2), '二级审批'))
+    if (tail === 'n_condition') {
+      // The > branch continues into level 2; the ≤ branch goes straight to the end (approve → approved).
+      pushEdge('n_condition', 'n_approval_2')
+      pushEdge('n_condition', 'n_end')
+    } else {
+      pushEdge(tail, 'n_approval_2')
+    }
+    tail = 'n_approval_2'
+  }
+  pushNode('end', 'end', { title: '结束' })
+  pushEdge(tail, 'n_end')
+  if (errors.length > 0) return { ok: false, errors }
+  return { ok: true, graph: { version: 1, nodes, edges } }
+}
+
+/**
+ * The round-trip equivalence assertion: compare live rows against the
+ * compiler's product with role keys normalized through the approver_map
+ * values (derived roles are canonical manager/gm/srm_manager; live rows may
+ * carry any keys naming the same approver sets).
+ * @param current - the flow's live rows.
+ * @param derived - the compiler's product over the re-imported graph.
+ * @returns the diff list; empty means semantically equivalent.
+ */
+export function assertRowsEquivalent(current: LiveFlowRows, derived: CompiledRows): string[] {
+  const diffs: string[] = []
+  const sortKeys = (value: unknown): unknown => {
+    if (Array.isArray(value)) return value.map(sortKeys)
+    if (typeof value === 'object' && value !== null) {
+      return Object.fromEntries(Object.keys(value as Record<string, unknown>).sort().map(key => [key, sortKeys((value as Record<string, unknown>)[key])]))
+    }
+    return value
+  }
+  const canonical = (value: unknown): string => JSON.stringify(sortKeys(value))
+  const liveStates = [...current.states].sort((a, b) => String(a.state).localeCompare(String(b.state)))
+  const derivedStates = [...derived.states].sort((a, b) => a.state.localeCompare(b.state))
+  if (liveStates.length !== derivedStates.length) {
+    diffs.push(`状态行数不一致：现库 ${String(liveStates.length)} vs 派生 ${String(derivedStates.length)}`)
+  } else {
+    for (const [index, liveRow] of liveStates.entries()) {
+      const derivedRow = derivedStates[index] as CompiledStateRow
+      const live = {
+        state: String(liveRow.state),
+        anchor: Number(liveRow.doc_status_anchor ?? 0),
+        allow_edit_role: String(liveRow.allow_edit_role ?? ''),
+        update_field: String(liveRow.update_field ?? ''),
+        update_value: String(liveRow.update_value ?? ''),
+      }
+      const want = { state: derivedRow.state, anchor: derivedRow.doc_status_anchor, allow_edit_role: derivedRow.allow_edit_role, update_field: derivedRow.update_field, update_value: derivedRow.update_value }
+      if (canonical(live) !== canonical(want)) diffs.push(`状态行不一致：${String(liveRow.state)} 现库 ${canonical(live)} vs 派生 ${canonical(want)}`)
+    }
+  }
+  const liveTransitions = [...current.transitions].sort((a, b) =>
+    `${String(a.state)}\u0000${String(a.action)}\u0000${String(a.next_state)}`.localeCompare(`${String(b.state)}\u0000${String(b.action)}\u0000${String(b.next_state)}`))
+  const derivedTransitions = [...derived.transitions].sort((a, b) => `${a.state}\u0000${a.action}\u0000${a.next_state}`.localeCompare(`${b.state}\u0000${b.action}\u0000${b.next_state}`))
+  if (liveTransitions.length !== derivedTransitions.length) {
+    diffs.push(`转移行数不一致：现库 ${String(liveTransitions.length)} vs 派生 ${String(derivedTransitions.length)}`)
+  } else {
+    for (const [index, liveRow] of liveTransitions.entries()) {
+      const derivedRow = derivedTransitions[index] as CompiledTransitionRow
+      const liveKey = `${String(liveRow.state)}×${String(liveRow.action)}→${String(liveRow.next_state)}`
+      const wantKey = `${derivedRow.state}×${derivedRow.action}→${derivedRow.next_state}`
+      if (liveKey !== wantKey) {
+        diffs.push(`转移不一致：现库 ${liveKey} vs 派生 ${wantKey}`)
+        continue
+      }
+      if (String(liveRow.condition_expr ?? '') !== derivedRow.condition_expr) {
+        diffs.push(`转移 ${liveKey} 条件不一致：现库「${String(liveRow.condition_expr ?? '')}」 vs 派生「${derivedRow.condition_expr}」`)
+      }
+      if (Boolean(liveRow.allow_self_approval) !== derivedRow.allow_self_approval) {
+        diffs.push(`转移 ${liveKey} allow_self_approval 不一致：现库 ${String(Boolean(liveRow.allow_self_approval))} vs 派生 ${String(derivedRow.allow_self_approval)}`)
+      }
+      // Both sides normalize through the same lens: value → entries array → canonical JSON.
+      const normalizeApprovers = (value: ApproverMapValue | undefined): string =>
+        canonical(value === undefined ? [] : Array.isArray(value) ? value : [value])
+      const liveApprovers = normalizeApprovers(current.approverMap[String(liveRow.allowed_role ?? '')])
+      const derivedApprovers = normalizeApprovers(derived.approverMap[derivedRow.allowed_role])
+      if (liveApprovers !== derivedApprovers) {
+        diffs.push(`转移 ${liveKey} 审批人不一致：现库角色 ${String(liveRow.allowed_role ?? '')}=${liveApprovers} vs 派生角色 ${derivedRow.allowed_role}=${derivedApprovers}`)
+      }
+    }
+  }
+  if (canonical(current.approverMap) !== canonical(derived.approverMap)) {
+    diffs.push(`approver_map 不一致：现库 ${canonical(current.approverMap)} vs 派生 ${canonical(derived.approverMap)}`)
+  }
+  if (canonical(current.extras ?? {}) !== canonical(derived.extras)) {
+    diffs.push(`extras 不一致：现库 ${canonical(current.extras ?? {})} vs 派生 ${canonical(derived.extras)}`)
+  }
+  return diffs
+}
+
+/**
+ * The /designer + /flow-graph handlers' config lookup: every flow row (active
+ * or not) is a valid graph target — the editing state stays orthogonal to
+ * activation until B1's publish derives states/transitions rows.
+ * @param io - the data access to read through.
+ * @param docType - the document-type collection key.
+ */
+async function flowConfigRow(io: NocoIO, docType: string): Promise<Record<string, any> | undefined> {
+  const rows = await io.list('wfl_flow_configs', { doc_type: docType })
+  return rows[0]
+}
+
+/**
+ * The /designer/meta formFields vocabulary — the merged, deduplicated,
+ * sorted editable field names across every flow config's doc-type
+ * collection (the formField assignee type's AutoComplete options; free
+ * input stays allowed, so the list is an aid, not a gate). System columns
+ * (id/createdAt/…) are excluded by name.
+ * @param token - a root auth token for the field-manager API.
+ * @param configs - the wfl_flow_configs rows (their doc_type names the collection).
+ * @returns the sorted unique field-name list.
+ */
+async function designerFormFieldVocabulary(token: string, configs: Array<Record<string, any>>): Promise<string[]> {
+  const names = new Set<string>()
+  for (const config of configs) {
+    const collection = String(config.doc_type)
+    const filter = encodeURIComponent(JSON.stringify({ collectionName: { $eq: collection } }))
+    const fields = await dataOf(token, 'GET', `/api/fields:list?pageSize=200&filter=${filter}`) as Array<{ name?: string }> | null
+    for (const field of fields ?? []) {
+      const name = String(field.name ?? '')
+      if (name !== '' && !GRAPH_SYSTEM_FIELD_NAMES.has(name)) names.add(name)
+    }
+  }
+  return [...names].sort()
+}
+
+/**
+ * Idempotently add wfl_flow_configs.graph (json) + graph_version (int) —
+ * the designer's persistence columns. Old rows keep graph NULL and the engine
+ * never reads these columns (B0 edits only; publish derivation is B1).
+ * @param token - a root auth token for the field-manager API.
+ */
+export async function ensureGraphColumns(token: string): Promise<void> {
+  const fields = await dataOf(token, 'GET', `/api/fields:list?pageSize=200&filter=${encodeURIComponent(JSON.stringify({ collectionName: { $eq: 'wfl_flow_configs' } }))}`) as Array<{ name?: string }> | null
+  const present = new Set((fields ?? []).map(field => String(field.name)))
+  const missing: Array<Record<string, unknown>> = []
+  if (!present.has('graph')) missing.push({ name: 'graph', type: 'json', interface: 'json', uiSchema: { type: 'object', 'x-component': 'Input.JSON', title: '流程图（设计器编辑态）' } })
+  if (!present.has('graph_version')) missing.push({ name: 'graph_version', type: 'integer', interface: 'number', uiSchema: { type: 'number', 'x-component': 'InputNumber', title: '图版本' } })
+  if (!present.has('published_graph_version')) missing.push({ name: 'published_graph_version', type: 'integer', interface: 'number', uiSchema: { type: 'number', 'x-component': 'InputNumber', title: '已发布图版本' } })
+  if (!present.has('published_at')) missing.push({ name: 'published_at', type: 'text', interface: 'input', uiSchema: { type: 'string', 'x-component': 'Input', title: '发布时间' } })
+  for (const field of missing) {
+    await dataOf(token, 'POST', '/api/fields:create', { collectionName: 'wfl_flow_configs', ...field })
+    console.log(`approval-engine: wfl_flow_configs.${String(field['name'])} column added (W5-B0 designer editing state)`)
+  }
+}
+
+/**
+ * The atomic publish write: ONE SQL statement whose every effect hangs off a
+ * data-modifying CTE. `bumped` re-writes the config row only when the CAS
+ * baseline matches; the DELETE/INSERT arms all key off `bumped`'s output, so
+ * a lost CAS (UPDATE matches zero rows) no-ops every arm. A multi-statement
+ * string would NOT give this: psql's implicit transaction commits a clean
+ * "UPDATE 0" and would still run the DELETEs (the derivation would land with
+ * no version move).
+ * @param flowId - the wfl_flow_configs row id.
+ * @param docType - the document-type collection key (CAS guard).
+ * @param baseVersion - the graph_version this publish is based on (CAS guard).
+ * @param rows - the compiled derivation.
+ * @param note - the appended config_note audit line (with the row snapshot).
+ * @param publishedAt - the ISO publish timestamp.
+ * @returns the SQL statement for one psql -c call.
+ */
+function publishSql(flowId: number, docType: string, baseVersion: number, rows: CompiledRows, note: string, publishedAt: string): string {
+  const nextVersion = baseVersion + 1
+  const stateValues = rows.states.map(row =>
+    `(${sqlLiteral(row.state)}, ${String(row.doc_status_anchor)}, ${sqlLiteral(row.allow_edit_role)}, '', '')`).join(', ')
+  const transitionValues = rows.transitions.map(row =>
+    `(${sqlLiteral(row.state)}, ${sqlLiteral(row.action)}, ${sqlLiteral(row.next_state)}, ${sqlLiteral(row.allowed_role)}, ${sqlLiteral(row.condition_expr)}, ${row.allow_self_approval ? 'TRUE' : 'FALSE'})`).join(', ')
+  return [
+    `WITH bumped AS (UPDATE wfl_flow_configs SET graph_version = ${String(nextVersion)}, approver_map = ${sqlLiteral(JSON.stringify(rows.approverMap))}, extras = ${sqlLiteral(JSON.stringify(rows.extras))}, published_graph_version = ${String(nextVersion)}, published_at = ${sqlLiteral(publishedAt)}, config_note = ${sqlLiteral(note)} WHERE id = ${String(flowId)} AND doc_type = ${sqlLiteral(docType)} AND graph_version = ${String(baseVersion)} RETURNING id),`,
+    `ds AS (DELETE FROM wfl_flow_states WHERE flow_id IN (SELECT id FROM bumped)),`,
+    `dt AS (DELETE FROM wfl_flow_transitions WHERE flow_id IN (SELECT id FROM bumped)),`,
+    `ins_s AS (INSERT INTO wfl_flow_states (flow_id, state, doc_status_anchor, allow_edit_role, update_field, update_value) SELECT b.id, v.state, v.anchor::integer, v.role, v.uf, v.uv FROM bumped b CROSS JOIN (VALUES ${stateValues}) AS v(state, anchor, role, uf, uv) RETURNING id),`,
+    `ins_t AS (INSERT INTO wfl_flow_transitions (flow_id, state, action, next_state, allowed_role, condition_expr, allow_self_approval) SELECT b.id, v.state, v.action, v.next, v.role, v.cond, v.self FROM bumped b CROSS JOIN (VALUES ${transitionValues}) AS v(state, action, next, role, cond, self) RETURNING id)`,
+    `SELECT (SELECT count(*) FROM bumped) AS bumped, (SELECT count(*) FROM ins_s) AS states, (SELECT count(*) FROM ins_t) AS transitions;`,
+  ].join('\n')
 }
 
 // ─── W2-B7: the built-in nightly timer (default off) ───
@@ -1285,6 +2181,14 @@ export async function serve(port = 13_110): Promise<void> {
   const nightly = parseNightlyEnv(process.env)
   const io = await restIO()
   const wmsToken = await signInWithRetry()
+  await ensureGraphColumns(wmsToken)
+  // W5-R1: rows that predate the graph column carry graph_version NULL — in
+  // SQL a NULL never equals any CAS baseline, so both same-instant saves
+  // would 409 against a fresh row. Backfill 0 once per serve start (one SQL
+  // UPDATE, idempotent; the engine's transition tables are untouched).
+  const psql = psqlRunner()
+  const backfilled = Number((psql('UPDATE wfl_flow_configs SET graph_version = 0 WHERE graph_version IS NULL;').trim().match(/^UPDATE (\d+)$/u) ?? [])[1] ?? 0)
+  if (backfilled > 0) console.log(`approval-engine: graph_version 回填 0（${String(backfilled)} 行 NULL → 0，CAS 基线可比对）`)
   const server = createServer((request, response) => {
     void (async () => {
       try {
@@ -1366,6 +2270,184 @@ export async function serve(port = 13_110): Promise<void> {
             await io.destroy('mrp_confirm_intents', intentId)
           }
           return writeJson(response, 200, { ok: true, suggestion_id: suggestionId, action })
+        }
+        // W5-B0: the visual designer — static SPA + graph editing state (no
+        // publish; that chain is B1). Token auth rides the terminal guard.
+        if (url.pathname === '/designer' || url.pathname.startsWith('/designer/') || url.pathname === '/designer/meta' || url.pathname === '/flow-graph' || url.pathname === '/flow-graph/publish') {
+          if ((process.env['W5_DESIGNER_ENABLED'] ?? 'true') === 'false') {
+            throw new HttpError(404, '设计器端点已关闭（W5_DESIGNER_ENABLED=false）；引擎其余路由不受影响')
+          }
+          checkTerminalToken(request, url)
+          const marker = { 'x-terminal-auth': process.env['W3_TERMINAL_TOKEN'] !== undefined && process.env['W3_TERMINAL_TOKEN'] !== '' ? 'strict' : 'lenient-demo' }
+          if (request.method === 'GET' && url.pathname === '/designer/meta') {
+            const configs = await io.list('wfl_flow_configs')
+            const users = await io.list('users')
+            const roles = await io.list('roles')
+            const departments = await io.list('departments')
+            const formFields = await designerFormFieldVocabulary(wmsToken, configs)
+            return writeJson(response, 200, {
+              ok: true,
+              meta: {
+                // Every label passes resolveI18nTitle so no {{t(...)}} template
+                // ever leaks into a dropdown (W5-R1); the label is the already-
+                // resolved display string.
+                docTypes: configs.map(row => ({ doc_type: String(row.doc_type), title: resolveI18nTitle(row.title, String(row.doc_type)), graph_version: Number(row.graph_version ?? 0), has_graph: row.graph != null, published_graph_version: row.published_graph_version == null ? null : Number(row.published_graph_version), published_at: row.published_at == null ? null : String(row.published_at) })),
+                users: users.map(row => ({ value: String(row.username ?? ''), label: String(row.nickname ?? '') !== '' ? `${String(row.nickname)}（${String(row.username)}）` : String(row.username ?? '') })),
+                roles: roles.map(row => ({ value: String(row.name ?? ''), label: resolveI18nTitle(row.title, String(row.name ?? '')) })),
+                departments: departments.flatMap(row => {
+                  const title = resolveI18nTitle(row.title, '')
+                  return title === '' ? [] : [{ value: title, label: title }]
+                }),
+                formFields,
+              },
+            }, marker)
+          }
+          if (request.method === 'GET' && (url.pathname === '/designer' || url.pathname.startsWith('/designer/'))) {
+            const name = url.pathname === '/designer' ? 'index.html' : url.pathname.slice('/designer/'.length)
+            const contentType = DESIGNER_STATIC_FILES[name]
+            if (contentType === undefined) throw new HttpError(404, `no designer file ${url.pathname}`)
+            const body = await readFile(fileURLToPath(new URL(`../designer/dist/${name}`, import.meta.url)))
+            response.writeHead(200, { 'content-type': contentType, ...marker })
+            response.end(body)
+            return
+          }
+          if (request.method === 'GET' && url.pathname === '/flow-graph') {
+            const docType = url.searchParams.get('doc_type') ?? ''
+            if (docType === '') return writeJson(response, 400, { ok: false, error: '需要 doc_type 查询参数' })
+            const row = await flowConfigRow(io, docType)
+            if (row === undefined) return writeJson(response, 404, { ok: false, error: `wfl_flow_configs 无 doc_type=${docType} 行（先建流程头）` })
+            return writeJson(response, 200, { ok: true, graph: row.graph ?? null, graph_version: Number(row.graph_version ?? 0) }, marker)
+          }
+          if (request.method === 'POST' && url.pathname === '/flow-graph') {
+            const body = await readBody(request)
+            const docType = String(body['doc_type'] ?? '')
+            if (docType === '') return writeJson(response, 400, { ok: false, error: '需要 doc_type' })
+            const baseVersion = Number(body['base_version'])
+            if (!Number.isInteger(baseVersion) || baseVersion < 0) {
+              return writeJson(response, 400, { ok: false, error: '需要 base_version（本次编辑所基于的 graph_version，非负整数）' })
+            }
+            const row = await flowConfigRow(io, docType)
+            if (row === undefined) return writeJson(response, 404, { ok: false, error: `wfl_flow_configs 无 doc_type=${docType} 行（先建流程头）` })
+            const failures = validateFlowGraph(body['graph'])
+            if (failures.length > 0) return writeJson(response, 400, { ok: false, error: `graph 校验未通过（${String(failures.length)} 处）：\n - ${failures.join('\n - ')}` })
+            const graph = normalizeGraphTitles(body['graph'] as Record<string, unknown>)
+            const nextVersion = baseVersion + 1
+            const note = `${String(row.config_note ?? '').trimEnd()}\n${new Date().toISOString()} w5b0 designer: graph saved v${String(nextVersion)} (nodes=${String(Array.isArray(graph['nodes']) ? graph['nodes'].length : 0)}, edges=${String(Array.isArray(graph['edges']) ? graph['edges'].length : 0)}); operator=designer`
+            try {
+              // W5-R1 atomic CAS over psql: NocoBase's REST filter update is a
+              // find→update-by-pk pair, not a compare-and-swap — two same-
+              // instant saves could both find the base version and both write
+              // (live evidence run 3). One SQL UPDATE is atomic: the row lock
+              // serializes the racers and the WHERE re-evaluates for the
+              // second, so exactly one side moves the row (and its audit
+              // line); the loser answers 409.
+              const outcome = psql(`UPDATE wfl_flow_configs SET graph = ${sqlLiteral(JSON.stringify(graph))}::json, graph_version = ${String(nextVersion)}, config_note = ${sqlLiteral(note)} WHERE id = ${String(Number(row.id))} AND doc_type = ${sqlLiteral(docType)} AND graph_version = ${String(baseVersion)};`).trim()
+              const moved = Number((outcome.match(/^UPDATE (\d+)$/u) ?? [])[1] ?? 0)
+              if (moved === 0) {
+                const currentVersion = Number((await flowConfigRow(io, docType))?.graph_version ?? 0)
+                console.warn(`approval-engine: flow-graph 409 — doc_type=${docType} base_version=${String(baseVersion)} current_version=${String(currentVersion)}（并发保存一胜一败，败者需重载）`)
+                return writeJson(response, 409, { ok: false, error: `版本冲突：画布基于 graph v${String(baseVersion)}，库里已是 v${String(currentVersion)}（他端已保存过）。请点「重新加载」拉取最新版本后重做修改。` })
+              }
+              console.log(`approval-engine: flow-graph saved — doc_type=${docType} v${String(baseVersion)}→v${String(nextVersion)}（nodes=${String(Array.isArray(graph['nodes']) ? graph['nodes'].length : 0)}, edges=${String(Array.isArray(graph['edges']) ? graph['edges'].length : 0)}）`)
+              return writeJson(response, 200, { ok: true, doc_type: docType, graph_version: nextVersion }, marker)
+            } catch (error) {
+              console.error(`approval-engine: flow-graph unexpected failure — doc_type=${docType} base_version=${String(baseVersion)}\n${error instanceof Error ? error.stack ?? error.message : String(error)}`)
+              throw error
+            }
+          }
+          // W5-B1: the publish verb — gates + one-way derivation + the atomic CTE rewrite.
+          if (request.method === 'POST' && url.pathname === '/flow-graph/publish') {
+            const body = await readBody(request)
+            const docType = String(body['doc_type'] ?? '')
+            if (docType === '') return writeJson(response, 400, { ok: false, errors: ['需要 doc_type'], error: '需要 doc_type' }, marker)
+            const baseVersion = Number(body['base_version'])
+            if (!Number.isInteger(baseVersion) || baseVersion < 0) {
+              return writeJson(response, 400, { ok: false, errors: ['需要 base_version（本次发布所基于的 graph_version，非负整数）'], error: '需要 base_version（本次发布所基于的 graph_version，非负整数）' }, marker)
+            }
+            const row = await flowConfigRow(io, docType)
+            if (row === undefined) return writeJson(response, 404, { ok: false, error: `wfl_flow_configs 无 doc_type=${docType} 行（先建流程头）` }, marker)
+            if (row.graph === null || row.graph === undefined) {
+              const error = '该流程还没有已保存的 graph（先在设计器保存画布再发布）'
+              return writeJson(response, 400, { ok: false, errors: [error], error }, marker)
+            }
+            const graphVersion = Number(row.graph_version ?? 0)
+            if (graphVersion !== baseVersion) {
+              return writeJson(response, 409, { ok: false, error: `版本冲突：发布基于 graph v${String(baseVersion)}，库里已是 v${String(graphVersion)}（他端已保存/发布过）。请点「重新加载」拉取最新版本后再发布。` }, marker)
+            }
+            // The compile context: field vocabulary, known users, the psql role
+            // snapshot, and the live extras the graph does not own.
+            const formFields = await designerFormFieldVocabulary(wmsToken, [row])
+            const knownUsernames = new Set((await io.list('users')).map(user => String(user.username ?? '')))
+            const usersOfRole = async (role: string): Promise<readonly string[]> => {
+              const output = psql(`SELECT u.username FROM "rolesUsers" r JOIN users u ON u.id = r."userId" WHERE r."roleName" = ${sqlLiteral(role)};`)
+              return output.split('\n').map(line => line.trim()).filter(line => line !== '')
+            }
+            const stateField = String(row.state_field ?? 'doc_status')
+            const preserveExtras = parseJsonColumn<Record<string, unknown>>(row.extras, 'extras', `审批流 #${String(row.id)}`) ?? {}
+            const ctx: CompileContext = { stateField, formFields, preserveExtras, knownUsernames, usersOfRole }
+            // Round-trip gate first: the compiler must faithfully reproduce the
+            // CURRENT rows before it is trusted to replace them.
+            const liveApproverMap = parseJsonColumn<ApproverMap>(row.approver_map, 'approver_map', `审批流 #${String(row.id)}`) ?? {}
+            const liveStates = await io.list('wfl_flow_states', { flow_id: Number(row.id) })
+            const liveTransitions = await io.list('wfl_flow_transitions', { flow_id: Number(row.id) })
+            const live: LiveFlowRows = { stateField, approverMap: liveApproverMap, extras: preserveExtras, states: liveStates, transitions: liveTransitions }
+            const roundTripErrors: string[] = []
+            const imported = rowsToGraph(live)
+            if (!imported.ok) {
+              roundTripErrors.push(...imported.errors.map(error => `round-trip：${error}`))
+            } else {
+              const recompiled = await compileGraphToRows(imported.graph, ctx)
+              if (!recompiled.ok) {
+                roundTripErrors.push(...recompiled.errors.map(error => `round-trip 重编译失败：${error}`))
+              } else {
+                const drift = assertRowsEquivalent(live, recompiled.rows)
+                if (drift.length > 0) roundTripErrors.push(...drift.map(error => `round-trip 等价断言失败：${error}`))
+              }
+            }
+            if (roundTripErrors.length > 0) {
+              const errors = [...roundTripErrors, '（编译器无法无损重现当前行表——拒绝发布，现有 states/transitions 继续生效）']
+              console.warn(`approval-engine: publish round-trip gate refused — doc_type=${docType}\n - ${errors.join('\n - ')}`)
+              return writeJson(response, 400, { ok: false, errors, error: `发布被 round-trip 等价断言拒绝（${String(errors.length)} 处）：\n - ${errors.join('\n - ')}` }, marker)
+            }
+            const compiled = await compileGraphToRows(row.graph, ctx)
+            if (!compiled.ok) {
+              console.warn(`approval-engine: publish gates refused — doc_type=${docType}（${String(compiled.errors.length)} 处）\n - ${compiled.errors.join('\n - ')}`)
+              return writeJson(response, 400, { ok: false, errors: compiled.errors, error: `发布门禁未通过（${String(compiled.errors.length)} 处）：\n - ${compiled.errors.join('\n - ')}` }, marker)
+            }
+            const publishedAt = new Date().toISOString()
+            // The rollback anchor: the pre-publish derived rows, replayable from config_note.
+            const snapshot = JSON.stringify({
+              states: liveStates.map(stateRow => ({ state: String(stateRow.state), anchor: Number(stateRow.doc_status_anchor ?? 0), role: String(stateRow.allow_edit_role ?? '') })),
+              transitions: liveTransitions.map(transitionRow => ({ state: String(transitionRow.state), action: String(transitionRow.action), next: String(transitionRow.next_state), role: String(transitionRow.allowed_role ?? ''), cond: String(transitionRow.condition_expr ?? ''), self: Boolean(transitionRow.allow_self_approval) })),
+              approver_map: liveApproverMap,
+              extras: preserveExtras,
+            })
+            const note = `${String(row.config_note ?? '').trimEnd()}\n${publishedAt} w5b1 publish: graph v${String(baseVersion)}→v${String(baseVersion + 1)} derived ${String(compiled.rows.states.length)} states / ${String(compiled.rows.transitions.length)} transitions (${compiled.rows.vocabulary}); snapshot=${snapshot}; operator=designer`
+            const outcome = psql(publishSql(Number(row.id), docType, baseVersion, compiled.rows, note, publishedAt)).trim()
+            const counts = outcome.split('|').map(part => Number(part.trim()))
+            if (counts.length !== 3 || !counts.every(count => Number.isFinite(count))) {
+              console.error(`approval-engine: publish unexpected psql output — doc_type=${docType} ${outcome.slice(0, 200)}`)
+              return writeJson(response, 500, { ok: false, error: '发布写入返回异常（psql 输出无法解析）——事务未落库或整体回滚，请检查服务日志' }, marker)
+            }
+            if ((counts[0] ?? 0) === 0) {
+              const currentVersion = Number((await flowConfigRow(io, docType))?.graph_version ?? 0)
+              console.warn(`approval-engine: publish 409 — doc_type=${docType} base_version=${String(baseVersion)} current_version=${String(currentVersion)}（并发保存/发布一胜一败，败者需重载）`)
+              return writeJson(response, 409, { ok: false, error: `版本冲突：发布基于 graph v${String(baseVersion)}，库里已是 v${String(currentVersion)}（他端已保存/发布过）。请点「重新加载」拉取最新版本后再发布。` }, marker)
+            }
+            if ((counts[1] ?? 0) !== compiled.rows.states.length || (counts[2] ?? 0) !== compiled.rows.transitions.length) {
+              console.error(`approval-engine: publish row-count mismatch — doc_type=${docType} inserted ${String(counts[1])}/${String(counts[2])} vs expected ${String(compiled.rows.states.length)}/${String(compiled.rows.transitions.length)}`)
+              return writeJson(response, 500, { ok: false, error: '发布写入行数与编译产物不一致（事务已整体落库或整体回滚）——请检查服务日志' }, marker)
+            }
+            console.log(`approval-engine: published — doc_type=${docType} graph v${String(baseVersion)}→v${String(baseVersion + 1)}（${String(counts[1])} states / ${String(counts[2])} transitions, ${compiled.rows.vocabulary}, cc=${String(compiled.rows.ccCount)}）`)
+            return writeJson(response, 200, {
+              ok: true,
+              doc_type: docType,
+              graph_version: baseVersion + 1,
+              published_at: publishedAt,
+              derived: { states: counts[1], transitions: counts[2], vocabulary: compiled.rows.vocabulary, cc: compiled.rows.ccCount, roles: Object.keys(compiled.rows.approverMap) },
+            }, marker)
+          }
+          throw new HttpError(405, `设计器端点不接受 ${String(request.method)} ${url.pathname}`)
         }
         // W3-B6: the operator terminals — static touch pages, card queues,
         // and the three narrow verbs (every write rides the engine functions).
@@ -1592,6 +2674,7 @@ export async function serve(port = 13_110): Promise<void> {
   await new Promise<void>(resolve => server.listen(port, '127.0.0.1', resolve))
   console.log(`approval-engine: serving on http://127.0.0.1:${port} (POST /act, POST /submit, POST /post-count-adjust, POST /scan-reorder, POST /calc-scorecard, POST /run-mrp, POST /calc-kpi, POST /run-nightly, POST /confirm-suggestion, GET /todos, GET /healthz)`)
   console.log(`approval-engine: W3-B6 terminals on :${String(port)} — GET /terminals/{report,inspect,receive}.html + terminal.css; GET /terminal/{report,inspect,receive}; POST /report-job, /inspect-submit, /receive-goods (enabled=${String((process.env['W3_TERMINAL_ENABLED'] ?? 'true') !== 'false')}, token=${String(process.env['W3_TERMINAL_TOKEN'] !== undefined && process.env['W3_TERMINAL_TOKEN'] !== '' ? 'strict' : 'lenient-demo（生产必须设 W3_TERMINAL_TOKEN）')})`)
+  console.log(`approval-engine: W5-B0 designer on :${String(port)} — GET /designer (SPA) + GET /designer/meta + GET/POST /flow-graph → wfl_flow_configs.graph json（编辑态落库）+ POST /flow-graph/publish → 门禁+round-trip 等价断言+单向编译派生 wfl 行表（一条 data-modifying CTE，CAS 败则整条 no-op）；保存与发布同走 graph_version 原子 CAS——同刻并发恰好一胜一败(enabled=${String((process.env['W5_DESIGNER_ENABLED'] ?? 'true') !== 'false')})`)
   // W2-B7: the built-in nightly timer — armed only on the env opt-in, fully
   // silent otherwise (zero drift from the W-round external-cron form). The
   // per-minute check fires when the local wall clock has passed the target
@@ -1995,7 +3078,254 @@ export async function selftest(): Promise<void> {
     const zeroQty = await failureOf(() => validateReceiveLines(poLines, [{ product_id: 12, lot_no: 'L-2', qty: 0 }]))
     if (!zeroQty.includes('大于 0')) throw new Error(`selftest 失败：零数量未拦截（${zeroQty}）`)
   }
-  console.log('approval-engine: selftest OK — 状态机全序列/金额阈值加签/驳回重提/非法转移/卡口/幂等/锁编辑/供应商准入流/准入卡口/B5阈值配置+多审批人/W3-B5部门路由(全员展开/混合并集/幽灵部门/空部门/坏形态/纯用户名零漂移)/夜间env负例/W3-B6终端校验(三数等式/读数判定/缺陷汇总/收货卡口) 全部通过')
+  await compilerSelftest()
+  console.log('approval-engine: selftest OK — 状态机全序列/金额阈值加签/驳回重提/非法转移/卡口/幂等/锁编辑/供应商准入流/准入卡口/B5阈值配置+多审批人/W3-B5部门路由(全员展开/混合并集/幽灵部门/空部门/坏形态/纯用户名零漂移)/夜间env负例/W3-B6终端校验(三数等式/读数判定/缺陷汇总/收货卡口)/W5-B1编译器(门禁矩阵/两级阈值/角色快照/round-trip等价/准入词汇表) 全部通过')
+}
+
+// ─── W5-B1: the publish-compiler assertion matrix (pure; shared with w5b1-publish.mts --selftest) ───
+
+/** One node fixture for the compiler matrix. */
+interface FixtureNode {
+  readonly id: string
+  readonly type: string
+  readonly title?: string
+  readonly approval?: Record<string, unknown>
+  readonly condition?: Record<string, unknown>
+  readonly cc?: Record<string, unknown>
+}
+
+/** Build one graph document from nodes and (source, target) pairs on a fixed grid. */
+function fixtureGraph(nodes: ReadonlyArray<FixtureNode>, edges: ReadonlyArray<readonly [string, string]>): Record<string, unknown> {
+  return {
+    version: 1,
+    nodes: nodes.map((node, index) => ({
+      id: node.id,
+      type: node.type,
+      position: { x: 40 + index * 200, y: 160 },
+      data: {
+        title: node.title ?? node.id,
+        ...(node.approval === undefined ? {} : { approval: node.approval }),
+        ...(node.condition === undefined ? {} : { condition: node.condition }),
+        ...(node.cc === undefined ? {} : { cc: node.cc }),
+      },
+    })),
+    edges: edges.map(([source, target], index) => ({ id: `e${String(index)}`, source, target })),
+  }
+}
+
+/** The compile-context fixture: three known users, one resolvable role. */
+function fixtureCompileContext(overrides: Partial<CompileContext> = {}): CompileContext {
+  return {
+    stateField: 'doc_status',
+    formFields: ['total', 'amount', 'qty'],
+    preserveExtras: { approved_by_field: 'approved_by', approved_at_field: 'approved_at' },
+    knownUsernames: new Set(['admin', 'quality_lead', 'chenliqun']),
+    usersOfRole: async (role) => role === 'finance' ? ['admin', 'quality_lead'] : [],
+    ...overrides,
+  }
+}
+
+/**
+ * The W5-B1 compiler matrix: gate negatives (each illegal construction
+ * refused with its readable family), compile positives (one-round,
+ * two-round threshold, structural two-level, role snapshot, empty-policy),
+ * and the rowsToGraph → compile round-trip over both vocabularies.
+ */
+export async function compilerSelftest(): Promise<void> {
+  const user = (assignees: string[]): Record<string, unknown> => ({ assigneeType: 'user', assignees, mode: 'or', emptyPolicy: 'transferAdmin' })
+  const role = (roles: string[], emptyPolicy = 'autoReject'): Record<string, unknown> => ({ assigneeType: 'role', assignees: roles, mode: 'or', emptyPolicy })
+  const rows = (...pairs: ReadonlyArray<readonly [string, string]>): ReadonlyArray<readonly [string, string]> => pairs
+  const compileErrors = async (graph: Record<string, unknown>, ctx: CompileContext = fixtureCompileContext()): Promise<string[]> => {
+    const outcome = await compileGraphToRows(graph, ctx)
+    return outcome.ok ? [] : outcome.errors
+  }
+  const expectRefused = async (that: string, graph: Record<string, unknown>, marker: string, ctx?: CompileContext): Promise<void> => {
+    const errors = await compileErrors(graph, ctx)
+    if (!errors.some(error => error.includes(marker))) {
+      throw new Error(`selftest 失败：${that} 未拦截或报错错位（期望含「${marker}」，实际 ${JSON.stringify(errors)}）`)
+    }
+  }
+  const expectRows = async (that: string, graph: Record<string, unknown>, ctx: CompileContext): Promise<CompiledRows> => {
+    const outcome = await compileGraphToRows(graph, ctx)
+    if (!outcome.ok) throw new Error(`selftest 失败：${that} 正例被拒（${JSON.stringify(outcome.errors)}）`)
+    return outcome.rows
+  }
+
+  // ── gate negatives (every illegal family fails loud with a readable message) ──
+  await expectRefused('孤立节点', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: user(['admin']) }, { id: 'e', type: 'end' }, { id: 'loose', type: 'cc', cc: { assignees: ['admin'] } },
+  ], rows(['s', 'a'], ['a', 'e'])), '孤立节点')
+  await expectRefused('缺开始节点', fixtureGraph([
+    { id: 'a', type: 'approval', approval: user(['admin']) }, { id: 'e', type: 'end' },
+  ], rows(['a', 'e'])), '缺开始节点')
+  await expectRefused('多个开始节点', fixtureGraph([
+    { id: 's1', type: 'start' }, { id: 's2', type: 'start' }, { id: 'a', type: 'approval', approval: user(['admin']) }, { id: 'e', type: 'end' },
+  ], rows(['s1', 'a'], ['a', 'e'], ['s2', 'e'])), '开始节点')
+  await expectRefused('缺结束节点', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: user(['admin']) },
+  ], rows(['s', 'a'])), '缺结束节点')
+  await expectRefused('环', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a1', type: 'approval', approval: user(['admin']) }, { id: 'a2', type: 'approval', approval: user(['quality_lead']) }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a1'], ['a1', 'a2'], ['a2', 'a1'], ['a2', 'e'])), '存在环')
+  await expectRefused('不可达节点', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: user(['admin']) }, { id: 'e1', type: 'end' }, { id: 'a2', type: 'approval', approval: user(['quality_lead']) }, { id: 'e2', type: 'end' },
+  ], rows(['s', 'a'], ['a', 'e1'], ['a2', 'e2'])), '不可达节点')
+  await expectRefused('条件缺行', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a1', type: 'approval', approval: user(['admin']) }, { id: 'c', type: 'condition', condition: { join: 'and', rows: [] } }, { id: 'a2', type: 'approval', approval: user(['quality_lead']) }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a1'], ['a1', 'c'], ['c', 'a2'], ['c', 'e'], ['a2', 'e'])), '缺条件行')
+  await expectRefused('条件操作符 <=', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a1', type: 'approval', approval: user(['admin']) }, { id: 'c', type: 'condition', condition: { join: 'and', rows: [{ field: 'total', op: '<=', value: '100000' }] } }, { id: 'a2', type: 'approval', approval: user(['quality_lead']) }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a1'], ['a1', 'c'], ['c', 'a2'], ['c', 'e'], ['a2', 'e'])), '操作符需为 >')
+  await expectRefused('条件字段不在词表', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a1', type: 'approval', approval: user(['admin']) }, { id: 'c', type: 'condition', condition: { join: 'and', rows: [{ field: 'price', op: '>', value: '100000' }] } }, { id: 'a2', type: 'approval', approval: user(['quality_lead']) }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a1'], ['a1', 'c'], ['c', 'a2'], ['c', 'e'], ['a2', 'e'])), '不在单据字段词表')
+  await expectRefused('supervisorChain', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: { assigneeType: 'supervisorChain', assignees: [], mode: 'or', emptyPolicy: 'transferAdmin' } }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a'], ['a', 'e'])), '连续多级主管')
+  await expectRefused('formField', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: { assigneeType: 'formField', assignees: ['owner'], mode: 'or', emptyPolicy: 'transferAdmin' } }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a'], ['a', 'e'])), '表单联系人字段')
+  await expectRefused('deptLeader', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: { assigneeType: 'deptLeader', assignees: ['质检部'], mode: 'or', emptyPolicy: 'transferAdmin' } }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a'], ['a', 'e'])), '部门主管')
+  await expectRefused('依次审批', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: { assigneeType: 'user', assignees: ['admin', 'quality_lead'], mode: 'sequential', emptyPolicy: 'transferAdmin' } }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a'], ['a', 'e'])), '依次审批')
+  await expectRefused('会签', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: { assigneeType: 'user', assignees: ['admin', 'quality_lead'], mode: 'countersign', emptyPolicy: 'transferAdmin' } }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a'], ['a', 'e'])), '会签')
+  await expectRefused('autoPass', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: { assigneeType: 'user', assignees: ['admin'], mode: 'or', emptyPolicy: 'autoPass' } }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a'], ['a', 'e'])), '自动通过')
+  await expectRefused('assignUser', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: { assigneeType: 'user', assignees: ['admin'], mode: 'or', emptyPolicy: 'assignUser' } }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a'], ['a', 'e'])), '指定人员')
+  await expectRefused('三级审批', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a1', type: 'approval', approval: user(['admin']) }, { id: 'a2', type: 'approval', approval: user(['quality_lead']) }, { id: 'a3', type: 'approval', approval: user(['chenliqun']) }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a1'], ['a1', 'a2'], ['a2', 'a3'], ['a3', 'e'])), '至多支持两级审批')
+  await expectRefused('条件分支无审批承接', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a1', type: 'approval', approval: user(['admin']) }, { id: 'c', type: 'condition', condition: { join: 'and', rows: [{ field: 'total', op: '>', value: '100000' }] } }, { id: 'e1', type: 'end' }, { id: 'e2', type: 'end' },
+  ], rows(['s', 'a1'], ['a1', 'c'], ['c', 'e1'], ['c', 'e2'])), '两条分支需分别指向二级审批节点和结束节点')
+  await expectRefused('条件先于审批', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: user(['admin']) }, { id: 'c', type: 'condition', condition: { join: 'and', rows: [{ field: 'total', op: '>', value: '100000' }] } }, { id: 'e', type: 'end' },
+  ], rows(['s', 'c'], ['c', 'a'], ['c', 'e'], ['a', 'e'])), '一级审批与二级审批之间')
+  await expectRefused('未知状态字段', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: user(['admin']) }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a'], ['a', 'e'])), '未知状态字段', fixtureCompileContext({ stateField: 'moon_phase' }))
+  await expectRefused('准入词汇表带条件', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a1', type: 'approval', approval: user(['admin']) }, { id: 'c', type: 'condition', condition: { join: 'and', rows: [{ field: 'total', op: '>', value: '100000' }] } }, { id: 'a2', type: 'approval', approval: user(['quality_lead']) }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a1'], ['a1', 'c'], ['c', 'a2'], ['c', 'e'], ['a2', 'e'])), '准入词汇表', fixtureCompileContext({ stateField: SUPPLIER_ADMISSION_STATE_FIELD }))
+  await expectRefused('幽灵用户', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: user(['ghost_user']) }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a'], ['a', 'e'])), '不存在的用户')
+  await expectRefused('空角色autoReject', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: role(['ghost_role']) }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a'], ['a', 'e'])), '没有任何成员')
+
+  // ── compile positives ──
+  const oneRound = await expectRows('一审直批', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: user(['admin']) }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a'], ['a', 'e'])), fixtureCompileContext())
+  expect('一审派生6状态', oneRound.states.length, 6)
+  expect('一审派生8转移', oneRound.transitions.length, 8)
+  expect('一审直批条件为空', oneRound.transitions.find(row => row.state === 'pending' && row.action === 'approve' && row.next_state === 'approved')?.condition_expr, '')
+  expect('一审审批人映射', oneRound.approverMap, { manager: 'admin' })
+  expect('一审extras不含金额键', 'amount_field' in oneRound.extras, false)
+
+  const twoRound = await expectRows('两级阈值', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a1', type: 'approval', approval: user(['admin']) }, { id: 'c', type: 'condition', condition: { join: 'and', rows: [{ field: 'total', op: '>', value: '100000' }] } }, { id: 'a2', type: 'approval', approval: user(['quality_lead']) }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a1'], ['a1', 'c'], ['c', 'a2'], ['c', 'e'], ['a2', 'e'])), fixtureCompileContext())
+  expect('两级≤字面量', twoRound.transitions.find(row => row.state === 'pending' && row.action === 'approve' && row.next_state === 'approved')?.condition_expr, 'total <= 100000')
+  expect('两级路由进阶条件为空', twoRound.transitions.find(row => row.state === 'pending' && row.action === 'approve' && row.next_state === 'pending_level2')?.condition_expr, '')
+  expect('两级审批人映射', twoRound.approverMap, { manager: 'admin', gm: 'quality_lead' })
+  expect('两级extras金额键', { amount_field: twoRound.extras.amount_field, amount_threshold: twoRound.extras.amount_threshold }, { amount_field: 'total', amount_threshold: 100000 })
+  expect('两级extras保留引擎键', twoRound.extras.approved_by_field, 'approved_by')
+
+  const structural = await expectRows('结构两级无条件', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a1', type: 'approval', approval: user(['admin']) }, { id: 'a2', type: 'approval', approval: user(['quality_lead']) }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a1'], ['a1', 'a2'], ['a2', 'e'])), fixtureCompileContext({ preserveExtras: { approved_by_field: 'approved_by', approved_at_field: 'approved_at', amount_field: 'amount', amount_threshold: 200000, invoice_match_tolerance: 0.1 } }))
+  expect('结构两级直批条件为空', structural.transitions.find(row => row.state === 'pending' && row.action === 'approve' && row.next_state === 'approved')?.condition_expr, '')
+  expect('结构两级删除金额字段键', structural.extras.amount_field, undefined)
+  expect('结构两级删除阈值键', structural.extras.amount_threshold, undefined)
+  expect('结构两级保留容差键', structural.extras.invoice_match_tolerance, 0.1)
+
+  const roleSnapshot = await expectRows('角色快照', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: role(['finance']) }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a'], ['a', 'e'])), fixtureCompileContext())
+  expect('角色快照展开', roleSnapshot.approverMap, { manager: ['admin', 'quality_lead'] })
+
+  const transferAdmin = await expectRows('空角色转管理员', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: role(['ghost_role'], 'transferAdmin') }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a'], ['a', 'e'])), fixtureCompileContext())
+  expect('空角色转管理员', transferAdmin.approverMap, { manager: 'admin' })
+
+  const ccPass = await expectRows('抄送透传', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: user(['admin']) }, { id: 'ncc', type: 'cc', cc: { assignees: ['quality_lead'] } }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a'], ['a', 'ncc'], ['ncc', 'e'])), fixtureCompileContext())
+  expect('抄送计数', ccPass.ccCount, 1)
+  expect('抄送不影响转移数', ccPass.transitions.length, 8)
+
+  const admission = await expectRows('准入词汇表', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: user(['admin']) }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a'], ['a', 'e'])), fixtureCompileContext({ stateField: SUPPLIER_ADMISSION_STATE_FIELD, preserveExtras: { approved_at_field: 'admitted_at' } }))
+  expect('准入派生4状态', admission.states.length, 4)
+  expect('准入派生4转移', admission.transitions.length, 4)
+  expect('准入审批人映射', admission.approverMap, { srm_manager: 'admin' })
+  expect('准入extras保留', admission.extras, { approved_at_field: 'admitted_at' })
+
+  // ── rowsToGraph → compile round-trip over both vocabularies ──
+  const liveDocRows: LiveFlowRows = {
+    stateField: 'doc_status',
+    approverMap: { manager: ['admin', 'quality_lead'], gm: 'admin' },
+    extras: { approved_by_field: 'approved_by', approved_at_field: 'approved_at', amount_field: 'amount', amount_threshold: 200000, invoice_match_tolerance: 0.1 },
+    states: docStateRows().map(row => ({ ...row })),
+    transitions: docTransitionRows('amount', 200000).map(row => ({ ...row })),
+  }
+  const importedDoc = rowsToGraph(liveDocRows)
+  if (!importedDoc.ok) throw new Error(`selftest 失败：六态行表逆向导入被拒（${JSON.stringify(importedDoc.errors)}）`)
+  const recompiledDoc = await compileGraphToRows(importedDoc.graph, fixtureCompileContext({ preserveExtras: liveDocRows.extras }))
+  if (!recompiledDoc.ok) throw new Error(`selftest 失败：六态 round-trip 重编译被拒（${JSON.stringify(recompiledDoc.errors)}）`)
+  const docDrift = assertRowsEquivalent(liveDocRows, recompiledDoc.rows)
+  if (docDrift.length > 0) throw new Error(`selftest 失败：六态 round-trip 不等价（${docDrift.join('；')}）`)
+  // Threshold drift must be caught: a literal out of step with extras refuses.
+  const driftedRows: LiveFlowRows = {
+    ...liveDocRows,
+    transitions: liveDocRows.transitions.map(row => row.state === 'pending' && row.action === 'approve' && row.next_state === 'approved' ? { ...row, condition_expr: 'amount <= 250000' } : row),
+  }
+  const driftedImport = rowsToGraph(driftedRows)
+  if (!driftedImport.ok) throw new Error('selftest 失败：漂移行表逆向导入被拒（不应发生）')
+  const driftedRecompile = await compileGraphToRows(driftedImport.graph, fixtureCompileContext({ preserveExtras: driftedRows.extras }))
+  if (driftedRecompile.ok && assertRowsEquivalent(driftedRows, driftedRecompile.rows).length === 0) {
+    throw new Error('selftest 失败：阈值漂移未被 round-trip 断言捕获')
+  }
+  // The pur_rfqs live shape: two approvals, no literal, no amount keys.
+  const structuralLive: LiveFlowRows = {
+    stateField: 'doc_status',
+    approverMap: { manager: 'admin', gm: 'admin' },
+    extras: { approved_by_field: 'approved_by', approved_at_field: 'approved_at' },
+    states: docStateRows().map(row => ({ ...row })),
+    transitions: docTransitionRows(null, null).map(row => ({ ...row })),
+  }
+  const structuralImport = rowsToGraph(structuralLive)
+  if (!structuralImport.ok) throw new Error(`selftest 失败：结构两级逆向导入被拒（${JSON.stringify(structuralImport.errors)}）`)
+  const structuralRecompile = await compileGraphToRows(structuralImport.graph, fixtureCompileContext({ preserveExtras: structuralLive.extras }))
+  if (!structuralRecompile.ok) throw new Error('selftest 失败：结构两级 round-trip 重编译被拒')
+  const structuralDrift = assertRowsEquivalent(structuralLive, structuralRecompile.rows)
+  if (structuralDrift.length > 0) throw new Error(`selftest 失败：结构两级 round-trip 不等价（${structuralDrift.join('；')}）`)
+  const admissionLive: LiveFlowRows = {
+    stateField: SUPPLIER_ADMISSION_STATE_FIELD,
+    approverMap: { srm_manager: 'admin' },
+    extras: { approved_at_field: 'admitted_at' },
+    states: admissionStateRows().map(row => ({ ...row })),
+    transitions: admissionTransitionRows().map(row => ({ ...row })),
+  }
+  const admissionImport = rowsToGraph(admissionLive)
+  if (!admissionImport.ok) throw new Error(`selftest 失败：准入行表逆向导入被拒（${JSON.stringify(admissionImport.errors)}）`)
+  const admissionRecompile = await compileGraphToRows(admissionImport.graph, fixtureCompileContext({ stateField: SUPPLIER_ADMISSION_STATE_FIELD, preserveExtras: admissionLive.extras }))
+  if (!admissionRecompile.ok) throw new Error('selftest 失败：准入 round-trip 重编译被拒')
+  const admissionDrift = assertRowsEquivalent(admissionLive, admissionRecompile.rows)
+  if (admissionDrift.length > 0) throw new Error(`selftest 失败：准入 round-trip 不等价（${admissionDrift.join('；')}）`)
+  console.log('approval-engine: compiler selftest OK — 门禁矩阵（孤立/缺端点/多开始/环/不可达/条件DSL/词表/特性矩阵/幽灵用户/空角色）+ 编译正例（一审/两级阈值/结构两级/角色快照/转管理员/抄送透传/准入）+ round-trip（六态阈值/阈值漂移捕获/结构两级/准入）')
 }
 
 // ─── CLI ───

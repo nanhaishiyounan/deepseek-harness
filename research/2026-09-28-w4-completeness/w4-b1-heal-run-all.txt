@@ -1,4 +1,19 @@
-# w4-b1 heal run all @ 2026-09-28T22:21:13.019Z
-page CRM 客户/销售线索
-  filterForm crm_leads uid=hk6dsysht3p fields=[status,name]
+# w4-b1 heal run all @ 2026-09-29T07:30:00.487Z
+page 项目与协同/项目
+  sort hub_pj_projects <- ["name"]
+  rel hub_pj_projects.owner -> users.nickname
+  recolor hub_pj_projects.status
+  filterForm hub_pj_projects uid=ikkjd7fjxsl fields=[status,name]
+page 项目与协同/任务列表
+  sort hub_pj_tasks <- ["-due_date"]
+  rel hub_pj_tasks.project -> hub_pj_projects.name
+  rel hub_pj_tasks.assignee -> users.nickname
+  recolor hub_pj_tasks.status
+  recolor hub_pj_tasks.priority
+  filterForm hub_pj_tasks uid=x14cmetc3l1 fields=[status,project]
+page 项目与协同/里程碑
+  sort hub_pj_milestones <- ["name"]
+  rel hub_pj_milestones.project -> hub_pj_projects.name
+  recolor hub_pj_milestones.status
+  filterForm hub_pj_milestones uid=5byh3ga6xcj fields=[status,name]
 pages=76

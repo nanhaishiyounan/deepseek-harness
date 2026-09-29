@@ -1,4 +1,17 @@
-# w4-b2 heal run all @ 2026-09-28T22:22:14.473Z
-form hub_hr_employees/create[09bvmy]
-  layout twoCol [基本信息×4 | 属性与联系×1]
-counts: {"layoutWritten":1,"itemProps":0,"fieldProps":0,"dividers":0,"assignRules":0,"submitActions":0,"editActions":0,"deleteActions":0}
+# w4-b2 heal run all @ 2026-09-29T07:30:32.644Z
+form hub_pj_milestones/create[6dc2w3]
+  +FormSubmitAction (was missing — F-10' negative channel)
+  fieldProps +2 (due_at:placeholder, status:options)
+  layout twoCol [基本信息×3 | 属性与联系×2]
+  assignRules +1 (status=pending)
+form hub_pj_tasks/create[hnv348]
+  required +1 (project)
+  fieldProps +5 (status:options, priority:options, due_at:placeholder, plan_start:placeholder, plan_end:placeholder)
+  layout twoCol [基本信息×4 | 交易对手与交付×2 | 财务与备注×2]
+  assignRules +1 (status=todo)
+form hub_pj_projects/create[mvf2j4]
+  +FormSubmitAction (was missing — F-10' negative channel)
+  fieldProps +4 (status:options, planned_end_date:placeholder, start_date:placeholder, due_date:placeholder)
+  layout twoCol [基本信息×6 | 属性与联系×4]
+  assignRules +2 (status=active, owner={{ctx.user.id}})
+counts: {"layoutWritten":3,"itemProps":1,"fieldProps":11,"dividers":7,"assignRules":3,"submitActions":2,"editActions":0,"deleteActions":0}

@@ -108,16 +108,16 @@
     "title": "工作台",
     "parentId": null,
     "icon": "DashboardOutlined",
-    "sort": 7,
-    "schemaUid": "b4k6wf2zu6k",
+    "sort": 17,
+    "schemaUid": "spu1k030ihg",
     "tabs": [
       {
-        "schemaUid": "o8u7f1fk903",
-        "tabSchemaName": "7h9hpxsui4a",
+        "schemaUid": "sndu7e5h9td",
+        "tabSchemaName": "zz1bfpfqhrb",
         "sort": 1
       }
     ],
-    "destroyedId": 386332338028544
+    "destroyedId": 389294422032384
   },
   {
     "title": "知识文章",
@@ -211,17 +211,17 @@
   },
   {
     "title": "采购供应商",
-    "parentId": 388679734198272,
+    "parentId": 389294422032386,
     "icon": "ShopOutlined",
     "sort": 1,
-    "schemaUid": "u63favrn9z7",
+    "schemaUid": "2ry91tafwjd",
     "tabs": [
       {
-        "schemaUid": "l5o16aqwgvy",
-        "tabSchemaName": "s82qk6ubiyd",
+        "schemaUid": "z8qbjb56gdh",
+        "tabSchemaName": "dkfctqsssgw",
         "sort": 1
       }
     ],
-    "destroyedId": 388679734198274
+    "destroyedId": 389294422032387
   }
 ]

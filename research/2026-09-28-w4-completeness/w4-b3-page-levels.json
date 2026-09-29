@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-28T17:41:25.445Z",
+  "generatedAt": "2026-09-29T07:34:38.273Z",
   "monthWindow": "2026-09-01",
   "counts": {
     "L1": 30,
     "L2": 20,
     "L3": 20,
-    "L4": 22
+    "L4": 20
   },
   "pages": [
     {
@@ -24,7 +24,7 @@
     },
     {
       "title": "任务列表",
-      "uid": "n17e11csgtbr0w3x",
+      "uid": "n17e1ilgn22ts32",
       "level": "L1",
       "statCards": 3,
       "hintBlock": 1
@@ -206,7 +206,7 @@
     },
     {
       "title": "项目",
-      "uid": "n17e1c4638iazhx",
+      "uid": "n17e1kqp4orpph5",
       "level": "L1",
       "statCards": 3,
       "hintBlock": 1
@@ -235,13 +235,6 @@
     {
       "title": "仓库库区",
       "uid": "h5wms50cuimohzz7",
-      "level": "L2",
-      "statCards": 1,
-      "hintBlock": 0
-    },
-    {
-      "title": "供应商",
-      "uid": "n17f3t3gtwv502s",
       "level": "L2",
       "statCards": 1,
       "hintBlock": 0
@@ -317,6 +310,13 @@
       "hintBlock": 0
     },
     {
+      "title": "维保服务商",
+      "uid": "n17f3t3gtwv502s",
+      "level": "L2",
+      "statCards": 2,
+      "hintBlock": 0
+    },
+    {
       "title": "联系人",
       "uid": "n17c3lkyg9zjd6",
       "level": "L2",
@@ -346,7 +346,7 @@
     },
     {
       "title": "里程碑",
-      "uid": "n17e12p5eoxa8l6",
+      "uid": "n17e1m63re4tgre8",
       "level": "L2",
       "statCards": 2,
       "hintBlock": 0
@@ -359,7 +359,7 @@
       "hintBlock": 0
     },
     {
-      "title": "AQL抽样方案",
+      "title": "AQL 抽样方案",
       "uid": "w8qm15rxe53v8hh",
       "level": "L3",
       "statCards": 0,
@@ -429,6 +429,13 @@
       "hintBlock": 0
     },
     {
+      "title": "排程明细",
+      "uid": "w5mfgp352sily7f",
+      "level": "L3",
+      "statCards": 0,
+      "hintBlock": 0
+    },
+    {
       "title": "整改跟踪",
       "uid": "h4srm25tmro1wjuw",
       "level": "L3",
@@ -480,13 +487,6 @@
     {
       "title": "补货预警",
       "uid": "h5wmstw8iug4upxs",
-      "level": "L3",
-      "statCards": 0,
-      "hintBlock": 0
-    },
-    {
-      "title": "采购联系人（历史）",
-      "uid": "n17f3gnpjv8rfd85",
       "level": "L3",
       "statCards": 0,
       "hintBlock": 0
@@ -548,22 +548,8 @@
       "hintBlock": 0
     },
     {
-      "title": "工作台",
-      "uid": "n17f34fr9khfzdhq",
-      "level": "L4",
-      "statCards": 0,
-      "hintBlock": 0
-    },
-    {
       "title": "库存看板",
       "uid": "w9kpiatwzi4gjbff",
-      "level": "L4",
-      "statCards": 0,
-      "hintBlock": 0
-    },
-    {
-      "title": "排产看板",
-      "uid": "w5mfgp352sily7f",
       "level": "L4",
       "statCards": 0,
       "hintBlock": 0
