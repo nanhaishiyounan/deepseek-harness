@@ -27,7 +27,7 @@ Status: implemented
 - 双键契约的 psql 证据：全部有线表的 `options->'stepParams'` 对 `resourceSettings` AND `tableSettings` 均为真；w1 待办行钉 `status=open` 且双键并存。
 - 浏览器证据：各看板 list XHR 携带 `{"board":{"$eq":…}}` 且零外板行（各 20 行）；审批中心待办 list 携带 `status=open` 且 6 行全 open；member 质检单渲染 17 列（前后 PNG），C2 验收（≥5 业务列）作为探针脚本硬断言。
 - **边界（记录未修）**：点击后的排序透传无法在浏览器内观测——服务端树对 code 列应答 `sorter: true` 且 `TableBlockModel.tsx` 把交互排序接进 list 请求，但 dev 会话的前端树缓存使列头排序器不物化（全新浏览器 context 亦然）。点击级断言以 deferred 腿留在脚本里；平台首屏排序缺口（B1）维持原状。
-- **边界**：member 统计卡仍渲染「请配置图表」占位（`charts:queryData` 在 plugin-acl applyQueryPermission 下 403）——B3 记录的 L1 遗留，本批未动。
+- **边界**：member 统计卡仍渲染「请配置图表」占位（`charts:queryData` 在 plugin-acl applyQueryPermission 下 403）——B3 记录的 L1 遗留，本批未动。**未申报副作用（R2 补记）**：member 角色还带一行 `charts:queryData` 授权（`rolesResourcesActions` id392，`fields ["*"]`），是 B3 heal 于 2026-09-28T17:41 落的（`w4-heal-b3.mts` 的授权 ensure）——403 的缓解尝试；B3 的判定是必要不充分（applyQueryPermission 在上游照样拒绝聚合查询，该行清不掉 403）。保留而非回退：w4-heal-b3 的 verify 腿断言该行存在（回退即破该门禁），且上游澄清聚合查询语义后该行就是 member 统计卡工作的必要前提。scope 良性：charts 资源上的一行 action，不放宽任何其他字段面。
 - 390px 新建入口平台形态正常：28×28 icon-only 按钮、`title="添加"`、在视口内——无需修复，此处留档。
 - `w4-r1-restore.mts` 重跑收敛：已正确的线网记 `keep` 跳过；view 白名单段对齐后为 no-op。
 
@@ -36,3 +36,13 @@ Status: implemented
 - 用 w9 `--rollback` 全量重建恢复 dataScope——否决：为重写两个 stepParams 键而摧毁页面/图表/集合（及其种子）；定向 spread 写入精确恢复。
 - 重跑 `nocobase-w3-org-acl.mts` 修白名单——否决：其 touch-through 按设计每次重写资源的一行，整矩阵重跑会重置后续批次调过的无关授权；一次对齐的 view 写入是最小面。
 - 把零列缺陷归因于 W4 heal——证据否决：归档 B6 截图已显示该态，heal 从不触 rolesResourcesActions；勘误记录时间线。
+- 回退 member 的 `charts:queryData` 授权行（id392）这个无效缓解——否决：w4-heal-b3 的 verify 腿没有该行即失败，且该行是上游修复后所必需的前提；上面的补记段说明其存在缘由。
+
+## R2 收口（2026-09-29）
+
+R1 复验（88.8 分）后的定向收口微批次，并入本 note：
+
+1. **排序交互措辞如实化**（随本 commit 落库）：restore 脚本 code 列注释与上面边界段只陈述已证层——服务端树携带 `sorter: true`、API 排序通道在跑、`TableBlockModel.tsx` 把交互排序接进 list 请求——而首屏 sorter widget 在 dev 会话前端树缓存下仍不可证（含全新浏览器 context；生产构建复测是记录在案的口径）。三张 demo PNG 以 fresh context 重拍。
+2. **浏览器列数腿并入 keyless verify**：`setup-nocobase.mts verify` 在 NocoBase 活于 :13000 时运行 `w4-r1-qc-browser.mts after`（live-probe 形态，与 approval-engine serve smoke 同款）——≥5 业务列断言随每次 verify 对活 dev server 生效，无 server 时降级为打印提示。活体探测本身以 `backoffDelayMs` 重试传输级失败：紧随 API 密集探针之后 dev server 会丢弃 keep-alive socket（即 `callGetWithRetry` 所规避的同一 ECONNRESET），首次 verify 跑时单次 fetch 把活体误报为不在。
+3. **TextAreaFieldModel 退役**（用户可见红字修复，W 轮 c07993210a 引入）：`nocobase-w8-quality.mts` 与 `nocobase-w6-mfg-exec.mts` `editModelFor` 的 textarea 分支删除——该类不在客户端注册表（B4 的活体验证 "Model class 'TextAreaFieldModel' not found"），字段自身的 uiSchema（Input.TextArea）负责多行渲染，即 `nocobase-w3-approval-visual.mts` 早已采用的形态。`examples/kb-agent/scripts/w4-r2-fix.mts` 把 8 行实库行 use-only 退役（props 与 stepParams 不动），幂等，复检 0 残留；质检单编辑表单重拍证明「判定说明」渲染为可用多行控件、零红错误节点（`research/2026-09-28-w4-completeness/w4-r2-qc-form-edit.png`）。
+4. **Minor 加固**：w9kpi `total=9` 探针行升为硬断言（4 KPI 板 + 4 对账块 + wms_lots 台账块）；`.b6-regression-drill.mts` 的暂存文件加 PID 后缀，两个并发演练不会在 rename 落地前互相覆写；`callGetWithRetry` 传输级重试间隔改用 `backoffDelayMs`，与 `signInWithRetry` 对称。

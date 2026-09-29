@@ -52,6 +52,7 @@ import { fileURLToPath } from 'node:url'
 import { BRAND_TITLE } from './dsh-brand.mts'
 import { resolveEnv } from './resolve-env.ts'
 import { assertWflConsistency } from './nocobase-w3-approval-visual.mts'
+import { backoffDelayMs } from './nocobase-flow-page-lib.mts'
 import { collectOrgAclFailures } from './nocobase-w3-org-acl.mts'
 import { withResilience } from './resilience.ts'
 import type { ResilienceOptions } from './resilience.ts'
@@ -2104,6 +2105,45 @@ async function stepVerify(): Promise<void> {
       failures.push(`w4r1 wires probe failed:\n${(probeRun.stdout ?? '') + (probeRun.stderr ?? '')}`.trim())
     } else {
       console.log('setup-nocobase verify: w4r1 wires — 4 board dataScope + w1 todo pin + w9kpi total=9 ✓')
+    }
+  }
+  // W4-R2: the zero-column regression's browser leg — the rendered business
+  // column count (≥5 with rows) is the user-visible contract; the API-side
+  // whitelist alignment above cannot see the renderer. Rides the live dev
+  // server only; without :13000 the leg degrades to a hint (start the dev
+  // server and rerun verify), matching the approval-engine serve smoke.
+  {
+    // The dev server drops keep-alive sockets after the API-heavy probe
+    // passes above (the same ECONNRESET callGetWithRetry rides out), so a
+    // single fetch can misreport a live server as absent — retry the
+    // transport failures with the lib's backoff before concluding.
+    let live = false
+    for (let attempt = 0; ; attempt += 1) {
+      try {
+        const res = await fetch('http://127.0.0.1:13000/api/app:getInfo', { signal: AbortSignal.timeout(10_000) })
+        live = res.ok
+        if (!live) console.log(`setup-nocobase verify: NocoBase :13000 answered HTTP ${String(res.status)} — treating as not live`)
+        break
+      } catch (error) {
+        const message = String((error as Error)?.cause ?? error ?? '')
+        const transport = /ECONNRESET|socket hang up|EPIPE|ETIMEDOUT|fetch failed/i.test(message)
+        if (!transport || attempt >= 2) {
+          console.log(`setup-nocobase verify: NocoBase :13000 probe threw (${String((error as Error)?.name ?? error)} / cause: ${String((error as Error)?.cause ?? 'none')}) — treating as not live`)
+          break
+        }
+        await new Promise(resolve => setTimeout(resolve, backoffDelayMs(attempt)))
+      }
+    }
+    if (live) {
+      const qcRun = spawnSync(process.execPath, ['--import', 'tsx/esm', 'examples/kb-agent/scripts/w4-r1-qc-browser.mts', 'after'], { encoding: 'utf8', timeout: 300_000 })
+      if (qcRun.status !== 0) {
+        failures.push(`w4r1 member 质检单 browser leg failed:\n${(qcRun.stdout ?? '') + (qcRun.stderr ?? '')}`.trim())
+      } else {
+        const columns = (qcRun.stdout ?? '').split('\n').find(line => line.startsWith('# rendered table header columns'))
+        console.log(`setup-nocobase verify: w4r1 member质检单 browser leg — ${columns ?? 'rendered'} ✓`)
+      }
+    } else {
+      console.log('setup-nocobase verify: no live NocoBase :13000; the w4r1 member质检单 browser column-count leg was not probed (start the dev server and rerun verify)')
     }
   }
   if (failures.length > 0) {

@@ -98,15 +98,11 @@ export async function signInWithRetry(attempts = 4): Promise<string> {
 }
 
 /**
- * List all flowModels rows, refusing to continue when the page size was
- * exceeded: a truncated list would make the kept-tree check and the orphan
- * sweep silently miss rows. Raise pageSize here when the catalog grows.
- */
-/**
  * Read-only GET with narrow transport retry: the dev server occasionally
  * drops a keep-alive socket mid-list (ECONNRESET / socket hang up), which
  * must not abort a long catalog walk. Non-2xx responses stay errors — only
- * transport-level failures retry.
+ * transport-level failures retry, spaced by {@link backoffDelayMs} like
+ * {@link signInWithRetry}.
  */
 async function callGetWithRetry(token: string, path: string, attempts = 3): Promise<any> {
   let lastError: unknown
@@ -118,6 +114,7 @@ async function callGetWithRetry(token: string, path: string, attempts = 3): Prom
       const transport = /ECONNRESET|socket hang up|EPIPE|ETIMEDOUT|fetch failed/i.test(message)
       if (!transport || attempt === attempts) throw error
       lastError = error
+      await new Promise(resolve => setTimeout(resolve, backoffDelayMs(attempt - 1)))
     }
   }
   throw lastError

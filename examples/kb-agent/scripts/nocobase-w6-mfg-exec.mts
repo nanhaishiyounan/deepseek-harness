@@ -672,7 +672,9 @@ const editModelFor = (kind: FieldKind): string => {
     case 'number': return 'NumberFieldModel'
     case 'm2o': return 'RecordSelectFieldModel'
     case 'date': return 'DateOnlyFieldModel'
-    case 'textarea': return 'TextAreaFieldModel'
+    // No TextArea edit model exists in the client registry (verified live:
+    // "Model class 'TextAreaFieldModel' not found"); the field's own
+    // uiSchema (Input.TextArea) shapes the multiline rendering.
     case 'boolean': return 'CheckboxFieldModel'
     default: return 'InputFieldModel'
   }

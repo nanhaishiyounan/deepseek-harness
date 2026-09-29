@@ -1,0 +1,8 @@
+w4-r2 form: no TextAreaFieldModel / Model class not-found text on the edit surface ✓
+w4-r2 form: 判定说明 label rendered (1 hit) ✓
+w4-r2 form: 判定说明 carries a working input control, no field error ✓
+w4-r2 form: zero red error nodes on the edit surface ✓
+console errors (5):
+  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+  J
+w4-r2 form forensics: OK — shot at research/2026-09-28-w4-completeness/w4-r2-qc-form-edit.png

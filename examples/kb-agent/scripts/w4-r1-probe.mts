@@ -45,7 +45,11 @@ for (const table of todos) {
 }
 
 const bare = models.filter(row => row?.use === 'TableBlockModel' && String(row.uid ?? '').startsWith('w9kpi'))
-console.log(`w9kpi TableBlockModels total=${String(bare.length)}`)
+// 9 = 4 KPI boards + 4 reconciliation blocks + the wms_lots ledger block
+// (which legitimately carries no tableSettings); a different count means a
+// block row was lost or a foreign row adopted the prefix.
+if (bare.length !== 9) failures.push(`w9kpi TableBlockModels total=${String(bare.length)} (expected 9)`)
+console.log(`w9kpi TableBlockModels total=${String(bare.length)}${bare.length === 9 ? '' : ' (expected 9)'}`)
 for (const row of bare) {
   console.log(`  ${String(row.uid)} tableSettings=${JSON.stringify((row.stepParams?.tableSettings ?? {}))}`)
 }

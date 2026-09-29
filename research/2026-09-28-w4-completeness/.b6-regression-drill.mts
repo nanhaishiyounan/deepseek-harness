@@ -31,8 +31,10 @@ const flush = () => {
     if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
   }
   const separator = history.length > 0 ? '\n\n' : ''
-  writeFileSync(`${OUT}.tmp`, `${history}${separator}${log.join('\n')}\n`)
-  renameSync(`${OUT}.tmp`, OUT)
+  // PID-suffixed tmp keeps two concurrent drills from clobbering each
+  // other's staging file before the rename lands.
+  writeFileSync(`${OUT}.${String(process.pid)}.tmp`, `${history}${separator}${log.join('\n')}\n`)
+  renameSync(`${OUT}.${String(process.pid)}.tmp`, OUT)
 }
 
 const run = (label: string, args: string[]) => {
