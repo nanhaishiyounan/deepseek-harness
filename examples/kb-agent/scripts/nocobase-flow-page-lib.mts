@@ -120,6 +120,11 @@ async function callGetWithRetry(token: string, path: string, attempts = 3): Prom
   throw lastError
 }
 
+/**
+ * List all flowModels rows, refusing to continue when the page size was
+ * exceeded: a truncated list would make the kept-tree check and the orphan
+ * sweep silently miss rows. Raise pageSize here when the catalog grows.
+ */
 export async function listFlowModels(token: string, label: string): Promise<FlowModelRow[]> {
   // W3-B2 pushed the catalog past 6000 rows (17 edit forms + 12 subtable
   // blocks + jump actions); keep headroom for later batches.

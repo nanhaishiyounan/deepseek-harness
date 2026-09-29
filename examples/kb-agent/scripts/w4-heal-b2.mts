@@ -617,6 +617,9 @@ const editModelFor = (field: FieldMeta): string => {
     case 'boolean': return 'CheckboxFieldModel'
     case 'float': case 'double': case 'integer': case 'bigInt': return 'NumberFieldModel'
     case 'date': case 'dateOnly': return 'DateOnlyFieldModel'
+    // type 'text' is the textarea column: the registered multiline model is
+    // TextareaFieldModel (the exact spelling is load-bearing).
+    case 'text': return 'TextareaFieldModel'
     default: return 'InputFieldModel'
   }
 }

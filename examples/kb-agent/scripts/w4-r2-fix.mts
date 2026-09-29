@@ -4,9 +4,9 @@
  * both nocobase-w8-quality.mts and nocobase-w6-mfg-exec.mts; the client
  * registry has no such class (B4's live "Model class 'TextAreaFieldModel'
  * not found"), so every quality/mfg form carrying one rendered the field
- * as a red error instead of an input. The field's own uiSchema
- * (Input.TextArea) shapes the multiline rendering — InputFieldModel is the
- * correct edit model (the w3-approval-visual form).
+ * as a red error instead of an input. InputFieldModel restored the usable
+ * single-line control; W4-R3 (w4-r3-fix.mts) moved these rows on to the
+ * registered TextareaFieldModel for the multiline control.
  *
  * Live rows are switched use-only (parentId/subKey passed through, props
  * and stepParams untouched); the source editModelFor branches are removed

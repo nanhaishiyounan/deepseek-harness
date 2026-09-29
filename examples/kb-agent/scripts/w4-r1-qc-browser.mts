@@ -47,11 +47,17 @@ for (const hit of api) {
   console.log(`${String(hit.status).padStart(3)} ${hit.method} ${hit.url.slice(0, 160)}`)
 }
 
-// Rendered column count from the table header (business columns = th with text).
-const columns = await page.evaluate(() => {
+// Rendered column count from the table header (business columns = th with
+// text). A zero-column read here is a not-yet-painted skeleton, not the
+// contract: wait for a th first, and when the read still comes back empty
+// retry it once after a backoff before the assertion below can fail.
+await page.waitForSelector('.ant-table-thead th', { timeout: 15_000 }).catch(() => null)
+const readHeaderColumns = (): Promise<string[]> => page.evaluate(() => {
   const headers = [...document.querySelectorAll('.ant-table-thead th')]
   return headers.map(th => (th.textContent ?? '').trim()).filter(text => text.length > 0)
 })
+if ((await readHeaderColumns()).length === 0) await page.waitForTimeout(4_000)
+const columns = await readHeaderColumns()
 console.log(`# rendered table header columns (${String(columns.length)}): ${columns.join(' | ')}`)
 // The C2 acceptance: the member session renders ≥5 business columns with
 // rows behind them (the pre-fix state was the lone 操作 column).

@@ -105,7 +105,7 @@ for (const table of models.filter(row => row?.use === 'TableBlockModel' && Strin
       ...(codeColumn.subKey === undefined ? {} : { subKey: codeColumn.subKey }),
       props: { ...codeColumn.props, sorter: true },
     })
-    console.log('restored 质检单 code column sorter (interaction sort channel)')
+    console.log('restored 质检单 code column sorter (server-side wire; front-end widget unproven)')
   } else {
     console.log('keep 质检单 code column sorter (already on)')
   }

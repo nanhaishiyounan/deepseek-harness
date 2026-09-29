@@ -86,10 +86,11 @@ const editModelFor = (kind: FieldKind): string => {
     case 'select': return 'SelectFieldModel'
     case 'number': return 'NumberFieldModel'
     case 'boolean': return 'CheckboxFieldModel'
-    // No TextArea edit model exists in the client registry (verified live:
-    // "Model class 'TextAreaFieldModel' not found"); the field's own
-    // uiSchema (Input.TextArea) shapes the multiline rendering.
-    case 'textarea': return 'InputFieldModel'
+    // The registry class for interface 'textarea' is TextareaFieldModel —
+    // the exact spelling is load-bearing (client-v2
+    // flow/models/fields/TextareaFieldModel.tsx binds ['textarea'] and
+    // renders the multiline Input.TextArea control).
+    case 'textarea': return 'TextareaFieldModel'
     default: return 'InputFieldModel'
   }
 }
