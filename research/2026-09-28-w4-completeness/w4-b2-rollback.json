@@ -35441,5 +35441,1349 @@
     "kind": "assignRules",
     "gridUid": "09bvmy800vm",
     "before": null
+  },
+  {
+    "kind": "gridLayout",
+    "gridUid": "09bvmy800vm",
+    "before": {
+      "props": {
+        "layout": {
+          "version": 2,
+          "rows": [
+            {
+              "sizes": [
+                24
+              ],
+              "cells": [
+                {
+                  "id": "sec0:cell:0",
+                  "items": [
+                    "w4b2dvwuv0kszogd"
+                  ]
+                }
+              ]
+            },
+            {
+              "sizes": [
+                24
+              ],
+              "cells": [
+                {
+                  "id": "r1:cell:0",
+                  "items": [
+                    "n17ioagutsidh5k"
+                  ]
+                }
+              ]
+            },
+            {
+              "sizes": [
+                24
+              ],
+              "cells": [
+                {
+                  "id": "r1:cell:1",
+                  "items": [
+                    "n17ikcm5pqyaj0q"
+                  ]
+                }
+              ]
+            },
+            {
+              "sizes": [
+                24
+              ],
+              "cells": [
+                {
+                  "id": "r2:cell:0",
+                  "items": [
+                    "n17iy2uxhuz1vi"
+                  ]
+                }
+              ]
+            },
+            {
+              "sizes": [
+                24
+              ],
+              "cells": [
+                {
+                  "id": "r2:cell:1",
+                  "items": [
+                    "n17im5r0b69pyc"
+                  ]
+                }
+              ]
+            },
+            {
+              "sizes": [
+                24
+              ],
+              "cells": [
+                {
+                  "id": "sec3:cell:0",
+                  "items": [
+                    "w4b2dvpwdx9e6yn2"
+                  ]
+                }
+              ]
+            },
+            {
+              "sizes": [
+                24
+              ],
+              "cells": [
+                {
+                  "id": "r4:cell:0",
+                  "items": [
+                    "n17ihaqowd6qx27"
+                  ]
+                }
+              ]
+            }
+          ],
+          "rowOrder": [
+            "sec0",
+            "r1",
+            "r2",
+            "sec3",
+            "r4"
+          ],
+          "rowGap": 0,
+          "colGap": 16
+        }
+      },
+      "stepParams": {
+        "gridSettings": {
+          "grid": {
+            "layout": {
+              "version": 2,
+              "rows": [
+                {
+                  "id": "sec0",
+                  "cells": [
+                    {
+                      "id": "sec0:cell:0",
+                      "items": [
+                        "w4b2dvwuv0kszogd"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    24
+                  ]
+                },
+                {
+                  "id": "r1",
+                  "cells": [
+                    {
+                      "id": "r1:cell:0",
+                      "items": [
+                        "n17ioagutsidh5k"
+                      ]
+                    },
+                    {
+                      "id": "r1:cell:1",
+                      "items": [
+                        "n17ikcm5pqyaj0q"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    12,
+                    12
+                  ]
+                },
+                {
+                  "id": "r2",
+                  "cells": [
+                    {
+                      "id": "r2:cell:0",
+                      "items": [
+                        "n17iy2uxhuz1vi"
+                      ]
+                    },
+                    {
+                      "id": "r2:cell:1",
+                      "items": [
+                        "n17im5r0b69pyc"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    12,
+                    12
+                  ]
+                },
+                {
+                  "id": "sec3",
+                  "cells": [
+                    {
+                      "id": "sec3:cell:0",
+                      "items": [
+                        "w4b2dvpwdx9e6yn2"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    24
+                  ]
+                },
+                {
+                  "id": "r4",
+                  "cells": [
+                    {
+                      "id": "r4:cell:0",
+                      "items": [
+                        "n17ihaqowd6qx27"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    12
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "formModelSettings": {
+          "assignRules": {
+            "value": [
+              {
+                "key": "w4b2-status-0",
+                "enable": true,
+                "targetPath": "status",
+                "mode": "default",
+                "value": "active"
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "kind": "fieldProps",
+    "uid": "tcy94q2b1mf",
+    "before": {
+      "placeholder": "如 PO-20261001-001"
+    },
+    "writtenKeys": [
+      "placeholder"
+    ]
+  },
+  {
+    "kind": "fieldProps",
+    "uid": "ngoddczkaj5",
+    "before": {
+      "placeholder": "如 PO-20261001-001"
+    },
+    "writtenKeys": [
+      "placeholder"
+    ]
+  },
+  {
+    "kind": "gridLayout",
+    "gridUid": "4mbay3domb5",
+    "before": {
+      "props": {
+        "layout": {
+          "version": 2,
+          "rows": [
+            {
+              "id": "sec0",
+              "cells": [
+                {
+                  "id": "sec0:cell:0",
+                  "items": [
+                    "w4b2dvkx2nf62hkk"
+                  ]
+                }
+              ],
+              "sizes": [
+                24
+              ]
+            },
+            {
+              "id": "r1",
+              "cells": [
+                {
+                  "id": "r1:cell:0",
+                  "items": [
+                    "w8qmij2gs7r5yjj"
+                  ]
+                }
+              ],
+              "sizes": [
+                12
+              ]
+            },
+            {
+              "id": "sec2",
+              "cells": [
+                {
+                  "id": "sec2:cell:0",
+                  "items": [
+                    "w4b2dvjjj7ey9azno"
+                  ]
+                }
+              ],
+              "sizes": [
+                24
+              ]
+            },
+            {
+              "id": "r3",
+              "cells": [
+                {
+                  "id": "r3:cell:0",
+                  "items": [
+                    "w8qmif82prlijbz4"
+                  ]
+                },
+                {
+                  "id": "r3:cell:1",
+                  "items": [
+                    "w8qmi876eg79hne5"
+                  ]
+                }
+              ],
+              "sizes": [
+                12,
+                12
+              ]
+            },
+            {
+              "id": "sec4",
+              "cells": [
+                {
+                  "id": "sec4:cell:0",
+                  "items": [
+                    "w4b2dvrdilj2sv7y9"
+                  ]
+                }
+              ],
+              "sizes": [
+                24
+              ]
+            },
+            {
+              "id": "r5",
+              "cells": [
+                {
+                  "id": "r5:cell:0",
+                  "items": [
+                    "w8qmiur3buuteoy"
+                  ]
+                },
+                {
+                  "id": "r5:cell:1",
+                  "items": [
+                    "w8qmiopd1lg27b3"
+                  ]
+                }
+              ],
+              "sizes": [
+                12,
+                12
+              ]
+            },
+            {
+              "id": "r6",
+              "cells": [
+                {
+                  "id": "r6:cell:0",
+                  "items": [
+                    "w8qmig7z9mhh0u39"
+                  ]
+                },
+                {
+                  "id": "r6:cell:1",
+                  "items": [
+                    "w8qmilr77sb0q80j"
+                  ]
+                }
+              ],
+              "sizes": [
+                12,
+                12
+              ]
+            },
+            {
+              "id": "r7",
+              "cells": [
+                {
+                  "id": "r7:cell:0",
+                  "items": [
+                    "w8qmiqc44ch5utm"
+                  ]
+                },
+                {
+                  "id": "r7:cell:1",
+                  "items": [
+                    "w8qmimcebyla0m1b"
+                  ]
+                }
+              ],
+              "sizes": [
+                12,
+                12
+              ]
+            },
+            {
+              "id": "r8",
+              "cells": [
+                {
+                  "id": "r8:cell:0",
+                  "items": [
+                    "w8qmiy2sbeb5hwkc"
+                  ]
+                }
+              ],
+              "sizes": [
+                12
+              ]
+            }
+          ],
+          "rowOrder": [
+            "sec0",
+            "r1",
+            "sec2",
+            "r3",
+            "sec4",
+            "r5",
+            "r6",
+            "r7",
+            "r8"
+          ],
+          "rowGap": 0,
+          "colGap": 16
+        }
+      },
+      "stepParams": {
+        "gridSettings": {
+          "grid": {
+            "layout": {
+              "version": 2,
+              "rows": [
+                {
+                  "id": "sec0",
+                  "cells": [
+                    {
+                      "id": "sec0:cell:0",
+                      "items": [
+                        "w4b2dvkx2nf62hkk"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    24
+                  ]
+                },
+                {
+                  "id": "r1",
+                  "cells": [
+                    {
+                      "id": "r1:cell:0",
+                      "items": [
+                        "w8qmij2gs7r5yjj"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    12
+                  ]
+                },
+                {
+                  "id": "sec2",
+                  "cells": [
+                    {
+                      "id": "sec2:cell:0",
+                      "items": [
+                        "w4b2dvjjj7ey9azno"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    24
+                  ]
+                },
+                {
+                  "id": "r3",
+                  "cells": [
+                    {
+                      "id": "r3:cell:0",
+                      "items": [
+                        "w8qmif82prlijbz4"
+                      ]
+                    },
+                    {
+                      "id": "r3:cell:1",
+                      "items": [
+                        "w8qmi876eg79hne5"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    12,
+                    12
+                  ]
+                },
+                {
+                  "id": "sec4",
+                  "cells": [
+                    {
+                      "id": "sec4:cell:0",
+                      "items": [
+                        "w4b2dvrdilj2sv7y9"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    24
+                  ]
+                },
+                {
+                  "id": "r5",
+                  "cells": [
+                    {
+                      "id": "r5:cell:0",
+                      "items": [
+                        "w8qmiur3buuteoy"
+                      ]
+                    },
+                    {
+                      "id": "r5:cell:1",
+                      "items": [
+                        "w8qmiopd1lg27b3"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    12,
+                    12
+                  ]
+                },
+                {
+                  "id": "r6",
+                  "cells": [
+                    {
+                      "id": "r6:cell:0",
+                      "items": [
+                        "w8qmig7z9mhh0u39"
+                      ]
+                    },
+                    {
+                      "id": "r6:cell:1",
+                      "items": [
+                        "w8qmilr77sb0q80j"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    12,
+                    12
+                  ]
+                },
+                {
+                  "id": "r7",
+                  "cells": [
+                    {
+                      "id": "r7:cell:0",
+                      "items": [
+                        "w8qmiqc44ch5utm"
+                      ]
+                    },
+                    {
+                      "id": "r7:cell:1",
+                      "items": [
+                        "w8qmimcebyla0m1b"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    12,
+                    12
+                  ]
+                },
+                {
+                  "id": "r8",
+                  "cells": [
+                    {
+                      "id": "r8:cell:0",
+                      "items": [
+                        "w8qmiy2sbeb5hwkc"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    12
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "kind": "dividerCreated",
+    "uid": "w4b2dvdsvvthp44yq",
+    "gridUid": "4mbay3domb5"
+  },
+  {
+    "kind": "dividerCreated",
+    "uid": "w4b2dvu47eaejk6jb",
+    "gridUid": "4mbay3domb5"
+  },
+  {
+    "kind": "fieldProps",
+    "uid": "w3b2effswz3jp0t00n",
+    "before": {
+      "placeholder": "如 PO-20261001-001"
+    },
+    "writtenKeys": [
+      "placeholder"
+    ]
+  },
+  {
+    "kind": "fieldProps",
+    "uid": "w3b2effdpgvxt6gtt",
+    "before": {
+      "placeholder": "如 PO-20261001-001"
+    },
+    "writtenKeys": [
+      "placeholder"
+    ]
+  },
+  {
+    "kind": "gridLayout",
+    "gridUid": "s4tqwd3prm3",
+    "before": {
+      "props": {
+        "layout": {
+          "version": 2,
+          "rows": [
+            {
+              "id": "sec0",
+              "cells": [
+                {
+                  "id": "sec0:cell:0",
+                  "items": [
+                    "w4b2dv9e00vfz0zkv"
+                  ]
+                }
+              ],
+              "sizes": [
+                24
+              ]
+            },
+            {
+              "id": "r1",
+              "cells": [
+                {
+                  "id": "r1:cell:0",
+                  "items": [
+                    "w3b2efi7erp4b48ani"
+                  ]
+                },
+                {
+                  "id": "r1:cell:1",
+                  "items": [
+                    "w3b2efinpwpptdhw8r"
+                  ]
+                }
+              ],
+              "sizes": [
+                12,
+                12
+              ]
+            },
+            {
+              "id": "sec2",
+              "cells": [
+                {
+                  "id": "sec2:cell:0",
+                  "items": [
+                    "w4b2dv4k2ccdae3wo"
+                  ]
+                }
+              ],
+              "sizes": [
+                24
+              ]
+            },
+            {
+              "id": "r3",
+              "cells": [
+                {
+                  "id": "r3:cell:0",
+                  "items": [
+                    "w3b2efiw0mt23lzs5"
+                  ]
+                },
+                {
+                  "id": "r3:cell:1",
+                  "items": [
+                    "w3b2efi80hk15tvbyl"
+                  ]
+                }
+              ],
+              "sizes": [
+                12,
+                12
+              ]
+            },
+            {
+              "id": "r4",
+              "cells": [
+                {
+                  "id": "r4:cell:0",
+                  "items": [
+                    "w3b2efinarg5462nwi"
+                  ]
+                },
+                {
+                  "id": "r4:cell:1",
+                  "items": [
+                    "w3b2efirj467s4z4zk"
+                  ]
+                }
+              ],
+              "sizes": [
+                12,
+                12
+              ]
+            },
+            {
+              "id": "r5",
+              "cells": [
+                {
+                  "id": "r5:cell:0",
+                  "items": [
+                    "w3b2efiy9ej7uv5lyo"
+                  ]
+                },
+                {
+                  "id": "r5:cell:1",
+                  "items": [
+                    "w3b2efi5jt0ohlrusk"
+                  ]
+                }
+              ],
+              "sizes": [
+                12,
+                12
+              ]
+            },
+            {
+              "id": "r6",
+              "cells": [
+                {
+                  "id": "r6:cell:0",
+                  "items": [
+                    "w3b2efizh9kehyivp"
+                  ]
+                },
+                {
+                  "id": "r6:cell:1",
+                  "items": [
+                    "w3b2efisq7wjv4260i"
+                  ]
+                }
+              ],
+              "sizes": [
+                12,
+                12
+              ]
+            },
+            {
+              "id": "r7",
+              "cells": [
+                {
+                  "id": "r7:cell:0",
+                  "items": [
+                    "w3b2efirko8eqcoy0l"
+                  ]
+                },
+                {
+                  "id": "r7:cell:1",
+                  "items": [
+                    "w3b2efid8io4b64u5"
+                  ]
+                }
+              ],
+              "sizes": [
+                12,
+                12
+              ]
+            },
+            {
+              "id": "r8",
+              "cells": [
+                {
+                  "id": "r8:cell:0",
+                  "items": [
+                    "w3b2efimbf8c3kx9hj"
+                  ]
+                },
+                {
+                  "id": "r8:cell:1",
+                  "items": [
+                    "w3b2efiqfshraazqx8"
+                  ]
+                }
+              ],
+              "sizes": [
+                12,
+                12
+              ]
+            },
+            {
+              "id": "r9",
+              "cells": [
+                {
+                  "id": "r9:cell:0",
+                  "items": [
+                    "w3b2efilz4zs1qp2gs"
+                  ]
+                },
+                {
+                  "id": "r9:cell:1",
+                  "items": [
+                    "w3b2efilic4ewx1guo"
+                  ]
+                }
+              ],
+              "sizes": [
+                12,
+                12
+              ]
+            },
+            {
+              "id": "r10",
+              "cells": [
+                {
+                  "id": "r10:cell:0",
+                  "items": [
+                    "w3b2efiuz0emmc950k"
+                  ]
+                },
+                {
+                  "id": "r10:cell:1",
+                  "items": [
+                    "w3b2efiv62wb4ln4c"
+                  ]
+                }
+              ],
+              "sizes": [
+                12,
+                12
+              ]
+            },
+            {
+              "id": "r11",
+              "cells": [
+                {
+                  "id": "r11:cell:0",
+                  "items": [
+                    "w3b2efi2900ewtuh78"
+                  ]
+                },
+                {
+                  "id": "r11:cell:1",
+                  "items": [
+                    "w3b2eficr30z2mhta"
+                  ]
+                }
+              ],
+              "sizes": [
+                12,
+                12
+              ]
+            },
+            {
+              "id": "r12",
+              "cells": [
+                {
+                  "id": "r12:cell:0",
+                  "items": [
+                    "w3b2efihw2jjsbacc"
+                  ]
+                }
+              ],
+              "sizes": [
+                12
+              ]
+            }
+          ],
+          "rowOrder": [
+            "sec0",
+            "r1",
+            "sec2",
+            "r3",
+            "r4",
+            "r5",
+            "r6",
+            "r7",
+            "r8",
+            "r9",
+            "r10",
+            "r11",
+            "r12"
+          ],
+          "rowGap": 0,
+          "colGap": 16
+        }
+      },
+      "stepParams": {
+        "gridSettings": {
+          "grid": {
+            "layout": {
+              "version": 2,
+              "rows": [
+                {
+                  "id": "sec0",
+                  "cells": [
+                    {
+                      "id": "sec0:cell:0",
+                      "items": [
+                        "w4b2dv9e00vfz0zkv"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    24
+                  ]
+                },
+                {
+                  "id": "r1",
+                  "cells": [
+                    {
+                      "id": "r1:cell:0",
+                      "items": [
+                        "w3b2efi7erp4b48ani"
+                      ]
+                    },
+                    {
+                      "id": "r1:cell:1",
+                      "items": [
+                        "w3b2efinpwpptdhw8r"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    12,
+                    12
+                  ]
+                },
+                {
+                  "id": "sec2",
+                  "cells": [
+                    {
+                      "id": "sec2:cell:0",
+                      "items": [
+                        "w4b2dv4k2ccdae3wo"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    24
+                  ]
+                },
+                {
+                  "id": "r3",
+                  "cells": [
+                    {
+                      "id": "r3:cell:0",
+                      "items": [
+                        "w3b2efiw0mt23lzs5"
+                      ]
+                    },
+                    {
+                      "id": "r3:cell:1",
+                      "items": [
+                        "w3b2efi80hk15tvbyl"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    12,
+                    12
+                  ]
+                },
+                {
+                  "id": "r4",
+                  "cells": [
+                    {
+                      "id": "r4:cell:0",
+                      "items": [
+                        "w3b2efinarg5462nwi"
+                      ]
+                    },
+                    {
+                      "id": "r4:cell:1",
+                      "items": [
+                        "w3b2efirj467s4z4zk"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    12,
+                    12
+                  ]
+                },
+                {
+                  "id": "r5",
+                  "cells": [
+                    {
+                      "id": "r5:cell:0",
+                      "items": [
+                        "w3b2efiy9ej7uv5lyo"
+                      ]
+                    },
+                    {
+                      "id": "r5:cell:1",
+                      "items": [
+                        "w3b2efi5jt0ohlrusk"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    12,
+                    12
+                  ]
+                },
+                {
+                  "id": "r6",
+                  "cells": [
+                    {
+                      "id": "r6:cell:0",
+                      "items": [
+                        "w3b2efizh9kehyivp"
+                      ]
+                    },
+                    {
+                      "id": "r6:cell:1",
+                      "items": [
+                        "w3b2efisq7wjv4260i"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    12,
+                    12
+                  ]
+                },
+                {
+                  "id": "r7",
+                  "cells": [
+                    {
+                      "id": "r7:cell:0",
+                      "items": [
+                        "w3b2efirko8eqcoy0l"
+                      ]
+                    },
+                    {
+                      "id": "r7:cell:1",
+                      "items": [
+                        "w3b2efid8io4b64u5"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    12,
+                    12
+                  ]
+                },
+                {
+                  "id": "r8",
+                  "cells": [
+                    {
+                      "id": "r8:cell:0",
+                      "items": [
+                        "w3b2efimbf8c3kx9hj"
+                      ]
+                    },
+                    {
+                      "id": "r8:cell:1",
+                      "items": [
+                        "w3b2efiqfshraazqx8"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    12,
+                    12
+                  ]
+                },
+                {
+                  "id": "r9",
+                  "cells": [
+                    {
+                      "id": "r9:cell:0",
+                      "items": [
+                        "w3b2efilz4zs1qp2gs"
+                      ]
+                    },
+                    {
+                      "id": "r9:cell:1",
+                      "items": [
+                        "w3b2efilic4ewx1guo"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    12,
+                    12
+                  ]
+                },
+                {
+                  "id": "r10",
+                  "cells": [
+                    {
+                      "id": "r10:cell:0",
+                      "items": [
+                        "w3b2efiuz0emmc950k"
+                      ]
+                    },
+                    {
+                      "id": "r10:cell:1",
+                      "items": [
+                        "w3b2efiv62wb4ln4c"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    12,
+                    12
+                  ]
+                },
+                {
+                  "id": "r11",
+                  "cells": [
+                    {
+                      "id": "r11:cell:0",
+                      "items": [
+                        "w3b2efi2900ewtuh78"
+                      ]
+                    },
+                    {
+                      "id": "r11:cell:1",
+                      "items": [
+                        "w3b2eficr30z2mhta"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    12,
+                    12
+                  ]
+                },
+                {
+                  "id": "r12",
+                  "cells": [
+                    {
+                      "id": "r12:cell:0",
+                      "items": [
+                        "w3b2efihw2jjsbacc"
+                      ]
+                    }
+                  ],
+                  "sizes": [
+                    12
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "kind": "dividerCreated",
+    "uid": "w4b2dvwgspj1sdnzk",
+    "gridUid": "s4tqwd3prm3"
+  },
+  {
+    "kind": "dividerCreated",
+    "uid": "w4b2dvmdd4rfjdqmp",
+    "gridUid": "s4tqwd3prm3"
+  },
+  {
+    "kind": "fieldProps",
+    "uid": "x5df4yqvi5i",
+    "before": {
+      "placeholder": "如 PO-20261001-001"
+    },
+    "writtenKeys": [
+      "placeholder"
+    ]
+  },
+  {
+    "kind": "gridLayout",
+    "gridUid": "xiqhq0fgi7u",
+    "before": {
+      "props": {
+        "layout": {
+          "version": 2,
+          "rows": [
+            {
+              "id": "sec0",
+              "cells": [
+                {
+                  "id": "sec0:cell:0",
+                  "items": [
+                    "w4b2dv4ujz3nisdjk"
+                  ]
+                }
+              ],
+              "sizes": [
+                24
+              ]
+            },
+            {
+              "id": "r1",
+              "cells": [
+                {
+                  "id": "r1:cell:0",
+                  "items": [
+                    "w8qmimp0ojqv83ll"
+                  ]
+                },
+                {
+                  "id": "r1:cell:1",
+                  "items": [
+                    "w8qmimxbnzqj58j"
+                  ]
+                }
+              ],
+              "sizes": [
+                12,
+                12
+              ]
+            },
+            {
+              "id": "r2",
+              "cells": [
+                {
+                  "id": "r2:cell:0",
+                  "items": [
+                    "w8qmi15dxr9s7kr"
+                  ]
+                }
+              ],
+              "sizes": [
+                12
+              ]
+            },
+            {
+              "id": "sec3",
+              "cells": [
+                {
+                  "id": "sec3:cell:0",
+                  "items": [
+                    "w4b2dvhfwwc80b0gb"
+                  ]
+                }
+              ],
+              "sizes": [
+                24
+              ]
+            },
+            {
+              "id": "r4",
+              "cells": [
+                {
+                  "id": "r4:cell:0",
+                  "items": [
+                    "w8qmix6xki7guy5"
+                  ]
+                },
+                {
+                  "id": "r4:cell:1",
+                  "items": [
+                    "w8qmi7815ztz6hoy"
+                  ]
+                }
+              ],
+              "sizes": [
+                12,
+                12
+              ]
+            },
+            {
+              "id": "r5",
+              "cells": [
+                {
+                  "id": "r5:cell:0",
+                  "items": [
+                    "w8qmip557anhcde"
+                  ]
+                },
+                {
+                  "id": "r5:cell:1",
+                  "items": [
+                    "w8qmilweb2rhzkw"
+                  ]
+                }
+              ],
+              "sizes": [
+                12,
+                12
+              ]
+            },
+            {
+              "id": "r6",
+              "cells": [
+                {
+                  "id": "r6:cell:0",
+                  "items": [
+                    "w8qmiwh2cm93mgi"
+                  ]
+                }
+              ],
+              "sizes": [
+                12
+              ]
+            }
+          ],
+          "rowOrder": [
+            "sec0",
+            "r1",
+            "r2",
+            "sec3",
+            "r4",
+            "r5",
+            "r6"
+          ],
+          "rowGap": 0,
+          "colGap": 16
+        }
+      },
+      "stepParams": {
+        "formModelSettings": {
+          "assignRules": {
+            "value": [
+              {
+                "key": "w4b2-status-0",
+                "enable": true,
+                "targetPath": "status",
+                "mode": "default",
+                "value": "open"
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "kind": "dividerCreated",
+    "uid": "w4b2dvcqdp1zlwx3u",
+    "gridUid": "xiqhq0fgi7u"
   }
 ]

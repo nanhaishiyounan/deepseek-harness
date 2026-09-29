@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-09-28-w4b2-form-standards-heal.md
-2026-09-28-w4b2-form-standards-heal.md: abda7dfbc7cb7646871d9625c34468f148feb6bf
-2026-09-28-w4b2-form-standards-heal.zh.md: d597b7b064ecfd3cd7a53fa9270b0254024a14b4
+2026-09-28-w4b2-form-standards-heal.md: 4e8ac0f77104daac448a7678b8641cfb074cb1b4
+2026-09-28-w4b2-form-standards-heal.zh.md: 86dcf4822850b96ae8e5548ca0df813eff3ed4f2

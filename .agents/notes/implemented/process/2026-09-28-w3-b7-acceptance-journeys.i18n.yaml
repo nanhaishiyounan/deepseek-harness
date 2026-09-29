@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/process/2026-09-28-w3-b7-acceptance-journeys.md
-2026-09-28-w3-b7-acceptance-journeys.md: 593b1fc8b3827f5db2c2ac3e1eca0a3cb86dfd4c
-2026-09-28-w3-b7-acceptance-journeys.zh.md: 0f26bcb3b454c2389375e2b189b0e5cfcfb1a669
+2026-09-28-w3-b7-acceptance-journeys.md: 431456d2451497065f76524d01d786fbeb990d41
+2026-09-28-w3-b7-acceptance-journeys.zh.md: 19fe21f51a3a749ead025edd2eb9dcd9d116c5a6

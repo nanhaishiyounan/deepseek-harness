@@ -18,3 +18,8 @@ W4-B6 回归拦截力演练 2026-09-28T20:10:37.507Z
 
 结论：两轮演练 均 红→恢复→绿 —— verify 断言族 fails-loud 证明成立
 （A：FilterForm 删除被 w4b1 断言拦截 filterFormBlocks 35<36 + pagesNoFilter=1；B：单列化被 w4b2 断言拦截 singleColEligible=1≠0）
+
+
+--- 历史段：第二次演练运行（R1 前被旧脚本覆写丢失上下文，仅存 3 行头，由 R1 归档保留）---
+W4-B6 回归拦截力演练 2026-09-28T22:21:36.818Z
+口径：人为破坏 → 断言变红 → 幂等 heal 恢复 → 断言回绿（fails-loud 证明）

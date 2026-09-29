@@ -1,9 +1,15 @@
-# W4-B5 菜单信息架构重整：16 → 12 组、先迁后删、双通道改名
+# Agent Note: W4-B5 菜单信息架构重整：16 → 12 组、先迁后删、双通道改名
+
+Status: implemented
 
 [English](2026-09-28-w4-b5-menu-ia-consolidation.md) | 中文
 - 日期：2026-09-28 · 批次：W4-B5（plans/2026-09-28-w4-completeness/05-b5-nav-ia.md）
 - 代码：`examples/kb-agent/scripts/w4-heal-b5.mts`（TARGET_IA 表 + 迁移/删除/改名/icon/sort + assert + rollback）；`examples/kb-agent/scripts/w4-heal-b4.mts`（A1/A2 基线翻到 B5 后世界）；`examples/kb-agent/scripts/setup-nocobase.mts`（3 处组名断言适配 + w4b5 门禁挂载 + OK 汇总行）；`examples/kb-agent/scripts/w4-heal-b3.mts`（L2 页清单与卡片规格随维保服务商改名传导）；8 个建页脚本组常量同步（`nocobase-crm-modules/hub-modules/w1-approval/w3-approval-visual/w3-org-acl/w3-views/w5-mfg/w6-mfg-exec`——重放落位到 B5 后组名）；`examples/kb-agent/QUICKSTART.zh.md`（菜单导览段重写为 12 组 IA）
 - 证据：`research/2026-09-28-w4-completeness/w4-b5-*`（routes-before/after · menu-tree · role-map · idempotent · rollback-drill · verify · journey-r1..r8 + member-acl + member-matrix-denied + menu-final）
+
+## 问题
+
+菜单已膨胀到 16 组，含四个冗余容器（空置的采购、两个职能重叠的流程组、与项目与协同重复的工单中心）。目标 IA 为 12 组且组内页序严格，迁移须保全 93 页、member 页级围栏与所有重放脚本的组名常量。
 
 ## 决策
 
@@ -21,7 +27,7 @@
 - **member 的「组壳」设计上全开**：qc_inspector 看得到全部 12 个组头（与 B5 前看得到全部 16 组一致——对照 w4b1-pilot-member-filtered.png）。裁剪在下一层：admin-only 页从菜单消失且直达无内容，而 qc token 直调 `desktopRoutes:list` 返回零行。不要把组头可见读作 ACL 回归；断言页绑定（assert A8）才是正解。
 - **`/admin` 落地页折叠未展开的组**，body 文本探针会漏组内容（B4 教训重演）：从目标页自身上下文探测，或先导航再判读。
 
-## 验收口径
+## 后果口径
 
 - `w4-heal-b5.mts --assert`（进 setup verify）：12 组、sort 1–12 唯一、无空组/重复组名/已删组名、顶级恰为 AI 工作台（RobotOutlined、sort 0）、93 页宇宙对账零丢失、各组组内清单与顺序等于 TARGET_IA、12 个组 icon 唯一非空 + 页 icon 全配无空格 + 付款申请 = DollarOutlined、routes = 198 且 type 计数 {group 12, flowPage 90, tabs 93, page 3}、双通道改名、93 页 surface 全 200、member 绑定完好（质检单保留 member、权限矩阵不保留）。
 - 证据：八角色 2 击旅程（w4-b5-journey-r1..r8-*.png）、member 取证（菜单 + 质检单可达 + 权限矩阵直达被拒）、终态菜单树（w4-b5-menu-tree.txt / menu-final.png）、幂等重跑零变化（198→198、22 skip）、两步式回滚演练（w4-b5-rollback-drill.txt）。
@@ -30,3 +36,8 @@
 ## 遗留
 
 - **无 B6 阻塞项**。文档表漏列项（排产甘特位置、三个销售日历页排序）已记入 TARGET_GROUPS；B6 直接消费角色映射表。
+
+## 备选与否决
+
+- 每角色独立菜单树——否决：8 角色 × 12 组让面数失控；页级 rolesDesktopRoutes 绑定加 W3 数据 ACL 已划清 member/admin 界线。
+- 合并组走先毁后建——否决：先迁后删加迁移前页面宇宙对账，才是能证明零丢页的唯一协议。

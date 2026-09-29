@@ -102,11 +102,32 @@ export async function signInWithRetry(attempts = 4): Promise<string> {
  * exceeded: a truncated list would make the kept-tree check and the orphan
  * sweep silently miss rows. Raise pageSize here when the catalog grows.
  */
+/**
+ * Read-only GET with narrow transport retry: the dev server occasionally
+ * drops a keep-alive socket mid-list (ECONNRESET / socket hang up), which
+ * must not abort a long catalog walk. Non-2xx responses stay errors — only
+ * transport-level failures retry.
+ */
+async function callGetWithRetry(token: string, path: string, attempts = 3): Promise<any> {
+  let lastError: unknown
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      return await call(token, 'GET', path)
+    } catch (error) {
+      const message = String((error as Error)?.cause ?? error ?? '')
+      const transport = /ECONNRESET|socket hang up|EPIPE|ETIMEDOUT|fetch failed/i.test(message)
+      if (!transport || attempt === attempts) throw error
+      lastError = error
+    }
+  }
+  throw lastError
+}
+
 export async function listFlowModels(token: string, label: string): Promise<FlowModelRow[]> {
   // W3-B2 pushed the catalog past 6000 rows (17 edit forms + 12 subtable
   // blocks + jump actions); keep headroom for later batches.
   const pageSize = 12000
-  const payload = await call(token, 'GET', `/api/flowModels:list?pageSize=${pageSize}`)
+  const payload = await callGetWithRetry(token, `/api/flowModels:list?pageSize=${pageSize}`)
   const rows = (payload?.data ?? null) as FlowModelRow[] | null
   if (rows === null) return []
   const total = payload?.meta?.total
@@ -781,12 +802,14 @@ export async function applyTableDefaultSort(
   const before = (row.props ?? {}) as Record<string, unknown>
   const initBefore = ((row.stepParams ?? {}).resourceSettings ?? {}).init as Record<string, unknown> | undefined
   const init = { ...(initBefore ?? {}), params: { ...((initBefore ?? {}).params ?? {}), sort } }
+  const stepParamsBefore = (row.stepParams ?? {}) as Record<string, unknown>
+  const resourceSettingsBefore = (stepParamsBefore.resourceSettings ?? {}) as Record<string, unknown>
   await dataOf(token, 'POST', '/api/flowModels:save', {
     uid: tableUid,
     ...(row.parentId === undefined ? {} : { parentId: row.parentId }),
     ...(row.subKey === undefined ? {} : { subKey: row.subKey }),
     props: { ...before, globalSort: sort },
-    stepParams: { resourceSettings: { init } },
+    stepParams: { ...stepParamsBefore, resourceSettings: { ...resourceSettingsBefore, init } },
   })
   if (sortColumnUid !== null) {
     const order = sort.some(entry => entry.startsWith('-')) ? 'descend' : 'ascend'

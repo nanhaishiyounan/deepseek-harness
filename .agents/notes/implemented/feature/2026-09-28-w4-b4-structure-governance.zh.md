@@ -1,10 +1,16 @@
-# W4-B4 结构治理 —— 退役协议执行化 + 双通道改名 + 重复组消解
+# Agent Note: W4-B4 结构治理 —— 退役协议执行化 + 双通道改名 + 重复组消解
+
+Status: implemented
 
 [English](2026-09-28-w4-b4-structure-governance.md) | 中文
 
 - 日期：2026-09-28
 - 状态：已实现
 - 范围：`examples/kb-agent/scripts/w4-heal-b4.mts`、`examples/kb-agent/scripts/setup-nocobase.mts` verify（missingV2Hub / n18ai 计数 / w4b4 断言段）、`examples/kb-agent/scripts/w4-heal-b1.mts`（FilterForm 下限）、`examples/kb-agent/QUICKSTART.zh.md`（菜单导览）
+
+## 问题
+
+W4 结构治理的裁决（两项退役、四项改名、一次组迁移、13 个重复组裁定）需要可执行协议：删除前先归档、改名时侧栏与路由行双通道一致、绝不留下半删除的树。
 
 ## 决策
 
@@ -24,7 +30,7 @@
 - **`nocobase-f3-hub-v2.mts` 是退役页的再生源**：重跑会在旧标题下重建两页（w2 retitle 随后复活「采购联系人（历史）」）。B4 后不要重跑 f3 的 hub 段；setup verify 的 missingV2Hub 断言已改为「必须保持消失」。
 - Playwright 侧栏文字探测要在**目标页自己的上下文**做：`/admin` 首页手风琴折叠未展开组，body.innerText 拿不到折叠组文字，会误报「菜单没改名」。
 
-## 验收口径
+## 后果口径
 
 - `w4-heal-b4.mts --assert`（进 setup verify）：退役页 schemaUid 零残留、路由计数 206→202（16g/90f/93t/3p）、「采购」组空壳保留（B5 处置）、四项改名双通道 title 对拍、应用中心在基础数据组（children=2）、三份 CSV 行数==psql count（11/20/40）、v1 三页 getProperties 200、退役页 flowSurface 404、孤儿 tabs/flowPage=0、重复组计数达标。
 - 旅程取证（`w4-b4-journey.txt` + 截图）：管理员打开「排程明细」功能完好（表格 16 行 9 列 + ViewActionModel×1 + FilterFormBlockModel×1，B1/W3 成果不回归）；两退役页 URL 前端 404（文案 + 无表格双证）。
@@ -36,3 +42,8 @@
 - 「采购」组成为空组（children=0）：B4 有意保留组行，空组合并/删除归 B5 菜单 IA（D8 先迁后删）。
 - RootPageModel 双通道改名约束对 B5 的全量重命名清单生效：B5 脚本必须复用本批的双通道改名逻辑（或抽入 flow-page-lib），否则重蹈侧栏旧名。
 - member 390px 双端抽查未在本批展开（B4 变更全是菜单层，member 视角由 B6 八角色旅程统一覆盖）。
+
+## 备选与否决
+
+- 回滚时手工重建退役页的 flowModels 树——否决：半吊子树比缺页更糟；重放属主建页脚本才是回滚通道。
+- 只经 desktopRoutes 单通道改名——否决：侧栏渲染 RootPageModel 标题，双通道必须同翻。

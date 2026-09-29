@@ -1,10 +1,16 @@
-# W4-B4 structure governance — the retire protocol executed, dual-channel renames, duplicate-group dissipation
+# Agent Note: W4-B4 structure governance — the retire protocol executed, dual-channel renames, duplicate-group dissipation
+
+Status: implemented
 
 English | [中文](2026-09-28-w4-b4-structure-governance.zh.md)
 
 - Date: 2026-09-28
-- Status: implemented
 - Scope: `examples/kb-agent/scripts/w4-heal-b4.mts`, `examples/kb-agent/scripts/setup-nocobase.mts` verify (missingV2Hub / n18ai count / w4b4 assert block), `examples/kb-agent/scripts/w4-heal-b1.mts` (FilterForm floor), `examples/kb-agent/QUICKSTART.zh.md` (menu tour)
+- Evidence: `research/2026-09-28-w4-completeness/w4-b4-*` (retired CSVs ×3 · routes-diff · journey txt + screenshots · idempotent rerun)
+
+## Problem
+
+W4's structure-governance verdicts (two retirements, four renames, one group move, 13 duplicate groups to adjudicate) needed an executable protocol: archive before deleting, keep the sidebar and the route row reconciled on renames, and never leave a half-deleted tree behind.
 
 ## Decision
 
@@ -24,7 +30,7 @@ Every keep/retire/rename verdict lives in the verdict-台账 constants at the to
 - **`nocobase-f3-hub-v2.mts` is the retired pages' resurrection source**: re-running it rebuilds both pages under old titles (w2's retitle then revives 采购联系人（历史）). Do not re-run f3's hub leg after B4; setup verify's missingV2Hub assert now demands they stay gone.
 - Playwright sidebar-text probes must run **inside the target page's own context**: the `/admin` landing folds unopened groups, and body.innerText misses folded group text — a false "menu not renamed" report.
 
-## Acceptance
+## Consequences
 
 - `w4-heal-b4.mts --assert` (in setup verify): retired schemaUids absent, route totals 206→202 (16g/90f/93t/3p), 「采购」group kept as an empty shell (B5 owns the merge), four renames reconciled on both channels, 应用中心 under 基础数据 (children=2), three CSVs == psql counts (11/20/40), v1 pages getProperties 200, retired surfaces 404, orphan tabs/flowPage=0, duplicate-group counts met.
 - Journey forensics (`w4-b4-journey.txt` + screenshots): admin opens 排程明细 fully functional (table 16×9 + ViewActionModel×1 + FilterFormBlockModel×1 — B1/W3 gains intact); both retired URLs render the frontend 404 (text + no table).
@@ -36,3 +42,8 @@ Every keep/retire/rename verdict lives in the verdict-台账 constants at the to
 - 「采购」group is now empty (children=0): kept on purpose; the empty-group merge/delete belongs to B5's menu IA (D8 migrate-before-destroy).
 - The RootPageModel dual-channel rename constraint binds B5's full rename list: B5 must reuse this batch's dual-channel logic (or lift it into flow-page-lib), or repeat the stale-sidebar failure.
 - member 390px dual-end sampling not exercised here (B4 changes are menu-layer only; the member view is covered by B6's eight-role journeys).
+
+## Alternatives considered
+
+- Hand-rebuilding retired pages' flowModels trees for rollback — rejected: a half-baked tree is worse than a missing page; replaying the owning build scripts is the rollback channel.
+- Single-channel rename through desktopRoutes — rejected: the sidebar renders the RootPageModel title, so both channels must flip together.

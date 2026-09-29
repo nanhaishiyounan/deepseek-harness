@@ -1,10 +1,16 @@
-# W4-B2 表单标准全域 heal —— 三工厂 + assignRules 首用 + 105 表单清扫
+# Agent Note: W4-B2 表单标准全域 heal —— 三工厂 + assignRules 首用 + 105 表单清扫
+
+Status: implemented
 
 [English](2026-09-28-w4b2-form-standards-heal.md) | 中文
 
 - 日期：2026-09-28
 - 状态：已实现
 - 范围：`examples/kb-agent/scripts/nocobase-flow-page-lib.mts`（W4-B2 段）、`examples/kb-agent/scripts/w4-heal-b2.mts`、`examples/kb-agent/scripts/setup-nocobase.mts` verify
+
+## 问题
+
+审计的表单面：105 个合格表单单列堆砌、无业务键必填标记、无默认值、无格式占位符；Edit 覆盖仅 18 页。heal 需在不移动 FormItemModel 行、不给引擎管辖域开编辑 UI 的前提下，把表单网格收敛到分节两栏标准。
 
 ## 决策
 
@@ -25,6 +31,11 @@
 - member pilot 段：qc_inspector 对 srm_suppliers 没有建权限，「添加」按钮隐藏是 W3-B5 的 ACL 正确围栏而非缺陷；member 的深度验证走 member 可建页面（hub_pj_tasks）。
 - B1 遗留（h5 WMS 两页只渲染操作列头）是**客户端长会话模块缓存**，不是数据问题：所有服务端通道（flowModels 行、flowSurfaces:get、浏览器实际请求的 findOne URL）返回的列全部完好，整树重写无效，全新浏览器上下文渲染出全部列。硬刷新 / 重新登录即恢复；flowModels 层无需修复。
 
-## 验收
+## 后果
 
 `w4-heal-b2.mts --assert` 在线复算五项指标并 fail-closed；`setup-nocobase.mts verify` 在 w4b1 断言之后拉起它。Before → after：合格表单单列 105→0（豁免 21：12 配置 + 9 小表单）、必填字段 128→318（目标 260；srm_suppliers 8、mfg_orders 6、crm_customers 5、hub_hr_employees 5）、placeholder 0→307（目标 200）、assignRules 网格 0→64（目标 60）、带 Edit 的页面 18→49（目标 44；B2 新增 31 页 + 引擎页保持 W3 受控 Edit）、引擎域 UI 开口 0。B1 全指标零漂移（排序/筛选/金额/日期/titleField/状态全为 0 缺陷），ledger 平衡，`.trees.mjs` anomalies=0 且 AddNew 子树 100% 在线，b9-chain s9 留痕 + movements 勾稽绿，`verify` 全绿。证据：`research/2026-09-28-w4-completeness/w4-b2-*`（pilot txt+8 png、journey txt+7 png、回滚演练、probe-after json、heal 日志）。
+
+## 备选与否决
+
+- 移动 FormItemModel 行做字段重排——否决：网格从 `props.layout.rows` 渲染，仅修布局即可，9 步链的 REST 写入不受影响。
+- 按前缀驱动 Edit/Delete 白名单——否决：引擎注册表（而非 uid 前缀）决定哪些域可开 Edit UI；srm 辅助集合经其注册表项获得受护栏的补全。

@@ -1,10 +1,16 @@
-# W4-B2 form standards heal — three factories, assignRules first use, and the 105-form sweep
+# Agent Note: W4-B2 form standards heal — three factories, assignRules first use, and the 105-form sweep
+
+Status: implemented
 
 English | [中文](2026-09-28-w4b2-form-standards-heal.zh.md)
 
 - Date: 2026-09-28
-- Status: implemented
 - Scope: `examples/kb-agent/scripts/nocobase-flow-page-lib.mts` (W4-B2 section), `examples/kb-agent/scripts/w4-heal-b2.mts`, `examples/kb-agent/scripts/setup-nocobase.mts` verify
+- Evidence: `research/2026-09-28-w4-completeness/w4-b2-*` (pilot txt + 8 png · journey txt + 7 png · rollback drill · probe-after json · heal logs)
+
+## Problem
+
+The audit's form side: 105 eligible forms stacked single-column with no business-key required marks, no default values, and no format placeholders; Edit coverage sat on 18 pages. The heal converges the form grids onto the sectioned two-column standard without moving FormItemModel rows or opening edit UI on engine-governed domains.
 
 ## Decision
 
@@ -25,6 +31,11 @@ The platform-wide form standards (two-column sectioned layouts / business-key re
 - The member pilot leg: qc_inspector holds no create grant on srm_suppliers, so the hidden 添加 button is the correct W3-B5 ACL fence, not a defect; deep member verification rides a member-creatable page (hub_pj_tasks).
 - The B1 leftover (h5 WMS pages rendering only the actions column) is a **client long-session module cache**, not data: every server channel (flowModels rows, flowSurfaces:get, the exact browser findOne URL) returns all columns intact, a whole-tree rewrite changes nothing, and a fresh browser context renders all columns. Hard refresh / re-login recovers; nothing to fix in flowModels.
 
-## Acceptance
+## Consequences
 
 `w4-heal-b2.mts --assert` recomputes the five metrics live and fails closed; `setup-nocobase.mts verify` spawns it after the w4b1 assert. Before → after: single-column eligible forms 105→0 (21 exempt: 12 config + 9 small), required fields 128→318 (floor 260; srm_suppliers 8, mfg_orders 6, crm_customers 5, hub_hr_employees 5), placeholders 0→307 (floor 200), assignRules grids 0→64 (floor 60), pages with Edit 18→49 (floor 44; 31 B2 pages + engine pages keep the W3 guarded Edit), engine-domain UI openings 0. Zero drift on every B1 metric (sort/filter/money/date/titleField/status all stay at 0 defects), ledger balanced, `.trees.mjs` anomalies 0 with AddNew subtrees 100% online, b9-chain s9 audit trail + movements reconciliation green, and `verify` fully green. Evidence: `research/2026-09-28-w4-completeness/w4-b2-*` (pilot txt+8 png, journey txt+7 png, rollback drill, probe-after json, heal logs).
+
+## Alternatives considered
+
+- Field reordering by moving FormItemModel rows — rejected: the grid renders from `props.layout.rows`; layout-only repair keeps the 9-step chain's REST writes untouched.
+- Prefix-driven Edit/Delete whitelist — rejected: the engine registry (not uid prefixes) decides which domains may open Edit UI; the srm auxiliary collections gained guarded completion through their registry entry.

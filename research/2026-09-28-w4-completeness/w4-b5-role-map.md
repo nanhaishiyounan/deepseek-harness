@@ -33,5 +33,5 @@
 
 ## member 裁剪口径（W3 ACL 延续零回归）
 
-- 页级 rolesDesktopRoutes 绑定不随组迁移变化（绑定键 = desktopRouteId 页行 id）；qc_inspector 仅见授权域（质量管理等），管理组（组织与系统/基础数据）不可见。
+- 页级 rolesDesktopRoutes 绑定不随组迁移变化（绑定键 = desktopRouteId 页行 id）；qc_inspector 的菜单树保留全部组壳（组行对全员可见），围栏在页级：未授权组的页面行不在其 routes 列表返回（组织与系统/基础数据组下 0 页可达）。
 - 取证：w4-b5-member-acl.png（qc_inspector 登录侧栏）+ w4-b5-journey-r4-qc.png。

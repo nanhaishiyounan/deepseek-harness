@@ -1,10 +1,16 @@
-# W4-B1 table standards heal — five factory functions and the 78-page sweep
+# Agent Note: W4-B1 table standards heal — five factory functions and the 78-page sweep
+
+Status: implemented
 
 English | [中文](2026-09-28-w4b1-table-standards-heal.zh.md)
 
 - Date: 2026-09-28
-- Status: implemented
 - Scope: `examples/kb-agent/scripts/nocobase-flow-page-lib.mts` (W4-B1 section), `examples/kb-agent/scripts/w4-heal-b1.mts`, `research/2026-09-28-w4-completeness/.audit-analyze.mjs`, `setup-nocobase.mts` verify
+- Evidence: `research/2026-09-28-w4-completeness/w4-b1-*` (heal-run pilot/crm/hub/manufacturing/procurement/quality/salesPlanning/supplyChain/warehousing · rollback-drill · audit basis)
+
+## Problem
+
+The W4 completeness audit found the 78-page table surface failing five standards platform-wide: 78 pages without default sort, 37 without a page-level filter, 151 unformatted money columns, unformatted date columns, 101 association columns showing raw ids, and 14 bare-text status columns. Regenerating pages would discard W3's per-page bindings, so the fix heals the existing trees in place.
 
 ## Decision
 
@@ -23,10 +29,15 @@ The platform-wide table standards (default sort / page-level filter / money and 
 - `rollback --domain X` must scope **every** journal entry kind to the selected pages. The first version filtered only `tableSort`; rolling back one domain reverted field props and column swaps platform-wide. Clearing a missing key with `null` crashes enum renderers (destructure defaults do not absorb null) — array-valued keys clear to `[]`.
 - The flat `fields:list` rows do carry `collectionName` (the initial suspicion was wrong); `/api/collectionFields:list` 404s on this deployment.
 
-## Acceptance
+## Consequences
 
 `w4-heal-b1.mts --assert` recomputes the five defect counters live over the 78-page/101-table audit basis and fails closed; `setup-nocobase.mts verify` spawns that assert. The archived probe (`.audit-fetch.mjs` + `.audit-analyze.mjs`) uses the same semantics: filter = FilterActionModel **or** a live `filterManager` connection, sort = `globalSort` first, money/date/rel/status counters as above. Before → after: pagesNoSort 78→0, no-filter pages 37→0 (FilterFormBlockModel 0→38), money unformatted 151→0 (145 counted after the 6 identifier columns are excluded), date unformatted →0, association columns without titleField 101→0, bare-text status columns 14→0, enum columns missing colors 2→0.
 
 ## Known gap
 
 The h5-built WMS pages (库存查询/盘点管理) render only the actions column header; the column models are intact and the same heal shape renders fine on n17/w3 pages. Reverting one swapped column did not restore the headers, so the gap predates or is orthogonal to the heal — left for B2 to examine with the form-side pass.
+
+## Alternatives considered
+
+- Wholesale page regeneration — rejected: it discards the W3 ACL bindings, jump actions, and guarded edits the pages already carry.
+- `flowSurfaces:updateSettings` for every write — rejected: its props domain rejects the render keys (`globalSort`, `format`, `separator`), so render-key writes ride `flowModels:save` read-merge instead.

@@ -1,4 +1,4 @@
-# w4-b1 heal run all @ 2026-09-28T20:09:44.497Z
-page 销售管理/销售仪表盘
-  filterForm crm_payments uid=bx1gtjpy7w7 fields=[status,customer]
+# w4-b1 heal run all @ 2026-09-28T22:21:13.019Z
+page CRM 客户/销售线索
+  filterForm crm_leads uid=hk6dsysht3p fields=[status,name]
 pages=76

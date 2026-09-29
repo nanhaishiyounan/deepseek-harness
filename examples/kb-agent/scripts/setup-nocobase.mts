@@ -2092,6 +2092,20 @@ async function stepVerify(): Promise<void> {
       console.log(`setup-nocobase verify: w4b5 menu IA — ${(assertRun.stdout ?? '').split('\n').filter(l => l.includes('assert:')).pop() ?? 'ok'} ✓`)
     }
   }
+  // W4-R1 repair batch: the restored tableSettings wires (the four KPI
+  // boards' dataScope + defaultSorting, the reconciliation blocks, the w1
+  // todo status=open pin) and the member qm_inspections view field
+  // whitelist aligned with list (the zero-column root cause). The probe is
+  // read-only and fails closed; the precise semantics live in
+  // w4-r1-probe.mts.
+  {
+    const probeRun = spawnSync(process.execPath, ['--import', 'tsx/esm', 'examples/kb-agent/scripts/w4-r1-probe.mts'], { encoding: 'utf8', timeout: 240_000 })
+    if (probeRun.status !== 0) {
+      failures.push(`w4r1 wires probe failed:\n${(probeRun.stdout ?? '') + (probeRun.stderr ?? '')}`.trim())
+    } else {
+      console.log('setup-nocobase verify: w4r1 wires — 4 board dataScope + w1 todo pin + w9kpi total=9 ✓')
+    }
+  }
   if (failures.length > 0) {
     console.error(`setup-nocobase verify: FAILED\n  - ${failures.join('\n  - ')}`)
     process.exitCode = 1

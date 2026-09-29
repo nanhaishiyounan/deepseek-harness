@@ -132,3 +132,9 @@ w4-b6-psql.txt 写入 20 条对拍
 
 ## 结论
 八角色旅程全通（8/8）；任务完成性双证齐（截图 60+ 张 + w4-b6-psql.txt 20 条 SQL 对拍 + 统计卡视觉读数 7/7 全中）；负例 6 处全部零落库拦截。
+
+# ════ W4-R1 勘误 @ 2026-09-29 ════
+- J4 行「卡对拍（待检 22/合格 40）」与列表读取所描述的 B6 时点状态不复核成立：vfy-b6-09-member-qc-list.png 复核显示该时点 member 质检单列表仅渲染「操作」1 列、业务列全部被隐藏（列表 XHR 数据完整、meta.total=62 行在），统计卡为「请配置图表」占位（charts:queryData 403，B3 已知遗留 L1）。
+- 根因（R1 定位）：member 角色 qm_inspections 的 rolesResourcesActions view 行字段白名单为 ["*","id"]（list/get/create/update 均为 26 字段全白名单），v2 列渲染的 aclCheck(actionName=view, fields=[name]) 将 "*" 按字面量匹配 → 全部业务列 hidden=true。
+- 修复：w4-r1-restore.mts 将 view 行白名单对齐 list 行；修复后 member 列表 17 业务列渲染、14 行有据（w4-r1-qc-member-list-before/after.png 前后对比）。
+- 时点归因：该缺陷至迟在 B6 演练时已存在（上列截图），非 W4 heal 批次引入（heal 只写 flowModels 面，不触 rolesResourcesActions；DB updatedAt 显示 view 行 2026-09-29 01:44 最后一次 touch，早于终验浏览器取证）。

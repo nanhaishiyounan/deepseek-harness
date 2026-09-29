@@ -12,7 +12,7 @@ Status: implemented
 
 - **旅程是业务闭环，不是页面巡游。** J1 的 PO 就是 J5 收的那张、其 IQC 由 J4 判——一条链：RFQ 比价下单 → 两级审批 → 扫码收货（待检）→ 逐项打分 → 总判 → 放行或处置（return 真实走 RETURN_VENDOR 过账）。J2 的 MRP 建议变成 J3 齐套、领料、报工、完工的那张 MO。跨旅程数据交接正是单批验证永远碰不到的接缝。
 - **旅程脚本按幂等重放设计。** 数据步骤全部 find-else-create，锚稳定单号（PO-B7J1 / QI-B7J4-* / MC-B7J2-0014…）；单号生成器内嵌 MO 后缀（MI-B7J2-0014-01），因为裸序列号跨重放轮次与孤儿 MO 必撞；single-shot 动词（判定/放行/处置）遇非 pending 态跳过并改由库行断言；UI 交互段就近截图，重放时沿用首轮。
-- **三处引擎缺陷现场修复，缺陷本体留证**（[w3-b7-defects.md](../../../research/2026-09-27-w3-usability/w3-b7-defects.md)）：① `nextDocCode` 扫 `wms_receipts` 根本没有的 `code` 列——第二张收货单起必然撞号；② `Number(null) === 0` 把感官行（两个规格界都 null）当成数值行判 `0∈[0,0]`=pass——质检员显式「不合格」被静默翻转为接收，数值行漏填读数也静默判 0；③ `availabilityCheck` 重入释放旧 reserved 行后，`reserve()` 按 code 幂等「kept released」——齐套读 assigned 而领料无 reserved 可耗，只有 check→check→领料 连续序列才暴露的死锁。
+- **三处引擎缺陷现场修复，缺陷本体留证**（[w3-b7-defects.md](../../../../research/2026-09-27-w3-usability/w3-b7-defects.md)）：① `nextDocCode` 扫 `wms_receipts` 根本没有的 `code` 列——第二张收货单起必然撞号；② `Number(null) === 0` 把感官行（两个规格界都 null）当成数值行判 `0∈[0,0]`=pass——质检员显式「不合格」被静默翻转为接收，数值行漏填读数也静默判 0；③ `availabilityCheck` 重入释放旧 reserved 行后，`reserve()` 按 code 幂等「kept released」——齐套读 assigned 而领料无 reserved 可耗，只有 check→check→领料 连续序列才暴露的死锁。
 - **9 步链 s5 增加幂等护栏（与 s3/s7 同族）。** 旅程合法地确认掉了全部 open MO 建议（两张 MO 承接 BOM-0002 净需求），新 MRP run 不再产出 MO 建议；s5 接受「建议已确认、净需求由在途 MO 承接」作为重放态，不再为暂缺素材 throw。
 
 ## 备选方案（未采纳）
@@ -23,7 +23,7 @@ Status: implemented
 
 ## 结果
 
-- J1–J7 全部双证通过（旅程日志 + [`w3-b7-psql.txt`](../../../research/2026-09-27-w3-usability/w3-b7-psql.txt)）；修复后全套门禁复跑全绿——9 步链三轮、assert-ledger（36 组/189 条流水）、两个 selftest、backfill 两趟（2081=2081）、setup verify（B1–B6 全部断言）、wire 探针（anomalies=0）；99 交付总表逐条回答用户三点反馈。
+- J1–J7 全部双证通过（旅程日志 + [`w3-b7-psql.txt`](../../../../research/2026-09-27-w3-usability/w3-b7-psql.txt)）；修复后全套门禁复跑全绿——9 步链三轮、assert-ledger（36 组/189 条流水）、两个 selftest、backfill 两趟（2081=2081）、setup verify（B1–B6 全部断言）、wire 探针（anomalies=0）；99 交付总表逐条回答用户三点反馈。
 - 看板列计数对拍（列头计数 vs SQL GROUP BY，2560px 视口装下全部九列）是「看板反映数据」的诚实断言法——单卡查找会输给分页与列虚拟化。
 - member 的治理边界是三层，必须分层断言：页面入口（404）、REST 写路径（403 探针）、以及 B1 刻意全局化的集合级 view 授权（**不是**安全边界）。
 

@@ -44,8 +44,8 @@ Status: implemented
 
 ## Verification
 
-- 图-表对拍：图的数据源就是同一 list API；`--assert` 打印各流节点/边计数（pur_orders 6 节点/8 边），与 psql 孪生 [w3-b4-psql.txt](../../../../../research/2026-09-27-w3-usability/w3-b4-psql.txt) 一致。
-- 编辑旅程（[w3-b4-journey.txt](../../../../../research/2026-09-27-w3-usability/w3-b4-journey.txt)）：pur_orders 200000→150000（extras + 条件字面量 + 审计行）→探针绿→新 ¥180,000 PO 提交后一审路由到 `pending_level2` 且 gm 待办已开；so_orders 配置 500000→新 ¥550,000 SO 路由 `pending_level2`；双双复原基线（pur_orders 200000/容差 0.1，so_orders 移除键）且全程探针绿、每一步都有审计行追加。
-- 负例 ×4（[w3-b4-consistency.txt](../../../../../research/2026-09-27-w3-usability/w3-b4-consistency.txt)）：孤儿转移、空 config_note（表单拒绝的 API 孪生）、双激活、阈值漂移各自令探针以预期消息变红，且清理后零残留、探针复绿。
-- ACL 双视角：admin 可见菜单项与完整编辑入口（[w3-b4-map-page.png](../../../../../research/2026-09-27-w3-usability/w3-b4-map-page.png)）；member（quality_lead）菜单不可见、URL 直达 404（[w3-b4-member-url-404.png](../../../../../research/2026-09-27-w3-usability/w3-b4-member-url-404.png)）；member API 写探针 403、只读 list 200。
+- 图-表对拍：图的数据源就是同一 list API；`--assert` 打印各流节点/边计数（pur_orders 6 节点/8 边），与 psql 孪生 [w3-b4-psql.txt](../../../../research/2026-09-27-w3-usability/w3-b4-psql.txt) 一致。
+- 编辑旅程（[w3-b4-journey.txt](../../../../research/2026-09-27-w3-usability/w3-b4-journey.txt)）：pur_orders 200000→150000（extras + 条件字面量 + 审计行）→探针绿→新 ¥180,000 PO 提交后一审路由到 `pending_level2` 且 gm 待办已开；so_orders 配置 500000→新 ¥550,000 SO 路由 `pending_level2`；双双复原基线（pur_orders 200000/容差 0.1，so_orders 移除键）且全程探针绿、每一步都有审计行追加。
+- 负例 ×4（[w3-b4-consistency.txt](../../../../research/2026-09-27-w3-usability/w3-b4-consistency.txt)）：孤儿转移、空 config_note（表单拒绝的 API 孪生）、双激活、阈值漂移各自令探针以预期消息变红，且清理后零残留、探针复绿。
+- ACL 双视角：admin 可见菜单项与完整编辑入口（[w3-b4-map-page.png](../../../../research/2026-09-27-w3-usability/w3-b4-map-page.png)）；member（quality_lead）菜单不可见、URL 直达 404（[w3-b4-member-url-404.png](../../../../research/2026-09-27-w3-usability/w3-b4-member-url-404.png)）；member API 写探针 403、只读 list 200。
 - 零回归：`setup-nocobase.mts verify` 绿（含 B4 新断言块：路由 + 绑定 + JSBlock code + 四表 + 编辑表单 + config_note 必填 + member 授权 + import 的探针）、b9 链 s2 绿、`--assert-ledger` 平衡（32 组/138 条流水）、approval-engine `--selftest` 绿（引擎零改动——approval-engine.mts 无任何代码变更）。

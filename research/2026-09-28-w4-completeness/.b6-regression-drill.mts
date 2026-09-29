@@ -12,12 +12,28 @@
  * shows red-then-green.
  */
 import { spawnSync } from 'node:child_process'
-import { appendFileSync, writeFileSync } from 'node:fs'
+import { readFileSync, renameSync, writeFileSync } from 'node:fs'
 import { call, dataOf, listFlowModels, signInWithRetry, type FlowModelRow } from '../../examples/kb-agent/scripts/nocobase-flow-page-lib.mts'
 
 const OUT = new URL('./w4-b6-regression-drill.txt', import.meta.url).pathname
 const log: string[] = []
 const say = (line: string) => { log.push(line); console.log(line) }
+
+// Atomic transcript persistence: prior runs are kept as history (the R1
+// overwrite loss — a second run truncated the drill-B findings to 3 lines),
+// the combined buffer lands via tmp+rename so a killed run never leaves a
+// half-written report in place of the previous one.
+const flush = () => {
+  let history = ''
+  try {
+    history = readFileSync(OUT, 'utf8')
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
+  }
+  const separator = history.length > 0 ? '\n\n' : ''
+  writeFileSync(`${OUT}.tmp`, `${history}${separator}${log.join('\n')}\n`)
+  renameSync(`${OUT}.tmp`, OUT)
+}
 
 const run = (label: string, args: string[]) => {
   const res = spawnSync(process.execPath, ['--import', 'tsx/esm', ...args], { encoding: 'utf8', timeout: 300_000 })
@@ -27,7 +43,9 @@ const run = (label: string, args: string[]) => {
   return res.status
 }
 
-writeFileSync(OUT, `W4-B6 回归拦截力演练 ${new Date().toISOString()}\n口径：人为破坏 → 断言变红 → 幂等 heal 恢复 → 断言回绿（fails-loud 证明）\n\n`)
+say(`W4-B6 回归拦截力演练 ${new Date().toISOString()}`)
+say('口径：人为破坏 → 断言变红 → 幂等 heal 恢复 → 断言回绿（fails-loud 证明）')
+say('')
 
 const rounds = process.argv.includes('--round') ? [process.argv[process.argv.indexOf('--round') + 1]] : ['a', 'b']
 const token = await signInWithRetry()
@@ -55,11 +73,11 @@ if (rounds.includes('a')) {
   say('破坏完成：节点已删 + filterManager 连接已清空')
   const red = run('A1 断言（期待红）', ['examples/kb-agent/scripts/w4-heal-b1.mts', '--assert'])
   say(`A1 判定: ${red !== 0 ? '红（断言拦截成功）✓' : '!! 未拦截 — FAIL'}`)
-  if (red === 0) { appendFileSync(OUT, log.join('\n')); process.exit(1) }
+  if (red === 0) { flush(); process.exit(1) }
   run('A2 恢复（幂等 heal）', ['examples/kb-agent/scripts/w4-heal-b1.mts', '--all'])
   const green = run('A3 断言（期待绿）', ['examples/kb-agent/scripts/w4-heal-b1.mts', '--assert'])
   say(`A3 判定: ${green === 0 ? '绿（恢复完成）✓' : '!! 恢复失败 — FAIL'}`)
-  if (green !== 0) { appendFileSync(OUT, log.join('\n')); process.exit(1) }
+  if (green !== 0) { flush(); process.exit(1) }
   say('')
 }
 
@@ -85,20 +103,20 @@ if (rounds.includes('b')) {
   say('破坏完成：layout 已改回单列堆砌')
   const red = run('B1 断言（期待红）', ['examples/kb-agent/scripts/w4-heal-b2.mts', '--assert'])
   say(`B1 判定: ${red !== 0 ? '红（断言拦截成功）✓' : '!! 未拦截 — FAIL'}`)
-  if (red === 0) { appendFileSync(OUT, log.join('\n')); process.exit(1) }
+  if (red === 0) { flush(); process.exit(1) }
   run('B2 恢复（幂等 heal）', ['examples/kb-agent/scripts/w4-heal-b2.mts', '--all'])
   const green = run('B3 断言（期待绿）', ['examples/kb-agent/scripts/w4-heal-b2.mts', '--assert'])
   say(`B3 判定: ${green === 0 ? '绿（恢复完成）✓' : '!! 恢复失败 — FAIL'}`)
-  if (green !== 0) { appendFileSync(OUT, log.join('\n')); process.exit(1) }
+  if (green !== 0) { flush(); process.exit(1) }
   // structural sanity: the flattened grid must be two-column again
   const after = await listFlowModels(token)
   const healed = after.find(row => row.uid === twoCol.uid)
   const healedRows = healed?.props?.layout?.rows as Array<{ sizes: number[] }> | undefined
   const isTwoColAgain = Array.isArray(healedRows) && healedRows.some(r => Array.isArray(r?.sizes) && r.sizes.length >= 2)
   say(`B4 结构复核: grid 两栏恢复=${isTwoColAgain ? '是 ✓' : '否 — FAIL'}（破坏前 rows=${JSON.stringify(before.rows.map(r => r.sizes))}）`)
-  if (!isTwoColAgain) { appendFileSync(OUT, log.join('\n')); process.exit(1) }
+  if (!isTwoColAgain) { flush(); process.exit(1) }
 }
 
 say('')
 say('结论：两轮演练 均 红→恢复→绿 —— verify 断言族 fails-loud 证明成立')
-appendFileSync(OUT, `${log.join('\n')}\n`)
+flush()

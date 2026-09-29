@@ -1,10 +1,16 @@
-# W4-B1 表格标准全域 heal —— 工厂五函数与 78 页清扫
+# Agent Note: W4-B1 表格标准全域 heal —— 工厂五函数与 78 页清扫
+
+Status: implemented
 
 [English](2026-09-28-w4b1-table-standards-heal.md) | 中文
 
 - 日期：2026-09-28
 - 状态：已实施
 - 范围：`examples/kb-agent/scripts/nocobase-flow-page-lib.mts`（W4-B1 段）、`examples/kb-agent/scripts/w4-heal-b1.mts`、`research/2026-09-28-w4-completeness/.audit-analyze.mjs`、`setup-nocobase.mts` verify
+
+## 问题
+
+W4 完备性审计发现 78 页表格面全域五项标准不达标：78 页无默认排序、37 页无页级筛选、151 个未格式化金额列、日期列未格式化、101 个关联列裸显 id、14 个纯文本状态列。重建页面会丢 W3 的页级绑定，因此修复以就地 heal 既有块树为前提。
 
 ## 决策
 
@@ -23,10 +29,15 @@
 - `rollback --domain X` 必须把**每种** journal 条目都按所选页过滤。第一版只过滤了 `tableSort`；回滚单域把全域的 field props 与列换绑一并回退。缺失键用 `null` 清除会让枚举渲染崩溃（解构默认不吸收 null）——数组值键清成 `[]`。
 - `fields:list` 的扁平行带 `collectionName`（最初的怀疑是错的）；本部署的 `/api/collectionFields:list` 是 404。
 
-## 验收
+## 后果
 
 `w4-heal-b1.mts --assert` 在 78 页/101 表的审计口径上 live 复算五类缺陷计数并 fail closed；`setup-nocobase.mts verify` spawn 该断言。存档探针（`.audit-fetch.mjs` + `.audit-analyze.mjs`）同语义：筛选 = FilterActionModel **或** 存活 `filterManager` 连接，排序优先读 `globalSort`，金额/日期/关联/状态计数同上。Before → after：无排序页 78→0，无筛选页 37→0（FilterFormBlockModel 0→38），金额未格式化 151→0（排除 6 个标识符列后计 145），日期未格式化 →0，关联列未绑 titleField 101→0，状态裸文本列 14→0，枚举列缺色 2→0。
 
 ## 已知缺口
 
 h5 建的 WMS 页（库存查询/盘点管理）只渲染操作列头；列模型完好，同样的 heal 形态在 n17/w3 页渲染正常。把一个换绑列还原并未让表头回来，该缺口早于 heal 或与其正交——留给 B2 随表单侧一遍检查。
+
+## 备选与否决
+
+- 整页重建——否决：会丢弃页面已携带的 W3 ACL 绑定、跳转动作与受护栏 Edit。
+- 所有写入走 `flowSurfaces:updateSettings`——否决：其 props 域拒绝渲染键（`globalSort`/`format`/`separator`），渲染键写入改走 `flowModels:save` 读-合并-写。

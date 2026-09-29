@@ -1,11 +1,17 @@
-# W4-B5 menu IA consolidation: 16 → 12 groups, migrate-first destroys, dual-channel rename
+# Agent Note: W4-B5 menu IA consolidation: 16 → 12 groups, migrate-first destroys, dual-channel rename
+
+Status: implemented
 
 English | [中文](2026-09-28-w4-b5-menu-ia-consolidation.zh.md)
 - Date: 2026-09-28 · Batch: W4-B5 (plans/2026-09-28-w4-completeness/05-b5-nav-ia.md)
 - Code: `examples/kb-agent/scripts/w4-heal-b5.mts` (TARGET_IA + migrate/destroy/rename/icon/sort + assert + rollback); `examples/kb-agent/scripts/w4-heal-b4.mts` (A1/A2 re-baselined to the post-B5 tree); `examples/kb-agent/scripts/setup-nocobase.mts` (3 group-title assertions adapted + w4b5 gate mounted + OK digest); `examples/kb-agent/scripts/w4-heal-b3.mts` (L2 page-list + card spec follow the 维保服务商 rename); 8 replay scripts re-pointed (`nocobase-crm-modules/hub-modules/w1-approval/w3-approval-visual/w3-org-acl/w3-views/w5-mfg/w6-mfg-exec` — group constants now target the post-B5 titles so replays land in the right groups); `examples/kb-agent/QUICKSTART.zh.md` (menu tour paragraph rewritten to the 12-group IA)
 - Evidence: `research/2026-09-28-w4-completeness/w4-b5-*` (routes-before/after · menu-tree · role-map · idempotent · rollback-drill · verify · journey-r1..r8 + member-acl + member-matrix-denied + menu-final)
 
-## Decisions
+## Problem
+
+The menu had grown to 16 groups with four redundant containers (an empty 采购, two overlapping workflow groups, a 工单中心 duplicating 项目与协同). The target IA is 12 groups with a strict per-group page order, and the move had to preserve all 93 pages, the member page-level fences, and every replay script's group-title constants.
+
+## Decision
 
 1. **Target IA = 12 groups (16 − 4), the doc table's 0–10 listing plus CRM 客户 and 资产管理 kept in place.** The four destroys are 采购 (empty since B4), 销售流程 (5 pages merged into 销售管理), 协同办公 (split across 组织与系统/项目与协同), 工单中心 (2 pages into 项目与协同). Group renames: 生产制造→生产与计划, 人事管理→组织与系统, 项目管理→项目与协同. The planning trio (主生产计划/MRP 快照/计划工作台) moves from 销售管理 into 生产与计划; 排产甘特 (absent from the doc table) sits right after 排程明细 per the D6 gantt/明细 pairing; the three sale-calendar/dashboard pages the doc table omits trail the six listed ones.
 2. **Migrate-first protocol (invariant 6) enforced by gates, not convention**: a pre-flight page-universe reconciliation (93 pages, canonicalized through PAGE_RENAMES) runs before anything mutates; every group destroy is preceded by a children-count check that throws on non-zero. Group rows carry no flowModels tree, but the N14 discipline is applied uniformly.
@@ -21,7 +27,7 @@ English | [中文](2026-09-28-w4-b5-menu-ia-consolidation.zh.md)
 - **The member "group shell" is all-open by design**: qc_inspector sees all 12 group headers (as it saw all 16 before B5 — w4b1-pilot-member-filtered.png is the control). Trimming lives one level down: admin-only pages vanish from the menu and their direct URLs render nothing for member, while plain `desktopRoutes:list` under the qc token returns zero rows. Do not read group-header visibility as an ACL regression; assert the page bindings instead (assert A8).
 - **`/admin` landing folds unopened groups**, so body-text probes miss group content (the B4 lesson repeated here): probe from the target page's own context or navigate first.
 
-## Acceptance
+## Consequences
 
 - `w4-heal-b5.mts --assert` (mounted in setup verify): 12 groups, sort 1–12 unique, no empty/duplicate/retired group names, top-level exactly AI 工作台 (RobotOutlined, sort 0), 93-page universe reconciliation zero-loss, per-group membership and ordering equal to TARGET_IA, 12 unique non-empty group icons + every page iconed + no leading spaces + 付款申请 = DollarOutlined, routes = 198 with type counts {group 12, flowPage 90, tabs 93, page 3}, dual-channel rename, all 93 surfaces resolve 200, member bindings intact (质检单 keeps member, 权限矩阵 does not).
 - Evidence: 8-role 2-click journeys (w4-b5-journey-r1..r8-*.png), member forensics (menu + 质检单 reachable + 权限矩阵 denied), terminal menu tree (w4-b5-menu-tree.txt / menu-final.png), idempotent rerun zero-diff (198→198, 22 skips), rollback drill with the two-step protocol (w4-b5-rollback-drill.txt).
@@ -30,3 +36,8 @@ English | [中文](2026-09-28-w4-b5-menu-ia-consolidation.zh.md)
 ## Loose ends
 
 - **None for B6.** The doc-table omissions resolved here (排产甘特 position, three sale pages trailing) are recorded in TARGET_GROUPS; B6 consumes the role map as-is.
+
+## Alternatives considered
+
+- Role-specific menu trees per persona — rejected: eight roles × 12 groups multiplies the surface; page-level rolesDesktopRoutes bindings plus the W3 data ACL already draw the member/admin line.
+- Destroy-then-rebuild for the merged groups — rejected: migrate-first with a pre-flight page-universe reconciliation is the only protocol that can prove zero page loss.

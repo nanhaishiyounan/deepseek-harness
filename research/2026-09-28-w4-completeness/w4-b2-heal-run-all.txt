@@ -1,4 +1,4 @@
-# w4-b2 heal run all @ 2026-09-28T20:22:03.704Z
+# w4-b2 heal run all @ 2026-09-28T22:22:14.473Z
 form hub_hr_employees/create[09bvmy]
-  assignRules +1 (status=active)
-counts: {"layoutWritten":0,"itemProps":0,"fieldProps":0,"dividers":0,"assignRules":1,"submitActions":0,"editActions":0,"deleteActions":0}
+  layout twoCol [基本信息×4 | 属性与联系×1]
+counts: {"layoutWritten":1,"itemProps":0,"fieldProps":0,"dividers":0,"assignRules":0,"submitActions":0,"editActions":0,"deleteActions":0}

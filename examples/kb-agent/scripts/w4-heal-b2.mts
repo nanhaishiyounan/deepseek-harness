@@ -120,14 +120,24 @@ const PHONE_FIELD = /(phone|mobile|tel)/
 const CODE_FIELD = /(code|_no|sku)$/
 const QTY_NAME = /(qty|quantity)/
 
-/** Format-class placeholder (F-9') for one field model, or null when the field is not format-class. */
-export function placeholderFor(modelUse: string, fieldPath: string): string | null {
+/**
+ * Format-class placeholder (F-9') for one field model, or null when the
+ * field is not format-class. `collection` narrows the document-number
+ * examples to the domain's real prefixes (the quality domain's QI-/QM-NC-
+ * and the receipt-anchored 来源单号 RCV-).
+ */
+export function placeholderFor(modelUse: string, fieldPath: string, collection?: string): string | null {
   if (modelUse === 'DateOnlyFieldModel') return 'YYYY-MM-DD'
   if (modelUse === 'DateTimeTzFieldModel' || modelUse === 'DateTimeFieldModel') return 'YYYY-MM-DD HH:mm'
   if (modelUse === 'InputFieldModel') {
     if (PHONE_FIELD.test(fieldPath)) return '11 位手机号'
     if (/email/.test(fieldPath)) return '如 name@company.com'
-    if (CODE_FIELD.test(fieldPath)) return '如 PO-20261001-001'
+    if (CODE_FIELD.test(fieldPath)) {
+      if (collection === 'qm_inspections' && fieldPath === 'code') return '如 QI-2026-0001'
+      if (collection === 'qm_inspections' && fieldPath === 'ref_no') return '来源单号，如收货单 RCV-20260928-001'
+      if (collection === 'qm_nc_dispositions' && fieldPath === 'code') return '如 QM-NC-2026-0001'
+      return '如 PO-20261001-001'
+    }
   }
   if (modelUse === 'NumberFieldModel') {
     if (MONEY_FIELD.test(fieldPath)) return '两位小数'
@@ -237,7 +247,26 @@ export function orderScore(fieldPath: string): number {
 const DOC_SECTIONS = ['基本信息', '交易对手与交付', '财务与备注'] as const
 const MASTER_SECTIONS = ['基本信息', '属性与联系'] as const
 
-function sectionIndexFor(template: FormTemplate, fieldPath: string): number {
+/**
+ * Domain section templates (W4-R1): the quality domain's forms read better
+ * split by inspection lifecycle than by the generic trading-doc thirds.
+ * The field classifier lives in {@link sectionIndexFor}; a collection not
+ * listed here keeps its template's default sections.
+ */
+const SECTION_OVERRIDES: Record<string, { sections: readonly string[], classify: (fieldPath: string) => number }> = {
+  qm_inspections: {
+    sections: ['检验信息', '结果与备注'],
+    classify: fieldPath => (/^(result|rigor|resubmission|note|inspected_at|inspector|defect_|aql_)/.test(fieldPath) ? 1 : 0),
+  },
+  qm_nc_dispositions: {
+    sections: ['处置信息', '结果与备注'],
+    classify: fieldPath => (/^(result|note|disposed_at|disposer|qty_)/.test(fieldPath) ? 1 : 0),
+  },
+}
+
+function sectionIndexFor(template: FormTemplate, fieldPath: string, collection?: string): number {
+  const override = collection === undefined ? undefined : SECTION_OVERRIDES[collection]
+  if (override !== undefined) return override.classify(fieldPath)
   if (template === 'master') return orderScore(fieldPath) <= 4 ? 0 : 1
   const score = orderScore(fieldPath)
   if (score <= 4) return 0
@@ -304,7 +333,7 @@ export function planForm(snapshot: LiveSnapshot, gridUid: string, collection: st
       itemProps.push({ uid: item.uid, props: { ...props, rules } })
     }
     if (item.fieldUid !== null && item.fieldUse !== null) {
-      const placeholder = placeholderFor(item.fieldUse, item.fieldPath)
+      const placeholder = placeholderFor(item.fieldUse, item.fieldPath, collection)
       if (placeholder !== null && item.fieldProps.placeholder !== placeholder) {
         fieldProps.push({ uid: item.fieldUid, props: { placeholder } })
       }
@@ -321,11 +350,12 @@ export function planForm(snapshot: LiveSnapshot, gridUid: string, collection: st
 
   // layout: doc/master with ≥4 fields get dividers + two columns; config and
   // small forms keep the single-column layout (F-1' exemption, Note-recorded)
-  const sectionLabels = template === 'master' ? MASTER_SECTIONS : DOC_SECTIONS
+  const override = SECTION_OVERRIDES[collection]
+  const sectionLabels = override?.sections ?? (template === 'master' ? MASTER_SECTIONS : DOC_SECTIONS)
   const buildLayout = (template === 'doc' || template === 'master') && items.length >= 4
   const sections = sectionLabels.map(label => ({ label, itemUids: [] as string[] }))
   for (const item of scored) {
-    const index = template === 'config' ? 0 : sectionIndexFor(template, item.fieldPath)
+    const index = template === 'config' && override === undefined ? 0 : sectionIndexFor(template, item.fieldPath, collection)
     sections[Math.min(index, sections.length - 1)].itemUids.push(item.uid)
   }
 

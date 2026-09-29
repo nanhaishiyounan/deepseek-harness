@@ -40,13 +40,13 @@
 | J1 | 采购员 | 统计卡 4/4 视觉+psql 双对拍（3/10/¥1,474,740/22）；新建 PO-J1-737059 落库 `draft`+需求日期=当天；必填负例 22→22 零落库；筛选证据组合（B1 pilot 铁证 + w4b1 断言 + 13 张构建器截图） |
 | J2 | 计划员 | 排序对拍（页首行 MPS-202610-01 == psql 同序首行）；行详情；MRP 快照可达 |
 | J3 | 车间主任 | 关联列产品名（psql JOIN 一致，非裸 ID）；彩标 57 tag；排程明细（B4 改名页）+ 排产甘特 v1 |
-| J4 | 质检员（member 端） | qc_inspector 菜单裁剪 + 页级围栏（routes 0 行）；卡对拍（待检 22/合格 40）；终端 iframe `:13110/terminals/inspect.html`（W3_TERMINAL_BASE 生效） |
+| J4 | 质检员（member 端） | qc_inspector 菜单裁剪 + 页级围栏（routes 0 行）；卡对拍（待检 22/合格 40）；终端 iframe `:13110/terminals/inspect.html`（W3_TERMINAL_BASE 生效）。**R1 勘误**：B6 时点 member 质检单列表实为零业务列（vfy-b6-09 截图复核证实——列表 XHR 数据完整但列被 ACL 字段白名单隐藏），统计卡因 charts:queryData 403 渲染为「请配置图表」占位；两项均于 W4-R1 修复（view 行字段白名单对齐 → 17 列 14 行有据；卡占位为 B3 遗留 L1 课题） |
 | J5 | 仓管员 | 三卡双对拍（397,400/397,155/195）；千分位；筛选空列表空态引导 |
 | J6 | 销售员 | 报价单必填负例 17→17 零落库；3 字段小表单（B2 豁免单列）；创建正例由 J1 同 assignRules 通道背书 |
 | J7 | 财务 | four-ledger 彩标（DOM 7 样式类）；应收 Σ1,401,890 / 应付 Σ1,474,740 psql 对拍；图表标题由 w4b3 断言背书 |
 | J8 | 管理员 | 员工 Edit 往返闭环（13800000001→13900000001→13800000001）；删除确认负例 6→6 零落库；审批流配置 admin 可见 |
 
-双端：admin 全旅程 + member（qc_inspector）J4；390px 抽查 3 页（采购订单 1408px/质检单 2608px/库存查询 1558px 横向滚动可用）。
+双端：admin 全旅程 + member（qc_inspector）J4；390px 抽查 3 页（采购订单 1408px/质检单 2608px/库存查询 1558px 横向滚动可用）。旅程终局口径以 W4-R1 修复后状态为准：member 质检单列表 17 业务列渲染有据（修复前后对比 w4-r1-qc-member-list-before/after.png）；admin 侧四个 KPI 看板 board 过滤与审批中心 status=open 钉住在实库 schema 恢复后经浏览器 XHR 复证（w4-r1-board-*.png + w4-r1-todo-open-pin.png）。
 
 ## 4. 断言固化与回归拦截力
 
