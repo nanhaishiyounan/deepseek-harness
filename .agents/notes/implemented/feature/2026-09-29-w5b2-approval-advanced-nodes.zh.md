@@ -36,7 +36,7 @@ B1 以「B2 启用」指针拒发布六类高级特性（supervisorChain/formFie
 - **CLI 生效钩子链偶发传输悬挂**（keep-alive 断连致顶层 await 永不落定、进程以 unsettled 警告退出 0）——Promise.race 超时 + 幂等 /effective-effects 重放，取证披露重放路径。
 - **oxlint 对 JSON.stringify 的类型窄化**（string 而非 string|undefined）：`?? ''`、`=== undefined`、`as string` 三种写法各触发一条规则——unknown 转文本用 `typeof x === 'string' ? x : JSON.stringify(x)`。
 
-## 结果
+## 后果口径
 
 - `--migrate`：10/10 类型全绿（每型：逆向导入 → round-trip 等价 → graph 保存 → CAS 发布 → psql 行数/发布标记复核 → 发布行内存状态机回放到 approved/qualified），70 断言全过；迁移后 10 型 extras 与种子形状逐字节一致。
 - `--features`：F1 会签（两待办/首签不推进/全员通过生效/任一拒即拒）、F2 依次（仅首人待办/越序 400/次人待办/末序生效）、F3 回退边（转移行改写/拒绝回一级/待办重开/重走生效）、F4 抄送（审批前零 cc 行/通过触发 kind=cc/不阻塞）、F5 deptLeader（解析质检部主管）、F6 主管链（两级依次）、F7 formField（owner 所指人）、F8 autoPass（无部门提交人提交即生效 + '(auto)' 留痕）、F9 assignUser（空解析回退指定人）、F10 通用条件（区间内进二级/区间外直批/正置字面量落库）——65 断言全过；发布门禁负例 8 例（含保存期 3 例）逐例 400 + 可读 + 版本不动；恢复基线后 states/transitions/approver_map/extras 四元组字节一致。

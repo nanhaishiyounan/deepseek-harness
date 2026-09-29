@@ -21,8 +21,8 @@
  *   node --import tsx/esm examples/kb-agent/scripts/approval-engine.mts --selftest
  *   node --import tsx/esm examples/kb-agent/scripts/approval-engine.mts --seed-flow
  *   node --import tsx/esm examples/kb-agent/scripts/approval-engine.mts --seed-admission
- *   node --import tsx/esm examples/kb-agent/scripts/approval-engine.mts --submit hub_po_purchase_orders 12
- *   node --import tsx/esm examples/kb-agent/scripts/approval-engine.mts --act hub_po_purchase_orders 12 approve admin 同意
+ *   node --import tsx/esm examples/kb-agent/scripts/approval-engine.mts --submit wfl_selftest_docs 12
+ *   node --import tsx/esm examples/kb-agent/scripts/approval-engine.mts --act wfl_selftest_docs 12 approve admin 同意
  *   node --import tsx/esm examples/kb-agent/scripts/approval-engine.mts --todos
  *   node --import tsx/esm examples/kb-agent/scripts/approval-engine.mts --serve 13110
  *
@@ -132,7 +132,6 @@ import { calcScorecard, inspectInspection, postCountAdjust, postJobReport, postR
 import {
   AMOUNT_FIELD,
   DEFAULT_AMOUNT_THRESHOLD,
-  DOC_FLOW_VOCABULARY,
   DOC_STATUS_ANCHORS,
   EFFECTIVE_STATE,
   SUPPLIER_ADMISSION_ANCHORS,
@@ -141,6 +140,9 @@ import {
   WORKFLOW_STATES,
   approversOfRole,
   conditionApplies,
+  DOC_FLOW_VOCABULARY,
+  extendVocabulary,
+  nextAdmissionStateOf,
   flowStateLabel,
   gateNotAdmittedMessage,
   gateNotEffectiveMessage,
@@ -150,6 +152,7 @@ import {
   parseRequiredStatuses,
   thresholdOf,
   vocabularyForStateField,
+  DOC_TERMINAL_ACTIONS,
   type ApprovalAction,
   type FlowVocabulary,
   type SupplierAdmissionState,
@@ -239,6 +242,12 @@ export interface FlowExtras {
   cc_after?: Record<string, readonly string[]>
   /** Set to 'v2' when the flow's routing rides the general condition literal on the level-2 row (graph-owned). */
   condition_dsl?: 'v2'
+  /**
+   * The flow's declared business-terminal states (W5-B5 graph-owned): the
+   * graph's terminals block compiles to derived rows and names them here, so
+   * readState accepts them and business actions route through the engine.
+   */
+  terminal_states?: readonly string[]
 }
 
 /** One wfl_flow_configs row (the engine's resolved configuration). */
@@ -322,9 +331,11 @@ function logThresholdFallback(docType: string, threshold: number): void {
   console.log(`approval-engine: flow ${docType} extras has no amount_threshold; defaulting to ${String(threshold)}`)
 }
 
-/** Read the document row, its current flow state, and the vocabulary that state rides (failing loud on unknown shapes). */
+/** Read the document row, its current flow state, and the vocabulary that state rides (failing loud on unknown shapes). A flow's extras.terminal_states extends the base vocabulary (W5-B5), so business-terminal documents keep acting through the engine. */
 async function readState(io: NocoIO, flow: FlowConfig, docType: string, docId: number): Promise<{ row: Record<string, any>, state: string, vocab: FlowVocabulary }> {
-  const vocab = vocabularyForStateField(flow.state_field)
+  const base = vocabularyForStateField(flow.state_field)
+  const terminals = Array.isArray(flow.extras?.terminal_states) ? flow.extras?.terminal_states.filter((value): value is string => typeof value === 'string') : []
+  const vocab = terminals.length > 0 ? extendVocabulary(base, terminals) : base
   const row = await io.get(docType, docId)
   if (row === undefined) {
     throw new Error(`单据不存在：${docType} 第 ${docId} 行`)
@@ -678,8 +689,9 @@ const AUTO_CHAIN_LIMIT = 8
  * @returns the act outcome.
  */
 export async function act(io: NocoIO, docType: string, docId: number, action: ApprovalAction, approver: string, comment?: string, source: 'engine' | 'page' = 'engine', depth = 0): Promise<ActResult> {
-  if (action !== 'approve' && action !== 'reject' && action !== 'void') {
-    throw new Error(`act 只接受 approve/reject/void 动作（收到 ${action}）；提交与重提走 submitForApproval`)
+  const businessAction = (DOC_TERMINAL_ACTIONS as readonly string[]).includes(action)
+  if (action !== 'approve' && action !== 'reject' && action !== 'void' && !businessAction) {
+    throw new Error(`act 只接受 approve/reject/void/业务终态动作（${DOC_TERMINAL_ACTIONS.join('/')}）动作（收到 ${action}）；提交与重提走 submitForApproval`)
   }
   if (depth > AUTO_CHAIN_LIMIT) {
     throw new Error(`空审批人自动链超过 ${String(AUTO_CHAIN_LIMIT)} 级（配置疑似成环）——拒绝继续推进`)
@@ -944,9 +956,9 @@ export async function listTodos(io: NocoIO, user?: string): Promise<Array<Record
   return await io.list('wfl_approval_todos', user === undefined ? { status: 'open' } : { status: 'open', user })
 }
 
-// ─── the pilot flow seed (shared by --seed-flow and nocobase-w1-approval.mts) ───
+// ─── the selftest carrier flow seed (shared by --seed-flow, the selftest, and w5b2 --features) ───
 
-/** The pilot transitions in seed order (see nextStateOf: the two approve rows split on the threshold condition). */
+/** The carrier transitions in seed order (see nextStateOf: the two approve rows split on the threshold condition). */
 export const PILOT_TRANSITIONS: ReadonlyArray<{ state: WorkflowState, action: ApprovalAction, next_state: WorkflowState, allowed_role: string, condition_expr: string, allow_self_approval: boolean }> = [
   { state: 'draft', action: 'submit', next_state: 'pending', allowed_role: 'manager', condition_expr: '', allow_self_approval: true },
   { state: 'rejected', action: 'resubmit', next_state: 'pending', allowed_role: 'manager', condition_expr: '', allow_self_approval: true },
@@ -959,22 +971,26 @@ export const PILOT_TRANSITIONS: ReadonlyArray<{ state: WorkflowState, action: Ap
 ]
 
 /**
- * Seed the pilot purchase-order flow (idempotent by doc_type: an existing
- * config row skips whole). States ride WORKFLOW_STATES with their anchors;
- * transitions ride {@link PILOT_TRANSITIONS}; the gate binds wms_receipts
- * rows (source_no) to effective purchase orders (po_number).
+ * Seed the engine's selftest-carrier flow over wfl_selftest_docs (idempotent
+ * by doc_type: an existing config row skips whole). W5-B3/BP-04 retired the
+ * hub_po_purchase_orders pilot onto pur_orders; this dedicated non-business
+ * collection now carries the selftest and the designer feature matrix, so
+ * engine rehearsals never touch business collections. States ride
+ * WORKFLOW_STATES with their anchors; transitions ride
+ * {@link PILOT_TRANSITIONS}; the gate binds wms_receipts rows (source_no) to
+ * effective carrier rows (po_number).
  * @param io - the data access to run over.
  * @param approverMap - role → username (defaults to the single-admin pilot).
  */
 export async function seedFlow(io: NocoIO, approverMap: Record<string, string> = { manager: 'admin', gm: 'admin' }): Promise<void> {
-  const docType = 'hub_po_purchase_orders'
+  const docType = 'wfl_selftest_docs'
   const existing = await io.list('wfl_flow_configs', { doc_type: docType })
   if (existing.length > 0) {
     console.log(`approval-engine: flow config for ${docType} exists (kept)`)
     return
   }
   const flow = await io.create('wfl_flow_configs', {
-    doc_type: docType, title: '采购订单审批', state_field: 'doc_status', is_active: true,
+    doc_type: docType, title: '引擎自测流', state_field: 'doc_status', is_active: true,
     approver_map: JSON.stringify(approverMap),
     extras: JSON.stringify({ approved_by_field: 'approved_by', approved_at_field: 'approved_at' }),
   })
@@ -1001,12 +1017,21 @@ export async function seedFlow(io: NocoIO, approverMap: Record<string, string> =
 
 // ─── the supplier-admission flow seed (B2; shared by nocobase-w2-supplier.mts) ───
 
-/** The admission flow's transitions in seed order (mirrors nextAdmissionStateOf). */
+/** The admission flow's transitions in seed order (mirrors nextAdmissionStateOf): the W5-B3 grade legs fold the four post-admission lifecycle grades into the same controlled machine. */
 export const ADMISSION_TRANSITIONS: ReadonlyArray<{ state: SupplierAdmissionState, action: ApprovalAction, next_state: SupplierAdmissionState, allowed_role: string, condition_expr: string, allow_self_approval: boolean }> = [
   { state: 'potential', action: 'submit', next_state: 'reviewing', allowed_role: 'srm_manager', condition_expr: '', allow_self_approval: true },
   { state: 'rejected', action: 'resubmit', next_state: 'reviewing', allowed_role: 'srm_manager', condition_expr: '', allow_self_approval: true },
   { state: 'reviewing', action: 'approve', next_state: 'qualified', allowed_role: 'srm_manager', condition_expr: '', allow_self_approval: true },
   { state: 'reviewing', action: 'reject', next_state: 'rejected', allowed_role: 'srm_manager', condition_expr: '', allow_self_approval: true },
+  { state: 'qualified', action: 'promote', next_state: 'preferred', allowed_role: 'srm_manager', condition_expr: '', allow_self_approval: true },
+  { state: 'preferred', action: 'demote', next_state: 'qualified', allowed_role: 'srm_manager', condition_expr: '', allow_self_approval: true },
+  { state: 'qualified', action: 'restrict', next_state: 'restricted', allowed_role: 'srm_manager', condition_expr: '', allow_self_approval: true },
+  { state: 'preferred', action: 'restrict', next_state: 'restricted', allowed_role: 'srm_manager', condition_expr: '', allow_self_approval: true },
+  { state: 'restricted', action: 'freeze', next_state: 'frozen', allowed_role: 'srm_manager', condition_expr: '', allow_self_approval: true },
+  { state: 'restricted', action: 'restore', next_state: 'qualified', allowed_role: 'srm_manager', condition_expr: '', allow_self_approval: true },
+  { state: 'frozen', action: 'restore', next_state: 'restricted', allowed_role: 'srm_manager', condition_expr: '', allow_self_approval: true },
+  { state: 'frozen', action: 'eliminate', next_state: 'eliminated', allowed_role: 'srm_manager', condition_expr: '', allow_self_approval: true },
+  { state: 'eliminated', action: 'resubmit', next_state: 'reviewing', allowed_role: 'srm_manager', condition_expr: '', allow_self_approval: true },
 ]
 
 /**
@@ -1951,15 +1976,67 @@ const admissionStateRows = (): ReadonlyArray<CompiledStateRow> =>
   }))
 
 /** The admission-vocabulary transitions template (the ADMISSION_TRANSITIONS shape). */
-const admissionTransitionRows = (): ReadonlyArray<CompiledTransitionRow> => [
-  { state: 'potential', action: 'submit', next_state: 'reviewing', allowed_role: 'srm_manager', condition_expr: '', allow_self_approval: true },
-  { state: 'rejected', action: 'resubmit', next_state: 'reviewing', allowed_role: 'srm_manager', condition_expr: '', allow_self_approval: true },
-  { state: 'reviewing', action: 'approve', next_state: 'qualified', allowed_role: 'srm_manager', condition_expr: '', allow_self_approval: true },
-  { state: 'reviewing', action: 'reject', next_state: 'rejected', allowed_role: 'srm_manager', condition_expr: '', allow_self_approval: true },
-]
+const admissionTransitionRows = (): ReadonlyArray<CompiledTransitionRow> =>
+  ADMISSION_TRANSITIONS.map(row => ({ ...row }))
 
 /** One resolved approver-map value: a single username stays a string, several become an array (the live forms). */
 const approverValueOf = (users: readonly string[]): ApproverMapValue => users.length === 1 ? users[0] as string : [...users]
+
+/** The approval actions the base templates emit (rows carrying any other action are terminal declarations). */
+const CORE_ACTIONS: readonly string[] = ['submit', 'resubmit', 'approve', 'reject', 'void']
+
+/**
+ * The graph's business-terminal declarations (W5-B5): `terminals.states`
+ * names states beyond the flow's base vocabulary, `termitions.transitions`
+ * wires the business actions onto them (from/to inside the extended set,
+ * action inside {@link DOC_TERMINAL_ACTIONS}, role one of the canonical
+ * three). Doc flows only — the admission vocabulary already carries its
+ * grade states in the base template.
+ * @param doc - the stored graph document.
+ * @param vocabulary - the flow's vocabulary family.
+ * @returns the compiled terminal rows plus the extras names, or the readable failure list.
+ */
+function parseGraphTerminals(doc: Record<string, unknown>, vocabulary: 'doc' | 'admission'): { states: CompiledStateRow[], transitions: CompiledTransitionRow[], names: string[] } | string[] {
+  const raw = doc['terminals']
+  if (raw === undefined) return { states: [], transitions: [], names: [] }
+  if (vocabulary === 'admission') return ['供应商准入词汇表的等级态已内置在基础模板——terminals 扩展块只属于单据词汇表']
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return ['graph.terminals 需为对象 { states, transitions }']
+  const block = raw as Record<string, unknown>
+  const baseStates = [...WORKFLOW_STATES]
+  const stateRows: CompiledStateRow[] = []
+  const names: string[] = []
+  const rawStates = Array.isArray(block['states']) ? block['states'] : []
+  for (const entry of rawStates) {
+    if (typeof entry !== 'object' || entry === null) return ['graph.terminals.states 的每个成员需为对象 { state, label? }']
+    const state = String((entry as Record<string, unknown>)['state'] ?? '')
+    if (state === '') return ['graph.terminals.states 的 state 需为非空字符串']
+    if (baseStates.includes(state)) return [`终态 ${state} 已在六态基础词汇内（terminals 只声明业务终态）`]
+    if (names.includes(state)) return [`终态 ${state} 声明重复`]
+    names.push(state)
+    stateRows.push({ state, doc_status_anchor: 1, allow_edit_role: 'manager', update_field: '', update_value: '' })
+  }
+  const known = [...baseStates, ...names]
+  const transitionRows: CompiledTransitionRow[] = []
+  const rawTransitions = Array.isArray(block['transitions']) ? block['transitions'] : []
+  for (const entry of rawTransitions) {
+    if (typeof entry !== 'object' || entry === null) return ['graph.terminals.transitions 的每个成员需为对象 { from, action, to, role? }']
+    const row = entry as Record<string, unknown>
+    const from = String(row['from'] ?? '')
+    const action = String(row['action'] ?? '')
+    const to = String(row['to'] ?? '')
+    const role = String(row['role'] ?? 'manager')
+    if (!known.includes(from)) return [`终态转移的 from ${from} 不在扩展状态集内`]
+    if (!known.includes(to)) return [`终态转移的 to ${to} 不在扩展状态集内`]
+    // Terminal transitions carry a business action, or void on a terminal
+    // state (the mispayment reversal — a core action riding the extension).
+    const fromTerminal = names.includes(from)
+    const actionOk = (DOC_TERMINAL_ACTIONS as readonly string[]).includes(action) || (action === 'void' && fromTerminal)
+    if (!actionOk) return [`终态转移动作 ${action} 不在业务动作白名单（${DOC_TERMINAL_ACTIONS.join('/')}，或终态上的 void）内`]
+    if (role !== 'manager' && role !== 'gm' && role !== 'srm_manager') return [`终态转移角色 ${role} 需为 manager/gm/srm_manager`]
+    transitionRows.push({ state: from, action, next_state: to, allowed_role: role, condition_expr: '', allow_self_approval: true })
+  }
+  return { states: stateRows, transitions: transitionRows, names }
+}
 
 /**
  * Compile one graph into the derived rows the engine consumes — the one-way
@@ -2258,6 +2335,8 @@ export async function compileGraphToRows(graph: unknown, ctx: CompileContext): P
     if (advanced.length > 0) {
       return { ok: false, errors: [`供应商准入词汇表不支持高级节点特性（${advanced.join('、')}）——多级/条件/会签/回退编排属于单据词汇表`] }
     }
+    const terminals = parseGraphTerminals(doc, vocabulary)
+    if (Array.isArray(terminals)) return { ok: false, errors: terminals }
     return {
       ok: true,
       rows: {
@@ -2270,12 +2349,16 @@ export async function compileGraphToRows(graph: unknown, ctx: CompileContext): P
       },
     }
   }
+  const terminals = parseGraphTerminals(doc, vocabulary)
+  if (Array.isArray(terminals)) return { ok: false, errors: terminals }
+  if (terminals.names.length > 0) extras.terminal_states = terminals.names
+  else delete extras.terminal_states
   return {
     ok: true,
     rows: {
       vocabulary: 'doc',
-      states: docStateRows(),
-      transitions: docTransitionRows(amountField, threshold, { level2Condition, rejectToPending }),
+      states: [...docStateRows(), ...terminals.states],
+      transitions: [...docTransitionRows(amountField, threshold, { level2Condition, rejectToPending }), ...terminals.transitions],
       approverMap,
       extras,
       ccCount,
@@ -2540,7 +2623,28 @@ export function rowsToGraph(live: LiveFlowRows): { ok: true, graph: Record<strin
   }
   pushEdge(tail, endId)
   if (errors.length > 0) return { ok: false, errors }
-  return { ok: true, graph: { version: 1, nodes, edges } }
+  // W5-B5: live rows beyond the base vocabulary import back as the graph's
+  // terminals block (states outside WORKFLOW_STATES, transitions whose action
+  // is a business action), so a publish round-trips them losslessly.
+  const terminalStates = live.states
+    .filter(row => !(WORKFLOW_STATES as readonly string[]).includes(String(row.state)))
+    .map(row => ({ state: String(row.state), label: String(row.state) }))
+  const terminalTransitions = live.transitions
+    .filter(row => {
+      const state = String(row.state)
+      const action = String(row.action)
+      const coreState = (WORKFLOW_STATES as readonly string[]).includes(state)
+      const coreAction = (CORE_ACTIONS as readonly string[]).includes(action)
+      // A business action, or a core void leaving a terminal state (the
+      // mispayment reversal), belongs to the terminals block; core actions
+      // leaving core states stay template rows.
+      return !coreAction || (!coreState && action === 'void')
+    })
+    .map(row => ({ from: String(row.state), action: String(row.action), to: String(row.next_state), role: String(row.allowed_role ?? 'manager') }))
+  const terminals = terminalStates.length > 0 || terminalTransitions.length > 0
+    ? { states: terminalStates, transitions: terminalTransitions }
+    : undefined
+  return { ok: true, graph: { version: 1, nodes, edges, ...(terminals === undefined ? {} : { terminals }) } }
 }
 
 /**
@@ -3567,6 +3671,31 @@ export async function selftest(): Promise<void> {
   expect('作废只从生效态', nextStateOf('draft', 'void', 500), undefined)
   expect('锚点映射', [DOC_STATUS_ANCHORS.draft, DOC_STATUS_ANCHORS.approved, DOC_STATUS_ANCHORS.void], [0, 1, 2])
 
+  // W5-B3: the admission grade legs — the four post-admission lifecycle
+  // grades ride the same controlled machine as admission itself.
+  expect('合格升优选', nextAdmissionStateOf('qualified', 'promote'), 'preferred')
+  expect('优选降回合格', nextAdmissionStateOf('preferred', 'demote'), 'qualified')
+  expect('合格设为受限', nextAdmissionStateOf('qualified', 'restrict'), 'restricted')
+  expect('优选也可受限', nextAdmissionStateOf('preferred', 'restrict'), 'restricted')
+  expect('受限冻结', nextAdmissionStateOf('restricted', 'freeze'), 'frozen')
+  expect('受限恢复合格', nextAdmissionStateOf('restricted', 'restore'), 'qualified')
+  expect('冻结解为受限', nextAdmissionStateOf('frozen', 'restore'), 'restricted')
+  expect('冻结淘汰', nextAdmissionStateOf('frozen', 'eliminate'), 'eliminated')
+  expect('淘汰重走准入', nextAdmissionStateOf('eliminated', 'resubmit'), 'reviewing')
+  expect('草稿态不能升优选', nextAdmissionStateOf('potential', 'promote'), undefined)
+  expect('准入词汇含等级四态', SUPPLIER_ADMISSION_STATES.includes('preferred') && SUPPLIER_ADMISSION_STATES.includes('eliminated'), true)
+
+  // W5-B5: the terminal vocabulary extension — a flow's declared terminal
+  // states join the legal set, resolve no fallback transition, and keep the
+  // base legs untouched.
+  const extended = extendVocabulary(DOC_FLOW_VOCABULARY, ['paid'])
+  expect('扩展态合法', extended.isState('paid'), true)
+  expect('基础态仍合法', extended.isState('draft'), true)
+  expect('扩展态无规则转移', extended.nextOf('paid', 'void', undefined), undefined)
+  expect('基础态规则保留', extended.nextOf('pending', 'approve', 1, undefined), 'approved')
+  expect('扩展态锚点生效侧', extended.anchors['paid'], 1)
+  expect('扩展态不入编辑锁', extended.lockedStates.includes('paid'), false)
+
   // In-memory orchestration: the pilot flow plus two purchase orders. The
   // users rows must exist before any todo opens: the approver-existence
   // check reads the users table fail-loud.
@@ -3574,53 +3703,53 @@ export async function selftest(): Promise<void> {
   await io.create('users', { username: 'admin', nickname: '管理员' })
   await io.create('users', { username: 'quality_lead', nickname: '质量主管' })
   await seedFlow(io)
-  const small = await io.create('hub_po_purchase_orders', { po_number: 'PO-TEST-1', total: 16_000, doc_status: 'draft' })
-  const large = await io.create('hub_po_purchase_orders', { po_number: 'PO-TEST-2', total: 250_000, doc_status: 'draft' })
+  const small = await io.create('wfl_selftest_docs', { po_number: 'PO-TEST-1', total: 16_000, doc_status: 'draft' })
+  const large = await io.create('wfl_selftest_docs', { po_number: 'PO-TEST-2', total: 250_000, doc_status: 'draft' })
 
   // Sequence one: submit → approve (≤ threshold) lands approved in one round.
-  let result = await submitForApproval(io, 'hub_po_purchase_orders', Number(small.id), 'chenliqun')
+  let result = await submitForApproval(io, 'wfl_selftest_docs', Number(small.id), 'chenliqun')
   expect('提交后待审批', result.to_state, 'pending')
   expect('首轮 attempt', result.attempt_no, 1)
-  expect('主表状态回写', (await io.get('hub_po_purchase_orders', Number(small.id)))?.doc_status, 'pending')
+  expect('主表状态回写', (await io.get('wfl_selftest_docs', Number(small.id)))?.doc_status, 'pending')
   const todos1 = await listTodos(io, 'admin')
   expect('一级待办生成', todos1.length, 1)
-  result = await act(io, 'hub_po_purchase_orders', Number(small.id), 'approve', 'admin', '同意，按合同执行')
+  result = await act(io, 'wfl_selftest_docs', Number(small.id), 'approve', 'admin', '同意，按合同执行')
   expect('一审生效', result.to_state, 'approved')
   expect('生效锚点', result.to_anchor, 1)
-  expect('回写审批人', (await io.get('hub_po_purchase_orders', Number(small.id)))?.approved_by, 'admin')
+  expect('回写审批人', (await io.get('wfl_selftest_docs', Number(small.id)))?.approved_by, 'admin')
   expect('待办清零', (await listTodos(io, 'admin')).length, 0)
-  const records1 = await io.list('wfl_approval_records', { doc_type: 'hub_po_purchase_orders', doc_id: Number(small.id) })
+  const records1 = await io.list('wfl_approval_records', { doc_type: 'wfl_selftest_docs', doc_id: Number(small.id) })
   expect('审计两行（提交+同意）', records1.length, 2)
 
   // Repeat act on the approved document refuses (idempotence by state, no double records).
-  const repeat = await failureOf(() => act(io, 'hub_po_purchase_orders', Number(small.id), 'approve', 'admin'))
+  const repeat = await failureOf(() => act(io, 'wfl_selftest_docs', Number(small.id), 'approve', 'admin'))
   if (repeat === '') throw new Error('selftest 失败：已生效单据的重复 act 未被拒绝')
-  const recordsAfterRepeat = await io.list('wfl_approval_records', { doc_type: 'hub_po_purchase_orders', doc_id: Number(small.id) })
+  const recordsAfterRepeat = await io.list('wfl_approval_records', { doc_type: 'wfl_selftest_docs', doc_id: Number(small.id) })
   expect('重复 act 不双写', recordsAfterRepeat.length, 2)
 
   // Sequence two: the amount-threshold route and reject→resubmit attempt_no+1.
-  await submitForApproval(io, 'hub_po_purchase_orders', Number(large.id), 'chenliqun')
-  result = await act(io, 'hub_po_purchase_orders', Number(large.id), 'approve', 'admin', '金额超限，报总经理加签')
+  await submitForApproval(io, 'wfl_selftest_docs', Number(large.id), 'chenliqun')
+  result = await act(io, 'wfl_selftest_docs', Number(large.id), 'approve', 'admin', '金额超限，报总经理加签')
   expect('超限一审进二级', result.to_state, 'pending_level2')
   const todos2 = await io.list('wfl_approval_todos', { doc_id: Number(large.id), status: 'open' })
   expect('二级待办生成', todos2.length, 1)
   expect('二级待办态', todos2[0]?.state, 'pending_level2')
-  result = await act(io, 'hub_po_purchase_orders', Number(large.id), 'reject', 'admin', '供应商资质不全')
+  result = await act(io, 'wfl_selftest_docs', Number(large.id), 'reject', 'admin', '供应商资质不全')
   expect('驳回', result.to_state, 'rejected')
-  result = await submitForApproval(io, 'hub_po_purchase_orders', Number(large.id), 'chenliqun')
+  result = await submitForApproval(io, 'wfl_selftest_docs', Number(large.id), 'chenliqun')
   expect('驳回重提整链重走', result.to_state, 'pending')
   expect('重提 attempt+1', result.attempt_no, 2)
 
   // Illegal transitions fail loud with the Chinese message.
-  const illegal = await failureOf(() => act(io, 'hub_po_purchase_orders', Number(large.id), 'void', 'admin'))
+  const illegal = await failureOf(() => act(io, 'wfl_selftest_docs', Number(large.id), 'void', 'admin'))
   if (!illegal.includes('非法审批转移')) throw new Error(`selftest 失败：非法转移消息缺失（${illegal}）`)
 
   // The gate: a draft purchase order cannot drive a receipt; approved passes.
   // (large is pending after the resubmit above — two approvals land it: the
   // threshold route, then the level-2 sign-off.)
-  await act(io, 'hub_po_purchase_orders', Number(large.id), 'approve', 'admin', '加签通过')
-  await act(io, 'hub_po_purchase_orders', Number(large.id), 'approve', 'admin', '二级通过')
-  const draftPo = await io.create('hub_po_purchase_orders', { po_number: 'PO-TEST-3', total: 1, doc_status: 'draft' })
+  await act(io, 'wfl_selftest_docs', Number(large.id), 'approve', 'admin', '加签通过')
+  await act(io, 'wfl_selftest_docs', Number(large.id), 'approve', 'admin', '二级通过')
+  const draftPo = await io.create('wfl_selftest_docs', { po_number: 'PO-TEST-3', total: 1, doc_status: 'draft' })
   const gateFailure = await failureOf(() => enforceGates(io, 'wms_receipts', { source_no: 'PO-TEST-3' }))
   if (!gateFailure.includes('未生效')) throw new Error(`selftest 失败：卡口消息缺「未生效」（${gateFailure}）`)
   const gateMissing = await failureOf(() => enforceGates(io, 'wms_receipts', { source_no: 'PO-TEST-404' }))
@@ -3628,10 +3757,39 @@ export async function selftest(): Promise<void> {
   await enforceGates(io, 'wms_receipts', { source_no: 'PO-TEST-2' })
   await enforceGates(io, 'wms_receipts', { source_no: null })
 
+  // W5-B5: the paid terminal rides the engine (BP-08) — settle lands paid
+  // through the derived terminal transition, void reverses a mispayment, and
+  // the resubmit re-enters review. Built on a seeded pur_payments flow whose
+  // terminal rows and extras.terminal_states arrive the way a publish does.
+  await seedDocFlow(io, 'pur_payments', '付款审批', { amountField: 'amount' })
+  const payFlow = (await io.list('wfl_flow_configs', { doc_type: 'pur_payments' }))[0]!
+  await io.create('wfl_flow_states', { flow_id: payFlow.id, state: 'paid', doc_status_anchor: 1, allow_edit_role: 'manager', update_field: '', update_value: '' })
+  await io.create('wfl_flow_transitions', { flow_id: payFlow.id, state: 'approved', action: 'settle', next_state: 'paid', allowed_role: 'manager', condition_expr: '', allow_self_approval: true })
+  await io.create('wfl_flow_transitions', { flow_id: payFlow.id, state: 'paid', action: 'void', next_state: 'void', allowed_role: 'manager', condition_expr: '', allow_self_approval: true })
+  const payExtras = JSON.parse(String(payFlow.extras)) as Record<string, unknown>
+  payExtras['terminal_states'] = ['paid']
+  await io.update('wfl_flow_configs', payFlow.id, { extras: JSON.stringify(payExtras) })
+  const payment = await io.create('pur_payments', { code: 'PAY-SELFTEST-1', amount: 8_000, doc_status: 'draft' })
+  await submitForApproval(io, 'pur_payments', Number(payment.id), 'chenliqun')
+  await act(io, 'pur_payments', Number(payment.id), 'approve', 'admin', '同意付款')
+  const settled = await act(io, 'pur_payments', Number(payment.id), 'settle', 'admin', '银行转账已汇出')
+  expect('settle 经引擎落 paid', settled.to_state, 'paid')
+  expect('paid 仍可读状态', (await io.get('pur_payments', Number(payment.id)))?.doc_status, 'paid')
+  const voided = await act(io, 'pur_payments', Number(payment.id), 'void', 'admin', '误付：收款方账号不符，作废重付')
+  expect('误付 paid 可 void', voided.to_state, 'void')
+  const illegalSettle = await failureOf(() => act(io, 'pur_payments', Number(payment.id), 'settle', 'admin'))
+  if (!illegalSettle.includes('非法审批转移')) throw new Error(`selftest 失败：void 后 settle 未被拒（${illegalSettle}）`)
+  const illegalPromote = await failureOf(() => act(io, 'pur_payments', Number(payment.id), 'promote', 'admin'))
+  if (!illegalPromote.includes('非法审批转移')) throw new Error(`selftest 失败：无转移行的业务动作未被拒（${illegalPromote}）`)
+  const payment2 = await io.create('pur_payments', { code: 'PAY-SELFTEST-2', amount: 9_000, doc_status: 'draft' })
+  await submitForApproval(io, 'pur_payments', Number(payment2.id), 'chenliqun')
+  await act(io, 'pur_payments', Number(payment2.id), 'approve', 'admin')
+  expect('第二笔同样可 settle', (await act(io, 'pur_payments', Number(payment2.id), 'settle', 'admin', '第二笔汇出')).to_state, 'paid')
+
   // The edit lock: approved/pending documents refuse, draft passes.
-  const lockFailure = await failureOf(() => assertEditable(io, 'hub_po_purchase_orders', Number(small.id), '采购单'))
+  const lockFailure = await failureOf(() => assertEditable(io, 'wfl_selftest_docs', Number(small.id), '采购单'))
   if (!lockFailure.includes('锁定编辑')) throw new Error(`selftest 失败：锁编辑消息缺失（${lockFailure}）`)
-  await assertEditable(io, 'hub_po_purchase_orders', Number(draftPo.id), '采购单')
+  await assertEditable(io, 'wfl_selftest_docs', Number(draftPo.id), '采购单')
 
   // The supplier-admission flow (B2): potential → submit → reviewing (locked)
   // → approve → qualified with admitted_at; the lifecycle gate then refuses a
@@ -3650,20 +3808,20 @@ export async function selftest(): Promise<void> {
   const admissionIllegal = await failureOf(() => act(io, 'srm_suppliers', Number(supplier.id), 'void', 'admin'))
   if (!admissionIllegal.includes('非法准入转移')) throw new Error(`selftest 失败：准入非法转移消息缺失（${admissionIllegal}）`)
   await io.create('wfl_gate_configs', {
-    downstream_collection: 'hub_po_purchase_orders', upstream_collection: 'srm_suppliers',
+    downstream_collection: 'wfl_selftest_docs', upstream_collection: 'srm_suppliers',
     upstream_field: 'supplier_id', upstream_ref_field: null, upstream_label: '供应商',
     upstream_state_field: 'lifecycle_status', required_status: 'qualified,preferred',
   })
   const pendingSupplier = await io.create('srm_suppliers', { name: '潜在供应商', lifecycle_status: 'potential' })
-  const denied = await failureOf(() => enforceGates(io, 'hub_po_purchase_orders', { supplier_id: pendingSupplier.id }))
+  const denied = await failureOf(() => enforceGates(io, 'wfl_selftest_docs', { supplier_id: pendingSupplier.id }))
   if (!denied.includes('未准入') || !denied.includes('不合格供方')) throw new Error(`selftest 失败：供应商卡口消息缺「未准入/不合格供方」（${denied}）`)
-  await enforceGates(io, 'hub_po_purchase_orders', { supplier_id: supplier.id })
+  await enforceGates(io, 'wfl_selftest_docs', { supplier_id: supplier.id })
   const preferredSupplier = await io.create('srm_suppliers', { name: '优选供应商', lifecycle_status: 'preferred' })
-  await enforceGates(io, 'hub_po_purchase_orders', { supplier_id: preferredSupplier.id })
+  await enforceGates(io, 'wfl_selftest_docs', { supplier_id: preferredSupplier.id })
 
   // W2-B5: the threshold rides flow extras; the manager tier may name two
   // approvers (either may act); a missing key falls back to the default.
-  const hubFlow = await loadFlow(io, 'hub_po_purchase_orders')
+  const hubFlow = await loadFlow(io, 'wfl_selftest_docs')
   expect('缺省阈值回退', hubFlow.threshold, DEFAULT_AMOUNT_THRESHOLD)
   const b5Options = {
     amountField: 'amount', amountThreshold: 200_000,
@@ -4210,8 +4368,11 @@ export async function compilerSelftest(): Promise<void> {
   const admission = await expectRows('准入词汇表', fixtureGraph([
     { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: user(['admin']) }, { id: 'e', type: 'end' },
   ], rows(['s', 'a'], ['a', 'e'])), fixtureCompileContext({ stateField: SUPPLIER_ADMISSION_STATE_FIELD, preserveExtras: { approved_at_field: 'admitted_at' } }))
-  expect('准入派生4状态', admission.states.length, 4)
-  expect('准入派生4转移', admission.transitions.length, 4)
+  // W5-B3: the grade extension grows the admission template to 8 states /
+  // 13 transitions (the admission core plus the six grade moves and the
+  // eliminated re-admission leg).
+  expect('准入派生8状态', admission.states.length, 8)
+  expect('准入派生13转移', admission.transitions.length, 13)
   expect('准入审批人映射', admission.approverMap, { srm_manager: 'admin' })
   expect('准入extras保留', admission.extras, { approved_at_field: 'admitted_at' })
 

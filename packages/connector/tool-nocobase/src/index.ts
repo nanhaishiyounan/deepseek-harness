@@ -101,6 +101,7 @@ export {
   WORKFLOW_STATES,
   approversOfRole,
   conditionApplies,
+  extendVocabulary,
   flowStateLabel,
   gateNotAdmittedMessage,
   gateNotEffectiveMessage,

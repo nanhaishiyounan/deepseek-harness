@@ -45,6 +45,8 @@ import {
   parseRequiredStatuses,
   thresholdOf,
   vocabularyForStateField,
+  DOC_TERMINAL_ACTIONS,
+  type BusinessAction,
   type ApprovalAction,
   type FlowVocabulary,
   type WorkflowState,
@@ -96,8 +98,8 @@ export interface NbUpdateToolValue {
 export interface NbApproveArgs {
   readonly doc_type: string
   readonly doc_id: number
-  /** submit | approve | reject | void (resubmit rides submit on a rejected document). */
-  readonly action: 'submit' | 'approve' | 'reject' | 'void'
+  /** submit/approve/reject/void (resubmit rides submit) plus the W5-B5 business actions, which delegate whole to the engine. */
+  readonly action: 'submit' | 'approve' | 'reject' | 'void' | BusinessAction
   readonly comment?: string
   /** The acting user's name for the audit record; defaults to admin (the service account). */
   readonly approver?: string
@@ -169,7 +171,8 @@ export function fieldChangesOf(before: NbRow, values: Record<string, JsonValue>)
 
 /**
  * Parse `nb_approve` arguments: no model-supplied tenant, non-empty doc_type,
- * positive integer doc_id, one of the four actions, comment optional.
+ * positive integer doc_id, one of the four core actions or a W5-B5 business
+ * action (settle / admission grade moves — engine-delegated), comment optional.
  * @param args - the schema-validated arguments.
  * @returns the validated approve input.
  */
@@ -181,8 +184,9 @@ export function parseNbApproveArgs(args: NbApproveArgs): { docType: string; docI
   if (docType.length === 0) throw new Error('nb_approve: doc_type must be a non-empty collection name')
   if (!Number.isInteger(args.doc_id) || args.doc_id < 1) throw new Error('nb_approve: doc_id must be a positive integer row id')
   const action = args.action
-  if (action !== 'submit' && action !== 'approve' && action !== 'reject' && action !== 'void') {
-    throw new Error(`nb_approve: action 只接受 submit/approve/reject/void（收到 ${String(action)}）`)
+  const business = (DOC_TERMINAL_ACTIONS as readonly string[]).includes(action)
+  if (action !== 'submit' && action !== 'approve' && action !== 'reject' && action !== 'void' && !business) {
+    throw new Error(`nb_approve: action 只接受 submit/approve/reject/void 或业务动作（${DOC_TERMINAL_ACTIONS.join('/')}）（收到 ${String(action)}）`)
   }
   const comment = args.comment === undefined ? undefined : args.comment.trim()
   const approver = args.approver === undefined || args.approver.trim() === '' ? 'admin' : args.approver.trim()
@@ -379,7 +383,7 @@ export function applyNbUpdateTool(ctx: Context, client: NocoBaseClient | undefin
       if (before === undefined) {
         throw new Error(`nb_update: no row ${input.id} exists in ${input.collection}`)
       }
-      await assertRowEditable(client, input.collection, before, exec.signal)
+      await assertRowEditable(client, input.collection, before, input.values, exec.signal)
       // The side door a code-changing patch would open is closed with the
       // create-side guard: the patch's number must stay free of every row
       // but this one (excludeId), or the update refuses before writing.
@@ -479,7 +483,7 @@ async function runEffectsViaEngine(input: { docType: string; docId: number }, co
  * @param input - the parsed nb_approve arguments.
  * @returns the transition receipt the engine produced.
  */
-async function delegateToEngine(input: { docType: string; docId: number; action: 'submit' | 'approve' | 'reject' | 'void'; comment: string | undefined; approver: string }): Promise<NbApproveToolValue> {
+async function delegateToEngine(input: { docType: string; docId: number; action: 'submit' | 'approve' | 'reject' | 'void' | BusinessAction; comment: string | undefined; approver: string }): Promise<NbApproveToolValue> {
   const base = (process.env['NOCOBASE_ENGINE_URL'] ?? 'http://127.0.0.1:13110').replace(/\/$/u, '')
   const path = input.action === 'submit' ? '/submit' : '/act'
   let response: Response
@@ -654,7 +658,13 @@ async function openTodoAt(
  * @param signal - caller cancellation.
  * @returns the transition receipt.
  */
-export async function nbApproveEngine(client: NocoBaseClient, input: { docType: string; docId: number; action: 'submit' | 'approve' | 'reject' | 'void'; comment: string | undefined; approver: string }, signal?: AbortSignal): Promise<NbApproveToolValue> {
+export async function nbApproveEngine(client: NocoBaseClient, input: { docType: string; docId: number; action: 'submit' | 'approve' | 'reject' | 'void' | BusinessAction; comment: string | undefined; approver: string }, signal?: AbortSignal): Promise<NbApproveToolValue> {
+  // W5-B5: business actions (settle / admission grade moves) live only in the
+  // flow's derived terminal transition rows — this twin implements no
+  // template for them, so they delegate whole to the engine.
+  if ((DOC_TERMINAL_ACTIONS as readonly string[]).includes(input.action)) {
+    return await delegateToEngine(input)
+  }
   const flow = await loadFlowConfig(client, input.docType, signal)
   // W5-B2: advanced flows (department routing, markers, countersign,
   // sequential, cc, general conditions) run on the engine — one code path per
@@ -881,18 +891,29 @@ function gateNotEffectiveText(label: string, ref: string, state: WorkflowState |
 /**
  * The nb_update edit lock: when the collection has an active flow config and
  * the row sits in a locked state (pending, pending_level2, approved, void),
- * direct edits refuse; draft and rejected stay editable.
+ * direct edits refuse; draft and rejected stay editable. The update's values
+ * may never touch the flow's state column itself (W5-B3/B5): state moves ride
+ * the engine (nb_approve / --act / the admission grade actions), so writing
+ * doc_status or lifecycle_status directly refuses in every state — closing
+ * the draft-side bypass a direct write used to allow.
  * @param client - the shared REST client.
  * @param collection - the collection nb_update targets.
  * @param before - the row as read immediately before the update.
+ * @param values - the update's changed fields (the state-column refusal reads their keys).
  * @param signal - caller cancellation.
  */
-export async function assertRowEditable(client: NocoBaseClient, collection: string, before: NbRow, signal?: AbortSignal): Promise<void> {
+export async function assertRowEditable(
+  client: NocoBaseClient, collection: string, before: NbRow,
+  values: Record<string, JsonValue> = {}, signal?: AbortSignal,
+): Promise<void> {
   const flows = await engineList(client, 'wfl_flow_configs', { doc_type: collection, is_active: true }, signal)
   const flowRow = flows[0]
   if (flowRow === undefined) return
   const stateField = flowRow['state_field']
   const vocab: FlowVocabulary = vocabularyForStateField(typeof stateField === 'string' && stateField !== '' ? stateField : 'doc_status')
+  if (Object.keys(values).includes(vocab.stateField)) {
+    throw new Error(`状态列受控：${collection} 的 ${vocab.stateField} 只能经审批引擎转移（nb_approve / approval-engine --act），不能直接修改`)
+  }
   const state = before[vocab.stateField]
   if (vocab.isState(state) && vocab.lockedStates.includes(state)) {
     throw new Error(`单据已锁定编辑：${collection} 当前状态「${flowStateLabel(state)}」，审批中/已生效/已作废的单据禁止直接修改`)
@@ -949,7 +970,7 @@ export function applyNbApproveTool(ctx: Context, client: NocoBaseClient | undefi
       action: {
         type: 'string',
         required: true,
-        description: 'One of submit | approve | reject | void. submit on a rejected document resubmits it (attempt +1).',
+        description: 'One of submit | approve | reject | void, or a business action (settle | promote | demote | restrict | freeze | eliminate | restore). submit on a rejected document resubmits it (attempt +1); business actions run on the engine (terminal transitions).',
       },
       comment: {
         type: 'string',

@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-09-29-w5-b3b5-closure-terminal-vocabulary.md
+2026-09-29-w5-b3b5-closure-terminal-vocabulary.md: 7b601e1b61dadb1ba2328242133cb3e1d945842e
+2026-09-29-w5-b3b5-closure-terminal-vocabulary.zh.md: 0141e181b1e6c4bec1e79ce4e1bb5657c2a276d1

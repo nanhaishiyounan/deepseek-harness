@@ -448,7 +448,7 @@ export const KPI_DEFS: readonly KpiDef[] = [
       const revenue = facts.soOrders.filter(row => row.doc_status === 'approved' && by(row.approved_at, asOf) && monthOf(row.approved_at!) === monthOf(asOf))
         .reduce((total, row) => total + Number(row.amount ?? 0), 0)
       const cost = facts.mos
-        .filter(row => row.doc_status === 'completed')
+        .filter(row => row.doc_status === 'closed')
         .map(row => ({ cost: Number(row.actual_cost ?? 0), done: moCompletedAt(facts, row.id) }))
         .filter(row => row.done !== null && by(row.done, asOf) && monthOf(row.done) === monthOf(asOf))
         .reduce((total, row) => total + row.cost, 0)
@@ -481,15 +481,15 @@ export const KPI_DEFS: readonly KpiDef[] = [
   {
     // W2-B7: the ar_balance mirror on the payable side — confirmed invoices
     // are the AP confirmation state (match_result=confirmed opens payments),
-    // approved pur_payments are the settled outflow. 业务台账口径，非会计核算
+    // approved+paid pur_payments are the settled outflow. 业务台账口径，非会计核算
     // (PLAN D11 keeps the general ledger out of scope).
     board: 'business', code: 'ap_balance', name: '应付余额', unit: 'money',
-    note: 'Σ confirmed pur_invoices.invoice_amount（billed_at ≤ 日）− Σ pur_payments.amount（doc_status=approved 且 pay_date ≤ 日）——业务台账口径，非会计核算（D11）',
+    note: 'Σ confirmed pur_invoices.invoice_amount（billed_at ≤ 日）− Σ pur_payments.amount（doc_status∈{approved,paid} 且 pay_date ≤ 日）——业务台账口径，非会计核算（D11）；W5-B3 口径修正：paid 是 approved 之后的受控终态（经引擎 settle 落地），两态都属已定出流，付完款应付不再回升',
     compute: (facts, asOf) => ({
       dim: null,
       value: q4(
         facts.purInvoices.filter(row => row.match_result === 'confirmed' && by(row.billed_at, asOf)).reduce((total, row) => total + Number(row.invoice_amount ?? 0), 0)
-        - facts.purPayments.filter(row => row.doc_status === 'approved' && by(row.pay_date, asOf)).reduce((total, row) => total + Number(row.amount ?? 0), 0),
+        - facts.purPayments.filter(row => (row.doc_status === 'approved' || row.doc_status === 'paid') && by(row.pay_date, asOf)).reduce((total, row) => total + Number(row.amount ?? 0), 0),
       ),
     }),
   },
@@ -555,10 +555,10 @@ export const KPI_DEFS: readonly KpiDef[] = [
   },
   {
     board: 'production', code: 'schedule_hit', name: '计划达成率', unit: 'percent',
-    note: "count(*) FILTER (WHERE 完工日 <= need_date) ÷ count(*) FROM mfg_orders m WHERE doc_status='completed' AND need_date IS NOT NULL（完工日=max(mfg_completions.completed_at)，≤ 计算日）",
+    note: "count(*) FILTER (WHERE 完工日 <= need_date) ÷ count(*) FROM mfg_orders m WHERE doc_status='closed' AND need_date IS NOT NULL（完工日=max(mfg_completions.completed_at)，≤ 计算日）",
     compute: (facts, asOf) => {
       const done = facts.mos
-        .filter(row => row.doc_status === 'completed' && row.need_date !== null && row.need_date !== '')
+        .filter(row => row.doc_status === 'closed' && row.need_date !== null && row.need_date !== '')
         .map(row => ({ need: row.need_date!, done: moCompletedAt(facts, row.id) }))
         .filter(row => row.done !== null && by(row.done, asOf))
       if (done.length === 0) return { dim: null, value: null }
@@ -1128,9 +1128,11 @@ export async function selftest(): Promise<void> {
     expect('ar_balance 无批准订单月=0 非null', ar.compute({ soOrders: [], payments: [] } as Pick<KpiFacts, 'soOrders' | 'payments'>, '2026-09-26'), { dim: null, value: 0 })
   }
 
-  // W2-B7 ap_balance — the ar_balance mirror: confirmed invoices − approved
+  // W2-B7 ap_balance — the ar_balance mirror: confirmed invoices − approved+paid
   // payments (billed_at/pay_date ≤ 日); unconfirmed invoices never count; a
-  // month with no confirmed invoice reads 0, not null.
+  // month with no confirmed invoice reads 0, not null. W5-B3: paid is the
+  // engine-controlled terminal after approved (settle), so both states net —
+  // paying a bill no longer bounces AP back up.
   {
     const apFacts = {
       purInvoices: [
@@ -1142,11 +1144,12 @@ export async function selftest(): Promise<void> {
       purPayments: [
         { amount: 880, pay_date: '2026-09-12', doc_status: 'approved' },
         { amount: 880, pay_date: '2026-09-15', doc_status: 'draft' },
+        { amount: 200, pay_date: '2026-09-18', doc_status: 'paid' },
       ],
     } as Pick<KpiFacts, 'purInvoices' | 'purPayments'>
     const ap = KPI_DEFS.find(def => def.code === 'ap_balance')
     if (ap === undefined) throw new Error('selftest 失败：ap_balance 定义缺失')
-    expect('ap_balance 镜像口径', ap.compute(apFacts, '2026-09-26').value, 1500)
+    expect('ap_balance 镜像口径', ap.compute(apFacts, '2026-09-26').value, 1300)
     expect('ap_balance 截日前发票不计', ap.compute(apFacts, '2026-08-31').value, 1200)
     expect('ap_balance 无确认发票月=0 非null', ap.compute({ purInvoices: [], purPayments: [] } as Pick<KpiFacts, 'purInvoices' | 'purPayments'>, '2026-09-26'), { dim: null, value: 0 })
   }

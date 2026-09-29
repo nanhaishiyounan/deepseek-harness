@@ -148,6 +148,8 @@ const COLLECTIONS: ReadonlyArray<{ name: string; title: string; fields: object[]
   {
     name: 'crm_payments', title: '回款', fields: [
       belongsTo('customer', '客户', 'crm_customers', 'customer_id'), belongsTo('deal', '订单', 'crm_deals', 'deal_id'), number('amount', '金额'),
+      // W5-B5/BP-10: the SO tie breaks AR down to per-order netting (回款按单核销).
+      belongsTo('so_order', '销售订单(核销)', 'so_orders', 'so_order_id'),
       select('method', '方式', options([['bank_transfer', '银行转账', 'blue'], ['letter_of_credit', '信用证', 'green'], ['acceptance_bill', '承兑汇票', 'orange']])),
       date('paid_at', '到账日期'), select('status', '状态', options([['pending', '待到账', 'orange'], ['received', '已到账', 'green']])),
     ],

@@ -1163,12 +1163,40 @@ async function payInvoice(token: string, code: string): Promise<void> {
     console.log(`nocobase-w3: [chain] payment ${code} approve → ${result.to_state}`)
   }
   if (current !== 'approved') throw new Error(`付款 ${code} 审批未生效（${current}）`)
+  // W5-B5/BP-08: paid is an engine-controlled terminal (approved×settle→paid),
+  // never a direct doc_status write — a mispayment can void through the same
+  // machine (paid×void→void) and ap_balance nets both states.
+  const settled = await act(io, 'pur_payments', Number(payment.id), 'settle', 'admin', '银行转账结算（引擎受控终态）')
+  if (settled.to_state !== 'paid') throw new Error(`付款 ${code} settle 未落 paid（${settled.to_state}）`)
   const today = new Date().toISOString().slice(0, 10)
-  await dataOf(token, 'POST', `/api/pur_payments:update?filterByTk=${payment.id}`, { doc_status: 'paid', pay_date: today })
+  await dataOf(token, 'POST', `/api/pur_payments:update?filterByTk=${payment.id}`, { pay_date: today })
   console.log(`nocobase-w3: [chain] payment ${code} paid（结算闭环，pay_date=${today}）`)
 }
 
 // ─── the end-to-end demo chain (04-b3 验收 checkbox 1:1) ───
+
+/**
+ * W5-B5/BP-17: close one purchase request — the closed enum's missing writer
+ * (converted lands via awardRfq's PR back-reference; closed terminates an
+ * approved PR whose remaining demand is cancelled). The conditional write
+ * refuses a draft/pending PR (close what was approved, or reject it).
+ */
+async function closeRequest(token: string, code: string): Promise<void> {
+  const requests = await rowsOf(token, 'pur_requests')
+  const request = requests.find(row => row.code === code)
+  if (request === undefined) throw new Error(`no request ${code}`)
+  if (String(request.doc_status) === 'closed') {
+    console.log(`nocobase-w3: request ${code} already closed (kept)`)
+    return
+  }
+  if (String(request.doc_status) !== 'approved' && String(request.doc_status) !== 'converted') {
+    throw new Error(`关闭被拒：请购单 ${code} 状态为 ${String(request.doc_status)}——草稿/待审请直接作废，已生效或已转单的才可关闭`)
+  }
+  await dataOf(token, 'POST', `/api/pur_requests:update?filterByTk=${request.id}`, {
+    doc_status: 'closed', reason: `${String(request.reason ?? '')}；W5-B5 关闭（剩余需求终止）`,
+  })
+  console.log(`nocobase-w3: request ${code} closed（${String(request.doc_status)} → closed）`)
+}
 
 async function demoChain(token: string): Promise<void> {
   const io = tokenIO(token)
@@ -1550,6 +1578,11 @@ async function main(): Promise<void> {
   const payIndex = args.indexOf('--pay')
   if (payIndex >= 0) {
     await payInvoice(token, String(args[payIndex + 1]))
+    return
+  }
+  const closePrIndex = args.indexOf('--close-pr')
+  if (closePrIndex >= 0) {
+    await closeRequest(token, String(args[closePrIndex + 1]))
     return
   }
   // W2-B5: the RFQ verbs stand alone (no chain replay needed).

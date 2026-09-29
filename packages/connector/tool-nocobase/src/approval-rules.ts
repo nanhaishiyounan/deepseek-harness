@@ -14,8 +14,16 @@
 /** One workflow state of the general approval engine (stored on the document's doc_status column). */
 export type WorkflowState = 'draft' | 'pending' | 'pending_level2' | 'approved' | 'rejected' | 'void'
 
+/**
+ * One business action the engine also routes (W5-B5 terminal-vocabulary
+ * extension): terminal transitions a flow declares in graph extras and the
+ * derived wfl_flow_transitions rows carry. Unlike approve/reject they open no
+ * todos and aggregate nothing — the transition is a direct CAS move.
+ */
+export type BusinessAction = 'settle' | 'promote' | 'demote' | 'restrict' | 'freeze' | 'eliminate' | 'restore'
+
 /** One approval action (what the actor performs, never a state name). */
-export type ApprovalAction = 'submit' | 'approve' | 'reject' | 'void' | 'resubmit'
+export type ApprovalAction = 'submit' | 'approve' | 'reject' | 'void' | 'resubmit' | BusinessAction
 
 /** Every workflow state in engine order (seed order for wfl_flow_states). */
 export const WORKFLOW_STATES: readonly WorkflowState[] = ['draft', 'pending', 'pending_level2', 'approved', 'rejected', 'void']
@@ -119,7 +127,17 @@ export const ACTION_LABELS: Readonly<Record<ApprovalAction, string>> = {
   reject: '驳回',
   void: '作废',
   resubmit: '重新提交',
+  settle: '结算付款',
+  promote: '升为优选',
+  demote: '降回合格',
+  restrict: '设为受限',
+  freeze: '冻结',
+  eliminate: '淘汰',
+  restore: '恢复',
 }
+
+/** The graph extras' terminal-transition actions the publish compiler accepts (the W5-B5 vocabulary extension's whitelist). */
+export const DOC_TERMINAL_ACTIONS: readonly string[] = ['settle', 'promote', 'demote', 'restrict', 'freeze', 'eliminate', 'restore']
 
 /**
  * The states under which the document is locked for direct edits
@@ -344,11 +362,22 @@ function conditionClauseApplies(clause: ConditionClause, row: Readonly<Record<st
  */
 export const SUPPLIER_ADMISSION_STATE_FIELD = 'lifecycle_status'
 
-/** The supplier-admission flow's states (the four the engine transitions among). */
-export type SupplierAdmissionState = 'potential' | 'reviewing' | 'qualified' | 'rejected'
+/** The admission core (the pre-W5-B3 four states the engine transitions among). */
+export type AdmissionCoreState = 'potential' | 'reviewing' | 'qualified' | 'rejected'
+
+/**
+ * The supplier-admission flow's full state set: the W5-B3 extension folds
+ * h4's four post-admission lifecycle grades (preferred/restricted/frozen/
+ * eliminated) into the same controlled machine, so grade moves ride engine
+ * transitions instead of direct writes.
+ */
+export type SupplierAdmissionState = AdmissionCoreState | 'preferred' | 'restricted' | 'frozen' | 'eliminated'
 
 /** Every admission state in flow order (seed order for wfl_flow_states). */
-export const SUPPLIER_ADMISSION_STATES: readonly SupplierAdmissionState[] = ['potential', 'reviewing', 'qualified', 'rejected']
+export const SUPPLIER_ADMISSION_STATES: readonly SupplierAdmissionState[] = ['potential', 'reviewing', 'qualified', 'rejected', 'preferred', 'restricted', 'frozen', 'eliminated']
+
+/** The admission states that existed before the W5-B3 grade extension (round-trip and template compat). */
+export const ADMISSION_CORE_STATES: readonly AdmissionCoreState[] = ['potential', 'reviewing', 'qualified', 'rejected']
 
 /** Chinese labels for the admission states (shared by both engine entry points). */
 export const SUPPLIER_ADMISSION_LABELS: Readonly<Record<SupplierAdmissionState, string>> = {
@@ -356,14 +385,26 @@ export const SUPPLIER_ADMISSION_LABELS: Readonly<Record<SupplierAdmissionState, 
   reviewing: '准入评审中',
   qualified: '合格',
   rejected: '已拒绝',
+  preferred: '优选',
+  restricted: '受限',
+  frozen: '冻结',
+  eliminated: '已淘汰',
 }
 
-/** The doc_status anchor per admission state (qualified is the effective one). */
+/**
+ * The doc_status anchor per admission state: qualified/preferred keep the AVL
+ * effective anchor (both may receive POs per the existing gate sets); the
+ * restricted/frozen/eliminated grades leave it.
+ */
 export const SUPPLIER_ADMISSION_ANCHORS: Readonly<Record<SupplierAdmissionState, 0 | 1 | 2>> = {
   potential: 0,
   reviewing: 0,
   qualified: 1,
   rejected: 0,
+  preferred: 1,
+  restricted: 0,
+  frozen: 0,
+  eliminated: 0,
 }
 
 /** The admission flow's effective state: qualified enters the AVL and may receive POs. */
@@ -373,9 +414,13 @@ export const ADMISSION_EFFECTIVE_STATE: SupplierAdmissionState = 'qualified'
 export const ADMISSION_EDIT_LOCKED_STATES: readonly SupplierAdmissionState[] = ['reviewing']
 
 /**
- * Resolve the next admission state for one transition (submit pushes a
- * potential supplier into review; resubmit re-pushes a rejected one; approve
- * lands qualified; reject lands rejected).
+ * Resolve the next admission state for one transition. The core legs: submit
+ * pushes a potential supplier into review; resubmit re-pushes a rejected one
+ * (and re-admits an eliminated one); approve lands qualified; reject lands
+ * rejected. The W5-B3 grade legs: promote/demote move between qualified and
+ * preferred; restrict demotes to restricted; freeze escalates restricted to
+ * frozen; eliminate terminates a frozen supplier; restore walks a sanctioned
+ * grade back to the AVL.
  * @param state - the supplier's current admission state.
  * @param action - the actor's action.
  * @returns the next state, or undefined when no transition exists.
@@ -385,11 +430,23 @@ export function nextAdmissionStateOf(state: SupplierAdmissionState, action: Appr
     case 'submit':
       return state === 'potential' ? 'reviewing' : undefined
     case 'resubmit':
-      return state === 'rejected' ? 'reviewing' : undefined
+      return state === 'rejected' || state === 'eliminated' ? 'reviewing' : undefined
     case 'approve':
       return state === 'reviewing' ? 'qualified' : undefined
     case 'reject':
       return state === 'reviewing' ? 'rejected' : undefined
+    case 'promote':
+      return state === 'qualified' ? 'preferred' : undefined
+    case 'demote':
+      return state === 'preferred' ? 'qualified' : undefined
+    case 'restrict':
+      return state === 'qualified' || state === 'preferred' ? 'restricted' : undefined
+    case 'freeze':
+      return state === 'restricted' ? 'frozen' : undefined
+    case 'eliminate':
+      return state === 'frozen' ? 'eliminated' : undefined
+    case 'restore':
+      return state === 'restricted' ? 'qualified' : state === 'frozen' ? 'restricted' : undefined
     default:
       return undefined
   }
@@ -414,14 +471,6 @@ export function illegalAdmissionTransitionMessage(state: SupplierAdmissionState,
   return `非法准入转移：供应商当前状态「${SUPPLIER_ADMISSION_LABELS[state]}」(${state}) 不支持动作「${ACTION_LABELS[action]}」(${action})`
 }
 
-/** The four lifecycle states outside the admission machine (h4's full LIFECYCLE vocabulary; the gate message renders them). */
-const EXTENDED_LIFECYCLE_LABELS: Readonly<Record<string, string>> = {
-  preferred: '优选',
-  restricted: '受限',
-  frozen: '冻结',
-  eliminated: '已淘汰',
-}
-
 /**
  * The Chinese label of either vocabulary's state (receipts echo what landed
  * regardless of which flow the document rides; the gate message also renders
@@ -432,7 +481,6 @@ const EXTENDED_LIFECYCLE_LABELS: Readonly<Record<string, string>> = {
 export function flowStateLabel(state: string): string {
   return STATE_LABELS[state as WorkflowState]
     ?? SUPPLIER_ADMISSION_LABELS[state as SupplierAdmissionState]
-    ?? EXTENDED_LIFECYCLE_LABELS[state]
     ?? state
 }
 
@@ -526,6 +574,38 @@ export const ADMISSION_FLOW_VOCABULARY: FlowVocabulary = {
   isState: isSupplierAdmissionState,
   nextOf: (state, action) => nextAdmissionStateOf(state as SupplierAdmissionState, action),
   illegalMessage: (state, action) => illegalAdmissionTransitionMessage(state as SupplierAdmissionState, action),
+}
+
+/**
+ * Extend one vocabulary with a flow's declared terminal states (the W5-B5
+ * mechanism: a flow whose graph extras name terminal states — pur_payments'
+ * paid, pur_requests' converted/closed — reads those values as legal states,
+ * so a business-terminal document keeps acting through the engine instead of
+ * failing the vocabulary check). Terminal states join `states` (transition
+ * lookups and legal-next filters see them), gain the effective-side anchor
+ * default, never join the edit-locked set, and resolve no fallback transition
+ * (their moves ride the derived terminal transition rows only).
+ * @param base - the vocabulary the flow's state_field selects.
+ * @param terminals - the flow-declared terminal state names (duplicates of base states are ignored).
+ * @returns the extended vocabulary (base untouched).
+ */
+export function extendVocabulary(base: FlowVocabulary, terminals: readonly string[]): FlowVocabulary {
+  const fresh = terminals.filter(name => !base.states.includes(name))
+  const anchors: Record<string, 0 | 1 | 2> = { ...base.anchors }
+  const labels: Record<string, string> = { ...base.labels }
+  for (const name of fresh) {
+    anchors[name] = 1
+    labels[name] = name
+  }
+  const states = [...base.states, ...fresh]
+  return {
+    ...base,
+    states,
+    labels,
+    anchors,
+    isState: (value: unknown): value is string => typeof value === 'string' && states.includes(value),
+    nextOf: (state, action, amount, threshold) => (fresh.includes(state) ? undefined : base.nextOf(state, action, amount, threshold)),
+  }
 }
 
 /**

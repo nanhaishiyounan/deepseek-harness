@@ -494,7 +494,7 @@ Source: [`packages/connector/tool-connector/src/index.ts`](../packages/connector
     },
     "action": {
       "type": "string",
-      "description": "One of submit | approve | reject | void. submit on a rejected document resubmits it (attempt +1)."
+      "description": "One of submit | approve | reject | void, or a business action (settle | promote | demote | restrict | freeze | eliminate | restore). submit on a rejected document resubmits it (attempt +1); business actions run on the engine (terminal transitions)."
     },
     "comment": {
       "type": "string",

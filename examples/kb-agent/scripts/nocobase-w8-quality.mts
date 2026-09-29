@@ -75,7 +75,9 @@ const INSP_RESULT = opts([
   ['failed', '不合格', 'red'], ['concession', '让步接收', 'purple'],
 ])
 const INSP_STATUS = opts([
-  ['draft', '草稿', 'default'], ['pending', '待检', 'blue'], ['closed', '已判定', 'green'],
+  // W5-B5/BP-16: draft never had a writer (anchor creation lands pending
+  // directly, the verdict lands closed) — the dead enum value is retired.
+  ['pending', '待检', 'blue'], ['closed', '已判定', 'green'],
 ])
 const REF_TYPE = opts([
   ['receipt', '收货单', 'blue'], ['job_report', '报工单', 'purple'], ['completion', '完工单', 'cyan'],

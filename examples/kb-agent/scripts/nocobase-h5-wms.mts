@@ -149,7 +149,7 @@ const RESERVATION_STATUS = opts([
 /** B4: what a reservation hard-allocates stock for (B6 齐套 / B7 销售发货 both write here). */
 const REF_TYPE = opts([['SO', '销售订单', 'blue'], ['MO', '生产工单', 'purple'], ['SHIPMENT', '发货单', 'cyan']])
 /** B4: the reorder suggestion lifecycle (open → dismissed / converted to a PR). */
-const SUGGESTION_STATUS = opts([['open', '待处理', 'orange'], ['dismissed', '已忽略', 'default'], ['converted', '已转请购', 'green']])
+const SUGGESTION_STATUS = opts([['open', '待处理', 'orange'], ['confirmed', '已确认(线下)', 'blue'], ['dismissed', '已忽略', 'default'], ['converted', '已转请购', 'green']])
 
 // ─── the collections (twelve: nine B0/B4 + the W2-B3 monthly balances) ───
 
@@ -287,6 +287,8 @@ const COLLECTIONS: ReadonlyArray<{ name: string, title: string, titleField?: str
       number('on_hand_atp', '可用量快照'), number('min', '再订货点'),
       number('suggest_qty', '建议补货量'), select('status', '状态', SUGGESTION_STATUS),
       date('suggested_at', '建议日期'), input('note', '说明'),
+      // W5-B4/BP-07: the confirm→PR conversion's back-reference (mrp_suggestions' shape).
+      input('converted_doc_code', '转单单号'), input('converted_by', '操作人'), date('converted_at', '转单日期'),
     ],
   },
 ]
@@ -755,6 +757,28 @@ async function ensureWmsColumns(token: string): Promise<void> {
     productsAdded += 1
   }
   if (productsAdded > 0) console.log(`nocobase-h5: hub_inv_products planning columns +${productsAdded} (B4 ROP/ABC)`)
+  // W5-B4/BP-07: the reorder suggestion grows the confirm→PR back-reference
+  // columns and the confirmed leg on its status enum (additive; the enum
+  // re-write follows the in_transit precedent).
+  const reorderCols = await columnNames('wms_reorder_suggestions')
+  let reorderAdded = 0
+  for (const field of [input('converted_doc_code', '转单单号'), input('converted_by', '操作人'), date('converted_at', '转单日期')]) {
+    const name = (field as { name: string }).name
+    if (reorderCols.has(name)) continue
+    await dataOf(token, 'POST', '/api/fields:create', { collectionName: 'wms_reorder_suggestions', ...field })
+    reorderAdded += 1
+  }
+  if (reorderAdded > 0) console.log(`nocobase-h5: wms_reorder_suggestions conversion columns +${reorderAdded} (W5-B4/BP-07)`)
+  {
+    const statusField = await dataOf(token, 'GET', `/api/fields:list?filter=${encodeURIComponent(JSON.stringify({ collectionName: { $eq: 'wms_reorder_suggestions' }, name: { $eq: 'status' } }))}&pageSize=1`) as Array<{ uiSchema?: { enum?: Array<{ value?: string }> } }> | null
+    const stored = statusField?.[0]?.uiSchema?.enum ?? []
+    if (!stored.some(option => option.value === 'confirmed')) {
+      await call(token, 'POST', `/api/collections/wms_reorder_suggestions/fields:update?filterByTk=status`, {
+        uiSchema: { type: 'string', 'x-component': 'Select', title: '状态', enum: SUGGESTION_STATUS },
+      })
+      console.log('nocobase-h5: wms_reorder_suggestions.status enum re-written with confirmed (W5-B4/BP-07)')
+    }
+  }
 }
 
 // ─── workflow ───
@@ -2032,7 +2056,24 @@ export async function scanReorder(token: string): Promise<number> {
     created += 1
     console.log(`nocobase-h5: [scan] ${String(product.sku)}（${String(product.name)}）ATP ${String(atp)} ≤ ROP ${String(min)} → 建议补 ${String(suggestQty)}`)
   }
-  console.log(`nocobase-h5: scan-reorder done — ${String(created)} open suggestion(s) created, ${String(refreshed)} refreshed, ${String(products.length)} policy product(s) scanned`)
+  // W5-B4/BP-07: ATP recovery closes stale rows — an open (or off-platform
+  // confirmed) suggestion whose product is back above its reorder point no
+  // longer lingers in the shortage counts.
+  let staleClosed = 0
+  for (const row of suggestions.filter(entry => entry.status === 'open' || entry.status === 'confirmed')) {
+    const pid = Number(row.product_id)
+    const atpNow = stocks.filter(entry => Number(entry.product_id) === pid && entry.status === 'good')
+      .reduce((total, entry) => total + Number(entry.qty_available ?? 0), 0)
+    if (atpNow > Number(row.min ?? 0)) {
+      await dataOf(token, 'POST', `/api/wms_reorder_suggestions:update?filterByTk=${row.id}`, {
+        status: 'dismissed',
+        note: `${String(row.note ?? '')}；ATP 回升至 ${String(atpNow)} > 再订货点 ${String(row.min)}，自动关闭（W5-B4）`,
+      })
+      staleClosed += 1
+      console.log(`nocobase-h5: [scan] 建议行 #${String(row.id)} ATP 回升（${String(atpNow)}）自动关闭`)
+    }
+  }
+  console.log(`nocobase-h5: scan-reorder done — ${String(created)} open suggestion(s) created, ${String(refreshed)} refreshed, ${String(staleClosed)} stale row(s) closed, ${String(products.length)} policy product(s) scanned`)
   return created
 }
 
@@ -3066,7 +3107,9 @@ export async function postCompletion(token: string, completionCode: string): Pro
   await dataOf(token, 'POST', `/api/mfg_completions:update?filterByTk=${completion.id}`, {
     status: 'posted', oqc_status: 'pending', lot_no: lotNo, completed_at: new Date().toISOString().slice(0, 10),
   })
-  await dataOf(token, 'POST', `/api/mfg_orders:update?filterByTk=${mo.id}`, { doc_status: 'completed' })
+  // W5-B5/BP-09: closed is the enum's post-completion terminal (released →
+  // closed); the pre-W5 write of the out-of-enum 'completed' is retired.
+  await dataOf(token, 'POST', `/api/mfg_orders:update?filterByTk=${mo.id}`, { doc_status: 'closed' })
   const cost = await settleMoCost(token, mo)
   console.log(`nocobase-h5: completion ${completionCode} posted — ${String(product.sku)} × ${String(qty)} → 待检区 ${String(bin.code)}（hold），MO → completed，成本 std=${String(cost.std)} actual=${String(cost.actual)} variance=${String(cost.variance)}`)
   // B8: the OQC anchor document (finished goods quarantine before release).
@@ -3089,6 +3132,10 @@ export async function releaseCompletion(token: string, completionCode: string): 
   if (completion === undefined) throw new Error(`no completion ${completionCode}`)
   if (String(completion.oqc_status) === 'passed') {
     console.log(`nocobase-h5: completion ${completionCode} already passed (kept; release is single-shot)`)
+    // W5-B4/BP-06 idempotent top-up leg: a first pass whose reservation
+    // step hiccupped re-runs it here (reserveForSo is idempotent).
+    const moRow = (await rowsOf(token, 'mfg_orders')).find(row => Number(row.id) === Number(completion.mo_id))
+    if (moRow !== undefined) await topUpOwingSoReservations(token, Number(moRow.product_id))
     return
   }
   if (String(completion.status) !== 'posted') throw new Error(`OQC 放行被拒：完工单 ${completionCode} 尚未过账（status=${String(completion.status)}）`)
@@ -3135,6 +3182,27 @@ export async function releaseCompletion(token: string, completionCode: string): 
   })
   await dataOf(token, 'POST', `/api/mfg_completions:update?filterByTk=${completion.id}`, { oqc_status: 'passed' })
   console.log(`nocobase-h5: completion ${completionCode} released — lot ${String(completion.lot_no)} → qualified，stock hold→good via ${String(destBin.code)}，±MOVE pair appended`)
+  await topUpOwingSoReservations(token, productId)
+}
+
+/**
+ * W5-B4/BP-06: the released finished goods auto-top-up every open approved SO
+ * that still owes this product — reserveForSo is idempotent and reports
+ * (never refuses on) a remaining shortfall, so the manual half-step before
+ * shipping is gone. The call runs as a child CLI (mrp-run statically imports
+ * this module's writers; a dynamic import back would deadlock the module
+ * graph under this module's top-level await).
+ */
+async function topUpOwingSoReservations(token: string, productId: number): Promise<void> {
+  const openSos = (await rowsOf(token, 'so_orders')).filter(row => String(row.doc_status) === 'approved' && String(row.shipping_status) !== 'shipped')
+  if (openSos.length === 0) return
+  const lines = await rowsOf(token, 'so_order_lines')
+  const owing = openSos.filter(so => lines.some(line => Number(line.order_id) === Number(so.id) && Number(line.product_id) === productId && Number(line.qty ?? 0) > Number(line.qty_shipped ?? 0)))
+  for (const so of owing) {
+    console.log(`nocobase-h5: [auto-reserve] OQC 放行 → 补 SO 预留 ${String(so.code)}（W5-B4 生效侧自动推进）`)
+    const child = spawnSync('node', ['--import', 'tsx/esm', fileURLToPath(new URL('./mrp-run.mts', import.meta.url)), '--reserve-so', String(so.code)], { stdio: 'inherit' })
+    if (child.status !== 0) throw new Error(`auto-reserve：mrp-run --reserve-so ${String(so.code)} 失败（exit ${String(child.status)}）`)
+  }
 }
 
 // ─── B8: the quality-domain engine (三检挂点建单 / AQL 查表判定 / 四路处置 / 季度物化) ───
@@ -3263,11 +3331,19 @@ export async function inspectInspection(token: string, code: string, defects: { 
     note: `AQL ${aql}（${rigor}）× 批量 ${String(lotQty)}（${band.label}/${String(plan.code)}）→ n=${String(n)} Ac=${String(ac)} Re=${String(re)}；d=${String(d)}${defects.critical > 0 ? ` + 严重 ${String(defects.critical)}（0收1拒）` : ''} → ${result === 'passed' ? 'd≤Ac 接收' : 'd≥Re 拒收'}${options.resubmission === true ? '；再提交批（不进转移计数，9.3.1）' : ''}`,
   })
   // Write the verdict back onto the anchor document (single-shot semantics:
-  // an anchor already past a verdict keeps it).
+  // an anchor already past a verdict keeps it). W5-B4/BP-05+06: a passed IQC
+  // auto-releases the receipt into the qualified zone and a passed OQC
+  // auto-releases the finished-goods lot (which then tops up the SO
+  // reservations inside releaseCompletion) — the half-step manual release is
+  // gone; failed/concession verdicts keep their human disposition paths.
   if (String(inspection.insp_type) === 'IQC' && String(inspection.ref_type) === 'receipt') {
     const receipt = (await rowsOf(token, 'wms_receipts')).find(row => row.receipt_no === String(inspection.ref_no))
     if (receipt !== undefined && (receipt.iqc_status === null || receipt.iqc_status === undefined || receipt.iqc_status === '' || receipt.iqc_status === 'pending')) {
       await dataOf(token, 'POST', `/api/wms_receipts:update?filterByTk=${receipt.id}`, { iqc_status: result })
+    }
+    if (result === 'passed' && receipt !== undefined && String(receipt.status) === 'posted') {
+      console.log(`nocobase-h5: [auto-release] IQC passed → 放行入库 ${String(receipt.receipt_no)}（W5-B4 生效侧自动推进）`)
+      await releaseReceipt(token, String(receipt.receipt_no))
     }
   } else if (String(inspection.insp_type) === 'IPQC' && String(inspection.ref_type) === 'job_report') {
     const report = (await rowsOf(token, 'mfg_job_reports')).find(row => row.code === String(inspection.ref_no))
@@ -3278,6 +3354,10 @@ export async function inspectInspection(token: string, code: string, defects: { 
     const completion = (await rowsOf(token, 'mfg_completions')).find(row => row.code === String(inspection.ref_no))
     if (completion !== undefined && (completion.oqc_status === null || completion.oqc_status === undefined || completion.oqc_status === '' || completion.oqc_status === 'pending')) {
       await dataOf(token, 'POST', `/api/mfg_completions:update?filterByTk=${completion.id}`, { oqc_status: result })
+    }
+    if (result === 'passed' && completion !== undefined && String(completion.status) === 'posted' && String(completion.oqc_status ?? 'pending') === 'pending') {
+      console.log(`nocobase-h5: [auto-release] OQC passed → 成品放行 ${String(completion.code)}（W5-B4 生效侧自动推进）`)
+      await releaseCompletion(token, String(completion.code))
     }
   }
   // failed → CAPA draft (business-key idempotent on title; the inspection
@@ -3604,9 +3684,14 @@ export async function calcScorecard(token: string, period: string): Promise<Arra
     const passed = windowIqc.filter(row => String(row.result) === 'passed').length
     const quality = passed / windowIqc.length * 100
     const supplierReceipts = receipts.filter(row => Number(row.supplier_id) === supplierId && inWindow(row.received_at) && (String(row.status) === 'posted' || String(row.status) === 'closed'))
-    const dated = supplierReceipts.map(receipt => {
+    // W5-B5/BP-12: the delivery axis unifies on need_date (the demand date the
+    // otd_supplier KPI already reads — 23/26 coverage vs expected_date's 2/26);
+    // rows without the date leave the denominator (kpi otdSupplierOf's dated
+    // filter), so the same supplier reads the same number here and there.
+    const dated = supplierReceipts.flatMap(receipt => {
       const po = orders.find(order => Number(order.id) === Number(receipt.po_id))
-      return { onTime: po === undefined || String(po.expected_date ?? '') === '' || String(receipt.received_at) <= String(po.expected_date) }
+      const due = po === undefined ? '' : String(po.need_date ?? '')
+      return due === '' ? [] : [{ onTime: String(receipt.received_at) <= due }]
     })
     const delivery = dated.length > 0 ? dated.filter(row => row.onTime).length / dated.length * 100 : 60
     const ownAverage = avgPriceOf(supplierId)

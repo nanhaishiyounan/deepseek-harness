@@ -17,9 +17,12 @@ import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import ToolRuntime from '@deepseek-ai/dsh-tools'
 import * as ToolNocoBase from '../src/index.ts'
 import {
+  DOC_FLOW_VOCABULARY,
   DOC_STATUS_ANCHORS,
   DEFAULT_AMOUNT_THRESHOLD,
+  WORKFLOW_STATES,
   conditionApplies,
+  extendVocabulary,
   illegalTransitionMessage,
   nextStateOf,
   parseNbApproveArgs,
@@ -241,7 +244,10 @@ describe('approval rules (the shared single source)', () => {
     expect(conditionApplies('total <= 100000', { total: 100_001 })).toBe(false)
     expect(conditionApplies('total > 100000', { total: 100_001 })).toBe(true)
     expect(conditionApplies(undefined, {})).toBe(true)
-    expect(() => conditionApplies('total >= 1', { total: 5 })).toThrow('审批条件表达式不支持')
+    // W5-B2 widened the operator set for the general condition DSL, so >= is
+    // legal now; an unsupported operator still fails loud.
+    expect(conditionApplies('total >= 1', { total: 5 })).toBe(true)
+    expect(() => conditionApplies('total =~ 1', { total: 5 })).toThrow('审批条件表达式不支持')
     expect(() => conditionApplies('total <= 100000', { total: 'abc' })).toThrow('不是数字')
   })
 
@@ -253,6 +259,23 @@ describe('approval rules (the shared single source)', () => {
     expect(parseNbApproveArgs({ doc_type: 'x', doc_id: 1, action: 'approve' })).toMatchObject({ approver: 'admin' })
     expect(parseNbApproveArgs({ doc_type: 'x', doc_id: 1, action: 'reject', comment: ' 资质不全 ', approver: 'chenliqun' }))
       .toMatchObject({ comment: '资质不全', approver: 'chenliqun' })
+    // W5-B5: the terminal business actions parse (engine-delegated); an
+    // unknown action still refuses with the extended whitelist message.
+    expect(parseNbApproveArgs({ doc_type: 'pur_payments', doc_id: 3, action: 'settle' })).toMatchObject({ action: 'settle' })
+    expect(parseNbApproveArgs({ doc_type: 'srm_suppliers', doc_id: 4, action: 'promote' })).toMatchObject({ action: 'promote' })
+    expect(() => parseNbApproveArgs({ doc_type: 'x', doc_id: 1, action: 'archive' as never })).toThrow('业务动作')
+  })
+
+  it('extends a vocabulary with flow-declared terminal states (W5-B5)', () => {
+    const extended = extendVocabulary(DOC_FLOW_VOCABULARY, ['paid'])
+    expect(extended.isState('paid')).toBe(true)
+    expect(extended.isState('draft')).toBe(true)
+    expect(extended.isState('converted')).toBe(false)
+    expect(extended.states).toEqual([...WORKFLOW_STATES, 'paid'])
+    expect(extended.anchors['paid']).toBe(1)
+    expect(extended.lockedStates).not.toContain('paid')
+    expect(extended.nextOf('paid', 'void', undefined)).toBeUndefined()
+    expect(extended.nextOf('approved', 'void', undefined)).toBe('void')
   })
 })
 

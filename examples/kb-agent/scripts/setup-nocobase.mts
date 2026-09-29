@@ -781,12 +781,17 @@ async function stepVerify(): Promise<void> {
   const w1GroupRoutes = await call(token, 'GET', `/api/desktopRoutes:list?filter=${encodeURIComponent(JSON.stringify({ title: { $eq: '项目与协同' }, type: { $eq: 'group' } }))}&pageSize=1`) as { data?: Array<{ id: number }> }
   if ((w1GroupRoutes?.data?.length ?? 0) === 0) failures.push('项目与协同 menu group missing (协同办公 was merged by W4-B5; run nocobase-w1-approval.mts)')
   {
-    const flowConfigs = await call(token, 'GET', `/api/wfl_flow_configs:list?filter=${encodeURIComponent(JSON.stringify({ doc_type: { $eq: 'hub_po_purchase_orders' }, is_active: true }))}&pageSize=5`) as { data?: Array<{ state_field?: string }> }
-    if ((flowConfigs?.data?.length ?? 0) === 0) failures.push('hub_po_purchase_orders has no active approval flow config (run nocobase-w1-approval.mts / approval-engine.mts --seed-flow)')
-    const gates = await call(token, 'GET', `/api/wfl_gate_configs:list?filter=${encodeURIComponent(JSON.stringify({ downstream_collection: { $eq: 'wms_receipts' } }))}&pageSize=5`) as { data?: unknown[] }
-    if ((gates?.data?.length ?? 0) === 0) failures.push('wms_receipts→hub_po_purchase_orders gate config missing (run nocobase-w1-approval.mts)')
-    const poFields = await call(token, 'GET', `/api/fields:list?filter=${encodeURIComponent(JSON.stringify({ collectionName: { $eq: 'hub_po_purchase_orders' }, name: { $eq: 'doc_status' } }))}&pageSize=5`) as { data?: unknown[] }
-    if ((poFields?.data?.length ?? 0) === 0) failures.push('hub_po_purchase_orders.doc_status missing (run nocobase-w1-approval.mts)')
+    // W5-B3/BP-04: hub_po_purchase_orders retired onto pur_orders — the
+    // active flow, the receipt gate, and the supplier gate all point at
+    // pur_orders now; the engine's own rehearsals ride wfl_selftest_docs.
+    const retiredHub = await call(token, 'GET', `/api/wfl_flow_configs:list?filter=${encodeURIComponent(JSON.stringify({ doc_type: { $eq: 'hub_po_purchase_orders' }, is_active: true }))}&pageSize=5`) as { data?: unknown[] }
+    if ((retiredHub?.data?.length ?? 0) > 0) failures.push('hub_po_purchase_orders must have NO active flow (W5-B3 retirement; run w5b3-closure.mts --run)')
+    const flowConfigs = await call(token, 'GET', `/api/wfl_flow_configs:list?filter=${encodeURIComponent(JSON.stringify({ doc_type: { $eq: 'pur_orders' }, is_active: true }))}&pageSize=5`) as { data?: Array<{ state_field?: string }> }
+    if ((flowConfigs?.data?.length ?? 0) === 0) failures.push('pur_orders has no active approval flow config (run nocobase-w3-procurement.mts)')
+    const gates = await call(token, 'GET', `/api/wfl_gate_configs:list?filter=${encodeURIComponent(JSON.stringify({ downstream_collection: { $eq: 'wms_receipts' }, upstream_collection: { $eq: 'pur_orders' } }))}&pageSize=5`) as { data?: unknown[] }
+    if ((gates?.data?.length ?? 0) === 0) failures.push('wms_receipts→pur_orders gate config missing (run nocobase-w3-procurement.mts)')
+    const carrier = await call(token, 'GET', `/api/wfl_flow_configs:list?filter=${encodeURIComponent(JSON.stringify({ doc_type: { $eq: 'wfl_selftest_docs' }, is_active: true }))}&pageSize=5`) as { data?: unknown[] }
+    if ((carrier?.data?.length ?? 0) === 0) failures.push('wfl_selftest_docs engine selftest carrier flow missing (run w5b3-closure.mts --run)')
   }
   // B2: the supplier single source — the admission flow over srm_suppliers,
   // the AVL gate on purchase-order creation, the h4 create-triggered workflow
@@ -795,9 +800,9 @@ async function stepVerify(): Promise<void> {
     const admissionConfigs = await call(token, 'GET', `/api/wfl_flow_configs:list?filter=${encodeURIComponent(JSON.stringify({ doc_type: { $eq: 'srm_suppliers' }, is_active: true }))}&pageSize=5`) as { data?: Array<{ state_field?: string }> }
     if ((admissionConfigs?.data?.length ?? 0) === 0) failures.push('srm_suppliers has no active admission flow config (run nocobase-w2-supplier.mts)')
     else if (admissionConfigs?.data?.[0]?.state_field !== 'lifecycle_status') failures.push('srm_suppliers admission flow must ride state_field=lifecycle_status (run nocobase-w2-supplier.mts)')
-    const supplierGates = await call(token, 'GET', `/api/wfl_gate_configs:list?filter=${encodeURIComponent(JSON.stringify({ downstream_collection: { $eq: 'hub_po_purchase_orders' }, upstream_collection: { $eq: 'srm_suppliers' } }))}&pageSize=5`) as { data?: Array<{ upstream_state_field?: string | null, required_status?: string | null }> }
+    const supplierGates = await call(token, 'GET', `/api/wfl_gate_configs:list?filter=${encodeURIComponent(JSON.stringify({ downstream_collection: { $eq: 'pur_orders' }, upstream_collection: { $eq: 'srm_suppliers' } }))}&pageSize=5`) as { data?: Array<{ upstream_state_field?: string | null, required_status?: string | null }> }
     const supplierGate = supplierGates?.data?.[0]
-    if (supplierGate === undefined) failures.push('hub_po_purchase_orders→srm_suppliers supplier gate missing (run nocobase-w2-supplier.mts)')
+    if (supplierGate === undefined) failures.push('pur_orders→srm_suppliers supplier gate missing (run nocobase-w2-supplier.mts)')
     else if (supplierGate.upstream_state_field !== 'lifecycle_status' || supplierGate.required_status !== 'qualified,preferred') {
       failures.push('the supplier gate must read lifecycle_status ∈ qualified,preferred (run nocobase-w2-supplier.mts)')
     }

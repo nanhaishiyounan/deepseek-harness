@@ -36,7 +36,7 @@ B1 refused six advanced features at publish with B2-pointer messages (supervisor
 - **The CLI's effective-hook chain can hang on a dropped keep-alive socket** (unsettled top-level await, exit 0 with a warning) — race a timeout and complete through the idempotent /effective-effects replay (disclosed in evidence).
 - **oxlint narrows JSON.stringify to `string`** (not `string | undefined`): `?? ''`, `=== undefined`, and `as string` each trip a different rule — convert unknown to text with `typeof x === 'string' ? x : JSON.stringify(x)`.
 
-## Outcome
+## Consequences
 
 - `--migrate`: 10/10 doc types green (each: reverse import → round-trip equivalence → graph save → CAS publish → psql row-count/published-flag re-assert → in-memory state-machine replay to approved/qualified), 70 assertions; every post-migration extras is byte-identical to its seed shape.
 - `--features`: F1 countersign (two todos / first sign holds / all-approve lands / any-reject rejects), F2 sequential (first-assignee-only todo / out-of-turn 400 / next todo / last step lands), F3 rejectTo (row rewrite / reject routes back / tier-1 todo reopens / re-run lands), F4 cc (zero cc rows before / kind=cc on approve / non-blocking), F5 deptLeader (resolves the QC owner), F6 supervisor chain (two levels sequential), F7 formField (the owner-field user), F8 autoPass (ownerless submitter lands approved with an '(auto)' row), F9 assignUser (empty resolution re-routes), F10 general conditions (in-range routes up / out-of-range direct / positive literal persisted) — 65 assertions; the publish-gate negative matrix (8 cases, 3 save-time) each 400 + readable + version unmoved; the restored baseline's states/transitions/approver_map/extras are byte-identical.
@@ -44,7 +44,7 @@ B1 refused six advanced features at publish with B2-pointer messages (supervisor
 - Regression: `approval-engine --selftest` (with the B2 runtime matrix, the compiler B2 matrix, and four new round-trips) OK; `w5b2-advanced --selftest` OK; `pnpm run lint` holds the 26-error baseline; `pnpm run typecheck` clean; designer `tsc --noEmit` clean; `w5r1-concurrent-cas` PASS; `setup-nocobase.mts verify` full chain OK; `nocobase-w3-approval-visual.mts` build (with the heal) + `--assert` OK.
 - Screenshots `demos/acceptance-w5/b2-00..05` (countersign panel / countersign mid-run / sequential second todo / rejectTo tier-1 reopen / read-only cc todo / multi-row condition panel); `b2-capture.mjs` is repeatable and restores the baseline; the isOwner org data stays as a resident improvement (disclosed).
 
-## Alternatives
+## Alternatives considered
 
 - Pushing countersign aggregation into SQL (todo-table aggregate queries) — rejected: not portable across NocoIO (REST/in-memory); application-level aggregation inside act() trusts the existing rows.
 - Compiling general conditions into multiple transition rows — rejected: combinatorial explosion and the reject routing is inexpressible; one positive literal plus row-driven evaluation is the row table's minimal extension.

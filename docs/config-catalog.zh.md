@@ -3410,7 +3410,7 @@ export interface Config {
 }
 ```
 
-Source: [`packages/connector/tool-nocobase/src/index.ts:86`](../packages/connector/tool-nocobase/src/index.ts)
+Source: [`packages/connector/tool-nocobase/src/index.ts:121`](../packages/connector/tool-nocobase/src/index.ts)
 
 <a id="deepseek-aidsh-tool-pwsh"></a>
 

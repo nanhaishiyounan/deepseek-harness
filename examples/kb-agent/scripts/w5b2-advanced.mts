@@ -14,7 +14,7 @@
  *                         HTTP → psql re-assert the derived rows → an
  *                         in-memory state-machine replay of the published
  *                         rows (submit → approve×N → approved)
- *   --features            the hub_po feature matrix with full restore: org
+ *   --features            the selftest-carrier feature matrix with full restore: org
  *                         owner heal, the ten feature publishes with real
  *                         document runs, the publish-gate negative matrix
  *   --parity              BP-02/BP-14: three fresh draft SOs through the CLI,
@@ -267,7 +267,7 @@ async function replayFlow(token: string, live: LiveFlowRows, docType: string): P
 // ─── --migrate: the ten-type round-trip migration ───
 
 const ALL_DOC_TYPES = [
-  'hub_po_purchase_orders', 'srm_suppliers', 'pur_requests', 'pur_rfqs', 'pur_orders',
+  'wfl_selftest_docs', 'srm_suppliers', 'pur_requests', 'pur_rfqs', 'pur_orders',
   'pur_payments', 'mfg_orders', 'so_orders', 'qm_nc_dispositions', 'mps_plans',
 ]
 
@@ -319,7 +319,7 @@ async function migrate(): Promise<void> {
   }
 }
 
-// ─── --features: the hub_po feature matrix ───
+// ─── --features: the selftest-carrier (wfl_selftest_docs) feature matrix ───
 
 /** One designer-graph fixture builder (same node shape the SPA persists). */
 const graphOf = (nodes: ReadonlyArray<Record<string, unknown>>, edges: ReadonlyArray<readonly [string, string]>): Record<string, unknown> => ({
@@ -346,9 +346,9 @@ async function publishGraph(docType: string, graph: Record<string, unknown>): Pr
   return { ok: false, status: published.status, errors: (published.body.errors as string[] | undefined) ?? [String(published.body.error ?? published.status)], body: published.body }
 }
 
-/** Create one draft hub_po row and answer its id. */
+/** Create one draft carrier row and answer its id. */
 async function createDraftPo(token: string, code: string, total: number, ownerId?: number): Promise<number> {
-  const row = await dataOf(token, 'POST', '/api/hub_po_purchase_orders:create', {
+  const row = await dataOf(token, 'POST', '/api/wfl_selftest_docs:create', {
     po_number: code, total, order_date: new Date().toISOString().slice(0, 10), doc_status: 'draft',
     ...(ownerId === undefined ? {} : { owner_id: ownerId }),
   }) as Record<string, any>
@@ -357,7 +357,7 @@ async function createDraftPo(token: string, code: string, total: number, ownerId
 
 async function features(): Promise<void> {
   const token = await signInWithRetry()
-  const docType = 'hub_po_purchase_orders'
+  const docType = 'wfl_selftest_docs'
   // Org heal (disclosed): the seeded departments carry no isOwner flags —
   // mark each real department's natural owner so deptLeader/supervisorChain
   // resolve. Kept as persistent org data (an ownerless org is the gate's
@@ -385,12 +385,12 @@ async function features(): Promise<void> {
   // run left behind, then converge the flow onto the canonical migrated
   // baseline (start → 一级 admin → total>100000 → 二级 admin → end) BEFORE
   // snapshotting, so a re-run always restores the same shape.
-  const strayIds = psql(`SELECT id FROM hub_po_purchase_orders WHERE po_number LIKE 'PO-W5B2-%';`).trim().split('\n').map(line => line.trim()).filter(line => line !== '')
+  const strayIds = psql(`SELECT id FROM wfl_selftest_docs WHERE po_number LIKE 'PO-W5B2-%';`).trim().split('\n').map(line => line.trim()).filter(line => line !== '')
   if (strayIds.length > 0) {
     for (const id of strayIds) {
       psql(`DELETE FROM wfl_approval_todos WHERE doc_type = '${docType}' AND doc_id = ${id};`)
       psql(`DELETE FROM wfl_approval_records WHERE doc_type = '${docType}' AND doc_id = ${id};`)
-      psql(`DELETE FROM hub_po_purchase_orders WHERE id = ${id};`)
+      psql(`DELETE FROM wfl_selftest_docs WHERE id = ${id};`)
     }
     log(`w5b2-advanced: 前次残留取证单清理 — ${String(strayIds.length)} 行（${strayIds.join('、')}）`)
   }
@@ -509,7 +509,7 @@ async function features(): Promise<void> {
     await approveOverHttp(id, 'admin')
     const ccRows = (await todosOf(id)).filter(todo => String(todo.kind ?? '') === 'cc')
     check('F4 通过触发抄送行', ccRows.length === 1 && String(ccRows[0]?.user) === 'quality_lead', ccRows.map(todo => `${String(todo.user)}:${String(todo.kind)}`).join('、'))
-    const docStatus = psql(`SELECT doc_status FROM hub_po_purchase_orders WHERE id = ${String(id)};`).trim()
+    const docStatus = psql(`SELECT doc_status FROM wfl_selftest_docs WHERE id = ${String(id)};`).trim()
     check('F4 抄送不阻塞流转', docStatus === 'approved', docStatus)
   }
 
@@ -729,7 +729,7 @@ async function features(): Promise<void> {
   for (const id of createdDocs) {
     psql(`DELETE FROM wfl_approval_todos WHERE doc_type = '${docType}' AND doc_id = ${String(id)};`)
     psql(`DELETE FROM wfl_approval_records WHERE doc_type = '${docType}' AND doc_id = ${String(id)};`)
-    psql(`DELETE FROM hub_po_purchase_orders WHERE id = ${String(id)};`)
+    psql(`DELETE FROM wfl_selftest_docs WHERE id = ${String(id)};`)
   }
   log(`w5b2-advanced: 取证清理 — ${String(createdDocs.length)} 张取证单及其待办/记录已删除（isOwner 组织数据保留为常驻改进，已披露）`)
 }

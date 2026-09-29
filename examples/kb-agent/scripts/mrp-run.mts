@@ -271,6 +271,10 @@ export async function runMrp(token: string): Promise<MrpRunResult> {
   // unset keeps the W-round 60-day default (zero drift).
   const horizonDays = parseHorizonDays(process.env['MRP_HORIZON_DAYS']) ?? PLAN_HORIZON_DAYS
   const runId = `MRP-${runDate.replaceAll('-', '')}-${String(((await rowsOf(token, 'mrp_snapshots')).filter(row => String(row.run_id ?? '').startsWith(`MRP-${runDate.replaceAll('-', '')}`)).length + 1)).padStart(2, '0')}`
+  // W5-B5/BP-15: approved SOs missing need_date used to drop out of the JIT
+  // window silently — the run summary now names them (the aggregation keeps
+  // the empty date, so nothing else moves).
+  const undatedSos: string[] = []
 
   // Supply facts (per product).
   const products = await rowsOf(token, 'hub_inv_products', 200)
@@ -332,6 +336,10 @@ export async function runMrp(token: string): Promise<MrpRunResult> {
     } else {
       entry.qty = q4(entry.qty + openQty)
     }
+    if (need === '') undatedSos.push(String(so?.code ?? `#${String(so?.id ?? '?')}`))
+  }
+  if (undatedSos.length > 0) {
+    console.warn(`mrp-run: 【需补交期】${String(undatedSos.length)} 张已生效销售订单缺 need_date，其需求不进 JIT 窗口（永不触发补货）——请补录交期：${undatedSos.slice(0, 8).join('、')}${undatedSos.length > 8 ? '…' : ''}`)
   }
 
   // The MPS rows ride the same gross0 aggregation (per item: qty sums across
@@ -401,7 +409,9 @@ export async function runMrp(token: string): Promise<MrpRunResult> {
       const rsv = reservedByProduct.get(productId) ?? 0
       const net = netRequirement(gross, safety, oh, inb, wp, rsv)
       const source = level === 0 ? gross0.get(productId) : undefined
-      const needDate = source === undefined ? null : String(source.need)
+      // An empty need (the BP-15 undated-SO leg) stores null, not '' — the
+      // date column refuses empty strings.
+      const needDate = source === undefined || source.need === '' ? null : String(source.need)
       const driverSo = source === undefined ? null : String(source.driver)
       snapshots.push({ run_id: runId, run_date: runDate, product_id: productId, sku, gross, safety, on_hand: oh, inbound: inb, wip: wp, reserved: rsv, net, need_date: needDate, driver_so: driverSo, bom_level: level })
       if (net <= 0) continue
@@ -649,6 +659,73 @@ export async function dismissSuggestion(token: string, suggestionId: number, ope
   console.log(`mrp-run: suggestion #${String(suggestionId)} dismissed by ${operator}`)
 }
 
+/**
+ * W5-B4/BP-07: confirm one open ROP suggestion (wms_reorder_suggestions). The
+ * default `pr` mode mints a draft pur_requests row (code + one line, the
+ * MRP-side confirmSuggestion shape) and lands converted with the
+ * back-reference columns; the `manual` mode lands confirmed — the buyer
+ * replenishes off-platform, the row stays as the audit trail. Either way the
+ * status machine is open → confirmed|converted (never back).
+ * @param token - the root API token.
+ * @param suggestionId - the wms_reorder_suggestions row id.
+ * @param operator - the confirming user (audit element).
+ * @param mode - pr (default) creates the purchase request; manual marks the off-platform buy.
+ * @returns the created PR's code (pr mode) or null (manual mode).
+ */
+export async function confirmReorderSuggestion(token: string, suggestionId: number, operator = 'admin', mode: 'pr' | 'manual' = 'pr'): Promise<string | null> {
+  const suggestions = await rowsOf(token, 'wms_reorder_suggestions')
+  const suggestion = suggestions.find(row => Number(row.id) === suggestionId)
+  if (suggestion === undefined) throw new Error(`确认被拒：补货建议 #${String(suggestionId)} 不存在`)
+  if (String(suggestion.status) !== 'open' && String(suggestion.status) !== 'confirmed') {
+    throw new Error(`确认被拒：补货建议 #${String(suggestionId)} 状态为 ${String(suggestion.status)}——只有 open 建议可确认`)
+  }
+  const productId = Number(suggestion.product_id)
+  const qty = Number(suggestion.suggest_qty)
+  if (mode === 'manual') {
+    await dataOf(token, 'POST', `/api/wms_reorder_suggestions:update?filterByTk=${suggestionId}`, {
+      status: 'confirmed', converted_by: operator, converted_at: todayIso(),
+      note: `${String(suggestion.note ?? '')}；人工确认线下采购（${operator}）`,
+    })
+    console.log(`mrp-run: reorder #${String(suggestionId)} confirmed (manual) by ${operator}`)
+    return null
+  }
+  const docCode = await nextCode(token, 'pur_requests', 'code', 'PR')
+  const pr = await dataOf(token, 'POST', '/api/pur_requests:create', {
+    code: docCode, requester: operator, department: '计划物控',
+    need_date: todayIso(), reason: `ROP 补货建议转单（建议 #${String(suggestionId)}，ATP ${String(suggestion.on_hand_atp)} ≤ 再订货点 ${String(suggestion.min)}）`,
+    doc_status: 'draft', driver_suggestion_id: suggestionId,
+  })
+  await dataOf(token, 'POST', '/api/pur_request_lines:create', {
+    request: { id: Number(pr.id) }, product: { id: productId }, qty,
+  })
+  await dataOf(token, 'POST', `/api/wms_reorder_suggestions:update?filterByTk=${suggestionId}`, {
+    status: 'converted', converted_doc_code: docCode, converted_by: operator, converted_at: todayIso(),
+  })
+  console.log(`mrp-run: reorder #${String(suggestionId)} → PR ${docCode} (draft, ×${String(qty)})`)
+  return docCode
+}
+
+/**
+ * W5-B4/BP-07: dismiss one open ROP suggestion (the audited 忽略; a stale row
+ * the nightly scan auto-closes carries its own note instead).
+ * @param token - the root API token.
+ * @param suggestionId - the wms_reorder_suggestions row id.
+ * @param operator - the dismissing user (audit element).
+ */
+export async function dismissReorderSuggestion(token: string, suggestionId: number, operator = 'admin'): Promise<void> {
+  const suggestions = await rowsOf(token, 'wms_reorder_suggestions')
+  const suggestion = suggestions.find(row => Number(row.id) === suggestionId)
+  if (suggestion === undefined) throw new Error(`忽略被拒：补货建议 #${String(suggestionId)} 不存在`)
+  if (String(suggestion.status) !== 'open') {
+    throw new Error(`忽略被拒：补货建议 #${String(suggestionId)} 状态为 ${String(suggestion.status)}——只有 open 建议可忽略`)
+  }
+  await dataOf(token, 'POST', `/api/wms_reorder_suggestions:update?filterByTk=${suggestionId}`, {
+    status: 'dismissed', converted_by: operator, converted_at: todayIso(),
+    note: `${String(suggestion.note ?? '')}；人工忽略（${operator}）`,
+  })
+  console.log(`mrp-run: reorder #${String(suggestionId)} dismissed by ${operator}`)
+}
+
 // ─── the SO-facing reservation + shipping ───
 
 /** One line's reservation outcome (top-up semantics: 可用则 assigned). */
@@ -770,6 +847,21 @@ export async function shipSo(token: string, soCode: string): Promise<ShipSoResul
       // The on-hand draw rides the engine's only stock writer (the B6
       // issue pattern); consume already returned the allocation.
       await applyStockDelta(token, { productId: Number(reservation.product_id), binId: Number(reservation.bin_id), lotId: Number(reservation.lot_id) }, -qty)
+      // W5-B4/BP-11: the shipment leg lands a wms_shipments row (sales type,
+      // posted) so the outbound ledger and its stat cards see SO shipping —
+      // the manual-shipment track no longer stands alone.
+      const shipmentNo = `SHP-SO-${soCode}`
+      const existing = (await rowsOf(token, 'wms_shipments')).find(row => String(row.shipment_no) === shipmentNo && Number(row.product_id) === Number(reservation.product_id) && Number(row.lot_id) === Number(reservation.lot_id))
+      if (existing === undefined) {
+        await dataOf(token, 'POST', '/api/wms_shipments:create', {
+          shipment_no: shipmentNo, shipment_type: 'sales', status: 'posted',
+          product: { id: Number(reservation.product_id) }, lot: { id: Number(reservation.lot_id) },
+          from_bin: { id: Number(reservation.bin_id) }, qty,
+          note: `SO ${soCode} 发货出库（${String(lot?.lot_no ?? '')}）`,
+        })
+      } else {
+        await dataOf(token, 'POST', `/api/wms_shipments:update?filterByTk=${existing.id}`, { qty: q4(Number(existing.qty ?? 0) + qty) })
+      }
       shipped = q4(shipped + qty)
     }
     await dataOf(token, 'POST', `/api/so_order_lines:update?filterByTk=${line.id}`, { qty_shipped: shipped })
@@ -890,6 +982,16 @@ async function main(): Promise<void> {
   const dismissIndex = args.indexOf('--dismiss')
   if (dismissIndex >= 0) {
     await dismissSuggestion(token, Number(args[dismissIndex + 1]), args[dismissIndex + 2] ?? 'admin')
+    return
+  }
+  const confirmReorderIndex = args.indexOf('--confirm-reorder')
+  if (confirmReorderIndex >= 0) {
+    await confirmReorderSuggestion(token, Number(args[confirmReorderIndex + 1]), args[confirmReorderIndex + 2] ?? 'admin', args.includes('--manual') ? 'manual' : 'pr')
+    return
+  }
+  const dismissReorderIndex = args.indexOf('--dismiss-reorder')
+  if (dismissReorderIndex >= 0) {
+    await dismissReorderSuggestion(token, Number(args[dismissReorderIndex + 1]), args[dismissReorderIndex + 2] ?? 'admin')
     return
   }
   const reserveIndex = args.indexOf('--reserve-so')
