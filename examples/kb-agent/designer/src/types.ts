@@ -21,10 +21,14 @@ export const NODE_KINDS: ReadonlyArray<{ kind: NodeKind; label: string; hint: st
 export const ASSIGNEE_TYPES = [
   { value: 'user', label: '指定成员' },
   { value: 'role', label: '角色' },
-  { value: 'deptLeader', label: '部门主管' },
+  { value: 'department', label: '部门成员' },
+  { value: 'deptLeader', label: '提交人部门主管' },
   { value: 'supervisorChain', label: '连续多级主管' },
   { value: 'formField', label: '表单联系人字段' },
 ] as const
+
+/** The runtime-resolved types: the assignee comes from resolution, not a static list. */
+export const RUNTIME_ASSIGNEE_TYPES: ReadonlySet<string> = new Set(['deptLeader', 'supervisorChain'])
 
 export const MULTI_MODES = [
   { value: 'sequential', label: '依次审批' },
@@ -67,6 +71,12 @@ export interface NodePayload {
     assignees: string[]
     mode: string
     emptyPolicy: string
+    /** supervisorChain: how many department-owner levels approve (1..10). */
+    levels?: number
+    /** emptyPolicy=assignUser: the fallback approver username. */
+    emptyAssignee?: string
+    /** W5-B2 回退边: reject routes back to this (earlier) approval node id. */
+    rejectTo?: string
   }
   cc?: { assignees: string[] }
   condition?: { join: 'and' | 'or'; rows: ConditionRow[] }
@@ -135,13 +145,15 @@ export interface DesignerMeta {
   departments: Array<{ value: string; label: string }>
   /** Editable field names across the doc-type collections — the formField AutoComplete vocabulary. */
   formFields: string[]
+  /** The personnel-typed (users m2o) fields — the formField publish gate's vocabulary. */
+  userFields: string[]
 }
 
 export const defaultPayload = (kind: NodeKind): NodePayload => {
   const titles: Record<NodeKind, string> = { start: '发起人', approval: '审批节点', cc: '抄送节点', condition: '条件分支', end: '结束' }
   const base: NodePayload = { title: titles[kind] }
   if (kind === 'approval') {
-    base.approval = { assigneeType: 'user', assignees: [], mode: 'or', emptyPolicy: 'autoPass' }
+    base.approval = { assigneeType: 'user', assignees: [], mode: 'or', emptyPolicy: 'transferAdmin' }
   } else if (kind === 'cc') {
     base.cc = { assignees: [] }
   } else if (kind === 'condition') {
@@ -154,8 +166,17 @@ export const defaultPayload = (kind: NodeKind): NodePayload => {
 export const payloadSummary = (data: NodePayload): string => {
   if (data.approval !== undefined) {
     const typeLabel = ASSIGNEE_TYPES.find(entry => entry.value === data.approval?.assigneeType)?.label ?? data.approval.assigneeType
-    const who = data.approval.assignees.length > 0 ? data.approval.assignees.join('、') : '（未配置）'
-    return `${typeLabel}：${who}`
+    let who: string
+    if (data.approval.assigneeType === 'deptLeader') {
+      who = '（提交人部门主管，运行时解析）'
+    } else if (data.approval.assigneeType === 'supervisorChain') {
+      who = `（提交人 ${String(data.approval.levels ?? 1)} 级部门主管链）`
+    } else {
+      who = data.approval.assignees.length > 0 ? data.approval.assignees.join('、') : '（未配置）'
+    }
+    const mode = data.approval.mode === 'countersign' ? ' · 会签' : data.approval.mode === 'sequential' ? ' · 依次' : ''
+    const back = data.approval.rejectTo !== undefined && data.approval.rejectTo !== '' ? ' · 驳回可回退' : ''
+    return `${typeLabel}：${who}${mode}${back}`
   }
   if (data.cc !== undefined) return data.cc.assignees.length > 0 ? data.cc.assignees.join('、') : '（未配置）'
   if (data.condition !== undefined) {

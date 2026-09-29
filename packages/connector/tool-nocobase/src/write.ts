@@ -408,12 +408,112 @@ export function applyNbUpdateTool(ctx: Context, client: NocoBaseClient | undefin
 interface FlowConfigRow {
   readonly id: number
   readonly state_field: string
-  readonly approver_map: Record<string, string | string[]> | null
-  readonly extras: { approved_by_field?: string; approved_at_field?: string; amount_field?: string; amount_threshold?: number } | null
+  readonly approver_map: Record<string, unknown> | null
+  readonly extras: {
+    approved_by_field?: string
+    approved_at_field?: string
+    amount_field?: string
+    amount_threshold?: number
+    /** W5-B2 graph-owned keys whose presence marks an engine-side advanced flow. */
+    sign_modes?: unknown
+    cc_after?: unknown
+    condition_dsl?: unknown
+  } | null
   /** The document column the amount-threshold routing reads (extras.amount_field, default total). */
   readonly amount_field: string
   /** The flow's two-level routing threshold (extras.amount_threshold via thresholdOf; default 100_000). */
   readonly threshold: number
+}
+
+/**
+ * Whether one flow needs the engine's W5-B2 runtime (department/marker
+ * approver entries, countersign/sequential aggregation, cc rows, or the
+ * row-driven general condition routing): this tool-side twin implements the
+ * static template only, so such flows delegate whole to the engine's POST
+ * /act — one code path per feature, no forked semantics (BP-02/BP-14).
+ * @param flow - the resolved flow configuration.
+ * @returns true when the act must run on the engine.
+ */
+export function flowNeedsEngine(flow: Pick<FlowConfigRow, 'approver_map' | 'extras'>): boolean {
+  for (const value of Object.values(flow.approver_map ?? {})) {
+    const entries = Array.isArray(value) ? value : [value]
+    if (entries.some(entry => typeof entry === 'object' && entry !== null)) return true
+  }
+  const extras = flow.extras ?? {}
+  return extras.sign_modes !== undefined || extras.cc_after !== undefined || extras.condition_dsl === 'v2'
+}
+
+/**
+ * Reach the engine's single effective-effect exit for a LOCAL act that just
+ * landed effective (BP-02: the mobile twin used to skip these hooks
+ * entirely). The hooks are idempotent, so an engine hiccup after the
+ * transition fails loud with the replay path instead of silently skipping.
+ * @param input - the parsed nb_approve arguments.
+ * @param code - the document's business code (reserveForSo resolves by it).
+ */
+async function runEffectsViaEngine(input: { docType: string; docId: number }, code: string): Promise<void> {
+  const base = (process.env['NOCOBASE_ENGINE_URL'] ?? 'http://127.0.0.1:13110').replace(/\/$/u, '')
+  let response: Response
+  try {
+    response = await fetch(`${base}/effective-effects`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ doc_type: input.docType, doc_id: input.docId, code }),
+      signal: AbortSignal.timeout(30_000),
+    })
+  } catch (error) {
+    throw new Error(`nb_approve：单据已生效，但生效钩子（${input.docType}#${String(input.docId)}）执行失败——引擎服务（${base}）不可达（${error instanceof Error ? error.message : String(error)}）；请启动 approval-engine --serve 后对该单据重跑 POST /effective-effects`)
+  }
+  if (!response.ok) {
+    const payload = await response.json().catch(() => null) as { error?: string } | null
+    throw new Error(`nb_approve：单据已生效，但生效钩子执行失败——${payload?.error ?? `HTTP ${String(response.status)}`}；请对该单据重跑 POST /effective-effects`)
+  }
+}
+
+/**
+ * The engine delegation (W5-B2): POST the act to approval-engine --serve,
+ * which runs the same orchestration plus the runtime resolution,
+ * aggregation, cc, and the single effective-effect exit (so_orders/
+ * mps_plans hooks included — BP-02). The engine owns advanced flows; this
+ * twin keeps only the static template (byte-parity with the pre-B2 path).
+ * @param input - the parsed nb_approve arguments.
+ * @returns the transition receipt the engine produced.
+ */
+async function delegateToEngine(input: { docType: string; docId: number; action: 'submit' | 'approve' | 'reject' | 'void'; comment: string | undefined; approver: string }): Promise<NbApproveToolValue> {
+  const base = (process.env['NOCOBASE_ENGINE_URL'] ?? 'http://127.0.0.1:13110').replace(/\/$/u, '')
+  const path = input.action === 'submit' ? '/submit' : '/act'
+  let response: Response
+  try {
+    response = await fetch(`${base}${path}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        doc_type: input.docType, doc_id: input.docId,
+        ...(input.action === 'submit' ? {} : { action: input.action }),
+        approver: input.approver, ...(input.comment === undefined ? {} : { comment: input.comment }),
+      }),
+      signal: AbortSignal.timeout(30_000),
+    })
+  } catch (error) {
+    throw new Error(`nb_approve：审批流「${input.docType}」使用了部门/会签/依次/抄送/通用条件等引擎侧特性，需经审批引擎执行，但引擎服务（${base}）不可达（${error instanceof Error ? error.message : String(error)}）；请先启动 approval-engine --serve 再重试本操作`)
+  }
+  const payload = await response.json().catch(() => null) as { ok?: boolean; error?: string; result?: Partial<NbApproveToolValue> } | null
+  if (!response.ok || payload === null || payload.ok !== true || payload.result === undefined) {
+    throw new Error(`nb_approve（引擎执行）：${payload?.error ?? `HTTP ${String(response.status)}`}`)
+  }
+  const result = payload.result
+  return {
+    doc_type: result.doc_type ?? input.docType,
+    doc_id: result.doc_id ?? input.docId,
+    action: result.action ?? input.action,
+    from_state: result.from_state ?? '',
+    to_state: result.to_state ?? '',
+    from_anchor: result.from_anchor ?? 0,
+    to_anchor: result.to_anchor ?? 0,
+    attempt_no: result.attempt_no ?? 0,
+    effective: result.effective === true,
+    doc_status: result.to_state ?? '',
+  }
 }
 
 /** Read one JSON text column, failing loud on a malformed value. */
@@ -450,7 +550,7 @@ async function loadFlowConfig(client: NocoBaseClient, docType: string, signal?: 
   return {
     id: Number(row['id']),
     state_field: typeof stateField === 'string' && stateField !== '' ? stateField : 'doc_status',
-    approver_map: parseJsonColumn<Record<string, string | string[]>>(row['approver_map'], 'approver_map'),
+    approver_map: parseJsonColumn<Record<string, unknown>>(row['approver_map'], 'approver_map'),
     extras,
     amount_field: extras?.amount_field !== undefined && extras.amount_field !== '' ? extras.amount_field : AMOUNT_FIELD,
     // Fails loud on a malformed amount_threshold (a missing key falls back to the default).
@@ -556,6 +656,12 @@ async function openTodoAt(
  */
 export async function nbApproveEngine(client: NocoBaseClient, input: { docType: string; docId: number; action: 'submit' | 'approve' | 'reject' | 'void'; comment: string | undefined; approver: string }, signal?: AbortSignal): Promise<NbApproveToolValue> {
   const flow = await loadFlowConfig(client, input.docType, signal)
+  // W5-B2: advanced flows (department routing, markers, countersign,
+  // sequential, cc, general conditions) run on the engine — one code path per
+  // feature, and the effective-effect hooks ride the same call (BP-02/14).
+  if (flowNeedsEngine(flow)) {
+    return await delegateToEngine(input)
+  }
   const row = await client.get<NbRow>(input.docType, input.docId, undefined, signal)
   if (row === undefined) {
     throw new Error(`单据不存在：${input.docType} 第 ${input.docId} 行`)
@@ -621,6 +727,13 @@ export async function nbApproveEngine(client: NocoBaseClient, input: { docType: 
   // opens the second todo. Both vocabularies share the rule.
   if (action === 'submit' || action === 'resubmit' || next === 'pending_level2') {
     await openTodoAt(client, flow, input.docType, input.docId, next, signal)
+  }
+  // BP-02 (W5-B2): a local act that lands effective reaches the same
+  // effective-effect exit the engine runs inline (the hooks are idempotent,
+  // so a replay after a hiccup is safe).
+  if (next === vocab.effectiveState) {
+    const code = typeof row['code'] === 'string' && row['code'] !== '' ? row['code'] : String(input.docId)
+    await runEffectsViaEngine(input, code)
   }
   return {
     doc_type: input.docType, doc_id: input.docId, action,

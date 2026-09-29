@@ -1,7 +1,13 @@
-import { App as AntApp, AutoComplete, Button, Drawer, Form, Input, Radio, Select, Space } from 'antd'
+import { App as AntApp, AutoComplete, Button, Drawer, Form, Input, InputNumber, Radio, Select, Space } from 'antd'
 import type { RadioChangeEvent } from 'antd'
 import type { JSX } from 'react'
-import { ASSIGNEE_TYPES, CONDITION_OPS, EMPTY_POLICIES, MULTI_MODES, NODE_TITLE_MAX, titleFault, type DesignerMeta, type NodePayload } from './types'
+import { ASSIGNEE_TYPES, CONDITION_OPS, EMPTY_POLICIES, MULTI_MODES, NODE_TITLE_MAX, RUNTIME_ASSIGNEE_TYPES, titleFault, type DesignerMeta, type NodePayload } from './types'
+
+/** One selectable earlier approval node (the rejectTo target list). */
+export interface ApprovalNodeOption {
+  readonly id: string
+  readonly title: string
+}
 
 /** The right-side property panel's props — every change writes straight back through onChange. */
 interface PropsPanelProps {
@@ -10,6 +16,8 @@ interface PropsPanelProps {
   kind: string | null
   nodeId: string | null
   meta: DesignerMeta | null
+  /** The canvas's other approval nodes (the rejectTo target list). */
+  approvalNodes: ReadonlyArray<ApprovalNodeOption>
   onClose: () => void
   onChange: (mutate: (draft: NodePayload) => void) => void
 }
@@ -21,16 +29,16 @@ interface PropsPanelProps {
  */
 export function PropsPanel(props: PropsPanelProps): JSX.Element {
   const { message } = AntApp.useApp()
-  const { open, payload, kind, nodeId, meta, onClose, onChange } = props
+  const { open, payload, kind, nodeId, meta, approvalNodes, onClose, onChange } = props
   if (payload === null || kind === null) {
     return <Drawer open={open} onClose={onClose} title="节点属性" width={380} data-testid="props-panel-empty">未选中节点</Drawer>
   }
 
   const assigneeOptions = (): Array<{ value: string; label: string }> => {
-    const list = meta ?? { docTypes: [], users: [], roles: [], departments: [], formFields: [] }
+    const list = meta ?? { docTypes: [], users: [], roles: [], departments: [], formFields: [], userFields: [] }
     switch (payload.approval?.assigneeType) {
       case 'role': return list.roles
-      case 'deptLeader': return list.departments
+      case 'department': return list.departments
       case 'user': default: return list.users
     }
   }
@@ -39,8 +47,11 @@ export function PropsPanel(props: PropsPanelProps): JSX.Element {
     onChange((draft) => {
       if (draft.approval === undefined) return
       draft.approval.assigneeType = String(event.target.value)
-      // The selector vocabulary changes with the type — stale values would dangle.
+      // The selector vocabulary changes with the type — stale values would
+      // dangle; runtime-resolved types carry no static assignees at all.
       draft.approval.assignees = []
+      draft.approval.levels = undefined
+      if (draft.approval.emptyPolicy !== 'assignUser') draft.approval.emptyAssignee = undefined
     })
   }
 
@@ -72,12 +83,10 @@ export function PropsPanel(props: PropsPanelProps): JSX.Element {
   }
 
   const assigneeType = payload.approval?.assigneeType ?? 'user'
-  const singleValue = assigneeType === 'supervisorChain' || assigneeType === 'formField'
-  const assigneeLabel = assigneeType === 'supervisorChain'
-    ? '审批人（主管链起点角色）'
-    : assigneeType === 'formField'
-      ? '审批人（表单联系人字段）'
-      : '审批人（可多选）'
+  const runtimeResolved = RUNTIME_ASSIGNEE_TYPES.has(assigneeType)
+  const assigneeLabel = assigneeType === 'formField'
+    ? '审批人（表单联系人字段）'
+    : '审批人（可多选）'
 
   return (
     <Drawer open={open} onClose={onClose} width={400} title={`节点属性 · ${payload.title}`} data-testid="props-panel">
@@ -111,29 +120,37 @@ export function PropsPanel(props: PropsPanelProps): JSX.Element {
                 {ASSIGNEE_TYPES.map(entry => <Radio.Button key={entry.value} value={entry.value}>{entry.label}</Radio.Button>)}
               </Radio.Group>
             </Form.Item>
-            <Form.Item label={assigneeLabel}>
-              {assigneeType === 'supervisorChain' && (
-                <Select
-                  allowClear
-                  showSearch
-                  optionFilterProp="label"
-                  placeholder="选择主管链起点角色"
-                  options={meta?.roles ?? []}
-                  value={payload.approval.assignees[0]}
-                  data-testid="prop-assignees"
-                  onChange={(value: string | undefined) => {
+            {assigneeType === 'deptLeader' && (
+              <Form.Item label="审批人">
+                <div className="panel-hint" data-testid="prop-runtime-hint">
+                  提交人所在部门的主管（运行时按提交人解析；部门主管在「组织架构 → 部门成员」中勾选负责人）。审批人为空时按下方空策略处理。
+                </div>
+              </Form.Item>
+            )}
+            {assigneeType === 'supervisorChain' && (
+              <Form.Item label="主管链级数（1..10）">
+                <InputNumber
+                  min={1}
+                  max={10}
+                  precision={0}
+                  value={payload.approval.levels ?? 1}
+                  data-testid="prop-levels"
+                  onChange={(value) => {
                     onChange((draft) => {
                       if (draft.approval === undefined) return
-                      draft.approval.assignees = value === undefined ? [] : [value]
+                      draft.approval.levels = value === null ? 1 : Math.round(value)
                     })
                   }}
                 />
-              )}
-              {assigneeType === 'formField' && (
+                <div className="panel-hint">从提交人所在部门起，逐级向上取部门主管，依次作为本节点审批人（每级取该部门「负责人」）。</div>
+              </Form.Item>
+            )}
+            {assigneeType === 'formField' && (
+              <Form.Item label={assigneeLabel}>
                 <AutoComplete
                   allowClear
-                  placeholder="输入表单联系人字段路径（可自由输入）"
-                  options={(meta?.formFields ?? []).map(field => ({ value: field }))}
+                  placeholder="选择或输入人员字段（如 owner）"
+                  options={(meta?.userFields ?? []).map(field => ({ value: field }))}
                   value={payload.approval.assignees[0]}
                   data-testid="prop-assignees"
                   onChange={(value) => {
@@ -143,8 +160,11 @@ export function PropsPanel(props: PropsPanelProps): JSX.Element {
                     })
                   }}
                 />
-              )}
-              {!singleValue && (
+                <div className="panel-hint">需为关联用户的字段（经办人/负责人）；发布校验字段在单据内且为人员类型。</div>
+              </Form.Item>
+            )}
+            {!runtimeResolved && assigneeType !== 'formField' && (
+              <Form.Item label={assigneeLabel}>
                 <Select
                   mode="multiple"
                   allowClear
@@ -160,8 +180,44 @@ export function PropsPanel(props: PropsPanelProps): JSX.Element {
                     })
                   }}
                 />
-              )}
-            </Form.Item>
+              </Form.Item>
+            )}
+            {payload.approval.emptyPolicy === 'assignUser' && (
+              <Form.Item label="空审批人时指定回退审批人">
+                <Select
+                  allowClear
+                  showSearch
+                  optionFilterProp="label"
+                  options={meta?.users ?? []}
+                  value={payload.approval.emptyAssignee}
+                  data-testid="prop-empty-assignee"
+                  onChange={(value: string | undefined) => {
+                    onChange((draft) => {
+                      if (draft.approval === undefined) return
+                      draft.approval.emptyAssignee = value === undefined ? undefined : value
+                    })
+                  }}
+                />
+              </Form.Item>
+            )}
+            {approvalNodes.length > 0 && (
+              <Form.Item label="驳回回退（可选）">
+                <Select
+                  allowClear
+                  placeholder="默认：驳回到「已驳回」由提交人修改后重提"
+                  options={approvalNodes.map(node => ({ value: node.id, label: node.title }))}
+                  value={payload.approval.rejectTo === '' ? undefined : payload.approval.rejectTo}
+                  data-testid="prop-reject-to"
+                  onChange={(value: string | undefined) => {
+                    onChange((draft) => {
+                      if (draft.approval === undefined) return
+                      draft.approval.rejectTo = value === undefined ? undefined : value
+                    })
+                  }}
+                />
+                <div className="panel-hint">配置后本节点拒绝时单据退回所选更早的审批节点重审（仅二级审批可回退一级）。</div>
+              </Form.Item>
+            )}
             <Form.Item label="多人审批方式">
               <Radio.Group
                 value={payload.approval.mode}
@@ -252,7 +308,7 @@ export function PropsPanel(props: PropsPanelProps): JSX.Element {
           </>
         )}
 
-        {kind === 'start' && <div className="panel-hint">开始节点：单据提交入口。引擎按现有 states/transitions 行执行；发布编译在 B1 批次接入。</div>}
+        {kind === 'start' && <div className="panel-hint">开始节点：单据提交入口。「保存」落编辑态，「发布」编译派生引擎行表即刻生效。</div>}
         {kind === 'end' && <div className="panel-hint">结束节点：流程终点。</div>}
       </Form>
     </Drawer>

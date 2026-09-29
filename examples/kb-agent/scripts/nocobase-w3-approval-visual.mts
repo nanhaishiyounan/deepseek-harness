@@ -604,6 +604,42 @@ async function ensureFlowMap(token: string, gridUid: string): Promise<void> {
   console.log(`nocobase-w3-approval-visual: flow-map JSBlock created (uid ${blockUid})`)
 }
 
+// ─── W5-B2: heal the designer decoration title (the stale B0 promise text) ───
+
+/**
+ * The W5-B0-era designer embed JS block decorates the page with a title whose
+ * promise text said「发布派生在 B1」— the publish chain shipped in B1 and the
+ * advanced nodes in B2, so the persisted decoration (flowModels row
+ * w3b4edtnkmzmd50m, platform data the source no longer owns) must be healed
+ * to the current state. Idempotent: a block already carrying the B2 line is
+ * kept; the iframe itself is preserved verbatim.
+ * @param token - a root auth token.
+ */
+export async function healDesignerDecoration(token: string): Promise<void> {
+  const SUB_B2 = '（拖拽编排 · 拉线连接 · 表单配置；保存=graph 编辑态，发布=编译派生引擎行表即刻生效——会签/依次/回退/抄送/主管链已上线）'
+  const models = await listFlowModels(token, 'w3-approval-visual heal-title')
+  const block = models.find(row => String(row.stepParams?.jsSettings?.runJs?.['code'] ?? '').includes('designer-embed'))
+  const code = block?.stepParams?.jsSettings?.runJs?.['code']
+  if (block === undefined || typeof code !== 'string' || !code.includes('/designer?doc_type=')) {
+    console.log('nocobase-w3-approval-visual: designer decoration JS block not found (nothing to heal)')
+    return
+  }
+  if (code.includes('发布=编译派生引擎行表即刻生效')) {
+    console.log('nocobase-w3-approval-visual: designer decoration title already healed (kept)')
+    return
+  }
+  const healed = code.replace(/（[^（）]*发布派生在 B1[^（）]*）/u, SUB_B2)
+  const stepParams = JSON.parse(JSON.stringify(block.stepParams ?? {})) as Record<string, any>
+  stepParams.jsSettings.runJs.code = healed
+  await dataOf(token, 'POST', '/api/flowModels:save', { uid: block.uid, stepParams })
+  // Read back and refuse to claim success on a silent no-op save.
+  const after = (await listFlowModels(token, 'w3-approval-visual heal-title verify')).find(row => row.uid === block.uid)
+  if (String(after?.stepParams?.jsSettings?.runJs?.['code'] ?? '') !== healed) {
+    throw new Error(`设计器装饰标题 heal 未生效（flowModels:save 未落 stepParams；uid ${String(block.uid)}）——改用 psql 通道重试`)
+  }
+  console.log(`nocobase-w3-approval-visual: designer decoration title healed → 审批流可视化设计器${SUB_B2}（uid ${String(block.uid)}）`)
+}
+
 // ─── W5-B1: retire the legacy JSON-textarea editing channel ───
 
 /** The config-center form fields the designer now owns (graph → publish compiles them). */
@@ -989,6 +1025,16 @@ async function assertVisual(token: string): Promise<void> {
       failures.push(`designer-embed iframe url does not point at the /designer SPA: ${String(embedBlock.props?.url)}`)
     }
   }
+  // W5-B2: the decoration title must no longer promise the B1 publish chain.
+  {
+    const code = String(models.find(row => String(row.stepParams?.jsSettings?.runJs?.['code'] ?? '').includes('designer-embed'))?.stepParams?.jsSettings?.runJs?.['code'] ?? '')
+    if (code !== '' && code.includes('发布派生在 B1')) {
+      failures.push('设计器装饰标题仍是 B0 期文案（发布派生在 B1）——跑 build 执行 healDesignerDecoration')
+    }
+    if (code !== '' && !code.includes('发布=编译派生引擎行表即刻生效')) {
+      failures.push('设计器装饰标题缺少 B2 状态文案（发布=编译派生引擎行表即刻生效）——跑 build 执行 healDesignerDecoration')
+    }
+  }
   // The configs Add-new form exists and config_note is required in both forms.
   const createForms = models.filter(row => row.use === 'CreateFormModel'
     && String(row.stepParams?.resourceSettings?.init?.collectionName ?? '') === 'wfl_flow_configs')
@@ -1111,6 +1157,7 @@ async function main(): Promise<void> {
   await ensureBaselineAudit(token)
   const { gridUid } = await ensureV2RouteShell(token, PAGE_TITLE, 'ControlOutlined', group.id)
   await ensureDesignerEmbed(token, gridUid)
+  await healDesignerDecoration(token)
   let sortIndex = 1
   for (const table of TABLES) {
     await ensureConfigTable(token, gridUid, table, sortIndex)

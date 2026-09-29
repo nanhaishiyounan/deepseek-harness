@@ -360,6 +360,9 @@ export function DesignerApp(): JSX.Element {
         kind={selected === null ? null : String(selected.data.kind)}
         nodeId={selected?.id ?? null}
         meta={meta}
+        approvalNodes={nodes
+          .filter(node => node.id !== selectedId && node.data.kind === 'approval')
+          .map(node => ({ id: node.id, title: (node.data.payload as NodePayload).title }))}
         onClose={() => { setSelectedId(null) }}
         onChange={mutateSelected}
       />

@@ -219,32 +219,119 @@ export function editLockedMessage(label: string, state: WorkflowState): string {
 
 /**
  * Evaluate one wfl_flow_transitions condition expression against a document
- * row. The engine accepts only the restricted comparison DSL
- * `<field> <= <number>` / `<field> > <number>` (the seeded threshold
- * conditions); anything else fails loud as an unsupported condition rather
- * than being silently skipped.
- * @param condition - the condition expression (e.g. `total <= 100000`), or
- * undefined for an unconditional transition.
+ * row. The DSL is one or more comparison clauses joined by a single AND or OR
+ * (W5-B2; the seeded flows' bare `<field> <= <number>` / `<field> > <number>`
+ * literals keep parsing unchanged). Clause operators: `> >= < <= == !=`
+ * compare numerically when both sides are numeric (`== / !=` also compare as
+ * strings), `contains` does a substring test on the field's string form.
+ * Anything else fails loud as an unsupported condition rather than being
+ * silently skipped.
+ * @param condition - the condition expression (e.g. `total <= 100000`,
+ * `total > 500 AND qty < 10`, `name contains '钢'`), or undefined for an
+ * unconditional transition.
  * @param row - the upstream document row the condition reads.
  * @returns true when the transition applies to this row.
  */
 export function conditionApplies(condition: string | undefined, row: Readonly<Record<string, unknown>>): boolean {
   if (condition === undefined || condition.trim() === '') return true
-  const match = /^([A-Za-z_][A-Za-z0-9_]*)\s*(<=|>)\s*(-?\d+(?:\.\d+)?)$/u.exec(condition.trim())
-  if (match === null) {
-    throw new Error(`审批条件表达式不支持：${condition}（引擎仅支持「字段 <= 阈值 / 字段 > 阈值」形式）`)
+  const clauses = parseConditionClauses(condition)
+  if (clauses.joiner === 'AND') return clauses.parts.every(clause => conditionClauseApplies(clause, row, condition))
+  return clauses.parts.some(clause => conditionClauseApplies(clause, row, condition))
+}
+
+/** One parsed comparison clause: a field, an operator, and the raw literal text. */
+interface ConditionClause {
+  readonly field: string
+  readonly operator: '>' | '>=' | '<' | '<=' | '==' | '!=' | 'contains'
+  readonly literal: string
+}
+
+/** The parsed condition expression: its clauses and the one joiner between them. */
+interface ParsedCondition {
+  readonly parts: ReadonlyArray<ConditionClause>
+  readonly joiner: 'AND' | 'OR'
+}
+
+/**
+ * Parse one condition expression into clauses plus its joiner. Every clause is
+ * `ident OP number` or `ident OP 'single-quoted string'`; clauses sit behind
+ * at most one joiner kind (mixed AND/OR in one expression fails loud — the
+ * publish compiler never emits it, and a hand-written row that mixes them is a
+ * configuration error, not a policy).
+ * @param condition - the raw condition_expr text.
+ * @returns the clauses in order and their joiner.
+ */
+function parseConditionClauses(condition: string): ParsedCondition {
+  const text = condition.trim()
+  const parts: ConditionClause[] = []
+  let joiner: 'AND' | 'OR' | null = null
+  let rest = text
+  while (rest !== '') {
+    const head = /^([A-Za-z_][A-Za-z0-9_]*)\s*(>=|<=|==|!=|>|<|contains)\s*(-?\d+(?:\.\d+)?|'[^']*')/u.exec(rest)
+    if (head === null) {
+      throw new Error(`审批条件表达式不支持：${condition}（需为「字段 <比较符> 数值或'字符串'」，多行以 AND/OR 连接）`)
+    }
+    parts.push({ field: head[1] as string, operator: head[2] as ConditionClause['operator'], literal: head[3] as string })
+    rest = rest.slice(head[0].length).trim()
+    if (rest === '') break
+    const connector = /^(AND|OR)\s+/u.exec(rest)
+    if (connector === null) {
+      throw new Error(`审批条件表达式不支持：${condition}（子句之间需以 AND/OR 连接）`)
+    }
+    const kind = connector[1] as 'AND' | 'OR'
+    if (joiner !== null && joiner !== kind) {
+      throw new Error(`审批条件表达式不支持：${condition}（AND 与 OR 不能混用于同一表达式）`)
+    }
+    joiner = kind
+    rest = rest.slice(connector[0].length).trim()
   }
-  const field = match[1]
-  const operator = match[2]
-  if (field === undefined || operator === undefined) {
-    throw new Error(`审批条件表达式不支持：${condition}（引擎仅支持「字段 <= 阈值 / 字段 > 阈值」形式）`)
+  if (parts.length === 0) {
+    throw new Error(`审批条件表达式不支持：${condition}`)
   }
-  const bound = Number(match[3])
-  const value = Number(row[field])
-  if (!Number.isFinite(value)) {
-    throw new Error(`审批条件字段 ${field} 不是数字（当前值 ${JSON.stringify(row[field])}），无法评估条件 ${condition}`)
+  return { parts, joiner: joiner ?? 'AND' }
+}
+
+/**
+ * Evaluate one parsed clause against the row. Numeric operators require a
+ * finite numeric field value (fail loud, as ever); == / != fall back to
+ * string comparison when either side is non-numeric; contains compares the
+ * field's string form.
+ * @param clause - the parsed clause.
+ * @param row - the document row the field reads.
+ * @param whole - the full condition text (error context).
+ * @returns whether the clause holds.
+ */
+function conditionClauseApplies(clause: ConditionClause, row: Readonly<Record<string, unknown>>, whole: string): boolean {
+  const raw = row[clause.field]
+  if (raw === undefined) {
+    throw new Error(`审批条件字段 ${clause.field} 不存在（无法评估条件 ${whole}）`)
   }
-  return operator === '<=' ? value <= bound : value > bound
+  const literalIsNumeric = clause.literal !== '' && !clause.literal.startsWith("'")
+  const literalNumber = Number(clause.literal)
+  const literalString = clause.literal.startsWith("'") ? clause.literal.slice(1, -1) : clause.literal
+  /** The field's string form (numbers stringify plainly, objects JSON — never '[object Object]'). */
+  const textOf = (value: unknown): string => typeof value === 'string' ? value : JSON.stringify(value)
+  if (clause.operator === 'contains') {
+    return textOf(raw).includes(literalString)
+  }
+  if (literalIsNumeric) {
+    const value = Number(raw)
+    if (Number.isFinite(value)) {
+      switch (clause.operator) {
+        case '>': return value > literalNumber
+        case '>=': return value >= literalNumber
+        case '<': return value < literalNumber
+        case '<=': return value <= literalNumber
+        case '==': return value === literalNumber
+        case '!=': return value !== literalNumber
+      }
+    }
+    if (clause.operator !== '==' && clause.operator !== '!=') {
+      throw new Error(`审批条件字段 ${clause.field} 不是数字（当前值 ${JSON.stringify(raw)}），无法评估条件 ${whole}`)
+    }
+  }
+  const text = textOf(raw)
+  return clause.operator === '!=' ? text !== literalString : text === literalString
 }
 
 // ─── the supplier-admission vocabulary (B2: one flow per state_field word-set) ───

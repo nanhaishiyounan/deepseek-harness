@@ -87,6 +87,27 @@
  * config_note (replayable rollback anchor); the engine's transition code
  * never changes.
  *
+ * W5-B2 unlocks the advanced nodes (plan-w5 §B2's sanctioned minimal engine
+ * extension — the aggregation judgement rides the rows the engine already
+ * trusts): approver_map entries may carry runtime-resolved markers
+ * ({type:'deptLeader'} = the submitter's department owners,
+ * {type:'supervisorChain', levels:N} = the submitter's N-level department
+ * owner chain, {type:'formField', value} = the document's user-typed field);
+ * extras.sign_modes drives 会签 countersign (all approve to advance, any
+ * reject rejects) and 依次审批 sequential (one todo at a time in resolution
+ * order); empty resolutions apply the node's emptyPolicy (autoPass performs
+ * the transition, autoReject rejects, transferAdmin/assignUser re-route the
+ * todo); a reject row may route back to the previous approval state (the
+ * graph's rejectTo property); approve routing on a waiting state is
+ * row-driven (conditional transition rows first, so the general condition
+ * DSL rides the pending→pending_level2 row); extras.cc_after fires read-only
+ * kind='cc' todo rows as the flow passes the keyed state. The single
+ * effective-effect exit effectiveEffects() (so_orders→reserveForSo,
+ * mps_plans→recalcPlan) serves the CLI, POST /act, POST /effective-effects,
+ * and the delegated nb_approve tool alike (BP-02); nb_approve delegates
+ * advanced flows to POST /act so department/marker routing resolves on the
+ * engine (BP-14).
+ *
  * W3-B6 adds the operator-terminal surface on --serve (D9): three narrow
  * business verbs — POST /report-job (报工: 完成+待求+损失=本循环计划数,
  * ERPNext complete_job_card clamp), POST /inspect-submit (逐项打分 →
@@ -157,11 +178,68 @@ export interface DepartmentApprover {
   readonly value: string
 }
 
-/** Every value an approver_map entry may carry: one username, the department form, or an array mixing both. */
-export type ApproverMapValue = string | DepartmentApprover | ReadonlyArray<string | DepartmentApprover>
+/** Every value an approver_map entry may carry: one username, the department form, a runtime-resolved marker (W5-B2), or an array mixing usernames and department forms. */
+export type ApproverMapValue =
+  | string
+  | DepartmentApprover
+  | DeptLeaderApprover
+  | SupervisorChainApprover
+  | FormFieldApprover
+  | ReadonlyArray<string | DepartmentApprover>
+
+/**
+ * The deptLeader marker (W5-B2): the tier resolves at runtime to the
+ * submitter's main department's owner usernames (departmentsUsers.isOwner).
+ * emptyPolicy/emptyAssignee ride the marker so a resolution that comes back
+ * empty applies the node's policy at the moment it happens.
+ */
+export interface DeptLeaderApprover {
+  readonly type: 'deptLeader'
+  readonly emptyPolicy: 'autoPass' | 'autoReject' | 'transferAdmin' | 'assignUser'
+  readonly emptyAssignee?: string
+}
+
+/**
+ * The supervisorChain marker (W5-B2): the tier resolves at runtime to the
+ * submitter's department-owner chain, nearest department first, at most
+ * `levels` owners up the department tree.
+ */
+export interface SupervisorChainApprover {
+  readonly type: 'supervisorChain'
+  readonly levels: number
+  readonly emptyPolicy: 'autoPass' | 'autoReject' | 'transferAdmin' | 'assignUser'
+  readonly emptyAssignee?: string
+}
+
+/**
+ * The formField marker (W5-B2): the tier resolves at runtime to the user the
+ * document's own field names (a users m2o — the REST row carries the raw
+ * `<field>_id`, a username string also passes).
+ */
+export interface FormFieldApprover {
+  readonly type: 'formField'
+  readonly value: string
+  readonly emptyPolicy: 'autoPass' | 'autoReject' | 'transferAdmin' | 'assignUser'
+  readonly emptyAssignee?: string
+}
 
 /** A parsed wfl_flow_configs.approver_map (W3-B5: department entries join the username forms). */
 export type ApproverMap = Record<string, ApproverMapValue>
+
+/** The graph-owned extras keys the W5-B2 publish compiler may add on top of the engine-owned ones. */
+export interface FlowExtras {
+  approved_by_field?: string
+  approved_at_field?: string
+  amount_field?: string
+  amount_threshold?: number
+  invoice_match_tolerance?: number
+  /** Role → sign mode for tiers that are not OR (graph-owned; absent role = or). */
+  sign_modes?: Record<string, 'countersign' | 'sequential'>
+  /** LEFT state → cc usernames fired when an approve transition leaves that state (graph-owned). */
+  cc_after?: Record<string, readonly string[]>
+  /** Set to 'v2' when the flow's routing rides the general condition literal on the level-2 row (graph-owned). */
+  condition_dsl?: 'v2'
+}
 
 /** One wfl_flow_configs row (the engine's resolved configuration). */
 export interface FlowConfig {
@@ -169,7 +247,7 @@ export interface FlowConfig {
   readonly doc_type: string
   readonly state_field: string
   readonly approver_map: ApproverMap
-  readonly extras: { approved_by_field?: string, approved_at_field?: string, amount_field?: string, amount_threshold?: number, invoice_match_tolerance?: number } | null
+  readonly extras: FlowExtras | null
   /** The document column the amount-threshold routing reads (extras.amount_field, default total). */
   readonly amount_field: string
   /** The flow's two-level routing threshold (extras.amount_threshold via thresholdOf; default 100_000). */
@@ -339,19 +417,115 @@ async function departmentUsernames(io: NocoIO, deptTitle: string, context: strin
   return [...new Set(members)]
 }
 
+/** The document context a W5-B2 runtime tier resolution reads (markers resolve per document, not per flow). */
+interface DocContext {
+  readonly docType: string
+  readonly docId: number
+  readonly row: Record<string, any>
+}
+
+/** Whether one approver_map entry is a W5-B2 runtime-resolved marker. */
+function isRuntimeMarker(raw: unknown): raw is DeptLeaderApprover | SupervisorChainApprover | FormFieldApprover {
+  if (typeof raw !== 'object' || raw === null) return false
+  const record = raw as Record<string, unknown>
+  return (record['type'] === 'deptLeader' || record['type'] === 'supervisorChain' || record['type'] === 'formField')
+    && typeof record['emptyPolicy'] === 'string'
+}
+
 /**
- * Resolve one role's approver usernames, expanding department entries
- * (W3-B5 D8): `{type:'department', value:'质检部'}` becomes the department's
- * member usernames and mixes freely with plain usernames. A role value with
- * no department entry delegates to the shared pure resolver with the same
- * map and arguments as W2 — the pure path is byte-identical (缺省零漂移).
+ * The submitter the runtime markers resolve against: the approver of the
+ * newest submit/resubmit record (the D4 chain replays per attempt, so the
+ * latest submitter is the one whose supervisors the current round owes).
+ */
+async function lastSubmitterOf(io: NocoIO, docType: string, docId: number): Promise<string | undefined> {
+  const records = await io.list('wfl_approval_records', { doc_type: docType, doc_id: docId, action: 'submit' })
+  return records.filter(record => Number(record.attempt_no ?? 0) > 0)
+    .sort((a, b) => Number(b.attempt_no ?? 0) - Number(a.attempt_no ?? 0) || Number(b.node_seq ?? 0) - Number(a.node_seq ?? 0))[0]?.approver
+}
+
+/**
+ * The usernames owning one department (departmentsUsers.isOwner — the
+ * plugin-departments owner flag). A department with no owner answers []: the
+ * caller applies the marker's empty policy rather than failing here (an
+ * ownerless department is an org-data gap the policy decides how to survive).
+ */
+async function departmentOwners(io: NocoIO, departmentId: unknown): Promise<readonly string[]> {
+  const users = await io.list('users', {})
+  const usernameOf = new Map(users.map(row => [String(row.id), String(row.username ?? '')]))
+  const links = await io.list('departmentsUsers', {})
+  return [...new Set(links
+    .filter(row => String(row.departmentId ?? '') === String(departmentId) && row.isOwner === true)
+    .map(row => usernameOf.get(String(row.userId ?? '')) ?? '')
+    .filter(username => username !== ''))]
+}
+
+/**
+ * The submitter's main department row: users.mainDepartmentId names it
+ * directly; a submitter without one falls back to their first
+ * departmentsUsers membership (a user attached to no department at all
+ * answers undefined — the marker's empty policy applies).
+ */
+async function mainDepartmentOf(io: NocoIO, submitter: string | undefined): Promise<Record<string, any> | undefined> {
+  if (submitter === undefined || submitter === '') return undefined
+  const userRow = (await io.list('users', {})).find(row => String(row.username ?? '') === submitter)
+  if (userRow === undefined) return undefined
+  const departments = await io.list('departments', {})
+  const byMain = departments.find(row => String(row.id ?? '') === String(userRow.mainDepartmentId ?? ''))
+  if (byMain !== undefined) return byMain
+  const links = await io.list('departmentsUsers', {})
+  const first = links.find(link => String(link.userId ?? '') === String(userRow.id ?? ''))
+  return departments.find(row => String(row.id ?? '') === String(first?.departmentId ?? ''))
+}
+
+/**
+ * Resolve one role's approver usernames. Static values (usernames, username
+ * arrays, department forms) expand exactly as W3-B5 did — the pure path stays
+ * byte-identical (缺省零漂移). A W5-B2 marker resolves against the document
+ * context: deptLeader → the submitter's main department owners;
+ * supervisorChain → that department's owner chain up the parentId tree,
+ * nearest first, at most `levels` owners; formField → the user the document's
+ * own field names (a users id or username; the REST row carries `<field>_id`).
  * @param io - the data access to run over.
  * @param flow - the resolved flow configuration.
  * @param role - the transition's allowed_role the todo expansion reads.
- * @returns the role's approver usernames.
+ * @param doc - the document context (required for marker entries; absent for callers that only ever resolve static maps).
+ * @returns the role's approver usernames, resolution order kept.
  */
-async function resolveApproversOfRole(io: NocoIO, flow: FlowConfig, role: string): Promise<readonly string[]> {
+async function resolveApproversOfRole(io: NocoIO, flow: FlowConfig, role: string, doc?: DocContext): Promise<readonly string[]> {
   const raw = flow.approver_map[role]
+  if (isRuntimeMarker(raw)) {
+    if (doc === undefined) {
+      throw new Error(`审批流「${flow.doc_type}」角色 ${role} 的审批人类型 ${raw.type} 需按单据运行时解析（缺少单据上下文）`)
+    }
+    if (raw.type === 'deptLeader') {
+      const department = await mainDepartmentOf(io, await lastSubmitterOf(io, doc.docType, doc.docId))
+      return department === undefined ? [] : await departmentOwners(io, department.id)
+    }
+    if (raw.type === 'supervisorChain') {
+      const departments = await io.list('departments', {})
+      const submitter = await lastSubmitterOf(io, doc.docType, doc.docId)
+      const chain: string[] = []
+      let cursor = await mainDepartmentOf(io, submitter)
+      const seen = new Set<string>()
+      while (cursor !== undefined && chain.length < raw.levels && !seen.has(String(cursor.id))) {
+        seen.add(String(cursor.id))
+        chain.push(...await departmentOwners(io, cursor.id))
+        cursor = departments.find(row => String(row.id ?? '') === String(cursor?.parentId ?? ''))
+      }
+      return [...new Set(chain)]
+    }
+    // formField: the document's own field (a users m2o — the raw row carries `<field>_id`).
+    const value = doc.row[raw.value] ?? doc.row[`${raw.value}_id`]
+    const resolved = typeof value === 'object' && value !== null && 'id' in (value as Record<string, unknown>)
+      ? (value as Record<string, unknown>)['id']
+      : value
+    if (resolved === null || resolved === undefined || resolved === '') return []
+    if (typeof resolved === 'number' || /^\d+$/u.test(String(resolved))) {
+      const user = await io.get('users', Number(resolved))
+      return user === undefined ? [] : [String(user.username ?? '')]
+    }
+    return [String(resolved)]
+  }
   const entries = raw === undefined || raw === null ? [] : Array.isArray(raw) ? raw : [raw]
   if (entries.length === 0 || !entries.some(isDepartmentRef)) {
     return approversOfRole(flow.approver_map, role)
@@ -364,32 +538,70 @@ async function resolveApproversOfRole(io: NocoIO, flow: FlowConfig, role: string
     } else if (typeof entry === 'string' && entry.trim() !== '') {
       users.push(entry.trim())
     } else {
-      throw new Error(`审批流角色 ${role} 的 approver_map 值非法：${JSON.stringify(raw)}（应为用户名、{"type":"department","value":"部门名"} 或二者的数组）`)
+      throw new Error(`审批流角色 ${role} 的 approver_map 值非法：${JSON.stringify(raw)}（应为用户名、{"type":"department","value":"部门名"} 或运行时标记）`)
     }
   }
   return [...new Set(users)]
+}
+
+/** The sign mode a state's approve tier runs under (extras.sign_modes[role]; absent = or). */
+function signModeOf(flow: FlowConfig, approveRole: string): 'or' | 'countersign' | 'sequential' {
+  const modes = flow.extras === null ? undefined : flow.extras.sign_modes as Record<string, unknown> | undefined
+  const mode = modes?.[approveRole]
+  return mode === 'countersign' || mode === 'sequential' ? mode : 'or'
+}
+
+/** One tier's open-todo outcome: who owes a todo, or which empty policy skipped it. */
+interface TierOutcome {
+  readonly users: readonly string[]
+  readonly skipped: 'autoPass' | 'autoReject' | null
 }
 
 /**
  * Create the open todo rows for a state that waits on one role. The role's
  * approver_map value may name several users (an array) or a department
  * (W3-B5): each resolved user expands to one todo row, and any one of them
- * acting completes the whole tier — the OR-sign-off contract (counter-sign
- * belongs to the enterprise edition).
+ * acting completes the whole tier — the OR-sign-off contract. A W5-B2 marker
+ * resolves per document and applies its empty policy when the resolution is
+ * empty: transferAdmin/assignUser re-route the todo, autoPass/autoReject
+ * answer {@link TierOutcome.skipped} for the caller to advance the chain.
+ * extras.sign_modes governs the fan-out shape: countersign/or open every
+ * user's todo at once (aggregation differs at act time), sequential opens
+ * only the first assignee's todo.
+ * @param io - the data access to run over.
+ * @param flow - the resolved flow configuration.
+ * @param docType - the document collection.
+ * @param docId - the document row id.
+ * @param state - the waiting state the tier sits on.
+ * @param doc - the document context the markers resolve against.
  */
-async function openTodo(io: NocoIO, flow: FlowConfig, docType: string, docId: number, state: string): Promise<readonly string[]> {
+async function openTodo(io: NocoIO, flow: FlowConfig, docType: string, docId: number, state: string, doc?: DocContext): Promise<TierOutcome> {
   const transitions = await io.list('wfl_flow_transitions', { flow_id: flow.id, state })
   const leaving = transitions.find(row => row.action === 'approve')
   if (leaving === undefined) {
     throw new Error(`审批流「${flow.doc_type}」缺 ${state} 状态的 approve 转移（wfl_flow_transitions）；配置不完整`)
   }
-  const users = await resolveApproversOfRole(io, flow, String(leaving.allowed_role ?? ''))
-  await assertApproversExist(io, flow, users)
-  const due = new Date(Date.now() + 2 * 24 * 3600 * 1000).toISOString().slice(0, 10)
-  for (const user of users) {
-    await io.create('wfl_approval_todos', { doc_type: docType, doc_id: docId, user, state, status: 'open', due_date: due })
+  const role = String(leaving.allowed_role ?? '')
+  const raw = flow.approver_map[role]
+  let users = await resolveApproversOfRole(io, flow, role, doc)
+  if (users.length === 0 && isRuntimeMarker(raw)) {
+    if (raw.emptyPolicy === 'transferAdmin') users = ['admin']
+    else if (raw.emptyPolicy === 'assignUser') {
+      const fallback = raw.emptyAssignee ?? ''
+      if (fallback === '') throw new Error(`审批流「${flow.doc_type}」角色 ${role} 的空策略为指定人员但未配置 emptyAssignee`)
+      users = [fallback]
+    } else {
+      return { users: [], skipped: raw.emptyPolicy }
+    }
   }
-  return users
+  await assertApproversExist(io, flow, users)
+  const mode = signModeOf(flow, role)
+  const due = new Date(Date.now() + 2 * 24 * 3600 * 1000).toISOString().slice(0, 10)
+  const openFor = mode === 'sequential' ? users.slice(0, 1) : users
+  for (const user of openFor) {
+    await io.create('wfl_approval_todos', { doc_type: docType, doc_id: docId, user, state, status: 'open', due_date: due, kind: 'todo' })
+  }
+  return { users, skipped: null }
 }
 
 /**
@@ -403,7 +615,7 @@ async function openTodo(io: NocoIO, flow: FlowConfig, docType: string, docId: nu
  */
 export async function submitForApproval(io: NocoIO, docType: string, docId: number, submitter: string): Promise<ActResult> {
   const flow = await loadFlow(io, docType)
-  const { state, vocab } = await readState(io, flow, docType, docId)
+  const { row, state, vocab } = await readState(io, flow, docType, docId)
   // Both vocabularies submit from their entry state (draft / potential) and
   // resubmit from their refusal state (rejected).
   const action: ApprovalAction = state === 'draft' || state === 'potential' ? 'submit' : 'resubmit'
@@ -420,7 +632,16 @@ export async function submitForApproval(io: NocoIO, docType: string, docId: numb
     throw new Error(`单据状态已变化：${docType} 第 ${docId} 行已不在「${state}」态（并发提交被拒绝，未双写）`)
   }
   await writeRecord(io, { doc_type: docType, doc_id: docId, approver: submitter, action, attempt_no: attemptNo, from_state: state, to_state: next, source: 'engine', anchors: vocab.anchors })
-  await openTodo(io, flow, docType, docId, next)
+  const tier = await openTodo(io, flow, docType, docId, next, { docType, docId, row })
+  // A tier that resolved empty under autoPass/autoReject advances itself (the
+  // auto chain cascades through act with a depth guard; the receipt echoes
+  // the final landing, the audit trail carries every auto step).
+  if (tier.skipped === 'autoPass') {
+    return await act(io, docType, docId, 'approve', '(auto)', '空审批人策略：自动通过', 'engine')
+  }
+  if (tier.skipped === 'autoReject') {
+    return await act(io, docType, docId, 'reject', '(auto)', '空审批人策略：自动拒绝', 'engine')
+  }
   return {
     doc_type: docType, doc_id: docId, action, from_state: state, to_state: next,
     from_anchor: vocab.anchors[state] ?? 0, to_anchor: vocab.anchors[next] ?? 0,
@@ -428,33 +649,54 @@ export async function submitForApproval(io: NocoIO, docType: string, docId: numb
   }
 }
 
+
+/** The auto-chain recursion ceiling (autoPass tiers cascading through act). */
+const AUTO_CHAIN_LIMIT = 8
+
 /**
- * Perform one approval action (approve / reject / void): validate the current
- * state against the shared rules, match the configured transition (amount
- * threshold included), write the audit record, close the current todo, open
- * the level-2 todo on the routed state, and write the doc_status back (with
- * approved_by/approved_at when the flow names them).
+ * Perform one approval action (approve / reject / void). The transition the
+ * document takes is row-driven first (W5-B2): among this state's configured
+ * rows for the action, the first conditional row whose general-DSL condition
+ * applies wins, else the first unconditional row — the engine already trusts
+ * these rows for the cross-check, so the seeded threshold shapes and the
+ * published general conditions route through one code path (the shared rules
+ * resolver remains the fallback when no rows bind). 会签/依次审批 aggregate
+ * here: an approve closes only the actor's todo and advances once the tier's
+ * open todos reach zero (sequential additionally re-opens the next assignee
+ * in resolution order); any reject closes the whole tier and routes by the
+ * reject rows — a rejectTo compile lands the document back on the previous
+ * approval state instead of rejected. Approve transitions leaving a state
+ * with an extras.cc_after entry fire read-only kind='cc' todo rows.
  * @param io - the data access to run over.
  * @param docType - the document collection.
  * @param docId - the document row id.
  * @param action - approve | reject | void.
- * @param approver - the acting user's name (audit element).
+ * @param approver - the acting user's name (audit element; '(auto)' marks an empty-policy auto step).
  * @param comment - the actor's remark (audit element; rejects read best with one).
  * @param source - which entry point fired (engine writes page-consumed rows as page).
+ * @param depth - the auto-chain recursion depth (internal; the ceiling refuses a pathological loop).
  * @returns the act outcome.
  */
-export async function act(io: NocoIO, docType: string, docId: number, action: ApprovalAction, approver: string, comment?: string, source: 'engine' | 'page' = 'engine'): Promise<ActResult> {
+export async function act(io: NocoIO, docType: string, docId: number, action: ApprovalAction, approver: string, comment?: string, source: 'engine' | 'page' = 'engine', depth = 0): Promise<ActResult> {
   if (action !== 'approve' && action !== 'reject' && action !== 'void') {
     throw new Error(`act 只接受 approve/reject/void 动作（收到 ${action}）；提交与重提走 submitForApproval`)
   }
+  if (depth > AUTO_CHAIN_LIMIT) {
+    throw new Error(`空审批人自动链超过 ${String(AUTO_CHAIN_LIMIT)} 级（配置疑似成环）——拒绝继续推进`)
+  }
   const flow = await loadFlow(io, docType)
   const { row, state, vocab } = await readState(io, flow, docType, docId)
-  const amount = row[flow.amount_field] === null || row[flow.amount_field] === undefined ? undefined : Number(row[flow.amount_field])
-  const next = vocab.nextOf(state, action, amount, flow.threshold)
+  const transitions = await io.list('wfl_flow_transitions', { flow_id: flow.id, state, action })
+  const legalStates = new Set(vocab.states)
+  const conditional = transitions.filter(candidate => legalStates.has(String(candidate.next_state))
+    && String(candidate.condition_expr ?? '').trim() !== '')
+  const unconditional = transitions.filter(candidate => legalStates.has(String(candidate.next_state))
+    && String(candidate.condition_expr ?? '').trim() === '')
+  const chosen = conditional.find(candidate => conditionApplies(String(candidate.condition_expr ?? ''), row)) ?? unconditional[0]
+  const next = chosen !== undefined ? String(chosen.next_state) : vocab.nextOf(state, action, row[flow.amount_field] === null || row[flow.amount_field] === undefined ? undefined : Number(row[flow.amount_field]), flow.threshold)
   if (next === undefined) {
     throw new Error(vocab.illegalMessage(state, action))
   }
-  const transitions = await io.list('wfl_flow_transitions', { flow_id: flow.id, state, action })
   const matched = transitions.find(candidate => candidate.next_state === next && conditionApplies(candidate.condition_expr === null || candidate.condition_expr === undefined ? undefined : String(candidate.condition_expr), row))
   if (matched === undefined) {
     throw new Error(`审批流「${docType}」缺 ${state}×${action}→${next} 的转移配置（wfl_flow_transitions）；规则与配置不一致，检查种子`)
@@ -466,6 +708,54 @@ export async function act(io: NocoIO, docType: string, docId: number, action: Ap
     if (lastSubmitter === approver) {
       throw new Error(`不允许自审自批：${docType} 第 ${docId} 行由 ${approver} 提交，该转移（${state}×${action}）未开启 allow_self_approval`)
     }
+  }
+  // 会签/依次审批 aggregation: the approve closes only the actor's todo; the
+  // tier advances when its open todos reach zero (sequential then re-opens
+  // the next assignee). Rejects always run the full-advance path.
+  const doc: DocContext = { docType, docId, row }
+  const approveRole = String((await io.list('wfl_flow_transitions', { flow_id: flow.id, state })).find(candidate => candidate.action === 'approve')?.allowed_role ?? '')
+  const mode = signModeOf(flow, approveRole)
+  if (action === 'approve' && (mode === 'countersign' || mode === 'sequential')) {
+    const openTodos = (await io.list('wfl_approval_todos', { doc_type: docType, doc_id: docId, state, status: 'open' }))
+      .filter(todo => String(todo.kind ?? 'todo') !== 'cc')
+    const actorTodo = openTodos.find(todo => String(todo.user ?? '') === approver)
+    if (actorTodo === undefined) {
+      throw new Error(`${mode === 'countersign' ? '会签' : '依次审批'}被拒：${approver} 在 ${docType} 第 ${docId} 行的「${state}」态没有待办（不在本节点审批名单，或已审批过）`)
+    }
+    await io.update('wfl_approval_todos', Number(actorTodo.id), { status: 'completed' })
+    const remaining = openTodos.filter(todo => Number(todo.id) !== Number(actorTodo.id))
+    // Sequential decides by the resolution order (one todo exists at a time,
+    // so remaining is normally zero long before the sequence ends).
+    if (mode === 'sequential') {
+      const sequence = await resolveApproversOfRole(io, flow, approveRole, doc)
+      const position = sequence.indexOf(approver)
+      if (position < 0) {
+        throw new Error(`依次审批被拒：${approver} 不在 ${docType} 第 ${docId} 行「${state}」态的审批顺序内（名单已变化，请管理员重核审批流）`)
+      }
+      const nextUser = sequence[position + 1]
+      if (nextUser !== undefined) {
+        const attemptNo = await currentAttempt(io, docType, docId)
+        await writeRecord(io, { doc_type: docType, doc_id: docId, approver, action: 'approve', comment, attempt_no: attemptNo, from_state: state, to_state: state, source, anchors: vocab.anchors })
+        const due = new Date(Date.now() + 2 * 24 * 3600 * 1000).toISOString().slice(0, 10)
+        await io.create('wfl_approval_todos', { doc_type: docType, doc_id: docId, user: nextUser, state, status: 'open', due_date: due, kind: 'todo' })
+        return {
+          doc_type: docType, doc_id: docId, action, from_state: state, to_state: state,
+          from_anchor: vocab.anchors[state] ?? 0, to_anchor: vocab.anchors[state] ?? 0,
+          attempt_no: attemptNo, effective: false,
+        }
+      }
+      // The last assignee in the order: the tier is complete — fall through.
+    } else if (remaining.length > 0) {
+      // Countersign partial: the tier still owes the remaining open todos.
+      const attemptNo = await currentAttempt(io, docType, docId)
+      await writeRecord(io, { doc_type: docType, doc_id: docId, approver, action: 'approve', comment, attempt_no: attemptNo, from_state: state, to_state: state, source, anchors: vocab.anchors })
+      return {
+        doc_type: docType, doc_id: docId, action, from_state: state, to_state: state,
+        from_anchor: vocab.anchors[state] ?? 0, to_anchor: vocab.anchors[state] ?? 0,
+        attempt_no: attemptNo, effective: false,
+      }
+    }
+    // The tier is complete — fall through to the full advance.
   }
   const attemptNo = await currentAttempt(io, docType, docId)
   const writeBack: Record<string, unknown> = { [flow.state_field]: next }
@@ -489,8 +779,30 @@ export async function act(io: NocoIO, docType: string, docId: number, action: Ap
   }
   await writeRecord(io, { doc_type: docType, doc_id: docId, approver, action, comment, attempt_no: attemptNo, from_state: state, to_state: next, source, anchors: vocab.anchors })
   await closeTodos(io, docType, docId, state)
-  if (next === 'pending_level2') {
-    await openTodo(io, flow, docType, docId, next)
+  // The cc plan fires as the flow passes the keyed state: an approve
+  // transition leaving S delivers the cc rows for whoever S's node named
+  // (they ride the entered state, so the NEXT transition's closeTodos sweep
+  // collects them; kind='cc' keeps them out of every aggregation count).
+  if (action === 'approve' && flow.extras !== null) {
+    const ccUsers = flow.extras.cc_after?.[state] ?? []
+    const due = new Date(Date.now() + 2 * 24 * 3600 * 1000).toISOString().slice(0, 10)
+    for (const user of ccUsers) {
+      await io.create('wfl_approval_todos', { doc_type: docType, doc_id: docId, user, state: next, status: 'open', due_date: due, kind: 'cc' })
+    }
+  }
+  // The next state's tier: any state with an approve-leaving row is waiting
+  // (pending, pending_level2, reviewing — and a rejectTo return to pending
+  // re-opens that tier). An empty resolution under autoPass/autoReject
+  // advances itself, cascading through this same act.
+  const nextRows = await io.list('wfl_flow_transitions', { flow_id: flow.id, state: next })
+  if (nextRows.some(candidate => candidate.action === 'approve')) {
+    const tier = await openTodo(io, flow, docType, docId, next, doc)
+    if (tier.skipped === 'autoPass') {
+      return await act(io, docType, docId, 'approve', '(auto)', '空审批人策略：自动通过', source, depth + 1)
+    }
+    if (tier.skipped === 'autoReject') {
+      return await act(io, docType, docId, 'reject', '(auto)', '空审批人策略：自动拒绝', source, depth + 1)
+    }
   }
   return {
     doc_type: docType, doc_id: docId, action, from_state: state, to_state: next,
@@ -1236,7 +1548,9 @@ function resolveI18nTitle(title: unknown, fallback: string): string {
   return text !== '' ? text : fallback
 }
 
-const GRAPH_ASSIGNEE_TYPES: ReadonlySet<string> = new Set(['user', 'role', 'deptLeader', 'supervisorChain', 'formField'])
+const GRAPH_ASSIGNEE_TYPES: ReadonlySet<string> = new Set(['user', 'role', 'department', 'deptLeader', 'supervisorChain', 'formField'])
+/** The runtime-resolved assignee types (W5-B2): resolution needs the document context, and an empty resolution is a policy decision, not a config error. */
+const GRAPH_RUNTIME_ASSIGNEE_TYPES: ReadonlySet<string> = new Set(['deptLeader', 'supervisorChain', 'formField'])
 const GRAPH_MODES: ReadonlySet<string> = new Set(['sequential', 'countersign', 'or'])
 const GRAPH_EMPTY_POLICIES: ReadonlySet<string> = new Set(['autoPass', 'autoReject', 'transferAdmin', 'assignUser'])
 const GRAPH_CONDITION_OPS: ReadonlySet<string> = new Set(['>', '>=', '<', '<=', '==', '!=', 'contains', 'in'])
@@ -1296,17 +1610,47 @@ export function validateFlowGraph(graph: unknown): string[] {
       if (typeof approval !== 'object' || approval === null) failures.push(`${label} 审批节点缺 data.approval`)
       else {
         const block = approval as Record<string, unknown>
-        if (!GRAPH_ASSIGNEE_TYPES.has(String(block['assigneeType']))) failures.push(`${label} assigneeType 非法：${String(block['assigneeType'])}`)
+        const assigneeType = String(block['assigneeType'])
+        if (!GRAPH_ASSIGNEE_TYPES.has(assigneeType)) failures.push(`${label} assigneeType 非法：${assigneeType}`)
         if (!GRAPH_MODES.has(String(block['mode']))) failures.push(`${label} mode 非法：${String(block['mode'])}`)
-        if (!GRAPH_EMPTY_POLICIES.has(String(block['emptyPolicy']))) failures.push(`${label} emptyPolicy 非法：${String(block['emptyPolicy'])}`)
+        const emptyPolicy = String(block['emptyPolicy'])
+        if (!GRAPH_EMPTY_POLICIES.has(emptyPolicy)) failures.push(`${label} emptyPolicy 非法：${emptyPolicy}`)
         if (!Array.isArray(block['assignees'])) failures.push(`${label} assignees 需为数组`)
-        else if ((block['assignees'] as unknown[]).length === 0) failures.push(`${label} 审批人未配置（assignees 为空）`)
-        else if (!(block['assignees'] as unknown[]).every(entry => typeof entry === 'string' && entry !== '')) failures.push(`${label} assignees 含空项（每项需非空字符串）`)
+        else {
+          const assignees = block['assignees'] as unknown[]
+          // Runtime-resolved types carry no static assignees (the resolution IS
+          // the assignee source); formField names exactly one field; the rest
+          // need at least one non-empty entry.
+          if (GRAPH_RUNTIME_ASSIGNEE_TYPES.has(assigneeType)) {
+            if (assigneeType !== 'formField' && assignees.length > 0) failures.push(`${label} assigneeType ${assigneeType} 由运行时解析，assignees 需为空`)
+            if (assigneeType === 'formField' && assignees.length !== 1) failures.push(`${label} formField 需恰好一个字段名（当前 ${String(assignees.length)} 项）`)
+          } else if (assignees.length === 0) {
+            failures.push(`${label} 审批人未配置（assignees 为空）`)
+          }
+          if (!assignees.every(entry => typeof entry === 'string' && entry !== '')) failures.push(`${label} assignees 含空项（每项需非空字符串）`)
+        }
+        if (assigneeType === 'supervisorChain') {
+          const levels = block['levels']
+          if (levels !== undefined && (!Number.isInteger(Number(levels)) || Number(levels) < 1 || Number(levels) > 10)) {
+            failures.push(`${label} 连续多级主管的级数 levels 需为 1..10 整数（当前 ${JSON.stringify(levels)}）`)
+          }
+        }
+        if (emptyPolicy === 'assignUser') {
+          const emptyAssignee = block['emptyAssignee']
+          if (typeof emptyAssignee !== 'string' || emptyAssignee.trim() === '') {
+            failures.push(`${label} 空策略「指定人员」需配置 emptyAssignee（回退审批人用户名）`)
+          }
+        }
+        const rejectTo = block['rejectTo']
+        if (rejectTo !== undefined && (typeof rejectTo !== 'string' || rejectTo.trim() === '')) {
+          failures.push(`${label} rejectTo 需为节点 id 字符串（当前 ${JSON.stringify(rejectTo)}）`)
+        }
       }
     }
     if (kind === 'cc') {
       const cc = payload['cc']
       if (typeof cc !== 'object' || cc === null || !Array.isArray((cc as Record<string, unknown>)['assignees'])) failures.push(`${label} 抄送节点缺 data.cc.assignees 数组`)
+      else if (((cc as Record<string, unknown>)['assignees'] as unknown[]).length === 0) failures.push(`${label} 抄送人未配置（assignees 为空）`)
     }
     if (kind === 'condition') {
       const condition = payload['condition']
@@ -1319,7 +1663,13 @@ export function validateFlowGraph(graph: unknown): string[] {
           if (typeof rowValue !== 'object' || rowValue === null) { failures.push(`${label} 条件行 #${String(rowIndex)} 不是对象`); continue }
           const row = rowValue as Record<string, unknown>
           if (typeof row['field'] !== 'string' || row['field'] === '') failures.push(`${label} 条件行 #${String(rowIndex)} 缺字段名`)
-          if (!GRAPH_CONDITION_OPS.has(String(row['op']))) failures.push(`${label} 条件行 #${String(rowIndex)} 操作符非法：${String(row['op'])}`)
+          const op = String(row['op'])
+          if (!GRAPH_CONDITION_OPS.has(op)) failures.push(`${label} 条件行 #${String(rowIndex)} 操作符非法：${op}`)
+          if (typeof row['value'] !== 'string' || row['value'].trim() === '') {
+            failures.push(`${label} 条件行 #${String(rowIndex)} 缺比较值`)
+          } else if (['>', '>=', '<', '<='].includes(op) && !Number.isFinite(Number(row['value']))) {
+            failures.push(`${label} 条件行 #${String(rowIndex)} 操作符 ${op} 需数字比较值（当前 ${String(row['value'])}）`)
+          }
         }
       }
     }
@@ -1404,6 +1754,10 @@ export interface CompileContext {
   readonly stateField: string
   /** The condition-field vocabulary (the /designer/meta formFields list). */
   readonly formFields: ReadonlyArray<string>
+  /** The personnel-typed fields (users m2o) among the vocabulary — the formField assignee's gate. */
+  readonly userFields: ReadonlyArray<string>
+  /** Whether any departmentsUsers.isOwner row exists — the supervisorChain/deptMarker publish gate (链路存在). */
+  readonly hasDepartmentOwners: boolean
   /** The live config's extras — engine-owned keys pass through; the graph owns amount_field/amount_threshold. */
   readonly preserveExtras: Record<string, unknown> | null
   /** Every known username (the publish-time user-existence gate). */
@@ -1506,24 +1860,32 @@ export function publishGateFailures(graph: unknown, formFields: ReadonlyArray<st
     if (kind === 'condition' && out !== 2) failures.push(`条件分支${label}需恰好两条出边（当前 ${String(out)} 条）`)
     if (kind === 'condition' && into !== 1) failures.push(`条件分支${label}需恰好一条入边（当前 ${String(into)} 条）`)
   }
-  // Feature matrix: what the engine can consume without changes (B1 boundary; the rest is B2).
+  // Feature matrix (W5-B2): the runtime-resolved assignee types and the
+  // multi-sign modes publish. The pure gates the graph alone can judge stay
+  // here; resolution-dependent gates (user existence, role expansion,
+  // department owners, user-typed form fields) live in compileGraphToRows,
+  // which carries the full context.
   for (const node of nodes) {
     if (String(node['type']) !== 'approval') continue
     const label = `审批节点「${titleOf(String(node['id']))}」`
     const block = (node['data'] as Record<string, unknown>)['approval'] as Record<string, unknown> | undefined
     if (block === undefined) continue
-    const assigneeType = String(block['assigneeType'])
-    if (assigneeType === 'supervisorChain') failures.push(`${label} 审批人类型「连续多级主管」依赖运行时提交人，引擎 B1 发布链路不支持（B2 启用）；请改用指定成员或角色`)
-    if (assigneeType === 'formField') failures.push(`${label} 审批人类型「表单联系人字段」依赖单据运行时字段，引擎 B1 发布链路不支持（B2 启用）；请改用指定成员或角色`)
-    if (assigneeType === 'deptLeader') failures.push(`${label} 审批人类型「部门主管」的引擎部门路由按全员展开（或签），主管专属语义 B1 不发布（B2 启用）；请改用指定成员或角色`)
-    const mode = String(block['mode'])
-    if (mode === 'sequential') failures.push(`${label} 多人方式「依次审批」需要引擎逐人聚合判定（B2 启用）；B1 仅支持或签（任一人可审）`)
-    if (mode === 'countersign') failures.push(`${label} 多人方式「会签（全过）」需要引擎扇出聚合判定（B2 启用）；B1 仅支持或签（任一人可审）`)
-    const emptyPolicy = String(block['emptyPolicy'])
-    if (emptyPolicy === 'autoPass') failures.push(`${label} 空策略「自动通过」需要引擎跳过语义（B2 启用）；B1 支持自动拒绝/转交管理员`)
-    if (emptyPolicy === 'assignUser') failures.push(`${label} 空策略「指定人员」需要引擎改派语义（B2 启用）；B1 支持自动拒绝/转交管理员`)
+    // rejectTo must name another approval node (the earlier-chain check runs
+    // in the compiler, which walks the topology).
+    const rejectTo = block['rejectTo']
+    if (rejectTo !== undefined) {
+      const target = String(rejectTo)
+      const targetKind = kindOf.get(target)
+      if (target === String(node['id'])) {
+        failures.push(`${label} 回退目标不能是审批节点自身——rejectTo 只能指向更早的审批节点`)
+      } else if (targetKind !== 'approval') {
+        failures.push(`${label} 回退目标 ${targetKind === undefined ? `节点 ${target} 不存在` : `「${titleOf(target)}」不是审批节点`}——rejectTo 只能指向更早的审批节点`)
+      }
+    }
   }
-  // Condition DSL: the engine consumes exactly one numeric > threshold row.
+  // Condition DSL (W5-B2): one or more rows over the field vocabulary with
+  // any operator from GRAPH_CONDITION_OPS (validateFlowGraph checked the
+  // value shapes; here the vocabulary binds).
   for (const node of nodes) {
     if (String(node['type']) !== 'condition') continue
     const label = `条件分支「${titleOf(String(node['id']))}」`
@@ -1534,16 +1896,12 @@ export function publishGateFailures(graph: unknown, formFields: ReadonlyArray<st
       failures.push(`${label} 缺条件行（至少一行「字段/操作符/值」）`)
       continue
     }
-    if (rows.length > 1) failures.push(`${label} 有 ${String(rows.length)} 行条件——引擎 B1 仅支持单行金额阈值（多行条件在 B2 扩展条件 DSL）`)
-    const row = rows[0] as Record<string, unknown>
-    const field = String(row['field'] ?? '')
-    const op = String(row['op'])
-    const value = String(row['value'] ?? '')
-    if (field === '') failures.push(`${label} 条件行缺字段名`)
-    else if (!/^[A-Za-z_][A-Za-z0-9_]*$/u.test(field)) failures.push(`${label} 条件字段名非法：${field}（需为数据库列名形式的标识符）`)
-    else if (!formFields.includes(field)) failures.push(`${label} 条件字段 ${field} 不在单据字段词表（可在属性面板重新选择字段）`)
-    if (op !== '>') failures.push(`${label} 条件操作符需为 >（引擎两级路由语义：金额超过阈值进二级审批，≤ 阈值一审即生效；其余操作符在 B2 扩展条件 DSL）`)
-    if (!Number.isFinite(Number(value))) failures.push(`${label} 条件值需为有限数字（当前 ${value === '' ? '空' : value}）`)
+    for (const [rowIndex, row] of rows.entries()) {
+      const field = String(row['field'] ?? '')
+      if (field === '') failures.push(`${label} 条件行 #${String(rowIndex)} 缺字段名`)
+      else if (!/^[A-Za-z_][A-Za-z0-9_]*$/u.test(field)) failures.push(`${label} 条件字段名非法：${field}（需为数据库列名形式的标识符）`)
+      else if (!formFields.includes(field)) failures.push(`${label} 条件字段 ${field} 不在单据字段词表（可在属性面板重新选择字段）`)
+    }
   }
   return failures
 }
@@ -1558,15 +1916,27 @@ const docStateRows = (): ReadonlyArray<CompiledStateRow> =>
     update_value: '',
   }))
 
-/** The doc-vocabulary transitions template: the ≤ literal rides the direct-approve row (the PILOT_TRANSITIONS shape). */
-const docTransitionRows = (amountField: string | null, threshold: number | null): ReadonlyArray<CompiledTransitionRow> => [
+/**
+ * The doc-vocabulary transitions template. The seeded threshold shape puts
+ * the ≤ literal on the direct-approve row (PILOT_TRANSITIONS shape); a W5-B2
+ * general condition instead rides the pending→pending_level2 row positively
+ * (the engine's row-driven routing evaluates conditional rows first, so both
+ * shapes route identically); a rejectTo compile redirects the level-2 reject
+ * row back to pending instead of rejected.
+ */
+const docTransitionRows = (amountField: string | null, threshold: number | null, options: {
+  /** The W5-B2 general-condition literal for the level-2 route (positive form). */
+  level2Condition?: string
+  /** W5-B2: the level-2 reject row routes back to pending (rejectTo). */
+  rejectToPending?: boolean
+} = {}): ReadonlyArray<CompiledTransitionRow> => [
   { state: 'draft', action: 'submit', next_state: 'pending', allowed_role: 'manager', condition_expr: '', allow_self_approval: true },
   { state: 'rejected', action: 'resubmit', next_state: 'pending', allowed_role: 'manager', condition_expr: '', allow_self_approval: true },
-  { state: 'pending', action: 'approve', next_state: 'approved', allowed_role: 'manager', condition_expr: amountField === null || threshold === null ? '' : `${amountField} <= ${String(threshold)}`, allow_self_approval: true },
-  { state: 'pending', action: 'approve', next_state: 'pending_level2', allowed_role: 'manager', condition_expr: '', allow_self_approval: true },
+  { state: 'pending', action: 'approve', next_state: 'approved', allowed_role: 'manager', condition_expr: options.level2Condition !== undefined ? '' : amountField === null || threshold === null ? '' : `${amountField} <= ${String(threshold)}`, allow_self_approval: true },
+  { state: 'pending', action: 'approve', next_state: 'pending_level2', allowed_role: 'manager', condition_expr: options.level2Condition ?? '', allow_self_approval: true },
   { state: 'pending_level2', action: 'approve', next_state: 'approved', allowed_role: 'gm', condition_expr: '', allow_self_approval: true },
   { state: 'pending', action: 'reject', next_state: 'rejected', allowed_role: 'manager', condition_expr: '', allow_self_approval: true },
-  { state: 'pending_level2', action: 'reject', next_state: 'rejected', allowed_role: 'gm', condition_expr: '', allow_self_approval: true },
+  { state: 'pending_level2', action: 'reject', next_state: options.rejectToPending === true ? 'pending' : 'rejected', allowed_role: 'gm', condition_expr: '', allow_self_approval: true },
   { state: 'approved', action: 'void', next_state: 'void', allowed_role: 'manager', condition_expr: '', allow_self_approval: true },
 ]
 
@@ -1682,6 +2052,13 @@ export async function compileGraphToRows(graph: unknown, ctx: CompileContext): P
   // Resolve each approval node's assignees into the approver_map value.
   const approverEntries: Array<[string, ApproverMapValue]> = []
   const roleNames = vocabulary === 'admission' ? ['srm_manager'] : approvals.length === 2 ? ['manager', 'gm'] : ['manager']
+  /** The marker payload both marker forms carry (empty policy + optional fallback). */
+  const markerExtrasOf = (block: Record<string, unknown>): { emptyPolicy: 'autoPass' | 'autoReject' | 'transferAdmin' | 'assignUser', emptyAssignee?: string } => {
+    const emptyPolicy = String(block['emptyPolicy']) as 'autoPass' | 'autoReject' | 'transferAdmin' | 'assignUser'
+    const emptyAssignee = typeof block['emptyAssignee'] === 'string' && block['emptyAssignee'] !== '' ? block['emptyAssignee'] : undefined
+    return emptyAssignee === undefined ? { emptyPolicy } : { emptyPolicy, emptyAssignee }
+  }
+  const advanced: string[] = []
   for (const [index, token] of approvals.entries()) {
     const node = byId.get(token.id)
     const block = (node?.data['approval'] ?? {}) as Record<string, unknown>
@@ -1713,26 +2090,174 @@ export async function compileGraphToRows(graph: unknown, ctx: CompileContext): P
       approverEntries.push([roleNames[index] as string, approverValueOf([...new Set(users)])])
       continue
     }
+    if (assigneeType === 'department') {
+      // The W3-B5 department form byte-matches the live entries (qm_nc's
+      // manager value) — member expansion and OR sign-off stay engine-side.
+      const missing = assignees.filter(title => title.trim() === '')
+      if (missing.length > 0 || assignees.length === 0) {
+        return { ok: false, errors: [`${label} 部门成员审批人需至少一个部门（当前 ${String(assignees.length)} 个）`] }
+      }
+      const value: ApproverMapValue = assignees.length === 1
+        ? { type: 'department', value: assignees[0] as string }
+        : assignees.map(title => ({ type: 'department', value: title }) as DepartmentApprover)
+      approverEntries.push([roleNames[index] as string, value])
+      advanced.push('department')
+      continue
+    }
+    if (assigneeType === 'deptLeader') {
+      if (!ctx.hasDepartmentOwners) {
+        return { ok: false, errors: [`${label} 审批人类型「部门主管」发布被拒：组织架构中没有任何部门主管（departmentsUsers.isOwner 全空）——先在部门成员中把主管勾为负责人，再发布本流程`] }
+      }
+      approverEntries.push([roleNames[index] as string, { type: 'deptLeader', ...markerExtrasOf(block) }])
+      advanced.push('deptLeader')
+      continue
+    }
+    if (assigneeType === 'supervisorChain') {
+      if (!ctx.hasDepartmentOwners) {
+        return { ok: false, errors: [`${label} 审批人类型「连续多级主管」发布被拒：组织架构中没有任何部门主管（departmentsUsers.isOwner 全空）——先在部门成员中把主管勾为负责人，再发布本流程`] }
+      }
+      const levels = block['levels'] === undefined ? 1 : Number(block['levels'])
+      if (!Number.isInteger(levels) || levels < 1 || levels > 10) {
+        return { ok: false, errors: [`${label} 连续多级主管的级数 levels 需为 1..10 整数（当前 ${JSON.stringify(block['levels'])}）`] }
+      }
+      approverEntries.push([roleNames[index] as string, { type: 'supervisorChain', levels, ...markerExtrasOf(block) }])
+      advanced.push('supervisorChain')
+      continue
+    }
+    if (assigneeType === 'formField') {
+      const field = assignees[0] ?? ''
+      if (field === '') {
+        return { ok: false, errors: [`${label} formField 需恰好一个字段名（当前为空）`] }
+      }
+      if (!ctx.formFields.includes(field)) {
+        return { ok: false, errors: [`${label} 表单联系人字段 ${field} 不在单据字段词表（可在属性面板重新选择字段）`] }
+      }
+      if (!ctx.userFields.includes(field)) {
+        return { ok: false, errors: [`${label} 表单联系人字段 ${field} 不是人员字段（需为关联 users 的联系人/经办人字段；可在属性面板重新选择）`] }
+      }
+      approverEntries.push([roleNames[index] as string, { type: 'formField', value: field, ...markerExtrasOf(block) }])
+      advanced.push('formField')
+      continue
+    }
     return { ok: false, errors: [`${label} 审批人类型 ${assigneeType} 不可编译（publishGateFailures 应已拦截）`] }
   }
+  // emptyAssignee must name a real user whenever the policy needs it.
+  for (const [, value] of approverEntries) {
+    const marker = value as Record<string, unknown>
+    if (typeof value === 'object' && value !== null && !Array.isArray(value) && marker['type'] !== 'department'
+      && marker['emptyPolicy'] === 'assignUser') {
+      const fallback = String(marker['emptyAssignee'] ?? '')
+      if (!ctx.knownUsernames.has(fallback)) {
+        return { ok: false, errors: [`空策略「指定人员」的回退审批人 ${fallback} 不存在（users 表无此用户名）`] }
+      }
+    }
+  }
+  // rejectTo: only the second approval may carry it, and only back to the first.
+  let rejectToPending = false
+  if (approvals.length === 2) {
+    const second = byId.get(approvals[1]?.id ?? '')
+    const rejectTo = (second?.data['approval'] ?? {}) as Record<string, unknown>
+    const target = rejectTo['rejectTo']
+    if (target !== undefined) {
+      if (approvals.length !== 2) {
+        return { ok: false, errors: [`回退边只支持二级审批节点拒绝时回退一级（当前主链审批节点数 ${String(approvals.length)}）`] }
+      }
+      if (String(target) !== String(approvals[0]?.id)) {
+        return { ok: false, errors: [`回退目标必须是一级审批节点「${byId.get(approvals[0]?.id ?? '')?.title ?? ''}」（当前指向 ${String(target)}）`] }
+      }
+      rejectToPending = true
+      advanced.push('rejectTo')
+    }
+  } else {
+    const only = (byId.get(String(approvals[0]?.id ?? ''))?.data['approval'] ?? {}) as Record<string, unknown>
+    if (only['rejectTo'] !== undefined) {
+      return { ok: false, errors: ['单级审批没有更早的审批节点可回退——rejectTo 只配置在二级审批节点上'] }
+    }
+  }
   const approverMap: ApproverMap = Object.fromEntries(approverEntries)
-  // Amount routing: the condition node owns amount_field/amount_threshold; no condition → the keys drop out.
+  // Condition routing: a single `field > number` row stays the B1 threshold
+  // template (byte-identical rows); anything richer compiles to the B2
+  // general form — the positive literal rides the pending→pending_level2 row
+  // and the amount keys drop out (the engine routes row-driven).
   const extras: Record<string, unknown> = { ...(ctx.preserveExtras ?? {}) }
   let amountField: string | null = null
   let threshold: number | null = null
+  let level2Condition: string | undefined
   if (conditions.length === 1) {
     const condition = (byId.get(conditions[0]?.id ?? '')?.data['condition'] ?? {}) as Record<string, unknown>
-    const row = ((condition['rows'] as Array<Record<string, unknown>>) ?? [])[0] as Record<string, unknown> | undefined
-    amountField = String(row?.['field'] ?? '')
-    threshold = Number(row?.['value'])
-    extras.amount_field = amountField
-    extras.amount_threshold = threshold
+    const rows = ((condition['rows'] as Array<Record<string, unknown>>) ?? [])
+    const join = String(condition['join'] ?? 'and') === 'or' ? ' OR ' : ' AND '
+    const simpleThreshold = rows.length === 1 && String(rows[0]?.['op']) === '>' && Number.isFinite(Number(rows[0]?.['value']))
+    if (simpleThreshold) {
+      amountField = String(rows[0]?.['field'] ?? '')
+      threshold = Number(rows[0]?.['value'])
+      // Defaults stay implicit (the engine resolves both through
+      // amount_field/amount_threshold fallbacks): a migrated default-
+      // threshold flow keeps its extras byte-identical to the seed shape.
+      if (amountField !== AMOUNT_FIELD) extras.amount_field = amountField
+      else delete extras.amount_field
+      if (threshold !== DEFAULT_AMOUNT_THRESHOLD) extras.amount_threshold = threshold
+      else delete extras.amount_threshold
+      delete extras.condition_dsl
+    } else {
+      level2Condition = rows.map(row => {
+        const value = String(row['value'] ?? '')
+        const literal = /^-?\d+(?:\.\d+)?$/u.test(value) ? value : `'${value.replaceAll("'", "''")}'`
+        return `${String(row['field'])} ${String(row['op'])} ${literal}`
+      }).join(join)
+      delete extras.amount_field
+      delete extras.amount_threshold
+      // The one compiler-owned key the shape needs: the v2 marker tells the
+      // nb_approve twin this flow's routing is row-driven (not the shared
+      // rules' amount resolver), so it delegates to the engine.
+      extras.condition_dsl = 'v2'
+      advanced.push('generalCondition')
+    }
   } else {
     delete extras.amount_field
     delete extras.amount_threshold
+    delete extras.condition_dsl
   }
+  // Sign modes: every non-OR tier records its role key (absent key = or).
+  const signModes: Record<string, 'countersign' | 'sequential'> = {}
+  for (const [index, token] of approvals.entries()) {
+    const block = (byId.get(token.id)?.data['approval'] ?? {}) as Record<string, unknown>
+    const mode = String(block['mode'])
+    if (mode === 'countersign' || mode === 'sequential') {
+      signModes[roleNames[index] as string] = mode
+      advanced.push(mode)
+    }
+  }
+  if (Object.keys(signModes).length > 0) extras.sign_modes = signModes
+  else delete extras.sign_modes
+  // The cc plan: every cc node attaches to the main-chain node it follows
+  // (start→cc fires at submit = leaving draft; approval_i→cc fires when that
+  // tier's approve moves the document on; a cc before the level-2 approval
+  // rides the same leaving-pending key). Keys are the LEFT state.
+  const stateOfApprovalIndex = (index: number): string => index === 0 ? 'pending' : 'pending_level2'
+  const ccAfter: Record<string, readonly string[]> = {}
+  const chainAfter: Array<string> = [start.id, ...approvals.map(token => token.id)]
+  for (const [index, anchor] of chainAfter.entries()) {
+    let hop = onlyOut(anchor)
+    const users: string[] = []
+    while (byId.get(hop)?.kind === 'cc') {
+      const ccBlock = (byId.get(hop)?.data['cc'] ?? {}) as Record<string, unknown>
+      users.push(...(Array.isArray(ccBlock['assignees']) ? ccBlock['assignees'].map(entry => String(entry)) : []))
+      hop = onlyOut(hop)
+    }
+    if (users.length > 0) {
+      const key = index === 0 ? 'draft' : stateOfApprovalIndex(index - 1)
+      const merged = [...new Set([...(ccAfter[key] ?? []), ...users])]
+      ccAfter[key] = merged
+    }
+  }
+  if (Object.keys(ccAfter).length > 0) extras.cc_after = ccAfter
+  else delete extras.cc_after
   const ccCount = nodes.filter(node => node.kind === 'cc').length
   if (vocabulary === 'admission') {
+    if (advanced.length > 0) {
+      return { ok: false, errors: [`供应商准入词汇表不支持高级节点特性（${advanced.join('、')}）——多级/条件/会签/回退编排属于单据词汇表`] }
+    }
     return {
       ok: true,
       rows: {
@@ -1750,7 +2275,7 @@ export async function compileGraphToRows(graph: unknown, ctx: CompileContext): P
     rows: {
       vocabulary: 'doc',
       states: docStateRows(),
-      transitions: docTransitionRows(amountField, threshold),
+      transitions: docTransitionRows(amountField, threshold, { level2Condition, rejectToPending }),
       approverMap,
       extras,
       ccCount,
@@ -1768,21 +2293,56 @@ export interface LiveFlowRows {
 }
 
 /** Fixed grid coordinates for imported graphs (round-trip stability; purely cosmetic). */
-const IMPORT_POSITIONS: Readonly<Record<'start' | 'approval_1' | 'condition' | 'approval_2' | 'end', { x: number, y: number }>> = {
+const IMPORT_POSITIONS: Readonly<Record<'start' | 'cc_1' | 'approval_1' | 'condition' | 'approval_2' | 'cc_2' | 'end', { x: number, y: number }>> = {
   start: { x: 40, y: 160 },
+  cc_1: { x: 200, y: 280 },
   approval_1: { x: 320, y: 160 },
   condition: { x: 600, y: 60 },
   approval_2: { x: 880, y: 260 },
+  cc_2: { x: 1040, y: 400 },
   end: { x: 1160, y: 60 },
+}
+
+/**
+ * Parse one general-condition literal back into structured rows (the B2
+ * compile's positive form on the pending→pending_level2 row). Returns null
+ * when the literal fits neither the general DSL nor a plain threshold.
+ * @param literal - the raw condition_expr text.
+ */
+function parseGeneralCondition(literal: string): { join: 'and' | 'or', rows: Array<{ field: string, op: string, value: string }> } | null {
+  const clause = /^([A-Za-z_][A-Za-z0-9_]*)\s*(>=|<=|==|!=|>|<|contains)\s*(-?\d+(?:\.\d+)?|'[^']*')/u
+  let rest = literal.trim()
+  const rows: Array<{ field: string, op: string, value: string }> = []
+  let join: 'and' | 'or' | null = null
+  while (rest !== '') {
+    const head = clause.exec(rest)
+    if (head === null) return null
+    const raw = head[3] as string
+    rows.push({ field: head[1] as string, op: head[2] as string, value: raw.startsWith("'") ? raw.slice(1, -1) : raw })
+    rest = rest.slice(head[0].length).trim()
+    if (rest === '') break
+    const connector = /^(AND|OR)\s+/u.exec(rest)
+    if (connector === null) return null
+    const kind = connector[1] === 'AND' ? 'and' : 'or'
+    if (join !== null && join !== kind) return null
+    join = kind
+    rest = rest.slice(connector[0].length).trim()
+  }
+  return rows.length === 0 ? null : { join: join ?? 'and', rows }
 }
 
 /**
  * The reverse importer: existing wfl states/transitions/approver_map → a
  * graph draft. The canonical roles map back onto approval nodes (manager →
  * level 1, gm → level 2, srm_manager → admission), the ≤ literal becomes the
- * condition node's single `field > threshold` row, and department-form values
- * import as deptLeader nodes. Used by the publish round-trip gate and the B2
- * full migration.
+ * condition node's single `field > threshold` row, and the W5-B2 shapes
+ * import back losslessly: department-form values import as department nodes,
+ * marker entries (deptLeader/supervisorChain/formField) import with their
+ * policy/levels/field, extras.sign_modes imports onto node modes, a
+ * pending_level2×reject→pending row imports as approval_2's rejectTo, the
+ * general-condition literal on the level-2 route imports as structured rows,
+ * and extras.cc_after imports as cc nodes re-attached after their chain
+ * anchor. Used by the publish round-trip gate and the B2 full migration.
  * @param live - the flow's live rows (config keys + states + transitions).
  * @returns the graph draft, or the readable failure list when the rows fit no known template.
  */
@@ -1790,52 +2350,97 @@ export function rowsToGraph(live: LiveFlowRows): { ok: true, graph: Record<strin
   const errors: string[] = []
   const transitionOf = (state: string, action: string, nextState?: string): Record<string, any> | undefined =>
     live.transitions.find(row => String(row.state) === state && String(row.action) === action && (nextState === undefined || String(row.next_state) === nextState))
+  /** The mode the role's tier runs under (extras.sign_modes; absent = or). */
+  const modeOf = (role: string): string => {
+    const modes = (live.extras ?? {}).sign_modes as Record<string, unknown> | undefined
+    return modes?.[role] === 'countersign' || modes?.[role] === 'sequential' ? String(modes[role]) : 'or'
+  }
   const assigneesOf = (role: string): { assigneeType: string, assignees: string[] } => {
     const value = live.approverMap[role]
     const entries = value === undefined || value === null ? [] : Array.isArray(value) ? value : [value]
     const plain = entries.filter((entry): entry is string => typeof entry === 'string' && entry.trim() !== '')
     if (plain.length === entries.length && entries.length > 0) return { assigneeType: 'user', assignees: plain }
     const departments = entries.filter(isDepartmentRef).map(entry => entry.value)
-    if (departments.length === entries.length && entries.length > 0) return { assigneeType: 'deptLeader', assignees: departments }
+    if (departments.length === entries.length && entries.length > 0) return { assigneeType: 'department', assignees: departments }
     return { assigneeType: 'user', assignees: [] }
+  }
+  /** The approval payload of one role's marker entry (deptLeader/supervisorChain/formField). */
+  const markerApprovalOf = (role: string, raw: unknown): { assigneeType: string, assignees: string[], levels?: number, emptyPolicy: string, emptyAssignee?: string, value?: string } | null => {
+    if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return null
+    const marker = raw as Record<string, unknown>
+    const emptyPolicy = typeof marker['emptyPolicy'] === 'string' ? marker['emptyPolicy'] : 'autoReject'
+    const emptyAssignee = typeof marker['emptyAssignee'] === 'string' && marker['emptyAssignee'] !== '' ? marker['emptyAssignee'] : undefined
+    if (marker['type'] === 'deptLeader') return emptyAssignee === undefined ? { assigneeType: 'deptLeader', assignees: [], emptyPolicy } : { assigneeType: 'deptLeader', assignees: [], emptyPolicy, emptyAssignee }
+    if (marker['type'] === 'supervisorChain') {
+      const levels = Number(marker['levels'] ?? 1)
+      return emptyAssignee === undefined ? { assigneeType: 'supervisorChain', assignees: [], levels, emptyPolicy } : { assigneeType: 'supervisorChain', assignees: [], levels, emptyPolicy, emptyAssignee }
+    }
+    if (marker['type'] === 'formField') {
+      const field = String(marker['value'] ?? '')
+      return emptyAssignee === undefined ? { assigneeType: 'formField', assignees: [field], emptyPolicy } : { assigneeType: 'formField', assignees: [field], emptyPolicy, emptyAssignee }
+    }
+    return null
   }
   const nodes: Array<Record<string, unknown>> = []
   const edges: Array<Record<string, unknown>> = []
-  const pushNode = (slot: 'start' | 'approval_1' | 'condition' | 'approval_2' | 'end', kind: string, data: Record<string, unknown>): string => {
-    const id = `n_${slot}`
+  const pushNode = (slot: keyof typeof IMPORT_POSITIONS, kind: string, data: Record<string, unknown>): string => {
+    const id = `n_${String(slot)}`
     nodes.push({ id, type: kind, position: { ...IMPORT_POSITIONS[slot] }, data })
     return id
   }
   const pushEdge = (source: string, target: string): void => {
     edges.push({ id: `e_${source}_${target}`, source, target })
   }
-  const approvalDataOf = (resolved: { assigneeType: string, assignees: string[] }, title: string): Record<string, unknown> => ({
+  const approvalDataOf = (resolved: { assigneeType: string, assignees: string[] }, title: string, mode = 'or', extra: Record<string, unknown> = {}): Record<string, unknown> => ({
     title,
     approval: {
       assigneeType: resolved.assigneeType,
       assignees: resolved.assignees,
-      mode: 'or',
+      mode,
       emptyPolicy: resolved.assignees.length === 0 ? 'autoReject' : 'transferAdmin',
+      ...extra,
     },
   })
+  /** The cc usernames keyed by the LEFT state (extras.cc_after). */
+  const ccAfter = ((live.extras ?? {}).cc_after ?? {}) as Record<string, unknown>
+  const ccUsersOf = (key: string): string[] => Array.isArray(ccAfter[key]) ? (ccAfter[key] as unknown[]).map(entry => String(entry)) : []
   if (live.stateField === SUPPLIER_ADMISSION_STATE_FIELD) {
     const approve = transitionOf('reviewing', 'approve')
     if (approve === undefined) return { ok: false, errors: ['无法逆向导入：缺 reviewing×approve 转移（准入流模板不完整）'] }
     const role = String(approve.allowed_role ?? '')
-    pushNode('start', 'start', { title: '发起人' })
-    pushNode('approval_1', 'approval', approvalDataOf(assigneesOf(role), '准入评审'))
-    pushNode('end', 'end', { title: '结束' })
-    pushEdge('n_start', 'n_approval_1')
-    pushEdge('n_approval_1', 'n_end')
+    const startId = pushNode('start', 'start', { title: '发起人' })
+    let tail = startId
+    const startCc = ccUsersOf('potential')
+    if (startCc.length > 0) {
+      const ccId = pushNode('cc_1', 'cc', { title: '抄送', cc: { assignees: startCc } })
+      pushEdge(tail, ccId)
+      tail = ccId
+    }
+    const approvalId = pushNode('approval_1', 'approval', approvalDataOf(assigneesOf(role), '准入评审'))
+    pushEdge(tail, approvalId)
+    tail = approvalId
+    const endId = pushNode('end', 'end', { title: '结束' })
+    pushEdge(tail, endId)
     return { ok: true, graph: { version: 1, nodes, edges } }
   }
   if (live.stateField !== 'doc_status') return { ok: false, errors: [`无法逆向导入：未知状态字段 ${live.stateField}（支持 doc_status 与 ${SUPPLIER_ADMISSION_STATE_FIELD}）`] }
-  const approve1 = transitionOf('pending', 'approve', 'approved') ?? transitionOf('pending', 'approve', 'pending_level2')
+  const approveRows = live.transitions.filter(row => String(row.state) === 'pending' && String(row.action) === 'approve')
+  const approve1 = approveRows.find(row => String(row.next_state) === 'approved') ?? approveRows.find(row => String(row.next_state) === 'pending_level2')
   if (approve1 === undefined) return { ok: false, errors: ['无法逆向导入：缺 pending×approve 转移（六态流模板不完整）'] }
   const level2 = transitionOf('pending_level2', 'approve', 'approved')
+  // A single-approval publish still emits the template's vestigial
+  // pending_level2 rows with no gm mapped; those rows are unreachable (the
+  // row-driven approve picks the approved row first), so import treats the
+  // flow as single-level rather than an approval node with no assignees.
+  const level2Mapped = level2 !== undefined && live.approverMap[String(level2.allowed_role ?? '')] !== undefined
+  const level2Route = approveRows.find(row => String(row.next_state) === 'pending_level2')
   const literal = String(approve1.condition_expr ?? '')
   const thresholdMatch = /^([A-Za-z_][A-Za-z0-9_]*)\s*<=\s*(-?\d+(?:\.\d+)?)$/u.exec(literal.trim())
-  const twoLevel = level2 !== undefined
+  const level2Literal = level2Route === undefined ? '' : String(level2Route.condition_expr ?? '').trim()
+  const generalCondition = thresholdMatch === null && level2Literal !== ''
+    ? parseGeneralCondition(level2Literal)
+    : null
+  const twoLevel = level2Mapped
   if (!twoLevel && literal.trim() !== '') {
     errors.push(`无法逆向导入：无二级审批但一级审批带条件「${literal}」（种子模板不会产出此形状）`)
   }
@@ -1845,31 +2450,95 @@ export function rowsToGraph(live: LiveFlowRows): { ok: true, graph: Record<strin
   if (twoLevel && thresholdMatch === null && literal.trim() !== '') {
     errors.push(`无法逆向导入：一级审批条件「${literal}」不是「字段 <= 阈值」形式（编译器仅支持该 DSL）`)
   }
-  const role2 = level2 === undefined ? '' : String(level2.allowed_role ?? '')
-  pushNode('start', 'start', { title: '发起人' })
-  pushNode('approval_1', 'approval', approvalDataOf(assigneesOf(String(approve1.allowed_role ?? '')), '一级审批'))
-  pushEdge('n_start', 'n_approval_1')
-  let tail = 'n_approval_1'
-  if (thresholdMatch !== null) {
-    const field = thresholdMatch[1] as string
-    const threshold = thresholdMatch[2] as string
-    pushNode('condition', 'condition', { title: '金额条件', condition: { join: 'and', rows: [{ field, op: '>', value: threshold }] } })
-    pushEdge(tail, 'n_condition')
-    tail = 'n_condition'
+  if (level2Literal !== '' && thresholdMatch === null && generalCondition === null) {
+    errors.push(`无法逆向导入：进阶路由条件「${level2Literal}」无法解析为结构化条件行`)
   }
-  if (twoLevel) {
-    pushNode('approval_2', 'approval', approvalDataOf(assigneesOf(role2), '二级审批'))
-    if (tail === 'n_condition') {
-      // The > branch continues into level 2; the ≤ branch goes straight to the end (approve → approved).
-      pushEdge('n_condition', 'n_approval_2')
-      pushEdge('n_condition', 'n_end')
+  // rejectTo: the level-2 reject row routing back to pending imports as
+  // approval_2's rejectTo property (→ the first approval node).
+  const rejectRow = live.transitions.find(row => String(row.state) === 'pending_level2' && String(row.action) === 'reject')
+  const rejectToPending = rejectRow !== undefined && String(rejectRow.next_state) === 'pending'
+  const role1 = String(approve1.allowed_role ?? '')
+  const role2 = level2 === undefined ? '' : String(level2.allowed_role ?? '')
+  const marker1 = markerApprovalOf(role1, live.approverMap[role1])
+  const marker2 = level2 === undefined ? null : markerApprovalOf(role2, live.approverMap[role2])
+  // Linear assembly on one tail cursor; every branch keeps the degree gates
+  // satisfiable (start/approval exactly 1-in-1-out except the condition's 2
+  // outs, cc pass-throughs insertable on any segment).
+  const startId = pushNode('start', 'start', { title: '发起人' })
+  let tail = startId
+  const startCc = ccUsersOf('draft')
+  if (startCc.length > 0) {
+    const ccId = pushNode('cc_1', 'cc', { title: '抄送', cc: { assignees: startCc } })
+    pushEdge(tail, ccId)
+    tail = ccId
+  }
+  const approval1Data = marker1 !== null
+    ? { title: '一级审批', approval: { ...marker1, mode: modeOf(role1) } }
+    : approvalDataOf(assigneesOf(role1), '一级审批', modeOf(role1))
+  const approval1Id = pushNode('approval_1', 'approval', approval1Data)
+  pushEdge(tail, approval1Id)
+  tail = approval1Id
+  // The cc fired when the first tier approves rides the level-2 branch (a
+  // trailing cc on the single-approval shape attaches after approval_1).
+  const pendingCc = ccUsersOf('pending')
+  const level2Cc = ccUsersOf('pending_level2')
+  const thresholdRows = thresholdMatch === null ? null : {
+    join: 'and' as const,
+    rows: [{ field: thresholdMatch[1] as string, op: '>', value: thresholdMatch[2] as string }],
+  }
+  const endId = pushNode('end', 'end', { title: '结束' })
+  const conditionPayload = thresholdRows ?? generalCondition
+  if (conditionPayload !== null) {
+    // The pending cc sits directly after the first approval (before the
+    // condition): the compiler's chain walk finds it there, and it fires the
+    // same moment — when the first tier's approve moves the document on.
+    if (pendingCc.length > 0) {
+      const ccId = pushNode('cc_2', 'cc', { title: '抄送', cc: { assignees: pendingCc } })
+      pushEdge(tail, ccId)
+      tail = ccId
+    }
+    const conditionId = pushNode('condition', 'condition', { title: thresholdRows !== null ? '金额条件' : '条件分支', condition: conditionPayload })
+    pushEdge(tail, conditionId)
+    if (twoLevel) {
+      // The > branch continues into level 2; the ≤ branch goes straight to the end.
+      const approval2Data = marker2 !== null
+        ? { title: '二级审批', approval: { ...marker2, mode: modeOf(role2), ...(rejectToPending ? { rejectTo: 'n_approval_1' } : {}) } }
+        : approvalDataOf(assigneesOf(role2), '二级审批', modeOf(role2), rejectToPending ? { rejectTo: 'n_approval_1' } : {})
+      pushNode('approval_2', 'approval', approval2Data)
+      // The > branch continues into level 2; the ≤ branch goes straight to the end.
+      pushEdge(conditionId, 'n_approval_2')
+      pushEdge(conditionId, endId)
+      tail = 'n_approval_2'
+    } else {
+      tail = conditionId
+    }
+  } else if (twoLevel) {
+    // Structural two-level (no condition): the pending cc sits between the tiers.
+    const approval2Data = marker2 !== null
+      ? { title: '二级审批', approval: { ...marker2, mode: modeOf(role2), ...(rejectToPending ? { rejectTo: 'n_approval_1' } : {}) } }
+      : approvalDataOf(assigneesOf(role2), '二级审批', modeOf(role2), rejectToPending ? { rejectTo: 'n_approval_1' } : {})
+    pushNode('approval_2', 'approval', approval2Data)
+    if (pendingCc.length > 0) {
+      const ccId = pushNode('cc_2', 'cc', { title: '抄送', cc: { assignees: pendingCc } })
+      pushEdge(tail, ccId)
+      pushEdge(ccId, 'n_approval_2')
     } else {
       pushEdge(tail, 'n_approval_2')
     }
     tail = 'n_approval_2'
+  } else if (pendingCc.length > 0) {
+    // Single approval with a trailing cc: it fires when the tier approves.
+    const ccId = pushNode('cc_2', 'cc', { title: '抄送', cc: { assignees: pendingCc } })
+    pushEdge(tail, ccId)
+    tail = ccId
   }
-  pushNode('end', 'end', { title: '结束' })
-  pushEdge(tail, 'n_end')
+  // The level-2 cc trails approval_2 (fires when the second tier approves).
+  if (twoLevel && level2Cc.length > 0) {
+    const ccId = pushNode('cc_1', 'cc', { title: '抄送', cc: { assignees: level2Cc } })
+    pushEdge(tail, ccId)
+    tail = ccId
+  }
+  pushEdge(tail, endId)
   if (errors.length > 0) return { ok: false, errors }
   return { ok: true, graph: { version: 1, nodes, edges } }
 }
@@ -1944,8 +2613,22 @@ export function assertRowsEquivalent(current: LiveFlowRows, derived: CompiledRow
   if (canonical(current.approverMap) !== canonical(derived.approverMap)) {
     diffs.push(`approver_map 不一致：现库 ${canonical(current.approverMap)} vs 派生 ${canonical(derived.approverMap)}`)
   }
-  if (canonical(current.extras ?? {}) !== canonical(derived.extras)) {
-    diffs.push(`extras 不一致：现库 ${canonical(current.extras ?? {})} vs 派生 ${canonical(derived.extras)}`)
+  // The extras comparison normalizes the amount pair through the engine's own
+  // resolution (thresholdOf / the total default): early-seeded flows carry
+  // the threshold only as the transition literal with no extras key (or name
+  // amount_field only), and the engine reads both through these defaults — a
+  // side omitting a key at its default value is equivalent, a genuine value
+  // difference still diffs.
+  const extrasThroughEngineLens = (extras: Record<string, unknown> | null): Record<string, unknown> => {
+    const copy = { ...(extras ?? {}) }
+    const field = typeof copy.amount_field === 'string' ? copy.amount_field : AMOUNT_FIELD
+    const threshold = thresholdOf(extras as Record<string, unknown> | null)
+    delete copy.amount_field
+    delete copy.amount_threshold
+    return { ...copy, amount_routing: `${field} <= ${String(threshold)}` }
+  }
+  if (canonical(extrasThroughEngineLens(current.extras)) !== canonical(extrasThroughEngineLens(derived.extras))) {
+    diffs.push(`extras 不一致：现库 ${canonical(extrasThroughEngineLens(current.extras))} vs 派生 ${canonical(extrasThroughEngineLens(derived.extras))}`)
   }
   return diffs
 }
@@ -1975,15 +2658,51 @@ async function flowConfigRow(io: NocoIO, docType: string): Promise<Record<string
 async function designerFormFieldVocabulary(token: string, configs: Array<Record<string, any>>): Promise<string[]> {
   const names = new Set<string>()
   for (const config of configs) {
-    const collection = String(config.doc_type)
-    const filter = encodeURIComponent(JSON.stringify({ collectionName: { $eq: collection } }))
-    const fields = await dataOf(token, 'GET', `/api/fields:list?pageSize=200&filter=${filter}`) as Array<{ name?: string }> | null
-    for (const field of fields ?? []) {
-      const name = String(field.name ?? '')
-      if (name !== '' && !GRAPH_SYSTEM_FIELD_NAMES.has(name)) names.add(name)
+    for (const field of await collectionFields(token, String(config.doc_type))) {
+      names.add(field.name)
     }
   }
   return [...names].sort()
+}
+
+/**
+ * One collection's editable fields (system columns excluded) with the
+ * relation target resolved for the personnel filter — fields:list may
+ * serialize `options` as a JSON string, so parse both shapes.
+ */
+async function collectionFields(token: string, collection: string): Promise<ReadonlyArray<{ name: string, target: unknown }>> {
+  const filter = encodeURIComponent(JSON.stringify({ collectionName: { $eq: collection } }))
+  const fields = await dataOf(token, 'GET', `/api/fields:list?pageSize=200&filter=${filter}`) as Array<Record<string, any>> | null
+  return (fields ?? [])
+    .filter(field => String(field.name ?? '') !== '' && !GRAPH_SYSTEM_FIELD_NAMES.has(String(field.name)))
+    .map(field => {
+      const rawOptions = field.options
+      const options = typeof rawOptions === 'string' ? JSON.parse(rawOptions) as Record<string, unknown> : rawOptions as Record<string, unknown> | undefined
+      return { name: String(field.name), target: field.target ?? options?.['target'] ?? field.targetCollection }
+    })
+}
+
+/**
+ * The personnel-typed vocabulary (W5-B2): the formFields whose field metadata
+ * targets the users collection — the formField assignee type's publish gate
+ * and the /designer/meta userFields list.
+ */
+async function designerUserFieldVocabulary(token: string, configs: Array<Record<string, any>>): Promise<string[]> {
+  const names = new Set<string>()
+  for (const config of configs) {
+    for (const field of await collectionFields(token, String(config.doc_type))) {
+      if (field.target === 'users') names.add(field.name)
+    }
+  }
+  return [...names].sort()
+}
+
+/**
+ * Whether the org has any department owner at all (departmentsUsers.isOwner)
+ * — the deptLeader/supervisorChain publish gate (链路存在).
+ */
+function departmentOwnersExist(psql: (sql: string) => string): boolean {
+  return Number(psql('SELECT count(*) FROM "departmentsUsers" WHERE "isOwner" = TRUE;').trim()) > 0
 }
 
 /**
@@ -2004,6 +2723,46 @@ export async function ensureGraphColumns(token: string): Promise<void> {
     await dataOf(token, 'POST', '/api/fields:create', { collectionName: 'wfl_flow_configs', ...field })
     console.log(`approval-engine: wfl_flow_configs.${String(field['name'])} column added (W5-B0 designer editing state)`)
   }
+}
+
+/**
+ * Idempotently add wfl_approval_todos.kind (W5-B2): 'todo' rows block the
+ * flow, 'cc' rows are read-only notifications the aggregation counts skip.
+ * Legacy rows keep NULL — every reader treats NULL as 'todo'.
+ * @param token - a root auth token for the field-manager API.
+ */
+export async function ensureTodoKindColumn(token: string): Promise<void> {
+  const fields = await dataOf(token, 'GET', `/api/fields:list?pageSize=200&filter=${encodeURIComponent(JSON.stringify({ collectionName: { $eq: 'wfl_approval_todos' } }))}`) as Array<{ name?: string }> | null
+  const present = new Set((fields ?? []).map(field => String(field.name)))
+  if (present.has('kind')) return
+  await dataOf(token, 'POST', '/api/fields:create', {
+    collectionName: 'wfl_approval_todos', name: 'kind', type: 'string', interface: 'select',
+    uiSchema: { type: 'string', 'x-component': 'Select', title: '待办类型' },
+  })
+  console.log('approval-engine: wfl_approval_todos.kind column added (W5-B2 cc rows; NULL = todo)')
+}
+
+/**
+ * The single effective-effect exit (W5-B2, BP-02): the transitions whose
+ * effective landing owes a downstream hook. The CLI --act, POST /act, POST
+ * /effective-effects, and the delegated nb_approve tool all reach these
+ * hooks through this one function — the effect layer cannot fork again.
+ * @param token - a root auth token (the mrp-run functions take one).
+ * @param docType - the document collection just landed effective.
+ * @param docId - the document row id.
+ * @param code - the document's business code (reserveForSo resolves by it).
+ * @returns the hook outcomes keyed by name, or null when the type has none.
+ */
+export async function effectiveEffects(token: string, docType: string, docId: number, code: string): Promise<Record<string, unknown> | null> {
+  if (docType === 'so_orders') {
+    const { reserveForSo } = await import('./mrp-run.mts')
+    return { reservation: await reserveForSo(token, code) }
+  }
+  if (docType === 'mps_plans') {
+    const { recalcPlan } = await import('./mrp-run.mts')
+    return { recalc: await recalcPlan(token, docId) }
+  }
+  return null
 }
 
 /**
@@ -2182,6 +2941,7 @@ export async function serve(port = 13_110): Promise<void> {
   const io = await restIO()
   const wmsToken = await signInWithRetry()
   await ensureGraphColumns(wmsToken)
+  await ensureTodoKindColumn(wmsToken)
   // W5-R1: rows that predate the graph column carry graph_version NULL — in
   // SQL a NULL never equals any CAS baseline, so both same-instant saves
   // would 409 against a fresh row. Backfill 0 once per serve start (one SQL
@@ -2285,6 +3045,7 @@ export async function serve(port = 13_110): Promise<void> {
             const roles = await io.list('roles')
             const departments = await io.list('departments')
             const formFields = await designerFormFieldVocabulary(wmsToken, configs)
+            const userFields = await designerUserFieldVocabulary(wmsToken, configs)
             return writeJson(response, 200, {
               ok: true,
               meta: {
@@ -2299,6 +3060,7 @@ export async function serve(port = 13_110): Promise<void> {
                   return title === '' ? [] : [{ value: title, label: title }]
                 }),
                 formFields,
+                userFields,
               },
             }, marker)
           }
@@ -2374,9 +3136,11 @@ export async function serve(port = 13_110): Promise<void> {
             if (graphVersion !== baseVersion) {
               return writeJson(response, 409, { ok: false, error: `版本冲突：发布基于 graph v${String(baseVersion)}，库里已是 v${String(graphVersion)}（他端已保存/发布过）。请点「重新加载」拉取最新版本后再发布。` }, marker)
             }
-            // The compile context: field vocabulary, known users, the psql role
-            // snapshot, and the live extras the graph does not own.
+            // The compile context: field vocabulary, personnel-typed fields,
+            // the org-owners fact, known users, the psql role snapshot, and
+            // the live extras the graph does not own.
             const formFields = await designerFormFieldVocabulary(wmsToken, [row])
+            const userFields = await designerUserFieldVocabulary(wmsToken, [row])
             const knownUsernames = new Set((await io.list('users')).map(user => String(user.username ?? '')))
             const usersOfRole = async (role: string): Promise<readonly string[]> => {
               const output = psql(`SELECT u.username FROM "rolesUsers" r JOIN users u ON u.id = r."userId" WHERE r."roleName" = ${sqlLiteral(role)};`)
@@ -2384,7 +3148,7 @@ export async function serve(port = 13_110): Promise<void> {
             }
             const stateField = String(row.state_field ?? 'doc_status')
             const preserveExtras = parseJsonColumn<Record<string, unknown>>(row.extras, 'extras', `审批流 #${String(row.id)}`) ?? {}
-            const ctx: CompileContext = { stateField, formFields, preserveExtras, knownUsernames, usersOfRole }
+            const ctx: CompileContext = { stateField, formFields, userFields, hasDepartmentOwners: departmentOwnersExist(psql), preserveExtras, knownUsernames, usersOfRole }
             // Round-trip gate first: the compiler must faithfully reproduce the
             // CURRENT rows before it is trusted to replace them.
             const liveApproverMap = parseJsonColumn<ApproverMap>(row.approver_map, 'approver_map', `审批流 #${String(row.id)}`) ?? {}
@@ -2639,31 +3403,50 @@ export async function serve(port = 13_110): Promise<void> {
           const intentId = Number(body['intent_record_id'])
           if (url.pathname === '/submit') {
             const result = await submitForApproval(io, docType, docId, approver)
+            if (result.effective) {
+              const doc = await io.get(docType, docId)
+              const effects = await effectiveEffects(wmsToken, docType, docId, String(doc?.code ?? docId))
+              if (effects !== null) return writeJson(response, 200, { ok: true, result, effects })
+            }
             return writeJson(response, 200, { ok: true, result })
           }
           const action = body['action']
           if (action !== 'approve' && action !== 'reject' && action !== 'void') {
             return writeJson(response, 400, { ok: false, error: `act 仅接受 approve/reject/void（收到 ${String(action)}）` })
           }
-          const result = await act(io, docType, docId, action, approver, comment, 'page')
-          if (docType === 'so_orders' && result.effective) {
-            const { reserveForSo } = await import('./mrp-run.mts')
+          // W5-B2: engine-executed audit rows carry source='engine' — the
+          // page-callback workflow replays /act for rows the PAGE creates as
+          // intents (source='page'); an engine-written 'page' row made it
+          // double-process every HTTP act (the phantom second approval a
+          // multi-tier run exposed). Provenance for page-originated acts
+          // stays on the consumed intent row.
+          const result = await act(io, docType, docId, action, approver, comment)
+          // W5-B2: the single effective-effect exit — so_orders→reserveForSo,
+          // mps_plans→recalcPlan (BP-02: the CLI, this route, and the
+          // delegated nb_approve tool all reach the hooks through it).
+          if (result.effective) {
             const doc = await io.get(docType, docId)
-            const reservation = await reserveForSo(wmsToken, String(doc?.code ?? docId))
-            return writeJson(response, 200, { ok: true, result, reservation })
-          }
-          // W2-B2: approving an MPS plan locks its snapshot in — one final
-          // max-merge at the effective moment; later SO changes leave the
-          // approved plan alone (the soft time fence).
-          if (docType === 'mps_plans' && result.effective) {
-            const { recalcPlan } = await import('./mrp-run.mts')
-            const recalc = await recalcPlan(wmsToken, docId)
-            return writeJson(response, 200, { ok: true, result, recalc })
+            const effects = await effectiveEffects(wmsToken, docType, docId, String(doc?.code ?? docId))
+            if (effects !== null) return writeJson(response, 200, { ok: true, result, effects })
           }
           if (Number.isInteger(intentId) && intentId > 0) {
             await io.destroy('wfl_approval_records', intentId)
           }
           return writeJson(response, 200, { ok: true, result })
+        }
+        // W5-B2: the effect exit over HTTP — nb_approve's delegated path and
+        // any replay tooling reach the same effectiveEffects() the /act route
+        // runs inline (one function, one seam, no forked hooks).
+        if (request.method === 'POST' && url.pathname === '/effective-effects') {
+          const body = await readBody(request)
+          const docType = typeof body['doc_type'] === 'string' ? body['doc_type'] : ''
+          const docId = Number(body['doc_id'])
+          if (docType === '' || !Number.isInteger(docId) || docId < 1) {
+            return writeJson(response, 400, { ok: false, error: '需要 doc_type 与正整数 doc_id' })
+          }
+          const code = typeof body['code'] === 'string' && body['code'] !== '' ? body['code'] : String(docId)
+          const effects = await effectiveEffects(wmsToken, docType, docId, code)
+          return writeJson(response, 200, { ok: true, effects })
         }
         writeJson(response, 404, { ok: false, error: `no route ${request.method} ${url.pathname}` })
       } catch (error) {
@@ -3078,8 +3861,147 @@ export async function selftest(): Promise<void> {
     const zeroQty = await failureOf(() => validateReceiveLines(poLines, [{ product_id: 12, lot_no: 'L-2', qty: 0 }]))
     if (!zeroQty.includes('大于 0')) throw new Error(`selftest 失败：零数量未拦截（${zeroQty}）`)
   }
+  // W5-B2: the advanced-node runtime matrix — 会签/依次审批 aggregation, the
+  // rejectTo return, cc rows, the runtime markers (deptLeader over an
+  // owner-marked org, supervisorChain walk, formField resolution), the empty
+  // policies, and the general-condition row-driven routing.
+  {
+    await io.create('users', { username: 'chenliqun', nickname: '陈立群' })
+    await io.create('users', { username: 'qc_inspector', nickname: '质检员' })
+    await io.create('users', { username: 'atlas', nickname: '无部门用户' })
+    const userRows = await io.list('users', {})
+    const userId = (username: string): number => Number(userRows.find(row => row.username === username)?.id ?? 0)
+    const group = await io.create('departments', { title: '新源食品集团' })
+    const purchase = await io.create('departments', { title: '采购部', parentId: group.id })
+    const quality = await io.create('departments', { title: '质检部', parentId: group.id })
+    await io.create('departmentsUsers', { departmentId: purchase.id, userId: userId('chenliqun'), isOwner: true })
+    await io.create('departmentsUsers', { departmentId: purchase.id, userId: userId('admin') })
+    await io.create('departmentsUsers', { departmentId: quality.id, userId: userId('quality_lead'), isOwner: true })
+    await io.create('departmentsUsers', { departmentId: quality.id, userId: userId('qc_inspector') })
+    await io.create('departmentsUsers', { departmentId: group.id, userId: userId('admin'), isOwner: true })
+
+    /** Attach the graph-owned extras keys (sign modes) to one seeded test flow. */
+    const withSignModes = async (docType: string, signModes: Record<string, 'countersign' | 'sequential'>): Promise<void> => {
+      const config = (await io.list('wfl_flow_configs', { doc_type: docType }))[0]
+      const extras = parseJsonColumn<Record<string, unknown>>(config?.extras, 'extras', `审批流 #${String(config?.id)}`) ?? {}
+      await io.update('wfl_flow_configs', Number(config?.id), { extras: JSON.stringify({ ...extras, sign_modes: signModes }) })
+    }
+
+    // 会签: two open todos; the first approve is partial; the second lands.
+    await seedDocFlow(io, 'w5b2_cs', '会签流', { approverMap: { manager: ['admin', 'quality_lead'], gm: 'admin' } })
+    await withSignModes('w5b2_cs', { manager: 'countersign' })
+    const csDoc = await io.create('w5b2_cs', { code: 'CS-1', doc_status: 'draft' })
+    await submitForApproval(io, 'w5b2_cs', Number(csDoc.id), '陈立群')
+    expect('会签两人两待办', (await io.list('wfl_approval_todos', { doc_id: Number(csDoc.id), status: 'open' })).filter(todo => todo.kind !== 'cc').length, 2)
+    let csResult = await act(io, 'w5b2_cs', Number(csDoc.id), 'approve', 'admin', '第一签')
+    expect('会签首签不推进', csResult.to_state, 'pending')
+    expect('会签首签留痕', (await io.list('wfl_approval_records', { doc_type: 'w5b2_cs', doc_id: Number(csDoc.id) })).length, 2)
+    const csOutsider = await failureOf(() => act(io, 'w5b2_cs', Number(csDoc.id), 'approve', 'chenliqun'))
+    if (!csOutsider.includes('没有待办')) throw new Error(`selftest 失败：会签圈外人不被拒（${csOutsider}）`)
+    csResult = await act(io, 'w5b2_cs', Number(csDoc.id), 'approve', 'quality_lead', '第二签生效')
+    expect('会签全员通过生效', csResult.to_state, 'approved')
+    expect('会签待办清零', (await io.list('wfl_approval_todos', { doc_id: Number(csDoc.id), status: 'open' })).length, 0)
+    // 会签任一拒绝即整单拒绝。
+    const csDoc2 = await io.create('w5b2_cs', { code: 'CS-2', doc_status: 'draft' })
+    await submitForApproval(io, 'w5b2_cs', Number(csDoc2.id), '陈立群')
+    csResult = await act(io, 'w5b2_cs', Number(csDoc2.id), 'reject', 'admin', '第一签即拒')
+    expect('会签任一拒绝即拒', csResult.to_state, 'rejected')
+
+    // 依次审批: one todo at a time in resolution order; out-of-turn refuses.
+    await seedDocFlow(io, 'w5b2_seq', '依次审批流', { approverMap: { manager: ['chenliqun', 'admin'], gm: 'admin' } })
+    await withSignModes('w5b2_seq', { manager: 'sequential' })
+    const seqDoc = await io.create('w5b2_seq', { code: 'SEQ-1', doc_status: 'draft' })
+    await submitForApproval(io, 'w5b2_seq', Number(seqDoc.id), 'qc_inspector')
+    expect('依次审批首人待办', (await io.list('wfl_approval_todos', { doc_id: Number(seqDoc.id), status: 'open' })).map(todo => String(todo.user)), ['chenliqun'])
+    const outOfTurn = await failureOf(() => act(io, 'w5b2_seq', Number(seqDoc.id), 'approve', 'admin'))
+    if (!outOfTurn.includes('没有待办')) throw new Error(`selftest 失败：依次审批越序不被拒（${outOfTurn}）`)
+    let seqResult = await act(io, 'w5b2_seq', Number(seqDoc.id), 'approve', 'chenliqun', '第一序')
+    expect('依次审批首序不推进', seqResult.to_state, 'pending')
+    expect('依次审批次人待办打开', (await io.list('wfl_approval_todos', { doc_id: Number(seqDoc.id), status: 'open' })).map(todo => String(todo.user)), ['admin'])
+    seqResult = await act(io, 'w5b2_seq', Number(seqDoc.id), 'approve', 'admin', '第二序生效')
+    expect('依次审批末序生效', seqResult.to_state, 'approved')
+
+    // 回退边: the level-2 reject row routes back to pending and re-opens tier 1.
+    await seedDocFlow(io, 'w5b2_reject', '回退流', { amountField: 'amount', amountThreshold: 100, approverMap: { manager: 'admin', gm: 'quality_lead' } })
+    const rejectFlow = (await io.list('wfl_flow_configs', { doc_type: 'w5b2_reject' }))[0]
+    const rejectRow = (await io.list('wfl_flow_transitions', { flow_id: Number(rejectFlow?.id) })).find(row => row.state === 'pending_level2' && row.action === 'reject')
+    await io.update('wfl_flow_transitions', Number(rejectRow?.id), { next_state: 'pending' })
+    const rjDoc = await io.create('w5b2_reject', { code: 'RJ-1', amount: 500, doc_status: 'draft' })
+    await submitForApproval(io, 'w5b2_reject', Number(rjDoc.id), '陈立群')
+    await act(io, 'w5b2_reject', Number(rjDoc.id), 'approve', 'admin', '进二级')
+    let rjResult = await act(io, 'w5b2_reject', Number(rjDoc.id), 'reject', 'quality_lead', '退回一级修改')
+    expect('回退边回到一级', rjResult.to_state, 'pending')
+    expect('回退后一级待办重开', (await io.list('wfl_approval_todos', { doc_id: Number(rjDoc.id), state: 'pending', status: 'open' })).map(todo => String(todo.user)), ['admin'])
+    await act(io, 'w5b2_reject', Number(rjDoc.id), 'approve', 'admin', '再进二级')
+    rjResult = await act(io, 'w5b2_reject', Number(rjDoc.id), 'approve', 'quality_lead', '二级通过')
+    expect('回退后重走生效', rjResult.to_state, 'approved')
+
+    // cc: the approve leaving the keyed state fires read-only kind='cc' rows.
+    await seedDocFlow(io, 'w5b2_cc', '抄送流', { approverMap: { manager: 'admin', gm: 'admin' } })
+    const ccFlow = (await io.list('wfl_flow_configs', { doc_type: 'w5b2_cc' }))[0]
+    const ccExtras = parseJsonColumn<Record<string, unknown>>(ccFlow?.extras, 'extras', 'cc') ?? {}
+    await io.update('wfl_flow_configs', Number(ccFlow?.id), { extras: JSON.stringify({ ...ccExtras, cc_after: { pending: ['quality_lead'] } }) })
+    const ccDoc = await io.create('w5b2_cc', { code: 'CC-1', doc_status: 'draft' })
+    await submitForApproval(io, 'w5b2_cc', Number(ccDoc.id), '陈立群')
+    expect('提交不触发 pending 抄送', (await io.list('wfl_approval_todos', { doc_id: Number(ccDoc.id), kind: 'cc' })).length, 0)
+    await act(io, 'w5b2_cc', Number(ccDoc.id), 'approve', 'admin', '通过并抄送')
+    expect('审批通过触发抄送行', (await io.list('wfl_approval_todos', { doc_id: Number(ccDoc.id), kind: 'cc' })).map(row => String(row.user)), ['quality_lead'])
+    expect('抄送行不阻塞（单据已生效）', (await io.get('w5b2_cc', Number(ccDoc.id)))?.doc_status, 'approved')
+
+    // deptLeader: the submitter's main department's owner owes the todo.
+    await seedDocFlow(io, 'w5b2_dl', '主管流', { approverMap: { manager: { type: 'deptLeader', emptyPolicy: 'transferAdmin' }, gm: 'admin' } as unknown as ApproverMap })
+    const dlDoc = await io.create('w5b2_dl', { code: 'DL-1', doc_status: 'draft' })
+    await submitForApproval(io, 'w5b2_dl', Number(dlDoc.id), 'qc_inspector')
+    expect('deptLeader 解析为主管', (await io.list('wfl_approval_todos', { doc_id: Number(dlDoc.id), status: 'open' })).map(todo => String(todo.user)), ['quality_lead'])
+    await act(io, 'w5b2_dl', Number(dlDoc.id), 'approve', 'quality_lead', '主管签核')
+
+    // supervisorChain: nearest owner first, up the parentId tree, levels cap.
+    await seedDocFlow(io, 'w5b2_chain', '主管链流', { approverMap: { manager: { type: 'supervisorChain', levels: 2, emptyPolicy: 'transferAdmin' }, gm: 'admin' } as unknown as ApproverMap })
+    const chainDoc = await io.create('w5b2_chain', { code: 'CH-1', doc_status: 'draft' })
+    await submitForApproval(io, 'w5b2_chain', Number(chainDoc.id), 'qc_inspector')
+    expect('主管链两级解析', (await io.list('wfl_approval_todos', { doc_id: Number(chainDoc.id), status: 'open' })).map(todo => String(todo.user)).sort(), ['admin', 'quality_lead'])
+
+    // formField: the document's own users-typed field names the approver.
+    await seedDocFlow(io, 'w5b2_ff', '表单字段流', { approverMap: { manager: { type: 'formField', value: 'owner', emptyPolicy: 'transferAdmin' }, gm: 'admin' } as unknown as ApproverMap })
+    const ffDoc = await io.create('w5b2_ff', { code: 'FF-1', owner_id: userId('chenliqun'), doc_status: 'draft' })
+    await submitForApproval(io, 'w5b2_ff', Number(ffDoc.id), 'admin')
+    expect('formField 解析为字段所指人', (await io.list('wfl_approval_todos', { doc_id: Number(ffDoc.id), status: 'open' })).map(todo => String(todo.user)), ['chenliqun'])
+    await act(io, 'w5b2_ff', Number(ffDoc.id), 'approve', 'chenliqun', '经办人签核')
+
+    // autoPass: an ownerless submitter resolves empty and the tier advances itself.
+    await seedDocFlow(io, 'w5b2_ap', '自动通过流', { approverMap: { manager: { type: 'deptLeader', emptyPolicy: 'autoPass' }, gm: 'admin' } as unknown as ApproverMap })
+    const apDoc = await io.create('w5b2_ap', { code: 'AP-1', doc_status: 'draft' })
+    const apResult = await submitForApproval(io, 'w5b2_ap', Number(apDoc.id), 'atlas')
+    expect('autoPass 提交即生效', apResult.to_state, 'approved')
+    expect('autoPass 自动步留痕', (await io.list('wfl_approval_records', { doc_type: 'w5b2_ap', doc_id: Number(apDoc.id) })).some(record => record.approver === '(auto)'), true)
+
+    // assignUser: the empty resolution re-routes to the configured fallback.
+    await seedDocFlow(io, 'w5b2_au', '指定人员流', { approverMap: { manager: { type: 'deptLeader', emptyPolicy: 'assignUser', emptyAssignee: 'admin' }, gm: 'admin' } as unknown as ApproverMap })
+    const auDoc = await io.create('w5b2_au', { code: 'AU-1', doc_status: 'draft' })
+    await submitForApproval(io, 'w5b2_au', Number(auDoc.id), 'atlas')
+    expect('assignUser 回退待办', (await io.list('wfl_approval_todos', { doc_id: Number(auDoc.id), status: 'open' })).map(todo => String(todo.user)), ['admin'])
+
+    // 通用条件: the row-driven routing reads the general literal on the
+    // level-2 row (500 < amount <= 10000 routes up; outside lands direct).
+    await seedDocFlow(io, 'w5b2_gc', '通用条件流', { approverMap: { manager: 'admin', gm: 'quality_lead' } })
+    const gcFlow = (await io.list('wfl_flow_configs', { doc_type: 'w5b2_gc' }))[0]
+    const gcTransitions = await io.list('wfl_flow_transitions', { flow_id: Number(gcFlow?.id) })
+    await io.update('wfl_flow_transitions', Number(gcTransitions.find(row => row.state === 'pending' && row.action === 'approve' && row.next_state === 'approved')?.id), { condition_expr: '' })
+    await io.update('wfl_flow_transitions', Number(gcTransitions.find(row => row.state === 'pending' && row.action === 'approve' && row.next_state === 'pending_level2')?.id), { condition_expr: 'amount > 500 AND amount <= 10000' })
+    const gcIn = await io.create('w5b2_gc', { code: 'GC-IN', amount: 1000, doc_status: 'draft' })
+    await submitForApproval(io, 'w5b2_gc', Number(gcIn.id), '陈立群')
+    let gcResult = await act(io, 'w5b2_gc', Number(gcIn.id), 'approve', 'admin', '区间内进二级')
+    expect('通用条件区间内进二级', gcResult.to_state, 'pending_level2')
+    gcResult = await act(io, 'w5b2_gc', Number(gcIn.id), 'approve', 'quality_lead', '二级通过')
+    expect('通用条件二级生效', gcResult.to_state, 'approved')
+    const gcOut = await io.create('w5b2_gc', { code: 'GC-OUT', amount: 20000, doc_status: 'draft' })
+    await submitForApproval(io, 'w5b2_gc', Number(gcOut.id), '陈立群')
+    gcResult = await act(io, 'w5b2_gc', Number(gcOut.id), 'approve', 'admin', '区间外直批')
+    expect('通用条件区间外直批', gcResult.to_state, 'approved')
+  }
+
   await compilerSelftest()
-  console.log('approval-engine: selftest OK — 状态机全序列/金额阈值加签/驳回重提/非法转移/卡口/幂等/锁编辑/供应商准入流/准入卡口/B5阈值配置+多审批人/W3-B5部门路由(全员展开/混合并集/幽灵部门/空部门/坏形态/纯用户名零漂移)/夜间env负例/W3-B6终端校验(三数等式/读数判定/缺陷汇总/收货卡口)/W5-B1编译器(门禁矩阵/两级阈值/角色快照/round-trip等价/准入词汇表) 全部通过')
+  console.log('approval-engine: selftest OK — 状态机全序列/金额阈值加签/驳回重提/非法转移/卡口/幂等/锁编辑/供应商准入流/准入卡口/B5阈值配置+多审批人/W3-B5部门路由(全员展开/混合并集/幽灵部门/空部门/坏形态/纯用户名零漂移)/夜间env负例/W3-B6终端校验(三数等式/读数判定/缺陷汇总/收货卡口)/W5-B2高级节点(会签/依次/回退边/抄送/deptLeader/主管链/formField/autoPass/assignUser/通用条件)/W5-B1编译器(门禁矩阵/两级阈值/角色快照/round-trip等价/准入词汇表) 全部通过')
 }
 
 // ─── W5-B1: the publish-compiler assertion matrix (pure; shared with w5b1-publish.mts --selftest) ───
@@ -3113,11 +4035,13 @@ function fixtureGraph(nodes: ReadonlyArray<FixtureNode>, edges: ReadonlyArray<re
   }
 }
 
-/** The compile-context fixture: three known users, one resolvable role. */
+/** The compile-context fixture: three known users, one resolvable role, two personnel fields. */
 function fixtureCompileContext(overrides: Partial<CompileContext> = {}): CompileContext {
   return {
     stateField: 'doc_status',
-    formFields: ['total', 'amount', 'qty'],
+    formFields: ['total', 'amount', 'qty', 'owner', 'assignee'],
+    userFields: ['owner', 'assignee'],
+    hasDepartmentOwners: true,
     preserveExtras: { approved_by_field: 'approved_by', approved_at_field: 'approved_at' },
     knownUsernames: new Set(['admin', 'quality_lead', 'chenliqun']),
     usersOfRole: async (role) => role === 'finance' ? ['admin', 'quality_lead'] : [],
@@ -3173,33 +4097,51 @@ export async function compilerSelftest(): Promise<void> {
   await expectRefused('条件缺行', fixtureGraph([
     { id: 's', type: 'start' }, { id: 'a1', type: 'approval', approval: user(['admin']) }, { id: 'c', type: 'condition', condition: { join: 'and', rows: [] } }, { id: 'a2', type: 'approval', approval: user(['quality_lead']) }, { id: 'e', type: 'end' },
   ], rows(['s', 'a1'], ['a1', 'c'], ['c', 'a2'], ['c', 'e'], ['a2', 'e'])), '缺条件行')
-  await expectRefused('条件操作符 <=', fixtureGraph([
-    { id: 's', type: 'start' }, { id: 'a1', type: 'approval', approval: user(['admin']) }, { id: 'c', type: 'condition', condition: { join: 'and', rows: [{ field: 'total', op: '<=', value: '100000' }] } }, { id: 'a2', type: 'approval', approval: user(['quality_lead']) }, { id: 'e', type: 'end' },
-  ], rows(['s', 'a1'], ['a1', 'c'], ['c', 'a2'], ['c', 'e'], ['a2', 'e'])), '操作符需为 >')
+  await expectRefused('数值操作符带非数字值', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a1', type: 'approval', approval: user(['admin']) }, { id: 'c', type: 'condition', condition: { join: 'and', rows: [{ field: 'total', op: '>', value: 'abc' }] } }, { id: 'a2', type: 'approval', approval: user(['quality_lead']) }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a1'], ['a1', 'c'], ['c', 'a2'], ['c', 'e'], ['a2', 'e'])), '需数字比较值')
   await expectRefused('条件字段不在词表', fixtureGraph([
     { id: 's', type: 'start' }, { id: 'a1', type: 'approval', approval: user(['admin']) }, { id: 'c', type: 'condition', condition: { join: 'and', rows: [{ field: 'price', op: '>', value: '100000' }] } }, { id: 'a2', type: 'approval', approval: user(['quality_lead']) }, { id: 'e', type: 'end' },
   ], rows(['s', 'a1'], ['a1', 'c'], ['c', 'a2'], ['c', 'e'], ['a2', 'e'])), '不在单据字段词表')
-  await expectRefused('supervisorChain', fixtureGraph([
-    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: { assigneeType: 'supervisorChain', assignees: [], mode: 'or', emptyPolicy: 'transferAdmin' } }, { id: 'e', type: 'end' },
-  ], rows(['s', 'a'], ['a', 'e'])), '连续多级主管')
-  await expectRefused('formField', fixtureGraph([
-    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: { assigneeType: 'formField', assignees: ['owner'], mode: 'or', emptyPolicy: 'transferAdmin' } }, { id: 'e', type: 'end' },
-  ], rows(['s', 'a'], ['a', 'e'])), '表单联系人字段')
-  await expectRefused('deptLeader', fixtureGraph([
+  await expectRefused('多行条件字段不在词表', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a1', type: 'approval', approval: user(['admin']) }, { id: 'c', type: 'condition', condition: { join: 'and', rows: [{ field: 'total', op: '>', value: '100' }, { field: 'ghost', op: '>', value: '5' }] } }, { id: 'a2', type: 'approval', approval: user(['quality_lead']) }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a1'], ['a1', 'c'], ['c', 'a2'], ['c', 'e'], ['a2', 'e'])), '不在单据字段词表')
+  await expectRefused('formField非人员字段', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: { assigneeType: 'formField', assignees: ['total'], mode: 'or', emptyPolicy: 'transferAdmin' } }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a'], ['a', 'e'])), '不是人员字段')
+  await expectRefused('formField不在词表', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: { assigneeType: 'formField', assignees: ['ghost_field'], mode: 'or', emptyPolicy: 'transferAdmin' } }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a'], ['a', 'e'])), '不在单据字段词表')
+  await expectRefused('deptLeader带静态审批人', fixtureGraph([
     { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: { assigneeType: 'deptLeader', assignees: ['质检部'], mode: 'or', emptyPolicy: 'transferAdmin' } }, { id: 'e', type: 'end' },
-  ], rows(['s', 'a'], ['a', 'e'])), '部门主管')
-  await expectRefused('依次审批', fixtureGraph([
-    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: { assigneeType: 'user', assignees: ['admin', 'quality_lead'], mode: 'sequential', emptyPolicy: 'transferAdmin' } }, { id: 'e', type: 'end' },
-  ], rows(['s', 'a'], ['a', 'e'])), '依次审批')
-  await expectRefused('会签', fixtureGraph([
-    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: { assigneeType: 'user', assignees: ['admin', 'quality_lead'], mode: 'countersign', emptyPolicy: 'transferAdmin' } }, { id: 'e', type: 'end' },
-  ], rows(['s', 'a'], ['a', 'e'])), '会签')
-  await expectRefused('autoPass', fixtureGraph([
-    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: { assigneeType: 'user', assignees: ['admin'], mode: 'or', emptyPolicy: 'autoPass' } }, { id: 'e', type: 'end' },
-  ], rows(['s', 'a'], ['a', 'e'])), '自动通过')
-  await expectRefused('assignUser', fixtureGraph([
-    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: { assigneeType: 'user', assignees: ['admin'], mode: 'or', emptyPolicy: 'assignUser' } }, { id: 'e', type: 'end' },
-  ], rows(['s', 'a'], ['a', 'e'])), '指定人员')
+  ], rows(['s', 'a'], ['a', 'e'])), '由运行时解析')
+  await expectRefused('supervisorChain级数越界', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: { assigneeType: 'supervisorChain', assignees: [], levels: 0, mode: 'or', emptyPolicy: 'transferAdmin' } }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a'], ['a', 'e'])), '级数 levels 需为')
+  await expectRefused('无部门主管', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: { assigneeType: 'deptLeader', assignees: [], mode: 'or', emptyPolicy: 'transferAdmin' } }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a'], ['a', 'e'])), '没有任何部门主管', fixtureCompileContext({ hasDepartmentOwners: false }))
+  await expectRefused('assignUser缺回退人', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: { assigneeType: 'deptLeader', assignees: [], mode: 'or', emptyPolicy: 'assignUser' } }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a'], ['a', 'e'])), 'emptyAssignee')
+  await expectRefused('assignUser回退人不存在', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: { assigneeType: 'deptLeader', assignees: [], mode: 'or', emptyPolicy: 'assignUser', emptyAssignee: 'ghost_user' } }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a'], ['a', 'e'])), '回退审批人')
+  await expectRefused('回退目标为结束节点', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a1', type: 'approval', approval: user(['admin']) }, { id: 'a2', type: 'approval', approval: { ...user(['quality_lead']), rejectTo: 'e' } }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a1'], ['a1', 'a2'], ['a2', 'e'])), '不是审批节点')
+  await expectRefused('单级审批带回退边（指向自身被拒）', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: { ...user(['admin']), rejectTo: 'a' } }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a'], ['a', 'e'])), '不能是审批节点自身')
+  await expectRefused('回退目标不能是自身', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a1', type: 'approval', approval: user(['admin']) }, { id: 'a2', type: 'approval', approval: { ...user(['quality_lead']), rejectTo: 'a2' } }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a1'], ['a1', 'a2'], ['a2', 'e'])), '不能是审批节点自身')
+  await expectRefused('空抄送人', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: user(['admin']) }, { id: 'ncc', type: 'cc', cc: { assignees: [] } }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a'], ['a', 'ncc'], ['ncc', 'e'])), '抄送人未配置')
+  await expectRefused('准入词汇表带会签', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: { assigneeType: 'user', assignees: ['admin'], mode: 'countersign', emptyPolicy: 'transferAdmin' } }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a'], ['a', 'e'])), '准入词汇表不支持高级节点特性', fixtureCompileContext({ stateField: SUPPLIER_ADMISSION_STATE_FIELD }))
   await expectRefused('三级审批', fixtureGraph([
     { id: 's', type: 'start' }, { id: 'a1', type: 'approval', approval: user(['admin']) }, { id: 'a2', type: 'approval', approval: user(['quality_lead']) }, { id: 'a3', type: 'approval', approval: user(['chenliqun']) }, { id: 'e', type: 'end' },
   ], rows(['s', 'a1'], ['a1', 'a2'], ['a2', 'a3'], ['a3', 'e'])), '至多支持两级审批')
@@ -3238,7 +4180,7 @@ export async function compilerSelftest(): Promise<void> {
   expect('两级≤字面量', twoRound.transitions.find(row => row.state === 'pending' && row.action === 'approve' && row.next_state === 'approved')?.condition_expr, 'total <= 100000')
   expect('两级路由进阶条件为空', twoRound.transitions.find(row => row.state === 'pending' && row.action === 'approve' && row.next_state === 'pending_level2')?.condition_expr, '')
   expect('两级审批人映射', twoRound.approverMap, { manager: 'admin', gm: 'quality_lead' })
-  expect('两级extras金额键', { amount_field: twoRound.extras.amount_field, amount_threshold: twoRound.extras.amount_threshold }, { amount_field: 'total', amount_threshold: 100000 })
+  expect('默认字段/阈值不落键', { amount_field: twoRound.extras.amount_field, amount_threshold: twoRound.extras.amount_threshold }, { amount_field: undefined, amount_threshold: undefined })
   expect('两级extras保留引擎键', twoRound.extras.approved_by_field, 'approved_by')
 
   const structural = await expectRows('结构两级无条件', fixtureGraph([
@@ -3272,6 +4214,59 @@ export async function compilerSelftest(): Promise<void> {
   expect('准入派生4转移', admission.transitions.length, 4)
   expect('准入审批人映射', admission.approverMap, { srm_manager: 'admin' })
   expect('准入extras保留', admission.extras, { approved_at_field: 'admitted_at' })
+
+  // ── W5-B2 compile positives: the advanced nodes ──
+  const deptLeader = await expectRows('部门主管标记', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: { assigneeType: 'deptLeader', assignees: [], mode: 'or', emptyPolicy: 'autoPass' } }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a'], ['a', 'e'])), fixtureCompileContext())
+  expect('deptLeader 标记落库', deptLeader.approverMap, { manager: { type: 'deptLeader', emptyPolicy: 'autoPass' } })
+  expect('deptLeader 不落额外 extras 键', deptLeader.extras.sign_modes, undefined)
+
+  const chain = await expectRows('连续多级主管', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: { assigneeType: 'supervisorChain', assignees: [], levels: 2, mode: 'sequential', emptyPolicy: 'transferAdmin' } }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a'], ['a', 'e'])), fixtureCompileContext())
+  expect('supervisorChain 标记落库', chain.approverMap, { manager: { type: 'supervisorChain', levels: 2, emptyPolicy: 'transferAdmin' } })
+  expect('supervisorChain 依次审批模式', chain.extras.sign_modes, { manager: 'sequential' })
+
+  const formField = await expectRows('表单联系人字段', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: { assigneeType: 'formField', assignees: ['owner'], mode: 'or', emptyPolicy: 'assignUser', emptyAssignee: 'admin' } }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a'], ['a', 'e'])), fixtureCompileContext())
+  expect('formField 标记落库', formField.approverMap, { manager: { type: 'formField', value: 'owner', emptyPolicy: 'assignUser', emptyAssignee: 'admin' } })
+
+  const departmentTier = await expectRows('部门成员或签', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: { assigneeType: 'department', assignees: ['质检部'], mode: 'or', emptyPolicy: 'transferAdmin' } }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a'], ['a', 'e'])), fixtureCompileContext())
+  expect('department 形态字节一致', departmentTier.approverMap, { manager: { type: 'department', value: '质检部' } })
+
+  const countersign = await expectRows('会签', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a1', type: 'approval', approval: { assigneeType: 'user', assignees: ['admin', 'quality_lead'], mode: 'countersign', emptyPolicy: 'transferAdmin' } }, { id: 'a2', type: 'approval', approval: user(['chenliqun']) }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a1'], ['a1', 'a2'], ['a2', 'e'])), fixtureCompileContext())
+  expect('会签模式落 extras', countersign.extras.sign_modes, { manager: 'countersign' })
+  expect('会签不改变转移数', countersign.transitions.length, 8)
+
+  const rejectTo = await expectRows('回退边', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a1', type: 'approval', approval: user(['admin']) }, { id: 'c', type: 'condition', condition: { join: 'and', rows: [{ field: 'total', op: '>', value: '100000' }] } }, { id: 'a2', type: 'approval', approval: { ...user(['quality_lead']), rejectTo: 'a1' } }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a1'], ['a1', 'c'], ['c', 'a2'], ['c', 'e'], ['a2', 'e'])), fixtureCompileContext())
+  expect('回退转移行改写', rejectTo.transitions.find(row => row.state === 'pending_level2' && row.action === 'reject')?.next_state, 'pending')
+  expect('一级拒绝保持原状', rejectTo.transitions.find(row => row.state === 'pending' && row.action === 'reject')?.next_state, 'rejected')
+
+  const generalCondition = await expectRows('通用条件', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a1', type: 'approval', approval: user(['admin']) }, { id: 'c', type: 'condition', condition: { join: 'and', rows: [{ field: 'total', op: '>', value: '500' }, { field: 'total', op: '<=', value: '10000' }] } }, { id: 'a2', type: 'approval', approval: user(['quality_lead']) }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a1'], ['a1', 'c'], ['c', 'a2'], ['c', 'e'], ['a2', 'e'])), fixtureCompileContext())
+  expect('通用条件正置进阶行', generalCondition.transitions.find(row => row.state === 'pending' && row.action === 'approve' && row.next_state === 'pending_level2')?.condition_expr, 'total > 500 AND total <= 10000')
+  expect('通用条件直批行为无条件', generalCondition.transitions.find(row => row.state === 'pending' && row.action === 'approve' && row.next_state === 'approved')?.condition_expr, '')
+  expect('通用条件删除金额键', generalCondition.extras.amount_field, undefined)
+  expect('通用条件 DSL 标记', generalCondition.extras.condition_dsl, 'v2')
+
+  const ccPlan = await expectRows('抄送计划', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'a', type: 'approval', approval: user(['admin']) }, { id: 'ncc', type: 'cc', cc: { assignees: ['quality_lead', 'chenliqun'] } }, { id: 'e', type: 'end' },
+  ], rows(['s', 'a'], ['a', 'ncc'], ['ncc', 'e'])), fixtureCompileContext())
+  expect('抄送挂离开态', ccPlan.extras.cc_after, { pending: ['quality_lead', 'chenliqun'] })
+
+  const startCc = await expectRows('发起后抄送', fixtureGraph([
+    { id: 's', type: 'start' }, { id: 'ncc', type: 'cc', cc: { assignees: ['quality_lead'] } }, { id: 'a', type: 'approval', approval: user(['admin']) }, { id: 'e', type: 'end' },
+  ], rows(['s', 'ncc'], ['ncc', 'a'], ['a', 'e'])), fixtureCompileContext())
+  expect('发起抄送挂 draft', startCc.extras.cc_after, { draft: ['quality_lead'] })
 
   // ── rowsToGraph → compile round-trip over both vocabularies ──
   const liveDocRows: LiveFlowRows = {
@@ -3325,7 +4320,71 @@ export async function compilerSelftest(): Promise<void> {
   if (!admissionRecompile.ok) throw new Error('selftest 失败：准入 round-trip 重编译被拒')
   const admissionDrift = assertRowsEquivalent(admissionLive, admissionRecompile.rows)
   if (admissionDrift.length > 0) throw new Error(`selftest 失败：准入 round-trip 不等价（${admissionDrift.join('；')}）`)
-  console.log('approval-engine: compiler selftest OK — 门禁矩阵（孤立/缺端点/多开始/环/不可达/条件DSL/词表/特性矩阵/幽灵用户/空角色）+ 编译正例（一审/两级阈值/结构两级/角色快照/转管理员/抄送透传/准入）+ round-trip（六态阈值/阈值漂移捕获/结构两级/准入）')
+
+  // ── W5-B2 round-trips: the early-seed amount shape, the markers, the
+  // general condition, the sign modes, and the rejectTo row ──
+  // hub_po's live shape: the threshold rides the literal only (extras carry
+  // no amount keys) — equivalent through the engine's default-resolution lens.
+  const earlySeedLive: LiveFlowRows = {
+    stateField: 'doc_status',
+    approverMap: { manager: 'admin', gm: 'admin' },
+    extras: { approved_by_field: 'approved_by', approved_at_field: 'approved_at' },
+    states: docStateRows().map(row => ({ ...row })),
+    transitions: docTransitionRows('total', DEFAULT_AMOUNT_THRESHOLD).map(row => ({ ...row })),
+  }
+  const earlySeedImport = rowsToGraph(earlySeedLive)
+  if (!earlySeedImport.ok) throw new Error(`selftest 失败：早期种子形状逆向导入被拒（${JSON.stringify(earlySeedImport.errors)}）`)
+  const earlySeedRecompile = await compileGraphToRows(earlySeedImport.graph, fixtureCompileContext({ preserveExtras: earlySeedLive.extras }))
+  if (!earlySeedRecompile.ok) throw new Error(`selftest 失败：早期种子 round-trip 重编译被拒（${JSON.stringify(earlySeedRecompile.errors)}）`)
+  const earlySeedDrift = assertRowsEquivalent(earlySeedLive, earlySeedRecompile.rows)
+  if (earlySeedDrift.length > 0) throw new Error(`selftest 失败：早期种子（extras 无金额键）round-trip 不等价（${earlySeedDrift.join('；')}）`)
+
+  // The deptLeader marker round-trips with its policy and the sign modes.
+  const markerLive: LiveFlowRows = {
+    stateField: 'doc_status',
+    approverMap: { manager: { type: 'deptLeader', emptyPolicy: 'assignUser', emptyAssignee: 'admin' }, gm: 'admin' },
+    extras: { approved_by_field: 'approved_by', approved_at_field: 'approved_at', sign_modes: { manager: 'countersign' } },
+    states: docStateRows().map(row => ({ ...row })),
+    transitions: docTransitionRows(null, null).map(row => ({ ...row })),
+  }
+  const markerImport = rowsToGraph(markerLive)
+  if (!markerImport.ok) throw new Error(`selftest 失败：deptLeader 标记逆向导入被拒（${JSON.stringify(markerImport.errors)}）`)
+  const markerRecompile = await compileGraphToRows(markerImport.graph, fixtureCompileContext({ preserveExtras: { approved_by_field: 'approved_by', approved_at_field: 'approved_at' } }))
+  if (!markerRecompile.ok) throw new Error(`selftest 失败：deptLeader round-trip 重编译被拒（${JSON.stringify(markerRecompile.errors)}）`)
+  const markerDrift = assertRowsEquivalent(markerLive, markerRecompile.rows)
+  if (markerDrift.length > 0) throw new Error(`selftest 失败：deptLeader+会签 round-trip 不等价（${markerDrift.join('；')}）`)
+
+  // The general condition and the rejectTo row round-trip.
+  const generalLive: LiveFlowRows = {
+    stateField: 'doc_status',
+    approverMap: { manager: 'admin', gm: 'quality_lead' },
+    extras: { approved_by_field: 'approved_by', approved_at_field: 'approved_at', condition_dsl: 'v2' },
+    states: docStateRows().map(row => ({ ...row })),
+    transitions: docTransitionRows(null, null, { level2Condition: 'total > 500 AND total <= 10000', rejectToPending: true }).map(row => ({ ...row })),
+  }
+  const generalImport = rowsToGraph(generalLive)
+  if (!generalImport.ok) throw new Error(`selftest 失败：通用条件+回退边逆向导入被拒（${JSON.stringify(generalImport.errors)}）`)
+  const generalRecompile = await compileGraphToRows(generalImport.graph, fixtureCompileContext({ preserveExtras: { approved_by_field: 'approved_by', approved_at_field: 'approved_at' } }))
+  if (!generalRecompile.ok) throw new Error(`selftest 失败：通用条件 round-trip 重编译被拒（${JSON.stringify(generalRecompile.errors)}）`)
+  const generalDrift = assertRowsEquivalent(generalLive, generalRecompile.rows)
+  if (generalDrift.length > 0) throw new Error(`selftest 失败：通用条件+回退边 round-trip 不等价（${generalDrift.join('；')}）`)
+
+  // The department form imports as a department node (qm_nc's live shape).
+  const departmentLive: LiveFlowRows = {
+    stateField: 'doc_status',
+    approverMap: { manager: { type: 'department', value: '质检部' }, gm: 'admin' },
+    extras: { approved_by_field: 'approved_by', approved_at_field: 'approved_at' },
+    states: docStateRows().map(row => ({ ...row })),
+    transitions: docTransitionRows(null, null).map(row => ({ ...row })),
+  }
+  const departmentImport = rowsToGraph(departmentLive)
+  if (!departmentImport.ok) throw new Error(`selftest 失败：部门成员形状逆向导入被拒（${JSON.stringify(departmentImport.errors)}）`)
+  const departmentRecompile = await compileGraphToRows(departmentImport.graph, fixtureCompileContext({ preserveExtras: { approved_by_field: 'approved_by', approved_at_field: 'approved_at' } }))
+  if (!departmentRecompile.ok) throw new Error(`selftest 失败：部门成员 round-trip 重编译被拒（${JSON.stringify(departmentRecompile.errors)}）`)
+  const departmentDrift = assertRowsEquivalent(departmentLive, departmentRecompile.rows)
+  if (departmentDrift.length > 0) throw new Error(`selftest 失败：部门成员 round-trip 不等价（${departmentDrift.join('；')}）`)
+
+  console.log('approval-engine: compiler selftest OK — 门禁矩阵（孤立/缺端点/多开始/环/不可达/条件DSL/词表/B2特性矩阵/幽灵用户/空角色）+ 编译正例（一审/两级阈值/结构两级/角色快照/转管理员/抄送透传/准入/deptLeader/主管链/表单字段/部门成员/会签/回退边/通用条件/抄送计划）+ round-trip（六态阈值/阈值漂移捕获/结构两级/准入/早期种子/deptLeader+会签/通用条件+回退/部门成员）')
 }
 
 // ─── CLI ───
@@ -3363,17 +4422,29 @@ async function main(): Promise<void> {
   const actIndex = args.indexOf('--act')
   if (actIndex >= 0) {
     const comment = args.slice(actIndex + 5).join(' ') || undefined
-    const result = await act(io, args[actIndex + 1], Number(args[actIndex + 2]), args[actIndex + 3] as ApprovalAction, args[actIndex + 4] ?? 'admin', comment)
+    const docType = String(args[actIndex + 1] ?? '')
+    const docId = Number(args[actIndex + 2])
+    const result = await act(io, docType, docId, args[actIndex + 3] as ApprovalAction, args[actIndex + 4] ?? 'admin', comment)
     console.log(`approval-engine: acted — ${JSON.stringify(result)}`)
-    if (args[actIndex + 1] === 'so_orders' && result.effective) {
-      const { reserveForSo } = await import('./mrp-run.mts')
-      const doc = await io.get('so_orders', Number(args[actIndex + 2]))
-      await reserveForSo(await signInWithRetry(), String(doc?.code ?? args[actIndex + 2]))
-    }
-    // W2-B2: approving an MPS plan locks its snapshot in (one final recalc).
-    if (args[actIndex + 1] === 'mps_plans' && result.effective) {
-      const { recalcPlan } = await import('./mrp-run.mts')
-      await recalcPlan(await signInWithRetry(), Number(args[actIndex + 2]))
+    // W5-B2: the single effective-effect exit (so_orders/mps_plans) — the
+    // same effectiveEffects() the HTTP route and nb_approve's delegated path
+    // run; the CLI copy of the hooks is gone.
+    if (result.effective) {
+      const doc = await io.get(docType, docId)
+      const code = String(doc?.code ?? docId)
+      // The effect chain rides the same REST transport; a dropped keep-alive
+      // socket would otherwise stall the CLI's top-level await forever. Race
+      // a timeout and print the idempotent replay path instead of hanging
+      // (the hooks are idempotent — POST /effective-effects completes them).
+      const effects = await Promise.race([
+        effectiveEffects(await signInWithRetry(), docType, docId, code),
+        new Promise<null>((resolve) => setTimeout(() => resolve(null), 25_000)),
+      ])
+      if (effects !== null) {
+        console.log(`approval-engine: effective effects — ${JSON.stringify(effects)}`)
+      } else {
+        console.log(`approval-engine: effective effects 超时（传输中断）——单据已生效；幂等重放：POST /effective-effects {"doc_type":"${docType}","doc_id":${String(docId)},"code":"${code}"}`)
+      }
     }
     return
   }
