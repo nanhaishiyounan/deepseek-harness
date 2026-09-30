@@ -1,0 +1,4 @@
+w6 stat-card density --assert @ 2026-09-30T10:18:29.133Z
+marker stat cards: 131
+already compact: 131, pending: 0
+assert: OK — 131 cards pinned at height 112 with compact raw

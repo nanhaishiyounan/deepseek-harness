@@ -70,7 +70,14 @@ export const Chart = forwardRef<EChartsType, ChartOptions>(
         {Component ? (
           <Component ref={ref} onRefReady={onRefReady} {...option} />
         ) : (
-          <ECharts key={errorKey} ref={ref} onRefReady={onRefReady} option={option} fillHeight={fillHeight} />
+          <ECharts
+            key={errorKey}
+            ref={ref}
+            onRefReady={onRefReady}
+            option={option}
+            fillHeight={fillHeight}
+            style={(option as { containerStyle?: React.CSSProperties })?.containerStyle}
+          />
         )}
       </ErrorBoundary>
     );

@@ -1159,6 +1159,15 @@ export const withW4b3Prefix = (tag: string): string => `w4b3${tag}${nodeKey()}`
 export const W4B3_MARKER = 'w4b3'
 
 /**
+ * Chart canvas height for the stat-card family: the ECharts renderer defaults
+ * to a fixed 400px canvas when no heightMode is set (ECharts.tsx `height:
+ * fillHeight ? '100%' : 400`), which left ~70% of every card as empty space.
+ * `heightMode: 'specifyValue' + height` pins the card through BlockItemCard's
+ * useBlockHeight and the chart fills that box.
+ */
+export const STATCARD_CHART_HEIGHT = 112
+
+/**
  * The single-value stat card's raw ECharts option (D3: ChartBlockModel
  * single-measure aggregation + visual.mode='custom'). Renders the card title,
  * the big number, and the 口径 footnote (P-2' — the card never follows the
@@ -1182,10 +1191,11 @@ export function statCardRaw(spec: {
     `const fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: ${spec.decimals ?? 2} });`,
     `const text = '${spec.unitPrefix ?? ''}' + (isFinite(n) ? fmt(n) : '0') + '${spec.unitSuffix ?? ''}';`,
     'return {',
+    `  containerStyle: { height: ${STATCARD_CHART_HEIGHT} },`,
     '  graphic: { elements: [',
-    `    { type: 'text', left: 16, top: 12, style: { text: ${JSON.stringify(spec.title)}, fontSize: 13, fontWeight: 500, fill: '#6b7280' } },`,
-    `    { type: 'text', left: 16, top: 36, style: { text: text, fontSize: 34, fontWeight: 700, fill: '#1d4ed8' } },`,
-    `    { type: 'text', left: 16, bottom: 8, style: { text: ${JSON.stringify(spec.footnote)}, fontSize: 11, fill: '#9ca3af' } },`,
+    `    { type: 'text', left: 12, top: 8, style: { text: ${JSON.stringify(spec.title)}, fontSize: 12, fontWeight: 500, fill: '#6b7280' } },`,
+    `    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },`,
+    `    { type: 'text', left: 12, bottom: 4, style: { text: ${JSON.stringify(spec.footnote)}, fontSize: 10, fill: '#9ca3af' } },`,
     '  ] },',
     '};',
   ].join('\n')
@@ -1241,7 +1251,7 @@ export async function metricChart(
   await dataOf(token, 'POST', '/api/flowModels:save', {
     uid, name: uid, parentId: spec.gridUid, subKey: 'items', subType: 'array',
     ...(spec.sortIndex === undefined ? {} : { sortIndex: spec.sortIndex }),
-    use: 'ChartBlockModel', decoratorProps: {},
+    use: 'ChartBlockModel', decoratorProps: { heightMode: 'specifyValue', height: STATCARD_CHART_HEIGHT },
     props: { title: spec.title },
     stepParams: {
       chartSettings: {
