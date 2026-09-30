@@ -1543,6 +1543,10 @@ export async function appendMovement(token: string, fields: Record<string, unkno
  * delta lands at qty_on_hand=0 with no allocation or lock is destroyed —
  * bins and lots keep the history (movements), the register keeps no
  * zero-quantity residue (W5-B8: the hold rows IQC release zeroed lingered).
+ * The destroy filter repeats the zero conditions (W5-R2): between the
+ * locked update and the destroy a concurrent writer may re-fill the row,
+ * and a bare filterByTk delete would drop it — the filtered destroy
+ * matches zero rows instead and the re-filled row survives.
  */
 export async function applyStockDelta(token: string, key: { productId: number, binId: number, lotId: number }, delta: number): Promise<void> {
   const stock = (await rowsOf(token, 'wms_stock', 500)).find(row =>
@@ -1562,8 +1566,13 @@ export async function applyStockDelta(token: string, key: { productId: number, b
     throw new Error(`optimistic-lock conflict on stock row ${stock.id}: expected version ${version} no longer matches (concurrent posting won); re-read and retry — refusing to double-apply`)
   }
   if (onHand + delta === 0 && Number(stock.qty_allocated ?? 0) === 0 && Number(stock.qty_locked ?? 0) === 0) {
-    await dataOf(token, 'POST', `/api/wms_stock:destroy?filterByTk=${stock.id}`)
-    console.log(`nocobase-h5: stock row #${String(stock.id)} hit zero (product #${String(key.productId)} bin #${String(key.binId)} lot #${String(key.lotId)}) — row removed`)
+    const destroyed = await dataOf(token, 'POST', `/api/wms_stock:destroy?filter=${encodeURIComponent(JSON.stringify({ id: stock.id, qty_on_hand: 0, qty_allocated: 0, qty_locked: 0 }))}`)
+    const destroyedCount = Array.isArray(destroyed) ? destroyed.length : Number(destroyed)
+    if (destroyedCount === 1) {
+      console.log(`nocobase-h5: stock row #${String(stock.id)} hit zero (product #${String(key.productId)} bin #${String(key.binId)} lot #${String(key.lotId)}) — row removed`)
+    } else {
+      console.log(`nocobase-h5: stock row #${String(stock.id)} hit zero but the guarded destroy matched ${String(destroyedCount)} rows (concurrent writer re-filled it) — row kept`)
+    }
   }
 }
 
@@ -1571,7 +1580,9 @@ export async function applyStockDelta(token: string, key: { productId: number, b
  * W5-B8: destroy every stock row resting at qty_on_hand=0 with no
  * allocation and no lock (the pre-B8 posting residue — 13 hold rows from
  * IQC releases and scrap legs). Idempotent; the ledger invariant is
- * unaffected (both sides of stock == Σmovements drop zero).
+ * unaffected (both sides of stock == Σmovements drop zero). The destroy
+ * filter repeats the zero conditions (W5-R2): a row re-filled between the
+ * read and the destroy matches zero rows and survives, never dies by id.
  * @param token - the root API token.
  * @returns the number of rows destroyed.
  */
@@ -1579,15 +1590,19 @@ export async function sweepZeroStockRows(token: string): Promise<number> {
   const stocks = await rowsOf(token, 'wms_stock', 500)
   const doomed = stocks.filter(row =>
     Number(row.qty_on_hand ?? 0) === 0 && Number(row.qty_allocated ?? 0) === 0 && Number(row.qty_locked ?? 0) === 0)
+  let destroyedTotal = 0
   for (const row of doomed) {
-    await dataOf(token, 'POST', `/api/wms_stock:destroy?filterByTk=${row.id}`)
+    const destroyed = await dataOf(token, 'POST', `/api/wms_stock:destroy?filter=${encodeURIComponent(JSON.stringify({ id: row.id, qty_on_hand: 0, qty_allocated: 0, qty_locked: 0 }))}`)
+    destroyedTotal += Array.isArray(destroyed) ? destroyed.length : Number(destroyed)
   }
-  if (doomed.length > 0) {
-    console.log(`nocobase-h5: sweep-zero-stock — ${String(doomed.length)} zero row(s) removed (ids ${doomed.map(row => String(row.id)).join(',')})`)
+  if (destroyedTotal > 0) {
+    console.log(`nocobase-h5: sweep-zero-stock — ${String(destroyedTotal)} zero row(s) removed (ids ${doomed.map(row => String(row.id)).join(',')})`)
+  } else if (doomed.length > 0) {
+    console.log(`nocobase-h5: sweep-zero-stock — ${String(doomed.length)} candidate(s) re-filled before destroy (guarded; none removed)`)
   } else {
     console.log('nocobase-h5: sweep-zero-stock — no zero rows (clean)')
   }
-  return doomed.length
+  return destroyedTotal
 }
 
 async function postShipment(token: string, shipmentNo: string): Promise<void> {

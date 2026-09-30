@@ -2,9 +2,9 @@
  * W5-B8 probe (research artifact): print the identity of every enum-interface
  * table column still rendered by DisplayTextFieldModel (the w5b6-heal
  * "bareText" census) so the drift can be attributed before healing.
- * Usage: node --import tsx/esm examples/kb-agent/scripts/.w5-b8-bare-probe.mts
+ * Usage: node --import tsx/esm research/2026-09-29-w5-rework/.w5-b8-bare-probe.mts
  */
-import { dataOf, listFlowModels, signInWithRetry } from './nocobase-flow-page-lib.mts'
+import { dataOf, listFlowModels, signInWithRetry } from '../../examples/kb-agent/scripts/nocobase-flow-page-lib.mts'
 
 type FieldMeta = { name: string, interface: string | null }
 

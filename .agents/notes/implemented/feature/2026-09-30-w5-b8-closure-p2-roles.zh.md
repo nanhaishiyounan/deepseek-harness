@@ -37,3 +37,16 @@ W5 七个实施批留下三类收尾债：① P2 残余——qty=0 的 hold 库�
 - **折叠侧栏的菜单文案不是权限探针**——组未展开时页面标题不在 DOM；隔离断言要用「直开 URL + 渲染内容」对照，不能读 aside 文本。
 - **CDP 等待文案必须是页面真实字面**——「SKU」不在库存页 DOM（列头是「库位」等），等待探针措辞先经一次实测校准；localStorage 清除后 SPA 可能仍持内存 token 渲染壳，登录表单探针需 reload 重试三轮。
 - **W5 证据两个家**：B0~B5 在 `examples/kb-agent/demos/acceptance-w5/`，B6~B8 在仓库根 `demos/acceptance-w5/`——断言脚本引用前先对准路径。
+
+## W5-R2 修复批次（终局验证 85 分 FAIL 后：3 BLOCKING + 4 顺手项）
+
+- **终验门禁退出码传播。** [`w5-final-gates.sh`](../../../../research/2026-09-29-w5-rework/w5-final-gates.sh) 末条 `echo` 吞掉 FAIL（恒 exit 0，接 CI 即伪通过）；PASS 计数 `^PASS$` 漏计 lint 腿 `PASS — N errors` 与重试腿 `PASS (attempt N)`——「16 腿」实为 20 门段。改前缀匹配计数 + FAIL>0 即 exit 1 + PASS≠20 报警；负例注入实证（`r2-fail-exit-check.sh`：假 FAIL 门 → exit 1）。「16 腿」表述在 handoff 勘误段更正，历史 commit 不改写。
+- **清行 destroy 加零值守卫（TOCTOU）。** [`nocobase-h5-wms.mts`](../../../../examples/kb-agent/scripts/nocobase-h5-wms.mts) 的 applyStockDelta/sweepZeroStockRows 原按 `filterByTk` 裸删——update 腿有乐观锁而 destroy 腿游离。改条件过滤 destroy（`filter={id, qty_on_hand:0, qty_allocated:0, qty_locked:0}`，kpi-run 先例）；当前版本 destroy filter 可完整表达且原子，无残余窗口（不入 backlog）。正/负例+对账证据 `research/2026-09-29-w5-rework/r2-destroy-guard.txt`。
+- **八角色动作腿（UJ-1）——走查从只读到读写。** [`b8-actions.mjs`](../../../../demos/acceptance-w5/b8-actions.mjs) 以真实账号执行八条写动作，每步 psql 复核状态转移：buyer 提交 PR→引擎 pending+待办；planner 引擎 run-mrp→快照产物行（member 无 MPS create 按钮，实测 ACL）；shop_lead 页面报工（m2o 选 MO）；qc_inspector 页面建单+引擎 `--inspect` 判定 pending→passed/closed；keeper 页面建单+`--post-receipt` 过账（stock +5、PUTAWAY 流水、ledger 平）；sales_rep 页面建 SO 草稿；finance 页面建付款申请+submit→approve→settle 全链落 paid；admin 引擎 `/act` 审批 PR 落 approved+待办 completed。W5B-\* 临时单据 finally 统一清理（16 步）后 `--assert-ledger` 复平；证据 `b8-r2-act-*.png` ×8 + `b8-actions.json`，由 `w5b8-closure --assert` 新动作腿门禁化。
+- **四顺手项。** 走查登录断言恒真改真判据——昵称正则从未命中（恒真一直掩盖），改 `/api/auth:check`（带 Bearer 头；裸 fetch 无认证头 401；admin 邮箱登录 username 是 nocobase，需 email 兼容）；w5b8-closure `openCount >= 0` 恒真改 `> 0`（实值 2）；walkthrough/actions 两驱动 finally 杀 chrome 进程组（旧 detached+unref 泄漏实例堆积 26 进程、maker 挂死 31 分钟）；r8 设计器截图先 scrollIntoView 再拍（旧图 iframe 在 y=5370 视口外，验证方 vfy 图已证滚动入镜形态）；`.w5-b8-bare-probe.mts` 迁回 research/2026-09-29-w5-rework/（点前缀工件归惯例家，相对导入随之改两级）。
+
+### R2 后果口径
+
+- 走查 8/8 全 PASS 重录（登录步换真判据后首次全绿）；动作腿 8/8（26 断言）全绿；清理后 ledger balanced。
+- 质检单浏览器表单不带 result/status 默认值（引擎挂点建单语义是 pending/pending）——提交后按引擎语义补登记待检态再判定（fill-if-empty，判定动词仍是引擎的）。
+- 质检/收货表单供应商为必填（页面校验「该字段是必填字段」不经 ant-message，须读 `.ant-form-item-explain-error` 定位）；IQC 判定挂 normal 档供应商（SUP-001），四态转移机按最近 5 批 closed 重算、W5B 行删除后自愈。

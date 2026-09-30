@@ -1,0 +1,7 @@
+  ✓ 正例：qty=0 行被守卫 destroy 删除（count=1） — count=1
+  ✓ 正例：删除后行不可读
+  ✓ 负例：qty>0 行经守卫 destroy 存活（count=0） — count=0
+  ✓ 负例：行仍可读（未被误删）
+  ✓ 清理：qty>0 行清零后经守卫 destroy 移除 — count=1
+  ✓ stock == Σmovements 对账仍平 — nocobase-h5: ledger balanced — stock == Σmovements per (product, lot)，48 组，211 条流水
+r2-destroy-guard: all green

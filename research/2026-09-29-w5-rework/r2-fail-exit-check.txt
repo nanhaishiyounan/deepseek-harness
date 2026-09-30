@@ -1,0 +1,5 @@
+PASS
+FAIL
+matrix done: 1 PASS / 1 FAIL
+EXITING 1 (FAIL propagates)
+exit_code=1

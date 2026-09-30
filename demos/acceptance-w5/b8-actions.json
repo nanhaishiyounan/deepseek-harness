@@ -1,0 +1,196 @@
+{
+  "legs": [
+    {
+      "role": "buyer 采购员",
+      "action": "提交采购申请 W5B-PR-R2-02 → 引擎提交流程",
+      "channel": "browser-form + engine-rest",
+      "checks": [
+        {
+          "name": "PR 落库（草稿）",
+          "ok": true,
+          "detail": "id=22 status=draft"
+        },
+        {
+          "name": "引擎提交后状态 pending（submitted）",
+          "ok": true,
+          "detail": "doc_status=pending"
+        },
+        {
+          "name": "待办生成（open ≥1）",
+          "ok": true,
+          "detail": "open=1"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "role": "planner 计划员",
+      "action": "MRP 快照生成（run-mrp）→ 产物行断言",
+      "channel": "engine-rest (/run-mrp) — member 页面无 MPS create 按钮（实测 ACL）",
+      "checks": [
+        {
+          "name": "MRP 快照产物行落库",
+          "ok": true,
+          "detail": "当日快照行 32 → 36"
+        },
+        {
+          "name": "最新批次 run_id 刷新",
+          "ok": true,
+          "detail": "run_id=MRP-20260930-33"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "role": "shop_lead 车间主任",
+      "action": "报工登记 W5B-JR-R2-01",
+      "channel": "browser-form",
+      "checks": [
+        {
+          "name": "生产订单已选（m2o）",
+          "ok": true,
+          "detail": "MO-2026-0001"
+        },
+        {
+          "name": "报工行落库",
+          "ok": true,
+          "detail": "W5B-JR-R2-01|draft|周强|5"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "role": "qc_inspector 质检员",
+      "action": "建质检单 W5B-QI-R2-01 → AQL 判定（passed）",
+      "channel": "browser-form + engine-cli (--inspect)",
+      "checks": [
+        {
+          "name": "质检单落库（待检）",
+          "ok": true,
+          "detail": "W5B-QI-R2-01|pending|pending"
+        },
+        {
+          "name": "判定转移：pending → passed/closed",
+          "ok": true,
+          "detail": "passed|closed|王倩"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "role": "keeper 仓管员",
+      "action": "收货登记 W5B-RCV-R2-01 → 过账入库",
+      "channel": "browser-form + engine-cli (--post-receipt)",
+      "checks": [
+        {
+          "name": "入库单落库",
+          "ok": true,
+          "detail": "43|draft"
+        },
+        {
+          "name": "过账转移：→ posted",
+          "ok": true,
+          "detail": "status=posted"
+        },
+        {
+          "name": "stock 变化 +5",
+          "ok": true,
+          "detail": "before=0 after=5"
+        },
+        {
+          "name": "PUTAWAY 流水落账",
+          "ok": true,
+          "detail": "movements=1"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "role": "sales_rep 销售",
+      "action": "创建销售订单草稿 W5B-SO-R2-01",
+      "channel": "browser-form",
+      "checks": [
+        {
+          "name": "客户已选（m2o）",
+          "ok": true,
+          "detail": "漯河宏发食品有限公司"
+        },
+        {
+          "name": "SO 草稿存在",
+          "ok": true,
+          "detail": "W5B-SO-R2-01|draft"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "role": "finance 财务",
+      "action": "付款申请 W5B-PAY-R2-01 → 提交/审批/核销（settle→paid）",
+      "channel": "browser-form + engine-rest + engine-cli (--act settle)",
+      "checks": [
+        {
+          "name": "付款申请落库（草稿）",
+          "ok": true,
+          "detail": "id=8 status=draft"
+        },
+        {
+          "name": "提交后 pending",
+          "ok": true,
+          "detail": "doc_status=pending"
+        },
+        {
+          "name": "审批通过",
+          "ok": true,
+          "detail": "doc_status=approved"
+        },
+        {
+          "name": "核销落 paid（终态）",
+          "ok": true,
+          "detail": "doc_status=paid"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "role": "admin 管理员",
+      "action": "审批采购申请 W5B-PR-R2-02（approve）",
+      "channel": "engine-rest (/act)",
+      "checks": [
+        {
+          "name": "PR 状态转移：→ approved",
+          "ok": true,
+          "detail": "doc_status=approved"
+        },
+        {
+          "name": "admin 待办完成（completed）",
+          "ok": true,
+          "detail": "todo=completed"
+        },
+        {
+          "name": "审批留痕落档",
+          "ok": true,
+          "detail": "records=1"
+        }
+      ],
+      "pass": true
+    }
+  ],
+  "cleanup": [
+    "wfl records: ok",
+    "wfl todos: ok",
+    "wfl records mps: ok",
+    "wfl todos mps: ok",
+    "wfl records pay: ok",
+    "wfl todos pay: ok",
+    "movements: ok",
+    "stock: ok",
+    "lots: ok",
+    "receipts: ok",
+    "pur_requests: ok",
+    "mps_plans: ok",
+    "job_reports: ok",
+    "inspections: ok",
+    "so_orders: ok",
+    "pur_payments: ok"
+  ]
+}

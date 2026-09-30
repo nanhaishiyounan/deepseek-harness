@@ -224,18 +224,29 @@ const signInAs = async (account, password) => {
   if (filled !== true) throw new Error(`sign-in form did not render for ${account}`)
   await evaluate(`[...document.querySelectorAll('button')].find(b => b.textContent.includes('登录'))?.click()`)
   await sleep(3500)
-  const nickname = await evaluate(`(document.body.innerText.match(/(${['蔡俊','孙梅','周强','王倩','吴涛','郑洁','冯琳','admin'].join('|')})/)||[''])[0]`)
-  return String(nickname)
+  // W5-R2: the nickname never renders in the post-login DOM (the old regex
+  // probe always missed; the tautology hid it) — the session's own auth:check
+  // (with the stored token; a bare fetch carries no header) is the honest
+  // identity anchor.
+  const identity = await evaluate(`fetch('/api/auth:check', { headers: { authorization: 'Bearer ' + localStorage.getItem('NOCOBASE_TOKEN') } }).then(r => r.json()).then(j => ({ nickname: String(j.data?.nickname ?? ''), username: String(j.data?.username ?? ''), email: String(j.data?.email ?? '') })).catch(() => ({ nickname: '', username: '', email: '' }))`)
+  // admin signs in by email while its username is 'nocobase' — accept either
+  // the username or the email as the identity match.
+  const ok = String(identity?.username) === account || String(identity?.email) === account
+  return { nickname: String(identity?.nickname ?? ''), username: String(identity?.username ?? ''), ok }
 }
 
 const results = []
+const walkRoles = async () => {
 for (const role of ROLES) {
   console.log(`\n== r${role.n} ${role.role}（${role.account}）==`)
   const steps = []
   let ok = true
-  const nickname = await signInAs(role.account, role.password)
-  const signedIn = nickname !== '' || (await goto(`${BASE}/admin`, null, 20000)) === false
-  steps.push({ name: '登录成功', ok: signedIn, detail: nickname === '' ? '未捕获昵称（以页面可达为准）' : `身份锚点「${nickname}」` })
+  const identity = await signInAs(role.account, role.password)
+  // W5-R2: the old `nickname !== '' || goto(...) === false` was a
+  // tautology (goto with no waitText always returns false); the session's
+  // /api/users:check username is the real assertion now.
+  const signedIn = identity.ok === true
+  steps.push({ name: '登录成功', ok: signedIn, detail: signedIn ? `身份锚点「${identity.nickname}」（${identity.username}）` : `auth:check 返回 ${identity.username || '(空)'}（期望 ${role.account}）——登录未生效` })
   if (!signedIn) ok = false
   // Data isolation contrast: the admin-only 权限矩阵 page under a direct
   // URL — the collapsed-group sidebar text is not a reliable probe, so the
@@ -257,14 +268,36 @@ for (const role of ROLES) {
       if (!one.ok) ok = false
     }
     if (step.name === role.shotOn) {
+      if (step.designerIframe === true) {
+        // W5-R2: the designer iframe sits ~5370px down the page — scroll
+        // it into the viewport before the shot or the canvas never lands
+        // in frame (the verifier's vfy-b8-designer-iframe.png proved the
+        // scroll-then-shoot shape).
+        await evaluate(`(() => { const f = [...document.querySelectorAll('iframe')].find(f => (f.src || '').includes('/designer')); if (f) f.scrollIntoView({ block: 'center' }); return !!f })()`)
+        await sleep(900)
+      }
       await shot(`b8-r${role.n}-walkthrough`)
     }
   }
   results.push({ role: `${role.role}（${role.account}）`, pass: ok, steps })
   console.log(`r${role.n} ${role.role}: ${ok ? 'PASS' : 'FAIL'} — ${String(steps.filter(s => s.ok).length)}/${String(steps.length)} 步`)
 }
+}
 
-writeFileSync(`${OUT}b8-walkthrough.json`, JSON.stringify(results, null, 2))
+try {
+  await walkRoles()
+  writeFileSync(`${OUT}b8-walkthrough.json`, JSON.stringify(results, null, 2))
+} finally {
+  // W5-R2: the detached+unref chrome used to outlive the driver (a hung
+  // maker left it running for 31 minutes) — kill the process group before
+  // the driver exits, whatever the walk outcome.
+  try {
+    process.kill(-chromeProc.pid, 'SIGTERM')
+  } catch (error) {
+    // ESRCH: the group already exited; anything else still gets SIGKILL.
+    if (String(error?.code) !== 'ESRCH') chromeProc.kill('SIGKILL')
+  }
+}
 const failed = results.filter(row => !row.pass)
 console.log(`\nwalkthrough: ${String(results.length - failed.length)}/${String(results.length)} 角色通过`)
 if (failed.length > 0) {

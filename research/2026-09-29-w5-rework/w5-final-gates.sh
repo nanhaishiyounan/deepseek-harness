@@ -106,4 +106,13 @@ run_gate "setup-nocobase verify 全链" node --env-file=.env --import tsx/esm ex
 # Keep the evidence file free of trailing whitespace (the blank tail lines
 # sed prefixes would otherwise carry it; pre-commit gates it).
 sed -i '' 's/[[:space:]]*$//' "$OUT"
-echo "matrix done: $(grep -c '^PASS$' "$OUT") PASS / $(grep -c '^FAIL$' "$OUT") FAIL" >> "$OUT"
+# Prefix match: lint writes "PASS — N errors", retry legs "PASS (attempt N)"
+# and the bare "PASS"; the chain legs' "  | sN PASS" indented lines never
+# match. The FAIL count rides the same prefix so a failed lint leg counts.
+pass_count=$(grep -c '^PASS' "$OUT")
+fail_count=$(grep -c '^FAIL' "$OUT")
+echo "matrix done: ${pass_count} PASS / ${fail_count} FAIL" >> "$OUT"
+# Exit code carries the verdict: a FAIL anywhere (or a short matrix) must
+# fail the run — the trailing echo used to swallow it (恒 exit 0).
+if (( fail_count > 0 )); then exit 1; fi
+if (( pass_count != 20 )); then echo "gate-count anomaly: expected 20 PASS legs, found ${pass_count}" >&2; exit 1; fi

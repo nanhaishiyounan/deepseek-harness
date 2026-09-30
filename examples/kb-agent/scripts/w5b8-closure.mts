@@ -143,7 +143,10 @@ function reorderLeg(): void {
   const dupOpen = psql("SELECT count(*) FROM (SELECT product_id FROM wms_reorder_suggestions WHERE status = 'open' GROUP BY product_id HAVING count(*) > 1) d;").trim()
   check('无同物料并列 open 建议', dupOpen === '0', `重复组 ${dupOpen}`)
   const openCount = psql("SELECT count(*) FROM wms_reorder_suggestions WHERE status = 'open';").trim()
-  check('open 建议行存在（扫描产物）', Number(openCount) >= 0, `open=${openCount} 行（scanReorder 存量 open 行走刷新不新建——w5b4 --assert 幂等重跑腿复证）`)
+  // W5-R2: `>= 0` was a tautology — the intent is that scanReorder's
+  // product exists, so a zero would fail it (live value: 2 open rows on
+  // two distinct products).
+  check('open 建议行存在（扫描产物）', Number(openCount) > 0, `open=${openCount} 行（scanReorder 存量 open 行走刷新不新建——w5b4 --assert 幂等重跑腿复证）`)
 }
 
 /** BP-21: the terminal strict regime is documented where deployment reads it. */
@@ -177,6 +180,25 @@ function walkthroughEvidenceLeg(): void {
   }
 }
 
+/** W5-R2 UJ-1: the eight role action-leg evidence (browser writes + engine verbs). */
+function actionEvidenceLeg(): void {
+  log('— W5-R2 八角色动作腿证据（写动作 + 状态转移）')
+  const outDir = here('../../../demos/acceptance-w5/')
+  for (const role of ['buyer', 'planner', 'shop_lead', 'qc_inspector', 'keeper', 'sales_rep', 'finance', 'admin']) {
+    const png = `b8-r2-act-${role}.png`
+    check(`动作截图 ${png}`, existsSync(outDir + png))
+  }
+  const resultsPath = outDir + 'b8-actions.json'
+  if (!existsSync(resultsPath)) {
+    check('动作腿结果 b8-actions.json', false, '未生成（先跑 b8-actions.mjs）')
+    return
+  }
+  const parsed = JSON.parse(readFileSync(resultsPath, 'utf8')) as { legs: Array<{ role: string; pass: boolean; checks: Array<{ ok: boolean }> }> }
+  for (const leg of parsed.legs) {
+    check(`${leg.role} 动作腿全断言通过`, leg.pass, `${String(leg.checks.filter(c => c.ok).length)}/${String(leg.checks.length)} 断言`)
+  }
+}
+
 async function main(): Promise<void> {
   log(`w5b8-closure: ${mode === 'run' ? 'run（种子+清偿+断言）' : 'assert（只读断言）'}`)
   const token = await signInWithRetry()
@@ -186,6 +208,7 @@ async function main(): Promise<void> {
   reorderLeg()
   terminalDocsLeg()
   walkthroughEvidenceLeg()
+  actionEvidenceLeg()
   log('— 22 项断点终态：16 项 B3~B5 已清偿（w5b3/4/5 --assert 复证）；BP-18/21/22 本批清偿；BP-19 发号 TOCTOU 转下轮 backlog（单写者演示环境无并发窗口；建议 doc_no 序列表或唯一索引+重试）；BP-20 f3 已在 B0 修复；其余 B0~B7 批内清偿（见 plans/handoff-2026-09-30-w5.zh.md 终态核对表）')
   if (failures.length > 0) {
     throw new Error(`w5b8-closure ${mode} 失败 ${String(failures.length)} 项：\n  - ${failures.join('\n  - ')}`)
