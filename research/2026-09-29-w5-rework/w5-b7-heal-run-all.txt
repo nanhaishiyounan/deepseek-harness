@@ -1,0 +1,24 @@
+# w5b7 document-detail heal all @ 2026-09-30T00:31:15.819Z
+timelineChannel pur_orders -> wfl_records_pur_orders
+hasMany pur_orders.receipts -> wms_receipts
+pur_orders: action w3b1vad8zxm5m8oet -> w5b7va4f70ui5txpm (fields=8 related=1 subtables=1)
+timelineChannel pur_requests -> wfl_records_pur_requests
+hasMany pur_requests.rfqs -> pur_rfqs
+pur_requests: action w3b1vagqjn42mliu -> w5b7va0bmskl5qmaj (fields=6 related=1 subtables=1)
+timelineChannel pur_rfqs -> wfl_records_pur_rfqs
+hasMany pur_rfqs.quotes -> pur_quotes
+hasMany pur_rfqs.orders -> pur_orders
+pur_rfqs: action w3b1vaf4fbaehpnf -> w5b7va8ffql72ph48 (fields=4 related=2 subtables=2)
+timelineChannel so_orders -> wfl_records_so_orders
+hasMany so_orders.payments -> crm_payments
+so_orders: action w3b1va9kumw72tue -> w5b7vaddhu3cp7pf (fields=8 related=1 subtables=1)
+so_orders: action w3b1vaovghu0o9f3f -> w5b7vagpq3e28ejgc (fields=5 related=1 subtables=1)
+timelineChannel mfg_orders -> wfl_records_mfg_orders
+mfg_orders: action w3b1vai233i5gusc -> w5b7vapbddq2ctadd (fields=13 related=0 subtables=0)
+mfg_orders: action w3b1vakwp8ydx2hqp -> w5b7va20lf1f5f9w6 (fields=11 related=0 subtables=0)
+timelineChannel qm_inspections -> wfl_records_qm_inspections
+qm_inspections: action w3b1vadxty1iuqo3j -> w5b7val98t6rq9kw (fields=16 related=0 subtables=1)
+timelineChannel crm_payments -> wfl_records_crm_payments
+crm_payments: action w3b1va0kfrrt6je6q -> w5b7va9ycesyk9vvp (fields=6 related=0 subtables=0)
+crm_payments: action w3b1vainqg5vbkmpq -> w5b7vamgztofplbi (fields=5 related=0 subtables=0)
+crm_payments: action w3b1vajmmzzyady3 -> w5b7vag684jmjfxzs (fields=6 related=0 subtables=0)

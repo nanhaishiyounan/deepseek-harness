@@ -1,0 +1,57 @@
+[
+  {
+    "collection": "pur_orders",
+    "actionUid": "w5b7va4f70ui5txpm",
+    "oldActionUid": "w3b1vad8zxm5m8oet"
+  },
+  {
+    "collection": "pur_requests",
+    "actionUid": "w5b7va0bmskl5qmaj",
+    "oldActionUid": "w3b1vagqjn42mliu"
+  },
+  {
+    "collection": "pur_rfqs",
+    "actionUid": "w5b7va8ffql72ph48",
+    "oldActionUid": "w3b1vaf4fbaehpnf"
+  },
+  {
+    "collection": "so_orders",
+    "actionUid": "w5b7vaddhu3cp7pf",
+    "oldActionUid": "w3b1va9kumw72tue"
+  },
+  {
+    "collection": "so_orders",
+    "actionUid": "w5b7vagpq3e28ejgc",
+    "oldActionUid": "w3b1vaovghu0o9f3f"
+  },
+  {
+    "collection": "mfg_orders",
+    "actionUid": "w5b7vapbddq2ctadd",
+    "oldActionUid": "w3b1vai233i5gusc"
+  },
+  {
+    "collection": "mfg_orders",
+    "actionUid": "w5b7va20lf1f5f9w6",
+    "oldActionUid": "w3b1vakwp8ydx2hqp"
+  },
+  {
+    "collection": "qm_inspections",
+    "actionUid": "w5b7val98t6rq9kw",
+    "oldActionUid": "w3b1vadxty1iuqo3j"
+  },
+  {
+    "collection": "crm_payments",
+    "actionUid": "w5b7va9ycesyk9vvp",
+    "oldActionUid": "w3b1va0kfrrt6je6q"
+  },
+  {
+    "collection": "crm_payments",
+    "actionUid": "w5b7vamgztofplbi",
+    "oldActionUid": "w3b1vainqg5vbkmpq"
+  },
+  {
+    "collection": "crm_payments",
+    "actionUid": "w5b7vag684jmjfxzs",
+    "oldActionUid": "w3b1vajmmzzyady3"
+  }
+]

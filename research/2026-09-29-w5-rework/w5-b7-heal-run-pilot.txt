@@ -1,0 +1,3 @@
+# w5b7 document-detail heal pilot @ 2026-09-29T23:00:22.577Z
+hasMany pur_orders.receipts -> wms_receipts
+pur_orders: action w3b1vad8zxm5m8oet -> w5b7va8n9n5gtju92 (fields=8 related=1)

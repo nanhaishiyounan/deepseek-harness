@@ -178,7 +178,7 @@ async function bp07RopLifecycle(token: string): Promise<void> {
   check('BP-07 建议行 converted', String(converted?.status) === 'converted', `status=${String(converted?.status)}（#${String(converted?.id)}）`)
   const prCode = String(converted?.converted_doc_code ?? '')
   const pr = prCode === '' ? undefined : await one(token, 'pur_requests', { code: prCode })
-  check('BP-07 PR 草稿创建+回链', pr !== undefined && String(pr.doc_status) === 'draft', `${prCode}（此前 PR 总数 ${prBefore}）`)
+  check('BP-07 PR 草稿创建+回链', pr !== undefined && String(pr.doc_status) === 'draft', `${prCode}（#${String(pr?.id ?? '?')}）`)
   const lineCount = pr === undefined ? 0 : Number(psql(`SELECT count(*) FROM pur_request_lines WHERE request_id = ${String(Number(pr.id))};`).trim())
   check('BP-07 PR 行落物料', lineCount === 1, `${String(lineCount)} 行`)
   // The stale leg: a fabricated open row whose product is far above its

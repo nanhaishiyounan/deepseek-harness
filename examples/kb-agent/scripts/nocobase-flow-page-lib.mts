@@ -1356,3 +1356,198 @@ export async function seatGridTopBlocks(
     stepParams: { gridSettings: { grid: { rows, sizes, rowOrder } } },
   })
 }
+
+// ─── W5-B7 document-detail pattern (header facts / approval timeline / connections) ───
+
+/** uid for W5-B7 nodes (timeline blocks, document-detail drawer trees); the `w5b7` prefix is the rollback anchor. */
+export const withW5b7Prefix = (tag: string): string => `w5b7${tag}${nodeKey()}`
+
+/** action → colored Tag options for the timeline block (the live wfl_approval_records.action values). */
+export const APPROVAL_ACTION_OPTIONS: ReadonlyArray<StatusColumnOption> = [
+  { value: 'submit', label: '提交', color: 'blue' },
+  { value: 'approve', label: '通过', color: 'green' },
+  { value: 'reject', label: '驳回', color: 'red' },
+  { value: 'promote', label: '晋级', color: 'cyan' },
+  { value: 'demote', label: '回退', color: 'orange' },
+  { value: 'resubmit', label: '重新提交', color: 'blue' },
+  { value: 'settle', label: '会签收敛', color: 'green' },
+  { value: 'void', label: '作废', color: 'default' },
+]
+
+/**
+ * The per-docType view collection name backing the timeline block (created by
+ * w5b7-detail's ensureTimelineChannel: a PG view over wfl_approval_records
+ * pinned to one doc_type, so the parent hasMany(foreignKey=doc_id) rides the
+ * association+sourceId channel the platform actually honors in drawers).
+ */
+export const timelineCollectionFor = (docType: string): string => `wfl_records_${docType}`
+
+/**
+ * The approval-timeline block (B7-2): a table block bound to the per-docType
+ * view collection through the parent association `<collection>.approvalRecords`
+ * + sourceId — the same drawer channel the W3-B2 subtable proved live (the
+ * dataScope/init.params paths never reach the first :list request; the B7
+ * browser probe on 2026-09-29 confirmed both platform gaps). The
+ * from_anchor/to_anchor pair carries the countersign fan-out and the return
+ * trajectory (demote).
+ *
+ * @param spec the drawer's collection and its wfl docType
+ */
+export function approvalTimelineBlock(spec: { collection: string, docType: string }): Record<string, unknown> {
+  const columns = ([
+    ['acted_at', '时间', 'DisplayDateTimeFieldModel', { format: 'YYYY-MM-DD' }, 'right'],
+    ['approver', '审批人', 'DisplayTextFieldModel', {}, 'left'],
+    ['from_anchor', '自节点', 'DisplayTextFieldModel', {}, 'left'],
+    ['to_anchor', '至节点', 'DisplayTextFieldModel', {}, 'left'],
+    ['action', '动作', 'DisplayEnumFieldModel', { options: [...APPROVAL_ACTION_OPTIONS] }, 'left'],
+    ['comment', '意见', 'DisplayTextFieldModel', {}, 'left'],
+  ] as const).map(([fieldPath, title, modelUse, props, align], index) => ({
+    uid: withW5b7Prefix('tlc'), subKey: 'columns', subType: 'array', sortIndex: index + 1,
+    use: 'TableColumnModel',
+    props: { title, dataIndex: fieldPath, width: 140, editable: false, sorter: false, fixed: 'none', align, ...props },
+    stepParams: {
+      fieldSettings: { init: { dataSourceKey: 'main', collectionName: 'wfl_approval_records', fieldPath } },
+      tableColumnSettings: { model: { use: modelUse } },
+    },
+    subModels: {
+      field: {
+        uid: withW5b7Prefix('tlf'), subKey: 'field', subType: 'object', sortIndex: 0,
+        use: modelUse,
+        props: { displayStyle: 'text', overflowMode: 'ellipsis', clickToOpen: false, displayCopyButton: false, ...props },
+        stepParams: { fieldSettings: { init: { dataSourceKey: 'main', collectionName: 'wfl_approval_records', fieldPath } } },
+      },
+    },
+  }))
+  return {
+    uid: withW5b7Prefix('tlb'), subKey: 'items', subType: 'array', sortIndex: 1,
+    use: 'TableBlockModel', props: { title: '审批轨迹' },
+    stepParams: {
+      resourceSettings: {
+        init: {
+          dataSourceKey: 'main',
+          collectionName: timelineCollectionFor(spec.docType),
+          associationName: `${spec.collection}.approvalRecords`,
+          sourceId: '{{ctx.view.inputArgs.filterByTk}}',
+        },
+      },
+    },
+    subModels: { columns },
+  }
+}
+
+/**
+ * The document-detail drawer tree (B7-1/2/3): three ChildPage tabs —
+ * 单据明细 (two-column header-facts layout, the Fiori object-page form facet),
+ * 审批记录 (the timeline block plus the designer deep link), and 关联单据
+ * (one association-bound subtable per business group, the ERPNext Connections
+ * pattern — {@link subtableBlockNode} shapes, rollback riding the parent tree
+ * rewrite).
+ *
+ * @param actionUid the view action this page tree hangs under
+ * @param spec collection, drawer fields (header facts first), wfl docType, connections, and the designer base URL
+ */
+export function documentDetailPageTree(
+  actionUid: string,
+  spec: {
+    collection: string
+    fields: ReadonlyArray<DetailFieldSpec>
+    docType: string
+    related?: ReadonlyArray<SubtableSpec>
+    /** W3-B2 subtable drill-down blocks carried over from the previous drawer verbatim (re-seated after the DetailsBlock). */
+    children?: Record<string, unknown>[]
+    designerBase?: string
+  },
+): Record<string, unknown> {
+  const uid = withW5b7Prefix
+  const itemUids = spec.fields.map(() => uid('dwi'))
+  // two-column fact grid: rows pair [12,12]; a trailing lone item keeps [12]
+  const rows: Array<Record<string, unknown>> = []
+  for (let index = 0; index < itemUids.length; index += 2) {
+    const id = `r${rows.length}`
+    const pair = itemUids.slice(index, index + 2)
+    rows.push({
+      id,
+      cells: pair.map((itemUid, cell) => ({ id: `${id}:cell:${cell}`, items: [itemUid] })),
+      sizes: pair.length === 2 ? [12, 12] : [12],
+    })
+  }
+  const designerBase = spec.designerBase ?? 'http://127.0.0.1:13110'
+  const related = spec.related ?? []
+  const detailTab = {
+    use: 'ChildPageTabModel', subKey: 'tabs', subType: 'array', sortIndex: 0, props: {},
+    stepParams: { pageTabSettings: { tab: { title: '单据明细' } } },
+    subModels: {
+      grid: {
+        use: 'BlockGridModel', subKey: 'grid', subType: 'object', sortIndex: 0, props: {}, filterManager: [],
+        subModels: {
+          items: [
+            {
+            use: 'DetailsBlockModel', subKey: 'items', subType: 'array', sortIndex: 1, props: {},
+            stepParams: {
+              resourceSettings: { init: { dataSourceKey: 'main', collectionName: spec.collection, filterByTk: '{{ctx.view.inputArgs.filterByTk}}' } },
+              detailsSettings: { layout: { layout: 'vertical', colon: true } },
+            },
+            subModels: {
+              grid: {
+                use: 'DetailsGridModel', subKey: 'grid', subType: 'object', sortIndex: 1,
+                props: { layout: { version: 2, rows, rowGap: 0, colGap: 16, sizes: {}, rowOrder: rows.map(row => String(row.id)) } },
+                stepParams: { gridSettings: { grid: { layout: { version: 2, rows } } } },
+                subModels: {
+                  items: spec.fields.map((field, index) => ({
+                    uid: itemUids[index], use: 'DetailsItemModel', subKey: 'items', subType: 'array', sortIndex: index + 1, props: {},
+                    stepParams: {
+                      fieldSettings: { init: { dataSourceKey: 'main', collectionName: spec.collection, fieldPath: field.fieldPath } },
+                      detailItemSettings: { showLabel: { showLabel: true } },
+                    },
+                    subModels: {
+                      field: {
+                        use: field.modelUse, subKey: 'field', subType: 'object', sortIndex: 1,
+                        props: field.options === undefined ? {} : { options: field.options },
+                        stepParams: { fieldSettings: { init: { dataSourceKey: 'main', collectionName: spec.collection, fieldPath: field.fieldPath } } },
+                      },
+                    },
+                  })),
+                },
+              },
+            },
+            }, ...(spec.children ?? [])],
+        },
+      },
+    },
+  }
+  const timelineTab = {
+    use: 'ChildPageTabModel', subKey: 'tabs', subType: 'array', sortIndex: 1, props: {},
+    stepParams: { pageTabSettings: { tab: { title: '审批记录' } } },
+    subModels: {
+      grid: {
+        use: 'BlockGridModel', subKey: 'grid', subType: 'object', sortIndex: 0, props: {}, filterManager: [],
+        subModels: {
+          items: [
+            approvalTimelineBlock({ collection: spec.collection, docType: spec.docType }),
+            {
+              uid: uid('md'), subKey: 'items', subType: 'array', sortIndex: 2,
+              use: 'MarkdownBlockModel', decoratorProps: {}, props: {},
+              stepParams: { markdownBlockSettings: { editMarkdown: { content: `在[审批设计器](${designerBase}/designer?doc_type=${spec.docType})中查看/编辑本类型流程图` } } },
+              popup: { mode: 'local' },
+            },
+          ],
+        },
+      },
+    },
+  }
+  const connectionsTab = related.length === 0 ? [] : [{
+    use: 'ChildPageTabModel', subKey: 'tabs', subType: 'array', sortIndex: 2, props: {},
+    stepParams: { pageTabSettings: { tab: { title: '关联单据' } } },
+    subModels: {
+      grid: {
+        use: 'BlockGridModel', subKey: 'grid', subType: 'object', sortIndex: 0, props: {}, filterManager: [],
+        subModels: { items: related.map((sub, index) => subtableBlockNode(sub, index + 1)) },
+      },
+    },
+  }]
+  return {
+    uid: uid('dwp'), parentId: actionUid, subKey: 'page', subType: 'object', use: 'ChildPageModel', props: {},
+    stepParams: { pageSettings: { general: { displayTitle: false, enableTabs: true } } },
+    subModels: { tabs: [detailTab, timelineTab, ...connectionsTab] },
+  }
+}
