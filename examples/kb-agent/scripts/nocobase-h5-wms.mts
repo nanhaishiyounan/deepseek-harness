@@ -70,6 +70,7 @@
  *   node --import tsx/esm examples/kb-agent/scripts/nocobase-h5-wms.mts --recalc [YYYY-MM]        (W2-B3: 快照幂等重算 + 差分对账)
  *   node --import tsx/esm examples/kb-agent/scripts/nocobase-h5-wms.mts --assert-monthly          (W2-B3: 快照 vs 流水重放对账)
  *   node --import tsx/esm examples/kb-agent/scripts/nocobase-h5-wms.mts --selftest-b3             (W2-B3: 纯函数自检)
+ *   node --import tsx/esm examples/kb-agent/scripts/nocobase-h5-wms.mts --sweep-zero-stock        (W5-B8: qty=0 无占用行清理 + 对账)
  *   node --import tsx/esm examples/kb-agent/scripts/nocobase-h5-wms.mts --selftest-b6             (W2-B6: 齐套策略/超领比例纯函数自检)
  */
 import { spawnSync } from 'node:child_process'
@@ -1538,7 +1539,10 @@ export async function appendMovement(token: string, fields: Record<string, unkno
 /**
  * Apply one stock delta with optimistic locking: the update filter carries
  * the version read moments before, so a concurrent writer makes the update
- * match zero rows and this throws instead of double-applying.
+ * match zero rows and this throws instead of double-applying. A row the
+ * delta lands at qty_on_hand=0 with no allocation or lock is destroyed —
+ * bins and lots keep the history (movements), the register keeps no
+ * zero-quantity residue (W5-B8: the hold rows IQC release zeroed lingered).
  */
 export async function applyStockDelta(token: string, key: { productId: number, binId: number, lotId: number }, delta: number): Promise<void> {
   const stock = (await rowsOf(token, 'wms_stock', 500)).find(row =>
@@ -1557,6 +1561,33 @@ export async function applyStockDelta(token: string, key: { productId: number, b
   if (updatedCount !== 1) {
     throw new Error(`optimistic-lock conflict on stock row ${stock.id}: expected version ${version} no longer matches (concurrent posting won); re-read and retry — refusing to double-apply`)
   }
+  if (onHand + delta === 0 && Number(stock.qty_allocated ?? 0) === 0 && Number(stock.qty_locked ?? 0) === 0) {
+    await dataOf(token, 'POST', `/api/wms_stock:destroy?filterByTk=${stock.id}`)
+    console.log(`nocobase-h5: stock row #${String(stock.id)} hit zero (product #${String(key.productId)} bin #${String(key.binId)} lot #${String(key.lotId)}) — row removed`)
+  }
+}
+
+/**
+ * W5-B8: destroy every stock row resting at qty_on_hand=0 with no
+ * allocation and no lock (the pre-B8 posting residue — 13 hold rows from
+ * IQC releases and scrap legs). Idempotent; the ledger invariant is
+ * unaffected (both sides of stock == Σmovements drop zero).
+ * @param token - the root API token.
+ * @returns the number of rows destroyed.
+ */
+export async function sweepZeroStockRows(token: string): Promise<number> {
+  const stocks = await rowsOf(token, 'wms_stock', 500)
+  const doomed = stocks.filter(row =>
+    Number(row.qty_on_hand ?? 0) === 0 && Number(row.qty_allocated ?? 0) === 0 && Number(row.qty_locked ?? 0) === 0)
+  for (const row of doomed) {
+    await dataOf(token, 'POST', `/api/wms_stock:destroy?filterByTk=${row.id}`)
+  }
+  if (doomed.length > 0) {
+    console.log(`nocobase-h5: sweep-zero-stock — ${String(doomed.length)} zero row(s) removed (ids ${doomed.map(row => String(row.id)).join(',')})`)
+  } else {
+    console.log('nocobase-h5: sweep-zero-stock — no zero rows (clean)')
+  }
+  return doomed.length
 }
 
 async function postShipment(token: string, shipmentNo: string): Promise<void> {
@@ -4052,6 +4083,12 @@ async function main(): Promise<void> {
   if (args.includes('--rollback')) {
     await rollback(token)
     console.log('nocobase-h5: done (rollback)')
+    return
+  }
+  if (args.includes('--sweep-zero-stock')) {
+    await sweepZeroStockRows(token)
+    await assertLedgerBalanced(token)
+    console.log('nocobase-h5: done (sweep-zero-stock)')
     return
   }
   const fefoIndex = args.indexOf('--fefo')

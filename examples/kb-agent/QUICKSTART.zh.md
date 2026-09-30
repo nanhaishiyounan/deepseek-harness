@@ -210,6 +210,27 @@ node --import tsx/esm examples/kb-agent/scripts/kpi-run.mts --selftest    # 纯�
 node --import tsx/esm examples/kb-agent/scripts/kpi-run.mts --trace po=PO-B9F-0001 mo=MO-2026-0009
 ```
 
+## 审批流可视化设计器（W5：拖拽编排、发布与会签）
+
+审批流不再手写 JSON：`approval-engine.mts --serve`（:13110）在 `/designer` 提供独立拖拽画布（React Flow），平台侧「项目与协同 → 审批流配置」页以 iframe 内嵌同源入口，打开即画布。链路铁律：`wfl_flow_configs.graph` JSONB 是编辑态唯一事实源，`states/transitions` 行表是发布期的单向编译产物——引擎运行时照旧行级读取，乐观锁/审计/探针零改动。
+
+操作动线（全程无 JSON 文本输入）：
+
+1. 左侧节点面板拖入节点——七类中已启用 start/approval/cc/handler/condition/parallel/end；画布拖拽定位、拖连线建边（自环与重边被拒）。
+2. 点节点开右侧属性面板：审批人五类（成员/角色/部门主管/逐级主管/表单字段）、多人方式（依次/会签/或签）、空审批人策略（自动通过/拒绝/转管理员/指定人）、条件节点二层面板（字段/运算符/阈值行组）、回退白名单。
+3. 「保存」只写 graph；「发布」先过门禁（孤立节点/缺终点/成环/审批人空/条件无 else 兜底逐类拒绝并给出行级错误列表），再以 CAS 原子替换派生 wfl 行（发布前行表快照进 config_note，可回滚重放）。发布前 round-trip 等价断言强制 diff=0——不等价即拒绝发布，旧行表继续生效。
+4. 生效即时：发布后新提交的单据按画布流转（会签=扇出 k 个待办全过才过、或签=任一即过、回退走 allowReturn 边）；CLI/HTTP/移动端 nb_approve 三入口走同一 effect 层，移动端审批同样触发预留/MPS 生效钩子。
+
+```sh
+# 设计器（浏览器直开；token 鉴权与车间终端同一 W3_TERMINAL_TOKEN）
+open "http://127.0.0.1:13110/designer?doc_type=pur_requests"
+# 发布链路与高级节点回归（编译器矩阵 + 10 类型 round-trip + 会签/或签/回退/并行/抄送断言）
+node --import tsx/esm examples/kb-agent/scripts/approval-engine.mts --selftest
+node --import tsx/esm examples/kb-agent/scripts/w5b2-advanced.mts --migrate
+```
+
+W5 起新链路的自动推进语义（生效侧例外才人工）：IQC 判定 passed 即自动放行合格区（不再另跑放行命令）；OQC 放行自动给欠货 SO 补成品预留；ROP 建议确认自动建请购草稿并回链，ATP 回升的 open 行自动关闭；SO 发货自动落 `wms_shipments` 出库单台账；付款 paid、供应商四态升降级、MO 完工全部收进审批引擎词汇族终态（误付可经引擎 void）。库存台账恒等式不变：`stock == Σmovements`，且数量清零且无占用/锁定的库存行不再残留（`--sweep-zero-stock` 幂等清理存量）。
+
 ## 供应链双系统：SRM + WMS 完整闭环（H 轮）
 
 五大企业系统（CRM ERP/MES/WMS/PLM/SRM）走「类似 admin、可 UI 配置」的单 NocoBase 应用路线，每系统一个菜单组、v2 flowPage 形态、工厂脚本幂等建成。H 轮交付**共享地基 + SRM + WMS 两个完整闭环**；PLM（含酱油山梨酸钾 GB2760 硬阻断场景）/MES/ERP+CRM 升级按 I/J/K 轮路线图分期（`plans/acceptance-fixes-2026-09-15-h/04-roadmap-five-systems.md`），未建系统的菜单组不出现。

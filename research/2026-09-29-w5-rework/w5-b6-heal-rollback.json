@@ -7891,5 +7891,256 @@
     "kind": "collapseAction",
     "actionUid": "w5b6ffcfjwa1uehno",
     "filterFormUid": "ljpexblqucb"
+  },
+  {
+    "kind": "columnAlign",
+    "columnUid": "w3b2stc0dpwic9gnia",
+    "before": {
+      "title": "规格下限",
+      "dataIndex": "spec_min",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none"
+    }
+  },
+  {
+    "kind": "columnAlign",
+    "columnUid": "w3b2stc1y754llphys",
+    "before": {
+      "title": "估价",
+      "dataIndex": "est_price",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none"
+    }
+  },
+  {
+    "kind": "columnAlign",
+    "columnUid": "w3b2stc6qe2o9hkz5i",
+    "before": {
+      "title": "报价有效期",
+      "dataIndex": "valid_until",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none"
+    }
+  },
+  {
+    "kind": "columnAlign",
+    "columnUid": "w3b2stcc4obwipmad",
+    "before": {
+      "title": "发出时间",
+      "dataIndex": "sent_at",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none"
+    }
+  },
+  {
+    "kind": "columnAlign",
+    "columnUid": "w3b2stcccdi4axhhyd",
+    "before": {
+      "title": "已发数量",
+      "dataIndex": "qty_shipped",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none"
+    }
+  },
+  {
+    "kind": "columnAlign",
+    "columnUid": "w3b2stce8hgyblw2xs",
+    "before": {
+      "title": "单价",
+      "dataIndex": "unit_price",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none"
+    }
+  },
+  {
+    "kind": "columnAlign",
+    "columnUid": "w3b2stcebzpvibcznr",
+    "before": {
+      "title": "数量",
+      "dataIndex": "qty",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none"
+    }
+  },
+  {
+    "kind": "columnAlign",
+    "columnUid": "w3b2stcj3t5xiktlfi",
+    "before": {
+      "title": "已收数量",
+      "dataIndex": "qty_received",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none"
+    }
+  },
+  {
+    "kind": "columnAlign",
+    "columnUid": "w3b2stcjbfxx34mftp",
+    "before": {
+      "title": "数量",
+      "dataIndex": "qty",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none"
+    }
+  },
+  {
+    "kind": "columnAlign",
+    "columnUid": "w3b2stcl3hh9k9c2fm",
+    "before": {
+      "title": "数量",
+      "dataIndex": "qty",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none"
+    }
+  },
+  {
+    "kind": "columnAlign",
+    "columnUid": "w3b2stclc0xmqr4xpn",
+    "before": {
+      "title": "数量",
+      "dataIndex": "qty",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none"
+    }
+  },
+  {
+    "kind": "columnAlign",
+    "columnUid": "w3b2stcnikh77eohvl",
+    "before": {
+      "title": "单价",
+      "dataIndex": "unit_price",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none"
+    }
+  },
+  {
+    "kind": "columnAlign",
+    "columnUid": "w3b2stcs9lj409hx4",
+    "before": {
+      "title": "单价",
+      "dataIndex": "unit_price",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none"
+    }
+  },
+  {
+    "kind": "columnAlign",
+    "columnUid": "w3b2stcsinmetyheqq",
+    "before": {
+      "title": "规格上限",
+      "dataIndex": "spec_max",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none"
+    }
+  },
+  {
+    "kind": "columnAlign",
+    "columnUid": "w3b2stcsmcabrphh1",
+    "before": {
+      "title": "数量",
+      "dataIndex": "qty",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none"
+    }
+  },
+  {
+    "kind": "columnAlign",
+    "columnUid": "w3b2stcvoq4ndka96",
+    "before": {
+      "title": "交期(天)",
+      "dataIndex": "lead_time_days",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none"
+    }
+  },
+  {
+    "kind": "columnAlign",
+    "columnUid": "w3b2stcwl78dtnx2gl",
+    "before": {
+      "title": "已发数量",
+      "dataIndex": "qty_shipped",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none"
+    }
+  },
+  {
+    "kind": "columnAlign",
+    "columnUid": "w3b2stcy5v54wh9k39",
+    "before": {
+      "title": "单价",
+      "dataIndex": "unit_price",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none"
+    }
+  },
+  {
+    "kind": "columnAlign",
+    "columnUid": "w3b2stczf4fgdtgeb9",
+    "before": {
+      "title": "实测值",
+      "dataIndex": "actual",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none"
+    }
+  },
+  {
+    "kind": "enumSwap",
+    "fieldUid": "w3b2stfrjnnasqa52l",
+    "beforeUse": "DisplayTextFieldModel",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false
+    }
+  },
+  {
+    "kind": "columnAlign",
+    "columnUid": "w3b2stc3yc7kq2navv",
+    "before": {
+      "title": "状态",
+      "dataIndex": "status",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none"
+    }
   }
 ]

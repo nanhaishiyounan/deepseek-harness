@@ -47,6 +47,7 @@
  *   node --import tsx/esm examples/kb-agent/scripts/mfg-schedule.mts --latest-start MO-2026-0002
  */
 import { dataOf, signInWithRetry } from './nocobase-flow-page-lib.mts'
+import { pathToFileURL } from 'node:url'
 
 // ─── the pure planning core ───
 
@@ -173,7 +174,7 @@ const workCenterOf = (world: PlanWorld, id: number): WorkCenterSpec =>
  * capacity. The span must parse as `HH:MM-HH:MM`; anything else fails loud
  * (misconfiguration fails loud).
  */
-export function dailyCapacityMinutes(wc: WorkCenterSpec): number {
+export function dailyCapacityMinutes(wc: Pick<WorkCenterSpec, 'code' | 'working_hours' | 'capacity_parallel'>): number {
   const match = /^(\d{1,2}):(\d{2})-(\d{1,2}):(\d{2})$/.exec(wc.working_hours.trim())
   if (match === null) {
     fail(`工作中心 ${wc.code} 的班次「${wc.working_hours}」不是 HH:MM-HH:MM 形式；修正 mfg_work_centers.working_hours`)
@@ -769,4 +770,8 @@ async function main(): Promise<void> {
   console.log('mfg-schedule: no verb — 用 --selftest / --preview <mo> [--save] / --apply <mo> / --void <mo> / --release <mo> / --latest-start <mo>')
 }
 
-await main()
+// Importable as a module (kpi-run reuses the pure capacity core); the CLI
+// runs only when this file is the invoked entry (the h5 main-guard idiom).
+if (process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  await main()
+}

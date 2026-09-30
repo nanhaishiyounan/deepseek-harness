@@ -105,4 +105,5 @@ v2 备份不会因为升级而重新可读：v3 构建同样拒绝它（schema �
 - `kb.ingest` 读取传入的任意路径：写方法开启后，能到达网关的攻击者可把主机上任何可读文件入库（任意文件读链）。网关只留 localhost 或放在带鉴权的反向代理之后。
 - `.env` 与 SQLite 文件承载租户语料：磁盘级访问控制（专用用户 + 仅属主权限）就是边界。
 - `kb_ingest_url` 默认拒绝私网地址（`allowPrivateNetworks` 默认 false）——对互联网暴露的部署保持默认。
+- `W3_TERMINAL_TOKEN` 未设置时，车间终端/审批设计器的窄端点以 lenient-demo 档裸奔（本机演示默认；`approval-engine --serve` 启动日志与响应标记都会明示）。生产部署必须设置：设后全部终端端点与 `/designer`、`/flow-graph`、`/flow-graph/publish` 改为 strict 档——缺 token/错 token 一律 401（header `x-terminal-token`、query `?token=`，或首次经 URL 注入后由 localStorage 复用）。令牌同为 iframe 宿主页（W3 终端、W5 审批流配置中心）的鉴权通道；`W3_TERMINAL_BASE` 指向引擎服务地址，缺省 `http://127.0.0.1:13110`。
 - 本组合 disable 了 base bundle 的 shell/editor/web 工具行（见 `cordis.patch.yml`）：部署内所有 agent 只从知识库作答。重新启用是明确的组合变更，按变更评审。

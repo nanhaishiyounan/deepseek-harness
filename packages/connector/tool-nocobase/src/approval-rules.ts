@@ -479,9 +479,9 @@ export function illegalAdmissionTransitionMessage(state: SupplierAdmissionState,
  * @returns the label, or the raw value when unknown.
  */
 export function flowStateLabel(state: string): string {
-  return STATE_LABELS[state as WorkflowState]
-    ?? SUPPLIER_ADMISSION_LABELS[state as SupplierAdmissionState]
-    ?? state
+  const flow = (STATE_LABELS as Record<string, string | undefined>)[state]
+  if (flow !== undefined) return flow
+  return (SUPPLIER_ADMISSION_LABELS as Record<string, string | undefined>)[state] ?? state
 }
 
 /**

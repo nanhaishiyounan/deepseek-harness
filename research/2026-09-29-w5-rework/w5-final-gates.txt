@@ -1,0 +1,137 @@
+══ lint (≤26 基线) ══
+$ pnpm run lint
+PASS — 24 errors (≤26 baseline)
+
+══ typecheck ══
+$ pnpm run typecheck
+PASS
+  | > @deepseek-ai/dsh-root@1.0.0 typecheck:contracts-ready
+  | > tsc -b tsconfig.client.json
+  |
+
+══ designer tsc ══
+$ npm run typecheck --prefix examples/kb-agent/designer
+PASS
+  | > kb-agent-approval-designer@0.1.0 typecheck
+  | > tsc --noEmit
+  |
+
+══ approval-engine --selftest ══
+$ node --import tsx/esm examples/kb-agent/scripts/approval-engine.mts --selftest
+PASS
+  | approval-engine: flow w5b2_gc extras has no amount_threshold; defaulting to 100000
+  | approval-engine: compiler selftest OK — 门禁矩阵（孤立/缺端点/多开始/环/不可达/条件DSL/词表/B2特性矩阵/幽灵用户/空角色）+ 编译正例（一审/两级阈值/结构两级/角色快照/转管理员/抄送透传/准入/deptLeader/主管链/表单字段/部门成员/会签/回退边/通用条件/抄送计划）+ round-trip（六态阈值/阈值漂移捕获/结构两级/准入/早期种子/deptLeader+会签/通用条件+回退/部门成员）
+  | approval-engine: selftest OK — 状态机全序列/金额阈值加签/驳回重提/非法转移/卡口/幂等/锁编辑/供应商准入流/准入卡口/B5阈值配置+多审批人/W3-B5部门路由(全员展开/混合并集/幽灵部门/空部门/坏形态/纯用户名零漂移)/夜间env负例/W3-B6终端校验(三数等式/读数判定/缺陷汇总/收货卡口)/W5-B2高级节点(会签/依次/回退边/抄送/deptLeader/主管链/formField/autoPass/assignUser/通用条件)/W5-B1编译器(门禁矩阵/两级阈值/角色快照/round-trip等价/准入词汇表) 全部通过
+
+══ w5b2 --migrate (10 型 round-trip) ══
+$ node --import tsx/esm examples/kb-agent/scripts/w5b2-advanced.mts --migrate
+PASS
+  |   ✓ mps_plans 回放留痕≥2 — 2 行
+  |
+  | w5b2-advanced: PASS
+
+══ w5b3 --assert ══
+$ node --import tsx/esm examples/kb-agent/scripts/w5b3-closure.mts --assert
+PASS (attempt 1)
+  |   ✓ BP-04 平台无 hub_po 采购单页面入口 — 0 行引用
+  |   ✓ BP-04 pur_orders 页面健在 — 153 块引用
+  | w5b3-closure: 全部断言通过
+
+══ w5b4 --assert ══
+$ node --import tsx/esm examples/kb-agent/scripts/w5b4-autoflow.mts --assert
+PASS (attempt 1)
+  |   ✓ BP-11 出库单类型 sales
+  |   ✓ B4 对账门禁（49 组） — nocobase-h5: ledger balanced — stock == Σmovements per (product, lot)，48 组，211 条流水
+  | w5b4-autoflow: 全部断言通过
+
+══ w5b5 --assert ══
+$ node --import tsx/esm examples/kb-agent/scripts/w5b5-terminals.mts --assert
+PASS (attempt 1)
+  |   ✓ BP-17 PR 终态词汇（converted/closed）声明 — ["converted", "closed"]
+  |   ✓ BP-17 PR closed 终态有数据 — 1 行
+  | w5b5-terminals: 全部断言通过
+
+══ w5b6-theme --assert ══
+$ node --import tsx/esm examples/kb-agent/scripts/w5b6-theme.mts --assert
+PASS
+  | w5b6-theme assert: themes=5 defaults=mfg-standard
+  | w5b6-theme assert: OK
+
+══ w5b6-heal --assert ══
+$ node --import tsx/esm examples/kb-agent/scripts/w5b6-heal.mts --assert
+PASS
+  | w5b6-heal assert: enumColumns=133 colorMismatch=0 bareText=0 enumNoLeft=0 numberNoRight=0/161 dateNoRight=0/63 ffNoCollapse=0/36
+  | w5b6-heal assert: OK — 色板 v2/对齐/收起 全部达标
+
+══ w5b7-detail --assert ══
+$ node --import tsx/esm examples/kb-agent/scripts/w5b7-detail.mts --assert
+PASS
+  |   so_orders/8:18
+  |   so_orders/6:18
+  |   so_orders/7:18
+
+══ w4-heal-b1 --assert (五缺陷归零保持) ══
+$ node --import tsx/esm examples/kb-agent/scripts/w4-heal-b1.mts --assert
+PASS
+  | w4-b1 assert: pagesWithTable=76 pagesNoSort=0 filterFormBlocks=36 pagesNoFilter=0 moneyNoFmt=0/144 dateNoFmt=0/61 relNoTitle=0/99 statusBareText=0 statusNoColor=0
+  | w4-b1 assert: OK — 五类缺陷计数全部归零
+
+══ w3-approval-visual --assert (textarea 退役复证) ══
+$ node --import tsx/esm examples/kb-agent/scripts/nocobase-w3-approval-visual.mts --assert
+PASS
+  | assert: member(quality_lead) update wfl_flow_configs → 403 ✓
+  | assert: member(quality_lead) list wfl_flow_configs → 200（只读面通）✓
+  | nocobase-w3-approval-visual: --assert OK (page wires + graph 对拍 + admin-only menu + ACL negatives + consistency baseline)
+
+══ w5r1-concurrent-cas (并发 CAS) ══
+$ node --import tsx/esm examples/kb-agent/scripts/w5r1-concurrent-cas.mts
+PASS
+  |   },
+  |   "verdict": "PASS — 同刻并发恰好一胜一败，DB 终值为胜者内容，审计行恰 +1"
+  | }
+
+══ w5b8-closure --assert (B8 收尾断言) ══
+$ node --import tsx/esm examples/kb-agent/scripts/w5b8-closure.mts --assert
+PASS
+  |   ✓ 管理员（admin@nocobase.com） 旅程全步通过 — 13/13 步
+  | — 22 项断点终态：16 项 B3~B5 已清偿（w5b3/4/5 --assert 复证）；BP-18/21/22 本批清偿；BP-19 发号 TOCTOU 转下轮 backlog（单写者演示环境无并发窗口；建议 doc_no 序列表或唯一索引+重试）；BP-20 f3 已在 B0 修复；其余 B0~B7 批内清偿（见 plans/handoff-2026-09-30-w5.zh.md 终态核对表）
+  | w5b8-closure: assert 全部断言通过
+
+══ b9-final-chain s1..s9 (九步链) ══
+$ for s in s1..s9: node --import tsx/esm research/2026-09-25-w-round/b9-final-chain.mts --stage $s
+  | s1 PASS
+  | s2 PASS
+  | s3 PASS
+  | s4 PASS
+  | s5 PASS
+  | s6 PASS
+  | s7 PASS
+  | s8 PASS
+  | s9 PASS
+PASS
+
+══ --assert-ledger (库存对账) ══
+$ node --import tsx/esm examples/kb-agent/scripts/nocobase-h5-wms.mts --assert-ledger
+PASS
+  | nocobase-h5: ledger balanced — stock == Σmovements per (product, lot)，48 组，211 条流水
+
+══ kpi-run --selftest ══
+$ node --import tsx/esm examples/kb-agent/scripts/kpi-run.mts --selftest
+PASS
+  | kpi-run: selftest OK — FPY 工例/OTIF 分子分母/账实相符率/percentile 对齐/呆滞库龄/临期窗口/RTY 连乘/OTD-S/产能分母 FCS 同源/KPI 表形态/批次合格率已判定口径/ar+ap 余额镜像/PRESENT_ONLY 收缩/重放三件套/月末锚点/周转率公式与除零/rowsOf 截断负例/沪日界边界 全部通过
+
+══ mfg-schedule --selftest ══
+$ node --import tsx/esm examples/kb-agent/scripts/mfg-schedule.mts --selftest
+PASS
+  | mfg-schedule: [selftest] ④ 后推负向告警 ✓ 最晚开工 2026-09-29 < 今天 2026-09-30（slack -1 天）
+  | mfg-schedule: [selftest] ⑤ 拆单建议卡 ✓ 1200分/480产能 → 拆3份×432分（earliest 2026-09-30）；负向 slack → expedite 卡 ✓
+  | mfg-schedule: selftest OK — 超载告警 / 替代 WC 切换 / 不跨天 / 后推负向 / 拆单建议卡 五断言全绿
+
+══ setup-nocobase verify 全链 ══
+$ node --env-file=.env --import tsx/esm examples/kb-agent/scripts/setup-nocobase.mts verify
+PASS
+  | setup-nocobase verify: w4r1 wires — 4 board dataScope + w1 todo pin + w9kpi total=9 ✓
+  | setup-nocobase verify: w4r1 member质检单 browser leg — # rendered table header columns (17): 质检单号 | 检验类型 | 来源类型 | 来源单号 | 物料 | 供应商 | 批量 | 样本量 | AQL档 | n | Ac | Re | 判定结果 | 检验员 | 检验日期 | 判定严格度 | 操作 ✓
+  | setup-nocobase verify: OK — full UI + collections + attachment field + seed + workflow chain + AI workbench + row floors + m2o fieldNames + n18ai- form AI buttons + portals + portal list probes + ai-proxy + API key + kg graph + h4 SRM (pages/group/floors/food columns) + h5 WMS (pages/group/floors/bin-map JSBlock) + w1 approval (wfl collections/审批中心 page/flow config/gate/doc_status column) + w2 supplier single-source (admission flow/AVL gate/h4 workflow retired/seed untouched/采购联系人 retitle) + w3 procurement (pur collections/采购管理 7 pages/gates/flows/receipt columns/待检区) + b4 inventory (reservations/reorder collections/3 pages/planning columns/virtual zones/count-workflow request leg/bypass guards/ledger balance) + w5 mfg (mfg collections/生产制造 5 pages/MO flow/BOM gate/seed floors) + b6 mfg-exec (4 execution collections/5 pages/mfg_orders columns+terminals/WIP zone/movement legs/seed floors/MO-0003 draft) + b7 sales-mrp (so collections/销售管理 3 pages/SO flow/gates/MRP workflow/driver columns/SHIPMENT_SO leg/seed floors) + b8 quality (qm collections/质量管理 5 pages/AQL full-table 135-row seeds (W2-B1)/additive columns/RETURN_VENDOR+SCRAP legs/concession flow/disposal reconciliation) + b9 dashboards (kpi_snapshots/so_orders.shipped_at/经营分析 4 pages/9 kpi charts + supplier radar/90-day backfill floor) + w2-b2 MPS (mps collections/主生产计划 page/mps flow/back-link column/seeds/covered-exclusivity invariant) + w2-b3 biz-date (movements/counts biz_date 100% coverage/appendMovement convergence/monthly balances reconcile/月度收发存 page) + w2-b5 approval-config (pur_orders extras threshold/tolerance, array approver_map, config_note audit, demo trio records/todos, so_orders default fallback, quality_lead user) + w2-b7 ops closure (kpi_snapshots 25-code floor with ap_balance/应收应付对账 page four ledger blocks + ar/ap trend charts/persona sources + .dsh mirrors) + w3 usability (b1 row-detail drawers + member ACL floors/b2 subtables + guarded actions + approval jumps/b3 four read-only kanbans + 排产甘特 v1 gantt + dual-block calendars + drawer record-scoping/b4 审批流配置中心 (SVG 状态图 + wfl 四表 row Edit + admin+root-only menu + config_note required + consistency probe + 部门形态审批人校验)/b5 组织权限 (departments 树 + 挂接 + 组织架构页 + 权限矩阵页 admin-only + member 动作矩阵 + approver_map 部门路由 qm_nc_dispositions 见证 + 员工页 org_dept 列)/b6 操作者终端 (三页 iframe + serve 动词端点 fail-loud 冒烟 + 部门围栏 403)) + w4 completeness (b1 table standards 五指标归零/b2 form standards 五指标达标/b3 page level: L1 30页统计卡≥3 + L2 20页计数卡 + 30 说明块 + 图表标题 100% + 终端 iframe W3_TERMINAL_BASE/b4 structure: 采购联系人（历史）+工作台 2 页退役（tabs 先删 N14）+ 排程明细/AQL 抽样方案 4 改名 + 应用中心归组基础数据 + routes 198 零孤儿/b5 menu IA: 16→12 组（先迁后删 采购/销售流程/协同办公/工单中心 + 计划三页入生产与计划 + 权限矩阵入组织与系统 + 维保服务商双通道改名 + 组 sort1-12 icon 唯一 + 顶级 AI 工作台 + 93 页可达 + member ACL 零回归) all verified
+
+matrix done: 16 PASS / 0 FAIL

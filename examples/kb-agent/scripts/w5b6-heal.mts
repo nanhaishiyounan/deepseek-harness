@@ -98,7 +98,7 @@ const domainOf = (collection: string): Domain =>
 
 // ─── snapshot ───
 
-type FieldMeta = { name: string, interface: string | null }
+type FieldMeta = { name: string, interface: string | null, options: Array<Record<string, unknown>> | null }
 
 async function loadFields(token: string): Promise<Map<string, FieldMeta[]>> {
   for (const path of ['/api/collectionFields:list?pageSize=2000&sort=collectionName', '/api/fields:list?pageSize=2000&sort=collectionName']) {
@@ -110,7 +110,13 @@ async function loadFields(token: string): Promise<Map<string, FieldMeta[]>> {
       const collection = typeof row.collectionName === 'string' ? row.collectionName : ''
       if (collection === '' || typeof row.name !== 'string') continue
       if (!map.has(collection)) map.set(collection, [])
-      map.get(collection)!.push({ name: row.name, interface: row.interface ?? null })
+      const enumOptions = Array.isArray(row.uiSchema?.enum)
+        ? row.uiSchema.enum as Array<Record<string, unknown>>
+        : Array.isArray(row.options) ? row.options as Array<Record<string, unknown>> : null
+      map.get(collection)!.push({
+        name: row.name, interface: row.interface ?? null,
+        options: enumOptions,
+      })
     }
     if (map.size > 0) return map
   }
@@ -125,6 +131,7 @@ type RollbackEntry =
   | { kind: 'fieldOptions', fieldUid: string, before: Record<string, unknown> }
   | { kind: 'columnAlign', columnUid: string, before: Record<string, unknown> }
   | { kind: 'collapseAction', actionUid: string, filterFormUid: string }
+  | { kind: 'enumSwap', fieldUid: string, beforeUse: string, before: Record<string, unknown> }
 
 function loadJournal(): RollbackEntry[] {
   try {
@@ -147,7 +154,7 @@ const withW5b6Prefix = (tag: string): string => `${PREFIX}${tag}${nodeKey()}`
 
 // ─── the heal walk ───
 
-export type HealCounts = { recolor: number, alignRight: number, alignLeft: number, collapse: number }
+export type HealCounts = { recolor: number, alignRight: number, alignLeft: number, collapse: number, enumSwap: number }
 
 type WalkSpec = {
   columns: Array<{ columnRow: FlowModelRow, fieldRow: FlowModelRow, fieldPath: string, collection: string, actions: string[] }>
@@ -161,7 +168,7 @@ type WalkSpec = {
  * submodel's own stepParams (rebuildColumnField writes them) with the
  * fallback of walking the owning table block.
  */
-export function buildWalkSpec(models: FlowModelRow[]): WalkSpec {
+export function buildWalkSpec(models: FlowModelRow[], fields: Map<string, FieldMeta[]>): WalkSpec {
   const byUid = new Map(models.map(row => [String(row.uid), row]))
   const childrenOf = (uid: string): FlowModelRow[] => models.filter(row => String(row.parentId ?? '') === uid)
   const columns: WalkSpec['columns'] = []
@@ -179,6 +186,11 @@ export function buildWalkSpec(models: FlowModelRow[]): WalkSpec {
       actions.push('recolor')
       if (columnRow.props?.align !== 'left') actions.push('alignLeft')
     }
+    // W5-B8: a select field still rendered as plain text (the W3-B2 subtable
+    // columns B7 carried verbatim) swaps to the enum model with v2 options.
+    if (use === 'DisplayTextFieldModel' && fields.get(collection)?.find(field => field.name === fieldPath)?.interface === 'select') {
+      actions.push('enumSwap')
+    }
     if (use === 'DisplayNumberFieldModel' && !(fieldPath === 'id' || /_id$/.test(fieldPath))) actions.push('alignRight')
     else if (use === 'DisplayDateTimeFieldModel') actions.push('alignRight')
     if (actions.length === 0) continue
@@ -191,10 +203,31 @@ export function buildWalkSpec(models: FlowModelRow[]): WalkSpec {
 
 async function runHeal(token: string, spec: WalkSpec, fields: Map<string, FieldMeta[]>, scope: (collection: string) => boolean, dryRun: boolean): Promise<{ log: string[], counts: HealCounts }> {
   const log: string[] = []
-  const counts: HealCounts = { recolor: 0, alignRight: 0, alignLeft: 0, collapse: 0 }
+  const counts: HealCounts = { recolor: 0, alignRight: 0, alignLeft: 0, collapse: 0, enumSwap: 0 }
   for (const { columnRow, fieldRow, fieldPath, collection, actions } of spec.columns) {
     if (collection !== '' && !scope(collection)) continue
     const journal: RollbackEntry[] = []
+    if (actions.includes('enumSwap')) {
+      const meta = fields.get(collection)?.find(field => field.name === fieldPath)
+      if (meta?.options == null || meta.options.length === 0) {
+        throw new Error(`enumSwap ${collection}.${fieldPath} 无字段选项（collectionFields.options 缺失）——拒绝盲换，先补字段选项`)
+      }
+      const options = meta.options.map(entry => {
+        const hit = v2For(String(entry.value ?? ''))
+        return hit === undefined
+          ? { label: String(entry.label ?? entry.value ?? ''), color: 'default', value: entry.value }
+          : { label: hit[0], color: hit[1], value: entry.value }
+      })
+      counts.enumSwap++
+      log.push(`  enumSwap ${collection}.${fieldPath} → DisplayEnumFieldModel（${String(options.length)} 项 v2 选项）`)
+      if (!dryRun) {
+        journal.push({ kind: 'enumSwap', fieldUid: String(fieldRow.uid), beforeUse: String(fieldRow.use ?? ''), before: JSON.parse(JSON.stringify(fieldRow.props ?? {})) })
+        await dataOf(token, 'POST', '/api/flowModels:save', {
+          uid: fieldRow.uid, parentId: fieldRow.parentId, subKey: fieldRow.subKey,
+          use: 'DisplayEnumFieldModel', props: { options },
+        })
+      }
+    }
     if (actions.includes('recolor')) {
       const current = (fieldRow.props ?? {}).options as Array<Record<string, unknown>>
       const { options, changed } = recolorOptions(current)
@@ -262,6 +295,18 @@ async function rollback(token: string, scope: (collection: string) => boolean, f
     const journal = loadJournal()
     const entry = journal[index]
     if (entry === undefined) break
+    if (entry.kind === 'enumSwap') {
+      const collection = collectionOfColumn(String(byUid.get(entry.fieldUid)?.parentId ?? ''))
+      if (collection !== '' && !scope(collection)) { undone.push(entry); continue }
+      const row = byUid.get(entry.fieldUid)
+      if (row === undefined) { undone.push(entry); continue }
+      await dataOf(token, 'POST', '/api/flowModels:save', {
+        uid: entry.fieldUid, parentId: row.parentId, subKey: row.subKey,
+        use: entry.beforeUse, props: { ...entry.before, options: entry.before.options ?? null },
+      })
+      log.push(`rollback enumSwap ${entry.fieldUid} → ${entry.beforeUse}`)
+      continue
+    }
     if (entry.kind === 'fieldOptions' || entry.kind === 'columnAlign') {
       const collection = collectionOfColumn(entry.kind === 'fieldOptions'
         ? String(byUid.get(entry.fieldUid)?.parentId ?? '')
@@ -385,10 +430,10 @@ async function main(): Promise<void> {
     return
   }
   const models = await listFlowModels(token, 'w5b6-heal')
-  const spec = buildWalkSpec(models)
+  const spec = buildWalkSpec(models, fields)
   const targetLabel = pilot ? 'pilot' : domain ?? 'all'
   const { log, counts } = await runHeal(token, spec, fields, scope, dryRun)
-  const summary = `${dryRun ? 'dry-run' : 'heal'} ${targetLabel}: recolor=${counts.recolor} alignRight=${counts.alignRight} collapse=${counts.collapse}`
+  const summary = `${dryRun ? 'dry-run' : 'heal'} ${targetLabel}: recolor=${counts.recolor} alignRight=${counts.alignRight} enumSwap=${counts.enumSwap} collapse=${counts.collapse}`
   const out = [...log, summary].join('\n')
   console.log(out)
   if (!dryRun) writeFileSync(`${RESEARCH_DIR}w5-b6-heal-run-${targetLabel}.txt`, `${out}\n`)

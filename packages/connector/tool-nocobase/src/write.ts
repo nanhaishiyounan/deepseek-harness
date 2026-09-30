@@ -885,7 +885,7 @@ export async function enforceCreateGates(
 
 /** The gate refusal text (kept beside enforceCreateGates; mirrors approval-rules' message). */
 function gateNotEffectiveText(label: string, ref: string, state: WorkflowState | 'draft'): string {
-  return gateNotEffectiveMessage(label, ref, state as WorkflowState)
+  return gateNotEffectiveMessage(label, ref, state)
 }
 
 /**

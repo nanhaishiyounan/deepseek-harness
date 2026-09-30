@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-09-30-w5-b6b7-uiux-design-system.md
-2026-09-30-w5-b6b7-uiux-design-system.md: ecae20e7fedd0f5693c1602f1051eb2ec9bd1a78
+2026-09-30-w5-b6b7-uiux-design-system.md: 1928595ea1a77f792ce1934b6fb2addc5c5ff236
 2026-09-30-w5-b6b7-uiux-design-system.zh.md: d3d1e23ae61abb83e94fd9191f3431728825279f

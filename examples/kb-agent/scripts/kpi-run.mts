@@ -37,6 +37,7 @@
  */
 import { call, dataOf, signInWithRetry } from './nocobase-flow-page-lib.mts'
 import { movingAverageCost, WIP_ZONE_CODE } from './nocobase-h5-wms.mts'
+import { dailyCapacityMinutes } from './mfg-schedule.mts'
 
 // ─── pure compute (selftested; no IO) ───
 
@@ -340,6 +341,35 @@ export function expiryAlertsOf(rows: readonly StockFact[], asOf: string): number
   return lots.size
 }
 
+/**
+ * W5-B8 (BP-18): the capacity-utilization denominator aligned with the FCS
+ * scheduler — every work center's daily capacity (working-hours span ×
+ * parallel, the same parse mfg-schedule runs) times its working days elapsed
+ * in asOf's month. Sundays and the center's calendar holidays (plus the ''
+ * shared calendar) rest, mirroring the scheduling rule; a misparsed shift
+ * fails loud through dailyCapacityMinutes.
+ */
+export function capacityMinutesOfMonthToDate(facts: Pick<KpiFacts, 'workCenters' | 'holidays'>, asOf: string): number {
+  const month = monthOf(asOf)
+  const lastDay = Number(asOf.slice(8, 10))
+  const sharedRest = new Set(facts.holidays.filter(row => row.calendar === '').map(row => row.date))
+  let capacity = 0
+  for (const wc of facts.workCenters) {
+    const rest = wc.holiday_calendar_id === null || wc.holiday_calendar_id === ''
+      ? sharedRest
+      : new Set([...sharedRest, ...facts.holidays.filter(row => row.calendar === wc.holiday_calendar_id).map(row => row.date)])
+    let workingDays = 0
+    for (let day = 1; day <= lastDay; day++) {
+      const iso = `${month}-${String(day).padStart(2, '0')}`
+      if (new Date(`${iso}T00:00:00.000Z`).getUTCDay() === 0) continue
+      if (rest.has(iso)) continue
+      workingDays += 1
+    }
+    capacity += dailyCapacityMinutes(wc) * workingDays
+  }
+  return Math.max(1, capacity)
+}
+
 // ─── the KPI definition table (board pages read these codes) ───
 
 /** The fact bundle one calc pass runs over (rows fetched once per run). */
@@ -348,8 +378,10 @@ export interface KpiFacts {
   readonly soLines: ReadonlyArray<{ order_id: number; qty: number; unit_price: number | null; qty_shipped: number | null }>
   readonly receiptPairs: readonly ReceiptPair[]
   readonly jobReports: readonly ReportFact[]
-  /** mfg_work_centers row count (the capacity-utilization denominator's per-center factor). */
-  readonly workCenterCount: number
+  /** The capacity-utilization denominator's per-center factors (FCS-aligned, W5-B8 BP-18). */
+  readonly workCenters: ReadonlyArray<{ code: string; working_hours: string; capacity_parallel: number; holiday_calendar_id: string | null }>
+  /** mfg_holidays rows (calendar '' is shared by every work center) — the denominator's rest days. */
+  readonly holidays: ReadonlyArray<{ calendar: string; date: string }>
   /** OQC inspection rows' KPI slice (lot_pass_rate's numerator/denominator source). */
   readonly oqcInspections: ReadonlyArray<{ inspected_at: string | null; result: string }>
   readonly counts: readonly CountFact[]
@@ -533,13 +565,11 @@ export const KPI_DEFS: readonly KpiDef[] = [
   },
   {
     board: 'production', code: 'capacity_util', name: '产能利用率', unit: 'percent',
-    note: 'Σ mfg_job_reports.duration_min（posted，report_date ≤ 日）÷（工作中心数 × 480 分 × 当月第 N 天）——8h/日铭牌、自然日历估算口径',
+    note: 'Σ mfg_job_reports.duration_min（posted，report_date ≤ 日且同月）÷（Σ工作中心班次跨度×并行 × 当月已过工作日；周日与班次日历节假日除外）——与 FCS 排产容量同源（W5-B8 BP-18）',
     compute: (facts, asOf) => {
       const minutes = facts.jobReports.filter(row => row.status === 'posted' && by(row.report_date, asOf) && monthOf(row.report_date!) === monthOf(asOf))
         .reduce((total, row) => total + Number(row.duration_min ?? 0), 0)
-      const dayOfMonth = Number(asOf.slice(8, 10))
-      // 8h/日铭牌 × 工作中心数 × 当月第 N 天（workCenterCount 由 fetchFacts 并行携带）。
-      const capacity = Math.max(1, facts.workCenterCount) * 480 * dayOfMonth
+      const capacity = capacityMinutesOfMonthToDate(facts, asOf)
       return { dim: null, value: q4(minutes / capacity) }
     },
   },
@@ -667,7 +697,7 @@ async function rowsOf(token: string, collection: string, pageSize = 500): Promis
 
 /** Fetch every source collection once (a backfill run reuses this bundle). */
 export async function fetchFacts(token: string): Promise<KpiFacts> {
-  const [soOrders, soLines, receipts, pos, jobReports, counts, stock, lots, products, mos, payments, todos, reorders, poLines, workCenters, oqc, completions, movements, bins, zones, monthlyBalances, purInvoices, purPayments] = await Promise.all([
+  const [soOrders, soLines, receipts, pos, jobReports, counts, stock, lots, products, mos, payments, todos, reorders, poLines, workCenters, oqc, completions, movements, bins, zones, monthlyBalances, purInvoices, purPayments, holidayRows] = await Promise.all([
     rowsOf(token, 'so_orders'), rowsOf(token, 'so_order_lines'), rowsOf(token, 'wms_receipts'), rowsOf(token, 'pur_orders'),
     rowsOf(token, 'mfg_job_reports'), rowsOf(token, 'wms_counts'), rowsOf(token, 'wms_stock', 1000), rowsOf(token, 'wms_lots'),
     rowsOf(token, 'hub_inv_products', 200), rowsOf(token, 'mfg_orders'), rowsOf(token, 'crm_payments'), rowsOf(token, 'wfl_approval_todos'),
@@ -676,6 +706,8 @@ export async function fetchFacts(token: string): Promise<KpiFacts> {
     rowsOf(token, 'wms_movements', 1000), rowsOf(token, 'wms_bins', 200), rowsOf(token, 'wms_zones'), rowsOf(token, 'wms_monthly_balances', 1000),
     // W2-B7: the AP pair (ap_balance's sources).
     rowsOf(token, 'pur_invoices'), rowsOf(token, 'pur_payments'),
+    // W5-B8: the capacity denominator's rest days (BP-18).
+    rowsOf(token, 'mfg_holidays'),
   ])
   const posById = new Map(pos.map(row => [Number(row.id), row]))
   const lotsById = new Map(lots.map(row => [Number(row.id), row]))
@@ -767,7 +799,12 @@ export async function fetchFacts(token: string): Promise<KpiFacts> {
       return { order_id: Number(row.order_id), qty: Number(row.qty ?? 0), qty_received: Number(row.qty_received ?? 0), po_status: String(po?.doc_status ?? '') }
     }),
     completions: completions.map(row => ({ mo_id: Number(row.mo_id), completed_at: row.completed_at ?? null })),
-    workCenterCount: workCenters.length,
+    workCenters: workCenters.map(row => ({
+      code: String(row.code ?? ''), working_hours: String(row.working_hours ?? ''),
+      capacity_parallel: Number(row.capacity_parallel ?? 1),
+      holiday_calendar_id: row.holiday_calendar_id === null || row.holiday_calendar_id === undefined || String(row.holiday_calendar_id) === '' ? null : String(row.holiday_calendar_id),
+    })),
+    holidays: holidayRows.map(row => ({ calendar: String(row.calendar ?? ''), date: String(row.date ?? '').slice(0, 10) })).filter(row => row.date !== ''),
     oqcInspections: oqc.filter(row => String(row.insp_type ?? '') === 'OQC').map(row => ({ inspected_at: row.inspected_at ?? null, result: String(row.result ?? '') })),
     movements: movementFacts,
     vwapByProduct,
@@ -1078,6 +1115,30 @@ export async function selftest(): Promise<void> {
     { op_seq: 2, report_date: '2026-09-01', status: 'posted', qty_good: 80, qty_scrap: 20, duration_min: null },
   ]), 0.72)
 
+  // W5-B8 BP-18：产能利用率分母与 FCS 排产容量同源 —— 2026-09-30 止，
+  // 周日 6/13/20/27 四天 + 共享日历节假日 09-07 一天 → 26−1=25 个工作日；
+  // 单工作中心 08:00-16:00（480 分）× 2 并行 = 960 分/日；分子 720 分
+  // （draft 未过账不计）。480×2×25=24000 分，720/24000=0.03。
+  {
+    const facts = {
+      jobReports: [
+        { op_seq: 1, report_date: '2026-09-28', status: 'posted', qty_good: 10, qty_scrap: 0, duration_min: 480 },
+        { op_seq: 2, report_date: '2026-09-29', status: 'posted', qty_good: 10, qty_scrap: 0, duration_min: 240 },
+        { op_seq: 3, report_date: '2026-09-29', status: 'draft', qty_good: 10, qty_scrap: 0, duration_min: 480 },
+      ],
+      workCenters: [{ code: 'WC-A', working_hours: '08:00-16:00', capacity_parallel: 2, holiday_calendar_id: null }],
+      holidays: [{ calendar: '', date: '2026-09-07' }],
+    } as Pick<KpiFacts, 'jobReports' | 'workCenters' | 'holidays'>
+    const util = KPI_DEFS.find(def => def.code === 'capacity_util')
+    if (util === undefined) throw new Error('selftest 失败：capacity_util 定义缺失')
+    expect('capacity_util 分母=FCS 工作日容量', util.compute(facts, '2026-09-30'), { dim: null, value: 0.03 })
+  }
+  // 非法班次 fail loud（错配即拒算，不落半真值）。
+  expectThrows('不是 HH:MM-HH:MM', () => capacityMinutesOfMonthToDate({
+    workCenters: [{ code: 'WC-BAD', working_hours: '弹性', capacity_parallel: 1, holiday_calendar_id: null }],
+    holidays: [],
+  }, '2026-09-30'))
+
   // OTD-S：准时 1/2。
   expect('供应商准时到货率', otdSupplierOf([
     { receipt_no: 'RCV-1', received_at: '2026-09-10', po_need_date: '2026-09-12', po_approved_at: '2026-09-01', supplier_name: '甲' },
@@ -1227,7 +1288,7 @@ export async function selftest(): Promise<void> {
   expect('日界：UTC 15:59 = 沪 23:59 → 仍归当日', shanghaiDate(new Date('2026-09-26T15:59:00Z')), '2026-09-26')
   expect('日界：UTC 16:00 = 沪次日 00:00 → 翻日', shanghaiDate(new Date('2026-09-26T16:00:00Z')), '2026-09-27')
 
-  console.log('kpi-run: selftest OK — FPY 工例/OTIF 分子分母/账实相符率/percentile 对齐/呆滞库龄/临期窗口/RTY 连乘/OTD-S/KPI 表形态/批次合格率已判定口径/ar+ap 余额镜像/PRESENT_ONLY 收缩/重放三件套/月末锚点/周转率公式与除零/rowsOf 截断负例/沪日界边界 全部通过')
+  console.log('kpi-run: selftest OK — FPY 工例/OTIF 分子分母/账实相符率/percentile 对齐/呆滞库龄/临期窗口/RTY 连乘/OTD-S/产能分母 FCS 同源/KPI 表形态/批次合格率已判定口径/ar+ap 余额镜像/PRESENT_ONLY 收缩/重放三件套/月末锚点/周转率公式与除零/rowsOf 截断负例/沪日界边界 全部通过')
 }
 
 // ─── CLI ───

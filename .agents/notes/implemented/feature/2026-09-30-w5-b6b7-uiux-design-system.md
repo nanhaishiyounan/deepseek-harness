@@ -23,7 +23,7 @@ The user verdict "uiux太难看" diagnosed by the W5 research (research/2026-09-
 - **Timeline data channel (B7-2)**: two platform paths were probed live and rejected — `resourceSettings.init.params.filter` never reaches the first `:list` request (the same gap W4 found for sort), and `stepParams.dataScope` persists but its handler does not replay on mount. The working channel is the one W3-B2 proved: a PG view per doc_type (`wfl_records_<docType> AS SELECT * FROM wfl_approval_records WHERE doc_type=…`, granted to the app DB user, registered as a NocoBase view collection with the 14 record fields) + parent `hasMany approvalRecords (foreignKey=doc_id)` + the block's `associationName`/`sourceId('{{ctx.view.inputArgs.filterByTk}}')`. The doc_type pin inside the view is what makes the bare doc_id foreign key unambiguous. Columns carry from_anchor/to_anchor (countersign fan-out, demote returns) and the action Tag options.
 - **Connections (B7-3)**: per-collection downstream o2m business groups via `ensureParentHasMany` (pur_orders→receipts, pur_requests→rfqs, pur_rfqs→quotes+orders, so_orders→payments), each an association-bound table block with row drill-down. Upstream belongsTo stays in the 明细 fields (RFQ number, PR link) — ERPNext-style upstream lists would need a separate channel and are B8.
 
-## Alternatives rejected
+## Alternatives considered
 
 - antd Tag custom hex colors — preset names already render the research's exact pairs with correct light backgrounds; hex mode flips Tag to solid-fill white text.
 - Direct `hasMany` onto `wfl_approval_records` — doc_id is polymorphic across doc_types; ids collide between types sharing a number.
