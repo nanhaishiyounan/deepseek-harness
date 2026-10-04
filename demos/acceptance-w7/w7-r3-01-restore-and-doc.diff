@@ -1,0 +1,41 @@
+# W7-R3-01 S6 — gates-r1.log L7 restored to the committed literal + 99-w7 §六 header conditionalized — 2026-10-04
+
+--- git diff (gates-r1.log + 99-w7-deliverables.md) ---
+diff --git a/demos/acceptance-w7/gates-r1.log b/demos/acceptance-w7/gates-r1.log
+index 1db98a54af..579c114cb4 100644
+--- a/demos/acceptance-w7/gates-r1.log
++++ b/demos/acceptance-w7/gates-r1.log
+@@ -4,7 +4,7 @@
+ 源码：packages/client/ui-mobile tokens.css（--dshm-stamp-doing 双轨一 token）+ work.module.css（stamp_doing 消费新 token）；examples/kb-agent/scripts/w7b6-binmap.mts（导出 BLOCK_UPDATE_CHANNEL 常量，行为不变）
+ 脚本：research/2026-10-03-w7-rework/b6/.w7b6-census.mjs（新，活重建共享模块）/.w7b6-probe.mjs（活 census+liveness 门+B5_KINDS 硬契约）/.w7b6-shot.mjs（同上门+liveness）/​.w7b6-index.mjs（改读活 census 产物）；m3/.w7m3-probe.mjs（第七门槛 stamp 腿）；demos/acceptance-w7/w7-b6-matrix.sh（腿四改现场实跑+第七门槛）；新增 w7-r1-03-channel-check.mjs / w7-r1-04-workdetail-reshoot.mjs / w7-r1-05-inject.mjs
+ 文档：B6+M3 Note 双语（通道更正×2处/语）、QUICKSTART.zh 层3b、99-w7（§四.1 通道+§二.3 归档措辞+新增 §五 R1 段）；Note pairing 重录 1 对
+-证据：research/2026-10-03-w7-rework/b6/after/ 三图重拍（109/110/040）、after-index.md 再生、w7-b6-w6gates-retry.log 完整替换（216B→9089B）、w7-r1-01..06 全系
++证据：b6/after/ 三图重拍（109/110/040）、after-index.md 再生、w7-b6-w6gates-retry.log 完整替换（216B→9089B）、w7-r1-01..06 全系
+
+ -- 终验矩阵 w7-b6-matrix.sh（R1 复跑，六腿）--
+ PASS — 6 legs, 0 failed, MATRIX ALL PASS（w7-b6-matrix.log）
+diff --git a/research/2026-10-03-w7-rework/99-w7-deliverables.md b/research/2026-10-03-w7-rework/99-w7-deliverables.md
+index 35ef739592..63afe2ed74 100644
+--- a/research/2026-10-03-w7-rework/99-w7-deliverables.md
++++ b/research/2026-10-03-w7-rework/99-w7-deliverables.md
+@@ -52,7 +52,7 @@ R1 回归：w7-b6-matrix 六腿复跑（probe 腿含 liveness 门+B5_KINDS 硬
+
+ ## 六、R2 微收尾轮（R1 验证 CONDITIONAL_PASS 的单行级清偿，2026-10-04）
+
+-只动叙述、守卫与检查脚本，不动业务面与归档正文；证据根 `demos/acceptance-w7/w7-r2-*`：
++只动叙述、守卫与检查脚本，不动业务面；归档 log 正文原文逐字不动、更正仅 L40 尾部追加勘误行（§六.4 的 L7 路径直改系越线，R3 已还原历史字面）；证据根 `demos/acceptance-w7/w7-r2-*`：
+
+ 1. **channel-check 解堵（根因）**：§五.4 行自身复述已退役的假通道字面量、且行内含 `w7b6-binmap.mts`，恰好落进 w7-r1-03 检查的 FAIL 分支（归档 GREEN log 早于该行新增，复现与改写见 `w7-r2-01`）——采验证方推荐路径改写该行（四处假通道字面量清零、统一引真实通道 `destroy+addBlock`），检查复跑 exit 0 GREEN 重录（输出与归档字节一致）；检查脚本中收集后未用的 binmap 死变量删除。
+ 2. **数字真话同步**：`w7-b6-w6gates-retry.log` 实测 wc -c 9075（9089B 为首录时点数字）——本文 §二.3/§五.3 直改 9075B；gates-b6.log/gates-r1.log 系历史产物，正文不动、尾部追加 R2 勘误行（`w7-r2-02`）。
+@@ -60,6 +60,8 @@ R1 回归：w7-b6-matrix 六腿复跑（probe 腿含 liveness 门+B5_KINDS 硬
+ 4. **Minor 三项**：m3-15 措辞改「首拍残留删除」（现行 w7-m3-15 为 M3 修复重拍的 work-detail 件）；gates-r1.log L7 after 图根路径改实际路径 research/2026-10-03-w7-rework/b6/after/；见 1 的死变量删除（`w7-r2-05`）。
+ 5. **G5 复写归档处置**：R1 验证方复跑曾复写 12 件归档（matrix-probe/census/dark-probe/inject 系列）——已恢复 R1 提交原档为本位，本轮探针复跑产物只存 w7-r2-03，不复写归档。
+
++R3（2026-10-04，验证 S6/S11 两清偿，`w7-r3-01..03`）：gates-r1.log L7 还原历史字面 `b6/after/`（git diff 仅 1 行回滚，路径更正只留 L40 勘误行披露）；ledgerService wireCell 三分支补测（present-doc null title→'—' U+2014／structured title→'#'+docId 非 '[object Object]'／structured owner→'#'+id），单文件 vitest 绿、全量 671/671 归档 `demos/acceptance-w7/w7-r3-02-vitest-full.log`，w7-r2-04 尾行悬空引用改指该归档。
++
+ ## 七、W8 候选遗留清单（终局盘点）
+
+ | # | 项 | 出处 |
+
+--- gates-r1.log diff hunk count (must be exactly the one L7 line) ---
+1	1	demos/acceptance-w7/gates-r1.log

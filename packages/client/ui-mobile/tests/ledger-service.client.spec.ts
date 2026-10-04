@@ -7,7 +7,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { enrichTodoRows, listMyTodos, myMonthlyRegistrations } from '../src/client/ledgerService.ts'
+import { enrichTodoRows, listMyAlerts, listMyTodos, myMonthlyRegistrations } from '../src/client/ledgerService.ts'
 
 interface RecordedCall {
   readonly url: string
@@ -90,6 +90,35 @@ describe('listMyTodos (G2)', () => {
     ])
     expect(enriched[0]?.docTitle).toBe('QM-2026-0009')
     expect(enriched[1]?.docTitle).toBe('#404')
+  })
+})
+
+describe('wireCell branch guards (W7-R3: nullish and structured wire cells)', () => {
+  it('renders a null title cell of a present document as the em dash U+2014', async () => {
+    stubGateway({ 'nocobase.get': { row: { id: 15, code: null } } })
+    const enriched = await enrichTodoRows([
+      { id: 9, docType: 'qm_inspections', docId: 15, user: 'qc', state: 'pending', kind: 'todo', docTitle: undefined, docLabel: '质检单' },
+    ])
+    expect(enriched[0]?.docTitle).toBe('—')
+  })
+
+  it('degrades a structured title cell to the #docId reference, never [object Object]', async () => {
+    stubGateway({ 'nocobase.get': { row: { id: 15, code: { zh: '质检', en: 'QC' } } } })
+    const enriched = await enrichTodoRows([
+      { id: 9, docType: 'qm_inspections', docId: 15, user: 'qc', state: 'pending', kind: 'todo', docTitle: undefined, docLabel: '质检单' },
+    ])
+    expect(enriched[0]?.docTitle).toBe('#15')
+  })
+
+  it('degrades a structured owner cell to the #id reference (listMyAlerts)', async () => {
+    stubGateway({
+      'nocobase.list': { count: 1, page: 1, page_size: 100, rows: [
+        { id: 77, rule_type: 'cert_expiry', severity: 'warning', title: '证照临期', entity_code: 'CERT-01', owner: { nickname: '张三' }, status: 'open', detail: null },
+      ] },
+    })
+    const alerts = await listMyAlerts()
+    expect(alerts).toHaveLength(1)
+    expect(alerts[0]?.owner).toBe('#77')
   })
 })
 

@@ -66,4 +66,4 @@ Finished in 3.1s on 1 file with 89 rules using 12 threads.
 clean (no diagnostics)
 
 --- targeted vitest (ledger-service + alerts-view specs) ---
-Tests 10 passed (10) — full-suite 668/668 re-run below in the round record
+Tests 10 passed (10) — full-suite 668/668; full re-run archived at demos/acceptance-w7/w7-r3-02-vitest-full.log (R3 re-run with the three new wireCell tests: 671/671)

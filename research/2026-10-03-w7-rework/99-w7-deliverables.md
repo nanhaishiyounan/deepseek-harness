@@ -52,13 +52,15 @@ R1 回归：w7-b6-matrix 六腿复跑（probe 腿含 liveness 门+B5_KINDS 硬�
 
 ## 六、R2 微收尾轮（R1 验证 CONDITIONAL_PASS 的单行级清偿，2026-10-04）
 
-只动叙述、守卫与检查脚本，不动业务面与归档正文；证据根 `demos/acceptance-w7/w7-r2-*`：
+只动叙述、守卫与检查脚本，不动业务面；归档 log 正文原文逐字不动、更正仅 L40 尾部追加勘误行（§六.4 的 L7 路径直改系越线，R3 已还原历史字面）；证据根 `demos/acceptance-w7/w7-r2-*`：
 
 1. **channel-check 解堵（根因）**：§五.4 行自身复述已退役的假通道字面量、且行内含 `w7b6-binmap.mts`，恰好落进 w7-r1-03 检查的 FAIL 分支（归档 GREEN log 早于该行新增，复现与改写见 `w7-r2-01`）——采验证方推荐路径改写该行（四处假通道字面量清零、统一引真实通道 `destroy+addBlock`），检查复跑 exit 0 GREEN 重录（输出与归档字节一致）；检查脚本中收集后未用的 binmap 死变量删除。
 2. **数字真话同步**：`w7-b6-w6gates-retry.log` 实测 wc -c 9075（9089B 为首录时点数字）——本文 §二.3/§五.3 直改 9075B；gates-b6.log/gates-r1.log 系历史产物，正文不动、尾部追加 R2 勘误行（`w7-r2-02`）。
 3. **顺手两项（Important#2/#3）**：①probe liveness 单页先死后经 ~1500ms 退避重试一轮再判（双败才 FAIL、log 记两轮；本轮 114 页复跑零触发、全绿 `w7-r2-03`）②ledgerService 两处 String(unknown) 换 wireCell 守卫（string→原值/nullish→'—'/结构化→'#'+id；owner 位 nullish→undefined 保「未认领」语义）+顺删冗余 as WireRow 断言，oxlint 该文件 0 警 0 错、tsc 干净、vitest 668/668 复跑绿（首轮 1 例偶发未再现、复跑两连绿，如实注明；`w7-r2-04`）。
 4. **Minor 三项**：m3-15 措辞改「首拍残留删除」（现行 w7-m3-15 为 M3 修复重拍的 work-detail 件）；gates-r1.log L7 after 图根路径改实际路径 research/2026-10-03-w7-rework/b6/after/；见 1 的死变量删除（`w7-r2-05`）。
 5. **G5 复写归档处置**：R1 验证方复跑曾复写 12 件归档（matrix-probe/census/dark-probe/inject 系列）——已恢复 R1 提交原档为本位，本轮探针复跑产物只存 w7-r2-03，不复写归档。
+
+R3（2026-10-04，验证 S6/S11 两清偿，`w7-r3-01..03`）：gates-r1.log L7 还原历史字面 `b6/after/`（git diff 仅 1 行回滚，路径更正只留 L40 勘误行披露）；ledgerService wireCell 三分支补测（present-doc null title→'—' U+2014／structured title→'#'+docId 非 '[object Object]'／structured owner→'#'+id），单文件 vitest 绿、全量 671/671 归档 `demos/acceptance-w7/w7-r3-02-vitest-full.log`，w7-r2-04 尾行悬空引用改指该归档。
 
 ## 七、W8 候选遗留清单（终局盘点）
 

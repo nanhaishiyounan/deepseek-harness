@@ -1,0 +1,48 @@
+# W7-R3-03 S11 — wireCell three-branch tests + focused vitest green + w7-r2-04 tail re-pointed — 2026-10-04
+
+--- the three new tests (packages/client/ui-mobile/tests/ledger-service.client.spec.ts) ---
+describe('wireCell branch guards (W7-R3: nullish and structured wire cells)', () => {
+  it('renders a null title cell of a present document as the em dash U+2014', async () => {
+    stubGateway({ 'nocobase.get': { row: { id: 15, code: null } } })
+    const enriched = await enrichTodoRows([
+      { id: 9, docType: 'qm_inspections', docId: 15, user: 'qc', state: 'pending', kind: 'todo', docTitle: undefined, docLabel: '质检单' },
+    ])
+    expect(enriched[0]?.docTitle).toBe('—')
+  })
+
+  it('degrades a structured title cell to the #docId reference, never [object Object]', async () => {
+    stubGateway({ 'nocobase.get': { row: { id: 15, code: { zh: '质检', en: 'QC' } } } })
+    const enriched = await enrichTodoRows([
+      { id: 9, docType: 'qm_inspections', docId: 15, user: 'qc', state: 'pending', kind: 'todo', docTitle: undefined, docLabel: '质检单' },
+    ])
+    expect(enriched[0]?.docTitle).toBe('#15')
+  })
+
+  it('degrades a structured owner cell to the #id reference (listMyAlerts)', async () => {
+    stubGateway({
+      'nocobase.list': { count: 1, page: 1, page_size: 100, rows: [
+        { id: 77, rule_type: 'cert_expiry', severity: 'warning', title: '证照临期', entity_code: 'CERT-01', owner: { nickname: '张三' }, status: 'open', detail: null },
+      ] },
+    })
+    const alerts = await listMyAlerts()
+    expect(alerts).toHaveLength(1)
+    expect(alerts[0]?.owner).toBe('#77')
+  })
+})
+
+--- focused vitest re-run (ledger-service spec) ---
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.8 [39m[90m/Users/mac/Documents/github/deepseek-harness[39m
+
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/ledger-service.client.spec.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 45[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m8 passed[39m[22m[90m (8)[39m
+[2m   Start at [22m 14:19:55
+[2m   Duration [22m 5.00s[2m (transform 1.58s, setup 1.27s, import 588ms, tests 45ms, environment 2.42s)[22m
+
+vitest-exit=0
+
+--- w7-r2-04 tail after the dangling-reference fix ---
+--- targeted vitest (ledger-service + alerts-view specs) ---
+Tests 10 passed (10) — full-suite 668/668; full re-run archived at demos/acceptance-w7/w7-r3-02-vitest-full.log (R3 re-run with the three new wireCell tests: 671/671)
