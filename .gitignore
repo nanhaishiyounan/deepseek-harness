@@ -64,4 +64,7 @@ screenshots/
 examples/kb-agent/demos/**/*-backup.sqlite
 research/**/sources/*
 !research/**/sources/sources.md
+# Raw upstream snapshots under research/*/raw/ stay untracked byte-verbatim;
+# ignoring them only stops the untracked listing in git status.
+research/*/raw/
 plans/

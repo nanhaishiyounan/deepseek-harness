@@ -60,7 +60,9 @@ R1 回归：w7-b6-matrix 六腿复跑（probe 腿含 liveness 门+B5_KINDS 硬�
 4. **Minor 三项**：m3-15 措辞改「首拍残留删除」（现行 w7-m3-15 为 M3 修复重拍的 work-detail 件）；gates-r1.log L7 after 图根路径改实际路径 research/2026-10-03-w7-rework/b6/after/；见 1 的死变量删除（`w7-r2-05`）。
 5. **G5 复写归档处置**：R1 验证方复跑曾复写 12 件归档（matrix-probe/census/dark-probe/inject 系列）——已恢复 R1 提交原档为本位，本轮探针复跑产物只存 w7-r2-03，不复写归档。
 
-R3（2026-10-04，验证 S6/S11 两清偿，`w7-r3-01..03`）：gates-r1.log L7 还原历史字面 `b6/after/`（git diff 仅 1 行回滚，路径更正只留 L40 勘误行披露）；ledgerService wireCell 三分支补测（present-doc null title→'—' U+2014／structured title→'#'+docId 非 '[object Object]'／structured owner→'#'+id），单文件 vitest 绿、全量 671/671 归档 `demos/acceptance-w7/w7-r3-02-vitest-full.log`，w7-r2-04 尾行悬空引用改指该归档。
+R3（2026-10-04，验证 S6/S11 两清偿，`w7-r3-01..03`）：gates-r1.log L7 还原历史字面 `b6/after/`（git diff 仅 1 行回滚，路径更正只留 L40 勘误行披露）；ledgerService wireCell 三分支补测（present-doc null title→'—' U+2014／structured title→'#'+docId 非 '[object Object]'／structured owner→'#'+id），单文件 vitest 绿、全量 671/671 归档 `demos/acceptance-w7/w7-r3-02-vitest-full.log`，w7-r2-04 尾行悬空引用改指该归档。变更文件共 7 个（4 修改 + 3 新增：gates-r1.log／w7-r2-04-wirecell-oxlint.txt／ledger-service.client.spec.ts／本文件改，w7-r3-01..03 新）。
+
+R4（2026-10-04，验证 Go-live 非阻断四件小额清偿，`w7-r4-01`）：R3 行补记变更面 7 文件（4 修改+3 新增）；gates-r1.log 尾部纯追加 L41 勘误闭环行（L7 已还原 R1 历史字面 `b6/after/`，L40「已改为」表述以 R2 时点为准）；.gitignore 追加 `research/*/raw/`（raw 快照保持 untracked byte-verbatim，仅不再列入 git status）；commit message `w7 r4: ledger count fix + archive errata closure + gitignore raw`。
 
 ## 七、W8 候选遗留清单（终局盘点）
 
