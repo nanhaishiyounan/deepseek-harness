@@ -25,9 +25,10 @@
         "#13c2c2": 0
       },
       "kind": "cockpit",
-      "rendered": false,
+      "rendered": true,
       "fakeZeroBars": 0,
-      "zeroBaselineDots": 0
+      "kpiCardRadius": "8px",
+      "zeroBaselineDots": 7
     }
   },
   {

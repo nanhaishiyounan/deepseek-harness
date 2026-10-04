@@ -10,6 +10,8 @@
  * shapes), fail the shape check and read as logged out.
  */
 
+import { Toast } from 'antd-mobile'
+
 /** localStorage key carrying the mobile identity. */
 const AUTH_STORAGE_KEY = 'dsh-mobile-auth'
 
@@ -62,4 +64,33 @@ export function saveIdentity(identity: MobileIdentity): void {
 /** Clear the identity (退出登录). */
 export function clearIdentity(): void {
   localStorage.removeItem(AUTH_STORAGE_KEY)
+}
+
+/** Listeners the expiry path notifies (the App root re-renders onto the login gate). */
+const expiryListeners = new Set<() => void>()
+
+/**
+ * Subscribe to session-expiry events (W8-B3): `handleSessionExpired` fires
+ * every listener after clearing the dead token.
+ * @param listener - called once per expiry.
+ * @returns the unsubscribe function.
+ */
+export function subscribeSessionExpired(listener: () => void): () => void {
+  expiryListeners.add(listener)
+  return () => { expiryListeners.delete(listener) }
+}
+
+/**
+ * The graceful expiry path (W8-B3): a gateway `nocobase-unauthorized` means
+ * the sign-in session died server-side. This clears the token (the app root
+ * lands on the login gate via the subscription) and tells the user once —
+ * and deliberately touches nothing else: work items, drafts, and both
+ * outboxes survive so the re-login backfill re-dispatches them.
+ */
+export function handleSessionExpired(): void {
+  if (localStorage.getItem(AUTH_STORAGE_KEY) === null) return
+  clearIdentity()
+  console.warn(JSON.stringify({ type: 'session_expired', at: new Date().toISOString() }))
+  Toast.show({ content: '登录已过期，请重新登录（本地数据已保留）' })
+  for (const listener of expiryListeners) listener()
 }

@@ -8,10 +8,29 @@
 }
 
 .body {
+  position: relative;
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
+}
+
+/* One routed page host. The keep-alive tab pages toggle through [hidden]
+ * recast as visibility (NOT display:none — leaving the render tree drops
+ * the browser's scroll positions, and keep-alive exists to keep them): the
+ * hosts park absolutely inside the body, hidden ones are invisible and
+ * inert but stay laid out, and the layer pages ride the same host keyed by
+ * route. The hidden attribute still carries the AT semantics. */
+.tabPage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.tabPage[hidden] {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 /* The shell-scoped mount point for antd-mobile portals (Popup/Picker/Dialog);

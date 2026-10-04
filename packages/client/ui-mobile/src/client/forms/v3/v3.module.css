@@ -108,8 +108,11 @@
 }
 
 .stamp_pending {
-  border-color: var(--dshm-primary);
-  color: var(--dshm-primary);
+  /* The hollow seal reads as text: the link grade holds the WCAG 1.4.11 3:1
+   * floor on dark where the brand blue measures 2.38:1 (the stamp-doing
+   * precedent). */
+  border-color: var(--dshm-link);
+  color: var(--dshm-link);
 }
 
 .stamp_submitted {
@@ -217,6 +220,21 @@
   margin-top: 0;
 }
 
+/* One required field's cell (W8-B2): the field row plus its nearby error
+   line — the column wrapper keeps the row's own horizontal layout intact. */
+.fieldCell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fieldError {
+  font-size: var(--dshm-fs-xs);
+  line-height: 16px;
+  color: var(--dshm-destructive);
+  padding-left: 2px;
+}
+
 .fieldLabel {
   font-size: var(--dshm-fs-xs);
   font-weight: 500;
@@ -234,24 +252,26 @@
 }
 
 /* The boxed field input: antd-mobile Input — the boxed face rides on the
-   wrapper (this class); the element inherits the fill through the dials. */
+   wrapper (this class); the element inherits the fill through the dials. The
+   fill rides --dshm-input-bg so the dark track's wells step one tier off the
+   card (W8 input-floor verdict), and the grade holds the 16px input floor. */
 .fieldInput:global(.adm-input) {
-  --font-size: var(--dshm-fs-sm);
+  --font-size: var(--dshm-fs-input);
   --color: var(--dshm-foreground);
   flex: 1;
-  max-width: 180px;
-  height: 36px;
+  max-width: 200px;
+  height: 38px;
   padding: 0 10px;
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-input);
   line-height: 22px;
   border: 1px solid var(--dshm-border);
   border-radius: var(--dshm-radius);
-  background: var(--dshm-card);
+  background: var(--dshm-input-bg);
   box-sizing: border-box;
 }
 
 .fieldInput:global(.adm-input):focus-within {
-  border: 2px solid var(--dshm-primary);
+  border: 2px solid var(--dshm-link);
   padding: 0 9px;
 }
 
@@ -262,14 +282,14 @@
   align-items: center;
   justify-content: center;
   flex: 1;
-  max-width: 180px;
-  height: 36px;
+  max-width: 200px;
+  height: 38px;
   padding: 0 10px;
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-input);
   line-height: 22px;
   border: 1px solid var(--dshm-border);
   border-radius: var(--dshm-radius);
-  background: var(--dshm-card);
+  background: var(--dshm-input-bg);
   color: var(--dshm-foreground);
   box-sizing: border-box;
 }

@@ -39,9 +39,15 @@ const CHIP_FACES: Record<ColleagueVisual['status'], { '--background-color': stri
   meeting: { '--background-color': 'var(--dshm-muted)', '--text-color': 'var(--dshm-brand2)', '--border-color': 'var(--dshm-border)' },
 }
 
+/** Agents-tab props: the keep-alive visibility gate. */
+export interface AgentsViewProps {
+  /** Suspends the roster read while the keep-alive page is hidden (default true). */
+  readonly active?: boolean
+}
+
 /** The agents tab. */
-export function AgentsView(): JSX.Element {
-  const roster = useAsync(listAiEmployees)
+export function AgentsView({ active = true }: AgentsViewProps): JSX.Element {
+  const roster = useAsync(listAiEmployees, active)
   /**
    * The starting row: a synchronous ref so two clicks in the same render
    * frame cannot both pass the guard (React batches the state update), plus

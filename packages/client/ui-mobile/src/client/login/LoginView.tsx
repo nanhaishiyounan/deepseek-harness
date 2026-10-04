@@ -9,6 +9,7 @@
 
 import { useState, type JSX } from 'react'
 import { Button, Input, Toast } from 'antd-mobile'
+import { Eye, EyeOff } from 'lucide-react'
 import { saveIdentity, type MobileIdentity } from '../auth.ts'
 import { rpc } from '../rpc.ts'
 import css from './login.module.css'
@@ -22,6 +23,7 @@ export interface LoginViewProps {
 export function LoginView({ onLoggedIn }: LoginViewProps): JSX.Element {
   const [account, setAccount] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | undefined>(undefined)
 
@@ -76,14 +78,27 @@ export function LoginView({ onLoggedIn }: LoginViewProps): JSX.Element {
         </label>
         <label className={css.field}>
           <span className={css.fieldLabel}>密码</span>
-          <Input
-            autoComplete="current-password"
-            type="password"
-            className={css.input}
-            value={password}
-            placeholder="业务账号密码"
-            onChange={(next) => { setPassword(next); setError(undefined) }}
-          />
+          <div className={css.secretRow}>
+            <Input
+              autoComplete="current-password"
+              type={showPassword ? 'text' : 'password'}
+              className={css.input}
+              value={password}
+              placeholder="业务账号密码"
+              onChange={(next) => { setPassword(next); setError(undefined) }}
+            />
+            <button
+              type="button"
+              className={css.secretToggle}
+              aria-label={showPassword ? '隐藏密码' : '显示密码'}
+              aria-pressed={showPassword}
+              onClick={() => { setShowPassword(current => !current) }}
+            >
+              {showPassword
+                ? <EyeOff size={20} strokeWidth={1.8} aria-hidden="true" />
+                : <Eye size={20} strokeWidth={1.8} aria-hidden="true" />}
+            </button>
+          </div>
         </label>
         {error !== undefined && <p className={css.error} role="alert">{error}</p>}
         <Button

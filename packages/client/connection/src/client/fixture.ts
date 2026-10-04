@@ -3204,6 +3204,19 @@ function createFixtureWorld(options: FixtureOptions): FixtureWorld {
         message: 'this deployment has not enabled the nocobase domain; set the api-gateway config nocobaseEnabled: true to expose business reads',
         details: {},
       }),
+      // The mobile work projection's write entrances keep the same posture:
+      // the fixture composes no nocobase backend, so the offline degrade the
+      // mobile store already carries answers locally.
+      mobileWorkSave: request => err(request, {
+        code: 'nocobase-not-composed',
+        message: 'this deployment has not enabled the nocobase domain; the mobile work store stays local',
+        details: {},
+      }),
+      mobileWorkDelete: request => err(request, {
+        code: 'nocobase-not-composed',
+        message: 'this deployment has not enabled the nocobase domain; the mobile work store stays local',
+        details: {},
+      }),
     },
 
     kb: {
@@ -3589,6 +3602,8 @@ export class FixtureApiClient extends AbstractApiClient {
       case 'nocobase.update': return this.api.nocobase.update(request, signal)
       case 'nocobase.alertAct': return this.api.nocobase.alertAct(request, signal)
       case 'nocobase.signIn': return this.api.nocobase.signIn(request, signal)
+      case 'nocobase.mobileWorkSave': return this.api.nocobase.mobileWorkSave(request, signal)
+      case 'nocobase.mobileWorkDelete': return this.api.nocobase.mobileWorkDelete(request, signal)
       case 'kb.stats': return this.api.kb.stats(request)
       case 'kb.search': return this.api.kb.search(request, signal)
       case 'kb.ingest': return this.api.kb.ingest(request, signal)

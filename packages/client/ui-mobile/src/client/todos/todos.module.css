@@ -32,7 +32,7 @@
   padding: 4px 11px;
   border-radius: var(--dshm-radius-pill);
   background: var(--dshm-primary-10);
-  color: var(--dshm-primary);
+  color: var(--dshm-on-soft);
   font-size: var(--dshm-fs-xs);
 }
 
@@ -68,7 +68,7 @@
 
 .retryLink {
   align-self: flex-start;
-  color: var(--dshm-primary);
+  color: var(--dshm-link);
 }
 
 .todoCard {
@@ -89,7 +89,7 @@
 
 .todoLabel {
   font-size: var(--dshm-fs-xs);
-  color: var(--dshm-primary);
+  color: var(--dshm-link);
   font-weight: 600;
 }
 
@@ -114,7 +114,7 @@
 }
 
 .docLink {
-  color: var(--dshm-primary);
+  color: var(--dshm-link);
   font-size: var(--dshm-fs-xs);
   padding: 0;
 }

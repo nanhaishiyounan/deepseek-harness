@@ -28,17 +28,29 @@
   }
 }
 
-main[data-transition='fade'] {
+main[data-transition='fade'],
+.dshm-root [data-transition='fade'] {
   animation: dsh-fade-in var(--dshm-motion-fast) ease;
 }
 
-main[data-transition='slide'] {
+/* The keep-alive hosts never leave the render tree (visibility swap, not
+ * display), so their entrance animation would not replay on its own: the
+ * data-active gate un-names it while hidden, and re-naming it on the
+ * false → true flip restarts the fade exactly when the page reappears. */
+.dshm-root [data-transition='fade'][data-active='false'] {
+  animation: none;
+}
+
+main[data-transition='slide'],
+.dshm-root [data-transition='slide'] {
   animation: dsh-slide-in-right var(--dshm-motion-page) ease;
 }
 
 @media (prefers-reduced-motion: reduce) {
   main[data-transition='fade'],
-  main[data-transition='slide'] {
+  .dshm-root [data-transition='fade'],
+  main[data-transition='slide'],
+  .dshm-root [data-transition='slide'] {
     animation-duration: 0.01ms;
   }
 }

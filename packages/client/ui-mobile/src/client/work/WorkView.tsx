@@ -53,15 +53,22 @@ const STATUS_TABS: ReadonlyArray<{ readonly status: WorkStatus; readonly label: 
 ]
 
 /**
- * The capsule tab the work tab reopens on (module state: the shell remounts
- * the view per route, and the picked filter must survive the tab round-trip).
+ * The capsule tab the work tab reopens on (module state: the picked filter
+ * must survive beyond this component instance — the shell keeps the page
+ * alive, and this carries the pick across any future remount).
  */
 let rememberedTab: WorkStatus = 'todo'
 
+/** Work-tab props: the keep-alive visibility gate. */
+export interface WorkViewProps {
+  /** Suspends the roster read while the keep-alive page is hidden (default true). */
+  readonly active?: boolean
+}
+
 /** The work tab. */
-export function WorkView(): JSX.Element {
+export function WorkView({ active = true }: WorkViewProps): JSX.Element {
   const store = useSyncExternalStore(subscribeWork, workSnapshot)
-  const roster = useAsync(listAiEmployees)
+  const roster = useAsync(listAiEmployees, active)
   /**
    * The starting lock: a synchronous ref so two clicks in the same render
    * frame cannot both pass the guard (React batches the state update), plus

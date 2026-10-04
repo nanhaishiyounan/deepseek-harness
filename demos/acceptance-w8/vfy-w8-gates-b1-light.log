@@ -1,0 +1,94 @@
+{
+  "theme": "light",
+  "values": {
+    "bg": "rgb(234, 235, 232)",
+    "card": "rgb(255, 255, 255)",
+    "textMain": "rgb(31, 38, 48)",
+    "textMuted": "rgb(85, 96, 110)",
+    "border": "rgb(224, 225, 222)",
+    "tabActiveColor": "rgb(30, 78, 140)",
+    "focusRingToken": "0 0 0 3px rgba(30, 78, 140, .35)",
+    "linkToken": "#1e4e8c",
+    "inputMutedToken": "#f3f4f1",
+    "chipsGap": "8px",
+    "chipHeight": 40
+  },
+  "checks": {
+    "textVsCardContrast": 15.24,
+    "mutedVsCardContrast": 6.39,
+    "cardVsBgElevationStep": 21,
+    "borderVsCardStep": 31,
+    "tabActiveVsTabbarContrast": 8.32,
+    "focusRuleFound": true,
+    "chipsGapPx": 8,
+    "touchSmPx": 40,
+    "searchBarPx": 44,
+    "inputFloorPx": 16,
+    "inputVsCardStep": 12
+  },
+  "surfaces": {
+    "work": {
+      "linkColor": "rgb(30, 78, 140)",
+      "cardBg": "rgb(255, 255, 255)",
+      "linkVsCardContrast": 8.32
+    },
+    "chats": {
+      "searchBarPx": 44,
+      "inputFloorPx": 16,
+      "inputBg": "#f3f4f1",
+      "headerBg": "rgba(0, 0, 0, 0)"
+    }
+  },
+  "gates": [
+    {
+      "name": "theme-light",
+      "ok": true
+    },
+    {
+      "name": "textVsCard≥4.5",
+      "ok": true
+    },
+    {
+      "name": "mutedVsCard≥4.5",
+      "ok": true
+    },
+    {
+      "name": "linkVsCard≥4.5",
+      "ok": true
+    },
+    {
+      "name": "inputVsCardStep≥8",
+      "ok": true
+    },
+    {
+      "name": "tabActiveVsTabbar≥3",
+      "ok": true
+    },
+    {
+      "name": "focus-ring declared",
+      "ok": true
+    },
+    {
+      "name": "chipsGapPx≥8",
+      "ok": true
+    },
+    {
+      "name": "touchSmPx≥40",
+      "ok": true
+    },
+    {
+      "name": "searchBarPx≥44",
+      "ok": true
+    },
+    {
+      "name": "inputFloorPx≥16",
+      "ok": true
+    }
+  ]
+}
+w8-b1 light probe: 11/11 gates pass — ALL PASS
+
+real	0m4.647s
+user	0m1.598s
+sys	0m0.389s
+PROBE_EXIT=0

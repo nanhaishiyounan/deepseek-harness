@@ -95,4 +95,33 @@ describe('useAsync', () => {
     expect(result.current.status).toBe('error')
     expect(result.current.error).toBe('加载失败')
   })
+
+  it('suspends while gated off and re-reads in place when a keep-alive page becomes visible', async () => {
+    let reads = 0
+    producer = vi.fn(async () => {
+      reads += 1
+      return `gate-${String(reads)}`
+    })
+    const { result, rerender } = renderHook(
+      ({ active }: { active: boolean }) => useAsync(producer, active),
+      { initialProps: { active: false } },
+    )
+    await act(async () => { await vi.advanceTimersByTimeAsync(0) })
+    expect(result.current.status).toBe('loading')
+    expect(producer).not.toHaveBeenCalled()
+    rerender({ active: true })
+    await act(async () => { await vi.advanceTimersByTimeAsync(0) })
+    expect(result.current.value).toBe('gate-1')
+    // Hiding keeps the last read on screen (no skeleton flash, no fetch).
+    rerender({ active: false })
+    await act(async () => { await vi.advanceTimersByTimeAsync(0) })
+    expect(result.current.status).toBe('ready')
+    expect(result.current.value).toBe('gate-1')
+    expect(producer).toHaveBeenCalledTimes(1)
+    // Becoming visible again re-reads and swaps the value in place.
+    rerender({ active: true })
+    await act(async () => { await vi.advanceTimersByTimeAsync(0) })
+    expect(result.current.status).toBe('ready')
+    expect(result.current.value).toBe('gate-2')
+  })
 })

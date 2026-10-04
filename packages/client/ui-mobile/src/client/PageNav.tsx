@@ -42,7 +42,9 @@ export function PageNav({ title, onBack, right }: PageNavProps): JSX.Element {
       onBack={onBack}
       right={right}
     >
-      {title}
+      {/* Every secondary page's title is the page's one h1 (W8-B2); the
+       * metrics keep the old span face, so the tree only gains semantics. */}
+      <h1 className={css.pageTitle}>{title}</h1>
     </NavBar>
   )
 }

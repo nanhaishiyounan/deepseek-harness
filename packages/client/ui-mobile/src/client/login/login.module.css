@@ -90,14 +90,43 @@
 
 /* The fill input: the muted block against the white card draws the field's
  * own boundary (v7, audit 04 §01 — the v6 card-on-card fill left the typing
- * area invisible). */
+ * area invisible); the grade holds the 16px input floor (W8 V5). */
 .input {
-  --font-size: var(--dshm-fs-md);
+  --font-size: var(--dshm-fs-input);
   --color: var(--dshm-foreground);
   --placeholder-color: var(--dshm-muted-foreground);
   --background: var(--dshm-muted);
   --border-radius: var(--dshm-radius);
   --height: 48px;
+}
+
+/* The password row: the eye toggle overlays the input's right edge with the
+ * full primary touch target (W8 B1 password-toggle). */
+.secretRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.secretToggle {
+  position: absolute;
+  right: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: var(--dshm-touch);
+  height: var(--dshm-touch);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--dshm-muted-foreground);
+  cursor: pointer;
+}
+
+.secretToggle:active {
+  color: var(--dshm-link);
 }
 
 .codeRow {

@@ -197,19 +197,21 @@
   --text-color: var(--dshm-muted-foreground);
 }
 
-/* ---- Quick-task starter chips (h36 capsules): one primary solid CTA, the
-        rest neutral card-face capsules (inline dials in HomeView.tsx). ---- */
+/* ---- Quick-task starter chips: one primary solid CTA, the rest neutral
+        card-face capsules (inline dials in HomeView.tsx). ---- */
 
-/* Four equal capsules on one ruled row — equal widths, never a wrap. */
+/* Four equal capsules on one ruled row — equal widths, never a wrap. The 8px
+ * gap is the W8 touch-spacing floor between adjacent hit areas. */
 .quickRow {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 8px;
 }
 
-/* The quick-task chips: antd-mobile Buttons; this class keeps the 36px size.
-    The neutral face rides the .quickChipNeutral dials (they would collide
-    with the primary solid's own inline defaults). */
+/* The quick-task chips: antd-mobile Buttons. The primary chip rides the 44px
+    primary touch grade (W8-R2); the neutrals stay at the 40px secondary
+    grade. The neutral face rides the .quickChipNeutral dials (they would
+    collide with the primary solid's own inline defaults). */
 .quickChip:global(.adm-button) {
   width: 100%;
   height: var(--dshm-touch-sm);
@@ -218,6 +220,10 @@
   font-size: var(--dshm-fs-xs);
   font-weight: 600;
   white-space: nowrap;
+}
+
+.quickChipPrimary:global(.adm-button) {
+  height: var(--dshm-touch);
 }
 
 .quickChipNeutral:global(.adm-button):active {
@@ -233,8 +239,8 @@
   -webkit-overflow-scrolling: touch;
   padding: 0 2px;
   /* The right-edge fade keeps the horizontal overflow discoverable. */
-  mask-image: linear-gradient(to right, #000 calc(100% - 26px), transparent);
-  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 26px), transparent);
+  mask-image: linear-gradient(to right, black calc(100% - 26px), transparent);
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 26px), transparent);
 }
 
 .rosterCard {

@@ -138,7 +138,7 @@ export function MessagesView(): JSX.Element {
   return (
     <div className={css.page}>
       <PageNav
-        title={<h1 className={css.headerTitle}>消息</h1>}
+        title="消息"
         onBack={() => { goBackOr('#/') }}
         right={(
           <button

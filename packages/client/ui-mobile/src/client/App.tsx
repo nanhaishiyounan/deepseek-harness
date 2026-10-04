@@ -8,8 +8,9 @@
  */
 
 import { useEffect, useState, type JSX } from 'react'
-import { clearIdentity, loadIdentity, type MobileIdentity } from './auth.ts'
+import { clearIdentity, loadIdentity, subscribeSessionExpired, type MobileIdentity } from './auth.ts'
 import { clearOutbox } from './outboxStore.ts'
+import { clearWorkOutbox } from './workSync.ts'
 import { LoginView } from './login/LoginView.tsx'
 import { MobileShell } from './shell/MobileShell.tsx'
 
@@ -37,6 +38,10 @@ export function App(): JSX.Element {
       localStorage.removeItem(THEME_KEY)
     }
   }
+  // A server-side session expiry lands here the same way a logout does, but
+  // keeps every local surface (work items, drafts, both outboxes) for the
+  // re-login backfill — the graceful-expiry contract (W8-B3).
+  useEffect(() => subscribeSessionExpired(() => { setIdentity(undefined) }), [])
   if (identity === undefined) {
     return (
       <div className="dshm-root" data-theme={dark ? 'dark' : 'light'}>
@@ -54,8 +59,10 @@ export function App(): JSX.Element {
         onDarkChange={applyDark}
         onLogout={() => {
           // The departed account's parked outbox messages must never send
-          // under the next login: the queue and its retry timer die here.
+          // under the next login: the queue and its retry timer die here —
+          // and the work projection's queue dies with it (W8-B3).
           clearOutbox()
+          clearWorkOutbox()
           clearIdentity()
           setIdentity(undefined)
         }}

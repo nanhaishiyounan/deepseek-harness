@@ -1,0 +1,18 @@
+-- 1. 主题行断言 --
+leg theme: SKIPPED (verify boundary: consumes :13000/:13110 live instances, not the rebuilt bundle)
+-- 2. heal 断言（B1/B2+B3/B4）--
+leg b1: SKIPPED (verify boundary: consumes :13000/:13110 live instances, not the rebuilt bundle)
+leg b23: SKIPPED (verify boundary: consumes :13000/:13110 live instances, not the rebuilt bundle)
+leg b4: SKIPPED (verify boundary: consumes :13000/:13110 live instances, not the rebuilt bundle)
+-- 3. 114 页禁色终查 + B5 域结构断言 + 引擎侧 iframe 面 --
+leg probe: SKIPPED (verify boundary: consumes :13000/:13110 live instances, not the rebuilt bundle)
+-- 4. mobile 暗轨 DOM 断言（M0/M1 口径门槛 + R1 印章第七门槛，探针现场实跑）--
+leg mobile-dark-probe: PASS
+
+== W7-B6 matrix: 1 legs, 0 failed ==
+MATRIX ALL PASS
+
+real	0m5.059s
+user	0m1.709s
+sys	0m0.465s
+MATRIX_EXIT=0

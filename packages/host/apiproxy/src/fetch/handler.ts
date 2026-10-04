@@ -72,6 +72,7 @@ import {
 import {
   nocobaseGetRequestSchema, nocobaseListMetaRequestSchema, nocobaseListRequestSchema,
   nocobaseAlertActRequestSchema, nocobaseSignInRequestSchema, nocobaseUpdateRequestSchema,
+  nocobaseMobileWorkDeleteRequestSchema, nocobaseMobileWorkSaveRequestSchema,
 } from '../api/nocobase.schema.ts'
 import { dataUploadRequestSchema } from '../api/data.schema.ts'
 import { ordersCreateRequestSchema, ordersListRequestSchema, ordersOrderIdRequestSchema } from '../api/orders.schema.ts'
@@ -199,6 +200,8 @@ const UNARY_ROUTES: UnaryRoutes = {
   'nocobase.update': { schema: nocobaseUpdateRequestSchema, invoke: (api, r, signal) => api.nocobase.update(r, signal) },
   'nocobase.alertAct': { schema: nocobaseAlertActRequestSchema, invoke: (api, r, signal) => api.nocobase.alertAct(r, signal) },
   'nocobase.signIn': { schema: nocobaseSignInRequestSchema, invoke: (api, r, signal) => api.nocobase.signIn(r, signal) },
+  'nocobase.mobileWorkSave': { schema: nocobaseMobileWorkSaveRequestSchema, invoke: (api, r, signal) => api.nocobase.mobileWorkSave(r, signal) },
+  'nocobase.mobileWorkDelete': { schema: nocobaseMobileWorkDeleteRequestSchema, invoke: (api, r, signal) => api.nocobase.mobileWorkDelete(r, signal) },
   'kb.stats': { schema: kbStatsRequestSchema, invoke: (api, r) => api.kb.stats(r) },
   'kb.search': { schema: kbSearchRequestSchema, invoke: (api, r, signal) => api.kb.search(r, signal) },
   'kb.ingest': { schema: kbIngestRequestSchema, invoke: (api, r, signal) => api.kb.ingest(r, signal) },

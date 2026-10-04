@@ -304,6 +304,21 @@ export class NocoBaseClient {
   }
 
   /**
+   * Delete one row through the resourcer's destroy action addressed by the
+   * `filterByTk` query parameter (the same addressing style update uses; the
+   * v2 resourcer registers no REST-style DELETE route). The action answers
+   * `{data: null}` on success — there is no row to return.
+   * @param collection - collection name (for example `wfl_mobile_work`).
+   * @param index - row primary key.
+   * @param signal - caller cancellation.
+   */
+  async destroy(collection: string, index: string | number, signal?: AbortSignal): Promise<void> {
+    const query = this.observe('POST', `/api/${collection}:destroy`)
+    query.set('filterByTk', String(index))
+    await this.request('POST', `/api/${collection}:destroy?${query.toString()}`, undefined, signal)
+  }
+
+  /**
    * Upload one file as a NocoBase attachment through the file-manager's
    * multipart `attachments:upload` action (form field `file`). The same
    * timeout, single network retry, and loud HTTP-error semantics as the JSON

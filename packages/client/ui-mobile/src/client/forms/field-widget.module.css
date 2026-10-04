@@ -43,7 +43,7 @@
 }
 
 .input {
-  --font-size: var(--dshm-fs-sm);
+  --font-size: var(--dshm-fs-input);
   flex: 1;
   min-width: 0;
   background: var(--dshm-muted);
@@ -52,7 +52,7 @@
 }
 
 .textArea {
-  --font-size: var(--dshm-fs-sm);
+  --font-size: var(--dshm-fs-input);
   flex: 1;
   background: var(--dshm-muted);
   border-radius: var(--dshm-radius);

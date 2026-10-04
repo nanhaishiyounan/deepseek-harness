@@ -9,17 +9,21 @@
  * routed user, 关闭 for the claimant — through nocobase.alertAct → the
  * engine's single write entrance; the engine's (from_state, action,
  * actor_role) transition table decides and a refusal surfaces inline (the
- * 403 with its fact, never a silent no-op).
+ * 403 with its fact, never a silent no-op). W8-B2: adjacent still-open rows
+ * of the same rule + title fold into one collapsible group card (the count
+ * badge and the newest raised time on the header; claimed/closed rows never
+ * join a group), and every row carries its raised timestamp.
  */
 
 import { useCallback, useEffect, useMemo, useState, type JSX } from 'react'
 import { Button, PullToRefresh, Toast } from 'antd-mobile'
-import { BellRing } from 'lucide-react'
+import { BellRing, ChevronDown } from 'lucide-react'
 import { loadIdentity } from '../auth.ts'
 import { EmptyState, SkelCard } from '../ui.tsx'
 import { PageNav } from '../PageNav.tsx'
 import { goBackOr } from '../router.ts'
 import { logClientError, messageOf } from '../hooks.ts'
+import { relativeTimeOf } from '../sessionsService.ts'
 import { actMyAlert, listMyAlerts, listMyRecallNotices, type AlertRow, type RecallNoticeRow } from '../ledgerService.ts'
 import css from './alerts.module.css'
 
@@ -56,18 +60,55 @@ function daysText(row: AlertRow): string | undefined {
 /** One in-flight row action (the button disables and shows the acting word). */
 type Pending = { readonly id: number; readonly verb: string }
 
+/** One grouping pass over the read: a run of adjacent still-open, unclaimed rows of the same rule + title. */
+interface AlertEntry {
+  /** Whether the run's rows may fold (open, unclaimed). */
+  readonly foldable: boolean
+  readonly rows: AlertRow[]
+}
+
+/**
+ * Group the read's rows (W8-B2): adjacent open-and-unclaimed rows sharing
+ * ruleType + title gather into one run (the group card); every other row
+ * stays its own single-row run. The wire order (newest first) is preserved.
+ * @param rows - the routed rows as read.
+ * @returns the ordered runs.
+ */
+function groupAlerts(rows: readonly AlertRow[]): AlertEntry[] {
+  const entries: AlertEntry[] = []
+  for (const row of rows) {
+    const foldable = row.status === 'open' && row.owner === undefined
+    const last = entries[entries.length - 1]
+    const head = last?.rows[0]
+    if (foldable && last !== undefined && head !== undefined
+      && head.ruleType === row.ruleType && head.title === row.title) {
+      last.rows.push(row)
+      continue
+    }
+    entries.push({ foldable, rows: [row] })
+  }
+  return entries
+}
+
 /** The alerts page. */
 export function AlertsView(): JSX.Element {
   const identity = loadIdentity()
   const [read, setRead] = useState<AlertsRead | undefined>(undefined)
   const [pending, setPending] = useState<Pending | undefined>(undefined)
+  /** The group headers the user opened (W8-B2 local memory, keyed rule+title). */
+  const [openGroups, setOpenGroups] = useState<ReadonlySet<string>>(new Set())
   // The alert-center in-app notices (recall orders' owner notifications,
   // W6-R3): a separate read that degrades on its own — a notices failure
   // never blanks the alerts list.
   const [notices, setNotices] = useState<readonly RecallNoticeRow[] | 'error'>([])
 
   const refresh = useCallback(async (): Promise<void> => {
-    if (identity === undefined) return
+    // The identity is read at call time, never from a render-closure object:
+    // `loadIdentity()` parses a fresh object per call, so keying this callback
+    // on it re-runs the read effect after every render (an unbounded refetch
+    // loop). Account switches remount this page via the App identity gate, so
+    // no identity dependency is owed here.
+    if (loadIdentity() === undefined) return
     try {
       setRead({ rows: await listMyAlerts() })
     } catch (cause) {
@@ -80,7 +121,7 @@ export function AlertsView(): JSX.Element {
       logClientError('alerts.notices', cause)
       setNotices('error')
     }
-  }, [identity])
+  }, [])
 
   useEffect(() => {
     void refresh()
@@ -125,6 +166,7 @@ export function AlertsView(): JSX.Element {
   }, [read])
 
   const me = identity?.username ?? ''
+  const rowSink = { me, pending, act }
   return (
     <div className={css.page}>
       <PageNav title="我的预警" onBack={() => { goBackOr('#/') }} />
@@ -177,45 +219,52 @@ export function AlertsView(): JSX.Element {
               description="效期/资质/账期/质量四路规则的扫描结果会出现在这里"
             />
           )}
-          {read !== undefined && !('error' in read) && read.rows.map((row) => {
-            const meta = severityMeta(row)
-            const days = daysText(row)
-            const mineClaimed = row.owner === me && row.status === 'acknowledged'
-            const busy = pending?.id === row.id
+          {read !== undefined && !('error' in read) && groupAlerts(read.rows).map((entry) => {
+            const head = entry.rows[0]
+            if (head === undefined || !entry.foldable || entry.rows.length < 2) {
+              return entry.rows.map(row => <AlertRowCard key={row.id} row={row} {...rowSink} />)
+            }
+            const groupKey = `${head.ruleType}:${head.title}`
+            const expanded = openGroups.has(groupKey)
+            const newest = groupTimeOf(entry.rows)
             return (
-              <article key={row.id} className={`${css.alertCard} ${meta.tier}`} data-testid="alert-row">
-                <header className={css.alertHead}>
-                  <span className={css.sevTag} data-severity={row.severity}>{meta.label}</span>
-                  <span className={css.ruleLabel}>{RULE_LABELS[row.ruleType] ?? row.ruleType}预警</span>
-                  {row.owner === undefined
-                    ? <span className={css.claimHint}>待认领</span>
-                    : <span className={css.claimed}>{row.status === 'acknowledged' ? `已认领 · ${row.owner}` : row.status}</span>}
-                </header>
-                <div className={css.alertTitle}>{row.title}</div>
-                <footer className={css.alertFoot}>
-                  <span className={css.entityCode}>{row.entityCode}</span>
-                  <span className={css.actGroup}>
-                    {days !== undefined && <span className={css.daysCell}>{days}</span>}
-                    {row.status !== 'resolved' && !mineClaimed && (
-                      <Button
-                        type="button" size="small" fill="outline" color="primary"
-                        className={css.actBtn} disabled={busy} aria-label={`认领预警 ${row.entityCode}`}
-                        onClick={() => { void act(row, 'claim') }}
-                      >
-                        {busy === true && pending?.verb === '认领' ? '认领中…' : '认领'}
-                      </Button>
-                    )}
-                    {mineClaimed && (
-                      <Button
-                        type="button" size="small" fill="solid" color="primary"
-                        className={css.actBtn} disabled={busy} aria-label={`关闭预警 ${row.entityCode}`}
-                        onClick={() => { void act(row, 'resolve') }}
-                      >
-                        {busy === true && pending?.verb === '关闭' ? '关闭中…' : '关闭'}
-                      </Button>
-                    )}
+              <article key={groupKey} className={css.alertGroup} data-testid="alert-group">
+                <button
+                  type="button"
+                  className={css.groupHead}
+                  aria-expanded={expanded}
+                  aria-label={`${RULE_LABELS[head.ruleType] ?? head.ruleType}预警 共${String(entry.rows.length)}条`}
+                  onClick={() => {
+                    setOpenGroups((current) => {
+                      const next = new Set(current)
+                      if (next.has(groupKey)) next.delete(groupKey)
+                      else next.add(groupKey)
+                      return next
+                    })
+                  }}
+                >
+                  <span className={css.sevTag} data-severity={head.severity}>
+                    {severityMeta(head).label}
                   </span>
-                </footer>
+                  <span className={css.groupTitle}>
+                    {RULE_LABELS[head.ruleType] ?? head.ruleType}预警
+                  </span>
+                  <span className={css.groupCount}>×{String(entry.rows.length)}</span>
+                  {newest !== undefined && (
+                    <span className={css.groupTime}>最新 {relativeTimeOf(newest)}</span>
+                  )}
+                  <ChevronDown
+                    size={16}
+                    strokeWidth={1.8}
+                    aria-hidden="true"
+                    className={expanded ? `${css.groupChevron} ${css.groupChevronOpen}` : css.groupChevron}
+                  />
+                </button>
+                {expanded && (
+                  <div className={css.groupBody}>
+                    {entry.rows.map(row => <AlertRowCard key={row.id} row={row} {...rowSink} />)}
+                  </div>
+                )}
               </article>
             )
           })}
@@ -245,5 +294,66 @@ export function AlertsView(): JSX.Element {
         </div>
       </PullToRefresh>
     </div>
+  )
+}
+
+/** The newest raised time of one group's rows (undefined when no row carries one). */
+function groupTimeOf(rows: readonly AlertRow[]): number | undefined {
+  let newest: number | undefined = undefined
+  for (const row of rows) {
+    if (row.createdAt !== undefined && (newest === undefined || row.createdAt > newest)) newest = row.createdAt
+  }
+  return newest
+}
+
+/** One alert row's render sinks (the busy action state and the act entrance). */
+interface RowSink {
+  readonly me: string
+  readonly pending: Pending | undefined
+  readonly act: (row: AlertRow, action: 'claim' | 'resolve') => Promise<void>
+}
+
+/** One routed alert row: the tiered card with its claim/close action. */
+function AlertRowCard({ row, me, pending, act }: { readonly row: AlertRow } & RowSink): JSX.Element {
+  const meta = severityMeta(row)
+  const days = daysText(row)
+  const mineClaimed = row.owner === me && row.status === 'acknowledged'
+  const busy = pending?.id === row.id
+  return (
+    <article className={`${css.alertCard} ${meta.tier}`} data-testid="alert-row">
+      <header className={css.alertHead}>
+        <span className={css.sevTag} data-severity={row.severity}>{meta.label}</span>
+        <span className={css.ruleLabel}>{RULE_LABELS[row.ruleType] ?? row.ruleType}预警</span>
+        {row.owner === undefined
+          ? <span className={css.claimHint}>待认领</span>
+          : <span className={css.claimed}>{row.status === 'acknowledged' ? `已认领 · ${row.owner}` : row.status}</span>}
+      </header>
+      <div className={css.alertTitle}>{row.title}</div>
+      <footer className={css.alertFoot}>
+        <span className={css.entityCode}>{row.entityCode}</span>
+        <span className={css.actGroup}>
+          {row.createdAt !== undefined && <span className={css.timeCell}>{relativeTimeOf(row.createdAt)}</span>}
+          {days !== undefined && <span className={css.daysCell}>{days}</span>}
+          {row.status !== 'resolved' && !mineClaimed && (
+            <Button
+              type="button" size="small" fill="outline" color="primary"
+              className={css.actBtn} disabled={busy} aria-label={`认领预警 ${row.entityCode}`}
+              onClick={() => { void act(row, 'claim') }}
+            >
+              {busy === true && pending?.verb === '认领' ? '认领中…' : '认领'}
+            </Button>
+          )}
+          {mineClaimed && (
+            <Button
+              type="button" size="small" fill="solid" color="primary"
+              className={css.actBtn} disabled={busy} aria-label={`关闭预警 ${row.entityCode}`}
+              onClick={() => { void act(row, 'resolve') }}
+            >
+              {busy === true && pending?.verb === '关闭' ? '关闭中…' : '关闭'}
+            </Button>
+          )}
+        </span>
+      </footer>
+    </article>
   )
 }

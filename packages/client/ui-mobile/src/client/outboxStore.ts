@@ -247,6 +247,15 @@ function backoffOf(attempts: number): number {
   return attempts === 0 ? 0 : Math.min(2 ** attempts * 1000, MAX_BACKOFF_MS)
 }
 
+/**
+ * Kick one immediate flush pass (W8-B3): the shell calls it after sign-in
+ * so a re-login's parked messages re-dispatch without waiting for the
+ * backoff timer (module load and the online event are the other kicks).
+ */
+export function kickOutboxFlush(): void {
+  scheduleFlush(0)
+}
+
 // The page mounts this module once (browser bundle only): going back online
 // flushes immediately, and a warm queue starts its backoff loop. The module
 // never loads in non-browser consumers (jsdom provides window in tests).

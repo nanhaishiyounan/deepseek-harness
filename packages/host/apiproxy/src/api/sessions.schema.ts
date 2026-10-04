@@ -138,11 +138,21 @@ export const sessionForkValueSchema = z.object({
   sessionId: sessionIdSchema,
 }) satisfies z.ZodType<Wire<ResponseValue<'session.fork'>>>
 
-/** session.history request payload (beforeSeq/maxMessages page backwards from the window tail). */
+/** session.history request payload (beforeSeq/maxMessages page backwards from the window tail; afterSeq pages forwards from a cursor). */
 export const sessionHistoryRequestSchema = z.object({
   sessionId: sessionIdSchema,
   beforeSeq: z.number().int().nonnegative().optional(),
+  /** W8-B3 cursor read: only events with seq strictly greater; exclusive with beforeSeq. */
+  afterSeq: z.number().int().nonnegative().optional(),
   maxMessages: z.number().int().positive().optional(),
+}).superRefine((payload, ctx) => {
+  if (payload.beforeSeq !== undefined && payload.afterSeq !== undefined) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['afterSeq'],
+      message: 'afterSeq and beforeSeq are exclusive: pick the forward cursor read or the backward page read, not both',
+    })
+  }
 }) satisfies z.ZodType<Wire<RequestPayload<'session.history'>>>
 
 /** Complete provider/model selection. */

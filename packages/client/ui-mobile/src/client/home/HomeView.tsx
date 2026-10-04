@@ -25,12 +25,13 @@ import { listMyAlerts } from '../ledgerService.ts'
 import { readWatermarkOf } from '../draftStore.ts'
 import { isWorkSession, subscribeWork, todayStats, workSnapshot } from '../workStore.ts'
 import { cachedProjectionOf, loadProjection } from '../messages/projection.ts'
-import { NewChatSheet } from '../messages/NewChatSheet.tsx'
 import css from './home.module.css'
 
-/** Home props: the current identity. */
+/** Home props: the current identity, and the keep-alive visibility gate. */
 export interface HomeViewProps {
   readonly identityName: string
+  /** Suspends the data reads while the keep-alive page is hidden (default true). */
+  readonly active?: boolean
 }
 
 /**
@@ -49,13 +50,15 @@ interface QuickChip {
   readonly label: string
   /** `primary` = the one solid brand CTA; the rest ride neutral capsules. */
   readonly variant: 'primary' | 'neutral'
-  readonly run: (openSheet: () => void) => void
+  readonly run: () => void
 }
 
-/** The quick-task action set (02 §10.4 + W6-B1/B2): the sync-closed pair of
- * server-backed pages rides ahead of the routes; the W6-B2 alert center
- * mirror follows; two preset directs stay. The register chip is the page's
- * single primary action (the brand budget, plan §3.1 ≤2 brand hits). */
+/** The quick-task action set (02 §10.4 + W6-B1/B2, folded 7→4 in W8-B2):
+ * the register direct stays the page's single primary action (the brand
+ * budget, plan §3.1 ≤2 brand hits), with one neutral chip per
+ * ledger/alert/doc surface. 查看工作 (the work Tab), 找 AI 同事 (the agents
+ * Tab and the roster rail below), and 问经营 (the roster's 经营参谋 card)
+ * duplicated other entries on the same screen and left the set. */
 const QUICK_CHIPS: readonly QuickChip[] = [
   {
     label: '我的待办',
@@ -77,21 +80,6 @@ const QUICK_CHIPS: readonly QuickChip[] = [
     variant: 'primary',
     run: () => { void startChat('mobile-form-assistant') },
   },
-  {
-    label: '问经营',
-    variant: 'neutral',
-    run: () => { void startChat('business-advisor') },
-  },
-  {
-    label: '查看工作',
-    variant: 'neutral',
-    run: () => { navigate('#/work') },
-  },
-  {
-    label: '找 AI 同事',
-    variant: 'neutral',
-    run: (openSheet) => { openSheet() },
-  },
 ]
 
 /** Start one colleague's session and land on its chat, toasting a failure (the agents page's behavior). */
@@ -106,23 +94,23 @@ async function startChat(preset: string): Promise<void> {
 }
 
 /** The home tab. */
-export function HomeView({ identityName }: HomeViewProps): JSX.Element {
+export function HomeView({ identityName, active = true }: HomeViewProps): JSX.Element {
   const store = useSyncExternalStore(subscribeWork, workSnapshot)
-  const roster = useAsync(listAiEmployees)
-  const sessions = useAsync(listSessions)
-  const [sheetOpen, setSheetOpen] = useState(false)
+  const roster = useAsync(listAiEmployees, active)
+  const sessions = useAsync(listSessions, active)
   /** The projection texts keyed by session id (tail reads). */
   const [projections, setProjections] = useState<ReadonlyMap<string, string>>(new Map())
   /** The routed-alert count for the「我的预警」chip badge (undefined = not loaded / unreadable — no badge shown). */
   const [alertCount, setAlertCount] = useState<number | undefined>(undefined)
 
   useEffect(() => {
+    if (!active) return
     let alive = true
     listMyAlerts()
       .then((rows) => { if (alive) setAlertCount(rows.length) })
       .catch(() => { if (alive) setAlertCount(undefined) })
     return () => { alive = false }
-  }, [])
+  }, [active])
 
   const stats = useMemo(() => todayStats(store.items, Date.now()), [store.items])
   const pendingCount = stats.todo + stats.review
@@ -207,7 +195,7 @@ export function HomeView({ identityName }: HomeViewProps): JSX.Element {
               color="primary"
               fill="solid"
               size="small"
-              className={`${css.quickChip} ${chip.variant === 'primary' ? '' : css.quickChipNeutral}`}
+              className={`${css.quickChip} ${chip.variant === 'primary' ? css.quickChipPrimary : css.quickChipNeutral}`}
               style={
                 chip.variant === 'primary'
                   ? { '--border-radius': 'var(--dshm-radius-pill)' }
@@ -218,7 +206,7 @@ export function HomeView({ identityName }: HomeViewProps): JSX.Element {
                     '--border-radius': 'var(--dshm-radius-pill)',
                   }
               }
-              onClick={() => { chip.run(() => { setSheetOpen(true) }) }}
+              onClick={chip.run}
             >
               {chip.label}
             </Button>
@@ -347,7 +335,6 @@ export function HomeView({ identityName }: HomeViewProps): JSX.Element {
               </div>
             )}
 
-      <NewChatSheet visible={sheetOpen} onClose={() => { setSheetOpen(false) }} />
     </div>
   )
 }

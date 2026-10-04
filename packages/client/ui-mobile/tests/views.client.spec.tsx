@@ -10,7 +10,7 @@
  * standalone entry's mount/unmount cycle.
  */
 
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { Toast } from 'antd-mobile'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { ChatAsk, ChatItem, FoldEvent } from '../src/client/fold.ts'
@@ -68,6 +68,18 @@ function stubGateway(routes: Record<string, unknown>): void {
     return new Response(JSON.stringify({ rpcId: body.rpcId, result: { ok: true, value } }), { status: 200 })
   })
   vi.stubGlobal('fetch', fetchMock)
+}
+
+/**
+ * The visible keep-alive tab page for `tab`. The shell keeps visited tab
+ * pages mounted behind [hidden], so text queries that predate keep-alive
+ * (when a route change unmounted the previous page) scope to the visible
+ * page host instead of the whole document.
+ */
+function visibleTabPage(tab: string): HTMLElement {
+  const page = document.querySelector(`section[data-tab="${tab}"]:not([hidden])`)
+  if (page === null) throw new Error(`the ${tab} tab page is not the visible page`)
+  return page as HTMLElement
 }
 
 /** One user message event (agent-kind source renders nothing). */
@@ -243,16 +255,20 @@ describe('mobile app shell', () => {
     await waitFor(() => { expect(screen.getByText('本月登记')).toBeTruthy() })
     navigate('#/profile')
     fireEvent(window, new HashChangeEvent('hashchange'))
-    await waitFor(() => { expect(screen.getByText('待审核')).toBeTruthy() })
-    // contacts folds onto the agents directory (02 §1.3): the view renders.
+    await waitFor(() => { expect(within(visibleTabPage('me')).getByText('待审核')).toBeTruthy() })
+    // contacts folds onto the agents directory (02 §1.3): the view renders,
+    // and the keep-alive home page stays mounted behind it, hidden.
     navigate('#/contacts')
     fireEvent(window, new HashChangeEvent('hashchange'))
-    await waitFor(() => { expect(screen.getByText('AI 同事')).toBeTruthy() })
+    await waitFor(() => { expect(within(visibleTabPage('agents')).getByText('AI 同事')).toBeTruthy() })
+    const homePage = document.querySelector('section[data-tab="home"]')
+    expect(homePage).not.toBeNull()
+    expect(homePage?.hasAttribute('hidden')).toBe(true)
     // workbench folds onto the work page: its header and status tabs render.
     navigate('#/workbench')
     fireEvent(window, new HashChangeEvent('hashchange'))
-    await waitFor(() => { expect(screen.getAllByText('工作').length).toBeGreaterThan(0) })
-    expect(screen.getByText('待处理 0')).toBeTruthy()
+    await waitFor(() => { expect(within(visibleTabPage('work')).getAllByText('工作').length).toBeGreaterThan(0) })
+    expect(within(visibleTabPage('work')).getByText('待处理 0')).toBeTruthy()
   })
 
   it('persists the dark theme through the me-tab switch', async () => {
@@ -1360,9 +1376,11 @@ describe('mobile shell route edges', () => {
     navigate('#/contacts')
     fireEvent(window, new HashChangeEvent('hashchange'))
     // The agents view owns the fold's landing (02 §1.3): its NavBar title
-    // renders, the chats surface is gone, and the v6 tab bar stays (agents is
-    // a whitelist page now).
-    await waitFor(() => { expect(screen.getByText('AI 同事')).toBeTruthy() })
+    // renders (scoped to the visible page — the keep-alive home's roster
+    // rail heading carries the same words behind [hidden]), the chats
+    // surface is gone, and the v6 tab bar stays (agents is a whitelist
+    // page now).
+    await waitFor(() => { expect(within(visibleTabPage('agents')).getByText('AI 同事')).toBeTruthy() })
     expect(screen.queryByPlaceholderText('搜索会话/同事')).toBeNull()
     expect(screen.getByRole('navigation', { name: '底部导航' })).toBeTruthy()
   })
@@ -1404,6 +1422,35 @@ describe('mobile shell route edges', () => {
     await waitFor(() => { expect(screen.getByText('本月登记')).toBeTruthy() })
     fireEvent.click(screen.getByText('工作台'))
     await waitFor(() => { expect(screen.getByRole('heading', { name: '工作' })).toBeTruthy() })
+  })
+
+  it('reaches and activates the tab bar items by keyboard (WCAG 2.1.1)', async () => {
+    stubGateway(shellRoutes)
+    const identity = { username: 'buyer', nickname: '采购员·蔡俊', token: 'tok-v', loggedAt: 1 }
+    render(<MobileShell identity={identity} dark={false} onDarkChange={() => {}} onLogout={() => {}} />)
+    // The four antd-mobile div items are operable tabs: focusable (tabIndex),
+    // role=tab + tablist (the shell's mount pass), aria-selected tracking the
+    // route.
+    const nav = screen.getByRole('navigation', { name: '底部导航' })
+    const tabs = within(nav).getAllByRole('tab')
+    expect(tabs.map(tab => tab.getAttribute('aria-selected'))).toEqual(['true', 'false', 'false', 'false'])
+    expect(tabs.every(tab => tab.tabIndex === 0)).toBe(true)
+    expect(within(nav).getByRole('tablist')).toBeTruthy()
+    const homeTab = within(nav).getByRole('tab', { name: '消息' })
+    const workTab = within(nav).getByRole('tab', { name: '工作台' })
+    const meTab = within(nav).getByRole('tab', { name: '我的' })
+    // Enter and Space both ride the same navigate() path as a click.
+    fireEvent.keyDown(meTab, { key: 'Enter' })
+    await waitFor(() => { expect(screen.getByText('本月登记')).toBeTruthy() })
+    fireEvent.keyDown(workTab, { key: ' ' })
+    await waitFor(() => { expect(screen.getByRole('heading', { name: '工作' })).toBeTruthy() })
+    expect(meTab.getAttribute('aria-selected')).toBe('false')
+    expect(workTab.getAttribute('aria-selected')).toBe('true')
+    // Other keys stay inert on a tab item, and Enter on the nav itself (no
+    // tab item under the cursor) stays put too.
+    fireEvent.keyDown(homeTab, { key: 'ArrowRight' })
+    fireEvent.keyDown(nav, { key: 'Enter' })
+    expect(screen.getByRole('heading', { name: '工作' })).toBeTruthy()
   })
 })
 
@@ -1612,7 +1659,10 @@ describe('mobile chat view (v3 fences)', () => {
       'session.prompt': {},
     })
     render(<ChatView sessionId="session-12" />)
-    await waitFor(() => { expect(screen.getByTestId('draft-card-v3')).toBeTruthy() })
+    const card = await screen.findByTestId('draft-card-v3')
+    // W8-B2: the blank required quantity (value null) must be filled before
+    // the confirm gate opens.
+    fireEvent.change(card.querySelector('input') as HTMLInputElement, { target: { value: '200' } })
     // The draft phase carries the re-phrase chips.
     expect(screen.getByRole('button', { name: '换一种单据' })).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: '确认写入' }))
@@ -1626,6 +1676,30 @@ describe('mobile chat view (v3 fences)', () => {
     await waitFor(() => {
       const reject = calls.filter(call => call.url === '/api/session.prompt').pop()
       expect(JSON.stringify(reject?.payload)).toContain('reject_flow')
+    })
+  })
+
+  it('keeps a blank required v3 field from sending and focuses the blank control (W8-B2)', async () => {
+    stubGateway({
+      'session.list': { items: [] },
+      'session.history': { events: [{ event: assistantMessage(1, `草稿：\n${v3DraftFence}`) }] },
+      'nocobase.listMeta': { collections: [] },
+      'session.prompt': {},
+    })
+    render(<ChatView sessionId="session-12" />)
+    const card = await screen.findByTestId('draft-card-v3')
+    fireEvent.click(screen.getByRole('button', { name: '确认写入' }))
+    // No prompt leaves the page; the nearby error renders and the first
+    // blank control takes focus.
+    await waitFor(() => { expect(screen.getAllByText('此项必填').length).toBeGreaterThan(0) })
+    expect(card.querySelector('input')).toEqual(document.activeElement)
+    expect(calls.filter(call => call.url === '/api/session.prompt')).toHaveLength(0)
+    // Filling the blank and confirming sends the fenced action.
+    fireEvent.change(card.querySelector('input') as HTMLInputElement, { target: { value: '200' } })
+    fireEvent.click(screen.getByRole('button', { name: '确认写入' }))
+    await waitFor(() => {
+      const confirm = calls.filter(call => call.url === '/api/session.prompt').pop()
+      expect(JSON.stringify(confirm?.payload)).toContain('form_confirm')
     })
   })
 

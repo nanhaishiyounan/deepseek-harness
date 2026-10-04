@@ -38,3 +38,13 @@
 .backHit:active {
   background: var(--dshm-muted);
 }
+
+/* The title slot's h1 (W8-B2): the old span metrics — one heading per
+ * secondary page with no visual change. */
+.pageTitle {
+  margin: 0;
+  font-size: var(--dshm-fs-lg);
+  line-height: 24px;
+  font-weight: 600;
+  color: var(--dshm-foreground);
+}

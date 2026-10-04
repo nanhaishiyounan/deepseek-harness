@@ -83,13 +83,21 @@ export async function searchSessions(query: string): Promise<SessionSearchHit[]>
 }
 
 /**
- * Read one session's raw event window (the fold's input).
+ * Read one session's raw event window (the fold's input). The default tail
+ * read pages back from the newest message; `afterSeq` (W8-B3) switches to
+ * the forward cursor read — only events strictly newer than the cursor
+ * cross the wire, so a running poll's payload shrinks from the whole window
+ * to what happened since the last poll. The fold itself never changes: the
+ * caller appends the cursor page onto its cached window before folding.
  * @param sessionId - the session whose history window to read.
- * @param maxMessages - the newest-message window size (default 200).
+ * @param maxMessages - the newest-message window size (default 200; ignored by the cursor read).
+ * @param afterSeq - the forward cursor (the last seq already held), when polling incrementally.
  * @returns the raw session events in seq order.
  */
-export async function readHistory(sessionId: string, maxMessages: number = 200): Promise<readonly FoldEvent[]> {
-  const value = await rpc('session.history', { sessionId: sessionOf(sessionId), maxMessages })
+export async function readHistory(sessionId: string, maxMessages: number = 200, afterSeq?: number): Promise<readonly FoldEvent[]> {
+  const value = afterSeq === undefined
+    ? await rpc('session.history', { sessionId: sessionOf(sessionId), maxMessages })
+    : await rpc('session.history', { sessionId: sessionOf(sessionId), afterSeq })
   return value.events.map(entry => entry.event as FoldEvent)
 }
 

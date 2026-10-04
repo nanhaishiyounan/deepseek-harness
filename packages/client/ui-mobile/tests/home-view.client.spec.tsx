@@ -2,9 +2,9 @@
 /**
  * The home tab (02 §2.1): the greeting line and the pending count, the stats
  * card's four status-colored cells and its route to work, the quick-task
- * chips' real actions (preset directs, route, new-chat sheet), the colleagues'
- * role-stamp scroller starting a chat, and the recent-chats rows filtering
- * the registered work sessions.
+ * chips' real actions (W8-B2: the register direct plus the route chips),
+ * the colleagues' role-stamp scroller starting a chat, and the recent-chats
+ * rows filtering the registered work sessions.
  */
 
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
@@ -95,20 +95,26 @@ describe('HomeView', () => {
     expect(screen.getByText(/今天有 2 件事等你/)).toBeTruthy()
   })
 
-  it('runs the quick-task chips: preset directs, route, and the new-chat sheet', async () => {
+  it('runs the quick-task chips: the preset direct and the route chips', async () => {
     stubGateway(emptyRoutes)
     render(<HomeView identityName="业务员" />)
+    // W8-B2: the set folded 7→4 — the register direct (the one primary) plus
+    // one route chip per ledger/alert/doc surface; the Tab/directory
+    // duplicates (查看工作 / 找 AI 同事 / 问经营) left the set.
     fireEvent.click(screen.getByRole('button', { name: '登记一条单据' }))
     await waitFor(() => { expect(location.hash).toBe('#/chat/new:mobile-form-assistant') })
     location.hash = ''
-    fireEvent.click(screen.getByRole('button', { name: '问经营' }))
-    await waitFor(() => { expect(location.hash).toBe('#/chat/new:business-advisor') })
+    fireEvent.click(screen.getByRole('button', { name: '我的待办' }))
+    expect(location.hash).toBe('#/todos')
     location.hash = ''
-    fireEvent.click(screen.getByRole('button', { name: '查看工作' }))
-    expect(location.hash).toBe('#/work')
+    fireEvent.click(screen.getByRole('button', { name: '我的预警' }))
+    expect(location.hash).toBe('#/alerts')
     location.hash = ''
-    fireEvent.click(screen.getByRole('button', { name: '找 AI 同事' }))
-    await waitFor(() => { expect(screen.getByRole('heading', { name: '新建会话' })).toBeTruthy() })
+    fireEvent.click(screen.getByRole('button', { name: '看单据' }))
+    expect(location.hash).toBe('#/docs')
+    expect(screen.queryByRole('button', { name: '问经营' })).toBeNull()
+    expect(screen.queryByRole('button', { name: '查看工作' })).toBeNull()
+    expect(screen.queryByRole('button', { name: '找 AI 同事' })).toBeNull()
   })
 
   it('starts a chat from a colleague card and routes to the whole roster', async () => {
@@ -205,14 +211,6 @@ describe('HomeView', () => {
     render(<HomeView identityName="业务员" />)
     // The failed tail read leaves the row on its colleague-duty subtitle.
     await waitFor(() => { expect(screen.getByText('经营洞察问答（只读）')).toBeTruthy() })
-  })
-
-  it('closes the new-chat sheet from the quick-task chip', async () => {
-    stubGateway(emptyRoutes)
-    render(<HomeView identityName="业务员" />)
-    fireEvent.click(screen.getByRole('button', { name: '找 AI 同事' }))
-    await waitFor(() => { expect(screen.getByRole('heading', { name: '新建会话' })).toBeTruthy() })
-    fireEvent.click(screen.getByRole('button', { name: '关闭' }))
   })
 
   it('shows the empty copy with no chats and links to the full list', async () => {

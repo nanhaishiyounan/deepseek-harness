@@ -338,6 +338,8 @@ export class FakeApiClient implements IApiClient {
     get: payload => this.record('nocobase.get', payload, Promise.resolve(ok({ collection: payload.collection, row: {} }))),
     alertAct: payload => this.record('nocobase.alertAct', payload, Promise.resolve(ok({ id: payload.id, action: payload.action, user: 'fixture' }))),
     signIn: payload => this.record('nocobase.signIn', payload, Promise.reject(new Error('用户名/邮箱或密码有误，请重新输入'))),
+    mobileWorkSave: payload => this.record('nocobase.mobileWorkSave', payload, Promise.resolve(ok({ clientId: payload.clientId, user: 'fixture' }))),
+    mobileWorkDelete: payload => this.record('nocobase.mobileWorkDelete', payload, Promise.resolve(ok({ clientId: payload.clientId, user: 'fixture' }))),
   }
 
   /** When true, streams never fire onOpen (misbehaving-carrier material for the handshake timeout guard). */

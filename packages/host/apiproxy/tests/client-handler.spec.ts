@@ -97,6 +97,8 @@ function scriptedApi(overrides: {
       update: err,
       alertAct: err,
       signIn: err,
+      mobileWorkSave: err,
+      mobileWorkDelete: err,
       ...overrides.nocobase,
     },
     sessions: {

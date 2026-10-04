@@ -2,21 +2,24 @@
    kind badges, the welcome card, the ask_choice trio, the pick capsule, and
    the markdown ticket face. */
 
+/* Narrative images never overflow the bubble (W8-B2: loading=lazy rides the
+   renderer in rich.ts). */
+.richText img {
+  max-width: 100%;
+}
+
+/* Narrative images never overflow the bubble (W8-B2: loading=lazy rides the
+   renderer in rich.ts). */
+.richText img {
+  max-width: 100%;
+}
+
 .page {
   display: flex;
   flex-direction: column;
   height: 100%;
   min-height: 0;
   background: var(--dshm-background);
-}
-
-/* The h1 riding PageNav's title slot (the layer's back header). */
-.headerTitle {
-  margin: 0;
-  font-size: var(--dshm-fs-lg);
-  line-height: 24px;
-  font-weight: 600;
-  color: var(--dshm-foreground);
 }
 
 .plus {
@@ -36,7 +39,9 @@
 }
 
 .searchBar {
-  --height: var(--dshm-touch-sm);
+  /* The search entry is a primary path: the 44px target and the input floor
+   * (W8 V10 / V5). */
+  --height: var(--dshm-touch);
   --border-radius: var(--dshm-radius);
   --background: var(--dshm-muted);
   --placeholder-color: var(--dshm-muted-foreground);
@@ -44,7 +49,7 @@
 }
 
 .searchBar :global(.adm-search-bar-input) {
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-input);
 }
 
 /* The filter capsules (CapsuleTabs) ride the ink selected fill. */
@@ -473,7 +478,10 @@
   border: 1px solid var(--dshm-primary-rim);
   border-radius: var(--dshm-radius);
   background: var(--dshm-card);
-  color: var(--dshm-primary);
+  /* The option word on the card face rides the link token: the dark-track
+   * brand step measures 2.38:1 on the card, under the 4.5:1 text floor
+   * (W8-B2 handover from B1). */
+  color: var(--dshm-link);
   transition: transform 120ms ease-out, background-color 120ms ease-out, border-color 120ms ease-out, color 120ms ease-out;
 }
 
@@ -663,7 +671,7 @@
 }
 
 .richText :global(a) {
-  color: var(--dshm-primary);
+  color: var(--dshm-link);
 }
 
 /* ---- The deep code plate (v6 B3, the design's .code-box) ---- */
@@ -696,7 +704,7 @@
 /* The copy entry: the antd mini none-fill word on the code plate's chrome. */
 .copyBtn:global(.adm-button) {
   --border-radius: var(--dshm-radius-corner);
-  --text-color: #c7d3e6;
+  --text-color: var(--dshm-code-action);
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -980,7 +988,7 @@
   margin-top: 0;
 }
 
-/* The shared 36px pill-grade sizing both arms keep. */
+/* The shared secondary-touch pill-grade sizing both arms keep. */
 .reportPrimary:global(.adm-button),
 .reportSecondary:global(.adm-button) {
   height: var(--dshm-touch-sm);
@@ -1089,8 +1097,8 @@
 }
 
 .approvalChipLevel2 {
-  color: var(--dshm-primary);
-  border-color: var(--dshm-primary);
+  color: var(--dshm-link);
+  border-color: var(--dshm-link);
 }
 
 .approvalChipApproved {

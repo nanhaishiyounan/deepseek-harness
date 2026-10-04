@@ -11,11 +11,12 @@
 import type {
   RequestPayload, ResponseValue, RpcMethodMap,
 } from '@deepseek-ai/dsh-host-apiproxy/api'
-import { loadIdentity } from './auth.ts'
+import { handleSessionExpired, loadIdentity } from './auth.ts'
 
 /** The methods whose payloads accept the sign-in session token server-side. */
 const TOKEN_METHODS: ReadonlySet<string> = new Set([
   'nocobase.list', 'nocobase.get', 'nocobase.update', 'nocobase.alertAct', 'session.prompt',
+  'nocobase.mobileWorkSave', 'nocobase.mobileWorkDelete',
 ])
 
 /** The method names the mobile surface calls. */
@@ -37,12 +38,40 @@ export type MobileRpcMethod =
   | 'nocobase.get'
   | 'nocobase.alertAct'
   | 'nocobase.signIn'
+  | 'nocobase.mobileWorkSave'
+  | 'nocobase.mobileWorkDelete'
   | 'lakehouse.overview'
 
-/** One server-response body narrowed to its result slot. */
+/** One server-response body narrowed to its result slot (the error keeps the gateway's code). */
 interface WireResponse<T> {
   rpcId: string
-  result: { ok: true; value: T } | { ok: false; error: { message: string } }
+  result: { ok: true; value: T } | { ok: false; error: { code?: string; message: string } }
+}
+
+/**
+ * A gateway refusal carrying its wire code: consumers narrow expiry by code
+ * (`isSessionExpiredError`) instead of matching message text.
+ */
+export class RpcFailure extends Error {
+  /** The gateway's structured error code ('nocobase-unauthorized', …). */
+  readonly code: string | undefined
+
+  constructor(message: string, code: string | undefined) {
+    super(message)
+    this.name = 'RpcFailure'
+    this.code = code
+  }
+}
+
+/**
+ * Whether one thrown rpc failure says the sign-in session expired (W8-B3):
+ * the gateway answers `nocobase-unauthorized` for a presented-but-invalid
+ * token across every identity-gated method.
+ * @param cause - the value a call site caught.
+ * @returns true when the failure is the expiry signal.
+ */
+export function isSessionExpiredError(cause: unknown): boolean {
+  return cause instanceof RpcFailure && cause.code === 'nocobase-unauthorized'
 }
 
 /**
@@ -74,7 +103,13 @@ export async function rpc<K extends MobileRpcMethod>(
     throw new Error(`移动端请求应答错配（${method}）`)
   }
   if (!full.result.ok) {
-    throw new Error(full.result.error.message)
+    // The expiry signal routes every caller the same way (W8-B3): clear the
+    // dead token, tell the user once, and land on the login gate — local
+    // work items and both outboxes stay untouched for the re-login backfill.
+    if (full.result.error.code === 'nocobase-unauthorized') {
+      handleSessionExpired()
+    }
+    throw new RpcFailure(full.result.error.message, full.result.error.code)
   }
   return full.result.value
 }

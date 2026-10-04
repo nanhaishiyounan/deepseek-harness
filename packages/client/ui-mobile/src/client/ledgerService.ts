@@ -141,6 +141,8 @@ export interface AlertRow {
   readonly owner: string | undefined
   readonly status: string
   readonly daysLeft: number | undefined
+  /** The row's raised time in epoch millis (undefined when the wire cell is absent or unparseable). */
+  readonly createdAt: number | undefined
 }
 
 /**
@@ -239,7 +241,18 @@ export async function listMyAlerts(): Promise<AlertRow[]> {
       daysLeft: row['detail'] !== null && typeof row['detail'] === 'object' && !Array.isArray(row['detail'])
         ? numIf((row['detail'] as Record<string, unknown>)['days_left'])
         : undefined,
+      createdAt: epochOfTime(row['created_at']),
     }))
+}
+
+/** The epoch millis of a wire time cell (an epoch number or an ISO string; undefined otherwise). */
+function epochOfTime(value: unknown): number | undefined {
+  if (typeof value === 'number' && Number.isFinite(value)) return value
+  if (typeof value === 'string' && value.trim() !== '') {
+    const parsed = Date.parse(value)
+    return Number.isFinite(parsed) ? parsed : undefined
+  }
+  return undefined
 }
 
 /** The finite-number read (a missing/non-finite detail cell answers undefined). */

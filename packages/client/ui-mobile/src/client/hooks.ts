@@ -48,21 +48,28 @@ export function logClientError(scope: string, cause: unknown): void {
 /**
  * Fetch one value and keep it in component state.
  * @param fetcher - async producer; identity changes re-run the fetch.
+ * @param active - visibility gate (default true): false suspends the fetch
+ * and keeps the last read; a false → true transition re-reads, so a
+ * keep-alive page refreshes on becoming visible without remounting.
  * @returns the cell's current state.
  */
-export function useAsync<T>(fetcher: () => Promise<T>): AsyncCell<T> {
+export function useAsync<T>(fetcher: () => Promise<T>, active: boolean = true): AsyncCell<T> {
   const [phase, setPhase] = useState<{ kind: 'loading' } | { kind: 'ready'; value: T } | { kind: 'error'; message: string }>({ kind: 'loading' })
   const [tick, setTick] = useState(0)
   useEffect(() => {
+    if (!active) return
     let alive = true
-    setPhase({ kind: 'loading' })
+    // A re-read over a ready cell keeps the previous value on screen: a
+    // kept-alive page becoming visible swaps data in, it does not flash its
+    // skeleton again.
+    setPhase(current => current.kind === 'ready' ? current : { kind: 'loading' })
     fetcher().then((value) => {
       if (alive) setPhase({ kind: 'ready', value })
     }, (error: unknown) => {
       if (alive) setPhase({ kind: 'error', message: messageOf(error) })
     })
     return () => { alive = false }
-  }, [fetcher, tick])
+  }, [fetcher, tick, active])
   const refresh = useCallback(() => { setTick(current => current + 1) }, [])
   switch (phase.kind) {
     case 'ready':
@@ -124,4 +131,22 @@ export function usePoll<T>(producer: () => Promise<T>, intervalMs: number, activ
     default:
       return { status: 'loading', value: undefined, error: undefined, refresh }
   }
+}
+
+/**
+ * The document's visibility as reactive state (W8-B3): a hidden page
+ * suspends its polls (the `active` gate `usePoll`/`useAsync` already
+ * accept), and becoming visible again re-reads — the false→true transition
+ * is exactly the event those hooks re-run on, so no extra wiring is needed
+ * at the call site beyond passing this value as `active`.
+ * @returns true while `document.visibilityState` is 'visible'.
+ */
+export function usePageVisible(): boolean {
+  const [visible, setVisible] = useState(() => typeof document === 'undefined' || document.visibilityState === 'visible')
+  useEffect(() => {
+    const onChange = (): void => { setVisible(document.visibilityState === 'visible') }
+    document.addEventListener('visibilitychange', onChange)
+    return () => { document.removeEventListener('visibilitychange', onChange) }
+  }, [])
+  return visible
 }

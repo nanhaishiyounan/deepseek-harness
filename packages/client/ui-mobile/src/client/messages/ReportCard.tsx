@@ -41,6 +41,24 @@ function metricToneClass(tone: 'positive' | 'warning' | 'danger' | undefined): s
   return tone === undefined ? undefined : TONE_CLASSES[tone]
 }
 
+/**
+ * The metric value's display text (W8-B2 §10): a bare numeric string of four
+ * digits or more gains the thousands separators; every other face (currency,
+ * units, pre-formatted text) stays verbatim — the model's strings are
+ * display-ready except for the bare count slips.
+ * @param value - the payload's metric value string.
+ * @returns the display text.
+ */
+export function metricValueText(value: string): string {
+  if (!/^[+-]?\d{4,}(\.\d+)?$/.test(value)) return value
+  const dot = value.indexOf('.')
+  const int = dot === -1 ? value : value.slice(0, dot)
+  const dec = dot === -1 ? '' : value.slice(dot + 1)
+  const sign = int.startsWith('-') || int.startsWith('+') ? int.slice(0, 1) : ''
+  const grouped = (sign === '' ? int : int.slice(1)).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  return `${sign}${grouped}${dec === '' ? '' : `.${dec}`}`
+}
+
 /** The severity dot's level class. */
 function levelClass(level: 'high' | 'medium' | 'low'): string | undefined {
   return LEVEL_CLASSES[level]
@@ -97,7 +115,7 @@ export function ReportCard({ payload, onAction }: ReportCardProps): JSX.Element 
         <div className={css.reportMetrics}>
           {payload.metrics.map(metric => (
             <span key={metric.label} className={css.metricMiniCell}>
-              <span className={`${css.metricMiniValue} ${metricToneClass(metric.tone) ?? ''}`}>{metric.value}</span>
+              <span className={`${css.metricMiniValue} ${metricToneClass(metric.tone) ?? ''}`}>{metricValueText(metric.value)}</span>
               <span className={css.metricMiniLabel}>{metric.label}</span>
             </span>
           ))}

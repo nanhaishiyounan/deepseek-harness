@@ -110,3 +110,48 @@ export const nocobaseAlertActValueSchema = z.object({
   action: z.enum(['claim', 'ack', 'resolve']),
   user: z.string().min(1),
 }) as unknown as z.ZodType<Wire<{ id: number; action: 'claim' | 'ack' | 'resolve'; user: string }>>
+
+/**
+ * nocobase.mobileWorkSave request payload (W8-B3): the client-minted key plus
+ * the projection columns; the acting account derives from the session token
+ * and is forced onto the row server-side.
+ */
+export const nocobaseMobileWorkSaveRequestSchema = z.object({
+  clientId: z.string().min(1).max(64),
+  values: z.object({
+    title: z.string().min(1).max(200),
+    owner_display: z.string().max(200).optional(),
+    due: z.string().max(10).optional(),
+    suggestion: z.string().max(2000).optional(),
+    status: z.enum(['todo', 'doing', 'review', 'done']),
+    source_session_id: z.string().max(64).optional(),
+    source_anchor: z.string().max(32).optional(),
+    exec_session_id: z.string().max(64).optional(),
+    result_summary: z.string().max(2000).optional(),
+    result_finished_at: z.number().int().nonnegative().optional(),
+    artifact: z.unknown().optional(),
+    pinned: z.boolean().optional(),
+    demo: z.boolean().optional(),
+    created_at: z.number().int().nonnegative(),
+    updated_at: z.number().int().nonnegative(),
+  }),
+  authToken: z.string().min(1).optional(),
+}) as unknown as z.ZodType<Wire<RequestPayload<'nocobase.mobileWorkSave'>>>
+
+/** nocobase.mobileWorkSave response value: the persisted key and the acting account. */
+export const nocobaseMobileWorkSaveValueSchema = z.object({
+  clientId: z.string().min(1),
+  user: z.string().min(1),
+}) as unknown as z.ZodType<Wire<{ clientId: string; user: string }>>
+
+/** nocobase.mobileWorkDelete request payload (idempotent by the client-minted key). */
+export const nocobaseMobileWorkDeleteRequestSchema = z.object({
+  clientId: z.string().min(1).max(64),
+  authToken: z.string().min(1).optional(),
+}) as unknown as z.ZodType<Wire<RequestPayload<'nocobase.mobileWorkDelete'>>>
+
+/** nocobase.mobileWorkDelete response value. */
+export const nocobaseMobileWorkDeleteValueSchema = z.object({
+  clientId: z.string().min(1),
+  user: z.string().min(1),
+}) as unknown as z.ZodType<Wire<{ clientId: string; user: string }>>

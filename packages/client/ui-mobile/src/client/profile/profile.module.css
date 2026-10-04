@@ -246,7 +246,7 @@
 
 /* The quick-start shortcut: antd-mobile Button on the neutral card-face
     capsule (inline dials in ProfileView.tsx, v7 de-blue); this class keeps
-    the 36px size and the pressed wash. */
+    the secondary-touch size and the pressed wash. */
 .shortcut:global(.adm-button) {
   height: var(--dshm-touch-sm);
   padding-block: 0;

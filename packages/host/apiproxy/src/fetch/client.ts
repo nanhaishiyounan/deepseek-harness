@@ -68,6 +68,8 @@ import {
   nocobaseGetValueSchema,
   nocobaseListMetaValueSchema,
   nocobaseListValueSchema,
+  nocobaseMobileWorkDeleteValueSchema,
+  nocobaseMobileWorkSaveValueSchema,
   nocobaseSignInValueSchema,
   nocobaseUpdateValueSchema,
 } from '../api/nocobase.schema.ts'
@@ -235,6 +237,8 @@ export interface IApiClient {
     get(payload: RequestPayload<'nocobase.get'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'nocobase.get'>>>
     update(payload: RequestPayload<'nocobase.update'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'nocobase.update'>>>
     alertAct(payload: RequestPayload<'nocobase.alertAct'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'nocobase.alertAct'>>>
+    mobileWorkSave(payload: RequestPayload<'nocobase.mobileWorkSave'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'nocobase.mobileWorkSave'>>>
+    mobileWorkDelete(payload: RequestPayload<'nocobase.mobileWorkDelete'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'nocobase.mobileWorkDelete'>>>
     signIn(payload: RequestPayload<'nocobase.signIn'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'nocobase.signIn'>>>
   }
   /** client-response passthrough (rpcId is a backfill of the server-request's id — never minted here). */
@@ -336,6 +340,8 @@ const UNARY_VALUE_SCHEMAS: { [K in keyof RpcMethodMap]: z.ZodType<Wire<ResponseV
   'nocobase.update': nocobaseUpdateValueSchema,
   'nocobase.alertAct': nocobaseAlertActValueSchema,
   'nocobase.signIn': nocobaseSignInValueSchema,
+  'nocobase.mobileWorkSave': nocobaseMobileWorkSaveValueSchema,
+  'nocobase.mobileWorkDelete': nocobaseMobileWorkDeleteValueSchema,
 }
 
 /** Default timeout for bounded unary calls (rpc-compare 2026-07-19: a hung host must not leave callers pending forever). */
@@ -680,6 +686,8 @@ export abstract class AbstractApiClient implements IApiClient {
     get: (payload, signal) => this.callUnary('nocobase.get', payload, signal, 'caller-signal-only'),
     update: (payload, signal) => this.callUnary('nocobase.update', payload, signal, 'caller-signal-only'),
     alertAct: (payload, signal) => this.callUnary('nocobase.alertAct', payload, signal, 'caller-signal-only'),
+    mobileWorkSave: (payload, signal) => this.callUnary('nocobase.mobileWorkSave', payload, signal, 'caller-signal-only'),
+    mobileWorkDelete: (payload, signal) => this.callUnary('nocobase.mobileWorkDelete', payload, signal, 'caller-signal-only'),
     signIn: (payload, signal) => this.callUnary('nocobase.signIn', payload, signal, 'caller-signal-only'),
   }
 

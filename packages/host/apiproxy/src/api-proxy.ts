@@ -3123,7 +3123,7 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
       },
 
       async history(request) {
-        const { sessionId, beforeSeq, maxMessages } = request.payload
+        const { sessionId, beforeSeq, afterSeq, maxMessages } = request.payload
         try {
           const source = await historySourceFor(sessionId)
           // Both awaits happen BEFORE the cut. Ensuring the recorded
@@ -3133,6 +3133,21 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
           // appending, so awaiting between the two reads would pair events cut
           // at N with a baseline folded to N+1.
           const scope = await presenterScopeFor(sessionId, sourceSession(source))
+          if (afterSeq !== undefined) {
+            // W8-B3 forward cursor read: no baseline (a cursor reader holds
+            // one), no pagination (the window is what happened since the
+            // cursor). Views still resolve against the full cut so a fresh
+            // tool-result referencing a pre-cursor call presents identically
+            // to the tail page.
+            const cut = historyCutOf(source, false)
+            const entries = cut.events
+              .filter(event => event.seq > afterSeq)
+              .map((event) => {
+                const view = viewFor(ctx, event, callId => backscanArgs(cut.events, callId), scope)
+                return { event, ...view === undefined ? {} : { view } }
+              })
+            return ok(request, { events: entries, hasMore: false })
+          }
           const cut = historyCutOf(source, beforeSeq === undefined)
           const page = historyPage(ctx, cut.events, beforeSeq, maxMessages, scope)
           return ok(request, {
@@ -3993,6 +4008,17 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
             details: {},
           })
         }
+        // wfl_mobile_work is owner-scoped by row the same way (W8-B3): the
+        // mobile work projection is per-account state, so an anonymous read
+        // refuses and the signed-in username is pushed down as an extra AND
+        // condition — a client-supplied filter cannot widen it.
+        if (collection === 'wfl_mobile_work' && authToken === undefined) {
+          return err(request, {
+            code: 'nocobase-unauthorized',
+            message: '移动工作项按登录人范围读取：请先通过 nocobase.signIn 获取会话凭据',
+            details: {},
+          })
+        }
         const scopeRefusal = nocobaseScopeRefusal(authToken, collection, defaults, 'read')
         if (scopeRefusal !== undefined) return err(request, scopeRefusal)
         const conditions: NbFilterCondition[] = []
@@ -4024,6 +4050,12 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
             if (userId !== undefined) {
               conditions.push({ field: 'userId', op: 'eq', value: userId })
             }
+          }
+        }
+        if (collection === 'wfl_mobile_work' && authToken !== undefined) {
+          const reader = resolveBusinessSession(authToken)
+          if (reader !== undefined) {
+            conditions.push({ field: 'user', op: 'eq', value: reader.username })
           }
         }
         const filterTree = compileNbFilter(conditions, match ?? 'and')
@@ -4064,6 +4096,16 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
             })
           }
         }
+        // wfl_mobile_work single-row reads stay owner-scoped (W8-B3): an
+        // anonymous read refuses, and the row check below happens after the
+        // fetch like the alerts one.
+        if (collection === 'wfl_mobile_work' && authToken === undefined) {
+          return err(request, {
+            code: 'nocobase-unauthorized',
+            message: '移动工作项按登录人范围读取：请先通过 nocobase.signIn 获取会话凭据',
+            details: {},
+          })
+        }
         const scopeRefusal = nocobaseScopeRefusal(authToken, collection, defaults, 'read')
         if (scopeRefusal !== undefined) return err(request, scopeRefusal)
         let row: Record<string, unknown> | undefined
@@ -4085,6 +4127,16 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
             return err(request, {
               code: 'nocobase-collection-forbidden',
               message: `该预警未路由给账号 ${reader.username}（notify_users/owner 均不匹配）`,
+              details: { collection, username: reader.username },
+            })
+          }
+        }
+        if (collection === 'wfl_mobile_work' && authToken !== undefined) {
+          const reader = resolveBusinessSession(authToken)
+          if (reader !== undefined && String(row['user'] ?? '') !== reader.username) {
+            return err(request, {
+              code: 'nocobase-collection-forbidden',
+              message: `该工作项不属于账号 ${reader.username}`,
               details: { collection, username: reader.username },
             })
           }
@@ -4179,6 +4231,101 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
           })
         }
         return ok(request, { id, action, user: user.username })
+      },
+
+      /**
+       * The mobile work projection's single write entrance (W8-B3): upsert
+       * one wfl_mobile_work row keyed by the client-minted clientId. The
+       * acting username derives from the sign-in session token server-side
+       * and is forced onto the row (create) or verified against the existing
+       * row's owner (update) — a caller never projects work under another
+       * account. Conflict resolution is last-write-wins on the client's
+       * updated_at; the projection is per-account UI state, not an audited
+       * business document.
+       */
+      async mobileWorkSave(request, signal) {
+        const { clientId, values, authToken } = request.payload
+        const user = authToken === undefined ? undefined : resolveBusinessSession(authToken)
+        if (user === undefined) {
+          return err(request, {
+            code: 'nocobase-unauthorized',
+            message: '移动工作项同步需要登录：请先通过 nocobase.signIn 获取会话凭据',
+            details: {},
+          })
+        }
+        const gates = await nocobaseGates()
+        if ('refusal' in gates) return err(request, gates.refusal)
+        const row = {
+          client_id: clientId,
+          title: values.title,
+          ...values.owner_display === undefined ? {} : { owner_display: values.owner_display },
+          ...values.due === undefined ? {} : { due: values.due },
+          ...values.suggestion === undefined ? {} : { suggestion: values.suggestion },
+          status: values.status,
+          ...values.source_session_id === undefined ? {} : { source_session_id: values.source_session_id },
+          ...values.source_anchor === undefined ? {} : { source_anchor: values.source_anchor },
+          ...values.exec_session_id === undefined ? {} : { exec_session_id: values.exec_session_id },
+          ...values.result_summary === undefined ? {} : { result_summary: values.result_summary },
+          ...values.result_finished_at === undefined ? {} : { result_finished_at: values.result_finished_at },
+          ...values.artifact === undefined ? {} : { artifact: values.artifact },
+          ...values.pinned === undefined ? {} : { pinned: values.pinned },
+          ...values.demo === undefined ? {} : { demo: values.demo },
+          created_at: values.created_at,
+          updated_at: values.updated_at,
+        }
+        try {
+          const existing = await gates.client.list<{ id?: number }>('wfl_mobile_work', {
+            filter: { client_id: { $eq: clientId }, user: { $eq: user.username } },
+            pageSize: 1,
+          }, signal)
+          const prior = existing.rows[0]
+          if (prior?.id !== undefined) {
+            await gates.client.update('wfl_mobile_work', prior.id, row, signal)
+          } else {
+            // The owner check rides the same filter as the lookup: a clientId
+            // another account already owns lands here only when that account's
+            // row is invisible to this reader, and the unique (user,
+            // client_id) index keeps the two rows apart instead of letting
+            // this create reach across accounts.
+            await gates.client.create('wfl_mobile_work', { user: user.username, ...row }, signal)
+          }
+        } catch (error: unknown) {
+          return err(request, nocobaseRequestError(error))
+        }
+        return ok(request, { clientId, user: user.username })
+      },
+
+      /**
+       * The mobile work projection's delete (W8-B3): remove the caller's own
+       * row by clientId. A row another account owns is invisible to the
+       * user-scoped lookup, so the delete answers idempotent success without
+       * touching it; a missing row is already deleted.
+       */
+      async mobileWorkDelete(request, signal) {
+        const { clientId, authToken } = request.payload
+        const user = authToken === undefined ? undefined : resolveBusinessSession(authToken)
+        if (user === undefined) {
+          return err(request, {
+            code: 'nocobase-unauthorized',
+            message: '移动工作项同步需要登录：请先通过 nocobase.signIn 获取会话凭据',
+            details: {},
+          })
+        }
+        const gates = await nocobaseGates()
+        if ('refusal' in gates) return err(request, gates.refusal)
+        try {
+          const existing = await gates.client.list<{ id?: number }>('wfl_mobile_work', {
+            filter: { client_id: { $eq: clientId }, user: { $eq: user.username } },
+            pageSize: 1,
+          }, signal)
+          const prior = existing.rows[0]
+          if (prior?.id !== undefined) {
+            await gates.client.destroy('wfl_mobile_work', prior.id, signal)
+          }
+        } catch (error: unknown) {
+          return err(request, nocobaseRequestError(error))
+        }
+        return ok(request, { clientId, user: user.username })
       },
 
       /**

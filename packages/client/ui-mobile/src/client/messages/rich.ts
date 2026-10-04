@@ -13,6 +13,19 @@ import DOMPurify from 'dompurify'
 /** The shared renderer: no raw HTML in, single newlines break, no linkify. */
 const md = new MarkdownIt({ html: false, breaks: true, linkify: false })
 
+// Narrative images lazy-load and never overflow the bubble (W8-B2 §3): the
+// model's markdown may omit the alt text, so an empty alt falls back to a
+// generic aria-label instead of an unnamed figure.
+md.renderer.rules.image = (tokens, index, options, _env, self) => {
+  const token = tokens[index]
+  if (token !== undefined) {
+    token.attrSet('loading', 'lazy')
+    const alt = (token.children ?? []).map(child => child.content).join('')
+    if (alt.trim() === '') token.attrSet('aria-label', '内容图片')
+  }
+  return self.renderToken(tokens, index, options)
+}
+
 /**
  * Render one narrative block to sanitized HTML.
  * @param text - the people-language text block.

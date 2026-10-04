@@ -291,8 +291,17 @@ export interface SessionsApi {
    * A deployment without the registry serves histories without the block.
    * Reading history uses an attached Session or persistence inspection and
    * never resumes or publishes an Agent.
+   *
+   * `afterSeq` (W8-B3) selects the forward cursor read instead: the answer
+   * carries every event with seq strictly greater than the cursor, unpaginated
+   * (an incremental window is bounded by what happened since the last poll),
+   * with `hasMore: false` and no projections — a cursor reader already holds a
+   * baseline. Presenter views still resolve against the full window (a fresh
+   * tool-result may reference a call logged before the cursor), so a cursor
+   * page's views match what the equivalent tail page would carry. `afterSeq`
+   * and `beforeSeq` are exclusive; naming both fails validation.
    */
-  history(request: RpcRequest<{ sessionId: SessionId; beforeSeq?: number; maxMessages?: number }>):
+  history(request: RpcRequest<{ sessionId: SessionId; beforeSeq?: number; afterSeq?: number; maxMessages?: number }>):
   Promise<RpcResponse<{ events: HistoryEntry[]; hasMore: boolean; projections?: SessionProjectionsBlock }>>
 
   /**

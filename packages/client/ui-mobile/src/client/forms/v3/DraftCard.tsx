@@ -9,7 +9,7 @@
  * re-edit diff marks the user-touched fields with the ink bar and tint.
  */
 
-import { useState, type JSX } from 'react'
+import { useRef, useState, type JSX } from 'react'
 import { Button, Collapse, Input } from 'antd-mobile'
 import type { CardPhase } from '../../cardState.ts'
 import type { NocobaseFieldView } from '@deepseek-ai/dsh-host-apiproxy/api'
@@ -45,14 +45,42 @@ function fieldClasses(edited: boolean | undefined): string {
  * @param props - the payload, edits, phase, field metadata, action sinks, busy gate.
  * @returns the draft card.
  */
+/**
+ * The required field's current text (edits over the payload's own value).
+ * @param field - the required-tier field.
+ * @param values - the card's merged edit values.
+ * @returns the field's text (empty string when still blank).
+ */
+function requiredTextOf(field: FormField, values: Readonly<Record<string, string>>): string {
+  return values[field.name] ?? field.value ?? ''
+}
+
 export function DraftCard(props: DraftCardProps): JSX.Element {
   const { payload, values, phase, onEdit, disabled } = props
   const [openDerived, setOpenDerived] = useState<ReadonlySet<string>>(new Set())
+  /** Whether a 确认写入 attempt already met a blank required field (W8-B2). */
+  const [attempted, setAttempted] = useState(false)
+  const requiredRows = useRef(new Map<string, HTMLLabelElement>())
   const required = payload.fields.filter(field => field.tier === 'required')
   const derived = payload.fields.filter(field => field.tier === 'derived')
   const system = payload.fields.filter(field => field.tier === 'system')
   const openDerivedField = (name: string): void => {
     setOpenDerived(current => new Set(current).add(name))
+  }
+  /** The 确认写入 gate (W8-B2): blank required fields stay the gate — the
+   * nearby 此项必填 line appears, the first blank control takes focus, and
+   * the confirm never reaches the send lane until the gaps close. */
+  const onConfirmClick = (): void => {
+    const missing = required.filter(field => requiredTextOf(field, values).trim() === '')
+    const first = missing[0]
+    if (missing.length > 0 && first !== undefined) {
+      setAttempted(true)
+      const row = requiredRows.current.get(first.name)
+      const focusable = row?.querySelector('input, button')
+      if (focusable instanceof HTMLElement) focusable.focus()
+      return
+    }
+    props.onConfirm()
   }
   return (
     <section className={css.card} data-testid="draft-card-v3" aria-label={`${payload.form.label}草稿卡`}>
@@ -65,25 +93,36 @@ export function DraftCard(props: DraftCardProps): JSX.Element {
       </header>
       {required.length > 0 && (
         <section className={css.tier} aria-label="需要你定">
-          <h4 className={css.tierHead}>需要你定</h4>
+          <div className={css.tierHead}>需要你定</div>
           {required.map(field => (
-            <label key={field.name} className={`${css.fieldRow}${fieldClasses(field.edited)}`}>
-              <span className={css.fieldLabel}>{field.label}</span>
-              <EditableValue
-                field={field}
-                payload={payload}
-                values={values}
-                meta={props.meta}
-                disabled={disabled}
-                onEdit={onEdit}
-              />
-            </label>
+            <span key={field.name} className={css.fieldCell}>
+              <label
+                ref={(node) => {
+                  if (node === null) requiredRows.current.delete(field.name)
+                  else requiredRows.current.set(field.name, node)
+                }}
+                className={`${css.fieldRow}${fieldClasses(field.edited)}`}
+              >
+                <span className={css.fieldLabel}>{field.label}</span>
+                <EditableValue
+                  field={field}
+                  payload={payload}
+                  values={values}
+                  meta={props.meta}
+                  disabled={disabled}
+                  onEdit={onEdit}
+                />
+              </label>
+              {attempted && requiredTextOf(field, values).trim() === '' && (
+                <span className={css.fieldError} role="alert">此项必填</span>
+              )}
+            </span>
           ))}
         </section>
       )}
       {derived.length > 0 && (
         <section className={`${css.tier} ${css.tierDerived}`} aria-label="请确认·AI 推导">
-          <h4 className={css.tierHead}>请确认 · AI 推导</h4>
+          <div className={css.tierHead}>请确认 · AI 推导</div>
           {derived.map(field => openDerived.has(field.name)
             ? (
               <label key={field.name} className={`${css.fieldRow}${fieldClasses(field.edited)}`}>
@@ -138,7 +177,7 @@ export function DraftCard(props: DraftCardProps): JSX.Element {
             <Button size="large" disabled={disabled} onClick={props.onReject} className={css.ghostButton}>
               驳回
             </Button>
-            <Button color="primary" size="large" disabled={disabled} onClick={props.onConfirm} className={css.primaryButton}>
+            <Button color="primary" size="large" disabled={disabled} onClick={onConfirmClick} className={css.primaryButton}>
               确认写入
             </Button>
           </>
@@ -194,6 +233,7 @@ function EditableValue(
       className={css.fieldInput}
       value={value}
       disabled={disabled}
+      inputMode={field.widget === 'number' ? 'decimal' : undefined}
       onChange={(next) => { onEdit(field.name, next) }}
     />
   )

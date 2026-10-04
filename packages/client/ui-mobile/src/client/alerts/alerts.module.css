@@ -33,7 +33,7 @@
   padding: 4px 11px;
   border-radius: var(--dshm-radius-pill);
   background: var(--dshm-primary-10);
-  color: var(--dshm-primary);
+  color: var(--dshm-on-soft);
   font-size: var(--dshm-fs-xs);
 }
 
@@ -69,7 +69,7 @@
 
 .retryLink {
   align-self: flex-start;
-  color: var(--dshm-primary);
+  color: var(--dshm-link);
 }
 
 .alertCard {
@@ -121,7 +121,7 @@
 
 .ruleLabel {
   font-size: var(--dshm-fs-xs);
-  color: var(--dshm-primary);
+  color: var(--dshm-link);
   font-weight: 600;
 }
 
@@ -160,9 +160,12 @@
   margin-left: auto;
 }
 
+/* Row actions ride the 40px base touch grade (W8-R2): the small-button
+   default sat at ~32px. */
 .actBtn {
   flex: none;
   min-width: 56px;
+  height: var(--dshm-touch-sm);
   --border-radius: var(--dshm-radius-pill);
   font-size: var(--dshm-fs-xs);
 }
@@ -184,4 +187,85 @@
   color: var(--dshm-muted-foreground);
   text-align: center;
   margin: 2px 0 0;
+}
+
+/* The raised-time cell (W8-B2): the relative stamp beside the entity code. */
+.timeCell {
+  font-size: var(--dshm-fs-xs);
+  color: var(--dshm-muted-foreground);
+}
+
+/* The folded group card (W8-B2 #⑦): one header row — severity seal, rule
+ * title, the ×count badge, the newest raised time — over the expanded
+ * detail rows (the row cards themselves stay unchanged inside). */
+.alertGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--dshm-radius);
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-border);
+}
+
+.groupHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--dshm-touch-sm);
+  padding: 0;
+  background: none;
+  color: var(--dshm-foreground);
+  text-align: left;
+}
+
+.groupHead:active {
+  opacity: 0.75;
+}
+
+.groupTitle {
+  font-size: var(--dshm-fs-sm);
+  font-weight: 600;
+  color: var(--dshm-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.groupCount {
+  flex: none;
+  font-size: var(--dshm-fs-xs);
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: var(--dshm-radius-pill);
+  background: var(--dshm-primary-10);
+  color: var(--dshm-on-soft);
+}
+
+.groupTime {
+  margin-left: auto;
+  font-size: var(--dshm-fs-xs);
+  color: var(--dshm-muted-foreground);
+}
+
+.groupChevron {
+  flex: none;
+  color: var(--dshm-muted-foreground);
+  transition: transform 220ms ease-out;
+}
+
+.groupChevronOpen {
+  transform: rotate(180deg);
+}
+
+.groupBody {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .groupChevron {
+    transition: none;
+  }
 }

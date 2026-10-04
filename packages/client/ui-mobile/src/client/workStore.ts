@@ -164,6 +164,24 @@ function mergeRemoteWorkStore(event: StorageEvent): void {
 window.addEventListener('storage', mergeRemoteWorkStore)
 
 /**
+ * The write-through sink the sync layer registers (W8-B3): every durable
+ * write notifies it so the server projection can mirror the change. The
+ * store itself never imports the sync module — the dependency stays one-way
+ * (sync → store) and an unregistered sink (pure-local demo mode, tests that
+ * never load the sync layer) is a silent no-op.
+ */
+let syncSink: { push: (item: WorkItem) => void; remove: (id: string) => void } | undefined
+
+/**
+ * Install the write-through sink (the sync module owns the call at its
+ * module top level, so loading the sync layer wires every write).
+ * @param sink - the push/remove pair the store notifies after each commit.
+ */
+export function setWorkSyncSink(sink: { push: (item: WorkItem) => void; remove: (id: string) => void }): void {
+  syncSink = sink
+}
+
+/**
  * Create one work item and append it to the store.
  * @param input - the item's fields (status defaults to todo; 'doing' models 立即执行).
  * @returns the created item (already persisted).
@@ -197,6 +215,7 @@ export function createWorkItem(input: {
     updatedAt: now,
   }
   commit({ ...store, items: [...store.items, item] })
+  syncSink?.push(item)
   return item
 }
 
@@ -213,6 +232,7 @@ export function updateWorkItem(id: string, patch: Partial<Omit<WorkItem, 'id' | 
   const items = [...store.items]
   items[index] = updated
   commit({ ...store, items })
+  syncSink?.push(updated)
   return updated
 }
 
@@ -242,6 +262,7 @@ export function deleteWorkItem(id: string): void {
   const items = [...store.items]
   items.splice(index, 1)
   commit({ ...store, items })
+  syncSink?.remove(id)
 }
 
 /**
@@ -308,6 +329,37 @@ function locateWorkItem(id: string): { item: WorkItem; index: number } {
   const index = store.items.findIndex(entry => entry.id === id)
   if (index === -1) throw new Error(`工作项不存在：${id}`)
   return { item: store.items[index] as WorkItem, index }
+}
+
+/**
+ * Merge the server projection's rows into the store (W8-B3 login
+ * backfill): a server row replaces its local twin when newer (updatedAt
+ * decides), joins when local is missing, and local rows the server never
+ * carried stay put — they are this device's unsynced additions, and the
+ * caller uploads them next. The exec isolation set unions and seeded
+ * latches like the cross-tab merge.
+ * @param serverItems - the account's projected rows (already owner-scoped by the gateway).
+ * @returns the local rows the server does not carry (upload candidates).
+ */
+export function applyServerItems(serverItems: readonly WorkItem[]): readonly WorkItem[] {
+  const byId = new Map(store.items.map(item => [item.id, item]))
+  for (const serverItem of serverItems) {
+    const local = byId.get(serverItem.id)
+    if (local === undefined || serverItem.updatedAt >= local.updatedAt) byId.set(serverItem.id, serverItem)
+  }
+  const serverIds = new Set(serverItems.map(item => item.id))
+  const execSessionIds = new Set(store.execSessionIds)
+  for (const serverItem of serverItems) {
+    if (serverItem.execSessionId !== undefined) execSessionIds.add(serverItem.execSessionId)
+  }
+  const next: WorkStoreShape = {
+    version: 1,
+    items: [...byId.values()],
+    execSessionIds: [...execSessionIds],
+    seeded: store.seeded || serverItems.length > 0,
+  }
+  if (JSON.stringify(next) !== JSON.stringify(store)) commit(next)
+  return store.items.filter(item => !serverIds.has(item.id))
 }
 
 /** The home/profile stats card counts. */

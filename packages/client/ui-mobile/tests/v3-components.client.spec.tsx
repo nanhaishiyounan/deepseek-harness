@@ -223,8 +223,10 @@ describe('DraftCard v3', () => {
   it('fires the double action on draft and offers re-edit on rejected', () => {
     const onConfirm = vi.fn()
     const onReject = vi.fn()
+    // W8-B2: the required quantity carries a value, so the confirm passes
+    // the blank-required gate.
     const { unmount } = render(
-      <DraftCard payload={DRAFT} values={{}} phase="draft" onEdit={() => {}} onConfirm={onConfirm} onReject={onReject} onRedraft={() => {}} disabled={false} />,
+      <DraftCard payload={DRAFT} values={{ quantity: '200' }} phase="draft" onEdit={() => {}} onConfirm={onConfirm} onReject={onReject} onRedraft={() => {}} disabled={false} />,
     )
     fireEvent.click(screen.getByRole('button', { name: '驳回' }))
     fireEvent.click(screen.getByRole('button', { name: '确认写入' }))
@@ -237,6 +239,31 @@ describe('DraftCard v3', () => {
     )
     fireEvent.click(screen.getByRole('button', { name: '重新编辑' }))
     expect(onRedraft).toHaveBeenCalledOnce()
+  })
+
+  it('blocks the confirm on a blank required field with the nearby error and focus (W8-B2)', () => {
+    const onConfirm = vi.fn()
+    const onEdit = vi.fn()
+    const blocked = render(
+      <DraftCard payload={DRAFT} values={{}} phase="draft" onEdit={onEdit} onConfirm={onConfirm} onReject={() => {}} onRedraft={() => {}} disabled={false} />,
+    )
+    fireEvent.click(screen.getByRole('button', { name: '确认写入' }))
+    // The blank gate: no confirm, the nearby live-region error, and the
+    // first blank control holds focus.
+    expect(onConfirm).not.toHaveBeenCalled()
+    expect(screen.getAllByText('此项必填').length).toBeGreaterThan(0)
+    expect(screen.getAllByRole('alert').length).toBeGreaterThan(0)
+    expect(blocked.container.querySelector('label .adm-input-element')).toEqual(document.activeElement)
+    // The edit sink still routes the fill.
+    fireEvent.change(screen.getByLabelText('数量'), { target: { value: '260' } })
+    expect(onEdit).toHaveBeenCalledWith('quantity', '260')
+    blocked.unmount()
+    // With the blank closed the confirm goes through.
+    render(
+      <DraftCard payload={DRAFT} values={{ quantity: '260' }} phase="draft" onEdit={() => {}} onConfirm={onConfirm} onReject={() => {}} onRedraft={() => {}} disabled={false} />,
+    )
+    fireEvent.click(screen.getByRole('button', { name: '确认写入' }))
+    expect(onConfirm).toHaveBeenCalledOnce()
   })
 
   it('shows the pending note instead of the decision actions', () => {

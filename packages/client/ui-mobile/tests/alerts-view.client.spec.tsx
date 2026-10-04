@@ -8,7 +8,7 @@
  * failed read leaves the error card plus a client_error trace.
  */
 
-import { cleanup, render, screen, waitFor } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AlertsView } from '../src/client/alerts/AlertsView.tsx'
 import { actMyAlert, listMyAlerts } from '../src/client/ledgerService.ts'
@@ -104,6 +104,51 @@ describe('alerts view', () => {
     expect(calls[0]?.payload['collection']).toBe('wfl_alerts')
   })
 
+  it('folds adjacent same-rule open rows into one collapsible group and keeps claimed rows out (W8-B2)', async () => {
+    signInAs('b4guard')
+    const now = Date.now()
+    const ccpRow = (id: number, status: string, owner: string | null): Record<string, unknown> => ({
+      id,
+      rule_type: 'ccp_deviation',
+      severity: 'critical',
+      title: 'CCP 杀菌温度偏离设定值',
+      entity_code: `BATCH-${String(id)}`,
+      status,
+      owner,
+      notify_users: ['b4guard'],
+      detail: {},
+      created_at: new Date(now - (32 - id) * 10_000).toISOString(),
+    })
+    stubGateway({
+      'nocobase.list': { count: 4, page: 1, page_size: 200, rows: [
+        ccpRow(31, 'open', null),
+        ccpRow(30, 'open', null),
+        ccpRow(29, 'open', null),
+        ccpRow(28, 'acknowledged', 'b4guard'),
+      ] },
+    })
+    render(<AlertsView />)
+    // One folded group card carries the rule name, the ×3 count, and the
+    // newest raised time on its header; the acknowledged same-title row
+    // stays outside as its own plain row.
+    const group = await screen.findByTestId('alert-group')
+    expect(group.textContent).toContain('CCP预警')
+    expect(group.textContent).toContain('×3')
+    expect(group.textContent).toContain('最新 刚刚')
+    expect(screen.getAllByTestId('alert-row')).toHaveLength(1)
+    expect(screen.getAllByTestId('alert-row')[0]?.textContent).toContain('已认领 · b4guard')
+    // The folded body renders no detail row; expanding reveals the three.
+    const head = group.querySelector('button[aria-expanded="false"]') as HTMLButtonElement
+    expect(group.querySelectorAll('[data-testid="alert-row"]')).toHaveLength(0)
+    fireEvent.click(head)
+    const open = await screen.findAllByTestId('alert-row')
+    expect(open).toHaveLength(4)
+    expect(open[0]?.textContent).toContain('BATCH-31')
+    expect(open[2]?.textContent).toContain('BATCH-29')
+    // The raised-time cell renders on a standalone row too.
+    expect(open[3]?.textContent).toContain('刚刚')
+  })
+
   // NOTE: the button→act wiring is NOT jsdom-click-tested here — antd-mobile's
   // button click never reaches the handler under this environment and spins
   // the worker. The live four-step smoke (demos/acceptance-w6/w6-r2-01: real
@@ -142,7 +187,7 @@ describe("actMyAlert (the row action's service contract)", () => {
   it('sends id/action plus the session token and no client-narrated user', async () => {
     signInAs('keeper')
     stubGateway({ 'nocobase.alertAct': { id: 21, action: 'claim', user: 'keeper' } })
-    const outcome = await actMyAlert({ id: 21, ruleType: 'expiry', severity: 'critical', title: '', entityCode: '', owner: undefined, status: 'open', daysLeft: undefined }, 'claim')
+    const outcome = await actMyAlert({ id: 21, ruleType: 'expiry', severity: 'critical', title: '', entityCode: '', owner: undefined, status: 'open', daysLeft: undefined, createdAt: undefined }, 'claim')
     expect(outcome).toMatchObject({ id: 21, action: 'claim', user: 'keeper' })
     const call = calls.find(entry => entry.method === 'nocobase.alertAct')
     expect(call?.payload).toMatchObject({ id: 21, action: 'claim' })
@@ -154,7 +199,7 @@ describe("actMyAlert (the row action's service contract)", () => {
   it('trims a non-empty resolve note onto the wire and throws the engine refusal fact', async () => {
     signInAs('keeper')
     stubGateway({ 'nocobase.alertAct': new Error('动作被拒（id=21 claim by keeper）——不在路由责任人白名单或状态流不匹配（认领→关闭）') })
-    const row = { id: 21, ruleType: 'expiry', severity: 'critical' as const, title: '', entityCode: '', owner: undefined, status: 'open', daysLeft: undefined }
+    const row = { id: 21, ruleType: 'expiry', severity: 'critical' as const, title: '', entityCode: '', owner: undefined, status: 'open', daysLeft: undefined, createdAt: undefined }
     await expect(actMyAlert(row, 'resolve', '  已处理  ')).rejects.toThrow('不在路由责任人白名单')
     const call = calls.find(entry => entry.method === 'nocobase.alertAct')
     expect(call?.payload['note']).toBe('已处理')

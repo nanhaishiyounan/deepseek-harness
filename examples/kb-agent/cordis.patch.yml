@@ -340,8 +340,12 @@
     # W6-R2: wfl_ engine tables are write-refused on the gateway by default
     # (their state machines own the transitions). This table stays EMPTY on
     # purpose: no business case needs a direct wfl_ column write, and the
-    # alert state machine rides nocobase.alertAct only. Set per-user entries
-    # here solely when a future batch documents the need.
+    # alert state machine rides nocobase.alertAct only. W8-B3 adds the same
+    # pattern's second instance: wfl_mobile_work (the mobile work
+    # projection) writes ride the dedicated nocobase.mobileWorkSave/Delete
+    # entrances with server-enforced account ownership, not a row here.
+    # Set per-user entries here solely when a future batch documents the
+    # need for a raw column write.
     nocobaseWflWriteScopes: {}
     # The signed-in role collection scopes enforced server-side on
     # nocobase.list/get/update (the mobile docs deep-link guard's second

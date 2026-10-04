@@ -179,7 +179,7 @@
   font-size: var(--dshm-fs-xs);
   line-height: 16px;
   font-weight: 600;
-  color: var(--dshm-primary);
+  color: var(--dshm-link);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -914,7 +914,7 @@
   gap: 4px;
   font-size: var(--dshm-fs-sm);
   font-weight: 500;
-  color: var(--dshm-primary);
+  color: var(--dshm-link);
 }
 
 /* The row's trailing chevron reads as chrome, not as the chosen value. */

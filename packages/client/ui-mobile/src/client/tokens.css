@@ -64,7 +64,12 @@ html[data-theme='light'] {
   --dshm-radius-pill: 999px;        /* tags, chips, capsules, badge dots */
   --dshm-tabbar-height: 58px;
   --dshm-touch: 44px;               /* primary touch target (send, back, new-chat) */
-  --dshm-touch-sm: 36px;            /* secondary touch target (chips, entries, stars) */
+  --dshm-touch-sm: 40px;            /* secondary touch target (chips, entries, stars) — the W8
+                                       * lift from 36px (WCAG 2.5.8 AA floor 24px, Apple 44pt
+                                       * for the primary paths that ride --dshm-touch) */
+  --dshm-link: #1e4e8c;             /* in-text links and tappable words on card/canvas (the
+                                       * brand value on light; dark lifts below for ≥4.5:1) */
+  --dshm-focus-ring: 0 0 0 3px rgba(30, 78, 140, 0.35); /* keyboard focus halo (W8 V8) */
   /* Elevation — diffuse same-tone shadows (第 3 档 = raised 深一档影) */
   --dshm-shadow-card: 0 1px 2px rgba(31, 38, 48, 0.04), 0 8px 24px rgba(31, 38, 48, 0.06);
   --dshm-shadow-raised: 0 4px 12px rgba(31, 38, 48, 0.10);
@@ -84,6 +89,10 @@ html[data-theme='light'] {
   --dshm-code-fg: #dfe5ee;
   --dshm-code-chrome: rgba(255, 255, 255, 0.05);
   --dshm-code-muted: #97a4b8;
+  --dshm-code-action: #c7d3e6;      /* the plate's copy word — the code plate stays deep on
+                                       * both tracks, so one value serves the pair */
+  --dshm-barcode-paper: #ffffff;    /* the barcode well stays paper-white on both tracks —
+                                       * scanners need the constant quiet zone */
 
   /* v5 · work-ledger increments (kept as reference tokens) */
   --dshm-work-todo: var(--dshm-muted-foreground);   /* 待处理（引用型） */
@@ -101,13 +110,16 @@ html[data-theme='light'] {
   --dshm-ease-stamp: cubic-bezier(0.2, 1.4, 0.4, 1);   /* stamping curve */
 
   /* Type ramp — five steps + numeric (plan §3.2; the 12px floor is the Tab
-   * label grade). Module files read these instead of hard-coded px. */
+    * label grade). Module files read these instead of hard-coded px. */
   --dshm-fs-xs: 12px;   /* Tab labels, meta — the readability floor */
   --dshm-fs-sm: 13px;   /* body text */
   --dshm-fs-md: 15px;   /* card titles */
   --dshm-fs-lg: 17px;   /* page titles */
   --dshm-fs-xl: 24px;   /* stat digits */
   --dshm-fs-num: 26px;  /* hero digits */
+  --dshm-fs-input: 16px; /* input floor — iOS Safari auto-zooms any focused
+                          * control under 16px, so every typing surface rides
+                          * this grade whatever its container dial says */
 
   /* antd-mobile theme mapping: same declaration as the tokens, so both mount
      points (root and html twin) carry it and every adm- component — portal or
@@ -164,11 +176,15 @@ html[data-theme='dark'] {
   --dshm-background: #0c1017;       /* 深蓝黑（与卡 #1e2634 拉开 ~9% RGB 差） */
   --dshm-card: #1e2634;
   --dshm-muted: #141b26;
+  --dshm-link: #7b9dd1;            /* brand #2a5fa6 measures 2.38:1 on the card —
+                                       * this blue holds ≥4.5:1 for in-text links */
+  --dshm-focus-ring: 0 0 0 3px rgba(83, 131, 199, 0.5);
   --dshm-border: #2a3444;
   --dshm-nav-line: #232d3d;         /* PageNav 底边线：深于 line 一阶，暗面 1px 不刺眼 */
   --dshm-header-bg: #131926;
   --dshm-tabbar-bg: #131926;
-  --dshm-input-bg: #1e2634;
+  --dshm-input-bg: #141b26;         /* input wells step one tier off the card (was the
+                                       * card value itself — a zero-contrast fill on dark) */
   --dshm-success: #5bae7d;          /* desaturated lift (5.5:1 on card) */
   --dshm-success-soft: #16281c;
   --dshm-success-10: rgba(91, 174, 125, 0.18);
@@ -211,6 +227,8 @@ html[data-theme='dark'] {
   font-variant-numeric: tabular-nums;
   color: var(--dshm-foreground);
   background: var(--dshm-background);
+  /* Taps paint instantly: no 300ms double-tap zoom delay anywhere in the shell. */
+  touch-action: manipulation;
   -webkit-font-smoothing: antialiased;
   /* The 430px phone shell: fluid (full width) under 720px, centered with a
    * halo otherwise; the login gate and the shell ride the same form. */
@@ -256,7 +274,20 @@ html[data-theme='dark'] {
 .dshm-root input,
 .dshm-root textarea {
   font: inherit;
+  /* The longhand after the shorthand overrides the inherited size: every
+   * typing element holds the --dshm-fs-input floor even when a component's
+   * dial above it names a display grade (iOS focus-zoom guard). */
+  font-size: max(var(--dshm-fs-input), 1em);
   color: inherit;
+}
+
+/* Keyboard focus is always visible (W8 V8): the halo rides a box-shadow so
+ * it wraps each control's own radius; pointer interaction never triggers it,
+ * and inputs that strengthen their own focus border keep that border under
+ * the halo. */
+.dshm-root :focus-visible {
+  outline: none;
+  box-shadow: var(--dshm-focus-ring);
 }
 
 /* Host document plumbing: the mobile page fills the viewport (and the preview

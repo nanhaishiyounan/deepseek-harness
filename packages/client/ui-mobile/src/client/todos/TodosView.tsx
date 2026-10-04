@@ -35,6 +35,13 @@ export function TodosView(): JSX.Element {
   const [pending, setPending] = useState<{ row: TodoRow; action: 'approve' | 'reject'; comment: string } | undefined>(undefined)
 
   const refresh = useCallback(async (): Promise<void> => {
+    // The identity is read at call time, never from a render-closure object:
+    // `loadIdentity()` parses a fresh object per call, so keying this callback
+    // on it re-runs the read effect after every render (an unbounded refetch
+    // loop — the alerts page's W8-R1 OOM root cause, same shape here).
+    // Account switches remount this page via the App identity gate, so no
+    // identity dependency is owed here.
+    const identity = loadIdentity()
     if (identity === undefined) return
     try {
       setRead({ rows: await enrichTodoRows(await listMyTodos(identity.username)) })
@@ -42,7 +49,7 @@ export function TodosView(): JSX.Element {
       logClientError('todos.list', cause)
       setRead({ error: messageOf(cause) })
     }
-  }, [identity])
+  }, [])
 
   useEffect(() => {
     void refresh()

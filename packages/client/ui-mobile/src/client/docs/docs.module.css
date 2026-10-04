@@ -85,14 +85,14 @@
   padding: 8px 14px;
   border-radius: var(--dshm-radius);
   background: var(--dshm-primary-10);
-  color: var(--dshm-primary);
+  color: var(--dshm-on-soft);
   font-size: var(--dshm-fs-xs);
   text-align: center;
 }
 
 .retryLink {
   align-self: flex-start;
-  color: var(--dshm-primary);
+  color: var(--dshm-link);
 }
 
 .listRow {
@@ -124,7 +124,7 @@
 
 .rowState {
   font-size: var(--dshm-fs-xs);
-  color: var(--dshm-primary);
+  color: var(--dshm-on-soft);
   background: var(--dshm-primary-10);
   border-radius: var(--dshm-radius-pill);
   padding: 2px 8px;
@@ -162,7 +162,7 @@
 .detailState {
   flex: none;
   font-size: var(--dshm-fs-xs);
-  color: var(--dshm-primary);
+  color: var(--dshm-on-soft);
   background: var(--dshm-primary-10);
   border-radius: var(--dshm-radius-pill);
   padding: 3px 9px;
@@ -263,7 +263,7 @@
   display: block;
   width: 100%;
   border-radius: var(--dshm-radius);
-  background: #fff;
+  background: var(--dshm-barcode-paper);
 }
 
 .barcodeFallback {

@@ -8,7 +8,7 @@
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { ReportCard, orderedActionsOf, stampCharOf } from '../src/client/messages/ReportCard.tsx'
+import { ReportCard, metricValueText, orderedActionsOf, stampCharOf } from '../src/client/messages/ReportCard.tsx'
 import type { ReportAction, ReportPayload } from '../src/client/protocol.ts'
 
 afterEach(cleanup)
@@ -55,6 +55,14 @@ describe('ReportCard sections', () => {
     expect(screen.getByText('1').className).toContain('metricToneWarning')
     expect(screen.getByText('96%').className).toContain('metricTonePositive')
     expect(screen.getByText('按期交付率')).toBeTruthy()
+    // The bare numeric count gains the thousands separators (W8-B2 §10);
+    // every pre-formatted face stays verbatim.
+    expect(metricValueText('1042')).toBe('1,042')
+    expect(metricValueText('1234567.89')).toBe('1,234,567.89')
+    expect(metricValueText('96%')).toBe('96%')
+    expect(metricValueText('¥6,400')).toBe('¥6,400')
+    expect(metricValueText('200 箱')).toBe('200 箱')
+    expect(metricValueText('999')).toBe('999')
     // Rows: label + hint pairs and the level dots.
     expect(screen.getByText('接口联调延期')).toBeTruthy()
     expect(screen.getByText('预计影响测试开始 1～2 天')).toBeTruthy()

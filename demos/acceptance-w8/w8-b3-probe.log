@@ -1,0 +1,11 @@
+PASS 探针会话创建（session.create） — id=session-186e45eb-291e-4ac2-b425-778262a863fe
+PASS 轮询首拉是全量读（无游标） — full=4
+PASS 后续轮询携带 afterSeq 游标 — cursor=5
+PASS 增量响应体积显著小于全量基线 — full≈267072B cursor≤30727B ratio=12%
+PASS 设备A登录后本地工作项就绪（seed 真实写入） — items=27
+PASS 写穿已上服务端（wfl_mobile_work 有 buyer 行） — rows=27
+PASS 清空本地后登录回灌，工作项从服务端存活 — items=30
+PASS 跨账号隔离（keeper 看不到 buyer 的工作项） — leak=0 keeperItems=6 buyerRows=30
+PASS 过期后回到登录门
+PASS 本地工作数据在过期后保留
+PASS 重登后回灌恢复工作项 — items=33
