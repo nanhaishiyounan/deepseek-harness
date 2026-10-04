@@ -29,3 +29,4 @@ w6-b10-gates.sh：22 legs——首轮 20 绿 + b3-recall(ECONNRESET)/b5-insp(并
 ① 019-库位平面图：JSBlock 活跃 code 在 stepParams.jsSettings（服务端塑形的不透明对象；两轮手写探查曾破坏渲染，均即时发现即时重建）——终局通道 destroy+flowSurfaces:addBlock（w7b6-binmap.mts 幂等版），页面实测 token 色板+禁色 0
 ② 034/099 看板 badge cyan：antd Badge preset 走复合选择器 (0,3,0)，单类覆写不敌——globalStyle 高特异性+!important 覆写段（w7b0-theme --apply），页面实测 #0E7490
 ③ probe 自身 evaluate 多参数误报四页——单对象参数修正后消失
+[R2 勘误 2026-10-04] L26「9089B」应为 9075B——w7-b6-w6gates-retry.log 实测 wc -c 9075（9089B 为首次归档时点数字，log 正文保留未改；99-w7 §二.3/§五.3 已同步更正）。

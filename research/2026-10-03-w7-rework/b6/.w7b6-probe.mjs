@@ -132,9 +132,17 @@ for (const entry of pages) {
     await page.goto(`${BASE}/admin/${entry.schemaUid}`, { waitUntil: 'domcontentloaded' })
     await page.waitForLoadState('networkidle', { timeout: 6000 }).catch(() => {})
     await page.waitForTimeout(2400)
-    const liveness = await page.evaluate(LIVENESS_PROBE)
+    // R2: a cold first paint can read dead before the route mounts — one
+    // ~1500ms backoff retry, logged as both rounds, before the page fails.
+    let liveness = await page.evaluate(LIVENESS_PROBE)
     if (!liveness.live) {
-      failures.push(`${String(entry.index).padStart(3, '0')}-${entry.title}: liveness FAIL (404stub=${String(liveness.is404Stub)} main=${String(liveness.hasMain)}) — uid ${entry.schemaUid} is not a live page`)
+      console.log(`probe ${String(entry.index).padStart(3, '0')}-${entry.title} liveness round1 dead (404stub=${String(liveness.is404Stub)}) — one retry after 1500ms backoff`)
+      await page.waitForTimeout(1500)
+      liveness = await page.evaluate(LIVENESS_PROBE)
+      console.log(`probe ${String(entry.index).padStart(3, '0')}-${entry.title} liveness round2 ${liveness.live ? 'live' : `dead (404stub=${String(liveness.is404Stub)})`}`)
+    }
+    if (!liveness.live) {
+      failures.push(`${String(entry.index).padStart(3, '0')}-${entry.title}: liveness FAIL after backoff retry (404stub=${String(liveness.is404Stub)} main=${String(liveness.hasMain)}) — uid ${entry.schemaUid} is not a live page`)
       console.log(`probe ${String(entry.index).padStart(3, '0')}-${entry.title} liveness=FAIL (404stub=${String(liveness.is404Stub)})`)
       report.push({ index: entry.index, title: entry.title, uid: entry.schemaUid, liveness: 'FAIL', is404Stub: liveness.is404Stub })
       continue

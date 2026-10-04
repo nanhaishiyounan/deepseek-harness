@@ -28,11 +28,22 @@ export interface TodoRow {
   readonly docLabel: string
 }
 
-/** One raw wire row (structural read). */
-type WireRow = Record<string, unknown>
-
 const num = (value: unknown): number => Number(value ?? 0)
 const str = (value: unknown): string => typeof value === 'string' ? value : ''
+
+/**
+ * Render one wire cell for display: a text cell passes through, a nullish
+ * cell reads as the empty placeholder, and a structured cell degrades to
+ * the '#'+id reference instead of '[object Object]'.
+ * @param value - the raw wire cell.
+ * @param id - the row id the structured-cell fallback renders.
+ * @returns the display string.
+ */
+const wireCell = (value: unknown, id: string | number): string => {
+  if (typeof value === 'string') return value
+  if (value === null || value === undefined) return '—'
+  return `#${String(id)}`
+}
 
 /**
  * Read one user's open todos (G2): the live wfl_approval_todos rows over the
@@ -78,8 +89,8 @@ export async function enrichTodoRows(rows: readonly TodoRow[]): Promise<TodoRow[
     if (seen.has(key) || row.docType === '') return
     try {
       const value = await rpc('nocobase.get', { collection: row.docType, id: row.docId })
-      const title = (value.row as WireRow)[docTitleFieldOf(row.docType)]
-      seen.set(key, title === null || title === undefined ? `#${String(row.docId)}` : String(title))
+      const title = value.row[docTitleFieldOf(row.docType)]
+      seen.set(key, wireCell(title, row.docId))
     } catch {
       seen.set(key, `#${String(row.docId)}`)
     }
@@ -223,7 +234,7 @@ export async function listMyAlerts(): Promise<AlertRow[]> {
       severity: str(row['severity']) === 'critical' ? 'critical' as const : 'warning' as const,
       title: str(row['title']),
       entityCode: str(row['entity_code']),
-      owner: row['owner'] === null || row['owner'] === undefined || row['owner'] === '' ? undefined : String(row['owner']),
+      owner: row['owner'] === null || row['owner'] === undefined || row['owner'] === '' ? undefined : wireCell(row['owner'], num(row['id'])),
       status: str(row['status']),
       daysLeft: row['detail'] !== null && typeof row['detail'] === 'object' && !Array.isArray(row['detail'])
         ? numIf((row['detail'] as Record<string, unknown>)['days_left'])

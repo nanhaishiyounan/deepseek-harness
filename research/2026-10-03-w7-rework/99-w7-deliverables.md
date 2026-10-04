@@ -20,7 +20,7 @@
 
 1. **114 页覆盖铁证**：`research/2026-10-03-w7-rework/b6/after/`——`.w7b6-shot.mjs after all` 单次成拍 114/114（111 flowPage + 3 v1）；[`after-index.md`](b6/after-index.md) 逐页三方对照（终验 after / B0 before / 改造批次图 114 张链接），114/114 无缺口。
 2. **美学断言矩阵**：[`w7-b6-matrix.log`](../../../demos/acceptance-w7/w7-b6-matrix.log)——主题断言+三 heal 断言+114 页 computed 禁色清零（含引擎侧 /insp /crm /cards 三 iframe 面顶层探测）+B5 域 23 页结构断言复验+mobile 暗轨六门槛；禁色历史：首轮抓出库位平面图 JSBlock 残留（#1677ff/#52c41a/#ff4d4f）与任务看板 badge cyan（#13c2c2）两处真实泄漏+probe 自身四例误报（evaluate 参数数 bug），全部修复后复跑全绿。
-3. **W6 零回退铁证**：[`w7-b6-w6matrix.log`](../../../demos/acceptance-w7/w7-b6-w6matrix.log)——44 门对账矩阵复跑 0 失败 MATRIX ALL PASS；[`w7-b6-w6gates.log`](../../../demos/acceptance-w7/w7-b6-w6gates.log)——w6-b10-gates 断言腿汇总复跑 22 腿（B0~B9 --assert 族+演练 8/8+typecheck+oxlint+pairing+清理腿；首轮 b3-recall/b5-insp 两腿因与 B6 probe 并发竞态 FAIL——ECONNRESET 与演练数据半造；R1 串行重验完整链归档 [`w7-b6-w6gates-retry.log`](../../../demos/acceptance-w7/w7-b6-w6gates-retry.log)（=w7-r1-02，9089B，替换首轮 216B 截断 log）：b5 cleanup→seed→wizard replay 28✓→assert PASS 全程 exit 0、b3-recall assert PASS，其余 20 腿首轮即绿）。
+3. **W6 零回退铁证**：[`w7-b6-w6matrix.log`](../../../demos/acceptance-w7/w7-b6-w6matrix.log)——44 门对账矩阵复跑 0 失败 MATRIX ALL PASS；[`w7-b6-w6gates.log`](../../../demos/acceptance-w7/w7-b6-w6gates.log)——w6-b10-gates 断言腿汇总复跑 22 腿（B0~B9 --assert 族+演练 8/8+typecheck+oxlint+pairing+清理腿；首轮 b3-recall/b5-insp 两腿因与 B6 probe 并发竞态 FAIL——ECONNRESET 与演练数据半造；R1 串行重验完整链归档 [`w7-b6-w6gates-retry.log`](../../../demos/acceptance-w7/w7-b6-w6gates-retry.log)（=w7-r1-02，9075B，替换首轮 216B 截断 log）：b5 cleanup→seed→wizard replay 28✓→assert PASS 全程 exit 0、b3-recall assert PASS，其余 20 腿首轮即绿）。
 4. **gates-b6 视域**（[`gates-b6.log`](../../../demos/acceptance-w7/gates-b6.log)）：typecheck PASS（w6-gates 腿内）、oxlint staged 0 警 0 错（本批 ts/mts 文件面）、translation pairing 1214 对全绿（W7 七对 Note 三件套重录+结构修齐）、agent-note-format 762 Note 全合规、doc-sync 29 门 0 败 0 跳。
 
 ## 三、mobile 双轨终验（M3+B6 合账）
@@ -42,15 +42,25 @@
 
 1. **P0 死路由三图（lesson1）**：B5 code-drift 重建轮换了效期看板/批次追溯/配方版本与变更的 uid，冻结 census 走死 uid 拍出三张字节相同的 404 帧——census 改为每轮从 `desktopRoutes:list` 现场重建（`.w7b6-census.mjs`，编号锚定标题序、uid 全取现值、缺页/增页 fail-loud），probe/shot 每页加 liveness 门（「404…Back Home」文案判死+非空正文判活），三页按现活 uid（w6b3v1vsyqj5u9a/w6b3tctwuy6wn0d/w6b4b2jezsof7xz）补拍补扫全过（`w7-r1-01-reshoot.log`/`w7-r1-01-probe.log`：liveness=PASS + kind=bomver/expiry/dag 结构复验 + 禁色 clean），`after-index.md` 再生 114/114。
 2. **B5_KINDS 硬契约（lesson4）**：matched==declared 断言进 probe（23/23，drift 时 fail-loud 打印缺失 uid）。
-3. **b5-retry 归档缺口（lesson2）**：216B 截断 log 替换为完整链归档 `w7-b6-w6gates-retry.log`（=w7-r1-02，9089B：cleanup→seed→wizard replay 28✓→assert 全程 exit0 + b3-recall assert PASS）；gates-b6 与本文两处措辞同步更正。
-4. **文档通道更正（lesson3）**：`w7b6-binmap.mts` 顶部导出 `BLOCK_UPDATE_CHANNEL='destroy+addBlock'`；B6+M3 Note 双语两处、QUICKSTART 层 3b、本文 §四.1 四处从 `flowSurfaces:updateSettings` 假通道改为真实通道；`w7-r1-03-channel-check.mjs` grep 级一致性检查 GREEN（常量↔四文档）。
+3. **b5-retry 归档缺口（lesson2）**：216B 截断 log 替换为完整链归档 `w7-b6-w6gates-retry.log`（=w7-r1-02，9075B：cleanup→seed→wizard replay 28✓→assert 全程 exit0 + b3-recall assert PASS）；gates-b6 与本文两处措辞同步更正。
+4. **文档通道更正（lesson3）**：`w7b6-binmap.mts` 顶部导出 `BLOCK_UPDATE_CHANNEL='destroy+addBlock'`；B6+M3 Note 双语两处、QUICKSTART 层 3b、本文 §四.1 四处假通道字面量清零、统一引真实通道 `destroy+addBlock`；`w7-r1-03-channel-check.mjs` grep 级一致性检查 GREEN（常量↔四文档）。
 5. **暗轨印章对比度（lesson5）**：tokens.css 双轨加 `--dshm-stamp-doing`（亮=引用 work-doing，暗=#5783bc 同 tab-active 阶），work stamp 接入；dark-probe 第七门槛 stamp≥3.0 实测 **3.89**（修复前 2.38，token 链 getComputedStyle 实算 vs 工票卡背景，`w7-r1-04-dark-probe.json`）；build:lib:client+vite 产物链重落、双轨 work-detail 复拍（light #1e4e8c 不变/dark #5783bc，`w7-r1-04-work-detail-*.png`）；ui-mobile vitest 43 文件 668/668 复跑绿（`w7-r1-04-mo-vitest.log`）。
 6. **注入类证据（lesson2，production-simulation 主因）**：`w7-r1-05-inject.mjs` 三场景全绿——offline（断网发送 fail-loud 落 outbox→online 冲刷队列清空+消息上屏）、CPU 4× 节流（五面导航 0 个 ≥500ms long task，全量明细归档；首轮曾现 1 例 635ms 波动，如实注明后两轮 0 例封顶 361ms）、死路由（#/work/<不存在 id> 落「该工作不存在或已删除」降级面、零未捕获错误）；前后截图+console log 归档。
-7. **顺手项**：w7b0-theme --rollback 演练留档（回滚生效 assert fail-loud→re-apply→assert OK，`w7-r1-06-advisory.log`）；w7-m3-15 名实不符图删除（实为 agents referral 首拍残留）；本文 M3 证据件数复核 13+1+2 张全对。
+7. **顺手项**：w7b0-theme --rollback 演练留档（回滚生效 assert fail-loud→re-apply→assert OK，`w7-r1-06-advisory.log`）；w7-m3-15 首拍残留删除（名实不符的 agents referral 图已清，现行为 M3 修复重拍的 work-detail 件）；本文 M3 证据件数复核 13+1+2 张全对。
 
 R1 回归：w7-b6-matrix 六腿复跑（probe 腿含 liveness 门+B5_KINDS 硬契约、mobile 腿改现场实跑七门槛，结果见 `gates-r1.log`）；W6 44 门不因本批复跑（本批只动证据层+2 个 CSS token+文档+1 个 mts 常量）。
 
-## 六、W8 候选遗留清单（终局盘点）
+## 六、R2 微收尾轮（R1 验证 CONDITIONAL_PASS 的单行级清偿，2026-10-04）
+
+只动叙述、守卫与检查脚本，不动业务面与归档正文；证据根 `demos/acceptance-w7/w7-r2-*`：
+
+1. **channel-check 解堵（根因）**：§五.4 行自身复述已退役的假通道字面量、且行内含 `w7b6-binmap.mts`，恰好落进 w7-r1-03 检查的 FAIL 分支（归档 GREEN log 早于该行新增，复现与改写见 `w7-r2-01`）——采验证方推荐路径改写该行（四处假通道字面量清零、统一引真实通道 `destroy+addBlock`），检查复跑 exit 0 GREEN 重录（输出与归档字节一致）；检查脚本中收集后未用的 binmap 死变量删除。
+2. **数字真话同步**：`w7-b6-w6gates-retry.log` 实测 wc -c 9075（9089B 为首录时点数字）——本文 §二.3/§五.3 直改 9075B；gates-b6.log/gates-r1.log 系历史产物，正文不动、尾部追加 R2 勘误行（`w7-r2-02`）。
+3. **顺手两项（Important#2/#3）**：①probe liveness 单页先死后经 ~1500ms 退避重试一轮再判（双败才 FAIL、log 记两轮；本轮 114 页复跑零触发、全绿 `w7-r2-03`）②ledgerService 两处 String(unknown) 换 wireCell 守卫（string→原值/nullish→'—'/结构化→'#'+id；owner 位 nullish→undefined 保「未认领」语义）+顺删冗余 as WireRow 断言，oxlint 该文件 0 警 0 错、tsc 干净、vitest 668/668 复跑绿（首轮 1 例偶发未再现、复跑两连绿，如实注明；`w7-r2-04`）。
+4. **Minor 三项**：m3-15 措辞改「首拍残留删除」（现行 w7-m3-15 为 M3 修复重拍的 work-detail 件）；gates-r1.log L7 after 图根路径改实际路径 research/2026-10-03-w7-rework/b6/after/；见 1 的死变量删除（`w7-r2-05`）。
+5. **G5 复写归档处置**：R1 验证方复跑曾复写 12 件归档（matrix-probe/census/dark-probe/inject 系列）——已恢复 R1 提交原档为本位，本轮探针复跑产物只存 w7-r2-03，不复写归档。
+
+## 七、W8 候选遗留清单（终局盘点）
 
 | # | 项 | 出处 |
 |---|---|---|

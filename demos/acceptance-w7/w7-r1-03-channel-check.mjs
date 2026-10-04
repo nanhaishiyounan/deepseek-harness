@@ -27,7 +27,6 @@ const failures = []
 for (const [path, mustContain] of DOCS) {
   const text = readFileSync(path, 'utf8')
   if (!text.includes(mustContain)) failures.push(`${path}: no ${mustContain} reference`)
-  const binmap = text.match(/binmap[^\n]{0,400}/gi) ?? []
   for (const line of text.split('\n')) {
     if (line.includes('w7b6-binmap') || line.includes('BIN_MAP_CODE')) {
       if (/flowSurfaces:updateSettings/.test(line) && !/写不进|never|no direct-update/.test(line)) {

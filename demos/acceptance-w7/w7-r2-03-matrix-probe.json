@@ -1,0 +1,2207 @@
+[
+  {
+    "index": 1,
+    "title": "经营总览",
+    "uid": "w6b9cdzrc2lst1dm",
+    "liveness": "PASS",
+    "kind": "cockpit",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    },
+    "structural": {
+      "banned": {
+        "#1677ff": 0,
+        "#722ed1": 0,
+        "#7c3aed": 0,
+        "#ff4d4f": 0,
+        "#faad14": 0,
+        "#c41d7f": 0,
+        "#13c2c2": 0
+      },
+      "kind": "cockpit",
+      "rendered": true,
+      "fakeZeroBars": 0,
+      "kpiCardRadius": "8px",
+      "zeroBaselineDots": 7
+    }
+  },
+  {
+    "index": 2,
+    "title": "AI 工作台",
+    "uid": "n13ai2efgqippp44",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 3,
+    "title": "销售线索",
+    "uid": "n17rwc527ujwt",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 4,
+    "title": "客户",
+    "uid": "n17sys042q2lz",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 5,
+    "title": "联系人",
+    "uid": "n17c3lkyg9zjd6",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 6,
+    "title": "产品与服务",
+    "uid": "n17f2wwpqs60dtk",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 7,
+    "title": "客户仪表盘",
+    "uid": "n17f2jumvap76nm8",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 8,
+    "title": "入库单",
+    "uid": "h5wmsrh8ls7pkv5i",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 9,
+    "title": "出库单",
+    "uid": "h5wmsvwkqjiiaxdj",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 10,
+    "title": "库存查询",
+    "uid": "h5wms9v2hly0cg6j",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 11,
+    "title": "盘点管理",
+    "uid": "h5wms2hmkvlfsmtf",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 12,
+    "title": "移库管理",
+    "uid": "h5wmspyqfovkqjff",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 13,
+    "title": "预留管理",
+    "uid": "h5wms9zlhetpzwl",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 14,
+    "title": "补货预警",
+    "uid": "h5wmstw8iug4upxs",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 15,
+    "title": "库存流水",
+    "uid": "h5wms9srcrn5fhiq",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 16,
+    "title": "月度收发存",
+    "uid": "h5wmslacezwb94s",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 17,
+    "title": "批次主数据",
+    "uid": "h5wmsgd4pntmwvg",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 18,
+    "title": "仓库库区",
+    "uid": "h5wms50cuimohzz7",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 19,
+    "title": "库位平面图",
+    "uid": "h5wms1nju21hb5c8",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 20,
+    "title": "盘点计划",
+    "uid": "h5wmsddav9gkxtl",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 21,
+    "title": "收货终端",
+    "uid": "w3b66yns80jnq92",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 22,
+    "title": "供应商档案",
+    "uid": "h4srm2u9xiqx09jb",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 23,
+    "title": "供应商准入",
+    "uid": "h4srm6hfqnpnrqu5",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 24,
+    "title": "审核检查表",
+    "uid": "h4srmuvf86en2kn",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 25,
+    "title": "审核评分录入",
+    "uid": "h4srmflpebqkuz",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 26,
+    "title": "绩效评分卡",
+    "uid": "h4srms4w5viez9zp",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 27,
+    "title": "供应商绩效雷达",
+    "uid": "h4srmaf4rurtt17p",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 28,
+    "title": "证照效期预警",
+    "uid": "h4srmjjlvbjei4fd",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 29,
+    "title": "整改跟踪",
+    "uid": "h4srm25tmro1wjuw",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 30,
+    "title": "分类维护",
+    "uid": "n17f3rnd403uzlkc",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 31,
+    "title": "生产订单",
+    "uid": "w5mfgntyu7wy20a",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 32,
+    "title": "MO 执行视图",
+    "uid": "w6mfgmct2tf2braf",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 33,
+    "title": "排程明细",
+    "uid": "w5mfgp352sily7f",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 34,
+    "title": "生产订单看板",
+    "uid": "w3b39xulomz8jj",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 35,
+    "title": "领料单",
+    "uid": "w6mfgsp029qziym",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 36,
+    "title": "退料单",
+    "uid": "w6mfg1zez6dqkcgh",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 37,
+    "title": "报工记录",
+    "uid": "w6mfglmxq9mhbkur",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 38,
+    "title": "工程变更单",
+    "uid": "w6b4bcr7wfgjxww",
+    "liveness": "PASS",
+    "kind": "bomver",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    },
+    "structural": {
+      "banned": {
+        "#1677ff": 0,
+        "#722ed1": 0,
+        "#7c3aed": 0,
+        "#ff4d4f": 0,
+        "#faad14": 0,
+        "#c41d7f": 0,
+        "#13c2c2": 0
+      },
+      "kind": "bomver",
+      "anyJsblock": false
+    }
+  },
+  {
+    "index": 39,
+    "title": "完工单",
+    "uid": "w6mfgp1rrz08ffa",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 40,
+    "title": "配方版本与变更",
+    "uid": "w6b4b2jezsof7xz",
+    "liveness": "PASS",
+    "kind": "bomver",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    },
+    "structural": {
+      "banned": {
+        "#1677ff": 0,
+        "#722ed1": 0,
+        "#7c3aed": 0,
+        "#ff4d4f": 0,
+        "#faad14": 0,
+        "#c41d7f": 0,
+        "#13c2c2": 0
+      },
+      "kind": "bomver",
+      "anyJsblock": false
+    }
+  },
+  {
+    "index": 41,
+    "title": "BOM 管理",
+    "uid": "w5mfga37ztlt6orc",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 42,
+    "title": "BOM 工序",
+    "uid": "w5mfgkkvs7a4ijya",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 43,
+    "title": "工作中心",
+    "uid": "w5mfg3eil2n4n0kr",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 44,
+    "title": "主生产计划",
+    "uid": "w7mrpyru4s708nwn",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 45,
+    "title": "MRP 快照",
+    "uid": "w7mrpowj6l93nn0a",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 46,
+    "title": "计划工作台",
+    "uid": "w7mrphtm8t9tzlk8",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 47,
+    "title": "车间终端",
+    "uid": "w3b6guuruqly03t",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 48,
+    "title": "APS瓶颈与负荷",
+    "uid": "w6b8a3fg2qshtalw",
+    "liveness": "PASS",
+    "kind": "aps",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    },
+    "structural": {
+      "banned": {
+        "#1677ff": 0,
+        "#722ed1": 0,
+        "#7c3aed": 0,
+        "#ff4d4f": 0,
+        "#faad14": 0,
+        "#c41d7f": 0,
+        "#13c2c2": 0
+      },
+      "kind": "aps",
+      "colorMixCells": 8,
+      "oldRgbaHeat": 0
+    }
+  },
+  {
+    "index": 49,
+    "title": "APS what-if沙箱",
+    "uid": "w6b8a9z9q2cliq77",
+    "liveness": "PASS",
+    "kind": "apswhatif",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    },
+    "structural": {
+      "banned": {
+        "#1677ff": 0,
+        "#722ed1": 0,
+        "#7c3aed": 0,
+        "#ff4d4f": 0,
+        "#faad14": 0,
+        "#c41d7f": 0,
+        "#13c2c2": 0
+      },
+      "kind": "apswhatif",
+      "colorMixCells": 0,
+      "oldRgbaHeat": 0
+    }
+  },
+  {
+    "index": 50,
+    "title": "员工",
+    "uid": "n17lhe5qyxu1g",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 51,
+    "title": "部门",
+    "uid": "n17f3er0aw80yc8i",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 52,
+    "title": "请假审批",
+    "uid": "n17f3wqpzee9wo2g",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 53,
+    "title": "组织架构",
+    "uid": "w3b57ix4086om95",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 54,
+    "title": "权限矩阵",
+    "uid": "w3b5m8kwiakieq",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 55,
+    "title": "经营看板",
+    "uid": "w9kpi7zv98whvfpv",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 56,
+    "title": "供应链看板",
+    "uid": "w9kpijpea6p6exnm",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 57,
+    "title": "生产看板",
+    "uid": "w9kpirvxmfx12l2i",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 58,
+    "title": "库存看板",
+    "uid": "w9kpiatwzi4gjbff",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 59,
+    "title": "应收应付对账",
+    "uid": "w9kpisldougonly",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 60,
+    "title": "财务工作台",
+    "uid": "w6b9fgcovvinqe85",
+    "liveness": "PASS",
+    "kind": "finwb",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    },
+    "structural": {
+      "banned": {
+        "#1677ff": 0,
+        "#722ed1": 0,
+        "#7c3aed": 0,
+        "#ff4d4f": 0,
+        "#faad14": 0,
+        "#c41d7f": 0,
+        "#13c2c2": 0
+      },
+      "kind": "finwb",
+      "rendered": true,
+      "softStatusLights": 3
+    }
+  },
+  {
+    "index": 61,
+    "title": "质检单",
+    "uid": "w8qmjvyv8p5j7j",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 62,
+    "title": "检验读数",
+    "uid": "w8qmg3yelbk0rzm",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 63,
+    "title": "AQL 抽样方案",
+    "uid": "w8qm15rxe53v8hh",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 64,
+    "title": "处置看板",
+    "uid": "w8qm472nluqt32x",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 65,
+    "title": "质检看板",
+    "uid": "w3b3uw3d0mrz1b",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 66,
+    "title": "季度绩效物化",
+    "uid": "w8qm8sx2tj9j0kb",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 67,
+    "title": "CCP监控配置",
+    "uid": "w6b4c4t709ypn92m",
+    "liveness": "PASS",
+    "kind": "tagpage",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    },
+    "structural": {
+      "banned": {
+        "#1677ff": 0,
+        "#722ed1": 0,
+        "#7c3aed": 0,
+        "#ff4d4f": 0,
+        "#faad14": 0,
+        "#c41d7f": 0,
+        "#13c2c2": 0
+      },
+      "kind": "tagpage",
+      "tagCount": 0,
+      "thWeight": "600",
+      "thBgNotWhite": true
+    }
+  },
+  {
+    "index": 68,
+    "title": "质检工作台",
+    "uid": "w3b6nour73ecwgb",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 69,
+    "title": "CCP监控记录",
+    "uid": "w6b4ce752lctbwp8",
+    "liveness": "PASS",
+    "kind": "tagpage",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    },
+    "structural": {
+      "banned": {
+        "#1677ff": 0,
+        "#722ed1": 0,
+        "#7c3aed": 0,
+        "#ff4d4f": 0,
+        "#faad14": 0,
+        "#c41d7f": 0,
+        "#13c2c2": 0
+      },
+      "kind": "tagpage",
+      "tagCount": 0,
+      "thWeight": "600",
+      "thBgNotWhite": true
+    }
+  },
+  {
+    "index": 70,
+    "title": "检验工作台",
+    "uid": "w6b5icrrgz5z9gu",
+    "liveness": "PASS",
+    "kind": "iframepage",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    },
+    "structural": {
+      "banned": {
+        "#1677ff": 0,
+        "#722ed1": 0,
+        "#7c3aed": 0,
+        "#ff4d4f": 0,
+        "#faad14": 0,
+        "#c41d7f": 0,
+        "#13c2c2": 0
+      },
+      "kind": "iframepage",
+      "anyJsblock": true
+    }
+  },
+  {
+    "index": 71,
+    "title": "出厂检验报告",
+    "uid": "w6b5ruwgh0d52fif",
+    "liveness": "PASS",
+    "kind": "tagpage",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    },
+    "structural": {
+      "banned": {
+        "#1677ff": 0,
+        "#722ed1": 0,
+        "#7c3aed": 0,
+        "#ff4d4f": 0,
+        "#faad14": 0,
+        "#c41d7f": 0,
+        "#13c2c2": 0
+      },
+      "kind": "tagpage",
+      "tagCount": 0,
+      "thWeight": "600",
+      "thBgNotWhite": true
+    }
+  },
+  {
+    "index": 72,
+    "title": "资产台账",
+    "uid": "n17wr2jbz8fl2i",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 73,
+    "title": "设备台账",
+    "uid": "w6b8ekr28fjs4b0k",
+    "liveness": "PASS",
+    "kind": "tagpage",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    },
+    "structural": {
+      "banned": {
+        "#1677ff": 0,
+        "#722ed1": 0,
+        "#7c3aed": 0,
+        "#ff4d4f": 0,
+        "#faad14": 0,
+        "#c41d7f": 0,
+        "#13c2c2": 0
+      },
+      "kind": "tagpage",
+      "tagCount": 16,
+      "tagRadius": "999px",
+      "tagSoftBg": true,
+      "thWeight": "600",
+      "thBgNotWhite": true
+    }
+  },
+  {
+    "index": 74,
+    "title": "维保服务商",
+    "uid": "n17f3t3gtwv502s",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 75,
+    "title": "维保计划",
+    "uid": "w6b8e2y41rty9rx",
+    "liveness": "PASS",
+    "kind": "tagpage",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    },
+    "structural": {
+      "banned": {
+        "#1677ff": 0,
+        "#722ed1": 0,
+        "#7c3aed": 0,
+        "#ff4d4f": 0,
+        "#faad14": 0,
+        "#c41d7f": 0,
+        "#13c2c2": 0
+      },
+      "kind": "tagpage",
+      "tagCount": 0,
+      "thWeight": "600",
+      "thBgNotWhite": true
+    }
+  },
+  {
+    "index": 76,
+    "title": "维保记录",
+    "uid": "n17f34o4bhrzg1w",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 77,
+    "title": "维保工单",
+    "uid": "w6b8eupafgchxsnf",
+    "liveness": "PASS",
+    "kind": "tagpage",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    },
+    "structural": {
+      "banned": {
+        "#1677ff": 0,
+        "#722ed1": 0,
+        "#7c3aed": 0,
+        "#ff4d4f": 0,
+        "#faad14": 0,
+        "#c41d7f": 0,
+        "#13c2c2": 0
+      },
+      "kind": "tagpage",
+      "tagCount": 60,
+      "tagRadius": "999px",
+      "tagSoftBg": true,
+      "thWeight": "600",
+      "thBgNotWhite": true
+    }
+  },
+  {
+    "index": 78,
+    "title": "计量校准",
+    "uid": "w6b8erufav9515p",
+    "liveness": "PASS",
+    "kind": "tagpage",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    },
+    "structural": {
+      "banned": {
+        "#1677ff": 0,
+        "#722ed1": 0,
+        "#7c3aed": 0,
+        "#ff4d4f": 0,
+        "#faad14": 0,
+        "#c41d7f": 0,
+        "#13c2c2": 0
+      },
+      "kind": "tagpage",
+      "tagCount": 4,
+      "tagRadius": "999px",
+      "tagSoftBg": true,
+      "thWeight": "600",
+      "thBgNotWhite": true
+    }
+  },
+  {
+    "index": 79,
+    "title": "维保日历",
+    "uid": "w6b8eci1cpbqsgtj",
+    "liveness": "PASS",
+    "kind": "calendar",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    },
+    "structural": {
+      "banned": {
+        "#1677ff": 0,
+        "#722ed1": 0,
+        "#7c3aed": 0,
+        "#ff4d4f": 0,
+        "#faad14": 0,
+        "#c41d7f": 0,
+        "#13c2c2": 0
+      },
+      "kind": "calendar",
+      "moreButtons": 2,
+      "chipTokens": 4
+    }
+  },
+  {
+    "index": 80,
+    "title": "采购申请",
+    "uid": "w3pura0kyqfx4f9",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 81,
+    "title": "询价管理",
+    "uid": "w3purlvif0v23bun",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 82,
+    "title": "供应商报价",
+    "uid": "w3pur9w1c3yg3rjd",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 83,
+    "title": "比价表",
+    "uid": "w3purb7o0r3yqi45",
+    "liveness": "PASS",
+    "kind": "matrix",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    },
+    "structural": {
+      "banned": {
+        "#1677ff": 0,
+        "#722ed1": 0,
+        "#7c3aed": 0,
+        "#ff4d4f": 0,
+        "#faad14": 0,
+        "#c41d7f": 0,
+        "#13c2c2": 0
+      },
+      "kind": "matrix",
+      "passMark": 0,
+      "barToken": 0
+    }
+  },
+  {
+    "index": 84,
+    "title": "采购订单",
+    "uid": "w3puryzkva06iuhh",
+    "liveness": "PASS",
+    "kind": "poboard",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    },
+    "structural": {
+      "banned": {
+        "#1677ff": 0,
+        "#722ed1": 0,
+        "#7c3aed": 0,
+        "#ff4d4f": 0,
+        "#faad14": 0,
+        "#c41d7f": 0,
+        "#13c2c2": 0
+      },
+      "kind": "poboard",
+      "anyJsblock": true
+    }
+  },
+  {
+    "index": 85,
+    "title": "发票匹配",
+    "uid": "w3pur45681oxtcsi",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 86,
+    "title": "付款申请",
+    "uid": "w3pur3an4pwnr1eo",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 87,
+    "title": "采购看板",
+    "uid": "w3b3x35bfqctwkn",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 88,
+    "title": "销售订单",
+    "uid": "w7mrp4w590rm0ws8",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 89,
+    "title": "商机管道",
+    "uid": "w6b6c6iqjj61zo9",
+    "liveness": "PASS",
+    "kind": "iframepage",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    },
+    "structural": {
+      "banned": {
+        "#1677ff": 0,
+        "#722ed1": 0,
+        "#7c3aed": 0,
+        "#ff4d4f": 0,
+        "#faad14": 0,
+        "#c41d7f": 0,
+        "#13c2c2": 0
+      },
+      "kind": "iframepage",
+      "anyJsblock": true
+    }
+  },
+  {
+    "index": 90,
+    "title": "报价单",
+    "uid": "n17v6xfvzxoj0f",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 91,
+    "title": "订单",
+    "uid": "n17vu68623sj9i",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 92,
+    "title": "回款",
+    "uid": "n17f2c15ji684n8g",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 93,
+    "title": "发票",
+    "uid": "n17f2utwb01mi3ha",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 94,
+    "title": "销售看板",
+    "uid": "w3b3utj5a15khmq",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 95,
+    "title": "交期日历",
+    "uid": "w3b3x8ymuxey8q",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 96,
+    "title": "计划日历",
+    "uid": "w3b3ass8lwvxiy",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 97,
+    "title": "销售仪表盘",
+    "uid": "n17f2y9wfrggxyo",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 98,
+    "title": "任务列表",
+    "uid": "n17e1ilgn22ts32",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 99,
+    "title": "任务看板",
+    "uid": "n17f12u108kzzyk1",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 100,
+    "title": "任务日历",
+    "uid": "n17f1ns70eshqwy",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 101,
+    "title": "项目",
+    "uid": "n17e1kqp4orpph5",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 102,
+    "title": "里程碑",
+    "uid": "n17e1m63re4tgre8",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 103,
+    "title": "工单",
+    "uid": "n17etqhllqqa28",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 104,
+    "title": "知识文章",
+    "uid": "n17f38lga4ln4s65",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 105,
+    "title": "审批中心",
+    "uid": "w1w167h6joi0ck6",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 106,
+    "title": "审批流配置",
+    "uid": "w3b4u2r9nnjqvi",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 107,
+    "title": "预警列表",
+    "uid": "w6b2dwgwk6zc3i",
+    "liveness": "PASS",
+    "kind": "tagpage",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    },
+    "structural": {
+      "banned": {
+        "#1677ff": 0,
+        "#722ed1": 0,
+        "#7c3aed": 0,
+        "#ff4d4f": 0,
+        "#faad14": 0,
+        "#c41d7f": 0,
+        "#13c2c2": 0
+      },
+      "kind": "tagpage",
+      "tagCount": 60,
+      "tagRadius": "999px",
+      "tagSoftBg": true,
+      "thWeight": "600",
+      "thBgNotWhite": true
+    }
+  },
+  {
+    "index": 108,
+    "title": "预警规则",
+    "uid": "w6b2rdacw363qjf7",
+    "liveness": "PASS",
+    "kind": "tagpage",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    },
+    "structural": {
+      "banned": {
+        "#1677ff": 0,
+        "#722ed1": 0,
+        "#7c3aed": 0,
+        "#ff4d4f": 0,
+        "#faad14": 0,
+        "#c41d7f": 0,
+        "#13c2c2": 0
+      },
+      "kind": "tagpage",
+      "tagCount": 16,
+      "tagRadius": "999px",
+      "tagSoftBg": true,
+      "thWeight": "600",
+      "thBgNotWhite": true
+    }
+  },
+  {
+    "index": 109,
+    "title": "效期看板",
+    "uid": "w6b3v1vsyqj5u9a",
+    "liveness": "PASS",
+    "kind": "expiry",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    },
+    "structural": {
+      "banned": {
+        "#1677ff": 0,
+        "#722ed1": 0,
+        "#7c3aed": 0,
+        "#ff4d4f": 0,
+        "#faad14": 0,
+        "#c41d7f": 0,
+        "#13c2c2": 0
+      },
+      "kind": "expiry",
+      "cellCount": 50,
+      "softCells": 50,
+      "kpiCards": 5
+    }
+  },
+  {
+    "index": 110,
+    "title": "批次追溯",
+    "uid": "w6b3tctwuy6wn0d",
+    "liveness": "PASS",
+    "kind": "dag",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    },
+    "structural": {
+      "banned": {
+        "#1677ff": 0,
+        "#722ed1": 0,
+        "#7c3aed": 0,
+        "#ff4d4f": 0,
+        "#faad14": 0,
+        "#c41d7f": 0,
+        "#13c2c2": 0
+      },
+      "kind": "dag",
+      "nodeCount": 18,
+      "strokeSet": [
+        "rgb(232, 232, 230)",
+        "rgb(30, 78, 140)",
+        "rgb(123, 157, 209)",
+        "rgb(58, 105, 164)",
+        "rgb(0, 112, 242)",
+        "rgb(23, 61, 112)"
+      ],
+      "strokesInWhitelist": true,
+      "anchorPrimary": null
+    }
+  },
+  {
+    "index": 111,
+    "title": "召回管理",
+    "uid": "w6b3r1wnc10bflfg",
+    "liveness": "PASS",
+    "kind": "tagpage",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    },
+    "structural": {
+      "banned": {
+        "#1677ff": 0,
+        "#722ed1": 0,
+        "#7c3aed": 0,
+        "#ff4d4f": 0,
+        "#faad14": 0,
+        "#c41d7f": 0,
+        "#13c2c2": 0
+      },
+      "kind": "tagpage",
+      "tagCount": 6,
+      "tagRadius": "999px",
+      "tagSoftBg": true,
+      "thWeight": "600",
+      "thBgNotWhite": true
+    }
+  },
+  {
+    "index": 112,
+    "title": "应用中心",
+    "uid": "c9c6wzppejk",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 113,
+    "title": "排产甘特",
+    "uid": "96yet9a0x45",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "index": 114,
+    "title": "任务甘特",
+    "uid": "zs3oqvlgqq0",
+    "liveness": "PASS",
+    "kind": "sweep",
+    "banned": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0,
+      "#ff4d4f": 0,
+      "#faad14": 0,
+      "#c41d7f": 0,
+      "#13c2c2": 0
+    }
+  },
+  {
+    "engine": "/insp",
+    "marker": "insp",
+    "w7Primary": "#1E4E8C",
+    "bannedComputed": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0
+    }
+  },
+  {
+    "engine": "/crm",
+    "marker": "crm",
+    "w7Primary": "#1E4E8C",
+    "bannedComputed": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0
+    }
+  },
+  {
+    "engine": "/terminals/cards.html",
+    "marker": "cards",
+    "w7Primary": "#5783BC",
+    "bannedComputed": {
+      "#1677ff": 0,
+      "#7c3aed": 0,
+      "#722ed1": 0
+    }
+  }
+]
