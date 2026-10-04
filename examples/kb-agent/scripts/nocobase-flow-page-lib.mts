@@ -1172,9 +1172,17 @@ export const STATCARD_CHART_HEIGHT = 112
  * single-measure aggregation + visual.mode='custom'). Renders the card title,
  * the big number, and the 口径 footnote (P-2' — the card never follows the
  * page filter, so the footnote states its own scope in plain words). The
- * first line carries {@link W4B3_MARKER} for batch identification.
+ * first line carries {@link W4B3_MARKER} for batch identification; the W7
+ * Forge line under it marks the upgraded look (design-language.md §5:
+ * 28/600/#1F2630 figure with the currency unit at 60% size, secondary-gray
+ * label, weak-gray footnote — no legacy #1d4ed8 figure).
  *
- * @param spec aggregation alias to read, unit strings, title and footnote texts
+ * Optional alertWhen colors the figure (and its unit) with alertColor when the
+ * value crosses the rule — count-style risk cards (临期批次>0 → red) and
+ * signed metrics (毛利率<0 → red) get value-driven semantic color without a
+ * component change.
+ *
+ * @param spec aggregation alias to read, unit strings, title and footnote texts, optional value-alert rule
  */
 export function statCardRaw(spec: {
   alias: string
@@ -1183,19 +1191,28 @@ export function statCardRaw(spec: {
   unitPrefix?: string
   unitSuffix?: string
   decimals?: number
+  /** Value rule that flips the figure to alertColor: n>0, or n<0. */
+  alertWhen?: 'nonZero' | 'ltZero'
+  /** Semantic fill for the alerted figure; defaults to Negative #AA0808. */
+  alertColor?: string
 }): string {
+  const alertColor = spec.alertColor ?? '#AA0808'
+  const alertRule = spec.alertWhen === 'nonZero' ? 'n > 0' : spec.alertWhen === 'ltZero' ? 'n < 0' : ''
   return [
     `/* ${W4B3_MARKER} statcard */`,
+    `/* w7 forge statcard */`,
     `const v = ((ctx.data.objects || [])[0] || {})['${spec.alias}'];`,
     'const n = Number(v == null ? 0 : v);',
     `const fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: ${spec.decimals ?? 2} });`,
-    `const text = '${spec.unitPrefix ?? ''}' + (isFinite(n) ? fmt(n) : '0') + '${spec.unitSuffix ?? ''}';`,
+    `const num = isFinite(n) ? fmt(n) : '0';`,
+    ...(alertRule === '' ? [] : [`const figFill = ${alertRule} ? '${alertColor}' : '#1F2630';`]),
+    `const text = '${spec.unitPrefix ? `{u|${spec.unitPrefix}}` : ''}' + num + '${spec.unitSuffix ? `{u|${spec.unitSuffix}}` : ''}';`,
     'return {',
     `  containerStyle: { height: ${STATCARD_CHART_HEIGHT} },`,
     '  graphic: { elements: [',
-    `    { type: 'text', left: 12, top: 8, style: { text: ${JSON.stringify(spec.title)}, fontSize: 12, fontWeight: 500, fill: '#6b7280' } },`,
-    `    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },`,
-    `    { type: 'text', left: 12, bottom: 4, style: { text: ${JSON.stringify(spec.footnote)}, fontSize: 10, fill: '#9ca3af' } },`,
+    `    { type: 'text', left: 12, top: 8, style: { text: ${JSON.stringify(spec.title)}, fontSize: 12, fontWeight: 500, fill: '#55606E' } },`,
+    `    { type: 'text', left: 12, top: 24, style: { text: text, fontSize: 28, fontWeight: 600, fill: ${alertRule === '' ? "'#1F2630'" : 'figFill'}, rich: { u: { fontSize: 17, fontWeight: 600, fill: ${alertRule === '' ? "'#1F2630'" : 'figFill'} } } } },`,
+    `    { type: 'text', left: 12, bottom: 4, style: { text: ${JSON.stringify(spec.footnote)}, fontSize: 10, fill: '#8A94A0' } },`,
     '  ] },',
     '};',
   ].join('\n')
@@ -1210,7 +1227,7 @@ export function statCardRaw(spec: {
  * {@link W4B3_MARKER} + props.title under the grid).
  *
  * @param token root auth token
- * @param spec collection, one measure, optional filter, card texts, and the sortIndex for grid placement
+ * @param spec collection, one measure, optional filter, card texts, the sortIndex for grid placement, and the optional value-alert rule passed through to the raw
  * @returns the created ChartBlockModel uid
  */
 export async function metricChart(
@@ -1226,6 +1243,8 @@ export async function metricChart(
     unitSuffix?: string
     decimals?: number
     sortIndex?: number
+    alertWhen?: 'nonZero' | 'ltZero'
+    alertColor?: string
   },
 ): Promise<string> {
   // Direct flowModels:save, not flowSurfaces:addBlock: the authoring channel
@@ -1270,6 +1289,8 @@ export async function metricChart(
                 ...(spec.unitPrefix === undefined ? {} : { unitPrefix: spec.unitPrefix }),
                 ...(spec.unitSuffix === undefined ? {} : { unitSuffix: spec.unitSuffix }),
                 ...(spec.decimals === undefined ? {} : { decimals: spec.decimals }),
+                ...(spec.alertWhen === undefined ? {} : { alertWhen: spec.alertWhen }),
+                ...(spec.alertColor === undefined || spec.alertWhen === undefined ? {} : { alertColor: spec.alertColor }),
               }),
             },
           },

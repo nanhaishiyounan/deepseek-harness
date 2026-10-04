@@ -1,0 +1,26 @@
+===== /alerts/act probes =====
+-- negative: keeper claims ar_overdue id=23 (not routed to keeper) --
+{"ok":false,"error":"动作被拒（id=23 claim by keeper）——不在路由责任人白名单或状态流不匹配（认领→关闭）"}
+HTTP 403
+-- positive: finance claims id=23 --
+{"ok":true,"id":23,"action":"claim","user":"finance","moved":1}
+HTTP 200
+-- DB after claim --
+23|acknowledged|finance|
+-- restore id23 (claim probe row) --
+23|open|
+UPDATE 1
+-- restore id22 (reopened-by-experiment row, original: resolved + note kept) --
+22|resolved|W6-B2 断言腿：已回款关闭
+UPDATE 1
+-- final ar_overdue state --
+22|SO-2026-0001|warning|resolved|
+23|SO-W6B2-SEED|critical|open|
+24|SO-W5B4-01|warning|open|
+-- final global count by status/rule_type (expect: total 20, open 12 / resolved 8) --
+resolved|8
+open|12
+ar_overdue|3
+cert_due|10
+expiry|4
+quality_abnormal|3

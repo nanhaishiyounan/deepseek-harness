@@ -30,6 +30,8 @@ export type {
   NocoBaseListOptions,
   NocoBaseListResult,
 } from './client.ts'
+export { clearSessionActingUser, sessionActingUserOf, setSessionActingUser } from './acting-user.ts'
+export type { ActingUser } from './acting-user.ts'
 export { compileNbFilter, describeNbFilterCondition, parseNbFilterCondition } from './filter.ts'
 export type { NbFilterCondition, NbFilterConditionInput, NbFilterMatch, NbFilterOp } from './filter.ts'
 export { NocoBaseConnectorProvider, NOCOBASE_PROVIDER_ID } from './provider.ts'

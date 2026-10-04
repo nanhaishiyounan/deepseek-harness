@@ -1,0 +1,121 @@
+{
+  "assertions": {
+    "liveTriple": true,
+    "crmSignin": true,
+    "pipeFiveColumns": true,
+    "pipeColumnSums": true,
+    "pipeWeightedStat": true,
+    "pipeXssInert": true,
+    "dragDispatched": true,
+    "dragWriteback": true,
+    "cust360Timeline": true,
+    "cust360Cards": true,
+    "cust360TimelineCount": true,
+    "convertQuoteListed": true,
+    "convertCreated": true,
+    "convertRecon": true,
+    "convertReplayRefused": true,
+    "negNoToken401": true,
+    "negBuyer403": true,
+    "negBuyerNoWrite": true,
+    "fix06DoneTab": true,
+    "fix06FqcLateSign": true,
+    "fix06OpensReport": true,
+    "fix01JudgedNotDash": true,
+    "fix02ReviewerBackfilled": true,
+    "fix03ConcessionAlertOpen": true,
+    "leakWizardBAvailable": true,
+    "fix05NoLeak": true,
+    "fix05ReopenClean": true,
+    "fix04NoReportEntry": true,
+    "fix04VerdictFailed": true
+  },
+  "identity": "销售工作台：sales_rep",
+  "board": {
+    "cols": [
+      {
+        "stage": "inquiry",
+        "sum": "Σ金额 ¥418000 · 加权 ¥41800",
+        "cards": 4
+      },
+      {
+        "stage": "quote",
+        "sum": "Σ金额 ¥494000 · 加权 ¥197600",
+        "cards": 4
+      },
+      {
+        "stage": "negotiation",
+        "sum": "Σ金额 ¥35000 · 加权 ¥24500",
+        "cards": 1
+      },
+      {
+        "stage": "won",
+        "sum": "Σ金额 ¥147000 · 加权 ¥147000",
+        "cards": 3
+      },
+      {
+        "stage": "lost",
+        "sum": "Σ金额 ¥58000 · 加权 ¥0",
+        "cards": 1
+      }
+    ],
+    "stats": "在途商机（询价/报价/谈判）9 在途总金额¥947000 加权管道 Σ(金额×概率)¥263900 累计赢单3",
+    "weighted": true,
+    "xssText": true,
+    "xssElement": false,
+    "dwellBadge": 0
+  },
+  "cust360": {
+    "stats": [
+      "1 · ¥68000",
+      "10",
+      "¥80890",
+      "¥40",
+      "2"
+    ],
+    "timelineKinds": [
+      "k-order",
+      "k-order",
+      "k-order",
+      "k-order",
+      "k-order",
+      "k-order",
+      "k-order",
+      "k-quote",
+      "k-quote",
+      "k-ship",
+      "k-payment",
+      "k-ship",
+      "k-ship"
+    ],
+    "orders": true,
+    "arCard": true
+  },
+  "convertMsg": "已生成销售订单 SO-2026-0094（金额 ¥1000 · 产品行 1） · 已提交审批（当前态 pending）",
+  "replay": {
+    "refused": true,
+    "duplicate": true,
+    "existing": "SO-2026-0094",
+    "error": ""
+  },
+  "negative": {
+    "noTokenStatus": 401,
+    "buyerRefused": true,
+    "buyerRefusedMsg": "CRM 写操作限 销售部/admin（buyer 不在围栏内——角色矩阵）",
+    "buyerConvertRefused": true
+  },
+  "doneTab": {
+    "ok": true,
+    "count": 30,
+    "hasReportNo": true,
+    "hasEntry": true,
+    "fqcRow": true
+  },
+  "leakA": "A 单让步理由——不应泄入 B 单",
+  "leakB": "",
+  "failResult": {
+    "text": "拒收（不合格） 检验单QI-W6B5-B6FIX 抽样方案2.5（normal）· 91-150/F → n=20 Ac=1 Re=2 缺陷计数严重 0 · 主要 3 · 次要 0 ← 返回队列",
+    "reportBtn": false,
+    "reportEntry": false
+  }
+}

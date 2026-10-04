@@ -29,7 +29,8 @@
     "**/*.js",
     "**/*.mjs",
     "**/*.config.ts", // Tool and app configs are outside the repository TypeScript programs.
-    "packages/client/tsdown.client.ts" // Shared client build preset, also outside a TypeScript program.
+    "packages/client/tsdown.client.ts", // Shared client build preset, also outside a TypeScript program.
+    "examples/kb-agent/labels/**" // Standalone esbuild SPA outside the repo TypeScript programs (type-aware rules see its unresolvable DOM/module types as `error`); its gates are the esbuild bundle + the w6b3-labels round-trip assert (W6-B10 closure: 59 type-aware errors were an artifact of the missing project context, not defects).
   ],
   "overrides": [
     {

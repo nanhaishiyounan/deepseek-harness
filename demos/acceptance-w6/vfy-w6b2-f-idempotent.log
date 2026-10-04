@@ -1,0 +1,18 @@
+===== SCENARIO F: idempotency — two consecutive scans =====
+-- F1 BEFORE --
+20
+3ea19f228000e611045f6421c2c50f8f
+121
+-- F2 scan #1 --
+06:30:01
+{"ok":true,"rules":[{"rule":"expiry","created":0,"updated":4,"resolved":0,"notified":0},{"rule":"cert_due","created":0,"updated":3,"resolved":0,"notified":0},{"rule":"ar_overdue","created":0,"updated":3,"resolved":0,"notified":0},{"rule":"quality_abnormal","created":0,"updated":3,"resolved":0,"notified":0}],"notified":0}
+-- F3 scan #2 (5s later) --
+06:30:07
+{"ok":true,"rules":[{"rule":"expiry","created":0,"updated":4,"resolved":0,"notified":0},{"rule":"cert_due","created":0,"updated":3,"resolved":0,"notified":0},{"rule":"ar_overdue","created":0,"updated":3,"resolved":0,"notified":0},{"rule":"quality_abnormal","created":0,"updated":3,"resolved":0,"notified":0}],"notified":0}
+-- F4 AFTER --
+20
+3ea19f228000e611045f6421c2c50f8f
+-- F5 dup dedup_key check (expect 0 rows) --
+(empty above = 0 dups)
+-- F6 notification delta --
+121

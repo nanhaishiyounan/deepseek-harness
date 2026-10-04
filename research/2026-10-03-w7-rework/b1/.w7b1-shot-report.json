@@ -1,0 +1,320 @@
+{
+  "requested": 22,
+  "ok": 22,
+  "failed": [],
+  "shots": [
+    {
+      "name": "w7-b1-04-客户.png",
+      "uid": "n17sys042q2lz",
+      "title": "客户",
+      "domain": "crm",
+      "bytes": 158120
+    },
+    {
+      "name": "w7-b1-03-销售线索.png",
+      "uid": "n17rwc527ujwt",
+      "title": "销售线索",
+      "domain": "crm",
+      "bytes": 174388
+    },
+    {
+      "name": "w7-b1-05-联系人.png",
+      "uid": "n17c3lkyg9zjd6",
+      "title": "联系人",
+      "domain": "crm",
+      "bytes": 148723
+    },
+    {
+      "name": "w7-b1-06-产品与服务.png",
+      "uid": "n17f2wwpqs60dtk",
+      "title": "产品与服务",
+      "domain": "crm",
+      "bytes": 153372
+    },
+    {
+      "name": "w7-b1-07-客户仪表盘.png",
+      "uid": "n17f2jumvap76nm8",
+      "title": "客户仪表盘",
+      "domain": "crm",
+      "bytes": 190851
+    },
+    {
+      "name": "w7-b1-91-订单.png",
+      "uid": "n17vu68623sj9i",
+      "title": "订单",
+      "domain": "sales",
+      "bytes": 161825
+    },
+    {
+      "name": "w7-b1-90-报价单.png",
+      "uid": "n17v6xfvzxoj0f",
+      "title": "报价单",
+      "domain": "sales",
+      "bytes": 139723
+    },
+    {
+      "name": "w7-b1-92-回款.png",
+      "uid": "n17f2c15ji684n8g",
+      "title": "回款",
+      "domain": "sales",
+      "bytes": 184700
+    },
+    {
+      "name": "w7-b1-93-发票.png",
+      "uid": "n17f2utwb01mi3ha",
+      "title": "发票",
+      "domain": "sales",
+      "bytes": 178467
+    },
+    {
+      "name": "w7-b1-97-销售仪表盘.png",
+      "uid": "n17f2y9wfrggxyo",
+      "title": "销售仪表盘",
+      "domain": "sales",
+      "bytes": 199689
+    },
+    {
+      "name": "w7-b1-88-销售订单.png",
+      "uid": "w7mrp4w590rm0ws8",
+      "title": "销售订单",
+      "domain": "sales",
+      "bytes": 165972
+    },
+    {
+      "name": "w7-b1-94-销售看板.png",
+      "uid": "w3b3utj5a15khmq",
+      "title": "销售看板",
+      "domain": "sales",
+      "bytes": 98984
+    },
+    {
+      "name": "w7-b1-95-交期日历.png",
+      "uid": "w3b3x8ymuxey8q",
+      "title": "交期日历",
+      "domain": "sales",
+      "bytes": 98540
+    },
+    {
+      "name": "w7-b1-96-计划日历.png",
+      "uid": "w3b3ass8lwvxiy",
+      "title": "计划日历",
+      "domain": "sales",
+      "bytes": 81003
+    },
+    {
+      "name": "w7-b1-80-采购申请.png",
+      "uid": "w3pura0kyqfx4f9",
+      "title": "采购申请",
+      "domain": "procurement",
+      "bytes": 159612
+    },
+    {
+      "name": "w7-b1-81-询价管理.png",
+      "uid": "w3purlvif0v23bun",
+      "title": "询价管理",
+      "domain": "procurement",
+      "bytes": 122756
+    },
+    {
+      "name": "w7-b1-82-供应商报价.png",
+      "uid": "w3pur9w1c3yg3rjd",
+      "title": "供应商报价",
+      "domain": "procurement",
+      "bytes": 160538
+    },
+    {
+      "name": "w7-b1-83-比价表.png",
+      "uid": "w3purb7o0r3yqi45",
+      "title": "比价表",
+      "domain": "procurement",
+      "bytes": 162711
+    },
+    {
+      "name": "w7-b1-84-采购订单.png",
+      "uid": "w3puryzkva06iuhh",
+      "title": "采购订单",
+      "domain": "procurement",
+      "bytes": 132884
+    },
+    {
+      "name": "w7-b1-85-发票匹配.png",
+      "uid": "w3pur45681oxtcsi",
+      "title": "发票匹配",
+      "domain": "procurement",
+      "bytes": 137388
+    },
+    {
+      "name": "w7-b1-86-付款申请.png",
+      "uid": "w3pur3an4pwnr1eo",
+      "title": "付款申请",
+      "domain": "procurement",
+      "bytes": 120492
+    },
+    {
+      "name": "w7-b1-87-采购看板.png",
+      "uid": "w3b3x35bfqctwkn",
+      "title": "采购看板",
+      "domain": "procurement",
+      "bytes": 103870
+    }
+  ],
+  "probes": {
+    "客户": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "noLegacyHex": true
+    },
+    "销售线索": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "联系人": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "noLegacyHex": true
+    },
+    "产品与服务": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "客户仪表盘": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "noLegacyHex": true
+    },
+    "订单": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "报价单": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "回款": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "发票": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "销售仪表盘": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "销售订单": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "销售看板": {
+      "tagSoft": true,
+      "tagPill": true,
+      "noLegacyHex": true
+    },
+    "交期日历": {
+      "noLegacyHex": true
+    },
+    "计划日历": {
+      "noLegacyHex": true
+    },
+    "采购申请": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "询价管理": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "供应商报价": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "比价表": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "采购订单": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "发票匹配": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "付款申请": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "采购看板": {
+      "tagSoft": true,
+      "tagPill": true,
+      "noLegacyHex": true
+    }
+  }
+}

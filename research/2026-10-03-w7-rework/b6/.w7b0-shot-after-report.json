@@ -1,0 +1,692 @@
+{
+  "phase": "after",
+  "requested": 114,
+  "ok": 114,
+  "failed": [],
+  "shots": [
+    {
+      "name": "001-经营总览.png",
+      "uid": "w6b9cdzrc2lst1dm",
+      "title": "经营总览",
+      "bytes": 230581
+    },
+    {
+      "name": "002-AI-工作台.png",
+      "uid": "n13ai2efgqippp44",
+      "title": "AI 工作台",
+      "bytes": 55364
+    },
+    {
+      "name": "003-销售线索.png",
+      "uid": "n17rwc527ujwt",
+      "title": "销售线索",
+      "bytes": 172146
+    },
+    {
+      "name": "004-客户.png",
+      "uid": "n17sys042q2lz",
+      "title": "客户",
+      "bytes": 157818
+    },
+    {
+      "name": "005-联系人.png",
+      "uid": "n17c3lkyg9zjd6",
+      "title": "联系人",
+      "bytes": 149223
+    },
+    {
+      "name": "006-产品与服务.png",
+      "uid": "n17f2wwpqs60dtk",
+      "title": "产品与服务",
+      "bytes": 142995
+    },
+    {
+      "name": "007-客户仪表盘.png",
+      "uid": "n17f2jumvap76nm8",
+      "title": "客户仪表盘",
+      "bytes": 191429
+    },
+    {
+      "name": "008-入库单.png",
+      "uid": "h5wmsrh8ls7pkv5i",
+      "title": "入库单",
+      "bytes": 190054
+    },
+    {
+      "name": "009-出库单.png",
+      "uid": "h5wmsvwkqjiiaxdj",
+      "title": "出库单",
+      "bytes": 169034
+    },
+    {
+      "name": "010-库存查询.png",
+      "uid": "h5wms9v2hly0cg6j",
+      "title": "库存查询",
+      "bytes": 159264
+    },
+    {
+      "name": "011-盘点管理.png",
+      "uid": "h5wms2hmkvlfsmtf",
+      "title": "盘点管理",
+      "bytes": 155838
+    },
+    {
+      "name": "012-移库管理.png",
+      "uid": "h5wmspyqfovkqjff",
+      "title": "移库管理",
+      "bytes": 120815
+    },
+    {
+      "name": "013-预留管理.png",
+      "uid": "h5wms9zlhetpzwl",
+      "title": "预留管理",
+      "bytes": 233166
+    },
+    {
+      "name": "014-补货预警.png",
+      "uid": "h5wmstw8iug4upxs",
+      "title": "补货预警",
+      "bytes": 144128
+    },
+    {
+      "name": "015-库存流水.png",
+      "uid": "h5wms9srcrn5fhiq",
+      "title": "库存流水",
+      "bytes": 212632
+    },
+    {
+      "name": "016-月度收发存.png",
+      "uid": "h5wmslacezwb94s",
+      "title": "月度收发存",
+      "bytes": 144816
+    },
+    {
+      "name": "017-批次主数据.png",
+      "uid": "h5wmsgd4pntmwvg",
+      "title": "批次主数据",
+      "bytes": 186002
+    },
+    {
+      "name": "018-仓库库区.png",
+      "uid": "h5wms50cuimohzz7",
+      "title": "仓库库区",
+      "bytes": 130450
+    },
+    {
+      "name": "019-库位平面图.png",
+      "uid": "h5wms1nju21hb5c8",
+      "title": "库位平面图",
+      "bytes": 134531
+    },
+    {
+      "name": "020-盘点计划.png",
+      "uid": "h5wmsddav9gkxtl",
+      "title": "盘点计划",
+      "bytes": 136195
+    },
+    {
+      "name": "021-收货终端.png",
+      "uid": "w3b66yns80jnq92",
+      "title": "收货终端",
+      "bytes": 100409
+    },
+    {
+      "name": "022-供应商档案.png",
+      "uid": "h4srm2u9xiqx09jb",
+      "title": "供应商档案",
+      "bytes": 163101
+    },
+    {
+      "name": "023-供应商准入.png",
+      "uid": "h4srm6hfqnpnrqu5",
+      "title": "供应商准入",
+      "bytes": 178810
+    },
+    {
+      "name": "024-审核检查表.png",
+      "uid": "h4srmuvf86en2kn",
+      "title": "审核检查表",
+      "bytes": 191357
+    },
+    {
+      "name": "025-审核评分录入.png",
+      "uid": "h4srmflpebqkuz",
+      "title": "审核评分录入",
+      "bytes": 163247
+    },
+    {
+      "name": "026-绩效评分卡.png",
+      "uid": "h4srms4w5viez9zp",
+      "title": "绩效评分卡",
+      "bytes": 132261
+    },
+    {
+      "name": "027-供应商绩效雷达.png",
+      "uid": "h4srmaf4rurtt17p",
+      "title": "供应商绩效雷达",
+      "bytes": 179964
+    },
+    {
+      "name": "028-证照效期预警.png",
+      "uid": "h4srmjjlvbjei4fd",
+      "title": "证照效期预警",
+      "bytes": 181958
+    },
+    {
+      "name": "029-整改跟踪.png",
+      "uid": "h4srm25tmro1wjuw",
+      "title": "整改跟踪",
+      "bytes": 135945
+    },
+    {
+      "name": "030-分类维护.png",
+      "uid": "n17f3rnd403uzlkc",
+      "title": "分类维护",
+      "bytes": 96422
+    },
+    {
+      "name": "031-生产订单.png",
+      "uid": "w5mfgntyu7wy20a",
+      "title": "生产订单",
+      "bytes": 181110
+    },
+    {
+      "name": "032-MO-执行视图.png",
+      "uid": "w6mfgmct2tf2braf",
+      "title": "MO 执行视图",
+      "bytes": 187461
+    },
+    {
+      "name": "033-排程明细.png",
+      "uid": "w5mfgp352sily7f",
+      "title": "排程明细",
+      "bytes": 191316
+    },
+    {
+      "name": "034-生产订单看板.png",
+      "uid": "w3b39xulomz8jj",
+      "title": "生产订单看板",
+      "bytes": 104351
+    },
+    {
+      "name": "035-领料单.png",
+      "uid": "w6mfgsp029qziym",
+      "title": "领料单",
+      "bytes": 184097
+    },
+    {
+      "name": "036-退料单.png",
+      "uid": "w6mfg1zez6dqkcgh",
+      "title": "退料单",
+      "bytes": 111248
+    },
+    {
+      "name": "037-报工记录.png",
+      "uid": "w6mfglmxq9mhbkur",
+      "title": "报工记录",
+      "bytes": 154569
+    },
+    {
+      "name": "038-工程变更单.png",
+      "uid": "w6b4bcr7wfgjxww",
+      "title": "工程变更单",
+      "bytes": 88286
+    },
+    {
+      "name": "039-完工单.png",
+      "uid": "w6mfgp1rrz08ffa",
+      "title": "完工单",
+      "bytes": 157360
+    },
+    {
+      "name": "040-配方版本与变更.png",
+      "uid": "w6b4bnn0n7n2p2i",
+      "title": "配方版本与变更",
+      "bytes": 49243
+    },
+    {
+      "name": "041-BOM-管理.png",
+      "uid": "w5mfga37ztlt6orc",
+      "title": "BOM 管理",
+      "bytes": 179377
+    },
+    {
+      "name": "042-BOM-工序.png",
+      "uid": "w5mfgkkvs7a4ijya",
+      "title": "BOM 工序",
+      "bytes": 140918
+    },
+    {
+      "name": "043-工作中心.png",
+      "uid": "w5mfg3eil2n4n0kr",
+      "title": "工作中心",
+      "bytes": 125328
+    },
+    {
+      "name": "044-主生产计划.png",
+      "uid": "w7mrpyru4s708nwn",
+      "title": "主生产计划",
+      "bytes": 147397
+    },
+    {
+      "name": "045-MRP-快照.png",
+      "uid": "w7mrpowj6l93nn0a",
+      "title": "MRP 快照",
+      "bytes": 147527
+    },
+    {
+      "name": "046-计划工作台.png",
+      "uid": "w7mrphtm8t9tzlk8",
+      "title": "计划工作台",
+      "bytes": 212152
+    },
+    {
+      "name": "047-车间终端.png",
+      "uid": "w3b6guuruqly03t",
+      "title": "车间终端",
+      "bytes": 125128
+    },
+    {
+      "name": "048-APS瓶颈与负荷.png",
+      "uid": "w6b8a3fg2qshtalw",
+      "title": "APS瓶颈与负荷",
+      "bytes": 148737
+    },
+    {
+      "name": "049-APS-what-if沙箱.png",
+      "uid": "w6b8a9z9q2cliq77",
+      "title": "APS what-if沙箱",
+      "bytes": 128183
+    },
+    {
+      "name": "050-员工.png",
+      "uid": "n17lhe5qyxu1g",
+      "title": "员工",
+      "bytes": 119673
+    },
+    {
+      "name": "051-部门.png",
+      "uid": "n17f3er0aw80yc8i",
+      "title": "部门",
+      "bytes": 91259
+    },
+    {
+      "name": "052-请假审批.png",
+      "uid": "n17f3wqpzee9wo2g",
+      "title": "请假审批",
+      "bytes": 118147
+    },
+    {
+      "name": "053-组织架构.png",
+      "uid": "w3b57ix4086om95",
+      "title": "组织架构",
+      "bytes": 97562
+    },
+    {
+      "name": "054-权限矩阵.png",
+      "uid": "w3b5m8kwiakieq",
+      "title": "权限矩阵",
+      "bytes": 122570
+    },
+    {
+      "name": "055-经营看板.png",
+      "uid": "w9kpi7zv98whvfpv",
+      "title": "经营看板",
+      "bytes": 69935
+    },
+    {
+      "name": "056-供应链看板.png",
+      "uid": "w9kpijpea6p6exnm",
+      "title": "供应链看板",
+      "bytes": 66862
+    },
+    {
+      "name": "057-生产看板.png",
+      "uid": "w9kpirvxmfx12l2i",
+      "title": "生产看板",
+      "bytes": 61818
+    },
+    {
+      "name": "058-库存看板.png",
+      "uid": "w9kpiatwzi4gjbff",
+      "title": "库存看板",
+      "bytes": 108198
+    },
+    {
+      "name": "059-应收应付对账.png",
+      "uid": "w9kpisldougonly",
+      "title": "应收应付对账",
+      "bytes": 119562
+    },
+    {
+      "name": "060-财务工作台.png",
+      "uid": "w6b9fgcovvinqe85",
+      "title": "财务工作台",
+      "bytes": 136609
+    },
+    {
+      "name": "061-质检单.png",
+      "uid": "w8qmjvyv8p5j7j",
+      "title": "质检单",
+      "bytes": 185148
+    },
+    {
+      "name": "062-检验读数.png",
+      "uid": "w8qmg3yelbk0rzm",
+      "title": "检验读数",
+      "bytes": 144125
+    },
+    {
+      "name": "063-AQL-抽样方案.png",
+      "uid": "w8qm15rxe53v8hh",
+      "title": "AQL 抽样方案",
+      "bytes": 105504
+    },
+    {
+      "name": "064-处置看板.png",
+      "uid": "w8qm472nluqt32x",
+      "title": "处置看板",
+      "bytes": 115537
+    },
+    {
+      "name": "065-质检看板.png",
+      "uid": "w3b3uw3d0mrz1b",
+      "title": "质检看板",
+      "bytes": 107743
+    },
+    {
+      "name": "066-季度绩效物化.png",
+      "uid": "w8qm8sx2tj9j0kb",
+      "title": "季度绩效物化",
+      "bytes": 152493
+    },
+    {
+      "name": "067-CCP监控配置.png",
+      "uid": "w6b4c4t709ypn92m",
+      "title": "CCP监控配置",
+      "bytes": 92259
+    },
+    {
+      "name": "068-质检工作台.png",
+      "uid": "w3b6nour73ecwgb",
+      "title": "质检工作台",
+      "bytes": 128364
+    },
+    {
+      "name": "069-CCP监控记录.png",
+      "uid": "w6b4ce752lctbwp8",
+      "title": "CCP监控记录",
+      "bytes": 168521
+    },
+    {
+      "name": "070-检验工作台.png",
+      "uid": "w6b5icrrgz5z9gu",
+      "title": "检验工作台",
+      "bytes": 77325
+    },
+    {
+      "name": "071-出厂检验报告.png",
+      "uid": "w6b5ruwgh0d52fif",
+      "title": "出厂检验报告",
+      "bytes": 83202
+    },
+    {
+      "name": "072-资产台账.png",
+      "uid": "n17wr2jbz8fl2i",
+      "title": "资产台账",
+      "bytes": 154879
+    },
+    {
+      "name": "073-设备台账.png",
+      "uid": "w6b8ekr28fjs4b0k",
+      "title": "设备台账",
+      "bytes": 134531
+    },
+    {
+      "name": "074-维保服务商.png",
+      "uid": "n17f3t3gtwv502s",
+      "title": "维保服务商",
+      "bytes": 118979
+    },
+    {
+      "name": "075-维保计划.png",
+      "uid": "w6b8e2y41rty9rx",
+      "title": "维保计划",
+      "bytes": 91526
+    },
+    {
+      "name": "076-维保记录.png",
+      "uid": "n17f34o4bhrzg1w",
+      "title": "维保记录",
+      "bytes": 137601
+    },
+    {
+      "name": "077-维保工单.png",
+      "uid": "w6b8eupafgchxsnf",
+      "title": "维保工单",
+      "bytes": 194236
+    },
+    {
+      "name": "078-计量校准.png",
+      "uid": "w6b8erufav9515p",
+      "title": "计量校准",
+      "bytes": 98095
+    },
+    {
+      "name": "079-维保日历.png",
+      "uid": "w6b8eci1cpbqsgtj",
+      "title": "维保日历",
+      "bytes": 85947
+    },
+    {
+      "name": "080-采购申请.png",
+      "uid": "w3pura0kyqfx4f9",
+      "title": "采购申请",
+      "bytes": 159216
+    },
+    {
+      "name": "081-询价管理.png",
+      "uid": "w3purlvif0v23bun",
+      "title": "询价管理",
+      "bytes": 122756
+    },
+    {
+      "name": "082-供应商报价.png",
+      "uid": "w3pur9w1c3yg3rjd",
+      "title": "供应商报价",
+      "bytes": 160538
+    },
+    {
+      "name": "083-比价表.png",
+      "uid": "w3purb7o0r3yqi45",
+      "title": "比价表",
+      "bytes": 146036
+    },
+    {
+      "name": "084-采购订单.png",
+      "uid": "w3puryzkva06iuhh",
+      "title": "采购订单",
+      "bytes": 136069
+    },
+    {
+      "name": "085-发票匹配.png",
+      "uid": "w3pur45681oxtcsi",
+      "title": "发票匹配",
+      "bytes": 136334
+    },
+    {
+      "name": "086-付款申请.png",
+      "uid": "w3pur3an4pwnr1eo",
+      "title": "付款申请",
+      "bytes": 120622
+    },
+    {
+      "name": "087-采购看板.png",
+      "uid": "w3b3x35bfqctwkn",
+      "title": "采购看板",
+      "bytes": 103457
+    },
+    {
+      "name": "088-销售订单.png",
+      "uid": "w7mrp4w590rm0ws8",
+      "title": "销售订单",
+      "bytes": 166980
+    },
+    {
+      "name": "089-商机管道.png",
+      "uid": "w6b6c6iqjj61zo9",
+      "title": "商机管道",
+      "bytes": 66079
+    },
+    {
+      "name": "090-报价单.png",
+      "uid": "n17v6xfvzxoj0f",
+      "title": "报价单",
+      "bytes": 139889
+    },
+    {
+      "name": "091-订单.png",
+      "uid": "n17vu68623sj9i",
+      "title": "订单",
+      "bytes": 163814
+    },
+    {
+      "name": "092-回款.png",
+      "uid": "n17f2c15ji684n8g",
+      "title": "回款",
+      "bytes": 185018
+    },
+    {
+      "name": "093-发票.png",
+      "uid": "n17f2utwb01mi3ha",
+      "title": "发票",
+      "bytes": 178128
+    },
+    {
+      "name": "094-销售看板.png",
+      "uid": "w3b3utj5a15khmq",
+      "title": "销售看板",
+      "bytes": 110167
+    },
+    {
+      "name": "095-交期日历.png",
+      "uid": "w3b3x8ymuxey8q",
+      "title": "交期日历",
+      "bytes": 99814
+    },
+    {
+      "name": "096-计划日历.png",
+      "uid": "w3b3ass8lwvxiy",
+      "title": "计划日历",
+      "bytes": 81459
+    },
+    {
+      "name": "097-销售仪表盘.png",
+      "uid": "n17f2y9wfrggxyo",
+      "title": "销售仪表盘",
+      "bytes": 199838
+    },
+    {
+      "name": "098-任务列表.png",
+      "uid": "n17e1ilgn22ts32",
+      "title": "任务列表",
+      "bytes": 175139
+    },
+    {
+      "name": "099-任务看板.png",
+      "uid": "n17f12u108kzzyk1",
+      "title": "任务看板",
+      "bytes": 121004
+    },
+    {
+      "name": "100-任务日历.png",
+      "uid": "n17f1ns70eshqwy",
+      "title": "任务日历",
+      "bytes": 84282
+    },
+    {
+      "name": "101-项目.png",
+      "uid": "n17e1kqp4orpph5",
+      "title": "项目",
+      "bytes": 166296
+    },
+    {
+      "name": "102-里程碑.png",
+      "uid": "n17e1m63re4tgre8",
+      "title": "里程碑",
+      "bytes": 119428
+    },
+    {
+      "name": "103-工单.png",
+      "uid": "n17etqhllqqa28",
+      "title": "工单",
+      "bytes": 176811
+    },
+    {
+      "name": "104-知识文章.png",
+      "uid": "n17f38lga4ln4s65",
+      "title": "知识文章",
+      "bytes": 129575
+    },
+    {
+      "name": "105-审批中心.png",
+      "uid": "w1w167h6joi0ck6",
+      "title": "审批中心",
+      "bytes": 145625
+    },
+    {
+      "name": "106-审批流配置.png",
+      "uid": "w3b4u2r9nnjqvi",
+      "title": "审批流配置",
+      "bytes": 135311
+    },
+    {
+      "name": "107-预警列表.png",
+      "uid": "w6b2dwgwk6zc3i",
+      "title": "预警列表",
+      "bytes": 62325
+    },
+    {
+      "name": "108-预警规则.png",
+      "uid": "w6b2rdacw363qjf7",
+      "title": "预警规则",
+      "bytes": 112147
+    },
+    {
+      "name": "109-效期看板.png",
+      "uid": "w6b3k0jfsyskif",
+      "title": "效期看板",
+      "bytes": 49243
+    },
+    {
+      "name": "110-批次追溯.png",
+      "uid": "w6b3by6ukynxfou",
+      "title": "批次追溯",
+      "bytes": 49243
+    },
+    {
+      "name": "111-召回管理.png",
+      "uid": "w6b3r1wnc10bflfg",
+      "title": "召回管理",
+      "bytes": 144356
+    },
+    {
+      "name": "112-应用中心.png",
+      "uid": "c9c6wzppejk",
+      "title": "应用中心",
+      "bytes": 89029
+    },
+    {
+      "name": "113-排产甘特.png",
+      "uid": "96yet9a0x45",
+      "title": "排产甘特",
+      "bytes": 77982
+    },
+    {
+      "name": "114-任务甘特.png",
+      "uid": "zs3oqvlgqq0",
+      "title": "任务甘特",
+      "bytes": 41778
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "overflow": {
+    "home": {
+      "scrollWidth": 375,
+      "clientWidth": 375
+    },
+    "agents": {
+      "scrollWidth": 375,
+      "clientWidth": 375
+    },
+    "work": {
+      "scrollWidth": 375,
+      "clientWidth": 375
+    },
+    "me": {
+      "scrollWidth": 375,
+      "clientWidth": 375
+    }
+  },
+  "light": {
+    "tabTitle": {
+      "font-size": "12px",
+      "font-weight": "600"
+    },
+    "tabActive": {
+      "color": "rgb(30, 78, 140)"
+    },
+    "rootBg": {
+      "background-color": "rgb(234, 235, 232)"
+    },
+    "card": {
+      "background-color": "rgb(255, 255, 255)",
+      "border-radius": "16px",
+      "box-shadow": "rgba(31, 38, 48, 0.04) 0px 1px 2px 0px, rgba(31, 38, 48, 0.06) 0px 8px 24px 0px"
+    },
+    "statValue": {
+      "font-size": "24px"
+    },
+    "statLabel": {
+      "font-size": "12px",
+      "color": "rgb(85, 96, 110)"
+    },
+    "brandCount": 21
+  },
+  "dark": {
+    "rootBg": "rgb(12, 16, 23)",
+    "cardBg": "rgb(30, 38, 52)"
+  },
+  "failures": []
+}

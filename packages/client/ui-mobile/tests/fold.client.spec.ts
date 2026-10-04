@@ -107,16 +107,37 @@ describe('foldHistory (v3 dsh fences)', () => {
   it('folds form_draft and submit_receipt fences into their items', () => {
     const folded = foldHistory([
       event('assistant/message', { message: { content: [{ type: 'text', text: `草稿已备好，请过目。\n${draftFence}` }] } }, 1),
-      event('assistant/message', { message: { content: [{ type: 'text', text: `已登记。\n${receiptFence}` }] } }, 2),
+      // W6-B1 ①: the receipt needs its successful nb_create landing line in
+      // the window before the fence renders as the receipt card.
+      event('tool/call', { callId: 'c9', name: 'nb_create', arguments: '{"collection":"hub_po_purchase_orders"}' }, 2),
+      event('tool/result', { message: { role: 'user', content: [{ type: 'tool-result', toolCallId: 'c9', isError: false, content: [{ type: 'text', text: '已在 hub_po_purchase_orders 创建第 1042 行：\n- code: "PO-1"' }] }] } }, 3),
+      event('assistant/message', { message: { content: [{ type: 'text', text: `已登记。\n${receiptFence}` }] } }, 4),
     ])
     const card = folded.items[1]
     if (card?.kind !== 'task-card' || card.payload === undefined) throw new Error('expected v3 draft card')
     expect(card.payload.draftId).toBe('d_1')
     expect(card.payload.fields[0]?.tier).toBe('required')
     expect(card.draft.collection).toBe('hub_po_purchase_orders')
-    const receipt = folded.items[3]
+    const receipt = folded.items[4]
     if (receipt?.kind !== 'receipt') throw new Error('expected receipt item')
     expect(receipt.payload.rowId).toBe('1042')
+  })
+
+  it('degrades a submit_receipt with no matching nb_create landing (W6-B1 ①)', () => {
+    // The pathological round: a confirm+reject pair with no nb_create behind
+    // it — the fabricated receipt must not render as the landed card.
+    const fabricated = '```dsh\n{"v":3,"type":"submit_receipt","draftId":"d_9","form":{"collection":"pur_orders","label":"采购单"},"rowId":"7","summary":[{"label":"合计金额","value":"¥1","kind":"money"}]}\n```'
+    const failedResult = { message: { role: 'user', content: [{ type: 'tool-result', toolCallId: 'cx', isError: true, content: [{ type: 'text', text: '单据编号撞号' }] }] } }
+    const folded = foldHistory([
+      event('tool/call', { callId: 'cx', name: 'nb_create', arguments: '{"collection":"pur_orders"}' }, 0),
+      event('tool/result', failedResult, 1),
+      event('assistant/message', { message: { content: [{ type: 'text', text: `已提交。\n${fabricated}` }] } }, 2),
+    ])
+    expect(folded.items.some(item => item.kind === 'receipt')).toBe(false)
+    expect(folded.degradedFences).toBe(1)
+    const notice = folded.items.find(item => item.kind === 'degraded')
+    if (notice?.kind !== 'degraded') throw new Error('expected degraded notice')
+    expect(notice.text.includes('回执未经落库核实')).toBe(true)
   })
 
   it('folds a fenced user action into an action item, not a bubble', () => {

@@ -1,0 +1,6 @@
+w6b9-cockpit: --clean removed 11 row(s) from fin_dunning_records
+w6b9-cockpit: --clean removed 14 row(s) from fin_dunning_audit
+w6b9-cockpit: --clean removed 3 row(s) from fin_dunning_tasks
+w6b9-cockpit: --clean removed 3 row(s) from fin_statements
+w6b9-cockpit: --clean removed 6 row(s) from fin_match_issues
+w6b9-cockpit: --clean complete（wfl_alerts/B2 扫描状态保留；--demo 可从零重放）

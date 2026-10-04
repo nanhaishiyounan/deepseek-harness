@@ -1,0 +1,106 @@
+[chrome] [76374:1460489:1004/000102.631769:ERROR:chrome/browser/process_singleton_posix.cc:347] Failed to create /private/tmp/w6b5-shot-profile/SingletonLock: File exists (17)
+[chrome] [76374:1460489:1004/000102.636512:ERROR:chrome/app/chrome_main_delegate.cc:562] Failed to create a ProcessSingleton for your profile directory. This means that running multiple instances would start multiple browser processes rather than opening a new window in the existing process. Aborting now to avoid profile corruption.
+live: engine=200 nocobase=200 web=200
+  ✓ liveTriple
+  ✓ queueRendered — tabs=3
+  ✓ queueIdentity — 质检员：qc_inspector
+  ✓ aqlBadge — 批量段281-500 | 样本量字码H | 样本量 n50 | 接收数 Ac3 | 拒收数 Re4 | 严格度normal
+  ✓ doubleTapConfirm — tap1=确认失败 tap2=再点确认失败
+  ✓ photoAttached — photo-attached
+  ✓ verdictBadgeFail — 拒收（严重 1（0收1拒））
+  ✓ resultRejected —
+
+    拒收（不合格）
+
+
+      检验单QI-W6B5-01
+      抽样方案2.5（normal）· 281-500/H → n=50 Ac=3 Re=4
+      缺陷计数严重 1 · 主要 1 · 次要 0
+      处置单QM-NC-2026-0045（四路已走审批引擎）
+
+  ✓ disposalConcession — QM-NC-2026-0045
+  ✓ reconVerdict — inspection|W6B5-QI-W6B5-01-muskx74z-ze21k0|1|1|50/3/4|qc_inspector|normal|true ; readings|5 ; alert|inspection_fail|critical|open ;
+  ✓ reconReadings — inspection|W6B5-QI-W6B5-01-muskx74z-ze21k0|1|1|50/3/4|qc_inspector|normal|true ; readings|5 ; alert|inspection_fail|critical|open ;
+  ✓ reconAlert — alert|inspection_fail|critical|open
+  ✓ reconRework — after|failed ; nc|QM-NC-2026-0045|rework|closed|approved|RW-2026-0008 ; rworkmo|RW-2026-0008|rework|draft ; rworkmo|RW-2026-0007|rework|draft ; capa|1 ;
+  ✓ idempotentSameKey — "duplicate"
+  ✓ idempotentOtherKeyRefused — 检验单 QI-W6B5-01 已被处理（result=failed；判定 single-shot，重判走处置/再提交批流程）
+  ✓ verdictBadgePass
+  ✓ oqcAccepted
+  ✓ reportNineElements — th=14
+  ✓ reportMissingPlaceholders — 未维护 ×4
+  ✓ reportIssued — 已签发：检验合格证号 QR-2026-0001 / QR-2026-0001
+  ✓ reportPdf — base64 428712B
+  ✓ negNoToken401 — status=401
+  ✓ negBuyer403 — 检验写操作限 质检部/admin（buyer 不在围栏内——角色矩阵）
+  ✓ negReviewerFence — 审核人 buyer 不在质检部（成员：quality_lead/qc_inspector）——出厂检验报告须质检部复核放行
+  ✓ negConcessionNeedsSign — 让步接收（特采）必填：让步理由 + 审批人（让步必审批留痕）
+  ✓ negXssInert — window.__w6b5xss undefined + payload rendered as text
+  ✓ negXssEscapedInReport — {"escaped":true,"noElement":true}
+  ✓ platformEmbed — http://127.0.0.1:13110/insp
+{
+  "generatedAt": "2026-10-03T16:01:03.794Z",
+  "live": {
+    "engine": 200,
+    "nocobase": 200,
+    "web": 200
+  },
+  "assertions": {
+    "liveTriple": true,
+    "queueRendered": true,
+    "queueIdentity": true,
+    "aqlBadge": true,
+    "doubleTapConfirm": true,
+    "photoAttached": true,
+    "verdictBadgeFail": true,
+    "resultRejected": true,
+    "disposalConcession": true,
+    "reconVerdict": true,
+    "reconReadings": true,
+    "reconAlert": true,
+    "reconRework": true,
+    "idempotentSameKey": true,
+    "idempotentOtherKeyRefused": true,
+    "verdictBadgePass": true,
+    "oqcAccepted": true,
+    "reportNineElements": true,
+    "reportMissingPlaceholders": true,
+    "reportIssued": true,
+    "reportPdf": true,
+    "negNoToken401": true,
+    "negBuyer403": true,
+    "negReviewerFence": true,
+    "negConcessionNeedsSign": true,
+    "negXssInert": true,
+    "negXssEscapedInReport": true,
+    "platformEmbed": true
+  },
+  "identity": "质检员：qc_inspector",
+  "submitKey": "W6B5-QI-W6B5-01-muskx74z-ze21k0",
+  "disposal": {
+    "nc_code": "QM-NC-2026-0045",
+    "fromPage": "\n  \n    拒收（不合格）\n    \n    \n      检验单QI-W6B5-01\n      抽样方案2.5（normal）· 281-500/H → n=50 Ac=3 Re=4\n      缺陷计数严重 1 · 主要 1 · 次要 0\n      处置单QM-NC-2026-0045（四路已走审批引擎）\n      \n    \n    \n      ← 返回队列\n      \n    \n  "
+  },
+  "replay": {
+    "sameDuplicate": true,
+    "otherRefused": true,
+    "sameMsg": "duplicate",
+    "otherMsg": "检验单 QI-W6B5-01 已被处理（result=failed；判定 single-shot，重判走处置/再提交批流程）"
+  },
+  "oqcOpenWizard": "clicked",
+  "spaErrors": "",
+  "issued": "已签发：检验合格证号 QR-2026-0001",
+  "reportNo": "QR-2026-0001",
+  "pdfBytes": 428712,
+  "negative": {
+    "noTokenStatus": 401,
+    "buyerRefused": true,
+    "buyerRefusedMsg": "检验写操作限 质检部/admin（buyer 不在围栏内——角色矩阵）",
+    "reviewerRefused": true,
+    "reviewerRefusedMsg": "审核人 buyer 不在质检部（成员：quality_lead/qc_inspector）——出厂检验报告须质检部复核放行",
+    "concessionRefused": true,
+    "concessionRefusedMsg": "让步接收（特采）必填：让步理由 + 审批人（让步必审批留痕）",
+    "xssInert": true
+  },
+  "allGreen": true
+}

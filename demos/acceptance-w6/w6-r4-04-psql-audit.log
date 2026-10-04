@@ -1,0 +1,26 @@
+═══ ④ pur_award_audit 定标审计行（award/submit_failed/resubmit/replay 全链，与状态迁移同一 CTE 事务写入）═══
+13|4|RFQ-B7J1|buyer|award|PO-2026-1059|2026-10-03 01:33:52.010254+08
+14|4|RFQ-B7J1|buyer|submit_failed|PO-2026-1059|2026-10-03 01:33:52.128877+08
+15|4|RFQ-B7J1|buyer|resubmit|PO-2026-1059|2026-10-03 01:33:52.802327+08
+16|2|RFQ-B9F-0001|buyer|award|PO-2026-1060|2026-10-03 01:43:37.074045+08
+
+═══ ④ 引擎送审失败 warn 留痕（w6-r4-engine-boot.log，leg7b 现场）═══
+[sourcing] PO PO-2026-1059 送审失败（award，actor=buyer）— 未找到 pur_orders 的激活审批流配置（wfl_flow_configs）；先运行 nocobase-w1-approval.mts 或 --seed-flow（已留痕 pur_award_audit action=submit_failed）
+
+═══ ④ pur_rfqs.awarded_at（定标时间，含幂等迁移回填）═══
+RFQ-B9F-0001|awarded|2026-10-03 02:02:51.533146+08
+RFQ-B7J1|awarded|2026-10-03 01:33:52.010254+08
+
+═══ ⑦ pur_quotes (rfq_id) WHERE is_won 部分唯一索引（B6 ux_crm_quotes_converted 先例）═══
+CREATE UNIQUE INDEX ux_pur_quotes_won_per_rfq ON public.pur_quotes USING btree (rfq_id) WHERE is_won
+
+═══ ⑨ pur_sourcing_weight_audit（append-only 权重审计，old→new+actor）═══
+1|buyer|{"lead": 30, "price": 50, "quality": 20} → {"lead": 2, "price": 10, "quality": 88}|2026-10-03 01:30:36.494773+08
+2|buyer|{"lead": 2, "price": 10, "quality": 88} → {"lead": 30, "price": 50, "quality": 20}|2026-10-03 01:30:36.901577+08
+3|buyer|{"lead": 30, "price": 50, "quality": 20} → {"lead": 2, "price": 10, "quality": 88}|2026-10-03 01:31:04.149221+08
+4|buyer|{"lead": 2, "price": 10, "quality": 88} → {"lead": 30, "price": 50, "quality": 20}|2026-10-03 01:31:04.552863+08
+5|buyer|{"lead": 30, "price": 50, "quality": 20} → {"lead": 2, "price": 10, "quality": 88}|2026-10-03 01:33:48.72279+08
+6|buyer|{"lead": 2, "price": 10, "quality": 88} → {"lead": 30, "price": 50, "quality": 20}|2026-10-03 01:33:49.13627+08
+
+═══ ④ 定标 PO 终态与回执（B7J1：PO pending=重送审成功）═══
+PO-2026-1059|pending|三维定标（权重 价格50/交期30/质量20）：价格分=¥0.98/¥1.1×100=89.1；交期分=3/3天×100=100；质量分=94(A·2026Q2

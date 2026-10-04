@@ -12,6 +12,7 @@
 
 import { useMemo, useRef, useState, type JSX } from 'react'
 import { Badge, DotLoading, SearchBar, Tag, Toast } from 'antd-mobile'
+import { ChevronRight } from 'lucide-react'
 import { colleagueOf, rosterBandsOf, statusLabelOf, type ColleagueVisual } from '../colleagues.ts'
 import { messageOf, useAsync } from '../hooks.ts'
 import { navigate } from '../router.ts'
@@ -152,8 +153,8 @@ export function AgentsView(): JSX.Element {
                             key={skill}
                             className={css.skillPill as string}
                             style={{
-                              '--background-color': 'var(--dshm-primary-soft)',
-                              '--text-color': 'var(--dshm-on-soft)',
+                              '--background-color': 'var(--dshm-muted)',
+                              '--text-color': 'var(--dshm-muted-foreground)',
                               '--border-color': 'transparent',
                             }}
                           >
@@ -168,9 +169,12 @@ export function AgentsView(): JSX.Element {
                       </span>
                     )}
                   </span>
-                  <Tag className={css.statusChip as string} style={CHIP_FACES[visual.status]}>
-                    {statusLabel}
-                  </Tag>
+                  <span className={css.rosterTail}>
+                    <Tag className={css.statusChip as string} style={CHIP_FACES[visual.status]}>
+                      {statusLabel}
+                    </Tag>
+                    <ChevronRight size={16} strokeWidth={2} className={css.rosterChevron} aria-hidden="true" />
+                  </span>
                 </button>
               )
             })}

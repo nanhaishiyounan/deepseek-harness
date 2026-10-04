@@ -326,8 +326,8 @@ describe('mobile auth non-object branch and routes', () => {
     expect(loadIdentity()).toBeUndefined()
     localStorage.setItem('dsh-mobile-auth', 'null')
     expect(loadIdentity()).toBeUndefined()
-    saveIdentity({ phone: '13800138000', name: '业务员', loggedAt: 1 })
-    expect(loadIdentity()?.name).toBe('业务员')
+    saveIdentity({ username: 'buyer', nickname: '采购员·蔡俊', token: 'tok-svc', loggedAt: 1 })
+    expect(loadIdentity()?.nickname).toBe('采购员·蔡俊')
   })
 
   it('parses the login route and reads the default route query as absent', () => {

@@ -1,0 +1,169 @@
+{
+  "totalRoutes": 242,
+  "typeCounts": {
+    "group": 14,
+    "page": 3,
+    "tabs": 114,
+    "flowPage": 111
+  },
+  "flowPageCount": 111,
+  "groupChains": {
+    "": 2,
+    "CRM 客户": 5,
+    "仓储管理": 14,
+    "供应链": 8,
+    "基础数据": 1,
+    "生产与计划": 19,
+    "组织与系统": 5,
+    "经营分析": 6,
+    "质量管理": 11,
+    "资产管理": 8,
+    "采购管理": 8,
+    "销售管理": 10,
+    "项目与协同": 9,
+    "预警中心": 2,
+    "食品合规": 3
+  },
+  "createdAtBuckets": {
+    "pre-0918": 39,
+    "0918-0928": 48,
+    "w5-0929-0930": 3,
+    "w6-1001-plus": 21
+  },
+  "w4Baseline": {
+    "total": 206,
+    "group": 16,
+    "page": 3,
+    "tabs": 95,
+    "flowPage": 92
+  },
+  "deltaVsW4": {
+    "total": 36,
+    "group": -2,
+    "page": 0,
+    "tabs": 19,
+    "flowPage": 19
+  },
+  "newPagesVsW4": [
+    {
+      "schemaUid": "w6b9cdzrc2lst1dm",
+      "title": "经营总览",
+      "chain": ""
+    },
+    {
+      "schemaUid": "w6b4bcr7wfgjxww",
+      "title": "工程变更单",
+      "chain": "生产与计划"
+    },
+    {
+      "schemaUid": "w6b4bnn0n7n2p2i",
+      "title": "配方版本与变更",
+      "chain": "生产与计划"
+    },
+    {
+      "schemaUid": "w6b8a3fg2qshtalw",
+      "title": "APS瓶颈与负荷",
+      "chain": "生产与计划"
+    },
+    {
+      "schemaUid": "w6b8a9z9q2cliq77",
+      "title": "APS what-if沙箱",
+      "chain": "生产与计划"
+    },
+    {
+      "schemaUid": "w6b9fgcovvinqe85",
+      "title": "财务工作台",
+      "chain": "经营分析"
+    },
+    {
+      "schemaUid": "w6b4c4t709ypn92m",
+      "title": "CCP监控配置",
+      "chain": "质量管理"
+    },
+    {
+      "schemaUid": "w6b4ce752lctbwp8",
+      "title": "CCP监控记录",
+      "chain": "质量管理"
+    },
+    {
+      "schemaUid": "w6b5icrrgz5z9gu",
+      "title": "检验工作台",
+      "chain": "质量管理"
+    },
+    {
+      "schemaUid": "w6b5ruwgh0d52fif",
+      "title": "出厂检验报告",
+      "chain": "质量管理"
+    },
+    {
+      "schemaUid": "w6b8ekr28fjs4b0k",
+      "title": "设备台账",
+      "chain": "资产管理"
+    },
+    {
+      "schemaUid": "w6b8e2y41rty9rx",
+      "title": "维保计划",
+      "chain": "资产管理"
+    },
+    {
+      "schemaUid": "w6b8eupafgchxsnf",
+      "title": "维保工单",
+      "chain": "资产管理"
+    },
+    {
+      "schemaUid": "w6b8erufav9515p",
+      "title": "计量校准",
+      "chain": "资产管理"
+    },
+    {
+      "schemaUid": "w6b8eci1cpbqsgtj",
+      "title": "维保日历",
+      "chain": "资产管理"
+    },
+    {
+      "schemaUid": "w6b6c6iqjj61zo9",
+      "title": "商机管道",
+      "chain": "销售管理"
+    },
+    {
+      "schemaUid": "n17e1ilgn22ts32",
+      "title": "任务列表",
+      "chain": "项目与协同"
+    },
+    {
+      "schemaUid": "n17e1kqp4orpph5",
+      "title": "项目",
+      "chain": "项目与协同"
+    },
+    {
+      "schemaUid": "n17e1m63re4tgre8",
+      "title": "里程碑",
+      "chain": "项目与协同"
+    },
+    {
+      "schemaUid": "w6b2dwgwk6zc3i",
+      "title": "预警列表",
+      "chain": "预警中心"
+    },
+    {
+      "schemaUid": "w6b2rdacw363qjf7",
+      "title": "预警规则",
+      "chain": "预警中心"
+    },
+    {
+      "schemaUid": "w6b3k0jfsyskif",
+      "title": "效期看板",
+      "chain": "食品合规"
+    },
+    {
+      "schemaUid": "w6b3by6ukynxfou",
+      "title": "批次追溯",
+      "chain": "食品合规"
+    },
+    {
+      "schemaUid": "w6b3r1wnc10bflfg",
+      "title": "召回管理",
+      "chain": "食品合规"
+    }
+  ]
+}

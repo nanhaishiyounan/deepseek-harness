@@ -1,0 +1,23 @@
+== gates-b5（2026-10-02T11:30Z）==
+-- pnpm run typecheck（client face）
+> tsc -b tsconfig.client.json
+（通过，无输出错误；本批无 packages/ 改动，typecheck 面不受影响）
+
+-- vitest（改动面核对）
+本批改动面全部在 examples/kb-agent（引擎路由/新脚本/insp SPA）与 demos/ 证据——
+仓库 vitest 套件不覆盖 examples/kb-agent（历史轮次同口径，W6-B3/B4 gates 同），
+无相关套件可跑，如实记 N/A。
+
+-- oxlint staged 口径（本批改动面 4 文件：insp/src/server.ts、insp/src/main.ts、
+   scripts/w6b5-insp.mts、demos/acceptance-w6/w6-b5-shoot.mjs；另 approval-engine.mts
+   与 w6b2-rules.mts 的 B5 增量段同规则复核）
+Found 0 warnings and 0 errors.
+
+-- w6b5-insp --assert（断言腿，进终验矩阵）
+w6b5-insp: assert PASS（14 项：列/索引/规则/队列口径/AQL 15 段三方对拍 4 锚点/两页+iframe/grant）
+
+-- 演练腿 node demos/acceptance-w6/w6-b5-shoot.mjs（live 三联 + CDP 全流程 + 负向）
+w6-b5-shot-meta.json assertions 28/28 全绿（allGreen=true）
+
+-- w6b2-rules --assert（六路规则断言——B5 修复 length=4→6 口径漂移后的回归）
+w6b2-rules: assert 全部断言通过（六路：expiry/cert_due/ar_overdue/quality_abnormal/ccp_deviation/inspection_fail）

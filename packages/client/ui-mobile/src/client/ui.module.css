@@ -5,8 +5,8 @@
    (ui.tsx TONE_FACES — a class declaration would lose to the component's own
    inline defaults), this class keeps only the 10px type scale and pad. */
 .badge {
-  --border-radius: 999px;
-  font-size: 10px;
+  --border-radius: var(--dshm-radius-pill);
+  font-size: var(--dshm-fs-xs);
   line-height: 1;
   padding: 3px 6px;
   font-weight: 500;
@@ -17,7 +17,7 @@
   align-items: center;
   gap: 8px;
   color: var(--dshm-muted-foreground);
-  font-size: 13px;
+  font-size: var(--dshm-fs-sm);
   padding: 4px 2px;
 }
 
@@ -25,6 +25,93 @@
   display: inline-flex;
   flex: none;
   color: var(--dshm-primary);
+}
+
+/* ---- The unified empty state (W7-M2, audit 04 TOP-5): one system for every
+ *      empty face — the icon block, two copy lines, one solid CTA. ---- */
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 44px 24px;
+  text-align: center;
+}
+
+/* The icon tile: the 48px rounded block on the muted fill with the brand ink
+ * glyph — one brand accent, no emoji. */
+.emptyIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--dshm-radius);
+  background: var(--dshm-muted);
+  color: var(--dshm-primary);
+}
+
+.emptyTexts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.emptyTitle {
+  font-size: var(--dshm-fs-md);
+  line-height: 22px;
+  font-weight: 600;
+  color: var(--dshm-foreground);
+}
+
+.emptyDesc {
+  font-size: var(--dshm-fs-sm);
+  line-height: 20px;
+  color: var(--dshm-muted-foreground);
+}
+
+/* The single solid CTA — the primary action is never the outlined face
+ * (audit 04 §04's weighted-CTA rule). */
+.emptyAction:global(.adm-button) {
+  margin-top: 8px;
+  --border-radius: var(--dshm-radius);
+  height: var(--dshm-touch-sm);
+  padding-block: 0;
+  padding-inline: 18px;
+  font-size: var(--dshm-fs-sm);
+  font-weight: 600;
+}
+
+/* The in-card compact face (files/home strips): the icon tile shrinks beside
+ * the left-aligned copy. */
+.emptyStateSection {
+  flex-direction: row;
+  gap: 10px;
+  padding: 18px 16px;
+  text-align: left;
+}
+
+.emptyStateSection .emptyIcon {
+  width: 40px;
+  height: 40px;
+  flex: none;
+}
+
+.emptyStateSection .emptyTexts {
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.emptyStateSection .emptyTitle {
+  font-size: var(--dshm-fs-sm);
+  line-height: 20px;
+}
+
+.emptyStateSection .emptyDesc {
+  font-size: var(--dshm-fs-xs);
+  line-height: 17px;
 }
 
 .notice {
@@ -98,15 +185,76 @@
   min-width: 0;
 }
 
+.skelTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
 .skelTitle {
   --width: 45%;
-  --height: 18px;
-  --border-radius: 6px;
+  --height: 16px;
+  --border-radius: var(--dshm-radius-corner);
   background-color: var(--dshm-muted);
 }
 
-.skelParagraph {
-  --height: 18px;
-  --border-radius: 6px;
+/* The trailing timestamp slot — the skeleton mirrors the real row. */
+.skelTime {
+  --width: 40px;
+  --height: 12px;
+  --border-radius: var(--dshm-radius-corner);
   background-color: var(--dshm-muted);
+  flex: none;
+}
+
+.skelLine {
+  --height: 14px;
+  --border-radius: var(--dshm-radius-corner);
+  background-color: var(--dshm-muted);
+}
+
+.skelLineShort {
+  --width: 60%;
+  --height: 14px;
+  --border-radius: var(--dshm-radius-corner);
+  background-color: var(--dshm-muted);
+}
+
+/* The card head's 24px stamp disc (the todo/doc/alert silhouette). */
+.skelStamp {
+  --width: 24px;
+  --height: 24px;
+  --border-radius: 50%;
+  flex: none;
+  background-color: var(--dshm-muted);
+}
+
+/* The chat thread's first-paint skeleton: two AI blocks (the second wider)
+ * then the short trailing user bubble, breathing on the same shimmer. */
+.skelThread {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 6px 0 18px;
+}
+
+.skelBubble {
+  --height: 64px;
+  --border-radius: var(--dshm-radius-bubble);
+  background-color: var(--dshm-muted);
+}
+
+.skelBubbleAi {
+  --width: 78%;
+}
+
+.skelBubbleWide {
+  --width: 88%;
+}
+
+.skelBubbleUser {
+  --width: 52%;
+  align-self: flex-end;
 }

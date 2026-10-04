@@ -381,8 +381,8 @@ describe('colleagues welcome metadata', () => {
     expect(welcomeOf('unknown-preset', undefined).greeting).toBe('你好，我是 AI 同事')
     expect(colleagueOf('business-advisor').duty).toBe('经营洞察问答（只读）')
     expect(colleagueOf('unknown-preset').acronym).toBe('AI')
-    expect(colleagueColor('mobile-form-assistant')).toBe('#2e7cf6')
-    expect(colleagueColor('business-advisor')).toBe('#4f6076')
+    expect(colleagueColor('mobile-form-assistant')).toBe('#1e4e8c')
+    expect(colleagueColor('business-advisor')).toBe('#1d5f5a')
   })
 })
 

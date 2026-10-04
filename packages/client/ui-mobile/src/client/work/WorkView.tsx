@@ -13,11 +13,12 @@
  */
 
 import { useMemo, useRef, useState, useSyncExternalStore, type JSX } from 'react'
-import { Button, CapsuleTabs, DotLoading, ErrorBlock, Tag, Toast } from 'antd-mobile'
-import { Bot, ChevronRight, ClipboardList, Database, LineChart, ShieldCheck } from 'lucide-react'
+import { Button, CapsuleTabs, DotLoading, Tag, Toast } from 'antd-mobile'
+import { Bot, ChevronRight, ClipboardCheck, ClipboardList, Database, LineChart, ShieldCheck } from 'lucide-react'
 import { buildReworkMessage, startWorkExecution } from '../actions.ts'
 import { colleagueOf, welcomeOf } from '../colleagues.ts'
 import { messageOf, useAsync } from '../hooks.ts'
+import { EmptyState } from '../ui.tsx'
 import { navigate } from '../router.ts'
 import { createSession, listAiEmployees, promptSession } from '../sessionsService.ts'
 import { byStatus, subscribeWork, transitionWorkItem, workSnapshot, type WorkItem, type WorkStatus } from '../workStore.ts'
@@ -29,7 +30,6 @@ interface ToolCard {
   readonly preset: string
   readonly name: string
   readonly description: string
-  readonly color: string
   readonly icon: JSX.Element
   /** The first starter's send text (the card's preseeded opening message). */
   readonly opening: string | undefined
@@ -77,7 +77,6 @@ export function WorkView(): JSX.Element {
       preset: employee.id,
       name: employee.name,
       description: employee.description !== '' ? employee.description : visual.duty,
-      color: visual.color,
       icon: toolIconOf(employee.id),
       opening: welcomeOf(employee.id, employee.welcome).starters[0]?.send,
     }
@@ -156,22 +155,15 @@ export function WorkView(): JSX.Element {
       </CapsuleTabs>
       <section className={css.workList} aria-label="工作列表">
         {rows.length === 0 && (
-          <div className={css.emptyWrap}>
-            <ErrorBlock status="empty" title="这个状态还没有工作" description="去聊天里让 AI 同事帮你处理" />
-            <Button
-              type="button"
-              fill="outline"
-              size="small"
-              className={css.actionSecondary}
-              style={{ '--border-color': 'var(--dshm-border)' }}
-              onClick={() => { navigate('#/agents') }}
-            >
-              去找 AI 同事
-            </Button>
-          </div>
+          <EmptyState
+            icon={<ClipboardCheck size={22} strokeWidth={1.8} />}
+            title="这个状态还没有工作"
+            description="去聊天里让 AI 同事帮你处理"
+            action={{ label: '去找 AI 同事', onClick: () => { navigate('#/agents') } }}
+          />
         )}
         {rows.map(item => (
-          <article key={item.id} className={css.workCard} data-testid="work-card">
+          <article key={item.id} className={`${css.workCard} ${css[`card_${item.status}`]}`} data-testid="work-card">
             <div className={css.cardHeadRow}>
               <button
                 type="button"
@@ -247,7 +239,7 @@ export function WorkView(): JSX.Element {
               disabled={startingTool}
               onClick={() => { openTool(tool) }}
             >
-              <span className={css.toolIcon} style={{ background: tool.color }}>{tool.icon}</span>
+              <span className={css.toolIcon}>{tool.icon}</span>
               <span className={css.toolName}>{tool.name}</span>
               <span className={css.toolDesc}>{tool.description}</span>
               <span className={css.toolGo}>去聊聊</span>

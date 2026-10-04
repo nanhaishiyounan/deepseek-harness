@@ -1,0 +1,35 @@
+== W6-B10 gates (如实) ==
+2026-10-04 04:59:50 CST
+-- 演练数据补播（上轮清理腿撤收过——先重放再断言）--
+preseed b9 --demo: w6b9-cockpit: demo complete
+preseed b6 --seed: w6b6-crm: seed complete
+preseed b5 wizard replay: 7 ✓ / 2 ✗
+gate assert b0: exit=0 — w6b0-identity: assert 全部断言通过
+gate assert b1-sync: exit=0 — w6b1-sync: 全部断言通过
+gate assert b2-rules: exit=0 — w6b2-rules: assert 全部断言通过
+gate assert b3-trace: exit=0 — w6b3-trace: --assert PASS
+  (b3-recall 首试 ECONNRESET——dev-server keep-alive 竞态，重试一次；两次日志均留档)
+gate assert b3-recall: FAIL exit=1 — Node.js v22.19.0
+gate assert b3-labels: exit=0 — w6b3-labels: --assert PASS
+gate assert b4-mes: exit=0 — w6b4-assert: ALL PASS
+gate assert b4-ccp: exit=0 — w6b4-ccp: assert PASS
+gate assert b4-bomver: exit=0 — w6b4-bomver: assert PASS
+gate assert b5-insp: FAIL exit=1 — Node.js v22.19.0
+gate assert b6-crm: exit=0 — w6b6-crm: assert PASS
+gate assert b7-sourcing: exit=0 — w6b7 assert: PASS
+gate assert b8-aps: exit=0 — w6b8-aps: assert PASS
+gate assert b8-eam: exit=0 — w6b8-assert: PASS（全部腿绿）
+gate assert b9-cockpit: exit=0 — w6b9-cockpit: all asserts green
+gate assert statcard: exit=0 — w6b10-statcard: seated 8 stat cards in 2 row(s) above the table rows
+gate matrix-44: exit=0 — 44 gates ALL PASS（45）
+gate walkthrough-8roles: exit=0 — 8/8 角色（w6-b10-walkthrough.json + actions.json + psql-recon.log）
+gate typecheck: PASS（exit=0，tail：）
+gate oxlint-staged（本批新文件面）: PASS — Found 0 warnings and 0 errors. Finished in 3.2s on 1 file with 48 rules using 12 threads.
+gate pairing: PASS —
+-- 演练数据清理（可识别演练行撤收；append-only 审计行保留并带演练标记）--
+cleanup b9 --clean: done — w6b9-cockpit: --clean complete（wfl_alerts/B2 扫描状态保留；--demo 可从零重放
+cleanup b6 --cleanup: done — w6b6-crm: cleanup complete
+cleanup b5 --cleanup: done — w6b5-insp: cleanup complete
+
+== W6-B10 gates: 22 legs, 2 failed ==
+GATES FAILED

@@ -1,0 +1,30 @@
+{
+  "theme": "dark",
+  "values": {
+    "bg": "rgb(12, 16, 23)",
+    "card": "rgb(30, 38, 52)",
+    "textMain": "rgb(232, 236, 241)",
+    "textMuted": "rgb(147, 160, 180)",
+    "border": "rgb(42, 52, 68)",
+    "tabTitleSize": "12px",
+    "tabActiveColor": "rgb(87, 131, 188)",
+    "stampDoing": "rgb(87, 131, 188)",
+    "stampDoingToken": "#5783bc"
+  },
+  "checks": {
+    "cardVsBgElevationStep": 23,
+    "textVsCardContrast": 12.81,
+    "mutedVsCardContrast": 5.74,
+    "borderVsCardStep": 14,
+    "tabTitlePx": 12,
+    "tabActiveVsTabbarContrast": 4.5,
+    "stampDoingVsCardContrast": 3.89
+  },
+  "stampLeg": {
+    "id": "w_mut8n3p0iotb",
+    "stampColor": "rgb(87, 131, 188)",
+    "cardBg": "rgb(30, 38, 52)",
+    "stampToken": "#5783bc",
+    "stampDoingVsCardContrast": 3.89
+  }
+}

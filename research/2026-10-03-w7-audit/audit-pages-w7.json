@@ -1,0 +1,3730 @@
+{
+  "generatedAt": "2026-10-03T11:29:29.759Z",
+  "pages": [
+    {
+      "title": "经营总览",
+      "routeId": 389955296690176,
+      "schemaUid": "w6b9cdzrc2lst1dm",
+      "url": "/admin/w6b9cdzrc2lst1dm",
+      "chain": "",
+      "createdAt": "2026-10-02T19:26:15.385Z",
+      "updatedAt": "2026-10-02T19:26:15.385Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "JSBlockModel": 1
+      },
+      "tables": [],
+      "tabCount": 1
+    },
+    {
+      "title": "AI 工作台",
+      "routeId": 386332356902916,
+      "schemaUid": "n13ai2efgqippp44",
+      "url": "/admin/n13ai2efgqippp44",
+      "chain": "",
+      "createdAt": "2026-09-12T19:33:43.861Z",
+      "updatedAt": "2026-09-29T06:29:15.692Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormResetActionModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormSubmitActionModel": 1,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "EditActionModel": 1,
+        "ChildPageModel": 2,
+        "DeleteActionModel": 1,
+        "ViewActionModel": 1,
+        "TableColumnModel": 3,
+        "DisplayTextFieldModel": 1,
+        "DisplayEnumFieldModel": 2,
+        "AIChatBoxBlockModel": 1,
+        "AIChatBoxCoreModel": 1
+      },
+      "tables": [
+        {
+          "uid": "n13tbq",
+          "collection": "hub_tk_tickets",
+          "filter": false,
+          "columnCount": 3
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "销售线索",
+      "routeId": 386332365291520,
+      "schemaUid": "n17rwc527ujwt",
+      "url": "/admin/n17rwc527ujwt",
+      "chain": "CRM 客户",
+      "createdAt": "2026-09-12T19:33:47.692Z",
+      "updatedAt": "2026-09-12T19:33:47.692Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 2,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "EditActionModel": 1,
+        "ChildPageModel": 2,
+        "DeleteActionModel": 1,
+        "ViewActionModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 5,
+        "DisplayTextFieldModel": 3,
+        "DisplayNumberFieldModel": 1,
+        "DisplayEnumFieldModel": 1,
+        "AddNewActionModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormSubmitActionModel": 1,
+        "FilterFormResetActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "n17tb3",
+          "collection": "crm_leads",
+          "filter": false,
+          "columnCount": 5
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "客户",
+      "routeId": 386332363194368,
+      "schemaUid": "n17sys042q2lz",
+      "url": "/admin/n17sys042q2lz",
+      "chain": "CRM 客户",
+      "createdAt": "2026-09-12T19:33:46.868Z",
+      "updatedAt": "2026-09-12T19:33:46.868Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 2,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "EditActionModel": 1,
+        "ChildPageModel": 2,
+        "DeleteActionModel": 1,
+        "ViewActionModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 6,
+        "DisplayEnumFieldModel": 3,
+        "DisplayTextFieldModel": 3,
+        "AddNewActionModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormResetActionModel": 1,
+        "FilterFormSubmitActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "n17tbg",
+          "collection": "crm_customers",
+          "filter": false,
+          "columnCount": 6
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "联系人",
+      "routeId": 386332367388672,
+      "schemaUid": "n17c3lkyg9zjd6",
+      "url": "/admin/n17c3lkyg9zjd6",
+      "chain": "CRM 客户",
+      "createdAt": "2026-09-12T19:33:48.448Z",
+      "updatedAt": "2026-09-12T19:33:48.448Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 1,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "EditActionModel": 1,
+        "ChildPageModel": 2,
+        "DeleteActionModel": 1,
+        "ViewActionModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 5,
+        "DisplayTextFieldModel": 4,
+        "DisplayEnumFieldModel": 1,
+        "AddNewActionModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormResetActionModel": 1,
+        "FilterFormSubmitActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "n17tbm",
+          "collection": "crm_contacts",
+          "filter": false,
+          "columnCount": 5
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "产品与服务",
+      "routeId": 386463571640328,
+      "schemaUid": "n17f2wwpqs60dtk",
+      "url": "/admin/n17f2wwpqs60dtk",
+      "chain": "CRM 客户",
+      "createdAt": "2026-09-13T12:56:31.963Z",
+      "updatedAt": "2026-09-13T12:56:31.963Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 2,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormResetActionModel": 1,
+        "FilterFormSubmitActionModel": 1,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "EditActionModel": 1,
+        "ChildPageModel": 2,
+        "DeleteActionModel": 1,
+        "ViewActionModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 5,
+        "DisplayTextFieldModel": 2,
+        "DisplayNumberFieldModel": 1,
+        "DisplayEnumFieldModel": 2,
+        "AddNewActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "n17f2t",
+          "collection": "crm_products",
+          "filter": false,
+          "columnCount": 5
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "客户仪表盘",
+      "routeId": 386463577931777,
+      "schemaUid": "n17f2jumvap76nm8",
+      "url": "/admin/n17f2jumvap76nm8",
+      "chain": "CRM 客户",
+      "createdAt": "2026-09-13T12:56:34.889Z",
+      "updatedAt": "2026-09-13T12:56:34.889Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormSubmitActionModel": 1,
+        "FilterFormResetActionModel": 1,
+        "ChartBlockModel": 2,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "EditActionModel": 1,
+        "ChildPageModel": 2,
+        "DeleteActionModel": 1,
+        "ViewActionModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 6,
+        "DisplayTextFieldModel": 3,
+        "DisplayEnumFieldModel": 3,
+        "AddNewActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "n17f2t",
+          "collection": "crm_customers",
+          "filter": false,
+          "columnCount": 6
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "入库单",
+      "routeId": 386812279783424,
+      "schemaUid": "h5wmsrh8ls7pkv5i",
+      "url": "/admin/h5wmsrh8ls7pkv5i",
+      "chain": "仓储管理",
+      "createdAt": "2026-09-15T11:07:48.208Z",
+      "updatedAt": "2026-09-28T19:11:28.145Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 3,
+        "MarkdownBlockModel": 1,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "EditActionModel": 1,
+        "ChildPageModel": 2,
+        "ViewActionModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "TableColumnModel": 7,
+        "DisplayTextFieldModel": 2,
+        "DisplayTitleFieldModel": 2,
+        "DisplayNumberFieldModel": 1,
+        "DisplayEnumFieldModel": 2,
+        "AddNewActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "h5wmst",
+          "collection": "wms_receipts",
+          "filter": true,
+          "columnCount": 7
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "出库单",
+      "routeId": 386812281880576,
+      "schemaUid": "h5wmsvwkqjiiaxdj",
+      "url": "/admin/h5wmsvwkqjiiaxdj",
+      "chain": "仓储管理",
+      "createdAt": "2026-09-15T11:07:49.291Z",
+      "updatedAt": "2026-09-28T19:11:28.165Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 3,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "EditActionModel": 1,
+        "ChildPageModel": 2,
+        "ViewActionModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "TableColumnModel": 7,
+        "DisplayTitleFieldModel": 3,
+        "DisplayEnumFieldModel": 2,
+        "DisplayTextFieldModel": 1,
+        "DisplayNumberFieldModel": 1,
+        "AddNewActionModel": 1,
+        "MarkdownBlockModel": 1
+      },
+      "tables": [
+        {
+          "uid": "h5wmst",
+          "collection": "wms_shipments",
+          "filter": true,
+          "columnCount": 7
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "库存查询",
+      "routeId": 386812283977728,
+      "schemaUid": "h5wms9v2hly0cg6j",
+      "url": "/admin/h5wms9v2hly0cg6j",
+      "chain": "仓储管理",
+      "createdAt": "2026-09-15T11:07:50.418Z",
+      "updatedAt": "2026-09-28T19:11:28.186Z",
+      "blocks": {
+        "BlockGridModel": 3,
+        "ChartBlockModel": 3,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 2,
+        "ChildPageTabModel": 2,
+        "DetailsBlockModel": 1,
+        "DetailsGridModel": 1,
+        "DetailsItemModel": 9,
+        "DisplayTextFieldModel": 3,
+        "DisplayNumberFieldModel": 10,
+        "DisplayEnumFieldModel": 2,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "TableColumnModel": 9,
+        "DisplayTitleFieldModel": 3,
+        "AddNewActionModel": 1,
+        "CreateFormModel": 1,
+        "FormSubmitActionModel": 1,
+        "AIEmployeeButtonModel": 1,
+        "FormGridModel": 1,
+        "DividerItemModel": 3,
+        "FormItemModel": 8,
+        "SelectFieldModel": 1,
+        "RecordSelectFieldModel": 3,
+        "NumberFieldModel": 4,
+        "MarkdownBlockModel": 1
+      },
+      "tables": [
+        {
+          "uid": "h5wmst",
+          "collection": "wms_stock",
+          "filter": true,
+          "columnCount": 9
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "盘点管理",
+      "routeId": 386812288172032,
+      "schemaUid": "h5wms2hmkvlfsmtf",
+      "url": "/admin/h5wms2hmkvlfsmtf",
+      "chain": "仓储管理",
+      "createdAt": "2026-09-15T11:07:52.166Z",
+      "updatedAt": "2026-09-28T19:11:28.209Z",
+      "blocks": {
+        "BlockGridModel": 4,
+        "ChartBlockModel": 3,
+        "MarkdownBlockModel": 1,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "JSRecordActionModel": 1,
+        "EditActionModel": 1,
+        "ChildPageModel": 3,
+        "ChildPageTabModel": 3,
+        "EditFormModel": 1,
+        "FormSubmitActionModel": 2,
+        "FormGridModel": 2,
+        "DividerItemModel": 5,
+        "FormItemModel": 19,
+        "InputFieldModel": 6,
+        "NumberFieldModel": 6,
+        "DateOnlyFieldModel": 1,
+        "ViewActionModel": 1,
+        "DetailsBlockModel": 1,
+        "DetailsGridModel": 1,
+        "DetailsItemModel": 9,
+        "DisplayEnumFieldModel": 4,
+        "DisplayTextFieldModel": 5,
+        "DisplayNumberFieldModel": 6,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "TableColumnModel": 9,
+        "DisplayTitleFieldModel": 3,
+        "AddNewActionModel": 1,
+        "CreateFormModel": 1,
+        "RecordSelectFieldModel": 4,
+        "SelectFieldModel": 2,
+        "AIEmployeeButtonModel": 1
+      },
+      "tables": [
+        {
+          "uid": "h5wmst",
+          "collection": "wms_counts",
+          "filter": true,
+          "columnCount": 9
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "移库管理",
+      "routeId": 386812290269184,
+      "schemaUid": "h5wmspyqfovkqjff",
+      "url": "/admin/h5wmspyqfovkqjff",
+      "chain": "仓储管理",
+      "createdAt": "2026-09-15T11:07:53.024Z",
+      "updatedAt": "2026-09-28T19:11:28.232Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "TableColumnModel": 7,
+        "DisplayTitleFieldModel": 4,
+        "DisplayEnumFieldModel": 1,
+        "DisplayNumberFieldModel": 1,
+        "DisplayTextFieldModel": 1,
+        "AddNewActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "h5wmst",
+          "collection": "wms_transfers",
+          "filter": true,
+          "columnCount": 7
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "预留管理",
+      "routeId": 388764687728640,
+      "schemaUid": "h5wms9zlhetpzwl",
+      "url": "/admin/h5wms9zlhetpzwl",
+      "chain": "仓储管理",
+      "createdAt": "2026-09-26T05:44:08.691Z",
+      "updatedAt": "2026-09-28T19:11:28.254Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "TableColumnModel": 8,
+        "DisplayEnumFieldModel": 2,
+        "DisplayTitleFieldModel": 3,
+        "DisplayNumberFieldModel": 1,
+        "DisplayTextFieldModel": 2,
+        "AddNewActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "h5wmst",
+          "collection": "wms_reservations",
+          "filter": true,
+          "columnCount": 8
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "补货预警",
+      "routeId": 388764689825792,
+      "schemaUid": "h5wmstw8iug4upxs",
+      "url": "/admin/h5wmstw8iug4upxs",
+      "chain": "仓储管理",
+      "createdAt": "2026-09-26T05:44:09.506Z",
+      "updatedAt": "2026-09-28T19:11:28.275Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "TableColumnModel": 7,
+        "DisplayNumberFieldModel": 3,
+        "DisplayEnumFieldModel": 1,
+        "DisplayTextFieldModel": 1,
+        "DisplayTitleFieldModel": 1,
+        "DisplayDateTimeFieldModel": 1,
+        "AddNewActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "h5wmst",
+          "collection": "wms_reorder_suggestions",
+          "filter": true,
+          "columnCount": 7
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "库存流水",
+      "routeId": 386812290269187,
+      "schemaUid": "h5wms9srcrn5fhiq",
+      "url": "/admin/h5wms9srcrn5fhiq",
+      "chain": "仓储管理",
+      "createdAt": "2026-09-15T11:07:53.655Z",
+      "updatedAt": "2026-09-28T19:11:28.295Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "TableColumnModel": 8,
+        "DisplayTextFieldModel": 2,
+        "DisplayTitleFieldModel": 4,
+        "DisplayNumberFieldModel": 1,
+        "DisplayEnumFieldModel": 1,
+        "AddNewActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "h5wmst",
+          "collection": "wms_movements",
+          "filter": true,
+          "columnCount": 8
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "月度收发存",
+      "routeId": 388942266171392,
+      "schemaUid": "h5wmslacezwb94s",
+      "url": "/admin/h5wmslacezwb94s",
+      "chain": "仓储管理",
+      "createdAt": "2026-09-27T05:15:24.348Z",
+      "updatedAt": "2026-09-28T19:11:28.315Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "TableColumnModel": 12,
+        "DisplayDateTimeFieldModel": 1,
+        "DisplayTextFieldModel": 1,
+        "DisplayNumberFieldModel": 8,
+        "DisplayEnumFieldModel": 1,
+        "DisplayTitleFieldModel": 1,
+        "AddNewActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "h5wmst",
+          "collection": "wms_monthly_balances",
+          "filter": true,
+          "columnCount": 12
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "批次主数据",
+      "routeId": 386812286074880,
+      "schemaUid": "h5wmsgd4pntmwvg",
+      "url": "/admin/h5wmsgd4pntmwvg",
+      "chain": "仓储管理",
+      "createdAt": "2026-09-15T11:07:51.418Z",
+      "updatedAt": "2026-09-28T19:11:28.339Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 2,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "TableColumnModel": 7,
+        "DisplayTitleFieldModel": 2,
+        "DisplayDateTimeFieldModel": 3,
+        "DisplayTextFieldModel": 1,
+        "DisplayEnumFieldModel": 1,
+        "AddNewActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "h5wmst",
+          "collection": "wms_lots",
+          "filter": true,
+          "columnCount": 7
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "仓库库区",
+      "routeId": 386812275589127,
+      "schemaUid": "h5wms50cuimohzz7",
+      "url": "/admin/h5wms50cuimohzz7",
+      "chain": "仓储管理",
+      "createdAt": "2026-09-15T11:07:46.960Z",
+      "updatedAt": "2026-09-28T19:11:28.360Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 1,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "TableColumnModel": 4,
+        "DisplayTextFieldModel": 2,
+        "DisplayEnumFieldModel": 1,
+        "DisplayTitleFieldModel": 1,
+        "AddNewActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "h5wmst",
+          "collection": "wms_zones",
+          "filter": true,
+          "columnCount": 4
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "库位平面图",
+      "routeId": 386812277686272,
+      "schemaUid": "h5wms1nju21hb5c8",
+      "url": "/admin/h5wms1nju21hb5c8",
+      "chain": "仓储管理",
+      "createdAt": "2026-09-15T11:07:47.503Z",
+      "updatedAt": "2026-09-28T19:11:28.381Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 2,
+        "JSBlockModel": 1,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "TableColumnModel": 5,
+        "DisplayTextFieldModel": 2,
+        "DisplayNumberFieldModel": 1,
+        "DisplayEnumFieldModel": 1,
+        "DisplayTitleFieldModel": 1,
+        "AddNewActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "h5wmst",
+          "collection": "wms_bins",
+          "filter": true,
+          "columnCount": 5
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "盘点计划",
+      "routeId": 388764691922944,
+      "schemaUid": "h5wmsddav9gkxtl",
+      "url": "/admin/h5wmsddav9gkxtl",
+      "chain": "仓储管理",
+      "createdAt": "2026-09-26T05:44:10.200Z",
+      "updatedAt": "2026-09-28T19:11:28.402Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "EditActionModel": 1,
+        "ChildPageModel": 2,
+        "DeleteActionModel": 1,
+        "ViewActionModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "TableColumnModel": 8,
+        "DisplayNumberFieldModel": 5,
+        "DisplayTextFieldModel": 2,
+        "DisplayEnumFieldModel": 1,
+        "AddNewActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "h5wmst",
+          "collection": "hub_inv_products",
+          "filter": true,
+          "columnCount": 8
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "收货终端",
+      "routeId": 389123493658624,
+      "schemaUid": "w3b66yns80jnq92",
+      "url": "/admin/w3b66yns80jnq92",
+      "chain": "仓储管理",
+      "createdAt": "2026-09-28T05:15:40.286Z",
+      "updatedAt": "2026-09-28T19:11:28.425Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "IframeBlockModel": 1
+      },
+      "tables": [],
+      "tabCount": 1
+    },
+    {
+      "title": "供应商档案",
+      "routeId": 386781711695885,
+      "schemaUid": "h4srm2u9xiqx09jb",
+      "url": "/admin/h4srm2u9xiqx09jb",
+      "chain": "供应链",
+      "createdAt": "2026-09-15T07:04:52.785Z",
+      "updatedAt": "2026-09-15T07:04:52.785Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 2,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "JSRecordActionModel": 1,
+        "EditActionModel": 1,
+        "ChildPageModel": 2,
+        "ViewActionModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "TableColumnModel": 7,
+        "DisplayEnumFieldModel": 5,
+        "DisplayCheckboxFieldModel": 1,
+        "DisplayTextFieldModel": 1,
+        "AddNewActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "h4srmt",
+          "collection": "srm_suppliers",
+          "filter": true,
+          "columnCount": 7
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "供应商准入",
+      "routeId": 386781713793024,
+      "schemaUid": "h4srm6hfqnpnrqu5",
+      "url": "/admin/h4srm6hfqnpnrqu5",
+      "chain": "供应链",
+      "createdAt": "2026-09-15T07:04:53.857Z",
+      "updatedAt": "2026-09-15T07:04:53.857Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 2,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "JSRecordActionModel": 1,
+        "EditActionModel": 1,
+        "ChildPageModel": 2,
+        "ViewActionModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "TableColumnModel": 5,
+        "DisplayDateTimeFieldModel": 1,
+        "DisplayEnumFieldModel": 3,
+        "DisplayTextFieldModel": 1,
+        "AddNewActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "h4srmt",
+          "collection": "srm_suppliers",
+          "filter": true,
+          "columnCount": 5
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "审核检查表",
+      "routeId": 386781717987328,
+      "schemaUid": "h4srmuvf86en2kn",
+      "url": "/admin/h4srmuvf86en2kn",
+      "chain": "供应链",
+      "createdAt": "2026-09-15T07:04:55.144Z",
+      "updatedAt": "2026-09-28T19:11:28.469Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "EditActionModel": 1,
+        "ChildPageModel": 2,
+        "DeleteActionModel": 1,
+        "ViewActionModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "TableColumnModel": 5,
+        "DisplayTextFieldModel": 3,
+        "DisplayCheckboxFieldModel": 1,
+        "DisplayNumberFieldModel": 1,
+        "AddNewActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "h4srmt",
+          "collection": "srm_audit_checklists",
+          "filter": true,
+          "columnCount": 5
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "审核评分录入",
+      "routeId": 386781717987331,
+      "schemaUid": "h4srmflpebqkuz",
+      "url": "/admin/h4srmflpebqkuz",
+      "chain": "供应链",
+      "createdAt": "2026-09-15T07:04:55.765Z",
+      "updatedAt": "2026-09-28T19:11:28.492Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 2,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "EditActionModel": 1,
+        "ChildPageModel": 2,
+        "DeleteActionModel": 1,
+        "ViewActionModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "TableColumnModel": 7,
+        "DisplayNumberFieldModel": 3,
+        "DisplayTextFieldModel": 1,
+        "DisplayTitleFieldModel": 1,
+        "DisplayEnumFieldModel": 1,
+        "DisplayDateTimeFieldModel": 1,
+        "AddNewActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "h4srmt",
+          "collection": "srm_audit_records",
+          "filter": true,
+          "columnCount": 7
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "绩效评分卡",
+      "routeId": 386781720084480,
+      "schemaUid": "h4srms4w5viez9zp",
+      "url": "/admin/h4srms4w5viez9zp",
+      "chain": "供应链",
+      "createdAt": "2026-09-15T07:04:56.579Z",
+      "updatedAt": "2026-09-28T19:11:28.513Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 2,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "EditActionModel": 1,
+        "ChildPageModel": 2,
+        "DeleteActionModel": 1,
+        "ViewActionModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "TableColumnModel": 9,
+        "DisplayNumberFieldModel": 6,
+        "DisplayEnumFieldModel": 2,
+        "DisplayTitleFieldModel": 1,
+        "AddNewActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "h4srmt",
+          "collection": "srm_score_cards",
+          "filter": true,
+          "columnCount": 9
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "供应商绩效雷达",
+      "routeId": 386781724278784,
+      "schemaUid": "h4srmaf4rurtt17p",
+      "url": "/admin/h4srmaf4rurtt17p",
+      "chain": "供应链",
+      "createdAt": "2026-09-15T07:04:58.058Z",
+      "updatedAt": "2026-09-28T19:11:28.534Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 2,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "EditActionModel": 1,
+        "ChildPageModel": 2,
+        "DeleteActionModel": 1,
+        "ViewActionModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "TableColumnModel": 4,
+        "DisplayEnumFieldModel": 2,
+        "DisplayNumberFieldModel": 1,
+        "DisplayTitleFieldModel": 1,
+        "AddNewActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "h4srmt",
+          "collection": "srm_score_cards",
+          "filter": true,
+          "columnCount": 4
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "证照效期预警",
+      "routeId": 386781715890176,
+      "schemaUid": "h4srmjjlvbjei4fd",
+      "url": "/admin/h4srmjjlvbjei4fd",
+      "chain": "供应链",
+      "createdAt": "2026-09-15T07:04:54.531Z",
+      "updatedAt": "2026-09-28T19:11:28.556Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 2,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "EditActionModel": 1,
+        "ChildPageModel": 2,
+        "DeleteActionModel": 1,
+        "ViewActionModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "TableColumnModel": 5,
+        "DisplayTextFieldModel": 1,
+        "DisplayEnumFieldModel": 2,
+        "DisplayTitleFieldModel": 1,
+        "DisplayDateTimeFieldModel": 1,
+        "AddNewActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "h4srmt",
+          "collection": "srm_certificates",
+          "filter": true,
+          "columnCount": 5
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "整改跟踪",
+      "routeId": 386781726375936,
+      "schemaUid": "h4srm25tmro1wjuw",
+      "url": "/admin/h4srm25tmro1wjuw",
+      "chain": "供应链",
+      "createdAt": "2026-09-15T07:04:59.245Z",
+      "updatedAt": "2026-09-15T07:04:59.245Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "KanbanBlockModel": 1,
+        "RefreshActionModel": 1,
+        "KanbanQuickCreateActionModel": 1,
+        "FilterActionModel": 1,
+        "KanbanCardViewActionModel": 1,
+        "ChildPageModel": 1,
+        "KanbanCardItemModel": 1,
+        "AddNewActionModel": 1
+      },
+      "tables": [],
+      "tabCount": 1
+    },
+    {
+      "title": "分类维护",
+      "routeId": 386424346902528,
+      "schemaUid": "n17f3rnd403uzlkc",
+      "url": "/admin/n17f3rnd403uzlkc",
+      "chain": "基础数据",
+      "createdAt": "2026-09-13T07:44:47.564Z",
+      "updatedAt": "2026-09-13T07:44:47.564Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormResetActionModel": 1,
+        "FilterFormSubmitActionModel": 1,
+        "TableBlockModel": 4,
+        "TableActionsColumnModel": 4,
+        "EditActionModel": 4,
+        "ChildPageModel": 8,
+        "DeleteActionModel": 4,
+        "ViewActionModel": 4,
+        "RefreshActionModel": 4,
+        "TableColumnModel": 12,
+        "DisplayTextFieldModel": 8,
+        "DisplayCheckboxFieldModel": 4,
+        "AddNewActionModel": 4
+      },
+      "tables": [
+        {
+          "uid": "n17f3t",
+          "collection": "hub_md_ticket_categories",
+          "filter": false,
+          "columnCount": 3
+        },
+        {
+          "uid": "n17f3t",
+          "collection": "hub_md_product_categories",
+          "filter": false,
+          "columnCount": 3
+        },
+        {
+          "uid": "n17f3t",
+          "collection": "hub_md_asset_categories",
+          "filter": false,
+          "columnCount": 3
+        },
+        {
+          "uid": "n17f3t",
+          "collection": "hub_md_customer_categories",
+          "filter": false,
+          "columnCount": 3
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "生产订单",
+      "routeId": 388774225575936,
+      "schemaUid": "w5mfgntyu7wy20a",
+      "url": "/admin/w5mfgntyu7wy20a",
+      "chain": "生产与计划",
+      "createdAt": "2026-09-26T06:59:56.648Z",
+      "updatedAt": "2026-09-28T19:11:27.660Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 4,
+        "TableBlockModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "TableColumnModel": 13,
+        "DisplayEnumFieldModel": 3,
+        "DisplayDateTimeFieldModel": 4,
+        "DisplayTitleFieldModel": 2,
+        "DisplayTextFieldModel": 1,
+        "DisplayNumberFieldModel": 3,
+        "AddNewActionModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 2,
+        "JSRecordActionModel": 1,
+        "EditActionModel": 1,
+        "MarkdownBlockModel": 1
+      },
+      "tables": [
+        {
+          "uid": "w5mfgt",
+          "collection": "mfg_orders",
+          "filter": true,
+          "columnCount": 13
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "MO 执行视图",
+      "routeId": 388785705385984,
+      "schemaUid": "w6mfgmct2tf2braf",
+      "url": "/admin/w6mfgmct2tf2braf",
+      "chain": "生产与计划",
+      "createdAt": "2026-09-26T08:31:10.019Z",
+      "updatedAt": "2026-09-28T19:11:27.680Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 2,
+        "RefreshActionModel": 2,
+        "TableColumnModel": 18,
+        "DisplayEnumFieldModel": 4,
+        "DisplayNumberFieldModel": 8,
+        "DisplayDateTimeFieldModel": 1,
+        "DisplayTextFieldModel": 2,
+        "DisplayTitleFieldModel": 3,
+        "TableActionsColumnModel": 2,
+        "ViewActionModel": 2,
+        "ChildPageModel": 3,
+        "JSRecordActionModel": 1,
+        "EditActionModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormResetActionModel": 1,
+        "FilterFormSubmitActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "w6mfgt",
+          "collection": "mfg_order_operations",
+          "filter": false,
+          "columnCount": 7
+        },
+        {
+          "uid": "w6mfgt",
+          "collection": "mfg_orders",
+          "filter": false,
+          "columnCount": 11
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "排程明细",
+      "routeId": 388774229770240,
+      "schemaUid": "w5mfgp352sily7f",
+      "url": "/admin/w5mfgp352sily7f",
+      "chain": "生产与计划",
+      "createdAt": "2026-09-26T06:59:58.017Z",
+      "updatedAt": "2026-09-28T19:11:27.706Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 8,
+        "DisplayNumberFieldModel": 2,
+        "DisplayTextFieldModel": 2,
+        "DisplayTitleFieldModel": 2,
+        "DisplayEnumFieldModel": 1,
+        "DisplayDateTimeFieldModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormSubmitActionModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormResetActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "w5mfgt",
+          "collection": "mfg_order_operations",
+          "filter": false,
+          "columnCount": 8
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "生产订单看板",
+      "routeId": 389082563543040,
+      "schemaUid": "w3b39xulomz8jj",
+      "url": "/admin/w3b39xulomz8jj",
+      "chain": "生产与计划",
+      "createdAt": "2026-09-27T23:50:23.340Z",
+      "updatedAt": "2026-09-28T19:11:27.751Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "KanbanBlockModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "KanbanCardViewActionModel": 1,
+        "ChildPageModel": 1,
+        "KanbanCardItemModel": 1
+      },
+      "tables": [],
+      "tabCount": 1
+    },
+    {
+      "title": "领料单",
+      "routeId": 388785690705920,
+      "schemaUid": "w6mfgsp029qziym",
+      "url": "/admin/w6mfgsp029qziym",
+      "chain": "生产与计划",
+      "createdAt": "2026-09-26T08:31:03.788Z",
+      "updatedAt": "2026-09-26T08:31:03.788Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 3,
+        "TableBlockModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "TableColumnModel": 8,
+        "DisplayTitleFieldModel": 3,
+        "DisplayTextFieldModel": 2,
+        "DisplayEnumFieldModel": 1,
+        "DisplayDateTimeFieldModel": 1,
+        "DisplayNumberFieldModel": 1,
+        "AddNewActionModel": 1,
+        "TableActionsColumnModel": 1,
+        "EditActionModel": 1,
+        "ChildPageModel": 2,
+        "ViewActionModel": 1,
+        "MarkdownBlockModel": 1
+      },
+      "tables": [
+        {
+          "uid": "w6mfgt",
+          "collection": "mfg_material_issues",
+          "filter": true,
+          "columnCount": 8
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "退料单",
+      "routeId": 388785694900224,
+      "schemaUid": "w6mfg1zez6dqkcgh",
+      "url": "/admin/w6mfg1zez6dqkcgh",
+      "chain": "生产与计划",
+      "createdAt": "2026-09-26T08:31:05.125Z",
+      "updatedAt": "2026-09-26T08:31:05.125Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 3,
+        "TableBlockModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "TableColumnModel": 8,
+        "DisplayTextFieldModel": 2,
+        "DisplayTitleFieldModel": 3,
+        "DisplayDateTimeFieldModel": 1,
+        "DisplayNumberFieldModel": 1,
+        "DisplayEnumFieldModel": 1,
+        "AddNewActionModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1,
+        "MarkdownBlockModel": 1
+      },
+      "tables": [
+        {
+          "uid": "w6mfgt",
+          "collection": "mfg_material_returns",
+          "filter": true,
+          "columnCount": 8
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "报工记录",
+      "routeId": 388785696997376,
+      "schemaUid": "w6mfglmxq9mhbkur",
+      "url": "/admin/w6mfglmxq9mhbkur",
+      "chain": "生产与计划",
+      "createdAt": "2026-09-26T08:31:06.548Z",
+      "updatedAt": "2026-09-26T08:31:06.548Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "TableColumnModel": 10,
+        "DisplayTextFieldModel": 2,
+        "DisplayNumberFieldModel": 4,
+        "DisplayTitleFieldModel": 1,
+        "DisplayDateTimeFieldModel": 1,
+        "DisplayEnumFieldModel": 2,
+        "AddNewActionModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1,
+        "ChartBlockModel": 3,
+        "MarkdownBlockModel": 1
+      },
+      "tables": [
+        {
+          "uid": "w6mfgt",
+          "collection": "mfg_job_reports",
+          "filter": true,
+          "columnCount": 10
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "工程变更单",
+      "routeId": 389869699334144,
+      "schemaUid": "w6b4bcr7wfgjxww",
+      "url": "/admin/w6b4bcr7wfgjxww",
+      "chain": "生产与计划",
+      "createdAt": "2026-10-02T08:05:59.391Z",
+      "updatedAt": "2026-10-02T08:05:59.391Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 12,
+        "DisplayTextFieldModel": 12,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormResetActionModel": 1,
+        "FilterFormSubmitActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "w6b4bt",
+          "collection": "mfg_ecos",
+          "filter": false,
+          "columnCount": 12
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "完工单",
+      "routeId": 388785701191680,
+      "schemaUid": "w6mfgp1rrz08ffa",
+      "url": "/admin/w6mfgp1rrz08ffa",
+      "chain": "生产与计划",
+      "createdAt": "2026-09-26T08:31:08.218Z",
+      "updatedAt": "2026-09-26T08:31:08.218Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 3,
+        "TableBlockModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "TableColumnModel": 8,
+        "DisplayTextFieldModel": 3,
+        "DisplayEnumFieldModel": 2,
+        "DisplayDateTimeFieldModel": 1,
+        "DisplayNumberFieldModel": 1,
+        "DisplayTitleFieldModel": 1,
+        "AddNewActionModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1,
+        "MarkdownBlockModel": 1
+      },
+      "tables": [
+        {
+          "uid": "w6mfgt",
+          "collection": "mfg_completions",
+          "filter": true,
+          "columnCount": 8
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "配方版本与变更",
+      "routeId": 389876152270848,
+      "schemaUid": "w6b4bnn0n7n2p2i",
+      "url": "/admin/w6b4bnn0n7n2p2i",
+      "chain": "生产与计划",
+      "createdAt": "2026-10-02T08:57:16.405Z",
+      "updatedAt": "2026-10-02T08:57:16.405Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "JSBlockModel": 1
+      },
+      "tables": [],
+      "tabCount": 1
+    },
+    {
+      "title": "BOM 管理",
+      "routeId": 388774219284482,
+      "schemaUid": "w5mfga37ztlt6orc",
+      "url": "/admin/w5mfga37ztlt6orc",
+      "chain": "生产与计划",
+      "createdAt": "2026-09-26T06:59:53.379Z",
+      "updatedAt": "2026-09-28T19:11:27.779Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 2,
+        "RefreshActionModel": 2,
+        "FilterActionModel": 2,
+        "TableColumnModel": 11,
+        "DisplayNumberFieldModel": 3,
+        "DisplayTitleFieldModel": 3,
+        "DisplayTextFieldModel": 3,
+        "AddNewActionModel": 2,
+        "TableActionsColumnModel": 2,
+        "ViewActionModel": 2,
+        "ChildPageModel": 3,
+        "DisplayCheckboxFieldModel": 1,
+        "DisplayEnumFieldModel": 1,
+        "EditActionModel": 1,
+        "MarkdownBlockModel": 1,
+        "ChartBlockModel": 3
+      },
+      "tables": [
+        {
+          "uid": "w5mfgt",
+          "collection": "mfg_bom_lines",
+          "filter": true,
+          "columnCount": 5
+        },
+        {
+          "uid": "w5mfgt",
+          "collection": "mfg_boms",
+          "filter": true,
+          "columnCount": 6
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "BOM 工序",
+      "routeId": 388774221381632,
+      "schemaUid": "w5mfgkkvs7a4ijya",
+      "url": "/admin/w5mfgkkvs7a4ijya",
+      "chain": "生产与计划",
+      "createdAt": "2026-09-26T06:59:54.467Z",
+      "updatedAt": "2026-09-28T19:11:27.810Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "TableColumnModel": 8,
+        "DisplayTitleFieldModel": 3,
+        "DisplayNumberFieldModel": 4,
+        "DisplayTextFieldModel": 1,
+        "AddNewActionModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1,
+        "ChartBlockModel": 2
+      },
+      "tables": [
+        {
+          "uid": "w5mfgt",
+          "collection": "mfg_bom_operations",
+          "filter": true,
+          "columnCount": 8
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "工作中心",
+      "routeId": 388774223478784,
+      "schemaUid": "w5mfg3eil2n4n0kr",
+      "url": "/admin/w5mfg3eil2n4n0kr",
+      "chain": "生产与计划",
+      "createdAt": "2026-09-26T06:59:55.492Z",
+      "updatedAt": "2026-09-28T19:11:27.833Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 2,
+        "RefreshActionModel": 2,
+        "FilterActionModel": 2,
+        "TableColumnModel": 11,
+        "DisplayTextFieldModel": 6,
+        "DisplayNumberFieldModel": 3,
+        "DisplayEnumFieldModel": 1,
+        "AddNewActionModel": 2,
+        "TableActionsColumnModel": 2,
+        "ViewActionModel": 2,
+        "ChildPageModel": 2,
+        "DisplayDateTimeFieldModel": 1,
+        "ChartBlockModel": 2
+      },
+      "tables": [
+        {
+          "uid": "w5mfgt",
+          "collection": "mfg_work_centers",
+          "filter": true,
+          "columnCount": 8
+        },
+        {
+          "uid": "w5mfgt",
+          "collection": "mfg_holidays",
+          "filter": true,
+          "columnCount": 3
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "主生产计划",
+      "routeId": 388919237345280,
+      "schemaUid": "w7mrpyru4s708nwn",
+      "url": "/admin/w7mrpyru4s708nwn",
+      "chain": "生产与计划",
+      "createdAt": "2026-09-27T02:12:23.917Z",
+      "updatedAt": "2026-09-28T19:36:05.576Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 2,
+        "RefreshActionModel": 2,
+        "FilterActionModel": 2,
+        "TableColumnModel": 15,
+        "DisplayDateTimeFieldModel": 3,
+        "DisplayTextFieldModel": 5,
+        "DisplayEnumFieldModel": 2,
+        "AddNewActionModel": 2,
+        "TableActionsColumnModel": 2,
+        "JSRecordActionModel": 1,
+        "EditActionModel": 1,
+        "ChildPageModel": 3,
+        "ViewActionModel": 2,
+        "DisplayNumberFieldModel": 3,
+        "DisplayTitleFieldModel": 2
+      },
+      "tables": [
+        {
+          "uid": "w7mrpt",
+          "collection": "mps_plans",
+          "filter": true,
+          "columnCount": 7
+        },
+        {
+          "uid": "w7mrpt",
+          "collection": "mps_plan_items",
+          "filter": true,
+          "columnCount": 8
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "MRP 快照",
+      "routeId": 388796834971648,
+      "schemaUid": "w7mrpowj6l93nn0a",
+      "url": "/admin/w7mrpowj6l93nn0a",
+      "chain": "生产与计划",
+      "createdAt": "2026-09-26T09:59:37.258Z",
+      "updatedAt": "2026-09-28T19:11:27.881Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 12,
+        "DisplayNumberFieldModel": 8,
+        "DisplayTextFieldModel": 3,
+        "DisplayDateTimeFieldModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormSubmitActionModel": 1,
+        "FilterFormResetActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "w7mrpt",
+          "collection": "mrp_snapshots",
+          "filter": false,
+          "columnCount": 12
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "计划工作台",
+      "routeId": 388796832874496,
+      "schemaUid": "w7mrphtm8t9tzlk8",
+      "url": "/admin/w7mrphtm8t9tzlk8",
+      "chain": "生产与计划",
+      "createdAt": "2026-09-26T09:59:36.122Z",
+      "updatedAt": "2026-09-28T19:11:27.911Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 2,
+        "RefreshActionModel": 2,
+        "TableColumnModel": 14,
+        "DisplayTextFieldModel": 6,
+        "DisplayNumberFieldModel": 2,
+        "DisplayEnumFieldModel": 3,
+        "DisplayDateTimeFieldModel": 2,
+        "DisplayTitleFieldModel": 1,
+        "TableActionsColumnModel": 2,
+        "ViewActionModel": 2,
+        "ChildPageModel": 2,
+        "FilterActionModel": 1,
+        "AddNewActionModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormResetActionModel": 1,
+        "FilterFormSubmitActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "w7mrpt",
+          "collection": "mrp_suggestions",
+          "filter": false,
+          "columnCount": 10
+        },
+        {
+          "uid": "w7mrpt",
+          "collection": "mrp_confirm_intents",
+          "filter": true,
+          "columnCount": 4
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "车间终端",
+      "routeId": 389123481075712,
+      "schemaUid": "w3b6guuruqly03t",
+      "url": "/admin/w3b6guuruqly03t",
+      "chain": "生产与计划",
+      "createdAt": "2026-09-28T05:15:34.795Z",
+      "updatedAt": "2026-09-28T19:11:27.934Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "IframeBlockModel": 1
+      },
+      "tables": [],
+      "tabCount": 1
+    },
+    {
+      "title": "APS瓶颈与负荷",
+      "routeId": 389948705341440,
+      "schemaUid": "w6b8a3fg2qshtalw",
+      "url": "/admin/w6b8a3fg2qshtalw",
+      "chain": "生产与计划",
+      "createdAt": "2026-10-02T18:33:52.924Z",
+      "updatedAt": "2026-10-02T18:33:52.924Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "JSBlockModel": 1
+      },
+      "tables": [],
+      "tabCount": 1
+    },
+    {
+      "title": "APS what-if沙箱",
+      "routeId": 389949074440192,
+      "schemaUid": "w6b8a9z9q2cliq77",
+      "url": "/admin/w6b8a9z9q2cliq77",
+      "chain": "生产与计划",
+      "createdAt": "2026-10-02T18:36:48.692Z",
+      "updatedAt": "2026-10-02T18:36:48.692Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "JSBlockModel": 1
+      },
+      "tables": [],
+      "tabCount": 1
+    },
+    {
+      "title": "员工",
+      "routeId": 386332373680130,
+      "schemaUid": "n17lhe5qyxu1g",
+      "url": "/admin/n17lhe5qyxu1g",
+      "chain": "组织与系统",
+      "createdAt": "2026-09-12T19:33:51.686Z",
+      "updatedAt": "2026-09-12T19:33:51.686Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 2,
+        "TableBlockModel": 1,
+        "TableColumnModel": 6,
+        "DisplayTitleFieldModel": 1,
+        "TableActionsColumnModel": 1,
+        "EditActionModel": 1,
+        "ChildPageModel": 2,
+        "DeleteActionModel": 1,
+        "ViewActionModel": 1,
+        "RefreshActionModel": 1,
+        "DisplayTextFieldModel": 4,
+        "DisplayEnumFieldModel": 1,
+        "AddNewActionModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormSubmitActionModel": 1,
+        "FilterFormResetActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "n17tbc",
+          "collection": "hub_hr_employees",
+          "filter": false,
+          "columnCount": 6
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "部门",
+      "routeId": 386424340611072,
+      "schemaUid": "n17f3er0aw80yc8i",
+      "url": "/admin/n17f3er0aw80yc8i",
+      "chain": "组织与系统",
+      "createdAt": "2026-09-13T07:44:44.865Z",
+      "updatedAt": "2026-09-13T07:44:44.865Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 1,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "EditActionModel": 1,
+        "ChildPageModel": 2,
+        "DeleteActionModel": 1,
+        "ViewActionModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 4,
+        "DisplayTextFieldModel": 3,
+        "DisplayNumberFieldModel": 1,
+        "AddNewActionModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormSubmitActionModel": 1,
+        "FilterFormResetActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "n17f3t",
+          "collection": "hub_hr_departments",
+          "filter": false,
+          "columnCount": 4
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "请假审批",
+      "routeId": 386424342708224,
+      "schemaUid": "n17f3wqpzee9wo2g",
+      "url": "/admin/n17f3wqpzee9wo2g",
+      "chain": "组织与系统",
+      "createdAt": "2026-09-13T07:44:45.597Z",
+      "updatedAt": "2026-09-13T07:44:45.597Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 3,
+        "MarkdownBlockModel": 1,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "EditActionModel": 1,
+        "ChildPageModel": 2,
+        "DeleteActionModel": 1,
+        "ViewActionModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 7,
+        "DisplayEnumFieldModel": 2,
+        "DisplayTitleFieldModel": 1,
+        "DisplayTextFieldModel": 1,
+        "DisplayNumberFieldModel": 1,
+        "DisplayDateTimeFieldModel": 2,
+        "AddNewActionModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormResetActionModel": 1,
+        "FilterFormSubmitActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "n17f3t",
+          "collection": "hub_hr_leave_requests",
+          "filter": false,
+          "columnCount": 7
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "组织架构",
+      "routeId": 389118003314688,
+      "schemaUid": "w3b57ix4086om95",
+      "url": "/admin/w3b57ix4086om95",
+      "chain": "组织与系统",
+      "createdAt": "2026-09-28T04:32:02.419Z",
+      "updatedAt": "2026-09-28T04:32:02.419Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "JSBlockModel": 1,
+        "TableBlockModel": 2,
+        "RefreshActionModel": 2,
+        "TableColumnModel": 6,
+        "DisplayNumberFieldModel": 2,
+        "DisplayTextFieldModel": 4,
+        "AddNewActionModel": 1,
+        "TableActionsColumnModel": 2,
+        "EditActionModel": 2,
+        "ChildPageModel": 4,
+        "ViewActionModel": 2,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormSubmitActionModel": 1,
+        "FilterFormResetActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "w3b5tb",
+          "collection": "departments",
+          "filter": false,
+          "columnCount": 2
+        },
+        {
+          "uid": "w3b5tb",
+          "collection": "users",
+          "filter": false,
+          "columnCount": 4
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "权限矩阵",
+      "routeId": 389118032674816,
+      "schemaUid": "w3b5m8kwiakieq",
+      "url": "/admin/w3b5m8kwiakieq",
+      "chain": "组织与系统",
+      "createdAt": "2026-09-28T04:32:16.038Z",
+      "updatedAt": "2026-09-28T19:11:26.288Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "JSBlockModel": 1
+      },
+      "tables": [],
+      "tabCount": 1
+    },
+    {
+      "title": "经营看板",
+      "routeId": 388860980559872,
+      "schemaUid": "w9kpi7zv98whvfpv",
+      "url": "/admin/w9kpi7zv98whvfpv",
+      "chain": "经营分析",
+      "createdAt": "2026-09-26T18:29:24.103Z",
+      "updatedAt": "2026-09-26T18:29:24.103Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 6,
+        "DisplayDateTimeFieldModel": 1,
+        "DisplayNumberFieldModel": 1,
+        "DisplayTextFieldModel": 3,
+        "DisplayEnumFieldModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormResetActionModel": 1,
+        "FilterFormSubmitActionModel": 1,
+        "ChartBlockModel": 2
+      },
+      "tables": [
+        {
+          "uid": "w9kpit",
+          "collection": "kpi_snapshots",
+          "filter": false,
+          "columnCount": 6
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "供应链看板",
+      "routeId": 388860982657024,
+      "schemaUid": "w9kpijpea6p6exnm",
+      "url": "/admin/w9kpijpea6p6exnm",
+      "chain": "经营分析",
+      "createdAt": "2026-09-26T18:29:25.169Z",
+      "updatedAt": "2026-09-26T18:29:25.169Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormResetActionModel": 1,
+        "FilterFormSubmitActionModel": 1,
+        "TableBlockModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 6,
+        "DisplayTextFieldModel": 3,
+        "DisplayNumberFieldModel": 1,
+        "DisplayDateTimeFieldModel": 1,
+        "DisplayEnumFieldModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1,
+        "ChartBlockModel": 3
+      },
+      "tables": [
+        {
+          "uid": "w9kpit",
+          "collection": "kpi_snapshots",
+          "filter": false,
+          "columnCount": 6
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "生产看板",
+      "routeId": 389085904306176,
+      "schemaUid": "w9kpirvxmfx12l2i",
+      "url": "/admin/w9kpirvxmfx12l2i",
+      "chain": "经营分析",
+      "createdAt": "2026-09-28T00:16:56.021Z",
+      "updatedAt": "2026-09-28T00:16:56.021Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 6,
+        "DisplayEnumFieldModel": 1,
+        "DisplayTextFieldModel": 3,
+        "DisplayNumberFieldModel": 1,
+        "DisplayDateTimeFieldModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormSubmitActionModel": 1,
+        "FilterFormResetActionModel": 1,
+        "ChartBlockModel": 2
+      },
+      "tables": [
+        {
+          "uid": "w9kpit",
+          "collection": "kpi_snapshots",
+          "filter": false,
+          "columnCount": 6
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "库存看板",
+      "routeId": 388860986851328,
+      "schemaUid": "w9kpiatwzi4gjbff",
+      "url": "/admin/w9kpiatwzi4gjbff",
+      "chain": "经营分析",
+      "createdAt": "2026-09-26T18:29:27.316Z",
+      "updatedAt": "2026-09-26T18:29:27.316Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 3,
+        "TableBlockModel": 2,
+        "RefreshActionModel": 2,
+        "TableColumnModel": 13,
+        "DisplayTextFieldModel": 4,
+        "DisplayEnumFieldModel": 2,
+        "DisplayDateTimeFieldModel": 5,
+        "DisplayTitleFieldModel": 1,
+        "TableActionsColumnModel": 2,
+        "ViewActionModel": 2,
+        "ChildPageModel": 2,
+        "DisplayNumberFieldModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormResetActionModel": 1,
+        "FilterFormSubmitActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "w9kpit",
+          "collection": "wms_lots",
+          "filter": false,
+          "columnCount": 7
+        },
+        {
+          "uid": "w9kpit",
+          "collection": "kpi_snapshots",
+          "filter": false,
+          "columnCount": 6
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "应收应付对账",
+      "routeId": 388987000520704,
+      "schemaUid": "w9kpisldougonly",
+      "url": "/admin/w9kpisldougonly",
+      "chain": "经营分析",
+      "createdAt": "2026-09-27T11:10:55.744Z",
+      "updatedAt": "2026-09-27T11:10:55.744Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 4,
+        "RefreshActionModel": 4,
+        "TableColumnModel": 21,
+        "DisplayDateTimeFieldModel": 4,
+        "DisplayNumberFieldModel": 4,
+        "DisplayTitleFieldModel": 3,
+        "DisplayEnumFieldModel": 6,
+        "TableActionsColumnModel": 4,
+        "ViewActionModel": 4,
+        "ChildPageModel": 6,
+        "EditActionModel": 2,
+        "DeleteActionModel": 1,
+        "DisplayTextFieldModel": 4,
+        "JSRecordActionModel": 2,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormSubmitActionModel": 1,
+        "FilterFormResetActionModel": 1,
+        "ChartBlockModel": 2
+      },
+      "tables": [
+        {
+          "uid": "w9kpit",
+          "collection": "crm_payments",
+          "filter": false,
+          "columnCount": 5
+        },
+        {
+          "uid": "w9kpit",
+          "collection": "so_orders",
+          "filter": false,
+          "columnCount": 5
+        },
+        {
+          "uid": "w9kpit",
+          "collection": "pur_payments",
+          "filter": false,
+          "columnCount": 5
+        },
+        {
+          "uid": "w9kpit",
+          "collection": "pur_invoices",
+          "filter": false,
+          "columnCount": 6
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "财务工作台",
+      "routeId": 389955823075328,
+      "schemaUid": "w6b9fgcovvinqe85",
+      "url": "/admin/w6b9fgcovvinqe85",
+      "chain": "经营分析",
+      "createdAt": "2026-10-02T19:30:26.683Z",
+      "updatedAt": "2026-10-02T19:30:26.683Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "JSBlockModel": 1
+      },
+      "tables": [],
+      "tabCount": 1
+    },
+    {
+      "title": "质检单",
+      "routeId": 388809612918784,
+      "schemaUid": "w8qmjvyv8p5j7j",
+      "url": "/admin/w8qmjvyv8p5j7j",
+      "chain": "质量管理",
+      "createdAt": "2026-09-26T11:41:10.155Z",
+      "updatedAt": "2026-09-26T11:41:10.155Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "MarkdownBlockModel": 1,
+        "TableBlockModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "TableColumnModel": 16,
+        "DisplayNumberFieldModel": 5,
+        "DisplayEnumFieldModel": 4,
+        "DisplayTitleFieldModel": 2,
+        "DisplayTextFieldModel": 4,
+        "DisplayDateTimeFieldModel": 1,
+        "AddNewActionModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 2,
+        "JSRecordActionModel": 1,
+        "EditActionModel": 1,
+        "ChartBlockModel": 3
+      },
+      "tables": [
+        {
+          "uid": "w8qmtb",
+          "collection": "qm_inspections",
+          "filter": true,
+          "columnCount": 16
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "检验读数",
+      "routeId": 388809617113088,
+      "schemaUid": "w8qmg3yelbk0rzm",
+      "url": "/admin/w8qmg3yelbk0rzm",
+      "chain": "质量管理",
+      "createdAt": "2026-09-26T11:41:12.638Z",
+      "updatedAt": "2026-09-26T11:41:12.638Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "TableColumnModel": 7,
+        "DisplayCheckboxFieldModel": 1,
+        "DisplayNumberFieldModel": 3,
+        "DisplayTextFieldModel": 2,
+        "DisplayTitleFieldModel": 1,
+        "AddNewActionModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1
+      },
+      "tables": [
+        {
+          "uid": "w8qmtb",
+          "collection": "qm_inspection_readings",
+          "filter": true,
+          "columnCount": 7
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "AQL 抽样方案",
+      "routeId": 388809623404544,
+      "schemaUid": "w8qm15rxe53v8hh",
+      "url": "/admin/w8qm15rxe53v8hh",
+      "chain": "质量管理",
+      "createdAt": "2026-09-26T11:41:15.920Z",
+      "updatedAt": "2026-09-28T19:11:27.983Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "TableColumnModel": 9,
+        "DisplayTextFieldModel": 4,
+        "DisplayNumberFieldModel": 3,
+        "DisplayEnumFieldModel": 2,
+        "AddNewActionModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1
+      },
+      "tables": [
+        {
+          "uid": "w8qmtb",
+          "collection": "qm_aql_plans",
+          "filter": true,
+          "columnCount": 9
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "处置看板",
+      "routeId": 388809621307392,
+      "schemaUid": "w8qm472nluqt32x",
+      "url": "/admin/w8qm472nluqt32x",
+      "chain": "质量管理",
+      "createdAt": "2026-09-26T11:41:14.368Z",
+      "updatedAt": "2026-09-28T19:11:28.054Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "KanbanBlockModel": 1,
+        "RefreshActionModel": 1,
+        "KanbanQuickCreateActionModel": 1,
+        "FilterActionModel": 1,
+        "KanbanCardViewActionModel": 1,
+        "ChildPageModel": 1,
+        "KanbanCardItemModel": 1,
+        "AddNewActionModel": 1,
+        "ChartBlockModel": 3,
+        "MarkdownBlockModel": 1
+      },
+      "tables": [],
+      "tabCount": 1
+    },
+    {
+      "title": "质检看板",
+      "routeId": 389082576125952,
+      "schemaUid": "w3b3uw3d0mrz1b",
+      "url": "/admin/w3b3uw3d0mrz1b",
+      "chain": "质量管理",
+      "createdAt": "2026-09-27T23:50:29.730Z",
+      "updatedAt": "2026-09-28T19:11:28.077Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "KanbanBlockModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "KanbanCardViewActionModel": 1,
+        "ChildPageModel": 1,
+        "KanbanCardItemModel": 1
+      },
+      "tables": [],
+      "tabCount": 1
+    },
+    {
+      "title": "季度绩效物化",
+      "routeId": 388810166566912,
+      "schemaUid": "w8qm8sx2tj9j0kb",
+      "url": "/admin/w8qm8sx2tj9j0kb",
+      "chain": "质量管理",
+      "createdAt": "2026-09-26T11:45:34.811Z",
+      "updatedAt": "2026-09-28T19:11:28.104Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "TableColumnModel": 10,
+        "DisplayEnumFieldModel": 3,
+        "DisplayNumberFieldModel": 6,
+        "DisplayTitleFieldModel": 1,
+        "AddNewActionModel": 1,
+        "TableActionsColumnModel": 1,
+        "EditActionModel": 1,
+        "ChildPageModel": 2,
+        "DeleteActionModel": 1,
+        "ViewActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "w8qmtb",
+          "collection": "srm_score_cards",
+          "filter": true,
+          "columnCount": 10
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "CCP监控配置",
+      "routeId": 389869435092992,
+      "schemaUid": "w6b4c4t709ypn92m",
+      "url": "/admin/w6b4c4t709ypn92m",
+      "chain": "质量管理",
+      "createdAt": "2026-10-02T08:03:53.558Z",
+      "updatedAt": "2026-10-02T08:03:53.558Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 8,
+        "DisplayTextFieldModel": 8,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormResetActionModel": 1,
+        "FilterFormSubmitActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "w6b4ct",
+          "collection": "mfg_ccp_points",
+          "filter": false,
+          "columnCount": 8
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "质检工作台",
+      "routeId": 389123487367168,
+      "schemaUid": "w3b6nour73ecwgb",
+      "url": "/admin/w3b6nour73ecwgb",
+      "chain": "质量管理",
+      "createdAt": "2026-09-28T05:15:37.304Z",
+      "updatedAt": "2026-09-28T05:15:37.304Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "IframeBlockModel": 1
+      },
+      "tables": [],
+      "tabCount": 1
+    },
+    {
+      "title": "CCP监控记录",
+      "routeId": 389869439287296,
+      "schemaUid": "w6b4ce752lctbwp8",
+      "url": "/admin/w6b4ce752lctbwp8",
+      "chain": "质量管理",
+      "createdAt": "2026-10-02T08:03:55.300Z",
+      "updatedAt": "2026-10-02T08:03:55.300Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormSubmitActionModel": 1,
+        "FilterFormResetActionModel": 1,
+        "TableBlockModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 12,
+        "DisplayTextFieldModel": 12,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1
+      },
+      "tables": [
+        {
+          "uid": "w6b4ct",
+          "collection": "mfg_ccp_records",
+          "filter": false,
+          "columnCount": 12
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "检验工作台",
+      "routeId": 389889343356939,
+      "schemaUid": "w6b5icrrgz5z9gu",
+      "url": "/admin/w6b5icrrgz5z9gu",
+      "chain": "质量管理",
+      "createdAt": "2026-10-02T10:42:06.580Z",
+      "updatedAt": "2026-10-02T10:42:06.580Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "IframeBlockModel": 1
+      },
+      "tables": [],
+      "tabCount": 1
+    },
+    {
+      "title": "出厂检验报告",
+      "routeId": 389889345454080,
+      "schemaUid": "w6b5ruwgh0d52fif",
+      "url": "/admin/w6b5ruwgh0d52fif",
+      "chain": "质量管理",
+      "createdAt": "2026-10-02T10:42:07.057Z",
+      "updatedAt": "2026-10-02T10:42:07.057Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 10,
+        "DisplayTextFieldModel": 9,
+        "DisplayDateTimeFieldModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormSubmitActionModel": 1,
+        "FilterFormResetActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "w6b5rt",
+          "collection": "qm_factory_reports",
+          "filter": false,
+          "columnCount": 10
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "资产台账",
+      "routeId": 386332373680128,
+      "schemaUid": "n17wr2jbz8fl2i",
+      "url": "/admin/n17wr2jbz8fl2i",
+      "chain": "资产管理",
+      "createdAt": "2026-09-12T19:33:51.038Z",
+      "updatedAt": "2026-09-12T19:33:51.038Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 2,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "EditActionModel": 1,
+        "ChildPageModel": 2,
+        "DeleteActionModel": 1,
+        "ViewActionModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 5,
+        "DisplayTextFieldModel": 3,
+        "DisplayEnumFieldModel": 2,
+        "AddNewActionModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormSubmitActionModel": 1,
+        "FilterFormResetActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "n17tbl",
+          "collection": "hub_as_assets",
+          "filter": false,
+          "columnCount": 5
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "设备台账",
+      "routeId": 389948629843968,
+      "schemaUid": "w6b8ekr28fjs4b0k",
+      "url": "/admin/w6b8ekr28fjs4b0k",
+      "chain": "资产管理",
+      "createdAt": "2026-10-02T18:33:16.026Z",
+      "updatedAt": "2026-10-02T18:33:16.026Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 9,
+        "DisplayTextFieldModel": 7,
+        "DisplayEnumFieldModel": 2,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormSubmitActionModel": 1,
+        "FilterFormResetActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "w6b8et",
+          "collection": "eam_assets",
+          "filter": false,
+          "columnCount": 9
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "维保服务商",
+      "routeId": 386424344805376,
+      "schemaUid": "n17f3t3gtwv502s",
+      "url": "/admin/n17f3t3gtwv502s",
+      "chain": "资产管理",
+      "createdAt": "2026-09-13T07:44:46.552Z",
+      "updatedAt": "2026-09-28T19:11:27.269Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 2,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "EditActionModel": 1,
+        "ChildPageModel": 2,
+        "DeleteActionModel": 1,
+        "ViewActionModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 4,
+        "DisplayTextFieldModel": 2,
+        "DisplayEnumFieldModel": 2,
+        "AddNewActionModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormSubmitActionModel": 1,
+        "FilterFormResetActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "n17f3t",
+          "collection": "hub_as_vendors",
+          "filter": false,
+          "columnCount": 4
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "维保计划",
+      "routeId": 389948631941120,
+      "schemaUid": "w6b8e2y41rty9rx",
+      "url": "/admin/w6b8e2y41rty9rx",
+      "chain": "资产管理",
+      "createdAt": "2026-10-02T18:33:17.619Z",
+      "updatedAt": "2026-10-02T18:33:17.619Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 8,
+        "DisplayTextFieldModel": 6,
+        "DisplayDateTimeFieldModel": 2,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormSubmitActionModel": 1,
+        "FilterFormResetActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "w6b8et",
+          "collection": "eam_maint_plans",
+          "filter": false,
+          "columnCount": 8
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "维保记录",
+      "routeId": 386424338513920,
+      "schemaUid": "n17f34o4bhrzg1w",
+      "url": "/admin/n17f34o4bhrzg1w",
+      "chain": "资产管理",
+      "createdAt": "2026-09-13T07:44:43.923Z",
+      "updatedAt": "2026-09-13T07:44:43.923Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 3,
+        "MarkdownBlockModel": 1,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "EditActionModel": 1,
+        "ChildPageModel": 2,
+        "DeleteActionModel": 1,
+        "ViewActionModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 6,
+        "DisplayDateTimeFieldModel": 1,
+        "DisplayNumberFieldModel": 1,
+        "DisplayEnumFieldModel": 2,
+        "DisplayTextFieldModel": 1,
+        "DisplayTitleFieldModel": 1,
+        "AddNewActionModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormResetActionModel": 1,
+        "FilterFormSubmitActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "n17f3t",
+          "collection": "hub_as_maintenance",
+          "filter": false,
+          "columnCount": 6
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "维保工单",
+      "routeId": 389948634038272,
+      "schemaUid": "w6b8eupafgchxsnf",
+      "url": "/admin/w6b8eupafgchxsnf",
+      "chain": "资产管理",
+      "createdAt": "2026-10-02T18:33:18.742Z",
+      "updatedAt": "2026-10-02T18:33:18.742Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 12,
+        "DisplayTextFieldModel": 8,
+        "DisplayEnumFieldModel": 3,
+        "DisplayDateTimeFieldModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormSubmitActionModel": 1,
+        "FilterFormResetActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "w6b8et",
+          "collection": "eam_maint_orders",
+          "filter": false,
+          "columnCount": 12
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "计量校准",
+      "routeId": 389948638232576,
+      "schemaUid": "w6b8erufav9515p",
+      "url": "/admin/w6b8erufav9515p",
+      "chain": "资产管理",
+      "createdAt": "2026-10-02T18:33:20.356Z",
+      "updatedAt": "2026-10-02T18:33:20.356Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 10,
+        "DisplayTextFieldModel": 7,
+        "DisplayDateTimeFieldModel": 2,
+        "DisplayEnumFieldModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormResetActionModel": 1,
+        "FilterFormSubmitActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "w6b8et",
+          "collection": "eam_calibrations",
+          "filter": false,
+          "columnCount": 10
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "维保日历",
+      "routeId": 389948640329728,
+      "schemaUid": "w6b8eci1cpbqsgtj",
+      "url": "/admin/w6b8eci1cpbqsgtj",
+      "chain": "资产管理",
+      "createdAt": "2026-10-02T18:33:21.722Z",
+      "updatedAt": "2026-10-02T18:33:21.722Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "JSBlockModel": 1
+      },
+      "tables": [],
+      "tabCount": 1
+    },
+    {
+      "title": "采购申请",
+      "routeId": 388751207235584,
+      "schemaUid": "w3pura0kyqfx4f9",
+      "url": "/admin/w3pura0kyqfx4f9",
+      "chain": "采购管理",
+      "createdAt": "2026-09-26T03:57:00.129Z",
+      "updatedAt": "2026-09-26T03:57:00.129Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 2,
+        "RefreshActionModel": 2,
+        "FilterActionModel": 2,
+        "TableColumnModel": 11,
+        "DisplayDateTimeFieldModel": 1,
+        "DisplayEnumFieldModel": 1,
+        "DisplayNumberFieldModel": 3,
+        "DisplayTextFieldModel": 4,
+        "AddNewActionModel": 2,
+        "TableActionsColumnModel": 2,
+        "ViewActionModel": 2,
+        "ChildPageModel": 3,
+        "JSRecordActionModel": 1,
+        "EditActionModel": 1,
+        "DisplayTitleFieldModel": 2,
+        "MarkdownBlockModel": 1,
+        "ChartBlockModel": 4
+      },
+      "tables": [
+        {
+          "uid": "w3purt",
+          "collection": "pur_requests",
+          "filter": true,
+          "columnCount": 6
+        },
+        {
+          "uid": "w3purt",
+          "collection": "pur_request_lines",
+          "filter": true,
+          "columnCount": 5
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "询价管理",
+      "routeId": 388751209332736,
+      "schemaUid": "w3purlvif0v23bun",
+      "url": "/admin/w3purlvif0v23bun",
+      "chain": "采购管理",
+      "createdAt": "2026-09-26T03:57:01.625Z",
+      "updatedAt": "2026-09-26T03:57:01.625Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 2,
+        "RefreshActionModel": 2,
+        "FilterActionModel": 2,
+        "TableColumnModel": 7,
+        "DisplayDateTimeFieldModel": 2,
+        "DisplayTextFieldModel": 1,
+        "DisplayTitleFieldModel": 3,
+        "DisplayEnumFieldModel": 1,
+        "AddNewActionModel": 2,
+        "TableActionsColumnModel": 2,
+        "ViewActionModel": 2,
+        "ChildPageModel": 3,
+        "JSRecordActionModel": 1,
+        "EditActionModel": 1,
+        "ChartBlockModel": 3,
+        "MarkdownBlockModel": 1
+      },
+      "tables": [
+        {
+          "uid": "w3purt",
+          "collection": "pur_rfqs",
+          "filter": true,
+          "columnCount": 4
+        },
+        {
+          "uid": "w3purt",
+          "collection": "pur_rfq_suppliers",
+          "filter": true,
+          "columnCount": 3
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "供应商报价",
+      "routeId": 388751213527040,
+      "schemaUid": "w3pur9w1c3yg3rjd",
+      "url": "/admin/w3pur9w1c3yg3rjd",
+      "chain": "采购管理",
+      "createdAt": "2026-09-26T03:57:03.103Z",
+      "updatedAt": "2026-09-26T03:57:03.103Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 3,
+        "TableBlockModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "TableColumnModel": 9,
+        "DisplayCheckboxFieldModel": 1,
+        "DisplayTitleFieldModel": 3,
+        "DisplayNumberFieldModel": 3,
+        "DisplayDateTimeFieldModel": 1,
+        "DisplayEnumFieldModel": 1,
+        "AddNewActionModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1,
+        "MarkdownBlockModel": 1
+      },
+      "tables": [
+        {
+          "uid": "w3purt",
+          "collection": "pur_quotes",
+          "filter": true,
+          "columnCount": 9
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "比价表",
+      "routeId": 388751215624192,
+      "schemaUid": "w3purb7o0r3yqi45",
+      "url": "/admin/w3purb7o0r3yqi45",
+      "chain": "采购管理",
+      "createdAt": "2026-09-26T03:57:04.725Z",
+      "updatedAt": "2026-09-26T03:57:04.725Z",
+      "blocks": {
+        "BlockGridModel": 2,
+        "ChartBlockModel": 3,
+        "MarkdownBlockModel": 1,
+        "TableBlockModel": 2,
+        "RefreshActionModel": 2,
+        "TableColumnModel": 10,
+        "DisplayNumberFieldModel": 4,
+        "DisplayEnumFieldModel": 1,
+        "DisplayTitleFieldModel": 4,
+        "TableActionsColumnModel": 2,
+        "ViewActionModel": 2,
+        "ChildPageModel": 3,
+        "AddNewActionModel": 1,
+        "ChildPageTabModel": 1,
+        "CreateFormModel": 1,
+        "AIEmployeeButtonModel": 1,
+        "FormGridModel": 1,
+        "FormItemModel": 8,
+        "NumberFieldModel": 3,
+        "DateOnlyFieldModel": 1,
+        "RecordSelectFieldModel": 3,
+        "SelectFieldModel": 1,
+        "FormSubmitActionModel": 1,
+        "AssignFormModel": 1,
+        "AssignFormGridModel": 1,
+        "DisplayCheckboxFieldModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormSubmitActionModel": 1,
+        "FilterFormResetActionModel": 1,
+        "JSBlockModel": 1
+      },
+      "tables": [
+        {
+          "uid": "w3purt",
+          "collection": "pur_quotes",
+          "filter": false,
+          "columnCount": 6
+        },
+        {
+          "uid": "w3purt",
+          "collection": "pur_quotes",
+          "filter": false,
+          "columnCount": 4
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "采购订单",
+      "routeId": 388751217721344,
+      "schemaUid": "w3puryzkva06iuhh",
+      "url": "/admin/w3puryzkva06iuhh",
+      "chain": "采购管理",
+      "createdAt": "2026-09-26T03:57:05.525Z",
+      "updatedAt": "2026-09-26T03:57:05.525Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 2,
+        "RefreshActionModel": 2,
+        "FilterActionModel": 2,
+        "TableColumnModel": 13,
+        "DisplayEnumFieldModel": 3,
+        "DisplayTitleFieldModel": 4,
+        "DisplayNumberFieldModel": 4,
+        "DisplayDateTimeFieldModel": 1,
+        "DisplayTextFieldModel": 1,
+        "AddNewActionModel": 2,
+        "TableActionsColumnModel": 2,
+        "ViewActionModel": 2,
+        "ChildPageModel": 3,
+        "JSRecordActionModel": 1,
+        "EditActionModel": 1,
+        "MarkdownBlockModel": 1,
+        "ChartBlockModel": 4,
+        "JSBlockModel": 1
+      },
+      "tables": [
+        {
+          "uid": "w3purt",
+          "collection": "pur_orders",
+          "filter": true,
+          "columnCount": 8
+        },
+        {
+          "uid": "w3purt",
+          "collection": "pur_order_lines",
+          "filter": true,
+          "columnCount": 5
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "发票匹配",
+      "routeId": 388751221915648,
+      "schemaUid": "w3pur45681oxtcsi",
+      "url": "/admin/w3pur45681oxtcsi",
+      "chain": "采购管理",
+      "createdAt": "2026-09-26T03:57:07.023Z",
+      "updatedAt": "2026-09-26T03:57:07.023Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "TableColumnModel": 7,
+        "DisplayTextFieldModel": 3,
+        "DisplayNumberFieldModel": 2,
+        "DisplayEnumFieldModel": 1,
+        "DisplayTitleFieldModel": 1,
+        "AddNewActionModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1,
+        "MarkdownBlockModel": 1,
+        "JSBlockModel": 1,
+        "ChartBlockModel": 4
+      },
+      "tables": [
+        {
+          "uid": "w3purt",
+          "collection": "pur_invoices",
+          "filter": true,
+          "columnCount": 7
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "付款申请",
+      "routeId": 388751221915651,
+      "schemaUid": "w3pur3an4pwnr1eo",
+      "url": "/admin/w3pur3an4pwnr1eo",
+      "chain": "采购管理",
+      "createdAt": "2026-09-26T03:57:07.903Z",
+      "updatedAt": "2026-09-28T19:11:27.320Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "TableColumnModel": 6,
+        "DisplayNumberFieldModel": 1,
+        "DisplayTextFieldModel": 1,
+        "DisplayEnumFieldModel": 2,
+        "DisplayDateTimeFieldModel": 1,
+        "DisplayTitleFieldModel": 1,
+        "AddNewActionModel": 1,
+        "TableActionsColumnModel": 1,
+        "JSRecordActionModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1,
+        "ChartBlockModel": 4,
+        "MarkdownBlockModel": 1
+      },
+      "tables": [
+        {
+          "uid": "w3purt",
+          "collection": "pur_payments",
+          "filter": true,
+          "columnCount": 6
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "采购看板",
+      "routeId": 389082555154432,
+      "schemaUid": "w3b3x35bfqctwkn",
+      "url": "/admin/w3b3x35bfqctwkn",
+      "chain": "采购管理",
+      "createdAt": "2026-09-27T23:50:19.573Z",
+      "updatedAt": "2026-09-27T23:50:19.573Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "KanbanBlockModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "KanbanCardViewActionModel": 1,
+        "ChildPageModel": 1,
+        "KanbanCardItemModel": 1
+      },
+      "tables": [],
+      "tabCount": 1
+    },
+    {
+      "title": "销售订单",
+      "routeId": 388796828680192,
+      "schemaUid": "w7mrp4w590rm0ws8",
+      "url": "/admin/w7mrp4w590rm0ws8",
+      "chain": "销售管理",
+      "createdAt": "2026-09-26T09:59:34.192Z",
+      "updatedAt": "2026-09-26T09:59:34.192Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "MarkdownBlockModel": 1,
+        "TableBlockModel": 2,
+        "RefreshActionModel": 2,
+        "FilterActionModel": 2,
+        "TableColumnModel": 13,
+        "DisplayTitleFieldModel": 3,
+        "DisplayTextFieldModel": 2,
+        "DisplayDateTimeFieldModel": 2,
+        "DisplayNumberFieldModel": 4,
+        "DisplayEnumFieldModel": 2,
+        "AddNewActionModel": 2,
+        "TableActionsColumnModel": 2,
+        "ViewActionModel": 2,
+        "ChildPageModel": 3,
+        "JSRecordActionModel": 1,
+        "EditActionModel": 1,
+        "ChartBlockModel": 4
+      },
+      "tables": [
+        {
+          "uid": "w7mrpt",
+          "collection": "so_orders",
+          "filter": true,
+          "columnCount": 8
+        },
+        {
+          "uid": "w7mrpt",
+          "collection": "so_order_lines",
+          "filter": true,
+          "columnCount": 5
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "商机管道",
+      "routeId": 389906797953025,
+      "schemaUid": "w6b6c6iqjj61zo9",
+      "url": "/admin/w6b6c6iqjj61zo9",
+      "chain": "销售管理",
+      "createdAt": "2026-10-02T13:00:49.443Z",
+      "updatedAt": "2026-10-02T13:00:49.443Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "IframeBlockModel": 1
+      },
+      "tables": [],
+      "tabCount": 1
+    },
+    {
+      "title": "报价单",
+      "routeId": 386332369485826,
+      "schemaUid": "n17v6xfvzxoj0f",
+      "url": "/admin/n17v6xfvzxoj0f",
+      "chain": "销售管理",
+      "createdAt": "2026-09-12T19:33:49.729Z",
+      "updatedAt": "2026-09-28T19:11:27.472Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormSubmitActionModel": 1,
+        "FilterFormResetActionModel": 1,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "EditActionModel": 1,
+        "ChildPageModel": 2,
+        "DeleteActionModel": 1,
+        "ViewActionModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 4,
+        "DisplayNumberFieldModel": 1,
+        "DisplayTextFieldModel": 2,
+        "DisplayEnumFieldModel": 1,
+        "AddNewActionModel": 1,
+        "ChartBlockModel": 3,
+        "MarkdownBlockModel": 1
+      },
+      "tables": [
+        {
+          "uid": "n17tbg",
+          "collection": "crm_quotes",
+          "filter": false,
+          "columnCount": 4
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "订单",
+      "routeId": 386332369485824,
+      "schemaUid": "n17vu68623sj9i",
+      "url": "/admin/n17vu68623sj9i",
+      "chain": "销售管理",
+      "createdAt": "2026-09-12T19:33:49.099Z",
+      "updatedAt": "2026-09-28T19:11:27.494Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 3,
+        "MarkdownBlockModel": 1,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "EditActionModel": 1,
+        "ChildPageModel": 2,
+        "DeleteActionModel": 1,
+        "ViewActionModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 5,
+        "DisplayTextFieldModel": 3,
+        "DisplayEnumFieldModel": 1,
+        "DisplayNumberFieldModel": 1,
+        "AddNewActionModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormResetActionModel": 1,
+        "FilterFormSubmitActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "n17tbe",
+          "collection": "crm_deals",
+          "filter": false,
+          "columnCount": 5
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "回款",
+      "routeId": 386463573737473,
+      "schemaUid": "n17f2c15ji684n8g",
+      "url": "/admin/n17f2c15ji684n8g",
+      "chain": "销售管理",
+      "createdAt": "2026-09-13T12:56:32.847Z",
+      "updatedAt": "2026-09-28T19:11:27.518Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 3,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 2,
+        "EditActionModel": 1,
+        "DeleteActionModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 6,
+        "DisplayTitleFieldModel": 2,
+        "DisplayDateTimeFieldModel": 1,
+        "DisplayNumberFieldModel": 1,
+        "DisplayEnumFieldModel": 2,
+        "AddNewActionModel": 1,
+        "MarkdownBlockModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormSubmitActionModel": 1,
+        "FilterFormResetActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "n17f2t",
+          "collection": "crm_payments",
+          "filter": false,
+          "columnCount": 6
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "发票",
+      "routeId": 386463575834624,
+      "schemaUid": "n17f2utwb01mi3ha",
+      "url": "/admin/n17f2utwb01mi3ha",
+      "chain": "销售管理",
+      "createdAt": "2026-09-13T12:56:33.974Z",
+      "updatedAt": "2026-09-28T19:11:27.538Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 3,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormSubmitActionModel": 1,
+        "FilterFormResetActionModel": 1,
+        "MarkdownBlockModel": 1,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "EditActionModel": 1,
+        "ChildPageModel": 2,
+        "DeleteActionModel": 1,
+        "ViewActionModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 6,
+        "DisplayTitleFieldModel": 2,
+        "DisplayNumberFieldModel": 1,
+        "DisplayTextFieldModel": 1,
+        "DisplayEnumFieldModel": 1,
+        "DisplayDateTimeFieldModel": 1,
+        "AddNewActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "n17f2t",
+          "collection": "crm_invoices",
+          "filter": false,
+          "columnCount": 6
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "销售看板",
+      "routeId": 389082571931648,
+      "schemaUid": "w3b3utj5a15khmq",
+      "url": "/admin/w3b3utj5a15khmq",
+      "chain": "销售管理",
+      "createdAt": "2026-09-27T23:50:27.325Z",
+      "updatedAt": "2026-09-28T19:11:27.558Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "KanbanBlockModel": 1,
+        "RefreshActionModel": 1,
+        "FilterActionModel": 1,
+        "KanbanCardViewActionModel": 1,
+        "ChildPageModel": 1,
+        "KanbanCardItemModel": 1
+      },
+      "tables": [],
+      "tabCount": 1
+    },
+    {
+      "title": "交期日历",
+      "routeId": 389082582417408,
+      "schemaUid": "w3b3x8ymuxey8q",
+      "url": "/admin/w3b3x8ymuxey8q",
+      "chain": "销售管理",
+      "createdAt": "2026-09-27T23:50:32.485Z",
+      "updatedAt": "2026-09-28T19:11:27.578Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "CalendarBlockModel": 2,
+        "RefreshActionModel": 2,
+        "FilterActionModel": 2,
+        "CalendarEventViewActionModel": 2,
+        "ChildPageModel": 2,
+        "CalendarViewSelectActionModel": 2,
+        "CalendarNavActionModel": 2
+      },
+      "tables": [],
+      "tabCount": 1
+    },
+    {
+      "title": "计划日历",
+      "routeId": 389082588708864,
+      "schemaUid": "w3b3ass8lwvxiy",
+      "url": "/admin/w3b3ass8lwvxiy",
+      "chain": "销售管理",
+      "createdAt": "2026-09-27T23:50:35.544Z",
+      "updatedAt": "2026-09-28T19:11:27.597Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "CalendarBlockModel": 2,
+        "RefreshActionModel": 2,
+        "FilterActionModel": 2,
+        "CalendarEventViewActionModel": 2,
+        "ChildPageModel": 2,
+        "CalendarViewSelectActionModel": 2,
+        "CalendarNavActionModel": 2
+      },
+      "tables": [],
+      "tabCount": 1
+    },
+    {
+      "title": "销售仪表盘",
+      "routeId": 386463582126080,
+      "schemaUid": "n17f2y9wfrggxyo",
+      "url": "/admin/n17f2y9wfrggxyo",
+      "chain": "销售管理",
+      "createdAt": "2026-09-13T12:56:36.118Z",
+      "updatedAt": "2026-09-28T19:11:27.618Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 2,
+        "EditActionModel": 1,
+        "DeleteActionModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 6,
+        "DisplayDateTimeFieldModel": 1,
+        "DisplayTitleFieldModel": 2,
+        "DisplayEnumFieldModel": 2,
+        "DisplayNumberFieldModel": 1,
+        "AddNewActionModel": 1,
+        "ChartBlockModel": 2,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormResetActionModel": 1,
+        "FilterFormSubmitActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "n17f2t",
+          "collection": "crm_payments",
+          "filter": false,
+          "columnCount": 6
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "任务列表",
+      "routeId": 389294447198208,
+      "schemaUid": "n17e1ilgn22ts32",
+      "url": "/admin/n17e1ilgn22ts32",
+      "chain": "项目与协同",
+      "createdAt": "2026-09-29T03:54:17.897Z",
+      "updatedAt": "2026-09-29T06:29:15.646Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormSubmitActionModel": 1,
+        "FilterFormResetActionModel": 1,
+        "ChartBlockModel": 3,
+        "MarkdownBlockModel": 1,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 8,
+        "DisplayTitleFieldModel": 2,
+        "DisplayDateTimeFieldModel": 3,
+        "DisplayEnumFieldModel": 2,
+        "DisplayTextFieldModel": 1,
+        "AddNewActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "n17e1t",
+          "collection": "hub_pj_tasks",
+          "filter": false,
+          "columnCount": 8
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "任务看板",
+      "routeId": 386420400062464,
+      "schemaUid": "n17f12u108kzzyk1",
+      "url": "/admin/n17f12u108kzzyk1",
+      "chain": "项目与协同",
+      "createdAt": "2026-09-13T07:13:25.302Z",
+      "updatedAt": "2026-09-13T07:13:25.302Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "KanbanBlockModel": 1,
+        "RefreshActionModel": 1,
+        "KanbanQuickCreateActionModel": 1,
+        "FilterActionModel": 1,
+        "KanbanCardViewActionModel": 1,
+        "ChildPageModel": 1,
+        "KanbanCardItemModel": 1,
+        "AddNewActionModel": 1
+      },
+      "tables": [],
+      "tabCount": 1
+    },
+    {
+      "title": "任务日历",
+      "routeId": 386421253603328,
+      "schemaUid": "n17f1ns70eshqwy",
+      "url": "/admin/n17f1ns70eshqwy",
+      "chain": "项目与协同",
+      "createdAt": "2026-09-13T07:20:12.031Z",
+      "updatedAt": "2026-09-13T07:20:12.031Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "CalendarBlockModel": 1,
+        "RefreshActionModel": 1,
+        "CalendarQuickCreateActionModel": 1,
+        "FilterActionModel": 1,
+        "CalendarEventViewActionModel": 1,
+        "ChildPageModel": 1,
+        "CalendarViewSelectActionModel": 1,
+        "CalendarNavActionModel": 1,
+        "AddNewActionModel": 1
+      },
+      "tables": [],
+      "tabCount": 1
+    },
+    {
+      "title": "项目",
+      "routeId": 389294443003906,
+      "schemaUid": "n17e1kqp4orpph5",
+      "url": "/admin/n17e1kqp4orpph5",
+      "chain": "项目与协同",
+      "createdAt": "2026-09-29T03:54:15.755Z",
+      "updatedAt": "2026-09-29T06:29:15.670Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 3,
+        "MarkdownBlockModel": 1,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 8,
+        "DisplayTitleFieldModel": 1,
+        "DisplayTextFieldModel": 3,
+        "DisplayEnumFieldModel": 2,
+        "DisplayNumberFieldModel": 1,
+        "DisplayDateTimeFieldModel": 1,
+        "AddNewActionModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormResetActionModel": 1,
+        "FilterFormSubmitActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "n17e1t",
+          "collection": "hub_pj_projects",
+          "filter": false,
+          "columnCount": 8
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "里程碑",
+      "routeId": 389294453489664,
+      "schemaUid": "n17e1m63re4tgre8",
+      "url": "/admin/n17e1m63re4tgre8",
+      "chain": "项目与协同",
+      "createdAt": "2026-09-29T03:54:20.621Z",
+      "updatedAt": "2026-09-29T03:54:20.621Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 2,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 4,
+        "DisplayTextFieldModel": 1,
+        "DisplayDateTimeFieldModel": 1,
+        "DisplayTitleFieldModel": 1,
+        "DisplayEnumFieldModel": 1,
+        "AddNewActionModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormResetActionModel": 1,
+        "FilterFormSubmitActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "n17e1t",
+          "collection": "hub_pj_milestones",
+          "filter": false,
+          "columnCount": 4
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "工单",
+      "routeId": 386332371582976,
+      "schemaUid": "n17etqhllqqa28",
+      "url": "/admin/n17etqhllqqa28",
+      "chain": "项目与协同",
+      "createdAt": "2026-09-12T19:33:50.331Z",
+      "updatedAt": "2026-09-28T19:11:28.661Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 3,
+        "MarkdownBlockModel": 1,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "EditActionModel": 1,
+        "ChildPageModel": 2,
+        "DeleteActionModel": 1,
+        "ViewActionModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 6,
+        "DisplayTextFieldModel": 3,
+        "DisplayEnumFieldModel": 3,
+        "AddNewActionModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormResetActionModel": 1,
+        "FilterFormSubmitActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "n17tbc",
+          "collection": "hub_tk_tickets",
+          "filter": false,
+          "columnCount": 6
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "知识文章",
+      "routeId": 386424336416768,
+      "schemaUid": "n17f38lga4ln4s65",
+      "url": "/admin/n17f38lga4ln4s65",
+      "chain": "项目与协同",
+      "createdAt": "2026-09-13T07:44:42.714Z",
+      "updatedAt": "2026-09-28T19:11:28.681Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 2,
+        "TableBlockModel": 1,
+        "TableActionsColumnModel": 1,
+        "EditActionModel": 1,
+        "ChildPageModel": 2,
+        "DeleteActionModel": 1,
+        "ViewActionModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 5,
+        "DisplayTextFieldModel": 1,
+        "DisplayNumberFieldModel": 1,
+        "DisplayEnumFieldModel": 1,
+        "DisplayTitleFieldModel": 1,
+        "DisplayDateTimeFieldModel": 1,
+        "AddNewActionModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormResetActionModel": 1,
+        "FilterFormSubmitActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "n17f3t",
+          "collection": "hub_kb_articles",
+          "filter": false,
+          "columnCount": 5
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "审批中心",
+      "routeId": 388694259073025,
+      "schemaUid": "w1w167h6joi0ck6",
+      "url": "/admin/w1w167h6joi0ck6",
+      "chain": "项目与协同",
+      "createdAt": "2026-09-25T20:24:25.277Z",
+      "updatedAt": "2026-09-28T19:11:28.702Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "ChartBlockModel": 3,
+        "MarkdownBlockModel": 1,
+        "TableBlockModel": 2,
+        "TableActionsColumnModel": 2,
+        "ViewActionModel": 2,
+        "ChildPageModel": 2,
+        "RefreshActionModel": 2,
+        "TableColumnModel": 17,
+        "DisplayDateTimeFieldModel": 3,
+        "DisplayNumberFieldModel": 4,
+        "DisplayTextFieldModel": 5,
+        "DisplayEnumFieldModel": 5,
+        "JSRecordActionModel": 1,
+        "AddNewActionModel": 1,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormSubmitActionModel": 1,
+        "FilterFormResetActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "w1w1tb",
+          "collection": "wfl_approval_records",
+          "filter": false,
+          "columnCount": 11
+        },
+        {
+          "uid": "w1w1tb",
+          "collection": "wfl_approval_todos",
+          "filter": false,
+          "columnCount": 6
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "审批流配置",
+      "routeId": 389092915085312,
+      "schemaUid": "w3b4u2r9nnjqvi",
+      "url": "/admin/w3b4u2r9nnjqvi",
+      "chain": "项目与协同",
+      "createdAt": "2026-09-28T01:12:39.984Z",
+      "updatedAt": "2026-09-28T19:11:28.722Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 4,
+        "RefreshActionModel": 4,
+        "TableColumnModel": 24,
+        "DisplayTextFieldModel": 15,
+        "DisplayCheckboxFieldModel": 2,
+        "DisplayEnumFieldModel": 5,
+        "DisplayNumberFieldModel": 2,
+        "TableActionsColumnModel": 4,
+        "EditActionModel": 4,
+        "ChildPageModel": 8,
+        "ViewActionModel": 4,
+        "AddNewActionModel": 1,
+        "JSBlockModel": 2,
+        "FilterFormBlockModel": 1,
+        "FilterFormCollapseActionModel": 1,
+        "FilterFormResetActionModel": 1,
+        "FilterFormSubmitActionModel": 1,
+        "IframeBlockModel": 1
+      },
+      "tables": [
+        {
+          "uid": "w3b4tb",
+          "collection": "wfl_flow_transitions",
+          "filter": false,
+          "columnCount": 7
+        },
+        {
+          "uid": "w3b4tb",
+          "collection": "wfl_flow_states",
+          "filter": false,
+          "columnCount": 6
+        },
+        {
+          "uid": "w3b4tb",
+          "collection": "wfl_flow_configs",
+          "filter": false,
+          "columnCount": 4
+        },
+        {
+          "uid": "w3b4tb",
+          "collection": "wfl_gate_configs",
+          "filter": false,
+          "columnCount": 7
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "预警列表",
+      "routeId": 389783497998341,
+      "schemaUid": "w6b2dwgwk6zc3i",
+      "url": "/admin/w6b2dwgwk6zc3i",
+      "chain": "预警中心",
+      "createdAt": "2026-10-01T20:40:55.716Z",
+      "updatedAt": "2026-10-01T20:40:55.716Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 8,
+        "DisplayDateTimeFieldModel": 2,
+        "DisplayEnumFieldModel": 3,
+        "DisplayTextFieldModel": 3,
+        "AddNewActionModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1,
+        "ChartBlockModel": 8,
+        "FilterFormBlockModel": 1,
+        "FilterFormSubmitActionModel": 1,
+        "FilterFormResetActionModel": 1
+      },
+      "tables": [
+        {
+          "uid": "w6b2tb",
+          "collection": "wfl_alerts",
+          "filter": false,
+          "columnCount": 8
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "预警规则",
+      "routeId": 389783502192640,
+      "schemaUid": "w6b2rdacw363qjf7",
+      "url": "/admin/w6b2rdacw363qjf7",
+      "chain": "预警中心",
+      "createdAt": "2026-10-01T20:40:57.200Z",
+      "updatedAt": "2026-10-01T20:40:57.200Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 6,
+        "DisplayEnumFieldModel": 2,
+        "DisplayTextFieldModel": 4,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1
+      },
+      "tables": [
+        {
+          "uid": "w6b2rb",
+          "collection": "alert_rules",
+          "filter": false,
+          "columnCount": 6
+        }
+      ],
+      "tabCount": 1
+    },
+    {
+      "title": "效期看板",
+      "routeId": 389856042680320,
+      "schemaUid": "w6b3k0jfsyskif",
+      "url": "/admin/w6b3k0jfsyskif",
+      "chain": "食品合规",
+      "createdAt": "2026-10-02T06:17:27.597Z",
+      "updatedAt": "2026-10-02T06:17:27.597Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "JSBlockModel": 1
+      },
+      "tables": [],
+      "tabCount": 1
+    },
+    {
+      "title": "批次追溯",
+      "routeId": 389856053166080,
+      "schemaUid": "w6b3by6ukynxfou",
+      "url": "/admin/w6b3by6ukynxfou",
+      "chain": "食品合规",
+      "createdAt": "2026-10-02T06:17:32.143Z",
+      "updatedAt": "2026-10-02T06:17:32.143Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "JSBlockModel": 1
+      },
+      "tables": [],
+      "tabCount": 1
+    },
+    {
+      "title": "召回管理",
+      "routeId": 389835509465089,
+      "schemaUid": "w6b3r1wnc10bflfg",
+      "url": "/admin/w6b3r1wnc10bflfg",
+      "chain": "食品合规",
+      "createdAt": "2026-10-02T03:34:16.029Z",
+      "updatedAt": "2026-10-02T03:34:16.029Z",
+      "blocks": {
+        "BlockGridModel": 1,
+        "TableBlockModel": 1,
+        "RefreshActionModel": 1,
+        "TableColumnModel": 9,
+        "DisplayDateTimeFieldModel": 1,
+        "DisplayTextFieldModel": 7,
+        "DisplayEnumFieldModel": 1,
+        "TableActionsColumnModel": 1,
+        "ViewActionModel": 1,
+        "ChildPageModel": 1,
+        "JSBlockModel": 1
+      },
+      "tables": [
+        {
+          "uid": "w6b3rt",
+          "collection": "recall_orders",
+          "filter": false,
+          "columnCount": 9
+        }
+      ],
+      "tabCount": 1
+    }
+  ]
+}

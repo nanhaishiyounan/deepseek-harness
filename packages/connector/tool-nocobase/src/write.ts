@@ -30,7 +30,7 @@
 import type { Context } from '@deepseek-ai/cordis'
 import { defineTool } from '@deepseek-ai/dsh-tools'
 import type { GenericCallView, GenericResultView, JsonValue, ToolResult } from '@deepseek-ai/dsh-tools'
-import { NocoBaseError, type NocoBaseClient } from '@deepseek-ai/dsh-connector-nocobase'
+import { NocoBaseError, type NocoBaseClient, sessionActingUserOf } from '@deepseek-ai/dsh-connector-nocobase'
 import {
   AMOUNT_FIELD,
   SUPPLIER_ADMISSION_STATE_FIELD,
@@ -77,6 +77,37 @@ export interface FieldChangeView {
   readonly field: string
   readonly before: JsonValue
   readonly after: JsonValue
+}
+
+/**
+ * The submitter-stamping columns: collections whose row records who performed
+ * the registration. When the executing session carries an acting user, these
+ * columns land that username regardless of what the model proposed — the
+ * audit value is server-owned (G4), never model-narrative.
+ */
+export const ACTING_USER_COLUMNS: Readonly<Record<string, string>> = {
+  pur_requests: 'requester',
+  qm_inspections: 'inspector',
+  mfg_job_reports: 'operator',
+}
+
+/**
+ * Stamp the acting user onto the collection's submitter column, when the
+ * session carries one. Collections without a configured column and anonymous
+ * sessions pass the values through unchanged.
+ * @param collection - the collection nb_create targets.
+ * @param values - the proposed row values.
+ * @param acting - the session's acting user, or undefined when anonymous.
+ * @returns the values to write (the input object when nothing changes).
+ */
+export function applyActingUserColumns(
+  collection: string,
+  values: Readonly<Record<string, JsonValue>>,
+  acting: { username: string } | undefined,
+): Record<string, JsonValue> {
+  const column = ACTING_USER_COLUMNS[collection]
+  if (column === undefined || acting === undefined) return { ...values }
+  return { ...values, [column]: acting.username }
 }
 
 /** The canonical `nb_create` output value: the landing receipt. */
@@ -290,9 +321,11 @@ export function applyNbCreateTool(ctx: Context, client: NocoBaseClient | undefin
       if (client === undefined) {
         throw new Error('nb_create: this deployment resolves no NocoBase credentials (NOCOBASE_BASE_URL/NOCOBASE_API_KEY); the business tools are unavailable')
       }
-      await enforceCodeUniqueness(client, input.collection, input.values, exec.signal)
-      await enforceCreateGates(client, input.collection, input.values, exec.signal)
-      const row = await client.create<NbRow>(input.collection, input.values, exec.signal)
+      const stamped = applyActingUserColumns(input.collection, input.values, sessionActingUserOf(exec.agent?.id))
+      const values = await allocateEmptyCode(client, input.collection, stamped, exec.signal)
+      await enforceCodeUniqueness(client, input.collection, values, exec.signal)
+      await enforceCreateGates(client, input.collection, values, exec.signal)
+      const row = await client.create<NbRow>(input.collection, values, exec.signal)
       return { collection: input.collection, id: row.id, row }
     },
     presentCall: args => writeCallCard('nb_create', args.collection),
@@ -450,13 +483,34 @@ export function flowNeedsEngine(flow: Pick<FlowConfigRow, 'approver_map' | 'extr
 /**
  * Reach the engine's single effective-effect exit for a LOCAL act that just
  * landed effective (BP-02: the mobile twin used to skip these hooks
- * entirely). The hooks are idempotent, so an engine hiccup after the
- * transition fails loud with the replay path instead of silently skipping.
+ * entirely). The hooks are idempotent. A failed call (W6-B1, the G8 fix)
+ * lands the document on the `wfl_effect_backlog` compensation queue — one
+ * pending row per still-unreplayed document — which the engine's serve loop
+ * replays automatically once the engine is back; the tool still fails loud
+ * so the conversation reports the deferred hook instead of silently
+ * skipping, but nobody re-curls the replay by hand anymore.
+ * @param client - the shared REST client (the backlog insert must not depend
+ * on the engine being up — NocoBase itself is the durable store).
  * @param input - the parsed nb_approve arguments.
  * @param code - the document's business code (reserveForSo resolves by it).
  */
-async function runEffectsViaEngine(input: { docType: string; docId: number }, code: string): Promise<void> {
+async function runEffectsViaEngine(client: NocoBaseClient, input: { docType: string; docId: number }, code: string): Promise<void> {
   const base = (process.env['NOCOBASE_ENGINE_URL'] ?? 'http://127.0.0.1:13110').replace(/\/$/u, '')
+  const deferred = async (reason: string): Promise<never> => {
+    // Idempotent enqueue: a still-pending row for the same document updates
+    // in place (the newest failure reason wins) instead of stacking.
+    const queued = await client.list<NbRow>('wfl_effect_backlog', {
+      filter: { doc_type: input.docType, doc_id: input.docId, status: 'pending' }, page: 1, pageSize: 5,
+    }).catch(() => ({ rows: [] as NbRow[] }))
+    if (queued.rows.length > 0) {
+      for (const row of queued.rows) {
+        await client.update('wfl_effect_backlog', Number(row['id']), { reason }).catch(() => undefined)
+      }
+    } else {
+      await client.create('wfl_effect_backlog', { doc_type: input.docType, doc_id: input.docId, code, reason, status: 'pending', attempts: 0 })
+    }
+    throw new Error(`nb_approve：单据已生效，但生效钩子（${input.docType}#${String(input.docId)}）暂未执行（${reason}）——已转入补偿队列，引擎恢复后自动重放，无需人工处理`)
+  }
   let response: Response
   try {
     response = await fetch(`${base}/effective-effects`, {
@@ -466,11 +520,11 @@ async function runEffectsViaEngine(input: { docType: string; docId: number }, co
       signal: AbortSignal.timeout(30_000),
     })
   } catch (error) {
-    throw new Error(`nb_approve：单据已生效，但生效钩子（${input.docType}#${String(input.docId)}）执行失败——引擎服务（${base}）不可达（${error instanceof Error ? error.message : String(error)}）；请启动 approval-engine --serve 后对该单据重跑 POST /effective-effects`)
+    throw await deferred(`引擎不可达：${error instanceof Error ? error.message : String(error)}`)
   }
   if (!response.ok) {
     const payload = await response.json().catch(() => null) as { error?: string } | null
-    throw new Error(`nb_approve：单据已生效，但生效钩子执行失败——${payload?.error ?? `HTTP ${String(response.status)}`}；请对该单据重跑 POST /effective-effects`)
+    throw await deferred(payload?.error ?? `HTTP ${String(response.status)}`)
   }
 }
 
@@ -649,6 +703,26 @@ async function openTodoAt(
 }
 
 /**
+ * The mobile-leg authorization gate: a session-bound acting user may approve
+ * or reject only a document that holds one of their OPEN todos (kind=cc rows
+ * never authorize). The engine's own OR-sign-off path admits any non-self
+ * approver, so the acting-user channel carries the assignment check the
+ * configured flow implies — the refusal names the routing so the operator
+ * learns whose queue the document sits in.
+ * @param client - the shared REST client.
+ * @param input - the parsed nb_approve arguments (doc identity only).
+ * @param username - the session's acting user.
+ * @param signal - caller cancellation.
+ */
+export async function assertActingUserHoldsTodo(
+  client: NocoBaseClient, input: { docType: string; docId: number }, username: string, signal?: AbortSignal,
+): Promise<void> {
+  const todos = await engineList(client, 'wfl_approval_todos', { doc_type: input.docType, doc_id: input.docId, user: username, status: 'open' }, signal)
+  if (todos.some(todo => String(todo['kind'] ?? 'todo') !== 'cc')) return
+  throw new Error(`越权审批被拒：当前登录用户 ${username} 在 ${input.docType} 第 ${String(input.docId)} 行没有待办（待办由审批流配置路由到该节点的审批人，在 PC 审批中心或持待办账号处理）`)
+}
+
+/**
  * The `nb_approve` engine: the tool-side twin of approval-engine.mts's
  * submit/act orchestration (same rules module, same table writes, same
  * Chinese failure messages — see the module docs for the same-source
@@ -743,7 +817,7 @@ export async function nbApproveEngine(client: NocoBaseClient, input: { docType: 
   // so a replay after a hiccup is safe).
   if (next === vocab.effectiveState) {
     const code = typeof row['code'] === 'string' && row['code'] !== '' ? row['code'] : String(input.docId)
-    await runEffectsViaEngine(input, code)
+    await runEffectsViaEngine(client, input, code)
   }
   return {
     doc_type: input.docType, doc_id: input.docId, action,
@@ -768,6 +842,90 @@ export const CODE_UNIQUENESS_COLUMNS: Readonly<Record<string, string>> = {
   mfg_orders: 'code',
   wms_receipts: 'receipt_no',
   srm_suppliers: 'code',
+}
+
+/**
+ * The number format each guarded collection's server-side allocation draws
+ * from (W6-B1): `PREFIX-YYYY-NNNN`. The prefix is the same one the mobile
+ * registry's rule text declares, restated here because the write path has no
+ * registry access — the two tables change together or not at all.
+ */
+const CODE_PREFIXES: Readonly<Record<string, string>> = {
+  pur_orders: 'PO',
+  pur_requests: 'PR',
+  so_orders: 'SO',
+  mfg_orders: 'MO',
+  wms_receipts: 'RCV',
+  srm_suppliers: 'SUP',
+}
+
+/**
+ * Draw the next `PREFIX-YYYY-NNNN` number for one guarded collection: the
+ * number column read back descending inside the current year's band (a
+ * `$like` prefix filter — probe numbers like PO-W6B1-… sort above PO-2026-…
+ * lexically and would crowd the plain descending first page out of the
+ * year's real max) and the same-year max suffix across the page decides — a
+ * year rollover or an empty table restarts at 0001. Scanning the whole page
+ * (not just its head) keeps the draw correct even where a backend ignores
+ * the sort. The clock fallback (a same-minute draw exhausting the 4-digit
+ * space) keeps the number format-true like the retired client-side preview
+ * did.
+ * @param client - the shared REST client.
+ * @param collection - the guarded collection.
+ * @param column - the number column.
+ * @param prefix - the collection's `PREFIX` from CODE_PREFIXES.
+ * @param signal - caller cancellation.
+ * @returns the allocated number.
+ */
+export async function nextNumberFor(
+  client: NocoBaseClient, collection: string, column: string, prefix: string, signal?: AbortSignal,
+): Promise<string> {
+  const year = new Date().getFullYear()
+  const base = `${prefix}-${String(year)}-`
+  // The prefix filter keeps the descending read inside the current year's
+  // number band — probe numbers like PO-W6B1-… sort above PO-2026-… lexically
+  // and would otherwise crowd the first page out of the year's max suffix.
+  const { rows } = await client.list<NbRow>(collection, {
+    filter: { [column]: { $like: `${base}%` } },
+    sort: [`-${column}`], page: 1, pageSize: 5, fields: [column],
+  }, signal)
+  let max = 0
+  for (const row of rows) {
+    const value = row[column]
+    if (typeof value !== 'string' || !value.startsWith(base)) continue
+    const suffix = Number(value.slice(base.length))
+    if (Number.isInteger(suffix) && suffix > max) max = suffix
+  }
+  const next = max + 1
+  const clock = new Date().getHours() * 60 + new Date().getMinutes()
+  return `${base}${next > 9999 ? String(clock).padStart(4, '0') : String(next).padStart(4, '0')}`
+}
+
+/**
+ * Server-side number allocation (W6-B1, the G5 fix): a create on a guarded
+ * collection whose number column arrives empty or blank draws the next number
+ * inside the write path. The mobile surface stopped pre-generating numbers
+ * (two clients drafting the same form drew the same preview number and the
+ * later submit bounced); the write path owns the number now, so concurrent
+ * drafts cannot collide and an outbox retry re-draws a fresh number instead
+ * of failing on the stale one. The allocation stays a read-then-write window
+ * behind the engine's serial write path; the partial unique index remains the
+ * authoritative backstop, exactly as for caller-supplied numbers.
+ * @param client - the shared REST client.
+ * @param collection - the collection nb_create targets.
+ * @param values - the written row's values; a drawn number lands in place.
+ * @param signal - caller cancellation.
+ * @returns the values to write (the input object when nothing changes).
+ */
+export async function allocateEmptyCode(
+  client: NocoBaseClient, collection: string, values: Record<string, JsonValue>, signal?: AbortSignal,
+): Promise<Record<string, JsonValue>> {
+  const column = CODE_UNIQUENESS_COLUMNS[collection]
+  const prefix = CODE_PREFIXES[collection]
+  if (column === undefined || prefix === undefined) return values
+  const current = values[column]
+  if (typeof current === 'string' && current !== '') return values
+  return { ...values, [column]: await nextNumberFor(client, collection, column, prefix, signal) }
 }
 
 /**
@@ -978,7 +1136,7 @@ export function applyNbApproveTool(ctx: Context, client: NocoBaseClient | undefi
       },
       approver: {
         type: 'string',
-        description: 'The acting user\'s name for the audit record; defaults to admin.',
+        description: 'The acting user\'s name for the audit record; a session-bound login identity (the gateway sign-in token) overrides this value server-side. Anonymous sessions are refused — approvals need a signed-in audit actor.',
       },
     },
     output: {
@@ -1010,7 +1168,17 @@ export function applyNbApproveTool(ctx: Context, client: NocoBaseClient | undefi
       if (client === undefined) {
         throw new Error('nb_approve: this deployment resolves no NocoBase credentials (NOCOBASE_BASE_URL/NOCOBASE_API_KEY); the business tools are unavailable')
       }
-      return await nbApproveEngine(client, input, exec.signal)
+      const acting = sessionActingUserOf(exec.agent?.id)
+      if (acting === undefined) {
+        // Anonymous approvals have no audit actor: the audit trail must carry
+        // a verified sign-in identity, so the caller is refused rather than
+        // falling back to the service account.
+        throw new Error('nb_approve: 审批动作需要登录身份——请先登录（会话凭据由服务端校验），匿名会话不能执行审批')
+      }
+      if (input.action === 'approve' || input.action === 'reject') {
+        await assertActingUserHoldsTodo(client, input, acting.username, exec.signal)
+      }
+      return await nbApproveEngine(client, { ...input, approver: acting.username }, exec.signal)
     },
     presentCall: args => writeCallCard('nb_approve', `${args.doc_type}#${args.doc_id}`),
     presentResult: (_args: NbApproveArgs, result: ToolResult): GenericResultView | undefined => {

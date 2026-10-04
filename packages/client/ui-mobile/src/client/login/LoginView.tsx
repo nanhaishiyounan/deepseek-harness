@@ -1,15 +1,16 @@
 /**
- * The mobile login page (v3, 03 §4.9): the stamp-form logo (the 表 seal with
- * the AI ring) over the mist background, the phone + code card with the
- * 60-second countdown, and the demo-auth disclosure. The handshake rides the
- * demo channel ([auth.ts](../auth.ts): any six-digit code verifies locally,
- * no server round-trip — production auth replaces that one seam); this page
- * owns the visuals only.
+ * The mobile login page (W6-B0): the stamp-form logo (the 表 seal with the
+ * AI ring) over the mist background, the account + password card, and the
+ * real-auth note. The handshake rides `nocobase.signIn` (the gateway proxies
+ * NocoBase's basic authenticator): wrong credentials surface the server's
+ * refusal verbatim, success persists the profile as the page identity that
+ * every session prompt re-carries. This page owns the visuals only.
  */
 
-import { useEffect, useRef, useState, type JSX } from 'react'
-import { Button, Input } from 'antd-mobile'
-import { saveIdentity, verifyCode, type MobileIdentity } from '../auth.ts'
+import { useState, type JSX } from 'react'
+import { Button, Input, Toast } from 'antd-mobile'
+import { saveIdentity, type MobileIdentity } from '../auth.ts'
+import { rpc } from '../rpc.ts'
 import css from './login.module.css'
 
 /** Login props: identity sink after a successful login. */
@@ -19,42 +20,37 @@ export interface LoginViewProps {
 
 /** The login page. */
 export function LoginView({ onLoggedIn }: LoginViewProps): JSX.Element {
-  const [phone, setPhone] = useState('13800138000')
-  const [code, setCode] = useState('')
-  const [countdown, setCountdown] = useState(0)
+  const [account, setAccount] = useState('')
+  const [password, setPassword] = useState('')
+  const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | undefined>(undefined)
-  const timer = useRef<number | undefined>(undefined)
-
-  useEffect(() => () => {
-    if (timer.current !== undefined) window.clearInterval(timer.current)
-  }, [])
-
-  const startCountdown = (): void => {
-    // The button is disabled while the countdown runs, so a second click cannot arrive here.
-    /* v8 ignore next -- the disabled button gates the re-entry. */
-    if (countdown > 0) return
-    setCountdown(60)
-    timer.current = window.setInterval(() => {
-      setCountdown((current) => {
-        if (current <= 1) {
-          window.clearInterval(timer.current)
-          return 0
-        }
-        return current - 1
-      })
-    }, 1000)
-  }
 
   const submit = (): void => {
-    try {
-      const identity = verifyCode(phone.trim(), code.trim())
-      saveIdentity(identity)
-      onLoggedIn(identity)
-    } catch (error_) {
-      // verifyCode only throws Error.
-      /* v8 ignore next -- verifyCode never throws a non-Error value. */
-      setError(error_ instanceof Error ? error_.message : String(error_))
+    if (busy) return
+    if (account.trim() === '' || password === '') {
+      Toast.show({ content: '请输入账号和密码' })
+      return
     }
+    setBusy(true)
+    setError(undefined)
+    void (async () => {
+      try {
+        const profile = await rpc('nocobase.signIn', { account: account.trim(), password })
+        const identity: MobileIdentity = {
+          username: profile.username,
+          nickname: profile.nickname,
+          token: profile.token,
+          loggedAt: Date.now(),
+        }
+        saveIdentity(identity)
+        onLoggedIn(identity)
+      } catch (error_) {
+        // rpc() throws Error with the server's refusal message (or transport text).
+        /* v8 ignore next 2 -- rpc() never throws a non-Error value. */
+        setError(error_ instanceof Error ? error_.message : String(error_))
+        setBusy(false)
+      }
+    })()
   }
 
   return (
@@ -69,45 +65,25 @@ export function LoginView({ onLoggedIn }: LoginViewProps): JSX.Element {
       </div>
       <div className={css.card}>
         <label className={css.field}>
-          <span className={css.fieldLabel}>手机号/账号</span>
+          <span className={css.fieldLabel}>账号</span>
           <Input
-            inputMode="tel"
-            maxLength={11}
+            autoComplete="username"
             className={css.input}
-            value={phone}
-            placeholder="手机号"
-            onChange={(next) => { setPhone(next); setError(undefined) }}
+            value={account}
+            placeholder="业务账号（如 buyer）"
+            onChange={(next) => { setAccount(next); setError(undefined) }}
           />
         </label>
         <label className={css.field}>
-          <span className={css.fieldLabel}>密码/验证码</span>
-          <span className={css.codeRow}>
-            <Input
-              inputMode="numeric"
-              maxLength={6}
-              className={css.input}
-              value={code}
-              placeholder="6 位验证码"
-              onChange={(next) => { setCode(next); setError(undefined) }}
-            />
-            <Button
-              type="button"
-              color="primary"
-              fill="solid"
-              size="small"
-              className={css.codeButton}
-              style={{
-                '--background-color': 'var(--dshm-primary-soft)',
-                '--text-color': 'var(--dshm-on-soft)',
-                '--border-color': 'transparent',
-                '--border-radius': 'var(--dshm-radius)',
-              }}
-              disabled={countdown > 0}
-              onClick={startCountdown}
-            >
-              {countdown > 0 ? `${String(countdown)}s` : '获取'}
-            </Button>
-          </span>
+          <span className={css.fieldLabel}>密码</span>
+          <Input
+            autoComplete="current-password"
+            type="password"
+            className={css.input}
+            value={password}
+            placeholder="业务账号密码"
+            onChange={(next) => { setPassword(next); setError(undefined) }}
+          />
         </label>
         {error !== undefined && <p className={css.error} role="alert">{error}</p>}
         <Button
@@ -115,13 +91,14 @@ export function LoginView({ onLoggedIn }: LoginViewProps): JSX.Element {
           color="primary"
           size="large"
           className={css.submit}
-          disabled={phone.trim() === '' || code.trim() === ''}
+          loading={busy}
+          disabled={busy}
           onClick={submit}
         >
           登录
         </Button>
       </div>
-      <p className={css.footer}>演示环境 · 数据仅限内测 · DeepSeek Harness</p>
+      <p className={css.footer}>企业账号登录 · 提交与审批以登录身份记录</p>
     </div>
   )
 }

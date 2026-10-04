@@ -15,6 +15,7 @@ import { Context } from '@deepseek-ai/cordis'
 import { CallId } from '@deepseek-ai/dsh-llm'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import ToolRuntime from '@deepseek-ai/dsh-tools'
+import { clearSessionActingUser, setSessionActingUser } from '@deepseek-ai/dsh-connector-nocobase'
 import * as ToolNocoBase from '../src/index.ts'
 import {
   DOC_FLOW_VOCABULARY,
@@ -94,6 +95,7 @@ async function bootMock(): Promise<MockServer> {
       { id: 41, code: 'PO-B5-A', amount: 150_000, doc_status: 'draft', approved_by: null, approved_at: null },
       { id: 42, code: 'PO-B5-B', amount: 250_000, doc_status: 'draft', approved_by: null, approved_at: null },
     ]],
+    ['pur_requests', []],
     ['wms_receipts', []],
     ['srm_suppliers', [
       { id: 31, name: '新味源', code: 'SUP-2026-0001', lifecycle_status: 'potential', source: 'internal', admitted_at: null },
@@ -179,6 +181,7 @@ const servers: Array<{ close: () => Promise<void> }> = []
 
 afterEach(async () => {
   Reflect.deleteProperty(process.env, KEY_ENV)
+  clearSessionActingUser('s-mount')
   await Promise.all(contexts.splice(0).map(ctx => ctx.fiber.dispose()))
   await Promise.all(servers.splice(0).map(server => server.close()))
 })
@@ -198,7 +201,7 @@ interface Mount {
   mock: MockServer
 }
 
-async function mount(): Promise<Mount> {
+async function mount(options: { agentId?: string; acting?: { username: string; nickname: string } } = {}): Promise<Mount> {
   const ctx = new Context()
   contexts.push(ctx)
   await ctx.plugin(SystemPrompt)
@@ -207,13 +210,30 @@ async function mount(): Promise<Mount> {
   servers.push(mock)
   process.env[KEY_ENV] = NC_TOKEN
   await ctx.plugin(ToolNocoBase, { baseUrl: mock.url, apiKeyEnv: KEY_ENV })
+  // The mock-world suites exercise the engine rules as a signed-in approver
+  // (nb_approve refuses anonymous sessions); `acting` binds that identity on
+  // the shared 's-mount' agent slot and a case may rebind mid-flight through
+  // setSessionActingUser.
+  const agentId = options.agentId ?? (options.acting === undefined ? undefined : 's-mount')
+  if (options.acting !== undefined) setSessionActingUser('s-mount', options.acting)
   const execute = async (name: string, args: unknown) => {
-    const result = await ctx.tools.execute({ signal, callId: CallId(`call-${++counter}`), name, arguments: args })
+    const result = await ctx.tools.execute({
+      signal,
+      callId: CallId(`call-${++counter}`),
+      name,
+      arguments: args,
+      // The acting-user channel keys on the executing agent's session id;
+      // the stub carries exactly that one read the tools perform.
+      ...(agentId === undefined ? {} : { agent: { id: agentId } as never }),
+    })
     const text = result.content.find(block => block.type === 'text')
     return { isError: result.isError, value: result.value, text: text?.type === 'text' ? text.text : '' }
   }
   return { execute, mock }
 }
+
+/** The acting identity the engine-world suites act as by default. */
+const ADMIN_ACTING = { username: 'admin', nickname: '管理员' }
 
 describe('approval rules (the shared single source)', () => {
   it('resolves the full transition table including the amount-threshold route', () => {
@@ -280,8 +300,16 @@ describe('approval rules (the shared single source)', () => {
 })
 
 describe('nb_approve over the mock engine world', () => {
-  it('runs submit → approve with the todo, audit record, and effective write-back', async () => {
+  it('refuses an anonymous session outright (the audit actor must be a sign-in)', async () => {
     const { execute, mock } = await mount()
+    const refused = await execute('nb_approve', { doc_type: 'hub_po_purchase_orders', doc_id: 21, action: 'submit', approver: 'chenliqun' })
+    expect(refused.isError).toBe(true)
+    expect(refused.text).toContain('需要登录身份')
+    expect(mock.rows.get('wfl_approval_todos')).toHaveLength(0)
+  })
+
+  it('runs submit → approve with the todo, audit record, and effective write-back', async () => {
+    const { execute, mock } = await mount({ acting: ADMIN_ACTING })
     const submit = await execute('nb_approve', { doc_type: 'hub_po_purchase_orders', doc_id: 21, action: 'submit', approver: 'chenliqun' })
     expect(submit.isError).toBe(false)
     expect(submit.value).toMatchObject({ from_state: 'draft', to_state: 'pending', attempt_no: 1, effective: false })
@@ -297,18 +325,19 @@ describe('nb_approve over the mock engine world', () => {
     expect(mock.rows.get('wfl_approval_todos')?.[0]).toMatchObject({ status: 'completed' })
     const records = mock.rows.get('wfl_approval_records') ?? []
     expect(records).toHaveLength(2)
-    expect(records[0]).toMatchObject({ action: 'submit', approver: 'chenliqun', attempt_no: 1, from_anchor: 0, to_anchor: 0, source: 'engine' })
+    expect(records[0]).toMatchObject({ action: 'submit', approver: 'admin', attempt_no: 1, from_anchor: 0, to_anchor: 0, source: 'engine' })
     expect(records[1]).toMatchObject({ action: 'approve', approver: 'admin', comment: '同意，按合同执行', to_anchor: 1 })
 
-    // The repeat act refuses (state-anchored idempotence) without a third record.
+    // The repeat act refuses at the todo gate (its todo closed with the
+    // approval — state-anchored idempotence) without a third record.
     const repeat = await execute('nb_approve', { doc_type: 'hub_po_purchase_orders', doc_id: 21, action: 'approve' })
     expect(repeat.isError).toBe(true)
-    expect(repeat.text).toContain('非法审批转移')
+    expect(repeat.text).toContain('越权审批被拒')
     expect(mock.rows.get('wfl_approval_records')).toHaveLength(2)
   })
 
   it('routes over-threshold approvals to the level-2 sign-off', async () => {
-    const { execute, mock } = await mount()
+    const { execute, mock } = await mount({ acting: ADMIN_ACTING })
     await execute('nb_approve', { doc_type: 'hub_po_purchase_orders', doc_id: 22, action: 'submit' })
     const first = await execute('nb_approve', { doc_type: 'hub_po_purchase_orders', doc_id: 22, action: 'approve', comment: '金额超限，报总经理加签' })
     expect(first.value).toMatchObject({ to_state: 'pending_level2', to_anchor: 0, effective: false })
@@ -319,7 +348,7 @@ describe('nb_approve over the mock engine world', () => {
   })
 
   it('rejects then resubmits with attempt_no+1, and locks edits on pending/approved rows', async () => {
-    const { execute, mock } = await mount()
+    const { execute, mock } = await mount({ acting: ADMIN_ACTING })
     await execute('nb_approve', { doc_type: 'hub_po_purchase_orders', doc_id: 21, action: 'submit' })
     const reject = await execute('nb_approve', { doc_type: 'hub_po_purchase_orders', doc_id: 21, action: 'reject', comment: '供应商资质不全' })
     expect(reject.value).toMatchObject({ to_state: 'rejected', to_anchor: 0 })
@@ -336,7 +365,7 @@ describe('nb_approve over the mock engine world', () => {
   })
 
   it('gates downstream nb_create on the upstream document being effective', async () => {
-    const { execute, mock } = await mount()
+    const { execute, mock } = await mount({ acting: ADMIN_ACTING })
     const blocked = await execute('nb_create', { collection: 'wms_receipts', values: { receipt_no: 'RCV-GATE-1', source_no: 'PO-TEST-1', qty: 10 } })
     expect(blocked.isError).toBe(true)
     expect(blocked.text).toContain('未生效')
@@ -358,7 +387,7 @@ describe('nb_approve over the mock engine world', () => {
 
 describe('the supplier-admission flow (B2)', () => {
   it('runs potential → reviewing → qualified with admitted_at, locking edits under review', async () => {
-    const { execute, mock } = await mount()
+    const { execute, mock } = await mount({ acting: ADMIN_ACTING })
     const submit = await execute('nb_approve', { doc_type: 'srm_suppliers', doc_id: 31, action: 'submit', approver: 'chenliqun' })
     expect(submit.isError).toBe(false)
     expect(submit.value).toMatchObject({ from_state: 'potential', to_state: 'reviewing', to_anchor: 0, effective: false })
@@ -383,14 +412,14 @@ describe('the supplier-admission flow (B2)', () => {
   })
 
   it('refuses an illegal admission action with the admission vocabulary message', async () => {
-    const { execute } = await mount()
+    const { execute } = await mount({ acting: ADMIN_ACTING })
     const denied = await execute('nb_approve', { doc_type: 'srm_suppliers', doc_id: 31, action: 'void' })
     expect(denied.isError).toBe(true)
     expect(denied.text).toContain('非法准入转移')
   })
 
   it('gates PO creation on the supplier lifecycle set (qualified/preferred)', async () => {
-    const { execute, mock } = await mount()
+    const { execute, mock } = await mount({ acting: ADMIN_ACTING })
     const blocked = await execute('nb_create', { collection: 'hub_po_purchase_orders', values: { po_number: 'PO-SUP-GATE-1', supplier_id: 31, total: 9_000 } })
     expect(blocked.isError).toBe(true)
     expect(blocked.text).toContain('未准入')
@@ -437,14 +466,15 @@ describe('approval config: thresholds and multi-approver routing (B5)', () => {
   })
 
   it('routes the configured pur_orders flow: 150k lands one round, 250k routes to the level-2 sign-off', async () => {
-    const { execute, mock } = await mount()
+    const { execute, mock } = await mount({ acting: { username: 'quality_lead', nickname: '质量主管' } })
     // The 150k document: one approval round on the 200k threshold.
     await execute('nb_approve', { doc_type: 'pur_orders', doc_id: 41, action: 'submit', approver: '陈立群' })
     const first = await execute('nb_approve', { doc_type: 'pur_orders', doc_id: 41, action: 'approve', approver: 'quality_lead', comment: '15 万 ≤ 20 万阈值，一审生效' })
     expect(first.isError).toBe(false)
     expect(first.value).toMatchObject({ from_state: 'pending', to_state: 'approved', effective: true })
     expect(mock.rows.get('pur_orders')?.find(row => row.id === 41)).toMatchObject({ doc_status: 'approved', approved_by: 'quality_lead' })
-    // The 250k document: the first approval routes to pending_level2, gm signs off.
+    // The 250k document: the gm-tier admin signs the rounds from here.
+    setSessionActingUser('s-mount', ADMIN_ACTING)
     await execute('nb_approve', { doc_type: 'pur_orders', doc_id: 42, action: 'submit', approver: '陈立群' })
     const routed = await execute('nb_approve', { doc_type: 'pur_orders', doc_id: 42, action: 'approve', approver: 'admin', comment: '25 万超阈值，报总经理加签' })
     expect(routed.value).toMatchObject({ to_state: 'pending_level2', effective: false })
@@ -453,7 +483,7 @@ describe('approval config: thresholds and multi-approver routing (B5)', () => {
   })
 
   it('expands the two-person manager tier into one todo per approver and closes both on either act', async () => {
-    const { execute, mock } = await mount()
+    const { execute, mock } = await mount({ acting: { username: 'quality_lead', nickname: '质量主管' } })
     await execute('nb_approve', { doc_type: 'pur_orders', doc_id: 41, action: 'submit', approver: '陈立群' })
     const open = mock.rows.get('wfl_approval_todos')?.filter(todo => todo.status === 'open' && todo.doc_id === 41) ?? []
     expect(open).toHaveLength(2)
@@ -470,7 +500,7 @@ describe('approval config: thresholds and multi-approver routing (B5)', () => {
   })
 
   it('fails loud on an approver_map naming a user the users table lacks', async () => {
-    const { execute, mock } = await mount()
+    const { execute, mock } = await mount({ acting: ADMIN_ACTING })
     const flow = mock.rows.get('wfl_flow_configs')?.find(row => row.doc_type === 'pur_orders')
     if (flow === undefined) throw new Error('pur_orders flow config missing from the mock world')
     flow['approver_map'] = '{"manager":["admin","ghost"],"gm":"admin"}'
@@ -482,7 +512,7 @@ describe('approval config: thresholds and multi-approver routing (B5)', () => {
   })
 
   it('fails loud on a malformed amount_threshold in flow extras', async () => {
-    const { execute, mock } = await mount()
+    const { execute, mock } = await mount({ acting: ADMIN_ACTING })
     const flow = mock.rows.get('wfl_flow_configs')?.find(row => row.doc_type === 'pur_orders')
     if (flow === undefined) throw new Error('pur_orders flow config missing from the mock world')
     flow['extras'] = '{"approved_by_field":"approved_by","approved_at_field":"approved_at","amount_field":"amount","amount_threshold":"abc"}'
@@ -490,5 +520,57 @@ describe('approval config: thresholds and multi-approver routing (B5)', () => {
     expect(refused.isError).toBe(true)
     expect(refused.text).toContain('amount_threshold')
     expect(mock.rows.get('wfl_approval_todos')).toHaveLength(0)
+  })
+})
+
+describe('acting user (W6-B0): the session login owns the audit actor', () => {
+  afterEach(() => {
+    clearSessionActingUser('s-w6b0')
+  })
+
+  it('overrides a model-supplied approver on submit and records the login on the audit trail', async () => {
+    const { execute, mock } = await mount({ agentId: 's-w6b0' })
+    setSessionActingUser('s-w6b0', { username: 'buyer', nickname: '采购员·蔡俊' })
+    const submitted = await execute('nb_approve', { doc_type: 'pur_orders', doc_id: 41, action: 'submit', approver: 'admin' })
+    expect(submitted.isError).toBe(false)
+    const records = mock.rows.get('wfl_approval_records')?.filter(record => record.doc_type === 'pur_orders' && record.doc_id === 41) ?? []
+    expect(records[0]).toMatchObject({ action: 'submit', approver: 'buyer' })
+  })
+
+  it('refuses approve when the acting user holds no open todo (越权审批拒绝)', async () => {
+    const { execute, mock } = await mount({ agentId: 's-w6b0' })
+    setSessionActingUser('s-w6b0', { username: 'buyer', nickname: '采购员·蔡俊' })
+    await execute('nb_approve', { doc_type: 'pur_orders', doc_id: 41, action: 'submit' })
+    setSessionActingUser('s-w6b0', { username: 'keeper', nickname: '仓管员·吴涛' })
+    const refused = await execute('nb_approve', { doc_type: 'pur_orders', doc_id: 41, action: 'approve', approver: 'admin', comment: '试试越权' })
+    expect(refused.isError).toBe(true)
+    expect(refused.text).toContain('越权审批被拒')
+    expect(refused.text).toContain('keeper')
+    // The document stays pending and its todos stay open.
+    expect(mock.rows.get('pur_orders')?.find(row => row.id === 41)).toMatchObject({ doc_status: 'pending' })
+    const open = mock.rows.get('wfl_approval_todos')?.filter(todo => todo.doc_id === 41 && todo.status === 'open') ?? []
+    expect(open).toHaveLength(2)
+  })
+
+  it('lets the acting todo-holder approve and records them, ignoring a model-supplied admin', async () => {
+    const { execute, mock } = await mount({ agentId: 's-w6b0' })
+    setSessionActingUser('s-w6b0', { username: 'buyer', nickname: '采购员·蔡俊' })
+    await execute('nb_approve', { doc_type: 'pur_orders', doc_id: 41, action: 'submit' })
+    setSessionActingUser('s-w6b0', { username: 'quality_lead', nickname: '质量主管' })
+    const approved = await execute('nb_approve', { doc_type: 'pur_orders', doc_id: 41, action: 'approve', approver: 'admin' })
+    expect(approved.isError).toBe(false)
+    expect(approved.value).toMatchObject({ to_state: 'approved', effective: true })
+    const records = mock.rows.get('wfl_approval_records')?.filter(record => record.doc_type === 'pur_orders' && record.doc_id === 41) ?? []
+    expect(records[1]).toMatchObject({ action: 'approve', approver: 'quality_lead' })
+    expect(mock.rows.get('pur_orders')?.find(row => row.id === 41)).toMatchObject({ doc_status: 'approved', approved_by: 'quality_lead' })
+  })
+
+  it('stamps the acting user onto the submitter column on nb_create (requester)', async () => {
+    const { execute, mock } = await mount({ agentId: 's-w6b0' })
+    setSessionActingUser('s-w6b0', { username: 'buyer', nickname: '采购员·蔡俊' })
+    const created = await execute('nb_create', { collection: 'pur_requests', values: { code: 'PR-1', requester: 'admin', department: '采购部', doc_status: 'draft' } })
+    expect(created.isError).toBe(false)
+    const row = mock.rows.get('pur_requests')?.find(entry => entry.code === 'PR-1')
+    expect(row).toMatchObject({ requester: 'buyer' })
   })
 })

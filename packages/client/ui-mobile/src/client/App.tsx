@@ -9,6 +9,7 @@
 
 import { useEffect, useState, type JSX } from 'react'
 import { clearIdentity, loadIdentity, type MobileIdentity } from './auth.ts'
+import { clearOutbox } from './outboxStore.ts'
 import { LoginView } from './login/LoginView.tsx'
 import { MobileShell } from './shell/MobileShell.tsx'
 
@@ -52,6 +53,9 @@ export function App(): JSX.Element {
         dark={dark}
         onDarkChange={applyDark}
         onLogout={() => {
+          // The departed account's parked outbox messages must never send
+          // under the next login: the queue and its retry timer die here.
+          clearOutbox()
           clearIdentity()
           setIdentity(undefined)
         }}

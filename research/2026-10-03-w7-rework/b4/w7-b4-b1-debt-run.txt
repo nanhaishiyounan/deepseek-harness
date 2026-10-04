@@ -1,0 +1,24 @@
+  fieldEnum crm_customers.level [客户仪表盘]（uiSchema.enum → v3）
+  fieldEnum crm_contacts.status [联系人]（uiSchema.enum → v3）
+  fieldEnum crm_leads.stage [销售线索]（uiSchema.enum → v3）
+  fieldEnum crm_quotes.status [报价单]（uiSchema.enum → v3）
+  fieldEnum crm_deals.status [订单]（uiSchema.enum → v3）
+  fieldEnum crm_customers.type [客户仪表盘]（uiSchema.enum → v3）
+  fieldEnum crm_customers.status [客户仪表盘]（uiSchema.enum → v3）
+  fieldEnum crm_payments.method [回款]（uiSchema.enum → v3）
+  fieldEnum crm_payments.status [销售仪表盘]（uiSchema.enum → v3）
+  fieldEnum crm_invoices.status [发票]（uiSchema.enum → v3）
+  fieldEnum crm_products.pricing_mode [产品与服务]（uiSchema.enum → v3）
+  fieldEnum crm_products.category [产品与服务]（uiSchema.enum → v3）
+  fieldEnum pur_orders.receiving_status [采购订单]（uiSchema.enum → v3）
+  fieldEnum pur_rfqs.doc_status [询价管理]（uiSchema.enum → v3）
+  fieldEnum pur_quotes.status [比价表]（uiSchema.enum → v3）
+  fieldEnum pur_payments.doc_status [付款申请]（uiSchema.enum → v3）
+  fieldEnum pur_payments.pay_method [付款申请]（uiSchema.enum → v3）
+  fieldEnum pur_orders.invoice_status [采购订单]（uiSchema.enum → v3）
+  fieldEnum pur_requests.doc_status [采购申请]（uiSchema.enum → v3）
+  fieldEnum pur_invoices.match_result [发票匹配]（uiSchema.enum → v3）
+  fieldEnum pur_orders.doc_status [采购订单]（uiSchema.enum → v3）
+  fieldEnum so_orders.doc_status [销售订单]（uiSchema.enum → v3）
+  fieldEnum so_orders.shipping_status [销售订单]（uiSchema.enum → v3）
+heal b1-debt: fieldEnum=23/23

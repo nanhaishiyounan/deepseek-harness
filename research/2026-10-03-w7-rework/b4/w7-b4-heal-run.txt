@@ -1,0 +1,22 @@
+  statcardQuery 经营看板 当月收入 → calc_date=2026-09-30
+  statcardQuery 经营看板 毛利率 → calc_date=2026-09-30
+  statcardQuery 经营看板 待审批单 → calc_date=2026-09-30
+  gridLayout 经营看板: 统计卡行置顶 + 图表区前移（2 图表行）+ 明细表殿后
+  statcardQuery 供应链看板 OTIF → calc_date=2026-09-30
+  statcardQuery 供应链看板 供应商准时到货率 → calc_date=2026-09-30
+  statcardQuery 供应链看板 缺料预警 → calc_date=2026-09-30
+  gridLayout 供应链看板: 统计卡行置顶 + 图表区前移（3 图表行）+ 明细表殿后
+  statcardQuery 生产看板 一次合格率 → calc_date=2026-09-30
+  statcardQuery 生产看板 直通率 → calc_date=2026-09-30
+  statcardQuery 生产看板 计划达成率 → calc_date=2026-09-30
+  gridLayout 生产看板: 统计卡行置顶 + 图表区前移（2 图表行）+ 明细表殿后
+  statcardQuery 库存看板 库存资金占用 → calc_date=2026-09-30
+  statcardQuery 库存看板 呆滞库存占比 → calc_date=2026-09-30
+  statcardQuery 库存看板 临期预警批次 → calc_date=2026-09-30
+  statcardQuery 库存看板 账实相符率 → calc_date=2026-09-30
+  gridLayout 库存看板: 统计卡行置顶 + 图表区前移（3 图表行）+ 明细表殿后
+  statcardQuery 应收应付对账 应收余额 → calc_date=2026-09-30
+  statcardQuery 应收应付对账 应付余额 → calc_date=2026-09-30
+  statcardQuery 应收应付对账 待审批单 → calc_date=2026-09-30
+  gridLayout 应收应付对账: 统计卡行置顶 + 图表区前移（2 图表行）+ 明细表殿后
+heal b4: pages=24/24 recolor=0 enumSwap=0 numberSwap=0 numberProps=0 dateProps=0 alignRight=0 alignLeft=0 statcardRegen=0 columnOptions=0 selectOptions=0 fieldEnum=0 kanbanOptions=0 calendarColor=0 statcardAdd=0 gridLayout=5

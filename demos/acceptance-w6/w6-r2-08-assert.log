@@ -1,0 +1,62 @@
+w6b2-rules: assert（验收断言矩阵——首次环境先 --seed --seed-ar）
+— ① 两表列齐全（information_schema 对照，date-only 串列）
+  ✓ alert_rules 列齐全
+  ✓ wfl_alerts 列齐全
+  ✓ dedup 唯一索引在库 — ux_wfl_alerts_dedup=1
+  ✓ 通知渠道 alert-center 已注册 — channels=1
+— ② 四路规则 seeded 且启用
+  ✓ 四路规则各一行启用 — expiry,cert_due,ar_overdue,quality_abnormal
+— ③ 首扫产出（每路 ≥1 行、级别分层在库）
+w6b2-rules: scan pass — expiry+0/~4/-0 cert_due+0/~3/-0 ar_overdue+0/~3/-0 quality_abnormal+0/~3/-0 notified=0
+  ✓ expiry 有生效预警行 — rows=4
+  ✓ cert_due 有生效预警行 — rows=3
+  ✓ ar_overdue 有生效预警行 — rows=3
+  ✓ quality_abnormal 有生效预警行 — rows=3
+  ✓ 红黄两层都有数据 — distinct severity=2
+— ④ 幂等契约（连续两轮扫描 count 不增）
+w6b2-rules: scan pass — expiry+0/~4/-0 cert_due+0/~3/-0 ar_overdue+0/~3/-0 quality_abnormal+0/~3/-0 notified=0
+w6b2-rules: scan pass — expiry+0/~4/-0 cert_due+0/~3/-0 ar_overdue+0/~3/-0 quality_abnormal+0/~3/-0 notified=0
+  ✓ 两轮扫描总行数不变 — before=20 after=20
+— ⑤ 效期对账（引擎行数 = 手写四日期×双轨阈值 SQL，差异=0）
+  ✓ 效期引擎=手写对账 — engine=4 recon=4
+— ⑥ 阈值可配（放大窗口→分层变化；恢复→系统自动关闭）
+w6b2-rules: scan pass — expiry+0/~4/-0 cert_due+0/~10/-0 ar_overdue+0/~3/-0 quality_abnormal+0/~3/-0 notified=7
+  ✓ 放大 warn_days 30→400 后新增预警行 — baseline=3 widened=10
+w6b2-rules: scan pass — expiry+0/~4/-0 cert_due+0/~3/-7 ar_overdue+0/~3/-0 quality_abnormal+0/~3/-0 notified=0
+  ✓ 恢复阈值后未命中行被系统自动关闭 — restored=3 baseline=3
+  ✓ 规则参数已复原 — t
+— ⑦ 通知送达 + 责任人路由
+  ✓ in-app 通知已产生 — messages=194
+  ✓ 仓储部 keeper 收到效期预警通知 — keeper messages=6
+  ✓ 效期路由到仓储部（notify_users 含 keeper） — ["b4guard", "keeper"]
+  ✓ 账期路由 finance/sales_rep — ["finance", "sales_rep"]
+— ⑧ 处理动作状态流 + 三元转换断言（越权/越态拒绝 + 重开二轮）
+  ✓ 非路由用户（keeper 认领账期预警）被拒 — moved=0
+  ✓ 未认领直接关闭被拒（open×resolve 无三元） — moved=0
+  ✓ finance 认领账期预警成功 — moved=1
+  ✓ 认领落库 owner=finance status=acknowledged — finance|acknowledged
+  ✓ 路由到但非认领人关闭被拒（acknowledged×resolve×routed 无三元） — moved=0
+  ✓ 认领人关闭成功 — moved=1
+  ✓ 关闭留痕 resolved_by=finance — resolved|finance
+  ✓ 已关闭行再认领被拒（resolved×claim 无三元） — moved=0
+w6b2-rules: scan pass — expiry+0/~4/-0 cert_due+0/~3/-0 ar_overdue+0/~3/-0 quality_abnormal+0/~3/-0 notified=1
+  ✓ 重扫重开 reopen_count=基线+1（非 NULL、非仅状态翻转） — open|5（基线 4）
+  ✓ 重开后重新通知 finance — 10→11
+  ✓ 二轮 认领→关闭 成功 — claim=1 resolve=1
+— ⑨ 预警中心两页在库（组+两 flowPage+表格块+认领意图表单+回调 workflow）
+  ✓ 菜单组「预警中心」
+  ✓ 页「预警列表」
+  ✓ 页「预警规则」
+  ✓ wfl_alerts 表格块在库 — 1 块
+  ✓ alert_rules 表格块在库 — 1 块
+  ✓ wfl_alert_acts 认领意图表单在库 — 1 块
+  ✓ 认领回调 workflow 在库且启用 — 1 条
+— ⑩ 单规则失败隔离（一条坏规则不中止全轮）
+w6b2-rules: 规则 ar_overdue 扫描失败（已隔离，其余规则继续）— 规则参数 ar_overdue.warn_days 需为 0~100000 整数（收到 oops）
+w6b2-rules: scan pass — expiry+0/~4/-0 cert_due+0/~3/-0 quality_abnormal+0/~3/-0 notified=0 failed=1（ar_overdue）
+  ✓ 坏规则（warn_days 非整数）被隔离为 1 条失败 — ar_overdue:规则参数 ar_overdue.warn_days 需为 0~100000 整数
+  ✓ 其余三路仍落库（expiry last_seen_at=CURRENT_DATE） — expiry=4
+  ✓ 失败已记 wfl_alert_scan_failures 审计行 — audit rows=3
+w6b2-rules: scan pass — expiry+0/~4/-0 cert_due+0/~3/-0 ar_overdue+0/~3/-0 quality_abnormal+0/~3/-0 notified=1
+  ✓ 参数复原后失败归零 — none
+w6b2-rules: assert 全部断言通过

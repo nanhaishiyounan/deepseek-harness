@@ -1,0 +1,23 @@
+== W7-B5 gates: W6 assert 全量矩阵复跑 2026-10-04 02:49:38 ==
+-- w6b2-rules --assert
+w6b2-rules: assert 全部断言通过
+-- w6b3-labels-assert
+w6b3-labels: --assert PASS
+-- w6b3-trace --assert
+w6b3-trace: --assert PASS
+-- w6b3-recall --assert
+w6b3-recall: --assert PASS
+-- w6b4-assert
+w6b4-assert: ALL PASS
+-- w6b5-insp --assert
+w6b5-insp: assert PASS
+-- w6b7-sourcing --assert
+w6b7 assert: PASS
+-- w6b8-assert
+w6b8-assert: PASS（全部腿绿）
+-- w6b9-cockpit --assert
+w6b9-cockpit: all asserts green
+-- w6b6-crm（cleanup→seed→assert 编排）
+w6b6-crm: cleanup complete
+w6b6-crm: seed complete
+w6b6-crm: assert PASS

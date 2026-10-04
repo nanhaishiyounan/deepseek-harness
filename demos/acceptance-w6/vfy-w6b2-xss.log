@@ -1,0 +1,15 @@
+{"id":2,"rule_type":"expiry","severity":"warning","entity":"wms_lots","entity_code":"SNA-260206-02","title":"批次 SNA-260206-02 32 天后到期","detail":{"days_left": 32, "alert_date": "2026-09-24", "lot_status": "qualified", "product_id": 10, "expiry_date": "2026-11-03", "removal_date": "2026-10-14", "production_date": "2026-02-06"},"status":"open","owner":null,"notify_users":["b4guard", "keeper"],"reopen_count":null,"first_seen_at":"2026-10-02","last_seen_at":"2026-10-02","notified_severity":"warning","resolved_by":null,"resolve_note":null,"rule_id":1,"entity_id":6,"dedup_key":"expiry:wms_lots:6","resolved_at":null}
+472|批次 <script>alert(1)</script> 供应商 O\'Brien & <b>超长</b>"特殊&字符名测试行XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX 已过期 999 天
+INSERT 0 1
+06:22:09
+472
+DELETE 1
+== cert_due rows routed ==
+
+== re-insert XSS row for PNG evidence ==
+551|批次 <script>alert(1)</script> 供应商 O'Brien & <b>超长</b>"特殊&字符名测试行XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX 已过期 999 天
+INSERT 0 1
+xss-render-probe={"visible":true,"escaped":false,"scripts":0}
+== delete XSS row ==
+551
+DELETE 1

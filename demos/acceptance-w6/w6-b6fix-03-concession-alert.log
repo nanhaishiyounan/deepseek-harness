@@ -1,0 +1,2 @@
+# W6-B6 修复债③ 特采消警语义（让步后 critical 预警仍在册，人工关闭才 resolved——resolved_by 不再是 system）
+concession|QI-2026-0005|open|

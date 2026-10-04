@@ -1,0 +1,3 @@
+# W6-B6 修复债④ failed 结果页无报告入口（按钮与提示均不渲染；服务端签发围栏仍为权威闸）
+# QI-W6B5-B6FIX 判定后 result: after|failed
+# DOM: #r-report 存在=false；result 页含「出具九要素报告」=false

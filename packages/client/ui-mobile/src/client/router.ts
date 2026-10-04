@@ -1,7 +1,10 @@
 /**
  * Hash router for the mobile v5 shell: `#/` (home, the default landing),
  * `#/chats`, `#/chat/<id>`, `#/work`, `#/work/<id>` (param sub-route
- * isomorphic to chat), `#/me`, `#/tasks`, `#/files`, `#/agents`, `#/login`.
+ * isomorphic to chat), `#/me`, `#/tasks`, `#/files`, `#/agents`, `#/login`,
+ * plus the W6-B1 sync surfaces `#/todos` (my open approval todos) and
+ * `#/docs[/:collection[/:id]]` (role directory → row list → row detail), and
+ * the W6-B2 alert surface `#/alerts` (the routed-user alert center mirror).
  * A bare `#/chat` (no id) folds onto `chats` — the chat view has no
  * id-less face, so the fallback mirrors the work/:bad-id pattern. The
  * v1/v2 route heads (messages/workbench/data/kg/contacts/profile) fold
@@ -14,9 +17,13 @@ import { useEffect, useState } from 'react'
 
 /** One parsed route. */
 export interface MobileRoute {
-  readonly name: 'home' | 'chats' | 'chat' | 'work' | 'me' | 'tasks' | 'files' | 'agents' | 'login'
-  /** Route parameter: the session id on `chat`, the work item id on `work`. */
+  readonly name: 'home' | 'chats' | 'chat' | 'work' | 'me' | 'tasks' | 'files' | 'agents' | 'login' | 'todos' | 'docs' | 'alerts'
+  /** Route parameter: the session id on `chat`, the work item id on `work`, the collection on `docs`. */
   readonly param?: string
+  /**
+   * Second route parameter (W6-B1): the row id on `#/docs/:collection/:id`.
+   */
+  readonly param2?: string
   /** Query parameters of the hash. */
   readonly query: ReadonlyURLSearchParams
 }
@@ -46,11 +53,19 @@ export function parseRoute(hash: string): MobileRoute {
   const [path = '', query = ''] = raw.split('?', 2)
   const params: ReadonlyURLSearchParams = new URLSearchParams(query)
   const segments = path.split('/').filter(segment => segment !== '')
-  const [head, param] = segments as [string | undefined, string | undefined]
+  const [head, param, param2] = segments as [string | undefined, string | undefined, string | undefined]
   if (head === 'work') {
     return param === undefined
       ? { name: 'work' as const, query: params }
       : { name: 'work' as const, param, query: params }
+  }
+  if (head === 'todos') return { name: 'todos' as const, query: params }
+  if (head === 'alerts') return { name: 'alerts' as const, query: params }
+  if (head === 'docs') {
+    const route: { name: 'docs'; param?: string; param2?: string; query: ReadonlyURLSearchParams } = { name: 'docs', query: params }
+    if (param !== undefined) route.param = param
+    if (param2 !== undefined) route.param2 = param2
+    return route
   }
   if (head === 'chat') {
     return param === undefined

@@ -13,7 +13,7 @@
 /* The h1 riding PageNav's title slot (the layer's back header). */
 .headerTitle {
   margin: 0;
-  font-size: 17px;
+  font-size: var(--dshm-fs-lg);
   line-height: 24px;
   font-weight: 600;
   color: var(--dshm-foreground);
@@ -44,7 +44,7 @@
 }
 
 .searchBar :global(.adm-search-bar-input) {
-  font-size: 13px;
+  font-size: var(--dshm-fs-sm);
 }
 
 /* The filter capsules (CapsuleTabs) ride the ink selected fill. */
@@ -52,13 +52,13 @@
   --adm-color-primary: var(--dshm-primary);
   --adm-color-text: var(--dshm-muted-foreground);
   --adm-color-text-active: var(--dshm-on-primary);
-  --adm-border-radius-s: 999px;
+  --adm-border-radius-s: var(--dshm-radius-pill);
   --adm-font-size-7: 12px;
   padding: 6px 12px 8px;
   flex: none;
   --active-line-height: 0;
   --active-line-color: transparent;
-  --title-font-size: 12px;
+  --title-font-size: var(--dshm-fs-xs);
 }
 
 .list {
@@ -121,7 +121,7 @@
 }
 
 .sessionTitle {
-  font-size: 15px;
+  font-size: var(--dshm-fs-md);
   line-height: 21px;
   font-weight: 650;
   color: var(--dshm-foreground);
@@ -131,7 +131,7 @@
 }
 
 .sessionTime {
-  font-size: 11px;
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
   color: var(--dshm-muted-foreground);
   flex: none;
@@ -141,7 +141,7 @@
 .timeBadge {
   --color: var(--dshm-destructive);
   flex: none;
-  font-size: 11px;
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
   color: var(--dshm-muted-foreground);
 }
@@ -168,13 +168,13 @@
 .kindTag {
   --adm-font-size-9: 10px;
   --adm-height: 16px;
-  --adm-border-radius: 999px;
+  --adm-border-radius: var(--dshm-radius-pill);
   --adm-padding: 0 6px;
   flex: none;
 }
 
 .sessionSummary {
-  font-size: 14px;
+  font-size: var(--dshm-fs-sm);
   line-height: 19px;
   color: var(--dshm-muted-foreground);
   overflow: hidden;
@@ -189,7 +189,7 @@
   gap: 8px;
   padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
   border-top: 1px solid var(--dshm-border);
-  font-size: 10px;
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
   color: var(--dshm-muted-foreground);
   background: var(--dshm-card);
@@ -234,7 +234,7 @@
   border-radius: 50%;
   border: 2px solid var(--dshm-primary);
   color: var(--dshm-primary);
-  font-size: 22px;
+  font-size: var(--dshm-fs-xl);
   font-weight: 600;
   display: inline-flex;
   align-items: center;
@@ -244,7 +244,7 @@
 
 .welcomeTitle {
   margin: 0;
-  font-size: 28px;
+  font-size: var(--dshm-fs-num);
   line-height: 34px;
   font-weight: 700;
   color: var(--dshm-foreground);
@@ -261,7 +261,7 @@
 }
 
 .welcomeLine {
-  font-size: 15px;
+  font-size: var(--dshm-fs-md);
   line-height: 24px;
   color: var(--dshm-foreground);
   display: flex;
@@ -288,13 +288,12 @@
      primary-outline slot (the brand rim rides an inline variable in
      WelcomeCard.tsx) — 44px capsules. */
 .starter:global(.adm-button) {
-  --border-radius: 999px;
+  --border-radius: var(--dshm-radius-pill);
   height: var(--dshm-touch);
   padding-block: 0;
   padding-inline: 16px;
-  font-size: 14px;
+  font-size: var(--dshm-fs-sm);
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(46, 124, 246, 0.08);
 }
 
 /* ask bubbles (v6, the design's .notice form): the three pick forms with the
@@ -307,8 +306,8 @@
   gap: 10px;
   padding: 11px 13px;
   background: var(--dshm-primary-soft);
-  border: 1px solid rgba(46, 124, 246, 0.2);
-  border-radius: 11px;
+  border: 1px solid var(--dshm-primary-rim);
+  border-radius: var(--dshm-radius);
   max-width: min(84vw, 326px);
 }
 
@@ -326,7 +325,7 @@
 
 .askQuestion {
   margin: 0;
-  font-size: 15px;
+  font-size: var(--dshm-fs-md);
   line-height: 24px;
   color: var(--dshm-foreground);
 }
@@ -414,13 +413,13 @@
 }
 
 .askCardLabel {
-  font-size: 14px;
+  font-size: var(--dshm-fs-sm);
   line-height: 22px;
   font-weight: 500;
 }
 
 .askCardHint {
-  font-size: 13px;
+  font-size: var(--dshm-fs-sm);
   line-height: 20px;
   color: var(--dshm-muted-foreground);
 }
@@ -440,10 +439,10 @@
   gap: 6px;
   min-height: 40px;
   padding: 0 14px;
-  font-size: 13px;
+  font-size: var(--dshm-fs-sm);
   line-height: 1.2;
-  border: 1px solid rgba(46, 124, 246, 0.35);
-  border-radius: 999px;
+  border: 1px solid var(--dshm-primary-rim);
+  border-radius: var(--dshm-radius-pill);
   background: var(--dshm-card);
   color: var(--dshm-on-soft);
   transition: transform 120ms ease-out, background-color 120ms ease-out, color 120ms ease-out;
@@ -454,7 +453,7 @@
 }
 
 .askChipHint {
-  font-size: 11px;
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
   color: var(--dshm-muted-foreground);
 }
@@ -468,11 +467,11 @@
 .askButton {
   min-height: 40px;
   padding: 0 15px;
-  font-size: 13px;
+  font-size: var(--dshm-fs-sm);
   line-height: 1.2;
   font-weight: 650;
-  border: 1px solid rgba(46, 124, 246, 0.35);
-  border-radius: 11px;
+  border: 1px solid var(--dshm-primary-rim);
+  border-radius: var(--dshm-radius);
   background: var(--dshm-card);
   color: var(--dshm-primary);
   transition: transform 120ms ease-out, background-color 120ms ease-out, border-color 120ms ease-out, color 120ms ease-out;
@@ -513,14 +512,14 @@
 .askFree:global(.adm-button) {
   align-self: flex-start;
   padding: 0;
-  font-size: 13px;
+  font-size: var(--dshm-fs-sm);
   color: var(--dshm-muted-foreground);
   text-decoration: underline;
 }
 
 .fieldAskLabel {
   margin: 0;
-  font-size: 12px;
+  font-size: var(--dshm-fs-xs);
   line-height: 18px;
   font-weight: 500;
   color: var(--dshm-muted-foreground);
@@ -535,7 +534,7 @@
   align-self: flex-end;
   height: 28px;
   padding: 0 12px;
-  font-size: 12px;
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
 }
 
@@ -547,7 +546,7 @@
 }
 
 .richText {
-  font-size: 15px;
+  font-size: var(--dshm-fs-md);
   line-height: 24px;
   color: var(--dshm-bubble-ai-fg);
 }
@@ -599,7 +598,7 @@
   position: absolute;
   left: 0;
   top: 0;
-  font-size: 12px;
+  font-size: var(--dshm-fs-xs);
   color: var(--dshm-muted-foreground);
 }
 
@@ -613,7 +612,7 @@
   margin: 6px 0;
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: var(--dshm-fs-sm);
   line-height: 32px;
   overflow-x: auto;
 }
@@ -644,9 +643,9 @@
 
 .richText :global(code) {
   font-family: var(--dshm-font-num);
-  font-size: 13px;
+  font-size: var(--dshm-fs-sm);
   background: var(--dshm-muted);
-  border-radius: 4px;
+  border-radius: var(--dshm-radius-corner);
   padding: 1px 4px;
 }
 
@@ -671,7 +670,7 @@
 
 .codeBox {
   background: var(--dshm-code-bg);
-  border-radius: 13px;
+  border-radius: var(--dshm-radius-lg);
   overflow: hidden;
   box-shadow: var(--dshm-shadow-card);
   max-width: 100%;
@@ -686,7 +685,7 @@
 }
 
 .codeLang {
-  font-size: 11.5px;
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
   letter-spacing: 0.6px;
   font-weight: 600;
@@ -696,13 +695,13 @@
 
 /* The copy entry: the antd mini none-fill word on the code plate's chrome. */
 .copyBtn:global(.adm-button) {
-  --border-radius: 7px;
+  --border-radius: var(--dshm-radius-corner);
   --text-color: #c7d3e6;
   display: inline-flex;
   align-items: center;
   gap: 4px;
   padding: 3px 8px;
-  font-size: 11.5px;
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
 }
 
@@ -711,7 +710,7 @@
   padding: 11px 13px;
   overflow-x: auto;
   font-family: var(--dshm-font-num);
-  font-size: 12.6px;
+  font-size: var(--dshm-fs-xs);
   line-height: 1.62;
   color: var(--dshm-code-fg);
   white-space: pre;
@@ -736,7 +735,7 @@
 }
 
 .metricMiniValue {
-  font-size: 20px;
+  font-size: var(--dshm-fs-lg);
   line-height: 26px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
@@ -744,7 +743,7 @@
 }
 
 .metricMiniLabel {
-  font-size: 11px;
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
   /* Muted-fill labels ≤13px take the foreground token (03 §7.2-1). */
   color: var(--dshm-foreground);
@@ -759,9 +758,9 @@
   max-width: 260px;
   height: 28px;
   padding: 0 12px;
-  font-size: 12px;
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
-  border-radius: 999px;
+  border-radius: var(--dshm-radius-pill);
   background: var(--dshm-primary-10);
   color: var(--dshm-on-soft);
 }
@@ -776,7 +775,7 @@
   padding: 12px 13px;
   background: var(--dshm-muted);
   border: 1px solid var(--dshm-border);
-  border-radius: 13px;
+  border-radius: var(--dshm-radius-lg);
   box-sizing: border-box;
   text-align: left;
 }
@@ -796,14 +795,14 @@
 }
 
 .reportTitle {
-  font-size: 15px;
+  font-size: var(--dshm-fs-md);
   line-height: 24px;
   font-weight: 600;
   color: var(--dshm-foreground);
 }
 
 .reportSubtitle {
-  font-size: 12px;
+  font-size: var(--dshm-fs-xs);
   line-height: 18px;
   color: var(--dshm-muted-foreground);
 }
@@ -820,7 +819,7 @@
   border-radius: 50%;
   background: var(--dshm-primary-soft);
   color: var(--dshm-on-soft);
-  font-size: 11px;
+  font-size: var(--dshm-fs-xs);
   font-weight: 600;
 }
 
@@ -920,14 +919,14 @@
 }
 
 .rowLabel {
-  font-size: 14px;
+  font-size: var(--dshm-fs-sm);
   line-height: 22px;
   font-weight: 500;
   color: var(--dshm-foreground);
 }
 
 .rowHint {
-  font-size: 12px;
+  font-size: var(--dshm-fs-xs);
   line-height: 18px;
   color: var(--dshm-muted-foreground);
 }
@@ -943,12 +942,12 @@
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
-  font-size: 13px;
+  font-size: var(--dshm-fs-sm);
   line-height: 20px;
 }
 
 .reportTable th {
-  font-size: 12px;
+  font-size: var(--dshm-fs-xs);
   font-weight: 500;
   color: var(--dshm-muted-foreground);
   background: var(--dshm-muted);
@@ -1035,7 +1034,7 @@
 }
 
 .typingLabel {
-  font-size: 11px;
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
   color: var(--dshm-muted-foreground);
 }
@@ -1075,8 +1074,8 @@
   align-items: center;
   height: 24px;
   padding-inline: 10px;
-  border-radius: 12px;
-  font-size: 12px;
+  border-radius: var(--dshm-radius);
+  font-size: var(--dshm-fs-xs);
   line-height: 18px;
   font-weight: 600;
   background: var(--dshm-card);
@@ -1108,10 +1107,18 @@
   color: var(--dshm-muted-foreground);
 }
 
+/* W6-B1 G2: the live read-back settled this pending card elsewhere — the
+ * muted note rides beside the settled chip. */
+.approvalElsewhere {
+  flex: none;
+  font-size: var(--dshm-fs-xs);
+  color: var(--dshm-muted-foreground);
+}
+
 /* The remark input rides the action row and yields space to the buttons. */
 .approvalComment {
   flex: 1 1 120px;
   min-width: 0;
   max-width: 180px;
-  --font-size: 12px;
+  --font-size: var(--dshm-fs-xs);
 }

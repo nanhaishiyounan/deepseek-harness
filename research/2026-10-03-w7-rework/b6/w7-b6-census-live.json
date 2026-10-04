@@ -1,0 +1,690 @@
+{
+  "rebuiltAt": "2026-10-04T02:52:08.272Z",
+  "flowPageCount": 111,
+  "pages": [
+    {
+      "index": 1,
+      "title": "经营总览",
+      "schemaUid": "w6b9cdzrc2lst1dm",
+      "v1": false
+    },
+    {
+      "index": 2,
+      "title": "AI 工作台",
+      "schemaUid": "n13ai2efgqippp44",
+      "v1": false
+    },
+    {
+      "index": 3,
+      "title": "销售线索",
+      "schemaUid": "n17rwc527ujwt",
+      "v1": false
+    },
+    {
+      "index": 4,
+      "title": "客户",
+      "schemaUid": "n17sys042q2lz",
+      "v1": false
+    },
+    {
+      "index": 5,
+      "title": "联系人",
+      "schemaUid": "n17c3lkyg9zjd6",
+      "v1": false
+    },
+    {
+      "index": 6,
+      "title": "产品与服务",
+      "schemaUid": "n17f2wwpqs60dtk",
+      "v1": false
+    },
+    {
+      "index": 7,
+      "title": "客户仪表盘",
+      "schemaUid": "n17f2jumvap76nm8",
+      "v1": false
+    },
+    {
+      "index": 8,
+      "title": "入库单",
+      "schemaUid": "h5wmsrh8ls7pkv5i",
+      "v1": false
+    },
+    {
+      "index": 9,
+      "title": "出库单",
+      "schemaUid": "h5wmsvwkqjiiaxdj",
+      "v1": false
+    },
+    {
+      "index": 10,
+      "title": "库存查询",
+      "schemaUid": "h5wms9v2hly0cg6j",
+      "v1": false
+    },
+    {
+      "index": 11,
+      "title": "盘点管理",
+      "schemaUid": "h5wms2hmkvlfsmtf",
+      "v1": false
+    },
+    {
+      "index": 12,
+      "title": "移库管理",
+      "schemaUid": "h5wmspyqfovkqjff",
+      "v1": false
+    },
+    {
+      "index": 13,
+      "title": "预留管理",
+      "schemaUid": "h5wms9zlhetpzwl",
+      "v1": false
+    },
+    {
+      "index": 14,
+      "title": "补货预警",
+      "schemaUid": "h5wmstw8iug4upxs",
+      "v1": false
+    },
+    {
+      "index": 15,
+      "title": "库存流水",
+      "schemaUid": "h5wms9srcrn5fhiq",
+      "v1": false
+    },
+    {
+      "index": 16,
+      "title": "月度收发存",
+      "schemaUid": "h5wmslacezwb94s",
+      "v1": false
+    },
+    {
+      "index": 17,
+      "title": "批次主数据",
+      "schemaUid": "h5wmsgd4pntmwvg",
+      "v1": false
+    },
+    {
+      "index": 18,
+      "title": "仓库库区",
+      "schemaUid": "h5wms50cuimohzz7",
+      "v1": false
+    },
+    {
+      "index": 19,
+      "title": "库位平面图",
+      "schemaUid": "h5wms1nju21hb5c8",
+      "v1": false
+    },
+    {
+      "index": 20,
+      "title": "盘点计划",
+      "schemaUid": "h5wmsddav9gkxtl",
+      "v1": false
+    },
+    {
+      "index": 21,
+      "title": "收货终端",
+      "schemaUid": "w3b66yns80jnq92",
+      "v1": false
+    },
+    {
+      "index": 22,
+      "title": "供应商档案",
+      "schemaUid": "h4srm2u9xiqx09jb",
+      "v1": false
+    },
+    {
+      "index": 23,
+      "title": "供应商准入",
+      "schemaUid": "h4srm6hfqnpnrqu5",
+      "v1": false
+    },
+    {
+      "index": 24,
+      "title": "审核检查表",
+      "schemaUid": "h4srmuvf86en2kn",
+      "v1": false
+    },
+    {
+      "index": 25,
+      "title": "审核评分录入",
+      "schemaUid": "h4srmflpebqkuz",
+      "v1": false
+    },
+    {
+      "index": 26,
+      "title": "绩效评分卡",
+      "schemaUid": "h4srms4w5viez9zp",
+      "v1": false
+    },
+    {
+      "index": 27,
+      "title": "供应商绩效雷达",
+      "schemaUid": "h4srmaf4rurtt17p",
+      "v1": false
+    },
+    {
+      "index": 28,
+      "title": "证照效期预警",
+      "schemaUid": "h4srmjjlvbjei4fd",
+      "v1": false
+    },
+    {
+      "index": 29,
+      "title": "整改跟踪",
+      "schemaUid": "h4srm25tmro1wjuw",
+      "v1": false
+    },
+    {
+      "index": 30,
+      "title": "分类维护",
+      "schemaUid": "n17f3rnd403uzlkc",
+      "v1": false
+    },
+    {
+      "index": 31,
+      "title": "生产订单",
+      "schemaUid": "w5mfgntyu7wy20a",
+      "v1": false
+    },
+    {
+      "index": 32,
+      "title": "MO 执行视图",
+      "schemaUid": "w6mfgmct2tf2braf",
+      "v1": false
+    },
+    {
+      "index": 33,
+      "title": "排程明细",
+      "schemaUid": "w5mfgp352sily7f",
+      "v1": false
+    },
+    {
+      "index": 34,
+      "title": "生产订单看板",
+      "schemaUid": "w3b39xulomz8jj",
+      "v1": false
+    },
+    {
+      "index": 35,
+      "title": "领料单",
+      "schemaUid": "w6mfgsp029qziym",
+      "v1": false
+    },
+    {
+      "index": 36,
+      "title": "退料单",
+      "schemaUid": "w6mfg1zez6dqkcgh",
+      "v1": false
+    },
+    {
+      "index": 37,
+      "title": "报工记录",
+      "schemaUid": "w6mfglmxq9mhbkur",
+      "v1": false
+    },
+    {
+      "index": 38,
+      "title": "工程变更单",
+      "schemaUid": "w6b4bcr7wfgjxww",
+      "v1": false
+    },
+    {
+      "index": 39,
+      "title": "完工单",
+      "schemaUid": "w6mfgp1rrz08ffa",
+      "v1": false
+    },
+    {
+      "index": 40,
+      "title": "配方版本与变更",
+      "schemaUid": "w6b4b2jezsof7xz",
+      "v1": false
+    },
+    {
+      "index": 41,
+      "title": "BOM 管理",
+      "schemaUid": "w5mfga37ztlt6orc",
+      "v1": false
+    },
+    {
+      "index": 42,
+      "title": "BOM 工序",
+      "schemaUid": "w5mfgkkvs7a4ijya",
+      "v1": false
+    },
+    {
+      "index": 43,
+      "title": "工作中心",
+      "schemaUid": "w5mfg3eil2n4n0kr",
+      "v1": false
+    },
+    {
+      "index": 44,
+      "title": "主生产计划",
+      "schemaUid": "w7mrpyru4s708nwn",
+      "v1": false
+    },
+    {
+      "index": 45,
+      "title": "MRP 快照",
+      "schemaUid": "w7mrpowj6l93nn0a",
+      "v1": false
+    },
+    {
+      "index": 46,
+      "title": "计划工作台",
+      "schemaUid": "w7mrphtm8t9tzlk8",
+      "v1": false
+    },
+    {
+      "index": 47,
+      "title": "车间终端",
+      "schemaUid": "w3b6guuruqly03t",
+      "v1": false
+    },
+    {
+      "index": 48,
+      "title": "APS瓶颈与负荷",
+      "schemaUid": "w6b8a3fg2qshtalw",
+      "v1": false
+    },
+    {
+      "index": 49,
+      "title": "APS what-if沙箱",
+      "schemaUid": "w6b8a9z9q2cliq77",
+      "v1": false
+    },
+    {
+      "index": 50,
+      "title": "员工",
+      "schemaUid": "n17lhe5qyxu1g",
+      "v1": false
+    },
+    {
+      "index": 51,
+      "title": "部门",
+      "schemaUid": "n17f3er0aw80yc8i",
+      "v1": false
+    },
+    {
+      "index": 52,
+      "title": "请假审批",
+      "schemaUid": "n17f3wqpzee9wo2g",
+      "v1": false
+    },
+    {
+      "index": 53,
+      "title": "组织架构",
+      "schemaUid": "w3b57ix4086om95",
+      "v1": false
+    },
+    {
+      "index": 54,
+      "title": "权限矩阵",
+      "schemaUid": "w3b5m8kwiakieq",
+      "v1": false
+    },
+    {
+      "index": 55,
+      "title": "经营看板",
+      "schemaUid": "w9kpi7zv98whvfpv",
+      "v1": false
+    },
+    {
+      "index": 56,
+      "title": "供应链看板",
+      "schemaUid": "w9kpijpea6p6exnm",
+      "v1": false
+    },
+    {
+      "index": 57,
+      "title": "生产看板",
+      "schemaUid": "w9kpirvxmfx12l2i",
+      "v1": false
+    },
+    {
+      "index": 58,
+      "title": "库存看板",
+      "schemaUid": "w9kpiatwzi4gjbff",
+      "v1": false
+    },
+    {
+      "index": 59,
+      "title": "应收应付对账",
+      "schemaUid": "w9kpisldougonly",
+      "v1": false
+    },
+    {
+      "index": 60,
+      "title": "财务工作台",
+      "schemaUid": "w6b9fgcovvinqe85",
+      "v1": false
+    },
+    {
+      "index": 61,
+      "title": "质检单",
+      "schemaUid": "w8qmjvyv8p5j7j",
+      "v1": false
+    },
+    {
+      "index": 62,
+      "title": "检验读数",
+      "schemaUid": "w8qmg3yelbk0rzm",
+      "v1": false
+    },
+    {
+      "index": 63,
+      "title": "AQL 抽样方案",
+      "schemaUid": "w8qm15rxe53v8hh",
+      "v1": false
+    },
+    {
+      "index": 64,
+      "title": "处置看板",
+      "schemaUid": "w8qm472nluqt32x",
+      "v1": false
+    },
+    {
+      "index": 65,
+      "title": "质检看板",
+      "schemaUid": "w3b3uw3d0mrz1b",
+      "v1": false
+    },
+    {
+      "index": 66,
+      "title": "季度绩效物化",
+      "schemaUid": "w8qm8sx2tj9j0kb",
+      "v1": false
+    },
+    {
+      "index": 67,
+      "title": "CCP监控配置",
+      "schemaUid": "w6b4c4t709ypn92m",
+      "v1": false
+    },
+    {
+      "index": 68,
+      "title": "质检工作台",
+      "schemaUid": "w3b6nour73ecwgb",
+      "v1": false
+    },
+    {
+      "index": 69,
+      "title": "CCP监控记录",
+      "schemaUid": "w6b4ce752lctbwp8",
+      "v1": false
+    },
+    {
+      "index": 70,
+      "title": "检验工作台",
+      "schemaUid": "w6b5icrrgz5z9gu",
+      "v1": false
+    },
+    {
+      "index": 71,
+      "title": "出厂检验报告",
+      "schemaUid": "w6b5ruwgh0d52fif",
+      "v1": false
+    },
+    {
+      "index": 72,
+      "title": "资产台账",
+      "schemaUid": "n17wr2jbz8fl2i",
+      "v1": false
+    },
+    {
+      "index": 73,
+      "title": "设备台账",
+      "schemaUid": "w6b8ekr28fjs4b0k",
+      "v1": false
+    },
+    {
+      "index": 74,
+      "title": "维保服务商",
+      "schemaUid": "n17f3t3gtwv502s",
+      "v1": false
+    },
+    {
+      "index": 75,
+      "title": "维保计划",
+      "schemaUid": "w6b8e2y41rty9rx",
+      "v1": false
+    },
+    {
+      "index": 76,
+      "title": "维保记录",
+      "schemaUid": "n17f34o4bhrzg1w",
+      "v1": false
+    },
+    {
+      "index": 77,
+      "title": "维保工单",
+      "schemaUid": "w6b8eupafgchxsnf",
+      "v1": false
+    },
+    {
+      "index": 78,
+      "title": "计量校准",
+      "schemaUid": "w6b8erufav9515p",
+      "v1": false
+    },
+    {
+      "index": 79,
+      "title": "维保日历",
+      "schemaUid": "w6b8eci1cpbqsgtj",
+      "v1": false
+    },
+    {
+      "index": 80,
+      "title": "采购申请",
+      "schemaUid": "w3pura0kyqfx4f9",
+      "v1": false
+    },
+    {
+      "index": 81,
+      "title": "询价管理",
+      "schemaUid": "w3purlvif0v23bun",
+      "v1": false
+    },
+    {
+      "index": 82,
+      "title": "供应商报价",
+      "schemaUid": "w3pur9w1c3yg3rjd",
+      "v1": false
+    },
+    {
+      "index": 83,
+      "title": "比价表",
+      "schemaUid": "w3purb7o0r3yqi45",
+      "v1": false
+    },
+    {
+      "index": 84,
+      "title": "采购订单",
+      "schemaUid": "w3puryzkva06iuhh",
+      "v1": false
+    },
+    {
+      "index": 85,
+      "title": "发票匹配",
+      "schemaUid": "w3pur45681oxtcsi",
+      "v1": false
+    },
+    {
+      "index": 86,
+      "title": "付款申请",
+      "schemaUid": "w3pur3an4pwnr1eo",
+      "v1": false
+    },
+    {
+      "index": 87,
+      "title": "采购看板",
+      "schemaUid": "w3b3x35bfqctwkn",
+      "v1": false
+    },
+    {
+      "index": 88,
+      "title": "销售订单",
+      "schemaUid": "w7mrp4w590rm0ws8",
+      "v1": false
+    },
+    {
+      "index": 89,
+      "title": "商机管道",
+      "schemaUid": "w6b6c6iqjj61zo9",
+      "v1": false
+    },
+    {
+      "index": 90,
+      "title": "报价单",
+      "schemaUid": "n17v6xfvzxoj0f",
+      "v1": false
+    },
+    {
+      "index": 91,
+      "title": "订单",
+      "schemaUid": "n17vu68623sj9i",
+      "v1": false
+    },
+    {
+      "index": 92,
+      "title": "回款",
+      "schemaUid": "n17f2c15ji684n8g",
+      "v1": false
+    },
+    {
+      "index": 93,
+      "title": "发票",
+      "schemaUid": "n17f2utwb01mi3ha",
+      "v1": false
+    },
+    {
+      "index": 94,
+      "title": "销售看板",
+      "schemaUid": "w3b3utj5a15khmq",
+      "v1": false
+    },
+    {
+      "index": 95,
+      "title": "交期日历",
+      "schemaUid": "w3b3x8ymuxey8q",
+      "v1": false
+    },
+    {
+      "index": 96,
+      "title": "计划日历",
+      "schemaUid": "w3b3ass8lwvxiy",
+      "v1": false
+    },
+    {
+      "index": 97,
+      "title": "销售仪表盘",
+      "schemaUid": "n17f2y9wfrggxyo",
+      "v1": false
+    },
+    {
+      "index": 98,
+      "title": "任务列表",
+      "schemaUid": "n17e1ilgn22ts32",
+      "v1": false
+    },
+    {
+      "index": 99,
+      "title": "任务看板",
+      "schemaUid": "n17f12u108kzzyk1",
+      "v1": false
+    },
+    {
+      "index": 100,
+      "title": "任务日历",
+      "schemaUid": "n17f1ns70eshqwy",
+      "v1": false
+    },
+    {
+      "index": 101,
+      "title": "项目",
+      "schemaUid": "n17e1kqp4orpph5",
+      "v1": false
+    },
+    {
+      "index": 102,
+      "title": "里程碑",
+      "schemaUid": "n17e1m63re4tgre8",
+      "v1": false
+    },
+    {
+      "index": 103,
+      "title": "工单",
+      "schemaUid": "n17etqhllqqa28",
+      "v1": false
+    },
+    {
+      "index": 104,
+      "title": "知识文章",
+      "schemaUid": "n17f38lga4ln4s65",
+      "v1": false
+    },
+    {
+      "index": 105,
+      "title": "审批中心",
+      "schemaUid": "w1w167h6joi0ck6",
+      "v1": false
+    },
+    {
+      "index": 106,
+      "title": "审批流配置",
+      "schemaUid": "w3b4u2r9nnjqvi",
+      "v1": false
+    },
+    {
+      "index": 107,
+      "title": "预警列表",
+      "schemaUid": "w6b2dwgwk6zc3i",
+      "v1": false
+    },
+    {
+      "index": 108,
+      "title": "预警规则",
+      "schemaUid": "w6b2rdacw363qjf7",
+      "v1": false
+    },
+    {
+      "index": 109,
+      "title": "效期看板",
+      "schemaUid": "w6b3v1vsyqj5u9a",
+      "v1": false
+    },
+    {
+      "index": 110,
+      "title": "批次追溯",
+      "schemaUid": "w6b3tctwuy6wn0d",
+      "v1": false
+    },
+    {
+      "index": 111,
+      "title": "召回管理",
+      "schemaUid": "w6b3r1wnc10bflfg",
+      "v1": false
+    },
+    {
+      "index": 112,
+      "title": "应用中心",
+      "schemaUid": "c9c6wzppejk",
+      "v1": true
+    },
+    {
+      "index": 113,
+      "title": "排产甘特",
+      "schemaUid": "96yet9a0x45",
+      "v1": true
+    },
+    {
+      "index": 114,
+      "title": "任务甘特",
+      "schemaUid": "zs3oqvlgqq0",
+      "v1": true
+    }
+  ]
+}

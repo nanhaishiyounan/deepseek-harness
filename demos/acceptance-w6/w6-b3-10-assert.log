@@ -1,0 +1,41 @@
+w6b3-trace: --assert 开始
+  ✓ v_trace_nodes/v_trace_edges 视图存在且非空 — nodes=131 edges=129
+  ✓ wms_receipts.lot_id 回填后孤儿行=0（验收⑥） — orphans=0
+  ✓ 完工单效期继承（无 lot_no 的完工单=0，验收③） — remaining=0
+  ✓ 存在完整三级链成品批次（完工←领料←供应商） — MFG-20260926-03
+  ✓ 反向追溯 MFG-20260926-03 到达原料批次（验收①） — lot_in=4
+  ✓ 反向追溯 MFG-20260926-03 到达供应商（三级追溯链闭合） — supplier=2
+  ✓ 与 kpi-run --trace 同口径（该 MO 的 ISSUE_WIP 组件批次全部落在反向闭包内） — 4/4（RM-260920-C1、RM-260920-H1、RM-260920-M1、RM-260920-P1）
+  ✓ 存在混料/分批场景原料批次（一料入多单） — RM-260920-M1
+  ✓ 混料闭包去重（DAG 非树形——节点不重复展开） — down=10 节点全部唯一
+  ✓ 混料原料正向到达 ≥2 个成品批次（树形失真反例） — lot_fg=5
+  ✓ 正向追溯锚点原料批次就绪 — RM-260920-M1
+  ✓ 正向召回范围三元组（成品批次/发运订单/客户）非空 — fg=5 so=1 cust=1
+  ✓ 效期看板/批次追溯 页面已铺（渲染证据见截图）
+w6b3-trace: --assert PASS
+w6b3-recall: --assert 开始
+  ✓ 召回锚点（混料原料批次）就绪 — RM-260920-M1
+w6b3-recall: RC-20261002-003 created — anchor=RM-260920-M1 owner=qc_inspector notified=true fg=5 so=1 cust=1
+  ✓ 召回范围快照三清单落库（成品/订单/客户） — fg=5 so=1 cust=1 status=initiated
+  ✓ 冻结范围 = 实时递归 CTE 正向闭包（对账一致） — fg 5==5 cust 1==1
+  ✓ 责任人通知送达（B2 通知面 in-app） — rows=1
+  ✓ 非白名单账号发起被拒（服务端卡口）
+  ✓ 跳步转移被拒（initiated 直接 close=0 行）
+  ✓ 外人流转被拒（buyer 无权 notify）
+  ✓ notify：initiated→notified
+  ✓ execute：notified→executing
+  ✓ close 无记录说明被拒（63 条「记录」动作）
+  ✓ close：executing→closed（含记录说明）
+  ✓ 终态=closed 且关闭日戳落库 — closed|2026-10-02
+  ✓ 召回管理页面已铺（渲染证据见截图）
+w6b3-recall: --assert PASS
+w6b3-labels: --assert 开始（锚点 MFG-20260926-03）
+  ✓ 引擎 /label/lot.svg 渲染产出 — 2702B
+  ✓ 条码回读：SVG bars 解码出 GS1 元素串 — 解码批号 MFG-20260926-03
+  ✓ AI(10) 批号 = wms_lots.lot_no
+  ✓ AI(11) 生产日期与库一致 — 2026-09-26 == 2026-09-26
+  ✓ AI(17) 到期日与库一致 — 2027-06-23 == 2027-06-23
+  ✓ AI(01) GTIN 为 14 位产品级编码 — 90000000000010
+  ✓ 法定最低信息集文本行（批号/日期）
+w6b3-labels: --assert PASS
+w6-b3-assert: ALL PASS

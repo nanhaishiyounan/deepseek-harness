@@ -934,6 +934,25 @@ export interface Config {
    */
   nocobaseWriteEnabled?: boolean
   /**
+   * Per-username collection whitelists enforced server-side on
+   * `nocobase.list/get/update` for signed-in callers (the docs deep-link
+   * guard's server layer). A username absent from the table has no
+   * configured scope; anonymous calls stay open.
+   */
+  nocobaseCollectionScopes?: Readonly<Record<string, readonly string[]>> | undefined
+  /**
+   * Per-username wfl_ collection whitelists for `nocobase.update` (engine
+   * tables default to write-refused — their state machines own the
+   * transitions; the alert flow rides `nocobase.alertAct`).
+   */
+  nocobaseWflWriteScopes?: Readonly<Record<string, readonly string[]>> | undefined
+  /**
+   * The alert engine's base URL `nocobase.alertAct` forwards to
+   * (`POST /alerts/act`); omitted = the `W6_ALERT_ENGINE_URL` environment
+   * variable, both absent = the method refuses `alert-engine-unconfigured`.
+   */
+  alertEngineUrl?: string | undefined
+  /**
    * Whether the graph-page domain (`kg.schema/search/subgraph/expand/stats`)
    * answers; absent means refused, same stance as `assetsEnabled`.
    */

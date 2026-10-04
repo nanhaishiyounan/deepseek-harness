@@ -1,11 +1,13 @@
 /**
  * The surface-owned v3 system-field guarantees (the N2/日期 contract): a
- * registry system number gets its value before the confirm message leaves
- * the client — max-suffix+1 over the live rows, a time-derived fallback
- * when the read fails — and a derived 今天 date field carries the client's
- * own calendar date, so the landing row can never miss either. Numbers are
- * cached per draft id: revisions of one draft keep one number, a fresh draft
- * re-reads and takes the next. No React imports.
+ * registry system number draws its PREVIEW before the confirm message leaves
+ * the client — max-suffix+1 over the live rows read back number-descending
+ * (W6-B1: the id-ascending first page read maxed out at 200 rows and drew
+ * colliding previews; the number itself is now server-assigned at nb_create,
+ * so this preview is display-only) — and a derived 今天 date field carries
+ * the client's own calendar date, so the landing row can never miss it.
+ * Numbers are cached per draft id: revisions of one draft keep one preview,
+ * a fresh draft re-reads and takes the next. No React imports.
  */
 
 import { FORM_REGISTRY } from './formRegistry.ts'
@@ -91,12 +93,15 @@ export function deriveNextNumber(
 const issuedNumbers = new Map<string, Record<string, string>>()
 
 /**
- * The system number one draft's blank system field will land with.
- * @param draftId - the owning draft (one number per draft, revisions included).
+ * The preview number one draft's blank system field shows (W6-B1: display
+ * only — nb_create assigns the landing number server-side, so two clients
+ * drafting the same form can share a preview without ever colliding on the
+ * row).
+ * @param draftId - the owning draft (one preview per draft, revisions included).
  * @param collection - the registry collection name.
  * @param field - the system field's name.
  * @param now - the client clock (fallback derivation).
- * @returns the generated number, resolved from the cache when this draft
+ * @returns the preview number, resolved from the cache when this draft
  * already drew one.
  */
 export async function nextSystemNumber(
@@ -114,13 +119,14 @@ export async function nextSystemNumber(
     const page = await rpc('nocobase.list', {
       collection,
       page: 1,
-      page_size: 200,
-      sort: ['id'],
+      page_size: 50,
+      sort: [`-${spec.field}`],
+      fields: [spec.field],
     })
     number = deriveNextNumber(page.rows, spec, now)
   } catch {
-    // The read-back is best effort; the clock suffix still lands a unique,
-    // format-true number — the row never goes blank.
+    // The read-back is best effort; the clock suffix still shows a unique,
+    // format-true preview — the field never renders blank.
     number = `${spec.prefix}-${String(new Date(now).getFullYear())}-${clockSuffix(now)}`
   }
   issuedNumbers.set(draftId, { ...(issuedNumbers.get(draftId) ?? {}), [field]: number })

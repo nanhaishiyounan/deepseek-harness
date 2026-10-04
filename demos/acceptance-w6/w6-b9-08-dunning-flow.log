@@ -1,0 +1,9 @@
+== W6-B9 dunning flow (psql) ==
+DUN-2026-0001 ← 预警#23 SO-W6B2-SEED L2 正式催收 promised 余额¥18800.00 逾期31天 承诺2026-10-10
+DUN-2026-0002 ← 预警#22 SO-2026-0001 L1 提醒 open 余额¥2420.00 逾期-3天 承诺—
+DUN-2026-0003 ← 预警#24 SO-W5B4-01 L1 提醒 open 余额¥60.00 逾期-3天 承诺—
+[phone] 电话联系客户采购负责人，客户确认收到对账无误，承诺下周三前付款 → reached（finance @ 10-03 06:57）
+[phone] 二次跟进：客户财务给出明确付款计划，承诺 2026-10-10 前结清 → promised（finance @ 10-03 06:57）
+  · 催收任务通知落 notificationInAppMessages：10 行
+  · fin_dunning_audit（任务状态机审计）：5 行
+  ✓ append-only 触发器拒绝 UPDATE — ERROR:  fin_dunning_records 追加只读（append-only）：

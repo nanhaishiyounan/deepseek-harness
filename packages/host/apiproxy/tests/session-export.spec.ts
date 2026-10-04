@@ -133,11 +133,13 @@ describe('session export compression config', () => {
       kbTenant: 'test',
       sessionExportCompressionLevel: 6,
       coldBlankProbeMaxBytes: 1024,
+      nocobaseCollectionScopes: {},
+      nocobaseWflWriteScopes: {},
     })
     expect(ApiProxyService.Config({ kbTenant: 'test', sessionExportCompressionLevel: 0 }))
-      .toEqual({ kbTenant: 'test', sessionExportCompressionLevel: 0, coldBlankProbeMaxBytes: 1024 })
+      .toEqual({ kbTenant: 'test', sessionExportCompressionLevel: 0, coldBlankProbeMaxBytes: 1024, nocobaseCollectionScopes: {}, nocobaseWflWriteScopes: {} })
     expect(ApiProxyService.Config({ kbTenant: 'test', sessionExportCompressionLevel: 9 }))
-      .toEqual({ kbTenant: 'test', sessionExportCompressionLevel: 9, coldBlankProbeMaxBytes: 1024 })
+      .toEqual({ kbTenant: 'test', sessionExportCompressionLevel: 9, coldBlankProbeMaxBytes: 1024, nocobaseCollectionScopes: {}, nocobaseWflWriteScopes: {} })
     for (const value of [-1, 10, 1.5]) {
       expect(() => ApiProxyService.Config({ sessionExportCompressionLevel: value } as never)).toThrow()
     }
@@ -147,9 +149,9 @@ describe('session export compression config', () => {
 describe('cold blank probe config', () => {
   it('accepts a per-Session byte bound including zero and rejects invalid bounds', () => {
     expect(ApiProxyService.Config({ kbTenant: 'test', coldBlankProbeMaxBytes: 0 }))
-      .toEqual({ kbTenant: 'test', sessionExportCompressionLevel: 6, coldBlankProbeMaxBytes: 0 })
+      .toEqual({ kbTenant: 'test', sessionExportCompressionLevel: 6, coldBlankProbeMaxBytes: 0, nocobaseCollectionScopes: {}, nocobaseWflWriteScopes: {} })
     expect(ApiProxyService.Config({ kbTenant: 'test', coldBlankProbeMaxBytes: 2048 }))
-      .toEqual({ kbTenant: 'test', sessionExportCompressionLevel: 6, coldBlankProbeMaxBytes: 2048 })
+      .toEqual({ kbTenant: 'test', sessionExportCompressionLevel: 6, coldBlankProbeMaxBytes: 2048, nocobaseCollectionScopes: {}, nocobaseWflWriteScopes: {} })
     for (const value of [-1, 1.5]) {
       expect(() => ApiProxyService.Config({ kbTenant: 'test', coldBlankProbeMaxBytes: value })).toThrow()
     }

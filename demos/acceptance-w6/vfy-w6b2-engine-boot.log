@@ -1,0 +1,12 @@
+approval-engine: serving on http://127.0.0.1:13110 (POST /act, POST /submit, POST /post-count-adjust, POST /scan-reorder, POST /calc-scorecard, POST /run-mrp, POST /calc-kpi, POST /run-nightly, POST /scan-alerts, POST /alerts/act, POST /confirm-suggestion, GET /todos, GET /healthz)
+approval-engine: W3-B6 terminals on :13110 — GET /terminals/{report,inspect,receive}.html + terminal.css; GET /terminal/{report,inspect,receive}; POST /report-job, /inspect-submit, /receive-goods (enabled=true, token=lenient-demo（生产必须设 W3_TERMINAL_TOKEN）)
+approval-engine: W5-B0 designer on :13110 — GET /designer (SPA) + GET /designer/meta + GET/POST /flow-graph → wfl_flow_configs.graph json（编辑态落库）+ POST /flow-graph/publish → 门禁+round-trip 等价断言+单向编译派生 wfl 行表（一条 data-modifying CTE，CAS 败则整条 no-op）；保存与发布同走 graph_version 原子 CAS——同刻并发恰好一胜一败(enabled=true)
+approval-engine: W6-B2 alert scan loop armed — every 3600s（POST /scan-alerts 手动触发同款；阈值/路由配置在 alert_rules 行）
+w6b2-rules: scan pass — expiry+0/~4/-0 cert_due+0/~3/-0 ar_overdue+0/~3/-0 quality_abnormal+0/~3/-0 notified=1
+w6b2-rules: scan pass — expiry+0/~4/-0 cert_due+0/~3/-0 ar_overdue+0/~3/-0 quality_abnormal+0/~3/-0 notified=0
+w6b2-rules: scan pass — expiry+0/~4/-0 cert_due+0/~3/-0 ar_overdue+0/~3/-0 quality_abnormal+0/~3/-0 notified=1
+w6b2-rules: scan pass — expiry+0/~4/-0 cert_due+0/~3/-0 ar_overdue+0/~3/-0 quality_abnormal+0/~3/-0 notified=1
+w6b2-rules: scan pass — expiry+0/~4/-0 cert_due+0/~3/-0 ar_overdue+0/~3/-0 quality_abnormal+0/~3/-0 notified=0
+w6b2-rules: scan pass — expiry+0/~4/-0 cert_due+0/~3/-0 ar_overdue+0/~3/-0 quality_abnormal+0/~3/-0 notified=0
+w6b2-rules: scan pass — expiry+0/~4/-0 cert_due+0/~3/-0 ar_overdue+0/~3/-0 quality_abnormal+0/~3/-0 notified=1
+w6b2-rules: scan pass — expiry+0/~4/-0 cert_due+0/~3/-0 ar_overdue+0/~3/-0 quality_abnormal+0/~3/-0 notified=0

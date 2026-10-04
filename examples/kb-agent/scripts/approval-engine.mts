@@ -87,6 +87,18 @@
  * config_note (replayable rollback anchor); the engine's transition code
  * never changes.
  *
+ * W6-B2 adds the platform rule-engine surface: the hourly alert scan loop
+ * (W6_ALERT_SCAN_ENABLED, default on; W6_ALERT_SCAN_INTERVAL_SEC, default
+ * 3600) and POST /scan-alerts run w6b2-rules.mts's scanAlerts verbatim
+ * (the same pass the nightly leg "scan-alerts" and the CLI --scan run — one
+ * scanner, three entry points; W6-R2 adds per-rule failure isolation and the
+ * /healthz scan pointers last_scan_at/last_scan_failures), and POST
+ * /alerts/act is the handling-action channel (claim/ack/resolve through the
+ * explicit (from_state, action, actor_role) transition table; w6b2-rules.mts
+ * owns the state flow). The rule thresholds and routing live in alert_rules
+ * rows — never in this file. A page intent row id riding intent_record_id is
+ * consumed on success (the W1 pattern — the PC alert list's wfl_alert_acts
+ * form + collection workflow is the PC claim entrance).
  * W5-B2 unlocks the advanced nodes (plan-w5 §B2's sanctioned minimal engine
  * extension — the aggregation judgement rides the rows the engine already
  * trusts): approver_map entries may carry runtime-resolved markers
@@ -1301,6 +1313,17 @@ async function readBody(request: IncomingMessage): Promise<Record<string, unknow
   return JSON.parse(text) as Record<string, unknown>
 }
 
+/**
+ * Strip credential-bearing query values (token= / bearer= / access_token= /
+ * api_key= / password=) from a URL before it reaches a log line — the route
+ * failure log and any future caller never see the raw query token.
+ * @param raw - the raw URL (possibly with a query string).
+ * @returns the URL with each matched value replaced by `<redacted>`.
+ */
+export function redactUrl(raw: string): string {
+  return raw.replace(/([?&](?:token|bearer|access_token|api_key|password)=)[^&\s]*/giu, '$1<redacted>')
+}
+
 /** One JSON response write (optional extra headers, e.g. the terminal-auth marker). */
 function writeJson(response: ServerResponse, status: number, body: unknown, headers: Record<string, string> = {}): void {
   response.writeHead(status, { 'content-type': 'application/json', ...headers })
@@ -1534,12 +1557,206 @@ function checkTerminalToken(request: IncomingMessage, url: URL): void {
   }
 }
 
+/**
+ * The W6-R3 recall-surface CORS headers: the 召回管理/追溯 pages' JSBlocks
+ * fetch this engine cross-origin (NocoBase :13000 → engine :13110) with an
+ * authorization header, so every /recall/* and /label/* response carries the
+ * allow-origin/headers/methods triple and OPTIONS preflights answer 204.
+ */
+const RECALL_CORS: Readonly<Record<string, string>> = {
+  'access-control-allow-origin': '*',
+  'access-control-allow-headers': 'authorization, content-type',
+  'access-control-allow-methods': 'GET, POST, OPTIONS',
+}
+
+/**
+ * Derive the acting username from the request's NocoBase session (W6-R3
+ * P0-4): the /recall/* write routes never trust a self-reported actor — the
+ * bearer token is exchanged for its users:me username, a missing or invalid
+ * credential is a 401, and a body claiming a different identity is the
+ * caller's 403.
+ * @param request - the engine request carrying the authorization header.
+ * @returns the session's username.
+ */
+async function recallActor(request: IncomingMessage): Promise<string> {
+  const header = request.headers.authorization
+  const bearer = Array.isArray(header) ? header[0] : header
+  const token = bearer?.startsWith('Bearer ') === true ? bearer.slice('Bearer '.length) : ''
+  if (token === '') {
+    throw new HttpError(401, '召回端点需要平台会话（authorization: Bearer <NOCOBASE_TOKEN>）——actor 由会话推导，不接受自报')
+  }
+  // Narrow transport retry: NocoBase resets keep-alive sockets briefly after
+  // heavy schema writes (the same ECONNRESET window signInWithRetry rides) —
+  // an identity probe must not fail over one dropped socket.
+  let me: { data?: { username?: unknown } } | null = null
+  for (let attempt = 0; attempt < 3 && me === null; attempt += 1) {
+    if (attempt > 0) await new Promise(resolve => setTimeout(resolve, 1000 * attempt))
+    me = await call(token, 'GET', '/api/auth:check').catch(() => null)
+  }
+  const username = typeof me?.data?.username === 'string' ? me.data.username : ''
+  if (username === '') throw new HttpError(401, '平台会话无效（auth:check 未返回用户名）——重新登录后重试')
+  return username
+}
+
 /** The static-page whitelist (files served from scripts/w3-terminals/). */
 const TERMINAL_STATIC_FILES: Readonly<Record<string, string>> = {
+  'cards.html': 'text/html; charset=utf-8',
   'report.html': 'text/html; charset=utf-8',
   'inspect.html': 'text/html; charset=utf-8',
   'receive.html': 'text/html; charset=utf-8',
   'terminal.css': 'text/css; charset=utf-8',
+}
+
+// ─── W6-B4: the MES execution surface (card flow + CCP) and PLM governance ───
+
+/**
+ * The shop-floor card flow's identity chain: the bearer session derives the
+ * username (recallActor), the department fence then admits only 生产车间
+ * members (admin bypasses) — the operator is never self-reported.
+ * @param io - the data access to run over.
+ * @param request - the engine request carrying the authorization header.
+ * @returns the fenced operator username.
+ */
+async function cardFlowOperator(io: NocoIO, request: IncomingMessage): Promise<string> {
+  return await terminalOperator(io, await recallActor(request), 'report')
+}
+
+/** The operator's display row (nickname + main department) for the sign-in panel. */
+async function operatorProfile(io: NocoIO, operator: string): Promise<{ nickname: string, department: string }> {
+  const userRow = (await io.list('users', {})).find(row => String(row.username ?? '') === operator)
+  const department = await mainDepartmentOf(io, operator)
+  return { nickname: String(userRow?.nickname ?? operator), department: String(department?.title ?? '') }
+}
+
+/**
+ * The ECO governance gate: planner (计划部（PMC）) and quality (质检部) own
+ * recipe changes, admin bypasses — the cordis.patch.yml role matrix's PLM
+ * seats, enforced server-side on every /eco/* write.
+ * @param io - the data access to run over.
+ * @param request - the engine request carrying the authorization header.
+ * @returns the gated actor username.
+ */
+async function ecoActor(io: NocoIO, request: IncomingMessage): Promise<string> {
+  const actor = await recallActor(request)
+  if (actor === 'admin') return actor
+  const allowed = new Set<string>([
+    ...await departmentUsernames(io, '计划部（PMC）', 'W6-B4 ECO'),
+    ...await departmentUsernames(io, '质检部', 'W6-B4 ECO'),
+  ])
+  if (!allowed.has(actor)) {
+    throw new HttpError(403, `工程变更限 计划部（PMC）/质检部/admin 发起（${actor} 不在围栏内——角色矩阵见 cordis.patch.yml）`)
+  }
+  return actor
+}
+
+/**
+ * The submit-key contract: one idempotency key per sheet open, server-checked
+ * before any write. The charset gate ([A-Za-z0-9:_-]) is the negative-case
+ * surface — markup, quotes, and SQL metacharacters are refused before psql.
+ */
+function validateSubmitKey(raw: unknown): string {
+  if (typeof raw !== 'string' || raw === '' || raw.length > 160 || !/^[A-Za-z0-9:_-]+$/u.test(raw)) {
+    throw new HttpError(400, `submit_key 需为 1..160 位 [A-Za-z0-9:_-] 幂等键（收到 ${JSON.stringify(typeof raw === 'string' ? raw.slice(0, 40) : raw)}）`)
+  }
+  return raw
+}
+
+/**
+ * Judge one CCP reading against its point's CL (HACCP critical limits; an
+ * absent bound is open, never zero — the qm reading semantics).
+ * @param point - the active mfg_ccp_points row.
+ * @param value - the measured value.
+ * @returns whether the reading deviates.
+ */
+export function ccpDeviationOf(point: Record<string, any>, value: number): boolean {
+  const min = point.cl_min === null || point.cl_min === undefined ? null : Number(point.cl_min)
+  const max = point.cl_max === null || point.cl_max === undefined ? null : Number(point.cl_max)
+  if (!Number.isFinite(value)) throw new HttpError(400, 'CCP 实测值需为有限数')
+  if (min !== null && value < min) return true
+  if (max !== null && value > max) return true
+  return false
+}
+
+/** Parse psql's pipe-separated output into keyed rows (the impact lists' shared shape). */
+function psqlRows(sql: string, keys: readonly string[], psql: (sql: string) => string): Array<Record<string, any>> {
+  return psql(sql).split('\n').map(line => line.trim()).filter(line => line !== '').map(line => {
+    const cells = line.split('|')
+    const row: Record<string, any> = {}
+    keys.forEach((key, index) => {
+      const cell = cells[index] ?? ''
+      row[key] = cell === '' || cell === '\\N' ? null : cell
+    })
+    return row
+  })
+}
+
+/**
+ * The ECO impact snapshot (the differentiation panel): in-production MOs still
+ * riding the from-BOM, the product's FG lots produced under it, and the
+ * undelivered SOs reachable either through so_order_lines or the B3 trace
+ * closure (v_trace_edges) — computed once at /eco/create and frozen onto the
+ * row the PLM console renders.
+ * @param psql - the engine's psql runner.
+ * @param fromBomId - the BOM row the ECO retires.
+ * @param productId - the recipe's product.
+ * @returns the three lists the impact panel shows.
+ */
+export function ecoImpactOf(psql: (sql: string) => string, fromBomId: number, productId: number): Record<string, unknown> {
+  const mos = psqlRows(`SELECT id, code, doc_status, qty FROM mfg_orders WHERE bom_id = ${String(fromBomId)} AND doc_status IN ('approved', 'released', 'in_progress') ORDER BY id;`, ['id', 'code', 'doc_status', 'qty'], psql)
+  const lots = psqlRows(`SELECT DISTINCT l.lot_no, l.production_date, l.status FROM wms_lots l
+JOIN mfg_completions c ON c.lot_no = l.lot_no
+JOIN mfg_orders o ON o.id = c.mo_id
+WHERE o.bom_id = ${String(fromBomId)} AND l.product_id = ${String(productId)} ORDER BY 1;`, ['lot_no', 'production_date', 'status'], psql)
+  const byLines = psqlRows(`SELECT DISTINCT s.id, s.code, s.doc_status, s.shipping_status FROM so_orders s
+JOIN so_order_lines l ON l.order_id = s.id
+WHERE l.product_id = ${String(productId)} AND COALESCE(s.shipping_status, '') <> 'shipped';`, ['id', 'code', 'doc_status', 'shipping_status'], psql)
+  const byTrace = psqlRows(`WITH RECURSIVE closure(node_key, depth) AS (
+  SELECT 'lot:' || l.id::text, 0 FROM wms_lots l
+  JOIN mfg_completions c ON c.lot_no = l.lot_no
+  JOIN mfg_orders o ON o.id = c.mo_id WHERE o.bom_id = ${String(fromBomId)}
+  UNION
+  SELECT e.to_key, closure.depth + 1 FROM v_trace_edges e JOIN closure ON e.from_key = closure.node_key WHERE closure.depth < 32
+)
+SELECT DISTINCT s.id, s.code, s.doc_status, s.shipping_status FROM so_orders s
+WHERE 'so:' || s.id::text IN (SELECT node_key FROM closure) AND COALESCE(s.shipping_status, '') <> 'shipped';`, ['id', 'code', 'doc_status', 'shipping_status'], psql)
+  const soSeen = new Map<string, Record<string, any>>()
+  for (const row of [...byLines, ...byTrace]) {
+    const code = String(row.code)
+    if (!soSeen.has(code)) soSeen.set(code, { code, doc_status: row.doc_status, shipping_status: row.shipping_status ?? '' })
+  }
+  return {
+    in_progress_mos: mos.map(row => ({ code: row.code, doc_status: row.doc_status, qty: Number(row.qty) })),
+    fg_lots: lots.map(row => ({ lot_no: row.lot_no, production_date: row.production_date, status: row.status })),
+    undelivered_sos: [...soSeen.values()],
+  }
+}
+
+/**
+ * Apply one approved ECO (the effectiveEffects hook): the version pair
+ * switches in one psql call — every current default for the product steps
+ * down, the to-BOM becomes the active default, the from-BOM retires — and the
+ * ECO row is stamped. In-production MOs keep their bom_id untouched (version
+ * snapshot semantics). Idempotent: an already-active to-BOM is a no-op.
+ * @param token - the root API token.
+ * @param docId - the mfg_ecos row id.
+ * @returns the switch outcome for the engine's response envelope.
+ */
+async function applyEco(token: string, docId: number): Promise<Record<string, unknown>> {
+  const io = new RestIO(token)
+  const eco = await io.get('mfg_ecos', docId)
+  if (eco === undefined) throw new Error(`ECO #${String(docId)} 不存在`)
+  const toBom = await io.get('mfg_boms', Number(eco.to_bom_id))
+  const fromBom = await io.get('mfg_boms', Number(eco.from_bom_id))
+  if (toBom === undefined || fromBom === undefined) throw new Error(`ECO ${String(eco.code)} 的版本对不完整（from=${String(eco.from_bom_id)} to=${String(eco.to_bom_id)}）`)
+  if (String(toBom.bom_status) === 'active') {
+    return { already_applied: true, from_code: String(fromBom.code), to_code: String(toBom.code) }
+  }
+  const psql = psqlRunner()
+  psql(`UPDATE mfg_boms SET is_default = FALSE WHERE product_id = ${String(Number(toBom.product_id))} AND is_default = TRUE;
+UPDATE mfg_boms SET bom_status = 'active', is_default = TRUE WHERE id = ${String(Number(toBom.id))};
+UPDATE mfg_boms SET bom_status = 'retired', is_default = FALSE WHERE id = ${String(Number(fromBom.id))};`)
+  await io.update('mfg_ecos', docId, { effective_at: today(), note: `${String(eco.note ?? '').trimEnd()}\n${new Date().toISOString()} w6b4 applyEco: v${String(fromBom.version)}→v${String(toBom.version)} 切换生效（在产 MO 保持 v${String(fromBom.version)} 快照）`.trim() })
+  return { switched: true, from_code: String(fromBom.code), from_version: Number(fromBom.version), to_code: String(toBom.code), to_version: Number(toBom.version), product_id: Number(toBom.product_id) }
 }
 
 // ─── W5-B0: the visual designer surface (graph editing state only) ───
@@ -1549,6 +1766,12 @@ const DESIGNER_STATIC_FILES: Readonly<Record<string, string>> = {
   'index.html': 'text/html; charset=utf-8',
   'designer.js': 'text/javascript; charset=utf-8',
   'designer.css': 'text/css; charset=utf-8',
+}
+
+/** The labels SPA's static-file whitelist (files served from ../labels/dist/ + ../labels/index.html). */
+const LABELS_STATIC_FILES: Readonly<Record<string, string>> = {
+  'index.html': 'text/html; charset=utf-8',
+  'labels.js': 'text/javascript; charset=utf-8',
 }
 
 const GRAPH_NODE_KINDS: ReadonlySet<string> = new Set(['start', 'approval', 'cc', 'condition', 'end'])
@@ -2847,6 +3070,79 @@ export async function ensureTodoKindColumn(token: string): Promise<void> {
 }
 
 /**
+ * Idempotently add the W6-B1 effect-backlog collection: the durable
+ * compensation queue a harness-side nb_approve lands on when the engine's
+ * /effective-effects call fails (engine down or hook error — the hooks are
+ * idempotent, so replay is safe). The serve loop drains it automatically;
+ * rows go pending → done, or failed after BACKLOG_MAX_ATTEMPTS tries.
+ * @param token - a root auth token for the collection-manager API.
+ */
+export async function ensureEffectBacklogCollection(token: string): Promise<void> {
+  const present = await dataOf(token, 'GET', '/api/collections/wfl_effect_backlog')
+    .then(row => (row as { name?: string } | null)?.name === 'wfl_effect_backlog')
+    .catch(() => false)
+  if (present) return
+  await dataOf(token, 'POST', '/api/collections:create', {
+    name: 'wfl_effect_backlog', title: '生效钩子补偿队列',
+    fields: [
+      { name: 'doc_type', type: 'string', interface: 'input', uiSchema: { type: 'string', title: '单据集合' } },
+      { name: 'doc_id', type: 'bigInt', interface: 'integer', uiSchema: { type: 'number', title: '单据ID' } },
+      { name: 'code', type: 'string', interface: 'input', uiSchema: { type: 'string', title: '单据编号' } },
+      { name: 'reason', type: 'text', interface: 'textarea', uiSchema: { type: 'string', title: '失败原因' } },
+      { name: 'status', type: 'string', interface: 'select', uiSchema: { type: 'string', 'x-component': 'Select', title: '状态', enum: ['pending', 'done', 'failed'] } },
+      { name: 'attempts', type: 'integer', interface: 'integer', uiSchema: { type: 'number', title: '重放次数' } },
+    ],
+  })
+  console.log('approval-engine: wfl_effect_backlog collection added (W6-B1 effect compensation queue)')
+}
+
+/** One backlog drain pass's outcome (the serve loop and /run-nightly share it). */
+export interface BacklogDrain { readonly replayed: number; readonly done: number; readonly failed: number }
+
+/** A pending backlog row gives up (status → failed) after this many replays. */
+const BACKLOG_MAX_ATTEMPTS = 10
+
+/**
+ * Drain the W6-B1 effect-backlog queue once: every pending row replays
+ * through effectiveEffects() (idempotent), landing done on success; a failure
+ * bumps attempts and re-pends for the next pass, giving up to failed at
+ * BACKLOG_MAX_ATTEMPTS. The queue lives in NocoBase, so it survives engine
+ * restarts — kill the engine, harness acts land rows, restart, and this loop
+ * replays them without anyone curling by hand.
+ * @param token - the root API token (effectiveEffects's NocoBase transport).
+ * @returns the pass counts.
+ */
+export async function drainEffectBacklog(token: string): Promise<BacklogDrain> {
+  const io = await restIO()
+  const rows = await io.list('wfl_effect_backlog', { status: 'pending' })
+  let done = 0
+  let failed = 0
+  for (const row of rows) {
+    const docType = String(row.doc_type ?? '')
+    const docId = Number(row.doc_id)
+    const code = String(row.code ?? '') === '' ? String(docId) : String(row.code)
+    const attempts = Number(row.attempts ?? 0)
+    try {
+      const effects = await effectiveEffects(token, docType, docId, code)
+      if (effects === null) throw new Error('effectiveEffects returned null')
+      await io.update('wfl_effect_backlog', Number(row.id), { status: 'done' })
+      done += 1
+      console.log(`approval-engine: backlog replay ok — ${docType}#${String(docId)} (${code})`)
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : String(error)
+      if (attempts + 1 >= BACKLOG_MAX_ATTEMPTS) {
+        await io.update('wfl_effect_backlog', Number(row.id), { status: 'failed', attempts: attempts + 1, reason })
+        failed += 1
+        console.error(`approval-engine: backlog replay gave up — ${docType}#${String(docId)} after ${String(attempts + 1)} tries: ${reason}`)
+      } else {
+        await io.update('wfl_effect_backlog', Number(row.id), { attempts: attempts + 1, reason })
+      }
+    }
+  }
+  return { replayed: rows.length, done, failed }
+}
+
+/**
  * The single effective-effect exit (W5-B2, BP-02): the transitions whose
  * effective landing owes a downstream hook. The CLI --act, POST /act, POST
  * /effective-effects, and the delegated nb_approve tool all reach these
@@ -2861,6 +3157,9 @@ export async function effectiveEffects(token: string, docType: string, docId: nu
   if (docType === 'so_orders') {
     const { reserveForSo } = await import('./mrp-run.mts')
     return { reservation: await reserveForSo(token, code) }
+  }
+  if (docType === 'mfg_ecos') {
+    return { eco: await applyEco(token, docId) }
   }
   if (docType === 'mps_plans') {
     const { recalcPlan } = await import('./mrp-run.mts')
@@ -2999,6 +3298,42 @@ export async function runNightlySteps(token: string, trigger: 'timer' | 'manual'
         return `date=${result.date} rows=${String(result.rows)} valued=${String(result.valued)}`
       },
     },
+    {
+      // W6-B1 (G7): the lakehouse refresh — the NocoBase business tables land
+      // as full-replace Parquet snapshots through the same lakehouse.load seam
+      // seed-lakehouse rides, so the agent's statistics answers stop drifting
+      // behind the last manual transfer.
+      name: 'lakehouse-transfer',
+      run: async () => {
+        const transfer = await import('./w6b1-lakehouse-transfer.mts')
+        return await transfer.runNocobaseTransfer(token)
+      },
+    },
+    {
+      // W6-B1 (G8): the effect-backlog drain rides the nightly pass too — a
+      // long engine outage outlives the 30s serve loop's gaps only in exotic
+      // cases, but the explicit leg keeps the queue observable in the nightly
+      // summary line.
+      name: 'drain-backlog',
+      run: async () => {
+        const drained = await drainEffectBacklog(token)
+        return `replayed=${String(drained.replayed)} done=${String(drained.done)} failed=${String(drained.failed)}`
+      },
+    },
+    {
+      // W6-B2: the alert scan rides the nightly pass as a floor — the hourly
+      // serve loop is the primary cadence, and this leg keeps the four rules'
+      // coverage observable in the nightly summary line (an unseeded
+      // alert_rules reports the missing baseline instead of silently no-op).
+      name: 'scan-alerts',
+      run: async () => {
+        const rules = await import('./w6b2-rules.mts')
+        const seeded = Number(psqlRunner()('SELECT count(*) FROM alert_rules;').trim())
+        if (seeded === 0) throw new Error('alert_rules 为空——先跑 w6b2-rules.mts --seed')
+        const outcome = await rules.scanAlerts()
+        return outcome.rules.map(rule => `${rule.rule}+${String(rule.created)}/-${String(rule.resolved)}`).join(' ') + ` notified=${String(outcome.notified)}`
+      },
+    },
     ...(quarterStart ? [{
       name: 'calc-scorecard',
       run: async (): Promise<string> => {
@@ -3046,6 +3381,9 @@ export async function serve(port = 13_110): Promise<void> {
   const wmsToken = await signInWithRetry()
   await ensureGraphColumns(wmsToken)
   await ensureTodoKindColumn(wmsToken)
+  // W6-B1 (G8): the effect compensation queue's collection must exist before
+  // the harness-side tools start landing rows on it.
+  await ensureEffectBacklogCollection(wmsToken)
   // W5-R1: rows that predate the graph column carry graph_version NULL — in
   // SQL a NULL never equals any CAS baseline, so both same-instant saves
   // would 409 against a fresh row. Backfill 0 once per serve start (one SQL
@@ -3058,7 +3396,17 @@ export async function serve(port = 13_110): Promise<void> {
       try {
         const url = new URL(request.url ?? '/', 'http://127.0.0.1')
         if (request.method === 'GET' && url.pathname === '/healthz') {
-          return writeJson(response, 200, { ok: true })
+          // W6-B1 (G8): the health check also reports the effect-backlog
+          // depth, so a monitor can tell "engine up, hooks caught up" from
+          // "engine up, replays still pending". W6-R2 adds the alert-scan
+          // pointers (last completed pass + rules it lost) so a stalled
+          // scanner is discoverable without the logs.
+          const backlog = await io.list('wfl_effect_backlog', { status: 'pending' }).catch(() => [])
+          const rules = await import('./w6b2-rules.mts')
+          return writeJson(response, 200, {
+            ok: true, backlog_pending: backlog.length,
+            last_scan_at: rules.scanState.lastScanAt, last_scan_failures: rules.scanState.lastScanFailures,
+          })
         }
         if (request.method === 'GET' && url.pathname === '/todos') {
           const user = url.searchParams.get('user') ?? undefined
@@ -3117,6 +3465,583 @@ export async function serve(port = 13_110): Promise<void> {
           const outcome = await runNightlySteps(wmsToken, 'manual', nightly)
           return writeJson(response, 200, { ok: outcome.steps.every(step => step.ok), trigger: 'manual', steps: outcome.steps })
         }
+        if (request.method === 'POST' && url.pathname === '/scan-alerts') {
+          // W6-B2: one manual alert-scan pass — the same scanAlerts the
+          // hourly loop and the nightly leg run (idempotent: a repeat pass
+          // creates and notifies nothing). W6-R2: per-rule failures ride the
+          // response (ok stays true — one bad rule never aborts the pass).
+          const rules = await import('./w6b2-rules.mts')
+          const outcome = await rules.scanAlerts()
+          return writeJson(response, 200, { ok: true, rules: outcome.rules, notified: outcome.notified, failures: outcome.failures })
+        }
+        // W6-R5: the cockpit's alert digest claims straight from the browser
+        // (cross-origin like every other JSBlock channel) — the preflight
+        // half of the R4 CORS lesson this route never needed until now.
+        if (request.method === 'OPTIONS' && url.pathname === '/alerts/act') {
+          response.writeHead(204, { ...RECALL_CORS, 'access-control-max-age': '600' })
+          response.end()
+          return
+        }
+        if (request.method === 'POST' && url.pathname === '/alerts/act') {
+          // W6-B2: the handling-action channel — claim/ack/resolve with the
+          // routed-user whitelist and the open→acknowledged→resolved flow the
+          // w6b2 module owns; zero rows moved answers 403 with the refusal
+          // fact (never a silent no-op on the read-back path).
+          const body = await readBody(request)
+          const id = Number(body['id'])
+          const action = body['action']
+          const user = typeof body['user'] === 'string' && body['user'] !== '' ? body['user'] : ''
+          const note = typeof body['note'] === 'string' ? body['note'] : ''
+          const intentId = Number(body['intent_record_id'])
+          if (!Number.isInteger(id) || id < 1) return writeJson(response, 400, { ok: false, error: '需要正整数 id' })
+          if (action !== 'claim' && action !== 'ack' && action !== 'resolve') {
+            return writeJson(response, 400, { ok: false, error: `action 仅接受 claim/ack/resolve（收到 ${String(action)}）` })
+          }
+          if (user === '') return writeJson(response, 400, { ok: false, error: '需要 user（当前身份）' })
+          const rules = await import('./w6b2-rules.mts')
+          const moved = rules.actOnAlert(id, action, user, note)
+          if (moved === 0) {
+            return writeJson(response, 403, { ok: false, error: `动作被拒（id=${String(id)} ${String(action)} by ${user}）——不在路由责任人白名单或状态流不匹配（认领→关闭）` })
+          }
+          // The PC intent row (the wfl_alert_acts workflow callback) is spent:
+          // consumed on success so the table only ever holds live intents. A
+          // missing row at this point only means a manual (non-workflow) call.
+          if (Number.isInteger(intentId) && intentId > 0) {
+            try {
+              await io.destroy('wfl_alert_acts', intentId)
+            } catch {
+              // The intent row may already be consumed; the act itself succeeded.
+            }
+          }
+          return writeJson(response, 200, { ok: true, id, action, user, moved }, RECALL_CORS)
+        }
+        // W6-B3: the food-compliance label + recall surface. /labels serves
+        // the SPA (same committed-bundle posture as /designer), /label/lots.json
+        // the picker list, /label/lot.svg one lot's barcode through the shared
+        // zero-dependency encoder (labels/src/code128.ts), and /recall/create +
+        // /recall/act the recall order lifecycle (the w6b3-recall module owns
+        // the whitelist, the frozen scope and the transition table — the CLI
+        // is the same functions' third entry).
+        // W6-B5: the QMS inspection workbench surface. /insp serves the SPA
+        // (the labels committed-bundle posture), /insp/queue.json the grouped
+        // pending queue, /insp/plan.json the sampling-plan lookup riding the
+        // W2 qm_aql_plans seed verbatim, /insp/submit the idempotent verdict,
+        // /insp/dispose the four-way NC decision, and /insp/report(+/issue)
+        // the nine-element factory report. Writes are fenced to 质检部+admin
+        // (the session-derived actor; the ECO gate pattern); reads need any
+        // platform session.
+        if (url.pathname === '/insp' || url.pathname.startsWith('/insp/')) {
+          const inspServer = await import('../insp/src/server.ts')
+          const assertQualityActor = async (): Promise<string> => {
+            const actor = await recallActor(request)
+            if (actor === 'admin') return actor
+            const allowed = await departmentUsernames(io, '质检部', 'W6-B5 检验工作台')
+            if (!allowed.includes(actor)) {
+              throw new HttpError(403, `检验写操作限 质检部/admin（${actor} 不在围栏内——角色矩阵）`)
+            }
+            return actor
+          }
+          if (request.method === 'GET' && (url.pathname === '/insp' || url.pathname === '/insp/')) {
+            const file = await readFile(fileURLToPath(new URL('../insp/index.html', import.meta.url)))
+            response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' })
+            response.end(file)
+            return
+          }
+          if (request.method === 'GET' && url.pathname === '/insp/dist/insp.js') {
+            const file = await readFile(fileURLToPath(new URL('../insp/dist/insp.js', import.meta.url)))
+            response.writeHead(200, { 'content-type': 'application/javascript; charset=utf-8' })
+            response.end(file)
+            return
+          }
+          if (request.method === 'GET' && url.pathname === '/insp/queue.json') {
+            const operator = await recallActor(request)
+            const members = await departmentUsernames(io, '质检部', 'W6-B5 检验工作台')
+            return writeJson(response, 200, { ok: true, operator, ...inspServer.inspQueue(), quality_members: members })
+          }
+          if (request.method === 'GET' && url.pathname === '/insp/plan.json') {
+            await recallActor(request)
+            const lotQty = Number(url.searchParams.get('lot_qty') ?? '0')
+            const aql = url.searchParams.get('aql') ?? '2.5'
+            const inspType = url.searchParams.get('insp_type') ?? ''
+            const supplierName = url.searchParams.get('supplier_name') ?? ''
+            let supplierId: number | null = null
+            if (supplierName !== '') {
+              const supplier = (await io.list('srm_suppliers')).find(row => String(row.name ?? '') === supplierName)
+              supplierId = supplier === undefined ? null : Number(supplier.id)
+            }
+            return writeJson(response, 200, { ok: true, plan: inspServer.inspPlan(lotQty, aql, inspType, supplierId) })
+          }
+          if (request.method === 'POST' && url.pathname === '/insp/submit') {
+            const body = await readBody(request)
+            const actor = await assertQualityActor()
+            const code = typeof body['code'] === 'string' ? body['code'] : ''
+            const aql = typeof body['aql'] === 'string' ? body['aql'] : '2.5'
+            const submitKey = typeof body['submit_key'] === 'string' ? body['submit_key'] : ''
+            const confirmOver = body['confirm_over'] === true
+            const photoEvidence = typeof body['photo_evidence'] === 'string' ? body['photo_evidence'].slice(0, 400_000) : ''
+            const rawReadings = Array.isArray(body['readings']) ? body['readings'] as Array<Record<string, unknown>> : []
+            const readings = rawReadings.map(raw => ({
+              parameter: String(raw['parameter'] ?? ''),
+              spec_min: raw['spec_min'] === null || raw['spec_min'] === undefined || raw['spec_min'] === '' ? null : Number(raw['spec_min']),
+              spec_max: raw['spec_max'] === null || raw['spec_max'] === undefined || raw['spec_max'] === '' ? null : Number(raw['spec_max']),
+              criteria: raw['criteria'] === null || raw['criteria'] === undefined || raw['criteria'] === '' ? null : String(raw['criteria']),
+              actual: raw['actual'] === null || raw['actual'] === undefined || raw['actual'] === '' ? null : Number(raw['actual']),
+              pass: raw['pass'] === true,
+              defect_class: raw['defect_class'] === 'critical' || raw['defect_class'] === 'minor' ? raw['defect_class'] : 'major',
+            }))
+            const outcome = await inspServer.inspSubmit(wmsToken, actor, code, aql, readings, submitKey, confirmOver, photoEvidence)
+            return writeJson(response, 200, { ok: true, ...outcome })
+          }
+          if (request.method === 'POST' && url.pathname === '/insp/dispose') {
+            const body = await readBody(request)
+            const actor = await assertQualityActor()
+            const code = typeof body['code'] === 'string' ? body['code'] : ''
+            const action = typeof body['action'] === 'string' ? body['action'] : ''
+            const reason = typeof body['reason'] === 'string' ? body['reason'].slice(0, 400) : ''
+            const deviationNote = typeof body['deviation_note'] === 'string' ? body['deviation_note'].slice(0, 400) : ''
+            const approver = typeof body['approver'] === 'string' ? body['approver'].slice(0, 80) : ''
+            const outcome = await inspServer.inspDispose(wmsToken, actor, code, action, reason, deviationNote, approver)
+            return writeJson(response, 200, { ok: true, ...outcome })
+          }
+          if (request.method === 'GET' && url.pathname === '/insp/report') {
+            const urlToken = url.searchParams.get('token') ?? ''
+            const header = request.headers.authorization
+            const bearer = Array.isArray(header) ? header[0] : header
+            if ((bearer?.startsWith('Bearer ') === true ? bearer.slice('Bearer '.length) : '') !== '') {
+              await recallActor(request)
+            } else if (urlToken !== '') {
+              const me = await call(urlToken, 'GET', '/api/auth:check').catch(() => null)
+              if (typeof me?.data?.username !== 'string' || me.data.username === '') {
+                throw new HttpError(401, '报告需要平台会话（authorization: Bearer 或 ?token=）')
+              }
+            } else {
+              throw new HttpError(401, '报告需要平台会话（authorization: Bearer 或 ?token=）')
+            }
+            const code = url.searchParams.get('code') ?? ''
+            if (code === '') throw new HttpError(400, '需要 code 查询参数（检验单号）')
+            response.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' })
+            response.end(inspServer.inspReportHtml(code))
+            return
+          }
+          if (request.method === 'POST' && url.pathname === '/insp/report/issue') {
+            const body = await readBody(request)
+            await assertQualityActor()
+            const code = typeof body['code'] === 'string' ? body['code'] : ''
+            const reviewer = typeof body['reviewer'] === 'string' ? body['reviewer'].slice(0, 80) : ''
+            const members = await departmentUsernames(io, '质检部', 'W6-B5 检验工作台')
+            const outcome = inspServer.inspReportIssue(wmsToken, code, reviewer, members)
+            return writeJson(response, 200, { ok: true, ...outcome })
+          }
+          throw new HttpError(404, `no insp route ${request.method} ${url.pathname}`)
+        }
+        // W6-B6: the CRM activation surface. /crm serves the SPA (the insp
+        // committed-bundle posture), /crm/pipe.json the stage board (cards +
+        // per-column amount sums + the probability-weighted total),
+        // /crm/move the drag write-back (stage+probability+status+audit),
+        // /crm/customers.json + /crm/customer.json the customer-360
+        // aggregate (orders/quotes/AR on the ar_overdue口径/timeline),
+        // /crm/quotes.json + /crm/products.json the转单 lists, and
+        // /crm/quote-to-so the server-numbered quote→SO conversion (draft +
+        // the so_orders approval flow when configured). Writes are fenced to
+        // 销售部+admin (the session-derived actor); reads need any platform
+        // session.
+        if (url.pathname === '/crm' || url.pathname.startsWith('/crm/')) {
+          const crmServer = await import('../crm/src/server.ts')
+          const assertSalesActor = async (): Promise<string> => {
+            const actor = await recallActor(request)
+            // admin is the engine's operator account, nocobase the platform
+            // root (Super Admin) — both sit above the department fence.
+            if (actor === 'admin' || actor === 'nocobase') return actor
+            const allowed = await departmentUsernames(io, '销售部', 'W6-B6 CRM 工作台')
+            if (!allowed.includes(actor)) {
+              throw new HttpError(403, `CRM 写操作限 销售部/admin（${actor} 不在围栏内——角色矩阵）`)
+            }
+            return actor
+          }
+          if (request.method === 'GET' && (url.pathname === '/crm' || url.pathname === '/crm/')) {
+            const file = await readFile(fileURLToPath(new URL('../crm/index.html', import.meta.url)))
+            response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' })
+            response.end(file)
+            return
+          }
+          if (request.method === 'GET' && url.pathname === '/crm/dist/crm.js') {
+            const file = await readFile(fileURLToPath(new URL('../crm/dist/crm.js', import.meta.url)))
+            response.writeHead(200, { 'content-type': 'application/javascript; charset=utf-8' })
+            response.end(file)
+            return
+          }
+          if (request.method === 'GET' && url.pathname === '/crm/pipe.json') {
+            const operator = await recallActor(request)
+            return writeJson(response, 200, { ok: true, operator, ...crmServer.crmPipe() })
+          }
+          if (request.method === 'POST' && url.pathname === '/crm/move') {
+            const body = await readBody(request)
+            const actor = await assertSalesActor()
+            const dealId = Number(body['deal_id'])
+            const toStage = typeof body['to_stage'] === 'string' ? body['to_stage'] : ''
+            const move = crmServer.crmMove(actor, dealId, toStage)
+            return writeJson(response, 200, { ok: true, actor, ...move })
+          }
+          if (request.method === 'GET' && url.pathname === '/crm/customers.json') {
+            await recallActor(request)
+            return writeJson(response, 200, { ok: true, customers: crmServer.crmCustomers() })
+          }
+          if (request.method === 'GET' && url.pathname === '/crm/customer.json') {
+            await recallActor(request)
+            const id = Number(url.searchParams.get('id') ?? '0')
+            return writeJson(response, 200, { ok: true, ...crmServer.crmCustomer(id) })
+          }
+          if (request.method === 'GET' && url.pathname === '/crm/quotes.json') {
+            await recallActor(request)
+            return writeJson(response, 200, { ok: true, quotes: crmServer.crmQuotes() })
+          }
+          if (request.method === 'GET' && url.pathname === '/crm/products.json') {
+            await recallActor(request)
+            return writeJson(response, 200, { ok: true, products: crmServer.crmProducts() })
+          }
+          if (request.method === 'POST' && url.pathname === '/crm/quote-to-so') {
+            const body = await readBody(request)
+            const actor = await assertSalesActor()
+            const quoteId = Number(body['quote_id'])
+            const needDate = typeof body['need_date'] === 'string' ? body['need_date'].slice(0, 10) : ''
+            const rawLines = Array.isArray(body['lines']) ? body['lines'] as Array<Record<string, unknown>> : []
+            const lines = rawLines.map(raw => ({
+              product_id: Number(raw['product_id']), qty: Number(raw['qty']), unit_price: Number(raw['unit_price']),
+            })).filter(line => line.qty > 0)
+            const outcome = crmServer.crmQuoteToSo(actor, quoteId, needDate, lines)
+            let submittedTo: string | undefined
+            let submitNote: string | undefined
+            if (!outcome.refused && outcome.so_id !== undefined) {
+              try {
+                const submitted = await submitForApproval(io, 'so_orders', outcome.so_id, actor)
+                submittedTo = submitted.to_state
+              } catch (error) {
+                submitNote = `审批流未走（${(error as Error).message}）——销售订单保留草稿`
+              }
+            }
+            return writeJson(response, 200, { ok: true, actor, ...outcome, ...(submittedTo === undefined ? {} : { submitted_to: submittedTo }), ...(submitNote === undefined ? {} : { submit_note: submitNote }) })
+          }
+          throw new HttpError(404, `no crm route ${request.method} ${url.pathname}`)
+        }
+        // W6-R3: the recall/label surface is cross-origin from the NocoBase
+        // pages — answer the authorization/content-type preflight up front.
+        if (request.method === 'OPTIONS' && (url.pathname.startsWith('/recall/') || url.pathname.startsWith('/label/'))) {
+          response.writeHead(204, { ...RECALL_CORS, 'access-control-max-age': '600' })
+          response.end()
+          return
+        }
+        if (url.pathname === '/labels' || url.pathname.startsWith('/labels/') || url.pathname === '/label/lots.json' || url.pathname === '/label/lot.svg' || url.pathname === '/recall/create' || url.pathname === '/recall/act' || url.pathname === '/recall/scope') {
+          const labelsServer = await import('../labels/src/server.ts')
+          if (request.method === 'GET' && (url.pathname === '/labels' || url.pathname.startsWith('/labels/'))) {
+            const name = url.pathname === '/labels' ? 'index.html' : url.pathname.slice('/labels/'.length)
+            const contentType = LABELS_STATIC_FILES[name]
+            if (contentType === undefined) throw new HttpError(404, `no labels file ${url.pathname}`)
+            const file = name === 'index.html'
+              ? await readFile(fileURLToPath(new URL('../labels/index.html', import.meta.url)))
+              : await readFile(fileURLToPath(new URL(`../labels/dist/${name}`, import.meta.url)))
+            response.writeHead(200, { 'content-type': contentType })
+            response.end(file)
+            return
+          }
+          if (request.method === 'GET' && url.pathname === '/label/lots.json') {
+            return writeJson(response, 200, { lots: labelsServer.labelLots() }, RECALL_CORS)
+          }
+          if (request.method === 'GET' && url.pathname === '/label/lot.svg') {
+            const lotNo = url.searchParams.get('lot_no') ?? ''
+            const code = url.searchParams.get('code') === 'plain' ? 'plain' : 'gs1'
+            const size = url.searchParams.get('size') === '50x30' ? '50x30' : '100x50'
+            if (lotNo === '') throw new HttpError(400, '需要 lot_no 查询参数')
+            const svg = labelsServer.lotLabelSvg(lotNo, code, size)
+            response.writeHead(200, { 'content-type': 'image/svg+xml; charset=utf-8', 'cache-control': 'no-store' })
+            response.end(svg)
+            return
+          }
+          if (request.method === 'GET' && url.pathname === '/recall/scope') {
+            await recallActor(request)
+            const lotNo = url.searchParams.get('lot_no') ?? ''
+            if (lotNo === '') return writeJson(response, 400, { ok: false, error: '需要 lot_no 查询参数' }, RECALL_CORS)
+            const recall = await import('./w6b3-recall.mts')
+            return writeJson(response, 200, { ok: true, scope: recall.computeRecallScope(lotNo) }, RECALL_CORS)
+          }
+          if (request.method === 'POST' && url.pathname === '/recall/create') {
+            // W6-R3 P0-4: the actor is credential-derived (the session's
+            // users:me username); a self-reported body actor that disagrees
+            // with the session is refused, the admin fallback is gone.
+            const body = await readBody(request)
+            const lotNo = typeof body['lot_no'] === 'string' ? body['lot_no'] : ''
+            const reason = typeof body['reason'] === 'string' ? body['reason'] : ''
+            const owner = typeof body['owner'] === 'string' ? body['owner'] : ''
+            const dueDate = typeof body['due_date'] === 'string' ? body['due_date'] : ''
+            const claimedActor = typeof body['actor'] === 'string' ? body['actor'] : ''
+            const actor = await recallActor(request)
+            if (claimedActor !== '' && claimedActor !== actor) {
+              console.error(`[recall] create refused identity claim: session=${actor} claimed=${claimedActor}`)
+              return writeJson(response, 403, { ok: false, error: `actor ${claimedActor} 与会话身份 ${actor} 不符——身份以会话推导为准` }, RECALL_CORS)
+            }
+            if (lotNo === '' || owner === '') return writeJson(response, 400, { ok: false, error: '需要 lot_no 与 owner' }, RECALL_CORS)
+            const recall = await import('./w6b3-recall.mts')
+            try {
+              const code = recall.createRecall(lotNo, reason, owner, dueDate, actor)
+              return writeJson(response, 200, { ok: true, code }, RECALL_CORS)
+            } catch (error) {
+              console.error(`[recall] create failed (actor=${actor} lot=${lotNo}): ${error instanceof Error ? (error.stack ?? error.message) : String(error)}`)
+              return writeJson(response, 403, { ok: false, error: error instanceof Error ? error.message : String(error) }, RECALL_CORS)
+            }
+          }
+          if (request.method === 'POST' && url.pathname === '/recall/act') {
+            const body = await readBody(request)
+            const code = typeof body['code'] === 'string' ? body['code'] : ''
+            const action = body['action']
+            const note = typeof body['note'] === 'string' ? body['note'] : ''
+            const claimedUser = typeof body['user'] === 'string' ? body['user'] : ''
+            const user = await recallActor(request)
+            if (claimedUser !== '' && claimedUser !== user) {
+              console.error(`[recall] act refused identity claim: session=${user} claimed=${claimedUser}`)
+              return writeJson(response, 403, { ok: false, error: `user ${claimedUser} 与会话身份 ${user} 不符——身份以会话推导为准` }, RECALL_CORS)
+            }
+            if (code === '' || !['notify', 'execute', 'close'].includes(String(action))) {
+              return writeJson(response, 400, { ok: false, error: '需要 code、action(notify|execute|close)' }, RECALL_CORS)
+            }
+            const recall = await import('./w6b3-recall.mts')
+            try {
+              const moved = recall.actRecall(code, action as 'notify' | 'execute' | 'close', user, note)
+              if (moved === 0) {
+                return writeJson(response, 403, { ok: false, error: `召回流转被拒（${code} ${String(action)} by ${user}）——状态机/责任人/关闭说明不满足` }, RECALL_CORS)
+              }
+              return writeJson(response, 200, { ok: true, code, action, user, moved }, RECALL_CORS)
+            } catch (error) {
+              console.error(`[recall] act failed (user=${user} code=${code} action=${String(action)}): ${error instanceof Error ? (error.stack ?? error.message) : String(error)}`)
+              return writeJson(response, 403, { ok: false, error: error instanceof Error ? error.message : String(error) }, RECALL_CORS)
+            }
+          }
+        }
+        // ─── W6-B4: ECO governance (cross-origin from the PLM console JSBlock) ───
+        if (request.method === 'OPTIONS' && (url.pathname === '/eco/create' || url.pathname === '/eco/submit')) {
+          response.writeHead(204, RECALL_CORS)
+          response.end()
+          return
+        }
+        if (url.pathname === '/eco/create' || url.pathname === '/eco/submit') {
+          if (request.method !== 'POST') throw new HttpError(405, `ECO 端点不接受 ${String(request.method)}`)
+          const body = await readBody(request)
+          const actor = await ecoActor(io, request)
+          if (url.pathname === '/eco/create') {
+            const productRow = body['product_id'] !== undefined
+              ? await io.get('hub_inv_products', Number(body['product_id']))
+              : (await io.list('hub_inv_products')).find(row => String(row.code) === String(body['product_code'] ?? ''))
+            if (productRow === undefined) throw new HttpError(400, '需要 product_id 或可识别的 product_code')
+            const productId = Number(productRow.id)
+            const fromBom = (await io.list('mfg_boms'))
+              .filter(row => Number(row.product_id) === productId && String(row.bom_status) === 'active' && row.is_default === true)
+              .sort((a, b) => Number(b.version) - Number(a.version))[0]
+            if (fromBom === undefined) throw new HttpError(400, `产品 #${String(productId)} 没有生效默认 BOM——先在配方版本页建立基线`)
+            const title = typeof body['title'] === 'string' && body['title'].trim() !== '' ? body['title'].trim().slice(0, 120) : ''
+            const reason = typeof body['reason'] === 'string' && body['reason'].trim() !== '' ? body['reason'].trim().slice(0, 800) : ''
+            if (title === '' || reason === '') throw new HttpError(400, 'ECO 需要 title 与 reason（变更原因必填）')
+            // line_changes validation: add/remove/update against real products.
+            const rawChanges = Array.isArray(body['line_changes']) ? body['line_changes'] as Array<Record<string, unknown>> : []
+            const products = await io.list('hub_inv_products')
+            const changes: Array<Record<string, unknown>> = []
+            for (const raw of rawChanges) {
+              const action = String(raw['action'] ?? '')
+              if (action !== 'add' && action !== 'remove' && action !== 'update') throw new HttpError(400, `line_changes.action 仅接受 add/remove/update（收到 ${action}）`)
+              const pid = Number(raw['product_id'])
+              if (!Number.isInteger(pid) || pid < 1 || !products.some(row => Number(row.id) === pid)) throw new HttpError(400, `line_changes 引用了不存在的产品行 ${String(raw['product_id'])}`)
+              if (action !== 'remove' && (!Number.isFinite(Number(raw['qty_per_unit'])) || Number(raw['qty_per_unit']) <= 0)) {
+                throw new HttpError(400, `line_changes（#${String(pid)}）需要正数 qty_per_unit`)
+              }
+              changes.push({ action, product_id: pid, qty_per_unit: Number(raw['qty_per_unit'] ?? 0), scrap_pct: Number(raw['scrap_pct'] ?? 0), uom: String(raw['uom'] ?? '') })
+            }
+            // The draft to-BOM: same version ladder +1, draft status, code = next numeric BOM slot.
+            const allBoms = await io.list('mfg_boms')
+            const nextVersion = 1 + allBoms.filter(row => Number(row.product_id) === productId).reduce((best, row) => Math.max(best, Number(row.version ?? 0)), 0)
+            const nextCode = `BOM-${String(1 + allBoms.reduce((best, row) => { const code = String(row.code ?? ''); return /^BOM-\d+$/u.test(code) ? Math.max(best, Number(code.slice(4))) : best }, 0)).padStart(4, '0')}`
+            const toBom = await io.create('mfg_boms', {
+              code: nextCode, version: nextVersion, is_default: false, bom_status: 'draft',
+              remark: `W6-B4 ECO 草稿版本（基线 ${String(fromBom.code)} v${String(fromBom.version)}）`, product: { id: productId },
+            })
+            const fromLines = (await io.list('mfg_bom_lines')).filter(row => Number(row.bom_id) === Number(fromBom.id))
+            const uomOf = new Map(products.map(row => [Number(row.id), String(row.uom ?? row.unit ?? '克')]))
+            const removed = new Set(changes.filter(change => change['action'] === 'remove').map(change => Number(change['product_id'])))
+            const applied: Array<Record<string, unknown>> = []
+            const clonedPids = new Set<number>()
+            for (const line of fromLines) {
+              if (removed.has(Number(line.product_id))) { applied.push({ action: 'remove', product_id: Number(line.product_id) }); continue }
+              clonedPids.add(Number(line.product_id))
+              const update = changes.find(change => change['action'] === 'update' && Number(change['product_id']) === Number(line.product_id))
+              await io.create('mfg_bom_lines', {
+                bom: { id: Number(toBom.id) }, product: { id: Number(line.product_id) },
+                qty_per_unit: update === undefined ? Number(line.qty_per_unit ?? 0) : Number(update['qty_per_unit']),
+                scrap_pct: update === undefined ? Number(line.scrap_pct ?? 0) : Number(update['scrap_pct'] ?? line.scrap_pct ?? 0),
+                uom: String(line.uom ?? uomOf.get(Number(line.product_id)) ?? ''),
+              })
+              if (update !== undefined) applied.push({ action: 'update', product_id: Number(line.product_id), qty_per_unit: Number(update['qty_per_unit']) })
+            }
+            for (const change of changes.filter(row => row['action'] === 'add')) {
+              // A repeated run must not duplicate the line: adding a product
+              // the from-version already carries is a mislabeled update.
+              if (clonedPids.has(Number(change['product_id']))) {
+                throw new HttpError(400, `line_changes add 被拒：产品 #${String(change['product_id'])} 已在基线版本行内——改用 action=update 调整用量`)
+              }
+              await io.create('mfg_bom_lines', {
+                bom: { id: Number(toBom.id) }, product: { id: Number(change['product_id']) },
+                qty_per_unit: Number(change['qty_per_unit']), scrap_pct: Number(change['scrap_pct'] ?? 0),
+                uom: String(change['uom'] ?? uomOf.get(Number(change['product_id'])) ?? ''),
+              })
+              applied.push({ action: 'add', product_id: Number(change['product_id']), qty_per_unit: Number(change['qty_per_unit']) })
+            }
+            for (const op of (await io.list('mfg_bom_operations')).filter(row => Number(row.bom_id) === Number(fromBom.id))) {
+              await io.create('mfg_bom_operations', {
+                bom: { id: Number(toBom.id) }, seq: Number(op.seq), name: String(op.name ?? ''),
+                setup_min: Number(op.setup_min ?? 0), run_min: Number(op.run_min ?? 0), batch_size: Number(op.batch_size ?? 0),
+                workcenter: { id: Number(op.workcenter_id) }, ...(op.alt_workcenter_id === null || op.alt_workcenter_id === undefined ? {} : { alt_workcenter: { id: Number(op.alt_workcenter_id) } }),
+              })
+            }
+            const impact = ecoImpactOf(psql, Number(fromBom.id), productId)
+            const ecoCode = await nextDocCode(io, 'mfg_ecos', 'ECO')
+            const eco = await io.create('mfg_ecos', {
+              code: ecoCode, title, reason, product_id: productId,
+              from_bom_id: Number(fromBom.id), to_bom_id: Number(toBom.id),
+              line_changes: JSON.stringify(changes), impact: JSON.stringify(impact),
+              doc_status: 'draft', requested_by: actor,
+              note: `W6-B4 /eco/create（${actor}）；基线 ${String(fromBom.code)} v${String(fromBom.version)} → 草稿 ${nextCode} v${String(nextVersion)}`,
+            })
+            return writeJson(response, 200, { ok: true, eco_code: ecoCode, eco_id: Number(eco.id), from_bom: String(fromBom.code), to_bom: nextCode, to_version: nextVersion, applied, impact, actor }, RECALL_CORS)
+          }
+          // /eco/submit
+          const ecoRow = (await io.list('mfg_ecos')).find(row => String(row.code) === String(body['eco_code'] ?? ''))
+          if (ecoRow === undefined) throw new HttpError(400, `找不到 ECO ${String(body['eco_code'] ?? '')}`)
+          if (String(ecoRow.doc_status) !== 'draft') throw new HttpError(400, `ECO ${String(ecoRow.code)} 状态为 ${String(ecoRow.doc_status)}——仅草稿可送审`)
+          const result = await submitForApproval(io, 'mfg_ecos', Number(ecoRow.id), actor)
+          let effects: Record<string, unknown> | null = null
+          if (result.effective) effects = await effectiveEffects(wmsToken, 'mfg_ecos', Number(ecoRow.id), String(ecoRow.code))
+          return writeJson(response, 200, { ok: true, eco_code: String(ecoRow.code), doc_status: String(result.to_state ?? ''), result, effects }, RECALL_CORS)
+        }
+        // ─── W6-B7: sourcing matrix + award (cross-origin from the 比价表 JSBlock) ───
+        if (request.method === 'OPTIONS' && url.pathname.startsWith('/sourcing/')) {
+          response.writeHead(204, RECALL_CORS)
+          response.end()
+          return
+        }
+        if (url.pathname.startsWith('/sourcing/')) {
+          const sourcing = await import('./w6b7-sourcing.mts')
+          if (request.method === 'GET') {
+            const actor = await recallActor(request)
+            // W6-R4 lesson 25: the matrix carries supplier pricing — reads are
+            // fenced to 采购部/admin/nocobase (sales/finance get a 403 with a
+            // CORS-visible body, same as the write fence refusals).
+            try {
+              await sourcing.assertSourcingReader(io, actor)
+            } catch (error) {
+              const message = error instanceof Error ? error.message : String(error)
+              return writeJson(response, 403, { ok: false, code: 'read_fenced', message, error: message }, RECALL_CORS)
+            }
+            const params: Record<string, unknown> = {}
+            for (const [key, value] of url.searchParams.entries()) params[key] = value
+            const out = await sourcing.sourcingRoute(io, url.pathname, 'GET', params, actor)
+            return writeJson(response, out.status, out.body, RECALL_CORS)
+          }
+          if (request.method !== 'POST') throw new HttpError(405, `sourcing 端点不接受 ${String(request.method)}`)
+          const body = await readBody(request)
+          const claimed = typeof body['actor'] === 'string' ? body['actor'] : ''
+          const actor = await recallActor(request)
+          if (claimed !== '' && claimed !== actor) {
+            console.error(`[sourcing] refused identity claim: session=${actor} claimed=${claimed}`)
+            return writeJson(response, 403, { ok: false, error: `actor ${claimed} 与会话身份 ${actor} 不符——身份以会话推导为准` }, RECALL_CORS)
+          }
+          try {
+            await sourcing.assertSourcingActor(io, actor)
+          } catch (error) {
+            return writeJson(response, 403, { ok: false, error: error instanceof Error ? error.message : String(error) }, RECALL_CORS)
+          }
+          const out = await sourcing.sourcingRoute(io, url.pathname, 'POST', body, actor)
+          return writeJson(response, out.status, out.body, RECALL_CORS)
+        }
+
+        // ─── W6-B8: EAM + APS (cross-origin from the 资产管理/生产与计划 JSBlocks) ───
+        if (request.method === 'OPTIONS' && (url.pathname.startsWith('/eam/') || url.pathname.startsWith('/aps/'))) {
+          response.writeHead(204, { ...RECALL_CORS, 'access-control-max-age': '600' })
+          response.end()
+          return
+        }
+        if (url.pathname.startsWith('/eam/') || url.pathname.startsWith('/aps/')) {
+          const actor = await recallActor(request)
+          if (request.method === 'GET') {
+            const params: Record<string, unknown> = {}
+            for (const [key, value] of url.searchParams.entries()) params[key] = value
+            const out = url.pathname.startsWith('/eam/')
+              ? await (await import('./w6b8-eam.mts')).eamRoute(io, url.pathname, 'GET', params, actor)
+              : await (await import('./w6b8-aps.mts')).apsRoute(io, url.pathname, 'GET', params, actor)
+            return writeJson(response, out.status, out.body, RECALL_CORS)
+          }
+          if (request.method !== 'POST') throw new HttpError(405, `eam/aps 端点不接受 ${String(request.method)}`)
+          const body = await readBody(request)
+          const out = url.pathname.startsWith('/eam/')
+            ? await (await import('./w6b8-eam.mts')).eamRoute(io, url.pathname, 'POST', body, actor)
+            : await (await import('./w6b8-aps.mts')).apsRoute(io, url.pathname, 'POST', body, actor)
+          return writeJson(response, out.status, out.body, RECALL_CORS)
+        }
+
+        // ─── W6-B9: the finance cockpit (cross-origin from the 经营总览 /
+        // 财务工作台 / 发票匹配 JSBlocks). GET /fin/cockpit takes any platform
+        // session (customer-dimension detail masks server-side for
+        // non-finance readers); every other GET runs the fin reader fence
+        // inside finRoute; POSTs add the session-identity claim check (the
+        // R3 posture — a self-reported actor that differs from the session
+        // is a 403 before any write). The statement print page answers HTML
+        // behind the same fence.
+        if (request.method === 'OPTIONS' && url.pathname.startsWith('/fin/')) {
+          response.writeHead(204, RECALL_CORS)
+          response.end()
+          return
+        }
+        if (url.pathname.startsWith('/fin/')) {
+          const fin = await import('./w6b9-cockpit.mts')
+          if (request.method === 'GET' && url.pathname === '/fin/statement/print') {
+            // The workbench opens this page in a new tab, which cannot carry
+            // the localStorage bearer — the query token (same browser, same
+            // session) is the fallback credential; the Authorization header
+            // stays the first choice.
+            if (url.searchParams.get('token') !== null && !request.headers.authorization) {
+              request.headers.authorization = `Bearer ${url.searchParams.get('token') ?? ''}`
+            }
+            const actor = await recallActor(request)
+            const statementNo = url.searchParams.get('statement_no') ?? ''
+            try {
+              const statement = fin.statementOf({ statement_no: statementNo })
+              if (statement === null) throw new HttpError(404, `对账单 ${statementNo} 不存在`)
+              if (actor !== 'admin' && actor !== 'finance' && actor !== 'nocobase') {
+                throw new HttpError(403, `对账单含价格信息，限 finance/admin 查看（${actor} 不在围栏内）`)
+              }
+            } catch (error) {
+              const message = error instanceof Error ? error.message : String(error)
+              const status = error instanceof HttpError ? error.status : 400
+              return writeJson(response, status, { ok: false, message, error: message }, RECALL_CORS)
+            }
+            const html = fin.statementHtml(statementNo)
+            response.writeHead(200, { ...RECALL_CORS, 'content-type': 'text/html; charset=utf-8' })
+            response.end(html)
+            return
+          }
+          if (request.method === 'GET') {
+            const actor = await recallActor(request)
+            const params: Record<string, unknown> = {}
+            for (const [key, value] of url.searchParams.entries()) params[key] = value
+            const out = await fin.finRoute(io, url.pathname, 'GET', params, actor)
+            return writeJson(response, out.status, out.body, RECALL_CORS)
+          }
+          if (request.method !== 'POST') throw new HttpError(405, `fin 端点不接受 ${String(request.method)}`)
+          const body = await readBody(request)
+          const claimed = typeof body['actor'] === 'string' ? body['actor'] : ''
+          const actor = await recallActor(request)
+          if (claimed !== '' && claimed !== actor) {
+            console.error(`[fin] refused identity claim: session=${actor} claimed=${claimed}`)
+            return writeJson(response, 403, { ok: false, error: `actor ${claimed} 与会话身份 ${actor} 不符——身份以会话推导为准` }, RECALL_CORS)
+          }
+          const out = await fin.finRoute(io, url.pathname, 'POST', body, actor)
+          return writeJson(response, out.status, out.body, RECALL_CORS)
+        }
+
         if (request.method === 'POST' && url.pathname === '/confirm-suggestion') {
           const body = await readBody(request)
           const suggestionId = Number(body['suggestion_id'])
@@ -3319,7 +4244,7 @@ export async function serve(port = 13_110): Promise<void> {
         }
         // W3-B6: the operator terminals — static touch pages, card queues,
         // and the three narrow verbs (every write rides the engine functions).
-        if (url.pathname.startsWith('/terminals/') || url.pathname.startsWith('/terminal/') || url.pathname === '/report-job' || url.pathname === '/inspect-submit' || url.pathname === '/receive-goods') {
+        if (url.pathname.startsWith('/terminals/') || url.pathname.startsWith('/terminal/') || url.pathname === '/report-job' || url.pathname === '/inspect-submit' || url.pathname === '/receive-goods' || url.pathname === '/job-start' || url.pathname === '/job-report' || url.pathname === '/andon/quality' || url.pathname === '/andon/maintenance') {
           if ((process.env['W3_TERMINAL_ENABLED'] ?? 'true') === 'false') {
             throw new HttpError(404, '终端端点已关闭（W3_TERMINAL_ENABLED=false）；引擎其余路由不受影响')
           }
@@ -3493,6 +4418,225 @@ export async function serve(port = 13_110): Promise<void> {
             }
             return writeJson(response, 200, { ok: true, po_code: String(poRow.code), receipts, quarantine_note: 'PO 来源收货已入待检区（lot 隔离 hold）——IQC 判定通过后放行转合格' }, marker)
           }
+          // ─── W6-B4 terminal routes (session identity, no self-report) ───
+          if (request.method === 'POST' && url.pathname === '/terminal/session') {
+            const body = await readBody(request)
+            const account = typeof body['account'] === 'string' ? body['account'].trim() : ''
+            const password = typeof body['password'] === 'string' ? body['password'] : ''
+            if (account === '' || password === '') throw new HttpError(400, '签到需要 account 与 password')
+            const payload = await call('', 'POST', '/api/auth:signIn', { account, password }).catch(() => {
+              throw new HttpError(401, '账号或密码不正确（平台 auth:signIn 拒绝）')
+            })
+            const token = typeof payload?.data?.token === 'string' ? payload.data.token : ''
+            if (token === '') throw new HttpError(401, '签到未返回会话 token')
+            return writeJson(response, 200, { ok: true, token, username: String(payload?.data?.user?.username ?? account), nickname: String(payload?.data?.user?.nickname ?? '') }, marker)
+          }
+          if (request.method === 'GET' && url.pathname === '/terminal/cards') {
+            const operator = await cardFlowOperator(io, request)
+            const profile = await operatorProfile(io, operator)
+            const mos = await io.list('mfg_orders', { doc_status: 'in_progress' })
+            const operations = await io.list('mfg_order_operations')
+            const posted = await io.list('mfg_job_reports', { status: 'posted' })
+            const productName = new Map((await io.list('hub_inv_products')).map(row => [Number(row.id), String(row.name ?? row.title ?? row.code ?? `#${String(row.id)}`)]))
+            const centerName = new Map((await io.list('mfg_work_centers')).map(row => [Number(row.id), String(row.name ?? `#${String(row.id)}`)]))
+            const boms = new Map((await io.list('mfg_boms')).map(row => [Number(row.id), row]))
+            const ccpPoints = (await io.list('mfg_ccp_points', { active: true })).map(row => ({
+              point_id: Number(row.id), code: String(row.code ?? ''), name: String(row.name ?? ''), unit: String(row.unit ?? ''),
+              cl_min: row.cl_min === null || row.cl_min === undefined ? null : Number(row.cl_min),
+              cl_max: row.cl_max === null || row.cl_max === undefined ? null : Number(row.cl_max),
+              frequency: String(row.frequency ?? ''), corrective_action: String(row.corrective_action ?? ''),
+              operation_name: String(row.operation_name ?? ''), product_id: row.product_id === null || row.product_id === undefined ? null : Number(row.product_id),
+            }))
+            const cards = mos.map(mo => {
+              const moId = Number(mo.id)
+              const bom = boms.get(Number(mo.bom_id))
+              const ops = operations.filter(row => Number(row.order_id) === moId).sort((a, b) => Number(a.seq) - Number(b.seq))
+              return {
+                mo: {
+                  id: moId, code: String(mo.code), qty: Number(mo.qty), product: productName.get(Number(mo.product_id)) ?? `#${String(mo.product_id)}`,
+                  need_date: mo.need_date ?? null, bom_code: String(bom?.code ?? `#${String(mo.bom_id)}`), bom_version: Number(bom?.version ?? 0),
+                },
+                operations: ops.map(op => {
+                  const seq = Number(op.seq)
+                  const reported = posted
+                    .filter(row => Number(row.mo_id) === moId && Number(row.op_seq) === seq)
+                    .reduce((sum, row) => sum + Number(row.qty_good ?? 0) + Number(row.qty_scrap ?? 0), 0)
+                  return {
+                    seq, name: String(op.name ?? ''), workcenter: centerName.get(Number(op.workcenter_id)) ?? `#${String(op.workcenter_id)}`,
+                    setup_min: Number(op.setup_min ?? 0), run_min: Number(op.run_min ?? 0),
+                    status: String(op.status ?? 'planned'), reported, remaining: Number(mo.qty) - reported,
+                    ccp: ccpPoints.filter(point => point.operation_name === String(op.name ?? '') && (point.product_id === null || point.product_id === Number(mo.product_id))),
+                  }
+                }),
+              }
+            })
+            return writeJson(response, 200, { ok: true, operator, nickname: profile.nickname, department: profile.department, cards }, marker)
+          }
+          if (request.method === 'POST' && url.pathname === '/job-start') {
+            const body = await readBody(request)
+            await cardFlowOperator(io, request)
+            const moRow = await resolveOrderByCode(io, 'mfg_orders', String(body['mo_code'] ?? ''), Number(body['mo_id']), 'MO')
+            const opSeq = Number(body['op_seq'])
+            const operation = (await io.list('mfg_order_operations')).find(row => Number(row.order_id) === Number(moRow.id) && Number(row.seq) === opSeq)
+            if (operation === undefined) throw new HttpError(400, `MO ${String(moRow.code)} 无工序 seq=${String(opSeq)}`)
+            if (String(operation.status) === 'planned') {
+              await io.update('mfg_order_operations', Number(operation.id), { status: 'started' })
+            }
+            const now = (await io.list('mfg_order_operations')).find(row => Number(row.id) === Number(operation.id))
+            return writeJson(response, 200, { ok: true, mo_code: String(moRow.code), op_seq: opSeq, op_status: String(now?.status ?? 'started') }, marker)
+          }
+          if (request.method === 'POST' && url.pathname === '/job-report') {
+            const body = await readBody(request)
+            const operator = await cardFlowOperator(io, request)
+            const submitKey = validateSubmitKey(body['submit_key'])
+            const moRow = await resolveOrderByCode(io, 'mfg_orders', String(body['mo_code'] ?? ''), Number(body['mo_id']), 'MO')
+            if (String(moRow.doc_status) !== 'in_progress') {
+              throw new Error(`报工被拒：MO ${String(moRow.code)} 状态为 ${String(moRow.doc_status)}——需已领料开工（in_progress）才能报工`)
+            }
+            const opSeq = Number(body['op_seq'])
+            const operation = (await io.list('mfg_order_operations')).find(row => Number(row.order_id) === Number(moRow.id) && Number(row.seq) === opSeq)
+            if (operation === undefined) throw new Error(`报工被拒：MO ${String(moRow.code)} 无工序 seq=${String(opSeq)}（先排产）`)
+            // Idempotency first: a replayed submit_key returns the original
+            // verdict without a second write (double-tap / retry safe).
+            const replay = (await io.list('mfg_job_reports', { submit_key: submitKey })).find(row => Number(row.mo_id) === Number(moRow.id) && Number(row.op_seq) === opSeq)
+            if (replay !== undefined) {
+              const opNow = (await io.list('mfg_order_operations')).find(row => Number(row.order_id) === Number(moRow.id) && Number(row.seq) === opSeq)
+              return writeJson(response, 200, { ok: true, duplicate: true, code: String(replay.code), mo_code: String(moRow.code), op_seq: opSeq, op_status: String(opNow?.status ?? ''), ccp: { records: 0, deviations: [] } }, marker)
+            }
+            const reportedSoFar = (await io.list('mfg_job_reports', { mo_id: Number(moRow.id), status: 'posted' }))
+              .filter(row => Number(row.op_seq) === opSeq)
+              .reduce((sum, row) => sum + Number(row.qty_good ?? 0) + Number(row.qty_scrap ?? 0), 0)
+            const qtyGood = Number(body['qty_good'])
+            const qtyPending = Number(body['qty_pending'] ?? 0)
+            const qtyScrap = Number(body['qty_scrap'] ?? 0)
+            const { planForCycle } = validateReportEquation(Number(moRow.qty), reportedSoFar, qtyGood, qtyPending, qtyScrap)
+            // CCP completeness: every scoped point must carry one finite
+            // reading (HACCP monitoring record); extra unscoped points refuse.
+            const points = await io.list('mfg_ccp_points', { active: true })
+            const scoped = points.filter(point =>
+              String(point.operation_name ?? '') === String(operation.name ?? '')
+              && (point.product_id === null || point.product_id === undefined || Number(point.product_id) === Number(moRow.product_id)))
+            const rawReadings = Array.isArray(body['ccp']) ? body['ccp'] as Array<Record<string, unknown>> : []
+            const readings: Array<{ point: Record<string, any>, value: number, action_taken: string, deviation: boolean }> = []
+            const scopedIds = new Set(scoped.map(point => Number(point.id)))
+            for (const raw of rawReadings) {
+              const point = scoped.find(row => Number(row.id) === Number(raw['point_id']))
+              if (point === undefined) throw new HttpError(400, `CCP 采集被拒：point_id=${String(raw['point_id'])} 不属于本工序的监控点（本工序应采：${scoped.map(row => String(row.code)).join('、') || '无'}）`)
+              if (!scopedIds.has(Number(point.id))) continue
+              scopedIds.delete(Number(point.id))
+              const value = Number(raw['value'])
+              if (!Number.isFinite(value)) throw new HttpError(400, `CCP 采集被拒：${String(point.code)} 实测值需为有限数（收到 ${String(raw['value'])}）`)
+              const action = typeof raw['action_taken'] === 'string' ? raw['action_taken'].slice(0, 500) : ''
+              const deviation = ccpDeviationOf(point, value)
+              if (deviation && action.trim() === '') throw new HttpError(400, `CCP 采集被拒：${String(point.code)} 实测越限，必须填写纠偏动作（action_taken）后才能提交`)
+              readings.push({ point, value, action_taken: action, deviation })
+            }
+            if (scopedIds.size > 0) {
+              const missing = scoped.filter(point => scopedIds.has(Number(point.id))).map(point => String(point.code))
+              throw new HttpError(400, `CCP 采集被拒：本工序监控点缺实测值（${missing.join('、')}——HACCP 监控记录必须齐全）`)
+            }
+            const lotNo = typeof body['lot_no'] === 'string' ? body['lot_no'].trim().slice(0, 64) : ''
+            const code = await nextDocCode(io, 'mfg_job_reports', 'JR')
+            const durationMin = Number(body['duration_min'])
+            await io.create('mfg_job_reports', {
+              code, mo: { id: Number(moRow.id) }, op_seq: opSeq, report_date: today(),
+              qty_good: qtyGood, qty_scrap: qtyScrap,
+              duration_min: Number.isFinite(durationMin) && durationMin > 0 ? Math.round(durationMin) : 0,
+              operator, qc_status: body['send_qc'] === true ? 'pending' : '',
+              status: 'draft', submit_key: submitKey,
+              remark: `W6-B4 卡片流报工；待求数 ${String(qtyPending)}（本循环未完成部分，下循环续报）`,
+              ccp_params: JSON.stringify({ readings: readings.map(row => ({ code: String(row.point.code), name: String(row.point.name), unit: String(row.point.unit ?? ''), measured: row.value, cl_min: row.point.cl_min ?? null, cl_max: row.point.cl_max ?? null, deviation: row.deviation, action_taken: row.action_taken })) }),
+            })
+            await postJobReport(wmsToken, code)
+            const deviations = readings.filter(row => row.deviation)
+            let lotFrozen = false
+            let ncCode: string | null = null
+            for (const row of readings) {
+              await io.create('mfg_ccp_records', {
+                point_id: Number(row.point.id), point_code: String(row.point.code ?? ''), name: String(row.point.name ?? ''), unit: String(row.point.unit ?? ''),
+                mo_id: Number(moRow.id), mo_code: String(moRow.code), op_seq: opSeq, lot_no: lotNo,
+                measured: row.value, cl_min: row.point.cl_min ?? null, cl_max: row.point.cl_max ?? null,
+                deviation: row.deviation, action_taken: row.action_taken, operator, recorded_at: new Date().toISOString(), submit_key: submitKey,
+              })
+            }
+            if (deviations.length > 0) {
+              // 批次冻结联动：越限读数挂批次则该批立即 frozen（出库被卡）。
+              if (lotNo !== '') {
+                const frozen = psql(`UPDATE wms_lots SET status = 'frozen' WHERE lot_no = ${sqlLiteral(lotNo)} AND status <> 'frozen';`).trim()
+                lotFrozen = /^UPDATE [1-9]/.test(frozen)
+              }
+              const first = deviations[0]!
+              ncCode = await nextDocCode(io, 'qm_nc_dispositions', 'QM-NC')
+              await io.create('qm_nc_dispositions', {
+                code: ncCode, action: 'rework', status: 'open', doc_status: 'draft',
+                reason: `CCP越限：${String(first.point.name)} 实测 ${String(first.value)}${String(first.point.unit ?? '')} 超出 CL [${first.point.cl_min === null || first.point.cl_min === undefined ? '−∞' : String(first.point.cl_min)}, ${first.point.cl_max === null || first.point.cl_max === undefined ? '+∞' : String(first.point.cl_max)}]（${String(moRow.code)} 工序${String(opSeq)}）`,
+                deviation_note: first.action_taken, ref_no: `${String(moRow.code)}#op${String(opSeq)}`,
+              })
+              // The B2 channel: one scanner pass lands the alert row + in-app
+              // notification under alert_rules.ccp_deviation's routing.
+              const rules = await import('./w6b2-rules.mts')
+              await rules.scanAlerts()
+            }
+            const opNow = (await io.list('mfg_order_operations')).find(row => Number(row.order_id) === Number(moRow.id) && Number(row.seq) === opSeq)
+            return writeJson(response, 200, {
+              ok: true, code, mo_code: String(moRow.code), op_seq: opSeq, op_status: String(opNow?.status ?? ''), plan_for_cycle: planForCycle, pending_carried: qtyPending,
+              ccp: {
+                records: readings.length,
+                deviations: deviations.map(row => ({ code: String(row.point.code), measured: row.value, cl_min: row.point.cl_min ?? null, cl_max: row.point.cl_max ?? null })),
+                lot_frozen: lotFrozen, nc_code: ncCode, alert_rule: deviations.length > 0 ? 'ccp_deviation(critical)' : null,
+              },
+            }, marker)
+          }
+          if (request.method === 'POST' && url.pathname === '/andon/quality') {
+            const body = await readBody(request)
+            const operator = await cardFlowOperator(io, request)
+            const moRow = await resolveOrderByCode(io, 'mfg_orders', String(body['mo_code'] ?? ''), Number(body['mo_id']), 'MO')
+            const opSeq = Number(body['op_seq'] ?? 0)
+            const note = typeof body['note'] === 'string' ? body['note'].slice(0, 400) : ''
+            if (note.trim() === '') throw new HttpError(400, '质量警报需要说明（note）')
+            const ncCode = await nextDocCode(io, 'qm_nc_dispositions', 'QM-NC')
+            await io.create('qm_nc_dispositions', {
+              code: ncCode, action: 'rework', status: 'open', doc_status: 'draft',
+              reason: `车间 Andon 质量警报：${note}`,
+              deviation_note: `${operator} 于 ${new Date().toISOString()} 自卡片流终端发起`, ref_no: `${String(moRow.code)}#op${String(opSeq)}`,
+            })
+            return writeJson(response, 200, { ok: true, code: ncCode, mo_code: String(moRow.code), operator }, marker)
+          }
+          // W6-B8: the Andon maintenance request — the card-flow operator asks
+          // for a repair; the order lands on the operation's work center (the
+          // eam_assets↔workcenter link) with the requester-verifies state
+          // machine ahead (new→accepted→done→closed).
+          if (request.method === 'POST' && url.pathname === '/andon/maintenance') {
+            const body = await readBody(request)
+            const operator = await cardFlowOperator(io, request)
+            const moRow = await resolveOrderByCode(io, 'mfg_orders', String(body['mo_code'] ?? ''), Number(body['mo_id']), 'MO')
+            const opSeq = Number(body['op_seq'] ?? 0)
+            const note = typeof body['note'] === 'string' ? body['note'].slice(0, 400) : ''
+            if (note.trim() === '') throw new HttpError(400, '维护请求需要故障说明（note）')
+            const operation = (await io.list('mfg_order_operations')).find(row => Number(row.order_id) === Number(moRow.id) && Number(row.seq) === opSeq)
+            if (operation === undefined) throw new HttpError(400, `MO ${String(moRow.code)} 无工序 seq=${String(opSeq)}`)
+            const centerName = new Map((await io.list('mfg_work_centers')).map(row => [Number(row.id), String(row.name ?? `#${String(row.id)}`)]))
+            const assets = await io.list('eam_assets')
+            const explicit = Number(body['asset_id'])
+            const asset = Number.isInteger(explicit) && explicit > 0
+              ? assets.find(row => Number(row.id) === explicit)
+              : assets.find(row => Number(row.workcenter_id ?? -1) === Number(operation.workcenter_id))
+            const woCode = await nextDocCode(io, 'eam_maint_orders', 'WO')
+            await io.create('eam_maint_orders', {
+              code: woCode,
+              ...(asset === undefined ? {} : { asset_id: Number(asset.id), asset_code: String(asset.code ?? '') }),
+              workcenter_name: centerName.get(Number(operation.workcenter_id)) ?? `#${String(operation.workcenter_id)}`,
+              source: 'andon', priority: 'P1',
+              problem: `车间 Andon 维护请求：${note}`,
+              status: 'new', planned_date: today(),
+              requested_by: operator, mo_code: String(moRow.code),
+            })
+            if (asset !== undefined && String(asset.status ?? '') === 'running') {
+              await io.update('eam_assets', Number(asset.id), { status: 'repair' })
+            }
+            return writeJson(response, 200, { ok: true, code: woCode, mo_code: String(moRow.code), asset_code: asset === undefined ? null : String(asset.code ?? ''), operator }, marker)
+          }
+
           throw new HttpError(404, `no terminal route ${request.method} ${url.pathname}`)
         }
         if (request.method === 'POST' && (url.pathname === '/act' || url.pathname === '/submit')) {
@@ -3554,14 +4698,77 @@ export async function serve(port = 13_110): Promise<void> {
         }
         writeJson(response, 404, { ok: false, error: `no route ${request.method} ${url.pathname}` })
       } catch (error) {
-        writeJson(response, error instanceof HttpError ? error.status : 400, { ok: false, error: error instanceof Error ? error.message : String(error) })
+        // W6-R3 审计四件套 (c): every route failure leaves a log line with
+        // the route and stack before the 4xx/400 response goes out. W6-R4
+        // lesson 22 widened the CORS half: every API route's error response
+        // carries allow-origin/allow-headers — a cross-origin page (the
+        // sourcing/recall/label JSBlocks) must see the 401/403/404 fact, not
+        // a masked fetch failure. Only the static HTML surfaces are exempt.
+        // The body also carries a machine-readable code + message (error
+        // stays as the legacy alias).
+        // W6-R5: the failing route's URL is logged redacted — a query-token
+        // print URL or a bearer query param must never land in the boot log.
+        console.error(`approval-engine: route ${request.method} ${redactUrl(String(request.url ?? '?'))} failed — ${error instanceof Error ? (error.stack ?? error.message) : String(error)}`)
+        const rawPath = request.url ?? ''
+        const isStaticPage = rawPath.startsWith('/designer') || rawPath.startsWith('/terminals/') || rawPath.startsWith('/crm') || rawPath.startsWith('/insp')
+        const message = error instanceof Error ? error.message : String(error)
+        writeJson(response, error instanceof HttpError ? error.status : 400, { ok: false, code: 'engine_error', message, error: message }, isStaticPage ? {} : RECALL_CORS)
       }
     })()
   })
   await new Promise<void>(resolve => server.listen(port, '127.0.0.1', resolve))
-  console.log(`approval-engine: serving on http://127.0.0.1:${port} (POST /act, POST /submit, POST /post-count-adjust, POST /scan-reorder, POST /calc-scorecard, POST /run-mrp, POST /calc-kpi, POST /run-nightly, POST /confirm-suggestion, GET /todos, GET /healthz)`)
+  console.log(`approval-engine: serving on http://127.0.0.1:${port} (POST /act, POST /submit, POST /post-count-adjust, POST /scan-reorder, POST /calc-scorecard, POST /run-mrp, POST /calc-kpi, POST /run-nightly, POST /scan-alerts, POST /alerts/act, POST /confirm-suggestion, POST /recall/create, POST /recall/act, GET /todos, GET /healthz, GET /labels, GET /label/lots.json, GET /label/lot.svg, GET/POST /insp/* 检验工作台, GET/POST /crm/* CRM 工作台, GET/POST /fin/* 财务驾驶舱+催收+对账单+三单匹配（B9）)`)
   console.log(`approval-engine: W3-B6 terminals on :${String(port)} — GET /terminals/{report,inspect,receive}.html + terminal.css; GET /terminal/{report,inspect,receive}; POST /report-job, /inspect-submit, /receive-goods (enabled=${String((process.env['W3_TERMINAL_ENABLED'] ?? 'true') !== 'false')}, token=${String(process.env['W3_TERMINAL_TOKEN'] !== undefined && process.env['W3_TERMINAL_TOKEN'] !== '' ? 'strict' : 'lenient-demo（生产必须设 W3_TERMINAL_TOKEN）')})`)
   console.log(`approval-engine: W5-B0 designer on :${String(port)} — GET /designer (SPA) + GET /designer/meta + GET/POST /flow-graph → wfl_flow_configs.graph json（编辑态落库）+ POST /flow-graph/publish → 门禁+round-trip 等价断言+单向编译派生 wfl 行表（一条 data-modifying CTE，CAS 败则整条 no-op）；保存与发布同走 graph_version 原子 CAS——同刻并发恰好一胜一败(enabled=${String((process.env['W5_DESIGNER_ENABLED'] ?? 'true') !== 'false')})`)
+  // W6-B1 (G8): the effect-backlog drain loop — every 30s the engine replays
+  // the pending compensation rows itself failed or never received (the hooks
+  // are idempotent). A pass that finds an empty queue costs one list read;
+  // crashes log and never take the timer down.
+  setInterval(() => {
+    void drainEffectBacklog(wmsToken).catch(error => {
+      console.error(`approval-engine: backlog drain pass crashed — ${error instanceof Error ? error.message : String(error)}`)
+    })
+  }, 30_000)
+  // W6-B2: the hourly alert scan loop (the same drain-loop pattern — one
+  // idempotent pass per tick, a crash logs and never takes the timer down).
+  // The two knobs fail loud at start: W6_ALERT_SCAN_ENABLED (default true)
+  // and W6_ALERT_SCAN_INTERVAL_SEC (default 3600, floor 60). An unseeded
+  // alert_rules disables the loop with the baseline pointer (no repeated
+  // error spam every tick).
+  {
+    const rawEnabled = process.env['W6_ALERT_SCAN_ENABLED'] ?? 'true'
+    if (rawEnabled !== 'true' && rawEnabled !== 'false') {
+      throw new Error(`W6_ALERT_SCAN_ENABLED 仅接受 true/false（收到 ${rawEnabled}）`)
+    }
+    const intervalSec = Number(process.env['W6_ALERT_SCAN_INTERVAL_SEC'] ?? '3600')
+    if (!Number.isInteger(intervalSec) || intervalSec < 60) {
+      throw new Error(`W6_ALERT_SCAN_INTERVAL_SEC 需为 ≥60 的整数秒（收到 ${String(process.env['W6_ALERT_SCAN_INTERVAL_SEC'] ?? '3600')}）`)
+    }
+    const seeded = Number(psql("SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'alert_rules'").trim()) > 0
+      && Number(psql('SELECT count(*) FROM alert_rules;').trim()) > 0
+    if (rawEnabled === 'true' && seeded) {
+      setInterval(() => {
+        void (async () => {
+          const rules = await import('./w6b2-rules.mts')
+          await rules.scanAlerts()
+          // W6-B8: the preventive-maintenance plan engine rides the same tick
+          // (idempotent per missed period; a not-yet-seeded eam_* is a no-op).
+          const eam = await import('./w6b8-eam.mts')
+          const maint = eam.scanMaintPlans()
+          if (maint.created > 0 || maint.advanced > 0) {
+            console.log(`approval-engine: W6-B8 maint-plan pass — created=${String(maint.created)} advanced=${String(maint.advanced)}`)
+          }
+        })().catch(error => {
+          console.error(`approval-engine: alert scan pass crashed — ${error instanceof Error ? error.message : String(error)}`)
+        })
+      }, intervalSec * 1000)
+      console.log(`approval-engine: W6-B2 alert scan loop armed — every ${String(intervalSec)}s + W6-B8 maint-plan pass（POST /scan-alerts 手动触发同款；阈值/路由配置在 alert_rules 行）`)
+    } else if (rawEnabled === 'true') {
+      console.log('approval-engine: W6-B2 alert scan loop NOT armed — alert_rules 未 seed（先跑 w6b2-rules.mts --seed）')
+    } else {
+      console.log('approval-engine: W6-B2 alert scan loop disabled（W6_ALERT_SCAN_ENABLED=false）')
+    }
+  }
   // W2-B7: the built-in nightly timer — armed only on the env opt-in, fully
   // silent otherwise (zero drift from the W-round external-cron form). The
   // per-minute check fires when the local wall clock has passed the target
@@ -3577,7 +4784,7 @@ export async function serve(port = 13_110): Promise<void> {
         console.error(`approval-engine: nightly timer pass crashed — ${error instanceof Error ? error.message : String(error)}`)
       })
     }, 60_000)
-    console.log(`approval-engine: nightly timer armed — daily at ${nightly.at} ${nightly.tz}（legs：scan-reorder → run-mrp → 月末 snapshot-month → calc-kpi，季初追加 calc-scorecard；marker 为进程内存，重启可能同日补跑——各腿均幂等）`)
+    console.log(`approval-engine: nightly timer armed — daily at ${nightly.at} ${nightly.tz}（legs：scan-reorder → run-mrp → 月末 snapshot-month → calc-kpi → lakehouse-transfer → drain-backlog → scan-alerts，季初追加 calc-scorecard；marker 为进程内存，重启可能同日补跑——各腿均幂等）`)
   }
 }
 

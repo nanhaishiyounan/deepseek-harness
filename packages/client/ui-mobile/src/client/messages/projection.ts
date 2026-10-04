@@ -107,8 +107,10 @@ export function cachedProjectionOf(sessionId: string, updatedAt: number): string
 export async function loadProjection(sessionId: string, updatedAt: number): Promise<string | undefined> {
   // A tiny newest-message window: the last message rides dozens of tool and
   // reasoning events, so even this reads a few hundred events, never the
-  // whole turn history.
-  const events = await readHistory(sessionId, 6)
+  // whole turn history. Sixteen events cover the turn's tail — including the
+  // nb_create call/result pair a submit_receipt fence must verify against
+  // (W6-B1 ①) — without reading the whole turn history.
+  const events = await readHistory(sessionId, 16)
   const text = lastProjectionOf(foldHistory(events).items)
   cache.set(sessionId, { updatedAt, text })
   return text

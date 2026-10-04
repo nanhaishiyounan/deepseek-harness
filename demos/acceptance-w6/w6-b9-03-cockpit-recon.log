@@ -1,0 +1,15 @@
+== W6-B9 cockpit cards vs psql (period 近90天) ==
+  ✓ 期间营收 = psql 发货口径 — 80920.0
+  ✓ 期间发货订单数 = psql — 3.0
+  ✓ 逾期应收 = psql B2 口径 — 18800.0
+  ✓ 到期应付 = psql 账期口径 — 0.0
+  ✓ 期间回款 = psql — 116640
+  ✓ 库存总量 = psql(wms_stock.qty_on_hand) — 398400
+== aging buckets vs psql ==
+  ✓ AR 桶 0-30 金额 = psql — 0.0
+  ✓ AR 桶 31-60 金额 = psql — 18800.0
+  ✓ AR 桶 61-90 金额 = psql — 0.0
+  ✓ AR 桶 91-120 金额 = psql — 0.0
+  ✓ AR 桶 120+ 金额 = psql — 0.0
+  ✓ AR 分桶合计 = 逾期应收 — 18800
+  · 客户钻取样本（31-60 桶）：#? 18800

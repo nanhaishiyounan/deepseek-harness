@@ -1,0 +1,43 @@
+{
+  "created": false,
+  "previousDefaultId": 5,
+  "previousDefaultDefault": true,
+  "w7RowBefore": {
+    "id": 7,
+    "createdAt": "2026-10-03T12:45:21.847Z",
+    "updatedAt": "2026-10-04T02:18:50.354Z",
+    "config": {
+      "name": "W7 铸造",
+      "token": {
+        "colorPrimary": "#1E4E8C",
+        "colorPrimaryHover": "#2A5FA6",
+        "colorPrimaryActive": "#173D70",
+        "colorSuccess": "#256F3A",
+        "colorWarning": "#E76500",
+        "colorError": "#AA0808",
+        "colorInfo": "#0070F2",
+        "colorLink": "#1E4E8C",
+        "colorLinkHover": "#2A5FA6",
+        "colorLinkActive": "#173D70",
+        "colorText": "#1F2630",
+        "colorTextSecondary": "#55606E",
+        "colorTextTertiary": "#8A94A0",
+        "colorBorder": "#D8D8D5",
+        "colorBorderSecondary": "#E8E8E6",
+        "colorBgLayout": "#F6F6F4",
+        "colorBgContainer": "#FFFFFF",
+        "colorBgSider": "#16304F",
+        "borderRadius": 6,
+        "fontSize": 14,
+        "sizeStep": 4,
+        "sizeUnit": 4,
+        "fontFamily": "'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei', system-ui, sans-serif",
+        "globalStyle": "\n/* ===== W7 铸造 · Forge — design tokens (plans/plan-w7.zh.md §3) ===== */\n:root {\n  /* brand: Prussian blue, hover/active steps */\n  --w7-primary: #1E4E8C;  --w7-primary-hover: #2A5FA6;  --w7-primary-active: #173D70;\n  --w7-primary-soft: #E8F0F9;\n  /* semantic five states (Fiori Morning Horizon fg/bg pairs) */\n  --w7-positive-fg: #256F3A;       --w7-positive-bg: #F5FAE5;\n  --w7-critical-fg: #E76500;       --w7-critical-bg: #FFF8D6;\n  --w7-negative-fg: #AA0808;       --w7-negative-bg: #FFEAF4;\n  --w7-neutral-fg: #788FA6;        --w7-neutral-bg: #EFF1F2;\n  --w7-informational-fg: #0070F2;  --w7-informational-bg: #E1F4FF;\n  /* neutral scale: warm-gray editorial */\n  --w7-canvas: #F6F6F4;  --w7-surface: #FFFFFF;  --w7-surface-2: #FAFAF9;\n  --w7-border: #E8E8E6;  --w7-border-strong: #D8D8D5;\n  --w7-text: #1F2630;  --w7-text-secondary: #55606E;  --w7-text-weak: #8A94A0;\n  /* chart series: same-hue blue ramp + neutral; heat ramp = semantic trio */\n  --w7-chart-1: #1E4E8C;  --w7-chart-2: #3A69A4;  --w7-chart-3: #5783BC;\n  --w7-chart-4: #7B9DD1;  --w7-chart-5: #A3BCE2;  --w7-chart-6: #CBDCF0;\n  --w7-chart-neutral: #B8BFC8;\n  /* geometry */\n  --w7-radius-card: 8px;  --w7-radius-control: 6px;  --w7-radius-tag: 999px;  --w7-radius-badge: 4px;\n  /* elevation: diffuse same-tone shadows, never plain black */\n  --w7-shadow-card: 0 1px 2px rgba(31,38,48,.04), 0 8px 24px rgba(31,38,48,.06);\n  --w7-shadow-raised: 0 4px 12px rgba(31,38,48,.10);\n  /* type ramp */\n  --w7-fs-caption: 12px;  --w7-fs-body: 13px;  --w7-fs-subtitle: 15px;  --w7-fs-title: 18px;  --w7-fs-kpi: 28px;\n  /* motion */\n  --w7-dur-fast: 160ms;  --w7-ease: cubic-bezier(0.16,1,0.3,1);\n}\n\n/* ===== table base: header 13/600 on surface-2, zebra, hover tint, tnum ===== */\n.ant-table-thead > tr > th, .ant-table-thead > tr > td {\n  font-size: var(--w7-fs-body); font-weight: 600;\n  color: var(--w7-text-secondary); background: var(--w7-surface-2);\n}\n.ant-table-tbody > tr > td { font-size: var(--w7-fs-body); }\n.ant-table-tbody > tr:nth-child(even) > td:not(.ant-table-cell-row-selected) { background: var(--w7-surface-2); }\n.ant-table-tbody > tr:hover > td:not(.ant-table-cell-row-selected) { background: #F0F6FC; }\n.ant-table td, .ant-table th { font-variant-numeric: tabular-nums; }\n\n/* ===== tags: pill form + preset classes remapped to W7 semantic soft pairs ===== */\n.ant-tag { border-radius: var(--w7-radius-tag) !important; font-size: var(--w7-fs-caption); }\n.ant-tag-blue, .ant-tag-geekblue { color: #0070F2 !important; background: #E1F4FF !important; border-color: #B3DCFF !important; }\n.ant-tag-green, .ant-tag-lime { color: #256F3A !important; background: #F5FAE5 !important; border-color: #CDE5B0 !important; }\n.ant-tag-red, .ant-tag-volcano { color: #AA0808 !important; background: #FFEAF4 !important; border-color: #F3B8C8 !important; }\n.ant-tag-orange, .ant-tag-gold { color: #E76500 !important; background: #FFF8D6 !important; border-color: #F2D98C !important; }\n.ant-tag-cyan { color: #0E7490 !important; background: #E0F5F7 !important; border-color: #B3E3E8 !important; }\n.ant-tag-purple, .ant-tag-magenta { color: #788FA6 !important; background: #EFF1F2 !important; border-color: #D5DBE2 !important; }\n/* object-header Tags one size up inside drawers (W5 rule kept) */\n.ant-drawer-content .ant-tag { font-size: 14px; line-height: 22px; padding: 0 8px; }\n\n/* ===== cards: one radius, 1px border + diffuse shadow ===== */\n.ant-card {\n  border-radius: var(--w7-radius-card);\n  border: 1px solid var(--w7-border);\n  box-shadow: var(--w7-shadow-card);\n}\n\n/* ===== buttons: pressed feedback, brand focus ring ===== */\n.ant-btn { transition: color var(--w7-dur-fast) var(--w7-ease), background-color var(--w7-dur-fast) var(--w7-ease), border-color var(--w7-dur-fast) var(--w7-ease), box-shadow var(--w7-dur-fast) var(--w7-ease), transform var(--w7-dur-fast) var(--w7-ease); }\n.ant-btn:active { transform: scale(0.98); }\n.ant-btn:focus-visible { outline: 2px solid rgba(30,78,140,.35); outline-offset: 1px; }\n\n/* ===== scrollbar + global focus + motion preference ===== */\n::-webkit-scrollbar { width: 8px; height: 8px; }\n::-webkit-scrollbar-thumb { background: var(--w7-border-strong); border-radius: var(--w7-radius-badge); }\n::-webkit-scrollbar-thumb:hover { background: #C0C0BC; }\n::-webkit-scrollbar-track { background: transparent; }\n:focus-visible { outline: 2px solid rgba(30,78,140,.35); outline-offset: 1px; }\n@media (prefers-reduced-motion: reduce) {\n  .ant-btn, .ant-card { transition: none !important; }\n  .ant-btn:active { transform: none; }\n}\n"
+      }
+    },
+    "optional": true,
+    "isBuiltIn": false,
+    "uid": "w7-forge",
+    "default": false
+  }
+}

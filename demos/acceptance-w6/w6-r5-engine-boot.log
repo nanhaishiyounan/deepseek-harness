@@ -1,0 +1,97 @@
+approval-engine: serving on http://127.0.0.1:13110 (POST /act, POST /submit, POST /post-count-adjust, POST /scan-reorder, POST /calc-scorecard, POST /run-mrp, POST /calc-kpi, POST /run-nightly, POST /scan-alerts, POST /alerts/act, POST /confirm-suggestion, POST /recall/create, POST /recall/act, GET /todos, GET /healthz, GET /labels, GET /label/lots.json, GET /label/lot.svg, GET/POST /insp/* 检验工作台, GET/POST /crm/* CRM 工作台, GET/POST /fin/* 财务驾驶舱+催收+对账单+三单匹配（B9）)
+approval-engine: W3-B6 terminals on :13110 — GET /terminals/{report,inspect,receive}.html + terminal.css; GET /terminal/{report,inspect,receive}; POST /report-job, /inspect-submit, /receive-goods (enabled=true, token=lenient-demo（生产必须设 W3_TERMINAL_TOKEN）)
+approval-engine: W5-B0 designer on :13110 — GET /designer (SPA) + GET /designer/meta + GET/POST /flow-graph → wfl_flow_configs.graph json（编辑态落库）+ POST /flow-graph/publish → 门禁+round-trip 等价断言+单向编译派生 wfl 行表（一条 data-modifying CTE，CAS 败则整条 no-op）；保存与发布同走 graph_version 原子 CAS——同刻并发恰好一胜一败(enabled=true)
+approval-engine: W6-B2 alert scan loop armed — every 3600s + W6-B8 maint-plan pass（POST /scan-alerts 手动触发同款；阈值/路由配置在 alert_rules 行）
+approval-engine: route GET /fin/statement/print?statement_no=ST-X&token=<redacted> failed — Error: 平台会话无效（auth:check 未返回用户名）——重新登录后重试
+    at recallActor (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:1597:30)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:4000:27)
+approval-engine: serving on http://127.0.0.1:13110 (POST /act, POST /submit, POST /post-count-adjust, POST /scan-reorder, POST /calc-scorecard, POST /run-mrp, POST /calc-kpi, POST /run-nightly, POST /scan-alerts, POST /alerts/act, POST /confirm-suggestion, POST /recall/create, POST /recall/act, GET /todos, GET /healthz, GET /labels, GET /label/lots.json, GET /label/lot.svg, GET/POST /insp/* 检验工作台, GET/POST /crm/* CRM 工作台, GET/POST /fin/* 财务驾驶舱+催收+对账单+三单匹配（B9）)
+approval-engine: W3-B6 terminals on :13110 — GET /terminals/{report,inspect,receive}.html + terminal.css; GET /terminal/{report,inspect,receive}; POST /report-job, /inspect-submit, /receive-goods (enabled=true, token=lenient-demo（生产必须设 W3_TERMINAL_TOKEN）)
+approval-engine: W5-B0 designer on :13110 — GET /designer (SPA) + GET /designer/meta + GET/POST /flow-graph → wfl_flow_configs.graph json（编辑态落库）+ POST /flow-graph/publish → 门禁+round-trip 等价断言+单向编译派生 wfl 行表（一条 data-modifying CTE，CAS 败则整条 no-op）；保存与发布同走 graph_version 原子 CAS——同刻并发恰好一胜一败(enabled=true)
+approval-engine: W6-B2 alert scan loop armed — every 3600s + W6-B8 maint-plan pass（POST /scan-alerts 手动触发同款；阈值/路由配置在 alert_rules 行）
+node:events:497
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use 127.0.0.1:13110
+    at Server.setupListenHandle [as _listen2] (node:net:1940:16)
+    at listenInCluster (node:net:1997:12)
+    at node:net:2206:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:1976:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -48,
+  syscall: 'listen',
+  address: '127.0.0.1',
+  port: 13110
+}
+
+Node.js v22.19.0
+node:events:497
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use 127.0.0.1:13110
+    at Server.setupListenHandle [as _listen2] (node:net:1940:16)
+    at listenInCluster (node:net:1997:12)
+    at node:net:2206:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:1976:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -48,
+  syscall: 'listen',
+  address: '127.0.0.1',
+  port: 13110
+}
+
+Node.js v22.19.0
+approval-engine: serving on http://127.0.0.1:13110 (POST /act, POST /submit, POST /post-count-adjust, POST /scan-reorder, POST /calc-scorecard, POST /run-mrp, POST /calc-kpi, POST /run-nightly, POST /scan-alerts, POST /alerts/act, POST /confirm-suggestion, POST /recall/create, POST /recall/act, GET /todos, GET /healthz, GET /labels, GET /label/lots.json, GET /label/lot.svg, GET/POST /insp/* 检验工作台, GET/POST /crm/* CRM 工作台, GET/POST /fin/* 财务驾驶舱+催收+对账单+三单匹配（B9）)
+approval-engine: W3-B6 terminals on :13110 — GET /terminals/{report,inspect,receive}.html + terminal.css; GET /terminal/{report,inspect,receive}; POST /report-job, /inspect-submit, /receive-goods (enabled=true, token=lenient-demo（生产必须设 W3_TERMINAL_TOKEN）)
+approval-engine: W5-B0 designer on :13110 — GET /designer (SPA) + GET /designer/meta + GET/POST /flow-graph → wfl_flow_configs.graph json（编辑态落库）+ POST /flow-graph/publish → 门禁+round-trip 等价断言+单向编译派生 wfl 行表（一条 data-modifying CTE，CAS 败则整条 no-op）；保存与发布同走 graph_version 原子 CAS——同刻并发恰好一胜一败(enabled=true)
+approval-engine: W6-B2 alert scan loop armed — every 3600s + W6-B8 maint-plan pass（POST /scan-alerts 手动触发同款；阈值/路由配置在 alert_rules 行）
+approval-engine: route POST /fin/pay/apply failed — SyntaxError: Unexpected token ',', ..."voice_id":,"amount":"... is not valid JSON
+    at JSON.parse (<anonymous>)
+    at readBody (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:1313:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:4034:24)
+[fin] GET /fin/aging refused: 财务明细限 finance/admin 读取（keeper 不在围栏内——价格信息按角色矩阵）
+approval-engine: route GET /fin/cockpit failed — Error: 召回端点需要平台会话（authorization: Bearer <NOCOBASE_TOKEN>）——actor 由会话推导，不接受自报
+    at recallActor (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:1586:11)
+    at <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:4027:33)
+[fin] POST /fin/dunning/followup refused: 财务操作限 finance/admin（keeper 不在围栏内）
+[fin] refused identity claim: session=finance claimed=admin
+[fin] pay/apply refused: 付款拦截（三单匹配）：发票 INV-B9F-0001 账单量 1000 > 已收货量 0——收货量达标前不予付款（差异工作台处置/补收后再试）
+[fin] GET /fin/aging refused: 财务明细限 finance/admin 读取（keeper 不在围栏内——价格信息按角色矩阵）
+approval-engine: route GET /fin/cockpit failed — Error: 召回端点需要平台会话（authorization: Bearer <NOCOBASE_TOKEN>）——actor 由会话推导，不接受自报
+    at recallActor (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:1586:11)
+    at <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:4027:33)
+[fin] POST /fin/dunning/followup refused: 财务操作限 finance/admin（keeper 不在围栏内）
+[fin] refused identity claim: session=finance claimed=admin
+[fin] pay/apply refused: 付款拦截（三单匹配）：发票 INV-B9F-0001 账单量 1000 > 已收货量 0——收货量达标前不予付款（差异工作台处置/补收后再试）
+[fin] GET /fin/aging refused: 财务明细限 finance/admin 读取（keeper 不在围栏内——价格信息按角色矩阵）
+approval-engine: route GET /fin/cockpit failed — Error: 召回端点需要平台会话（authorization: Bearer <NOCOBASE_TOKEN>）——actor 由会话推导，不接受自报
+    at recallActor (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:1586:11)
+    at <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:4027:33)
+[fin] POST /fin/dunning/followup refused: 财务操作限 finance/admin（keeper 不在围栏内）
+[fin] refused identity claim: session=finance claimed=admin
+[fin] pay/apply refused: 付款拦截（三单匹配）：发票 INV-B9F-0001 账单量 1000 > 已收货量 0——收货量达标前不予付款（差异工作台处置/补收后再试）
+[fin] GET /fin/aging refused: 财务明细限 finance/admin 读取（keeper 不在围栏内——价格信息按角色矩阵）
+approval-engine: route GET /fin/cockpit failed — Error: 召回端点需要平台会话（authorization: Bearer <NOCOBASE_TOKEN>）——actor 由会话推导，不接受自报
+    at recallActor (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:1586:11)
+    at <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:4027:33)
+[fin] POST /fin/dunning/followup refused: 财务操作限 finance/admin（keeper 不在围栏内）
+[fin] refused identity claim: session=finance claimed=admin
+[fin] pay/apply refused: 付款拦截（三单匹配）：发票 INV-B9F-0001 账单量 1000 > 已收货量 0——收货量达标前不予付款（差异工作台处置/补收后再试）
+[fin] GET /fin/aging refused: 财务明细限 finance/admin 读取（keeper 不在围栏内——价格信息按角色矩阵）
+approval-engine: route GET /fin/cockpit failed — Error: 召回端点需要平台会话（authorization: Bearer <NOCOBASE_TOKEN>）——actor 由会话推导，不接受自报
+    at recallActor (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:1586:11)
+    at <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:4027:33)
+[fin] POST /fin/dunning/followup refused: 财务操作限 finance/admin（keeper 不在围栏内）
+[fin] refused identity claim: session=finance claimed=admin
+w6b2-rules: scan pass — expiry+0/~5/-0 cert_due+0/~3/-0 ar_overdue+0/~3/-0 quality_abnormal+0/~31/-0 ccp_deviation+0/~16/-0 inspection_fail+0/~20/-0 calibration_due+0/~3/-0 maint_overdue+0/~1/-0 notified=0
+w6b2-rules: scan pass — expiry+0/~5/-0 cert_due+0/~3/-0 ar_overdue+0/~3/-0 quality_abnormal+0/~31/-0 ccp_deviation+0/~16/-0 inspection_fail+0/~20/-0 calibration_due+0/~3/-0 maint_overdue+0/~1/-0 notified=0

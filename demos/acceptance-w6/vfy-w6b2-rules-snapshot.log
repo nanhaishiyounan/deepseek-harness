@@ -1,0 +1,5 @@
+== alert_rules byte-level snapshot (md5 of params::text + raw) ==
+1|expiry|0ebdad9c802d0a32acbe51d0f0b29bbc|{"warn_days":30,"critical_days":7,"regulatory":true}
+2|cert_due|d4e29e780663fca83e2a8516e1e578d7|{"warn_days":30,"critical_days":7}
+3|ar_overdue|471412031f21411e090d5d4de280f864|{"warn_days":7}
+4|quality_abnormal|99914b932bd37a50b983c5e7c90ae93b|{}

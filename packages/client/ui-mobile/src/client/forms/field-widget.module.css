@@ -17,7 +17,7 @@
 }
 
 .label {
-  font-size: 13px;
+  font-size: var(--dshm-fs-sm);
   color: var(--dshm-muted-foreground);
   flex: none;
   max-width: 40%;
@@ -27,7 +27,7 @@
 }
 
 .lockedValue {
-  font-size: 14px;
+  font-size: var(--dshm-fs-sm);
   font-weight: 500;
   color: var(--dshm-foreground);
   text-align: right;
@@ -35,7 +35,7 @@
 }
 
 .pickerValue {
-  font-size: 14px;
+  font-size: var(--dshm-fs-sm);
   color: var(--dshm-foreground);
   padding: 4px 10px;
   border-radius: var(--dshm-radius);
@@ -43,7 +43,7 @@
 }
 
 .input {
-  --font-size: 14px;
+  --font-size: var(--dshm-fs-sm);
   flex: 1;
   min-width: 0;
   background: var(--dshm-muted);
@@ -52,7 +52,7 @@
 }
 
 .textArea {
-  --font-size: 14px;
+  --font-size: var(--dshm-fs-sm);
   flex: 1;
   background: var(--dshm-muted);
   border-radius: var(--dshm-radius);

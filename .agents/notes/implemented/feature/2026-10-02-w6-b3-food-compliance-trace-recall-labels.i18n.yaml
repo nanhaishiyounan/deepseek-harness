@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-10-02-w6-b3-food-compliance-trace-recall-labels.md
+2026-10-02-w6-b3-food-compliance-trace-recall-labels.md: 57f1e2cad3775b62496c0161cd87a63852e723f6
+2026-10-02-w6-b3-food-compliance-trace-recall-labels.zh.md: fac70b45f3c6e6af59b369f1fbb20f9f07372f57

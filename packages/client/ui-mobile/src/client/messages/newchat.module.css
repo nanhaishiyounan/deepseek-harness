@@ -36,7 +36,7 @@
 
 .title {
   margin: 0;
-  font-size: 17px;
+  font-size: var(--dshm-fs-lg);
   line-height: 24px;
   font-weight: 600;
 }
@@ -54,7 +54,7 @@
 
 .error {
   margin: 0 0 8px;
-  font-size: 12px;
+  font-size: var(--dshm-fs-xs);
   line-height: 18px;
   color: var(--dshm-destructive);
 }
@@ -96,13 +96,13 @@
 }
 
 .rosterName {
-  font-size: 14px;
+  font-size: var(--dshm-fs-sm);
   line-height: 22px;
   font-weight: 500;
 }
 
 .rosterDuty {
-  font-size: 11px;
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
   color: var(--dshm-muted-foreground);
 }
@@ -116,14 +116,14 @@
 /* Plain display chips (antd Tag; the brand-soft face rides inline dials in
    NewChatSheet.tsx): the whole roster row is the one button. */
 .rosterChip {
-  --border-radius: 999px;
-  font-size: 10px;
+  --border-radius: var(--dshm-radius-pill);
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
 }
 
 .empty {
   padding: 16px 0;
-  font-size: 13px;
+  font-size: var(--dshm-fs-sm);
   color: var(--dshm-muted-foreground);
   text-align: center;
 }
@@ -132,7 +132,7 @@
   margin: 12px 0 4px;
   padding-top: 12px;
   border-top: 1px solid var(--dshm-stroke-soft);
-  font-size: 11px;
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
   font-weight: 500;
   color: var(--dshm-muted-foreground);
@@ -166,7 +166,7 @@
 .recentTitle {
   flex: 1;
   min-width: 0;
-  font-size: 13px;
+  font-size: var(--dshm-fs-sm);
   line-height: 20px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -175,7 +175,7 @@
 
 .recentTime {
   flex: none;
-  font-size: 11px;
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
   color: var(--dshm-muted-foreground);
 }

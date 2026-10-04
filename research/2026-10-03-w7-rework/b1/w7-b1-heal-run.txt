@@ -1,0 +1,47 @@
+  columnOptions crm_customers.level
+  columnOptions crm_contacts.status
+  columnOptions crm_leads.stage
+  columnOptions crm_quotes.status
+  columnOptions crm_deals.status
+  columnOptions crm_customers.type
+  columnOptions crm_customers.status
+  columnOptions crm_customers.status
+  columnOptions crm_payments.method
+  columnOptions crm_payments.method
+  columnOptions crm_payments.status
+  columnOptions crm_invoices.status
+  columnOptions crm_customers.level
+  columnOptions crm_payments.status
+  columnOptions crm_products.pricing_mode
+  columnOptions crm_products.category
+  columnOptions crm_customers.type
+  columnOptions pur_rfqs.doc_status
+  columnOptions crm_payments.method
+  columnOptions crm_payments.method
+  columnOptions pur_orders.receiving_status
+  columnOptions pur_rfqs.doc_status
+  columnOptions pur_quotes.status
+  columnOptions pur_payments.doc_status
+  columnOptions pur_payments.pay_method
+  columnOptions pur_orders.invoice_status
+  columnOptions pur_requests.doc_status
+  columnOptions pur_quotes.status
+  columnOptions pur_invoices.match_result
+  columnOptions pur_orders.doc_status
+  columnOptions so_orders.doc_status
+  columnOptions so_orders.shipping_status
+  selectOptions pur_orders select 0mmfgf5cuew
+  selectOptions pur_quotes select 241f4dd35cd
+  selectOptions crm_payments select 92ffukmx65f
+  selectOptions crm_customers select cf503q32l9j
+  selectOptions crm_quotes select cm8c1ywagst
+  selectOptions crm_payments select iw1unq24ofe
+  selectOptions crm_customers select limh0fu9omo
+  selectOptions crm_leads select m77ldhli8in
+  selectOptions pur_invoices select mbsbcviaox9
+  selectOptions pur_payments select v5nm0cw2xeh
+  selectOptions so_orders select vunxbttgw7i
+  selectOptions crm_deals select vyp02usbjl6
+  selectOptions pur_rfqs select xz2wzcfkgdf
+  selectOptions pur_requests select z62lcebz7g0
+heal b1: recolor=0 enumSwap=0 numberSwap=0 numberProps=0 dateProps=0 alignRight=0 alignLeft=0 statcardRegen=0

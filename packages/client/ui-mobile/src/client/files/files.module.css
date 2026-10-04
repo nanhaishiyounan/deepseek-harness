@@ -25,7 +25,7 @@
 
 .sectionTitle {
   margin: 4px 4px 0;
-  font-size: 13px;
+  font-size: var(--dshm-fs-sm);
   line-height: 18px;
   font-weight: 500;
   color: var(--dshm-muted-foreground);
@@ -75,23 +75,23 @@
 /* The 24px type badge: antd Tag (the soft fill rides inline dials in
    FilesView.tsx); this class keeps the square scale. */
 .typeBadge {
-  --border-radius: 6px;
+  --border-radius: var(--dshm-radius-corner);
   flex: none;
   width: 24px;
   height: 24px;
   padding: 0;
-  font-size: 12px;
+  font-size: var(--dshm-fs-xs);
   font-weight: 600;
 }
 
 /* The row's origin badge: antd Tag (the brand wash rides inline dials in
    FilesView.tsx) marking AI-generated files inside the recent window. */
 .originBadge {
-  --border-radius: 999px;
+  --border-radius: var(--dshm-radius-pill);
   flex: none;
   height: 18px;
   padding: 0 6px;
-  font-size: 10px;
+  font-size: var(--dshm-fs-xs);
   line-height: 1;
   font-weight: 600;
 }
@@ -99,7 +99,7 @@
 .fileName {
   flex: 1;
   min-width: 0;
-  font-size: 14px;
+  font-size: var(--dshm-fs-sm);
   line-height: 20px;
   font-weight: 500;
   color: var(--dshm-foreground);
@@ -130,7 +130,7 @@
   align-items: center;
   gap: 8px;
   padding-left: 32px;
-  font-size: 11px;
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
   color: var(--dshm-muted-foreground);
 }
@@ -138,16 +138,16 @@
 /* The meta's link word: the antd mini none-fill brand word. */
 .fileMetaLink:global(.adm-button) {
   padding: 0;
-  font-size: 11px;
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
   font-weight: 600;
 }
 
 /* The demo tag: antd Tag recolored through its inline dials in FilesView.tsx. */
 .demoTag {
-  --border-radius: 999px;
+  --border-radius: var(--dshm-radius-pill);
   flex: none;
-  font-size: 10px;
+  font-size: var(--dshm-fs-xs);
   line-height: 14px;
 }
 
@@ -156,11 +156,4 @@
   padding: 0 14px 10px;
   display: flex;
   justify-content: center;
-}
-
-.sectionEmpty {
-  padding: 14px;
-  font-size: 12px;
-  line-height: 18px;
-  color: var(--dshm-muted-foreground);
 }

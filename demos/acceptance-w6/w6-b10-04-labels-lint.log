@@ -1,0 +1,20 @@
+== W6-B10 labels lint 治理（豁免清单收编） ==
+治理前（default .oxlintrc.json 直扫 labels/）——B3 验证遗留 64 错（B10 复测 59，R3 修复已带走 5）：
+Found 0 warnings and 59 errors.
+Finished in 2.8s on 3 files with 89 rules using 12 threads.
+
+处置：.oxlintrc.json ignorePatterns 收编 examples/kb-agent/labels/**（与 platform/native 同格式，注释说明其自有门禁=esbuild bundle + w6b3-labels round-trip 断言——59 错全部是「游离 TS 工程外」的类型感知伪错，非缺陷；labels 是独立 esbuild SPA，不在仓内任何 tsconfig program 内，type-aware 规则将 DOM/模块类型解析失败记为 error）。
+
+治理后：
+No files found to lint. Please check your paths and ignore patterns.
+Finished in 1.4s on 0 files with 89 rules using 12 threads.
+
+仓面回归：run-oxlint examples/kb-agent/（含豁免后全 kb-agent 面）：见上行 tail。
+
+补充（如实）：豁免后 run-oxlint examples/kb-agent/ 仍报 247 errors / 151 files——同类
+「游离 TS 工程外」类型感知伪错遍布 examples/kb-agent 的 .ts 面（tests/*.spec.ts、crm/src
+等，历史上一直如此，非本批引入；B3 验证当时只点名 labels 64 错）。全仓官方
+`pnpm run lint` 的该面治理超出 B10 低成本收编范围（需 tsconfig 收编工程或整面豁免，
+涉及仓级 lint 契约变更）——记录为 W7 候选。本批处置严格限定任务指定的 labels 面：
+labels/ 0 error（豁免生效），labels 自有门禁不变（esbuild bundle + w6b3-labels
+round-trip 断言，本轮全量回归复跑见 gates-b10.log）。

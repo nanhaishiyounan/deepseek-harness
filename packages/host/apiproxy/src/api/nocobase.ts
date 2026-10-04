@@ -54,6 +54,12 @@ export interface NocobaseFilterConditionView {
  * Business-system read methods; every call fails loud when the deployment
  * has not enabled the domain or the service-account credentials resolve to
  * nothing.
+ *
+ * Signed-in callers attach their `nocobase.signIn` session token
+ * (`authToken`): the gateway resolves the business identity server-side and
+ * enforces the per-user collection scope on reads and the credential
+ * requirement on writes. Calls without a token stay anonymous reads (the PC
+ * browse surface) and are refused on writes.
  */
 export interface NocobaseApi {
   /** List every collection definition the backend reports (schema discovery). */
@@ -64,7 +70,8 @@ export interface NocobaseApi {
 
   /**
    * Query one collection's rows with the restricted filter vocabulary,
-   * sorting, and paging.
+   * sorting, and paging. A resolved `authToken` whose user's scope excludes
+   * the collection fails with `nocobase-collection-forbidden`.
    */
   list(
     request: RpcRequest<{
@@ -75,24 +82,60 @@ export interface NocobaseApi {
       page_size?: number
       sort?: readonly string[]
       fields?: readonly string[]
+      authToken?: string
     }>,
     signal?: AbortSignal,
   ): Promise<RpcResponse<NocobaseRowPageView>>
 
-  /** Read one row by collection and id; a missing row fails with `nocobase-row-missing`. */
+  /**
+   * Read one row by collection and id; a missing row fails with
+   * `nocobase-row-missing`, an out-of-scope collection with
+   * `nocobase-collection-forbidden`.
+   */
   get(
-    request: RpcRequest<{ collection: string; id: number }>,
+    request: RpcRequest<{ collection: string; id: number; authToken?: string }>,
     signal?: AbortSignal,
   ): Promise<RpcResponse<{ collection: string; row: NocobaseRowView }>>
 
   /**
    * Patch one row's whitelisted low-risk fields inline (the business page's
    * 备注/数量/日期 fast path). Refused until the deployment opts in through
-   * `nocobaseWriteEnabled`; higher-risk changes stay on the agent's nb_update
-   * confirmation flow by contract.
+   * `nocobaseWriteEnabled` and the caller presents a valid sign-in session
+   * token; higher-risk changes stay on the agent's nb_update confirmation
+   * flow by contract. wfl_ engine collections refuse by default (their state
+   * machines carry server-side transition whitelists) unless the caller's
+   * username is whitelisted for the collection in `nocobaseWflWriteScopes`.
    */
   update(
-    request: RpcRequest<{ collection: string; id: number; values: Record<string, string | number | null> }>,
+    request: RpcRequest<{ collection: string; id: number; values: Record<string, string | number | null>; authToken?: string }>,
     signal?: AbortSignal,
   ): Promise<RpcResponse<{ collection: string; row: NocobaseRowView }>>
+
+  /**
+   * Act on one alert (claim/ack/resolve) through the engine's single write
+   * entrance. The acting username derives from the sign-in session token
+   * server-side; the engine's (from_state, action, actor_role) transition
+   * table and routed-user whitelist decide — its 403 crosses as
+   * `nocobase-alert-refused`, an unconfigured engine base URL as
+   * `alert-engine-unconfigured`.
+   */
+  alertAct(
+    request: RpcRequest<{ id: number; action: 'claim' | 'ack' | 'resolve'; note?: string; authToken?: string }>,
+    signal?: AbortSignal,
+  ): Promise<RpcResponse<{ id: number; action: 'claim' | 'ack' | 'resolve'; user: string }>>
+
+  /**
+   * Verify one business account's credentials against NocoBase's own
+   * `auth:signIn` (the basic authenticator; username-or-email + password) and
+   * answer the signed-in profile together with a gateway session token. The
+   * token binds the verified identity server-side (never client-narrated):
+   * prompts derive the acting user from it and nocobase reads/writes enforce
+   * its scope. No NocoBase token crosses the wire; the gateway session
+   * expires server-side. Wrong credentials fail with
+   * `nocobase-signin-rejected`.
+   */
+  signIn(
+    request: RpcRequest<{ account: string; password: string }>,
+    signal?: AbortSignal,
+  ): Promise<RpcResponse<{ username: string; nickname: string; token: string }>>
 }

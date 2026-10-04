@@ -196,12 +196,18 @@ W 轮（B0–B9 十批）把平台升级为真实制造业闭环：通用审批�
 ⑨ 审计：任一 PO/MO 双向追溯（`kpi-run.mts --trace po=<PO> mo=<MO>`，19/19 链路闭合：PO↑PR/RFQ/报价 ↓收货/IQC/批次/发票/付款；MO↑BOM/建议/SO ↓领料/报工/完工 + 批次三级追溯 成品→组件→供应商）
 ```
 
-日常操作：mobile 端对话登记/审批/查 KPI（「这周 OTIF 多少」出报告卡）；平台侧各域页面照常使用。夜间任务（W2-B7 起两条路，二选一勿双跑）——
+日常操作：mobile 端对话登记/审批/查 KPI（「这周 OTIF 多少」出报告卡）；平台侧各域页面照常使用。夜间任务（W2-B7 起两条路，二选一勿双跑；W6-B1/B2 起夜间链尾部固定追加 lakehouse-transfer、drain-backlog、scan-alerts 三条腿）——
 
 ```sh
 # 路 A（内置定时器，默认关）：env 开关让 approval-engine --serve 自己跑夜间链
-#   腿序 scan-reorder → run-mrp →（月末）月度收发存快照 → calc-kpi，季初月每日幂等重算追加 calc-scorecard；
-#   任一腿失败不阻断后续；POST :13110/run-nightly 随时手动触发一次（不占当日标记）。
+#   腿序 scan-reorder → run-mrp →（月末）月度收发存快照 → calc-kpi → lakehouse-transfer → drain-backlog → scan-alerts，
+#   季初月每日幂等重算追加 calc-scorecard；任一腿失败不阻断后续；
+#   POST :13110/run-nightly 随时手动触发一次（不占当日标记）。
+#   · lakehouse-transfer：13 张 NocoBase 业务表全量替换落 nb_* Parquet 快照（经营参谋 lakehouse 口径）；
+#   · drain-backlog：补偿队列 wfl_effect_backlog 的兜底重放（serve 循环每 30s 也自跑，夜间腿是可观测兜底）；
+#   · scan-alerts（W6-B2）：跑一遍预警规则扫描（与小时循环/POST /scan-alerts 同一实现，幂等）；
+#   · 深度监控：GET :13110/healthz——backlog_pending 为补偿队列积压深度（持续 >0 查 engine 日志），
+#     last_scan_at/last_scan_failures 为预警扫描指针（停摆可发现：长时间未更新或 failures 持续 >0 即查 wfl_alert_scan_failures 审计表）。
 W1_NIGHTLY_ENABLED=true W1_NIGHTLY_AT=02:30 node --import tsx/esm examples/kb-agent/scripts/approval-engine.mts --serve
 
 # 路 B（W 轮形态，外部 cron 逐动词 curl；不带 env 起 serve 时与之完全一致，零漂移）：
@@ -230,6 +236,41 @@ node --import tsx/esm examples/kb-agent/scripts/w5b2-advanced.mts --migrate
 ```
 
 W5 起新链路的自动推进语义（生效侧例外才人工）：IQC 判定 passed 即自动放行合格区（不再另跑放行命令）；OQC 放行自动给欠货 SO 补成品预留；ROP 建议确认自动建请购草稿并回链，ATP 回升的 open 行自动关闭；SO 发货自动落 `wms_shipments` 出库单台账；付款 paid、供应商四态升降级、MO 完工全部收进审批引擎词汇族终态（误付可经引擎 void）。库存台账恒等式不变：`stock == Σmovements`，且数量清零且无占用/锁定的库存行不再残留（`--sweep-zero-stock` 幂等清理存量）。
+
+## 平台规则引擎与预警中心（W6-B2）
+
+四路规则（效期/资质/账期/质量）扫四张业务表，命中落 `wfl_alerts` 台账（幂等：同对象恒一行，脱离范围自动关闭，再命中重开并重新通知），阈值与责任人路由全在 `alert_rules` 行上改——代码里没有阈值。首次启用：
+
+```sh
+node --import tsx/esm examples/kb-agent/scripts/w6b2-rules.mts --seed     # 两集合+通知渠道+四路规则+预警中心两页+认领入口
+node --import tsx/esm examples/kb-agent/scripts/w6b2-rules.mts --seed-ar  # 账期规则的真实逾期种子单（演示 critical 级）
+node --import tsx/esm examples/kb-agent/scripts/w6b2-rules.mts --assert   # 验收矩阵（扫描对账/幂等/阈值可配/三元状态断言/失败隔离）
+```
+
+- **入口**：平台侧菜单组「预警中心」——「预警列表」（红黄分级 + 筛选 + 行内「认领 / 关闭预警」意图表单，经 workflow 回调引擎）与「预警规则」（阈值/路由/启停，改后下一次扫描生效；每次改动落 `wfl_alert_config_audit` 审计）。移动端登录后首页 chip「我的预警」（带计数角标）→ `#/alerts`：只看路由给你的行，行内一键「认领」/「关闭」。
+- **认领纪律（单一写入口）**：状态流 open→acknowledged→resolved 由引擎 `(from_state, action, actor_role)` 三元转换表把关——认领仅路由责任人（或 admin），关闭仅认领人（或 admin），越权/越态一律拒绝并给事实。网关侧 `wfl_*` 表默认拒绝直写（`nocobaseWflWriteScopes` 显式白名单除外），预警动作统一走 `nocobase.alertAct` → `POST :13110/alerts/act`。
+- **env 旋钮**：`W6_ALERT_SCAN_ENABLED`（默认 true，小时级扫描循环开关）、`W6_ALERT_SCAN_INTERVAL_SEC`（默认 3600，下限 60）、`W6_ALERT_ENGINE_URL`（网关 alertAct 转发目标，默认 `http://127.0.0.1:13110`）。单条规则失败只隔离该路（记 `wfl_alert_scan_failures` 审计），其余三路照常扫描；通知送达不全部落行时不落 notified 戳、留审计下一轮重试。
+
+## W6 全轮速览：mobile 生产化与各域语义化交互（B0~B10）
+
+W6 在 B2 之上再落九批：mobile 真实身份与同步闭环（B0/B1——`/mobile.html#/login` 用八角色业务账号登录，#/todos 待办、#/docs/:collection 单据浏览、#/alerts 预警、工作台账服务端投影）、食品合规四件套（B3 效期看板/批次追溯 DAG/召回管理/条码打印中心）、MES 执行面（B4 车间卡片流终端 `:13110/terminals/cards.html`+CCP 监控+配方版本 ECO）、QMS（B5 检验工作台 `:13110/insp`+出厂检验报告九要素）、CRM（B6 商机管道 Kanban+客户 360）、SCM（B7 比价矩阵定标）、EAM+APS（B8 设备台账/维保日历/计量校准/瓶颈热力/what-if）、经营驾驶舱+财务 P1（B9 经营总览/账龄五桶/对账单/分级催收/三单付款门）。
+
+- **菜单组**：一级新增「预警中心」与「经营总览」（导航首位）；资产管理组扩设备台账/维保计划/工单/日历/计量校准；质量管理组扩检验工作台/出厂检验报告；采购组比价表重设计；销售组加商机管道。页路由以 `desktopRoutes` 为准（`psql -c "SELECT \"schemaUid\",title FROM \"desktopRoutes\" WHERE title LIKE '%…%'"`）。
+- **引擎路由补充**：`GET /todos`、`GET /labels`、`/label/lots.json`、`/insp/*`（登录+队列+向导+报告）、`/crm/*`（管道/360/报价转单）、`/fin/*`（驾驶舱/账龄/对账单打印/催收/三单付款门）、`/terminals/cards.html`、`/recall/*`、`/eco/*`。
+- **八角色演练与终验矩阵（可重跑）**：`node demos/acceptance-w6/w6-b10-walkthrough.mjs`（八角色真实账号+mobile 腿，产出 w6-b10-r*.png / actions.json / psql-recon.log）；`bash demos/acceptance-w6/w6-b10-matrix.sh`（44 门 psql↔引擎/湖仓对账 → w6-b10-matrix.log）；`bash demos/acceptance-w6/w6-b10-gates.sh`（全断言腿+typecheck+oxlint+pairing+演练清理汇总 → gates-b10.log）。前置：三服务全起，且网关必须带 `--patch` 启动（否则 nocobase domain 关闭，mobile 登录报「未启用」结构化拒绝）。
+- **env 旋钮（W6 增量）**：`W6_ALERT_SCAN_*` 见上节；`W6B4_ENGINE_BASE`（B4 断言腿引擎地址，默认 `http://127.0.0.1:13110`）；夜间链新增 lakehouse-transfer / drain-backlog / scan-alerts 三腿（见「制造业全链闭环」节）。
+- 逐批证据与交付记录：[`research/2026-10-01-w6-rework/99-w6-deliverables.md`](../../research/2026-10-01-w6-rework/99-w6-deliverables.md)；GB 14881-2025 条款映射：[`research/2026-10-01-w6-rework/b10/gb14881-mapping.md`](../../research/2026-10-01-w6-rework/b10/gb14881-mapping.md)。
+
+## W7 全站美学重设计：Forge 设计语言（B0~B6 + M0~M3）
+
+W7 是纯视觉层专项：114 PC 页面单元 + mobile 16 存档位全部改造为「W7 铸造 · Forge」设计语言（普鲁士深蓝 `#1E4E8C` 主色、Fiori Morning Horizon 语义五态配对、暖灰中性阶、4/8 网格、弥散同调阴影、字阶五档），业务功能零改动（W6 44 门对账矩阵复跑全 PASS 为铁证）。
+
+- **主题三模式（层 1+2 唯一入口，全站换肤）**：`node --import tsx/esm examples/kb-agent/scripts/w7b0-theme.mts --apply`（落 `w7-forge` 主题行为 default 并写 rollback 快照）/ `--assert`（断言 default+令牌 globalStyle 在位）/ `--rollback`（恢复 mfg-standard 前值）。globalStyle 同时承载 Tag/Badge preset 语义配对覆写与表格密度基底——改这两类视觉先改这里再 `--apply`，不要逐页手调。
+- **heal 断言（层 3a，schema 层治理）**：`w7b1-heal.mts`（销售/采购/CRM）/`w7b23-heal.mts`（生产/仓储/质量等）/`w7b4-heal.mts`（经营/协同/看板/v1）各自支持 `--dry-run/--apply/--assert/--rollback` 四模式；`--assert` 全绿即色板/对齐/千分位/统计卡在位。结构搬运（重排/新建块）后必须重跑 `--assert`（W5 坑 #10 继承）。
+- **JSBlock 更新通道（层 3b）**：建页脚本只建不更；改样式段后按 `BLOCK_UPDATE_CHANNEL`（`w7b6-binmap.mts` 导出，值 destroy+addBlock——存量 code 在服务端塑形的 stepParams.jsSettings 里，直接 updateSettings 写不进）销毁旧块再经 `flowSurfaces:addBlock` 重建（先例 `w7b6-binmap.mts`：token 引用式四态色板，B6 probe 回读断言零禁色）。
+- **mobile v7 双轨**：令牌唯一来源 `packages/client/ui-mobile/src/client/tokens.css`（`--dshm-*` 双轨 + `--adm-*` 全映射 + 暗轨去饱和/提亮）；改后必须 `pnpm run build:lib:client && cd apps/web && npx vite build` 才在 :3080 生效（44 bundle 契约 + 模块图冻结坑）。暗轨切换：me 页开关或 `localStorage['dsh-mobile-theme']='dark'` + 硬重载。
+- **终验矩阵（可重跑）**：`bash demos/acceptance-w7/w7-b6-matrix.sh`（美学断言汇总：主题+三 heal+114 页禁色/B5 结构 probe+mobile 暗轨门槛 → w7-b6-matrix.log）；W6 零回退腿 `bash demos/acceptance-w6/w6-b10-matrix.sh`（44 门）与 `bash demos/acceptance-w6/w6-b10-gates.sh`（B0~B9 断言腿汇总）。114 页 before/after 索引：[`research/2026-10-03-w7-rework/b6/after-index.md`](../../research/2026-10-03-w7-rework/b6/after-index.md)。
+- 逐批证据与交付记录：[`research/2026-10-03-w7-rework/99-w7-deliverables.md`](../../research/2026-10-03-w7-rework/99-w7-deliverables.md)；设计语言规范源：[`research/2026-10-03-w7-rework/b0/design-language.md`](../../research/2026-10-03-w7-rework/b0/design-language.md)。
 
 ## 供应链双系统：SRM + WMS 完整闭环（H 轮）
 

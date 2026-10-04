@@ -14,7 +14,7 @@
 .tabs {
   --active-line-height: 0;
   --active-line-color: transparent;
-  --title-font-size: 12px;
+  --title-font-size: var(--dshm-fs-xs);
   padding: 0 12px;
   flex: none;
 }
@@ -30,7 +30,7 @@
 /* The team group's demo-team banner (02 §10.1's identifiable seed mark). */
 .teamBanner {
   margin: 0 0 6px;
-  font-size: 11px;
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
   color: var(--dshm-on-soft);
   background: var(--dshm-primary-10);
@@ -66,7 +66,7 @@
 .taskTitle {
   flex: 1;
   min-width: 0;
-  font-size: 14px;
+  font-size: var(--dshm-fs-sm);
   line-height: 20px;
   font-weight: 500;
   color: var(--dshm-foreground);
@@ -77,7 +77,7 @@
 
 .taskOwner {
   flex: none;
-  font-size: 11px;
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
   color: var(--dshm-muted-foreground);
 }
@@ -86,7 +86,7 @@
   flex: none;
   font-family: var(--dshm-font-num);
   font-variant-numeric: tabular-nums;
-  font-size: 11px;
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
   color: var(--dshm-muted-foreground);
 }
@@ -97,27 +97,8 @@
 
 /* The demo tag: antd Tag recolored through its inline dials in TasksView.tsx. */
 .demoTag {
-  --border-radius: 999px;
+  --border-radius: var(--dshm-radius-pill);
   flex: none;
-  font-size: 10px;
+  font-size: var(--dshm-fs-xs);
   line-height: 14px;
-}
-
-.emptyWrap {
-  flex: none;
-  padding-top: 40px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-/* The empty-state route: the antd outline capsule (the hairline rim rides an
-   inline variable in TasksView.tsx). */
-.emptyCta:global(.adm-button) {
-  --border-radius: var(--dshm-radius);
-  height: 36px;
-  padding-block: 0;
-  padding-inline: 16px;
-  font-size: 13px;
 }

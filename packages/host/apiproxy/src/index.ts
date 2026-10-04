@@ -93,6 +93,25 @@ export interface Config {
    */
   nocobaseWriteEnabled?: boolean
   /**
+   * Per-username collection whitelists enforced server-side on
+   * `nocobase.list/get/update` for signed-in callers (the docs deep-link
+   * guard's server layer). A username absent from the table has no
+   * configured scope; anonymous calls stay open.
+   */
+  nocobaseCollectionScopes?: Readonly<Record<string, readonly string[]>> | undefined
+  /**
+   * Per-username wfl_ collection whitelists for `nocobase.update` (engine
+   * tables default to write-refused — their state machines own the
+   * transitions; the alert flow rides `nocobase.alertAct`).
+   */
+  nocobaseWflWriteScopes?: Readonly<Record<string, readonly string[]>> | undefined
+  /**
+   * The alert engine's base URL `nocobase.alertAct` forwards to
+   * (`POST /alerts/act`); omitted = the `W6_ALERT_ENGINE_URL` environment
+   * variable, both absent = the method refuses `alert-engine-unconfigured`.
+   */
+  alertEngineUrl?: string | undefined
+  /**
    * Whether the graph-page domain (`kg.schema/search/subgraph/expand/stats`)
    * answers; absent means refused, same stance as `assetsEnabled`.
    */
@@ -168,6 +187,9 @@ export class ApiProxyService extends Service implements ApiProxy {
     ordersEnabled: z.boolean(),
     nocobaseEnabled: z.boolean(),
     nocobaseWriteEnabled: z.boolean(),
+    nocobaseCollectionScopes: z.dict(z.array(z.string())),
+    nocobaseWflWriteScopes: z.dict(z.array(z.string())),
+    alertEngineUrl: z.string(),
     nocobaseBaseUrl: z.string(),
     nocobaseApiKeyEnv: z.string().role('credential-ref'),
     assetsEnabled: z.boolean(),
@@ -177,7 +199,9 @@ export class ApiProxyService extends Service implements ApiProxy {
     kgEnabled: z.boolean(),
     kgTenant: z.string(),
     viewActionTimeoutMs: z.number().step(1).min(1000),
-  })
+    // The dict row widens differently from Config's optional readonly map
+    // under exactOptionalPropertyTypes; the parse contract is the object row.
+  }) as unknown as z<Config>
 
   readonly sessions: ApiProxy['sessions']
   readonly subagents: ApiProxy['subagents']
@@ -213,6 +237,9 @@ export class ApiProxyService extends Service implements ApiProxy {
       ...config.ordersEnabled === undefined ? {} : { ordersEnabled: config.ordersEnabled },
       ...config.nocobaseEnabled === undefined ? {} : { nocobaseEnabled: config.nocobaseEnabled },
       ...config.nocobaseWriteEnabled === undefined ? {} : { nocobaseWriteEnabled: config.nocobaseWriteEnabled },
+      ...config.nocobaseCollectionScopes === undefined ? {} : { nocobaseCollectionScopes: config.nocobaseCollectionScopes },
+      ...config.nocobaseWflWriteScopes === undefined ? {} : { nocobaseWflWriteScopes: config.nocobaseWflWriteScopes },
+      ...config.alertEngineUrl === undefined ? {} : { alertEngineUrl: config.alertEngineUrl },
       ...config.nocobaseBaseUrl === undefined ? {} : { nocobaseBaseUrl: config.nocobaseBaseUrl },
       ...config.nocobaseApiKeyEnv === undefined ? {} : { nocobaseApiKeyEnv: config.nocobaseApiKeyEnv },
       ...config.assetsEnabled === undefined ? {} : { assetsEnabled: config.assetsEnabled },

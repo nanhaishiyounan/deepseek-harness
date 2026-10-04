@@ -266,6 +266,22 @@ function resultCallOf(data: unknown): { callId?: string; failed?: boolean } {
   return id === undefined ? {} : { callId: id, failed: block.isError === true }
 }
 
+/**
+ * The result block's text content (nb_create's landing receipt parses from
+ * it) — the first text block of the tool result's content array.
+ */
+function resultTextOf(data: unknown): string {
+  const content = (data as { message?: { content?: unknown } } | undefined)?.message?.content
+  if (!Array.isArray(content) || content.length === 0) return ''
+  const blocks = (content[0] as { content?: unknown }).content
+  if (!Array.isArray(blocks)) return ''
+  for (const block of blocks) {
+    const text = (block as { type?: unknown; text?: unknown }).text
+    if ((block as { type?: unknown }).type === 'text' && typeof text === 'string') return text
+  }
+  return ''
+}
+
 /** The v2 flat-draft projection of a v3 payload (the legacy render path's data). */
 function legacyDraftOf(payload: FormDraftPayload): FormDraft {
   const fields: Record<string, string> = {}
@@ -275,8 +291,26 @@ function legacyDraftOf(payload: FormDraftPayload): FormDraft {
   return { collection: payload.form.collection, title: payload.title, fields }
 }
 
+/**
+ * The receipt verification ledger (W6-B1 leftover ①): collection:id pairs
+ * every successful nb_create tool result landed in this history window. A
+ * submit_receipt fence may only render as the receipt card when its rowId
+ * matches one of these — the model's narrative is no longer a receipt
+ * source (a pathological confirm+reject round used to bait a fabricated
+ * submit_receipt out of the model with no nb_create behind it).
+ */
+export interface ReceiptVerification {
+  /** `collection:id` pairs of successful nb_create results, in event order. */
+  readonly landedCreates: ReadonlySet<string>
+}
+
+/** One nb_create landing line as its tool result text opens (`已在 X 创建第 N 行：`). */
+const CREATE_LINE = /^已在 (\S+) 创建第 (\d+) 行：/u
+
 /** Fold one assistant message's text through the v3 splitter into items. */
-function foldAssistantText(text: string, seq: number, time: number, items: ChatItem[], degradedOut: { count: number }): void {
+function foldAssistantText(
+  text: string, seq: number, time: number, items: ChatItem[], degradedOut: { count: number }, verification: ReceiptVerification,
+): void {
   const { segments, degraded } = splitMessage(text)
   degradedOut.count += degraded
   // A degraded dsh fence still marks the message as v3: its payload failed
@@ -299,6 +333,21 @@ function foldAssistantText(text: string, seq: number, time: number, items: ChatI
     }
     if (segment.kind === 'degraded') {
       items.push({ kind: 'degraded', seq: itemSeq, time, text: segment.text })
+      return
+    }
+    // W6-B1 leftover ①: a submit_receipt renders only against a matching
+    // successful nb_create result — anything else folds to the collapsed
+    // notice with the cause spelled out (the model narrative is not a
+    // receipt source).
+    if (segment.payload.type === 'submit_receipt'
+      && !verification.landedCreates.has(`${segment.payload.form.collection}:${segment.payload.rowId}`)) {
+      degradedOut.count += 1
+      items.push({
+        kind: 'degraded',
+        seq: itemSeq,
+        time,
+        text: `回执未经落库核实（没有对应的写入结果落库 ${segment.payload.form.collection} 第 ${segment.payload.rowId} 行），该回执不可信，请以单据页为准`,
+      })
       return
     }
     const payload = segment.payload
@@ -423,6 +472,11 @@ export function foldHistory(events: readonly FoldEvent[]): FoldedTurn {
   // Turn bookkeeping: an open turn/start without its turn/end means running.
   const openTurns = new Set<number>()
   let sawAnyTurn = false
+  // Receipt verification (W6-B1 ①): callIds of open nb_create calls and the
+  // collection:id pairs their successful results landed.
+  const nbCreateCalls = new Set<string>()
+  const landedCreates = new Set<string>()
+  const verification: ReceiptVerification = { landedCreates }
 
   for (const event of sorted) {
     switch (event.type) {
@@ -447,7 +501,7 @@ export function foldHistory(events: readonly FoldEvent[]): FoldedTurn {
         // The event data wraps the message: {turn, step, message}.
         const text = textBlocksOf((event.data as { message?: { content?: unknown } }).message?.content).join('')
         if (text === '') break
-        foldAssistantText(text, event.seq, event.time, items, degraded)
+        foldAssistantText(text, event.seq, event.time, items, degraded, verification)
         break
       }
       case 'tool/call': {
@@ -466,6 +520,7 @@ export function foldHistory(events: readonly FoldEvent[]): FoldedTurn {
         }
         items.push(row)
         if (typeof data.callId === 'string') toolRows.set(data.callId, row)
+        if (name === 'nb_create' && typeof data.callId === 'string') nbCreateCalls.add(data.callId)
         collectKgQuery(name, data.arguments, kgQueries)
         break
       }
@@ -474,6 +529,13 @@ export function foldHistory(events: readonly FoldEvent[]): FoldedTurn {
         if (callId !== undefined) {
           const row = toolRows.get(callId)
           if (row !== undefined) row.state = failed === true ? 'error' : 'done'
+          // A successful nb_create result's landing line joins the receipt
+          // verification ledger (W6-B1 ①) — seq order guarantees the result
+          // precedes any receipt fence that cites it.
+          if (failed !== true && nbCreateCalls.has(callId)) {
+            const landed = CREATE_LINE.exec(resultTextOf(event.data))
+            if (landed !== null) landedCreates.add(`${landed[1]}:${landed[2]}`)
+          }
         }
         break
       }

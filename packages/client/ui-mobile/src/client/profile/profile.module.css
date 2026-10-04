@@ -32,7 +32,7 @@
 
 .headerTitle {
   margin: 0;
-  font-size: 17px;
+  font-size: var(--dshm-fs-lg);
   line-height: 24px;
   font-weight: 600;
   color: var(--dshm-foreground);
@@ -60,14 +60,14 @@
 }
 
 .userName {
-  font-size: 17px;
+  font-size: var(--dshm-fs-lg);
   line-height: 24px;
   font-weight: 700;
   color: var(--dshm-foreground);
 }
 
 .userMeta {
-  font-size: 12px;
+  font-size: var(--dshm-fs-xs);
   line-height: 18px;
   color: var(--dshm-muted-foreground);
 }
@@ -93,13 +93,13 @@
 }
 
 .metricLabel {
-  font-size: 11px;
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
   color: var(--dshm-muted-foreground);
 }
 
 .metricValue {
-  font-size: 22px;
+  font-size: var(--dshm-fs-xl);
   line-height: 28px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
@@ -128,7 +128,7 @@
 }
 
 .workspaceTitle {
-  font-size: 11px;
+  font-size: var(--dshm-fs-xs);
   font-weight: 500;
   line-height: 16px;
   color: var(--dshm-muted-foreground);
@@ -153,14 +153,14 @@
 .workspaceValue {
   font-family: var(--dshm-font-num);
   font-variant-numeric: tabular-nums;
-  font-size: 20px;
+  font-size: var(--dshm-fs-lg);
   line-height: 26px;
   font-weight: 600;
   color: var(--dshm-foreground);
 }
 
 .workspaceLabel {
-  font-size: 11px;
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
   color: var(--dshm-foreground);
 }
@@ -181,7 +181,7 @@
 
 .recentTitle {
   margin: 0 0 4px;
-  font-size: 11px;
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
   font-weight: 500;
   color: var(--dshm-muted-foreground);
@@ -206,7 +206,7 @@
 .receiptNo {
   font-family: var(--dshm-font-num);
   font-variant-numeric: tabular-nums;
-  font-size: 12px;
+  font-size: var(--dshm-fs-xs);
   line-height: 18px;
   font-weight: 600;
   color: var(--dshm-success);
@@ -214,7 +214,7 @@
 }
 
 .recentForm {
-  font-size: 13px;
+  font-size: var(--dshm-fs-sm);
   line-height: 20px;
   font-weight: 500;
   color: var(--dshm-foreground);
@@ -228,7 +228,7 @@
 .recentHero {
   font-family: var(--dshm-font-num);
   font-variant-numeric: tabular-nums;
-  font-size: 13px;
+  font-size: var(--dshm-fs-sm);
   line-height: 20px;
   font-weight: 600;
   color: var(--dshm-foreground);
@@ -244,13 +244,19 @@
   flex: none;
 }
 
-/* The quick-start shortcut: antd-mobile Button (the washed capsule face
-   rides inline variables in ProfileView.tsx); this class keeps the 36px size. */
+/* The quick-start shortcut: antd-mobile Button on the neutral card-face
+    capsule (inline dials in ProfileView.tsx, v7 de-blue); this class keeps
+    the 36px size and the pressed wash. */
 .shortcut:global(.adm-button) {
   height: var(--dshm-touch-sm);
   padding-block: 0;
   padding-inline: 14px;
-  font-size: 12px;
+  font-size: var(--dshm-fs-xs);
+  font-weight: 600;
+}
+
+.shortcut:global(.adm-button):active {
+  background: var(--dshm-muted);
 }
 
 /* The settings band (the design's .set-group): the group title over one card
@@ -265,7 +271,7 @@
 .setTitle {
   margin: 0;
   padding: 12px 14px 4px;
-  font-size: 12.5px;
+  font-size: var(--dshm-fs-xs);
   line-height: 18px;
   font-weight: 600;
   color: var(--dshm-muted-foreground);
@@ -287,7 +293,7 @@
 .settings :global(.adm-switch) {
   --width: 46px;
   --height: 27px;
-  --border-radius: 999px;
+  --border-radius: var(--dshm-radius-pill);
   --checked-color: var(--dshm-primary);
 }
 
@@ -312,11 +318,11 @@
   margin: 16px 12px 0;
   padding: 12px 14px;
   text-align: center;
-  font-size: 12px;
+  font-size: var(--dshm-fs-xs);
   line-height: 1.6;
   color: var(--dshm-muted-foreground);
   background: var(--dshm-card);
   border: 1px dashed var(--dshm-border);
-  border-radius: 12px;
+  border-radius: var(--dshm-radius);
   flex: none;
 }

@@ -1,0 +1,20 @@
+== baseline wfl_alerts count/status/rule_type/severity ==
+total|20
+open|12
+resolved|8
+ar_overdue|3
+cert_due|10
+expiry|4
+quality_abnormal|3
+ar_overdue|critical|open|1
+ar_overdue|warning|open|1
+ar_overdue|warning|resolved|1
+cert_due|critical|open|1
+cert_due|warning|open|2
+cert_due|warning|resolved|7
+expiry|critical|open|3
+expiry|warning|open|1
+quality_abnormal|warning|open|3
+== alert_rules (byte-level params snapshot) ==
+== notifications count ==
+115

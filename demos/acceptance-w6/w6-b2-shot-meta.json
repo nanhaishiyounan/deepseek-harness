@@ -1,0 +1,51 @@
+{
+  "generatedAt": "2026-10-01T21:16:33.615Z",
+  "steps": {
+    "liveTriple": {
+      "healthz": {
+        "ok": true,
+        "backlog_pending": 0
+      },
+      "scanSummary": "expiry+0/~4/-0 cert_due+0/~3/-0 ar_overdue+0/~3/-0 quality_abnormal+0/~3/-0",
+      "notified": 0
+    },
+    "adminIdentity": "nocobase",
+    "alertsPage": {
+      "statCount": 0,
+      "tableRows": 20,
+      "allAntCards": 6
+    },
+    "keeperPcIdentity": "keeper",
+    "keeperInbox": {
+      "messages": [
+        {
+          "channelName": "alert-center",
+          "title": "批次 MOON-260318-01 已过期 18 天",
+          "status": "unread"
+        },
+        {
+          "channelName": "alert-center",
+          "title": "批次 MILK-260914-01 已过期 11 天",
+          "status": "unread"
+        },
+        {
+          "channelName": "alert-center",
+          "title": "批次 SNA-260206-02 32 天后到期",
+          "status": "unread"
+        },
+        {
+          "channelName": "alert-center",
+          "title": "批次 BEV-260825-02 7 天后到期",
+          "status": "unread"
+        }
+      ],
+      "unreadCount": 4
+    },
+    "mobileIdentity": "keeper",
+    "homeChip": true,
+    "mobileAlerts": {
+      "alertRows": 4,
+      "textOk": true
+    }
+  }
+}

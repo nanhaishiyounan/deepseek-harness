@@ -220,7 +220,7 @@ describe('HomeView', () => {
     render(<HomeView identityName="业务员" />)
     // The session read runs async: the skeleton shows first, the empty copy
     // only once the ready read reports no chats.
-    await waitFor(() => { expect(screen.getByText('还没有对话，找 AI 同事开个头')).toBeTruthy() })
+    await waitFor(() => { expect(screen.getByText('还没有对话')).toBeTruthy() })
     fireEvent.click(screen.getAllByRole('button', { name: '查看全部 ›' })[1] as HTMLButtonElement)
     expect(location.hash).toBe('#/chats')
   })
@@ -265,9 +265,9 @@ describe('HomeView', () => {
     const alert = await screen.findByRole('alert')
     expect(alert.textContent).toContain('最近对话加载失败：会话目录 503')
     // The failure is not the empty state: the empty copy never shows.
-    expect(screen.queryByText('还没有对话，找 AI 同事开个头')).toBeNull()
+    expect(screen.queryByText('还没有对话')).toBeNull()
     failSessions = false
     fireEvent.click(screen.getByRole('button', { name: '重试' }))
-    await waitFor(() => { expect(screen.getByText('还没有对话，找 AI 同事开个头')).toBeTruthy() })
+    await waitFor(() => { expect(screen.getByText('还没有对话')).toBeTruthy() })
   })
 })

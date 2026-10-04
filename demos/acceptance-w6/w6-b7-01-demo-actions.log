@@ -1,0 +1,44 @@
+— leg 0: reset RFQ-B7J1 to the awardable state（演练可重跑）
+  ✓ RFQ-B7J1 重置为 approved+三家 submitted
+— leg 1: live surface + matrix on RFQ-B7J1
+  ✓ GET /sourcing/rfqs 200 — status=200
+  ✓ GET /sourcing/matrix 200 — status=200
+  ✓ 矩阵返回三家报价行 — rows=3
+  ✓ 山东鲁丰 prevent（最新期评级 D） — 评级 D∈prevent
+  ✓ 味之源 warn（评级 C） — 评级 C∈warn
+  ✓ 珠海鲜丰准入 ok — ok
+— leg 2: scorecard + pass-rate + total-score reconciliation (psql hand calc)
+  ✓ 矩阵质量分=psql 最新期 score_quality（鲜丰） — matrix=94 psql=94(A@2026Q2)
+  ✓ 矩阵质量分=psql 最新期 score_quality（味之源） — matrix=42.9 psql=42.9(C@2026Q3)
+  ✓ 矩阵批次合格率=psql 聚合（鲜丰） — matrix=75% psql=75.0%
+  ✓ 三维总分手算对拍（鲜丰） — hand=93.4 engine=93.4（权重 50/30/20）
+  算式（鲜丰）：价格分=¥0.98/¥1.1×100=89.1；交期分=3/3天×100=100；质量分=94(A·2026Q2)；总分=(50×89.1+30×100+20×94)/100=93.4
+  算式（鲁丰）：价格分=¥0.98/¥0.98×100=100；交期分=3/4天×100=75；质量分=45(D·2026Q2)；总分=(50×100+30×75+20×45)/100=81.5
+— leg 3: weight flip scenario（RFQ-W6B7-0002，味之源低价 vs 鲜丰优质）
+  ✓ 权重 50/30/20 → 味之源（低价）#1 — 味之源调味食品股份有限公司#1(88.6)、珠海鲜丰水产科技有限公司#2(83.8)
+  ✓ 权重 10/2/88 → 鲜丰（优质）#1，排名翻转 — 珠海鲜丰水产科技有限公司#1(91.7)、味之源调味食品股份有限公司#2(49.8)
+  权重50/30/20排名：味之源调味食品股份有限公司#1(88.6)、珠海鲜丰水产科技有限公司#2(83.8)
+  权重10/2/88排名：珠海鲜丰水产科技有限公司#1(91.7)、味之源调味食品股份有限公司#2(49.8)
+  demo RFQ+quotes 已清理，权重已恢复 50/30/20
+— leg 4: prevent refusal（山东鲁丰 → 403 评分卡联动）
+  ✓ prevent 供应商定标被拒 403 — status=403 error=供应商 山东鲁丰食品配料有限公司 最新评级 D∈prevent(D)——禁止定标（评分卡联动）
+  ✓ 拒绝理由含 prevent/评分卡联动 — 供应商 山东鲁丰食品配料有限公司 最新评级 D∈prevent(D)——禁止定标（评分卡联动）
+— leg 5: fence refusal（finance → 403 围栏）
+  ✓ 非采购角色定标 403 — status=403 error=比价定标限 采购部/admin 操作（finance 不在围栏内）
+— leg 6: award（buyer 定标珠海鲜丰，落选取消）→ 全链落库
+  ✓ 定标 200 — status=200 po=PO-2026-1057 error=
+  ✓ RFQ 状态流转 approved→awarded
+  ✓ 中标行 is_won（鲜丰）
+  ✓ 落选行 lost（鲁丰/味之源）
+  ✓ PO compare_note 含三维定标算式 — 三维定标（权重 价格50/交期30/质量20）：价格分=¥0.98/¥1.1×100=89.1；交期分=3/3天×100=100；质量分=94(A·2026Q2)；总分=(50×89.1+30×100+20×94)/10
+  ✓ PO rfq_id 回链
+  compare_note：三维定标（权重 价格50/交期30/质量20）：价格分=¥0.98/¥1.1×100=89.1；交期分=3/3天×100=100；质量分=94(A·2026Q2)；总分=(50×89.1+30×100+20×94)/100=93.4；授标 珠海鲜丰水产科技有限公司（¥1.1×1000，排名#1）；比价：珠海鲜丰水产科技有限公司¥1.1/3天=93.4分；山东鲁丰食品配料有限公司¥0.98/4天=8…
+— leg 7: idempotency（双击重放 + 换 winner 409）
+  ✓ 同 winner 重放 200 幂等 — status=200 idempotent=true
+  ✓ 幂等重放未新增 PO — first-award-added=1（恰一张）
+  ✓ 换 winner 重定标 409 — status=409 error=询价单 RFQ-B7J1 已定标（PO PO-2026-1057，中标报价行 10）——重复定标被拒（本次 winner=11）
+— leg 8: XSS 惰性（注入供应商名进 RFQ-B9F-0001 矩阵）
+  ✓ 矩阵 JSON 携带原文（无注入面） — <img src=x onerror=window.__w6b7Xss=1>
+  ✓ esc 由 JSBlock 渲染层负责（JSON 层无 HTML 求值）
+  ✓ XSS 演练残留清理=0
+w6b7 demo: PASS

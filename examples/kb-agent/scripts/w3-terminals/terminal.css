@@ -9,13 +9,13 @@
   --line: #32404f;
   --ink: #f2f6fa;
   --ink-dim: #a7b6c4;
-  --primary: #1677ff;
+  --primary: #5783BC; /* W7 chart-3 亮蓝（深底终端变体，锚定 --w7-primary 色相） */
   --primary-ink: #ffffff;
-  --ok: #52c41a;
-  --ok-ink: #08290c;
-  --bad: #ff4d4f;
+  --ok: #6EB871; /* W7 positive 亮变体 */
+  --ok-ink: #2E5B33;
+  --bad: #C93A3A; /* W7 negative 亮变体 */
   --bad-ink: #ffffff;
-  --warn: #faad14;
+  --warn: #F09A4B; /* W7 critical 亮变体 */
   --radius: 14px;
 }
 

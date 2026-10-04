@@ -1,0 +1,6 @@
+gate expect-matrix(03+05b+10): PASS
+gate dunning-flow(08): 1 checks
+gate match-recon(09b): 1 checks
+gate negatives(10): 6 checks
+gate b9-assert(12): exit=0 w6b9-cockpit: all asserts green
+gate b2-regression(13): exit=0 w6b2-rules: assert 全部断言通过

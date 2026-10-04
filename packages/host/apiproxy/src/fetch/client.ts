@@ -64,7 +64,12 @@ import {
 import { llmDiscoverModelsValueSchema, llmModelsValueSchema, llmProvidersValueSchema } from '../api/llm.schema.ts'
 import { kbIngestValueSchema, kbSearchValueSchema, kbStatsValueSchema, kbUploadValueSchema } from '../api/kb.schema.ts'
 import {
-  nocobaseGetValueSchema, nocobaseListMetaValueSchema, nocobaseListValueSchema, nocobaseUpdateValueSchema,
+  nocobaseAlertActValueSchema,
+  nocobaseGetValueSchema,
+  nocobaseListMetaValueSchema,
+  nocobaseListValueSchema,
+  nocobaseSignInValueSchema,
+  nocobaseUpdateValueSchema,
 } from '../api/nocobase.schema.ts'
 import { dataUploadValueSchema } from '../api/data.schema.ts'
 import { orderValueSchema, ordersListValueSchema } from '../api/orders.schema.ts'
@@ -229,6 +234,8 @@ export interface IApiClient {
     list(payload: RequestPayload<'nocobase.list'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'nocobase.list'>>>
     get(payload: RequestPayload<'nocobase.get'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'nocobase.get'>>>
     update(payload: RequestPayload<'nocobase.update'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'nocobase.update'>>>
+    alertAct(payload: RequestPayload<'nocobase.alertAct'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'nocobase.alertAct'>>>
+    signIn(payload: RequestPayload<'nocobase.signIn'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'nocobase.signIn'>>>
   }
   /** client-response passthrough (rpcId is a backfill of the server-request's id — never minted here). */
   respond(message: ClientResponse, signal?: AbortSignal): Promise<RpcReceipt>
@@ -327,6 +334,8 @@ const UNARY_VALUE_SCHEMAS: { [K in keyof RpcMethodMap]: z.ZodType<Wire<ResponseV
   'nocobase.list': nocobaseListValueSchema,
   'nocobase.get': nocobaseGetValueSchema,
   'nocobase.update': nocobaseUpdateValueSchema,
+  'nocobase.alertAct': nocobaseAlertActValueSchema,
+  'nocobase.signIn': nocobaseSignInValueSchema,
 }
 
 /** Default timeout for bounded unary calls (rpc-compare 2026-07-19: a hung host must not leave callers pending forever). */
@@ -670,6 +679,8 @@ export abstract class AbstractApiClient implements IApiClient {
     list: (payload, signal) => this.callUnary('nocobase.list', payload, signal, 'caller-signal-only'),
     get: (payload, signal) => this.callUnary('nocobase.get', payload, signal, 'caller-signal-only'),
     update: (payload, signal) => this.callUnary('nocobase.update', payload, signal, 'caller-signal-only'),
+    alertAct: (payload, signal) => this.callUnary('nocobase.alertAct', payload, signal, 'caller-signal-only'),
+    signIn: (payload, signal) => this.callUnary('nocobase.signIn', payload, signal, 'caller-signal-only'),
   }
 
   readonly events: IApiClient['events'] = {

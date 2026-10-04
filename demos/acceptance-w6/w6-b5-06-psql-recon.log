@@ -1,0 +1,12 @@
+# W6-B5 psql recon (QI-W6B5-01 IQC N=300 → plan 281-500/H n=50 Ac=3 Re=4; critical=1 → rejected → concession disposal)
+# A. verdict + readings + alert (pre-disposal)
+inspection|W6B5-QI-W6B5-01-mut6t665-3jphen|1|1|50/3/4|qc_inspector|normal|true
+readings|5
+alert|inspection_fail|critical|open
+
+# B. concession aftermath (result re-labeled, NC closed approved, CAPA draft)
+after|failed
+nc|QM-NC-2026-0052|rework|closed|approved|RW-2026-0011
+rworkmo|RW-2026-0011|rework|draft
+rworkmo|RW-2026-0010|rework|draft
+capa|1

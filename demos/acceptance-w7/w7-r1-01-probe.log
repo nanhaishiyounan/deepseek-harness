@@ -1,0 +1,121 @@
+census rebuilt live: 114 units (111 flowPage + 3 v1)
+B5_KINDS contract: matched 23/23 declared uids in the live census
+probe 001-经营总览 liveness=PASS kind=cockpit clean
+probe 002-AI 工作台 liveness=PASS kind=sweep clean
+probe 003-销售线索 liveness=PASS kind=sweep clean
+probe 004-客户 liveness=PASS kind=sweep clean
+probe 005-联系人 liveness=PASS kind=sweep clean
+probe 006-产品与服务 liveness=PASS kind=sweep clean
+probe 007-客户仪表盘 liveness=PASS kind=sweep clean
+probe 008-入库单 liveness=PASS kind=sweep clean
+probe 009-出库单 liveness=PASS kind=sweep clean
+probe 010-库存查询 liveness=PASS kind=sweep clean
+probe 011-盘点管理 liveness=PASS kind=sweep clean
+probe 012-移库管理 liveness=PASS kind=sweep clean
+probe 013-预留管理 liveness=PASS kind=sweep clean
+probe 014-补货预警 liveness=PASS kind=sweep clean
+probe 015-库存流水 liveness=PASS kind=sweep clean
+probe 016-月度收发存 liveness=PASS kind=sweep clean
+probe 017-批次主数据 liveness=PASS kind=sweep clean
+probe 018-仓库库区 liveness=PASS kind=sweep clean
+probe 019-库位平面图 liveness=PASS kind=sweep clean
+probe 020-盘点计划 liveness=PASS kind=sweep clean
+probe 021-收货终端 liveness=PASS kind=sweep clean
+probe 022-供应商档案 liveness=PASS kind=sweep clean
+probe 023-供应商准入 liveness=PASS kind=sweep clean
+probe 024-审核检查表 liveness=PASS kind=sweep clean
+probe 025-审核评分录入 liveness=PASS kind=sweep clean
+probe 026-绩效评分卡 liveness=PASS kind=sweep clean
+probe 027-供应商绩效雷达 liveness=PASS kind=sweep clean
+probe 028-证照效期预警 liveness=PASS kind=sweep clean
+probe 029-整改跟踪 liveness=PASS kind=sweep clean
+probe 030-分类维护 liveness=PASS kind=sweep clean
+probe 031-生产订单 liveness=PASS kind=sweep clean
+probe 032-MO 执行视图 liveness=PASS kind=sweep clean
+probe 033-排程明细 liveness=PASS kind=sweep clean
+probe 034-生产订单看板 liveness=PASS kind=sweep clean
+probe 035-领料单 liveness=PASS kind=sweep clean
+probe 036-退料单 liveness=PASS kind=sweep clean
+probe 037-报工记录 liveness=PASS kind=sweep clean
+probe 038-工程变更单 liveness=PASS kind=bomver clean
+probe 039-完工单 liveness=PASS kind=sweep clean
+probe 040-配方版本与变更 liveness=PASS kind=bomver clean
+probe 041-BOM 管理 liveness=PASS kind=sweep clean
+probe 042-BOM 工序 liveness=PASS kind=sweep clean
+probe 043-工作中心 liveness=PASS kind=sweep clean
+probe 044-主生产计划 liveness=PASS kind=sweep clean
+probe 045-MRP 快照 liveness=PASS kind=sweep clean
+probe 046-计划工作台 liveness=PASS kind=sweep clean
+probe 047-车间终端 liveness=PASS kind=sweep clean
+probe 048-APS瓶颈与负荷 liveness=PASS kind=aps clean
+probe 049-APS what-if沙箱 liveness=PASS kind=apswhatif clean
+probe 050-员工 liveness=PASS kind=sweep clean
+probe 051-部门 liveness=PASS kind=sweep clean
+probe 052-请假审批 liveness=PASS kind=sweep clean
+probe 053-组织架构 liveness=PASS kind=sweep clean
+probe 054-权限矩阵 liveness=PASS kind=sweep clean
+probe 055-经营看板 liveness=PASS kind=sweep clean
+probe 056-供应链看板 liveness=PASS kind=sweep clean
+probe 057-生产看板 liveness=PASS kind=sweep clean
+probe 058-库存看板 liveness=PASS kind=sweep clean
+probe 059-应收应付对账 liveness=PASS kind=sweep clean
+probe 060-财务工作台 liveness=PASS kind=finwb clean
+probe 061-质检单 liveness=PASS kind=sweep clean
+probe 062-检验读数 liveness=PASS kind=sweep clean
+probe 063-AQL 抽样方案 liveness=PASS kind=sweep clean
+probe 064-处置看板 liveness=PASS kind=sweep clean
+probe 065-质检看板 liveness=PASS kind=sweep clean
+probe 066-季度绩效物化 liveness=PASS kind=sweep clean
+probe 067-CCP监控配置 liveness=PASS kind=tagpage clean
+probe 068-质检工作台 liveness=PASS kind=sweep clean
+probe 069-CCP监控记录 liveness=PASS kind=tagpage clean
+probe 070-检验工作台 liveness=PASS kind=iframepage clean
+probe 071-出厂检验报告 liveness=PASS kind=tagpage clean
+probe 072-资产台账 liveness=PASS kind=sweep clean
+probe 073-设备台账 liveness=PASS kind=tagpage clean
+probe 074-维保服务商 liveness=PASS kind=sweep clean
+probe 075-维保计划 liveness=PASS kind=tagpage clean
+probe 076-维保记录 liveness=PASS kind=sweep clean
+probe 077-维保工单 liveness=PASS kind=tagpage clean
+probe 078-计量校准 liveness=PASS kind=tagpage clean
+probe 079-维保日历 liveness=PASS kind=calendar clean
+probe 080-采购申请 liveness=PASS kind=sweep clean
+probe 081-询价管理 liveness=PASS kind=sweep clean
+probe 082-供应商报价 liveness=PASS kind=sweep clean
+probe 083-比价表 liveness=PASS kind=matrix clean
+probe 084-采购订单 liveness=PASS kind=poboard clean
+probe 085-发票匹配 liveness=PASS kind=sweep clean
+probe 086-付款申请 liveness=PASS kind=sweep clean
+probe 087-采购看板 liveness=PASS kind=sweep clean
+probe 088-销售订单 liveness=PASS kind=sweep clean
+probe 089-商机管道 liveness=PASS kind=iframepage clean
+probe 090-报价单 liveness=PASS kind=sweep clean
+probe 091-订单 liveness=PASS kind=sweep clean
+probe 092-回款 liveness=PASS kind=sweep clean
+probe 093-发票 liveness=PASS kind=sweep clean
+probe 094-销售看板 liveness=PASS kind=sweep clean
+probe 095-交期日历 liveness=PASS kind=sweep clean
+probe 096-计划日历 liveness=PASS kind=sweep clean
+probe 097-销售仪表盘 liveness=PASS kind=sweep clean
+probe 098-任务列表 liveness=PASS kind=sweep clean
+probe 099-任务看板 liveness=PASS kind=sweep clean
+probe 100-任务日历 liveness=PASS kind=sweep clean
+probe 101-项目 liveness=PASS kind=sweep clean
+probe 102-里程碑 liveness=PASS kind=sweep clean
+probe 103-工单 liveness=PASS kind=sweep clean
+probe 104-知识文章 liveness=PASS kind=sweep clean
+probe 105-审批中心 liveness=PASS kind=sweep clean
+probe 106-审批流配置 liveness=PASS kind=sweep clean
+probe 107-预警列表 liveness=PASS kind=tagpage clean
+probe 108-预警规则 liveness=PASS kind=tagpage clean
+probe 109-效期看板 liveness=PASS kind=expiry clean
+probe 110-批次追溯 liveness=PASS kind=dag clean
+probe 111-召回管理 liveness=PASS kind=tagpage clean
+probe 112-应用中心 liveness=PASS kind=sweep clean
+probe 113-排产甘特 liveness=PASS kind=sweep clean
+probe 114-任务甘特 liveness=PASS kind=sweep clean
+engine /insp primary=#1E4E8C banned={"#1677ff":0,"#7c3aed":0,"#722ed1":0}
+engine /crm primary=#1E4E8C banned={"#1677ff":0,"#7c3aed":0,"#722ed1":0}
+engine /terminals/cards.html primary=#5783BC banned={"#1677ff":0,"#7c3aed":0,"#722ed1":0}
+ALL B6 PROBES GREEN
+probe-exit=0

@@ -1,0 +1,20 @@
+== W6-B3 live 三联（2026-10-02T04:34:53Z）==
+-- 引擎 :13110 /healthz
+{"ok":true,"backlog_pending":0,"last_scan_at":null,"last_scan_failures":0}
+-- 引擎路由指针（启动 log 尾部）
+approval-engine: serving on http://127.0.0.1:13110 (POST /act, POST /submit, POST /post-count-adjust, POST /scan-reorder, POST /calc-scorecard, POST /run-mrp, POST /calc-kpi, POST /run-nightly, POST /scan-alerts, POST /alerts/act, POST /confirm-suggestion, POST /recall/create, POST /recall/act, GET /todos, GET /healthz, GET /labels, GET /label/lots.json, GET /label/lot.svg)
+-- 网关 :3080
+GET / → 200
+GET /mobile → 200
+-- NocoBase :13000 食品合规三页路由
+-n 效期看板 → /admin/
+w6b3d5c6mpmzl1
+-n 批次追溯 → /admin/
+w6b3vmzwuyqofp
+-n 召回管理 → /admin/
+w6b3r1wnc10bflfg
+-- 数据面（131节点/129边视图 + 召回单 + 预警）
+v_trace_nodes=131
+v_trace_edges=129
+recall_orders=3
+expiry_alerts(open/ack)=4

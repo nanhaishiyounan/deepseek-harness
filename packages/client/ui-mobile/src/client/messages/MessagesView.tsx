@@ -10,12 +10,12 @@
 
 import { useEffect, useMemo, useState, type JSX } from 'react'
 import { Badge, CapsuleTabs, ErrorBlock, InfiniteScroll, PullToRefresh, SearchBar, SwipeAction, Tag } from 'antd-mobile'
-import { Plus } from 'lucide-react'
+import { MessageCircle, Plus } from 'lucide-react'
 import type { SessionSummary } from '@deepseek-ai/dsh-host-apiproxy/api'
 import { goBackOr, navigate } from '../router.ts'
 import { PageNav } from '../PageNav.tsx'
 import { usePoll } from '../hooks.ts'
-import { Avatar, SkelRow } from '../ui.tsx'
+import { Avatar, EmptyState, SkelRow } from '../ui.tsx'
 import { colleagueColor, colleagueOf } from '../colleagues.ts'
 import { listSessions, relativeTimeOf, titleOf } from '../sessionsService.ts'
 import { markSessionRead, pendingReviewSessions, pinSession, pinnedSessions, readWatermarkOf, unpinSession } from '../draftStore.ts'
@@ -183,7 +183,11 @@ export function MessagesView(): JSX.Element {
             <ErrorBlock status="disconnected" title={sessionsPoll.error} className={css.empty as string} />
           )}
           {rows?.length === 0 && (
-            <ErrorBlock status="empty" title="没有匹配的会话" description="右上角 + 找 AI 同事开聊" className={css.empty as string} />
+            <EmptyState
+              icon={<MessageCircle size={22} strokeWidth={1.8} />}
+              title={filter === 'all' && keyword.trim() === '' ? '还没有会话' : '没有匹配的会话'}
+              description={filter === 'all' && keyword.trim() === '' ? '右上角 + 找 AI 同事开聊' : '换个筛选或关键词，右上角 + 开个新会话'}
+            />
           )}
           {rows?.slice(0, visible).map((summary: SessionSummary) => {
             const preset = summary.agentPreset

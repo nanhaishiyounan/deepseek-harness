@@ -73,8 +73,8 @@ import type {
 } from '@deepseek-ai/dsh-kb-graph'
 import { kgCorefEdgeId, kgCorefPairKey, kgRelationId } from '@deepseek-ai/dsh-kb-graph'
 import type { KgOntologyChangeOp } from '@deepseek-ai/dsh-kb-graph'
-import { compileNbFilter, NocoBaseClient, parseNbFilterCondition, unwrapNbTitle } from '@deepseek-ai/dsh-connector-nocobase'
-import type { NbFilterCondition, NocoBaseCollectionMeta, NocoBaseListResult } from '@deepseek-ai/dsh-connector-nocobase'
+import { compileNbFilter, NocoBaseClient, parseNbFilterCondition, setSessionActingUser, unwrapNbTitle } from '@deepseek-ai/dsh-connector-nocobase'
+import type { ActingUser, NbFilterCondition, NocoBaseCollectionMeta, NocoBaseListResult } from '@deepseek-ai/dsh-connector-nocobase'
 import type {} from '@deepseek-ai/dsh-tools'
 import type {
   ApiProxy, ConfigurableProviderView, CredentialView, GoalRef, HistoryEntry, HostFrame,
@@ -173,6 +173,182 @@ export const DEFAULT_VIEW_ACTION_TIMEOUT_MS = 30_000
 const MESSAGE_TYPES = new Set(['user/message', 'assistant/message'])
 
 /** Validate one prompt as a batch before publishing any durable image object. */
+/**
+ * Prefix the session-opening identity stamp onto the first text part (or
+ * append one when the message carries no text): the model learns who it is
+ * talking to from a durable, server-written line exactly once per session,
+ * and the acting-user registry (the enforcement channel) stays in step with
+ * what the model narrates. Later prompts rebind the registry without
+ * restamping — the opening line rides the replayed history.
+ * @param content - the prompt's wire content parts.
+ * @param user - the signed-in identity the prompt carries.
+ * @returns the stamped content parts.
+ */
+function stampLoginIdentity(content: readonly PromptContentPart[], user: ActingUser): PromptContentPart[] {
+  const line = `【登录身份】${user.username}（${user.nickname}）——本行由系统注入：当前用户=${user.username}，凡「当前用户/提交人/检验员/操作员/审批人」一律取该用户名，查待办只看该用户的待办。`
+  const firstText = content.findIndex(part => part.type === 'text')
+  if (firstText === -1) return [...content, { type: 'text' as const, text: line }]
+  return content.map((part, index) => index === firstText && part.type === 'text'
+    ? { ...part, text: `${line}\n${part.text}` }
+    : part)
+}
+
+/** Gateway sign-in session lifetime: 12h, then the client must sign in again. */
+const BUSINESS_SESSION_TTL_MS = 12 * 60 * 60 * 1000
+
+/** One issued gateway sign-in session (the verified NocoBase identity + expiry). */
+interface BusinessSession {
+  readonly user: ActingUser
+  readonly expiresAt: number
+}
+
+/**
+ * The sign-in session tokens this gateway issued (`nocobase.signIn`). The
+ * registry is process-local by design: a gateway restart retires every
+ * session, and clients re-sign-in — the same stance as the acting-user
+ * registry the tokens feed.
+ */
+const businessSessions = new Map<string, BusinessSession>()
+
+/**
+ * Issue one gateway session token for a verified identity (expired entries
+ * sweep on the way).
+ * @param user - the identity NocoBase's authenticator verified.
+ * @returns the opaque token the client re-presents on prompts and reads.
+ */
+function issueBusinessSession(user: ActingUser): string {
+  const token = randomUUID()
+  const now = Date.now()
+  for (const [existing, session] of businessSessions) {
+    if (session.expiresAt <= now) businessSessions.delete(existing)
+  }
+  businessSessions.set(token, { user, expiresAt: now + BUSINESS_SESSION_TTL_MS })
+  return token
+}
+
+/**
+ * Resolve one presented token to its verified identity.
+ * @param token - the token a prompt/read request carries.
+ * @returns the identity, or undefined when unknown or expired (both mean
+ * "sign in again").
+ */
+function resolveBusinessSession(token: string): ActingUser | undefined {
+  const session = businessSessions.get(token)
+  if (session === undefined) return undefined
+  if (session.expiresAt <= Date.now()) {
+    businessSessions.delete(token)
+    return undefined
+  }
+  return session.user
+}
+
+/** How many accepted clientMsgIds one session remembers (the dedup window). */
+const PROMPT_IDEMPOTENCY_CAP = 128
+
+/** Accepted clientMsgIds per session, oldest first (a bounded ring). */
+const acceptedClientMsgIds = new Map<string, string[]>()
+
+/**
+ * Record one clientMsgId as accepted.
+ * @param sessionId - the session the prompt targets.
+ * @param clientMsgId - the caller's idempotency key.
+ * @returns true when the id is fresh (enqueue proceeds); false when the same
+ * id already landed (the caller answers accepted without re-enqueueing).
+ */
+function markClientMsgAccepted(sessionId: string, clientMsgId: string): boolean {
+  const seen = acceptedClientMsgIds.get(sessionId) ?? []
+  if (seen.includes(clientMsgId)) return false
+  const next = seen.length >= PROMPT_IDEMPOTENCY_CAP
+    ? [...seen.slice(seen.length - PROMPT_IDEMPOTENCY_CAP + 1), clientMsgId]
+    : [...seen, clientMsgId]
+  acceptedClientMsgIds.set(sessionId, next)
+  return true
+}
+
+/**
+ * Enforce the signed-in caller's collection scope on one nocobase
+ * read/write, split by verb. Anonymous (token-less) reads pass; a
+ * presented-but-invalid token and an out-of-scope collection refuse.
+ *
+ * The wfl_* engine tables are the shared workflow surface every signed-in
+ * role READS (todos, records, backlog); the scope table governs business
+ * collections only. WRITES are the opposite: the wfl_ tables are
+ * engine-owned state machines whose transitions carry their own server-side
+ * whitelists, so the gateway refuses direct wfl_ writes by default — only an
+ * explicit `nocobaseWflWriteScopes` entry (per user, per collection) admits
+ * one, and the alert state machine stays on its single entrance
+ * (nocobase.alertAct → the engine's POST /alerts/act).
+ * @param authToken - the request's sign-in token, when it carries one.
+ * @param collection - the collection the request names.
+ * @param defaults - the gateway defaults carrying the scope tables.
+ * @param verb - 'read' (list/get) or 'write' (update) — picks the wfl_ rule.
+ * @returns the refusal, or undefined when the call may proceed.
+ */
+/** The username → NocoBase user-id memo backing the notification row scope (W6-R3). */
+const notificationUserIdMemo = new Map<string, string>()
+
+function nocobaseScopeRefusal(
+  authToken: string | undefined,
+  collection: string,
+  defaults: ApiProxyDefaults,
+  verb: 'read' | 'write',
+): RpcError | undefined {
+  if (authToken === undefined) return undefined
+  const user = resolveBusinessSession(authToken)
+  if (user === undefined) {
+    return {
+      code: 'nocobase-unauthorized',
+      message: '登录会话已失效，请重新登录后再试',
+      details: {},
+    }
+  }
+  // notificationInAppMessages rides no collection-scope row: its read face is
+  // row-scoped by the gateway itself (userId equals the signed-in user's
+  // NocoBase id — the mobile alerts page's recall notices read it that way),
+  // and writes stay engine-side (recall_orders' notify leg owns them).
+  if (collection === 'notificationInAppMessages' && verb === 'read') return undefined
+  if (collection.startsWith('wfl_')) {
+    if (verb === 'read') return undefined
+    const writable = defaults.nocobaseWflWriteScopes?.[user.username]
+    if (writable === undefined || !writable.includes(collection)) {
+      return {
+        code: 'nocobase-collection-forbidden',
+        message: `wfl_ 引擎表不接受网关直写（${collection}，账号 ${user.username}）——引擎状态机走单一入口：预警认领/关闭用 nocobase.alertAct，审批走 POST /act`,
+        details: { collection, username: user.username },
+      }
+    }
+    return undefined
+  }
+  const scope = defaults.nocobaseCollectionScopes?.[user.username]
+  if (scope !== undefined && !scope.includes(collection)) {
+    return {
+      code: 'nocobase-collection-forbidden',
+      message: `账号 ${user.username} 无权访问集合 ${collection}`,
+      details: { collection, username: user.username },
+    }
+  }
+  return undefined
+}
+
+/**
+ * Whether one wfl_alerts row is inside the signed-in reader's scope: the row
+ * routes to them (notify_users carries the username — the scan already
+ * expanded departments) or they claimed it; admin reads everything. This is
+ * the row-level half of the alert read face: the collection-level scope
+ * above cannot express "keeper sees the expiry rows routed to 仓储部 but
+ * never the finance-only AR rows", and the client-side cut the mobile page
+ * used to apply shipped the out-of-scope rows to the browser first.
+ * @param row - one wfl_alerts wire row.
+ * @param username - the signed-in reader's username.
+ * @returns true when the row may cross the wire to this reader.
+ */
+function wflAlertsRowInScope(row: Record<string, unknown>, username: string): boolean {
+  if (username === 'admin') return true
+  const routed = Array.isArray(row['notify_users']) && (row['notify_users'] as unknown[]).includes(username)
+  const owner = row['owner'] === undefined || row['owner'] === null || row['owner'] === '' ? false : row['owner'] === username
+  return routed === true || owner
+}
+
 async function durablePromptContent(ctx: Context, content: readonly PromptContentPart[]): Promise<ContentBlock[]> {
   if (content.every(part => part.type === 'text')) {
     return content.map(part => ({ type: 'text', text: part.text }))
@@ -823,6 +999,30 @@ export interface ApiProxyDefaults {
    * confirmation flow, same stance as `ordersEnabled`.
    */
   nocobaseWriteEnabled?: boolean
+  /**
+   * Per-username collection whitelists enforced server-side on
+   * `nocobase.list/get/update` for signed-in callers (the docs deep-link
+   * guard's second layer: the client catalog is UX, this table is the
+   * boundary). A username absent from the table has no configured scope and
+   * reads freely; anonymous calls stay open (the PC browse surface).
+   */
+  nocobaseCollectionScopes?: Readonly<Record<string, readonly string[]>>
+  /**
+   * Per-username wfl_ collection whitelists for `nocobase.update` (engine
+   * tables default to write-refused — their state machines carry server-side
+   * transition whitelists the gateway cannot re-implement). An entry here
+   * names the rare business case that genuinely needs a direct column write
+   * on one wfl_ table; the alert state machine is never one (it rides
+   * `nocobase.alertAct` → the engine's single entrance).
+   */
+  nocobaseWflWriteScopes?: Readonly<Record<string, readonly string[]>>
+  /**
+   * The alert engine's base URL (for example `http://127.0.0.1:13110`) the
+   * `nocobase.alertAct` proxy forwards to (`POST /alerts/act`). Omitted = the
+   * `W6_ALERT_ENGINE_URL` environment variable; both absent means the method
+   * answers `alert-engine-unconfigured`.
+   */
+  alertEngineUrl?: string
   /**
    * Whether the data-asset market domain (`assets.list/detail/stats`) answers.
    * Absent means refused: market reads ride the connector seam's discovery,
@@ -3130,7 +3330,24 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
       },
 
       async prompt(request) {
-        const { sessionId, mode, content, clientTimeZone } = request.payload
+        const { sessionId, mode, content, clientTimeZone, authToken, clientMsgId } = request.payload
+        // Idempotency fast path (the outbox double-send window): a repeated
+        // clientMsgId answers accepted without dispatching a second turn.
+        if (clientMsgId !== undefined && !markClientMsgAccepted(sessionId, clientMsgId)) {
+          return ok(request, { accepted: true as const })
+        }
+        // The acting identity derives from the gateway's own sign-in session,
+        // never from a client-narrated loginUser: a presented-but-invalid
+        // token refuses, an absent token leaves the session anonymous (the
+        // nb_* write tools gate on that and refuse).
+        const credential = authToken === undefined ? undefined : resolveBusinessSession(authToken)
+        if (authToken !== undefined && credential === undefined) {
+          return err(request, {
+            code: 'nocobase-unauthorized',
+            message: '登录会话已失效，请重新登录后再发送',
+            details: {},
+          })
+        }
         const canonicalTimeZone = clientTimeZone === undefined
           ? undefined
           : canonicalClientTimeZone(clientTimeZone)
@@ -3144,6 +3361,18 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
         const resolved = await turnAgentFor<{ accepted: true }>(request, sessionId)
         if ('refused' in resolved) return resolved.refused
         const agent = resolved.agent
+        // A credential-derived identity binds the session server-side (the
+        // nb_* tools stamp it onto audit columns and gate approvals on it)
+        // and, on the session's opening message only, rides the durable text
+        // so the model narrates the same identity the tools enforce. A bare
+        // loginUser without a token binds nothing.
+        if (credential !== undefined) {
+          setSessionActingUser(sessionId, credential)
+        }
+        const stamped = credential !== undefined
+          && !agent.session.events.some(event => event.type === 'user/message')
+          ? stampLoginIdentity(content, credential)
+          : content
         // Request identity and optional browser zone ride the exact durable user message.
         const source: MessageSource = {
           kind: 'user',
@@ -3164,7 +3393,7 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
                 })
               }
             }
-            const durable = await durablePromptContent(ctx, content)
+            const durable = await durablePromptContent(ctx, stamped)
             const message: UserMessage = createUserMessage({ content: durable, source })
             if (mode === 'steer') agent.steer(message)
             else agent.followup(message)
@@ -3741,7 +3970,31 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
       async list(request, signal) {
         const gates = await nocobaseGates()
         if ('refusal' in gates) return err(request, gates.refusal)
-        const { collection, filter, match, page, page_size: pageSize, sort, fields } = request.payload
+        const { collection, filter, match, page, page_size: pageSize, sort, fields, authToken } = request.payload
+        // wfl_alerts is login-scoped by row (the routed-user alert face): an
+        // anonymous read refuses — the wire answer may only carry rows the
+        // signed-in user is routed to or owns (admin reads all). A stale
+        // token falls through to the shared scope refusal below.
+        if (collection === 'wfl_alerts' && authToken === undefined) {
+          return err(request, {
+            code: 'nocobase-unauthorized',
+            message: '预警记录按登录人范围读取：请先通过 nocobase.signIn 获取会话凭据',
+            details: {},
+          })
+        }
+        // notificationInAppMessages is login-scoped by row the same way
+        // (W6-R3): the wire answer may only carry the signed-in user's own
+        // notices (userId equals their NocoBase user id), and the id filter
+        // is pushed down so the count re-states the scoped page.
+        if (collection === 'notificationInAppMessages' && authToken === undefined) {
+          return err(request, {
+            code: 'nocobase-unauthorized',
+            message: '站内通知按登录人范围读取：请先通过 nocobase.signIn 获取会话凭据',
+            details: {},
+          })
+        }
+        const scopeRefusal = nocobaseScopeRefusal(authToken, collection, defaults, 'read')
+        if (scopeRefusal !== undefined) return err(request, scopeRefusal)
         const conditions: NbFilterCondition[] = []
         for (const raw of filter ?? []) {
           const parsed = parseNbFilterCondition(raw)
@@ -3749,6 +4002,29 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
             return err(request, { code: 'nocobase-request-failed', message: `nocobase.list: ${parsed.error}`, details: {} })
           }
           conditions.push(parsed.value)
+        }
+        if (collection === 'notificationInAppMessages' && authToken !== undefined) {
+          const reader = resolveBusinessSession(authToken)
+          if (reader !== undefined) {
+            let userId = notificationUserIdMemo.get(reader.username)
+            if (userId === undefined) {
+              try {
+                const users = await gates.client.list<{ id?: unknown }>('users', { filter: { username: { $eq: reader.username } }, pageSize: 1 }, signal)
+                const first = users.rows[0]
+                if (first?.id !== undefined) {
+                  userId = String(first.id)
+                  notificationUserIdMemo.set(reader.username, userId)
+                }
+              } catch {
+                // The pushed-down filter below just stays absent for this
+                // one read; the row cut then happens client-side via the
+                // empty result the unfiltered read returns for member roles.
+              }
+            }
+            if (userId !== undefined) {
+              conditions.push({ field: 'userId', op: 'eq', value: userId })
+            }
+          }
         }
         const filterTree = compileNbFilter(conditions, match ?? 'and')
         let result: NocoBaseListResult<Record<string, unknown>>
@@ -3763,13 +4039,33 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
         } catch (error: unknown) {
           return err(request, nocobaseRequestError(error))
         }
+        if (collection === 'wfl_alerts') {
+          const reader = authToken === undefined ? undefined : resolveBusinessSession(authToken)
+          // The count re-states the scoped page (the NocoBase filter tree has
+          // no json-array membership operator, so the row cut happens here —
+          // server-side, before anything crosses the wire).
+          const rows = reader === undefined ? [] : result.rows.filter(row => wflAlertsRowInScope(row, reader.username))
+          return ok(request, { count: rows.length, page: result.page, page_size: result.pageSize, rows })
+        }
         return ok(request, { count: result.count, page: result.page, page_size: result.pageSize, rows: result.rows })
       },
 
       async get(request, signal) {
         const gates = await nocobaseGates()
         if ('refusal' in gates) return err(request, gates.refusal)
-        const { collection, id } = request.payload
+        const { collection, id, authToken } = request.payload
+        if (collection === 'wfl_alerts') {
+          const reader = authToken === undefined ? undefined : resolveBusinessSession(authToken)
+          if (reader === undefined) {
+            return err(request, {
+              code: 'nocobase-unauthorized',
+              message: '预警记录按登录人范围读取：请先通过 nocobase.signIn 获取会话凭据',
+              details: {},
+            })
+          }
+        }
+        const scopeRefusal = nocobaseScopeRefusal(authToken, collection, defaults, 'read')
+        if (scopeRefusal !== undefined) return err(request, scopeRefusal)
         let row: Record<string, unknown> | undefined
         try {
           row = await gates.client.get<Record<string, unknown>>(collection, id, undefined, signal)
@@ -3783,6 +4079,16 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
             details: { collection, id },
           })
         }
+        if (collection === 'wfl_alerts' && authToken !== undefined) {
+          const reader = resolveBusinessSession(authToken)
+          if (reader !== undefined && !wflAlertsRowInScope(row, reader.username)) {
+            return err(request, {
+              code: 'nocobase-collection-forbidden',
+              message: `该预警未路由给账号 ${reader.username}（notify_users/owner 均不匹配）`,
+              details: { collection, username: reader.username },
+            })
+          }
+        }
         return ok(request, { collection, row })
       },
 
@@ -3794,9 +4100,21 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
             details: {},
           })
         }
+        // Record writes need a live sign-in session: the inline fast path has
+        // no in-conversation confirmation, so the audit actor must come from
+        // a gateway-issued token, never from wire narration.
+        const { collection, id, values, authToken } = request.payload
+        if (authToken === undefined || resolveBusinessSession(authToken) === undefined) {
+          return err(request, {
+            code: 'nocobase-unauthorized',
+            message: '业务记录修改需要登录：请先通过 nocobase.signIn 获取会话凭据',
+            details: {},
+          })
+        }
+        const scopeRefusal = nocobaseScopeRefusal(authToken, collection, defaults, 'write')
+        if (scopeRefusal !== undefined) return err(request, scopeRefusal)
         const gates = await nocobaseGates()
         if ('refusal' in gates) return err(request, gates.refusal)
-        const { collection, id, values } = request.payload
         let row: Record<string, unknown> & { id: number }
         try {
           row = await gates.client.update<Record<string, unknown>>(collection, id, values, signal)
@@ -3804,6 +4122,113 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
           return err(request, nocobaseRequestError(error))
         }
         return ok(request, { collection, row })
+      },
+
+      /**
+       * Act on one alert (claim/ack/resolve) through the engine's single
+       * write entrance: the acting username derives from the sign-in session
+       * token server-side (never wire-narrated), the engine's
+       * (from_state, action, actor_role) transition table + routed-user
+       * whitelist decide, and its 403 crosses as `nocobase-alert-refused`
+       * with the refusal fact. This is the mobile alerts page's row action
+       * and any future PC direct-call path; the gateway adds no policy of
+       * its own.
+       */
+      async alertAct(request, signal) {
+        const { id, action, note, authToken } = request.payload
+        const user = authToken === undefined ? undefined : resolveBusinessSession(authToken)
+        if (user === undefined) {
+          return err(request, {
+            code: 'nocobase-unauthorized',
+            message: '预警处理需要登录：请先通过 nocobase.signIn 获取会话凭据',
+            details: {},
+          })
+        }
+        const base = (defaults.alertEngineUrl || process.env.W6_ALERT_ENGINE_URL || '').replace(/\/$/u, '')
+        if (base === '') {
+          return err(request, {
+            code: 'alert-engine-unconfigured',
+            message: '本部署未配置预警引擎地址：在 api-gateway 配置 alertEngineUrl（或环境变量 W6_ALERT_ENGINE_URL）后重试',
+            details: {},
+          })
+        }
+        let response: Response
+        try {
+          response = await fetch(`${base}/alerts/act`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ id, action, ...(note === undefined ? {} : { note }), user: user.username }),
+            ...(signal === undefined ? {} : { signal }),
+          })
+        } catch (error: unknown) {
+          return err(request, nocobaseRequestError(error))
+        }
+        const payload = await response.json().catch(() => null) as { ok?: boolean; error?: unknown } | null
+        if (response.status === 403) {
+          return err(request, {
+            code: 'nocobase-alert-refused',
+            message: typeof payload?.error === 'string' && payload.error !== '' ? payload.error : `引擎拒绝该动作（id=${String(id)} ${action}）`,
+            details: { id, action },
+          })
+        }
+        if (!response.ok || payload?.ok !== true) {
+          return err(request, {
+            code: 'nocobase-request-failed',
+            message: typeof payload?.error === 'string' && payload.error !== '' ? payload.error : `预警引擎应答异常（HTTP ${String(response.status)}）`,
+            details: {},
+          })
+        }
+        return ok(request, { id, action, user: user.username })
+      },
+
+      /**
+       * The mobile login's credential check: NocoBase's own basic
+       * authenticator decides, so the eight rehearsal accounts (and any
+       * deployment-created user) verify with their real passwords. The
+       * answer carries the profile plus a gateway session token that later
+       * prompts and nocobase calls present — the acting identity derives
+       * from that token server-side, never from client narration. No
+       * NocoBase token crosses the wire; later writes keep riding the
+       * service account with this identity as the audit actor.
+       */
+      async signIn(request, signal) {
+        const gates = await nocobaseGates()
+        if ('refusal' in gates) return err(request, gates.refusal)
+        const { account, password } = request.payload
+        const baseUrl = (defaults.nocobaseBaseUrl || process.env.NOCOBASE_BASE_URL || '').replace(/\/$/u, '')
+        let response: Response
+        try {
+          response = await fetch(`${baseUrl}/api/auth:signIn`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json', 'x-locale': 'zh-CN' },
+            body: JSON.stringify({ account, password }),
+            ...(signal === undefined ? {} : { signal }),
+          })
+        } catch (error: unknown) {
+          return err(request, nocobaseRequestError(error))
+        }
+        const payload = await response.json().catch(() => null) as
+          | { data?: { user?: { username?: unknown; nickname?: unknown } } }
+          | { errors?: Array<{ message?: unknown }> }
+          | null
+        if (!response.ok) {
+          const message = payload !== null && 'errors' in payload && payload.errors !== undefined
+            && typeof payload.errors[0]?.message === 'string' && payload.errors[0].message !== ''
+            ? payload.errors[0].message
+            : `登录被拒（HTTP ${String(response.status)}）：用户名或密码不正确`
+          return err(request, { code: 'nocobase-signin-rejected', message, details: {} })
+        }
+        const user = payload !== null && 'data' in payload ? payload.data?.user : undefined
+        if (typeof user?.username !== 'string' || user.username === '') {
+          return err(request, {
+            code: 'nocobase-signin-rejected',
+            message: '登录账号缺少用户名，无法作为业务身份使用',
+            details: {},
+          })
+        }
+        const nickname = typeof user.nickname === 'string' && user.nickname !== '' ? user.nickname : user.username
+        const token = issueBusinessSession({ username: user.username, nickname })
+        return ok(request, { username: user.username, nickname, token })
       },
     },
 

@@ -502,7 +502,7 @@ Source: [`packages/connector/tool-connector/src/index.ts`](../packages/connector
     },
     "approver": {
       "type": "string",
-      "description": "The acting user's name for the audit record; defaults to admin."
+      "description": "The acting user's name for the audit record; a session-bound login identity (the gateway sign-in token) overrides this value server-side. Anonymous sessions are refused — approvals need a signed-in audit actor."
     }
   },
   "required": [

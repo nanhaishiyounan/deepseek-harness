@@ -1,25 +1,27 @@
 /**
- * The home tab (v6「消息」, the design's page-home): the gradient hero
- * greeting card (daypart + identity over the user gradient), the search-box
- * entry (a visual affordance that lands on the all-chats layer, which owns
- * the real filtering), the compact today-ledger chip strip (the four status
- * counts routing to work), the quick-task chips (two preset directs, one
- * route, one new-chat sheet), the colleagues' horizontal avatar rail, and
- * the recent-chats list in the conv-item form — the stamp avatar with the
- * presence dot, the one-line projection preview, the relative time, and the
- * unread dot badge off the draftStore read watermark (work sessions stay
- * filtered out, 02 §9).
+ * The home tab (v7: the neutral hero card — daypart + identity on white with
+ * the date capsule as the one brand accent, W7-M1's de-blue move that retires
+ * the v6 gradient hero), the search-box entry (a visual affordance that lands
+ * on the all-chats layer, which owns the real filtering), the compact
+ * today-ledger grid (the four status counts routing to work; a zero renders
+ * neutral, a live count keeps its status hue), the quick-task chips (one
+ * solid primary CTA, the rest neutral capsules), the colleagues' horizontal
+ * avatar rail, and the recent-chats list in the conv-item form — the stamp
+ * avatar with the presence dot, the one-line projection preview, the relative
+ * time, and the unread dot badge off the draftStore read watermark (work
+ * sessions stay filtered out, 02 §9).
  */
 
 import { useEffect, useMemo, useState, useSyncExternalStore, type JSX } from 'react'
 import { Badge, Button, Skeleton, Toast } from 'antd-mobile'
-import { Search } from 'lucide-react'
+import { MessageCircle, Search } from 'lucide-react'
 import type { SessionSummary } from '@deepseek-ai/dsh-host-apiproxy/api'
-import { Avatar, SkelRow } from '../ui.tsx'
+import { Avatar, EmptyState, SkelRow } from '../ui.tsx'
 import { messageOf, useAsync } from '../hooks.ts'
 import { colleagueColor, colleagueOf } from '../colleagues.ts'
 import { navigate } from '../router.ts'
 import { createSession, listAiEmployees, listSessions, relativeTimeOf, subtitleOf, titleOf } from '../sessionsService.ts'
+import { listMyAlerts } from '../ledgerService.ts'
 import { readWatermarkOf } from '../draftStore.ts'
 import { isWorkSession, subscribeWork, todayStats, workSnapshot } from '../workStore.ts'
 import { cachedProjectionOf, loadProjection } from '../messages/projection.ts'
@@ -42,28 +44,52 @@ export function greetingWordOf(hour: number): string {
   return '下午好'
 }
 
-/** One quick-task chip: the label plus its real action. */
+/** One quick-task chip: the label, its face, and its real action. */
 interface QuickChip {
   readonly label: string
+  /** `primary` = the one solid brand CTA; the rest ride neutral capsules. */
+  readonly variant: 'primary' | 'neutral'
   readonly run: (openSheet: () => void) => void
 }
 
-/** The quick-task action set (02 §10.4): two preset directs, one route, one sheet. */
+/** The quick-task action set (02 §10.4 + W6-B1/B2): the sync-closed pair of
+ * server-backed pages rides ahead of the routes; the W6-B2 alert center
+ * mirror follows; two preset directs stay. The register chip is the page's
+ * single primary action (the brand budget, plan §3.1 ≤2 brand hits). */
 const QUICK_CHIPS: readonly QuickChip[] = [
   {
+    label: '我的待办',
+    variant: 'neutral',
+    run: () => { navigate('#/todos') },
+  },
+  {
+    label: '我的预警',
+    variant: 'neutral',
+    run: () => { navigate('#/alerts') },
+  },
+  {
+    label: '看单据',
+    variant: 'neutral',
+    run: () => { navigate('#/docs') },
+  },
+  {
     label: '登记一条单据',
+    variant: 'primary',
     run: () => { void startChat('mobile-form-assistant') },
   },
   {
     label: '问经营',
+    variant: 'neutral',
     run: () => { void startChat('business-advisor') },
   },
   {
     label: '查看工作',
+    variant: 'neutral',
     run: () => { navigate('#/work') },
   },
   {
     label: '找 AI 同事',
+    variant: 'neutral',
     run: (openSheet) => { openSheet() },
   },
 ]
@@ -87,6 +113,16 @@ export function HomeView({ identityName }: HomeViewProps): JSX.Element {
   const [sheetOpen, setSheetOpen] = useState(false)
   /** The projection texts keyed by session id (tail reads). */
   const [projections, setProjections] = useState<ReadonlyMap<string, string>>(new Map())
+  /** The routed-alert count for the「我的预警」chip badge (undefined = not loaded / unreadable — no badge shown). */
+  const [alertCount, setAlertCount] = useState<number | undefined>(undefined)
+
+  useEffect(() => {
+    let alive = true
+    listMyAlerts()
+      .then((rows) => { if (alive) setAlertCount(rows.length) })
+      .catch(() => { if (alive) setAlertCount(undefined) })
+    return () => { alive = false }
+  }, [])
 
   const stats = useMemo(() => todayStats(store.items, Date.now()), [store.items])
   const pendingCount = stats.todo + stats.review
@@ -127,7 +163,10 @@ export function HomeView({ identityName }: HomeViewProps): JSX.Element {
   return (
     <div className={css.homePage}>
       <section className={css.heroCard} aria-label="工作概览">
-        <h1 className={css.heroTitle}>{greetingWordOf(new Date().getHours())}，{identityName}</h1>
+        <div className={css.heroTop}>
+          <h1 className={css.heroTitle}>{greetingWordOf(new Date().getHours())}，{identityName}</h1>
+          <span className={css.heroDate}>{headDateOf(new Date())}</span>
+        </div>
         <p className={css.heroDesc}>
           {pendingCount > 0 ? `今天有 ${String(pendingCount)} 件事等你` : '今天没有待办，随时找 AI 同事聊聊'}
         </p>
@@ -139,18 +178,17 @@ export function HomeView({ identityName }: HomeViewProps): JSX.Element {
       </button>
 
       <button type="button" className={css.statsCard} aria-label="今日台账" onClick={() => { navigate('#/work') }}>
-        <span className={css.statsHeadLabel}>{headDateOf(new Date())}</span>
         <span className={css.statsGrid}>
           <span className={css.statCell}>
-            <span className={`${css.statValue} ${css.statTodo}`}>{String(stats.todo)}</span>
+            <span className={`${css.statValue} ${stats.todo === 0 ? css.statZero : css.statTodo}`}>{String(stats.todo)}</span>
             <span className={css.statLabel}>待处理</span>
           </span>
           <span className={css.statCell}>
-            <span className={`${css.statValue} ${css.statDoing}`}>{String(stats.doing)}</span>
+            <span className={`${css.statValue} ${stats.doing === 0 ? css.statZero : css.statDoing}`}>{String(stats.doing)}</span>
             <span className={css.statLabel}>进行中</span>
           </span>
           <span className={css.statCell}>
-            <span className={`${css.statValue} ${css.statReview}`}>{String(stats.review)}</span>
+            <span className={`${css.statValue} ${stats.review === 0 ? css.statZero : css.statReview}`}>{String(stats.review)}</span>
             <span className={css.statLabel}>待确认</span>
           </span>
           <span className={css.statCell}>
@@ -161,25 +199,36 @@ export function HomeView({ identityName }: HomeViewProps): JSX.Element {
       </button>
 
       <div className={css.quickRow}>
-        {QUICK_CHIPS.map(chip => (
-          <Button
-            key={chip.label}
-            type="button"
-            color="primary"
-            fill="solid"
-            size="small"
-            className={css.quickChip}
-            style={{
-              '--background-color': 'var(--dshm-primary-soft)',
-              '--text-color': 'var(--dshm-on-soft)',
-              '--border-color': 'transparent',
-              '--border-radius': '999px',
-            }}
-            onClick={() => { chip.run(() => { setSheetOpen(true) }) }}
-          >
-            {chip.label}
-          </Button>
-        ))}
+        {QUICK_CHIPS.map((chip) => {
+          const chipButton = (
+            <Button
+              key={chip.label}
+              type="button"
+              color="primary"
+              fill="solid"
+              size="small"
+              className={`${css.quickChip} ${chip.variant === 'primary' ? '' : css.quickChipNeutral}`}
+              style={
+                chip.variant === 'primary'
+                  ? { '--border-radius': 'var(--dshm-radius-pill)' }
+                  : {
+                    '--background-color': 'var(--dshm-card)',
+                    '--text-color': 'var(--dshm-foreground)',
+                    '--border-color': 'var(--dshm-border)',
+                    '--border-radius': 'var(--dshm-radius-pill)',
+                  }
+              }
+              onClick={() => { chip.run(() => { setSheetOpen(true) }) }}
+            >
+              {chip.label}
+            </Button>
+          )
+          // W6-R2: the alert chip carries its routed count; an unreadable or
+          // empty alert set keeps the plain chip (no badge noise).
+          return chip.label === '我的预警' && alertCount !== undefined && alertCount > 0
+            ? <Badge key={chip.label} color="var(--dshm-destructive)" content={String(Math.min(alertCount, 99))}>{chipButton}</Badge>
+            : chipButton
+        })}
       </div>
 
       <div className={css.sectionRow}>
@@ -252,7 +301,16 @@ export function HomeView({ identityName }: HomeViewProps): JSX.Element {
             </div>
           )
           : recentRows.length === 0
-            ? <div className={css.recentEmpty}>还没有对话，找 AI 同事开个头</div>
+            ? (
+              <div className={css.recentCard}>
+                <EmptyState
+                  variant="section"
+                  icon={<MessageCircle size={20} strokeWidth={1.8} />}
+                  title="还没有对话"
+                  description="上面的快捷入口或同事卡片，点一下就开聊"
+                />
+              </div>
+            )
             : (
               <div className={css.recentList}>
                 {recentRows.map((summary) => {
@@ -294,8 +352,8 @@ export function HomeView({ identityName }: HomeViewProps): JSX.Element {
   )
 }
 
-/** The hero card's date line: 今日台账·09-22周二. */
+/** The hero date capsule's line: 09-22周二. */
 function headDateOf(now: Date): string {
   const weekday = now.toLocaleDateString('zh-CN', { weekday: 'short' })
-  return `今日台账 · ${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}${weekday}`
+  return `${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}${weekday}`
 }

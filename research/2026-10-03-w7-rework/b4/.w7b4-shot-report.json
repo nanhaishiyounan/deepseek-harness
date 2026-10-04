@@ -1,0 +1,349 @@
+{
+  "requested": 32,
+  "ok": 32,
+  "failed": [],
+  "shotOnly": [
+    "w7-b4-23-经营总览",
+    "w7-b4-27-应用中心"
+  ],
+  "probes": {
+    "w7-b4-01-经营看板": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true,
+      "cardsFirst": true,
+      "cardsCount": 3,
+      "laneTags": 20,
+      "eventColors": 0,
+      "eventPills": 0
+    },
+    "w7-b4-02-供应链看板": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true,
+      "cardsFirst": true,
+      "cardsCount": 3,
+      "laneTags": 20,
+      "eventColors": 0,
+      "eventPills": 0
+    },
+    "w7-b4-03-生产看板": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true,
+      "cardsFirst": true,
+      "cardsCount": 3,
+      "laneTags": 20,
+      "eventColors": 0,
+      "eventPills": 0
+    },
+    "w7-b4-04-库存看板": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true,
+      "cardsFirst": true,
+      "cardsCount": 4,
+      "laneTags": 40,
+      "eventColors": 0,
+      "eventPills": 0
+    },
+    "w7-b4-05-应收应付对账": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true,
+      "cardsFirst": true,
+      "cardsCount": 3,
+      "laneTags": 55,
+      "eventColors": 0,
+      "eventPills": 0
+    },
+    "w7-b4-06-任务列表": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true,
+      "cardsFirst": true,
+      "cardsCount": 3,
+      "laneTags": 40,
+      "eventColors": 0,
+      "eventPills": 0
+    },
+    "w7-b4-07-项目": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true,
+      "cardsFirst": true,
+      "cardsCount": 3,
+      "laneTags": 34,
+      "eventColors": 0,
+      "eventPills": 0
+    },
+    "w7-b4-08-里程碑": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true,
+      "cardsFirst": true,
+      "cardsCount": 2,
+      "laneTags": 5,
+      "eventColors": 0,
+      "eventPills": 0
+    },
+    "w7-b4-09-工单": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "noLegacyHex": true,
+      "cardsFirst": true,
+      "cardsCount": 3,
+      "laneTags": 60,
+      "eventColors": 0,
+      "eventPills": 0
+    },
+    "w7-b4-10-知识文章": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true,
+      "cardsFirst": true,
+      "cardsCount": 2,
+      "laneTags": 6,
+      "eventColors": 0,
+      "eventPills": 0
+    },
+    "w7-b4-11-审批中心": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true,
+      "cardsFirst": true,
+      "cardsCount": 3,
+      "laneTags": 84,
+      "eventColors": 0,
+      "eventPills": 0
+    },
+    "w7-b4-12-审批流配置": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "noLegacyHex": true,
+      "laneTags": 100,
+      "eventColors": 0,
+      "eventPills": 0
+    },
+    "w7-b4-13-任务看板": {
+      "tagSoft": true,
+      "tagPill": true,
+      "noLegacyHex": true,
+      "laneTags": 36,
+      "eventColors": 0,
+      "eventPills": 0
+    },
+    "w7-b4-14-任务日历": {
+      "noLegacyHex": true,
+      "laneTags": 0,
+      "eventColors": 4,
+      "eventPills": 7
+    },
+    "w7-b4-15-销售看板": {
+      "tagSoft": true,
+      "tagPill": true,
+      "noLegacyHex": true,
+      "laneTags": 9,
+      "eventColors": 0,
+      "eventPills": 0
+    },
+    "w7-b4-16-采购看板": {
+      "tagSoft": true,
+      "tagPill": true,
+      "noLegacyHex": true,
+      "laneTags": 22,
+      "eventColors": 0,
+      "eventPills": 0
+    },
+    "w7-b4-17-生产订单看板": {
+      "noLegacyHex": true,
+      "laneTags": 0,
+      "eventColors": 0,
+      "eventPills": 0
+    },
+    "w7-b4-18-质检看板": {
+      "tagSoft": true,
+      "tagPill": true,
+      "noLegacyHex": true,
+      "laneTags": 28,
+      "eventColors": 0,
+      "eventPills": 0
+    },
+    "w7-b4-19-处置看板": {
+      "tagSoft": true,
+      "tagPill": true,
+      "noLegacyHex": true,
+      "laneTags": 27,
+      "eventColors": 0,
+      "eventPills": 0
+    },
+    "w7-b4-20-整改跟踪": {
+      "tagSoft": true,
+      "tagPill": true,
+      "noLegacyHex": true,
+      "laneTags": 10,
+      "eventColors": 0,
+      "eventPills": 0
+    },
+    "w7-b4-21-交期日历": {
+      "noLegacyHex": true,
+      "laneTags": 0,
+      "eventColors": 3,
+      "eventPills": 17
+    },
+    "w7-b4-22-计划日历": {
+      "noLegacyHex": true,
+      "laneTags": 0,
+      "eventColors": 3,
+      "eventPills": 9
+    },
+    "w7-b4-24-AI工作台": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "noLegacyHex": true,
+      "laneTags": 40,
+      "eventColors": 0,
+      "eventPills": 0
+    },
+    "w7-b4-25-排产甘特": {
+      "noLegacyHex": true,
+      "laneTags": 0,
+      "eventColors": 0,
+      "eventPills": 0,
+      "ganttTick": true,
+      "todayStroke": true,
+      "labelBaseline": true
+    },
+    "w7-b4-26-任务甘特": {
+      "noLegacyHex": true,
+      "laneTags": 0,
+      "eventColors": 0,
+      "eventPills": 0,
+      "ganttTick": true,
+      "todayStroke": true,
+      "labelBaseline": true
+    },
+    "w7-b4-r01-客户": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "noLegacyHex": true,
+      "cardsFirst": true,
+      "cardsCount": 2,
+      "laneTags": 60,
+      "eventColors": 0,
+      "eventPills": 0
+    },
+    "w7-b4-r02-销售线索": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true,
+      "cardsFirst": true,
+      "cardsCount": 2,
+      "laneTags": 20,
+      "eventColors": 0,
+      "eventPills": 0
+    },
+    "w7-b4-r03-采购订单": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true,
+      "cardsFirst": false,
+      "cardsCount": 4,
+      "laneTags": 56,
+      "eventColors": 0,
+      "eventPills": 0
+    },
+    "w7-b4-r04-销售订单": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true,
+      "cardsFirst": true,
+      "cardsCount": 4,
+      "laneTags": 24,
+      "eventColors": 0,
+      "eventPills": 0
+    },
+    "w7-b4-r05-比价表": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true,
+      "cardsFirst": false,
+      "cardsCount": 3,
+      "laneTags": 17,
+      "eventColors": 0,
+      "eventPills": 0
+    }
+  },
+  "verdicts": {
+    "table": {
+      "pass": 7,
+      "fail": []
+    },
+    "kpi": {
+      "pass": 11,
+      "fail": []
+    },
+    "kanban": {
+      "pass": 7,
+      "fail": []
+    },
+    "calendar": {
+      "pass": 3,
+      "fail": []
+    },
+    "v1gantt": {
+      "pass": 2,
+      "fail": []
+    }
+  }
+}

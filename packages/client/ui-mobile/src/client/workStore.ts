@@ -29,7 +29,7 @@ export interface WorkItem {
   /** `'w_' + Date.now().toString(36) + random suffix`, generated locally. */
   readonly id: string
   readonly title: string
-  /** Team-member name or identity.name. */
+  /** Team-member name or identity.nickname. */
   readonly owner: string
   /** `'YYYY-MM-DD'` or undefined (undated). */
   readonly due: string | undefined
@@ -364,7 +364,7 @@ export function workOf(items: readonly WorkItem[], id: string): WorkItem | undef
 /**
  * The tasks owned by the current identity, newest update first.
  * @param items - the store's items.
- * @param myOwner - the current identity.name.
+ * @param myOwner - the current identity.nickname.
  * @returns the items whose owner matches.
  */
 export function myTasks(items: readonly WorkItem[], myOwner: string): WorkItem[] {
@@ -374,7 +374,7 @@ export function myTasks(items: readonly WorkItem[], myOwner: string): WorkItem[]
 /**
  * The tasks owned by everyone else (the 演示团队 section), newest update first.
  * @param items - the store's items.
- * @param myOwner - the current identity.name.
+ * @param myOwner - the current identity.nickname.
  * @returns the items whose owner differs.
  */
 export function teamTasks(items: readonly WorkItem[], myOwner: string): WorkItem[] {

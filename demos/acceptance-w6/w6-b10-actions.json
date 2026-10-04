@@ -1,0 +1,248 @@
+[
+  {
+    "at": "2026-10-03T03:04:08.759Z",
+    "role": "buyer",
+    "action": "pc-signin",
+    "detail": "身份锚点 采购员·蔡俊（buyer）"
+  },
+  {
+    "at": "2026-10-03T03:04:41.032Z",
+    "role": "buyer",
+    "action": "open /admin/w3purb7o0r3yqi45",
+    "detail": "比价矩阵页（B7）"
+  },
+  {
+    "at": "2026-10-03T03:04:46.501Z",
+    "role": "buyer",
+    "action": "open /admin/w3puryzkva06iuhh",
+    "detail": "采购订单列表"
+  },
+  {
+    "at": "2026-10-03T03:05:04.221Z",
+    "role": "buyer",
+    "action": "mobile-signin #/docs/pur_orders",
+    "detail": "dsh-mobile-auth=buyer"
+  },
+  {
+    "at": "2026-10-03T03:05:05.425Z",
+    "role": "buyer",
+    "action": "mobile #/docs/pur_orders",
+    "detail": "mobile 单据浏览（B1 G6）"
+  },
+  {
+    "at": "2026-10-03T03:05:31.441Z",
+    "role": "planner",
+    "action": "pc-signin",
+    "detail": "身份锚点 计划员·孙梅（planner）"
+  },
+  {
+    "at": "2026-10-03T03:06:04.744Z",
+    "role": "planner",
+    "action": "open /admin/w7mrphtm8t9tzlk8",
+    "detail": "计划工作台"
+  },
+  {
+    "at": "2026-10-03T03:06:08.763Z",
+    "role": "planner",
+    "action": "open /admin/w6b8eci1cpbqsgtj",
+    "detail": "维保日历（B8）"
+  },
+  {
+    "at": "2026-10-03T03:06:16.716Z",
+    "role": "planner",
+    "action": "observe /admin/w6b9cdzrc2lst1dm",
+    "detail": "rendered=true denied=false"
+  },
+  {
+    "at": "2026-10-03T03:06:34.209Z",
+    "role": "planner",
+    "action": "mobile-signin #/todos",
+    "detail": "dsh-mobile-auth=planner"
+  },
+  {
+    "at": "2026-10-03T03:06:35.411Z",
+    "role": "planner",
+    "action": "mobile #/todos",
+    "detail": "mobile 待办页（B1 G2）"
+  },
+  {
+    "at": "2026-10-03T03:07:02.495Z",
+    "role": "shop_lead",
+    "action": "pc-signin",
+    "detail": "身份锚点 车间主任·周强（shop_lead）"
+  },
+  {
+    "at": "2026-10-03T03:07:32.777Z",
+    "role": "shop_lead",
+    "action": "open /terminals/cards.html",
+    "detail": "车间卡片流终端（B4 M1）"
+  },
+  {
+    "at": "2026-10-03T03:07:37.744Z",
+    "role": "shop_lead",
+    "action": "open /admin/w6b4c4t709ypn92m",
+    "detail": "CCP 监控配置（B4）"
+  },
+  {
+    "at": "2026-10-03T03:07:41.762Z",
+    "role": "shop_lead",
+    "action": "open /admin/w6b4bnn0n7n2p2i",
+    "detail": "配方版本与变更（B4 ECO）"
+  },
+  {
+    "at": "2026-10-03T03:08:07.759Z",
+    "role": "qc_inspector",
+    "action": "pc-signin",
+    "detail": "身份锚点 质检员·王倩（qc_inspector）"
+  },
+  {
+    "at": "2026-10-03T03:08:39.845Z",
+    "role": "qc_inspector",
+    "action": "open /admin/w6b5icrrgz5z9gu",
+    "detail": "检验工作台页（B5 队列）"
+  },
+  {
+    "at": "2026-10-03T03:08:56.804Z",
+    "role": "qc_inspector",
+    "action": "insp-signin",
+    "detail": "向导身份 质检员：qc_inspector"
+  },
+  {
+    "at": "2026-10-03T03:09:00.945Z",
+    "role": "qc_inspector",
+    "action": "open /admin/w6b5ruwgh0d52fif",
+    "detail": "出厂检验报告页（B5）"
+  },
+  {
+    "at": "2026-10-03T03:09:05.136Z",
+    "role": "qc_inspector",
+    "action": "open /admin/w6b3r1wnc10bflfg",
+    "detail": "召回管理（B3）"
+  },
+  {
+    "at": "2026-10-03T03:09:31.035Z",
+    "role": "keeper",
+    "action": "pc-signin",
+    "detail": "身份锚点 仓管员·吴涛（keeper）"
+  },
+  {
+    "at": "2026-10-03T03:10:03.237Z",
+    "role": "keeper",
+    "action": "open /admin/w6b3k0jfsyskif",
+    "detail": "效期看板（B3 双轨阈值）"
+  },
+  {
+    "at": "2026-10-03T03:10:07.373Z",
+    "role": "keeper",
+    "action": "open /admin/w6b2dwgwk6zc3i",
+    "detail": "预警列表（B2 认领主场）"
+  },
+  {
+    "at": "2026-10-03T03:10:09.646Z",
+    "role": "keeper",
+    "action": "open /labels",
+    "detail": "条码打印中心（B3 labels）"
+  },
+  {
+    "at": "2026-10-03T03:10:27.097Z",
+    "role": "keeper",
+    "action": "mobile-signin #/alerts",
+    "detail": "dsh-mobile-auth=keeper"
+  },
+  {
+    "at": "2026-10-03T03:10:28.300Z",
+    "role": "keeper",
+    "action": "mobile #/alerts",
+    "detail": "mobile 预警页（B2/B1）"
+  },
+  {
+    "at": "2026-10-03T03:10:54.493Z",
+    "role": "sales_rep",
+    "action": "pc-signin",
+    "detail": "身份锚点 销售·郑洁（sales_rep）"
+  },
+  {
+    "at": "2026-10-03T03:11:27.531Z",
+    "role": "sales_rep",
+    "action": "open /admin/w6b6c6iqjj61zo9",
+    "detail": "商机管道 Kanban（B6）"
+  },
+  {
+    "at": "2026-10-03T03:11:32.721Z",
+    "role": "sales_rep",
+    "action": "open /admin/n17sys042q2lz",
+    "detail": "客户 360（B6）"
+  },
+  {
+    "at": "2026-10-03T03:11:50.194Z",
+    "role": "sales_rep",
+    "action": "mobile-signin #/docs/so_orders",
+    "detail": "dsh-mobile-auth=sales_rep"
+  },
+  {
+    "at": "2026-10-03T03:11:51.396Z",
+    "role": "sales_rep",
+    "action": "mobile #/docs/so_orders",
+    "detail": "mobile 单据浏览（B1）"
+  },
+  {
+    "at": "2026-10-03T03:12:17.462Z",
+    "role": "finance",
+    "action": "pc-signin",
+    "detail": "身份锚点 财务·冯琳（finance）"
+  },
+  {
+    "at": "2026-10-03T03:12:51.348Z",
+    "role": "finance",
+    "action": "open /admin/w6b9cdzrc2lst1dm",
+    "detail": "经营总览驾驶舱（B9）"
+  },
+  {
+    "at": "2026-10-03T03:12:56.330Z",
+    "role": "finance",
+    "action": "open /admin/w6b9fgcovvinqe85",
+    "detail": "财务工作台（B9 催收）"
+  },
+  {
+    "at": "2026-10-03T03:13:00.434Z",
+    "role": "finance",
+    "action": "open /admin/w3pur45681oxtcsi",
+    "detail": "发票匹配（B9 三单）"
+  },
+  {
+    "at": "2026-10-03T03:13:17.908Z",
+    "role": "finance",
+    "action": "mobile-signin #/alerts",
+    "detail": "dsh-mobile-auth=finance"
+  },
+  {
+    "at": "2026-10-03T03:13:19.111Z",
+    "role": "finance",
+    "action": "mobile #/alerts",
+    "detail": "mobile 预警页（R5 催收通知）"
+  },
+  {
+    "at": "2026-10-03T03:13:45.276Z",
+    "role": "admin@nocobase.com",
+    "action": "pc-signin",
+    "detail": "身份锚点 Super Admin（nocobase）"
+  },
+  {
+    "at": "2026-10-03T03:13:56.756Z",
+    "role": "admin@nocobase.com",
+    "action": "open /admin/w6b2rdacw363qjf7",
+    "detail": "预警规则配置（B2/B5 六路）"
+  },
+  {
+    "at": "2026-10-03T03:14:01.773Z",
+    "role": "admin@nocobase.com",
+    "action": "open /admin/w3b4u2r9nnjqvi",
+    "detail": "审批流配置（设计器 iframe）"
+  },
+  {
+    "at": "2026-10-03T03:14:10.406Z",
+    "role": "admin@nocobase.com",
+    "action": "open /admin/w3b5m8kwiakieq",
+    "detail": "权限矩阵页"
+  }
+]

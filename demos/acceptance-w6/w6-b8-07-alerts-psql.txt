@@ -1,0 +1,41 @@
+════ W6-B8 计量/维保预警 psql 对账（实测于 2026-10-03 02:48:02 +0800）════
+
+── eam_calibrations（强检台账：下次校准日=本次+周期）──
+    code    |    instrument    | asset_code | ccp_code  | calibrated_at | period_days | next_due_date |        agency        | result |   cert_no
+------------+------------------+------------+-----------+---------------+-------------+---------------+----------------------+--------+--------------
+ CB-JJ-26Q3 | 金检机（灵敏度） | EQ-JJ-01   | CCP-JC-01 | 2026-03-27    |         180 | 2026-09-23    | 市计量质量检测研究院 | passed | JL-2026-1187
+ CB-WD-26Q3 | 速冻库温度计     | EQ-WD-01   | CCP-SD-01 | 2025-10-17    |         365 | 2026-10-17    | 市计量质量检测研究院 | passed | JL-2026-0932
+ CB-TD-26Q3 | 电子天平         | EQ-TD-01   |           | 2026-09-03    |         365 | 2027-09-03    | 省计量科学研究院     | passed | JL-2026-1203
+ CB-PH-26Q3 | pH 计            | EQ-PH-01   |           | 2026-04-09    |         180 | 2026-10-06    | 省计量科学研究院     | passed | JL-2026-0871
+(4 rows)
+
+
+── wfl_alerts 两路新预警（calibration_due / maint_overdue 全列）──
+  id   |    rule_type    | severity |  entity_code   |                                   title                                   |  status  | notified_severity | first_seen_at
+-------+-----------------+----------+----------------+---------------------------------------------------------------------------+----------+-------------------+---------------
+  7058 | calibration_due | critical | CB-PH-26Q3     | 计量器具 pH 计（CB-PH-26Q3）3 天后到校准期（2026-10-06）                  | open     | critical          | 2026-10-03
+  7060 | calibration_due | critical | CB-JJ-26Q3     | 计量器具 金检机（灵敏度）（CB-JJ-26Q3）校准已过期 10 天——强检器具停用送检 | open     | critical          | 2026-10-03
+  7059 | calibration_due | warning  | CB-WD-26Q3     | 计量器具 速冻库温度计（CB-WD-26Q3）14 天后到校准期（2026-10-17）          | open     | warning           | 2026-10-03
+  7061 | maint_overdue   | warning  | WO-P3-20261002 | 维保工单 WO-P3-20261002（EQ-BZ-01）已逾期 1 天未完成（状态 new）          | open     | warning           | 2026-10-03
+  7062 | maint_overdue   | warning  | WO-2026-0001   | 维保工单 WO-2026-0001（EQ-JJ-01）已逾期 1 天未完成（状态 accepted）       | resolved | warning           | 2026-10-03
+  7327 | maint_overdue   | warning  | WO-2026-0002   | 维保工单 WO-2026-0002（EQ-JJ-01）已逾期 1 天未完成（状态 accepted）       | resolved | warning           | 2026-10-03
+  7592 | maint_overdue   | warning  | WO-2026-0003   | 维保工单 WO-2026-0003（EQ-JJ-01）已逾期 1 天未完成（状态 accepted）       | resolved | warning           | 2026-10-03
+  7857 | maint_overdue   | warning  | WO-2026-0004   | 维保工单 WO-2026-0004（EQ-JJ-01）已逾期 1 天未完成（状态 accepted）       | resolved | warning           | 2026-10-03
+  8122 | maint_overdue   | warning  | WO-2026-0005   | 维保工单 WO-2026-0005（EQ-JJ-01）已逾期 1 天未完成（状态 accepted）       | resolved | warning           | 2026-10-03
+ 10231 | maint_overdue   | warning  | WO-2026-0006   | 维保工单 WO-2026-0006（EQ-JJ-01）已逾期 1 天未完成（状态 accepted）       | resolved | warning           | 2026-10-03
+ 11334 | maint_overdue   | warning  | WO-2026-0007   | 维保工单 WO-2026-0007（EQ-JJ-01）已逾期 1 天未完成（状态 accepted）       | resolved | warning           | 2026-10-03
+(11 rows)
+
+
+── 到期判定口径复核：next_due_date vs CURRENT_DATE（手算=引擎 hitsSelect 同式）──
+    code    |    instrument    | next_due_date |   today    | days_left | expected_tier
+------------+------------------+---------------+------------+-----------+---------------
+ CB-JJ-26Q3 | 金检机（灵敏度） | 2026-09-23    | 2026-10-03 |       -10 | critical
+ CB-PH-26Q3 | pH 计            | 2026-10-06    | 2026-10-03 |         3 | critical
+ CB-WD-26Q3 | 速冻库温度计     | 2026-10-17    | 2026-10-03 |        14 | warning
+ CB-TD-26Q3 | 电子天平         | 2027-09-03    | 2026-10-03 |       335 | no-hit
+(4 rows)
+
+
+── in-app 通知送达（notificationInAppMessages 经 alert-center 渠道）──
+9

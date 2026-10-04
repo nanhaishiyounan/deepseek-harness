@@ -1,0 +1,122 @@
+{
+  "phase": "after",
+  "requested": 19,
+  "ok": 19,
+  "failed": [],
+  "shots": [
+    {
+      "name": "001-经营总览.png",
+      "uid": "w6b9cdzrc2lst1dm",
+      "title": "经营总览",
+      "bytes": 224711
+    },
+    {
+      "name": "004-客户.png",
+      "uid": "n17sys042q2lz",
+      "title": "客户",
+      "bytes": 157738
+    },
+    {
+      "name": "010-库存查询.png",
+      "uid": "h5wms9v2hly0cg6j",
+      "title": "库存查询",
+      "bytes": 158019
+    },
+    {
+      "name": "022-供应商档案.png",
+      "uid": "h4srm2u9xiqx09jb",
+      "title": "供应商档案",
+      "bytes": 162798
+    },
+    {
+      "name": "031-生产订单.png",
+      "uid": "w5mfgntyu7wy20a",
+      "title": "生产订单",
+      "bytes": 181280
+    },
+    {
+      "name": "044-主生产计划.png",
+      "uid": "w7mrpyru4s708nwn",
+      "title": "主生产计划",
+      "bytes": 150260
+    },
+    {
+      "name": "048-APS瓶颈与负荷.png",
+      "uid": "w6b8a3fg2qshtalw",
+      "title": "APS瓶颈与负荷",
+      "bytes": 141564
+    },
+    {
+      "name": "050-员工.png",
+      "uid": "n17lhe5qyxu1g",
+      "title": "员工",
+      "bytes": 119069
+    },
+    {
+      "name": "058-库存看板.png",
+      "uid": "w9kpiatwzi4gjbff",
+      "title": "库存看板",
+      "bytes": 162216
+    },
+    {
+      "name": "060-财务工作台.png",
+      "uid": "w6b9fgcovvinqe85",
+      "title": "财务工作台",
+      "bytes": 109306
+    },
+    {
+      "name": "061-质检单.png",
+      "uid": "w8qmjvyv8p5j7j",
+      "title": "质检单",
+      "bytes": 186293
+    },
+    {
+      "name": "070-检验工作台.png",
+      "uid": "w6b5icrrgz5z9gu",
+      "title": "检验工作台",
+      "bytes": 77243
+    },
+    {
+      "name": "079-维保日历.png",
+      "uid": "w6b8eci1cpbqsgtj",
+      "title": "维保日历",
+      "bytes": 114478
+    },
+    {
+      "name": "083-比价表.png",
+      "uid": "w3purb7o0r3yqi45",
+      "title": "比价表",
+      "bytes": 162686
+    },
+    {
+      "name": "084-采购订单.png",
+      "uid": "w3puryzkva06iuhh",
+      "title": "采购订单",
+      "bytes": 132884
+    },
+    {
+      "name": "088-销售订单.png",
+      "uid": "w7mrp4w590rm0ws8",
+      "title": "销售订单",
+      "bytes": 166381
+    },
+    {
+      "name": "089-商机管道.png",
+      "uid": "w6b6c6iqjj61zo9",
+      "title": "商机管道",
+      "bytes": 66028
+    },
+    {
+      "name": "110-批次追溯.png",
+      "uid": "w6b3by6ukynxfou",
+      "title": "批次追溯",
+      "bytes": 95781
+    },
+    {
+      "name": "113-排产甘特.png",
+      "uid": "96yet9a0x45",
+      "title": "排产甘特",
+      "bytes": 76659
+    }
+  ]
+}

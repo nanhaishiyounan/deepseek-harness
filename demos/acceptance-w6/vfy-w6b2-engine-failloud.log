@@ -1,0 +1,16 @@
+approval-engine: serving on http://127.0.0.1:13110 (POST /act, POST /submit, POST /post-count-adjust, POST /scan-reorder, POST /calc-scorecard, POST /run-mrp, POST /calc-kpi, POST /run-nightly, POST /scan-alerts, POST /alerts/act, POST /confirm-suggestion, GET /todos, GET /healthz)
+approval-engine: W3-B6 terminals on :13110 — GET /terminals/{report,inspect,receive}.html + terminal.css; GET /terminal/{report,inspect,receive}; POST /report-job, /inspect-submit, /receive-goods (enabled=true, token=lenient-demo（生产必须设 W3_TERMINAL_TOKEN）)
+approval-engine: W5-B0 designer on :13110 — GET /designer (SPA) + GET /designer/meta + GET/POST /flow-graph → wfl_flow_configs.graph json（编辑态落库）+ POST /flow-graph/publish → 门禁+round-trip 等价断言+单向编译派生 wfl 行表（一条 data-modifying CTE，CAS 败则整条 no-op）；保存与发布同走 graph_version 原子 CAS——同刻并发恰好一胜一败(enabled=true)
+/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3737
+      throw new Error(`W6_ALERT_SCAN_ENABLED 仅接受 true/false（收到 ${rawEnabled}）`)
+            ^
+
+
+Error: W6_ALERT_SCAN_ENABLED 仅接受 true/false（收到 yes）
+    at serve (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3737:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async main (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:4770:5)
+    at async <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:4824:3)
+
+Node.js v22.19.0
+exit=1

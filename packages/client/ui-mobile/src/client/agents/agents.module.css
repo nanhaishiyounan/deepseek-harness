@@ -24,7 +24,7 @@
 
 .headerTitle {
   margin: 0;
-  font-size: 20px;
+  font-size: var(--dshm-fs-lg);
   line-height: 28px;
   font-weight: 700;
   letter-spacing: 0.5px;
@@ -40,13 +40,13 @@
    dial set the chats layer's search rides). */
 .searchBox {
   --height: var(--dshm-touch);
-  --border-radius: 14px;
+  --border-radius: var(--dshm-radius-lg);
   --background: var(--dshm-card);
   --placeholder-color: var(--dshm-muted-foreground);
 }
 
 .searchBox :global(.adm-search-bar-input) {
-  font-size: 15px;
+  font-size: var(--dshm-fs-md);
   color: var(--dshm-foreground);
 }
 
@@ -61,18 +61,30 @@
   padding: 4px 12px calc(16px + env(safe-area-inset-bottom));
 }
 
-/* One capability band: the 13/600 group title over its roster items. */
+/* One capability band: the group title over its roster items (v7: the title
+    carries the ink grade + a short neutral rule so it stops reading level
+    with the skill pills — audit 04 §03). */
 .band {
   display: flex;
   flex-direction: column;
 }
 
 .bandTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin: 14px 2px 6px;
-  font-size: 13px;
+  font-size: var(--dshm-fs-sm);
   line-height: 18px;
   font-weight: 600;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-foreground);
+}
+
+.bandTitle::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--dshm-border);
 }
 
 /* The design's .roster-item: avatar + info column + the trailing chip. */
@@ -123,7 +135,7 @@
 }
 
 .rosterName {
-  font-size: 15.5px;
+  font-size: var(--dshm-fs-md);
   line-height: 22px;
   font-weight: 650;
   color: var(--dshm-foreground);
@@ -133,7 +145,7 @@
 }
 
 .rosterRole {
-  font-size: 12.5px;
+  font-size: var(--dshm-fs-xs);
   line-height: 18px;
   font-weight: 500;
   color: var(--dshm-muted-foreground);
@@ -145,7 +157,7 @@
 
 .rosterTag {
   margin-top: 2px;
-  font-size: 13px;
+  font-size: var(--dshm-fs-sm);
   line-height: 19px;
   color: var(--dshm-muted-foreground);
   overflow: hidden;
@@ -153,8 +165,9 @@
   white-space: nowrap;
 }
 
-/* The design's .skill-pill: antd Tag (the brand-soft face rides inline dials
-   in AgentsView.tsx) at the 11px scale. */
+/* The skill pills: antd Tags on the neutral face (inline dials in
+    AgentsView.tsx) at the 12px scale — the v7 de-blue retires the
+    blue-soft fill (audit 04 §03). */
 .skillPills {
   display: flex;
   flex-wrap: wrap;
@@ -163,19 +176,32 @@
 }
 
 .skillPill {
-  --border-radius: 999px;
-  font-size: 11px;
+  --border-radius: var(--dshm-radius-pill);
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
   font-weight: 600;
 }
 
 /* The design's .status-chip: antd Tag (the per-presence color rides inline
-   dials in AgentsView.tsx) as the quiet capsule. */
+    dials in AgentsView.tsx) as the quiet capsule. */
 .statusChip {
-  --border-radius: 999px;
+  --border-radius: var(--dshm-radius-pill);
   flex: none;
-  font-size: 11px;
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
+}
+
+/* The trailing affordance (v7, audit 04 §03): the presence chip plus the
+    disclosure chevron — the row's tap target reads as an entry. */
+.rosterTail {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+}
+
+.rosterChevron {
+  color: var(--dshm-muted-foreground);
 }
 
 /* The busy mark while a colleague's session is being created. */
@@ -184,7 +210,7 @@
   align-items: center;
   gap: 4px;
   margin-top: 6px;
-  font-size: 12px;
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
   color: var(--dshm-muted-foreground);
 }

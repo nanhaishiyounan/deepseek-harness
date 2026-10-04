@@ -1,0 +1,3039 @@
+[
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "n17c15fez1adt8jf",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "A",
+          "label": "A 级",
+          "color": "green"
+        },
+        {
+          "value": "B",
+          "label": "B 级",
+          "color": "blue"
+        },
+        {
+          "value": "C",
+          "label": "C 级",
+          "color": "orange"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "n17cdnpflwji8w4f",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "new",
+          "label": "新建",
+          "color": "default"
+        },
+        {
+          "value": "contacted",
+          "label": "Contacted",
+          "color": "blue"
+        },
+        {
+          "value": "requirements_confirmed",
+          "label": "Requirements confirmed",
+          "color": "blue"
+        },
+        {
+          "value": "proposal",
+          "label": "Proposal or quotation",
+          "color": "blue"
+        },
+        {
+          "value": "negotiation",
+          "label": "Negotiation",
+          "color": "blue"
+        },
+        {
+          "value": "won",
+          "label": "Won",
+          "color": "blue"
+        },
+        {
+          "value": "lost",
+          "label": "Lost",
+          "color": "blue"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "n17cneqrt5bclf",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "sent",
+          "label": "已发送",
+          "color": "blue"
+        },
+        {
+          "value": "accepted",
+          "label": "已接受",
+          "color": "blue"
+        },
+        {
+          "value": "converted",
+          "label": "已转单",
+          "color": "blue"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "default"
+        },
+        {
+          "value": "rejected",
+          "label": "已驳回",
+          "color": "red"
+        },
+        {
+          "value": "pending_approval",
+          "label": "待审批",
+          "color": "blue"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "n17cooj7zv8zzmdf",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "pending",
+          "label": "待处理",
+          "color": "orange"
+        },
+        {
+          "value": "fulfilled",
+          "label": "已交付",
+          "color": "blue"
+        },
+        {
+          "value": "cancelled",
+          "label": "已取消",
+          "color": "default"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "n17cqmq4hqagsbrf",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "enterprise",
+          "label": "企业客户",
+          "color": "blue"
+        },
+        {
+          "value": "trader",
+          "label": "贸易商",
+          "color": "cyan"
+        },
+        {
+          "value": "factory",
+          "label": "工厂",
+          "color": "green"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "n17cuh5soevyzeff",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "active",
+          "label": "生效",
+          "color": "green"
+        },
+        {
+          "value": "prospect",
+          "label": "潜在",
+          "color": "blue"
+        },
+        {
+          "value": "churned",
+          "label": "已流失",
+          "color": "blue"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "n17f2c02tl5h9jysvf",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "active",
+          "label": "生效",
+          "color": "green"
+        },
+        {
+          "value": "prospect",
+          "label": "潜在",
+          "color": "blue"
+        },
+        {
+          "value": "churned",
+          "label": "已流失",
+          "color": "blue"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "n17f2c0wc15685o89f",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "bank_transfer",
+          "label": "银行转账",
+          "color": "blue"
+        },
+        {
+          "value": "letter_of_credit",
+          "label": "信用证",
+          "color": "green"
+        },
+        {
+          "value": "acceptance_bill",
+          "label": "承兑汇票",
+          "color": "orange"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "n17f2c16i5ji6ols7f",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "bank_transfer",
+          "label": "银行转账",
+          "color": "blue"
+        },
+        {
+          "value": "letter_of_credit",
+          "label": "信用证",
+          "color": "green"
+        },
+        {
+          "value": "acceptance_bill",
+          "label": "承兑汇票",
+          "color": "orange"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "n17f2c1byet2ldjjrf",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "pending",
+          "label": "待处理",
+          "color": "orange"
+        },
+        {
+          "value": "received",
+          "label": "已到账",
+          "color": "blue"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "n17f2cbl8rabti5vsf",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "A",
+          "label": "A 级",
+          "color": "green"
+        },
+        {
+          "value": "B",
+          "label": "B 级",
+          "color": "blue"
+        },
+        {
+          "value": "C",
+          "label": "C 级",
+          "color": "orange"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "n17f2ccx8hr6r1azef",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "pending",
+          "label": "待处理",
+          "color": "orange"
+        },
+        {
+          "value": "received",
+          "label": "已到账",
+          "color": "blue"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "n17f2cfgwv2vt5mo9f",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "fixed",
+          "label": "固定报价",
+          "color": "blue"
+        },
+        {
+          "value": "times",
+          "label": "按次计费",
+          "color": "green"
+        },
+        {
+          "value": "subscription",
+          "label": "年度订阅",
+          "color": "purple"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "n17f2cfxfcu3yp55f",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "compliance",
+          "label": "合规认证",
+          "color": "blue"
+        },
+        {
+          "value": "logistics",
+          "label": "海外仓储",
+          "color": "cyan"
+        },
+        {
+          "value": "channel",
+          "label": "渠道拓展",
+          "color": "green"
+        },
+        {
+          "value": "brand",
+          "label": "品牌营销",
+          "color": "purple"
+        },
+        {
+          "value": "data",
+          "label": "数据洞察",
+          "color": "orange"
+        },
+        {
+          "value": "ops",
+          "label": "运营辅导",
+          "color": "default"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "n17f2cj36o0tbewyf",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "enterprise",
+          "label": "企业客户",
+          "color": "blue"
+        },
+        {
+          "value": "trader",
+          "label": "贸易商",
+          "color": "cyan"
+        },
+        {
+          "value": "factory",
+          "label": "工厂",
+          "color": "green"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "numberProps",
+    "fieldUid": "w3b2stfhrntgmhd6vu",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false
+    }
+  },
+  {
+    "kind": "dateProps",
+    "fieldUid": "w3b2stfsu8w8fczwzn",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false
+    }
+  },
+  {
+    "kind": "dateProps",
+    "fieldUid": "w3b2stfesnxuxvcsf",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false
+    }
+  },
+  {
+    "kind": "numberProps",
+    "fieldUid": "w3b2stfoaenj1va0sr",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false
+    }
+  },
+  {
+    "kind": "numberProps",
+    "fieldUid": "w3b2stf7n4tck46jc6",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false
+    }
+  },
+  {
+    "kind": "numberProps",
+    "fieldUid": "w3b2stfwwl9onxctk",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false
+    }
+  },
+  {
+    "kind": "numberProps",
+    "fieldUid": "w3b2stfr0gpn85uneb",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false
+    }
+  },
+  {
+    "kind": "numberProps",
+    "fieldUid": "w3b2stf1nb7dzom0ko",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false
+    }
+  },
+  {
+    "kind": "numberProps",
+    "fieldUid": "w3b2stf2be86jik4yx",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false
+    }
+  },
+  {
+    "kind": "numberProps",
+    "fieldUid": "w3b2stfgqtnmkvux3",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false
+    }
+  },
+  {
+    "kind": "numberProps",
+    "fieldUid": "w3b2stfklvkll3i8a",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false
+    }
+  },
+  {
+    "kind": "numberProps",
+    "fieldUid": "w3b2stf8wg77j8y009",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false
+    }
+  },
+  {
+    "kind": "numberProps",
+    "fieldUid": "w3b2stfucc81bl5n6r",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false
+    }
+  },
+  {
+    "kind": "numberProps",
+    "fieldUid": "w3b2stf40gdwmhae8m",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false
+    }
+  },
+  {
+    "kind": "numberProps",
+    "fieldUid": "w3b2stfotlfpjwwewd",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false
+    }
+  },
+  {
+    "kind": "numberProps",
+    "fieldUid": "w3b2stf2jdr8h7gwd",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "w3purc0s5y59cu8vpf",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "none",
+          "label": "未收货",
+          "color": "default"
+        },
+        {
+          "value": "partial",
+          "label": "部分付款",
+          "color": "orange"
+        },
+        {
+          "value": "received",
+          "label": "收货完成",
+          "color": "green"
+        }
+      ],
+      "align": null
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "w3purc0ym12v4419uf",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "pending",
+          "label": "待处理",
+          "color": "orange"
+        },
+        {
+          "value": "pending_level2",
+          "label": "二级审批中",
+          "color": "purple"
+        },
+        {
+          "value": "approved",
+          "label": "已生效",
+          "color": "green"
+        },
+        {
+          "value": "rejected",
+          "label": "已驳回",
+          "color": "red"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "default"
+        },
+        {
+          "value": "sent",
+          "label": "已发出",
+          "color": "blue"
+        },
+        {
+          "value": "closed",
+          "label": "已关闭",
+          "color": "default"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "numberProps",
+    "fieldUid": "w3purc7imvpzde073f",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "separator": "0,0.00",
+      "numberStep": 2
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "w3purc9dw5ll8vqoof",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "pending",
+          "label": "待处理",
+          "color": "orange"
+        },
+        {
+          "value": "pending_level2",
+          "label": "二级审批中",
+          "color": "purple"
+        },
+        {
+          "value": "approved",
+          "label": "已生效",
+          "color": "green"
+        },
+        {
+          "value": "rejected",
+          "label": "已驳回",
+          "color": "red"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "default"
+        },
+        {
+          "value": "paid",
+          "label": "已付讫",
+          "color": "green"
+        }
+      ],
+      "align": null
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "w3purch39knsxhau6f",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "bank",
+          "label": "银行转账",
+          "color": "blue"
+        },
+        {
+          "value": "bill",
+          "label": "承兑汇票",
+          "color": "purple"
+        },
+        {
+          "value": "cash",
+          "label": "现金",
+          "color": "default"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "w3purchgbcq6ekmzaf",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "no_invoice",
+          "label": "未开票",
+          "color": "default"
+        },
+        {
+          "value": "to_invoice",
+          "label": "待开票",
+          "color": "orange"
+        },
+        {
+          "value": "invoiced",
+          "label": "已开票",
+          "color": "green"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "w3purcrzj0uldkv4f",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "pending",
+          "label": "待处理",
+          "color": "orange"
+        },
+        {
+          "value": "pending_level2",
+          "label": "二级审批中",
+          "color": "purple"
+        },
+        {
+          "value": "approved",
+          "label": "已生效",
+          "color": "green"
+        },
+        {
+          "value": "rejected",
+          "label": "已驳回",
+          "color": "red"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "default"
+        },
+        {
+          "value": "converted",
+          "label": "已转单",
+          "color": "blue"
+        },
+        {
+          "value": "closed",
+          "label": "已关闭",
+          "color": "default"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "w3purct0lq8azni6f",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "pending",
+          "label": "待处理",
+          "color": "orange"
+        },
+        {
+          "value": "matched",
+          "label": "匹配通过",
+          "color": "blue"
+        },
+        {
+          "value": "exception",
+          "label": "匹配异常",
+          "color": "blue"
+        },
+        {
+          "value": "confirmed",
+          "label": "已确认",
+          "color": "green"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "w3purcz31ge3lnuydf",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "pending",
+          "label": "待处理",
+          "color": "orange"
+        },
+        {
+          "value": "pending_level2",
+          "label": "二级审批中",
+          "color": "purple"
+        },
+        {
+          "value": "approved",
+          "label": "已生效",
+          "color": "green"
+        },
+        {
+          "value": "rejected",
+          "label": "已驳回",
+          "color": "red"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "default"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "numberProps",
+    "fieldUid": "w3purczcj7lqppx0kf",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "separator": "0,0.00",
+      "numberStep": 2
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "w7mrpc1y9852clyyxf",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "pending",
+          "label": "待处理",
+          "color": "orange"
+        },
+        {
+          "value": "pending_level2",
+          "label": "二级审批中",
+          "color": "purple"
+        },
+        {
+          "value": "approved",
+          "label": "已生效",
+          "color": "green"
+        },
+        {
+          "value": "rejected",
+          "label": "已驳回",
+          "color": "red"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "default"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "w7mrpcerskobk9btwf",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "none",
+          "label": "未发货",
+          "color": "default"
+        },
+        {
+          "value": "partial",
+          "label": "部分付款",
+          "color": "orange"
+        },
+        {
+          "value": "shipped",
+          "label": "全部交付",
+          "color": "green"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "w4b1cfcyol180xkpw",
+    "before": {
+      "options": [
+        {
+          "value": "bank_transfer",
+          "label": "银行转账",
+          "color": "blue"
+        },
+        {
+          "value": "letter_of_credit",
+          "label": "信用证",
+          "color": "blue"
+        },
+        {
+          "value": "acceptance_bill",
+          "label": "承兑汇票",
+          "color": "blue"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "w4b1cfdc2v8g1hyo",
+    "before": {
+      "options": [
+        {
+          "value": "pending",
+          "label": "待处理",
+          "color": "orange"
+        },
+        {
+          "value": "received",
+          "label": "已到账",
+          "color": "blue"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "w4b1cfzwwjurcij6k",
+    "before": {
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "pending",
+          "label": "待处理",
+          "color": "orange"
+        },
+        {
+          "value": "matched",
+          "label": "匹配通过",
+          "color": "blue"
+        },
+        {
+          "value": "exception",
+          "label": "匹配异常",
+          "color": "blue"
+        },
+        {
+          "value": "confirmed",
+          "label": "已确认",
+          "color": "green"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "w4b1cfgiwj4j9jvv8",
+    "before": {
+      "options": [
+        {
+          "value": "none",
+          "label": "未发货",
+          "color": "blue"
+        },
+        {
+          "value": "partial",
+          "label": "部分付款",
+          "color": "orange"
+        },
+        {
+          "value": "shipped",
+          "label": "全部交付",
+          "color": "blue"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "w4b1cfo4vez716lx",
+    "before": {
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "pending",
+          "label": "待处理",
+          "color": "orange"
+        },
+        {
+          "value": "pending_level2",
+          "label": "二级审批中",
+          "color": "purple"
+        },
+        {
+          "value": "approved",
+          "label": "已生效",
+          "color": "green"
+        },
+        {
+          "value": "rejected",
+          "label": "已驳回",
+          "color": "red"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "default"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "w4b1cfv2hu5taetb",
+    "before": {
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "pending",
+          "label": "待处理",
+          "color": "orange"
+        },
+        {
+          "value": "pending_level2",
+          "label": "二级审批中",
+          "color": "purple"
+        },
+        {
+          "value": "approved",
+          "label": "已生效",
+          "color": "green"
+        },
+        {
+          "value": "rejected",
+          "label": "已驳回",
+          "color": "red"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "default"
+        },
+        {
+          "value": "paid",
+          "label": "已付讫",
+          "color": "green"
+        }
+      ],
+      "align": null
+    }
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "039kr1e4ius",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '¥' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"报价金额合计\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：全部报价金额合计\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "0tg4yqqlq1h",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"草稿数\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：状态=草稿 · 全量\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "0v64wei9lx4",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"询价单总数\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：全量 · 不随筛选联动\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "1qvrnknff5c",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"待审批\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：状态=待审/二级审批中 · 全量\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "3fwnws856t3",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '¥' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"估算总额\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：全部申请金额合计\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "3ja3erwjxdm",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"待审批\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：状态=待审/二级审批中 · 全量\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "3jk4n466a6p",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"待审批报价\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：状态=待审批 · 全量\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "3sp1m8pt60g",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '¥' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"回款金额合计\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：全部状态回款金额合计\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "5it0r57grg1",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"已支付\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：状态=已支付 · 全量\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "6u7i38pl8yp",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"订单总数\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：全量 · 不随筛选联动\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "99439ty2n4q",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '¥' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"金额合计\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：全部状态订单金额合计\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "9e5ra1v2imb",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"本月回款单\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：2026-09-01 起到账（按回款日）\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "9yuje2qw9h9",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '¥' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"金额合计\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：全部状态订单金额合计\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "bb8300acoez",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"申请单总数\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：全量 · 不随筛选联动\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "bi0kng8ihrl",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '¥' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"发票金额合计\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：全部发票金额合计\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "bv4zy4webh9",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"已开票/已收\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：状态=已开票+已收讫 · 全量\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "dsbaclosrda",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"已发货订单\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：发货状态=已发货 · 全量\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "eom35q7ivog",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"中标报价数\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：中标=true · 全量\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "ew92c97l2fv",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"报价总数\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：全量 · 不随筛选联动\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "fvxs4bg7vlf",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"本月审批通过\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：2026-09-01 起审批通过（按审批日，非创建日）\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "iapvwzdhr4x",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"待审批\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：状态=待审/二级审批中 · 全量\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "jlo6m5w4ykr",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"匹配异常数\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：匹配结果=异常 · 全量\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "kfzninqrr9w",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '¥' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"付款金额合计\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：全部付款金额合计\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "l8t14tp5ong",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"已提交报价\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：状态=已提交 · 全量\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "lrg4tsh2fuh",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"已关闭\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：状态=已关闭 · 全量\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "mpe81jv8exd",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"本月审批通过\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：2026-09-01 起审批通过（按审批日，非创建日）\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "ozqxkn8q7ac",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"待确认回款\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：状态=待确认 · 全量\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "peslnpw64vf",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"已批准\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：状态=已生效 · 全量\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "u7gwkln6raq",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"发票总数\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：全量 · 不随筛选联动\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "u9gbeevy416",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"付款单总数\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：全量 · 不随筛选联动\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "w4b3sc1pdhcq9mfvw",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"产品总数\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：全量 · 不随筛选联动\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "w4b3sc37fmwtj597l",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"客户总数\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：全量 · 不随筛选联动\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "w4b3sc5bjjsu0x0gk",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 1 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + ' 天';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"平均交货周期\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：全部报价交期均值\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "w4b3sc6jt90yqbm36",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '¥' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"金额合计\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：全部订单金额合计\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "w4b3sc7odlm5liw1o",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"进行中订单\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：状态=进行中 · 全量\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "w4b3sc9ga0mi69cc",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"在售产品\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：在售=true · 全量\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "w4b3scbae8lzeldq",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"进行中线索\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：阶段未终结 · 全量\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "w4b3sccfp8qmdlsta",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"线索总数\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：全量 · 不随筛选联动\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "w4b3sceopswyks4z",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"联系人总数\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：全量 · 不随筛选联动\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "w4b3scid667vy5lgk",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '¥' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"平均报价\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：全部报价均价\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "w4b3scp1xt4jkwjxo",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"订单总数\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：全量 · 不随筛选联动\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "w4b3scp3s88gv9x1",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"报价总数\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：全量 · 不随筛选联动\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "w4b3sctmtguor19f",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"活跃客户\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：状态=活跃 · 全量\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "xzsy581xv5z",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"报价总数\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：全量 · 不随筛选联动\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "ym7ez5ktgvk",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '¥' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"发票金额合计\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：全部发票金额合计\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "zywkq4rpamn",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"本月开票\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：2026-09-01 起开票（按开票日）\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "n17c15fez1adt8j",
+    "before": {
+      "title": "等级",
+      "dataIndex": "level",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "A",
+          "label": "A 级",
+          "color": "green"
+        },
+        {
+          "value": "B",
+          "label": "B 级",
+          "color": "blue"
+        },
+        {
+          "value": "C",
+          "label": "C 级",
+          "color": "orange"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "n17ca5rs5hqus56",
+    "before": {
+      "title": "状态",
+      "dataIndex": "status",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "active",
+          "label": "在职",
+          "color": "green"
+        },
+        {
+          "value": "inactive",
+          "label": "离职",
+          "color": "default"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "n17cdnpflwji8w4",
+    "before": {
+      "title": "阶段",
+      "dataIndex": "stage",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "new",
+          "label": "新线索",
+          "color": "default"
+        },
+        {
+          "value": "contacted",
+          "label": "已联系",
+          "color": "blue"
+        },
+        {
+          "value": "requirements_confirmed",
+          "label": "需求确认",
+          "color": "cyan"
+        },
+        {
+          "value": "proposal",
+          "label": "方案报价",
+          "color": "purple"
+        },
+        {
+          "value": "negotiation",
+          "label": "商务谈判",
+          "color": "orange"
+        },
+        {
+          "value": "won",
+          "label": "赢单",
+          "color": "green"
+        },
+        {
+          "value": "lost",
+          "label": "输单",
+          "color": "red"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "n17cneqrt5bcl",
+    "before": {
+      "title": "状态",
+      "dataIndex": "status",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "sent",
+          "label": "已发送",
+          "color": "blue"
+        },
+        {
+          "value": "accepted",
+          "label": "已接受",
+          "color": "green"
+        },
+        {
+          "value": "converted",
+          "label": "已转订单",
+          "color": "purple"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "default"
+        },
+        {
+          "value": "rejected",
+          "label": "已拒绝",
+          "color": "red"
+        },
+        {
+          "value": "pending_approval",
+          "label": "待审批",
+          "color": "orange"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "n17cooj7zv8zzmd",
+    "before": {
+      "title": "状态",
+      "dataIndex": "status",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "pending",
+          "label": "处理中",
+          "color": "blue"
+        },
+        {
+          "value": "fulfilled",
+          "label": "已交付",
+          "color": "green"
+        },
+        {
+          "value": "cancelled",
+          "label": "已取消",
+          "color": "red"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "n17cqmq4hqagsbr",
+    "before": {
+      "title": "类型",
+      "dataIndex": "type",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "enterprise",
+          "label": "企业客户",
+          "color": "blue"
+        },
+        {
+          "value": "trader",
+          "label": "贸易商",
+          "color": "cyan"
+        },
+        {
+          "value": "factory",
+          "label": "工厂",
+          "color": "green"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "n17cuh5soevyzef",
+    "before": {
+      "title": "状态",
+      "dataIndex": "status",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "active",
+          "label": "合作中",
+          "color": "green"
+        },
+        {
+          "value": "prospect",
+          "label": "潜在",
+          "color": "blue"
+        },
+        {
+          "value": "churned",
+          "label": "已流失",
+          "color": "red"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "n17f2c02tl5h9jysv",
+    "before": {
+      "title": "状态",
+      "dataIndex": "status",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "active",
+          "label": "合作中",
+          "color": "green"
+        },
+        {
+          "value": "prospect",
+          "label": "潜在",
+          "color": "blue"
+        },
+        {
+          "value": "churned",
+          "label": "已流失",
+          "color": "red"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "n17f2c0wc15685o89",
+    "before": {
+      "title": "方式",
+      "dataIndex": "method",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "bank_transfer",
+          "label": "银行转账",
+          "color": "blue"
+        },
+        {
+          "value": "letter_of_credit",
+          "label": "信用证",
+          "color": "green"
+        },
+        {
+          "value": "acceptance_bill",
+          "label": "承兑汇票",
+          "color": "orange"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "n17f2c16i5ji6ols7",
+    "before": {
+      "title": "方式",
+      "dataIndex": "method",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "bank_transfer",
+          "label": "银行转账",
+          "color": "blue"
+        },
+        {
+          "value": "letter_of_credit",
+          "label": "信用证",
+          "color": "green"
+        },
+        {
+          "value": "acceptance_bill",
+          "label": "承兑汇票",
+          "color": "orange"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "n17f2c1byet2ldjjr",
+    "before": {
+      "title": "状态",
+      "dataIndex": "status",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "pending",
+          "label": "待到账",
+          "color": "orange"
+        },
+        {
+          "value": "received",
+          "label": "已到账",
+          "color": "green"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "n17f2c6iba7zx5mop",
+    "before": {
+      "title": "状态",
+      "dataIndex": "status",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "issued",
+          "label": "已开具",
+          "color": "blue"
+        },
+        {
+          "value": "paid",
+          "label": "已收款",
+          "color": "green"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "red"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "n17f2cbl8rabti5vs",
+    "before": {
+      "title": "等级",
+      "dataIndex": "level",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "A",
+          "label": "A 级",
+          "color": "green"
+        },
+        {
+          "value": "B",
+          "label": "B 级",
+          "color": "blue"
+        },
+        {
+          "value": "C",
+          "label": "C 级",
+          "color": "orange"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "n17f2ccx8hr6r1aze",
+    "before": {
+      "title": "状态",
+      "dataIndex": "status",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "pending",
+          "label": "待到账",
+          "color": "orange"
+        },
+        {
+          "value": "received",
+          "label": "已到账",
+          "color": "green"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "n17f2cfgwv2vt5mo9",
+    "before": {
+      "title": "计价方式",
+      "dataIndex": "pricing_mode",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "fixed",
+          "label": "固定报价",
+          "color": "blue"
+        },
+        {
+          "value": "times",
+          "label": "按次计费",
+          "color": "green"
+        },
+        {
+          "value": "subscription",
+          "label": "年度订阅",
+          "color": "purple"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "n17f2cfxfcu3yp55",
+    "before": {
+      "title": "类别",
+      "dataIndex": "category",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "compliance",
+          "label": "合规认证",
+          "color": "blue"
+        },
+        {
+          "value": "logistics",
+          "label": "海外仓储",
+          "color": "cyan"
+        },
+        {
+          "value": "channel",
+          "label": "渠道拓展",
+          "color": "green"
+        },
+        {
+          "value": "brand",
+          "label": "品牌营销",
+          "color": "purple"
+        },
+        {
+          "value": "data",
+          "label": "数据洞察",
+          "color": "orange"
+        },
+        {
+          "value": "ops",
+          "label": "运营辅导",
+          "color": "default"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "n17f2cj36o0tbewy",
+    "before": {
+      "title": "类型",
+      "dataIndex": "type",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "enterprise",
+          "label": "企业客户",
+          "color": "blue"
+        },
+        {
+          "value": "trader",
+          "label": "贸易商",
+          "color": "cyan"
+        },
+        {
+          "value": "factory",
+          "label": "工厂",
+          "color": "green"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "w3b2stcehhodzdzqph",
+    "before": {
+      "title": "审批状态",
+      "dataIndex": "doc_status",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "pending",
+          "label": "待处理",
+          "color": "orange"
+        },
+        {
+          "value": "pending_level2",
+          "label": "二级审批中",
+          "color": "purple"
+        },
+        {
+          "value": "approved",
+          "label": "已生效",
+          "color": "green"
+        },
+        {
+          "value": "rejected",
+          "label": "已驳回",
+          "color": "red"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "default"
+        },
+        {
+          "value": "sent",
+          "label": "已发出",
+          "color": "blue"
+        },
+        {
+          "value": "closed",
+          "label": "已关闭",
+          "color": "default"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "w3b2stcepuo027v8ua",
+    "before": {
+      "title": "方式",
+      "dataIndex": "method",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "bank_transfer",
+          "label": "银行转账",
+          "color": "blue"
+        },
+        {
+          "value": "letter_of_credit",
+          "label": "信用证",
+          "color": "green"
+        },
+        {
+          "value": "acceptance_bill",
+          "label": "承兑汇票",
+          "color": "orange"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "w3b2stcrnh00d9hl8b",
+    "before": {
+      "title": "方式",
+      "dataIndex": "method",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "bank_transfer",
+          "label": "银行转账",
+          "color": "blue"
+        },
+        {
+          "value": "letter_of_credit",
+          "label": "信用证",
+          "color": "green"
+        },
+        {
+          "value": "acceptance_bill",
+          "label": "承兑汇票",
+          "color": "orange"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "w3purc0s5y59cu8vp",
+    "before": {
+      "title": "收货进度",
+      "dataIndex": "receiving_status",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "none",
+          "label": "未收货",
+          "color": "default"
+        },
+        {
+          "value": "partial",
+          "label": "部分收货",
+          "color": "orange"
+        },
+        {
+          "value": "received",
+          "label": "收货完成",
+          "color": "green"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "w3purc0ym12v4419u",
+    "before": {
+      "title": "审批状态",
+      "dataIndex": "doc_status",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "pending",
+          "label": "待审批",
+          "color": "orange"
+        },
+        {
+          "value": "pending_level2",
+          "label": "二级审批中",
+          "color": "purple"
+        },
+        {
+          "value": "approved",
+          "label": "已生效",
+          "color": "green"
+        },
+        {
+          "value": "rejected",
+          "label": "已驳回",
+          "color": "red"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "default"
+        },
+        {
+          "value": "sent",
+          "label": "已发出",
+          "color": "blue"
+        },
+        {
+          "value": "closed",
+          "label": "已关闭",
+          "color": "default"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "w3purc248mzdu0k3o",
+    "before": {
+      "title": "状态",
+      "dataIndex": "status",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "submitted",
+          "label": "已报价",
+          "color": "green"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "w3purc9dw5ll8vqoo",
+    "before": {
+      "title": "审批状态",
+      "dataIndex": "doc_status",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "pending",
+          "label": "待审批",
+          "color": "orange"
+        },
+        {
+          "value": "pending_level2",
+          "label": "二级审批中",
+          "color": "purple"
+        },
+        {
+          "value": "approved",
+          "label": "已生效",
+          "color": "green"
+        },
+        {
+          "value": "rejected",
+          "label": "已驳回",
+          "color": "red"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "default"
+        },
+        {
+          "value": "paid",
+          "label": "已付款",
+          "color": "green"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "w3purch39knsxhau6",
+    "before": {
+      "title": "付款方式",
+      "dataIndex": "pay_method",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "bank",
+          "label": "银行转账",
+          "color": "blue"
+        },
+        {
+          "value": "bill",
+          "label": "承兑汇票",
+          "color": "purple"
+        },
+        {
+          "value": "cash",
+          "label": "现金",
+          "color": "default"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "w3purchgbcq6ekmza",
+    "before": {
+      "title": "发票进度",
+      "dataIndex": "invoice_status",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "no_invoice",
+          "label": "未开票",
+          "color": "default"
+        },
+        {
+          "value": "to_invoice",
+          "label": "待开票",
+          "color": "orange"
+        },
+        {
+          "value": "invoiced",
+          "label": "已开票",
+          "color": "green"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "w3purcrzj0uldkv4",
+    "before": {
+      "title": "审批状态",
+      "dataIndex": "doc_status",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "pending",
+          "label": "待审批",
+          "color": "orange"
+        },
+        {
+          "value": "pending_level2",
+          "label": "二级审批中",
+          "color": "purple"
+        },
+        {
+          "value": "approved",
+          "label": "已生效",
+          "color": "green"
+        },
+        {
+          "value": "rejected",
+          "label": "已驳回",
+          "color": "red"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "default"
+        },
+        {
+          "value": "converted",
+          "label": "已转单",
+          "color": "cyan"
+        },
+        {
+          "value": "closed",
+          "label": "已关闭",
+          "color": "default"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "w3purcsbbf0vbwpe",
+    "before": {
+      "title": "状态",
+      "dataIndex": "status",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "submitted",
+          "label": "已报价",
+          "color": "green"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "w3purct0lq8azni6",
+    "before": {
+      "title": "匹配结果",
+      "dataIndex": "match_result",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "draft",
+          "label": "待匹配",
+          "color": "default"
+        },
+        {
+          "value": "pending",
+          "label": "匹配中",
+          "color": "orange"
+        },
+        {
+          "value": "matched",
+          "label": "匹配通过",
+          "color": "green"
+        },
+        {
+          "value": "exception",
+          "label": "匹配异常",
+          "color": "red"
+        },
+        {
+          "value": "confirmed",
+          "label": "已确认",
+          "color": "cyan"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "w3purcz31ge3lnuyd",
+    "before": {
+      "title": "审批状态",
+      "dataIndex": "doc_status",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "pending",
+          "label": "待审批",
+          "color": "orange"
+        },
+        {
+          "value": "pending_level2",
+          "label": "二级审批中",
+          "color": "purple"
+        },
+        {
+          "value": "approved",
+          "label": "已生效",
+          "color": "green"
+        },
+        {
+          "value": "rejected",
+          "label": "已驳回",
+          "color": "red"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "default"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "w7mrpc1y9852clyyx",
+    "before": {
+      "title": "审批状态",
+      "dataIndex": "doc_status",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "pending",
+          "label": "待审批",
+          "color": "orange"
+        },
+        {
+          "value": "pending_level2",
+          "label": "二级审批中",
+          "color": "purple"
+        },
+        {
+          "value": "approved",
+          "label": "已生效",
+          "color": "green"
+        },
+        {
+          "value": "rejected",
+          "label": "已驳回",
+          "color": "red"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "default"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "w7mrpcerskobk9btw",
+    "before": {
+      "title": "发货进度",
+      "dataIndex": "shipping_status",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "none",
+          "label": "未发货",
+          "color": "default"
+        },
+        {
+          "value": "partial",
+          "label": "部分交付",
+          "color": "orange"
+        },
+        {
+          "value": "shipped",
+          "label": "全部交付",
+          "color": "green"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "selectOptions",
+    "fieldUid": "0mmfgf5cuew",
+    "before": {
+      "allowClear": true,
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "pending",
+          "label": "待处理",
+          "color": "orange"
+        },
+        {
+          "value": "pending_level2",
+          "label": "二级审批中",
+          "color": "purple"
+        },
+        {
+          "value": "approved",
+          "label": "已生效",
+          "color": "green"
+        },
+        {
+          "value": "rejected",
+          "label": "已驳回",
+          "color": "red"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "default"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "selectOptions",
+    "fieldUid": "241f4dd35cd",
+    "before": {
+      "allowClear": true,
+      "options": [
+        {
+          "color": "default",
+          "label": "草稿",
+          "value": "draft",
+          "rawLabel": "草稿"
+        },
+        {
+          "color": "green",
+          "label": "已报价",
+          "value": "submitted",
+          "rawLabel": "已报价"
+        },
+        {
+          "color": "default",
+          "label": "已落选",
+          "value": "lost",
+          "rawLabel": "已落选"
+        },
+        {
+          "color": "cyan",
+          "label": "后备",
+          "value": "backup",
+          "rawLabel": "后备"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "selectOptions",
+    "fieldUid": "92ffukmx65f",
+    "before": {
+      "allowClear": true,
+      "options": [
+        {
+          "value": "pending",
+          "label": "待处理",
+          "color": "orange"
+        },
+        {
+          "value": "received",
+          "label": "已到账",
+          "color": "blue"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "selectOptions",
+    "fieldUid": "cf503q32l9j",
+    "before": {
+      "allowClear": true,
+      "options": [
+        {
+          "value": "active",
+          "label": "生效",
+          "color": "green"
+        },
+        {
+          "value": "prospect",
+          "label": "潜在",
+          "color": "blue"
+        },
+        {
+          "value": "churned",
+          "label": "已流失",
+          "color": "blue"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "selectOptions",
+    "fieldUid": "cm8c1ywagst",
+    "before": {
+      "allowClear": true,
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "sent",
+          "label": "已发送",
+          "color": "blue"
+        },
+        {
+          "value": "accepted",
+          "label": "已接受",
+          "color": "blue"
+        },
+        {
+          "value": "converted",
+          "label": "已转订单",
+          "color": "blue"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "default"
+        },
+        {
+          "value": "rejected",
+          "label": "已驳回",
+          "color": "red"
+        },
+        {
+          "value": "pending_approval",
+          "label": "待审批",
+          "color": "blue"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "selectOptions",
+    "fieldUid": "iw1unq24ofe",
+    "before": {
+      "allowClear": true,
+      "options": [
+        {
+          "value": "pending",
+          "label": "待处理",
+          "color": "orange"
+        },
+        {
+          "value": "received",
+          "label": "已到账",
+          "color": "blue"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "selectOptions",
+    "fieldUid": "limh0fu9omo",
+    "before": {
+      "allowClear": true,
+      "options": [
+        {
+          "value": "active",
+          "label": "生效",
+          "color": "green"
+        },
+        {
+          "value": "prospect",
+          "label": "潜在",
+          "color": "blue"
+        },
+        {
+          "value": "churned",
+          "label": "已流失",
+          "color": "blue"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "selectOptions",
+    "fieldUid": "m77ldhli8in",
+    "before": {
+      "allowClear": true,
+      "options": [
+        {
+          "value": "new",
+          "label": "新建",
+          "color": "default"
+        },
+        {
+          "value": "contacted",
+          "label": "Contacted",
+          "color": "blue"
+        },
+        {
+          "value": "requirements_confirmed",
+          "label": "Requirements confirmed",
+          "color": "blue"
+        },
+        {
+          "value": "proposal",
+          "label": "Proposal or quotation",
+          "color": "blue"
+        },
+        {
+          "value": "negotiation",
+          "label": "Negotiation",
+          "color": "blue"
+        },
+        {
+          "value": "won",
+          "label": "Won",
+          "color": "blue"
+        },
+        {
+          "value": "lost",
+          "label": "Lost",
+          "color": "blue"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "selectOptions",
+    "fieldUid": "mbsbcviaox9",
+    "before": {
+      "allowClear": true,
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "pending",
+          "label": "待处理",
+          "color": "orange"
+        },
+        {
+          "value": "matched",
+          "label": "匹配通过",
+          "color": "blue"
+        },
+        {
+          "value": "exception",
+          "label": "匹配异常",
+          "color": "blue"
+        },
+        {
+          "value": "confirmed",
+          "label": "已确认",
+          "color": "green"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "selectOptions",
+    "fieldUid": "v5nm0cw2xeh",
+    "before": {
+      "allowClear": true,
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "pending",
+          "label": "待处理",
+          "color": "orange"
+        },
+        {
+          "value": "pending_level2",
+          "label": "二级审批中",
+          "color": "purple"
+        },
+        {
+          "value": "approved",
+          "label": "已生效",
+          "color": "green"
+        },
+        {
+          "value": "rejected",
+          "label": "已驳回",
+          "color": "red"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "default"
+        },
+        {
+          "value": "paid",
+          "label": "已付款",
+          "color": "blue"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "selectOptions",
+    "fieldUid": "vunxbttgw7i",
+    "before": {
+      "allowClear": true,
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "pending",
+          "label": "待处理",
+          "color": "orange"
+        },
+        {
+          "value": "pending_level2",
+          "label": "二级审批中",
+          "color": "purple"
+        },
+        {
+          "value": "approved",
+          "label": "已生效",
+          "color": "green"
+        },
+        {
+          "value": "rejected",
+          "label": "已驳回",
+          "color": "red"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "default"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "selectOptions",
+    "fieldUid": "vyp02usbjl6",
+    "before": {
+      "allowClear": true,
+      "options": [
+        {
+          "value": "pending",
+          "label": "待处理",
+          "color": "orange"
+        },
+        {
+          "value": "fulfilled",
+          "label": "已交付",
+          "color": "blue"
+        },
+        {
+          "value": "cancelled",
+          "label": "已取消",
+          "color": "default"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "selectOptions",
+    "fieldUid": "xz2wzcfkgdf",
+    "before": {
+      "allowClear": true,
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "pending",
+          "label": "待处理",
+          "color": "orange"
+        },
+        {
+          "value": "pending_level2",
+          "label": "二级审批中",
+          "color": "purple"
+        },
+        {
+          "value": "approved",
+          "label": "已生效",
+          "color": "green"
+        },
+        {
+          "value": "rejected",
+          "label": "已驳回",
+          "color": "red"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "default"
+        },
+        {
+          "value": "sent",
+          "label": "已发出",
+          "color": "blue"
+        },
+        {
+          "value": "closed",
+          "label": "已关闭",
+          "color": "default"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "selectOptions",
+    "fieldUid": "z62lcebz7g0",
+    "before": {
+      "allowClear": true,
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "pending",
+          "label": "待处理",
+          "color": "orange"
+        },
+        {
+          "value": "pending_level2",
+          "label": "二级审批中",
+          "color": "purple"
+        },
+        {
+          "value": "approved",
+          "label": "已生效",
+          "color": "green"
+        },
+        {
+          "value": "rejected",
+          "label": "已驳回",
+          "color": "red"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "default"
+        },
+        {
+          "value": "converted",
+          "label": "已转单",
+          "color": "blue"
+        },
+        {
+          "value": "closed",
+          "label": "已关闭",
+          "color": "default"
+        }
+      ]
+    }
+  }
+]

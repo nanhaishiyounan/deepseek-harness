@@ -128,6 +128,16 @@ export interface RpcErrorDetailsMap {
   'nocobase-request-failed': {}
   /** A nocobase.get named a row the backend does not have (the v2 wire answers `{data: null}`). */
   'nocobase-row-missing': { collection: string; id: number }
+  /** A nocobase.signIn the backend's basic authenticator refused (wrong credentials or a profile without a username). */
+  'nocobase-signin-rejected': {}
+  /** A nocobase.alertAct the alert engine's transition table / routed-user whitelist refused; the message is the engine's refusal fact. */
+  'nocobase-alert-refused': { id: number; action: string }
+  /** A nocobase.alertAct in a deployment that configured no alert engine base URL (alertEngineUrl / W6_ALERT_ENGINE_URL). */
+  'alert-engine-unconfigured': {}
+  /** A nocobase write (update) arrived with no sign-in session token, or one the gateway no longer honors. */
+  'nocobase-unauthorized': {}
+  /** A signed-in user's collection scope excludes the named collection (the role whitelist's server-side leg). */
+  'nocobase-collection-forbidden': { collection: string; username: string }
   /** An assets-domain call ran in a deployment that did not opt in through `assetsEnabled`. */
   'assets-not-composed': {}
   /** An assets-domain call found the deployment composing no connector capability. */

@@ -1,0 +1,7 @@
+INJECTED buyer(19).systemSettings.themeId=5 (mfg-standard)
+  w7b0-theme assert: FAILED
+    - users pinned to a non-w7-forge theme: buyer→5
+ASSERT-EXIT=1 (expected non-zero) → NEGATIVE PROOF OK
+APPLY: swept themeId pins on 1 user(s)
+ASSERT-2: w7b0-theme assert: OK
+PIN-JOURNAL cleared entries: nocobase(1)←3, qc_inspector(18)←3, buyer(19)←5

@@ -1,0 +1,11 @@
+— 结构
+  ✓ mfg_ecos 集合在位
+  ✓ mfg_job_reports.submit_key 字段已注册 — fields=1
+  ✓ submit_key 唯一索引在位 — ux_mfg_job_reports_submit
+  ✓ mfg_ecos 六态审批流已注册且激活 — t
+— 铺页
+  ✓ v2 页「工程变更单」在生产与计划组下
+  ✓ v2 页「配方版本与变更」在生产与计划组下
+— 版本语义底座
+  ✓ 存量 MO 均引用具体 bom_id（版本快照底座） — rows=33
+w6b4-bomver: assert PASS

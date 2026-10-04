@@ -1,0 +1,13 @@
+== W6-B9 three-way match recon (psql) ==
+INV-NO-2026-088 ← PO-2026-0003：开票1000 收货1000 订购1000 | 发票¥120000 vs 订单行¥120000 | 收货单2
+INV-NO-2026-089 ← PO-2026-0003：开票1000 收货1000 订购1000 | 发票¥121000 vs 订单行¥120000 | 收货单2
+INV-NO-B9-001 ← (无PO)：开票1000 收货0 订购0 | 发票¥880 vs 订单行¥0 | 收货单0
+INV-NO-INV-2026-B5TOL-A ← PO-B5-C：开票1000 收货1000 订购1000 | 发票¥120000.08 vs 订单行¥120000 | 收货单2
+INV-NO-INV-2026-B5TOL-B ← PO-B5-C：开票1000 收货1000 订购1000 | 发票¥120000.08 vs 订单行¥120000 | 收货单2
+INV-2026-B5TOL-B price_diff open
+INV-2026-B5TOL-A price_diff open
+INV-B9F-0001 no_receipt open
+INV-B9F-0001 price_diff open
+INV-B9F-0001 qty_short open
+INV-2026-0002 price_diff open
+  ✓ 未收货付款被拦截（HTTP 403）— 付款拦截（三单匹配）：发票 INV-B9F-0001 账单量 1000 > 已收货量 0——收货量达标前不予付款（差异工

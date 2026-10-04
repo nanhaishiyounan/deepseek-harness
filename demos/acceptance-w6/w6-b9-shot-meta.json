@@ -1,0 +1,56 @@
+{
+  "generatedAt": "2026-10-02T19:54:36.224Z",
+  "steps": {
+    "liveTriple": {
+      "healthz": {
+        "ok": true,
+        "backlog_pending": 0,
+        "last_scan_at": "2026-10-02T19:52:19.619Z",
+        "last_scan_failures": 0
+      },
+      "scanSummary": "expiry+0/~5/-0 cert_due+0/~3/-0 ar_overdue+0/~3/-0 quality_abnormal+0/~31/-0 ccp_deviation+0/~16/-0 inspection_fail+0/~20/-0 calibration_due+0/~3/-0 maint_overdue+0/~1/-0",
+      "notified": 0
+    },
+    "financeIdentity": "finance",
+    "cockpitPack": {
+      "cards": [
+        {
+          "key": "revenue",
+          "value": 80920
+        },
+        {
+          "key": "orders",
+          "value": 3
+        },
+        {
+          "key": "avg_order",
+          "value": 26973.33
+        },
+        {
+          "key": "ar_overdue",
+          "value": 18800
+        },
+        {
+          "key": "ap_due",
+          "value": 0
+        }
+      ],
+      "agingTotal": 18800,
+      "chain": 9
+    },
+    "cockpitRender": true,
+    "click30": "clicked",
+    "periodSwitch": true,
+    "agingDrill": true,
+    "finWorkbench": true,
+    "dunningTrailOpen": true,
+    "statementPrint": true,
+    "matchWorkbench": true,
+    "mobileIdentity": "finance",
+    "mobileAlerts": {
+      "mobileRows": 45,
+      "dunning": true,
+      "arLabel": true
+    }
+  }
+}

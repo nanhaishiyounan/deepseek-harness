@@ -1,82 +1,97 @@
 /*
- * Mobile v6 token set: the「AI 同事」design direction (plans/2026-09-23
- * mobile-v6-uidesign B1) — brand blue #2E7CF6 with the #22B8E8 gradient partner
- * on mist-blue surfaces, white cards, and pass/hold/reject semantics carried
- * over from the ledger era. Light and dark are two whole tracks declared on
- * both `.dshm-root` and `html[data-theme]`: antd-mobile renders Popup/Picker/
+ * Mobile v7 token set:「W7 铸造 · Forge」(plans/2026-10-03 plan-w7.zh.md §3)
+ * — Prussian blue #1E4E8C shared with the PC w7-forge theme, Fiori Morning
+ * Horizon semantic pairs, warm-gray neutrals, and a three-step elevation
+ * (canvas / white card + diffuse shadow / raised card, ~8% RGB step between
+ * canvas and card). Light and dark are two whole tracks declared on both
+ * `.dshm-root` and `html[data-theme]`: antd-mobile renders Popup/Picker/
  * Dialog/Toast portals into `document.body`, outside `.dshm-root`, so the html
  * twin (specificity (0,1,1), beating antd's `:root` defaults) keeps every
  * portal on the same track. antd-mobile reads the same names through var()
  * references, so its components follow the track without per-theme overrides.
- * The root also draws the 430px phone shell: fluid full-width below 720px, a
- * centered rounded bezel with an outer shadow on desktop.
+ * Brand discipline: blue stays on primary actions and links, ≤2 brand hits
+ * per screen; everything else rides the neutral ramp. The root also draws the
+ * 430px phone shell: fluid full-width below 720px, a centered rounded bezel
+ * with an outer shadow on desktop.
  */
 
 .dshm-root,
 html[data-theme='light'] {
-  /* Brand axis */
-  --dshm-primary: #2e7cf6;          /* 品牌蓝 brand */
+  /* Brand axis (same source as PC --w7-primary) */
+  --dshm-primary: #1e4e8c;          /* 普鲁士深蓝 brand */
   --dshm-on-primary: #ffffff;       /* selected-state foreground (brand is track-constant) */
-  --dshm-brand2: #22b8e8;           /* 渐变副色 / 会议中状态 (brand2) */
-  --dshm-user-grad: linear-gradient(135deg, #2e7cf6, #22b8e8); /* hero/send/bubble accent (user-grad) */
-  --dshm-primary-10: rgba(46, 124, 246, 0.10);
-  --dshm-primary-soft: #eaf2ff;     /* selected chip / starter chip fill (brand-soft) */
-  --dshm-foreground: #18202f;       /* 墨蓝 text */
-  --dshm-muted-foreground: #758199; /* 蓝灰 sub */
-  --dshm-background: #f2f5f9;       /* 雾蓝白 bg */
-  --dshm-card: #ffffff;             /* card */
-  --dshm-muted: #f7f9fd;            /* fold zones, input fills (card2) */
-  --dshm-border: #e8edf4;           /* line */
+  --dshm-brand2: #3a69a4;           /* 同源蓝第二阶（图表序列），替代旧亮青渐变副色 */
+  --dshm-user-grad: linear-gradient(135deg, #1e4e8c, #3a69a4); /* hero/send/bubble accent (user-grad) */
+  --dshm-primary-10: rgba(30, 78, 140, 0.10);
+  --dshm-primary-soft: #e8f0f9;     /* selected chip / starter chip fill (brand-soft) */
+  --dshm-foreground: #1f2630;       /* off-black 文字-主（对齐 PC --w7-text） */
+  --dshm-muted-foreground: #55606e; /* 暖灰 sub（对齐 PC --w7-text-secondary） */
+  --dshm-background: #eaebe8;       /* 暖灰画布（三档海拔第 1 档，对白卡 RGB 平均差 ~8%） */
+  --dshm-card: #ffffff;             /* card（第 2 档：白卡+弥散影） */
+  --dshm-muted: #f3f4f1;            /* fold zones, input fills (card2) */
+  --dshm-border: #e0e1de;           /* line（比 PC 略深一阶，小屏 1px 可见） */
   --dshm-nav-line: var(--dshm-border);  /* PageNav 底边线（引用型；暗轨压深一阶） */
   --dshm-header-bg: #ffffff;        /* chat/page header surface (header) */
   --dshm-tabbar-bg: #ffffff;        /* bottom tab bar surface (tabbar) */
   --dshm-input-bg: #ffffff;         /* composer input fill (input-bg) */
-  /* Semantics */
-  --dshm-success: #18a058;          /* 通过绿 ok（暗轨同值：4.8:1 on card） */
-  --dshm-success-10: rgba(24, 160, 88, 0.12);
-  --dshm-warning: #f59e0b;          /* 琥珀 warn（双轨同值：暗轨 on card 7.5:1，无需抬升） */
-  --dshm-warning-10: rgba(245, 158, 11, 0.12);
-  --dshm-destructive: #e5484d;      /* 危险红 danger */
-  --dshm-destructive-10: rgba(229, 72, 77, 0.12);
+  /* Semantics — Fiori Morning Horizon pairs, aligned with the PC theme */
+  --dshm-success: #256f3a;          /* Positive（对白卡 6.9:1） */
+  --dshm-success-soft: #f5fae5;
+  --dshm-success-10: rgba(37, 111, 58, 0.12);
+  --dshm-warning: #e76500;          /* Critical */
+  --dshm-warning-soft: #fff8d6;
+  --dshm-warning-10: rgba(231, 101, 0, 0.12);
+  --dshm-destructive: #aa0808;      /* Negative */
+  --dshm-destructive-soft: #ffeaf4;
+  --dshm-destructive-10: rgba(170, 8, 8, 0.12);
+  --dshm-info: #0070f2;             /* Informational */
+  --dshm-info-soft: #e1f4ff;
   /* Temperature-layer badges (cargo fields only, never brand surfaces) */
   --dshm-temp-chill: #0e7490;
   --dshm-temp-frozen: #1e40af;
   --dshm-temp-ambient: #8a6a3b;
   /* Bubbles */
-  --dshm-bubble-user-bg: #2e7cf6;   /* solid fallback; the accent face is --dshm-user-grad */
+  --dshm-bubble-user-bg: #1e4e8c;   /* solid fallback; the accent face is --dshm-user-grad */
   --dshm-bubble-user-fg: #ffffff;
   --dshm-bubble-ai-bg: #ffffff;
-  --dshm-bubble-ai-fg: #18202f;
-  --dshm-bubble-ai-border: #e8edf4;
-  /* Structure */
-  --dshm-radius: 10px;              /* field rows, small controls */
-  --dshm-radius-lg: 16px;           /* cards, sheets (radius) */
-  --dshm-radius-bubble: 16px;       /* chat bubbles */
-  --dshm-radius-corner: 6px;        /* speaking corner */
+  --dshm-bubble-ai-fg: #1f2630;
+  --dshm-bubble-ai-border: #e0e1de;
+  /* Structure — radius ladder s8 / m12 / l16 + pill */
+  --dshm-radius: 12px;              /* field rows, small controls (m) */
+  --dshm-radius-lg: 16px;           /* cards, sheets (l) */
+  --dshm-radius-bubble: 16px;       /* chat bubbles (l) */
+  --dshm-radius-corner: 8px;        /* speaking corner (s) */
+  --dshm-radius-pill: 999px;        /* tags, chips, capsules, badge dots */
   --dshm-tabbar-height: 58px;
   --dshm-touch: 44px;               /* primary touch target (send, back, new-chat) */
   --dshm-touch-sm: 36px;            /* secondary touch target (chips, entries, stars) */
-  --dshm-shadow-card: 0 6px 24px rgba(23, 43, 77, 0.07);
-  --dshm-stroke-soft: rgba(232, 237, 244, 0.6); /* in-card ledger dividers */
-  --dshm-primary-press: #2468cc;    /* pressed primary (sends, seals) */
-  --dshm-receipt-wash: rgba(24, 160, 88, 0.16); /* the receipt card's fill */
-  --dshm-success-rim: rgba(24, 160, 88, 0.55);  /* the receipt card's rim */
+  /* Elevation — diffuse same-tone shadows (第 3 档 = raised 深一档影) */
+  --dshm-shadow-card: 0 1px 2px rgba(31, 38, 48, 0.04), 0 8px 24px rgba(31, 38, 48, 0.06);
+  --dshm-shadow-raised: 0 4px 12px rgba(31, 38, 48, 0.10);
+  --dshm-stroke-soft: rgba(224, 225, 222, 0.6); /* in-card ledger dividers */
+  --dshm-primary-rim: rgba(30, 78, 140, 0.35); /* hairline brand rim (ghost chips, ask bubble) */
+  --dshm-send-shadow: 0 4px 12px rgba(30, 78, 140, 0.32); /* the send seal's brand glow */
+  --dshm-primary-press: #173d70;    /* pressed primary (sends, seals) */
+  --dshm-receipt-wash: rgba(37, 111, 58, 0.16); /* the receipt card's fill */
+  --dshm-success-rim: rgba(37, 111, 58, 0.55);  /* the receipt card's rim */
+  --dshm-tab-active: var(--dshm-primary);  /* selected Tab state (see tail override) */
   --dshm-font-sans: -apple-system, 'BlinkMacSystemFont', 'PingFang SC', 'HarmonyOS Sans SC',
     'Noto Sans SC', 'Microsoft YaHei', sans-serif;
   --dshm-font-num: 'SF Mono', ui-monospace, 'Menlo', 'Roboto Mono', monospace;
-  --dshm-shell-shadow: 0 0 40px rgba(23, 43, 77, 0.12); /* the desktop phone-shell halo */
-  /* The narrative code block's near-black plate (v6 B3: track-deepened). */
-  --dshm-code-bg: #131926;
-  --dshm-code-fg: #dce6f5;
+  --dshm-shell-shadow: 0 0 40px rgba(31, 38, 48, 0.14); /* the desktop phone-shell halo */
+  /* The narrative code block's near-black plate (track-deepened). */
+  --dshm-code-bg: #14181f;
+  --dshm-code-fg: #dfe5ee;
   --dshm-code-chrome: rgba(255, 255, 255, 0.05);
-  --dshm-code-muted: #93a3bc;
+  --dshm-code-muted: #97a4b8;
 
   /* v5 · work-ledger increments (kept as reference tokens) */
   --dshm-work-todo: var(--dshm-muted-foreground);   /* 待处理（引用型） */
   --dshm-work-doing: var(--dshm-primary);           /* 进行中（引用型） */
   --dshm-work-review: var(--dshm-warning);          /* 待确认（引用型） */
   --dshm-work-done: var(--dshm-success);            /* 已完成（引用型） */
-  --dshm-on-soft: #1d5fd6;          /* foreground on primary-10/primary-soft fills (5.1:1 on soft) */
+  --dshm-stamp-doing: var(--dshm-work-doing);       /* 进行中印章文字/描边（暗轨单列一阶，见 dark 段） */
+  --dshm-on-soft: #1e4e8c;          /* foreground on primary-10/primary-soft fills (7:1 on soft) */
   --dshm-stamp-lg: 44px;           /* detail-grade stamp (phase/work) */
   --dshm-stamp-sm: 28px;           /* list-grade stamp (work/report) */
   --dshm-stamp-avatar: 36px;       /* role stamp */
@@ -85,11 +100,21 @@ html[data-theme='light'] {
   --dshm-ease-slide: cubic-bezier(0.2, 0.8, 0.2, 1);   /* overshoot-free decaying push */
   --dshm-ease-stamp: cubic-bezier(0.2, 1.4, 0.4, 1);   /* stamping curve */
 
+  /* Type ramp — five steps + numeric (plan §3.2; the 12px floor is the Tab
+   * label grade). Module files read these instead of hard-coded px. */
+  --dshm-fs-xs: 12px;   /* Tab labels, meta — the readability floor */
+  --dshm-fs-sm: 13px;   /* body text */
+  --dshm-fs-md: 15px;   /* card titles */
+  --dshm-fs-lg: 17px;   /* page titles */
+  --dshm-fs-xl: 24px;   /* stat digits */
+  --dshm-fs-num: 26px;  /* hero digits */
+
   /* antd-mobile theme mapping: same declaration as the tokens, so both mount
      points (root and html twin) carry it and every adm- component — portal or
      not — follows the track. --adm-radius-* are antd-mobile's real radius
      dials; --adm-center-popup-border-radius covers Picker/DatePicker/Dialog/
-     Modal panels. */
+     Modal panels. The font-size ladder is fully remapped onto the five-step
+     ramp (adm-grade 5 settles at 14px, the mobile body grade). */
   --adm-color-primary: var(--dshm-primary);
   --adm-color-success: var(--dshm-success);
   --adm-color-warning: var(--dshm-warning);
@@ -106,48 +131,79 @@ html[data-theme='light'] {
   --adm-radius-m: var(--dshm-radius);
   --adm-radius-l: var(--dshm-radius-lg);
   --adm-center-popup-border-radius: var(--dshm-radius-lg);
+  --adm-font-size-1: 9px;
+  --adm-font-size-2: 11px;
+  --adm-font-size-3: var(--dshm-fs-xs);
+  --adm-font-size-4: var(--dshm-fs-sm);
+  --adm-font-size-5: 14px;
+  --adm-font-size-6: var(--dshm-fs-md);
+  --adm-font-size-7: var(--dshm-fs-lg);
+  --adm-font-size-8: 20px;
+  --adm-font-size-9: var(--dshm-fs-xl);
+  --adm-font-size-10: 28px;
 }
 
 .dshm-root[data-theme='dark'],
 html[data-theme='dark'] {
-  --dshm-primary-10: rgba(46, 124, 246, 0.16);
-  --dshm-primary-soft: #1b2c4a;
-  --dshm-foreground: #e8ecf4;
-  --dshm-muted-foreground: #8c96aa;
-  --dshm-background: #0e131b;       /* 深蓝黑 */
-  --dshm-card: #1a212d;
-  --dshm-muted: #151b26;
-  --dshm-border: #252e3e;
-  --dshm-nav-line: #1f2734;         /* PageNav 底边线：深于 line 一阶，暗面 1px 不刺眼 */
-  --dshm-header-bg: #131924;
-  --dshm-tabbar-bg: #131924;
-  --dshm-input-bg: #1a212d;
-  --dshm-success-10: rgba(24, 160, 88, 0.18);
-  --dshm-warning-10: rgba(245, 158, 11, 0.18);
-  --dshm-destructive: #ef5f64;      /* dark-track lift: #e5484d reads 4.1:1 on card (v5 B3 先例) */
+  /* Dark track: desaturated, lifted brand and semantic steps so every figure
+   * keeps ≥4.5:1 on the raised card (#1e2634). */
+  --dshm-primary: #2a5fa6;          /* brand lifted one step on dark */
+  --dshm-tab-active: #5783bc;       /* chart-3 blue: the primary-on-tabbar figure
+                                       * (selected Tab state) needs ≥3:1 (WCAG
+                                       * 1.4.11) against #131926 — 4.5:1 here —
+                                       * while solid fills keep white-on-#2a5fa6 */
+  --dshm-stamp-doing: #5783bc;      /* the work stamp's 进行中 seal is hollow
+                                       * text+outline: #2a5fa6 on card #1e2634 is
+                                       * 2.38:1, under the 3:1 (WCAG 1.4.11) text
+                                       * floor — same lift as the tab-active tier */
+  --dshm-primary-10: rgba(42, 95, 166, 0.20);
+  --dshm-primary-soft: #1b2c48;
+  --dshm-primary-press: #4c79b8;
+  --dshm-foreground: #e8ecf1;
+  --dshm-muted-foreground: #93a0b4; /* desaturated blue-gray */
+  --dshm-background: #0c1017;       /* 深蓝黑（与卡 #1e2634 拉开 ~9% RGB 差） */
+  --dshm-card: #1e2634;
+  --dshm-muted: #141b26;
+  --dshm-border: #2a3444;
+  --dshm-nav-line: #232d3d;         /* PageNav 底边线：深于 line 一阶，暗面 1px 不刺眼 */
+  --dshm-header-bg: #131926;
+  --dshm-tabbar-bg: #131926;
+  --dshm-input-bg: #1e2634;
+  --dshm-success: #5bae7d;          /* desaturated lift (5.5:1 on card) */
+  --dshm-success-soft: #16281c;
+  --dshm-success-10: rgba(91, 174, 125, 0.18);
+  --dshm-warning: #f2a93b;          /* desaturated amber (7.9:1 on card) */
+  --dshm-warning-soft: #2e2413;
+  --dshm-warning-10: rgba(242, 169, 59, 0.18);
+  --dshm-destructive: #ef5f64;      /* dark-track lift: base #aa0808 is 2.1:1 on card */
+  --dshm-destructive-soft: #331a1d;
   --dshm-destructive-10: rgba(239, 95, 100, 0.18);
+  --dshm-info: #5b9df2;
+  --dshm-info-soft: #16283f;
   --dshm-temp-chill: #57b3cc;
   --dshm-temp-frozen: #8fa8f0;
   --dshm-temp-ambient: #c0a276;
-  --dshm-bubble-user-bg: #2e7cf6;
+  --dshm-bubble-user-bg: #2a5fa6;
   --dshm-bubble-user-fg: #ffffff;
-  --dshm-bubble-ai-bg: #1a212d;
-  --dshm-bubble-ai-fg: #e8ecf4;
-  --dshm-bubble-ai-border: #252e3e;
-  --dshm-shadow-card: 0 6px 24px rgba(0, 0, 0, 0.4);
-  --dshm-code-bg: #0c111a;
-  --dshm-stroke-soft: rgba(37, 46, 62, 0.7);
-  --dshm-primary-press: #4a92f8;
-  --dshm-receipt-wash: rgba(24, 160, 88, 0.22);
-  --dshm-success-rim: rgba(24, 160, 88, 0.6);
-  --dshm-on-soft: #e8ecf4;         /* dark-track chip foreground: brand on #1b2c4a is 3.5:1 */
+  --dshm-bubble-ai-bg: #1e2634;
+  --dshm-bubble-ai-fg: #e8ecf1;
+  --dshm-bubble-ai-border: #2a3444;
+  --dshm-shadow-card: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --dshm-shadow-raised: 0 4px 12px rgba(0, 0, 0, 0.55);
+  --dshm-code-bg: #0b0f16;
+  --dshm-stroke-soft: rgba(42, 52, 68, 0.7);
+  --dshm-primary-rim: rgba(83, 131, 199, 0.55);
+  --dshm-send-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+  --dshm-receipt-wash: rgba(91, 174, 125, 0.22);
+  --dshm-success-rim: rgba(91, 174, 125, 0.6);
+  --dshm-on-soft: #c9d8f0;         /* dark-track chip foreground on #1b2c48 */
   --dshm-shell-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
 }
 
 .dshm-root {
   box-sizing: border-box;
   /* The host page sets viewport-fit=cover; the root clears the notch / status
-     bar for every page (each surface owns its own bottom inset). */
+   * bar for every page (each surface owns its own bottom inset). */
   padding-top: env(safe-area-inset-top);
   font-family: var(--dshm-font-sans);
   font-size: 16px;
@@ -157,7 +213,7 @@ html[data-theme='dark'] {
   background: var(--dshm-background);
   -webkit-font-smoothing: antialiased;
   /* The 430px phone shell: fluid (full width) under 720px, centered with a
-     halo otherwise; the login gate and the shell ride the same form. */
+   * halo otherwise; the login gate and the shell ride the same form. */
   height: 100%;
   max-width: 430px;
   margin: 0 auto;
@@ -213,11 +269,11 @@ body {
 }
 
 body {
-  background: #e9edf4;
+  background: #dfe1de;
 }
 
 body[data-theme='dark'] {
-  background: #0a0e15;
+  background: #080b11;
 }
 
 #mobile-root {
@@ -242,6 +298,14 @@ body[data-theme='dark'] {
   border-radius: var(--dshm-radius-lg) var(--dshm-radius-lg) 0 0;
 }
 
+/* The selected TabBar item rides --adm-color-primary, whose dark-track brand
+ * step measures 2.75:1 on the #131926 bar — below the 3:1 state-indicator
+ * floor (WCAG 1.4.11). The tab-active token splits that concern from solid
+ * fills (white-on-brand buttons keep their own ratio) and lifts only on dark. */
+.adm-tab-bar-item-active {
+  color: var(--dshm-tab-active);
+}
+
 .adm-toast-mask .adm-toast-main {
   /* antd positions this inline-block with an inline top and translateY(-50%);
    * the capsule anchors to the wrap's bottom edge instead. */
@@ -253,12 +317,12 @@ body[data-theme='dark'] {
   max-width: 86%;
   padding: 9px 16px;
   font-size: 13px;
-  border-radius: 999px;
-  background: rgba(24, 32, 47, 0.92);
+  border-radius: var(--dshm-radius-pill);
+  background: rgba(31, 38, 48, 0.92);
   color: #ffffff;
 }
 
 html[data-theme='dark'] .adm-toast-mask .adm-toast-main {
-  background: rgba(232, 236, 244, 0.92);
-  color: #18202f;
+  background: rgba(232, 236, 241, 0.92);
+  color: #1f2630;
 }

@@ -45,6 +45,7 @@ export const nocobaseListRequestSchema = z.object({
   page_size: z.number().int().min(1).max(100).optional(),
   sort: z.array(z.string().min(1)).optional(),
   fields: z.array(z.string().min(1)).optional(),
+  authToken: z.string().min(1).optional(),
 }) as unknown as z.ZodType<Wire<RequestPayload<'nocobase.list'>>>
 
 /** nocobase.list response value. */
@@ -59,6 +60,7 @@ export const nocobaseListValueSchema = z.object({
 export const nocobaseGetRequestSchema = z.object({
   collection: z.string().min(1),
   id: z.number().int().min(1),
+  authToken: z.string().min(1).optional(),
 }) as unknown as z.ZodType<Wire<RequestPayload<'nocobase.get'>>>
 
 /** nocobase.get response value. */
@@ -67,11 +69,25 @@ export const nocobaseGetValueSchema = z.object({
   row: z.record(z.string(), z.unknown()),
 }) as unknown as z.ZodType<Wire<{ collection: string; row: Record<string, unknown> }>>
 
+/** nocobase.signIn request payload (credentials arrive once; never echoed in any response). */
+export const nocobaseSignInRequestSchema = z.object({
+  account: z.string().min(1).max(200),
+  password: z.string().min(1).max(200),
+}) as unknown as z.ZodType<Wire<RequestPayload<'nocobase.signIn'>>>
+
+/** nocobase.signIn response value: the signed-in profile plus the gateway session token. */
+export const nocobaseSignInValueSchema = z.object({
+  username: z.string().min(1),
+  nickname: z.string().min(1),
+  token: z.string().min(1),
+}) as unknown as z.ZodType<Wire<{ username: string; nickname: string; token: string }>>
+
 /** nocobase.update request payload. */
 export const nocobaseUpdateRequestSchema = z.object({
   collection: z.string().min(1),
   id: z.number().int().min(1),
   values: z.record(z.string(), z.union([z.string(), z.number(), z.null()])),
+  authToken: z.string().min(1).optional(),
 }) as unknown as z.ZodType<Wire<RequestPayload<'nocobase.update'>>>
 
 /** nocobase.update response value. */
@@ -79,3 +95,18 @@ export const nocobaseUpdateValueSchema = z.object({
   collection: z.string(),
   row: z.record(z.string(), z.unknown()),
 }) as unknown as z.ZodType<Wire<{ collection: string; row: Record<string, unknown> }>>
+
+/** nocobase.alertAct request payload (the acting identity is the session token, never a payload field). */
+export const nocobaseAlertActRequestSchema = z.object({
+  id: z.number().int().min(1),
+  action: z.enum(['claim', 'ack', 'resolve']),
+  note: z.string().max(2000).optional(),
+  authToken: z.string().min(1).optional(),
+}) as unknown as z.ZodType<Wire<RequestPayload<'nocobase.alertAct'>>>
+
+/** nocobase.alertAct response value. */
+export const nocobaseAlertActValueSchema = z.object({
+  id: z.number().int().min(1),
+  action: z.enum(['claim', 'ack', 'resolve']),
+  user: z.string().min(1),
+}) as unknown as z.ZodType<Wire<{ id: number; action: 'claim' | 'ack' | 'resolve'; user: string }>>

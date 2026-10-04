@@ -35,11 +35,11 @@
   min-height: var(--dshm-tabbar-height);
 }
 
-/* The mock's .tab-item typography: 10.5px/600 labels under a 22px icon slot
- * (the lucide 1.8-stroke glyphs ride the 22px visual grade). */
+/* The tab labels ride the W7 type-ramp floor (12px, plan §3.2); 10.5px sat
+ * below the readability minimum the audit flagged. */
 .tabbar :global(.adm-tab-bar-item-title) {
   margin-top: 3px;
-  font-size: 10.5px;
+  font-size: var(--dshm-fs-xs);
   font-weight: 600;
   line-height: 1.2;
 }

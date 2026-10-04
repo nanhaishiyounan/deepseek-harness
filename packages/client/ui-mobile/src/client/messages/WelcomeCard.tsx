@@ -43,7 +43,7 @@ export function WelcomeCard({ welcome, onSend, disabled }: WelcomeCardProps): JS
               color="primary"
               fill="outline"
               className={css.starter}
-              style={{ '--border-color': 'rgba(46, 124, 246, 0.35)' }}
+              style={{ '--border-color': 'var(--dshm-primary-rim)' }}
               disabled={disabled}
               onClick={() => { onSend(starter.send) }}
             >

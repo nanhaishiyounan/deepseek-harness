@@ -1,0 +1,53 @@
+— live 三联与终端面
+  ✓ 引擎 :13110 /healthz 200 — status=200
+  ✓ NocoBase :13000 app:getInfo 200 — status=200
+  ✓ web :3080 200 — status=200
+  ✓ GET /terminals/cards.html 200 且含签到面板与卡片流
+  ✓ 错误密码被平台会话拒绝（401） — status=401
+  ✓ shop_lead 会话签到成功（B0 真实账号） — token 256 chars
+— 车间卡片流（队列→执行→报工）
+  ✓ GET /terminal/cards 会话推导 operator=shop_lead — operator=shop_lead
+  ✓ 签到面板显示部门围栏（生产车间） — department=生产车间
+  ✓ 卡片含 SOP 要点数据（setup/run 分钟） — op1 setup=0 run=0
+  ✓ 工序按配置挂 CCP 监控点（和馅→XT、成型速冻→SD） — op1 ccp=1 op2 ccp=1
+  ✓ POST /job-start planned→started（或已 started 幂等） — op_status=started
+  ✓ 正常 CCP 报工受理（服务端发号 JR-） — code=JR-2026-0027
+  ✓ 报工后工序状态推进（started，余量续报） — op_status=started
+  ✓ mfg_job_reports 落行：operator=会话推导 shop_lead（非自报） — shop_lead|248|posted
+  ✓ CCP 正常值留痕（谁/实测/限值/未越限） — shop_lead|5|false
+  ✓ CCP 记录含限值快照（CL 0..10） — 0..10
+— 报工双击/重复幂等
+  ✓ 同一 submit_key 重放返回 duplicate=true 且同 code — duplicate=true code=JR-2026-0027
+  ✓ psql 对账：该 submit_key 报工行 count=1 — count=1
+  ✓ psql 对账：CCP 记录同样 count=1 — count=1
+— CCP 越限链（预警/冻结/纠偏单）
+  ✓ 越限报工仍受理（记录留痕优先，处置联动随行） — code=JR-2026-0028
+  ✓ 响应声明 critical 预警路由 + 冻结 + 纠偏单 — {"records":1,"deviations":[{"code":"CCP-XT-01","measured":-10,"cl_min":0,"cl_max":10}],"lot_frozen":true,"nc_code":"QM-NC-2026-0026","alert_rule":"ccp_deviation
+  ✓ wfl_alerts 落行：rule_type=ccp_deviation severity=critical status=open — critical|open
+  ✓ in-app 通知送达规则路由（质检部+planner ≥3 行） — rows=12
+  ✓ 批次冻结联动（FRZ-260414-01: qualified→frozen） — frozen
+  ✓ 纠偏单生成（qm_nc_dispositions draft/open） — QM-NC-2026-0026|open
+  （演练清理：FRZ-260414-01 已恢复 qualified；预警/CCP 记录/纠偏单留台账）
+— BOM 版本化 + ECO（版本快照）
+  ✓ 基线：product11 生效默认版本在位 — BOM-0018 v16
+  ✓ planner /eco/create 受理（服务端发号 ECO-） — eco=ECO-2026-0016
+  ✓ 影响分析列出受影响在产 MO（MO-W6B4-IMP-MUQQTHLW 在列） — MO-W6B4-IMP-MUQQTHLW
+  ✓ 影响分析列出受影响未交付 SO（SO-2026-0002/0092 在列） — SO-2026-0002、SO-2026-0092
+  ✓ planner /eco/submit 送审（draft→pending） — doc_status=pending
+  ✓ qc_inspector 审批通过且 effectiveEffects 触发版本切换 — {"eco":{"switched":true,"from_code":"BOM-0018","from_version":16,"to_code":"BOM-0019","to_version":17,"product_id":11}}
+  ✓ psql 三查①旧版 retired/非默认 ②新版 active/默认 — retired|false ; active|true
+  ✓ ECO 行：approved + qc_inspector + effective_at 盖章 — approved|qc_inspector|2026-10-02
+  ✓ psql 三查③新 MO 将引用新默认版本 — default 21→22
+  ✓ 新 MO 创建引用新默认 BOM — bom_id=22 default=22
+  ✓ 在产 MO-W6B4-IMP-MUQQTHLW 仍引用旧版本（版本快照） — bom_id=21 (base=21)
+  ✓ 历史在产 MO-2026-0002 的 bom_id 原样未动（快照不被切换触碰） — bom_id=3
+  ✓ 新版本行变更落库（新增行存在——diff 蓝行的 psql 对账） — rows=1
+  ✓ 新版本用量变更落库（→0.07） — 0.07
+  （演练清理：两张演练 MO 已删除；ECO/版本切换/JR/CCP 台账保留）
+— 负向用例（XSS/越权）
+  ✓ XSS 味 submit_key 被字符集门禁拒绝（400，未达 SQL） — status=400
+  ✓ 缺 submit_key 拒绝（幂等键必填） — status=400
+  ✓ 质检会话进车间卡片流被部门围栏拒绝（403） — status=403
+  ✓ shop_lead 发起 ECO 被治理面围栏拒绝（403） — status=403
+  ✓ 无会话访问执行面被拒（401，身份不可缺省） — status=401
+w6b4-assert: ALL PASS

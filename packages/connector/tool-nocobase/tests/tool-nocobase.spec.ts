@@ -166,6 +166,7 @@ function matchesFilter(row: Record<string, unknown>, filter: Record<string, unkn
     if ('$gt' in operators && !(typeof row[field] === 'number' && row[field] > (operators.$gt as number))) return false
     if ('$lt' in operators && !(typeof row[field] === 'number' && row[field] < (operators.$lt as number))) return false
     if ('$includes' in operators && !(typeof row[field] === 'string' && row[field].includes(operators.$includes as string))) return false
+    if ('$like' in operators && !(typeof row[field] === 'string' && row[field].startsWith(String(operators.$like).replaceAll('%', '')))) return false
   }
   return true
 }
@@ -383,11 +384,48 @@ describe('nb_create', () => {
     const free = await execute('nb_create', { collection: 'pur_orders', values: { code: 'PO-2026-0003', doc_status: 'draft' } })
     expect(free.isError).toBe(false)
     expect(mock!.rows.get('pur_orders')).toHaveLength(3)
-    // A row without a code passes the guard without a lookup wire call.
+    // Unguarded collections never draw a number (no list read-back).
     const servedBefore = mock!.served.length
-    const noCode = await execute('nb_create', { collection: 'pur_orders', values: { doc_status: 'draft' } })
-    expect(noCode.isError).toBe(false)
-    expect(mock!.served.slice(servedBefore).some(call => call.path === '/api/pur_orders:list')).toBe(false)
+    const unguarded = await execute('nb_create', { collection: 'orders', values: { status: 'pending' } })
+    expect(unguarded.isError).toBe(false)
+    expect(mock!.served.slice(servedBefore).some(call => call.path === '/api/orders:list')).toBe(false)
+  })
+
+  it('server-assigns the next number when the guarded column arrives empty (W6-B1 G5)', async () => {
+    const { execute, mock } = await mount()
+    const year = new Date().getFullYear()
+    // The mock seeds PO-YYYY-0001/0002; an empty code draws max+1 inside the
+    // write path — the mobile preview number never lands.
+    const drawn = await execute('nb_create', { collection: 'pur_orders', values: { code: '', doc_status: 'draft' } })
+    expect(drawn.isError).toBe(false)
+    const landed = drawn.value as { row: Record<string, unknown> }
+    expect(landed.row['code']).toBe(`PO-${String(year)}-0003`)
+    expect(mock!.rows.get('pur_orders')?.filter(row => row.code === `PO-${String(year)}-0003`)).toHaveLength(1)
+    // Two concurrent empty-code drafts both land: each draw re-reads the
+    // live rows, so the second draw takes the next number (no preview
+    // collision, no fail-loud bounce).
+    const again = await execute('nb_create', { collection: 'pur_orders', values: { code: '', doc_status: 'draft' } })
+    expect(again.isError).toBe(false)
+    const landedAgain = again.value as { row: Record<string, unknown> }
+    expect(landedAgain.row['code']).toBe(`PO-${String(year)}-0004`)
+    const codes = mock!.rows.get('pur_orders')?.map(row => String(row.code))
+    expect(new Set(codes).size).toBe(codes?.length)
+  })
+
+  it('draws from the current year band even when probe numbers outrank it lexically (W6-B1 G5)', async () => {
+    const { execute, mock } = await mount()
+    const year = new Date().getFullYear()
+    // Probe-style codes sort ABOVE PO-YYYY-… lexically; the plain descending
+    // first page would miss the year's real max and restart at 0001 (the
+    // live incident the closure probe exposed).
+    mock!.rows.get('pur_orders')!.unshift(
+      { id: 900, code: 'PO-W6B1-20261001114916', doc_status: 'approved' },
+      { id: 901, code: 'PO-W6B0-20260930', doc_status: 'rejected' },
+    )
+    const drawn = await execute('nb_create', { collection: 'pur_orders', values: { code: '', doc_status: 'draft' } })
+    expect(drawn.isError).toBe(false)
+    const landed = drawn.value as { row: Record<string, unknown> }
+    expect(landed.row['code']).toBe(`PO-${String(year)}-0003`)
   })
 })
 

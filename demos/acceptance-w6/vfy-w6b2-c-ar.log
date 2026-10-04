@@ -1,0 +1,3 @@
+23|订单 SO-W6B2-SEED 逾期 30 天，余额 ¥18800.00|critical|open|["finance", "sales_rep"]
+24|订单 SO-W5B4-01 4 天后到期，余额 ¥60.00|warning|open|["finance", "sales_rep"]
+== quality open ==

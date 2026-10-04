@@ -1,0 +1,31 @@
+== W7-B6+M3 gates（如实汇总，2026-10-04 05:3x CST 视域）==
+
+-- typecheck --
+PASS（exit 0）——w6-b10-gates 复跑腿内首试即绿（w7-b6-w6gates.log "gate typecheck: PASS"行）
+
+-- oxlint（staged 口径 .oxlintrc.staged.json，本批 ts/mts 文件面）--
+PASS — Found 0 warnings and 0 errors（w7b6-binmap.mts / nocobase-h5-wms.mts / w7b0-theme.mts）
+
+-- verify-agent-note-format --
+PASS — 762 Agent Note(s) checked, all conform（W7 七对 Note 补 Problem/Alternatives/Consequences 骨架后）
+
+-- verify-translation-pairing --
+PASS — 1214 pair(s) checked across all in-scope documentation, all consistent（W7 七对三件套 --write 重录；修齐 b1/b0-m0 zh 链接降级、b4 zh 节名英化+补 Alternatives）
+
+-- pnpm run doc-sync --
+PASS — 29 passed, 0 failed, 0 skipped in 253.65s（含 markdown links / type equivalence / skill metadata / translation prompt 等全部门）
+
+-- mobile vitest（ui-mobile 43 文件）--
+PASS — 668/668（复跑两连绿；首轮 1 例 draft→review 卡流转 findByTestId 超时，按 flake 处置如实注明，证据 w7-b6-mo-vitest.log）
+
+-- 终验矩阵 w7-b6-matrix.sh --
+见 w7-b6-matrix.log（六腿：theme assert / w7b1-heal assert / w7b23-heal assert / w7b4-heal assert / 114 页禁色+B5 结构 probe / mobile 暗轨门槛）
+
+-- W6 零回退 --
+w6-b10-matrix.sh：44 gates, 0 failed, MATRIX ALL PASS（w7-b6-w6matrix.log）
+w6-b10-gates.sh：22 legs——首轮 20 绿 + b3-recall(ECONNRESET)/b5-insp(并发竞态数据半造) 两腿 FAIL；串行重验 2/2 绿（R1 补跑完整链归档 w7-b6-w6gates-retry.log=w7-r1-02-b5-full-chain.log，9089B：b5 cleanup→seed→wizard replay 28✓→assert PASS 全程 exit 0 + b3-recall assert PASS；首轮 05:16 的 216B 截断 log 已被替换）
+
+-- 美学终查修复链（首轮 FAIL → 终局清零）--
+① 019-库位平面图：JSBlock 活跃 code 在 stepParams.jsSettings（服务端塑形的不透明对象；两轮手写探查曾破坏渲染，均即时发现即时重建）——终局通道 destroy+flowSurfaces:addBlock（w7b6-binmap.mts 幂等版），页面实测 token 色板+禁色 0
+② 034/099 看板 badge cyan：antd Badge preset 走复合选择器 (0,3,0)，单类覆写不敌——globalStyle 高特异性+!important 覆写段（w7b0-theme --apply），页面实测 #0E7490
+③ probe 自身 evaluate 多参数误报四页——单对象参数修正后消失

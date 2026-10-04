@@ -21,6 +21,12 @@ export interface ApprovalCardProps {
   /** Sends the fenced approval_confirm user message (pending cards only). */
   readonly onSend: (text: string) => void
   readonly disabled: boolean
+  /**
+   * The live document state read back from NocoBase (W6-B1 G2): when another
+   * surface already settled the document, the frozen pending snapshot
+   * renders as settled (他端已处理) instead of offering dead buttons.
+   */
+  readonly externalState?: ApprovalResultPayload['state'] | undefined
 }
 
 /** The one state's view row; the closed union always hits a row, the literal fallback keeps the type string-tight. */
@@ -70,10 +76,17 @@ export function approvalConfirmOf(payload: ApprovalPendingPayload, action: 'appr
  * @param props - the payload, send sink, busy gate.
  * @returns the card element.
  */
-export function ApprovalCard({ payload, onSend, disabled }: ApprovalCardProps): JSX.Element {
+export function ApprovalCard({ payload, onSend, disabled, externalState }: ApprovalCardProps): JSX.Element {
   const [comment, setComment] = useState('')
   const pending = payload.type === 'approval_pending'
-  const state = pending ? 'pending' : payload.state
+  // G2: a live read-back that left the review states settles the frozen
+  // pending snapshot — the card flips to the settled chip with the 他端已处理
+  // note and the action buttons retire (they would bounce off the state
+  // machine anyway).
+  const settledElsewhere = pending && externalState !== undefined
+    && externalState !== 'pending' && externalState !== 'pending_level2'
+    && externalState !== 'reviewing'
+  const state = settledElsewhere ? externalState : pending ? 'pending' : payload.state
   const view = stateViewOf(state)
   const doc = payload.doc
   return (
@@ -125,7 +138,8 @@ export function ApprovalCard({ payload, onSend, disabled }: ApprovalCardProps): 
       <div className={css.reportDivider} aria-hidden="true" />
       <div className={css.approvalFooter}>
         <span className={`${css.approvalChip} ${view.chip}`}>{view.label}</span>
-        {pending && (
+        {settledElsewhere && <span className={css.approvalElsewhere}>他端已处理</span>}
+        {pending && !settledElsewhere && (
           <span className={css.reportActions}>
             <Input
               className={css.approvalComment}

@@ -1,0 +1,116 @@
+{
+  "generatedAt": "2026-10-02T07:33:45.654Z",
+  "assertions": {
+    "labelsSpaDraws": true,
+    "labelsSpaProbe": {
+      "present": true,
+      "complete": true,
+      "naturalWidth": 378,
+      "src": "/label/lot.svg?lot_no=MFG-20260926-03&code=gs1&size=100x50"
+    },
+    "labelPathCount": 124,
+    "boardRendered": true,
+    "boardXss": {
+      "present": true,
+      "scriptNodes": 0,
+      "rawOpen": false,
+      "rawAmp": false,
+      "escapedVisible": true
+    },
+    "dagRendered": true,
+    "dagBoth": {
+      "hasSvg": true,
+      "nodeG": 10,
+      "footerNodes": 10,
+      "nanInSvg": false,
+      "rects": 18,
+      "notice": "链路不完整：缺  环节（数据质量信号——补录收货/完工/发运单据后自动接通）",
+      "noticeVisible": false
+    },
+    "dagUp": {
+      "hasSvg": true,
+      "nodeG": 8,
+      "footerNodes": 8,
+      "nanInSvg": false,
+      "rects": 16,
+      "notice": "链路不完整：缺  环节（数据质量信号——补录收货/完工/发运单据后自动接通）",
+      "noticeVisible": false
+    },
+    "dagDown": {
+      "hasSvg": true,
+      "nodeG": 11,
+      "footerNodes": 11,
+      "nanInSvg": false,
+      "rects": 19,
+      "notice": "链路不完整：缺  环节（数据质量信号——补录收货/完工/发运单据后自动接通）",
+      "noticeVisible": false
+    },
+    "recallButton": {
+      "label": "对 RM-260920-M1 发起召回",
+      "lot": "RM-260920-M1"
+    },
+    "brokenDown": {
+      "hasSvg": true,
+      "nodeG": 2,
+      "footerNodes": 2,
+      "nanInSvg": false,
+      "rects": 10,
+      "notice": "链路不完整：缺 生产工单、成品批次、销售订单、客户 环节（数据质量信号——补录收货/完工/发运单据后自动接通）",
+      "noticeVisible": true
+    },
+    "brokenUp": {
+      "hasSvg": true,
+      "nodeG": 2,
+      "footerNodes": 2,
+      "nanInSvg": false,
+      "rects": 10,
+      "notice": "链路不完整：缺  环节（数据质量信号——补录收货/完工/发运单据后自动接通）",
+      "noticeVisible": false
+    },
+    "recallConsoleRendered": true,
+    "identityGate": {
+      "noCredentialStatus": 401,
+      "sessionCreateStatus": 200,
+      "sessionCreateCode": "RC-20261002-007",
+      "forgedActorStatus": 403,
+      "forgedActorBody": "actor qc_inspector 与会话身份 buyer 不符——身份以会话推导为准"
+    },
+    "consoleFlow": {
+      "codeFilled": true,
+      "notify": {
+        "btn": true,
+        "text": "RC-20261002-007 notify OK（nocobase）"
+      },
+      "execute": {
+        "btn": true,
+        "text": "RC-20261002-007 execute OK（nocobase）"
+      },
+      "close": {
+        "btn": true,
+        "text": "RC-20261002-007 close OK（nocobase）"
+      }
+    },
+    "mobileRecallNotice": {
+      "title": "召回任务通知不合格处置 QM-NC-W6B1-20261001115245 待处置（concession）【关注】不合格"
+    },
+    "mobileLotRows": 13,
+    "mobileBarcodeDefault": {
+      "loaded": true,
+      "src": "http://127.0.0.1:13110/label/lot.svg?lot_no=MFG-20260926-03&code=gs1&size=100x50"
+    },
+    "mobileBarcodeInjected": {
+      "loaded": true,
+      "src": "http://localhost:13110/label/lot.svg?lot_no=MFG-20260926-03&code=gs1&size=100x50"
+    }
+  },
+  "identity": {
+    "admin": "nocobase",
+    "mobile": "signed"
+  },
+  "cleanup": {
+    "recallAuditTrail": "initiate,notify,execute,close",
+    "sweep": "1|1",
+    "leftoverDrillOrders": "0",
+    "auditCascadeLeft": "0"
+  }
+}

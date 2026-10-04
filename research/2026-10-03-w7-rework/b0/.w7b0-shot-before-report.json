@@ -1,0 +1,26 @@
+{
+  "phase": "before",
+  "requested": 3,
+  "ok": 3,
+  "failed": [],
+  "shots": [
+    {
+      "name": "112-应用中心.png",
+      "uid": "c9c6wzppejk",
+      "title": "应用中心",
+      "bytes": 81240
+    },
+    {
+      "name": "113-排产甘特.png",
+      "uid": "96yet9a0x45",
+      "title": "排产甘特",
+      "bytes": 91392
+    },
+    {
+      "name": "114-任务甘特.png",
+      "uid": "zs3oqvlgqq0",
+      "title": "任务甘特",
+      "bytes": 47158
+    }
+  ]
+}

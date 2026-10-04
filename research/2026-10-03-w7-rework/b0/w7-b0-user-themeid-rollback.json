@@ -1,0 +1,39 @@
+{
+  "cleared": [
+    {
+      "id": 1,
+      "username": "nocobase",
+      "removedThemeId": 3
+    },
+    {
+      "id": 18,
+      "username": "qc_inspector",
+      "removedThemeId": 3
+    },
+    {
+      "id": 19,
+      "username": "buyer",
+      "removedThemeId": 5
+    }
+  ],
+  "before": {
+    "1": {
+      "username": "nocobase",
+      "systemSettings": {
+        "themeId": 3
+      }
+    },
+    "18": {
+      "username": "qc_inspector",
+      "systemSettings": {
+        "themeId": 3
+      }
+    },
+    "19": {
+      "username": "buyer",
+      "systemSettings": {
+        "themeId": 5
+      }
+    }
+  }
+}

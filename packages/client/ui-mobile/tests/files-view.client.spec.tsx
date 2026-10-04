@@ -36,7 +36,8 @@ describe('FilesView', () => {
     render(<FilesView />)
     expect(screen.getByText('近 7 天还没有 AI 生成的报告')).toBeTruthy()
     expect(screen.getByText('近 7 天没有新文件')).toBeTruthy()
-    expect(screen.getByText('还没有收藏，点亮星标收进这里')).toBeTruthy()
+    expect(screen.getByText('还没有收藏')).toBeTruthy()
+    expect(screen.getByText('点亮星标收进这里')).toBeTruthy()
   })
 
   it('lists the generated artifacts newest first and previews one inline', async () => {
@@ -141,7 +142,8 @@ describe('FilesView', () => {
     // generated section's star unpins it.
     fireEvent.click(screen.getAllByRole('button', { name: '取消收藏' })[0] as HTMLButtonElement)
     await waitFor(() => { expect(workSnapshot().items[0]?.pinned).toBe(false) })
-    expect(screen.getByText('还没有收藏，点亮星标收进这里')).toBeTruthy()
+    expect(screen.getByText('还没有收藏')).toBeTruthy()
+    expect(screen.getByText('点亮星标收进这里')).toBeTruthy()
     // Pin back through the generated section's star (unpinned rows show it in favorites only).
     fireEvent.click(screen.getAllByRole('button', { name: '收藏' })[0] as HTMLButtonElement)
     await waitFor(() => { expect(workSnapshot().items[0]?.pinned).toBe(true) })

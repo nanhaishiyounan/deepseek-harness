@@ -15,13 +15,34 @@ export type AsyncCell<T> =
   | { readonly status: 'ready'; readonly value: T; readonly error: undefined; readonly refresh: () => void }
   | { readonly status: 'error'; readonly value: undefined; readonly error: string; readonly refresh: () => void }
 
+/** The transport-level failure text the zh surfaces render (never raw "Failed to fetch"). */
+const NETWORK_FAILURE_TEXT = '网络连接失败，请检查网络后重试'
+
 /**
- * Failure text for any thrown value.
+ * Failure text for any thrown value. A browser transport failure (fetch's
+ * TypeError, or its "Failed to fetch" text on proxies that wrap it) renders
+ * in Chinese instead of the raw engine message.
  * @param error - the thrown value.
  * @returns its message text.
  */
 export function messageOf(error: unknown): string {
-  return error instanceof Error ? error.message : String(error)
+  if (error instanceof TypeError) return NETWORK_FAILURE_TEXT
+  const text = error instanceof Error ? error.message : String(error)
+  return text === 'Failed to fetch' || text === 'NetworkError when attempting to fetch resource.'
+    ? NETWORK_FAILURE_TEXT
+    : text
+}
+
+/**
+ * Leave a structured client-error trace (W6-R1 observability): every ledger
+ * and docs read failure prints one warn line a BI replay can grep, so a
+ * silent dash is auditable.
+ * @param scope - the failing surface's name (e.g. 'ledger.monthly').
+ * @param cause - the thrown value.
+ */
+export function logClientError(scope: string, cause: unknown): void {
+  const message = cause instanceof Error ? cause.message : String(cause)
+  console.warn(JSON.stringify({ type: 'client_error', scope, message, at: new Date().toISOString() }))
 }
 
 /**

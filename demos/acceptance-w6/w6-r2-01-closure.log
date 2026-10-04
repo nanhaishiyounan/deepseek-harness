@@ -1,0 +1,12 @@
+w6-r2-01: 认领目标行 #4（MOON-260318-01，keeper 路由的 open 效期行）
+w6-r2-01: ① keeper 登录成功（mobile identity=keeper）
+w6-r2-01: 首页「我的预警」chip 角标=4
+w6-r2-01: shot w6-r2-01a-mobile-home-badge.png
+w6-r2-01: ② #/alerts 渲染 4 行（open 行带认领按钮 4 个）
+w6-r2-01: shot w6-r2-01b-mobile-alerts-before.png
+w6-r2-01: ③ 点击前 psql：#4 owner/status=NULL|open
+w6-r2-01: ③ 认领后 psql：#4 owner/status=keeper|acknowledged（应 keeper|acknowledged）
+w6-r2-01: ③ mobile 回显已认领 + 关闭按钮=true
+w6-r2-01: shot w6-r2-01c-mobile-alerts-after-claim.png
+w6-r2-01: ④ PC 预警中心（admin=nocobase）表格 20 行，含 MOON-260318-01 的 已认领/keeper=true
+w6-r2-01: shot w6-r2-01d-pc-alert-center-readback.png

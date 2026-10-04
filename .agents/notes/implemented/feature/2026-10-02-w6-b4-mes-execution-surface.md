@@ -1,0 +1,37 @@
+# Agent Note: W6-B4 MES execution surface — card flow, CCP monitoring, BOM versioning/ECO
+
+Status: implemented
+
+English | [中文](2026-10-02-w6-b4-mes-execution-surface.zh.md)
+
+## Problem
+
+The manufacturing round's research verdict split the production chain into an execution face and a governance face, and the W6-B4 batch owed both. The shop floor had only a report terminal whose operator was self-reported through `?operator=`; food HACCP critical-control-point readings had no ledger and no alert path; and recipe BOMs carried `version`/`bom_status` columns with no change-order discipline — a recipe edit could silently move under in-production orders. The batch had to deliver three things over the existing spine (W3 terminals, W-round mfg tables, B2 alert engine, B3 trace views, wfl approval engine) without forking any of them: a touch card flow whose operator identity is session-derived, CCP monitoring whose thresholds live in data, and ECO-gated BOM version switching with snapshot semantics for in-production MOs.
+
+## Decision
+
+**Card flow = session identity + engine-issued idempotency.** `scripts/w3-terminals/cards.html` (served at `/terminals/cards.html`) signs the operator in through the engine's `POST /terminal/session`, which proxies NocoBase `auth:signIn` and hands back the platform token; every subsequent read/write carries `authorization: Bearer` and the engine derives the operator with `recallActor` + the 生产车间 department fence (`cardFlowOperator` in `approval-engine.mts`). Writes never accept a self-reported operator. `POST /job-report` reuses the W3 three-number equation clamp and `postJobReport` posting path, adds a client-minted `submit_key` (one per sheet open, `[A-Za-z0-9:_-]` charset gate — markup and SQL metacharacters refuse before any psql), and dedupes on `mfg_job_reports.submit_key` (unique index; a replay returns the original verdict with `duplicate: true`). Numbering stays server-side (`nextDocCode`).
+
+**CCP monitoring = configured points, append-only ledger, one alert channel.** `mfg_ccp_points` rows carry parameter/unit/CL bounds/frequency/operation scope/corrective-action guidance — thresholds are data the「CCP监控配置」page edits, never code constants. `POST /job-report` refuses unless every scoped point has a finite reading (HACCP monitoring completeness) and appends `mfg_ccp_records` rows (who/when/measured/CL-snapshot/deviation/action-taken). A deviation triggers three consequences in one write: the lot named on the report freezes (`wms_lots.status='frozen'`), a corrective `qm_nc_dispositions` draft opens, and one `scanAlerts()` pass lands the `ccp_deviation` critical alert + in-app notifications under the seeded rule's routing. The alert row is created only through the B2 scanner (its `hitsSelect` branch honors a quality-side resolution by leaving resolved alerts out of the hit), never by a second insert path.
+
+**ECO = draft-at-create, impact frozen at create, engine-switched versions.** `mfg_ecos` rides the six-state wfl flow (manager tier 质检部 two-name array, gm admin). `POST /eco/create` (planner/quality/admin fenced by department, per the cordis.patch.yml role matrix) clones the product's default active BOM into a draft next version, applies validated `line_changes` (`add` refuses products already in the baseline — use `update`), copies operations, and freezes the impact snapshot: in-production MOs on the from-BOM, the product's FG lots, and undelivered SOs reached through `so_order_lines` **or** the B3 `v_trace_edges` recursive closure. Approval fires the `effectiveEffects('mfg_ecos')` hook (`applyEco`): one psql call demotes every current default, activates the to-BOM, retires the from-BOM, and stamps `effective_at`. MOs keep their `bom_id` — in-production orders never move (version snapshot). The「配方版本与变更」JSBlock console renders the version timeline, the blue/black/red line diff, the impact panel, and submits draft ECOs through the engine with the session's bearer (`window.__w6b4PlmRender` is the evidence driver's render hook).
+
+## Alternatives considered
+
+**Terminal-token-only identity (the W3 pattern).** The existing `W3_TERMINAL_TOKEN` still guards every terminal route, but it authenticates the kiosk, not the person. The B0 real-account base made per-operator sessions available, and R3's discipline forbids self-reported actors on writes — so the session chain won even though it costs a sign-in step on a shared terminal.
+
+**CCP thresholds inside `alert_rules.params`.** The B2 rule row carries routing well, but CL bounds need per-operation scoping, unit metadata, monitoring frequency, and corrective-action guidance that the rule row would have to overload. A dedicated `mfg_ccp_points` table keeps the rule row to routing (what B2 owns) and gives the config page a first-class editing surface.
+
+**Direct `wfl_alerts` insert on deviation.** Writing the alert row from the terminal route would be one less scan, but it forks the alert-creation path: dedup semantics, reopen behavior, and notification stamping would drift from the scanner. One `scanAlerts()` pass after the record write keeps a single creation channel and inherits the resolution-honoring hit filter.
+
+**New BOM version created at approval time.** Building the to-version inside the effective hook would guarantee only approved versions exist as drafts-never, but then reviewers approve a change *description* with nothing diffable. Draft-at-create gives the PLM console a real second version to diff against and keeps the approval flow about the artifact.
+
+## Consequences
+
+The execution face gained a real identity boundary: an unauthenticated call, a wrong-password sign-in, a 质检部 session on the card flow, and a shop_lead session on `/eco/create` are all refused (401/403) and asserted. Double-tapped submits land exactly one row — the count=1 psql leg is part of the acceptance matrix. The cost is engine surface growth: five new terminal routes, three eco routes, and the `applyEco` hook live in `approval-engine.mts` behind the existing token guard and CORS envelope, and the engine must be restarted to pick them up. Rehearsal data is identified and cleanup is scripted in the assert (frozen lots restored, rehearsal MOs deleted, the `MO-W6B4-FLOW` carrier MO deep-resets its own rehearsal reports when its cycle plan is exhausted, so the matrix re-runs green indefinitely).
+
+Deferred: the Andon gear's 维护请求 item waits for the B8 maintenance module (the button is visibly disabled with that reason); the B2 预警列表 page's `rule_type` enum chip set predates `ccp_deviation` (rows render and filter by status; a fifth stat card is a B10 polish); the mobile leg of the card flow is out of B4 scope.
+
+## Testing
+
+`w6b4-assert.mts` runs 44 gates across six legs — live services, card flow with session identity and psql reconciliation (`operator=shop_lead` from the session, op status advance), idempotent replay (count=1), the CCP deviation chain (alert row critical/open, ≥3 routed notifications, lot frozen→restored, corrective NC order), the ECO version ladder (impact lists, submit, approve, version switch, new-MO-on-new-default, in-production-MO-unchanged, diff rows in psql), and the negatives. Three consecutive runs pass unchanged. Evidence: `demos/acceptance-w6/w6-b4-01..10-*` (nine browser screenshots from the CDP driver `demos/acceptance-w6/.shoot-w6b4.mjs`, the assert log, the psql reconciliation log) and `demos/acceptance-w6/gates-b4.log` (typecheck, oxlint staged, three assert legs).

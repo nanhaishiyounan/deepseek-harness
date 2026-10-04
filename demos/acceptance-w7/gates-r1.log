@@ -1,0 +1,39 @@
+== W7-R1 gates（B6+M3 终验封口·证据链窄修轮，如实汇总 2026-10-04 11:0x CST 视域）==
+
+-- 变更面（如实）--
+源码：packages/client/ui-mobile tokens.css（--dshm-stamp-doing 双轨一 token）+ work.module.css（stamp_doing 消费新 token）；examples/kb-agent/scripts/w7b6-binmap.mts（导出 BLOCK_UPDATE_CHANNEL 常量，行为不变）
+脚本：research/2026-10-03-w7-rework/b6/.w7b6-census.mjs（新，活重建共享模块）/.w7b6-probe.mjs（活 census+liveness 门+B5_KINDS 硬契约）/.w7b6-shot.mjs（同上门+liveness）/​.w7b6-index.mjs（改读活 census 产物）；m3/.w7m3-probe.mjs（第七门槛 stamp 腿）；demos/acceptance-w7/w7-b6-matrix.sh（腿四改现场实跑+第七门槛）；新增 w7-r1-03-channel-check.mjs / w7-r1-04-workdetail-reshoot.mjs / w7-r1-05-inject.mjs
+文档：B6+M3 Note 双语（通道更正×2处/语）、QUICKSTART.zh 层3b、99-w7（§四.1 通道+§二.3 归档措辞+新增 §五 R1 段）；Note pairing 重录 1 对
+证据：b6/after/ 三图重拍（109/110/040）、after-index.md 再生、w7-b6-w6gates-retry.log 完整替换（216B→9089B）、w7-r1-01..06 全系
+
+-- 终验矩阵 w7-b6-matrix.sh（R1 复跑，六腿）--
+PASS — 6 legs, 0 failed, MATRIX ALL PASS（w7-b6-matrix.log）
+  · probe 腿：census 活重建 114 单元（111 flowPage+3 v1，B5_KINDS 契约 matched 23/23 declared），114 页 liveness 全 PASS，computed 禁色清零，B5 结构断言绿，引擎 /insp /crm /cards 三面 primary 正确+禁色 0
+  · mobile 暗轨腿（改现场实跑）：theme=dark elev=23 text=12.81 muted=5.74 border=14 tab=12px tabActive=4.5 **stamp=3.89**（第七门槛 ≥3.0，token #5783bc；修复前实测 2.38）
+  · 如实注明：本轮第一次跑 probe 腿曾因 liveness 判据对 v1 页（112-应用中心 main 挂载时机）误报 + 腿四 node -e require 相对路径拼装错而 2 腿 FAIL——两处修复（判据改「404 文案判死+非空正文判活，main 降为观测」；require 加 ./ 前缀）后复跑全绿；失败轮 log 未保留（被复跑覆盖），缺陷与修复以本条如实入档
+
+-- mobile vitest（ui-mobile 43 文件，stamp token 改动面）--
+PASS — 668/668（w7-r1-04-mo-vitest.log；首轮命令带 --reporter=basic 触发 vitest4 启动错误 ERR_LOAD_URL，非测试失败，去参后全绿，如实注明）
+
+-- 注入三场景 w7-r1-05-inject.mjs（production-simulation 补齐）--
+PASS — offline：断网发送 fail-loud 落 outbox（rows=1）→ online 冲刷队列清空+消息上屏；CPU 4×：五面导航 0 个 ≥500ms long task（最长 361ms，全量明细入 log；首轮曾现 1 例 635ms 波动，复跑两轮 0 例封顶 215/361ms，波动如实注明）；死路由：#/work/<不存在 id> 落「该工作不存在或已删除」降级面+零未捕获错误
+
+-- b5 完整链串行重验（替换 216B 截断归档）--
+PASS — w7-b6-w6gates-retry.log（=w7-r1-02，9089B）：cleanup→seed→wizard replay 28✓→assert 全程 exit 0 + b3-recall assert PASS
+
+-- BLOCK_UPDATE_CHANNEL 一致性检查（w7-r1-03-channel-check.mjs，CI 可选）--
+PASS — 常量 destroy+addBlock ↔ QUICKSTART.zh/Note.md/Note.zh/99-w7 四文档全一致；无文档再把 updateSettings 呈现为 bin-map 通道
+
+-- w7b0-theme --rollback 演练 --
+PASS — 回滚生效（assert fail-loud 退出 1，w7-forge 不再默认+3 用户 pin 复原）→ re-apply → assert OK（w7-r1-06-advisory.log）
+
+-- 文档门禁 --
+verify-translation-pairing：PASS — 1214 对全绿（Note 三件态重录 1 对后）
+verify-agent-note-format：PASS — 762 Note 全合规
+oxlint（staged 口径，本批 ts/mts 变更面 w7b6-binmap.mts）：PASS — 0 warnings 0 errors
+
+-- W6 44 门 --
+不因本批复跑（本批只动证据层+2 个 CSS token+文档+1 个 mts 常量；唯一触及 W6 断言面的是 w7b6-binmap.mts 加常量——行为零变更，B6 终验矩阵含其页面级断言已复跑绿）
+
+-- 遗留（W8 候选，非本批范围）--
+CPU 4× 首轮 635ms 单例波动未归因到具体导航（复跑不复现）；注入 s1 气泡上屏需重进会话一次（flush 后会话视图不自动重读，属已知交互形态，如实记录）

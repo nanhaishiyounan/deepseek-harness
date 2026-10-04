@@ -1,0 +1,36 @@
+W6-B2 质量门禁记录（2026-10-02 05:31 Asia/Shanghai）
+
+[PASS] node --import tsx/esm examples/kb-agent/scripts/w6b2-rules.mts --assert
+       九腿全绿（列核对/四路规则/分层/幂等/效期对账4=4/阈值可配/通知+路由/动作白名单/两页块）
+       完整输出：w6-b2-06-assert.log
+[PASS] pnpm run typecheck（全仓 0 error；含 B1 遗留 nocobase-sessions-auth.spec.ts:124 的
+       exactOptionalPropertyTypes 修复——authToken 条件展开，同文件 111/116 行既有模式）
+[PASS] pnpm vitest run packages/client/ui-mobile/tests packages/host/apiproxy/tests/nocobase-sessions-auth.spec.ts
+       43 files / 663 tests 全绿（含本批新增 alerts-view.client.spec.tsx 3 用例）
+[PASS] npx oxlint --config .oxlintrc.staged.json <本批全部改动文件>
+       0 warnings / 0 errors
+[PASS] pnpm run build:lib:client && pnpm run build:web（mobile bundle 两层重建 + :3080 重启后
+       /assets/mobile-*.js 含「我的预警」chip，grep=2）
+[PASS] 引擎 live 三联：:13110 /healthz ok（backlog_pending=0）+ POST /scan-alerts 幂等扫描
+       （created=0/resolved=0/notified=0）+ 周期循环 armed（默认 3600s，W6_ALERT_SCAN_* env 可调）
+
+验收证据索引（demos/acceptance-w6/）：
+  w6-b2-01-alert-center.png      预警中心列表页（表格红黄分级 15 行：2 紧急/13 关注；7 已关闭/8 待处理）
+  w6-b2-02-alert-rules.png       预警规则配置页（四路规则 params/route_to/enabled）
+  w6-b2-03-keeper-inapp-context.png  keeper 登录 PC 预警页（站内信送达取证见 meta）
+  w6-b2-04a-mobile-home-chip.png mobile 首页「我的预警」入口（keeper 登录）
+  w6-b2-04b-mobile-keeper-alerts.png mobile #/alerts 红黄 rail 4 行（效期 critical/warning 混合）
+  w6-b2-05-recon.log             recon.sql 全量对账输出（效期 4=4 差 0；四路样例含规则/对象/级别/时间/路由）
+  w6-b2-06-assert.log            --assert 九腿完整输出
+  w6-b2-shot-meta.json           live 三联 + keeper 站内信 myInAppMessages 读证 + mobile 行数/文本断言
+  w6-b2-cards-dom.json           统计卡交互式浏览器 DOM 取证（headless canvas 不挂载的替代证据对）
+
+已知遗留（见 Agent Note）：
+  1. 预警列表页四张统计卡渲染于表格下方（v2 grid 块序=插入序，sortIndex 改写无效）→ B10 heal
+  2. headless chrome 不挂载该页 ECharts canvas → 统计卡截图证据以 DOM 取证替代
+  3. AR 种子单 SO-W6B2-SEED（note 标注 seed）为真实落库行，保留在库供 B9 催收演示
+
+—— W6-R2 勘误（2026-10-02 09:31 Asia/Shanghai）：上文「npx oxlint --config .oxlintrc.staged.json …
+   0 warnings / 0 errors」与实测不符。按 staged 配置对本批改动文件实测存在 unused-disable directive
+   warning（这些指令为 .oxlintrc.json 全量 lint 所需，staged 配置规则集不同故报 unused）。
+   修正后的实测以 demos/acceptance-w6/gates-r2.log 为准；本行勘误保留原始记录不改写。

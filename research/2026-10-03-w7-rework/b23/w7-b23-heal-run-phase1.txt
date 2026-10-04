@@ -1,0 +1,208 @@
+  recolor h4srm2u9xiqx09jb srm_suppliers.lifecycle_status
+  numberProps h4srms4w5viez9zp srm_score_cards.score_service（qty 千分位）
+  recolor h4srmjjlvbjei4fd srm_certificates.warn_status
+  recolor h4srm6hfqnpnrqu5 srm_suppliers.lifecycle_status
+  numberProps h4srmflpebqkuz srm_audit_records.score_quality（qty 千分位）
+  numberProps h4srms4w5viez9zp srm_score_cards.score_quality（qty 千分位）
+  recolor h4srmflpebqkuz srm_audit_records.grade
+  recolor h4srm6hfqnpnrqu5 srm_suppliers.audit_grade
+  numberProps h4srmflpebqkuz srm_audit_records.score_system（qty 千分位）
+  recolor h4srm2u9xiqx09jb srm_suppliers.category
+  recolor h4srm6hfqnpnrqu5 srm_suppliers.source
+  recolor h4srmjjlvbjei4fd srm_certificates.cert_type
+  numberProps h4srmflpebqkuz srm_audit_records.score_compliance（qty 千分位）
+  recolor h4srms4w5viez9zp srm_score_cards.rating
+  numberProps h4srms4w5viez9zp srm_score_cards.score_compliance（qty 千分位）
+  recolor h4srm2u9xiqx09jb srm_suppliers.iqc_level
+  numberProps h4srmuvf86en2kn srm_audit_checklists.weight（qty 千分位）
+  recolor h4srm2u9xiqx09jb srm_suppliers.audit_grade
+  recolor h4srmaf4rurtt17p srm_score_cards.rating
+  recolor h4srm2u9xiqx09jb srm_suppliers.regulatory_risk
+  recolor h5wmsvwkqjiiaxdj wms_shipments.shipment_type
+  numberProps h5wmsddav9gkxtl hub_inv_products.safety_stock（qty 千分位）
+  recolor h5wms1nju21hb5c8 wms_bins.status
+  recolor h5wms9srcrn5fhiq wms_movements.move_type
+  recolor h5wms2hmkvlfsmtf wms_counts.status
+  recolor h5wmsrh8ls7pkv5i wms_receipts.status
+  recolor h5wmsrh8ls7pkv5i wms_receipts.receipt_type
+  recolor h5wms50cuimohzz7 wms_zones.temp_zone
+  recolor h5wmsgd4pntmwvg wms_lots.status
+  recolor h5wmslacezwb94s wms_monthly_balances.source
+  recolor h5wmsddav9gkxtl hub_inv_products.abc_class
+  recolor h5wmsvwkqjiiaxdj wms_shipments.status
+  recolor h5wms9zlhetpzwl wms_reservations.status
+  recolor h5wms2hmkvlfsmtf wms_counts.count_type
+  numberProps h5wmsddav9gkxtl hub_inv_products.lead_time_days（qty 千分位）
+  recolor h5wms9zlhetpzwl wms_reservations.ref_type
+  recolor n17wr2jbz8fl2i hub_as_assets.status
+  recolor n17lhe5qyxu1g hub_hr_employees.status
+  recolor n17wr2jbz8fl2i hub_as_assets.category
+  recolor n17f3t3gtwv502s hub_as_vendors.category
+  recolor n17f34o4bhrzg1w hub_as_maintenance.type
+  numberProps n17f3wqpzee9wo2g hub_hr_leave_requests.days（qty 千分位）
+  recolor n17f3wqpzee9wo2g hub_hr_leave_requests.type
+  recolor n17f34o4bhrzg1w hub_as_maintenance.status
+  recolor w5mfgntyu7wy20a mfg_orders.kit_policy
+  recolor w6mfgmct2tf2braf mfg_orders.kit_policy
+  recolor w5mfgp352sily7f mfg_order_operations.status
+  recolor w5mfgntyu7wy20a mfg_orders.doc_status
+  recolor w5mfgntyu7wy20a mfg_orders.reservation_state
+  recolor w6mfglmxq9mhbkur mfg_job_reports.qc_status
+  recolor w6mfgmct2tf2braf mfg_orders.reservation_state
+  numberProps w6mfglmxq9mhbkur mfg_job_reports.duration_min（qty 千分位）
+  recolor w6mfgmct2tf2braf mfg_orders.doc_status
+  recolor w6mfgmct2tf2braf mfg_order_operations.status
+  recolor w6mfgp1rrz08ffa mfg_completions.oqc_status
+  recolor w7mrpyru4s708nwn mps_plans.doc_status
+  recolor w7mrphtm8t9tzlk8 mrp_suggestions.plan_type
+  recolor w7mrpyru4s708nwn mps_plan_items.driver
+  recolor w7mrphtm8t9tzlk8 mrp_confirm_intents.action
+  recolor w8qmjvyv8p5j7j qm_inspections.insp_type
+  recolor w8qm8sx2tj9j0kb srm_score_cards.rating
+  recolor w8qm15rxe53v8hh qm_aql_plans.severity
+  recolor w8qm15rxe53v8hh qm_aql_plans.rigor
+  recolor w8qmjvyv8p5j7j qm_inspections.ref_type
+  recolor w8qm8sx2tj9j0kb srm_score_cards.rating_change
+  numberProps w8qm8sx2tj9j0kb srm_score_cards.score_delivery（qty 千分位）
+  numberProps w8qm8sx2tj9j0kb srm_score_cards.score_compliance（qty 千分位）
+  numberProps w8qm8sx2tj9j0kb srm_score_cards.score_service（qty 千分位）
+  recolor w8qmjvyv8p5j7j qm_inspections.rigor
+  numberProps w8qm8sx2tj9j0kb srm_score_cards.score_quality（qty 千分位）
+  recolor w8qm8sx2tj9j0kb srm_score_cards.period
+  columnOptions h4srm2u9xiqx09jb srm_suppliers.lifecycle_status
+  columnOptions h4srmjjlvbjei4fd srm_certificates.warn_status
+  columnOptions h4srm6hfqnpnrqu5 srm_suppliers.lifecycle_status
+  columnOptions h4srmflpebqkuz srm_audit_records.grade
+  columnOptions h4srm6hfqnpnrqu5 srm_suppliers.audit_grade
+  columnOptions h4srm2u9xiqx09jb srm_suppliers.category
+  columnOptions h4srm6hfqnpnrqu5 srm_suppliers.source
+  columnOptions h4srmjjlvbjei4fd srm_certificates.cert_type
+  columnOptions h4srms4w5viez9zp srm_score_cards.rating
+  columnOptions h4srm2u9xiqx09jb srm_suppliers.iqc_level
+  columnOptions h4srm2u9xiqx09jb srm_suppliers.audit_grade
+  columnOptions h4srmaf4rurtt17p srm_score_cards.rating
+  columnOptions h4srm2u9xiqx09jb srm_suppliers.regulatory_risk
+  columnOptions h5wmsvwkqjiiaxdj wms_shipments.shipment_type
+  columnOptions h5wms9v2hly0cg6j wms_stock.status
+  columnOptions h5wms1nju21hb5c8 wms_bins.status
+  columnOptions h5wms9srcrn5fhiq wms_movements.move_type
+  columnOptions h5wms2hmkvlfsmtf wms_counts.status
+  columnOptions h5wmsrh8ls7pkv5i wms_receipts.status
+  columnOptions h5wmsrh8ls7pkv5i wms_receipts.receipt_type
+  columnOptions h5wmstw8iug4upxs wms_reorder_suggestions.status
+  columnOptions h5wms50cuimohzz7 wms_zones.temp_zone
+  columnOptions h5wmsgd4pntmwvg wms_lots.status
+  columnOptions h5wmslacezwb94s wms_monthly_balances.source
+  columnOptions h5wmsddav9gkxtl hub_inv_products.abc_class
+  columnOptions h5wmsvwkqjiiaxdj wms_shipments.status
+  columnOptions h5wms9zlhetpzwl wms_reservations.status
+  columnOptions h5wms2hmkvlfsmtf wms_counts.count_type
+  columnOptions h5wmspyqfovkqjff wms_transfers.status
+  columnOptions h5wms9zlhetpzwl wms_reservations.ref_type
+  columnOptions n17wr2jbz8fl2i hub_as_assets.status
+  columnOptions n17lhe5qyxu1g hub_hr_employees.status
+  columnOptions n17wr2jbz8fl2i hub_as_assets.category
+  columnOptions n17f3t3gtwv502s hub_as_vendors.category
+  columnOptions n17f3t3gtwv502s hub_as_vendors.status
+  columnOptions n17f34o4bhrzg1w hub_as_maintenance.type
+  columnOptions n17f3wqpzee9wo2g hub_hr_leave_requests.type
+  columnOptions n17f34o4bhrzg1w hub_as_maintenance.status
+  columnOptions n17f3wqpzee9wo2g hub_hr_leave_requests.status
+  columnOptions w5mfgntyu7wy20a mfg_orders.kit_policy
+  columnOptions w6mfgmct2tf2braf mfg_orders.kit_policy
+  columnOptions w5mfgp352sily7f mfg_order_operations.status
+  columnOptions w5mfg3eil2n4n0kr mfg_work_centers.status
+  columnOptions w5mfga37ztlt6orc mfg_boms.bom_status
+  columnOptions w5mfgntyu7wy20a mfg_orders.doc_status
+  columnOptions w5mfgntyu7wy20a mfg_orders.reservation_state
+  columnOptions w6mfglmxq9mhbkur mfg_job_reports.qc_status
+  columnOptions w6mfgmct2tf2braf mfg_orders.reservation_state
+  columnOptions w6mfgmct2tf2braf mfg_orders.doc_status
+  columnOptions w6mfgmct2tf2braf mfg_order_operations.status
+  columnOptions w6mfgp1rrz08ffa mfg_completions.oqc_status
+  columnOptions w7mrpyru4s708nwn mps_plans.doc_status
+  columnOptions w7mrphtm8t9tzlk8 mrp_suggestions.status
+  columnOptions w7mrphtm8t9tzlk8 mrp_suggestions.plan_type
+  columnOptions w7mrpyru4s708nwn mps_plan_items.driver
+  columnOptions w7mrphtm8t9tzlk8 mrp_confirm_intents.action
+  columnOptions w8qmjvyv8p5j7j qm_inspections.insp_type
+  columnOptions w8qm8sx2tj9j0kb srm_score_cards.rating
+  columnOptions w8qm15rxe53v8hh qm_aql_plans.severity
+  columnOptions w8qm15rxe53v8hh qm_aql_plans.rigor
+  columnOptions w8qmjvyv8p5j7j qm_inspections.ref_type
+  columnOptions w8qmjvyv8p5j7j qm_inspections.result
+  columnOptions w8qm8sx2tj9j0kb srm_score_cards.rating_change
+  columnOptions w8qmjvyv8p5j7j qm_inspections.rigor
+  selectOptions h5wms2hmkvlfsmtf select 31gu0wjpef8
+  selectOptions h5wms2hmkvlfsmtf select 58ecc9xwg7s
+  selectOptions h5wms9v2hly0cg6j select n3bh2goiaii
+  statcardRegen h5wmsrh8ls7pkv5i 待检数
+  statcardRegen h5wms9v2hly0cg6j 库存总件数
+  statcardRegen w6mfgp1rrz08ffa 完工总量
+  statcardRegen w5mfgntyu7wy20a 订单总数
+  statcardRegen h5wmsvwkqjiiaxdj 出库总量
+  statcardRegen w6mfglmxq9mhbkur 报废数合计
+  statcardRegen w5mfgntyu7wy20a 执行中订单
+  statcardRegen w8qmjvyv8p5j7j 不合格数
+  statcardRegen w6mfglmxq9mhbkur 本月报工
+  statcardRegen w6mfgsp029qziym 领料单总数
+  statcardRegen w6mfgp1rrz08ffa 本月完工
+  statcardRegen h5wmsrh8ls7pkv5i 本月入库单
+  statcardRegen h5wms2hmkvlfsmtf 盘点单总数
+  statcardRegen h5wmsvwkqjiiaxdj 出库单总数
+  statcardRegen h5wms2hmkvlfsmtf 本月盘点
+  statcardRegen w6mfg1zez6dqkcgh 退料总量
+  statcardRegen w5mfga37ztlt6orc BOM 总数
+  statcardRegen w6mfgsp029qziym 已过账
+  statcardRegen w5mfgntyu7wy20a 已齐套订单
+  statcardRegen h5wmsrh8ls7pkv5i 入库总量
+  statcardRegen h5wms2hmkvlfsmtf 差异单数
+  statcardRegen w5mfga37ztlt6orc 启用 BOM
+  statcardRegen h5wmsvwkqjiiaxdj 已过账
+  statcardRegen w6mfg1zez6dqkcgh 已过账
+  statcardRegen w8qmjvyv8p5j7j 待检数
+  statcardRegen w8qmjvyv8p5j7j 合格数
+  statcardRegen w5mfga37ztlt6orc 默认 BOM
+  statcardRegen w6mfglmxq9mhbkur 合格数合计
+  statcardRegen h5wms9v2hly0cg6j 可用量合计
+  statcardRegen h5wmsgd4pntmwvg 合格批次
+  statcardRegen h5wms50cuimohzz7 库区总数
+  statcardRegen n17f34o4bhrzg1w 待执行
+  statcardRegen n17f3wqpzee9wo2g 待审批
+  statcardRegen h4srm6hfqnpnrqu5 供应商总数
+  statcardRegen w8qm472nluqt32x 处置单总数
+  statcardRegen n17f34o4bhrzg1w 维保成本合计
+  statcardRegen w5mfg3eil2n4n0kr 中心总数
+  statcardRegen h4srmjjlvbjei4fd 证照总数
+  statcardRegen n17f3er0aw80yc8i 部门总数
+  statcardRegen h5wms1nju21hb5c8 可用库位
+  statcardRegen w8qm472nluqt32x 处置中
+  statcardRegen n17wr2jbz8fl2i 在用资产
+  statcardRegen h4srms4w5viez9zp 评分卡总数
+  statcardRegen w5mfgkkvs7a4ijya 工序总数
+  statcardRegen h4srmjjlvbjei4fd 预警证照
+  statcardRegen h5wms1nju21hb5c8 库位总数
+  statcardRegen n17wr2jbz8fl2i 资产总数
+  statcardRegen h4srmflpebqkuz 平均总分
+  statcardRegen n17lhe5qyxu1g 在职员工
+  statcardRegen w5mfg3eil2n4n0kr 启用中心
+  statcardRegen n17f3t3gtwv502s 维保服务商总数
+  statcardRegen h4srm2u9xiqx09jb 供应商总数
+  statcardRegen w5mfgkkvs7a4ijya 平均工时
+  statcardRegen n17f3t3gtwv502s 供应商总数
+  statcardRegen w8qm472nluqt32x 报废成本合计
+  statcardRegen n17f3wqpzee9wo2g 请假天数合计
+  statcardRegen h4srm2u9xiqx09jb 合格供方
+  statcardRegen h4srmflpebqkuz 审核记录数
+  statcardRegen h4srms4w5viez9zp 平均总分
+  statcardRegen h5wmsgd4pntmwvg 批次总数
+  statcardRegen n17f34o4bhrzg1w 记录总数
+  statcardRegen n17f3wqpzee9wo2g 申请总数
+  statcardRegen n17lhe5qyxu1g 员工总数
+  statcardRegen h4srm6hfqnpnrqu5 准入流程中
+  statcardRegen w6mfgp1rrz08ffa OQC 合格
+  statcardRegen w5mfgntyu7wy20a 已完工订单
+  statcardRegen h5wms9v2hly0cg6j 占用件数
+  statcardRegen w6mfg1zez6dqkcgh 退料单总数
+  statcardRegen w6mfgsp029qziym 草稿数
+heal b23: pages=53 recolor=56 enumSwap=0 numberSwap=0 numberProps=15 dateProps=0 alignRight=0 alignLeft=0 statcardRegen=69 columnOptions=64 selectOptions=3

@@ -1,0 +1,30 @@
+{
+  "phase": "after",
+  "requested": 3,
+  "ok": 3,
+  "livenessFails": [],
+  "failed": [],
+  "shots": [
+    {
+      "name": "040-配方版本与变更.png",
+      "uid": "w6b4b2jezsof7xz",
+      "title": "配方版本与变更",
+      "liveness": "PASS",
+      "bytes": 112070
+    },
+    {
+      "name": "109-效期看板.png",
+      "uid": "w6b3v1vsyqj5u9a",
+      "title": "效期看板",
+      "liveness": "PASS",
+      "bytes": 115747
+    },
+    {
+      "name": "110-批次追溯.png",
+      "uid": "w6b3tctwuy6wn0d",
+      "title": "批次追溯",
+      "liveness": "PASS",
+      "bytes": 100114
+    }
+  ]
+}

@@ -12,8 +12,9 @@
 
 import { useMemo, useState, useSyncExternalStore, type JSX } from 'react'
 import { Button, Tag } from 'antd-mobile'
-import { Star } from 'lucide-react'
+import { FileClock, Star } from 'lucide-react'
 import { goBackOr, navigate } from '../router.ts'
+import { EmptyState } from '../ui.tsx'
 import { PageNav } from '../PageNav.tsx'
 import type { ReportPayload } from '../protocol.ts'
 import { fileProjections, subscribeWork, updateWorkItem, workOf, workSnapshot, type FileCardRow } from '../workStore.ts'
@@ -139,17 +140,44 @@ export function FilesView(): JSX.Element {
       <section className={css.list} aria-label="文件">
         <h2 className={css.sectionTitle}>AI 生成</h2>
         {generated.length === 0
-          ? <div className={css.sectionCard}><p className={css.sectionEmpty}>近 7 天还没有 AI 生成的报告</p></div>
+          ? (
+            <div className={css.sectionCard}>
+              <EmptyState
+                variant="section"
+                icon={<FileClock size={20} strokeWidth={1.8} />}
+                title="近 7 天还没有 AI 生成的报告"
+                description="对话中的报告卡会归档到这里"
+              />
+            </div>
+          )
           : <div className={css.sectionCard}>{generated.map(row => renderRow(row, true, 'generated'))}</div>}
 
         <h2 className={css.sectionTitle}>最近文件</h2>
         {recent.length === 0
-          ? <div className={css.sectionCard}><p className={css.sectionEmpty}>近 7 天没有新文件</p></div>
+          ? (
+            <div className={css.sectionCard}>
+              <EmptyState
+                variant="section"
+                icon={<FileClock size={20} strokeWidth={1.8} />}
+                title="近 7 天没有新文件"
+                description="报告与登记回执会归档到这里"
+              />
+            </div>
+          )
           : <div className={css.sectionCard}>{recent.map(row => renderRow(row, true, 'recent'))}</div>}
 
         <h2 className={css.sectionTitle}>收藏</h2>
         {pinned.length === 0
-          ? <div className={css.sectionCard}><p className={css.sectionEmpty}>还没有收藏，点亮星标收进这里</p></div>
+          ? (
+            <div className={css.sectionCard}>
+              <EmptyState
+                variant="section"
+                icon={<Star size={20} strokeWidth={1.8} />}
+                title="还没有收藏"
+                description="点亮星标收进这里"
+              />
+            </div>
+          )
           : <div className={css.sectionCard}>{pinned.map(row => renderRow(row, true, 'pinned'))}</div>}
       </section>
     </div>

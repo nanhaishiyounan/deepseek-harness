@@ -1,0 +1,174 @@
+== W7-R1 串行重验完整归档（替换 216B 截断版 w7-b6-w6gates-retry.log，2026-10-04 10:13:43 CST）==
+
+-- b5 链 1/4: w6b5-insp --cleanup --
+w6b5-insp: rehearsal rows + readings + reports + alerts + CAPA aftermath removed
+w6b5-insp: cleanup complete
+cleanup-exit=0
+
+-- b5 链 2/4: w6b5-insp --seed --
+w6b5-insp: rule inspection_fail seeded (route 质检部+quality_lead+planner)
+w6b5-insp: v2 page 检验工作台 exists (kept)
+w6b5-insp: v2 page 出厂检验报告 exists (kept)
+w6b5-insp: rehearsal inspections QI-W6B5-01 (IQC N=300) + QI-W6B5-F1 (OQC N=350) ensured
+w6b5-insp: seed complete
+seed-exit=0
+
+-- b5 链 3/4: w6-b5-shoot.mjs wizard replay（IQC→处置→OQC→报告签发 CDP 无头全流程）--
+[chrome] [6361:2399380:1004/101346.458205:ERROR:chrome/browser/process_singleton_posix.cc:347] Failed to create /private/tmp/w6b5-shot-profile/SingletonLock: File exists (17)
+[chrome] [6361:2399380:1004/101346.461253:ERROR:chrome/app/chrome_main_delegate.cc:562] Failed to create a ProcessSingleton for your profile directory. This means that running multiple instances would start multiple browser processes rather than opening a new window in the existing process. Aborting now to avoid profile corruption.
+live: engine=200 nocobase=200 web=200
+  ✓ liveTriple
+  ✓ queueRendered — tabs=3
+  ✓ queueIdentity — 质检员：qc_inspector
+  ✓ aqlBadge — 批量段281-500 | 样本量字码H | 样本量 n50 | 接收数 Ac3 | 拒收数 Re4 | 严格度normal
+  ✓ doubleTapConfirm — tap1=确认失败 tap2=再点确认失败
+  ✓ photoAttached — photo-attached
+  ✓ verdictBadgeFail — 拒收（严重 1（0收1拒））
+  ✓ resultRejected —
+
+    拒收（不合格）
+
+
+      检验单QI-W6B5-01
+      抽样方案2.5（normal）· 281-500/H → n=50 Ac=3 Re=4
+      缺陷计数严重 1 · 主要 1 · 次要 0
+      处置单QM-NC-2026-0052（四路已走审批引擎）
+
+  ✓ disposalConcession — QM-NC-2026-0052
+  ✓ reconVerdict — inspection|W6B5-QI-W6B5-01-mut6t665-3jphen|1|1|50/3/4|qc_inspector|normal|true ; readings|5 ; alert|inspection_fail|critical|open ;
+  ✓ reconReadings — inspection|W6B5-QI-W6B5-01-mut6t665-3jphen|1|1|50/3/4|qc_inspector|normal|true ; readings|5 ; alert|inspection_fail|critical|open ;
+  ✓ reconAlert — alert|inspection_fail|critical|open
+  ✓ reconRework — after|failed ; nc|QM-NC-2026-0052|rework|closed|approved|RW-2026-0011 ; rworkmo|RW-2026-0011|rework|draft ; rworkmo|RW-2026-0010|rework|draft ; capa|1 ;
+  ✓ idempotentSameKey — "duplicate"
+  ✓ idempotentOtherKeyRefused — 检验单 QI-W6B5-01 已被处理（result=failed；判定 single-shot，重判走处置/再提交批流程）
+  ✓ verdictBadgePass
+  ✓ oqcAccepted
+  ✓ reportNineElements — th=14
+  ✓ reportMissingPlaceholders — 未维护 ×4
+  ✓ reportIssued — 已签发：检验合格证号 QR-2026-0001 / QR-2026-0001
+  ✓ reportPdf — base64 428708B
+  ✓ negNoToken401 — status=401
+  ✓ negBuyer403 — 检验写操作限 质检部/admin（buyer 不在围栏内——角色矩阵）
+  ✓ negReviewerFence — 审核人 buyer 不在质检部（成员：quality_lead/qc_inspector）——出厂检验报告须质检部复核放行
+  ✓ negConcessionNeedsSign — 让步接收（特采）必填：让步理由 + 审批人（让步必审批留痕）
+  ✓ negXssInert — window.__w6b5xss undefined + payload rendered as text
+  ✓ negXssEscapedInReport — {"escaped":true,"noElement":true}
+  ✓ platformEmbed — http://127.0.0.1:13110/insp
+{
+  "generatedAt": "2026-10-04T02:13:47.525Z",
+  "live": {
+    "engine": 200,
+    "nocobase": 200,
+    "web": 200
+  },
+  "assertions": {
+    "liveTriple": true,
+    "queueRendered": true,
+    "queueIdentity": true,
+    "aqlBadge": true,
+    "doubleTapConfirm": true,
+    "photoAttached": true,
+    "verdictBadgeFail": true,
+    "resultRejected": true,
+    "disposalConcession": true,
+    "reconVerdict": true,
+    "reconReadings": true,
+    "reconAlert": true,
+    "reconRework": true,
+    "idempotentSameKey": true,
+    "idempotentOtherKeyRefused": true,
+    "verdictBadgePass": true,
+    "oqcAccepted": true,
+    "reportNineElements": true,
+    "reportMissingPlaceholders": true,
+    "reportIssued": true,
+    "reportPdf": true,
+    "negNoToken401": true,
+    "negBuyer403": true,
+    "negReviewerFence": true,
+    "negConcessionNeedsSign": true,
+    "negXssInert": true,
+    "negXssEscapedInReport": true,
+    "platformEmbed": true
+  },
+  "identity": "质检员：qc_inspector",
+  "submitKey": "W6B5-QI-W6B5-01-mut6t665-3jphen",
+  "disposal": {
+    "nc_code": "QM-NC-2026-0052",
+    "fromPage": "\n  \n    拒收（不合格）\n    \n    \n      检验单QI-W6B5-01\n      抽样方案2.5（normal）· 281-500/H → n=50 Ac=3 Re=4\n      缺陷计数严重 1 · 主要 1 · 次要 0\n      处置单QM-NC-2026-0052（四路已走审批引擎）\n      \n    \n    \n      ← 返回队列\n      \n    \n  "
+  },
+  "replay": {
+    "sameDuplicate": true,
+    "otherRefused": true,
+    "sameMsg": "duplicate",
+    "otherMsg": "检验单 QI-W6B5-01 已被处理（result=failed；判定 single-shot，重判走处置/再提交批流程）"
+  },
+  "oqcOpenWizard": "clicked",
+  "spaErrors": "",
+  "issued": "已签发：检验合格证号 QR-2026-0001",
+  "reportNo": "QR-2026-0001",
+  "pdfBytes": 428708,
+  "negative": {
+    "noTokenStatus": 401,
+    "buyerRefused": true,
+    "buyerRefusedMsg": "检验写操作限 质检部/admin（buyer 不在围栏内——角色矩阵）",
+    "reviewerRefused": true,
+    "reviewerRefusedMsg": "审核人 buyer 不在质检部（成员：quality_lead/qc_inspector）——出厂检验报告须质检部复核放行",
+    "concessionRefused": true,
+    "concessionRefusedMsg": "让步接收（特采）必填：让步理由 + 审批人（让步必审批留痕）",
+    "xssInert": true
+  },
+  "allGreen": true
+}
+replay-exit=0
+
+-- b5 链 4/4: w6b5-insp --assert --
+— 集合与规则
+  ✓ qm_inspections.submit_key 列在位（幂等 CAS） — cols=1
+  ✓ qm_inspections.photo_evidence 列在位（拍照留证） — cols=1
+  ✓ qm_factory_reports 九要素档案列齐全（12 列） — cols=12
+  ✓ 报告编号唯一 + 一检验一报告 唯一索引 — idx=2
+  ✓ inspection_fail 规则行启用 — t
+  ✓ 队列口径有待检单（status=pending ∧ result=pending） — rows=21
+  ✓ 报告明细「单项判定」首行非恒 — 且语义与 pass 一致 — judged=合格 pass=true
+  ✓ 签发报告 reviewer 非空（签发人回填）且渲染按档案回读 — db=quality_lead|QR-2026-0001 render=quality_lead 报告=QR-2026-0001
+— AQL 15 段对拍（psql 直查 × 向导 inspPlan × W2 种子锚点三方一致）
+  ✓ N=200 × AQL 2.5 × normal → n=32 Ac=2 Re=3（直查=32|2|3 向导=32/2/3） — band=151-280/G
+  ✓ N=300 × AQL 2.5 × normal → n=50 Ac=3 Re=4（直查=50|3|4 向导=50/3/4） — band=281-500/H
+  ✓ N=350 × AQL 2.5 × normal → n=50 Ac=3 Re=4（直查=50|3|4 向导=50/3/4） — band=281-500/H
+  ✓ N=2000 × AQL 2.5 × tightened → n=125 Ac=5 Re=6（直查=125|5|6；tightened 需加严供应商，向导侧不虚演）
+— 治理面铺页
+  ✓ v2 页「检验工作台」在质量管理组下
+  ✓ v2 页「出厂检验报告」在质量管理组下
+  ✓ 检验工作台 iframe 块指向引擎 /insp — http://127.0.0.1:13110/insp
+  ✓ member 对 qm_factory_reports view 授权（其他角色只读） — grants=1
+w6b5-insp: assert PASS
+assert-exit=0
+
+-- b3-recall 串行重验 --
+w6b3-recall: --assert 开始
+  ✓ 召回锚点（混料原料批次）就绪 — RM-260920-M1
+w6b3-recall: RC-20261004-001 created — anchor=RM-260920-M1 owner=qc_inspector notified=true fg=5 so=1 cust=1
+  ✓ due_date 昨天日期被拒（三层校验前置腿）
+  ✓ 召回范围快照三清单落库（成品/订单/客户） — fg=5 so=1 cust=1 status=initiated
+  ✓ 冻结范围 = 实时递归 CTE 正向闭包（对账一致） — fg 5==5 cust 1==1
+  ✓ 责任人通知送达（B2 通知面 in-app） — rows=1
+  ✓ 非白名单账号发起被拒（服务端卡口）
+  ✓ 跳步转移被拒（initiated 直接 close=0 行）
+  ✓ 外人流转被拒（buyer 无权 notify）
+  ✓ notify：initiated→notified
+  ✓ execute：notified→executing
+  ✓ close 无记录说明被拒（63 条「记录」动作）
+  ✓ close：executing→closed（含记录说明）
+  ✓ 终态=closed 且关闭日戳落库 — closed|2026-10-04
+  ✓ recall_orders.created_at 非空（审计四件套 a） — null rows=0
+  ✓ 审计流水=状态迁移序列 initiate,notify,execute,close（审计四件套 b/d） — initiate,notify,execute,close
+  ✓ 全表审计行数自洽（每行对应一次状态迁移） — 4 rows
+  ✓ 召回管理页面已铺（渲染证据见截图）
+w6b3-recall: 演练清理 — 单 1、审计级联 4、通知 1
+  ✓ 演练单已清理（台账纯净） — orders=1 audits=4 notices=1
+w6b3-recall: --assert PASS
+b3-assert-exit=0
+
+== R1 串行重验完（时点 2026-10-04 10:14:37 CST）==
+chain-done exit=0

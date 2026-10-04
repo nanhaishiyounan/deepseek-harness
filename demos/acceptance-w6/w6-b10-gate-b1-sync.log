@@ -1,0 +1,33 @@
+w6b1-sync: assert（断言腿）
+— G8 补偿队列基座（wfl_effect_backlog + /healthz backlog_pending）
+  ✓ wfl_effect_backlog 集合存在
+  ✓ /healthz 报告 backlog_pending — backlog_pending=0
+— G2 待办读对账 + 状态回流闭环探针
+  ✓ 引擎待办 = psql open 行数（buyer） — engine=0 psql=0
+  ✓ 闭环探针采购单落库（draft） — PO-W6B1-20261003210100 #94
+  ✓ buyer 送审 → pending — to_state=pending
+  ✓ 待办路由真实主管（非 buyer/admin） — todo=chenliqun
+  ✓ 主管批准 → approved — to_state=approved
+  ✓ 单据状态已回流（approved） — doc_status=approved
+  ✓ 待办已关闭（open=0） — open=0
+— G7 湖仓定时 transfer（nb_pur_orders 快照对账）
+  · transfer: tables=13 skipped=0 rows=445
+  ✓ 湖仓 nb_pur_orders 行数 = psql 实时行数 — lake=31 psql=31
+— G8 补偿队列自动重放（幂等钩子）
+  ✓ pending 行已入队 — so_orders#30 SO-W6B2-SEED
+mrp-run: SO SO-W6B2-SEED 预留 →
+approval-engine: backlog replay ok — so_orders#30 (SO-W6B2-SEED)
+  · drain: replayed=1 done=1 failed=0
+  ✓ 重放后行落 done — status=done
+— G5 服务端发号（守卫集合无重复号；分配路径见 tool-nocobase 单测）
+  ✓ 六个守卫集合零撞号
+  ✓ PO 当年号段连续可续（服务端 max+1 可解析） — max=1060
+— G3/R1 列名防复发（wfl_approval_* schema 对账 + G3 月度投影）
+  ✓ wfl_approval_records schema 可读 — columns=13
+  ✓ acted_at 列存在（时间戳列）
+  ✓ created_at 列确不存在（旧误用列）
+  ✓ acted_at 全表非空 — null=0
+  ✓ ledgerService/DocsView 的 wfl 列名全部在 schema 中 — todos-used=5 records-used=8
+  ✓ 已退役的 created_at 用法零复发
+  ✓ G3 月度投影 API = psql（buyer 本月 submit，date-only 本地月窗） — api=8 psql=8
+w6b1-sync: 全部断言通过

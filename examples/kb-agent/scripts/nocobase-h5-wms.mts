@@ -1395,7 +1395,7 @@ async function ensureV2Page(token: string, spec: TablePageSpec, groupId: number,
 // ─── the 库位图 jsBlock (A route; probe-verified vocabulary) ───
 
 /** The map block: reads wms_bins, renders a zone-grouped CSS grid colored by status with a hover summary. */
-const BIN_MAP_CODE = [
+export const BIN_MAP_CODE = [
   // Probe-verified 2026-09-15: collection access must ride the FlowResource
   // vocabulary (makeResource/setResourceName/setPageSize/refresh/getData);
   // ctx.api.resource(...).list is rejected by the runjs allowlist.
@@ -1411,17 +1411,18 @@ const BIN_MAP_CODE = [
   '  if (!zoneOf[zoneKey]) zoneOf[zoneKey] = [];',
   '  zoneOf[zoneKey].push(bin);',
   '}',
-  'const color = { idle: "#52c41a", occupied: "#1677ff", disabled: "#bfbfbf", frozen: "#ff4d4f" };',
+  'const color = { idle: "var(--w7-positive-bg)", occupied: "var(--w7-informational-bg)", disabled: "var(--w7-neutral-bg)", frozen: "var(--w7-negative-bg)" };',
+  'const ink = { idle: "var(--w7-positive-fg)", occupied: "var(--w7-informational-fg)", disabled: "var(--w7-neutral-fg)", frozen: "var(--w7-negative-fg)" };',
   'const label = { idle: "空闲", occupied: "占用", disabled: "禁用", frozen: "盘点冻结" };',
   'let sections = "";',
   'for (const key of Object.keys(zoneOf).sort()) {',
   '  const rows = zoneOf[key].slice().sort((a, b) => String(a.code).localeCompare(String(b.code)));',
-  '  const cells = rows.map((bin) => `<div title="${bin.code} · ${label[bin.status] || bin.status}${bin.sku_summary ? " · " + bin.sku_summary : ""}" style="width:34px;height:34px;margin:2px;border-radius:6px;background:${color[bin.status] || "#bfbfbf"};color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;cursor:pointer">${String(bin.code || "").split("-").pop()}</div>`).join("");',
+  '  const cells = rows.map((bin) => `<div title="${bin.code} · ${label[bin.status] || bin.status}${bin.sku_summary ? " · " + bin.sku_summary : ""}" style="width:34px;height:34px;margin:2px;border-radius:6px;background:${color[bin.status] || "var(--w7-neutral-bg)"};color:${ink[bin.status] || "var(--w7-neutral-fg)"};font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer">${String(bin.code || "").split("-").pop()}</div>`).join("");',
   '  const counts = { idle: 0, occupied: 0, disabled: 0, frozen: 0 };',
   '  for (const bin of rows) counts[bin.status] = (counts[bin.status] || 0) + 1;',
   '  sections += `<div style="margin:8px 0"><div style="font-weight:600;margin-bottom:4px">${zoneNames[String(key).replace("-", "_")] || key}（空闲 ${counts.idle} / 占用 ${counts.occupied} / 禁用 ${counts.disabled} / 冻结 ${counts.frozen}）</div><div style="display:flex;flex-wrap:wrap">${cells}</div></div>`;',
   '}',
-  'const legend = `<div style="margin-bottom:8px;font-size:12px">图例：<span style="color:#52c41a">■ 空闲</span>　<span style="color:#1677ff">■ 占用</span>　<span style="color:#bfbfbf">■ 禁用</span>　<span style="color:#ff4d4f">■ 盘点冻结</span>（悬停查看存货摘要）</div>`;',
+  'const legend = `<div style="margin-bottom:8px;font-size:12px">图例：<span style="color:var(--w7-positive-fg)">■ 空闲</span>　<span style="color:var(--w7-informational-fg)">■ 占用</span>　<span style="color:var(--w7-neutral-fg)">■ 禁用</span>　<span style="color:var(--w7-negative-fg)">■ 盘点冻结</span>（悬停查看存货摘要）</div>`;',
   'ctx.render(`<div data-wms="bin-map" style="padding:8px">${legend}${sections}</div>`);',
 ].join('\n')
 

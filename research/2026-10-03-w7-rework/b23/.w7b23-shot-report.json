@@ -1,0 +1,384 @@
+{
+  "requested": 53,
+  "ok": 53,
+  "failed": [],
+  "shotOnly": [
+    "w7-b2-15-车间终端",
+    "w7-b2-29-收货终端",
+    "w7-b3-07-质检工作台"
+  ],
+  "shotFails": [],
+  "probes": {
+    "w7-b2-01-BOM管理": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b2-02-BOM工序": {
+      "thead600": true,
+      "theadBg": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b2-03-工作中心": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b2-04-生产订单": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b2-05-排程明细": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b2-06-领料单": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b2-07-退料单": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b2-08-报工记录": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b2-09-完工单": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b2-10-MO执行视图": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b2-11-计划工作台": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b2-12-MRP快照": {
+      "thead600": true,
+      "theadBg": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b2-13-主生产计划": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b2-14-生产订单看板": {
+      "noLegacyHex": true
+    },
+    "w7-b2-16-仓库库区": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "noLegacyHex": true
+    },
+    "w7-b2-17-库位平面图": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b2-18-入库单": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b2-19-出库单": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b2-20-库存查询": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b2-21-批次主数据": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b2-22-盘点管理": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b2-23-移库管理": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b2-24-库存流水": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b2-25-预留管理": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b2-26-补货预警": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b2-27-盘点计划": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b2-28-月度收发存": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b3-01-质检单": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b3-02-检验读数": {
+      "thead600": true,
+      "theadBg": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b3-03-处置看板": {
+      "tagSoft": true,
+      "tagPill": true,
+      "noLegacyHex": true
+    },
+    "w7-b3-04-AQL抽样方案": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b3-05-季度绩效物化": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b3-06-质检看板": {
+      "tagSoft": true,
+      "tagPill": true,
+      "noLegacyHex": true
+    },
+    "w7-b3-08-供应商档案": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "noLegacyHex": true
+    },
+    "w7-b3-09-供应商准入": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b3-10-证照效期预警": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b3-11-审核检查表": {
+      "thead600": true,
+      "theadBg": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b3-12-审核评分录入": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b3-13-绩效评分卡": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b3-14-供应商绩效雷达": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b3-15-整改跟踪": {
+      "tagSoft": true,
+      "tagPill": true,
+      "noLegacyHex": true
+    },
+    "w7-b3-16-员工": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "noLegacyHex": true
+    },
+    "w7-b3-17-部门": {
+      "thead600": true,
+      "theadBg": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b3-18-请假审批": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b3-19-组织架构": {
+      "thead600": true,
+      "theadBg": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b3-20-权限矩阵": {
+      "noLegacyHex": true
+    },
+    "w7-b3-21-资产台账": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "noLegacyHex": true
+    },
+    "w7-b3-22-维保记录": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "numRightTnum": true,
+      "noLegacyHex": true
+    },
+    "w7-b3-23-维保服务商": {
+      "thead600": true,
+      "theadBg": true,
+      "tagSoft": true,
+      "tagPill": true,
+      "noLegacyHex": true
+    },
+    "w7-b3-24-分类维护": {
+      "thead600": true,
+      "theadBg": true,
+      "noLegacyHex": true
+    }
+  },
+  "verdicts": {
+    "table": {
+      "pass": 44,
+      "fail": []
+    },
+    "form": {
+      "pass": 6,
+      "fail": []
+    }
+  }
+}

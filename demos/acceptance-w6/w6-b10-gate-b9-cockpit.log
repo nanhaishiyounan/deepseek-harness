@@ -1,0 +1,34 @@
+== W6-B9 assert: cockpit caliber ==
+  ✓ 营收卡 = psql 发货口径直算 — 80920 vs 80920
+  ✓ 订单数卡 = psql 直算 — 3 vs 3
+  ✓ 逾期应收卡 = psql B2 口径直算 — 18800 vs 18800
+  ✓ 账龄分桶合计 = 逾期应收卡 — 18800 vs 18800
+  ✓ 九步链路齐备 — 9 步
+  ✓ 非 finance 读到脱敏明细 — tops/aging masked=true
+== W6-B9 assert: aging buckets vs psql ==
+  ✓ 0-30 桶单数 = psql 直算 — 0 vs 0
+== W6-B9 assert: statement equation + idempotency ==
+  ✓ 存在已生成对账单 — ST-2026-0001
+  ✓ 四段等式 期初+发货−回款=期末 — 80880+0−0=80880
+  ✓ 重复生成返回同一份（幂等） — ST-2026-0001 duplicate=true
+== W6-B9 assert: append-only + state machine negatives ==
+  ✓ 跟进记录 UPDATE 被触发器拒绝
+  ✓ sales_rep 财务写被围栏拒
+  ✓ open 任务直接关闭被状态机拒
+== W6-B9 assert: three-way match + pay gate ==
+  ✓ 三单差异已分类落表 — open=6 types=price_diff,no_receipt,qty_short
+  ✓ 未收货付款被拦截（负例） — 拦截事实：
+  ✓ 页面块 经营总览（w6b9-cockpit）在 — 1 行
+  ✓ 页面块 财务工作台（w6b9-fin-wb）在 — 1 行
+  ✓ 页面块 发票匹配（w6b9-match-wb）在 — 1 行
+  ✓ 对账单行 ≥1（demo 落库） — 1 份
+  ✓ 催收任务/记录落库 — 3 任务 / 6 记录
+  ✓ 催收任务审计触发器在写 — 9 行 ≥ 任务数 3
+== W6-R5 assert: print link / KPI contract / followup dedup / AP mirror ==
+  ✓ 打印入口统一 printUrl()（含 token，两处调用） — 定义 true / 调用 2 处（列表 <a> + 生成后 window.open）
+  ✓ 列表打印链接不再裸拼（无 token 401 断链根因已除） — href 走 printUrl()
+  ✓ KPI 渲染契约（scale×100 + % 后缀，formatKpi 统一） — 契约表 true / mini 走 formatKpi true
+  ✓ 渲染值 = 快照值 × scale（1 → 100%） — lot_pass_rate 快照 1 → 渲染 100%
+  ✓ 跟进 client_msg_id 去重（重放恰一条） — 首次 record #7 / 重放 duplicate=true 同 id=7 / 行数 6→7
+  ✓ 驾驶舱 payload 含 AP 账龄镜像（切桶控件数据面） — 5 桶 / 到期合计 0
+w6b9-cockpit: all asserts green

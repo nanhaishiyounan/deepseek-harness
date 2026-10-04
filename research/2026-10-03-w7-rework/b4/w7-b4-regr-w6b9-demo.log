@@ -1,0 +1,14 @@
+w6b9-cockpit: 3 dunning candidate(s) from open ar_overdue alerts
+w6b9-cockpit: dunning task DUN-2026-0001 created from alert #23 by finance (L2 正式催收, notified 2)
+  DUN-2026-0001 ← 预警 #23
+w6b9-cockpit: dunning task DUN-2026-0002 created from alert #22 by finance (L1 提醒, notified 2)
+  DUN-2026-0002 ← 预警 #22
+w6b9-cockpit: dunning task DUN-2026-0003 created from alert #24 by finance (L1 提醒, notified 2)
+  DUN-2026-0003 ← 预警 #24
+  跟进演示落痕：任务 #1 两条记录（reached + promised）
+  对账单 ST-2026-0001：客户 漯河宏发食品有限公司 期初 80880 + 发货 0 − 回款 0 = 期末 80880
+  三单初扫：open=6 resolved=0 by_type={"price_diff":4,"qty_short":1,"no_receipt":1}
+w6b9-cockpit: 经营总览 JSBlock exists (w6b9-cockpit kept)
+w6b9-cockpit: 财务工作台 JSBlock exists (w6b9-fin-wb kept)
+w6b9-cockpit: 发票匹配 JSBlock exists (w6b9-match-wb kept)
+w6b9-cockpit: demo complete

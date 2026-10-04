@@ -8,6 +8,7 @@
 import type {
   AgentPresetEntry, RequestPayload, SessionSearchItem, SessionSummary,
 } from '@deepseek-ai/dsh-host-apiproxy/api'
+import { loadIdentity } from './auth.ts'
 import { rpc } from './rpc.ts'
 import type { FoldEvent } from './fold.ts'
 import { colleagueOf, type Welcome } from './colleagues.ts'
@@ -127,17 +128,39 @@ export function pendingPresetOf(sessionId: string): string | undefined {
 }
 
 /**
- * Send one user message (queue mode).
+ * Send one user message (queue mode). The gateway session token
+ * (`authToken`, auto-attached by rpc) is what the host derives the acting
+ * user from — the audit identity nb_create/nb_approve stamp and gate on; the
+ * display profile rides `loginUser` for the opening stamp only.
+ * `clientMsgId` is the send's idempotency key: a retry (the offline outbox)
+ * presenting the same id cannot double-dispatch server-side.
  * @param sessionId - target session.
  * @param text - the message text.
+ * @param clientMsgId - the caller's idempotency key, when this send is retryable.
  */
-export async function promptSession(sessionId: string, text: string): Promise<void> {
+export async function promptSession(sessionId: string, text: string, clientMsgId?: string): Promise<void> {
+  const identity = loadIdentity()
   await rpc('session.prompt', {
     sessionId: sessionOf(sessionId),
     mode: 'queue',
     content: [{ type: 'text', text }],
     clientTimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    ...(clientMsgId === undefined ? {} : { clientMsgId }),
+    ...(identity === undefined ? {} : { loginUser: { username: identity.username, nickname: identity.nickname } }),
   })
+}
+
+/**
+ * The idempotency key for one outbound user message: hash of the acting
+ * user, the text, the wall clock, and a per-call nonce — stable across the
+ * send's retries, unique per composed message.
+ * @param actor - the acting username (or '' when signed out).
+ * @param text - the message text.
+ * @returns the client-side message id.
+ */
+export function newClientMsgId(actor: string, text: string): string {
+  const nonce = crypto.randomUUID().slice(0, 8)
+  return `m_${actor}_${text.length}_${Date.now().toString(36)}_${nonce}`
 }
 
 /**

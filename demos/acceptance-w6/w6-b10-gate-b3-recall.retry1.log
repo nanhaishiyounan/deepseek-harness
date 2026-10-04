@@ -1,0 +1,38 @@
+w6b3-recall: --assert 开始
+  ✓ 召回锚点（混料原料批次）就绪 — RM-260920-M1
+w6b3-recall: RC-20261004-001 created — anchor=RM-260920-M1 owner=qc_inspector notified=true fg=5 so=1 cust=1
+  ✓ due_date 昨天日期被拒（三层校验前置腿）
+  ✓ 召回范围快照三清单落库（成品/订单/客户） — fg=5 so=1 cust=1 status=initiated
+  ✓ 冻结范围 = 实时递归 CTE 正向闭包（对账一致） — fg 5==5 cust 1==1
+  ✓ 责任人通知送达（B2 通知面 in-app） — rows=1
+  ✓ 非白名单账号发起被拒（服务端卡口）
+  ✓ 跳步转移被拒（initiated 直接 close=0 行）
+  ✓ 外人流转被拒（buyer 无权 notify）
+  ✓ notify：initiated→notified
+  ✓ execute：notified→executing
+  ✓ close 无记录说明被拒（63 条「记录」动作）
+  ✓ close：executing→closed（含记录说明）
+  ✓ 终态=closed 且关闭日戳落库 — closed|2026-10-04
+  ✓ recall_orders.created_at 非空（审计四件套 a） — null rows=0
+  ✓ 审计流水=状态迁移序列 initiate,notify,execute,close（审计四件套 b/d） — initiate,notify,execute,close
+  ✓ 全表审计行数自洽（每行对应一次状态迁移） — 4 rows
+node:internal/deps/undici/undici:13510
+      Error.captureStackTrace(err);
+            ^
+
+TypeError: fetch failed
+    at node:internal/deps/undici/undici:13510:13
+    at async call (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/nocobase-flow-page-lib.mts:50:20)
+    at async listRoutes (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/nocobase-flow-page-lib.mts:144:19)
+    at async assertRecall (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/w6b3-recall.mts:634:18)
+    at async main (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/w6b3-recall.mts:681:3)
+    at async <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/w6b3-recall.mts:684:1) {
+  [cause]: Error: read ECONNRESET
+      at TCP.onStreamRead (node:internal/stream_base_commons:216:20) {
+    errno: -54,
+    code: 'ECONNRESET',
+    syscall: 'read'
+  }
+}
+
+Node.js v22.19.0

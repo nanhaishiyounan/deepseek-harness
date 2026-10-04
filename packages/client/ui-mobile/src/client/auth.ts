@@ -1,26 +1,31 @@
 /**
- * Demo-grade local auth for the mobile page: a phone + code handshake that
- * accepts any six-digit code (the prototype's mock verification stance) and
- * persists the identity in localStorage. Structure kept ready for a real
- * channel: `verifyCode` is the single seam a production implementation
- * replaces, and the stored record already carries the login timestamp a real
- * session expiry would read. Single-tenant deployments stay protected by the
- * host's disk-level access control, exactly like the PC page.
+ * Mobile auth over the real NocoBase account system: the login handshake is
+ * `nocobase.signIn` (the gateway proxies NocoBase's basic authenticator, so
+ * the rehearsal role accounts verify with their real passwords), and the
+ * returned profile plus gateway session token persist in localStorage as the
+ * page identity. Every session prompt and nocobase read re-carries the token
+ * (`authToken`) — the host derives the acting user from it server-side and
+ * stamps/gates the nb_* tools on that identity. Records from the retired
+ * any-code demo channel, and identities without a token (pre-credential
+ * shapes), fail the shape check and read as logged out.
  */
 
 /** localStorage key carrying the mobile identity. */
 const AUTH_STORAGE_KEY = 'dsh-mobile-auth'
 
-/** The persisted mobile identity. */
+/** The persisted mobile identity (a real NocoBase account + its gateway session). */
 export interface MobileIdentity {
-  readonly phone: string
-  readonly name: string
+  readonly username: string
+  readonly nickname: string
+  /** The gateway session token from nocobase.signIn (the credential the wire re-carries). */
+  readonly token: string
   readonly loggedAt: number
 }
 
 /**
  * Read the persisted identity, if any.
- * @returns the stored identity, or undefined when absent or malformed.
+ * @returns the stored identity, or undefined when absent, malformed, from the
+ * retired phone+code demo shape, or carrying no session token (re-login).
  */
 export function loadIdentity(): MobileIdentity | undefined {
   const raw = localStorage.getItem(AUTH_STORAGE_KEY)
@@ -29,10 +34,18 @@ export function loadIdentity(): MobileIdentity | undefined {
     const parsed: unknown = JSON.parse(raw)
     if (typeof parsed !== 'object' || parsed === null) return undefined
     const record = parsed as Record<string, unknown>
-    if (typeof record['phone'] !== 'string' || typeof record['name'] !== 'string' || typeof record['loggedAt'] !== 'number') {
+    if (typeof record['username'] !== 'string' || record['username'] === ''
+      || typeof record['nickname'] !== 'string' || record['nickname'] === ''
+      || typeof record['token'] !== 'string' || record['token'] === ''
+      || typeof record['loggedAt'] !== 'number') {
       return undefined
     }
-    return { phone: record['phone'], name: record['name'], loggedAt: record['loggedAt'] }
+    return {
+      username: record['username'],
+      nickname: record['nickname'],
+      token: record['token'],
+      loggedAt: record['loggedAt'],
+    }
   } catch {
     return undefined
   }
@@ -49,18 +62,4 @@ export function saveIdentity(identity: MobileIdentity): void {
 /** Clear the identity (退出登录). */
 export function clearIdentity(): void {
   localStorage.removeItem(AUTH_STORAGE_KEY)
-}
-
-/**
- * Verify one submitted code against the requested phone.
- * @param phone - the phone number the code was issued for.
- * @param code - the submitted six-digit code.
- * @returns the identity to persist.
- * @throws {Error} when the code is not six digits.
- */
-export function verifyCode(phone: string, code: string): MobileIdentity {
-  if (!/^\d{6}$/.test(code)) {
-    throw new Error('验证码为 6 位数字（演示通道：任意 6 位数字均可）')
-  }
-  return { phone, name: '业务员', loggedAt: Date.now() }
 }

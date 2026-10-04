@@ -1,0 +1,8 @@
+w6-r6-03: keeper identity=keeper
+w6-r6-03: stat-card canvases=0 emptyCards(请配置图表)=8 tableRows=20 NoPermissionsToast=true
+w6-r6-03: 4xx responses (4 uniq):
+  401 /api/auth:check
+  401 /api/aiEmployees:listByUser
+  401 /api/aiConversations:unreadCounts
+  403 /api/charts:queryData
+w6-r6-03: w6-r6-03-member-charts-before.png written

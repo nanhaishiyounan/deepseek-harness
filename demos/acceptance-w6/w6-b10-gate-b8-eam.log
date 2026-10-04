@@ -1,0 +1,44 @@
+— live 三联与 Andon 面
+  ✓ 引擎 :13110 /healthz 200 — status=200
+  ✓ NocoBase :13000 app:getInfo 200 — status=200
+  ✓ web :3080 200 — status=200
+  ✓ cards.html 维护请求按钮已启用（B4 占位接活） — bytes=24329
+— Andon 维护请求（卡片流会话 → eam 维保工单）
+  （演练载体：MO-W6B4-FLOW 工序3 @ WC#2）
+  ✓ 空故障说明被拒（400） — status=400
+  ✓ POST /andon/maintenance 生成维保工单 — code=WO-2026-0019
+  ✓ 工单 psql 对账：source=andon/status=new/发起人=会话推导 shop_lead — andon|new|shop_lead|EQ-JJ-01|P1
+  ✓ 设备按工序工作中心自动挂接（含 XSS 载荷原文入库——渲染面 esc 防线在日历块） — asset=EQ-JJ-01 priority=P1
+  ✓ 关联设备态翻转为维修（repair） — asset=EQ-JJ-01 status=repair
+  ✓ 非车间部门会话被部门围栏拒（403） — status=403
+— 维保工单状态机 new→accepted→done→closed
+  ✓ 跨态 close 被状态机拒（409 带现态事实） — 工单 WO-2026-0019 状态为 new，close 需要状态 done（状态机 new→accepted→don
+  ✓ buyer 越权受理被围栏拒（403） — 维保处理限 设备/生产/admin 操作（buyer 不在围栏内）
+  ✓ 未知动作被拒（400） — status=400
+  ✓ 未受理先 done 被状态机拒 / 空说明被拒 — done@new=400 无说明=400
+  ✓ 受理成功（accepted_by=shop_lead） — WO-2026-0019
+  ✓ 完成维修（done_note+actual_min 落库） — WO-2026-0019
+  ✓ 非发起人验收被拒（403） — status=403
+  ✓ 发起人验收关闭成功 — WO-2026-0019
+  ✓ 闭环 psql 对账：closed/closed_by=shop_lead/维修说明在 — closed|shop_lead|更换传送带轴承并复测 Fe 试块通过
+— 预防性维保引擎
+  ✓ POST /eam/scan-plans 可手动触发（生产围栏） — {"ok":true,"actor":"shop_lead","created":0,"advanced":0}
+  ✓ 重复扫描零生成（dedup_key 幂等） — created=0
+  ✓ 计划工单在库（≥1，来源=plan） — rows=1
+  ✓ 逾期计划 next_due_date 已前推（> 今天） — 2026-11-01 vs 2026-10-04
+— B2 规则引擎两路新预警
+  ✓ POST /scan-alerts 扫描通过 — status=200
+  ✓ 金检机校准过期 → calibration_due critical（GB 14881 强检） — critical|CB-JJ-26Q3
+  ✓ 计量预警分级：critical≥2（过期JJ+3天pH）/ warning≥1（14天WD） — 2|1
+  ✓ 维保逾期预警出现（预防性工单计划日已过） — rows=14
+  ✓ 新预警 in-app 通知已送达（notified_severity 已盖章） — rows=17
+— APS what-if（隔离不落库）与 promote
+  ✓ /aps/load 瓶颈含 W2-B6 超载桶（1200 分 > 480 分/日）+ 占用 MO 归因 — 1200|480|mos=1
+  ✓ 非法加班值被拒（400，0-960 上限） — status=400
+  ✓ 加班 960 分场景：超载解除 ≥1 且日期移动有据（本轮实测或首轮留痕） — cleared=1 本轮moved=0 首轮moved=2
+  ✓ 模拟零写入（mfg_order_operations 快照 md5 前后一致） — ddf7b626… vs ddf7b626…
+  ✓ buyer 应用被围栏拒（403 计划部/admin） — status=403
+  ✓ planner 应用成功 + 差异报告留存（aps_whatif_runs +1） — applied=0 runs=14→15
+  ✓ W2-B6 开放工序重排至 ≥ 今天（原 2026-09-28 过期日） — 2026-10-05 vs 2026-10-04
+  ✓ run 行 actor=planner 且 delta 留痕 — planner|0
+w6b8-assert: PASS（全部腿绿）

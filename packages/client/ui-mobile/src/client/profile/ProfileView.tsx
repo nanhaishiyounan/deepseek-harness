@@ -21,10 +21,12 @@ import { navigate } from '../router.ts'
 import { createSession } from '../sessionsService.ts'
 import { currentRunMode, setRunMode, type RunMode } from '../runMode.ts'
 import { clearDemoData } from '../demoSeed.ts'
+import { logClientError } from '../hooks.ts'
+import { myMonthlyRegistrations } from '../ledgerService.ts'
 import { subscribeWork, todayStats, workSnapshot } from '../workStore.ts'
 import { pendingReviewSessions } from '../draftStore.ts'
 import { listSessions, readHistory } from '../sessionsService.ts'
-import { foldHistory } from '../fold.ts'
+import { foldHistory, type FoldEvent } from '../fold.ts'
 import type { SubmitReceiptPayload } from '../protocol.ts'
 import css from './profile.module.css'
 
@@ -54,7 +56,7 @@ const SHORTCUTS: ReadonlyArray<{ readonly label: string; readonly preset: string
 
 /** The me tab. */
 export function ProfileView({ identity, dark, onDarkChange, onLogout }: ProfileViewProps): JSX.Element {
-  const [monthlyCount, setMonthlyCount] = useState<number | undefined>(undefined)
+  const [monthlyCount, setMonthlyCount] = useState<number | undefined | 'error'>(undefined)
   const [recent, setRecent] = useState<readonly ReceiptStripRow[] | undefined>(undefined)
   const [starting, setStarting] = useState(false)
   const pendingCount = useMemo(() => pendingReviewSessions().size, [])
@@ -71,41 +73,51 @@ export function ProfileView({ identity, dark, onDarkChange, onLogout }: ProfileV
     return () => { alive = false }
   }, [])
 
-  // 本月登记 + 最近回执: fold the newest fill-assistant sessions (derived
-  // from the durable log, 01 ④f-2); this month's fences count, and the strip
-  // leads with the newest receipts (sessions list newest-first, so the head
-  // of the collected order is the latest three, newest first).
+  // 本月登记 (W6-B1 G3): the server projection — the month's wfl submit
+  // records by the signed-in user (myMonthlyRegistrations), reconciling with
+  // NocoBase across devices and surviving a cleared local store. The recent
+  // receipts strip keeps folding the durable session log (the strip links
+  // back into chats). The two reads settle independently (W6-R1 allSettled):
+  // a failed server projection no longer takes the local receipts strip down
+  // with it, and each failed leg leaves its own error trace.
   useEffect(() => {
     let alive = true
-    void listSessions().then(async (sessions) => {
-      const monthStart = new Date()
-      monthStart.setDate(1)
-      monthStart.setHours(0, 0, 0, 0)
-      const rows = sessions
-        .filter(row => row.agentPreset === 'mobile-form-assistant' || row.agentPreset === undefined)
-        .slice(0, 10)
-      const windows = await Promise.all(rows.map(async row => [row.sessionId, await readHistory(row.sessionId).catch(() => [])] as const))
+    void (async () => {
+      const [countLeg, receiptsLeg] = await Promise.allSettled([
+        myMonthlyRegistrations(identity.username),
+        listSessions().then(async (sessions) => {
+          const rows = sessions
+            .filter(row => row.agentPreset === 'mobile-form-assistant' || row.agentPreset === undefined)
+            .slice(0, 10)
+          const windowOf = async (row: { sessionId: string }): Promise<readonly [string, readonly FoldEvent[]]> =>
+            [row.sessionId, await readHistory(row.sessionId).catch(() => [])]
+          const windows = await Promise.all(rows.map(windowOf))
+          const receipts: ReceiptStripRow[] = []
+          for (const [sessionId, events] of windows) {
+            for (const item of foldHistory(events).items) {
+              if (item.kind !== 'receipt') continue
+              receipts.push({ sessionId, payload: item.payload })
+            }
+          }
+          return receipts.slice(0, 3)
+        }),
+      ])
       if (!alive) return
-      let count = 0
-      const receipts: ReceiptStripRow[] = []
-      for (const [sessionId, events] of windows) {
-        for (const item of foldHistory(events).items) {
-          if (item.kind !== 'receipt') continue
-          if (item.time >= monthStart.getTime()) count += 1
-          receipts.push({ sessionId, payload: item.payload })
-        }
+      if (countLeg.status === 'fulfilled') {
+        setMonthlyCount(countLeg.value)
+      } else {
+        logClientError('ledger.monthly', countLeg.reason)
+        setMonthlyCount('error')
       }
-      setMonthlyCount(count)
-      setRecent(receipts.slice(0, 3))
-    }, () => {
-      // A failed read leaves the metric unrevealed rather than wrong.
-      if (alive) {
-        setMonthlyCount(undefined)
-        setRecent(undefined)
+      if (receiptsLeg.status === 'fulfilled') {
+        setRecent(receiptsLeg.value)
+      } else {
+        logClientError('ledger.recent', receiptsLeg.reason)
+        setRecent([])
       }
-    })
+    })()
     return () => { alive = false }
-  }, [])
+  }, [identity.username])
 
   const startShortcut = async (preset: string): Promise<void> => {
     /* v8 ignore next -- the disabled shortcut buttons screen the busy re-entry arm. */
@@ -125,7 +137,7 @@ export function ProfileView({ identity, dark, onDarkChange, onLogout }: ProfileV
   const confirmLogout = (): void => {
     void Dialog.confirm({
       title: '退出登录',
-      content: '退出后需要重新验证手机号；会话与业务数据保留在服务端。',
+      content: '退出后需重新输入账号密码登录；会话与业务数据保留在服务端。',
       confirmText: '退出',
       cancelText: '取消',
       getContainer: portalContainer,
@@ -140,17 +152,17 @@ export function ProfileView({ identity, dark, onDarkChange, onLogout }: ProfileV
       </header>
 
       <section className={css.userCard} aria-label="身份卡">
-        <Avatar background="var(--dshm-user-grad)" acronym="我" size={54} />
+        <Avatar background="var(--dshm-primary)" acronym="我" size={54} />
         <div className={css.userMain}>
-          <span className={css.userName}>{identity.name}</span>
-          <span className={css.userMeta}>{identity.phone} · 演示租户 · 管理员</span>
+          <span className={css.userName}>{identity.nickname}</span>
+          <span className={css.userMeta}>{identity.username} · 真实账号 · NocoBase 账号体系</span>
         </div>
       </section>
 
       <section className={css.metrics} aria-label="本月台账">
         <div className={css.metricRow}>
           <span className={css.metricLabel}>本月登记</span>
-          <span className={css.metricValue}>{monthlyCount === undefined ? '—' : `${String(monthlyCount)} 条`}</span>
+          <span className={css.metricValue}>{monthlyCount === undefined ? '…' : monthlyCount === 'error' ? '读取失败' : `${String(monthlyCount)} 条`}</span>
         </div>
         <div className={css.metricDivider} aria-hidden="true" />
         <div className={css.metricRow}>
@@ -211,10 +223,10 @@ export function ProfileView({ identity, dark, onDarkChange, onLogout }: ProfileV
             size="small"
             className={css.shortcut}
             style={{
-              '--background-color': 'var(--dshm-primary-soft)',
-              '--text-color': 'var(--dshm-primary)',
-              '--border-color': 'transparent',
-              '--border-radius': '999px',
+              '--background-color': 'var(--dshm-card)',
+              '--text-color': 'var(--dshm-foreground)',
+              '--border-color': 'var(--dshm-border)',
+              '--border-radius': 'var(--dshm-radius-pill)',
             }}
             disabled={starting}
             onClick={() => { void startShortcut(shortcut.preset) }}

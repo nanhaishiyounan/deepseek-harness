@@ -1,0 +1,14 @@
+— ⑧ 处理动作状态流 + 三元转换断言（越权/越态拒绝 + 重开二轮）
+  ✓ 非路由用户（keeper 认领账期预警）被拒 — moved=0
+  ✓ 未认领直接关闭被拒（open×resolve 无三元） — moved=0
+  ✓ finance 认领账期预警成功 — moved=1
+  ✓ 认领落库 owner=finance status=acknowledged — finance|acknowledged
+  ✓ 路由到但非认领人关闭被拒（acknowledged×resolve×routed 无三元） — moved=0
+  ✓ 认领人关闭成功 — moved=1
+  ✓ 关闭留痕 resolved_by=finance — resolved|finance
+  ✓ 已关闭行再认领被拒（resolved×claim 无三元） — moved=0
+w6b2-rules: scan pass — expiry+0/~4/-0 cert_due+0/~3/-0 ar_overdue+0/~3/-0 quality_abnormal+0/~3/-0 notified=1
+  ✓ 重扫重开 reopen_count=基线+1（非 NULL、非仅状态翻转） — open|5（基线 4）
+  ✓ 重开后重新通知 finance — 10→11
+  ✓ 二轮 认领→关闭 成功 — claim=1 resolve=1
+— ⑨ 预警中心两页在库（组+两 flowPage+表格块+认领意图表单+回调 workflow）

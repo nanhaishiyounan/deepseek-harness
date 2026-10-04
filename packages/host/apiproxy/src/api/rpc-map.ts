@@ -101,6 +101,8 @@ export interface RpcMethodMap {
   'nocobase.list': NocobaseApi['list']
   'nocobase.get': NocobaseApi['get']
   'nocobase.update': NocobaseApi['update']
+  'nocobase.alertAct': NocobaseApi['alertAct']
+  'nocobase.signIn': NocobaseApi['signIn']
   'goal.create': GoalsApi['create']
   'goal.edit': GoalsApi['edit']
   'goal.pause': GoalsApi['pause']

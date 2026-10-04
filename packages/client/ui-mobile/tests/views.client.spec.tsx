@@ -60,6 +60,10 @@ function stubGateway(routes: Record<string, unknown>): void {
     const produced = typeof route === 'function'
       ? await (route as (payload: Record<string, unknown>) => Promise<unknown>)(body.payload ?? {})
       : route
+    if (produced instanceof Error) {
+      const refusal = JSON.stringify({ rpcId: body.rpcId, result: { ok: false, error: { message: produced.message } } })
+      return new Response(refusal, { status: 200 })
+    }
     const value = produced
     return new Response(JSON.stringify({ rpcId: body.rpcId, result: { ok: true, value } }), { status: 200 })
   })
@@ -74,6 +78,15 @@ function userMessage(seq: number, text: string, sourceKind = 'user'): FoldEvent 
 /** One assistant message event wrapping the message content. */
 function assistantMessage(seq: number, text: string, time = 1): FoldEvent {
   return { type: 'assistant/message', seq, time, data: { message: { content: [{ type: 'text', text }] } } }
+}
+
+/** The nb_create call+result pair a submit_receipt fence verifies against (W6-B1 ①). */
+function nbCreateLanded(seq: number, collection: string, rowId: string | number): { event: FoldEvent }[] {
+  const callId = `nc-${String(seq)}`
+  return [
+    { event: { type: 'tool/call', seq, time: 1, data: { callId, name: 'nb_create', arguments: JSON.stringify({ collection }) } } },
+    { event: { type: 'tool/result', seq: seq + 0.5, time: 1, data: { message: { content: [{ toolCallId: callId, isError: false, content: [{ type: 'text', text: `已在 ${collection} 创建第 ${String(rowId)} 行：\n- id: ${String(rowId)}` }] }] } } } },
+  ]
 }
 
 const EMPTY_HISTORY = { events: [] as { event: FoldEvent }[] }
@@ -115,63 +128,69 @@ describe('mobile UI atoms', () => {
 })
 
 describe('mobile login gate', () => {
-  it('renders the brand defaults with the submit disabled until both fields hold', () => {
+  /** Fill the account + password card. */
+  const fill = (view: ReturnType<typeof render>, account: string, password: string): void => {
+    fireEvent.change(view.container.querySelector('input[autocomplete="username"]') as HTMLInputElement, { target: { value: account } })
+    fireEvent.change(view.container.querySelector('input[type="password"]') as HTMLInputElement, { target: { value: password } })
+  }
+
+  it('renders the brand defaults and toasts on an empty submit without dialing the gateway', async () => {
+    stubGateway({ 'nocobase.signIn': { username: 'buyer', nickname: '采购员·蔡俊' } })
     const view = render(<LoginView onLoggedIn={() => {}} />)
     expect(screen.getByText('食链通 · AI 员工')).toBeTruthy()
     expect(screen.getByText('食品企业移动端 · 单据与问答')).toBeTruthy()
-    const phone = view.container.querySelector('input[inputmode="tel"]') as HTMLInputElement
-    const code = view.container.querySelector('input[inputmode="numeric"]') as HTMLInputElement
     const submit = screen.getByRole('button', { name: '登录' }) as HTMLButtonElement
-    expect(phone.value).toBe('13800138000')
-    expect(submit.disabled).toBe(true)
-    fireEvent.change(code, { target: { value: '123456' } })
     expect(submit.disabled).toBe(false)
-    fireEvent.change(phone, { target: { value: '' } })
-    expect(submit.disabled).toBe(true)
+    fireEvent.click(submit)
+    await waitFor(() => { expect(screen.getAllByText('请输入账号和密码').length).toBeGreaterThan(0) })
+    expect(calls).toEqual([])
+    fill(view, 'buyer', '')
+    fireEvent.click(submit)
+    await waitFor(() => { expect(screen.getAllByText('请输入账号和密码').length).toBeGreaterThan(0) })
+    expect(calls).toEqual([])
+    fill(view, 'buyer', 'Buyer#2026')
+    expect(submit.disabled).toBe(false)
   })
 
-  it('runs the 60-second countdown once and recovers the button at zero', () => {
-    vi.useFakeTimers()
-    const view = render(<LoginView onLoggedIn={() => {}} />)
-    const codeButton = screen.getByRole('button', { name: '获取' })
-    fireEvent.click(codeButton)
-    expect(screen.getByRole('button', { name: '60s' }).hasAttribute('disabled')).toBe(true)
-    act(() => { vi.advanceTimersByTime(61_000) })
-    expect(screen.getByRole('button', { name: '获取' }).hasAttribute('disabled')).toBe(false)
-    view.unmount()
-  })
-
-  it('shows the verify failure, clears it on edit, and logs the identity in', () => {
+  it('shows the server refusal, clears it on edit, and logs the signed-in profile in', async () => {
+    stubGateway({
+      'nocobase.signIn': (payload: Record<string, unknown>) => payload['password'] === 'wrong'
+        ? Promise.reject(new Error('用户名/邮箱或密码有误，请重新输入'))
+        : Promise.resolve({ username: 'buyer', nickname: '采购员·蔡俊' }),
+    })
     const loggedIn = vi.fn()
     const view = render(<LoginView onLoggedIn={loggedIn} />)
-    const phone = view.container.querySelector('input[inputmode="tel"]') as HTMLInputElement
-    const code = view.container.querySelector('input[inputmode="numeric"]') as HTMLInputElement
-    fireEvent.change(code, { target: { value: '12345' } })
+    fill(view, 'buyer', 'wrong')
     fireEvent.click(screen.getByRole('button', { name: '登录' }))
-    expect(screen.getByRole('alert').textContent).toContain('6 位数字')
-    fireEvent.change(phone, { target: { value: '13900139000' } })
-    expect(screen.queryByRole('alert')).toBeNull()
-    fireEvent.change(code, { target: { value: '123456' } })
+    await waitFor(() => { expect(screen.getByRole('alert').textContent).toContain('密码有误') })
+    expect(loggedIn).not.toHaveBeenCalled()
+    const pass = view.container.querySelector('input[type="password"]') as HTMLInputElement
+    fireEvent.change(pass, { target: { value: 'Buyer#2026' } })
+    await waitFor(() => { expect(screen.queryByRole('alert')).toBeNull() })
     fireEvent.click(screen.getByRole('button', { name: '登录' }))
-    expect(loggedIn).toHaveBeenCalledWith(expect.objectContaining({ phone: '13900139000', name: '业务员' }))
-    expect(loadIdentityName()).toBe('业务员')
+    await waitFor(() => { expect(loggedIn).toHaveBeenCalledWith(expect.objectContaining({ username: 'buyer', nickname: '采购员·蔡俊' })) })
+    expect(loadIdentityName()).toBe('采购员·蔡俊')
   })
 })
 
 function loadIdentityName(): string | undefined {
   const raw = localStorage.getItem('dsh-mobile-auth')
-  return raw === null ? undefined : (JSON.parse(raw) as { name?: string }).name
+  return raw === null ? undefined : (JSON.parse(raw) as { nickname?: string }).nickname
 }
 
 describe('mobile app shell', () => {
   it('logs in through the gate onto the home tab from a cold identity', async () => {
-    stubGateway({ 'agentPreset.list': { presets: [] }, 'session.list': { items: [] } })
+    stubGateway({
+      'nocobase.signIn': { username: 'buyer', nickname: '采购员·蔡俊' },
+      'agentPreset.list': { presets: [] },
+      'session.list': { items: [] },
+    })
     render(<App />)
-    const code = document.querySelector('input[inputmode="numeric"]') as HTMLInputElement
-    fireEvent.change(code, { target: { value: '123456' } })
+    fireEvent.change(document.querySelector('input[autocomplete="username"]') as HTMLInputElement, { target: { value: 'buyer' } })
+    fireEvent.change(document.querySelector('input[type="password"]') as HTMLInputElement, { target: { value: 'Buyer#2026' } })
     fireEvent.click(screen.getByRole('button', { name: '登录' }))
-    await waitFor(() => { expect(screen.getAllByText(/今日台账/).length).toBeGreaterThan(0) })
-    expect(localStorage.getItem('dsh-mobile-auth')).toContain('业务员')
+    await waitFor(() => { expect(screen.getAllByText(/今日台账|待处理/).length).toBeGreaterThan(0) })
+    expect(localStorage.getItem('dsh-mobile-auth')).toContain('采购员·蔡俊')
   })
 
   it('renders the login page inside the themed root in both tracks', () => {
@@ -191,9 +210,9 @@ describe('mobile app shell', () => {
       'session.list': { items: [] },
       'session.history': EMPTY_HISTORY,
     })
-    localStorage.setItem('dsh-mobile-auth', JSON.stringify({ phone: '13800138000', name: '业务员', loggedAt: 1 }))
+    localStorage.setItem('dsh-mobile-auth', JSON.stringify({ username: 'buyer', nickname: '采购员·蔡俊', token: 'tok-v', loggedAt: 1 }))
     render(<App />)
-    expect(screen.getAllByText(/今日台账/).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/今日台账|待处理/).length).toBeGreaterThan(0)
     navigate('#/me')
     fireEvent(window, new HashChangeEvent('hashchange'))
     await waitFor(() => screen.getByRole('button', { name: /退出登录/ }))
@@ -217,9 +236,9 @@ describe('mobile app shell', () => {
     })
     // The empty hash lands on home; walk the tab bar and the folded heads.
     location.hash = '#/'
-    const identity = { phone: '13800138000', name: '业务员', loggedAt: 1 }
+    const identity = { username: 'buyer', nickname: '采购员·蔡俊', token: 'tok-v', loggedAt: 1 }
     render(<MobileShell identity={identity} dark={false} onDarkChange={() => {}} onLogout={() => {}} />)
-    await waitFor(() => { expect(screen.getAllByText(/今日台账/).length).toBeGreaterThan(0) })
+    await waitFor(() => { expect(screen.getAllByText(/今日台账|待处理/).length).toBeGreaterThan(0) })
     fireEvent.click(screen.getByText('我的'))
     await waitFor(() => { expect(screen.getByText('本月登记')).toBeTruthy() })
     navigate('#/profile')
@@ -243,9 +262,9 @@ describe('mobile app shell', () => {
       'session.history': EMPTY_HISTORY,
       'nocobase.listMeta': { collections: [] },
     })
-    localStorage.setItem('dsh-mobile-auth', JSON.stringify({ phone: '13800138000', name: '业务员', loggedAt: 1 }))
+    localStorage.setItem('dsh-mobile-auth', JSON.stringify({ username: 'buyer', nickname: '采购员·蔡俊', token: 'tok-v', loggedAt: 1 }))
     const { container } = render(<App />)
-    await waitFor(() => { expect(screen.getAllByText(/今日台账/).length).toBeGreaterThan(0) })
+    await waitFor(() => { expect(screen.getAllByText(/今日台账|待处理/).length).toBeGreaterThan(0) })
     expect(container.querySelector('.dshm-root')?.getAttribute('data-theme')).toBe('light')
     navigate('#/me')
     fireEvent(window, new HashChangeEvent('hashchange'))
@@ -256,9 +275,9 @@ describe('mobile app shell', () => {
 
   it('routes the tasks and files layers under the shell', async () => {
     stubGateway({ 'agentPreset.list': { presets: [] }, 'session.list': { items: [] } })
-    const identity = { phone: '13800138000', name: '业务员', loggedAt: 1 }
+    const identity = { username: 'buyer', nickname: '采购员·蔡俊', token: 'tok-v', loggedAt: 1 }
     render(<MobileShell identity={identity} dark={false} onDarkChange={() => {}} onLogout={() => {}} />)
-    await waitFor(() => { expect(screen.getAllByText(/今日台账/).length).toBeGreaterThan(0) })
+    await waitFor(() => { expect(screen.getAllByText(/今日台账|待处理/).length).toBeGreaterThan(0) })
     navigate('#/tasks')
     fireEvent(window, new HashChangeEvent('hashchange'))
     await waitFor(() => { expect(screen.getByText('我的任务')).toBeTruthy() })
@@ -274,7 +293,7 @@ describe('mobile app shell', () => {
       'session.history': EMPTY_HISTORY,
       'nocobase.listMeta': { collections: [] },
     })
-    const identity = { phone: '13800138000', name: '业务员', loggedAt: 1 }
+    const identity = { username: 'buyer', nickname: '采购员·蔡俊', token: 'tok-v', loggedAt: 1 }
     render(<MobileShell identity={identity} dark={false} onDarkChange={() => {}} onLogout={() => {}} />)
     navigate('#/chat/session-abc')
     fireEvent(window, new HashChangeEvent('hashchange'))
@@ -315,7 +334,10 @@ describe('mobile chats tab', () => {
         { sessionId: 's1', updatedAt: now, running: true, agentPreset: 'purchase-assistant', projections: { values: { title: '采购会话' } } },
         { sessionId: 's2', updatedAt: now - 10_000, blank: true },
       ] },
-      'session.history': { events: [{ event: assistantMessage(2, receiptFence) }] },
+      'session.history': { events: [
+        ...nbCreateLanded(1, 'hub_po_purchase_orders', '1042'),
+        { event: assistantMessage(2, receiptFence) },
+      ] },
     })
     render(<MessagesView />)
     await waitFor(() => { expect(screen.getByText('采购会话')).toBeTruthy() })
@@ -334,7 +356,7 @@ describe('mobile chats tab', () => {
     expect(screen.getByText('采购会话')).toBeTruthy()
     fireEvent.change(search, { target: { value: '不存在' } })
     await waitFor(() => { expect(screen.getByText('没有匹配的会话')).toBeTruthy() })
-    expect(screen.getByText('右上角 + 找 AI 同事开聊')).toBeTruthy()
+    expect(screen.getByText('换个筛选或关键词，右上角 + 开个新会话')).toBeTruthy()
     fireEvent.change(search, { target: { value: '' } })
     fireEvent.click(screen.getByText('新会话'))
     expect(location.hash).toBe('#/chat/s2')
@@ -543,28 +565,35 @@ describe('mobile new-chat sheet', () => {
 })
 
 describe('mobile me tab', () => {
-  it('tolerates a failed ledger read by withholding the metric', async () => {
+  it('names a failed ledger read on the metric instead of a silent dash', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
     stubGateway({
       'agentPreset.list': { presets: [] },
-      'session.list': () => { throw new Error('目录 503') },
+      'session.list': { items: [] },
+      // The server projection leg fails (no stub): the strip leg still settles.
+      'nocobase.list': () => { throw new Error('台账 503') },
     })
     render(
       <ProfileView
-        identity={{ phone: '13800138000', name: '业务员', loggedAt: 1 }}
+        identity={{ username: 'buyer', nickname: '采购员·蔡俊', token: 'tok-v', loggedAt: 1 }}
         dark={false}
         onDarkChange={() => {}}
         onLogout={() => {}}
       />,
     )
-    await waitFor(() => { expect(screen.getByText('—')).toBeTruthy() })
+    // W6-R1: the failed metric reads 读取失败 (never a bare —), the failure
+    // leaves a client_error trace, and 待审核 (local) still renders.
+    await waitFor(() => { expect(screen.getByText('读取失败')).toBeTruthy() })
     expect(screen.getByText('0 条')).toBeTruthy()
+    expect(warnSpy.mock.calls.some(call => String(call[0]).includes('ledger.monthly'))).toBe(true)
+    warnSpy.mockRestore()
   })
 
   it('opens the data and about dialogs', async () => {
     stubGateway({ 'agentPreset.list': { presets: [] }, 'session.list': { items: [] } })
     render(
       <ProfileView
-        identity={{ phone: '13800138000', name: '业务员', loggedAt: 1 }}
+        identity={{ username: 'buyer', nickname: '采购员·蔡俊', token: 'tok-v', loggedAt: 1 }}
         dark={false}
         onDarkChange={() => {}}
         onLogout={() => {}}
@@ -586,7 +615,7 @@ describe('mobile me tab', () => {
     })
     const view = render(
       <ProfileView
-        identity={{ phone: '13800138000', name: '业务员', loggedAt: 1 }}
+        identity={{ username: 'buyer', nickname: '采购员·蔡俊', token: 'tok-v', loggedAt: 1 }}
         dark={false}
         onDarkChange={() => {}}
         onLogout={() => {}}
@@ -606,7 +635,7 @@ describe('mobile me tab', () => {
     })
     const view = render(
       <ProfileView
-        identity={{ phone: '13800138000', name: '业务员', loggedAt: 1 }}
+        identity={{ username: 'buyer', nickname: '采购员·蔡俊', token: 'tok-v', loggedAt: 1 }}
         dark={false}
         onDarkChange={() => {}}
         onLogout={() => {} }
@@ -625,14 +654,14 @@ describe('mobile me tab', () => {
     const onDark = vi.fn()
     render(
       <ProfileView
-        identity={{ phone: '13800138000', name: '业务员', loggedAt: 1 }}
+        identity={{ username: 'buyer', nickname: '采购员·蔡俊', token: 'tok-v', loggedAt: 1 }}
         dark={false}
         onDarkChange={onDark}
         onLogout={() => {}}
       />,
     )
-    expect(screen.getByText('业务员')).toBeTruthy()
-    expect(screen.getByText('13800138000 · 演示租户 · 管理员')).toBeTruthy()
+    expect(screen.getByText('采购员·蔡俊')).toBeTruthy()
+    expect(screen.getByText('buyer · 真实账号 · NocoBase 账号体系')).toBeTruthy()
     await waitFor(() => { expect(screen.getByText('本月登记').textContent).toBe('本月登记') })
     expect(screen.getByText('待审核')).toBeTruthy()
     const toggle = screen.getByRole('switch', { name: '深色模式' })
@@ -655,13 +684,16 @@ describe('mobile me tab', () => {
         const rowId = { m1: '1044', m2: '1043', m3: '1042', m4: '1041' }[payload.sessionId as string] ?? '9999'
         const amount = { m1: '¥9,900', m2: '¥7,700', m3: '¥6,400', m4: '¥4,400' }[payload.sessionId as string] ?? '¥0'
         return { events: [
-          { event: assistantMessage(1, `已登记。\n\`\`\`dsh\n{"v":3,"type":"submit_receipt","draftId":"d_${rowId}","form":{"collection":"hub_po_purchase_orders","label":"采购单"},"rowId":"${rowId}","summary":[{"label":"合计金额","value":"${amount}","kind":"money"}]}\n\`\`\``, Date.now()) },
+          ...nbCreateLanded(1, 'hub_po_purchase_orders', rowId),
+          { event: assistantMessage(2, `已登记。\n\`\`\`dsh\n{"v":3,"type":"submit_receipt","draftId":"d_${rowId}","form":{"collection":"hub_po_purchase_orders","label":"采购单"},"rowId":"${rowId}","summary":[{"label":"合计金额","value":"${amount}","kind":"money"}]}\n\`\`\``, Date.now()) },
         ] }
       },
+      // W6-B1 G3: 本月登记 reads the server projection (wfl submit records).
+      'nocobase.list': { count: 4, page: 1, page_size: 1, rows: [] },
     })
     render(
       <ProfileView
-        identity={{ phone: '13800138000', name: '业务员', loggedAt: 1 }}
+        identity={{ username: 'buyer', nickname: '采购员·蔡俊', token: 'tok-v', loggedAt: 1 }}
         dark={false}
         onDarkChange={() => {}}
         onLogout={() => {}}
@@ -692,7 +724,7 @@ describe('mobile me tab', () => {
     })
     render(
       <ProfileView
-        identity={{ phone: '13800138000', name: '业务员', loggedAt: 1 }}
+        identity={{ username: 'buyer', nickname: '采购员·蔡俊', token: 'tok-v', loggedAt: 1 }}
         dark={false}
         onDarkChange={() => {}}
         onLogout={() => {}}
@@ -714,13 +746,16 @@ describe('mobile me tab', () => {
       'agentPreset.list': { presets: [] },
       'session.list': { items: [{ sessionId: 'm2', updatedAt: Date.now(), agentPreset: 'mobile-form-assistant' }] },
       'session.history': { events: [
-        // A last-month receipt still leads the strip but never counts toward 本月登记.
-        { event: assistantMessage(1, '已登记。\n```dsh\n{"v":3,"type":"submit_receipt","draftId":"d_2","form":{"collection":"hub_wms_outbound","label":"出库单"},"rowId":"1043","summary":[{"label":"经手人","value":"林小满","kind":"text"}]}\n```', new Date(new Date().getFullYear(), new Date().getMonth() - 1, 15).getTime()) },
+        ...nbCreateLanded(1, 'hub_wms_outbound', '1043'),
+        // A last-month receipt still leads the strip; the server projection
+        // counts zero this month (W6-B1 G3).
+        { event: assistantMessage(2, '已登记。\n```dsh\n{"v":3,"type":"submit_receipt","draftId":"d_2","form":{"collection":"hub_wms_outbound","label":"出库单"},"rowId":"1043","summary":[{"label":"经手人","value":"林小满","kind":"text"}]}\n```', new Date(new Date().getFullYear(), new Date().getMonth() - 1, 15).getTime()) },
       ] },
+      'nocobase.list': { count: 0, page: 1, page_size: 1, rows: [] },
     })
     render(
       <ProfileView
-        identity={{ phone: '13800138000', name: '业务员', loggedAt: 1 }}
+        identity={{ username: 'buyer', nickname: '采购员·蔡俊', token: 'tok-v', loggedAt: 1 }}
         dark={false}
         onDarkChange={() => {}}
         onLogout={() => {}}
@@ -740,7 +775,7 @@ describe('mobile me tab', () => {
     const onLogout = vi.fn()
     render(
       <ProfileView
-        identity={{ phone: '13800138000', name: '业务员', loggedAt: 1 }}
+        identity={{ username: 'buyer', nickname: '采购员·蔡俊', token: 'tok-v', loggedAt: 1 }}
         dark={false}
         onDarkChange={() => {}}
         onLogout={onLogout}
@@ -796,7 +831,7 @@ describe('mobile chat view', () => {
       ...metaRoutes,
     })
     render(<ChatView sessionId="session-12" />)
-    expect(screen.getByText('会话加载中…')).toBeTruthy()
+    expect(screen.getByRole('status', { name: '正在加载会话' })).toBeTruthy()
     await waitFor(() => { expect(screen.getByText('帮我登记采购单')).toBeTruthy() })
     expect(screen.getByText(/已为你预填草稿/)).toBeTruthy()
     await waitFor(() => { expect(screen.getByTestId('receipt-card')).toBeTruthy() })
@@ -1287,7 +1322,7 @@ describe('mobile app theme round-trip', () => {
       'session.history': EMPTY_HISTORY,
       'nocobase.listMeta': { collections: [] },
     })
-    localStorage.setItem('dsh-mobile-auth', JSON.stringify({ phone: '13800138000', name: '业务员', loggedAt: 1 }))
+    localStorage.setItem('dsh-mobile-auth', JSON.stringify({ username: 'buyer', nickname: '采购员·蔡俊', token: 'tok-v', loggedAt: 1 }))
     localStorage.setItem('dsh-mobile-theme', 'dark')
     const { container } = render(<App />)
     await waitFor(() => { expect(container.querySelector('.dshm-root')?.getAttribute('data-theme')).toBe('dark') })
@@ -1311,16 +1346,16 @@ describe('mobile shell route edges', () => {
 
   it('lands a pre-identity login hash on the home tab', async () => {
     stubGateway(shellRoutes)
-    const identity = { phone: '13800138000', name: '业务员', loggedAt: 1 }
+    const identity = { username: 'buyer', nickname: '采购员·蔡俊', token: 'tok-v', loggedAt: 1 }
     render(<MobileShell identity={identity} dark={false} onDarkChange={() => {}} onLogout={() => {}} />)
     navigate('#/login')
     fireEvent(window, new HashChangeEvent('hashchange'))
-    await waitFor(() => { expect(screen.getAllByText(/今日台账/).length).toBeGreaterThan(0) })
+    await waitFor(() => { expect(screen.getAllByText(/今日台账|待处理/).length).toBeGreaterThan(0) })
   })
 
   it('folds the retired contacts hash onto the agents tab', async () => {
     stubGateway(shellRoutes)
-    const identity = { phone: '13800138000', name: '业务员', loggedAt: 1 }
+    const identity = { username: 'buyer', nickname: '采购员·蔡俊', token: 'tok-v', loggedAt: 1 }
     render(<MobileShell identity={identity} dark={false} onDarkChange={() => {}} onLogout={() => {}} />)
     navigate('#/contacts')
     fireEvent(window, new HashChangeEvent('hashchange'))
@@ -1336,7 +1371,7 @@ describe('mobile shell route edges', () => {
     stubGateway({ ...shellRoutes, 'session.prompt': {} })
     localStorage.setItem('dsh-mobile-runmode', 'demo')
     const item = createWorkItem({ title: '路由任务', owner: '业务员' })
-    const identity = { phone: '13800138000', name: '业务员', loggedAt: 1 }
+    const identity = { username: 'buyer', nickname: '采购员·蔡俊', token: 'tok-v', loggedAt: 1 }
     render(<MobileShell identity={identity} dark={false} onDarkChange={() => {}} onLogout={() => {}} />)
     navigate(`#/work/${item.id}`)
     fireEvent(window, new HashChangeEvent('hashchange'))
@@ -1347,7 +1382,7 @@ describe('mobile shell route edges', () => {
 
   it('folds a param-less chat hash onto the chats layer', async () => {
     stubGateway(shellRoutes)
-    const identity = { phone: '13800138000', name: '业务员', loggedAt: 1 }
+    const identity = { username: 'buyer', nickname: '采购员·蔡俊', token: 'tok-v', loggedAt: 1 }
     render(<MobileShell identity={identity} dark={false} onDarkChange={() => {}} onLogout={() => {}} />)
     navigate('#/chat')
     fireEvent(window, new HashChangeEvent('hashchange'))
@@ -1363,7 +1398,7 @@ describe('mobile shell route edges', () => {
 
   it('switches between the me and work tabs through the tab bar', async () => {
     stubGateway(shellRoutes)
-    const identity = { phone: '13800138000', name: '业务员', loggedAt: 1 }
+    const identity = { username: 'buyer', nickname: '采购员·蔡俊', token: 'tok-v', loggedAt: 1 }
     render(<MobileShell identity={identity} dark={false} onDarkChange={() => {}} onLogout={() => {}} />)
     fireEvent.click(screen.getByText('我的'))
     await waitFor(() => { expect(screen.getByText('本月登记')).toBeTruthy() })
@@ -1600,6 +1635,7 @@ describe('mobile chat view (v3 fences)', () => {
       'session.history': { events: [
         { event: assistantMessage(1, `草稿：\n${v3DraftFence}`) },
         { event: userMessage(2, v3ConfirmUserMessage) },
+        ...nbCreateLanded(2.5, 'hub_po_purchase_orders', '1042'),
         { event: assistantMessage(3, `已登记。\n${v3ReceiptFence}`) },
       ] },
       'nocobase.listMeta': { collections: [] },
@@ -1678,6 +1714,7 @@ describe('mobile chat view (v3 ask field and chips)', () => {
       'session.history': { events: [
         { event: assistantMessage(1, `草稿：\n${v3DraftFence}`) },
         { event: userMessage(2, v3ConfirmUserMessage) },
+        ...nbCreateLanded(2.5, 'hub_po_purchase_orders', '1042'),
         { event: assistantMessage(3, `已登记。\n${v3ReceiptFence}`) },
       ] },
       'nocobase.listMeta': { collections: [] },
@@ -2047,7 +2084,7 @@ describe('mobile me tab (v5 additions)', () => {
     const realItem = createWorkItem({ title: '真实项', owner: '业务员' })
     render(
       <ProfileView
-        identity={{ phone: '13800138000', name: '业务员', loggedAt: 1 }}
+        identity={{ username: 'buyer', nickname: '采购员·蔡俊', token: 'tok-v', loggedAt: 1 }}
         dark={false}
         onDarkChange={() => {}}
         onLogout={() => {}}
@@ -2074,4 +2111,25 @@ describe('mobile me tab (v5 additions)', () => {
       { timeout: 8000 },
     )
   }, 15_000)
+})
+
+describe('mobile docs route reference (W6-R1; the todos leg lives in todos-view.client.spec.tsx)', () => {
+  const shellRoutes = {
+    'agentPreset.list': { presets: [] },
+    'session.list': { items: [] },
+    'session.history': EMPTY_HISTORY,
+    'nocobase.listMeta': { collections: [] },
+    'nocobase.list': { count: 0, page: 1, page_size: 100, rows: [] },
+  }
+
+  it('routes #/docs onto the docs directory and its role subset', async () => {
+    stubGateway(shellRoutes)
+    const identity = { username: 'buyer', nickname: '采购员·蔡俊', token: 'tok-v', loggedAt: 1 }
+    localStorage.setItem('dsh-mobile-auth', JSON.stringify(identity))
+    render(<MobileShell identity={identity} dark={false} onDarkChange={() => {}} onLogout={() => {}} />)
+    navigate('#/docs')
+    fireEvent(window, new HashChangeEvent('hashchange'))
+    await waitFor(() => { expect(screen.getAllByTestId('docs-collection').length).toBe(3) })
+    expect(screen.getByText('采购订单')).toBeTruthy()
+  })
 })

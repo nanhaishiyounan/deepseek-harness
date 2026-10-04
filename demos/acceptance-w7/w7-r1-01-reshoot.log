@@ -1,0 +1,6 @@
+auth:check -> HTTP 200
+shot 040-配方版本与变更.png liveness=PASS
+shot 109-效期看板.png liveness=PASS
+shot 110-批次追溯.png liveness=PASS
+
+== after: 成功 3/3, liveness失败 0, 其他失败 0 ==

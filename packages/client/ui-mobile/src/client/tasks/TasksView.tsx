@@ -7,8 +7,10 @@
  */
 
 import { useMemo, useState, useSyncExternalStore, type JSX } from 'react'
-import { Button, CapsuleTabs, ErrorBlock, Tag } from 'antd-mobile'
+import { CapsuleTabs, Tag } from 'antd-mobile'
+import { CircleCheckBig } from 'lucide-react'
 import { goBackOr, navigate } from '../router.ts'
+import { EmptyState } from '../ui.tsx'
 import { PageNav } from '../PageNav.tsx'
 import { myTasks, subscribeWork, teamTasks, workSnapshot, type WorkItem } from '../workStore.ts'
 import { statusDotClass } from '../work/WorkStamp.tsx'
@@ -59,19 +61,12 @@ export function TasksView({ identityName }: TasksViewProps): JSX.Element {
       <section className={css.list} aria-label="任务列表">
         {tab === 'team' && rows.length > 0 && <p className={css.teamBanner}>演示团队 · 数据来自演示样例，不声称来自后端</p>}
         {rows.length === 0 && (
-          <div className={css.emptyWrap}>
-            <ErrorBlock status="empty" title={tab === 'mine' ? '还没有你的任务' : '团队还没有任务'} />
-            <Button
-              type="button"
-              fill="outline"
-              size="small"
-              className={css.emptyCta}
-              style={{ '--border-color': 'var(--dshm-border)' }}
-              onClick={() => { navigate('#/chats') }}
-            >
-              去对话里让 AI 同事派个活
-            </Button>
-          </div>
+          <EmptyState
+            icon={<CircleCheckBig size={22} strokeWidth={1.8} />}
+            title={tab === 'mine' ? '还没有你的任务' : '团队还没有任务'}
+            description="任务由 AI 同事在对话中承接后生成"
+            action={{ label: '去对话里让 AI 同事派个活', onClick: () => { navigate('#/chats') } }}
+          />
         )}
         {rows.length > 0 && (
           <div className={css.rowCard}>

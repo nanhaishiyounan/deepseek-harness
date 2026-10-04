@@ -1,0 +1,11 @@
+== probe 1: the OLD pipeline shape loses FAILS (the fake-PASS root cause reproduced) ==
+  → 管道内调用后主 shell FAILS=0（增量丢失——旧门禁因此恒报 PASS）
+== probe 2: the NEW main-shell expect catches the injected wrong value ==
+  ✗ 新比较器·故意注入错值 — want 99999999 got 80920.0
+  → 主 shell FAILS=1（增量被捕获）
+  → numeq exit=1（非 0 = 判不等，正确拒绝）
+== probe 3: numeric normalization kills the old string false-negatives ==
+  ✓ numeq 80920 == 80920.0（数值等价）
+  ✓ numeq 12 == 12.0（数值等价）
+  ✓ numeq 18800.00 == 18800.0（数值等价）
+  ✓ numeq 80920 != 80921（真实差异被拒绝）

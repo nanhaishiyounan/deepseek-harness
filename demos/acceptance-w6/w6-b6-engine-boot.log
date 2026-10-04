@@ -1,0 +1,158 @@
+approval-engine: serving on http://127.0.0.1:13110 (POST /act, POST /submit, POST /post-count-adjust, POST /scan-reorder, POST /calc-scorecard, POST /run-mrp, POST /calc-kpi, POST /run-nightly, POST /scan-alerts, POST /alerts/act, POST /confirm-suggestion, POST /recall/create, POST /recall/act, GET /todos, GET /healthz, GET /labels, GET /label/lots.json, GET /label/lot.svg, GET/POST /insp/* 检验工作台, GET/POST /crm/* CRM 工作台)
+approval-engine: W3-B6 terminals on :13110 — GET /terminals/{report,inspect,receive}.html + terminal.css; GET /terminal/{report,inspect,receive}; POST /report-job, /inspect-submit, /receive-goods (enabled=true, token=lenient-demo（生产必须设 W3_TERMINAL_TOKEN）)
+approval-engine: W5-B0 designer on :13110 — GET /designer (SPA) + GET /designer/meta + GET/POST /flow-graph → wfl_flow_configs.graph json（编辑态落库）+ POST /flow-graph/publish → 门禁+round-trip 等价断言+单向编译派生 wfl 行表（一条 data-modifying CTE，CAS 败则整条 no-op）；保存与发布同走 graph_version 原子 CAS——同刻并发恰好一胜一败(enabled=true)
+approval-engine: W6-B2 alert scan loop armed — every 3600s（POST /scan-alerts 手动触发同款；阈值/路由配置在 alert_rules 行）
+approval-engine: route POST /crm/move failed — Error: CRM 写操作限 销售部/admin（nocobase 不在围栏内——角色矩阵）
+    at assertSalesActor (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3636:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3658:27)
+approval-engine: serving on http://127.0.0.1:13110 (POST /act, POST /submit, POST /post-count-adjust, POST /scan-reorder, POST /calc-scorecard, POST /run-mrp, POST /calc-kpi, POST /run-nightly, POST /scan-alerts, POST /alerts/act, POST /confirm-suggestion, POST /recall/create, POST /recall/act, GET /todos, GET /healthz, GET /labels, GET /label/lots.json, GET /label/lot.svg, GET/POST /insp/* 检验工作台, GET/POST /crm/* CRM 工作台)
+approval-engine: W3-B6 terminals on :13110 — GET /terminals/{report,inspect,receive}.html + terminal.css; GET /terminal/{report,inspect,receive}; POST /report-job, /inspect-submit, /receive-goods (enabled=true, token=lenient-demo（生产必须设 W3_TERMINAL_TOKEN）)
+approval-engine: W5-B0 designer on :13110 — GET /designer (SPA) + GET /designer/meta + GET/POST /flow-graph → wfl_flow_configs.graph json（编辑态落库）+ POST /flow-graph/publish → 门禁+round-trip 等价断言+单向编译派生 wfl 行表（一条 data-modifying CTE，CAS 败则整条 no-op）；保存与发布同走 graph_version 原子 CAS——同刻并发恰好一胜一败(enabled=true)
+approval-engine: W6-B2 alert scan loop armed — every 3600s（POST /scan-alerts 手动触发同款；阈值/路由配置在 alert_rules 行）
+approval-engine: route POST /crm/quote-to-so failed — Error: psql failed: INSERT INTO so_order_lines (order_id, product_id, qty, unit_price) VALUES (NaN, 1, 10, 100);…
+ERROR:  column "nan" does not exist
+LINE 1: ...s (order_id, product_id, qty, unit_price) VALUES (NaN, 1, 10...
+                                                             ^
+
+    at psql (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/crm/src/server.ts:26:31)
+    at Module.crmQuoteToSo (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/crm/src/server.ts:375:5)
+    at <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3692:39)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+approval-engine: serving on http://127.0.0.1:13110 (POST /act, POST /submit, POST /post-count-adjust, POST /scan-reorder, POST /calc-scorecard, POST /run-mrp, POST /calc-kpi, POST /run-nightly, POST /scan-alerts, POST /alerts/act, POST /confirm-suggestion, POST /recall/create, POST /recall/act, GET /todos, GET /healthz, GET /labels, GET /label/lots.json, GET /label/lot.svg, GET/POST /insp/* 检验工作台, GET/POST /crm/* CRM 工作台)
+approval-engine: W3-B6 terminals on :13110 — GET /terminals/{report,inspect,receive}.html + terminal.css; GET /terminal/{report,inspect,receive}; POST /report-job, /inspect-submit, /receive-goods (enabled=true, token=lenient-demo（生产必须设 W3_TERMINAL_TOKEN）)
+approval-engine: W5-B0 designer on :13110 — GET /designer (SPA) + GET /designer/meta + GET/POST /flow-graph → wfl_flow_configs.graph json（编辑态落库）+ POST /flow-graph/publish → 门禁+round-trip 等价断言+单向编译派生 wfl 行表（一条 data-modifying CTE，CAS 败则整条 no-op）；保存与发布同走 graph_version 原子 CAS——同刻并发恰好一胜一败(enabled=true)
+approval-engine: W6-B2 alert scan loop armed — every 3600s（POST /scan-alerts 手动触发同款；阈值/路由配置在 alert_rules 行）
+approval-engine: flow so_orders extras has no amount_threshold; defaulting to 100000
+approval-engine: route GET /crm/products.json failed — Error: psql failed: SELECT p.id, COALESCE(p.name,''), COALESCE(p.base_price, 0) FROM hub_inv_products p WHERE COALESCE(p.status, 'active') =…
+ERROR:  column p.base_price does not exist
+LINE 1: SELECT p.id, COALESCE(p.name,''), COALESCE(p.base_price, 0) ...
+                                                   ^
+
+    at psql (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/crm/src/server.ts:26:31)
+    at splitRows (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/crm/src/server.ts:199:48)
+    at Module.crmProducts (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/crm/src/server.ts:400:10)
+    at <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3681:77)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+approval-engine: route POST /crm/quote-to-so failed — Error: 转单行需要 product_id（正整数）
+    at Module.crmQuoteToSo (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/crm/src/server.ts:357:75)
+    at <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3692:39)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+approval-engine: route GET /crm/products.json failed — Error: psql failed: SELECT p.id, COALESCE(p.name,''), COALESCE(p.base_price, 0) FROM hub_inv_products p WHERE COALESCE(p.status, 'active') =…
+ERROR:  column p.base_price does not exist
+LINE 1: SELECT p.id, COALESCE(p.name,''), COALESCE(p.base_price, 0) ...
+                                                   ^
+
+    at psql (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/crm/src/server.ts:26:31)
+    at splitRows (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/crm/src/server.ts:199:48)
+    at Module.crmProducts (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/crm/src/server.ts:400:10)
+    at <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3681:77)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+approval-engine: route POST /crm/quote-to-so failed — Error: 转单行需要 product_id（正整数）
+    at Module.crmQuoteToSo (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/crm/src/server.ts:357:75)
+    at <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3692:39)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+approval-engine: route GET /crm/products.json failed — Error: psql failed: SELECT p.id, COALESCE(p.name,''), COALESCE(p.base_price, 0) FROM hub_inv_products p WHERE COALESCE(p.status, 'active') =…
+ERROR:  column p.base_price does not exist
+LINE 1: SELECT p.id, COALESCE(p.name,''), COALESCE(p.base_price, 0) ...
+                                                   ^
+
+    at psql (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/crm/src/server.ts:26:31)
+    at splitRows (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/crm/src/server.ts:199:48)
+    at Module.crmProducts (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/crm/src/server.ts:400:10)
+    at <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3681:77)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+approval-engine: serving on http://127.0.0.1:13110 (POST /act, POST /submit, POST /post-count-adjust, POST /scan-reorder, POST /calc-scorecard, POST /run-mrp, POST /calc-kpi, POST /run-nightly, POST /scan-alerts, POST /alerts/act, POST /confirm-suggestion, POST /recall/create, POST /recall/act, GET /todos, GET /healthz, GET /labels, GET /label/lots.json, GET /label/lot.svg, GET/POST /insp/* 检验工作台, GET/POST /crm/* CRM 工作台)
+approval-engine: W3-B6 terminals on :13110 — GET /terminals/{report,inspect,receive}.html + terminal.css; GET /terminal/{report,inspect,receive}; POST /report-job, /inspect-submit, /receive-goods (enabled=true, token=lenient-demo（生产必须设 W3_TERMINAL_TOKEN）)
+approval-engine: W5-B0 designer on :13110 — GET /designer (SPA) + GET /designer/meta + GET/POST /flow-graph → wfl_flow_configs.graph json（编辑态落库）+ POST /flow-graph/publish → 门禁+round-trip 等价断言+单向编译派生 wfl 行表（一条 data-modifying CTE，CAS 败则整条 no-op）；保存与发布同走 graph_version 原子 CAS——同刻并发恰好一胜一败(enabled=true)
+approval-engine: W6-B2 alert scan loop armed — every 3600s（POST /scan-alerts 手动触发同款；阈值/路由配置在 alert_rules 行）
+approval-engine: route GET /crm/customers.json failed — Error: 召回端点需要平台会话（authorization: Bearer <NOCOBASE_TOKEN>）——actor 由会话推导，不接受自报
+    at recallActor (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:1575:11)
+    at <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3667:19)
+approval-engine: route GET /crm/quotes.json failed — Error: 召回端点需要平台会话（authorization: Bearer <NOCOBASE_TOKEN>）——actor 由会话推导，不接受自报
+    at recallActor (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:1575:11)
+    at <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3676:19)
+approval-engine: route GET /crm/products.json failed — Error: 召回端点需要平台会话（authorization: Bearer <NOCOBASE_TOKEN>）——actor 由会话推导，不接受自报
+    at recallActor (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:1575:11)
+    at <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3680:19)
+approval-engine: flow so_orders extras has no amount_threshold; defaulting to 100000
+approval-engine: route POST /crm/quote-to-so failed — Error: 需要 quote_id（正整数）
+    at Module.crmQuoteToSo (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/crm/src/server.ts:345:57)
+    at <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3692:39)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+approval-engine: route GET /crm/pipe.json failed — Error: 召回端点需要平台会话（authorization: Bearer <NOCOBASE_TOKEN>）——actor 由会话推导，不接受自报
+    at recallActor (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:1575:11)
+    at <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3655:36)
+approval-engine: route POST /crm/move failed — Error: CRM 写操作限 销售部/admin（buyer 不在围栏内——角色矩阵）
+    at assertSalesActor (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3638:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3660:27)
+approval-engine: route POST /crm/quote-to-so failed — Error: CRM 写操作限 销售部/admin（buyer 不在围栏内——角色矩阵）
+    at assertSalesActor (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3638:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3685:27)
+nocobase-h5: CAPA 草稿「检验不合格·QI-W6B5-B6FIX」已发起（srm_capas.inspection_code 关联）
+nocobase-h5: inspection QI-W6B5-B6FIX → failed（批量 120=91-150/F，AQL 2.5（normal），n=20 Ac=1 Re=2，d=3）
+w6b2-rules: scan pass — expiry+0/~4/-0 cert_due+0/~3/-0 ar_overdue+0/~3/-0 quality_abnormal+0/~23/-0 ccp_deviation+0/~8/-0 inspection_fail+1/~20/-0 notified=1
+approval-engine: route GET /crm/pipe.json failed — Error: 召回端点需要平台会话（authorization: Bearer <NOCOBASE_TOKEN>）——actor 由会话推导，不接受自报
+    at recallActor (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:1575:11)
+    at <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3655:36)
+approval-engine: route POST /crm/move failed — Error: CRM 写操作限 销售部/admin（buyer 不在围栏内——角色矩阵）
+    at assertSalesActor (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3638:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3660:27)
+approval-engine: route POST /crm/quote-to-so failed — Error: CRM 写操作限 销售部/admin（buyer 不在围栏内——角色矩阵）
+    at assertSalesActor (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3638:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3685:27)
+approval-engine: route GET /crm/customers.json failed — Error: 召回端点需要平台会话（authorization: Bearer <NOCOBASE_TOKEN>）——actor 由会话推导，不接受自报
+    at recallActor (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:1575:11)
+    at <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3667:19)
+approval-engine: route GET /crm/quotes.json failed — Error: 召回端点需要平台会话（authorization: Bearer <NOCOBASE_TOKEN>）——actor 由会话推导，不接受自报
+    at recallActor (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:1575:11)
+    at <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3676:19)
+approval-engine: route GET /crm/products.json failed — Error: 召回端点需要平台会话（authorization: Bearer <NOCOBASE_TOKEN>）——actor 由会话推导，不接受自报
+    at recallActor (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:1575:11)
+    at <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3680:19)
+approval-engine: route GET /crm/pipe.json failed — Error: 召回端点需要平台会话（authorization: Bearer <NOCOBASE_TOKEN>）——actor 由会话推导，不接受自报
+    at recallActor (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:1575:11)
+    at <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3655:36)
+approval-engine: route POST /crm/move failed — Error: CRM 写操作限 销售部/admin（buyer 不在围栏内——角色矩阵）
+    at assertSalesActor (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3638:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3660:27)
+approval-engine: route POST /crm/quote-to-so failed — Error: CRM 写操作限 销售部/admin（buyer 不在围栏内——角色矩阵）
+    at assertSalesActor (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3638:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3685:27)
+approval-engine: route GET /crm/pipe.json failed — Error: 召回端点需要平台会话（authorization: Bearer <NOCOBASE_TOKEN>）——actor 由会话推导，不接受自报
+    at recallActor (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:1575:11)
+    at <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3655:36)
+approval-engine: route POST /crm/move failed — Error: CRM 写操作限 销售部/admin（buyer 不在围栏内——角色矩阵）
+    at assertSalesActor (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3638:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3660:27)
+approval-engine: route POST /crm/quote-to-so failed — Error: CRM 写操作限 销售部/admin（buyer 不在围栏内——角色矩阵）
+    at assertSalesActor (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3638:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3685:27)
+nocobase-h5: inspection QI-W6B5-B6FIX → failed（批量 120=91-150/F，AQL 2.5（normal），n=20 Ac=1 Re=2，d=3）
+w6b2-rules: scan pass — expiry+0/~4/-0 cert_due+0/~3/-0 ar_overdue+0/~3/-0 quality_abnormal+0/~23/-0 ccp_deviation+0/~8/-0 inspection_fail+1/~20/-0 notified=1
+approval-engine: serving on http://127.0.0.1:13110 (POST /act, POST /submit, POST /post-count-adjust, POST /scan-reorder, POST /calc-scorecard, POST /run-mrp, POST /calc-kpi, POST /run-nightly, POST /scan-alerts, POST /alerts/act, POST /confirm-suggestion, POST /recall/create, POST /recall/act, GET /todos, GET /healthz, GET /labels, GET /label/lots.json, GET /label/lot.svg, GET/POST /insp/* 检验工作台, GET/POST /crm/* CRM 工作台)
+approval-engine: W3-B6 terminals on :13110 — GET /terminals/{report,inspect,receive}.html + terminal.css; GET /terminal/{report,inspect,receive}; POST /report-job, /inspect-submit, /receive-goods (enabled=true, token=lenient-demo（生产必须设 W3_TERMINAL_TOKEN）)
+approval-engine: W5-B0 designer on :13110 — GET /designer (SPA) + GET /designer/meta + GET/POST /flow-graph → wfl_flow_configs.graph json（编辑态落库）+ POST /flow-graph/publish → 门禁+round-trip 等价断言+单向编译派生 wfl 行表（一条 data-modifying CTE，CAS 败则整条 no-op）；保存与发布同走 graph_version 原子 CAS——同刻并发恰好一胜一败(enabled=true)
+approval-engine: W6-B2 alert scan loop armed — every 3600s（POST /scan-alerts 手动触发同款；阈值/路由配置在 alert_rules 行）
+approval-engine: flow so_orders extras has no amount_threshold; defaulting to 100000
+approval-engine: route GET /crm/pipe.json failed — Error: 召回端点需要平台会话（authorization: Bearer <NOCOBASE_TOKEN>）——actor 由会话推导，不接受自报
+    at recallActor (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:1575:11)
+    at <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3655:36)
+approval-engine: route POST /crm/move failed — Error: CRM 写操作限 销售部/admin（buyer 不在围栏内——角色矩阵）
+    at assertSalesActor (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3638:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3660:27)
+approval-engine: route POST /crm/quote-to-so failed — Error: CRM 写操作限 销售部/admin（buyer 不在围栏内——角色矩阵）
+    at assertSalesActor (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3638:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async <anonymous> (/Users/mac/Documents/github/deepseek-harness/examples/kb-agent/scripts/approval-engine.mts:3685:27)
+nocobase-h5: inspection QI-W6B5-B6FIX → failed（批量 120=91-150/F，AQL 2.5（normal），n=20 Ac=1 Re=2，d=3）
+w6b2-rules: scan pass — expiry+0/~4/-0 cert_due+0/~3/-0 ar_overdue+0/~3/-0 quality_abnormal+0/~23/-0 ccp_deviation+0/~8/-0 inspection_fail+1/~20/-0 notified=1

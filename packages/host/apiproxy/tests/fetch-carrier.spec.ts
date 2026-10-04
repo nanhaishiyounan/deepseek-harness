@@ -65,6 +65,8 @@ function fakeApi(overrides: Partial<{ muxFrames: MuxFrame[]; hostFrames: HostFra
       list: kbRefuse,
       get: kbRefuse,
       update: kbRefuse,
+      alertAct: kbRefuse,
+      signIn: kbRefuse,
     },
     sessions: {
       async list(request) {

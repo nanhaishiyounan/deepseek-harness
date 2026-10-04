@@ -1,0 +1,143 @@
+{
+  "pages": [
+    {
+      "page": "crm-customer",
+      "uid": "n17sys042q2lz",
+      "probe": {
+        "primaryBtn": {
+          "background-color": "rgb(30, 78, 140)"
+        },
+        "headerTh": {
+          "font-weight": "600",
+          "font-size": "13px",
+          "color": "rgb(31, 38, 48)",
+          "background-color": "rgb(250, 250, 250)"
+        },
+        "tag": {
+          "background-color": "rgb(245, 250, 229)",
+          "color": "rgb(37, 111, 58)",
+          "border-radius": "999px"
+        },
+        "card": {
+          "border-radius": "8px",
+          "box-shadow": "rgba(31, 38, 48, 0.04) 0px 1px 2px 0px, rgba(31, 38, 48, 0.06) 0px 8px 24px 0px",
+          "border-top-color": "rgb(232, 232, 230)"
+        },
+        "blueResidue": 10
+      },
+      "checks": {
+        "primaryBrand": true,
+        "headerWeight": true,
+        "tagSoft": true,
+        "cardRadius": true
+      }
+    },
+    {
+      "page": "wms-stock",
+      "uid": "h5wms9v2hly0cg6j",
+      "probe": {
+        "primaryBtn": {
+          "background-color": "rgb(30, 78, 140)"
+        },
+        "headerTh": {
+          "font-weight": "600",
+          "font-size": "13px",
+          "color": "rgb(31, 38, 48)",
+          "background-color": "rgb(250, 250, 250)"
+        },
+        "tag": {
+          "background-color": "rgb(245, 250, 229)",
+          "color": "rgb(37, 111, 58)",
+          "border-radius": "999px"
+        },
+        "card": {
+          "border-radius": "8px",
+          "box-shadow": "rgba(31, 38, 48, 0.04) 0px 1px 2px 0px, rgba(31, 38, 48, 0.06) 0px 8px 24px 0px",
+          "border-top-color": "rgb(232, 232, 230)"
+        },
+        "blueResidue": 12
+      },
+      "checks": {
+        "primaryBrand": true,
+        "headerWeight": true,
+        "tagSoft": true,
+        "cardRadius": true
+      }
+    },
+    {
+      "page": "pur-order",
+      "uid": "w3puryzkva06iuhh",
+      "probe": {
+        "primaryBtn": {
+          "background-color": "rgb(30, 78, 140)"
+        },
+        "headerTh": {
+          "font-weight": "600",
+          "font-size": "13px",
+          "color": "rgb(31, 38, 48)",
+          "background-color": "rgb(250, 250, 250)"
+        },
+        "tag": {
+          "background-color": "rgb(245, 250, 229)",
+          "color": "rgb(37, 111, 58)",
+          "border-radius": "999px"
+        },
+        "card": {
+          "border-radius": "8px",
+          "box-shadow": "rgba(31, 38, 48, 0.04) 0px 1px 2px 0px, rgba(31, 38, 48, 0.06) 0px 8px 24px 0px",
+          "border-top-color": "rgb(232, 232, 230)"
+        },
+        "blueResidue": 12
+      },
+      "checks": {
+        "primaryBrand": true,
+        "headerWeight": true,
+        "tagSoft": true,
+        "cardRadius": true
+      }
+    },
+    {
+      "page": "cockpit",
+      "uid": "w6b9cdzrc2lst1dm",
+      "probe": {
+        "primaryBtn": null,
+        "headerTh": null,
+        "tag": null,
+        "card": {
+          "border-radius": "8px",
+          "box-shadow": "rgba(31, 38, 48, 0.04) 0px 1px 2px 0px, rgba(31, 38, 48, 0.06) 0px 8px 24px 0px",
+          "border-top-color": "rgb(232, 232, 230)"
+        },
+        "blueResidue": 9
+      },
+      "checks": {
+        "primaryBrand": "n/a",
+        "headerWeight": "n/a",
+        "tagSoft": "n/a",
+        "cardRadius": true
+      }
+    },
+    {
+      "page": "v1-gantt",
+      "uid": "96yet9a0x45",
+      "probe": {
+        "primaryBtn": null,
+        "headerTh": null,
+        "tag": null,
+        "card": {
+          "border-radius": "8px",
+          "box-shadow": "rgba(0, 0, 0, 0.03) 0px 1px 2px 0px, rgba(0, 0, 0, 0.02) 0px 1px 6px -1px, rgba(0, 0, 0, 0.02) 0px 2px 4px 0px",
+          "border-top-color": "rgb(232, 232, 230)"
+        },
+        "blueResidue": 10
+      },
+      "checks": {
+        "primaryBrand": "n/a",
+        "headerWeight": "n/a",
+        "tagSoft": "n/a",
+        "cardRadius": true
+      }
+    }
+  ],
+  "failures": []
+}

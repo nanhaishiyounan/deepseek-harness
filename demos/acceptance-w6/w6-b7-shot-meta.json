@@ -1,0 +1,53 @@
+{
+  "generatedAt": "2026-10-02T16:17:31.172Z",
+  "steps": {
+    "liveTriple": {
+      "healthzOk": true,
+      "sourcingOk": true,
+      "ncOk": true
+    },
+    "adminIdentity": "nocobase",
+    "matrix": {
+      "hook": true,
+      "rfq": "RFQ-B9F-0001",
+      "rows": 5
+    },
+    "matrixInert": {
+      "disabled": 1,
+      "xssExecuted": false,
+      "xssText": true,
+      "ranks": [
+        "#1 <img src=x one",
+        "#2 禾创源食品原料有限公司准入 ",
+        "#3 珠海鲜丰水产科技有限公司准入",
+        "#4 山东鲁丰食品配料有限公司pr",
+        "RFQ-B7J1 PO-2026-1055"
+      ]
+    },
+    "weightFlip": {
+      "before": "#1 <img src=x one | #2 禾创源食品原料有限公司准入  | #3 珠海鲜丰水产科技有限公司准入 | #4 山东鲁丰食品配料有限公司pr | RFQ-B7J1 PO-2026-1055",
+      "after": "#1 <img src=x one 100 | #2 禾创源食品原料有限公司准入  71.4 | #3 珠海鲜丰水产科技有限公司准入 69.7 | #4 山东鲁丰食品配料有限公司pr 53.3 | RFQ-B7J1 PO-2026-1055 undefined",
+      "note": "✗ 比价定标限 采购部/admin 操作（nocobase 不在围栏内）"
+    },
+    "financeIdentity": "finance",
+    "negative": {
+      "clicked": true,
+      "modal": true,
+      "note": "✗ 比价定标限 采购部/admin 操作（finance 不在围栏内）"
+    },
+    "buyerIdentity": "buyer",
+    "awardClick": true,
+    "award": {
+      "note": "已定标 → PO-2026-1056"
+    },
+    "awardedBanner": true,
+    "recon": {
+      "rfqStatus": "awarded",
+      "po": "true|三维定标（权重 价格50/交期30/质量20）：价格分=¥0.88/¥0.92×100=95.7；交期分=3/3天×100=100；无评分卡→两维归一；总分=(50×95.7+30"
+    },
+    "poBoardLanes": 6,
+    "poBackLink": true,
+    "invoiceCharts": 1,
+    "payCharts": 1
+  }
+}

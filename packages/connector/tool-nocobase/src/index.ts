@@ -69,6 +69,9 @@ export type {
   NbRow,
 } from './read.ts'
 export {
+  ACTING_USER_COLUMNS,
+  applyActingUserColumns,
+  assertActingUserHoldsTodo,
   fieldChangesOf,
   formatNbApproveOutput,
   formatNbCreateOutput,

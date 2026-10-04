@@ -1,0 +1,7 @@
+send1→ {"accepted":true} send2→ {"accepted":true}
+user-messages-with-probe: 3 (idempotent server-side)
+forged-stamp-present: false | chenliqun-present: false
+复核（session.history 按 user/message 展开）：
+- seq 7：【登录身份】buyer…+「W6-R1 双发探针」——唯一一条真实用户消息（同 clientMsgId 双发收敛为一条，至多触发一轮 → 至多一次建单；服务端幂等 live 确证）
+- seq 8/9：运行时上下文注入（Current runtime context / 当前工作台视图），非用户消息；初判口径中的 3 为系统注入行引用了探针文本
+- 伪造 loginUser（chenliqun）无 token：forged-stamp-present=false、chenliqun-present=false —— 客户端叙述的身份绑定不了任何东西（P1-1 live 确证）

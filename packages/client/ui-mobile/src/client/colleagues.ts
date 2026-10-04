@@ -96,10 +96,16 @@ function fillAssistantWelcome(): Welcome {
   }
 }
 
+/**
+ * The avatar stamp palette (W7-M1, audit 04 §03·08): four equidistant deep
+ * hues (blue 212° / teal 177° / green 122° / ochre 28°) at one shared
+ * lightness band (L≈28-35%, white-acronym contrast ≥6:1) — one palette
+ * logic instead of the candy-color mix, anchored on the brand blue.
+ */
 /** The preset-id → visual table (the four roster presets, 04 §6; unknown presets take the fallback). */
 const COLLEAGUES: Readonly<Record<string, ColleagueVisual>> = {
   'mobile-form-assistant': {
-    color: '#2e7cf6',
+    color: '#1e4e8c',
     acronym: '表单',
     duty: '单据登记与任务执行',
     group: '职能与效率',
@@ -108,7 +114,7 @@ const COLLEAGUES: Readonly<Record<string, ColleagueVisual>> = {
     welcome: fillAssistantWelcome(),
   },
   'business-advisor': {
-    color: '#4f6076',
+    color: '#1d5f5a',
     acronym: '参谋',
     duty: '经营洞察问答（只读）',
     group: '数据与技术',
@@ -128,7 +134,7 @@ const COLLEAGUES: Readonly<Record<string, ColleagueVisual>> = {
     },
   },
   'enterprise-data-assistant': {
-    color: '#3d5a80',
+    color: '#2e5e34',
     acronym: '数据',
     duty: '企业数据问答与统计建议',
     group: '数据与技术',
@@ -148,7 +154,7 @@ const COLLEAGUES: Readonly<Record<string, ColleagueVisual>> = {
     },
   },
   'food-compliance-officer': {
-    color: '#7a5c3e',
+    color: '#7a5230',
     acronym: '合规',
     duty: '食安法规问答与审核要点',
     group: '职能与效率',
@@ -171,7 +177,7 @@ const COLLEAGUES: Readonly<Record<string, ColleagueVisual>> = {
 
 /** The fallback visual for presets the table does not name. */
 const FALLBACK: ColleagueVisual = {
-  color: '#1c2b29',
+  color: '#3a4450',
   acronym: 'AI',
   duty: 'AI 同事',
   skills: ['AI 同事'],

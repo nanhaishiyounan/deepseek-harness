@@ -16,7 +16,10 @@ import { setPortalHost } from '../portal.ts'
 import type { MobileIdentity } from '../auth.ts'
 import { navigate, useRoute } from '../router.ts'
 import { AgentsView } from '../agents/AgentsView.tsx'
+import { AlertsView } from '../alerts/AlertsView.tsx'
 import { ChatView } from '../messages/ChatView.tsx'
+import { DocsView } from '../docs/DocsView.tsx'
+import { TodosView } from '../todos/TodosView.tsx'
 import { FilesView } from '../files/FilesView.tsx'
 import { HomeView } from '../home/HomeView.tsx'
 import { MessagesView } from '../messages/MessagesView.tsx'
@@ -59,13 +62,16 @@ export function MobileShell({ identity, dark, onDarkChange, onLogout }: MobileSh
   return (
     <div className={css.shell}>
       <main className={css.body} key={routeKey} data-transition={chrome ? 'fade' : 'slide'} data-route={name}>
-        {name === 'home' && <HomeView identityName={identity.name} />}
+        {name === 'home' && <HomeView identityName={identity.nickname} />}
         {name === 'chats' && <MessagesView />}
         {name === 'chat' && route.param !== undefined && <ChatView sessionId={route.param} />}
         {name === 'work' && (route.param === undefined
           ? <WorkView />
           : <WorkDetailView workId={route.param} />)}
-        {name === 'tasks' && <TasksView identityName={identity.name} />}
+        {name === 'todos' && <TodosView />}
+        {name === 'alerts' && <AlertsView />}
+        {name === 'docs' && <DocsView collection={route.param} rowId={route.param2} />}
+        {name === 'tasks' && <TasksView identityName={identity.nickname} />}
         {name === 'files' && <FilesView />}
         {name === 'agents' && <AgentsView />}
         {name === 'me' && (

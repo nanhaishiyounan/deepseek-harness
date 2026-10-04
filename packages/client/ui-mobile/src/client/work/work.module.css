@@ -2,8 +2,9 @@
    status modifiers, the four-status work cards with their per-status action
    row, the detail page's ticket head / context card / binding-line timeline /
    result card / bottom action area, and the task-form bottom sheet. Every
-   color rides the --dshm-* tokens (the work statuses only through the
-   --dshm-work-* four). */
+   color rides the --dshm-* tokens (the work statuses through the
+   --dshm-work-* four; the doing stamp's text/outline through
+   --dshm-stamp-doing, which the dark track lifts one tier for 3:1). */
 
 /* ---- Work stamp (03 §5) ---- */
 
@@ -18,8 +19,8 @@
 }
 
 .stamp_doing {
-  border-color: var(--dshm-work-doing);
-  color: var(--dshm-work-doing);
+  border-color: var(--dshm-stamp-doing);
+  color: var(--dshm-stamp-doing);
 }
 
 .stamp_review {
@@ -100,7 +101,7 @@
 
 .workTitle {
   margin: 0;
-  font-size: 17px;
+  font-size: var(--dshm-fs-lg);
   line-height: 24px;
   font-weight: 600;
   color: var(--dshm-foreground);
@@ -121,7 +122,9 @@
   padding: 2px 12px calc(12px + env(safe-area-inset-bottom));
 }
 
-/* The design's .tool-card: the 42px icon block over name/desc/去聊聊. */
+/* The design's .tool-card: the 42px icon block over name/desc/去聊聊
+    (v7: one monochrome icon system — the v6 per-colleague candy blocks
+    retired, audit 04 §04). */
 .toolCard {
   display: flex;
   flex-direction: column;
@@ -149,19 +152,20 @@
   justify-content: center;
   width: 42px;
   height: 42px;
-  border-radius: 13px;
-  color: var(--dshm-on-primary);
+  border-radius: var(--dshm-radius-lg);
+  background: var(--dshm-muted);
+  color: var(--dshm-foreground);
 }
 
 .toolName {
-  font-size: 15px;
+  font-size: var(--dshm-fs-md);
   line-height: 21px;
   font-weight: 650;
   color: var(--dshm-foreground);
 }
 
 .toolDesc {
-  font-size: 12.5px;
+  font-size: var(--dshm-fs-xs);
   line-height: 1.45;
   min-height: 34px;
   color: var(--dshm-muted-foreground);
@@ -172,7 +176,7 @@
 }
 
 .toolGo {
-  font-size: 12px;
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
   font-weight: 600;
   color: var(--dshm-primary);
@@ -185,22 +189,30 @@
 }
 
 /* The header's secondary entries: antd outline capsules (the hairline rim
-   rides an inline variable in WorkView.tsx). */
+    rides an inline variable in WorkView.tsx). */
 .entryLink:global(.adm-button) {
-  --border-radius: 999px;
+  --border-radius: var(--dshm-radius-pill);
   height: var(--dshm-touch-sm);
   padding-block: 0;
   padding-inline: 14px;
-  font-size: 12px;
+  font-size: var(--dshm-fs-xs);
 }
 
+/* The four-status capsules (v7, audit 04 §04): the active tab rides the
+    brand-soft fill + on-soft ink instead of the v6 solid-vs-outline extreme
+    contrast. */
 .statusTabs {
   --active-line-height: 0;
   --active-line-color: transparent;
-  --title-font-size: 12px;
-  --adm-color-primary: var(--dshm-primary);
+  --title-font-size: var(--dshm-fs-xs);
+  --adm-color-text: var(--dshm-muted-foreground);
   padding: 6px 12px 0;
   flex: none;
+}
+
+.statusTabs :global(.adm-capsule-tabs-tab-active) {
+  background: var(--dshm-primary-soft);
+  color: var(--dshm-on-soft);
 }
 
 .workList {
@@ -211,17 +223,50 @@
   padding: 10px 12px 6px;
 }
 
-/* One work card: stamp head, ledger fields, per-status action row. */
+/* One work card: stamp head, ledger fields, per-status action row — with the
+    3px status spine on the left edge (the STATUS_PALETTE mobile face rides
+    the --dshm-work-* four, plan §3.5 kanban-card rule). */
 .workCard {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 12px 14px;
+  padding: 12px 14px 12px 16px;
   background: var(--dshm-card);
   border: 1px solid var(--dshm-border);
   border-radius: var(--dshm-radius-lg);
   box-shadow: var(--dshm-shadow-card);
   text-align: left;
+  overflow: hidden;
+}
+
+.card_todo::before,
+.card_doing::before,
+.card_review::before,
+.card_done::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  border-radius: var(--dshm-radius-pill);
+}
+
+.card_todo::before {
+  background: var(--dshm-work-todo);
+}
+
+.card_doing::before {
+  background: var(--dshm-work-doing);
+}
+
+.card_review::before {
+  background: var(--dshm-work-review);
+}
+
+.card_done::before {
+  background: var(--dshm-work-done);
 }
 
 .cardHeadRow {
@@ -244,7 +289,7 @@
 .cardTitle {
   flex: 1;
   min-width: 0;
-  font-size: 15px;
+  font-size: var(--dshm-fs-md);
   line-height: 22px;
   font-weight: 500;
   color: var(--dshm-foreground);
@@ -258,7 +303,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 4px 10px;
-  font-size: 12px;
+  font-size: var(--dshm-fs-xs);
   line-height: 18px;
   color: var(--dshm-muted-foreground);
 }
@@ -266,8 +311,8 @@
 /* The demo tag: antd Tag recolored through its inline dials in WorkView.tsx;
    this class keeps the quiet hairline capsule scale. */
 .cardDemoTag {
-  --border-radius: 999px;
-  font-size: 10px;
+  --border-radius: var(--dshm-radius-pill);
+  font-size: var(--dshm-fs-xs);
   line-height: 14px;
   flex: none;
 }
@@ -275,13 +320,13 @@
 /* The source-chat back-link badge: the antd mini none-fill word on the
    primary-10 capsule (the wash rides an inline variable in WorkView.tsx). */
 .sourceBadge:global(.adm-button) {
-  --border-radius: 999px;
+  --border-radius: var(--dshm-radius-pill);
   display: inline-flex;
   align-items: center;
   gap: 2px;
   height: 20px;
   padding: 0 8px;
-  font-size: 10px;
+  font-size: var(--dshm-fs-xs);
   line-height: 18px;
 }
 
@@ -302,7 +347,7 @@
   height: var(--dshm-touch-sm);
   padding-block: 0;
   padding-inline: 14px;
-  font-size: 13px;
+  font-size: var(--dshm-fs-sm);
 }
 
 .actionPrimary:global(.adm-button) {
@@ -317,7 +362,7 @@
   height: var(--dshm-touch-sm);
   padding-block: 0;
   padding-inline: 10px;
-  font-size: 13px;
+  font-size: var(--dshm-fs-sm);
   font-weight: 600;
 }
 
@@ -326,24 +371,19 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: var(--dshm-fs-xs);
   color: var(--dshm-work-doing);
 }
 
 .doneSummary {
   flex: 1;
   min-width: 0;
-  font-size: 12px;
+  font-size: var(--dshm-fs-xs);
   line-height: 18px;
   color: var(--dshm-muted-foreground);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.emptyWrap {
-  flex: none;
-  padding-top: 40px;
 }
 
 /* ---- Work detail page (03 §6.3) ---- */
@@ -359,7 +399,7 @@
 .demoBanner {
   flex: none;
   padding: 6px 16px;
-  font-size: 11px;
+  font-size: var(--dshm-fs-xs);
   line-height: 18px;
   color: var(--dshm-on-soft);
   background: var(--dshm-primary-10);
@@ -400,7 +440,7 @@
 .ticketNo {
   font-family: var(--dshm-font-num);
   font-variant-numeric: tabular-nums;
-  font-size: 13px;
+  font-size: var(--dshm-fs-sm);
   line-height: 18px;
   color: var(--dshm-muted-foreground);
 }
@@ -409,7 +449,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 4px 10px;
-  font-size: 12px;
+  font-size: var(--dshm-fs-xs);
   line-height: 18px;
   color: var(--dshm-muted-foreground);
 }
@@ -440,7 +480,7 @@
   align-items: center;
   gap: 8px;
   margin: 2px 0;
-  font-size: 11px;
+  font-size: var(--dshm-fs-xs);
   font-weight: 500;
   line-height: 16px;
   color: var(--dshm-muted-foreground);
@@ -460,7 +500,7 @@
   background: var(--dshm-muted);
   border-left: 3px solid var(--dshm-primary);
   border-radius: var(--dshm-radius);
-  font-size: 13px;
+  font-size: var(--dshm-fs-sm);
   line-height: 20px;
   color: var(--dshm-foreground);
   display: -webkit-box;
@@ -470,7 +510,7 @@
 }
 
 .quoteEmpty {
-  font-size: 12px;
+  font-size: var(--dshm-fs-xs);
   line-height: 18px;
   color: var(--dshm-muted-foreground);
 }
@@ -478,7 +518,7 @@
 .sourceLink:global(.adm-button) {
   align-self: flex-start;
   padding: 0;
-  font-size: 13px;
+  font-size: var(--dshm-fs-sm);
   line-height: 20px;
   font-weight: 600;
 }
@@ -492,14 +532,14 @@
   padding: 11px 13px;
   background: var(--dshm-muted);
   border: 1px solid var(--dshm-border);
-  border-radius: 13px;
+  border-radius: var(--dshm-radius-lg);
 }
 
 .progressLabel {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  font-size: 12.8px;
+  font-size: var(--dshm-fs-xs);
   font-weight: 600;
   line-height: 18px;
   color: var(--dshm-foreground);
@@ -517,7 +557,7 @@
 .progressTrack {
   --track-width: 8px;
   --track-color: var(--dshm-border);
-  --border-radius: 999px;
+  --border-radius: var(--dshm-radius-pill);
 }
 
 /* The execution timeline (v6, the design's .tl): the 56px right-aligned
@@ -528,7 +568,7 @@
 }
 
 .timelineEmpty {
-  font-size: 12px;
+  font-size: var(--dshm-fs-xs);
   line-height: 18px;
   color: var(--dshm-muted-foreground);
 }
@@ -547,7 +587,7 @@
 .stepTime {
   text-align: right;
   padding-top: 2px;
-  font-size: 12.3px;
+  font-size: var(--dshm-fs-xs);
   line-height: 18px;
   color: var(--dshm-muted-foreground);
   font-family: var(--dshm-font-num);
@@ -643,14 +683,14 @@
 }
 
 .stepLabel {
-  font-size: 14px;
+  font-size: var(--dshm-fs-sm);
   line-height: 20px;
   font-weight: 500;
   color: var(--dshm-foreground);
 }
 
 .stepDetail {
-  font-size: 11px;
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
   color: var(--dshm-muted-foreground);
 }
@@ -674,14 +714,14 @@
 }
 
 .resultTitle {
-  font-size: 15px;
+  font-size: var(--dshm-fs-md);
   line-height: 22px;
   font-weight: 600;
   color: var(--dshm-foreground);
 }
 
 .resultSummary {
-  font-size: 13px;
+  font-size: var(--dshm-fs-sm);
   line-height: 20px;
   color: var(--dshm-foreground);
   display: -webkit-box;
@@ -691,7 +731,7 @@
 }
 
 .resultMeta {
-  font-size: 11px;
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
   color: var(--dshm-muted-foreground);
 }
@@ -699,7 +739,7 @@
 .resultLink:global(.adm-button) {
   align-self: flex-start;
   padding: 0;
-  font-size: 13px;
+  font-size: var(--dshm-fs-sm);
   line-height: 20px;
   font-weight: 600;
 }
@@ -746,7 +786,7 @@
 
 .sheetTitle {
   margin: 0;
-  font-size: 17px;
+  font-size: var(--dshm-fs-lg);
   line-height: 24px;
   font-weight: 600;
   color: var(--dshm-foreground);
@@ -787,7 +827,7 @@
   border-radius: var(--dshm-radius);
   background: var(--dshm-primary-10);
   color: var(--dshm-on-soft);
-  font-size: 12.5px;
+  font-size: var(--dshm-fs-xs);
   line-height: 18px;
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -803,7 +843,7 @@
 
 .fieldLabel {
   margin: 0;
-  font-size: 12px;
+  font-size: var(--dshm-fs-xs);
   font-weight: 500;
   line-height: 18px;
   color: var(--dshm-muted-foreground);
@@ -811,7 +851,7 @@
 
 .fieldError {
   margin: 0;
-  font-size: 11px;
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
   color: var(--dshm-destructive);
 }
@@ -819,13 +859,13 @@
 /* The title input: antd-mobile Input — the boxed face rides on the wrapper
     (this class), the element inherits the fill through the component dials. */
 .fieldInput:global(.adm-input) {
-  --font-size: 14px;
+  --font-size: var(--dshm-fs-sm);
   --color: var(--dshm-foreground);
   --placeholder-color: var(--dshm-muted-foreground);
   width: 100%;
   height: 44px;
   padding: 0 12px;
-  font-size: 14px;
+  font-size: var(--dshm-fs-sm);
   line-height: 22px;
   border: 1px solid var(--dshm-border);
   border-radius: var(--dshm-radius);
@@ -851,7 +891,7 @@
   width: 100%;
   min-height: 44px;
   padding: 0 12px;
-  font-size: 14px;
+  font-size: var(--dshm-fs-sm);
   text-align: left;
   background: var(--dshm-card);
   color: var(--dshm-foreground);
@@ -864,7 +904,7 @@
 }
 
 .pickerLabel {
-  font-size: 14px;
+  font-size: var(--dshm-fs-sm);
   color: var(--dshm-foreground);
 }
 
@@ -872,7 +912,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 14px;
+  font-size: var(--dshm-fs-sm);
   font-weight: 500;
   color: var(--dshm-primary);
 }
@@ -910,7 +950,7 @@
 }
 
 .suggestionLabel {
-  font-size: 11px;
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
   font-weight: 600;
   color: var(--dshm-muted-foreground);
@@ -918,7 +958,7 @@
 
 .suggestionText {
   margin: 3px 0 0;
-  font-size: 13px;
+  font-size: var(--dshm-fs-sm);
   line-height: 20px;
   color: var(--dshm-foreground);
 }
@@ -939,14 +979,14 @@
 }
 
 .switchTitle {
-  font-size: 14px;
+  font-size: var(--dshm-fs-sm);
   line-height: 20px;
   font-weight: 500;
   color: var(--dshm-foreground);
 }
 
 .switchHint {
-  font-size: 11px;
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
   color: var(--dshm-muted-foreground);
 }

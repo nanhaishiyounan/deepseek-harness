@@ -329,8 +329,49 @@
     nocobaseEnabled: true
     # The business page's inline-edit fast path over the same service account
     # (whitelisted low-risk fields only; high-risk changes stay on the
-    # agent's nb_update confirmation flow).
+    # agent's nb_update confirmation flow). Requires a live signIn session
+    # token; the audit actor derives from it server-side.
     nocobaseWriteEnabled: true
+    # W6-R2: the alert engine's base URL for nocobase.alertAct (the mobile
+    # alerts page's claim/close rows forward here — the engine's transition
+    # table + routed-user whitelist stay the single decision point, the
+    # gateway only carries the session-derived identity).
+    alertEngineUrl: !!js "process.env.W6_ALERT_ENGINE_URL ?? 'http://127.0.0.1:13110'"
+    # W6-R2: wfl_ engine tables are write-refused on the gateway by default
+    # (their state machines own the transitions). This table stays EMPTY on
+    # purpose: no business case needs a direct wfl_ column write, and the
+    # alert state machine rides nocobase.alertAct only. Set per-user entries
+    # here solely when a future batch documents the need.
+    nocobaseWflWriteScopes: {}
+    # The signed-in role collection scopes enforced server-side on
+    # nocobase.list/get/update (the mobile docs deep-link guard's second
+    # layer; mirrors ui-mobile docsCatalog's role table — one deployment,
+    # one shared whitelist). Accounts absent here have no configured scope.
+    nocobaseCollectionScopes:
+      buyer: [pur_orders, pur_requests, srm_suppliers]
+      finance: [pur_orders, so_orders, srm_suppliers]
+      keeper: [wms_receipts, wms_transfers, wms_reservations, hub_inv_products, wms_lots]
+      qc_inspector: [qm_inspections, qm_nc_dispositions, wms_receipts, wms_lots]
+      planner: [mfg_orders, pur_requests, hub_inv_products]
+      shop_lead: [mfg_orders, mfg_job_reports, mfg_completions]
+      sales_rep: [so_orders, hub_inv_products]
+      # wfl_alerts rides no row here: its read face is row-scoped by the
+      # gateway itself (notify_users/owner; admin all), not this table.
+      admin:
+        - pur_orders
+        - pur_requests
+        - so_orders
+        - mfg_orders
+        - wms_receipts
+        - wms_transfers
+        - wms_reservations
+        - mfg_job_reports
+        - mfg_completions
+        - qm_inspections
+        - qm_nc_dispositions
+        - srm_suppliers
+        - hub_inv_products
+        - wms_lots
     # The data-asset market surface (assets.list/detail/stats): connector
     # discovery projects the catalog; orders.create backs the confirm card.
     assetsEnabled: true

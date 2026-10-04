@@ -1,0 +1,4312 @@
+[
+  {
+    "kind": "fieldEnum",
+    "collection": "crm_customers",
+    "field": "level",
+    "before": [
+      {
+        "value": "A",
+        "label": "A 级",
+        "color": "green"
+      },
+      {
+        "value": "B",
+        "label": "B 级",
+        "color": "blue"
+      },
+      {
+        "value": "C",
+        "label": "C 级",
+        "color": "orange"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "crm_contacts",
+    "field": "status",
+    "before": [
+      {
+        "value": "active",
+        "label": "在职",
+        "color": "green"
+      },
+      {
+        "value": "inactive",
+        "label": "离职",
+        "color": "default"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "crm_leads",
+    "field": "stage",
+    "before": [
+      {
+        "value": "new",
+        "label": "New lead",
+        "color": "default"
+      },
+      {
+        "value": "contacted",
+        "label": "Contacted",
+        "color": "blue"
+      },
+      {
+        "value": "requirements_confirmed",
+        "label": "Requirements confirmed",
+        "color": "cyan"
+      },
+      {
+        "value": "proposal",
+        "label": "Proposal or quotation",
+        "color": "purple"
+      },
+      {
+        "value": "negotiation",
+        "label": "Negotiation",
+        "color": "orange"
+      },
+      {
+        "value": "won",
+        "label": "Won",
+        "color": "green"
+      },
+      {
+        "value": "lost",
+        "label": "Lost",
+        "color": "red"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "crm_quotes",
+    "field": "status",
+    "before": [
+      {
+        "value": "draft",
+        "label": "草稿",
+        "color": "default"
+      },
+      {
+        "value": "sent",
+        "label": "已发送",
+        "color": "blue"
+      },
+      {
+        "value": "accepted",
+        "label": "已接受",
+        "color": "green"
+      },
+      {
+        "value": "converted",
+        "label": "已转订单",
+        "color": "purple"
+      },
+      {
+        "value": "void",
+        "label": "已作废",
+        "color": "default"
+      },
+      {
+        "value": "rejected",
+        "label": "已拒绝",
+        "color": "red"
+      },
+      {
+        "value": "pending_approval",
+        "label": "待审批",
+        "color": "orange"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "crm_deals",
+    "field": "status",
+    "before": [
+      {
+        "value": "pending",
+        "label": "处理中",
+        "color": "blue"
+      },
+      {
+        "value": "fulfilled",
+        "label": "已交付",
+        "color": "green"
+      },
+      {
+        "value": "cancelled",
+        "label": "已取消",
+        "color": "red"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "crm_customers",
+    "field": "type",
+    "before": [
+      {
+        "value": "enterprise",
+        "label": "企业客户",
+        "color": "blue"
+      },
+      {
+        "value": "trader",
+        "label": "贸易商",
+        "color": "cyan"
+      },
+      {
+        "value": "factory",
+        "label": "工厂",
+        "color": "green"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "crm_customers",
+    "field": "status",
+    "before": [
+      {
+        "value": "active",
+        "label": "合作中",
+        "color": "green"
+      },
+      {
+        "value": "prospect",
+        "label": "潜在",
+        "color": "blue"
+      },
+      {
+        "value": "churned",
+        "label": "已流失",
+        "color": "red"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "crm_payments",
+    "field": "method",
+    "before": [
+      {
+        "value": "bank_transfer",
+        "label": "银行转账",
+        "color": "blue"
+      },
+      {
+        "value": "letter_of_credit",
+        "label": "信用证",
+        "color": "green"
+      },
+      {
+        "value": "acceptance_bill",
+        "label": "承兑汇票",
+        "color": "orange"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "crm_payments",
+    "field": "status",
+    "before": [
+      {
+        "value": "pending",
+        "label": "待到账",
+        "color": "orange"
+      },
+      {
+        "value": "received",
+        "label": "已到账",
+        "color": "green"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "crm_invoices",
+    "field": "status",
+    "before": [
+      {
+        "value": "draft",
+        "label": "草稿",
+        "color": "default"
+      },
+      {
+        "value": "issued",
+        "label": "已开具",
+        "color": "blue"
+      },
+      {
+        "value": "paid",
+        "label": "已收款",
+        "color": "green"
+      },
+      {
+        "value": "void",
+        "label": "已作废",
+        "color": "red"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "crm_products",
+    "field": "pricing_mode",
+    "before": [
+      {
+        "value": "fixed",
+        "label": "固定报价",
+        "color": "blue"
+      },
+      {
+        "value": "times",
+        "label": "按次计费",
+        "color": "green"
+      },
+      {
+        "value": "subscription",
+        "label": "年度订阅",
+        "color": "purple"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "crm_products",
+    "field": "category",
+    "before": [
+      {
+        "value": "compliance",
+        "label": "合规认证",
+        "color": "blue"
+      },
+      {
+        "value": "logistics",
+        "label": "海外仓储",
+        "color": "cyan"
+      },
+      {
+        "value": "channel",
+        "label": "渠道拓展",
+        "color": "green"
+      },
+      {
+        "value": "brand",
+        "label": "品牌营销",
+        "color": "purple"
+      },
+      {
+        "value": "data",
+        "label": "数据洞察",
+        "color": "orange"
+      },
+      {
+        "value": "ops",
+        "label": "运营辅导",
+        "color": "default"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "pur_orders",
+    "field": "receiving_status",
+    "before": [
+      {
+        "value": "none",
+        "label": "未收货",
+        "color": "default"
+      },
+      {
+        "value": "partial",
+        "label": "部分收货",
+        "color": "orange"
+      },
+      {
+        "value": "received",
+        "label": "收货完成",
+        "color": "green"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "pur_rfqs",
+    "field": "doc_status",
+    "before": [
+      {
+        "color": "default",
+        "label": "草稿",
+        "value": "draft"
+      },
+      {
+        "color": "orange",
+        "label": "待审批",
+        "value": "pending"
+      },
+      {
+        "color": "purple",
+        "label": "二级审批中",
+        "value": "pending_level2"
+      },
+      {
+        "color": "green",
+        "label": "已生效",
+        "value": "approved"
+      },
+      {
+        "color": "red",
+        "label": "已驳回",
+        "value": "rejected"
+      },
+      {
+        "color": "default",
+        "label": "已作废",
+        "value": "void"
+      },
+      {
+        "color": "blue",
+        "label": "已发出",
+        "value": "sent"
+      },
+      {
+        "color": "default",
+        "label": "已关闭",
+        "value": "closed"
+      },
+      {
+        "color": "purple",
+        "label": "已定标",
+        "value": "awarded"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "pur_quotes",
+    "field": "status",
+    "before": [
+      {
+        "color": "default",
+        "label": "草稿",
+        "value": "draft"
+      },
+      {
+        "color": "green",
+        "label": "已报价",
+        "value": "submitted"
+      },
+      {
+        "color": "default",
+        "label": "已落选",
+        "value": "lost"
+      },
+      {
+        "color": "cyan",
+        "label": "后备",
+        "value": "backup"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "pur_payments",
+    "field": "doc_status",
+    "before": [
+      {
+        "value": "draft",
+        "label": "草稿",
+        "color": "default"
+      },
+      {
+        "value": "pending",
+        "label": "待审批",
+        "color": "orange"
+      },
+      {
+        "value": "pending_level2",
+        "label": "二级审批中",
+        "color": "purple"
+      },
+      {
+        "value": "approved",
+        "label": "已生效",
+        "color": "green"
+      },
+      {
+        "value": "rejected",
+        "label": "已驳回",
+        "color": "red"
+      },
+      {
+        "value": "void",
+        "label": "已作废",
+        "color": "default"
+      },
+      {
+        "value": "paid",
+        "label": "已付款",
+        "color": "green"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "pur_payments",
+    "field": "pay_method",
+    "before": [
+      {
+        "value": "bank",
+        "label": "银行转账",
+        "color": "blue"
+      },
+      {
+        "value": "bill",
+        "label": "承兑汇票",
+        "color": "purple"
+      },
+      {
+        "value": "cash",
+        "label": "现金",
+        "color": "default"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "pur_orders",
+    "field": "invoice_status",
+    "before": [
+      {
+        "value": "no_invoice",
+        "label": "未开票",
+        "color": "default"
+      },
+      {
+        "value": "to_invoice",
+        "label": "待开票",
+        "color": "orange"
+      },
+      {
+        "value": "invoiced",
+        "label": "已开票",
+        "color": "green"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "pur_requests",
+    "field": "doc_status",
+    "before": [
+      {
+        "value": "draft",
+        "label": "草稿",
+        "color": "default"
+      },
+      {
+        "value": "pending",
+        "label": "待审批",
+        "color": "orange"
+      },
+      {
+        "value": "pending_level2",
+        "label": "二级审批中",
+        "color": "purple"
+      },
+      {
+        "value": "approved",
+        "label": "已生效",
+        "color": "green"
+      },
+      {
+        "value": "rejected",
+        "label": "已驳回",
+        "color": "red"
+      },
+      {
+        "value": "void",
+        "label": "已作废",
+        "color": "default"
+      },
+      {
+        "value": "converted",
+        "label": "已转单",
+        "color": "cyan"
+      },
+      {
+        "value": "closed",
+        "label": "已关闭",
+        "color": "default"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "pur_invoices",
+    "field": "match_result",
+    "before": [
+      {
+        "value": "draft",
+        "label": "待匹配",
+        "color": "default"
+      },
+      {
+        "value": "pending",
+        "label": "匹配中",
+        "color": "orange"
+      },
+      {
+        "value": "matched",
+        "label": "匹配通过",
+        "color": "green"
+      },
+      {
+        "value": "exception",
+        "label": "匹配异常",
+        "color": "red"
+      },
+      {
+        "value": "confirmed",
+        "label": "已确认",
+        "color": "cyan"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "pur_orders",
+    "field": "doc_status",
+    "before": [
+      {
+        "value": "draft",
+        "label": "草稿",
+        "color": "default"
+      },
+      {
+        "value": "pending",
+        "label": "待审批",
+        "color": "orange"
+      },
+      {
+        "value": "pending_level2",
+        "label": "二级审批中",
+        "color": "purple"
+      },
+      {
+        "value": "approved",
+        "label": "已生效",
+        "color": "green"
+      },
+      {
+        "value": "rejected",
+        "label": "已驳回",
+        "color": "red"
+      },
+      {
+        "value": "void",
+        "label": "已作废",
+        "color": "default"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "so_orders",
+    "field": "doc_status",
+    "before": [
+      {
+        "value": "draft",
+        "label": "草稿",
+        "color": "default"
+      },
+      {
+        "value": "pending",
+        "label": "待审批",
+        "color": "orange"
+      },
+      {
+        "value": "pending_level2",
+        "label": "二级审批中",
+        "color": "purple"
+      },
+      {
+        "value": "approved",
+        "label": "已生效",
+        "color": "green"
+      },
+      {
+        "value": "rejected",
+        "label": "已驳回",
+        "color": "red"
+      },
+      {
+        "value": "void",
+        "label": "已作废",
+        "color": "default"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "so_orders",
+    "field": "shipping_status",
+    "before": [
+      {
+        "value": "none",
+        "label": "未发货",
+        "color": "default"
+      },
+      {
+        "value": "partial",
+        "label": "部分交付",
+        "color": "orange"
+      },
+      {
+        "value": "shipped",
+        "label": "全部交付",
+        "color": "green"
+      }
+    ]
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "n13wksf",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "new",
+          "label": "新建",
+          "color": "default"
+        },
+        {
+          "value": "assigned",
+          "label": "已指派",
+          "color": "blue"
+        },
+        {
+          "value": "waiting_customer",
+          "label": "待客户",
+          "color": "blue"
+        },
+        {
+          "value": "waiting_internal",
+          "label": "待内部",
+          "color": "blue"
+        },
+        {
+          "value": "in_progress",
+          "label": "执行中",
+          "color": "blue"
+        },
+        {
+          "value": "resolved",
+          "label": "已解决",
+          "color": "green"
+        },
+        {
+          "value": "closed",
+          "label": "已关闭",
+          "color": "default"
+        },
+        {
+          "value": "reopened",
+          "label": "重开",
+          "color": "blue"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "w4b1cfp9gb0ygaxak",
+    "before": {
+      "options": [
+        {
+          "value": "customs",
+          "label": "关务",
+          "color": "blue"
+        },
+        {
+          "value": "logistics",
+          "label": "物流仓储",
+          "color": "blue"
+        },
+        {
+          "value": "compliance",
+          "label": "合规认证",
+          "color": "blue"
+        },
+        {
+          "value": "channel",
+          "label": "渠道上架",
+          "color": "blue"
+        },
+        {
+          "value": "payment",
+          "label": "结算支付",
+          "color": "blue"
+        },
+        {
+          "value": "policy",
+          "label": "政策咨询",
+          "color": "blue"
+        },
+        {
+          "value": "after_sales",
+          "label": "售后",
+          "color": "blue"
+        },
+        {
+          "value": "legal",
+          "label": "法务",
+          "color": "blue"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "n17cgi0y45zx2tff",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "new",
+          "label": "新建",
+          "color": "default"
+        },
+        {
+          "value": "assigned",
+          "label": "已指派",
+          "color": "blue"
+        },
+        {
+          "value": "waiting_customer",
+          "label": "待客户",
+          "color": "blue"
+        },
+        {
+          "value": "waiting_internal",
+          "label": "待内部",
+          "color": "blue"
+        },
+        {
+          "value": "in_progress",
+          "label": "执行中",
+          "color": "blue"
+        },
+        {
+          "value": "resolved",
+          "label": "已解决",
+          "color": "green"
+        },
+        {
+          "value": "closed",
+          "label": "已关闭",
+          "color": "default"
+        },
+        {
+          "value": "reopened",
+          "label": "重开",
+          "color": "blue"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "n17e1cc88znx9wpzaf",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "backlog",
+          "label": "待规划",
+          "color": "blue"
+        },
+        {
+          "value": "todo",
+          "label": "待处理",
+          "color": "blue"
+        },
+        {
+          "value": "in_progress",
+          "label": "执行中",
+          "color": "blue"
+        },
+        {
+          "value": "review",
+          "label": "评审中",
+          "color": "blue"
+        },
+        {
+          "value": "done",
+          "label": "已完成",
+          "color": "cyan"
+        },
+        {
+          "value": "blocked",
+          "label": "受阻",
+          "color": "blue"
+        },
+        {
+          "value": "cancelled",
+          "label": "已取消",
+          "color": "default"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "n17e1cinmkcsqw2pqf",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "low",
+          "label": "低",
+          "color": "blue"
+        },
+        {
+          "value": "medium",
+          "label": "中",
+          "color": "blue"
+        },
+        {
+          "value": "high",
+          "label": "高",
+          "color": "blue"
+        },
+        {
+          "value": "urgent",
+          "label": "紧急",
+          "color": "blue"
+        },
+        {
+          "value": "med",
+          "label": "Med",
+          "color": "blue"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "n17e1cioaziq1goqf",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "pending",
+          "label": "待处理",
+          "color": "orange"
+        },
+        {
+          "value": "reached",
+          "label": "已达成",
+          "color": "blue"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "n17e1cp7rwjadr8qbf",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "planning",
+          "label": "规划中",
+          "color": "blue"
+        },
+        {
+          "value": "in_progress",
+          "label": "执行中",
+          "color": "blue"
+        },
+        {
+          "value": "blocked",
+          "label": "受阻",
+          "color": "blue"
+        },
+        {
+          "value": "completed",
+          "label": "已完成",
+          "color": "cyan"
+        },
+        {
+          "value": "archived",
+          "label": "已归档",
+          "color": "blue"
+        },
+        {
+          "value": "active",
+          "label": "生效",
+          "color": "green"
+        },
+        {
+          "value": "done",
+          "label": "已完成",
+          "color": "cyan"
+        },
+        {
+          "value": "on_hold",
+          "label": "On hold",
+          "color": "blue"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "w1w1c249fbdp8nc4f",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "submit",
+          "label": "提交审批",
+          "color": "blue"
+        },
+        {
+          "value": "resubmit",
+          "label": "重新提交",
+          "color": "blue"
+        },
+        {
+          "value": "approve",
+          "label": "同意",
+          "color": "blue"
+        },
+        {
+          "value": "reject",
+          "label": "驳回",
+          "color": "blue"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "default"
+        },
+        {
+          "value": "comment",
+          "label": "意见",
+          "color": "blue"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "w1w1ck3n58to9off",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "engine",
+          "label": "引擎",
+          "color": "blue"
+        },
+        {
+          "value": "page",
+          "label": "页面",
+          "color": "purple"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "w1w1clte70b7ncff",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "pending",
+          "label": "待处理",
+          "color": "orange"
+        },
+        {
+          "value": "pending_level2",
+          "label": "二级审批中",
+          "color": "purple"
+        },
+        {
+          "value": "approved",
+          "label": "已生效",
+          "color": "green"
+        },
+        {
+          "value": "rejected",
+          "label": "已驳回",
+          "color": "red"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "default"
+        },
+        {
+          "value": "potential",
+          "label": "潜在",
+          "color": "blue"
+        },
+        {
+          "value": "reviewing",
+          "label": "准入评审中",
+          "color": "blue"
+        },
+        {
+          "value": "qualified",
+          "label": "合格",
+          "color": "blue"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "w1w1cwa9jgbws3xsf",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "pending",
+          "label": "待处理",
+          "color": "orange"
+        },
+        {
+          "value": "pending_level2",
+          "label": "二级审批中",
+          "color": "purple"
+        },
+        {
+          "value": "approved",
+          "label": "已生效",
+          "color": "green"
+        },
+        {
+          "value": "rejected",
+          "label": "已驳回",
+          "color": "red"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "default"
+        },
+        {
+          "value": "potential",
+          "label": "潜在",
+          "color": "blue"
+        },
+        {
+          "value": "reviewing",
+          "label": "准入评审中",
+          "color": "blue"
+        },
+        {
+          "value": "qualified",
+          "label": "合格",
+          "color": "blue"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "w1w1cxfje01yvpprf",
+    "before": {
+      "displayStyle": "text",
+      "overflowMode": "ellipsis",
+      "clickToOpen": false,
+      "displayCopyButton": false,
+      "options": [
+        {
+          "value": "open",
+          "label": "进行中",
+          "color": "blue"
+        },
+        {
+          "value": "completed",
+          "label": "已完成",
+          "color": "cyan"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "w4b1cfh7yu778b10r",
+    "before": {
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "pending",
+          "label": "待处理",
+          "color": "orange"
+        },
+        {
+          "value": "pending_level2",
+          "label": "二级审批中",
+          "color": "purple"
+        },
+        {
+          "value": "approved",
+          "label": "已生效",
+          "color": "green"
+        },
+        {
+          "value": "rejected",
+          "label": "已驳回",
+          "color": "red"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "default"
+        },
+        {
+          "value": "potential",
+          "label": "潜在",
+          "color": "blue"
+        },
+        {
+          "value": "reviewing",
+          "label": "准入评审中",
+          "color": "blue"
+        },
+        {
+          "value": "qualified",
+          "label": "合格",
+          "color": "blue"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "w4b1cfuet6hs2j4bj",
+    "before": {
+      "options": [
+        {
+          "value": "submit",
+          "label": "提交审批",
+          "color": "blue"
+        },
+        {
+          "value": "resubmit",
+          "label": "重新提交",
+          "color": "blue"
+        },
+        {
+          "value": "approve",
+          "label": "同意",
+          "color": "blue"
+        },
+        {
+          "value": "reject",
+          "label": "驳回",
+          "color": "blue"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "default"
+        },
+        {
+          "value": "comment",
+          "label": "意见",
+          "color": "blue"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "w4b1cflkozrg4h11",
+    "before": {
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "pending",
+          "label": "待处理",
+          "color": "orange"
+        },
+        {
+          "value": "pending_level2",
+          "label": "二级审批中",
+          "color": "purple"
+        },
+        {
+          "value": "approved",
+          "label": "已生效",
+          "color": "green"
+        },
+        {
+          "value": "rejected",
+          "label": "已驳回",
+          "color": "red"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "default"
+        },
+        {
+          "value": "potential",
+          "label": "潜在",
+          "color": "blue"
+        },
+        {
+          "value": "reviewing",
+          "label": "准入评审中",
+          "color": "blue"
+        },
+        {
+          "value": "qualified",
+          "label": "合格",
+          "color": "blue"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "w4b1cf9v1132uvkaj",
+    "before": {
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "pending",
+          "label": "待处理",
+          "color": "orange"
+        },
+        {
+          "value": "pending_level2",
+          "label": "二级审批中",
+          "color": "purple"
+        },
+        {
+          "value": "approved",
+          "label": "已生效",
+          "color": "green"
+        },
+        {
+          "value": "rejected",
+          "label": "已驳回",
+          "color": "red"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "default"
+        },
+        {
+          "value": "potential",
+          "label": "潜在",
+          "color": "blue"
+        },
+        {
+          "value": "reviewing",
+          "label": "准入评审中",
+          "color": "blue"
+        },
+        {
+          "value": "qualified",
+          "label": "合格",
+          "color": "blue"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "fieldOptions",
+    "fieldUid": "w4b1cf0i4zbf649dl",
+    "before": {
+      "options": [
+        {
+          "value": "qualified",
+          "label": "合格",
+          "color": "blue"
+        },
+        {
+          "value": "quarantined",
+          "label": "隔离",
+          "color": "blue"
+        },
+        {
+          "value": "frozen",
+          "label": "冻结",
+          "color": "blue"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "n13wks",
+    "before": {
+      "title": "状态",
+      "dataIndex": "status",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "new",
+          "label": "新建",
+          "color": "default"
+        },
+        {
+          "value": "assigned",
+          "label": "已指派",
+          "color": "blue"
+        },
+        {
+          "value": "waiting_customer",
+          "label": "待客户",
+          "color": "orange"
+        },
+        {
+          "value": "waiting_internal",
+          "label": "待内部",
+          "color": "purple"
+        },
+        {
+          "value": "in_progress",
+          "label": "处理中",
+          "color": "cyan"
+        },
+        {
+          "value": "resolved",
+          "label": "已解决",
+          "color": "green"
+        },
+        {
+          "value": "closed",
+          "label": "已关闭",
+          "color": "default"
+        },
+        {
+          "value": "reopened",
+          "label": "重开",
+          "color": "red"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "n17cgi0y45zx2tf",
+    "before": {
+      "title": "状态",
+      "dataIndex": "status",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "new",
+          "label": "新建",
+          "color": "default"
+        },
+        {
+          "value": "assigned",
+          "label": "已指派",
+          "color": "blue"
+        },
+        {
+          "value": "waiting_customer",
+          "label": "待客户",
+          "color": "orange"
+        },
+        {
+          "value": "waiting_internal",
+          "label": "待内部",
+          "color": "purple"
+        },
+        {
+          "value": "in_progress",
+          "label": "处理中",
+          "color": "cyan"
+        },
+        {
+          "value": "resolved",
+          "label": "已解决",
+          "color": "green"
+        },
+        {
+          "value": "closed",
+          "label": "已关闭",
+          "color": "default"
+        },
+        {
+          "value": "reopened",
+          "label": "重开",
+          "color": "red"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "n17e1cc88znx9wpza",
+    "before": {
+      "title": "状态",
+      "dataIndex": "status",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "backlog",
+          "label": "待规划",
+          "color": "default"
+        },
+        {
+          "value": "todo",
+          "label": "待处理",
+          "color": "blue"
+        },
+        {
+          "value": "in_progress",
+          "label": "进行中",
+          "color": "cyan"
+        },
+        {
+          "value": "review",
+          "label": "评审中",
+          "color": "purple"
+        },
+        {
+          "value": "done",
+          "label": "已完成",
+          "color": "green"
+        },
+        {
+          "value": "blocked",
+          "label": "受阻",
+          "color": "red"
+        },
+        {
+          "value": "cancelled",
+          "label": "已取消",
+          "color": "default"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "n17e1cioaziq1goq",
+    "before": {
+      "title": "状态",
+      "dataIndex": "status",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "pending",
+          "label": "待达成",
+          "color": "blue"
+        },
+        {
+          "value": "reached",
+          "label": "已达成",
+          "color": "green"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "n17e1cp7rwjadr8qb",
+    "before": {
+      "title": "状态",
+      "dataIndex": "status",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "planning",
+          "label": "规划中",
+          "color": "blue"
+        },
+        {
+          "value": "in_progress",
+          "label": "进行中",
+          "color": "cyan"
+        },
+        {
+          "value": "blocked",
+          "label": "受阻",
+          "color": "red"
+        },
+        {
+          "value": "completed",
+          "label": "已完成",
+          "color": "green"
+        },
+        {
+          "value": "archived",
+          "label": "已归档",
+          "color": "default"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "w1w1c249fbdp8nc4",
+    "before": {
+      "title": "动作",
+      "dataIndex": "action",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "submit",
+          "label": "提交审批",
+          "color": "blue"
+        },
+        {
+          "value": "resubmit",
+          "label": "重新提交",
+          "color": "cyan"
+        },
+        {
+          "value": "approve",
+          "label": "同意",
+          "color": "green"
+        },
+        {
+          "value": "reject",
+          "label": "驳回",
+          "color": "red"
+        },
+        {
+          "value": "void",
+          "label": "作废",
+          "color": "default"
+        },
+        {
+          "value": "comment",
+          "label": "意见",
+          "color": "default"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "w1w1ck3n58to9of",
+    "before": {
+      "title": "入口",
+      "dataIndex": "source",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "engine",
+          "label": "引擎",
+          "color": "blue"
+        },
+        {
+          "value": "page",
+          "label": "页面",
+          "color": "purple"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "w1w1clte70b7ncf",
+    "before": {
+      "title": "新状态",
+      "dataIndex": "to_state",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "pending",
+          "label": "待审批",
+          "color": "orange"
+        },
+        {
+          "value": "pending_level2",
+          "label": "二级审批中",
+          "color": "purple"
+        },
+        {
+          "value": "approved",
+          "label": "已生效",
+          "color": "green"
+        },
+        {
+          "value": "rejected",
+          "label": "已驳回",
+          "color": "red"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "default"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "w1w1cwa9jgbws3xs",
+    "before": {
+      "title": "所在状态",
+      "dataIndex": "state",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "pending",
+          "label": "待审批",
+          "color": "orange"
+        },
+        {
+          "value": "pending_level2",
+          "label": "二级审批中",
+          "color": "purple"
+        },
+        {
+          "value": "approved",
+          "label": "已生效",
+          "color": "green"
+        },
+        {
+          "value": "rejected",
+          "label": "已驳回",
+          "color": "red"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "default"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "columnOptions",
+    "columnUid": "w1w1cxfje01yvppr",
+    "before": {
+      "title": "状态",
+      "dataIndex": "status",
+      "width": 150,
+      "editable": false,
+      "sorter": false,
+      "fixed": "none",
+      "options": [
+        {
+          "value": "open",
+          "label": "待办",
+          "color": "orange"
+        },
+        {
+          "value": "completed",
+          "label": "已完成",
+          "color": "green"
+        }
+      ],
+      "align": "left"
+    }
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "hub_tk_tickets",
+    "field": "status",
+    "before": [
+      {
+        "value": "new",
+        "label": "新建",
+        "color": "default"
+      },
+      {
+        "value": "assigned",
+        "label": "已指派",
+        "color": "blue"
+      },
+      {
+        "value": "waiting_customer",
+        "label": "待客户",
+        "color": "orange"
+      },
+      {
+        "value": "waiting_internal",
+        "label": "待内部",
+        "color": "purple"
+      },
+      {
+        "value": "in_progress",
+        "label": "处理中",
+        "color": "cyan"
+      },
+      {
+        "value": "resolved",
+        "label": "已解决",
+        "color": "green"
+      },
+      {
+        "value": "closed",
+        "label": "已关闭",
+        "color": "default"
+      },
+      {
+        "value": "reopened",
+        "label": "重开",
+        "color": "red"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "hub_tk_tickets",
+    "field": "category",
+    "before": [
+      {
+        "value": "customs",
+        "label": "关务",
+        "color": "blue"
+      },
+      {
+        "value": "logistics",
+        "label": "物流仓储",
+        "color": "cyan"
+      },
+      {
+        "value": "compliance",
+        "label": "合规认证",
+        "color": "purple"
+      },
+      {
+        "value": "channel",
+        "label": "渠道上架",
+        "color": "green"
+      },
+      {
+        "value": "payment",
+        "label": "结算支付",
+        "color": "orange"
+      },
+      {
+        "value": "policy",
+        "label": "政策咨询",
+        "color": "default"
+      },
+      {
+        "value": "after_sales",
+        "label": "售后",
+        "color": "red"
+      },
+      {
+        "value": "legal",
+        "label": "法务",
+        "color": "default"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "hub_pj_tasks",
+    "field": "status",
+    "before": [
+      {
+        "value": "backlog",
+        "label": "待规划",
+        "color": "default"
+      },
+      {
+        "value": "todo",
+        "label": "待处理",
+        "color": "blue"
+      },
+      {
+        "value": "in_progress",
+        "label": "进行中",
+        "color": "cyan"
+      },
+      {
+        "value": "review",
+        "label": "评审中",
+        "color": "purple"
+      },
+      {
+        "value": "done",
+        "label": "已完成",
+        "color": "green"
+      },
+      {
+        "value": "blocked",
+        "label": "受阻",
+        "color": "red"
+      },
+      {
+        "value": "cancelled",
+        "label": "已取消",
+        "color": "default"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "hub_pj_tasks",
+    "field": "priority",
+    "before": [
+      {
+        "value": "low",
+        "label": "低",
+        "color": "default"
+      },
+      {
+        "value": "medium",
+        "label": "中",
+        "color": "blue"
+      },
+      {
+        "value": "high",
+        "label": "高",
+        "color": "orange"
+      },
+      {
+        "value": "urgent",
+        "label": "紧急",
+        "color": "red"
+      },
+      {
+        "value": "med",
+        "label": "Med"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "hub_pj_milestones",
+    "field": "status",
+    "before": [
+      {
+        "value": "pending",
+        "label": "待达成",
+        "color": "blue"
+      },
+      {
+        "value": "reached",
+        "label": "已达成",
+        "color": "green"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "hub_pj_projects",
+    "field": "status",
+    "before": [
+      {
+        "value": "planning",
+        "label": "规划中",
+        "color": "blue"
+      },
+      {
+        "value": "in_progress",
+        "label": "进行中",
+        "color": "cyan"
+      },
+      {
+        "value": "blocked",
+        "label": "受阻",
+        "color": "red"
+      },
+      {
+        "value": "completed",
+        "label": "已完成",
+        "color": "green"
+      },
+      {
+        "value": "archived",
+        "label": "已归档",
+        "color": "default"
+      },
+      {
+        "value": "active",
+        "label": "Active"
+      },
+      {
+        "value": "done",
+        "label": "Done"
+      },
+      {
+        "value": "on_hold",
+        "label": "On hold"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "wfl_approval_records",
+    "field": "action",
+    "before": [
+      {
+        "value": "submit",
+        "label": "提交审批",
+        "color": "blue"
+      },
+      {
+        "value": "resubmit",
+        "label": "重新提交",
+        "color": "cyan"
+      },
+      {
+        "value": "approve",
+        "label": "同意",
+        "color": "green"
+      },
+      {
+        "value": "reject",
+        "label": "驳回",
+        "color": "red"
+      },
+      {
+        "value": "void",
+        "label": "作废",
+        "color": "default"
+      },
+      {
+        "value": "comment",
+        "label": "意见",
+        "color": "default"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "wfl_approval_records",
+    "field": "source",
+    "before": [
+      {
+        "value": "engine",
+        "label": "引擎",
+        "color": "blue"
+      },
+      {
+        "value": "page",
+        "label": "页面",
+        "color": "purple"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "wfl_approval_records",
+    "field": "to_state",
+    "before": [
+      {
+        "value": "draft",
+        "label": "草稿",
+        "color": "default"
+      },
+      {
+        "value": "pending",
+        "label": "待审批",
+        "color": "orange"
+      },
+      {
+        "value": "pending_level2",
+        "label": "二级审批中",
+        "color": "purple"
+      },
+      {
+        "value": "approved",
+        "label": "已生效",
+        "color": "green"
+      },
+      {
+        "value": "rejected",
+        "label": "已驳回",
+        "color": "red"
+      },
+      {
+        "value": "void",
+        "label": "已作废",
+        "color": "default"
+      },
+      {
+        "value": "potential",
+        "label": "潜在",
+        "color": "default"
+      },
+      {
+        "value": "reviewing",
+        "label": "准入评审中",
+        "color": "blue"
+      },
+      {
+        "value": "qualified",
+        "label": "合格",
+        "color": "green"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "wfl_approval_todos",
+    "field": "state",
+    "before": [
+      {
+        "value": "draft",
+        "label": "草稿",
+        "color": "default"
+      },
+      {
+        "value": "pending",
+        "label": "待审批",
+        "color": "orange"
+      },
+      {
+        "value": "pending_level2",
+        "label": "二级审批中",
+        "color": "purple"
+      },
+      {
+        "value": "approved",
+        "label": "已生效",
+        "color": "green"
+      },
+      {
+        "value": "rejected",
+        "label": "已驳回",
+        "color": "red"
+      },
+      {
+        "value": "void",
+        "label": "已作废",
+        "color": "default"
+      },
+      {
+        "value": "potential",
+        "label": "潜在",
+        "color": "default"
+      },
+      {
+        "value": "reviewing",
+        "label": "准入评审中",
+        "color": "blue"
+      },
+      {
+        "value": "qualified",
+        "label": "合格",
+        "color": "green"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "wfl_approval_todos",
+    "field": "status",
+    "before": [
+      {
+        "value": "open",
+        "label": "待办",
+        "color": "orange"
+      },
+      {
+        "value": "completed",
+        "label": "已完成",
+        "color": "green"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "wfl_flow_transitions",
+    "field": "state",
+    "before": [
+      {
+        "value": "draft",
+        "label": "草稿",
+        "color": "default"
+      },
+      {
+        "value": "pending",
+        "label": "待审批",
+        "color": "orange"
+      },
+      {
+        "value": "pending_level2",
+        "label": "二级审批中",
+        "color": "purple"
+      },
+      {
+        "value": "approved",
+        "label": "已生效",
+        "color": "green"
+      },
+      {
+        "value": "rejected",
+        "label": "已驳回",
+        "color": "red"
+      },
+      {
+        "value": "void",
+        "label": "已作废",
+        "color": "default"
+      },
+      {
+        "value": "potential",
+        "label": "潜在",
+        "color": "default"
+      },
+      {
+        "value": "reviewing",
+        "label": "准入评审中",
+        "color": "blue"
+      },
+      {
+        "value": "qualified",
+        "label": "合格",
+        "color": "green"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "wfl_flow_transitions",
+    "field": "action",
+    "before": [
+      {
+        "value": "submit",
+        "label": "提交审批",
+        "color": "blue"
+      },
+      {
+        "value": "resubmit",
+        "label": "重新提交",
+        "color": "cyan"
+      },
+      {
+        "value": "approve",
+        "label": "同意",
+        "color": "green"
+      },
+      {
+        "value": "reject",
+        "label": "驳回",
+        "color": "red"
+      },
+      {
+        "value": "void",
+        "label": "作废",
+        "color": "default"
+      },
+      {
+        "value": "comment",
+        "label": "意见",
+        "color": "default"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "wfl_flow_transitions",
+    "field": "next_state",
+    "before": [
+      {
+        "value": "draft",
+        "label": "草稿",
+        "color": "default"
+      },
+      {
+        "value": "pending",
+        "label": "待审批",
+        "color": "orange"
+      },
+      {
+        "value": "pending_level2",
+        "label": "二级审批中",
+        "color": "purple"
+      },
+      {
+        "value": "approved",
+        "label": "已生效",
+        "color": "green"
+      },
+      {
+        "value": "rejected",
+        "label": "已驳回",
+        "color": "red"
+      },
+      {
+        "value": "void",
+        "label": "已作废",
+        "color": "default"
+      },
+      {
+        "value": "potential",
+        "label": "潜在",
+        "color": "default"
+      },
+      {
+        "value": "reviewing",
+        "label": "准入评审中",
+        "color": "blue"
+      },
+      {
+        "value": "qualified",
+        "label": "合格",
+        "color": "green"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "wfl_flow_states",
+    "field": "state",
+    "before": [
+      {
+        "value": "draft",
+        "label": "草稿",
+        "color": "default"
+      },
+      {
+        "value": "pending",
+        "label": "待审批",
+        "color": "orange"
+      },
+      {
+        "value": "pending_level2",
+        "label": "二级审批中",
+        "color": "purple"
+      },
+      {
+        "value": "approved",
+        "label": "已生效",
+        "color": "green"
+      },
+      {
+        "value": "rejected",
+        "label": "已驳回",
+        "color": "red"
+      },
+      {
+        "value": "void",
+        "label": "已作废",
+        "color": "default"
+      },
+      {
+        "value": "potential",
+        "label": "潜在",
+        "color": "default"
+      },
+      {
+        "value": "reviewing",
+        "label": "准入评审中",
+        "color": "blue"
+      },
+      {
+        "value": "qualified",
+        "label": "合格",
+        "color": "green"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "srm_capas",
+    "field": "status",
+    "before": [
+      {
+        "value": "initiated",
+        "label": "发起",
+        "color": "orange"
+      },
+      {
+        "value": "replied",
+        "label": "供应商回复",
+        "color": "blue"
+      },
+      {
+        "value": "verifying",
+        "label": "验证",
+        "color": "purple"
+      },
+      {
+        "value": "closed",
+        "label": "关闭",
+        "color": "green"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "qm_inspections",
+    "field": "status",
+    "before": [
+      {
+        "value": "draft",
+        "label": "草稿",
+        "color": "default"
+      },
+      {
+        "value": "pending",
+        "label": "待检",
+        "color": "blue"
+      },
+      {
+        "value": "closed",
+        "label": "已判定",
+        "color": "green"
+      }
+    ]
+  },
+  {
+    "kind": "fieldEnum",
+    "collection": "qm_nc_dispositions",
+    "field": "action",
+    "before": [
+      {
+        "value": "return",
+        "label": "退货",
+        "color": "red"
+      },
+      {
+        "value": "concession",
+        "label": "让步接收",
+        "color": "purple"
+      },
+      {
+        "value": "rework",
+        "label": "返工",
+        "color": "orange"
+      },
+      {
+        "value": "scrap",
+        "label": "报废",
+        "color": "magenta"
+      }
+    ]
+  },
+  {
+    "kind": "kanbanOptions",
+    "blockUid": "h4srmkbbdp9gw5ygmp",
+    "before": {
+      "groupField": "status",
+      "groupOptions": [
+        {
+          "value": "initiated",
+          "label": "发起",
+          "color": "orange"
+        },
+        {
+          "value": "replied",
+          "label": "供应商回复",
+          "color": "blue"
+        },
+        {
+          "value": "verifying",
+          "label": "验证",
+          "color": "purple"
+        },
+        {
+          "value": "closed",
+          "label": "关闭",
+          "color": "green"
+        }
+      ],
+      "styleVariant": "color",
+      "quickCreateEnabled": false,
+      "dragEnabled": true,
+      "sortField": "sort"
+    }
+  },
+  {
+    "kind": "kanbanOptions",
+    "blockUid": "n17f1kb9s8i5vxgl3v",
+    "before": {
+      "groupField": "status",
+      "groupOptions": [
+        {
+          "value": "backlog",
+          "label": "待规划",
+          "color": "default"
+        },
+        {
+          "value": "todo",
+          "label": "待处理",
+          "color": "blue"
+        },
+        {
+          "value": "in_progress",
+          "label": "进行中",
+          "color": "cyan"
+        },
+        {
+          "value": "review",
+          "label": "评审中",
+          "color": "purple"
+        },
+        {
+          "value": "done",
+          "label": "已完成",
+          "color": "green"
+        },
+        {
+          "value": "blocked",
+          "label": "受阻",
+          "color": "red"
+        },
+        {
+          "value": "cancelled",
+          "label": "已取消",
+          "color": "default"
+        }
+      ],
+      "styleVariant": "color",
+      "quickCreateEnabled": false,
+      "dragEnabled": true,
+      "sortField": "sort"
+    }
+  },
+  {
+    "kind": "kanbanOptions",
+    "blockUid": "w3b3kbk2rpc8iv55",
+    "before": {
+      "groupField": "status",
+      "groupOptions": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "pending",
+          "label": "待检",
+          "color": "blue"
+        },
+        {
+          "value": "closed",
+          "label": "已判定",
+          "color": "green"
+        }
+      ],
+      "styleVariant": "color",
+      "quickCreateEnabled": false,
+      "dragEnabled": false
+    }
+  },
+  {
+    "kind": "kanbanOptions",
+    "blockUid": "w3b3kbl868zxpmxk",
+    "before": {
+      "groupField": "doc_status",
+      "groupOptions": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "pending",
+          "label": "待审批",
+          "color": "orange"
+        },
+        {
+          "value": "pending_level2",
+          "label": "二级审批中",
+          "color": "purple"
+        },
+        {
+          "value": "approved",
+          "label": "已生效",
+          "color": "green"
+        },
+        {
+          "value": "rejected",
+          "label": "已驳回",
+          "color": "red"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "default"
+        }
+      ],
+      "styleVariant": "color",
+      "quickCreateEnabled": false,
+      "dragEnabled": false
+    }
+  },
+  {
+    "kind": "kanbanOptions",
+    "blockUid": "w3b3kbs44dn37lpx",
+    "before": {
+      "groupField": "doc_status",
+      "groupOptions": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "pending",
+          "label": "待审批",
+          "color": "orange"
+        },
+        {
+          "value": "pending_level2",
+          "label": "二级审批中",
+          "color": "purple"
+        },
+        {
+          "value": "approved",
+          "label": "已生效",
+          "color": "green"
+        },
+        {
+          "value": "rejected",
+          "label": "已驳回",
+          "color": "red"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "default"
+        }
+      ],
+      "styleVariant": "color",
+      "quickCreateEnabled": false,
+      "dragEnabled": false
+    }
+  },
+  {
+    "kind": "kanbanOptions",
+    "blockUid": "w3b3kbsrcsphno46d",
+    "before": {
+      "groupField": "doc_status",
+      "groupOptions": [
+        {
+          "value": "draft",
+          "label": "草稿",
+          "color": "default"
+        },
+        {
+          "value": "pending",
+          "label": "待审批",
+          "color": "orange"
+        },
+        {
+          "value": "pending_level2",
+          "label": "二级审批中",
+          "color": "purple"
+        },
+        {
+          "value": "approved",
+          "label": "已生效",
+          "color": "green"
+        },
+        {
+          "value": "rejected",
+          "label": "已驳回",
+          "color": "red"
+        },
+        {
+          "value": "void",
+          "label": "已作废",
+          "color": "default"
+        },
+        {
+          "value": "released",
+          "label": "已下达",
+          "color": "blue"
+        },
+        {
+          "value": "in_progress",
+          "label": "执行中",
+          "color": "orange"
+        },
+        {
+          "value": "completed",
+          "label": "已完工",
+          "color": "green"
+        },
+        {
+          "value": "closed",
+          "label": "已关闭",
+          "color": "default"
+        }
+      ],
+      "styleVariant": "color",
+      "quickCreateEnabled": false,
+      "dragEnabled": false
+    }
+  },
+  {
+    "kind": "kanbanOptions",
+    "blockUid": "w8qmkby7q15jr6nd",
+    "before": {
+      "groupField": "action",
+      "groupOptions": [
+        {
+          "value": "return",
+          "label": "退货",
+          "color": "red"
+        },
+        {
+          "value": "concession",
+          "label": "让步接收",
+          "color": "purple"
+        },
+        {
+          "value": "rework",
+          "label": "返工",
+          "color": "orange"
+        },
+        {
+          "value": "scrap",
+          "label": "报废",
+          "color": "magenta"
+        }
+      ],
+      "styleVariant": "color",
+      "quickCreateEnabled": false,
+      "dragEnabled": true
+    }
+  },
+  {
+    "kind": "calendarColor",
+    "blockUid": "n17f1cdi00jjs4urd",
+    "before": {
+      "fieldNames": {
+        "id": "id",
+        "title": "title",
+        "start": "due_at",
+        "end": "plan_end"
+      },
+      "defaultView": "month",
+      "enableQuickCreateEvent": true,
+      "weekStart": 1
+    }
+  },
+  {
+    "kind": "calendarColor",
+    "blockUid": "w3b3cd0xri0m8kc7k",
+    "before": {
+      "fieldNames": {
+        "id": "id",
+        "title": "code",
+        "start": "period_from",
+        "end": "period_to"
+      },
+      "defaultView": "month",
+      "enableQuickCreateEvent": false,
+      "weekStart": 1
+    }
+  },
+  {
+    "kind": "calendarColor",
+    "blockUid": "w3b3cd17rcrufddj",
+    "before": {
+      "fieldNames": {
+        "id": "id",
+        "title": "plan_type",
+        "start": "suggest_date",
+        "end": "need_date"
+      },
+      "defaultView": "month",
+      "enableQuickCreateEvent": false,
+      "weekStart": 1
+    }
+  },
+  {
+    "kind": "calendarColor",
+    "blockUid": "w3b3cd2o2rvi9079v",
+    "before": {
+      "fieldNames": {
+        "id": "id",
+        "title": "code",
+        "start": "need_date",
+        "end": "need_date"
+      },
+      "defaultView": "month",
+      "enableQuickCreateEvent": false,
+      "weekStart": 1
+    }
+  },
+  {
+    "kind": "calendarColor",
+    "blockUid": "w3b3cdrpbx3cpuoub",
+    "before": {
+      "fieldNames": {
+        "id": "id",
+        "title": "code",
+        "start": "need_date",
+        "end": "need_date"
+      },
+      "defaultView": "month",
+      "enableQuickCreateEvent": false,
+      "weekStart": 1
+    }
+  },
+  {
+    "kind": "statcardAdd",
+    "blockUid": "w4b3sciwj23ughb0s"
+  },
+  {
+    "kind": "statcardAdd",
+    "blockUid": "w4b3sc97cx5zdhozo"
+  },
+  {
+    "kind": "statcardAdd",
+    "blockUid": "w4b3sc47gvdkpjeh7"
+  },
+  {
+    "kind": "gridLayout",
+    "gridUid": "w9kpigal3cr0vll1p",
+    "before": {
+      "rows": {
+        "autoRow1": [
+          [
+            "w9kpitbzizoqvkhb5"
+          ]
+        ],
+        "autoRow2": [
+          [
+            "j46xnwspu4i"
+          ]
+        ],
+        "appendRow1": [
+          [
+            "vnfdwl1m6dh"
+          ]
+        ],
+        "appendRow2": [
+          [
+            "w6kb6owxqhl"
+          ]
+        ]
+      },
+      "sizes": {
+        "autoRow1": [
+          24
+        ],
+        "autoRow2": [
+          24
+        ],
+        "appendRow1": [
+          24
+        ],
+        "appendRow2": [
+          24
+        ]
+      },
+      "rowOrder": [
+        "autoRow1",
+        "autoRow2",
+        "appendRow1",
+        "appendRow2"
+      ]
+    }
+  },
+  {
+    "kind": "statcardAdd",
+    "blockUid": "w4b3scw10fxunrdvn"
+  },
+  {
+    "kind": "statcardAdd",
+    "blockUid": "w4b3sctzp6nt9az8j"
+  },
+  {
+    "kind": "statcardAdd",
+    "blockUid": "w4b3sc3qn41lp5lqa"
+  },
+  {
+    "kind": "gridLayout",
+    "gridUid": "w9kpigoduqcrardr",
+    "before": {
+      "rows": {
+        "autoRow1": [
+          [
+            "w9kpitb8xk3drbk2g6"
+          ]
+        ],
+        "autoRow2": [
+          [
+            "l3zjpbrpg3h"
+          ]
+        ],
+        "appendRow1": [
+          [
+            "gk30ke34we1"
+          ]
+        ],
+        "appendRow2": [
+          [
+            "0zuef44i2ih"
+          ]
+        ],
+        "appendRow3": [
+          [
+            "yamwu5yx010"
+          ]
+        ]
+      },
+      "sizes": {
+        "autoRow1": [
+          24
+        ],
+        "autoRow2": [
+          24
+        ],
+        "appendRow1": [
+          24
+        ],
+        "appendRow2": [
+          24
+        ],
+        "appendRow3": [
+          24
+        ]
+      },
+      "rowOrder": [
+        "autoRow1",
+        "autoRow2",
+        "appendRow1",
+        "appendRow2",
+        "appendRow3"
+      ]
+    }
+  },
+  {
+    "kind": "statcardAdd",
+    "blockUid": "w4b3sc12nfnjdw3ie"
+  },
+  {
+    "kind": "statcardAdd",
+    "blockUid": "w4b3scznb00p58ix"
+  },
+  {
+    "kind": "statcardAdd",
+    "blockUid": "w4b3sc76kbb3pewrm"
+  },
+  {
+    "kind": "gridLayout",
+    "gridUid": "w9kpigzkgvq2sj5j",
+    "before": {
+      "rows": {
+        "autoRow1": [
+          [
+            "w9kpitbp322t6x8r6"
+          ]
+        ],
+        "autoRow2": [
+          [
+            "q1nlsga832f"
+          ]
+        ],
+        "autoRow3": [
+          [
+            "k5yy62n6zfi"
+          ]
+        ],
+        "autoRow4": [
+          [
+            "w0hy3vswbsd"
+          ]
+        ]
+      },
+      "sizes": {
+        "autoRow1": [
+          24
+        ],
+        "autoRow2": [
+          24
+        ],
+        "autoRow3": [
+          24
+        ],
+        "autoRow4": [
+          24
+        ]
+      },
+      "rowOrder": [
+        "autoRow1",
+        "autoRow2",
+        "autoRow3",
+        "autoRow4"
+      ]
+    }
+  },
+  {
+    "kind": "statcardAdd",
+    "blockUid": "w4b3scjtu9ozi29"
+  },
+  {
+    "kind": "statcardAdd",
+    "blockUid": "w4b3sc2vralkuklm2"
+  },
+  {
+    "kind": "statcardAdd",
+    "blockUid": "w4b3sc5g92f02ae7"
+  },
+  {
+    "kind": "statcardAdd",
+    "blockUid": "w4b3scf34krvxbjho"
+  },
+  {
+    "kind": "gridLayout",
+    "gridUid": "w9kpig56gegx88o9w",
+    "before": {
+      "rows": {
+        "autoRow1": [
+          [
+            "w9kpitbnba0vu68fq"
+          ]
+        ],
+        "autoRow2": [
+          [
+            "w9kpitbsbcw4wjtfak"
+          ]
+        ],
+        "autoRow3": [
+          [
+            "fhgs2216p22"
+          ]
+        ],
+        "appendRow1": [
+          [
+            "zymp2u7fzvr"
+          ]
+        ],
+        "appendRow2": [
+          [
+            "o0pqj6411z6"
+          ]
+        ],
+        "appendRow3": [
+          [
+            "g5xylifndft"
+          ]
+        ]
+      },
+      "sizes": {
+        "autoRow1": [
+          24
+        ],
+        "autoRow2": [
+          24
+        ],
+        "autoRow3": [
+          24
+        ],
+        "appendRow1": [
+          24
+        ],
+        "appendRow2": [
+          24
+        ],
+        "appendRow3": [
+          24
+        ]
+      },
+      "rowOrder": [
+        "autoRow1",
+        "autoRow2",
+        "autoRow3",
+        "appendRow1",
+        "appendRow2",
+        "appendRow3"
+      ]
+    }
+  },
+  {
+    "kind": "statcardAdd",
+    "blockUid": "w4b3scw7fdhywoojg"
+  },
+  {
+    "kind": "statcardAdd",
+    "blockUid": "w4b3sc4rkhxax9xze"
+  },
+  {
+    "kind": "statcardAdd",
+    "blockUid": "w4b3scuejajblship"
+  },
+  {
+    "kind": "gridLayout",
+    "gridUid": "w9kpig7eefasu60m9",
+    "before": {
+      "rows": {
+        "autoRow1": [
+          [
+            "w9kpitbf5irc6g0owe"
+          ]
+        ],
+        "autoRow2": [
+          [
+            "w9kpitbx7qr8p6h83l"
+          ]
+        ],
+        "autoRow3": [
+          [
+            "w9kpitb9thyzhbnxkj"
+          ]
+        ],
+        "autoRow4": [
+          [
+            "w9kpitba5p0ben50qc"
+          ]
+        ],
+        "autoRow5": [
+          [
+            "e015d6dmqvq"
+          ]
+        ],
+        "appendRow1": [
+          [
+            "433a2917cm1"
+          ]
+        ],
+        "appendRow2": [
+          [
+            "pk877uqy410"
+          ]
+        ]
+      },
+      "sizes": {
+        "autoRow1": [
+          24
+        ],
+        "autoRow2": [
+          24
+        ],
+        "autoRow3": [
+          24
+        ],
+        "autoRow4": [
+          24
+        ],
+        "autoRow5": [
+          24
+        ],
+        "appendRow1": [
+          24
+        ],
+        "appendRow2": [
+          24
+        ]
+      },
+      "rowOrder": [
+        "autoRow1",
+        "autoRow2",
+        "autoRow3",
+        "autoRow4",
+        "autoRow5",
+        "appendRow1",
+        "appendRow2"
+      ]
+    }
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "w4b3sc1nmw31pde0n",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"已完成任务\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：状态=已完成 · 全量\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "w4b3sc2uth5nh3wpw",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"二级审批中\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：二级待办 · 全量\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "w4b3sc5idqclyx9q3",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"工单总数\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：全量 · 不随筛选联动\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "w4b3sc5zvdnqykrg4",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"未结工单\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：状态∉{已解决,已关闭} · 全量\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "w4b3sc8lw2elpl15k",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"里程碑总数\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：全量 · 不随筛选联动\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "w4b3scahqhw4ypzub",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 1 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '%';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"平均进度\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：全部项目进度均值\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "w4b3scdfgzk6fnia9",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"未完成任务\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：状态≠已完成/已取消 · 全量\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "w4b3scezvelmm60g7",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"文章总数\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：全量 · 不随筛选联动\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "w4b3scggjuc850z2",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"待办行总数\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：全部状态待办行 · 不随筛选联动\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "w4b3scj6e36jjyrvs",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"进行中项目\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：状态=活跃/执行中/规划中 · 全量\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "w4b3scl05j3dvr3hc",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"待办数\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：一级待办 · 全量\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "w4b3scnse7m4frp6h",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"任务总数\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：全量 · 不随筛选联动\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "w4b3scpnbn9yv4qe",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"未完成里程碑\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：状态=待完成 · 全量\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "w4b3scu3g6ajeadp",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"已发布\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：状态=已发布 · 全量\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "w4b3scuc2g6sks4xk",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"逾期工单\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：逾期=true · 全量\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardRegen",
+    "blockUid": "w4b3scv1frtc1h52",
+    "beforeRaw": "/* w4b3 statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst text = '' + (isFinite(n) ? fmt(n) : '0') + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"项目总数\", fontSize: 12, fontWeight: 500, fill: '#6b7280' } },\n    { type: 'text', left: 12, top: 26, style: { text: text, fontSize: 24, fontWeight: 700, fill: '#1d4ed8' } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"口径：全量 · 不随筛选联动\", fontSize: 10, fill: '#9ca3af' } },\n  ] },\n};"
+  },
+  {
+    "kind": "statcardQuery",
+    "blockUid": "w4b3sciwj23ughb0s",
+    "before": {
+      "chartSettings": {
+        "configure": {
+          "query": {
+            "mode": "builder",
+            "collectionPath": [
+              "main",
+              "kpi_snapshots"
+            ],
+            "measures": [
+              {
+                "field": "value",
+                "aggregation": "avg",
+                "alias": "v"
+              }
+            ],
+            "filter": {
+              "logic": "$and",
+              "items": [
+                {
+                  "path": "kpi_code",
+                  "operator": "$eq",
+                  "value": "revenue_monthly"
+                }
+              ]
+            }
+          },
+          "chart": {
+            "option": {
+              "mode": "custom",
+              "raw": "/* w4b3 statcard */\n/* w7 forge statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst num = isFinite(n) ? fmt(n) : '0';\nconst text = '{u|¥}' + num + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"当月收入\", fontSize: 12, fontWeight: 500, fill: '#55606E' } },\n    { type: 'text', left: 12, top: 24, style: { text: text, fontSize: 28, fontWeight: 600, fill: '#1F2630', rich: { u: { fontSize: 17, fontWeight: 600, fill: '#1F2630' } } } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"kpi_snapshots 快照月度汇总\", fontSize: 10, fill: '#8A94A0' } },\n  ] },\n};"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "kind": "statcardQuery",
+    "blockUid": "w4b3sc97cx5zdhozo",
+    "before": {
+      "chartSettings": {
+        "configure": {
+          "query": {
+            "mode": "builder",
+            "collectionPath": [
+              "main",
+              "kpi_snapshots"
+            ],
+            "measures": [
+              {
+                "field": "value",
+                "aggregation": "avg",
+                "alias": "v"
+              }
+            ],
+            "filter": {
+              "logic": "$and",
+              "items": [
+                {
+                  "path": "kpi_code",
+                  "operator": "$eq",
+                  "value": "gross_margin"
+                }
+              ]
+            }
+          },
+          "chart": {
+            "option": {
+              "mode": "custom",
+              "raw": "/* w4b3 statcard */\n/* w7 forge statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst num = isFinite(n) ? fmt(n) : '0';\nconst figFill = n < 0 ? '#AA0808' : '#1F2630';\nconst text = '' + num + '{u|%}';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"毛利率\", fontSize: 12, fontWeight: 500, fill: '#55606E' } },\n    { type: 'text', left: 12, top: 24, style: { text: text, fontSize: 28, fontWeight: 600, fill: figFill, rich: { u: { fontSize: 17, fontWeight: 600, fill: figFill } } } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"快照月度均值；负值标红\", fontSize: 10, fill: '#8A94A0' } },\n  ] },\n};"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "kind": "statcardQuery",
+    "blockUid": "w4b3sc47gvdkpjeh7",
+    "before": {
+      "chartSettings": {
+        "configure": {
+          "query": {
+            "mode": "builder",
+            "collectionPath": [
+              "main",
+              "kpi_snapshots"
+            ],
+            "measures": [
+              {
+                "field": "value",
+                "aggregation": "avg",
+                "alias": "v"
+              }
+            ],
+            "filter": {
+              "logic": "$and",
+              "items": [
+                {
+                  "path": "kpi_code",
+                  "operator": "$eq",
+                  "value": "pending_approvals"
+                }
+              ]
+            }
+          },
+          "chart": {
+            "option": {
+              "mode": "custom",
+              "raw": "/* w4b3 statcard */\n/* w7 forge statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 0 });\nconst num = isFinite(n) ? fmt(n) : '0';\nconst figFill = n > 0 ? '#E76500' : '#1F2630';\nconst text = '' + num + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"待审批单\", fontSize: 12, fontWeight: 500, fill: '#55606E' } },\n    { type: 'text', left: 12, top: 24, style: { text: text, fontSize: 28, fontWeight: 600, fill: figFill, rich: { u: { fontSize: 17, fontWeight: 600, fill: figFill } } } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"全类型待审批计数；>0 标橙\", fontSize: 10, fill: '#8A94A0' } },\n  ] },\n};"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "kind": "gridLayout",
+    "gridUid": "w9kpigal3cr0vll1p",
+    "before": {
+      "rows": {
+        "autoRow1": [
+          [
+            "w9kpitbzizoqvkhb5"
+          ]
+        ],
+        "autoRow2": [
+          [
+            "j46xnwspu4i"
+          ]
+        ],
+        "appendRow1": [
+          [
+            "vnfdwl1m6dh"
+          ]
+        ],
+        "appendRow2": [
+          [
+            "w6kb6owxqhl"
+          ]
+        ],
+        "w7b4cards": [
+          [
+            "w4b3sciwj23ughb0s"
+          ],
+          [
+            "w4b3sc97cx5zdhozo"
+          ],
+          [
+            "w4b3sc47gvdkpjeh7"
+          ]
+        ]
+      },
+      "sizes": {
+        "autoRow1": [
+          24
+        ],
+        "autoRow2": [
+          24
+        ],
+        "appendRow1": [
+          24
+        ],
+        "appendRow2": [
+          24
+        ],
+        "w7b4cards": [
+          8,
+          8,
+          8
+        ]
+      },
+      "rowOrder": [
+        "w7b4cards",
+        "autoRow2",
+        "appendRow1",
+        "autoRow1",
+        "appendRow2"
+      ]
+    }
+  },
+  {
+    "kind": "statcardQuery",
+    "blockUid": "w4b3scw10fxunrdvn",
+    "before": {
+      "chartSettings": {
+        "configure": {
+          "query": {
+            "mode": "builder",
+            "collectionPath": [
+              "main",
+              "kpi_snapshots"
+            ],
+            "measures": [
+              {
+                "field": "value",
+                "aggregation": "avg",
+                "alias": "v"
+              }
+            ],
+            "filter": {
+              "logic": "$and",
+              "items": [
+                {
+                  "path": "kpi_code",
+                  "operator": "$eq",
+                  "value": "otif"
+                }
+              ]
+            }
+          },
+          "chart": {
+            "option": {
+              "mode": "custom",
+              "raw": "/* w4b3 statcard */\n/* w7 forge statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst num = isFinite(n) ? fmt(n) : '0';\nconst text = '' + num + '{u|%}';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"OTIF\", fontSize: 12, fontWeight: 500, fill: '#55606E' } },\n    { type: 'text', left: 12, top: 24, style: { text: text, fontSize: 28, fontWeight: 600, fill: '#1F2630', rich: { u: { fontSize: 17, fontWeight: 600, fill: '#1F2630' } } } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"快照月度均值\", fontSize: 10, fill: '#8A94A0' } },\n  ] },\n};"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "kind": "statcardQuery",
+    "blockUid": "w4b3sctzp6nt9az8j",
+    "before": {
+      "chartSettings": {
+        "configure": {
+          "query": {
+            "mode": "builder",
+            "collectionPath": [
+              "main",
+              "kpi_snapshots"
+            ],
+            "measures": [
+              {
+                "field": "value",
+                "aggregation": "avg",
+                "alias": "v"
+              }
+            ],
+            "filter": {
+              "logic": "$and",
+              "items": [
+                {
+                  "path": "kpi_code",
+                  "operator": "$eq",
+                  "value": "otd_supplier"
+                }
+              ]
+            }
+          },
+          "chart": {
+            "option": {
+              "mode": "custom",
+              "raw": "/* w4b3 statcard */\n/* w7 forge statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst num = isFinite(n) ? fmt(n) : '0';\nconst text = '' + num + '{u|%}';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"供应商准时到货率\", fontSize: 12, fontWeight: 500, fill: '#55606E' } },\n    { type: 'text', left: 12, top: 24, style: { text: text, fontSize: 28, fontWeight: 600, fill: '#1F2630', rich: { u: { fontSize: 17, fontWeight: 600, fill: '#1F2630' } } } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"快照月度均值\", fontSize: 10, fill: '#8A94A0' } },\n  ] },\n};"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "kind": "statcardQuery",
+    "blockUid": "w4b3sc3qn41lp5lqa",
+    "before": {
+      "chartSettings": {
+        "configure": {
+          "query": {
+            "mode": "builder",
+            "collectionPath": [
+              "main",
+              "kpi_snapshots"
+            ],
+            "measures": [
+              {
+                "field": "value",
+                "aggregation": "avg",
+                "alias": "v"
+              }
+            ],
+            "filter": {
+              "logic": "$and",
+              "items": [
+                {
+                  "path": "kpi_code",
+                  "operator": "$eq",
+                  "value": "shortage_alerts"
+                }
+              ]
+            }
+          },
+          "chart": {
+            "option": {
+              "mode": "custom",
+              "raw": "/* w4b3 statcard */\n/* w7 forge statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 0 });\nconst num = isFinite(n) ? fmt(n) : '0';\nconst figFill = n > 0 ? '#AA0808' : '#1F2630';\nconst text = '' + num + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"缺料预警\", fontSize: 12, fontWeight: 500, fill: '#55606E' } },\n    { type: 'text', left: 12, top: 24, style: { text: text, fontSize: 28, fontWeight: 600, fill: figFill, rich: { u: { fontSize: 17, fontWeight: 600, fill: figFill } } } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"缺料预警计数；>0 标红\", fontSize: 10, fill: '#8A94A0' } },\n  ] },\n};"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "kind": "gridLayout",
+    "gridUid": "w9kpigoduqcrardr",
+    "before": {
+      "rows": {
+        "autoRow1": [
+          [
+            "w9kpitb8xk3drbk2g6"
+          ]
+        ],
+        "autoRow2": [
+          [
+            "l3zjpbrpg3h"
+          ]
+        ],
+        "appendRow1": [
+          [
+            "gk30ke34we1"
+          ]
+        ],
+        "appendRow2": [
+          [
+            "0zuef44i2ih"
+          ]
+        ],
+        "appendRow3": [
+          [
+            "yamwu5yx010"
+          ]
+        ],
+        "w7b4cards": [
+          [
+            "w4b3scw10fxunrdvn"
+          ],
+          [
+            "w4b3sctzp6nt9az8j"
+          ],
+          [
+            "w4b3sc3qn41lp5lqa"
+          ]
+        ]
+      },
+      "sizes": {
+        "autoRow1": [
+          24
+        ],
+        "autoRow2": [
+          24
+        ],
+        "appendRow1": [
+          24
+        ],
+        "appendRow2": [
+          24
+        ],
+        "appendRow3": [
+          24
+        ],
+        "w7b4cards": [
+          8,
+          8,
+          8
+        ]
+      },
+      "rowOrder": [
+        "w7b4cards",
+        "autoRow2",
+        "appendRow1",
+        "appendRow2",
+        "autoRow1",
+        "appendRow3"
+      ]
+    }
+  },
+  {
+    "kind": "statcardQuery",
+    "blockUid": "w4b3sc12nfnjdw3ie",
+    "before": {
+      "chartSettings": {
+        "configure": {
+          "query": {
+            "mode": "builder",
+            "collectionPath": [
+              "main",
+              "kpi_snapshots"
+            ],
+            "measures": [
+              {
+                "field": "value",
+                "aggregation": "avg",
+                "alias": "v"
+              }
+            ],
+            "filter": {
+              "logic": "$and",
+              "items": [
+                {
+                  "path": "kpi_code",
+                  "operator": "$eq",
+                  "value": "fpy"
+                }
+              ]
+            }
+          },
+          "chart": {
+            "option": {
+              "mode": "custom",
+              "raw": "/* w4b3 statcard */\n/* w7 forge statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst num = isFinite(n) ? fmt(n) : '0';\nconst text = '' + num + '{u|%}';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"一次合格率\", fontSize: 12, fontWeight: 500, fill: '#55606E' } },\n    { type: 'text', left: 12, top: 24, style: { text: text, fontSize: 28, fontWeight: 600, fill: '#1F2630', rich: { u: { fontSize: 17, fontWeight: 600, fill: '#1F2630' } } } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"快照月度均值\", fontSize: 10, fill: '#8A94A0' } },\n  ] },\n};"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "kind": "statcardQuery",
+    "blockUid": "w4b3scznb00p58ix",
+    "before": {
+      "chartSettings": {
+        "configure": {
+          "query": {
+            "mode": "builder",
+            "collectionPath": [
+              "main",
+              "kpi_snapshots"
+            ],
+            "measures": [
+              {
+                "field": "value",
+                "aggregation": "avg",
+                "alias": "v"
+              }
+            ],
+            "filter": {
+              "logic": "$and",
+              "items": [
+                {
+                  "path": "kpi_code",
+                  "operator": "$eq",
+                  "value": "rty"
+                }
+              ]
+            }
+          },
+          "chart": {
+            "option": {
+              "mode": "custom",
+              "raw": "/* w4b3 statcard */\n/* w7 forge statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst num = isFinite(n) ? fmt(n) : '0';\nconst text = '' + num + '{u|%}';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"直通率\", fontSize: 12, fontWeight: 500, fill: '#55606E' } },\n    { type: 'text', left: 12, top: 24, style: { text: text, fontSize: 28, fontWeight: 600, fill: '#1F2630', rich: { u: { fontSize: 17, fontWeight: 600, fill: '#1F2630' } } } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"快照月度均值\", fontSize: 10, fill: '#8A94A0' } },\n  ] },\n};"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "kind": "statcardQuery",
+    "blockUid": "w4b3sc76kbb3pewrm",
+    "before": {
+      "chartSettings": {
+        "configure": {
+          "query": {
+            "mode": "builder",
+            "collectionPath": [
+              "main",
+              "kpi_snapshots"
+            ],
+            "measures": [
+              {
+                "field": "value",
+                "aggregation": "avg",
+                "alias": "v"
+              }
+            ],
+            "filter": {
+              "logic": "$and",
+              "items": [
+                {
+                  "path": "kpi_code",
+                  "operator": "$eq",
+                  "value": "schedule_hit"
+                }
+              ]
+            }
+          },
+          "chart": {
+            "option": {
+              "mode": "custom",
+              "raw": "/* w4b3 statcard */\n/* w7 forge statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst num = isFinite(n) ? fmt(n) : '0';\nconst text = '' + num + '{u|%}';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"计划达成率\", fontSize: 12, fontWeight: 500, fill: '#55606E' } },\n    { type: 'text', left: 12, top: 24, style: { text: text, fontSize: 28, fontWeight: 600, fill: '#1F2630', rich: { u: { fontSize: 17, fontWeight: 600, fill: '#1F2630' } } } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"快照月度均值\", fontSize: 10, fill: '#8A94A0' } },\n  ] },\n};"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "kind": "gridLayout",
+    "gridUid": "w9kpigzkgvq2sj5j",
+    "before": {
+      "rows": {
+        "autoRow1": [
+          [
+            "w9kpitbp322t6x8r6"
+          ]
+        ],
+        "autoRow2": [
+          [
+            "q1nlsga832f"
+          ]
+        ],
+        "autoRow3": [
+          [
+            "k5yy62n6zfi"
+          ]
+        ],
+        "autoRow4": [
+          [
+            "w0hy3vswbsd"
+          ]
+        ],
+        "w7b4cards": [
+          [
+            "w4b3sc12nfnjdw3ie"
+          ],
+          [
+            "w4b3scznb00p58ix"
+          ],
+          [
+            "w4b3sc76kbb3pewrm"
+          ]
+        ]
+      },
+      "sizes": {
+        "autoRow1": [
+          24
+        ],
+        "autoRow2": [
+          24
+        ],
+        "autoRow3": [
+          24
+        ],
+        "autoRow4": [
+          24
+        ],
+        "w7b4cards": [
+          8,
+          8,
+          8
+        ]
+      },
+      "rowOrder": [
+        "w7b4cards",
+        "autoRow2",
+        "autoRow3",
+        "autoRow1",
+        "autoRow4"
+      ]
+    }
+  },
+  {
+    "kind": "statcardQuery",
+    "blockUid": "w4b3scjtu9ozi29",
+    "before": {
+      "chartSettings": {
+        "configure": {
+          "query": {
+            "mode": "builder",
+            "collectionPath": [
+              "main",
+              "kpi_snapshots"
+            ],
+            "measures": [
+              {
+                "field": "value",
+                "aggregation": "avg",
+                "alias": "v"
+              }
+            ],
+            "filter": {
+              "logic": "$and",
+              "items": [
+                {
+                  "path": "kpi_code",
+                  "operator": "$eq",
+                  "value": "capital_occupied"
+                }
+              ]
+            }
+          },
+          "chart": {
+            "option": {
+              "mode": "custom",
+              "raw": "/* w4b3 statcard */\n/* w7 forge statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst num = isFinite(n) ? fmt(n) : '0';\nconst text = '{u|¥}' + num + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"库存资金占用\", fontSize: 12, fontWeight: 500, fill: '#55606E' } },\n    { type: 'text', left: 12, top: 24, style: { text: text, fontSize: 28, fontWeight: 600, fill: '#1F2630', rich: { u: { fontSize: 17, fontWeight: 600, fill: '#1F2630' } } } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"快照月度汇总\", fontSize: 10, fill: '#8A94A0' } },\n  ] },\n};"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "kind": "statcardQuery",
+    "blockUid": "w4b3sc2vralkuklm2",
+    "before": {
+      "chartSettings": {
+        "configure": {
+          "query": {
+            "mode": "builder",
+            "collectionPath": [
+              "main",
+              "kpi_snapshots"
+            ],
+            "measures": [
+              {
+                "field": "value",
+                "aggregation": "avg",
+                "alias": "v"
+              }
+            ],
+            "filter": {
+              "logic": "$and",
+              "items": [
+                {
+                  "path": "kpi_code",
+                  "operator": "$eq",
+                  "value": "dead_stock_ratio"
+                }
+              ]
+            }
+          },
+          "chart": {
+            "option": {
+              "mode": "custom",
+              "raw": "/* w4b3 statcard */\n/* w7 forge statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst num = isFinite(n) ? fmt(n) : '0';\nconst figFill = n > 0 ? '#E76500' : '#1F2630';\nconst text = '' + num + '{u|%}';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"呆滞库存占比\", fontSize: 12, fontWeight: 500, fill: '#55606E' } },\n    { type: 'text', left: 12, top: 24, style: { text: text, fontSize: 28, fontWeight: 600, fill: figFill, rich: { u: { fontSize: 17, fontWeight: 600, fill: figFill } } } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \">0 标橙（呆滞即损失风险）\", fontSize: 10, fill: '#8A94A0' } },\n  ] },\n};"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "kind": "statcardQuery",
+    "blockUid": "w4b3sc5g92f02ae7",
+    "before": {
+      "chartSettings": {
+        "configure": {
+          "query": {
+            "mode": "builder",
+            "collectionPath": [
+              "main",
+              "kpi_snapshots"
+            ],
+            "measures": [
+              {
+                "field": "value",
+                "aggregation": "avg",
+                "alias": "v"
+              }
+            ],
+            "filter": {
+              "logic": "$and",
+              "items": [
+                {
+                  "path": "kpi_code",
+                  "operator": "$eq",
+                  "value": "expiry_alerts"
+                }
+              ]
+            }
+          },
+          "chart": {
+            "option": {
+              "mode": "custom",
+              "raw": "/* w4b3 statcard */\n/* w7 forge statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 0 });\nconst num = isFinite(n) ? fmt(n) : '0';\nconst figFill = n > 0 ? '#AA0808' : '#1F2630';\nconst text = '' + num + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"临期预警批次\", fontSize: 12, fontWeight: 500, fill: '#55606E' } },\n    { type: 'text', left: 12, top: 24, style: { text: text, fontSize: 28, fontWeight: 600, fill: figFill, rich: { u: { fontSize: 17, fontWeight: 600, fill: figFill } } } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"剩余效期<30 天批次计数；>0 标红\", fontSize: 10, fill: '#8A94A0' } },\n  ] },\n};"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "kind": "statcardQuery",
+    "blockUid": "w4b3scf34krvxbjho",
+    "before": {
+      "chartSettings": {
+        "configure": {
+          "query": {
+            "mode": "builder",
+            "collectionPath": [
+              "main",
+              "kpi_snapshots"
+            ],
+            "measures": [
+              {
+                "field": "value",
+                "aggregation": "avg",
+                "alias": "v"
+              }
+            ],
+            "filter": {
+              "logic": "$and",
+              "items": [
+                {
+                  "path": "kpi_code",
+                  "operator": "$eq",
+                  "value": "count_accuracy"
+                }
+              ]
+            }
+          },
+          "chart": {
+            "option": {
+              "mode": "custom",
+              "raw": "/* w4b3 statcard */\n/* w7 forge statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst num = isFinite(n) ? fmt(n) : '0';\nconst text = '' + num + '{u|%}';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"账实相符率\", fontSize: 12, fontWeight: 500, fill: '#55606E' } },\n    { type: 'text', left: 12, top: 24, style: { text: text, fontSize: 28, fontWeight: 600, fill: '#1F2630', rich: { u: { fontSize: 17, fontWeight: 600, fill: '#1F2630' } } } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"快照月度均值\", fontSize: 10, fill: '#8A94A0' } },\n  ] },\n};"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "kind": "gridLayout",
+    "gridUid": "w9kpig56gegx88o9w",
+    "before": {
+      "rows": {
+        "autoRow1": [
+          [
+            "w9kpitbnba0vu68fq"
+          ]
+        ],
+        "autoRow2": [
+          [
+            "w9kpitbsbcw4wjtfak"
+          ]
+        ],
+        "autoRow3": [
+          [
+            "fhgs2216p22"
+          ]
+        ],
+        "appendRow1": [
+          [
+            "zymp2u7fzvr"
+          ]
+        ],
+        "appendRow2": [
+          [
+            "o0pqj6411z6"
+          ]
+        ],
+        "appendRow3": [
+          [
+            "g5xylifndft"
+          ]
+        ],
+        "w7b4cards": [
+          [
+            "w4b3scjtu9ozi29"
+          ],
+          [
+            "w4b3sc2vralkuklm2"
+          ],
+          [
+            "w4b3sc5g92f02ae7"
+          ],
+          [
+            "w4b3scf34krvxbjho"
+          ]
+        ]
+      },
+      "sizes": {
+        "autoRow1": [
+          24
+        ],
+        "autoRow2": [
+          24
+        ],
+        "autoRow3": [
+          24
+        ],
+        "appendRow1": [
+          24
+        ],
+        "appendRow2": [
+          24
+        ],
+        "appendRow3": [
+          24
+        ],
+        "w7b4cards": [
+          6,
+          6,
+          6,
+          6
+        ]
+      },
+      "rowOrder": [
+        "w7b4cards",
+        "autoRow3",
+        "appendRow1",
+        "appendRow2",
+        "autoRow1",
+        "autoRow2",
+        "appendRow3"
+      ]
+    }
+  },
+  {
+    "kind": "statcardQuery",
+    "blockUid": "w4b3scw7fdhywoojg",
+    "before": {
+      "chartSettings": {
+        "configure": {
+          "query": {
+            "mode": "builder",
+            "collectionPath": [
+              "main",
+              "kpi_snapshots"
+            ],
+            "measures": [
+              {
+                "field": "value",
+                "aggregation": "avg",
+                "alias": "v"
+              }
+            ],
+            "filter": {
+              "logic": "$and",
+              "items": [
+                {
+                  "path": "kpi_code",
+                  "operator": "$eq",
+                  "value": "ar_balance"
+                }
+              ]
+            }
+          },
+          "chart": {
+            "option": {
+              "mode": "custom",
+              "raw": "/* w4b3 statcard */\n/* w7 forge statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst num = isFinite(n) ? fmt(n) : '0';\nconst figFill = n < 0 ? '#AA0808' : '#1F2630';\nconst text = '{u|¥}' + num + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"应收余额\", fontSize: 12, fontWeight: 500, fill: '#55606E' } },\n    { type: 'text', left: 12, top: 24, style: { text: text, fontSize: 28, fontWeight: 600, fill: figFill, rich: { u: { fontSize: 17, fontWeight: 600, fill: figFill } } } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"approved 锚 − 回款抵减；负值标红\", fontSize: 10, fill: '#8A94A0' } },\n  ] },\n};"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "kind": "statcardQuery",
+    "blockUid": "w4b3sc4rkhxax9xze",
+    "before": {
+      "chartSettings": {
+        "configure": {
+          "query": {
+            "mode": "builder",
+            "collectionPath": [
+              "main",
+              "kpi_snapshots"
+            ],
+            "measures": [
+              {
+                "field": "value",
+                "aggregation": "avg",
+                "alias": "v"
+              }
+            ],
+            "filter": {
+              "logic": "$and",
+              "items": [
+                {
+                  "path": "kpi_code",
+                  "operator": "$eq",
+                  "value": "ap_balance"
+                }
+              ]
+            }
+          },
+          "chart": {
+            "option": {
+              "mode": "custom",
+              "raw": "/* w4b3 statcard */\n/* w7 forge statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 2 });\nconst num = isFinite(n) ? fmt(n) : '0';\nconst text = '{u|¥}' + num + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"应付余额\", fontSize: 12, fontWeight: 500, fill: '#55606E' } },\n    { type: 'text', left: 12, top: 24, style: { text: text, fontSize: 28, fontWeight: 600, fill: '#1F2630', rich: { u: { fontSize: 17, fontWeight: 600, fill: '#1F2630' } } } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"confirmed 锚 − 付款抵减\", fontSize: 10, fill: '#8A94A0' } },\n  ] },\n};"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "kind": "statcardQuery",
+    "blockUid": "w4b3scuejajblship",
+    "before": {
+      "chartSettings": {
+        "configure": {
+          "query": {
+            "mode": "builder",
+            "collectionPath": [
+              "main",
+              "kpi_snapshots"
+            ],
+            "measures": [
+              {
+                "field": "value",
+                "aggregation": "avg",
+                "alias": "v"
+              }
+            ],
+            "filter": {
+              "logic": "$and",
+              "items": [
+                {
+                  "path": "kpi_code",
+                  "operator": "$eq",
+                  "value": "pending_approvals"
+                }
+              ]
+            }
+          },
+          "chart": {
+            "option": {
+              "mode": "custom",
+              "raw": "/* w4b3 statcard */\n/* w7 forge statcard */\nconst v = ((ctx.data.objects || [])[0] || {})['v'];\nconst n = Number(v == null ? 0 : v);\nconst fmt = (x) => x.toLocaleString('zh-CN', { maximumFractionDigits: 0 });\nconst num = isFinite(n) ? fmt(n) : '0';\nconst figFill = n > 0 ? '#E76500' : '#1F2630';\nconst text = '' + num + '';\nreturn {\n  containerStyle: { height: 112 },\n  graphic: { elements: [\n    { type: 'text', left: 12, top: 8, style: { text: \"待审批单\", fontSize: 12, fontWeight: 500, fill: '#55606E' } },\n    { type: 'text', left: 12, top: 24, style: { text: text, fontSize: 28, fontWeight: 600, fill: figFill, rich: { u: { fontSize: 17, fontWeight: 600, fill: figFill } } } },\n    { type: 'text', left: 12, bottom: 4, style: { text: \"全类型待审批计数；>0 标橙\", fontSize: 10, fill: '#8A94A0' } },\n  ] },\n};"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "kind": "gridLayout",
+    "gridUid": "w9kpig7eefasu60m9",
+    "before": {
+      "rows": {
+        "autoRow1": [
+          [
+            "w9kpitbf5irc6g0owe"
+          ]
+        ],
+        "autoRow2": [
+          [
+            "w9kpitbx7qr8p6h83l"
+          ]
+        ],
+        "autoRow3": [
+          [
+            "w9kpitb9thyzhbnxkj"
+          ]
+        ],
+        "autoRow4": [
+          [
+            "w9kpitba5p0ben50qc"
+          ]
+        ],
+        "autoRow5": [
+          [
+            "e015d6dmqvq"
+          ]
+        ],
+        "appendRow1": [
+          [
+            "433a2917cm1"
+          ]
+        ],
+        "appendRow2": [
+          [
+            "pk877uqy410"
+          ]
+        ],
+        "w7b4cards": [
+          [
+            "w4b3scw7fdhywoojg"
+          ],
+          [
+            "w4b3sc4rkhxax9xze"
+          ],
+          [
+            "w4b3scuejajblship"
+          ]
+        ]
+      },
+      "sizes": {
+        "autoRow1": [
+          24
+        ],
+        "autoRow2": [
+          24
+        ],
+        "autoRow3": [
+          24
+        ],
+        "autoRow4": [
+          24
+        ],
+        "autoRow5": [
+          24
+        ],
+        "appendRow1": [
+          24
+        ],
+        "appendRow2": [
+          24
+        ],
+        "w7b4cards": [
+          8,
+          8,
+          8
+        ]
+      },
+      "rowOrder": [
+        "w7b4cards",
+        "autoRow5",
+        "appendRow1",
+        "autoRow1",
+        "autoRow2",
+        "autoRow3",
+        "autoRow4",
+        "appendRow2"
+      ]
+    }
+  }
+]

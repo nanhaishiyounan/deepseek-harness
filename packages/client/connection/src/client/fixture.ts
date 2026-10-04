@@ -3190,6 +3190,20 @@ function createFixtureWorld(options: FixtureOptions): FixtureWorld {
         message: 'this deployment has not enabled the inline record write; set the api-gateway config nocobaseWriteEnabled: true to expose nocobase.update',
         details: {},
       }),
+      // The alert-act channel's structured refusal: the fixture composes no
+      // alert engine, so the row action keeps its unconfigured refusal.
+      alertAct: request => err(request, {
+        code: 'alert-engine-unconfigured',
+        message: 'the demo fixture composes no alert engine; the mobile row actions run against the live gateway',
+        details: {},
+      }),
+      // The fixture signs nobody in: the mobile login's real channel is the
+      // live gateway, and the demo fixture keeps the structured refusal.
+      signIn: request => err(request, {
+        code: 'nocobase-not-composed',
+        message: 'this deployment has not enabled the nocobase domain; set the api-gateway config nocobaseEnabled: true to expose business reads',
+        details: {},
+      }),
     },
 
     kb: {
@@ -3573,6 +3587,8 @@ export class FixtureApiClient extends AbstractApiClient {
       case 'nocobase.list': return this.api.nocobase.list(request, signal)
       case 'nocobase.get': return this.api.nocobase.get(request, signal)
       case 'nocobase.update': return this.api.nocobase.update(request, signal)
+      case 'nocobase.alertAct': return this.api.nocobase.alertAct(request, signal)
+      case 'nocobase.signIn': return this.api.nocobase.signIn(request, signal)
       case 'kb.stats': return this.api.kb.stats(request)
       case 'kb.search': return this.api.kb.search(request, signal)
       case 'kb.ingest': return this.api.kb.ingest(request, signal)

@@ -20,8 +20,8 @@
   width: var(--dshm-touch);
   height: var(--dshm-touch);
   border-radius: 50%;
-  background: var(--dshm-primary);
-  color: var(--dshm-on-primary);
+  background: var(--dshm-primary-soft);
+  color: var(--dshm-primary);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -45,7 +45,7 @@
 }
 
 .headerTitle {
-  font-size: 16px;
+  font-size: var(--dshm-fs-md);
   line-height: 22px;
   font-weight: 700;
   color: var(--dshm-foreground);
@@ -55,7 +55,7 @@
 }
 
 .headerHint {
-  font-size: 11.5px;
+  font-size: var(--dshm-fs-xs);
   line-height: 14px;
   color: var(--dshm-muted-foreground);
   overflow: hidden;
@@ -107,7 +107,7 @@
 /* The design's .day-divider: the quiet centered 11.5 label. */
 .daySeparator {
   align-self: center;
-  font-size: 11.5px;
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
   color: var(--dshm-muted-foreground);
   padding: 4px 0;
@@ -152,7 +152,7 @@
   border: 1.5px solid var(--dshm-primary);
   background: var(--dshm-background);
   color: var(--dshm-primary);
-  font-size: 8px;
+  font-size: var(--dshm-fs-xs);
   line-height: 1;
   font-weight: 600;
 }
@@ -165,7 +165,7 @@
   border-radius: var(--dshm-radius-corner) var(--dshm-radius-bubble) var(--dshm-radius-bubble) var(--dshm-radius-bubble);
   box-shadow: var(--dshm-shadow-card);
   padding: 10px 13px;
-  font-size: 14.5px;
+  font-size: var(--dshm-fs-sm);
   line-height: 1.62;
   color: var(--dshm-bubble-ai-fg);
   max-width: min(78vw, 320px);
@@ -180,7 +180,7 @@
   color: var(--dshm-bubble-user-fg);
   border-radius: var(--dshm-radius-bubble) var(--dshm-radius-corner) var(--dshm-radius-bubble) var(--dshm-radius-bubble);
   padding: 10px 13px;
-  font-size: 14.5px;
+  font-size: var(--dshm-fs-sm);
   line-height: 1.62;
   max-width: min(78vw, 320px);
   overflow-wrap: anywhere;
@@ -194,9 +194,9 @@
   align-self: flex-end;
   height: 28px;
   padding: 0 12px;
-  font-size: 12px;
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
-  border-radius: 999px;
+  border-radius: var(--dshm-radius-pill);
   background: var(--dshm-primary-10);
   color: var(--dshm-primary);
 }
@@ -221,9 +221,9 @@
   margin-left: 41px;
   max-width: calc(100% - 41px);
   padding: 4px 10px 4px 4px;
-  border-radius: 999px;
+  border-radius: var(--dshm-radius-pill);
   background: var(--dshm-muted);
-  font-size: 11px;
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
   color: var(--dshm-muted-foreground);
 }
@@ -259,12 +259,12 @@
     the dashed rim; the summary keeps the human copy, the body the raw text. */
 .degradedNotice {
   max-width: min(78vw, 320px);
-  font-size: 12.8px;
+  font-size: var(--dshm-fs-xs);
   line-height: 1.55;
   color: var(--dshm-foreground);
   background: var(--dshm-primary-soft);
   border: 1px dashed var(--dshm-bubble-ai-border);
-  border-radius: 11px;
+  border-radius: var(--dshm-radius);
   padding: 9px 11px;
   overflow-wrap: anywhere;
 }
@@ -278,11 +278,11 @@
   margin: 6px 0 0;
   padding: 8px;
   font-family: var(--dshm-font-num);
-  font-size: 10px;
+  font-size: var(--dshm-fs-xs);
   line-height: 14px;
   white-space: pre-wrap;
   background: var(--dshm-bubble-ai-bg);
-  border-radius: 6px;
+  border-radius: var(--dshm-radius-corner);
   color: var(--dshm-muted-foreground);
 }
 
@@ -290,17 +290,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-/* The first-read spinner row (never an empty-state card: loading is loading). */
-.loadingRow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 18px 0;
-  color: var(--dshm-muted-foreground);
-  font-size: 12px;
 }
 
 /* ---- Typing indicator (the design's .typing-bubble): the bot-plate bubble
@@ -377,7 +366,7 @@
   bottom: 100%;
   background: var(--dshm-tabbar-bg);
   border-top: 1px solid var(--dshm-border);
-  border-radius: 18px 18px 0 0;
+  border-radius: var(--dshm-radius-lg) 18px 0 0;
   padding: 14px 16px 12px;
   box-shadow: 0 -8px 30px rgba(23, 43, 77, 0.12);
   animation: quick-panel-in 240ms cubic-bezier(0.22, 0.9, 0.35, 1);
@@ -392,7 +381,7 @@
 
 .qpTitle {
   margin: 0 0 10px;
-  font-size: 13.5px;
+  font-size: var(--dshm-fs-sm);
   line-height: 18px;
   font-weight: 600;
   color: var(--dshm-muted-foreground);
@@ -410,10 +399,10 @@
   gap: 9px;
   min-height: 46px;
   padding: 12px;
-  border-radius: 12px;
+  border-radius: var(--dshm-radius);
   background: var(--dshm-muted);
   border: 1px solid var(--dshm-border);
-  font-size: 13.2px;
+  font-size: var(--dshm-fs-sm);
   line-height: 18px;
   font-weight: 600;
   color: var(--dshm-foreground);
@@ -436,7 +425,7 @@
 .qpEmpty {
   margin: 0;
   padding: 10px 2px;
-  font-size: 12.5px;
+  font-size: var(--dshm-fs-xs);
   line-height: 18px;
   color: var(--dshm-muted-foreground);
 }
@@ -454,11 +443,11 @@
   justify-content: center;
   gap: 6px;
   min-height: 46px;
-  border-radius: 12px;
+  border-radius: var(--dshm-radius);
   border: 1px solid var(--dshm-border);
   background: none;
   color: var(--dshm-muted-foreground);
-  font-size: 12.5px;
+  font-size: var(--dshm-fs-xs);
   line-height: 16px;
 }
 
@@ -481,12 +470,12 @@
    slot (the card face and brand rim ride inline variables in ChatView.tsx);
    this class keeps the 36px capsule sizing. */
 .chip:global(.adm-button) {
-  --border-radius: 999px;
+  --border-radius: var(--dshm-radius-pill);
   flex: none;
   height: var(--dshm-touch-sm);
   padding-block: 0;
   padding-inline: 12px;
-  font-size: 12px;
+  font-size: var(--dshm-fs-xs);
 }
 
 .inputRow {
@@ -495,11 +484,13 @@
   gap: 8px;
 }
 
-/* The + entry (the design's .plus-btn): 44px, radius 12, brand-soft when on. */
+/* The + entry (the design's .plus-btn): the 44px circle — one 「新增」 shape
+    everywhere (v7, audit 04 §07: the square-plus / round-send / capsule-input
+    mix retired), brand-soft when on. */
 .plusBtn {
   width: var(--dshm-touch);
   height: var(--dshm-touch);
-  border-radius: 12px;
+  border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -521,18 +512,18 @@
 .input {
   flex: 1;
   min-width: 0;
-  --font-size: 16px;
+  --font-size: var(--dshm-fs-md);
   --color: var(--dshm-foreground);
   --placeholder-color: var(--dshm-muted-foreground);
   --background: var(--dshm-input-bg);
-  --border-radius: 22px;
+  --border-radius: var(--dshm-radius-lg);
   --adm-text-area-min-height: calc(44px - 20px);
   --adm-text-area-max-height: calc(4 * 22px + 20px);
   --padding: 10px 15px;
   --box-sizing: border-box;
   --line-height: 22px;
   border: 1px solid var(--dshm-border);
-  border-radius: 22px;
+  border-radius: var(--dshm-radius-lg);
 }
 
 /* The send button (the design's .send-btn): the gradient circle, the pressed
@@ -547,7 +538,7 @@
   align-items: center;
   justify-content: center;
   flex: none;
-  box-shadow: 0 4px 12px rgba(46, 124, 246, 0.35);
+  box-shadow: var(--dshm-send-shadow);
   transition: transform 120ms ease-out, opacity 150ms ease-out;
 }
 
@@ -563,10 +554,10 @@
 .stop {
   height: var(--dshm-touch-sm);
   padding: 0 14px;
-  border-radius: 999px;
+  border-radius: var(--dshm-radius-pill);
   background: var(--dshm-muted);
   color: var(--dshm-muted-foreground);
-  font-size: 12px;
+  font-size: var(--dshm-fs-xs);
   gap: 4px;
   display: inline-flex;
   align-items: center;
@@ -591,4 +582,16 @@
   .send {
     transition: none;
   }
+}
+
+/* W6-B1 G5: the session's queued-sends strip under the flow — the visible
+ * promise that offline messages retry automatically. */
+.outboxStrip {
+  margin: 8px auto;
+  padding: 6px 12px;
+  border-radius: var(--dshm-radius);
+  background: var(--dshm-warning-10);
+  color: var(--dshm-warning);
+  font-size: var(--dshm-fs-xs);
+  text-align: center;
 }

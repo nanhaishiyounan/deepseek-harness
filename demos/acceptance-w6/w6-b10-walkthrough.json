@@ -1,0 +1,611 @@
+{
+  "generatedAt": "2026-10-03T03:14:10.577Z",
+  "live": {
+    "nocobase": 200,
+    "engine": 200,
+    "web": 200
+  },
+  "results": [
+    {
+      "role": "采购员（buyer）",
+      "pass": true,
+      "steps": [
+        {
+          "name": "PC 登录成功",
+          "ok": true,
+          "detail": "身份锚点「采购员·蔡俊」（buyer）"
+        },
+        {
+          "name": "隔离：直开权限矩阵页被拦（矩阵不渲染）",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "比价矩阵页（B7）：页面出现「比价」",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "比价矩阵页（B7）：无 403/无权限误伤",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "比价矩阵页（B7）：非白屏渲染",
+          "ok": true,
+          "detail": "DOM 279394 字节"
+        },
+        {
+          "name": "比价矩阵页（B7）：W6 形态探针",
+          "ok": true,
+          "detail": "命中"
+        },
+        {
+          "name": "采购订单列表：页面出现「PO-2026」",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "采购订单列表：无 403/无权限误伤",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "采购订单列表：非白屏渲染",
+          "ok": true,
+          "detail": "DOM 351790 字节"
+        },
+        {
+          "name": "采购订单列表：表格有数据行",
+          "ok": true,
+          "detail": "39 行"
+        },
+        {
+          "name": "mobile 单据浏览（B1 G6）：mobile 真实登录",
+          "ok": true,
+          "detail": "身份 buyer"
+        },
+        {
+          "name": "mobile 单据浏览（B1 G6）：出现「PO-」",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "mobile": {
+        "ok": true,
+        "username": "buyer"
+      }
+    },
+    {
+      "role": "计划员（planner）",
+      "pass": true,
+      "steps": [
+        {
+          "name": "PC 登录成功",
+          "ok": true,
+          "detail": "身份锚点「计划员·孙梅」（planner）"
+        },
+        {
+          "name": "隔离：直开权限矩阵页被拦（矩阵不渲染）",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "计划工作台：页面出现「计划」",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "计划工作台：无 403/无权限误伤",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "计划工作台：非白屏渲染",
+          "ok": true,
+          "detail": "DOM 166371 字节"
+        },
+        {
+          "name": "计划工作台：表格有数据行",
+          "ok": true,
+          "detail": "23 行"
+        },
+        {
+          "name": "维保日历（B8）：页面出现「维保」",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "维保日历（B8）：无 403/无权限误伤",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "维保日历（B8）：非白屏渲染",
+          "ok": true,
+          "detail": "DOM 17438 字节"
+        },
+        {
+          "name": "经营总览直开（R5 裁决观察项）（观察，不计分）",
+          "ok": true,
+          "detail": "渲染=true 被拦=false — 设计意图=钱面页对 planner 不可见；记录实际渲染与否"
+        },
+        {
+          "name": "mobile 待办页（B1 G2）：mobile 真实登录",
+          "ok": true,
+          "detail": "身份 planner"
+        },
+        {
+          "name": "mobile 待办页（B1 G2）：出现「待办」",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "mobile": {
+        "ok": true,
+        "username": "planner"
+      }
+    },
+    {
+      "role": "车间主任（shop_lead）",
+      "pass": true,
+      "steps": [
+        {
+          "name": "PC 登录成功",
+          "ok": true,
+          "detail": "身份锚点「车间主任·周强」（shop_lead）"
+        },
+        {
+          "name": "隔离：直开权限矩阵页被拦（矩阵不渲染）",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "车间卡片流终端（B4 M1）：页面出现「操作工签到」",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "车间卡片流终端（B4 M1）：非白屏渲染",
+          "ok": true,
+          "detail": "DOM 20171 字节"
+        },
+        {
+          "name": "车间卡片流终端（B4 M1）：执行面探针",
+          "ok": true,
+          "detail": "命中"
+        },
+        {
+          "name": "CCP 监控配置（B4）：页面出现「CCP」",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "CCP 监控配置（B4）：无 403/无权限误伤",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "CCP 监控配置（B4）：非白屏渲染",
+          "ok": true,
+          "detail": "DOM 39417 字节"
+        },
+        {
+          "name": "配方版本与变更（B4 ECO）：页面出现「配方」",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "配方版本与变更（B4 ECO）：无 403/无权限误伤",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "配方版本与变更（B4 ECO）：非白屏渲染",
+          "ok": true,
+          "detail": "DOM 11077 字节"
+        }
+      ],
+      "mobile": null
+    },
+    {
+      "role": "质检员（qc_inspector）",
+      "pass": true,
+      "steps": [
+        {
+          "name": "PC 登录成功",
+          "ok": true,
+          "detail": "身份锚点「质检员·王倩」（qc_inspector）"
+        },
+        {
+          "name": "隔离：直开权限矩阵页被拦（矩阵不渲染）",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "检验工作台页（B5 队列）：页面出现「检验」",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "检验工作台页（B5 队列）：无 403/无权限误伤",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "检验工作台页（B5 队列）：非白屏渲染",
+          "ok": true,
+          "detail": "DOM 6975 字节"
+        },
+        {
+          "name": "检验向导（B5 引擎面）：向导登录+队列",
+          "ok": true,
+          "detail": "质检员：qc_inspector"
+        },
+        {
+          "name": "检验向导（B5 引擎面）：队列分段 ≥2",
+          "ok": true,
+          "detail": "3 段"
+        },
+        {
+          "name": "出厂检验报告页（B5）：页面出现「报告」",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "出厂检验报告页（B5）：无 403/无权限误伤",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "出厂检验报告页（B5）：非白屏渲染",
+          "ok": true,
+          "detail": "DOM 30490 字节"
+        },
+        {
+          "name": "出厂检验报告页（B5）：表格有数据行",
+          "ok": true,
+          "detail": "2 行"
+        },
+        {
+          "name": "召回管理（B3）：页面出现「召回」",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "召回管理（B3）：无 403/无权限误伤",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "召回管理（B3）：非白屏渲染",
+          "ok": true,
+          "detail": "DOM 55089 字节"
+        }
+      ],
+      "mobile": null
+    },
+    {
+      "role": "仓管员（keeper）",
+      "pass": true,
+      "steps": [
+        {
+          "name": "PC 登录成功",
+          "ok": true,
+          "detail": "身份锚点「仓管员·吴涛」（keeper）"
+        },
+        {
+          "name": "隔离：直开权限矩阵页被拦（矩阵不渲染）",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "效期看板（B3 双轨阈值）：页面出现「效期」",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "效期看板（B3 双轨阈值）：无 403/无权限误伤",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "效期看板（B3 双轨阈值）：非白屏渲染",
+          "ok": true,
+          "detail": "DOM 48094 字节"
+        },
+        {
+          "name": "效期看板（B3 双轨阈值）：W6 形态探针",
+          "ok": true,
+          "detail": "命中"
+        },
+        {
+          "name": "预警列表（B2 认领主场）：页面出现「预警」",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "预警列表（B2 认领主场）：无 403/无权限误伤",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "预警列表（B2 认领主场）：非白屏渲染",
+          "ok": true,
+          "detail": "DOM 156180 字节"
+        },
+        {
+          "name": "预警列表（B2 认领主场）：表格有数据行",
+          "ok": true,
+          "detail": "21 行"
+        },
+        {
+          "name": "条码打印中心（B3 labels）：页面出现「标签」",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "条码打印中心（B3 labels）：非白屏渲染",
+          "ok": true,
+          "detail": "DOM 5227 字节"
+        },
+        {
+          "name": "条码打印中心（B3 labels）：执行面探针",
+          "ok": true,
+          "detail": "命中"
+        },
+        {
+          "name": "mobile 预警页（B2/B1）：mobile 真实登录",
+          "ok": true,
+          "detail": "身份 keeper"
+        },
+        {
+          "name": "mobile 预警页（B2/B1）：出现「预警」",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "mobile 预警页（B2/B1）：数据行探针",
+          "ok": true,
+          "detail": "命中"
+        }
+      ],
+      "mobile": {
+        "ok": true,
+        "username": "keeper"
+      }
+    },
+    {
+      "role": "销售（sales_rep）",
+      "pass": true,
+      "steps": [
+        {
+          "name": "PC 登录成功",
+          "ok": true,
+          "detail": "身份锚点「销售·郑洁」（sales_rep）"
+        },
+        {
+          "name": "隔离：直开权限矩阵页被拦（矩阵不渲染）",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "商机管道 Kanban（B6）：页面出现「商机」",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "商机管道 Kanban（B6）：无 403/无权限误伤",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "商机管道 Kanban（B6）：非白屏渲染",
+          "ok": true,
+          "detail": "DOM 6978 字节"
+        },
+        {
+          "name": "商机管道 Kanban（B6）：W6 形态探针",
+          "ok": true,
+          "detail": "命中"
+        },
+        {
+          "name": "客户 360（B6）：页面出现「客户」",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "客户 360（B6）：无 403/无权限误伤",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "客户 360（B6）：非白屏渲染",
+          "ok": true,
+          "detail": "DOM 122698 字节"
+        },
+        {
+          "name": "客户 360（B6）：表格有数据行",
+          "ok": true,
+          "detail": "21 行"
+        },
+        {
+          "name": "mobile 单据浏览（B1）：mobile 真实登录",
+          "ok": true,
+          "detail": "身份 sales_rep"
+        },
+        {
+          "name": "mobile 单据浏览（B1）：出现「SO-」",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "mobile": {
+        "ok": true,
+        "username": "sales_rep"
+      }
+    },
+    {
+      "role": "财务（finance）",
+      "pass": true,
+      "steps": [
+        {
+          "name": "PC 登录成功",
+          "ok": true,
+          "detail": "身份锚点「财务·冯琳」（finance）"
+        },
+        {
+          "name": "隔离：直开权限矩阵页被拦（矩阵不渲染）",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "经营总览驾驶舱（B9）：页面出现「营收」",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "经营总览驾驶舱（B9）：无 403/无权限误伤",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "经营总览驾驶舱（B9）：非白屏渲染",
+          "ok": true,
+          "detail": "DOM 24611 字节"
+        },
+        {
+          "name": "经营总览驾驶舱（B9）：W6 形态探针",
+          "ok": true,
+          "detail": "命中"
+        },
+        {
+          "name": "财务工作台（B9 催收）：页面出现「催收」",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "财务工作台（B9 催收）：无 403/无权限误伤",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "财务工作台（B9 催收）：非白屏渲染",
+          "ok": true,
+          "detail": "DOM 12957 字节"
+        },
+        {
+          "name": "发票匹配（B9 三单）：页面出现「发票」",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "发票匹配（B9 三单）：无 403/无权限误伤",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "发票匹配（B9 三单）：非白屏渲染",
+          "ok": true,
+          "detail": "DOM 107379 字节"
+        },
+        {
+          "name": "mobile 预警页（R5 催收通知）：mobile 真实登录",
+          "ok": true,
+          "detail": "身份 finance"
+        },
+        {
+          "name": "mobile 预警页（R5 催收通知）：出现「预警」",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "mobile 预警页（R5 催收通知）：数据行探针",
+          "ok": true,
+          "detail": "命中"
+        }
+      ],
+      "mobile": {
+        "ok": true,
+        "username": "finance"
+      }
+    },
+    {
+      "role": "管理员（admin@nocobase.com）",
+      "pass": true,
+      "steps": [
+        {
+          "name": "PC 登录成功",
+          "ok": true,
+          "detail": "身份锚点「Super Admin」（nocobase）"
+        },
+        {
+          "name": "对照：直开权限矩阵页渲染矩阵",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "预警规则配置（B2/B5 六路）：页面出现「规则」",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "预警规则配置（B2/B5 六路）：无 403/无权限误伤",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "预警规则配置（B2/B5 六路）：非白屏渲染",
+          "ok": true,
+          "detail": "DOM 49720 字节"
+        },
+        {
+          "name": "预警规则配置（B2/B5 六路）：表格有数据行",
+          "ok": true,
+          "detail": "9 行"
+        },
+        {
+          "name": "审批流配置（设计器 iframe）：页面出现「审批流配置」",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "审批流配置（设计器 iframe）：无 403/无权限误伤",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "审批流配置（设计器 iframe）：非白屏渲染",
+          "ok": true,
+          "detail": "DOM 123463 字节"
+        },
+        {
+          "name": "审批流配置（设计器 iframe）：设计器 iframe 挂载",
+          "ok": true,
+          "detail": "http://127.0.0.1:13110/designer?doc_type=pur_orders"
+        },
+        {
+          "name": "权限矩阵页：页面出现「角色」",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "权限矩阵页：无 403/无权限误伤",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "权限矩阵页：非白屏渲染",
+          "ok": true,
+          "detail": "DOM 59855 字节"
+        },
+        {
+          "name": "权限矩阵页：矩阵表渲染",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "mobile": null
+    }
+  ]
+}

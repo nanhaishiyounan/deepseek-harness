@@ -1,0 +1,16 @@
+{
+  "generatedAt": "2026-10-02T01:18:04.510Z",
+  "steps": {
+    "mobileIdentity": "keeper",
+    "homeBadge": "4",
+    "alertRows": 4,
+    "claimButtons": 4,
+    "psqlAfterClaim": "keeper|acknowledged",
+    "mobileAcknowledged": true,
+    "pcIdentity": "nocobase",
+    "pcReadback": {
+      "rows": 20,
+      "seenKeeperAck": true
+    }
+  }
+}

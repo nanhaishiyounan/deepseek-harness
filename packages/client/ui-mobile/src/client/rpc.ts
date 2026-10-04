@@ -2,13 +2,21 @@
  * Unary RPC client for the mobile page: the same `/api/<method>` wire the PC
  * shell's fetch carrier speaks (client-request POST → server-response body),
  * reduced to the methods the mobile surface reads. Same-origin by
- * construction — the page is served by the gateway process itself, so the
- * request needs no credentials or base configuration.
+ * construction — the page is served by the gateway process itself. The
+ * identity-gated methods (`nocobase.list/get/update`, `session.prompt`)
+ * carry the signed-in gateway session token (`authToken`) the server derives
+ * the acting identity and collection scope from.
  */
 
 import type {
   RequestPayload, ResponseValue, RpcMethodMap,
 } from '@deepseek-ai/dsh-host-apiproxy/api'
+import { loadIdentity } from './auth.ts'
+
+/** The methods whose payloads accept the sign-in session token server-side. */
+const TOKEN_METHODS: ReadonlySet<string> = new Set([
+  'nocobase.list', 'nocobase.get', 'nocobase.update', 'nocobase.alertAct', 'session.prompt',
+])
 
 /** The method names the mobile surface calls. */
 export type MobileRpcMethod =
@@ -26,6 +34,9 @@ export type MobileRpcMethod =
   | 'kg.subgraph'
   | 'nocobase.listMeta'
   | 'nocobase.list'
+  | 'nocobase.get'
+  | 'nocobase.alertAct'
+  | 'nocobase.signIn'
   | 'lakehouse.overview'
 
 /** One server-response body narrowed to its result slot. */
@@ -46,10 +57,14 @@ export async function rpc<K extends MobileRpcMethod>(
   payload: RequestPayload<K> & Record<string, unknown>,
 ): Promise<ResponseValue<K>> {
   const rpcId = crypto.randomUUID()
+  const identity = TOKEN_METHODS.has(method) ? loadIdentity() : undefined
+  const wire = identity === undefined || payload['authToken'] !== undefined
+    ? payload
+    : { ...payload, authToken: identity.token }
   const response = await fetch(`/api/${method}`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ type: 'client-request', rpcId, method, payload }),
+    body: JSON.stringify({ type: 'client-request', rpcId, method, payload: wire }),
   })
   if (!response.ok) {
     throw new Error(`移动端请求失败（${method}，HTTP ${String(response.status)}）`)

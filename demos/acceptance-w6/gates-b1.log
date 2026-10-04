@@ -1,0 +1,46 @@
+# W6-B1 gates.log — mobile 同步闭环（G2/G3/G5/G6/G7/G8 + B0 遗留①②③）
+# 执行时间：2026-10-01 19:49~20:20 (Asia/Shanghai)；环境：gateway :3080（build:lib:client + apps/web vite 双轨重建后重启）、engine :13110（重启后含补偿队列/夜间新腿）、NocoBase :13000、PG localhost:5432/nocobase
+# 对账 SQL 固化：research/2026-10-01-w6-rework/b1/recon.sql
+
+## A. 单元/类型门禁
+- [PASS] pnpm run typecheck（全仓，0 error）
+- [PASS] vitest packages/client/ui-mobile（644/644；新增 outbox-store 5 例、docs-catalog 3 例、fold 病态回执降级 1 例；receipt 渲染既有用例改写为带 nb_create 落库对）
+- [PASS] vitest packages/connector/tool-nocobase（48/48 于本包两文件；含服务端发号对例：空号 max+1、双并发空号不撞、探针号字典序抢占回归例；无号读回断言改为 unguarded 集合不读回）
+- [PASS] vitest packages/host/apiproxy（全绿；handler.ts 超长行修复）
+- [PASS] oxlint（staged 配置）改动文件 0 error（2 warning 为既有 disable-directive 提示，非本批引入）
+
+## B. live 服务三联断言（引擎含 B1 新代码重启后）
+- [PASS] GET /healthz → {"ok":true,"backlog_pending":0}（G8 健康面含补偿深度）
+- [PASS] wfl_effect_backlog 集合存在（engine serve 启动幂等建表）
+- [PASS] /mobile → 200（build:lib:client + vite 双轨重建纪律执行——单跑 vite 吃旧 lib 产物会冻结旧 UI，本批实证复现并按双轨重建）
+
+## C. w6b1-sync.mts --assert（14/14，w6-b1-09-assert.log）
+- [PASS] G8 基座：wfl_effect_backlog 存在 + /healthz backlog_pending=0
+- [PASS] G2 读对账：引擎 /todos?user=buyer = psql open 行数（0=0）
+- [PASS] G2 闭环探针：PO-W6B1-20261001114916 落库 → buyer 送审 pending → 待办路由 chenliqun（真实主管，非 buyer/admin）→ 批准 approved → 单据状态回流 → 待办关闭 open=0
+- [PASS] G7 湖仓定时 transfer：13 表 388 行落 nb_* Parquet（w6-b1-09-assert.log 末趟 rows=388）；nb_pur_orders 行数=psql 实时行数（29=29）
+- [PASS] G8 补偿重放：so_orders#25 pending 行入队 → drain → done（幂等钩子真实重放预留）
+- [PASS] G5 发号态：六守卫集合零撞号；PO-2026 号段 max=1052 连续可续
+
+## D. 浏览器 live 证据（playwright，真实账号）
+- [PASS] w6-b1-01：qc_inspector 登录 → #/todos 待办页渲染 QM-NC-W6B1-20261001115245；psql open(qc_inspector)=1 与页面行数对账一致
+- [PASS] w6-b1-02：待办页「同意」→ 审批 Modal（意见输入+B0 闸门提示）→ 确认后打开 AI 会话执行 nb_approve
+- [PASS] w6-b1-03：closed=true；doc_status=approved；wfl_approval_records 追加 approve|qc_inspector（审计人=登录人，非 admin）→ 待办页轮询后清空截图
+- [PASS] w6-b1-04a/c：#/docs 目录（qc_inspector：质检单/不合格处置单/收货单）→ 列表（QM-NC-W6B1…已生效 #15）→ 详情（字段+审批轨迹 timeline）
+- [PASS] w6-b1-04d：buyer 角色过滤对照（采购订单/请购单/供应商档案——只见采购域）
+- [PASS] w6-b1-05：断网（context.setOffline）发送 → 降级提示+待发队列=1 → 恢复 → online 事件冲刷 → 队列清空（补偿成功）
+- [PASS] w6-b1-06：服务端发号 live 回合（w6-b1-06-server-numbering.log）：buyer 真实模型回合 → 草稿卡编号列空（rationale「落库后服务端分配」）→ 确认写入 → 回执卡服务端号 PO-2026-1053 = psql 落库号，同号行数=1，登记即送审 pending
+- [PASS] 发号 live 反例抓虫（真话债正面证据）：首轮回合报「撞号 PO-2026-0001」——探针号 PO-W6B1-* 字典序压过 PO-2026-*，纯降序首页取不到当年号段；修复 nextNumberFor 加 $like 当年前缀过滤（write.ts）+ mock $like 支持 + 回归用例 'draws from the current year band even when probe numbers outrank it lexically'（tool-nocobase 48/48 含此例）
+
+## E. B0 遗留清偿
+- [PASS] ① 回执以工具结果为准：fold.ts ReceiptVerification——submit_receipt 仅在同窗口存在同 collection:id 成功 nb_create 时渲染；病态双动作回合的编造回执降级为「回执未经落库核实」折叠条（单测 'degrades a submit_receipt with no matching nb_create landing'；loadProjection 窗口 6→16 保证 call/result 对在视野）
+- [PASS] ② 退出登录文案：「退出后需重新输入账号密码登录；会话与业务数据保留在服务端。」（ProfileView，与真实账号体系一致）
+- [PASS] ③ draft 过账语义：docsCatalog.stateWordOf——wms_receipts/mfg_* 等 posting 集合 draft→待过账、pending→过账处理中（绝不套审批词）；preset 同步加「清单之外集合一律不送审+过账语义话术」
+
+## F. 文档/notes 门禁
+- [PASS] Agent Note 三件套：.agents/notes/implemented/feature/2026-10-01-w6-b1-mobile-sync-closure.{md,zh.md,i18n.yaml}
+
+## 遗留（转后续批次）
+- 待办/单据面 5s/4s 轮询在推送通道落地后可替换（单站点规模成本正确）
+- #/docs 角色目录为固定表（B10 演练若需按站点扩展走配置面）
+- nightly lakehouse-transfer 首次人工触发已验证；定时生效依赖 W1_NIGHTLY_ENABLED=true（部署项，QUICKSTART 更新归 B10）

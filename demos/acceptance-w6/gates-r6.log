@@ -1,0 +1,9 @@
+W6-R6 gates（轻量收尾——只覆盖本批变更面）
+gate b2-rules assert: PASS —   ✓ 参数复原后失败归零 — none w6b2-rules: assert 全部断言通过
+gate cockpit-mask: PASS — w6-r6-02: ALL PASS
+gate ui-mobile views: PASS —
+gate typecheck: PASS（build:lib:host exit=0）— tail:
+gate oxlint-staged（本批变更面）: PASS — Found 0 warnings and 0 errors. Finished in 3.0s on 3 files with 48 rules using 12 threads.
+gate pairing: PASS —
+R6 GATES: 6 legs, 0 failed — ALL PASS
+脚注（如实）：本批未动 w6b9-cockpit.mts（cockpit 服务端脱敏 B9 已全覆盖：tops.customers/aging 钻取行非 finance 置空 + masked 旗标，computeCockpit L250-268）——b9 assert 腿未复跑，以 gate 2 的围栏对称断言（w6-r6-02，planner masked/finance 全量/aging 403，8/8）替代覆盖。b2 assert 因渲染层改动（enabled 列是/否枚举）复跑绿。

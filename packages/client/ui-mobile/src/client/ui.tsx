@@ -3,12 +3,14 @@
  * language; antd-mobile's Avatar is img-only with a required string `src`, so
  * the acronym block stays this app's own span), the badge chip (antd-mobile
  * Tag on the token track), the running spinner row, the loading skeletons
- * (antd-mobile Skeleton), and the empty/error states (antd-mobile Empty /
+ * (antd-mobile Skeleton — list rows with the timestamp slot, cards, and the
+ * chat thread), the unified empty state (icon + title + description + one
+ * solid CTA, W7-M2), and the empty/error notice cards (antd-mobile
  * ErrorBlock on this app's token track). Presentation only; no data paths.
  */
 
 import type { JSX, ReactNode } from 'react'
-import { DotLoading, ErrorBlock, Skeleton, Tag } from 'antd-mobile'
+import { Button, DotLoading, ErrorBlock, Skeleton, Tag } from 'antd-mobile'
 import css from './ui.module.css'
 
 /** Avatar props: the flat background css, the acronym block, and an optional glyph. */
@@ -99,10 +101,62 @@ export function NoticeCard({ kind, text }: { kind: 'empty' | 'error'; text: stri
   )
 }
 
+/** The unified empty state's CTA (one solid primary action, never outlined). */
+export interface EmptyStateAction {
+  readonly label: string
+  readonly onClick: () => void
+}
+
+/** EmptyState props: the linear icon, the two copy lines, the optional CTA, the density. */
+export interface EmptyStateProps {
+  /** A lucide glyph (stroke 1.8) — the single visual anchor, no emoji. */
+  readonly icon: ReactNode
+  readonly title: string
+  /** The second line distinguishing 未设筛选 vs 筛选无结果 (Fiori copy rule). */
+  readonly description?: string
+  readonly action?: EmptyStateAction
+  /** `section` = the in-card compact row (files/home strips); default `page`. */
+  readonly variant?: 'page' | 'section'
+}
+
 /**
- * One skeleton placeholder row (list-shaped loading state): avatar disc plus
- * two text bars, breathing on antd-mobile's shimmer. Purely visual — the
- * wrapping page group carries the role="status" announcement.
+ * The unified empty state (W7-M2, audit 04 TOP-5): icon block + title +
+ * description + one solid CTA. `page` centers the stack in the scroll body;
+ * `section` rides one compact in-card row.
+ * @param props - icon, title, optional description, optional action, variant.
+ * @returns the empty-state block.
+ */
+export function EmptyState({ icon, title, description, action, variant = 'page' }: EmptyStateProps): JSX.Element {
+  const root = variant === 'section' ? `${css.emptyState} ${css.emptyStateSection}` : css.emptyState
+  return (
+    <div className={root} role="empty" data-testid="empty-state">
+      <span className={css.emptyIcon} aria-hidden="true">{icon}</span>
+      <span className={css.emptyTexts}>
+        <span className={css.emptyTitle}>{title}</span>
+        {description !== undefined && <span className={css.emptyDesc}>{description}</span>}
+        {action !== undefined && (
+          <Button
+            type="button"
+            color="primary"
+            fill="solid"
+            size="small"
+            className={css.emptyAction as string}
+            onClick={action.onClick}
+          >
+            {action.label}
+          </Button>
+        )}
+      </span>
+    </div>
+  )
+}
+
+/**
+ * One skeleton placeholder row (list-shaped loading state): avatar disc, a
+ * title bar with the trailing timestamp slot, and one summary bar — matching
+ * the real row's structure (W7-M2, audit 04 TOP-4: the skeleton mirrors what
+ * lands). Purely visual — the wrapping page group carries the role="status"
+ * announcement.
  * @returns the skeleton row.
  */
 export function SkelRow(): JSX.Element {
@@ -110,27 +164,50 @@ export function SkelRow(): JSX.Element {
     <div className={css.skelRow} aria-hidden="true">
       <Skeleton animated className={css.skelAvatar as string} />
       <span className={css.skelTexts}>
-        <Skeleton.Paragraph animated lineCount={2} className={css.skelParagraph as string} />
+        <span className={css.skelTop}>
+          <Skeleton animated className={css.skelTitle as string} />
+          <Skeleton animated className={css.skelTime as string} />
+        </span>
+        <Skeleton animated className={css.skelLine as string} />
       </span>
     </div>
   )
 }
 
 /**
- * One skeleton placeholder card (card-shaped loading state): head row (avatar
- * disc plus a title bar) over two body bars, breathing on the same shimmer.
+ * One skeleton placeholder card (card-shaped loading state): head row (a
+ * 24px stamp disc plus a title bar) over two body bars, breathing on the
+ * same shimmer — the todo/doc/alert card silhouette.
  * @returns the skeleton card.
  */
 export function SkelCard(): JSX.Element {
   return (
     <div className={css.skelCard} aria-hidden="true">
       <span className={css.skelHead}>
-        <Skeleton animated className={css.skelAvatar as string} />
+        <Skeleton animated className={css.skelStamp as string} />
         <span className={css.skelTexts}>
-          <Skeleton.Title animated className={css.skelTitle as string} />
+          <Skeleton animated className={css.skelTitle as string} />
         </span>
       </span>
-      <Skeleton.Paragraph animated lineCount={2} className={css.skelParagraph as string} />
+      <Skeleton animated className={css.skelLine as string} />
+      <Skeleton animated className={css.skelLineShort as string} />
+    </div>
+  )
+}
+
+/**
+ * The chat thread's first-paint skeleton (W7-M2, audit 04 §07): an AI bubble
+ * block, a wider reply block, then a short user bubble on the trailing right
+ * — the shape the loaded thread lands in, replacing the one-line「会话加载中」
+ * over 750px of blank flow.
+ * @returns the thread skeleton.
+ */
+export function SkelThread(): JSX.Element {
+  return (
+    <div className={css.skelThread} aria-hidden="true">
+      <Skeleton animated className={`${css.skelBubble} ${css.skelBubbleAi}` as string} />
+      <Skeleton animated className={`${css.skelBubble} ${css.skelBubbleAi} ${css.skelBubbleWide}` as string} />
+      <Skeleton animated className={`${css.skelBubble} ${css.skelBubbleUser}` as string} />
     </div>
   )
 }

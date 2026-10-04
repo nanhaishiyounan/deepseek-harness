@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-09-30-w6-statcard-density.md
-2026-09-30-w6-statcard-density.md: 71d6328eaccd3bfd757b10aa88bcdc3547c8bdc9
-2026-09-30-w6-statcard-density.zh.md: 47401ba02986748ea314b925aed8d410baf724db
+2026-09-30-w6-statcard-density.md: 8345feb34a8d3eec236a13adef296369a8b19e17
+2026-09-30-w6-statcard-density.zh.md: 705e2c545c90b48666e20f295914d583f8c65a88

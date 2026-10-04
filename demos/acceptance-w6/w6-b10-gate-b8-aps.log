@@ -1,0 +1,10 @@
+— 瓶颈口径对账（负荷率计算式）
+  ✓ 瓶颈行数：psql 手写负荷率式 = /aps/load 引擎输出 — 手写=1 引擎=1
+  ✓ W2-B6 拆单演示桶在瓶颈集合（1200分 > 480分/日） — 1200|480
+  ✓ aps_whatif_runs 差异报告表在位 — aps_whatif_runs
+— 铺页
+  ✓ v2 页「APS瓶颈与负荷」在生产与计划组下
+  ✓ v2 页「APS what-if沙箱」在生产与计划组下
+  ✓ JSBlock w6b8-aps-load 挂载
+  ✓ JSBlock w6b8-aps-whatif 挂载
+w6b8-aps: assert PASS

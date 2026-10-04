@@ -1,0 +1,4 @@
+# W6-B6 管道拖拽迁移 psql 对账（sales_rep 会话拖拽 → inquiry→quote）
+# 迁移前: inquiry|10
+# 迁移后 crm_deals(stage|probability|status): quote|40|pending
+# crm_stage_audit(actor|to_stage|probability): sales_rep|quote|40

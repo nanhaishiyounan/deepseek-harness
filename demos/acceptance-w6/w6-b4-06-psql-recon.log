@@ -1,0 +1,81 @@
+== w6-b4 psql 对账（2026-10-02，w6b4-assert 演练后台账）==
+-- ① 报工身份：卡片流报工 operator 全部=会话推导（shop_lead），无自报/缺省 admin
+psql> SELECT operator, count(*) FROM mfg_job_reports WHERE submit_key LIKE 'w6b4:%' OR submit_key LIKE 'smoke:w6b4:%' GROUP BY 1;
+ operator  | count
+-----------+-------
+ shop_lead |     8
+(1 row)
+
+-- ② 幂等：每个 submit_key 恰好 1 行报工 + 1 行 CCP 记录（双击/重放合并）
+psql> SELECT c.submit_key, count(DISTINCT j.id) AS jr_rows, count(c.id) AS ccp_rows FROM mfg_ccp_records c LEFT JOIN mfg_job_reports j ON j.submit_key = c.submit_key WHERE c.submit_key LIKE 'w6b4:%' OR c.submit_key LIKE 'smoke:w6b4:%' GROUP BY 1 ORDER BY 1;
+-- ③ CCP 记录留痕（谁/何时/实测/限值快照/越限/纠偏）
+psql> SELECT point_code, operator, measured, cl_min, cl_max, deviation, recorded_at FROM mfg_ccp_records ORDER BY id;
+ point_code | operator  | measured | cl_min | cl_max | deviation |       recorded_at
+------------+-----------+----------+--------+--------+-----------+--------------------------
+ CCP-XT-01  | shop_lead |      4.5 |      0 |     10 | f         | 2026-10-02T08:20:45.396Z
+ CCP-SD-01  | shop_lead |      -10 |    -30 |    -18 | t         | 2026-10-02T08:20:59.405Z
+ CCP-XT-01  | shop_lead |      4.5 |      0 |     10 | f         | 2026-10-02T08:24:39.176Z
+ CCP-SD-01  | shop_lead |      -10 |    -30 |    -18 | t         | 2026-10-02T08:24:41.031Z
+ CCP-XT-01  | shop_lead |      4.5 |      0 |     10 | f         | 2026-10-02T08:28:35.304Z
+ CCP-SD-01  | shop_lead |      -10 |    -30 |    -18 | t         | 2026-10-02T08:28:38.871Z
+ CCP-XT-01  | shop_lead |      4.5 |      0 |     10 | f         | 2026-10-02T08:33:35.716Z
+ CCP-SD-01  | shop_lead |      -10 |    -30 |    -18 | t         | 2026-10-02T08:33:39.098Z
+(8 rows)
+
+-- ④ 越限→B2 预警（critical/open）+ 纠偏单
+psql> SELECT rule_type, severity, entity_code, status FROM wfl_alerts WHERE rule_type='ccp_deviation' ORDER BY id;
+psql> SELECT code, action, status, ref_no FROM qm_nc_dispositions WHERE ref_no LIKE 'MO-2026-0002#op%' ORDER BY id;
+   rule_type   | severity |         entity_code          | status
+---------------+----------+------------------------------+--------
+ ccp_deviation | critical | MO-2026-0002#工序2#CCP-SD-01 | open
+ ccp_deviation | critical | MO-2026-0002#工序2#CCP-SD-01 | open
+ ccp_deviation | critical | MO-2026-0002#工序2#CCP-SD-01 | open
+ ccp_deviation | critical | MO-2026-0002#工序2#CCP-SD-01 | open
+(4 rows)
+
+      code       | action | status |      ref_no
+-----------------+--------+--------+------------------
+ QM-NC-2026-0007 | rework | open   | MO-2026-0002#op2
+ QM-NC-2026-0008 | rework | open   | MO-2026-0002#op2
+ QM-NC-2026-0009 | rework | open   | MO-2026-0002#op2
+ QM-NC-2026-0010 | rework | open   | MO-2026-0002#op2
+(4 rows)
+
+-- ⑤ BOM 版本快照三查（ECO 生效后）
+psql> SELECT code, version, bom_status, is_default FROM mfg_boms WHERE product_id = 11 ORDER BY version;
+psql> SELECT code, doc_status, requested_by, approved_by, effective_at FROM mfg_ecos ORDER BY id;
+psql> SELECT code, bom_id, doc_status FROM mfg_orders WHERE id = 2 OR code LIKE 'MO-W6B4-%';
+psql> （在产 MO-2026-0002 bom_id=3 不随 ECO 切换；演练 MO 已清理）
+   code   | version | bom_status | is_default
+----------+---------+------------+------------
+ BOM-0003 |       1 | retired    | f
+ BOM-0004 |       2 | retired    | f
+ BOM-0005 |       3 | retired    | f
+ BOM-0006 |       4 | retired    | f
+ BOM-0007 |       5 | active     | t
+(5 rows)
+
+     code      | doc_status | requested_by | approved_by  | effective_at
+---------------+------------+--------------+--------------+--------------
+ ECO-2026-0001 | approved   | planner      | qc_inspector | 2026-10-02
+ ECO-2026-0002 | approved   | planner      | qc_inspector | 2026-10-02
+ ECO-2026-0003 | approved   | planner      | qc_inspector | 2026-10-02
+ ECO-2026-0004 | approved   | planner      | qc_inspector | 2026-10-02
+(4 rows)
+
+     code     | bom_id | doc_status
+--------------+--------+-------------
+ MO-2026-0002 |      3 | in_progress
+(1 row)
+
+          submit_key          | jr_rows | ccp_rows
+------------------------------+---------+----------
+ smoke:w6b4:op1:normal:001    |       1 |        1
+ smoke:w6b4:op2:deviation:001 |       1 |        1
+ w6b4:muqp64qa:op1:normal     |       1 |        1
+ w6b4:muqp64qa:op2:deviation  |       1 |        1
+ w6b4:muqpb0or:op1:normal     |       1 |        1
+ w6b4:muqpb0or:op2:deviation  |       1 |        1
+ w6b4:muqphirj:op1:normal     |       1 |        1
+ w6b4:muqphirj:op2:deviation  |       1 |        1
+(8 rows)

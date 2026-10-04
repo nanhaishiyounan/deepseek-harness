@@ -1,0 +1,7 @@
+== W6-B9 negatives ==
+  ✓ keeper 读财务明细 → 403 — 403
+  ✓ 无会话读驾驶舱 → 401 — 401
+  ✓ keeper 财务写 → 403 — 403
+  ✓ 自报 actor≠会话 → 拒 — 403
+  ✓ statement_no 注入被剥离（无 <img 反射）
+  ✓ keeper 读打印页 → 403 — 403

@@ -13,11 +13,11 @@
  * an antd-mobile NavBar over it.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState, type JSX } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type JSX } from 'react'
 import { Button, SpinLoading, TextArea, Toast, type TextAreaRef } from 'antd-mobile'
 import { BarChart3, CalendarClock, Check, ClipboardCheck, FileText, Mic, Paperclip, PenLine, Plus, Search, Send, Smile, Square, X } from 'lucide-react'
 import type { NocobaseFieldView, SessionSummary } from '@deepseek-ai/dsh-host-apiproxy/api'
-import { Avatar, NoticeCard, RunningRow } from '../ui.tsx'
+import { Avatar, NoticeCard, RunningRow, SkelThread } from '../ui.tsx'
 import { PageNav } from '../PageNav.tsx'
 import { loadIdentity } from '../auth.ts'
 import { dispatchReportAction } from '../actions.ts'
@@ -27,16 +27,21 @@ import { goBackOr } from '../router.ts'
 import { currentRunMode } from '../runMode.ts'
 import { rpc } from '../rpc.ts'
 import { useAsync, usePoll } from '../hooks.ts'
-import { cancelSession, listAiEmployees, listSessions, pendingPresetOf, promptSession, readHistory, titleOf } from '../sessionsService.ts'
+import { cancelSession, listAiEmployees, listSessions, newClientMsgId, pendingPresetOf, promptSession, readHistory, titleOf } from '../sessionsService.ts'
 import { dayLabelOf } from '../sessionsService.ts'
 import { mergeCardValues, nextSystemNumber } from '../systemFields.ts'
+import { enqueueOutbox, outboxSnapshot, subscribeOutbox } from '../outboxStore.ts'
 import { deriveCardStates, type CardPhase, type DerivedCardState } from '../cardState.ts'
 import { clearDraftEdits, clearPendingReview, loadDraftEdits, markPendingReview, saveDraftEdits } from '../draftStore.ts'
 import { KgEvidenceSection } from '../kg/KgEvidence.tsx'
 import { DraftCard, ReceiptCard, RejectedCard, ReviewCard, type CollectionFieldMeta, type FieldMetas } from '../forms/task-cards.tsx'
 import { DraftCard as DraftCardV3 } from '../forms/v3/DraftCard.tsx'
 import { ReceiptCard as ReceiptCardV3 } from '../forms/v3/ReceiptCard.tsx'
-import { buildConfirmMessage, buildRejectMessage, type FormConfirmPayload, type FormDraftPayload } from '../protocol.ts'
+import {
+  buildConfirmMessage, buildRejectMessage,
+  type ApprovalPendingPayload, type ApprovalResultPayload,
+  type FormConfirmPayload, type FormDraftPayload,
+} from '../protocol.ts'
 import { sanitizeBizText } from './rich.ts'
 import { WelcomeCard } from './WelcomeCard.tsx'
 import { ChoiceBubble } from './ChoiceBubble.tsx'
@@ -191,8 +196,12 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
     if (trimmed === '' || sending) return
     setSending(true)
     setError(undefined)
+    // One idempotency key per composed message: the server collapses a
+    // repeated session.prompt carrying the same id (the offline outbox's
+    // retry and the response-lost double-send window both ride it).
+    const clientMsgId = newClientMsgId(loadIdentity()?.username ?? '', trimmed)
     try {
-      await promptSession(sessionId, trimmed)
+      await promptSession(sessionId, trimmed, clientMsgId)
       setDraft('')
       setPollInterval(1200)
       if (demoMode) {
@@ -207,10 +216,24 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
       }
     } catch (cause) {
       // A failed send must not leave the simulated typing dots breathing
-      // forever: retire the pending timer and the indicator, then surface the
-      // error so the composer is clearly usable again.
+      // forever: retire the pending timer and the indicator, then route the
+      // failure by kind. Only a transport-level TypeError (the request never
+      // reached the server — or the response was lost mid-flight, where the
+      // server-side clientMsgId dedup keeps the retry harmless) parks the
+      // message in the outbox; a server refusal (any rpc Error) never
+      // re-sends — the retry cannot fix it and a duplicate could double-execute.
       if (typingTimer.current !== undefined) window.clearTimeout(typingTimer.current)
       setTyping(false)
+      if (cause instanceof TypeError) {
+        enqueueOutbox(sessionId, trimmed, clientMsgId)
+        setDraft('')
+        setError('网络不可用，消息已存入待发队列，恢复后自动发送')
+        return
+      }
+      console.warn(JSON.stringify({
+        type: 'client_error', scope: 'chat.send-refused', clientMsgId,
+        message: cause instanceof Error ? cause.message : String(cause), at: new Date().toISOString(),
+      }))
       // the rpc seam only rejects with Error.
       /* v8 ignore next -- the rpc seam never rejects with a non-Error value. */
       setError(cause instanceof Error ? cause.message : String(cause))
@@ -218,6 +241,39 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
       setSending(false)
     }
   }, [sessionId, sending, demoMode])
+
+  // W6-B1 G2: live read-back of every still-pending approval card's document
+  // state (4s poll while no turn runs — the in-session result card owns the
+  // running window). A state that left the review words settles the frozen
+  // pending snapshot with 他端已处理.
+  const pendingApprovals = useMemo(() => folded.items.flatMap((item): ApprovalPendingPayload[] =>
+    item.kind === 'approval' && item.payload.type === 'approval_pending' ? [item.payload] : []), [folded.items])
+  const approvalStates = usePoll(async () => {
+    const reads = await Promise.all(pendingApprovals.map(async (payload) => {
+      const docId = Number(payload.doc.docId)
+      if (!Number.isInteger(docId) || docId < 1) return undefined
+      try {
+        const value = await rpc('nocobase.get', { collection: payload.doc.collection, id: docId })
+        // The state column by the collection's own vocabulary (posting
+        // collections ride lifecycle_status/status, approval ones doc_status)
+        // — the 他端已处理 flip must settle for both.
+        const state = (value.row as Record<string, unknown>)['doc_status']
+          ?? (value.row as Record<string, unknown>)['status']
+          ?? (value.row as Record<string, unknown>)['lifecycle_status']
+        return typeof state === 'string'
+          ? [`${payload.doc.collection}:${payload.doc.docId}`, state as ApprovalResultPayload['state']] as const
+          : undefined
+      } catch {
+        return undefined
+      }
+    }))
+    return new Map(reads.flatMap(entry => entry === undefined ? [] : [entry]))
+  }, 4000, !folded.running && pendingApprovals.length > 0)
+  const approvalExternalStates = approvalStates.value ?? new Map<string, ApprovalResultPayload['state']>()
+  // The outbox strip: queued sends for this session surface under the flow
+  // (G5 degradation notice); recovery clears it automatically.
+  const outbox = useSyncExternalStore(subscribeOutbox, outboxSnapshot)
+  const sessionOutbox = outbox.entries.filter(entry => entry.sessionId === sessionId)
 
   // Resolve the run mode once; clear the typing indicator's timer on unmount.
   useEffect(() => {
@@ -423,15 +479,19 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
         }}
       >
         {history.value === undefined && history.error === undefined && (
-          <div className={css.loadingRow} role="status">
-            <SpinLoading color="currentColor" style={{ '--size': '16px' }} />
-            <span>会话加载中…</span>
+          <div role="status" aria-label="正在加载会话">
+            <SkelThread />
           </div>
         )}
         {history.error !== undefined && <NoticeCard kind="error" text={history.error} />}
         {showWelcome && (
           <div className={css.welcomeStage}>
             <WelcomeCard welcome={welcome} onSend={(text) => { void send(text) }} disabled={sending} />
+          </div>
+        )}
+        {sessionOutbox.length > 0 && (
+          <div className={css.outboxStrip} role="status" aria-label="待发队列">
+            网络恢复后将自动发送 {String(sessionOutbox.length)} 条待发消息
           </div>
         )}
         {folded.items.map((item, index) => (
@@ -446,6 +506,7 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
             systemValues={systemValues}
             meta={meta.value}
             sending={sending}
+            approvalExternalStates={approvalExternalStates}
             onDraftEdit={onDraftEdit}
             onSubmitReview={onSubmitReview}
             onConfirm={onConfirm}
@@ -522,7 +583,7 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
                 fill="outline"
                 size="small"
                 className={css.chip}
-                style={{ '--background-color': 'var(--dshm-card)', '--border-color': 'rgba(46, 124, 246, 0.35)' }}
+                style={{ '--background-color': 'var(--dshm-card)', '--border-color': 'var(--dshm-primary-rim)' }}
                 disabled={sending || folded.running}
                 onClick={() => { void send(text) }}
               >
@@ -580,7 +641,7 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
       <TaskFormModal
         visible={taskForm.open}
         onClose={() => { setTaskForm(current => ({ ...current, open: false })) }}
-        identityName={loadIdentity()?.name ?? '我'}
+        identityName={loadIdentity()?.nickname ?? '我'}
         prefill={taskForm.prefill}
         sourceSessionId={sessionId}
         sourceAnchor={taskForm.anchor}
@@ -615,6 +676,8 @@ function FlowItem(
     readonly systemValues: ReadonlyMap<string, Record<string, string>>
     readonly meta: FieldMetas | undefined
     readonly sending: boolean
+    /** Live doc_status read-backs keyed `collection:docId` (G2 他端已处理). */
+    readonly approvalExternalStates: ReadonlyMap<string, ApprovalResultPayload['state']>
     readonly onDraftEdit: (seq: number) => (name: string, value: string) => void
     readonly onSubmitReview: (seq: number) => () => void
     readonly onConfirm: (seq: number, fields: Record<string, string>, collection: string) => () => void
@@ -766,11 +829,14 @@ function FlowItem(
     )
   }
   if (item.kind === 'approval') {
+    const external = item.payload.type === 'approval_pending'
+      ? props.approvalExternalStates.get(`${item.payload.doc.collection}:${item.payload.doc.docId}`)
+      : undefined
     return (
       <>
         {separator}
         {aiRow(
-          <ApprovalCard payload={item.payload} onSend={props.onSend} disabled={props.sending} />,
+          <ApprovalCard payload={item.payload} onSend={props.onSend} disabled={props.sending} externalState={external} />,
         )}
       </>
     )
