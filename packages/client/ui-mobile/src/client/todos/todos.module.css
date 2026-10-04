@@ -1,0 +1,148 @@
+/* The W6-B1 todos page: segmented counts over the ledger card list — the
+ * same card material the report/approval cards ride, tightened for the
+ * compact todo row. */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 8px 14px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.segRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.segChip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  padding: 4px 11px;
+  border-radius: var(--dshm-radius-pill);
+  background: var(--dshm-primary-10);
+  color: var(--dshm-primary);
+  font-size: var(--dshm-fs-xs);
+}
+
+.segCount {
+  font-size: var(--dshm-fs-sm);
+  font-weight: 600;
+}
+
+.segHint {
+  font-size: var(--dshm-fs-xs);
+  color: var(--dshm-muted-foreground);
+}
+
+/* The card-skeleton column (W7-M2): three SkelCards stacked on the list rhythm. */
+.skelGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 2px 0 8px;
+}
+
+.errorCard {
+  padding: 14px;
+  border-radius: var(--dshm-radius);
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-destructive);
+  color: var(--dshm-destructive);
+  font-size: var(--dshm-fs-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.retryLink {
+  align-self: flex-start;
+  color: var(--dshm-primary);
+}
+
+.todoCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: var(--dshm-radius);
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-border);
+}
+
+.todoHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.todoLabel {
+  font-size: var(--dshm-fs-xs);
+  color: var(--dshm-primary);
+  font-weight: 600;
+}
+
+.todoState {
+  font-size: var(--dshm-fs-xs);
+  color: var(--dshm-muted-foreground);
+}
+
+.todoTitle {
+  font-size: var(--dshm-fs-md);
+  font-weight: 600;
+  color: var(--dshm-foreground);
+  overflow-wrap: anywhere;
+}
+
+.todoFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px dashed var(--dshm-border);
+  padding-top: 8px;
+}
+
+.docLink {
+  color: var(--dshm-primary);
+  font-size: var(--dshm-fs-xs);
+  padding: 0;
+}
+
+.todoActions {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.ccNote {
+  font-size: var(--dshm-fs-xs);
+  color: var(--dshm-muted-foreground);
+}
+
+.dialogBody {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dialogDoc {
+  margin: 0;
+  font-size: var(--dshm-fs-sm);
+  font-weight: 600;
+}
+
+.dialogHint {
+  margin: 0;
+  font-size: var(--dshm-fs-xs);
+  color: var(--dshm-muted-foreground);
+}

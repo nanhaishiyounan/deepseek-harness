@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>检验工作台 · QMS</title>
+<style>
+  /* W7 铸造常量表（iframe 文档不继承 NocoBase 的 globalStyle，这里内嵌同值令牌——plans/plan-w7 §3.7 层3c） */
+  :root { color-scheme: light;
+    --w7-primary: #1E4E8C; --w7-primary-hover: #2A5FA6; --w7-primary-soft: #E8F0F9;
+    --w7-positive-fg: #256F3A; --w7-positive-bg: #F5FAE5;
+    --w7-critical-fg: #E76500; --w7-critical-bg: #FFF8D6;
+    --w7-negative-fg: #AA0808; --w7-negative-bg: #FFEAF4;
+    --w7-neutral-fg: #788FA6; --w7-neutral-bg: #EFF1F2;
+    --w7-informational-fg: #0070F2; --w7-informational-bg: #E1F4FF;
+    --w7-canvas: #F6F6F4; --w7-surface: #FFFFFF; --w7-surface-2: #FAFAF9;
+    --w7-border: #E8E8E6; --w7-border-strong: #D8D8D5;
+    --w7-text: #1F2630; --w7-text-secondary: #55606E; --w7-text-weak: #8A94A0;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, -apple-system, sans-serif; background: var(--w7-canvas); color: var(--w7-text); font-size: 15px; }
+  header { background: var(--w7-surface); border-bottom: 1px solid var(--w7-border); padding: 12px 18px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; position: sticky; top: 0; z-index: 5; }
+  header h1 { font-size: 17px; margin: 0; }
+  header .who { margin-left: auto; font-size: 13px; color: var(--w7-text-secondary); }
+  header button { padding: 8px 16px; border-radius: 10px; border: 1px solid var(--w7-border-strong); background: var(--w7-surface-2); font-size: 14px; min-height: 40px; }
+  main { padding: 16px; max-width: 980px; margin: 0 auto; }
+  .card { background: var(--w7-surface); border: 1px solid var(--w7-border); border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+  .hint { color: var(--w7-text-weak); font-size: 13px; }
+  .error { background: var(--w7-negative-bg); border: 1px solid var(--w7-negative-fg); color: var(--w7-negative-fg); border-radius: 12px; padding: 10px 14px; margin-bottom: 12px; display: none; white-space: pre-wrap; }
+  .ok { background: var(--w7-positive-bg); border: 1px solid var(--w7-positive-fg); color: var(--w7-positive-fg); border-radius: 12px; padding: 10px 14px; margin-bottom: 12px; display: none; white-space: pre-wrap; }
+  /* the grouped queue */
+  .tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .tabs button { flex: 1; min-width: 150px; min-height: 54px; border-radius: 12px; border: 1px solid var(--w7-border-strong); background: var(--w7-surface); font-size: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+  .tabs button.active { border-color: var(--w7-primary); background: var(--w7-primary-soft); }
+  .tabs .count { font-size: 20px; font-weight: 700; }
+  .tabs .over { color: var(--w7-negative-fg); font-size: 12px; }
+  .qcard { background: var(--w7-surface); border: 1px solid var(--w7-border); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; cursor: pointer; }
+  .qcard:hover { border-color: var(--w7-primary); }
+  .qcard .code { font-weight: 700; font-size: 15px; }
+  .qcard .meta { color: var(--w7-text-secondary); font-size: 13px; flex: 1 1 260px; }
+  .qcard .qty { font-size: 14px; }
+  .badge-over { background: var(--w7-negative-bg); color: var(--w7-negative-fg); border-radius: 8px; padding: 2px 8px; font-size: 12px; }
+  .badge-type { background: var(--w7-surface-2); border-radius: 8px; padding: 2px 8px; font-size: 12px; color: var(--w7-text-secondary); }
+  .qcard .go { min-height: 44px; padding: 8px 18px; border-radius: 10px; border: none; background: var(--w7-primary); color: #fff; font-size: 14px; }
+  /* the wizard */
+  .step-title { font-size: 14px; color: var(--w7-text-secondary); margin: 2px 0 10px; }
+  .planbox { display: flex; gap: 10px; flex-wrap: wrap; }
+  .planbox .pill { background: var(--w7-surface-2); border: 1px solid var(--w7-border); border-radius: 12px; padding: 10px 14px; text-align: center; min-width: 92px; }
+  .planbox .pill b { display: block; font-size: 21px; }
+  .planbox .pill span { font-size: 12px; color: var(--w7-text-secondary); }
+  input, select, textarea { min-height: 44px; border-radius: 10px; border: 1px solid var(--w7-border-strong); padding: 8px 12px; font-size: 15px; background: var(--w7-surface); }
+  input[type=number] { width: 110px; }
+  .aqlpills { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+  .aqlpills button { min-height: 44px; min-width: 64px; border-radius: 10px; border: 1px solid var(--w7-border-strong); background: var(--w7-surface); font-size: 15px; }
+  .aqlpills button.active { border-color: var(--w7-primary); background: var(--w7-primary-soft); font-weight: 700; }
+  table.readings { width: 100%; border-collapse: collapse; }
+  table.readings th, table.readings td { border-bottom: 1px solid var(--w7-border); padding: 7px 6px; font-size: 14px; text-align: left; }
+  table.readings input { min-height: 38px; padding: 4px 8px; }
+  table.readings select { min-height: 38px; padding: 4px 6px; }
+  .rowfail { background: var(--w7-negative-bg); }
+  .rowok { background: var(--w7-positive-bg); }
+  .confirm-fail { min-height: 40px; border-radius: 8px; border: 1px solid var(--w7-critical-fg); background: var(--w7-critical-bg); color: var(--w7-critical-fg); font-size: 13px; padding: 4px 10px; }
+  .confirm-fail.armed { background: var(--w7-negative-fg); color: #fff; border-color: var(--w7-negative-fg); }
+  .verdict { display: inline-flex; align-items: center; gap: 10px; border-radius: 14px; padding: 12px 22px; font-size: 20px; font-weight: 800; }
+  .verdict.pass { background: var(--w7-positive-bg); color: var(--w7-positive-fg); border: 2px solid var(--w7-positive-fg); }
+  .verdict.fail { background: var(--w7-negative-bg); color: var(--w7-negative-fg); border: 2px solid var(--w7-negative-fg); }
+  .verdict.pending { background: var(--w7-surface-2); color: var(--w7-text-secondary); border: 2px dashed var(--w7-border-strong); }
+  button.primary { min-height: 50px; padding: 10px 28px; border-radius: 12px; border: none; background: var(--w7-primary); color: #fff; font-size: 16px; }
+  button.primary:disabled { background: #A3BCE2; }
+  button.ghost { min-height: 44px; padding: 8px 18px; border-radius: 12px; border: 1px solid var(--w7-border-strong); background: var(--w7-surface); font-size: 14px; }
+  .actions { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+  .disposal button { min-height: 48px; min-width: 120px; border-radius: 12px; border: 1px solid var(--w7-border-strong); background: var(--w7-surface); font-size: 15px; }
+  .disposal button.active { border-color: var(--w7-primary); background: var(--w7-primary-soft); font-weight: 700; }
+  .photo img { width: 120px; height: 120px; object-fit: cover; border-radius: 10px; border: 1px solid var(--w7-border); }
+  .report-view iframe, .report-view .doc { width: 100%; min-height: 640px; border: 1px solid var(--w7-border); border-radius: 12px; background: var(--w7-surface); }
+  .field { display: flex; align-items: center; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
+  .field label { min-width: 110px; color: var(--w7-text-secondary); font-size: 14px; }
+  .kv { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; font-size: 14px; }
+  .kv b { color: var(--w7-text-secondary); font-weight: 600; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<header>
+  <h1>检验工作台</h1>
+  <span class="hint">待检队列 → AQL 抽样向导 → 判定落库 → 处置/出厂报告</span>
+  <span class="who" id="who"></span>
+  <button id="auth-btn" class="ghost" type="button"></button>
+</header>
+<main>
+  <div id="error" class="error"></div>
+  <div id="ok" class="ok"></div>
+
+  <section id="login-view" class="card hidden">
+    <div class="step-title">质检员签到（会话身份——写路由按平台会话推导操作人，不接受自报）</div>
+    <div class="field"><label>账号</label><input id="login-account" autocomplete="username" placeholder="qc_inspector" /></div>
+    <div class="field"><label>密码</label><input id="login-password" type="password" autocomplete="current-password" /></div>
+    <div class="actions"><button id="login-btn" class="primary" type="button">签到</button></div>
+  </section>
+
+  <section id="queue-view" class="hidden">
+    <div class="tabs" id="queue-tabs"></div>
+    <div id="queue-cards"></div>
+    <div class="hint">逾期 = 收货（received_at）超 48h 未判定。点卡片进入检验向导。</div>
+  </section>
+
+  <section id="wizard-view" class="hidden"></section>
+
+  <section id="result-view" class="hidden"></section>
+
+  <section id="report-view" class="hidden"></section>
+</main>
+<script src="/insp/dist/insp.js"></script>
+</body>
+</html>

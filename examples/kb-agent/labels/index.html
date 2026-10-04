@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>条码打印中心 · 食品合规</title>
+<style>
+  :root { color-scheme: light; }
+  body { margin: 0; font-family: system-ui, sans-serif; background: #FAFAF9; color: #1F2630; }
+  header { background: #fff; border-bottom: 1px solid #E8E8E6; padding: 14px 22px; display: flex; align-items: baseline; gap: 12px; }
+  header h1 { font-size: 17px; margin: 0; }
+  header small { color: #55606E; }
+  main { padding: 18px 22px; max-width: 860px; }
+  fieldset { border: 1px solid #E8E8E6; background: #fff; border-radius: 10px; margin-bottom: 14px; display: flex; gap: 16px; flex-wrap: wrap; align-items: center; padding: 12px 16px; }
+  legend { font-size: 12px; color: #55606E; padding: 0 6px; }
+  select { padding: 6px 10px; border-radius: 8px; border: 1px solid #D8D8D5; min-width: 300px; }
+  label.radio { display: flex; align-items: center; gap: 4px; font-size: 13px; }
+  #preview { background: #fff; border: 1px dashed #D8D8D5; border-radius: 10px; padding: 18px; display: flex; justify-content: center; min-height: 220px; }
+  #preview img { max-width: 100%; background: #fff; box-shadow: 0 1px 6px rgba(0,0,0,.12); }
+  #meta { margin: 8px 2px; font-size: 13px; color: #55606E; }
+  .hint { color: #8A94A0; font-size: 13px; align-self: center; }
+  button#print { margin: 4px 0 20px; padding: 9px 22px; border-radius: 999px; border: none; background: #1E4E8C; color: #fff; font-size: 14px; cursor: pointer; }
+  button#print:hover { background: #1E4E8C; }
+  #sheet { display: none; }
+  @media print {
+    body { background: #fff; }
+    header, fieldset, #preview, #meta, button#print { display: none !important; }
+    #sheet { display: block !important; }
+    #sheet .label { page-break-after: always; display: flex; justify-content: center; }
+    #sheet img { max-width: 100%; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>条码打印中心</h1>
+  <small>W6-B3 食品合规 · GS1-128（AI 01 GTIN / 10 批号 / 11 生产日期 / 17 到期日）+ 明文 Code128 · 法定最低信息集（食安法第 50/51 条：批号/品名/效期/供应商）</small>
+</header>
+<main>
+  <fieldset>
+    <legend>批次</legend>
+    <select id="lot"></select>
+  </fieldset>
+  <fieldset>
+    <legend>模板</legend>
+    <label class="radio"><input type="radio" name="template" value="100x50" checked /> 成品箱标 100×50mm</label>
+    <label class="radio"><input type="radio" name="template" value="50x30" /> 批次小标 50×30mm</label>
+  </fieldset>
+  <fieldset>
+    <legend>码制</legend>
+    <label class="radio"><input type="radio" name="symbology" value="gs1" checked /> GS1-128（四 AI 法定最小集）</label>
+    <label class="radio"><input type="radio" name="symbology" value="plain" /> 明文 Code128（仅批号）</label>
+  </fieldset>
+  <div id="preview"><div class="hint">加载批次…</div></div>
+  <div id="meta"></div>
+  <button id="print" type="button">打印标签</button>
+  <div id="sheet"></div>
+</main>
+<script src="/labels/labels.js"></script>
+</body>
+</html>

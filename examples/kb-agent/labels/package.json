@@ -1,0 +1,13 @@
+{
+  "name": "kb-agent-label-print",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "W6-B3 food-compliance label-print SPA: zero-dependency Code128/GS1-128 SVG encoder (src/code128.ts — the same module approval-engine.mts serves /label/lot.svg from), batch templates with the legal minimum lines (食安法第 50/51 条), browser printing via window.print. Built by esbuild into dist/ and served by approval-engine.mts --serve under /labels; the built bundle is committed so a fresh checkout serves without a build step.",
+  "scripts": {
+    "build": "node esbuild.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.10"
+  }
+}

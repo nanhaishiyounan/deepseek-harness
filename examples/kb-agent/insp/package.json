@@ -1,0 +1,13 @@
+{
+  "name": "kb-agent-insp-workbench",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "W6-B5 QMS inspection workbench SPA: zero-dependency grouped queue (IQC/IPQC/OQC + overdue), the AQL badge wizard (plan lookup on the engine's qm_aql_plans 15-band seed, per-item readings with the double-tap out-of-tolerance confirm, live verdict badge, idempotent submit), the four-way NC disposal card, and the nine-element factory-inspection report (沪市监食监〔2025〕195号) with explicit 未维护 placeholders. src/server.ts holds the engine's /insp/* handlers' logic. Built by esbuild into dist/ and served by approval-engine.mts --serve under /insp; the built bundle is committed so a fresh checkout serves without a build step.",
+  "scripts": {
+    "build": "node esbuild.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.10"
+  }
+}

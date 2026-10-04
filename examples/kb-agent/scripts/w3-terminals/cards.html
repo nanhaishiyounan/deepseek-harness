@@ -1,0 +1,502 @@
+<!doctype html>
+<!-- W6-B4 车间卡片流终端（执行面，Odoo Shop Floor M1 形态）：左签到面板 + 右
+     MO 卡片流。操作工身份走平台会话（POST /terminal/session 换 NocoBase token，
+     之后每个读写带 authorization: Bearer —— 引擎 recallActor 推导 operator，
+     永不自报）；卡片三段（头 MO/产品/计划 · 体 工序进度 done 灰+删除线 · 脚
+     大按钮开始）；执行中面板含 SOP 要点与 CCP 采集（CL 上下限即时判定）；
+     报工三数等式 + 服务端发号 + submit_key 幂等（双击/重放单条落库）；齿轮
+     菜单 Andon 质量警报直达 qm 不合格单。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>车间卡片流终端</title>
+<link rel="stylesheet" href="terminal.css">
+<style>
+/* W6-B4 卡片流专属层：全屏卡片 + 左签到栏（terminal.css 之上的增量）。 */
+body.w6b4 { background: var(--bg); }
+.deck { display: grid; grid-template-columns: 300px 1fr; gap: 14px; max-width: 1180px; margin: 0 auto; padding: 12px 12px 48px; align-items: start; }
+@media (max-width: 900px) { .deck { grid-template-columns: 1fr; } }
+.signin { position: sticky; top: 62px; }
+.signin .panel-in { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; }
+.signin h2 { margin: 0 0 6px; font-size: 17px; }
+.signin .me { display: flex; flex-direction: column; gap: 2px; padding: 10px; border-radius: 10px; background: var(--surface-2); margin-bottom: 10px; }
+.signin .me b { font-size: 16px; }
+.signin .me span { color: var(--ink-dim); font-size: 13px; }
+.field { margin-bottom: 10px; }
+.field label { display: block; font-size: 13px; color: var(--ink-dim); margin-bottom: 4px; }
+.field input { width: 100%; min-height: 48px; font-size: 17px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); padding: 0 12px; }
+.stage { position: relative; min-height: 60vh; }
+.op-chip { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); margin-bottom: 8px; }
+.op-chip.done { opacity: 0.45; }
+.op-chip.done .name { text-decoration: line-through; }
+.op-chip .name { flex: 1; font-size: 16px; }
+.op-chip .badge { font-size: 13px; }
+.gear { position: absolute; top: 0; right: 0; }
+.gear .menu { position: absolute; right: 0; top: 46px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; min-width: 220px; z-index: 8; display: none; }
+.gear.open .menu { display: block; }
+.gear .menu button { display: block; width: 100%; text-align: left; padding: 12px; background: none; border: none; color: var(--ink); font-size: 15px; cursor: pointer; }
+.gear .menu button:hover { background: var(--line); }
+.sop { background: var(--surface-2); border-radius: 12px; padding: 12px; margin: 10px 0; }
+.sop h3 { margin: 0 0 6px; font-size: 15px; }
+.sop ul { margin: 0; padding-left: 18px; color: var(--ink-dim); font-size: 14px; }
+.ccp-row { background: var(--surface-2); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; }
+.ccp-row .t { display: flex; justify-content: space-between; font-size: 15px; margin-bottom: 6px; }
+.ccp-row .cl { color: var(--ink-dim); font-size: 13px; }
+.ccp-row input { width: 100%; min-height: 50px; font-size: 20px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); padding: 0 12px; text-align: center; }
+.ccp-row.dev input { border-color: var(--bad); }
+.ccp-row.ok input { border-color: var(--ok); }
+.ccp-row .judge { font-size: 14px; margin-top: 4px; min-height: 20px; }
+.ccp-row .judge.bad { color: var(--bad); font-weight: 700; }
+.ccp-row .judge.ok { color: var(--ok); }
+.ccp-row textarea { width: 100%; min-height: 64px; font-size: 15px; border-radius: 10px; border: 1px solid var(--bad); background: var(--bg); color: var(--ink); padding: 8px 10px; }
+.fullcard { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
+.fullcard .mo-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; margin-bottom: 8px; }
+.fullcard .mo-head .code { font-size: 22px; font-weight: 800; }
+.actions { display: flex; gap: 10px; margin-top: 14px; }
+.actions .btn { flex: 1; min-height: 64px; font-size: 19px; }
+</style>
+</head>
+<body class="w6b4">
+<div class="term-top">
+  <div class="title">车间卡片流终端</div>
+  <div class="who" id="who">未签到</div>
+  <button class="btn small" id="refresh">刷新</button>
+</div>
+<div id="note"></div>
+
+<div class="deck">
+  <!-- 左：签到面板（会话身份的唯一入口） -->
+  <div class="signin">
+    <div class="panel-in">
+      <h2>操作工签到</h2>
+      <div id="signin-form">
+        <div class="field"><label>账号（生产车间）</label><input id="acct" autocomplete="username" placeholder="shop_lead"></div>
+        <div class="field"><label>密码</label><input id="passwd" type="password" autocomplete="current-password" placeholder="••••••••"></div>
+        <button class="btn primary block" id="signin-btn" style="min-height:54px">签到上岗</button>
+      </div>
+      <div id="me-box" style="display:none">
+        <div class="me"><b id="me-name"></b><span id="me-dept"></span></div>
+        <button class="btn block" id="signout-btn">签退</button>
+      </div>
+      <p style="color:var(--ink-dim);font-size:13px;margin:10px 0 0">身份由平台会话推导（auth:check），写路由不可自报操作工；部门围栏=生产车间。</p>
+    </div>
+  </div>
+
+  <!-- 右：卡片流舞台（队列 → 执行中 → 报工） -->
+  <div class="stage">
+    <div class="gear" id="gear" style="display:none">
+      <button class="btn small" id="gear-btn">⚙ Andon</button>
+      <div class="menu">
+        <button id="andon-quality">🚨 质量警报（生成不合格处置单）</button>
+        <button id="andon-maint">🔧 维护请求（生成维保工单）</button>
+      </div>
+    </div>
+    <div id="stage-body"><div class="empty">签到后加载我的队列…</div></div>
+  </div>
+</div>
+
+<div class="sheet" id="sheet">
+  <div class="panel">
+    <h2 id="sheet-title">报工</h2>
+    <p class="sub" id="sheet-sub"></p>
+    <div id="sheet-body"></div>
+  </div>
+</div>
+
+<script>
+'use strict'
+const base = new URL('..', location.href).href.replace(/\/$/, '')
+const params = new URLSearchParams(location.search)
+
+/* strict 档 token：与 report.html 同一 W3_TERMINAL_TOKEN 通道。 */
+const TERM_KEY = 'w3-terminal-token'
+const urlToken = params.get('token')
+if (urlToken !== null && urlToken !== '') {
+  try { localStorage.setItem(TERM_KEY, urlToken) } catch (err) { /* 隐私模式：URL 带 ?token= 即可 */ }
+}
+const terminalToken = urlToken !== null && urlToken !== ''
+  ? urlToken
+  : (() => { try { const v = localStorage.getItem(TERM_KEY); return v === null || v === '' ? null : v } catch (err) { return null } })()
+
+/* 平台会话 token（签到后持有；身份全部由此推导）。 */
+const SESSION_KEY = 'w6b4-session-token'
+let sessionToken = null
+try { const v = localStorage.getItem(SESSION_KEY); sessionToken = v === null || v === '' ? null : v } catch (err) { sessionToken = null }
+
+function esc(value) {
+  const amp = '\u0026'
+  const map = { '&': amp + 'amp;', '<': amp + 'lt;', '>': amp + 'gt;', '"': amp + 'quot;', "'": amp + '#39;' }
+  return String(value).replace(/[&<>"']/g, ch => map[ch])
+}
+
+function note(html, kind) {
+  document.getElementById('note').innerHTML = html === '' ? '' : `<div class="note ${kind}">${html}</div>`
+}
+
+async function api(path, options = {}) {
+  const headers = { ...(options.headers ?? {}) }
+  if (terminalToken !== null) headers['x-terminal-token'] = terminalToken
+  if (sessionToken !== null) headers['authorization'] = `Bearer ${sessionToken}`
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), 20000)
+  let response
+  try {
+    response = await fetch(`${base}${path}`, { ...options, headers, signal: controller.signal })
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') throw new Error('请求超时（20s）——服务不可达或过载')
+    throw error
+  } finally {
+    clearTimeout(timer)
+  }
+  const payload = await response.json().catch(() => ({}))
+  if (!response.ok || payload.ok === false) {
+    const error = new Error(payload.error || `HTTP ${response.status}`)
+    error.status = response.status
+    throw error
+  }
+  return payload
+}
+
+const state = { cards: [], current: null, submitting: false }
+const statusLabel = { planned: '已计划', started: '执行中', done: '已完成' }
+
+/* ── 签到面板 ── */
+function renderMe(me) {
+  const form = document.getElementById('signin-form')
+  const box = document.getElementById('me-box')
+  if (me === null) {
+    form.style.display = ''
+    box.style.display = 'none'
+    document.getElementById('who').textContent = '未签到'
+    document.getElementById('gear').style.display = 'none'
+    return
+  }
+  form.style.display = 'none'
+  box.style.display = ''
+  document.getElementById('me-name').textContent = `${me.nickname || me.username}（${me.username}）`
+  document.getElementById('me-dept').textContent = `${me.department || '—'} · 卡片流执行面`
+  document.getElementById('who').textContent = `${me.username} 在岗`
+  document.getElementById('gear').style.display = ''
+}
+
+document.getElementById('signin-btn').addEventListener('click', async () => {
+  const acct = document.getElementById('acct').value.trim()
+  const passwd = document.getElementById('passwd').value
+  if (acct === '' || passwd === '') { note('<b>签到被拒</b>账号与密码都必填', 'bad'); return }
+  const btn = document.getElementById('signin-btn')
+  btn.disabled = true; btn.textContent = '签到中…'
+  try {
+    const payload = await api('/terminal/session', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ account: acct, password: passwd }),
+    })
+    sessionToken = payload.token
+    try { localStorage.setItem(SESSION_KEY, sessionToken) } catch (err) { /* 隐私模式：本页内保持 */ }
+    renderMe({ username: payload.username, nickname: payload.nickname, department: payload.department })
+    note(`<b>签到成功</b>${esc(payload.nickname || payload.username)}（${esc(payload.department || '未挂部门')}）`, 'ok')
+    await load()
+  } catch (error) {
+    note(`<b>签到被拒</b>${esc(error.message)}`, 'bad')
+  } finally {
+    btn.disabled = false; btn.textContent = '签到上岗'
+  }
+})
+
+document.getElementById('signout-btn').addEventListener('click', () => {
+  sessionToken = null
+  try { localStorage.removeItem(SESSION_KEY) } catch (err) { /* 忽略 */ }
+  renderMe(null)
+  document.getElementById('stage-body').innerHTML = '<div class="empty">签到后加载我的队列…</div>'
+})
+
+/* ── 队列（我的卡片） ── */
+async function load() {
+  if (sessionToken === null) return
+  try {
+    const payload = await api('/terminal/cards')
+    state.cards = payload.cards
+    renderQueue()
+  } catch (error) {
+    document.getElementById('stage-body').innerHTML = '<div class="empty">队列加载失败</div>'
+    if (error.status === 401) {
+      sessionToken = null
+      try { localStorage.removeItem(SESSION_KEY) } catch (err) { /* 忽略 */ }
+      renderMe(null)
+      note('<b>会话已失效</b>重新签到后继续', 'bad')
+      return
+    }
+    note(`<b>队列加载失败</b>${esc(error.message)}`, 'bad')
+  }
+}
+
+function renderQueue() {
+  const stage = document.getElementById('stage-body')
+  state.current = null
+  if (state.cards.length === 0) {
+    stage.innerHTML = '<div class="empty">当前没有执行中的 MO——领料开工后这里出现卡片</div>'
+    return
+  }
+  const html = state.cards.map(card => {
+    const openOps = card.operations.filter(op => op.status !== 'done')
+    const doneOps = card.operations.filter(op => op.status === 'done')
+    return `
+    <div class="fullcard" style="margin-bottom:12px" data-card="${String(card.mo.id)}">
+      <div class="mo-head">
+        <span class="code">${esc(card.mo.code)}</span>
+        <span class="meta">${esc(card.mo.product)} · 计划 ${String(card.mo.qty)}</span>
+        <span class="badge green">${String(doneOps.length)}/${String(card.operations.length)} 工序</span>
+        <span class="badge">BOM ${esc(card.mo.bom_code)} v${String(card.mo.bom_version)}</span>
+      </div>
+      <div>${card.operations.map(op => `
+        <div class="op-chip ${op.status === 'done' ? 'done' : ''}">
+          <span class="name">工序${String(op.seq)} ${esc(op.name)} · ${esc(op.workcenter)}</span>
+          <span>${statusLabel[op.status] || esc(op.status)}</span>
+          <span class="badge ${op.remaining === 0 ? 'green' : 'blue'}">已报 ${String(op.reported)}/${String(card.mo.qty)}</span>
+        </div>`).join('')}
+      </div>
+      ${openOps.length > 0
+        ? `<div class="actions"><button class="btn primary" data-start="${String(card.mo.id)}">▶ 开始执行（工序${String(openOps[0].seq)} ${esc(openOps[0].name)}）</button></div>`
+        : '<div class="badge green" style="display:block;text-align:center;padding:8px">全部工序已报完</div>'}
+    </div>`
+  }).join('')
+  stage.innerHTML = html
+  for (const btn of stage.querySelectorAll('[data-start]')) {
+    btn.addEventListener('click', () => openCard(Number(btn.dataset.start)))
+  }
+}
+
+/* ── 执行中面板（SOP 要点 + CCP 采集 + 报工入口 + Andon 齿轮锚点） ── */
+async function openCard(moId) {
+  const card = state.cards.find(c => c.mo.id === moId)
+  if (card === undefined) return
+  const op = card.operations.find(row => row.status !== 'done') ?? card.operations[card.operations.length - 1]
+  if (op === undefined) return
+  if (op.status === 'planned') {
+    try {
+      await api('/job-start', {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ mo_id: moId, op_seq: op.seq }),
+      })
+      op.status = 'started'
+    } catch (error) {
+      note(`<b>开工被拒</b>${esc(error.message)}`, 'bad')
+      return
+    }
+  }
+  state.current = { card, op }
+  renderStage()
+}
+
+function renderStage() {
+  const { card, op } = state.current
+  const sop = [
+    `工序 ${String(op.seq)}「${op.name}」 @ ${op.workcenter}`,
+    `标准工时：换型 ${String(op.setup_min)} 分钟 · 单件 ${String(op.run_min)} 分钟`,
+    `监控频率内必须采集 CCP 实测值（缺项报工被拒）`,
+  ]
+  const stage = document.getElementById('stage-body')
+  stage.innerHTML = `
+    <div class="fullcard">
+      <div class="mo-head">
+        <span class="code">${esc(card.mo.code)}</span>
+        <span class="meta">${esc(card.mo.product)} · 工序${String(op.seq)} ${esc(op.name)} · 剩余 ${String(op.remaining)} 未报</span>
+      </div>
+      <div class="sop">
+        <h3>📋 SOP 要点</h3>
+        <ul>${sop.map(line => `<li>${esc(line)}</li>`).join('')}</ul>
+      </div>
+      ${op.ccp.length > 0 ? `
+        <h3 style="margin:6px 0">🌡 CCP 关键控制点（HACCP 实时判定）</h3>
+        ${op.ccp.map(point => `
+          <div class="ccp-row" data-point="${String(point.point_id)}">
+            <div class="t"><span>${esc(point.code)} ${esc(point.name)}</span><span class="cl">CL [${point.cl_min === null ? '−∞' : String(point.cl_min)}, ${point.cl_max === null ? '+∞' : String(point.cl_max)}] ${esc(point.unit)} · ${esc(point.frequency)}</span></div>
+            <input type="number" inputmode="decimal" step="any" placeholder="实测值（${esc(point.unit)}）" data-ccp-value>
+            <div class="judge" data-ccp-judge>&nbsp;</div>
+            <div class="cl" style="margin-top:4px">纠偏指引：${esc(point.corrective_action)}</div>
+          </div>`).join('')}` : '<div class="badge" style="display:block;padding:6px 0">本工序无 CCP 监控点</div>'}
+      <div class="actions">
+        <button class="btn" id="back-queue">返回队列</button>
+        <button class="btn primary" id="open-report">✅ 报工提交</button>
+      </div>
+    </div>`
+  for (const input of stage.querySelectorAll('[data-ccp-value]')) {
+    input.addEventListener('input', () => judgeCcpRow(input.closest('.ccp-row')))
+  }
+  stage.querySelector('#back-queue').addEventListener('click', renderQueue)
+  stage.querySelector('#open-report').addEventListener('click', () => openSheet(card, op))
+}
+
+function judgeCcpRow(row) {
+  const point = state.current.op.ccp.find(p => String(p.point_id) === row.dataset.point)
+  const input = row.querySelector('[data-ccp-value]')
+  const judge = row.querySelector('[data-ccp-judge]')
+  row.classList.remove('dev', 'ok')
+  if (input.value === '') { judge.textContent = '\u00a0'; return null }
+  const value = Number(input.value)
+  if (!Number.isFinite(value)) { judge.textContent = '\u00a0'; return null }
+  const below = point.cl_min !== null && value < point.cl_min
+  const above = point.cl_max !== null && value > point.cl_max
+  const dev = below || above
+  row.classList.add(dev ? 'dev' : 'ok')
+  judge.className = `judge ${dev ? 'bad' : 'ok'}`
+  judge.textContent = dev
+    ? `❌ 越限：实测 ${String(value)} 超出 CL [${point.cl_min === null ? '−∞' : String(point.cl_min)}, ${point.cl_max === null ? '+∞' : String(point.cl_max)}]——须填纠偏动作后提交（引擎将冻结批次+发 critical 预警+开纠偏单）`
+    : `✅ 合格（CL 内）`
+  if (dev && row.querySelector('textarea') === null) {
+    const box = document.createElement('textarea')
+    box.placeholder = '纠偏动作（必填，落 CCP 记录与纠偏单）'
+    box.dataset.ccpAction = ''
+    row.appendChild(box)
+  }
+  return dev
+}
+
+/* ── 报工 sheet（三数等式 + submit_key 幂等 + 批次零填表） ── */
+function newSubmitKey(moId, opSeq) {
+  const rand = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+    ? crypto.randomUUID()
+    : `${Date.now()}-${String(Math.random()).slice(2)}`
+  return `job:${String(moId)}:${String(opSeq)}:${rand}`
+}
+
+function openSheet(card, op) {
+  const body = document.getElementById('sheet-body')
+  document.getElementById('sheet-title').textContent = `${card.mo.code} 工序${String(op.seq)} 报工`
+  document.getElementById('sheet-sub').textContent = `${card.mo.product} · 本循环计划数 ${String(op.remaining)}（完成+待求+损失必须相等）`
+  const submitKey = newSubmitKey(card.mo.id, op.seq)
+  body.innerHTML = `
+    <div class="field"><label>完成数（合格）</label><input type="number" id="qty-good" min="0" step="1" value="0" inputmode="numeric"></div>
+    <div class="field"><label>待求数（本循环未完成，下循环续报——不计损耗）</label><input type="number" id="qty-pending" min="0" step="1" value="0" inputmode="numeric"></div>
+    <div class="field"><label>损失数（不合格/废品）</label><input type="number" id="qty-scrap" min="0" step="1" value="0" inputmode="numeric"></div>
+    <div class="equation" id="equation"></div>
+    <div class="field"><label>关联批次号（成品批，选填——CCP 越限时冻结该批）</label><input id="lot-no" placeholder="扫码或留空（完工自动建批）"></div>
+    <label class="critical-toggle"><input type="checkbox" id="send-qc"> 本批报工送 IPQC 检验</label>
+    <p class="sub">操作工 ${esc(document.getElementById('me-name').textContent || '')} · 由会话推导，不可代报</p>
+    <div class="card-foot" style="padding:14px 0 0">
+      <button class="btn block" id="sheet-cancel">取消</button>
+      <button class="btn primary block" id="sheet-submit" disabled>提交报工</button>
+    </div>`
+  document.getElementById('sheet').classList.add('open')
+
+  const good = body.querySelector('#qty-good')
+  const pending = body.querySelector('#qty-pending')
+  const scrap = body.querySelector('#qty-scrap')
+  const equation = body.querySelector('#equation')
+  const submit = body.querySelector('#sheet-submit')
+  const update = () => {
+    const sum = Number(good.value || 0) + Number(pending.value || 0) + Number(scrap.value || 0)
+    const ok = sum === op.remaining
+    equation.className = `equation ${ok ? 'ok' : 'bad'}`
+    equation.innerHTML = `${good.value || '0'} + ${pending.value || '0'} + ${scrap.value || '0'} = ${String(sum)} <span style="font-size:20px">${ok ? '=' : '≠'}</span> 本循环 ${String(op.remaining)}${ok ? '' : '（数量必须全部交代去向）'}`
+    const ccpReady = state.current.op.ccp.every(point => {
+      const row = document.querySelector(`[data-point="${String(point.point_id)}"]`)
+      const input = row?.querySelector('[data-ccp-value]')
+      return input !== undefined && input.value !== '' && (row.querySelector('[data-ccp-judge]').className.includes('ok') || row.querySelector('textarea')?.value.trim() !== '')
+    })
+    submit.disabled = !ok || !ccpReady || state.submitting
+    if (!ccpReady) equation.innerHTML += '<div style="font-size:14px;color:var(--warn)">CCP 采集未完成（每点须有实测值；越限点须填纠偏动作）</div>'
+  }
+  for (const input of [good, pending, scrap]) input.addEventListener('input', update)
+  document.querySelectorAll('[data-ccp-value]').forEach(input => input.addEventListener('input', update))
+  document.querySelectorAll('.ccp-row textarea').forEach(box => box.addEventListener('input', update))
+  update()
+
+  body.querySelector('#sheet-cancel').addEventListener('click', () => {
+    document.getElementById('sheet').classList.remove('open')
+    state.submitting = false
+  })
+  submit.addEventListener('click', async () => {
+    if (state.submitting) return
+    state.submitting = true
+    submit.disabled = true
+    submit.textContent = '提交中…'
+    const ccp = state.current.op.ccp.map(point => {
+      const row = document.querySelector(`[data-point="${String(point.point_id)}"]`)
+      return {
+        point_id: point.point_id,
+        value: Number(row.querySelector('[data-ccp-value]').value),
+        action_taken: row.querySelector('textarea')?.value.trim() || '',
+      }
+    })
+    try {
+      const payload = await api('/job-report', {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          mo_id: card.mo.id, op_seq: op.seq,
+          qty_good: Number(good.value || 0), qty_pending: Number(pending.value || 0), qty_scrap: Number(scrap.value || 0),
+          duration_min: 0, send_qc: body.querySelector('#send-qc').checked,
+          lot_no: body.querySelector('#lot-no').value.trim(),
+          ccp, submit_key: submitKey,
+        }),
+      })
+      document.getElementById('sheet').classList.remove('open')
+      state.submitting = false
+      const deviations = (payload.ccp?.deviations ?? []).map(d => `${esc(d.code)} 实测 ${String(d.measured)}`)
+      note(`<b>报工成功 ${esc(payload.code)}${payload.duplicate === true ? '（重复提交已合并——幂等键命中）' : ''}</b>工序 ${String(payload.op_seq)} → ${esc(payload.op_status)}${payload.ccp && payload.ccp.records > 0 ? `；CCP 记录 ${String(payload.ccp.records)} 条${deviations.length > 0 ? `，越限 ${String(deviations.length)}：${deviations.join('、')}${payload.ccp.lot_frozen === true ? '——批次已冻结' : ''}${payload.ccp.nc_code !== null && payload.ccp.nc_code !== undefined ? `，纠偏单 ${esc(payload.ccp.nc_code)}` : ''}` : '，全部合格'}` : ''}`, deviations.length > 0 ? 'bad' : 'ok')
+      await load()
+    } catch (error) {
+      note(`<b>报工被拒</b>${esc(error.message)}`, 'bad')
+      submit.textContent = '提交报工'
+      state.submitting = false
+      update()
+    }
+  })
+}
+
+/* ── Andon 齿轮：质量警报 → qm 不合格处置单 / 维护请求 → eam 维保工单（会话身份） ── */
+document.getElementById('gear-btn').addEventListener('click', () => document.getElementById('gear').classList.toggle('open'))
+document.getElementById('andon-quality').addEventListener('click', async () => {
+  document.getElementById('gear').classList.remove('open')
+  if (state.current === null) { note('<b>Andon</b>先打开一张执行卡再发质量警报', 'bad'); return }
+  const { card, op } = state.current
+  const text = window.prompt(`质量警报说明（${card.mo.code} 工序${String(op.seq)}）：`) ?? ''
+  if (text.trim() === '') return
+  try {
+    const payload = await api('/andon/quality', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ mo_id: card.mo.id, op_seq: op.seq, note: text.trim() }),
+    })
+    note(`<b>Andon 已受理</b>不合格处置单 ${esc(payload.code)} 已生成（${esc(payload.operator)}），质量部将跟进`, 'ok')
+  } catch (error) {
+    note(`<b>Andon 被拒</b>${esc(error.message)}`, 'bad')
+  }
+})
+
+/* ── Andon 维护请求 → eam 维保工单（W6-B8：按工序工作中心自动挂设备，状态机走完） ── */
+document.getElementById('andon-maint').addEventListener('click', async () => {
+  document.getElementById('gear').classList.remove('open')
+  if (state.current === null) { note('<b>Andon</b>先打开一张执行卡再发维护请求', 'bad'); return }
+  const { card, op } = state.current
+  const text = window.prompt(`设备故障说明（${card.mo.code} 工序${String(op.seq)} @ ${op.workcenter}）：`) ?? ''
+  if (text.trim() === '') return
+  try {
+    const payload = await api('/andon/maintenance', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ mo_id: card.mo.id, op_seq: op.seq, note: text.trim() }),
+    })
+    note(`<b>Andon 已受理</b>维保工单 ${esc(payload.code)} 已生成（${esc(payload.operator)}，设备 ${esc(payload.asset_code ?? op.workcenter)}），维修组将到场`, 'ok')
+  } catch (error) {
+    note(`<b>Andon 被拒</b>${esc(error.message)}`, 'bad')
+  }
+})
+
+document.getElementById('refresh').addEventListener('click', () => { note('', 'info'); void load() })
+
+/* 启动：持有会话则直接恢复队列，否则等签到。 */
+if (sessionToken !== null) {
+  api('/terminal/cards').then(payload => {
+    renderMe({ username: payload.operator, nickname: payload.nickname, department: payload.department })
+    state.cards = payload.cards
+    renderQueue()
+  }).catch(() => {
+    sessionToken = null
+    try { localStorage.removeItem(SESSION_KEY) } catch (err) { /* 忽略 */ }
+    renderMe(null)
+  })
+} else {
+  renderMe(null)
+}
+</script>
+</body>
+</html>

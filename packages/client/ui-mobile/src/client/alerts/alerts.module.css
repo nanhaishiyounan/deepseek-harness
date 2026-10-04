@@ -1,0 +1,187 @@
+/* The W6-B2 alerts page: the todos card material with the severity rails —
+ * critical rows carry the red left rail, warning rows the amber one (the
+ * PC alert center's red/yellow tiers, the same vocabulary). W6-R2 adds the
+ * row-action group (claim for routed users, close for the claimant). */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 8px 14px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.segRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.segChip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  padding: 4px 11px;
+  border-radius: var(--dshm-radius-pill);
+  background: var(--dshm-primary-10);
+  color: var(--dshm-primary);
+  font-size: var(--dshm-fs-xs);
+}
+
+.segCount {
+  font-size: var(--dshm-fs-sm);
+  font-weight: 600;
+}
+
+.segHint {
+  font-size: var(--dshm-fs-xs);
+  color: var(--dshm-muted-foreground);
+}
+
+/* The card-skeleton column (W7-M2): three SkelCards stacked on the list rhythm. */
+.skelGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 2px 0 8px;
+}
+
+.errorCard {
+  padding: 14px;
+  border-radius: var(--dshm-radius);
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-destructive);
+  color: var(--dshm-destructive);
+  font-size: var(--dshm-fs-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.retryLink {
+  align-self: flex-start;
+  color: var(--dshm-primary);
+}
+
+.alertCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: var(--dshm-radius);
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-border);
+  border-left: 3px solid var(--dshm-border);
+}
+
+.critical {
+  border-left-color: var(--dshm-destructive);
+}
+
+.warning {
+  border-left-color: var(--dshm-warning);
+}
+
+.alertHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* The severity tag (v7, audit 04 §11): critical stays the solid red seal —
+ * the one glance-weight face — while warning drops to the soft amber chip, so
+ * the two tiers separate by material, not just hue distance. */
+.sevTag {
+  font-size: var(--dshm-fs-xs);
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: var(--dshm-radius-pill);
+  color: var(--dshm-on-primary);
+  background: var(--dshm-muted-foreground);
+}
+
+.sevTag[data-severity='critical'] {
+  background: var(--dshm-destructive);
+}
+
+.sevTag[data-severity='warning'] {
+  color: var(--dshm-warning);
+  background: var(--dshm-warning-soft);
+  border: 1px solid var(--dshm-warning);
+}
+
+.ruleLabel {
+  font-size: var(--dshm-fs-xs);
+  color: var(--dshm-primary);
+  font-weight: 600;
+}
+
+.claimHint {
+  margin-left: auto;
+  font-size: var(--dshm-fs-xs);
+  color: var(--dshm-muted-foreground);
+}
+
+.claimed {
+  margin-left: auto;
+  font-size: var(--dshm-fs-xs);
+  color: var(--dshm-muted-foreground);
+}
+
+.alertTitle {
+  font-size: var(--dshm-fs-md);
+  font-weight: 600;
+  color: var(--dshm-foreground);
+  overflow-wrap: anywhere;
+}
+
+.alertFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-top: 1px dashed var(--dshm-border);
+  padding-top: 8px;
+}
+
+.actGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.actBtn {
+  flex: none;
+  min-width: 56px;
+  --border-radius: var(--dshm-radius-pill);
+  font-size: var(--dshm-fs-xs);
+}
+
+.entityCode {
+  font-size: var(--dshm-fs-xs);
+  color: var(--dshm-muted-foreground);
+}
+
+.daysCell {
+  font-size: var(--dshm-fs-xs);
+  color: var(--dshm-foreground);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.footNote {
+  font-size: var(--dshm-fs-xs);
+  color: var(--dshm-muted-foreground);
+  text-align: center;
+  margin: 2px 0 0;
+}

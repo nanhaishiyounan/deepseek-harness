@@ -1,0 +1,13 @@
+{
+  "name": "kb-agent-crm-workbench",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "W6-B6 CRM workbench SPA: zero-dependency deal-pipeline Kanban (drag between stage columns → /crm/move writes stage+probability+status back with a crm_stage_audit row; column headers carry amount sums and the probability-weighted value), the customer-360 aggregate (profile + counts + AR balance on the ar_overdue口径 + the报价→订单→发货→收款 timeline), and the quote→sales-order conversion (server-minted SO code, optional product lines, converted_so_code CAS so one quote converts exactly once). src/server.ts holds the engine's /crm/* handlers' logic. Built by esbuild into dist/ and served by approval-engine.mts --serve under /crm; the built bundle is committed so a fresh checkout serves without a build step.",
+  "scripts": {
+    "build": "node esbuild.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.10"
+  }
+}

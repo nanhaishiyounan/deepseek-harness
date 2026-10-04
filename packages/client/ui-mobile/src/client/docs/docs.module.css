@@ -1,0 +1,273 @@
+/* The W6-B1 documents pages: the role directory grid, the row list, and the
+ * detail card (fields + approval trail) — the ledger card material again,
+ * with the detail's field rows in the definition-list rhythm. */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 8px 14px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.headBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: none;
+  border: none;
+  padding: 4px 6px;
+  font-size: var(--dshm-fs-xs);
+  color: var(--dshm-muted-foreground);
+  cursor: pointer;
+}
+
+.indexHint {
+  margin: 4px 0 0;
+  font-size: var(--dshm-fs-xs);
+  color: var(--dshm-muted-foreground);
+}
+
+.indexGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.indexCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 16px 6px;
+  border-radius: var(--dshm-radius);
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-border);
+  color: var(--dshm-primary);
+  cursor: pointer;
+}
+
+.indexLabel {
+  font-size: var(--dshm-fs-xs);
+  color: var(--dshm-foreground);
+}
+
+/* The card-skeleton column (W7-M2): three SkelCards stacked on the list rhythm. */
+.skelGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 2px 0 8px;
+}
+
+.errorCard {
+  padding: 14px;
+  border-radius: var(--dshm-radius);
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-destructive);
+  color: var(--dshm-destructive);
+  font-size: var(--dshm-fs-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.truncateNote {
+  padding: 8px 14px;
+  border-radius: var(--dshm-radius);
+  background: var(--dshm-primary-10);
+  color: var(--dshm-primary);
+  font-size: var(--dshm-fs-xs);
+  text-align: center;
+}
+
+.retryLink {
+  align-self: flex-start;
+  color: var(--dshm-primary);
+}
+
+.listRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--dshm-radius);
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-border);
+  cursor: pointer;
+  text-align: left;
+}
+
+.rowTitle {
+  font-size: var(--dshm-fs-sm);
+  font-weight: 600;
+  color: var(--dshm-foreground);
+  overflow-wrap: anywhere;
+}
+
+.rowMeta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+}
+
+.rowState {
+  font-size: var(--dshm-fs-xs);
+  color: var(--dshm-primary);
+  background: var(--dshm-primary-10);
+  border-radius: var(--dshm-radius-pill);
+  padding: 2px 8px;
+}
+
+.rowId {
+  font-size: var(--dshm-fs-xs);
+  color: var(--dshm-muted-foreground);
+}
+
+.detailCard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--dshm-radius);
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-border);
+}
+
+.detailHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.detailTitle {
+  font-size: var(--dshm-fs-md);
+  font-weight: 600;
+  color: var(--dshm-foreground);
+  overflow-wrap: anywhere;
+}
+
+.detailState {
+  flex: none;
+  font-size: var(--dshm-fs-xs);
+  color: var(--dshm-primary);
+  background: var(--dshm-primary-10);
+  border-radius: var(--dshm-radius-pill);
+  padding: 3px 9px;
+}
+
+.fieldList {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.fieldRow {
+  display: flex;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px dashed var(--dshm-border);
+}
+
+.fieldRow:last-child {
+  border-bottom: none;
+}
+
+.fieldName {
+  flex: 0 0 38%;
+  font-size: var(--dshm-fs-xs);
+  color: var(--dshm-muted-foreground);
+  overflow-wrap: anywhere;
+}
+
+.fieldValue {
+  flex: 1;
+  margin: 0;
+  font-size: var(--dshm-fs-sm);
+  color: var(--dshm-foreground);
+  overflow-wrap: anywhere;
+}
+
+.trailTitle {
+  margin: 2px 0 0;
+  font-size: var(--dshm-fs-sm);
+  font-weight: 600;
+}
+
+.trailEmpty {
+  margin: 0;
+  font-size: var(--dshm-fs-xs);
+  color: var(--dshm-muted-foreground);
+}
+
+.trailList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.trailRow {
+  display: flex;
+  gap: 9px;
+}
+
+.trailDot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  margin-top: 5px;
+  border-radius: var(--dshm-radius-pill);
+  background: var(--dshm-primary);
+}
+
+.trailTexts {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.trailLine {
+  font-size: var(--dshm-fs-sm);
+  color: var(--dshm-foreground);
+}
+
+.trailMeta {
+  font-size: var(--dshm-fs-xs);
+  color: var(--dshm-muted-foreground);
+  overflow-wrap: anywhere;
+}
+
+.barcodeHint {
+  margin: 0 0 8px;
+  font-size: var(--dshm-fs-xs);
+  color: var(--dshm-muted-foreground);
+}
+
+.barcodeImg {
+  display: block;
+  width: 100%;
+  border-radius: var(--dshm-radius);
+  background: #fff;
+}
+
+.barcodeFallback {
+  margin: 0;
+  font-size: var(--dshm-fs-xs);
+  color: var(--dshm-muted-foreground);
+}
