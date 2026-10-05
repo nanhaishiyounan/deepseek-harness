@@ -70,6 +70,7 @@ export function FilesView(): JSX.Element {
           >
             报
           </Tag>
+          {/* oxlint-disable-next-line typescript/no-unnecessary-condition -- the origin union widens with future file sources. */}
           {row.origin === 'ai' && (
             <Tag
               className={css.originBadge as string}

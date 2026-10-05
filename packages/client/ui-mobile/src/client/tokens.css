@@ -58,6 +58,8 @@ html[data-theme='light'] {
   --dshm-bubble-ai-border: #eadfc9;
   --dshm-seal-ring: #b4530a;        /* 印章环线（酱印/收讫章描边） */
   --dshm-seal-face: #ffffff;        /* 印面底 */
+  --dshm-seal-gloss: #ffffff;       /* 酱印径向高光起点（亮轨印面即纸白，渐变呈恒白） */
+  --dshm-seal-shade: var(--dshm-card);  /* 酱印径向基底端（亮轨=卡面） */
   --dshm-stamp-avatar-1: #1e4e8c;   /* AI 同事四字章（章色双轨恒定，W7 stamp 盘继承） */
   --dshm-stamp-avatar-2: #1d5f5a;
   --dshm-stamp-avatar-3: #2e5e34;
@@ -87,6 +89,7 @@ html[data-theme='light'] {
   --dshm-space-6: 28px;
   --dshm-r-card: 20px;              /* 卡片/回执/追问卡 */
   --dshm-r-ctl: 14px;               /* 控件/输入槽 */
+  --dshm-r-ctl-corner: 14px;        /* 控件内角件（徽标/骨架条/迷你代码块，与 r-ctl 同值阶） */
   --dshm-r-bubble: 18px;            /* 气泡（尾角 6px — the paper-label notch） */
   --dshm-r-seal: 999px;             /* 印章/胶囊章 */
   --dshm-shadow-card: 0 1px 2px rgba(61, 43, 31, 0.04), 0 8px 24px rgba(61, 43, 31, 0.05);
@@ -260,6 +263,8 @@ html[data-theme='dark'] {
   --dshm-bubble-ai-border: #453728;
   --dshm-seal-ring: #e58b4a;
   --dshm-seal-face: #241a12;
+  --dshm-seal-gloss: #2e241b;       /* 酱印高光：比印面亮一阶的柔和焙面光泽 */
+  --dshm-seal-shade: var(--dshm-seal-face);
   /* stamp-avatar-1..4: seal colors stay track-constant (§3.3). */
 
   --dshm-focus-ring: 0 0 0 3px rgba(229, 139, 74, 0.55);
@@ -509,21 +514,8 @@ html[data-theme='dark'] .adm-toast-mask .adm-toast-main {
   box-shadow: var(--dshm-shadow-card);
 }
 
-/* The round-stamp base (send button 收讫 seals, hero 酱印): a circular seal
- * face with the ring line; callers size it and ink the glyph. */
-.dshm-stamp-round {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  border: 2px solid var(--dshm-seal-ring);
-  background: var(--dshm-seal-face);
-  color: var(--dshm-seal-ring);
-  box-shadow: var(--dshm-shadow-seal);
-}
-
 /* The filled round seal (the send button's persimmon stamp): solid brand
- * face with on-brand glyph — the CTA tier of the stamp base. */
+ * face with on-brand glyph. */
 .dshm-stamp-solid {
   display: inline-flex;
   align-items: center;

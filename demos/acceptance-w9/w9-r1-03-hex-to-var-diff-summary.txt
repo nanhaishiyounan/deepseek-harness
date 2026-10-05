@@ -1,0 +1,19 @@
+== W9-R1 F3 hex→var diff 摘要（四处酱印径向渐变 + 双轨 token 定义）==
++    gradient rides the track-paired --dshm-seal-gloss/shade pair. */
+-  background: radial-gradient(circle at 32% 28%, #ffffff 0%, var(--dshm-card) 58%);
++  background: radial-gradient(circle at 32% 28%, var(--dshm-seal-gloss) 0%, var(--dshm-seal-shade) 58%);
+-  background: radial-gradient(circle at 32% 28%, #2e241b 0%, var(--dshm-seal-face) 58%);
++    gloss gradient rides the track-paired --dshm-seal-gloss/shade pair. */
+-  background: radial-gradient(circle at 32% 28%, #ffffff 0%, var(--dshm-card) 58%);
++  background: radial-gradient(circle at 32% 28%, var(--dshm-seal-gloss) 0%, var(--dshm-seal-shade) 58%);
+-  background: radial-gradient(circle at 32% 28%, #2e241b 0%, var(--dshm-seal-face) 58%);
++  --dshm-seal-gloss: #ffffff;       /* 酱印径向高光起点（亮轨印面即纸白，渐变呈恒白） */
++  --dshm-seal-shade: var(--dshm-card);  /* 酱印径向基底端（亮轨=卡面） */
++  --dshm-r-ctl-corner: 14px;        /* 控件内角件（徽标/骨架条/迷你代码块，与 r-ctl 同值阶） */
++  --dshm-seal-gloss: #2e241b;       /* 酱印高光：比印面亮一阶的柔和焙面光泽 */
++  --dshm-seal-shade: var(--dshm-seal-face);
+
+== F4 挂钩消费点 ==
+packages/client/ui-mobile/src/client/messages/chat/FlowItem.tsx:112:        : <div className={`dshm-bubble-paper-user ${css.userBubble}`}>{item.text}</div>
+packages/client/ui-mobile/src/client/messages/chat/FlowItem.tsx:115:    return <>{separator}{aiRow(<div className={`dshm-bubble-paper-ai ${css.assistantBubble}`}><RichContent text={item.text} /></div>)}</>
+packages/client/ui-mobile/src/client/ui.tsx:136:      <span className={`dshm-stamp-faint ${String(css.emptyIcon)}`} aria-hidden="true">{icon}</span>

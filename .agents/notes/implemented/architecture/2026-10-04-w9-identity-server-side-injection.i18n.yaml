@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-10-04-w9-identity-server-side-injection.md
-2026-10-04-w9-identity-server-side-injection.md: 9f22b349f03c0d9dda09cd62e23b610eb3987eee
-2026-10-04-w9-identity-server-side-injection.zh.md: 359acaf50bfb992433faada0571b0d497c2c9dc3
+2026-10-04-w9-identity-server-side-injection.md: 902257a09b32e954d00187b4582018591a1bd859
+2026-10-04-w9-identity-server-side-injection.zh.md: 3703a222ee66a7ce17e245634ce4d4bd5c439607

@@ -91,6 +91,12 @@ export const NB_LIST_MAX_PAGE_SIZE = 100
  */
 const TODOS_UNBOUND_REFUSAL = 'nb_list: 审批待办（wfl_approval_todos）是登录用户的私有数据；当前会话未绑定登录身份，拒绝读取'
 
+/** The refusal `nb_get` answers for the same collection under an unbound
+ * session (W9-R1): the single-row read is the fourth entry point into the
+ * todos and refuses the same way the list gate does.
+ */
+const TODOS_GET_UNBOUND_REFUSAL = 'nb_get: 审批待办（wfl_approval_todos）是登录用户的私有数据；当前会话未绑定登录身份，拒绝读取'
+
 /** Default nb_list page size. */
 export const NB_LIST_DEFAULT_PAGE_SIZE = 20
 
@@ -519,9 +525,27 @@ export function applyNbGetTool(ctx: Context, client: NocoBaseClient | undefined,
       if (client === undefined) {
         throw new Error('nb_get: this deployment resolves no NocoBase credentials (NOCOBASE_BASE_URL/NOCOBASE_API_KEY); the business tools are unavailable')
       }
+      // W9-R1: single-row reads of the todos stay owner-scoped the same way
+      // the list gate is (the gateway's nocobase.get row check is the twin):
+      // an unbound session refuses before any wire call, a bound session
+      // refuses any fetched row whose user is not the acting username.
+      const actingUsername = input.collection === 'wfl_approval_todos'
+        ? sessionActingUserOf(exec.agent?.id)?.username
+        : undefined
+      if (input.collection === 'wfl_approval_todos' && actingUsername === undefined) {
+        throw new Error(TODOS_GET_UNBOUND_REFUSAL)
+      }
       const row = await client.get<NbRow>(input.collection, input.id, undefined, exec.signal)
       if (row === undefined) {
         throw new Error(`nb_get: no row ${input.id} exists in ${input.collection}`)
+      }
+      if (input.collection === 'wfl_approval_todos') {
+        // The owner column is a username string on every well-formed row; a
+        // non-string cell fails the scope the same way a foreign one does.
+        const rowUser = row['user']
+        if (typeof rowUser !== 'string' || rowUser !== actingUsername) {
+          throw new Error(`nb_get: 该审批待办不属于账号 ${actingUsername ?? '(未绑定)'}，拒绝跨用户读取`)
+        }
       }
       return { collection: input.collection, row }
     },

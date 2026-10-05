@@ -160,32 +160,24 @@
   font-weight: 600;
 }
 
-/* The AI bubble (§五 气泡·AI): the white paper plate with the roast-line
-    border and the 6px bottom-left fold notch. */
+/* The AI bubble (§五 气泡·AI): the paper plate's seal face rides the global
+    .dshm-bubble-paper-ai hook (border/notch/max-width/plate); the local class
+    keeps only the chat-grade text metrics. */
 .assistantBubble {
-  background: var(--dshm-bubble-ai-bg);
-  border: 1px solid var(--dshm-bubble-ai-border);
-  border-radius: var(--dshm-r-bubble) var(--dshm-r-bubble) var(--dshm-r-bubble) 6px;
-  box-shadow: var(--dshm-shadow-card);
   padding: 12px 15px;
   font-size: var(--dshm-fs-body);
   line-height: 1.62;
-  color: var(--dshm-bubble-ai-fg);
-  max-width: min(80vw, 300px);
   overflow-wrap: anywhere;
 }
 
-/* The user bubble (§五 气泡·user): the solid persimmon label, white text,
-    the 6px bottom-right fold notch. */
+/* The user bubble (§五 气泡·user): the persimmon label face rides the global
+    .dshm-bubble-paper-user hook; the local class keeps the stream alignment
+    and the chat-grade text metrics. */
 .userBubble {
   align-self: flex-end;
-  background: var(--dshm-bubble-user-bg);
-  color: var(--dshm-bubble-user-fg);
-  border-radius: var(--dshm-r-bubble) var(--dshm-r-bubble) 6px var(--dshm-r-bubble);
   padding: 12px 15px;
   font-size: var(--dshm-fs-body);
   line-height: 1.62;
-  max-width: min(80vw, 300px);
   overflow-wrap: anywhere;
 }
 

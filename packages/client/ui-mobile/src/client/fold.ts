@@ -398,9 +398,12 @@ function actionLineOf(action: 'confirm' | 'reject', segments: readonly MessageSe
  * The legacy session-opening identity stamp line (W6-B0 through W8; the
  * gateway retired it in W9-B2 — identity now rides the system prompt): the
  * durable logs of old sessions keep the line, so display folding strips a
- * first-line stamp and keeps the prose underneath.
+ * first-line stamp and keeps the prose underneath. The match requires the
+ * full server-stamped sentence — the `——本行由系统注入` tail is the
+ * injection marker a hand-typed `【登录身份】…` line never carries, so a
+ * user's own first-line mention keeps its bubble.
  */
-const LEGACY_IDENTITY_STAMP_LINE = /^【登录身份】/
+const LEGACY_IDENTITY_STAMP_LINE = /^【登录身份】[^\n]*——本行由系统注入/
 
 /** Strip a first-line legacy identity stamp; any later occurrence stays (only the server wrote it first). */
 function stripLegacyIdentityStamp(text: string): string {

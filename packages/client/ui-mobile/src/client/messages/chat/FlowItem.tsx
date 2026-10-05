@@ -109,10 +109,10 @@ export function FlowItem(props: FlowItemProps): JSX.Element | null {
             {sanitizeBizText(item.text)}
           </div>
         )
-        : <div className={css.userBubble}>{item.text}</div>
+        : <div className={`dshm-bubble-paper-user ${css.userBubble}`}>{item.text}</div>
       return <>{separator}{body}</>
     }
-    return <>{separator}{aiRow(<div className={css.assistantBubble}><RichContent text={item.text} /></div>)}</>
+    return <>{separator}{aiRow(<div className={`dshm-bubble-paper-ai ${css.assistantBubble}`}><RichContent text={item.text} /></div>)}</>
   }
   if (item.kind === 'tool') {
     // A protocol-fence name the model emitted as a tool call renders as the

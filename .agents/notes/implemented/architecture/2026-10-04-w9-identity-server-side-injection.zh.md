@@ -38,4 +38,4 @@ W9 从移动端聊天链路移除了登录身份在用户可见面上的最后�
 ## 一并记录的 W9 决策
 
 - **预制 tag 辅助输入（B1）：** 预制 tag（欢迎卡 starters、快捷面板指令、上下文 chips、字段补问建议）改为填入输入框草稿而非直接发送；围栏动作（ask_choice 选项、审批/计划/报告卡动作）保持即时执行。切分按意图形状：可编辑草稿 vs 确定性动作。
-- **视觉语言「酱园琥珀」（B3–B6）：** 移动端设计语言以 `demos/acceptance-w9/design-language-w9.md` 为唯一定稿（token 单一来源）；B6 将 W7 时代旧名 token 消费全量迁移到 §3 基础名（645+ 处 → 0；别名声明保留在 `tokens.css` 作兼容层，下轮再剪）。
+- **视觉语言「酱园琥珀」（B3–B6）：** 移动端设计语言以 `demos/acceptance-w9/design-language-w9.md` 为唯一定稿（token 单一来源）；B6 把 W7 时代旧名 token 消费迁移到 §3 基础名——核心语义名（primary/foreground/muted/border/fs-*）清零，别名尾段仍有过渡残留（on-soft ×22、stroke-soft ×15、work-*/stamp-* 等，css `var()` 读共 73 处）待下批迁移；别名声明保留在 `tokens.css` 作兼容层。

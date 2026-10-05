@@ -191,22 +191,25 @@ export async function renameSession(sessionId: string, title: string): Promise<v
  * new sessions in W9-B2): the auto-title of an old session derives from the
  * first user message, so the durable titles keep the stamp sentence as a
  * leading residue. The identification rule matches fold.ts's
- * `LEGACY_IDENTITY_STAMP_LINE` (the /^【登录身份】/ first-line test); the
- * display layer strips the sentence — the log data itself never moves.
+ * `LEGACY_IDENTITY_STAMP_LINE` (the first line must carry the full
+ * server-stamped sentence with the `——本行由系统注入` tail); the display
+ * layer strips the sentence — the log data itself never moves.
  */
-const LEGACY_STAMP_TITLE = /^【登录身份】/
+const LEGACY_STAMP_TITLE = /^【登录身份】[^\n]*——本行由系统注入/
 
 /**
  * Strip a leading legacy identity-stamp sentence from a pinned title: the
  * marker plus everything up to the stamp line's closing full stop (the
  * auto-title collapses the stamp's first line into one string; a title
- * truncated inside the stamp yields nothing and falls back).
+ * truncated inside the stamp yields nothing and falls back). A hand-typed
+ * `【登录身份】…` line without the injection tail is the user's own title
+ * and stays verbatim.
  * @param title - the raw pinned title.
  * @returns the stripped remainder (possibly empty).
  */
 function stripLegacyStampTitle(title: string): string {
   if (!LEGACY_STAMP_TITLE.test(title)) return title
-  return title.replace(/^【登录身份】[^。]*。?/, '').trim()
+  return title.replace(/^【登录身份】[^。]*——本行由系统注入[^。]*。?/, '').trim()
 }
 
 /**

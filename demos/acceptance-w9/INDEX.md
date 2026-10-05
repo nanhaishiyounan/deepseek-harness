@@ -68,3 +68,16 @@
 ## B7 收尾
 
 - 本 `INDEX.md`；全量回归、B1/B2 负向复跑、W8 资产断言、B4 gate 复跑结果见提交信息与 `w9-b4-gate.log`（19/19）。
+
+## R1 终验修复批（F1~F8）
+
+- `w9-r1-live-probe.log` / `.w9-r1-shoot.mjs` — 14 项活体断言全 PASS（3080 真实网关 + 真实模型流）：F1 徽章圆角 102/102=14px、F3 酱印双轨 gloss/shade（亮 #ffffff/#ffffff、暗 #2e241b/#241a12，hero+登录页）、F4 气泡/淡印钩子承形、F2 手打「【登录身份】foo」气泡可见 + B2 会话带尾巴注入行仍折叠（N5 回归）。
+- `w9-r1-01-files-typebadge-radius-restored-375.png` — files 页徽章圆角复原（修复前 102 个 0px）。
+- `w9-r1-02a/02b-home-seal-{light,dark}-375.png`、`w9-r1-02c-login-seal-dark-375.png` — 酱印渐变 token 化后亮暗双轨。
+- `w9-r1-03-emptystate-stamp-faint-375.png` — 空态淡印挂 `.dshm-stamp-faint`。
+- `w9-r1-04-handtyped-identity-line-bubble-visible-375.png` — 用户手打【登录身份】行（无系统注入尾巴）气泡可见。
+- `w9-r1-05-legacy-tailed-stamp-still-folds-375.png` — B2 探针会话（seq7 带尾巴 stamp）注入行仍折叠。
+- `w9-r1-03-hex-to-var-diff-summary.txt` — F3 hex→var 四处 + 双轨 token 定义摘要。
+- `w9-r1-06-oxlint.log` — FilesView/read.ts 单文件 0 error + ui-mobile staged 门禁口径 0 error。
+- `w9-r1-07-spec-runs.log` — ui-mobile 全量 691、tool-nocobase 55（含 F6 新增 nb_get owner 2 例）、apiproxy sessions-auth 12。
+- `w9-r1-b4-gate-rerun.json` — B4 gate 19 项在 token 增删后复跑（19/19 ALL PASS；原 `w9-b4-light-probe.json` 未动）。

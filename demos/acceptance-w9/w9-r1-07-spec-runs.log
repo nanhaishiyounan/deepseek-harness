@@ -1,0 +1,10 @@
+== W9-R1 spec 运行记录 ==
+-- ui-mobile 全量 --
+[2m Test Files [22m [1m[32m45 passed[39m[22m[90m (45)[39m
+[2m      Tests [22m [1m[32m691 passed[39m[22m[90m (691)[39m
+-- tool-nocobase 全量（含 F6 新增 nb_get row-scope 2 例）--
+[2m Test Files [22m [1m[32m2 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[32m55 passed[39m[22m[90m (55)[39m
+-- apiproxy 定向 nocobase-sessions-auth --
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m12 passed[39m[22m[90m (12)[39m

@@ -41,19 +41,11 @@
   text-align: center;
 }
 
-/* The faint seal: the dashed ring carries no text duty (decorative, aria
-   hidden); the glyph inside rides the seal-ring amber. */
+/* The faint seal: the dashed ring's seal face rides the global
+   .dshm-stamp-faint hook; the local class keeps only the flex-slot pin (the
+   section variant sizes the ring down below). */
 .emptyIcon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
   flex: none;
-  border: 1.5px dashed var(--dshm-seal-ring);
-  border-radius: 50%;
-  background: transparent;
-  color: var(--dshm-brand);
 }
 
 .emptyTexts {

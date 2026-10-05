@@ -395,6 +395,18 @@ describe('foldHistory (report fences)', () => {
     expect(third.text).toBe(`第一行不是注入行\n${stamped}`)
   })
 
+  it('keeps a hand-typed 【登录身份】 line without the injection tail visible (W9-R1)', () => {
+    const folded = foldHistory([
+      event('user/message', { content: [{ type: 'text', text: '【登录身份】foo' }], source: { kind: 'user' } }, 0),
+    ])
+    // The tail ——本行由系统注入 is the server-injection marker; without it the
+    // line is the user's own words and its bubble stays.
+    const first = folded.items[0]
+    if (first?.kind !== 'text') throw new Error('expected user text')
+    expect(first.role).toBe('user')
+    expect(first.text).toBe('【登录身份】foo')
+  })
+
   it('retires a stale ask when a report follows it', () => {
     const askFence = '```dsh\n{"v":3,"type":"ask_choice","id":"choice_1","question":"登记成什么？",'
       + '"options":[{"label":"采购单","value":"hub_po"}]}\n```'

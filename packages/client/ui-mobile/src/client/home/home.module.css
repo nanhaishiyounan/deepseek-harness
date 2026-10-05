@@ -72,7 +72,8 @@
 
 /* The 84px 鲜酿 round seal: solid brand ring + dashed inner ring + the soft
     inset wash, the vertical 800 word, and the mono batch code at the foot
-    (design §六.1 — the W7 stamp logo's warm mobile descendant). */
+    (design §六.1 — the W7 stamp logo's warm mobile descendant). The gloss
+    gradient rides the track-paired --dshm-seal-gloss/shade pair. */
 .heroSeal {
   position: relative;
   display: grid;
@@ -81,7 +82,7 @@
   width: 84px;
   height: 84px;
   border-radius: 50%;
-  background: radial-gradient(circle at 32% 28%, #ffffff 0%, var(--dshm-card) 58%);
+  background: radial-gradient(circle at 32% 28%, var(--dshm-seal-gloss) 0%, var(--dshm-seal-shade) 58%);
   border: 2.5px solid var(--dshm-brand);
   box-shadow: var(--dshm-shadow-seal), inset 0 0 0 3px var(--dshm-brand-soft);
 }
@@ -92,13 +93,6 @@
   inset: 5px;
   border-radius: 50%;
   border: 1px dashed rgba(180, 83, 10, 0.45);
-}
-
-/* The dark tray swaps the seal plate to its roasted face (the highlight
-    gradient reads as a light-tray gloss only). */
-[data-theme='dark'] .heroSeal,
-.dshm-root[data-theme='dark'] .heroSeal {
-  background: radial-gradient(circle at 32% 28%, #2e241b 0%, var(--dshm-seal-face) 58%);
 }
 
 .heroSealGlyph {

@@ -418,6 +418,26 @@ describe('nb_get', () => {
   })
 })
 
+describe('nb_get row-scopes wfl_approval_todos to the acting user (W9-R1)', () => {
+  it('refuses the unbound session before any wire call leaves', async () => {
+    const { execute, mock } = await mount()
+    const refused = await execute('nb_get', { collection: 'wfl_approval_todos', id: 101 })
+    expect(refused.isError).toBe(true)
+    expect(refused.text).toContain('登录用户的私有数据')
+    expect(mock!.served.filter(served => served.path.includes('wfl_approval_todos'))).toHaveLength(0)
+  })
+
+  it('refuses a bound user reading someone else\'s todo and serves their own', async () => {
+    const { execute } = await mount({ acting: { username: 'buyer', nickname: '采购员·蔡俊' } })
+    const foreign = await execute('nb_get', { collection: 'wfl_approval_todos', id: 103 })
+    expect(foreign.isError).toBe(true)
+    expect(foreign.text).toContain('该审批待办不属于账号 buyer')
+    const mine = await execute('nb_get', { collection: 'wfl_approval_todos', id: 101 })
+    expect(mine.isError).toBe(false)
+    expect(mine.value).toMatchObject({ collection: 'wfl_approval_todos', row: { id: 101, user: 'buyer' } })
+  })
+})
+
 describe('nb_create', () => {
   it('lands the row and answers the receipt with the server-assigned id', async () => {
     const { execute, mock } = await mount()

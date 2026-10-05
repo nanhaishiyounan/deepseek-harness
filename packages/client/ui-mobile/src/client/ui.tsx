@@ -133,7 +133,7 @@ export function EmptyState({ icon, title, description, action, variant = 'page' 
   const root = variant === 'section' ? `${css.emptyState} ${css.emptyStateSection}` : css.emptyState
   return (
     <div className={root} role="empty" data-testid="empty-state">
-      <span className={css.emptyIcon} aria-hidden="true">{icon}</span>
+      <span className={`dshm-stamp-faint ${String(css.emptyIcon)}`} aria-hidden="true">{icon}</span>
       <span className={css.emptyTexts}>
         <span className={css.emptyTitle}>{title}</span>
         {description !== undefined && <span className={css.emptyDesc}>{description}</span>}
