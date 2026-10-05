@@ -218,6 +218,23 @@ export function stampAcronymOf(presetId: string | undefined, name: string): stri
 }
 
 /**
+ * The colleague name the chat header and turn stamps borrow from: the
+ * roster row's display name (the roster page's own stamp source), else the
+ * visual's duty tag. Session titles (question text / 新会话) never reach
+ * the stamps, so one preset's chat seals and roster stamp read the same
+ * name for every session.
+ * @param presetId - the agentPreset id (undefined for local sessions).
+ * @param rosterRow - the roster row when agentPreset.list carries one.
+ * @returns the display name the stamp's borrow rule reads.
+ */
+export function colleagueNameOf(
+  presetId: string | undefined,
+  rosterRow: { readonly name: string } | undefined,
+): string {
+  return rosterRow?.name ?? colleagueOf(presetId).duty
+}
+
+/**
  * The roster render bands (v6): the three capability groups in order, then
  * the 更多 AI 同事 catch-all for visuals the table left ungrouped. Empty
  * bands drop out (the design's renderRoster: no heading without items).

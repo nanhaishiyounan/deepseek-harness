@@ -1301,6 +1301,76 @@ describe('mobile chat view durable states', () => {
     expect(screen.getByText('读取业务行')).toBeTruthy()
   })
 
+  it('sources the header and turn stamps from the roster name across title kinds', async () => {
+    // One user→assistant turn renders the header stamp, the turn stamp, and
+    // the turn seal; every scenario below reuses it.
+    const history = { events: [
+      { event: userMessage(1, '帮我看一下') },
+      { event: assistantMessage(2, '收到，这就去查。') },
+    ] }
+    const renderChat = (item: Record<string, unknown>, presets: Record<string, unknown>[]): void => {
+      stubGateway({
+        'session.list': { items: [item] },
+        'session.history': history,
+        'agentPreset.list': { presets },
+        'nocobase.listMeta': { collections: [] },
+      })
+      render(<ChatView sessionId="stamp-1" />)
+    }
+    const headerStamp = (): string => document.querySelector('[class*="headerMain_"] [class*="avatar_"]')?.textContent ?? ''
+    const turnStamp = (): string => document.querySelector('[class*="assistantCol_"] [class*="avatar_"]')?.textContent ?? ''
+
+    // An AI-prefixed roster name borrows its leading pair (食安) into both
+    // stamps; a question-text title never reaches the stamp.
+    renderChat(
+      { sessionId: 'stamp-1', updatedAt: 1, agentPreset: 'ghost-safety', projections: { values: { title: 'GB2760防腐剂限量怎么查' } } },
+      [{ id: 'ghost-safety', name: 'AI食安合规官', description: '', isDefault: false }],
+    )
+    await waitFor(() => { expect(headerStamp()).toBe('食安') })
+    expect(turnStamp()).toBe('食安')
+    expect(document.querySelector('[class*="aiSeal_"]')?.textContent).toBe('AI')
+    cleanup()
+
+    // A 新会话 title: the stamps stay roster-sourced.
+    renderChat(
+      { sessionId: 'stamp-1', updatedAt: 1, agentPreset: 'ghost-safety', projections: { values: { title: '新会话' } } },
+      [{ id: 'ghost-safety', name: 'AI食安合规官', description: '', isDefault: false }],
+    )
+    await waitFor(() => { expect(screen.getByText('新会话')).toBeTruthy() })
+    expect(headerStamp()).toBe('食安')
+    expect(turnStamp()).toBe('食安')
+    cleanup()
+
+    // A roster name without the AI prefix keeps the fallback stamp word
+    // (AI) — the same stamp the roster page shows for that name.
+    renderChat(
+      { sessionId: 'stamp-1', updatedAt: 1, agentPreset: 'ghost-master', projections: { values: { title: '帮我看一下到货' } } },
+      [{ id: 'ghost-master', name: '张师傅', description: '', isDefault: false }],
+    )
+    await waitFor(() => { expect(headerStamp()).toBe('AI') })
+    expect(turnStamp()).toBe('AI')
+    cleanup()
+
+    // A preset the roster does not carry falls back to the visual's duty
+    // tag (AI 同事 → 同事), never the title.
+    renderChat(
+      { sessionId: 'stamp-1', updatedAt: 1, agentPreset: 'ghost-any', projections: { values: { title: '随便问点什么' } } },
+      [],
+    )
+    await waitFor(() => { expect(headerStamp()).toBe('同事') })
+    expect(turnStamp()).toBe('同事')
+    cleanup()
+
+    // A preset the visual table names keeps its own stamp word (合规) —
+    // the roster page's own stamp for the same row.
+    renderChat(
+      { sessionId: 'stamp-1', updatedAt: 1, agentPreset: 'food-compliance-officer', projections: { values: { title: '审一下供应商资质' } } },
+      [{ id: 'food-compliance-officer', name: 'AI食安合规官', description: '', isDefault: false }],
+    )
+    await waitFor(() => { expect(headerStamp()).toBe('合规') })
+    expect(turnStamp()).toBe('合规')
+  })
+
   it('surfaces a failed stop and drops blank enter sends', async () => {
     stubGateway({
       'session.list': { items: [] },

@@ -35,8 +35,9 @@ export interface FlowItemProps {
   readonly item: ChatItem
   readonly previous: ChatItem | undefined
   readonly preset: string | undefined
-  /** The colleague's display name (the header title); the stamp borrows its
-   * leading pair when the fallback acronym would repeat the name's AI prefix. */
+  /** The colleague's roster-resolved name (never the session title); the
+   * stamp borrows its leading pair when the fallback acronym would repeat
+   * the name's AI prefix. */
   readonly name: string
   readonly cardStates: ReadonlyMap<number, DerivedCardState>
   readonly reopened: ReadonlySet<number>

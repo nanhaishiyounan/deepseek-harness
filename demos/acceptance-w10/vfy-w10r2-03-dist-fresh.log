@@ -1,0 +1,36 @@
+# vfy-w10r2-03: dist freshness vs commit 39d8c1b49c (w10-r) + w10-r2 P2
+generated: 2026-10-05T10:27:39Z (feature counts re-verified 10:28:14Z)
+
+## commit under verification
+39d8c1b49c 2026-10-05 17:47:05 +0800 w10-r: 终验 4 项 Important 清偿
+
+## served bundles (live 3080) = freshly built dist identity
+mobile.html script: /assets/mobile-D5O5KRUa.js
+mobile.html css:    /assets/mobile-Dit2eMUK.css
+-rw-r--r--  650230 Oct  5 18:26 apps/web/dist/assets/mobile-D5O5KRUa.js
+-rw-r--r--  151610 Oct  5 18:26 apps/web/dist/assets/mobile-Dit2eMUK.css
+
+## feature greps — LIVE 3080 response bodies
+(occurrence counts via `grep -o | wc -l`; minified files are near-single-line, so `grep -c` would undercount)
+G1 stamp borrow slice(2).trim().slice(0,2) [js]:  1 match (expect 1)
+G2 var(--dshm-on-brand) usages [css]: 17 matches (expect >=1; alertBadge rides this set)
+G2 literal #241708 [css]: 1 match = the `--dshm-on-brand:` token DEFINITION only
+    (tokens.css single source of truth, dark-track value; every usage site references var()).
+G2 literal #241708 [js]: 0 matches.
+
+## feature greps — DISK artifacts (same counts as live: served body == disk file)
+G1 [js]: 1; var(--dshm-on-brand) usages [css]: 17; #241708 [js]: 0; #241708 [css]: 1 (token definition).
+css module hook alertBadge present [js]: 2 matches.
+
+## mtime chain: source edits -> rebuilt dist (all after commit 39d8c1b49c at 2026-10-05 17:47:05 +0800)
+Oct  5 18:23:22 2026  packages/client/ui-mobile/src/client/colleagues.ts
+Oct  5 18:23:31 2026  packages/client/ui-mobile/src/client/messages/ChatView.tsx
+Oct  5 18:26:19 2026  apps/web/dist/mobile.html
+Oct  5 18:26:19 2026  apps/web/dist/assets/mobile-D5O5KRUa.js
+Oct  5 18:26:19 2026  apps/web/dist/assets/mobile-Dit2eMUK.css
+
+## note
+Minified P2 colleagueNameOf leaves no stable identifier in the bundle; its behavior is
+proven live by vfy-w10r2-02 (chat title = question text / 新会话, stamp = roster pair 食安).
+Terminal 1 (3080) serves apps/web/dist static files per request; the rebuilt bundles are
+already live without a process restart (script/css URLs above are the new-build hashes).

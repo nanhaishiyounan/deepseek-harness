@@ -19,7 +19,7 @@ import { Avatar, NoticeCard, RunningRow, SkelThread } from '../ui.tsx'
 import { PageNav } from '../PageNav.tsx'
 import { loadIdentity } from '../auth.ts'
 import { dispatchReportAction } from '../actions.ts'
-import { colleagueColor, colleagueOf, stampAcronymOf, welcomeOf, type ColleagueVisual, type Welcome } from '../colleagues.ts'
+import { colleagueColor, colleagueNameOf, colleagueOf, stampAcronymOf, welcomeOf, type ColleagueVisual, type Welcome } from '../colleagues.ts'
 import { foldHistory } from '../fold.ts'
 import { goBackOr } from '../router.ts'
 import { useAsync, usePageVisible, usePoll } from '../hooks.ts'
@@ -143,6 +143,10 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
     () => roster.value?.find(row => row.id === preset),
     [roster.value, preset],
   )
+  // The stamps' name source: the roster row's name, else the visual's duty
+  // tag — never the session title, so the header and turn seals match the
+  // roster page's stamps for every session of one preset.
+  const stampName = colleagueNameOf(preset, rosterRow)
   const { draftValues, systemValues, onEdit: onDraftEdit } = useDraftValues(folded.items, cardStates, sessionId)
   // W6-B1 G2: the pending approval cards' live document read-back.
   const approvalExternalStates = useApprovalReadback(folded.items, folded.running)
@@ -313,7 +317,7 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
       <PageNav
         title={(
           <span className={css.headerMain}>
-            <Avatar background={colleagueColor(preset)} acronym={stampAcronymOf(preset, title)} size={30} />
+            <Avatar background={colleagueColor(preset)} acronym={stampAcronymOf(preset, stampName)} size={30} />
             <span className={css.headerTexts}>
               <span className={css.headerTitle}>{title}</span>
               <span className={css.headerHint}>
@@ -366,7 +370,7 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
             item={item}
             previous={folded.items[index - 1]}
             preset={preset}
-            name={title}
+            name={stampName}
             cardStates={cardStates}
             reopened={reopened}
             draftValues={draftValues}
