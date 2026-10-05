@@ -19,7 +19,7 @@ import { Avatar, NoticeCard, RunningRow, SkelThread } from '../ui.tsx'
 import { PageNav } from '../PageNav.tsx'
 import { loadIdentity } from '../auth.ts'
 import { dispatchReportAction } from '../actions.ts'
-import { colleagueColor, colleagueNameOf, colleagueOf, stampAcronymOf, welcomeOf, type ColleagueVisual, type Welcome } from '../colleagues.ts'
+import { colleagueColor, colleagueNameOf, colleagueOf, stampAcronymOf, welcomeOf, type Welcome } from '../colleagues.ts'
 import { foldHistory } from '../fold.ts'
 import { goBackOr } from '../router.ts'
 import { useAsync, usePageVisible, usePoll } from '../hooks.ts'
@@ -49,9 +49,9 @@ import css from './chat.module.css'
 export { contextChipsOf } from './chat/chips.ts'
 
 /** The header's colleague label: the roster name, else the duty tag. */
-function presetLabelOf(preset: string | undefined, rosterRow: { readonly name: string } | undefined, visual: ColleagueVisual): string {
+function presetLabelOf(preset: string | undefined, rosterRow: { readonly name: string } | undefined): string {
   if (preset === undefined) return '本地会话'
-  return rosterRow?.name ?? visual.duty
+  return colleagueNameOf(preset, rosterRow)
 }
 
 /** The conversation page props: the session id from the route. */
@@ -321,7 +321,7 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
             <span className={css.headerTexts}>
               <span className={css.headerTitle}>{title}</span>
               <span className={css.headerHint}>
-                {presetLabelOf(preset, rosterRow, colleague)}
+                {presetLabelOf(preset, rosterRow)}
                 {summary?.running === true ? ' · 处理中' : ''}
               </span>
             </span>

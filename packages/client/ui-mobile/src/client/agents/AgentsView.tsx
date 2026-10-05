@@ -13,7 +13,7 @@
 import { useMemo, useRef, useState, type JSX } from 'react'
 import { Badge, DotLoading, SearchBar, Tag, Toast } from 'antd-mobile'
 import { ChevronRight } from 'lucide-react'
-import { colleagueOf, rosterBandsOf, stampAcronymOf, statusLabelOf, type ColleagueVisual } from '../colleagues.ts'
+import { colleagueNameOf, colleagueOf, rosterBandsOf, stampAcronymOf, statusLabelOf, type ColleagueVisual } from '../colleagues.ts'
 import { messageOf, useAsync } from '../hooks.ts'
 import { navigate } from '../router.ts'
 import { createSession, listAiEmployees } from '../sessionsService.ts'
@@ -141,7 +141,7 @@ export function AgentsView({ active = true }: AgentsViewProps): JSX.Element {
                 >
                   <span className={css.rosterAva}>
                     <Badge color={DOT_COLORS[visual.status]} content={Badge.dot} className={css.avaDot as string}>
-                      <Avatar background={visual.color} acronym={stampAcronymOf(row.id, row.name)} size={42} />
+                      <Avatar background={visual.color} acronym={stampAcronymOf(row.id, colleagueNameOf(row.id, row))} size={42} />
                     </Badge>
                   </span>
                   <span className={css.rosterInfo}>

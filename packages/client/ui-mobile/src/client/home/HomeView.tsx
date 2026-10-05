@@ -17,7 +17,7 @@ import { MessageCircle, Search } from 'lucide-react'
 import type { SessionSummary } from '@deepseek-ai/dsh-host-apiproxy/api'
 import { Avatar, EmptyState, SkelRow } from '../ui.tsx'
 import { messageOf, useAsync } from '../hooks.ts'
-import { colleagueColor, colleagueOf, stampAcronymOf } from '../colleagues.ts'
+import { colleagueColor, colleagueNameOf, colleagueOf, stampAcronymOf } from '../colleagues.ts'
 import { navigate } from '../router.ts'
 import { createSession, listAiEmployees, listSessions, relativeTimeOf, subtitleOf, titleOf } from '../sessionsService.ts'
 import { listMyAlerts } from '../ledgerService.ts'
@@ -210,6 +210,13 @@ export function HomeView({ identityName, active = true }: HomeViewProps): JSX.El
     .filter(summary => !isWorkSession(summary.sessionId))
     .slice(0, 3), [sessions.value])
 
+  // The roster rows by preset id — the recent rows' stamp name source, so the
+  // roster rail above and the chat page show the same stamp for one preset.
+  const rosterById = useMemo(
+    () => new Map((roster.value ?? []).map(row => [row.id, row] as const)),
+    [roster.value],
+  )
+
   // Keep the recent rows' one-line projections warm (the chats list's C1).
   useEffect(() => {
     let alive = true
@@ -399,16 +406,18 @@ export function HomeView({ identityName, active = true }: HomeViewProps): JSX.El
                   const preset = summary.agentPreset
                   const subtitle = projections.get(summary.sessionId) ?? subtitleOf(summary)
                   const unread = summary.updatedAt > readWatermarkOf(summary.sessionId)
+                  const rosterRow = preset === undefined ? undefined : rosterById.get(preset)
+                  const stampName = colleagueNameOf(preset, rosterRow)
                   return (
                     <button key={summary.sessionId} type="button" className={css.recentRow} onClick={() => { openSession(summary) }}>
                       <span className={css.recentAva}>
                         {preset !== undefined
                           ? (
                             <Badge color="var(--dshm-success)" content={Badge.dot} className={css.recentAvaDot as string}>
-                              <Avatar background={colleagueColor(preset)} acronym={stampAcronymOf(preset, titleOf(summary))} size={42} />
+                              <Avatar background={colleagueColor(preset)} acronym={stampAcronymOf(preset, stampName)} size={42} />
                             </Badge>
                           )
-                          : <Avatar background={colleagueColor(preset)} acronym={stampAcronymOf(preset, titleOf(summary))} size={42} />}
+                          : <Avatar background={colleagueColor(preset)} acronym={stampAcronymOf(preset, stampName)} size={42} />}
                       </span>
                       <span className={css.recentMain}>
                         <span className={css.recentTop}>

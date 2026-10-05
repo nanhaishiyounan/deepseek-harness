@@ -1,0 +1,279 @@
+{
+  "at": "2026-10-05T11:42:29.094Z",
+  "chats": [
+    {
+      "stamp": "食安",
+      "title": "新会话"
+    },
+    {
+      "stamp": "食安",
+      "title": "GB 2760 里防腐剂的限量怎么看"
+    },
+    {
+      "stamp": "表单",
+      "title": "哪些料要补货"
+    },
+    {
+      "stamp": "表单",
+      "title": "哪些料要补货"
+    },
+    {
+      "stamp": "表单",
+      "title": "帮我登记一条采购单：供应商"
+    },
+    {
+      "stamp": "表单",
+      "title": "新会话"
+    },
+    {
+      "stamp": "表单",
+      "title": "帮我登记一条采购单：供应商"
+    },
+    {
+      "stamp": "表单",
+      "title": "向宏发食品采购 500kg 面粉，单"
+    },
+    {
+      "stamp": "合规",
+      "title": "【登录身份】admin（管理员）"
+    },
+    {
+      "stamp": "合规",
+      "title": "GB 2760 里防腐剂的限量怎么看"
+    },
+    {
+      "stamp": "合规",
+      "title": "GB 2760 里防腐剂的限量怎么看"
+    },
+    {
+      "stamp": "合规",
+      "title": "GB 2760 里防腐剂的限量怎么看"
+    },
+    {
+      "stamp": "合规",
+      "title": "GB 2760 里防腐剂的限量怎么看"
+    },
+    {
+      "stamp": "合规",
+      "title": "GB 2760 里防腐剂的限量怎么看"
+    },
+    {
+      "stamp": "合规",
+      "title": "GB 2760 里防腐剂的限量怎么看"
+    },
+    {
+      "stamp": "表单",
+      "title": "向宏发食品采购 500kg 面粉，单"
+    },
+    {
+      "stamp": "合规",
+      "title": "查询待办数量"
+    },
+    {
+      "stamp": "表单",
+      "title": "新会话"
+    },
+    {
+      "stamp": "合规",
+      "title": "【登录身份】buyer（采购员·蔡"
+    },
+    {
+      "stamp": "合规",
+      "title": "你好，帮我查一下酱油还有多"
+    }
+  ],
+  "roster": [
+    {
+      "stamp": "数据",
+      "name": "企业数据助手"
+    },
+    {
+      "stamp": "合规",
+      "name": "AI 食安合规官"
+    },
+    {
+      "stamp": "表单",
+      "name": "智能填表助手"
+    },
+    {
+      "stamp": "营销",
+      "name": "AI 营销洞察主管"
+    },
+    {
+      "stamp": "AI",
+      "name": "消费者洞察主管"
+    },
+    {
+      "stamp": "AI",
+      "name": "智能品控主管"
+    },
+    {
+      "stamp": "新品",
+      "name": "AI 新品研发助手"
+    },
+    {
+      "stamp": "食安",
+      "name": "AI 食安服务主管"
+    },
+    {
+      "stamp": "食安",
+      "name": "AI 食安巡检员"
+    },
+    {
+      "stamp": "库存",
+      "name": "AI 库存与定价管家"
+    },
+    {
+      "stamp": "AI",
+      "name": "供应商风险评估员"
+    },
+    {
+      "stamp": "退税",
+      "name": "AI 退税管家"
+    },
+    {
+      "stamp": "设备",
+      "name": "AI 设备维护主管"
+    },
+    {
+      "stamp": "AI",
+      "name": "数据资产入表顾问"
+    },
+    {
+      "stamp": "采销",
+      "name": "AI 采销主管"
+    },
+    {
+      "stamp": "海外",
+      "name": "AI 海外市场洞察官"
+    },
+    {
+      "stamp": "出海",
+      "name": "AI 出海合规官"
+    },
+    {
+      "stamp": "报关",
+      "name": "AI 报关物流官"
+    },
+    {
+      "stamp": "供应",
+      "name": "AI 供应链金融官"
+    },
+    {
+      "stamp": "渠道",
+      "name": "AI 渠道匹配官"
+    },
+    {
+      "stamp": "出海",
+      "name": "AI 出海项目经理"
+    },
+    {
+      "stamp": "产品",
+      "name": "AI 产品研发官"
+    },
+    {
+      "stamp": "自有",
+      "name": "AI 自有品牌顾问"
+    },
+    {
+      "stamp": "食安",
+      "name": "AI 食安合规官"
+    },
+    {
+      "stamp": "AI",
+      "name": "企业数据助手"
+    },
+    {
+      "stamp": "巡检",
+      "name": "AI 巡检排产员"
+    },
+    {
+      "stamp": "原料",
+      "name": "AI 原料行情分析师"
+    },
+    {
+      "stamp": "质量",
+      "name": "AI 质量成本分析师"
+    },
+    {
+      "stamp": "冷链",
+      "name": "AI 冷链管理主管"
+    },
+    {
+      "stamp": "标签",
+      "name": "AI 标签合规审查员"
+    },
+    {
+      "stamp": "供应",
+      "name": "AI 供应商开发专员"
+    },
+    {
+      "stamp": "电商",
+      "name": "AI 电商运营主管"
+    },
+    {
+      "stamp": "ES",
+      "name": "AI ESG 报告助理"
+    },
+    {
+      "stamp": "AI",
+      "name": "标准模式"
+    },
+    {
+      "stamp": "AI",
+      "name": "PTC 模式"
+    },
+    {
+      "stamp": "AI",
+      "name": "极简模式"
+    },
+    {
+      "stamp": "AI",
+      "name": "创造模式"
+    }
+  ],
+  "chat": {
+    "headerStamp": "食安",
+    "title": "AI 同事"
+  },
+  "home": [
+    {
+      "stamp": "食安",
+      "title": "新会话"
+    },
+    {
+      "stamp": "食安",
+      "title": "GB 2760 里防腐剂的限量怎么看"
+    },
+    {
+      "stamp": "表单",
+      "title": "哪些料要补货"
+    }
+  ],
+  "gates": [
+    {
+      "name": "roster-shian-present",
+      "ok": true
+    },
+    {
+      "name": "chats-shian-sourced",
+      "ok": true
+    },
+    {
+      "name": "chat-header-shian",
+      "ok": true
+    },
+    {
+      "name": "home-recent-shian",
+      "ok": true
+    },
+    {
+      "name": "no-title-loan-rows",
+      "ok": true
+    },
+    {
+      "name": "three-face-same-word",
+      "ok": true
+    }
+  ]
+}

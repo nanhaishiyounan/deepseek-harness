@@ -1369,6 +1369,35 @@ describe('mobile chat view durable states', () => {
     )
     await waitFor(() => { expect(headerStamp()).toBe('合规') })
     expect(turnStamp()).toBe('合规')
+    cleanup()
+
+    // A special-character name borrows exactly its leading pair past the AI
+    // prefix — no word-splitting filter drops the 「!!」.
+    renderChat(
+      { sessionId: 'stamp-1', updatedAt: 1, agentPreset: 'ghost-alarm', projections: { values: { title: '车间温度超限了' } } },
+      [{ id: 'ghost-alarm', name: 'AI!!报警', description: '', isDefault: false }],
+    )
+    await waitFor(() => { expect(headerStamp()).toBe('!!') })
+    expect(turnStamp()).toBe('!!')
+    cleanup()
+
+    // A blank or whitespace-only name after the prefix falls back to the AI
+    // stamp word — the borrow never renders an empty pair.
+    renderChat(
+      { sessionId: 'stamp-1', updatedAt: 1, agentPreset: 'ghost-blank', projections: { values: { title: '随便问点什么' } } },
+      [{ id: 'ghost-blank', name: 'AI ', description: '', isDefault: false }],
+    )
+    await waitFor(() => { expect(headerStamp()).toBe('AI') })
+    expect(turnStamp()).toBe('AI')
+    cleanup()
+
+    // An empty name never starts with the prefix: the fallback stamp word.
+    renderChat(
+      { sessionId: 'stamp-1', updatedAt: 1, agentPreset: 'ghost-empty', projections: { values: { title: '随便问点什么' } } },
+      [{ id: 'ghost-empty', name: '', description: '', isDefault: false }],
+    )
+    await waitFor(() => { expect(headerStamp()).toBe('AI') })
+    expect(turnStamp()).toBe('AI')
   })
 
   it('surfaces a failed stop and drops blank enter sends', async () => {

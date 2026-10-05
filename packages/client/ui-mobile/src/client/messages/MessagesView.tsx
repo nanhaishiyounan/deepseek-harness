@@ -14,10 +14,10 @@ import { MessageCircle, Plus } from 'lucide-react'
 import type { SessionSummary } from '@deepseek-ai/dsh-host-apiproxy/api'
 import { goBackOr, navigate } from '../router.ts'
 import { PageNav } from '../PageNav.tsx'
-import { usePoll } from '../hooks.ts'
+import { useAsync, usePoll } from '../hooks.ts'
 import { Avatar, EmptyState, SkelRow } from '../ui.tsx'
-import { colleagueColor, colleagueOf, stampAcronymOf } from '../colleagues.ts'
-import { listSessions, relativeTimeOf, titleOf } from '../sessionsService.ts'
+import { colleagueColor, colleagueNameOf, colleagueOf, stampAcronymOf } from '../colleagues.ts'
+import { listAiEmployees, listSessions, relativeTimeOf, titleOf } from '../sessionsService.ts'
 import { markSessionRead, pendingReviewSessions, pinSession, pinnedSessions, readWatermarkOf, unpinSession } from '../draftStore.ts'
 import { isWorkSession } from '../workStore.ts'
 import { cachedProjectionOf, loadProjection } from './projection.ts'
@@ -44,6 +44,12 @@ function kindBadgeOf(preset: string | undefined): { label: string; advisor: bool
 export function MessagesView(): JSX.Element {
   const sessionsPoll = usePoll(listSessions, 4000, true)
   const sessions = sessionsPoll.value
+  /** The roster rows by preset id — the row stamps' name source, never the title. */
+  const roster = useAsync(listAiEmployees)
+  const rosterById = useMemo(
+    () => new Map((roster.value ?? []).map(row => [row.id, row] as const)),
+    [roster.value],
+  )
   const [filter, setFilter] = useState<ChatFilter>('all')
   const [keyword, setKeyword] = useState('')
   const [sheetOpen, setSheetOpen] = useState(false)
@@ -192,6 +198,10 @@ export function MessagesView(): JSX.Element {
           {rows?.slice(0, visible).map((summary: SessionSummary) => {
             const preset = summary.agentPreset
             const visual = colleagueOf(preset)
+            // The stamp reads the colleague name (roster row, else duty), so
+            // every session of one preset carries the roster page's stamp.
+            const rosterRow = preset === undefined ? undefined : rosterById.get(preset)
+            const stampName = colleagueNameOf(preset, rosterRow)
             const unread = summary.updatedAt > readWatermarkOf(summary.sessionId)
             const kind = kindBadgeOf(preset)
             const pinned = pins.has(summary.sessionId)
@@ -224,7 +234,7 @@ export function MessagesView(): JSX.Element {
                   className={`${css.sessionRow} ${pinned ? css.sessionPinned : ''}`}
                   onClick={() => { open(summary) }}
                 >
-                  <Avatar background={colleagueColor(preset)} acronym={stampAcronymOf(preset, titleOf(summary))} size={44} />
+                  <Avatar background={colleagueColor(preset)} acronym={stampAcronymOf(preset, stampName)} size={44} />
                   <span className={css.sessionMain}>
                     <span className={css.sessionTop}>
                       <span className={css.sessionTitle}>{titleOf(summary)}</span>
