@@ -11,7 +11,6 @@ import type { SessionEvent, SessionId } from '@deepseek-ai/dsh-session/types'
 // The pure-type outlet: api/ is browser-importable, and the package root's
 // cordis Context merge (via dsh-agent) must not enter client aggregates.
 import type { SessionProjectionMap } from '@deepseek-ai/dsh-session-projection/types'
-import type { ActingUser } from '@deepseek-ai/dsh-connector-nocobase'
 import type { RpcId, RpcRequest, RpcResponse } from './rpc.ts'
 import type { ViewReport } from '@deepseek-ai/dsh-view-context/types'
 import type { ToolEventView } from './events.ts'
@@ -48,13 +47,6 @@ export interface SessionListMetadata {
   /** Latest source.kind=user message time in the checkpoint prefix. */
   lastPromptAt: number | null
 }
-
-/**
- * The signed-in business identity one prompt carries (`session.prompt`'s
- * `loginUser`): shape-shared with the connector's {@link ActingUser} the
- * tools enforce, aliased so the wire surface names its own channel.
- */
-export type PromptLoginUser = ActingUser
 
 declare module '@deepseek-ai/dsh-llm' {
   interface MessageSourceMap {
@@ -366,10 +358,10 @@ export interface SessionsApi {
    * valid for non-browser callers. A signed-in caller attaches its gateway
    * session token (`authToken`, issued by `nocobase.signIn`): the Host derives
    * the acting user from the token server-side — the audit identity the nb_*
-   * tools stamp and gate on — and stamps it onto the session's opening
-   * message so the model narrates the same identity. A bare `loginUser`
-   * without a valid token binds nothing (identity is never client-narrated);
-   * a presented-but-invalid token fails with `nocobase-unauthorized`.
+   * tools stamp and gate on, rendered into every step's system prompt by the
+   * gateway's acting-user section, while the durable user message itself
+   * stays verbatim (a hand-typed identity line changes nothing). A
+   * presented-but-invalid token fails with `nocobase-unauthorized`.
    * `clientMsgId` is the caller's idempotency key: a second prompt carrying
    * an already-accepted id on the same session answers `accepted` without
    * enqueueing again (the offline outbox's retry double-send window).
@@ -381,7 +373,6 @@ export interface SessionsApi {
     mode: 'queue' | 'steer'
     content: PromptContentPart[]
     clientTimeZone?: string
-    loginUser?: PromptLoginUser
     authToken?: string
     clientMsgId?: string
   }>): Promise<RpcResponse<{ accepted: true; command?: { kind: 'success'; text?: string } }>>

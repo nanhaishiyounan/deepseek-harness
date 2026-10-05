@@ -8,10 +8,10 @@
   width: 100%;
   height: 40px;
   padding: 0 12px;
-  border-radius: var(--dshm-radius);
-  background: var(--dshm-muted);
-  color: var(--dshm-foreground);
-  font-size: var(--dshm-fs-xs);
+  border-radius: var(--dshm-r-ctl);
+  background: var(--dshm-card2);
+  color: var(--dshm-ink);
+  font-size: var(--dshm-fs-caption);
   line-height: 18px;
   text-align: left;
 }
@@ -23,7 +23,7 @@
 .entryIcon {
   flex: none;
   display: inline-flex;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 .entryText {
@@ -36,8 +36,8 @@
 
 .entryChevron {
   flex: none;
-  color: var(--dshm-muted-foreground);
-  font-size: var(--dshm-fs-md);
+  color: var(--dshm-ink-sub);
+  font-size: var(--dshm-fs-body);
 }
 
 .sheetWrap {
@@ -45,7 +45,7 @@
 }
 
 .sheetBody {
-  border-radius: var(--dshm-radius-lg) var(--dshm-radius-lg) 0 0;
+  border-radius: var(--dshm-r-card) var(--dshm-r-card) 0 0;
   background: var(--dshm-card);
   max-height: 70vh;
 }
@@ -55,7 +55,7 @@
   flex-direction: column;
   gap: 8px;
   padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
   overflow-y: auto;
 }
 
@@ -63,9 +63,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   font-weight: 600;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 .evidenceHeadSide {
@@ -78,8 +78,8 @@
   width: var(--dshm-touch-sm);
   height: var(--dshm-touch-sm);
   border-radius: 50%;
-  background: var(--dshm-muted);
-  color: var(--dshm-muted-foreground);
+  background: var(--dshm-card2);
+  color: var(--dshm-ink-sub);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -87,8 +87,8 @@
 
 .card {
   background: var(--dshm-card);
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius-lg);
+  border: 1px solid var(--dshm-line);
+  border-radius: var(--dshm-r-card);
   padding: 10px 12px;
   display: flex;
   flex-direction: column;
@@ -103,13 +103,13 @@
 }
 
 .cardTitle {
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   font-weight: 600;
 }
 
 .phrase {
-  font-size: var(--dshm-fs-xs);
-  color: var(--dshm-muted-foreground);
+  font-size: var(--dshm-fs-caption);
+  color: var(--dshm-ink-sub);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -125,20 +125,20 @@
   display: inline-flex;
   flex-direction: column;
   gap: 1px;
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius);
-  background: var(--dshm-background);
+  border: 1px solid var(--dshm-line);
+  border-radius: var(--dshm-r-ctl);
+  background: var(--dshm-canvas);
   padding: 4px 8px;
 }
 
 .nodeName {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   font-weight: 500;
 }
 
 .nodeType {
-  font-size: var(--dshm-fs-xs);
-  color: var(--dshm-muted-foreground);
+  font-size: var(--dshm-fs-caption);
+  color: var(--dshm-ink-sub);
 }
 
 .edgeList {
@@ -155,27 +155,27 @@
   align-items: center;
   gap: 5px;
   flex-wrap: wrap;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
 }
 
 .edgeEndpoint {
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
   font-weight: 500;
 }
 
 .edgeRelation {
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 
 .hint {
   margin: 0;
-  font-size: var(--dshm-fs-xs);
-  color: var(--dshm-muted-foreground);
+  font-size: var(--dshm-fs-caption);
+  color: var(--dshm-ink-sub);
 }
 
 .hintError {
   margin: 0;
-  font-size: var(--dshm-fs-xs);
-  color: var(--dshm-destructive);
+  font-size: var(--dshm-fs-caption);
+  color: var(--dshm-danger);
 }

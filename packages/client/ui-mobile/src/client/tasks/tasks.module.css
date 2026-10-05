@@ -8,13 +8,13 @@
   flex-direction: column;
   height: 100%;
   min-height: 0;
-  background: var(--dshm-background);
+  background: var(--dshm-canvas);
 }
 
 .tabs {
   --active-line-height: 0;
   --active-line-color: transparent;
-  --title-font-size: var(--dshm-fs-xs);
+  --title-font-size: var(--dshm-fs-caption);
   padding: 0 12px;
   flex: none;
 }
@@ -30,18 +30,18 @@
 /* The team group's demo-team banner (02 §10.1's identifiable seed mark). */
 .teamBanner {
   margin: 0 0 6px;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
   color: var(--dshm-on-soft);
-  background: var(--dshm-primary-10);
-  border-radius: var(--dshm-radius);
+  background: var(--dshm-brand-soft);
+  border-radius: var(--dshm-r-ctl);
   padding: 4px 10px;
 }
 
 .rowCard {
   background: var(--dshm-card);
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius-lg);
+  border: 1px solid var(--dshm-line);
+  border-radius: var(--dshm-r-card);
   box-shadow: var(--dshm-shadow-card);
   overflow: hidden;
 }
@@ -55,7 +55,7 @@
   padding: 8px 14px;
   text-align: left;
   background: none;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
   border-bottom: 1px solid var(--dshm-stroke-soft);
 }
 
@@ -66,10 +66,10 @@
 .taskTitle {
   flex: 1;
   min-width: 0;
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 20px;
   font-weight: 500;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -77,18 +77,18 @@
 
 .taskOwner {
   flex: none;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 .taskDue {
   flex: none;
   font-family: var(--dshm-font-num);
   font-variant-numeric: tabular-nums;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 .dueSoon {
@@ -97,8 +97,8 @@
 
 /* The demo tag: antd Tag recolored through its inline dials in TasksView.tsx. */
 .demoTag {
-  --border-radius: var(--dshm-radius-pill);
+  --border-radius: var(--dshm-r-seal);
   flex: none;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 14px;
 }

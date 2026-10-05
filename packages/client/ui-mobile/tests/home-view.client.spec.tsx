@@ -9,7 +9,7 @@
 
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { HomeView, greetingWordOf } from '../src/client/home/HomeView.tsx'
+import { HomeView, batchOf, greetingWordOf, solarTermOf, solarTermPhraseOf } from '../src/client/home/HomeView.tsx'
 import { createWorkItem, deleteWorkItem, registerExecSession, workSnapshot } from '../src/client/workStore.ts'
 import { loadProjection as warmProjection } from '../src/client/messages/projection.ts'
 
@@ -71,13 +71,39 @@ describe('greetingWordOf', () => {
   })
 })
 
+describe('solarTermOf / batchOf (W9-B5)', () => {
+  it('pins the known 2026 crossing days from the sun longitude', () => {
+    expect(solarTermOf(new Date(2026, 9, 23))).toEqual({ name: '霜降', day: 1 })
+    expect(solarTermOf(new Date(2026, 9, 8))).toEqual({ name: '寒露', day: 1 })
+    expect(solarTermOf(new Date(2026, 1, 4))).toEqual({ name: '立春', day: 1 })
+    expect(solarTermOf(new Date(2025, 9, 23))).toEqual({ name: '霜降', day: 1 })
+  })
+
+  it('reports the term the in-between days sit in', () => {
+    expect(solarTermOf(new Date(2026, 9, 5))).toEqual({ name: '秋分', day: 13 })
+    expect(solarTermOf(new Date(2026, 11, 31))).toEqual({ name: '冬至', day: 10 })
+  })
+
+  it('phrases the crossing day as 今日X and the rest as X时节', () => {
+    expect(solarTermPhraseOf(new Date(2026, 9, 23))).toBe('今日霜降')
+    expect(solarTermPhraseOf(new Date(2026, 9, 5))).toBe('秋分时节')
+  })
+
+  it('derives the hero seal batch from the local calendar day', () => {
+    expect(batchOf(new Date(2026, 9, 5))).toBe('B-1005')
+    expect(batchOf(new Date(2026, 0, 3))).toBe('B-0103')
+  })
+})
+
 describe('HomeView', () => {
   it('renders the greeting, the empty-day sub, and the stats cells routing to work', () => {
     stubGateway(emptyRoutes)
     const { container } = render(<HomeView identityName="王经理" />)
-    expect(container.textContent).toContain('，王经理')
+    // W9-B5 hero: the daypart word rides its own line above the name+term line.
+    expect(container.textContent).toMatch(/(早上好|下午好|晚上好)/)
+    expect(container.textContent).toContain('王经理')
     // Empty store: zero counts and the quiet-day copy.
-    expect(screen.getByText('今天没有待办，随时找 AI 同事聊聊')).toBeTruthy()
+    expect(screen.getByText(/今天没有待办，随时找 AI 同事聊聊/)).toBeTruthy()
     const cells = screen.getAllByText(/^0$/)
     expect(cells.length).toBe(4)
     expect(screen.getByText('待处理').tagName).toBe('SPAN')

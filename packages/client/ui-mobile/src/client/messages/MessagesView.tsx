@@ -229,7 +229,7 @@ export function MessagesView(): JSX.Element {
                         ? (
                           <Badge
                             content={Badge.dot}
-                            color="var(--dshm-destructive)"
+                            color="var(--dshm-danger)"
                             aria-label="有新消息"
                             className={css.timeBadge as string}
                           >

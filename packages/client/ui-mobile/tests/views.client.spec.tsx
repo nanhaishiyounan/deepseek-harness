@@ -900,10 +900,18 @@ describe('mobile chat view', () => {
     expect(prompts).toBe(1)
     fireEvent.keyDown(box, { key: 'Enter' })
     await waitFor(() => { expect(document.querySelector('.adm-toast-main')?.textContent ?? '').toContain('推送通道拒绝') })
-    // The empty session renders the welcome card; picking a starter sends it
-    // as the user's own first message (01 ④a).
+    // The empty session renders the welcome card; picking a starter fills
+    // the composer draft — replacing the failed send's residue — and sends
+    // nothing until the user taps send (W9-B1: a tag assists input, it does
+    // not speak for the user).
     fireEvent.click(screen.getByRole('button', { name: '登记一条采购单' }))
+    expect(box.value).toBe('帮我登记一条采购单')
+    expect(prompts).toBe(2)
+    expect(screen.getByTestId('welcome-card')).toBeTruthy()
+    // The one-tap follow-through stays: send carries the box text as typed.
+    fireEvent.click(screen.getByRole('button', { name: '发送' }))
     await waitFor(() => { expect(prompts).toBe(3) })
+    expect(JSON.stringify(calls.filter(call => call.url === '/api/session.prompt').at(-1)?.payload)).toContain('帮我登记一条采购单')
   })
 
   it('opens and closes the new-chat sheet from the header plus', async () => {
@@ -920,7 +928,7 @@ describe('mobile chat view', () => {
     fireEvent.click(screen.getByRole('button', { name: '关闭' }))
   })
 
-  it('runs the quick panel: starter commands send, placeholders toast, empty falls back', async () => {
+  it('runs the quick panel: picks fill the draft, placeholders toast, empty falls back', async () => {
     stubGateway({
       'session.list': { items: [{ sessionId: 'session-12', updatedAt: 1, agentPreset: 'business-advisor' }] },
       'session.history': EMPTY_HISTORY,
@@ -938,10 +946,25 @@ describe('mobile chat view', () => {
     // The placeholder tools toast instead of opening a lane.
     fireEvent.click(screen.getByRole('button', { name: '语音' }))
     await waitFor(() => { expect(document.querySelector('.adm-toast-main')?.textContent ?? '').toContain('演示版暂未开放') })
-    // Picking a command closes the panel and sends the starter's send-text.
+    // Picking a command closes the panel and fills the draft (W9-B1): the
+    // picked send-text replaces a half-typed draft, focuses the box with the
+    // caret parked at the end, and sends nothing on its own.
+    const box = screen.getByPlaceholderText('问我任何经营问题...') as HTMLTextAreaElement
+    fireEvent.change(box, { target: { value: '半句话' } })
     fireEvent.click(screen.getAllByRole('button', { name: '问经营' })[1] as HTMLButtonElement)
-    await waitFor(() => { expect(calls.some(call => call.url === '/api/session.prompt')).toBe(true) })
+    expect(box.value).toBe('本月经营概览和风险提示')
     expect(screen.queryByRole('dialog', { name: '快捷指令' })).toBeNull()
+    expect(calls.some(call => call.url === '/api/session.prompt')).toBe(false)
+    expect(document.activeElement).toBe(box)
+    expect(box.selectionStart).toBe('本月经营概览和风险提示'.length)
+    expect(box.selectionEnd).toBe('本月经营概览和风险提示'.length)
+    // The fill is not a message, so the welcome card stays; the user's own
+    // send tap then carries the filled text (the one-tap path).
+    expect(screen.getByTestId('welcome-card')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: '发送' }))
+    await waitFor(() => {
+      expect(JSON.stringify(calls.find(call => call.url === '/api/session.prompt')?.payload)).toContain('本月经营概览和风险提示')
+    })
     // A starter-less colleague (the local fallback) shows the empty note.
     cleanup()
     stubGateway({
@@ -953,6 +976,27 @@ describe('mobile chat view', () => {
     await waitFor(() => { expect(screen.getByTestId('welcome-card')).toBeTruthy() })
     fireEvent.click(screen.getByRole('button', { name: '打开快捷面板' }))
     await waitFor(() => { expect(screen.getByText('当前同事没有预置指令，直接打字聊聊吧')).toBeTruthy() })
+  })
+
+  it('keeps the welcome card through a fill and retires it once the first send lands', async () => {
+    let history = EMPTY_HISTORY
+    stubGateway({
+      'session.list': { items: [{ sessionId: 'session-12', updatedAt: 1, agentPreset: 'mobile-form-assistant' }] },
+      'session.history': () => history,
+      'nocobase.listMeta': { collections: [] },
+      'session.prompt': () => {
+        history = { events: [{ event: userMessage(1, '帮我登记一条采购单') }] }
+        return {}
+      },
+    })
+    render(<ChatView sessionId="session-12" />)
+    await waitFor(() => { expect(screen.getByTestId('welcome-card')).toBeTruthy() })
+    fireEvent.click(screen.getByRole('button', { name: '登记一条采购单' }))
+    // The fill is not a message: the welcome card stays until the send lands.
+    expect(screen.getByTestId('welcome-card')).toBeTruthy()
+    expect(screen.getByPlaceholderText<HTMLTextAreaElement>('问我任何经营问题...').value).toBe('帮我登记一条采购单')
+    fireEvent.click(screen.getByRole('button', { name: '发送' }))
+    await waitFor(() => { expect(screen.queryByTestId('welcome-card')).toBeNull() }, { timeout: 4000 })
   })
 
   it('renders fenced assistant code as the deep plate and copies it', async () => {
@@ -1764,7 +1808,7 @@ describe('contextChipsOf', () => {
 })
 
 describe('mobile chat view (v3 ask field and chips)', () => {
-  it('renders a field-ask with suggestions and focuses the composer from the free-text entry', async () => {
+  it('renders a field-ask whose suggestion fills the draft for the user to edit', async () => {
     stubGateway({
       'session.list': { items: [] },
       'session.history': { events: [
@@ -1776,13 +1820,14 @@ describe('mobile chat view (v3 ask field and chips)', () => {
     render(<ChatView sessionId="session-12" />)
     await waitFor(() => { expect(screen.getByTestId('field-ask')).toBeTruthy() })
     fireEvent.click(screen.getByText('200 箱'))
-    await waitFor(() => {
-      const prompt = calls.find(call => call.url === '/api/session.prompt')
-      expect(JSON.stringify(prompt?.payload)).toContain('200 箱')
-    })
+    const box = screen.getByPlaceholderText('问我任何经营问题...') as HTMLTextAreaElement
+    expect(box.value).toBe('200 箱')
+    expect(calls.some(call => call.url === '/api/session.prompt')).toBe(false)
+    expect(document.activeElement).toBe(box)
+    expect(box.selectionStart).toBe('200 箱'.length)
   })
 
-  it('sends a receipt-phase chip as the user message', async () => {
+  it('fills a receipt-phase chip into the draft instead of sending it', async () => {
     stubGateway({
       'session.list': { items: [] },
       'session.history': { events: [
@@ -1797,10 +1842,11 @@ describe('mobile chat view (v3 ask field and chips)', () => {
     render(<ChatView sessionId="session-12" />)
     await waitFor(() => { expect(screen.getByRole('button', { name: '再来一单' })).toBeTruthy() })
     fireEvent.click(screen.getByRole('button', { name: '再来一单' }))
-    await waitFor(() => {
-      const prompt = calls.filter(call => call.url === '/api/session.prompt').pop()
-      expect(JSON.stringify(prompt?.payload)).toContain('再来一单')
-    })
+    const box = screen.getByPlaceholderText('问我任何经营问题...') as HTMLTextAreaElement
+    expect(box.value).toBe('再来一单')
+    expect(calls.some(call => call.url === '/api/session.prompt')).toBe(false)
+    expect(document.activeElement).toBe(box)
+    expect(box.selectionStart).toBe('再来一单'.length)
   })
 })
 

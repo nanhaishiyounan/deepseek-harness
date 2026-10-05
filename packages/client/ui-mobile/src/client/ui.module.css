@@ -1,14 +1,15 @@
 /* Shared atoms: tag badges (antd Tag on the token track), running row,
    notices, and the stamp avatar's typographic track. */
 
-/* The pill badge: antd-mobile Tag; the token tone rides inline CSS variables
-   (ui.tsx TONE_FACES — a class declaration would lose to the component's own
-   inline defaults), this class keeps only the 10px type scale and pad. */
+/* The pill badge (§五 状态 soft 章胶囊): antd-mobile Tag; the token tone rides
+   inline CSS variables (ui.tsx TONE_FACES — a class declaration would lose to
+   the component's own inline defaults), this class keeps only the caption
+   type scale and the seal-capsule pad. */
 .badge {
-  --border-radius: var(--dshm-radius-pill);
-  font-size: var(--dshm-fs-xs);
+  --border-radius: var(--dshm-r-seal);
+  font-size: var(--dshm-fs-caption);
   line-height: 1;
-  padding: 3px 6px;
+  padding: 3px 8px;
   font-weight: 500;
 }
 
@@ -16,40 +17,43 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--dshm-muted-foreground);
-  font-size: var(--dshm-fs-sm);
+  color: var(--dshm-ink-sub);
+  font-size: var(--dshm-fs-body);
   padding: 4px 2px;
 }
 
 .runningDot {
   display: inline-flex;
   flex: none;
-  color: var(--dshm-primary);
+  color: var(--dshm-brand);
 }
 
-/* ---- The unified empty state (W7-M2, audit 04 TOP-5): one system for every
- *      empty face — the icon block, two copy lines, one solid CTA. ---- */
+/* ---- The unified empty state (§五 EmptyState 情绪化空态): the faint dashed
+ *      seal — a 40px vermilion ring stamp as the single visual anchor — over
+ *      the heading-tier copy and the one solid CTA. ---- */
 
 .emptyState {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 44px 24px;
+  gap: var(--dshm-space-3);
+  padding: 44px var(--dshm-space-6);
   text-align: center;
 }
 
-/* The icon tile: the 48px rounded block on the muted fill with the brand ink
- * glyph — one brand accent, no emoji. */
+/* The faint seal: the dashed ring carries no text duty (decorative, aria
+   hidden); the glyph inside rides the seal-ring amber. */
 .emptyIcon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
-  border-radius: var(--dshm-radius);
-  background: var(--dshm-muted);
-  color: var(--dshm-primary);
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border: 1.5px dashed var(--dshm-seal-ring);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--dshm-brand);
 }
 
 .emptyTexts {
@@ -60,42 +64,43 @@
 }
 
 .emptyTitle {
-  font-size: var(--dshm-fs-md);
-  line-height: 22px;
-  font-weight: 600;
-  color: var(--dshm-foreground);
+  font-size: var(--dshm-fs-heading);
+  line-height: 24px;
+  font-weight: 700;
+  color: var(--dshm-ink);
 }
 
 .emptyDesc {
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 20px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
-/* The single solid CTA — the primary action is never the outlined face
- * (audit 04 §04's weighted-CTA rule). */
+/* The single solid CTA — the persimmon capsule with the seal's dyed shadow
+   (audit 04 §04's weighted-CTA rule rides the amber heartbeats). */
 .emptyAction:global(.adm-button) {
-  margin-top: 8px;
-  --border-radius: var(--dshm-radius);
+  margin-top: var(--dshm-space-2);
+  --border-radius: var(--dshm-r-seal);
   height: var(--dshm-touch-sm);
   padding-block: 0;
   padding-inline: 18px;
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   font-weight: 600;
+  box-shadow: var(--dshm-shadow-seal);
 }
 
-/* The in-card compact face (files/home strips): the icon tile shrinks beside
- * the left-aligned copy. */
+/* The in-card compact face (files/home strips): the seal shrinks beside the
+   left-aligned copy. */
 .emptyStateSection {
   flex-direction: row;
-  gap: 10px;
-  padding: 18px 16px;
+  gap: var(--dshm-space-3);
+  padding: 18px var(--dshm-space-4);
   text-align: left;
 }
 
 .emptyStateSection .emptyIcon {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   flex: none;
 }
 
@@ -105,24 +110,24 @@
 }
 
 .emptyStateSection .emptyTitle {
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 20px;
 }
 
 .emptyStateSection .emptyDesc {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 17px;
 }
 
 .notice {
-  padding: 16px 8px;
+  padding: var(--dshm-space-4) var(--dshm-space-2);
 }
 
 .noticeBlock {
-  --adm-color-text: var(--dshm-muted-foreground);
-  --adm-color-text-description: var(--dshm-muted-foreground);
-  --adm-color-border: var(--dshm-border);
-  --adm-color-fill: var(--dshm-muted);
+  --adm-color-text: var(--dshm-ink-sub);
+  --adm-color-text-description: var(--dshm-ink-sub);
+  --adm-color-border: var(--dshm-line);
+  --adm-color-fill: var(--dshm-card2);
   padding: 8px 0;
 }
 
@@ -131,22 +136,23 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  color: var(--dshm-on-primary);
+  color: var(--dshm-on-brand);
   font-weight: 600;
   letter-spacing: 1px;
   flex: none;
   user-select: none;
 }
 
-/* Skeleton placeholders (loading states): antd-mobile Skeleton blocks on the
- * layout classes below; only the track sizing and the ink wash override the
- * component defaults. The wrapping page group carries role="status"; these
- * blocks stay aria-hidden. */
+/* Skeleton placeholders (§五 Skeleton 暖纸脉冲): antd-mobile Skeleton blocks on
+   the layout classes below; the warm-paper pulse rides the token track (the
+   bars wash in card2 through the adm box mapping, the shimmer stays antd's),
+   and the card skeleton keeps the 20px card co-radius. The wrapping page
+   group carries role="status"; these blocks stay aria-hidden. */
 
 .skelRow {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--dshm-space-3);
   min-height: 64px;
   padding: 10px 14px;
   background: var(--dshm-card);
@@ -156,18 +162,18 @@
 .skelCard {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--dshm-space-3);
   padding: 14px;
   background: var(--dshm-card);
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius-lg);
+  border: 1px solid var(--dshm-line);
+  border-radius: var(--dshm-r-card);
   box-shadow: var(--dshm-shadow-card);
 }
 
 .skelHead {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--dshm-space-3);
 }
 
 /* The 44px avatar disc and the text bars ride antd's shimmer on the token
@@ -177,7 +183,7 @@
   --height: 44px;
   --border-radius: 50%;
   flex: none;
-  background-color: var(--dshm-muted);
+  background-color: var(--dshm-card2);
 }
 
 .skelTexts {
@@ -189,37 +195,37 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 8px;
+  gap: var(--dshm-space-3);
+  margin-bottom: var(--dshm-space-2);
 }
 
 .skelTitle {
   --width: 45%;
   --height: 16px;
-  --border-radius: var(--dshm-radius-corner);
-  background-color: var(--dshm-muted);
+  --border-radius: var(--dshm-r-ctl-corner);
+  background-color: var(--dshm-card2);
 }
 
 /* The trailing timestamp slot — the skeleton mirrors the real row. */
 .skelTime {
   --width: 40px;
   --height: 12px;
-  --border-radius: var(--dshm-radius-corner);
-  background-color: var(--dshm-muted);
+  --border-radius: var(--dshm-r-ctl-corner);
+  background-color: var(--dshm-card2);
   flex: none;
 }
 
 .skelLine {
   --height: 14px;
-  --border-radius: var(--dshm-radius-corner);
-  background-color: var(--dshm-muted);
+  --border-radius: var(--dshm-r-ctl-corner);
+  background-color: var(--dshm-card2);
 }
 
 .skelLineShort {
   --width: 60%;
   --height: 14px;
-  --border-radius: var(--dshm-radius-corner);
-  background-color: var(--dshm-muted);
+  --border-radius: var(--dshm-r-ctl-corner);
+  background-color: var(--dshm-card2);
 }
 
 /* The card head's 24px stamp disc (the todo/doc/alert silhouette). */
@@ -228,11 +234,12 @@
   --height: 24px;
   --border-radius: 50%;
   flex: none;
-  background-color: var(--dshm-muted);
+  background-color: var(--dshm-card2);
 }
 
 /* The chat thread's first-paint skeleton: two AI blocks (the second wider)
- * then the short trailing user bubble, breathing on the same shimmer. */
+   then the short trailing user bubble, breathing on the same shimmer — the
+   paper-label radius rides the bubble dial. */
 .skelThread {
   display: flex;
   flex-direction: column;
@@ -242,8 +249,8 @@
 
 .skelBubble {
   --height: 64px;
-  --border-radius: var(--dshm-radius-bubble);
-  background-color: var(--dshm-muted);
+  --border-radius: var(--dshm-r-bubble);
+  background-color: var(--dshm-card2);
 }
 
 .skelBubbleAi {

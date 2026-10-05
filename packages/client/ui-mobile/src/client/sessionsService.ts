@@ -8,7 +8,6 @@
 import type {
   AgentPresetEntry, RequestPayload, SessionSearchItem, SessionSummary,
 } from '@deepseek-ai/dsh-host-apiproxy/api'
-import { loadIdentity } from './auth.ts'
 import { rpc } from './rpc.ts'
 import type { FoldEvent } from './fold.ts'
 import { colleagueOf, type Welcome } from './colleagues.ts'
@@ -138,8 +137,9 @@ export function pendingPresetOf(sessionId: string): string | undefined {
 /**
  * Send one user message (queue mode). The gateway session token
  * (`authToken`, auto-attached by rpc) is what the host derives the acting
- * user from — the audit identity nb_create/nb_approve stamp and gate on; the
- * display profile rides `loginUser` for the opening stamp only.
+ * user from — the audit identity nb_create/nb_approve stamp and gate on,
+ * rendered into the system prompt by the gateway's acting-user section; the
+ * message text itself carries no identity.
  * `clientMsgId` is the send's idempotency key: a retry (the offline outbox)
  * presenting the same id cannot double-dispatch server-side.
  * @param sessionId - target session.
@@ -147,14 +147,12 @@ export function pendingPresetOf(sessionId: string): string | undefined {
  * @param clientMsgId - the caller's idempotency key, when this send is retryable.
  */
 export async function promptSession(sessionId: string, text: string, clientMsgId?: string): Promise<void> {
-  const identity = loadIdentity()
   await rpc('session.prompt', {
     sessionId: sessionOf(sessionId),
     mode: 'queue',
     content: [{ type: 'text', text }],
     clientTimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     ...(clientMsgId === undefined ? {} : { clientMsgId }),
-    ...(identity === undefined ? {} : { loginUser: { username: identity.username, nickname: identity.nickname } }),
   })
 }
 
@@ -189,14 +187,42 @@ export async function renameSession(sessionId: string, title: string): Promise<v
 }
 
 /**
- * Display title of one session summary (the 'title' projection).
+ * The legacy session-opening identity stamp (W6-B0 through W8; retired from
+ * new sessions in W9-B2): the auto-title of an old session derives from the
+ * first user message, so the durable titles keep the stamp sentence as a
+ * leading residue. The identification rule matches fold.ts's
+ * `LEGACY_IDENTITY_STAMP_LINE` (the /^【登录身份】/ first-line test); the
+ * display layer strips the sentence — the log data itself never moves.
+ */
+const LEGACY_STAMP_TITLE = /^【登录身份】/
+
+/**
+ * Strip a leading legacy identity-stamp sentence from a pinned title: the
+ * marker plus everything up to the stamp line's closing full stop (the
+ * auto-title collapses the stamp's first line into one string; a title
+ * truncated inside the stamp yields nothing and falls back).
+ * @param title - the raw pinned title.
+ * @returns the stripped remainder (possibly empty).
+ */
+function stripLegacyStampTitle(title: string): string {
+  if (!LEGACY_STAMP_TITLE.test(title)) return title
+  return title.replace(/^【登录身份】[^。]*。?/, '').trim()
+}
+
+/**
+ * Display title of one session summary (the 'title' projection, with a
+ * leading legacy identity-stamp sentence stripped — W9-B5).
  * @param summary - the session summary row.
- * @returns the pinned title or the blank/new fallback.
+ * @returns the pinned title (stamp-stripped) or the blank/new fallback.
  */
 export function titleOf(summary: SessionSummary): string {
   const values = summary.projections?.values as { title?: unknown } | undefined
   const title = values?.title
-  if (typeof title === 'string' && title.trim() !== '') return title
+  if (typeof title === 'string' && title.trim() !== '') {
+    const stripped = stripLegacyStampTitle(title)
+    if (stripped !== '') return stripped
+    return summary.blank ? '新会话' : '未命名会话'
+  }
   return summary.blank ? '新会话' : '未命名会话'
 }
 

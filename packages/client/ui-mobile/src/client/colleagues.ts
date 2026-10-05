@@ -12,7 +12,7 @@
 
 import { FORM_REGISTRY, registryCapabilityLine, type FormRegistryEntry } from './formRegistry.ts'
 
-/** One starter chip: what the user sees and what picking it sends. */
+/** One starter chip: what the user sees and what picking it fills the draft with (W9-B1). */
 export interface WelcomeStarter {
   readonly label: string
   readonly send: string
@@ -24,7 +24,7 @@ export interface Welcome {
   readonly greeting: string
   /** Capability lines (2-5). */
   readonly capabilities: readonly string[]
-  /** Starter chips; picking one sends it as the user's own message. */
+  /** Starter chips; picking one fills the composer draft (W9-B1). */
   readonly starters: readonly WelcomeStarter[]
 }
 

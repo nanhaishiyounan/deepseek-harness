@@ -234,7 +234,7 @@ describe('kb-agent scenario set (keyless, text-only degraded mode)', () => {
         'kb_ingest', 'kb_ingest_url', 'kb_search', 'kb_stats',
         'kg_query', 'kg_schema', 'kg_subgraph',
         'lakehouse_query', 'lakehouse_tables',
-        'nb_collections', 'nb_create', 'nb_get', 'nb_list', 'nb_update',
+        'nb_approve', 'nb_collections', 'nb_create', 'nb_get', 'nb_list', 'nb_update',
         'order_create', 'order_status',
         'switch_view', 'view_apply', 'view_state_get',
       ].sort())

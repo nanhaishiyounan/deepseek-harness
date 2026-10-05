@@ -12,7 +12,7 @@ import type { Context } from '@deepseek-ai/cordis'
 import { defineTool } from '@deepseek-ai/dsh-tools'
 import type { GenericCallView, GenericResultView, JsonValue, ToolResult } from '@deepseek-ai/dsh-tools'
 import type { NocoBaseClient, NocoBaseCollectionMeta } from '@deepseek-ai/dsh-connector-nocobase'
-import { unwrapNbTitle } from '@deepseek-ai/dsh-connector-nocobase'
+import { sessionActingUserOf, unwrapNbTitle } from '@deepseek-ai/dsh-connector-nocobase'
 import { compileFilter, describeFilterCondition, parseFilterCondition } from './filter.ts'
 import type { NbFilterCondition, NbFilterConditionInput, NbFilterMatch } from './filter.ts'
 
@@ -84,6 +84,12 @@ export interface NbGetToolValue {
 
 /** Upper bound for one nb_list page; larger requests refuse at parse time. */
 export const NB_LIST_MAX_PAGE_SIZE = 100
+
+/** The refusal `nb_list` answers for a `wfl_approval_todos` read under a
+ * session with no bound acting user (W9-B2): approval todos are the signed-in
+ * user's private rows, so the read gate refuses instead of returning anyone's.
+ */
+const TODOS_UNBOUND_REFUSAL = 'nb_list: 审批待办（wfl_approval_todos）是登录用户的私有数据；当前会话未绑定登录身份，拒绝读取'
 
 /** Default nb_list page size. */
 export const NB_LIST_DEFAULT_PAGE_SIZE = 20
@@ -422,7 +428,18 @@ export function applyNbListTool(ctx: Context, client: NocoBaseClient | undefined
       if (client === undefined) {
         throw new Error('nb_list: this deployment resolves no NocoBase credentials (NOCOBASE_BASE_URL/NOCOBASE_API_KEY); the business tools are unavailable')
       }
-      const filter = compileFilter(input.conditions, input.match)
+      let filter: Record<string, unknown> = compileFilter(input.conditions, input.match)
+      if (input.collection === 'wfl_approval_todos') {
+        // W9-B2: approval todos are the acting user's private rows — the
+        // server owns the user condition. The owner term wraps the whole
+        // narrated filter tree in an $and, so neither an and- nor an
+        // or-joined narration can widen the scope (an and-joined foreign
+        // username narrows to the empty set).
+        const acting = sessionActingUserOf(exec.agent?.id)
+        if (acting === undefined) throw new Error(TODOS_UNBOUND_REFUSAL)
+        const owner = { user: { $eq: acting.username } }
+        filter = Object.keys(filter).length === 0 ? owner : { $and: [owner, filter] }
+      }
       const result = await client.list<NbRow>(input.collection, {
         ...Object.keys(filter).length === 0 ? {} : { filter },
         page: input.page,

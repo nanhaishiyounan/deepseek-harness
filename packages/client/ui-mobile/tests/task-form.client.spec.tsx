@@ -213,6 +213,26 @@ describe('TaskFormModal', () => {
     })
   })
 
+  it('leads the sheet head with the business seal (W9-B6)', () => {
+    stubGateway(routes)
+    const { rerender } = render(
+      <TaskFormModal visible onClose={() => {}} identityName="业务员" prefill={undefined} sourceSessionId={undefined} sourceAnchor={undefined} />,
+    )
+    // No prefill → the plain task word 任.
+    expect(screen.getByLabelText('创建处理任务').querySelector('[class*="sheetSeal"]')?.textContent).toBe('任')
+    rerender(
+      <TaskFormModal
+        visible
+        onClose={() => {}}
+        identityName="业务员"
+        prefill={{ title: '采购单 №1042 供应商资质跟进', suggestion: undefined }}
+        sourceSessionId="s_src"
+        sourceAnchor="3"
+      />,
+    )
+    expect(screen.getByLabelText('创建处理任务').querySelector('[class*="sheetSeal"]')?.textContent).toBe('采')
+  })
+
   it('skips M1 on manual creation (no source session)', async () => {
     stubGateway(routes)
     render(

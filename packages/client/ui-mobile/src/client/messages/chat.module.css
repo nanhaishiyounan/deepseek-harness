@@ -1,27 +1,28 @@
-/* Chat page (v6, the design's page-chat): the two-state bubbles — the bot's
-    white bordered plate with the 6px top-left speaking corner, the user's
-    gradient bubble with the top-right corner — the breathing typing plate,
-    the deep degraded notice, and the input bar with the + entry over the
-    slide-up quick panel, the rounded textarea, and the gradient send button
-    (the gradient's two sanctioned chat surfaces: the user bubble and send).
-    The detail page is a full-screen layer — no tab bar under it; the header
-    is the shared PageNav. */
+/* Chat page (W9「酱园琥珀」, page-chat): the two-state paper-label bubbles —
+    the user's solid-persimmon label with the 6px bottom-right fold notch, the
+    AI's white paper plate with the roast-line border and the 6px bottom-left
+    notch (§五 气泡) — the breathing typing plate, the degraded notice, and
+    the composer bar with the + entry over the slide-up quick panel (ledger
+    paper), the capsule paper input slot, the context chips riding the global
+    capsule-seal hook, and the 46px round persimmon send stamp (the global
+    .dshm-stamp-solid hook). The detail page is a full-screen layer — no tab
+    bar under it; the header is the shared PageNav. */
 
 .page {
   display: flex;
   flex-direction: column;
   height: 100%;
   min-height: 0;
-  background: var(--dshm-background);
+  background: var(--dshm-canvas);
 }
 
-/* The header's new-chat entry: the primary touch target. */
+/* The header's new-chat entry: the primary touch target on the soft wash. */
 .headerPlus {
   width: var(--dshm-touch);
   height: var(--dshm-touch);
   border-radius: 50%;
-  background: var(--dshm-primary-soft);
-  color: var(--dshm-primary);
+  background: var(--dshm-brand-soft);
+  color: var(--dshm-brand);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -32,7 +33,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--dshm-space-2);
   min-width: 0;
 }
 
@@ -45,19 +46,19 @@
 }
 
 .headerTitle {
-  font-size: var(--dshm-fs-md);
-  line-height: 22px;
+  font-size: var(--dshm-fs-heading);
+  line-height: 24px;
   font-weight: 700;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .headerHint {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 14px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -71,7 +72,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 14px 12px 16px;
+  padding: 14px var(--dshm-space-3) var(--dshm-space-4);
 }
 
 /* The quick panel overlays the flow bottom (absolute over the composer);
@@ -104,13 +105,15 @@
   justify-content: center;
 }
 
-/* The design's .day-divider: the quiet centered 11.5 label. */
+/* The design's .day-divider: the quiet centered capsule on the paper. */
 .daySeparator {
   align-self: center;
-  font-size: var(--dshm-fs-xs);
+  padding: 4px 12px;
+  border-radius: var(--dshm-r-seal);
+  background: var(--dshm-card2);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
-  color: var(--dshm-muted-foreground);
-  padding: 4px 0;
+  color: var(--dshm-ink-sub);
   flex: none;
 }
 
@@ -149,40 +152,40 @@
   width: 15px;
   height: 15px;
   border-radius: 50%;
-  border: 1.5px solid var(--dshm-primary);
-  background: var(--dshm-background);
-  color: var(--dshm-primary);
-  font-size: var(--dshm-fs-xs);
+  border: 1.5px solid var(--dshm-brand);
+  background: var(--dshm-canvas);
+  color: var(--dshm-brand);
+  font-size: var(--dshm-fs-caption);
   line-height: 1;
   font-weight: 600;
 }
 
-/* The bot bubble (the design's .msg-row.bot .bubble): the white bordered
-    plate, the 6px top-left corner, the card shadow. */
+/* The AI bubble (§五 气泡·AI): the white paper plate with the roast-line
+    border and the 6px bottom-left fold notch. */
 .assistantBubble {
   background: var(--dshm-bubble-ai-bg);
   border: 1px solid var(--dshm-bubble-ai-border);
-  border-radius: var(--dshm-radius-corner) var(--dshm-radius-bubble) var(--dshm-radius-bubble) var(--dshm-radius-bubble);
+  border-radius: var(--dshm-r-bubble) var(--dshm-r-bubble) var(--dshm-r-bubble) 6px;
   box-shadow: var(--dshm-shadow-card);
-  padding: 10px 13px;
-  font-size: var(--dshm-fs-sm);
+  padding: 12px 15px;
+  font-size: var(--dshm-fs-body);
   line-height: 1.62;
   color: var(--dshm-bubble-ai-fg);
-  max-width: min(78vw, 320px);
+  max-width: min(80vw, 300px);
   overflow-wrap: anywhere;
 }
 
-/* The user bubble (the design's .msg-row.user .bubble): the gradient face,
-    white text, the 6px top-right corner. */
+/* The user bubble (§五 气泡·user): the solid persimmon label, white text,
+    the 6px bottom-right fold notch. */
 .userBubble {
   align-self: flex-end;
-  background: var(--dshm-user-grad);
+  background: var(--dshm-bubble-user-bg);
   color: var(--dshm-bubble-user-fg);
-  border-radius: var(--dshm-radius-bubble) var(--dshm-radius-corner) var(--dshm-radius-bubble) var(--dshm-radius-bubble);
-  padding: 10px 13px;
-  font-size: var(--dshm-fs-sm);
+  border-radius: var(--dshm-r-bubble) var(--dshm-r-bubble) 6px var(--dshm-r-bubble);
+  padding: 12px 15px;
+  font-size: var(--dshm-fs-body);
   line-height: 1.62;
-  max-width: min(78vw, 320px);
+  max-width: min(80vw, 300px);
   overflow-wrap: anywhere;
 }
 
@@ -194,10 +197,10 @@
   align-self: flex-end;
   height: 28px;
   padding: 0 12px;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
-  border-radius: var(--dshm-radius-pill);
-  background: var(--dshm-primary-10);
+  border-radius: var(--dshm-r-seal);
+  background: var(--dshm-brand-soft);
   color: var(--dshm-on-soft);
 }
 
@@ -212,7 +215,7 @@
   min-width: 0;
 }
 
-/* Tool rows ride in a quiet container: muted fill, rim roundels. */
+/* Tool rows ride in a quiet container: the card2 well, rim roundels. */
 .toolRow {
   display: flex;
   align-items: center;
@@ -221,11 +224,11 @@
   margin-left: 41px;
   max-width: calc(100% - 41px);
   padding: 4px 10px 4px 4px;
-  border-radius: var(--dshm-radius-pill);
-  background: var(--dshm-muted);
-  font-size: var(--dshm-fs-xs);
+  border-radius: var(--dshm-r-seal);
+  background: var(--dshm-card2);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 .toolDot,
@@ -241,30 +244,30 @@
 }
 
 .toolDot {
-  background: var(--dshm-success-10);
+  background: var(--dshm-success-soft);
   color: var(--dshm-success);
 }
 
 .toolDotRunning {
-  background: var(--dshm-primary-10);
+  background: var(--dshm-brand-soft);
   color: var(--dshm-on-soft);
 }
 
 .toolDotError {
-  background: var(--dshm-destructive-10);
-  color: var(--dshm-destructive);
+  background: var(--dshm-danger-soft);
+  color: var(--dshm-danger);
 }
 
 /* The degraded fence (the design's .notice form): the brand-soft strip with
     the dashed rim; the summary keeps the human copy, the body the raw text. */
 .degradedNotice {
-  max-width: min(78vw, 320px);
-  font-size: var(--dshm-fs-xs);
+  max-width: min(80vw, 300px);
+  font-size: var(--dshm-fs-caption);
   line-height: 1.55;
-  color: var(--dshm-foreground);
-  background: var(--dshm-primary-soft);
-  border: 1px dashed var(--dshm-bubble-ai-border);
-  border-radius: var(--dshm-radius);
+  color: var(--dshm-ink);
+  background: var(--dshm-brand-soft);
+  border: 1px dashed var(--dshm-line-strong);
+  border-radius: var(--dshm-r-ctl);
   padding: 9px 11px;
   overflow-wrap: anywhere;
 }
@@ -278,12 +281,12 @@
   margin: 6px 0 0;
   padding: 8px;
   font-family: var(--dshm-font-num);
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 14px;
   white-space: pre-wrap;
   background: var(--dshm-bubble-ai-bg);
-  border-radius: var(--dshm-radius-corner);
-  color: var(--dshm-muted-foreground);
+  border-radius: var(--dshm-r-ctl-corner);
+  color: var(--dshm-ink-sub);
 }
 
 .toolLabel {
@@ -292,8 +295,8 @@
   white-space: nowrap;
 }
 
-/* ---- Typing indicator (the design's .typing-bubble): the bot-plate bubble
-       with three breathing dots, .18s apart. ---- */
+/* ---- Typing indicator (the design's .typing-bubble): the paper-plate bubble
+        with three breathing dots, .18s apart. ---- */
 
 .typingRow {
   display: flex;
@@ -307,7 +310,7 @@
   padding: 13px 15px;
   background: var(--dshm-bubble-ai-bg);
   border: 1px solid var(--dshm-bubble-ai-border);
-  border-radius: var(--dshm-radius-corner) var(--dshm-radius-bubble) var(--dshm-radius-bubble) var(--dshm-radius-bubble);
+  border-radius: var(--dshm-r-bubble) var(--dshm-r-bubble) var(--dshm-r-bubble) 6px;
   box-shadow: var(--dshm-shadow-card);
   animation: chat-enter 200ms ease;
 }
@@ -316,7 +319,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--dshm-muted-foreground);
+  background: var(--dshm-ink-sub);
   animation: typing-blink 1.1s infinite;
 }
 
@@ -342,34 +345,38 @@
   }
 }
 
-/* ---- Composer (the design's .chat-input-bar + #quick-panel): the slide-up
-       quick panel, the context chips, the + entry, the rounded textarea, and
-       the gradient send button. ---- */
+/* ---- Composer (§五 Composer): the slide-up quick panel on ledger paper, the
+        context chips riding the capsule-seal hook, the + entry, the capsule
+        paper input slot, and the 46px round persimmon send stamp. ---- */
 
 .composer {
   position: relative;
   flex: none;
-  border-top: 1px solid var(--dshm-border);
+  border-top: 1px solid var(--dshm-line);
   background: var(--dshm-tabbar-bg);
-  padding: 9px 12px calc(9px + env(safe-area-inset-bottom));
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 9px var(--dshm-space-3) calc(9px + env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--dshm-space-2);
 }
 
-/* The quick panel (the design's #quick-panel): the top-rounded sheet with
-    the upward shadow, sliding in over the flow. */
+/* The quick panel: the top-rounded ledger sheet with the roast line and the
+    upward warm shadow, sliding in over the flow. */
 .quickPanel {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 100%;
   background: var(--dshm-tabbar-bg);
-  border-top: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius-lg) 18px 0 0;
-  padding: 14px 16px 12px;
-  box-shadow: 0 -8px 30px rgba(23, 43, 77, 0.12);
-  animation: quick-panel-in 220ms cubic-bezier(0.22, 0.9, 0.35, 1);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-top: 1px solid var(--dshm-line);
+  border-radius: var(--dshm-r-card) var(--dshm-r-card) 0 0;
+  padding: 14px var(--dshm-space-4) var(--dshm-space-3);
+  box-shadow: 0 -8px 30px rgba(61, 43, 31, 0.12);
+  animation: quick-panel-in var(--dshm-motion-fast) var(--dshm-ease-fast);
 }
 
 @keyframes quick-panel-in {
@@ -381,10 +388,10 @@
 
 .qpTitle {
   margin: 0 0 10px;
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 18px;
   font-weight: 600;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 .qpGrid {
@@ -393,24 +400,26 @@
   gap: 9px;
 }
 
+/* One starter command: a ledger-paper tile — the white card face with the
+    roast line (the R3 move off the plain muted tile). */
 .qpItem {
   display: flex;
   align-items: center;
   gap: 9px;
-  min-height: 46px;
-  padding: 12px;
-  border-radius: var(--dshm-radius);
-  background: var(--dshm-muted);
-  border: 1px solid var(--dshm-border);
-  font-size: var(--dshm-fs-sm);
+  min-height: 48px;
+  padding: var(--dshm-space-3);
+  border-radius: var(--dshm-r-ctl);
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-line);
+  font-size: var(--dshm-fs-body);
   line-height: 18px;
   font-weight: 600;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
   text-align: left;
 }
 
 .qpItem:active {
-  background: var(--dshm-primary-soft);
+  background: var(--dshm-brand-soft);
 }
 
 .qpItem:disabled {
@@ -418,16 +427,16 @@
 }
 
 .qpItem svg {
-  color: var(--dshm-primary);
+  color: var(--dshm-brand);
   flex: none;
 }
 
 .qpEmpty {
   margin: 0;
   padding: 10px 2px;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 18px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 .qpTools {
@@ -442,22 +451,22 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  min-height: 46px;
-  border-radius: var(--dshm-radius);
-  border: 1px solid var(--dshm-border);
+  min-height: 44px;
+  border-radius: var(--dshm-r-ctl);
+  border: 1px solid var(--dshm-line);
   background: none;
-  color: var(--dshm-muted-foreground);
-  font-size: var(--dshm-fs-xs);
+  color: var(--dshm-ink-sub);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
 }
 
 .qpTool:active {
-  background: var(--dshm-muted);
+  background: var(--dshm-card2);
 }
 
 .chipRow {
   display: flex;
-  gap: 8px;
+  gap: var(--dshm-space-2);
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -466,27 +475,26 @@
   display: none;
 }
 
-/* The composer's candidate chips: antd-mobile Buttons in the primary-outline
-   slot (the card face and brand rim ride inline variables in ChatView.tsx);
-   this class keeps the 40px secondary-touch capsule sizing. */
-.chip:global(.adm-button) {
-  --border-radius: var(--dshm-radius-pill);
+/* The composer's candidate chips (W9-B5): plain buttons riding the global
+    capsule-seal hook (.dshm-seal-chip — paper face, roast-line border, the
+    vermilion dot); the module class owns only the flex sizing and the busy
+    dim. */
+.chip {
   flex: none;
-  height: var(--dshm-touch-sm);
-  padding-block: 0;
-  padding-inline: 12px;
-  font-size: var(--dshm-fs-xs);
+}
+
+.chip:disabled {
+  opacity: 0.5;
 }
 
 .inputRow {
   display: flex;
   align-items: flex-end;
-  gap: 8px;
+  gap: 10px;
 }
 
 /* The + entry (the design's .plus-btn): the 44px circle — one 「新增」 shape
-    everywhere (v7, audit 04 §07: the square-plus / round-send / capsule-input
-    mix retired), brand-soft when on. */
+    everywhere (v7, audit 04 §07), brand-soft when on. */
 .plusBtn {
   width: var(--dshm-touch);
   height: var(--dshm-touch);
@@ -495,50 +503,65 @@
   align-items: center;
   justify-content: center;
   background: none;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
   flex: none;
   transition: background-color 150ms ease-out, color 150ms ease-out;
 }
 
 .plusBtn:active {
-  background: var(--dshm-muted);
+  background: var(--dshm-card2);
 }
 
 .plusBtnOn {
-  background: var(--dshm-primary-soft);
-  color: var(--dshm-primary);
+  background: var(--dshm-brand-soft);
+  color: var(--dshm-brand);
 }
 
+/* The input slot (§五 Composer): the capsule paper slot — the white face with
+    the deep roast rim, antd TextArea dials mapped on. */
 .input {
   flex: 1;
   min-width: 0;
   --font-size: var(--dshm-fs-input);
-  --color: var(--dshm-foreground);
-  --placeholder-color: var(--dshm-muted-foreground);
-  --background: var(--dshm-input-bg);
-  --border-radius: var(--dshm-radius-lg);
-  --adm-text-area-min-height: calc(44px - 20px);
+  --color: var(--dshm-ink);
+  --placeholder-color: var(--dshm-ink-sub);
+  --background: var(--dshm-card);
+  --border-radius: var(--dshm-r-seal);
+  --adm-text-area-min-height: calc(46px - 20px);
   --adm-text-area-max-height: calc(4 * 22px + 20px);
-  --padding: 10px 15px;
+  --padding: 10px 18px;
   --box-sizing: border-box;
   --line-height: 22px;
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius-lg);
+  border: 1.5px solid var(--dshm-line-strong);
 }
 
-/* The send button (the design's .send-btn): the gradient circle, the pressed
-    scale, the disabled dim. */
+/* W9-B1/B5: the assist-input fill flash — the freshly filled slot wears the
+    soft wash and the brand rim, settling back on the paper over the fast
+    motion token (220ms); the contract is the data-fill attribute on the row. */
+.inputRow[data-fill] .input {
+  animation: input-fill var(--dshm-motion-fast) var(--dshm-ease-fast);
+}
+
+@keyframes input-fill {
+  0% {
+    border-color: var(--dshm-brand);
+    box-shadow: 0 0 0 3px var(--dshm-brand-soft);
+  }
+
+  100% {
+    border-color: var(--dshm-line-strong);
+    box-shadow: none;
+  }
+}
+
+/* The send button (§五 Composer): the 46px round persimmon stamp — the solid
+    seal face, its dyed shadow, and the pressed scale ride the global
+    .dshm-stamp-solid hook; this class owns the size and the disabled dim. */
 .send {
-  width: var(--dshm-touch);
-  height: var(--dshm-touch);
-  border-radius: 50%;
-  background: var(--dshm-user-grad);
-  color: var(--dshm-bubble-user-fg);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  width: 46px;
+  height: 46px;
   flex: none;
-  box-shadow: var(--dshm-send-shadow);
+  margin-bottom: 1px;
   transition: transform 120ms ease-out, opacity 150ms ease-out;
 }
 
@@ -553,13 +576,13 @@
 
 .stop {
   /* Stopping a running generation is a primary path: the full 44px target
-   * (W8 V10 — was the secondary grade). */
+    * (W8 V10 — was the secondary grade). */
   height: var(--dshm-touch);
   padding: 0 14px;
-  border-radius: var(--dshm-radius-pill);
-  background: var(--dshm-muted);
-  color: var(--dshm-muted-foreground);
-  font-size: var(--dshm-fs-xs);
+  border-radius: var(--dshm-r-seal);
+  background: var(--dshm-card2);
+  color: var(--dshm-ink-sub);
+  font-size: var(--dshm-fs-caption);
   gap: 4px;
   display: inline-flex;
   align-items: center;
@@ -572,7 +595,8 @@
 @media (prefers-reduced-motion: reduce) {
   .flow > *,
   .typingBubble,
-  .quickPanel {
+  .quickPanel,
+  .inputRow[data-fill] .input {
     animation: none;
   }
 
@@ -589,11 +613,11 @@
 /* W6-B1 G5: the session's queued-sends strip under the flow — the visible
  * promise that offline messages retry automatically. */
 .outboxStrip {
-  margin: 8px auto;
+  margin: var(--dshm-space-2) auto;
   padding: 6px 12px;
-  border-radius: var(--dshm-radius);
-  background: var(--dshm-warning-10);
+  border-radius: var(--dshm-r-ctl);
+  background: var(--dshm-warning-soft);
   color: var(--dshm-warning);
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   text-align: center;
 }

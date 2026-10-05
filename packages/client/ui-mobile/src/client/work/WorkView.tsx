@@ -144,8 +144,8 @@ export function WorkView({ active = true }: WorkViewProps): JSX.Element {
       <header className={css.workHeader}>
         <h1 className={css.workTitle}>工作</h1>
         <div className={css.workEntries}>
-          <Button type="button" fill="outline" size="small" className={css.entryLink} style={{ '--border-color': 'var(--dshm-border)' }} onClick={() => { navigate('#/tasks') }}>任务</Button>
-          <Button type="button" fill="outline" size="small" className={css.entryLink} style={{ '--border-color': 'var(--dshm-border)' }} onClick={() => { navigate('#/files') }}>文件</Button>
+          <Button type="button" fill="outline" size="small" className={css.entryLink} style={{ '--border-color': 'var(--dshm-line)' }} onClick={() => { navigate('#/tasks') }}>任务</Button>
+          <Button type="button" fill="outline" size="small" className={css.entryLink} style={{ '--border-color': 'var(--dshm-line)' }} onClick={() => { navigate('#/files') }}>文件</Button>
         </div>
       </header>
       <CapsuleTabs
@@ -181,7 +181,7 @@ export function WorkView({ active = true }: WorkViewProps): JSX.Element {
                 <WorkStamp status={item.status} size="sm" />
                 <span className={css.cardTitle}>{item.title}</span>
               </button>
-              {item.demo && <Tag className={css.cardDemoTag as string} style={{ '--background-color': 'transparent', '--text-color': 'var(--dshm-muted-foreground)', '--border-color': 'var(--dshm-border)' }}>示例</Tag>}
+              {item.demo && <Tag className={css.cardDemoTag as string} style={{ '--background-color': 'transparent', '--text-color': 'var(--dshm-ink-sub)', '--border-color': 'var(--dshm-line)' }}>示例</Tag>}
             </div>
             <div className={css.cardMeta}>
               <span>负责人 {item.owner}</span>
@@ -211,7 +211,7 @@ export function WorkView({ active = true }: WorkViewProps): JSX.Element {
                   fill="outline"
                   size="small"
                   className={css.actionSecondary}
-                  style={{ '--border-color': 'var(--dshm-border)' }}
+                  style={{ '--border-color': 'var(--dshm-line)' }}
                   onClick={() => { navigate(`#/work/${item.id}`) }}
                 >
                   查看进度
@@ -220,7 +220,7 @@ export function WorkView({ active = true }: WorkViewProps): JSX.Element {
             )}
             {item.status === 'review' && (
               <div className={css.cardActions}>
-                <Button type="button" fill="outline" size="small" className={css.actionSecondary} style={{ '--border-color': 'var(--dshm-border)' }} onClick={() => { reject(item) }}>打回</Button>
+                <Button type="button" fill="outline" size="small" className={css.actionSecondary} style={{ '--border-color': 'var(--dshm-line)' }} onClick={() => { reject(item) }}>打回</Button>
                 <Button type="button" color="primary" size="small" className={css.actionPrimary} onClick={() => { confirm(item) }}>确认完成</Button>
               </div>
             )}

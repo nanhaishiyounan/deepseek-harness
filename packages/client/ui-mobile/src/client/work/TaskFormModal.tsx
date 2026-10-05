@@ -20,6 +20,20 @@ import { promptSession } from '../sessionsService.ts'
 import { createWorkItem } from '../workStore.ts'
 import css from './work.module.css'
 
+/**
+ * The sheet head's business-seal word (W9-B6): 采/销/库 off the prefill's
+ * source title, 任 as the plain task word.
+ * @param sourceTitle - the prefill's source title, when present.
+ * @returns the seal character.
+ */
+function bizSealOf(sourceTitle: string | undefined): string {
+  if (sourceTitle === undefined) return '任'
+  if (sourceTitle.includes('采购') || sourceTitle.includes('进货')) return '采'
+  if (sourceTitle.includes('销') || sourceTitle.includes('出货')) return '销'
+  if (sourceTitle.includes('库') || sourceTitle.includes('盘')) return '库'
+  return '任'
+}
+
 /** The modal's prefilled creation anchor (a report action's create-task fields). */
 export interface TaskPrefill {
   readonly title: string
@@ -149,6 +163,7 @@ export function TaskFormModal(
     >
       <div className={css.sheet} aria-label="创建处理任务">
         <header className={css.sheetHead}>
+          <span className={css.sheetSeal} aria-hidden="true">{bizSealOf(prefill?.title)}</span>
           <h2 className={css.sheetTitle}>创建处理任务</h2>
           <button type="button" className={css.sheetClose} aria-label="关闭" onClick={onClose}>
             <X size={18} aria-hidden="true" />
@@ -232,7 +247,7 @@ export function TaskFormModal(
           </div>
         </div>
         <div className={css.sheetActions}>
-          <Button type="button" size="large" fill="outline" className={css.sheetCancel} style={{ '--border-color': 'var(--dshm-muted-foreground)' }} disabled={submitting} onClick={onClose}>取消</Button>
+          <Button type="button" size="large" fill="outline" className={css.sheetCancel} style={{ '--border-color': 'var(--dshm-ink-sub)' }} disabled={submitting} onClick={onClose}>取消</Button>
           <Button
             type="button"
             size="large"

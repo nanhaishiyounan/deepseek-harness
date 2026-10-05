@@ -1,9 +1,10 @@
-/* Login page (v3, 03 §4.9): stamp logo over mist, h48 inputs, ink CTA. */
+/* Login page (W9-B6): the brand 酱印 over the warm paper, h48 inputs, the one
+    solid persimmon capsule CTA. */
 
 .page {
   min-height: 100%;
-  background: var(--dshm-background);
-  color: var(--dshm-foreground);
+  background: var(--dshm-canvas);
+  color: var(--dshm-ink);
   padding: 0 24px calc(24px + env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
@@ -18,58 +19,71 @@
   text-align: center;
 }
 
-/* The stamp-form logo: the 表 seal inside the stroked AI ring (03 §4.6/§4.9);
-   the ring carries its full 2px weight — the seal must read at a glance. */
+/* The brand 酱印 (§六.1): the hero seal's login twin — solid ring, dashed
+   inner ring, the vertical 800 word, the day's batch code at the foot. */
 .stampLogo {
   position: relative;
   width: 96px;
   height: 96px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, #ffffff 0%, var(--dshm-card) 58%);
+  border: 2.5px solid var(--dshm-brand);
+  box-shadow: var(--dshm-shadow-seal), inset 0 0 0 3px var(--dshm-brand-soft);
 }
 
-.stampRing {
+.stampLogo::before {
+  content: '';
   position: absolute;
-  inset: 0;
+  inset: 5px;
   border-radius: 50%;
-  border: 2px solid var(--dshm-primary);
-  opacity: 0.85;
-  box-sizing: border-box;
+  border: 1px dashed rgba(180, 83, 10, 0.45);
+}
+
+[data-theme='dark'] .stampLogo,
+.dshm-root[data-theme='dark'] .stampLogo {
+  background: radial-gradient(circle at 32% 28%, #2e241b 0%, var(--dshm-seal-face) 58%);
 }
 
 .stampGlyph {
-  width: 76px;
-  height: 76px;
-  border-radius: 50%;
-  border: 2px solid var(--dshm-primary);
-  color: var(--dshm-primary);
-  font-size: var(--dshm-fs-num);
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: var(--dshm-brand);
+  writing-mode: vertical-rl;
+  transform: translateY(-5px);
+}
+
+.stampBatch {
+  position: absolute;
+  bottom: 14px;
+  font-family: var(--dshm-font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 8px;
+  letter-spacing: 1px;
+  color: var(--dshm-ink-sub);
 }
 
 .brandTitle {
   margin: 0;
-  font-size: var(--dshm-fs-xl);
-  line-height: 34px;
-  font-weight: 700;
+  font-size: var(--dshm-fs-display);
+  line-height: 38px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
 }
 
 .brandSubtitle {
   margin: 0;
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 20px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 .card {
   background: var(--dshm-card);
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius-lg);
+  border: 1px solid var(--dshm-line);
+  border-radius: var(--dshm-r-card);
   padding: 20px 16px;
   display: flex;
   flex-direction: column;
@@ -83,9 +97,9 @@
 }
 
 .fieldLabel {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 18px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 /* The fill input: the muted block against the white card draws the field's
@@ -93,10 +107,10 @@
  * area invisible); the grade holds the 16px input floor (W8 V5). */
 .input {
   --font-size: var(--dshm-fs-input);
-  --color: var(--dshm-foreground);
-  --placeholder-color: var(--dshm-muted-foreground);
-  --background: var(--dshm-muted);
-  --border-radius: var(--dshm-radius);
+  --color: var(--dshm-ink);
+  --placeholder-color: var(--dshm-ink-sub);
+  --background: var(--dshm-card2);
+  --border-radius: var(--dshm-r-ctl);
   --height: 48px;
 }
 
@@ -121,7 +135,7 @@
   border: none;
   background: none;
   padding: 0;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
   cursor: pointer;
 }
 
@@ -143,27 +157,33 @@
   height: 48px;
   padding-block: 0;
   padding-inline: 12px;
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
 }
 
 .error {
   margin: 0;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 18px;
-  color: var(--dshm-destructive);
+  color: var(--dshm-danger);
 }
 
+/* The one solid persimmon capsule (the .dshm-seal-cta hook); this class owns
+    the block width and the 48px login target. */
 .submit {
-  --border-radius: var(--dshm-radius);
-  --font-weight: 600;
-  --height: 48px;
+  width: 100%;
+  min-height: 48px;
+  font-size: 16px;
+}
+
+.submit:disabled {
+  opacity: 0.7;
 }
 
 .footer {
   margin: auto 0 0;
   padding-top: 24px;
   text-align: center;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }

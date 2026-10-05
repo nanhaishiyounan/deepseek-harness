@@ -309,19 +309,19 @@ export function WorkDetailView({ workId }: WorkDetailViewProps): JSX.Element {
                 fill="outline"
                 size="small"
                 className={css.actionSecondary}
-                style={{ '--border-color': 'var(--dshm-border)' }}
+                style={{ '--border-color': 'var(--dshm-line)' }}
                 onClick={() => { navigate(`#/chat/${execChatId}`) }}
               >
                 查看执行会话
               </Button>
             )}
-            <Button type="button" fill="outline" size="small" className={css.actionSecondary} style={{ '--border-color': 'var(--dshm-border)' }} onClick={onRequeue}>重新执行</Button>
+            <Button type="button" fill="outline" size="small" className={css.actionSecondary} style={{ '--border-color': 'var(--dshm-line)' }} onClick={onRequeue}>重新执行</Button>
             <Button type="button" color="primary" size="small" className={css.actionPrimary} onClick={onManualDone}>手动完成</Button>
           </>
         )}
         {item.status === 'review' && (
           <>
-            <Button type="button" fill="outline" size="small" className={css.actionSecondary} style={{ '--border-color': 'var(--dshm-border)' }} onClick={() => { setReworkOpen(true) }}>打回修改</Button>
+            <Button type="button" fill="outline" size="small" className={css.actionSecondary} style={{ '--border-color': 'var(--dshm-line)' }} onClick={() => { setReworkOpen(true) }}>打回修改</Button>
             <Button type="button" color="primary" size="small" className={css.actionPrimary} onClick={onConfirm}>确认完成</Button>
           </>
         )}

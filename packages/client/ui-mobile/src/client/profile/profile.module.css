@@ -12,7 +12,7 @@
   min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  background: var(--dshm-background);
+  background: var(--dshm-canvas);
   padding-bottom: calc(16px + env(safe-area-inset-bottom));
 }
 
@@ -26,16 +26,16 @@
   top: 0;
   z-index: 5;
   background: var(--dshm-card);
-  border-bottom: 1px solid var(--dshm-border);
+  border-bottom: 1px solid var(--dshm-line);
   flex: none;
 }
 
 .headerTitle {
   margin: 0;
-  font-size: var(--dshm-fs-lg);
+  font-size: var(--dshm-fs-heading);
   line-height: 24px;
   font-weight: 600;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
 }
 
 .userCard {
@@ -45,8 +45,8 @@
   margin: 4px 12px 0;
   padding: 18px 16px;
   background: var(--dshm-card);
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius-lg);
+  border: 1px solid var(--dshm-line);
+  border-radius: var(--dshm-r-card);
   box-shadow: var(--dshm-shadow-card);
   flex: none;
 }
@@ -60,16 +60,16 @@
 }
 
 .userName {
-  font-size: var(--dshm-fs-lg);
+  font-size: var(--dshm-fs-heading);
   line-height: 24px;
   font-weight: 700;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
 }
 
 .userMeta {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 18px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 .metrics {
@@ -79,8 +79,8 @@
   margin: 0 12px;
   padding: 12px 14px;
   background: var(--dshm-card);
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius-lg);
+  border: 1px solid var(--dshm-line);
+  border-radius: var(--dshm-r-card);
   box-shadow: var(--dshm-shadow-card);
   flex: none;
 }
@@ -93,17 +93,17 @@
 }
 
 .metricLabel {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 .metricValue {
-  font-size: var(--dshm-fs-xl);
+  font-size: var(--dshm-fs-num-md);
   line-height: 28px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
 }
 
 .metricDivider {
@@ -119,19 +119,19 @@
   margin: 0 12px;
   padding: 12px 14px;
   background: var(--dshm-card);
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius-lg);
+  border: 1px solid var(--dshm-line);
+  border-radius: var(--dshm-r-card);
   box-shadow: var(--dshm-shadow-card);
   text-align: left;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
   flex: none;
 }
 
 .workspaceTitle {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   font-weight: 500;
   line-height: 16px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 .workspaceGrid {
@@ -145,24 +145,24 @@
   flex-direction: column;
   gap: 2px;
   padding: 8px 6px;
-  background: var(--dshm-muted);
-  border-radius: var(--dshm-radius);
+  background: var(--dshm-card2);
+  border-radius: var(--dshm-r-ctl);
   min-width: 0;
 }
 
 .workspaceValue {
   font-family: var(--dshm-font-num);
   font-variant-numeric: tabular-nums;
-  font-size: var(--dshm-fs-lg);
+  font-size: var(--dshm-fs-heading);
   line-height: 26px;
   font-weight: 600;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
 }
 
 .workspaceLabel {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
 }
 
 /* The recent-receipts strip: the newest landings in the ticket face. */
@@ -173,18 +173,18 @@
   margin: 0 12px;
   padding: 12px 14px;
   background: var(--dshm-card);
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius-lg);
+  border: 1px solid var(--dshm-line);
+  border-radius: var(--dshm-r-card);
   box-shadow: var(--dshm-shadow-card);
   flex: none;
 }
 
 .recentTitle {
   margin: 0 0 4px;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
   font-weight: 500;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 .recentRow {
@@ -195,7 +195,7 @@
   padding: 4px 0;
   text-align: left;
   background: none;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
   border-bottom: 1px solid var(--dshm-stroke-soft);
 }
 
@@ -206,7 +206,7 @@
 .receiptNo {
   font-family: var(--dshm-font-num);
   font-variant-numeric: tabular-nums;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 18px;
   font-weight: 600;
   color: var(--dshm-success);
@@ -214,10 +214,10 @@
 }
 
 .recentForm {
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 20px;
   font-weight: 500;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
   flex: 1;
   min-width: 0;
   overflow: hidden;
@@ -228,10 +228,10 @@
 .recentHero {
   font-family: var(--dshm-font-num);
   font-variant-numeric: tabular-nums;
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 20px;
   font-weight: 600;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
   flex: none;
 }
 
@@ -251,12 +251,12 @@
   height: var(--dshm-touch-sm);
   padding-block: 0;
   padding-inline: 14px;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   font-weight: 600;
 }
 
 .shortcut:global(.adm-button):active {
-  background: var(--dshm-muted);
+  background: var(--dshm-card2);
 }
 
 /* The settings band (the design's .set-group): the group title over one card
@@ -271,37 +271,37 @@
 .setTitle {
   margin: 0;
   padding: 12px 14px 4px;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 18px;
   font-weight: 600;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 .settings {
-  border-radius: var(--dshm-radius-lg);
+  border-radius: var(--dshm-r-card);
   overflow: hidden;
   --adm-font-size-9: 14px;
 }
 
 .settings :global(.adm-list) {
   --adm-color-background: var(--dshm-card);
-  border-radius: var(--dshm-radius-lg);
-  border: 1px solid var(--dshm-border);
+  border-radius: var(--dshm-r-card);
+  border: 1px solid var(--dshm-line);
 }
 
 /* The design's 46×27 switch capsule: brand fill when checked. */
 .settings :global(.adm-switch) {
   --width: 46px;
   --height: 27px;
-  --border-radius: var(--dshm-radius-pill);
-  --checked-color: var(--dshm-primary);
+  --border-radius: var(--dshm-r-seal);
+  --checked-color: var(--dshm-brand);
 }
 
 /* The destructive logout block stands alone, off the settings group: the
    antd Button (the destructive wash rides inline variables in
    ProfileView.tsx) keeps the 44px band and the icon gap. */
 .logout:global(.adm-button) {
-  --border-radius: var(--dshm-radius-lg);
+  --border-radius: var(--dshm-r-card);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -318,11 +318,11 @@
   margin: 16px 12px 0;
   padding: 12px 14px;
   text-align: center;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 1.6;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
   background: var(--dshm-card);
-  border: 1px dashed var(--dshm-border);
-  border-radius: var(--dshm-radius);
+  border: 1px dashed var(--dshm-line);
+  border-radius: var(--dshm-r-ctl);
   flex: none;
 }

@@ -1,243 +1,288 @@
-/* Home (v7): the neutral white hero card with the date capsule as the page's
-    brand accent (W7-M1 de-blue: the v6 gradient hero retired), the search-box
-    entry, the today-ledger grid (a zero renders neutral, a live count its
-    status hue), the quick-task chips (one solid primary CTA + neutral
-    capsules), the colleagues' avatar rail, and the recent-chats conv-item rows
-    (presence dot, preview, time, unread dot). Colors ride the --dshm-* tokens;
-    the work-status numbers only through the --dshm-work-* four. */
+/* Home (W9「酱园琥珀」): the brand hero on the warm-paper canvas — the display
+    greeting with the solar-term phrase and the 84px 鲜酿 round seal (the
+    page's signature stamp, batch code derived from the day) — the card2 pill
+    search entry, the two-column big stat cards (32px mono tabular digits; a
+    zero renders neutral, a live count its status hue), the quick-task chips
+    in the seal language (one solid persimmon CTA + paper capsules riding the
+    global .dshm-seal-chip hook), the colleagues' avatar rail (transparent —
+    the stamps sit straight on the paper), and the recent-chats card.
+    Spacing rides the §3.5 ladder: page margin 20, block gap 20 (sections add
+    up to 28). Colors ride the §3 base token names. */
 
 .homePage {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--dshm-space-5);
   height: 100%;
   min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  background: var(--dshm-background);
-  padding: 10px 12px calc(16px + env(safe-area-inset-bottom));
+  background: var(--dshm-canvas);
+  padding: 10px var(--dshm-space-5) calc(16px + env(safe-area-inset-bottom));
 }
 
-/* ---- Hero greeting card (v7): the white card face; the date capsule is the
-        one brand accent (brand budget: capsule + the register CTA). ---- */
+/* ---- Hero: greeting + solar term + the 酱印 signature seal (§六.1) — on the
+        canvas itself, no card chrome; the persimmon hits live in the seal
+        ring, the alert figure, and the register CTA. ---- */
 
 .heroCard {
-  margin: 2px 0 0;
-  padding: 14px 15px;
-  border-radius: var(--dshm-radius-lg);
-  background: var(--dshm-card);
-  border: 1px solid var(--dshm-border);
-  box-shadow: var(--dshm-shadow-card);
-  color: var(--dshm-foreground);
-}
-
-.heroTop {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: var(--dshm-space-4);
+  padding: 4px 0 0;
+}
+
+.heroTexts {
+  min-width: 0;
 }
 
 .heroTitle {
   margin: 0;
-  font-size: var(--dshm-fs-md);
-  line-height: 24px;
-  font-weight: 700;
-  color: var(--dshm-foreground);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: var(--dshm-fs-display);
+  line-height: 1.25;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--dshm-ink);
+  overflow-wrap: anywhere;
 }
 
-/* The brand-soft date capsule (heroDate): 09-22周二 in tabular digits. */
+/* The spaced small-caps greeting line above the name (the mock's .hi). */
+.heroHi {
+  display: block;
+  margin-bottom: 6px;
+  font-size: var(--dshm-fs-body);
+  font-weight: 500;
+  letter-spacing: 2px;
+  color: var(--dshm-ink-sub);
+}
+
 .heroDate {
+  margin: var(--dshm-space-2) 0 0;
+  font-size: var(--dshm-fs-caption);
+  line-height: 1.5;
+  color: var(--dshm-ink-sub);
+}
+
+/* The routed-alert figure is the hero's persimmon point (the 柿橙粗体点睛). */
+.heroDate b {
+  color: var(--dshm-brand);
+  font-weight: 700;
+}
+
+/* The 84px 鲜酿 round seal: solid brand ring + dashed inner ring + the soft
+    inset wash, the vertical 800 word, and the mono batch code at the foot
+    (design §六.1 — the W7 stamp logo's warm mobile descendant). */
+.heroSeal {
+  position: relative;
+  display: grid;
+  place-items: center;
   flex: none;
-  padding: 3px 10px;
-  border-radius: var(--dshm-radius-pill);
-  background: var(--dshm-primary-soft);
-  color: var(--dshm-on-soft);
-  font-size: var(--dshm-fs-xs);
-  line-height: 16px;
-  font-weight: 600;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, #ffffff 0%, var(--dshm-card) 58%);
+  border: 2.5px solid var(--dshm-brand);
+  box-shadow: var(--dshm-shadow-seal), inset 0 0 0 3px var(--dshm-brand-soft);
+}
+
+.heroSeal::before {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  border: 1px dashed rgba(180, 83, 10, 0.45);
+}
+
+/* The dark tray swaps the seal plate to its roasted face (the highlight
+    gradient reads as a light-tray gloss only). */
+[data-theme='dark'] .heroSeal,
+.dshm-root[data-theme='dark'] .heroSeal {
+  background: radial-gradient(circle at 32% 28%, #2e241b 0%, var(--dshm-seal-face) 58%);
+}
+
+.heroSealGlyph {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: var(--dshm-brand);
+  writing-mode: vertical-rl;
+  transform: translateY(-4px);
+}
+
+.heroSealBatch {
+  position: absolute;
+  bottom: 13px;
   font-family: var(--dshm-font-num);
   font-variant-numeric: tabular-nums;
+  font-size: 8px;
+  letter-spacing: 1px;
+  color: var(--dshm-ink-sub);
 }
 
-.heroDesc {
-  margin: 5px 0 0;
-  font-size: var(--dshm-fs-sm);
-  line-height: 1.55;
-  color: var(--dshm-muted-foreground);
-}
-
-/* ---- Search-box entry (the design's .search-box): a card-faced affordance
-       landing on the all-chats layer, which owns the real filtering. ---- */
+/* ---- Search-box entry: the card2 pill (the design's .search) landing on the
+        all-chats layer, which owns the real filtering. ---- */
 
 .searchEntry {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 9px 12px;
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius-lg);
-  background: var(--dshm-card);
-  color: var(--dshm-muted-foreground);
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 18px;
+  border: 1px solid var(--dshm-line);
+  border-radius: var(--dshm-r-seal);
+  background: var(--dshm-card2);
+  color: var(--dshm-ink-sub);
   text-align: left;
 }
 
 .searchEntry:active {
-  background: var(--dshm-muted);
+  background: var(--dshm-brand-soft);
 }
 
 .searchEntryText {
-  font-size: var(--dshm-fs-md);
+  font-size: var(--dshm-fs-body);
   line-height: 22px;
 }
 
-/* ---- Today-ledger grid: the four status counts in one card row. ---- */
+/* ---- Today ledger: two columns of big cards (§五 统计卡 — the R1 breathing
+        move off the four-cell ruled strip). ---- */
 
-.statsCard {
-  display: flex;
-  flex-direction: column;
-  padding: 12px 10px;
-  background: var(--dshm-card);
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius-lg);
-  box-shadow: var(--dshm-shadow-card);
-  text-align: left;
-  color: var(--dshm-foreground);
-}
-
-.statsCard:active {
-  background: var(--dshm-muted);
-}
-
-/* The four counts sit as a ruled ledger row: hairline column dividers, the
-    number at the 26px KPI grade, the label quietly muted below it. */
 .statsGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  background: none;
+  text-align: left;
+  color: var(--dshm-ink);
 }
 
 .statCell {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 0;
   min-width: 0;
-  padding: 0 6px;
+  padding: 18px 18px 16px;
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-line);
+  border-radius: var(--dshm-r-card);
+  box-shadow: var(--dshm-shadow-card);
 }
 
-.statCell + .statCell {
-  /* The ledger column rule reads as a visible hairline, not the alpha wash
-     the in-card row dividers use. */
-  border-left: 1px solid var(--dshm-border);
+.statCell:active {
+  background: var(--dshm-card2);
 }
 
+/* The 32px KPI digits: mono tabular 800, letter-spacing tightened — the
+    number track the hero-grade stats ride (D2's numeric discipline fused in). */
 .statValue {
   font-family: var(--dshm-font-num);
   font-variant-numeric: tabular-nums;
-  font-size: var(--dshm-fs-num);
-  line-height: 30px;
+  font-size: var(--dshm-fs-num-lg);
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -1px;
+  color: var(--dshm-ink);
+}
+
+/* The unit word rides beside the digit at the caption grade (the mock's
+    <small>项</small>). */
+.statValue small {
+  margin-left: 2px;
+  font-family: var(--dshm-font-sans);
+  font-size: 13px;
   font-weight: 600;
-  color: var(--dshm-foreground);
+  letter-spacing: 0;
+  color: var(--dshm-ink-sub);
 }
 
 /* The zero narrative (audit 04 §02): a zero renders neutral — only a live
     count earns its status hue. */
 .statZero {
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 .statTodo {
-  color: var(--dshm-work-todo);
+  color: var(--dshm-brand);
 }
 
 .statDoing {
-  color: var(--dshm-work-doing);
+  color: var(--dshm-info);
 }
 
 .statReview {
-  color: var(--dshm-work-review);
+  color: var(--dshm-warning);
 }
 
 .statDone {
-  color: var(--dshm-work-done);
+  color: var(--dshm-success);
 }
 
 .statLabel {
-  font-size: var(--dshm-fs-xs);
+  margin-top: var(--dshm-space-2);
+  font-size: 13px;
   line-height: 16px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
-/* ---- Section head rows (13/600 sub + 12 link). ---- */
+/* ---- Section head rows: the 20/800 block title + the anchor-blue link. ---- */
 
 .sectionRow {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
+  gap: var(--dshm-space-2);
+  margin-top: var(--dshm-space-2);
   padding: 0 2px;
 }
 
 .sectionTitle {
   margin: 0;
-  font-size: var(--dshm-fs-sm);
-  line-height: 18px;
-  font-weight: 600;
-  color: var(--dshm-muted-foreground);
+  font-size: var(--dshm-fs-title);
+  line-height: 1.3;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  color: var(--dshm-ink);
 }
 
-/* The section's trailing link word: the quiet secondary tone (the v6 brand
-    word was one more blue hit the de-blue budget removes). */
+/* The section's trailing link word: the W7 anchor blue (§3.1). */
 .sectionLink:global(.adm-button) {
   padding: 0;
-  font-size: var(--dshm-fs-xs);
+  font-size: 13px;
   line-height: 18px;
   font-weight: 600;
-  --text-color: var(--dshm-muted-foreground);
+  --text-color: var(--dshm-anchor);
 }
 
-/* ---- Quick-task starter chips: one primary solid CTA, the rest neutral
-        card-face capsules (inline dials in HomeView.tsx). ---- */
+/* ---- Quick-task chips: the seal language. The primary is the page's one
+        solid persimmon capsule (the global .dshm-seal-cta hook); the rest
+        ride the paper capsule (.dshm-seal-chip with its vermilion dot). ---- */
 
-/* Four equal capsules on one ruled row — equal widths, never a wrap. The 8px
- * gap is the W8 touch-spacing floor between adjacent hit areas. */
 .quickRow {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
-/* The quick-task chips: antd-mobile Buttons. The primary chip rides the 44px
-    primary touch grade (W8-R2); the neutrals stay at the 40px secondary
-    grade. The neutral face rides the .quickChipNeutral dials (they would
-    collide with the primary solid's own inline defaults). */
-.quickChip:global(.adm-button) {
-  width: 100%;
-  height: var(--dshm-touch-sm);
-  padding-block: 0;
-  padding-inline: 4px;
-  font-size: var(--dshm-fs-xs);
-  font-weight: 600;
-  white-space: nowrap;
+.quickChipCta {
+  flex: none;
+  padding: 0 20px;
 }
 
-.quickChipPrimary:global(.adm-button) {
-  height: var(--dshm-touch);
+.quickChip {
+  flex: 1 1 auto;
+  justify-content: center;
 }
 
-.quickChipNeutral:global(.adm-button):active {
-  background: var(--dshm-muted);
-}
-
-/* ---- Colleagues' avatar rail (the design's .ava form, w72). ---- */
+/* ---- Colleagues' avatar rail: the stamps sit straight on the paper (no card
+        chrome — the R1 breathing move), the card2 rim ring on the dot. ---- */
 
 .rosterScroller {
   display: flex;
-  gap: 8px;
+  gap: 18px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 0 2px;
+  padding: 2px 2px 4px;
   /* The right-edge fade keeps the horizontal overflow discoverable. */
   mask-image: linear-gradient(to right, black calc(100% - 26px), transparent);
   -webkit-mask-image: linear-gradient(to right, black calc(100% - 26px), transparent);
@@ -248,18 +293,16 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  width: 76px;
-  padding: 9px 0;
+  gap: var(--dshm-space-2);
+  width: 72px;
+  padding: var(--dshm-space-1) 0;
   flex: none;
-  background: var(--dshm-card);
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius-lg);
-  color: var(--dshm-foreground);
+  background: none;
+  color: var(--dshm-ink);
 }
 
 .rosterCard:active {
-  background: var(--dshm-muted);
+  opacity: 0.75;
 }
 
 /* The 42px avatar wrapped by its antd Badge presence dot. */
@@ -268,27 +311,27 @@
   flex: none;
 }
 
-/* The wrapped dot parks on the avatar's lower right with the card rim. */
+/* The wrapped dot parks on the avatar's lower right with the canvas rim. */
 .rosterAvaDot:global(.adm-badge-dot) {
   --right: -4px;
   --top: 100%;
   width: 11px;
   height: 11px;
   min-width: 11px;
-  border: 2px solid var(--dshm-card);
+  border: 2px solid var(--dshm-canvas);
   box-sizing: border-box;
 }
 
 /* Two centered lines carry the roster's real names (AI 食安合规官 and longer)
     in full instead of the ellipsis clip a single 64px line forced. */
 .rosterName {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 15px;
   /* Short viewports collapse the unclamped natural height to 2px; two
-      15px lines are the card's stable floor. */
+      15px lines are the stable floor. */
   min-height: 30px;
-  font-weight: 500;
-  color: var(--dshm-foreground);
+  font-weight: 600;
+  color: var(--dshm-ink);
   max-width: 68px;
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -298,16 +341,16 @@
 
 .rosterEmpty {
   padding: 8px 4px;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 18px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
-/* The roster's loading placeholders: the avatar-card silhouette on antd
- * Skeleton's shimmer. */
+/* The roster's loading placeholders: the stamp silhouette on antd Skeleton's
+ * shimmer over the paper. */
 .rosterSkelGroup {
   display: flex;
-  gap: 8px;
+  gap: 18px;
 }
 
 .rosterSkel {
@@ -315,13 +358,10 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  width: 76px;
-  padding: 9px 0;
+  gap: var(--dshm-space-2);
+  width: 72px;
+  padding: var(--dshm-space-1) 0;
   flex: none;
-  background: var(--dshm-card);
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius-lg);
 }
 
 .rosterSkelStamp {
@@ -329,14 +369,14 @@
   --height: 42px;
   --border-radius: 50%;
   flex: none;
-  background-color: var(--dshm-muted);
+  background-color: var(--dshm-card2);
 }
 
 .rosterSkelName {
   --width: 44px;
   --height: 10px;
-  --border-radius: var(--dshm-radius-corner);
-  background-color: var(--dshm-muted);
+  --border-radius: var(--dshm-r-ctl-corner);
+  background-color: var(--dshm-card2);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -347,14 +387,14 @@
   }
 }
 
-/* ---- Recent chats: the design's .conv-item rows on a card list. ---- */
+/* ---- Recent chats: the ledger-paper card list (§五 conv rows). ---- */
 
 .recentList {
   display: flex;
   flex-direction: column;
   background: var(--dshm-card);
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius-lg);
+  border: 1px solid var(--dshm-line);
+  border-radius: var(--dshm-r-card);
   box-shadow: var(--dshm-shadow-card);
   overflow: hidden;
 }
@@ -362,12 +402,12 @@
 .recentRow {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
-  min-height: 64px;
+  gap: 13px;
+  padding: var(--dshm-space-4) 18px;
+  min-height: 68px;
   text-align: left;
   background: none;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
 }
 
 .recentRow + .recentRow {
@@ -375,11 +415,11 @@
 }
 
 .recentRow:active {
-  background: var(--dshm-muted);
+  background: var(--dshm-card2);
 }
 
 /* The 42px avatar wrapped by its antd Badge presence dot (AI-colleague
-   sessions only). */
+    sessions only). */
 .recentAva {
   display: inline-flex;
   flex: none;
@@ -407,14 +447,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--dshm-space-2);
 }
 
 .recentTitle {
-  font-size: var(--dshm-fs-md);
-  line-height: 21px;
-  font-weight: 650;
-  color: var(--dshm-foreground);
+  font-size: var(--dshm-fs-heading);
+  line-height: 24px;
+  font-weight: 700;
+  color: var(--dshm-ink);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -422,33 +462,32 @@
 
 .recentTime {
   flex: none;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 .recentSummary {
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 19px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 /* The unread dot badge (the draftStore watermark's boolean face), riding the
-    top row beside the time like the design's .conv-badge — the card rim plus
-    the destructive halo ring keeps a bare red dot from reading as an error
-    bug (audit 04 §02; the rim alone vanishes on the white card). */
+    top row beside the time — the card rim plus the danger halo ring keeps a
+    bare red dot from reading as an error bug (audit 04 §02). */
 .recentBadge {
   flex: none;
   align-self: center;
   width: 10px;
   height: 10px;
-  border-radius: var(--dshm-radius-pill);
-  background: var(--dshm-destructive);
+  border-radius: 50%;
+  background: var(--dshm-danger);
   box-sizing: border-box;
-  box-shadow: 0 0 0 2px var(--dshm-card), 0 0 0 3.5px var(--dshm-destructive-10);
+  box-shadow: 0 0 0 2px var(--dshm-card), 0 0 0 3.5px var(--dshm-danger-soft);
   margin-left: 4px;
 }
 
@@ -458,18 +497,18 @@
   display: flex;
   flex-direction: column;
   background: var(--dshm-card);
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius-lg);
+  border: 1px solid var(--dshm-line);
+  border-radius: var(--dshm-r-card);
   box-shadow: var(--dshm-shadow-card);
   overflow: hidden;
 }
 
 /* The error strip's retry entry: the antd none-fill brand word after the
-   failure text. */
+    failure text. */
 .retryLink:global(.adm-button) {
-  margin-left: 8px;
+  margin-left: var(--dshm-space-2);
   padding: 0;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   font-weight: 600;
 }
 
@@ -478,8 +517,8 @@
   display: flex;
   flex-direction: column;
   background: var(--dshm-card);
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius-lg);
+  border: 1px solid var(--dshm-line);
+  border-radius: var(--dshm-r-card);
   box-shadow: var(--dshm-shadow-card);
   overflow: hidden;
 }

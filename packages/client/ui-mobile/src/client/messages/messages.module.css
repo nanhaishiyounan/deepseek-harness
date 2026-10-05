@@ -8,26 +8,20 @@
   max-width: 100%;
 }
 
-/* Narrative images never overflow the bubble (W8-B2: loading=lazy rides the
-   renderer in rich.ts). */
-.richText img {
-  max-width: 100%;
-}
-
 .page {
   display: flex;
   flex-direction: column;
   height: 100%;
   min-height: 0;
-  background: var(--dshm-background);
+  background: var(--dshm-canvas);
 }
 
 .plus {
   width: var(--dshm-touch);
   height: var(--dshm-touch);
   border-radius: 50%;
-  background: var(--dshm-primary);
-  color: var(--dshm-on-primary);
+  background: var(--dshm-brand);
+  color: var(--dshm-on-brand);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -42,9 +36,9 @@
   /* The search entry is a primary path: the 44px target and the input floor
    * (W8 V10 / V5). */
   --height: var(--dshm-touch);
-  --border-radius: var(--dshm-radius);
-  --background: var(--dshm-muted);
-  --placeholder-color: var(--dshm-muted-foreground);
+  --border-radius: var(--dshm-r-ctl);
+  --background: var(--dshm-card2);
+  --placeholder-color: var(--dshm-ink-sub);
   flex: none;
 }
 
@@ -54,16 +48,16 @@
 
 /* The filter capsules (CapsuleTabs) ride the ink selected fill. */
 .filterTabs {
-  --adm-color-primary: var(--dshm-primary);
-  --adm-color-text: var(--dshm-muted-foreground);
-  --adm-color-text-active: var(--dshm-on-primary);
-  --adm-border-radius-s: var(--dshm-radius-pill);
+  --adm-color-primary: var(--dshm-brand);
+  --adm-color-text: var(--dshm-ink-sub);
+  --adm-color-text-active: var(--dshm-on-brand);
+  --adm-border-radius-s: var(--dshm-r-seal);
   --adm-font-size-7: 12px;
   padding: 6px 12px 8px;
   flex: none;
   --active-line-height: 0;
   --active-line-color: transparent;
-  --title-font-size: var(--dshm-fs-xs);
+  --title-font-size: var(--dshm-fs-caption);
 }
 
 .list {
@@ -86,21 +80,21 @@
   text-align: left;
   background: var(--dshm-card);
   border-bottom: 1px solid var(--dshm-stroke-soft);
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
 }
 
 .sessionRow:active {
-  background: var(--dshm-muted);
+  background: var(--dshm-card2);
 }
 
 /* A pinned row keeps a quiet ink bar on its leading edge. */
 .sessionPinned {
-  border-left: 3px solid var(--dshm-primary);
+  border-left: 3px solid var(--dshm-brand);
   padding-left: 11px;
 }
 
 .empty {
-  --adm-color-text: var(--dshm-muted-foreground);
+  --adm-color-text: var(--dshm-ink-sub);
   padding: 32px 0;
 }
 
@@ -126,29 +120,29 @@
 }
 
 .sessionTitle {
-  font-size: var(--dshm-fs-md);
+  font-size: var(--dshm-fs-heading);
   line-height: 21px;
-  font-weight: 650;
-  color: var(--dshm-foreground);
+  font-weight: 700;
+  color: var(--dshm-ink);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .sessionTime {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
   flex: none;
 }
 
 /* The time text rides inside the unread badge; the dot marks unread. */
 .timeBadge {
-  --color: var(--dshm-destructive);
+  --color: var(--dshm-danger);
   flex: none;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 .timeBadge :global(.adm-badge.fixed) {
@@ -173,15 +167,15 @@
 .kindTag {
   --adm-font-size-9: 10px;
   --adm-height: 16px;
-  --adm-border-radius: var(--dshm-radius-pill);
+  --adm-border-radius: var(--dshm-r-seal);
   --adm-padding: 0 6px;
   flex: none;
 }
 
 .sessionSummary {
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 19px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -193,16 +187,17 @@
   justify-content: space-between;
   gap: 8px;
   padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
-  border-top: 1px solid var(--dshm-border);
-  font-size: var(--dshm-fs-xs);
+  border-top: 1px solid var(--dshm-line);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
   background: var(--dshm-card);
 }
 
-/* Welcome screen (03 §4.6): the centered invitation over the empty flow —
-   the 72px stamp logo, the display greeting, the capability ledger, the
-   starter chips. No card chrome: the empty state is a stage, not a row. */
+/* Welcome screen (03 §4.6, re-skinned W9-B5): the centered invitation over the
+   empty flow — the 72px double-ring seal logo, the display greeting, the
+   capability ledger, the starter chips in the capsule-seal form. No card
+   chrome: the empty state is a stage, not a row. */
 .welcomeCard {
   display: flex;
   flex-direction: column;
@@ -213,7 +208,8 @@
   text-align: center;
 }
 
-/* The 72px stamp-form logo: the 表 seal inside the stroked ring. */
+/* The 72px seal-form logo: the solid ring with the dashed inner ring — the
+   hero 酱印's welcome-screen twin (§六.1). */
 .welcomeLogo {
   position: relative;
   width: 72px;
@@ -228,19 +224,27 @@
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  border: 2px solid var(--dshm-primary);
-  opacity: 0.85;
+  border: 2.5px solid var(--dshm-brand);
+  opacity: 0.9;
   box-sizing: border-box;
+}
+
+.welcomeLogoRing::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  border: 1px dashed rgba(180, 83, 10, 0.45);
 }
 
 .welcomeLogoGlyph {
   width: 54px;
   height: 54px;
   border-radius: 50%;
-  border: 2px solid var(--dshm-primary);
-  color: var(--dshm-primary);
-  font-size: var(--dshm-fs-xl);
-  font-weight: 600;
+  border: none;
+  color: var(--dshm-brand);
+  font-size: var(--dshm-fs-num-md);
+  font-weight: 800;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -249,10 +253,11 @@
 
 .welcomeTitle {
   margin: 0;
-  font-size: var(--dshm-fs-num);
-  line-height: 34px;
-  font-weight: 700;
-  color: var(--dshm-foreground);
+  font-size: var(--dshm-fs-display);
+  line-height: 38px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--dshm-ink);
 }
 
 .welcomeList {
@@ -266,53 +271,52 @@
 }
 
 .welcomeLine {
-  font-size: var(--dshm-fs-md);
-  line-height: 24px;
-  color: var(--dshm-foreground);
+  font-size: var(--dshm-fs-body);
+  line-height: 22px;
+  color: var(--dshm-ink);
   display: flex;
   align-items: baseline;
 }
 
-/* The 4px ink-teal square bullet (03 §4.1). */
+/* The 4px vermilion square bullet (03 §4.1; W9 persimmon). */
 .welcomeLine::before {
   content: '';
   flex: none;
   width: 4px;
   height: 4px;
   margin-right: 8px;
-  background: var(--dshm-primary);
+  background: var(--dshm-brand);
 }
 
 .welcomeStarters {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  justify-content: center;
+  gap: var(--dshm-space-2);
 }
 
-/* The starter chips (the design's .chip): antd-mobile Buttons in the
-     primary-outline slot (the brand rim rides an inline variable in
-     WelcomeCard.tsx) — 44px capsules. */
-.starter:global(.adm-button) {
-  --border-radius: var(--dshm-radius-pill);
-  height: var(--dshm-touch);
-  padding-block: 0;
-  padding-inline: 16px;
-  font-size: var(--dshm-fs-sm);
-  font-weight: 600;
+/* The starter chips (W9-B5): plain buttons riding the global capsule-seal
+    hook (.dshm-seal-chip); this class keeps the primary-touch height and the
+    body-grade word. */
+.starter {
+  min-height: var(--dshm-touch);
+  padding: 0 16px;
+  font-size: var(--dshm-fs-body);
+  font-weight: 500;
 }
 
-/* ask bubbles (v6, the design's .notice form): the three pick forms with the
-    pick feedback and the answered fade. The ask tier rides the brand-soft
-    material with the hairline brand rim — a question is never another white
-    card. */
+/* ask bubbles (W9-B5 追问卡, §五): the white ledger card at the 20px radius
+    with the roast-line rim — the question tier; the option cards ride the
+    card2 wells inside it. */
 .askBubble {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 11px 13px;
-  background: var(--dshm-primary-soft);
-  border: 1px solid var(--dshm-primary-rim);
-  border-radius: var(--dshm-radius);
+  padding: var(--dshm-space-4);
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-line);
+  border-radius: var(--dshm-r-card);
+  box-shadow: var(--dshm-shadow-card);
   max-width: min(84vw, 326px);
 }
 
@@ -330,16 +334,17 @@
 
 .askQuestion {
   margin: 0;
-  font-size: var(--dshm-fs-md);
-  line-height: 24px;
-  color: var(--dshm-foreground);
+  font-size: var(--dshm-fs-heading);
+  line-height: 25px;
+  font-weight: 700;
+  color: var(--dshm-ink);
 }
 
 /* The notice glyph leading the question (the design's .notice svg). */
 .askMark {
   flex: none;
   align-self: center;
-  color: var(--dshm-primary);
+  color: var(--dshm-brand);
 }
 
 .askCards {
@@ -356,11 +361,10 @@
   gap: 10px;
   padding: 10px 12px;
   text-align: left;
-  background: var(--dshm-card);
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius);
-  box-shadow: var(--dshm-shadow-card);
-  color: var(--dshm-foreground);
+  background: var(--dshm-card2);
+  border: 1px solid var(--dshm-line);
+  border-radius: var(--dshm-r-ctl);
+  color: var(--dshm-ink);
   transition: background-color 120ms ease-out, border-color 120ms ease-out, color 120ms ease-out;
 }
 
@@ -372,7 +376,7 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  border: 2px solid var(--dshm-border);
+  border: 2px solid var(--dshm-line);
   flex: none;
   transition: border-color 120ms ease-out;
 }
@@ -387,11 +391,11 @@
 
 .askCard.askSelected .askCardRadio,
 .askCard.askSelected .askCardRadioDot {
-  border-color: var(--dshm-on-primary);
+  border-color: var(--dshm-on-brand);
 }
 
 .askCard.askSelected .askCardRadioDot {
-  background: var(--dshm-on-primary);
+  background: var(--dshm-on-brand);
 }
 
 .askCardMain {
@@ -414,19 +418,19 @@
   height: 20px;
   border-radius: 50%;
   background: var(--dshm-success);
-  color: var(--dshm-on-primary);
+  color: var(--dshm-on-brand);
 }
 
 .askCardLabel {
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 22px;
   font-weight: 500;
 }
 
 .askCardHint {
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 20px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 .askChips {
@@ -435,22 +439,38 @@
   gap: 8px;
 }
 
-/* The ask picks ride the quick-chip form (44px capsule, brand rim). The chip
-     face takes on-soft, not primary: on the dark card track brand reads 4.1:1
-     (the ghost-button precedent, v3.module.css). */
+/* The ask suggestions ride the capsule-seal form (§五 chips — paper face,
+      roast-line border, the vermilion dot leading). The word takes on-soft,
+      not brand: on the dark card track brand reads 4.1:1 (the ghost-button
+      precedent, v3.module.css). */
 .askChip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   min-height: 40px;
   padding: 0 14px;
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 1.2;
-  border: 1px solid var(--dshm-primary-rim);
-  border-radius: var(--dshm-radius-pill);
+  border: 1.5px solid var(--dshm-line-strong);
+  border-radius: var(--dshm-r-seal);
   background: var(--dshm-card);
   color: var(--dshm-on-soft);
   transition: transform 120ms ease-out, background-color 120ms ease-out, color 120ms ease-out;
+}
+
+/* The capsule seal's vermilion dot (the .dshm-seal-chip twin). */
+.askChip::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--dshm-brand);
+}
+
+/* A picked suggestion keeps the dot but reads on the soft wash. */
+.askChip.askSelected::before {
+  background: var(--dshm-on-soft);
 }
 
 .askChip:active {
@@ -458,9 +478,9 @@
 }
 
 .askChipHint {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 .askButtons {
@@ -472,11 +492,11 @@
 .askButton {
   min-height: 40px;
   padding: 0 15px;
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 1.2;
   font-weight: 650;
-  border: 1px solid var(--dshm-primary-rim);
-  border-radius: var(--dshm-radius);
+  border: 1px solid var(--dshm-line-strong);
+  border-radius: var(--dshm-r-ctl);
   background: var(--dshm-card);
   /* The option word on the card face rides the link token: the dark-track
    * brand step measures 2.38:1 on the card, under the 4.5:1 text floor
@@ -491,17 +511,17 @@
 
 /* The picked option: ink fill, on-primary face (03 §2.4). */
 .askSelected {
-  background: var(--dshm-primary);
-  border-color: var(--dshm-primary);
-  color: var(--dshm-on-primary);
+  background: var(--dshm-brand);
+  border-color: var(--dshm-brand);
+  color: var(--dshm-on-brand);
 }
 
 /* The picked chip keeps its chip scale: brand-soft fill under the solid brand
     rim (the design's chip:active form) — a shade change, not the ink face the
     picked askCard carries. */
 .askChip.askSelected {
-  background: var(--dshm-primary-soft);
-  border-color: var(--dshm-primary);
+  background: var(--dshm-brand-soft);
+  border-color: var(--dshm-brand);
   color: var(--dshm-on-soft);
 }
 
@@ -512,7 +532,7 @@
 
 .askSelected .askCardHint,
 .askSelected .askChipHint {
-  color: var(--dshm-on-primary);
+  color: var(--dshm-on-brand);
   opacity: 0.8;
 }
 
@@ -520,17 +540,22 @@
 .askFree:global(.adm-button) {
   align-self: flex-start;
   padding: 0;
-  font-size: var(--dshm-fs-sm);
-  color: var(--dshm-muted-foreground);
+  font-size: var(--dshm-fs-body);
+  color: var(--dshm-ink-sub);
   text-decoration: underline;
 }
 
+/* The「补一项」soft seal label (§五 追问卡): the asked field's own capsule. */
 .fieldAskLabel {
+  align-self: flex-start;
   margin: 0;
-  font-size: var(--dshm-fs-xs);
-  line-height: 18px;
-  font-weight: 500;
-  color: var(--dshm-muted-foreground);
+  padding: 3px 10px;
+  border-radius: var(--dshm-r-seal);
+  background: var(--dshm-brand-soft);
+  font-size: var(--dshm-fs-caption);
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--dshm-on-soft);
 }
 
 /* The receipt capsule (antd Tag; the tone washes ride inline variables in
@@ -542,7 +567,7 @@
   align-self: flex-end;
   height: 28px;
   padding: 0 12px;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
 }
 
@@ -554,7 +579,7 @@
 }
 
 .richText {
-  font-size: var(--dshm-fs-md);
+  font-size: var(--dshm-fs-body);
   line-height: 24px;
   color: var(--dshm-bubble-ai-fg);
 }
@@ -571,7 +596,7 @@
    underline — no recolor (03 §4.5). */
 .richText :global(strong) {
   font-weight: 600;
-  border-bottom: 2px solid var(--dshm-primary-10);
+  border-bottom: 2px solid var(--dshm-brand-soft);
 }
 
 .richText :global(ul),
@@ -593,7 +618,7 @@
   top: 10px;
   width: 4px;
   height: 4px;
-  background: var(--dshm-primary);
+  background: var(--dshm-brand);
 }
 
 .richText :global(ol) {
@@ -606,8 +631,8 @@
   position: absolute;
   left: 0;
   top: 0;
-  font-size: var(--dshm-fs-xs);
-  color: var(--dshm-muted-foreground);
+  font-size: var(--dshm-fs-caption);
+  color: var(--dshm-ink-sub);
 }
 
 .richText :global(li + li) {
@@ -620,7 +645,7 @@
   margin: 6px 0;
   width: 100%;
   border-collapse: collapse;
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 32px;
   overflow-x: auto;
 }
@@ -628,40 +653,43 @@
 .richText :global(th) {
   text-align: left;
   padding: 0 10px;
-  background: var(--dshm-muted);
-  color: var(--dshm-muted-foreground);
+  background: var(--dshm-card2);
+  color: var(--dshm-ink-sub);
   font-weight: 500;
 }
 
 .richText :global(td) {
   padding: 0 10px;
   border-bottom: 1px solid var(--dshm-stroke-soft);
+  /* Long batch/location codes break anywhere instead of colliding across
+     the fixed columns of a narrow in-bubble table. */
+  overflow-wrap: anywhere;
 }
 
 .richText :global(td:first-child),
 .richText :global(th:first-child) {
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 .richText :global(td + td) {
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
   font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
 
 .richText :global(code) {
   font-family: var(--dshm-font-num);
-  font-size: var(--dshm-fs-sm);
-  background: var(--dshm-muted);
-  border-radius: var(--dshm-radius-corner);
+  font-size: var(--dshm-fs-body);
+  background: var(--dshm-card2);
+  border-radius: var(--dshm-r-ctl-corner);
   padding: 1px 4px;
 }
 
 .richText :global(pre) {
   margin: 6px 0;
   padding: 8px 10px;
-  background: var(--dshm-muted);
-  border-radius: var(--dshm-radius);
+  background: var(--dshm-card2);
+  border-radius: var(--dshm-r-ctl);
   overflow-x: auto;
 }
 
@@ -678,7 +706,7 @@
 
 .codeBox {
   background: var(--dshm-code-bg);
-  border-radius: var(--dshm-radius-lg);
+  border-radius: var(--dshm-r-card);
   overflow: hidden;
   box-shadow: var(--dshm-shadow-card);
   max-width: 100%;
@@ -693,7 +721,7 @@
 }
 
 .codeLang {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
   letter-spacing: 0.6px;
   font-weight: 600;
@@ -703,13 +731,13 @@
 
 /* The copy entry: the antd mini none-fill word on the code plate's chrome. */
 .copyBtn:global(.adm-button) {
-  --border-radius: var(--dshm-radius-corner);
+  --border-radius: var(--dshm-r-ctl-corner);
   --text-color: var(--dshm-code-action);
   display: inline-flex;
   align-items: center;
   gap: 4px;
   padding: 3px 8px;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
 }
 
@@ -718,7 +746,7 @@
   padding: 11px 13px;
   overflow-x: auto;
   font-family: var(--dshm-font-num);
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 1.62;
   color: var(--dshm-code-fg);
   white-space: pre;
@@ -738,23 +766,23 @@
   flex-direction: column;
   gap: 1px;
   padding: 8px 10px;
-  background: var(--dshm-muted);
-  border-radius: var(--dshm-radius);
+  background: var(--dshm-card2);
+  border-radius: var(--dshm-r-ctl);
 }
 
 .metricMiniValue {
-  font-size: var(--dshm-fs-lg);
+  font-size: var(--dshm-fs-heading);
   line-height: 26px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
 }
 
 .metricMiniLabel {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
   /* Muted-fill labels ≤13px take the foreground token (03 §7.2-1). */
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
 }
 
 /* The pick receipt capsule (03 §4.1): a 28px pill, never a full bubble. */
@@ -766,24 +794,26 @@
   max-width: 260px;
   height: 28px;
   padding: 0 12px;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
-  border-radius: var(--dshm-radius-pill);
-  background: var(--dshm-primary-10);
+  border-radius: var(--dshm-r-seal);
+  background: var(--dshm-brand-soft);
   color: var(--dshm-on-soft);
 }
 
-/* ---- Report card (v6 rich-card base: the card2 plate, 13px corners) ---- */
+/* ---- Report card (W9-B5: the ledger-paper sheet — the white card with the
+        roast-line rim and the 20px radius; the approval/plan cards share it) ---- */
 
 .reportCard {
   display: flex;
   flex-direction: column;
   gap: 12px;
   width: 100%;
-  padding: 12px 13px;
-  background: var(--dshm-muted);
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius-lg);
+  padding: 14px 15px;
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-line);
+  border-radius: var(--dshm-r-card);
+  box-shadow: var(--dshm-shadow-card);
   box-sizing: border-box;
   text-align: left;
 }
@@ -803,16 +833,16 @@
 }
 
 .reportTitle {
-  font-size: var(--dshm-fs-md);
+  font-size: var(--dshm-fs-heading);
   line-height: 24px;
-  font-weight: 600;
-  color: var(--dshm-foreground);
+  font-weight: 700;
+  color: var(--dshm-ink);
 }
 
 .reportSubtitle {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 18px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 /* The 28px report stamp: soft fill, ink-teal rim, the type's lead character. */
@@ -823,11 +853,11 @@
   justify-content: center;
   width: var(--dshm-stamp-sm);
   height: var(--dshm-stamp-sm);
-  border: 2px solid var(--dshm-primary);
+  border: 2px solid var(--dshm-brand);
   border-radius: 50%;
-  background: var(--dshm-primary-soft);
+  background: var(--dshm-brand-soft);
   color: var(--dshm-on-soft);
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   font-weight: 600;
 }
 
@@ -846,9 +876,9 @@
   flex-direction: column;
   gap: 2px;
   padding: 8px 10px;
-  background: var(--dshm-card);
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius);
+  background: var(--dshm-card2);
+  border: 1px solid var(--dshm-line);
+  border-radius: var(--dshm-r-ctl);
   min-width: 0;
 }
 
@@ -859,7 +889,7 @@
   font-size: clamp(16px, 4.8vw, 20px);
   line-height: 26px;
   font-weight: 600;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
 }
 
 .metricTonePositive {
@@ -871,7 +901,7 @@
 }
 
 .metricToneDanger {
-  color: var(--dshm-destructive);
+  color: var(--dshm-danger);
 }
 
 /* The in-card ledger divider between the head and the entry sections. */
@@ -908,7 +938,7 @@
 }
 
 .rowDotHigh {
-  background: var(--dshm-destructive);
+  background: var(--dshm-danger);
 }
 
 .rowDotMedium {
@@ -916,7 +946,7 @@
 }
 
 .rowDotLow {
-  background: var(--dshm-muted-foreground);
+  background: var(--dshm-ink-sub);
 }
 
 .rowTexts {
@@ -927,16 +957,16 @@
 }
 
 .rowLabel {
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 22px;
   font-weight: 500;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
 }
 
 .rowHint {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 18px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 /* The compact ticket table (the design's .tbl): fixed layout, th 12/sub,
@@ -950,15 +980,15 @@
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 20px;
 }
 
 .reportTable th {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   font-weight: 500;
-  color: var(--dshm-muted-foreground);
-  background: var(--dshm-muted);
+  color: var(--dshm-ink-sub);
+  background: var(--dshm-card2);
   padding: 6px 10px;
   text-align: left;
   white-space: nowrap;
@@ -968,14 +998,14 @@
   height: 32px;
   padding: 6px 10px;
   border-bottom: 1px solid var(--dshm-stroke-soft);
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
   font-weight: 500;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
 .reportTableFirst {
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 /* The action row: antd-mobile Buttons — the primary arm rides the brand solid
@@ -998,7 +1028,7 @@
 }
 
 .reportPrimary:global(.adm-button) {
-  --border-radius: var(--dshm-radius);
+  --border-radius: var(--dshm-r-ctl);
 }
 
 /* ---- Demo typing indicator (03 §8-6): three breathing stamp dots. ---- */
@@ -1019,7 +1049,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--dshm-primary);
+  background: var(--dshm-brand);
   animation: typing-breathe 1.2s ease-in-out infinite;
 }
 
@@ -1042,9 +1072,9 @@
 }
 
 .typingLabel {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1082,13 +1112,13 @@
   align-items: center;
   height: 24px;
   padding-inline: 10px;
-  border-radius: var(--dshm-radius);
-  font-size: var(--dshm-fs-xs);
+  border-radius: var(--dshm-r-ctl);
+  font-size: var(--dshm-fs-caption);
   line-height: 18px;
   font-weight: 600;
   background: var(--dshm-card);
-  border: 1px solid var(--dshm-border);
-  color: var(--dshm-muted-foreground);
+  border: 1px solid var(--dshm-line);
+  color: var(--dshm-ink-sub);
 }
 
 .approvalChipPending {
@@ -1107,20 +1137,20 @@
 }
 
 .approvalChipRejected {
-  border-color: var(--dshm-destructive);
-  color: var(--dshm-destructive);
+  border-color: var(--dshm-danger);
+  color: var(--dshm-danger);
 }
 
 .approvalChipDraft {
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 /* W6-B1 G2: the live read-back settled this pending card elsewhere — the
  * muted note rides beside the settled chip. */
 .approvalElsewhere {
   flex: none;
-  font-size: var(--dshm-fs-xs);
-  color: var(--dshm-muted-foreground);
+  font-size: var(--dshm-fs-caption);
+  color: var(--dshm-ink-sub);
 }
 
 /* The remark input rides the action row and yields space to the buttons. */
@@ -1128,5 +1158,5 @@
   flex: 1 1 120px;
   min-width: 0;
   max-width: 180px;
-  --font-size: var(--dshm-fs-xs);
+  --font-size: var(--dshm-fs-caption);
 }

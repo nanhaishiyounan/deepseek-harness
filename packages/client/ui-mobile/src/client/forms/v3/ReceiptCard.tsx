@@ -1,16 +1,15 @@
 /**
- * The v3 receipt card: the landing-row receipt as a metric ticket — the
- * money summary as the big number in the monospace face, the date/count/id
- * summaries in a two-column grid, the three-dot ticket trail (对话→确认→已落库),
- * the row-number phase stamp, the ticket-number strip, and the view-record
- * entry. The card rides the receipt-material tier — the pass-green wash with
- * the green rim — so a landed ticket reads as the finished copy at a glance.
- * No raw JSON ever renders.
+ * The v3 receipt card: the landing-row receipt as a ledger-paper ticket
+ * (W9-B5) — the「收」round seal heading the copy, the money summary as the big
+ * number in the monospace face, the date/count/id summaries in a two-column
+ * grid, the three-dot ticket trail (对话→确认→已落库), the row-number phase
+ * stamp, the ticket-number strip, the view-record entry, and the「收讫」
+ * sign-off stamp floating off the bottom-right corner (rotated -6°, the F3
+ * fusion — like the chop on a paper ledger). No raw JSON ever renders.
  */
 
 import { type JSX } from 'react'
 import { Button } from 'antd-mobile'
-import { Check } from 'lucide-react'
 import type { SubmitReceiptPayload } from '../../protocol.ts'
 import css from './v3.module.css'
 import { PhaseStamp } from './PhaseStamp.tsx'
@@ -46,10 +45,8 @@ export function ReceiptCard({ payload, onView }: ReceiptCardProps): JSX.Element 
       <header className={css.cardHeader}>
         <div className={css.cardTitles}>
           <span className={css.cardBiz}>
-            <span className={css.receiptSeal} aria-hidden="true">
-              <Check size={12} strokeWidth={3} />
-            </span>
-            已登记 · {payload.form.label}
+            <span className={css.receiptSeal} aria-hidden="true">收</span>
+            {payload.form.label}已登记
           </span>
         </div>
         <PhaseStamp phase="submitted" rowId={payload.rowId} />
@@ -68,6 +65,7 @@ export function ReceiptCard({ payload, onView }: ReceiptCardProps): JSX.Element 
           </div>
         ))}
       </div>
+      <span className={css.receiptSign} aria-hidden="true">收讫</span>
       <div className={css.steps} aria-label="三步流程">
         {TRAIL.map((label, index) => (
           <span key={label} className={css.stepRun}>

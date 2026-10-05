@@ -82,7 +82,7 @@ export function TasksView({ identityName }: TasksViewProps): JSX.Element {
                 >
                   <span className={statusDotClass(item.status)} aria-hidden="true" />
                   <span className={css.taskTitle}>{item.title}</span>
-                  {item.demo && <Tag className={css.demoTag as string} style={{ '--background-color': 'transparent', '--text-color': 'var(--dshm-muted-foreground)', '--border-color': 'var(--dshm-border)' }}>示例</Tag>}
+                  {item.demo && <Tag className={css.demoTag as string} style={{ '--background-color': 'transparent', '--text-color': 'var(--dshm-ink-sub)', '--border-color': 'var(--dshm-line)' }}>示例</Tag>}
                   {tab === 'team' && <span className={css.taskOwner}>{item.owner}</span>}
                   {due !== undefined && (
                     <span className={`${css.taskDue} ${due.soon ? css.dueSoon : ''}`}>{due.text}</span>

@@ -104,16 +104,16 @@ describe('ChoiceBubble', () => {
 })
 
 describe('FieldAskBubble', () => {
-  it('shows the unit and sends a picked suggestion by its label', () => {
-    const onSend = vi.fn()
-    render(<FieldAskBubble ask={fieldAskOf()} onSend={onSend} disabled={false} />)
+  it('shows the unit and fills the composer with a picked suggestion', () => {
+    const onFill = vi.fn()
+    render(<FieldAskBubble ask={fieldAskOf()} onFill={onFill} disabled={false} />)
     expect(screen.getByText('数量（箱）')).toBeTruthy()
     fireEvent.click(screen.getByText('200 箱'))
-    expect(onSend).toHaveBeenCalledWith('200 箱')
+    expect(onFill).toHaveBeenCalledWith('200 箱')
   })
 
   it('greys once answered with the picked suggestion highlighted', () => {
-    render(<FieldAskBubble ask={fieldAskOf({ selected: '200' })} onSend={() => {}} disabled={false} />)
+    render(<FieldAskBubble ask={fieldAskOf({ selected: '200' })} onFill={() => {}} disabled={false} />)
     expect(screen.getByTestId('field-ask').className).toContain('askAnswered')
     expect(screen.getByText<HTMLButtonElement>('200 箱').disabled).toBe(true)
   })
@@ -140,8 +140,8 @@ describe('ActionBadge and RichContent', () => {
 })
 
 describe('WelcomeCard', () => {
-  it('renders greeting, capabilities, and starter chips that send', () => {
-    const onSend = vi.fn()
+  it('renders greeting, capabilities, and starter chips that fill the draft', () => {
+    const onFill = vi.fn()
     render(
       <WelcomeCard
         welcome={{
@@ -149,16 +149,16 @@ describe('WelcomeCard', () => {
           capabilities: ['登记六类单据'],
           starters: [{ label: '登记一条采购单', send: '向宏发采购' }],
         }}
-        onSend={onSend}
+        onFill={onFill}
         disabled={false}
       />,
     )
     fireEvent.click(screen.getByRole('button', { name: '登记一条采购单' }))
-    expect(onSend).toHaveBeenCalledWith('向宏发采购')
+    expect(onFill).toHaveBeenCalledWith('向宏发采购')
   })
 
   it('renders without starters', () => {
-    render(<WelcomeCard welcome={{ greeting: '你好', capabilities: [], starters: [] }} onSend={() => {}} disabled />)
+    render(<WelcomeCard welcome={{ greeting: '你好', capabilities: [], starters: [] }} onFill={() => {}} disabled />)
     expect(screen.getByText('你好')).toBeTruthy()
     expect(screen.queryByRole('button')).toBeNull()
   })
@@ -308,7 +308,10 @@ describe('ReceiptCard v3', () => {
     expect(screen.getByText('¥6,400')).toBeTruthy()
     expect(screen.getByText('合计金额')).toBeTruthy()
     expect(screen.getByText('200 箱')).toBeTruthy()
-    expect(screen.getByText('已登记 · 采购单')).toBeTruthy()
+    expect(screen.getByText('采购单已登记')).toBeTruthy()
+    // W9-B5: the 收讫 sign-off stamp floats off the receipt's corner.
+    expect(screen.getByText('收讫')).toBeTruthy()
+    expect(screen.getByText('收')).toBeTruthy()
     expect(screen.getByTestId('phase-stamp').textContent).toBe('№1042')
     expect(screen.getByText('已落库')).toBeTruthy()
   })
@@ -475,7 +478,7 @@ describe('remaining component branches', () => {
       time: 1,
       payload: { v: 3, type: 'ask_field', id: 'f', question: '备注写什么？', field: { name: 'note', label: '备注', widget: 'text', suggestions: [] } },
     }
-    render(<FieldAskBubble ask={bare} onSend={() => {}} disabled={false} />)
+    render(<FieldAskBubble ask={bare} onFill={() => {}} disabled={false} />)
     expect(screen.getByText('备注')).toBeTruthy()
     expect(screen.queryByRole('button')).toBeNull()
   })

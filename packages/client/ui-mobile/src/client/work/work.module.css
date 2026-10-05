@@ -31,7 +31,7 @@
 .stamp_done {
   border-color: var(--dshm-work-done);
   background: var(--dshm-work-done);
-  color: var(--dshm-on-primary);
+  color: var(--dshm-on-brand);
   /* The done seal comes down oversized and askew, same as the phase stamp. */
   animation: work-stamp-in 200ms var(--dshm-ease-stamp) both;
 }
@@ -81,7 +81,7 @@
   min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  background: var(--dshm-background);
+  background: var(--dshm-canvas);
 }
 
 .workHeader {
@@ -95,16 +95,16 @@
   top: 0;
   z-index: 5;
   background: var(--dshm-card);
-  border-bottom: 1px solid var(--dshm-border);
+  border-bottom: 1px solid var(--dshm-line);
   flex: none;
 }
 
 .workTitle {
   margin: 0;
-  font-size: var(--dshm-fs-lg);
+  font-size: var(--dshm-fs-heading);
   line-height: 24px;
   font-weight: 600;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
 }
 
 .workEntries {
@@ -131,10 +131,10 @@
   gap: 9px;
   padding: 16px 14px;
   background: var(--dshm-card);
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius-lg);
+  border: 1px solid var(--dshm-line);
+  border-radius: var(--dshm-r-card);
   text-align: left;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
   transition: transform 120ms ease-out;
 }
 
@@ -152,23 +152,23 @@
   justify-content: center;
   width: 42px;
   height: 42px;
-  border-radius: var(--dshm-radius-lg);
-  background: var(--dshm-muted);
-  color: var(--dshm-foreground);
+  border-radius: var(--dshm-r-card);
+  background: var(--dshm-card2);
+  color: var(--dshm-ink);
 }
 
 .toolName {
-  font-size: var(--dshm-fs-md);
+  font-size: var(--dshm-fs-heading);
   line-height: 21px;
-  font-weight: 650;
-  color: var(--dshm-foreground);
+  font-weight: 700;
+  color: var(--dshm-ink);
 }
 
 .toolDesc {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 1.45;
   min-height: 34px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -176,7 +176,7 @@
 }
 
 .toolGo {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
   font-weight: 600;
   color: var(--dshm-link);
@@ -191,11 +191,11 @@
 /* The header's secondary entries: antd outline capsules (the hairline rim
     rides an inline variable in WorkView.tsx). */
 .entryLink:global(.adm-button) {
-  --border-radius: var(--dshm-radius-pill);
+  --border-radius: var(--dshm-r-seal);
   height: var(--dshm-touch-sm);
   padding-block: 0;
   padding-inline: 14px;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
 }
 
 /* The four-status capsules (v7, audit 04 §04): the active tab rides the
@@ -204,14 +204,14 @@
 .statusTabs {
   --active-line-height: 0;
   --active-line-color: transparent;
-  --title-font-size: var(--dshm-fs-xs);
-  --adm-color-text: var(--dshm-muted-foreground);
+  --title-font-size: var(--dshm-fs-caption);
+  --adm-color-text: var(--dshm-ink-sub);
   padding: 6px 12px 0;
   flex: none;
 }
 
 .statusTabs :global(.adm-capsule-tabs-tab-active) {
-  background: var(--dshm-primary-soft);
+  background: var(--dshm-brand-soft);
   color: var(--dshm-on-soft);
 }
 
@@ -233,8 +233,8 @@
   gap: 8px;
   padding: 12px 14px 12px 16px;
   background: var(--dshm-card);
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius-lg);
+  border: 1px solid var(--dshm-line);
+  border-radius: var(--dshm-r-card);
   box-shadow: var(--dshm-shadow-card);
   text-align: left;
   overflow: hidden;
@@ -250,7 +250,7 @@
   top: 10px;
   bottom: 10px;
   width: 3px;
-  border-radius: var(--dshm-radius-pill);
+  border-radius: var(--dshm-r-seal);
 }
 
 .card_todo::before {
@@ -283,16 +283,16 @@
   min-width: 0;
   text-align: left;
   background: none;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
 }
 
 .cardTitle {
   flex: 1;
   min-width: 0;
-  font-size: var(--dshm-fs-md);
+  font-size: var(--dshm-fs-heading);
   line-height: 22px;
-  font-weight: 500;
-  color: var(--dshm-foreground);
+  font-weight: 700;
+  color: var(--dshm-ink);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -303,16 +303,16 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 4px 10px;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 18px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 /* The demo tag: antd Tag recolored through its inline dials in WorkView.tsx;
    this class keeps the quiet hairline capsule scale. */
 .cardDemoTag {
-  --border-radius: var(--dshm-radius-pill);
-  font-size: var(--dshm-fs-xs);
+  --border-radius: var(--dshm-r-seal);
+  font-size: var(--dshm-fs-caption);
   line-height: 14px;
   flex: none;
 }
@@ -320,13 +320,13 @@
 /* The source-chat back-link badge: the antd mini none-fill word on the
    primary-10 capsule (the wash rides an inline variable in WorkView.tsx). */
 .sourceBadge:global(.adm-button) {
-  --border-radius: var(--dshm-radius-pill);
+  --border-radius: var(--dshm-r-seal);
   display: inline-flex;
   align-items: center;
   gap: 2px;
   height: 20px;
   padding: 0 8px;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 18px;
 }
 
@@ -343,11 +343,11 @@
    WorkView.tsx / WorkDetailView.tsx. */
 .actionPrimary:global(.adm-button),
 .actionSecondary:global(.adm-button) {
-  --border-radius: var(--dshm-radius);
+  --border-radius: var(--dshm-r-ctl);
   height: var(--dshm-touch-sm);
   padding-block: 0;
   padding-inline: 14px;
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
 }
 
 .actionPrimary:global(.adm-button) {
@@ -362,7 +362,7 @@
   height: var(--dshm-touch-sm);
   padding-block: 0;
   padding-inline: 10px;
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   font-weight: 600;
 }
 
@@ -371,16 +371,16 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   color: var(--dshm-work-doing);
 }
 
 .doneSummary {
   flex: 1;
   min-width: 0;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 18px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -393,16 +393,16 @@
   flex-direction: column;
   height: 100%;
   min-height: 0;
-  background: var(--dshm-background);
+  background: var(--dshm-canvas);
 }
 
 .demoBanner {
   flex: none;
   padding: 6px 16px;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 18px;
   color: var(--dshm-on-soft);
-  background: var(--dshm-primary-10);
+  background: var(--dshm-brand-soft);
   text-align: center;
 }
 
@@ -425,8 +425,8 @@
   gap: 10px;
   padding: 12px 14px;
   background: var(--dshm-card);
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius-lg);
+  border: 1px solid var(--dshm-line);
+  border-radius: var(--dshm-r-card);
   box-shadow: var(--dshm-shadow-card);
 }
 
@@ -440,22 +440,22 @@
 .ticketNo {
   font-family: var(--dshm-font-num);
   font-variant-numeric: tabular-nums;
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 18px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 .ticketStatus {
   display: flex;
   flex-wrap: wrap;
   gap: 4px 10px;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 18px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 .ticketStatusValue {
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
   font-weight: 500;
 }
 
@@ -470,8 +470,8 @@
   gap: 8px;
   padding: 12px 14px;
   background: var(--dshm-card);
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius-lg);
+  border: 1px solid var(--dshm-line);
+  border-radius: var(--dshm-r-card);
   box-shadow: var(--dshm-shadow-card);
 }
 
@@ -480,10 +480,10 @@
   align-items: center;
   gap: 8px;
   margin: 2px 0;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   font-weight: 500;
   line-height: 16px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 .tierHead::before,
@@ -497,12 +497,12 @@
 /* The suggestion quote: muted fill, ink-teal left bar, two-line clip. */
 .quote {
   padding: 8px 10px;
-  background: var(--dshm-muted);
-  border-left: 3px solid var(--dshm-primary);
-  border-radius: var(--dshm-radius);
-  font-size: var(--dshm-fs-sm);
+  background: var(--dshm-card2);
+  border-left: 3px solid var(--dshm-brand);
+  border-radius: var(--dshm-r-ctl);
+  font-size: var(--dshm-fs-body);
   line-height: 20px;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
@@ -510,15 +510,15 @@
 }
 
 .quoteEmpty {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 18px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 .sourceLink:global(.adm-button) {
   align-self: flex-start;
   padding: 0;
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 20px;
   font-weight: 600;
 }
@@ -530,34 +530,34 @@
   flex-direction: column;
   gap: 8px;
   padding: 11px 13px;
-  background: var(--dshm-muted);
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius-lg);
+  background: var(--dshm-card2);
+  border: 1px solid var(--dshm-line);
+  border-radius: var(--dshm-r-card);
 }
 
 .progressLabel {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   font-weight: 600;
   line-height: 18px;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
 }
 
 .progressNum {
   font-style: normal;
   font-family: var(--dshm-font-num);
   font-variant-numeric: tabular-nums;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 /* The execution progress: antd-mobile ProgressBar (the brand gradient fill
    rides an inline variable in WorkDetailView.tsx) on the hairline track. */
 .progressTrack {
   --track-width: 8px;
-  --track-color: var(--dshm-border);
-  --border-radius: var(--dshm-radius-pill);
+  --track-color: var(--dshm-line);
+  --border-radius: var(--dshm-r-seal);
 }
 
 /* The execution timeline (v6, the design's .tl): the 56px right-aligned
@@ -568,9 +568,9 @@
 }
 
 .timelineEmpty {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 18px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 .stepRow {
@@ -587,9 +587,9 @@
 .stepTime {
   text-align: right;
   padding-top: 2px;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 18px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
   font-family: var(--dshm-font-num);
   font-variant-numeric: tabular-nums;
 }
@@ -605,7 +605,7 @@
   flex: 1;
   width: 2px;
   margin-top: 3px;
-  background: var(--dshm-border);
+  background: var(--dshm-line);
 }
 
 .stepRow:last-child .stepLine {
@@ -630,9 +630,9 @@
 }
 
 .stepRunning {
-  border: 2px solid var(--dshm-primary);
+  border: 2px solid var(--dshm-brand);
   background: var(--dshm-card);
-  box-shadow: 0 0 0 3px var(--dshm-primary-10);
+  box-shadow: 0 0 0 3px var(--dshm-brand-soft);
 }
 
 .stepRunning::after {
@@ -640,7 +640,7 @@
   position: absolute;
   inset: 2px;
   border-radius: 50%;
-  background: var(--dshm-primary);
+  background: var(--dshm-brand);
   animation: work-step-breathe 1.2s ease-in-out infinite;
 }
 
@@ -655,14 +655,14 @@
 }
 
 .stepError {
-  border: 2px solid var(--dshm-destructive);
-  background: var(--dshm-destructive-10);
-  box-shadow: 0 0 0 3px var(--dshm-destructive-10);
+  border: 2px solid var(--dshm-danger);
+  background: var(--dshm-danger-soft);
+  box-shadow: 0 0 0 3px var(--dshm-danger-soft);
 }
 
 .stepFuture {
   /* Future/undecided point: the slate outline (never the 1.35:1 rim, 03 §7.2-4). */
-  border: 2px solid var(--dshm-muted-foreground);
+  border: 2px solid var(--dshm-ink-sub);
   background: var(--dshm-card);
 }
 
@@ -683,16 +683,16 @@
 }
 
 .stepLabel {
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 20px;
   font-weight: 500;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
 }
 
 .stepDetail {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 /* The result card: receipt wash + pass-green rim + 20px check seal. */
@@ -709,21 +709,21 @@
   height: 20px;
   border-radius: 50%;
   background: var(--dshm-success);
-  color: var(--dshm-on-primary);
+  color: var(--dshm-on-brand);
   flex: none;
 }
 
 .resultTitle {
-  font-size: var(--dshm-fs-md);
+  font-size: var(--dshm-fs-heading);
   line-height: 22px;
-  font-weight: 600;
-  color: var(--dshm-foreground);
+  font-weight: 700;
+  color: var(--dshm-ink);
 }
 
 .resultSummary {
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 20px;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -731,15 +731,15 @@
 }
 
 .resultMeta {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 .resultLink:global(.adm-button) {
   align-self: flex-start;
   padding: 0;
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 20px;
   font-weight: 600;
 }
@@ -753,7 +753,7 @@
   gap: 8px;
   padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
   background: var(--dshm-card);
-  border-top: 1px solid var(--dshm-border);
+  border-top: 1px solid var(--dshm-line);
 }
 
 /* ---- Task form bottom sheet (03 §6.5) ---- */
@@ -762,7 +762,7 @@
     phone viewports scroll the form instead of pushing the actions offscreen. */
 .sheetBody {
   display: flex;
-  border-radius: var(--dshm-radius-lg) var(--dshm-radius-lg) 0 0;
+  border-radius: var(--dshm-r-card) var(--dshm-r-card) 0 0;
   background: var(--dshm-card);
   max-height: calc(100vh - 76px);
   max-height: calc(100dvh - 76px);
@@ -781,15 +781,36 @@
   align-items: center;
   justify-content: space-between;
   flex: none;
+  gap: var(--dshm-space-2);
   padding: 14px 16px 2px;
+}
+
+/* The business seal (W9-B6, §B6.2): the 36px hollow round chop leading the
+    sheet title — 采/销/库 off the prefill's source title, 任 as the plain
+    task word (the PlanCard seal language). */
+.sheetSeal {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--dshm-seal-ring);
+  background: var(--dshm-seal-face);
+  color: var(--dshm-seal-ring);
+  font-size: var(--dshm-fs-heading);
+  font-weight: 800;
 }
 
 .sheetTitle {
   margin: 0;
-  font-size: var(--dshm-fs-lg);
+  flex: 1;
+  min-width: 0;
+  font-size: var(--dshm-fs-heading);
   line-height: 24px;
-  font-weight: 600;
-  color: var(--dshm-foreground);
+  font-weight: 700;
+  color: var(--dshm-ink);
 }
 
 .sheetClose {
@@ -799,12 +820,12 @@
   width: var(--dshm-touch-sm);
   height: var(--dshm-touch-sm);
   border-radius: 50%;
-  background: var(--dshm-muted);
-  color: var(--dshm-muted-foreground);
+  background: var(--dshm-card2);
+  color: var(--dshm-ink-sub);
 }
 
 .sheetClose:active {
-  background: var(--dshm-border);
+  background: var(--dshm-line);
 }
 
 /* The scrollable form stage: head and actions stay pinned, the fields scroll. */
@@ -824,10 +845,10 @@
     text already lives in the AI-suggestion block; two-line clip. */
 .sourceStrip {
   padding: 8px 12px;
-  border-radius: var(--dshm-radius);
-  background: var(--dshm-primary-10);
+  border-radius: var(--dshm-r-ctl);
+  background: var(--dshm-brand-soft);
   color: var(--dshm-on-soft);
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 18px;
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -843,43 +864,43 @@
 
 .fieldLabel {
   margin: 0;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   font-weight: 500;
   line-height: 18px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 .fieldError {
   margin: 0;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
-  color: var(--dshm-destructive);
+  color: var(--dshm-danger);
 }
 
 /* The title input: antd-mobile Input — the boxed face rides on the wrapper
     (this class), the element inherits the fill through the component dials. */
 .fieldInput:global(.adm-input) {
-  --font-size: var(--dshm-fs-sm);
-  --color: var(--dshm-foreground);
-  --placeholder-color: var(--dshm-muted-foreground);
+  --font-size: var(--dshm-fs-body);
+  --color: var(--dshm-ink);
+  --placeholder-color: var(--dshm-ink-sub);
   width: 100%;
   height: 44px;
   padding: 0 12px;
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 22px;
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius);
+  border: 1px solid var(--dshm-line);
+  border-radius: var(--dshm-r-ctl);
   background: var(--dshm-card);
   box-sizing: border-box;
 }
 
 .fieldInput:global(.adm-input):focus-within {
-  border: 2px solid var(--dshm-primary);
+  border: 2px solid var(--dshm-brand);
   padding: 0 11px;
 }
 
 .fieldInvalid:global(.adm-input) {
-  border-color: var(--dshm-destructive);
+  border-color: var(--dshm-danger);
 }
 
 /* The picker rows share the title input's boxed face — one field language. */
@@ -891,35 +912,35 @@
   width: 100%;
   min-height: 44px;
   padding: 0 12px;
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   text-align: left;
   background: var(--dshm-card);
-  color: var(--dshm-foreground);
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius);
+  color: var(--dshm-ink);
+  border: 1px solid var(--dshm-line);
+  border-radius: var(--dshm-r-ctl);
 }
 
 .pickerRow:active {
-  background: var(--dshm-muted);
+  background: var(--dshm-card2);
 }
 
 .pickerLabel {
-  font-size: var(--dshm-fs-sm);
-  color: var(--dshm-foreground);
+  font-size: var(--dshm-fs-body);
+  color: var(--dshm-ink);
 }
 
 .pickerValue {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   font-weight: 500;
   color: var(--dshm-link);
 }
 
 /* The row's trailing chevron reads as chrome, not as the chosen value. */
 .pickerChevron {
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 /* The due date's clear affordance: its own muted hit circle, apart from the
@@ -932,35 +953,35 @@
   height: 28px;
   margin-right: -6px;
   border-radius: 50%;
-  background: var(--dshm-muted);
-  color: var(--dshm-muted-foreground);
+  background: var(--dshm-card2);
+  color: var(--dshm-ink-sub);
 }
 
 .pickerClear:active {
-  background: var(--dshm-border);
+  background: var(--dshm-line);
 }
 
 /* The read-only AI suggestion block (no override entry — advice reads): the
     work detail's quote language — muted fill, brand left bar. */
 .suggestionBlock {
   padding: 10px 12px;
-  border-left: 3px solid var(--dshm-primary);
-  border-radius: var(--dshm-radius);
-  background: var(--dshm-muted);
+  border-left: 3px solid var(--dshm-brand);
+  border-radius: var(--dshm-r-ctl);
+  background: var(--dshm-card2);
 }
 
 .suggestionLabel {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
   font-weight: 600;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 .suggestionText {
   margin: 3px 0 0;
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 20px;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
 }
 
 /* The immediate-run switch row. */
@@ -979,16 +1000,16 @@
 }
 
 .switchTitle {
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 20px;
   font-weight: 500;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
 }
 
 .switchHint {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 /* The pinned action footer: rim-topped, safe-area-padded, always reachable. */
@@ -997,14 +1018,14 @@
   gap: 10px;
   flex: none;
   padding: 10px 16px calc(12px + env(safe-area-inset-bottom));
-  border-top: 1px solid var(--dshm-border);
+  border-top: 1px solid var(--dshm-line);
   background: var(--dshm-card);
 }
 
 /* The sheet's action pair: antd-mobile Buttons — cancel the outline slot,
     submit the brand solid slot with the in-flight loading face. */
 .sheetCancel:global(.adm-button) {
-  --border-radius: var(--dshm-radius);
+  --border-radius: var(--dshm-r-ctl);
   flex: 1;
   height: 44px;
   padding-block: 0;
@@ -1012,7 +1033,7 @@
 }
 
 .sheetSubmit:global(.adm-button) {
-  --border-radius: var(--dshm-radius);
+  --border-radius: var(--dshm-r-ctl);
   flex: 1.4;
   height: 44px;
   padding-block: 0;

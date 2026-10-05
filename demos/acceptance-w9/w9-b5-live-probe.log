@@ -1,0 +1,16 @@
+PASS A1 hero 酱印在位
+PASS A2 酱印含竖排「鲜酿」+ 当日批次号 — text=鲜酿B-1005 batch=B-1005
+PASS A3 节气文案派生自真实日期 — 早上好质检员·王倩，秋分时节
+PASS A4 两列大卡统计（4 格独立白卡）
+PASS A5 唯一实底 CTA 胶囊章
+PASS A6 中性 chips 胶囊章
+PASS B1 会话就绪 — id=session-7a40f09e-903e-460b-8687-4b299ce96edb (reused)
+PASS B2 发送钮为圆形柿橙印章（dshm-stamp-solid）
+PASS B3 用户气泡正文无身份行 — 查一下酱油还有多少库存
+PASS C1 stamp 标题落库（rename 成角）
+PASS C2 chats 列表标题残影剥离（stamp 不可见，降级 fallback）
+PASS C3 顶栏标题残影剥离 — header=新会话
+PASS D1 GIF 尾帧：纯净用户气泡（无身份行）
+PASS GIF 合成（B1 填入 + B2 纯净气泡同框） — demos/acceptance-w9/w9-b5-chat-flow.gif
+PASS before/after 拼图 w9-b5-03-home-before-after-375.png — demos/acceptance-w9/w9-b5-03-home-before-after-375.png
+PASS before/after 拼图 w9-b5-04-chat-before-after-375.png — demos/acceptance-w9/w9-b5-04-chat-before-after-375.png

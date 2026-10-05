@@ -6,7 +6,7 @@
 }
 
 .sheetBody {
-  border-radius: var(--dshm-radius-lg) var(--dshm-radius-lg) 0 0;
+  border-radius: var(--dshm-r-card) var(--dshm-r-card) 0 0;
   background: var(--dshm-card);
   max-height: 60vh;
 }
@@ -15,7 +15,7 @@
   display: flex;
   flex-direction: column;
   padding: 0 16px calc(16px + env(safe-area-inset-bottom));
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
 }
 
 .handle {
@@ -23,7 +23,7 @@
   width: 36px;
   height: 4px;
   border-radius: 2px;
-  background: var(--dshm-border);
+  background: var(--dshm-line);
   margin: 8px 0 10px;
 }
 
@@ -36,7 +36,7 @@
 
 .title {
   margin: 0;
-  font-size: var(--dshm-fs-lg);
+  font-size: var(--dshm-fs-heading);
   line-height: 24px;
   font-weight: 600;
 }
@@ -45,8 +45,8 @@
   width: var(--dshm-touch-sm);
   height: var(--dshm-touch-sm);
   border-radius: 50%;
-  background: var(--dshm-muted);
-  color: var(--dshm-muted-foreground);
+  background: var(--dshm-card2);
+  color: var(--dshm-ink-sub);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -54,9 +54,9 @@
 
 .error {
   margin: 0 0 8px;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 18px;
-  color: var(--dshm-destructive);
+  color: var(--dshm-danger);
 }
 
 .roster {
@@ -76,7 +76,7 @@
   padding: 8px 0;
   text-align: left;
   background: none;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
 }
 
 .rosterRow:active {
@@ -96,15 +96,15 @@
 }
 
 .rosterName {
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 22px;
   font-weight: 500;
 }
 
 .rosterDuty {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 .rosterChips {
@@ -116,15 +116,15 @@
 /* Plain display chips (antd Tag; the brand-soft face rides inline dials in
    NewChatSheet.tsx): the whole roster row is the one button. */
 .rosterChip {
-  --border-radius: var(--dshm-radius-pill);
-  font-size: var(--dshm-fs-xs);
+  --border-radius: var(--dshm-r-seal);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
 }
 
 .empty {
   padding: 16px 0;
-  font-size: var(--dshm-fs-sm);
-  color: var(--dshm-muted-foreground);
+  font-size: var(--dshm-fs-body);
+  color: var(--dshm-ink-sub);
   text-align: center;
 }
 
@@ -132,10 +132,10 @@
   margin: 12px 0 4px;
   padding-top: 12px;
   border-top: 1px solid var(--dshm-stroke-soft);
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
   font-weight: 500;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 .recent {
@@ -156,7 +156,7 @@
   padding: 6px 0;
   text-align: left;
   background: none;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
 }
 
 .recentRow:active {
@@ -166,7 +166,7 @@
 .recentTitle {
   flex: 1;
   min-width: 0;
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 20px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -175,7 +175,7 @@
 
 .recentTime {
   flex: none;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }

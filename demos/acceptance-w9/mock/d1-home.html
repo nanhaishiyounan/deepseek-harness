@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>D1 暖食工坊 · 酱园琥珀 — home mock</title>
+<style>
+  /* D1「酱园琥珀」— 暖纸画布 / 柿橙主色 / 深焙墨 / 酱印签名 / 大圆角呼吸
+   * CSS 变量名 = B4 tokens.css 未来名（直译路径）。 */
+  :root {
+    --dshm-canvas: #fbf5eb;        /* 暖纸画布（酱油稀释色，非 chalk 奶油） */
+    --dshm-card: #ffffff;
+    --dshm-card2: #f6eddf;         /* fold/input 井 */
+    --dshm-ink: #3d2b1f;           /* 深焙墨（对白卡 13.5:1） */
+    --dshm-ink-sub: #6f5b49;       /* 次文字（对画布 6.0:1） */
+    --dshm-ink-weak: #9a8570;      /* 仅装饰/骨架，不负载正文 */
+    --dshm-brand: #b4530a;         /* 柿橙（对画布 4.7:1，白字 5.0:1） */
+    --dshm-brand-deep: #8f4106;
+    --dshm-brand-soft: #f8e4d2;
+    --dshm-anchor: #1e4e8c;        /* W7 品牌蓝锚（链接/章环，每屏 ≤2） */
+    --dshm-line: #eadfc9;
+    --dshm-success: #4a7031;  --dshm-success-soft: #eaf2dc;
+    --dshm-warning: #c25e00;  --dshm-warning-soft: #fbefd9;
+    --dshm-danger: #a93226;   --dshm-danger-soft: #f9e4e0;
+    --dshm-info: #2e6e8e;     --dshm-info-soft: #e0eef4;
+    --dshm-r-card: 20px; --dshm-r-ctl: 14px; --dshm-r-bubble: 18px; --dshm-r-pill: 999px;
+    --font-num: 'SF Mono', ui-monospace, 'Menlo', monospace;
+    --ease-out: cubic-bezier(0.22, 0.9, 0.3, 1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 375px; height: 812px; overflow: hidden;
+    background: var(--dshm-canvas); color: var(--dshm-ink);
+    font-family: -apple-system, 'BlinkMacSystemFont', 'PingFang SC', 'HarmonyOS Sans SC', 'Noto Sans SC', sans-serif;
+    font-variant-numeric: tabular-nums; position: relative;
+  }
+  .page { padding: 0 20px 96px; display: flex; flex-direction: column; gap: 20px; }
+  .statusbar { height: 44px; display: flex; justify-content: space-between; align-items: center;
+    padding: 0 20px; font-size: 12px; font-weight: 600; color: var(--dshm-ink); }
+
+  /* ── Hero：问候 + 酱印签名 ─────────────────────────── */
+  .hero { display: flex; justify-content: space-between; align-items: center; padding-top: 10px; }
+  .hero h1 { font-size: 30px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.25; }
+  .hero h1 .hi { display: block; font-size: 14px; font-weight: 500; color: var(--dshm-ink-sub);
+    letter-spacing: 2px; margin-bottom: 6px; }
+  .hero .date { font-size: 12px; color: var(--dshm-ink-sub); margin-top: 8px; }
+  .hero .date b { color: var(--dshm-brand); font-weight: 700; }
+  /* 酱印：圆章签名 = W7 stamp 基因的暖系表达（品牌记忆点） */
+  .seal { width: 84px; height: 84px; border-radius: 50%; position: relative; flex: none;
+    background: radial-gradient(circle at 32% 28%, #ffffff 0%, var(--dshm-card) 58%);
+    border: 2.5px solid var(--dshm-brand);
+    box-shadow: 0 2px 10px rgba(180, 83, 10, 0.18), inset 0 0 0 3px var(--dshm-brand-soft);
+    display: grid; place-items: center; }
+  .seal::before { content: ''; position: absolute; inset: 5px; border-radius: 50%;
+    border: 1px dashed rgba(180, 83, 10, 0.45); }
+  .seal .zi { font-size: 22px; font-weight: 800; color: var(--dshm-brand); letter-spacing: 2px;
+    writing-mode: vertical-rl; }
+  .seal .batch { position: absolute; bottom: 13px; font-family: var(--font-num);
+    font-size: 8px; color: var(--dshm-ink-sub); letter-spacing: 1px; }
+
+  /* ── 搜索条 ───────────────────────────────────────── */
+  .search { display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 18px;
+    background: var(--dshm-card2); border: 1px solid var(--dshm-line); border-radius: var(--dshm-r-pill); }
+  .search svg { flex: none; }
+  .search span { font-size: 14px; color: var(--dshm-ink-sub); }
+
+  /* ── 今日台账：两列大卡（呼吸感，数字节奏） ────────── */
+  .ledger { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .stat { background: var(--dshm-card); border: 1px solid var(--dshm-line);
+    border-radius: var(--dshm-r-card); padding: 18px 18px 16px;
+    box-shadow: 0 1px 2px rgba(61, 43, 31, 0.04), 0 8px 24px rgba(61, 43, 31, 0.05); }
+  .stat .n { font-size: 32px; font-weight: 800; line-height: 1; font-family: var(--font-num);
+    letter-spacing: -1px; }
+  .stat .n small { font-size: 13px; font-weight: 600; color: var(--dshm-ink-sub);
+    font-family: -apple-system, 'PingFang SC', sans-serif; letter-spacing: 0; margin-left: 2px; }
+  .stat .l { font-size: 13px; color: var(--dshm-ink-sub); margin-top: 8px; }
+  .stat .chip { display: inline-block; margin-top: 10px; padding: 3px 10px; border-radius: var(--dshm-r-pill);
+    font-size: 11px; font-weight: 600; }
+  .stat.todo .n { color: var(--dshm-brand); }
+  .stat.todo .chip { background: var(--dshm-brand-soft); color: var(--dshm-brand-deep); }
+  .stat.doing .n { color: var(--dshm-info); }
+  .stat.doing .chip { background: var(--dshm-info-soft); color: var(--dshm-info); }
+  .stat.review .n { color: var(--dshm-warning); }
+  .stat.review .chip { background: var(--dshm-warning-soft); color: var(--dshm-warning); }
+  .stat.done .n { color: var(--dshm-success); }
+  .stat.done .chip { background: var(--dshm-success-soft); color: var(--dshm-success); }
+
+  /* ── 快捷 chips：一个柿橙 CTA + 纸胶囊 ─────────────── */
+  .chips { display: flex; gap: 10px; }
+  .chip-cta { height: 44px; padding: 0 20px; border-radius: var(--dshm-r-pill);
+    background: var(--dshm-brand); color: #fff; font-size: 15px; font-weight: 700;
+    display: flex; align-items: center; gap: 7px;
+    box-shadow: 0 4px 12px rgba(180, 83, 10, 0.30); }
+  .chip-plain { height: 44px; padding: 0 16px; border-radius: var(--dshm-r-pill);
+    background: var(--dshm-card); border: 1.5px solid var(--dshm-line); color: var(--dshm-ink);
+    font-size: 14px; font-weight: 600; display: flex; align-items: center; }
+
+  /* ── AI 同事 rail：色环圆章头像 ───────────────────── */
+  .rail-head { display: flex; justify-content: space-between; align-items: baseline; }
+  .rail-head h2 { font-size: 20px; font-weight: 800; letter-spacing: -0.3px; }
+  .rail-head a { font-size: 13px; color: var(--dshm-anchor); text-decoration: none; font-weight: 600; }
+  .rail { display: flex; gap: 18px; overflow: visible; padding: 2px 2px 4px; }
+  .colleague { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 64px; flex: none; }
+  .colleague .ava { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center;
+    font-size: 15px; font-weight: 700; color: #fff; position: relative; }
+  .colleague .ava::after { content: ''; position: absolute; inset: -4px; border-radius: 50%;
+    border: 2px solid var(--dshm-card); }
+  .colleague.c1 .ava { background: #1e4e8c; }
+  .colleague.c2 .ava { background: #1d5f5a; }
+  .colleague.c3 .ava { background: #2e5e34; }
+  .colleague.c4 .ava { background: #7a5230; }
+  .colleague .dot { position: absolute; right: 0; bottom: 0; width: 13px; height: 13px;
+    border-radius: 50%; background: #4a7031; border: 2.5px solid var(--dshm-canvas); }
+  .colleague .nm { font-size: 12px; font-weight: 600; color: var(--dshm-ink); }
+  .colleague .du { font-size: 10px; color: var(--dshm-ink-sub); }
+
+  /* ── 最近会话 ─────────────────────────────────────── */
+  .recent { background: var(--dshm-card); border: 1px solid var(--dshm-line);
+    border-radius: var(--dshm-r-card); overflow: hidden;
+    box-shadow: 0 1px 2px rgba(61, 43, 31, 0.04), 0 8px 24px rgba(61, 43, 31, 0.05); }
+  .conv { display: flex; align-items: center; gap: 13px; padding: 16px 18px; }
+  .conv + .conv { border-top: 1px solid #f2e9d8; }
+  .conv .stamp { width: 42px; height: 42px; border-radius: 13px; display: grid; place-items: center;
+    font-size: 13px; font-weight: 700; color: #fff; flex: none; }
+  .conv .mid { flex: 1; min-width: 0; }
+  .conv .t { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .conv .t .unread { width: 8px; height: 8px; border-radius: 50%; background: var(--dshm-brand); }
+  .conv .p { font-size: 13px; color: var(--dshm-ink-sub); margin-top: 3px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .conv .tm { font-size: 12px; color: var(--dshm-ink-sub); flex: none; align-self: flex-start; margin-top: 3px; }
+
+  /* ── TabBar：暖纸托盘 + 朱点活性 ──────────────────── */
+  .tabbar { position: absolute; left: 0; right: 0; bottom: 0; height: 84px;
+    background: rgba(255, 252, 246, 0.96); backdrop-filter: blur(14px);
+    border-top: 1px solid var(--dshm-line); display: flex; padding: 8px 8px 26px; }
+  .tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+    justify-content: center; font-size: 11px; color: var(--dshm-ink-sub); }
+  .tab .ic { width: 26px; height: 26px; border-radius: 9px; display: grid; place-items: center; }
+  .tab.on { color: var(--dshm-brand); font-weight: 700; }
+  .tab.on .ic { background: var(--dshm-brand-soft); color: var(--dshm-brand); }
+</style>
+</head>
+<body>
+  <div class="statusbar"><span>9:41</span><span>●●●● ⁄ 安全区域</span></div>
+  <div class="page">
+    <div class="hero">
+      <div>
+        <h1><span class="hi">早 上 好</span>高翔，今日霜降</h1>
+        <div class="date">10月5日 周一 · <b>2 项预警待看</b></div>
+      </div>
+      <div class="seal" aria-label="今日酱印">
+        <span class="zi">鲜酿</span>
+        <span class="batch">B-1005</span>
+      </div>
+    </div>
+
+    <div class="search">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#6f5b49" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.8-3.8"/></svg>
+      <span>搜单据、问一句、找同事…</span>
+    </div>
+
+    <div class="ledger">
+      <div class="stat todo"><div class="n">5<small>项</small></div><div class="l">待处理</div><span class="chip">含 2 项今日到期</span></div>
+      <div class="stat doing"><div class="n">3<small>项</small></div><div class="l">进行中</div><span class="chip">酱油灌装线 · MO-26-0007</span></div>
+      <div class="stat review"><div class="n">2<small>项</small></div><div class="l">待确认</div><span class="chip">冷链箱锁价方案</span></div>
+      <div class="stat done"><div class="n">12<small>项</small></div><div class="l">已完成</div><span class="chip">本周累计</span></div>
+    </div>
+
+    <div class="chips">
+      <div class="chip-cta"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>登记一条单据</div>
+      <div class="chip-plain">我的待办</div>
+      <div class="chip-plain">我的预警</div>
+    </div>
+
+    <div>
+      <div class="rail-head"><h2>AI 同事</h2><a>全部 ›</a></div>
+      <div class="rail" style="margin-top: 12px;">
+        <div class="colleague c1"><div class="ava">表<span class="dot"></span></div><div class="nm">填表助手</div><div class="du">单据登记</div></div>
+        <div class="colleague c2"><div class="ava">参<span class="dot"></span></div><div class="nm">经营参谋</div><div class="du">经营问答</div></div>
+        <div class="colleague c3"><div class="ava">数<span class="dot"></span></div><div class="nm">数据助手</div><div class="du">企业档案</div></div>
+        <div class="colleague c4"><div class="ava">合<span class="dot"></span></div><div class="nm">合规官</div><div class="du">食安法规</div></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="rail-head"><h2>最近会话</h2></div>
+      <div class="recent" style="margin-top: 12px;">
+        <div class="conv">
+          <div class="stamp" style="background:#1e4e8c;">表</div>
+          <div class="mid"><div class="t">填表助手<span class="unread"></span></div><div class="p">已登记 №1042 · 采购单</div></div>
+          <div class="tm">09:32</div>
+        </div>
+        <div class="conv">
+          <div class="stamp" style="background:#1d5f5a;">参</div>
+          <div class="mid"><div class="t">经营参谋</div><div class="p">本月采购额按供应商拆开看…</div></div>
+          <div class="tm">昨天</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabbar">
+    <div class="tab on"><div class="ic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V21h-6v-6h-6v6H3z"/></svg></div>首页</div>
+    <div class="tab"><div class="ic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6.5 6.5-6.5s6.5 2.9 6.5 6.5"/><circle cx="17.5" cy="9.5" r="2.5"/><path d="M16 14.2c2.9.4 5.5 2.7 5.5 5.8"/></svg></div>同事</div>
+    <div class="tab"><div class="ic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="16" rx="3"/><path d="M8 3v4M16 3v4M3.5 10.5h17"/></svg></div>工作</div>
+    <div class="tab"><div class="ic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4.5 21c0-4.1 3.4-7.5 7.5-7.5s7.5 3.4 7.5 7.5"/></svg></div>我的</div>
+  </div>
+</body>
+</html>

@@ -34,9 +34,9 @@ const DOT_COLORS: Record<ColleagueVisual['status'], string> = {
  * inline defaults), so the quiet capsule recolors through these dials.
  */
 const CHIP_FACES: Record<ColleagueVisual['status'], { '--background-color': string; '--text-color': string; '--border-color': string }> = {
-  online: { '--background-color': 'var(--dshm-muted)', '--text-color': 'var(--dshm-success)', '--border-color': 'var(--dshm-border)' },
-  busy: { '--background-color': 'var(--dshm-muted)', '--text-color': 'var(--dshm-warning)', '--border-color': 'var(--dshm-border)' },
-  meeting: { '--background-color': 'var(--dshm-muted)', '--text-color': 'var(--dshm-brand2)', '--border-color': 'var(--dshm-border)' },
+  online: { '--background-color': 'var(--dshm-card2)', '--text-color': 'var(--dshm-success)', '--border-color': 'var(--dshm-line)' },
+  busy: { '--background-color': 'var(--dshm-card2)', '--text-color': 'var(--dshm-warning)', '--border-color': 'var(--dshm-line)' },
+  meeting: { '--background-color': 'var(--dshm-card2)', '--text-color': 'var(--dshm-brand2)', '--border-color': 'var(--dshm-line)' },
 }
 
 /** Agents-tab props: the keep-alive visibility gate. */
@@ -159,8 +159,8 @@ export function AgentsView({ active = true }: AgentsViewProps): JSX.Element {
                             key={skill}
                             className={css.skillPill as string}
                             style={{
-                              '--background-color': 'var(--dshm-muted)',
-                              '--text-color': 'var(--dshm-muted-foreground)',
+                              '--background-color': 'var(--dshm-card2)',
+                              '--text-color': 'var(--dshm-ink-sub)',
                               '--border-color': 'transparent',
                             }}
                           >

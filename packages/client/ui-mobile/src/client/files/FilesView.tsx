@@ -65,16 +65,15 @@ export function FilesView(): JSX.Element {
         >
           <Tag
             className={css.typeBadge as string}
-            style={{ '--background-color': 'var(--dshm-primary-soft)', '--text-color': 'var(--dshm-on-soft)', '--border-color': 'transparent' }}
+            style={{ '--background-color': 'var(--dshm-brand-soft)', '--text-color': 'var(--dshm-on-soft)', '--border-color': 'transparent' }}
             aria-hidden="true"
           >
             报
           </Tag>
-          {/* oxlint-disable-next-line typescript/no-unnecessary-condition -- the origin union widens with future file sources. */}
           {row.origin === 'ai' && (
             <Tag
               className={css.originBadge as string}
-              style={{ '--background-color': 'var(--dshm-primary-10)', '--text-color': 'var(--dshm-on-soft)', '--border-color': 'transparent' }}
+              style={{ '--background-color': 'var(--dshm-brand-soft)', '--text-color': 'var(--dshm-on-soft)', '--border-color': 'transparent' }}
               aria-hidden="true"
             >
               AI
@@ -84,7 +83,7 @@ export function FilesView(): JSX.Element {
           {row.demo && (
             <Tag
               className={css.demoTag as string}
-              style={{ '--background-color': 'transparent', '--text-color': 'var(--dshm-muted-foreground)', '--border-color': 'var(--dshm-border)' }}
+              style={{ '--background-color': 'transparent', '--text-color': 'var(--dshm-ink-sub)', '--border-color': 'var(--dshm-line)' }}
             >
               示例
             </Tag>

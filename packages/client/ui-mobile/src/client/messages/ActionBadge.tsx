@@ -31,12 +31,12 @@ export function ActionBadge({ action, formLabel, text: override }: ActionBadgePr
   // the brand-10 wash, the reject arm the destructive wash.
   const face = action === 'reject'
     ? {
-      '--background-color': 'var(--dshm-destructive-10)',
-      '--text-color': 'var(--dshm-destructive)',
+      '--background-color': 'var(--dshm-danger-soft)',
+      '--text-color': 'var(--dshm-danger)',
       '--border-color': 'transparent',
     }
     : {
-      '--background-color': 'var(--dshm-primary-10)',
+      '--background-color': 'var(--dshm-brand-soft)',
       '--text-color': 'var(--dshm-on-soft)',
       '--border-color': 'transparent',
     }

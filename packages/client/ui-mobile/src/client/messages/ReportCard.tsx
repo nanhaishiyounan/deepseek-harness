@@ -170,7 +170,7 @@ export function ReportCard({ payload, onAction }: ReportCardProps): JSX.Element 
               style={index === primaryIndex
                 ? undefined
                 : {
-                  '--background-color': 'var(--dshm-primary-soft)',
+                  '--background-color': 'var(--dshm-brand-soft)',
                   '--text-color': 'var(--dshm-on-soft)',
                   '--border-color': 'transparent',
                   '--border-radius': '11px',

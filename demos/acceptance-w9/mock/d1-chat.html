@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>D1 暖食工坊 · 酱园琥珀 — chat mock</title>
+<style>
+  /* D1 chat：纸标签气泡（非对称尾角）/ 回执酱印卡 / 建议章 chips */
+  :root {
+    --dshm-canvas: #fbf5eb; --dshm-card: #ffffff; --dshm-card2: #f6eddf;
+    --dshm-ink: #3d2b1f; --dshm-ink-sub: #6f5b49; --dshm-ink-weak: #9a8570;
+    --dshm-brand: #b4530a; --dshm-brand-deep: #8f4106; --dshm-brand-soft: #f8e4d2;
+    --dshm-anchor: #1e4e8c; --dshm-line: #eadfc9;
+    --dshm-success: #4a7031; --dshm-success-soft: #eaf2dc;
+    --dshm-warning: #c25e00; --dshm-warning-soft: #fbefd9;
+    --dshm-r-card: 20px; --dshm-r-ctl: 14px; --dshm-r-bubble: 18px;
+    --font-num: 'SF Mono', ui-monospace, 'Menlo', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { width: 375px; height: 812px; overflow: hidden; background: var(--dshm-canvas);
+    color: var(--dshm-ink); font-variant-numeric: tabular-nums;
+    font-family: -apple-system, 'BlinkMacSystemFont', 'PingFang SC', 'HarmonyOS Sans SC', 'Noto Sans SC', sans-serif;
+    display: flex; flex-direction: column; }
+  .statusbar { height: 44px; display: flex; justify-content: space-between; align-items: center;
+    padding: 0 20px; font-size: 12px; font-weight: 600; }
+  /* 顶栏：纸面白 + 焙线 */
+  .nav { height: 52px; background: rgba(255, 252, 246, 0.94); border-bottom: 1px solid var(--dshm-line);
+    display: flex; align-items: center; gap: 10px; padding: 0 14px; }
+  .nav .back { font-size: 24px; color: var(--dshm-ink); width: 32px; }
+  .nav .stamp { width: 34px; height: 34px; border-radius: 11px; background: #1e4e8c; color: #fff;
+    display: grid; place-items: center; font-size: 12px; font-weight: 700; }
+  .nav .who { flex: 1; }
+  .nav .who .n { font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
+  .nav .who .n .ai { font-size: 9px; font-weight: 700; color: var(--dshm-brand);
+    background: var(--dshm-brand-soft); padding: 2px 7px; border-radius: 999px; letter-spacing: 1px; }
+  .nav .who .d { font-size: 11px; color: var(--dshm-ink-sub); }
+
+  .flow { flex: 1; overflow: hidden; padding: 18px 16px 8px; display: flex; flex-direction: column; gap: 14px; }
+  .day { text-align: center; font-size: 11px; color: var(--dshm-ink-sub); }
+  .day span { background: #f1e6d2; padding: 4px 12px; border-radius: 999px; }
+
+  .row { display: flex; gap: 10px; }
+  .row.me { justify-content: flex-end; }
+  .row.me .bub { background: var(--dshm-brand); color: #fff;
+    border-radius: 18px 18px 6px 18px; }
+  .row.ai .ava { width: 34px; height: 34px; border-radius: 50%; background: #1e4e8c; color: #fff;
+    display: grid; place-items: center; font-size: 12px; font-weight: 700; flex: none; margin-top: 2px; }
+  .bub { max-width: 272px; padding: 13px 16px; font-size: 15px; line-height: 1.6;
+    background: var(--dshm-card); border: 1px solid var(--dshm-line);
+    border-radius: 18px 18px 18px 6px; box-shadow: 0 1px 2px rgba(61, 43, 31, 0.03); }
+
+  /* 追问卡：字段问题 + 建议章 */
+  .ask { max-width: 292px; background: var(--dshm-card); border: 1px solid var(--dshm-line);
+    border-radius: var(--dshm-r-card); padding: 16px 16px 14px;
+    box-shadow: 0 1px 2px rgba(61, 43, 31, 0.04), 0 8px 24px rgba(61, 43, 31, 0.05); }
+  .ask .tag { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    color: var(--dshm-brand-deep); background: var(--dshm-brand-soft); border-radius: 999px;
+    padding: 3px 10px; margin-bottom: 10px; }
+  .ask .q { font-size: 16px; font-weight: 700; line-height: 1.5; }
+  .ask .h { font-size: 12px; color: var(--dshm-ink-sub); margin-top: 4px; }
+  .ask .opts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .ask .opt { height: 40px; padding: 0 16px; border-radius: 999px; border: 1.5px solid #e6c9a8;
+    background: #fffcf6; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 7px; }
+  .ask .opt .pt { width: 7px; height: 7px; border-radius: 50%; background: var(--dshm-brand); }
+
+  /* 回执卡：酱印角标 + 台账行 */
+  .receipt { max-width: 300px; background: var(--dshm-card); border: 1.5px solid #dfc9a6;
+    border-radius: var(--dshm-r-card); overflow: hidden;
+    box-shadow: 0 2px 4px rgba(61, 43, 31, 0.05), 0 10px 28px rgba(61, 43, 31, 0.06); }
+  .receipt .hd { display: flex; align-items: center; gap: 10px; padding: 14px 16px 12px;
+    background: linear-gradient(180deg, #fdf7ea 0%, #ffffff 100%); }
+  .receipt .mini-seal { width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--dshm-success);
+    display: grid; place-items: center; font-size: 12px; font-weight: 800; color: var(--dshm-success); flex: none; }
+  .receipt .hd .tt { font-size: 15px; font-weight: 800; }
+  .receipt .hd .no { font-size: 12px; color: var(--dshm-ink-sub); font-family: var(--font-num); margin-top: 2px; }
+  .receipt .hd .st { margin-left: auto; font-size: 11px; font-weight: 700; color: var(--dshm-success);
+    background: var(--dshm-success-soft); padding: 4px 10px; border-radius: 999px; }
+  .receipt .rows { padding: 2px 16px 12px; }
+  .receipt .r { display: flex; justify-content: space-between; padding: 8px 0; font-size: 13px;
+    border-bottom: 1px dashed #efe3cb; }
+  .receipt .r:last-child { border-bottom: none; }
+  .receipt .r .k { color: var(--dshm-ink-sub); }
+  .receipt .r .v { font-weight: 600; }
+  .receipt .r .v.num { font-family: var(--font-num); }
+
+  .tail { font-size: 12px; color: var(--dshm-ink-sub); max-width: 272px; line-height: 1.7; }
+
+  /* Composer：纸槽 + 圆形柿橙发送章 */
+  .composer { background: rgba(255, 252, 246, 0.96); backdrop-filter: blur(14px);
+    border-top: 1px solid var(--dshm-line); padding: 10px 14px 30px; }
+  .ctx-chips { display: flex; gap: 8px; margin-bottom: 10px; }
+  .ctx { height: 32px; padding: 0 13px; border-radius: 999px; background: var(--dshm-card2);
+    border: 1px solid var(--dshm-line); font-size: 12px; font-weight: 600; color: var(--dshm-ink-sub);
+    display: flex; align-items: center; gap: 6px; }
+  .ctx .x { color: var(--dshm-ink-weak); }
+  .inbox { display: flex; align-items: center; gap: 10px; }
+  .field { flex: 1; height: 46px; background: var(--dshm-card); border: 1.5px solid #e6c9a8;
+    border-radius: 999px; padding: 0 18px; font-size: 16px; color: var(--dshm-ink-sub);
+    display: flex; align-items: center; }
+  .send { width: 46px; height: 46px; border-radius: 50%; background: var(--dshm-brand);
+    display: grid; place-items: center; box-shadow: 0 4px 12px rgba(180, 83, 10, 0.30); flex: none; }
+</style>
+</head>
+<body>
+  <div class="statusbar"><span>9:41</span><span>●●●●</span></div>
+  <div class="nav">
+    <div class="back">‹</div>
+    <div class="stamp">表</div>
+    <div class="who"><div class="n">填表助手<span class="ai">AI</span></div><div class="d">单据登记与任务执行</div></div>
+  </div>
+
+  <div class="flow">
+    <div class="day"><span>今天 09:32</span></div>
+
+    <div class="row me"><div class="bub">向宏发食品采购 500kg 面粉，单价 3.2</div></div>
+
+    <div class="row ai">
+      <div class="ava">表</div>
+      <div class="ask">
+        <span class="tag">补 一 项</span>
+        <div class="q">这批面粉入哪个仓库？</div>
+        <div class="h">确认后我就按 PO-2026-1042 生成采购单</div>
+        <div class="opts">
+          <div class="opt"><span class="pt"></span>东仓 A01</div>
+          <div class="opt"><span class="pt"></span>西仓 B02</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row me"><div class="bub">东仓 A01</div></div>
+
+    <div class="row ai">
+      <div class="ava">表</div>
+      <div class="receipt">
+        <div class="hd">
+          <div class="mini-seal">收</div>
+          <div><div class="tt">采购单已登记</div><div class="no">№ 1042 · PO-2026-1042</div></div>
+          <div class="st">已提交</div>
+        </div>
+        <div class="rows">
+          <div class="r"><span class="k">供应商</span><span class="v">宏发食品</span></div>
+          <div class="r"><span class="k">品名</span><span class="v">高筋面粉</span></div>
+          <div class="r"><span class="k">数量</span><span class="v num">500 kg</span></div>
+          <div class="r"><span class="k">单价</span><span class="v num">¥ 3.20 / kg</span></div>
+          <div class="r"><span class="k">金额</span><span class="v num">¥ 1,600.00</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row ai">
+      <div class="ava">表</div>
+      <div class="tail">单据已提交审批，可在「看单据」里跟踪进度。要顺手登记下一笔吗？</div>
+    </div>
+  </div>
+
+  <div class="composer">
+    <div class="ctx-chips">
+      <div class="ctx">采购单 №1042<span class="x"> ×</span></div>
+      <div class="ctx">换个说法<span class="x"> ×</span></div>
+    </div>
+    <div class="inbox">
+      <div class="field">说一句，或点上面的问题…</div>
+      <div class="send"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-8-8 18-2.5-7.5z"/></svg></div>
+    </div>
+  </div>
+</body>
+</html>

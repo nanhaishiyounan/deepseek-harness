@@ -394,6 +394,20 @@ function actionLineOf(action: 'confirm' | 'reject', segments: readonly MessageSe
   return action === 'confirm' ? '确认写入' : '驳回'
 }
 
+/**
+ * The legacy session-opening identity stamp line (W6-B0 through W8; the
+ * gateway retired it in W9-B2 — identity now rides the system prompt): the
+ * durable logs of old sessions keep the line, so display folding strips a
+ * first-line stamp and keeps the prose underneath.
+ */
+const LEGACY_IDENTITY_STAMP_LINE = /^【登录身份】/
+
+/** Strip a first-line legacy identity stamp; any later occurrence stays (only the server wrote it first). */
+function stripLegacyIdentityStamp(text: string): string {
+  if (!LEGACY_IDENTITY_STAMP_LINE.test(text)) return text
+  return text.split('\n').slice(1).join('\n')
+}
+
 /** Fold one user message: fenced/prefixed actions collapse, the rest bubbles. */
 function foldUserText(text: string, seq: number, time: number, items: ChatItem[]): void {
   const { segments } = splitMessage(text)
@@ -420,7 +434,10 @@ function foldUserText(text: string, seq: number, time: number, items: ChatItem[]
     items.push({ kind: 'action', seq, time, action: 'reject', text })
     return
   }
-  items.push({ kind: 'text', seq, time, role: 'user', text })
+  const display = stripLegacyIdentityStamp(text)
+  if (display.length > 0) {
+    items.push({ kind: 'text', seq, time, role: 'user', text: display })
+  }
 }
 
 /**

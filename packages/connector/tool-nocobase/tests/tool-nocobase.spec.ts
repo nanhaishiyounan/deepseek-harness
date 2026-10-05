@@ -13,6 +13,7 @@ import type { IncomingMessage, Server, ServerResponse } from 'node:http'
 import { afterEach, describe, expect, it } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import { CallId } from '@deepseek-ai/dsh-llm'
+import { clearSessionActingUser, setSessionActingUser } from '@deepseek-ai/dsh-connector-nocobase'
 import SystemPrompt, { renderPrompt } from '@deepseek-ai/dsh-system-prompt'
 import ToolRuntime from '@deepseek-ai/dsh-tools'
 import * as ToolNocoBase from '../src/index.ts'
@@ -62,6 +63,11 @@ async function bootMock(): Promise<MockServer> {
     ['pur_orders', [
       { id: 21, code: 'PO-2026-0001', doc_status: 'approved' },
       { id: 22, code: 'PO-2026-0002', doc_status: 'draft' },
+    ]],
+    ['wfl_approval_todos', [
+      { id: 101, user: 'buyer', doc_type: 'pur_orders', status: 'open' },
+      { id: 102, user: 'buyer', doc_type: 'so_orders', status: 'open' },
+      { id: 103, user: 'keeper', doc_type: 'wms_transfers', status: 'open' },
     ]],
   ])
   let idSeq = 100
@@ -147,12 +153,18 @@ async function bootMock(): Promise<MockServer> {
   }
 }
 
-/** Apply one mock-side filter tree: top-level keys AND, `$or` any-clause, `$eq`/`$in`/`$gt`/`$lt`/`$includes` operators. */
+/** Apply one mock-side filter tree: top-level keys AND, `$or` any-clause, `$and`
+ * all-clauses, `$eq`/`$in`/`$gt`/`$lt`/`$includes` operators. */
 function matchesFilter(row: Record<string, unknown>, filter: Record<string, unknown>): boolean {
   for (const [field, cell] of Object.entries(filter)) {
     if (field === '$or') {
       const clauses = cell as Array<Record<string, unknown>>
       if (!clauses.some(clause => matchesFilter(row, clause))) return false
+      continue
+    }
+    if (field === '$and') {
+      const clauses = cell as Array<Record<string, unknown>>
+      if (!clauses.every(clause => matchesFilter(row, clause))) return false
       continue
     }
     if (typeof cell !== 'object' || cell === null) {
@@ -176,6 +188,7 @@ const servers: Array<{ close: () => Promise<void> }> = []
 
 afterEach(async () => {
   Reflect.deleteProperty(process.env, KEY_ENV)
+  clearSessionActingUser('s-list')
   await Promise.all(contexts.splice(0).map(ctx => ctx.fiber.dispose()))
   await Promise.all(servers.splice(0).map(server => server.close()))
 })
@@ -197,7 +210,7 @@ interface Mount {
   mock: MockServer | undefined
 }
 
-async function mount(options: { degraded?: boolean } = {}): Promise<Mount> {
+async function mount(options: { degraded?: boolean; acting?: { username: string; nickname: string } } = {}): Promise<Mount> {
   const ctx = new Context()
   contexts.push(ctx)
   await ctx.plugin(SystemPrompt)
@@ -212,8 +225,17 @@ async function mount(options: { degraded?: boolean } = {}): Promise<Mount> {
     delete process.env.NOCOBASE_BASE_URL
     await ctx.plugin(ToolNocoBase, { apiKeyEnv: KEY_ENV })
   }
+  if (options.acting !== undefined) setSessionActingUser('s-list', options.acting)
   const execute = async (name: string, args: unknown): Promise<ExecuteResult> => {
-    const result = await ctx.tools.execute({ signal, callId: CallId(`call-${++counter}`), name, arguments: args })
+    const result = await ctx.tools.execute({
+      signal,
+      callId: CallId(`call-${++counter}`),
+      name,
+      arguments: args,
+      // The acting-user tests ride the 's-list' agent slot (the registry key
+      // the tools read through exec.agent.id).
+      ...(options.acting === undefined ? {} : { agent: { id: 's-list' } as never }),
+    })
     const text = result.content.find(block => block.type === 'text')
     return { isError: result.isError, value: result.value, text: text?.type === 'text' ? text.text : '', meta: result.meta }
   }
@@ -320,6 +342,58 @@ describe('nb_list', () => {
     const result = await execute('nb_list', { collection: 'orders', tenant: 'evil' })
     expect(result.isError).toBe(true)
     expect(result.text).toContain('a tenant argument is not accepted')
+  })
+})
+
+describe('nb_list row-scopes wfl_approval_todos to the acting user (W9-B2)', () => {
+  it('refuses the anonymous/unbound session: approval todos are the signed-in user\'s private data', async () => {
+    const { execute, mock } = await mount()
+    const refused = await execute('nb_list', { collection: 'wfl_approval_todos' })
+    expect(refused.isError).toBe(true)
+    expect(refused.text).toContain('登录用户的私有数据')
+    // The refusal answered before any wire call left.
+    expect(mock!.served.filter(served => served.path.includes('wfl_approval_todos'))).toHaveLength(0)
+  })
+
+  it('pushes the acting username down as the owner condition; a narrated foreign filter yields the contradictory empty set', async () => {
+    const { execute, mock } = await mount({ acting: { username: 'buyer', nickname: '采购员·蔡俊' } })
+    const mine = await execute('nb_list', { collection: 'wfl_approval_todos' })
+    expect(mine.isError).toBe(false)
+    expect(mine.value).toMatchObject({ collection: 'wfl_approval_todos', count: 2 })
+    expect(JSON.parse(mock!.served[0]!.query.get('filter') ?? 'null')).toEqual({ user: { $eq: 'buyer' } })
+    if (!mine.isError) {
+      expect((mine.value as { rows: Array<{ user: string }> }).rows.every(row => row.user === 'buyer')).toBe(true)
+    }
+    // Narrating the foreign username AND-joins into a contradiction: the
+    // backend answers zero rows, never keeper's.
+    const foreign = await execute('nb_list', {
+      collection: 'wfl_approval_todos',
+      filter: [{ field: 'user', op: 'eq', value: 'keeper' }],
+    })
+    expect(foreign.isError).toBe(false)
+    expect(foreign.value).toMatchObject({ count: 0 })
+    expect(JSON.parse(mock!.served[1]!.query.get('filter') ?? 'null'))
+      .toMatchObject({ $and: [{ user: { $eq: 'buyer' } }, { user: { $eq: 'keeper' } }] })
+  })
+
+  it('AND-wraps an or-joined narrated filter so the owner scope still holds', async () => {
+    const { execute, mock } = await mount({ acting: { username: 'buyer', nickname: '采购员·蔡俊' } })
+    const orWide = await execute('nb_list', {
+      collection: 'wfl_approval_todos',
+      match: 'or',
+      filter: [{ field: 'user', op: 'eq', value: 'keeper' }, { field: 'status', op: 'eq', value: 'open' }],
+    })
+    expect(orWide.isError).toBe(false)
+    expect(orWide.value).toMatchObject({ count: 2 })
+    expect(JSON.parse(mock!.served[0]!.query.get('filter') ?? 'null'))
+      .toMatchObject({ $and: [{ user: { $eq: 'buyer' } }, { $or: [{ user: { $eq: 'keeper' } }, { status: { $eq: 'open' } }] }] })
+  })
+
+  it('leaves every other collection unscoped (the acting-user read gate is todos-only)', async () => {
+    const { execute } = await mount({ acting: { username: 'buyer', nickname: '采购员·蔡俊' } })
+    const result = await execute('nb_list', { collection: 'orders' })
+    expect(result.isError).toBe(false)
+    expect(result.value).toMatchObject({ collection: 'orders', count: 3 })
   })
 })
 

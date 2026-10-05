@@ -1,0 +1,269 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.8 [39m[90m/Users/mac/Documents/github/deepseek-harness[39m
+
+[90mstderr[2m | packages/client/ui-mobile/tests/demo-seed.client.spec.ts[2m > [22m[2mseedDemoData[2m > [22m[2mnever seeds a store a corrupt reset already marked seeded
+[22m[39mdsh-mobile-work 存储损坏，已重置为空工作空间
+
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/demo-seed.client.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 2056[2mms[22m[39m
+     [33m[2m✓[22m[39m names the three demo members with their duty lines [33m 2014[2mms[22m[39m
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/run-mode.client.spec.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 2120[2mms[22m[39m
+     [33m[2m✓[22m[39m returns the pinned value without probing [33m 2016[2mms[22m[39m
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/workStore.client.spec.ts [2m([22m[2m30 tests[22m[2m)[22m[33m 2515[2mms[22m[39m
+     [33m[2m✓[22m[39m creates with the documented defaults and persists the whole store [33m 2184[2mms[22m[39m
+[90mstderr[2m | packages/client/ui-mobile/tests/field-widget.client.spec.tsx[2m > [22m[2mFieldWidget enum Picker[2m > [22m[2mopens the popup through actions.open and confirms the chosen option
+[22m[39m[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+
+[90mstderr[2m | packages/client/ui-mobile/tests/field-widget.client.spec.tsx[2m > [22m[2mFieldWidget enum Picker[2m > [22m[2mopens the popup through actions.open and confirms the chosen option
+[22m[39m[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+
+[90mstderr[2m | packages/client/ui-mobile/tests/field-widget.client.spec.tsx[2m > [22m[2mFieldWidget enum Picker[2m > [22m[2mkeeps the current value when confirming an empty vocabulary
+[22m[39m[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+
+[90mstderr[2m | packages/client/ui-mobile/tests/field-widget.client.spec.tsx[2m > [22m[2mFieldWidget enum Picker[2m > [22m[2mkeeps the current value when confirming an empty vocabulary
+[22m[39m[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+
+[90mstderr[2m | packages/client/ui-mobile/tests/field-widget.client.spec.tsx[2m > [22m[2mFieldWidget date DatePicker[2m > [22m[2mopens the popup through actions.open and confirms a YYYY-MM-DD choice
+[22m[39m[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+
+[90mstderr[2m | packages/client/ui-mobile/tests/field-widget.client.spec.tsx[2m > [22m[2mFieldWidget relation Picker[2m > [22m[2mloads target rows into the popup and confirms a picked id
+[22m[39m[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+
+[90mstderr[2m | packages/client/ui-mobile/tests/field-widget.client.spec.tsx[2m > [22m[2mFieldWidget relation Picker[2m > [22m[2mloads target rows into the popup and confirms a picked id
+[22m[39m[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+
+[90mstderr[2m | packages/client/ui-mobile/tests/field-widget.client.spec.tsx[2m > [22m[2mFieldWidget relation Picker[2m > [22m[2mopens the relation picker from the keyboard and ignores unrelated keys
+[22m[39m[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+
+[90mstderr[2m | packages/client/ui-mobile/tests/field-widget.client.spec.tsx[2m > [22m[2mFieldWidget relation Picker[2m > [22m[2mshows the matched option label for an AI-prefilled id and still confirms the id
+[22m[39m[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+
+[90mstderr[2m | packages/client/ui-mobile/tests/field-widget.client.spec.tsx[2m > [22m[2mFieldWidget relation Picker[2m > [22m[2mshows the raw id while the option read is in flight, then resolves the label and confirms the id
+[22m[39m[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+
+[90mstderr[2m | packages/client/ui-mobile/tests/field-widget.client.spec.tsx[2m > [22m[2mFieldWidget relation Picker[2m > [22m[2mshows the raw value while unmatched and falls back to the id column when the label misses
+[22m[39m[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+
+[90mstderr[2m | packages/client/ui-mobile/tests/task-form.client.spec.tsx[2m > [22m[2mTaskFormModal[2m > [22m[2mwalks the owner picker, the due picker, the clear key, and the suggestion carry
+[22m[39m[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+
+[90mstderr[2m | packages/client/ui-mobile/tests/field-widget.client.spec.tsx[2m > [22m[2mFieldWidget relation Picker[2m > [22m[2mshows the raw value while unmatched and falls back to the id column when the label misses
+[22m[39m[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+
+[90mstderr[2m | packages/client/ui-mobile/tests/field-widget.client.spec.tsx[2m > [22m[2mFieldWidget relation Picker[2m > [22m[2mshows the raw value while unmatched and falls back to the id column when the label misses
+[22m[39m[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+
+[90mstderr[2m | packages/client/ui-mobile/tests/field-widget.client.spec.tsx[2m > [22m[2mFieldWidget relation Picker[2m > [22m[2mlabels the users target by nickname and renders object cells empty
+[22m[39m[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+
+[90mstderr[2m | packages/client/ui-mobile/tests/task-form.client.spec.tsx[2m > [22m[2mTaskFormModal[2m > [22m[2mwalks the owner picker, the due picker, the clear key, and the suggestion carry
+[22m[39m[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/files-view.client.spec.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 1564[2mms[22m[39m
+     [33m[2m✓[22m[39m lists the generated artifacts newest first and previews one inline [33m 988[2mms[22m[39m
+[90mstderr[2m | packages/client/ui-mobile/tests/field-widget.client.spec.tsx[2m > [22m[2mFieldWidget relation Picker[2m > [22m[2mkeeps the row usable as an empty vocabulary when the option read fails
+[22m[39m[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/field-widget.client.spec.tsx [2m([22m[2m22 tests[22m[2m)[22m[33m 2001[2mms[22m[39m
+[90mstderr[2m | packages/client/ui-mobile/tests/v3-components.client.spec.tsx[2m > [22m[2mReceiptCard v3[2m > [22m[2mrenders relation fields as the picker trigger on the edit row and the derived face on the derived tier
+[22m[39m[antd-mobile: Global] You are using a not supported CSS unit in `auto`. Only `px` `rem` and `vw` are supported.
+
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/task-form.client.spec.tsx [2m([22m[2m9 tests[22m[2m)[22m[33m 2591[2mms[22m[39m
+     [33m[2m✓[22m[39m opens with the prefill and shows the source strip and suggestion [33m 348[2mms[22m[39m
+     [33m[2m✓[22m[39m blocks submit on an empty title with the inline error, then edits clear it [33m 510[2mms[22m[39m
+     [33m[2m✓[22m[39m runs the chain in order: create, M1, toast, navigate [33m 338[2mms[22m[39m
+     [33m[2m✓[22m[39m walks the owner picker, the due picker, the clear key, and the suggestion carry [33m 571[2mms[22m[39m
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/work-view.client.spec.tsx [2m([22m[2m16 tests[22m[2m)[22m[33m 2474[2mms[22m[39m
+     [33m[2m✓[22m[39m renders the empty state per status with the agents route [33m 508[2mms[22m[39m
+     [33m[2m✓[22m[39m starts a tool card over createSession with the starter opener [33m 380[2mms[22m[39m
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/v3-components.client.spec.tsx [2m([22m[2m35 tests[22m[2m)[22m[33m 2055[2mms[22m[39m
+     [33m[2m✓[22m[39m renders the cards variant with hints and sends the picked send-text [33m 455[2mms[22m[39m
+     [33m[2m✓[22m[39m renders relation fields as the picker trigger on the edit row and the derived face on the derived tier [33m 331[2mms[22m[39m
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/home-view.client.spec.tsx [2m([22m[2m15 tests[22m[2m)[22m[33m 2619[2mms[22m[39m
+     [33m[2m✓[22m[39m renders the greeting, the empty-day sub, and the stats cells routing to work [33m 676[2mms[22m[39m
+[90mstderr[2m | packages/client/ui-mobile/tests/views.client.spec.tsx[2m > [22m[2mmobile app shell[2m > [22m[2mgates on the stored identity and logs out back to the login page
+[22m[39m{"type":"client_error","scope":"workSync.pull","message":"no stub for nocobase.list","at":"2026-10-04T22:58:33.005Z"}
+
+[90mstderr[2m | packages/client/ui-mobile/tests/views.client.spec.tsx[2m > [22m[2mmobile app shell[2m > [22m[2mgates on the stored identity and logs out back to the login page
+[22m[39m{"type":"client_error","scope":"ledger.monthly","message":"no stub for nocobase.list","at":"2026-10-04T22:58:33.006Z"}
+
+[90mstderr[2m | packages/client/ui-mobile/tests/views.client.spec.tsx[2m > [22m[2mmobile app shell[2m > [22m[2mroutes the four tabs and redirects the v1 heads onto their views
+[22m[39m{"type":"client_error","scope":"ledger.monthly","message":"no stub for nocobase.list","at":"2026-10-04T22:58:33.591Z"}
+
+[90mstderr[2m | packages/client/ui-mobile/tests/views.client.spec.tsx[2m > [22m[2mmobile app shell[2m > [22m[2mpersists the dark theme through the me-tab switch
+[22m[39m{"type":"client_error","scope":"workSync.pull","message":"no stub for nocobase.list","at":"2026-10-04T22:58:33.886Z"}
+
+[90mstderr[2m | packages/client/ui-mobile/tests/views.client.spec.tsx[2m > [22m[2mmobile app shell[2m > [22m[2mpersists the dark theme through the me-tab switch
+[22m[39m{"type":"client_error","scope":"ledger.monthly","message":"no stub for nocobase.list","at":"2026-10-04T22:58:34.019Z"}
+
+[90mstderr[2m | packages/client/ui-mobile/tests/views.client.spec.tsx[2m > [22m[2mmobile chats tab[2m > [22m[2mfilters the registered work sessions out of the row list
+[22m[39m[antd-mobile: Global] The px tester is not rendering properly. Please make sure you have imported `antd-mobile/es/global`.
+
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/work-timeline.client.spec.ts [2m([22m[2m11 tests[22m[2m)[22m[33m 1303[2mms[22m[39m
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/task-cards.client.spec.tsx [2m([22m[2m20 tests[22m[2m)[22m[33m 1367[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps the card pending when the confirm dialog closes without writing [33m 545[2mms[22m[39m
+     [33m[2m✓[22m[39m shows the raw id when the label read fails [33m 322[2mms[22m[39m
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/agents-view.client.spec.tsx [2m([22m[2m10 tests[22m[2m)[22m[33m 1653[2mms[22m[39m
+     [33m[2m✓[22m[39m renders the banded roster with skills and presence chips [33m 482[2mms[22m[39m
+     [33m[2m✓[22m[39m starts the colleague chat over createSession [33m 418[2mms[22m[39m
+[90mstderr[2m | packages/client/ui-mobile/tests/views.client.spec.tsx[2m > [22m[2mmobile me tab[2m > [22m[2mopens the data and about dialogs
+[22m[39m{"type":"client_error","scope":"ledger.monthly","message":"no stub for nocobase.list","at":"2026-10-04T22:58:37.006Z"}
+
+[90mstderr[2m | packages/client/ui-mobile/tests/views.client.spec.tsx[2m > [22m[2mmobile me tab[2m > [22m[2mrenders the identity card, ledger metrics, and toggles the dark theme
+[22m[39m{"type":"client_error","scope":"ledger.monthly","message":"no stub for nocobase.list","at":"2026-10-04T22:58:37.205Z"}
+
+[90mstderr[2m | packages/client/ui-mobile/tests/views.client.spec.tsx[2m > [22m[2mmobile me tab[2m > [22m[2mruns the quick-start shortcuts, restoring the button on failure
+[22m[39m{"type":"client_error","scope":"ledger.monthly","message":"no stub for nocobase.list","at":"2026-10-04T22:58:37.404Z"}
+
+[90mstderr[2m | packages/client/ui-mobile/tests/docs-view.client.spec.tsx[2m > [22m[2mdocs view: the deep-link role guard (W6-R1 P0-2 layer 1)[2m > [22m[2mbounces buyer out of qm_inspections back onto the directory
+[22m[39m[antd-mobile: Global] The px tester is not rendering properly. Please make sure you have imported `antd-mobile/es/global`.
+{"type":"client_error","scope":"docs.guard","message":"账号 buyer 深链越权集合 qm_inspections，已重定向","at":"2026-10-04T22:58:37.402Z"}
+
+[90mstderr[2m | packages/client/ui-mobile/tests/views.client.spec.tsx[2m > [22m[2mmobile me tab[2m > [22m[2mlogs out through the confirm dialog
+[22m[39m{"type":"client_error","scope":"ledger.monthly","message":"Failed to parse URL from /api/nocobase.list","at":"2026-10-04T22:58:37.884Z"}
+{"type":"client_error","scope":"ledger.recent","message":"Failed to parse URL from /api/session.list","at":"2026-10-04T22:58:37.906Z"}
+
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/tasks-view.client.spec.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 997[2mms[22m[39m
+     [33m[2m✓[22m[39m renders the mine empty state routing to chats [33m 549[2mms[22m[39m
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/report-card.client.spec.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 782[2mms[22m[39m
+     [33m[2m✓[22m[39m renders the head, stamp, metrics, rows, table, and the action row [33m 621[2mms[22m[39m
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/docs-view.client.spec.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 1268[2mms[22m[39m
+     [33m[2m✓[22m[39m bounces buyer out of qm_inspections back onto the directory [33m 601[2mms[22m[39m
+[90mstderr[2m | packages/client/ui-mobile/tests/alerts-view.client.spec.tsx[2m > [22m[2malerts view[2m > [22m[2mrenders the scoped rows with tiers, segments, the days wording, and the per-row actions
+[22m[39m[antd-mobile: Global] The px tester is not rendering properly. Please make sure you have imported `antd-mobile/es/global`.
+
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/approval-card.client.spec.tsx [2m([22m[2m9 tests[22m[2m)[22m[33m 747[2mms[22m[39m
+     [33m[2m✓[22m[39m renders the pending card with the summary grid, stamp, chip, remark input, and both buttons [33m 567[2mms[22m[39m
+[90mstderr[2m | packages/client/ui-mobile/tests/todos-view.client.spec.tsx[2m > [22m[2mtodos view[2m > [22m[2mrenders the open rows with enrichment (the 同意 dialog handoff rides the live evidence: w6-b1-02; antd-mobile Modal keeps this jsdom worker from draining)
+[22m[39m[antd-mobile: Global] The px tester is not rendering properly. Please make sure you have imported `antd-mobile/es/global`.
+
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/todos-view.client.spec.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 895[2mms[22m[39m
+     [33m[2m✓[22m[39m renders the open rows with enrichment (the 同意 dialog handoff rides the live evidence: w6-b1-02; antd-mobile Modal keeps this jsdom worker from draining) [33m 731[2mms[22m[39m
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/alerts-view.client.spec.tsx [2m([22m[2m6 tests[22m[2m)[22m[33m 1086[2mms[22m[39m
+     [33m[2m✓[22m[39m renders the scoped rows with tiers, segments, the days wording, and the per-row actions [33m 765[2mms[22m[39m
+[90mstderr[2m | packages/client/ui-mobile/tests/views.client.spec.tsx[2m > [22m[2mmobile chat view[2m > [22m[2msends drafts through the composer and chips, failing loud on rejection
+[22m[39m{"type":"client_error","scope":"chat.send-refused","clientMsgId":"m__4_muuf9ubo_d2db80ba","message":"推送通道拒绝","at":"2026-10-04T22:58:38.955Z"}
+
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/work-detail.client.spec.tsx [2m([22m[2m25 tests[22m[2m)[22m[33m 11000[2mms[22m[39m
+     [33m[2m✓[22m[39m names a missing item and fires its back arm [33m 447[2mms[22m[39m
+     [33m[2m✓[22m[39m completes the demo doing chain: review flip, result, M3 to the source chat [33m 4096[2mms[22m[39m
+     [33m[2m✓[22m[39m renders a failed live tool step without finishing the item [33m 366[2mms[22m[39m
+     [33m[2m✓[22m[39m toasts a failed M3 notice and still flips to review [33m 4045[2mms[22m[39m
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/services.client.spec.ts [2m([22m[2m24 tests[22m[2m)[22m[33m 385[2mms[22m[39m
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/action-dispatch.client.spec.ts [2m([22m[2m15 tests[22m[2m)[22m[33m 439[2mms[22m[39m
+[90mstderr[2m | packages/client/ui-mobile/tests/work-sync.client.spec.ts[2m > [22m[2mwork projection mapping[2m > [22m[2mmaps rows both ways; a malformed row drops
+[22m[39m{"type":"client_error","scope":"workSync.row","message":"projection row dropped","at":"2026-10-04T22:58:41.645Z"}
+{"type":"client_error","scope":"workSync.row","message":"projection row dropped","at":"2026-10-04T22:58:41.646Z"}
+
+[90mstderr[2m | packages/client/ui-mobile/tests/work-sync.client.spec.ts[2m > [22m[2msession expiry over the rpc wire[2m > [22m[2mnarrows by code, clears the token, and notifies — other errors keep the identity
+[22m[39m{"type":"session_expired","at":"2026-10-04T22:58:41.683Z"}
+
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/protocol.client.spec.ts [2m([22m[2m84 tests[22m[2m)[22m[32m 81[2mms[22m[39m
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/work-sync.client.spec.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 118[2mms[22m[39m
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/rich.client.spec.ts [2m([22m[2m21 tests[22m[2m)[22m[32m 187[2mms[22m[39m
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/hooks.client.spec.tsx [2m([22m[2m6 tests[22m[2m)[22m[32m 134[2mms[22m[39m
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/rich-content.client.spec.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 247[2mms[22m[39m
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/fold.client.spec.ts [2m([22m[2m28 tests[22m[2m)[22m[32m 102[2mms[22m[39m
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/ledger-service.client.spec.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 63[2mms[22m[39m
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/system-fields.client.spec.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 61[2mms[22m[39m
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/router.client.spec.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/form-registry.client.spec.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 27[2mms[22m[39m
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/card-state.client.spec.ts [2m([22m[2m26 tests[22m[2m)[22m[32m 24[2mms[22m[39m
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/outbox-store.client.spec.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 108[2mms[22m[39m
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/fold-branches.client.spec.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 47[2mms[22m[39m
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/draft-store.client.spec.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 42[2mms[22m[39m
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/form-draft.client.spec.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/docs-catalog.client.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+[90mstderr[2m | packages/client/ui-mobile/tests/views.client.spec.tsx[2m > [22m[2mmobile app theme round-trip[2m > [22m[2mturns the dark theme back off and clears the stored choice
+[22m[39m{"type":"client_error","scope":"workSync.pull","message":"no stub for nocobase.list","at":"2026-10-04T22:58:45.896Z"}
+
+[90mstderr[2m | packages/client/ui-mobile/tests/views.client.spec.tsx[2m > [22m[2mmobile app theme round-trip[2m > [22m[2mturns the dark theme back off and clears the stored choice
+[22m[39m{"type":"client_error","scope":"ledger.monthly","message":"no stub for nocobase.list","at":"2026-10-04T22:58:45.939Z"}
+
+[90mstderr[2m | packages/client/ui-mobile/tests/views.client.spec.tsx[2m > [22m[2mmobile shell route edges[2m > [22m[2mswitches between the me and work tabs through the tab bar
+[22m[39m{"type":"client_error","scope":"ledger.monthly","message":"no stub for nocobase.list","at":"2026-10-04T22:58:46.266Z"}
+
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/plan-card.client.spec.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/projection.client.spec.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+[90mstderr[2m | packages/client/ui-mobile/tests/views.client.spec.tsx[2m > [22m[2mmobile shell route edges[2m > [22m[2mreaches and activates the tab bar items by keyboard (WCAG 2.1.1)
+[22m[39m{"type":"client_error","scope":"ledger.monthly","message":"no stub for nocobase.list","at":"2026-10-04T22:58:46.530Z"}
+
+[90mstderr[2m | packages/client/ui-mobile/tests/views.client.spec.tsx[2m > [22m[2mmobile chat view (v3 fences)[2m > [22m[2mrenders an open ask with no composer chips and sends the pick as the user
+[22m[39m{"type":"client_error","scope":"chat.send-refused","clientMsgId":"m__12_muufa0hj_f6f3cbe6","message":"no stub for session.prompt","at":"2026-10-04T22:58:46.914Z"}
+
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/field-controls.client.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/portal.client.spec.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/auth.client.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+[90mstderr[2m | packages/client/ui-mobile/tests/views.client.spec.tsx[2m > [22m[2mmobile chat view (demo typing)[2m > [22m[2mclears the typing indicator and re-enables the composer when a send fails
+[22m[39m{"type":"client_error","scope":"chat.send-refused","clientMsgId":"m__3_muufa43c_0057b46b","message":"推送通道拒绝","at":"2026-10-04T22:58:51.576Z"}
+
+[90mstderr[2m | packages/client/ui-mobile/tests/views.client.spec.tsx[2m > [22m[2mmobile me tab (v5 additions)[2m > [22m[2mshows the workspace card, flips the run mode to live, and clears the demo data
+[22m[39m{"type":"client_error","scope":"ledger.monthly","message":"no stub for nocobase.list","at":"2026-10-04T22:58:49.181Z"}
+
+[90mstderr[2m | packages/client/ui-mobile/tests/views.client.spec.tsx[2m > [22m[2mmobile docs route reference (W6-R1; the todos leg lives in todos-view.client.spec.tsx)[2m > [22m[2mroutes #/docs onto the docs directory and its role subset
+[22m[39m{"type":"client_error","scope":"workSync.push","message":"no stub for nocobase.mobileWorkSave","at":"2026-10-04T22:58:49.605Z"}
+
+[90mstderr[2m | packages/client/ui-mobile/tests/views.client.spec.tsx[2m > [22m[2mmobile docs route reference (W6-R1; the todos leg lives in todos-view.client.spec.tsx)[2m > [22m[2mroutes #/docs onto the docs directory and its role subset
+[22m[39m{"type":"client_error","scope":"workSync.push","message":"no stub for nocobase.mobileWorkSave","at":"2026-10-04T22:58:49.608Z"}
+
+[90mstderr[2m | packages/client/ui-mobile/tests/views.client.spec.tsx[2m > [22m[2mmobile docs route reference (W6-R1; the todos leg lives in todos-view.client.spec.tsx)[2m > [22m[2mroutes #/docs onto the docs directory and its role subset
+[22m[39m{"type":"client_error","scope":"workSync.push","message":"no stub for nocobase.mobileWorkSave","at":"2026-10-04T22:58:49.608Z"}
+
+[90mstderr[2m | packages/client/ui-mobile/tests/views.client.spec.tsx[2m > [22m[2mmobile docs route reference (W6-R1; the todos leg lives in todos-view.client.spec.tsx)[2m > [22m[2mroutes #/docs onto the docs directory and its role subset
+[22m[39m{"type":"client_error","scope":"workSync.push","message":"no stub for nocobase.mobileWorkSave","at":"2026-10-04T22:58:49.609Z"}
+
+[90mstderr[2m | packages/client/ui-mobile/tests/views.client.spec.tsx[2m > [22m[2mmobile docs route reference (W6-R1; the todos leg lives in todos-view.client.spec.tsx)[2m > [22m[2mroutes #/docs onto the docs directory and its role subset
+[22m[39m{"type":"client_error","scope":"workSync.push","message":"no stub for nocobase.mobileWorkSave","at":"2026-10-04T22:58:49.609Z"}
+
+[90mstderr[2m | packages/client/ui-mobile/tests/views.client.spec.tsx[2m > [22m[2mmobile docs route reference (W6-R1; the todos leg lives in todos-view.client.spec.tsx)[2m > [22m[2mroutes #/docs onto the docs directory and its role subset
+[22m[39m{"type":"client_error","scope":"workSync.push","message":"no stub for nocobase.mobileWorkSave","at":"2026-10-04T22:58:49.609Z"}
+
+ [32m✓[39m [30m[45m thread-safe [49m[39m packages/client/ui-mobile/tests/views.client.spec.tsx [2m([22m[2m100 tests[22m[2m)[22m[33m 18082[2mms[22m[39m
+     [33m[2m✓[22m[39m renders the stamp avatar, badge tones, running row, notices, and the skeleton card [33m 527[2mms[22m[39m
+     [33m[2m✓[22m[39m gates on the stored identity and logs out back to the login page [33m 595[2mms[22m[39m
+     [33m[2m✓[22m[39m routes the four tabs and redirects the v1 heads onto their views [33m 486[2mms[22m[39m
+     [33m[2m✓[22m[39m renders the six-element rows with filters, search, and the unread dot [33m 337[2mms[22m[39m
+     [33m[2m✓[22m[39m pins a session above the rest, unpins, and marks read through the swipe row [33m 318[2mms[22m[39m
+     [33m[2m✓[22m[39m loads the next page when the list overflows the first page [33m 712[2mms[22m[39m
+     [33m[2m✓[22m[39m shows the loading notice and the folded flow once the window lands [33m 307[2mms[22m[39m
+     [33m[2m✓[22m[39m sends drafts through the composer and chips, failing loud on rejection [33m 639[2mms[22m[39m
+     [33m[2m✓[22m[39m runs the quick panel: picks fill the draft, placeholders toast, empty falls back [33m 601[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps the welcome card through a fill and retires it once the first send lands [33m 376[2mms[22m[39m
+     [33m[2m✓[22m[39m edits fields, submits for review, confirms, and sends the final payload [33m 654[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects from the review card and re-edits from the rejected card [33m 1206[2mms[22m[39m
+     [33m[2m✓[22m[39m stops pinning the flow once the user scrolls away from the bottom [33m 1713[2mms[22m[39m
+     [33m[2m✓[22m[39m renders and opens the modal from the real-LLM text-only create-task capture [33m 637[2mms[22m[39m
+     [33m[2m✓[22m[39m shows the workspace card, flips the run mode to live, and clears the demo data [33m 446[2mms[22m[39m
+[90mstderr[2m | logClientError (/Users/mac/Documents/github/deepseek-harness/packages/client/ui-mobile/src/client/hooks.ts:45:11)
+[22m[39m{"type":"client_error","scope":"workSync.push","message":"Failed to parse URL from /api/nocobase.mobileWorkDelete","at":"2026-10-04T22:58:49.618Z"}
+
+[90mstderr[2m | logClientError (/Users/mac/Documents/github/deepseek-harness/packages/client/ui-mobile/src/client/hooks.ts:45:11)
+[22m[39m{"type":"client_error","scope":"workSync.push","message":"Failed to parse URL from /api/nocobase.mobileWorkDelete","at":"2026-10-04T22:58:49.622Z"}
+
+[90mstderr[2m | logClientError (/Users/mac/Documents/github/deepseek-harness/packages/client/ui-mobile/src/client/hooks.ts:45:11)
+[22m[39m{"type":"client_error","scope":"workSync.push","message":"Failed to parse URL from /api/nocobase.mobileWorkDelete","at":"2026-10-04T22:58:49.623Z"}
+
+
+[2m Test Files [22m [1m[32m43 passed[39m[22m[90m (43)[39m
+[2m      Tests [22m [1m[32m673 passed[39m[22m[90m (673)[39m
+[2m   Start at [22m 06:58:22
+[2m   Duration [22m 26.66s[2m (transform 13.00s, setup 10.24s, import 67.51s, tests 61.33s, environment 99.12s)[22m

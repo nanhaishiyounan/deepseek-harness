@@ -1,0 +1,153 @@
+{
+  "theme": "light",
+  "values": {
+    "bg": "rgb(251, 245, 235)",
+    "card": "rgb(255, 255, 255)",
+    "textMain": "rgb(61, 43, 31)",
+    "textMuted": "rgb(111, 91, 73)",
+    "border": "rgb(234, 223, 201)",
+    "tabActiveColor": "rgb(180, 83, 10)",
+    "tabbarBg": "rgba(255, 252, 246, 0.96)",
+    "focusRingToken": "0 0 0 3px rgba(180, 83, 10, .4)",
+    "linkToken": "#1e4e8c",
+    "inputWellToken": "#f6eddf",
+    "chipsGap": "10px",
+    "chipHeight": 40
+  },
+  "checks": {
+    "textVsCardContrast": 13.43,
+    "mutedVsCardContrast": 6.42,
+    "cardVsBgElevationStep": 11,
+    "borderVsCardStep": 36,
+    "tabActiveVsTabbarContrast": 4.9,
+    "focusRuleFound": true,
+    "chipsGapPx": 10,
+    "touchSmPx": 40,
+    "brandHits": 9,
+    "searchBarPx": 44,
+    "inputFloorPx": 16,
+    "inputVsCardStep": 20
+  },
+  "login": {
+    "loginButtonBg": null,
+    "focusTargetTag": "BUTTON",
+    "focusShadow": "rgba(180, 83, 10, 0.4) 0px 0px 0px 3px"
+  },
+  "injected": {
+    "displayPx": 30,
+    "bodyPx": 14,
+    "monoFamily": "\"SF Mono\", ui-monospace, Menlo, monospace",
+    "monoVariant": "tabular-nums",
+    "rootTabular": "tabular-nums",
+    "admPrimary": "rgb(180, 83, 10)",
+    "admBodyBg": "rgb(251, 245, 235)",
+    "admRadiusM": "14px",
+    "admFs10": 44
+  },
+  "surfaces": {
+    "work": {
+      "linkColor": "rgb(30, 78, 140)",
+      "cardBg": "rgb(255, 255, 255)",
+      "linkVsCardContrast": 8.32
+    },
+    "chats": {
+      "searchBarPx": 44,
+      "inputFloorPx": 16
+    }
+  },
+  "dark": {
+    "theme": "dark",
+    "canvas": "rgb(25, 19, 16)",
+    "card": "rgb(42, 34, 28)",
+    "ink": "rgb(242, 227, 211)",
+    "brandResolved": "rgb(229, 139, 74)",
+    "tabActive": "rgb(240, 154, 94)",
+    "tabbarBg": "rgba(31, 25, 19, 0.96)",
+    "focusRingToken": "0 0 0 3px rgba(229, 139, 74, .55)",
+    "textVsCard": 12.43,
+    "tabActiveVsTabbar": 7.86
+  },
+  "gates": [
+    {
+      "name": "theme-light",
+      "ok": true
+    },
+    {
+      "name": "textVsCard≥4.5",
+      "ok": true
+    },
+    {
+      "name": "mutedVsCard≥4.5",
+      "ok": true
+    },
+    {
+      "name": "linkVsCard≥4.5",
+      "ok": true
+    },
+    {
+      "name": "inputVsCardStep≥8",
+      "ok": true
+    },
+    {
+      "name": "tabActiveVsTabbar≥3",
+      "ok": true
+    },
+    {
+      "name": "focus-ring declared",
+      "ok": true
+    },
+    {
+      "name": "chipsGapPx≥8",
+      "ok": true
+    },
+    {
+      "name": "touchSmPx≥40",
+      "ok": true
+    },
+    {
+      "name": "searchBarPx≥44",
+      "ok": true
+    },
+    {
+      "name": "inputFloorPx≥16",
+      "ok": true
+    },
+    {
+      "name": "focusRingVisible(kbd)",
+      "ok": true
+    },
+    {
+      "name": "canvasWarmPaper #fbf5eb",
+      "ok": true
+    },
+    {
+      "name": "brandPersimmonHits≥2",
+      "ok": true
+    },
+    {
+      "name": "typeScale display30/body14",
+      "ok": true
+    },
+    {
+      "name": "monoNumTrack tabular",
+      "ok": true
+    },
+    {
+      "name": "admOverrideSample≥3",
+      "ok": true
+    },
+    {
+      "name": "darkFollows tokens",
+      "ok": true
+    },
+    {
+      "name": "darkContrast text≥4.5/tab≥3",
+      "ok": true
+    }
+  ],
+  "summary": {
+    "admOverrideSamplesPassed": 4,
+    "brandHits": 9
+  }
+}
+w9-b4 probe: 19/19 gates pass — ALL PASS

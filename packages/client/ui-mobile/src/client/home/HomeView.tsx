@@ -1,15 +1,14 @@
 /**
- * The home tab (v7: the neutral hero card — daypart + identity on white with
- * the date capsule as the one brand accent, W7-M1's de-blue move that retires
- * the v6 gradient hero), the search-box entry (a visual affordance that lands
- * on the all-chats layer, which owns the real filtering), the compact
- * today-ledger grid (the four status counts routing to work; a zero renders
- * neutral, a live count keeps its status hue), the quick-task chips (one
- * solid primary CTA, the rest neutral capsules), the colleagues' horizontal
- * avatar rail, and the recent-chats list in the conv-item form — the stamp
- * avatar with the presence dot, the one-line projection preview, the relative
- * time, and the unread dot badge off the draftStore read watermark (work
- * sessions stay filtered out, 02 §9).
+ * The home tab (W9「酱园琥珀」: the brand hero — the display greeting over the
+ * warm-paper canvas with the 84px 鲜酿 round seal as the page's signature
+ * stamp, the solar-term line computed from the real sun longitude, the
+ * two-column big stat cards (32px mono tabular digits, the zero-neutral
+ * narrative kept), the quick-task chips in the seal language (one solid
+ * persimmon CTA + paper capsules), the colleagues' avatar rail, and the
+ * recent-chats list in the conv-item form — the stamp avatar with the
+ * presence dot, the one-line projection preview, the relative time, and the
+ * unread dot badge off the draftStore read watermark (work sessions stay
+ * filtered out, 02 §9).
  */
 
 import { useEffect, useMemo, useState, useSyncExternalStore, type JSX } from 'react'
@@ -45,20 +44,109 @@ export function greetingWordOf(hour: number): string {
   return '下午好'
 }
 
+/** The current solar term plus the days elapsed since its crossing. */
+export interface SolarTerm {
+  readonly name: string
+  /** 1 on the crossing day itself (the 「今日霜降」 day). */
+  readonly day: number
+}
+
+const DEG = Math.PI / 180
+const DAY_MS = 86_400_000
+
+/**
+ * The apparent solar longitude at a UTC instant (Meeus low-precision series:
+ * ±0.01° ≈ ±15 min of term time — enough to pin the Gregorian day of every
+ * 15° crossing through the 21st century).
+ * @param utcMs - the epoch milliseconds.
+ * @returns the apparent longitude in [0, 360).
+ */
+function sunLongitudeOf(utcMs: number): number {
+  const t = (utcMs / 86400000 + 2440587.5 - 2451545) / 36525
+  const l0 = 280.46646 + 36000.76983 * t + 0.0003032 * t * t
+  const m = 357.52911 + 35999.05029 * t - 0.0001537 * t * t
+  const center = (1.914602 - 0.004817 * t - 0.000014 * t * t) * Math.sin(m * DEG)
+    + (0.019993 - 0.000101 * t) * Math.sin(2 * m * DEG)
+    + 0.000289 * Math.sin(3 * m * DEG)
+  const omega = 125.04 - 1934.136 * t
+  const lambda = l0 + center - 0.00569 - 0.00478 * Math.sin(omega * DEG)
+  return ((lambda % 360) + 360) % 360
+}
+
+/** The 24 terms in longitude order: index k is the k·15° crossing, 春分 = 0°. */
+const TERM_NAMES = ['春分', '清明', '谷雨', '立夏', '小满', '芒种', '夏至', '小暑', '大暑', '立秋', '处暑', '白露', '秋分', '寒露', '霜降', '立冬', '小雪', '大雪', '冬至', '小寒', '大寒', '立春', '雨水', '惊蛰'] as const
+
+/** The midnight instant (UTC ms) that opens the local calendar day. */
+function localMidnightOf(date: Date): number {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
+}
+
+/**
+ * The solar term the calendar day sits in: the most recent 15° crossing at or
+ * before today's Beijing-midnight sampling. The scan window (16 days) covers
+ * the longest gap between crossings (≈15.2 days around 冬至→小寒).
+ * @param date - the local day.
+ * @returns the term name and its day count, or undefined when no crossing sits
+ * within the window (only reachable outside the formula's validity).
+ */
+export function solarTermOf(date: Date): SolarTerm | undefined {
+  const start = localMidnightOf(date)
+  for (let back = 0; back <= 16; back += 1) {
+    const midnight = start - back * DAY_MS
+    const before = sunLongitudeOf(midnight)
+    const after = sunLongitudeOf(midnight + DAY_MS)
+    for (let index = TERM_NAMES.length - 1; index >= 0; index -= 1) {
+      const degree = index * 15
+      // A crossing when the day's arc sweeps over the boundary (the wrap day
+      // around 360° matches either half).
+      const crossed = before < after
+        ? before < degree && degree <= after
+        : before < degree || degree <= after
+      if (crossed) {
+        const name = TERM_NAMES[index]
+        if (name !== undefined) return { name, day: back + 1 }
+      }
+    }
+  }
+  return undefined
+}
+
+/**
+ * The hero's solar-term phrase: 「今日霜降」 on the crossing day, the plain
+ * 「霜降时节」 afterwards.
+ * @param date - the local day.
+ * @returns the phrase, or undefined outside the term table's reach.
+ */
+export function solarTermPhraseOf(date: Date): string | undefined {
+  const term = solarTermOf(date)
+  if (term === undefined) return undefined
+  return term.day === 1 ? `今日${term.name}` : `${term.name}时节`
+}
+
+/**
+ * The hero seal's batch number: the brewing batch of the day, `B-MMDD` off the
+ * local calendar (design §六.1 — derived, never a pinned string).
+ * @param date - the local day.
+ * @returns the batch code.
+ */
+export function batchOf(date: Date): string {
+  return `B-${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`
+}
+
 /** One quick-task chip: the label, its face, and its real action. */
 interface QuickChip {
   readonly label: string
-  /** `primary` = the one solid brand CTA; the rest ride neutral capsules. */
+  /** `primary` = the one solid persimmon CTA; the rest ride paper capsules. */
   readonly variant: 'primary' | 'neutral'
   readonly run: () => void
 }
 
 /** The quick-task action set (02 §10.4 + W6-B1/B2, folded 7→4 in W8-B2):
- * the register direct stays the page's single primary action (the brand
- * budget, plan §3.1 ≤2 brand hits), with one neutral chip per
- * ledger/alert/doc surface. 查看工作 (the work Tab), 找 AI 同事 (the agents
- * Tab and the roster rail below), and 问经营 (the roster's 经营参谋 card)
- * duplicated other entries on the same screen and left the set. */
+ * the register direct stays the page's single solid action (the one
+ * seal-CTA per screen), with one capsule chip per ledger/alert/doc surface.
+ * 查看工作 (the work Tab), 找 AI 同事 (the agents Tab and the roster rail
+ * below), and 问经营 (the roster's 经营参谋 card) duplicated other entries
+ * on the same screen and left the set. */
 const QUICK_CHIPS: readonly QuickChip[] = [
   {
     label: '我的待办',
@@ -114,6 +202,8 @@ export function HomeView({ identityName, active = true }: HomeViewProps): JSX.El
 
   const stats = useMemo(() => todayStats(store.items, Date.now()), [store.items])
   const pendingCount = stats.todo + stats.review
+  const now = new Date()
+  const termPhrase = solarTermPhraseOf(now)
 
   // The three most recent chats, work sessions excluded (02 §9).
   const recentRows = useMemo(() => (sessions.value ?? [])
@@ -151,13 +241,24 @@ export function HomeView({ identityName, active = true }: HomeViewProps): JSX.El
   return (
     <div className={css.homePage}>
       <section className={css.heroCard} aria-label="工作概览">
-        <div className={css.heroTop}>
-          <h1 className={css.heroTitle}>{greetingWordOf(new Date().getHours())}，{identityName}</h1>
-          <span className={css.heroDate}>{headDateOf(new Date())}</span>
+        <div className={css.heroTexts}>
+          <h1 className={css.heroTitle}>
+            <span className={css.heroHi}>{greetingWordOf(now.getHours())}</span>
+            {termPhrase === undefined ? identityName : `${identityName}，${termPhrase}`}
+          </h1>
+          <p className={css.heroDate}>
+            {headDateOf(now)}
+            {alertCount !== undefined && alertCount > 0
+              ? <b> · {String(Math.min(alertCount, 99))} 项预警待看</b>
+              : pendingCount > 0
+                ? ` · 今天有 ${String(pendingCount)} 件事等你`
+                : ' · 今天没有待办，随时找 AI 同事聊聊'}
+          </p>
         </div>
-        <p className={css.heroDesc}>
-          {pendingCount > 0 ? `今天有 ${String(pendingCount)} 件事等你` : '今天没有待办，随时找 AI 同事聊聊'}
-        </p>
+        <span className={css.heroSeal} aria-label="今日酱印" title="鲜酿">
+          <span className={css.heroSealGlyph} aria-hidden="true">鲜酿</span>
+          <span className={css.heroSealBatch} aria-hidden="true">{batchOf(now)}</span>
+        </span>
       </section>
 
       <button type="button" className={css.searchEntry} aria-label="搜索会话与同事" onClick={() => { navigate('#/chats') }}>
@@ -165,56 +266,49 @@ export function HomeView({ identityName, active = true }: HomeViewProps): JSX.El
         <span className={css.searchEntryText}>搜索会话 / AI 同事</span>
       </button>
 
-      <button type="button" className={css.statsCard} aria-label="今日台账" onClick={() => { navigate('#/work') }}>
-        <span className={css.statsGrid}>
-          <span className={css.statCell}>
-            <span className={`${css.statValue} ${stats.todo === 0 ? css.statZero : css.statTodo}`}>{String(stats.todo)}</span>
-            <span className={css.statLabel}>待处理</span>
+      <button type="button" className={css.statsGrid} aria-label="今日台账" onClick={() => { navigate('#/work') }}>
+        <span className={css.statCell}>
+          <span className={`${css.statValue} ${stats.todo === 0 ? css.statZero : css.statTodo}`}>
+            {String(stats.todo)}<small>项</small>
           </span>
-          <span className={css.statCell}>
-            <span className={`${css.statValue} ${stats.doing === 0 ? css.statZero : css.statDoing}`}>{String(stats.doing)}</span>
-            <span className={css.statLabel}>进行中</span>
+          <span className={css.statLabel}>待处理</span>
+        </span>
+        <span className={css.statCell}>
+          <span className={`${css.statValue} ${stats.doing === 0 ? css.statZero : css.statDoing}`}>
+            {String(stats.doing)}<small>项</small>
           </span>
-          <span className={css.statCell}>
-            <span className={`${css.statValue} ${stats.review === 0 ? css.statZero : css.statReview}`}>{String(stats.review)}</span>
-            <span className={css.statLabel}>待确认</span>
+          <span className={css.statLabel}>进行中</span>
+        </span>
+        <span className={css.statCell}>
+          <span className={`${css.statValue} ${stats.review === 0 ? css.statZero : css.statReview}`}>
+            {String(stats.review)}<small>项</small>
           </span>
-          <span className={css.statCell}>
-            <span className={`${css.statValue} ${css.statDone}`}>{String(stats.doneToday)}</span>
-            <span className={css.statLabel}>已完成</span>
+          <span className={css.statLabel}>待确认</span>
+        </span>
+        <span className={css.statCell}>
+          <span className={`${css.statValue} ${css.statDone}`}>
+            {String(stats.doneToday)}<small>项</small>
           </span>
+          <span className={css.statLabel}>已完成</span>
         </span>
       </button>
 
       <div className={css.quickRow}>
         {QUICK_CHIPS.map((chip) => {
           const chipButton = (
-            <Button
+            <button
               key={chip.label}
               type="button"
-              color="primary"
-              fill="solid"
-              size="small"
-              className={`${css.quickChip} ${chip.variant === 'primary' ? css.quickChipPrimary : css.quickChipNeutral}`}
-              style={
-                chip.variant === 'primary'
-                  ? { '--border-radius': 'var(--dshm-radius-pill)' }
-                  : {
-                    '--background-color': 'var(--dshm-card)',
-                    '--text-color': 'var(--dshm-foreground)',
-                    '--border-color': 'var(--dshm-border)',
-                    '--border-radius': 'var(--dshm-radius-pill)',
-                  }
-              }
+              className={chip.variant === 'primary' ? `dshm-seal-cta ${css.quickChipCta}` : `dshm-seal-chip ${css.quickChip}`}
               onClick={chip.run}
             >
               {chip.label}
-            </Button>
+            </button>
           )
           // W6-R2: the alert chip carries its routed count; an unreadable or
           // empty alert set keeps the plain chip (no badge noise).
           return chip.label === '我的预警' && alertCount !== undefined && alertCount > 0
-            ? <Badge key={chip.label} color="var(--dshm-destructive)" content={String(Math.min(alertCount, 99))}>{chipButton}</Badge>
+            ? <Badge key={chip.label} color="var(--dshm-danger)" content={String(Math.min(alertCount, 99))}>{chipButton}</Badge>
             : chipButton
         })}
       </div>
@@ -323,7 +417,7 @@ export function HomeView({ identityName, active = true }: HomeViewProps): JSX.El
                           <span className={css.recentTime}>{relativeTimeOf(summary.updatedAt)}</span>
                           {unread && (
                             <span className={css.recentBadge} aria-label="有新消息">
-                              <Badge color="var(--dshm-destructive)" content={Badge.dot} />
+                              <Badge color="var(--dshm-danger)" content={Badge.dot} />
                             </span>
                           )}
                         </span>
@@ -339,8 +433,8 @@ export function HomeView({ identityName, active = true }: HomeViewProps): JSX.El
   )
 }
 
-/** The hero date capsule's line: 09-22周二. */
+/** The hero date line: 10月5日 周一. */
 function headDateOf(now: Date): string {
   const weekday = now.toLocaleDateString('zh-CN', { weekday: 'short' })
-  return `${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}${weekday}`
+  return `${now.getMonth() + 1}月${now.getDate()}日 ${weekday}`
 }

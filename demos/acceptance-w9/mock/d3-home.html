@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>D3 墨纸编辑部 · 食谱书页 — home mock</title>
+<style>
+  /* D3「食谱书页」— 纸感米白 / 浓墨宋体 display / 朱砂点缀 / 章节式排版 / 8px 圆角 + 大留白
+   * 反报纸簇：非零圆角、非密集栏、行距放宽。 */
+  :root {
+    --dshm-canvas: #f8f4ea; --dshm-card: #fffdf7; --dshm-card2: #f3eee0;
+    --dshm-ink: #29241b; --dshm-ink-sub: #6e6454; --dshm-ink-weak: #a29880;
+    --dshm-brand: #b3402a; --dshm-brand-soft: #f5e6dc;      /* 朱砂（印泥红） */
+    --dshm-anchor: #1e4e8c;                                  /* 品牌蓝锚（链接） */
+    --dshm-line: #e6dec9; --dshm-rule: #c9bfa4;              /* 章节双细线 */
+    --dshm-success: #4a6737; --dshm-success-soft: #edf2e2;
+    --dshm-warning: #a05c00; --dshm-warning-soft: #f7ecd6;
+    --dshm-danger: #973423;  --dshm-danger-soft: #f6e7e0;
+    --dshm-info: #3a6884;    --dshm-info-soft: #e6eef2;
+    --dshm-r-card: 8px; --dshm-r-ctl: 6px;
+    --font-display: 'Songti SC', 'STSong', 'Noto Serif SC', 'SimSun', serif;
+    --font-num: 'SF Mono', ui-monospace, 'Menlo', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { width: 375px; height: 812px; overflow: hidden; background: var(--dshm-canvas);
+    color: var(--dshm-ink); font-variant-numeric: tabular-nums; position: relative;
+    font-family: -apple-system, 'BlinkMacSystemFont', 'PingFang SC', 'HarmonyOS Sans SC', 'Noto Sans SC', sans-serif; }
+  .statusbar { height: 44px; display: flex; justify-content: space-between; align-items: center;
+    padding: 0 20px; font-size: 12px; font-weight: 600; }
+  .page { padding: 6px 22px 96px; display: flex; flex-direction: column; gap: 24px; }
+
+  /* ── 章题：浓墨宋体 + 双细线（编辑部节奏） ─────────── */
+  .chapter { padding-top: 8px; }
+  .chapter .kicker { font-size: 11px; letter-spacing: 4px; color: var(--dshm-ink-sub); font-weight: 600; }
+  .chapter h1 { font-family: var(--font-display); font-size: 34px; font-weight: 900;
+    letter-spacing: 2px; line-height: 1.3; margin-top: 6px; }
+  .chapter h1 em { font-style: normal; color: var(--dshm-brand); }
+  .rule { border-top: 1px solid var(--dshm-rule); border-bottom: 1px solid var(--dshm-rule);
+    height: 4px; margin-top: 14px; }
+  .chapter .meta { display: flex; justify-content: space-between; align-items: center; margin-top: 10px;
+    font-size: 12px; color: var(--dshm-ink-sub); }
+  .chapter .meta b { color: var(--dshm-brand); font-weight: 700; }
+  /* 朱砂印落款（品牌记忆点）：右下方位随标题 */
+  .sealmark { display: flex; align-items: center; gap: 12px; margin-top: 16px; }
+  .sealmark .stamp { width: 44px; height: 44px; border: 2.5px solid var(--dshm-brand); border-radius: 6px;
+    color: var(--dshm-brand); font-family: var(--font-display); font-size: 17px; font-weight: 900;
+    display: grid; place-items: center; transform: rotate(-4deg); letter-spacing: 1px;
+    box-shadow: inset 0 0 0 1.5px rgba(179, 64, 42, 0.25); }
+  .sealmark .say { font-family: var(--font-display); font-size: 14px; color: var(--dshm-ink-sub);
+    line-height: 1.8; }
+
+  .search { display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 17px;
+    background: var(--dshm-card); border: 1px solid var(--dshm-line); border-radius: var(--dshm-r-ctl); }
+  .search span { font-size: 14px; color: var(--dshm-ink-weak); }
+
+  /* ── 台账：纸面行式 + 字号对比（数字大衬线感用 mono 大号） ── */
+  .section-t { display: flex; align-items: baseline; gap: 10px; }
+  .section-t h2 { font-family: var(--font-display); font-size: 20px; font-weight: 900; letter-spacing: 1px; }
+  .section-t .sub { font-size: 11px; color: var(--dshm-ink-weak); letter-spacing: 1px; }
+  .section-t .more { margin-left: auto; font-size: 12px; color: var(--dshm-anchor); font-weight: 600; }
+  .ledger { background: var(--dshm-card); border: 1px solid var(--dshm-line); border-radius: var(--dshm-r-card);
+    margin-top: 12px; }
+  .lrow { display: flex; align-items: center; gap: 14px; padding: 15px 18px; }
+  .lrow + .lrow { border-top: 1px solid var(--dshm-line); }
+  .lrow .name { font-size: 14px; color: var(--dshm-ink-sub); flex: 1; letter-spacing: 1px; }
+  .lrow .num { font-family: var(--font-num); font-size: 26px; font-weight: 700; letter-spacing: -1px; }
+  .lrow .note { font-size: 11px; color: var(--dshm-ink-weak); width: 84px; text-align: right; }
+  .lrow.todo .num { color: var(--dshm-brand); }
+  .lrow.doing .num { color: var(--dshm-info); }
+  .lrow.review .num { color: var(--dshm-warning); }
+  .lrow.done .num { color: var(--dshm-success); }
+
+  /* ── chips：墨框词条 ──────────────────────────────── */
+  .chips { display: flex; gap: 10px; }
+  .chip-cta { height: 44px; padding: 0 18px; border-radius: var(--dshm-r-ctl);
+    background: var(--dshm-brand); color: #fff; font-size: 14px; font-weight: 700; letter-spacing: 1px;
+    display: flex; align-items: center; gap: 7px; }
+  .chip-plain { height: 44px; padding: 0 15px; border-radius: var(--dshm-r-ctl);
+    background: transparent; border: 1.5px solid #cbbf9f; color: var(--dshm-ink); font-size: 13px;
+    font-weight: 600; letter-spacing: 1px; display: flex; align-items: center; }
+
+  /* ── AI 同事：墨圈字章 ────────────────────────────── */
+  .rail { display: flex; gap: 18px; margin-top: 12px; }
+  .colleague { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 62px; }
+  .colleague .ava { width: 52px; height: 52px; border-radius: 50%; border: 2px solid var(--dshm-ink);
+    background: var(--dshm-card); color: var(--dshm-ink); font-family: var(--font-display);
+    font-size: 18px; font-weight: 900; display: grid; place-items: center; position: relative; }
+  .colleague.c1 .ava { border-color: #1e4e8c; color: #1e4e8c; }
+  .colleague.c2 .ava { border-color: #1d5f5a; color: #1d5f5a; }
+  .colleague.c3 .ava { border-color: #2e5e34; color: #2e5e34; }
+  .colleague.c4 .ava { border-color: #7a5230; color: #7a5230; }
+  .colleague .dot { position: absolute; right: 1px; bottom: 1px; width: 11px; height: 11px;
+    border-radius: 50%; background: #4a6737; border: 2px solid var(--dshm-canvas); }
+  .colleague .nm { font-size: 12px; font-weight: 700; letter-spacing: 1px; }
+
+  /* ── 最近会话：纸片便签 ───────────────────────────── */
+  .recent { background: var(--dshm-card); border: 1px solid var(--dshm-line); border-radius: var(--dshm-r-card);
+    margin-top: 12px; }
+  .conv { display: flex; align-items: center; gap: 13px; padding: 15px 17px; }
+  .conv + .conv { border-top: 1px solid var(--dshm-line); }
+  .conv .mark { font-family: var(--font-display); font-size: 17px; font-weight: 900; flex: none; width: 34px;
+    text-align: center; }
+  .conv .mid { flex: 1; min-width: 0; }
+  .conv .t { font-size: 15px; font-weight: 700; letter-spacing: 0.5px; display: flex; align-items: center; gap: 7px; }
+  .conv .t .unread { width: 7px; height: 7px; border-radius: 50%; background: var(--dshm-brand); }
+  .conv .p { font-size: 12px; color: var(--dshm-ink-sub); margin-top: 3px; white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis; }
+  .conv .tm { font-size: 11px; color: var(--dshm-ink-weak); }
+
+  /* ── TabBar：纸面 + 墨字 + 朱砂下划 ──────────────── */
+  .tabbar { position: absolute; left: 0; right: 0; bottom: 0; height: 80px; background: var(--dshm-card);
+    border-top: 1px solid var(--dshm-rule); display: flex; padding: 6px 8px 24px; }
+  .tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 3px; font-size: 10px; color: var(--dshm-ink-sub); letter-spacing: 2px; font-weight: 600; }
+  .tab .u { width: 16px; height: 2.5px; background: transparent; }
+  .tab.on { color: var(--dshm-ink); font-weight: 700; }
+  .tab.on .u { background: var(--dshm-brand); }
+</style>
+</head>
+<body>
+  <div class="statusbar"><span>9:41</span><span>●●●●</span></div>
+  <div class="page">
+    <div class="chapter">
+      <div class="kicker">食 品 厂 志</div>
+      <h1>早上好，<em>高翔</em></h1>
+      <div class="rule"></div>
+      <div class="meta"><span>十月五日 · 周一 · 霜降</span><span><b>2 项预警</b>待看</span></div>
+      <div class="sealmark">
+        <div class="stamp">验</div>
+        <div class="say">灌装一班已开工，<br>晨检记录一切如常。</div>
+      </div>
+    </div>
+
+    <div class="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a29880" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.8-3.8"/></svg>
+      <span>搜单据、问一句、找同事…</span>
+    </div>
+
+    <div>
+      <div class="section-t"><h2>今日台账</h2><span class="sub">四则</span><span class="more">去工作台 ›</span></div>
+      <div class="ledger">
+        <div class="lrow todo"><span class="name">待处理</span><span class="num">5</span><span class="note">2 项今日到期</span></div>
+        <div class="lrow doing"><span class="name">进行中</span><span class="num">3</span><span class="note">MO-26-0007</span></div>
+        <div class="lrow review"><span class="name">待确认</span><span class="num">2</span><span class="note">冷链锁价</span></div>
+        <div class="lrow done"><span class="name">已完成</span><span class="num">12</span><span class="note">本周累计</span></div>
+      </div>
+    </div>
+
+    <div class="chips">
+      <div class="chip-cta">＋ 登记一条单据</div>
+      <div class="chip-plain">我的待办</div>
+      <div class="chip-plain">我的预警</div>
+    </div>
+
+    <div>
+      <div class="section-t"><h2>AI 同事</h2><span class="more">全部 ›</span></div>
+      <div class="rail">
+        <div class="colleague c1"><div class="ava">表<span class="dot"></span></div><span class="nm">填表助手</span></div>
+        <div class="colleague c2"><div class="ava">参<span class="dot"></span></div><span class="nm">经营参谋</span></div>
+        <div class="colleague c3"><div class="ava">数<span class="dot"></span></div><span class="nm">数据助手</span></div>
+        <div class="colleague c4"><div class="ava">合<span class="dot"></span></div><span class="nm">合规官</span></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-t"><h2>最近会话</h2></div>
+      <div class="recent">
+        <div class="conv">
+          <span class="mark" style="color:#1e4e8c;">表</span>
+          <div class="mid"><div class="t">填表助手<span class="unread"></span></div><div class="p">已登记 №1042 · 采购单</div></div>
+          <span class="tm">09:32</span>
+        </div>
+        <div class="conv">
+          <span class="mark" style="color:#1d5f5a;">参</span>
+          <div class="mid"><div class="t">经营参谋</div><div class="p">本月采购额按供应商拆开看…</div></div>
+          <span class="tm">昨天</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabbar">
+    <div class="tab on"><div class="u"></div>首页</div>
+    <div class="tab"><div class="u"></div>同事</div>
+    <div class="tab"><div class="u"></div>工作</div>
+    <div class="tab"><div class="u"></div>我的</div>
+  </div>
+</body>
+</html>

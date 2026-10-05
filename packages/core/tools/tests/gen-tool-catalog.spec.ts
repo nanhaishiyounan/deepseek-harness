@@ -34,7 +34,7 @@ describe('gen-tool-catalog collectToolCatalog', () => {
       'kb_ingest', 'kb_ingest_url', 'kb_search', 'kb_stats',
       'kg_query', 'kg_schema', 'kg_subgraph',
       'lakehouse_query', 'lakehouse_tables',
-      'list_agents', 'list_agents', 'lsp', 'nb_collections', 'nb_create', 'nb_get', 'nb_list', 'nb_update', 'order_create', 'order_status', 'pwsh', 'pwsh', 'ralph',
+      'list_agents', 'list_agents', 'lsp', 'nb_approve', 'nb_collections', 'nb_create', 'nb_get', 'nb_list', 'nb_update', 'order_create', 'order_status', 'pwsh', 'pwsh', 'ralph',
       'read', 'read_image', 'report', 'run_code', 'schedule_create', 'schedule_delete',
       'schedule_list', 'send_message', 'send_message', 'session_event_read', 'session_event_search',
       'session_event_trace', 'session_search', 'session_trace', 'skill', 'spawn_teammate',

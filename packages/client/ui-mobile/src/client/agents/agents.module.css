@@ -9,7 +9,7 @@
   flex-direction: column;
   height: 100%;
   min-height: 0;
-  background: var(--dshm-background);
+  background: var(--dshm-canvas);
 }
 
 .header {
@@ -18,17 +18,17 @@
   padding: 12px 16px 8px;
   min-height: 52px;
   background: var(--dshm-header-bg);
-  border-bottom: 1px solid var(--dshm-border);
+  border-bottom: 1px solid var(--dshm-line);
   flex: none;
 }
 
 .headerTitle {
   margin: 0;
-  font-size: var(--dshm-fs-lg);
+  font-size: var(--dshm-fs-heading);
   line-height: 28px;
   font-weight: 700;
   letter-spacing: 0.5px;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
 }
 
 .searchWrap {
@@ -40,14 +40,14 @@
    dial set the chats layer's search rides). */
 .searchBox {
   --height: var(--dshm-touch);
-  --border-radius: var(--dshm-radius-lg);
+  --border-radius: var(--dshm-r-card);
   --background: var(--dshm-card);
-  --placeholder-color: var(--dshm-muted-foreground);
+  --placeholder-color: var(--dshm-ink-sub);
 }
 
 .searchBox :global(.adm-search-bar-input) {
-  font-size: var(--dshm-fs-md);
-  color: var(--dshm-foreground);
+  font-size: var(--dshm-fs-input);
+  color: var(--dshm-ink);
 }
 
 .list {
@@ -74,17 +74,17 @@
   align-items: center;
   gap: 8px;
   margin: 14px 2px 6px;
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 18px;
   font-weight: 600;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
 }
 
 .bandTitle::after {
   content: '';
   flex: 1;
   height: 1px;
-  background: var(--dshm-border);
+  background: var(--dshm-line);
 }
 
 /* The design's .roster-item: avatar + info column + the trailing chip. */
@@ -93,14 +93,14 @@
   align-items: center;
   gap: 12px;
   padding: 12px 10px;
-  border-radius: var(--dshm-radius-lg);
+  border-radius: var(--dshm-r-card);
   background: none;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
   text-align: left;
 }
 
 .rosterItem:active {
-  background: var(--dshm-muted);
+  background: var(--dshm-card2);
 }
 
 .rosterAva {
@@ -135,20 +135,20 @@
 }
 
 .rosterName {
-  font-size: var(--dshm-fs-md);
+  font-size: var(--dshm-fs-body);
   line-height: 22px;
   font-weight: 650;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .rosterRole {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 18px;
   font-weight: 500;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -157,9 +157,9 @@
 
 .rosterTag {
   margin-top: 2px;
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 19px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -176,8 +176,8 @@
 }
 
 .skillPill {
-  --border-radius: var(--dshm-radius-pill);
-  font-size: var(--dshm-fs-xs);
+  --border-radius: var(--dshm-r-seal);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
   font-weight: 600;
 }
@@ -185,9 +185,9 @@
 /* The design's .status-chip: antd Tag (the per-presence color rides inline
     dials in AgentsView.tsx) as the quiet capsule. */
 .statusChip {
-  --border-radius: var(--dshm-radius-pill);
+  --border-radius: var(--dshm-r-seal);
   flex: none;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
 }
 
@@ -201,7 +201,7 @@
 }
 
 .rosterChevron {
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 /* The busy mark while a colleague's session is being created. */
@@ -210,9 +210,9 @@
   align-items: center;
   gap: 4px;
   margin-top: 6px;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 /* The loading skeleton group keeps the roster rows' rhythm. */

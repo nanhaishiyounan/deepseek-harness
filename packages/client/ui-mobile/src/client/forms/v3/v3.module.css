@@ -1,20 +1,23 @@
-/* v3 form cards (v6 rich-card base): the three-tier draft card on the card2
-    plate with dashed field rules and the 44px phase stamp, the receipt metric
-    card with the ticket-face hero number on the pass-green wash. Colors ride
-    the --dshm-* tracks only; the inner panels take the card face against the
-    card2 plate. */
+/* v3 form cards (W9-B5 ledger paper): the three-tier draft card as the white
+    ledger sheet with the roast-line rim and the 20px card radius, the inner
+    panels on the card2 well; the receipt metric card rides the deeper
+    receipt rim (line-strong 1.5px) with the「收」round seal heading and the
+   「收讫」sign-off stamp floating off the bottom-right corner. Colors ride the
+    --dshm-* tracks only. */
 
 .card {
   display: flex;
   flex-direction: column;
   gap: 8px;
   width: 100%;
-  padding: 12px 13px;
-  background: var(--dshm-muted);
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius-lg);
+  padding: 13px 14px;
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-line);
+  border-radius: var(--dshm-r-card);
+  box-shadow: var(--dshm-shadow-card);
   box-sizing: border-box;
   text-align: left;
+  position: relative;
 }
 
 /* The landed card flashes its rim once as the stamp comes down (03 §6.3). */
@@ -28,15 +31,43 @@
   }
 }
 
-/* The receipt-material tier: the pass-green wash copy of the ticket. */
+/* The receipt-material tier (§五 ReceiptCard): the ledger-paper copy — the
+    white sheet with the deep roast rim. */
 .receiptCard {
-  background: var(--dshm-receipt-wash);
-  border-color: var(--dshm-success-rim);
+  background: var(--dshm-card);
+  border-color: var(--dshm-line-strong);
+  border-width: 1.5px;
 }
 
-/* The receipt's metric cells keep the card face against the green wash. */
+/* The receipt's metric cells ride the card2 well against the white sheet. */
 .receiptCard .metricCell {
-  background: var(--dshm-card);
+  background: var(--dshm-card2);
+}
+
+/* The「收讫」sign-off stamp (the F3 fusion): a 36px square persimmon chop,
+    rotated -6°, floating off the copy's bottom-right corner — the seal a
+    clerk stamps across the ledger line. Decorative; the receipt's state
+    semantics ride the phase stamp. */
+.receiptSign {
+  position: absolute;
+  right: -9px;
+  bottom: -9px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--dshm-brand);
+  color: var(--dshm-on-brand);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  writing-mode: vertical-rl;
+  transform: rotate(-6deg);
+  box-shadow: var(--dshm-shadow-seal);
+  pointer-events: none;
 }
 
 .cardHeader {
@@ -56,29 +87,33 @@
 .cardBiz {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: var(--dshm-fs-md);
-  font-weight: 600;
+  gap: 8px;
+  font-size: var(--dshm-fs-heading);
+  font-weight: 700;
   line-height: 24px;
 }
 
-/* The pass-green check seal heading the receipt copy. */
+/* The「收」round seal heading the receipt copy (§五 ReceiptCard): a hollow
+    success-ring stamp, 38px — the finished-copy mark of the landed ticket. */
 .receiptSeal {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  background: var(--dshm-success);
-  color: var(--dshm-on-primary);
+  border: 2px solid var(--dshm-success);
+  background: var(--dshm-seal-face);
+  color: var(--dshm-success);
+  font-size: 12px;
+  font-weight: 800;
   flex: none;
 }
 
 .cardTitle {
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 20px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 /* The phase stamp: a round lifecycle seal, the v3 signature (03 §4.3). The
@@ -103,8 +138,8 @@
 }
 
 .stamp_draft {
-  border-color: var(--dshm-muted-foreground);
-  color: var(--dshm-muted-foreground);
+  border-color: var(--dshm-ink-sub);
+  color: var(--dshm-ink-sub);
 }
 
 .stamp_pending {
@@ -118,14 +153,14 @@
 .stamp_submitted {
   border-color: var(--dshm-success);
   background: var(--dshm-success);
-  color: var(--dshm-on-primary);
+  color: var(--dshm-on-brand);
   /* The stamp comes down oversized and askew, settling at a slight tilt. */
   animation: v3-stamp-in 200ms var(--dshm-ease-stamp) both;
 }
 
 .stamp_rejected {
-  border-color: var(--dshm-destructive);
-  color: var(--dshm-destructive);
+  border-color: var(--dshm-danger);
+  color: var(--dshm-danger);
 }
 
 /* The rejected seal carries the strike-through slash, corner to corner. */
@@ -134,7 +169,7 @@
   position: absolute;
   width: 40px;
   height: 2px;
-  background: var(--dshm-destructive);
+  background: var(--dshm-danger);
   transform: rotate(-45deg);
   border-radius: 1px;
 }
@@ -149,14 +184,14 @@
 }
 
 .stampNo {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 1;
 }
 
 .stampRow {
   font-family: var(--dshm-font-num);
   font-variant-numeric: tabular-nums;
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 1;
 }
 
@@ -167,11 +202,11 @@
   gap: 2px;
 }
 
-/* The derived tier rides the card-face panel against the card2 plate. */
+/* The derived tier rides the card2 well inside the white sheet. */
 .tierDerived {
-  background: var(--dshm-card);
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius);
+  background: var(--dshm-card2);
+  border: 1px solid var(--dshm-line);
+  border-radius: var(--dshm-r-ctl);
   padding: 8px 10px;
 }
 
@@ -180,10 +215,10 @@
   align-items: center;
   gap: 8px;
   margin: 6px 0 2px;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   font-weight: 500;
   line-height: 16px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 .tierHead::before,
@@ -197,7 +232,7 @@
 /* Inside the washed derived panel the divider drops out (panel is the line). */
 .tierDerived .tierHead::before,
 .tierDerived .tierHead::after {
-  background: var(--dshm-border);
+  background: var(--dshm-line);
 }
 
 /* The field rows (the design's .rc-field): the dashed rule between them. */
@@ -207,7 +242,7 @@
   justify-content: space-between;
   gap: 10px;
   min-height: 44px;
-  border-top: 1px dashed var(--dshm-border);
+  border-top: 1px dashed var(--dshm-line);
   padding-top: 6px;
   margin-top: 6px;
 }
@@ -229,24 +264,24 @@
 }
 
 .fieldError {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
-  color: var(--dshm-destructive);
+  color: var(--dshm-danger);
   padding-left: 2px;
 }
 
 .fieldLabel {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   font-weight: 500;
   line-height: 18px;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
   flex: none;
 }
 
 .rationale {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
   font-weight: 400;
   text-align: right;
 }
@@ -257,15 +292,15 @@
    card (W8 input-floor verdict), and the grade holds the 16px input floor. */
 .fieldInput:global(.adm-input) {
   --font-size: var(--dshm-fs-input);
-  --color: var(--dshm-foreground);
+  --color: var(--dshm-ink);
   flex: 1;
   max-width: 200px;
   height: 38px;
   padding: 0 10px;
   font-size: var(--dshm-fs-input);
   line-height: 22px;
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius);
+  border: 1px solid var(--dshm-line);
+  border-radius: var(--dshm-r-ctl);
   background: var(--dshm-input-bg);
   box-sizing: border-box;
 }
@@ -287,10 +322,10 @@
   padding: 0 10px;
   font-size: var(--dshm-fs-input);
   line-height: 22px;
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius);
+  border: 1px solid var(--dshm-line);
+  border-radius: var(--dshm-r-ctl);
   background: var(--dshm-input-bg);
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
   box-sizing: border-box;
 }
 
@@ -302,7 +337,7 @@
   padding: 0;
   text-align: left;
   background: none;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
 }
 
 .derivedRow:active {
@@ -319,11 +354,11 @@
 }
 
 .derivedValue {
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   font-weight: 500;
   line-height: 22px;
   font-variant-numeric: tabular-nums;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -332,7 +367,7 @@
 /* The re-edit diff: my change against the AI prefill (01 ④f-6). */
 .fieldEdited {
   position: relative;
-  border-radius: var(--dshm-radius-corner);
+  border-radius: var(--dshm-r-ctl-corner);
 }
 
 .fieldEdited::before {
@@ -344,25 +379,25 @@
   width: 3px;
   height: 20px;
   border-radius: 2px;
-  background: var(--dshm-primary);
+  background: var(--dshm-brand);
 }
 
 .fieldValueEdited {
-  background: var(--dshm-primary-10);
+  background: var(--dshm-brand-soft);
   padding: 2px 6px;
-  border-radius: var(--dshm-radius-corner);
+  border-radius: var(--dshm-r-ctl-corner);
 }
 
 .fieldEdited .fieldInput {
-  background: var(--dshm-primary-10);
+  background: var(--dshm-brand-soft);
 }
 
 /* The system tier folds into a Collapse strip (antd-mobile default motion). */
 .systemFold {
-  --adm-color-primary: var(--dshm-primary);
-  --adm-color-text: var(--dshm-muted-foreground);
+  --adm-color-primary: var(--dshm-brand);
+  --adm-color-text: var(--dshm-ink-sub);
   --adm-color-border: var(--dshm-stroke-soft);
-  --adm-border-radius-s: var(--dshm-radius);
+  --adm-border-radius-s: var(--dshm-r-ctl);
   --adm-collapse-panel-content-padding: 2px 0;
   --adm-collapse-panel-header-padding: 8px 2px;
   border-top: none;
@@ -370,7 +405,7 @@
 }
 
 .systemFold :global(.adm-collapse-panel-header) {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   font-weight: 500;
   line-height: 16px;
 }
@@ -380,9 +415,9 @@
 }
 
 .systemValue {
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 20px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
   font-variant-numeric: tabular-nums;
 }
 
@@ -395,7 +430,7 @@
 }
 
 .actions :global(.adm-button) {
-  --border-radius: var(--dshm-radius);
+  --border-radius: var(--dshm-r-ctl);
   height: 44px;
   font-weight: 650;
 }
@@ -409,19 +444,19 @@
   /* on-soft, not primary: the dark soft track lifts brand text past the
      4.5:1 floor (brand on the dark soft fill reads 3.5:1). */
   color: var(--dshm-on-soft);
-  background: var(--dshm-primary-soft);
+  background: var(--dshm-brand-soft);
   border: none;
 }
 
 /* The reject arm rides the quiet gray capsule. */
 .actions :global(.adm-button):not(.primaryButton) {
   background: var(--dshm-card);
-  border: 1px solid var(--dshm-border);
-  color: var(--dshm-muted-foreground);
+  border: 1px solid var(--dshm-line);
+  color: var(--dshm-ink-sub);
 }
 
 .actions :global(.adm-button).ghostButton {
-  background: var(--dshm-primary-soft);
+  background: var(--dshm-brand-soft);
   border: none;
   color: var(--dshm-on-soft);
 }
@@ -431,8 +466,8 @@
   align-items: center;
   gap: 6px;
   min-height: 44px;
-  font-size: var(--dshm-fs-sm);
-  color: var(--dshm-muted-foreground);
+  font-size: var(--dshm-fs-body);
+  color: var(--dshm-ink-sub);
 }
 
 /* Receipt metric card (03 §4.4). */
@@ -446,16 +481,16 @@
 
 .metricHeroValue {
   font-family: var(--dshm-font-num);
-  font-size: var(--dshm-fs-num);
+  font-size: var(--dshm-fs-num-lg);
   line-height: 34px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
 .metricHeroLabel {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 .metricGrid {
@@ -470,22 +505,22 @@
   gap: 2px;
   padding: 8px 10px;
   background: var(--dshm-card);
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius);
+  border: 1px solid var(--dshm-line);
+  border-radius: var(--dshm-r-ctl);
 }
 
 .metricValue {
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 22px;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
 
 .metricLabel {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
   /* Muted-fill labels ≤13px take the foreground token (03 §7.2-1: 4.46:1 fails). */
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
 }
 
 /* The three-step ticket trail: dots and a rim line (03 §4.4). */
@@ -515,15 +550,15 @@
   flex: 1;
   height: 2px;
   border-radius: 1px;
-  background: var(--dshm-border);
+  background: var(--dshm-line);
 }
 
 .stepLabel {
   flex: none;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
   /* Small text on the receipt's green wash takes the foreground token (03 §7.2-3). */
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
 }
 
 /* The ticket-number strip: label left, monospace value right. */
@@ -534,20 +569,20 @@
   gap: 8px;
   margin-top: 2px;
   padding: 6px 10px;
-  border: 1px dashed var(--dshm-border);
-  border-radius: var(--dshm-radius);
+  border: 1px dashed var(--dshm-line);
+  border-radius: var(--dshm-r-ctl);
 }
 
 .ticketLabel {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 .ticketValue {
   font-family: var(--dshm-font-num);
   font-variant-numeric: tabular-nums;
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 18px;
   font-weight: 500;
 }
@@ -557,7 +592,7 @@
 }
 
 .receiptFooter :global(.adm-button) {
-  --border-radius: var(--dshm-radius);
+  --border-radius: var(--dshm-r-ctl);
   height: 40px;
 }
 

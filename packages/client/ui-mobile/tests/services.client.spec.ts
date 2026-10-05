@@ -191,6 +191,16 @@ describe('mobile sessions service', () => {
     expect(clockOf(new Date('2026-09-19T09:05:00').getTime())).toBe('09:05')
   })
 
+  it('strips a leading legacy identity-stamp sentence from pinned titles (W9-B5)', () => {
+    const base = { sessionId: 's', updatedAt: 0 } as unknown as SessionSummary
+    const stamped = '【登录身份】张红喜（张红喜）——本行由系统注入：当前用户=张红喜，凡「当前用户/提交人」一律取该用户名，查待办只看该用户的待办。帮我登记采购单'
+    expect(titleOf({ ...base, projections: { values: { title: stamped } } } as never)).toBe('帮我登记采购单')
+    // A title truncated inside the stamp sentence yields nothing → fallback.
+    expect(titleOf({ ...base, projections: { values: { title: '【登录身份】张红喜（张红喜）——本行' } } } as never)).toBe('未命名会话')
+    // Titles not opening with the marker ride untouched.
+    expect(titleOf({ ...base, projections: { values: { title: '回复里的【登录身份】不算开头' } } } as never)).toBe('回复里的【登录身份】不算开头')
+  })
+
   it('searches the message surface and maps the hit rows', async () => {
     stubGateway({
       'session.search': { items: [{ sessionId: 's1', snippet: '宏发…出口' }], hasMore: false },

@@ -17,8 +17,8 @@
 }
 
 .label {
-  font-size: var(--dshm-fs-sm);
-  color: var(--dshm-muted-foreground);
+  font-size: var(--dshm-fs-body);
+  color: var(--dshm-ink-sub);
   flex: none;
   max-width: 40%;
   overflow: hidden;
@@ -27,34 +27,34 @@
 }
 
 .lockedValue {
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   font-weight: 500;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
   text-align: right;
   overflow-wrap: anywhere;
 }
 
 .pickerValue {
-  font-size: var(--dshm-fs-sm);
-  color: var(--dshm-foreground);
+  font-size: var(--dshm-fs-body);
+  color: var(--dshm-ink);
   padding: 4px 10px;
-  border-radius: var(--dshm-radius);
-  background: var(--dshm-muted);
+  border-radius: var(--dshm-r-ctl);
+  background: var(--dshm-card2);
 }
 
 .input {
   --font-size: var(--dshm-fs-input);
   flex: 1;
   min-width: 0;
-  background: var(--dshm-muted);
-  border-radius: var(--dshm-radius);
+  background: var(--dshm-card2);
+  border-radius: var(--dshm-r-ctl);
   padding: 6px 10px;
 }
 
 .textArea {
   --font-size: var(--dshm-fs-input);
   flex: 1;
-  background: var(--dshm-muted);
-  border-radius: var(--dshm-radius);
+  background: var(--dshm-card2);
+  border-radius: var(--dshm-r-ctl);
   padding: 6px 10px;
 }

@@ -375,6 +375,26 @@ describe('foldHistory (report fences)', () => {
     expect(folded.items.map(item => item.kind)).toEqual(['text', 'degraded'])
   })
 
+  it('folds away a legacy session-opening identity stamp line, keeping the rest of the message (W9-B2)', () => {
+    const stamped = '【登录身份】buyer（采购员·蔡俊）——本行由系统注入：当前用户=buyer，查待办只看该用户的待办。'
+    const folded = foldHistory([
+      event('user/message', { content: [{ type: 'text', text: `${stamped}\n帮我登记采购单` }], source: { kind: 'user' } }, 0),
+      event('user/message', { content: [{ type: 'text', text: stamped }], source: { kind: 'user' } }, 1),
+      event('user/message', { content: [{ type: 'text', text: `第一行不是注入行\n${stamped}` }], source: { kind: 'user' } }, 2),
+    ])
+    // The first line's stamp folds away; the prose underneath still bubbles.
+    const first = folded.items[0]
+    if (first?.kind !== 'text') throw new Error('expected user text')
+    expect(first.role).toBe('user')
+    expect(first.text).toBe('帮我登记采购单')
+    // A stamp-only message produces no bubble at all.
+    expect(folded.items).toHaveLength(2)
+    // Only a first-line stamp folds: the same text mid-message stays verbatim.
+    const third = folded.items[1]
+    if (third?.kind !== 'text') throw new Error('expected user text')
+    expect(third.text).toBe(`第一行不是注入行\n${stamped}`)
+  })
+
   it('retires a stale ask when a report follows it', () => {
     const askFence = '```dsh\n{"v":3,"type":"ask_choice","id":"choice_1","question":"登记成什么？",'
       + '"options":[{"label":"采购单","value":"hub_po"}]}\n```'

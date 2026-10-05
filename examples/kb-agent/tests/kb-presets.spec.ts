@@ -218,7 +218,7 @@ describe('kb-agent role presets (keyless, text-only degraded mode)', () => {
       const kbTools = ['kb_ingest', 'kb_ingest_url', 'kb_search', 'kb_stats', 'kg_query', 'kg_schema', 'kg_subgraph']
       const viewTools = ['switch_view', 'view_apply', 'view_state_get']
       const expectedTools = preset.id === 'enterprise-data-assistant'
-        ? [...kbTools, ...viewTools, 'assets_browse', 'lakehouse_query', 'lakehouse_tables', 'connector_discover', 'connector_fetch', 'connector_transfer', 'order_create', 'order_status', 'nb_collections', 'nb_list', 'nb_get', 'nb_create', 'nb_update'].sort()
+        ? [...kbTools, ...viewTools, 'assets_browse', 'lakehouse_query', 'lakehouse_tables', 'connector_discover', 'connector_fetch', 'connector_transfer', 'order_create', 'order_status', 'nb_collections', 'nb_list', 'nb_get', 'nb_create', 'nb_update', 'nb_approve'].sort()
         : [...kbTools, ...viewTools]
       expect(names).toEqual(expectedTools)
 

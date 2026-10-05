@@ -1,19 +1,21 @@
-/* Task cards (v6 rich-card base): the card2-plate chat-embedded cards
-    (draft/review/rejected/receipt) with dashed field rules. */
+/* Task cards (W9-B5 ledger paper): the chat-embedded cards
+    (draft/review/rejected/receipt) as white ledger sheets with the roast-line
+    rim, the 20px radius, and the dashed field rules. */
 
 .card {
-  background: var(--dshm-muted);
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius-lg);
-  padding: 12px 13px;
-  width: min(78vw, 300px);
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-line);
+  border-radius: var(--dshm-r-card);
+  box-shadow: var(--dshm-shadow-card);
+  padding: 13px 14px;
+  width: min(80vw, 300px);
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
 .cardRejected {
-  border-color: var(--dshm-destructive-10);
+  border-color: var(--dshm-danger-soft);
 }
 
 .header {
@@ -31,16 +33,16 @@
 }
 
 .title {
-  font-size: var(--dshm-fs-sm);
-  font-weight: 600;
-  color: var(--dshm-foreground);
+  font-size: var(--dshm-fs-heading);
+  font-weight: 700;
+  color: var(--dshm-ink);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .titleIcon {
-  color: var(--dshm-primary);
+  color: var(--dshm-brand);
   flex: none;
 }
 
@@ -51,8 +53,8 @@
 
 .collection {
   margin: 0;
-  font-size: var(--dshm-fs-xs);
-  color: var(--dshm-muted-foreground);
+  font-size: var(--dshm-fs-caption);
+  color: var(--dshm-ink-sub);
 }
 
 .fields {
@@ -67,7 +69,7 @@
   justify-content: space-between;
   gap: 12px;
   padding: 4px 0;
-  border-bottom: 1px dashed var(--dshm-border);
+  border-bottom: 1px dashed var(--dshm-line);
 }
 
 .diffRow:last-child {
@@ -75,8 +77,8 @@
 }
 
 .label {
-  font-size: var(--dshm-fs-xs);
-  color: var(--dshm-muted-foreground);
+  font-size: var(--dshm-fs-caption);
+  color: var(--dshm-ink-sub);
   flex: none;
   max-width: 40%;
   overflow: hidden;
@@ -93,21 +95,21 @@
 }
 
 .diffOld {
-  font-size: var(--dshm-fs-xs);
-  color: var(--dshm-muted-foreground);
+  font-size: var(--dshm-fs-caption);
+  color: var(--dshm-ink-sub);
   text-decoration: line-through;
 }
 
 .diffNew {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   font-weight: 600;
   color: var(--dshm-warning);
 }
 
 .diffSame {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   font-weight: 500;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
 }
 
 .rejectedNote {
@@ -115,12 +117,12 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: var(--dshm-fs-xs);
-  color: var(--dshm-muted-foreground);
+  font-size: var(--dshm-fs-caption);
+  color: var(--dshm-ink-sub);
 }
 
 .rejectedNote .titleIcon {
-  color: var(--dshm-destructive);
+  color: var(--dshm-danger);
 }
 
 .actions {
@@ -134,37 +136,37 @@
 }
 
 .primaryButton {
-  --border-radius: var(--dshm-radius-lg);
+  --border-radius: var(--dshm-r-card);
   font-weight: 600;
 }
 
 .ghostButton {
-  --border-radius: var(--dshm-radius-lg);
-  --border-color: var(--dshm-border);
+  --border-radius: var(--dshm-r-card);
+  --border-color: var(--dshm-line);
   background: transparent;
 }
 
 .steps {
-  --text-color: var(--dshm-muted-foreground);
-  font-size: var(--dshm-fs-xs);
+  --text-color: var(--dshm-ink-sub);
+  font-size: var(--dshm-fs-caption);
 }
 
 .receiptBody {
   background: var(--dshm-card);
-  border-radius: var(--dshm-radius);
+  border-radius: var(--dshm-r-ctl);
   padding: 8px;
 }
 
 .receiptHint {
-  font-size: var(--dshm-fs-xs);
-  color: var(--dshm-muted-foreground);
+  font-size: var(--dshm-fs-caption);
+  color: var(--dshm-ink-sub);
 }
 
 .receiptPre {
   margin: 0;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 1.5;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   max-height: 200px;

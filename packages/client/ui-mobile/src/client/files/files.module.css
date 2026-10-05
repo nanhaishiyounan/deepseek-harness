@@ -9,7 +9,7 @@
   flex-direction: column;
   height: 100%;
   min-height: 0;
-  background: var(--dshm-background);
+  background: var(--dshm-canvas);
 }
 
 .list {
@@ -25,16 +25,16 @@
 
 .sectionTitle {
   margin: 4px 4px 0;
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 18px;
   font-weight: 500;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 .sectionCard {
   background: var(--dshm-card);
-  border: 1px solid var(--dshm-border);
-  border-radius: var(--dshm-radius-lg);
+  border: 1px solid var(--dshm-line);
+  border-radius: var(--dshm-r-card);
   box-shadow: var(--dshm-shadow-card);
   overflow: hidden;
 }
@@ -69,29 +69,29 @@
   min-width: 0;
   text-align: left;
   background: none;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
 }
 
 /* The 24px type badge: antd Tag (the soft fill rides inline dials in
    FilesView.tsx); this class keeps the square scale. */
 .typeBadge {
-  --border-radius: var(--dshm-radius-corner);
+  --border-radius: var(--dshm-r-ctl-corner);
   flex: none;
   width: 24px;
   height: 24px;
   padding: 0;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   font-weight: 600;
 }
 
 /* The row's origin badge: antd Tag (the brand wash rides inline dials in
    FilesView.tsx) marking AI-generated files inside the recent window. */
 .originBadge {
-  --border-radius: var(--dshm-radius-pill);
+  --border-radius: var(--dshm-r-seal);
   flex: none;
   height: 18px;
   padding: 0 6px;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 1;
   font-weight: 600;
 }
@@ -99,10 +99,10 @@
 .fileName {
   flex: 1;
   min-width: 0;
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   line-height: 20px;
   font-weight: 500;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -118,7 +118,7 @@
   width: var(--dshm-touch-sm);
   height: var(--dshm-touch-sm);
   margin-right: -10px;
-  color: var(--dshm-border);
+  color: var(--dshm-line);
 }
 
 .starActive {
@@ -130,24 +130,24 @@
   align-items: center;
   gap: 8px;
   padding-left: 32px;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
 }
 
 /* The meta's link word: the antd mini none-fill brand word. */
 .fileMetaLink:global(.adm-button) {
   padding: 0;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 16px;
   font-weight: 600;
 }
 
 /* The demo tag: antd Tag recolored through its inline dials in FilesView.tsx. */
 .demoTag {
-  --border-radius: var(--dshm-radius-pill);
+  --border-radius: var(--dshm-r-seal);
   flex: none;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   line-height: 14px;
 }
 

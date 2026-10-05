@@ -40,30 +40,64 @@
   display: contents;
 }
 
-/* The v6 tab bar surface: the mock's #tabbar — its own tabbar color (not the
- * page background), the hairline top line, and the 58px item row. */
+/* The W9 amber tray (§五 TabBar): a warm-paper tray floating over the page —
+ * the 96% translucent paper over a 14px frosted blur, the roast-line hairline
+ * as its rim, and breathing room above the item row so the tray reads as a
+ * raised dish rather than a border-stripped column. */
 .tabbar {
   flex: none;
   background: var(--dshm-tabbar-bg);
-  border-top: 1px solid var(--dshm-border);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border-top: 1px solid var(--dshm-line);
+  padding-top: var(--dshm-space-1);
 }
 
 /* antd-mobile's TabBar row is .adm-tab-bar-wrap (min-height 48px default);
- * the inactive/active item colors ride the container-level --adm-* mapping. */
+ * the tray's item row rides the structure height. */
 .tabbar :global(.adm-tab-bar-wrap) {
   min-height: var(--dshm-tabbar-height);
 }
 
-/* The tab labels ride the W7 type-ramp floor (12px, plan §3.2); 10.5px sat
- * below the readability minimum the audit flagged. */
-.tabbar :global(.adm-tab-bar-item-title) {
-  margin-top: 3px;
-  font-size: var(--dshm-fs-xs);
-  font-weight: 600;
-  line-height: 1.2;
+/* The icon slot (§五): every icon sits in a 44px capsule slot so the selected
+ * amber-soft fill lands as a rounded well around the glyph — the tray's
+ * selected marker is the slot, not a color swap alone. */
+.tabbar :global(.adm-tab-bar-item) :global(.adm-tab-bar-item-icon) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 28px;
+  border-radius: 10px;
+  transition: background var(--dshm-motion-fast) var(--dshm-ease-fast);
+}
+
+.tabbar :global(.adm-tab-bar-item-active) :global(.adm-tab-bar-item-icon) {
+  background: var(--dshm-brand-soft);
 }
 
 .tabbar :global(.adm-tab-bar-item-icon) :global(svg) {
   width: 22px;
   height: 22px;
+}
+
+/* Unselected items ride the secondary ink; the selected item's color comes
+ * from the .adm-tab-bar-item-active override in tokens.css (the tab-active
+ * amber tier) — the :not keeps this rule's specificity off the active item. */
+.tabbar :global(.adm-tab-bar-item:not(.adm-tab-bar-item-active)) {
+  color: var(--dshm-ink-sub);
+}
+
+/* The tab labels ride the caption grade; the selected title presses into the
+ * 800 display weight — the ink-side counterpart of the amber slot. */
+.tabbar :global(.adm-tab-bar-item-title) {
+  margin-top: 3px;
+  font-size: var(--dshm-fs-caption);
+  font-weight: 500;
+  line-height: 1.2;
+  transition: color var(--dshm-motion-fast) var(--dshm-ease-fast);
+}
+
+.tabbar :global(.adm-tab-bar-item-active) :global(.adm-tab-bar-item-title) {
+  font-weight: 800;
 }

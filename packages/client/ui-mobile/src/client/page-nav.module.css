@@ -9,6 +9,7 @@
   background: var(--dshm-card);
   flex: none;
   border-bottom: 1px solid var(--dshm-nav-line);
+  box-shadow: var(--dshm-shadow-card);
 }
 
 .pageNav :global(.adm-nav-bar-back) {
@@ -32,19 +33,20 @@
   margin-left: -10px;
   border-radius: 50%;
   background: none;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
 }
 
 .backHit:active {
-  background: var(--dshm-muted);
+  background: var(--dshm-brand-soft);
 }
 
-/* The title slot's h1 (W8-B2): the old span metrics — one heading per
- * secondary page with no visual change. */
+/* The title slot's h1 (W8-B2): one heading per secondary page, pressed into
+ * the heading tier's 700 weight (§3.4). */
 .pageTitle {
   margin: 0;
-  font-size: var(--dshm-fs-lg);
+  font-size: var(--dshm-fs-heading);
   line-height: 24px;
-  font-weight: 600;
-  color: var(--dshm-foreground);
+  font-weight: 700;
+  color: var(--dshm-ink);
+  letter-spacing: -0.2px;
 }

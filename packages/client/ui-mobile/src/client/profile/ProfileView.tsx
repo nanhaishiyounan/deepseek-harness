@@ -152,7 +152,7 @@ export function ProfileView({ identity, dark, onDarkChange, onLogout }: ProfileV
       </header>
 
       <section className={css.userCard} aria-label="身份卡">
-        <Avatar background="var(--dshm-primary)" acronym="我" size={54} />
+        <Avatar background="var(--dshm-brand)" acronym="我" size={54} />
         <div className={css.userMain}>
           <span className={css.userName}>{identity.nickname}</span>
           <span className={css.userMeta}>{identity.username} · 真实账号 · NocoBase 账号体系</span>
@@ -224,9 +224,9 @@ export function ProfileView({ identity, dark, onDarkChange, onLogout }: ProfileV
             className={css.shortcut}
             style={{
               '--background-color': 'var(--dshm-card)',
-              '--text-color': 'var(--dshm-foreground)',
-              '--border-color': 'var(--dshm-border)',
-              '--border-radius': 'var(--dshm-radius-pill)',
+              '--text-color': 'var(--dshm-ink)',
+              '--border-color': 'var(--dshm-line)',
+              '--border-radius': 'var(--dshm-r-seal)',
             }}
             disabled={starting}
             onClick={() => { void startShortcut(shortcut.preset) }}
@@ -317,8 +317,8 @@ export function ProfileView({ identity, dark, onDarkChange, onLogout }: ProfileV
         size="large"
         className={css.logout}
         style={{
-          '--background-color': 'var(--dshm-destructive-10)',
-          '--text-color': 'var(--dshm-destructive)',
+          '--background-color': 'var(--dshm-danger-soft)',
+          '--text-color': 'var(--dshm-danger)',
           '--border-color': 'transparent',
         }}
         onClick={confirmLogout}

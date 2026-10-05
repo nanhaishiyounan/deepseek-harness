@@ -3,7 +3,8 @@
  * colleague's own starter commands as the two-column grid plus the three
  * placeholder tools (local toasts, never real lanes). The open animation
  * rides the 220ms slide-fade (reduced-motion degrades to none); picking a
- * command closes the panel and sends through the parent's sink.
+ * command closes the panel and fills the composer draft through the parent's
+ * sink (W9-B1).
  */
 
 import type { JSX } from 'react'
@@ -38,7 +39,7 @@ const QP_TOOLS: ReadonlyArray<{ readonly label: string; readonly icon: JSX.Eleme
 export interface QuickPanelProps {
   readonly commands: readonly QuickCommand[]
   readonly sending: boolean
-  /** Closes the panel and sends the picked starter's send-text. */
+  /** Carries the picked starter's send-text to the parent (fill + panel close). */
   readonly onPick: (text: string) => void
 }
 

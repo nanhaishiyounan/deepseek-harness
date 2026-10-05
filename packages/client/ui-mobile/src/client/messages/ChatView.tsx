@@ -125,6 +125,8 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
 
   const meta = useAsync(readCollectionMeta)
   const [draft, setDraft] = useState('')
+  /** Timestamp of the last assist-input fill (drives the box's data-fill flash). */
+  const [filledAt, setFilledAt] = useState(0)
   const [sending, setSending] = useState(false)
   const [newChatOpen, setNewChatOpen] = useState(false)
   /** The quick panel's open flag (local view state; a send or route change closes it). */
@@ -190,6 +192,29 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
       setSending(false)
     }
   }, [sessionId, sending, typingCell])
+
+  /**
+   * The assist-input fill (W9-B1): a picked starter/quick command/chip/
+   * suggestion replaces the whole draft (the tag is a complete intent; a
+   * half-typed draft is a fragment), then the composer takes focus with the
+   * caret at the end. Nothing goes out until the user's own send tap.
+   * @param text - the picked tag's full send-text.
+   */
+  const fillDraft = useCallback((text: string) => {
+    setDraft(text)
+    setFilledAt(Date.now())
+  }, [])
+
+  // The fill's focus pass runs after the new draft commits to the box, so
+  // the caret lands at the end of the filled text.
+  useEffect(() => {
+    if (filledAt === 0) return
+    const box = inputRef.current?.nativeElement
+    if (box === null || box === undefined) return
+    box.focus()
+    const end = box.value.length
+    box.setSelectionRange(end, end)
+  }, [filledAt])
 
   // Keep the flow pinned to the newest item while the user is at the bottom.
   useEffect(() => {
@@ -327,7 +352,7 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
         {history.error !== undefined && <NoticeCard kind="error" text={history.error} />}
         {showWelcome && (
           <div className={css.welcomeStage}>
-            <WelcomeCard welcome={welcome} onSend={(text) => { void send(text) }} disabled={sending} />
+            <WelcomeCard welcome={welcome} onFill={fillDraft} disabled={sending} />
           </div>
         )}
         {sessionOutbox.length > 0 && (
@@ -356,6 +381,7 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
             onRejectV3={onRejectV3}
             onRedraft={onRedraft}
             onSend={(text) => { void send(text) }}
+            onFill={fillDraft}
             onFreeText={() => { inputRef.current?.nativeElement?.focus() }}
             onReportAction={onReportAction}
             localPending={localPending}
@@ -387,13 +413,15 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
         panelOpen={panelOpen}
         onTogglePanel={() => { setPanelOpen(open => !open) }}
         inputRef={inputRef}
+        onFill={fillDraft}
+        filledAt={filledAt}
         panel={(
           <QuickPanel
             commands={quickCommands}
             sending={sending}
             onPick={(text) => {
               setPanelOpen(false)
-              void send(text)
+              fillDraft(text)
             }}
           />
         )}

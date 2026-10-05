@@ -31,20 +31,20 @@
   align-items: baseline;
   gap: 5px;
   padding: 4px 11px;
-  border-radius: var(--dshm-radius-pill);
-  background: var(--dshm-primary-10);
+  border-radius: var(--dshm-r-seal);
+  background: var(--dshm-brand-soft);
   color: var(--dshm-on-soft);
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
 }
 
 .segCount {
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   font-weight: 600;
 }
 
 .segHint {
-  font-size: var(--dshm-fs-xs);
-  color: var(--dshm-muted-foreground);
+  font-size: var(--dshm-fs-caption);
+  color: var(--dshm-ink-sub);
 }
 
 /* The card-skeleton column (W7-M2): three SkelCards stacked on the list rhythm. */
@@ -57,11 +57,11 @@
 
 .errorCard {
   padding: 14px;
-  border-radius: var(--dshm-radius);
+  border-radius: var(--dshm-r-ctl);
   background: var(--dshm-card);
-  border: 1px solid var(--dshm-destructive);
-  color: var(--dshm-destructive);
-  font-size: var(--dshm-fs-sm);
+  border: 1px solid var(--dshm-danger);
+  color: var(--dshm-danger);
+  font-size: var(--dshm-fs-body);
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -77,14 +77,14 @@
   flex-direction: column;
   gap: 8px;
   padding: 12px 14px;
-  border-radius: var(--dshm-radius);
+  border-radius: var(--dshm-r-ctl);
   background: var(--dshm-card);
-  border: 1px solid var(--dshm-border);
-  border-left: 3px solid var(--dshm-border);
+  border: 1px solid var(--dshm-line);
+  border-left: 3px solid var(--dshm-line);
 }
 
 .critical {
-  border-left-color: var(--dshm-destructive);
+  border-left-color: var(--dshm-danger);
 }
 
 .warning {
@@ -101,16 +101,16 @@
  * the one glance-weight face — while warning drops to the soft amber chip, so
  * the two tiers separate by material, not just hue distance. */
 .sevTag {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   font-weight: 600;
   padding: 1px 8px;
-  border-radius: var(--dshm-radius-pill);
-  color: var(--dshm-on-primary);
-  background: var(--dshm-muted-foreground);
+  border-radius: var(--dshm-r-seal);
+  color: var(--dshm-on-brand);
+  background: var(--dshm-ink-sub);
 }
 
 .sevTag[data-severity='critical'] {
-  background: var(--dshm-destructive);
+  background: var(--dshm-danger);
 }
 
 .sevTag[data-severity='warning'] {
@@ -120,27 +120,27 @@
 }
 
 .ruleLabel {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   color: var(--dshm-link);
   font-weight: 600;
 }
 
 .claimHint {
   margin-left: auto;
-  font-size: var(--dshm-fs-xs);
-  color: var(--dshm-muted-foreground);
+  font-size: var(--dshm-fs-caption);
+  color: var(--dshm-ink-sub);
 }
 
 .claimed {
   margin-left: auto;
-  font-size: var(--dshm-fs-xs);
-  color: var(--dshm-muted-foreground);
+  font-size: var(--dshm-fs-caption);
+  color: var(--dshm-ink-sub);
 }
 
 .alertTitle {
-  font-size: var(--dshm-fs-md);
-  font-weight: 600;
-  color: var(--dshm-foreground);
+  font-size: var(--dshm-fs-heading);
+  font-weight: 700;
+  color: var(--dshm-ink);
   overflow-wrap: anywhere;
 }
 
@@ -149,7 +149,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  border-top: 1px dashed var(--dshm-border);
+  border-top: 1px dashed var(--dshm-line);
   padding-top: 8px;
 }
 
@@ -166,33 +166,33 @@
   flex: none;
   min-width: 56px;
   height: var(--dshm-touch-sm);
-  --border-radius: var(--dshm-radius-pill);
-  font-size: var(--dshm-fs-xs);
+  --border-radius: var(--dshm-r-seal);
+  font-size: var(--dshm-fs-caption);
 }
 
 .entityCode {
-  font-size: var(--dshm-fs-xs);
-  color: var(--dshm-muted-foreground);
+  font-size: var(--dshm-fs-caption);
+  color: var(--dshm-ink-sub);
 }
 
 .daysCell {
-  font-size: var(--dshm-fs-xs);
-  color: var(--dshm-foreground);
+  font-size: var(--dshm-fs-caption);
+  color: var(--dshm-ink);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
 .footNote {
-  font-size: var(--dshm-fs-xs);
-  color: var(--dshm-muted-foreground);
+  font-size: var(--dshm-fs-caption);
+  color: var(--dshm-ink-sub);
   text-align: center;
   margin: 2px 0 0;
 }
 
 /* The raised-time cell (W8-B2): the relative stamp beside the entity code. */
 .timeCell {
-  font-size: var(--dshm-fs-xs);
-  color: var(--dshm-muted-foreground);
+  font-size: var(--dshm-fs-caption);
+  color: var(--dshm-ink-sub);
 }
 
 /* The folded group card (W8-B2 #⑦): one header row — severity seal, rule
@@ -203,9 +203,9 @@
   flex-direction: column;
   gap: 10px;
   padding: 10px 14px;
-  border-radius: var(--dshm-radius);
+  border-radius: var(--dshm-r-ctl);
   background: var(--dshm-card);
-  border: 1px solid var(--dshm-border);
+  border: 1px solid var(--dshm-line);
 }
 
 .groupHead {
@@ -215,7 +215,7 @@
   min-height: var(--dshm-touch-sm);
   padding: 0;
   background: none;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
   text-align: left;
 }
 
@@ -224,9 +224,9 @@
 }
 
 .groupTitle {
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   font-weight: 600;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -234,23 +234,23 @@
 
 .groupCount {
   flex: none;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   font-weight: 600;
   padding: 1px 8px;
-  border-radius: var(--dshm-radius-pill);
-  background: var(--dshm-primary-10);
+  border-radius: var(--dshm-r-seal);
+  background: var(--dshm-brand-soft);
   color: var(--dshm-on-soft);
 }
 
 .groupTime {
   margin-left: auto;
-  font-size: var(--dshm-fs-xs);
-  color: var(--dshm-muted-foreground);
+  font-size: var(--dshm-fs-caption);
+  color: var(--dshm-ink-sub);
 }
 
 .groupChevron {
   flex: none;
-  color: var(--dshm-muted-foreground);
+  color: var(--dshm-ink-sub);
   transition: transform 220ms ease-out;
 }
 

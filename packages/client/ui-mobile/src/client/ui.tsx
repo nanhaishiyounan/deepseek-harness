@@ -43,9 +43,12 @@ export type BadgeTone = 'primary' | 'success' | 'warning' | 'muted' | 'destructi
  * tone resolves to its token dials.
  */
 const TONE_FACES = {
+  /* The caption-grade tone text rides the deep tier on the 10% washes: brand
+   * on primary-10 holds only ~4.3:1 and warning on warning-10 ~4.2:1 at 12px,
+   * under the 4.5:1 body floor — the deep steps clear 5.9:1 (W9 amber). */
   primary: {
-    '--background-color': 'var(--dshm-primary-10)',
-    '--text-color': 'var(--dshm-primary)',
+    '--background-color': 'var(--dshm-brand-soft)',
+    '--text-color': 'var(--dshm-on-soft)',
     '--border-color': 'transparent',
   },
   success: {
@@ -55,17 +58,17 @@ const TONE_FACES = {
   },
   warning: {
     '--background-color': 'var(--dshm-warning-10)',
-    '--text-color': 'var(--dshm-warning)',
+    '--text-color': 'var(--dshm-warning-deep)',
     '--border-color': 'transparent',
   },
   muted: {
-    '--background-color': 'var(--dshm-muted)',
-    '--text-color': 'var(--dshm-muted-foreground)',
+    '--background-color': 'var(--dshm-card2)',
+    '--text-color': 'var(--dshm-ink-sub)',
     '--border-color': 'transparent',
   },
   destructive: {
-    '--background-color': 'var(--dshm-destructive-10)',
-    '--text-color': 'var(--dshm-destructive)',
+    '--background-color': 'var(--dshm-danger-soft)',
+    '--text-color': 'var(--dshm-danger)',
     '--border-color': 'transparent',
   },
 } as const

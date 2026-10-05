@@ -107,7 +107,7 @@ export function NewChatSheet({ visible, onClose }: NewChatSheetProps): JSX.Eleme
                           <Tag
                             key={chip}
                             className={css.rosterChip as string}
-                            style={{ '--background-color': 'var(--dshm-primary-soft)', '--text-color': 'var(--dshm-primary)', '--border-color': 'transparent' }}
+                            style={{ '--background-color': 'var(--dshm-brand-soft)', '--text-color': 'var(--dshm-brand)', '--border-color': 'transparent' }}
                           >
                             {chip}
                           </Tag>

@@ -26,15 +26,15 @@
   background: none;
   border: none;
   padding: 4px 6px;
-  font-size: var(--dshm-fs-xs);
-  color: var(--dshm-muted-foreground);
+  font-size: var(--dshm-fs-caption);
+  color: var(--dshm-ink-sub);
   cursor: pointer;
 }
 
 .indexHint {
   margin: 4px 0 0;
-  font-size: var(--dshm-fs-xs);
-  color: var(--dshm-muted-foreground);
+  font-size: var(--dshm-fs-caption);
+  color: var(--dshm-ink-sub);
 }
 
 .indexGrid {
@@ -49,16 +49,16 @@
   align-items: center;
   gap: 7px;
   padding: 16px 6px;
-  border-radius: var(--dshm-radius);
+  border-radius: var(--dshm-r-ctl);
   background: var(--dshm-card);
-  border: 1px solid var(--dshm-border);
-  color: var(--dshm-primary);
+  border: 1px solid var(--dshm-line);
+  color: var(--dshm-brand);
   cursor: pointer;
 }
 
 .indexLabel {
-  font-size: var(--dshm-fs-xs);
-  color: var(--dshm-foreground);
+  font-size: var(--dshm-fs-caption);
+  color: var(--dshm-ink);
 }
 
 /* The card-skeleton column (W7-M2): three SkelCards stacked on the list rhythm. */
@@ -71,11 +71,11 @@
 
 .errorCard {
   padding: 14px;
-  border-radius: var(--dshm-radius);
+  border-radius: var(--dshm-r-ctl);
   background: var(--dshm-card);
-  border: 1px solid var(--dshm-destructive);
-  color: var(--dshm-destructive);
-  font-size: var(--dshm-fs-sm);
+  border: 1px solid var(--dshm-danger);
+  color: var(--dshm-danger);
+  font-size: var(--dshm-fs-body);
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -83,10 +83,10 @@
 
 .truncateNote {
   padding: 8px 14px;
-  border-radius: var(--dshm-radius);
-  background: var(--dshm-primary-10);
+  border-radius: var(--dshm-r-ctl);
+  background: var(--dshm-brand-soft);
   color: var(--dshm-on-soft);
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   text-align: center;
 }
 
@@ -101,17 +101,17 @@
   justify-content: space-between;
   gap: 10px;
   padding: 12px 14px;
-  border-radius: var(--dshm-radius);
+  border-radius: var(--dshm-r-ctl);
   background: var(--dshm-card);
-  border: 1px solid var(--dshm-border);
+  border: 1px solid var(--dshm-line);
   cursor: pointer;
   text-align: left;
 }
 
 .rowTitle {
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   font-weight: 600;
-  color: var(--dshm-foreground);
+  color: var(--dshm-ink);
   overflow-wrap: anywhere;
 }
 
@@ -123,16 +123,16 @@
 }
 
 .rowState {
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   color: var(--dshm-on-soft);
-  background: var(--dshm-primary-10);
-  border-radius: var(--dshm-radius-pill);
+  background: var(--dshm-brand-soft);
+  border-radius: var(--dshm-r-seal);
   padding: 2px 8px;
 }
 
 .rowId {
-  font-size: var(--dshm-fs-xs);
-  color: var(--dshm-muted-foreground);
+  font-size: var(--dshm-fs-caption);
+  color: var(--dshm-ink-sub);
 }
 
 .detailCard {
@@ -140,9 +140,9 @@
   flex-direction: column;
   gap: 10px;
   padding: 12px 14px;
-  border-radius: var(--dshm-radius);
+  border-radius: var(--dshm-r-ctl);
   background: var(--dshm-card);
-  border: 1px solid var(--dshm-border);
+  border: 1px solid var(--dshm-line);
 }
 
 .detailHead {
@@ -153,18 +153,18 @@
 }
 
 .detailTitle {
-  font-size: var(--dshm-fs-md);
-  font-weight: 600;
-  color: var(--dshm-foreground);
+  font-size: var(--dshm-fs-heading);
+  font-weight: 700;
+  color: var(--dshm-ink);
   overflow-wrap: anywhere;
 }
 
 .detailState {
   flex: none;
-  font-size: var(--dshm-fs-xs);
+  font-size: var(--dshm-fs-caption);
   color: var(--dshm-on-soft);
-  background: var(--dshm-primary-10);
-  border-radius: var(--dshm-radius-pill);
+  background: var(--dshm-brand-soft);
+  border-radius: var(--dshm-r-seal);
   padding: 3px 9px;
 }
 
@@ -178,7 +178,7 @@
   display: flex;
   gap: 12px;
   padding: 7px 0;
-  border-bottom: 1px dashed var(--dshm-border);
+  border-bottom: 1px dashed var(--dshm-line);
 }
 
 .fieldRow:last-child {
@@ -187,29 +187,29 @@
 
 .fieldName {
   flex: 0 0 38%;
-  font-size: var(--dshm-fs-xs);
-  color: var(--dshm-muted-foreground);
+  font-size: var(--dshm-fs-caption);
+  color: var(--dshm-ink-sub);
   overflow-wrap: anywhere;
 }
 
 .fieldValue {
   flex: 1;
   margin: 0;
-  font-size: var(--dshm-fs-sm);
-  color: var(--dshm-foreground);
+  font-size: var(--dshm-fs-body);
+  color: var(--dshm-ink);
   overflow-wrap: anywhere;
 }
 
 .trailTitle {
   margin: 2px 0 0;
-  font-size: var(--dshm-fs-sm);
+  font-size: var(--dshm-fs-body);
   font-weight: 600;
 }
 
 .trailEmpty {
   margin: 0;
-  font-size: var(--dshm-fs-xs);
-  color: var(--dshm-muted-foreground);
+  font-size: var(--dshm-fs-caption);
+  color: var(--dshm-ink-sub);
 }
 
 .trailList {
@@ -231,8 +231,8 @@
   width: 7px;
   height: 7px;
   margin-top: 5px;
-  border-radius: var(--dshm-radius-pill);
-  background: var(--dshm-primary);
+  border-radius: var(--dshm-r-seal);
+  background: var(--dshm-brand);
 }
 
 .trailTexts {
@@ -243,31 +243,31 @@
 }
 
 .trailLine {
-  font-size: var(--dshm-fs-sm);
-  color: var(--dshm-foreground);
+  font-size: var(--dshm-fs-body);
+  color: var(--dshm-ink);
 }
 
 .trailMeta {
-  font-size: var(--dshm-fs-xs);
-  color: var(--dshm-muted-foreground);
+  font-size: var(--dshm-fs-caption);
+  color: var(--dshm-ink-sub);
   overflow-wrap: anywhere;
 }
 
 .barcodeHint {
   margin: 0 0 8px;
-  font-size: var(--dshm-fs-xs);
-  color: var(--dshm-muted-foreground);
+  font-size: var(--dshm-fs-caption);
+  color: var(--dshm-ink-sub);
 }
 
 .barcodeImg {
   display: block;
   width: 100%;
-  border-radius: var(--dshm-radius);
+  border-radius: var(--dshm-r-ctl);
   background: var(--dshm-barcode-paper);
 }
 
 .barcodeFallback {
   margin: 0;
-  font-size: var(--dshm-fs-xs);
-  color: var(--dshm-muted-foreground);
+  font-size: var(--dshm-fs-caption);
+  color: var(--dshm-ink-sub);
 }

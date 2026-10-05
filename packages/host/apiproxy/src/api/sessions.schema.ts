@@ -303,15 +303,8 @@ export const sessionPromptRequestSchema = z.object({
   // dispatch a real model call over no content.
   content: z.array(promptContentPartSchema).min(1),
   clientTimeZone: z.string().optional(),
-  // The mobile caller's signed-in business identity; bound as the acting
-  // user only when the request also carries the matching gateway session
-  // token (authToken below) — identity is derived server-side from the
-  // token, never client-narrated.
-  loginUser: z.object({
-    username: z.string().min(1).max(100),
-    nickname: z.string().min(1).max(100),
-  }).optional(),
-  // The nocobase.signIn session token the acting user derives from.
+  // The nocobase.signIn session token the acting user derives from (identity
+  // is derived server-side from the token, never client-narrated).
   authToken: z.string().min(1).optional(),
   // Caller idempotency key: a repeat of an already-accepted id on the same
   // session answers accepted without enqueueing again.

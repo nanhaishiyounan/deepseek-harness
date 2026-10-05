@@ -1,219 +1,295 @@
 /*
- * Mobile v7 token set:「W7 铸造 · Forge」(plans/2026-10-03 plan-w7.zh.md §3)
- * — Prussian blue #1E4E8C shared with the PC w7-forge theme, Fiori Morning
- * Horizon semantic pairs, warm-gray neutrals, and a three-step elevation
- * (canvas / white card + diffuse shadow / raised card, ~8% RGB step between
- * canvas and card). Light and dark are two whole tracks declared on both
- * `.dshm-root` and `html[data-theme]`: antd-mobile renders Popup/Picker/
- * Dialog/Toast portals into `document.body`, outside `.dshm-root`, so the html
- * twin (specificity (0,1,1), beating antd's `:root` defaults) keeps every
- * portal on the same track. antd-mobile reads the same names through var()
- * references, so its components follow the track without per-theme overrides.
- * Brand discipline: blue stays on primary actions and links, ≤2 brand hits
- * per screen; everything else rides the neutral ramp. The root also draws the
- * 430px phone shell: fluid full-width below 720px, a centered rounded bezel
- * with an outer shadow on desktop.
+ * Mobile v8 token set:「酱园琥珀 · Sauce Amber」(demos/acceptance-w9/
+ * design-language-w9.md §3 — the single visual source of W9). Light and dark
+ * are two whole tracks declared on both `.dshm-root` and `html[data-theme]`:
+ * antd-mobile renders Popup/Picker/Dialog/Toast portals into document.body,
+ * outside `.dshm-root`, so the html twin (specificity (0,1,1), beating antd's
+ * `:root` defaults) keeps every portal on the same track. Warm-paper canvas,
+ * persimmon brand heartbeats (CTA / key figures / selected states — the warm
+ * palette may hit 2–4 times per screen; the paper digests the saturation),
+ * roast-ink text, and the seal language (paper-label bubbles, capsule chips,
+ * round stamps) that B5/B6 attach through the form hooks at the tail.
+ *
+ * Layering: the §3 base names (canvas/ink/brand/…) are the declared table;
+ * the W7-era names (primary/foreground/background/muted/border/…) survive as
+ * reference aliases so the 40+ module consumers follow the new values without
+ * per-file edits — B5/B6 migrate call sites to the base names. Contrast pairs
+ * noted per line are measured by the WCAG relative-luminance formula (the
+ * w9-b4 probe re-measures them on the live DOM): body text ≥4.5:1, large
+ * text and state figures ≥3:1.
  */
 
 .dshm-root,
 html[data-theme='light'] {
-  /* Brand axis (same source as PC --w7-primary) */
-  --dshm-primary: #1e4e8c;          /* 普鲁士深蓝 brand */
-  --dshm-on-primary: #ffffff;       /* selected-state foreground (brand is track-constant) */
-  --dshm-brand2: #3a69a4;           /* 同源蓝第二阶（图表序列），替代旧亮青渐变副色 */
-  --dshm-user-grad: linear-gradient(135deg, #1e4e8c, #3a69a4); /* hero/send/bubble accent (user-grad) */
-  --dshm-primary-10: rgba(30, 78, 140, 0.10);
-  --dshm-primary-soft: #e8f0f9;     /* selected chip / starter chip fill (brand-soft) */
-  --dshm-foreground: #1f2630;       /* off-black 文字-主（对齐 PC --w7-text） */
-  --dshm-muted-foreground: #55606e; /* 暖灰 sub（对齐 PC --w7-text-secondary） */
-  --dshm-background: #eaebe8;       /* 暖灰画布（三档海拔第 1 档，对白卡 RGB 平均差 ~8%） */
-  --dshm-card: #ffffff;             /* card（第 2 档：白卡+弥散影） */
-  --dshm-muted: #f3f4f1;            /* fold zones, input fills (card2) */
-  --dshm-border: #e0e1de;           /* line（比 PC 略深一阶，小屏 1px 可见） */
-  --dshm-nav-line: var(--dshm-border);  /* PageNav 底边线（引用型；暗轨压深一阶） */
-  --dshm-header-bg: #ffffff;        /* chat/page header surface (header) */
-  --dshm-tabbar-bg: #ffffff;        /* bottom tab bar surface (tabbar) */
-  --dshm-input-bg: #ffffff;         /* composer input fill (input-bg) */
-  /* Semantics — Fiori Morning Horizon pairs, aligned with the PC theme */
-  --dshm-success: #256f3a;          /* Positive（对白卡 6.9:1） */
-  --dshm-success-soft: #f5fae5;
-  --dshm-success-10: rgba(37, 111, 58, 0.12);
-  --dshm-warning: #e76500;          /* Critical */
-  --dshm-warning-soft: #fff8d6;
-  --dshm-warning-10: rgba(231, 101, 0, 0.12);
-  --dshm-destructive: #aa0808;      /* Negative */
-  --dshm-destructive-soft: #ffeaf4;
-  --dshm-destructive-10: rgba(170, 8, 8, 0.12);
-  --dshm-info: #0070f2;             /* Informational */
-  --dshm-info-soft: #e1f4ff;
-  /* Temperature-layer badges (cargo fields only, never brand surfaces) */
+  /* -- Brand & canvas (§3.1) ---------------------------------------------- */
+  --dshm-canvas: #fbf5eb;           /* 暖纸画布（ink 对它 12.0:1） */
+  --dshm-card: #ffffff;             /* 卡面（ink 对卡 13.5:1） */
+  --dshm-card2: #f6eddf;            /* fold 区 / 输入井（对卡 RGB 平均差 ~20） */
+  --dshm-brand: #b4530a;            /* 柿橙主色（对画布 4.7:1 / 对白卡 5.0:1） */
+  --dshm-brand-deep: #8f4106;       /* 按压态 / soft 底上的深一阶（对 brand-soft 5.8:1） */
+  --dshm-brand-soft: #f8e4d2;       /* 主色 soft 底（chip / 选中槽） */
+  --dshm-on-brand: #ffffff;         /* 主色实底上的前景（亮 5.0:1） */
+  --dshm-anchor: #1e4e8c;           /* W7 品牌蓝锚：链接/「全部›」/表单助手章（对白卡 8.3:1） */
+  --dshm-ink: #3d2b1f;              /* 深焙墨·主文字（对画布 12.0:1 / 对卡 13.5:1） */
+  --dshm-ink-sub: #6f5b49;          /* 墨·次文字（对画布 6.0:1 / 对卡 6.4:1） */
+  --dshm-ink-weak: #9a8570;         /* 仅装饰/骨架/时间戳壳，不负载正文 */
+  --dshm-line: #eadfc9;             /* 焙线描边 */
+  --dshm-line-strong: #dfc9a6;      /* 回执卡描边（深一阶） */
+
+  /* -- Semantic five states (§3.2, fg ratios on the white card) ------------ */
+  --dshm-success: #4a7031;          /* 合格/生效/已完成（5.1:1） */
+  --dshm-success-soft: #eaf2dc;
+  --dshm-warning: #b35600;          /* 待处理/临期（4.95:1） */
+  --dshm-warning-soft: #fbefd9;
+  --dshm-warning-deep: #8f4400;     /* soft 底上的深一阶（对 warning-soft ~5.9:1；
+                                     * symmetric to brand-deep, the badge-tone floor） */
+  --dshm-danger: #a93226;           /* 不合格/驳回/逾期（6.6:1） */
+  --dshm-danger-soft: #f9e4e0;
+  --dshm-info: #2e6e8e;             /* 进行中/已提交（5.6:1） */
+  --dshm-info-soft: #e0eef4;
+  --dshm-neutral: #7a6a58;          /* 草稿/停用/元数据（5.3:1） */
+  --dshm-neutral-soft: #f1e8da;
+
+  /* -- Bubbles & seals (§3.3) ---------------------------------------------- */
+  --dshm-bubble-user-bg: #b4530a;   /* 用户气泡（白字 5.0:1） */
+  --dshm-bubble-user-fg: #ffffff;
+  --dshm-bubble-ai-bg: #ffffff;     /* AI 气泡（纸标签） */
+  --dshm-bubble-ai-fg: var(--dshm-ink);
+  --dshm-bubble-ai-border: #eadfc9;
+  --dshm-seal-ring: #b4530a;        /* 印章环线（酱印/收讫章描边） */
+  --dshm-seal-face: #ffffff;        /* 印面底 */
+  --dshm-stamp-avatar-1: #1e4e8c;   /* AI 同事四字章（章色双轨恒定，W7 stamp 盘继承） */
+  --dshm-stamp-avatar-2: #1d5f5a;
+  --dshm-stamp-avatar-3: #2e5e34;
+  --dshm-stamp-avatar-4: #7a5230;
+
+  /* -- Type ramp (§3.4): six grades + the mono numeric track --------------- */
+  --dshm-fs-display: 30px;          /* hero 问候、章中心字（800/1.25） */
+  --dshm-fs-title: 20px;            /* 区块标题（800/1.3） */
+  --dshm-fs-heading: 17px;          /* 卡片标题、页面标题（700/1.4） */
+  --dshm-fs-body: 14px;             /* 正文（400/1.6 — the breathing lift from 13px） */
+  --dshm-fs-caption: 12px;          /* 标签、脚注、Tab 文字（500/1.5） */
+  --dshm-fs-num-lg: 32px;           /* 统计大数字（700 mono tabular；hero 可到 44px） */
+  --dshm-fs-num-md: 26px;           /* 台账行数字（700 mono tabular） */
+  --dshm-fs-input: 16px;            /* input floor — iOS Safari auto-zooms any focused
+                                      * control under 16px, so every typing surface rides
+                                      * this grade whatever its container dial says */
+  --dshm-font-num: 'SF Mono', ui-monospace, 'Menlo', monospace;
+  --dshm-font-sans: -apple-system, 'PingFang SC', 'HarmonyOS Sans SC', 'Noto Sans SC',
+    'Microsoft YaHei', sans-serif;
+
+  /* -- Space / radius / shadow / motion (§3.5) ------------------------------ */
+  --dshm-space-1: 4px;              /* 4px 基数阶：卡间=5(20) 区块=6(28) 页边=5(20) */
+  --dshm-space-2: 8px;
+  --dshm-space-3: 12px;
+  --dshm-space-4: 16px;
+  --dshm-space-5: 20px;
+  --dshm-space-6: 28px;
+  --dshm-r-card: 20px;              /* 卡片/回执/追问卡 */
+  --dshm-r-ctl: 14px;               /* 控件/输入槽 */
+  --dshm-r-bubble: 18px;            /* 气泡（尾角 6px — the paper-label notch） */
+  --dshm-r-seal: 999px;             /* 印章/胶囊章 */
+  --dshm-shadow-card: 0 1px 2px rgba(61, 43, 31, 0.04), 0 8px 24px rgba(61, 43, 31, 0.05);
+  --dshm-shadow-raised: 0 4px 12px rgba(61, 43, 31, 0.10);
+  --dshm-shadow-seal: 0 4px 12px rgba(180, 83, 10, 0.30); /* 主 CTA 印章柿橙染影 */
+  /* Motion tokens stay pure durations: module call sites splice them into the
+   * animation shorthand (`animation: x var(--dshm-motion-fast) ease`), where a
+   * composite value would derail the slot order. The curves ride the ease set. */
+  --dshm-motion-fast: 220ms;        /* 微交互（选中/chips）— pair --dshm-ease-fast */
+  --dshm-motion-page: 220ms;        /* 页面推入（保持 W8 时长） */
+  --dshm-motion-stamp: 260ms;       /* 印章落章 — pair --dshm-ease-stamp */
+  --dshm-ease-fast: cubic-bezier(0.22, 0.9, 0.3, 1);
+  --dshm-ease-slide: cubic-bezier(0.2, 0.8, 0.2, 1);   /* overshoot-free decaying push */
+  --dshm-ease-stamp: cubic-bezier(0.2, 1.4, 0.4, 1);   /* stamping curve */
+
+  /* -- Structure constants (§3.6, W8 asset values unchanged) ---------------- */
+  --dshm-touch: 44px;               /* primary touch target (send, back, new-chat) */
+  --dshm-touch-sm: 40px;            /* secondary touch target (chips, entries, stars) — the W8
+                                      * lift from 36px (WCAG 2.5.8 AA floor 24px, Apple 44pt
+                                      * for the primary paths that ride --dshm-touch) */
+  --dshm-tabbar-height: 58px;
+
+  /* -- W8 accessibility semantics, re-valued onto the amber palette (§七；
+   *    names and gates survive, values re-measured by the w9-b4 probe). ---- */
+  --dshm-focus-ring: 0 0 0 3px rgba(180, 83, 10, 0.40); /* keyboard focus halo */
+  --dshm-link: #1e4e8c;             /* in-text links on card/canvas (8.3:1 on card) */
+  --dshm-tab-active: #b4530a;       /* selected Tab state (4.9:1 on the tray) */
+
+  /* -- W7-era reference aliases: the names module files already read; each
+   *    resolves onto the §3 base so every consumer follows the track. (The
+   *    unmigrated page shells keep their own grade; B5/B6 move call sites.) */
+  --dshm-primary: var(--dshm-brand);
+  --dshm-primary-press: var(--dshm-brand-deep);
+  --dshm-primary-soft: var(--dshm-brand-soft);
+  --dshm-primary-10: rgba(180, 83, 10, 0.12);
+  --dshm-primary-rim: rgba(180, 83, 10, 0.35);   /* hairline brand rim (ghost chips) */
+  --dshm-on-primary: var(--dshm-on-brand);
+  --dshm-brand2: var(--dshm-brand-deep);         /* chart series 2 — the amber second step */
+  --dshm-user-grad: linear-gradient(135deg, #b4530a, #8f4106); /* hero/send accent */
+  --dshm-foreground: var(--dshm-ink);
+  --dshm-muted-foreground: var(--dshm-ink-sub);
+  --dshm-background: var(--dshm-canvas);
+  --dshm-muted: var(--dshm-card2);
+  --dshm-border: var(--dshm-line);
+  --dshm-nav-line: var(--dshm-line);             /* PageNav 底边线 */
+  --dshm-header-bg: #ffffff;
+  --dshm-tabbar-bg: rgba(255, 252, 246, 0.96);   /* 暖纸托盘（blur14 见 shell.module.css） */
+  --dshm-input-bg: #ffffff;
+  --dshm-success-10: rgba(74, 112, 49, 0.12);
+  --dshm-warning-10: rgba(179, 86, 0, 0.12);
+  --dshm-destructive: var(--dshm-danger);
+  --dshm-destructive-soft: var(--dshm-danger-soft);
+  --dshm-destructive-10: rgba(169, 50, 38, 0.12);
+  --dshm-stroke-soft: rgba(234, 223, 201, 0.6);  /* in-card ledger dividers */
+  --dshm-send-shadow: var(--dshm-shadow-seal);
+  --dshm-receipt-wash: rgba(74, 112, 49, 0.16);  /* the receipt card's fill */
+  --dshm-success-rim: rgba(74, 112, 49, 0.55);
+  --dshm-on-soft: var(--dshm-brand-deep);        /* fg on primary-10/brand-soft (5.8:1) */
+
+  /* Temperature-layer badges (cargo fields only, never brand surfaces). */
   --dshm-temp-chill: #0e7490;
   --dshm-temp-frozen: #1e40af;
   --dshm-temp-ambient: #8a6a3b;
-  /* Bubbles */
-  --dshm-bubble-user-bg: #1e4e8c;   /* solid fallback; the accent face is --dshm-user-grad */
-  --dshm-bubble-user-fg: #ffffff;
-  --dshm-bubble-ai-bg: #ffffff;
-  --dshm-bubble-ai-fg: #1f2630;
-  --dshm-bubble-ai-border: #e0e1de;
-  /* Structure — radius ladder s8 / m12 / l16 + pill */
-  --dshm-radius: 12px;              /* field rows, small controls (m) */
-  --dshm-radius-lg: 16px;           /* cards, sheets (l) */
-  --dshm-radius-bubble: 16px;       /* chat bubbles (l) */
-  --dshm-radius-corner: 8px;        /* speaking corner (s) */
-  --dshm-radius-pill: 999px;        /* tags, chips, capsules, badge dots */
-  --dshm-tabbar-height: 58px;
-  --dshm-touch: 44px;               /* primary touch target (send, back, new-chat) */
-  --dshm-touch-sm: 40px;            /* secondary touch target (chips, entries, stars) — the W8
-                                       * lift from 36px (WCAG 2.5.8 AA floor 24px, Apple 44pt
-                                       * for the primary paths that ride --dshm-touch) */
-  --dshm-link: #1e4e8c;             /* in-text links and tappable words on card/canvas (the
-                                       * brand value on light; dark lifts below for ≥4.5:1) */
-  --dshm-focus-ring: 0 0 0 3px rgba(30, 78, 140, 0.35); /* keyboard focus halo (W8 V8) */
-  /* Elevation — diffuse same-tone shadows (第 3 档 = raised 深一档影) */
-  --dshm-shadow-card: 0 1px 2px rgba(31, 38, 48, 0.04), 0 8px 24px rgba(31, 38, 48, 0.06);
-  --dshm-shadow-raised: 0 4px 12px rgba(31, 38, 48, 0.10);
-  --dshm-stroke-soft: rgba(224, 225, 222, 0.6); /* in-card ledger dividers */
-  --dshm-primary-rim: rgba(30, 78, 140, 0.35); /* hairline brand rim (ghost chips, ask bubble) */
-  --dshm-send-shadow: 0 4px 12px rgba(30, 78, 140, 0.32); /* the send seal's brand glow */
-  --dshm-primary-press: #173d70;    /* pressed primary (sends, seals) */
-  --dshm-receipt-wash: rgba(37, 111, 58, 0.16); /* the receipt card's fill */
-  --dshm-success-rim: rgba(37, 111, 58, 0.55);  /* the receipt card's rim */
-  --dshm-tab-active: var(--dshm-primary);  /* selected Tab state (see tail override) */
-  --dshm-font-sans: -apple-system, 'BlinkMacSystemFont', 'PingFang SC', 'HarmonyOS Sans SC',
-    'Noto Sans SC', 'Microsoft YaHei', sans-serif;
-  --dshm-font-num: 'SF Mono', ui-monospace, 'Menlo', 'Roboto Mono', monospace;
-  --dshm-shell-shadow: 0 0 40px rgba(31, 38, 48, 0.14); /* the desktop phone-shell halo */
+
+  /* Elevation faces and seals. */
+  --dshm-shell-shadow: 0 0 40px rgba(61, 43, 31, 0.14); /* the desktop phone-shell halo */
+
   /* The narrative code block's near-black plate (track-deepened). */
   --dshm-code-bg: #14181f;
   --dshm-code-fg: #dfe5ee;
   --dshm-code-chrome: rgba(255, 255, 255, 0.05);
   --dshm-code-muted: #97a4b8;
   --dshm-code-action: #c7d3e6;      /* the plate's copy word — the code plate stays deep on
-                                       * both tracks, so one value serves the pair */
+                                      * both tracks, so one value serves the pair */
   --dshm-barcode-paper: #ffffff;    /* the barcode well stays paper-white on both tracks —
-                                       * scanners need the constant quiet zone */
+                                      * scanners need the constant quiet zone */
 
-  /* v5 · work-ledger increments (kept as reference tokens) */
+  /* v5 · work-ledger reference tokens (values follow the aliases above). */
   --dshm-work-todo: var(--dshm-muted-foreground);   /* 待处理（引用型） */
-  --dshm-work-doing: var(--dshm-primary);           /* 进行中（引用型） */
+  --dshm-work-doing: var(--dshm-primary);           /* 进行中（引用型 → 柿橙） */
   --dshm-work-review: var(--dshm-warning);          /* 待确认（引用型） */
   --dshm-work-done: var(--dshm-success);            /* 已完成（引用型） */
   --dshm-stamp-doing: var(--dshm-work-doing);       /* 进行中印章文字/描边（暗轨单列一阶，见 dark 段） */
-  --dshm-on-soft: #1e4e8c;          /* foreground on primary-10/primary-soft fills (7:1 on soft) */
   --dshm-stamp-lg: 44px;           /* detail-grade stamp (phase/work) */
   --dshm-stamp-sm: 28px;           /* list-grade stamp (work/report) */
   --dshm-stamp-avatar: 36px;       /* role stamp */
-  --dshm-motion-fast: 220ms;       /* tab fade — the design's pageIn .22s */
-  --dshm-motion-page: 220ms;       /* secondary-page push — the design's pageIn .22s */
-  --dshm-ease-slide: cubic-bezier(0.2, 0.8, 0.2, 1);   /* overshoot-free decaying push */
-  --dshm-ease-stamp: cubic-bezier(0.2, 1.4, 0.4, 1);   /* stamping curve */
 
-  /* Type ramp — five steps + numeric (plan §3.2; the 12px floor is the Tab
-    * label grade). Module files read these instead of hard-coded px. */
-  --dshm-fs-xs: 12px;   /* Tab labels, meta — the readability floor */
-  --dshm-fs-sm: 13px;   /* body text */
-  --dshm-fs-md: 15px;   /* card titles */
-  --dshm-fs-lg: 17px;   /* page titles */
-  --dshm-fs-xl: 24px;   /* stat digits */
-  --dshm-fs-num: 26px;  /* hero digits */
-  --dshm-fs-input: 16px; /* input floor — iOS Safari auto-zooms any focused
-                          * control under 16px, so every typing surface rides
-                          * this grade whatever its container dial says */
+  /* W7 five-step ramp aliases: xs=12 caption, sm=14 body (the breathing lift),
+   * md holds 15 for the unmigrated card titles (B5 moves them to fs-heading
+   * 17/700), lg=17 heading, xl=26 num-md, num=32 num-lg. */
+  --dshm-fs-xs: var(--dshm-fs-caption);
+  --dshm-fs-sm: var(--dshm-fs-body);
+  --dshm-fs-md: 15px;
+  --dshm-fs-lg: var(--dshm-fs-heading);
+  --dshm-fs-xl: var(--dshm-fs-num-md);
+  --dshm-fs-num: var(--dshm-fs-num-lg);
 
-  /* antd-mobile theme mapping: same declaration as the tokens, so both mount
-     points (root and html twin) carry it and every adm- component — portal or
-     not — follows the track. --adm-radius-* are antd-mobile's real radius
-     dials; --adm-center-popup-border-radius covers Picker/DatePicker/Dialog/
-     Modal panels. The font-size ladder is fully remapped onto the five-step
-     ramp (adm-grade 5 settles at 14px, the mobile body grade). */
-  --adm-color-primary: var(--dshm-primary);
+  /* Radius ladder aliases onto the §3.5 dial set. */
+  --dshm-radius: var(--dshm-r-ctl);
+  --dshm-radius-lg: var(--dshm-r-card);
+  --dshm-radius-bubble: var(--dshm-r-bubble);
+  --dshm-radius-corner: 8px;        /* seal-internal small pieces (= --adm-radius-s) */
+  --dshm-radius-pill: var(--dshm-r-seal);
+
+  /* antd-mobile theme mapping (§4): same declaration on both mount points,
+   * so every adm- component — portal or not — follows the track. Font-size
+   * grades re-ladder onto the six-grade scale (grade5=15 card-title tier,
+   * grade9=display, grade10=hero digits). */
+  --adm-color-primary: var(--dshm-brand);
   --adm-color-success: var(--dshm-success);
   --adm-color-warning: var(--dshm-warning);
-  --adm-color-danger: var(--dshm-destructive);
-  --adm-color-text: var(--dshm-foreground);
-  --adm-color-text-secondary: var(--dshm-muted-foreground);
-  --adm-color-weak: var(--dshm-muted-foreground);
-  --adm-color-border: var(--dshm-border);
-  --adm-color-box: var(--dshm-muted);
+  --adm-color-danger: var(--dshm-danger);
+  --adm-color-text: var(--dshm-ink);
+  --adm-color-text-secondary: var(--dshm-ink-sub);
+  --adm-color-weak: var(--dshm-ink-sub);   /* weak 提一档：不再用 ink-weak 承载可读文本 */
+  --adm-color-border: var(--dshm-line);
+  --adm-color-box: var(--dshm-card2);
   --adm-color-background: var(--dshm-card);
-  --adm-color-background-body: var(--dshm-background);
+  --adm-color-background-body: var(--dshm-canvas);
   --adm-font-family: var(--dshm-font-sans);
-  --adm-radius-s: var(--dshm-radius-corner);
-  --adm-radius-m: var(--dshm-radius);
-  --adm-radius-l: var(--dshm-radius-lg);
-  --adm-center-popup-border-radius: var(--dshm-radius-lg);
+  --adm-radius-s: 8px;
+  --adm-radius-m: var(--dshm-r-ctl);
+  --adm-radius-l: var(--dshm-r-card);
+  --adm-center-popup-border-radius: var(--dshm-r-card);
   --adm-font-size-1: 9px;
   --adm-font-size-2: 11px;
-  --adm-font-size-3: var(--dshm-fs-xs);
-  --adm-font-size-4: var(--dshm-fs-sm);
-  --adm-font-size-5: 14px;
-  --adm-font-size-6: var(--dshm-fs-md);
-  --adm-font-size-7: var(--dshm-fs-lg);
-  --adm-font-size-8: 20px;
-  --adm-font-size-9: var(--dshm-fs-xl);
-  --adm-font-size-10: 28px;
+  --adm-font-size-3: var(--dshm-fs-caption);
+  --adm-font-size-4: var(--dshm-fs-body);
+  --adm-font-size-5: 15px;
+  --adm-font-size-6: var(--dshm-fs-heading);
+  --adm-font-size-7: 20px;
+  --adm-font-size-8: 24px;
+  --adm-font-size-9: var(--dshm-fs-display);
+  --adm-font-size-10: 44px;
 }
 
 .dshm-root[data-theme='dark'],
 html[data-theme='dark'] {
-  /* Dark track: desaturated, lifted brand and semantic steps so every figure
-   * keeps ≥4.5:1 on the raised card (#1e2634). */
-  --dshm-primary: #2a5fa6;          /* brand lifted one step on dark */
-  --dshm-tab-active: #5783bc;       /* chart-3 blue: the primary-on-tabbar figure
-                                       * (selected Tab state) needs ≥3:1 (WCAG
-                                       * 1.4.11) against #131926 — 4.5:1 here —
-                                       * while solid fills keep white-on-#2a5fa6 */
-  --dshm-stamp-doing: #5783bc;      /* the work stamp's 进行中 seal is hollow
-                                       * text+outline: #2a5fa6 on card #1e2634 is
-                                       * 2.38:1, under the 3:1 (WCAG 1.4.11) text
-                                       * floor — same lift as the tab-active tier */
-  --dshm-primary-10: rgba(42, 95, 166, 0.20);
-  --dshm-primary-soft: #1b2c48;
-  --dshm-primary-press: #4c79b8;
-  --dshm-foreground: #e8ecf1;
-  --dshm-muted-foreground: #93a0b4; /* desaturated blue-gray */
-  --dshm-background: #0c1017;       /* 深蓝黑（与卡 #1e2634 拉开 ~9% RGB 差） */
-  --dshm-card: #1e2634;
-  --dshm-muted: #141b26;
-  --dshm-link: #7b9dd1;            /* brand #2a5fa6 measures 2.38:1 on the card —
-                                       * this blue holds ≥4.5:1 for in-text links */
-  --dshm-focus-ring: 0 0 0 3px rgba(83, 131, 199, 0.5);
-  --dshm-border: #2a3444;
-  --dshm-nav-line: #232d3d;         /* PageNav 底边线：深于 line 一阶，暗面 1px 不刺眼 */
-  --dshm-header-bg: #131926;
-  --dshm-tabbar-bg: #131926;
-  --dshm-input-bg: #141b26;         /* input wells step one tier off the card (was the
-                                       * card value itself — a zero-contrast fill on dark) */
-  --dshm-success: #5bae7d;          /* desaturated lift (5.5:1 on card) */
-  --dshm-success-soft: #16281c;
-  --dshm-success-10: rgba(91, 174, 125, 0.18);
-  --dshm-warning: #f2a93b;          /* desaturated amber (7.9:1 on card) */
-  --dshm-warning-soft: #2e2413;
+  /* Dark track (§3 dark columns): roasted paper — every body-text pair keeps
+   * ≥4.5:1 and state figures ≥3:1 on the raised card (#2a221c). */
+  --dshm-canvas: #191310;           /* 焙黑画布 */
+  --dshm-card: #2a221c;             /* 卡面（ink 对卡 12.6:1） */
+  --dshm-card2: #1f1913;            /* fold 区 / 输入井（对卡 ~10 RGB step） */
+  --dshm-brand: #e58b4a;            /* 柿橙提亮一阶（对卡 6.2:1） */
+  --dshm-brand-deep: #c26f33;
+  --dshm-brand-soft: #3b2a1c;
+  --dshm-on-brand: #241708;         /* 主色实底上的深字（6.2:1） */
+  --dshm-anchor: #7b9dd1;           /* 链接锚（对卡 6.1:1） */
+  --dshm-ink: #f2e3d3;              /* 纸墨·主文字（对卡 12.6:1） */
+  --dshm-ink-sub: #c3ab93;          /* 墨·次文字（对卡 7.2:1） */
+  --dshm-ink-weak: #8d7b66;         /* 仅装饰/骨架，不负载正文 */
+  --dshm-line: #453728;
+  --dshm-line-strong: #57452f;
+
+  --dshm-success: #8fbe72;          /* 对卡 7.5:1 */
+  --dshm-success-soft: #22301b;
+  --dshm-warning: #f2a93b;          /* 对卡 8.1:1 */
+  --dshm-warning-soft: #33270f;
+  --dshm-warning-deep: var(--dshm-warning);   /* soft底上已 ≥6:1，无需再分阶 */
+  --dshm-danger: #ef8078;           /* 对卡 6.1:1 */
+  --dshm-danger-soft: #3a1d18;
+  --dshm-info: #6fb1ce;             /* 对卡 6.6:1 */
+  --dshm-info-soft: #16303c;
+  --dshm-neutral: #b3a28c;          /* 对卡 6.4:1 */
+  --dshm-neutral-soft: #2e261c;
+
+  --dshm-bubble-user-bg: #a85f1f;   /* 用户气泡（#fdf3e7 字 6.1:1） */
+  --dshm-bubble-user-fg: #fdf3e7;
+  --dshm-bubble-ai-bg: #2a221c;
+  --dshm-bubble-ai-fg: var(--dshm-ink);
+  --dshm-bubble-ai-border: #453728;
+  --dshm-seal-ring: #e58b4a;
+  --dshm-seal-face: #241a12;
+  /* stamp-avatar-1..4: seal colors stay track-constant (§3.3). */
+
+  --dshm-focus-ring: 0 0 0 3px rgba(229, 139, 74, 0.55);
+  --dshm-link: #7b9dd1;             /* in-text links (≥4.5:1 on card) */
+  --dshm-tab-active: #f09a5e;       /* selected Tab state (7.9:1 on the tray) */
+
+  /* Reference aliases, dark values. */
+  --dshm-primary-10: rgba(229, 139, 74, 0.20);
+  --dshm-primary-rim: rgba(229, 139, 74, 0.50);
+  --dshm-user-grad: linear-gradient(135deg, #e58b4a, #c26f33);
+  --dshm-header-bg: #221a14;
+  --dshm-tabbar-bg: rgba(31, 25, 19, 0.96);  /* 焙纸托盘 */
+  --dshm-input-bg: #1f1913;         /* input wells step one tier off the card */
+  --dshm-success-10: rgba(143, 190, 114, 0.18);
   --dshm-warning-10: rgba(242, 169, 59, 0.18);
-  --dshm-destructive: #ef5f64;      /* dark-track lift: base #aa0808 is 2.1:1 on card */
-  --dshm-destructive-soft: #331a1d;
-  --dshm-destructive-10: rgba(239, 95, 100, 0.18);
-  --dshm-info: #5b9df2;
-  --dshm-info-soft: #16283f;
+  --dshm-destructive-10: rgba(239, 128, 120, 0.18);
   --dshm-temp-chill: #57b3cc;
   --dshm-temp-frozen: #8fa8f0;
   --dshm-temp-ambient: #c0a276;
-  --dshm-bubble-user-bg: #2a5fa6;
-  --dshm-bubble-user-fg: #ffffff;
-  --dshm-bubble-ai-bg: #1e2634;
-  --dshm-bubble-ai-fg: #e8ecf1;
-  --dshm-bubble-ai-border: #2a3444;
   --dshm-shadow-card: 0 8px 24px rgba(0, 0, 0, 0.45);
   --dshm-shadow-raised: 0 4px 12px rgba(0, 0, 0, 0.55);
-  --dshm-code-bg: #0b0f16;
-  --dshm-stroke-soft: rgba(42, 52, 68, 0.7);
-  --dshm-primary-rim: rgba(83, 131, 199, 0.55);
-  --dshm-send-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
-  --dshm-receipt-wash: rgba(91, 174, 125, 0.22);
-  --dshm-success-rim: rgba(91, 174, 125, 0.6);
-  --dshm-on-soft: #c9d8f0;         /* dark-track chip foreground on #1b2c48 */
+  --dshm-shadow-seal: 0 4px 12px rgba(229, 139, 74, 0.28);
+  --dshm-stroke-soft: rgba(69, 55, 40, 0.7);
+  --dshm-receipt-wash: rgba(143, 190, 114, 0.22);
+  --dshm-success-rim: rgba(143, 190, 114, 0.6);
+  --dshm-on-soft: #f09a5e;          /* fg on brand-soft #3b2a1c (6.2:1) */
   --dshm-shell-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+  --dshm-stamp-doing: #f09a5e;      /* the hollow seal figure needs ≥3:1 on card —
+                                      * brand #e58b4a would ride 4.4:1, the lifted
+                                      * amber tier clears it like the tab-active lift */
 }
 
 .dshm-root {
@@ -225,8 +301,8 @@ html[data-theme='dark'] {
   font-size: 16px;
   line-height: 1.5;
   font-variant-numeric: tabular-nums;
-  color: var(--dshm-foreground);
-  background: var(--dshm-background);
+  color: var(--dshm-ink);
+  background: var(--dshm-canvas);
   /* Taps paint instantly: no 300ms double-tap zoom delay anywhere in the shell. */
   touch-action: manipulation;
   -webkit-font-smoothing: antialiased;
@@ -239,10 +315,10 @@ html[data-theme='dark'] {
 }
 
 /* The desktop phone-shell form (the design's @media ≥720px): a floating
- * rounded bezel with breathing room, matching #app in the v6 mock. The
- * translateZ turns the shell into the containing block for the fixed-position
- * portal layers (antd-mobile Popup/Dialog/Picker mount inside the shell via
- * the portal host), so they stay within the 430px bezel on desktop. */
+ * rounded bezel with breathing room. The translateZ turns the shell into the
+ * containing block for the fixed-position portal layers (antd-mobile Popup/
+ * Dialog/Picker mount inside the shell via the portal host), so they stay
+ * within the 430px bezel on desktop. */
 @media (min-width: 720px) {
   .dshm-root {
     margin: 14px auto;
@@ -291,8 +367,8 @@ html[data-theme='dark'] {
 }
 
 /* Host document plumbing: the mobile page fills the viewport (and the preview
- * iframe's bezel) without default margins; the body carries the desk surface
- * behind the 430px shell, so App mirrors the theme onto html and body. */
+ * iframe's bezel) without default margins; the body carries the warm desk
+ * surface behind the 430px shell, so App mirrors the theme onto html and body. */
 html,
 body {
   height: 100%;
@@ -300,11 +376,11 @@ body {
 }
 
 body {
-  background: #dfe1de;
+  background: #e9dfcc;
 }
 
 body[data-theme='dark'] {
-  background: #080b11;
+  background: #0d0a07;
 }
 
 #mobile-root {
@@ -314,25 +390,24 @@ body[data-theme='dark'] {
 /* Portal skins (antd-mobile layers mount inside the shell's portal host or,
  * unconfigured, at body — both under the html token twin): the mask at the
  * design's 0.5 black (antd's 0.55 rides an inline style, so !important), and
- * the toast as the mock's #toast capsule — bottom:110px, 999px pill, ink
- * plate in light and the inverted porcelain plate in dark. */
+ * the toast as the amber-language capsule — ink plate with paper words in
+ * light, inverted porcelain in dark. */
 .adm-mask {
   background: rgba(0, 0, 0, 0.5) !important;
 }
 
 /* The Picker/DatePicker panel corners: antd-mobile hard-codes 8px on
  * `.adm-picker-popup .adm-popup-body` (no --adm-* dial reaches it), so the
- * sheet-grade 16px rides an explicit same-specificity override that wins on
+ * card-grade 20px rides an explicit same-specificity override that wins on
  * load order; the date-picker alias covers any future split class name. */
 .adm-picker-popup .adm-popup-body,
 .adm-date-picker-popup .adm-popup-body {
-  border-radius: var(--dshm-radius-lg) var(--dshm-radius-lg) 0 0;
+  border-radius: var(--dshm-r-card) var(--dshm-r-card) 0 0;
 }
 
-/* The selected TabBar item rides --adm-color-primary, whose dark-track brand
- * step measures 2.75:1 on the #131926 bar — below the 3:1 state-indicator
- * floor (WCAG 1.4.11). The tab-active token splits that concern from solid
- * fills (white-on-brand buttons keep their own ratio) and lifts only on dark. */
+/* The selected TabBar item rides the tab-active tier (§3.1's amber): brand
+ * on light would read 4.9:1 on the tray, and the dark amber holds 7.9:1 —
+ * both clear the 3:1 state-indicator floor (WCAG 1.4.11). */
 .adm-tab-bar-item-active {
   color: var(--dshm-tab-active);
 }
@@ -349,11 +424,131 @@ body[data-theme='dark'] {
   padding: 9px 16px;
   font-size: 13px;
   border-radius: var(--dshm-radius-pill);
-  background: rgba(31, 38, 48, 0.92);
-  color: #ffffff;
+  background: rgba(61, 43, 31, 0.92);
+  color: #fff8ee;
 }
 
 html[data-theme='dark'] .adm-toast-mask .adm-toast-main {
-  background: rgba(232, 236, 241, 0.92);
-  color: #1f2630;
+  background: rgba(242, 227, 211, 0.92);
+  color: #3d2b1f;
+}
+
+/* -- W9 form hooks (§五 component grammar, global tier) ---------------------
+ * B4 lays the CSS foundation; B5/B6 attach these classes in the page-level
+ * components (paper-label bubbles, capsule-seal chips, the round seal send
+ * button). Each hook is a pure presentation class over the §3 tokens. */
+
+/* The capsule seal chip (context/suggestion chips): paper face, roast-line
+ * border, the 7px vermilion dot on the left end; the CTA twin is the one
+ * solid-filled chip per screen (§五 chips 快捷 CTA). */
+.dshm-seal-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: var(--dshm-touch-sm);
+  padding: 0 14px;
+  border: 1.5px solid var(--dshm-line-strong);
+  border-radius: var(--dshm-r-seal);
+  background: var(--dshm-card);
+  color: var(--dshm-ink);
+  font-size: var(--dshm-fs-caption);
+  font-weight: 500;
+}
+
+.dshm-seal-chip::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--dshm-brand);
+}
+
+.dshm-seal-chip[data-selected='true'] {
+  background: var(--dshm-brand-soft);
+  color: var(--dshm-on-soft);
+  border-color: transparent;
+}
+
+/* The solid CTA capsule — persimmon face, paper words, the seal's dyed
+ * shadow (shadow-seal). One per screen; chips never inherit this face. */
+.dshm-seal-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--dshm-touch-sm);
+  padding: 0 18px;
+  border: none;
+  border-radius: var(--dshm-r-seal);
+  background: var(--dshm-brand);
+  color: var(--dshm-on-brand);
+  font-size: var(--dshm-fs-body);
+  font-weight: 600;
+  box-shadow: var(--dshm-shadow-seal);
+}
+
+.dshm-seal-cta:active {
+  background: var(--dshm-brand-deep);
+}
+
+/* The paper-label bubble pair (§五 气泡): asymmetric notch corners — the
+ * user tail folds the bottom-right 18→6px, the AI tail the bottom-left. */
+.dshm-bubble-paper-user {
+  max-width: min(80vw, 300px);
+  border-radius: var(--dshm-r-bubble) var(--dshm-r-bubble) 6px var(--dshm-r-bubble);
+  background: var(--dshm-bubble-user-bg);
+  color: var(--dshm-bubble-user-fg);
+}
+
+.dshm-bubble-paper-ai {
+  max-width: min(80vw, 300px);
+  border: 1px solid var(--dshm-bubble-ai-border);
+  border-radius: var(--dshm-r-bubble) var(--dshm-r-bubble) var(--dshm-r-bubble) 6px;
+  background: var(--dshm-bubble-ai-bg);
+  color: var(--dshm-bubble-ai-fg);
+  box-shadow: var(--dshm-shadow-card);
+}
+
+/* The round-stamp base (send button 收讫 seals, hero 酱印): a circular seal
+ * face with the ring line; callers size it and ink the glyph. */
+.dshm-stamp-round {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid var(--dshm-seal-ring);
+  background: var(--dshm-seal-face);
+  color: var(--dshm-seal-ring);
+  box-shadow: var(--dshm-shadow-seal);
+}
+
+/* The filled round seal (the send button's persimmon stamp): solid brand
+ * face with on-brand glyph — the CTA tier of the stamp base. */
+.dshm-stamp-solid {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: none;
+  background: var(--dshm-brand);
+  color: var(--dshm-on-brand);
+  box-shadow: var(--dshm-shadow-seal);
+}
+
+.dshm-stamp-solid:active {
+  background: var(--dshm-brand-deep);
+}
+
+/* The faint dashed empty seal (EmptyState's 虚线环淡印): decorative ring,
+ * never carries text contrast duty (the copy rides ink beside it). */
+.dshm-stamp-faint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1.5px dashed var(--dshm-seal-ring);
+  background: transparent;
+  color: var(--dshm-brand);
 }

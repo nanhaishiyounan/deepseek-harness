@@ -56,6 +56,8 @@ export interface FlowItemProps {
   readonly onRejectV3: (seq: number, draftId: string) => () => void
   readonly onRedraft: (seq: number) => () => void
   readonly onSend: (text: string) => void
+  /** The assist-input fill sink: the field-ask suggestion chips (W9-B1). */
+  readonly onFill: (text: string) => void
   readonly onFreeText: () => void
   readonly onReportAction: (action: ReportAction, anchorSeq: number) => void
   readonly localPending: ReadonlyMap<number, Record<string, string>>
@@ -163,7 +165,7 @@ export function FlowItem(props: FlowItemProps): JSX.Element | null {
     return (
       <>
         {separator}
-        {aiRow(<FieldAskBubble ask={item} onSend={props.onSend} disabled={props.sending} />)}
+        {aiRow(<FieldAskBubble ask={item} onFill={props.onFill} disabled={props.sending} />)}
       </>
     )
   }

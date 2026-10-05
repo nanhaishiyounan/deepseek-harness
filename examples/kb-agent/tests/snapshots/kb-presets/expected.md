@@ -18,7 +18,7 @@
   - 数据来源：走访调研（已脱敏）
 
 ## enterprise-data-assistant
-- tools: assets_browse, connector_discover, connector_fetch, connector_transfer, kb_ingest, kb_ingest_url, kb_search, kb_stats, kg_query, kg_schema, kg_subgraph, lakehouse_query, lakehouse_tables, nb_collections, nb_create, nb_get, nb_list, nb_update, order_create, order_status, switch_view, view_apply, view_state_get
+- tools: assets_browse, connector_discover, connector_fetch, connector_transfer, kb_ingest, kb_ingest_url, kb_search, kb_stats, kg_query, kg_schema, kg_subgraph, lakehouse_query, lakehouse_tables, nb_approve, nb_collections, nb_create, nb_get, nb_list, nb_update, order_create, order_status, switch_view, view_apply, view_state_get
 - persona: contains "企业数据助手"
 - kb_search "宏发食品 成本测算 原材料":
   (text-only mode: no embed provider is available; results come from full-text search alone)
