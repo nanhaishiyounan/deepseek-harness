@@ -359,7 +359,11 @@ export function HomeView({ identityName, active = true }: HomeViewProps): JSX.El
             >
               <span className={css.rosterAva}>
                 <Badge color="var(--dshm-success)" content={Badge.dot} className={css.rosterAvaDot as string}>
-                  <Avatar background={visual.color} acronym={stampAcronymOf(employee.id, employee.name)} size={42} />
+                  <Avatar
+                    background={visual.color}
+                    acronym={stampAcronymOf(employee.id, colleagueNameOf(employee.id, employee))}
+                    size={42}
+                  />
                 </Badge>
               </span>
               <span className={css.rosterName}>{employee.name}</span>

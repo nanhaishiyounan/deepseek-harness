@@ -423,6 +423,27 @@ describe('mobile chats tab', () => {
     expect(screen.getAllByText('参谋').length).toBeGreaterThan(1)
   })
 
+  it('sources the chats row stamp from the roster name, never the session title', async () => {
+    stubGateway({
+      'agentPreset.list': { presets: [
+        { id: 'ghost-safety', name: 'AI食安合规官', description: '', isDefault: false },
+      ] },
+      'session.list': { items: [
+        // A question-text title would loan its leading pair (GB) under the
+        // retired titleOf stamp; the roster-sourced stamp keeps the
+        // colleague's own word.
+        { sessionId: 'stamp-row', updatedAt: 1, agentPreset: 'ghost-safety', projections: { values: { title: 'GB2760防腐剂限量怎么查' } } },
+      ] },
+    })
+    render(<MessagesView />)
+    await waitFor(() => { expect(screen.getByText('GB2760防腐剂限量怎么查')).toBeTruthy() })
+    const rowStamp = (): string => document.querySelector('[class*="sessionRow_"] [class*="avatar_"]')?.textContent ?? ''
+    // The row's avatar acronym is the roster name's own pair (食安); a
+    // titleOf regression flips it to the title's leading pair (GB) and this
+    // assertion red.
+    expect(rowStamp()).toBe('食安')
+  })
+
   it('pins a session above the rest, unpins, and marks read through the swipe row', async () => {
     const now = Date.now()
     stubGateway({
@@ -1175,7 +1196,10 @@ describe('mobile draft → review → receipt card loop', () => {
     render(<ChatView sessionId="loop-2" />)
     await screen.findByTestId('draft-card')
     fireEvent.click(screen.getByRole('button', { name: '提交审核' }))
-    await screen.findByTestId('review-card')
+    // The explicit timeout absorbs the under-load paint jitter the default
+    // 1s intermittently tripped over (W10-R4 flake hardening; 8s held under
+    // a cold-cache full-suite run with a dev server co-resident).
+    await screen.findByTestId('review-card', {}, { timeout: 8000 })
     fireEvent.click(screen.getByRole('button', { name: '驳回' }))
     await waitFor(() => {
       const sent = calls.find(call => call.url === '/api/session.prompt' && JSON.stringify(call.payload).includes('驳回'))

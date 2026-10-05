@@ -10,7 +10,7 @@ Status: implemented
 
 ## Decision
 
-`colleagues.ts` 的 `colleagueNameOf(presetId, rosterRow)` 是所有章面读取的唯一名源模板——roster 行显示名，缺省 visual 职责标签；会话标题永不进章。W10-R3 收口让每一面都组合 `stampAcronymOf(preset, colleagueNameOf(preset, rosterRow))`：`MessagesView` 用挂载即读一次的 `listAiEmployees` 喂一张 preset-id→行映射供会话行用；`HomeView` 在既有 roster 读之上建同一张映射供最近对话行用；`AgentsView` 传 `colleagueNameOf(row.id, row)` 替代裸 `row.name`（行为等价——行名胜出——但同源规则从此靠构造成立而非碰巧一致）；`ChatView` 的 `presetLabelOf` 头部副标签非本地分支复用该 selector 替代重复表达式（头章/回合章本身已在 W10-R2 迁移）。会话标题保有自己的位置——行标题文本、搜索匹配、chat 头部主标题——约束只有一条：标题永不喂给章。
+`colleagues.ts` 的 `colleagueNameOf(presetId, rosterRow)` 是所有章面读取的唯一名源模板——roster 行显示名，缺省 visual 职责标签；会话标题永不进章。W10-R3 收口让每个列表面都组合 `stampAcronymOf(preset, colleagueNameOf(preset, rosterRow))`：`MessagesView` 用挂载即读一次的 `listAiEmployees` 喂一张 preset-id→行映射供会话行用；`HomeView` 在既有 roster 读之上建同一张映射供最近对话行用；`AgentsView` 传 `colleagueNameOf(row.id, row)` 替代裸 `row.name`（行为等价——行名胜出——但同源规则从此靠构造成立而非碰巧一致）；`ChatView` 的 `presetLabelOf` 头部副标签非本地分支复用该 selector 替代重复表达式（头章/回合章本身已在 W10-R2 迁移）。W10-R4 守卫收口把最后两处裸名直传——新建会话弹层的 roster 行与首页 roster 横条——并入同一组合，从此每一面都靠构造走同一 selector 链。会话标题保有自己的位置——行标题文本、搜索匹配、chat 头部主标题——约束只有一条：标题永不喂给章。
 
 ## Alternatives considered
 

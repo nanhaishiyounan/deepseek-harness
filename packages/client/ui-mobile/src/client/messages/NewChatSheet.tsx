@@ -13,7 +13,7 @@ import { portalContainer } from '../portal.ts'
 import { navigate } from '../router.ts'
 import { useAsync } from '../hooks.ts'
 import { Avatar } from '../ui.tsx'
-import { colleagueColor, colleagueOf, stampAcronymOf } from '../colleagues.ts'
+import { colleagueColor, colleagueNameOf, colleagueOf, stampAcronymOf } from '../colleagues.ts'
 import { FORM_REGISTRY } from '../formRegistry.ts'
 import { createSession, listAiEmployees, listSessions, relativeTimeOf, titleOf } from '../sessionsService.ts'
 import css from './newchat.module.css'
@@ -94,7 +94,11 @@ export function NewChatSheet({ visible, onClose }: NewChatSheetProps): JSX.Eleme
             return (
               <li key={employee.id}>
                 <button type="button" className={css.rosterRow} disabled={busy} onClick={() => { void start(employee.id) }}>
-                  <Avatar background={colleagueColor(employee.id)} acronym={stampAcronymOf(employee.id, employee.name)} size={40} />
+                  <Avatar
+                    background={colleagueColor(employee.id)}
+                    acronym={stampAcronymOf(employee.id, colleagueNameOf(employee.id, employee))}
+                    size={40}
+                  />
                   <span className={css.rosterMain}>
                     <span className={css.rosterName}>{employee.name}</span>
                     <span className={css.rosterDuty}>{duty}</span>

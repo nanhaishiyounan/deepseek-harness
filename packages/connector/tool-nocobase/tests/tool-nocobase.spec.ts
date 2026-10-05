@@ -450,6 +450,35 @@ describe('nb_get row-scopes wfl_approval_todos to the acting user (W9-R1)', () =
   })
 })
 
+describe('nb_update row-scopes wfl_approval_todos writes to the acting user (W10-R4)', () => {
+  it('refuses the unbound session before any wire call leaves', async () => {
+    const { execute, mock } = await mount()
+    const refused = await execute('nb_update', { collection: 'wfl_approval_todos', id: 101, values: { status: 'completed' } })
+    expect(refused.isError).toBe(true)
+    expect(refused.text).toContain('登录用户的私有数据')
+    expect(mock!.served.filter(served => served.path.includes('wfl_approval_todos'))).toHaveLength(0)
+  })
+
+  it('refuses a bound user writing someone else\'s todo and lands their own', async () => {
+    const { execute, mock } = await mount({ acting: { username: 'buyer', nickname: '采购员·蔡俊' } })
+    const foreign = await execute('nb_update', { collection: 'wfl_approval_todos', id: 103, values: { status: 'completed' } })
+    expect(foreign.isError).toBe(true)
+    expect(foreign.text).toContain('该审批待办不属于账号 buyer')
+    expect(mock!.served.some(call => call.path === '/api/wfl_approval_todos:update')).toBe(false)
+    const mine = await execute('nb_update', { collection: 'wfl_approval_todos', id: 101, values: { status: 'completed' } })
+    expect(mine.isError).toBe(false)
+    expect(mine.value).toMatchObject({ collection: 'wfl_approval_todos', id: 101, changes: [{ field: 'status', before: 'open', after: 'completed' }] })
+    expect(mock!.rows.get('wfl_approval_todos')?.find(row => row.id === 101)).toMatchObject({ status: 'completed' })
+  })
+
+  it('fails closed on a row whose user cell is a numeric id, not a username', async () => {
+    const { execute } = await mount({ acting: { username: 'buyer', nickname: '采购员·蔡俊' } })
+    const malformed = await execute('nb_update', { collection: 'wfl_approval_todos', id: 104, values: { status: 'completed' } })
+    expect(malformed.isError).toBe(true)
+    expect(malformed.text).toContain('该审批待办不属于账号 buyer')
+  })
+})
+
 describe('nb_create', () => {
   it('lands the row and answers the receipt with the server-assigned id', async () => {
     const { execute, mock } = await mount()

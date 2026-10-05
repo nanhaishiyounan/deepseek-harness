@@ -10,7 +10,7 @@ import type {
 } from '@deepseek-ai/dsh-host-apiproxy/api'
 import { rpc } from './rpc.ts'
 import type { FoldEvent } from './fold.ts'
-import { colleagueOf, type Welcome } from './colleagues.ts'
+import { colleagueNameOf, type Welcome } from './colleagues.ts'
 
 /** The wire's branded session id; the mobile surface carries plain strings. */
 type SessionIdWire = RequestPayload<'session.history'>['sessionId']
@@ -232,13 +232,16 @@ export function titleOf(summary: SessionSummary): string {
 /**
  * Subtitle of one session summary: the owning preset's roster name (cached
  * from the roster read), its colleague-duty line before that read lands, or
- * the local-session label. A bare preset id never reaches the user.
+ * the local-session label. A bare preset id never reaches the user. The name
+ * arm reuses the stamp selector's expression (roster name, else the duty
+ * tag), so the subtitle and the stamps stay same-sourced by construction.
  * @param summary - the session summary row.
  * @returns the preset's display subtitle or the local-session label.
  */
 export function subtitleOf(summary: SessionSummary): string {
   if (summary.agentPreset === undefined) return '本地会话'
-  return rosterNames.get(summary.agentPreset) ?? colleagueOf(summary.agentPreset).duty
+  const rosterName = rosterNames.get(summary.agentPreset)
+  return colleagueNameOf(summary.agentPreset, rosterName === undefined ? undefined : { name: rosterName })
 }
 
 /**

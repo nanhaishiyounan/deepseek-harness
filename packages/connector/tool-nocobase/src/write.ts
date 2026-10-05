@@ -110,6 +110,14 @@ export function applyActingUserColumns(
   return { ...values, [column]: acting.username }
 }
 
+/**
+ * The refusal `nb_update` answers for a `wfl_approval_todos` write under a
+ * session with no bound acting user (W10-R4): the todos rows are the
+ * signed-in user's private data, so the last ungated write entry closes the
+ * same way the nb_list/nb_get read gates did (W9-B2/W9-R1).
+ */
+const TODOS_UPDATE_UNBOUND_REFUSAL = 'nb_update: 审批待办（wfl_approval_todos）是登录用户的私有数据；当前会话未绑定登录身份，拒绝修改'
+
 /** The canonical `nb_create` output value: the landing receipt. */
 export interface NbCreateToolValue {
   readonly collection: string
@@ -412,9 +420,31 @@ export function applyNbUpdateTool(ctx: Context, client: NocoBaseClient | undefin
       if (client === undefined) {
         throw new Error('nb_update: this deployment resolves no NocoBase credentials (NOCOBASE_BASE_URL/NOCOBASE_API_KEY); the business tools are unavailable')
       }
+      // W10-R4: the todos write closes the last ungated write entry the same
+      // way nb_get closes single-row reads (W9-R1): an unbound session refuses
+      // before any wire call; a bound session refuses any row whose user is
+      // not the acting username. The approval engine's own todo writes
+      // (nb_approve's create/complete transitions) ride the client directly
+      // and never pass through this tool, so the engine's server-owned
+      // approver stamping is untouched.
+      const actingUsername = input.collection === 'wfl_approval_todos'
+        ? sessionActingUserOf(exec.agent?.id)?.username
+        : undefined
+      if (input.collection === 'wfl_approval_todos' && actingUsername === undefined) {
+        throw new Error(TODOS_UPDATE_UNBOUND_REFUSAL)
+      }
       const before = await client.get<NbRow>(input.collection, input.id, undefined, exec.signal)
       if (before === undefined) {
         throw new Error(`nb_update: no row ${input.id} exists in ${input.collection}`)
+      }
+      if (input.collection === 'wfl_approval_todos') {
+        // The owner column is a username string on every well-formed row; a
+        // non-string cell fails the scope the same way a foreign one does
+        // (the nb_get owner check's twin).
+        const rowUser = before['user']
+        if (typeof rowUser !== 'string' || rowUser !== actingUsername) {
+          throw new Error(`nb_update: 该审批待办不属于账号 ${actingUsername ?? '(未绑定)'}，拒绝跨用户修改`)
+        }
       }
       await assertRowEditable(client, input.collection, before, input.values, exec.signal)
       // The side door a code-changing patch would open is closed with the
