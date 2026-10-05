@@ -67,6 +67,8 @@ export interface RpcMethodMap {
   'agentPreset.openDocument': AgentPresetsApi['openDocument']
   'agentPreset.remove': AgentPresetsApi['remove']
   'data.upload': DataApi['upload']
+  'data.describeImage': DataApi['describeImage']
+  'data.extractText': DataApi['extractText']
   'orders.create': OrdersApi['create']
   'orders.get': OrdersApi['get']
   'orders.list': OrdersApi['list']

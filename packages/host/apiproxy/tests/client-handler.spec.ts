@@ -44,7 +44,7 @@ function scriptedApi(overrides: {
   const kbRefuse = <T>(r: RpcRequest<unknown>): Promise<RpcResponse<T>> =>
     Promise.resolve({ rpcId: r.rpcId, result: { ok: false, error: { code: 'kb-not-composed' as never, message: 'stub', details: {} } } })
   return {
-    data: { upload: kbRefuse, ...overrides.data },
+    data: { upload: kbRefuse, describeImage: kbRefuse, extractText: kbRefuse, ...overrides.data },
     lakehouse: { overview: err, ...overrides.lakehouse },
     orders: {
       create: err,

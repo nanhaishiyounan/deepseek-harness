@@ -1,0 +1,7 @@
+{
+  "content": "```json\n[\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"ua-default-style\",\n    \"description\": \"页面整体无明显浏览器原生控件残留，但未观察到任何 select/checkbox 等控件实例，无法确认控件主题化覆盖情况，存在潜在风险\",\n    \"suggestion\": \"后续接入表单控件时需统一覆盖原生 select、radio、checkbox、date picker 外观，确保圆角、描边、聚焦环使用酱色/琥珀色而非系统蓝\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"inconsistency\",\n    \"description\": \"四个文档卡片的图标均为相同的「文档」符号（仅文字标签不同：质检单/不合格处置单/收货单/批次档案），无法通过形态区分功能，视觉辨识度过低\",\n    \"suggestion\": \"为不同类型单据配置差异化印章/图标（如质检章、不合格章、收货章、档案章），强化食链通「印章」设计语言的语义表达\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"contrast\",\n    \"description\": \"顶部副标题「质检员·王倩·常用单据」与右下区域小字提示在暖纸底上对比偏弱，灰度信息层级感不足\",\n    \"suggestion\": \"将副标题提升至与主标题至少 1.5 倍对比度，可使用酱色淡彩（如 #8B5A3C 80%）以呼应品牌色\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"spacing\",\n    \"description\": \"卡片网格第一行三列之间间距与第二行单列卡片上方留白视觉上不对称，第二行卡片左对齐后右侧大面积空白显得失衡\",\n    \"suggestion\": \"考虑改为两列网格以填满宽度，或在单列卡片右侧加一个「+ 新建单据」入口卡片平衡版面\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"typography\",\n    \"description\": \"卡片标签字号（质检单等）层级过小，与「单据」主标题之间缺少中间过渡字号（如分类标题或说明文字）\",\n    \"suggestion\": \"可加入 14–16px 的副标题层级，遵循「主标题 18 / 副标题 14 / 卡片 16」节奏，强化信息层次\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"other\",\n    \"description\": \"「酱园琥珀」设计语言强调印章元素，但当前页面除通用文档图标外未见任何印章/钤印/朱泥红装饰，与品牌设定略有距离\",\n    \"suggestion\": \"在标题栏右侧、副标题前或卡片左上角点缀小型印章/朱泥红圆点，强化食链通品类识别\"\n  }\n]\n```",
+  "base_resp": {
+    "status_code": 0,
+    "status_msg": "success"
+  }
+}

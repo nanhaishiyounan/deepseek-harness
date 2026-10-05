@@ -287,6 +287,13 @@
   white-space: nowrap;
 }
 
+/* X20 (W10 pool, settled W11-B2): consecutive tool rows are one status group,
+    so the flow's 10px row gap folds to 5px between them — the labels read as
+    a list, not as separate messages. */
+.toolRow + .toolRow {
+  margin-top: -5px;
+}
+
 /* ---- Typing indicator (the design's .typing-bubble): the paper-plate bubble
         with three breathing dots, .18s apart. ---- */
 
@@ -432,7 +439,8 @@
 }
 
 .qpTools {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 9px;
   margin-top: 10px;
 }
@@ -485,6 +493,171 @@
   gap: 10px;
 }
 
+/* The input slot's box (W11-B2): relative so the listening card can cover the
+    slot's own geometry while the textarea stays mounted underneath. */
+.inputShell {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* The draft attachment strip (W11-B2): a horizontal chip rail above the input
+    row — one capsule chip per pick, horizontally scrollable, never pushing
+    the 46px input contract. */
+.attachRow {
+  display: flex;
+  gap: var(--dshm-space-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.attachRow::-webkit-scrollbar {
+  display: none;
+}
+
+/* One attachment chip: the paper face, the roast line, the type glyph or
+    thumbnail, the name, and the remove ×. Uploading breathes; failed wears
+    the danger rim and the human hint under the name. */
+.attachChip {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 220px;
+  min-height: 40px;
+  padding: 6px 30px 6px 8px;
+  border-radius: var(--dshm-r-ctl);
+  background: var(--dshm-card);
+  border: 1px solid var(--dshm-line);
+}
+
+.attachChipFailed {
+  border-color: var(--dshm-danger);
+}
+
+.attachThumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex: none;
+}
+
+.attachGlyph {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: var(--dshm-brand-soft);
+  color: var(--dshm-brand);
+  flex: none;
+}
+
+.attachSpinner {
+  position: absolute;
+  right: 26px;
+  color: var(--dshm-ink-sub);
+  animation: attach-spin 1s linear infinite;
+  flex: none;
+}
+
+@keyframes attach-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.attachName {
+  font-size: var(--dshm-fs-caption);
+  line-height: 16px;
+  color: var(--dshm-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.attachError {
+  position: absolute;
+  left: 8px;
+  right: 30px;
+  bottom: -16px;
+  font-size: 11px;
+  line-height: 14px;
+  color: var(--dshm-danger);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.attachRemove {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--dshm-card2);
+  color: var(--dshm-ink-sub);
+}
+
+/* The listening card (W11-B2): covers the input slot's box while recognition
+    runs — the persimmon pulse dot and the live interim text on the paper
+    face; one tap ends the stretch. The textarea underneath stays mounted. */
+.listeningCard {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10.5px 18px;
+  background: var(--dshm-card);
+  border: 1.5px solid var(--dshm-brand);
+  border-radius: var(--dshm-r-seal);
+  text-align: left;
+}
+
+.listenPulse {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--dshm-brand);
+  animation: listen-pulse 1.1s ease-in-out infinite;
+  flex: none;
+}
+
+@keyframes listen-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.55;
+  }
+}
+
+.listenText {
+  font-size: var(--dshm-fs-input);
+  line-height: 22px;
+  color: var(--dshm-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The hidden pickers: display-none inputs the tool tiles click through. */
+.hiddenInput {
+  display: none;
+}
+
 /* The + entry (the design's .plus-btn): the 44px circle — one 「新增」 shape
     everywhere (v7, audit 04 §07), brand-soft when on. */
 .plusBtn {
@@ -510,29 +683,47 @@
 }
 
 /* The input slot (§五 Composer): the capsule paper slot — the white face with
-    the deep roast rim, antd TextArea dials mapped on. */
+    the deep roast rim. The capsule padding lives here on the wrapper:
+    antd-mobile 5.43's text-area element consumes only --font-size/--color/
+    --placeholder-color (the legacy --padding/--line-height/
+    --adm-text-area-* dials below were dead declarations), so the 46px
+    single-line contract rides the wrapper box — 1.5px rim ×2 + 10.5px padding
+    ×2 + 22px line — and the element rule owns the line metrics the autoSize
+    sizer reads. */
 .input {
-  flex: 1;
-  min-width: 0;
+  width: 100%;
   --font-size: var(--dshm-fs-input);
   --color: var(--dshm-ink);
   --placeholder-color: var(--dshm-ink-sub);
-  --background: var(--dshm-card);
-  --adm-text-area-min-height: calc(46px - 20px);
-  --adm-text-area-max-height: calc(4 * 22px + 20px);
-  --padding: 10px 18px;
-  --box-sizing: border-box;
-  --line-height: 22px;
+  padding: 10.5px 18px;
+  background: var(--dshm-card);
   border: 1.5px solid var(--dshm-line-strong);
-  /* The capsule paper slot rides a plain border-radius: antd's TextArea never
-   * consumes --border-radius (that dial belongs to Button), so the W10 audit
-   * read the slot at radius 0 — the native-look seam. */
   border-radius: var(--dshm-r-seal);
 }
 
-/* W9-B1/B5: the assist-input fill flash — the freshly filled slot wears the
-    soft wash and the brand rim, settling back on the paper over the fast
-    motion token (220ms); the contract is the data-fill attribute on the row. */
+/* The line metrics for the autoSize sizer: it reads the element's computed
+    line-height and clamps to [minRows, maxRows] × 22px, so the element itself
+    carries no padding and every row lands on a 22px step (1 row = 46px capsule,
+    4 rows = 112px, then it scrolls). */
+.input :global(.adm-text-area-element) {
+  line-height: 22px;
+  min-height: 22px;
+}
+
+/* Focus (W11-B1): the brand rim + soft halo — the same value pair the fill
+    flash opens on, held while the slot keeps focus. Mobile taps carry :focus,
+    not :focus-visible, so the global focus ring never fired on this slot. */
+.input:focus-within {
+  border-color: var(--dshm-brand);
+  box-shadow: 0 0 0 3px var(--dshm-brand-soft);
+}
+
+/* W9-B1/B5 (W11-B1 split): the assist-input fill flash — the freshly filled
+    slot wears the soft wash and the brand rim, settling back on the paper over
+    the fast motion token (220ms); the contract is the data-fill attribute on
+    the row. Only the 0% frame is pinned: every property interpolates back to
+    its cascade value, so a flash while focused fades the wash out without
+    fighting the focus-within rim. */
 .inputRow[data-fill] .input {
   animation: input-fill var(--dshm-motion-fast) var(--dshm-ease-fast);
 }
@@ -541,11 +732,7 @@
   0% {
     border-color: var(--dshm-brand);
     box-shadow: 0 0 0 3px var(--dshm-brand-soft);
-  }
-
-  100% {
-    border-color: var(--dshm-line-strong);
-    box-shadow: none;
+    background-color: var(--dshm-brand-soft);
   }
 }
 
@@ -592,6 +779,11 @@
   .typingBubble,
   .quickPanel,
   .inputRow[data-fill] .input {
+    animation: none;
+  }
+
+  .listenPulse,
+  .attachSpinner {
     animation: none;
   }
 

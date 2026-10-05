@@ -51,4 +51,10 @@
   font-weight: 700;
   color: var(--dshm-ink);
   letter-spacing: -0.2px;
+  /* One heading line: a title that outruns the center slot (work-detail's
+   * supplier + batch + ISO string) ellipsizes instead of clipping raw (the
+   * W11 audit caught the hard cut with no ellipsis). */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

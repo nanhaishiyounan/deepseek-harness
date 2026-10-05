@@ -11,6 +11,13 @@
  * `data-lakehouse-unavailable` error instead. The tenant binding is the
  * deployment's own (the shared `kbTenant` config); the wire surface never
  * carries a tenant.
+ *
+ * The composer-attachment pair rides the same domain: `describeImage` admits
+ * one image through the shared attachment admission (durable store, same
+ * limits as `session.prompt` image parts) and returns a VLM description the
+ * mobile composer splices into its draft; `extractText` returns one
+ * pdf/md/txt document's text layer for the same draft-quote purpose (the
+ * kb ingest channels stay untouched).
  */
 
 import type { RpcRequest, RpcResponse } from './rpc.ts'
@@ -39,6 +46,24 @@ export interface DataLakehouseUploadView {
 /** `data.upload` response: the route receipt, discriminated by destination. */
 export type DataUploadView = DataKbUploadView | DataLakehouseUploadView
 
+/** `data.describeImage` response: the durable admission plus the VLM description. */
+export interface DataDescribeImageView {
+  /** The content-addressed attachment id (readable back via `session.attachment`). */
+  readonly attachmentId: string
+  /** The upload's declared name, echoed when one was provided. */
+  readonly name: string | undefined
+  /** The vision model's description of the image (zh-CN prompt by default). */
+  readonly description: string
+}
+
+/** `data.extractText` response: the document's text layer under the wire bound. */
+export interface DataExtractTextView {
+  /** The extracted text (pdf) or raw utf-8 body (md/txt), truncated to the wire bound. */
+  readonly text: string
+  /** True when the source text exceeded the wire bound and the tail was cut. */
+  readonly truncated: boolean
+}
+
 /** The unified data-upload surface; every call fails loud when routing or the destination refuses. */
 export interface DataApi {
   /**
@@ -53,4 +78,25 @@ export interface DataApi {
     request: RpcRequest<{ filename: string; data: string; mime?: string; doc_kind?: string; title?: string; collected_at?: string }>,
     signal?: AbortSignal,
   ): Promise<RpcResponse<DataUploadView>>
+  /**
+   * Admit one base64 image into the durable attachment store (same batch
+   * admission policy as `session.prompt` image parts) and describe it through
+   * the deployment's configured vision endpoint. The description is the only
+   * model-facing projection this returns — the mobile composer quotes it into
+   * the draft text, so `session.prompt`'s content stays plain text.
+   */
+  describeImage(
+    request: RpcRequest<{ image: string; mediaType: 'image/png' | 'image/jpeg' | 'image/webp' | 'image/gif'; name?: string; prompt?: string }>,
+    signal?: AbortSignal,
+  ): Promise<RpcResponse<DataDescribeImageView>>
+  /**
+   * Extract one pdf/md/txt document's text layer for a draft quote. Unlike
+   * `data.upload` nothing is stored: the caller (the mobile composer) splices
+   * the returned text into its message draft, where the user can edit or
+   * remove it before sending.
+   */
+  extractText(
+    request: RpcRequest<{ filename: string; data: string; mime?: string }>,
+    signal?: AbortSignal,
+  ): Promise<RpcResponse<DataExtractTextView>>
 }

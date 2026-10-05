@@ -41,6 +41,8 @@ export type MobileRpcMethod =
   | 'nocobase.mobileWorkSave'
   | 'nocobase.mobileWorkDelete'
   | 'lakehouse.overview'
+  | 'data.describeImage'
+  | 'data.extractText'
 
 /** One server-response body narrowed to its result slot (the error keeps the gateway's code). */
 interface WireResponse<T> {

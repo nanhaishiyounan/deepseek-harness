@@ -9,7 +9,7 @@
     "tabActiveColor": "rgb(180, 83, 10)",
     "tabbarBg": "rgba(255, 252, 246, 0.96)",
     "focusRingToken": "0 0 0 3px rgba(180, 83, 10, .4)",
-    "linkToken": "#1e4e8c",
+    "linkToken": "#8f4106",
     "inputWellToken": "#f6eddf",
     "chipsGap": "10px",
     "chipHeight": 40
@@ -46,9 +46,9 @@
   },
   "surfaces": {
     "work": {
-      "linkColor": "rgb(30, 78, 140)",
+      "linkColor": "rgb(143, 65, 6)",
       "cardBg": "rgb(255, 255, 255)",
-      "linkVsCardContrast": 8.32
+      "linkVsCardContrast": 7.18
     },
     "chats": {
       "searchBarPx": 44,

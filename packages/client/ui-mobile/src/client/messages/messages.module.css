@@ -59,6 +59,13 @@
   --active-line-color: transparent;
 }
 
+/* The idle capsules wear the hairline roast rim: on the dark track the card2
+    face sits only ~6 RGB off the canvas (the W11 audit read the idle row as a
+    dead zone), so the rim carries the separation on both tracks. */
+.filterTabs :global(.adm-capsule-tabs-tab) {
+  border: 1px solid var(--dshm-line);
+}
+
 .list {
   flex: 1;
   min-height: 0;

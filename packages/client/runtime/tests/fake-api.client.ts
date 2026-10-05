@@ -281,6 +281,8 @@ export class FakeApiClient implements IApiClient {
 
   readonly data: IApiClient['data'] = {
     upload: payload => this.record('data.upload', payload, Promise.resolve(ok({ destination: 'kb', replaced: false, document: { doc_id: 0, chunks: 0, embedded: false } }))),
+    describeImage: payload => this.record('data.describeImage', payload, Promise.resolve(ok({ attachmentId: 'att_fixture', name: undefined, description: 'fixture' }))),
+    extractText: payload => this.record('data.extractText', payload, Promise.resolve(ok({ text: 'fixture', truncated: false }))),
   }
 
   readonly orders: IApiClient['orders'] = {

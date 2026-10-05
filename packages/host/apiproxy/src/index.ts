@@ -47,6 +47,15 @@ export interface Config {
    */
   dataUploadEnabled?: boolean
   /**
+   * Whether the composer image-describe channel (`data.describeImage`)
+   * answers; absent means refused, same stance as `dataUploadEnabled`.
+   */
+  visionDescribeEnabled?: boolean
+  /** Credential reference the vision endpoint key resolves through; defaults to `MINIMAX_API_KEY`. */
+  visionApiKeyEnv?: string
+  /** Vision endpoint base URL; defaults to `https://api.minimaxi.com/v1`. */
+  visionBaseUrl?: string
+  /**
    * Whether the orders domain's write methods (`orders.create`,
    * `orders.fulfill`) answer. Absent means refused: an order is a real
    * transaction against a priced expert service, so the unauthenticated
@@ -184,6 +193,9 @@ export class ApiProxyService extends Service implements ApiProxy {
     kbTenant: z.string().required(),
     kbWriteEnabled: z.boolean(),
     dataUploadEnabled: z.boolean(),
+    visionDescribeEnabled: z.boolean(),
+    visionApiKeyEnv: z.string().role('credential-ref'),
+    visionBaseUrl: z.string(),
     ordersEnabled: z.boolean(),
     nocobaseEnabled: z.boolean(),
     nocobaseWriteEnabled: z.boolean(),
@@ -234,6 +246,9 @@ export class ApiProxyService extends Service implements ApiProxy {
       kbTenant: config.kbTenant,
       ...config.kbWriteEnabled === undefined ? {} : { kbWriteEnabled: config.kbWriteEnabled },
       ...config.dataUploadEnabled === undefined ? {} : { dataUploadEnabled: config.dataUploadEnabled },
+      ...config.visionDescribeEnabled === undefined ? {} : { visionDescribeEnabled: config.visionDescribeEnabled },
+      ...config.visionApiKeyEnv === undefined ? {} : { visionApiKeyEnv: config.visionApiKeyEnv },
+      ...config.visionBaseUrl === undefined ? {} : { visionBaseUrl: config.visionBaseUrl },
       ...config.ordersEnabled === undefined ? {} : { ordersEnabled: config.ordersEnabled },
       ...config.nocobaseEnabled === undefined ? {} : { nocobaseEnabled: config.nocobaseEnabled },
       ...config.nocobaseWriteEnabled === undefined ? {} : { nocobaseWriteEnabled: config.nocobaseWriteEnabled },

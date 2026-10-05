@@ -1,0 +1,7 @@
+{
+  "content": "[\n  {\n    \"severity\": \"P1明显\",\n    \"category\": \"layout-overflow\",\n    \"description\": \"顶部导航栏标题「味之源 SUP-004 ISO22000 重办VFY-...」在 375px 宽度下发生硬截断，末尾字符被裁切且无省略号。\",\n    \"suggestion\": \"对标题文字进行 CSS `text-overflow: ellipsis` 处理，并确保标题容器预留足够的左右边距。\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"contrast\",\n    \"description\": \"第一张卡片中「截止 2026-10-06」的琥珀色文字与暖纸色背景对比度较低，在低亮度屏幕下可能存在阅读困难。\",\n    \"suggestion\": \"适度降低琥珀色的明度（增加棕红比例）以提升文本对比度，确保符合 Web 内容无障碍指南 (WCAG) 的可读性标准。\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"misalign\",\n    \"description\": \"顶部返回箭头与右侧标题文字的垂直中线不一致，文字位置视觉上略偏上。\",\n    \"suggestion\": \"检查 Flex 布局的 `align-items: center` 属性，确保导航栏内所有元素基于中轴线对齐。\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"contrast\",\n    \"description\": \"「上下文」与「执行时间线」两侧的装饰线条颜色（浅灰）与背景的暖纸底对比度不足，几乎不可见，削弱了区块的节奏感。\",\n    \"suggestion\": \"将线条颜色更换为「酱色」的极低透明度（如 10%-15%），使其在维持克制感的同时具有可辨识性。\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"spacing\",\n    \"description\": \"底部操作区「开始执行」按钮容器的底部内边距与屏幕两侧边距不均等，且未明显体现出适配全面屏的安全区（safe-area）逻辑。\",\n    \"suggestion\": \"增加底部按钮容器的 padding-bottom，使用 `env(safe-area-inset-bottom)` 来确保在不同机型下视觉重心的稳定。\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"typography\",\n    \"description\": \"「上下文」气泡文字「ISO22000 已过期30天...」行高过紧，在两行以上文本时视觉上略显拥挤，不符合「酱园琥珀」语言中的呼吸感。\",\n    \"suggestion\": \"将正文行高 (line-height) 调整为 1.5 到 1.6 倍，增加阅读时的舒适度。\"\n  }\n]",
+  "base_resp": {
+    "status_code": 0,
+    "status_msg": "success"
+  }
+}

@@ -82,7 +82,9 @@ export type {
   NocobaseApi, NocobaseCollectionMetaView, NocobaseFieldView, NocobaseFilterConditionView,
   NocobaseRowPageView, NocobaseRowView,
 } from './nocobase.ts'
-export type { DataApi, DataKbUploadView, DataLakehouseUploadView, DataUploadView } from './data.ts'
+export type {
+  DataApi, DataDescribeImageView, DataExtractTextView, DataKbUploadView, DataLakehouseUploadView, DataUploadView,
+} from './data.ts'
 export type { OrderStatusView, OrderView, OrdersApi } from './orders.ts'
 export type {
   AssetFeaturedView, AssetKindView, AssetView, AssetsApi, AssetsStatsView,

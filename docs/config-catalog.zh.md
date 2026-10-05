@@ -888,6 +888,15 @@ export interface Config {
    */
   dataUploadEnabled?: boolean
   /**
+   * Whether the composer image-describe channel (`data.describeImage`)
+   * answers; absent means refused, same stance as `dataUploadEnabled`.
+   */
+  visionDescribeEnabled?: boolean
+  /** Credential reference the vision endpoint key resolves through; defaults to `MINIMAX_API_KEY`. */
+  visionApiKeyEnv?: string
+  /** Vision endpoint base URL; defaults to `https://api.minimaxi.com/v1`. */
+  visionBaseUrl?: string
+  /**
    * Whether the orders domain's write methods (`orders.create`,
    * `orders.fulfill`) answer. Absent means refused: an order is a real
    * transaction against a priced expert service, so the unauthenticated

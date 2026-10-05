@@ -319,6 +319,10 @@
     # The unified upload channel: workbench uploads route to the kb or the
     # lakehouse through the shared data router.
     dataUploadEnabled: true
+    # The composer's image-describe channel: photos get a server-side VLM
+    # description (MiniMax vision, the key the embeddings provider already
+    # resolves) that the mobile draft quotes as plain text.
+    visionDescribeEnabled: true
     # The expert-service order surface: placing and fulfilling orders from
     # the workbench (single-tenant deployment behind disk-level access
     # control, same stance as kbWriteEnabled).

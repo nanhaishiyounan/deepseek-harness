@@ -73,7 +73,7 @@ import {
   nocobaseSignInValueSchema,
   nocobaseUpdateValueSchema,
 } from '../api/nocobase.schema.ts'
-import { dataUploadValueSchema } from '../api/data.schema.ts'
+import { dataDescribeImageValueSchema, dataExtractTextValueSchema, dataUploadValueSchema } from '../api/data.schema.ts'
 import { orderValueSchema, ordersListValueSchema } from '../api/orders.schema.ts'
 import { assetDetailValueSchema, assetsListValueSchema, assetsStatsValueSchema } from '../api/assets.schema.ts'
 import { lakehouseOverviewValueSchema } from '../api/lakehouse.schema.ts'
@@ -188,6 +188,8 @@ export interface IApiClient {
   }
   data: {
     upload(payload: RequestPayload<'data.upload'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'data.upload'>>>
+    describeImage(payload: RequestPayload<'data.describeImage'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'data.describeImage'>>>
+    extractText(payload: RequestPayload<'data.extractText'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'data.extractText'>>>
   }
   orders: {
     create(payload: RequestPayload<'orders.create'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'orders.create'>>>
@@ -304,6 +306,8 @@ const UNARY_VALUE_SCHEMAS: { [K in keyof RpcMethodMap]: z.ZodType<Wire<ResponseV
   'llm.models': llmModelsValueSchema,
   'llm.discoverModels': llmDiscoverModelsValueSchema,
   'data.upload': dataUploadValueSchema,
+  'data.describeImage': dataDescribeImageValueSchema,
+  'data.extractText': dataExtractTextValueSchema,
   'orders.create': orderValueSchema,
   'orders.get': orderValueSchema,
   'orders.list': ordersListValueSchema,
@@ -623,6 +627,8 @@ export abstract class AbstractApiClient implements IApiClient {
 
   readonly data: IApiClient['data'] = {
     upload: (payload, signal) => this.callUnary('data.upload', payload, signal, 'caller-signal-only'),
+    describeImage: (payload, signal) => this.callUnary('data.describeImage', payload, signal, 'caller-signal-only'),
+    extractText: (payload, signal) => this.callUnary('data.extractText', payload, signal, 'caller-signal-only'),
   }
 
   readonly orders: IApiClient['orders'] = {

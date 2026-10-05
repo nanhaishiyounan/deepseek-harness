@@ -1,0 +1,944 @@
+{
+  "light": {
+    "empty": {
+      "tag": "empty",
+      "chain": [
+        "DIV.adm-text-area _input_1as74_482",
+        "TEXTAREA.adm-text-area-element"
+      ],
+      "wrap": {
+        "rect": {
+          "top": 758,
+          "height": 45,
+          "bottom": 803,
+          "width": 241
+        },
+        "display": "block",
+        "alignItems": "normal",
+        "height": "45px",
+        "padding": "10.5px 18px",
+        "border": "1px solid rgb(223, 201, 166)",
+        "radius": "999px",
+        "boxShadow": "none",
+        "overflow": "visible"
+      },
+      "slot": {
+        "rect": {
+          "top": 769.5,
+          "height": 22,
+          "bottom": 791.5,
+          "width": 203
+        },
+        "paddingTop": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "paddingRight": "0px",
+        "minHeight": "22px",
+        "maxHeight": "100%",
+        "lineHeight": "22px",
+        "fontSize": "16px",
+        "height": "22px",
+        "boxSizing": "border-box",
+        "scrollHeight": 22,
+        "clientHeight": 22,
+        "overflowY": "auto",
+        "borderTop": "0px",
+        "focusState": "blurred"
+      },
+      "peers": {
+        "send": {
+          "top": 756,
+          "height": 46,
+          "bottom": 802,
+          "width": 46
+        },
+        "plus": {
+          "top": 759,
+          "height": 44,
+          "bottom": 803,
+          "width": 44
+        }
+      },
+      "deltas": {
+        "textCenterVsWrapCenterPx": 0,
+        "topGapPx": 11.5,
+        "bottomGapPx": 11.5,
+        "wrapVsSendHeightPx": -1
+      }
+    },
+    "single": {
+      "tag": "single-char",
+      "chain": [
+        "DIV.adm-text-area _input_1as74_482",
+        "TEXTAREA.adm-text-area-element"
+      ],
+      "wrap": {
+        "rect": {
+          "top": 758,
+          "height": 45,
+          "bottom": 803,
+          "width": 241
+        },
+        "display": "block",
+        "alignItems": "normal",
+        "height": "45px",
+        "padding": "10.5px 18px",
+        "border": "1px solid rgb(180, 83, 10)",
+        "radius": "999px",
+        "boxShadow": "rgb(248, 228, 210) 0px 0px 0px 3px",
+        "overflow": "visible"
+      },
+      "slot": {
+        "rect": {
+          "top": 769.5,
+          "height": 22,
+          "bottom": 791.5,
+          "width": 203
+        },
+        "paddingTop": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "paddingRight": "0px",
+        "minHeight": "22px",
+        "maxHeight": "100%",
+        "lineHeight": "22px",
+        "fontSize": "16px",
+        "height": "22px",
+        "boxSizing": "border-box",
+        "scrollHeight": 22,
+        "clientHeight": 22,
+        "overflowY": "auto",
+        "borderTop": "0px",
+        "focusState": "focused"
+      },
+      "peers": {
+        "send": {
+          "top": 756,
+          "height": 46,
+          "bottom": 802,
+          "width": 46
+        },
+        "plus": {
+          "top": 759,
+          "height": 44,
+          "bottom": 803,
+          "width": 44
+        }
+      },
+      "deltas": {
+        "textCenterVsWrapCenterPx": 0,
+        "topGapPx": 11.5,
+        "bottomGapPx": 11.5,
+        "wrapVsSendHeightPx": -1
+      }
+    },
+    "singleWide": {
+      "tag": "single-wide",
+      "chain": [
+        "DIV.adm-text-area _input_1as74_482",
+        "TEXTAREA.adm-text-area-element"
+      ],
+      "wrap": {
+        "rect": {
+          "top": 736,
+          "height": 67,
+          "bottom": 803,
+          "width": 241
+        },
+        "display": "block",
+        "alignItems": "normal",
+        "height": "67px",
+        "padding": "10.5px 18px",
+        "border": "1px solid rgb(180, 83, 10)",
+        "radius": "999px",
+        "boxShadow": "rgb(248, 228, 210) 0px 0px 0px 3px",
+        "overflow": "visible"
+      },
+      "slot": {
+        "rect": {
+          "top": 747.5,
+          "height": 44,
+          "bottom": 791.5,
+          "width": 203
+        },
+        "paddingTop": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "paddingRight": "0px",
+        "minHeight": "22px",
+        "maxHeight": "100%",
+        "lineHeight": "22px",
+        "fontSize": "16px",
+        "height": "44px",
+        "boxSizing": "border-box",
+        "scrollHeight": 44,
+        "clientHeight": 44,
+        "overflowY": "auto",
+        "borderTop": "0px",
+        "focusState": "focused"
+      },
+      "peers": {
+        "send": {
+          "top": 756,
+          "height": 46,
+          "bottom": 802,
+          "width": 46
+        },
+        "plus": {
+          "top": 759,
+          "height": 44,
+          "bottom": 803,
+          "width": 44
+        }
+      },
+      "deltas": {
+        "textCenterVsWrapCenterPx": -11,
+        "topGapPx": 11.5,
+        "bottomGapPx": 33.5,
+        "wrapVsSendHeightPx": 21
+      }
+    },
+    "four": {
+      "tag": "four-lines",
+      "chain": [
+        "DIV.adm-text-area _input_1as74_482",
+        "TEXTAREA.adm-text-area-element"
+      ],
+      "wrap": {
+        "rect": {
+          "top": 692,
+          "height": 111,
+          "bottom": 803,
+          "width": 241
+        },
+        "display": "block",
+        "alignItems": "normal",
+        "height": "111px",
+        "padding": "10.5px 18px",
+        "border": "1px solid rgb(180, 83, 10)",
+        "radius": "999px",
+        "boxShadow": "rgb(248, 228, 210) 0px 0px 0px 3px",
+        "overflow": "visible"
+      },
+      "slot": {
+        "rect": {
+          "top": 703.5,
+          "height": 88,
+          "bottom": 791.5,
+          "width": 203
+        },
+        "paddingTop": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "paddingRight": "0px",
+        "minHeight": "22px",
+        "maxHeight": "100%",
+        "lineHeight": "22px",
+        "fontSize": "16px",
+        "height": "88px",
+        "boxSizing": "border-box",
+        "scrollHeight": 88,
+        "clientHeight": 88,
+        "overflowY": "auto",
+        "borderTop": "0px",
+        "focusState": "focused"
+      },
+      "peers": {
+        "send": {
+          "top": 756,
+          "height": 46,
+          "bottom": 802,
+          "width": 46
+        },
+        "plus": {
+          "top": 759,
+          "height": 44,
+          "bottom": 803,
+          "width": 44
+        }
+      },
+      "deltas": {
+        "textCenterVsWrapCenterPx": -33,
+        "topGapPx": 11.5,
+        "bottomGapPx": 77.5,
+        "wrapVsSendHeightPx": 65
+      }
+    },
+    "six": {
+      "tag": "six-lines-over-maxRows",
+      "chain": [
+        "DIV.adm-text-area _input_1as74_482",
+        "TEXTAREA.adm-text-area-element"
+      ],
+      "wrap": {
+        "rect": {
+          "top": 692,
+          "height": 111,
+          "bottom": 803,
+          "width": 241
+        },
+        "display": "block",
+        "alignItems": "normal",
+        "height": "111px",
+        "padding": "10.5px 18px",
+        "border": "1px solid rgb(180, 83, 10)",
+        "radius": "999px",
+        "boxShadow": "rgb(248, 228, 210) 0px 0px 0px 3px",
+        "overflow": "visible"
+      },
+      "slot": {
+        "rect": {
+          "top": 703.5,
+          "height": 88,
+          "bottom": 791.5,
+          "width": 203
+        },
+        "paddingTop": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "paddingRight": "0px",
+        "minHeight": "22px",
+        "maxHeight": "100%",
+        "lineHeight": "22px",
+        "fontSize": "16px",
+        "height": "88px",
+        "boxSizing": "border-box",
+        "scrollHeight": 132,
+        "clientHeight": 88,
+        "overflowY": "auto",
+        "borderTop": "0px",
+        "focusState": "focused"
+      },
+      "peers": {
+        "send": {
+          "top": 756,
+          "height": 46,
+          "bottom": 802,
+          "width": 46
+        },
+        "plus": {
+          "top": 759,
+          "height": 44,
+          "bottom": 803,
+          "width": 44
+        }
+      },
+      "deltas": {
+        "textCenterVsWrapCenterPx": -33,
+        "topGapPx": 11.5,
+        "bottomGapPx": 77.5,
+        "wrapVsSendHeightPx": 65
+      }
+    },
+    "overlong": {
+      "tag": "overlong-single-line",
+      "chain": [
+        "DIV.adm-text-area _input_1as74_482",
+        "TEXTAREA.adm-text-area-element"
+      ],
+      "wrap": {
+        "rect": {
+          "top": 692,
+          "height": 111,
+          "bottom": 803,
+          "width": 241
+        },
+        "display": "block",
+        "alignItems": "normal",
+        "height": "111px",
+        "padding": "10.5px 18px",
+        "border": "1px solid rgb(180, 83, 10)",
+        "radius": "999px",
+        "boxShadow": "rgb(248, 228, 210) 0px 0px 0px 3px",
+        "overflow": "visible"
+      },
+      "slot": {
+        "rect": {
+          "top": 703.5,
+          "height": 88,
+          "bottom": 791.5,
+          "width": 203
+        },
+        "paddingTop": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "paddingRight": "0px",
+        "minHeight": "22px",
+        "maxHeight": "100%",
+        "lineHeight": "22px",
+        "fontSize": "16px",
+        "height": "88px",
+        "boxSizing": "border-box",
+        "scrollHeight": 220,
+        "clientHeight": 88,
+        "overflowY": "auto",
+        "borderTop": "0px",
+        "focusState": "focused"
+      },
+      "peers": {
+        "send": {
+          "top": 756,
+          "height": 46,
+          "bottom": 802,
+          "width": 46
+        },
+        "plus": {
+          "top": 759,
+          "height": 44,
+          "bottom": 803,
+          "width": 44
+        }
+      },
+      "deltas": {
+        "textCenterVsWrapCenterPx": -33,
+        "topGapPx": 11.5,
+        "bottomGapPx": 77.5,
+        "wrapVsSendHeightPx": 65
+      }
+    },
+    "focus": {
+      "tag": "focused-single",
+      "chain": [
+        "DIV.adm-text-area _input_1as74_482",
+        "TEXTAREA.adm-text-area-element"
+      ],
+      "wrap": {
+        "rect": {
+          "top": 692,
+          "height": 111,
+          "bottom": 803,
+          "width": 241
+        },
+        "display": "block",
+        "alignItems": "normal",
+        "height": "111px",
+        "padding": "10.5px 18px",
+        "border": "1px solid rgb(180, 83, 10)",
+        "radius": "999px",
+        "boxShadow": "rgb(248, 228, 210) 0px 0px 0px 3px",
+        "overflow": "visible"
+      },
+      "slot": {
+        "rect": {
+          "top": 703.5,
+          "height": 88,
+          "bottom": 791.5,
+          "width": 203
+        },
+        "paddingTop": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "paddingRight": "0px",
+        "minHeight": "22px",
+        "maxHeight": "100%",
+        "lineHeight": "22px",
+        "fontSize": "16px",
+        "height": "88px",
+        "boxSizing": "border-box",
+        "scrollHeight": 220,
+        "clientHeight": 88,
+        "overflowY": "auto",
+        "borderTop": "0px",
+        "focusState": "focused"
+      },
+      "peers": {
+        "send": {
+          "top": 756,
+          "height": 46,
+          "bottom": 802,
+          "width": 46
+        },
+        "plus": {
+          "top": 759,
+          "height": 44,
+          "bottom": 803,
+          "width": 44
+        }
+      },
+      "deltas": {
+        "textCenterVsWrapCenterPx": -33,
+        "topGapPx": 11.5,
+        "bottomGapPx": 77.5,
+        "wrapVsSendHeightPx": 65
+      },
+      "focusRead": {
+        "wrapBorderColor": "rgb(180, 83, 10)",
+        "wrapBoxShadow": "rgb(248, 228, 210) 0px 0px 0px 3px",
+        "wrapOutline": "rgb(61, 43, 31) none 3px",
+        "active": true,
+        "activeClass": "adm-text-area-element"
+      }
+    }
+  },
+  "dark": {
+    "empty": {
+      "tag": "empty",
+      "chain": [
+        "DIV.adm-text-area _input_1as74_482",
+        "TEXTAREA.adm-text-area-element"
+      ],
+      "wrap": {
+        "rect": {
+          "top": 758,
+          "height": 45,
+          "bottom": 803,
+          "width": 241
+        },
+        "display": "block",
+        "alignItems": "normal",
+        "height": "45px",
+        "padding": "10.5px 18px",
+        "border": "1px solid rgb(87, 69, 47)",
+        "radius": "999px",
+        "boxShadow": "none",
+        "overflow": "visible"
+      },
+      "slot": {
+        "rect": {
+          "top": 769.5,
+          "height": 22,
+          "bottom": 791.5,
+          "width": 203
+        },
+        "paddingTop": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "paddingRight": "0px",
+        "minHeight": "22px",
+        "maxHeight": "100%",
+        "lineHeight": "22px",
+        "fontSize": "16px",
+        "height": "22px",
+        "boxSizing": "border-box",
+        "scrollHeight": 22,
+        "clientHeight": 22,
+        "overflowY": "auto",
+        "borderTop": "0px",
+        "focusState": "blurred"
+      },
+      "peers": {
+        "send": {
+          "top": 756,
+          "height": 46,
+          "bottom": 802,
+          "width": 46
+        },
+        "plus": {
+          "top": 759,
+          "height": 44,
+          "bottom": 803,
+          "width": 44
+        }
+      },
+      "deltas": {
+        "textCenterVsWrapCenterPx": 0,
+        "topGapPx": 11.5,
+        "bottomGapPx": 11.5,
+        "wrapVsSendHeightPx": -1
+      }
+    },
+    "single": {
+      "tag": "single-char",
+      "chain": [
+        "DIV.adm-text-area _input_1as74_482",
+        "TEXTAREA.adm-text-area-element"
+      ],
+      "wrap": {
+        "rect": {
+          "top": 758,
+          "height": 45,
+          "bottom": 803,
+          "width": 241
+        },
+        "display": "block",
+        "alignItems": "normal",
+        "height": "45px",
+        "padding": "10.5px 18px",
+        "border": "1px solid rgb(229, 139, 74)",
+        "radius": "999px",
+        "boxShadow": "rgb(59, 42, 28) 0px 0px 0px 3px",
+        "overflow": "visible"
+      },
+      "slot": {
+        "rect": {
+          "top": 769.5,
+          "height": 22,
+          "bottom": 791.5,
+          "width": 203
+        },
+        "paddingTop": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "paddingRight": "0px",
+        "minHeight": "22px",
+        "maxHeight": "100%",
+        "lineHeight": "22px",
+        "fontSize": "16px",
+        "height": "22px",
+        "boxSizing": "border-box",
+        "scrollHeight": 22,
+        "clientHeight": 22,
+        "overflowY": "auto",
+        "borderTop": "0px",
+        "focusState": "focused"
+      },
+      "peers": {
+        "send": {
+          "top": 756,
+          "height": 46,
+          "bottom": 802,
+          "width": 46
+        },
+        "plus": {
+          "top": 759,
+          "height": 44,
+          "bottom": 803,
+          "width": 44
+        }
+      },
+      "deltas": {
+        "textCenterVsWrapCenterPx": 0,
+        "topGapPx": 11.5,
+        "bottomGapPx": 11.5,
+        "wrapVsSendHeightPx": -1
+      }
+    },
+    "singleWide": {
+      "tag": "single-wide",
+      "chain": [
+        "DIV.adm-text-area _input_1as74_482",
+        "TEXTAREA.adm-text-area-element"
+      ],
+      "wrap": {
+        "rect": {
+          "top": 736,
+          "height": 67,
+          "bottom": 803,
+          "width": 241
+        },
+        "display": "block",
+        "alignItems": "normal",
+        "height": "67px",
+        "padding": "10.5px 18px",
+        "border": "1px solid rgb(229, 139, 74)",
+        "radius": "999px",
+        "boxShadow": "rgb(59, 42, 28) 0px 0px 0px 3px",
+        "overflow": "visible"
+      },
+      "slot": {
+        "rect": {
+          "top": 747.5,
+          "height": 44,
+          "bottom": 791.5,
+          "width": 203
+        },
+        "paddingTop": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "paddingRight": "0px",
+        "minHeight": "22px",
+        "maxHeight": "100%",
+        "lineHeight": "22px",
+        "fontSize": "16px",
+        "height": "44px",
+        "boxSizing": "border-box",
+        "scrollHeight": 44,
+        "clientHeight": 44,
+        "overflowY": "auto",
+        "borderTop": "0px",
+        "focusState": "focused"
+      },
+      "peers": {
+        "send": {
+          "top": 756,
+          "height": 46,
+          "bottom": 802,
+          "width": 46
+        },
+        "plus": {
+          "top": 759,
+          "height": 44,
+          "bottom": 803,
+          "width": 44
+        }
+      },
+      "deltas": {
+        "textCenterVsWrapCenterPx": -11,
+        "topGapPx": 11.5,
+        "bottomGapPx": 33.5,
+        "wrapVsSendHeightPx": 21
+      }
+    },
+    "four": {
+      "tag": "four-lines",
+      "chain": [
+        "DIV.adm-text-area _input_1as74_482",
+        "TEXTAREA.adm-text-area-element"
+      ],
+      "wrap": {
+        "rect": {
+          "top": 692,
+          "height": 111,
+          "bottom": 803,
+          "width": 241
+        },
+        "display": "block",
+        "alignItems": "normal",
+        "height": "111px",
+        "padding": "10.5px 18px",
+        "border": "1px solid rgb(229, 139, 74)",
+        "radius": "999px",
+        "boxShadow": "rgb(59, 42, 28) 0px 0px 0px 3px",
+        "overflow": "visible"
+      },
+      "slot": {
+        "rect": {
+          "top": 703.5,
+          "height": 88,
+          "bottom": 791.5,
+          "width": 203
+        },
+        "paddingTop": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "paddingRight": "0px",
+        "minHeight": "22px",
+        "maxHeight": "100%",
+        "lineHeight": "22px",
+        "fontSize": "16px",
+        "height": "88px",
+        "boxSizing": "border-box",
+        "scrollHeight": 88,
+        "clientHeight": 88,
+        "overflowY": "auto",
+        "borderTop": "0px",
+        "focusState": "focused"
+      },
+      "peers": {
+        "send": {
+          "top": 756,
+          "height": 46,
+          "bottom": 802,
+          "width": 46
+        },
+        "plus": {
+          "top": 759,
+          "height": 44,
+          "bottom": 803,
+          "width": 44
+        }
+      },
+      "deltas": {
+        "textCenterVsWrapCenterPx": -33,
+        "topGapPx": 11.5,
+        "bottomGapPx": 77.5,
+        "wrapVsSendHeightPx": 65
+      }
+    },
+    "six": {
+      "tag": "six-lines-over-maxRows",
+      "chain": [
+        "DIV.adm-text-area _input_1as74_482",
+        "TEXTAREA.adm-text-area-element"
+      ],
+      "wrap": {
+        "rect": {
+          "top": 692,
+          "height": 111,
+          "bottom": 803,
+          "width": 241
+        },
+        "display": "block",
+        "alignItems": "normal",
+        "height": "111px",
+        "padding": "10.5px 18px",
+        "border": "1px solid rgb(229, 139, 74)",
+        "radius": "999px",
+        "boxShadow": "rgb(59, 42, 28) 0px 0px 0px 3px",
+        "overflow": "visible"
+      },
+      "slot": {
+        "rect": {
+          "top": 703.5,
+          "height": 88,
+          "bottom": 791.5,
+          "width": 203
+        },
+        "paddingTop": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "paddingRight": "0px",
+        "minHeight": "22px",
+        "maxHeight": "100%",
+        "lineHeight": "22px",
+        "fontSize": "16px",
+        "height": "88px",
+        "boxSizing": "border-box",
+        "scrollHeight": 132,
+        "clientHeight": 88,
+        "overflowY": "auto",
+        "borderTop": "0px",
+        "focusState": "focused"
+      },
+      "peers": {
+        "send": {
+          "top": 756,
+          "height": 46,
+          "bottom": 802,
+          "width": 46
+        },
+        "plus": {
+          "top": 759,
+          "height": 44,
+          "bottom": 803,
+          "width": 44
+        }
+      },
+      "deltas": {
+        "textCenterVsWrapCenterPx": -33,
+        "topGapPx": 11.5,
+        "bottomGapPx": 77.5,
+        "wrapVsSendHeightPx": 65
+      }
+    },
+    "overlong": {
+      "tag": "overlong-single-line",
+      "chain": [
+        "DIV.adm-text-area _input_1as74_482",
+        "TEXTAREA.adm-text-area-element"
+      ],
+      "wrap": {
+        "rect": {
+          "top": 692,
+          "height": 111,
+          "bottom": 803,
+          "width": 241
+        },
+        "display": "block",
+        "alignItems": "normal",
+        "height": "111px",
+        "padding": "10.5px 18px",
+        "border": "1px solid rgb(229, 139, 74)",
+        "radius": "999px",
+        "boxShadow": "rgb(59, 42, 28) 0px 0px 0px 3px",
+        "overflow": "visible"
+      },
+      "slot": {
+        "rect": {
+          "top": 703.5,
+          "height": 88,
+          "bottom": 791.5,
+          "width": 203
+        },
+        "paddingTop": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "paddingRight": "0px",
+        "minHeight": "22px",
+        "maxHeight": "100%",
+        "lineHeight": "22px",
+        "fontSize": "16px",
+        "height": "88px",
+        "boxSizing": "border-box",
+        "scrollHeight": 220,
+        "clientHeight": 88,
+        "overflowY": "auto",
+        "borderTop": "0px",
+        "focusState": "focused"
+      },
+      "peers": {
+        "send": {
+          "top": 756,
+          "height": 46,
+          "bottom": 802,
+          "width": 46
+        },
+        "plus": {
+          "top": 759,
+          "height": 44,
+          "bottom": 803,
+          "width": 44
+        }
+      },
+      "deltas": {
+        "textCenterVsWrapCenterPx": -33,
+        "topGapPx": 11.5,
+        "bottomGapPx": 77.5,
+        "wrapVsSendHeightPx": 65
+      }
+    },
+    "focus": {
+      "tag": "focused-single",
+      "chain": [
+        "DIV.adm-text-area _input_1as74_482",
+        "TEXTAREA.adm-text-area-element"
+      ],
+      "wrap": {
+        "rect": {
+          "top": 692,
+          "height": 111,
+          "bottom": 803,
+          "width": 241
+        },
+        "display": "block",
+        "alignItems": "normal",
+        "height": "111px",
+        "padding": "10.5px 18px",
+        "border": "1px solid rgb(229, 139, 74)",
+        "radius": "999px",
+        "boxShadow": "rgb(59, 42, 28) 0px 0px 0px 3px",
+        "overflow": "visible"
+      },
+      "slot": {
+        "rect": {
+          "top": 703.5,
+          "height": 88,
+          "bottom": 791.5,
+          "width": 203
+        },
+        "paddingTop": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "paddingRight": "0px",
+        "minHeight": "22px",
+        "maxHeight": "100%",
+        "lineHeight": "22px",
+        "fontSize": "16px",
+        "height": "88px",
+        "boxSizing": "border-box",
+        "scrollHeight": 220,
+        "clientHeight": 88,
+        "overflowY": "auto",
+        "borderTop": "0px",
+        "focusState": "focused"
+      },
+      "peers": {
+        "send": {
+          "top": 756,
+          "height": 46,
+          "bottom": 802,
+          "width": 46
+        },
+        "plus": {
+          "top": 759,
+          "height": 44,
+          "bottom": 803,
+          "width": 44
+        }
+      },
+      "deltas": {
+        "textCenterVsWrapCenterPx": -33,
+        "topGapPx": 11.5,
+        "bottomGapPx": 77.5,
+        "wrapVsSendHeightPx": 65
+      },
+      "focusRead": {
+        "wrapBorderColor": "rgb(229, 139, 74)",
+        "wrapBoxShadow": "rgb(59, 42, 28) 0px 0px 0px 3px",
+        "wrapOutline": "rgb(242, 227, 211) none 3px",
+        "active": true,
+        "activeClass": "adm-text-area-element"
+      }
+    }
+  }
+}

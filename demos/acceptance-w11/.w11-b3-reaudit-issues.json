@@ -1,0 +1,2020 @@
+{
+  "pipeline": "mmx vision describe (MiniMax VLM)",
+  "promptLenses": 8,
+  "shots": 18,
+  "generatedAt": "2026-10-05T16:58:49.137Z",
+  "results": [
+    {
+      "screenshot": "w11-b2-attach-failed-375-light.png",
+      "route": "attach-failed-375-light",
+      "ok": true,
+      "issues": [
+        {
+          "screenshot": "w11-b2-attach-failed-375-light.png",
+          "route": "attach-failed-375-light",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "底部输入框左侧的「+」号按钮无任何背景/边框/圆角样式约束，呈现为裸文本符号，与「酱园琥珀」设计语言的印章/胶囊按钮风格脱节；且未做命中区域放大，疑似浏览器默认 button 元素残留观感。",
+          "suggestion": "为 + 按钮套上与右上角「+」一致的圆形琥珀底/酱色描边胶囊，明确 hit area ≥44pt，统一两处加号视觉语言。"
+        },
+        {
+          "screenshot": "w11-b2-attach-failed-375-light.png",
+          "route": "attach-failed-375-light",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "底部「empty-note.txt」附件 chip 使用了浏览器/系统默认的浅灰圆角矩形 + 浅色边框 + 文件图标底色块（带淡蓝灰感），与暖纸底色和印章风格冲突，呈现明显的桌面浏览器/移动端原生控件观感。",
+          "suggestion": "自定义附件 chip：底色改为暖纸米白加深一档，边框改用酱色 1px 或无边框+印章式虚线圈，关闭图标去掉冷色块，改用琥珀实心印章图形。"
+        },
+        {
+          "screenshot": "w11-b2-attach-failed-375-light.png",
+          "route": "attach-failed-375-light",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "底部「empty-note.txt」chip 右侧的「×」关闭按钮为默认深灰小号「×」字符，未做颜色/字重/可点击态处理，属于典型的浏览器原生关闭按钮残留。",
+          "suggestion": "将关闭按钮替换为琥珀色实心圆点 + 白色「×」或酱色「×」图标，并确保 44×44 命中区域。"
+        },
+        {
+          "screenshot": "w11-b2-attach-failed-375-light.png",
+          "route": "attach-failed-375-light",
+          "severity": "P2",
+          "category": "ua-default-style",
+          "description": "顶部「数据」徽标虽为酱色圆+印章字，但其外侧圆形描边为系统默认灰棕色细线，未使用设计语言中印章常用的虚线/双线，偏向原生 badge 观感。",
+          "suggestion": "将「数据」徽标外圈改为酱色 1.5px 虚线描边或双圈印章式，强化印章语言。"
+        },
+        {
+          "screenshot": "w11-b2-attach-failed-375-light.png",
+          "route": "attach-failed-375-light",
+          "severity": "P2",
+          "category": "inconsistency",
+          "description": "顶部右上角「+」按钮为琥珀实心圆+白色「+」胶囊；底部输入区左侧「+」却是裸字符；底部发送箭头为琥珀实心圆+白色箭头。同一应用内加号/操作类按钮形态分裂。",
+          "suggestion": "统一为「琥珀实心圆 + 白色线性图标」胶囊式，或「酱色描边圆 + 酱色图标」印章式，二选一贯穿全应用。"
+        },
+        {
+          "screenshot": "w11-b2-attach-failed-375-light.png",
+          "route": "attach-failed-375-light",
+          "severity": "P2",
+          "category": "layout-overflow",
+          "description": "「empty-note.txt」chip 与左侧「+」按钮之间留白过窄，chip 几乎紧贴 + 号；同时该 chip 与底部输入框、发送按钮三者水平排布，375px 宽度下「empty-note.txt」宽度占比偏大，存在窄屏挤压输入框文字的隐患。",
+          "suggestion": "为附件 chip 设置 max-width 并允许文本省略（如「empty-no…txt」），并增大与 + 按钮的间距（≥12px）。"
+        },
+        {
+          "screenshot": "w11-b2-attach-failed-375-light.png",
+          "route": "attach-failed-375-light",
+          "severity": "P2",
+          "category": "misalign",
+          "description": "底部三个控件（+ 按钮、输入框、发送按钮）底边未严格对齐：+ 号与输入框左内边距基线不齐，输入框与发送按钮的垂直中线也略有错位，肉眼可见不等高。",
+          "suggestion": "将三者统一高度 44–48px，使用同一基线网格，并保证输入框圆角与按钮圆角呼应。"
+        },
+        {
+          "screenshot": "w11-b2-attach-failed-375-light.png",
+          "route": "attach-failed-375-light",
+          "severity": "P2",
+          "category": "spacing",
+          "description": "主区域「我是企业数据助手」标题与上方「表」印章的间距（约 40px）合理，但三条要点列表项之间的行距偏紧（约 18px），与卡片/胶囊周围的宽松留白节奏不一致，形成上松下紧的失衡。",
+          "suggestion": "将要点行高从 ~18px 提到 ~28–32px，使列表与印章、按钮胶囊的呼吸感统一。"
+        },
+        {
+          "screenshot": "w11-b2-attach-failed-375-light.png",
+          "route": "attach-failed-375-light",
+          "severity": "P2",
+          "category": "contrast",
+          "description": "顶部「数据」徽标内的「数据」二字采用酱色（深棕红）压在同色系酱色背景上，对比度偏弱，「数」「据」两字辨识度下降，远低于 WCAG AA。",
+          "suggestion": "将徽标内文字改为暖纸米白色或象牙白，保留酱色描边外圈，确保对比度 ≥ 4.5:1。"
+        },
+        {
+          "screenshot": "w11-b2-attach-failed-375-light.png",
+          "route": "attach-failed-375-light",
+          "severity": "P2",
+          "category": "typography",
+          "description": "副标题「企业数据助手」与主标题「我是企业数据助手」字号/字重区分不够明显（均为酱色 sans-serif），且与下方要点列表的层级跳跃过陡（直接落到最小号正文），中间缺少描述性副文层级。",
+          "suggestion": "明确三级节奏：H1（我是企业数据助手）→ H2/副标 → 描述句 → 要点列表（bullet），每级字号差 ≥ 2pt。"
+        },
+        {
+          "screenshot": "w11-b2-attach-failed-375-light.png",
+          "route": "attach-failed-375-light",
+          "severity": "P2",
+          "category": "inconsistency",
+          "description": "「问企业档案」「问供应链」两个胶囊按钮使用琥珀实心圆点+酱色文字，而底部发送按钮是琥珀实心圆+白色图标；同样是琥珀圆点语言，承担动作的「问…」按钮未给可点击反馈态（无按压/聚焦描边变化），与系统默认按钮观感接近。",
+          "suggestion": "为「问企业档案/问供应链」胶囊加：默认酱色 1px 描边 + 琥珀圆点；按压态填充实心琥珀+白色文字；明确可点击层级。"
+        },
+        {
+          "screenshot": "w11-b2-attach-failed-375-light.png",
+          "route": "attach-failed-375-light",
+          "severity": "P2",
+          "category": "ua-default-style",
+          "description": "底部输入框「问我任何经营问题…」为浅灰描边圆角胶囊，占位文字呈系统默认浅灰，未做暖纸/酱色体系下的 placeholder 着色，与上方暖纸底+酱色文字的整体观感轻微撕裂。",
+          "suggestion": "将输入框边框改为酱色 1px（默认态）/ 琥珀 1.5px（聚焦态），占位文字使用酱色 40% 透明，聚焦环使用琥珀外发光而非系统蓝。"
+        },
+        {
+          "screenshot": "w11-b2-attach-failed-375-light.png",
+          "route": "attach-failed-375-light",
+          "severity": "P2",
+          "category": "other",
+          "description": "顶部左上角返回箭头为细线条酱色 chevron，与整体印章/琥珀圆点语言相比过于「线性 icon」化，缺少重量感；右下角发送图标同样为线性，方向虽合理但与琥珀实心圆底在视觉重量上不对称（实心底+线性图，略显空）。",
+          "suggestion": "返回箭头保留线性但加粗至 2px 或改用印章式方框+箭头；发送图标可考虑琥珀底+实心白色飞机形以平衡视觉重量。"
+        }
+      ]
+    },
+    {
+      "screenshot": "w11-b2-attach-ready-image-375-light.png",
+      "route": "attach-ready-image-375-light",
+      "ok": true,
+      "issues": [
+        {
+          "screenshot": "w11-b2-attach-ready-image-375-light.png",
+          "route": "attach-ready-image-375-light",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "顶部状态栏「数据」徽标为系统默认胶囊药丸形态，浅灰底配深字，缺乏酱色/琥珀语言定制，与「印章元素」设计语言不符。",
+          "suggestion": "将徽标改为酱色描边或琥珀填充的印章圆章形态（与中部「表」印章呼应），去掉默认胶囊底色。"
+        },
+        {
+          "screenshot": "w11-b2-attach-ready-image-375-light.png",
+          "route": "attach-ready-image-375-light",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "右上角「+」新建按钮为系统默认圆按钮形态，浅灰白底灰边，无品牌色，与设计语言冲突。",
+          "suggestion": "改为琥珀/酱色实心圆按钮或带印章纹理的浮动操作按钮（FAB）。"
+        },
+        {
+          "screenshot": "w11-b2-attach-ready-image-375-light.png",
+          "route": "attach-ready-image-375-light",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "底部输入栏为纯白底直角矩形，缺乏圆角与暖纸底，左下「+」和右下发送图标按钮为系统默认灰色圆形，原生观感明显。",
+          "suggestion": "输入栏整体改为暖米色底+大圆角（与快捷指令卡片一致），按钮改用酱色/琥珀填充并保持圆角一致。"
+        },
+        {
+          "screenshot": "w11-b2-attach-ready-image-375-light.png",
+          "route": "attach-ready-image-375-light",
+          "severity": "P0",
+          "category": "ua-default-style",
+          "description": "快捷指令区底部附件预览项「vfy-w10-01-home-375…」使用浏览器/系统默认浅灰胶囊条（带文档图标占位+关闭×），是典型的原生文件附件控件残留，与酱园琥珀设计语言完全冲突，是用户最直观的「浏览器默认样式」感受点。",
+          "suggestion": "用品牌化附件胶囊替换：酱色描边圆角矩形、印章式文档图标、自定义×按钮，文字截断用省略号+琥珀提示。"
+        },
+        {
+          "screenshot": "w11-b2-attach-ready-image-375-light.png",
+          "route": "attach-ready-image-375-light",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "中部「问企业档案」「问供应链」两个示例气泡为白底直角矩形，无圆角无品牌色，像是默认系统提示气泡。",
+          "suggestion": "改为暖米底+酱色细描边+圆角胶囊，或做成印章式标签形态。"
+        },
+        {
+          "screenshot": "w11-b2-attach-ready-image-375-light.png",
+          "route": "attach-ready-image-375-light",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "快捷指令区「问企业档案/问供应链/语音/拍照/相册/文件」共 6 个按钮虽为胶囊形，但均为纯白底+浅灰描边+系统蓝灰色图标（铅笔、柱状图、麦克风、相机、相册、文档），呈现明显的浏览器/iOS 系统默认控件观感，蓝灰工业色与暖纸+酱色语言冲突。",
+          "suggestion": "图标统一改用酱色线性图标或琥珀色填充；底色改为暖米色（#F5EFE6 系），描边改酱色 1px；保持 12-16px 圆角。"
+        },
+        {
+          "screenshot": "w11-b2-attach-ready-image-375-light.png",
+          "route": "attach-ready-image-375-light",
+          "severity": "P2",
+          "category": "inconsistency",
+          "description": "快捷指令区 6 个按钮的圆角与上方示例气泡、中部「表」印章、下方输入栏圆角均不一致，组件形态缺乏统一节奏。",
+          "suggestion": "建立全局圆角 token：印章/胶囊 999px、卡片 12-16px、输入栏 20px，所有控件引用统一值。"
+        },
+        {
+          "screenshot": "w11-b2-attach-ready-image-375-light.png",
+          "route": "attach-ready-image-375-light",
+          "severity": "P2",
+          "category": "contrast",
+          "description": "顶部标题「新会话」「企业数据助手」及正文「我是企业数据助手」与暖纸底对比度尚可，但「问企业档案、走访纪要、市场与供应链数据」「统计理论结构化报告卡」「变更记录确认后落库」三条项目符号使用酱色小方块，颜色过深且字号偏小，行高偏紧，可读性下降。",
+          "suggestion": "项目符号改用琥珀色或降低透明度避免抢戏；正文行高从约 1.4 提升到 1.7，字号 14→15。"
+        },
+        {
+          "screenshot": "w11-b2-attach-ready-image-375-light.png",
+          "route": "attach-ready-image-375-light",
+          "severity": "P2",
+          "category": "misalign",
+          "description": "中部示例气泡「问企业档案」「问供应链」水平居中但两枚胶囊之间无视觉关联（如连线、序号或印章连接器），与上方三行项目列表也缺少对齐基准线。",
+          "suggestion": "在两枚胶囊之间加琥珀色虚线或「↓」印章引导，强化「示例→快捷入口」的视觉路径。"
+        },
+        {
+          "screenshot": "w11-b2-attach-ready-image-375-light.png",
+          "route": "attach-ready-image-375-light",
+          "severity": "P2",
+          "category": "layout-overflow",
+          "description": "底部输入栏「问我任何经营问题…」占位文字与左侧「+」按钮之间距离过近，且右侧发送按钮几乎贴边，留白失衡，375 宽度下文字易被裁切。",
+          "suggestion": "输入框左右内边距至少 16px，发送按钮距右 12px，整体 input 高度统一为 44-48px。"
+        },
+        {
+          "screenshot": "w11-b2-attach-ready-image-375-light.png",
+          "route": "attach-ready-image-375-light",
+          "severity": "P2",
+          "category": "spacing",
+          "description": "中部主标题区到「问企业档案…/统计理论…/变更记录…」三条列表之间间距约 24px，但三条列表之间仅 8-10px，节奏突然收紧；列表与下方示例气泡又拉大到 32px，整体纵向节奏失序。",
+          "suggestion": "采用 8pt 网格：标题→列表 24px、列表项间 12px、列表→示例气泡 32px，保持递进。"
+        },
+        {
+          "screenshot": "w11-b2-attach-ready-image-375-light.png",
+          "route": "attach-ready-image-375-light",
+          "severity": "P2",
+          "category": "design-language-drift",
+          "description": "顶部左上「‹」返回箭头为细线灰色系统图标，与中部印章「表」、暖纸底、酱色语言完全脱节，呈现蓝灰工业风。",
+          "suggestion": "返回箭头改用酱色粗描边箭头（类似印章刻刀笔触），与「表」印章视觉呼应。"
+        },
+        {
+          "screenshot": "w11-b2-attach-ready-image-375-light.png",
+          "route": "attach-ready-image-375-light",
+          "severity": "P2",
+          "category": "typography",
+          "description": "「数据」徽标、「新会话」标题、「企业数据助手」副标题三者字号层级仅靠粗细区分（均为 14-16px），缺乏清晰的标题/副标题/标签三级节奏。",
+          "suggestion": "明确层级：标题 18px Bold、徽标 12px Regular 并加酱色底色、副标题 13px Regular 灰酱色。"
+        },
+        {
+          "screenshot": "w11-b2-attach-ready-image-375-light.png",
+          "route": "attach-ready-image-375-light",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "附件预览项关闭按钮「×」为浅灰小方块，是典型系统默认 close 图标，未做品牌化处理。",
+          "suggestion": "改为酱色描边的圆形 × 按钮，hover/active 加琥珀色填充。"
+        }
+      ]
+    },
+    {
+      "screenshot": "w11-b2-attach-ready-pdf-375-light.png",
+      "route": "attach-ready-pdf-375-light",
+      "ok": true,
+      "issues": []
+    },
+    {
+      "screenshot": "w11-b2-attach-uploading-375-light.png",
+      "route": "attach-uploading-375-light",
+      "ok": true,
+      "issues": [
+        {
+          "screenshot": "w11-b2-attach-uploading-375-light.png",
+          "route": "attach-uploading-375-light",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "底部输入框「问我任何经营问题…」使用的疑似为浏览器原生 input 样式，未做圆角、底色、聚焦环的定制，右侧「+」按钮（应为自定义圆角图标按钮）呈现为左下角的浅色圆形按钮，与暖纸卡片整体语言脱节。",
+          "suggestion": "用自定义 chat composer 组件替换原生 input：圆角胶囊底色、暖纸底+酱色描边、聚焦环使用琥珀色；左下「+」改为琥珀或酱色填充的圆形图标按钮并加柔和阴影。"
+        },
+        {
+          "screenshot": "w11-b2-attach-uploading-375-light.png",
+          "route": "attach-uploading-375-light",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "「vfy-w10-01-home-375…」附件上传条左侧缩略图、文件名文本及右侧「×」关闭按钮均呈现为浅灰底+直角圆角+系统字体的浏览器/文件默认外观，未走「酱园琥珀」卡片样式。",
+          "suggestion": "将附件 chip 替换为设计语言内的「琥珀描边圆角胶囊」：暖米色底、酱色文件名文字、关闭按钮改为琥珀色 × 图标，与快捷指令卡片视觉同源。"
+        },
+        {
+          "screenshot": "w11-b2-attach-uploading-375-light.png",
+          "route": "attach-uploading-375-light",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "「语音 / 拍照 / 相册 / 文件」四个快捷指令按钮使用浅灰底+直角圆角（约 4–6px）+系统默认无衬线字体的观感，与上方「问企业档案 / 问供应链」两枚同语义按钮（白底圆角胶囊+酱色文字）形态完全不一致，明显是系统 button 默认样式残留。",
+          "suggestion": "统一为同一组件：白底/暖米色底、圆角 16–20px 胶囊、酱色文字+琥珀或酱色线性图标、可选琥珀色聚焦态，去掉默认灰底与系统圆角。"
+        },
+        {
+          "screenshot": "w11-b2-attach-uploading-375-light.png",
+          "route": "attach-uploading-375-light",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "「问企业档案」「问供应链」两枚胶囊按钮聚焦/激活态的高亮为默认系统蓝点（小圆点指示符），并非设计语言内的琥珀/酱色。",
+          "suggestion": "将按钮前的小圆点 indicator 改为琥珀色 (#D9A24A 系) 或酱色实心，去除任何系统蓝回退。"
+        },
+        {
+          "screenshot": "w11-b2-attach-uploading-375-light.png",
+          "route": "attach-uploading-375-light",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "顶部「新会话」标题右侧、底栏右侧均出现「+」号按钮，呈现为浅米色实心圆+系统蓝或灰描边，是浏览器/系统原生 button 默认外观；并且底栏的「+」与发送纸飞机按钮并排却没有统一的胶囊容器，疑似裸 input submit + native button。",
+          "suggestion": "将两处「+」统一为琥珀或酱色填充的圆形图标按钮，半径与聊天发送按钮协调；底栏整体包成单一暖米色胶囊 composer，避免原生控件外露。"
+        },
+        {
+          "screenshot": "w11-b2-attach-uploading-375-light.png",
+          "route": "attach-uploading-375-light",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "顶部状态栏/导航栏整体为浏览器默认白色 + 系统字体（疑似 iOS Safari 默认 17px Regular），未按「酱园琥珀」做暖纸底处理，「数据」胶囊与「新会话」标题之间也保留了系统级留白节奏。",
+          "suggestion": "将 status bar 与 nav 区域背景统一为暖纸底 (#F5EDDF 附近)，标题字体使用品牌衬线/思源宋体或半粗无衬线，圆角与印章元素呼应。"
+        },
+        {
+          "screenshot": "w11-b2-attach-uploading-375-light.png",
+          "route": "attach-uploading-375-light",
+          "severity": "P2",
+          "category": "ua-default-style",
+          "description": "「vfy-w10-01-home-375…」文件名被截断显示「…」且使用系统等宽字体，文件 chip 没有 ellipsis 渐隐或自定义省略样式，呈原生文本截断。",
+          "suggestion": "在自定义 chip 组件中用 max-width + 渐隐 mask 实现省略，并使用品牌字体。"
+        },
+        {
+          "screenshot": "w11-b2-attach-uploading-375-light.png",
+          "route": "attach-uploading-375-light",
+          "severity": "P2",
+          "category": "inconsistency",
+          "description": "「我是企业数据助手」上方的「表」印章圆形徽标使用酱色描边+酱色字，而下方功能介绍处的列表项目符号（•）使用琥珀色/橙色小方块，整页印章/标识语系不一致：印章走酱色，bullet 走琥珀，且 bullet 偏方非圆。",
+          "suggestion": "统一为「酱色印章+琥珀点缀」语系：bullet 改为小圆点琥珀色，或统一替换为酱色方点；保持印章与点缀的角色分工清晰。"
+        },
+        {
+          "screenshot": "w11-b2-attach-uploading-375-light.png",
+          "route": "attach-uploading-375-light",
+          "severity": "P2",
+          "category": "inconsistency",
+          "description": "「快捷指令」标题下的 6 个按钮圆角与「问企业档案/问供应链」两枚胶囊不一致：上方两枚是较大圆角胶囊（约 999px），下方 6 个是中等圆角（约 8–12px）且底色更灰，形态分裂。",
+          "suggestion": "将「快捷指令」6 个按钮升级为与上方同源的全圆角胶囊，统一高度、内边距、底色和聚焦态。"
+        },
+        {
+          "screenshot": "w11-b2-attach-uploading-375-light.png",
+          "route": "attach-uploading-375-light",
+          "severity": "P2",
+          "category": "contrast",
+          "description": "「vfy-w10-01-home-375…」附件文件名文字为浅灰，对暖米色底对比度偏低，目测接近 WCAG AA 边界以下。",
+          "suggestion": "将文件名文字色提升至酱色 #5A2A1A 一档或 #6B3A2A，确保 ≥4.5:1 对比度。"
+        },
+        {
+          "screenshot": "w11-b2-attach-uploading-375-light.png",
+          "route": "attach-uploading-375-light",
+          "severity": "P2",
+          "category": "spacing",
+          "description": "「快捷指令」卡片标题与上方 6 按钮组的间距明显大于 6 按钮组内行间距（双列内 16–20px，卡片标题到第一行按钮约 32px+），且 6 按钮双列两行之间留白略紧，造成卡片上半空、下半挤。",
+          "suggestion": "将卡片内统一节奏：标题 24px→首行 20px，行间距 14–16px，整体更均衡。"
+        },
+        {
+          "screenshot": "w11-b2-attach-uploading-375-light.png",
+          "route": "attach-uploading-375-light",
+          "severity": "P2",
+          "category": "typography",
+          "description": "「我是企业数据助手」使用系统默认无衬线粗体，未呈现设计语言「酱园琥珀」应有的衬线/半衬线印章字感，与上方「表」印章圆形徽标形成字体反差。",
+          "suggestion": "将主标题改为品牌衬线字（如思源宋体/方正宋刻本悦宋），字重 600，颜色酱色 #4A1F12，呼应印章语言。"
+        },
+        {
+          "screenshot": "w11-b2-attach-uploading-375-light.png",
+          "route": "attach-uploading-375-light",
+          "severity": "P2",
+          "category": "layout-overflow",
+          "description": "底部「+」按钮与「问我任何经营问题…」输入框并排时，输入框明显偏短（约 60% 宽），加上右侧发送按钮导致视觉重心偏移；且底栏距离 iPhone Home Indicator 安全区仅约 8px，存在被手势条遮挡风险。",
+          "suggestion": "底栏增加底部安全区 padding 至少 24px；将输入框与两侧按钮按 1:6:1 比例重排，发送按钮与「+」按钮等高对齐。"
+        },
+        {
+          "screenshot": "w11-b2-attach-uploading-375-light.png",
+          "route": "attach-uploading-375-light",
+          "severity": "P2",
+          "category": "other",
+          "description": "顶部左侧返回箭头「‹」为系统默认 ‹ 字符，颜色与底色对比尚可但与「酱园琥珀」印章语言无关联，呈浏览器返回按钮默认观感。",
+          "suggestion": "替换为品牌印章风格的「←」线性图标（1.5px 酱色描边）或「回」字形徽标，融入印章语系。"
+        },
+        {
+          "screenshot": "w11-b2-attach-uploading-375-light.png",
+          "route": "attach-uploading-375-light",
+          "severity": "P2",
+          "category": "other",
+          "description": "「数据」徽标使用绿底+白字，与整页酱色+琥珀+暖纸主色完全脱节，类似系统 tag 默认色。",
+          "suggestion": "将「数据」徽标改为酱色描边+酱色字+暖米色底，或琥珀色填充+深棕字，保持三色（酱/琥珀/暖纸）系统内。"
+        }
+      ]
+    },
+    {
+      "screenshot": "w11-b2-image-send-draft-375-light.png",
+      "route": "image-send-draft-375-light",
+      "ok": true,
+      "issues": [
+        {
+          "screenshot": "w11-b2-image-send-draft-375-light.png",
+          "route": "image-send-draft-375-light",
+          "severity": "P0毁容级",
+          "category": "ua-default-style",
+          "description": "底部消息输入框的附件上传按钮「+」和发送按钮（纸飞机图标）使用浏览器原生 button 样式：圆形灰底、系统默认边框/聚焦环，与「酱园琥珀」暖纸+酱色设计语言完全冲突。",
+          "suggestion": "将这两个按钮重做为符合设计语言的扁平圆角按钮，背景使用酱色或琥珀色，去除原生灰底与系统聚焦环。"
+        },
+        {
+          "screenshot": "w11-b2-image-send-draft-375-light.png",
+          "route": "image-send-draft-375-light",
+          "severity": "P0毁容级",
+          "category": "ua-default-style",
+          "description": "快捷指令区的 6 个胶囊按钮（问企业档案/问供应链/语音/拍照/相册/文件）整体外观接近浏览器原生按钮：白底、1px 浅灰描边、轻微系统阴影，未呈现「酱园琥珀」印章/烫蜡质感。",
+          "suggestion": "替换为暖米色底+酱色细描边+琥珀点缀的圆角卡片，使用衬线/印章字体而非系统字体。"
+        },
+        {
+          "screenshot": "w11-b2-image-send-draft-375-light.png",
+          "route": "image-send-draft-375-light",
+          "severity": "P0毁容级",
+          "category": "ua-default-style",
+          "description": "两个「问企业档案」「问供应链」提示胶囊中的圆点（bullet）使用系统默认橙色 bullet marker，与设计语言冲突。",
+          "suggestion": "改用酱色或琥珀色实心圆点（<span> 圆点元素 + 自定义 color），并保持与按钮配色统一。"
+        },
+        {
+          "screenshot": "w11-b2-image-send-draft-375-light.png",
+          "route": "image-send-draft-375-light",
+          "severity": "P1明显",
+          "category": "ua-default-style",
+          "description": "顶部「+」新建会话按钮使用浏览器默认圆角灰底按钮样式，无品牌色。",
+          "suggestion": "重做为酱色填充圆角按钮或琥珀描边圆形图标按钮。"
+        },
+        {
+          "screenshot": "w11-b2-image-send-draft-375-light.png",
+          "route": "image-send-draft-375-light",
+          "severity": "P1明显",
+          "category": "ua-default-style",
+          "description": "附件预览缩略图「vfy-wl0-01-home-375..」的文件关闭按钮（×）为系统默认灰色 × 图标与浅灰底。",
+          "suggestion": "使用酱色描边圆形按钮，× 图标用琥珀色，并按「印章」造型处理。"
+        },
+        {
+          "screenshot": "w11-b2-image-send-draft-375-light.png",
+          "route": "image-send-draft-375-light",
+          "severity": "P1明显",
+          "category": "typography",
+          "description": "「我是企业数据助手」标题使用系统默认无衬线粗体字，未采用设计语言中强调的印章/衬线字体，与顶部「新会话」形成风格断层。",
+          "suggestion": "标题换用衬线/印章体（思源宋体/方正印章体），并使用酱色强化仪式感。"
+        },
+        {
+          "screenshot": "w11-b2-image-send-draft-375-light.png",
+          "route": "image-send-draft-375-light",
+          "severity": "P1明显",
+          "category": "typography",
+          "description": "「数据」徽标下的「企业数据助手」副标题字号偏小且字重过轻，与上方徽标对比失衡。",
+          "suggestion": "提升副标题字重至 500/600，并补充微小琥珀色点状装饰或留白节奏。"
+        },
+        {
+          "screenshot": "w11-b2-image-send-draft-375-light.png",
+          "route": "image-send-draft-375-light",
+          "severity": "P1明显",
+          "category": "inconsistency",
+          "description": "「问企业档案」和「问供应链」在提示胶囊中是带 bullet 的文字条目，但在下方「快捷指令」区又变成了带图标的按钮，同一概念在两处视觉形态完全不同。",
+          "suggestion": "统一为同一种胶囊形态（图标+文字+酱色描边），避免同一功能双形态出现。"
+        },
+        {
+          "screenshot": "w11-b2-image-send-draft-375-light.png",
+          "route": "image-send-draft-375-light",
+          "severity": "P1明显",
+          "category": "contrast",
+          "description": "快捷指令区 6 个按钮的文字（语音/拍照/相册/文件/问企业档案/问供应链）颜色为系统默认深灰，对暖米色底对比度尚可，但图标颜色偏淡，识别度低。",
+          "suggestion": "图标统一用酱色，文字用深棕红（#5A2A1F 一类），提升图标与背景对比。"
+        },
+        {
+          "screenshot": "w11-b2-image-send-draft-375-light.png",
+          "route": "image-send-draft-375-light",
+          "severity": "P2瑕疵",
+          "category": "spacing",
+          "description": "顶部 header 与「我是企业数据助手」主区之间留白过大（约 80px），而快捷指令区到输入框距离过近，节奏失衡。",
+          "suggestion": "收紧 header 与 Hero 区距离，扩展底部输入区上方呼吸空间至 24–32px。"
+        },
+        {
+          "screenshot": "w11-b2-image-send-draft-375-light.png",
+          "route": "image-send-draft-375-light",
+          "severity": "P2瑕疵",
+          "category": "misalign",
+          "description": "「新会话」标题在 header 中未严格水平居中，偏向右侧「+」按钮方向。",
+          "suggestion": "用 flex 居中并让左右返回/新增按钮等宽占位，保证标题精确居中。"
+        },
+        {
+          "screenshot": "w11-b2-image-send-draft-375-light.png",
+          "route": "image-send-draft-375-light",
+          "severity": "P2瑕疵",
+          "category": "other",
+          "description": "「表」字圆形印章装饰元素尺寸偏大、压住标题空间，且印章描边为默认深灰而非酱色烫蜡效果，削弱品牌识别。",
+          "suggestion": "印章缩为 56–64px，描边与底色使用酱色渐变，模仿真实烫蜡印章质感。"
+        }
+      ]
+    },
+    {
+      "screenshot": "w11-b2-image-turn-answered-375-light.png",
+      "route": "image-turn-answered-375-light",
+      "ok": true,
+      "issues": [
+        {
+          "screenshot": "w11-b2-image-turn-answered-375-light.png",
+          "route": "image-turn-answered-375-light",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "快捷指令网格中的「语音」「拍照」「相册」「文件」四个次级按钮，使用了极浅的灰色边框 + 纯文字 + 单色线性图标，呈现接近浏览器/系统默认 outline 按钮观感，与设计语言要求的「酱色印章/琥珀点缀」暖意不一致",
+          "suggestion": "统一为酱色细描边 + 琥珀色图标 + 居中文字；或采用与「问企业档案/问供应链」同款两栏胶囊按钮（带印章感前缀图标），保留语言一致"
+        },
+        {
+          "screenshot": "w11-b2-image-turn-answered-375-light.png",
+          "route": "image-turn-answered-375-light",
+          "severity": "P2",
+          "category": "ua-default-style",
+          "description": "底部附件条（vfy-wl0–01-home-375…）使用系统默认灰底胶囊 + 灰色关闭叉（✕），呈典型移动端浏览器/输入法附件条原生观感，缺少酱色印章或琥珀高光",
+          "suggestion": "替换为酱色描边胶囊，关闭按钮采用琥珀色或酱色实心，圆角与卡片统一"
+        },
+        {
+          "screenshot": "w11-b2-image-turn-answered-375-light.png",
+          "route": "image-turn-answered-375-light",
+          "severity": "P1",
+          "category": "inconsistency",
+          "description": "首屏主操作「问企业档案」「问供应链」为带圆点的胶囊按钮（酱色），而下方快捷指令网格中同名同义操作「问企业档案」「问供应链」却变成带线性图标的矩形卡，形态完全不统一",
+          "suggestion": "在快捷指令网格中也沿用印章式圆点 + 胶囊，或将首屏两个胶囊也升级为带图标的卡片，二选一保持统一"
+        },
+        {
+          "screenshot": "w11-b2-image-turn-answered-375-light.png",
+          "route": "image-turn-answered-375-light",
+          "severity": "P2",
+          "category": "inconsistency",
+          "description": "右上角「+」新建按钮为大圆橙色实心按钮，左下角「+」则为浅灰小圆按钮；同为「新建/唤起」语义入口，视觉权重与色相不一致",
+          "suggestion": "将左下角 + 统一为酱色/琥珀色实心或描边圆按钮，尺寸与右上角呼应"
+        },
+        {
+          "screenshot": "w11-b2-image-turn-answered-375-light.png",
+          "route": "image-turn-answered-375-light",
+          "severity": "P2",
+          "category": "misalign",
+          "description": "底部附件胶囊未与右侧发送按钮（橙圆形✈）在垂直基线上对齐，胶囊整体略偏上、且与左下 + 按钮的中线不齐",
+          "suggestion": "将附件胶囊 + 输入栏 + 发送按钮纳入同一 flex 行，align-items:center，胶囊与发送按钮水平中线重合"
+        },
+        {
+          "screenshot": "w11-b2-image-turn-answered-375-light.png",
+          "route": "image-turn-answered-375-light",
+          "severity": "P2",
+          "category": "spacing",
+          "description": "快捷指令区块上下间距偏紧，标题「快捷指令」与第一行卡片几乎贴边；卡片之间纵向 gap 较横向 gap 小，节奏失衡",
+          "suggestion": "标题与首行卡片加 16px 间距；卡片纵横 gap 统一为 12px"
+        },
+        {
+          "screenshot": "w11-b2-image-turn-answered-375-light.png",
+          "route": "image-turn-answered-375-light",
+          "severity": "P2",
+          "category": "typography",
+          "description": "「问企业档案 / 问供应链 / 语音 / 拍照 / 相册 / 文件」六项按钮文字字号与字重未区分主次，主推两项与次要四项视觉权重几乎相同",
+          "suggestion": "主推项「问企业档案/问供应链」使用酱色 + 16px medium，次要四项使用琥珀灰 + 14px regular 建立层级"
+        },
+        {
+          "screenshot": "w11-b2-image-turn-answered-375-light.png",
+          "route": "image-turn-answered-375-light",
+          "severity": "P2",
+          "category": "contrast",
+          "description": "「语音/拍照/相册/文件」图标与文字使用浅灰（接近 #B8A99A），在暖纸底上对比度偏低，可辨识性弱",
+          "suggestion": "图标与文字提升至酱色 60% 透明度以上（#7A4A3A 区域），保证 WCAG AA"
+        },
+        {
+          "screenshot": "w11-b2-image-turn-answered-375-light.png",
+          "route": "image-turn-answered-375-light",
+          "severity": "P2",
+          "category": "ua-default-style",
+          "description": "用户消息气泡（「看这张截图：四个统计数字分别是什么？只回答数字。」）呈白底圆角+细灰边，未使用酱色描边或琥珀底，接近系统默认聊天气泡观感",
+          "suggestion": "用户气泡采用暖米底 + 酱色细描边，或右侧加一道琥珀色印章边作为身份标识"
+        },
+        {
+          "screenshot": "w11-b2-image-turn-answered-375-light.png",
+          "route": "image-turn-answered-375-light",
+          "severity": "P2",
+          "category": "other",
+          "description": "「新会话 企业数据助手」标题区与底部输入栏颜色饱和度/暖度差异大：顶部偏冷白、底部偏暖纸，整体色调未形成统一暖纸基底",
+          "suggestion": "顶部栏背景统一为 #F7EFE3 暖纸色，状态栏图标调暗棕，与底部输入区形成连续暖色基调"
+        }
+      ]
+    },
+    {
+      "screenshot": "w11-b2-panel-375-light.png",
+      "route": "panel-375-light",
+      "ok": true,
+      "issues": [
+        {
+          "screenshot": "w11-b2-panel-375-light.png",
+          "route": "panel-375-light",
+          "severity": "P1明显",
+          "category": "ua-default-style",
+          "description": "顶部返回箭头「‹」呈浏览器/系统原生 chevron 样式（非品牌化图标），与印章/琥珀设计语言冲突；右上「+」号同样为系统默认加号，圆角、线宽未做品牌化处理。",
+          "suggestion": "替换为自定义矢量 SVG 图标（线宽 1.5–2px，圆角端点），并使用酱色 #8B3A2E 着色，与整体语言一致。"
+        },
+        {
+          "screenshot": "w11-b2-panel-375-light.png",
+          "route": "panel-375-light",
+          "severity": "P1明显",
+          "category": "ua-default-style",
+          "description": "底部输入框「问我任何经营问题…」为典型 iOS/浏览器 textarea 原生外观：圆角极小（约 4px）、浅灰底、默认字体、聚焦无琥珀色环，与卡片化暖纸语言割裂。",
+          "suggestion": "重写为胶囊/圆角卡片形态（圆角 18–22px），底色改为暖米白 #FAF4EA，聚焦态描 1.5px 琥珀色 #C9892F。"
+        },
+        {
+          "screenshot": "w11-b2-panel-375-light.png",
+          "route": "panel-375-light",
+          "severity": "P1明显",
+          "category": "ua-default-style",
+          "description": "底部右下「发送」按钮为系统圆形默认按钮，浅灰底+系统蓝/灰图标，无品牌色，无琥珀强调；与「快捷指令」区胶囊按钮风格不一致。",
+          "suggestion": "统一为琥珀填充圆形按钮（#C9892F 底+白色纸纹图标），或与「问企业档案」快捷按钮同体系。"
+        },
+        {
+          "screenshot": "w11-b2-panel-375-light.png",
+          "route": "panel-375-light",
+          "severity": "P1明显",
+          "category": "inconsistency",
+          "description": "「问企业档案」「问供应链」两个胶囊按钮（中部）与「快捷指令」区六个同语义按钮，圆角、描边粗细、图标风格、底色处理不统一：中部为细描边胶囊，快捷区为卡片化浅色按钮，重复控件两种形态。",
+          "suggestion": "统一为同一组件：暖纸底 + 1px 酱色描边（淡酱 30% 透明）+ 琥珀色左侧图标 + 圆角 12px。"
+        },
+        {
+          "screenshot": "w11-b2-panel-375-light.png",
+          "route": "panel-375-light",
+          "severity": "P2瑕疵",
+          "category": "inconsistency",
+          "description": "「问企业档案」在中部和「快捷指令」区出现两次且形态不同（胶囊 vs 卡片），功能重复造成用户认知负担。",
+          "suggestion": "保留「快捷指令」区作为入口，删除中部重复胶囊，或中部改为「推荐问法」示例标签。"
+        },
+        {
+          "screenshot": "w11-b2-panel-375-light.png",
+          "route": "panel-375-light",
+          "severity": "P1明显",
+          "category": "ua-default-style",
+          "description": "「数据」胶囊标签（顶部）使用系统默认绿色徽章 + 默认字号，与暖纸+酱色语言冲突；底部「+」按钮亦为系统默认灰圆按钮。",
+          "suggestion": "「数据」徽章改为酱色描边暖底胶囊；左下「+」改为琥珀描边圆按钮或保留为系统风格但着色与品牌一致。"
+        },
+        {
+          "screenshot": "w11-b2-panel-375-light.png",
+          "route": "panel-375-light",
+          "severity": "P1明显",
+          "category": "ua-default-style",
+          "description": "快捷指令区图标（铅笔📝、柱状图📊、麦克风🎙、相机📷、相册🖼、文件📄）疑似为 Emoji 字符渲染，非品牌化线性图标，线宽/粗细/圆角与「酱园琥珀」印章式语言不一致。",
+          "suggestion": "全量替换为统一线性 SVG 图标（1.5px 描边，琥珀色 #C9892F），保持视觉节奏一致。"
+        },
+        {
+          "screenshot": "w11-b2-panel-375-light.png",
+          "route": "panel-375-light",
+          "severity": "P2瑕疵",
+          "category": "typography",
+          "description": "中部三条说明文字（问企业档案…、统计建议…、变更记录…）行高偏紧，与「我是企业数据助手」标题（28px 粗体）之间缺乏视觉呼吸；列表项字号与正文一致未做层级区分。",
+          "suggestion": "说明区容器增加 16–20px 上下内边距；列表项可放大 1px 或使用 14/15 暖灰，与标题形成节奏。"
+        },
+        {
+          "screenshot": "w11-b2-panel-375-light.png",
+          "route": "panel-375-light",
+          "severity": "P2瑕疵",
+          "category": "misalign",
+          "description": "中部说明区三条文字前的「·」项目符号为酱色但基线与首字未严格对齐（视觉下沉 1–2px），影响左侧竖向节奏。",
+          "suggestion": "调整 list-style-position 或使用 flex 自定义圆点，确保与文字基线齐平。"
+        },
+        {
+          "screenshot": "w11-b2-panel-375-light.png",
+          "route": "panel-375-light",
+          "severity": "P2瑕疵",
+          "category": "spacing",
+          "description": "「我是企业数据助手」标题与上方「表」印章圆形之间留白过大（约 80px），而印章与顶部导航区留白偏小，垂直节奏失衡。",
+          "suggestion": "压缩印章上方空白至 48–56px，或在标题区上下各加 24px 等距留白。"
+        },
+        {
+          "screenshot": "w11-b2-panel-375-light.png",
+          "route": "panel-375-light",
+          "severity": "P2瑕疵",
+          "category": "layout-overflow",
+          "description": "底部输入区「+」按钮、输入框、发送按钮三者在 375px 窄屏下间距较紧，发送按钮贴右侧安全区边缘，未预留 16px 安全边距。",
+          "suggestion": "外层容器增加 padding-right: 16px（已在但视觉不足），或缩小发送按钮尺寸。"
+        },
+        {
+          "screenshot": "w11-b2-panel-375-light.png",
+          "route": "panel-375-light",
+          "severity": "P2瑕疵",
+          "category": "contrast",
+          "description": "「语音」「相册」「文件」三个快捷指令图标+文字为浅灰（#B8AEA0 估计），在暖米底上对比度偏低，长辈用户或弱光环境辨识困难。",
+          "suggestion": "图标与文字提至 #6B5A4A 以上对比度（WCAG AA 4.5:1），保持暖灰但加深饱和度。"
+        },
+        {
+          "screenshot": "w11-b2-panel-375-light.png",
+          "route": "panel-375-light",
+          "severity": "P2瑕疵",
+          "category": "ua-default-style",
+          "description": "页面无自定义滚动条样式（虽然内容未溢出但应预防），默认 WebKit 滚动条为蓝灰，与暖纸语言冲突。",
+          "suggestion": "全局 ::-webkit-scrollbar 设置为 6px 宽、暖米色轨道、透明 thumb，或在移动端隐藏滚动条以保持沉浸。"
+        },
+        {
+          "screenshot": "w11-b2-panel-375-light.png",
+          "route": "panel-375-light",
+          "severity": "P2瑕疵",
+          "category": "other",
+          "description": "「新会话」「企业数据助手」标题区域与下方「表」印章主视觉之间缺少品牌分隔/装饰（如细酱色横线或印章落款），视觉锚点单一。",
+          "suggestion": "在标题下方加 1px 酱色细线或小型琥珀点缀，强化「酱园」印章式版面感。"
+        }
+      ]
+    },
+    {
+      "screenshot": "w11-b2-panel-attach-dark-375.png",
+      "route": "panel-attach-dark-375",
+      "ok": true,
+      "issues": [
+        {
+          "screenshot": "w11-b2-panel-attach-dark-375.png",
+          "route": "panel-attach-dark-375",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "顶部「<」返回箭头为细线、极细灰黑色矢量箭头，呈典型 iOS/SF 系统默认图标观感，未替换为印章/篆刻风暖色笔触，与「酱园琥珀」设计语言冲突。",
+          "suggestion": "替换为暖纸底色上的酱色或琥珀色回旋箭头，或印章形返回符号，避免系统图标直接外露。"
+        },
+        {
+          "screenshot": "w11-b2-panel-attach-dark-375.png",
+          "route": "panel-attach-dark-375",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "右上「+」新建按钮为浅米色圆形（接近 #F4E6D5），内含极细灰黑线性「+」号，呈典型 iOS Safari/系统 plus 按钮默认态，缺乏品牌色与印章感。",
+          "suggestion": "填充酱色或琥珀色实心圆形，「+」改为印章风粗壮白色或琥珀描线，与顶部头像徽标呼应。"
+        },
+        {
+          "screenshot": "w11-b2-panel-attach-dark-375.png",
+          "route": "panel-attach-dark-375",
+          "severity": "P0",
+          "category": "ua-default-style",
+          "description": "中下「vfy-w10-01-home-375-...」文件附件胶囊出现原生浏览器/系统 chip 观感：浅米白底、直角圆角混用、左侧文档缩略图、右侧灰色「×」关闭按钮，为典型 iOS Safari 文件附件控件残留，与暗色暖纸语言严重冲突。",
+          "suggestion": "改用自绘酱色边框/琥珀点缀的胶囊，左侧文件图标改用印章/食字图标，关闭按钮改用与底色对比的酱色「×」并加暖色 hover 区。"
+        },
+        {
+          "screenshot": "w11-b2-panel-attach-dark-375.png",
+          "route": "panel-attach-dark-375",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "「我是企业数据助手」三张快捷指令卡片（问企业档案 / 问供应链 / 语音 / 拍照 / 相册 / 文件）为纯白底+极浅灰描边+灰黑线性图标，整体观感回退至 Material/微信白卡默认风，「酱园琥珀」语言的暖纸底与琥珀/酱色印章元素完全缺失。",
+          "suggestion": "卡片底色改为 #FFF7EC 暖纸色，边框 1px 酱色 12% 透明度；图标改用酱色实心/印章风，标题用酱色加粗，描述字色降为暖棕灰；圆角统一 16–20rpx，并加入印章角饰或琥珀色高光。"
+        },
+        {
+          "screenshot": "w11-b2-panel-attach-dark-375.png",
+          "route": "panel-attach-dark-375",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "「问企业档案」「问供应链」两个 CTA 胶囊为白底+浅灰描边+酱色实心小圆点，呈 iOS 按钮默认态，未使用酱色主按钮的填充或琥珀描金观感。",
+          "suggestion": "改为主按钮：酱色填充底+暖白文字，或琥珀底+酱色文字+印章红圆点，圆角统一 999rpx。"
+        },
+        {
+          "screenshot": "w11-b2-panel-attach-dark-375.png",
+          "route": "panel-attach-dark-375",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "顶部「数据」圆形徽标为白色实心圆+深灰「数据」二字，圆心阴影与细描边是 iOS App 图标/系统徽章默认观感，无印章、琥珀、酱色或暖纸底融合。",
+          "suggestion": "徽标改为酱色底白字圆形 + 琥珀色细环描边，或暖纸底印章式「食」字。"
+        },
+        {
+          "screenshot": "w11-b2-panel-attach-dark-375.png",
+          "route": "panel-attach-dark-375",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "底部输入区左侧「+」加号按钮、右侧「↗」发送箭头按钮呈浅米色小圆+极细灰黑线性图标，对比度低且为系统默认 line icon，与上方「+」风格重复外露。",
+          "suggestion": "左侧「+」改为酱色描边圆 + 琥珀色「+」；右侧发送按钮改用酱色实心 + 暖白「↗」，并加大触控热区到 44×44。"
+        },
+        {
+          "screenshot": "w11-b2-panel-attach-dark-375.png",
+          "route": "panel-attach-dark-375",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "输入框「问我任何经营问题...」占位符与边框为浅米色胶囊，呈 iOS Safari 默认 search/pill 控件外观，未融入暗色暖纸语言。",
+          "suggestion": "输入框底色改为 #2A211B 类深酱色（暗色模式下），边框 1px 琥珀 20% 透明，占位符文字使用 #8A6B5A 暖棕灰，聚焦时改为琥珀色发光。"
+        },
+        {
+          "screenshot": "w11-b2-panel-attach-dark-375.png",
+          "route": "panel-attach-dark-375",
+          "severity": "P1",
+          "category": "contrast",
+          "description": "暗色模式下「快速指令」标题、卡片描述文字、底部「vfy-w10...」附件文件名、关闭「×」整体偏浅灰且与暗色暖纸底色对比度偏低（接近 #B5A89B 文字 on 暗底），在低光环境易糊。",
+          "suggestion": "主文字提到 #F3E7D6，次要文字不低于 #9C8472 暖棕灰，并做 WCAG AA 自查（≥4.5:1）。"
+        },
+        {
+          "screenshot": "w11-b2-panel-attach-dark-375.png",
+          "route": "panel-attach-dark-375",
+          "severity": "P1",
+          "category": "contrast",
+          "description": "中间「问企业档案…问供应链…语音…拍照…相册…文件」所有文字与图标线宽均极浅灰（接近 #C2B6A8 on 暗暖纸底），图标辨识度低，触及「浅字浅底」禁区。",
+          "suggestion": "图标与文字统一改用 #6E554A 暖深棕，标题加粗至 500/600，字号提升 1–2pt。"
+        },
+        {
+          "screenshot": "w11-b2-panel-attach-dark-375.png",
+          "route": "panel-attach-dark-375",
+          "severity": "P2",
+          "category": "misalign",
+          "description": "中部两枚 CTA「问企业档案 / 问供应链」胶囊水平居中，但与小标题正文基线未对齐网格；左胶囊内部小圆点垂直偏上，与右胶囊略不一致。",
+          "suggestion": "将两个胶囊放入 Flex 居中并锁定 8px 基线网格，圆点使用同一 SVG 容器保证像素对齐。"
+        },
+        {
+          "screenshot": "w11-b2-panel-attach-dark-375.png",
+          "route": "panel-attach-dark-375",
+          "severity": "P2",
+          "category": "misalign",
+          "description": "快捷指令 6 张卡片呈 2 列 3 行网格，但每张卡片高度不统一（语音/相册占位与图标宽度不均），造成底部「文件」卡与左侧「语音」「相册」卡底基线错位 4–6px。",
+          "suggestion": "统一卡片 height: 96rpx，内容垂直居中，固定 2 列 16px 网格。"
+        },
+        {
+          "screenshot": "w11-b2-panel-attach-dark-375.png",
+          "route": "panel-attach-dark-375",
+          "severity": "P2",
+          "category": "typography",
+          "description": "「我是企业数据助手」主标题字号显著大于三行要点列表，但要点列表项之间行高（约 28px）偏紧，长句「问企业档案、走访纪要、市场与供应链数据」出现视觉拥挤；中点「、」为全角中文标点，与句末「。」粗细一致，缺乏层级。",
+          "suggestion": "要点行高提到 36–40rpx，关键名词「企业档案/走访纪要/市场与供应链」用酱色 + 琥珀高亮区分。"
+        },
+        {
+          "screenshot": "w11-b2-panel-attach-dark-375.png",
+          "route": "panel-attach-dark-375",
+          "severity": "P2",
+          "category": "inconsistency",
+          "description": "页面存在三套圆角：顶部「+」/「<」为 999rpx 圆形，「我是企业数据助手」外层无圆角，CTA 胶囊为 999rpx，快捷指令卡片接近直角（4–6rpx），底部输入与附件胶囊为 999rpx，缺乏统一节奏。",
+          "suggestion": "制定「酱园琥珀」圆角阶梯：印章 4rpx / 卡片 16rpx / 胶囊 999rpx / 头像 999rpx，并全面覆盖。"
+        },
+        {
+          "screenshot": "w11-b2-panel-attach-dark-375.png",
+          "route": "panel-attach-dark-375",
+          "severity": "P2",
+          "category": "inconsistency",
+          "description": "主色使用混乱：标题「我是企业数据助手」为深酱色，但要点项目符「•」为亮橙/琥珀色（接近品牌辅色），两枚 CTA 小圆点同样为亮橙，导致酱色与琥珀色边界不清，层级不明。",
+          "suggestion": "明确：标题/主按钮 = 酱色 #6B2A1F；强调/点睛 = 琥珀 #D89A4A；正文 = 暖棕灰。点睛仅用于高亮 1–2 处。"
+        },
+        {
+          "screenshot": "w11-b2-panel-attach-dark-375.png",
+          "route": "panel-attach-dark-375",
+          "severity": "P1",
+          "category": "other",
+          "description": "页面整体为暗色模式，但大块「快捷指令」6 张卡片仍使用纯白 #FFFFFF 实心底，与暗色暖纸底产生「亮块硬切」，破坏「暖纸+酱色」暗色一致性，属典型暗色轨缺陷。",
+          "suggestion": "暗色下快捷卡片改为 #1F1814 暗酱色 + 1px 琥珀 10% 边框，文字相应调亮，符合暗色模式语义层级。"
+        },
+        {
+          "screenshot": "w11-b2-panel-attach-dark-375.png",
+          "route": "panel-attach-dark-375",
+          "severity": "P2",
+          "category": "other",
+          "description": "页面「数据」徽标外、CTA、快捷指令卡、附件胶囊等多个元素均使用「细描边 + 极浅米白底」组合，形成多次「纸片漂浮」感，缺乏印章应有的红泥/朱砂封泥质感。",
+          "suggestion": "在关键节点（标题下、CTA 旁、底部输入框）加入印章形红泥元素（如 24×24 的圆形「食」字压章），强化品牌。"
+        }
+      ]
+    },
+    {
+      "screenshot": "w11-b2-pdf-turn-answered-375-light.png",
+      "route": "pdf-turn-answered-375-light",
+      "ok": true,
+      "issues": [
+        {
+          "screenshot": "w11-b2-pdf-turn-answered-375-light.png",
+          "route": "pdf-turn-answered-375-light",
+          "severity": "P0毁容级",
+          "category": "ua-default-style",
+          "description": "聊天输入框左侧的「+」按钮（位于「库存是多少箱？只回答数字。」输入框左下角）呈系统默认原生外观：浅灰圆形背景、无圆角统一、无品牌色，明显的 iOS/Android 原生 FAB 默认色，与酱园琥珀设计语言强烈冲突。",
+          "suggestion": "用品牌酱色（深棕红）填充或描边，圆角与卡片保持一致，hover/active 给琥珀色反馈，并加入印章或暖纸纹理质感。"
+        },
+        {
+          "screenshot": "w11-b2-pdf-turn-answered-375-light.png",
+          "route": "pdf-turn-answered-375-light",
+          "severity": "P0毁容级",
+          "category": "ua-default-style",
+          "description": "聊天输入框右下角的发送按钮（纸飞机图标所在的圆形按钮）使用系统灰白底+蓝灰色图标，呈现 iOS 原生 toolbar 默认观感，无品牌主色，与设计语言严重冲突。",
+          "suggestion": "改为酱色实心圆形+琥珀色纸飞机图标，或纸底+酱色描边，激活态用琥珀色高光，遵循印章/琥珀点缀风格。"
+        },
+        {
+          "screenshot": "w11-b2-pdf-turn-answered-375-light.png",
+          "route": "pdf-turn-answered-375-light",
+          "severity": "P0毁容级",
+          "category": "ua-default-style",
+          "description": "顶部导航栏右上角的「+」新建会话按钮（位于「新会话 企业数据助手」右侧）使用浅米色圆形底+酱色加号，圆角、尺寸与整页暖纸+酱色基调接近，但色彩饱和度偏低、更接近系统浅灰FAB，且无任何品牌纹理或印章细节，呈现明显的浏览器/系统默认按钮观感。",
+          "suggestion": "强化为酱色实心或加深描边，加入印章风格边框、暖纸纹理或微阴影，与快捷指令卡片视觉层级一致。"
+        },
+        {
+          "screenshot": "w11-b2-pdf-turn-answered-375-light.png",
+          "route": "pdf-turn-answered-375-light",
+          "severity": "P0毁容级",
+          "category": "ua-default-style",
+          "description": "快捷指令区「语音」「拍照」「相册」「文件」四个按钮使用了系统级 Material/iOS 图标（麦克风、相机、相册、文件）配系统默认灰字、浅描边，图标线条为系统蓝灰，呈现原生控件观感，与酱色品牌严重冲突。",
+          "suggestion": "图标改用统一酱色单线/双线风格，字色提为酱色或深棕，按钮底色统一为暖纸色+酱色细描边，圆角与上方「问企业档案/问供应链」保持一致。"
+        },
+        {
+          "screenshot": "w11-b2-pdf-turn-answered-375-light.png",
+          "route": "pdf-turn-answered-375-light",
+          "severity": "P0毁容级",
+          "category": "ua-default-style",
+          "description": "文件附件 chip「w1-sku.pdf」使用了浏览器/PDF 默认文件图标（带折角的橙色 PDF 缩略图样式），属系统/Acrobat 默认 thumbnail，并非品牌自定义图标，且与左侧「vfY-w10-01-home-375...」缩略图风格不一致。",
+          "suggestion": "替换为品牌统一文件缩略图（暖纸色底+酱色印章角标或「PDF」酱色标签），并对所有文件 chip 保持一致的圆角、内边距、配色。"
+        },
+        {
+          "screenshot": "w11-b2-pdf-turn-answered-375-light.png",
+          "route": "pdf-turn-answered-375-light",
+          "severity": "P1明显",
+          "category": "ua-default-style",
+          "description": "聊天输入框「库存是多少箱？只回答数字。」使用系统默认输入框外观：纯白底+1px 浅灰描边+直角、灰色 placeholder，与下方「快捷指令」暖纸卡片+圆角形成强烈对比，明显是浏览器/原生 textarea 默认样式。",
+          "suggestion": "改为暖纸色（#F5E9D5 之类）底，2px 圆角，酱色细描边，placeholder 改用酱色低透明度，文字统一品牌深棕。"
+        },
+        {
+          "screenshot": "w11-b2-pdf-turn-answered-375-light.png",
+          "route": "pdf-turn-answered-375-light",
+          "severity": "P1明显",
+          "category": "ua-default-style",
+          "description": "输入框内 placeholder「库存是多少箱？只回答数字。」字体为系统默认中文字（PingFang/Noto Sans CJK 默认灰），未跟随品牌字体节奏，且颜色过浅，对比度不足。",
+          "suggestion": "指定品牌中文字体栈（思源宋体/方正书宋等暖纸风格），颜色提至酱色 40% 透明度以上，并保持与用户输入文字同字号同字重。"
+        },
+        {
+          "screenshot": "w11-b2-pdf-turn-answered-375-light.png",
+          "route": "pdf-turn-answered-375-light",
+          "severity": "P1明显",
+          "category": "inconsistency",
+          "description": "按钮圆角严重不统一：「问企业档案」「问供应链」快捷入口为胶囊形全圆角；快捷指令区六个功能按钮为 12px 左右中等圆角；顶部「+」和输入框旁「+」为正圆；发送按钮为正圆；输入框几乎直角。同一页内至少 4 套圆角规范。",
+          "suggestion": "统一为 3 档：胶囊形（主操作强调）、中等圆角 12-16px（卡片/次级按钮）、正圆（仅用于图标 FAB），并将所有 input 也归入 12-16px 圆角档。"
+        },
+        {
+          "screenshot": "w11-b2-pdf-turn-answered-375-light.png",
+          "route": "pdf-turn-answered-375-light",
+          "severity": "P1明显",
+          "category": "inconsistency",
+          "description": "底部「+」按钮与发送按钮尺寸明显大于顶部「+」按钮，但视觉权重与功能层级关系不匹配；底部「+」为正圆浅灰、发送为正圆浅灰，两者在暖纸底上几乎融为一体，像系统 toolbar 默认布局。",
+          "suggestion": "明确层级：发送为主操作，酱色实心；+为次要辅助，描边或低饱和暖色填充；顶部 + 与底部 + 尺寸/样式统一。"
+        },
+        {
+          "screenshot": "w11-b2-pdf-turn-answered-375-light.png",
+          "route": "pdf-turn-answered-375-light",
+          "severity": "P1明显",
+          "category": "ua-default-style",
+          "description": "文件附件 chip「vfY-w10-01-home-375...」左侧的缩略图疑似为系统/浏览器默认文件预览缩略图（带浏览器 UI 残影的极小截图），与酱园琥珀暖纸语言完全不在同一视觉体系，属 WebView/浏览器原生渲染残留。",
+          "suggestion": "对文件预览缩略图应用品牌遮罩或替换为统一暖纸色文件占位卡（带酱色文件类型角标）。"
+        },
+        {
+          "screenshot": "w11-b2-pdf-turn-answered-375-light.png",
+          "route": "pdf-turn-answered-375-light",
+          "severity": "P1明显",
+          "category": "ua-default-style",
+          "description": "chip 关闭按钮「×」使用系统默认浅灰小叉号，无品牌色，与 chip 暖纸底之间的对比和形态都不协调。",
+          "suggestion": "× 改为酱色 60% 透明度，hover 至 100%，尺寸与 chip 高度比例统一。"
+        },
+        {
+          "screenshot": "w11-b2-pdf-turn-answered-375-light.png",
+          "route": "pdf-turn-answered-375-light",
+          "severity": "P1明显",
+          "category": "contrast",
+          "description": "中央欢迎区「我是企业数据助手」标题为深棕红，三条说明文字为浅褐，placeholder 区域与底部快捷指令卡片之间对比度梯度合理；但底部「语音/拍照/相册/文件」图标与文字对比度明显不足，浅灰图标+浅灰字在暖纸底上几乎看不清。",
+          "suggestion": "图标与文字统一提至酱色 70% 以上，对比度至少满足 WCAG AA 4.5:1。"
+        },
+        {
+          "screenshot": "w11-b2-pdf-turn-answered-375-light.png",
+          "route": "pdf-turn-answered-375-light",
+          "severity": "P1明显",
+          "category": "misalign",
+          "description": "底部「+」按钮、输入框、发送按钮三者基线未对齐：输入框垂直居中线略高于「+」按钮中心，发送按钮又略低于输入框中心，三件套视觉重心不齐。",
+          "suggestion": "三者统一以同一水平基线居中，固定高度（如输入框 44pt，圆形按钮 36pt 居中）。"
+        },
+        {
+          "screenshot": "w11-b2-pdf-turn-answered-375-light.png",
+          "route": "pdf-turn-answered-375-light",
+          "severity": "P2瑕疵",
+          "category": "ua-default-style",
+          "description": "顶部导航栏返回箭头「<」使用系统默认浅灰，无品牌色，与右侧「+」新会话按钮配色不统一。",
+          "suggestion": "返回箭头改用酱色主色，与「+」形成一致品牌色调。"
+        },
+        {
+          "screenshot": "w11-b2-pdf-turn-answered-375-light.png",
+          "route": "pdf-turn-answered-375-light",
+          "severity": "P2瑕疵",
+          "category": "ua-default-style",
+          "description": "顶部「数据」徽标使用绿色圆点+白字，绿色与「酱园琥珀」暖色调（深棕红+琥珀）属于互补色冲突，绿色出现没有品牌依据。",
+          "suggestion": "将「数据」徽标底色改为酱色或琥珀色，白字保留。"
+        },
+        {
+          "screenshot": "w11-b2-pdf-turn-answered-375-light.png",
+          "route": "pdf-turn-answered-375-light",
+          "severity": "P2瑕疵",
+          "category": "inconsistency",
+          "description": "「问企业档案」「问供应链」在欢迎区中部和快捷指令区各出现一次，样式完全相同（胶囊+小圆点+酱色文字），但点击后预期反馈未在视觉上区分，造成重复入口冗余。",
+          "suggestion": "欢迎区为引导入口（虚线/描边态），快捷指令区为常用入口（实色态），做视觉分级避免重复感。"
+        },
+        {
+          "screenshot": "w11-b2-pdf-turn-answered-375-light.png",
+          "route": "pdf-turn-answered-375-light",
+          "severity": "P2瑕疵",
+          "category": "typography",
+          "description": "中央「我是企业数据助手」标题与下方三条说明文字行高偏紧，1.4 倍以下，且说明文字字号偏小（约 13-14px），与品牌「印章」大标题相比节奏断裂。",
+          "suggestion": "说明文字提至 14-15px，行高 1.6-1.8，标题与正文之间增加 8px 视觉缓冲。"
+        },
+        {
+          "screenshot": "w11-b2-pdf-turn-answered-375-light.png",
+          "route": "pdf-turn-answered-375-light",
+          "severity": "P2瑕疵",
+          "category": "layout-overflow",
+          "description": "快捷指令区「问企业档案」「问供应链」两个胶囊按钮与下方「语音/拍照/相册/文件」四宫格之间没有明显分组标签或分隔，六个按钮混排在同一卡片中，认知层级模糊。",
+          "suggestion": "在两行之间加一条暖纸色细分隔线或小标题「常用」「工具」，或拆为两个独立卡片。"
+        },
+        {
+          "screenshot": "w11-b2-pdf-turn-answered-375-light.png",
+          "route": "pdf-turn-answered-375-light",
+          "severity": "P2瑕疵",
+          "category": "spacing",
+          "description": "文件附件两个 chip（vfY-w10-01...、w1-sku.pdf）水平间距过近，约 4-6px，且 chip 自身内边距偏小，长文件名「vfY-w10-01-home-375...」明显被截断省略，无 tooltip 提示。",
+          "suggestion": "chip 之间间距增至 8-12px，内边距水平至少 10px，文件名截断处加 longpress tooltip 显示完整名。"
+        }
+      ]
+    },
+    {
+      "screenshot": "w11-b2-voice-error-375-light.png",
+      "route": "voice-error-375-light",
+      "ok": true,
+      "issues": [
+        {
+          "screenshot": "w11-b2-voice-error-375-light.png",
+          "route": "voice-error-375-light",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "底部语音输入条「正在聆听，点击结束」左侧的状态指示点呈默认橙色/系统色圆点，与品牌酱色（深棕红）不符；输入框整体为细黑边浅底圆角胶囊，未使用琥珀/酱色描边或暖纸底，属于浏览器/系统默认 input + 按钮的拼接感。",
+          "suggestion": "将指示点替换为酱色 #8B2A1A 或琥珀 #C68A3A，激活态输入条改用暖纸底（#F5EDE0）+ 酱色 1px 描边 + 拾音波形用琥珀色，避免「默认橙点 + 黑色细描边」的系统控件观感。"
+        },
+        {
+          "screenshot": "w11-b2-voice-error-375-light.png",
+          "route": "voice-error-375-light",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "「数据」导航徽标使用浏览器/系统默认绿色实心圆 + 白色文字，呈现典型未主题化的 OS 标签观感，破坏印章/暖纸语言。",
+          "suggestion": "将数据徽标改为酱色描边圆 + 暖纸底 + 酱色字（与「表」印章同体系），或用琥珀圆 + 酱色字，去除默认绿。"
+        },
+        {
+          "screenshot": "w11-b2-voice-error-375-light.png",
+          "route": "voice-error-375-light",
+          "severity": "P2",
+          "category": "ua-default-style",
+          "description": "顶部右上角「+」按钮为浅橙圆形，纯图标无文字，呈现移动端系统 FAB 默认观感，未沿用印章方/圆语言。",
+          "suggestion": "将「+」改为酱色描边方印形态或带 1px 描边的暖色圆，hover/active 态用琥珀填充，与下方快捷指令形成同族组件。"
+        },
+        {
+          "screenshot": "w11-b2-voice-error-375-light.png",
+          "route": "voice-error-375-light",
+          "severity": "P2",
+          "category": "ua-default-style",
+          "description": "底部「语音」「拍照」「相册」「文件」四宫格图标为单色灰描线 + 浅灰字，线条粗细、风格与上方「问企业档案」「问供应链」双色（酱+琥珀）胶囊不一致，存在两套图标体系。",
+          "suggestion": "将四宫格图标统一为酱色描线（线性 1.5px、圆头端点），底色用米白/暖纸，描边与上方胶囊保持一致；图标色不要再使用系统灰。"
+        },
+        {
+          "screenshot": "w11-b2-voice-error-375-light.png",
+          "route": "voice-error-375-light",
+          "severity": "P1",
+          "category": "contrast",
+          "description": "「正在聆听，点击结束」文字为暖纸色（接近 #E8DCC4）在浅米底上，对比度偏低，长时间阅读吃力；左侧状态点与文字整体偏淡。",
+          "suggestion": "将文字提到酱色 #6B1F15 或深棕 #3D2418，状态点改用饱和酱色，确保 WCAG AA（≥4.5:1）。"
+        },
+        {
+          "screenshot": "w11-b2-voice-error-375-light.png",
+          "route": "voice-error-375-light",
+          "severity": "P2",
+          "category": "inconsistency",
+          "description": "快捷指令区存在两种按钮形态：上行「问企业档案」「问供应链」为白底酱描胶囊且带图标；下行「语音/拍照/相册/文件」为白底细灰边胶囊且只有图标。圆角、描边粗细、底色逻辑不统一。",
+          "suggestion": "统一为同一种卡片规范：圆角 12px、米白底、1px 酱色描边；上行带图标+文字，下行可保留纯图标但描边必须与上行同色同粗。"
+        },
+        {
+          "screenshot": "w11-b2-voice-error-375-light.png",
+          "route": "voice-error-375-light",
+          "severity": "P2",
+          "category": "inconsistency",
+          "description": "「问企业档案」「问供应链」在主区为暖色描边胶囊（琥珀/酱色），在快捷指令区又为白底细描胶囊，同名功能视觉差异明显。",
+          "suggestion": "主区与快捷指令区使用同一组 token：底色、描边、圆角、字号统一，区分仅在尺寸与是否带图标。"
+        },
+        {
+          "screenshot": "w11-b2-voice-error-375-light.png",
+          "route": "voice-error-375-light",
+          "severity": "P2",
+          "category": "typography",
+          "description": "「我是企业数据助手」为粗体大标题，正文三条说明项字号偏小、字重偏轻，与印章「表」视觉重量不平衡；三条列表项行高过紧。",
+          "suggestion": "正文项 line-height 提到 1.7–1.8，字号 14–15px，颜色用深棕而非纯黑；标题与正文维持 3:1.5:1 节奏。"
+        },
+        {
+          "screenshot": "w11-b2-voice-error-375-light.png",
+          "route": "voice-error-375-light",
+          "severity": "P2",
+          "category": "misalign",
+          "description": "三条说明项的小圆点项目符号与文字基线略错位（点偏上），且三个点大小/颜色不完全一致（受字符渲染影响），列表项左侧缩进不等。",
+          "suggestion": "改用统一酱色方点或酱色「·」，与文字基线对齐；统一 list-style 或使用自绘 bullet，确保三项视觉一致。"
+        },
+        {
+          "screenshot": "w11-b2-voice-error-375-light.png",
+          "route": "voice-error-375-light",
+          "severity": "P2",
+          "category": "layout-overflow",
+          "description": "375px 宽度下，顶部 header「< 数据 新会话 企业数据助手 +」元素间距偏紧，「企业数据助手」副标题在窄屏下与「新会话」主标题视觉抢戏，且右下「+」与左下「<」对称失衡。",
+          "suggestion": "副标题字号降至 11px、字重 regular，或仅在新会话卡片内显示；将「+」与「<」使用同一直径同一样式，形成对称锚点。"
+        },
+        {
+          "screenshot": "w11-b2-voice-error-375-light.png",
+          "route": "voice-error-375-light",
+          "severity": "P2",
+          "category": "spacing",
+          "description": "主区三大功能简介到下方两个胶囊「问企业档案 / 问供应链」间距偏紧，而胶囊到快捷指令卡片之间的留白又过大，节奏失衡。",
+          "suggestion": "将功能简介区与胶囊间距设为 16px，胶囊区与快捷指令卡片间距设为 24px，使用 8 的倍数网格统一。"
+        },
+        {
+          "screenshot": "w11-b2-voice-error-375-light.png",
+          "route": "voice-error-375-light",
+          "severity": "P2",
+          "category": "other",
+          "description": "印章「表」为虚线圆环 + 暖底 + 酱字，呈现良好；但整个页面仅此一枚印章，与底部「正在聆听」语音条缺少品牌呼应，印章语言仅作装饰未成为系统化组件。",
+          "suggestion": "为按钮、徽标、激活态建立「印章 token」：方印或圆印 + 虚线/实线 + 酱色描边，让印章成为组件库基础形态而非单点装饰。"
+        }
+      ]
+    },
+    {
+      "screenshot": "w11-b2-voice-listening-375-light.png",
+      "route": "voice-listening-375-light",
+      "ok": true,
+      "issues": [
+        {
+          "screenshot": "w11-b2-voice-listening-375-light.png",
+          "route": "voice-listening-375-light",
+          "severity": "P0毁容级",
+          "category": "ua-default-style",
+          "description": "底部「正在聆听，点击结束」胶囊按钮与左侧 + 按钮、右侧发送按钮使用浏览器/系统默认的浅米色背景与细灰描边（疑似原生 <button> 样式），未应用酱园琥珀主色（深棕红填充 + 琥珀点 / 印章红环），与卡片、印章、快捷指令的暖纸+酱色语言完全脱节，且无圆角统一处理，呈 Windows/浏览器原生观感。",
+          "suggestion": "自定义底部 input-bar：取消原生 button 默认外观，统一使用酱色 #8B2A1A 实心填充或琥珀点缀 + 16px 圆角胶囊，+ 与发送按钮复用同一 token，与快捷指令卡片视觉同源。"
+        },
+        {
+          "screenshot": "w11-b2-voice-listening-375-light.png",
+          "route": "voice-listening-375-light",
+          "severity": "P0毁容级",
+          "category": "ua-default-style",
+          "description": "快捷指令区 6 个按钮（「问企业档案」「问供应链」「语音」「拍照」「相册」「文件」）均使用浏览器默认 outline 浅米色背景 + 细灰描边 + 系统字重，无圆角卡片底、无印章色高亮，且「语音/拍照/相册/文件」四个未选中态与「问企业档案/问供应链」两个选中态仅以图标+文字粗细区分，缺乏酱色品牌色锚点，呈现典型系统按钮 fallback。",
+          "suggestion": "将快捷指令改用品牌卡片 token：默认态=暖纸白底+酱色细描边+酱色图标/文字；激活态=酱色实心+琥珀文字/反白；统一 12-16px 圆角，去除所有 native button 残留。"
+        },
+        {
+          "screenshot": "w11-b2-voice-listening-375-light.png",
+          "route": "voice-listening-375-light",
+          "severity": "P0毁容级",
+          "category": "ua-default-style",
+          "description": "顶部「<」返回箭头与右上「+」新会话按钮呈纯黑/系统灰色线性图标，无暖色描边、无印章红衬底，与「数据」徽章（酱色实心）和「正在聆听」胶囊的暖色语言割裂，像未走查的浏览器默认图标。",
+          "suggestion": "将 topbar 图标统一为酱色 #8B2A1A 1.5px 线性或回形针/印章风，去掉黑色 fallback。"
+        },
+        {
+          "screenshot": "w11-b2-voice-listening-375-light.png",
+          "route": "voice-listening-375-light",
+          "severity": "P1明显",
+          "category": "ua-default-style",
+          "description": "底部「正在聆听，点击结束」使用浏览器原生 ::focus / ::active 灰色聚焦环（点按时可见浅灰外环），而非设计语言定义的酱色或琥珀聚焦指示。",
+          "suggestion": "重置 button:focus-visible { outline: 2px solid 琥珀; outline-offset: 2px; }，并去除默认 user-agent 外环。"
+        },
+        {
+          "screenshot": "w11-b2-voice-listening-375-light.png",
+          "route": "voice-listening-375-light",
+          "severity": "P1明显",
+          "category": "ua-default-style",
+          "description": "主标题「我是企业数据助手」与三条说明文字使用系统默认无衬线（疑似 -apple-system / PingFang 退化）且字重偏轻（regular），与「酱园琥珀」要求的印章/宋楷/暖意字风不一致；副文本「问企业档案、走访纪要…」行高过紧，视觉如 markdown 默认渲染。",
+          "suggestion": "主标题改用印章体/思源宋体 Heavy 22-24px，行高 1.6；副说明改用暖棕 #6B4226 14px regular，行高 1.8。"
+        },
+        {
+          "screenshot": "w11-b2-voice-listening-375-light.png",
+          "route": "voice-listening-375-light",
+          "severity": "P1明显",
+          "category": "inconsistency",
+          "description": "「问企业档案」与「问供应链」两个胶囊按钮（图2区，圆点+文字）与底部「正在聆听，点击结束」胶囊虽同为胶囊形态，但前者是酱色细描边+琥珀圆点，后者是浅米色背景+深字+酱点，描边/底色/字号完全不一致；快捷指令区又是另一种描边卡片。同一交互语义出现三种胶囊。",
+          "suggestion": "定义单一 Button-Capsule token：描边 1px 酱色、底色暖纸白、圆点琥珀、16px 圆角、14px 文字；底部录音条复用此 token，仅把文字换成录音文案。"
+        },
+        {
+          "screenshot": "w11-b2-voice-listening-375-light.png",
+          "route": "voice-listening-375-light",
+          "severity": "P1明显",
+          "category": "ua-default-style",
+          "description": "印章圆环「表」字 logo 使用浏览器默认细黑线 1px 圆环 + 极细虚线刻度，刻度线呈系统 1px 灰，整体像 SVG 默认 stroke 而非印章刻线语言，缺乏酱色双环+琥珀刻度的品牌锚定。",
+          "suggestion": "外环 2px 酱色实线 + 内环 1px 酱色 + 12 道琥珀短刻度（gap 对称），「表」字用印章红 #B8331F 衬底白字或反白。"
+        },
+        {
+          "screenshot": "w11-b2-voice-listening-375-light.png",
+          "route": "voice-listening-375-light",
+          "severity": "P1明显",
+          "category": "contrast",
+          "description": "「正在聆听，点击结束」文字为深棕黑配浅米底，对比度约 4.0:1，AA 边缘；快捷指令区「语音/拍照/相册/文件」未激活态为浅灰文字（#9A8A78 估），落在暖纸底上对比不足 3:1，弱光环境难辨识。",
+          "suggestion": "主文字提到 #4A2A1C（深酱），次级图标文字提到 #6B4226（暖棕），保证 ≥4.5:1。"
+        },
+        {
+          "screenshot": "w11-b2-voice-listening-375-light.png",
+          "route": "voice-listening-375-light",
+          "severity": "P2瑕疵",
+          "category": "spacing",
+          "description": "「快捷指令」小标题与下方 2x3 网格之间无分割/留白过渡，网格内 6 个按钮垂直间距 8px、水平间距 8px，但按钮内左右 padding 仅 12px，「相册」「文件」文字几乎贴住左图标，呼吸感不足。",
+          "suggestion": "按钮内 padding 改 14-16px 水平，卡片之间间距 10px；「快捷指令」标题下加 12px 留白或 1px 暖纸分割线。"
+        },
+        {
+          "screenshot": "w11-b2-voice-listening-375-light.png",
+          "route": "voice-listening-375-light",
+          "severity": "P2瑕疵",
+          "category": "misalign",
+          "description": "顶部 status bar 时间「9:41」位于左上安全区，但下方「<」返回与「数据」徽章+「新会话」标题的水平基线不一致：「<」垂直居中于 44px topbar，而徽章+标题整体下移约 2px，目测徽章底边与「新会话」基线不齐。",
+          "suggestion": "将 topbar 改为 flex items-center 垂直居中徽章+标题块，确保「<」与文字块中心线对齐。"
+        },
+        {
+          "screenshot": "w11-b2-voice-listening-375-light.png",
+          "route": "voice-listening-375-light",
+          "severity": "P2瑕疵",
+          "category": "typography",
+          "description": "三条说明项（问企业档案…/统计提议…/变更记录…）每行起首的酱色小方块（■）高度与首字「问」上沿平齐但下沿超出文字 baseline，视觉上像 list-style 默认 marker，未做印章/方朱字体优化。",
+          "suggestion": "将方块替换为 6x6 酱色实心印章点，vertical-align middle，或用伪元素 + 圆角 1px 与文字精确对齐。"
+        },
+        {
+          "screenshot": "w11-b2-voice-listening-375-light.png",
+          "route": "voice-listening-375-light",
+          "severity": "P2瑕疵",
+          "category": "layout-overflow",
+          "description": "375px 宽度下，「正在聆听，点击结束」胶囊与右侧发送按钮几乎贴边（右侧仅余 ~6px），未考虑 iPhone 安全区；底部 input-bar 整体高度 56px 也未设 safe-area-inset-bottom padding，X 系列机型会被 Home Indicator 遮挡。",
+          "suggestion": "底部 bar 加 padding-bottom: env(safe-area-inset-bottom)，并将胶囊水平 margin 至少 16px。"
+        },
+        {
+          "screenshot": "w11-b2-voice-listening-375-light.png",
+          "route": "voice-listening-375-light",
+          "severity": "P2瑕疵",
+          "category": "ua-default-style",
+          "description": "整页无自定义滚动条样式，亮色模式下若内容溢出将出现系统默认灰白滚动条，与暖纸底冲突；当前虽未出现滚动，但未做 ::-webkit-scrollbar 美化预留。",
+          "suggestion": "定义全局滚动条：宽 4px、轨道透明、thumb 酱色 40% 透明、圆角 2px，提前收敛原生观感。"
+        },
+        {
+          "screenshot": "w11-b2-voice-listening-375-light.png",
+          "route": "voice-listening-375-light",
+          "severity": "P2瑕疵",
+          "category": "other",
+          "description": "「数据」徽章为深酱色实心圆角方块，但右上「+」新会话按钮是同色系小圆按钮，徽章与按钮同色无层次，徽章内的「数据」白字在 32x32 徽章中显得拥挤（字距过紧）。",
+          "suggestion": "徽章改 36x36 或 40x40，加 1px 琥珀内描边；「数据」字间 letter-spacing 0.5px，与「企业数据助手」副标题形成主次。"
+        }
+      ]
+    },
+    {
+      "screenshot": "w11-b2-x20-tool-tag-375-light.png",
+      "route": "x20-tool-tag-375-light",
+      "ok": true,
+      "issues": []
+    },
+    {
+      "screenshot": "w11-b3-chat-fresh-375-light.png",
+      "route": "chat-fresh-375-light",
+      "ok": true,
+      "issues": [
+        {
+          "screenshot": "w11-b3-chat-fresh-375-light.png",
+          "route": "chat-fresh-375-light",
+          "severity": "P0毁容级",
+          "category": "ua-default-style",
+          "description": "顶部右上角「+」按钮为浏览器/系统原生样式：浅米色圆形背景、浅灰边框、灰黑色细「+」字，与「酱园琥珀」设计语言（深棕红 #6B3410 系主色、琥珀点缀）严重冲突，呈现明显的 iOS/Android 系统默认观感残留。",
+          "suggestion": "替换为品牌主色填充的圆形按钮，使用酱色实底或琥珀描边，内部「+」图标用 1.5–2px 描边粗度的暖白/琥珀色，与顶部「表单」印章徽标形成呼应。"
+        },
+        {
+          "screenshot": "w11-b3-chat-fresh-375-light.png",
+          "route": "chat-fresh-375-light",
+          "severity": "P0毁容级",
+          "category": "ua-default-style",
+          "description": "顶部左上角返回箭头为深灰近黑色（#2C2C2C 系）线性 chevron，使用默认系统色与系统箭头线条粗细，未替换为品牌暖色（酱色/琥珀），在暖纸底上呈现冷色「回退到浏览器默认导航」观感。",
+          "suggestion": "改为酱色 #6B3410 或琥珀 #B87333 的实心/线性箭头，线宽 2px，必要时配合圆形暖色触摸热区。"
+        },
+        {
+          "screenshot": "w11-b3-chat-fresh-375-light.png",
+          "route": "chat-fresh-375-light",
+          "severity": "P0毁容级",
+          "category": "ua-default-style",
+          "description": "底部聊天输入框「问我任何经营问题…」为浏览器/系统原生 input 默认外观：直角矩形、极浅灰边框（接近 #E5E5E5）、系统字体、placeholder 浅灰，无圆角无底色无聚焦环，与中部所有圆角胶囊按钮（圆角 ≥ 999px 的「登记一条采购单」「查一下库存」等）形态完全不一致。",
+          "suggestion": "将输入框改造为圆角胶囊/卡片：底色暖米 #FFF8EC、边框琥珀描边 1px、圆角 22–24px、内部文本使用品牌衬线/手书体，placeholder 改为酱色 40% 透明度。"
+        },
+        {
+          "screenshot": "w11-b3-chat-fresh-375-light.png",
+          "route": "chat-fresh-375-light",
+          "severity": "P0毁容级",
+          "category": "ua-default-style",
+          "description": "底部右下角发送按钮为浅米色圆背景 + 浅灰细线「纸飞机」图标，线条粗细与颜色明显是系统/字体图标默认回退（如 SF Symbols 的 thin 变体或 Material outline 默认色），与暖纸+酱色语言冲突。",
+          "suggestion": "填充酱色实底圆，内部纸飞机图标用暖白 #FFF8EC，线宽加粗至 2px，或改用琥珀渐变背景 + 白色实心图标。"
+        },
+        {
+          "screenshot": "w11-b3-chat-fresh-375-light.png",
+          "route": "chat-fresh-375-light",
+          "severity": "P0毁容级",
+          "category": "ua-default-style",
+          "description": "底部「+」附件/加号按钮为浅灰边框、浅色「+」字、圆形——典型浏览器或未样式化的 Web button 默认态，与品牌完全脱节。",
+          "suggestion": "统一为酱色描边圆按钮，「+」字 1.5–2px 粗，悬停/按下时填充琥珀色。"
+        },
+        {
+          "screenshot": "w11-b3-chat-fresh-375-light.png",
+          "route": "chat-fresh-375-light",
+          "severity": "P1明显",
+          "category": "ua-default-style",
+          "description": "顶部标题区「表单」徽标为深棕红实心圆配白字，但「表单」二字使用系统默认无衬线/等线体（笔画均匀、无衬线装饰），未做品牌字体适配，与下方主标题「我是智能填表助手」的手书/楷体形成「系统字 vs 品牌字」撕裂。",
+          "suggestion": "徽标内文字统一替换为品牌手书体或带衬线的印章体，必要时加 0.5px 字间距强化「印章」感。"
+        },
+        {
+          "screenshot": "w11-b3-chat-fresh-375-light.png",
+          "route": "chat-fresh-375-light",
+          "severity": "P1明显",
+          "category": "ua-default-style",
+          "description": "中部 6 个建议气泡按钮（「登记一条采购单」「查一下库存」「哪些料要补货」「给供应商建档」「问经营」「整理项目风险」）左前缀点为系统默认小圆点（纯黑或 #333 实心圆，2–3px），未替换为琥珀色实心圆或酱色印章小点，呈现典型 ul/li 默认 marker 残留观感。",
+          "suggestion": "前缀点改为琥珀 #B87333 实心圆 4–5px，或替换为更小的酱色方印/圆印图案，与整体印章语言一致。"
+        },
+        {
+          "screenshot": "w11-b3-chat-fresh-375-light.png",
+          "route": "chat-fresh-375-light",
+          "severity": "P1明显",
+          "category": "inconsistency",
+          "description": "主体列表的 5 个要点使用「■」方形项目符号（深酱色），与下方 6 个建议气泡按钮使用的「●」圆形项目符号形态/尺寸/颜色规则不统一；上方方形大、下方圆点小，缺少统一的「章印式」标记语言。",
+          "suggestion": "全站统一项目符号为同一规格的酱色或琥珀色印章元素（如统一小方印 6×6px 或统一小圆 4px），并在颜色与尺寸上建立单一规范。"
+        },
+        {
+          "screenshot": "w11-b3-chat-fresh-375-light.png",
+          "route": "chat-fresh-375-light",
+          "severity": "P1明显",
+          "category": "ua-default-style",
+          "description": "中部 5 段说明文字「说一句话就能登记…」「表单类型我来判断…」「日期、编号、合计…」「风险、汇总、对比类…」「查库存、看补货预警…」为浅灰近黑文字（接近 #555–#666）配系统默认无衬线字体，行高偏紧，与「我是智能填表助手」主标题的暖棕+手书体形成字体家族分裂。",
+          "suggestion": "正文使用品牌衬线/手书体的「轻量」字重（300–400），颜色提升至 #4A2A1A（深酱）或 #6B3410 主酱色，行高 1.7–1.8，避免与主标题字体家族错位。"
+        },
+        {
+          "screenshot": "w11-b3-chat-fresh-375-light.png",
+          "route": "chat-fresh-375-light",
+          "severity": "P1明显",
+          "category": "contrast",
+          "description": "顶部「智能填表助手」副标题颜色偏浅（接近 #8A7A6A 的暖灰），与暖米底色对比度仅约 2.4:1，低于 WCAG AA 4.5:1 要求，可读性不足，尤其在强光环境下几乎不可辨。",
+          "suggestion": "副标题色加深至 #6B3410 主酱色或 #8B5A2B 琥珀深色，确保对比度 ≥ 4.5:1。"
+        },
+        {
+          "screenshot": "w11-b3-chat-fresh-375-light.png",
+          "route": "chat-fresh-375-light",
+          "severity": "P1明显",
+          "category": "contrast",
+          "description": "底部输入框 placeholder「问我任何经营问题…」为浅灰（接近 #B8B0A8），与暖米底色 #FFF8EC 对比度仅 1.8:1，严重不达可读性标准。",
+          "suggestion": "placeholder 使用酱色 35–45% 透明度（#6B3410 at 40%），并适当增加字重至 500。"
+        },
+        {
+          "screenshot": "w11-b3-chat-fresh-375-light.png",
+          "route": "chat-fresh-375-light",
+          "severity": "P1明显",
+          "category": "ua-default-style",
+          "description": "中部圆形「表」印章徽标虽然采用了酱色双线圆 + 手书「表」字，但外圈虚线（dashed）粗细与间隔疑似浏览器 CSS border: 1px dashed 默认值，未做手绘抖动或印章裂痕效果，呈现「CSS 默认虚线」观感。",
+          "suggestion": "用 SVG 路径绘制手绘不规则虚线圆（带轻微抖动与断裂），或在 dashed 基础上叠加 noise 纹理，强化「印章」质感。"
+        },
+        {
+          "screenshot": "w11-b3-chat-fresh-375-light.png",
+          "route": "chat-fresh-375-light",
+          "severity": "P2瑕疵",
+          "category": "spacing",
+          "description": "顶部 header 区（左箭头 / 徽标+标题 / + 按钮）高度与安全区处理未明确：左箭头与「+」按钮垂直居中，但「表单」徽标与「新会话」标题、副标题「智能填表助手」三者的垂直间距约为 6/4/2px，节奏偏紧，徽标像被挤压。",
+          "suggestion": "将 header 内的元素垂直间距统一为 4–6px 等距，徽标与主标题间距 ≥ 6px，整体 header 高度从约 56px 提升至 60–64px，预留 iOS 状态栏安全区。"
+        },
+        {
+          "screenshot": "w11-b3-chat-fresh-375-light.png",
+          "route": "chat-fresh-375-light",
+          "severity": "P2瑕疵",
+          "category": "spacing",
+          "description": "中部 5 段要点列表的项目符号「■」与首字之间缩进过小（仅约 6–8px），与正文换行后第二行起的悬挂缩进不匹配，视觉上不像列表更像「半角空格分隔」。",
+          "suggestion": "将列表项左缩进统一为 16–20px，并确保第二行起悬挂对齐于首字（text-indent: -20px; padding-left: 20px）。"
+        },
+        {
+          "screenshot": "w11-b3-chat-fresh-375-light.png",
+          "route": "chat-fresh-375-light",
+          "severity": "P2瑕疵",
+          "category": "inconsistency",
+          "description": "中部 6 个建议气泡按钮两列布局，但「登记一条采购单」/「哪些料要补货」/「问经营」在左列、「查一下库存」/「给供应商建档」/「整理项目风险」在右列，左右两列宽度未严格等分，左列文字更长导致「登记一条采购单」与「查一下库存」垂直方向未严格基线对齐（中文字符宽度差异造成）。",
+          "suggestion": "将两列改为等宽 flex 布局（flex: 1 1 0），并对长文案做单行省略 + tooltip，避免列宽差异。"
+        },
+        {
+          "screenshot": "w11-b3-chat-fresh-375-light.png",
+          "route": "chat-fresh-375-light",
+          "severity": "P2瑕疵",
+          "category": "typography",
+          "description": "主标题「我是智能填表助手」字重偏粗（接近 700），但中段长说明文字字重为常规（400），整体对比强烈到「标题像 banner、正文像脚注」，字号层级仅 1 级（28px / 14px），缺少中间 18–20px 的次级标题层级。",
+          "suggestion": "主标题字重降至 600（避免过粗的「黑体」观感），并在每段说明前增加 16px 酱色小标题，建立 28/18/14 三级节奏。"
+        },
+        {
+          "screenshot": "w11-b3-chat-fresh-375-light.png",
+          "route": "chat-fresh-375-light",
+          "severity": "P2瑕疵",
+          "category": "ua-default-style",
+          "description": "中部圆形「表」印章徽标直径约 96px，但内嵌「表」字使用与正文相同的无衬线字体，仅靠居中与放大模拟「印章字」，缺少印章特有的「字压边框/破边/留白」处理。",
+          "suggestion": "为「表」字使用品牌印章体（带轻微破损/笔触粗细变化），字号放大至占圆 60–65%，并可加 0.5px 字距让字与边框之间留呼吸。"
+        },
+        {
+          "screenshot": "w11-b3-chat-fresh-375-light.png",
+          "route": "chat-fresh-375-light",
+          "severity": "P2瑕疵",
+          "category": "other",
+          "description": "页面整体为单一暖米底色（#FFF8EC 或近似），缺少「酱园琥珀」语言中应有的纹理（如米黄宣纸纤维、琥珀光晕渐变、印章印泥晕染），导致大段空白处显得「干净到像空白占位符」，品牌氛围流失。",
+          "suggestion": "在 body 背景叠加 4–6% 透明度的纸质 noise 纹理（SVG turbulence 滤镜生成），并在「表」印章徽标周围加 120px 半径的琥珀径向渐变光晕，强化「酱园」氛围。"
+        }
+      ]
+    },
+    {
+      "screenshot": "w11-b3-chats-375-dark.png",
+      "route": "chats-375-dark",
+      "ok": true,
+      "issues": [
+        {
+          "screenshot": "w11-b3-chats-375-dark.png",
+          "route": "chats-375-dark",
+          "severity": "P0毁容级",
+          "category": "ua-default-style",
+          "description": "搜索框「搜索会话/同事」为浏览器原生 input 默认样式，圆角、聚焦环、内边距与「酱园琥珀」圆角卡片+琥珀色描边语言完全冲突，呈现系统灰底深字观感。",
+          "suggestion": "替换为自定义输入控件：暖纸深底（#2a1f1a 一类）+ 1px 琥珀色（#c98a3a）1px 描边 + 8px 圆角 + 搜索图标改用线性 SVG 替换系统放大镜。"
+        },
+        {
+          "screenshot": "w11-b3-chats-375-dark.png",
+          "route": "chats-375-dark",
+          "severity": "P0毁容级",
+          "category": "ua-default-style",
+          "description": "顶部 Tab「全部 / AI 同事 / 待审核」使用胶囊形圆角但描边、内边距与色阶过渡像浏览器默认 segmented control，「全部」选中态橙红 + 文字无层级反白生硬。",
+          "suggestion": "改为印章/朱印语言：未选态用 1px 酱色（#5a2a1f）描边 + 透明底；选中态改为「酱色实底 + 反白 + 左侧朱红 4px 色条」，呼应印章元素。"
+        },
+        {
+          "screenshot": "w11-b3-chats-375-dark.png",
+          "route": "chats-375-dark",
+          "severity": "P1明显",
+          "category": "inconsistency",
+          "description": "会话列表图标圆形头像为纯色（红=表单、绿=数据），但顶部「+」按钮为实心橙圆 + 黑十字，几何语言不统一（印章/印章 vs FAB），且「+」是系统按钮默认观感。",
+          "suggestion": "+按钮改为朱红印章方印（22px 圆角方块 + 白色「＋」字），与左侧两类头像印章体系一致。"
+        },
+        {
+          "screenshot": "w11-b3-chats-375-dark.png",
+          "route": "chats-375-dark",
+          "severity": "P1明显",
+          "category": "inconsistency",
+          "description": "列表项右侧「表单」徽标为橙底白字直角矩形（疑似系统 tag/badge 残留），与圆角卡片+印章语言冲突，且不同行时间文案「刚刚 / 00:27」右对齐但徽标位置漂浮。",
+          "suggestion": "徽标改为 4px 圆角 + 酱色描边 + 琥珀色文字（或反之），与卡片同语言；时间与徽标垂直基线对齐，统一右栏栅格。"
+        },
+        {
+          "screenshot": "w11-b3-chats-375-dark.png",
+          "route": "chats-375-dark",
+          "severity": "P1明显",
+          "category": "ua-default-style",
+          "description": "未读小红点为浏览器默认通知红点（#ff3b30 系统红实心圆），与「琥珀点缀」语言冲突，且与左侧「+」橙色、徽标橙色形成多色硬块。",
+          "suggestion": "统一为朱红/印章红（#b03020）+ 1px 暖纸描边外发光，或琥珀橙（#c98a3a），保持调性统一。"
+        },
+        {
+          "screenshot": "w11-b3-chats-375-dark.png",
+          "route": "chats-375-dark",
+          "severity": "P1明显",
+          "category": "layout-overflow",
+          "description": "第 2 条「请用查询业务记录工具（nb_list」标题被截断，括号内文字与下条「请调用「查询业务记录」工具」语义重复，疑似控件宽度计算错误导致 ellipsis 过早截断。",
+          "suggestion": "检查 title 容器宽度，优先压缩右侧时间+徽标宽度，标题最多 2 行省略；并合并语义相同的会话条目。"
+        },
+        {
+          "screenshot": "w11-b3-chats-375-dark.png",
+          "route": "chats-375-dark",
+          "severity": "P1明显",
+          "category": "contrast",
+          "description": "副标题行（如「单据登记与任务执行」「企业数据问答与统计建议」）文字为低饱和暖灰，在 #1a1410 底上对比度接近 3:1，弱视/小屏下难以阅读。",
+          "suggestion": "副标题改为 #a89486 或 #b8a89a，对比度提升至 4.5:1 以上；主标题保持 #f0e6dc。"
+        },
+        {
+          "screenshot": "w11-b3-chats-375-dark.png",
+          "route": "chats-375-dark",
+          "severity": "P2瑕疵",
+          "category": "ua-default-style",
+          "description": "顶部「<」返回箭头为浏览器默认箭头字符，颜色为白色硬块，无圆角无印章处理。",
+          "suggestion": "改为 24px 线性 SVG 箭头 + 2px 描边色 #d4a574，或改为朱红印章返回图标。"
+        },
+        {
+          "screenshot": "w11-b3-chats-375-dark.png",
+          "route": "chats-375-dark",
+          "severity": "P2瑕疵",
+          "category": "typography",
+          "description": "标题「消息」为系统默认无衬线粗体，与「酱园琥珀」印章/毛笔语言不符；列表项标题字号偏大（17-18px），在 375 屏上挤占行高。",
+          "suggestion": "导航标题改用衬线/印章体（思源宋体或站酷小薇体），列表标题降至 15-16px，行高 1.4。"
+        },
+        {
+          "screenshot": "w11-b3-chats-375-dark.png",
+          "route": "chats-375-dark",
+          "severity": "P2瑕疵",
+          "category": "spacing",
+          "description": "列表项之间无分割线，仅靠背景色区分，4 条「表单」+ 4 条「数据」分组语义模糊；卡片内左头像与文字标题/副标题的左对齐基线偏移约 2px。",
+          "suggestion": "增加 1px #2a1f1a 暖色细分隔线；头像与文字标题严格同基线对齐，padding 统一为 14px 16px。"
+        },
+        {
+          "screenshot": "w11-b3-chats-375-dark.png",
+          "route": "chats-375-dark",
+          "severity": "P2瑕疵",
+          "category": "contrast",
+          "description": "底部说明文字「NocoBase 业务系统 · AI 员工入...」为低对比暖灰，在深棕底上几乎不可读，且「与 PC 工作台共享会话 / 业务表」出现断行错乱。",
+          "suggestion": "提升对比度至 #8a7a6e 以上；缩短文案或使用 2 行截断，避免「业务表」单独换行。"
+        },
+        {
+          "screenshot": "w11-b3-chats-375-dark.png",
+          "route": "chats-375-dark",
+          "severity": "P2瑕疵",
+          "category": "inconsistency",
+          "description": "左侧「表单」红色头像（#a52a2a）与「数据」绿色头像（#2d6a4f）色相跳跃，且与全站酱红+琥珀双色系统冲突，引入第三色绿色。",
+          "suggestion": "统一为酱色印章（深浅两档酱红）区分类型，或「数据」改为琥珀橙，与「表单」酱红形成同色系层次。"
+        },
+        {
+          "screenshot": "w11-b3-chats-375-dark.png",
+          "route": "chats-375-dark",
+          "severity": "P2瑕疵",
+          "category": "ua-default-style",
+          "description": "列表右侧未读小红点为系统通知样式小圆点，无发光无描边，在暗色琥珀底上像 UI bug 残留。",
+          "suggestion": "增加 1px 暖纸底描边 + 微光晕，呼应印章朱泥质感。"
+        }
+      ]
+    },
+    {
+      "screenshot": "w11-b3-chats-375-light.png",
+      "route": "chats-375-light",
+      "ok": true,
+      "issues": [
+        {
+          "screenshot": "w11-b3-chats-375-light.png",
+          "route": "chats-375-light",
+          "severity": "P0毁容级",
+          "category": "ua-default-style",
+          "description": "顶栏「+」新建按钮使用橙红色实心圆形容器，色相偏纯橙红（接近 #D04A1F 区间），未在「酱园琥珀」体系中找到对应色标，更接近系统 iOS 原生 '+' 按钮观感，与深棕红/酱色主色存在色相脱节。",
+          "suggestion": "将「+」按钮底色替换为酱色主色（深棕红系）或琥珀色（点缀用），并明确是否带阴影/描边以区分导航按钮与功能触发器。"
+        },
+        {
+          "screenshot": "w11-b3-chats-375-light.png",
+          "route": "chats-375-light",
+          "severity": "P1明显",
+          "category": "ua-default-style",
+          "description": "顶栏「<」返回箭头使用系统默认深灰色，笔画粗细与回退系统图标无异，未替换为「酱园琥珀」体系的自绘箭头图标，缺乏印章/墨笔风格。",
+          "suggestion": "用 SVG 自绘一枚墨笔/印章质感的返回箭头，色值取酱色主色并保证点击区 ≥44px。"
+        },
+        {
+          "screenshot": "w11-b3-chats-375-light.png",
+          "route": "chats-375-light",
+          "severity": "P1明显",
+          "category": "ua-default-style",
+          "description": "搜索框「搜索会话/同事」左侧的放大镜图标为浅灰线框默认外观，文本为浅灰（与暖纸底对比度约 2.8:1），placeholder 颜色过淡，整体像是浏览器/系统未样式化 input。",
+          "suggestion": "input 容器应用暖纸底卡片样式（圆角 12、底色 #FBF5EA），placeholder 提升至 #8A7A6A 以上的暖灰，图标用酱色描边并填实。"
+        },
+        {
+          "screenshot": "w11-b3-chats-375-light.png",
+          "route": "chats-375-light",
+          "severity": "P1明显",
+          "category": "inconsistency",
+          "description": "三个分类胶囊「全部 / AI 同事 / 待审核」中，激活态「全部」使用纯橙红（#C84A1E 系），与列表项头像「表单」使用的暗红棕（#8B2E1F 系）色相不同，存在两套红色；琥珀点缀在亮色模式下未出现，色板断层。",
+          "suggestion": "统一激活态与头像主色为酱色 (#8B2E1F 或更暗一档)，琥珀色 (#D4933A) 仅用于数字徽标、强调点等点缀位，避免与酱色争夺主色身份。"
+        },
+        {
+          "screenshot": "w11-b3-chats-375-light.png",
+          "route": "chats-375-light",
+          "severity": "P1明显",
+          "category": "inconsistency",
+          "description": "三个列表项右侧时间「00:27 / 00:25 / 00:24」上方紧贴一个红色实心圆点，红点直径小、纯红 (#E03E2E 系)，与体系内其他徽标（时间标签、表单标签）形态完全不一致，像未读红点是直接引用了系统未读消息样式。",
+          "suggestion": "未读点改为琥珀色 (#D4933A) 或 6px 印章圆，附带细微外发光/纸质纹理，与「酱园琥珀」语汇一致；如需保留「未读」语义可加入小角标而非纯红点。"
+        },
+        {
+          "screenshot": "w11-b3-chats-375-light.png",
+          "route": "chats-375-light",
+          "severity": "P1明显",
+          "category": "ua-default-style",
+          "description": "每个列表项右下角的「表单」标签为圆角矩形描边 + 酱色文字，但边框线宽 1px、颜色偏淡，文字字号 11px，整体像是浏览器默认 badge，没有印章/纸标签的厚度与质感。",
+          "suggestion": "将「表单/数据/营销」分类标签升级为纸标签：底色 #FBF5EA、边框 0.5px 酱色虚线或印泥红边、字重 600、圆角 4，内边距 1px×6px，传递「贴在表单上的小签」观感。"
+        },
+        {
+          "screenshot": "w11-b3-chats-375-light.png",
+          "route": "chats-375-light",
+          "severity": "P2瑕疵",
+          "category": "inconsistency",
+          "description": "列表项头像出现三类色：暗红「表单」、墨绿「数据」、未完整显示的「营销」。其中「数据」头像的绿（#2F5C3A 系）与「酱园琥珀」暖色系无关联，墨绿属冷色入侵，破坏整体暖纸调。",
+          "suggestion": "将头像背景统一为酱色/深棕/琥珀/米白四种暖色梯度，或采用同色相不同明度（深酱、中酱、浅酱、琥珀）来区分业务类型，避免冷色直接出现。"
+        },
+        {
+          "screenshot": "w11-b3-chats-375-light.png",
+          "route": "chats-375-light",
+          "severity": "P2瑕疵",
+          "category": "spacing",
+          "description": "搜索框与分类胶囊之间有约 8px 间距，但胶囊与第一条列表项之间有约 24px 空白，分区层级断点不一致；同时列表项之间无明显分隔线，仅靠 12px 内边距区分，密集 7 条同类项时容易黏成一片。",
+          "suggestion": "在分类胶囊与列表之间加一条 0.5px 暖灰 (#E8DDD0) 分隔线；列表项之间改为 1px 浅色描边卡片 (圆角 10, 底 #FFFFFF) 并上下间距 6px，强化节奏。"
+        },
+        {
+          "screenshot": "w11-b3-chats-375-light.png",
+          "route": "chats-375-light",
+          "severity": "P2瑕疵",
+          "category": "contrast",
+          "description": "列表项副标题（如「采购订单 采购订单 按 id 倒序取 3 条...」「近 10 条采购单已列出，其中 4 单待...」）颜色为浅暖灰，对比度约 3.2:1，在 375px 小屏、长文本截断后辨识吃力。",
+          "suggestion": "副标题色由 #B8A99A 提升至 #7A6A5A（暖深棕），主标题保持 #2B1A12 酱色；可读性提升且不破坏层级。"
+        },
+        {
+          "screenshot": "w11-b3-chats-375-light.png",
+          "route": "chats-375-light",
+          "severity": "P2瑕疵",
+          "category": "typography",
+          "description": "标题「请用查询业务记录工具（nb_list」在 375px 视口下被截断，括号内英文 token 占用过多空间，截断后语义断裂；时间戳「00:27」与标题在同一基线右对齐，挤压了标题长度。",
+          "suggestion": "1) 标题改用 1 行省略并隐藏英文括号（移至副标题或详情）；2) 时间戳下移至副标题行尾或作为右上小标签，避免与标题抢宽度。"
+        },
+        {
+          "screenshot": "w11-b3-chats-375-light.png",
+          "route": "chats-375-light",
+          "severity": "P2瑕疵",
+          "category": "layout-overflow",
+          "description": "「请用查询业务记录工具（nb_list」标题溢出至下一行（视觉上为单行截断），但「00:27」右侧的小红点被推到接近屏幕右边缘，与右侧 16px 安全区仅剩 4px，几乎贴边。",
+          "suggestion": "在时间与红点右侧统一增加 12–16px 内边距容器，或将红点放进时间文字左侧的胶囊内，避免右贴边。"
+        },
+        {
+          "screenshot": "w11-b3-chats-375-light.png",
+          "route": "chats-375-light",
+          "severity": "P2瑕疵",
+          "category": "spacing",
+          "description": "底部信息条「NocoBase 业务系统 · AI 员工与 PC 工作台共享会话 / 业务表」字号约 10px、行高 1.3、灰度偏淡，文本被强制折行（「口」单独成行、出现「/ 业务表」断行），阅读体验破碎。",
+          "suggestion": "底部状态条升级为固定小卡片：底色 #FBF5EA、单行省略、字号 11px、字色 #8A7A6A；超长文案用 middle ellipsis 截断，避免断在中文字符中间。"
+        },
+        {
+          "screenshot": "w11-b3-chats-375-light.png",
+          "route": "chats-375-light",
+          "severity": "P2瑕疵",
+          "category": "inconsistency",
+          "description": "「新会话」五条连续列表项的副标题完全相同「企业数据问答与统计建议」，且无新消息标识（除红点外没有任何差异点），与「表单」三项有实际摘要不同——同类项没有视觉差异化策略，用户难以判断是否已读/是否新内容。",
+          "suggestion": "为「新会话」项增加占位提示（如「点击开始第一次数据问答 →」）或用首条带琥珀色「NEW」印章徽标区分，其余用 50% 透明度弱化。"
+        },
+        {
+          "screenshot": "w11-b3-chats-375-light.png",
+          "route": "chats-375-light",
+          "severity": "P2瑕疵",
+          "category": "other",
+          "description": "整体页面缺少印章/纸质纹理装饰，与「酱园琥珀」语汇承诺的「印章元素」不匹配；当前是纯平涂 + 圆角 + 阴影的通用移动端观感，缺少灵魂。",
+          "suggestion": "在顶栏右侧或分类胶囊激活态下添加一枚 0.05 透明度的酱色印章水印（中文篆体「食」「链」「通」任选），或将「+」按钮本身做成方形印泥质感以承载设计语言。"
+        },
+        {
+          "screenshot": "w11-b3-chats-375-light.png",
+          "route": "chats-375-light",
+          "severity": "P2瑕疵",
+          "category": "ua-default-style",
+          "description": "顶栏「消息」标题使用系统默认中文黑体（PingFang/Source Han）回退感明显，字重 500、字距 0，无任何印刻/手写特征，与酱园主题应有的毛笔或宋刻感背离。",
+          "suggestion": "标题用「思源宋体」或自带的暖纸宋体，标题字重 600 并加 0.02em 字距，可叠加极轻的纸质噪点滤镜强化主题。"
+        }
+      ]
+    },
+    {
+      "screenshot": "w11-b3-home-375-dark.png",
+      "route": "home-375-dark",
+      "ok": true,
+      "issues": [
+        {
+          "screenshot": "w11-b3-home-375-dark.png",
+          "route": "home-375-dark",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "顶部搜索框「搜索会话 / AI 同事」使用原生 input 样式，输入框左侧搜索图标为系统灰色，且输入框无暗色背景（透明感），与酱园琥珀设计语言的暖纸卡感不一致。",
+          "suggestion": "为 input 包裹暖棕底色（#2A1F18 类）、琥珀色搜索图标、圆角胶囊形态、加内边距。"
+        },
+        {
+          "screenshot": "w11-b3-home-375-dark.png",
+          "route": "home-375-dark",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "「登记一条单据」主按钮虽用琥珀色，但形状接近浏览器 button 默认直角胶囊，未体现酱园印章元素（方印/方角）与琥珀光晕，且缺少印章感投影。",
+          "suggestion": "改为方形或半方形圆角（带印章切口），叠加琥珀外发光与微微的纸纹压痕。"
+        },
+        {
+          "screenshot": "w11-b3-home-375-dark.png",
+          "route": "home-375-dark",
+          "severity": "P0",
+          "category": "ua-default-style",
+          "description": "「我的待办 / 我的预警 / 看单据」三个 chip 按钮呈现典型浏览器原生气泡形态：白底、灰描边、黑色小圆点，几乎是 Windows 11 Segoe UI 控件直出，与暗色暖纸语言严重冲突。",
+          "suggestion": "改为深棕卡片底（#241A14）+ 琥珀色圆点 + 暖白文字，统一圆角和描边色。"
+        },
+        {
+          "screenshot": "w11-b3-home-375-dark.png",
+          "route": "home-375-dark",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "顶部右上角「鲜酿 B-1006」圆形印章：内部使用衬线体（疑似系统默认 Times），字号与外圈不协调，描边为标准 SVG 黑线，缺乏印章朱泥不规则的质感。",
+          "suggestion": "替换为设计专用印章字体（如方正小篆体/演示夏行楷），描边使用酱红色（#A8412B）并加做旧颗粒。"
+        },
+        {
+          "screenshot": "w11-b3-home-375-dark.png",
+          "route": "home-375-dark",
+          "severity": "P1",
+          "category": "inconsistency",
+          "description": "「待处理 0 项 / 进行中 35 项 / 待确认 34 项 / 已完成 11 项」四个统计卡片的圆角、描边粗细、内边距不完全一致（数字字体大小相同但「项」与说明文字位置略错位），且四卡并列节奏不等距。",
+          "suggestion": "统一圆角 20px、描边 1px #3A2A20、数字—单位—标签三行栅格固定基线。"
+        },
+        {
+          "screenshot": "w11-b3-home-375-dark.png",
+          "route": "home-375-dark",
+          "severity": "P1",
+          "category": "contrast",
+          "description": "副信息「10月6日 周二 · 75 项预警待看」中「75 项预警待看」使用琥珀色在 #1A0F08 背景上对比勉强，但在深棕卡上几乎可读性下降。",
+          "suggestion": "提亮琥珀至 #F0A85A，或在深背景上使用米色 #E8D4B5。"
+        },
+        {
+          "screenshot": "w11-b3-home-375-dark.png",
+          "route": "home-375-dark",
+          "severity": "P2",
+          "category": "contrast",
+          "description": "四张统计卡片中的数字颜色（白、蓝、琥珀、绿）仅靠色彩区分状态，绿色「11」在暗色卡上偏暗，弱视用户难以识别「已完成」语义。",
+          "suggestion": "在数字旁增加微型文字标签（如 ⏳ 进行中 / ✅ 已完成），避免仅靠色相。"
+        },
+        {
+          "screenshot": "w11-b3-home-375-dark.png",
+          "route": "home-375-dark",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "「我的预警」右上角红点徽标「75」使用浏览器原生 badge 观感：粉红背景 + 黑色描边，类似未读消息系统控件，与酱园语言冲突。",
+          "suggestion": "改为朱砂印章方块（#C0392B）+ 米白字，置于按钮外上角。"
+        },
+        {
+          "screenshot": "w11-b3-home-375-dark.png",
+          "route": "home-375-dark",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "「AI 同事」四个圆形头像（合规/数据/表单/参谋）使用系统默认调色板（棕、绿、红、青），圆点状态指示器为纯绿/灰，类似系统通讯录默认气泡。",
+          "suggestion": "统一为酱园色板：酱红/赭石/琥珀/墨绿，并在头像下沿叠加暖纸纹理。"
+        },
+        {
+          "screenshot": "w11-b3-home-375-dark.png",
+          "route": "home-375-dark",
+          "severity": "P2",
+          "category": "typography",
+          "description": "「AI 食品安全合规官 / 企业数据助手 / 智能填表助手 / 经营参谋」标签文字两行换行不一致：「食品安全合规官」与「智能填表助手」均分两行但基线不齐。",
+          "suggestion": "限制为统一两行（14px / 1.4 行高），文案统一为 4 字 + 2 字节奏。"
+        },
+        {
+          "screenshot": "w11-b3-home-375-dark.png",
+          "route": "home-375-dark",
+          "severity": "P2",
+          "category": "misalign",
+          "description": "AI 同事区域「查看全部 >」与下方头像列中心不对齐：右侧链接与四个圆形头像的中线偏差约 6–8px。",
+          "suggestion": "将「查看全部 >」右对齐到容器 16px 安全区内，并下移 4px。"
+        },
+        {
+          "screenshot": "w11-b3-home-375-dark.png",
+          "route": "home-375-dark",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "底部 Tab 栏「消息 / 同事 / 工作台 / 我的」图标使用线性 SF Symbol/System Icon 风格，选中态「消息」仅是图标变橙色，未做底色高亮，与上方印章按钮节奏割裂。",
+          "suggestion": "为选中项增加酱色填充底块 + 米白图标；非选中项图标描边色统一为 #6B5340。"
+        },
+        {
+          "screenshot": "w11-b3-home-375-dark.png",
+          "route": "home-375-dark",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "底部 Tab 栏字体为系统默认 sans（疑似 PingFang/Segoe），与首页大标题「质检员·王倩」所用衬线/手写体（暖纸字体）完全脱节，存在双字体系统冲突。",
+          "suggestion": "全局统一为暖纸字体栈：标题 演示悠然小楷 / 正文 思源宋体 / 数字 Inter。"
+        },
+        {
+          "screenshot": "w11-b3-home-375-dark.png",
+          "route": "home-375-dark",
+          "severity": "P2",
+          "category": "contrast",
+          "description": "问候语「晚上好」与主标题「质检员·王倩，秋分时节」之间没有明确层级：两者颜色接近米白，字号差距小，弱化了主标题仪式感。",
+          "suggestion": "「晚上好」改用 #8A6A4A 暖灰，字号 13px；主标题加印章红小印点缀。"
+        },
+        {
+          "screenshot": "w11-b3-home-375-dark.png",
+          "route": "home-375-dark",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "整页暗色模式但容器没有任何纸张纹理或琥珀光晕，背景为纯黑 #000，卡片为 #1F1610，导致「暖纸底」语言完全消失，落入通用暗色 App 套壳。",
+          "suggestion": "底层叠加 4% 噪点 + 边缘琥珀渐变光（#3A2418 → #0E0805），卡片加 1px 琥珀内描边。"
+        },
+        {
+          "screenshot": "w11-b3-home-375-dark.png",
+          "route": "home-375-dark",
+          "severity": "P2",
+          "category": "spacing",
+          "description": "「AI 同事」区域上方留白 32px，下方「最近对话」区域也留 32px，但中间四列头像的内边距 0，导致头像视觉上紧贴区段标题。",
+          "suggestion": "统一区段内边距 24px，并在头像行上下各加 12px 呼吸间距。"
+        },
+        {
+          "screenshot": "w11-b3-home-375-dark.png",
+          "route": "home-375-dark",
+          "severity": "P2",
+          "category": "inconsistency",
+          "description": "「最近对话」标题与下方内容区（被截图裁切）无可见列表项，但区段上方 16px 内边距而下方紧贴 Tab 栏，节奏失衡。",
+          "suggestion": "为最近对话区段固定底部 24px 留白，或在 Tab 栏上叠加渐隐遮罩。"
+        },
+        {
+          "screenshot": "w11-b3-home-375-dark.png",
+          "route": "home-375-dark",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "「75」徽标数字为系统默认无衬线粗体，圆形描边为系统灰，完全无印章感。",
+          "suggestion": "改为印章方印（10×10 圆角矩形），朱泥色 #B23A2A + 米白字 + 1px 米黄外描边。"
+        },
+        {
+          "screenshot": "w11-b3-home-375-dark.png",
+          "route": "home-375-dark",
+          "severity": "P2",
+          "category": "contrast",
+          "description": "「最近对话」「AI 同事」区段标题颜色为 #C9A678，在 #1A0F08 背景上对比度约 5.4:1（边缘达标），但「查看全部 >」链接同样琥珀色，层级冲突。",
+          "suggestion": "「查看全部 >」改为更亮的 #F0C28A 并加下划线动效，标题保持 #C9A678。"
+        },
+        {
+          "screenshot": "w11-b3-home-375-dark.png",
+          "route": "home-375-dark",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "底部 Tab 栏四个图标中「同事」图标（双人轮廓）为系统 People 符号的默认实心样式，与「消息/工作台/我的」线性描边风格不一致。",
+          "suggestion": "全部切换为统一线性 1.5px 描边图标，选中态用琥珀色填充。"
+        }
+      ]
+    },
+    {
+      "screenshot": "w11-b3-home-375-light.png",
+      "route": "home-375-light",
+      "ok": true,
+      "issues": [
+        {
+          "screenshot": "w11-b3-home-375-light.png",
+          "route": "home-375-light",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "搜索框内「🔍 搜索会话 / AI 同事」使用系统默认 placeholder 灰色（约 #999 灰）与「酱园琥珀」暖纸底对比过弱，且搜索图标为系统 emoji 黑色线型，与印章/琥珀语言风格不一致",
+          "suggestion": "placeholder 改为暖灰（如 #B8956A 系），搜索图标替换为线性矢量图标并染酱色"
+        },
+        {
+          "screenshot": "w11-b3-home-375-light.png",
+          "route": "home-375-light",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "顶部四个统计卡片（0项/34项/34项/10项）的数字字体明显为系统数字字体，0/34/10 字形粗细、字宽与下方「待处理/进行中/待确认/已完成」设计字号节奏脱节，且数字无颜色权重（与设计语言要求的琥珀重点色冲突）",
+          "suggestion": "将数字改为与品牌一致的衬线/手写体或加粗设计字体，并按状态着色：待处理=酱红，进行中=琥珀，待确认=深棕，已完成=暖灰绿"
+        },
+        {
+          "screenshot": "w11-b3-home-375-light.png",
+          "route": "home-375-light",
+          "severity": "P1",
+          "category": "contrast",
+          "description": "「已选酿 B-1006」印章内文字「鲜酿」为酱红叠在暖米色圆环上，但「B-1006」字母过小且呈深棕细体，对比度勉强；圆环虚线为默认灰色而非品牌色",
+          "suggestion": "圆环虚线统一为酱色 #8B3A1F 或琥珀 #C8851A，字母 B-1006 加粗并提亮底色"
+        },
+        {
+          "screenshot": "w11-b3-home-375-light.png",
+          "route": "home-375-light",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "「我的待办 / 我的预警(75) / 看单据」三个胶囊按钮的描边为细灰线（约 1px #DDD 系），圆角与卡片圆角不一致；「我的预警」红点徽标 75 为系统小红点样式（圆形直角数字），与印章/琥珀语言冲突",
+          "suggestion": "描边换酱色 1.5px 圆角统一 20px；75 徽标改为酱红圆角矩形 + 米色数字"
+        },
+        {
+          "screenshot": "w11-b3-home-375-light.png",
+          "route": "home-375-light",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "「登记一条单据」主按钮为酱色实心胶囊，但按下态/聚焦态无视觉反馈，且字体为系统常规字重，与下方「我的待办」等轻量按钮层级区分仅靠颜色，缺印章/琥珀语言强化",
+          "suggestion": "增加长投影或内阴影模拟印章压印效果，字重提至 600 并加 letter-spacing"
+        },
+        {
+          "screenshot": "w11-b3-home-375-light.png",
+          "route": "home-375-light",
+          "severity": "P1",
+          "category": "ua-default-style",
+          "description": "底部 TabBar「消息/同事/工作台/我的」图标为系统线性图标（细黑/细灰），未做任何品牌色适配；激活态仅用酱色文字，无图标激活色变化，与「酱园琥珀」印章图章语感不匹配",
+          "suggestion": "图标替换为线性矢量并统一描边 1.5px，激活态图标填充酱色 + 加琥珀点饰"
+        },
+        {
+          "screenshot": "w11-b3-home-375-light.png",
+          "route": "home-375-light",
+          "severity": "P2",
+          "category": "ua-default-style",
+          "description": "「AI 同事」区四个圆形图标（合规/数据/表单/参谋）为实心彩色圆，但圆内白色文字为系统默认字体且粗细不一，边缘有抗锯齿灰边，呈现「系统图标 + 默认字体」观感",
+          "suggestion": "改用品牌衬线或加粗手写体，字号统一 14px，圆形加 1px 酱色描边模拟印章边"
+        },
+        {
+          "screenshot": "w11-b3-home-375-light.png",
+          "route": "home-375-light",
+          "severity": "P2",
+          "category": "ua-default-style",
+          "description": "右上「鲜酿」印章边缘锯齿/虚线为浏览器默认 SVG 描边，未做圆头线帽与品牌色定制，呈现为系统默认观感",
+          "suggestion": "外环虚线改圆头 linecap，颜色用琥珀 #C8851A，内层加细酱色实线分隔"
+        },
+        {
+          "screenshot": "w11-b3-home-375-light.png",
+          "route": "home-375-light",
+          "severity": "P2",
+          "category": "misalign",
+          "description": "四个统计卡片采用 2×2 网格但右上「34项 进行中」与左下「34项 待确认」字号完全相同却用不同品牌色，视觉权重不对等；卡片之间垂直间距略大于水平间距",
+          "suggestion": "水平/垂直间距统一为 12px，按状态语义重新分配色彩权重"
+        },
+        {
+          "screenshot": "w11-b3-home-375-light.png",
+          "route": "home-375-light",
+          "severity": "P2",
+          "category": "spacing",
+          "description": "「75 项预警待看」与下方搜索框之间留白偏大（约 24px），而「我的待办」三个胶囊与「登记一条单据」按钮之间仅 12px，节奏失衡",
+          "suggestion": "模块间距统一为 16/20/24 的 4 倍数阶梯"
+        },
+        {
+          "screenshot": "w11-b3-home-375-light.png",
+          "route": "home-375-light",
+          "severity": "P2",
+          "category": "typography",
+          "description": "「质检员·王倩，秋分时节」大标题与「75 项预警待看」副信息字号差过大（约 28px vs 13px），行高比为 1.1 与 1.6，对比生硬",
+          "suggestion": "标题字号降至 22px 行高 1.3，副信息 14px 行高 1.5，建立 1.5 倍黄金比"
+        },
+        {
+          "screenshot": "w11-b3-home-375-light.png",
+          "route": "home-375-light",
+          "severity": "P2",
+          "category": "inconsistency",
+          "description": "顶部用户问候区「晚上好」与「10月6日 周二 · 75 项预警待看」分置标题上下，但「·」分隔符颜色与正文同色（暖棕），与「酱色重点」语言不符；右侧「75」数字为酱红但前面「75 项预警待看」却用普通暖棕，色彩语义不一致",
+          "suggestion": "「·」用琥珀色，关键数字 75 统一为酱红高亮"
+        },
+        {
+          "screenshot": "w11-b3-home-375-light.png",
+          "route": "home-375-light",
+          "severity": "P2",
+          "category": "contrast",
+          "description": "「AI 食安合规官 / 企业数据助手 / 智能填表助手 / 经营参谋」下方双行小字呈浅灰（约 #B8A88C）落在暖米底上，对比度低于 WCAG AA 4.5:1 阈值",
+          "suggestion": "改为深棕 #6B4423 系，对比度提升至 5:1 以上"
+        },
+        {
+          "screenshot": "w11-b3-home-375-light.png",
+          "route": "home-375-light",
+          "severity": "P2",
+          "category": "ua-default-style",
+          "description": "「查看全部 ›」箭头为系统全角字符 ›，与品牌印章/琥珀线型语感不匹配；颜色为酱红但字号偏小",
+          "suggestion": "替换为线性矢量箭头（→ 圆头线帽），字号 13px → 14px"
+        },
+        {
+          "screenshot": "w11-b3-home-375-light.png",
+          "route": "home-375-light",
+          "severity": "P2",
+          "category": "inconsistency",
+          "description": "统计卡片圆角约为 16px，而「我的待办」胶囊按钮圆角为 20px，「登记一条单据」按钮圆角为 24px，三种圆角并存",
+          "suggestion": "建立圆角阶：卡片 16px / 胶囊 20px / 主按钮 24px，并在设计 Token 统一"
+        },
+        {
+          "screenshot": "w11-b3-home-375-light.png",
+          "route": "home-375-light",
+          "severity": "P2",
+          "category": "ua-default-style",
+          "description": "页面背景为纯米色无任何纹理，「酱园琥珀」语言要求「暖纸底」但当前为平整填充，缺纸纹/印章残印等质感，呈现 Web 默认 body 背景观感",
+          "suggestion": "叠加 SVG 噪点纸纹（透明度 3-5%）或局部印章残印图章"
+        },
+        {
+          "screenshot": "w11-b3-home-375-light.png",
+          "route": "home-375-light",
+          "severity": "P2",
+          "category": "layout-overflow",
+          "description": "「最近对话」标题在屏幕底部被 TabBar 遮挡，仅显示上半部分，存在安全区/fixed 布局冲突",
+          "suggestion": "为底部 fixed TabBar 预留 56px 底部 padding，或将最近对话模块上移"
+        }
+      ]
+    },
+    {
+      "screenshot": "w11-b3-me-375-light.png",
+      "route": "me-375-light",
+      "ok": true,
+      "issues": [
+        {
+          "screenshot": "w11-b3-me-375-light.png",
+          "route": "me-375-light",
+          "severity": "P1明显",
+          "category": "ua-default-style",
+          "description": "「深色模式」「真实模式」「通知」右侧的 toggle 开关（switch）整体呈系统默认观感——白色圆形拨钮 + 灰白底槽，未与「酱园琥珀」语言融合，也未使用圆角琥珀色填充或印章质感，浮在卡片上像浏览器原生物件。",
+          "suggestion": "自定义 Switch 组件：轨道使用酱色/琥珀色系（如 #7A3B1E 关闭态、#B8651E 开启态），拨钮采用品牌圆角并加微阴影，圆角半径统一为 12px。"
+        },
+        {
+          "screenshot": "w11-b3-me-375-light.png",
+          "route": "me-375-light",
+          "severity": "P2瑕疵",
+          "category": "inconsistency",
+          "description": "开关轨道为胶囊全圆角，但偏好区卡片内其他控件（如无）应保持一致；目前真实模式开关为「开启」态用酱色填充，与未开启的深色模式/通知开关仅靠颜色区分，缺乏一致性视觉锚点。",
+          "suggestion": "为开启态统一加入「琥珀圆点 + 短横刻度」的印章式细节，或统一在开启时显示微小对勾/印章图标。"
+        },
+        {
+          "screenshot": "w11-b3-me-375-light.png",
+          "route": "me-375-light",
+          "severity": "P1明显",
+          "category": "ua-default-style",
+          "description": "「真实模式」项前的 🤖 robot emoji 图标和「通知」前的 🔔 bell emoji 均为系统 emoji 字体直接渲染，未做任何与品牌色或印章元素一致的描边/底色处理，与整体「酱色印章 + 琥珀点缀」语言割裂。",
+          "suggestion": "替换为线性图标（lucide / 自绘），主色使用酱色 #7A3B1E，开启态辅以琥珀 #D4A24C 描边或浅琥珀底圆。"
+        },
+        {
+          "screenshot": "w11-b3-me-375-light.png",
+          "route": "me-375-light",
+          "severity": "P1明显",
+          "category": "ua-default-style",
+          "description": "头像圆形使用纯色酱橙填充 + 居中白色「我」字，呈现为扁平色块，缺少印章元素应有的不规则边缘、纹理或轻微旋转感，与设计语言中的「印章」核心意象脱节。",
+          "suggestion": "为头像底图增加印章式不规则外缘（如 1-2px 锯齿/破损笔触）、轻微旋转（-4°~4°），并辅以极淡的纹理叠加。"
+        },
+        {
+          "screenshot": "w11-b3-me-375-light.png",
+          "route": "me-375-light",
+          "severity": "P2瑕疵",
+          "category": "ua-default-style",
+          "description": "「本月登记 / 待审核 / 工作空间 / 偏好 / 数据与关于」等区段小标题使用纯文字、无印章下划线或竖线装饰，与设计中「印章元素」承诺不一致。",
+          "suggestion": "在区段标题前增加一枚 4×4px 酱色印章方块，或在标题下方增加 1px 琥珀色短分隔线，强化品牌识别。"
+        },
+        {
+          "screenshot": "w11-b3-me-375-light.png",
+          "route": "me-375-light",
+          "severity": "P2瑕疵",
+          "category": "misalign",
+          "description": "「工作空间」区下方四宫格（0/34/34/35）四张卡片的水平基线未严格对齐到同一栅格，数字与下方说明文字之间的间距在「今日待处理」与「累计完成」列明显不同。",
+          "suggestion": "统一四宫格卡片为相同内边距（如 16px），数字与说明文字间距固定为 6px，强制四列等宽等高。"
+        },
+        {
+          "screenshot": "w11-b3-me-375-light.png",
+          "route": "me-375-light",
+          "severity": "P2瑕疵",
+          "category": "spacing",
+          "description": "「工作空间」卡与其下「登记采购单 / 登记出库单 / 问经营参谋」三个胶囊按钮之间垂直距离（≈24px）大于上方卡片之间的间距（≈12px），节奏不均匀。",
+          "suggestion": "将工作空间卡与胶囊按钮组的间距统一为 16px，建立 4 / 8 / 16 / 24 节奏表。"
+        },
+        {
+          "screenshot": "w11-b3-me-375-light.png",
+          "route": "me-375-light",
+          "severity": "P2瑕疵",
+          "category": "contrast",
+          "description": "「登记采购单」「登记出库单」「问经营参谋」三个胶囊按钮文字颜色 #5C4A3E（估）与底色 #EFE6DA 非常接近，对比度约 3.2:1，未达 WCAG AA 4.5:1。",
+          "suggestion": "将按钮文字加深至 #3D2A1F 或直接使用酱色 #7A3B1E，确保 ≥4.5:1。"
+        },
+        {
+          "screenshot": "w11-b3-me-375-light.png",
+          "route": "me-375-light",
+          "severity": "P2瑕疵",
+          "category": "contrast",
+          "description": "「本月登记 1 条」「待审核 0 条」上方说明小字与卡片底色对比偏弱（≈3.8:1），长时阅读易疲劳。",
+          "suggestion": "小字标题色由 #8A7560 调整为 #5C4A3E 或更深，保持 ≥4.5:1。"
+        },
+        {
+          "screenshot": "w11-b3-me-375-light.png",
+          "route": "me-375-light",
+          "severity": "P1明显",
+          "category": "ua-default-style",
+          "description": "「清除演示数据」项最右侧未显示任何可点击指示（无 chevron、无按钮形态），与 iOS/Android 列表导航默认观感趋同，缺少品牌化点击区域或印章式进入图标。",
+          "suggestion": "在行尾加入 16px 琥珀色 › chevron 图标，或整行增加轻微按下反馈态，明确可点击语义。"
+        },
+        {
+          "screenshot": "w11-b3-me-375-light.png",
+          "route": "me-375-light",
+          "severity": "P2瑕疵",
+          "category": "typography",
+          "description": "「进行中 34 / 待确认 34 / 累计完成 35」三处大号数字字号一致（≈28px），但「今日待处理 0」因个位数视觉重量不足，整行看上去偏小，破坏四宫格节奏。",
+          "suggestion": "将所有数字统一为 tabular-nums 等宽数字 + 相同字重（600），并确保 0 也占满与 34 相同宽度（避免位数导致的视觉塌陷）。"
+        },
+        {
+          "screenshot": "w11-b3-me-375-light.png",
+          "route": "me-375-light",
+          "severity": "P2瑕疵",
+          "category": "inconsistency",
+          "description": "顶部「我的」标题字号与底部 TabBar「我的」选中态字号、字重几乎相同，缺少页面级标题应有的层级强化。",
+          "suggestion": "将顶部「我的」加大至 20-22px / 600，并加 1-2px 印章式下划线或酱色短装饰，区别于 TabBar 12-14px 标签。"
+        },
+        {
+          "screenshot": "w11-b3-me-375-light.png",
+          "route": "me-375-light",
+          "severity": "P1明显",
+          "category": "ua-default-style",
+          "description": "底部 TabBar 选中态「我的」图标仅靠颜色变化（灰→酱）区分，未填充琥珀色徽标或印章点，4 个图标同尺寸同描边粗细，无法在 0.5 秒内识别当前页。",
+          "suggestion": "为选中 Tab 图标下方增加 4×4px 印章方块或琥珀色圆点指示器，强化状态识别。"
+        }
+      ]
+    }
+  ]
+}

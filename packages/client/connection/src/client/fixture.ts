@@ -3121,6 +3121,8 @@ function createFixtureWorld(options: FixtureOptions): FixtureWorld {
     },
     data: {
       upload: request => err(request, { code: 'data-write-disabled', message: 'the demo fixture refuses data writes', details: {} }),
+      describeImage: request => err(request, { code: 'data-vision-disabled', message: 'the demo fixture refuses vision calls', details: {} }),
+      extractText: request => err(request, { code: 'data-vision-disabled', message: 'the demo fixture refuses text extraction', details: {} }),
     },
     nocobase: {
       // The business page's deterministic fixture: three collections (the
@@ -3609,6 +3611,8 @@ export class FixtureApiClient extends AbstractApiClient {
       case 'kb.ingest': return this.api.kb.ingest(request, signal)
       case 'kb.ingestUrl': return this.api.kb.ingestUrl(request, signal)
       case 'data.upload': return this.api.data.upload(request, signal)
+      case 'data.describeImage': return this.api.data.describeImage(request, signal)
+      case 'data.extractText': return this.api.data.extractText(request, signal)
       case 'orders.create': return this.api.orders.create(request, signal)
       case 'orders.get': return this.api.orders.get(request, signal)
       case 'assets.list': return this.api.assets.list(request, signal)

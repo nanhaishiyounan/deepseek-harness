@@ -14,7 +14,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type JSX } from 'react'
 import type { SessionSummary } from '@deepseek-ai/dsh-host-apiproxy/api'
 import { Plus } from 'lucide-react'
-import type { TextAreaRef } from 'antd-mobile'
+import { Toast, type TextAreaRef } from 'antd-mobile'
 import { Avatar, NoticeCard, RunningRow, SkelThread } from '../ui.tsx'
 import { PageNav } from '../PageNav.tsx'
 import { loadIdentity } from '../auth.ts'
@@ -40,6 +40,8 @@ import { useDemoTyping } from './chat/useDemoTyping.ts'
 import { useDraftValues } from './chat/useDraftValues.ts'
 import { FlowItem, renderKeyOf } from './chat/FlowItem.tsx'
 import { QuickPanel } from './chat/QuickPanel.tsx'
+import { composeWithAttachments, useAttachments, DOC_ACCEPT, IMAGE_ACCEPT } from './chat/attachments.ts'
+import { useVoiceInput } from './chat/useVoiceInput.ts'
 import { Composer } from './chat/Composer.tsx'
 import { confirmPayloadOf } from './chat/confirm.ts'
 import css from './chat.module.css'
@@ -131,6 +133,8 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
   const [newChatOpen, setNewChatOpen] = useState(false)
   /** The quick panel's open flag (local view state; a send or route change closes it). */
   const [panelOpen, setPanelOpen] = useState(false)
+  /** The composer's draft attachments (W11-B2): pick → uploading → ready/failed. */
+  const lane = useAttachments()
   const [error, setError] = useState<string | undefined>(undefined)
   /** Seqs the user locally reopened for editing (rejected → draft). */
   const [reopened, setReopened] = useState<ReadonlySet<number>>(new Set())
@@ -138,6 +142,10 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
   const [localPending, setLocalPending] = useState<ReadonlyMap<number, Record<string, string>>>(new Map())
   const flowRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<TextAreaRef>(null)
+  /** The three hidden pickers (W11-B2): camera (capture), album, documents. */
+  const cameraInput = useRef<HTMLInputElement>(null)
+  const albumInput = useRef<HTMLInputElement>(null)
+  const fileInput = useRef<HTMLInputElement>(null)
   const stickToBottom = useRef(true)
   const rosterRow = useMemo(
     () => roster.value?.find(row => row.id === preset),
@@ -156,7 +164,15 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
   const sessionOutbox = outbox.entries.filter(entry => entry.sessionId === sessionId)
 
   const send = useCallback(async (text: string) => {
-    const trimmed = text.trim()
+    if (lane.attachments.some(row => row.status === 'uploading')) {
+      Toast.show({ content: '附件还在处理中，稍候再发送' })
+      return
+    }
+    // The ready attachments' quote blocks lead the typed text; the send lane
+    // itself stays plain text (W11-B2 T1 — the server already described the
+    // image and extracted the document).
+    const composed = composeWithAttachments(lane.attachments, text)
+    const trimmed = composed.trim()
     if (trimmed === '' || sending) return
     setSending(true)
     setError(undefined)
@@ -167,6 +183,7 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
     try {
       await promptSession(sessionId, trimmed, clientMsgId)
       setDraft('')
+      lane.clear()
       setPollInterval(800)
       // The demo typing window (04 §4.2) arms inside the cell; live mode no-ops.
       typingCell.armAfterSend()
@@ -195,7 +212,7 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
     } finally {
       setSending(false)
     }
-  }, [sessionId, sending, typingCell])
+  }, [sessionId, sending, typingCell, lane])
 
   /**
    * The assist-input fill (W9-B1): a picked starter/quick command/chip/
@@ -219,6 +236,15 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
     const end = box.value.length
     box.setSelectionRange(end, end)
   }, [filledAt])
+
+  /** The voice lane (W11-B2): zh-CN recognition; final segments append to the draft. */
+  const voice = useVoiceInput({
+    lang: 'zh-CN',
+    onInterim: () => {},
+    onFinal: (text) => { setDraft(current => current + text) },
+    onError: (message) => { Toast.show({ content: message }) },
+  })
+  useEffect(() => lane.disposeThumbs, [lane.disposeThumbs])
 
   // Keep the flow pinned to the newest item while the user is at the bottom.
   useEffect(() => {
@@ -298,6 +324,22 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
       setError(cause instanceof Error ? cause.message : String(cause))
     })
   }, [sessionId])
+
+  /**
+   * One quick-panel tool pick (W11-B2): the photo lanes open their hidden
+   * picker, the file lane the document picker, the voice lane flips the
+   * listening card. The panel itself closes for the pickers (the OS sheet
+   * covers it) but stays open for voice (the mic runs beside it).
+   */
+  const onToolPick = useCallback((tool: 'voice' | 'camera' | 'album' | 'file') => {
+    if (tool === 'voice') {
+      voice.toggle()
+      return
+    }
+    setPanelOpen(false)
+    const input = tool === 'camera' ? cameraInput.current : tool === 'album' ? albumInput.current : fileInput.current
+    input?.click()
+  }, [voice])
 
   const title = summary === undefined ? colleague.duty : titleOf(summary)
   const showWelcome = history.status === 'ready' && folded.items.length === 0
@@ -420,6 +462,11 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
         inputRef={inputRef}
         onFill={fillDraft}
         filledAt={filledAt}
+        attachments={lane.attachments}
+        onRemoveAttachment={lane.remove}
+        listening={voice.listening}
+        interim={voice.interim}
+        onStopListening={voice.toggle}
         panel={(
           <QuickPanel
             commands={quickCommands}
@@ -428,8 +475,48 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
               setPanelOpen(false)
               fillDraft(text)
             }}
+            onToolPick={onToolPick}
+            voiceSupported={voice.supported}
           />
         )}
+      />
+      <input
+        ref={cameraInput}
+        type="file"
+        accept={IMAGE_ACCEPT}
+        capture="environment"
+        className={css.hiddenInput}
+        aria-hidden="true"
+        tabIndex={-1}
+        onChange={(event) => {
+          for (const file of event.currentTarget.files ?? []) void lane.pickImage(file)
+          event.currentTarget.value = ''
+        }}
+      />
+      <input
+        ref={albumInput}
+        type="file"
+        accept={IMAGE_ACCEPT}
+        multiple
+        className={css.hiddenInput}
+        aria-hidden="true"
+        tabIndex={-1}
+        onChange={(event) => {
+          for (const file of event.currentTarget.files ?? []) void lane.pickImage(file)
+          event.currentTarget.value = ''
+        }}
+      />
+      <input
+        ref={fileInput}
+        type="file"
+        accept={DOC_ACCEPT}
+        className={css.hiddenInput}
+        aria-hidden="true"
+        tabIndex={-1}
+        onChange={(event) => {
+          for (const file of event.currentTarget.files ?? []) void lane.pickDoc(file)
+          event.currentTarget.value = ''
+        }}
       />
       <NewChatSheet visible={newChatOpen} onClose={() => { setNewChatOpen(false) }} />
       <TaskFormModal

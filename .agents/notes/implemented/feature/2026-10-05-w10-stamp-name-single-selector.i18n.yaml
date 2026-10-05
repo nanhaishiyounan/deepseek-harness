@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-10-05-w10-stamp-name-single-selector.md
-2026-10-05-w10-stamp-name-single-selector.md: 7ecba6ea3bd74beb0d15a0aa20b89a50dad3aa8d
-2026-10-05-w10-stamp-name-single-selector.zh.md: ee1c0d3c6abef59cc4b4fad1a78575a81f6392dd
+2026-10-05-w10-stamp-name-single-selector.md: d8ec077e832fa6cb7ba8d63ed4f75e9f7d7d6e77
+2026-10-05-w10-stamp-name-single-selector.zh.md: 088720b92446035632b0887f84bebb1adf4ab303

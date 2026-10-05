@@ -1,16 +1,22 @@
 /**
  * The chat composer (split from ChatView, W8-B2; re-skinned W9-B5): the
  * context chip row (the conversation-phase shortcuts as capsule-seal chips; a
- * chip pick fills the draft for the user to edit, W9-B1), the input row with
- * the + entry over the slide-up quick panel, the capsule paper textarea
- * (Enter sends, Shift+Enter breaks, composition is never split), and the 46px
- * round persimmon send stamp (the global .dshm-stamp-solid hook) that becomes
- * the stop control while a turn runs. A transient send failure toasts once.
+ * chip pick fills the draft for the user to edit, W9-B1), the draft
+ * attachment strip (W11-B2: one chip per picked image/document — thumbnail,
+ * name, uploading breath / failed rim with the human hint, a remove ×), the
+ * input row with the + entry over the slide-up quick panel, the capsule
+ * paper textarea (Enter sends, Shift+Enter breaks, composition is never
+ * split), the listening card that covers the input slot's box while voice
+ * recognition runs (the persimmon pulse dot plus the live interim text; the
+ * textarea itself stays mounted and untouched), and the 46px round persimmon
+ * send stamp (the global .dshm-stamp-solid hook) that becomes the stop
+ * control while a turn runs. A transient send failure toasts once.
  */
 
 import { useEffect, useState, type JSX, type ReactNode, type RefObject } from 'react'
 import { TextArea, Toast, type TextAreaRef } from 'antd-mobile'
-import { Plus, Send, Square } from 'lucide-react'
+import { FileWarning, Image as ImageIcon, Loader2, Plus, Send, Square, X } from 'lucide-react'
+import type { DraftAttachment } from './attachments.ts'
 import css from '../chat.module.css'
 
 /** Composer props: the chip/draft/running state and the orchestration sinks. */
@@ -38,12 +44,22 @@ export interface ComposerProps {
   readonly onTogglePanel: () => void
   /** The shared textarea ref (the free-text entry focuses it). */
   readonly inputRef: RefObject<TextAreaRef>
+  /** The draft attachment rows (W11-B2); empty renders no strip. */
+  readonly attachments: readonly DraftAttachment[]
+  /** Removes one draft attachment chip (the ×). */
+  readonly onRemoveAttachment: (id: string) => void
+  /** The voice lane's listening flag: true covers the input slot with the listening card. */
+  readonly listening: boolean
+  /** The voice lane's live interim text (the listening card's body). */
+  readonly interim: string
+  /** Ends the listening stretch (the card's own tap target). */
+  readonly onStopListening: () => void
 }
 
 /**
  * The chat composer bar.
  * @param props - the chip/draft/running state and the sinks.
- * @returns the chip row plus the input bar.
+ * @returns the chip row, the attachment strip, and the input bar.
  */
 export function Composer(props: ComposerProps): JSX.Element {
   const { chips, chipsDisabled, draft, sending, running, panelOpen } = props
@@ -74,6 +90,17 @@ export function Composer(props: ComposerProps): JSX.Element {
           ))}
         </div>
       )}
+      {props.attachments.length > 0 && (
+        <div className={css.attachRow} role="list" aria-label="待发送附件">
+          {props.attachments.map(attachment => (
+            <AttachmentChip
+              key={attachment.id}
+              attachment={attachment}
+              onRemove={() => { props.onRemoveAttachment(attachment.id) }}
+            />
+          ))}
+        </div>
+      )}
       <div className={css.inputRow} data-fill={fillLive ? 'true' : undefined}>
         <button
           type="button"
@@ -84,21 +111,35 @@ export function Composer(props: ComposerProps): JSX.Element {
         >
           <Plus size={22} strokeWidth={1.8} aria-hidden="true" />
         </button>
-        <TextArea
-          ref={props.inputRef}
-          className={css.input}
-          placeholder="问我任何经营问题..."
-          aria-label="消息输入"
-          value={draft}
-          autoSize={{ minRows: 1, maxRows: 4 }}
-          onChange={props.onDraftChange}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
-              event.preventDefault()
-              props.onSend(draft)
-            }
-          }}
-        />
+        <div className={css.inputShell}>
+          <TextArea
+            ref={props.inputRef}
+            className={css.input}
+            placeholder="问我任何经营问题..."
+            aria-label="消息输入"
+            value={draft}
+            rows={1}
+            autoSize={{ minRows: 1, maxRows: 4 }}
+            onChange={props.onDraftChange}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
+                event.preventDefault()
+                props.onSend(draft)
+              }
+            }}
+          />
+          {props.listening && (
+            <button
+              type="button"
+              className={css.listeningCard}
+              aria-label="正在聆听，点击结束"
+              onClick={props.onStopListening}
+            >
+              <span className={css.listenPulse} aria-hidden="true" />
+              <span className={css.listenText}>{props.interim === '' ? '正在聆听，点击结束' : props.interim}</span>
+            </button>
+          )}
+        </div>
         {running
           ? (
             <button type="button" className={css.stop} aria-label="停止生成" onClick={props.onStop}>
@@ -119,6 +160,43 @@ export function Composer(props: ComposerProps): JSX.Element {
           )}
       </div>
       {props.error !== undefined && <ErrorToast error={props.error} />}
+    </div>
+  )
+}
+
+/** One draft attachment chip: the three statuses a pick goes through. */
+function AttachmentChip({ attachment, onRemove }: {
+  readonly attachment: DraftAttachment
+  readonly onRemove: () => void
+}): JSX.Element {
+  return (
+    <div
+      className={`${css.attachChip} ${attachment.status === 'failed' ? css.attachChipFailed : ''}`}
+      role="listitem"
+      aria-label={`附件 ${attachment.name}`}
+    >
+      {attachment.kind === 'image' && attachment.thumbUrl !== undefined
+        ? <img className={css.attachThumb} src={attachment.thumbUrl} alt="" />
+        : (
+          <span className={css.attachGlyph} aria-hidden="true">
+            {attachment.status === 'failed' ? <FileWarning size={15} /> : <ImageIcon size={15} />}
+          </span>
+        )}
+      {attachment.status === 'uploading' && (
+        <Loader2 className={css.attachSpinner} size={13} aria-hidden="true" />
+      )}
+      <span className={css.attachName}>{attachment.name}</span>
+      <button
+        type="button"
+        className={css.attachRemove}
+        aria-label={`移除 ${attachment.name}`}
+        onClick={onRemove}
+      >
+        <X size={12} aria-hidden="true" />
+      </button>
+      {attachment.status === 'failed' && attachment.error !== undefined && (
+        <span className={css.attachError}>{attachment.error}</span>
+      )}
     </div>
   )
 }

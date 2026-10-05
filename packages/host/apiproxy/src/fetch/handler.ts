@@ -74,7 +74,7 @@ import {
   nocobaseAlertActRequestSchema, nocobaseSignInRequestSchema, nocobaseUpdateRequestSchema,
   nocobaseMobileWorkDeleteRequestSchema, nocobaseMobileWorkSaveRequestSchema,
 } from '../api/nocobase.schema.ts'
-import { dataUploadRequestSchema } from '../api/data.schema.ts'
+import { dataDescribeImageRequestSchema, dataExtractTextRequestSchema, dataUploadRequestSchema } from '../api/data.schema.ts'
 import { ordersCreateRequestSchema, ordersListRequestSchema, ordersOrderIdRequestSchema } from '../api/orders.schema.ts'
 import {
   assetsDetailRequestSchema, assetsListRequestSchema, assetsStatsRequestSchema,
@@ -169,6 +169,8 @@ const UNARY_ROUTES: UnaryRoutes = {
   'llm.models': { schema: llmModelsRequestSchema, invoke: (api, r) => api.llm.models(r) },
   'llm.discoverModels': { schema: llmDiscoverModelsRequestSchema, invoke: (api, r, signal) => api.llm.discoverModels(r, signal) },
   'data.upload': { schema: dataUploadRequestSchema, invoke: (api, r, signal) => api.data.upload(r, signal) },
+  'data.describeImage': { schema: dataDescribeImageRequestSchema, invoke: (api, r, signal) => api.data.describeImage(r, signal) },
+  'data.extractText': { schema: dataExtractTextRequestSchema, invoke: (api, r, signal) => api.data.extractText(r, signal) },
   'orders.create': { schema: ordersCreateRequestSchema, invoke: (api, r, signal) => api.orders.create(r, signal) },
   'orders.get': { schema: ordersOrderIdRequestSchema, invoke: (api, r, signal) => api.orders.get(r, signal) },
   'orders.list': { schema: ordersListRequestSchema, invoke: (api, r, signal) => api.orders.list(r, signal) },

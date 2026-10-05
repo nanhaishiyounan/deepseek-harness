@@ -1,15 +1,17 @@
 /**
  * The composer's slide-up quick panel (split from ChatView, W8-B2): the
- * colleague's own starter commands as the two-column grid plus the three
- * placeholder tools (local toasts, never real lanes). The open animation
+ * colleague's own starter commands as the two-column grid plus the tool grid
+ * (W11-B2: the three placeholder toasts became the real lanes — voice,
+ * camera, album, files — as a 2×2 capsule-tile grid). The open animation
  * rides the 220ms slide-fade (reduced-motion degrades to none); picking a
  * command closes the panel and fills the composer draft through the parent's
- * sink (W9-B1).
+ * sink (W9-B1); picking a tool hands the lane to the parent's onToolPick
+ * (the picker inputs and the voice lifecycle live in ChatView).
  */
 
 import type { JSX } from 'react'
 import { Toast } from 'antd-mobile'
-import { BarChart3, CalendarClock, ClipboardCheck, FileText, Mic, Paperclip, PenLine, Search, Smile } from 'lucide-react'
+import { BarChart3, CalendarClock, Camera, ClipboardCheck, FileText, Image, Mic, PenLine, Search } from 'lucide-react'
 import css from '../chat.module.css'
 
 /** One starter command the panel lists (the colleague's welcome starters). */
@@ -28,27 +30,54 @@ const QP_ICONS: readonly JSX.Element[] = [
   <CalendarClock key="calendar" size={17} strokeWidth={1.8} aria-hidden="true" />,
 ]
 
-/** The quick panel's placeholder tools: local toasts, never real lanes. */
-const QP_TOOLS: ReadonlyArray<{ readonly label: string; readonly icon: JSX.Element }> = [
-  { label: '语音', icon: <Mic size={16} strokeWidth={1.8} aria-hidden="true" /> },
-  { label: '文件', icon: <Paperclip size={16} strokeWidth={1.8} aria-hidden="true" /> },
-  { label: '表情', icon: <Smile size={16} strokeWidth={1.8} aria-hidden="true" /> },
-]
+/** One composer tool lane the panel's tool grid offers. */
+export type ComposerTool = 'voice' | 'camera' | 'album' | 'file'
 
-/** Quick-panel props: the starter commands, the busy gate, and the pick sink. */
+/** One tool tile: its lane id, glyph, and label. */
+interface ToolTile {
+  readonly tool: ComposerTool
+  readonly label: string
+  readonly icon: JSX.Element
+}
+
+/** Quick-panel props: the starter commands, the gates, and the pick sinks. */
 export interface QuickPanelProps {
   readonly commands: readonly QuickCommand[]
   readonly sending: boolean
   /** Carries the picked starter's send-text to the parent (fill + panel close). */
   readonly onPick: (text: string) => void
+  /**
+   * Hands a tool-lane pick to the parent (the pickers and the voice toggle
+   * live in ChatView). `voice` and `album` are rendered only when the lane
+   * can run — see `voiceSupported`.
+   */
+  readonly onToolPick: (tool: ComposerTool) => void
+  /**
+   * The voice lane's detect verdict: 'no' hides the voice tile (the WeChat
+   * webview never exposes the engine), 'broken' renders it inert with a
+   * hint, 'yes' runs it.
+   */
+  readonly voiceSupported: 'yes' | 'no' | 'broken'
 }
 
 /**
  * The slide-up quick panel.
- * @param props - the commands, the busy gate, the pick sink.
+ * @param props - the commands, the gates, and the pick sinks.
  * @returns the panel dialog.
  */
-export function QuickPanel({ commands, sending, onPick }: QuickPanelProps): JSX.Element {
+export function QuickPanel({ commands, sending, onPick, onToolPick, voiceSupported }: QuickPanelProps): JSX.Element {
+  const tools: readonly ToolTile[] = voiceSupported === 'no'
+    ? [
+      { tool: 'camera', label: '拍照', icon: <Camera size={16} strokeWidth={1.8} aria-hidden="true" /> },
+      { tool: 'album', label: '相册', icon: <Image size={16} strokeWidth={1.8} aria-hidden="true" /> },
+      { tool: 'file', label: '文件', icon: <FileText size={16} strokeWidth={1.8} aria-hidden="true" /> },
+    ]
+    : [
+      { tool: 'voice', label: '语音', icon: <Mic size={16} strokeWidth={1.8} aria-hidden="true" /> },
+      { tool: 'camera', label: '拍照', icon: <Camera size={16} strokeWidth={1.8} aria-hidden="true" /> },
+      { tool: 'album', label: '相册', icon: <Image size={16} strokeWidth={1.8} aria-hidden="true" /> },
+      { tool: 'file', label: '文件', icon: <FileText size={16} strokeWidth={1.8} aria-hidden="true" /> },
+    ]
   return (
     <div className={css.quickPanel} role="dialog" aria-label="快捷指令">
       <p className={css.qpTitle}>快捷指令</p>
@@ -70,13 +99,20 @@ export function QuickPanel({ commands, sending, onPick }: QuickPanelProps): JSX.
       ) : (
         <p className={css.qpEmpty}>当前同事没有预置指令，直接打字聊聊吧</p>
       )}
-      <div className={css.qpTools}>
-        {QP_TOOLS.map(tool => (
+      <div className={css.qpTools} role="toolbar" aria-label="工具">
+        {tools.map(tool => (
           <button
-            key={tool.label}
+            key={tool.tool}
             type="button"
             className={css.qpTool}
-            onClick={() => { Toast.show({ content: '演示版暂未开放，先用文字试试吧' }) }}
+            aria-disabled={voiceSupported === 'broken' && tool.tool === 'voice' ? true : undefined}
+            onClick={() => {
+              if (voiceSupported === 'broken' && tool.tool === 'voice') {
+                Toast.show({ content: '当前环境不支持语音，试试拍照或打字' })
+                return
+              }
+              onToolPick(tool.tool)
+            }}
           >
             {tool.icon}
             {tool.label}

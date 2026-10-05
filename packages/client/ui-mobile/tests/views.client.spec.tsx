@@ -894,6 +894,21 @@ describe('mobile chat view', () => {
     })
   })
 
+  it('the composer textarea rides rows=1 so the autoSize sizer lands single-line on the 46px capsule (W11-B1)', async () => {
+    stubGateway({
+      'session.list': { items: [{ sessionId: 'session-12', updatedAt: 1, agentPreset: 'mobile-form-assistant' }] },
+      'session.history': EMPTY_HISTORY,
+      'agentPreset.list': { presets: [{ id: 'mobile-form-assistant', name: '智能填表助手', description: '', isDefault: true }] },
+      'nocobase.listMeta': { collections: [] },
+      'session.prompt': () => ({}),
+    })
+    render(<ChatView sessionId="session-12" />)
+    const box = screen.getByPlaceholderText('问我任何经营问题...') as HTMLTextAreaElement
+    // antd-mobile defaults rows=2; its hidden sizer then floors the single-line
+    // height at two rows, stranding the text off-center inside the capsule.
+    expect(box.getAttribute('rows')).toBe('1')
+  })
+
   it('sends drafts through the composer and chips, failing loud on rejection', async () => {
     let prompts = 0
     stubGateway({
@@ -964,9 +979,13 @@ describe('mobile chat view', () => {
     await waitFor(() => { expect(screen.getByRole('dialog', { name: '快捷指令' })).toBeTruthy() })
     // The starter also lives on the welcome card; the panel adds the second copy.
     expect(screen.getAllByText('问经营').length).toBe(2)
-    // The placeholder tools toast instead of opening a lane.
-    fireEvent.click(screen.getByRole('button', { name: '语音' }))
-    await waitFor(() => { expect(document.querySelector('.adm-toast-main')?.textContent ?? '').toContain('演示版暂未开放') })
+    // The tool lanes are real now (W11-B2): jsdom exposes no speech engine,
+    // so the voice tile is hidden outright (the WeChat webview steady state)
+    // and the three picker lanes answer.
+    expect(screen.queryByRole('button', { name: '语音' })).toBeNull()
+    for (const lane of ['拍照', '相册', '文件']) {
+      expect(screen.getByRole('button', { name: lane })).toBeTruthy()
+    }
     // Picking a command closes the panel and fills the draft (W9-B1): the
     // picked send-text replaces a half-typed draft, focuses the box with the
     // caret parked at the end, and sends nothing on its own.

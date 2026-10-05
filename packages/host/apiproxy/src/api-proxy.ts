@@ -53,7 +53,7 @@ import type { DataRoute } from '@deepseek-ai/dsh-lakehouse/data-router'
 import type {} from '@deepseek-ai/dsh-lakehouse'
 import { parseCsvTabular, parseJsonTabular, parseXlsxTabular, tableNameFromFilename } from '@deepseek-ai/dsh-lakehouse/tabular'
 import type { XlsxWorkbookLike } from '@deepseek-ai/dsh-lakehouse/tabular'
-import type { DataUploadView } from './api/data.ts'
+import type { DataDescribeImageView, DataExtractTextView, DataUploadView } from './api/data.ts'
 import type { OrderView } from './api/orders.ts'
 import type { OrderRecord } from '@deepseek-ai/dsh-expert-orders'
 // Type-only: resolves `ctx.get('connector')` to the seam's runtime type.
@@ -466,6 +466,8 @@ function paginate(
 /** Wrap an ok result echoing the request's rpcId. */
 /** Upper bound on one workbench-ingested binary document's bytes (the tool suite's own limit). */
 const MAX_KB_INGEST_BYTES = 64 * 1024 * 1024
+/** Draft-quote wire bound for `data.extractText`: enough for a multi-page pdf's text layer inside a prompt. */
+const DATA_EXTRACT_WIRE_MAX_CODE_POINTS = 6000
 
 /**
  * Narrow one wire doc_kind for the kb workbench. `KbDocKind` is itself a
@@ -964,6 +966,23 @@ export interface ApiProxyDefaults {
    * opt-in independent of `kbWriteEnabled`.
    */
   dataUploadEnabled?: boolean
+  /**
+   * Whether the composer image-describe channel (`data.describeImage`)
+   * answers. Absent means refused, same stance as `dataUploadEnabled`: the
+   * call spends a third-party vision credit, so the deployment opts in.
+   */
+  visionDescribeEnabled?: boolean
+  /**
+   * Credential reference (environment-variable name) the vision endpoint key
+   * resolves through; defaults to `MINIMAX_API_KEY`.
+   */
+  visionApiKeyEnv?: string
+  /**
+   * Vision endpoint base URL; defaults to the MiniMax platform
+   * (`https://api.minimaxi.com/v1`, the same origin the llm-minimax adapter
+   * and kb-embed-minimax use).
+   */
+  visionBaseUrl?: string
   /**
    * Whether the orders domain's write methods (`orders.create`,
    * `orders.fulfill`) answer. Absent means refused: an order is a real
@@ -4743,6 +4762,133 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
             details: { path: sourcePath },
           })
         }
+      },
+
+      async describeImage(request, signal): Promise<RpcResponse<DataDescribeImageView>> {
+        const { image, mediaType, name, prompt } = request.payload
+        if (defaults.visionDescribeEnabled !== true) {
+          return err(request, {
+            code: 'data-vision-disabled',
+            message: 'the image-describe channel is disabled; set the api-gateway config visionDescribeEnabled: true to allow describing uploads',
+            details: {},
+          })
+        }
+        const apiKeyEnv = defaults.visionApiKeyEnv ?? 'MINIMAX_API_KEY'
+        const credentials = ctx.get('credentials')
+        const apiKey = credentials !== undefined
+          ? (await credentials.resolve(credentialRef(apiKeyEnv)))?.value
+          : process.env[apiKeyEnv]
+        if (apiKey === undefined || apiKey.length === 0) {
+          return err(request, {
+            code: 'data-vision-unavailable',
+            message: `no vision credential resolves: set the ${apiKeyEnv} credential or environment variable`,
+            details: { apiKeyEnv },
+          })
+        }
+        // The same durable admission `session.prompt` image parts go through:
+        // one stored copy, one content-addressed id the client can read back.
+        let ref: ImageAttachmentRef
+        try {
+          const refs = await admitEncodedImages(ctx.attachments, [{
+            data: image, mediaType, ...name === undefined ? {} : { name },
+          }])
+          ref = refs[0] as ImageAttachmentRef
+        } catch (error: unknown) {
+          return err(request, {
+            code: 'attachment-error',
+            message: error instanceof Error ? error.message : String(error),
+            details: { reason: error instanceof AttachmentError ? error.code : 'save-images-refused' },
+          })
+        }
+        // The endpoint requires the data-URL form; the bare base64 payload
+        // answers status 2013 (verified against the live service).
+        const timed = signal === undefined ? AbortSignal.timeout(30_000) : AbortSignal.any([signal, AbortSignal.timeout(30_000)])
+        let description: string
+        try {
+          const response = await fetch(`${defaults.visionBaseUrl ?? 'https://api.minimaxi.com/v1'}/coding_plan/vlm`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              prompt: prompt ?? '请客观描述这张图片的全部关键信息：文字、数字、物体、场景。用中文，尽量具体。',
+              image_url: `data:${mediaType};base64,${image}`,
+            }),
+            signal: timed,
+          })
+          const body = await response.json() as { content?: unknown; base_resp?: { status_code?: unknown; status_msg?: unknown } }
+          if (!response.ok || body.base_resp?.status_code !== 0 || typeof body.content !== 'string' || body.content.length === 0) {
+            throw new Error(`vision endpoint answered ${String(response.status)} status_code=${String(body.base_resp?.status_code)} ${String(body.base_resp?.status_msg ?? '')}`.trim())
+          }
+          description = body.content
+        } catch (error: unknown) {
+          return err(request, {
+            code: 'data-vision-failed',
+            message: error instanceof Error ? error.message : String(error),
+            details: { reason: 'vlm-request-failed' },
+          })
+        }
+        return ok(request, {
+          attachmentId: String(ref.attachmentId),
+          name: ref.name,
+          description,
+        })
+      },
+
+      async extractText(request): Promise<RpcResponse<DataExtractTextView>> {
+        const { filename, data, mime } = request.payload
+        const sanitized = sanitizeUploadFilename(filename)
+        if (sanitized === undefined) {
+          return err(request, {
+            code: 'kb-invalid-filename',
+            message: 'filename must reduce to one safe file name (no directory segments or reserved names)',
+            details: { filename },
+          })
+        }
+        const extension = sanitized.slice(sanitized.lastIndexOf('.')).toLowerCase()
+        if (extension !== '.pdf' && extension !== '.md' && extension !== '.txt') {
+          return err(request, {
+            code: 'data-extract-unsupported',
+            message: 'extractText accepts pdf, md, and txt documents only',
+            details: { filename: sanitized },
+          })
+        }
+        const bytes = Buffer.from(data, 'base64')
+        if (bytes.byteLength > MAX_KB_INGEST_BYTES) {
+          return err(request, {
+            code: 'data-upload-too-large',
+            message: `upload exceeds the workbench limit of ${MAX_KB_INGEST_BYTES} bytes`,
+            details: { filename: sanitized, maxBytes: MAX_KB_INGEST_BYTES },
+          })
+        }
+        // The declared mime is advisory only; the extension decides the
+        // channel, matching the data router's classification stance.
+        void mime
+        let full: string
+        try {
+          full = extension === '.pdf'
+            ? await extractPdfText(new Uint8Array(bytes))
+            : new TextDecoder('utf-8', { fatal: true }).decode(bytes)
+        } catch (error: unknown) {
+          return err(request, {
+            code: 'data-extract-failed',
+            message: error instanceof Error ? error.message : String(error),
+            details: { filename: sanitized, reason: 'text-layer-extraction-failed' },
+          })
+        }
+        if (full.trim().length === 0) {
+          return err(request, {
+            code: 'data-extract-failed',
+            message: 'no text layer extracted (a scanned PDF carries none)',
+            details: { filename: sanitized, reason: 'empty-text-layer' },
+          })
+        }
+        const codePoints = Array.from(full)
+        if (codePoints.length <= DATA_EXTRACT_WIRE_MAX_CODE_POINTS) {
+          return ok(request, { text: full, truncated: false })
+        }
+        return ok(request, {
+          text: codePoints.slice(0, DATA_EXTRACT_WIRE_MAX_CODE_POINTS).join(''),
+          truncated: true,
+        })
       },
     },
 

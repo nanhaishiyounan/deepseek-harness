@@ -186,6 +186,16 @@ export interface RpcErrorDetailsMap {
   'data-lakehouse-unavailable': {}
   /** A unified data upload's decoded bytes exceeded the workbench byte limit. */
   'data-upload-too-large': { filename: string; maxBytes: number }
+  /** The describeImage channel is off (visionDescribeEnabled unset) — the composer hides its entry. */
+  'data-vision-disabled': {}
+  /** No credential resolves for the vision endpoint; the deployment must provide the key. */
+  'data-vision-unavailable': { apiKeyEnv: string }
+  /** The vision endpoint refused or failed the describe call. */
+  'data-vision-failed': { reason: string }
+  /** extractText accepts only pdf/md/txt (the composer's file picker filters the same set). */
+  'data-extract-unsupported': { filename: string }
+  /** The document's text layer could not be extracted (unparseable bytes or a scanned PDF with no text). */
+  'data-extract-failed': { filename: string; reason: string }
   /** A unified data upload failed (decode, parser, or seam refusal); the message is the cause's text. */
   'data-ingest-failed': { path: string }
   /** A lakehouse-overview call ran in a deployment that configured no overview seed (`lakehouseOverviewPath`). */

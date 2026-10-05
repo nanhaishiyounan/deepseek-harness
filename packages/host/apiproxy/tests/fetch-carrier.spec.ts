@@ -18,7 +18,7 @@ function fakeApi(overrides: Partial<{ muxFrames: MuxFrame[]; hostFrames: HostFra
   const kbRefuse = async (request: RpcRequest<unknown>): Promise<{ rpcId: typeof request.rpcId; result: { ok: false; error: { code: 'internal'; message: string; details: {} } } }> =>
     ({ rpcId: request.rpcId, result: { ok: false, error: { code: 'internal', message: 'kb stub', details: {} } } })
   return {
-    data: { upload: kbRefuse },
+    data: { upload: kbRefuse, describeImage: kbRefuse, extractText: kbRefuse },
     lakehouse: { overview: kbRefuse },
     orders: {
       create: kbRefuse,
