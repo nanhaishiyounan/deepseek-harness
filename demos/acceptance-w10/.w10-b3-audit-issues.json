@@ -15,7 +15,8 @@
           "severity": "P1明显",
           "category": "ua-default-style",
           "description": "“在线”标签表现出明显的浏览器/系统默认按钮样式残留，带有浅灰色细边框和默认圆角，与“酱园琥珀”设计语言中的印章元素或琥珀质感不符。",
-          "suggestion": "移除默认边框，改为琥珀色（#FFBF00系统色）背景配合酱色文字，或设计为更具“酱园”特色的印章造型。"
+          "suggestion": "移除默认边框，改为琥珀色（#FFBF00系统色）背景配合酱色文字，或设计为更具“酱园”特色的印章造型。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-agents-375-light.png",
@@ -23,7 +24,8 @@
           "severity": "P0毁容级",
           "category": "layout-overflow",
           "description": "底部卡片“智能品控主管”被底部导航栏（Tab Bar）完全遮挡了“在线”状态及下半部分内容，且未见安全区留白。",
-          "suggestion": "为列表容器增加 padding-bottom，确保最后一条卡片能完整滚动到导航栏上方，并适配 iOS/Android 底部安全区。"
+          "suggestion": "为列表容器增加 padding-bottom，确保最后一条卡片能完整滚动到导航栏上方，并适配 iOS/Android 底部安全区。",
+          "status": "rejected"
         },
         {
           "screenshot": "w10-b3-agents-375-light.png",
@@ -31,7 +33,8 @@
           "severity": "P1明显",
           "category": "misalign",
           "description": "各分组标题（如“数据与技术”、“职能与效率”）右侧的装饰横线与文字的垂直对齐方式异常，明显偏向文字基线而非中线，且线长与右侧边界间距不一致。",
-          "suggestion": "使用 flex 布局的 align-items: center 确保横线垂直居中，并统一线条的右边距。"
+          "suggestion": "使用 flex 布局的 align-items: center 确保横线垂直居中，并统一线条的右边距。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-agents-375-light.png",
@@ -39,7 +42,8 @@
           "severity": "P2瑕疵",
           "category": "typography",
           "description": "“智能填表助手”卡片中的描述文字“移动端唯一的持表 AI 同事：一...”截断位置过早，导致关键语义丢失。",
-          "suggestion": "考虑多行溢出隐藏（line-clamp: 2）或优化文案长度，保证用户能获取核心功能信息。"
+          "suggestion": "考虑多行溢出隐藏（line-clamp: 2）或优化文案长度，保证用户能获取核心功能信息。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-agents-375-light.png",
@@ -47,7 +51,8 @@
           "severity": "P1明显",
           "category": "inconsistency",
           "description": "左侧圆形头像图标底色不统一，“数据”为绿色，“合规”为酱色，“表单”为暗红色，打破了“酱园琥珀”主色的视觉统治力，显得凌乱。",
-          "suggestion": "统一图标底色方案，建议均采用“酱色”不同深浅的渐变或琥珀色作为点缀，保持品牌视觉一致性。"
+          "suggestion": "统一图标底色方案，建议均采用“酱色”不同深浅的渐变或琥珀色作为点缀，保持品牌视觉一致性。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-agents-375-light.png",
@@ -55,7 +60,8 @@
           "severity": "P2瑕疵",
           "category": "spacing",
           "description": "搜索框内部的放大镜图标与左边缘的间距，明显小于占位文字“搜索姓名...”与图标的间距，视觉重心左偏。",
-          "suggestion": "调整搜索框内左侧 padding 和图标 margin，使其视觉间距更符合呼吸感。"
+          "suggestion": "调整搜索框内左侧 padding 和图标 margin，使其视觉间距更符合呼吸感。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-agents-375-light.png",
@@ -63,7 +69,8 @@
           "severity": "P1明显",
           "category": "contrast",
           "description": "各卡片下方的标签（如“企业档案”、“供应链”）使用灰底黑字，在暖纸底背景上显得脏且对比度不足，工业冷灰感重。",
-          "suggestion": "改用浅琥珀色底纹或淡米色底纹，配合酱色文字，以符合“酱园琥珀”的暖色调体系。"
+          "suggestion": "改用浅琥珀色底纹或淡米色底纹，配合酱色文字，以符合“酱园琥珀”的暖色调体系。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-agents-375-light.png",
@@ -71,7 +78,8 @@
           "severity": "P2瑕疵",
           "category": "other",
           "description": "顶部状态栏或搜索框区域的阴影过于生硬（见搜索框下方），呈现出 Windows 风格的默认投影，与“克制阴影”的设计指导偏离。",
-          "suggestion": "减小 shadow-blur 和 spread，使用更柔和的酱色透明度作为投影色，而非纯黑色透明度。"
+          "suggestion": "减小 shadow-blur 和 spread，使用更柔和的酱色透明度作为投影色，而非纯黑色透明度。",
+          "status": "converged-with-b1"
         }
       ]
     },
@@ -86,7 +94,8 @@
           "severity": "P1明显",
           "category": "spacing",
           "description": "顶部“加载中...”提示文字的左边距（约16px）与下方骨架屏卡片的整体左边距（约20px）不一致，导致视觉轴线断裂。",
-          "suggestion": "统一页面全局水平内边距（Margin），建议“加载中...”对齐卡片左边缘。"
+          "suggestion": "统一页面全局水平内边距（Margin），建议“加载中...”对齐卡片左边缘。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-alerts-375-light.png",
@@ -94,7 +103,8 @@
           "severity": "P1明显",
           "category": "other",
           "description": "骨架屏占位元素（圆与条状）采用冷灰色调，与「酱园琥珀」的暖纸底视觉风格严重冲突，呈现出通用UI组件库的默认未定义感。",
-          "suggestion": "将骨架屏颜色调整为带有暖色倾向的浅色（如极低饱和度的酱红或琥珀金背景），以符合整体视觉语言。"
+          "suggestion": "将骨架屏颜色调整为带有暖色倾向的浅色（如极低饱和度的酱红或琥珀金背景），以符合整体视觉语言。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-alerts-375-light.png",
@@ -102,7 +112,8 @@
           "severity": "P2瑕疵",
           "category": "typography",
           "description": "“加载中...”文字使用系统默认深灰色且字号较小，与顶部导航栏“我的预警”的酱色主色调在视觉节奏上缺乏连贯性。",
-          "suggestion": "建议将加载提示文字改为设计语言中的“酱色”或琥珀色，并适当增加字号以提升识别度。"
+          "suggestion": "建议将加载提示文字改为设计语言中的“酱色”或琥珀色，并适当增加字号以提升识别度。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-alerts-375-light.png",
@@ -110,7 +121,8 @@
           "severity": "P2瑕疵",
           "category": "misalign",
           "description": "骨架屏内部圆形占位符与第一行条状占位符在垂直中轴线上未完全对齐，间距过窄（约8px），视觉上显得局促。",
-          "suggestion": "优化卡片内部组件的布局对齐，适当增加头像区域与文字区域的横向间距。"
+          "suggestion": "优化卡片内部组件的布局对齐，适当增加头像区域与文字区域的横向间距。",
+          "status": "next-batch"
         },
         {
           "screenshot": "w10-b3-alerts-375-light.png",
@@ -118,7 +130,8 @@
           "severity": "P2瑕疵",
           "category": "contrast",
           "description": "白色卡片背景与暖纸底（#F9F4E8 左右）对比度较低，阴影层级过轻，在某些高亮屏幕下卡片边界会消失。",
-          "suggestion": "适当增强卡片的“克制阴影”，可引入微量的琥珀色/酱色混合投影，或增加0.5px的极细浅色描边以勾勒轮廓。"
+          "suggestion": "适当增强卡片的“克制阴影”，可引入微量的琥珀色/酱色混合投影，或增加0.5px的极细浅色描边以勾勒轮廓。",
+          "status": "kept"
         },
         {
           "screenshot": "w10-b3-alerts-375-light.png",
@@ -126,7 +139,8 @@
           "severity": "P1明显",
           "category": "ua-default-style",
           "description": "骨架屏条状元素的圆角处理虽然是圆角，但其比例与卡片的圆角弧度不协调，呈现出浏览器默认UI框架的机械感。",
-          "suggestion": "微调骨架屏元素圆角，使其逻辑上呼应“酱园琥珀”卡片的圆润感，避免直角或过度极端的胶囊圆角。"
+          "suggestion": "微调骨架屏元素圆角，使其逻辑上呼应“酱园琥珀”卡片的圆润感，避免直角或过度极端的胶囊圆角。",
+          "status": "kept"
         }
       ]
     },
@@ -141,7 +155,8 @@
           "severity": "P1明显",
           "category": "ua-default-style",
           "description": "底部输入框（问我任何经营问题...）的 placeholder 颜色疑似为浏览器默认灰色，未遵循「酱园琥珀」的暖色系色谱，在暗色模式下显得生硬且带有工业感。",
-          "suggestion": "将占位符文字颜色调整为低饱和度的琥珀色或带暖调的深灰色（如 #6B5D52）。"
+          "suggestion": "将占位符文字颜色调整为低饱和度的琥珀色或带暖调的深灰色（如 #6B5D52）。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-chat-375-dark.png",
@@ -149,7 +164,8 @@
           "severity": "P2瑕疵",
           "category": "inconsistency",
           "description": "圆角逻辑不统一：用户气泡采用大圆角（接近胶囊形），而 AI 回复卡片及列表项（查询业务记录）采用中等圆角。顶层容器与内部元素圆角嵌套比例未对齐。",
-          "suggestion": "统一圆角规范，建议 AI 卡片圆角适当加大以匹配用户气泡的柔和感，或定义明确的层级圆角倍数。"
+          "suggestion": "统一圆角规范，建议 AI 卡片圆角适当加大以匹配用户气泡的柔和感，或定义明确的层级圆角倍数。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-chat-375-dark.png",
@@ -157,7 +173,8 @@
           "severity": "P1明显",
           "category": "contrast",
           "description": "状态追踪列表（查询业务记录）的文字颜色与深灰色背景块对比度较低，在暗色模式下识别度受限，不符合无障碍阅读标准。",
-          "suggestion": "提升列表项文字亮度，或将背景块颜色略微调浅，增加明度差。"
+          "suggestion": "提升列表项文字亮度，或将背景块颜色略微调浅，增加明度差。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-chat-375-dark.png",
@@ -165,7 +182,8 @@
           "severity": "P0毁容级",
           "category": "other",
           "description": "设计语言「酱园琥珀」核心元素缺失：界面中未见任何「印章元素」，且背景仅为纯黑/暗灰，丢失了「暖纸底」的纸质纹理感，导致品牌辨识度退化为通用暗色 UI。",
-          "suggestion": "在背景中加入微弱的纸质纤维纹理，并在 AI 身份标识或关键操作处（如提交成功）引入篆刻/印章风格的图标或装饰。"
+          "suggestion": "在背景中加入微弱的纸质纤维纹理，并在 AI 身份标识或关键操作处（如提交成功）引入篆刻/印章风格的图标或装饰。",
+          "status": "rejected"
         },
         {
           "screenshot": "w10-b3-chat-375-dark.png",
@@ -173,7 +191,8 @@
           "severity": "P2瑕疵",
           "category": "spacing",
           "description": "AI 详细回复卡片（查到两个情况...）内部行间距过密，尤其是包含加粗文字的列表行，在 375px 小屏上阅读压迫感较强。",
-          "suggestion": "增加正文行高（建议 1.6-1.8），并在段落序号 1、2 之间增加 4-8px 的段间距。"
+          "suggestion": "增加正文行高（建议 1.6-1.8），并在段落序号 1、2 之间增加 4-8px 的段间距。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-chat-375-dark.png",
@@ -181,7 +200,8 @@
           "severity": "P1明显",
           "category": "dark-mode",
           "description": "暗色模式下层级感丢失：AI 回复卡片与背景的区分仅靠微弱色差，缺乏「酱园琥珀」要求的克制阴影或琥珀色描边，导致视觉平面化。",
-          "suggestion": "为卡片增加一层极细的琥珀色半透明描边（border: 0.5px solid rgba(255, 191, 0, 0.1)）或增加深色投影来增强立体感。"
+          "suggestion": "为卡片增加一层极细的琥珀色半透明描边（border: 0.5px solid rgba(255, 191, 0, 0.1)）或增加深色投影来增强立体感。",
+          "status": "kept"
         },
         {
           "screenshot": "w10-b3-chat-375-dark.png",
@@ -189,7 +209,8 @@
           "severity": "P2瑕疵",
           "category": "typography",
           "description": "文字加粗（**供应商「宏发食品」**）在暗色环境下显得过粗，产生「晕开」感，且与未加粗文字的字重跳跃度过大。",
-          "suggestion": "在暗色模式下使用 Medium 字重替代 Bold，或通过颜色亮度区分重点，而非单纯依赖字重。"
+          "suggestion": "在暗色模式下使用 Medium 字重替代 Bold，或通过颜色亮度区分重点，而非单纯依赖字重。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-chat-375-dark.png",
@@ -197,7 +218,8 @@
           "severity": "P1明显",
           "category": "layout-overflow",
           "description": "顶部状态栏「本地会话」副标题字号过小且位置紧贴主标题，在全面屏手势区下方显得局促，易被忽略。",
-          "suggestion": "适当增加主副标题间距，并略微提升副标题对比度。"
+          "suggestion": "适当增加主副标题间距，并略微提升副标题对比度。",
+          "status": "converged-with-b1"
         }
       ]
     },
@@ -212,7 +234,8 @@
           "severity": "P1明显",
           "category": "ua-default-style",
           "description": "底部输入框“问我任何经营问题...”保留了原生 textarea/input 的浅灰色描边与默认聚焦外观，与整体设计语言不符。",
-          "suggestion": "移除原生边框，改用酱色（深棕红）或琥珀色细描边，并应用“酱园琥珀”风格的圆角。"
+          "suggestion": "移除原生边框，改用酱色（深棕红）或琥珀色细描边，并应用“酱园琥珀”风格的圆角。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-chat-375-light.png",
@@ -220,7 +243,8 @@
           "severity": "P1明显",
           "category": "other",
           "description": "“查询业务记录”状态项使用了标准的功能性亮绿色，与“酱园琥珀”要求的暖纸底、酱色、琥珀色视觉基调冲突，呈现工业化冷色感。",
-          "suggestion": "将绿色勾选框替换为琥珀色或橄榄绿调的暖色系，背景色调整为与暖纸底更协调的米黄或淡琥珀色。"
+          "suggestion": "将绿色勾选框替换为琥珀色或橄榄绿调的暖色系，背景色调整为与暖纸底更协调的米黄或淡琥珀色。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-chat-375-light.png",
@@ -228,7 +252,8 @@
           "severity": "P2瑕疵",
           "category": "layout-overflow",
           "description": "顶部导航栏标题“帮我登记一条采购单：供...”发生严重截断，未根据屏幕宽度动态调整或采用更优雅的折行/滚动处理方式。",
-          "suggestion": "优化标题字号或增加跑马灯/折行逻辑，确保核心意图可见。"
+          "suggestion": "优化标题字号或增加跑马灯/折行逻辑，确保核心意图可见。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-chat-375-light.png",
@@ -236,7 +261,8 @@
           "severity": "P2瑕疵",
           "category": "spacing",
           "description": "用户发送的酱色气泡右侧边距与 AI 回复气泡左侧（含头像）的非对称间距不统一，导致视觉重心左右摇摆。",
-          "suggestion": "规范对话流两侧的安全间距，确保左右气泡在屏幕两侧的呼吸感一致。"
+          "suggestion": "规范对话流两侧的安全间距，确保左右气泡在屏幕两侧的呼吸感一致。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-chat-375-light.png",
@@ -244,7 +270,8 @@
           "severity": "P1明显",
           "category": "contrast",
           "description": "状态标签“查询业务记录”的浅绿底色与背景暖纸色对比度过低，导致标签边缘模糊，不符合可访问性要求。",
-          "suggestion": "加深标签背景色或增加酱色细边框以强化轮廓区分。"
+          "suggestion": "加深标签背景色或增加酱色细边框以强化轮廓区分。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-chat-375-light.png",
@@ -252,7 +279,8 @@
           "severity": "P2瑕疵",
           "category": "typography",
           "description": "AI 回复中的长文本段落（如 1、2 点说明）行高（line-height）过紧，在 375px 宽度下阅读压力较大。",
-          "suggestion": "将正文行高提升至 1.5-1.6 倍，增加行间呼吸感。"
+          "suggestion": "将正文行高提升至 1.5-1.6 倍，增加行间呼吸感。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-chat-375-light.png",
@@ -260,7 +288,8 @@
           "severity": "P2瑕疵",
           "category": "inconsistency",
           "description": "用户气泡的圆角逻辑（左上、左下、右上大圆角，右下小圆角）与 AI 气泡的圆角弧度不完全对应，且弧度数值与底部输入框圆角不统一。",
-          "suggestion": "统一全局圆角比例尺，确保所有卡片与气泡的圆角特征遵循同一比例逻辑。"
+          "suggestion": "统一全局圆角比例尺，确保所有卡片与气泡的圆角特征遵循同一比例逻辑。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-chat-375-light.png",
@@ -268,7 +297,8 @@
           "severity": "P1明显",
           "category": "other",
           "description": "底部发送按钮的琥珀色圆底与加号图标的尺寸比例、视觉量感不协调，加号按钮显得单薄且未风格化。",
-          "suggestion": "将左侧加号按钮也进行容器化处理，或统一图标粗细，使其符合“印章元素”的设计特征。"
+          "suggestion": "将左侧加号按钮也进行容器化处理，或统一图标粗细，使其符合“印章元素”的设计特征。",
+          "status": "converged-with-b1"
         }
       ]
     },
@@ -283,7 +313,8 @@
           "severity": "P1明显",
           "category": "layout-overflow",
           "description": "页脚文本“NocoBase 业务系统...与 PC 工作台共享会话”极其贴近屏幕底边，未预留底部安全区（Safe Area），在全面屏设备上会被系统 Home Indicator 遮挡。",
-          "suggestion": "增加底部内边距，建议使用 padding-bottom: env(safe-area-inset-bottom) 或至少预留 24px 间距。"
+          "suggestion": "增加底部内边距，建议使用 padding-bottom: env(safe-area-inset-bottom) 或至少预留 24px 间距。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-chats-375-light.png",
@@ -291,7 +322,8 @@
           "severity": "P2瑕疵",
           "category": "design-language",
           "description": "骨架屏占位图（圆形头像、条状文本）和页脚文字采用了中性冷灰色，与“酱园琥珀”的暖纸底色调不协，呈现出工业化的廉价感。",
-          "suggestion": "将灰色占位符及辅助文字色值改为带暖色倾向的浅褐色（如酱色的 10% 透明度或琥珀色的低饱和度灰），以维持视觉风格的连贯性。"
+          "suggestion": "将灰色占位符及辅助文字色值改为带暖色倾向的浅褐色（如酱色的 10% 透明度或琥珀色的低饱和度灰），以维持视觉风格的连贯性。",
+          "status": "kept"
         },
         {
           "screenshot": "w10-b3-chats-375-light.png",
@@ -299,7 +331,8 @@
           "severity": "P1明显",
           "category": "contrast",
           "description": "搜索框占位语“搜索会话/同事”及未激活选项卡“AI 同事”、“待审核”的文字颜色过浅，与暖纸背景对比度不足，易读性差。",
-          "suggestion": "提升非激活状态文字的对比度，确保符合 WCAG AA 级标准，建议使用深褐色降低透明度而非纯灰色。"
+          "suggestion": "提升非激活状态文字的对比度，确保符合 WCAG AA 级标准，建议使用深褐色降低透明度而非纯灰色。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-chats-375-light.png",
@@ -307,7 +340,8 @@
           "severity": "P2瑕疵",
           "category": "typography",
           "description": "底部页脚文字字号过小（视觉判断约 10-11px），且两行文本排版割裂，“与 PC 工作台...”这一行左侧对齐方式生硬。",
-          "suggestion": "字号建议不低于 12px，两行文字建议采用居中对齐或调整行高与间距，使其看起来像一个完整的版权/说明块。"
+          "suggestion": "字号建议不低于 12px，两行文字建议采用居中对齐或调整行高与间距，使其看起来像一个完整的版权/说明块。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-chats-375-light.png",
@@ -315,7 +349,8 @@
           "severity": "P2瑕疵",
           "category": "spacing",
           "description": "列表区域与筛选标签栏之间的顶部间距偏大，导致首条消息内容被挤向下方，首屏内容利用率较低。",
-          "suggestion": "适当压缩标签栏下方的 Margin 或 Padding，使列表首条内容上移，提高信息密度。"
+          "suggestion": "适当压缩标签栏下方的 Margin 或 Padding，使列表首条内容上移，提高信息密度。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-chats-375-light.png",
@@ -323,7 +358,8 @@
           "severity": "P1明显",
           "category": "ua-default-style",
           "description": "搜索输入框（搜索会话/同事）虽然有圆角，但其背景色与描边呈现出 Web 端 input 的默认平面感，缺乏设计语言要求的“圆角卡片”厚度或“暖纸”质感。",
-          "suggestion": "去除 input 的默认 border 与 outline，应用轻微的内阴影或琥珀色细边框，并确保聚焦时不弹出浏览器原生的蓝色聚焦环。"
+          "suggestion": "去除 input 的默认 border 与 outline，应用轻微的内阴影或琥珀色细边框，并确保聚焦时不弹出浏览器原生的蓝色聚焦环。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-chats-375-light.png",
@@ -331,7 +367,8 @@
           "severity": "P2瑕疵",
           "category": "misalign",
           "description": "顶部标题“消息”与右侧“+”号按钮的垂直中心线似乎未完全对齐，视觉上“+”号圆圈略显靠上。",
-          "suggestion": "使用 Flexbox 确保顶部导航栏所有元素在垂直方向上绝对居中对齐。"
+          "suggestion": "使用 Flexbox 确保顶部导航栏所有元素在垂直方向上绝对居中对齐。",
+          "status": "next-batch"
         }
       ]
     },
@@ -346,7 +383,8 @@
           "severity": "P1明显",
           "category": "contrast",
           "description": "页面上方“质检员·王倩 · 常用单据”文本颜色过淡且字号较小，在暖纸色背景下对比度不足，影响可读性。",
-          "suggestion": "加深该文本颜色，建议使用酱色系的深灰褐色，并适当增大字号以符合企业端易读性要求。"
+          "suggestion": "加深该文本颜色，建议使用酱色系的深灰褐色，并适当增大字号以符合企业端易读性要求。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-docs-375-light.png",
@@ -354,7 +392,8 @@
           "severity": "P2瑕疵",
           "category": "spacing",
           "description": "卡片网格布局间距失衡，卡片间的横向间距与纵向间距不一致，且首行三个卡片间的空隙感略显局促。",
-          "suggestion": "统一网格间距（如 12px 或 16px），并确保卡片组两侧的页边距与导航栏对齐。"
+          "suggestion": "统一网格间距（如 12px 或 16px），并确保卡片组两侧的页边距与导航栏对齐。",
+          "status": "next-batch"
         },
         {
           "screenshot": "w10-b3-docs-375-light.png",
@@ -362,7 +401,8 @@
           "severity": "P2瑕疵",
           "category": "layout-overflow",
           "description": "“不合格处置单”卡片内文字左右间距过窄，几乎贴合卡片边框，视觉上产生压迫感。",
-          "suggestion": "优化长文本的处理方式，可尝试减小卡片内文字字号或增加卡片内边距，确保文字与边缘留有呼吸感。"
+          "suggestion": "优化长文本的处理方式，可尝试减小卡片内文字字号或增加卡片内边距，确保文字与边缘留有呼吸感。",
+          "status": "next-batch"
         },
         {
           "screenshot": "w10-b3-docs-375-light.png",
@@ -370,7 +410,8 @@
           "severity": "P2瑕疵",
           "category": "other",
           "description": "卡片阴影色值偏向默认中性灰，与“酱园琥珀”温润、暖调的设计语言不符，显得生硬。",
-          "suggestion": "将卡片阴影改为带有暖棕色相的低透明度投影（如 rgba(84, 38, 25, 0.08)），使层次感更符合视觉语言。"
+          "suggestion": "将卡片阴影改为带有暖棕色相的低透明度投影（如 rgba(84, 38, 25, 0.08)），使层次感更符合视觉语言。",
+          "status": "kept"
         },
         {
           "screenshot": "w10-b3-docs-375-light.png",
@@ -378,7 +419,8 @@
           "severity": "P2瑕疵",
           "category": "misalign",
           "description": "顶部导航栏返回箭头与左侧边缘的间距较小，不符合主流移动端安全区点击热区规范。",
-          "suggestion": "增加返回按钮与屏幕左侧的边距（建议 16px），提升操作舒适度与视觉平衡。"
+          "suggestion": "增加返回按钮与屏幕左侧的边距（建议 16px），提升操作舒适度与视觉平衡。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-docs-375-light.png",
@@ -386,7 +428,8 @@
           "severity": "P2瑕疵",
           "category": "inconsistency",
           "description": "卡片边框颜色极浅，在暖纸底色上与背景区分度不够明显，导致卡片轮廓感减弱。",
-          "suggestion": "略微加深卡片边框色值，或适当增加背景色与卡片色的色差，强化容器边界。"
+          "suggestion": "略微加深卡片边框色值，或适当增加背景色与卡片色的色差，强化容器边界。",
+          "status": "converged-with-b1"
         }
       ]
     },
@@ -401,7 +444,8 @@
           "severity": "P1",
           "category": "contrast",
           "description": "卡片内辅助描述文字（如“截至今天 · 数据来自...”）颜色过浅，在暖色纸张背景下辨识度较低。",
-          "suggestion": "提高文字对比度，建议将色值调整为更深的酱色系灰色，确保符合 WCAG AA 级对比度标准。"
+          "suggestion": "提高文字对比度，建议将色值调整为更深的酱色系灰色，确保符合 WCAG AA 级对比度标准。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-files-375-light.png",
@@ -409,7 +453,8 @@
           "severity": "P1",
           "category": "ua-default-style",
           "description": "“示例”标签的灰色细边框观感过于工业化且接近浏览器默认组件样式，与“酱园琥珀”温润的设计语言不符。",
-          "suggestion": "移除或更换中性灰边框，改用琥珀色或淡酱色的浅底色填充，并配合适当的圆角。"
+          "suggestion": "移除或更换中性灰边框，改用琥珀色或淡酱色的浅底色填充，并配合适当的圆角。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-files-375-light.png",
@@ -417,7 +462,8 @@
           "severity": "P2",
           "category": "misalign",
           "description": "右侧“琥珀星号”图标与第一行标题文字（本月经营概览）在垂直方向上未完全居中对齐，略偏上。",
-          "suggestion": "调整星号图标的垂直对齐方式，使其与该行文本的中轴线保持一致。"
+          "suggestion": "调整星号图标的垂直对齐方式，使其与该行文本的中轴线保持一致。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-files-375-light.png",
@@ -425,7 +471,8 @@
           "severity": "P2",
           "category": "spacing",
           "description": "卡片内纵向间距失衡：标题与辅助文字间距过近，而辅助文字与底部“查看报告”链接之间的间距明显增大。",
-          "suggestion": "统一卡片内部元素的纵向步进间距，建议采用 4px/8px 的倍数关系重新分配。"
+          "suggestion": "统一卡片内部元素的纵向步进间距，建议采用 4px/8px 的倍数关系重新分配。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-files-375-light.png",
@@ -433,7 +480,8 @@
           "severity": "P2",
           "category": "typography",
           "description": "分组标题（如“AI 生成”、“最近文件”）字号过小且色值较淡，导致页面层级感不够明确。",
-          "suggestion": "稍微增加分组标题的字重或使用深酱色（主色），以强化页面区块的导视功能。"
+          "suggestion": "稍微增加分组标题的字重或使用深酱色（主色），以强化页面区块的导视功能。",
+          "status": "next-batch"
         },
         {
           "screenshot": "w10-b3-files-375-light.png",
@@ -441,7 +489,8 @@
           "severity": "P2",
           "category": "inconsistency",
           "description": "卡片内部采用左对齐排列，但底部操作项“查看报告”似乎处于居中或偏右的模糊位置，导致视觉重心偏移。",
-          "suggestion": "将“查看报告”明确统一为左对齐，或将卡片操作区进行横向通栏化设计。"
+          "suggestion": "将“查看报告”明确统一为左对齐，或将卡片操作区进行横向通栏化设计。",
+          "status": "next-batch"
         },
         {
           "screenshot": "w10-b3-files-375-light.png",
@@ -449,7 +498,8 @@
           "severity": "P2",
           "category": "other",
           "description": "左侧“报”字印章元素采用正圆背景，与设计语言中提及的“酱园”传统文化感结合度一般。",
-          "suggestion": "可尝试微圆角矩形或更具书法质感的“圆方印”形态，以更好地契合“印章元素”的设计要求。"
+          "suggestion": "可尝试微圆角矩形或更具书法质感的“圆方印”形态，以更好地契合“印章元素”的设计要求。",
+          "status": "converged-with-b1"
         }
       ]
     },
@@ -464,7 +514,8 @@
           "severity": "P1明显",
           "category": "layout-overflow",
           "description": "「AI 同事」横向列表最右侧「AI 营销洞察主管」元素超出屏幕边界，文字发生截断且布局顶出安全区",
-          "suggestion": "将「AI 同事」列表改为横向滚动容器（Scroll Container），并确保容器末尾留有 16px 或 20px 的内边距"
+          "suggestion": "将「AI 同事」列表改为横向滚动容器（Scroll Container），并确保容器末尾留有 16px 或 20px 的内边距",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-home-375-dark.png",
@@ -472,7 +523,8 @@
           "severity": "P1明显",
           "category": "inconsistency",
           "description": "中部状态统计卡片中，「进行中」与「已完成」的数字（34）使用了高饱和青绿色，与『酱园琥珀』设计语言中的暖纸底、琥珀色系严重冲突",
-          "suggestion": "建议将统计数字统一为琥珀色，或使用设计语言内的酱色系深红色以体现视觉一致性"
+          "suggestion": "建议将统计数字统一为琥珀色，或使用设计语言内的酱色系深红色以体现视觉一致性",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-home-375-dark.png",
@@ -480,7 +532,8 @@
           "severity": "P1明显",
           "category": "other",
           "description": "「我的预警」右上角红色角标使用了系统默认的亮红色，未应用『酱园琥珀』设计语言中的“酱色（深棕红）”",
-          "suggestion": "将通知角标颜色调整为调性一致的深红棕色，或饱和度略高的酱红色"
+          "suggestion": "将通知角标颜色调整为调性一致的深红棕色，或饱和度略高的酱红色",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-home-375-dark.png",
@@ -488,7 +541,8 @@
           "severity": "P2瑕疵",
           "category": "contrast",
           "description": "「AI 同事」模块中，最右侧「营」图标与背景色对比度过低，且下方文字在暗色模式下灰度太高，可读性弱",
-          "suggestion": "提升非激活态图标的背景明度，或为图标增加细微的琥珀色边框；加亮文字颜色以通过 WCAG 对比度标准"
+          "suggestion": "提升非激活态图标的背景明度，或为图标增加细微的琥珀色边框；加亮文字颜色以通过 WCAG 对比度标准",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-home-375-dark.png",
@@ -496,7 +550,8 @@
           "severity": "P2瑕疵",
           "category": "inconsistency",
           "description": "「AI 同事」图标背景色混乱，出现了高亮绿、亮红等工业色，破坏了“酱园琥珀”风格的暖纸色调一致性",
-          "suggestion": "统一 AI 助手的圆形背景色板，建议采用酱色系的不同深浅度或带透明度的琥珀色"
+          "suggestion": "统一 AI 助手的圆形背景色板，建议采用酱色系的不同深浅度或带透明度的琥珀色",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-home-375-dark.png",
@@ -504,7 +559,8 @@
           "severity": "P2瑕疵",
           "category": "typography",
           "description": "「AI 食安合规官」等标签文字行高过紧，且在四个字以上的情况下与上方的圆形图标间距失序",
-          "suggestion": "适当增加标签与图标间的间距（8px-12px），并优化长文本的折行或缩略处理"
+          "suggestion": "适当增加标签与图标间的间距（8px-12px），并优化长文本的折行或缩略处理",
+          "status": "next-batch"
         },
         {
           "screenshot": "w10-b3-home-375-dark.png",
@@ -512,7 +568,8 @@
           "severity": "P2瑕疵",
           "category": "misalign",
           "description": "顶部「10月5日 周一 · 75 项预警待看」中的中点分隔符（·）垂直中心线未与两侧文字完美对齐，视觉偏上",
-          "suggestion": "手动微调分隔符的垂直偏移量，确保在视觉上位于文字行高的物理正中心"
+          "suggestion": "手动微调分隔符的垂直偏移量，确保在视觉上位于文字行高的物理正中心",
+          "status": "next-batch"
         },
         {
           "screenshot": "w10-b3-home-375-dark.png",
@@ -520,7 +577,8 @@
           "severity": "P1明显",
           "category": "other",
           "description": "底部导航栏「工作台」与「我的」图标线条粗细及风格与已选中的「消息」实心风格不统一，且灰色深度不足",
-          "suggestion": "统一底部导航图标的线条磅数和风格，暗色模式下非选中态建议增加 10%-15% 的亮度以增强辨识度"
+          "suggestion": "统一底部导航图标的线条磅数和风格，暗色模式下非选中态建议增加 10%-15% 的亮度以增强辨识度",
+          "status": "converged-with-b1"
         }
       ]
     },
@@ -535,7 +593,8 @@
           "severity": "P1明显",
           "category": "layout-overflow",
           "description": "“AI 同事”区域右侧元素“AI 营销洞察主管”及其图标被容器截断，且未提供明确的滑动指引。",
-          "suggestion": "增加右侧内边距或使用渐变遮罩提示可横向滚动，确保最后一个元素显示完整或有明显的露出感。"
+          "suggestion": "增加右侧内边距或使用渐变遮罩提示可横向滚动，确保最后一个元素显示完整或有明显的露出感。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-home-375-light.png",
@@ -543,7 +602,8 @@
           "severity": "P1明显",
           "category": "contrast",
           "description": "底部导航栏非激活态图标及文字（同事、工作台、我的）颜色过浅，与暖纸底色对比度不足。",
-          "suggestion": "加深非激活态的灰色值，确保在亮色模式下满足最低可读性标准。"
+          "suggestion": "加深非激活态的灰色值，确保在亮色模式下满足最低可读性标准。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-home-375-light.png",
@@ -551,7 +611,8 @@
           "severity": "P2瑕疵",
           "category": "design-language",
           "description": "“AI 营销洞察主管”的圆形图标采用了冷灰色渐变，与“酱园琥珀”设计语言中强调的酱色、暖调严重冲突，观感偏工业/默认样式。",
-          "suggestion": "将该图标背景色统一为酱色或深绿等暖色系，去除冷色渐变。"
+          "suggestion": "将该图标背景色统一为酱色或深绿等暖色系，去除冷色渐变。",
+          "status": "kept"
         },
         {
           "screenshot": "w10-b3-home-375-light.png",
@@ -559,7 +620,8 @@
           "severity": "P2瑕疵",
           "category": "contrast",
           "description": "顶部日期“10月5日 周一”以及卡片下方说明文字“待处理”、“进行中”等字色过淡，在暖黄背景上辨识度较低。",
-          "suggestion": "提高二级文字的明度对比，建议使用深棕灰色（酱色的低饱和版本）代替默认浅灰。"
+          "suggestion": "提高二级文字的明度对比，建议使用深棕灰色（酱色的低饱和版本）代替默认浅灰。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-home-375-light.png",
@@ -567,7 +629,8 @@
           "severity": "P2瑕疵",
           "category": "inconsistency",
           "description": "“我的预警”按钮上的数字角标“75”使用了系统默认红色，与品牌主色“酱色”（如登记按钮）存在色相偏差，且角标压线位置略显拥挤。",
-          "suggestion": "将角标底色统一为品牌酱色或琥珀色，并微调角标 Offset 位置避免视觉压迫边缘。"
+          "suggestion": "将角标底色统一为品牌酱色或琥珀色，并微调角标 Offset 位置避免视觉压迫边缘。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-home-375-light.png",
@@ -575,7 +638,8 @@
           "severity": "P2瑕疵",
           "category": "ua-default-style",
           "description": "搜索框的描边色采用了类似浏览器默认的浅灰色（#E...），在整体暖色调界面中显得生硬且带有“工业蓝灰”残留感。",
-          "suggestion": "将搜索框描边改为浅琥珀色或极浅的酱色，使其融入“暖纸”背景。"
+          "suggestion": "将搜索框描边改为浅琥珀色或极浅的酱色，使其融入“暖纸”背景。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-home-375-light.png",
@@ -583,7 +647,8 @@
           "severity": "P2瑕疵",
           "category": "spacing",
           "description": "底部导航栏“我的”图标及文字距离屏幕右侧边缘过近，与左侧“消息”的边距不完全对称。",
-          "suggestion": "核对底部导航栏的容器内边距，确保左右两侧留白一致。"
+          "suggestion": "核对底部导航栏的容器内边距，确保左右两侧留白一致。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-home-375-light.png",
@@ -591,7 +656,8 @@
           "severity": "P2瑕疵",
           "category": "typography",
           "description": "“AI 食安合规官”等描述文字字号偏小且行高紧凑，在小尺寸屏幕上易产生视觉疲劳。",
-          "suggestion": "微调 AI 助手标题的行高，增加文字与图标之间的间距。"
+          "suggestion": "微调 AI 助手标题的行高，增加文字与图标之间的间距。",
+          "status": "converged-with-b1"
         }
       ]
     },
@@ -606,7 +672,8 @@
           "severity": "P1明显",
           "category": "typography",
           "description": "“AI 同事”区域中，“AI 营销洞察主管”文字发生折行，导致该卡片高度与其他单行显示的卡片（如“AI 食安合规官”）不一致，破坏了水平对齐的视觉节奏。",
-          "suggestion": "优化文字布局，建议适当缩小该处字号或调整容器宽度，确保标签内容单行展示以维持垂直对齐。"
+          "suggestion": "优化文字布局，建议适当缩小该处字号或调整容器宽度，确保标签内容单行展示以维持垂直对齐。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-home-390-light.png",
@@ -614,7 +681,8 @@
           "severity": "P1明显",
           "category": "style-drift",
           "description": "“我的预警”按钮右上角的数字角标“75”使用了标准高饱和度系统红，与“酱园琥珀”设计语言中的深棕红（酱色）主基调产生严重视觉冲突，呈现出通用的工业化界面感。",
-          "suggestion": "将角标颜色调整为符合“酱园琥珀”色系的酱红色或较深的琥珀色，使其视觉风格统一。"
+          "suggestion": "将角标颜色调整为符合“酱园琥珀”色系的酱红色或较深的琥珀色，使其视觉风格统一。",
+          "status": "kept"
         },
         {
           "screenshot": "w10-b3-home-390-light.png",
@@ -622,7 +690,8 @@
           "severity": "P1明显",
           "category": "contrast",
           "description": "底部导航栏中非激活态的文字（同事、工作台、我的）色值过浅，在“暖纸底”背景上的对比度不足，影响功能的可发现性。",
-          "suggestion": "加深非激活态文字的颜色深度，确保其满足 WCAG 基本可读性对比度要求。"
+          "suggestion": "加深非激活态文字的颜色深度，确保其满足 WCAG 基本可读性对比度要求。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-home-390-light.png",
@@ -630,7 +699,8 @@
           "severity": "P2瑕疵",
           "category": "style-drift",
           "description": "“AI 同事”头像上的在线状态指示点使用了标准功能绿，其高饱和度色调在整体暖色调的“酱园琥珀”背景中显得生硬且突兀。",
-          "suggestion": "对绿色圆点的饱和度进行降准处理，使其更趋向于暖绿色调，或使用琥珀色系圆点以适配整体视觉风格。"
+          "suggestion": "对绿色圆点的饱和度进行降准处理，使其更趋向于暖绿色调，或使用琥珀色系圆点以适配整体视觉风格。",
+          "status": "kept"
         },
         {
           "screenshot": "w10-b3-home-390-light.png",
@@ -638,7 +708,8 @@
           "severity": "P2瑕疵",
           "category": "inconsistency",
           "description": "同一页面内“75”这一数值存在两种视觉表达：顶部日期条中为琥珀色点缀，而“我的预警”角标中为红底白字，同类语义信息的视觉权重和颜色定义不统一。",
-          "suggestion": "统一预警数值的视觉语义，建议将角标背景色与顶部点缀色保持一致或同属酱色系。"
+          "suggestion": "统一预警数值的视觉语义，建议将角标背景色与顶部点缀色保持一致或同属酱色系。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-home-390-light.png",
@@ -646,7 +717,8 @@
           "severity": "P2瑕疵",
           "category": "contrast",
           "description": "搜索栏内的占位符文字“搜索会话 / AI 同事”与放大镜图标使用的灰色调偏冷，与背景的暖纸色（Warm Paper）融合度欠佳，带有明显的默认 UI 残留感。",
-          "suggestion": "将搜索栏内的文本和图标色值微调为偏暖的深棕灰色，以符合“酱园琥珀”的设计语言。"
+          "suggestion": "将搜索栏内的文本和图标色值微调为偏暖的深棕灰色，以符合“酱园琥珀”的设计语言。",
+          "status": "converged-with-b1"
         }
       ]
     },
@@ -661,7 +733,8 @@
           "severity": "P1",
           "category": "layout-overflow",
           "description": "顶部标题栏文字「帮我登记一条采购单：供...」在关键信息处被截断，影响业务意图识别。",
-          "suggestion": "优化标题显示策略，可采用跑马灯效果或在非关键位置截断，或者允许标题换行显示。"
+          "suggestion": "优化标题显示策略，可采用跑马灯效果或在非关键位置截断，或者允许标题换行显示。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-ix-composer-focus-375-light.png",
@@ -669,7 +742,8 @@
           "severity": "P1",
           "category": "ua-default-style",
           "description": "底部输入框 textarea 呈现明显的系统默认控件感，边框粗细与圆角（约 4px）与卡片大圆角（约 12-16px）视觉冲突，缺乏设计语言定制。",
-          "suggestion": "移除原生边框，使用酱色系的浅淡边框或微弱内阴影，增大圆角至 8-10px，使其融入「酱园琥珀」暖纸底色。"
+          "suggestion": "移除原生边框，使用酱色系的浅淡边框或微弱内阴影，增大圆角至 8-10px，使其融入「酱园琥珀」暖纸底色。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-ix-composer-focus-375-light.png",
@@ -677,7 +751,8 @@
           "severity": "P1",
           "category": "other",
           "description": "用户消息气泡底色为琥珀橙色，与设计语言定义的「酱色（深棕红）」主色不符，主次色倒置。",
-          "suggestion": "将用户气泡底色修改为酱色（深棕红），文字保持白色；琥珀色应保留在操作按钮或状态强调上。"
+          "suggestion": "将用户气泡底色修改为酱色（深棕红），文字保持白色；琥珀色应保留在操作按钮或状态强调上。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-ix-composer-focus-375-light.png",
@@ -685,7 +760,8 @@
           "severity": "P2",
           "category": "misalign",
           "description": "AI 助手头像「表单 AI」与右侧白色消息气泡的顶端物理位置未对齐，视觉上产生偏移。",
-          "suggestion": "将头像中轴线或顶端与消息气泡进行对齐，确保视觉流平整。"
+          "suggestion": "将头像中轴线或顶端与消息气泡进行对齐，确保视觉流平整。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-ix-composer-focus-375-light.png",
@@ -693,7 +769,8 @@
           "severity": "P1",
           "category": "inconsistency",
           "description": "「查询业务记录」状态标签的绿色图标与背景色具有明显的通用工业感，与「暖纸+琥珀」的复古暖调视觉冲突。",
-          "suggestion": "调整状态色值，建议使用更偏暖的色相（如暗金、朱砂红或偏棕的草绿），并统一图标线条粗细。"
+          "suggestion": "调整状态色值，建议使用更偏暖的色相（如暗金、朱砂红或偏棕的草绿），并统一图标线条粗细。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-ix-composer-focus-375-light.png",
@@ -701,7 +778,8 @@
           "severity": "P2",
           "category": "typography",
           "description": "AI 回复大卡片内，列表项 1 和 2 的正文行高（Line-height）较窄，尤其是包含加粗文字时显得拥挤。",
-          "suggestion": "将正文行高调整为 1.5 倍至 1.6 倍字号，增加段间距，提高长文阅读舒适度。"
+          "suggestion": "将正文行高调整为 1.5 倍至 1.6 倍字号，增加段间距，提高长文阅读舒适度。",
+          "status": "next-batch"
         },
         {
           "screenshot": "w10-b3-ix-composer-focus-375-light.png",
@@ -709,7 +787,8 @@
           "severity": "P2",
           "category": "spacing",
           "description": "三个「查询业务记录」标签之间的纵向间距过大，导致与上下文的消息流产生断裂感。",
-          "suggestion": "缩小状态标签组的内部间距，并使该组整体相对于上方消息气泡的间距保持一致性。"
+          "suggestion": "缩小状态标签组的内部间距，并使该组整体相对于上方消息气泡的间距保持一致性。",
+          "status": "next-batch"
         },
         {
           "screenshot": "w10-b3-ix-composer-focus-375-light.png",
@@ -717,7 +796,8 @@
           "severity": "P1",
           "category": "other",
           "description": "顶部右侧「+」按钮与底部发送按钮的图标风格不统一，前者为细线型，后者为填充型，且圆角弧度不一致。",
-          "suggestion": "统一全局图标集视觉权重，建议全部使用圆润的填充型图标或统一宽度的线框图标，并统一按钮投影样式。"
+          "suggestion": "统一全局图标集视觉权重，建议全部使用圆润的填充型图标或统一宽度的线框图标，并统一按钮投影样式。",
+          "status": "converged-with-b1"
         }
       ]
     },
@@ -732,7 +812,8 @@
           "severity": "P2瑕疵",
           "category": "misalign",
           "description": "顶部次级标题“质检员·王倩 · 常用单据”的左侧对齐基准与下方卡片矩阵的左边缘不一致，标题文本明显更靠右，未对齐容器安全边距。",
-          "suggestion": "统一页面的水平内边距（Padding-left），确保文本标题与下方卡片组的左侧物理边缘在同一垂直轴线上。"
+          "suggestion": "统一页面的水平内边距（Padding-left），确保文本标题与下方卡片组的左侧物理边缘在同一垂直轴线上。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-ix-docs-scroll-375-light.png",
@@ -740,7 +821,8 @@
           "severity": "P1明显",
           "category": "spacing",
           "description": "次级标题“常用单据”与第一行卡片之间的纵向间距过窄，与其上方“质检员”文本的行间距比例失调，导致视觉层级挤压。",
-          "suggestion": "增加标题与卡片区域之间的 Margin-top，建议间距调整为 20px-24px，以拉开业务模块的间距。"
+          "suggestion": "增加标题与卡片区域之间的 Margin-top，建议间距调整为 20px-24px，以拉开业务模块的间距。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-ix-docs-scroll-375-light.png",
@@ -748,7 +830,8 @@
           "severity": "P2瑕疵",
           "category": "inconsistency",
           "description": "卡片容器的边框色呈现为偏冷的灰色，与设计语言要求的“暖纸底”及“酱色”主色调冲突，破坏了整体色温的一致性。",
-          "suggestion": "将卡片边框颜色调整为浅琥珀色或极浅的酱色（带暖调的棕红系），以符合“酱园琥珀”视觉规范。"
+          "suggestion": "将卡片边框颜色调整为浅琥珀色或极浅的酱色（带暖调的棕红系），以符合“酱园琥珀”视觉规范。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-ix-docs-scroll-375-light.png",
@@ -756,7 +839,8 @@
           "severity": "P2瑕疵",
           "category": "typography",
           "description": "卡片内标题“不合格处置单”字数（5字）多于其他卡片（3-4字），在相同宽度的卡片内导致左右留白（Padding-inline）显得过窄，视觉节奏不统一。",
-          "suggestion": "建议统一减小卡片内标题字号 1px，或微调卡片布局，确保长文本标签在卡片内依然有舒适的留白空间。"
+          "suggestion": "建议统一减小卡片内标题字号 1px，或微调卡片布局，确保长文本标签在卡片内依然有舒适的留白空间。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-ix-docs-scroll-375-light.png",
@@ -764,7 +848,8 @@
           "severity": "P2瑕疵",
           "category": "other",
           "description": "功能图标采用的是通用线性图标，未体现设计语言中强调的“印章元素”，图标辨识度与文化调性契合度不足。",
-          "suggestion": "将文档类图标优化为带有“印章”质感或方圆印迹特征的图形，以强化“食链通”品牌视觉记忆点。"
+          "suggestion": "将文档类图标优化为带有“印章”质感或方圆印迹特征的图形，以强化“食链通”品牌视觉记忆点。",
+          "status": "rejected"
         }
       ]
     },
@@ -779,7 +864,8 @@
           "severity": "P1明显",
           "category": "contrast",
           "description": "底部备案/备注文字（“企业账号登录 · 提交与审批...”）与背景对比度严重不足，色值过于接近，在低亮度屏幕下几乎不可见。",
-          "suggestion": "将文字颜色提升至更高亮度的琥珀色或浅酱色（如 #8C7A6D），确保符合 WCAG AA 级对比度标准。"
+          "suggestion": "将文字颜色提升至更高亮度的琥珀色或浅酱色（如 #8C7A6D），确保符合 WCAG AA 级对比度标准。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-login-375-dark.png",
@@ -787,7 +873,8 @@
           "severity": "P1明显",
           "category": "contrast",
           "description": "输入框占位符文字（“业务账号 (如 buyer)”）与卡片深褐背景对比度不足，视觉识别效率低。",
-          "suggestion": "调亮占位符颜色，建议使用浅琥珀灰或暖灰色，提升暗色模式下的可读性。"
+          "suggestion": "调亮占位符颜色，建议使用浅琥珀灰或暖灰色，提升暗色模式下的可读性。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-login-375-dark.png",
@@ -795,7 +882,8 @@
           "severity": "P2瑕疵",
           "category": "ua-default-style",
           "description": "输入框下边框（边框线）表现为 1px 的扁平直角细线，呈现 Web 端 Input 标签的默认观感，缺乏移动端组件的精致感。",
-          "suggestion": "建议根据「酱园琥珀」语言，将输入区改为浅酱色底色的微圆角（4-8px）色块，或加粗底线并赋予微弱的琥珀渐变/圆角端点。"
+          "suggestion": "建议根据「酱园琥珀」语言，将输入区改为浅酱色底色的微圆角（4-8px）色块，或加粗底线并赋予微弱的琥珀渐变/圆角端点。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-login-375-dark.png",
@@ -803,7 +891,8 @@
           "severity": "P2瑕疵",
           "category": "inconsistency",
           "description": "组件形态不统一：输入框使用底边框风格（线型），而登录按钮使用全圆角药丸风格（面型），两者设计语言冲突。",
-          "suggestion": "建议统一形态，将输入框改为带微圆角的框式设计，或将按钮圆角调整为与输入框比例一致的圆角矩形。"
+          "suggestion": "建议统一形态，将输入框改为带微圆角的框式设计，或将按钮圆角调整为与输入框比例一致的圆角矩形。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-login-375-dark.png",
@@ -811,7 +900,8 @@
           "severity": "P2瑕疵",
           "category": "typography",
           "description": "副标题“食品企业移动端 · 单据与问答”的字重过细且行间距与上方主标题过于紧凑，导致文字节奏略显局促。",
-          "suggestion": "适当增加主副标题间的间距（由目前的约 12px 增至 16px-20px），并微调副标题透明度以增强层级感。"
+          "suggestion": "适当增加主副标题间的间距（由目前的约 12px 增至 16px-20px），并微调副标题透明度以增强层级感。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-login-375-dark.png",
@@ -819,7 +909,8 @@
           "severity": "P2瑕疵",
           "category": "spacing",
           "description": "登录卡片内部边距（Padding）上下失衡：底部按钮到卡片底边的距离与上方标题到顶边的距离不一致，视觉重心略微靠下。",
-          "suggestion": "增加卡片底部的内边距（Padding-bottom），使卡片内上下留白在感官上保持平衡。"
+          "suggestion": "增加卡片底部的内边距（Padding-bottom），使卡片内上下留白在感官上保持平衡。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-login-375-dark.png",
@@ -827,7 +918,8 @@
           "severity": "P2瑕疵",
           "category": "other",
           "description": "密码显隐图标（眼睛图标）风格过于工业化、通用化，线条过细且色温偏冷，与“酱园琥珀”温润、印章感的语言不符。",
-          "suggestion": "重绘图标，使用稍粗的线条并赋予酱色或琥珀色，形态上可处理得更圆润或带有点状元素以契合品牌调性。"
+          "suggestion": "重绘图标，使用稍粗的线条并赋予酱色或琥珀色，形态上可处理得更圆润或带有点状元素以契合品牌调性。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-login-375-dark.png",
@@ -835,7 +927,8 @@
           "severity": "P2瑕疵",
           "category": "dark-mode",
           "description": "卡片外阴影在暗色模式下完全消失，导致卡片与背景的层级感仅靠色差维持，深度感不足。",
-          "suggestion": "在暗色模式下使用带有琥珀色调的微弱外发光（Ambient Glow）替代传统阴影，以强化卡片的悬浮感。"
+          "suggestion": "在暗色模式下使用带有琥珀色调的微弱外发光（Ambient Glow）替代传统阴影，以强化卡片的悬浮感。",
+          "status": "kept"
         }
       ]
     },
@@ -850,7 +943,8 @@
           "severity": "P1明显",
           "category": "ua-default-style",
           "description": "输入框（账号、密码处）完全剥离了原生边框但未补充视觉锚点，导致点击区域不明确，且占位符“业务账号（如 buyer）”呈现浏览器默认灰度色，与暖纸底色融合度差。",
-          "suggestion": "为输入框增加底部细边框（酱色30%透明度）或浅琥珀色底块，并将占位符颜色调整为带有暖色调的深灰棕色。"
+          "suggestion": "为输入框增加底部细边框（酱色30%透明度）或浅琥珀色底块，并将占位符颜色调整为带有暖色调的深灰棕色。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-login-375-light.png",
@@ -858,7 +952,8 @@
           "severity": "P2瑕疵",
           "category": "misalign",
           "description": "顶部印章元素内，“食链 B-1005”文字块在圆环内垂直居中微偏上，视觉重心不稳。",
-          "suggestion": "微调文字块的 margin-top，使其在视觉上处于圆环的正中心。"
+          "suggestion": "微调文字块的 margin-top，使其在视觉上处于圆环的正中心。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-login-375-light.png",
@@ -866,7 +961,8 @@
           "severity": "P1明显",
           "category": "contrast",
           "description": "底部备案/备注信息“企业账号登录 · 提交与审批...”颜色过浅，在暖纸底（#F9F3E6感）上对比度不足，可能导致视力弱用户无法阅读。",
-          "suggestion": "提升底部文字颜色的明度，使用深棕色（酱色）的低饱和版本，确保对比度符合 WCAG AA 标准。"
+          "suggestion": "提升底部文字颜色的明度，使用深棕色（酱色）的低饱和版本，确保对比度符合 WCAG AA 标准。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-login-375-light.png",
@@ -874,7 +970,8 @@
           "severity": "P2瑕疵",
           "category": "spacing",
           "description": "卡片内垂直间距失调：账号输入项到底部“密码”标签的间距比“账号”标签到输入项的间距更窄，导致信息块视觉粘连。",
-          "suggestion": "统一表单项组间距（Form Group Margin），加大账号输入项与下一个标签之间的距离。"
+          "suggestion": "统一表单项组间距（Form Group Margin），加大账号输入项与下一个标签之间的距离。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-login-375-light.png",
@@ -882,7 +979,8 @@
           "severity": "P2瑕疵",
           "category": "typography",
           "description": "主标题“食链通 · AI 员工”中，中文字符与“AI”英文字符的字重视觉上不统一，“AI”显得略细且字间距过大。",
-          "suggestion": "统一字重设置，并微调中西文混排的 kerning（字间距），使视觉节奏更紧凑。"
+          "suggestion": "统一字重设置，并微调中西文混排的 kerning（字间距），使视觉节奏更紧凑。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-login-375-light.png",
@@ -890,7 +988,8 @@
           "severity": "P2瑕疵",
           "category": "inconsistency",
           "description": "密码显隐图标（眼睛）使用了纯黑或冷灰色，与全局酱色/琥珀色的暖色调设计语言产生冲突，显得像是浏览器原生插件注入的图标。",
-          "suggestion": "将图标颜色同步为主题酱色或琥珀色，并优化线条粗细使其与输入框文字视觉量感一致。"
+          "suggestion": "将图标颜色同步为主题酱色或琥珀色，并优化线条粗细使其与输入框文字视觉量感一致。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-login-375-light.png",
@@ -898,7 +997,8 @@
           "severity": "P1明显",
           "category": "other",
           "description": "设计语言“酱园琥珀”要求克制阴影，当前登录卡片与登录按钮的阴影弥散度（Blur）过大且色相偏冷灰，产生了“脏”的工业感，破坏了暖纸底的纯净度。",
-          "suggestion": "将阴影色相调整为深棕色（酱色）的低透明度版本，并减小扩散半径，使其呈现更柔和的纸面叠层感。"
+          "suggestion": "将阴影色相调整为深棕色（酱色）的低透明度版本，并减小扩散半径，使其呈现更柔和的纸面叠层感。",
+          "status": "converged-with-b1"
         }
       ]
     },
@@ -913,7 +1013,8 @@
           "severity": "P0毁容级",
           "category": "ua-default-style",
           "description": "「偏好」区域内的「深色模式」「真实模式」「通知」三个开关使用操作系统原生 toggle：白色椭圆滑块在橙色椭圆轨道上、矩形圆角、外圈有轻微高光、与琥珀+酱色语言的「印章/卷轴」质感严重冲突，是典型的 iOS/Android 原生控件残留。",
-          "suggestion": "替换为自定义 toggle：矩形或药丸形轨道、内填酱色+琥珀描边、开关拨片使用印章红/琥珀填充，关闭态为浅米色描边，去除白色高光与默认 iOS 蓝。"
+          "suggestion": "替换为自定义 toggle：矩形或药丸形轨道、内填酱色+琥珀描边、开关拨片使用印章红/琥珀填充，关闭态为浅米色描边，去除白色高光与默认 iOS 蓝。",
+          "status": "rejected"
         },
         {
           "screenshot": "w10-b3-me-375-dark.png",
@@ -921,7 +1022,8 @@
           "severity": "P1明显",
           "category": "ua-default-style",
           "description": "「深色模式」与「通知」选项前的图标为线性 SVG 描边（深色月牙、机器人、铃铛），线条为系统默认浅灰，未注入琥珀色或酱色描边，呈现为「系统图标库」默认观感，与「酱园琥珀」品牌图形语言不一致。",
-          "suggestion": "统一将偏好区图标 stroke 改为琥珀色（如 #C9A36A）或暖米色，线宽 1.5–1.75，必要时为图标增加印章式圆形底牌以呼应设计语言。"
+          "suggestion": "统一将偏好区图标 stroke 改为琥珀色（如 #C9A36A）或暖米色，线宽 1.5–1.75，必要时为图标增加印章式圆形底牌以呼应设计语言。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-me-375-dark.png",
@@ -929,7 +1031,8 @@
           "severity": "P1明显",
           "category": "contrast",
           "description": "「数据与关于」分区下「清除演示数据」文字位于最深暗色卡片底，文字呈低饱和米灰（约 #8A7A6A 类），在 #1A0F0A 类黑底上对比度仅约 4.0 边缘值，且「偏好」与「数据与关于」之间的分节标题同样过暗，整体可读性低于 WCAG AA。",
-          "suggestion": "将分节标题与次级操作文字提升至 #C9A36A 琥珀或 #D9C9B4 暖米色，确保对比度 ≥4.5:1。"
+          "suggestion": "将分节标题与次级操作文字提升至 #C9A36A 琥珀或 #D9C9B4 暖米色，确保对比度 ≥4.5:1。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-me-375-dark.png",
@@ -937,7 +1040,8 @@
           "severity": "P1明显",
           "category": "ua-default-style",
           "description": "顶部「我的」标题区域：左侧为浏览器/系统状态栏安全区，但未见自定义 status bar 模拟（如时间、信号、电量），整体直接以纯文字「我的」贴顶，未做任何暖纸底纹或印章元素处理，与下方厚重的「酱园琥珀」卡片形成「系统层 vs 品牌层」割裂。",
-          "suggestion": "在 iOS 端隐藏原生 status bar 或自绘暖纸色 status bar 背景；为「我的」标题加印章式底牌或衬线标题字（思源宋体/Noto Serif SC），与品牌语言对齐。"
+          "suggestion": "在 iOS 端隐藏原生 status bar 或自绘暖纸色 status bar 背景；为「我的」标题加印章式底牌或衬线标题字（思源宋体/Noto Serif SC），与品牌语言对齐。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-me-375-dark.png",
@@ -945,7 +1049,8 @@
           "severity": "P1明显",
           "category": "ua-default-style",
           "description": "底部 Tab Bar 选中态「我的」图标使用默认 iOS 风格线性人形（person.fill）+ 橙色填充，未做品牌化改造（无印章/无衬线外框），与「酱园琥珀」印章元素语言脱节；未选中图标为系统 SF Symbols 风格细线图标，整体仍是 iOS HIG 默认观感。",
-          "suggestion": "将 4 个 Tab 图标替换为自定义线性+印章感图标，选中态使用琥珀色填充并加圆形印章底牌，未选中态使用 #6B5A4A 暖棕色描边。"
+          "suggestion": "将 4 个 Tab 图标替换为自定义线性+印章感图标，选中态使用琥珀色填充并加圆形印章底牌，未选中态使用 #6B5A4A 暖棕色描边。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-me-375-dark.png",
@@ -953,7 +1058,8 @@
           "severity": "P1明显",
           "category": "inconsistency",
           "description": "头像「我」采用纯橙色实心圆 + 黑色 sans-serif「我」字，圆角为标准 50% 圆形，边缘锐利无印章毛边；与工作空间区 4 个数据卡片（深棕圆角矩形 + 衬线大数字）的「印章/卷轴」语感完全不在同一系统。",
-          "suggestion": "将头像改为圆形印章式：底色琥珀渐变 + 双圈描边（外圈酱色 1px、内圈米色 0.5px），文字改为印章体（思源宋体 Bold）或篆体「我」。"
+          "suggestion": "将头像改为圆形印章式：底色琥珀渐变 + 双圈描边（外圈酱色 1px、内圈米色 0.5px），文字改为印章体（思源宋体 Bold）或篆体「我」。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-me-375-dark.png",
@@ -961,7 +1067,8 @@
           "severity": "P1明显",
           "category": "typography",
           "description": "「质检员·王倩」使用 sans-serif 加粗（疑似 PingFang/思源黑体 Bold），与「工作空间」数据卡片的衬线大数字（34/35/34）形成两套字体系统；中文标题未使用品牌指定的衬线字体（思源宋体/Noto Serif SC），与「酱园琥珀」的复古纸张调性冲突。",
-          "suggestion": "将所有中文标题（质检员、我的、本月登记、待审核、工作空间、偏好、数据与关于）统一为思源宋体/Noto Serif SC Bold；数据数字保留衬线；正文辅助文字可用黑体 Regular。"
+          "suggestion": "将所有中文标题（质检员、我的、本月登记、待审核、工作空间、偏好、数据与关于）统一为思源宋体/Noto Serif SC Bold；数据数字保留衬线；正文辅助文字可用黑体 Regular。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-me-375-dark.png",
@@ -969,7 +1076,8 @@
           "severity": "P2瑕疵",
           "category": "ua-default-style",
           "description": "「工作空间」4 个数据卡片数字「0/34/35/34」使用大号无衬线字体（疑似 SF Pro Display / 思源黑体 Heavy），与卡片圆角矩形+暖色描边的「印章卷轴」形态并存时显得工业感强烈，且数字 0 与其他数字字号一致但视觉权重明显偏空。",
-          "suggestion": "将数字改为思源宋体/Noto Serif SC Heavy，并增加印章红/琥珀色字色；为数字加轻量印章底纹或描边以呼应品牌。"
+          "suggestion": "将数字改为思源宋体/Noto Serif SC Heavy，并增加印章红/琥珀色字色；为数字加轻量印章底纹或描边以呼应品牌。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-me-375-dark.png",
@@ -977,7 +1085,8 @@
           "severity": "P2瑕疵",
           "category": "misalign",
           "description": "「工作空间」4 个数据卡片高度一致但内部「今日待处理/进行中/待确认/累计完成」标签文字与上方数字基线对齐不一致：第 1 列「0 今日待处理」标签与数字左对齐但视觉上更靠上，其余 3 列文字更居中，4 列垂直基线不齐。",
-          "suggestion": "统一 4 列卡片采用「数字顶部 + 标签底部」的两行定高结构，标签固定贴底 12px，数字固定距顶 16px，4 列基线严格对齐。"
+          "suggestion": "统一 4 列卡片采用「数字顶部 + 标签底部」的两行定高结构，标签固定贴底 12px，数字固定距顶 16px，4 列基线严格对齐。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-me-375-dark.png",
@@ -985,7 +1094,8 @@
           "severity": "P2瑕疵",
           "category": "inconsistency",
           "description": "「登记采购单/登记出库单/问经营参谋」3 个 pill 按钮圆角较小（约 20px 胶囊形），描边为细线深棕；但「偏好」与「数据与关于」下方卡片为 16px 大圆角矩形；上下两组控件圆角语言不统一。",
-          "suggestion": "统一所有次要操作按钮圆角为 999px（完整胶囊）或 12px 圆角矩形二选一，并在胶囊上加轻量印章红描边或顶部小色块点缀。"
+          "suggestion": "统一所有次要操作按钮圆角为 999px（完整胶囊）或 12px 圆角矩形二选一，并在胶囊上加轻量印章红描边或顶部小色块点缀。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-me-375-dark.png",
@@ -993,7 +1103,8 @@
           "severity": "P2瑕疵",
           "category": "spacing",
           "description": "「偏好」分区到「深色模式」首项之间的纵向间距约 20px，而「深色模式」到「真实模式」之间仅约 16px；3 个开关项之间应有等距分节线但当前仅前 2 项有分隔线，「通知」与上方「真实模式」之间无视觉断点，分组节奏混乱。",
-          "suggestion": "统一 3 个偏好项之间的间距为 16px，并每项之间增加 1px 酱色 #3A2418 描边分隔线以维持印章装订线感。"
+          "suggestion": "统一 3 个偏好项之间的间距为 16px，并每项之间增加 1px 酱色 #3A2418 描边分隔线以维持印章装订线感。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-me-375-dark.png",
@@ -1001,7 +1112,8 @@
           "severity": "P2瑕疵",
           "category": "contrast",
           "description": "用户信息卡中「qc_inspector · 真实账号 · NocoBase 账号体系」副文字颜色过淡（接近 #6B5A4A），在深棕卡片底上对比度不足 3.5:1，长串小字阅读吃力。",
-          "suggestion": "将副文字色提升至 #A89888 或琥珀 #C9A36A，并在「真实账号」等关键属性处用印章红高亮。"
+          "suggestion": "将副文字色提升至 #A89888 或琥珀 #C9A36A，并在「真实账号」等关键属性处用印章红高亮。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-me-375-dark.png",
@@ -1009,7 +1121,8 @@
           "severity": "P2瑕疵",
           "category": "ua-default-style",
           "description": "「数据与关于」分区下「清除演示数据」所在的卡片底色与上方「偏好」卡片底色完全一致（同为 #1F1410），且无任何印章/卷轴纹样或描边装饰，暗色下两张卡片「黑底黑卡」几乎融为一片，依赖分隔线区分，层级感丢失。",
-          "suggestion": "为「数据与关于」卡片增加 1px 酱色描边 #3A2418 与轻微暖色内阴影，或在卡片左侧加 4px 宽印章红竖条作 section marker。"
+          "suggestion": "为「数据与关于」卡片增加 1px 酱色描边 #3A2418 与轻微暖色内阴影，或在卡片左侧加 4px 宽印章红竖条作 section marker。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-me-375-dark.png",
@@ -1017,7 +1130,8 @@
           "severity": "P2瑕疵",
           "category": "inconsistency",
           "description": "「本月登记 1 条 / 待审核 0 条」与下方「工作空间」区均展示数据指标，但前者数字为 sans-serif 衬线不明（看似黑体），后者数字为大号无衬线，两套指标数字字形与尺寸不一致。",
-          "suggestion": "统一两处指标数字为同一种衬线字体（思源宋体 Heavy），且同级别数字字号统一（如 32px）。"
+          "suggestion": "统一两处指标数字为同一种衬线字体（思源宋体 Heavy），且同级别数字字号统一（如 32px）。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-me-375-dark.png",
@@ -1025,7 +1139,8 @@
           "severity": "P2瑕疵",
           "category": "ua-default-style",
           "description": "整页未观察到品牌化的「印章」元素（无「食链通」篆体印章、无「酱园」红泥印、无品牌角标），仅有「我的」顶部、Tab Bar 默认图标等系统默认形态，设计语言中最具识别度的「印章」符号在「我的」页面完全缺席。",
-          "suggestion": "在头像右上角或页面右上角增加一枚 32×32 的「食」字朱红印章（#8B2E1F + 篆体白文），并在每张卡片左上角加 4×4 印章红小方块作装饰，强化品牌锚点。"
+          "suggestion": "在头像右上角或页面右上角增加一枚 32×32 的「食」字朱红印章（#8B2E1F + 篆体白文），并在每张卡片左上角加 4×4 印章红小方块作装饰，强化品牌锚点。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-me-375-dark.png",
@@ -1033,7 +1148,8 @@
           "severity": "P2瑕疵",
           "category": "contrast",
           "description": "「登记采购单/登记出库单/问经营参谋」3 个 pill 按钮文字为暖米色 #D9C9B4，描边为深棕 #3A2418，但按钮底色与背景同色（#1A0F0A），按钮轮廓仅靠 1px 细描边维持，在暗色下几乎隐形，CTA 视觉权重不足。",
-          "suggestion": "为 3 个 pill 按钮填充半透明酱色 #2A1810 底，并增加印章红 hover/focus 态；或在按钮内左侧加 6px 琥珀色圆点作激活指示。"
+          "suggestion": "为 3 个 pill 按钮填充半透明酱色 #2A1810 底，并增加印章红 hover/focus 态；或在按钮内左侧加 6px 琥珀色圆点作激活指示。",
+          "status": "converged-with-b1"
         }
       ]
     },
@@ -1048,7 +1164,8 @@
           "severity": "P1",
           "category": "layout-overflow",
           "description": "顶部标题「我的」文字上方未预留系统状态栏安全区，与屏幕顶边缘过于接近",
-          "suggestion": "增加顶部安全区外边距（Safe Area Margin），建议 44px 或以上"
+          "suggestion": "增加顶部安全区外边距（Safe Area Margin），建议 44px 或以上",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-me-375-light.png",
@@ -1056,7 +1173,8 @@
           "severity": "P1",
           "category": "contrast",
           "description": "用户 ID「qc_inspector...」及通知说明「本地开关占位...」等辅助文字颜色过浅，在暖纸底色上对比度不足",
-          "suggestion": "调深辅助文字颜色，建议使用酱色（深棕红）的 60% 透明度版本，以满足可读性要求"
+          "suggestion": "调深辅助文字颜色，建议使用酱色（深棕红）的 60% 透明度版本，以满足可读性要求",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-me-375-light.png",
@@ -1064,7 +1182,8 @@
           "severity": "P2",
           "category": "ua-default-style",
           "description": "「登记采购单」等操作按钮呈现典型的浏览器默认边框风格，浅灰色细边框与「酱园琥珀」的重彩风格不符",
-          "suggestion": "去除默认灰边框，改用酱色实线边框或琥珀色浅底色，并微调圆角以体现「印章」质感"
+          "suggestion": "去除默认灰边框，改用酱色实线边框或琥珀色浅底色，并微调圆角以体现「印章」质感",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-me-375-light.png",
@@ -1072,7 +1191,8 @@
           "severity": "P1",
           "category": "inconsistency",
           "description": "「琥珀」装饰色不统一：底部导航激活项背景为浅杏色，而「真实模式」开关激活态为高饱和橙色，色相偏差较大",
-          "suggestion": "统一琥珀色的色相值（Hue），建议将开关的橙色调整为与品牌视觉一致的温润琥珀金"
+          "suggestion": "统一琥珀色的色相值（Hue），建议将开关的橙色调整为与品牌视觉一致的温润琥珀金",
+          "status": "kept"
         },
         {
           "screenshot": "w10-b3-me-375-light.png",
@@ -1080,7 +1200,8 @@
           "severity": "P2",
           "category": "spacing",
           "description": "「工作空间」卡片内，数字与下方文字标签「今日待处理」等垂直间距过紧，且四个区块的内边距不平衡",
-          "suggestion": "增加数字与文字间的间距（建议 4-8px），并统一四个区块的 Padding"
+          "suggestion": "增加数字与文字间的间距（建议 4-8px），并统一四个区块的 Padding",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-me-375-light.png",
@@ -1088,7 +1209,8 @@
           "severity": "P1",
           "category": "layout-overflow",
           "description": "页面底部「数据与关于」卡片内容被底栏（Tabbar）遮挡，列表项「清除演示数据」显示不全",
-          "suggestion": "为页面滚动区域增加足够的 bottom-padding，确保最下方元素能完全滚出底栏遮挡区"
+          "suggestion": "为页面滚动区域增加足够的 bottom-padding，确保最下方元素能完全滚出底栏遮挡区",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-me-375-light.png",
@@ -1096,7 +1218,8 @@
           "severity": "P2",
           "category": "typography",
           "description": "「待审核」右侧的数字「0」与单位「条」基准线对齐略显生硬，且「0」的字重与左侧加粗标题不匹配",
-          "suggestion": "微调数字与文字的基准线对齐，并保持同一统计维度下的字重一致性"
+          "suggestion": "微调数字与文字的基准线对齐，并保持同一统计维度下的字重一致性",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-me-375-light.png",
@@ -1104,7 +1227,8 @@
           "severity": "P2",
           "category": "other",
           "description": "「本月登记」下的三个点「...」作为占位符形式不明，且视觉重心偏下，容易误判为加载失败或默认字符",
-          "suggestion": "若为无数据状态应显示数字「0」，若为加载中应使用标准的 Loading 动画组件"
+          "suggestion": "若为无数据状态应显示数字「0」，若为加载中应使用标准的 Loading 动画组件",
+          "status": "converged-with-b1"
         }
       ]
     },
@@ -1131,7 +1255,8 @@
           "severity": "P1明显",
           "category": "ua-default-style",
           "description": "顶部「待办」标签疑似使用浏览器默认 select 下拉箭头与样式，呈现灰底直角外观，与「酱园琥珀」设计语言的琥珀色圆角控件冲突",
-          "suggestion": "将 select 替换为自定义下拉组件，使用酱色或琥珀色边框与圆角，去除原生箭头并自定义指示符"
+          "suggestion": "将 select 替换为自定义下拉组件，使用酱色或琥珀色边框与圆角，去除原生箭头并自定义指示符",
+          "status": "rejected"
         },
         {
           "screenshot": "w10-b3-todos-390-light.png",
@@ -1139,7 +1264,8 @@
           "severity": "P2瑕疵",
           "category": "ua-default-style",
           "description": "空状态图标使用虚线圆圈包裹的 inbox 描线图标，描线较细且缺乏琥珀点缀，与印章/圆角设计语言融合度不足",
-          "suggestion": "将图标描边加粗，使用酱色实色或琥珀填充，弱化虚线圆圈或改为实线印章样式"
+          "suggestion": "将图标描边加粗，使用酱色实色或琥珀填充，弱化虚线圆圈或改为实线印章样式",
+          "status": "kept"
         },
         {
           "screenshot": "w10-b3-todos-390-light.png",
@@ -1147,7 +1273,8 @@
           "severity": "P2瑕疵",
           "category": "contrast",
           "description": "「PC 端或 AI 同事提交的单据会出现在这里」说明文字颜色偏淡灰，与暖纸底对比度处于临界，可读性略弱",
-          "suggestion": "将说明文字颜色加深一档（如 #8B6F5C），提升与底色的对比度"
+          "suggestion": "将说明文字颜色加深一档（如 #8B6F5C），提升与底色的对比度",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-todos-390-light.png",
@@ -1155,7 +1282,8 @@
           "severity": "P2瑕疵",
           "category": "typography",
           "description": "页面整体字号层级偏少，标题「我的待办」与空状态主标题「当前没有待办」字号接近，缺少主次节奏",
-          "suggestion": "放大「我的待办」页眉或缩小空状态主标题，建立 2-3 级清晰字号层级"
+          "suggestion": "放大「我的待办」页眉或缩小空状态主标题，建立 2-3 级清晰字号层级",
+          "status": "next-batch"
         },
         {
           "screenshot": "w10-b3-todos-390-light.png",
@@ -1163,7 +1291,8 @@
           "severity": "P2瑕疵",
           "category": "spacing",
           "description": "空状态区域上下留白不均：图标距上方「待办」标签较远（约 120px），而「看看已登记的单据」按钮与下方说明文字间距过紧（约 12px）",
-          "suggestion": "统一空状态垂直节奏，建议三组（图标/标题+说明/按钮）之间使用 24-32px 一致间距"
+          "suggestion": "统一空状态垂直节奏，建议三组（图标/标题+说明/按钮）之间使用 24-32px 一致间距",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-todos-390-light.png",
@@ -1171,7 +1300,8 @@
           "severity": "P2瑕疵",
           "category": "inconsistency",
           "description": "「看看已登记的单据」按钮使用药丸状（full-pill）大圆角，但「待办」下拉标签若为直角灰底，二者圆角语言不一致",
-          "suggestion": "统一主交互按钮与次级标签的圆角体系，全局采用 8/12/full-pill 三档并明确各场景使用哪一档"
+          "suggestion": "统一主交互按钮与次级标签的圆角体系，全局采用 8/12/full-pill 三档并明确各场景使用哪一档",
+          "status": "converged-with-b1"
         }
       ]
     },
@@ -1186,7 +1316,8 @@
           "severity": "P1明显",
           "category": "layout-overflow",
           "description": "顶部状态筛选栏（待处理、进行中等）右侧「已完成」文本被边缘切断，且无渐变消隐或滚动提示。",
-          "suggestion": "增加容器右侧内边距或使用渐变遮罩提示可横向滚动。"
+          "suggestion": "增加容器右侧内边距或使用渐变遮罩提示可横向滚动。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-work-375-dark.png",
@@ -1194,7 +1325,8 @@
           "severity": "P1明显",
           "category": "contrast",
           "description": "缺省状态文案「去聊天里让 AI 同事帮你处理」及卡片描述文字（如：食品安全合规问答...）颜色过深，与深褐色背景对比度不足，暗光环境下识别困难。",
-          "suggestion": "提升辅助文字亮度，建议使用设计语言中对应暗色模式的浅暖灰色（#A69D94 左右）。"
+          "suggestion": "提升辅助文字亮度，建议使用设计语言中对应暗色模式的浅暖灰色（#A69D94 左右）。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-work-375-dark.png",
@@ -1202,7 +1334,8 @@
           "severity": "P2瑕疵",
           "category": "inconsistency",
           "description": "四个 AI 助手卡片内的图标视觉重量不统一，「AI 食安合规官」的盾牌图标线型较粗，「AI 营销洞察主管」的小机器人图标细节过多且线型较细。",
-          "suggestion": "统一图标的视觉体量、线条粗细与填充风格，确保组件库的一致性。"
+          "suggestion": "统一图标的视觉体量、线条粗细与填充风格，确保组件库的一致性。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-work-375-dark.png",
@@ -1210,7 +1343,8 @@
           "severity": "P2瑕疵",
           "category": "spacing",
           "description": "卡片内部的纵向间距分布失衡，底部「去聊聊」链接与卡片底部的间距明显小于顶部图标与卡片顶部的间距。",
-          "suggestion": "增加卡片底部内边距（Padding-bottom），使内容在卡片内上下视觉居中。"
+          "suggestion": "增加卡片底部内边距（Padding-bottom），使内容在卡片内上下视觉居中。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-work-375-dark.png",
@@ -1218,7 +1352,8 @@
           "severity": "P2瑕疵",
           "category": "other",
           "description": "暗色模式背景采用纯冷灰色，偏离了「酱园琥珀」设计语言中要求的「暖纸底」调性，产生工业化冷硬感。",
-          "suggestion": "将暗色背景调整为带有微弱暖色调（Soy/Amber 调）的深色（如深暖褐黑），以契合品牌调性。"
+          "suggestion": "将暗色背景调整为带有微弱暖色调（Soy/Amber 调）的深色（如深暖褐黑），以契合品牌调性。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-work-375-dark.png",
@@ -1226,7 +1361,8 @@
           "severity": "P2瑕疵",
           "category": "ua-default-style",
           "description": "顶部右侧「任务/文件」切换组件在暗色下边缘轮廓较硬，疑似残留了部分浏览器默认的 button 阴影或描边逻辑。",
-          "suggestion": "显式设置 border: none 并使用设计语言规定的酱色圆角背景，消除默认控件残留感。"
+          "suggestion": "显式设置 border: none 并使用设计语言规定的酱色圆角背景，消除默认控件残留感。",
+          "status": "converged-with-b1"
         }
       ]
     },
@@ -1241,7 +1377,8 @@
           "severity": "P1明显",
           "category": "layout-overflow",
           "description": "顶部状态切换栏（待处理、进行中...）右侧“已完成”标签被容器边缘直接截断，且无渐变消隐或滚动提示。",
-          "suggestion": "增加右侧边缘的透明遮罩渐变提示可滚动，或调整容器内边距确保标签显示完整。"
+          "suggestion": "增加右侧边缘的透明遮罩渐变提示可滚动，或调整容器内边距确保标签显示完整。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-work-375-light.png",
@@ -1249,7 +1386,8 @@
           "severity": "P1明显",
           "category": "ua-default-style",
           "description": "右上角“任务/文件”切换按钮使用了浏览器默认的细灰色描边，呈现出明显的工业化控件感，与整体“酱园琥珀”的温暖手感视觉冲突。",
-          "suggestion": "移除灰色细边框，改用酱色（深棕红）或琥珀色作为边框/激活态底色，并增加圆角弧度以符合整体风格。"
+          "suggestion": "移除灰色细边框，改用酱色（深棕红）或琥珀色作为边框/激活态底色，并增加圆角弧度以符合整体风格。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-work-375-light.png",
@@ -1257,7 +1395,8 @@
           "severity": "P2瑕疵",
           "category": "contrast",
           "description": "卡片内描述性文字（如“食品安全合规问答：依据...”）字体颜色过浅，在浅色卡片背景上的对比度较低，不利于长文本阅读。",
-          "suggestion": "调深描述文字的灰度值，确保在亮色模式下符合 WCAG AA 级对比度标准。"
+          "suggestion": "调深描述文字的灰度值，确保在亮色模式下符合 WCAG AA 级对比度标准。",
+          "status": "kept"
         },
         {
           "screenshot": "w10-b3-work-375-light.png",
@@ -1265,7 +1404,8 @@
           "severity": "P2瑕疵",
           "category": "misalign",
           "description": "顶部状态栏左侧间距（屏幕边缘到“待处理”标签）与标签间的间距不一致，导致视觉重心向右偏移。",
-          "suggestion": "统一横向滚动容器的 contentInset 左右边距，保持视觉平衡。"
+          "suggestion": "统一横向滚动容器的 contentInset 左右边距，保持视觉平衡。",
+          "status": "next-batch"
         },
         {
           "screenshot": "w10-b3-work-375-light.png",
@@ -1273,7 +1413,8 @@
           "severity": "P2瑕疵",
           "category": "inconsistency",
           "description": "底部导航栏“工作台”项的激活底色块为圆角矩形，而顶部状态标签为半圆胶囊形，组件形态语言不统一。",
-          "suggestion": "统一组件圆角逻辑，建议底部激活块也采用更大圆角的胶囊形以呼应顶部设计。"
+          "suggestion": "统一组件圆角逻辑，建议底部激活块也采用更大圆角的胶囊形以呼应顶部设计。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-work-375-light.png",
@@ -1281,7 +1422,8 @@
           "severity": "P2瑕疵",
           "category": "spacing",
           "description": "下方四块 AI 同事卡片内，“去聊聊”链接与下方卡片边缘的留白在不同卡片中表现不一（受描述文字行数影响），导致底部对齐失序。",
-          "suggestion": "固定卡片内底部留白高度，或将“去聊聊”链接设置为绝对底对齐（Absolute bottom positioning）。"
+          "suggestion": "固定卡片内底部留白高度，或将“去聊聊”链接设置为绝对底对齐（Absolute bottom positioning）。",
+          "status": "next-batch"
         },
         {
           "screenshot": "w10-b3-work-375-light.png",
@@ -1289,7 +1431,8 @@
           "severity": "P1明显",
           "category": "other",
           "description": "底部导航栏上边缘的分割线使用了默认的浅灰色，在“暖纸底”设计中显得生硬且带有 Window/浏览器默认观感。",
-          "suggestion": "将分割线颜色改为极浅的酱色透明度或琥珀色系，淡化工业感，融入暖色背景。"
+          "suggestion": "将分割线颜色改为极浅的酱色透明度或琥珀色系，淡化工业感，融入暖色背景。",
+          "status": "converged-with-b1"
         }
       ]
     },
@@ -1304,7 +1447,8 @@
           "severity": "P1明显",
           "category": "contrast",
           "description": "底部「执行时间线」卡片内文字「尚未开始执行」颜色过浅",
-          "suggestion": "增强文字对比度，建议使用设计规范中的中灰色或酱色淡化色，确保在暖纸底色上的可读性。"
+          "suggestion": "增强文字对比度，建议使用设计规范中的中灰色或酱色淡化色，确保在暖纸底色上的可读性。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-work-detail-375-light.png",
@@ -1312,7 +1456,8 @@
           "severity": "P2瑕疵",
           "category": "layout-overflow",
           "description": "顶部标题「味之源 SUP-004 ISO22000 重办VFY-」末尾发生截断",
-          "suggestion": "若标题重要，建议采用换行处理或跑马灯效果；或者优化标题逻辑，优先展示业务核心编号。"
+          "suggestion": "若标题重要，建议采用换行处理或跑马灯效果；或者优化标题逻辑，优先展示业务核心编号。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-work-detail-375-light.png",
@@ -1320,7 +1465,8 @@
           "severity": "P2瑕疵",
           "category": "spacing",
           "description": "「执行时间线」卡片内部上下留白过大，与上方信息密集度较高的卡片节奏不一致",
-          "suggestion": "缩减空状态下的垂直内边距，保持页面各卡片视觉重心的一致性。"
+          "suggestion": "缩减空状态下的垂直内边距，保持页面各卡片视觉重心的一致性。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-work-detail-375-light.png",
@@ -1328,7 +1474,8 @@
           "severity": "P2瑕疵",
           "category": "design-language",
           "description": "「上下文」与「执行时间线」的分割横线使用了冷灰色，偏离了「酱园琥珀」的暖色调视觉体系",
-          "suggestion": "将分割线颜色改为淡酱色或低饱和度的暖琥珀灰，减少工业冷感。"
+          "suggestion": "将分割线颜色改为淡酱色或低饱和度的暖琥珀灰，减少工业冷感。",
+          "status": "kept"
         },
         {
           "screenshot": "w10-b3-work-detail-375-light.png",
@@ -1336,7 +1483,8 @@
           "severity": "P2瑕疵",
           "category": "typography",
           "description": "「待处理」印章元素内的文字字重较细，在缩略视图下辨识度受限",
-          "suggestion": "适当增加印章内文字字重，或微调印章描边粗细，强化“印章”这一核心视觉符号的权威感。"
+          "suggestion": "适当增加印章内文字字重，或微调印章描边粗细，强化“印章”这一核心视觉符号的权威感。",
+          "status": "converged-with-b1"
         },
         {
           "screenshot": "w10-b3-work-detail-375-light.png",
@@ -1344,7 +1492,8 @@
           "severity": "P1明显",
           "category": "ua-default-style",
           "description": "底部操作栏「开始执行」按钮呈现出较为生硬的 CSS 默认圆角矩形质感，缺乏设计语言要求的“酱园”厚重感",
-          "suggestion": "优化按钮阴影，采用更克制的扩散效果，并微调主色饱和度，使其更贴合琥珀酱色的质感，避免呈现出浏览器默认按钮的廉价感。"
+          "suggestion": "优化按钮阴影，采用更克制的扩散效果，并微调主色饱和度，使其更贴合琥珀酱色的质感，避免呈现出浏览器默认按钮的廉价感。",
+          "status": "kept"
         }
       ]
     }

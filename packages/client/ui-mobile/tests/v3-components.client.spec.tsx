@@ -415,6 +415,19 @@ describe('colleagues welcome metadata', () => {
     expect(colleagueColor('mobile-form-assistant')).toBe('var(--dshm-stamp-avatar-1)')
     expect(colleagueColor('business-advisor')).toBe('var(--dshm-stamp-avatar-2)')
   })
+
+  it('borrows the name leading pair for the fallback stamp without cutting a word', async () => {
+    const { stampAcronymOf } = await import('../src/client/colleagues.ts')
+    // A space after the prefix used to make slice(2,4) return one char of the
+    // two-char word (「AI 食安合规官」 → 食); the trim-first pair keeps 食安.
+    expect(stampAcronymOf('unknown-preset', 'AI 食安合规官')).toBe('食安')
+    // A name without the AI prefix keeps the visual's own stamp word.
+    expect(stampAcronymOf('unknown-preset', '张师傅')).toBe('AI')
+    expect(stampAcronymOf('mobile-form-assistant', '张师傅')).toBe('表单')
+    // Short names never crash: a bare prefix falls back, a single char stays.
+    expect(stampAcronymOf('unknown-preset', 'AI')).toBe('AI')
+    expect(stampAcronymOf('unknown-preset', 'AI 张')).toBe('张')
+  })
 })
 
 describe('ChoiceBubble remaining branches', () => {

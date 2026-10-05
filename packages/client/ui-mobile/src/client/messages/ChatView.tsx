@@ -19,7 +19,7 @@ import { Avatar, NoticeCard, RunningRow, SkelThread } from '../ui.tsx'
 import { PageNav } from '../PageNav.tsx'
 import { loadIdentity } from '../auth.ts'
 import { dispatchReportAction } from '../actions.ts'
-import { colleagueColor, colleagueOf, welcomeOf, type ColleagueVisual, type Welcome } from '../colleagues.ts'
+import { colleagueColor, colleagueOf, stampAcronymOf, welcomeOf, type ColleagueVisual, type Welcome } from '../colleagues.ts'
 import { foldHistory } from '../fold.ts'
 import { goBackOr } from '../router.ts'
 import { useAsync, usePageVisible, usePoll } from '../hooks.ts'
@@ -313,7 +313,7 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
       <PageNav
         title={(
           <span className={css.headerMain}>
-            <Avatar background={colleagueColor(preset)} acronym={colleague.acronym} size={30} />
+            <Avatar background={colleagueColor(preset)} acronym={stampAcronymOf(preset, title)} size={30} />
             <span className={css.headerTexts}>
               <span className={css.headerTitle}>{title}</span>
               <span className={css.headerHint}>
@@ -366,6 +366,7 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
             item={item}
             previous={folded.items[index - 1]}
             preset={preset}
+            name={title}
             cardStates={cardStates}
             reopened={reopened}
             draftValues={draftValues}

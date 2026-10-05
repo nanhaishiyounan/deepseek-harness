@@ -72,7 +72,7 @@
 | `--dshm-brand-deep` | `#8f4106` | `#c26f33` | 按压态 / 深一阶 |
 | `--dshm-brand-soft` | `#f8e4d2` | `#3b2a1c` | 主色 soft 底（chip/选中槽） |
 | `--dshm-on-brand` | `#ffffff` | `#241708` | 主色实底上的前景（亮 5.0:1） |
-| `--dshm-anchor` | `#1e4e8c` | `#7b9dd1` | **W7 品牌蓝锚**：链接/「全部 ›」/表单助手章（亮对画布 7.7:1；暗沿用 W8 值） |
+| `--dshm-anchor` | `#8f4106` | `#f09a5e` | 链接/「全部 ›」/表单助手章锚（亮=柿橙深阶对白卡 7.2:1 / 暗=柿橙提亮阶对卡 7.0:1）〔W10 修订：清除 W7 品牌蓝锚，并入柿橙系〕 |
 | `--dshm-ink` | `#3d2b1f` | `#f2e3d3` | 墨·主文字（亮对画布 12.0:1 / 对卡 13.5:1；暗对卡 12.6:1） |
 | `--dshm-ink-sub` | `#6f5b49` | `#c3ab93` | 墨·次文字（亮对画布 6.0:1；暗对卡 7.2:1） |
 | `--dshm-ink-weak` | `#9a8570` | `#8d7b66` | 仅装饰/骨架/时间戳壳，**不负载正文** |
@@ -99,7 +99,8 @@
 | `--dshm-bubble-ai-border` | `#eadfc9` | `#453728` | AI 气泡描边 |
 | `--dshm-seal-ring` | `#b4530a` | `#e58b4a` | 印章环线（酱印/收讫章描边） |
 | `--dshm-seal-face` | `#ffffff` | `#241a12` | 印面底 |
-| `--dshm-stamp-avatar-1..4` | `#1e4e8c / #1d5f5a / #2e5e34 / #7a5230` | 同亮（章色恒定） | AI 同事四字章（W7 stamp 盘直接继承） |
+| `--dshm-stamp-avatar-1..4` | `#93382a / #1d5f5a / #2e5e34 / #7a5230` | 同亮（章色恒定） | AI 同事四字章（W7 stamp 盘直接继承）〔W10 修订：1 号章由 W7 蓝 `#1e4e8c` 改暖红棕 `#93382a`，去蓝残留〕 |
+| `--dshm-stamp-ink` | `#fff8ee` | 同亮（双轨恒定） | 章面字色（章底恒深，纸白字 ≥7:1）〔W10 新增〕 |
 
 ### 3.4 字体阶（六阶 + mono 轨；治 R4）
 
@@ -195,7 +196,7 @@
 | `--dshm-touch: 44px` 主触控 | 不变 | gate `touch ≥44` |
 | `--dshm-touch-sm: 40px` 次触控 | 不变 | gate `touchSm ≥40` |
 | `--dshm-fs-input: 16px` 输入下限 | 不变（iOS 聚焦缩放防线） | gate `inputFloor ≥16` |
-| `--dshm-link` 正文链接 | 亮 `#1e4e8c`（对白卡 6.9:1）/ 暗 `#7b9dd1`（沿用 W8 值） | gate `linkVsCard ≥4.5` |
+| `--dshm-link` 正文链接 | 亮 `#8f4106`（对白卡 7.2:1）/ 暗 `#f09a5e`（对卡 7.0:1）〔W10 修订：去工业蓝〕 | gate `linkVsCard ≥4.5` |
 | `--dshm-tab-active` Tab 选中态 | 亮 `#b4530a`（4.9:1）/ 暗 `#f09a5e`（7.8:1） | gate `tabActive ≥3` |
 | 正文对比度 | 墨对卡 12:1+（亮）/ 12.6:1（暗）；柿橙对画布 4.7:1 | gate `textVsCard ≥4.5` |
 | Tab 键盘可达（role=tab + Enter/Space） | 不变（MobileShell 资产） | views spec 复跑 |

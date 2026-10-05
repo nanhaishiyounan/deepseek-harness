@@ -11,7 +11,7 @@ import { SpinLoading } from 'antd-mobile'
 import { Check, X } from 'lucide-react'
 import type { NocobaseFieldView } from '@deepseek-ai/dsh-host-apiproxy/api'
 import { Avatar } from '../../ui.tsx'
-import { colleagueColor, colleagueOf } from '../../colleagues.ts'
+import { colleagueColor, stampAcronymOf } from '../../colleagues.ts'
 import { dayLabelOf } from '../../sessionsService.ts'
 import { mergeCardValues } from '../../systemFields.ts'
 import type { DerivedCardState } from '../../cardState.ts'
@@ -35,6 +35,9 @@ export interface FlowItemProps {
   readonly item: ChatItem
   readonly previous: ChatItem | undefined
   readonly preset: string | undefined
+  /** The colleague's display name (the header title); the stamp borrows its
+   * leading pair when the fallback acronym would repeat the name's AI prefix. */
+  readonly name: string
   readonly cardStates: ReadonlyMap<number, DerivedCardState>
   readonly reopened: ReadonlySet<number>
   readonly draftValues: ReadonlyMap<number, Record<string, string>>
@@ -79,7 +82,7 @@ function isUserOwned(item: ChatItem): boolean {
  * @returns the row tree, or null for a hidden (superseded/submitted) card.
  */
 export function FlowItem(props: FlowItemProps): JSX.Element | null {
-  const { item, previous, preset } = props
+  const { item, previous, preset, name } = props
   const showDay = previous === undefined || dayLabelOf(item.time) !== dayLabelOf(previous.time)
   const separator = showDay ? <div className={css.daySeparator}>{dayLabelOf(item.time)}</div> : null
   // Turn-level avatar (03 §4.1): only the first assistant-owned item after a
@@ -89,7 +92,7 @@ export function FlowItem(props: FlowItemProps): JSX.Element | null {
   const avatarCol = firstOfTurn
     ? (
       <span className={css.assistantCol}>
-        <Avatar background={colleagueColor(preset)} acronym={colleagueOf(preset).acronym} size={32} />
+        <Avatar background={colleagueColor(preset)} acronym={stampAcronymOf(preset, name)} size={32} />
         <span className={css.aiSeal} aria-hidden="true">AI</span>
       </span>
     )

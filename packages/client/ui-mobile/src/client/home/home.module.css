@@ -509,7 +509,7 @@
  * rides the roasted-paper deep ink there (6.7:1); light keeps white-on-brand
  * (6.6:1). */
 :global(html[data-theme='dark']) .alertBadge {
-  --adm-color-text-light-solid: #241708;
+  --adm-color-text-light-solid: var(--dshm-on-brand);
 }
 
 /* The error strip's retry entry: the antd none-fill brand word after the

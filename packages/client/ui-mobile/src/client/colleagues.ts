@@ -212,7 +212,7 @@ export function colleagueOf(presetId: string | undefined): ColleagueVisual {
 export function stampAcronymOf(presetId: string | undefined, name: string): string {
   const visual = colleagueOf(presetId)
   if (visual.acronym === 'AI' && name.startsWith('AI')) {
-    return name.slice(2, 4).trim() || 'AI'
+    return name.slice(2).trim().slice(0, 2) || 'AI'
   }
   return visual.acronym
 }
