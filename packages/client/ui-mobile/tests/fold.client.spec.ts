@@ -407,6 +407,28 @@ describe('foldHistory (report fences)', () => {
     expect(first.text).toBe('【登录身份】foo')
   })
 
+  it('folds an identity-empty stamp and keeps a tail-only line verbatim (W9-R2)', () => {
+    const emptyIdentity = '【登录身份】——本行由系统注入：当前用户=buyer。'
+    const tailOnly = '——本行由系统注入：当前用户=buyer'
+    const folded = foldHistory([
+      event('user/message', { content: [{ type: 'text', text: `${emptyIdentity}\n帮我登记采购单` }], source: { kind: 'user' } }, 0),
+      event('user/message', { content: [{ type: 'text', text: emptyIdentity }], source: { kind: 'user' } }, 1),
+      event('user/message', { content: [{ type: 'text', text: tailOnly }], source: { kind: 'user' } }, 2),
+    ])
+    // The injection tail with nothing between the prefix still marks the
+    // server-stamped sentence, so the first line folds and the prose bubbles.
+    const first = folded.items[0]
+    if (first?.kind !== 'text') throw new Error('expected user text')
+    expect(first.text).toBe('帮我登记采购单')
+    // The identity-empty stamp-only message produces no bubble; the tail-only
+    // line lacks the 【登录身份】 prefix the server always writes, so it is
+    // the user's own words and keeps its bubble.
+    expect(folded.items).toHaveLength(2)
+    const third = folded.items[1]
+    if (third?.kind !== 'text') throw new Error('expected user text')
+    expect(third.text).toBe(tailOnly)
+  })
+
   it('retires a stale ask when a report follows it', () => {
     const askFence = '```dsh\n{"v":3,"type":"ask_choice","id":"choice_1","question":"登记成什么？",'
       + '"options":[{"label":"采购单","value":"hub_po"}]}\n```'

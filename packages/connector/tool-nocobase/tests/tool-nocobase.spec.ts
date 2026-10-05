@@ -68,6 +68,9 @@ async function bootMock(): Promise<MockServer> {
       { id: 101, user: 'buyer', doc_type: 'pur_orders', status: 'open' },
       { id: 102, user: 'buyer', doc_type: 'so_orders', status: 'open' },
       { id: 103, user: 'keeper', doc_type: 'wms_transfers', status: 'open' },
+      // A malformed owner cell: the user column holds a numeric user id, not
+      // the username string every well-formed row carries.
+      { id: 104, user: 12345, doc_type: 'pur_orders', status: 'open' },
     ]],
   ])
   let idSeq = 100
@@ -435,6 +438,15 @@ describe('nb_get row-scopes wfl_approval_todos to the acting user (W9-R1)', () =
     const mine = await execute('nb_get', { collection: 'wfl_approval_todos', id: 101 })
     expect(mine.isError).toBe(false)
     expect(mine.value).toMatchObject({ collection: 'wfl_approval_todos', row: { id: 101, user: 'buyer' } })
+  })
+
+  it('fails closed on a row whose user cell is a numeric id, not a username (W9-R2)', async () => {
+    const { execute } = await mount({ acting: { username: 'buyer', nickname: '采购员·蔡俊' } })
+    const malformed = await execute('nb_get', { collection: 'wfl_approval_todos', id: 104 })
+    // A non-string owner cell fails the scope the same way a foreign one
+    // does — a refusal, never a type crash or an unchecked pass-through.
+    expect(malformed.isError).toBe(true)
+    expect(malformed.text).toContain('该审批待办不属于账号 buyer')
   })
 })
 
