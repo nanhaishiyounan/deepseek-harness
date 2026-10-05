@@ -170,9 +170,16 @@
   font-size: var(--dshm-fs-caption);
 }
 
+/* The entity id yields first when the foot row runs tight: it shrinks to its
+ * ellipsis instead of wrapping the raised time beside the actions (W10 T6). */
 .entityCode {
   font-size: var(--dshm-fs-caption);
   color: var(--dshm-ink-sub);
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .daysCell {
@@ -180,6 +187,7 @@
   color: var(--dshm-ink);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .footNote {
@@ -193,6 +201,7 @@
 .timeCell {
   font-size: var(--dshm-fs-caption);
   color: var(--dshm-ink-sub);
+  white-space: nowrap;
 }
 
 /* The folded group card (W8-B2 #⑦): one header row — severity seal, rule

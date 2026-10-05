@@ -152,7 +152,7 @@ export function ProfileView({ identity, dark, onDarkChange, onLogout }: ProfileV
       </header>
 
       <section className={css.userCard} aria-label="身份卡">
-        <Avatar background="var(--dshm-brand)" acronym="我" size={54} />
+        <Avatar background="var(--dshm-brand)" acronym="我" size={54} className={css.userAva as string} />
         <div className={css.userMain}>
           <span className={css.userName}>{identity.nickname}</span>
           <span className={css.userMeta}>{identity.username} · 真实账号 · NocoBase 账号体系</span>

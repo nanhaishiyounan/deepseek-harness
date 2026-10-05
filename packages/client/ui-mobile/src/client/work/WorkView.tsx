@@ -144,8 +144,8 @@ export function WorkView({ active = true }: WorkViewProps): JSX.Element {
       <header className={css.workHeader}>
         <h1 className={css.workTitle}>工作</h1>
         <div className={css.workEntries}>
-          <Button type="button" fill="outline" size="small" className={css.entryLink} style={{ '--border-color': 'var(--dshm-line)' }} onClick={() => { navigate('#/tasks') }}>任务</Button>
-          <Button type="button" fill="outline" size="small" className={css.entryLink} style={{ '--border-color': 'var(--dshm-line)' }} onClick={() => { navigate('#/files') }}>文件</Button>
+          <Button type="button" fill="outline" size="small" className={css.entryLink} style={{ '--border-color': 'var(--dshm-line-strong)' }} onClick={() => { navigate('#/tasks') }}>任务</Button>
+          <Button type="button" fill="outline" size="small" className={css.entryLink} style={{ '--border-color': 'var(--dshm-line-strong)' }} onClick={() => { navigate('#/files') }}>文件</Button>
         </div>
       </header>
       <CapsuleTabs

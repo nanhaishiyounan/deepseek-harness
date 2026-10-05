@@ -518,13 +518,16 @@
   --color: var(--dshm-ink);
   --placeholder-color: var(--dshm-ink-sub);
   --background: var(--dshm-card);
-  --border-radius: var(--dshm-r-seal);
   --adm-text-area-min-height: calc(46px - 20px);
   --adm-text-area-max-height: calc(4 * 22px + 20px);
   --padding: 10px 18px;
   --box-sizing: border-box;
   --line-height: 22px;
   border: 1.5px solid var(--dshm-line-strong);
+  /* The capsule paper slot rides a plain border-radius: antd's TextArea never
+   * consumes --border-radius (that dial belongs to Button), so the W10 audit
+   * read the slot at radius 0 — the native-look seam. */
+  border-radius: var(--dshm-r-seal);
 }
 
 /* W9-B1/B5: the assist-input fill flash — the freshly filled slot wears the

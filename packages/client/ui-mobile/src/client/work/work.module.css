@@ -204,10 +204,28 @@
 .statusTabs {
   --active-line-height: 0;
   --active-line-color: transparent;
-  --title-font-size: var(--dshm-fs-caption);
   --adm-color-text: var(--dshm-ink-sub);
   padding: 6px 12px 0;
   flex: none;
+}
+
+/* The capsules ride the caption grade in a natural horizontal scroll (antd's
+ * flex:auto wrappers at the 20px default title size pushed the last capsules
+ * past the 375px viewport — W10 T6); the trailing fade keeps the scroll
+ * discoverable, the roster rail's cue. */
+.statusTabs :global(.adm-capsule-tabs-tab-wrapper) {
+  flex: none;
+}
+
+.statusTabs :global(.adm-capsule-tabs-tab) {
+  padding: 8px 14px;
+  font-size: var(--dshm-fs-caption);
+  font-weight: 600;
+}
+
+.statusTabs :global(.adm-capsule-tabs-tab-list) {
+  mask-image: linear-gradient(to right, black calc(100% - 18px), transparent);
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 18px), transparent);
 }
 
 .statusTabs :global(.adm-capsule-tabs-tab-active) {

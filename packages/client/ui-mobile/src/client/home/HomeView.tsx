@@ -17,7 +17,7 @@ import { MessageCircle, Search } from 'lucide-react'
 import type { SessionSummary } from '@deepseek-ai/dsh-host-apiproxy/api'
 import { Avatar, EmptyState, SkelRow } from '../ui.tsx'
 import { messageOf, useAsync } from '../hooks.ts'
-import { colleagueColor, colleagueOf } from '../colleagues.ts'
+import { colleagueColor, colleagueOf, stampAcronymOf } from '../colleagues.ts'
 import { navigate } from '../router.ts'
 import { createSession, listAiEmployees, listSessions, relativeTimeOf, subtitleOf, titleOf } from '../sessionsService.ts'
 import { listMyAlerts } from '../ledgerService.ts'
@@ -308,7 +308,7 @@ export function HomeView({ identityName, active = true }: HomeViewProps): JSX.El
           // W6-R2: the alert chip carries its routed count; an unreadable or
           // empty alert set keeps the plain chip (no badge noise).
           return chip.label === '我的预警' && alertCount !== undefined && alertCount > 0
-            ? <Badge key={chip.label} color="var(--dshm-danger)" content={String(Math.min(alertCount, 99))}>{chipButton}</Badge>
+            ? <Badge key={chip.label} color="var(--dshm-danger)" content={String(Math.min(alertCount, 99))} className={css.alertBadge as string}>{chipButton}</Badge>
             : chipButton
         })}
       </div>
@@ -352,7 +352,7 @@ export function HomeView({ identityName, active = true }: HomeViewProps): JSX.El
             >
               <span className={css.rosterAva}>
                 <Badge color="var(--dshm-success)" content={Badge.dot} className={css.rosterAvaDot as string}>
-                  <Avatar background={visual.color} acronym={visual.acronym} size={42} />
+                  <Avatar background={visual.color} acronym={stampAcronymOf(employee.id, employee.name)} size={42} />
                 </Badge>
               </span>
               <span className={css.rosterName}>{employee.name}</span>
@@ -397,7 +397,6 @@ export function HomeView({ identityName, active = true }: HomeViewProps): JSX.El
               <div className={css.recentList}>
                 {recentRows.map((summary) => {
                   const preset = summary.agentPreset
-                  const visual = colleagueOf(preset)
                   const subtitle = projections.get(summary.sessionId) ?? subtitleOf(summary)
                   const unread = summary.updatedAt > readWatermarkOf(summary.sessionId)
                   return (
@@ -406,10 +405,10 @@ export function HomeView({ identityName, active = true }: HomeViewProps): JSX.El
                         {preset !== undefined
                           ? (
                             <Badge color="var(--dshm-success)" content={Badge.dot} className={css.recentAvaDot as string}>
-                              <Avatar background={colleagueColor(preset)} acronym={visual.acronym} size={42} />
+                              <Avatar background={colleagueColor(preset)} acronym={stampAcronymOf(preset, titleOf(summary))} size={42} />
                             </Badge>
                           )
-                          : <Avatar background={colleagueColor(preset)} acronym={visual.acronym} size={42} />}
+                          : <Avatar background={colleagueColor(preset)} acronym={stampAcronymOf(preset, titleOf(summary))} size={42} />}
                       </span>
                       <span className={css.recentMain}>
                         <span className={css.recentTop}>

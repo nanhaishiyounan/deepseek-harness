@@ -1,0 +1,7 @@
+{
+  "content": "```json\n[\n  {\n    \"severity\": \"P1明显\",\n    \"category\": \"layout-overflow\",\n    \"description\": \"顶部状态筛选栏（待处理、进行中等）右侧「已完成」文本被边缘切断，且无渐变消隐或滚动提示。\",\n    \"suggestion\": \"增加容器右侧内边距或使用渐变遮罩提示可横向滚动。\"\n  },\n  {\n    \"severity\": \"P1明显\",\n    \"category\": \"contrast\",\n    \"description\": \"缺省状态文案「去聊天里让 AI 同事帮你处理」及卡片描述文字（如：食品安全合规问答...）颜色过深，与深褐色背景对比度不足，暗光环境下识别困难。\",\n    \"suggestion\": \"提升辅助文字亮度，建议使用设计语言中对应暗色模式的浅暖灰色（#A69D94 左右）。\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"inconsistency\",\n    \"description\": \"四个 AI 助手卡片内的图标视觉重量不统一，「AI 食安合规官」的盾牌图标线型较粗，「AI 营销洞察主管」的小机器人图标细节过多且线型较细。\",\n    \"suggestion\": \"统一图标的视觉体量、线条粗细与填充风格，确保组件库的一致性。\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"spacing\",\n    \"description\": \"卡片内部的纵向间距分布失衡，底部「去聊聊」链接与卡片底部的间距明显小于顶部图标与卡片顶部的间距。\",\n    \"suggestion\": \"增加卡片底部内边距（Padding-bottom），使内容在卡片内上下视觉居中。\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"other\",\n    \"description\": \"暗色模式背景采用纯冷灰色，偏离了「酱园琥珀」设计语言中要求的「暖纸底」调性，产生工业化冷硬感。\",\n    \"suggestion\": \"将暗色背景调整为带有微弱暖色调（Soy/Amber 调）的深色（如深暖褐黑），以契合品牌调性。\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"ua-default-style\",\n    \"description\": \"顶部右侧「任务/文件」切换组件在暗色下边缘轮廓较硬，疑似残留了部分浏览器默认的 button 阴影或描边逻辑。\",\n    \"suggestion\": \"显式设置 border: none 并使用设计语言规定的酱色圆角背景，消除默认控件残留感。\"\n  }\n]\n```",
+  "base_resp": {
+    "status_code": 0,
+    "status_msg": "success"
+  }
+}

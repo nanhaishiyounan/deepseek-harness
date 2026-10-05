@@ -1,0 +1,545 @@
+{
+  "homeOutsetButtons": [
+    {
+      "cls": "_statsGrid_uacrg_145",
+      "aria": "今日台账",
+      "text": "0项待处理34项进行中35项待确认34项",
+      "rect": {
+        "x": 20,
+        "y": 227,
+        "w": 335,
+        "h": 204
+      },
+      "inNav": false,
+      "parentCls": "_homePage_uacrg_12"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 AI 食安合规官",
+      "text": "合规AI 食安合规官",
+      "rect": {
+        "x": 22,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 企业数据助手",
+      "text": "数据企业数据助手",
+      "rect": {
+        "x": 112,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 智能填表助手",
+      "text": "表单智能填表助手",
+      "rect": {
+        "x": 202,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 AI 营销洞察主管",
+      "text": "AIAI 营销洞察主管",
+      "rect": {
+        "x": 292,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 消费者洞察主管",
+      "text": "AI消费者洞察主管",
+      "rect": {
+        "x": 382,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 智能品控主管",
+      "text": "AI智能品控主管",
+      "rect": {
+        "x": 472,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 AI 新品研发助手",
+      "text": "AIAI 新品研发助手",
+      "rect": {
+        "x": 562,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 AI 食安服务主管",
+      "text": "AIAI 食安服务主管",
+      "rect": {
+        "x": 652,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 AI 食安巡检员",
+      "text": "AIAI 食安巡检员",
+      "rect": {
+        "x": 742,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 AI 库存与定价管家",
+      "text": "AIAI 库存与定价管家",
+      "rect": {
+        "x": 832,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 供应商风险评估员",
+      "text": "AI供应商风险评估员",
+      "rect": {
+        "x": 922,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 AI 退税管家",
+      "text": "AIAI 退税管家",
+      "rect": {
+        "x": 1012,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 AI 设备维护主管",
+      "text": "AIAI 设备维护主管",
+      "rect": {
+        "x": 1102,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 数据资产入表顾问",
+      "text": "AI数据资产入表顾问",
+      "rect": {
+        "x": 1192,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 AI 采销主管",
+      "text": "AIAI 采销主管",
+      "rect": {
+        "x": 1282,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 AI 海外市场洞察官",
+      "text": "AIAI 海外市场洞察官",
+      "rect": {
+        "x": 1372,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 AI 出海合规官",
+      "text": "AIAI 出海合规官",
+      "rect": {
+        "x": 1462,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 AI 报关物流官",
+      "text": "AIAI 报关物流官",
+      "rect": {
+        "x": 1552,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 AI 供应链金融官",
+      "text": "AIAI 供应链金融官",
+      "rect": {
+        "x": 1642,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 AI 渠道匹配官",
+      "text": "AIAI 渠道匹配官",
+      "rect": {
+        "x": 1732,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 AI 出海项目经理",
+      "text": "AIAI 出海项目经理",
+      "rect": {
+        "x": 1822,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 AI 产品研发官",
+      "text": "AIAI 产品研发官",
+      "rect": {
+        "x": 1912,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 AI 自有品牌顾问",
+      "text": "AIAI 自有品牌顾问",
+      "rect": {
+        "x": 2002,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 AI 食安合规官",
+      "text": "AIAI 食安合规官",
+      "rect": {
+        "x": 2092,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 企业数据助手",
+      "text": "AI企业数据助手",
+      "rect": {
+        "x": 2182,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 AI 巡检排产员",
+      "text": "AIAI 巡检排产员",
+      "rect": {
+        "x": 2272,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 AI 原料行情分析师",
+      "text": "AIAI 原料行情分析师",
+      "rect": {
+        "x": 2362,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 AI 质量成本分析师",
+      "text": "AIAI 质量成本分析师",
+      "rect": {
+        "x": 2452,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 AI 冷链管理主管",
+      "text": "AIAI 冷链管理主管",
+      "rect": {
+        "x": 2542,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 AI 标签合规审查员",
+      "text": "AIAI 标签合规审查员",
+      "rect": {
+        "x": 2632,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 AI 供应商开发专员",
+      "text": "AIAI 供应商开发专员",
+      "rect": {
+        "x": 2722,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 AI 电商运营主管",
+      "text": "AIAI 电商运营主管",
+      "rect": {
+        "x": 2812,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 AI ESG 报告助理",
+      "text": "AIAI ESG 报告助理",
+      "rect": {
+        "x": 2902,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 标准模式",
+      "text": "AI标准模式",
+      "rect": {
+        "x": 2992,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 PTC 模式",
+      "text": "AIPTC 模式",
+      "rect": {
+        "x": 3082,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 极简模式",
+      "text": "AI极简模式",
+      "rect": {
+        "x": 3172,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_rosterCard_uacrg_285",
+      "aria": "找 创造模式",
+      "text": "AI创造模式",
+      "rect": {
+        "x": 3262,
+        "y": 617,
+        "w": 72,
+        "h": 12
+      },
+      "inNav": false,
+      "parentCls": "_rosterScroller_uacrg_274"
+    },
+    {
+      "cls": "_recentRow_uacrg_396",
+      "aria": "",
+      "text": "表单帮我登记一条采购单：供应商15:42",
+      "rect": {
+        "x": 21,
+        "y": 706,
+        "w": 333,
+        "h": 68
+      },
+      "inNav": false,
+      "parentCls": "_recentList_uacrg_386"
+    }
+  ],
+  "workDarkSegment": [
+    {
+      "hop": 0,
+      "tag": "div",
+      "cls": "adm-capsule-tabs-tab",
+      "bg": "rgb(245, 245, 245)",
+      "color": "rgb(242, 227, 211)",
+      "radius": "20px"
+    },
+    {
+      "hop": 1,
+      "tag": "div",
+      "cls": "adm-capsule-tabs-tab-wrapper",
+      "bg": "rgba(0, 0, 0, 0)",
+      "color": "rgb(242, 227, 211)",
+      "radius": "0px"
+    },
+    {
+      "hop": 2,
+      "tag": "div",
+      "cls": "adm-capsule-tabs-tab-list",
+      "bg": "rgba(0, 0, 0, 0)",
+      "color": "rgb(242, 227, 211)",
+      "radius": "0px"
+    },
+    {
+      "hop": 3,
+      "tag": "div",
+      "cls": "adm-capsule-tabs-header",
+      "bg": "rgba(0, 0, 0, 0)",
+      "color": "rgb(242, 227, 211)",
+      "radius": "0px"
+    }
+  ]
+}

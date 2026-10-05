@@ -16,7 +16,7 @@ import { goBackOr, navigate } from '../router.ts'
 import { PageNav } from '../PageNav.tsx'
 import { usePoll } from '../hooks.ts'
 import { Avatar, EmptyState, SkelRow } from '../ui.tsx'
-import { colleagueColor, colleagueOf } from '../colleagues.ts'
+import { colleagueColor, colleagueOf, stampAcronymOf } from '../colleagues.ts'
 import { listSessions, relativeTimeOf, titleOf } from '../sessionsService.ts'
 import { markSessionRead, pendingReviewSessions, pinSession, pinnedSessions, readWatermarkOf, unpinSession } from '../draftStore.ts'
 import { isWorkSession } from '../workStore.ts'
@@ -211,7 +211,10 @@ export function MessagesView(): JSX.Element {
                   {
                     key: 'read',
                     text: '标记已读',
-                    color: 'default',
+                    /* antd's 'default' face is a white plate under the forced
+                     * white action words (ratio 1.0, the W10 audit's hidden
+                     * white-on-white); the warning amber carries 5.0:1. */
+                    color: 'warning',
                     onClick: () => { markRead(summary) },
                   },
                 ]}
@@ -221,7 +224,7 @@ export function MessagesView(): JSX.Element {
                   className={`${css.sessionRow} ${pinned ? css.sessionPinned : ''}`}
                   onClick={() => { open(summary) }}
                 >
-                  <Avatar background={colleagueColor(preset)} acronym={visual.acronym} size={44} />
+                  <Avatar background={colleagueColor(preset)} acronym={stampAcronymOf(preset, titleOf(summary))} size={44} />
                   <span className={css.sessionMain}>
                     <span className={css.sessionTop}>
                       <span className={css.sessionTitle}>{titleOf(summary)}</span>

@@ -33,7 +33,9 @@
   margin-left: -10px;
   border-radius: 50%;
   background: none;
-  color: var(--dshm-ink);
+  /* The secondary ink keeps the glyph off the near-black industrial read the
+   * W10 audit flagged across the secondary pages (6.4:1 on the card face). */
+  color: var(--dshm-ink-sub);
 }
 
 .backHit:active {

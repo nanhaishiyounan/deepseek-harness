@@ -128,7 +128,11 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  color: var(--dshm-on-brand);
+  /* The stamp face rides the track-constant paper ink: the stamp palette is a
+   * deep-constant set, so --dshm-on-brand (deep words on the dark track) fell
+   * to 1.8-2.6:1 on it (W10 audit P1-04). Brand-faced avatars (the user's
+   * seal) re-point this to --dshm-on-brand at their call site. */
+  color: var(--dshm-stamp-ink);
   font-weight: 600;
   letter-spacing: 1px;
   flex: none;

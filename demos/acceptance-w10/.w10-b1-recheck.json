@@ -1,0 +1,144 @@
+{
+  "chats-375-light": {
+    "navTop": -1,
+    "lowestText": {
+      "text": "单据登记与任务执行",
+      "bottom": 1506,
+      "cls": "_sessionSummary_1penl_175"
+    },
+    "overlapPx": 1507,
+    "scrollerCls": "_body_1fa37_10"
+  },
+  "work-375-light": {
+    "tabs": [
+      {
+        "text": "待处理 0",
+        "right": 143,
+        "w": 119,
+        "bg": "rgb(248, 228, 210)",
+        "color": "rgb(143, 65, 6)"
+      },
+      {
+        "text": "进行中 35",
+        "right": 285,
+        "w": 131,
+        "bg": "rgb(246, 237, 223)",
+        "color": "rgb(61, 43, 31)"
+      },
+      {
+        "text": "待确认 34",
+        "right": 428,
+        "w": 131,
+        "bg": "rgb(246, 237, 223)",
+        "color": "rgb(61, 43, 31)"
+      },
+      {
+        "text": "已完成 34",
+        "right": 571,
+        "w": 131,
+        "bg": "rgb(246, 237, 223)",
+        "color": "rgb(61, 43, 31)"
+      }
+    ],
+    "listRight": 375,
+    "listOverflowX": "visible",
+    "link": {
+      "tag": "span",
+      "cls": "_toolGo_1tfrn_178",
+      "color": "rgb(30, 78, 140)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "textDecoration": "none",
+      "radius": "0px"
+    },
+    "outsetButtons": 1
+  },
+  "chat-375-light": {
+    "textarea": null
+  },
+  "files-375-light": {
+    "outsetCount": 104,
+    "outsetSample": [
+      {
+        "cls": "_statsGrid_uacrg_145",
+        "text": "0项待处理34项进行中35项待确认34项"
+      },
+      {
+        "cls": "_backHit_n1x91_27",
+        "text": ""
+      },
+      {
+        "cls": "_fileTopMain_1sdmh_64",
+        "text": "报AI本月经营概览示例"
+      }
+    ],
+    "shapes": {
+      "999px|1px solid rgb(234, 223, 201)": 1,
+      "0px|2px outset rgb(0, 0, 0)": 103,
+      "999px|1px solid rgb(223, 201, 166)": 3,
+      "999px|0px none rgb(255, 255, 255)": 1,
+      "4px|0px solid rgb(234, 223, 201)": 2,
+      "50%|2px outset rgb(0, 0, 0)": 1,
+      "4px|0px solid rgb(180, 83, 10)": 102
+    }
+  },
+  "ix-composer-focus-375-light": {
+    "tabBadges": [
+      {
+        "text": "合规",
+        "hop": 0,
+        "bg": "rgb(122, 82, 48)",
+        "color": "rgb(255, 255, 255)",
+        "cls": "_avatar_h2ezd_126"
+      },
+      {
+        "text": "数据",
+        "hop": 0,
+        "bg": "rgb(46, 94, 52)",
+        "color": "rgb(255, 255, 255)",
+        "cls": "_avatar_h2ezd_126"
+      },
+      {
+        "text": "表单",
+        "hop": 0,
+        "bg": "rgb(30, 78, 140)",
+        "color": "rgb(255, 255, 255)",
+        "cls": "_avatar_h2ezd_126"
+      },
+      {
+        "text": "AI",
+        "hop": 0,
+        "bg": "rgb(58, 68, 80)",
+        "color": "rgb(255, 255, 255)",
+        "cls": "_avatar_h2ezd_126"
+      },
+      {
+        "text": "AI",
+        "hop": 0,
+        "bg": "rgb(58, 68, 80)",
+        "color": "rgb(255, 255, 255)",
+        "cls": "_avatar_h2ezd_126"
+      },
+      {
+        "text": "AI",
+        "hop": 0,
+        "bg": "rgb(58, 68, 80)",
+        "color": "rgb(255, 255, 255)",
+        "cls": "_avatar_h2ezd_126"
+      },
+      {
+        "text": "AI",
+        "hop": 0,
+        "bg": "rgb(58, 68, 80)",
+        "color": "rgb(255, 255, 255)",
+        "cls": "_avatar_h2ezd_126"
+      },
+      {
+        "text": "AI",
+        "hop": 0,
+        "bg": "rgb(58, 68, 80)",
+        "color": "rgb(255, 255, 255)",
+        "cls": "_avatar_h2ezd_126"
+      }
+    ]
+  }
+}

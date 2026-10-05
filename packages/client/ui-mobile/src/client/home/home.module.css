@@ -21,6 +21,13 @@
   padding: 10px var(--dshm-space-5) calc(16px + env(safe-area-inset-bottom));
 }
 
+/* The page is a scroll column: sections must never flex-shrink. Without this
+ * floor a tall roster stack squeezed the sections (the W10 audit's roster
+ * collapse to a 12px slit) instead of letting the column scroll. */
+.homePage > * {
+  flex: none;
+}
+
 /* ---- Hero: greeting + solar term + the 酱印 signature seal (§六.1) — on the
         canvas itself, no card chrome; the persimmon hits live in the seal
         ring, the alert figure, and the register CTA. ---- */
@@ -495,6 +502,14 @@
   border-radius: var(--dshm-r-card);
   box-shadow: var(--dshm-shadow-card);
   overflow: hidden;
+}
+
+/* The alert chip's count badge (antd Badge): on the dark track the lifted
+ * danger face (#ef8078) only holds 2.6:1 under white words, so the figure
+ * rides the roasted-paper deep ink there (6.7:1); light keeps white-on-brand
+ * (6.6:1). */
+:global(html[data-theme='dark']) .alertBadge {
+  --adm-color-text-light-solid: #241708;
 }
 
 /* The error strip's retry entry: the antd none-fill brand word after the

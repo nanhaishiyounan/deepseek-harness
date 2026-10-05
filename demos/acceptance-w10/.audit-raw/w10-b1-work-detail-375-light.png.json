@@ -1,0 +1,7 @@
+{
+  "content": "[\n  {\n    \"severity\": \"P1明显\",\n    \"category\": \"layout-overflow\",\n    \"description\": \"页面顶部标题文字“味之源 SUP-004 ISO22000 重办VFY-”在右侧发生截断，未完整展示业务名称\",\n    \"suggestion\": \"建议标题栏支持多行显示或通过走马灯形式展示完整内容，确保关键信息可见\"\n  },\n  {\n    \"severity\": \"P1明显\",\n    \"category\": \"contrast\",\n    \"description\": \"卡片内“创建 10/05 04:10”、“负责人”以及下方“尚未开始执行”的文字颜色过浅，在暖纸色背景下对比度不足\",\n    \"suggestion\": \"提高文字对比度，将辅助文字颜色调整为符合“酱园”色系的深灰褐色\"\n  },\n  {\n    \"severity\": \"P1明显\",\n    \"category\": \"design-language\",\n    \"description\": \"大量使用工业感的中性灰（如负责人标签、状态描述），与“酱园琥珀”视觉语言中强调的暖纸、酱色体系不符，导致画面色彩“发脏”\",\n    \"suggestion\": \"将所有中性灰色阶替换为带有Sepia（深褐）色调的暖灰，保持色调统一性\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"misalign\",\n    \"description\": \"“回到源对话 >”橙色文字块与上方琥珀色左边框容器的左侧内边距不对齐，视觉动线偏移\",\n    \"suggestion\": \"将链接文字的左侧起始位置与上方文本块的左边线对齐\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"contrast\",\n    \"description\": \"“上下文”与“执行时间线”标题两侧的装饰分割线颜色极淡，起不到视觉区域划分的作用\",\n    \"suggestion\": \"增强分割线存在感，可使用浅琥珀色或极细的酱色线条\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"spacing\",\n    \"description\": \"底部“开始执行”按钮仅右侧布局，造成左侧大面积留白失衡，且单手操作舒适度欠佳\",\n    \"suggestion\": \"建议按钮采用通栏宽度或居中布局，并增加底部安全区域的留白\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"typography\",\n    \"description\": \"“待处理”印章内部文字字号偏小，且线条粗细与外圈圆环不匹配，视觉重心不稳\",\n    \"suggestion\": \"优化印章组件，适当放大内部文字并加粗，模拟真实印章的厚重感\"\n  }\n]",
+  "base_resp": {
+    "status_code": 0,
+    "status_msg": "success"
+  }
+}

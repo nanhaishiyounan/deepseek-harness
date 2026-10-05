@@ -1,0 +1,7 @@
+{
+  "content": "```json\n[\n  {\n    \"severity\": \"P1明显\",\n    \"category\": \"contrast\",\n    \"description\": \"底部「执行时间线」卡片内文字「尚未开始执行」颜色过浅\",\n    \"suggestion\": \"增强文字对比度，建议使用设计规范中的中灰色或酱色淡化色，确保在暖纸底色上的可读性。\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"layout-overflow\",\n    \"description\": \"顶部标题「味之源 SUP-004 ISO22000 重办VFY-」末尾发生截断\",\n    \"suggestion\": \"若标题重要，建议采用换行处理或跑马灯效果；或者优化标题逻辑，优先展示业务核心编号。\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"spacing\",\n    \"description\": \"「执行时间线」卡片内部上下留白过大，与上方信息密集度较高的卡片节奏不一致\",\n    \"suggestion\": \"缩减空状态下的垂直内边距，保持页面各卡片视觉重心的一致性。\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"design-language\",\n    \"description\": \"「上下文」与「执行时间线」的分割横线使用了冷灰色，偏离了「酱园琥珀」的暖色调视觉体系\",\n    \"suggestion\": \"将分割线颜色改为淡酱色或低饱和度的暖琥珀灰，减少工业冷感。\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"typography\",\n    \"description\": \"「待处理」印章元素内的文字字重较细，在缩略视图下辨识度受限\",\n    \"suggestion\": \"适当增加印章内文字字重，或微调印章描边粗细，强化“印章”这一核心视觉符号的权威感。\"\n  },\n  {\n    \"severity\": \"P1明显\",\n    \"category\": \"ua-default-style\",\n    \"description\": \"底部操作栏「开始执行」按钮呈现出较为生硬的 CSS 默认圆角矩形质感，缺乏设计语言要求的“酱园”厚重感\",\n    \"suggestion\": \"优化按钮阴影，采用更克制的扩散效果，并微调主色饱和度，使其更贴合琥珀酱色的质感，避免呈现出浏览器默认按钮的廉价感。\"\n  }\n]\n```",
+  "base_resp": {
+    "status_code": 0,
+    "status_msg": "success"
+  }
+}

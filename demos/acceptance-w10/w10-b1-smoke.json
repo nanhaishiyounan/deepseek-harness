@@ -1,0 +1,9 @@
+{
+  "pipeline": "mmx vision describe",
+  "model": "unknown",
+  "keys": [
+    "content",
+    "base_resp"
+  ],
+  "parsedIssues": "[\n  {\n    \"severity\": \"P0\",\n    \"category\": \"layout-overflow\",\n    \"description\": \"“AI 同事”模块下的头像显示严重异常，表现为扁平的矩形且内容被截断，未能正确显示为圆形或正常的头像比例。\",\n    \"suggestion\": \"检查头像组件的 CSS 容器宽高比设置，确保图片以 object-fit: cover 方式在圆形容器内居中显示。\"\n  },\n  {\n    \"severity\": \"P1\",\n    \"category\": \"contrast\",\n    \"description\": \"顶部副标题“75 项预警待看”采用浅橙色文字，在浅黄色背景下的对比度极低，不符合无障碍设计标准，识别困难。\",\n    \"suggestion\": \"加深该文本颜色，或为该文本添加深色底块以提升阅读对比度。\""
+}

@@ -57,7 +57,6 @@
   flex: none;
   --active-line-height: 0;
   --active-line-color: transparent;
-  --title-font-size: var(--dshm-fs-caption);
 }
 
 .list {

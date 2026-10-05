@@ -134,14 +134,15 @@
   min-width: 0;
 }
 
+/* The name stays whole — the duty beside it yields (the W10 audit caught
+ * five-character names clipped while the long duty held flex: none). */
 .rosterName {
   font-size: var(--dshm-fs-body);
   line-height: 22px;
   font-weight: 650;
   color: var(--dshm-ink);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  flex: none;
+  max-width: 100%;
 }
 
 .rosterRole {
@@ -152,7 +153,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  flex: none;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .rosterTag {

@@ -51,6 +51,13 @@
   flex: none;
 }
 
+/* The user seal rides the brand face, so its words follow the track-aware
+ * on-brand pair (deep words on the lifted dark-track amber) instead of the
+ * stamp palette's constant paper ink. */
+.userAva {
+  color: var(--dshm-on-brand);
+}
+
 .userMain {
   display: flex;
   flex-direction: column;

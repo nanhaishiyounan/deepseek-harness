@@ -105,7 +105,7 @@ function fillAssistantWelcome(): Welcome {
 /** The preset-id → visual table (the four roster presets, 04 §6; unknown presets take the fallback). */
 const COLLEAGUES: Readonly<Record<string, ColleagueVisual>> = {
   'mobile-form-assistant': {
-    color: '#1e4e8c',
+    color: 'var(--dshm-stamp-avatar-1)',
     acronym: '表单',
     duty: '单据登记与任务执行',
     group: '职能与效率',
@@ -114,7 +114,7 @@ const COLLEAGUES: Readonly<Record<string, ColleagueVisual>> = {
     welcome: fillAssistantWelcome(),
   },
   'business-advisor': {
-    color: '#1d5f5a',
+    color: 'var(--dshm-stamp-avatar-2)',
     acronym: '参谋',
     duty: '经营洞察问答（只读）',
     group: '数据与技术',
@@ -134,7 +134,7 @@ const COLLEAGUES: Readonly<Record<string, ColleagueVisual>> = {
     },
   },
   'enterprise-data-assistant': {
-    color: '#2e5e34',
+    color: 'var(--dshm-stamp-avatar-3)',
     acronym: '数据',
     duty: '企业数据问答与统计建议',
     group: '数据与技术',
@@ -154,7 +154,7 @@ const COLLEAGUES: Readonly<Record<string, ColleagueVisual>> = {
     },
   },
   'food-compliance-officer': {
-    color: '#7a5230',
+    color: 'var(--dshm-stamp-avatar-4)',
     acronym: '合规',
     duty: '食安法规问答与审核要点',
     group: '职能与效率',
@@ -175,9 +175,10 @@ const COLLEAGUES: Readonly<Record<string, ColleagueVisual>> = {
   },
 }
 
-/** The fallback visual for presets the table does not name. */
+/** The fallback visual for presets the table does not name. The face stays a
+ * track-constant deep roast (the stamp ink is paper-white on both tracks). */
 const FALLBACK: ColleagueVisual = {
-  color: '#3a4450',
+  color: '#6b5040',
   acronym: 'AI',
   duty: 'AI 同事',
   skills: ['AI 同事'],
@@ -197,6 +198,23 @@ const FALLBACK: ColleagueVisual = {
 export function colleagueOf(presetId: string | undefined): ColleagueVisual {
   if (presetId === undefined) return FALLBACK
   return COLLEAGUES[presetId] ?? FALLBACK
+}
+
+/**
+ * The stamp word shown beside a colleague's full name. Runtime presets carry
+ * names with an「AI」prefix (AI 食安合规官); the fallback stamp's own「AI」word
+ * then reads twice (the W10 audit's AIAI seam), so the stamp borrows the
+ * name's own leading pair instead.
+ * @param presetId - the agentPreset id.
+ * @param name - the colleague's display name rendered beside the stamp.
+ * @returns the stamp acronym to show.
+ */
+export function stampAcronymOf(presetId: string | undefined, name: string): string {
+  const visual = colleagueOf(presetId)
+  if (visual.acronym === 'AI' && name.startsWith('AI')) {
+    return name.slice(2, 4).trim() || 'AI'
+  }
+  return visual.acronym
 }
 
 /**

@@ -13,19 +13,22 @@ import type { JSX, ReactNode } from 'react'
 import { Button, DotLoading, ErrorBlock, Skeleton, Tag } from 'antd-mobile'
 import css from './ui.module.css'
 
-/** Avatar props: the flat background css, the acronym block, and an optional glyph. */
+/** Avatar props: the flat background css, the acronym block, an optional glyph,
+ * and an optional class hook (e.g. a brand-faced seal re-pointing the stamp
+ * ink to the track-aware on-brand words). */
 export interface AvatarProps {
   readonly background: string
   readonly acronym?: string
   readonly size?: number
   readonly children?: ReactNode
+  readonly className?: string
 }
 
 /** One flat stamp avatar (colleague identity block, v3: no gradients). */
-export function Avatar({ background, acronym, size = 40, children }: AvatarProps): JSX.Element {
+export function Avatar({ background, acronym, size = 40, children, className }: AvatarProps): JSX.Element {
   return (
     <span
-      className={css.avatar}
+      className={className === undefined ? css.avatar : `${css.avatar} ${className}`}
       style={{ width: `${size}px`, height: `${size}px`, background, fontSize: `${Math.round(size * 0.36)}px` }}
       aria-hidden="true"
     >

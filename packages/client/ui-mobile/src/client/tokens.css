@@ -29,7 +29,7 @@ html[data-theme='light'] {
   --dshm-brand-deep: #8f4106;       /* 按压态 / soft 底上的深一阶（对 brand-soft 5.8:1） */
   --dshm-brand-soft: #f8e4d2;       /* 主色 soft 底（chip / 选中槽） */
   --dshm-on-brand: #ffffff;         /* 主色实底上的前景（亮 5.0:1） */
-  --dshm-anchor: #1e4e8c;           /* W7 品牌蓝锚：链接/「全部›」/表单助手章（对白卡 8.3:1） */
+  --dshm-anchor: var(--dshm-brand-deep); /* 链接/「全部›」锚：柿橙深阶（对白卡 7.2:1；W10 清除 W7 品牌蓝锚残留） */
   --dshm-ink: #3d2b1f;              /* 深焙墨·主文字（对画布 12.0:1 / 对卡 13.5:1） */
   --dshm-ink-sub: #6f5b49;          /* 墨·次文字（对画布 6.0:1 / 对卡 6.4:1） */
   --dshm-ink-weak: #9a8570;         /* 仅装饰/骨架/时间戳壳，不负载正文 */
@@ -60,10 +60,11 @@ html[data-theme='light'] {
   --dshm-seal-face: #ffffff;        /* 印面底 */
   --dshm-seal-gloss: #ffffff;       /* 酱印径向高光起点（亮轨印面即纸白，渐变呈恒白） */
   --dshm-seal-shade: var(--dshm-card);  /* 酱印径向基底端（亮轨=卡面） */
-  --dshm-stamp-avatar-1: #1e4e8c;   /* AI 同事四字章（章色双轨恒定，W7 stamp 盘继承） */
+  --dshm-stamp-avatar-1: #93382a;   /* AI 同事四字章（章色双轨恒定；表单章 W10 改暖红棕，去 W7 蓝残留） */
   --dshm-stamp-avatar-2: #1d5f5a;
   --dshm-stamp-avatar-3: #2e5e34;
   --dshm-stamp-avatar-4: #7a5230;
+  --dshm-stamp-ink: #fff8ee;        /* 章面字色（双轨恒定纸白：章底都是深色盘，白字 ≥7:1） */
 
   /* -- Type ramp (§3.4): six grades + the mono numeric track --------------- */
   --dshm-fs-display: 30px;          /* hero 问候、章中心字（800/1.25） */
@@ -115,7 +116,7 @@ html[data-theme='light'] {
   /* -- W8 accessibility semantics, re-valued onto the amber palette (§七；
    *    names and gates survive, values re-measured by the w9-b4 probe). ---- */
   --dshm-focus-ring: 0 0 0 3px rgba(180, 83, 10, 0.40); /* keyboard focus halo */
-  --dshm-link: #1e4e8c;             /* in-text links on card/canvas (8.3:1 on card) */
+  --dshm-link: var(--dshm-brand-deep); /* in-text links on card/canvas (7.2:1 on card; W10 去工业蓝) */
   --dshm-tab-active: #b4530a;       /* selected Tab state (4.9:1 on the tray) */
 
   /* -- W7-era reference aliases: the names module files already read; each
@@ -224,6 +225,7 @@ html[data-theme='light'] {
   --adm-font-size-8: 24px;
   --adm-font-size-9: var(--dshm-fs-display);
   --adm-font-size-10: 44px;
+  --adm-color-fill-content: var(--dshm-card2); /* capsule-tab / scroll-track fills (W10: antd default #f5f5f5 leak) */
 }
 
 .dshm-root[data-theme='dark'],
@@ -237,7 +239,7 @@ html[data-theme='dark'] {
   --dshm-brand-deep: #c26f33;
   --dshm-brand-soft: #3b2a1c;
   --dshm-on-brand: #241708;         /* 主色实底上的深字（6.2:1） */
-  --dshm-anchor: #7b9dd1;           /* 链接锚（对卡 6.1:1） */
+  --dshm-anchor: #f09a5e;           /* 链接锚（对卡 7.0:1；W10 去蓝灰锚，并入柿橙提亮阶） */
   --dshm-ink: #f2e3d3;              /* 纸墨·主文字（对卡 12.6:1） */
   --dshm-ink-sub: #c3ab93;          /* 墨·次文字（对卡 7.2:1） */
   --dshm-ink-weak: #8d7b66;         /* 仅装饰/骨架，不负载正文 */
@@ -268,8 +270,41 @@ html[data-theme='dark'] {
   /* stamp-avatar-1..4: seal colors stay track-constant (§3.3). */
 
   --dshm-focus-ring: 0 0 0 3px rgba(229, 139, 74, 0.55);
-  --dshm-link: #7b9dd1;             /* in-text links (≥4.5:1 on card) */
+  --dshm-link: #f09a5e;             /* in-text links (7.0:1 on card; W10 去蓝灰链接) */
   --dshm-tab-active: #f09a5e;       /* selected Tab state (7.9:1 on the tray) */
+
+  /* antd-mobile theme mapping, dark track (§4): the W10 audit found the dark
+   * segment never re-declared the --adm-* dials, so every portal-mounted
+   * component fell back to the light values (or antd defaults — the capsule
+   * tab's #f5f5f5). Mirroring the light mapping onto the dark dials keeps
+   * every adm- component on the roasted-paper track. */
+  --adm-color-primary: var(--dshm-brand);
+  --adm-color-success: var(--dshm-success);
+  --adm-color-warning: var(--dshm-warning);
+  --adm-color-danger: var(--dshm-danger);
+  --adm-color-text: var(--dshm-ink);
+  --adm-color-text-secondary: var(--dshm-ink-sub);
+  --adm-color-weak: var(--dshm-ink-sub);
+  --adm-color-border: var(--dshm-line);
+  --adm-color-box: var(--dshm-card2);
+  --adm-color-background: var(--dshm-card);
+  --adm-color-background-body: var(--dshm-canvas);
+  --adm-font-family: var(--dshm-font-sans);
+  --adm-radius-s: 8px;
+  --adm-radius-m: var(--dshm-r-ctl);
+  --adm-radius-l: var(--dshm-r-card);
+  --adm-center-popup-border-radius: var(--dshm-r-card);
+  --adm-font-size-1: 9px;
+  --adm-font-size-2: 11px;
+  --adm-font-size-3: var(--dshm-fs-caption);
+  --adm-font-size-4: var(--dshm-fs-body);
+  --adm-font-size-5: 15px;
+  --adm-font-size-6: var(--dshm-fs-heading);
+  --adm-font-size-7: 20px;
+  --adm-font-size-8: 24px;
+  --adm-font-size-9: var(--dshm-fs-display);
+  --adm-font-size-10: 44px;
+  --adm-color-fill-content: var(--dshm-card2);
 
   /* Reference aliases, dark values. */
   --dshm-primary-10: rgba(229, 139, 74, 0.20);
@@ -340,16 +375,22 @@ html[data-theme='dark'] {
   box-sizing: border-box;
 }
 
-/* Only class-less native buttons take the reset; every styled button (CSS
- * module classes, antd's .adm-button) owns its own background/padding, which
- * a bare `button` selector at (0,1,1) would out-cascade at (0,1,0). */
-.dshm-root button:not([class]) {
-  font: inherit;
-  border: none;
-  cursor: pointer;
-  background: none;
-  padding: 0;
-  color: inherit;
+/* Every native button under the shell takes the UA reset from a low-priority
+ * cascade layer (W10 T1): the (0,1,1) bare selector used to skip styled
+ * buttons (`:not([class])`), leaking the UA's 2px outset border and gray face
+ * onto every CSS-module card button. In a layer, unlayered rules — module
+ * classes, antd's .adm-button — always win without a specificity fight, so
+ * each component keeps owning its own face while nothing inherits the UA's. */
+@layer dshm-button-reset {
+  .dshm-root button {
+    font: inherit;
+    border: none;
+    appearance: none;
+    cursor: pointer;
+    background: transparent;
+    padding: 0;
+    color: inherit;
+  }
 }
 
 .dshm-root input,
