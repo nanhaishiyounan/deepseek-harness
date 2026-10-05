@@ -133,8 +133,9 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
   const [newChatOpen, setNewChatOpen] = useState(false)
   /** The quick panel's open flag (local view state; a send or route change closes it). */
   const [panelOpen, setPanelOpen] = useState(false)
-  /** The composer's draft attachments (W11-B2): pick → uploading → ready/failed. */
-  const lane = useAttachments()
+  /** The composer's draft attachments (W11-B2): pick → uploading → ready/failed;
+   * keyed to the session so the ready strip survives a refresh (W11-R1). */
+  const lane = useAttachments(sessionId)
   const [error, setError] = useState<string | undefined>(undefined)
   /** Seqs the user locally reopened for editing (rejected → draft). */
   const [reopened, setReopened] = useState<ReadonlySet<number>>(new Set())
@@ -163,6 +164,18 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
   const outbox = useSyncExternalStore(subscribeOutbox, outboxSnapshot)
   const sessionOutbox = outbox.entries.filter(entry => entry.sessionId === sessionId)
 
+  /**
+   * One send's terminal cleanup: the composed text left the composer — sent,
+   * parked in the outbox, or refused with the toast — so the draft box and
+   * the attachment strip reset together (W11-R1). A lingering ready chip
+   * would re-quote the same attachment on the next send, which is the
+   * offline double-send window (the parked entry already carries the quote).
+   */
+  const finalizeSend = useCallback(() => {
+    setDraft('')
+    lane.clear()
+  }, [lane])
+
   const send = useCallback(async (text: string) => {
     if (lane.attachments.some(row => row.status === 'uploading')) {
       Toast.show({ content: '附件还在处理中，稍候再发送' })
@@ -182,8 +195,7 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
     const clientMsgId = newClientMsgId(loadIdentity()?.username ?? '', trimmed)
     try {
       await promptSession(sessionId, trimmed, clientMsgId)
-      setDraft('')
-      lane.clear()
+      finalizeSend()
       setPollInterval(800)
       // The demo typing window (04 §4.2) arms inside the cell; live mode no-ops.
       typingCell.armAfterSend()
@@ -198,7 +210,7 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
       typingCell.retire()
       if (cause instanceof TypeError) {
         enqueueOutbox(sessionId, trimmed, clientMsgId)
-        setDraft('')
+        finalizeSend()
         setError('网络不可用，消息已存入待发队列，恢复后自动发送')
         return
       }
@@ -209,10 +221,11 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
       // the rpc seam only rejects with Error.
       /* v8 ignore next -- the rpc seam never rejects with a non-Error value. */
       setError(cause instanceof Error ? cause.message : String(cause))
+      finalizeSend()
     } finally {
       setSending(false)
     }
-  }, [sessionId, sending, typingCell, lane])
+  }, [sessionId, sending, typingCell, lane, finalizeSend])
 
   /**
    * The assist-input fill (W9-B1): a picked starter/quick command/chip/

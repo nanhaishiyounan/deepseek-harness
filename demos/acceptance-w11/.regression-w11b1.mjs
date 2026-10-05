@@ -54,7 +54,10 @@ await starter.click()
 await sleep(300)
 const stateA = await page.evaluate(() => {
   const slot = document.querySelector('.adm-text-area[aria-label="消息输入"] textarea:not(.adm-text-area-element-hidden)')
-  const row = document.querySelector('.adm-text-area[aria-label="消息输入"]').parentElement
+  // data-fill lives on the inputRow (the textarea's grandparent); the shell
+  // in between never carries it (W11-R1: this probe used to read the shell
+  // and false-failed A5 on a live fill flash).
+  const row = slot.closest('div[class*="inputRow"]')
   const send = document.querySelector('button[aria-label="发送"]')
   return {
     value: slot.value, focused: document.activeElement === slot,

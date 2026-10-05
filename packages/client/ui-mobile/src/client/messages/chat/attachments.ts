@@ -9,9 +9,10 @@
  * see and delete the whole citation before it goes.
  */
 
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Toast } from 'antd-mobile'
 import { rpc } from '../../rpc.ts'
+import { uid } from '../../uid.ts'
 
 /** The composer's draft-attachment row (the chip strip above the input row). */
 export interface DraftAttachment {
@@ -31,6 +32,9 @@ export interface DraftAttachment {
 
 /** The wire media types the describe lane accepts. */
 const IMAGE_MEDIA = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif'])
+
+/** Prefix of one session's persisted ready-attachment strip (W11-R1). */
+const PERSIST_PREFIX = 'dsh-mobile-attachments-'
 
 /** The extensions the extract lane accepts (the picker filters the same set). */
 export const DOC_ACCEPT = '.pdf,.md,.txt'
@@ -109,6 +113,60 @@ function quoteOf(kind: 'image' | 'doc', name: string, body: string, truncated: b
   return `📎 ${name}\n【${tag}】${body}${truncated ? '\n（原文过长，已截断）' : ''}`
 }
 
+/** The persisted ready-row descriptor: the quote rides along — it is the only
+ * recoverable form of the content once the page let go of the File. */
+interface PersistedRow {
+  readonly id: string
+  readonly kind: 'image' | 'doc'
+  readonly name: string
+  readonly sizeBytes: number
+  readonly quote: string
+}
+
+/** The persisted strip's storage shape. */
+interface PersistedShape {
+  readonly version: 1
+  readonly rows: readonly PersistedRow[]
+}
+
+/** The durable-boundary shape check (a corrupt strip is an empty strip). */
+function isPersistedShape(value: unknown): value is PersistedShape {
+  if (typeof value !== 'object' || value === null) return false
+  const shape = value as Record<string, unknown>
+  if (shape['version'] !== 1 || !Array.isArray(shape['rows'])) return false
+  return shape['rows'].every((row) => {
+    if (typeof row !== 'object' || row === null) return false
+    const typed = row as Record<string, unknown>
+    return typeof typed['id'] === 'string' && (typed['kind'] === 'image' || typed['kind'] === 'doc')
+      && typeof typed['name'] === 'string' && typeof typed['sizeBytes'] === 'number'
+      && typeof typed['quote'] === 'string'
+  })
+}
+
+/** Read one session's persisted ready rows back as live ready chips. */
+function loadPersisted(key: string): readonly DraftAttachment[] {
+  const raw = localStorage.getItem(key)
+  if (raw === null) return []
+  try {
+    const parsed: unknown = JSON.parse(raw)
+    if (!isPersistedShape(parsed)) return []
+    return parsed.rows.map(row => ({
+      ...row, thumbUrl: undefined, status: 'ready' as const, error: undefined,
+    }))
+  } catch {
+    return []
+  }
+}
+
+/** Write one session's ready rows (an empty strip removes the key). */
+function savePersisted(key: string, rows: readonly DraftAttachment[]): void {
+  const ready = rows
+    .filter(row => row.status === 'ready' && row.quote !== undefined)
+    .map(row => ({ id: row.id, kind: row.kind, name: row.name, sizeBytes: row.sizeBytes, quote: row.quote as string }))
+  if (ready.length === 0) localStorage.removeItem(key)
+  else localStorage.setItem(key, JSON.stringify({ version: 1, rows: ready } satisfies PersistedShape))
+}
+
 /** The attachment lane's state and pick sinks (what `useAttachments` returns). */
 export interface UseAttachmentsResult {
   readonly attachments: readonly DraftAttachment[]
@@ -120,20 +178,44 @@ export interface UseAttachmentsResult {
 }
 
 /**
- * The attachment lane's state and pick sinks.
+ * The attachment lane's state and pick sinks. With a session id the ready
+ * rows survive a refresh: backgrounding (`visibilitychange`→hidden) and
+ * `pagehide` persist the ready descriptors under the session's own key, the
+ * mount rehydrates them, and a clear (the post-send reset) drops the key so
+ * a sent attachment never resurrects.
+ * @param sessionId - the owning session, when the strip should persist.
  * @returns the draft rows plus the image/document pick handlers and removal.
  */
-export function useAttachments(): UseAttachmentsResult {
-  const [attachments, setAttachments] = useState<readonly DraftAttachment[]>([])
+export function useAttachments(sessionId?: string): UseAttachmentsResult {
+  const persistKey = sessionId === undefined ? undefined : `${PERSIST_PREFIX}${sessionId}`
+  const [attachments, setAttachments] = useState<readonly DraftAttachment[]>(
+    () => (persistKey === undefined ? [] : loadPersisted(persistKey)),
+  )
   // The rows' mirror: picks read the current list synchronously (the image
   // cap check) without racing the state commit — a setState updater must stay
   // pure, so the upload side effects live outside it.
-  const rowsRef = useRef<readonly DraftAttachment[]>([])
-  /** One commit: mirror + state move together. */
+  const rowsRef = useRef<readonly DraftAttachment[]>(attachments)
+  /** One commit: mirror + state + the persisted strip move together. */
   const commit = useCallback((rows: readonly DraftAttachment[]) => {
     rowsRef.current = rows
     setAttachments(rows)
-  }, [])
+    if (persistKey !== undefined) savePersisted(persistKey, rows)
+  }, [persistKey])
+  // Persist on the page's own hiding events (a plain reload may never turn
+  // the visibility state before it goes).
+  useEffect(() => {
+    if (persistKey === undefined) return
+    const flush = (): void => { savePersisted(persistKey, rowsRef.current) }
+    const onVisibility = (): void => {
+      if (document.visibilityState === 'hidden') flush()
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    window.addEventListener('pagehide', flush)
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility)
+      window.removeEventListener('pagehide', flush)
+    }
+  }, [persistKey])
   const thumbs = useRef<readonly string[]>([])
   // Revoke every preview URL when the composer unmounts.
   const disposeThumbs = useCallback(() => {
@@ -164,7 +246,7 @@ export function useAttachments(): UseAttachmentsResult {
       Toast.show({ content: `一次最多带 ${MAX_IMAGES} 张图片` })
       return
     }
-    const id = crypto.randomUUID()
+    const id = uid()
     const thumbUrl = URL.createObjectURL(file)
     thumbs.current = [...thumbs.current, thumbUrl]
     commit([...rowsRef.current, {
@@ -194,7 +276,7 @@ export function useAttachments(): UseAttachmentsResult {
 
   /** One pdf/md/txt file through extract: quote the text layer. */
   const pickDoc = useCallback(async (file: File) => {
-    const id = crypto.randomUUID()
+    const id = uid()
     commit([...rowsRef.current, {
       id, kind: 'doc' as const, name: file.name, sizeBytes: file.size,
       thumbUrl: undefined, status: 'uploading' as const, quote: undefined, error: undefined,

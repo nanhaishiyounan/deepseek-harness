@@ -12,6 +12,7 @@ import type {
   RequestPayload, ResponseValue, RpcMethodMap,
 } from '@deepseek-ai/dsh-host-apiproxy/api'
 import { handleSessionExpired, loadIdentity } from './auth.ts'
+import { uid } from './uid.ts'
 
 /** The methods whose payloads accept the sign-in session token server-side. */
 const TOKEN_METHODS: ReadonlySet<string> = new Set([
@@ -87,7 +88,7 @@ export async function rpc<K extends MobileRpcMethod>(
   method: K,
   payload: RequestPayload<K> & Record<string, unknown>,
 ): Promise<ResponseValue<K>> {
-  const rpcId = crypto.randomUUID()
+  const rpcId = uid()
   const identity = TOKEN_METHODS.has(method) ? loadIdentity() : undefined
   const wire = identity === undefined || payload['authToken'] !== undefined
     ? payload

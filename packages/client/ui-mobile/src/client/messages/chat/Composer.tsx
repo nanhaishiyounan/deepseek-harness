@@ -13,7 +13,7 @@
  * control while a turn runs. A transient send failure toasts once.
  */
 
-import { useEffect, useState, type JSX, type ReactNode, type RefObject } from 'react'
+import { useEffect, useRef, useState, type JSX, type ReactNode, type RefObject } from 'react'
 import { TextArea, Toast, type TextAreaRef } from 'antd-mobile'
 import { FileWarning, Image as ImageIcon, Loader2, Plus, Send, Square, X } from 'lucide-react'
 import type { DraftAttachment } from './attachments.ts'
@@ -72,6 +72,22 @@ export function Composer(props: ComposerProps): JSX.Element {
     const timer = setTimeout(() => { setFillLive(false) }, 650)
     return () => { clearTimeout(timer) }
   }, [props.filledAt])
+  // The send gate's single source (W11-R1): a ready attachment alone arms the
+  // send — an uploading or failed row never reaches the wire, so it never arms
+  // the send either. The stamp and the Enter path bind the same flag.
+  const hasReadyAttachment = props.attachments.some(row => row.status === 'ready')
+  const canSend = (draft.trim() !== '' || hasReadyAttachment) && !sending
+  // The one-shot failed-attachment toast (W11-R1): a pick that lands failed
+  // names itself once; the chip's own error line carries the detail for as
+  // long as it stays, so a repeat toast on every render would nag.
+  const toasted = useRef<ReadonlySet<string>>(new Set())
+  useEffect(() => {
+    const fresh = props.attachments.find(row =>
+      row.status === 'failed' && row.error !== undefined && !toasted.current.has(row.id))
+    if (fresh === undefined) return
+    toasted.current = new Set(toasted.current).add(fresh.id)
+    Toast.show({ content: `附件「${fresh.name}」未上传：${fresh.error}`, position: 'bottom' })
+  }, [props.attachments])
   return (
     <div className={css.composer}>
       {panelOpen && props.panel}
@@ -124,7 +140,7 @@ export function Composer(props: ComposerProps): JSX.Element {
             onKeyDown={(event) => {
               if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
                 event.preventDefault()
-                props.onSend(draft)
+                if (canSend) props.onSend(draft)
               }
             }}
           />
@@ -152,7 +168,7 @@ export function Composer(props: ComposerProps): JSX.Element {
               type="button"
               className={`dshm-stamp-solid ${css.send}`}
               aria-label="发送"
-              disabled={draft.trim() === '' || sending}
+              disabled={!canSend}
               onClick={() => { props.onSend(draft) }}
             >
               <Send size={19} aria-hidden="true" />
@@ -174,6 +190,7 @@ function AttachmentChip({ attachment, onRemove }: {
       className={`${css.attachChip} ${attachment.status === 'failed' ? css.attachChipFailed : ''}`}
       role="listitem"
       aria-label={`附件 ${attachment.name}`}
+      data-status={attachment.status}
     >
       {attachment.kind === 'image' && attachment.thumbUrl !== undefined
         ? <img className={css.attachThumb} src={attachment.thumbUrl} alt="" />

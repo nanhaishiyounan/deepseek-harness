@@ -66,6 +66,16 @@ describe('composer skin contract (W11-B1)', () => {
     expect(fold).toContain('margin-top: -5px')
   })
 
+  it('the failed chip carries its error line inside the chip, not clipped outside it (W11-R1)', () => {
+    const chip = declarations('.attachChip')
+    expect(chip).toContain('flex-wrap: wrap')
+    const error = declarations('.attachError')
+    expect(error).not.toMatch(/position:\s*absolute/)
+    expect(error).not.toMatch(/bottom:\s*-16px/)
+    expect(error).toContain('flex-basis: 100%')
+    expect(error).toContain('font-size: var(--dshm-fs-caption)')
+  })
+
   it('no dead antd-mobile dials: 5.43 consumes none of the legacy --padding/--adm-text-area-* set', () => {
     for (const dead of ['--padding:', '--adm-text-area-min-height', '--adm-text-area-max-height', '--box-sizing:', '--line-height:']) {
       expect(cssText.includes(dead), `dead dial ${dead} re-introduced`).toBe(false)

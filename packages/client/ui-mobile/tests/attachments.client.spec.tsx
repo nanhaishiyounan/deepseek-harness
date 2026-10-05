@@ -102,6 +102,66 @@ describe('useAttachments — document lane', () => {
     act(() => { result.current.clear() })
     expect(result.current.attachments).toHaveLength(0)
   })
+
+  it('picks and lands ready chips with crypto.randomUUID undefined (LAN HTTP, W11-R1)', async () => {
+    const original = Object.getOwnPropertyDescriptor(globalThis.crypto, 'randomUUID')
+    Object.defineProperty(globalThis.crypto, 'randomUUID', { value: undefined, configurable: true })
+    try {
+      rpcMock.mockResolvedValue({ text: '冷库温控记录', truncated: false })
+      const { result } = renderHook(() => useAttachments())
+      await act(async () => { await result.current.pickDoc(new File([new Uint8Array([1])], 'cold.txt', { type: 'text/plain' })) })
+      await waitFor(() => { expect(result.current.attachments[0]?.status).toBe('ready') })
+      expect(result.current.attachments[0]?.quote).toContain('📎 cold.txt')
+    } finally {
+      Object.defineProperty(globalThis.crypto, 'randomUUID', original ?? { value: undefined, configurable: true, writable: true })
+    }
+  })
+})
+
+describe('useAttachments — the refresh survival (W11-R1)', () => {
+  /** Flip jsdom's visibility the way a backgrounded tab reads. */
+  function goHidden(): void {
+    Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true })
+    document.dispatchEvent(new Event('visibilitychange'))
+  }
+
+  function goVisible(): void {
+    Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true })
+  }
+
+  afterEach(() => { goVisible() })
+
+  it('persists the ready descriptors on visibilitychange→hidden (the quote rides along)', async () => {
+    rpcMock.mockResolvedValue({ text: '冷库温控记录', truncated: false })
+    const { result } = renderHook(() => useAttachments('keep-1'))
+    await act(async () => { await result.current.pickDoc(new File([new Uint8Array([1])], 'cold.txt', { type: 'text/plain' })) })
+    await waitFor(() => { expect(result.current.attachments[0]?.status).toBe('ready') })
+    goHidden()
+    const stored = localStorage.getItem('dsh-mobile-attachments-keep-1')
+    expect(stored).toContain('cold.txt')
+    expect(stored).toContain('【文件内容】冷库温控记录')
+  })
+
+  it('persists on pagehide and rehydrates the strip on the next mount (the refresh simulation)', async () => {
+    localStorage.setItem('dsh-mobile-attachments-keep-2', JSON.stringify({
+      version: 1,
+      rows: [{ id: 'r9', kind: 'doc', name: 'regime.txt', sizeBytes: 12, quote: '📎 regime.txt\n【文件内容】入库明细' }],
+    }))
+    const { result } = renderHook(() => useAttachments('keep-2'))
+    expect(result.current.attachments).toHaveLength(1)
+    expect(result.current.attachments[0]?.status).toBe('ready')
+    expect(result.current.attachments[0]?.quote).toContain('入库明细')
+  })
+
+  it('clear drops the persisted strip too — a sent attachment never resurrects on refresh', async () => {
+    rpcMock.mockResolvedValue({ text: '温控记录', truncated: false })
+    const { result } = renderHook(() => useAttachments('keep-3'))
+    await act(async () => { await result.current.pickDoc(new File([new Uint8Array([1])], 'warm.txt', { type: 'text/plain' })) })
+    await waitFor(() => { expect(result.current.attachments[0]?.status).toBe('ready') })
+    act(() => { result.current.clear() })
+    goHidden()
+    expect(localStorage.getItem('dsh-mobile-attachments-keep-3')).toBeNull()
+  })
 })
 
 describe('composeWithAttachments', () => {

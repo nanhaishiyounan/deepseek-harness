@@ -1,9 +1,9 @@
-PASS A0 会话就绪 — session-98cba1aa-7e14-4164-88bd-9f3959318b03
-PASS A1 starter 点击 → 草稿填入（未发送） — {"value":"向宏发食品采购 500kg 面粉，单价 3.2","focused":true,"start":23,"end":23,"fillFlag":null,"sendDisabled":false,"welcome":true}
+PASS A0 会话就绪 — session-3b3c74f7-7666-41bd-a1a9-1920b65612fa
+PASS A1 starter 点击 → 草稿填入（未发送） — {"value":"向宏发食品采购 500kg 面粉，单价 3.2","focused":true,"start":23,"end":23,"fillFlag":"true","sendDisabled":false,"welcome":true}
 PASS A2 输入框自动聚焦
 PASS A3 光标在末尾 — start=23 end=23
 PASS A4 未自动发送（prompts=0） — prompts=0
-FAIL A5 data-fill 闪烁挂载
+PASS A5 data-fill 闪烁挂载
 PASS A6 发送钮随填入激活
 PASS A7 欢迎屏仍在（填入≠消息）
 PASS A8 手动发送发出（prompts=1） — prompts=1
@@ -18,4 +18,4 @@ PASS B #/me 可达 — text:本月登记
 PASS B #/todos 可达 — h1[class*="pageTitle"]
 PASS B #/alerts 可达 — h1[class*="pageTitle"]
 PASS B #/docs 可达 — h1[class*="pageTitle"]
-PASS B #/chat/session-98cba1aa-7e14-4164-88bd-9f3959318b03 可达 — .adm-text-area[aria-label="消息输入"]
+PASS B #/chat/session-3b3c74f7-7666-41bd-a1a9-1920b65612fa 可达 — .adm-text-area[aria-label="消息输入"]

@@ -519,13 +519,16 @@
 
 /* One attachment chip: the paper face, the roast line, the type glyph or
     thumbnail, the name, and the remove ×. Uploading breathes; failed wears
-    the danger rim and the human hint under the name. */
+    the danger rim and wraps onto a second in-chip line for the human hint
+    (W11-R1 — the strip's overflow-x would clip an absolutely positioned
+    hint hanging outside the chip). */
 .attachChip {
   position: relative;
   flex: none;
   display: flex;
   align-items: center;
-  gap: 7px;
+  flex-wrap: wrap;
+  gap: 5px 7px;
   max-width: 220px;
   min-height: 40px;
   padding: 6px 30px 6px 8px;
@@ -582,12 +585,11 @@
 }
 
 .attachError {
-  position: absolute;
-  left: 8px;
-  right: 30px;
-  bottom: -16px;
-  font-size: 11px;
-  line-height: 14px;
+  flex-basis: 100%;
+  padding: 0 30px 0 35px;
+  margin-top: -2px;
+  font-size: var(--dshm-fs-caption);
+  line-height: 16px;
   color: var(--dshm-danger);
   white-space: nowrap;
   overflow: hidden;

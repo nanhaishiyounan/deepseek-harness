@@ -26,6 +26,7 @@ import { App } from '../src/client/App.tsx'
 import { AppMobileEntry } from '../src/client/entry.tsx'
 import { navigate } from '../src/client/router.ts'
 import { saveDraftEdits } from '../src/client/draftStore.ts'
+import { clearOutbox } from '../src/client/outboxStore.ts'
 import { createWorkItem, deleteWorkItem, registerExecSession, workSnapshot } from '../src/client/workStore.ts'
 import { createSession } from '../src/client/sessionsService.ts'
 import { todayOf } from '../src/client/systemFields.ts'
@@ -115,6 +116,9 @@ afterEach(() => {
   cleanup()
   // The work store is a module singleton; clear its items between cases.
   for (const item of workSnapshot().items) deleteWorkItem(item.id)
+  // The outbox is one too: a mid-test failure must not park entries that
+  // later cases' stubs would keep retrying.
+  clearOutbox()
 })
 
 describe('mobile UI atoms', () => {
@@ -2337,6 +2341,56 @@ describe('mobile chat view (demo typing)', () => {
     expect(box.value).toBe('第三条')
     vi.useRealTimers()
   })
+
+  it('drops the ready chips when a send parks in the outbox, so the recovered follow-up text carries no quote (W11-R1)', async () => {
+    let offline = false
+    stubGateway({
+      'agentPreset.list': { presets: [] },
+      'session.list': { items: [] },
+      'session.history': { events: [{ event: assistantMessage(1, '欢迎') }] },
+      'nocobase.listMeta': { collections: [] },
+      'data.extractText': { text: '入库明细：面粉 500kg', truncated: false },
+      'session.prompt': () => {
+        // A transport-level rejection parks the message in the outbox.
+        if (offline) throw new TypeError('Failed to fetch')
+        return {}
+      },
+    })
+    render(<ChatView sessionId="outbox-attach-1" />)
+    await screen.findByText('欢迎')
+    // One document pick lands a ready chip.
+    const picker = document.querySelector('input[type="file"][accept=".pdf,.md,.txt"]') as HTMLInputElement
+    fireEvent.change(picker, { target: { files: [new File([new Uint8Array([1])], 'regime.txt', { type: 'text/plain' })] } })
+    await waitFor(() => { expect(screen.getByLabelText('附件 regime.txt').getAttribute('data-status')).toBe('ready') })
+    const box = screen.getByPlaceholderText('问我任何经营问题...') as HTMLTextAreaElement
+    fireEvent.change(box, { target: { value: '照这张单登记' } })
+    // The offline send parks in the outbox and must take the chips with it —
+    // a lingering ready chip would re-quote the same attachment on the next
+    // send (the double-send window).
+    offline = true
+    fireEvent.click(screen.getByRole('button', { name: '发送' }))
+    await screen.findByRole('status', { name: '待发队列' })
+    expect(box.value).toBe('')
+    expect(screen.queryByLabelText('待发送附件')).toBeNull()
+    // Recovery flushes the parked quote (the strip clears when it lands).
+    offline = false
+    await waitFor(() => { expect(screen.queryByRole('status', { name: '待发队列' })).toBeNull() }, { timeout: 6000 })
+    const wiredText = (call: { url: string; payload: Record<string, unknown> }): string => {
+      const content = call.payload['content']
+      return Array.isArray(content) && typeof content[0] === 'object' && content[0] !== null
+        ? String((content[0] as Record<string, unknown>)['text'] ?? '')
+        : ''
+    }
+    expect(calls.some(call => call.url.includes('session.prompt') && wiredText(call).includes('📎'))).toBe(true)
+    // The follow-up text goes out plain — no re-quote of the parked chip.
+    fireEvent.change(box, { target: { value: '再补一句文字' } })
+    fireEvent.click(screen.getByRole('button', { name: '发送' }))
+    await waitFor(() => {
+      expect(calls.some(call => call.url.includes('session.prompt') && wiredText(call) === '再补一句文字')).toBe(true)
+    })
+    const followUps = calls.filter(call => call.url.includes('session.prompt') && wiredText(call) === '再补一句文字')
+    expect(followUps).toHaveLength(1)
+  }, 15_000)
 })
 
 describe('mobile me tab (v5 additions)', () => {
