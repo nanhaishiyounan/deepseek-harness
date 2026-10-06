@@ -11,6 +11,7 @@ import type {
 import { rpc } from './rpc.ts'
 import type { FoldEvent } from './fold.ts'
 import { colleagueNameOf, type Welcome } from './colleagues.ts'
+import { uid } from './uid.ts'
 
 /** The wire's branded session id; the mobile surface carries plain strings. */
 type SessionIdWire = RequestPayload<'session.history'>['sessionId']
@@ -159,13 +160,16 @@ export async function promptSession(sessionId: string, text: string, clientMsgId
 /**
  * The idempotency key for one outbound user message: hash of the acting
  * user, the text, the wall clock, and a per-call nonce — stable across the
- * send's retries, unique per composed message.
+ * send's retries, unique per composed message. The nonce rides `uid()` (not
+ * a bare `crypto.randomUUID`): the LAN HTTP deployment is not a secure
+ * context, where the bare call throws and kills the send at the composer
+ * (W11-R2).
  * @param actor - the acting username (or '' when signed out).
  * @param text - the message text.
  * @returns the client-side message id.
  */
 export function newClientMsgId(actor: string, text: string): string {
-  const nonce = crypto.randomUUID().slice(0, 8)
+  const nonce = uid().replace(/-/g, '').slice(0, 8)
   return `m_${actor}_${text.length}_${Date.now().toString(36)}_${nonce}`
 }
 

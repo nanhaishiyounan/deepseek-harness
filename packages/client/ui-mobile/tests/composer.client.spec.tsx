@@ -97,4 +97,21 @@ describe('composer failed-attachment toast (W11-R1)', () => {
     rerender(<Composer {...initial} draft="再打几个字" />)
     expect(vi.mocked(Toast.show).mock.calls.length).toBe(toastsAfterMount)
   })
+
+  it('aggregates a failed batch into one toast with the count and every reason (W11-R2)', () => {
+    mountComposer({
+      attachments: [
+        attachment({ id: 'ok1' }),
+        attachment({ id: 'f1', name: 'shelf.png', status: 'failed', quote: undefined, error: '图片识别失败，请重试' }),
+        attachment({ id: 'f2', kind: 'doc', name: 'regime.pdf', status: 'failed', quote: undefined, error: '文件超过大小限制' }),
+      ],
+    })
+    // One toast carries the batch: the count plus each failed pick's reason.
+    expect(vi.mocked(Toast.show).mock.calls).toHaveLength(1)
+    const shown = vi.mocked(Toast.show).mock.calls.at(-1)?.[0]
+    const content = typeof shown === 'string' ? shown : shown?.content
+    expect(content).toContain('2项附件上传失败')
+    expect(content).toContain('「shelf.png」图片识别失败，请重试')
+    expect(content).toContain('「regime.pdf」文件超过大小限制')
+  })
 })

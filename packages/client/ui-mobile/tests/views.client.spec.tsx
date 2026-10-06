@@ -2391,6 +2391,77 @@ describe('mobile chat view (demo typing)', () => {
     const followUps = calls.filter(call => call.url.includes('session.prompt') && wiredText(call) === '再补一句文字')
     expect(followUps).toHaveLength(1)
   }, 15_000)
+
+  /** Install the LAN HTTP face: insecure context, randomUUID gone. */
+  function dropSecureCrypto(): () => void {
+    const originalUUID = Object.getOwnPropertyDescriptor(globalThis.crypto, 'randomUUID')
+    Object.defineProperty(globalThis.crypto, 'randomUUID', { value: undefined, configurable: true })
+    Object.defineProperty(window, 'isSecureContext', { configurable: true, get: () => false })
+    return () => {
+      Object.defineProperty(globalThis.crypto, 'randomUUID', originalUUID ?? { value: undefined, configurable: true, writable: true })
+      Reflect.deleteProperty(window, 'isSecureContext')
+    }
+  }
+
+  it('sends to the success terminal state under the insecure LAN HTTP face (W11-R2)', async () => {
+    stubGateway({
+      'session.list': { items: [{ sessionId: 'session-12', updatedAt: 1, agentPreset: 'mobile-form-assistant' }] },
+      'session.history': EMPTY_HISTORY,
+      'agentPreset.list': { presets: [{ id: 'mobile-form-assistant', name: '智能填表助手', description: '', isDefault: true }] },
+      'nocobase.listMeta': { collections: [] },
+      'session.prompt': {},
+    })
+    const restore = dropSecureCrypto()
+    try {
+      render(<ChatView sessionId="session-12" />)
+      const box = screen.getByPlaceholderText('问我任何经营问题...') as HTMLTextAreaElement
+      fireEvent.change(box, { target: { value: '帮我盘点库存' } })
+      fireEvent.click(screen.getByRole('button', { name: '发送' }))
+      // The send reaches its success terminal state — the pre-fix face died
+      // at the bare crypto.randomUUID inside newClientMsgId with the
+      // composer stuck on sending and the text lost.
+      await waitFor(() => { expect(calls.some(call => call.url === '/api/session.prompt')).toBe(true) })
+      await waitFor(() => { expect(box.value).toBe('') })
+      // sending reset: the next draft arms the stamp and goes out too.
+      fireEvent.change(box, { target: { value: '再问一句' } })
+      expect((screen.getByRole('button', { name: '发送' }) as HTMLButtonElement).disabled).toBe(false)
+      fireEvent.click(screen.getByRole('button', { name: '发送' }))
+      await waitFor(() => { expect(calls.filter(call => call.url === '/api/session.prompt')).toHaveLength(2) })
+    } finally {
+      restore()
+    }
+  })
+
+  it('parks in the outbox terminal state on a transport failure under the same face', async () => {
+    let offline = false
+    stubGateway({
+      'session.list': { items: [] },
+      'session.history': { events: [{ event: assistantMessage(1, '欢迎') }] },
+      'agentPreset.list': { presets: [] },
+      'nocobase.listMeta': { collections: [] },
+      'session.prompt': () => {
+        if (offline) throw new TypeError('Failed to fetch')
+        return {}
+      },
+    })
+    const restore = dropSecureCrypto()
+    try {
+      render(<ChatView sessionId="insecure-1" />)
+      await screen.findByText('欢迎')
+      const box = screen.getByPlaceholderText('问我任何经营问题...') as HTMLTextAreaElement
+      fireEvent.change(box, { target: { value: '断网下这条' } })
+      offline = true
+      fireEvent.click(screen.getByRole('button', { name: '发送' }))
+      // The parked terminal state: the strip shows, the draft cleared, and
+      // the composer re-arms for the next message.
+      await screen.findByRole('status', { name: '待发队列' })
+      expect(box.value).toBe('')
+      fireEvent.change(box, { target: { value: '恢复后这条' } })
+      expect((screen.getByRole('button', { name: '发送' }) as HTMLButtonElement).disabled).toBe(false)
+    } finally {
+      restore()
+    }
+  })
 })
 
 describe('mobile me tab (v5 additions)', () => {

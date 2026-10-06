@@ -56,3 +56,12 @@ W11 = B1（输入框精修 + 细节自发现）+ B2（加号真功能：语音/�
 - 截图 5 张：`w11-r1-{t1-offline-parked-no-lingering, t1-recovered-history-single-quote, f2-attach-error-visible-in-chip, f4-send-armed-attach-only, f10-uid-fallback-attach-ready}-375.png`
 - 测试：ui-mobile **743/743**（新增 composer.client 7 + uid 2 + attachments 4 + composer-skin CSS 契约 1 + views outbox 双发 1）· apiproxy **488/488** · typecheck 绿 · oxlint 新增/改动 0/0。
 - **business-advisor 存量 YAML 损坏（B3 顺手修复）**：`agent-presets/business-advisor/agent.cordis.yml` 32~34 行缩进 6→7 空格（`bad indentation 32:6`，mount 失败，非 W11 引入）；源与 `.dsh/` 运行时副本均已修复并 parse 验证。
+
+## R2 — LAN HTTP 交付障碍清偿（1 Critical 存量 + 3 卫生项）
+
+- 修复面（R1 终验 PASS_WITH_DEBT 87.8 的 Go-live 前置）：① `newClientMsgId` 裸调 `crypto.randomUUID()`（w7 存量）改骑 `uid()`（去连字符取 8 位 hex nonce），`ChatView.send()` 的键构造移入 try 块——LAN HTTP 点发送不再 TypeError 死锁 composer；② attachments 持久化卫生对齐 outboxStore——try/catch + 结构化 warn（含 key 名）、quota 超限按 `savedAt` 驱逐最旧其他会话 strip 重试一次（version 1→2）、损坏/不合 schema 的 key 即删；③ Composer 批失败 Toast 聚合（一次 Toast 报全部 fresh failed：`N项附件上传失败：「a」原因A；「b」原因B`）；④ 新 `localKeys.ts` 单源 `MOBILE_SESSION_KEY_PREFIXES` + 登出 `sweepSessionKeys()`（draft/outbox/attachments 三族全清，theme/水位/置顶按设计保留）。
+- `w11-r2-live-verify.log`（`.verify-w11r2.mjs`）：**11/11**，跑在真非 secure 上下文——`http://w11lan.test:3080` 经 Chromium `--host-resolver-rules` 映射 127.0.0.1（CLI 按设计拒绝非 loopback 绑定；/api 围栏 `--trusted-host` 加白），环境面实测 `isSecureContext=false` 且 `randomUUID=undefined` 零 stub；发送到达终态六断言（wire `m_` 前缀 clientMsgId / draft 清空 / turn 后 sending 复位 / 第二条异键再发 / history 落账）+ 非 secure 下附件 strip reload 回填 + 登出三类键全清且 theme 保留。
+- 截图 3 张：`w11-r2-{01-lan-http-send-terminal, 02-attach-rehydrate-insecure, 03-logout-swept}-375.png`
+- 测试：ui-mobile **745/745**（新增 views LAN HTTP 终态 2 + attachments 卫生 4 + composer 批 Toast 1 + local-keys 4）· typecheck 绿 · oxlint 改动文件 0 errors。
+- 构建链教训（复确认 build:lib:client 契约）：apps/web bare-import ui-mobile（main→`lib/`），源码修复必须 `pnpm run build:lib:client` 后再 vite build——首跑活体在新 dist 上服务旧 lib，忠实复现修复前崩溃。
+- Agent Note：`.agents/notes/implemented/bug-fix/2026-10-06-w11r2-mobile-lan-http-blockers.md`（三件套）。

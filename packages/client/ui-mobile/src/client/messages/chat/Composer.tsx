@@ -77,16 +77,21 @@ export function Composer(props: ComposerProps): JSX.Element {
   // the send either. The stamp and the Enter path bind the same flag.
   const hasReadyAttachment = props.attachments.some(row => row.status === 'ready')
   const canSend = (draft.trim() !== '' || hasReadyAttachment) && !sending
-  // The one-shot failed-attachment toast (W11-R1): a pick that lands failed
-  // names itself once; the chip's own error line carries the detail for as
-  // long as it stays, so a repeat toast on every render would nag.
+  // The one-shot failed-attachment toast (W11-R1, aggregated W11-R2): picks
+  // that land failed name themselves once — together in one toast when a
+  // batch fails, so three failed picks read as one sentence, not three
+  // toasts stacked over each other; the chips' own error lines carry the
+  // detail for as long as they stay, so a repeat toast would nag.
   const toasted = useRef<ReadonlySet<string>>(new Set())
   useEffect(() => {
-    const fresh = props.attachments.find(row =>
+    const fresh = props.attachments.filter(row =>
       row.status === 'failed' && row.error !== undefined && !toasted.current.has(row.id))
-    if (fresh === undefined) return
-    toasted.current = new Set(toasted.current).add(fresh.id)
-    Toast.show({ content: `附件「${fresh.name}」未上传：${fresh.error}`, position: 'bottom' })
+    if (fresh.length === 0) return
+    const seen = new Set(toasted.current)
+    for (const row of fresh) seen.add(row.id)
+    toasted.current = seen
+    const reasons = fresh.map(row => `「${row.name}」${row.error}`).join('；')
+    Toast.show({ content: `${fresh.length}项附件上传失败：${reasons}`, position: 'bottom' })
   }, [props.attachments])
   return (
     <div className={css.composer}>

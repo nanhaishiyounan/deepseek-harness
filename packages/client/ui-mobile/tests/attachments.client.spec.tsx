@@ -24,6 +24,7 @@ function pngFile(name = 'shelf.png'): File {
 }
 
 beforeEach(() => {
+  localStorage.clear()
   rpcMock.mockReset()
   vi.spyOn(Toast, 'show').mockImplementation(() => ({ close: () => {} }))
 })
@@ -144,7 +145,8 @@ describe('useAttachments — the refresh survival (W11-R1)', () => {
 
   it('persists on pagehide and rehydrates the strip on the next mount (the refresh simulation)', async () => {
     localStorage.setItem('dsh-mobile-attachments-keep-2', JSON.stringify({
-      version: 1,
+      version: 2,
+      savedAt: 1,
       rows: [{ id: 'r9', kind: 'doc', name: 'regime.txt', sizeBytes: 12, quote: '📎 regime.txt\n【文件内容】入库明细' }],
     }))
     const { result } = renderHook(() => useAttachments('keep-2'))
@@ -188,5 +190,73 @@ describe('composeWithAttachments', () => {
     expect(composeWithAttachments([ready('📎 a\n【文件内容】x')], '  ')).toBe('📎 a\n【文件内容】x')
     expect(composeWithAttachments([pending, failed], '普通消息')).toBe('普通消息')
     expect(composeWithAttachments([pending], '   ')).toBe('')
+  })
+})
+
+describe('useAttachments — persistence hygiene (W11-R2)', () => {
+  /** The joined console.warn output so far. */
+  function warned(spy: { readonly mock: { readonly calls: readonly unknown[][] } }): string {
+    return spy.mock.calls.map(call => String(call[0])).join('\n')
+  }
+
+  it('drops a corrupt stored strip, removes the key, and warns naming the key', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    localStorage.setItem('dsh-mobile-attachments-corrupt-1', '{not json')
+    const { result } = renderHook(() => useAttachments('corrupt-1'))
+    expect(result.current.attachments).toHaveLength(0)
+    expect(localStorage.getItem('dsh-mobile-attachments-corrupt-1')).toBeNull()
+    expect(warned(warn)).toContain('attachments.persist-corrupt')
+    expect(warned(warn)).toContain('dsh-mobile-attachments-corrupt-1')
+  })
+
+  it('drops a non-conforming strip (the pre-W11-R2 version) the same way', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    localStorage.setItem('dsh-mobile-attachments-corrupt-2', JSON.stringify({ version: 1, rows: [] }))
+    const { result } = renderHook(() => useAttachments('corrupt-2'))
+    expect(result.current.attachments).toHaveLength(0)
+    expect(localStorage.getItem('dsh-mobile-attachments-corrupt-2')).toBeNull()
+    expect(warned(warn)).toContain('attachments.persist-corrupt')
+  })
+
+  it('on quota exceeded evicts the oldest other strip, retries once, and keeps the chips in memory', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    localStorage.setItem('dsh-mobile-attachments-old', JSON.stringify({
+      version: 2, savedAt: 1,
+      rows: [{ id: 'o', kind: 'doc', name: 'old.txt', sizeBytes: 1, quote: 'x' }],
+    }))
+    localStorage.setItem('dsh-mobile-attachments-newer', JSON.stringify({
+      version: 2, savedAt: 2,
+      rows: [{ id: 'n', kind: 'doc', name: 'newer.txt', sizeBytes: 1, quote: 'y' }],
+    }))
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementationOnce(() => {
+      throw new DOMException('The quota has been exceeded', 'QuotaExceededError')
+    })
+    rpcMock.mockResolvedValue({ text: '冷库温控记录', truncated: false })
+    const { result } = renderHook(() => useAttachments('quota-1'))
+    await act(async () => { await result.current.pickDoc(new File([new Uint8Array([1])], 'q.txt', { type: 'text/plain' })) })
+    // The chip itself lands ready in memory — a storage failure never
+    // touches the lane's live state.
+    await waitFor(() => { expect(result.current.attachments[0]?.status).toBe('ready') })
+    // The oldest other strip is gone, the newer one stays, this key persisted.
+    expect(localStorage.getItem('dsh-mobile-attachments-old')).toBeNull()
+    expect(localStorage.getItem('dsh-mobile-attachments-newer')).not.toBeNull()
+    expect(localStorage.getItem('dsh-mobile-attachments-quota-1')).toContain('q.txt')
+    expect(warned(warn)).toContain('attachments.persist-quota')
+    expect(warned(warn)).toContain('dsh-mobile-attachments-old')
+  })
+
+  it('warns without evicting when the write fails for a non-quota reason', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementationOnce(() => {
+      throw new Error('storage backend gone')
+    })
+    rpcMock.mockResolvedValue({ text: '入库明细', truncated: false })
+    const { result } = renderHook(() => useAttachments('plain-1'))
+    await act(async () => { await result.current.pickDoc(new File([new Uint8Array([1])], 'p.txt', { type: 'text/plain' })) })
+    await waitFor(() => { expect(result.current.attachments[0]?.status).toBe('ready') })
+    expect(localStorage.getItem('dsh-mobile-attachments-plain-1')).toBeNull()
+    expect(warned(warn)).toContain('attachments.persist-failed')
+    expect(warned(warn)).toContain('dsh-mobile-attachments-plain-1')
+    expect(warned(warn)).not.toContain('attachments.persist-quota')
   })
 })

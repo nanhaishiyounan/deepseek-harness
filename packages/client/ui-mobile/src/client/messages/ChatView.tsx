@@ -189,11 +189,16 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
     if (trimmed === '' || sending) return
     setSending(true)
     setError(undefined)
-    // One idempotency key per composed message: the server collapses a
-    // repeated session.prompt carrying the same id (the offline outbox's
-    // retry and the response-lost double-send window both ride it).
-    const clientMsgId = newClientMsgId(loadIdentity()?.username ?? '', trimmed)
+    /** The send's idempotency key, set once the try below builds it. */
+    let clientMsgId: string | undefined
     try {
+      // One idempotency key per composed message: the server collapses a
+      // repeated session.prompt carrying the same id (the offline outbox's
+      // retry and the response-lost double-send window both ride it). The
+      // key builds inside the try: any failure here falls to the same
+      // catch/finally, so the composer never deadlocks on a stuck sending
+      // flag (W11-R2).
+      clientMsgId = newClientMsgId(loadIdentity()?.username ?? '', trimmed)
       await promptSession(sessionId, trimmed, clientMsgId)
       finalizeSend()
       setPollInterval(800)
@@ -209,7 +214,10 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
       // re-sends — the retry cannot fix it and a duplicate could double-execute.
       typingCell.retire()
       if (cause instanceof TypeError) {
-        enqueueOutbox(sessionId, trimmed, clientMsgId)
+        // A key build that itself died (the pre-uid LAN HTTP face) parked
+        // nothing — a fresh key is safe there because no attempt was ever
+        // dispatched under the failed build.
+        enqueueOutbox(sessionId, trimmed, clientMsgId ?? newClientMsgId(loadIdentity()?.username ?? '', trimmed))
         finalizeSend()
         setError('网络不可用，消息已存入待发队列，恢复后自动发送')
         return

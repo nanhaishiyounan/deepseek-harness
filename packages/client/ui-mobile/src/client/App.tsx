@@ -10,6 +10,7 @@
 import { useEffect, useState, type JSX } from 'react'
 import { clearIdentity, loadIdentity, subscribeSessionExpired, type MobileIdentity } from './auth.ts'
 import { clearOutbox } from './outboxStore.ts'
+import { sweepSessionKeys } from './localKeys.ts'
 import { clearWorkOutbox } from './workSync.ts'
 import { LoginView } from './login/LoginView.tsx'
 import { MobileShell } from './shell/MobileShell.tsx'
@@ -60,10 +61,13 @@ export function App(): JSX.Element {
         onLogout={() => {
           // The departed account's parked outbox messages must never send
           // under the next login: the queue and its retry timer die here —
-          // and the work projection's queue dies with it (W8-B3).
+          // and the work projection's queue dies with it (W8-B3). The sweep
+          // then drops every session-scoped key (draft edits, attachment
+          // strips, outbox residue) from one shared prefix list (W11-R2).
           clearOutbox()
           clearWorkOutbox()
           clearIdentity()
+          sweepSessionKeys()
           setIdentity(undefined)
         }}
       />

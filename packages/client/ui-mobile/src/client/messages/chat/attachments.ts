@@ -123,9 +123,10 @@ interface PersistedRow {
   readonly quote: string
 }
 
-/** The persisted strip's storage shape. */
+/** The persisted strip's storage shape. `savedAt` ranks eviction (W11-R2). */
 interface PersistedShape {
-  readonly version: 1
+  readonly version: 2
+  readonly savedAt: number
   readonly rows: readonly PersistedRow[]
 }
 
@@ -133,7 +134,7 @@ interface PersistedShape {
 function isPersistedShape(value: unknown): value is PersistedShape {
   if (typeof value !== 'object' || value === null) return false
   const shape = value as Record<string, unknown>
-  if (shape['version'] !== 1 || !Array.isArray(shape['rows'])) return false
+  if (shape['version'] !== 2 || !Array.isArray(shape['rows']) || typeof shape['savedAt'] !== 'number') return false
   return shape['rows'].every((row) => {
     if (typeof row !== 'object' || row === null) return false
     const typed = row as Record<string, unknown>
@@ -143,28 +144,101 @@ function isPersistedShape(value: unknown): value is PersistedShape {
   })
 }
 
+/** One structured persistence trace an operator can grep (outboxStore's style). */
+function warnPersist(kind: 'attachments.persist-failed' | 'attachments.persist-quota' | 'attachments.persist-corrupt', key: string, detail: Record<string, unknown> = {}): void {
+  console.warn(JSON.stringify({ type: kind, key, ...detail, at: new Date().toISOString() }))
+}
+
+/**
+ * Whether a storage write failure is quota exhaustion: the spec's
+ * `QuotaExceededError` DOMException is not an `Error` subclass, and older
+ * WebKit surfaces it as a plain Error whose message names the quota.
+ */
+function isQuotaExceeded(cause: unknown): boolean {
+  const name = typeof cause === 'object' && cause !== null ? (cause as { readonly name?: unknown }).name : undefined
+  return name === 'QuotaExceededError' || (cause instanceof Error && /quota/i.test(cause.message))
+}
+
+/** One message string for a caught cause. */
+function messageOf(cause: unknown): string {
+  return cause instanceof Error ? cause.message : String(cause)
+}
+
+/**
+ * Remove the oldest other session's persisted strip and return its key: the
+ * `savedAt` field ranks the candidates (a strip that fails to parse counts
+ * as the oldest — eviction clears the residue). Returns undefined when no
+ * other strip exists.
+ */
+function evictOldestStrip(current: string): string | undefined {
+  let oldestKey: string | undefined
+  let oldestAt = Number.POSITIVE_INFINITY
+  for (let index = 0; index < localStorage.length; index++) {
+    const key = localStorage.key(index)
+    if (key === null || !key.startsWith(PERSIST_PREFIX) || key === current) continue
+    const raw = localStorage.getItem(key)
+    if (raw === null) continue
+    let savedAt: unknown
+    try { savedAt = (JSON.parse(raw) as Record<string, unknown>)['savedAt'] } catch { savedAt = 0 }
+    const at = typeof savedAt === 'number' ? savedAt : 0
+    if (at < oldestAt) {
+      oldestAt = at
+      oldestKey = key
+    }
+  }
+  if (oldestKey !== undefined) localStorage.removeItem(oldestKey)
+  return oldestKey
+}
+
 /** Read one session's persisted ready rows back as live ready chips. */
 function loadPersisted(key: string): readonly DraftAttachment[] {
   const raw = localStorage.getItem(key)
   if (raw === null) return []
   try {
     const parsed: unknown = JSON.parse(raw)
-    if (!isPersistedShape(parsed)) return []
+    if (!isPersistedShape(parsed)) {
+      localStorage.removeItem(key)
+      warnPersist('attachments.persist-corrupt', key)
+      return []
+    }
     return parsed.rows.map(row => ({
       ...row, thumbUrl: undefined, status: 'ready' as const, error: undefined,
     }))
   } catch {
+    localStorage.removeItem(key)
+    warnPersist('attachments.persist-corrupt', key)
     return []
   }
 }
 
-/** Write one session's ready rows (an empty strip removes the key). */
+/** Write one session's ready rows (an empty strip removes the key). A
+ * quota-exceeded write evicts the oldest other session's strip and retries
+ * once; any other write failure only warns — the in-memory chips keep
+ * working and the next commit tries again. */
 function savePersisted(key: string, rows: readonly DraftAttachment[]): void {
   const ready = rows
     .filter(row => row.status === 'ready' && row.quote !== undefined)
     .map(row => ({ id: row.id, kind: row.kind, name: row.name, sizeBytes: row.sizeBytes, quote: row.quote as string }))
-  if (ready.length === 0) localStorage.removeItem(key)
-  else localStorage.setItem(key, JSON.stringify({ version: 1, rows: ready } satisfies PersistedShape))
+  if (ready.length === 0) {
+    localStorage.removeItem(key)
+    return
+  }
+  const encoded = JSON.stringify({ version: 2, savedAt: Date.now(), rows: ready } satisfies PersistedShape)
+  try {
+    localStorage.setItem(key, encoded)
+  } catch (cause) {
+    if (!isQuotaExceeded(cause)) {
+      warnPersist('attachments.persist-failed', key, { message: messageOf(cause) })
+      return
+    }
+    const evicted = evictOldestStrip(key)
+    try {
+      localStorage.setItem(key, encoded)
+      warnPersist('attachments.persist-quota', key, { evicted: evicted ?? null })
+    } catch (retryCause) {
+      warnPersist('attachments.persist-failed', key, { evicted: evicted ?? null, message: messageOf(retryCause) })
+    }
+  }
 }
 
 /** The attachment lane's state and pick sinks (what `useAttachments` returns). */
