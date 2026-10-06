@@ -18,7 +18,7 @@ W11-R4 终验收口 PASS_WITH_DEBT 88.3（Go-live 放行），登记 1 条债 + 
 - **INDEX 篇首定义计数口径**（一段，两个数字、恒 9 出处、复现脚本路径），R2/R3/R4 记账行重述勘正归因；w11r4 note（中英）同行勘正；`verify-translation-pairing --write` 重录该对。`demos/acceptance-w11/scripts/count-ui-mobile-tests.mjs` 以显式 tests/ 路径跑 vitest 复现两口径（纯口径必须钉 `packages/client/ui-mobile/tests`——子串行为正是惯例口径的成因），产物 `w11-r5-test-count.json`；每口径一次重试吸收满载 jsdom 超时，不掩盖第二次失败。
 - **清扫先快照**：`Object.keys(localStorage)` 先定死名单，删除针对冻结名单执行。local-keys spec 的清扫用例扩为 12 个会话键（三族）+ 5 个无关键：12 全删、5 个 byte-identical 存活。
 - **`chat/toast.ts` 是 chat 输入面的唯一锚**：`hoistToast({ content })` 以 bottom 位置 + `toastLift` mask 展示；ChatView（两处）、QuickPanel（一处）、attachments（两处）、Composer（批失败 + ErrorToast，两处手写展开收编）全部经它。`toast-anchor.client.spec.tsx` 钉运行时锚选项，并静态扫描 chat 输入面源码断言 helper 之外无 `Toast.show` 调用。
-- **`verify-acceptance-narrative.mjs` 机械化闸叙述**：每条 claim 是 `{claim, file-glob, must-contain|absent}` 三元组，加可选 commit 事实断言（对照 `git show --name-status`——裸 `--stat` 截断长路径，闸自己的首跑就抓到了这一点）。R5 批 6/6 通过（`w11-r5-narrative-check.log`），含两条 commit 事实：R2 commit 动了 ui-mobile 的 tests 而未动 preview 包；preview spec 首落于 mobile-v3 里程碑。
+- **`verify-acceptance-narrative.mjs` 机械化闸叙述**：每条 claim 是 `{claim, file-glob, must-contain|absent}` 三元组，加可选 commit 事实断言（对照 `git show --name-status`——裸 `--stat` 截断长路径，闸自己的首跑就抓到了这一点）。R5 批 6/6 通过（`w11-r5-narrative-check.log`），含两条 commit 事实：R2 commit 动了 ui-mobile 的 tests 而未动 preview 包；preview spec 首落于 mobile-v3 里程碑。W11-R6 补录了该 log：R5 节自述句在转述闸首跑所抓内容时把禁词原文引了回来，对已提交工作树自触 absent 检查；改为转述措辞后闸重跑 6/6。
 
 ## 后果
 

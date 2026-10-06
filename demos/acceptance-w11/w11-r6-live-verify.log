@@ -1,0 +1,7 @@
+PASS R6-A1 三族会话键登出全清（draft/outbox/attachments 0 残留） — left=[]
+PASS R6-A2 theme 存活 + auth 清除（按设计保留/清除面） — theme=light auth=null
+PASS R6-A3 session-keys.swept 留痕 count=3 且 keys 含三族 — count=3 keys=["dsh-mobile-draft-session-w11r6-lum-probe","dsh-mobile-outbox","dsh-mobile-attachments-session-w11r6-lum-probe"]
+PASS R6-B1 聚合 Toast 在场点名全部失败附件（hoistToast 收编的批失败路径） — 2项附件上传失败：「broken-a.png」图片识别失败（探针）；「broken-b.png」图片识别失败（探针）
+PASS R6-B2 mask 带 lift 类且 computed bottom=150px（hoistToast 单源锚） — mask=adm-mask adm-toast-mask _toastLift_1xlx2_530 top=566px bottom=150px
+PASS R6-B3 Toast 底缘清空附件条顶缘 ≥15px — clearance=25.0px toastBottom=662.0 railTop=687.0
+PASS R6-C 100 键 sweep 复测全清（真实 Chromium Storage，0 漏删；明细 w11-r6-sweep-100keys.log） — 4/4

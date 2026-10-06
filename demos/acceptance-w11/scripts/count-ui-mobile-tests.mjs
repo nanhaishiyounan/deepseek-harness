@@ -54,3 +54,6 @@ if (!failed) {
   console.log(`pure=${result.scopes.pure.passed} convention=${result.scopes.convention.passed} delta=${result.delta}`)
   console.log(`written: ${out}`)
 }
+// The authoritative exit code: evidence scripts must fail CI-shaped callers,
+// not just print their failure to the log.
+process.exitCode = failed ? 1 : 0
