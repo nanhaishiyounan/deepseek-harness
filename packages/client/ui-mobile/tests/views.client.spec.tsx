@@ -1026,6 +1026,51 @@ describe('mobile chat view', () => {
     await waitFor(() => { expect(screen.getByText('当前同事没有预置指令，直接打字聊聊吧')).toBeTruthy() })
   })
 
+  it('template starters fill the draft skeleton with the first placeholder span selected (W12)', async () => {
+    stubGateway({
+      'session.list': { items: [{ sessionId: 'session-12', updatedAt: 1, agentPreset: 'mobile-form-assistant' }] },
+      'session.history': EMPTY_HISTORY,
+      'agentPreset.list': {
+        presets: [{
+          id: 'mobile-form-assistant', name: '智能填表助手', description: '', isDefault: true,
+          welcome: {
+            greeting: '我是智能填表助手',
+            capabilities: ['说一句话就能登记'],
+            starters: [
+              { label: '登记一条采购单', send: '向【供应商】采购【物料】，数量【数量】，单价【单价】' },
+              { label: '查一下库存', send: '查一下【物料名】还有多少库存' },
+              { label: '哪些料要补货', send: '哪些料要补货' },
+            ],
+          },
+        }],
+      },
+      'nocobase.listMeta': { collections: [] },
+      'session.prompt': {},
+    })
+    render(<ChatView sessionId="session-12" />)
+    await waitFor(() => { expect(screen.getByTestId('welcome-card')).toBeTruthy() })
+    const box = screen.getByPlaceholderText('问我任何经营问题...') as HTMLTextAreaElement
+    // A template pick fills the skeleton and selects the first 【…】 span:
+    // the user's typing overwrites 供应商, not the sentence around it, and
+    // the pick still sends nothing on its own.
+    fireEvent.click(screen.getByRole('button', { name: '登记一条采购单' }))
+    expect(box.value).toBe('向【供应商】采购【物料】，数量【数量】，单价【单价】')
+    expect(box.selectionStart).toBe(1)
+    expect(box.selectionEnd).toBe(6)
+    expect(calls.some(call => call.url === '/api/session.prompt')).toBe(false)
+    expect(document.activeElement).toBe(box)
+    // A single-placeholder skeleton selects its own span the same way.
+    fireEvent.click(screen.getByRole('button', { name: '查一下库存' }))
+    expect(box.value).toBe('查一下【物料名】还有多少库存')
+    expect(box.selectionStart).toBe(3)
+    expect(box.selectionEnd).toBe(8)
+    // A placeholder-free pick keeps the end-of-text caret (W9-B1 behavior).
+    fireEvent.click(screen.getByRole('button', { name: '哪些料要补货' }))
+    expect(box.value).toBe('哪些料要补货')
+    expect(box.selectionStart).toBe('哪些料要补货'.length)
+    expect(box.selectionEnd).toBe('哪些料要补货'.length)
+  })
+
   it('keeps the welcome card through a fill and retires it once the first send lands', async () => {
     let history = EMPTY_HISTORY
     stubGateway({

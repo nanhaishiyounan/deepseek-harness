@@ -321,6 +321,19 @@ agent-presets:
   default: food-compliance
 ```
 
+移动端（`/mobile`）登录用的八个业务账号如下，全部走真实 `nocobase.signIn` 通道；密码为排练明文（W5-B8 走查同源，`examples/kb-agent/scripts/w5b8-closure.mts` 幂等重种）。`admin` 管业务系统全域；NocoBase 平台后台另用超管 `nocobase/admin123`。
+
+| 账号 | 密码 | 姓名 · 部门 | 角色面 |
+|------|------|-------------|--------|
+| buyer | Buyer#2026 | 采购员·蔡俊 · 采购部 | 采购单/请购/供应商档案与采购审批 |
+| planner | Planner#2026 | 计划员·孙梅 · 计划部（PMC） | MPS/预测登记/生产订单排程 |
+| shop_lead | Lead#2026 | 车间主任·周强 · 生产车间 | 车间触屏终端：报工/完工/安灯 |
+| keeper | Keeper#2026 | 仓管员·吴涛 · 仓储部 | 收货/入库/出库/移库/盘点 |
+| qc_inspector | Qc#2026 | 质检员·王倩 · 质检部 | 质检登记与 AQL 抽检报告 |
+| sales_rep | Sales#2026 | 销售·郑洁 · 销售部 | 销售订单/客户与发货 |
+| finance | Finance#2026 | 财务·冯琳 · 财务 | 回款/对账单/账龄与催收 |
+| admin | Admin#2026 | 业务系统管理员 | 全域数据与审批配置 |
+
 ## 网页版工作台
 
 ```sh

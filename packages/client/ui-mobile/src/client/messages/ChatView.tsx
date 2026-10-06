@@ -51,6 +51,9 @@ import css from './chat.module.css'
 // keeps this module the spec-facing import surface.
 export { contextChipsOf } from './chat/chips.ts'
 
+/** One 【…】 placeholder span a template starter leaves for the user to overwrite (W12). */
+const TEMPLATE_PLACEHOLDER = /【[^【】]*】/u
+
 /** The header's colleague label: the roster name, else the duty tag. */
 function presetLabelOf(preset: string | undefined, rosterRow: { readonly name: string } | undefined): string {
   if (preset === undefined) return '本地会话'
@@ -239,8 +242,10 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
   /**
    * The assist-input fill (W9-B1): a picked starter/quick command/chip/
    * suggestion replaces the whole draft (the tag is a complete intent; a
-   * half-typed draft is a fragment), then the composer takes focus with the
-   * caret at the end. Nothing goes out until the user's own send tap.
+   * half-typed draft is a fragment), then the composer takes focus. A plain
+   * pick parks the caret at the end; a template pick (skeleton text with
+   * 【…】 placeholders, W12) selects the first placeholder span so typing
+   * overwrites it. Nothing goes out until the user's own send tap.
    * @param text - the picked tag's full send-text.
    */
   const fillDraft = useCallback((text: string) => {
@@ -248,15 +253,22 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
     setFilledAt(Date.now())
   }, [])
 
-  // The fill's focus pass runs after the new draft commits to the box, so
-  // the caret lands at the end of the filled text.
+  // The fill's focus pass runs after the new draft commits to the box: a
+  // template draft selects its first 【…】 placeholder span so the user's
+  // typing replaces it (W12); a plain draft parks the caret at the end of
+  // the filled text.
   useEffect(() => {
     if (filledAt === 0) return
     const box = inputRef.current?.nativeElement
     if (box === null || box === undefined) return
     box.focus()
-    const end = box.value.length
-    box.setSelectionRange(end, end)
+    const placeholder = TEMPLATE_PLACEHOLDER.exec(box.value)
+    if (placeholder === null) {
+      const end = box.value.length
+      box.setSelectionRange(end, end)
+      return
+    }
+    box.setSelectionRange(placeholder.index, placeholder.index + placeholder[0].length)
   }, [filledAt])
 
   /** The voice lane (W11-B2): zh-CN recognition; final segments append to the draft. */
