@@ -10,9 +10,9 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Toast } from 'antd-mobile'
 import { rpc } from '../../rpc.ts'
 import { uid } from '../../uid.ts'
+import { hoistToast } from './toast.ts'
 
 /** The composer's draft-attachment row (the chip strip above the input row). */
 export interface DraftAttachment {
@@ -313,11 +313,11 @@ export function useAttachments(sessionId?: string): UseAttachmentsResult {
   /** One image file through describe: compress, upload, quote the description. */
   const pickImage = useCallback(async (file: File) => {
     if (!IMAGE_MEDIA.has(file.type)) {
-      Toast.show({ content: `不支持的图片格式（${file.type === '' ? '未知' : file.type}）` })
+      hoistToast({ content: `不支持的图片格式（${file.type === '' ? '未知' : file.type}）` })
       return
     }
     if (rowsRef.current.filter(row => row.kind === 'image').length >= MAX_IMAGES) {
-      Toast.show({ content: `一次最多带 ${MAX_IMAGES} 张图片` })
+      hoistToast({ content: `一次最多带 ${MAX_IMAGES} 张图片` })
       return
     }
     const id = uid()

@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/bug-fix/2026-10-06-w11r4-advisory-clearance.md
-2026-10-06-w11r4-advisory-clearance.md: c119c8ec92324ac785e3d48b321dadf8b581e9b3
-2026-10-06-w11r4-advisory-clearance.zh.md: caff6e5a3df4725fca41cf846550dbcd14203e70
+2026-10-06-w11r4-advisory-clearance.md: addacbbb8402a9b971139f0ff2fb788445cd95b3
+2026-10-06-w11r4-advisory-clearance.zh.md: 8ac8fac32d0ea2616df7b823518d9de9962e4fc3

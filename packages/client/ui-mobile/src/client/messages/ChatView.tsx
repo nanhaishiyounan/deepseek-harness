@@ -14,7 +14,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type JSX } from 'react'
 import type { SessionSummary } from '@deepseek-ai/dsh-host-apiproxy/api'
 import { Plus } from 'lucide-react'
-import { Toast, type TextAreaRef } from 'antd-mobile'
+import { type TextAreaRef } from 'antd-mobile'
 import { Avatar, NoticeCard, RunningRow, SkelThread } from '../ui.tsx'
 import { PageNav } from '../PageNav.tsx'
 import { loadIdentity } from '../auth.ts'
@@ -44,6 +44,7 @@ import { composeWithAttachments, useAttachments, DOC_ACCEPT, IMAGE_ACCEPT } from
 import { useVoiceInput } from './chat/useVoiceInput.ts'
 import { Composer } from './chat/Composer.tsx'
 import { confirmPayloadOf } from './chat/confirm.ts'
+import { hoistToast } from './chat/toast.ts'
 import css from './chat.module.css'
 
 // The chips decision table moved to ./chat/chips.ts (W8-B2); the re-export
@@ -178,7 +179,7 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
 
   const send = useCallback(async (text: string) => {
     if (lane.attachments.some(row => row.status === 'uploading')) {
-      Toast.show({ content: '附件还在处理中，稍候再发送' })
+      hoistToast({ content: '附件还在处理中，稍候再发送' })
       return
     }
     // The ready attachments' quote blocks lead the typed text; the send lane
@@ -263,7 +264,7 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
     lang: 'zh-CN',
     onInterim: () => {},
     onFinal: (text) => { setDraft(current => current + text) },
-    onError: (message) => { Toast.show({ content: message }) },
+    onError: (message) => { hoistToast({ content: message }) },
   })
   useEffect(() => lane.disposeThumbs, [lane.disposeThumbs])
 

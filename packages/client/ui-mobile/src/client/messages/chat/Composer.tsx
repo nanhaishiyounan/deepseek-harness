@@ -14,10 +14,11 @@
  */
 
 import { useEffect, useRef, useState, type JSX, type ReactNode, type RefObject } from 'react'
-import { TextArea, Toast, type TextAreaRef } from 'antd-mobile'
+import { TextArea, type TextAreaRef } from 'antd-mobile'
 import { FileWarning, Image as ImageIcon, Loader2, Plus, Send, Square, X } from 'lucide-react'
 import type { DraftAttachment } from './attachments.ts'
 import css from '../chat.module.css'
+import { hoistToast } from './toast.ts'
 
 /** Composer props: the chip/draft/running state and the orchestration sinks. */
 export interface ComposerProps {
@@ -93,11 +94,7 @@ export function Composer(props: ComposerProps): JSX.Element {
     for (const row of fresh) seen.add(row.id)
     toasted.current = seen
     const reasons = fresh.map(row => `「${row.name}」${row.error}`).join('；')
-    Toast.show({
-      content: `${fresh.length}项附件上传失败：${reasons}`,
-      position: 'bottom',
-      ...(css.toastLift === undefined ? {} : { maskClassName: css.toastLift }),
-    })
+    hoistToast({ content: `${fresh.length}项附件上传失败：${reasons}` })
   }, [props.attachments])
   return (
     <div className={css.composer}>
@@ -231,16 +228,12 @@ function AttachmentChip({ attachment, onRemove }: {
 
 /**
  * One transient composer failure: a toast, retriable by sending again. The
- * toast rides the batch-failure lift (W11-R4): both failure toasts anchor on
- * the strip's band, so both clear it the same way.
+ * toast rides the chat surface's shared hoist anchor (W11-R5): both failure
+ * toasts anchor on the strip's band, so both clear it the same way.
  */
 function ErrorToast({ error }: { readonly error: string }): JSX.Element | null {
   useEffect(() => {
-    Toast.show({
-      content: error,
-      position: 'bottom',
-      ...(css.toastLift === undefined ? {} : { maskClassName: css.toastLift }),
-    })
+    hoistToast({ content: error })
   }, [error])
   return null
 }

@@ -27,15 +27,27 @@ describe('sweepSessionKeys (the shared prefix source)', () => {
     expect(MOBILE_SESSION_KEY_PREFIXES).toEqual(['dsh-mobile-draft', 'dsh-mobile-outbox', 'dsh-mobile-attachments'])
   })
 
-  it('clears every session-prefixed key across the three families and reports them', () => {
-    localStorage.setItem('dsh-mobile-draft-s1-abc', '{}')
-    localStorage.setItem('dsh-mobile-outbox', '[]')
-    localStorage.setItem('dsh-mobile-attachments-s2', '{}')
+  it('clears all twelve session keys in one sweep and leaves five unrelated keys byte-identical', () => {
+    const doomed = [
+      'dsh-mobile-draft-s1-a', 'dsh-mobile-draft-s1-b', 'dsh-mobile-draft-s2-c', 'dsh-mobile-draft-s3-d',
+      'dsh-mobile-outbox', 'dsh-mobile-outbox-k1', 'dsh-mobile-outbox-k2', 'dsh-mobile-outbox-k3',
+      'dsh-mobile-attachments-s1', 'dsh-mobile-attachments-s2', 'dsh-mobile-attachments-s3', 'dsh-mobile-attachments-s4',
+    ]
+    for (const key of doomed) localStorage.setItem(key, 'x')
+    const keep = new Map<string, string>([
+      ['dsh-mobile-theme', '{"mode":"dark","density":3}'],
+      ['dsh-mobile-read', 'seq:42,偏移+8'],
+      ['dsh-mobile-pins', '[1,2,3]'],
+      ['dsh-mobile-auth', '{"token":"tok ✓"}'],
+      ['dsh-mobile-work', '{"cells":{"a":"行1\n行2"}}'],
+    ])
+    for (const [key, value] of keep) localStorage.setItem(key, value)
     const removed = sweepSessionKeys()
-    expect([...removed].sort()).toEqual(['dsh-mobile-attachments-s2', 'dsh-mobile-draft-s1-abc', 'dsh-mobile-outbox'])
-    expect(localStorage.getItem('dsh-mobile-draft-s1-abc')).toBeNull()
-    expect(localStorage.getItem('dsh-mobile-outbox')).toBeNull()
-    expect(localStorage.getItem('dsh-mobile-attachments-s2')).toBeNull()
+    expect([...removed].sort()).toEqual([...doomed].sort())
+    for (const key of doomed) expect(localStorage.getItem(key)).toBeNull()
+    // The unrelated keys survive byte-identical (W11-R5): the sweep deletes
+    // only the doomed set and never rewrites what it keeps.
+    for (const [key, value] of keep) expect(localStorage.getItem(key)).toBe(value)
   })
 
   it('keeps every other dsh-mobile key (theme, watermarks, marks, pins, auth, work)', () => {

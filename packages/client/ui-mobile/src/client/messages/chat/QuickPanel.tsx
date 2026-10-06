@@ -10,9 +10,9 @@
  */
 
 import type { JSX } from 'react'
-import { Toast } from 'antd-mobile'
 import { BarChart3, CalendarClock, Camera, ClipboardCheck, FileText, Image, Mic, PenLine, Search } from 'lucide-react'
 import css from '../chat.module.css'
+import { hoistToast } from './toast.ts'
 
 /** One starter command the panel lists (the colleague's welcome starters). */
 export interface QuickCommand {
@@ -108,7 +108,7 @@ export function QuickPanel({ commands, sending, onPick, onToolPick, voiceSupport
             aria-disabled={voiceSupported === 'broken' && tool.tool === 'voice' ? true : undefined}
             onClick={() => {
               if (voiceSupported === 'broken' && tool.tool === 'voice') {
-                Toast.show({ content: '当前环境不支持语音，试试拍照或打字' })
+                hoistToast({ content: '当前环境不支持语音，试试拍照或打字' })
                 return
               }
               onToolPick(tool.tool)

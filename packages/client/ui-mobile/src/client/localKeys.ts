@@ -20,15 +20,11 @@ export const MOBILE_SESSION_KEY_PREFIXES: readonly string[] = [
  * @returns the removed key names (the logout trace's detail).
  */
 export function sweepSessionKeys(): string[] {
-  const doomed: string[] = []
-  // Walk backwards: each removeItem reindexes the tail.
-  for (let index = localStorage.length - 1; index >= 0; index--) {
-    const key = localStorage.key(index)
-    if (key === null) continue
-    if (MOBILE_SESSION_KEY_PREFIXES.some(prefix => key.startsWith(prefix))) {
-      localStorage.removeItem(key)
-      doomed.push(key)
-    }
-  }
+  // Snapshot the key list first (W11-R5): mutating while walking the live
+  // collection reindexes it under the cursor, so the doomed set is decided
+  // up front and every removal then reads from the frozen snapshot.
+  const doomed = Object.keys(localStorage).filter(key =>
+    MOBILE_SESSION_KEY_PREFIXES.some(prefix => key.startsWith(prefix)))
+  for (const key of doomed) localStorage.removeItem(key)
   return doomed
 }
