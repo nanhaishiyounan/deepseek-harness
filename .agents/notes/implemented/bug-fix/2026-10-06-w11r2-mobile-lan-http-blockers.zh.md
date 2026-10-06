@@ -22,7 +22,7 @@ W11-R1 复验以 PASS_WITH_DEBT 87.8 收口；Go-live 判定「LAN HTTP 形态�
 
 ## 后果
 
-ui-mobile 745/745（新增：views LAN HTTP 终态 2、attachments 卫生 4、composer 批 Toast 1、local-keys 4）、typecheck 绿、改动文件 oxlint 0 errors。活体复验 `w11-r2-live-verify.log` 9/9，跑在**真非 secure 上下文**——`http://w11lan.test:3080` 经 Chromium `--host-resolver-rules` 映射到 127.0.0.1（CLI 按设计拒绝非 loopback 绑定；/api 信任围栏经 `--trusted-host` 加白该 authority）：环境面断言 `isSecureContext === false` 且 `randomUUID === undefined`，零 stub；点发送到达终态（wire 携带 uid 兜底产出的 `m_` 前缀 `clientMsgId`、draft 清空、所开启回合结束后 sending 复位、第二条以不同键再发、history 落账）；同一形态下 ready 附件 strip reload 回填；登出清空全部三类种子键而 theme 键保留。截图 `w11-r2-{01-lan-http-send-terminal, 02-attach-rehydrate-insecure, 03-logout-swept}-375.png`。
+ui-mobile 754/754（R2 期新增：views LAN HTTP 终态 2、attachments 卫生 4、composer 批 Toast 1、local-keys 4；原记 745 系低报 9，W11-R4 勘正）、typecheck 绿、改动文件 oxlint 0 errors。活体复验 `w11-r2-live-verify.log` 9/9，跑在**真非 secure 上下文**——`http://w11lan.test:3080` 经 Chromium `--host-resolver-rules` 映射到 127.0.0.1（CLI 按设计拒绝非 loopback 绑定；/api 信任围栏经 `--trusted-host` 加白该 authority）：环境面断言 `isSecureContext === false` 且 `randomUUID === undefined`，零 stub；点发送到达终态（wire 携带 uid 兜底产出的 `m_` 前缀 `clientMsgId`、draft 清空、所开启回合结束后 sending 复位、第二条以不同键再发、history 落账）；同一形态下 ready 附件 strip reload 回填；登出清空全部三类种子键而 theme 键保留。截图 `w11-r2-{01-lan-http-send-terminal, 02-attach-rehydrate-insecure, 03-logout-swept}-375.png`。
 
 lib 产物契约教训复确认：`apps/web` 以 bare import 引 `@deepseek-ai/dsh-client-ui-mobile`（main → `lib/`），源码修复要到达被服务的 dist 必须 `pnpm run build:lib:client` **之后**再跑 apps/web 的 vite build——第一次活体跑在新 dist 之上服务了旧 lib，忠实复现了修复前的崩溃。
 

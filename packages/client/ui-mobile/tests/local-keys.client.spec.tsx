@@ -5,7 +5,8 @@
  * exactly those keys (drafts, the outbox, attachment strips) while every
  * other dsh-mobile key survives, and the App's logout path wires it after
  * the identity drops — a departed account's parked data never leaks into
- * the next login.
+ * the next login. The logout leaves one session-keys.swept trace (W11-R3):
+ * a single console.info line in the outbox store's observation format.
  */
 
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
@@ -81,11 +82,21 @@ describe('the App logout path', () => {
     fireEvent.click(screen.getByRole('button', { name: /退出登录/ }))
     // Logout confirms first; the dialog's destructive button performs it.
     await waitFor(() => screen.getByRole('button', { name: '退出' }))
+    const info = vi.spyOn(console, 'info').mockImplementation(() => {})
     fireEvent.click(screen.getByRole('button', { name: '退出' }))
     await waitFor(() => {
       expect(localStorage.getItem('dsh-mobile-draft-s9-1')).toBeNull()
       expect(localStorage.getItem('dsh-mobile-attachments-s9')).toBeNull()
     })
+    // The sweep leaves exactly one trace (W11-R3): type, count, and the
+    // removed-key list in one console.info JSON line.
+    const swept = info.mock.calls.map(call => String(call[0])).filter(text => text.includes('session-keys.swept'))
+    expect(swept).toHaveLength(1)
+    const trace = JSON.parse(swept[0]!) as { type: string; count: number; keys: string[] }
+    expect(trace.type).toBe('session-keys.swept')
+    expect(trace.count).toBe(trace.keys.length)
+    expect(trace.keys).toContain('dsh-mobile-draft-s9-1')
+    expect(trace.keys).toContain('dsh-mobile-attachments-s9')
     expect(localStorage.getItem('dsh-mobile-auth')).toBeNull()
     expect(localStorage.getItem('dsh-mobile-theme')).toBe('dark')
     await waitFor(() => { expect(screen.getByText('食链通 · AI 员工')).toBeTruthy() })

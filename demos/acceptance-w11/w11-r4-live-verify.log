@@ -1,0 +1,8 @@
+PASS R4-1a 横屏 Toast 在场且点名全部失败附件（聚合） — 2项附件上传失败：「broken-a.png」图片识别失败（探针）；「broken-b.png」图片识别失败（探针）
+PASS R4-1b 横屏 Toast 底缘清空附件条顶缘 ≥15px — clearance=36.0px toastBottom=215.0 railTop=251.0
+PASS R4-1c 横屏 mask 带 lift 类且 bottom=175px（媒体查询锚） — mask=adm-mask adm-toast-mask _toastLift_1xlx2_530 top=158px bottom=175px
+PASS R4-2a 发送失败 Toast 文案在场（refused 路径） — 会话暂不可用（探针拒绝）
+PASS R4-2b 发送失败 Toast 与批失败同锚（lift 类 + computed bottom=150px） — mask=adm-mask adm-toast-mask _toastLift_1xlx2_530 top=624.5px bottom=150px
+PASS R4-2c 底缘离视口底 150px（rect 实测） — offFloor=150.0px viewportH=812
+PASS R4-3a 数据行与披露同口径（三族 + 登出即清） — me 页数据行
+PASS R4-3b 登出弹窗披露点名三族（草稿/待发/附件） — 退出后需重新输入账号密码登录；会话与业务数据保留在服务端；本地草稿、待发消息与附件将被清除。

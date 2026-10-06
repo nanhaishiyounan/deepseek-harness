@@ -22,7 +22,7 @@ W11-R2 re-verification closed PASS 87.7 (LAN HTTP deliverable) with four hour-sc
 
 ## Consequences
 
-ui-mobile 754/754 (new: views logout-disclosure 1, composer maskClassName 1), `tsc -b tsconfig.client.json` green, oxlint 0 errors on changed files. Live verification `w11-r3-live-verify.log` 6/6 on the rebuilt :3080 dist: the page identity is seeded straight into localStorage (every item under test is pure front-end behavior — no product seam stubbed) and the `nocobase-unauthorized` bounce a seeded token provokes is isolated with a `not-composed` refusal; the toast geometry asserts clearance=25.0px ≥15px with computed bottom=150px, the dialog text discloses verbatim, and the logout leaves `session-keys.swept` with count=3 covering all three seeded key families while the theme key survives. Screenshots `w11-r3-{toast-lift-clearance, logout-disclosure}-375.png`.
+ui-mobile 754/754 (assertions folded into existing cases; R2's ledger read 745 — the 9-case gap is R2-era additions), `tsc -b tsconfig.client.json` green, oxlint 0 errors on changed files. Live verification `w11-r3-live-verify.log` 6/6 on the rebuilt :3080 dist: the page identity is seeded straight into localStorage (every item under test is pure front-end behavior — no product seam stubbed) and the `nocobase-unauthorized` bounce a seeded token provokes is isolated with a `not-composed` refusal; the toast geometry asserts clearance=25.0px ≥15px with computed bottom=150px, the dialog text discloses verbatim, and the logout leaves `session-keys.swept` with count=3 covering all three seeded key families while the theme key survives. Screenshots `w11-r3-{toast-lift-clearance, logout-disclosure}-375.png`.
 
 ## Alternatives considered
 

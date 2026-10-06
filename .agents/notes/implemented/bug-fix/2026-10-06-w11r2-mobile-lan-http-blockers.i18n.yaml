@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/bug-fix/2026-10-06-w11r2-mobile-lan-http-blockers.md
-2026-10-06-w11r2-mobile-lan-http-blockers.md: 7818fa3e029d0f77329b3f322441bf0a402187f7
-2026-10-06-w11r2-mobile-lan-http-blockers.zh.md: 51da66ff97883825081a4901691a4bd1cefe769c
+2026-10-06-w11r2-mobile-lan-http-blockers.md: c133609293657233843b98605182ac0bb2a6386a
+2026-10-06-w11r2-mobile-lan-http-blockers.zh.md: 8ec767c80dc450b87d0f8a5bf909ea5d47cd3327

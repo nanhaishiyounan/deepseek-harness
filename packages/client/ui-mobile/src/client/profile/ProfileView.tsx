@@ -47,6 +47,14 @@ export interface ReceiptStripRow {
 /** The about entry's single version source (the list row and the dialog read one constant). */
 const APP_VERSION = 'v6'
 
+/**
+ * The data row's single copy source (the list row and its dialog read one
+ * constant): server-held data, the theme preference kept locally, and the
+ * three sweep-cleared session families (drafts, parked outbox messages,
+ * attachment strips) — the same local face the logout dialog discloses.
+ */
+const DATA_NOTE = '会话与业务数据存储于服务端，与 PC 工作台同库；本机仅保留主题等偏好，草稿、待发消息与附件为登出即清的暂存。'
+
 /** The quick-start shortcuts (label + the session preset they open). */
 const SHORTCUTS: ReadonlyArray<{ readonly label: string; readonly preset: string }> = [
   { label: '登记采购单', preset: 'mobile-form-assistant' },
@@ -138,8 +146,8 @@ export function ProfileView({ identity, dark, onDarkChange, onLogout }: ProfileV
     void Dialog.confirm({
       title: '退出登录',
       // The sweep (W11-R2) clears drafts, parked outbox messages, and
-      // attachment strips on logout — the dialog discloses that local face.
-      content: '退出后需重新输入账号密码登录；会话与业务数据保留在服务端；本地草稿与待发消息将被清除。',
+      // attachment strips on logout — the dialog names all three families.
+      content: '退出后需重新输入账号密码登录；会话与业务数据保留在服务端；本地草稿、待发消息与附件将被清除。',
       confirmText: '退出',
       cancelText: '取消',
       getContainer: portalContainer,
@@ -296,9 +304,9 @@ export function ProfileView({ identity, dark, onDarkChange, onLogout }: ProfileV
           <List.Item
             prefix={<Database size={18} aria-hidden="true" />}
             title="数据"
-            description="会话与业务数据存储于服务端，与 PC 工作台同库；本机仅保留主题与输入中的草稿。"
+            description={DATA_NOTE}
             onClick={() => {
-              void Dialog.alert({ title: '数据', content: '会话与业务数据存储于服务端，与 PC 工作台同库；本机仅保留主题与输入中的草稿。', confirmText: '知道了', getContainer: portalContainer })
+              void Dialog.alert({ title: '数据', content: DATA_NOTE, confirmText: '知道了', getContainer: portalContainer })
             }}
           />
           <List.Item

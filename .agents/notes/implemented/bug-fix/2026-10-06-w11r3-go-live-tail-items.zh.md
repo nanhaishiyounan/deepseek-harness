@@ -22,7 +22,7 @@ W11-R2 复验以 PASS 87.7 收口（LAN HTTP 可交付），留下四条小时�
 
 ## 后果
 
-ui-mobile 754/754（新增：views 登出披露 1、composer maskClassName 1）、`tsc -b tsconfig.client.json` 绿、改动文件 oxlint 0 errors。活体验证 `w11-r3-live-verify.log` 6/6，跑在重建的 :3080 dist 上：页面 identity 以合法 shape 直种 localStorage（受测四项全部为纯前端行为——零产品 seam 被 stub），种 token 引发的 `nocobase-unauthorized` 弹回以 `not-composed` 拒答隔离；Toast 几何断言 clearance=25.0px ≥15px 且 computed bottom=150px，弹窗文案逐字披露，登出留下 count=3 的 `session-keys.swept` 覆盖全部三类种子键而 theme 键保留。截图 `w11-r3-{toast-lift-clearance, logout-disclosure}-375.png`。
+ui-mobile 754/754（断言并入既有用例；R2 记账为 745，差 9 为 R2 期新增）、`tsc -b tsconfig.client.json` 绿、改动文件 oxlint 0 errors。活体验证 `w11-r3-live-verify.log` 6/6，跑在重建的 :3080 dist 上：页面 identity 以合法 shape 直种 localStorage（受测四项全部为纯前端行为——零产品 seam 被 stub），种 token 引发的 `nocobase-unauthorized` 弹回以 `not-composed` 拒答隔离；Toast 几何断言 clearance=25.0px ≥15px 且 computed bottom=150px，弹窗文案逐字披露，登出留下 count=3 的 `session-keys.swept` 覆盖全部三类种子键而 theme 键保留。截图 `w11-r3-{toast-lift-clearance, logout-disclosure}-375.png`。
 
 ## 备选方案
 

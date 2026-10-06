@@ -229,10 +229,18 @@ function AttachmentChip({ attachment, onRemove }: {
   )
 }
 
-/** One transient composer failure: a toast, retriable by sending again. */
+/**
+ * One transient composer failure: a toast, retriable by sending again. The
+ * toast rides the batch-failure lift (W11-R4): both failure toasts anchor on
+ * the strip's band, so both clear it the same way.
+ */
 function ErrorToast({ error }: { readonly error: string }): JSX.Element | null {
   useEffect(() => {
-    Toast.show({ content: error, position: 'bottom' })
+    Toast.show({
+      content: error,
+      position: 'bottom',
+      ...(css.toastLift === undefined ? {} : { maskClassName: css.toastLift }),
+    })
   }, [error])
   return null
 }

@@ -119,3 +119,16 @@ describe('composer failed-attachment toast (W11-R1)', () => {
     expect(config?.maskClassName).not.toBe('')
   })
 })
+
+describe('composer transient send-failure toast (W11-R4)', () => {
+  it('rides the same lift anchor as the batch-failure toast', () => {
+    mountComposer({ error: '会话不可用，请稍后重试' })
+    expect(vi.mocked(Toast.show).mock.calls).toHaveLength(1)
+    const shown = vi.mocked(Toast.show).mock.calls.at(-1)?.[0]
+    const config = typeof shown === 'string' ? undefined : shown
+    expect(config?.content).toBe('会话不可用，请稍后重试')
+    expect(config?.position).toBe('bottom')
+    expect(typeof config?.maskClassName).toBe('string')
+    expect(config?.maskClassName).not.toBe('')
+  })
+})

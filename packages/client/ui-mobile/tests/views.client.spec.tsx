@@ -643,7 +643,7 @@ describe('mobile me tab', () => {
     await waitFor(() => { expect(screen.getByText('本月登记')).toBeTruthy() })
     fireEvent.click(screen.getByText('数据'))
     // The description renders on the row and again in the opened dialog.
-    await waitFor(() => { expect(screen.getAllByText('会话与业务数据存储于服务端，与 PC 工作台同库；本机仅保留主题与输入中的草稿。').length).toBeGreaterThan(1) })
+    await waitFor(() => { expect(screen.getAllByText('会话与业务数据存储于服务端，与 PC 工作台同库；本机仅保留主题等偏好，草稿、待发消息与附件为登出即清的暂存。').length).toBeGreaterThan(1) })
     fireEvent.click(screen.getByText('v6'))
   })
 
@@ -825,8 +825,9 @@ describe('mobile me tab', () => {
     fireEvent.click(screen.getByRole('button', { name: '退出登录' }))
     await waitFor(() => screen.getByRole('button', { name: '退出' }))
     // The confirm dialog discloses the sweep's local face before the
-    // destructive tap (W11-R3): drafts and parked messages die with logout.
-    expect(screen.getByText(/本地草稿与待发消息将被清除/)).toBeTruthy()
+    // destructive tap (W11-R3, all three families named W11-R4): drafts,
+    // parked messages, and attachment strips die with logout.
+    expect(screen.getByText(/本地草稿、待发消息与附件将被清除/)).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: '退出' }))
     await waitFor(() => { expect(onLogout).toHaveBeenCalledTimes(1) })
   })

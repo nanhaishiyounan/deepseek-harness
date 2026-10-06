@@ -522,10 +522,20 @@
     the same band this strip's rail occupies over the input row — so the
     toast re-anchors on its bottom edge 150px up, clear of the strip's top
     rail (measured 812/667 viewports: clearance 25px, toast-height
-    independent); !important overrides the Toast component's inline top. */
+    independent); !important overrides the Toast component's inline top.
+    The landscape override (W11-R4): a landscape viewport (~390px tall)
+    squeezes the strip's top rail further from the floor (844×390 measured
+    +11/-10px at the 150px anchor), so the bottom edge rides 175px up to
+    keep the >=15px clearance on both faces. */
 .toastLift :global(.adm-toast-main) {
   top: auto !important;
   bottom: 150px !important;
+}
+
+@media (orientation: landscape) {
+  .toastLift :global(.adm-toast-main) {
+    bottom: 175px !important;
+  }
 }
 
 /* One attachment chip: the paper face, the roast line, the type glyph or
