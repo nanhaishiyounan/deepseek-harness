@@ -60,8 +60,16 @@ W11 = B1（输入框精修 + 细节自发现）+ B2（加号真功能：语音/�
 ## R2 — LAN HTTP 交付障碍清偿（1 Critical 存量 + 3 卫生项）
 
 - 修复面（R1 终验 PASS_WITH_DEBT 87.8 的 Go-live 前置）：① `newClientMsgId` 裸调 `crypto.randomUUID()`（w7 存量）改骑 `uid()`（去连字符取 8 位 hex nonce），`ChatView.send()` 的键构造移入 try 块——LAN HTTP 点发送不再 TypeError 死锁 composer；② attachments 持久化卫生对齐 outboxStore——try/catch + 结构化 warn（含 key 名）、quota 超限按 `savedAt` 驱逐最旧其他会话 strip 重试一次（version 1→2）、损坏/不合 schema 的 key 即删；③ Composer 批失败 Toast 聚合（一次 Toast 报全部 fresh failed：`N项附件上传失败：「a」原因A；「b」原因B`）；④ 新 `localKeys.ts` 单源 `MOBILE_SESSION_KEY_PREFIXES` + 登出 `sweepSessionKeys()`（draft/outbox/attachments 三族全清，theme/水位/置顶按设计保留）。
-- `w11-r2-live-verify.log`（`.verify-w11r2.mjs`）：**11/11**，跑在真非 secure 上下文——`http://w11lan.test:3080` 经 Chromium `--host-resolver-rules` 映射 127.0.0.1（CLI 按设计拒绝非 loopback 绑定；/api 围栏 `--trusted-host` 加白），环境面实测 `isSecureContext=false` 且 `randomUUID=undefined` 零 stub；发送到达终态六断言（wire `m_` 前缀 clientMsgId / draft 清空 / turn 后 sending 复位 / 第二条异键再发 / history 落账）+ 非 secure 下附件 strip reload 回填 + 登出三类键全清且 theme 保留。
+- `w11-r2-live-verify.log`（`.verify-w11r2.mjs`）：**9/9**，跑在真非 secure 上下文——`http://w11lan.test:3080` 经 Chromium `--host-resolver-rules` 映射 127.0.0.1（CLI 按设计拒绝非 loopback 绑定；/api 围栏 `--trusted-host` 加白），环境面实测 `isSecureContext=false` 且 `randomUUID=undefined` 零 stub；发送到达终态六断言（wire `m_` 前缀 clientMsgId / draft 清空 / turn 后 sending 复位 / 第二条异键再发 / history 落账）+ 非 secure 下附件 strip reload 回填 + 登出三类键全清且 theme 保留。
 - 截图 3 张：`w11-r2-{01-lan-http-send-terminal, 02-attach-rehydrate-insecure, 03-logout-swept}-375.png`
 - 测试：ui-mobile **745/745**（新增 views LAN HTTP 终态 2 + attachments 卫生 4 + composer 批 Toast 1 + local-keys 4）· typecheck 绿 · oxlint 改动文件 0 errors。
 - 构建链教训（复确认 build:lib:client 契约）：apps/web bare-import ui-mobile（main→`lib/`），源码修复必须 `pnpm run build:lib:client` 后再 vite build——首跑活体在新 dist 上服务旧 lib，忠实复现修复前崩溃。
 - Agent Note：`.agents/notes/implemented/bug-fix/2026-10-06-w11r2-mobile-lan-http-blockers.md`（三件套）。
+
+## R3 — Go-live 收尾微批（R2 终验 4 条小时级顺手项）
+
+- 修复面（R2 终验 PASS 87.7 的 Go-live 建议）：① 计数勘误——三处「11/11」按 log 实测改「9/9」（本 INDEX R2 节 + R2 note 中英文同行；`w11-r2-live-verify.log` 实为 R2-0/1a~1f/2/3 九条）；② 登出披露——确认弹窗补「本地草稿与待发消息将被清除」（W11-R2 扩大清除面后的披露义务，views spec 加断言）；③ sweep 留痕——`App.onLogout` 消费 `sweepSessionKeys()` 返回值，`console.info` 单行 JSON（`session-keys.swept` + count/keys/at，对齐 outboxStore 观测口径）；④ 失败聚合 Toast 重锚——实测发现 antd-mobile bottom toast 打开态 `position:absolute` 且底缘钉死视口底部（inline `top:80%` 被覆盖只拉伸高度、rect.bottom 纹丝不动），故改 `bottom:150px !important` 重锚（`top:auto`），clearance=25px 且与 toast 高度无关（1~3 行皆稳）。
+- `w11-r3-live-verify.log`（`.verify-w11r3.mjs`）：**6/6**（3080 重建 dist；页面 identity 以合法 shape 直种 localStorage——本批全部为纯前端行为，无产品 seam 被 stub；种 token 引发的 `nocobase-unauthorized` 弹回以 `not-composed` 拒答隔离）：R3-1 失败 Toast 在场点名附件 + 底缘清空附件条顶缘 ≥15px（clearance=25.0px）+ mask 带 lift 类且 computed bottom=150px；R3-2 弹窗披露逐字；R3-3 登出留痕 count=3 且 keys 含全部三类会话键；R3-4 auth 清除 theme 保留。
+- 截图 2 张：`w11-r3-{toast-lift-clearance, logout-disclosure}-375.png`
+- 测试：ui-mobile **754/754**（views 登出披露 1 + composer maskClassName 1）· `tsc -b tsconfig.client.json` 绿（随 build:lib:client）· oxlint 改动文件 0 errors。
+- Agent Note：`.agents/notes/implemented/bug-fix/2026-10-06-w11r3-go-live-tail-items.md`（三件套）。

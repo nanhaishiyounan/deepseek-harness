@@ -137,7 +137,9 @@ export function ProfileView({ identity, dark, onDarkChange, onLogout }: ProfileV
   const confirmLogout = (): void => {
     void Dialog.confirm({
       title: '退出登录',
-      content: '退出后需重新输入账号密码登录；会话与业务数据保留在服务端。',
+      // The sweep (W11-R2) clears drafts, parked outbox messages, and
+      // attachment strips on logout — the dialog discloses that local face.
+      content: '退出后需重新输入账号密码登录；会话与业务数据保留在服务端；本地草稿与待发消息将被清除。',
       confirmText: '退出',
       cancelText: '取消',
       getContainer: portalContainer,

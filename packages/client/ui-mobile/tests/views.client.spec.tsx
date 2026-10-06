@@ -824,6 +824,9 @@ describe('mobile me tab', () => {
     )
     fireEvent.click(screen.getByRole('button', { name: '退出登录' }))
     await waitFor(() => screen.getByRole('button', { name: '退出' }))
+    // The confirm dialog discloses the sweep's local face before the
+    // destructive tap (W11-R3): drafts and parked messages die with logout.
+    expect(screen.getByText(/本地草稿与待发消息将被清除/)).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: '退出' }))
     await waitFor(() => { expect(onLogout).toHaveBeenCalledTimes(1) })
   })

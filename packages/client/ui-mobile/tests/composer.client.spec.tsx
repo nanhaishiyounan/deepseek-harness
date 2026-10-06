@@ -106,12 +106,16 @@ describe('composer failed-attachment toast (W11-R1)', () => {
         attachment({ id: 'f2', kind: 'doc', name: 'regime.pdf', status: 'failed', quote: undefined, error: '文件超过大小限制' }),
       ],
     })
-    // One toast carries the batch: the count plus each failed pick's reason.
+    // One toast carries the batch: the count plus each failed pick's reason,
+    // lifted clear of the strip the failed chips live on (W11-R3).
     expect(vi.mocked(Toast.show).mock.calls).toHaveLength(1)
     const shown = vi.mocked(Toast.show).mock.calls.at(-1)?.[0]
-    const content = typeof shown === 'string' ? shown : shown?.content
+    const config = typeof shown === 'string' ? undefined : shown
+    const content = config?.content
     expect(content).toContain('2项附件上传失败')
     expect(content).toContain('「shelf.png」图片识别失败，请重试')
     expect(content).toContain('「regime.pdf」文件超过大小限制')
+    expect(typeof config?.maskClassName).toBe('string')
+    expect(config?.maskClassName).not.toBe('')
   })
 })

@@ -63,11 +63,14 @@ export function App(): JSX.Element {
           // under the next login: the queue and its retry timer die here —
           // and the work projection's queue dies with it (W8-B3). The sweep
           // then drops every session-scoped key (draft edits, attachment
-          // strips, outbox residue) from one shared prefix list (W11-R2).
+          // strips, outbox residue) from one shared prefix list (W11-R2),
+          // leaving one session-keys.swept trace in the outbox store's
+          // observation format with the removed keys (W11-R3).
           clearOutbox()
           clearWorkOutbox()
           clearIdentity()
-          sweepSessionKeys()
+          const swept = sweepSessionKeys()
+          console.info(JSON.stringify({ type: 'session-keys.swept', count: swept.length, keys: swept, at: new Date().toISOString() }))
           setIdentity(undefined)
         }}
       />

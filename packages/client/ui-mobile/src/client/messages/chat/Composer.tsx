@@ -81,7 +81,9 @@ export function Composer(props: ComposerProps): JSX.Element {
   // that land failed name themselves once — together in one toast when a
   // batch fails, so three failed picks read as one sentence, not three
   // toasts stacked over each other; the chips' own error lines carry the
-  // detail for as long as they stay, so a repeat toast would nag.
+  // detail for as long as they stay, so a repeat toast would nag. The toast
+  // lifts clear of the strip (W11-R3): the failed rows live on the strip,
+  // and the strip rides the same bottom band the bottom toast anchors to.
   const toasted = useRef<ReadonlySet<string>>(new Set())
   useEffect(() => {
     const fresh = props.attachments.filter(row =>
@@ -91,7 +93,11 @@ export function Composer(props: ComposerProps): JSX.Element {
     for (const row of fresh) seen.add(row.id)
     toasted.current = seen
     const reasons = fresh.map(row => `「${row.name}」${row.error}`).join('；')
-    Toast.show({ content: `${fresh.length}项附件上传失败：${reasons}`, position: 'bottom' })
+    Toast.show({
+      content: `${fresh.length}项附件上传失败：${reasons}`,
+      position: 'bottom',
+      ...(css.toastLift === undefined ? {} : { maskClassName: css.toastLift }),
+    })
   }, [props.attachments])
   return (
     <div className={css.composer}>

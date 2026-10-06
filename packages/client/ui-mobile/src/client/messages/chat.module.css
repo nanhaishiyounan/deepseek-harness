@@ -517,6 +517,17 @@
   display: none;
 }
 
+/* The failed-batch toast's lift (W11-R3): the bottom toast's main rides
+    position:absolute with its bottom edge pinned near the viewport floor —
+    the same band this strip's rail occupies over the input row — so the
+    toast re-anchors on its bottom edge 150px up, clear of the strip's top
+    rail (measured 812/667 viewports: clearance 25px, toast-height
+    independent); !important overrides the Toast component's inline top. */
+.toastLift :global(.adm-toast-main) {
+  top: auto !important;
+  bottom: 150px !important;
+}
+
 /* One attachment chip: the paper face, the roast line, the type glyph or
     thumbnail, the name, and the remove ×. Uploading breathes; failed wears
     the danger rim and wraps onto a second in-chip line for the human hint

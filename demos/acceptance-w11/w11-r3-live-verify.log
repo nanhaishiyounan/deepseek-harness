@@ -1,0 +1,6 @@
+PASS R3-1a 失败 Toast 在场且点名附件 — 1项附件上传失败：「broken-b.txt」未能提取文本（扫描件可能没有文字层）
+PASS R3-1b Toast 底缘清空附件条顶缘 ≥15px（lift 生效） — clearance=25.0px toastBottom=662.0 railTop=687.0 h=76.5
+PASS R3-1c mask 带 lift 类且 bottom 重锚（computed） — mask=adm-mask adm-toast-mask _toastLift_1iifz_526 top=585.5px bottom=150px
+PASS R3-2 登出确认弹窗披露本地清除面 — 退出后需重新输入账号密码登录；会话与业务数据保留在服务端；本地草稿与待发消息将被清除。
+PASS R3-3 登出留痕 session-keys.swept（type/count/keys 单行 JSON） — count=3 keys=dsh-mobile-attachments-session-w11r3-lum-probe,dsh-mobile-draft-session-w11r3-lum-probe,dsh-mobile-outbox
+PASS R3-4 登出后 auth 清除且 theme 保留 — {"auth":null,"theme":"light"}
