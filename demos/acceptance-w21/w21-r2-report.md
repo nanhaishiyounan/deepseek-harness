@@ -42,7 +42,7 @@
 
 - `pnpm vitest run packages/interaction/tool-present-card`：**66/66 绿**（46→66：枚举全表 +13、seq289 复刻端到端 +2、widget 缺省 +2、null 集合 +1、schema 形态重写等）
 - `pnpm vitest run packages/client/ui-mobile`：**815/815 绿**（809→815）
-- `pnpm run test:web -- mobile-assistant-toolcard`：**4/4 绿**（无 golden 漂移，未 refresh）
+- `pnpm run test:web apps/web/tests/mobile-assistant-toolcard.e2e.ts`：**4/4 绿**（无 golden 漂移，未 refresh）
 - `pnpm run typecheck`：**0 错误**；`pnpm run build:lib` / `build:lib:client`：通过
 - 本批文件 staged 口径 oxlint（.oxlintrc.staged.json）+ type-aware：**tool-present-card 包 0 警告 0 错误**（含 R1 遗留 5 项 type-aware 清偿：no-unnecessary-condition ×3、boolean-literal-compare、require-await）；protocol.ts/protocol.client.spec.ts 0 错误；ui-mobile 其余预存 type-aware 项为他批债务未扩面
 - `pnpm run doc-sync`：**29 过 1 败**——唯一红为预存 `verify-export-jsdoc`（session-persistence-jsonl build 产物 `JsonlSessionPersistence.config`，R1 报告同款、零 W21-R2 变更，非本批引入）；translation pairing 经三组 --write 重录后 1233 对全绿

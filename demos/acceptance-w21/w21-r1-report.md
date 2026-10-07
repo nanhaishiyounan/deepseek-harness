@@ -31,7 +31,7 @@
 
 - `pnpm vitest run packages/interaction/tool-present-card`：**46/46 绿**（新增 coerce 输出 deep-equal、payload 字符串、中文路径化 11 用例）
 - `pnpm vitest run packages/client/ui-mobile`：**809/809 绿**（原 796 + 镜像 13；既有「form_confirm 数字 value/table 数字 cell 拒绝」两负例按行为变化更新为 boolean 变体，数字→coerce 已由新用例正向锁定）
-- `pnpm run test:web -- mobile-assistant-toolcard`：**4/4 绿**（原 3 + W21-R1 新 it；golden refresh 后 replay 一致）
+- `pnpm run test:web apps/web/tests/mobile-assistant-toolcard.e2e.ts`：**4/4 绿**（原 3 + W21-R1 新 it；golden refresh 后 replay 一致）
 - `pnpm run typecheck`：**0 错误**
 - 本批次 6 个源文件 oxlint（.oxlintrc.staged.json）：**0 警告 0 错误**
 - `pnpm run doc-sync`：**仅预存红 export-jsdoc**（session-persistence-jsonl build 产物，P3 报告同款、零 W21-R1 变更）；tool-catalog 因 description 更新已 `gen-tool-catalog` 再生成
