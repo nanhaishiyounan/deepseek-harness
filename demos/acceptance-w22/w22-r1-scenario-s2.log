@@ -1,0 +1,87 @@
+[run 1] form_draft (63s, 4轮): 采购订单号(po_id)=relation 来源单据(source_no)=text 物料(product_id)=relation 数量(qty)=number 入库类型(receipt_type)=select+opts3 入库日期(received_at)=date 状态(status)=select+opts2 IQC 状态(iqc_status)=select+opts2 单号(receipt_no)=text
+=== PER-RUN MATRIX ===
+run 1 [wms_receipts]: supplier=absent date=date✓ qty=number✓ price=absent remark=absent
+=== RAW JSON ===
+[
+ {
+  "run": 1,
+  "outcome": "form_draft",
+  "rounds": 4,
+  "secs": 63,
+  "collection": "wms_receipts",
+  "fields": [
+   {
+    "name": "po_id",
+    "label": "采购订单号",
+    "widget": "relation",
+    "value": null,
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "source_no",
+    "label": "来源单据",
+    "widget": "text",
+    "value": "TL-88",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "product_id",
+    "label": "物料",
+    "widget": "relation",
+    "value": "47",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "qty",
+    "label": "数量",
+    "widget": "number",
+    "value": "50",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "receipt_type",
+    "label": "入库类型",
+    "widget": "select",
+    "value": "return",
+    "tier": "derived",
+    "options": 3
+   },
+   {
+    "name": "received_at",
+    "label": "入库日期",
+    "widget": "date",
+    "value": "2026-10-08",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "status",
+    "label": "状态",
+    "widget": "select",
+    "value": "pending",
+    "tier": "derived",
+    "options": 2
+   },
+   {
+    "name": "iqc_status",
+    "label": "IQC 状态",
+    "widget": "select",
+    "value": "not_required",
+    "tier": "derived",
+    "options": 2
+   },
+   {
+    "name": "receipt_no",
+    "label": "单号",
+    "widget": "text",
+    "value": "",
+    "tier": "system",
+    "options": 0
+   }
+  ]
+ }
+]

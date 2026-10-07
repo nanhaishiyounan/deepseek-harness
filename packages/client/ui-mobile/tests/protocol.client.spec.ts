@@ -95,6 +95,9 @@ describe('parseDshPayloadObject (present_card args mirror)', () => {
     'report.empty-table-cell.valid',
     // W22-B2: the four draft widgets with select options in both tiers.
     'form-draft.widgets.valid',
+    // W22-R1: the server widget rewrite lands number on the quantity/price
+    // names — the corrected payload stays client-legal as-is.
+    'form-draft.widget-coercion.valid',
     // W21-R8: the lossless actions spellings — wrapper key, missing kind,
     // and the lone actions object — mirror the server resolve step.
     'report.actions-wrapper-key.valid',

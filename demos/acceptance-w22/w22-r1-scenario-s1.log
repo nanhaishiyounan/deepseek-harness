@@ -1,0 +1,63 @@
+[run 1] form_draft (15s, 1轮): 供应商名称(name)=text 联系人(contact)=text 电话(phone)=text 生命周期状态(lifecycle_status)=text 来源(source)=text 供应商编号(code)=text
+=== PER-RUN MATRIX ===
+run 1 [srm_suppliers]: supplier=text✗ date=absent qty=absent price=absent remark=absent
+=== RAW JSON ===
+[
+ {
+  "run": 1,
+  "outcome": "form_draft",
+  "rounds": 1,
+  "secs": 15,
+  "collection": "srm_suppliers",
+  "fields": [
+   {
+    "name": "name",
+    "label": "供应商名称",
+    "widget": "text",
+    "value": "W22R1测试供应商5321",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "contact",
+    "label": "联系人",
+    "widget": "text",
+    "value": "王强",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "phone",
+    "label": "电话",
+    "widget": "text",
+    "value": "13800001111",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "lifecycle_status",
+    "label": "生命周期状态",
+    "widget": "text",
+    "value": "potential",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "source",
+    "label": "来源",
+    "widget": "text",
+    "value": "internal",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "code",
+    "label": "供应商编号",
+    "widget": "text",
+    "value": "",
+    "tier": "system",
+    "options": 0
+   }
+  ]
+ }
+]

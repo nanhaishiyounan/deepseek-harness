@@ -1,0 +1,14 @@
+{
+  "v": 3,
+  "type": "form_draft",
+  "draftId": "d_w22r1_3",
+  "revision": 1,
+  "form": { "collection": "hub_inv_products", "label": "库存商品" },
+  "title": "商品卡",
+  "fields": [
+    { "name": "name", "label": "品名", "value": "食品级柠檬酸", "tier": "required", "widget": "text" },
+    { "name": "sku", "label": "SKU 编码", "value": "SKU-CIT-0046", "tier": "required", "widget": "text" },
+    { "name": "unit_price", "label": "单位价格", "value": "25", "tier": "required", "widget": "text" },
+    { "name": "status", "label": "状态", "value": "active", "tier": "required", "widget": "text" }
+  ]
+}

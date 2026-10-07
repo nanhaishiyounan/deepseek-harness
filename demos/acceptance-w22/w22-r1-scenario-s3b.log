@@ -1,0 +1,87 @@
+[run 1] form_draft (45s, 2轮): 采购订单(po_id)=text 供应商(supplier_id)=relation 品名(product_id)=relation 数量(qty)=number 批次号(lot_no)=text 单据类型(receipt_type)=select+opts1 检验状态(iqc_status)=select+opts1 单据状态(status)=select+opts1 收货单号(receipt_no)=text
+=== PER-RUN MATRIX ===
+run 1 [wms_receipts]: supplier=relation✓ date=absent qty=number✓ price=absent remark=absent
+=== RAW JSON ===
+[
+ {
+  "run": 1,
+  "outcome": "form_draft",
+  "rounds": 2,
+  "secs": 45,
+  "collection": "wms_receipts",
+  "fields": [
+   {
+    "name": "po_id",
+    "label": "采购订单",
+    "widget": "text",
+    "value": "PO-2026-0001",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "supplier_id",
+    "label": "供应商",
+    "widget": "relation",
+    "value": "12",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "product_id",
+    "label": "品名",
+    "widget": "relation",
+    "value": "8",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "qty",
+    "label": "数量",
+    "widget": "number",
+    "value": "200",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "lot_no",
+    "label": "批次号",
+    "widget": "text",
+    "value": "SOY-20261008-A",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "receipt_type",
+    "label": "单据类型",
+    "widget": "select",
+    "value": "purchase",
+    "tier": "derived",
+    "options": 1
+   },
+   {
+    "name": "iqc_status",
+    "label": "检验状态",
+    "widget": "select",
+    "value": "pending",
+    "tier": "derived",
+    "options": 1
+   },
+   {
+    "name": "status",
+    "label": "单据状态",
+    "widget": "select",
+    "value": "pending",
+    "tier": "derived",
+    "options": 1
+   },
+   {
+    "name": "receipt_no",
+    "label": "收货单号",
+    "widget": "text",
+    "value": "",
+    "tier": "system",
+    "options": 0
+   }
+  ]
+ }
+]

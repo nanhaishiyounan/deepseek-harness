@@ -3440,6 +3440,44 @@ export interface Config {
 
 Source: [`packages/connector/tool-nocobase/src/index.ts:121`](../packages/connector/tool-nocobase/src/index.ts)
 
+<a id="deepseek-aidsh-tool-present-card"></a>
+
+## `@deepseek-ai/dsh-tool-present-card`
+
+Requires: `tools`
+
+```ts config-catalog
+/**
+ * Plugin config: the form registry above. `formCollections` defaults to an
+ * empty object, which disables both the whitelist and the floor.
+ */
+export interface Config {
+  /** Collections the model may draft against, keyed by collection name. */
+  formCollections?: FormCollections
+}
+
+/** The whole machine-readable form registry a deployment configures. */
+export type FormCollections = Readonly<Record<string, FormCollectionSpec>>
+
+/** One registered collection: its card label and optional required floor. */
+export interface FormCollectionSpec {
+  /** The collection's business label (采购单), reserved for diagnostics. */
+  readonly label: string
+  /** Absent or empty means whitelisted only — no required-field floor. */
+  readonly requiredFields?: readonly RequiredFieldGroup[]
+}
+
+/** One required-field floor entry: any listed column name satisfies it. */
+export interface RequiredFieldGroup {
+  /** Synonym column names (`quantity`/`qty`, `product_name`/`product_id`). */
+  readonly names: readonly string[]
+  /** The business noun the error message shows (`数量`, `品名`). */
+  readonly label: string
+}
+```
+
+Source: [`packages/interaction/tool-present-card/src/form-contract.ts:40`](../packages/interaction/tool-present-card/src/form-contract.ts)
+
 <a id="deepseek-aidsh-tool-pwsh"></a>
 
 ## `@deepseek-ai/dsh-tool-pwsh`
@@ -4098,7 +4136,6 @@ export interface Config {
 - `@deepseek-ai/dsh-tool-ask-user` — 需要 `tools` · `userInteraction`（[`packages/interaction/tool-ask-user/src/index.ts`](../packages/interaction/tool-ask-user/src/index.ts)）
 - `@deepseek-ai/dsh-tool-call-timeout-policy` — 需要 `tools`（[`packages/guard/timeout-policy/src/index.ts`](../packages/guard/timeout-policy/src/index.ts)）
 - `@deepseek-ai/dsh-tool-cordis` — 需要 `tools` · `systemPrompt` · `dynamicCordisRunner` · `cordisInspect`（[`packages/extensions/tool-cordis/src/index.ts`](../packages/extensions/tool-cordis/src/index.ts)）
-- `@deepseek-ai/dsh-tool-present-card` — 需要 `tools`（[`packages/interaction/tool-present-card/src/index.ts`](../packages/interaction/tool-present-card/src/index.ts)）
 - `@deepseek-ai/dsh-tool-subagent-control` — 需要 `tools` · `subagents`（[`packages/subagent/tool-subagent-control/src/index.ts`](../packages/subagent/tool-subagent-control/src/index.ts)）
 - `@deepseek-ai/dsh-tool-view-actions` — 需要 `tools` · `viewActions` · `viewState`（[`packages/interaction/tool-view-actions/src/index.ts`](../packages/interaction/tool-view-actions/src/index.ts)）
 - `@deepseek-ai/dsh-user-questions`（[`packages/interaction/user-questions/src/index.ts`](../packages/interaction/user-questions/src/index.ts)）

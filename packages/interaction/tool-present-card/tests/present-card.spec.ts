@@ -6,7 +6,7 @@ import { CallId } from '@deepseek-ai/dsh-llm'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import ToolRuntime from '@deepseek-ai/dsh-tools'
 import * as toolPresentCard from '@deepseek-ai/dsh-tool-present-card'
-import { resolvePresentCardPayload } from '@deepseek-ai/dsh-tool-present-card'
+import { enforceFormContract, resolvePresentCardPayload, type FormCollections } from '@deepseek-ai/dsh-tool-present-card'
 
 const testToolSignal = new AbortController().signal
 const fixturesDir = fileURLToPath(new URL('./fixtures', import.meta.url))
@@ -50,6 +50,19 @@ async function setup() {
   return ctx
 }
 
+/**
+ * Mount the plugin with a `formCollections` config (the W22-R1 form-contract
+ * deployment shape) so execute-level assertions see the deterministic
+ * collection whitelist and required-field floor.
+ */
+async function setupWithFormCollections(formCollections: FormCollections) {
+  const ctx = new Context()
+  await ctx.plugin(SystemPrompt)
+  await ctx.plugin(ToolRuntime)
+  await ctx.plugin(toolPresentCard, { formCollections })
+  return ctx
+}
+
 let callSeq = 0
 
 async function present(ctx: Context, payload: unknown) {
@@ -85,6 +98,9 @@ const VALID_FIXTURES = [
   'report.empty-table-cell.valid',
   // W22-B2: the four draft widgets with select options in both tiers.
   'form-draft.widgets.valid',
+  // W22-R1: model-declared text widgets on quantity/price/amount names ride
+  // the deterministic server-side rewrite — the presented payload is legal.
+  'form-draft.widget-coercion.valid',
   // W21-R8: the lossless actions spellings — wrapper key, missing kind.
   'report.actions-wrapper-key.valid',
   'report.actions-missing-kind.valid',
@@ -571,6 +587,231 @@ describe('present_card tool', () => {
       },
     ])('$leaf', ({ run, violation }) => {
       expect(resolvePresentCardPayload(run())).toEqual({ violations: [violation] })
+    })
+  })
+
+  // W22-R1: the widget kind for quantity/price/amount and date field names is
+  // a server-side mechanical fact — the model's declared widget loses, and
+  // only the rewritten payload reaches the card (runA run2 shape: quantity
+  // text, runB run3 shape: qty labels with unit suffixes).
+  describe('deterministic widget rewrite (W22-R1)', () => {
+    it('rewrites model-declared text to number for quantity/unit_price/amount (runA run2 shape)', () => {
+      const resolved = resolvePresentCardPayload(fixture('form-draft.widget-coercion.valid'))
+      expect('payload' in resolved && resolved.payload.type === 'form_draft').toBe(true)
+      if (!('payload' in resolved) || resolved.payload.type !== 'form_draft') return
+      const widgets = Object.fromEntries(resolved.payload.fields.map(field => [field.name, field.widget]))
+      expect(widgets).toEqual({
+        supplier_id: 'relation',
+        product_name: 'text',
+        quantity: 'number',
+        unit_price: 'number',
+        amount: 'number',
+        need_date: 'date',
+        currency: 'text',
+        code: 'text',
+      })
+    })
+
+    it.each([
+      { name: 'quantity', expected: 'number' },
+      { name: 'qty', expected: 'number' },
+      { name: 'unit_price', expected: 'number' },
+      { name: 'price', expected: 'number' },
+      { name: 'amount', expected: 'number' },
+      { name: 'total_est', expected: 'number' },
+      { name: 'std_cost', expected: 'number' },
+      { name: 'estimated_cost', expected: 'number' },
+      { name: 'forecast_qty', expected: 'number' },
+      { name: 'lot_qty', expected: 'number' },
+      { name: 'sample_qty', expected: 'number' },
+      { name: 'qty_scrap', expected: 'number' },
+      { name: 'defect_minor', expected: 'number' },
+      { name: 'payment_amount', expected: 'number' },
+      { name: 'need_date', expected: 'date' },
+      { name: 'received_at', expected: 'date' },
+      { name: 'issue_date', expected: 'date' },
+      { name: 'inspected_at', expected: 'date' },
+      { name: 'released_at', expected: 'date' },
+      { name: 'expiry_date', expected: 'date' },
+      { name: 'receipt_no', expected: 'text' },
+      { name: 'currency', expected: 'text' },
+      { name: 'doc_status', expected: 'text' },
+      { name: 'sku', expected: 'text' },
+    ])('$name declared text resolves to $expected', ({ name, expected }) => {
+      const resolved = resolvePresentCardPayload({
+        v: 3,
+        type: 'form_draft',
+        draftId: 'd_variant',
+        revision: 1,
+        form: { collection: 't_any', label: '任意表' },
+        title: '变体表',
+        fields: [{ name, label: '占位', value: '1', tier: 'required', widget: 'text' }],
+      })
+      expect('payload' in resolved && resolved.payload.type === 'form_draft').toBe(true)
+      if (!('payload' in resolved) || resolved.payload.type !== 'form_draft') return
+      expect(resolved.payload.fields[0]?.widget).toBe(expected)
+    })
+
+    it('matches Chinese label fragments: 入库数量（箱）label forces number (runB run3 shape)', () => {
+      const resolved = resolvePresentCardPayload({
+        v: 3,
+        type: 'form_draft',
+        draftId: 'd_label',
+        revision: 1,
+        form: { collection: 'wms_receipts', label: '收货单' },
+        title: '收货单草稿',
+        fields: [{ name: 'qty_boxes', label: '入库数量（箱）', value: '100', tier: 'required', widget: 'text' }],
+      })
+      expect('payload' in resolved && resolved.payload.type === 'form_draft').toBe(true)
+      if (!('payload' in resolved) || resolved.payload.type !== 'form_draft') return
+      expect(resolved.payload.fields[0]?.widget).toBe('number')
+    })
+
+    it('forces select for a field carrying non-empty options even when declared text', () => {
+      const resolved = resolvePresentCardPayload(mutated('form-draft.widget-coercion.valid', (payload) => {
+        const field = recordAt(payload.fields, 6)
+        field.widget = 'text'
+        field.options = [{ label: '人民币', value: 'CNY' }]
+      }))
+      expect('payload' in resolved && resolved.payload.type === 'form_draft').toBe(true)
+      if (!('payload' in resolved) || resolved.payload.type !== 'form_draft') return
+      expect(resolved.payload.fields[6]?.widget).toBe('select')
+    })
+
+    it('rewrites the ask_field branch too: quantity declared text resolves to number', () => {
+      const resolved = resolvePresentCardPayload(mutated('ask-field.valid', (payload) => {
+        asRecord(payload.field).name = 'quantity'
+        asRecord(payload.field).widget = 'text'
+      }))
+      expect('payload' in resolved && resolved.payload.type === 'ask_field').toBe(true)
+      if (!('payload' in resolved) || resolved.payload.type !== 'ask_field') return
+      expect(resolved.payload.field.widget).toBe('number')
+    })
+
+    it('leaves every other payload branch untouched', () => {
+      const resolved = resolvePresentCardPayload(fixture('report.valid'))
+      expect(resolved).toEqual({ payload: fixture('report.valid') })
+    })
+  })
+
+  // W22-R1: the form contract — collection whitelist plus the per-collection
+  // required-field floor (fields must appear on the card; values may be
+  // prefilled) — is a server-side fail-closed step the model retried into.
+  describe('form contract enforcement (W22-R1)', () => {
+    const FORM_COLLECTIONS = {
+      pur_orders: {
+        label: '采购单',
+        requiredFields: [
+          { names: ['supplier_id', 'supplier'], label: '供应商' },
+          { names: ['product_name', 'product_id'], label: '品名' },
+          { names: ['quantity', 'qty'], label: '数量' },
+        ],
+      },
+      wms_receipts: {
+        label: '收货单',
+        requiredFields: [
+          { names: ['po_id', 'po_no'], label: '采购订单号' },
+          { names: ['qty', 'quantity'], label: '数量' },
+        ],
+      },
+      mfg_orders: { label: '生产订单' },
+    } as const
+
+    it('accepts a pur_orders draft carrying supplier, product name, and quantity', () => {
+      const resolved = resolvePresentCardPayload(fixture('form-draft.widget-coercion.valid'))
+      if (!('payload' in resolved)) throw new Error('fixture must resolve')
+      expect(enforceFormContract(resolved.payload, FORM_COLLECTIONS)).toEqual([])
+    })
+
+    it('rejects a pur_orders draft missing品名+数量 with one pathed error per field (runA run4 shape)', () => {
+      const resolved = resolvePresentCardPayload(fixture('form-draft.contract-missing-required'))
+      if (!('payload' in resolved)) throw new Error('fixture must resolve')
+      expect(enforceFormContract(resolved.payload, FORM_COLLECTIONS)).toEqual([
+        'payload.fields缺少必答字段 product_name/product_id（品名）——必答字段必须出现在卡片上，值可预填（value 可为 null 或预填值）',
+        'payload.fields缺少必答字段 quantity/qty（数量）——必答字段必须出现在卡片上，值可预填（value 可为 null 或预填值）',
+      ])
+    })
+
+    it('rejects an unregistered collection with the whitelist (runA run1 shape)', () => {
+      const resolved = resolvePresentCardPayload(fixture('form-draft.contract-unknown-collection'))
+      if (!('payload' in resolved)) throw new Error('fixture must resolve')
+      expect(enforceFormContract(resolved.payload, FORM_COLLECTIONS)).toEqual([
+        'payload.form.collection "hub_inv_products" 不在表单注册表内（合法集合：mfg_orders/pur_orders/wms_receipts）'
+          + '——禁止漂移到未注册表或自造集合，请改用注册表内的表单类型重新出卡',
+      ])
+    })
+
+    it('counts any synonym in a required group as present (qty satisfies 数量, product_id satisfies 品名)', () => {
+      const resolved = resolvePresentCardPayload({
+        v: 3,
+        type: 'form_draft',
+        draftId: 'd_syn',
+        revision: 1,
+        form: { collection: 'pur_orders', label: '采购单' },
+        title: '采购单草稿',
+        fields: [
+          { name: 'supplier_id', label: '供应商', value: '2', tier: 'required', widget: 'relation' },
+          { name: 'product_id', label: '品名', value: '46', tier: 'required', widget: 'relation' },
+          { name: 'qty', label: '数量', value: '200', tier: 'required', widget: 'number' },
+        ],
+      })
+      if (!('payload' in resolved)) throw new Error('payload must resolve')
+      expect(enforceFormContract(resolved.payload, FORM_COLLECTIONS)).toEqual([])
+    })
+
+    it('skips the required-field floor for a registered collection without requiredFields', () => {
+      const resolved = resolvePresentCardPayload({
+        v: 3,
+        type: 'form_draft',
+        draftId: 'd_mfg',
+        revision: 1,
+        form: { collection: 'mfg_orders', label: '生产订单' },
+        title: '生产订单草稿',
+        fields: [{ name: 'code', label: '单号', value: '', tier: 'system', widget: 'text' }],
+      })
+      if (!('payload' in resolved)) throw new Error('payload must resolve')
+      expect(enforceFormContract(resolved.payload, FORM_COLLECTIONS)).toEqual([])
+    })
+
+    it('returns no violations for non-form_draft payloads', () => {
+      const resolved = resolvePresentCardPayload(fixture('submit-receipt.valid'))
+      if (!('payload' in resolved)) throw new Error('fixture must resolve')
+      expect(enforceFormContract(resolved.payload, FORM_COLLECTIONS)).toEqual([])
+    })
+
+    it('enforces nothing when no formCollections are configured (generic deployments)', () => {
+      const resolved = resolvePresentCardPayload(fixture('form-draft.contract-unknown-collection'))
+      if (!('payload' in resolved)) throw new Error('fixture must resolve')
+      expect(enforceFormContract(resolved.payload, {})).toEqual([])
+    })
+
+    it('execute rejects the missing-required draft as INVALID_ARGS under the configured plugin', async () => {
+      const ctx = await setupWithFormCollections(FORM_COLLECTIONS)
+      const result = await present(ctx, fixture('form-draft.contract-missing-required'))
+      expect(result.isError).toBe(true)
+      expect(result.error).toMatchObject({ info: { code: 'INVALID_ARGS' } })
+      const text = result.content[0]?.type === 'text' ? result.content[0].text : ''
+      expect(text).toContain('payload.fields缺少必答字段 quantity/qty（数量）')
+      expect(result.concludesTurn).toBeUndefined()
+    })
+
+    it('execute rejects the unregistered collection as INVALID_ARGS under the configured plugin', async () => {
+      const ctx = await setupWithFormCollections(FORM_COLLECTIONS)
+      const result = await present(ctx, fixture('form-draft.contract-unknown-collection'))
+      expect(result.isError).toBe(true)
+      expect(result.error).toMatchObject({ info: { code: 'INVALID_ARGS' } })
+      const text = result.content[0]?.type === 'text' ? result.content[0].text : ''
+      expect(text).toContain('payload.form.collection "hub_inv_products" 不在表单注册表内')
+      expect(result.concludesTurn).toBeUndefined()
+    })
+
+    it('execute still presents the same drafts without the config (no false rejections)', async () => {
+      const ctx = await setup()
+      for (const name of ['form-draft.contract-missing-required', 'form-draft.contract-unknown-collection']) {
+        const result = await present(ctx, fixture(name))
+        expect(result.isError).toBe(false)
+        expect(result.value).toEqual({ presented: true })
+      }
     })
   })
 

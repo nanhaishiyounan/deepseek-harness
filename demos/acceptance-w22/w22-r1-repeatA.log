@@ -1,0 +1,1034 @@
+[run 1] form_draft (24s, 1轮): 供应商(supplier_id)=relation 品名(product_name)=text 数量(quantity)=number 单价(unit_price)=number 合计金额(amount)=number 币种(currency)=text 需求日期(need_date)=date 备注(remark)=text 单据状态(doc_status)=text 收货状态(receiving_status)=text 发票状态(invoice_status)=text 单号(code)=text
+[run 2] form_draft (30s, 1轮): 供应商(supplier_id)=relation 品名(product_name)=text 数量(quantity)=number 单价(unit_price)=number 合计金额(amount)=number 需求日期(need_date)=date 币种(currency)=text 单号(code)=text 状态(doc_status)=text 收货进度(receiving_status)=text 发票进度(invoice_status)=text
+[run 3] form_draft (33s, 1轮): 供应商(supplier)=relation 品名(product_name)=text 数量(qty)=number 单价(unit_price)=number 合计金额(amount)=number 币种(currency)=text 需求日期(need_date)=date 备注(compare_note)=text 单号(code)=text 审批状态(doc_status)=text 收货进度(receiving_status)=text 发票进度(invoice_status)=text
+[run 4] form_draft (33s, 1轮): 供应商(supplier)=relation 品名(product_name)=text 数量(quantity)=number 单价(unit_price)=number 需求日期(need_date)=date 备注(compare_note)=text 合计金额(amount)=number 币种(currency)=text 单据状态(doc_status)=text 收货状态(receiving_status)=text 发票状态(invoice_status)=text 单号(code)=text
+[run 5] form_draft (27s, 1轮): 供应商(supplier_id)=relation 品名(product_name)=text 数量(quantity)=number 单价(unit_price)=number 需求日期(need_date)=date 合计金额(amount)=number 币种(currency)=text 单据状态(doc_status)=text 收货状态(receiving_status)=text 发票状态(invoice_status)=text 单号(code)=text
+[run 6] form_draft (21s, 1轮): 供应商(supplier_id)=relation 品名(product_name)=relation 数量(quantity)=number 单价(unit_price)=number 需求日期(need_date)=date 合计金额(amount)=number 币种(currency)=text 单据状态(doc_status)=text 收货进度(receiving_status)=text 发票进度(invoice_status)=text 单号(code)=text 备注(remark)=text
+[run 7] form_draft (30s, 1轮): 供应商(supplier_id)=relation 物料(product_id)=relation 数量(quantity)=number 单价(unit_price)=number 需求日期(need_date)=date 合计金额(amount)=number 币种(currency)=text 备注(compare_note)=text 审批状态(doc_status)=text 收货状态(receiving_status)=text 发票状态(invoice_status)=text 单号(code)=text
+[run 8] form_draft (31s, 1轮): 供应商(supplier_id)=relation 采购品名(product_id)=relation 数量(qty)=number 单价(unit_price)=number 需求日期(need_date)=date 合计金额(amount)=number 币种(currency)=text 单据状态(doc_status)=text 收货状态(receiving_status)=text 发票状态(invoice_status)=text 单号(code)=text
+[run 9] form_draft (51s, 1轮): 供应商(supplier_id)=relation 品名（明细）(product_id)=text 数量(quantity)=number 单价(unit_price)=number 合计金额(amount)=number 币种(currency)=text 需求日期(need_date)=date 单号(code)=text 单据状态(doc_status)=text 收货状态(receiving_status)=text 发票状态(invoice_status)=text
+[run 10] form_draft (30s, 1轮): 供应商(supplier_id)=relation 需求日期(need_date)=date 品名(product_id)=relation 数量(quantity)=number 单价(unit_price)=number 合计金额(amount)=number 币种(currency)=text 单据状态(doc_status)=text 收货状态(receiving_status)=text 发票状态(invoice_status)=text 单号(code)=text
+=== PER-RUN MATRIX ===
+run 1 [pur_orders]: supplier=relation✓ date=date✓ qty=number✓ price=number✓ remark=text✓
+run 2 [pur_orders]: supplier=relation✓ date=date✓ qty=number✓ price=number✓ remark=absent
+run 3 [pur_orders]: supplier=relation✓ date=date✓ qty=number✓ price=number✓ remark=text✓
+run 4 [pur_orders]: supplier=relation✓ date=date✓ qty=number✓ price=number✓ remark=text✓
+run 5 [pur_orders]: supplier=relation✓ date=date✓ qty=number✓ price=number✓ remark=absent
+run 6 [pur_orders]: supplier=relation✓ date=date✓ qty=number✓ price=number✓ remark=text✓
+run 7 [pur_orders]: supplier=relation✓ date=date✓ qty=number✓ price=number✓ remark=text✓
+run 8 [pur_orders]: supplier=relation✓ date=date✓ qty=number✓ price=number✓ remark=absent
+run 9 [pur_orders]: supplier=relation✓ date=date✓ qty=number✓ price=number✓ remark=absent
+run 10 [pur_orders]: supplier=relation✓ date=date✓ qty=number✓ price=number✓ remark=absent
+=== RAW JSON ===
+[
+ {
+  "run": 1,
+  "outcome": "form_draft",
+  "rounds": 1,
+  "secs": 24,
+  "collection": "pur_orders",
+  "fields": [
+   {
+    "name": "supplier_id",
+    "label": "供应商",
+    "widget": "relation",
+    "value": "山东鲁丰食品配料有限公司（SUP-002·优选）",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "product_name",
+    "label": "品名",
+    "widget": "text",
+    "value": "食品级柠檬酸",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "quantity",
+    "label": "数量",
+    "widget": "number",
+    "value": "200",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "unit_price",
+    "label": "单价",
+    "widget": "number",
+    "value": "25",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "amount",
+    "label": "合计金额",
+    "widget": "number",
+    "value": "5000",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "currency",
+    "label": "币种",
+    "widget": "text",
+    "value": "CNY",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "need_date",
+    "label": "需求日期",
+    "widget": "date",
+    "value": "2026-10-15",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "remark",
+    "label": "备注",
+    "widget": "text",
+    "value": "常规订单",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "doc_status",
+    "label": "单据状态",
+    "widget": "text",
+    "value": "draft",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "receiving_status",
+    "label": "收货状态",
+    "widget": "text",
+    "value": "none",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "invoice_status",
+    "label": "发票状态",
+    "widget": "text",
+    "value": "no_invoice",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "code",
+    "label": "单号",
+    "widget": "text",
+    "value": "",
+    "tier": "system",
+    "options": 0
+   }
+  ]
+ },
+ {
+  "run": 2,
+  "outcome": "form_draft",
+  "rounds": 1,
+  "secs": 30,
+  "collection": "pur_orders",
+  "fields": [
+   {
+    "name": "supplier_id",
+    "label": "供应商",
+    "widget": "relation",
+    "value": "2",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "product_name",
+    "label": "品名",
+    "widget": "text",
+    "value": "一水柠檬酸",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "quantity",
+    "label": "数量",
+    "widget": "number",
+    "value": "200",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "unit_price",
+    "label": "单价",
+    "widget": "number",
+    "value": "25",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "amount",
+    "label": "合计金额",
+    "widget": "number",
+    "value": "5000",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "need_date",
+    "label": "需求日期",
+    "widget": "date",
+    "value": "2026-10-15",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "currency",
+    "label": "币种",
+    "widget": "text",
+    "value": "CNY",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "code",
+    "label": "单号",
+    "widget": "text",
+    "value": "",
+    "tier": "system",
+    "options": 0
+   },
+   {
+    "name": "doc_status",
+    "label": "状态",
+    "widget": "text",
+    "value": "draft",
+    "tier": "system",
+    "options": 0
+   },
+   {
+    "name": "receiving_status",
+    "label": "收货进度",
+    "widget": "text",
+    "value": "none",
+    "tier": "system",
+    "options": 0
+   },
+   {
+    "name": "invoice_status",
+    "label": "发票进度",
+    "widget": "text",
+    "value": "no_invoice",
+    "tier": "system",
+    "options": 0
+   }
+  ]
+ },
+ {
+  "run": 3,
+  "outcome": "form_draft",
+  "rounds": 1,
+  "secs": 33,
+  "collection": "pur_orders",
+  "fields": [
+   {
+    "name": "supplier",
+    "label": "供应商",
+    "widget": "relation",
+    "value": "2",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "product_name",
+    "label": "品名",
+    "widget": "text",
+    "value": "食品级柠檬酸 → 一水柠檬酸（id=46）",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "qty",
+    "label": "数量",
+    "widget": "number",
+    "value": "200",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "unit_price",
+    "label": "单价",
+    "widget": "number",
+    "value": "25",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "amount",
+    "label": "合计金额",
+    "widget": "number",
+    "value": "5000",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "currency",
+    "label": "币种",
+    "widget": "text",
+    "value": "CNY",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "need_date",
+    "label": "需求日期",
+    "widget": "date",
+    "value": "2026-10-15",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "compare_note",
+    "label": "备注",
+    "widget": "text",
+    "value": "常规订单",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "code",
+    "label": "单号",
+    "widget": "text",
+    "value": "",
+    "tier": "system",
+    "options": 0
+   },
+   {
+    "name": "doc_status",
+    "label": "审批状态",
+    "widget": "text",
+    "value": "draft",
+    "tier": "system",
+    "options": 0
+   },
+   {
+    "name": "receiving_status",
+    "label": "收货进度",
+    "widget": "text",
+    "value": "none",
+    "tier": "system",
+    "options": 0
+   },
+   {
+    "name": "invoice_status",
+    "label": "发票进度",
+    "widget": "text",
+    "value": "no_invoice",
+    "tier": "system",
+    "options": 0
+   }
+  ]
+ },
+ {
+  "run": 4,
+  "outcome": "form_draft",
+  "rounds": 1,
+  "secs": 33,
+  "collection": "pur_orders",
+  "fields": [
+   {
+    "name": "supplier",
+    "label": "供应商",
+    "widget": "relation",
+    "value": "2",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "product_name",
+    "label": "品名",
+    "widget": "text",
+    "value": "一水柠檬酸",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "quantity",
+    "label": "数量",
+    "widget": "number",
+    "value": "200",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "unit_price",
+    "label": "单价",
+    "widget": "number",
+    "value": "25",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "need_date",
+    "label": "需求日期",
+    "widget": "date",
+    "value": "2026-10-15",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "compare_note",
+    "label": "备注",
+    "widget": "text",
+    "value": "常规订单",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "amount",
+    "label": "合计金额",
+    "widget": "number",
+    "value": "5000",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "currency",
+    "label": "币种",
+    "widget": "text",
+    "value": "CNY",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "doc_status",
+    "label": "单据状态",
+    "widget": "text",
+    "value": "draft",
+    "tier": "system",
+    "options": 0
+   },
+   {
+    "name": "receiving_status",
+    "label": "收货状态",
+    "widget": "text",
+    "value": "none",
+    "tier": "system",
+    "options": 0
+   },
+   {
+    "name": "invoice_status",
+    "label": "发票状态",
+    "widget": "text",
+    "value": "no_invoice",
+    "tier": "system",
+    "options": 0
+   },
+   {
+    "name": "code",
+    "label": "单号",
+    "widget": "text",
+    "value": "",
+    "tier": "system",
+    "options": 0
+   }
+  ]
+ },
+ {
+  "run": 5,
+  "outcome": "form_draft",
+  "rounds": 1,
+  "secs": 27,
+  "collection": "pur_orders",
+  "fields": [
+   {
+    "name": "supplier_id",
+    "label": "供应商",
+    "widget": "relation",
+    "value": "2",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "product_name",
+    "label": "品名",
+    "widget": "text",
+    "value": "食品级柠檬酸",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "quantity",
+    "label": "数量",
+    "widget": "number",
+    "value": "200",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "unit_price",
+    "label": "单价",
+    "widget": "number",
+    "value": "25",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "need_date",
+    "label": "需求日期",
+    "widget": "date",
+    "value": "2026-10-15",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "amount",
+    "label": "合计金额",
+    "widget": "number",
+    "value": "5000",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "currency",
+    "label": "币种",
+    "widget": "text",
+    "value": "CNY",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "doc_status",
+    "label": "单据状态",
+    "widget": "text",
+    "value": "draft",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "receiving_status",
+    "label": "收货状态",
+    "widget": "text",
+    "value": "none",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "invoice_status",
+    "label": "发票状态",
+    "widget": "text",
+    "value": "no_invoice",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "code",
+    "label": "单号",
+    "widget": "text",
+    "value": "",
+    "tier": "system",
+    "options": 0
+   }
+  ]
+ },
+ {
+  "run": 6,
+  "outcome": "form_draft",
+  "rounds": 1,
+  "secs": 21,
+  "collection": "pur_orders",
+  "fields": [
+   {
+    "name": "supplier_id",
+    "label": "供应商",
+    "widget": "relation",
+    "value": "2",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "product_name",
+    "label": "品名",
+    "widget": "relation",
+    "value": "一水柠檬酸",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "quantity",
+    "label": "数量",
+    "widget": "number",
+    "value": "200",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "unit_price",
+    "label": "单价",
+    "widget": "number",
+    "value": "25",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "need_date",
+    "label": "需求日期",
+    "widget": "date",
+    "value": "2026-10-15",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "amount",
+    "label": "合计金额",
+    "widget": "number",
+    "value": "5000",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "currency",
+    "label": "币种",
+    "widget": "text",
+    "value": "CNY",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "doc_status",
+    "label": "单据状态",
+    "widget": "text",
+    "value": "draft",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "receiving_status",
+    "label": "收货进度",
+    "widget": "text",
+    "value": "none",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "invoice_status",
+    "label": "发票进度",
+    "widget": "text",
+    "value": "no_invoice",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "code",
+    "label": "单号",
+    "widget": "text",
+    "value": "",
+    "tier": "system",
+    "options": 0
+   },
+   {
+    "name": "remark",
+    "label": "备注",
+    "widget": "text",
+    "value": "常规订单",
+    "tier": "required",
+    "options": 0
+   }
+  ]
+ },
+ {
+  "run": 7,
+  "outcome": "form_draft",
+  "rounds": 1,
+  "secs": 30,
+  "collection": "pur_orders",
+  "fields": [
+   {
+    "name": "supplier_id",
+    "label": "供应商",
+    "widget": "relation",
+    "value": "2",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "product_id",
+    "label": "物料",
+    "widget": "relation",
+    "value": "46",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "quantity",
+    "label": "数量",
+    "widget": "number",
+    "value": "200",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "unit_price",
+    "label": "单价",
+    "widget": "number",
+    "value": "25",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "need_date",
+    "label": "需求日期",
+    "widget": "date",
+    "value": "2026-10-15",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "amount",
+    "label": "合计金额",
+    "widget": "number",
+    "value": "5000",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "currency",
+    "label": "币种",
+    "widget": "text",
+    "value": "CNY",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "compare_note",
+    "label": "备注",
+    "widget": "text",
+    "value": "常规订单",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "doc_status",
+    "label": "审批状态",
+    "widget": "text",
+    "value": "draft",
+    "tier": "system",
+    "options": 0
+   },
+   {
+    "name": "receiving_status",
+    "label": "收货状态",
+    "widget": "text",
+    "value": "none",
+    "tier": "system",
+    "options": 0
+   },
+   {
+    "name": "invoice_status",
+    "label": "发票状态",
+    "widget": "text",
+    "value": "no_invoice",
+    "tier": "system",
+    "options": 0
+   },
+   {
+    "name": "code",
+    "label": "单号",
+    "widget": "text",
+    "value": "",
+    "tier": "system",
+    "options": 0
+   }
+  ]
+ },
+ {
+  "run": 8,
+  "outcome": "form_draft",
+  "rounds": 1,
+  "secs": 31,
+  "collection": "pur_orders",
+  "fields": [
+   {
+    "name": "supplier_id",
+    "label": "供应商",
+    "widget": "relation",
+    "value": "2",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "product_id",
+    "label": "采购品名",
+    "widget": "relation",
+    "value": "46",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "qty",
+    "label": "数量",
+    "widget": "number",
+    "value": "200",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "unit_price",
+    "label": "单价",
+    "widget": "number",
+    "value": "25",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "need_date",
+    "label": "需求日期",
+    "widget": "date",
+    "value": "2026-10-15",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "amount",
+    "label": "合计金额",
+    "widget": "number",
+    "value": "5000",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "currency",
+    "label": "币种",
+    "widget": "text",
+    "value": "CNY",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "doc_status",
+    "label": "单据状态",
+    "widget": "text",
+    "value": "draft",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "receiving_status",
+    "label": "收货状态",
+    "widget": "text",
+    "value": "none",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "invoice_status",
+    "label": "发票状态",
+    "widget": "text",
+    "value": "no_invoice",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "code",
+    "label": "单号",
+    "widget": "text",
+    "value": "",
+    "tier": "system",
+    "options": 0
+   }
+  ]
+ },
+ {
+  "run": 9,
+  "outcome": "form_draft",
+  "rounds": 1,
+  "secs": 51,
+  "collection": "pur_orders",
+  "fields": [
+   {
+    "name": "supplier_id",
+    "label": "供应商",
+    "widget": "relation",
+    "value": "2",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "product_id",
+    "label": "品名（明细）",
+    "widget": "text",
+    "value": "一水柠檬酸",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "quantity",
+    "label": "数量",
+    "widget": "number",
+    "value": "200",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "unit_price",
+    "label": "单价",
+    "widget": "number",
+    "value": "25",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "amount",
+    "label": "合计金额",
+    "widget": "number",
+    "value": "5000",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "currency",
+    "label": "币种",
+    "widget": "text",
+    "value": "CNY",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "need_date",
+    "label": "需求日期",
+    "widget": "date",
+    "value": "2026-10-15",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "code",
+    "label": "单号",
+    "widget": "text",
+    "value": "",
+    "tier": "system",
+    "options": 0
+   },
+   {
+    "name": "doc_status",
+    "label": "单据状态",
+    "widget": "text",
+    "value": "draft",
+    "tier": "system",
+    "options": 0
+   },
+   {
+    "name": "receiving_status",
+    "label": "收货状态",
+    "widget": "text",
+    "value": "none",
+    "tier": "system",
+    "options": 0
+   },
+   {
+    "name": "invoice_status",
+    "label": "发票状态",
+    "widget": "text",
+    "value": "no_invoice",
+    "tier": "system",
+    "options": 0
+   }
+  ]
+ },
+ {
+  "run": 10,
+  "outcome": "form_draft",
+  "rounds": 1,
+  "secs": 30,
+  "collection": "pur_orders",
+  "fields": [
+   {
+    "name": "supplier_id",
+    "label": "供应商",
+    "widget": "relation",
+    "value": "2",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "need_date",
+    "label": "需求日期",
+    "widget": "date",
+    "value": "2026-10-15",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "product_id",
+    "label": "品名",
+    "widget": "relation",
+    "value": "46",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "quantity",
+    "label": "数量",
+    "widget": "number",
+    "value": "200",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "unit_price",
+    "label": "单价",
+    "widget": "number",
+    "value": "25",
+    "tier": "required",
+    "options": 0
+   },
+   {
+    "name": "amount",
+    "label": "合计金额",
+    "widget": "number",
+    "value": "5000",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "currency",
+    "label": "币种",
+    "widget": "text",
+    "value": "CNY",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "doc_status",
+    "label": "单据状态",
+    "widget": "text",
+    "value": "draft",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "receiving_status",
+    "label": "收货状态",
+    "widget": "text",
+    "value": "none",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "invoice_status",
+    "label": "发票状态",
+    "widget": "text",
+    "value": "no_invoice",
+    "tier": "derived",
+    "options": 0
+   },
+   {
+    "name": "code",
+    "label": "单号",
+    "widget": "text",
+    "value": "",
+    "tier": "system",
+    "options": 0
+   }
+  ]
+ }
+]

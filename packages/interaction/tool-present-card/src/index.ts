@@ -50,6 +50,18 @@
  * object lifts to the one-element array, and a discriminant failure reports
  * the concrete JSON skeletons of the four branches so one retry hits.
  *
+ * W22-R1 determinism contract, two server-side mechanisms the model no
+ * longer decides: (1) the widget kind on `form_draft` fields and the
+ * `ask_field` field is rewritten by the field-name/label resolver
+ * (quantity/price/amount families → number, date families → date, non-empty
+ * options → select) — the model's declared widget loses only where the
+ * classification is mechanical, and the rewritten payload keeps riding the
+ * full validation; (2) the optional `formCollections` config pins the
+ * collection whitelist and per-collection required-field floor for
+ * `form_draft` (fields must appear on the card; values may stay prefilled),
+ * failing closed with pathed Chinese errors the model corrects in one
+ * retry. An unconfigured deployment keeps the contract-free behavior.
+ *
  * @module @deepseek-ai/dsh-tool-present-card
  */
 
@@ -67,6 +79,13 @@ import {
   type StringValueSchemaSpec,
   type ValueSchemaSpec,
 } from '@deepseek-ai/dsh-tools'
+import { enforceFormContract, type Config } from './form-contract.ts'
+import { applyDeterministicWidgets } from './widget.ts'
+
+export { enforceFormContract } from './form-contract.ts'
+export type { Config, FormCollectionSpec, FormCollections, RequiredFieldGroup } from './form-contract.ts'
+export { applyDeterministicWidgets, inferWidgetKind } from './widget.ts'
+export type { WidgetKind } from './widget.ts'
 
 export const name = 'tool-present-card'
 export const inject = ['tools']
@@ -831,7 +850,11 @@ export function resolvePresentCardPayload(raw: unknown): ResolvePresentCardPaylo
   const walked = walkSchema(branchOfType(typeValue as PayloadType), obj, 'payload')
   violations.push(...walked.violations)
   if (violations.length > 0) return { violations }
-  return { payload: walked.value as PresentCardPayload }
+  // W22-R1: the widget-bearing branches ride the deterministic resolver —
+  // a validated payload leaves with its mechanically decidable widgets
+  // corrected, so the model's widget choice never reaches the card where a
+  // field name decides.
+  return { payload: applyDeterministicWidgets(walked.value as PresentCardPayload) }
 }
 
 /** The fixed receipt text the successful result renders (model- and user-visible). */
@@ -950,7 +973,7 @@ function collectBoundViolations(payload: PresentCardPayload): string[] {
   return violations
 }
 
-export function apply(ctx: Context): void {
+export function apply(ctx: Context, config: Config = {}): void {
   ctx.tools.register(defineTool({
     name: 'present_card',
     description,
@@ -968,7 +991,12 @@ export function apply(ctx: Context): void {
     execute(args, exec) {
       const resolved = resolvePresentCardPayload(args.payload)
       if ('violations' in resolved) throw new ToolArgsError([...resolved.violations])
-      const violations = collectBoundViolations(resolved.payload)
+      const violations = [
+        ...collectBoundViolations(resolved.payload),
+        // W22-R1: the configured form contract (collection whitelist plus
+        // the required-field floor) fails closed with its own pathed errors.
+        ...enforceFormContract(resolved.payload, config.formCollections ?? {}),
+      ]
       if (violations.length > 0) throw new ToolArgsError(violations)
       exec.concludeTurn()
       return Promise.resolve({ presented: true })

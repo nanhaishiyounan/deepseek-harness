@@ -285,8 +285,56 @@
     # validation and concludeTurn instead of a probabilistic ```dsh fence.
     # User-action fences (form_confirm / reject_flow / approval_confirm /
     # plan_confirm) stay client-authored and need no tool row here.
+    # W22-R1: the formCollections keys mirror the persona's 17-table form
+    # registry (agent-presets/mobile-form-assistant — keep both in lockstep
+    # when a table is added): an unlisted collection rejects the whole draft
+    # card, and the five high-traffic tables carry their required-field floor
+    # (the field must appear on the card; the value may stay prefilled/null).
     - id: tool-present-card
       name: '@deepseek-ai/dsh-tool-present-card'
+      config:
+        formCollections:
+          pur_orders:
+            label: 采购单
+            requiredFields:
+              - { names: [supplier_id, supplier], label: 供应商 }
+              - { names: [product_name, product_id], label: 品名 }
+              - { names: [quantity, qty], label: 数量 }
+          srm_suppliers:
+            label: 供应商登记
+            requiredFields:
+              - { names: [name, supplier_name], label: 供应商名称 }
+              - { names: [contact, contact_name], label: 联系人 }
+          qm_inspections:
+            label: 质检登记
+            requiredFields:
+              - { names: [ref_no], label: 收货单号 }
+              - { names: [lot_qty], label: 批量 }
+              - { names: [sample_qty], label: 抽检数 }
+              - { names: [defect_minor, defect_major, defect_critical], label: 不合格数 }
+          wms_receipts:
+            label: 收货单
+            requiredFields:
+              - { names: [po_id, po_no], label: 采购订单号 }
+              - { names: [qty, quantity], label: 数量 }
+          hub_wms_inbound:
+            label: 入库单
+            requiredFields:
+              - { names: [source_no, ref_no, po_id], label: 来源单据 }
+              - { names: [product_name, product_id, product], label: 品名 }
+              - { names: [quantity, qty], label: 数量 }
+          pur_requests: { label: 请购单 }
+          hub_wms_outbound: { label: 出库单 }
+          hub_fin_payments: { label: 回款记录 }
+          wms_transfers: { label: 移库申请 }
+          wms_reservations: { label: 预留登记 }
+          mfg_boms: { label: BOM 登记 }
+          mfg_orders: { label: 生产订单 }
+          mfg_material_issues: { label: 领料登记 }
+          mfg_job_reports: { label: 报工登记 }
+          mfg_completions: { label: 完工登记 }
+          so_orders: { label: 销售订单 }
+          mps_plan_items: { label: 预测登记 }
 
     # Tab-aware workbench context (J3): the gateway's session.viewStateReport
     # RPC writes this plugin's per-session view cache, and its pre-step hook

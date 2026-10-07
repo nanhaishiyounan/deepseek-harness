@@ -1,0 +1,18 @@
+{
+  "v": 3,
+  "type": "form_draft",
+  "draftId": "d_w22r1_1",
+  "revision": 1,
+  "form": { "collection": "pur_orders", "label": "采购单" },
+  "title": "采购单草稿",
+  "fields": [
+    { "name": "supplier_id", "label": "供应商", "value": "2", "tier": "required", "widget": "relation" },
+    { "name": "product_name", "label": "品名", "value": "食品级柠檬酸", "tier": "required", "widget": "text" },
+    { "name": "quantity", "label": "数量", "value": "200", "tier": "required", "widget": "text" },
+    { "name": "unit_price", "label": "单价", "value": "25", "tier": "derived", "widget": "text" },
+    { "name": "amount", "label": "合计金额", "value": "5000", "tier": "derived", "widget": "text" },
+    { "name": "need_date", "label": "需求日期", "value": "2026-10-15", "tier": "required", "widget": "date" },
+    { "name": "currency", "label": "币种", "value": "CNY", "tier": "derived", "widget": "text" },
+    { "name": "code", "label": "单号", "value": "", "tier": "system", "widget": "text" }
+  ]
+}

@@ -5,7 +5,11 @@
  * surfaces spell and read dates identically.
  */
 
-/** Parse a draft's date string (YYYY-MM-DD or epoch) into a Date, or null. */
+/**
+ * Parse a draft's date string into the DatePicker's Date.
+ * @param value - the wire's date text (YYYY-MM-DD) or an epoch-millis string.
+ * @returns the parsed Date, or null for an empty or unparsable value.
+ */
 export function parseDateText(value: string): Date | null {
   if (value === '') return null
   const epoch = Number(value)
@@ -17,7 +21,11 @@ export function parseDateText(value: string): Date | null {
   return Number.isNaN(parsed.getTime()) ? null : parsed
 }
 
-/** Format a Date back to the draft's YYYY-MM-DD string. */
+/**
+ * Format a picked Date back to the wire's date text.
+ * @param date - the DatePicker's picked Date (local calendar fields).
+ * @returns the YYYY-MM-DD string for the draft payload.
+ */
 export function formatDateText(date: Date): string {
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
