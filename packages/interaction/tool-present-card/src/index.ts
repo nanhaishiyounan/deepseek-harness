@@ -41,6 +41,15 @@
  * (omitted, mirroring the client parser); optional enum leaves keep
  * rejecting null.
  *
+ * W21-R8 actions leniency contract, both mirrors in lockstep: a report
+ * action element that arrives as a single-key wrapper
+ * (`{"view":{"label":…,"route":…}}` — the compact union notation reads that
+ * way) is flattened, a missing `kind` discriminant is filled when exactly
+ * one branch's other required fields are all present (`{label,route}` →
+ * view; an explicit illegal `kind` is never overridden), a lone actions
+ * object lifts to the one-element array, and a discriminant failure reports
+ * the concrete JSON skeletons of the four branches so one retry hits.
+ *
  * @module @deepseek-ai/dsh-tool-present-card
  */
 
@@ -523,20 +532,48 @@ function checkScalarLiteral(
   return { value, violations: [] }
 }
 
+/** One object branch's const discriminant: its field name and const value. */
+interface ConstDiscriminant {
+  readonly field: string
+  readonly value: unknown
+}
+
+/** The first const scalar property an object branch discriminates on. */
+function constDiscriminantOf(branch: ValueSchemaSpec): ConstDiscriminant | undefined {
+  if ('oneOf' in branch || branch.type !== 'object') return undefined
+  for (const [key, prop] of Object.entries(branch.properties ?? {})) {
+    const constValue = (prop as { const?: unknown }).const
+    if (constValue !== undefined) return { field: key, value: constValue }
+  }
+  return undefined
+}
+
 /** The first const scalar each object branch discriminates on, for diagnostics. */
 function discriminantValues(branches: readonly ValueSchemaSpec[]): string[] {
   const values: string[] = []
   for (const branch of branches) {
-    if ('oneOf' in branch || branch.type !== 'object') continue
-    for (const prop of Object.values(branch.properties ?? {})) {
-      const constValue = (prop as { const?: unknown }).const
-      if (constValue !== undefined) {
-        values.push(JSON.stringify(constValue))
-        break
-      }
-    }
+    const discriminant = constDiscriminantOf(branch)
+    if (discriminant !== undefined) values.push(JSON.stringify(discriminant.value))
   }
   return values
+}
+
+/**
+ * A concrete JSON skeleton of one object branch — the const discriminant
+ * plus every required field with a `"…"` placeholder — so a discriminant
+ * failure shows the shape to copy instead of only the legal values.
+ */
+function branchSkeleton(branch: ValueSchemaSpec): string | undefined {
+  if ('oneOf' in branch || branch.type !== 'object') return undefined
+  const parts: string[] = []
+  for (const [key, prop] of Object.entries(branch.properties ?? {})) {
+    if ((prop as { required?: true }).required !== true) continue
+    const constValue = (prop as { const?: unknown }).const
+    parts.push(constValue !== undefined
+      ? `${JSON.stringify(key)}:${JSON.stringify(constValue)}`
+      : `${JSON.stringify(key)}:"…"`)
+  }
+  return `{${parts.join(',')}}`
 }
 
 /** Select the object branch whose const discriminator matches the value's field. */
@@ -544,13 +581,70 @@ function selectByConstDiscriminant(branches: readonly ValueSchemaSpec[], value: 
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return undefined
   const record = value as Record<string, unknown>
   for (const branch of branches) {
+    // The inline object check narrows branch to ObjectValueSchemaSpec; the
+    // helper's return carries no narrowing.
     if ('oneOf' in branch || branch.type !== 'object') continue
-    for (const [key, prop] of Object.entries(branch.properties ?? {})) {
-      const constValue = (prop as { const?: unknown }).const
-      if (constValue !== undefined && record[key] === constValue) return branch
+    const discriminant = constDiscriminantOf(branch)
+    if (discriminant !== undefined && record[discriminant.field] === discriminant.value) return branch
+  }
+  return undefined
+}
+
+/**
+ * Flatten the wrapper-key spelling of a discriminated member (W21-R8): a
+ * single-key object whose key is a branch's const value wrapping that
+ * branch's own fields (`{"view":{"label":…,"route":…}}`) merges to the flat
+ * shape. The wrapper key wins over an inner discriminant of the same field.
+ * @returns the flattened candidate, or undefined when the value is not that
+ * spelling.
+ */
+function unwrapSingleKeyDiscriminant(branches: readonly ValueSchemaSpec[], value: unknown): unknown | undefined {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return undefined
+  const record = value as Record<string, unknown>
+  const keys = Object.keys(record)
+  if (keys.length !== 1) return undefined
+  const [key] = keys
+  if (key === undefined) return undefined
+  const inner = record[key]
+  if (typeof inner !== 'object' || inner === null || Array.isArray(inner)) return undefined
+  for (const branch of branches) {
+    const discriminant = constDiscriminantOf(branch)
+    if (discriminant !== undefined && discriminant.value === key) {
+      return { ...(inner as Record<string, unknown>), [discriminant.field]: discriminant.value }
     }
   }
   return undefined
+}
+
+/**
+ * Fill a missing discriminant from a unique required-field signature
+ * (W21-R8): when no branch's discriminant field is present and exactly one
+ * branch's other required fields are all present, that branch is the only
+ * reading (`{label,route}` → view). An explicit-but-illegal discriminant
+ * stays a violation — inference never overrides a stated value.
+ * @returns the candidate with the discriminant filled, or undefined when
+ * zero or several branches match.
+ */
+function inferMissingDiscriminant(branches: readonly ValueSchemaSpec[], value: unknown): unknown | undefined {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return undefined
+  const record = value as Record<string, unknown>
+  const discriminants: { branch: ObjectValueSchemaSpec; discriminant: ConstDiscriminant }[] = []
+  for (const branch of branches) {
+    if ('oneOf' in branch || branch.type !== 'object') continue
+    const discriminant = constDiscriminantOf(branch)
+    if (discriminant === undefined) continue
+    if (Object.hasOwn(record, discriminant.field)) return undefined
+    discriminants.push({ branch, discriminant })
+  }
+  const candidates = discriminants.filter(({ branch, discriminant }) =>
+    Object.entries(branch.properties ?? {}).every(([key, prop]) =>
+      key === discriminant.field
+      || (prop as { required?: true }).required !== true
+      || Object.hasOwn(record, key)))
+  if (candidates.length !== 1) return undefined
+  const [candidate] = candidates
+  if (candidate === undefined) return undefined
+  return { ...record, [candidate.discriminant.field]: candidate.discriminant.value }
 }
 
 /**
@@ -599,11 +693,22 @@ function walkSchema(spec: PayloadSchemaSpec, value: unknown, path: string): Walk
       return { value, violations: [`${path} 应为${expected}（收到${showValue(value)}）`] }
     }
     const branch = selectByConstDiscriminant(branches, value)
-    if (branch === undefined) {
-      const kinds = discriminantValues(branches).join('/')
-      return { value, violations: [`${path} 应为 ${kinds} 之一（判别字段缺失或无法识别，收到${showValue(value)}）`] }
+    if (branch !== undefined) return walkSchema(branch, value, path)
+    // W21-R8 leniency: the two lossless action spellings — the wrapper key
+    // and the missing discriminant with a unique required-field signature —
+    // flatten/fill here and re-select; anything else reports the concrete
+    // skeletons so one retry hits.
+    const coerced = unwrapSingleKeyDiscriminant(branches, value) ?? inferMissingDiscriminant(branches, value)
+    if (coerced !== undefined) {
+      const selected = selectByConstDiscriminant(branches, coerced)
+      if (selected !== undefined) return walkSchema(selected, coerced, path)
     }
-    return walkSchema(branch, value, path)
+    const kinds = discriminantValues(branches).join('/')
+    const skeletons = branches
+      .map(branchSkeleton)
+      .filter((skeleton): skeleton is string => skeleton !== undefined)
+      .join('/')
+    return { value, violations: [`${path} 应为 ${kinds} 之一（判别字段缺失或无法识别，收到${showValue(value)}）；每枚形如 ${skeletons}`] }
   }
   switch (spec.type) {
     case 'object': {
@@ -708,12 +813,20 @@ export function resolvePresentCardPayload(raw: unknown): ResolvePresentCardPaylo
   if (typeof candidate !== 'object' || candidate === null || Array.isArray(candidate)) {
     return { violations: [`payload 应为九类卡片载荷对象（按 type 判别九选一），收到${showValue(candidate)}`] }
   }
-  const obj = candidate as Record<string, unknown>
+  let obj = candidate as Record<string, unknown>
   const violations: string[] = []
   const typeValue = obj['type']
   if (typeof typeValue !== 'string' || !(PAYLOAD_TYPES as readonly string[]).includes(typeValue)) {
     violations.push(`payload.type 应为九类卡片类型之一：${PAYLOAD_TYPES.join('/')}（收到${showValue(typeValue)}）`)
     return { violations }
+  }
+  // W21-R8: a lone actions object lifts to the one-element array before the
+  // walk, so its element then rides the element-level coercions above.
+  if (typeValue === 'report') {
+    const actions = obj['actions']
+    if (typeof actions === 'object' && actions !== null && !Array.isArray(actions)) {
+      obj = { ...obj, actions: [actions] }
+    }
   }
   const walked = walkSchema(branchOfType(typeValue as PayloadType), obj, 'payload')
   violations.push(...walked.violations)
@@ -745,7 +858,8 @@ const presentCardParameters = {
       + 'report{id,title,subtitle?,metrics[1-6]{label,value,kind(count/money/percent/text),tone?(positive/warning/danger)},'
       + 'rows?[≤8]{label,hint?,level(high/medium/low)},'
       + 'table?{columns[1-5]{label,kind?(text/money/percent/count)},rows[≤10 且每行=列数]},'
-      + 'actions?[≤4]{view{label,route}|create-task{label,title,suggestion?}|send{label,text}|link{label,url}}}；'
+      + 'actions?[≤4]按钮数组，每枚是扁平对象，判别字段 kind 与其余字段同级，形如 {"kind":"view","label":"查看采购订单","route":"#/work"}；'
+      + 'kind 四选一：view(需 label,route)/create-task(需 label,title，可附 suggestion)/send(需 label,text)/link(需 label,url)}；'
       + 'approval_pending{id,doc{collection,label,docId,title},summary[≥1]{label,value,kind(同 submit_receipt)},applicant?,node?,attempt?}；'
       + 'approval_result{approvalId,doc(结构同上),action(approve/reject),'
       + 'state(draft/pending/pending_level2/approved/rejected/void/potential/reviewing/qualified),by,comment?,at?}；'

@@ -93,6 +93,11 @@ describe('parseDshPayloadObject (present_card args mirror)', () => {
     // W21-R3: the legal empty strings — a draft-field value and a blank cell.
     'form-draft.empty-field-value.valid',
     'report.empty-table-cell.valid',
+    // W21-R8: the lossless actions spellings — wrapper key, missing kind,
+    // and the lone actions object — mirror the server resolve step.
+    'report.actions-wrapper-key.valid',
+    'report.actions-missing-kind.valid',
+    'report.actions-single-object.valid',
   ] as const
 
   const INVALID_FIXTURES = [
@@ -114,6 +119,8 @@ describe('parseDshPayloadObject (present_card args mirror)', () => {
     'payload-string.not-json',
     'plan-suggest.empty-id.invalid',
     'report.actions-over',
+    // W21-R8: an ambiguous signature and a bare label stay violations.
+    'report.actions-ambiguous.invalid',
     'report.empty-metric-value.invalid',
     'report.metrics-over',
     'report.rows-over',

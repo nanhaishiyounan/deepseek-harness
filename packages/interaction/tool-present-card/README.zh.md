@@ -25,6 +25,10 @@ P3 确定性矩阵捕获了一个失败族：模型在 id/value/数量类叶子�
 
 结构约束进 schema；schema DSL 表达不了的条数上限（无 `minItems`/`maxItems`）在 `execute` 里手工校验：ask_choice options ≥1；form_draft fields ≥1、revision ≥1、`value: null` 仅允许 `required` 层字段；submit_receipt 与 approval_pending summary ≥1；report metrics 1–6、rows ≤8、table ≤5 列 ≤10 行且每行宽度=列数、actions ≤4。违规抛 `ToolArgsError`，错误信息带参数路径，模型据此在同一回合内修正重试。
 
+### actions 宽容（W21-R8）
+
+一次供应链实活会话连续 4 次折叠同一 actions 嵌套错误、最终靠删按钮才出卡。原始捕获显示两种写法：包装键（`{"view":{"label":…,"route":…}}`——旧参数描述的紧凑联合记法正是这么读的）与缺 `kind` 判别字段的扁平对象；4 次错误一字不差、只列四个 kind 值，模型始终学不到「扁平判别字段」这一合法形态。修复（客户端解析器镜像同步）：resolve 解包包装键；`kind` 缺失且恰好一个分支的其余必填字段齐备时补上判别值（显式非法 `kind` 绝不被覆盖；`{label,route,title}` 这类歧义签名仍拒绝）；单个 actions 对象提升为单元素数组；判别失败错误追加四枚具体 JSON 骨架（`{"kind":"view","label":"…","route":"…"}/…`）让一轮重试命中；参数描述改为扁平形状+可照抄示例。persona few-shot 补 view 形态与「kind 是同级字段、不是包装键」规则。
+
 成功调用执行 `exec.concludeTurn()` 并返回 `{ presented: true }` 与固定回执文案：卡片即回合收尾物，用户的点选或确认作为下一条普通用户消息到达，且明确禁止模型替用户作答。Fire-and-forget：工具从不等待用户输入——与既有围栏 UX 逐位等价。
 
 ## 角色

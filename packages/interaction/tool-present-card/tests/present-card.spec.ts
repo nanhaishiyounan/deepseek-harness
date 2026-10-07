@@ -83,6 +83,10 @@ const VALID_FIXTURES = [
   // W21-R3: the legal empty strings — a draft-field value and a blank cell.
   'form-draft.empty-field-value.valid',
   'report.empty-table-cell.valid',
+  // W21-R8: the lossless actions spellings — wrapper key, missing kind.
+  'report.actions-wrapper-key.valid',
+  'report.actions-missing-kind.valid',
+  'report.actions-single-object.valid',
 ] as const
 
 // Structural rejections the execute-side resolve step owns: the framework
@@ -99,6 +103,9 @@ const STRUCTURAL_REJECTIONS: ReadonlyArray<{ fixture: string; fragment: string }
   { fixture: 'ask-field.missing-suggestions.invalid', fragment: 'payload.field.suggestions 缺失（必填字段）' },
   { fixture: 'ask-choice.boolean-value', fragment: 'payload.options[0].value 应为字符串或数字' },
   { fixture: 'report.title-number', fragment: 'payload.title 应为字符串（收到数字 5）' },
+  // W21-R8: an ambiguous signature (route+title) and a bare label stay
+  // violations, and the message carries the concrete skeletons.
+  { fixture: 'report.actions-ambiguous.invalid', fragment: 'payload.actions[0] 应为 "view"/"create-task"/"send"/"link" 之一' },
   // W21-R3: a required scalar leaf rejects the empty string, both mirrors.
   { fixture: 'ask-choice.empty-question.invalid', fragment: 'payload.question 不能为空字符串' },
   { fixture: 'ask-choice.empty-option-label.invalid', fragment: 'payload.options[0].label 不能为空字符串' },
@@ -332,13 +339,75 @@ describe('present_card tool', () => {
       })
     })
 
-    it('reports an unrecognizable report action kind with its discriminated values', () => {
+    it('reports an unrecognizable report action kind with its skeletons to copy', () => {
       const resolved = resolvePresentCardPayload({
         ...fixture('report.valid') as Record<string, unknown>,
         actions: [{ label: '按钮', kind: 'explode' }],
       })
       expect(resolved).toEqual({
-        violations: ['payload.actions[0] 应为 "view"/"create-task"/"send"/"link" 之一（判别字段缺失或无法识别，收到对象）'],
+        violations: ['payload.actions[0] 应为 "view"/"create-task"/"send"/"link" 之一（判别字段缺失或无法识别，收到对象）；'
+          + '每枚形如 {"kind":"view","label":"…","route":"…"}/{"kind":"create-task","label":"…","title":"…"}/'
+          + '{"kind":"send","label":"…","text":"…"}/{"kind":"link","label":"…","url":"…"}'],
+      })
+    })
+
+    // W21-R8: the two lossless action spellings resolve to the flat kind
+    // field — an explicit illegal kind is never overridden, and an ambiguous
+    // signature (route+title) stays a violation.
+    describe('actions leniency (W21-R8)', () => {
+      it('flattens the wrapper-key spelling to the kind field', () => {
+        const resolved = resolvePresentCardPayload(fixture('report.actions-wrapper-key.valid'))
+        expect(resolved).toEqual({
+          payload: {
+            v: 3,
+            type: 'report',
+            id: 'r_1',
+            title: '库存查询',
+            subtitle: '现有/可用/已分配',
+            metrics: [
+              { label: '现有数量', value: '500', kind: 'count' },
+              { label: '可用数量', value: '480', kind: 'count', tone: 'positive' },
+            ],
+            rows: [{ label: 'SH-A-01-01', hint: '批次 LOT-01', level: 'low' }],
+            table: {
+              columns: [{ label: '库位', kind: 'text' }, { label: '现有', kind: 'count' }],
+              rows: [['SH-A-01-01', '500']],
+            },
+            actions: [
+              { kind: 'view', label: '查看采购订单', route: '#/work' },
+              { kind: 'send', label: '查看补货建议', text: '看补货预警' },
+            ],
+          },
+        })
+      })
+
+      it('fills a missing kind from the unique required-field signature', () => {
+        const resolved = resolvePresentCardPayload(fixture('report.actions-missing-kind.valid'))
+        expect('payload' in resolved && resolved.payload.type === 'report').toBe(true)
+        if (!('payload' in resolved) || resolved.payload.type !== 'report') return
+        expect(resolved.payload.actions).toEqual([
+          { kind: 'view', label: '查看采购订单', route: '#/work' },
+          { kind: 'create-task', label: '创建处理任务', title: '补货' },
+        ])
+      })
+
+      it('lifts a lone actions object to the one-element array', () => {
+        const resolved = resolvePresentCardPayload(fixture('report.actions-single-object.valid'))
+        expect('payload' in resolved && resolved.payload.type === 'report').toBe(true)
+        if (!('payload' in resolved) || resolved.payload.type !== 'report') return
+        expect(resolved.payload.actions).toEqual([{ kind: 'view', label: '查看采购订单', route: '#/work' }])
+      })
+
+      it('keeps an ambiguous signature a violation with the skeletons', () => {
+        const resolved = resolvePresentCardPayload(fixture('report.actions-ambiguous.invalid'))
+        const skeleton = '每枚形如 {"kind":"view","label":"…","route":"…"}/{"kind":"create-task","label":"…","title":"…"}/'
+          + '{"kind":"send","label":"…","text":"…"}/{"kind":"link","label":"…","url":"…"}'
+        expect(resolved).toEqual({
+          violations: [
+            `payload.actions[0] 应为 "view"/"create-task"/"send"/"link" 之一（判别字段缺失或无法识别，收到对象）；${skeleton}`,
+            `payload.actions[1] 应为 "view"/"create-task"/"send"/"link" 之一（判别字段缺失或无法识别，收到对象）；${skeleton}`,
+          ],
+        })
       })
     })
 

@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-10-07-present-card-actions-lenient-shapes.md
+2026-10-07-present-card-actions-lenient-shapes.md: 990b53e0ffa27e03084eead450017fd54100839e
+2026-10-07-present-card-actions-lenient-shapes.zh.md: 0b9d614ee3422460c3b4d688829f0604d2287179

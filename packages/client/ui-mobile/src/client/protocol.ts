@@ -542,10 +542,50 @@ function parseReportTable(value: unknown): ReportTable | undefined {
   return { columns, rows }
 }
 
+/**
+ * Each action kind's required fields besides the shared label — the
+ * missing-kind inference signature table (the server resolve's branch
+ * required-field walk, mirrored).
+ */
+const REPORT_ACTION_SIGNATURES: Readonly<Record<'view' | 'create-task' | 'send' | 'link', readonly string[]>> = {
+  view: ['route'],
+  'create-task': ['title'],
+  send: ['text'],
+  link: ['url'],
+}
+
+/**
+ * The W21-R8 action-lenient spellings, mirroring the server resolve step: a
+ * single-key wrapper (`{"view":{label,route}}`) flattens to the kind-field
+ * shape, and a missing `kind` is filled when exactly one kind's signature
+ * fields are all present. An explicit `kind` is never overridden.
+ * @param record - the raw action object.
+ * @returns the action record to validate (the original when no leniency
+ * applies).
+ */
+function coerceReportActionShape(record: Record<string, unknown>): Record<string, unknown> {
+  const keys = Object.keys(record)
+  if (keys.length === 1) {
+    const [key] = keys
+    const inner = key === undefined ? undefined : record[key]
+    if (key !== undefined && key in REPORT_ACTION_SIGNATURES
+      && typeof inner === 'object' && inner !== null && !Array.isArray(inner)) {
+      return { ...(inner as Record<string, unknown>), kind: key }
+    }
+  }
+  if (!Object.hasOwn(record, 'kind')) {
+    const matches = (Object.keys(REPORT_ACTION_SIGNATURES) as Array<keyof typeof REPORT_ACTION_SIGNATURES>)
+      .filter(kind => REPORT_ACTION_SIGNATURES[kind].every(field => Object.hasOwn(record, field)))
+    const [only] = matches
+    if (matches.length === 1 && only !== undefined) return { ...record, kind: only }
+  }
+  return record
+}
+
 /** Validate one report action by its discriminated kind. */
 function parseReportAction(raw: unknown): ReportAction | undefined {
   if (typeof raw !== 'object' || raw === null) return undefined
-  const action = raw as Record<string, unknown>
+  const action = coerceReportActionShape(raw as Record<string, unknown>)
   const label = requiredText(action['label'])
   if (label === undefined) return undefined
   switch (oneOf(action['kind'], ['view', 'create-task', 'send', 'link'] as const)) {
@@ -613,11 +653,13 @@ function parseReport(obj: Record<string, unknown>): ReportPayload | undefined {
   }
   let actions: ReportAction[] | undefined
   // An explicit null is the "left this one out" spelling here too (matching
-  // rows/table above and the server-side resolve walk).
+  // rows/table above and the server-side resolve walk). A lone action object
+  // lifts to the one-element array (W21-R8, mirroring the server resolve).
   if (obj['actions'] !== undefined && obj['actions'] !== null) {
-    if (!Array.isArray(obj['actions']) || obj['actions'].length > 4) return undefined
+    const list = Array.isArray(obj['actions']) ? obj['actions'] : [obj['actions']]
+    if (list.length > 4) return undefined
     actions = []
-    for (const raw of obj['actions']) {
+    for (const raw of list) {
       const action = parseReportAction(raw)
       if (action === undefined) return undefined
       actions.push(action)

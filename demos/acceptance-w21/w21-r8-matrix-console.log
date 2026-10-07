@@ -1,0 +1,17 @@
+preflight: /mobile=200 persona-projection-sync=true
+login: buyer (leg s#1)
+  [s#1] PASS sid=session-bbafdf16-5d50-4417-a7b0-16b3b0abe02c firstPass=true errs=0 rawShape=flat-kind kinds=view,view,view,view buttons=3 45492ms
+login: buyer (leg s#2)
+  [s#2] FAIL sid=session-a2514259-b096-4d1c-8b27-21d6e558309f firstPass=false errs=2 rawShape=flat-kind kinds=view,view,view,send buttons=3 60444ms
+    ✗ 零 degraded 折叠
+login: buyer (leg s#3)
+  [s#3] PASS sid=session-aa4d3e5f-04a0-4acc-b9bd-72cd70d8f7da firstPass=true errs=0 rawShape=flat-kind kinds=view,view,create-task,send buttons=3 90556ms
+login: buyer (leg s#4)
+  [s#4] PASS sid=session-ebab5ca2-f323-47a4-9ad2-862a93dcbdd2 firstPass=true errs=0 rawShape=flat-kind kinds=view,view,view buttons=3 45330ms
+login: buyer (leg s#5)
+  [s#5] FAIL sid=session-4ee999bc-4ac0-497d-b1b2-8a57e79553bf firstPass=false errs=2 rawShape=flat-kind kinds=view,view,view,create-task buttons=3 60539ms
+    ✗ 零 degraded 折叠
+login: buyer (leg a#1)
+  [a#1] PASS sid=session-b9c87b3f-5228-4456-b733-b44f6b255a91 firstPass=true errs=0 rawShape=flat-kind kinds=view,send buttons=2 25453ms
+login: buyer (leg a#2)
+  [a#2] PASS sid=session-99b4d5b8-6d2d-4826-9990-451292fa00db firstPass=true errs=0 rawShape=flat-kind kinds=create-task buttons=1 30457ms
