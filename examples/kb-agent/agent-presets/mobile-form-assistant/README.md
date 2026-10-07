@@ -2,7 +2,7 @@
 
 English | [中文](README.zh.md)
 
-The M3 mobile client's AI form-filling employee: extracts business-record fields from a conversational description, asks for missing slots, emits one fenced-JSON draft the mobile task card parses into an editable form, and calls `nb_create` only after the user's explicit push confirmation.
+The M3 mobile client's AI form-filling employee: extracts business-record fields from a conversational description, asks for missing slots, presents every structured card (choice / draft / receipt / report / approval / plan) as a validated `present_card` tool call the mobile renders as an editable card, and calls `nb_create` only after the user's explicit push confirmation. Legacy dsh-fenced sessions keep replaying through the client's read-only fence channel.
 
 - `preset.yml` — the preset name and description (the roster discovery entry).
 - `agent.cordis.yml` — the agent-plane composition: a persona plus the NocoBase tool row. No retrieval or destructive tools — this employee only registers business records.
