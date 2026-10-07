@@ -361,7 +361,6 @@ const main = async () => {
     }
   } finally {
     await browser.close()
-    writeFileSync(`${OUT}/p3-matrix-console.log`, `${LOG.join('\n')}\n`)
   }
 
   // Summary table from the ledger.
@@ -384,11 +383,14 @@ const main = async () => {
   const judged = Object.keys(summary).filter((key) => (only === null || only.includes(key)) && SCENARIOS[key].observe !== true)
   for (const [key, s] of Object.entries(summary)) {
     if (SCENARIOS[key].observe !== true || (only !== null && !only.includes(key))) continue
-    console.warn(`observe leg ${key} ${s.label}: ledger pass=${s.pass}/${s.required} fail=${s.fail} — excluded from the exit-code verdict`)
+    log(`observe leg ${key} ${s.label}: ledger pass=${s.pass}/${s.required} fail=${s.fail} — excluded from the exit-code verdict`)
   }
   const failed = judged.some((key) => summary[key].fail > 0 || summary[key].pass < summary[key].required)
   process.exitCode = failed ? 1 : 0
   log(`matrix verdict: ${failed ? 'FAIL' : 'PASS'}`)
+  // Written after the verdict so the summary and observe lines land in the
+  // transcript file instead of only on stdout.
+  writeFileSync(`${OUT}/p3-matrix-console.log`, `${LOG.join('\n')}\n`)
 }
 
 await main()

@@ -352,10 +352,9 @@ const main = async () => {
   writeFileSync(`${OUT}/w21-r2-matrix-summary.json`, JSON.stringify({ at: new Date().toISOString(), summary }, null, 2))
   log('\n== w21-r2 matrix summary ==')
   for (const [key, s] of Object.entries(summary)) log(`${key} ${s.label}: pass=${s.pass}/${s.required} fail=${s.fail} leaves=[${s.numericLeaves.join(',')}] payloadString=${s.payloadStringObserved} matchedZero=${s.matchedZero} enumTriggered=${s.enumTriggered}`)
-  // The exit code mirrors the matrix outcome (W21-R3): a judged leg with a
-  // recorded failure or an unmet pass count fails the run — previously only
-  // the preflight set a non-zero code, so a fully failing matrix still exited 0.
-  // --only judges its selection; the legs it excludes are not in the ledger.
+  // The exit code mirrors the matrix outcome: a judged leg with a recorded
+  // failure or an unmet pass count fails the run. --only judges its
+  // selection; the legs it excludes are not in the ledger.
   const judged = Object.keys(summary).filter((key) => only === null || only.includes(key))
   const failed = judged.some((key) => summary[key].fail > 0 || summary[key].pass < summary[key].required)
   process.exitCode = failed ? 1 : 0

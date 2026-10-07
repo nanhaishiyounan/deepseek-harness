@@ -63,7 +63,7 @@
 - Agent Note：`.agents/notes/implemented/architecture/2026-10-06-mobile-structured-cards-tool-channel{,.zh.md,.i18n.yaml}`（v:3 双通道契约/两套校验器镜像/fixtures 同步义务/叶子值 deferred）；M3 note 部分 supersession 事实更新+交叉链接；`verify-agent-note-format` 778 全绿；supersession 审计：无完全 superseded（M3 为部分，保留双链接）
 - preset README 双语提法更新（围栏→present_card）；pairing 1231 对全绿
 - doc-sync：28 过 / 1 预存红（export jsdoc）；W21 欠账（tool-present-card README 双段、config/tool 目录双语、interaction README pairing）全部清偿
-- pre-push 最小集实跑：`vitest packages/interaction/tool-present-card`（25/25）、`vitest packages/client/ui-mobile`（796/796）、`test:web apps/web/tests/mobile-assistant-toolcard.e2e.ts`（3/3）、typecheck 绿、定向 lint 0 错、doc-sync 上述
+- pre-push 最小集实跑：`vitest packages/interaction/tool-present-card`（25/25）、`vitest packages/client/ui-mobile`（796/796）、`pnpm run test:web apps/web/tests/mobile-assistant-toolcard.e2e.ts`（3/3）、typecheck 绿、定向 lint 0 错、doc-sync 上述
 - GIF 落盘（非 PR 场景按 skill 存 demos/ 未发布 assets 分支）
 
 ## 七、确定性结论（对照 Goal Contract「不能掷骰子」）
