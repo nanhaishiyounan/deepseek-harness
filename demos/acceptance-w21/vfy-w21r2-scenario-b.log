@@ -1,0 +1,7 @@
+shot: vfy-w21r2-b-01-mild-bait.png
+mild bait not triggered (first shot legal) — escalating
+shot: vfy-w21r2-b-02-escalated.png
+PASS 回合正常收尾 | reason=completed
+FAIL 越位被触发（错误结果出现） | errors=0
+PASS 一轮自纠出卡（同会话错误后成功出卡） | okAfterErr=2 errTotal=0
+PASS 终态无未解释 degraded 折叠 | degraded=0（错误回显折叠形态需视觉核对截图）

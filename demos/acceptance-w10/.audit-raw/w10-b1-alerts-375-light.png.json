@@ -1,7 +1,0 @@
-{
-  "content": "[\n  {\n    \"severity\": \"P1明显\",\n    \"category\": \"layout-overflow\",\n    \"description\": \"第二、四张卡片底部左侧 ID 路径文字（如 MO-W6B4-FLOW...）过长，挤压了右侧日期“昨天”的显示空间，导致日期文字发生非预期的垂直换行堆叠。\",\n    \"suggestion\": \"给左侧 ID 文字容器设置 `flex-shrink: 1` 和 `text-overflow: ellipsis`，同时为右侧日期容器设置 `flex-shrink: 0` 和 `white-space: nowrap`。\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"spacing\",\n    \"description\": \"顶部筛选标签组（“31 紧急”至“1 召回”）的行间距（row-gap）明显大于水平间距（column-gap），导致视觉逻辑断层，“1 召回”标签显得孤立。\",\n    \"suggestion\": \"统一 `gap` 参数，减小行间距，使其在视觉上呈现为紧凑的标签池。\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"typography\",\n    \"description\": \"“认领”印章式按钮内的文字在部分卡片中（如第一张）垂直居中不准，视觉上略微靠下，且文字边缘与边框距离过近，显得局促。\",\n    \"suggestion\": \"微调按钮的 `padding` 或 `line-height`，确保文字在椭圆印章框内绝对视觉居中，增加 2-4px 的呼吸空间。\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"other\",\n    \"description\": \"左上角返回按钮采用黑底白箭头圆形，风格偏向操作系统原生 UI 或工业化工具感，与“酱园琥珀”设计语言要求的温润、酱色主调冲突。\",\n    \"suggestion\": \"将返回箭头颜色改为酱色（深棕红），移除纯黑圆圈，改用更符合“琥珀”主题的柔和点缀色或琥珀质感圆形背景。\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"inconsistency\",\n    \"description\": \"卡片顶部状态标签（如“紧急”、“关注”）的圆角大小与“认领”按钮的完全圆角（pill-shaped）不统一，前者圆角半径偏小。\",\n    \"suggestion\": \"统一此类装饰性标签的圆角逻辑，建议均采用大圆角（完全圆角）以符合“圆角卡片”与“印章”的设计语言一致性。\"\n  }\n]",
-  "base_resp": {
-    "status_code": 0,
-    "status_msg": "success"
-  }
-}

@@ -1,7 +1,0 @@
-{
-  "content": "```json\n[\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"misalign\",\n    \"description\": \"顶部导航栏返回按钮（左侧圆形图标）与页面标题“我的待办”在垂直中心线上未完全对齐，视觉上标题略微偏高。\",\n    \"suggestion\": \"使用 Flex 布局的 align-items: center 确保返回按钮与标题文字轴线对齐。\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"spacing\",\n    \"description\": \"内容区左上方文字“待办”距离顶部导航栏底边缘及左边缘间距过窄，缺乏呼吸感。\",\n    \"suggestion\": \"增加“待办”标签的 margin-top 和 margin-left，建议遵循 16px 或 20px 的模数间距。\"\n  },\n  {\n    \"severity\": \"P1明显\",\n    \"category\": \"contrast\",\n    \"description\": \"空状态辅助描述文字“PC 端或 AI 同事提交的单据会出现在这里”颜色过浅，在暖纸底色（#F8F3E8 左右）上的对比度不足，可能影响弱视用户阅读。\",\n    \"suggestion\": \"调深描述文字颜色，确保对比度达到 WCAG AA 级标准，建议使用酱色（深棕红）的低透明度版本。\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"other\",\n    \"description\": \"底部操作按钮“看看已登记的单据”的投影过于弥散且色值偏深，不符合设计语言中“克制阴影”的定义，呈现出较为廉价的默认阴影感。\",\n    \"suggestion\": \"减小阴影的模糊半径（blur）和扩散半径（spread），降低透明度，或使用更接近琥珀色的有色阴影。\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"other\",\n    \"description\": \"页面主标题“我的待办”及空状态标题“当前没有待办”目前疑似为纯黑或深灰，未应用设计语言要求的“酱色（深棕红）”主色。\",\n    \"suggestion\": \"将标题文字颜色统一为酱园琥珀主题的深酱红品牌色，以增强视觉身份一致性。\"\n  },\n  {\n    \"severity\": \"P1明显\",\n    \"category\": \"inconsistency\",\n    \"description\": \"顶部导航栏背景为纯白色，而内容区背景为“暖纸底”米黄色，分界线生硬，未体现“暖纸底”的全局连贯性。\",\n    \"suggestion\": \"将顶部导航栏背景同步为暖纸底色，或采用通透的无底色设计，仅保留细微的视觉分割。\"\n  }\n]\n```",
-  "base_resp": {
-    "status_code": 0,
-    "status_msg": "success"
-  }
-}

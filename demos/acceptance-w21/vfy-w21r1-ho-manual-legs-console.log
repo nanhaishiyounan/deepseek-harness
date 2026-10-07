@@ -1,0 +1,7 @@
+login: buyer OK
+L1 r4 folded bars on screen: 2
+  folded#ctx: ...200 | 200 | 向鲜丰采购面粉，数量100，单价10 | 查询业务记录 | 找到两家名字带"鲜丰"的，都是合格供方，你确认下是哪家。 |
+  folded#ctx: ...200 | 向鲜丰采购面粉，数量100，单价10 | 查询业务记录 | 找到两家名字带"鲜丰"的，都是合格供方，你确认下是哪家。 |  | 结构化消息（格式异常，已折叠）
+L2 s1 ask_choice: {"cards":["ask_choice"],"errs":0,"loop":false,"turnEnd":"completed","errTexts":[]} options~3 pickVisible=false
+L3 r4user#1: chat=0c/0e cont=["report"] errs=0 degraded=0
+L3 r4user#2: chat=0c/0e cont=["ask_field"] errs=0 degraded=0

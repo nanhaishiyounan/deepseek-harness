@@ -1,4 +1,0 @@
-═══ ⑤ GET /sourcing/matrix 读围栏（引擎 :13110，会话推导身份）═══
-sales_rep → GET /sourcing/matrix：HTTP 403  acao=*  body=ok= false code=read_fenced message=比价矩阵限 采购部/admin/nocobase 读取（sales_rep 不在读围栏内）
-buyer → GET /sourcing/matrix：HTTP 200  acao=*  body=ok= true, groups=1
-finance → GET /sourcing/matrix：HTTP 403  acao=*  body=ok= false code=read_fenced message=比价矩阵限 采购部/admin/nocobase 读取（finance 不在读围栏内）

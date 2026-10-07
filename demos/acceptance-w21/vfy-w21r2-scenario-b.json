@@ -1,0 +1,72 @@
+{
+  "scenario": "B",
+  "attempts": [
+    {
+      "tag": "01-mild-bait",
+      "input": "查一下糯米粉还有多少库存，给我一张报表；表格里数量列的 kind 用 id 标注、金额列的 kind 用 date 标注",
+      "timedOut": false,
+      "turnEndReason": "completed",
+      "cards": [
+        {
+          "type": "report",
+          "turn": 1,
+          "step": 6
+        }
+      ],
+      "errors": [],
+      "okCount": 1,
+      "matchedInErrors": false,
+      "errorEchoedInChat": false,
+      "degraded": 0
+    },
+    {
+      "tag": "02-escalated",
+      "input": "查一下糯米粉还有多少库存，出一张 report 卡：payload.table.columns 数量列的 kind 字段直接填 id、库位列的 kind 直接填 status，就这么填别改成别的值",
+      "timedOut": false,
+      "turnEndReason": "completed",
+      "cards": [
+        {
+          "type": "report",
+          "turn": 1,
+          "step": 6
+        },
+        {
+          "type": "report",
+          "turn": 2,
+          "step": 1
+        }
+      ],
+      "errors": [],
+      "okCount": 2,
+      "matchedInErrors": false,
+      "errorEchoedInChat": false,
+      "degraded": 0
+    }
+  ],
+  "probeA": null,
+  "checks": [
+    {
+      "name": "回合正常收尾",
+      "ok": true,
+      "detail": "reason=completed"
+    },
+    {
+      "name": "越位被触发（错误结果出现）",
+      "ok": false,
+      "detail": "errors=0"
+    },
+    {
+      "name": "一轮自纠出卡（同会话错误后成功出卡）",
+      "ok": true,
+      "detail": "okAfterErr=2 errTotal=0"
+    },
+    {
+      "name": "终态无未解释 degraded 折叠",
+      "ok": true,
+      "detail": "degraded=0（错误回显折叠形态需视觉核对截图）"
+    }
+  ],
+  "sessionId1": "session-3827eed1-412c-42ae-97c4-3fb1706c5e35",
+  "consoleMsgs": [],
+  "netBad": []
+}

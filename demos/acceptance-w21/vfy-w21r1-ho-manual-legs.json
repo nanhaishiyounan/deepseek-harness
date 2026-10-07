@@ -1,0 +1,88 @@
+{
+ "at": "2026-10-06T19:55:02.995Z",
+ "r4FoldedBars": {
+  "count": 2,
+  "contexts": [
+   {
+    "idx": 87,
+    "before": "200 | 200 | 向鲜丰采购面粉，数量100，单价10 | 查询业务记录 | 找到两家名字带\"鲜丰\"的，都是合格供方，你确认下是哪家。 | "
+   },
+   {
+    "idx": 88,
+    "before": "200 | 向鲜丰采购面粉，数量100，单价10 | 查询业务记录 | 找到两家名字带\"鲜丰\"的，都是合格供方，你确认下是哪家。 |  | 结构化消息（格式异常，已折叠）"
+   }
+  ]
+ },
+ "s1Pick": {
+  "sid": "session-77619d3a-3ba9-4b8b-9dba-dcbaf5dcee34",
+  "log": {
+   "cards": [
+    "ask_choice"
+   ],
+   "errs": 0,
+   "loop": false,
+   "turnEnd": "completed",
+   "errTexts": []
+  },
+  "optionCount": 3,
+  "optionTexts": [
+   "珠海鲜丰水产科技（南美白虾仁）\nSUP-001 · 主营虾仁冷链",
+   "鲜丰（自采购联系人）\nSUP-2026-0001 · 张经理",
+   "自己打字说明"
+  ],
+  "pickVisible": false
+ },
+ "r4User": [
+  {
+   "sid": "session-9a5b7c01-c98d-470c-86a0-051ef29a6693",
+   "chatTurn": {
+    "texts": 1,
+    "cards": 0,
+    "errs": 0
+   },
+   "contTurn": {
+    "cards": [
+     "report"
+    ],
+    "errs": 0,
+    "loop": false,
+    "errTexts": []
+   },
+   "domCards": {
+    "ask-choice": 0,
+    "field-ask": 0,
+    "draft-card-v3": 0,
+    "receipt-card-v3": 0,
+    "report-card": 1,
+    "plan-card": 0
+   },
+   "degraded": 0
+  },
+  {
+   "sid": "session-03b7c6fd-be8b-44a5-85fd-beef9b8d8c0f",
+   "chatTurn": {
+    "texts": 1,
+    "cards": 0,
+    "errs": 0
+   },
+   "contTurn": {
+    "cards": [
+     "ask_field"
+    ],
+    "errs": 0,
+    "loop": false,
+    "errTexts": []
+   },
+   "domCards": {
+    "ask-choice": 0,
+    "field-ask": 1,
+    "draft-card-v3": 0,
+    "receipt-card-v3": 0,
+    "report-card": 0,
+    "plan-card": 0
+   },
+   "degraded": 0
+  }
+ ],
+ "reportCardDom": null
+}

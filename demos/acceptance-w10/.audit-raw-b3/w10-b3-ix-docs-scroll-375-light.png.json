@@ -1,7 +1,0 @@
-{
-  "content": "[\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"misalign\",\n    \"description\": \"顶部次级标题“质检员·王倩 · 常用单据”的左侧对齐基准与下方卡片矩阵的左边缘不一致，标题文本明显更靠右，未对齐容器安全边距。\",\n    \"suggestion\": \"统一页面的水平内边距（Padding-left），确保文本标题与下方卡片组的左侧物理边缘在同一垂直轴线上。\"\n  },\n  {\n    \"severity\": \"P1明显\",\n    \"category\": \"spacing\",\n    \"description\": \"次级标题“常用单据”与第一行卡片之间的纵向间距过窄，与其上方“质检员”文本的行间距比例失调，导致视觉层级挤压。\",\n    \"suggestion\": \"增加标题与卡片区域之间的 Margin-top，建议间距调整为 20px-24px，以拉开业务模块的间距。\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"inconsistency\",\n    \"description\": \"卡片容器的边框色呈现为偏冷的灰色，与设计语言要求的“暖纸底”及“酱色”主色调冲突，破坏了整体色温的一致性。\",\n    \"suggestion\": \"将卡片边框颜色调整为浅琥珀色或极浅的酱色（带暖调的棕红系），以符合“酱园琥珀”视觉规范。\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"typography\",\n    \"description\": \"卡片内标题“不合格处置单”字数（5字）多于其他卡片（3-4字），在相同宽度的卡片内导致左右留白（Padding-inline）显得过窄，视觉节奏不统一。\",\n    \"suggestion\": \"建议统一减小卡片内标题字号 1px，或微调卡片布局，确保长文本标签在卡片内依然有舒适的留白空间。\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"other\",\n    \"description\": \"功能图标采用的是通用线性图标，未体现设计语言中强调的“印章元素”，图标辨识度与文化调性契合度不足。\",\n    \"suggestion\": \"将文档类图标优化为带有“印章”质感或方圆印迹特征的图形，以强化“食链通”品牌视觉记忆点。\"\n  }\n]",
-  "base_resp": {
-    "status_code": 0,
-    "status_msg": "success"
-  }
-}

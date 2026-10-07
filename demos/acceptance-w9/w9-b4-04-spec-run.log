@@ -1,6 +1,0 @@
-[2m Test Files [22m [1m[32m43 passed[39m[22m[90m (43)[39m
-[2m      Tests [22m [1m[32m674 passed[39m[22m[90m (674)[39m
-[2m   Duration [22m 36.71s[2m (transform 16.54s, setup 15.07s, import 92.43s, tests 87.57s, environment 142.38s)[22m
-
-> @deepseek-ai/dsh-root@1.0.0 typecheck:contracts-ready
-> tsc -b tsconfig.client.json

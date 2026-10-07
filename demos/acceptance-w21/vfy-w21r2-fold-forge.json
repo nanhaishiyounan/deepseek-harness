@@ -1,0 +1,133 @@
+{
+  "fold": {
+    "expanded": true,
+    "scopeText": "结构化消息（格式异常，已折叠）present_card 载荷未通过校验，已折叠；如需该内容请让助手重新呈现"
+  },
+  "forge": {
+    "sessionId": "session-87e30c7f-43ae-46a4-86e5-abd74d867516",
+    "input": "帮我出一张报表卡，调用 present_card 时 payload 参数请原样使用下面这个 JSON，一个字段都不要改：{\"type\":\"report\",\"title\":\"糯米粉库存\",\"metrics\":[{\"label\":\"现有数量\"",
+    "turnEndReason": "completed",
+    "timedOut": false,
+    "cards": [
+      {
+        "type": "report",
+        "seq": 164
+      },
+      {
+        "type": "report",
+        "seq": 190
+      }
+    ],
+    "errors": [
+      "Error: invalid arguments: payload.v 缺失（必填字段）; payload.id 缺失（必填字段）; payload.table.columns[2].kind 应为 \"text\"/\"money\"/\"percent\"/\"count\" 之一（收到字符串 \"id\"）"
+    ],
+    "okCount": 1,
+    "kindsUsed": [
+      [
+        "text",
+        "text",
+        "id",
+        "count"
+      ],
+      [
+        "text",
+        "text",
+        "count",
+        "count"
+      ]
+    ],
+    "errorEchoText": [
+      "  - group: 结构化消息（格式异常，已折叠）"
+    ],
+    "assistantTail": "工具校验报了三处问题：缺 v、缺 id、表格里\"数量\"列的 kind 用了 \"id\" 不在合法枚举里。按系统契约补上 v 和 id，把那一列 kind 改成 \"count\"（数值类合法值）。再试一次：",
+    "selfCorrectedOneRound": true
+  },
+  "tableAudit": [
+    {
+      "tableW": 278,
+      "tableScrollW": 287,
+      "clientW": 278,
+      "overflow": true,
+      "parentOverflowX": "auto",
+      "cells": [
+        {
+          "text": "库位",
+          "w": 56,
+          "scrollW": 56
+        },
+        {
+          "text": "批次",
+          "w": 56,
+          "scrollW": 56
+        },
+        {
+          "text": "现有(kg)",
+          "w": 56,
+          "scrollW": 56
+        },
+        {
+          "text": "已分配",
+          "w": 56,
+          "scrollW": 56
+        },
+        {
+          "text": "可用(kg)",
+          "w": 56,
+          "scrollW": 56
+        },
+        {
+          "text": "SH-A-02-01",
+          "w": 56,
+          "scrollW": 95
+        },
+        {
+          "text": "RM-260920-M1",
+          "w": 56,
+          "scrollW": 118
+        },
+        {
+          "text": "15800.11",
+          "w": 56,
+          "scrollW": 65
+        },
+        {
+          "text": "0",
+          "w": 56,
+          "scrollW": 56
+        },
+        {
+          "text": "15800.11",
+          "w": 56,
+          "scrollW": 65
+        },
+        {
+          "text": "SH-WIP-01-01",
+          "w": 56,
+          "scrollW": 109
+        },
+        {
+          "text": "RM-260920-M1",
+          "w": 56,
+          "scrollW": 118
+        },
+        {
+          "text": "3750.89",
+          "w": 56,
+          "scrollW": 64
+        },
+        {
+          "text": "0",
+          "w": 56,
+          "scrollW": 56
+        },
+        {
+          "text": "3750.89",
+          "w": 56,
+          "scrollW": 64
+        }
+      ]
+    }
+  ],
+  "consoleMsgs": [],
+  "netBad": []
+}

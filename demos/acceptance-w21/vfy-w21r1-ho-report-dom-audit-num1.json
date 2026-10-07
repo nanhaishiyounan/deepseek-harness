@@ -1,0 +1,276 @@
+{
+ "at": "2026-10-06T20:05:21.302Z",
+ "sid": "session-fe986d43-8a30-4c18-8e4f-34d617d6828f",
+ "audit": {
+  "docWide": {
+   "scrollWidth": 375,
+   "clientWidth": 375
+  },
+  "cards": [
+   {
+    "cardRect": {
+     "x": 53,
+     "y": 319,
+     "w": 310,
+     "h": 411
+    },
+    "cells": [
+     {
+      "tag": "TH",
+      "text": "库位",
+      "x": 69,
+      "y": 617,
+      "w": 56,
+      "h": 32,
+      "scrollW": 56,
+      "clientW": 56,
+      "clipped": false
+     },
+     {
+      "tag": "TH",
+      "text": "批次",
+      "x": 125,
+      "y": 617,
+      "w": 56,
+      "h": 32,
+      "scrollW": 56,
+      "clientW": 56,
+      "clipped": false
+     },
+     {
+      "tag": "TH",
+      "text": "现有(kg)",
+      "x": 180,
+      "y": 617,
+      "w": 56,
+      "h": 32,
+      "scrollW": 56,
+      "clientW": 56,
+      "clipped": false
+     },
+     {
+      "tag": "TH",
+      "text": "可用(kg)",
+      "x": 236,
+      "y": 617,
+      "w": 56,
+      "h": 32,
+      "scrollW": 56,
+      "clientW": 56,
+      "clipped": false
+     },
+     {
+      "tag": "TH",
+      "text": "金额(元)",
+      "x": 291,
+      "y": 617,
+      "w": 56,
+      "h": 32,
+      "scrollW": 56,
+      "clientW": 56,
+      "clipped": false
+     },
+     {
+      "tag": "TD",
+      "text": "SH-A-02-01",
+      "x": 69,
+      "y": 649,
+      "w": 56,
+      "h": 33,
+      "scrollW": 95,
+      "clientW": 56,
+      "clipped": true
+     },
+     {
+      "tag": "TD",
+      "text": "RM-260920-M1",
+      "x": 125,
+      "y": 649,
+      "w": 56,
+      "h": 33,
+      "scrollW": 118,
+      "clientW": 56,
+      "clipped": true
+     },
+     {
+      "tag": "TD",
+      "text": "15,800.11",
+      "x": 180,
+      "y": 649,
+      "w": 56,
+      "h": 33,
+      "scrollW": 68,
+      "clientW": 56,
+      "clipped": true
+     },
+     {
+      "tag": "TD",
+      "text": "15,800.11",
+      "x": 236,
+      "y": 649,
+      "w": 56,
+      "h": 33,
+      "scrollW": 68,
+      "clientW": 56,
+      "clipped": true
+     },
+     {
+      "tag": "TD",
+      "text": "¥2,844,019.80",
+      "x": 291,
+      "y": 649,
+      "w": 56,
+      "h": 33,
+      "scrollW": 103,
+      "clientW": 56,
+      "clipped": true
+     },
+     {
+      "tag": "TD",
+      "text": "SH-WIP-01-01",
+      "x": 69,
+      "y": 682,
+      "w": 56,
+      "h": 33,
+      "scrollW": 109,
+      "clientW": 56,
+      "clipped": true
+     },
+     {
+      "tag": "TD",
+      "text": "RM-260920-M1",
+      "x": 125,
+      "y": 682,
+      "w": 56,
+      "h": 33,
+      "scrollW": 118,
+      "clientW": 56,
+      "clipped": true
+     },
+     {
+      "tag": "TD",
+      "text": "3,750.89",
+      "x": 180,
+      "y": 682,
+      "w": 56,
+      "h": 33,
+      "scrollW": 67,
+      "clientW": 56,
+      "clipped": true
+     },
+     {
+      "tag": "TD",
+      "text": "3,750.89",
+      "x": 236,
+      "y": 682,
+      "w": 56,
+      "h": 33,
+      "scrollW": 67,
+      "clientW": 56,
+      "clipped": true
+     },
+     {
+      "tag": "TD",
+      "text": "¥675,160.20",
+      "x": 291,
+      "y": 682,
+      "w": 56,
+      "h": 33,
+      "scrollW": 90,
+      "clientW": 56,
+      "clipped": true
+     }
+    ],
+    "overlapPairs": [],
+    "clippedCells": [
+     {
+      "text": "SH-A-02-01",
+      "scrollW": 95,
+      "clientW": 56
+     },
+     {
+      "text": "RM-260920-M1",
+      "scrollW": 118,
+      "clientW": 56
+     },
+     {
+      "text": "15,800.11",
+      "scrollW": 68,
+      "clientW": 56
+     },
+     {
+      "text": "15,800.11",
+      "scrollW": 68,
+      "clientW": 56
+     },
+     {
+      "text": "¥2,844,019.80",
+      "scrollW": 103,
+      "clientW": 56
+     },
+     {
+      "text": "SH-WIP-01-01",
+      "scrollW": 109,
+      "clientW": 56
+     },
+     {
+      "text": "RM-260920-M1",
+      "scrollW": 118,
+      "clientW": 56
+     },
+     {
+      "text": "3,750.89",
+      "scrollW": 67,
+      "clientW": 56
+     },
+     {
+      "text": "3,750.89",
+      "scrollW": 67,
+      "clientW": 56
+     },
+     {
+      "text": "¥675,160.20",
+      "scrollW": 90,
+      "clientW": 56
+     }
+    ],
+    "rowClickable": {
+     "totalRows": 3,
+     "clickish": 0
+    },
+    "metrics": [
+     {
+      "text": "19,551.00 kg现有数量",
+      "fontVariant": "tabular-nums",
+      "fontWeight": "400"
+     },
+     {
+      "text": "19,551.00 kg",
+      "fontVariant": "tabular-nums",
+      "fontWeight": "600"
+     },
+     {
+      "text": "现有数量",
+      "fontVariant": "tabular-nums",
+      "fontWeight": "400"
+     },
+     {
+      "text": "0.00 kg已分配",
+      "fontVariant": "tabular-nums",
+      "fontWeight": "400"
+     },
+     {
+      "text": "0.00 kg",
+      "fontVariant": "tabular-nums",
+      "fontWeight": "600"
+     },
+     {
+      "text": "已分配",
+      "fontVariant": "tabular-nums",
+      "fontWeight": "400"
+     }
+    ]
+   }
+  ]
+ }
+}

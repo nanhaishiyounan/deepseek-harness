@@ -1,6 +1,0 @@
-PASS N2 keeper 只见 keeper 的待办 — rows=0
-PASS N2 keeper 看不到 buyer 的待办
-PASS N2 buyer 伪造 keeper filter → 空集 — count=0
-PASS N2 匿名读待办被拒（403 式 nocobase-unauthorized） — code=nocobase-unauthorized
-PASS N3 前置会话创建 — id=session-aedfc783-d600-4e16-83ee-f348b050920b
-PASS N3 首绑 buyer：待办按 buyer 过滤

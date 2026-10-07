@@ -1,0 +1,53 @@
+{
+  "at": "2026-10-06T15:58:31.287Z",
+  "legs": [
+    {
+      "leg": "r1-fence-report",
+      "sessionId": "session-07dac775-6ea9-4e5f-bf6b-09b8cb11e49f",
+      "ok": true
+    },
+    {
+      "leg": "r2-fence-choice-historical-degraded",
+      "sessionId": "session-8bbc5505-aa6f-44c2-b016-df8cc6f740b0",
+      "ok": true,
+      "folded": true,
+      "contentKept": true,
+      "note": "fence-era type \"choice\" degraded since creation — fossil of the probabilistic era, not a P1/P2 regression"
+    },
+    {
+      "leg": "r3-toolcard",
+      "sessionId": "session-a035ed7d-6166-4f23-81d9-5956a364bd25",
+      "ok": true
+    },
+    {
+      "leg": "r4-mixed",
+      "sessionId": "session-07dac775-6ea9-4e5f-bf6b-09b8cb11e49f",
+      "ok": false,
+      "turnDone": true,
+      "newPresentCards": 10,
+      "cardType": "ask_choice",
+      "allResultsOk": false,
+      "fenceCardVisible": true,
+      "newCardVisible": false
+    },
+    {
+      "leg": "r5-reopen-x3",
+      "sessionId": "session-fd6e892b-01de-43bc-a9db-a18e9979f565",
+      "ok": true,
+      "reopen": [
+        {
+          "okCard": true,
+          "len": 671
+        },
+        {
+          "okCard": true,
+          "len": 671
+        },
+        {
+          "okCard": true,
+          "len": 671
+        }
+      ]
+    }
+  ]
+}

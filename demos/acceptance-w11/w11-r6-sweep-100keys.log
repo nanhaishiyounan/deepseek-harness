@@ -1,4 +1,0 @@
-PASS R6-C1 种键布局：60 会话键（三族前缀各 20）+ 40 无关键（精确种入清单） — doomed=60 keep=40
-PASS R6-C2 0 漏删：60 个会话键全部清除（真实 Chromium Storage） — missed=[]
-PASS R6-C3 40 个无关键 byte-identical 存活 — identical=40/40
-PASS R6-C4 swept 留痕点名全部 60 个种入会话键（count=61，≥60 即合法——outbox store 运行期回写） — count=61 unlisted=[]

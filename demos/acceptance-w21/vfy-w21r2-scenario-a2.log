@@ -1,0 +1,21 @@
+prior tool errors: [{"tool":"nb_list","text":"Error: nb_list: filter on lifecycle_status: op \"in\" needs a non-empty array value"},{"tool":"nb_list","text":"Error: nb_list: filter on lifecycle_status: op \"in\" needs a non-empty array value"}]
+PASS 供应商 chips 存在（含山东鲁丰）
+PASS chip 点击填入 composer | draft="山东鲁丰食品配料有限公司"
+shot: vfy-w21r2-a-06-supplier-sent.png
+PASS 供应商回答后回合收尾 | reason=completed cards=ask_field,form_draft
+PASS form-draft 卡片渲染且唯一 | {"ask-choice":0,"field-ask":1,"draft-card-v3":1,"receipt-card-v3":0,"report-card":0,"approval-card":0,"plan-card":0}
+PASS 无 degraded 折叠（draft 阶段） | degraded=0
+PASS 卡片不折叠丢失（aria-label） | 采购单草稿卡
+PASS 无重复卡（draft=1） | draft=1
+fieldDump: {"rows":[{"label":"合计金额","hasInput":false,"inputMode":null,"inputValue":null,"textValue":"1000","expandBtn":"展开编辑 合计金额"},{"label":"币种","hasInput":false,"inputMode":null,"inputValue":null,"textValue":"CNY","expandBtn":"展开编辑 币种"},{"label":"需求日期","hasInput":false,"inputMode":null,"inputValue":null,"textValue":"","expandBtn":"展开编辑 需求日期"}],"tiers":["需要你定","请确认·AI 推导"],"buttons":[{"text":"驳回","disabled":false},{"text":"确认写入","disabled":false}]}
+PASS widget 控件在（字段行可输入或可展开） | ["合计金额:fold","币种:fold","需求日期:fold"]
+shot: vfy-w21r2-a-07-form-draft.png
+FAIL 数字字段[数量]填入 100 | input not found; derived text="" row=""
+FAIL 数字字段[单价]填入 10 | input not found; derived text="" row=""
+shot: vfy-w21r2-a-08-filled.png
+PASS 确认写入按钮可点 | count=1
+PASS 提交后回合收尾 | reason=completed
+PASS 提交一次成功（零 error、回执卡出现） | receipt=1 cards=ask_field,form_draft,submit_receipt errs=[]
+shot: vfy-w21r2-a-09-submitted.png
+receipt: 收采购单已登记№972026-10-07日期PO-2026-1062单号山东鲁丰食品配料有限公司供应商¥1,000合计金额收讫对话确认已落库单号PO-2026-1062查看这条记录
+PASS 提交后无 degraded 折叠 | degraded=0

@@ -1,0 +1,21 @@
+PASS 登录 buyer 成功
+shot: vfy-w21r2-a-01-login.png
+PASS session.create | session-faded363-1816-4f5a-9ad5-4ab63ae7bd1f
+FAIL 供应商点选卡片出现并被选择 | picked="" options=[]
+FAIL 供应商选择后回合收尾 | turn timeout
+FAIL form-draft 卡片渲染 | draft-card-v3 count=0 cards=ask_field
+PASS 无 degraded 折叠（draft 阶段） | degraded=0
+PASS 无重复卡（draft/receipt 唯一） | {"ask-choice":0,"field-ask":1,"draft-card-v3":0,"receipt-card-v3":0,"report-card":0,"approval-card":0,"approval-card-result":0,"plan-card":0,"plan-card-result":0}
+FAIL 卡片 aria-label（不折叠丢失） | null
+fieldDump: null
+FAIL widget 控件在（字段行含 input 或可展开） | []
+shot: vfy-w21r2-a-03-form-draft.png
+FAIL 数字字段[数量]填入 100 | input not found; row text=""
+FAIL 数字字段[单价]填入 10 | input not found; row text=""
+shot: vfy-w21r2-a-04-filled.png
+FAIL 确认写入按钮可点 | count=0
+ERROR locator.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for getByRole('button', { name: '确认写入' }).first()
+
+shot: vfy-w21r2-a-99-error.png

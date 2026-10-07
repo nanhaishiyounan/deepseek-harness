@@ -1,7 +1,0 @@
-{
-  "content": "[\n  {\n    \"severity\": \"P1明显\",\n    \"category\": \"inconsistency\",\n    \"description\": \"页面左上角返回按钮的圆形描边和内部箭头采用纯黑色，与设计语言中要求的“酱色”（深棕红）主色及暖纸底色严重冲突，破坏了整体视觉的一致性。\",\n    \"suggestion\": \"将返回按钮的描边及图标颜色统一修改为“酱色”（#4A2B2B 或类似深棕红色）。\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"misalign\",\n    \"description\": \"“质检员·王倩 · 常用单据”文本行的起始位置与下方第一列卡片（质检单、批次档案）的左边缘未完全对齐，存在约 2-4px 的微小位移。\",\n    \"suggestion\": \"统一左边距配置，确保次级标题与卡片列表在视觉纵轴上严格对齐。\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"contrast\",\n    \"description\": \"次级标题文字“质检员·王倩 · 常用单据”颜色较浅，在暖黄色背景下的对比度略显不足，易影响阅读体验。\",\n    \"suggestion\": \"提升该部分文字的灰度或采用深棕色，确保满足 WCAG 可读性标准。\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"inconsistency\",\n    \"description\": \"功能卡片（如“质检单”）的边框颜色偏向冷灰色调，未能体现“酱园琥珀”风格的温润感，与暖纸底色搭配时略显突兀。\",\n    \"suggestion\": \"将卡片边框颜色调整为带有暖色倾向的浅酱色或琥珀色，或者使用极淡的酱色阴影代替物理边框。\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"typography\",\n    \"description\": \"卡片内标题文字（如“不合格处置单”）行高与图标的间距偏大，且字号相比图标视觉比重略轻，导致卡片内部中心感偏下。\",\n    \"suggestion\": \"微调卡片内部间距（Padding/Gap），适当加粗文字或微调字号，使图标与文字的视觉重心更稳固。\"\n  }\n]",
-  "base_resp": {
-    "status_code": 0,
-    "status_msg": "success"
-  }
-}

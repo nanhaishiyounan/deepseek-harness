@@ -1,9 +1,0 @@
-PASS R2-0 LAN HTTP 面：isSecureContext=false 且 randomUUID undefined（真非 secure，无 stub） — {"secure":false,"uuid":"undefined"}
-PASS R2-1a 会话就绪 — session-39daceaf-0d31-43fe-a2c3-592b34c60d4d
-PASS R2-1b 非 secure 下 wire 发出且 clientMsgId 为 m_ 前缀（uid 兜底） — key=m_qc_inspector_29_muvyiwdj_ca5c414c
-PASS R2-1c 发送成功终态：draft 清空 — ""
-PASS R2-1d 发送终态后 sending 复位（turn 结束后第二条可发） — armed=true
-PASS R2-1e 第二条 wire 发出且 clientMsgId 不同 — keys=m_qc_inspector_29_muvyiwdj_ca5c414c vs m_qc_inspector_8_muvyj3gr_d61eaea8
-PASS R2-1f history 落账第一条消息 — total=4
-PASS R2-2 非 secure 下 ready 附件 reload 回填（savePersisted 正常） — count=1
-PASS R2-3 登出 sweep：三类会话键全清、theme 保留 — {"draft":null,"outbox":null,"attachments":null,"theme":"dark"}

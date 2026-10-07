@@ -20,9 +20,9 @@ Status: implemented
 ## 影响
 
 - 模型回合只能经由用户发送前可见可删的引用块读到附件内容——引用整段天然对用户可见；提取失败落在 chip 上（`data-extract-failed` → 扫描件提示话术）而不是静默发空。
-- 语音探测判定是面板消费的 prop（`voiceSupported: 'yes' | 'no' | 'broken'`）；jsdom spec 钉隐藏分支与三条 picker 车道，真机裁定归清单（[w11-b3-voice-realdevice.md](../../../../demos/acceptance-w11/w11-b3-voice-realdevice.md)，OQ-2 用户回填）。
+- 语音探测判定是面板消费的 prop（`voiceSupported: 'yes' | 'no' | 'broken'`）；jsdom spec 钉隐藏分支与三条 picker 车道，真机裁定归清单（`demos/acceptance-w11/w11-b3-voice-realdevice.md`，OQ-2 用户回填）。
 - 微信内预期：工具区三格、无语音格——这个「不在」就是契约在工作，不是回归。
-- Office 文件（docx/xlsx）、微信 JS-SDK 麦克风车道、端侧 ASR（sherpa-onnx）、多模态 T2 进 W12 池（deferral 记录在 [demos/acceptance-w11/INDEX.md](../../../../demos/acceptance-w11/INDEX.md)）。
+- Office 文件（docx/xlsx）、微信 JS-SDK 麦克风车道、端侧 ASR（sherpa-onnx）、多模态 T2 进 W12 池（deferral 记录在 `demos/acceptance-w11/INDEX.md`）。
 
 ## 备选方案
 

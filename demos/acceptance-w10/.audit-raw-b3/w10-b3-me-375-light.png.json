@@ -1,7 +1,0 @@
-{
-  "content": "[\n  {\"severity\":\"P1\",\"category\":\"layout-overflow\",\"description\":\"顶部标题「我的」文字上方未预留系统状态栏安全区，与屏幕顶边缘过于接近\",\"suggestion\":\"增加顶部安全区外边距（Safe Area Margin），建议 44px 或以上\"},\n  {\"severity\":\"P1\",\"category\":\"contrast\",\"description\":\"用户 ID「qc_inspector...」及通知说明「本地开关占位...」等辅助文字颜色过浅，在暖纸底色上对比度不足\",\"suggestion\":\"调深辅助文字颜色，建议使用酱色（深棕红）的 60% 透明度版本，以满足可读性要求\"},\n  {\"severity\":\"P2\",\"category\":\"ua-default-style\",\"description\":\"「登记采购单」等操作按钮呈现典型的浏览器默认边框风格，浅灰色细边框与「酱园琥珀」的重彩风格不符\",\"suggestion\":\"去除默认灰边框，改用酱色实线边框或琥珀色浅底色，并微调圆角以体现「印章」质感\"},\n  {\"severity\":\"P1\",\"category\":\"inconsistency\",\"description\":\"「琥珀」装饰色不统一：底部导航激活项背景为浅杏色，而「真实模式」开关激活态为高饱和橙色，色相偏差较大\",\"suggestion\":\"统一琥珀色的色相值（Hue），建议将开关的橙色调整为与品牌视觉一致的温润琥珀金\"},\n  {\"severity\":\"P2\",\"category\":\"spacing\",\"description\":\"「工作空间」卡片内，数字与下方文字标签「今日待处理」等垂直间距过紧，且四个区块的内边距不平衡\",\"suggestion\":\"增加数字与文字间的间距（建议 4-8px），并统一四个区块的 Padding\"},\n  {\"severity\":\"P1\",\"category\":\"layout-overflow\",\"description\":\"页面底部「数据与关于」卡片内容被底栏（Tabbar）遮挡，列表项「清除演示数据」显示不全\",\"suggestion\":\"为页面滚动区域增加足够的 bottom-padding，确保最下方元素能完全滚出底栏遮挡区\"},\n  {\"severity\":\"P2\",\"category\":\"typography\",\"description\":\"「待审核」右侧的数字「0」与单位「条」基准线对齐略显生硬，且「0」的字重与左侧加粗标题不匹配\",\"suggestion\":\"微调数字与文字的基准线对齐，并保持同一统计维度下的字重一致性\"},\n  {\"severity\":\"P2\",\"category\":\"other\",\"description\":\"「本月登记」下的三个点「...」作为占位符形式不明，且视觉重心偏下，容易误判为加载失败或默认字符\",\"suggestion\":\"若为无数据状态应显示数字「0」，若为加载中应使用标准的 Loading 动画组件\"}\n]",
-  "base_resp": {
-    "status_code": 0,
-    "status_msg": "success"
-  }
-}

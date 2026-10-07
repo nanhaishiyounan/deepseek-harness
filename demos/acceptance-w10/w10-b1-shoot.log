@@ -1,3 +1,0 @@
-PASS chat 会话就绪 — session-f2cdd70b-e362-4688-a7c0-abc3982b25d0
-FAIL chat 回合卡面出现 — 模型走纯文本路径（卡片渲染由 v3 spec 覆盖）
-PASS work 详情路由进入 — http://127.0.0.1:3080/mobile.html#/work/w_muu99d3ug9js

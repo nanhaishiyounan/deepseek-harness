@@ -1,0 +1,8 @@
+[replay r1-fence-report] PASS legacy fence report renders
+[replay r2-fence-choice] PASS folded=true content-kept=true (historical degraded state preserved)
+[replay r3-toolcard] PASS present_card ask renders
+[replay r4-mixed] FAIL fence-card=true new-ask_choice-card=false newCalls=10 resultsOk=false
+[replay r5-reopen] #1 card-visible=true len=671
+[replay r5-reopen] #2 card-visible=true len=671
+[replay r5-reopen] #3 card-visible=true len=671
+[replay r5-reopen-x3] PASS identical snapshots across 3 reopens

@@ -1,0 +1,4 @@
+preflight: /mobile=200 persona-projection-sync=true
+login: buyer
+  [r4#1] PASS sid=session-07dac775-6ea9-4e5f-bf6b-09b8cb11e49f cards=report payloadString=false errs=0 10110ms
+  [r4#2] PASS sid=session-07dac775-6ea9-4e5f-bf6b-09b8cb11e49f cards=report payloadString=false errs=0 10086ms

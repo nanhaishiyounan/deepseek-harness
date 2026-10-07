@@ -1,0 +1,170 @@
+{
+  "scenario": "A2",
+  "sessionId": "session-faded363-1816-4f5a-9ad5-4ab63ae7bd1f",
+  "checks": [
+    {
+      "name": "供应商 chips 存在（含山东鲁丰）",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "chip 点击填入 composer",
+      "ok": true,
+      "detail": "draft=\"山东鲁丰食品配料有限公司\""
+    },
+    {
+      "name": "供应商回答后回合收尾",
+      "ok": true,
+      "detail": "reason=completed cards=ask_field,form_draft"
+    },
+    {
+      "name": "form-draft 卡片渲染且唯一",
+      "ok": true,
+      "detail": "{\"ask-choice\":0,\"field-ask\":1,\"draft-card-v3\":1,\"receipt-card-v3\":0,\"report-card\":0,\"approval-card\":0,\"plan-card\":0}"
+    },
+    {
+      "name": "无 degraded 折叠（draft 阶段）",
+      "ok": true,
+      "detail": "degraded=0"
+    },
+    {
+      "name": "卡片不折叠丢失（aria-label）",
+      "ok": true,
+      "detail": "采购单草稿卡"
+    },
+    {
+      "name": "无重复卡（draft=1）",
+      "ok": true,
+      "detail": "draft=1"
+    },
+    {
+      "name": "widget 控件在（字段行可输入或可展开）",
+      "ok": true,
+      "detail": "[\"合计金额:fold\",\"币种:fold\",\"需求日期:fold\"]"
+    },
+    {
+      "name": "数字字段[数量]填入 100",
+      "ok": false,
+      "detail": "input not found; derived text=\"\" row=\"\""
+    },
+    {
+      "name": "数字字段[单价]填入 10",
+      "ok": false,
+      "detail": "input not found; derived text=\"\" row=\"\""
+    },
+    {
+      "name": "确认写入按钮可点",
+      "ok": true,
+      "detail": "count=1"
+    },
+    {
+      "name": "提交后回合收尾",
+      "ok": true,
+      "detail": "reason=completed"
+    },
+    {
+      "name": "提交一次成功（零 error、回执卡出现）",
+      "ok": true,
+      "detail": "receipt=1 cards=ask_field,form_draft,submit_receipt errs=[]"
+    },
+    {
+      "name": "提交后无 degraded 折叠",
+      "ok": true,
+      "detail": "degraded=0"
+    }
+  ],
+  "priorToolErrors": [
+    {
+      "seq": 45,
+      "callId": "call_01a1132da55276238ee66182",
+      "tool": "nb_list",
+      "isError": true,
+      "text": "Error: nb_list: filter on lifecycle_status: op \"in\" needs a non-empty array value"
+    },
+    {
+      "seq": 61,
+      "callId": "call_01a1132db0c47d50b2fcb19b",
+      "tool": "nb_list",
+      "isError": true,
+      "text": "Error: nb_list: filter on lifecycle_status: op \"in\" needs a non-empty array value"
+    }
+  ],
+  "cardsAfterSupplier": [
+    "ask_field",
+    "form_draft"
+  ],
+  "errorsAfterSupplier": [],
+  "cardCountsAtDraft": {
+    "ask-choice": 0,
+    "field-ask": 1,
+    "draft-card-v3": 1,
+    "receipt-card-v3": 0,
+    "report-card": 0,
+    "approval-card": 0,
+    "plan-card": 0
+  },
+  "fieldDump": {
+    "rows": [
+      {
+        "label": "合计金额",
+        "hasInput": false,
+        "inputMode": null,
+        "inputValue": null,
+        "textValue": "1000",
+        "expandBtn": "展开编辑 合计金额"
+      },
+      {
+        "label": "币种",
+        "hasInput": false,
+        "inputMode": null,
+        "inputValue": null,
+        "textValue": "CNY",
+        "expandBtn": "展开编辑 币种"
+      },
+      {
+        "label": "需求日期",
+        "hasInput": false,
+        "inputMode": null,
+        "inputValue": null,
+        "textValue": "",
+        "expandBtn": "展开编辑 需求日期"
+      }
+    ],
+    "tiers": [
+      "需要你定",
+      "请确认·AI 推导"
+    ],
+    "buttons": [
+      {
+        "text": "驳回",
+        "disabled": false
+      },
+      {
+        "text": "确认写入",
+        "disabled": false
+      }
+    ]
+  },
+  "fill": {
+    "qtyOk": false,
+    "priceOk": false
+  },
+  "cardsAfterConfirm": [
+    "ask_field",
+    "form_draft",
+    "submit_receipt"
+  ],
+  "errorsAfterConfirm": [],
+  "cardCountsAfterConfirm": {
+    "ask-choice": 0,
+    "field-ask": 1,
+    "draft-card-v3": 0,
+    "receipt-card-v3": 1,
+    "report-card": 0,
+    "approval-card": 0,
+    "plan-card": 0
+  },
+  "receiptText": "收采购单已登记№972026-10-07日期PO-2026-1062单号山东鲁丰食品配料有限公司供应商¥1,000合计金额收讫对话确认已落库单号PO-2026-1062查看这条记录",
+  "consoleMsgs": [],
+  "netBad": []
+}

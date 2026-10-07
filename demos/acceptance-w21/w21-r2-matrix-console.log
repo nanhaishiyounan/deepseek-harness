@@ -1,0 +1,7 @@
+preflight: /mobile=200 persona-projection-sync=true
+  [num#1] 已完成，跳过（resume）
+  [num#2] 已完成，跳过（resume）
+  [num#3] 已完成，跳过（resume）
+  [enum#1] 已完成，跳过（resume）
+  [enum#2] 已完成，跳过（resume）
+  [enum#3] 已完成，跳过（resume）

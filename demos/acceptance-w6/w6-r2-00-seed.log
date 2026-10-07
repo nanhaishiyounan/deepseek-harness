@@ -1,6 +1,0 @@
-w6b2-rules: four rules seeded (alert_rules rows=4)
-w6b2-rules: member→wfl_alert_acts view granted
-w6b2-rules: member→wfl_alert_acts create granted
-w6b2-rules: 认领意图表单已挂到预警列表（AddNew → wfl_alert_acts → workflow → POST /alerts/act）
-w6b2-rules: workflow "W6B2-预警处理回调" created (wfl_alert_acts:create → request http://127.0.0.1:13110/alerts/act)
-w6b2-rules: seed 完成（集合+渠道+四路规则+两页+认领入口）

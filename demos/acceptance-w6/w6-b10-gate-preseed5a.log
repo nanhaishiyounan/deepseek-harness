@@ -1,5 +1,0 @@
-w6b5-insp: rule inspection_fail seeded (route 质检部+quality_lead+planner)
-w6b5-insp: v2 page 检验工作台 exists (kept)
-w6b5-insp: v2 page 出厂检验报告 exists (kept)
-w6b5-insp: rehearsal inspections QI-W6B5-01 (IQC N=300) + QI-W6B5-F1 (OQC N=350) ensured
-w6b5-insp: seed complete

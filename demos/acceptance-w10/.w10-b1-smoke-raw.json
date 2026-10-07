@@ -1,7 +1,0 @@
-{
-  "content": "```json\n[\n  {\n    \"severity\": \"P0\",\n    \"category\": \"layout-overflow\",\n    \"description\": \"“AI 同事”模块下的头像显示严重异常，表现为扁平的矩形且内容被截断，未能正确显示为圆形或正常的头像比例。\",\n    \"suggestion\": \"检查头像组件的 CSS 容器宽高比设置，确保图片以 object-fit: cover 方式在圆形容器内居中显示。\"\n  },\n  {\n    \"severity\": \"P1\",\n    \"category\": \"contrast\",\n    \"description\": \"顶部副标题“75 项预警待看”采用浅橙色文字，在浅黄色背景下的对比度极低，不符合无障碍设计标准，识别困难。\",\n    \"suggestion\": \"加深该文本颜色，或为该文本添加深色底块以提升阅读对比度。\"\n  },\n  {\n    \"severity\": \"P2\",\n    \"category\": \"spacing\",\n    \"description\": \"“我的预警”按钮上的红色角标“75”位置过于靠上，贴近上方卡片边缘，视觉上显得局促且存在重叠风险。\",\n    \"suggestion\": \"调整角标的相对定位偏移量，使其向下向左适当移动，并增加模块间的纵向间距。\"\n  },\n  {\n    \"severity\": \"P1\",\n    \"category\": \"layout-overflow\",\n    \"description\": \"页面底部的“最近对话”卡片在底部导航栏上方被截断，且没有足够的留白，导致视觉上卡片未完整显示。\",\n    \"suggestion\": \"为滚动容器添加 padding-bottom，确保最后一个列表项能完整露在导航栏上方。\"\n  },\n  {\n    \"severity\": \"P2\",\n    \"category\": \"inconsistency\",\n    \"description\": \"底部导航栏中，“消息”图标为填充色块风格，而“同事”、“工作台”、“我的”图标为线性风格，视觉语言不统一。\",\n    \"suggestion\": \"统一导航栏图标风格，建议全部使用线性图标，仅在选中态进行填充或变色。\"\n  },\n  {\n    \"severity\": \"P2\",\n    \"category\": \"typography\",\n    \"description\": \"页面顶部标题“质检员·王倩，秋分时节”字号较大且行宽较长，右侧紧贴“鲜酿”印章装饰物，视觉重心失衡且显得拥挤。\",\n    \"suggestion\": \"适当缩小该行标题字号，或调整右侧装饰物的位置，保持呼吸感。\"\n  }\n]\n```",
-  "base_resp": {
-    "status_code": 0,
-    "status_msg": "success"
-  }
-}

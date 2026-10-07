@@ -20,9 +20,9 @@ The + panel's three tool entries were placeholder toasts. Turning them real need
 ## Consequences
 
 - A model turn answers from an attachment's content only through the quote block the user can see and delete before sending — the whole citation is user-visible by construction, and a failed extraction surfaces on the chip (`data-extract-failed` → the scan-hint sentence) instead of silently shipping nothing.
-- The voice detect verdict is a prop (`voiceSupported: 'yes' | 'no' | 'broken'`) the panel consumes; jsdom specs pin the hidden-tile branch and the three picker lanes, and the real-device checklist ([w11-b3-voice-realdevice.md](../../../../demos/acceptance-w11/w11-b3-voice-realdevice.md)) owns the on-hardware verdicts (OQ-2, user-fill).
+- The voice detect verdict is a prop (`voiceSupported: 'yes' | 'no' | 'broken'`) the panel consumes; jsdom specs pin the hidden-tile branch and the three picker lanes, and the real-device checklist (`demos/acceptance-w11/w11-b3-voice-realdevice.md`) owns the on-hardware verdicts (OQ-2, user-fill).
 - In-WeChat expectation: the tool grid shows three tiles with no voice tile — that absence is the contract working, not a regression.
-- Office files (docx/xlsx), the WeChat JS-SDK mic lane, on-device ASR (sherpa-onnx), and multimodal T2 ride the W12 pool (deferral recorded in [demos/acceptance-w11/INDEX.md](../../../../demos/acceptance-w11/INDEX.md)).
+- Office files (docx/xlsx), the WeChat JS-SDK mic lane, on-device ASR (sherpa-onnx), and multimodal T2 ride the W12 pool (deferral recorded in `demos/acceptance-w11/INDEX.md`).
 
 ## Alternatives considered
 

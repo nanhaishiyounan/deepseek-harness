@@ -1,0 +1,2189 @@
+{
+  "stages": [
+    {
+      "stage": "chat-open",
+      "url": "http://127.0.0.1:3080/mobile.html#/chat/session-5c4e7e35-10bc-4e44-a121-4efea7ff61be"
+    },
+    {
+      "stage": "send",
+      "draftBeforeSend": "查一下酱油还有多少库存"
+    },
+    {
+      "stage": "outcome",
+      "state": {
+        "bubbleCount": 0,
+        "hasUserEcho": true,
+        "hasError": false,
+        "tail": "表单\n查一下酱油还有多少库存\n智能填表助手\n今天\n查一下酱油还有多少库存\n表单\nAI\n\n好的，我来查一下酱油的库存。\n\n先按品名解析物料，再查各库位的良品库存。\n\n查询业务记录\n查询业务记录\n\n找到了酱油物料，但库存表的过滤字段名得试一下。\n\n查询业务记录\n\n库存表回出来了，良品行按库位汇总前，回读一下库位名称。\n\n查询业务记录\n\n酱油 500ml（酿造型）共有 8 个在架良品位，合计现有 2115 件、可用 2001 件（已扣预留 74 件；A01-02 批次 2 还有 40 件被锁）。\n\n结构化消息（格式异常，已折叠）"
+      }
+    },
+    {
+      "stage": "send-verdict",
+      "sendOutcome": "timeout"
+    },
+    {
+      "stage": "nav-info",
+      "navInfo": []
+    },
+    {
+      "stage": "tab-#/",
+      "hash": "#/",
+      "textLen": 691,
+      "head": "下午好\n质检员·王倩，秋分时节\n\n10月6日 周二 · 75 项预警待看\n\n鲜酿\nB-1006\n搜索会话 / AI 同事\n0项\n待处理\n36项\n进行中\n34项\n",
+      "blank": false
+    },
+    {
+      "stage": "tab-#/work",
+      "hash": "#/work",
+      "textLen": 906,
+      "head": "工作\n任务\n文件\n待处理 0\n进行中 36\n待确认 34\n已完成 33\n这个状态还没有工作\n去聊天里让 AI 同事帮你处理\n去找 AI 同事\nAI 食安合规官\n",
+      "blank": false
+    },
+    {
+      "stage": "tab-#/me",
+      "hash": "#/me",
+      "textLen": 330,
+      "head": "我的\n我\n质检员·王倩\nqc_inspector · 真实账号 · NocoBase 账号体系\n本月登记\n1 条\n待审核\n0 条\n工作空间\n0\n今日待处理\n36",
+      "blank": false
+    },
+    {
+      "stage": "tab-#/chats",
+      "hash": "#/chats",
+      "textLen": 883,
+      "head": "消息\n全部\nAI 同事\n待审核\n下拉刷新\n表单\n查一下酱油还有多少库存\n17:09\n酱油 500ml（酿造型）共有 8 个在架良品位…\n表单\n置顶\n标记已读\n表",
+      "blank": false
+    }
+  ],
+  "requests": [
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.prompt",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"946963af-f96e-4054-9a75-e4fb11550f54\",\"method\":\"session.prompt\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"mode\":\"queue\",\"content\":[{\"type\":\"text\",\"text\":\"查一下酱油还有多少库存\"}],\"clientTimeZone\":\"Asia/Shanghai\",\"clientMsgId\":\"m_qc_inspector_11_muwgj3kp_1604306c\",\"authToken\":\"76aec1e6-c4e2-418f-8ea1-0de419139835\"}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.prompt"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"a486f78c-2c6d-481a-8e97-9fab603718fc\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":2}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"41e6bda1-f209-4df7-a032-18d99df62337\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":5}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"4fb7eaf1-1528-488b-b15b-a48a778dce80\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":13}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"ad5cfc0d-381d-4424-996f-f4eebcd92c16\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":13}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"971429e3-2c4a-4e4f-b3d2-b2220c2281b4\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":13}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"4ce7e40b-5701-4f58-973e-9015c666781f\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":13}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"fb04ab40-1fd1-426b-b6b9-7170f1c77717\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":13}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"45112e4e-8625-46d4-bb7e-7bddaabdb58a\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":13}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.list",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"307405e1-b48d-40e6-a8c3-19a6548dfb6c\",\"method\":\"session.list\",\"payload\":{}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"7557b811-0192-4d42-a298-55b851507226\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":13}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.list"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"a85209d0-78e1-4d5b-b73b-926936273567\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":13}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"961c9832-8b35-4c79-8491-3a5a60eca904\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":13}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"e45b8f81-6747-4c41-9c95-ed9283379031\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":13}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"a681c0a6-b226-487a-87de-2a4ad76a0d77\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":13}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"60b177dc-eb04-4802-9810-32913810900e\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":13}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"eef8bad1-5caf-4a93-9d21-c66a1a91e8a2\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":13}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"b70bdaa7-f5fc-43a6-84d2-d346c91a87a3\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":15}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"3eee2af9-0ea8-4e04-a537-5d4cb807e096\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":22}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"41368179-8b4d-48d9-af09-41f1ea777dfa\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":47}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"ab5d801e-d751-4635-b807-41ab8349737f\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":60}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.list",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"15356c61-ec2f-4fc0-b77c-626473e29de1\",\"method\":\"session.list\",\"payload\":{}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"4e59ba50-fa56-4586-88cb-fb84070e01a1\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":64}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.list"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"bda18295-e6f9-4a65-843d-3514747191df\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":64}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"38a2ce7c-5016-4ca7-8087-83806a8f8ed2\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":64}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"a6867f6b-7dcf-44ef-b72c-a21ada9d37c2\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":64}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"992c353d-d47d-41e8-a8e4-7d1ed0d33db1\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":64}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"06cd6a27-6b69-472e-87dd-3d54fa01bfbe\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":64}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"06abe78a-aae1-4269-ae3d-3292ac26f01c\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":89}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"cd041527-244c-4598-b896-8345bdc4450e\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":92}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"9c21b1d4-22fe-475f-8e6b-93e747cc908e\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":102}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"1cc0736f-5575-4da5-a20b-2bffb36d38c3\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":102}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"8bbdc482-86f0-454c-9d82-2a5a0f02a961\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":102}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.list",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"735b824d-ed7b-4453-8299-a3f681a2bf91\",\"method\":\"session.list\",\"payload\":{}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"e7bae68d-8ef6-4dfc-ad45-c8afa8a5586d\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"maxMessages\":200}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.list"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"c57937ec-b7eb-47ec-8876-a10aac4b6722\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":143}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"7413fc3f-c84c-4fa0-a19d-e4f28abd446c\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":148}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"2022170e-1875-4117-962b-cc4a869c1608\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":157}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"de50a582-dfe0-4987-a2b8-dbeec3621c0c\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":181}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"04c55a0e-14c5-4818-ba85-f0755b1a653a\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":191}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"5b08f9ef-4f1e-4e13-9cbf-f3da1ce2ea22\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":220}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"601e0f75-0d76-4f7f-b563-c68e8f2e4f77\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":232}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"0fd43e1f-99b9-4690-b6d7-faa971f1cf40\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":255}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"a9c61a0d-c6d8-47ea-b3ae-a311dc47b7a9\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":271}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"cb79ab88-6cad-434b-98dc-9fb4cec94e21\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":285}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.list",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"0d8d4bf2-c2d3-4ea9-829d-a701d3695b4f\",\"method\":\"session.list\",\"payload\":{}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.list"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"3b4cdf82-66a5-43bb-a2d6-c46d7855cff8\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":294}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"6dca526f-c672-4339-a86e-86d598f0c686\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":297}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"d1ad1d00-58ca-44c4-8063-405eef516afc\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":297}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"098c779f-a682-4887-973c-9764a031674f\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":299}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"517eca4d-eacf-4c5c-aa82-b3c02bb6e65a\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":332}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"bb10db81-d3b0-4922-822f-5d4b3aeda1bf\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":344}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"dc9ec0b4-1e55-4516-b3c1-b8aebcab24cd\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":354}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"73405183-b7f0-41f9-ac12-7faf9abbc777\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":387}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"802a3cd8-b47a-410c-a6d2-b5e6390cf88c\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":409}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"70ed74fa-8835-46b3-9d75-58887e32d012\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":429}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.list",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"6e8bfffb-33d4-40ed-95b9-7c61b74cc293\",\"method\":\"session.list\",\"payload\":{}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"59143f79-6872-469f-b69a-8531f4addf1d\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":433}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.list"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"57ee3c66-e6a6-40f2-a02c-ab0ab0d1b3b7\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"maxMessages\":200}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"b4b245ac-177e-4fb8-90d1-6dce82443a1e\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":480}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"4ae9d4b7-5f64-44ee-8576-32e9eaf7e118\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":480}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.list",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"f55434ba-b4d3-4dae-9c1b-79ff9f94d188\",\"method\":\"session.list\",\"payload\":{}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.list"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"379731da-c30f-4ff1-89db-5f6666843456\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":480}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"33a00dcb-cad3-4adb-b978-2bcdcda7c43d\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":480}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.list",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"2e502983-1a21-4867-a9d1-a43e6b20e554\",\"method\":\"session.list\",\"payload\":{}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.list"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"e2b73897-a253-4556-a86e-9b15f42454d3\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":480}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.list",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"4888ea95-fced-4ecc-beb3-cdca17c131a1\",\"method\":\"session.list\",\"payload\":{}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"9e83d2df-efe2-48bb-af52-eb4970f6e275\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":480}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.list"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"9f895bb1-134f-4368-9b9a-2ebeee4f51f3\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":480}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.list",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"652fcb3d-7cb7-433e-822e-d05a002f2ae1\",\"method\":\"session.list\",\"payload\":{}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.list"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"01617897-1efe-4d4d-a31e-1578c2d595a7\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":480}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"382167a6-526e-4b50-9384-6c7c24c1ad57\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":480}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.list",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"9a86cd85-eebe-453d-82b4-2cb172604bcf\",\"method\":\"session.list\",\"payload\":{}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.list"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"55a4ca28-dcab-4ef8-9539-0e3ba00f916c\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":480}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"6e92fd57-e860-4a2c-a4ad-2500ff8def29\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":480}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.list",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"73f02177-c673-4710-8945-72c11478c0bc\",\"method\":\"session.list\",\"payload\":{}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.list"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"af024271-d6a1-40a4-ad40-240ad1726f01\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":480}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.list",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"591aa501-abca-4765-bdc0-98060c959f7f\",\"method\":\"session.list\",\"payload\":{}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.list"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"045fcdbd-99ce-4980-80cc-fe53bf3aeac4\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":480}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"48a33100-aac2-47ba-93fc-35f5f3e8c755\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":480}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.list",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"9273003b-aba9-4b8b-a50e-6dc26a1928c9\",\"method\":\"session.list\",\"payload\":{}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.list"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"fba4cb5e-510c-4502-9812-0fce31f7aad5\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":480}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"aaede57e-048a-4951-9339-6f938f605daf\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"afterSeq\":480}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.list",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"fc72251b-20c6-4a8d-9545-57bb40989887\",\"method\":\"session.list\",\"payload\":{}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.list"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/agentPreset.list",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"8ffcf65e-564e-4a6b-8ea0-e105c4ed7502\",\"method\":\"agentPreset.list\",\"payload\":{}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.list",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"8b2d02d5-7c8a-4ba5-ad55-375ed8163f86\",\"method\":\"session.list\",\"payload\":{}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/nocobase.list",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"b1cfe7a8-626e-44af-9c2b-bd0b0d74a155\",\"method\":\"nocobase.list\",\"payload\":{\"collection\":\"wfl_alerts\",\"filter\":[{\"field\":\"status\",\"op\":\"in\",\"value\":[\"open\",\"acknowledged\"]}],\"page\":1,\"page_size\":100,\"sort\":[\"-id\"],\"authToken\":\"76aec1e6-c4e2-418f-8ea1-0de419139835\"}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/agentPreset.list"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/nocobase.list"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.list"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"ae950834-fc7a-4c25-9195-d5aebb97de7c\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"maxMessages\":16}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"4db61c77-acb5-4794-b494-9f369da5a298\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-aa781ee7-7ab6-4322-85c0-cda931deb4e9\",\"maxMessages\":16}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"d6ba1ac3-caeb-47c6-95ea-9d0b3559b684\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-4684b2cd-d2bf-48d1-9ed0-30684aba6c2c\",\"maxMessages\":16}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/agentPreset.list",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"ecf9f13e-6e8a-42a5-8314-5a52ed6024ef\",\"method\":\"agentPreset.list\",\"payload\":{}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/agentPreset.list"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/nocobase.list",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"13d6a759-3b40-4d04-b4dc-52f6e6193c0b\",\"method\":\"nocobase.list\",\"payload\":{\"collection\":\"wfl_approval_records\",\"filter\":[{\"field\":\"approver\",\"op\":\"eq\",\"value\":\"qc_inspector\"},{\"field\":\"action\",\"op\":\"eq\",\"value\":\"submit\"},{\"field\":\"acted_at\",\"op\":\"gt\",\"value\":\"2026-09-30\"},{\"field\":\"acted_at\",\"op\":\"lt\",\"value\":\"2026-11-01\"}],\"page\":1,\"page_size\":1,\"authToken\":\"76aec1e6-c4e2-418f-8ea1-0de419139835\"}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.list",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"e9312285-29f6-45a8-9232-6a065c93bc57\",\"method\":\"session.list\",\"payload\":{}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/nocobase.list"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.list"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"537373e7-2119-46f2-ac3f-2fc2dd010f29\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-5c4e7e35-10bc-4e44-a121-4efea7ff61be\",\"maxMessages\":200}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"07d1ca56-c2ed-4e68-a5ef-832be74149af\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-aa781ee7-7ab6-4322-85c0-cda931deb4e9\",\"maxMessages\":200}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"bc836f60-384c-45c9-a141-39cfe776e123\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-4684b2cd-d2bf-48d1-9ed0-30684aba6c2c\",\"maxMessages\":200}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"9f4cc2fb-6509-452c-9a6f-f69177415e20\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-aac67dad-edf5-4479-939b-d70ee4cafa50\",\"maxMessages\":200}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"9c7a30da-6d59-43bb-bb53-4bafd85ce6f8\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-f388e750-feae-42f9-b7f1-e0083e1940b5\",\"maxMessages\":200}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"f14c8fe9-3492-42bb-b1d2-edb80dfd6f45\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-92e18cdf-1372-41d7-98f3-b4ce0c753171\",\"maxMessages\":200}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"b67644fc-4611-4700-9550-77eef4e89baf\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-b8952713-4a81-4a83-877d-abe95749505b\",\"maxMessages\":200}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"833d5568-9391-48ae-8f74-5b93353e32e4\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-29555d13-adff-4b75-9c54-5d62f765b361\",\"maxMessages\":200}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"6b6c00a6-b4aa-49aa-a3f7-aa1ce5dbabc1\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-3ba9f908-76e2-4a40-8482-344f72f59cdc\",\"maxMessages\":200}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"7417ffde-9c31-4eab-ae64-9365a60ecfcd\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-f176f088-9a4e-490b-9f0b-1fd8e0366fa2\",\"maxMessages\":200}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/agentPreset.list",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"07b99282-6ccf-4ec9-bac3-3a2fe2de86f9\",\"method\":\"agentPreset.list\",\"payload\":{}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.list",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"0d5d81cc-4f4a-4aa6-9888-acb7638a2e00\",\"method\":\"session.list\",\"payload\":{}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.list",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"72494715-06aa-4196-a4cb-687d0319faf0\",\"method\":\"session.list\",\"payload\":{}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/agentPreset.list",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"5d95d696-a888-4eab-9626-35b36beb3c2b\",\"method\":\"agentPreset.list\",\"payload\":{}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/agentPreset.list"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/agentPreset.list"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.list"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.list"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"ba31317b-bfa3-4473-8b2b-d700208e032e\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-aa781ee7-7ab6-4322-85c0-cda931deb4e9\",\"maxMessages\":16}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"7aeb7893-69b1-4c72-aed2-a9c94866291c\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-4684b2cd-d2bf-48d1-9ed0-30684aba6c2c\",\"maxMessages\":16}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"52ea66c6-f153-46b4-b17f-beef619d75c7\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-aac67dad-edf5-4479-939b-d70ee4cafa50\",\"maxMessages\":16}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"533cfc3f-0438-4399-b4e2-ccec35f7cf8a\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-f388e750-feae-42f9-b7f1-e0083e1940b5\",\"maxMessages\":16}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"927c0620-a10f-4aea-8c21-5046f265339a\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-92e18cdf-1372-41d7-98f3-b4ce0c753171\",\"maxMessages\":16}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"3756fc43-3f62-4fd1-ad06-e2921bb2c8a6\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-b8952713-4a81-4a83-877d-abe95749505b\",\"maxMessages\":16}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"c915a5d6-e30f-4ce8-9441-fb422a1ebdc3\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-29555d13-adff-4b75-9c54-5d62f765b361\",\"maxMessages\":16}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"c841c05a-789f-4091-be25-378840184c82\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-3ba9f908-76e2-4a40-8482-344f72f59cdc\",\"maxMessages\":16}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"eff1213d-42b5-4f3d-8a9a-249a8b19610b\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-f176f088-9a4e-490b-9f0b-1fd8e0366fa2\",\"maxMessages\":16}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"5febe34c-8b62-41a8-9970-606afbbc6ca7\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-4bc8216f-802f-4ea5-8c15-0387b457e013\",\"maxMessages\":16}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"022909b0-b93c-4355-98b0-e1f4f1e239ef\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-40215c68-7ede-44da-af5f-bf50c4f7c235\",\"maxMessages\":16}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"e67a7923-a05c-4777-818b-48526f0f9aa1\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-3a9620ee-13a5-4c9e-9025-596f68b8e3cd\",\"maxMessages\":16}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"f88837cb-364c-4d6a-b463-d07ce8f95327\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-e9bd1dcc-7a86-43df-8f32-3d4a78d40f3b\",\"maxMessages\":16}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"2c6dcec4-c3d8-4abe-b31b-6dd721309d95\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-2244caa9-434b-4162-b0f6-7beb807de18d\",\"maxMessages\":16}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/agentPreset.list",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"12a10655-1ab3-45b1-9ffb-b986ebc198fa\",\"method\":\"agentPreset.list\",\"payload\":{}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.list",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"304205e1-8e7e-4ea6-9dfc-7f0109eeae82\",\"method\":\"session.list\",\"payload\":{}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/nocobase.list",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"512a89e9-1a2c-4895-90fa-c2c55b62fce6\",\"method\":\"nocobase.list\",\"payload\":{\"collection\":\"wfl_alerts\",\"filter\":[{\"field\":\"status\",\"op\":\"in\",\"value\":[\"open\",\"acknowledged\"]}],\"page\":1,\"page_size\":100,\"sort\":[\"-id\"],\"authToken\":\"76aec1e6-c4e2-418f-8ea1-0de419139835\"}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/agentPreset.list"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/nocobase.list"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.list"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"3c21953c-2404-4841-aa05-94ae9b411f7a\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-aa781ee7-7ab6-4322-85c0-cda931deb4e9\",\"maxMessages\":16}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"72b1da0d-6caa-4195-84cc-060715a74e46\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-4684b2cd-d2bf-48d1-9ed0-30684aba6c2c\",\"maxMessages\":16}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.create",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"e211e4ce-525d-4241-baf1-0666c6631237\",\"method\":\"session.create\",\"payload\":{\"agentPreset\":\"mobile-form-assistant\"}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.create"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/agentPreset.list",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"ee0aeb2a-365f-4f7e-b54d-9b952fd27519\",\"method\":\"agentPreset.list\",\"payload\":{}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.list",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"4017d9ab-8cbe-4c38-8d88-20077773519a\",\"method\":\"session.list\",\"payload\":{}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.history",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"5dee22fd-084e-4023-bf31-c0a2d9fa9980\",\"method\":\"session.history\",\"payload\":{\"sessionId\":\"session-6604457b-f3c8-4820-9b9d-386ecf347313\",\"maxMessages\":200}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/session.list",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"01b1073f-bdc0-48c3-9adc-5ccc1520c4f3\",\"method\":\"session.list\",\"payload\":{}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/agentPreset.list",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"b0b78a4e-7532-4d2b-90ea-3d91fffdc570\",\"method\":\"agentPreset.list\",\"payload\":{}}"
+    },
+    {
+      "step": "req",
+      "method": "POST",
+      "url": "http://127.0.0.1:3080/api/nocobase.listMeta",
+      "headers": {
+        "auth": null,
+        "cookie": null,
+        "ct": "application/json"
+      },
+      "body": "{\"type\":\"client-request\",\"rpcId\":\"ec5365f2-26f5-44a4-a2f9-4437eae3cbd9\",\"method\":\"nocobase.listMeta\",\"payload\":{}}"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.history"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/agentPreset.list"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/agentPreset.list"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/nocobase.listMeta"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.list"
+    },
+    {
+      "step": "res",
+      "status": 200,
+      "url": "http://127.0.0.1:3080/api/session.list"
+    }
+  ],
+  "consoleErrors": [],
+  "pageErrors": []
+}

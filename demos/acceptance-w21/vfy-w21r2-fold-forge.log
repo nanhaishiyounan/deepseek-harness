@@ -1,0 +1,8 @@
+fold bar present: true
+shot: vfy-w21r2-b-10-enum3-fold-closed.png
+shot: vfy-w21r2-b-11-enum3-fold-open.png
+fold scope text: 结构化消息（格式异常，已折叠）present_card 载荷未通过校验，已折叠；如需该内容请让助手重新呈现
+tableAudit: [{"tableW":278,"tableScrollW":287,"clientW":278,"overflow":true,"parentOverflowX":"auto","cells":[{"text":"库位","w":56,"scrollW":56},{"text":"批次","w":56,"scrollW":56},{"text":"现有(kg)","w":56,"scrollW":56},{"text":"已分配","w":56,"scrollW":56},{"text":"可用(kg)","w":56,"scrollW":56},{"text":"SH-A-02-01","w":56,"scrollW":95},{"text":"RM-260920-M1","w":56,"scrollW":118},{"text":"15800.11","w":56,"scrollW":65},{"text":"0","w":56,"scrollW":56},{"text":"15800.11","w":56,"scrollW":65},{"text":"SH-WIP-01-01","w":56,"scrollW":109},{"text":"RM-260920-M1","w":56,"scrollW":118},{"text":"3750.89","w":56,"scrollW":64},{"text":"0","w":56,"scrollW":56},{"text":"3750.89","w":56,"scrollW":64}]}]
+shot: vfy-w21r2-b-12-enum3-table-audit.png
+forge result: {"errors":["Error: invalid arguments: payload.v 缺失（必填字段）; payload.id 缺失（必填字段）; payload.table.columns[2].kind 应为 \"text\"/\"money\"/\"percent\"/\"count\" 之一（收到字符串 \"id\"）"],"kindsUsed":[["text","text","id","count"],["text","text","count","count"]],"ok":1,"echo":["  - group: 结构化消息（格式异常，已折叠）"]}
+shot: vfy-w21r2-b-13-forge-bait.png

@@ -1,4 +1,0 @@
-== W6-R5 顺手项：route-fail 日志 redactUrl ==
-触发：GET /fin/statement/print?statement_no=ST-X&token=SECRET-TOKEN-LITERAL-XYZ（无效会话→route-fail 路径）
-approval-engine: route GET /fin/statement/print?statement_no=ST-X&token=<redacted> failed — Error: 平台会话无效（auth:check 未返回用户名）——重新登录后重试
-断言：boot log 中 token 字面值出现次数 = 0（0=已剥离）

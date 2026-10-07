@@ -1,0 +1,61 @@
+{
+  "at": "2026-10-06T16:12:47.286Z",
+  "summary": {
+    "s1": {
+      "label": "S1 采购消歧（鲜丰 2 候选）",
+      "required": 5,
+      "pass": 4,
+      "fail": 1,
+      "emptyFinishFirst": false
+    },
+    "s2": {
+      "label": "S2 直达表单草稿（唯一名新单位）",
+      "required": 5,
+      "pass": 5,
+      "fail": 0,
+      "emptyFinishFirst": false
+    },
+    "s3": {
+      "label": "S3 库存报告（糯米粉 2 库位行）",
+      "required": 5,
+      "pass": 4,
+      "fail": 1,
+      "emptyFinishFirst": false
+    },
+    "s4": {
+      "label": "S4 纯文本负例",
+      "required": 3,
+      "pass": 3,
+      "fail": 0,
+      "emptyFinishFirst": false
+    },
+    "s5b": {
+      "label": "S5b MRP 建议双卡同批（open=2）",
+      "required": 1,
+      "pass": 1,
+      "fail": 0,
+      "emptyFinishFirst": false
+    },
+    "s5": {
+      "label": "S5 审批待办（admin 6 条 open>2，观察项）",
+      "required": 2,
+      "pass": 0,
+      "fail": 2,
+      "emptyFinishFirst": false
+    },
+    "s3f": {
+      "label": "S3f post-fix 库存报告（叶子值铁律后）",
+      "required": 3,
+      "pass": 1,
+      "fail": 2,
+      "emptyFinishFirst": false
+    },
+    "s1f": {
+      "label": "S1f post-fix 采购消歧（叶子值铁律后）",
+      "required": 2,
+      "pass": 1,
+      "fail": 1,
+      "emptyFinishFirst": false
+    }
+  }
+}

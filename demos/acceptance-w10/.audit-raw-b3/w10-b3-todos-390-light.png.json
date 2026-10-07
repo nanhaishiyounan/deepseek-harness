@@ -1,7 +1,0 @@
-{
-  "content": "[{\"severity\":\"P1明显\",\"category\":\"ua-default-style\",\"description\":\"顶部「待办」标签疑似使用浏览器默认 select 下拉箭头与样式，呈现灰底直角外观，与「酱园琥珀」设计语言的琥珀色圆角控件冲突\",\"suggestion\":\"将 select 替换为自定义下拉组件，使用酱色或琥珀色边框与圆角，去除原生箭头并自定义指示符\"},{\"severity\":\"P2瑕疵\",\"category\":\"ua-default-style\",\"description\":\"空状态图标使用虚线圆圈包裹的 inbox 描线图标，描线较细且缺乏琥珀点缀，与印章/圆角设计语言融合度不足\",\"suggestion\":\"将图标描边加粗，使用酱色实色或琥珀填充，弱化虚线圆圈或改为实线印章样式\"},{\"severity\":\"P2瑕疵\",\"category\":\"contrast\",\"description\":\"「PC 端或 AI 同事提交的单据会出现在这里」说明文字颜色偏淡灰，与暖纸底对比度处于临界，可读性略弱\",\"suggestion\":\"将说明文字颜色加深一档（如 #8B6F5C），提升与底色的对比度\"},{\"severity\":\"P2瑕疵\",\"category\":\"typography\",\"description\":\"页面整体字号层级偏少，标题「我的待办」与空状态主标题「当前没有待办」字号接近，缺少主次节奏\",\"suggestion\":\"放大「我的待办」页眉或缩小空状态主标题，建立 2-3 级清晰字号层级\"},{\"severity\":\"P2瑕疵\",\"category\":\"spacing\",\"description\":\"空状态区域上下留白不均：图标距上方「待办」标签较远（约 120px），而「看看已登记的单据」按钮与下方说明文字间距过紧（约 12px）\",\"suggestion\":\"统一空状态垂直节奏，建议三组（图标/标题+说明/按钮）之间使用 24-32px 一致间距\"},{\"severity\":\"P2瑕疵\",\"category\":\"inconsistency\",\"description\":\"「看看已登记的单据」按钮使用药丸状（full-pill）大圆角，但「待办」下拉标签若为直角灰底，二者圆角语言不一致\",\"suggestion\":\"统一主交互按钮与次级标签的圆角体系，全局采用 8/12/full-pill 三档并明确各场景使用哪一档\"}]",
-  "base_resp": {
-    "status_code": 0,
-    "status_msg": "success"
-  }
-}

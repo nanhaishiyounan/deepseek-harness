@@ -1,7 +1,0 @@
-{
-  "content": "[\n  {\n    \"severity\": \"P1\",\n    \"category\": \"contrast\",\n    \"description\": \"卡片内辅助描述文字（如“截至今天 · 数据来自...”）颜色过浅，在暖色纸张背景下辨识度较低。\",\n    \"suggestion\": \"提高文字对比度，建议将色值调整为更深的酱色系灰色，确保符合 WCAG AA 级对比度标准。\"\n  },\n  {\n    \"severity\": \"P1\",\n    \"category\": \"ua-default-style\",\n    \"description\": \"“示例”标签的灰色细边框观感过于工业化且接近浏览器默认组件样式，与“酱园琥珀”温润的设计语言不符。\",\n    \"suggestion\": \"移除或更换中性灰边框，改用琥珀色或淡酱色的浅底色填充，并配合适当的圆角。\"\n  },\n  {\n    \"severity\": \"P2\",\n    \"category\": \"misalign\",\n    \"description\": \"右侧“琥珀星号”图标与第一行标题文字（本月经营概览）在垂直方向上未完全居中对齐，略偏上。\",\n    \"suggestion\": \"调整星号图标的垂直对齐方式，使其与该行文本的中轴线保持一致。\"\n  },\n  {\n    \"severity\": \"P2\",\n    \"category\": \"spacing\",\n    \"description\": \"卡片内纵向间距失衡：标题与辅助文字间距过近，而辅助文字与底部“查看报告”链接之间的间距明显增大。\",\n    \"suggestion\": \"统一卡片内部元素的纵向步进间距，建议采用 4px/8px 的倍数关系重新分配。\"\n  },\n  {\n    \"severity\": \"P2\",\n    \"category\": \"typography\",\n    \"description\": \"分组标题（如“AI 生成”、“最近文件”）字号过小且色值较淡，导致页面层级感不够明确。\",\n    \"suggestion\": \"稍微增加分组标题的字重或使用深酱色（主色），以强化页面区块的导视功能。\"\n  },\n  {\n    \"severity\": \"P2\",\n    \"category\": \"inconsistency\",\n    \"description\": \"卡片内部采用左对齐排列，但底部操作项“查看报告”似乎处于居中或偏右的模糊位置，导致视觉重心偏移。\",\n    \"suggestion\": \"将“查看报告”明确统一为左对齐，或将卡片操作区进行横向通栏化设计。\"\n  },\n  {\n    \"severity\": \"P2\",\n    \"category\": \"other\",\n    \"description\": \"左侧“报”字印章元素采用正圆背景，与设计语言中提及的“酱园”传统文化感结合度一般。\",\n    \"suggestion\": \"可尝试微圆角矩形或更具书法质感的“圆方印”形态，以更好地契合“印章元素”的设计要求。\"\n  }\n]",
-  "base_resp": {
-    "status_code": 0,
-    "status_msg": "success"
-  }
-}

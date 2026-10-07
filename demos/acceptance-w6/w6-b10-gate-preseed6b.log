@@ -1,6 +1,0 @@
-w6b6-crm: crm_deals.probability backfilled (0
- rows)
-w6b6-crm: crm_stage_audit + indexes ensured
-w6b6-crm: v2 page 商机管道 exists (kept)
-w6b6-crm: rehearsal rows ensured (customer XSS 探针 / deal 管道迁移 / quote 转单)
-w6b6-crm: seed complete

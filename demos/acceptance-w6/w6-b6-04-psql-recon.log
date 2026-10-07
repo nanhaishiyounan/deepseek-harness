@@ -1,7 +1,0 @@
-# W6-B6 报价转单 psql 对账（QT-W6B6-01 → SO-2026-0094，sales_rep 会话经对话框转单）
-so|SO-2026-0094|1000|pending|W6-B6 报价转单 QT-W6B6-01（sales_rep）
-lines|1
-quote|converted|SO-2026-0094
-
-# 二次转单（页面通道重放）: refused=true duplicate=true existing=SO-2026-0094
-# 同源 SO 行数守恒: 1

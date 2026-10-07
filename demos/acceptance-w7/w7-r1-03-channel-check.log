@@ -1,6 +1,0 @@
-examples/kb-agent/QUICKSTART.zh.md: OK
-.agents/notes/implemented/architecture/2026-10-04-w7-b6-m3-final-verification.md: OK
-.agents/notes/implemented/architecture/2026-10-04-w7-b6-m3-final-verification.zh.md: OK
-research/2026-10-03-w7-rework/99-w7-deliverables.md: OK
-BLOCK_UPDATE_CHANNEL = 'destroy+addBlock'
-CHANNEL CHECK GREEN — docs and constant agree on destroy+addBlock

@@ -1,8 +1,0 @@
-PASS — INDEX defines the two counting scopes once, up front (D-1)
-PASS — INDEX R2/R3/R4 ledger lines carry the corrected attribution (D-1)
-PASS — the w11r4 note (en) corrects the 9-case gap to counting scope, not an undercount
-PASS — the w11r4 note (zh) carries the same corrected attribution
-PASS — commit fact: the R2 commit added its 11 tests inside ui-mobile's own tests, leaving the preview package untouched (the 9 is a constant, not an R2 addition)
-PASS — commit fact: the preview spec's 9 tests predate W11 entirely (first present in the mobile-v3 milestone)
-
-6/6 claims hold

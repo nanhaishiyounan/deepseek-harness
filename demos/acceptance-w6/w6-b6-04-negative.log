@@ -1,6 +1,0 @@
-# W6-B6 负向（越权/XSS）
-# no-token /crm/pipe.json → HTTP 401
-# buyer /crm/move → CRM 写操作限 销售部/admin（buyer 不在围栏内——角色矩阵）
-# buyer /crm/quote-to-so → refused=true
-# XSS 探针客户名（W6B6<img src=x onerror>）渲染为文本：domElement=false windowFlag=undefined（未触发）
-# buyer 越权后 deal stage 守恒: quote

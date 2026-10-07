@@ -1,0 +1,90 @@
+{
+  "scenario": "A",
+  "checks": [
+    {
+      "name": "登录 buyer 成功",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "session.create",
+      "ok": true,
+      "detail": "session-faded363-1816-4f5a-9ad5-4ab63ae7bd1f"
+    },
+    {
+      "name": "供应商点选卡片出现并被选择",
+      "ok": false,
+      "detail": "picked=\"\" options=[]"
+    },
+    {
+      "name": "供应商选择后回合收尾",
+      "ok": false,
+      "detail": "turn timeout"
+    },
+    {
+      "name": "form-draft 卡片渲染",
+      "ok": false,
+      "detail": "draft-card-v3 count=0 cards=ask_field"
+    },
+    {
+      "name": "无 degraded 折叠（draft 阶段）",
+      "ok": true,
+      "detail": "degraded=0"
+    },
+    {
+      "name": "无重复卡（draft/receipt 唯一）",
+      "ok": true,
+      "detail": "{\"ask-choice\":0,\"field-ask\":1,\"draft-card-v3\":0,\"receipt-card-v3\":0,\"report-card\":0,\"approval-card\":0,\"approval-card-result\":0,\"plan-card\":0,\"plan-card-result\":0}"
+    },
+    {
+      "name": "卡片 aria-label（不折叠丢失）",
+      "ok": false,
+      "detail": "null"
+    },
+    {
+      "name": "widget 控件在（字段行含 input 或可展开）",
+      "ok": false,
+      "detail": "[]"
+    },
+    {
+      "name": "数字字段[数量]填入 100",
+      "ok": false,
+      "detail": "input not found; row text=\"\""
+    },
+    {
+      "name": "数字字段[单价]填入 10",
+      "ok": false,
+      "detail": "input not found; row text=\"\""
+    },
+    {
+      "name": "确认写入按钮可点",
+      "ok": false,
+      "detail": "count=0"
+    }
+  ],
+  "sessionId": "session-faded363-1816-4f5a-9ad5-4ab63ae7bd1f",
+  "input": "向【供应商】采购【面粉】，数量【100】，单价【10】",
+  "cardsAfterPick": [
+    "ask_field"
+  ],
+  "errorsAfterPick": [],
+  "cardCountsAtDraft": {
+    "ask-choice": 0,
+    "field-ask": 1,
+    "draft-card-v3": 0,
+    "receipt-card-v3": 0,
+    "report-card": 0,
+    "approval-card": 0,
+    "approval-card-result": 0,
+    "plan-card": 0,
+    "plan-card-result": 0
+  },
+  "fieldDump": null,
+  "fill": {
+    "qtyOk": false,
+    "priceOk": false
+  },
+  "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for getByRole('button', { name: '确认写入' }).first()\n",
+  "consoleMsgs": [],
+  "netBad": []
+}

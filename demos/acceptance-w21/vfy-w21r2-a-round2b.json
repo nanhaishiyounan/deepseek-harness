@@ -1,0 +1,46 @@
+{
+  "scenario": "A-round2-continue",
+  "sessionId": "session-92bbd992-b66c-4297-924c-75e31c135970",
+  "checks": [
+    {
+      "name": "ask-choice 供应商选择卡在场",
+      "ok": true,
+      "detail": "radios=11"
+    },
+    {
+      "name": "点选后回合收尾",
+      "ok": true,
+      "detail": "reason=completed cards=ask_choice,ask_choice"
+    },
+    {
+      "name": "form-draft 渲染",
+      "ok": false,
+      "detail": ""
+    },
+    {
+      "name": "数字字段[数量]真实键盘填入 100",
+      "ok": false,
+      "detail": "{\"ok\":false,\"why\":\"row missing\"}"
+    },
+    {
+      "name": "数字字段[单价]真实键盘填入 10",
+      "ok": false,
+      "detail": "{\"ok\":false,\"why\":\"row missing\"}"
+    },
+    {
+      "name": "确认写入按钮可点",
+      "ok": false,
+      "detail": ""
+    }
+  ],
+  "picked": "W4B2试点供应商-muldkd67SUP-muldkd67 · 潜在 · 原料",
+  "cardsAfterPick": [
+    "ask_choice",
+    "ask_choice"
+  ],
+  "errorsAfterPick": [],
+  "fieldDump": null,
+  "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for getByRole('button', { name: '确认写入' }).first()\n",
+  "consoleMsgs": [],
+  "netBad": []
+}

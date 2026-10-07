@@ -1,8 +1,0 @@
-w6b9-cockpit: 0 dunning candidate(s) from open ar_overdue alerts
-  跟进演示已存在（2 条），幂等跳过
-  对账单 ST-2026-0001（已存在，幂等返回）：客户 漯河宏发食品有限公司 期初 80880 + 发货 0 − 回款 0 = 期末 80880
-  三单初扫：open=6 resolved=0 by_type={"price_diff":4,"qty_short":1,"no_receipt":1}
-w6b9-cockpit: 经营总览 JSBlock exists (w6b9-cockpit kept)
-w6b9-cockpit: 财务工作台 JSBlock exists (w6b9-fin-wb kept)
-w6b9-cockpit: 发票匹配 JSBlock exists (w6b9-match-wb kept)
-w6b9-cockpit: demo complete

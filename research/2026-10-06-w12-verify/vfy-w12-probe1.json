@@ -1,0 +1,148 @@
+{
+  "stages": [
+    {
+      "stage": "A-login",
+      "url": "http://127.0.0.1:3080/mobile.html#/login",
+      "ok": true
+    },
+    {
+      "stage": "B-home-chips",
+      "chips": [
+        "我的待办",
+        "我的预警",
+        "看单据",
+        "登记一条单据"
+      ]
+    },
+    {
+      "stage": "B2-home-cta-click",
+      "url": "http://127.0.0.1:3080/mobile.html#/chat/session-aac67dad-edf5-4479-939b-d70ee4cafa50",
+      "draft": {
+        "textarea": "",
+        "contenteditable": null
+      }
+    },
+    {
+      "stage": "C-composer-buttons",
+      "buttons": [
+        {
+          "text": "",
+          "aria": "打开快捷面板",
+          "cls": "_plusBtn_1xlx2_686 "
+        },
+        {
+          "text": "",
+          "aria": "发送",
+          "cls": "dshm-stamp-solid _send_1xlx2_765"
+        }
+      ]
+    },
+    {
+      "stage": "C2-quickpanel",
+      "plusEntryFound": true,
+      "panelOpened": true,
+      "panel": {
+        "open": true,
+        "items": [
+          "登记一条采购单",
+          "查一下库存",
+          "哪些料要补货",
+          "给供应商建档",
+          "问经营",
+          "整理项目风险",
+          "语音",
+          "拍照",
+          "相册",
+          "文件"
+        ]
+      }
+    },
+    {
+      "stage": "C3-quickpicks",
+      "picks": [
+        {
+          "label": "登记一条采购单",
+          "draftAfterPick": {
+            "textarea": "向宏发食品采购 500kg 面粉，单价 3.2",
+            "contenteditable": null
+          }
+        },
+        {
+          "label": "查一下库存",
+          "draftAfterPick": {
+            "textarea": "查一下酱油还有多少库存",
+            "contenteditable": null
+          }
+        },
+        {
+          "label": "问经营",
+          "draftAfterPick": {
+            "textarea": "本月经营概览和风险提示",
+            "contenteditable": null
+          }
+        }
+      ]
+    },
+    {
+      "stage": "D-welcome-starters",
+      "starters": [
+        "登记一条采购单",
+        "查一下库存",
+        "哪些料要补货",
+        "给供应商建档",
+        "问经营",
+        "整理项目风险"
+      ]
+    },
+    {
+      "stage": "D2-starter-picks",
+      "starterPicks": [
+        {
+          "label": "登记一条采购单",
+          "draftAfterPick": {
+            "textarea": "向宏发食品采购 500kg 面粉，单价 3.2",
+            "contenteditable": null
+          }
+        },
+        {
+          "label": "查一下库存",
+          "draftAfterPick": {
+            "textarea": "查一下酱油还有多少库存",
+            "contenteditable": null
+          }
+        },
+        {
+          "label": "哪些料要补货",
+          "draftAfterPick": {
+            "textarea": "哪些料要补货",
+            "contenteditable": null
+          }
+        },
+        {
+          "label": "给供应商建档",
+          "draftAfterPick": {
+            "textarea": "给供应商三味食品登个档",
+            "contenteditable": null
+          }
+        },
+        {
+          "label": "问经营",
+          "draftAfterPick": {
+            "textarea": "本月经营概览和风险提示",
+            "contenteditable": null
+          }
+        },
+        {
+          "label": "整理项目风险",
+          "draftAfterPick": {
+            "textarea": "帮我整理一下现在的项目风险",
+            "contenteditable": null
+          }
+        }
+      ]
+    }
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "finalUrl": "http://127.0.0.1:3080/mobile.html#/chat/session-4684b2cd-d2bf-48d1-9ed0-30684aba6c2c"
+}

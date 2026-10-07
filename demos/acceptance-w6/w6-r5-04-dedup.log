@@ -1,7 +1,0 @@
-== W6-R5 Important-6：跟进防重（前端 inFlight 锁 + 后端 client_msg_id 去重）==
-任务 #1 并发双发同 client_msg_id=w6r5-concurrent-1790978344（curl 后台并发，绕过前端锁，直压后端唯一索引）
-响应A：{"ok":true,"record_id":8,"duplicate":false}
-响应B：{"ok":true,"record_id":8,"duplicate":true}
-psql：fin_dunning_records 7 → 8（恰 +1）；client_msg_id=w6r5-concurrent-1790978344 命中 1 行
-断言：两响应同 record_id=8，一 duplicate=false 一 duplicate=true，行数恰 +1 —— 并发重放落一条。
-（另见 w6-b9-12-assert.log 的「跟进 client_msg_id 去重（重放恰一条）」函数级断言）

@@ -1,3 +1,0 @@
-PASS F1 chats 暗轨 idle 分段焙线在位 — {"border":"1px solid rgb(69, 55, 40)"}
-FAIL F2 work 末胶囊脱离渐隐区（≥18px 尾距） — {"paddingRight":"18px","lastRightInList":-16.3,"lastOpacityFull":false}
-FAIL F3 work-detail 标题省略三件套在位 — {"overflow":"visible","textOverflow":"clip","whiteSpace":"normal","scrollW":235,"clientW":235}

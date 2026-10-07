@@ -1,0 +1,24 @@
+{
+ "at": "2026-10-06T20:02:06.047Z",
+ "sid": "session-77619d3a-3ba9-4b8b-9dba-dcbaf5dcee34",
+ "after": {
+  "cards": [
+   {
+    "seq": 1004,
+    "type": "submit_receipt"
+   }
+  ],
+  "errCount": 0,
+  "errs": [],
+  "domCards": {
+   "ask-choice": 1,
+   "field-ask": 0,
+   "draft-card-v3": 0,
+   "receipt-card-v3": 1,
+   "report-card": 0,
+   "plan-card": 0
+  },
+  "degraded": 0,
+  "tail": "- main:\n  - button \"返回\":\n    - button \"返回\"\n  - heading \"向鲜丰采购面粉，数量100，单 智能填表助手\" [level=1]\n  - button \"新建会话\"\n  - text: 今天 向鲜丰采购面粉，数量100，单价10\n  - paragraph:\n    - text: 好的，登记一张\n    - strong: 采购单\n    - text: 。先解析供应商和物料。\n  - text: 查询业务记录 查询业务记录\n  - paragraph: 查到两家名字带「鲜丰」的供应商（都是合格状态，可下单）。另外「面粉」在物料库里没找到，先确认一下供应商：\n  - paragraph: 哪家鲜丰？\n  - radiogroup \"哪家鲜丰？\":\n    - radio \"珠海鲜丰水产科技（南美白虾仁） SUP-001 · 主营虾仁冷链\" [checked] [disabled]\n    - radio \"鲜丰（自采购联系人） SUP-2026-0001 · 张经理\" [disabled]\n  - text: 是珠海鲜丰水产科技，从他们进面粉\n  - paragraph: 珠海鲜丰水产科技确认。但「面粉」在物料库里查不到——明细行落库可能拿不到 product_id，主表照常可以登记。要不要继续出草稿？\n  - text: 你确认了这张采购单\n  - paragraph: 收到，确认写入采购单主表。\n  - text: 写入业务记录\n  - paragraph: 主表落库成功。现在自动送审。\n  - text: 审批操作\n  - paragraph: 主表已落库，明细行因为「面粉」物料库查不到没有写入。另外送审调用返回会话过期（401），这条单据的审批要你重登后再补提。\n  - region \"落库回执卡\":\n    - text: 采购单已登记 № 96 ¥1,000 合计金额 2026-10-13 需求日期 PO-2026-1061 单号 对话 确认 已落库 单号 PO-2026-1061\n    - button \"查看这条记录\"\n  - button \"再来一单\"\n  - button \"查这条记录\"\n  - button \"打开快捷面板\"\n  - textbox \"问我任何经营问题...\"\n  - button \"发送\" [disabled]"
+ }
+}

@@ -1,7 +1,0 @@
-PASS chat 会话就绪 — session-06347f2e-ffa8-4a5a-aeb7-3469840cb721
-PASS 聚焦态 DOM 断言（brand 边 + soft halo） — {"borderColor":"rgb(180, 83, 10)","boxShadow":"rgb(248, 228, 210) 0px 0px 0px 3px","dataFill":null}
-PASS 4 行态自然增高（~111px） — h=111
-PASS 键盘弹起态（视口钳制模拟）composer 在视口内
-PASS fill 闪帧 DOM 断言（data-fill 在位） — {"borderColor":"rgb(180, 83, 10)","boxShadow":"rgb(248, 228, 210) 0px 0px 0px 3px","dataFill":null}
-PASS running 态停止钮在位
-PASS 暗轨聚焦态 DOM 断言（提亮 brand 边 + 暗轨 halo） — {"borderColor":"rgb(229, 139, 74)","boxShadow":"rgb(59, 42, 28) 0px 0px 0px 3px","dataFill":null}

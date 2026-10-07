@@ -1,7 +1,0 @@
-{
-  "content": "```json\n[\n  {\n    \"severity\": \"P1明显\",\n    \"category\": \"design-language\",\n    \"description\": \"底部按钮“去对话里让 AI 同事派个活”阴影过重且扩散值大，呈现出 Web 默认的 box-shadow 质感，违反了“克制阴影”的设计语言要求。\",\n    \"suggestion\": \"调低阴影的不透明度，增加模糊半径，或使用酱色系的浅阴影使其融入背景，避免出现‘脏’的工业感。\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"inconsistency\",\n    \"description\": \"左上角返回按钮的圆形外框采用了黑色/深灰色描边，与全局“酱园琥珀”色系冲突，表现出工业化 UI 的残留观感。\",\n    \"suggestion\": \"将返回按钮的描边颜色修改为“酱色（深棕红）”，以符合整体视觉语言。\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"inconsistency\",\n    \"description\": \"组件形态不统一：上方 Tab 切换（我的/团队）为中度圆角矩形，而下方按钮为全圆角（胶囊形），视觉逻辑冲突。\",\n    \"suggestion\": \"统一圆角规范，建议 Tab 切换组件也采用更圆润的胶囊造型或统一圆角半径。\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"contrast\",\n    \"description\": \"未选中状态的 Tab“团队 103”文字颜色与淡黄色背景对比度偏低，阅读舒适度不足。\",\n    \"suggestion\": \"加深未选中状态的文字色值，确保在暖纸背景下的清晰度。\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"contrast\",\n    \"description\": \"空状态副案文“任务由 AI 同事在对话中承接后生成”字号过小且颜色偏淡，在亮色模式暖底上易被忽略。\",\n    \"suggestion\": \"字号至少提升至 12-14px，并略微加深文字颜色，确保信息可读性。\"\n  },\n  {\n    \"severity\": \"P2瑕疵\",\n    \"category\": \"spacing\",\n    \"description\": \"底部按钮“去对话里让 AI 同事派个活”内边距失衡，文字左右间距相对于上下间距显得过窄，视觉上显得局促。\",\n    \"suggestion\": \"增加按钮左右内边距（padding-left/right），使按钮形态更加舒展。\"\n  }\n]\n```",
-  "base_resp": {
-    "status_code": 0,
-    "status_msg": "success"
-  }
-}

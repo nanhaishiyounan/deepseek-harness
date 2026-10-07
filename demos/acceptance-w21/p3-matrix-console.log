@@ -1,0 +1,15 @@
+preflight: /mobile=200 persona-projection-sync=true
+login: buyer
+  [s3f#1] PASS sid=session-a4243df5-87cd-450f-b51d-ac7c6bcf527c cards=report 50145ms
+  [s3f#2] FAIL sid=session-ea3b6e46-7842-4f1d-b5bd-5e48730b4fea cards=report,report,report,report,ask_choice 210366ms
+    ✗ 唯一卡类型为 report
+    ✗ 卡片调用结果成功
+    ✗ report-card DOM 渲染 report-card=0
+    ✗ 零 degraded 折叠
+  [s3f#3] FAIL sid=session-e947494b-c3b8-4567-8f4e-7c88e6f2e218 cards=report,report 100298ms
+    ✗ 卡片调用结果成功
+    ✗ 零 degraded 折叠
+  [s1f#1] FAIL sid=session-bd5eb735-10a2-401b-9392-460cb20e5149 cards=ask_choice,ask_choice,ask_choice,ask_choice 70136ms
+    ✗ 卡片调用结果成功（非 error 重试链）
+    ✗ 零 degraded 折叠
+  [s1f#2] PASS sid=session-5a82f875-c43e-47b0-9dee-21bb2381c714 cards=ask_choice 15031ms
