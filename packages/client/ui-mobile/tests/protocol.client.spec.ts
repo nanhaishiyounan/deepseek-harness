@@ -93,6 +93,8 @@ describe('parseDshPayloadObject (present_card args mirror)', () => {
     // W21-R3: the legal empty strings — a draft-field value and a blank cell.
     'form-draft.empty-field-value.valid',
     'report.empty-table-cell.valid',
+    // W22-B2: the four draft widgets with select options in both tiers.
+    'form-draft.widgets.valid',
     // W21-R8: the lossless actions spellings — wrapper key, missing kind,
     // and the lone actions object — mirror the server resolve step.
     'report.actions-wrapper-key.valid',
@@ -110,6 +112,7 @@ describe('parseDshPayloadObject (present_card args mirror)', () => {
     'ask-field.missing-widget.invalid',
     'envelope.unknown-type',
     'envelope.wrong-version',
+    'form-draft.bad-options',
     'form-draft.bad-widget',
     'form-draft.empty-fields',
     'form-draft.missing-widget.invalid',
@@ -317,17 +320,30 @@ describe('message builders', () => {
 })
 
 describe('parseDshPayload select options', () => {
-  it('keeps valid draft-field options and rejects malformed ones', () => {
+  it('keeps valid draft-field options and omits the member when absent', () => {
     const withOptions = parseDshPayload('{"v":3,"type":"form_draft","draftId":"d","revision":1,"form":{"collection":"c","label":"采购单"},"title":"t","fields":[{"name":"status","label":"状态","value":"draft","tier":"derived","rationale":"默认","widget":"select","options":[{"label":"草稿","value":"draft"},{"label":"已发","value":"sent"}]}]}')
     if (withOptions?.type !== 'form_draft') throw new Error('expected draft')
     expect(withOptions.fields[0]?.options).toEqual([{ label: '草稿', value: 'draft' }, { label: '已发', value: 'sent' }])
-    // Malformed options degrade to no candidates rather than rejecting the field.
-    const dropped = parseDshPayload('{"v":3,"type":"form_draft","draftId":"d","revision":1,"form":{"collection":"c","label":"l"},"title":"t","fields":[{"name":"s","label":"状态","value":"draft","tier":"derived","widget":"select","options":[{"label":"只有标签"}]}]}')
-    if (dropped?.type !== 'form_draft') throw new Error('expected draft')
-    expect(dropped.fields[0]?.options).toBeUndefined()
-    const notAList = parseDshPayload('{"v":3,"type":"form_draft","draftId":"d","revision":1,"form":{"collection":"c","label":"l"},"title":"t","fields":[{"name":"s","label":"状态","value":"draft","tier":"derived","widget":"select","options":"not-a-list"}]}')
-    if (notAList?.type !== 'form_draft') throw new Error('expected draft')
-    expect(notAList.fields[0]?.options).toBeUndefined()
+    const withoutOptions = parseDshPayload('{"v":3,"type":"form_draft","draftId":"d","revision":1,"form":{"collection":"c","label":"采购单"},"title":"t","fields":[{"name":"s","label":"状态","value":"draft","tier":"derived","widget":"select"}]}')
+    if (withoutOptions?.type !== 'form_draft') throw new Error('expected draft')
+    expect(withoutOptions.fields[0]?.options).toBeUndefined()
+  })
+
+  it('parses the widgets fixture with select options in both tiers', () => {
+    const payload = parseDshPayloadObject(presentCardFixture('form-draft.widgets.valid'))
+    if (payload?.type !== 'form_draft') throw new Error('expected draft')
+    const selectField = payload.fields.find(field => field.widget === 'select')
+    if (selectField === undefined) throw new Error('expected select field')
+    expect(selectField.options?.[0]).toEqual({ label: '月结30天', value: 'net30' })
+    const dateField = payload.fields.find(field => field.widget === 'date' && field.tier === 'required')
+    expect(dateField).toBeDefined()
+  })
+
+  it('rejects malformed draft-field options (W22-B2 tool-mirror parity)', () => {
+    // A present-but-invalid options member rejects the whole draft, mirroring
+    // the tool schema walk's rejection of the same payload.
+    expect(parseDshPayload('{"v":3,"type":"form_draft","draftId":"d","revision":1,"form":{"collection":"c","label":"l"},"title":"t","fields":[{"name":"s","label":"状态","value":"draft","tier":"derived","widget":"select","options":[{"label":"只有标签"}]}]}')).toBeUndefined()
+    expect(parseDshPayload('{"v":3,"type":"form_draft","draftId":"d","revision":1,"form":{"collection":"c","label":"l"},"title":"t","fields":[{"name":"s","label":"状态","value":"draft","tier":"derived","widget":"select","options":"not-a-list"}]}')).toBeUndefined()
   })
 })
 
@@ -448,10 +464,10 @@ describe('parseDshPayload first-condition short-circuits', () => {
 })
 
 describe('parseDshPayload remaining first-condition arms', () => {
-  it('drops non-object option elements and rejects a form without a collection', () => {
-    const dropped = parseDshPayload('{"v":3,"type":"form_draft","draftId":"d","revision":1,"form":{"collection":"c","label":"l"},"title":"t","fields":[{"name":"s","label":"状态","value":"draft","tier":"derived","widget":"select","options":["x"]}]}')
-    if (dropped?.type !== 'form_draft') throw new Error('expected draft')
-    expect(dropped.fields[0]?.options).toBeUndefined()
+  it('rejects non-object option elements and a form without a collection', () => {
+    // W22-B2: a non-object options element rejects the draft (tool-mirror
+    // parity) instead of degrading to no candidates.
+    expect(parseDshPayload('{"v":3,"type":"form_draft","draftId":"d","revision":1,"form":{"collection":"c","label":"l"},"title":"t","fields":[{"name":"s","label":"状态","value":"draft","tier":"derived","widget":"select","options":["x"]}]}')).toBeUndefined()
     expect(parseDshPayload('{"v":3,"type":"form_confirm","draftId":"d","revision":1,"form":{"label":"采购单"},"fields":[{"name":"n","label":"l","value":"1"}]}')).toBeUndefined()
   })
 })

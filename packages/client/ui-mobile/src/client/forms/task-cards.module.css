@@ -135,6 +135,16 @@
   padding-top: 4px;
 }
 
+/* The in-card action arms ride the secondary-touch pill grade the v3 draft
+   and report cards keep (W22-B1): body grade, 40px, 600. */
+.actions :global(.adm-button),
+.actionsPair :global(.adm-button) {
+  height: var(--dshm-touch-sm);
+  padding-block: 0;
+  padding-inline: 15px;
+  font-weight: 600;
+}
+
 .primaryButton {
   --border-radius: var(--dshm-r-card);
   font-weight: 600;

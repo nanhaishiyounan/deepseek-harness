@@ -1,0 +1,24 @@
+{
+  "v": 3,
+  "type": "form_draft",
+  "draftId": "d_20261007_9",
+  "revision": 1,
+  "form": { "collection": "pur_orders", "label": "采购单" },
+  "title": "采购单草稿",
+  "fields": [
+    { "name": "pay_method", "label": "结算方式", "value": null, "tier": "required", "widget": "select", "options": [
+      { "label": "月结30天", "value": "net30" },
+      { "label": "货到付款", "value": "cod" },
+      { "label": "预付全款", "value": "prepaid" }
+    ] },
+    { "name": "need_date", "label": "需求日期", "value": null, "tier": "required", "widget": "date" },
+    { "name": "quantity", "label": "数量", "value": null, "tier": "required", "widget": "number" },
+    { "name": "note", "label": "备注", "value": null, "tier": "required", "widget": "text" },
+    { "name": "order_date", "label": "单据日期", "value": "2026-10-07", "tier": "derived", "rationale": "今天", "widget": "date" },
+    { "name": "doc_status", "label": "单据状态", "value": "draft", "tier": "derived", "rationale": "登记即送审", "widget": "select", "options": [
+      { "label": "草稿", "value": "draft" },
+      { "label": "已送审", "value": "pending" }
+    ] },
+    { "name": "code", "label": "单号", "value": "", "tier": "system", "rationale": "落库后生成", "widget": "text" }
+  ]
+}

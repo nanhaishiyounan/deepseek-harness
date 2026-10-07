@@ -7,14 +7,20 @@
  * a Collapse strip. Derived values rest as name-resolved rows (a user may
  * tap one open to override the derivation — the assistant never asks); the
  * re-edit diff marks the user-touched fields with the ink bar and tint.
+ * The required-tier control follows the field's widget: select fields pick
+ * from the payload's own options (W22-B2), date fields roll the DatePicker,
+ * number fields hold the decimal keyboard, and text fields keep the boxed
+ * input.
  */
 
 import { useRef, useState, type JSX } from 'react'
-import { Button, Collapse, Input } from 'antd-mobile'
+import { Button, Collapse, DatePicker, Input, Picker } from 'antd-mobile'
 import type { CardPhase } from '../../cardState.ts'
 import type { NocobaseFieldView } from '@deepseek-ai/dsh-host-apiproxy/api'
 import { fieldControlOf } from '../../fieldControls.ts'
 import type { FormDraftPayload, FormField } from '../../protocol.ts'
+import { portalContainer } from '../../portal.ts'
+import { formatDateText, parseDateText } from '../dateText.ts'
 import { useRelationLabel } from '../relation-label.ts'
 import { RelationSelect } from '../RelationSelect.tsx'
 import css from './v3.module.css'
@@ -76,7 +82,7 @@ export function DraftCard(props: DraftCardProps): JSX.Element {
     if (missing.length > 0 && first !== undefined) {
       setAttempted(true)
       const row = requiredRows.current.get(first.name)
-      const focusable = row?.querySelector('input, button')
+      const focusable = row?.querySelector('input, button, [role="button"]')
       if (focusable instanceof HTMLElement) focusable.focus()
       return
     }
@@ -174,17 +180,17 @@ export function DraftCard(props: DraftCardProps): JSX.Element {
       <footer className={css.actions}>
         {phase === 'draft' && (
           <>
-            <Button size="large" disabled={disabled} onClick={props.onReject} className={css.ghostButton}>
+            <Button size="small" disabled={disabled} onClick={props.onReject} className={css.ghostButton}>
               驳回
             </Button>
-            <Button color="primary" size="large" disabled={disabled} onClick={onConfirmClick} className={css.primaryButton}>
+            <Button color="primary" size="small" disabled={disabled} onClick={onConfirmClick} className={css.primaryButton}>
               确认写入
             </Button>
           </>
         )}
         {phase === 'pending' && <span className={css.phaseNote}>正在写入…</span>}
         {phase === 'rejected' && (
-          <Button size="large" disabled={disabled} onClick={props.onRedraft} className={css.ghostButton}>
+          <Button size="small" disabled={disabled} onClick={props.onRedraft} className={css.ghostButton}>
             重新编辑
           </Button>
         )}
@@ -194,8 +200,12 @@ export function DraftCard(props: DraftCardProps): JSX.Element {
 }
 
 /**
- * One editable field's control: relations pick names (the id never shows),
- * everything else stays the boxed text input.
+ * One editable field's control, following the field's widget (W22-B2):
+ * relation fields pick names through the RelationSelect (the id never
+ * shows), select fields pick from the payload's own options, date fields
+ * roll the DatePicker, and number/text fields stay the boxed input. A
+ * select without options degrades to the boxed input, and a locked card
+ * rests select and date fields on the read-only value line.
  * @param props - the field, its payload context, edits, metadata, busy gate.
  * @returns the control element.
  */
@@ -226,6 +236,80 @@ function EditableValue(
       )
     }
   }
+  if (field.widget === 'select') {
+    const options = field.options ?? []
+    if (disabled) {
+      return <span className={css.fieldStatic} data-testid="select-static">{selectFace(value, options)}</span>
+    }
+    if (options.length > 0) {
+      return (
+        <Picker
+          columns={[options.map(option => ({ value: option.value, label: option.label }))]}
+          getContainer={portalContainer}
+          value={[value]}
+          aria-label={field.label}
+          onConfirm={(choice) => {
+            // An empty choice keeps the current value.
+            const next = choice[0]
+            if (next !== null && next !== undefined) onEdit(field.name, String(next))
+          }}
+        >
+          {(_items, actions) => (
+            <span
+              className={css.fieldPicker}
+              data-testid="select-trigger"
+              role="button"
+              tabIndex={0}
+              aria-label={field.label}
+              onClick={actions.open}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault()
+                  actions.open()
+                }
+              }}
+            >
+              {value === '' ? '请选择' : selectFace(value, options)}
+            </span>
+          )}
+        </Picker>
+      )
+    }
+  }
+  if (field.widget === 'date' && !disabled) {
+    const picked = parseDateText(value)
+    return (
+      <DatePicker
+        value={picked}
+        getContainer={portalContainer}
+        precision="day"
+        aria-label={field.label}
+        onConfirm={(date) => { onEdit(field.name, formatDateText(date)) }}
+      >
+        {(_picked, actions) => (
+          <span
+            className={css.fieldPicker}
+            data-testid="date-trigger"
+            role="button"
+            tabIndex={0}
+            aria-label={field.label}
+            onClick={actions.open}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                actions.open()
+              }
+            }}
+          >
+            {value === '' ? '请选择日期' : picked === null ? value : formatDateText(picked)}
+          </span>
+        )}
+      </DatePicker>
+    )
+  }
+  if (field.widget === 'date') {
+    return <span className={css.fieldStatic} data-testid="date-static">{value === '' ? '—' : value}</span>
+  }
   // antd-mobile Input: the enclosing fieldRow label names the control (the
   // component's prop face does not carry aria-label through to the element).
   return (
@@ -237,6 +321,17 @@ function EditableValue(
       onChange={(next) => { onEdit(field.name, next) }}
     />
   )
+}
+
+/**
+ * A select field's display face: the matched option's label, else the raw
+ * value (a value the options page does not carry still shows verbatim).
+ * @param value - the field's current value.
+ * @param options - the payload's own select candidates.
+ * @returns the display text.
+ */
+function selectFace(value: string, options: ReadonlyArray<{ label: string; value: string }>): string {
+  return options.find(option => option.value === value)?.label ?? value
 }
 
 /**

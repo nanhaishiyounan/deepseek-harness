@@ -70,7 +70,7 @@ export function DraftCard({ draft, meta, values, onEdit, onSubmitReview, disable
         <Button
           block
           color="primary"
-          size="large"
+          size="small"
           disabled={disabled}
           onClick={onSubmitReview}
           className={css.primaryButton}
@@ -135,13 +135,13 @@ export function ReviewCard(
         ))}
       </div>
       <footer className={css.actionsPair}>
-        <Button block size="large" disabled={disabled} onClick={onReject} className={css.ghostButton}>
+        <Button block size="small" disabled={disabled} onClick={onReject} className={css.ghostButton}>
           驳回
         </Button>
         <Button
           block
           color="primary"
-          size="large"
+          size="small"
           disabled={disabled}
           onClick={() => { setConfirmOpen(true) }}
           className={css.primaryButton}
@@ -201,7 +201,7 @@ export function RejectedCard({ draft, onRedraft, disabled }: RejectedCardProps):
         草稿已作废，未写库。可以重新编辑后再提交。
       </p>
       <footer className={css.actions}>
-        <Button block size="large" disabled={disabled} onClick={onRedraft} className={css.ghostButton}>
+        <Button block size="small" disabled={disabled} onClick={onRedraft} className={css.ghostButton}>
           重新编辑
         </Button>
       </footer>

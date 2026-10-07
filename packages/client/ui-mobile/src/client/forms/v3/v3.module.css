@@ -286,10 +286,25 @@
   text-align: right;
 }
 
+/* A locked select/date field's read-only value line: the settled figure the
+    disabled control rests as (W22-B2), body grade with the quiet ink. */
+.fieldStatic {
+  flex: 1;
+  min-width: 0;
+  max-width: 200px;
+  font-size: var(--dshm-fs-body);
+  line-height: 22px;
+  color: var(--dshm-ink-sub);
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* The boxed field input: antd-mobile Input — the boxed face rides on the
-   wrapper (this class); the element inherits the fill through the dials. The
-   fill rides --dshm-input-bg so the dark track's wells step one tier off the
-   card (W8 input-floor verdict), and the grade holds the 16px input floor. */
+    wrapper (this class); the element inherits the fill through the dials. The
+    fill rides --dshm-input-bg so the dark track's wells step one tier off the
+    card (W8 input-floor verdict), and the grade holds the 16px input floor. */
 .fieldInput:global(.adm-input) {
   --font-size: var(--dshm-fs-input);
   --color: var(--dshm-ink);
@@ -388,7 +403,8 @@
   border-radius: var(--dshm-r-ctl-corner);
 }
 
-.fieldEdited .fieldInput {
+.fieldEdited .fieldInput,
+.fieldEdited .fieldPicker {
   background: var(--dshm-brand-soft);
 }
 
@@ -422,7 +438,9 @@
 }
 
 /* The decision row (the design's .btn-row): pri = brand solid, ghost =
-    brand on brand-soft, gray = card2 with the hairline rim. */
+    brand on brand-soft, gray = card2 with the hairline rim. The arms ride
+    the secondary-touch pill grade the report/approval cards keep (W22-B1:
+    body grade, 40px, 600) — the card's in-card action, not a page CTA. */
 .actions {
   display: flex;
   gap: 9px;
@@ -431,8 +449,10 @@
 
 .actions :global(.adm-button) {
   --border-radius: var(--dshm-r-ctl);
-  height: 44px;
-  font-weight: 650;
+  height: var(--dshm-touch-sm);
+  padding-block: 0;
+  padding-inline: 15px;
+  font-weight: 600;
 }
 
 .primaryButton {
@@ -593,7 +613,10 @@
 
 .receiptFooter :global(.adm-button) {
   --border-radius: var(--dshm-r-ctl);
-  height: 40px;
+  height: var(--dshm-touch-sm);
+  padding-block: 0;
+  padding-inline: 15px;
+  font-weight: 600;
 }
 
 /* Motion discipline (03 §6): the stamp and rim flash collapse to instant

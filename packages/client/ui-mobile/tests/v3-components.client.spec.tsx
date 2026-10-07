@@ -185,6 +185,15 @@ describe('PhaseStamp', () => {
   })
 })
 
+/**
+ * Let the mounted PickerView settle its wheel selection before confirming:
+ * an unmatched value re-selects the first item through a zero-wait debounce,
+ * and confirming inside that window would read the stale inner value.
+ */
+async function settleWheel(): Promise<void> {
+  await new Promise((resolve) => { setTimeout(resolve, 30) })
+}
+
 const DRAFT: FormDraftPayload = {
   v: 3,
   type: 'form_draft',
@@ -454,14 +463,111 @@ describe('ChoiceBubble remaining branches', () => {
 })
 
 describe('DraftCard v3 derived edit', () => {
-  it('opens the derived row on tap and routes the override edit', () => {
+  it('opens the derived date row into the DatePicker and confirms the override (W22-B2)', async () => {
     const onEdit = vi.fn()
+    // The derived value arrives hydrated from the payload (useDraftValues'
+    // mount hydration), so the open control shows the settled figure.
     render(
-      <DraftCard payload={DRAFT} values={{}} phase="draft" onEdit={onEdit} onConfirm={() => {}} onReject={() => {}} onRedraft={() => {}} disabled={false} />,
+      <DraftCard payload={DRAFT} values={{ order_date: '2026-09-21' }} phase="draft" onEdit={onEdit} onConfirm={() => {}} onReject={() => {}} onRedraft={() => {}} disabled={false} />,
     )
     fireEvent.click(screen.getByRole('button', { name: '展开编辑 日期' }))
-    fireEvent.change(screen.getByLabelText('日期'), { target: { value: '2026-09-25' } })
-    expect(onEdit).toHaveBeenCalledWith('order_date', '2026-09-25')
+    const trigger = screen.getByTestId('date-trigger')
+    expect(trigger.textContent).toBe('2026-09-21')
+    fireEvent.click(trigger)
+    await waitFor(() => { expect(document.querySelector('.adm-picker')).toBeTruthy() })
+    await settleWheel()
+    fireEvent.click(screen.getByText('确定'))
+    await waitFor(() => { expect(onEdit).toHaveBeenCalledWith('order_date', '2026-09-21') })
+  })
+})
+
+/** A required tier mixing the four widget kinds (W22-B2). */
+const WIDGETS: FormDraftPayload = {
+  v: 3,
+  type: 'form_draft',
+  draftId: 'd_2',
+  revision: 1,
+  form: { collection: 'pur_orders', label: '采购单' },
+  title: '混合字段草稿',
+  fields: [
+    {
+      name: 'pay_method', label: '结算方式', value: null, tier: 'required', widget: 'select',
+      options: [{ label: '月结30天', value: 'net30' }, { label: '货到付款', value: 'cod' }],
+    },
+    { name: 'need_date', label: '需求日期', value: null, tier: 'required', widget: 'date' },
+    { name: 'quantity', label: '数量', value: null, tier: 'required', widget: 'number' },
+    { name: 'note', label: '备注', value: null, tier: 'required', widget: 'text' },
+  ],
+}
+
+describe('DraftCard v3 widget controls (W22-B2)', () => {
+  it('renders the select field as a picker trigger and confirms the first option', async () => {
+    const onEdit = vi.fn()
+    render(
+      <DraftCard payload={WIDGETS} values={{}} phase="draft" onEdit={onEdit} onConfirm={() => {}} onReject={() => {}} onRedraft={() => {}} disabled={false} />,
+    )
+    const trigger = screen.getByTestId('select-trigger')
+    expect(trigger.textContent).toBe('请选择')
+    fireEvent.click(trigger)
+    await waitFor(() => { expect(document.querySelector('.adm-picker')).toBeTruthy() })
+    await settleWheel()
+    fireEvent.click(screen.getByText('确定'))
+    await waitFor(() => { expect(onEdit).toHaveBeenCalledWith('pay_method', 'net30') })
+  })
+
+  it('shows the matched option label as the select face', () => {
+    render(
+      <DraftCard payload={WIDGETS} values={{ pay_method: 'cod' }} phase="draft" onEdit={() => {}} onConfirm={() => {}} onReject={() => {}} onRedraft={() => {}} disabled={false} />,
+    )
+    expect(screen.getByTestId('select-trigger').textContent).toBe('货到付款')
+  })
+
+  it('rolls the date picker from the trigger and feeds the YYYY-MM-DD pick', async () => {
+    const onEdit = vi.fn()
+    render(
+      <DraftCard payload={WIDGETS} values={{}} phase="draft" onEdit={onEdit} onConfirm={() => {}} onReject={() => {}} onRedraft={() => {}} disabled={false} />,
+    )
+    const trigger = screen.getByTestId('date-trigger')
+    expect(trigger.textContent).toBe('请选择日期')
+    fireEvent.click(trigger)
+    await waitFor(() => { expect(document.querySelector('.adm-picker')).toBeTruthy() })
+    await settleWheel()
+    fireEvent.click(screen.getByText('确定'))
+    await waitFor(() => { expect(onEdit).toHaveBeenCalledTimes(1) })
+    const [, picked] = onEdit.mock.calls[0] ?? []
+    expect(picked).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+  })
+
+  it('holds the decimal keyboard on number and keeps text boxed', () => {
+    render(
+      <DraftCard payload={WIDGETS} values={{}} phase="draft" onEdit={() => {}} onConfirm={() => {}} onReject={() => {}} onRedraft={() => {}} disabled={false} />,
+    )
+    expect(screen.getByLabelText('数量').getAttribute('inputmode')).toBe('decimal')
+    expect(screen.getByLabelText('备注').getAttribute('inputmode')).toBeNull()
+  })
+
+  it('degrades a select without options to the boxed input', () => {
+    const degraded: FormDraftPayload = {
+      ...WIDGETS,
+      fields: [{ name: 'pay', label: '付款方式', value: '', tier: 'required', widget: 'select' }],
+    }
+    render(
+      <DraftCard payload={degraded} values={{}} phase="draft" onEdit={() => {}} onConfirm={() => {}} onReject={() => {}} onRedraft={() => {}} disabled={false} />,
+    )
+    expect(screen.queryByTestId('select-trigger')).toBeNull()
+    expect(screen.getByLabelText('付款方式').tagName).toBe('INPUT')
+  })
+
+  it('rests locked select and date fields as the static value line', () => {
+    const settled: FormDraftPayload = {
+      ...WIDGETS,
+      fields: WIDGETS.fields.slice(0, 2).map(field => ({ ...field, value: field.widget === 'select' ? 'net30' : '2026-10-07' })),
+    }
+    render(
+      <DraftCard payload={settled} values={{ pay_method: 'net30', need_date: '2026-10-07' }} phase="pending" onEdit={() => {}} onConfirm={() => {}} onReject={() => {}} onRedraft={() => {}} disabled />,
+    )
+    expect(screen.getByTestId('select-static').textContent).toBe('月结30天')
+    expect(screen.getByTestId('date-static').textContent).toBe('2026-10-07')
   })
 })
 

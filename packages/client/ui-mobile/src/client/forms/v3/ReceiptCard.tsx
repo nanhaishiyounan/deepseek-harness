@@ -83,7 +83,7 @@ export function ReceiptCard({ payload, onView }: ReceiptCardProps): JSX.Element 
       )}
       {onView !== undefined && (
         <footer className={css.receiptFooter}>
-          <Button size="large" onClick={onView}>查看这条记录</Button>
+          <Button size="small" onClick={onView}>查看这条记录</Button>
         </footer>
       )}
     </section>

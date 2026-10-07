@@ -10,6 +10,7 @@ import { type JSX } from 'react'
 import { DatePicker, Input, Picker, Stepper, Switch, TextArea } from 'antd-mobile'
 import type { FieldControlSpec } from '../fieldControls.ts'
 import { portalContainer } from '../portal.ts'
+import { formatDateText, parseDateText } from './dateText.ts'
 import { RelationSelect } from './RelationSelect.tsx'
 import css from './field-widget.module.css'
 
@@ -67,15 +68,15 @@ export function FieldWidget({ spec, value, locked, onChange }: FieldWidgetProps)
         <div className={css.row}>
           <span className={css.label}>{spec.label}</span>
           <DatePicker
-            value={parseDate(value)}
+            value={parseDateText(value)}
             getContainer={portalContainer}
             precision="day"
             aria-label={spec.label}
-            onConfirm={(date) => { onChange(formatDate(date)) }}
+            onConfirm={(date) => { onChange(formatDateText(date)) }}
           >
             {(picked, actions) => (
               <span className={css.pickerValue} data-testid="date-value" onClick={actions.open}>
-                {picked === null ? (value === '' ? '请选择日期' : value) : formatDate(picked)}
+                {picked === null ? (value === '' ? '请选择日期' : value) : formatDateText(picked)}
               </span>
             )}
           </DatePicker>
@@ -175,23 +176,4 @@ interface PickerItem {
 function pickerText(item: PickerItem | null | undefined, fallback: string): string {
   if (item === null || item === undefined) return fallback
   return String(item.label)
-}
-
-/** Parse a draft's date string (YYYY-MM-DD or epoch) into a Date. */
-function parseDate(value: string): Date | null {
-  if (value === '') return null
-  const epoch = Number(value)
-  if (Number.isFinite(epoch) && value.trim() !== '') {
-    const fromEpoch = new Date(epoch)
-    if (!Number.isNaN(fromEpoch.getTime())) return fromEpoch
-  }
-  const parsed = new Date(value)
-  return Number.isNaN(parsed.getTime()) ? null : parsed
-}
-
-/** Format a Date back to the draft's YYYY-MM-DD string. */
-function formatDate(date: Date): string {
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${String(date.getFullYear())}-${month}-${day}`
 }

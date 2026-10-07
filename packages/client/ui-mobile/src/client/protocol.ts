@@ -420,6 +420,7 @@ function parseFormDraftPayload(obj: Record<string, unknown>): FormDraftPayload |
     if (base.value === null && tier !== 'required') return undefined
     const rationale = optionalText(row['rationale'])
     const options = parseFieldOptions(row['options'])
+    if (options === null) return undefined
     fields.push({
       ...base,
       tier,
@@ -432,17 +433,23 @@ function parseFormDraftPayload(obj: Record<string, unknown>): FormDraftPayload |
   return { v: DSH_PROTOCOL_VERSION, type: 'form_draft', draftId, revision, form, title, fields }
 }
 
-/** The select/relation candidates of one draft field, when present and valid. */
-function parseFieldOptions(value: unknown): ReadonlyArray<{ label: string; value: string }> | undefined {
+/**
+ * The select/relation candidates of one draft field, when present and valid.
+ * Returns undefined for an omitted options member (legal — a select without
+ * candidates renders as text) and null for a present-but-invalid one: the
+ * whole draft then rejects, mirroring the tool schema walk's rejection of
+ * the same payload (W22-B2 parity).
+ */
+function parseFieldOptions(value: unknown): ReadonlyArray<{ label: string; value: string }> | null | undefined {
   if (value === undefined) return undefined
-  if (!Array.isArray(value)) return undefined
+  if (!Array.isArray(value)) return null
   const options: { label: string; value: string }[] = []
   for (const raw of value) {
-    if (typeof raw !== 'object' || raw === null) return undefined
+    if (typeof raw !== 'object' || raw === null) return null
     const option = raw as Record<string, unknown>
     const label = requiredText(option['label'])
     const optionValue = coercedText(option['value'])
-    if (label === undefined || optionValue === undefined) return undefined
+    if (label === undefined || optionValue === undefined) return null
     options.push({ label, value: optionValue })
   }
   return options

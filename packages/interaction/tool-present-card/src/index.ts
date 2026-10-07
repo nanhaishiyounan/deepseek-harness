@@ -238,7 +238,7 @@ const payloadBranches = [
   },
   {
     type: 'object',
-    description: '三层草稿卡：必答/推导/系统字段',
+    description: '三层草稿卡：必答/推导/系统字段。widget 按字段性质选：select（有限枚举如状态/方式，必带 options 候选）date（YYYY-MM-DD 日期）number（数量/金额）text（编号/备注/名称）relation（关联表行，不带 options）',
     additionalProperties: false,
     properties: {
       v: { type: 'integer', const: ENVELOPE_VERSION, required: true },

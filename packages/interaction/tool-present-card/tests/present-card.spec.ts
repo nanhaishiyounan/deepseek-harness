@@ -83,6 +83,8 @@ const VALID_FIXTURES = [
   // W21-R3: the legal empty strings — a draft-field value and a blank cell.
   'form-draft.empty-field-value.valid',
   'report.empty-table-cell.valid',
+  // W22-B2: the four draft widgets with select options in both tiers.
+  'form-draft.widgets.valid',
   // W21-R8: the lossless actions spellings — wrapper key, missing kind.
   'report.actions-wrapper-key.valid',
   'report.actions-missing-kind.valid',
@@ -111,6 +113,8 @@ const STRUCTURAL_REJECTIONS: ReadonlyArray<{ fixture: string; fragment: string }
   { fixture: 'ask-choice.empty-option-label.invalid', fragment: 'payload.options[0].label 不能为空字符串' },
   { fixture: 'report.empty-metric-value.invalid', fragment: 'payload.metrics[0].value 不能为空字符串' },
   { fixture: 'plan-suggest.empty-id.invalid', fragment: 'payload.id 不能为空字符串' },
+  // W22-B2: a present-but-invalid options member rejects, both mirrors.
+  { fixture: 'form-draft.bad-options', fragment: 'payload.fields[0].options 应为数组（收到字符串 "net30"）' },
 ]
 
 // Every execute-level bound violation pairs the fixture with the English

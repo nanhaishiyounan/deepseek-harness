@@ -1,0 +1,12 @@
+{
+  "v": 3,
+  "type": "form_draft",
+  "draftId": "d_20261007_10",
+  "revision": 1,
+  "form": { "collection": "pur_orders", "label": "采购单" },
+  "title": "采购单草稿",
+  "fields": [
+    { "name": "pay_method", "label": "结算方式", "value": null, "tier": "required", "widget": "select", "options": "net30" },
+    { "name": "code", "label": "单号", "value": "", "tier": "system", "widget": "text" }
+  ]
+}
