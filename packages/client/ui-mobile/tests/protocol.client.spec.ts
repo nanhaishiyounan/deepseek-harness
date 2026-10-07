@@ -335,6 +335,10 @@ describe('parseDshPayload rejection matrix (model-output boundary)', () => {
     ['ask_choice option missing value', '{"v":3,"type":"ask_choice","id":"c","question":"q","options":[{"label":"l"}]}'],
     ['ask_field without field', '{"v":3,"type":"ask_field","id":"f","question":"q"}'],
     ['ask_field field not an object', '{"v":3,"type":"ask_field","id":"f","question":"q","field":"x"}'],
+    // W21-R4: the server schema marks field.suggestions required; the mirror
+    // fixture is ask-field.missing-suggestions.invalid.
+    ['ask_field missing suggestions', '{"v":3,"type":"ask_field","id":"f","question":"q","field":{"name":"n","label":"l","widget":"text"}}'],
+    ['ask_field suggestions not a list', '{"v":3,"type":"ask_field","id":"f","question":"q","field":{"name":"n","label":"l","widget":"text","suggestions":"x"}}'],
     ['ask_field suggestion not an object', '{"v":3,"type":"ask_field","id":"f","question":"q","field":{"name":"n","label":"l","widget":"text","suggestions":["x"]}}'],
     ['ask_field suggestion missing value', '{"v":3,"type":"ask_field","id":"f","question":"q","field":{"name":"n","label":"l","widget":"text","suggestions":[{"label":"l"}]}}'],
     ['form_draft field row not an object', draft('["x"]')],
@@ -407,14 +411,12 @@ describe('parseDshPayload remaining condition arms', () => {
 })
 
 describe('parseDshPayload middle-arm and lenient arms', () => {
-  it('drops unusable suggestions and a missing unit without rejecting the field ask', () => {
-    const noUnit = parseDshPayload('{"v":3,"type":"ask_field","id":"f","question":"q","field":{"name":"n","label":"l","widget":"text"}}')
+  it('keeps a missing unit but rejects a field ask without a suggestions list (W21-R4)', () => {
+    const noUnit = parseDshPayload('{"v":3,"type":"ask_field","id":"f","question":"q","field":{"name":"n","label":"l","widget":"text","suggestions":[]}}')
     if (noUnit?.type !== 'ask_field') throw new Error('expected field ask')
     expect(noUnit.field.unit).toBeUndefined()
-    expect(noUnit.field.suggestions).toEqual([])
-    const notAList = parseDshPayload('{"v":3,"type":"ask_field","id":"f","question":"q","field":{"name":"n","label":"l","widget":"text","suggestions":"x"}}')
-    if (notAList?.type !== 'ask_field') throw new Error('expected field ask')
-    expect(notAList.field.suggestions).toEqual([])
+    expect(parseDshPayload('{"v":3,"type":"ask_field","id":"f","question":"q","field":{"name":"n","label":"l","widget":"text"}}')).toBeUndefined()
+    expect(parseDshPayload('{"v":3,"type":"ask_field","id":"f","question":"q","field":{"name":"n","label":"l","widget":"text","suggestions":"x"}}')).toBeUndefined()
   })
 
   it('rejects a draft field without a name and a receipt without a draftId', () => {

@@ -95,6 +95,8 @@ const STRUCTURAL_REJECTIONS: ReadonlyArray<{ fixture: string; fragment: string }
   { fixture: 'form-draft.bad-widget', fragment: 'payload.fields[1].widget 应为 "text"/"number"/"date"/"select"/"relation" 之一' },
   { fixture: 'form-draft.missing-widget.invalid', fragment: 'payload.fields[1].widget 缺失（必填字段）' },
   { fixture: 'ask-field.missing-widget.invalid', fragment: 'payload.field.widget 缺失（必填字段）' },
+  // W21-R4: the client parse walk mirrors this required list exactly.
+  { fixture: 'ask-field.missing-suggestions.invalid', fragment: 'payload.field.suggestions 缺失（必填字段）' },
   { fixture: 'ask-choice.boolean-value', fragment: 'payload.options[0].value 应为字符串或数字' },
   { fixture: 'report.title-number', fragment: 'payload.title 应为字符串（收到数字 5）' },
   // W21-R3: a required scalar leaf rejects the empty string, both mirrors.

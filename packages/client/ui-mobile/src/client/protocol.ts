@@ -360,17 +360,19 @@ function parseAskField(obj: Record<string, unknown>): AskFieldPayload | undefine
   const label = requiredText(field['label'])
   const widget = oneOf(field['widget'], ['text', 'number', 'date', 'select', 'relation'] as const)
   if (name === undefined || label === undefined || widget === undefined) return undefined
+  // The server schema marks field.suggestions required; a fence that omits it
+  // (or spells it as a non-list) degrades the same way, so replayed history
+  // never renders a button-less field card.
+  if (!Array.isArray(field['suggestions'])) return undefined
   const suggestions: AskFieldSuggestion[] = []
-  if (Array.isArray(field['suggestions'])) {
-    for (const raw of field['suggestions']) {
-      if (typeof raw !== 'object' || raw === null) return undefined
-      const suggestion = raw as Record<string, unknown>
-      const sLabel = requiredText(suggestion['label'])
-      const sValue = coercedText(suggestion['value'])
-      if (sLabel === undefined || sValue === undefined) return undefined
-      const hint = optionalText(suggestion['hint'])
-      suggestions.push({ label: sLabel, value: sValue, ...hint === undefined ? {} : { hint } })
-    }
+  for (const raw of field['suggestions']) {
+    if (typeof raw !== 'object' || raw === null) return undefined
+    const suggestion = raw as Record<string, unknown>
+    const sLabel = requiredText(suggestion['label'])
+    const sValue = coercedText(suggestion['value'])
+    if (sLabel === undefined || sValue === undefined) return undefined
+    const hint = optionalText(suggestion['hint'])
+    suggestions.push({ label: sLabel, value: sValue, ...hint === undefined ? {} : { hint } })
   }
   const unit = optionalText(field['unit'])
   return {

@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-10-06-mobile-structured-cards-tool-channel.md
-2026-10-06-mobile-structured-cards-tool-channel.md: 373eeb98da6f114ac679f0c6ab5908c0a3914930
-2026-10-06-mobile-structured-cards-tool-channel.zh.md: 83d89fd445e3ce432b80d9d3d40197c1618dc2cc
+2026-10-06-mobile-structured-cards-tool-channel.md: 9c0170504abe79f345d1b6a1bc1cf7746dbac205
+2026-10-06-mobile-structured-cards-tool-channel.zh.md: 3f5e839f12d7479e2bab8503fe99debbe47aead8

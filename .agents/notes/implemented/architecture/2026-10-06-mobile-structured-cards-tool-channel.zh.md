@@ -10,7 +10,7 @@ Status: implemented
 
 ## Decision
 
-**v:3 envelope 从此有两个通道、权威分置。** `present_card` 工具（[packages/interaction/tool-present-card](../../../../packages/interaction/tool-present-card/src/index.ts)）是模型输出九类 assistant 载荷的唯一通道：oneOf 判别的 `payload` 参数（结构约束走 schema DSL）、叶子条数上限走 `execute`（ask options ≥1；report metrics 1-6 / rows ≤8 / table ≤5×10 / actions ≤4），execute 成功即调用 `exec.concludeTurn()`——模型在自己的卡片之后机制上不可能再作答。校验失败返回错误结果让模型重试（最多两次），仍失败必须用业务语言如实说明卡片没发出来。客户端 fold（[fold.ts](../../../../packages/client/ui-mobile/src/client/fold.ts)）把 `present_card` tool/call 折叠成与围栏路径完全相同的 ChatItem 种类——两个来源是同一个纯函数的字节等价输入，实时与回放共用一条链路。
+**v:3 envelope 从此有两个通道、权威分置。** `present_card` 工具（[packages/interaction/tool-present-card](../../../../packages/interaction/tool-present-card/src/index.ts)）是模型输出九类 assistant 载荷的唯一通道：oneOf 判别的 `payload` 参数（结构约束走 schema DSL；W21-R2 起被更正——参数改为普通 `type:'json'` 声明、判别由工具层 resolve 走查承担，见 [non-intercept note](2026-10-06-present-card-nonintercept-payload-and-mirror-alignment.zh.md)）、叶子条数上限走 `execute`（ask options ≥1；report metrics 1-6 / rows ≤8 / table ≤5×10 / actions ≤4），execute 成功即调用 `exec.concludeTurn()`——模型在自己的卡片之后机制上不可能再作答。校验失败返回错误结果让模型重试（最多两次），仍失败必须用业务语言如实说明卡片没发出来。客户端 fold（[fold.ts](../../../../packages/client/ui-mobile/src/client/fold.ts)）把 `present_card` tool/call 折叠成与围栏路径完全相同的 ChatItem 种类——两个来源是同一个纯函数的字节等价输入，实时与回放共用一条链路。
 
 **围栏保留为只读通道。** 四类用户动作载荷（form_confirm / reject_flow / approval_confirm / plan_confirm）是客户端按钮点击时确定性构造的，从来不是模型输出；它们继续走围栏。历史会话永远经围栏解析器回放；fold 的双源合并由 P3 回放矩阵实证（旧围栏卡与新工具卡在同一屏渲染）。
 
