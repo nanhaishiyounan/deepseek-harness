@@ -1,0 +1,12 @@
+{
+  "v": 3,
+  "type": "form_draft",
+  "draftId": "d_20261006_1",
+  "revision": 1,
+  "form": {
+    "collection": "pur_orders",
+    "label": "采购单"
+  },
+  "title": "采购单草稿",
+  "fields": []
+}

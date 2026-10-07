@@ -1,0 +1,12 @@
+{
+  "v": 3,
+  "type": "submit_receipt",
+  "draftId": "d_20261006_1",
+  "form": { "collection": "pur_orders", "label": "采购单" },
+  "rowId": "7",
+  "summary": [
+    { "label": "日期", "value": "2026-10-06", "kind": "date" },
+    { "label": "单号", "value": "PO-2026-0042", "kind": "id" },
+    { "label": "合计金额", "value": "¥1,000", "kind": "money" }
+  ]
+}

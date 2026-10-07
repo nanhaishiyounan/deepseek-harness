@@ -766,6 +766,9 @@ importers:
       '@deepseek-ai/dsh-tool-nocobase':
         specifier: workspace:*
         version: link:../packages/connector/tool-nocobase
+      '@deepseek-ai/dsh-tool-present-card':
+        specifier: workspace:*
+        version: link:../packages/interaction/tool-present-card
       '@deepseek-ai/dsh-tool-pwsh':
         specifier: workspace:*
         version: link:../packages/shell/tool-pwsh
@@ -6114,6 +6117,24 @@ importers:
       '@deepseek-ai/dsh-user-questions':
         specifier: workspace:^
         version: link:../user-questions
+
+  packages/interaction/tool-present-card:
+    devDependencies:
+      '@deepseek-ai/cordis':
+        specifier: workspace:^
+        version: link:../../../vendor/cordis
+      '@deepseek-ai/dsh-invariants':
+        specifier: workspace:^
+        version: link:../../runtime-diagnostics/invariants
+      '@deepseek-ai/dsh-llm':
+        specifier: workspace:^
+        version: link:../../llm/llm
+      '@deepseek-ai/dsh-system-prompt':
+        specifier: workspace:^
+        version: link:../../core/system-prompt
+      '@deepseek-ai/dsh-tools':
+        specifier: workspace:^
+        version: link:../../core/tools
 
   packages/interaction/tool-view-actions:
     devDependencies:

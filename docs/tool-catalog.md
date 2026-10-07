@@ -20,6 +20,7 @@ This table connects model-visible tool names to the plugin package and service s
 | `@deepseek-ai/dsh-tool-connector` | `assets_browse`, `connector_discover`, `connector_fetch`, `connector_transfer`, `order_create`, `order_status` | `ctx.tools`, `ctx.connector`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | connector_discover, connector_fetch, and connector_transfer run under the deployment-bound tenant (the model never supplies one); discovery answers with a grouped listing carrying provider and dataset ids, previews are capped (8 rows / 400 characters), and transfers render the landing receipt with the catalog transfer-record id and the next-step guidance (lakehouse_query over the named table, or kb_search with citations). |
 | `@deepseek-ai/dsh-tool-nocobase` | `nb_approve`, `nb_collections`, `nb_create`, `nb_get`, `nb_list`, `nb_update` | `ctx.tools`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | nb_collections, nb_list, nb_get, nb_create, and nb_update speak to the deployment's NocoBase under a service account (the model never supplies a tenant); the filter vocabulary is closed (eq/in/gt/lt joined by one and/or), and the write tools carry the confirmed-change contract — the system-prompt guidance demands the presented preview / before→after diff and the user's explicit go-ahead before nb_create/nb_update run, and their receipts echo the landing id or the field-by-field diff. |
 | `@deepseek-ai/dsh-tool-ask-user` | `ask_user_question` | `ctx.tools`, `ctx.userQuestions` | `tool/call`, `tool/result after a UI/provider answers the question` | - | ask_user_question pauses the tool call until the active UI provider returns a human answer. |
+| `@deepseek-ai/dsh-tool-present-card` | `present_card` | `ctx.tools` | `tool/call`, `tool/result` | - | present_card is the mobile structured-card channel: one tool, a closed nine-branch payload union (ask_choice / ask_field / form_draft / submit_receipt / report / approval_pending / approval_result / plan_suggest / plan_result) validated by schema plus execute-level count bounds. A successful call concludes the turn — the card is the turn's final artifact and the user's pick arrives as the next user message; the four user-action payloads stay client-fenced. |
 | `@deepseek-ai/dsh-tool-view-actions` | `switch_view`, `view_apply`, `view_state_get` | `ctx.tools`, `ctx.viewActions`, `ctx.viewState` | `tool/call`, `tool/result` | - | switch_view, view_apply, and view_state_get steer the browser workbench view; view manipulation is reversible UI state and carries no approval (destructive writes stay on the nb_* confirmation contract), actions are validated against the browser-reported catalog, and an unreachable browser fails with a readable error instead of a hang. |
 | `@deepseek-ai/dsh-tools` | `run_code` | `ctx.tools`, `ctx.codeRuntime (execution time)`, `ctx.systemPrompt` | `tool/call`, `one tool/code-dispatch-start + tool/code-dispatch pair per bridged sub-call`, `tool/result` | - | Owned by the tool registry as a reserved transport outside filterable capability layers under `mode: code` / `mode: both` (see the Code Mode Agent Note). Under `code` it is the registry's only wire contribution; the other visible capabilities are declared in a generated SDK section in the loaded runtime's language, and a program calls them through bindings scheduled under the native concurrency contract (submission-ordered starts and policy; concurrency-safe bodies overlap up to `maxParallelSubCalls`) that re-enter the complete guarded tool pipeline and link each nested execution to this outer result. |
 | `@deepseek-ai/dsh-plan-mode` | `exit_plan_mode` | `ctx.tools`, `ctx.systemPrompt`, `ctx.userQuestions (execution time, opportunistic)` | `tool/call`, `plan/mode inactive on an approved review`, `tool/result` | - | exit_plan_mode stays in the model-facing schema while planning is inactive so transitions add no tool-catalog churn on top of the plan-policy change. Its execute path rejects calls outside plan mode; in plan mode it presents the plan over the user-questions seam (approve / keep planning with feedback), and approval logs plan mode inactive at the step boundary. |
@@ -764,6 +765,32 @@ Ask the user a concise question when you need confirmation, a choice, or missing
 Source: [`packages/interaction/tool-ask-user/src/index.ts`](../packages/interaction/tool-ask-user/src/index.ts)
 
 ask_user_question pauses the tool call until the active UI provider returns a human answer.
+
+<a id="deepseek-aidsh-tool-present-card"></a>
+
+## `@deepseek-ai/dsh-tool-present-card`
+
+### `present_card`
+
+向用户呈现结构化卡片（ask_choice/ask_field/form_draft/submit_receipt/report/approval_pending/approval_result/plan_suggest/plan_result 九类载荷）。凡需用户点选或结构化呈现的内容必须且只能通过本工具输出，禁止在回复文本中输出 ```dsh 围栏、JSON 块或裸选项列表。先写不超过两句的人话叙述，再调用本工具：工具成功即本回合结束，其后的任何叙述都不会发出。同一回合要出多张卡时必须在同一批并行调用多个 present_card。载荷中 id/value/数量类叶子字段可直接传数字（自动转为字符串）；payload 也可传其 JSON 字符串（自动解析）。参数校验失败会返回带字段路径的错误信息：按其修正参数后重试，最多两次；仍失败就用一句业务语言如实说明并结束。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "payload": {
+      "description": "九类卡片载荷对象（v 恒为3，按 type 判别九选一），也可传整个载荷的 JSON 字符串（自动解析）。id/value/数量类叶子可直接传数字（自动转字符串）；可选的普通字段传 null 等同省略。各类型必填字段与枚举（? 为可选）：ask_choice{id,mode(single/multi),variant(cards/chips/buttons),question,options[≥1]{label,value,hint?,send?},allowFreeText}；ask_field{id,question,field{name,label,widget(text/number/date/select/relation),unit?,suggestions{label,value,hint?}}}；form_draft{draftId,revision(≥1整数),form{collection,label},title,fields[≥1]{name,label,value(null 仅 tier=required),tier(required/derived/system),widget(同 ask_field),rationale?,edited?,options?{label,value}}}；submit_receipt{draftId,form,rowId,summary[≥1]{label,value,kind(money/date/id/count/text)}}；report{id,title,subtitle?,metrics[1-6]{label,value,kind(count/money/percent/text),tone?(positive/warning/danger)},rows?[≤8]{label,hint?,level(high/medium/low)},table?{columns[1-5]{label,kind?(text/money/percent/count)},rows[≤10 且每行=列数]},actions?[≤4]{view{label,route}|create-task{label,title,suggestion?}|send{label,text}|link{label,url}}}；approval_pending{id,doc{collection,label,docId,title},summary[≥1]{label,value,kind(同 submit_receipt)},applicant?,node?,attempt?}；approval_result{approvalId,doc(结构同上),action(approve/reject),state(draft/pending/pending_level2/approved/rejected/void/potential/reviewing/qualified),by,comment?,at?}；plan_suggest{id,suggestionId,planType(MO/PR),product,qty,suggestDate?,driverSo?,needDate?}；plan_result{planId,suggestionId,planType,product,outcome(converted/dismissed),docCode?,state?,by?}"
+    }
+  },
+  "required": [
+    "payload"
+  ]
+}
+```
+
+Source: [`packages/interaction/tool-present-card/src/index.ts`](../packages/interaction/tool-present-card/src/index.ts)
+
+present_card is the mobile structured-card channel: one tool, a closed nine-branch payload union (ask_choice / ask_field / form_draft / submit_receipt / report / approval_pending / approval_result / plan_suggest / plan_result) validated by schema plus execute-level count bounds. A successful call concludes the turn — the card is the turn's final artifact and the user's pick arrives as the next user message; the four user-action payloads stay client-fenced.
 
 <a id="deepseek-aidsh-tool-view-actions"></a>
 

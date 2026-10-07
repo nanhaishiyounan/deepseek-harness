@@ -279,6 +279,15 @@
     - id: tool-nocobase
       name: '@deepseek-ai/dsh-tool-nocobase'
 
+    # The deterministic card channel for the mobile form assistant: every
+    # structured card (ask_choice / ask_field / form_draft / submit_receipt /
+    # report / approval_* / plan_*) rides a present_card tool call with schema
+    # validation and concludeTurn instead of a probabilistic ```dsh fence.
+    # User-action fences (form_confirm / reject_flow / approval_confirm /
+    # plan_confirm) stay client-authored and need no tool row here.
+    - id: tool-present-card
+      name: '@deepseek-ai/dsh-tool-present-card'
+
     # Tab-aware workbench context (J3): the gateway's session.viewStateReport
     # RPC writes this plugin's per-session view cache, and its pre-step hook
     # injects the active tab's snapshot as a durable user-role message.

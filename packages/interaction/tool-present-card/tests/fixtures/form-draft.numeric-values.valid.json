@@ -1,0 +1,26 @@
+{
+  "v": 3,
+  "type": "form_draft",
+  "draftId": 5,
+  "revision": 1,
+  "form": { "collection": "hub_inv_products", "label": "商品" },
+  "title": "商品建档草稿",
+  "fields": [
+    { "name": "product_name", "label": "品名", "value": "水磨糯米粉", "tier": "required", "widget": "text" },
+    { "name": "qty", "label": "数量", "value": 100, "tier": "required", "widget": "number" },
+    { "name": "unit_price", "label": "单价", "value": 10.5, "tier": "required", "widget": "number" },
+    { "name": "doc_no", "label": "编号", "value": null, "tier": "required", "widget": "text" },
+    { "name": "row_no", "label": "行号", "value": 3, "tier": "derived", "widget": "number" },
+    {
+      "name": "supplier",
+      "label": "供应商",
+      "value": "s-13",
+      "tier": "required",
+      "widget": "select",
+      "options": [
+        { "label": "珠海鲜丰水产", "value": 1 },
+        { "label": "鲜丰", "value": 13 }
+      ]
+    }
+  ]
+}

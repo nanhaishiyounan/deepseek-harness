@@ -1,0 +1,12 @@
+{
+  "v": 3,
+  "type": "ask_field",
+  "id": "field_1",
+  "question": "数量是多少？",
+  "field": {
+    "name": "qty",
+    "label": "数量",
+    "unit": "箱",
+    "suggestions": [{ "label": "200 箱", "value": "200" }]
+  }
+}

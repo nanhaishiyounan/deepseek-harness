@@ -1,0 +1,20 @@
+{
+  "v": 3,
+  "type": "report",
+  "id": 42,
+  "title": "糯米粉库存",
+  "metrics": [
+    { "label": "现有数量", "value": 15800.11, "kind": "count" },
+    { "label": "库位数", "value": 2, "kind": "count", "tone": "positive" }
+  ],
+  "table": {
+    "columns": [
+      { "label": "库位", "kind": "text" },
+      { "label": "现有", "kind": "count" }
+    ],
+    "rows": [
+      ["bin7", 15800.11],
+      ["bin87", 2]
+    ]
+  }
+}

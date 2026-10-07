@@ -121,6 +121,7 @@
     "@deepseek-ai/dsh-tool-nocobase": "workspace:*",
     "@deepseek-ai/dsh-tool-pwsh": "workspace:*",
     "@deepseek-ai/dsh-tool-pwsh-persistent": "workspace:*",
+    "@deepseek-ai/dsh-tool-present-card": "workspace:*",
     "@deepseek-ai/dsh-tool-ralph": "workspace:*",
     "@deepseek-ai/dsh-tool-session-query": "workspace:*",
     "@deepseek-ai/dsh-tool-skill": "workspace:*",

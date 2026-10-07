@@ -1,0 +1,1 @@
+"{\"v\":3,\"type\":\"ask_choice\",\"id\":\"choice_s\",\"mode\":\"single\",\"variant\":\"chips\",\"question\":\"确认供应商？\",\"options\":[{\"label\":\"珠海鲜丰水产\",\"value\":\"sup-1\"},{\"label\":\"鲜丰\",\"value\":\"sup-13\"}],\"allowFreeText\":true}"

@@ -54,6 +54,7 @@ import SkillRegistry from '@deepseek-ai/dsh-skill'
 import * as SkillFileSystem from '@deepseek-ai/dsh-skill-filesystem'
 import LocalJobRegistry from '@deepseek-ai/dsh-jobs-local'
 import * as ToolAskUser from '@deepseek-ai/dsh-tool-ask-user'
+import * as ToolPresentCard from '@deepseek-ai/dsh-tool-present-card'
 import * as ToolBash from '@deepseek-ai/dsh-tool-bash'
 import * as ToolPwsh from '@deepseek-ai/dsh-tool-pwsh'
 import * as ToolBashPersistent from '@deepseek-ai/dsh-tool-bash-persistent'
@@ -305,6 +306,23 @@ const TOOL_PACKAGES: ToolPackage[] = [
     },
     note:
       'ask_user_question pauses the tool call until the active UI provider returns a human answer.',
+  },
+  {
+    pkg: '@deepseek-ai/dsh-tool-present-card',
+    dir: 'tool-present-card',
+    source: 'packages/interaction/tool-present-card/src/index.ts',
+    requires: ['ctx.tools'],
+    writes: ['tool/call', 'tool/result'],
+    async mount(ctx) {
+      await ctx.plugin(ToolPresentCard)
+    },
+    note:
+      'present_card is the mobile structured-card channel: one tool, a closed nine-branch payload '
+      + 'union (ask_choice / ask_field / form_draft / submit_receipt / report / approval_pending / '
+      + 'approval_result / plan_suggest / plan_result) validated by schema plus execute-level count '
+      + 'bounds. A successful call concludes the turn — the card is the turn\'s final artifact and '
+      + 'the user\'s pick arrives as the next user message; the four user-action payloads stay '
+      + 'client-fenced.',
   },
   {
     pkg: '@deepseek-ai/dsh-tool-view-actions',

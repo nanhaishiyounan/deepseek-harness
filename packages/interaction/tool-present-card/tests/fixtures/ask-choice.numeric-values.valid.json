@@ -1,0 +1,14 @@
+{
+  "v": 3,
+  "type": "ask_choice",
+  "id": 7,
+  "mode": "single",
+  "variant": "chips",
+  "question": "向哪家供应商采购面粉？",
+  "options": [
+    { "label": "珠海鲜丰水产", "value": 1 },
+    { "label": "鲜丰", "value": 13, "hint": "数字值会规范化为字符串" },
+    { "label": "华丰食品", "value": "hf-001" }
+  ],
+  "allowFreeText": true
+}

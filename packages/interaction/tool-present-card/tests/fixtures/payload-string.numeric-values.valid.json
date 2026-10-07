@@ -1,0 +1,1 @@
+"{\"v\":3,\"type\":\"ask_choice\",\"id\":13,\"mode\":\"single\",\"variant\":\"buttons\",\"question\":\"数字与字符串混合的字符串载荷\",\"options\":[{\"label\":\"A\",\"value\":1},{\"label\":\"B\",\"value\":13},{\"label\":\"C\",\"value\":\"c-3\"}],\"allowFreeText\":false}"

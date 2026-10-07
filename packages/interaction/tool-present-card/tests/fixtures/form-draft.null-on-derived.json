@@ -1,0 +1,37 @@
+{
+  "v": 3,
+  "type": "form_draft",
+  "draftId": "d_20261006_1",
+  "revision": 1,
+  "form": {
+    "collection": "pur_orders",
+    "label": "采购单"
+  },
+  "title": "采购单草稿",
+  "fields": [
+    {
+      "name": "supplier_id",
+      "label": "供应商",
+      "value": null,
+      "tier": "required",
+      "widget": "relation",
+      "rationale": "名称多候选，需要你点选"
+    },
+    {
+      "name": "amount",
+      "label": "合计金额",
+      "value": null,
+      "tier": "derived",
+      "widget": "text",
+      "rationale": "数量100×单价10"
+    },
+    {
+      "name": "code",
+      "label": "单号",
+      "value": "",
+      "tier": "system",
+      "widget": "text",
+      "rationale": "落库后生成"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "v": 3,
+  "type": "submit_receipt",
+  "draftId": "d_20261006_1",
+  "form": {
+    "collection": "pur_orders",
+    "label": "采购单"
+  },
+  "rowId": "7",
+  "summary": []
+}

@@ -1,0 +1,11 @@
+{
+  "v": 3,
+  "type": "approval_result",
+  "approvalId": "ap_1",
+  "doc": { "collection": "pur_orders", "label": "采购单", "docId": "7", "title": "PO-2026-0042" },
+  "action": "approve",
+  "state": "approved",
+  "by": "admin",
+  "comment": "同意，按合同执行",
+  "at": "2026-10-06"
+}

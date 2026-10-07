@@ -1,0 +1,72 @@
+{
+  "v": 3,
+  "type": "report",
+  "id": "r_1",
+  "title": "库存查询",
+  "subtitle": "现有/可用/已分配",
+  "metrics": [
+    {
+      "label": "现有数量",
+      "value": "500",
+      "kind": "count"
+    },
+    {
+      "label": "可用数量",
+      "value": "480",
+      "kind": "count",
+      "tone": "positive"
+    }
+  ],
+  "rows": [
+    {
+      "label": "SH-A-01-01",
+      "hint": "批次 LOT-01",
+      "level": "low"
+    }
+  ],
+  "table": {
+    "columns": [
+      {
+        "label": "库位",
+        "kind": "text"
+      },
+      {
+        "label": "现有",
+        "kind": "count"
+      }
+    ],
+    "rows": [
+      [
+        "SH-A-01-01",
+        "500"
+      ]
+    ]
+  },
+  "actions": [
+    {
+      "kind": "send",
+      "label": "动作0",
+      "text": "追问0"
+    },
+    {
+      "kind": "send",
+      "label": "动作1",
+      "text": "追问1"
+    },
+    {
+      "kind": "send",
+      "label": "动作2",
+      "text": "追问2"
+    },
+    {
+      "kind": "send",
+      "label": "动作3",
+      "text": "追问3"
+    },
+    {
+      "kind": "send",
+      "label": "动作4",
+      "text": "追问4"
+    }
+  ]
+}

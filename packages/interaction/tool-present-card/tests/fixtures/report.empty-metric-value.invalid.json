@@ -1,0 +1,18 @@
+{
+  "v": 3,
+  "type": "report",
+  "id": "r_1",
+  "title": "库存查询",
+  "metrics": [
+    {
+      "label": "现有数量",
+      "value": "",
+      "kind": "count"
+    },
+    {
+      "label": "可用数量",
+      "value": "480",
+      "kind": "count"
+    }
+  ]
+}

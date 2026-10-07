@@ -1,0 +1,12 @@
+{
+  "v": 3,
+  "type": "plan_suggest",
+  "id": "pl_1",
+  "suggestionId": "12",
+  "planType": "MO",
+  "product": "全麦粉",
+  "qty": "800",
+  "suggestDate": "2026-10-08",
+  "driverSo": "SO-2026-0011",
+  "needDate": "2026-10-15"
+}

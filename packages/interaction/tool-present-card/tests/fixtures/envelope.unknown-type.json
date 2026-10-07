@@ -1,0 +1,22 @@
+{
+  "v": 3,
+  "type": "mystery",
+  "id": "choice_1",
+  "mode": "single",
+  "variant": "cards",
+  "question": "要登记哪类单据？",
+  "options": [
+    {
+      "label": "采购单",
+      "value": "pur_orders",
+      "hint": "从供应商买进",
+      "send": "是采购单，我们从鲜丰买进"
+    },
+    {
+      "label": "入库单",
+      "value": "hub_wms_inbound",
+      "hint": "货到了上架"
+    }
+  ],
+  "allowFreeText": true
+}

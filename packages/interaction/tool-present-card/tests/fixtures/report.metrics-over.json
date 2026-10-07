@@ -1,0 +1,76 @@
+{
+  "v": 3,
+  "type": "report",
+  "id": "r_1",
+  "title": "库存查询",
+  "subtitle": "现有/可用/已分配",
+  "metrics": [
+    {
+      "label": "指标1",
+      "value": "1",
+      "kind": "count"
+    },
+    {
+      "label": "指标2",
+      "value": "2",
+      "kind": "count"
+    },
+    {
+      "label": "指标3",
+      "value": "3",
+      "kind": "count"
+    },
+    {
+      "label": "指标4",
+      "value": "4",
+      "kind": "count"
+    },
+    {
+      "label": "指标5",
+      "value": "5",
+      "kind": "count"
+    },
+    {
+      "label": "指标6",
+      "value": "6",
+      "kind": "count"
+    },
+    {
+      "label": "指标7",
+      "value": "7",
+      "kind": "count"
+    }
+  ],
+  "rows": [
+    {
+      "label": "SH-A-01-01",
+      "hint": "批次 LOT-01",
+      "level": "low"
+    }
+  ],
+  "table": {
+    "columns": [
+      {
+        "label": "库位",
+        "kind": "text"
+      },
+      {
+        "label": "现有",
+        "kind": "count"
+      }
+    ],
+    "rows": [
+      [
+        "SH-A-01-01",
+        "500"
+      ]
+    ]
+  },
+  "actions": [
+    {
+      "kind": "send",
+      "label": "查看补货建议",
+      "text": "看补货预警"
+    }
+  ]
+}

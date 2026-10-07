@@ -1,0 +1,14 @@
+{
+  "v": 3,
+  "type": "approval_pending",
+  "id": "ap_1",
+  "doc": {
+    "collection": "pur_orders",
+    "label": "采购单",
+    "docId": "7",
+    "title": "PO-2026-0042"
+  },
+  "applicant": "陈立群",
+  "node": "经理审批",
+  "summary": []
+}

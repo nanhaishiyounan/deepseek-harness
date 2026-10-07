@@ -1,0 +1,9 @@
+{
+  "v": 3,
+  "type": "report",
+  "id": "r_num",
+  "title": 5,
+  "metrics": [
+    { "label": "现有数量", "value": "500", "kind": "count" }
+  ]
+}

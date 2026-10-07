@@ -1,0 +1,13 @@
+{
+  "v": 3,
+  "type": "ask_choice",
+  "id": "choice_1",
+  "mode": "single",
+  "variant": "cards",
+  "question": "要登记哪类单据？",
+  "options": [
+    { "label": "", "value": "pur_orders" },
+    { "label": "入库单", "value": "hub_wms_inbound" }
+  ],
+  "allowFreeText": true
+}

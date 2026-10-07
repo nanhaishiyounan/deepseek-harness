@@ -1,0 +1,31 @@
+{
+  "v": 3,
+  "type": "report",
+  "id": "r_1",
+  "title": "库存查询",
+  "metrics": [
+    {
+      "label": "现有数量",
+      "value": "500",
+      "kind": "count"
+    }
+  ],
+  "table": {
+    "columns": [
+      {
+        "label": "库位",
+        "kind": "text"
+      },
+      {
+        "label": "备注",
+        "kind": "text"
+      }
+    ],
+    "rows": [
+      [
+        "SH-A-01-01",
+        ""
+      ]
+    ]
+  }
+}

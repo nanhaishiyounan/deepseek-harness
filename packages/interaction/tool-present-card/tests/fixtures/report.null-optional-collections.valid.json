@@ -1,0 +1,16 @@
+{
+  "v": 3,
+  "type": "report",
+  "id": "r_null",
+  "title": "库存查询",
+  "metrics": [
+    {
+      "label": "现有数量",
+      "value": "500",
+      "kind": "count"
+    }
+  ],
+  "rows": null,
+  "table": null,
+  "actions": null
+}
