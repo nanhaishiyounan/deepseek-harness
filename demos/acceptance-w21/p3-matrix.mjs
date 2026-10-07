@@ -383,7 +383,10 @@ const main = async () => {
   const judged = Object.keys(summary).filter((key) => (only === null || only.includes(key)) && SCENARIOS[key].observe !== true)
   for (const [key, s] of Object.entries(summary)) {
     if (SCENARIOS[key].observe !== true || (only !== null && !only.includes(key))) continue
-    log(`observe leg ${key} ${s.label}: ledger pass=${s.pass}/${s.required} fail=${s.fail} — excluded from the exit-code verdict`)
+    const observeLine = `observe leg ${key} ${s.label}: ledger pass=${s.pass}/${s.required} fail=${s.fail} — excluded from the exit-code verdict`
+    log(observeLine)
+    // stderr mirror so CI consumers that split streams still see observe legs.
+    process.stderr.write(`${observeLine}\n`)
   }
   const failed = judged.some((key) => summary[key].fail > 0 || summary[key].pass < summary[key].required)
   process.exitCode = failed ? 1 : 0

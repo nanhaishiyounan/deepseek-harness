@@ -1,15 +1,15 @@
 preflight: /mobile=200 persona-projection-sync=true
-login: buyer
-  [s3f#1] PASS sid=session-a4243df5-87cd-450f-b51d-ac7c6bcf527c cards=report 50145ms
-  [s3f#2] FAIL sid=session-ea3b6e46-7842-4f1d-b5bd-5e48730b4fea cards=report,report,report,report,ask_choice 210366ms
-    ✗ 唯一卡类型为 report
-    ✗ 卡片调用结果成功
-    ✗ report-card DOM 渲染 report-card=0
-    ✗ 零 degraded 折叠
-  [s3f#3] FAIL sid=session-e947494b-c3b8-4567-8f4e-7c88e6f2e218 cards=report,report 100298ms
-    ✗ 卡片调用结果成功
-    ✗ 零 degraded 折叠
-  [s1f#1] FAIL sid=session-bd5eb735-10a2-401b-9392-460cb20e5149 cards=ask_choice,ask_choice,ask_choice,ask_choice 70136ms
-    ✗ 卡片调用结果成功（非 error 重试链）
-    ✗ 零 degraded 折叠
-  [s1f#2] PASS sid=session-5a82f875-c43e-47b0-9dee-21bb2381c714 cards=ask_choice 15031ms
+  [s5#1] 已完成，跳过（resume）
+  [s5#2] 已完成，跳过（resume）
+
+== matrix summary ==
+s1 S1 采购消歧（鲜丰 2 候选）: pass=4/5 fail=1 emptyFinishFirst=false
+s2 S2 直达表单草稿（唯一名新单位）: pass=5/5 fail=0 emptyFinishFirst=false
+s3 S3 库存报告（糯米粉 2 库位行）: pass=4/5 fail=1 emptyFinishFirst=false
+s4 S4 纯文本负例: pass=3/3 fail=0 emptyFinishFirst=false
+s5b S5b MRP 建议双卡同批（open=2）: pass=1/1 fail=0 emptyFinishFirst=false
+s5 S5 审批待办（admin 6 条 open>2，观察项）: pass=0/2 fail=2 emptyFinishFirst=false
+s3f S3f post-fix 库存报告（叶子值铁律后）: pass=1/3 fail=2 emptyFinishFirst=false
+s1f S1f post-fix 采购消歧（叶子值铁律后）: pass=1/2 fail=1 emptyFinishFirst=false
+observe leg s5 S5 审批待办（admin 6 条 open>2，观察项）: ledger pass=0/2 fail=2 — excluded from the exit-code verdict
+matrix verdict: PASS
