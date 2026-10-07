@@ -14,7 +14,7 @@ kb-agent 部署在浏览器里只有 PC 形态：工作台三栏布局在 1024px
 
 对话新鲜度走**轮询 history，不走流**：移动端完全不占 mux/host WebSocket 机制；`session.history` 重读（turn 进行中 1.2s、空闲 5s）整段重算折叠。这是本批对计划风险①的裁决——events 域没有扩展。折叠本身教了两课 PC runtime 藏起来的 wire 形状：`assistant/message` 事件的 content 在 `data.message.content` 下；`tool/result` 靠结果块的 provider 中性 `toolCallId` 关联（事件顶层没有 `callId`），`isError` 也在同一块上——移动折叠两者都读。
 
-AI 填表骑在 agent 上，不在 wire 上：`mobile-form-assistant` 预设每步输出一个围栏 JSON 草稿；移动端把**每一张**草稿解析成各自的可编辑任务卡（供应商→采购单→明细的链渲染三张卡），「推送」经同一会话发送放行消息，写入因此走 `nb_create` 的预览→放行→回执契约。回执随后用落地行复核（`nocobase.list` filter id）——任务卡展示的是落库的行，不是 agent 的口供。
+AI 填表骑在 agent 上，不在 wire 上：`mobile-form-assistant` 预设每步输出一个围栏 JSON 草稿；移动端把**每一张**草稿解析成各自的可编辑任务卡（供应商→采购单→明细的链渲染三张卡），「推送」经同一会话发送放行消息，写入因此走 `nb_create` 的预览→放行→回执契约。回执随后用落地行复核（`nocobase.list` filter id）——任务卡展示的是落库的行，不是 agent 的口供。（W21 确定性批次起，模型侧的九类 assistant 载荷改走 `present_card` 工具调用、不再走围栏；围栏保留为读/回放通道与四类用户动作载荷的构造通道——该契约由[工具通道 note](2026-10-06-mobile-structured-cards-tool-channel.zh.md)持有。）
 
 ## Consequences
 
