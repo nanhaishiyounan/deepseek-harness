@@ -1,14 +1,32 @@
 // @vitest-environment jsdom
 /** The v3 dsh protocol: payload validation, fence splitting, and message builders. */
 
+import { readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import {
   answerTextOf,
   buildConfirmMessage,
   buildRejectMessage,
   parseDshPayload,
+  parseDshPayloadObject,
   splitMessage,
 } from '../src/client/protocol.ts'
+
+/**
+ * Load one tool-present-card fixtures/<name>.json as raw payload data. The
+ * corpus is the mirror source for this args-level validator — a protocol
+ * change on either side must update both in one PR. The path resolves off
+ * this spec file's own runner-state location (expect.getState().testPath),
+ * never the process cwd; the jsdom environment rewrites import.meta.url to
+ * an http URL, so the file location has to come from the runner state.
+ */
+function presentCardFixture(name: string): unknown {
+  const testPath = expect.getState().testPath
+  if (testPath === undefined) throw new Error('protocol.client.spec: runner state carries no testPath')
+  const fixturesDir = join(dirname(testPath), '../../../interaction/tool-present-card/tests/fixtures')
+  return JSON.parse(readFileSync(join(fixturesDir, `${name}.json`), 'utf8'))
+}
 
 describe('parseDshPayload', () => {
   it('parses a valid ask_choice with defaults for omitted presentation hints', () => {
@@ -56,6 +74,186 @@ describe('parseDshPayload', () => {
     const confirm = parseDshPayload('{"v":3,"type":"form_confirm","draftId":"d","revision":1,"form":{"collection":"c","label":"l"},"fields":[{"name":"n","label":"数量","value":"200"}]}')
     expect(confirm?.type).toBe('form_confirm')
     expect(parseDshPayload('{"v":3,"type":"form_confirm","draftId":"d","revision":1,"form":{"collection":"c","label":"l"},"fields":[{"name":"n","label":"数量","value":null}]}')).toBeUndefined()
+  })
+})
+
+describe('parseDshPayloadObject (present_card args mirror)', () => {
+  const VALID_FIXTURES = [
+    'ask-choice.valid',
+    'ask-field.valid',
+    'form-draft.valid',
+    'submit-receipt.valid',
+    'report.valid',
+    'approval-pending.valid',
+    'approval-result.valid',
+    'plan-suggest.valid',
+    'plan-result.valid',
+    // W21-R2: explicit null at the optional report collections is "left out".
+    'report.null-optional-collections.valid',
+    // W21-R3: the legal empty strings — a draft-field value and a blank cell.
+    'form-draft.empty-field-value.valid',
+    'report.empty-table-cell.valid',
+  ] as const
+
+  const INVALID_FIXTURES = [
+    'approval-pending.empty-summary',
+    'ask-choice.boolean-value',
+    'ask-choice.empty-options',
+    // W21-R3: a required scalar leaf rejects the empty string, both mirrors.
+    'ask-choice.empty-question.invalid',
+    'ask-choice.empty-option-label.invalid',
+    'ask-field.missing-widget.invalid',
+    'envelope.unknown-type',
+    'envelope.wrong-version',
+    'form-draft.bad-widget',
+    'form-draft.empty-fields',
+    'form-draft.missing-widget.invalid',
+    'form-draft.null-on-derived',
+    'form-draft.zero-revision',
+    'payload-string.bad-type',
+    'payload-string.not-json',
+    'plan-suggest.empty-id.invalid',
+    'report.actions-over',
+    'report.empty-metric-value.invalid',
+    'report.metrics-over',
+    'report.rows-over',
+    'report.table-columns-over',
+    'report.table-row-width-mismatch',
+    'report.table-rows-over',
+    'report.title-number',
+    'submit-receipt.empty-summary',
+  ] as const
+
+  describe.each(VALID_FIXTURES)('%s', (name) => {
+    it('accepts the valid envelope and keeps its discriminant type', () => {
+      const payload = parseDshPayloadObject(presentCardFixture(name))
+      const expectedType = (name.split('.')[0] ?? '').replaceAll('-', '_')
+      expect(payload).toBeDefined()
+      expect(payload?.type).toBe(expectedType)
+    })
+  })
+
+  describe.each(INVALID_FIXTURES)('%s', (name) => {
+    it('rejects the invalid envelope', () => {
+      expect(parseDshPayloadObject(presentCardFixture(name))).toBeUndefined()
+    })
+  })
+
+  it('rejects non-object input without throwing', () => {
+    expect(parseDshPayloadObject('{"v":3}')).toBeUndefined()
+    expect(parseDshPayloadObject(null)).toBeUndefined()
+    expect(parseDshPayloadObject(3)).toBeUndefined()
+    expect(parseDshPayloadObject(['ask_choice'])).toBeUndefined()
+  })
+
+  it('agrees with the fence path on the same payload', () => {
+    const raw = presentCardFixture('report.valid')
+    const viaFence = parseDshPayload(JSON.stringify(raw))
+    expect(parseDshPayloadObject(raw)).toEqual(viaFence)
+  })
+
+  describe('W21-R1 leniency mirrors the server-side resolve step', () => {
+    it.each([
+      'ask-choice.numeric-values.valid',
+      'report.numeric-cells.valid',
+      'form-draft.numeric-values.valid',
+    ])('%s coerces numeric leaves to strings', (name) => {
+      const payload = parseDshPayloadObject(presentCardFixture(name))
+      expect(payload).toBeDefined()
+    })
+
+    it('coerces a numeric ask_choice exactly like the all-strings payload', () => {
+      const payload = parseDshPayloadObject(presentCardFixture('ask-choice.numeric-values.valid'))
+      expect(payload).toEqual({
+        v: 3,
+        type: 'ask_choice',
+        id: '7',
+        mode: 'single',
+        variant: 'chips',
+        question: '向哪家供应商采购面粉？',
+        options: [
+          { label: '珠海鲜丰水产', value: '1' },
+          { label: '鲜丰', value: '13', hint: '数字值会规范化为字符串' },
+          { label: '华丰食品', value: 'hf-001' },
+        ],
+        allowFreeText: true,
+      })
+    })
+
+    it('coerces report table cells and metric values', () => {
+      const payload = parseDshPayloadObject(presentCardFixture('report.numeric-cells.valid'))
+      if (payload?.type !== 'report') throw new Error('expected report')
+      expect(payload.id).toBe('42')
+      expect(payload.metrics.map(metric => metric.value)).toEqual(['15800.11', '2'])
+      expect(payload.table?.rows).toEqual([['bin7', '15800.11'], ['bin87', '2']])
+    })
+
+    it('parses a stringified payload and still coerces its numeric leaves', () => {
+      const viaString = parseDshPayloadObject(presentCardFixture('payload-string.numeric-values.valid'))
+      expect(viaString).toEqual(parseDshPayloadObject({
+        v: 3,
+        type: 'ask_choice',
+        id: 13,
+        mode: 'single',
+        variant: 'buttons',
+        question: '数字与字符串混合的字符串载荷',
+        options: [
+          { label: 'A', value: 1 },
+          { label: 'B', value: 13 },
+          { label: 'C', value: 'c-3' },
+        ],
+        allowFreeText: false,
+      }))
+    })
+
+    it('coerces numeric leaves on the fence path too, identically', () => {
+      const raw = JSON.stringify(presentCardFixture('ask-choice.numeric-values.valid'))
+      expect(parseDshPayload(raw)).toEqual(parseDshPayloadObject(presentCardFixture('ask-choice.numeric-values.valid')))
+    })
+  })
+
+  describe('W21-R2 widget-required and null-as-absent alignment', () => {
+    it('rejects a missing widget exactly like the server-side walk (ask_field)', () => {
+      expect(parseDshPayloadObject(presentCardFixture('ask-field.missing-widget.invalid'))).toBeUndefined()
+    })
+
+    it('rejects a missing widget exactly like the server-side walk (form_draft)', () => {
+      expect(parseDshPayloadObject(presentCardFixture('form-draft.missing-widget.invalid'))).toBeUndefined()
+    })
+
+    it('omits rows/table/actions when the model spells them null', () => {
+      const payload = parseDshPayloadObject(presentCardFixture('report.null-optional-collections.valid'))
+      expect(payload).toEqual({
+        v: 3,
+        type: 'report',
+        id: 'r_null',
+        title: '库存查询',
+        metrics: [{ label: '现有数量', value: '500', kind: 'count' }],
+      })
+    })
+  })
+
+  describe('W21-R3 empty-string parity with the server-side walk', () => {
+    it.each([
+      'ask-choice.empty-question.invalid',
+      'ask-choice.empty-option-label.invalid',
+      'report.empty-metric-value.invalid',
+      'plan-suggest.empty-id.invalid',
+    ])('%s rejects exactly like the server-side walk', (name) => {
+      expect(parseDshPayloadObject(presentCardFixture(name))).toBeUndefined()
+    })
+
+    it('keeps the draft-field empty value (the generated-after-landing spelling)', () => {
+      const payload = parseDshPayloadObject(presentCardFixture('form-draft.empty-field-value.valid'))
+      if (payload?.type !== 'form_draft') throw new Error('expected form_draft')
+      expect(payload.fields.map(field => field.value)).toEqual(['13', ''])
+    })
+
+    it('keeps a blank report table cell', () => {
+      const payload = parseDshPayloadObject(presentCardFixture('report.empty-table-cell.valid'))
+      if (payload?.type !== 'report') throw new Error('expected report')
+      expect(payload.table?.rows).toEqual([['SH-A-01-01', '']])
+    })
   })
 })
 
@@ -143,7 +341,9 @@ describe('parseDshPayload rejection matrix (model-output boundary)', () => {
     ['form_draft field missing tier', draft('[{"name":"n","label":"l","value":"1","widget":"text"}]')],
     ['form_draft fields empty', draft('[]')],
     ['form_confirm fields empty', '{"v":3,"type":"form_confirm","draftId":"d","revision":1,"form":{"collection":"c","label":"l"},"fields":[]}'],
-    ['form_confirm row value not a string', '{"v":3,"type":"form_confirm","draftId":"d","revision":1,"form":{"collection":"c","label":"l"},"fields":[{"name":"n","label":"l","value":3}]}'],
+    // W21-R1: a numeric row value now coerces to its string form; a boolean
+    // stays a rejection.
+    ['form_confirm row value neither string nor number', '{"v":3,"type":"form_confirm","draftId":"d","revision":1,"form":{"collection":"c","label":"l"},"fields":[{"name":"n","label":"l","value":true}]}'],
     ['submit_receipt without rowId', '{"v":3,"type":"submit_receipt","draftId":"d","form":{"collection":"c","label":"l"},"summary":[{"label":"l","value":"v","kind":"text"}]}'],
     ['submit_receipt summary not a list', '{"v":3,"type":"submit_receipt","draftId":"d","form":{"collection":"c","label":"l"},"rowId":"1","summary":"x"}'],
     ['submit_receipt summary row not an object', '{"v":3,"type":"submit_receipt","draftId":"d","form":{"collection":"c","label":"l"},"rowId":"1","summary":["x"]}'],
@@ -370,7 +570,9 @@ describe('parseDshPayload report payloads', () => {
     ['table with six columns', report(`,"table":{"columns":[${plainColumns(6)}],"rows":[]}`)],
     ['table with eleven rows', report(`,"table":{"columns":[{"label":"列"}],"rows":[${cellRows(11, 1)}]}`)],
     ['table row wider than the columns', '{"v":3,"type":"report","id":"r","title":"t","metrics":[{"label":"a","value":"1","kind":"text"}],"table":{"columns":[{"label":"列"}],"rows":[["a","b"]]}}'],
-    ['table with a non-string cell', '{"v":3,"type":"report","id":"r","title":"t","metrics":[{"label":"a","value":"1","kind":"text"}],"table":{"columns":[{"label":"列"}],"rows":[[3]]}}'],
+    // W21-R1: a numeric cell now coerces to its string form; a boolean cell
+    // stays a rejection.
+    ['table with a cell neither string nor number', '{"v":3,"type":"report","id":"r","title":"t","metrics":[{"label":"a","value":"1","kind":"text"}],"table":{"columns":[{"label":"列"}],"rows":[[true]]}}'],
     ['table column without a label', '{"v":3,"type":"report","id":"r","title":"t","metrics":[{"label":"a","value":"1","kind":"text"}],"table":{"columns":[{"kind":"money"}],"rows":[["1"]]}}'],
     ['table column with an illegal kind', '{"v":3,"type":"report","id":"r","title":"t","metrics":[{"label":"a","value":"1","kind":"text"}],"table":{"columns":[{"label":"列","kind":"date"}],"rows":[["1"]]}}'],
     ['five actions', report(`,"actions":[${sendActions(5)}]`)],

@@ -2,18 +2,22 @@
  * Session-event fold for the mobile chat surface: a pure projection from raw
  * `session.history` events onto chat items — narrative bubbles (never
  * protocol fences), tool-call rows with their running/done state, the v3
- * structured items (ask / field-ask / action / receipt / report), the
- * form-assistant task cards, the collapsed notices for unvalidatable dsh
- * fences, and the KG evidence descriptors the answer cited. v3 fences
- * (```dsh) split out of the narrative; v2 drafts (```json) keep their legacy
- * parse with the recognized fence stripped from the bubble. Deterministic by
- * seq; no React imports.
+ * structured items (ask / field-ask / action / receipt / report; each carried
+ * by either a ```dsh fence or a `present_card` tool call — the two render
+ * sources share one payload mapping), the form-assistant task cards, the
+ * collapsed notices for unvalidatable dsh fences and present_card payloads,
+ * and the KG evidence descriptors the answer cited. v3 fences (```dsh) split
+ * out of the narrative; v2 drafts (```json) keep their legacy parse with the
+ * recognized fence stripped from the bubble. Deterministic by seq; no React
+ * imports.
  */
 
 import { parseConfirmPush, splitDraftMessage, type ConfirmPush, type FormDraft } from './form-draft.ts'
 import {
   answerTextOf,
+  parseDshPayloadObject,
   splitMessage,
+  type DshPayload,
   type MessageSegment,
   type ApprovalConfirmPayload,
   type ApprovalPendingPayload,
@@ -29,6 +33,9 @@ import {
   type ReportPayload,
   type SubmitReceiptPayload,
 } from './protocol.ts'
+
+/** The tool-call name carrying the structured-card payloads (the P2 output channel). */
+const PRESENT_CARD_TOOL = 'present_card'
 
 /** One folded text bubble. */
 export interface ChatTextMessage {
@@ -307,6 +314,69 @@ export interface ReceiptVerification {
 /** One nb_create landing line as its tool result text opens (`已在 X 创建第 N 行：`). */
 const CREATE_LINE = /^已在 (\S+) 创建第 (\d+) 行：/u
 
+/**
+ * Append one validated dsh payload's chat item — the shared mapping both
+ * render sources ride (the ```dsh fence source and the `present_card`
+ * tool-call source), so a card renders identically whichever channel carried
+ * it. A submit_receipt renders only against a matching successful nb_create
+ * result (W6-B1 leftover ①) — anything else folds to the collapsed notice
+ * with the cause spelled out (the model narrative is not a receipt source).
+ * @param payload - the validated protocol payload.
+ * @param seq - the item's seq (the fence path sub-sequences inside one message).
+ * @param time - the carrying event's time.
+ * @param items - the fold's item sink, in order.
+ * @param degradedOut - the degraded-count accumulator.
+ * @param verification - the receipt verification ledger for this window.
+ */
+function appendPayloadItem(
+  payload: DshPayload, seq: number, time: number, items: ChatItem[], degradedOut: { count: number }, verification: ReceiptVerification,
+): void {
+  if (payload.type === 'submit_receipt'
+    && !verification.landedCreates.has(`${payload.form.collection}:${payload.rowId}`)) {
+    degradedOut.count += 1
+    items.push({
+      kind: 'degraded',
+      seq,
+      time,
+      text: `回执未经落库核实（没有对应的写入结果落库 ${payload.form.collection} 第 ${payload.rowId} 行），该回执不可信，请以单据页为准`,
+    })
+    return
+  }
+  switch (payload.type) {
+    case 'ask_choice':
+      items.push({ kind: 'ask', seq, time, payload })
+      break
+    case 'ask_field':
+      items.push({ kind: 'field-ask', seq, time, payload })
+      break
+    case 'form_draft':
+      items.push({ kind: 'task-card', seq, time, draft: legacyDraftOf(payload), payload })
+      break
+    case 'submit_receipt':
+      items.push({ kind: 'receipt', seq, time, payload })
+      break
+    case 'report':
+      items.push({ kind: 'report', seq, time, payload })
+      break
+    case 'form_confirm':
+    case 'reject_flow':
+    case 'approval_confirm':
+    case 'plan_confirm':
+      // User-action fences never render from an assistant message; a model
+      // emitting one is violating the contract, and dropping the payload
+      // keeps the replay honest.
+      break
+    case 'approval_pending':
+    case 'approval_result':
+      items.push({ kind: 'approval', seq, time, payload })
+      break
+    case 'plan_suggest':
+    case 'plan_result':
+      items.push({ kind: 'plan', seq, time, payload })
+      break
+  }
+}
+
 /** Fold one assistant message's text through the v3 splitter into items. */
 function foldAssistantText(
   text: string, seq: number, time: number, items: ChatItem[], degradedOut: { count: number }, verification: ReceiptVerification,
@@ -335,56 +405,49 @@ function foldAssistantText(
       items.push({ kind: 'degraded', seq: itemSeq, time, text: segment.text })
       return
     }
-    // W6-B1 leftover ①: a submit_receipt renders only against a matching
-    // successful nb_create result — anything else folds to the collapsed
-    // notice with the cause spelled out (the model narrative is not a
-    // receipt source).
-    if (segment.payload.type === 'submit_receipt'
-      && !verification.landedCreates.has(`${segment.payload.form.collection}:${segment.payload.rowId}`)) {
-      degradedOut.count += 1
-      items.push({
-        kind: 'degraded',
-        seq: itemSeq,
-        time,
-        text: `回执未经落库核实（没有对应的写入结果落库 ${segment.payload.form.collection} 第 ${segment.payload.rowId} 行），该回执不可信，请以单据页为准`,
-      })
-      return
-    }
-    const payload = segment.payload
-    switch (payload.type) {
-      case 'ask_choice':
-        items.push({ kind: 'ask', seq: itemSeq, time, payload })
-        break
-      case 'ask_field':
-        items.push({ kind: 'field-ask', seq: itemSeq, time, payload })
-        break
-      case 'form_draft':
-        items.push({ kind: 'task-card', seq: itemSeq, time, draft: legacyDraftOf(payload), payload })
-        break
-      case 'submit_receipt':
-        items.push({ kind: 'receipt', seq: itemSeq, time, payload })
-        break
-      case 'report':
-        items.push({ kind: 'report', seq: itemSeq, time, payload })
-        break
-      case 'form_confirm':
-      case 'reject_flow':
-      case 'approval_confirm':
-      case 'plan_confirm':
-        // User-action fences never render from an assistant message; a model
-        // emitting one is violating the contract, and dropping the payload
-        // keeps the replay honest.
-        break
-      case 'approval_pending':
-      case 'approval_result':
-        items.push({ kind: 'approval', seq: itemSeq, time, payload })
-        break
-      case 'plan_suggest':
-      case 'plan_result':
-        items.push({ kind: 'plan', seq: itemSeq, time, payload })
-        break
-    }
+    appendPayloadItem(segment.payload, itemSeq, time, items, degradedOut, verification)
   })
+}
+
+/**
+ * Fold one `present_card` tool call into its chat card — the structured-card
+ * output channel that replaced the ```dsh fence as the model's authoritative
+ * route. The raw arguments string parses and validates against the same
+ * payload validators the fence path rides; a violation folds to the collapsed
+ * notice instead of a tool row (the card IS the tool's presentation, so no
+ * neutral row ever appears and the tool/result finds no row to flip).
+ * @param rawArguments - the call's raw argument string.
+ * @param seq - the call event's seq.
+ * @param time - the call event's time.
+ * @param items - the fold's item sink, in order.
+ * @param degradedOut - the degraded-count accumulator.
+ * @param verification - the receipt verification ledger for this window.
+ */
+function foldPresentCard(
+  rawArguments: unknown, seq: number, time: number, items: ChatItem[], degradedOut: { count: number }, verification: ReceiptVerification,
+): void {
+  let payload: DshPayload | undefined
+  if (typeof rawArguments === 'string') {
+    try {
+      payload = parseDshPayloadObject((JSON.parse(rawArguments) as { payload?: unknown } | null)?.payload)
+    } catch {
+      // Swallows only JSON.parse's SyntaxError on a non-JSON argument string:
+      // the string came from the untyped tool-call wire, so malformed JSON
+      // lands in the degraded notice below.
+      payload = undefined
+    }
+  }
+  if (payload === undefined) {
+    degradedOut.count += 1
+    items.push({
+      kind: 'degraded',
+      seq,
+      time,
+      text: 'present_card 载荷未通过校验，已折叠；如需该内容请让助手重新呈现',
+    })
+    return
+  }
+  appendPayloadItem(payload, seq, time, items, degradedOut, verification)
 }
 
 /** The action message's display line: its narrative text or the fixed default. */
@@ -527,6 +590,12 @@ export function foldHistory(events: readonly FoldEvent[]): FoldedTurn {
       case 'tool/call': {
         const data = event.data as { callId?: unknown; name?: unknown; arguments?: unknown }
         const name = typeof data.name === 'string' ? data.name : 'tool'
+        if (name === PRESENT_CARD_TOOL) {
+          // The structured-card channel renders its payload, never a tool row;
+          // its callId stays unregistered so the tool/result stays inert.
+          foldPresentCard(data.arguments, event.seq, event.time, items, degraded, verification)
+          break
+        }
         const protocolLabel = protocolToolLabel(name)
         const kpiLabel = kpiLookupLabel(name, data.arguments)
         const row: ChatToolRow = {

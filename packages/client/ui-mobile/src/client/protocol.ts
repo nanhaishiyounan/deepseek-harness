@@ -6,6 +6,12 @@
  * shapes' validation and the narrative/fence splitting every fold consumer
  * rides; an invalid or unknown fence degrades to ordinary text instead of
  * breaking the chat flow. No React imports.
+ *
+ * W21-R1 leniency, mirrored with the server-side present_card resolve step:
+ * id/value/count leaves also accept bare numbers and coerce them to strings,
+ * and a stringified payload object parses before validation, so a card
+ * renders identically whichever channel carried it. Narrative leaves
+ * (question, label, title…) stay string-only.
  */
 
 import { stripJsonComments } from './form-draft.ts'
@@ -289,6 +295,16 @@ function requiredText(value: unknown): string | undefined {
   return typeof value === 'string' && value !== '' ? value : undefined
 }
 
+/**
+ * A non-empty string, or a finite number coerced to its string form, or
+ * undefined for anything else — the id/value/count leaves the present_card
+ * schema widens; the fence and tool channels coerce them identically.
+ */
+function coercedText(value: unknown): string | undefined {
+  if (typeof value === 'number' && Number.isFinite(value)) return String(value)
+  return typeof value === 'string' && value !== '' ? value : undefined
+}
+
 /** A trimmed optional string, or undefined for anything else. */
 function optionalText(value: unknown): string | undefined {
   if (typeof value !== 'string') return undefined
@@ -303,7 +319,7 @@ function oneOf<T extends string>(value: unknown, allowed: readonly T[]): T | und
 
 /** Validate an ask_choice fence body. */
 function parseAskChoice(obj: Record<string, unknown>): AskChoicePayload | undefined {
-  const id = requiredText(obj['id'])
+  const id = coercedText(obj['id'])
   const question = requiredText(obj['question'])
   if (id === undefined || question === undefined) return undefined
   if (!Array.isArray(obj['options']) || obj['options'].length === 0) return undefined
@@ -312,7 +328,7 @@ function parseAskChoice(obj: Record<string, unknown>): AskChoicePayload | undefi
     if (typeof raw !== 'object' || raw === null) return undefined
     const option = raw as Record<string, unknown>
     const label = requiredText(option['label'])
-    const value = requiredText(option['value'])
+    const value = coercedText(option['value'])
     if (label === undefined || value === undefined) return undefined
     const hint = optionalText(option['hint'])
     const send = optionalText(option['send'])
@@ -334,7 +350,7 @@ function parseAskChoice(obj: Record<string, unknown>): AskChoicePayload | undefi
 
 /** Validate an ask_field fence body. */
 function parseAskField(obj: Record<string, unknown>): AskFieldPayload | undefined {
-  const id = requiredText(obj['id'])
+  const id = coercedText(obj['id'])
   const question = requiredText(obj['question'])
   const rawField = obj['field']
   if (id === undefined || question === undefined) return undefined
@@ -350,7 +366,7 @@ function parseAskField(obj: Record<string, unknown>): AskFieldPayload | undefine
       if (typeof raw !== 'object' || raw === null) return undefined
       const suggestion = raw as Record<string, unknown>
       const sLabel = requiredText(suggestion['label'])
-      const sValue = requiredText(suggestion['value'])
+      const sValue = coercedText(suggestion['value'])
       if (sLabel === undefined || sValue === undefined) return undefined
       const hint = optionalText(suggestion['hint'])
       suggestions.push({ label: sLabel, value: sValue, ...hint === undefined ? {} : { hint } })
@@ -374,13 +390,17 @@ function fieldRowOf(raw: unknown, allowNull: boolean): { name: string; label: st
   const label = requiredText(row['label'])
   if (name === undefined || label === undefined) return undefined
   if (row['value'] === null) return allowNull ? { name, label, value: null } : undefined
-  if (typeof row['value'] !== 'string') return undefined
-  return { name, label, value: row['value'] }
+  // A field value keeps the original any-string semantics (the empty string is
+  // the "generated after landing" spelling); finite numbers coerce to strings.
+  if (typeof row['value'] === 'number' && Number.isFinite(row['value'])) {
+    return { name, label, value: String(row['value']) }
+  }
+  return typeof row['value'] === 'string' ? { name, label, value: row['value'] } : undefined
 }
 
 /** Validate a form_draft fence body. */
 function parseFormDraftPayload(obj: Record<string, unknown>): FormDraftPayload | undefined {
-  const draftId = requiredText(obj['draftId'])
+  const draftId = coercedText(obj['draftId'])
   const revision = obj['revision']
   const title = requiredText(obj['title'])
   const form = formOf(obj['form'])
@@ -419,7 +439,7 @@ function parseFieldOptions(value: unknown): ReadonlyArray<{ label: string; value
     if (typeof raw !== 'object' || raw === null) return undefined
     const option = raw as Record<string, unknown>
     const label = requiredText(option['label'])
-    const optionValue = requiredText(option['value'])
+    const optionValue = coercedText(option['value'])
     if (label === undefined || optionValue === undefined) return undefined
     options.push({ label, value: optionValue })
   }
@@ -466,7 +486,7 @@ function parseReportMetric(raw: unknown): ReportMetric | undefined {
   if (typeof raw !== 'object' || raw === null) return undefined
   const metric = raw as Record<string, unknown>
   const label = requiredText(metric['label'])
-  const value = requiredText(metric['value'])
+  const value = coercedText(metric['value'])
   const kind = oneOf(metric['kind'], ['count', 'money', 'percent', 'text'] as const)
   if (label === undefined || value === undefined || kind === undefined) return undefined
   const tone = oneOf(metric['tone'], ['positive', 'warning', 'danger'] as const)
@@ -508,6 +528,10 @@ function parseReportTable(value: unknown): ReportTable | undefined {
     if (!Array.isArray(raw) || raw.length !== columns.length) return undefined
     const cells: string[] = []
     for (const cell of raw) {
+      if (typeof cell === 'number' && Number.isFinite(cell)) {
+        cells.push(String(cell))
+        continue
+      }
       if (typeof cell !== 'string') return undefined
       cells.push(cell)
     }
@@ -558,7 +582,7 @@ function parseReportAction(raw: unknown): ReportAction | undefined {
  * (its original fence stays visible) rather than silently truncating.
  */
 function parseReport(obj: Record<string, unknown>): ReportPayload | undefined {
-  const id = requiredText(obj['id'])
+  const id = coercedText(obj['id'])
   const title = requiredText(obj['title'])
   if (id === undefined || title === undefined) return undefined
   if (!Array.isArray(obj['metrics']) || obj['metrics'].length < 1 || obj['metrics'].length > 6) return undefined
@@ -586,7 +610,9 @@ function parseReport(obj: Record<string, unknown>): ReportPayload | undefined {
     if (table === undefined) return undefined
   }
   let actions: ReportAction[] | undefined
-  if (obj['actions'] !== undefined) {
+  // An explicit null is the "left this one out" spelling here too (matching
+  // rows/table above and the server-side resolve walk).
+  if (obj['actions'] !== undefined && obj['actions'] !== null) {
     if (!Array.isArray(obj['actions']) || obj['actions'].length > 4) return undefined
     actions = []
     for (const raw of obj['actions']) {
@@ -618,7 +644,7 @@ function approvalDocOf(value: unknown, requireTitle: boolean): ApprovalDocRef | 
   const doc = value as Record<string, unknown>
   const collection = requiredText(doc['collection'])
   const label = requiredText(doc['label'])
-  const docId = requiredText(doc['docId'])
+  const docId = coercedText(doc['docId'])
   if (collection === undefined || label === undefined || docId === undefined) return undefined
   if (requireTitle) {
     const title = requiredText(doc['title'])
@@ -636,7 +662,7 @@ function approvalSummaryOf(value: unknown): ReadonlyArray<{ label: string; value
     if (typeof raw !== 'object' || raw === null) return undefined
     const row = raw as Record<string, unknown>
     const label = requiredText(row['label'])
-    const cell = requiredText(row['value'])
+    const cell = coercedText(row['value'])
     const kind = oneOf(row['kind'], ['money', 'date', 'id', 'count', 'text'] as const)
     if (label === undefined || cell === undefined || kind === undefined) return undefined
     rows.push({ label, value: cell, kind })
@@ -646,7 +672,7 @@ function approvalSummaryOf(value: unknown): ReadonlyArray<{ label: string; value
 
 /** Validate an approval_pending fence body. */
 function parseApprovalPending(obj: Record<string, unknown>): ApprovalPendingPayload | undefined {
-  const id = requiredText(obj['id'])
+  const id = coercedText(obj['id'])
   const doc = approvalDocOf(obj['doc'], true)
   if (id === undefined || doc === undefined) return undefined
   const summary = approvalSummaryOf(obj['summary'])
@@ -696,7 +722,7 @@ function normalizeApprovalState(value: unknown): ApprovalResultPayload['state'] 
 
 /** Validate an approval_result fence body. */
 function parseApprovalResult(obj: Record<string, unknown>): ApprovalResultPayload | undefined {
-  const approvalId = requiredText(obj['approvalId'])
+  const approvalId = coercedText(obj['approvalId'])
   const doc = approvalDocOf(obj['doc'], true)
   if (approvalId === undefined || doc === undefined) return undefined
   const action = oneOf(obj['action'], ['approve', 'reject'] as const)
@@ -720,9 +746,9 @@ function parseApprovalResult(obj: Record<string, unknown>): ApprovalResultPayloa
 
 /** Validate a submit_receipt fence body. */
 function parseSubmitReceipt(obj: Record<string, unknown>): SubmitReceiptPayload | undefined {
-  const draftId = requiredText(obj['draftId'])
+  const draftId = coercedText(obj['draftId'])
   const form = formOf(obj['form'])
-  const rowId = requiredText(obj['rowId'])
+  const rowId = coercedText(obj['rowId'])
   if (draftId === undefined || form === undefined || rowId === undefined) return undefined
   if (!Array.isArray(obj['summary']) || obj['summary'].length === 0) return undefined
   const summary: { label: string; value: string; kind: ReceiptSummaryKind }[] = []
@@ -730,7 +756,7 @@ function parseSubmitReceipt(obj: Record<string, unknown>): SubmitReceiptPayload 
     if (typeof raw !== 'object' || raw === null) return undefined
     const row = raw as Record<string, unknown>
     const label = requiredText(row['label'])
-    const value = requiredText(row['value'])
+    const value = coercedText(row['value'])
     const kind = oneOf(row['kind'], ['money', 'date', 'id', 'count', 'text'] as const)
     if (label === undefined || value === undefined || kind === undefined) return undefined
     summary.push({ label, value, kind })
@@ -740,11 +766,11 @@ function parseSubmitReceipt(obj: Record<string, unknown>): SubmitReceiptPayload 
 
 /** Validate a plan_suggest fence body. */
 function parsePlanSuggest(obj: Record<string, unknown>): PlanSuggestPayload | undefined {
-  const id = requiredText(obj['id'])
-  const suggestionId = requiredText(obj['suggestionId'])
+  const id = coercedText(obj['id'])
+  const suggestionId = coercedText(obj['suggestionId'])
   const planType = oneOf(obj['planType'], ['MO', 'PR'] as const)
   const product = requiredText(obj['product'])
-  const qty = requiredText(obj['qty'])
+  const qty = coercedText(obj['qty'])
   if (id === undefined || suggestionId === undefined || planType === undefined || product === undefined || qty === undefined) {
     return undefined
   }
@@ -761,8 +787,8 @@ function parsePlanSuggest(obj: Record<string, unknown>): PlanSuggestPayload | un
 
 /** Validate a plan_result fence body. */
 function parsePlanResult(obj: Record<string, unknown>): PlanResultPayload | undefined {
-  const planId = requiredText(obj['planId'])
-  const suggestionId = requiredText(obj['suggestionId'])
+  const planId = coercedText(obj['planId'])
+  const suggestionId = coercedText(obj['suggestionId'])
   const planType = oneOf(obj['planType'], ['MO', 'PR'] as const)
   const product = requiredText(obj['product'])
   const outcome = oneOf(obj['outcome'], ['converted', 'dismissed'] as const)
@@ -818,8 +844,32 @@ export function parseDshPayload(body: string): DshPayload | undefined {
   } catch {
     return undefined
   }
-  if (typeof parsed !== 'object' || parsed === null) return undefined
-  const obj = parsed as Record<string, unknown>
+  return parseDshPayloadObject(parsed)
+}
+
+/**
+ * Validate one already-parsed envelope object into its payload — the
+ * args-level entry the `present_card` tool-call source rides (the model's
+ * arguments arrive as a JSON object, not fence text). Shares the fence path's
+ * validators verbatim; the fixture corpus in
+ * packages/interaction/tool-present-card/tests/fixtures is the mirror source —
+ * a protocol change on either side must update both in one PR.
+ * @param value - the parsed candidate envelope.
+ * @returns the validated payload, or undefined when the value is not one.
+ */
+export function parseDshPayloadObject(value: unknown): DshPayload | undefined {
+  let candidate: unknown = value
+  if (typeof candidate === 'string') {
+    // A stringified payload is the double-serialization shape old-fence
+    // contexts induce; mirror the server-side resolve step and parse first.
+    try {
+      candidate = JSON.parse(candidate)
+    } catch {
+      return undefined
+    }
+  }
+  if (typeof candidate !== 'object' || candidate === null) return undefined
+  const obj = candidate as Record<string, unknown>
   if (obj['v'] !== DSH_PROTOCOL_VERSION) return undefined
   switch (obj['type']) {
     case 'ask_choice': return parseAskChoice(obj)

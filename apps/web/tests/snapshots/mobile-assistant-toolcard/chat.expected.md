@@ -1,0 +1,50 @@
+- main:
+  - button "返回":
+    - button "返回"
+  - heading "未命名会话 本地会话" [level=1]
+  - button "新建会话"
+  - text: 2026年7月26日 帮我登记一下，刚和鲜丰谈好一批冷链箱
+  - paragraph: 这笔可以从两个方向登记，请点选：
+  - paragraph: 这笔要登记成什么单据？
+  - radiogroup "这笔要登记成什么单据？":
+    - radio "采购单 我们向鲜丰买进 · 鲜丰作为供应商" [checked] [disabled]
+    - radio "出库单 我们向鲜丰发货 · 鲜丰作为客户" [disabled]
+  - text: 是采购单，我们从鲜丰买进
+  - paragraph:
+    - text: 好的，登记一张
+    - strong: 采购单
+    - text: 。日期、状态、合计我来推导，你确认数量就行：
+  - text: 你确认了这张采购单 写入业务记录
+  - paragraph: 已登记完成，单号 PO-2026-0042。
+  - region "落库回执卡":
+    - text: 采购单已登记 № 1042 ¥6,400 合计金额 200 箱 数量 2026-09-21 日期 对话 确认 已落库
+    - button "查看这条记录"
+  - text: 帮我整理一下现在的项目风险
+  - paragraph: 整理好了，当前主要有 3 项风险：
+  - region "报告 项目风险":
+    - text: 项目风险 截至今天 · 数据来自业务记录与知识库 2 高风险 1 中风险 3 关联供应商
+    - list:
+      - listitem: 鲜丰冷链箱交期推迟 影响下周出库排期，来源：走访纪要
+      - listitem: 棕榈油价格上涨 采购成本抬升约 8%，来源：湖仓指标
+      - listitem: 三味食品资质临期 证照 30 天内到期
+    - button "追问缓解建议"
+    - button "创建处理任务"
+  - text: 有什么待我审批的
+  - paragraph: 有一张待审：
+  - region "审批卡 采购单 鲜丰冷链箱采购":
+    - text: 鲜丰冷链箱采购 采购单 100 数量 6400 金额 待审批
+    - textbox "审批意见":
+      - /placeholder: 审批意见（可选）
+    - button "驳回"
+    - button "同意"
+  - text: 有什么计划建议
+  - paragraph: 系统给了两条建议：
+  - region "计划卡 生产建议 糯米粉":
+    - text: 糯米粉 生产建议 500 建议数量 2026-10-12 建议下单日
+    - button "忽略"
+    - button "确认转单"
+  - button "再来一单"
+  - button "查这条记录"
+  - button "打开快捷面板"
+  - textbox "问我任何经营问题..."
+  - button "发送" [disabled]

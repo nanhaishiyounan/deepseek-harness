@@ -1,8 +1,30 @@
 // @vitest-environment jsdom
 /** foldHistory: the mobile chat surface's projection from raw session events. */
 
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { foldHistory, type FoldEvent } from '../src/client/fold.ts'
+
+/**
+ * The present_card fixture corpus (P1), reused as the tool-call arguments
+ * source so the fold's tool branch stays same-sourced with the server-side
+ * validator (a protocol change on either side must update both in one PR).
+ * Resolved off the process cwd because jsdom rewrites import.meta.url to an
+ * http URL (vitest always starts at the repository root).
+ */
+const FIXTURES_DIR = join(process.cwd(), 'packages/interaction/tool-present-card/tests/fixtures')
+
+/** One present_card tool/call event data with a fixture payload as arguments. */
+function presentCardCall(callId: string, fixtureName: string): { callId: string; name: 'present_card'; arguments: string } {
+  const raw = readFileSync(`${FIXTURES_DIR}/${fixtureName}.json`, 'utf8')
+  return { callId, name: 'present_card', arguments: `{"payload":${raw.replace(/\s+/g, '')}}` }
+}
+
+/** One present_card tool/call event data with arbitrary raw arguments. */
+function presentCardRawCall(callId: string, arguments_: string): { callId: string; name: 'present_card'; arguments: string } {
+  return { callId, name: 'present_card', arguments: arguments_ }
+}
 
 /** One raw event helper (seq/time implied by position). */
 function event(type: string, data: unknown, seq: number): FoldEvent {
@@ -330,6 +352,163 @@ describe('foldHistory (protocol names as tool calls)', () => {
     if (row?.kind !== 'tool') throw new Error('expected tool row')
     expect(row.protocol).toBeUndefined()
     expect(row.label).toBe('some_real_tool')
+  })
+})
+
+describe('foldHistory (present_card tool calls)', () => {
+  it('folds a present_card ask_choice call into the ask card with no tool row', () => {
+    const folded = foldHistory([
+      event('assistant/message', { message: { content: [{ type: 'text', text: '这笔可以从两个方向登记，请点选：' }] } }, 0),
+      event('tool/call', { turn: 1, step: 1, ...presentCardCall('pc1', 'ask-choice.valid') }, 1),
+      event('tool/result', { message: { role: 'user', content: [{ type: 'tool-result', toolCallId: 'pc1', isError: false, content: [{ type: 'text', text: '卡片已呈现，本回合到此结束' }] }] } }, 2),
+    ])
+    expect(folded.items.map(item => item.kind)).toEqual(['text', 'ask'])
+    const ask = folded.items[1]
+    if (ask?.kind !== 'ask') throw new Error('expected ask item')
+    expect(ask.payload.options).toHaveLength(2)
+    // The tool row never appears and the result has no row to flip.
+    expect(folded.items.some(item => item.kind === 'tool')).toBe(false)
+  })
+
+  it('folds a present_card form_draft call into the v3 task card', () => {
+    const folded = foldHistory([
+      event('tool/call', presentCardCall('pc2', 'form-draft.valid'), 1),
+    ])
+    const card = folded.items[0]
+    if (card?.kind !== 'task-card' || card.payload === undefined) throw new Error('expected v3 draft card')
+    expect(card.payload.draftId).toBe('d_20261006_1')
+    expect(card.draft.collection).toBe('pur_orders')
+  })
+
+  it('folds a present_card report call into the report card', () => {
+    const folded = foldHistory([
+      event('tool/call', presentCardCall('pc3', 'report.valid'), 1),
+    ])
+    const report = folded.items[0]
+    if (report?.kind !== 'report') throw new Error('expected report item')
+    expect(report.payload.title).toBe('库存查询')
+    expect(report.payload.metrics).toHaveLength(2)
+  })
+
+  it('folds a numeric-leaf ask_choice into the ask card with coerced strings', () => {
+    const folded = foldHistory([
+      event('tool/call', presentCardCall('pc16', 'ask-choice.numeric-values.valid'), 1),
+    ])
+    const ask = folded.items[0]
+    if (ask?.kind !== 'ask') throw new Error('expected ask item')
+    expect(ask.payload.id).toBe('7')
+    expect(ask.payload.options.map(option => option.value)).toEqual(['1', '13', 'hf-001'])
+    expect(folded.degradedFences).toBe(0)
+  })
+
+  it('folds a stringified-payload present_card call (double serialization) into the card', () => {
+    const raw = readFileSync(`${FIXTURES_DIR}/payload-string.ask-choice.valid.json`, 'utf8').replace(/\s+/g, '')
+    const folded = foldHistory([
+      event('tool/call', presentCardRawCall('pc17', `{"payload":${raw}}`), 1),
+    ])
+    const ask = folded.items[0]
+    if (ask?.kind !== 'ask') throw new Error('expected ask item')
+    expect(ask.payload.id).toBe('choice_s')
+    expect(folded.degradedFences).toBe(0)
+  })
+
+  it('degrades a present_card call whose payload fails validation, with no tool row', () => {
+    const folded = foldHistory([
+      event('tool/call', presentCardCall('pc4', 'report.metrics-over'), 1),
+    ])
+    expect(folded.degradedFences).toBe(1)
+    expect(folded.items).toHaveLength(1)
+    const notice = folded.items[0]
+    if (notice?.kind !== 'degraded') throw new Error('expected degraded notice')
+    expect(notice.text).toContain('present_card')
+    // The over-limit payload never leaks its raw JSON into the surface.
+    expect(folded.items.some(item => item.kind === 'report')).toBe(false)
+  })
+
+  it('degrades a present_card call with malformed arguments', () => {
+    const folded = foldHistory([
+      event('tool/call', presentCardRawCall('pc5', 'not json'), 1),
+      event('tool/call', presentCardRawCall('pc6', '{}'), 2),
+      event('tool/call', presentCardRawCall('pc7', '{"payload":"ask_choice"}'), 3),
+    ])
+    expect(folded.degradedFences).toBe(3)
+    expect(folded.items.every(item => item.kind === 'degraded')).toBe(true)
+  })
+
+  it('degrades a present_card submit_receipt without a matching nb_create landing', () => {
+    const folded = foldHistory([
+      event('tool/call', presentCardCall('pc8', 'submit-receipt.valid'), 1),
+    ])
+    expect(folded.items.some(item => item.kind === 'receipt')).toBe(false)
+    expect(folded.degradedFences).toBe(1)
+    const notice = folded.items.find(item => item.kind === 'degraded')
+    if (notice?.kind !== 'degraded') throw new Error('expected degraded notice')
+    expect(notice.text).toContain('回执未经落库核实')
+  })
+
+  it('renders a present_card submit_receipt against its landed nb_create', () => {
+    const folded = foldHistory([
+      event('tool/call', { callId: 'c9', name: 'nb_create', arguments: '{"collection":"pur_orders"}' }, 0),
+      event('tool/result', { message: { role: 'user', content: [{ type: 'tool-result', toolCallId: 'c9', isError: false, content: [{ type: 'text', text: '已在 pur_orders 创建第 7 行：\n- code: "PO-1"' }] }] } }, 1),
+      event('tool/call', presentCardCall('pc9', 'submit-receipt.valid'), 2),
+    ])
+    // The nb_create keeps its tool row; the present_card call does not.
+    expect(folded.items.map(item => item.kind)).toEqual(['tool', 'receipt'])
+    const receipt = folded.items[1]
+    if (receipt?.kind !== 'receipt') throw new Error('expected receipt item')
+    expect(receipt.payload.rowId).toBe('7')
+  })
+
+  it('drops the four user-action payloads a model sends through present_card', () => {
+    const confirm = {
+      v: 3, type: 'form_confirm', draftId: 'd_1', revision: 1,
+      form: { collection: 'c', label: '采购单' },
+      fields: [{ name: 'n', label: '数量', value: '200' }],
+    }
+    const folded = foldHistory([
+      event('tool/call', presentCardRawCall('pc10', JSON.stringify({ payload: confirm })), 1),
+    ])
+    // A valid-but-user-action payload renders nothing, same as the fence path.
+    expect(folded.items).toHaveLength(0)
+    expect(folded.degradedFences).toBe(0)
+  })
+
+  it('renders the fence source and the tool source in one window (dual-source replay)', () => {
+    const askFence = '```dsh\n{"v":3,"type":"ask_choice","id":"choice_1","mode":"single","variant":"cards","question":"这笔要登记成什么单据？","options":[{"label":"采购单","value":"hub_po_purchase_orders","hint":"我们向鲜丰买进","send":"是采购单，我们从鲜丰买进"},{"label":"出库单","value":"hub_wms_outbound","hint":"我们向鲜丰发货","send":"是出库单，我们发货给鲜丰"}],"allowFreeText":true}\n```'
+    const folded = foldHistory([
+      event('assistant/message', { message: { content: [{ type: 'text', text: `先确认单据类型。\n${askFence}` }] } }, 1),
+      event('tool/call', presentCardCall('pc11', 'report.valid'), 2),
+    ])
+    expect(folded.items.map(item => item.kind)).toEqual(['text', 'ask', 'report'])
+  })
+
+  it('folds two parallel present_card calls into both cards in call order', () => {
+    const folded = foldHistory([
+      event('tool/call', presentCardCall('pc12', 'ask-choice.valid'), 1),
+      event('tool/call', presentCardCall('pc13', 'ask-field.valid'), 2),
+    ])
+    expect(folded.items.map(item => item.kind)).toEqual(['ask', 'field-ask'])
+  })
+
+  it('derives the answered state for a tool-sourced ask like the fence path', () => {
+    const folded = foldHistory([
+      event('tool/call', presentCardCall('pc14', 'ask-choice.valid'), 1),
+      event('user/message', { content: [{ type: 'text', text: '是采购单，我们从鲜丰买进' }], source: { kind: 'user' } }, 2),
+    ])
+    const ask = folded.items[0]
+    if (ask?.kind !== 'ask') throw new Error('expected ask item')
+    expect(ask.answered).toEqual({ selected: 'pur_orders' })
+  })
+
+  it('retires a tool-sourced ask when the next-turn assistant moves on', () => {
+    const folded = foldHistory([
+      event('tool/call', presentCardCall('pc15', 'ask-choice.valid'), 1),
+      event('assistant/message', { message: { content: [{ type: 'text', text: '先说别的。' }] } }, 2),
+      event('user/message', { content: [{ type: 'text', text: '是采购单，我们从鲜丰买进' }], source: { kind: 'user' } }, 3),
+    ])
+    const ask = folded.items[0]
+    if (ask?.kind !== 'ask') throw new Error('expected ask item')
+    expect(ask.answered).toBeUndefined()
   })
 })
 

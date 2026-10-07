@@ -107,6 +107,7 @@
     "tests/new-session-lifecycle.e2e.ts",
     "tests/mobile-shell.e2e.ts",
     "tests/mobile-assistant.e2e.ts",
+    "tests/mobile-assistant-toolcard.e2e.ts",
     "tests/mobile-preview-iframe.e2e.ts"
   ],
   "references": [
