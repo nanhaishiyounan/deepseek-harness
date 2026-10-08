@@ -292,6 +292,45 @@ describe('alerts view', () => {
     }
   })
 
+  it('keeps a code-fold expansion when a re-read re-orders its members (W23-R6 dual anchor)', async () => {
+    signInAs('keeper')
+    const codeRow = (id: number, title: string, days: number): Record<string, unknown> => ({
+      id,
+      rule_type: 'expiry',
+      severity: 'warning',
+      title,
+      entity_code: 'LOT-K',
+      status: 'open',
+      owner: null,
+      notify_users: ['keeper'],
+      detail: { days_left: days },
+    })
+    // Distinct titles fold this pair on the shared entity code, not on a
+    // shared title — the fold the reset test above never covers.
+    let rows = [codeRow(91, '甲批 LOT-K 12 天后到期', 12), codeRow(92, '乙批 LOT-K 15 天后到期', 15)]
+    stubGateway({
+      'nocobase.list': () => ({ count: rows.length, page: 1, page_size: 200, rows }),
+    })
+    vi.useFakeTimers()
+    try {
+      render(<AlertsView />)
+      await vi.advanceTimersByTimeAsync(0)
+      const group = screen.getByTestId('alert-group')
+      fireEvent.click(group.querySelector('button[aria-expanded]') as HTMLButtonElement)
+      expect(group.querySelectorAll('[data-testid="alert-row"]')).toHaveLength(2)
+      // The next poll re-orders the members: the head row changes, but the
+      // shared code — not the head identity — keys the group, so the opened
+      // state survives. The dual anchor of the title-fold reset above.
+      rows = [rows[1]!, rows[0]!]
+      await vi.advanceTimersByTimeAsync(30_000)
+      const reRead = screen.getByTestId('alert-group')
+      expect(reRead.querySelector('button[aria-expanded]')?.getAttribute('aria-expanded')).toBe('true')
+      expect(reRead.querySelectorAll('[data-testid="alert-row"]')).toHaveLength(2)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
   // NOTE: the button→act wiring is NOT jsdom-click-tested here — antd-mobile's
   // button click never reaches the handler under this environment and spins
   // the worker. The live four-step smoke (demos/acceptance-w6/w6-r2-01: real

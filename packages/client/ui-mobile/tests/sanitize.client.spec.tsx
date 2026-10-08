@@ -48,7 +48,7 @@ describe('sanitizeSubtitle (W23-R3 F2)', () => {
 })
 
 describe('the report render site (W23-R3 F2)', () => {
-  const reportItem = (subtitle: string): ChatItem => ({
+  const reportItem = (subtitle: string, title = '待办概览'): ChatItem => ({
     kind: 'report',
     seq: 2,
     time: 1000,
@@ -56,7 +56,7 @@ describe('the report render site (W23-R3 F2)', () => {
       v: 3,
       type: 'report',
       id: 'r_leak',
-      title: '待办概览',
+      title,
       subtitle,
       metrics: [{ label: '待办', value: '3', kind: 'count' }],
     },
@@ -103,6 +103,15 @@ describe('the report render site (W23-R3 F2)', () => {
     renderFlow(reportItem('实时查询 · 待办表 WFL_Approval_Todos 已清空'))
     const node = document.querySelector('[class*="reportSubtitle"]')
     expect(node?.textContent).toBe('实时查询 · 待办表 已清空')
+    expect(/wfl_approval_todos/i.test(document.body.textContent ?? '')).toBe(false)
+  })
+
+  it('renders no casing variant of the leaked token in the title face (W23-R6)', () => {
+    renderFlow(reportItem('近30天 · 实时查询', 'WFL_Approval_Todos 待办概览'))
+    // The outer wrapper class is `reportTitles`; :not skips it for the title
+    // span itself.
+    const node = document.querySelector('[class*="reportTitle"]:not([class*="reportTitles"])')
+    expect(node?.textContent).toBe('待办概览')
     expect(/wfl_approval_todos/i.test(document.body.textContent ?? '')).toBe(false)
   })
 

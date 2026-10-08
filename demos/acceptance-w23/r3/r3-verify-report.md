@@ -18,7 +18,7 @@
 - 场景 ①（存量泄漏重放）：z2 `session-453ee9d6` 的 5 张卡——含 B2 实测泄漏的 turn2/turn3 两张——subtitle 全部渲染为「实时查询 · 待办表 已清空…」（`wfl_approval_todos` 被剥），`subtitleTokenLeaks: []`（`r3-live-probe.json` + `r3-f2-z2-leak-cards-clean.png`）。
 - 场景 ②（z4 重放）：subtitle 面无存活卡（其卡全被拒为折叠条，由 F1 主证覆盖）。
 - 场景 ③（新 turn 复跑 ×2）：在 z2 会话真实发送「再查一遍我名下的待审批明细，出一张卡」两轮，新产出第 6/7 张卡（「实时查询 · 待办表 已清空 · 质检/回款 pending 项责任人均非 buyer」「实时查询 · 第四次刷新结果一致 · 待办表 已清空」），`subtitleTokenLeaks: []`（`r3-f2-replay-probe.json` + `r3-f2-fresh-replay-clean.png`）。
-- 如实记录（W23-R5 更正口径）：z2 存量正文叙述含 4 处小写协议 token 泄漏（B2 时代 durable log 产物，正文渲染层不在本批修复面——B2 评估维持开放集不枚举决策）；R3 双捕获两轮新 turn 正文新增泄漏 1 处（`r3-f2-replay-probe.json` `newBodyLeakTail: 1`——原文「零新增泄漏」与该探针自相矛盾，此处按实测改口），新产物仍由 persona 补丁约束。
+- 如实记录（W23-R5 更正口径；W23-R6 补可复算源并按实测改数）：z2 存量正文叙述小写协议 token 泄漏按 durable log 终态 assistant 正文（`assistant/message` 的 `text` 块）实测 3 处（2026-10-08T17:34:26/17:35:26/17:36:17Z 三条各 1，即 B2 网关 01:34–01:37 本地时产物；原文「4 处」在该口径下不可复现），复算：`zstdcat examples/kb-agent/.dsh/sessions/--Users-mac-Documents-github-deepseek-harness--/session-453ee9d6-3da6-4417-9a9b-9234b0f7eb21/session.jsonl.zstd | jq -r 'select(.type=="assistant/message" and ((.time|tonumber)<1791481910967)) | .data.message.content[]? | select(.type=="text") | .text' | grep -o 'wfl_approval_todos' | wc -l` → 3（B2 时代 durable log 产物，正文渲染层不在本批修复面——B2 评估维持开放集不枚举决策）；R3 双捕获两轮新 turn 正文新增泄漏 1 处（`r3-f2-replay-probe.json` `newBodyLeakTail: 1`，log 侧 19:14:33Z 同口径命中——原文「零新增泄漏」与该探针自相矛盾，此处按实测改口），新产物仍由 persona 补丁约束。
 - DOM 级测试：`sanitize.client.spec.tsx` 10 用例（含「渲染后 DOM 全文不含 wfl_approval_todos」「剥空 subtitle 按省略渲染」「OTIF/GB 2760 原样通过」）。
 
 ## F3 protocol 行契约（单测 + 接线证明）
