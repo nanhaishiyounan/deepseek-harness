@@ -1,0 +1,54 @@
+2,10c2,11
+<  * The deterministic widget resolver (W22-R1, refined W22-R2): which on-screen
+<  * control a draft field renders is a mechanical fact of the field's name and
+<  * label, so the server rewrites the model-declared `widget` on the two
+<  * widget-bearing payload branches instead of trusting the model to pick
+<  * correctly every time. The resolver is deliberately fail-open — a name it
+<  * cannot classify keeps the declared widget — because only the
+<  * quantity/price/amount and date families are mechanically decidable;
+<  * enum-style fields still need the model to carry `options`, which no server
+<  * table can invent.
+---
+>  * The deterministic widget resolver, mirrored from the server's
+>  * `@deepseek-ai/dsh-tool-present-card` src/widget.ts (W22-R2): the render fold
+>  * applies the same classification the server's resolve step applies, so a
+>  * model-declared `text` on `quantity` renders the number keypad regardless of
+>  * which channel carried the payload. The mirror exists because the client
+>  * bundle purity gate forbids cross-plugin value imports (an interaction
+>  * package is not an inline-safe wire layer), the same reason the payload
+>  * validators in protocol.ts are a mirror pair — any rule change here ships in
+>  * the same PR as the server's widget.ts and the shared fixtures, with the
+>  * same-name tables kept token-identical.
+12,21c13,16
+<  * W22-R2 refinement, mirrored in the client render fold
+<  * (dsh-client-ui-mobile src/client/widget.ts): free-text field names (note /
+<  * remark / comment families) and free-text label words (备注/说明) pin the
+<  * declared widget BEFORE any money/date label fragment can fire — a
+<  * `customer_note` labeled 客户备注（含单价上限） stays text — and the label
+<  * fragments themselves match on token boundaries (a compound's head word)
+<  * instead of raw substrings, so a connector-led token like 含单价 never
+<  * classifies.
+<  *
+<  * @module @deepseek-ai/dsh-tool-present-card/widget
+---
+>  * The rewrite is render-only: the session log and the model's context keep
+>  * the declared widget (model-visible ⟺ logged), the card renders the
+>  * mechanically decidable one, and locked/read-only fields render their value
+>  * line either way.
+26c21
+< /** The widget enum every draft field and ask_field field declares. */
+---
+> /** The widget kinds a protocol field can ask the surface to render. */
+141,145c136,141
+<  * Rewrite the widget-bearing branches of a resolved payload with the
+<  * deterministic classification: `form_draft` fields (options count as select
+<  * evidence) and the lone `ask_field` field (suggestions are free-text hints,
+<  * never select candidates). Every other branch passes through untouched.
+<  * @param payload - the structurally validated, normalized payload.
+---
+>  * Rewrite the widget-bearing branches of a validated payload with the
+>  * deterministic classification, the render-side twin of the server's resolve
+>  * step: `form_draft` fields (options count as select evidence) and the lone
+>  * `ask_field` field (suggestions are free-text hints, never select
+>  * candidates). Every other branch passes through untouched.
+>  * @param payload - the validated protocol payload.

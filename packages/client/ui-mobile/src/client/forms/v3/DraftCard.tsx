@@ -17,7 +17,7 @@ import { useRef, useState, type JSX } from 'react'
 import { Button, Collapse, DatePicker, Input, Picker } from 'antd-mobile'
 import type { CardPhase } from '../../cardState.ts'
 import type { NocobaseFieldView } from '@deepseek-ai/dsh-host-apiproxy/api'
-import { fieldControlOf } from '../../fieldControls.ts'
+import { fieldControlOf, metaFieldOf } from '../../fieldControls.ts'
 import type { FormDraftPayload, FormField } from '../../protocol.ts'
 import { portalContainer } from '../../portal.ts'
 import { formatDateText, parseDateText } from '../dateText.ts'
@@ -222,7 +222,7 @@ function EditableValue(
   const { field, payload, values, meta, disabled, onEdit } = props
   const value = values[field.name] ?? ''
   if (field.widget === 'relation' && !disabled) {
-    const spec = fieldControlOf(payload.form.collection, field.name, meta?.get(field.name))
+    const spec = fieldControlOf(payload.form.collection, field.name, metaFieldOf(meta, field.name))
     if (spec.kind === 'relation') {
       return (
         <RelationSelect
@@ -350,18 +350,29 @@ function DerivedFace(
 ): JSX.Element {
   const { field, value, payload, meta } = props
   const spec = field.widget === 'relation'
-    ? fieldControlOf(payload.form.collection, field.name, meta?.get(field.name))
+    ? fieldControlOf(payload.form.collection, field.name, metaFieldOf(meta, field.name))
     : undefined
-  return <DerivedFaceResolved kind={spec?.kind} target={spec?.target} value={value} />
+  return <DerivedFaceResolved kind={spec?.kind} target={spec?.target} value={value} declaredRelation={field.widget === 'relation'} />
 }
 
 /** The name-resolved arm of the derived face (hook isolation per row). */
 function DerivedFaceResolved(
-  props: { readonly kind: string | undefined; readonly target: string | undefined; readonly value: string },
+  props: {
+    readonly kind: string | undefined
+    readonly target: string | undefined
+    readonly value: string
+    readonly declaredRelation: boolean
+  },
 ): JSX.Element {
   const resolved = useRelationLabel(
     props.kind === 'relation' ? { kind: props.kind, target: props.target } : undefined,
     props.value,
   )
+  // A declared relation the meta read could not key resolves no target row:
+  // a numeric value shows as the opaque reference `引用 #47` instead of a
+  // bare number that reads like a quantity or amount.
+  if (props.declaredRelation && (props.kind !== 'relation' || props.target === undefined) && /^\d+$/.test(props.value)) {
+    return <>引用 #{props.value}</>
+  }
   return <>{resolved ?? props.value}</>
 }

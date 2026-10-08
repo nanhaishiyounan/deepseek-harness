@@ -1,0 +1,2428 @@
+{
+ "A": [
+  {
+   "sid": "session-d7f07d53-ecea-434f-a8a6-7437b82c595b",
+   "retries": 0,
+   "prompt": "枧水月饼皮预拌粉 25kg",
+   "cards": [
+    {
+     "type": "ask_field",
+     "ok": true,
+     "fields": "NOT_ARRAY:undefined",
+     "askField": {
+      "n": "product_name",
+      "w": "text"
+     },
+     "diff": []
+    },
+    {
+     "type": "form_draft",
+     "ok": true,
+     "collection": "pur_orders",
+     "fields": [
+      {
+       "n": "supplier_id",
+       "w": "relation",
+       "v": "2",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "product_name",
+       "w": "text",
+       "v": "枧水月饼皮预拌粉 25kg",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "quantity",
+       "w": "number",
+       "v": "100",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "unit_price",
+       "w": "number",
+       "v": "10",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "amount",
+       "w": "number",
+       "v": "1000",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "currency",
+       "w": "text",
+       "v": "CNY",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "need_date",
+       "w": "date",
+       "v": null,
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "doc_status",
+       "w": "text",
+       "v": "draft",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "receiving_status",
+       "w": "text",
+       "v": "none",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "invoice_status",
+       "w": "text",
+       "v": "no_invoice",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "code",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      }
+     ],
+     "diff": []
+    }
+   ]
+  },
+  {
+   "sid": "session-e9f546f6-28ab-452b-8b5c-804ffb072ffd",
+   "retries": 0,
+   "prompt": "帮我登记一张采购单：向 山东鲁丰食品配料有限公司 采购 面粉，数量 100，单价 10",
+   "cards": [
+    {
+     "type": "form_draft",
+     "ok": true,
+     "collection": "pur_orders",
+     "fields": [
+      {
+       "n": "supplier_id",
+       "w": "relation",
+       "v": "2",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "product_name",
+       "w": "text",
+       "v": "面粉",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "quantity",
+       "w": "number",
+       "v": "100",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "unit_price",
+       "w": "number",
+       "v": "10",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "need_date",
+       "w": "date",
+       "v": null,
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "amount",
+       "w": "number",
+       "v": "1000",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "currency",
+       "w": "text",
+       "v": "CNY",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "doc_status",
+       "w": "select",
+       "v": "draft",
+       "t": "derived",
+       "o": 5
+      },
+      {
+       "n": "receiving_status",
+       "w": "select",
+       "v": "none",
+       "t": "derived",
+       "o": 3
+      },
+      {
+       "n": "invoice_status",
+       "w": "select",
+       "v": "no_invoice",
+       "t": "derived",
+       "o": 3
+      },
+      {
+       "n": "code",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      }
+     ],
+     "diff": []
+    }
+   ]
+  },
+  {
+   "sid": "session-90ddd4d8-7900-4b8c-89f7-7b59db71764a",
+   "retries": 0,
+   "prompt": "帮我登记一张采购单：向 山东鲁丰食品配料有限公司 采购 面粉，数量 100，单价 10",
+   "cards": []
+  },
+  {
+   "sid": "session-1a226e35-c17d-4c02-a38d-c247cef1b906",
+   "retries": 0,
+   "prompt": "帮我登记一张采购单：向 山东鲁丰食品配料有限公司 采购 面粉，数量 100，单价 10",
+   "cards": [
+    {
+     "type": "form_draft",
+     "ok": false,
+     "err": "\"text\":\"Error: invalid arguments: payload.fields[2].unit 不是声明字段（本卡类型不允许额外属性）; payload.fields[3].unit 不是声明字段（本卡类型不允许额外属性）\" {\"name\":\"ToolArgsError\",\"code\":\"INVALID_ARGS\"}",
+     "collection": "pur_orders",
+     "fields": [
+      {
+       "n": "supplier_id",
+       "w": "relation",
+       "v": "2",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "product_name",
+       "w": "text",
+       "v": "面粉",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "quantity",
+       "w": "number",
+       "v": "100",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "unit_price",
+       "w": "number",
+       "v": "10",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "need_date",
+       "w": "date",
+       "v": null,
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "amount",
+       "w": "number",
+       "v": "1000",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "currency",
+       "w": "text",
+       "v": "CNY",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "code",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      },
+      {
+       "n": "doc_status",
+       "w": "text",
+       "v": "draft",
+       "t": "system",
+       "o": 0
+      },
+      {
+       "n": "receiving_status",
+       "w": "text",
+       "v": "none",
+       "t": "system",
+       "o": 0
+      },
+      {
+       "n": "invoice_status",
+       "w": "text",
+       "v": "no_invoice",
+       "t": "system",
+       "o": 0
+      }
+     ],
+     "diff": []
+    },
+    {
+     "type": "form_draft",
+     "ok": true,
+     "collection": "pur_orders",
+     "fields": [
+      {
+       "n": "supplier_id",
+       "w": "relation",
+       "v": "2",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "product_name",
+       "w": "text",
+       "v": "面粉",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "quantity",
+       "w": "number",
+       "v": "100",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "unit_price",
+       "w": "number",
+       "v": "10",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "need_date",
+       "w": "date",
+       "v": null,
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "amount",
+       "w": "number",
+       "v": "1000",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "currency",
+       "w": "text",
+       "v": "CNY",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "code",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      },
+      {
+       "n": "doc_status",
+       "w": "text",
+       "v": "draft",
+       "t": "system",
+       "o": 0
+      },
+      {
+       "n": "receiving_status",
+       "w": "text",
+       "v": "none",
+       "t": "system",
+       "o": 0
+      },
+      {
+       "n": "invoice_status",
+       "w": "text",
+       "v": "no_invoice",
+       "t": "system",
+       "o": 0
+      }
+     ],
+     "diff": []
+    }
+   ]
+  },
+  {
+   "sid": "session-d2091d27-b206-44a5-bb6e-e81b5d11a80c",
+   "retries": 0,
+   "prompt": "2026-10-09",
+   "cards": [
+    {
+     "type": "ask_choice",
+     "ok": true,
+     "fields": "NOT_ARRAY:undefined",
+     "diff": []
+    },
+    {
+     "type": "ask_field",
+     "ok": true,
+     "fields": "NOT_ARRAY:undefined",
+     "askField": {
+      "n": "unit_price",
+      "w": "number"
+     },
+     "diff": []
+    },
+    {
+     "type": "ask_field",
+     "ok": true,
+     "fields": "NOT_ARRAY:undefined",
+     "askField": {
+      "n": "need_date",
+      "w": "date"
+     },
+     "diff": []
+    },
+    {
+     "type": "form_draft",
+     "ok": true,
+     "collection": "pur_orders",
+     "fields": [
+      {
+       "n": "supplier_id",
+       "w": "relation",
+       "v": "2",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "product_name",
+       "w": "text",
+       "v": "枧水月饼皮预拌粉 25kg",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "quantity",
+       "w": "number",
+       "v": "100",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "unit_price",
+       "w": "number",
+       "v": "10",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "need_date",
+       "w": "date",
+       "v": "2026-10-09",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "amount",
+       "w": "number",
+       "v": "1000",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "currency",
+       "w": "text",
+       "v": "CNY",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "doc_status",
+       "w": "text",
+       "v": "draft",
+       "t": "system",
+       "o": 0
+      },
+      {
+       "n": "receiving_status",
+       "w": "text",
+       "v": "none",
+       "t": "system",
+       "o": 0
+      },
+      {
+       "n": "invoice_status",
+       "w": "text",
+       "v": "no_invoice",
+       "t": "system",
+       "o": 0
+      },
+      {
+       "n": "code",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      }
+     ],
+     "diff": []
+    }
+   ]
+  },
+  {
+   "sid": "session-b2e5be37-5c78-48e6-932a-3f9bbb424c5c",
+   "retries": 0,
+   "prompt": "帮我登记一张采购单：向 山东鲁丰食品配料有限公司 采购 面粉，数量 100，单价 10",
+   "cards": [
+    {
+     "type": "form_draft",
+     "ok": true,
+     "collection": "pur_orders",
+     "fields": [
+      {
+       "n": "supplier_id",
+       "w": "relation",
+       "v": "2",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "product_name",
+       "w": "text",
+       "v": "面粉",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "quantity",
+       "w": "number",
+       "v": "100",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "unit_price",
+       "w": "number",
+       "v": "10",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "amount",
+       "w": "number",
+       "v": "1000",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "currency",
+       "w": "text",
+       "v": "CNY",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "need_date",
+       "w": "date",
+       "v": "2026-10-08",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "doc_status",
+       "w": "text",
+       "v": "draft",
+       "t": "system",
+       "o": 0
+      },
+      {
+       "n": "receiving_status",
+       "w": "text",
+       "v": "none",
+       "t": "system",
+       "o": 0
+      },
+      {
+       "n": "invoice_status",
+       "w": "text",
+       "v": "no_invoice",
+       "t": "system",
+       "o": 0
+      },
+      {
+       "n": "code",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      }
+     ],
+     "diff": []
+    }
+   ]
+  },
+  {
+   "sid": "session-3fffdf84-e566-40d4-b953-c0dd970c9321",
+   "retries": 0,
+   "prompt": "是枧水月饼皮预拌粉 25kg，数量 100，单价 10",
+   "cards": [
+    {
+     "type": "ask_choice",
+     "ok": true,
+     "fields": "NOT_ARRAY:undefined",
+     "diff": []
+    },
+    {
+     "type": "form_draft",
+     "ok": false,
+     "err": "\"text\":\"Error: invalid arguments: payload.fields缺少必答字段 product_name/product_id（品名）——必答字段必须出现在卡片上，值可预填（value 可为 null 或预填值）\" {\"name\":\"ToolArgsError\",\"code\":\"INVALID_ARGS\"}",
+     "collection": "pur_orders",
+     "fields": [
+      {
+       "n": "supplier_id",
+       "w": "relation",
+       "v": "2",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "product",
+       "w": "text",
+       "v": "枧水月饼皮预拌粉 25kg",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "quantity",
+       "w": "number",
+       "v": "100",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "unit_price",
+       "w": "number",
+       "v": "10",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "amount",
+       "w": "number",
+       "v": "1000",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "currency",
+       "w": "text",
+       "v": "CNY",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "need_date",
+       "w": "date",
+       "v": null,
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "code",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      }
+     ],
+     "diff": []
+    },
+    {
+     "type": "form_draft",
+     "ok": true,
+     "collection": "pur_orders",
+     "fields": [
+      {
+       "n": "supplier_id",
+       "w": "relation",
+       "v": "2",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "product_name",
+       "w": "text",
+       "v": "枧水月饼皮预拌粉 25kg",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "quantity",
+       "w": "number",
+       "v": "100",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "unit_price",
+       "w": "number",
+       "v": "10",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "amount",
+       "w": "number",
+       "v": "1000",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "currency",
+       "w": "text",
+       "v": "CNY",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "need_date",
+       "w": "date",
+       "v": null,
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "code",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      }
+     ],
+     "diff": []
+    }
+   ]
+  },
+  {
+   "sid": "session-3bb360d5-ff81-4eb6-b427-43d8c9a59972",
+   "retries": 0,
+   "prompt": "2026-10-15",
+   "cards": [
+    {
+     "type": "ask_field",
+     "ok": false,
+     "err": "\"text\":\"Error: invalid arguments: payload.field.suggestions 缺失（必填字段）\" {\"name\":\"ToolArgsError\",\"code\":\"INVALID_ARGS\"}",
+     "fields": "NOT_ARRAY:undefined",
+     "askField": {
+      "n": "product_name",
+      "w": "text"
+     },
+     "diff": []
+    },
+    {
+     "type": "ask_field",
+     "ok": true,
+     "fields": "NOT_ARRAY:undefined",
+     "askField": {
+      "n": "product_name",
+      "w": "text"
+     },
+     "diff": []
+    },
+    {
+     "type": "ask_field",
+     "ok": false,
+     "err": "\"text\":\"Error: invalid arguments: payload.field.suggestions 缺失（必填字段）\" {\"name\":\"ToolArgsError\",\"code\":\"INVALID_ARGS\"}",
+     "fields": "NOT_ARRAY:undefined",
+     "askField": {
+      "n": "need_date",
+      "w": "date"
+     },
+     "diff": []
+    },
+    {
+     "type": "ask_field",
+     "ok": true,
+     "fields": "NOT_ARRAY:undefined",
+     "askField": {
+      "n": "need_date",
+      "w": "date"
+     },
+     "diff": []
+    },
+    {
+     "ok": false,
+     "parseErr": "Unexpected non-whitespace character after JSON at position 1427 (line 1 column 1428)",
+     "err": "\"text\":\"Error: invalid arguments: payload 应为九类卡片载荷对象或其 JSON 字符串，收到的字符串无法解析为 JSON（前32字：{\\\" {\"name\":\"ToolArgsError\",\"code\":\"INVALID_ARGS\"}"
+    },
+    {
+     "type": "form_draft",
+     "ok": true,
+     "collection": "pur_orders",
+     "fields": [
+      {
+       "n": "supplier_id",
+       "w": "relation",
+       "v": "山东鲁丰食品配料有限公司",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "product_id",
+       "w": "relation",
+       "v": "枧水月饼皮预拌粉 25kg",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "quantity",
+       "w": "number",
+       "v": "100",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "unit_price",
+       "w": "number",
+       "v": "10",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "need_date",
+       "w": "date",
+       "v": "2026-10-15",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "amount",
+       "w": "number",
+       "v": "1000",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "currency",
+       "w": "text",
+       "v": "CNY",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "doc_status",
+       "w": "text",
+       "v": "draft",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "receiving_status",
+       "w": "text",
+       "v": "none",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "invoice_status",
+       "w": "text",
+       "v": "no_invoice",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "code",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      }
+     ],
+     "diff": []
+    }
+   ]
+  },
+  {
+   "sid": "session-1077f11e-2dff-4e98-bee4-a957c74f81f8",
+   "retries": 0,
+   "prompt": "帮我登记一张采购单：向 山东鲁丰食品配料有限公司 采购 面粉，数量 100，单价 10",
+   "cards": [
+    {
+     "type": "form_draft",
+     "ok": false,
+     "err": "\"text\":\"Error: invalid arguments: payload.fields缺少必答字段 product_name/product_id（品名）——必答字段必须出现在卡片上，值可预填（value 可为 null 或预填值）\" {\"name\":\"ToolArgsError\",\"code\":\"INVALID_ARGS\"}",
+     "collection": "pur_orders",
+     "fields": [
+      {
+       "n": "supplier_id",
+       "w": "relation",
+       "v": "2",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "need_date",
+       "w": "date",
+       "v": null,
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "quantity",
+       "w": "number",
+       "v": "100",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "unit_price",
+       "w": "number",
+       "v": "10",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "amount",
+       "w": "number",
+       "v": "1000",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "currency",
+       "w": "text",
+       "v": "CNY",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "doc_status",
+       "w": "text",
+       "v": "draft",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "receiving_status",
+       "w": "text",
+       "v": "none",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "invoice_status",
+       "w": "text",
+       "v": "no_invoice",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "code",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      }
+     ],
+     "diff": []
+    },
+    {
+     "type": "form_draft",
+     "ok": true,
+     "collection": "pur_orders",
+     "fields": [
+      {
+       "n": "supplier_id",
+       "w": "relation",
+       "v": "2",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "product_name",
+       "w": "text",
+       "v": "面粉",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "quantity",
+       "w": "number",
+       "v": "100",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "unit_price",
+       "w": "number",
+       "v": "10",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "need_date",
+       "w": "date",
+       "v": null,
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "amount",
+       "w": "number",
+       "v": "1000",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "currency",
+       "w": "text",
+       "v": "CNY",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "doc_status",
+       "w": "text",
+       "v": "draft",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "receiving_status",
+       "w": "text",
+       "v": "none",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "invoice_status",
+       "w": "text",
+       "v": "no_invoice",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "code",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      }
+     ],
+     "diff": []
+    }
+   ]
+  },
+  {
+   "sid": "session-593f3daa-8f99-4153-a482-39c1f583168f",
+   "retries": 0,
+   "prompt": "2026-10-09",
+   "cards": [
+    {
+     "type": "ask_choice",
+     "ok": true,
+     "fields": "NOT_ARRAY:undefined",
+     "diff": []
+    },
+    {
+     "type": "ask_field",
+     "ok": true,
+     "fields": "NOT_ARRAY:undefined",
+     "askField": {
+      "n": "need_date",
+      "w": "date"
+     },
+     "diff": []
+    },
+    {
+     "type": "form_draft",
+     "ok": false,
+     "err": "\"text\":\"Error: invalid arguments: payload.fields缺少必答字段 product_name/product_id（品名）——必答字段必须出现在卡片上，值可预填（value 可为 null 或预填值）\" {\"name\":\"ToolArgsError\",\"code\":\"INVALID_ARGS\"}",
+     "collection": "pur_orders",
+     "fields": [
+      {
+       "n": "supplier_id",
+       "w": "relation",
+       "v": "2",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "product",
+       "w": "relation",
+       "v": "4",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "quantity",
+       "w": "number",
+       "v": "100",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "unit_price",
+       "w": "number",
+       "v": "10",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "amount",
+       "w": "number",
+       "v": "1000",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "currency",
+       "w": "text",
+       "v": "CNY",
+       "t": "system",
+       "o": 0
+      },
+      {
+       "n": "need_date",
+       "w": "date",
+       "v": "2026-10-09",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "doc_status",
+       "w": "text",
+       "v": "draft",
+       "t": "system",
+       "o": 0
+      },
+      {
+       "n": "receiving_status",
+       "w": "text",
+       "v": "none",
+       "t": "system",
+       "o": 0
+      },
+      {
+       "n": "invoice_status",
+       "w": "text",
+       "v": "no_invoice",
+       "t": "system",
+       "o": 0
+      },
+      {
+       "n": "code",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      }
+     ],
+     "diff": []
+    },
+    {
+     "type": "form_draft",
+     "ok": true,
+     "collection": "pur_orders",
+     "fields": [
+      {
+       "n": "supplier_id",
+       "w": "relation",
+       "v": "2",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "product_name",
+       "w": "relation",
+       "v": "枧水月饼皮预拌粉 25kg",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "quantity",
+       "w": "number",
+       "v": "100",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "unit_price",
+       "w": "number",
+       "v": "10",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "amount",
+       "w": "number",
+       "v": "1000",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "currency",
+       "w": "text",
+       "v": "CNY",
+       "t": "system",
+       "o": 0
+      },
+      {
+       "n": "need_date",
+       "w": "date",
+       "v": "2026-10-09",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "doc_status",
+       "w": "text",
+       "v": "draft",
+       "t": "system",
+       "o": 0
+      },
+      {
+       "n": "receiving_status",
+       "w": "text",
+       "v": "none",
+       "t": "system",
+       "o": 0
+      },
+      {
+       "n": "invoice_status",
+       "w": "text",
+       "v": "no_invoice",
+       "t": "system",
+       "o": 0
+      },
+      {
+       "n": "code",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      }
+     ],
+     "diff": []
+    }
+   ]
+  }
+ ],
+ "s1": [
+  {
+   "sid": "session-0b612dd6-561a-4115-a7c6-0256d5b3781e",
+   "retries": 0,
+   "prompt": "帮我登记一个新供应商：名称 山东鲁丰食品配料有限公司，联系人 张红喜，电话 13800001234",
+   "cards": [
+    {
+     "type": "form_draft",
+     "ok": true,
+     "collection": "srm_suppliers",
+     "fields": [
+      {
+       "n": "name",
+       "w": "text",
+       "v": "山东鲁丰食品配料有限公司",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "contact",
+       "w": "text",
+       "v": "张红喜",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "phone",
+       "w": "text",
+       "v": "13800001234",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "lifecycle_status",
+       "w": "text",
+       "v": "potential",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "source",
+       "w": "text",
+       "v": "internal",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "code",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      }
+     ],
+     "diff": []
+    }
+   ]
+  },
+  {
+   "sid": "session-0109bae9-6ad8-4119-89d9-ea538a024a78",
+   "retries": 0,
+   "prompt": "帮我登记一个新供应商：名称 山东鲁丰食品配料有限公司，联系人 张红喜，电话 13800001234",
+   "cards": [
+    {
+     "type": "form_draft",
+     "ok": false,
+     "err": "\"text\":\"Error: invalid arguments: payload.fields[2].source 不是声明字段（本卡类型不允许额外属性）\" {\"name\":\"ToolArgsError\",\"code\":\"INVALID_ARGS\"}",
+     "collection": "srm_suppliers",
+     "fields": [
+      {
+       "n": "name",
+       "w": "text",
+       "v": "山东鲁丰食品配料有限公司",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "contact",
+       "w": "text",
+       "v": "张红喜",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "phone",
+       "w": "text",
+       "v": "13800001234",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "lifecycle_status",
+       "w": "text",
+       "v": "potential",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "source",
+       "w": "text",
+       "v": "internal",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "code",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      }
+     ],
+     "diff": []
+    },
+    {
+     "type": "form_draft",
+     "ok": true,
+     "collection": "srm_suppliers",
+     "fields": [
+      {
+       "n": "name",
+       "w": "text",
+       "v": "山东鲁丰食品配料有限公司",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "contact",
+       "w": "text",
+       "v": "张红喜",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "phone",
+       "w": "text",
+       "v": "13800001234",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "lifecycle_status",
+       "w": "text",
+       "v": "potential",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "source",
+       "w": "text",
+       "v": "internal",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "code",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      }
+     ],
+     "diff": []
+    }
+   ]
+  },
+  {
+   "sid": "session-70fcbd63-be80-421a-b28c-6635cf1dacc9",
+   "retries": 0,
+   "prompt": "帮我登记一个新供应商：名称 山东鲁丰食品配料有限公司，联系人 张红喜，电话 13800001234",
+   "cards": [
+    {
+     "type": "form_draft",
+     "ok": true,
+     "collection": "srm_suppliers",
+     "fields": [
+      {
+       "n": "name",
+       "w": "text",
+       "v": "山东鲁丰食品配料有限公司",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "contact",
+       "w": "text",
+       "v": "张红喜",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "phone",
+       "w": "text",
+       "v": "13800001234",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "lifecycle_status",
+       "w": "text",
+       "v": "potential",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "source",
+       "w": "text",
+       "v": "internal",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "code",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      }
+     ],
+     "diff": []
+    }
+   ]
+  },
+  {
+   "sid": "session-606bf8e0-1b90-4560-845a-073a61c2fb4f",
+   "retries": 0,
+   "prompt": "帮我登记一个新供应商：名称 山东鲁丰食品配料有限公司，联系人 张红喜，电话 13800001234",
+   "cards": [
+    {
+     "type": "form_draft",
+     "ok": true,
+     "collection": "srm_suppliers",
+     "fields": [
+      {
+       "n": "name",
+       "w": "text",
+       "v": "山东鲁丰食品配料有限公司",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "contact",
+       "w": "text",
+       "v": "张红喜",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "phone",
+       "w": "text",
+       "v": "13800001234",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "lifecycle_status",
+       "w": "text",
+       "v": "potential",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "source",
+       "w": "text",
+       "v": "internal",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "code",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      }
+     ],
+     "diff": []
+    }
+   ]
+  },
+  {
+   "sid": "session-5b463c13-ebc7-45b9-8031-4145c6399b5f",
+   "retries": 0,
+   "prompt": "帮我登记一个新供应商：名称 山东鲁丰食品配料有限公司，联系人 张红喜，电话 13800001234",
+   "cards": [
+    {
+     "type": "form_draft",
+     "ok": true,
+     "collection": "srm_suppliers",
+     "fields": [
+      {
+       "n": "name",
+       "w": "text",
+       "v": "山东鲁丰食品配料有限公司",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "contact",
+       "w": "text",
+       "v": "张红喜",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "phone",
+       "w": "text",
+       "v": "13800001234",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "lifecycle_status",
+       "w": "text",
+       "v": "potential",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "source",
+       "w": "text",
+       "v": "internal",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "code",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      }
+     ],
+     "diff": []
+    }
+   ]
+  }
+ ],
+ "s2": [
+  {
+   "sid": "session-2174ce9b-95e1-420e-9107-a393efadbc00",
+   "retries": 5,
+   "prompt": "帮我登记一张入库单：来源 TL-88，品名 面粉，数量 100",
+   "cards": []
+  },
+  {
+   "sid": "session-d1a1963a-dbee-4921-bac8-43f18da4aad6",
+   "retries": 5,
+   "prompt": "帮我登记一张入库单：来源 TL-88，品名 面粉，数量 100",
+   "cards": []
+  },
+  {
+   "sid": "session-f1f276da-f8aa-476b-a186-a8f21aa43d3c",
+   "retries": 5,
+   "prompt": "帮我登记一张入库单：来源 TL-88，品名 面粉，数量 100",
+   "cards": []
+  },
+  {
+   "sid": "session-b768a2ee-cb6f-494d-9054-e93a244bb56c",
+   "retries": 0,
+   "prompt": "帮我登记一张入库单：来源 TL-88，品名 面粉，数量 100",
+   "cards": [
+    {
+     "type": "form_draft",
+     "ok": false,
+     "err": "\"text\":\"Error: invalid arguments: payload.fields缺少必答字段 po_id/po_no（采购订单号）——必答字段必须出现在卡片上，值可预填（value 可为 null 或预填值）\" {\"name\":\"ToolArgsError\",\"code\":\"INVALID_ARGS\"}",
+     "collection": "wms_receipts",
+     "fields": [
+      {
+       "n": "source_no",
+       "w": "text",
+       "v": "TL-88",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "product",
+       "w": "relation",
+       "v": "48",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "qty",
+       "w": "number",
+       "v": "100",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "receipt_type",
+       "w": "select",
+       "v": "other",
+       "t": "derived",
+       "o": 4
+      },
+      {
+       "n": "received_at",
+       "w": "date",
+       "v": "2026-10-08",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "status",
+       "w": "text",
+       "v": "pending",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "iqc_status",
+       "w": "text",
+       "v": "pending",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "receipt_no",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      }
+     ],
+     "diff": []
+    },
+    {
+     "type": "form_draft",
+     "ok": true,
+     "collection": "wms_receipts",
+     "fields": [
+      {
+       "n": "source_no",
+       "w": "text",
+       "v": "TL-88",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "po_id",
+       "w": "relation",
+       "v": null,
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "product",
+       "w": "relation",
+       "v": "48",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "qty",
+       "w": "number",
+       "v": "100",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "received_at",
+       "w": "date",
+       "v": "2026-10-08",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "receipt_type",
+       "w": "select",
+       "v": "other",
+       "t": "derived",
+       "o": 4
+      },
+      {
+       "n": "status",
+       "w": "text",
+       "v": "pending",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "iqc_status",
+       "w": "text",
+       "v": "pending",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "receipt_no",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      }
+     ],
+     "diff": []
+    }
+   ]
+  },
+  {
+   "sid": "session-e812c685-1b44-40b4-b3dc-59c901ee9c92",
+   "retries": 0,
+   "prompt": "帮我登记一张入库单：来源 TL-88，品名 面粉，数量 100",
+   "cards": [
+    {
+     "type": "form_draft",
+     "ok": false,
+     "err": "\"text\":\"Error: invalid arguments: payload.fields缺少必答字段 po_id/po_no（采购订单号）——必答字段必须出现在卡片上，值可预填（value 可为 null 或预填值）\" {\"name\":\"ToolArgsError\",\"code\":\"INVALID_ARGS\"}",
+     "collection": "wms_receipts",
+     "fields": [
+      {
+       "n": "source_no",
+       "w": "text",
+       "v": "TL-88",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "product",
+       "w": "relation",
+       "v": "48",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "qty",
+       "w": "number",
+       "v": "100",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "received_at",
+       "w": "date",
+       "v": "2026-10-08",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "status",
+       "w": "text",
+       "v": "pending",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "receipt_type",
+       "w": "text",
+       "v": "purchase",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "iqc_status",
+       "w": "text",
+       "v": "pending",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "supplier",
+       "w": "relation",
+       "v": "",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "receipt_no",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      }
+     ],
+     "diff": []
+    },
+    {
+     "type": "form_draft",
+     "ok": true,
+     "collection": "wms_receipts",
+     "fields": [
+      {
+       "n": "po_id",
+       "w": "relation",
+       "v": null,
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "source_no",
+       "w": "text",
+       "v": "TL-88",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "product",
+       "w": "relation",
+       "v": "48",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "qty",
+       "w": "number",
+       "v": "100",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "received_at",
+       "w": "date",
+       "v": "2026-10-08",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "status",
+       "w": "text",
+       "v": "pending",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "receipt_type",
+       "w": "text",
+       "v": "purchase",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "iqc_status",
+       "w": "text",
+       "v": "pending",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "supplier",
+       "w": "relation",
+       "v": "",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "receipt_no",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      }
+     ],
+     "diff": []
+    }
+   ]
+  },
+  {
+   "sid": "session-3fdb87b7-360f-4c59-b3d6-d113ff91fd0a",
+   "retries": 0,
+   "prompt": "帮我登记一张入库单：来源 TL-88，品名 面粉，数量 100",
+   "cards": [
+    {
+     "type": "form_draft",
+     "ok": false,
+     "err": "\"text\":\"Error: invalid arguments: payload.fields缺少必答字段 po_id/po_no（采购订单号）——必答字段必须出现在卡片上，值可预填（value 可为 null 或预填值）\" {\"name\":\"ToolArgsError\",\"code\":\"INVALID_ARGS\"}",
+     "collection": "wms_receipts",
+     "fields": [
+      {
+       "n": "source_no",
+       "w": "text",
+       "v": "TL-88",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "product_id",
+       "w": "relation",
+       "v": "48",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "qty",
+       "w": "number",
+       "v": "100",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "receipt_type",
+       "w": "select",
+       "v": "purchase",
+       "t": "derived",
+       "o": 3
+      },
+      {
+       "n": "received_at",
+       "w": "date",
+       "v": "2026-10-08",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "status",
+       "w": "text",
+       "v": "pending",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "iqc_status",
+       "w": "text",
+       "v": "pending",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "receipt_no",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      }
+     ],
+     "diff": []
+    }
+   ]
+  },
+  {
+   "sid": "session-77b6e5ce-ecdb-4306-bedd-fbf5f68d08a5",
+   "retries": 0,
+   "prompt": "帮我登记一张入库单：来源 TL-88，品名 面粉，数量 100",
+   "cards": [
+    {
+     "type": "form_draft",
+     "ok": false,
+     "err": "\"text\":\"Error: invalid arguments: payload.v 应为整数（收到字符串 \\\" {\"name\":\"ToolArgsError\",\"code\":\"INVALID_ARGS\"}",
+     "collection": "hub_wms_inbound",
+     "fields": "NOT_ARRAY:{\"item\":[{\"name\":\"source_document\",\"label\":\"来源单据\",\"value\":\"TL-88\",\"tier\":\"required\",\"widget\":\"text\",\"rationale\":\"按你提供的来源",
+     "diff": [
+      {
+       "err": "diff-failed"
+      }
+     ]
+    },
+    {
+     "type": "form_draft",
+     "ok": false,
+     "err": "\"text\":\"Error: invalid arguments: payload.v 应为整数（收到字符串 \\\" {\"name\":\"ToolArgsError\",\"code\":\"INVALID_ARGS\"}",
+     "collection": "hub_wms_inbound",
+     "fields": "NOT_ARRAY:{\"item\":[{\"name\":\"source_no\",\"label\":\"来源单据\",\"value\":\"TL-88\",\"tier\":\"required\",\"widget\":\"text\",\"rationale\":\"按你提供的来源单据填写\"}",
+     "diff": [
+      {
+       "err": "diff-failed"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "sid": "session-c61ab170-34de-4fe9-aa50-ca62e0b35b79",
+   "retries": 0,
+   "prompt": "帮我登记一张入库单：来源 TL-88，品名 面粉，数量 100",
+   "cards": [
+    {
+     "type": "form_draft",
+     "ok": false,
+     "err": "\"text\":\"Error: invalid arguments: payload.v 应为整数（收到字符串 \\\" {\"name\":\"ToolArgsError\",\"code\":\"INVALID_ARGS\"}",
+     "collection": "hub_wms_inbound",
+     "fields": "NOT_ARRAY:{\"item\":[{\"name\":\"source_doc\",\"label\":\"来源单据\",\"value\":\"TL-88\",\"tier\":\"required\",\"widget\":\"text\",\"rationale\":\"你提供的来源单据\"},{",
+     "diff": [
+      {
+       "err": "diff-failed"
+      }
+     ]
+    },
+    {
+     "type": "form_draft",
+     "ok": false,
+     "err": "\"text\":\"Error: invalid arguments: payload.v 应为整数（收到字符串 \\\" {\"name\":\"ToolArgsError\",\"code\":\"INVALID_ARGS\"}",
+     "collection": "hub_wms_inbound",
+     "fields": "NOT_ARRAY:{\"item\":[{\"name\":\"source_doc\",\"label\":\"来源单据\",\"value\":\"TL-88\",\"tier\":\"required\",\"widget\":\"text\",\"rationale\":\"你提供的来源单据\"},{",
+     "diff": [
+      {
+       "err": "diff-failed"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "s3": [
+  {
+   "sid": "session-f4deccc0-8093-4f35-b022-39014b944479",
+   "retries": 5,
+   "prompt": "帮我登记一张销售出库单：卖给 青岛海韵烘焙坊，面粉 50 袋，单价 20",
+   "cards": []
+  },
+  {
+   "sid": "session-a7a263f3-79e9-4e38-a3e9-fa008bcba20d",
+   "retries": 5,
+   "prompt": "帮我登记一张销售出库单：卖给 青岛海韵烘焙坊，面粉 50 袋，单价 20",
+   "cards": []
+  },
+  {
+   "sid": "session-e80752ee-b481-4eaa-92af-04f1d9e62554",
+   "retries": 4,
+   "prompt": "先建客户档案,名称青岛海韵烘焙坊",
+   "cards": [
+    {
+     "type": "ask_choice",
+     "ok": true,
+     "fields": "NOT_ARRAY:undefined",
+     "diff": []
+    },
+    {
+     "type": "ask_choice",
+     "ok": true,
+     "fields": "NOT_ARRAY:undefined",
+     "diff": []
+    },
+    {
+     "type": "ask_choice",
+     "ok": true,
+     "fields": "NOT_ARRAY:undefined",
+     "diff": []
+    },
+    {
+     "type": "ask_choice",
+     "ok": true,
+     "fields": "NOT_ARRAY:undefined",
+     "diff": []
+    },
+    {
+     "type": "form_draft",
+     "ok": true,
+     "collection": "so_orders",
+     "fields": [
+      {
+       "n": "customer_id",
+       "w": "text",
+       "v": "48",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "product_id",
+       "w": "text",
+       "v": "48",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "quantity",
+       "w": "number",
+       "v": "50",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "unit_price",
+       "w": "number",
+       "v": "20",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "amount",
+       "w": "number",
+       "v": "1000",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "need_date",
+       "w": "date",
+       "v": "",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "code",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      },
+      {
+       "n": "doc_status",
+       "w": "text",
+       "v": "draft",
+       "t": "system",
+       "o": 0
+      },
+      {
+       "n": "shipping_status",
+       "w": "text",
+       "v": "none",
+       "t": "system",
+       "o": 0
+      }
+     ],
+     "diff": []
+    }
+   ]
+  },
+  {
+   "sid": "session-de10cde3-6435-49fb-9b70-e477020fdf55",
+   "retries": 0,
+   "prompt": "帮我登记一张销售出库单：卖给 青岛海韵烘焙坊，面粉 50 袋，单价 20",
+   "cards": []
+  },
+  {
+   "sid": "session-23462245-5e0a-4e24-a43f-9dbfd2d92176",
+   "retries": 0,
+   "prompt": "帮我登记一张销售出库单：卖给 青岛海韵烘焙坊，面粉 50 袋，单价 20",
+   "cards": [
+    {
+     "type": "form_draft",
+     "ok": true,
+     "collection": "so_orders",
+     "fields": [
+      {
+       "n": "customer_id",
+       "w": "relation",
+       "v": "48",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "product",
+       "w": "text",
+       "v": "面粉",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "quantity",
+       "w": "number",
+       "v": "50",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "unit_price",
+       "w": "number",
+       "v": "20",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "amount",
+       "w": "number",
+       "v": "1000",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "need_date",
+       "w": "date",
+       "v": "",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "code",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      },
+      {
+       "n": "doc_status",
+       "w": "text",
+       "v": "draft",
+       "t": "system",
+       "o": 0
+      },
+      {
+       "n": "shipping_status",
+       "w": "text",
+       "v": "none",
+       "t": "system",
+       "o": 0
+      }
+     ],
+     "diff": []
+    }
+   ]
+  },
+  {
+   "sid": "session-e80c053a-1173-4f02-a486-76a26b34f0ff",
+   "retries": 0,
+   "prompt": "是销售订单，含单价金额",
+   "cards": [
+    {
+     "type": "ask_choice",
+     "ok": true,
+     "fields": "NOT_ARRAY:undefined",
+     "diff": []
+    },
+    {
+     "type": "form_draft",
+     "ok": true,
+     "collection": "so_orders",
+     "fields": [
+      {
+       "n": "customer_id",
+       "w": "relation",
+       "v": "青岛海韵烘焙坊",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "product",
+       "w": "text",
+       "v": "面粉",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "qty",
+       "w": "number",
+       "v": "50",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "unit_price",
+       "w": "number",
+       "v": "20",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "amount",
+       "w": "number",
+       "v": "1000",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "need_date",
+       "w": "date",
+       "v": "",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "code",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      }
+     ],
+     "diff": []
+    }
+   ]
+  },
+  {
+   "sid": "session-143dd241-4cf6-4f6b-bd7c-6b8a453fbed5",
+   "retries": 0,
+   "prompt": "帮我登记一张销售出库单：卖给 青岛海韵烘焙坊，面粉 50 袋，单价 20",
+   "cards": [
+    {
+     "type": "form_draft",
+     "ok": false,
+     "err": "\"text\":\"Error: invalid arguments: payload.form.collection \\\" {\"name\":\"ToolArgsError\",\"code\":\"INVALID_ARGS\"}",
+     "collection": "wms_shipments",
+     "fields": [
+      {
+       "n": "shipment_no",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      },
+      {
+       "n": "product",
+       "w": "relation",
+       "v": "48",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "qty",
+       "w": "number",
+       "v": "50",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "shipment_type",
+       "w": "text",
+       "v": "销售出库",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "status",
+       "w": "text",
+       "v": "待发运",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "from_bin",
+       "w": "relation",
+       "v": null,
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "note",
+       "w": "text",
+       "v": "客户：青岛海韵烘焙坊；单价：20",
+       "t": "derived",
+       "o": 0
+      }
+     ],
+     "diff": []
+    },
+    {
+     "type": "form_draft",
+     "ok": true,
+     "collection": "hub_wms_outbound",
+     "fields": [
+      {
+       "n": "outbound_number",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      },
+      {
+       "n": "product",
+       "w": "relation",
+       "v": "48",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "qty",
+       "w": "number",
+       "v": "50",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "shipment_type",
+       "w": "text",
+       "v": "销售出库",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "status",
+       "w": "text",
+       "v": "待发运",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "from_bin",
+       "w": "relation",
+       "v": null,
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "customer_note",
+       "w": "text",
+       "v": "客户：青岛海韵烘焙坊（crm_customers id=48）；单价：20",
+       "t": "derived",
+       "o": 0
+      }
+     ],
+     "diff": [
+      {
+       "name": "customer_note",
+       "declared": "text",
+       "rewritten": "number"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

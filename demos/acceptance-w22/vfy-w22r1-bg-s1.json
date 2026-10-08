@@ -1,0 +1,442 @@
+{
+ "label": "s1",
+ "prompt": "帮我登记一个新供应商：名称 山东鲁丰食品配料有限公司，联系人 张红喜，电话 13800001234",
+ "runs": 5,
+ "results": [
+  {
+   "run": 1,
+   "sid": "session-0b612dd6-561a-4115-a7c6-0256d5b3781e",
+   "outcome": "form_draft",
+   "rounds": 1,
+   "secs": 12,
+   "collection": "srm_suppliers",
+   "resolverDiff": [],
+   "toolErrors": [],
+   "timeline": [
+    {
+     "round": 0,
+     "sent": "帮我登记一个新供应商：名称 山东鲁丰食品配料有限公司，联系人 张红喜，电话 13800001234",
+     "cards": [
+      "form_draft"
+     ],
+     "toolErrors": []
+    }
+   ],
+   "allCards": [
+    {
+     "type": "form_draft",
+     "collection": "srm_suppliers",
+     "fields": [
+      {
+       "n": "name",
+       "l": "供应商名称",
+       "w": "text",
+       "v": "山东鲁丰食品配料有限公司",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "contact",
+       "l": "联系人",
+       "w": "text",
+       "v": "张红喜",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "phone",
+       "l": "电话",
+       "w": "text",
+       "v": "13800001234",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "lifecycle_status",
+       "l": "生命周期状态",
+       "w": "text",
+       "v": "potential",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "source",
+       "l": "来源",
+       "w": "text",
+       "v": "internal",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "code",
+       "l": "编号",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "run": 2,
+   "sid": "session-0109bae9-6ad8-4119-89d9-ea538a024a78",
+   "outcome": "form_draft",
+   "rounds": 1,
+   "secs": 15,
+   "collection": "srm_suppliers",
+   "resolverDiff": [],
+   "toolErrors": [],
+   "timeline": [
+    {
+     "round": 0,
+     "sent": "帮我登记一个新供应商：名称 山东鲁丰食品配料有限公司，联系人 张红喜，电话 13800001234",
+     "cards": [
+      "form_draft",
+      "form_draft"
+     ],
+     "toolErrors": []
+    }
+   ],
+   "allCards": [
+    {
+     "type": "form_draft",
+     "collection": "srm_suppliers",
+     "fields": [
+      {
+       "n": "name",
+       "l": "供应商名称",
+       "w": "text",
+       "v": "山东鲁丰食品配料有限公司",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "contact",
+       "l": "联系人",
+       "w": "text",
+       "v": "张红喜",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "phone",
+       "l": "电话",
+       "w": "text",
+       "v": "13800001234",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "lifecycle_status",
+       "l": "准入状态",
+       "w": "text",
+       "v": "potential",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "source",
+       "l": "来源",
+       "w": "text",
+       "v": "internal",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "code",
+       "l": "供应商编号",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      }
+     ]
+    },
+    {
+     "type": "form_draft",
+     "collection": "srm_suppliers",
+     "fields": [
+      {
+       "n": "name",
+       "l": "供应商名称",
+       "w": "text",
+       "v": "山东鲁丰食品配料有限公司",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "contact",
+       "l": "联系人",
+       "w": "text",
+       "v": "张红喜",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "phone",
+       "l": "电话",
+       "w": "text",
+       "v": "13800001234",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "lifecycle_status",
+       "l": "准入状态",
+       "w": "text",
+       "v": "potential",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "source",
+       "l": "来源",
+       "w": "text",
+       "v": "internal",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "code",
+       "l": "供应商编号",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "run": 3,
+   "sid": "session-70fcbd63-be80-421a-b28c-6635cf1dacc9",
+   "outcome": "form_draft",
+   "rounds": 1,
+   "secs": 6,
+   "collection": "srm_suppliers",
+   "resolverDiff": [],
+   "toolErrors": [],
+   "timeline": [
+    {
+     "round": 0,
+     "sent": "帮我登记一个新供应商：名称 山东鲁丰食品配料有限公司，联系人 张红喜，电话 13800001234",
+     "cards": [
+      "form_draft"
+     ],
+     "toolErrors": []
+    }
+   ],
+   "allCards": [
+    {
+     "type": "form_draft",
+     "collection": "srm_suppliers",
+     "fields": [
+      {
+       "n": "name",
+       "l": "供应商名称",
+       "w": "text",
+       "v": "山东鲁丰食品配料有限公司",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "contact",
+       "l": "联系人",
+       "w": "text",
+       "v": "张红喜",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "phone",
+       "l": "电话",
+       "w": "text",
+       "v": "13800001234",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "lifecycle_status",
+       "l": "生命周期状态",
+       "w": "text",
+       "v": "potential",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "source",
+       "l": "来源",
+       "w": "text",
+       "v": "internal",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "code",
+       "l": "供应商编号",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "run": 4,
+   "sid": "session-606bf8e0-1b90-4560-845a-073a61c2fb4f",
+   "outcome": "form_draft",
+   "rounds": 1,
+   "secs": 21,
+   "collection": "srm_suppliers",
+   "resolverDiff": [],
+   "toolErrors": [],
+   "timeline": [
+    {
+     "round": 0,
+     "sent": "帮我登记一个新供应商：名称 山东鲁丰食品配料有限公司，联系人 张红喜，电话 13800001234",
+     "cards": [
+      "form_draft"
+     ],
+     "toolErrors": []
+    }
+   ],
+   "allCards": [
+    {
+     "type": "form_draft",
+     "collection": "srm_suppliers",
+     "fields": [
+      {
+       "n": "name",
+       "l": "供应商名称",
+       "w": "text",
+       "v": "山东鲁丰食品配料有限公司",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "contact",
+       "l": "联系人",
+       "w": "text",
+       "v": "张红喜",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "phone",
+       "l": "联系电话",
+       "w": "text",
+       "v": "13800001234",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "lifecycle_status",
+       "l": "状态",
+       "w": "text",
+       "v": "potential",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "source",
+       "l": "来源",
+       "w": "text",
+       "v": "internal",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "code",
+       "l": "供应商编号",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "run": 5,
+   "sid": "session-5b463c13-ebc7-45b9-8031-4145c6399b5f",
+   "outcome": "form_draft",
+   "rounds": 1,
+   "secs": 15,
+   "collection": "srm_suppliers",
+   "resolverDiff": [],
+   "toolErrors": [],
+   "timeline": [
+    {
+     "round": 0,
+     "sent": "帮我登记一个新供应商：名称 山东鲁丰食品配料有限公司，联系人 张红喜，电话 13800001234",
+     "cards": [
+      "form_draft"
+     ],
+     "toolErrors": []
+    }
+   ],
+   "allCards": [
+    {
+     "type": "form_draft",
+     "collection": "srm_suppliers",
+     "fields": [
+      {
+       "n": "name",
+       "l": "供应商名称",
+       "w": "text",
+       "v": "山东鲁丰食品配料有限公司",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "contact",
+       "l": "联系人",
+       "w": "text",
+       "v": "张红喜",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "phone",
+       "l": "电话",
+       "w": "text",
+       "v": "13800001234",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "lifecycle_status",
+       "l": "生命周期状态",
+       "w": "text",
+       "v": "potential",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "source",
+       "l": "来源",
+       "w": "text",
+       "v": "internal",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "code",
+       "l": "供应商编号",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

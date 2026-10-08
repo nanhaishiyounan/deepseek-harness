@@ -1,0 +1,46 @@
+{
+  "at": "2026-10-07T18:45:00+08:00",
+  "verifier": "verify-executor W21-R8 final gate",
+  "gateway": {
+    "restarted": true,
+    "reason": "BUG-4 guard: old PID 31687 lstart 02:56:45... (01:56:45) earlier than tool-present-card/src/index.ts mtime 02:12:09",
+    "newPid": 37095,
+    "newLstart": "2026-10-08 02:27:45",
+    "mobileHttpStatus": 200
+  },
+  "scenarios": {
+    "A": {
+      "session": "session-487e88e3",
+      "input": "供应链数据里有什么值得关注的",
+      "presentCardFoldedAttempts": 0,
+      "presentCardSelfCorrectRounds": 0,
+      "note": "lakehouse query layer self-corrected 3x (filter/serialization/string-date), NOT present_card actions",
+      "actionsButtons": ["查看采购订单", "查看供应商关系图谱", "查看市场/原料报告"],
+      "buttonClick": { "button": "查看采购订单", "result": "navigated #/work", "ok": true },
+      "refreshPersistence": { "buttonsAfterReload": 3, "folded": 0, "ok": true }
+    },
+    "B": {
+      "session": "session-29a1b7f0",
+      "autoOpener": "帮我看一下这家企业的档案要点",
+      "askChoiceCard": { "rendered": true, "options": 6, "radios": 5, "fallbackButton": "自己打字说明" },
+      "foldedItem": {
+        "count": 1,
+        "cause": "present_card type field missing (应为九类卡片类型之一...收到缺失) — NOT actions-position; same family as maker-declared candidate-followup residue (s#5 type-wrapping)",
+        "actionsPositionRecurrence": false
+      },
+      "optionClick": { "option": "宏发·产能与扩产计划", "result": "user message sent + AI resumed with semantics", "checkedDisabledAfter": true }
+    },
+    "C": {
+      "session": "session-f9c27861",
+      "input": "你好，你能做什么",
+      "result": "plain text reply, 0 card buttons, 0 folded — no fabricated actions"
+    }
+  },
+  "consoleErrors": 0,
+  "viewport": { "initialBug": "resize_page(375) yielded innerWidth 500; fixed via emulate 375x812x3 mobile touch", "finalInnerWidth": 375 },
+  "makerCrossCheck": {
+    "makerClaim": "final card 7/7, actions retained 7/7, wrapper-key/missing-kind recurrence 0, s-leg first-pass 3/5 (2 legs 2-round self-correct on non-actions positions)",
+    "verifierIndependent": "consistent; no delete-actions bypass observed in 3 fresh sessions nor in maker runs.jsonl"
+  },
+  "screenshots": ["vfy-w21r8-a-1.png", "vfy-w21r8-a-2.png", "vfy-w21r8-a-375-0.png", "vfy-w21r8-a-375-1.png", "vfy-w21r8-a-375-mid.png", "vfy-w21r8-b-1.png", "vfy-w21r8-b-2.png", "vfy-w21r8-c-1.png"]
+}

@@ -1,0 +1,5 @@
+# W22-R2 P4 replay — session-25152bb7-8f29-4c05-9e35-da419adc6de7 (FULL-P4-RUN1)
+# 2026-10-08 12:24:26 +0800 — gateway 127.0.0.1:3080 bundle client-BhZO_JAd.js (W22-R3 rebuild: build:lib:client + apps/web build)
+# method: W22-R2 verifier playwright read — quantity/date fields' inputmode + date-trigger; nocobase.list stubbed to empty rows (render-layer isolation)
+FULL-P4-RUN1 → [{"label":"数量","inputMode":"decimal","dateTrigger":false},{"label":"需求日期","inputMode":null,"dateTrigger":true}]
+verdict: 旁路封死（数量 inputmode=decimal，需求日期 date-trigger）

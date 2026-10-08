@@ -1,0 +1,71 @@
+{
+ "label": "s2",
+ "prompt": "帮我登记一张入库单：来源 TL-88，品名 面粉，数量 100",
+ "runs": 5,
+ "results": [
+  {
+   "run": 1,
+   "outcome": "error",
+   "error": "fetch failed"
+  },
+  {
+   "run": 2,
+   "sid": "session-2174ce9b-95e1-420e-9107-a393efadbc00",
+   "outcome": "no_card",
+   "rounds": 1,
+   "secs": 18,
+   "resolverDiff": [],
+   "toolErrors": [],
+   "timeline": [
+    {
+     "round": 0,
+     "sent": "帮我登记一张入库单：来源 TL-88，品名 面粉，数量 100",
+     "cards": [],
+     "toolErrors": []
+    }
+   ],
+   "allCards": []
+  },
+  {
+   "run": 3,
+   "sid": "session-d1a1963a-dbee-4921-bac8-43f18da4aad6",
+   "outcome": "no_card",
+   "rounds": 1,
+   "secs": 15,
+   "resolverDiff": [],
+   "toolErrors": [],
+   "timeline": [
+    {
+     "round": 0,
+     "sent": "帮我登记一张入库单：来源 TL-88，品名 面粉，数量 100",
+     "cards": [],
+     "toolErrors": []
+    }
+   ],
+   "allCards": []
+  },
+  {
+   "run": 4,
+   "outcome": "error",
+   "error": "fetch failed"
+  },
+  {
+   "run": 5,
+   "sid": "session-f1f276da-f8aa-476b-a186-a8f21aa43d3c",
+   "outcome": "no_card",
+   "rounds": 1,
+   "secs": 22,
+   "resolverDiff": [],
+   "toolErrors": [],
+   "timeline": [
+    {
+     "round": 0,
+     "sent": "帮我登记一张入库单：来源 TL-88，品名 面粉，数量 100",
+     "cards": [],
+     "toolErrors": []
+    }
+   ],
+   "allCards": []
+  }
+ ]
+}

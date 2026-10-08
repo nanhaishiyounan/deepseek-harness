@@ -1,0 +1,14 @@
+=== p1-widget-text round1 done=true cards=0
+  [result seq=50] callId=undefined keys=turn,step,message,meta
+  [result seq=51] callId=undefined keys=turn,step,message,meta
+  [result seq=70] callId=undefined keys=turn,step,message,meta
+  [result seq=71] callId=undefined keys=turn,step,message,meta
+  [result seq=91] callId=undefined keys=turn,step,message,meta
+  [result seq=92] callId=undefined keys=turn,step,message,meta
+=== p2-whitelist-drift round1 done=true cards=0
+=== p3-required-missing round1 done=true cards=1
+  [call seq=137] type=ask_choice
+  [result seq=75] callId=undefined keys=turn,step,message,meta
+  [result seq=92] callId=undefined keys=turn,step,message,meta
+  [result seq=138] callId=undefined keys=turn,step,message
+WROTE /Users/mac/Documents/github/deepseek-harness/demos/acceptance-w22/vfy-w22r1-mc-probes.json

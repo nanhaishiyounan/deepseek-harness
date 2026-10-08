@@ -2,7 +2,7 @@
 /** fieldControls: the NocoBase field-type → widget mapping. */
 
 import { describe, expect, it } from 'vitest'
-import { fieldControlOf, fieldLabelOf, relationLabelColumn } from '../src/client/fieldControls.ts'
+import { fieldControlOf, fieldLabelOf, metaFieldOf, relationLabelColumn } from '../src/client/fieldControls.ts'
 
 describe('fieldControlOf', () => {
   it('maps the five typed widgets from the schema field', () => {
@@ -35,5 +35,17 @@ describe('fieldControlOf', () => {
     expect(fieldLabelOf(undefined, 'a')).toBe('a')
     expect(relationLabelColumn('hub_po_suppliers')).toBe('name')
     expect(relationLabelColumn('users')).toBe('nickname')
+  })
+})
+
+describe('metaFieldOf', () => {
+  const meta = new Map([['supplier', { name: 'supplier', type: 'belongsTo', target: 'hub_po_suppliers' }]])
+
+  it('retries a stripped _id suffix when the raw name misses', () => {
+    expect(metaFieldOf(meta, 'supplier_id')?.target).toBe('hub_po_suppliers')
+    expect(metaFieldOf(meta, 'supplier')?.target).toBe('hub_po_suppliers')
+    expect(metaFieldOf(meta, 'owner_id')).toBeUndefined()
+    expect(metaFieldOf(meta, 'note')).toBeUndefined()
+    expect(metaFieldOf(undefined, 'supplier_id')).toBeUndefined()
   })
 })

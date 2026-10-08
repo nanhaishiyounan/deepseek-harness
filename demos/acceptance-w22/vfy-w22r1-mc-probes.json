@@ -1,0 +1,398 @@
+[
+  {
+    "tag": "p1-widget-text",
+    "sessionId": "session-88931e52-73be-489f-b9e3-63822f79c2ba",
+    "turns": [
+      {
+        "round": 1,
+        "prompt": "帮我登记一张采购单：向 联调测试供应商 采购 100 箱 联调测试品A，单价 10 元，需求日期 2026-10-20。系统联调要求：出 form_draft 草稿卡时，quantity 数量字段的 widget 参数请严格填 \"text\"（这是接口兼容性测试，必须传 text），其余字段正常。",
+        "done": true,
+        "calls": [],
+        "results": [
+          {
+            "seq": 50,
+            "data": {
+              "turn": 1,
+              "step": 1,
+              "message": {
+                "source": {
+                  "kind": "tool",
+                  "callId": "call_01a1189f80127042a850519c"
+                },
+                "content": [
+                  {
+                    "type": "tool-result",
+                    "toolCallId": "call_01a1189f80127042a850519c",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "srm_suppliers 第 1 页（每页 20，共 0 行）\n本页没有行。"
+                      }
+                    ],
+                    "isError": false
+                  }
+                ],
+                "role": "user",
+                "id": "04288037-4e85-430e-aa03-f688e13c1543"
+              },
+              "meta": {
+                "collection": "srm_suppliers",
+                "count": 0,
+                "page": 1,
+                "filters": [
+                  "name includes 联调测试供应商"
+                ]
+              }
+            }
+          },
+          {
+            "seq": 51,
+            "data": {
+              "turn": 1,
+              "step": 1,
+              "message": {
+                "source": {
+                  "kind": "tool",
+                  "callId": "call_01a1189f82907a61ae936a39"
+                },
+                "content": [
+                  {
+                    "type": "tool-result",
+                    "toolCallId": "call_01a1189f82907a61ae936a39",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "hub_inv_products 第 1 页（每页 20，共 0 行）\n本页没有行。"
+                      }
+                    ],
+                    "isError": false
+                  }
+                ],
+                "role": "user",
+                "id": "c19059d0-e0d6-40b3-bb1b-d86b0550c255"
+              },
+              "meta": {
+                "collection": "hub_inv_products",
+                "count": 0,
+                "page": 1,
+                "filters": [
+                  "name includes 联调测试品A"
+                ]
+              }
+            }
+          },
+          {
+            "seq": 70,
+            "data": {
+              "turn": 1,
+              "step": 2,
+              "message": {
+                "source": {
+                  "kind": "tool",
+                  "callId": "call_01a1189f8af57d229d1c929f"
+                },
+                "content": [
+                  {
+                    "type": "tool-result",
+                    "toolCallId": "call_01a1189f8af57d229d1c929f",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "srm_suppliers 第 1 页（每页 50，共 30 行）\n- {\"id\":1,\"name\":\"珠海鲜丰水产科技有限公司\",\"code\":\"SUP-001\",\"uscc\":\"91440400MA51XXXX1A\",\"contact\":\"陈海燕\",\"phone\":\"0756-6612xxx\",\"region\":\"广东珠海\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":\"2026-09-30\",\"note\":\"南美白虾仁主供应商，冷链资质齐全\",\"reject_streak\":1,\"switch_score\":0,\"lifecycle_status\":\"qualified\",\"audit_grade\":\"A\",\"category\":\"raw\",\"source\":\"invited\",\"iqc_level\":\"normal\",\"regulatory_risk\":\"B\"}\n- {\"id\":2,\"name\":\"山东鲁丰食品配料有限公司\",\"code\":\"SUP-002\",\"uscc\":\"91370700MA3CXXXX2B\",\"contact\":\"刘志强\",\"phone\":\"0536-8291xxx\",\"region\":\"山东潍坊\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":\"2023-10-01\",\"note\":\"月饼皮预拌粉/膨化原料\",\"reject_streak\":1,\"switch_score\":0,\"lifecycle_status\":\"preferred\",\"audit_grade\":\"A\",\"category\":\"aux\",\"source\":\"invited\",\"iqc_level\":\"normal\",\"regulatory_risk\":\"B\"}\n- {\"id\":3,\"name\":\"江南乳业集团股份有限公司\",\"code\":\"SUP-003\",\"uscc\":\"91320500MA1WXXXX3C\",\"contact\":\"周美娟\",\"phone\":\"0512-6753xxx\",\"region\":\"江苏苏州\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":\"2025-03-24\",\"note\":\"巴氏鲜奶，上季度交期评分偏低，限期整改中\",\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"restricted\",\"audit_grade\":\"C\",\"category\":\"raw\",\"source\":\"self\",\"iqc_level\":\"tightened\",\"regulatory_risk\":\"C\"}\n- {\"id\":4,\"name\":\"味之源调味食品股份有限公司\",\"code\":\"SUP-004\",\"uscc\":\"91440100MA9UXXXX4D\",\"contact\":\"黄启明\",\"phone\":\"020-3876xxx\",\"region\":\"广东广州\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":\"2024-03-29\",\"note\":\"酱油/调味汁，GB2760 合规档案完整\",\"reject_streak\":5,\"switch_score\":0,\"lifecycle_status\":\"qualified\",\"audit_grade\":\"B\",\"category\":\"raw\",\"source\":\"invited\",\"iqc_level\":\"tightened\",\"regulatory_risk\":\"A\"}\n- {\"id\":5,\"name\":\"绿源包装材料有限公司\",\"code\":\"SUP-005\",\"uscc\":\"91440300MA5DXXXX5E\",\"contact\":\"何伟\",\"phone\":\"0755-2831xxx\",\"region\":\"广东深圳\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":\"2023-04-04\",\"note\":\"玻璃罐/复合膜包材\",\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"qualified\",\"audit_grade\":\"B\",\"category\":\"packaging\",\"source\":\"internal\",\"iqc_level\":\"relaxed\",\"regulatory_risk\":\"A\"}\n- {\"id\":6,\"name\":\"丹东禾丰果蔬专业合作社\",\"code\":\"SUP-006\",\"uscc\":\"91210600MA0PXXXX6F\",\"contact\":\"孙立国\",\"phone\":\"0415-4127xxx\",\"region\":\"辽宁丹东\",\"is_blacklisted\":true,\"blacklist_reason\":\"农残抽检不合格且整改无效，冻结供货\",\"admitted_at\":\"2024-07-07\",\"note\":\"冻干草莓原料，已启动替代供应商\",\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"frozen\",\"audit_grade\":\"D\",\"category\":\"raw\",\"source\":\"self\",\"iqc_level\":\"suspended\",\"regulatory_risk\":\"D\"}\n- {\"id\":7,\"name\":\"内蒙古草原雪花粮油有限公司\",\"code\":\"SUP-007\",\"uscc\":\"91520100MA7QXXXX7G\",\"contact\":\"巴特尔\",\"phone\":\"0471-6309xxx\",\"region\":\"内蒙古呼和浩特\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":\"新增食用油候选，等待准入评审\",\"reject_streak\":1,\"switch_score\":0,\"lifecycle_status\":\"potential\",\"audit_grade\":null,\"category\":\"raw\",\"source\":\"self\",\"iqc_level\":null,\"regulatory_risk\":\"B\"}\n- {\"id\":8,\"name\":\"顺发冷链物流股份有限公司\",\"code\":\"SUP-008\",\"uscc\":\"91330100MA2BXXXX8H\",\"contact\":\"王敏\",\"phone\":\"0571-8602xxx\",\"region\":\"浙江杭州\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":\"2024-12-04\",\"note\":\"干线冷链运输服务\",\"reject_streak\":3,\"switch_score\":0,\"lifecycle_status\":\"qualified\",\"audit_grade\":\"B\",\"category\":\"service\",\"source\":\"invited\",\"iqc_level\":\"normal\",\"regulatory_risk\":\"A\"}\n- {\"id\":9,\"name\":\"漳州市蜜果休闲食品有限公司\",\"code\":\"SUP-009\",\"uscc\":\"91350600MA8KXXXX9J\",\"contact\":\"林晓芸\",\"phone\":\"0596-2635xxx\",\"region\":\"福建漳州\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":\"果蔬脆片混合装原料，准入评审中\",\"reject_streak\":0,\"switch_score\":0,\"lifecycle_status\":\"reviewing\",\"audit_grade\":null,\"category\":\"raw\",\"source\":\"self\",\"iqc_level\":\"tightened\",\"regulatory_risk\":\"C\"}\n- {\"id\":11,\"name\":\"泉州市安记香辛料有限公司\",\"code\":\"SUP-010\",\"uscc\":null,\"contact\":\"丁永丰\",\"phone\":null,\"region\":\"福建泉州\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":null,\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"qualified\",\"audit_grade\":null,\"category\":null,\"source\":null,\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":12,\"name\":\"东港丰泽果蔬专业合作社\",\"code\":\"SUP-006B\",\"uscc\":\"91210681MA0Y3JXJ90\",\"contact\":\"王立军\",\"phone\":\"0415-7588xxx\",\"region\":\"辽宁丹东东港\",\"is_blacklisted\":false,\"blacklist_reason\":\"\",\"admitted_at\":\"2026-09-13\",\"note\":\"替代 SUP-006 丹东禾丰果蔬专业合作社（农残不合格冻结）。2026-09-09 启动 7 天准入流程：D1 送样、D2-D3 IQC 检测与资质核验、D4 现场审核、D5（09-13）准入决议、D6（09-14）首单下达。适用 GB 14881《食品安全国家标准 食品生产通用卫生规范》；冻干水果产品本身不直接涉及 GB 2760 添加剂，若后续配方添加抗结剂/抗氧化剂，按 GB 2760 表 A.1 规定执行。\",\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"qualified\",\"audit_grade\":\"B\",\"category\":\"raw\",\"source\":\"alternate\",\"iqc_level\":\"normal\",\"regulatory_risk\":\"B\"}\n- {\"id\":13,\"name\":\"鲜丰\",\"code\":\"SUP-2026-0001\",\"uscc\":null,\"contact\":\"张经理\",\"phone\":null,\"region\":null,\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":\"2026-09-26\",\"note\":\"自采购联系人（hub_po_suppliers 第 7 行）归一；邮箱 ops@xianfeng.example\",\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"qualified\",\"audit_grade\":null,\"category\":null,\"source\":\"internal\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":14,\"name\":\"三味食品\",\"code\":\"SUP-2026-0002\",\"uscc\":null,\"contact\":\"李贺\",\"phone\":null,\"region\":null,\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":\"2026-09-26\",\"note\":\"自采购联系人（hub_po_suppliers 第 9 行）归一\",\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"qualified\",\"audit_grade\":null,\"category\":null,\"source\":\"internal\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":15,\"name\":\"李贺\",\"code\":\"SUP-2026-0003\",\"uscc\":null,\"contact\":\"lihe\",\"phone\":null,\"region\":null,\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":\"自采购联系人（hub_po_suppliers 第 10 行）归一\",\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"potential\",\"audit_grade\":null,\"category\":null,\"source\":\"internal\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":16,\"name\":\"B0测试食品\",\"code\":\"SUP-2026-0004\",\"uscc\":null,\"contact\":\"王版本\",\"phone\":null,\"region\":null,\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":\"自采购联系人（hub_po_suppliers 第 11 行）归一\",\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"potential\",\"audit_grade\":null,\"category\":null,\"source\":\"internal\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":17,\"name\":\"新味源食品\",\"code\":\"SUP-2026-0005\",\"uscc\":null,\"contact\":\"周晓芸\",\"phone\":\"13800001111\",\"region\":null,\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":\"2026-09-26\",\"note\":null,\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"qualified\",\"audit_grade\":null,\"category\":null,\"source\":\"internal\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":18,\"name\":\"禾创源食品原料有限公司\",\"code\":\"SUP-2026-1300\",\"uscc\":null,\"contact\":\"罗工\",\"phone\":\"13800001234\",\"region\":null,\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":\"2026-09-26\",\"note\":null,\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"qualified\",\"audit_grade\":null,\"category\":null,\"source\":\"internal\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":33,\"name\":\"W4B2试点供应商-muldkd67\",\"code\":\"SUP-muldkd67\",\"uscc\":\"91350100MA34H4W4B2\",\"contact\":\"试点联系人\",\"phone\":\"13800001234\",\"region\":\"福建漳州\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":null,\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"potential\",\"audit_grade\":null,\"category\":\"raw\",\"source\":\"self\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":34,\"name\":\"W4B2试点供应商-muldmh09\",\"code\":\"SUP-muldmh09\",\"uscc\":\"91350100MA34H4W4B2\",\"contact\":\"试点联系人\",\"phone\":\"13800001234\",\"region\":\"福建漳州\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":null,\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"potential\",\"audit_grade\":null,\"category\":\"raw\",\"source\":\"self\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":35,\"name\":\"W4B2试点供应商-muldnmsm\",\"code\":\"SUP-muldnmsm\",\"uscc\":\"91350100MA34H4W4B2\",\"contact\":\"试点联系人\",\"phone\":\"13800001234\",\"region\":\"福建漳州\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":null,\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"potential\",\"audit_grade\":null,\"category\":\"raw\",\"source\":\"self\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":36,\"name\":\"W4B2试点供应商-muldps34\",\"code\":\"SUP-muldps34\",\"uscc\":\"91350100MA34H4W4B2\",\"contact\":\"试点联系人\",\"phone\":\"13800001234\",\"region\":\"福建漳州\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":null,\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"potential\",\"audit_grade\":null,\"category\":\"raw\",\"source\":\"self\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":37,\"name\":\"W4B2试点供应商-muldrytf\",\"code\":\"SUP-muldrytf\",\"uscc\":\"91350100MA34H4W4B2\",\"contact\":\"试点联系人\",\"phone\":\"13800001234\",\"region\":\"福建漳州\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":null,\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"potential\",\"audit_grade\":null,\"category\":\"raw\",\"source\":\"self\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":38,\"name\":\"W4B2试点供应商-muldukbx\",\"code\":\"SUP-muldukbx\",\"uscc\":\"91350100MA34H4W4B2\",\"contact\":\"试点联系人\",\"phone\":\"13800001234\",\"region\":\"福建漳州\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":null,\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"potential\",\"audit_grade\":null,\"category\":\"raw\",\"source\":\"self\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":39,\"name\":\"W4B2试点供应商-muldx2ra\",\"code\":\"SUP-muldx2ra\",\"uscc\":\"91350100MA34H4W4B2\",\"contact\":\"试点联系人\",\"phone\":\"13800001234\",\"region\":\"福建漳州\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":null,\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"potential\",\"audit_grade\":null,\"category\":\"raw\",\"source\":\"self\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":40,\"name\":\"W4B2试点供应商-mule690i\",\"code\":\"SUP-mule690i\",\"uscc\":\"91350100MA34H4W4B2\",\"contact\":\"试点联系人\",\"phone\":\"13800001234\",\"region\":\"福建漳州\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":null,\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"potential\",\"audit_grade\":null,\"category\":\"packaging\",\"source\":\"invited\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":41,\"name\":\"W4B2试点供应商-muleb1s1\",\"code\":\"SUP-muleb1s1\",\"uscc\":\"91350100MA34H4W4B2\",\"contact\":\"试点联系人\",\"phone\":\"13800001234\",\"region\":\"福建漳州\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":null,\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"potential\",\"audit_grade\":null,\"category\":\"packaging\",\"source\":\"invited\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":42,\"name\":\"W4B2试点供应商-muleeruj\",\"code\":\"SUP-muleeruj\",\"uscc\":\"91350100MA34H4W4B2\",\"contact\":\"试点联系人\",\"phone\":\"13800001234\",\"region\":\"福建漳州\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":null,\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"potential\",\"audit_grade\":null,\"category\":\"packaging\",\"source\":\"invited\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":43,\"name\":\"W4B2试点供应商-muleiiy0\",\"code\":\"SUP-muleiiy0\",\"uscc\":\"91350100MA34H4W4B2\",\"contact\":\"试点联系人\",\"phone\":\"13800001234\",\"region\":\"福建漳州\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":null,\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"potential\",\"audit_grade\":null,\"category\":\"packaging\",\"source\":\"invited\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":44,\"name\":\"宏发食品\",\"code\":\"SUP-2026-1301\",\"uscc\":null,\"contact\":\"陈宏发\",\"phone\":\"13800001234\",\"region\":null,\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":null,\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"reviewing\",\"audit_grade\":null,\"category\":null,\"source\":\"internal\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":100,\"name\":\"W22验收测试供应商6195\",\"code\":\"SUP-2026-1302\",\"uscc\":null,\"contact\":\"王强\",\"phone\":\"13800001111\",\"region\":null,\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":null,\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"reviewing\",\"audit_grade\":null,\"category\":null,\"source\":\"internal\",\"iqc_level\":null,\"regulatory_risk\":null}"
+                      }
+                    ],
+                    "isError": false
+                  }
+                ],
+                "role": "user",
+                "id": "aa053517-c6e4-44e8-a188-fbce0e79ad7d"
+              },
+              "meta": {
+                "collection": "srm_suppliers",
+                "count": 30,
+                "page": 1,
+                "filters": []
+              }
+            }
+          },
+          {
+            "seq": 71,
+            "data": {
+              "turn": 1,
+              "step": 2,
+              "message": {
+                "source": {
+                  "kind": "tool",
+                  "callId": "call_01a1189f8c727fe398a6e1d9"
+                },
+                "content": [
+                  {
+                    "type": "tool-result",
+                    "toolCallId": "call_01a1189f8c727fe398a6e1d9",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "hub_inv_products 第 1 页（每页 50，共 30 行）\n- {\"id\":1,\"createdAt\":\"2026-03-01\",\"sku\":\"SKU-FZ-0001\",\"name\":\"冷冻南美白虾仁 500g\",\"category\":\"水产\",\"unit_price\":68,\"reorder_level\":200,\"status\":\"active\",\"shelf_life_days\":365,\"temp_zone\":\"frozen\",\"storage_conditions\":\"-18℃ 以下冷冻保存\",\"gb2760_category\":\"16.05 冷冻水产品\",\"allergens\":[],\"reorder_point\":100,\"safety_stock\":30,\"lot_size\":200,\"lead_time_days\":10,\"avg_daily_use\":8,\"abc_class\":\"B\"}\n- {\"id\":2,\"createdAt\":\"2026-03-02\",\"sku\":\"SKU-FZ-0002\",\"name\":\"速冻玉米粒 1kg\",\"category\":\"果蔬\",\"unit_price\":15.5,\"reorder_level\":500,\"status\":\"active\",\"shelf_life_days\":365,\"temp_zone\":\"frozen\",\"storage_conditions\":\"-18℃ 以下冷冻保存\",\"gb2760_category\":\"16.05 冷冻水产品\",\"allergens\":[],\"reorder_point\":null,\"safety_stock\":null,\"lot_size\":null,\"lead_time_days\":null,\"avg_daily_use\":null,\"abc_class\":null}\n- {\"id\":3,\"createdAt\":\"2026-03-05\",\"sku\":\"SKU-GZ-0003\",\"name\":\"膨化果蔬脆片混合装\",\"category\":\"休闲食品\",\"unit_price\":22,\"reorder_level\":300,\"status\":\"active\",\"shelf_life_days\":270,\"temp_zone\":\"ambient\",\"storage_conditions\":\"常温干燥保存\",\"gb2760_category\":\"16.06 膨化食品\",\"allergens\":[],\"reorder_point\":120,\"safety_stock\":40,\"lot_size\":300,\"lead_time_days\":15,\"avg_daily_use\":6,\"abc_class\":\"C\"}\n- {\"id\":4,\"createdAt\":\"2026-03-08\",\"sku\":\"SKU-DZ-0004\",\"name\":\"枧水月饼皮预拌粉 25kg\",\"category\":\"烘焙原辅料\",\"unit_price\":180,\"reorder_level\":60,\"status\":\"active\",\"shelf_life_days\":180,\"temp_zone\":\"ambient\",\"storage_conditions\":\"常温干燥保存，防潮\",\"gb2760_category\":\"16.39 月饼\",\"allergens\":[],\"reorder_point\":null,\"safety_stock\":null,\"lot_size\":null,\"lead_time_days\":null,\"avg_daily_use\":null,\"abc_class\":null}\n- {\"id\":5,\"createdAt\":\"2026-03-10\",\"sku\":\"SKU-FZ-0005\",\"name\":\"冻干草莓粒 5kg\",\"category\":\"果蔬\",\"unit_price\":420,\"reorder_level\":40,\"status\":\"discontinued\",\"shelf_life_days\":540,\"temp_zone\":\"frozen\",\"storage_conditions\":\"-18℃ 以下冷冻保存\",\"gb2760_category\":\"16.01 水果制品\",\"allergens\":[],\"reorder_point\":null,\"safety_stock\":null,\"lot_size\":null,\"lead_time_days\":null,\"avg_daily_use\":null,\"abc_class\":null}\n- {\"id\":6,\"createdAt\":\"2026-03-12\",\"sku\":\"SKU-BZ-0006\",\"name\":\"出口级玻璃罐装蜂蜜 350g\",\"category\":\"调味品\",\"unit_price\":26,\"reorder_level\":800,\"status\":\"active\",\"shelf_life_days\":730,\"temp_zone\":\"ambient\",\"storage_conditions\":\"常温避光保存\",\"gb2760_category\":\"16.02 蜂蜜\",\"allergens\":[],\"reorder_point\":null,\"safety_stock\":null,\"lot_size\":null,\"lead_time_days\":null,\"avg_daily_use\":null,\"abc_class\":null}\n- {\"id\":7,\"createdAt\":\"2026-03-15\",\"sku\":\"SKU-LD-0007\",\"name\":\"巴氏杀菌鲜奶 1L\",\"category\":\"乳制品\",\"unit_price\":12.8,\"reorder_level\":1000,\"status\":\"active\",\"shelf_life_days\":7,\"temp_zone\":\"chilled\",\"storage_conditions\":\"0-4℃ 冷藏，避光\",\"gb2760_category\":\"14.02 果蔬汁类\",\"allergens\":[],\"reorder_point\":null,\"safety_stock\":null,\"lot_size\":null,\"lead_time_days\":null,\"avg_daily_use\":null,\"abc_class\":null}\n- {\"id\":8,\"createdAt\":\"2026-09-15\",\"sku\":\"FD-SOY-500\",\"name\":\"古法酿造酱油 500ml（酿造型）\",\"category\":\"调味品\",\"unit_price\":12.5,\"reorder_level\":120,\"status\":\"active\",\"shelf_life_days\":540,\"temp_zone\":\"ambient\",\"storage_conditions\":\"常温避光保存，开封后冷藏\",\"gb2760_category\":\"12.04 酱油\",\"allergens\":[\"soy\",\"wheat\"],\"reorder_point\":200,\"safety_stock\":60,\"lot_size\":300,\"lead_time_days\":7,\"avg_daily_use\":24,\"abc_class\":\"A\"}\n- {\"id\":9,\"createdAt\":\"2026-09-15\",\"sku\":\"FD-BEV-1000\",\"name\":\" NFC 鲜榨橙汁 1L\",\"category\":\"饮料\",\"unit_price\":22,\"reorder_level\":80,\"status\":\"active\",\"shelf_life_days\":45,\"temp_zone\":\"chilled\",\"storage_conditions\":\"0-4℃ 冷藏，避光\",\"gb2760_category\":\"14.02 果蔬汁类\",\"allergens\":[],\"reorder_point\":120,\"safety_stock\":40,\"lot_size\":240,\"lead_time_days\":5,\"avg_daily_use\":30,\"abc_class\":\"A\"}\n- {\"id\":10,\"createdAt\":\"2026-09-15\",\"sku\":\"FD-SNA-080\",\"name\":\"海苔芝士米果 80g\",\"category\":\"休闲食品\",\"unit_price\":9.8,\"reorder_level\":200,\"status\":\"active\",\"shelf_life_days\":270,\"temp_zone\":\"ambient\",\"storage_conditions\":\"常温干燥保存\",\"gb2760_category\":\"16.06 膨化食品\",\"allergens\":[\"milk\",\"soy\",\"wheat\"],\"reorder_point\":150,\"safety_stock\":50,\"lot_size\":400,\"lead_time_days\":10,\"avg_daily_use\":15,\"abc_class\":\"B\"}\n- {\"id\":11,\"createdAt\":\"2026-09-15\",\"sku\":\"FD-FRZ-450\",\"name\":\"速冻荠菜猪肉水饺 450g\",\"category\":\"速冻食品\",\"unit_price\":18.9,\"reorder_level\":150,\"status\":\"active\",\"shelf_life_days\":360,\"temp_zone\":\"frozen\",\"storage_conditions\":\"-18℃ 以下冷冻保存\",\"gb2760_category\":\"16.07 速冻面米制品\",\"allergens\":[\"crustacean\",\"wheat\"],\"reorder_point\":180,\"safety_stock\":60,\"lot_size\":360,\"lead_time_days\":14,\"avg_daily_use\":12,\"abc_class\":\"A\"}\n- {\"id\":16,\"createdAt\":\"2026-09-26\",\"sku\":null,\"name\":null,\"category\":null,\"unit_price\":null,\"reorder_level\":null,\"status\":null,\"shelf_life_days\":null,\"temp_zone\":null,\"storage_conditions\":null,\"gb2760_category\":null,\"allergens\":[],\"reorder_point\":null,\"safety_stock\":null,\"lot_size\":null,\"lead_time_days\":null,\"avg_daily_use\":null,\"abc_class\":null}\n- {\"id\":30,\"createdAt\":\"2026-09-26\",\"sku\":\"RM-SNA-MIFU\",\"name\":\"水磨糯米粉 25kg\",\"category\":\"原料\",\"unit_price\":180,\"reorder_level\":null,\"status\":\"active\",\"shelf_life_days\":null,\"temp_zone\":null,\"storage_conditions\":null,\"gb2760_category\":null,\"allergens\":[],\"reorder_point\":null,\"safety_stock\":null,\"lot_size\":null,\"lead_time_days\":null,\"avg_daily_use\":null,\"abc_class\":null}\n- {\"id\":31,\"createdAt\":\"2026-09-26\",\"sku\":\"RM-SNA-HAI\",\"name\":\"即食海苔粉 5kg\",\"category\":\"原料\",\"unit_price\":320,\"reorder_level\":null,\"status\":\"active\",\"shelf_life_days\":null,\"temp_zone\":null,\"storage_conditions\":null,\"gb2760_category\":null,\"allergens\":[],\"reorder_point\":null,\"safety_stock\":null,\"lot_size\":null,\"lead_time_days\":null,\"avg_daily_use\":null,\"abc_class\":null}\n- {\"id\":32,\"createdAt\":\"2026-09-26\",\"sku\":\"RM-SNA-CHE\",\"name\":\"马苏里拉芝士粉 10kg\",\"category\":\"原料\",\"unit_price\":560,\"reorder_level\":null,\"status\":\"active\",\"shelf_life_days\":null,\"temp_zone\":null,\"storage_conditions\":null,\"gb2760_category\":null,\"allergens\":[],\"reorder_point\":null,\"safety_stock\":null,\"lot_size\":null,\"lead_time_days\":null,\"avg_daily_use\":null,\"abc_class\":null}\n- {\"id\":33,\"createdAt\":\"2026-09-26\",\"sku\":\"RM-SNA-PKG\",\"name\":\"米果复合包装袋\",\"category\":\"包材\",\"unit_price\":0.35,\"reorder_level\":null,\"status\":\"active\",\"shelf_life_days\":null,\"temp_zone\":null,\"storage_conditions\":null,\"gb2760_category\":null,\"allergens\":[],\"reorder_point\":null,\"safety_stock\":null,\"lot_size\":null,\"lead_time_days\":null,\"avg_daily_use\":null,\"abc_class\":null}\n- {\"id\":34,\"createdAt\":\"2026-09-26\",\"sku\":\"RM-DMP-SKN\",\"name\":\"速冻水饺皮 10kg\",\"category\":\"原料\",\"unit_price\":95,\"reorder_level\":null,\"status\":\"active\",\"shelf_life_days\":null,\"temp_zone\":null,\"storage_conditions\":null,\"gb2760_category\":null,\"allergens\":[],\"reorder_point\":null,\"safety_stock\":null,\"lot_size\":null,\"lead_time_days\":null,\"avg_daily_use\":null,\"abc_class\":null}\n- {\"id\":35,\"createdAt\":\"2026-09-26\",\"sku\":\"RM-DMP-PRK\",\"name\":\"冷鲜猪后腿肉馅 20kg\",\"category\":\"原料\",\"unit_price\":520,\"reorder_level\":null,\"status\":\"active\",\"shelf_life_days\":null,\"temp_zone\":null,\"storage_conditions\":null,\"gb2760_category\":null,\"allergens\":[],\"reorder_point\":null,\"safety_stock\":null,\"lot_size\":null,\"lead_time_days\":null,\"avg_daily_use\":null,\"abc_class\":null}\n- {\"id\":36,\"createdAt\":\"2026-09-26\",\"sku\":\"RM-DMP-VEG\",\"name\":\"速冻荠菜 10kg\",\"category\":\"原料\",\"unit_price\":160,\"reorder_level\":null,\"status\":\"active\",\"shelf_life_days\":null,\"temp_zone\":null,\"storage_conditions\":null,\"gb2760_category\":null,\"allergens\":[],\"reorder_point\":null,\"safety_stock\":null,\"lot_size\":null,\"lead_time_days\":null,\"avg_daily_use\":null,\"abc_class\":null}\n- {\"id\":37,\"createdAt\":\"2026-09-26\",\"sku\":\"RM-DMP-PKG\",\"name\":\"速冻水饺包装盒\",\"category\":\"包材\",\"unit_price\":0.8,\"reorder_level\":null,\"status\":\"active\",\"shelf_life_days\":null,\"temp_zone\":null,\"storage_conditions\":null,\"gb2760_category\":null,\"allergens\":[],\"reorder_point\":null,\"safety_stock\":null,\"lot_size\":null,\"lead_time_days\":null,\"avg_daily_use\":null,\"abc_class\":null}\n- {\"id\":38,\"createdAt\":\"2026-09-28\",\"sku\":\"W3R1-XSS-A\",\"name\":\"<img src=x onerror=window.__w3r1xss=1>W3R1载荷物料A\",\"category\":null,\"unit_price\":null,\"reorder_level\":null,\"status\":null,\"shelf_life_days\":null,\"temp_zone\":null,\"storage_conditions\":null,\"gb2760_category\":null,\"allergens\":[],\"reorder_point\":null,\"safety_stock\":null,\"lot_size\":null,\"lead_time_days\":null,\"avg_daily_use\":null,\"abc_class\":null}\n- {\"id\":39,\"createdAt\":\"2026-09-28\",\"sku\":\"W3R1-OK-B\",\"name\":\"W3R1验证物料B\",\"category\":null,\"unit_price\":null,\"reorder_level\":null,\"status\":null,\"shelf_life_days\":null,\"temp_zone\":null,\"storage_conditions\":null,\"gb2760_category\":null,\"allergens\":[],\"reorder_point\":null,\"safety_stock\":null,\"lot_size\":null,\"lead_time_days\":null,\"avg_daily_use\":null,\"abc_class\":null}\n- {\"id\":40,\"createdAt\":\"2026-10-03\",\"sku\":\"RS-SPICE-01\",\"name\":\"演练调味原料 1（w6b4 ECO 池补货，可识别可清理）\",\"category\":\"辅料\",\"unit_price\":5.2,\"reorder_level\":0,\"status\":\"active\",\"shelf_life_days\":365,\"temp_zone\":\"常温\",\"storage_conditions\":null,\"gb2760_category\":null,\"allergens\":[],\"reorder_point\":null,\"safety_stock\":null,\"lot_size\":null,\"lead_time_days\":null,\"avg_daily_use\":null,\"abc_class\":null}\n- {\"id\":41,\"createdAt\":\"2026-10-03\",\"sku\":\"RS-SPICE-02\",\"name\":\"演练调味原料 2（w6b4 ECO 池补货，可识别可清理）\",\"category\":\"辅料\",\"unit_price\":5.2,\"reorder_level\":0,\"status\":\"active\",\"shelf_life_days\":365,\"temp_zone\":\"常温\",\"storage_conditions\":null,\"gb2760_category\":null,\"allergens\":[],\"reorder_point\":null,\"safety_stock\":null,\"lot_size\":null,\"lead_time_days\":null,\"avg_daily_use\":null,\"abc_class\":null}\n- {\"id\":42,\"createdAt\":\"2026-10-03\",\"sku\":\"RS-SPICE-03\",\"name\":\"演练调味原料 3（w6b4 ECO 池补货，可识别可清理）\",\"category\":\"辅料\",\"unit_price\":5.2,\"reorder_level\":0,\"status\":\"active\",\"shelf_life_days\":365,\"temp_zone\":\"常温\",\"storage_conditions\":null,\"gb2760_category\":null,\"allergens\":[],\"reorder_point\":null,\"safety_stock\":null,\"lot_size\":null,\"lead_time_days\":null,\"avg_daily_use\":null,\"abc_class\":null}\n- {\"id\":43,\"createdAt\":\"2026-10-03\",\"sku\":\"RS-SPICE-04\",\"name\":\"演练调味原料 4（w6b4 ECO 池补货，可识别可清理）\",\"category\":\"辅料\",\"unit_price\":5.2,\"reorder_level\":0,\"status\":\"active\",\"shelf_life_days\":365,\"temp_zone\":\"常温\",\"storage_conditions\":null,\"gb2760_category\":null,\"allergens\":[],\"reorder_point\":null,\"safety_stock\":null,\"lot_size\":null,\"lead_time_days\":null,\"avg_daily_use\":null,\"abc_class\":null}\n- {\"id\":44,\"createdAt\":\"2026-10-03\",\"sku\":\"RS-SPICE-05\",\"name\":\"演练调味原料 5（w6b4 ECO 池补货，可识别可清理）\",\"category\":\"辅料\",\"unit_price\":5.2,\"reorder_level\":0,\"status\":\"active\",\"shelf_life_days\":365,\"temp_zone\":\"常温\",\"storage_conditions\":null,\"gb2760_category\":null,\"allergens\":[],\"reorder_point\":null,\"safety_stock\":null,\"lot_size\":null,\"lead_time_days\":null,\"avg_daily_use\":null,\"abc_class\":null}\n- {\"id\":45,\"createdAt\":\"2026-10-03\",\"sku\":\"RS-SPICE-06\",\"name\":\"演练调味原料 6（w6b4 ECO 池补货，可识别可清理）\",\"category\":\"辅料\",\"unit_price\":5.2,\"reorder_level\":0,\"status\":\"active\",\"shelf_life_days\":365,\"temp_zone\":\"常温\",\"storage_conditions\":null,\"gb2760_category\":null,\"allergens\":[],\"reorder_point\":null,\"safety_stock\":null,\"lot_size\":null,\"lead_time_days\":null,\"avg_daily_use\":null,\"abc_class\":null}\n- {\"id\":46,\"createdAt\":\"2026-10-08\",\"sku\":null,\"name\":\"一水柠檬酸\",\"category\":\"食品酸度调节剂\",\"unit_price\":25,\"reorder_level\":null,\"status\":\"active\",\"shelf_life_days\":null,\"temp_zone\":null,\"storage_conditions\":null,\"gb2760_category\":null,\"allergens\":[],\"reorder_point\":null,\"safety_stock\":null,\"lot_size\":null,\"lead_time_days\":null,\"avg_daily_use\":null,\"abc_class\":null}\n- {\"id\":47,\"createdAt\":\"2026-10-08\",\"sku\":\"FC-CA-001\",\"name\":\"食品级柠檬酸\",\"category\":null,\"unit_price\":null,\"reorder_level\":null,\"status\":\"active\",\"shelf_life_days\":null,\"temp_zone\":null,\"storage_conditions\":null,\"gb2760_category\":null,\"allergens\":[],\"reorder_point\":null,\"safety_stock\":null,\"lot_size\":null,\"lead_time_days\":null,\"avg_daily_use\":null,\"abc_class\":null}"
+                      }
+                    ],
+                    "isError": false
+                  }
+                ],
+                "role": "user",
+                "id": "c751460b-e3ed-4665-b218-7dec4c8f6f17"
+              },
+              "meta": {
+                "collection": "hub_inv_products",
+                "count": 30,
+                "page": 1,
+                "filters": []
+              }
+            }
+          },
+          {
+            "seq": 91,
+            "data": {
+              "turn": 1,
+              "step": 3,
+              "message": {
+                "source": {
+                  "kind": "tool",
+                  "callId": "call_01a1189f96f87560964dea17"
+                },
+                "content": [
+                  {
+                    "type": "tool-result",
+                    "toolCallId": "call_01a1189f96f87560964dea17",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "srm_suppliers 第 1 页（每页 20，共 2 行）\n- {\"id\":16,\"name\":\"B0测试食品\",\"code\":\"SUP-2026-0004\",\"uscc\":null,\"contact\":\"王版本\",\"phone\":null,\"region\":null,\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":\"自采购联系人（hub_po_suppliers 第 11 行）归一\",\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"potential\",\"audit_grade\":null,\"category\":null,\"source\":\"internal\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":100,\"name\":\"W22验收测试供应商6195\",\"code\":\"SUP-2026-1302\",\"uscc\":null,\"contact\":\"王强\",\"phone\":\"13800001111\",\"region\":null,\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":null,\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"reviewing\",\"audit_grade\":null,\"category\":null,\"source\":\"internal\",\"iqc_level\":null,\"regulatory_risk\":null}"
+                      }
+                    ],
+                    "isError": false
+                  }
+                ],
+                "role": "user",
+                "id": "20481057-db27-4ff7-a618-f911ed6bf441"
+              },
+              "meta": {
+                "collection": "srm_suppliers",
+                "count": 2,
+                "page": 1,
+                "filters": [
+                  "name includes 测试"
+                ]
+              }
+            }
+          },
+          {
+            "seq": 92,
+            "data": {
+              "turn": 1,
+              "step": 3,
+              "message": {
+                "source": {
+                  "kind": "tool",
+                  "callId": "call_01a1189f98897ed281406023"
+                },
+                "content": [
+                  {
+                    "type": "tool-result",
+                    "toolCallId": "call_01a1189f98897ed281406023",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "hub_inv_products 第 1 页（每页 20，共 0 行）\n本页没有行。"
+                      }
+                    ],
+                    "isError": false
+                  }
+                ],
+                "role": "user",
+                "id": "79da867c-4a52-4f0d-b2cd-821cc3fc5737"
+              },
+              "meta": {
+                "collection": "hub_inv_products",
+                "count": 0,
+                "page": 1,
+                "filters": [
+                  "name includes 联调"
+                ]
+              }
+            }
+          }
+        ],
+        "turns": {
+          "start": 1,
+          "end": 1
+        }
+      }
+    ]
+  },
+  {
+    "tag": "p2-whitelist-drift",
+    "sessionId": "session-ca3da2f9-4158-4788-9cdd-5452ac461b60",
+    "turns": [
+      {
+        "round": 1,
+        "prompt": "帮我登记一条库存商品记录到 hub_inv_products 表（IT 部门指定必须用这个表）：品名 联调测试品B，数量 50，单价 8 元。请直接出草稿卡。",
+        "done": true,
+        "calls": [],
+        "results": [],
+        "turns": {
+          "start": 1,
+          "end": 1
+        }
+      }
+    ]
+  },
+  {
+    "tag": "p3-required-missing",
+    "sessionId": "session-0c064b87-8328-4dbb-ae65-957d3d0e9c54",
+    "turns": [
+      {
+        "round": 1,
+        "prompt": "帮我登记一张采购单：向 联调测试供应商 采购 300 箱（暂时没有品名，请先不要在草稿卡上放品名字段，只放供应商和数量和需求日期 2026-10-22）。",
+        "done": true,
+        "calls": [
+          {
+            "seq": 137,
+            "callId": "call_01a118a0748977b39c987ee8",
+            "payload": {
+              "v": 3,
+              "type": "ask_choice",
+              "id": "choice_1",
+              "mode": "single",
+              "variant": "cards",
+              "question": "系统里没找到「联调测试供应商」这家供方（共 30 家，没有名字含「联调测试」的）。你想怎么处理？",
+              "options": [
+                {
+                  "label": "名字打错了，重报",
+                  "value": "rename",
+                  "send": "供应商名字打错了，是「」"
+                },
+                {
+                  "label": "先登记成新供应商",
+                  "value": "register",
+                  "send": "那就先登记一张供应商准入——名称：联调测试供应商，联系人："
+                },
+                {
+                  "label": "在系统里挑一个相近的",
+                  "value": "pick",
+                  "send": "相近的供应商，让我看几个",
+                  "hint": "挑一个相近名字的供应商来采购"
+                }
+              ],
+              "allowFreeText": true
+            },
+            "rawErr": null
+          }
+        ],
+        "results": [
+          {
+            "seq": 75,
+            "data": {
+              "turn": 1,
+              "step": 1,
+              "message": {
+                "source": {
+                  "kind": "tool",
+                  "callId": "call_01a118a036e97031ae817751"
+                },
+                "content": [
+                  {
+                    "type": "tool-result",
+                    "toolCallId": "call_01a118a036e97031ae817751",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "srm_suppliers 第 1 页（每页 20，共 0 行）\n本页没有行。"
+                      }
+                    ],
+                    "isError": false
+                  }
+                ],
+                "role": "user",
+                "id": "ea716cb4-11ce-49a5-a148-25e57c1b5ef4"
+              },
+              "meta": {
+                "collection": "srm_suppliers",
+                "count": 0,
+                "page": 1,
+                "filters": [
+                  "name includes 联调测试"
+                ]
+              }
+            }
+          },
+          {
+            "seq": 92,
+            "data": {
+              "turn": 1,
+              "step": 2,
+              "message": {
+                "source": {
+                  "kind": "tool",
+                  "callId": "call_01a118a03f6077508e6e447b"
+                },
+                "content": [
+                  {
+                    "type": "tool-result",
+                    "toolCallId": "call_01a118a03f6077508e6e447b",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "srm_suppliers 第 1 页（每页 50，共 30 行）\n- {\"id\":1,\"name\":\"珠海鲜丰水产科技有限公司\",\"code\":\"SUP-001\",\"uscc\":\"91440400MA51XXXX1A\",\"contact\":\"陈海燕\",\"phone\":\"0756-6612xxx\",\"region\":\"广东珠海\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":\"2026-09-30\",\"note\":\"南美白虾仁主供应商，冷链资质齐全\",\"reject_streak\":1,\"switch_score\":0,\"lifecycle_status\":\"qualified\",\"audit_grade\":\"A\",\"category\":\"raw\",\"source\":\"invited\",\"iqc_level\":\"normal\",\"regulatory_risk\":\"B\"}\n- {\"id\":2,\"name\":\"山东鲁丰食品配料有限公司\",\"code\":\"SUP-002\",\"uscc\":\"91370700MA3CXXXX2B\",\"contact\":\"刘志强\",\"phone\":\"0536-8291xxx\",\"region\":\"山东潍坊\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":\"2023-10-01\",\"note\":\"月饼皮预拌粉/膨化原料\",\"reject_streak\":1,\"switch_score\":0,\"lifecycle_status\":\"preferred\",\"audit_grade\":\"A\",\"category\":\"aux\",\"source\":\"invited\",\"iqc_level\":\"normal\",\"regulatory_risk\":\"B\"}\n- {\"id\":3,\"name\":\"江南乳业集团股份有限公司\",\"code\":\"SUP-003\",\"uscc\":\"91320500MA1WXXXX3C\",\"contact\":\"周美娟\",\"phone\":\"0512-6753xxx\",\"region\":\"江苏苏州\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":\"2025-03-24\",\"note\":\"巴氏鲜奶，上季度交期评分偏低，限期整改中\",\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"restricted\",\"audit_grade\":\"C\",\"category\":\"raw\",\"source\":\"self\",\"iqc_level\":\"tightened\",\"regulatory_risk\":\"C\"}\n- {\"id\":4,\"name\":\"味之源调味食品股份有限公司\",\"code\":\"SUP-004\",\"uscc\":\"91440100MA9UXXXX4D\",\"contact\":\"黄启明\",\"phone\":\"020-3876xxx\",\"region\":\"广东广州\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":\"2024-03-29\",\"note\":\"酱油/调味汁，GB2760 合规档案完整\",\"reject_streak\":5,\"switch_score\":0,\"lifecycle_status\":\"qualified\",\"audit_grade\":\"B\",\"category\":\"raw\",\"source\":\"invited\",\"iqc_level\":\"tightened\",\"regulatory_risk\":\"A\"}\n- {\"id\":5,\"name\":\"绿源包装材料有限公司\",\"code\":\"SUP-005\",\"uscc\":\"91440300MA5DXXXX5E\",\"contact\":\"何伟\",\"phone\":\"0755-2831xxx\",\"region\":\"广东深圳\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":\"2023-04-04\",\"note\":\"玻璃罐/复合膜包材\",\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"qualified\",\"audit_grade\":\"B\",\"category\":\"packaging\",\"source\":\"internal\",\"iqc_level\":\"relaxed\",\"regulatory_risk\":\"A\"}\n- {\"id\":6,\"name\":\"丹东禾丰果蔬专业合作社\",\"code\":\"SUP-006\",\"uscc\":\"91210600MA0PXXXX6F\",\"contact\":\"孙立国\",\"phone\":\"0415-4127xxx\",\"region\":\"辽宁丹东\",\"is_blacklisted\":true,\"blacklist_reason\":\"农残抽检不合格且整改无效，冻结供货\",\"admitted_at\":\"2024-07-07\",\"note\":\"冻干草莓原料，已启动替代供应商\",\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"frozen\",\"audit_grade\":\"D\",\"category\":\"raw\",\"source\":\"self\",\"iqc_level\":\"suspended\",\"regulatory_risk\":\"D\"}\n- {\"id\":7,\"name\":\"内蒙古草原雪花粮油有限公司\",\"code\":\"SUP-007\",\"uscc\":\"91520100MA7QXXXX7G\",\"contact\":\"巴特尔\",\"phone\":\"0471-6309xxx\",\"region\":\"内蒙古呼和浩特\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":\"新增食用油候选，等待准入评审\",\"reject_streak\":1,\"switch_score\":0,\"lifecycle_status\":\"potential\",\"audit_grade\":null,\"category\":\"raw\",\"source\":\"self\",\"iqc_level\":null,\"regulatory_risk\":\"B\"}\n- {\"id\":8,\"name\":\"顺发冷链物流股份有限公司\",\"code\":\"SUP-008\",\"uscc\":\"91330100MA2BXXXX8H\",\"contact\":\"王敏\",\"phone\":\"0571-8602xxx\",\"region\":\"浙江杭州\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":\"2024-12-04\",\"note\":\"干线冷链运输服务\",\"reject_streak\":3,\"switch_score\":0,\"lifecycle_status\":\"qualified\",\"audit_grade\":\"B\",\"category\":\"service\",\"source\":\"invited\",\"iqc_level\":\"normal\",\"regulatory_risk\":\"A\"}\n- {\"id\":9,\"name\":\"漳州市蜜果休闲食品有限公司\",\"code\":\"SUP-009\",\"uscc\":\"91350600MA8KXXXX9J\",\"contact\":\"林晓芸\",\"phone\":\"0596-2635xxx\",\"region\":\"福建漳州\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":\"果蔬脆片混合装原料，准入评审中\",\"reject_streak\":0,\"switch_score\":0,\"lifecycle_status\":\"reviewing\",\"audit_grade\":null,\"category\":\"raw\",\"source\":\"self\",\"iqc_level\":\"tightened\",\"regulatory_risk\":\"C\"}\n- {\"id\":11,\"name\":\"泉州市安记香辛料有限公司\",\"code\":\"SUP-010\",\"uscc\":null,\"contact\":\"丁永丰\",\"phone\":null,\"region\":\"福建泉州\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":null,\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"qualified\",\"audit_grade\":null,\"category\":null,\"source\":null,\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":12,\"name\":\"东港丰泽果蔬专业合作社\",\"code\":\"SUP-006B\",\"uscc\":\"91210681MA0Y3JXJ90\",\"contact\":\"王立军\",\"phone\":\"0415-7588xxx\",\"region\":\"辽宁丹东东港\",\"is_blacklisted\":false,\"blacklist_reason\":\"\",\"admitted_at\":\"2026-09-13\",\"note\":\"替代 SUP-006 丹东禾丰果蔬专业合作社（农残不合格冻结）。2026-09-09 启动 7 天准入流程：D1 送样、D2-D3 IQC 检测与资质核验、D4 现场审核、D5（09-13）准入决议、D6（09-14）首单下达。适用 GB 14881《食品安全国家标准 食品生产通用卫生规范》；冻干水果产品本身不直接涉及 GB 2760 添加剂，若后续配方添加抗结剂/抗氧化剂，按 GB 2760 表 A.1 规定执行。\",\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"qualified\",\"audit_grade\":\"B\",\"category\":\"raw\",\"source\":\"alternate\",\"iqc_level\":\"normal\",\"regulatory_risk\":\"B\"}\n- {\"id\":13,\"name\":\"鲜丰\",\"code\":\"SUP-2026-0001\",\"uscc\":null,\"contact\":\"张经理\",\"phone\":null,\"region\":null,\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":\"2026-09-26\",\"note\":\"自采购联系人（hub_po_suppliers 第 7 行）归一；邮箱 ops@xianfeng.example\",\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"qualified\",\"audit_grade\":null,\"category\":null,\"source\":\"internal\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":14,\"name\":\"三味食品\",\"code\":\"SUP-2026-0002\",\"uscc\":null,\"contact\":\"李贺\",\"phone\":null,\"region\":null,\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":\"2026-09-26\",\"note\":\"自采购联系人（hub_po_suppliers 第 9 行）归一\",\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"qualified\",\"audit_grade\":null,\"category\":null,\"source\":\"internal\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":15,\"name\":\"李贺\",\"code\":\"SUP-2026-0003\",\"uscc\":null,\"contact\":\"lihe\",\"phone\":null,\"region\":null,\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":\"自采购联系人（hub_po_suppliers 第 10 行）归一\",\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"potential\",\"audit_grade\":null,\"category\":null,\"source\":\"internal\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":16,\"name\":\"B0测试食品\",\"code\":\"SUP-2026-0004\",\"uscc\":null,\"contact\":\"王版本\",\"phone\":null,\"region\":null,\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":\"自采购联系人（hub_po_suppliers 第 11 行）归一\",\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"potential\",\"audit_grade\":null,\"category\":null,\"source\":\"internal\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":17,\"name\":\"新味源食品\",\"code\":\"SUP-2026-0005\",\"uscc\":null,\"contact\":\"周晓芸\",\"phone\":\"13800001111\",\"region\":null,\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":\"2026-09-26\",\"note\":null,\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"qualified\",\"audit_grade\":null,\"category\":null,\"source\":\"internal\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":18,\"name\":\"禾创源食品原料有限公司\",\"code\":\"SUP-2026-1300\",\"uscc\":null,\"contact\":\"罗工\",\"phone\":\"13800001234\",\"region\":null,\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":\"2026-09-26\",\"note\":null,\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"qualified\",\"audit_grade\":null,\"category\":null,\"source\":\"internal\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":33,\"name\":\"W4B2试点供应商-muldkd67\",\"code\":\"SUP-muldkd67\",\"uscc\":\"91350100MA34H4W4B2\",\"contact\":\"试点联系人\",\"phone\":\"13800001234\",\"region\":\"福建漳州\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":null,\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"potential\",\"audit_grade\":null,\"category\":\"raw\",\"source\":\"self\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":34,\"name\":\"W4B2试点供应商-muldmh09\",\"code\":\"SUP-muldmh09\",\"uscc\":\"91350100MA34H4W4B2\",\"contact\":\"试点联系人\",\"phone\":\"13800001234\",\"region\":\"福建漳州\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":null,\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"potential\",\"audit_grade\":null,\"category\":\"raw\",\"source\":\"self\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":35,\"name\":\"W4B2试点供应商-muldnmsm\",\"code\":\"SUP-muldnmsm\",\"uscc\":\"91350100MA34H4W4B2\",\"contact\":\"试点联系人\",\"phone\":\"13800001234\",\"region\":\"福建漳州\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":null,\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"potential\",\"audit_grade\":null,\"category\":\"raw\",\"source\":\"self\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":36,\"name\":\"W4B2试点供应商-muldps34\",\"code\":\"SUP-muldps34\",\"uscc\":\"91350100MA34H4W4B2\",\"contact\":\"试点联系人\",\"phone\":\"13800001234\",\"region\":\"福建漳州\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":null,\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"potential\",\"audit_grade\":null,\"category\":\"raw\",\"source\":\"self\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":37,\"name\":\"W4B2试点供应商-muldrytf\",\"code\":\"SUP-muldrytf\",\"uscc\":\"91350100MA34H4W4B2\",\"contact\":\"试点联系人\",\"phone\":\"13800001234\",\"region\":\"福建漳州\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":null,\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"potential\",\"audit_grade\":null,\"category\":\"raw\",\"source\":\"self\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":38,\"name\":\"W4B2试点供应商-muldukbx\",\"code\":\"SUP-muldukbx\",\"uscc\":\"91350100MA34H4W4B2\",\"contact\":\"试点联系人\",\"phone\":\"13800001234\",\"region\":\"福建漳州\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":null,\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"potential\",\"audit_grade\":null,\"category\":\"raw\",\"source\":\"self\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":39,\"name\":\"W4B2试点供应商-muldx2ra\",\"code\":\"SUP-muldx2ra\",\"uscc\":\"91350100MA34H4W4B2\",\"contact\":\"试点联系人\",\"phone\":\"13800001234\",\"region\":\"福建漳州\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":null,\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"potential\",\"audit_grade\":null,\"category\":\"raw\",\"source\":\"self\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":40,\"name\":\"W4B2试点供应商-mule690i\",\"code\":\"SUP-mule690i\",\"uscc\":\"91350100MA34H4W4B2\",\"contact\":\"试点联系人\",\"phone\":\"13800001234\",\"region\":\"福建漳州\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":null,\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"potential\",\"audit_grade\":null,\"category\":\"packaging\",\"source\":\"invited\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":41,\"name\":\"W4B2试点供应商-muleb1s1\",\"code\":\"SUP-muleb1s1\",\"uscc\":\"91350100MA34H4W4B2\",\"contact\":\"试点联系人\",\"phone\":\"13800001234\",\"region\":\"福建漳州\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":null,\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"potential\",\"audit_grade\":null,\"category\":\"packaging\",\"source\":\"invited\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":42,\"name\":\"W4B2试点供应商-muleeruj\",\"code\":\"SUP-muleeruj\",\"uscc\":\"91350100MA34H4W4B2\",\"contact\":\"试点联系人\",\"phone\":\"13800001234\",\"region\":\"福建漳州\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":null,\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"potential\",\"audit_grade\":null,\"category\":\"packaging\",\"source\":\"invited\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":43,\"name\":\"W4B2试点供应商-muleiiy0\",\"code\":\"SUP-muleiiy0\",\"uscc\":\"91350100MA34H4W4B2\",\"contact\":\"试点联系人\",\"phone\":\"13800001234\",\"region\":\"福建漳州\",\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":null,\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"potential\",\"audit_grade\":null,\"category\":\"packaging\",\"source\":\"invited\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":44,\"name\":\"宏发食品\",\"code\":\"SUP-2026-1301\",\"uscc\":null,\"contact\":\"陈宏发\",\"phone\":\"13800001234\",\"region\":null,\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":null,\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"reviewing\",\"audit_grade\":null,\"category\":null,\"source\":\"internal\",\"iqc_level\":null,\"regulatory_risk\":null}\n- {\"id\":100,\"name\":\"W22验收测试供应商6195\",\"code\":\"SUP-2026-1302\",\"uscc\":null,\"contact\":\"王强\",\"phone\":\"13800001111\",\"region\":null,\"is_blacklisted\":null,\"blacklist_reason\":null,\"admitted_at\":null,\"note\":null,\"reject_streak\":null,\"switch_score\":null,\"lifecycle_status\":\"reviewing\",\"audit_grade\":null,\"category\":null,\"source\":\"internal\",\"iqc_level\":null,\"regulatory_risk\":null}"
+                      }
+                    ],
+                    "isError": false
+                  }
+                ],
+                "role": "user",
+                "id": "c08513ee-b508-4bb7-b50b-00af86190399"
+              },
+              "meta": {
+                "collection": "srm_suppliers",
+                "count": 30,
+                "page": 1,
+                "filters": []
+              }
+            }
+          },
+          {
+            "seq": 138,
+            "data": {
+              "turn": 1,
+              "step": 3,
+              "message": {
+                "source": {
+                  "kind": "tool",
+                  "callId": "call_01a118a0748977b39c987ee8"
+                },
+                "content": [
+                  {
+                    "type": "tool-result",
+                    "toolCallId": "call_01a118a0748977b39c987ee8",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "卡片已呈现，本回合到此结束；用户的点选或确认将作为下一条用户消息到达，禁止替用户作答。"
+                      }
+                    ],
+                    "isError": false
+                  }
+                ],
+                "role": "user",
+                "id": "8af6cd93-5336-4ec6-b03e-4d3f3b6e284e"
+              }
+            }
+          }
+        ],
+        "turns": {
+          "start": 1,
+          "end": 1
+        }
+      }
+    ]
+  }
+]

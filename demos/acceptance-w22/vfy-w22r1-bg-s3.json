@@ -1,0 +1,320 @@
+{
+ "label": "s3",
+ "prompt": "帮我登记一张销售出库单：卖给 青岛海韵烘焙坊，面粉 50 袋，单价 20",
+ "runs": 5,
+ "results": [
+  {
+   "run": 1,
+   "sid": "session-f4deccc0-8093-4f35-b022-39014b944479",
+   "outcome": "no_card",
+   "rounds": 1,
+   "secs": 18,
+   "resolverDiff": [],
+   "toolErrors": [],
+   "timeline": [
+    {
+     "round": 0,
+     "sent": "帮我登记一张销售出库单：卖给 青岛海韵烘焙坊，面粉 50 袋，单价 20",
+     "cards": [],
+     "toolErrors": []
+    }
+   ],
+   "allCards": []
+  },
+  {
+   "run": 2,
+   "sid": "session-a7a263f3-79e9-4e38-a3e9-fa008bcba20d",
+   "outcome": "no_card",
+   "rounds": 1,
+   "secs": 18,
+   "resolverDiff": [],
+   "toolErrors": [],
+   "timeline": [
+    {
+     "round": 0,
+     "sent": "帮我登记一张销售出库单：卖给 青岛海韵烘焙坊，面粉 50 袋，单价 20",
+     "cards": [],
+     "toolErrors": []
+    }
+   ],
+   "allCards": []
+  },
+  {
+   "run": 3,
+   "sid": "session-e80752ee-b481-4eaa-92af-04f1d9e62554",
+   "outcome": "form_draft",
+   "rounds": 5,
+   "secs": 180,
+   "collection": "so_orders",
+   "resolverDiff": [],
+   "toolErrors": [],
+   "timeline": [
+    {
+     "round": 0,
+     "sent": "帮我登记一张销售出库单：卖给 青岛海韵烘焙坊，面粉 50 袋，单价 20",
+     "cards": [
+      "ask_choice"
+     ],
+     "toolErrors": []
+    },
+    {
+     "round": 1,
+     "sent": "是销售订单,卖给青岛海韵烘焙坊,面粉50袋单价20",
+     "cards": [
+      "ask_choice",
+      "ask_choice",
+      "ask_choice"
+     ],
+     "toolErrors": []
+    },
+    {
+     "round": 2,
+     "sent": "先建物料档案,品名面粉,单价20",
+     "cards": [
+      "ask_choice",
+      "ask_choice",
+      "ask_choice"
+     ],
+     "toolErrors": []
+    },
+    {
+     "round": 3,
+     "sent": "先建物料档案,品名面粉,单价20",
+     "cards": [
+      "ask_choice",
+      "ask_choice",
+      "ask_choice",
+      "ask_choice"
+     ],
+     "toolErrors": []
+    },
+    {
+     "round": 4,
+     "sent": "先建客户档案,名称青岛海韵烘焙坊",
+     "cards": [
+      "ask_choice",
+      "ask_choice",
+      "ask_choice",
+      "ask_choice",
+      "form_draft"
+     ],
+     "toolErrors": []
+    }
+   ],
+   "allCards": [
+    {
+     "type": "ask_choice",
+     "fields": []
+    },
+    {
+     "type": "ask_choice",
+     "fields": []
+    },
+    {
+     "type": "ask_choice",
+     "fields": []
+    },
+    {
+     "type": "ask_choice",
+     "fields": []
+    },
+    {
+     "type": "form_draft",
+     "collection": "so_orders",
+     "fields": [
+      {
+       "n": "customer_id",
+       "l": "客户",
+       "w": "text",
+       "v": "48",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "product_id",
+       "l": "品名",
+       "w": "text",
+       "v": "48",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "quantity",
+       "l": "数量",
+       "w": "number",
+       "v": "50",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "unit_price",
+       "l": "单价",
+       "w": "number",
+       "v": "20",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "amount",
+       "l": "合计金额",
+       "w": "number",
+       "v": "1000",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "need_date",
+       "l": "需求日期",
+       "w": "date",
+       "v": "",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "code",
+       "l": "单号",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      },
+      {
+       "n": "doc_status",
+       "l": "审批状态",
+       "w": "text",
+       "v": "draft",
+       "t": "system",
+       "o": 0
+      },
+      {
+       "n": "shipping_status",
+       "l": "发货状态",
+       "w": "text",
+       "v": "none",
+       "t": "system",
+       "o": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "run": 4,
+   "sid": "session-de10cde3-6435-49fb-9b70-e477020fdf55",
+   "outcome": "no_card",
+   "rounds": 1,
+   "secs": 90,
+   "resolverDiff": [],
+   "toolErrors": [],
+   "timeline": [
+    {
+     "round": 0,
+     "sent": "帮我登记一张销售出库单：卖给 青岛海韵烘焙坊，面粉 50 袋，单价 20",
+     "cards": [],
+     "toolErrors": []
+    }
+   ],
+   "allCards": []
+  },
+  {
+   "run": 5,
+   "sid": "session-23462245-5e0a-4e24-a43f-9dbfd2d92176",
+   "outcome": "form_draft",
+   "rounds": 1,
+   "secs": 105,
+   "collection": "so_orders",
+   "resolverDiff": [],
+   "toolErrors": [],
+   "timeline": [
+    {
+     "round": 0,
+     "sent": "帮我登记一张销售出库单：卖给 青岛海韵烘焙坊，面粉 50 袋，单价 20",
+     "cards": [
+      "form_draft"
+     ],
+     "toolErrors": []
+    }
+   ],
+   "allCards": [
+    {
+     "type": "form_draft",
+     "collection": "so_orders",
+     "fields": [
+      {
+       "n": "customer_id",
+       "l": "客户",
+       "w": "relation",
+       "v": "48",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "product",
+       "l": "品名",
+       "w": "text",
+       "v": "面粉",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "quantity",
+       "l": "数量",
+       "w": "number",
+       "v": "50",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "unit_price",
+       "l": "单价",
+       "w": "number",
+       "v": "20",
+       "t": "required",
+       "o": 0
+      },
+      {
+       "n": "amount",
+       "l": "合计金额",
+       "w": "number",
+       "v": "1000",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "need_date",
+       "l": "需求日期",
+       "w": "date",
+       "v": "",
+       "t": "derived",
+       "o": 0
+      },
+      {
+       "n": "code",
+       "l": "单号",
+       "w": "text",
+       "v": "",
+       "t": "system",
+       "o": 0
+      },
+      {
+       "n": "doc_status",
+       "l": "审批状态",
+       "w": "text",
+       "v": "draft",
+       "t": "system",
+       "o": 0
+      },
+      {
+       "n": "shipping_status",
+       "l": "发货状态",
+       "w": "text",
+       "v": "none",
+       "t": "system",
+       "o": 0
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

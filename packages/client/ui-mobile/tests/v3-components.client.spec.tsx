@@ -402,6 +402,44 @@ describe('ReceiptCard v3', () => {
     await waitFor(() => { expect(onEdit).toHaveBeenCalledWith('supplier_id', '42') })
   })
 
+  it('strips a _id suffix against the meta keys and shows an opaque reference when the meta misses', async () => {
+    // The meta table keys the association column `supplier` while the model
+    // declared `supplier_id` (the W22-R2 verification's scenario D): the
+    // stripped retry still resolves both the picker and the derived face.
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+      const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
+      const body = JSON.parse((init?.body ?? '{}') as string) as { rpcId?: string }
+      const method = url.replace('/api/', '')
+      const value = method === 'nocobase.list' ? { rows: [{ id: 47, name: '鲁丰配料' }] } : {}
+      return new Response(JSON.stringify({ rpcId: body.rpcId, result: { ok: true, value } }), { status: 200 })
+    })
+    vi.stubGlobal('fetch', fetchMock)
+    const meta = new Map<string, CollectionFieldMeta>([['hub_po_purchase_orders', new Map<string, NocobaseFieldView>([
+      ['supplier', { name: 'supplier', type: 'belongsTo', target: 'hub_po_suppliers' }],
+    ])]])
+    const payload: FormDraftPayload = {
+      ...DRAFT,
+      fields: [
+        { name: 'supplier_id', label: '供应商', value: '47', tier: 'required', widget: 'relation' },
+        { name: 'customer_id', label: '客户', value: '48', tier: 'derived', widget: 'relation' },
+      ],
+    }
+    render(
+      <DraftCard
+        payload={payload} values={{ supplier_id: '47', customer_id: '48' }} phase="draft"
+        meta={meta.get('hub_po_purchase_orders')}
+        onEdit={() => {}} onConfirm={() => {}} onReject={() => {}} onRedraft={() => {}} disabled={false}
+      />,
+    )
+    // The edit row resolves through the stripped key: the picker trigger
+    // shows the target-row label, not a bare input with the raw id.
+    await waitFor(() => { expect(screen.getByRole('button', { name: '供应商' }).textContent).toContain('鲁丰配料') })
+    // The derived relation whose meta key no stripping recovers never shows
+    // the bare number: it reads as the opaque row reference.
+    expect(screen.getByText('引用 #48')).toBeTruthy()
+    vi.unstubAllGlobals()
+  })
+
   it('ignores rich taps that did not land on an image', () => {
     render(<RichContent text="一段普通叙述文字，没有图片。" />)
     fireEvent.click(screen.getByText('一段普通叙述文字，没有图片。'))

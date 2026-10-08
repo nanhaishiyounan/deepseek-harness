@@ -33,6 +33,10 @@ The W22 verification's ten-run repeater caught the model rolling dice on mechani
 
 Structural constraints live in the schema; count bounds the schema DSL cannot express (no `minItems`/`maxItems`) are enforced in `execute`: ask_choice options ≥1, form_draft fields ≥1 / revision ≥1 / `value: null` only on `required`-tier fields, submit_receipt and approval_pending summary ≥1, report metrics 1–6 / rows ≤8 / table ≤5 columns ≤10 rows with row width = column count / actions ≤4. Violations throw `ToolArgsError` with messages naming the offending parameter path, so the model corrects and retries within the same turn.
 
+### Rollback runbook (W22)
+
+Rolling back the W22 determinism stack reverts two commits together: R1 (`bed1a834a3`, the widget resolver + form contract) left `form-contract.ts` importing a package whose `@deepseek-ai/schemastery` dependency declaration only R2 (`b092a00b31`) landed, so R1 alone does not build — `git revert b092a00b31 bed1a834a3` in that order.
+
 A successful call invokes `exec.concludeTurn()` and returns `{ presented: true }` with a fixed receipt text: the card is the turn's final artifact, the user's pick or confirmation arrives as the next ordinary user message, and the model is told never to answer on the user's behalf. Fire-and-forget: the tool never waits for user input — the legacy fence UX is preserved byte-for-byte.
 
 ## Role

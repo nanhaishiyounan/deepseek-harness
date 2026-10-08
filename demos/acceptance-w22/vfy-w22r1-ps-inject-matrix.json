@@ -1,0 +1,48 @@
+{
+  "matrix": [
+    {
+      "label": "A1 illegal-widget-enum",
+      "outcome": [
+        "payload.fields[2].widget 应为 \"text\"/\"number\"/\"date\"/\"select\"/\"relation\" 之一（收到字符串 \"textarea\"）"
+      ]
+    },
+    {
+      "label": "A2 empty-fields",
+      "outcome": "RESOLVED"
+    },
+    {
+      "label": "A3 missing-fields-key",
+      "outcome": [
+        "payload.fields 缺失（必填字段）"
+      ]
+    },
+    {
+      "label": "A4 10k-char-field-name",
+      "outcome": "RESOLVED"
+    },
+    {
+      "label": "A5 unknown-collection",
+      "outcome": "RESOLVED"
+    },
+    {
+      "label": "A6 numeric-widget",
+      "outcome": [
+        "payload.fields[2].widget 应为字符串（收到数字 7）"
+      ]
+    },
+    {
+      "label": "A7 stringified-payload",
+      "outcome": "RESOLVED"
+    },
+    {
+      "label": "A8 duplicate-form-draft-same-draftId-revision",
+      "outcome": "RESOLVED+RESOLVED (no idempotency anchor at resolve layer)"
+    }
+  ],
+  "foldOutcome": {
+    "items": [],
+    "running": false,
+    "kgQueries": [],
+    "degradedFences": 0
+  }
+}

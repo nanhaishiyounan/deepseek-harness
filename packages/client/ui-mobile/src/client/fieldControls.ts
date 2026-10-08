@@ -57,6 +57,24 @@ export function fieldLabelOf(field: NocobaseFieldView | undefined, name: string)
 }
 
 /**
+ * The meta lookup for one draft field: a model-declared name the meta table
+ * keys by its association column (`supplier_id` vs `supplier`) retries once
+ * with the `_id` suffix stripped, so the relation still resolves its target
+ * instead of degrading to the bare-input fallback.
+ * @param meta - the collection's field table when the read carried one.
+ * @param name - the draft's field name.
+ * @returns the schema field under the raw name, the stripped one, or undefined.
+ */
+export function metaFieldOf(
+  meta: ReadonlyMap<string, NocobaseFieldView> | undefined,
+  name: string,
+): NocobaseFieldView | undefined {
+  const direct = meta?.get(name)
+  if (direct !== undefined) return direct
+  return name.endsWith('_id') ? meta?.get(name.slice(0, -3)) : undefined
+}
+
+/**
  * Resolve one draft field's widget spec.
  * @param collection - the draft's target collection.
  * @param name - the field name.

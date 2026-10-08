@@ -1,0 +1,7 @@
+session: session-69459231-7962-4900-9b80-0597a3f968ac
+--- round 0 cards=[ask_field] errors=0
+ASK_FIELD: quantity number
+--- round 1 cards=[ask_field,form_draft,form_draft] errors=1
+ERRORS: [{"type":"tool-result","toolCallId":"call_01a1191e8f4a72d3b23511bc","content":[{"type":"text","text":"Error: invalid arguments: payload.fields缺少必答字段 product_name/product_id（品名）——必答字段必须出现在卡片上，值可预填（value 可为 null 或预填值）"}],"isError":true}]
+DRAFT collection=pur_orders hasQtyRow=true fields=supplier_id:relation,product_name:text,quantity:number,unit_price:number,need_date:date,amount:number,code:text
+saved: /Users/mac/Documents/github/deepseek-harness/demos/acceptance-w22/vfy-w22r1-uj-journey.json

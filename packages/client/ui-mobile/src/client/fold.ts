@@ -167,8 +167,8 @@ export interface FoldedTurn {
   readonly running: boolean
   /** KG queries in event order (deduplicated, last occurrence wins position). */
   readonly kgQueries: readonly KgEvidenceQuery[]
-  /** dsh fences that failed validation and degraded to collapsed summary rows (the §5.3 report point). */
-  readonly degradedFences: number
+  /** Degraded cards: fences that failed validation plus tool-rejected present_card calls, collapsed to notice rows. */
+  readonly degradedCards: number
 }
 
 /**
@@ -449,7 +449,9 @@ function foldPresentCard(
       kind: 'degraded',
       seq,
       time,
-      text: '这张卡片因参数校验未通过已被系统退回，不可交互；请以后续修正后的卡片为准',
+      // Cause-neutral: isError also covers timeouts and internal tool
+      // failures, not only payload validation.
+      text: '这张卡片未通过校验已被系统退回，不可交互；请以后续修正后的卡片为准',
     })
     return
   }
@@ -669,7 +671,7 @@ export function foldHistory(events: readonly FoldEvent[]): FoldedTurn {
   }
   deriveAnswered(items)
   const running = sawAnyTurn && openTurns.size > 0
-  return { items, running, kgQueries, degradedFences: degraded.count }
+  return { items, running, kgQueries, degradedCards: degraded.count }
 }
 
 /**

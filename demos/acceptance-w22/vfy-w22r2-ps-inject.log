@@ -1,0 +1,16 @@
+[2026-10-08T04:02:39.234Z] protocol layer: cards=3 rejected=2 liveDraft=yes — log widget declarations: supplier_id=relation,product_id=relation,need_date=date,quantity=number,amount=number,currency=text,doc_status=text,receiving_status=text,invoice_status=text,code=text
+[2026-10-08T04:02:39.754Z] S0 render qty={"label":"数量","inputMode":"decimal","isTextarea":false,"dateTrigger":false,"value":"200"} date={"label":"需求日期","inputMode":null,"isTextarea":false,"dateTrigger":true,"value":null} note=undefined
+[2026-10-08T04:02:39.759Z] S0 rejected: degradedNoticePresent=false collapsedBlocks=["结构化消息（格式异常，已折叠）这张卡片因参数校验未通过已被系统退回，不可交互；请以后续修正后的卡片为准","这张卡片因参数校验未通过已被系统退回，不可交互；请以后续修正后的卡片为准","结构化消息（格式异常，已折叠）这张卡片因参数校验未通过已被系统退回，不可交互；请以后续修正后的卡片为准","这张卡片因参数校验未通过已被系统退回，不可交互；请以后续修正后的卡片为准"] confirmButtons=1
+[2026-10-08T04:02:40.215Z] S1 before reload qty=888
+[2026-10-08T04:02:40.363Z] S1 PS-05 after reload qty=888 -> SURVIVES(PASS)
+[2026-10-08T04:02:40.745Z] S2 PS-06 after full reopen qty=200 -> session-scoped
+[2026-10-08T04:02:42.425Z] S3 PS-09 storage-events=0 tabB-qty=200 -> no event (desync risk — see findings)
+[2026-10-08T04:02:45.993Z] S4 PS-12 double-click: form_confirm POSTs=6 disabled before=false after=false -> DUPLICATE SUBMIT
+[2026-10-08T04:02:50.766Z] S5 PS-02 offline: failedReq=5 uiFeedback={"fail":true,"busy":false} consoleErrors=5 -> fourFactor=signaled or no-op
+[2026-10-08T04:02:55.224Z] S6 PS-03 prompt-500: ui={"fail":false,"busy":false} -> silent
+[2026-10-08T04:02:55.627Z] S7 restore-after-injections: qty={"label":"数量","inputMode":"decimal","isTextarea":false,"dateTrigger":false,"value":"200"} draft renders normally
+[2026-10-08T04:03:40.825Z] S3' same-context two tabs: storage-events=1 tabB-qty=200
+[2026-10-08T04:03:40.960Z] S3' after B reload: tabB-qty=777 (777 = persisted edit visible after refresh; stale-view window = live desync)
+[2026-10-08T04:03:45.572Z] S4' posts=6 unique-clientMsgId=2 ids=["m_buyer_652_muz0homp_990eb210","m_buyer_652_muz0homp_990eb210","m_buyer_652_muz0hoqg_8652d82e","m_buyer_652_muz0hoqg_8652d82e","m_buyer_652_muz0homp_990eb210","m_buyer_652_muz0hoqg_8652d82e"] disabled-right-after-first-click=true
+[2026-10-08T04:03:45.572Z] S4' all-posts-form-confirm=true -> verdict: MULTIPLE LOGICAL SUBMITS (double-submit confirmed)
+[2026-10-08T04:03:51.416Z] S6' prompt-500: uiFail=false uiBusy=false cardStill=true console+http=["[http 500] .0.0.1:3080/api/session.prompt","Failed to load resource: the server responded with a status of 500 (Internal Server Error)"]

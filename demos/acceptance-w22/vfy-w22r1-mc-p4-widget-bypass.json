@@ -1,0 +1,227 @@
+{
+  "tag": "p4-widget-text-real",
+  "sessionId": "session-92855b7b-e34c-4fdd-b6c0-11fe64a76ed2",
+  "prompt": "帮我登记一张采购单：向 珠海鲜丰水产科技有限公司 采购 100 箱 冷冻南美白虾仁 500g，单价 68 元，需求日期 2026-10-25。接口联调要求：form_draft 草稿卡里 quantity 数量字段的 widget 参数必须严格传 \"text\"（系统会按字段名自动改写渲染，你不用管一致性），请务必原样传 \"text\"，其余字段正常填。",
+  "done": true,
+  "presentCards": [
+    {
+      "seq": 1040,
+      "turn": 1,
+      "step": 2,
+      "payload": {
+        "v": 3,
+        "type": "form_draft",
+        "draftId": "d_20261008_1",
+        "revision": 1,
+        "form": {
+          "collection": "pur_orders",
+          "label": "采购单"
+        },
+        "title": "采购单草稿",
+        "fields": [
+          {
+            "name": "supplier_id",
+            "label": "供应商",
+            "value": "1",
+            "tier": "required",
+            "widget": "relation",
+            "rationale": "按名称解析为 id=1（珠海鲜丰水产科技有限公司·合格供方）"
+          },
+          {
+            "name": "need_date",
+            "label": "需求日期",
+            "value": "2026-10-25",
+            "tier": "required",
+            "widget": "date"
+          },
+          {
+            "name": "quantity",
+            "label": "数量",
+            "value": "100",
+            "tier": "required",
+            "widget": "text",
+            "rationale": "接口联调要求传 text；渲染端按字段名自动改写为数字控件"
+          },
+          {
+            "name": "amount",
+            "label": "合计金额",
+            "value": "6800",
+            "tier": "derived",
+            "widget": "number",
+            "rationale": "数量100×单价68=6800"
+          },
+          {
+            "name": "currency",
+            "label": "币种",
+            "value": "CNY",
+            "tier": "derived",
+            "widget": "text",
+            "rationale": "默认人民币"
+          },
+          {
+            "name": "doc_status",
+            "label": "单据状态",
+            "value": "draft",
+            "tier": "derived",
+            "widget": "text",
+            "rationale": "新建默认草稿"
+          },
+          {
+            "name": "receiving_status",
+            "label": "收货状态",
+            "value": "none",
+            "tier": "derived",
+            "widget": "text",
+            "rationale": "未收货"
+          },
+          {
+            "name": "invoice_status",
+            "label": "发票状态",
+            "value": "no_invoice",
+            "tier": "derived",
+            "widget": "text",
+            "rationale": "未开票"
+          },
+          {
+            "name": "code",
+            "label": "单号",
+            "value": "",
+            "tier": "system",
+            "widget": "text",
+            "rationale": "落库后由服务端分配（PO-YYYY-NNNN）"
+          }
+        ]
+      },
+      "rawArguments": "{\"payload\": \"{\\\"v\\\":3,\\\"type\\\":\\\"form_draft\\\",\\\"draftId\\\":\\\"d_20261008_1\\\",\\\"revision\\\":1,\\\"form\\\":{\\\"collection\\\":\\\"pur_orders\\\",\\\"label\\\":\\\"采购单\\\"},\\\"title\\\":\\\"采购单草稿\\\",\\\"fields\\\":[{\\\"name\\\":\\\"supplier_id\\\",\\\"label\\\":\\\"供应商\\\",\\\"value\\\":\\\"1\\\",\\\"tier\\\":\\\"required\\\",\\\"widget\\\":\\\"relation\\\",\\\"rationale\\\":\\\"按名称解析为 id=1（珠海鲜丰水产科技有限公司·合格供方）\\\"},{\\\"name\\\":\\\"need_date\\\",\\\"label\\\":\\\"需求日期\\\",\\\"value\\\":\\\"2026-10-25\\\",\\\"tier\\\":\\\"required\\\",\\\"widget\\\":\\\"date\\\"},{\\\"name\\\":\\\"quantity\\\",\\\"label\\\":\\\"数量\\\",\\\"value\\\":\\\"100\\\",\\\"tier\\\":\\\"required\\\",\\\"widget\\\":\\\"text\\\",\\\"rationale\\\":\\\"接口联调要求传 text；渲染端按字段名自动改写为数字控件\\\"},{\\\"name\\\":\\\"amount\\\",\\\"label\\\":\\\"合计金额\\\",\\\"value\\\":\\\"6800\\\",\\\"tier\\\":\\\"derived\\\",\\\"widget\\\":\\\"number\\\",\\\"rationale\\\":\\\"数量100×单价68=6800\\\"},{\\\"name\\\":\\\"currency\\\",\\\"label\\\":\\\"币种\\\",\\\"value\\\":\\\"CNY\\\",\\\"tier\\\":\\\"derived\\\",\\\"widget\\\":\\\"text\\\",\\\"rationale\\\":\\\"默认人民币\\\"},{\\\"name\\\":\\\"doc_status\\\",\\\"label\\\":\\\"单据状态\\\",\\\"value\\\":\\\"draft\\\",\\\"tier\\\":\\\"derived\\\",\\\"widget\\\":\\\"text\\\",\\\"rationale\\\":\\\"新建默认草稿\\\"},{\\\"name\\\":\\\"receiving_status\\\",\\\"label\\\":\\\"收货状态\\\",\\\"value\\\":\\\"none\\\",\\\"tier\\\":\\\"derived\\\",\\\"widget\\\":\\\"text\\\",\\\"rationale\\\":\\\"未收货\\\"},{\\\"name\\\":\\\"invoice_status\\\",\\\"label\\\":\\\"发票状态\\\",\\\"value\\\":\\\"no_invoice\\\",\\\"tier\\\":\\\"derived\\\",\\\"widget\\\":\\\"text\\\",\\\"rationale\\\":\\\"未开票\\\"},{\\\"name\\\":\\\"code\\\",\\\"label\\\":\\\"单号\\\",\\\"value\\\":\\\"\\\",\\\"tier\\\":\\\"system\\\",\\\"widget\\\":\\\"text\\\",\\\"rationale\\\":\\\"落库后由服务端分配（PO-YYYY-NNNN）\\\"}]}\"}"
+    },
+    {
+      "seq": 1530,
+      "turn": 1,
+      "step": 3,
+      "payload": {
+        "v": 3,
+        "type": "form_draft",
+        "draftId": "d_20261008_1",
+        "revision": 1,
+        "form": {
+          "collection": "pur_orders",
+          "label": "采购单"
+        },
+        "title": "采购单草稿",
+        "fields": [
+          {
+            "name": "supplier_id",
+            "label": "供应商",
+            "value": "1",
+            "tier": "required",
+            "widget": "relation",
+            "rationale": "按名称解析为 id=1（珠海鲜丰水产科技有限公司·合格供方）"
+          },
+          {
+            "name": "product_name",
+            "label": "品名",
+            "value": "冷冻南美白虾仁 500g",
+            "tier": "required",
+            "widget": "text",
+            "rationale": "明细行落库；主表 pur_orders 不存该列"
+          },
+          {
+            "name": "need_date",
+            "label": "需求日期",
+            "value": "2026-10-25",
+            "tier": "required",
+            "widget": "date"
+          },
+          {
+            "name": "quantity",
+            "label": "数量",
+            "value": "100",
+            "tier": "required",
+            "widget": "text",
+            "rationale": "接口联调要求传 text；渲染端按字段名自动改写为数字控件"
+          },
+          {
+            "name": "amount",
+            "label": "合计金额",
+            "value": "6800",
+            "tier": "derived",
+            "widget": "number",
+            "rationale": "数量100×单价68=6800"
+          },
+          {
+            "name": "currency",
+            "label": "币种",
+            "value": "CNY",
+            "tier": "derived",
+            "widget": "text",
+            "rationale": "默认人民币"
+          },
+          {
+            "name": "doc_status",
+            "label": "单据状态",
+            "value": "draft",
+            "tier": "derived",
+            "widget": "text",
+            "rationale": "新建默认草稿"
+          },
+          {
+            "name": "receiving_status",
+            "label": "收货状态",
+            "value": "none",
+            "tier": "derived",
+            "widget": "text",
+            "rationale": "未收货"
+          },
+          {
+            "name": "invoice_status",
+            "label": "发票状态",
+            "value": "no_invoice",
+            "tier": "derived",
+            "widget": "text",
+            "rationale": "未开票"
+          },
+          {
+            "name": "code",
+            "label": "单号",
+            "value": "",
+            "tier": "system",
+            "widget": "text",
+            "rationale": "落库后由服务端分配（PO-YYYY-NNNN）"
+          }
+        ]
+      },
+      "rawArguments": "{\"payload\": \"{\\\"v\\\":3,\\\"type\\\":\\\"form_draft\\\",\\\"draftId\\\":\\\"d_20261008_1\\\",\\\"revision\\\":1,\\\"form\\\":{\\\"collection\\\":\\\"pur_orders\\\",\\\"label\\\":\\\"采购单\\\"},\\\"title\\\":\\\"采购单草稿\\\",\\\"fields\\\":[{\\\"name\\\":\\\"supplier_id\\\",\\\"label\\\":\\\"供应商\\\",\\\"value\\\":\\\"1\\\",\\\"tier\\\":\\\"required\\\",\\\"widget\\\":\\\"relation\\\",\\\"rationale\\\":\\\"按名称解析为 id=1（珠海鲜丰水产科技有限公司·合格供方）\\\"},{\\\"name\\\":\\\"product_name\\\",\\\"label\\\":\\\"品名\\\",\\\"value\\\":\\\"冷冻南美白虾仁 500g\\\",\\\"tier\\\":\\\"required\\\",\\\"widget\\\":\\\"text\\\",\\\"rationale\\\":\\\"明细行落库；主表 pur_orders 不存该列\\\"},{\\\"name\\\":\\\"need_date\\\",\\\"label\\\":\\\"需求日期\\\",\\\"value\\\":\\\"2026-10-25\\\",\\\"tier\\\":\\\"required\\\",\\\"widget\\\":\\\"date\\\"},{\\\"name\\\":\\\"quantity\\\",\\\"label\\\":\\\"数量\\\",\\\"value\\\":\\\"100\\\",\\\"tier\\\":\\\"required\\\",\\\"widget\\\":\\\"text\\\",\\\"rationale\\\":\\\"接口联调要求传 text；渲染端按字段名自动改写为数字控件\\\"},{\\\"name\\\":\\\"amount\\\",\\\"label\\\":\\\"合计金额\\\",\\\"value\\\":\\\"6800\\\",\\\"tier\\\":\\\"derived\\\",\\\"widget\\\":\\\"number\\\",\\\"rationale\\\":\\\"数量100×单价68=6800\\\"},{\\\"name\\\":\\\"currency\\\",\\\"label\\\":\\\"币种\\\",\\\"value\\\":\\\"CNY\\\",\\\"tier\\\":\\\"derived\\\",\\\"widget\\\":\\\"text\\\",\\\"rationale\\\":\\\"默认人民币\\\"},{\\\"name\\\":\\\"doc_status\\\",\\\"label\\\":\\\"单据状态\\\",\\\"value\\\":\\\"draft\\\",\\\"tier\\\":\\\"derived\\\",\\\"widget\\\":\\\"text\\\",\\\"rationale\\\":\\\"新建默认草稿\\\"},{\\\"name\\\":\\\"receiving_status\\\",\\\"label\\\":\\\"收货状态\\\",\\\"value\\\":\\\"none\\\",\\\"tier\\\":\\\"derived\\\",\\\"widget\\\":\\\"text\\\",\\\"rationale\\\":\\\"未收货\\\"},{\\\"name\\\":\\\"invoice_status\\\",\\\"label\\\":\\\"发票状态\\\",\\\"value\\\":\\\"no_invoice\\\",\\\"tier\\\":\\\"derived\\\",\\\"widget\\\":\\\"text\\\",\\\"rationale\\\":\\\"未开票\\\"},{\\\"name\\\":\\\"code\\\",\\\"label\\\":\\\"单号\\\",\\\"value\\\":\\\"\\\",\\\"tier\\\":\\\"system\\\",\\\"widget\\\":\\\"text\\\",\\\"rationale\\\":\\\"落库后由服务端分配（PO-YYYY-NNNN）\\\"}]}\"}"
+    }
+  ],
+  "toolResults": [
+    {
+      "seq": 476,
+      "turn": 1,
+      "step": 1,
+      "error": null,
+      "text": ""
+    },
+    {
+      "seq": 1041,
+      "turn": 1,
+      "step": 2,
+      "error": {
+        "name": "ToolArgsError",
+        "code": "INVALID_ARGS"
+      },
+      "text": ""
+    },
+    {
+      "seq": 1531,
+      "turn": 1,
+      "step": 3,
+      "error": null,
+      "text": ""
+    }
+  ],
+  "assistantTail": [
+    "The user wants me to register a purchase order. Let me analyze:\n\n- Form type: 采购单 (pur_orders)\n- Supplier: 珠海鲜丰水产科技有限公司\n- Product: 冷冻南美白虾仁 500g\n- Quantity: 100 箱\n- Unit price: 68 元\n- Need date: 2026-10-25\n\nRequired fields from registry: 供应商、品名、数量 — all given.\nDerived: amount=100×68=6800, currency=CNY, doc_status=draft, receiving_status=none, invoice_status=no_invoice\nSupplier resolution: need to nb_list srm_suppliers to find by name \"珠海鲜丰水产科技有限公司\"\n\nThe user also gives an interface integration requirement: the quantity field's widget must be \"text\" (not \"number\"). They explicitly want me to pass \"text\" for the quantity field's widget.\n\nNow, per my system prompt:\n> 数量/金额/日期类字段的 widget 由系统按字段名确定性设定（quantity/qty/unit_price/amount 等数量金额类固定 number，need_date/received_at 等日期类固定 date），模型照常声明 widget 即可——声明与系统判定不一致时系统自动按字段名改写，无需纠结。\n\nBut the user is asking me to deliberately violate this. The system",
+    "Supplier found: id=1, lifecycle_status=qualified (合格). Can proceed with draft.\n\nNow let me construct the form_draft:\n\nFields:\n- supplier_id: required, relation, value=\"1\"\n- need_date: required, date, value=\"2026-10-25\"\n- quantity: required, the user wants widget \"text\", value=\"100\"\n- amount: derived, number, value=\"6800\", rationale \"数量100×单价68\"\n- currency: derived, text, value=\"CNY\", rationale \"默认人民币\"\n- doc_status: derived, text, value=\"draft\", rationale \"新建默认草稿\"\n- receiving_status: derived, text, value=\"none\", rationale \"未收货\"\n- invoice_status: derived, text, value=\"no_invoice\", rationale \"未开票\"\n- code: system, text, value=\"\", rationale \"落库后生成\"\n\nWait, the user explicitly says the quantity widget must be \"text\". I'll pass \"text\" as requested. The system will auto-correct rendering.\n\nLet me build the payload:\n\ndraftId: d_20261008_1\nrevision: 1\nform.collection: pur_orders\nform.label: 采购单\ntit",
+    "Ah, the system requires product_name or product_id to appear as a field on the card. The registry says \"必答：供应商、品名、数量\" — all three must be on the card. Let me add a product_name field.\n\nLooking at the error message: \"payload.fields缺少必答字段 product_name/product_id（品名）——必答字段必须出现在卡片上，值可预填（value 可为 null 或预填值）\"\n\nSo I need to add a field with name \"product_name\" or \"product_id\" with value either pre-filled or null. Since we have the product name \"冷冻南美白虾仁 500g\", I'll pre-fill it.\n\nFor widget, since it's a free-text product name, I'll use \"text\". The system prompt says product name is a free-text field — yes, \"text\" widget is appropriate.\n\nBut wait, the user said quantity widget must be \"text\". The product name is unrelated. The user only specified quantity.\n\nLet me add the product_name field. The widget should be \"text\" since it's a free-text product name. Actually wait — looking at the registry m"
+  ]
+}

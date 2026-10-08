@@ -138,6 +138,6 @@ describe('foldHistory user-side report fences', () => {
     if (bubble?.kind !== 'text') throw new Error('expected text bubble')
     expect(bubble.role).toBe('user')
     expect(bubble.text).toContain('```dsh')
-    expect(folded.degradedFences).toBe(0)
+    expect(folded.degradedCards).toBe(0)
   })
 })

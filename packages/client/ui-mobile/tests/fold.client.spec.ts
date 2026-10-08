@@ -98,7 +98,7 @@ describe('foldHistory', () => {
   })
 
   it('tolerates unsorted input and empty logs', () => {
-    expect(foldHistory([])).toEqual({ items: [], running: false, kgQueries: [], degradedFences: 0 })
+    expect(foldHistory([])).toEqual({ items: [], running: false, kgQueries: [], degradedCards: 0 })
     const folded = foldHistory([
       event('turn/end', { turn: 1, reason: { kind: 'completed' } }, 2),
       event('turn/start', { turn: 1 }, 1),
@@ -156,7 +156,7 @@ describe('foldHistory (v3 dsh fences)', () => {
       event('assistant/message', { message: { content: [{ type: 'text', text: `已提交。\n${fabricated}` }] } }, 2),
     ])
     expect(folded.items.some(item => item.kind === 'receipt')).toBe(false)
-    expect(folded.degradedFences).toBe(1)
+    expect(folded.degradedCards).toBe(1)
     const notice = folded.items.find(item => item.kind === 'degraded')
     if (notice?.kind !== 'degraded') throw new Error('expected degraded notice')
     expect(notice.text.includes('回执未经落库核实')).toBe(true)
@@ -227,7 +227,7 @@ describe('foldHistory (v3 dsh fences)', () => {
     const folded = foldHistory([
       event('assistant/message', { message: { content: [{ type: 'text', text: '叙述\n```dsh\n{"v":3,"type":"nonsense"}\n```' }] } }, 1),
     ])
-    expect(folded.degradedFences).toBe(1)
+    expect(folded.degradedCards).toBe(1)
     // The narrative keeps only the prose; the invalid fence becomes its own
     // notice item carrying the original fenced text for the expandable view.
     expect(folded.items.map(item => item.kind)).toEqual(['text', 'degraded'])
@@ -398,7 +398,7 @@ describe('foldHistory (present_card tool calls)', () => {
     if (ask?.kind !== 'ask') throw new Error('expected ask item')
     expect(ask.payload.id).toBe('7')
     expect(ask.payload.options.map(option => option.value)).toEqual(['1', '13', 'hf-001'])
-    expect(folded.degradedFences).toBe(0)
+    expect(folded.degradedCards).toBe(0)
   })
 
   it('folds a stringified-payload present_card call (double serialization) into the card', () => {
@@ -409,14 +409,14 @@ describe('foldHistory (present_card tool calls)', () => {
     const ask = folded.items[0]
     if (ask?.kind !== 'ask') throw new Error('expected ask item')
     expect(ask.payload.id).toBe('choice_s')
-    expect(folded.degradedFences).toBe(0)
+    expect(folded.degradedCards).toBe(0)
   })
 
   it('degrades a present_card call whose payload fails validation, with no tool row', () => {
     const folded = foldHistory([
       event('tool/call', presentCardCall('pc4', 'report.metrics-over'), 1),
     ])
-    expect(folded.degradedFences).toBe(1)
+    expect(folded.degradedCards).toBe(1)
     expect(folded.items).toHaveLength(1)
     const notice = folded.items[0]
     if (notice?.kind !== 'degraded') throw new Error('expected degraded notice')
@@ -431,7 +431,7 @@ describe('foldHistory (present_card tool calls)', () => {
       event('tool/call', presentCardRawCall('pc6', '{}'), 2),
       event('tool/call', presentCardRawCall('pc7', '{"payload":"ask_choice"}'), 3),
     ])
-    expect(folded.degradedFences).toBe(3)
+    expect(folded.degradedCards).toBe(3)
     expect(folded.items.every(item => item.kind === 'degraded')).toBe(true)
   })
 
@@ -440,7 +440,7 @@ describe('foldHistory (present_card tool calls)', () => {
       event('tool/call', presentCardCall('pc8', 'submit-receipt.valid'), 1),
     ])
     expect(folded.items.some(item => item.kind === 'receipt')).toBe(false)
-    expect(folded.degradedFences).toBe(1)
+    expect(folded.degradedCards).toBe(1)
     const notice = folded.items.find(item => item.kind === 'degraded')
     if (notice?.kind !== 'degraded') throw new Error('expected degraded notice')
     expect(notice.text).toContain('回执未经落库核实')
@@ -510,8 +510,8 @@ describe('foldHistory (present_card tool calls)', () => {
       expect(folded.items.map(item => item.kind)).toEqual(['degraded', 'task-card'])
       const notice = folded.items[0]
       if (notice?.kind !== 'degraded') throw new Error('expected the rejected card to degrade')
-      expect(notice.text).toContain('参数校验未通过')
-      expect(folded.degradedFences).toBe(1)
+      expect(notice.text).toContain('未通过校验')
+      expect(folded.degradedCards).toBe(1)
     })
 
     it('keeps rendering the card while the result has not landed yet (running turn)', () => {
@@ -519,7 +519,7 @@ describe('foldHistory (present_card tool calls)', () => {
         event('tool/call', presentCardCall('pcx3', 'form-draft.widget-coercion.valid'), 1),
       ])
       expect(folded.items.map(item => item.kind)).toEqual(['task-card'])
-      expect(folded.degradedFences).toBe(0)
+      expect(folded.degradedCards).toBe(0)
     })
   })
 
@@ -547,7 +547,7 @@ describe('foldHistory (present_card tool calls)', () => {
     ])
     // A valid-but-user-action payload renders nothing, same as the fence path.
     expect(folded.items).toHaveLength(0)
-    expect(folded.degradedFences).toBe(0)
+    expect(folded.degradedCards).toBe(0)
   })
 
   it('renders the fence source and the tool source in one window (dual-source replay)', () => {
@@ -627,7 +627,7 @@ describe('foldHistory (report fences)', () => {
     const folded = foldHistory([
       event('assistant/message', { message: { content: [{ type: 'text', text: `报告来了。\n${overLimit}` }] } }, 1),
     ])
-    expect(folded.degradedFences).toBe(1)
+    expect(folded.degradedCards).toBe(1)
     expect(folded.items.map(item => item.kind)).toEqual(['text', 'degraded'])
   })
 
