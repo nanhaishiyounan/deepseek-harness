@@ -6,7 +6,13 @@ import { CallId } from '@deepseek-ai/dsh-llm'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import ToolRuntime from '@deepseek-ai/dsh-tools'
 import * as toolPresentCard from '@deepseek-ai/dsh-tool-present-card'
-import { enforceFormContract, resolvePresentCardPayload, type FormCollections } from '@deepseek-ai/dsh-tool-present-card'
+import {
+  enforceFormContract,
+  isLegalViewRoute,
+  resolvePresentCardPayload,
+  VIEW_ROUTE_CANDIDATES,
+  type FormCollections,
+} from '@deepseek-ai/dsh-tool-present-card'
 
 const testToolSignal = new AbortController().signal
 const fixturesDir = fileURLToPath(new URL('./fixtures', import.meta.url))
@@ -356,6 +362,43 @@ describe('present_card tool', () => {
       const resolved = resolvePresentCardPayload('[1,2]')
       expect(resolved).toEqual({
         violations: ['payload 应为九类卡片载荷对象（按 type 判别九选一），收到数组'],
+      })
+    })
+
+    // W23-B1: the view-route shape contract — legal candidates pass, the
+    // invented sub-path chains (the audit's dead route) die with the
+    // candidate list so one retry hits.
+    describe('view-route shape contract (W23-B1)', () => {
+      it('accepts the router heads and the docs drill-down with a trailing query', () => {
+        const routes = ['#/', '#/chats', '#/chat/s_1', '#/work', '#/tasks', '#/todos', '#/docs', '#/docs/pur_orders', '#/docs/pur_orders/42', '#/files', '#/agents', '#/me', '#/alerts', '#/work?collection=pur_orders&days=30']
+        for (const route of routes) {
+          expect(isLegalViewRoute(route), route).toBe(true)
+        }
+      })
+
+      it('rejects invented heads, the two-segment work dead route, and over-deep chains', () => {
+        const routes = ['#/work/business/pur_orders', '#/docs/pur_orders/42/extra', '#/work/w_1', '#/login', '#/evil', 'https://example.com', '#/alerts/todos']
+        for (const route of routes) {
+          expect(isLegalViewRoute(route), route).toBe(false)
+        }
+      })
+
+      it('reports the route violation with its legal candidates on the resolve path', () => {
+        const resolved = resolvePresentCardPayload({
+          ...fixture('report.valid') as Record<string, unknown>,
+          actions: [{ kind: 'view', label: '查看全部采购订单', route: '#/work/business/pur_orders' }],
+        })
+        expect(resolved).toEqual({
+          violations: ['payload.actions[0].route "#/work/business/pur_orders" 不是合法站内路由；合法候选：' + VIEW_ROUTE_CANDIDATES],
+        })
+      })
+
+      it('keeps a legal view route resolving untouched', () => {
+        const resolved = resolvePresentCardPayload({
+          ...fixture('report.valid') as Record<string, unknown>,
+          actions: [{ kind: 'view', label: '查看采购订单', route: '#/docs/pur_orders' }],
+        })
+        expect('violations' in resolved).toBe(false)
       })
     })
 

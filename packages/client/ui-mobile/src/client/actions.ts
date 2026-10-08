@@ -71,22 +71,45 @@ export interface ReportActionContext {
 /** One dispatch outcome: success, or a user-readable failure reason. */
 export type DispatchResult = { readonly ok: true } | { readonly ok: false; readonly reason: string }
 
-/** The ten in-product route heads a `view` action may target (02 §1.1). */
-const ROUTE_HEADS: ReadonlySet<string> = new Set([
-  'home', 'chats', 'chat', 'work', 'me', 'tasks', 'files', 'agents', 'login',
-])
+/**
+ * The view-route shape contract (W23-B1), the client mirror of the
+ * server-side present_card check: the route head must be one of the live
+ * router names and the param count must fit the head — `docs` takes one or
+ * two (`#/docs/<collection>[/<rowId>]`), `chat` exactly one, and every other
+ * head none (`work/:id` keys client-local work ids a model cannot know, so a
+ * model-authored `#/work/<x>/<y>` chain dies here instead of on the dead
+ * detail page). A query string may trail any of them.
+ */
+const VIEW_PARAM_HEADS: Readonly<Record<string, number>> = {
+  docs: 2,
+  chat: 1,
+  work: 0,
+  chats: 0,
+  me: 0,
+  tasks: 0,
+  todos: 0,
+  files: 0,
+  agents: 0,
+  alerts: 0,
+}
 
 /**
- * Whether a view action's route names a live in-product page.
+ * Whether a view action's route names a live in-product page with a legal
+ * param shape.
  * @param route - the action's route string.
- * @returns true when the route starts `#/` and its head is one of the ten routes.
+ * @returns true when the route starts `#/`, its head is a router name (the
+ * bare `#/` names home), and the trailing segments fit that head's param
+ * count.
  */
 export function isProductRoute(route: string): boolean {
   if (!route.startsWith('#/')) return false
-  // The bare `#/` names home; the rest read their head segment.
-  /* v8 ignore next -- split on a non-empty string always yields a first element. */
-  const head = route.slice(2).split('/')[0] ?? ''
-  return ROUTE_HEADS.has(head === '' ? 'home' : head)
+  const path = route.slice(2).split('?', 2)[0] ?? ''
+  const segments = path.split('/').filter(segment => segment !== '')
+  const [head] = segments
+  if (head === undefined) return true
+  const maxParams = VIEW_PARAM_HEADS[head]
+  if (maxParams === undefined) return false
+  return segments.length - 1 <= maxParams
 }
 
 /**
@@ -102,8 +125,8 @@ export async function dispatchReportAction(action: ReportAction, ctx: ReportActi
   switch (action.kind) {
     case 'view': {
       if (!isProductRoute(action.route)) {
-        Toast.show({ content: '无法打开该页面' })
-        return { ok: false, reason: `route 不在十路由内：${action.route}` }
+        Toast.show({ content: '不支持的目标' })
+        return { ok: false, reason: `route 非法（不在产品路由枚举内）：${action.route}` }
       }
       navigate(action.route)
       return { ok: true }

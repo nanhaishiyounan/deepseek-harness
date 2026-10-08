@@ -25,12 +25,16 @@ export const TEAM_MEMBERS: readonly TeamMember[] = [
   { name: '林小满', duty: '仓储' },
 ]
 
-/** The seeded report artifact (a legal ReportPayload the FilesView/ReportCard render). */
+/** The seeded report artifact (a legal ReportPayload the FilesView/ReportCard render).
+ * The title stays concrete (month + a carried fact, W23-B1): a「本月经营概览」
+ * template here leaks into the model's own report titles through the demo
+ * corpus the persona's discipline now forbids. */
+const seedMonth = new Date().getMonth() + 1
 const DEMO_REPORT: ReportPayload = {
   v: 3,
   type: 'report',
   id: 'r_1',
-  title: '本月经营概览',
+  title: `${String(seedMonth)}月经营概览：按期交付 96%`,
   subtitle: '截至今天 · 数据来自湖仓指标',
   metrics: [
     { label: '采购额', value: '¥128,600', kind: 'money' },
@@ -60,6 +64,14 @@ function tomorrow(): string {
  */
 export function seedDemoData(): void {
   if (workSnapshot().seeded) return
+  // Cross-browser idempotence (W23-B1): a store that already carries any
+  // demo row (the server backfill merged another device's seed) only
+  // latches the flag — re-seeding per cleared cache is what stacked the
+  // duplicated demo report rows in wfl_mobile_work.
+  if (workSnapshot().items.some(item => item.demo)) {
+    markWorkSeeded()
+    return
+  }
   const now = Date.now()
   createWorkItem({
     title: '供应商资质到期提醒',
@@ -78,9 +90,9 @@ export function seedDemoData(): void {
     demo: true,
   })
   updateWorkItem(review.id, { result: { summary: '已汇总本月五类采购单据，两项价格异常待确认', finishedAt: now } })
-  const artifact = createWorkItem({ title: '本月经营概览', owner: '林小满', status: 'done', demo: true })
+  const artifact = createWorkItem({ title: DEMO_REPORT.title, owner: '林小满', status: 'done', demo: true })
   updateWorkItem(artifact.id, {
-    result: { summary: '已生成本月经营概览报告', finishedAt: now },
+    result: { summary: `已生成${DEMO_REPORT.title}报告`, finishedAt: now },
     artifact: DEMO_REPORT,
     pinned: true,
   })

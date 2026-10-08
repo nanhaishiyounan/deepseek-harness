@@ -177,6 +177,8 @@ export interface RecallNoticeRow {
   readonly content: string
   readonly status: string
   readonly category: 'recall' | 'dunning' | 'alert'
+  /** How many channel rows folded into this one (W23-B1 dedup; ≥1). */
+  readonly count: number
 }
 
 /**
@@ -184,8 +186,10 @@ export interface RecallNoticeRow {
  * orders' owner notifications land in notificationInAppMessages on the
  * channelName 'alert-center' (the B2 notification face both engines write);
  * this read makes them visible on mobile the same way the PC alert center
- * shows them.
- * @returns the unread channel notices, newest first.
+ * shows them. Rows with the same title collapse onto the newest carry with
+ * its scan count (W23-B1): the engine writes one notice per scan day, which
+ * stacked the same certificate five deep on the page.
+ * @returns the unread channel notices deduped by title, newest first.
  */
 export async function listMyRecallNotices(): Promise<RecallNoticeRow[]> {
   const page = await rpc('nocobase.list', {
@@ -198,16 +202,28 @@ export async function listMyRecallNotices(): Promise<RecallNoticeRow[]> {
     page_size: 50,
     sort: ['-id'],
   })
-  return page.rows.map((row) => {
+  const folded: RecallNoticeRow[] = []
+  for (const row of page.rows) {
     const title = str(row['title'])
-    return {
+    const candidate: RecallNoticeRow = {
       id: num(row['id']),
       title,
       content: str(row['content']),
       status: str(row['status']),
       category: title.startsWith('催收任务') ? 'dunning' as const : title.includes('召回') ? 'recall' as const : 'alert' as const,
+      count: 1,
     }
-  })
+    const existingIndex = folded.findIndex(entry => entry.title === title)
+    if (existingIndex === -1) {
+      folded.push(candidate)
+      continue
+    }
+    // Rows arrive newest first (-id sort): the first fold of a title keeps
+    // the newest row's id and content; later siblings only add their count.
+    const existing = folded[existingIndex]
+    if (existing !== undefined) folded[existingIndex] = { ...existing, count: existing.count + 1 }
+  }
+  return folded
 }
 
 /**

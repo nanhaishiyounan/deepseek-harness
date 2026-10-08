@@ -449,9 +449,10 @@
 
 .actions :global(.adm-button) {
   --border-radius: var(--dshm-r-ctl);
-  height: var(--dshm-touch-sm);
+  height: 36px;
   padding-block: 0;
   padding-inline: 15px;
+  font-size: var(--dshm-fs-body);
   font-weight: 600;
 }
 
@@ -613,9 +614,10 @@
 
 .receiptFooter :global(.adm-button) {
   --border-radius: var(--dshm-r-ctl);
-  height: var(--dshm-touch-sm);
+  height: 36px;
   padding-block: 0;
   padding-inline: 15px;
+  font-size: var(--dshm-fs-body);
   font-weight: 600;
 }
 

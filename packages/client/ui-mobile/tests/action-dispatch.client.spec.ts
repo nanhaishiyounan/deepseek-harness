@@ -85,6 +85,27 @@ describe('dispatchReportAction', () => {
     expect(location.hash).toBe('#/work')
   })
 
+  it('enforces the W23-B1 per-head param shapes: docs deep links pass, invented sub-paths die', async () => {
+    // docs carries the collection drill-down (list and row detail) and a
+    // trailing query stays legal on any route.
+    expect(isProductRoute('#/docs')).toBe(true)
+    expect(isProductRoute('#/docs/pur_orders')).toBe(true)
+    expect(isProductRoute('#/docs/pur_orders/42')).toBe(true)
+    expect(isProductRoute('#/todos')).toBe(true)
+    expect(isProductRoute('#/alerts')).toBe(true)
+    expect(isProductRoute('#/work?collection=pur_orders')).toBe(true)
+    // The dead-route shape the audit caught: a two-segment work chain lands
+    // on the work/:id detail face with an unresolvable id.
+    expect(isProductRoute('#/work/business/pur_orders')).toBe(false)
+    expect(isProductRoute('#/docs/pur_orders/42/extra')).toBe(false)
+    expect(isProductRoute('#/chats/s_1/extra')).toBe(false)
+    expect(isProductRoute('#/login')).toBe(false)
+    location.hash = '#/work'
+    const result: DispatchResult = await dispatchReportAction({ kind: 'view', label: '查看全部采购订单', route: '#/work/business/pur_orders' }, CTX)
+    expect(result.ok).toBe(false)
+    expect(location.hash).toBe('#/work')
+  })
+
   it('opens the host modal with the create-task prefill', async () => {
     const onCreateTask = vi.fn()
     const result = await dispatchReportAction(

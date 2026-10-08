@@ -160,14 +160,22 @@
   margin-left: auto;
 }
 
-/* Row actions ride the 40px base touch grade (W8-R2): the small-button
-   default sat at ~32px. */
-.actBtn {
+/* The deduped notice's fold count (W23-B1): a muted suffix on the title. */
+.noticeCount {
+  font-size: var(--dshm-fs-caption);
+  font-weight: 500;
+  color: var(--dshm-ink-sub);
+  margin-left: 6px;
+}
+
+/* Row actions ride the in-card action grade (W23-B1): 14px on 36px — the
+   antd small-button font would otherwise win the cascade. */
+.actBtn:global(.adm-button) {
   flex: none;
   min-width: 56px;
-  height: var(--dshm-touch-sm);
+  height: 36px;
   --border-radius: var(--dshm-r-seal);
-  font-size: var(--dshm-fs-caption);
+  font-size: var(--dshm-fs-body);
 }
 
 /* The entity id yields first when the foot row runs tight: it shrinks to its

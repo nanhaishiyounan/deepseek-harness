@@ -451,12 +451,14 @@ export interface FileCardRow {
 
 /**
  * Project every artifact-bearing item onto a FilesView card row, newest
- * generation first.
+ * generation first. Demo rows collapse per title to the newest (W23-B1): the
+ * seed's cross-device reruns land as sibling rows in wfl_mobile_work, and
+ * the files list showed the same「示例」report once per rerun.
  * @param items - the store's items.
  * @returns the AI-generated and pinned cards' rows.
  */
 export function fileProjections(items: readonly WorkItem[]): FileCardRow[] {
-  return items
+  const rows = items
     .flatMap((item): FileCardRow[] => {
       if (item.artifact === undefined) return []
       return [{
@@ -471,4 +473,11 @@ export function fileProjections(items: readonly WorkItem[]): FileCardRow[] {
       }]
     })
     .sort((a, b) => b.createdAt - a.createdAt)
+  const seenDemoTitles = new Set<string>()
+  return rows.filter((row) => {
+    if (!row.demo) return true
+    if (seenDemoTitles.has(row.title)) return false
+    seenDemoTitles.add(row.title)
+    return true
+  })
 }

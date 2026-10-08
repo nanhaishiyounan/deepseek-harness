@@ -306,7 +306,8 @@
 
 /* The destructive logout block stands alone, off the settings group: the
    antd Button (the destructive wash rides inline variables in
-   ProfileView.tsx) keeps the 44px band and the icon gap. */
+   ProfileView.tsx) keeps the W23-B1 page-CTA grade — 16px on the 48px
+   band — and the icon gap. */
 .logout:global(.adm-button) {
   --border-radius: var(--dshm-r-card);
   display: inline-flex;
@@ -314,8 +315,9 @@
   justify-content: center;
   gap: 6px;
   margin: 4px 12px 0;
-  height: 44px;
+  height: 48px;
   padding-block: 0;
+  font-size: var(--dshm-fs-input);
   font-weight: 500;
   flex: none;
 }

@@ -59,10 +59,6 @@ export function MobileShell({ identity, dark, onDarkChange, onLogout }: MobileSh
   const tabbarRef = useRef<HTMLElement | null>(null)
   // Keep-alive set: every tab page that has been visited stays mounted.
   const [visitedTabs, setVisitedTabs] = useState<ReadonlySet<string>>(() => new Set(['home']))
-  // The first-run demo workspace seeds once per shell mount (idempotent).
-  useEffect(() => {
-    seedDemoData()
-  }, [])
   // A (re-)login re-dispatches the parked message outbox immediately — the
   // expiry path keeps it on purpose (W8-B3's re-login backfill contract).
   useEffect(() => {
@@ -72,9 +68,17 @@ export function MobileShell({ identity, dark, onDarkChange, onLogout }: MobileSh
   // work items rehydrate from wfl_mobile_work and local-only rows ride up —
   // a device switch or a cleared localStorage lands on the same workspace.
   // Offline or unauthenticated deployments no-op here (the store stays the
-  // local source it already was).
+  // local source it already was). The first-run demo seed runs after the
+  // backfill settles (W23-B1): seeding before the merge is what stacked a
+  // second demo report on another device's server-side rows — now the seed
+  // sees the rehydrated demo rows and only latches its flag.
   useEffect(() => {
-    void syncWorkFromServer()
+    let alive = true
+    void (async () => {
+      await syncWorkFromServer()
+      if (alive) seedDemoData()
+    })()
+    return () => { alive = false }
   }, [identity.username])
   /** Document visibility gates every kept-alive tab's polls too (W8-B3). */
   const pageVisible = usePageVisible()

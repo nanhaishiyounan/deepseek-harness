@@ -124,6 +124,14 @@
   gap: 8px;
 }
 
+/* The row's inline arms ride the in-card action grade (W23-B1). */
+.todoActions :global(.adm-button) {
+  height: 36px;
+  padding-block: 0;
+  padding-inline: 14px;
+  font-size: var(--dshm-fs-body);
+}
+
 .ccNote {
   font-size: var(--dshm-fs-caption);
   color: var(--dshm-ink-sub);

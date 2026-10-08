@@ -1,0 +1,160 @@
+{
+  "c1": [
+    {
+      "src": "fence",
+      "type": "report",
+      "title": "本月经营概览",
+      "subtitle": "T+1 快照 · 计算日 2026-09-30",
+      "metrics": [
+        "当月确认收入=¥280,920",
+        "毛利率=-2.18%",
+        "应付余额=¥119,766",
+        "待审批数=6"
+      ],
+      "rows": [
+        "9 月毛利率为负,确认收入低于完工成本",
+        "回款率/应收余额暂无定值,口径覆盖期未到",
+        "待审批 6 单,涉及订单/付款待办"
+      ],
+      "table": null,
+      "actions": [
+        {
+          "kind": "send",
+          "label": "看供应链与库存看板",
+          "route": null,
+          "text": "看下供应链和库存看板的关键指标",
+          "title": null
+        },
+        {
+          "kind": "send",
+          "label": "按供应商拆准时到货率",
+          "route": null,
+          "text": "按供应商拆准时到货率(OTD)",
+          "title": null
+        },
+        {
+          "kind": "create-task",
+          "label": "跟进毛利率异常",
+          "route": null,
+          "text": "",
+          "title": "排查 9 月毛利率为负的原因"
+        }
+      ]
+    }
+  ],
+  "c2": [
+    {
+      "src": "present_card",
+      "type": "report",
+      "title": "采购员·蔡俊｜最近30天采购订单（pur_orders 主流程）",
+      "subtitle": "口径：approved_at ∈ [2026-09-08, 2026-10-08]；buyer 未作为审批人；按审批时间倒序",
+      "metrics": [
+        "已审批订单数=10",
+        "已审批总金额=¥718,221",
+        "已收货=5",
+        "待收货=5",
+        "已开票/待开票=3",
+        "未开票=7"
+      ],
+      "rows": [
+        "核心供应商",
+        "审批人分布",
+        "风险提示"
+      ],
+      "table": "5x10",
+      "actions": [
+        {
+          "kind": "view",
+          "label": "查看全部采购订单",
+          "route": "#/work/business/pur_orders",
+          "text": "",
+          "title": null
+        },
+        {
+          "kind": "create-task",
+          "label": "查看待办",
+          "route": null,
+          "text": "",
+          "title": "buyer 待办"
+        },
+        {
+          "kind": "send",
+          "label": "导出本次清单",
+          "route": null,
+          "text": "请把 buyer 近 30 天 pur_orders 的全字段（po_number、supplier、amount、ne",
+          "title": null
+        }
+      ]
+    }
+  ],
+  "c3": [
+    {
+      "src": "fence",
+      "type": "report",
+      "title": "糯米粉库存盘点与风险",
+      "subtitle": "湖仓快照 · 数据截至 2026-10-03（nb_wms_stock / nb_wms_lots / nb_hub_inv_products / nb_pur_orders）",
+      "metrics": [
+        "在架数量=19,551 kg",
+        "可用库存=19,551 kg",
+        "在途采购=1 单（80 行）",
+        "主数据完整度=缺关键参数"
+      ],
+      "rows": [
+        "物料主数据缺失：reorder_point / safety_stock / avg_daily_use / lead_time_days / shelf_life_days 均为空，无法评估断料覆盖天数",
+        "仅 1 个批次在架（lot_id=18，2027-09-12 到期），存在批次单点失效风险",
+        "在途 PO-2026-1053 单据状态 pending、receiving_status=none，需关注到货"
+      ],
+      "table": null,
+      "actions": [
+        {
+          "kind": "create-task",
+          "label": "让采购助理补全糯米粉主数据",
+          "route": null,
+          "text": "",
+          "title": "补全糯米粉主数据并复核在途 PO-2026-1053"
+        },
+        {
+          "kind": "send",
+          "label": "按供应商拆糯米粉到货",
+          "route": null,
+          "text": "糯米粉近三个月的到货与检验情况按供应商拆开看",
+          "title": null
+        }
+      ]
+    }
+  ],
+  "c4": [
+    {
+      "src": "present_card",
+      "type": "report",
+      "title": "采购员·蔡俊的待审批单",
+      "subtitle": "查询结论：你名下没有审批待办，但有 7 单采购单已提交待上级审批",
+      "metrics": [
+        "我名下的待办审批=0",
+        "我已提交待上级审批=7",
+        "其中二级审批（金额 ≥ ¥150,000）=2"
+      ],
+      "rows": [
+        "我名下的待办审批",
+        "采购订单审批流（pur_orders）"
+      ],
+      "table": "4x7",
+      "actions": [
+        {
+          "kind": "view",
+          "label": "打开采购订单",
+          "route": "#/work",
+          "text": "",
+          "title": null
+        },
+        {
+          "kind": "send",
+          "label": "催办 admin/quality_lead",
+          "route": null,
+          "text": "将 7 张待审批采购单（含 2 张二级审批）转交给 admin 或 quality_lead，请尽快处理。",
+          "title": null
+        }
+      ]
+    }
+  ]
+}

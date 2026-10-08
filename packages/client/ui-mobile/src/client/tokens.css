@@ -197,8 +197,10 @@ html[data-theme='light'] {
 
   /* antd-mobile theme mapping (§4): same declaration on both mount points,
    * so every adm- component — portal or not — follows the track. Font-size
-   * grades re-ladder onto the six-grade scale (grade5=15 card-title tier,
-   * grade9=display, grade10=hero digits). */
+   * grades stay control-grade (W23-B1): 7=14 card-action buttons, 8=15,
+   * 9=16 default controls, 10=17 Dialog/NavBar titles — the display type
+   * ramp lives on --dshm-fs-* alone, so a control grade never borrows a
+   * display size again (the 44px/20px button leak this replaced). */
   --adm-color-primary: var(--dshm-brand);
   --adm-color-success: var(--dshm-success);
   --adm-color-warning: var(--dshm-warning);
@@ -221,10 +223,10 @@ html[data-theme='light'] {
   --adm-font-size-4: var(--dshm-fs-body);
   --adm-font-size-5: 15px;
   --adm-font-size-6: var(--dshm-fs-heading);
-  --adm-font-size-7: 20px;
-  --adm-font-size-8: 24px;
-  --adm-font-size-9: var(--dshm-fs-display);
-  --adm-font-size-10: 44px;
+  --adm-font-size-7: 14px;
+  --adm-font-size-8: 15px;
+  --adm-font-size-9: 16px;
+  --adm-font-size-10: 17px;
   --adm-color-fill-content: var(--dshm-card2); /* capsule-tab / scroll-track fills (W10: antd default #f5f5f5 leak) */
 }
 
@@ -300,10 +302,10 @@ html[data-theme='dark'] {
   --adm-font-size-4: var(--dshm-fs-body);
   --adm-font-size-5: 15px;
   --adm-font-size-6: var(--dshm-fs-heading);
-  --adm-font-size-7: 20px;
-  --adm-font-size-8: 24px;
-  --adm-font-size-9: var(--dshm-fs-display);
-  --adm-font-size-10: 44px;
+  --adm-font-size-7: 14px;
+  --adm-font-size-8: 15px;
+  --adm-font-size-9: 16px;
+  --adm-font-size-10: 17px;
   --adm-color-fill-content: var(--dshm-card2);
 
   /* Reference aliases, dark values. */

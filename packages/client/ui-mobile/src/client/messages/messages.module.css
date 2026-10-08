@@ -1024,17 +1024,29 @@
   margin-top: 0;
 }
 
-/* The shared secondary-touch pill-grade sizing both arms keep. */
+/* The shared in-card pill grade both arms keep (W23-B1): body-grade 14px on
+   the 36px card-action height — the CTA 16/48 grade belongs to page/sheet
+   CTAs, never in-card arms. */
 .reportPrimary:global(.adm-button),
 .reportSecondary:global(.adm-button) {
-  height: var(--dshm-touch-sm);
+  height: 36px;
   padding-block: 0;
   padding-inline: 15px;
+  font-size: var(--dshm-fs-body);
   font-weight: 600;
 }
 
 .reportPrimary:global(.adm-button) {
   --border-radius: var(--dshm-r-ctl);
+}
+
+/* The plan card's confirm pair rides the same in-card grade (W23-B1). */
+.approvalActions :global(.adm-button) {
+  height: 36px;
+  padding-block: 0;
+  padding-inline: 15px;
+  font-size: var(--dshm-fs-body);
+  font-weight: 600;
 }
 
 /* ---- Demo typing indicator (03 §8-6): three breathing stamp dots. ---- */

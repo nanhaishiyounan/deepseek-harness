@@ -25,8 +25,21 @@ describe('session title normalization', () => {
     expect(normalizeSessionTitle('\u001B]0;stolen\u0007  Hello\t brave\nnew world  ', 80))
       .toBe('Hello brave new world')
     expect(fallbackSessionTitle('one two three four', 3, 80)).toBe('one two three')
-    expect(fallbackSessionTitle('你好世界', 5, 7)).toBe('你好')
+    // W23-B1 word-safe cut: an over-budget unsegmented title ends at the
+    // code-point cut plus the ellipsis, never mid-word without a marker.
+    expect(fallbackSessionTitle('你好世界', 5, 7)).toBe('你…')
     expect(Buffer.byteLength(fallbackSessionTitle('😀😀', 5, 5), 'utf8')).toBe(4)
+  })
+
+  it('keeps whole sentence segments when the byte cap cuts a CJK fallback (W23-B1)', () => {
+    // 45 bytes over the 40-byte cap: the cut lands after the comma segment
+    // with an ellipsis instead of mid-word (「…有什么讲」).
+    expect(fallbackSessionTitle('今天寒露，这个节气有什么讲究', 5, 40)).toBe('今天寒露，…')
+    // The leading punctuation segment alone fits the budget: the whole first
+    // sentence survives and the ellipsis marks the cut.
+    expect(fallbackSessionTitle('这个月经营情况怎么样？给我出份报告', 5, 40)).toBe('这个月经营情况怎么样？…')
+    // Space-delimited over-budget titles cut at the last whole word.
+    expect(fallbackSessionTitle('hello wonderful world of titles', 5, 20)).toBe('hello wonderful…')
   })
 
   it('rejects non-positive and fractional public limits', () => {

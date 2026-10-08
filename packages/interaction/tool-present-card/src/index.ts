@@ -62,6 +62,12 @@
  * failing closed with pathed Chinese errors the model corrects in one
  * retry. An unconfigured deployment keeps the contract-free behavior.
  *
+ * W23-B1 view-route contract: a report action's view route must fit the
+ * shared route-shape table (router heads with per-head param counts,
+ * mirrored by ui-mobile's client-side check) — the model cannot invent
+ * routes anymore; the violation message carries the legal candidates so one
+ * retry hits.
+ *
  * @module @deepseek-ai/dsh-tool-present-card
  */
 
@@ -802,6 +808,48 @@ function walkSchema(spec: PayloadSchemaSpec, value: unknown, path: string): Walk
   }
 }
 
+/**
+ * The view-route shape the report card's `view` action accepts (W23-B1), the
+ * server mirror of ui-mobile's `isProductRoute`: the head must be one of the
+ * router names and the param count must fit the head (`docs` takes up to two
+ * — collection then row id, `chat` one, every other head none; `work/:id`
+ * keys client-local ids a model cannot know, so a two-segment `work` chain is
+ * the dead-route shape this rejects), with an optional trailing query string.
+ */
+const VIEW_ROUTE_PARAM_HEADS: Readonly<Record<string, number>> = {
+  docs: 2,
+  chat: 1,
+  work: 0,
+  chats: 0,
+  me: 0,
+  tasks: 0,
+  todos: 0,
+  files: 0,
+  agents: 0,
+  alerts: 0,
+}
+
+/** The model-facing legal-candidates line view-route violations carry. */
+export const VIEW_ROUTE_CANDIDATES = '#/（首页）、#/chats（对话）、#/chat/<会话id>、#/work（工作台账）、#/tasks（任务）、'
+  + '#/todos（审批待办）、#/docs（单据目录）、#/docs/<collection>（单据列表，collection 如 pur_orders/so_orders/wms_receipts/srm_suppliers）、'
+  + '#/files（文件）、#/agents（AI 同事）、#/me（我的）、#/alerts（预警）'
+
+/**
+ * Whether a view action's route fits the route-shape contract above.
+ * @param route - the route string as normalized.
+ * @returns true when the head and param count are legal.
+ */
+export function isLegalViewRoute(route: string): boolean {
+  if (!route.startsWith('#/')) return false
+  const path = route.slice(2).split('?', 2)[0] ?? ''
+  const segments = path.split('/').filter(segment => segment !== '')
+  const [head] = segments
+  if (head === undefined) return true
+  const maxParams = VIEW_ROUTE_PARAM_HEADS[head]
+  if (maxParams === undefined) return false
+  return segments.length - 1 <= maxParams
+}
+
 /** The resolved payload outcome: either a normalized payload or violations. */
 export type ResolvePresentCardPayload =
   | { readonly payload: PresentCardPayload }
@@ -855,6 +903,20 @@ export function resolvePresentCardPayload(raw: unknown): ResolvePresentCardPaylo
   const walked = walkSchema(branchOfType(typeValue as PayloadType), obj, 'payload')
   violations.push(...walked.violations)
   if (violations.length > 0) return { violations }
+  // W23-B1: a structurally valid report still owes the view-route shape —
+  // an illegal route dies here with its legal candidates instead of on the
+  // client's dead page.
+  if (typeValue === 'report') {
+    const actions = (walked.value as Extract<PresentCardPayload, { type: 'report' }>).actions
+    let index = 0
+    for (const action of actions ?? []) {
+      if (action.kind === 'view' && !isLegalViewRoute(action.route)) {
+        violations.push(`payload.actions[${index}].route "${action.route}" 不是合法站内路由；合法候选：${VIEW_ROUTE_CANDIDATES}`)
+      }
+      index += 1
+    }
+    if (violations.length > 0) return { violations }
+  }
   // W22-R1: the widget-bearing branches ride the deterministic resolver —
   // a validated payload leaves with its mechanically decidable widgets
   // corrected, so the model's widget choice never reaches the card where a
@@ -886,8 +948,11 @@ const presentCardParameters = {
       + 'report{id,title,subtitle?,metrics[1-6]{label,value,kind(count/money/percent/text),tone?(positive/warning/danger)},'
       + 'rows?[≤8]{label,hint?,level(high/medium/low)},'
       + 'table?{columns[1-5]{label,kind?(text/money/percent/count)},rows[≤10 且每行=列数]},'
-      + 'actions?[≤4]按钮数组，每枚是扁平对象，判别字段 kind 与其余字段同级，形如 {"kind":"view","label":"查看采购订单","route":"#/work"}；'
-      + 'kind 四选一：view(需 label,route)/create-task(需 label,title，可附 suggestion)/send(需 label,text)/link(需 label,url)}；'
+      + 'actions?[≤4]按钮数组，每枚是扁平对象，判别字段 kind 与其余字段同级，形如 {"kind":"view","label":"查看采购订单","route":"#/docs/pur_orders"}；'
+      + 'kind 四选一：view(需 label,route；route 只能取合法站内路由：#/、#/chats、#/chat/<会话id>、#/work、#/tasks、#/todos、'
+      + '#/docs、#/docs/<collection>（单据列表，如 pur_orders）、#/docs/<collection>/<行id>、#/files、#/agents、#/me、#/alerts，可带查询参数；'
+      + '查看/导航类意图必须用 view 而非 create-task)/create-task(需 label,title，可附 suggestion；仅用于「创建任务/登记」诉求)'
+      + '/send(需 label,text；text 是一句简短明确指令，禁止把报告全文或大段数据塞进 text)/link(需 label,url)}；'
       + 'approval_pending{id,doc{collection,label,docId,title},summary[≥1]{label,value,kind(同 submit_receipt)},applicant?,node?,attempt?}；'
       + 'approval_result{approvalId,doc(结构同上),action(approve/reject),'
       + 'state(draft/pending/pending_level2/approved/rejected/void/potential/reviewing/qualified),by,comment?,at?}；'

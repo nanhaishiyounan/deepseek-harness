@@ -358,11 +358,12 @@
 /* The per-status action row: antd-mobile Buttons — primary rides the brand
    solid slot, secondary the outline slot with the hairline rim, the trailing
    link the none-fill brand word. Faces that recolor ride inline variables in
-   WorkView.tsx / WorkDetailView.tsx. */
+   WorkView.tsx / WorkDetailView.tsx. In-card arms keep the W23-B1 14/36
+   card-action grade. */
 .actionPrimary:global(.adm-button),
 .actionSecondary:global(.adm-button) {
   --border-radius: var(--dshm-r-ctl);
-  height: var(--dshm-touch-sm);
+  height: 36px;
   padding-block: 0;
   padding-inline: 14px;
   font-size: var(--dshm-fs-body);
@@ -377,7 +378,7 @@
 }
 
 .actionLink:global(.adm-button) {
-  height: var(--dshm-touch-sm);
+  height: 36px;
   padding-block: 0;
   padding-inline: 10px;
   font-size: var(--dshm-fs-body);
@@ -1041,20 +1042,23 @@
 }
 
 /* The sheet's action pair: antd-mobile Buttons — cancel the outline slot,
-    submit the brand solid slot with the in-flight loading face. */
+    submit the brand solid slot with the in-flight loading face. Both ride
+    the W23-B1 sheet-CTA grade: 16px on the 48px band. */
 .sheetCancel:global(.adm-button) {
   --border-radius: var(--dshm-r-ctl);
   flex: 1;
-  height: 44px;
+  height: 48px;
   padding-block: 0;
+  font-size: var(--dshm-fs-input);
   font-weight: 500;
 }
 
 .sheetSubmit:global(.adm-button) {
   --border-radius: var(--dshm-r-ctl);
   flex: 1.4;
-  height: 44px;
+  height: 48px;
   padding-block: 0;
+  font-size: var(--dshm-fs-input);
   font-weight: 600;
 }
 

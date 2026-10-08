@@ -284,7 +284,10 @@ export function AlertsView(): JSX.Element {
                     </span>
                     <span className={css.ruleLabel}>{notice.category === 'dunning' ? '催收任务' : notice.category === 'recall' ? '召回任务' : '任务通知'}</span>
                   </header>
-                  <div className={css.alertTitle}>{notice.title}</div>
+                  <div className={css.alertTitle}>
+                    {notice.title}
+                    {notice.count > 1 && <span className={css.noticeCount}> ×{String(notice.count)}</span>}
+                  </div>
                   <p className={css.footNote}>{notice.content}</p>
                 </article>
               ))}

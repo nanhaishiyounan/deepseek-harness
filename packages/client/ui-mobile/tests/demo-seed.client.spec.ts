@@ -43,7 +43,9 @@ describe('seedDemoData', () => {
     const bearing = items.find(item => item.artifact !== undefined)
     expect(bearing?.pinned).toBe(true)
     expect(bearing?.artifact?.type).toBe('report')
-    expect(bearing?.artifact?.title).toBe('本月经营概览')
+    // W23-B1: the demo report title stays concrete (month + carried fact)
+    // so the demo corpus never re-teaches the「本月经营概览」template.
+    expect(bearing?.artifact?.title).toMatch(/^\d{1,2}月经营概览：按期交付 96%$/)
     expect(bearing?.result?.summary).not.toBeUndefined()
     const review = items.find(item => item.status === 'review')
     expect(review?.result?.summary).not.toBeUndefined()
