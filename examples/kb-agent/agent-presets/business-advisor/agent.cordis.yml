@@ -34,10 +34,11 @@
       - 违规→修正对照（条数超限的处理姿势）：指标超 6 个（如把整个看板的行全查回来）→ 只挑最关键 4 个进 metrics，其余用一句正文带过（例：「另外呆滞占比、临期预警、在制在架都平稳，想看哪个我单独拉」），禁止满编硬塞；表格超 10 行 → 只留前 8 行并在叙述里注明「仅列前 8，完整清单可追问」。
       - 拆查指引（宽问题两步走）：用户问「经营怎么样/最近情况如何」这类多指标开放问题 → 第一步只出 4 个指标以内的汇总卡（按提问侧重挑，如当月收入/毛利率/回款率/应收余额），并在 actions 放 send 追问（如「看库存三个指标」「按供应商拆准时率」）；明细留给用户点选后的第二次查询——一次铺开整个看板必超限，拆两次查询是唯一稳态。
       - 数据来源纪律：subtitle 或 rows 的 hint 必须注明数据来源（湖仓表/知识库/图谱），延续「结论注明来源」的只读纪律；指标值来自真实工具查询结果，禁止编造。
-      - actions 语义约束（W23-B1 四类各归其位）：kind 只能取 view / create-task / send / link，按用户意图选，不混用。view 用于「查看/打开某页」的导航诉求，route 只能取合法站内路由（#/、#/chats、#/chat/<会话id>、#/work、#/tasks、#/todos、#/docs、#/docs/<collection>（单据列表，如 pur_orders/so_orders/srm_suppliers）、#/docs/<collection>/<行id>、#/files、#/agents、#/me、#/alerts）——「查看待办」用 #/todos、「看采购订单」用 #/docs/pur_orders，绝不做 create-task。create-task 仅用于用户明确要「创建任务/登记跟进」，动作必须含 title 字段（取自本报告风险条目，可附 suggestion），不得用 text 字段替代——缺 title 的动作整卡无法渲染。send 仅用于「让 AI 继续做某事」，text 写一句简短明确指令（如「按供应商拆开看」「和上月比呢」），禁止把报告全文、CSV、大段数据塞进 text；link 仅用于确有外部文档地址时，没有就不放。「复制文本/导出清单」类诉求不做成按钮——数据放正文代码块（自带复制能力）即可。
+      - actions 语义约束（W23-B1 四类各归其位）：kind 只能取 view / create-task / send / link，按用户意图选，不混用。view 用于「查看/打开某页」的导航诉求，route 只能取合法站内路由（#/、#/chats、#/chat/<会话id>、#/work、#/tasks、#/todos、#/docs、#/docs/<collection>（单据列表，如 pur_orders/so_orders/srm_suppliers）、#/docs/<collection>/<行id>、#/files、#/agents、#/me、#/alerts）——「查看待办」用 #/todos、「看采购订单」用 #/docs/pur_orders，绝不做 create-task。create-task 仅用于用户明确要「创建任务/登记跟进」，动作必须含 title 字段（取自本报告风险条目，可附 suggestion），不得用 text 字段替代——缺 title 的动作整卡无法渲染。send 仅用于「让 AI 继续做某事」，text 写一句用户自己会说的话（如「按供应商拆开看」「把这 15 单导出成清单」）——禁止机器味指令、禁止罗列字段名或英文参数、禁止把报告全文、CSV、大段数据塞进 text；link 仅用于确有外部文档地址时，没有就不放。「复制文本/导出清单」类诉求不做成按钮——数据放正文代码块（自带复制能力）即可。
+      - 卡面术语纪律（W23-B2）：围栏内全部用户可见字段（title/subtitle、metrics 的 label、rows 的 label 与 hint、table 的列名与单元格、actions 的 label）都说人话——英文表名（pur_orders/kpi_snapshots…）、snake_case 字段名（approved_at/supplier_id…）、协议与格式术语（RFC 4180、UTF-8 BOM、payload、schema）一律不出现；技术口径（快照日期、字段来源、转义规则）需要交代时，subtitle 用业务措辞（如「近30天 · 湖仓快照 · 数据截至 10月7日」），字段对照细节留在模型侧不进卡面。
       - 正文纪律：围栏之外只说人话——一句总括即可，数据口径说明放 subtitle 不占正文，禁止出现 JSON、表名与 snake_case 字段名；围栏内容不重复出现在叙述里。围栏是消息收尾，前置叙述不超过两句，一次完整闭合（以 } 结束并带回栏标记）。
 
-      语言：中文。回答保持简短。
+      语言：中文（除法规编号、标准号、品牌与型号等专有名词外不夹英文单词）。回答保持简短。
 
 - id: tool-kb
   name: '@deepseek-ai/dsh-tool-kb'

@@ -149,6 +149,31 @@ describe('alerts view', () => {
     expect(open[3]?.textContent).toContain('刚刚')
   })
 
+  it('bands by urgency: urgent first, near labeled, far collapsed behind the fold (W23-B2)', async () => {
+    signInAs('keeper')
+    stubGateway({
+      'nocobase.list': { count: 4, page: 1, page_size: 200, rows: [
+        { id: 41, rule_type: 'cert_due', severity: 'warning', title: '证照 CERT-F 72 天后到期', entity_code: 'CERT-F', status: 'open', owner: null, notify_users: ['keeper'], detail: { days_left: 72 } },
+        { id: 42, rule_type: 'cert_due', severity: 'warning', title: '证照 CERT-F 73 天后到期', entity_code: 'CERT-F', status: 'open', owner: null, notify_users: ['keeper'], detail: { days_left: 73 } },
+        { id: 43, rule_type: 'expiry', severity: 'warning', title: '批次 LOT-N 12 天后到期', entity_code: 'LOT-N', status: 'open', owner: null, notify_users: ['keeper'], detail: { days_left: 12 } },
+        { id: 44, rule_type: 'expiry', severity: 'critical', title: '批次 LOT-U 已过期 3 天', entity_code: 'LOT-U', status: 'open', owner: null, notify_users: ['keeper'], detail: { days_left: -3 } },
+      ] },
+    })
+    render(<AlertsView />)
+    // The far band stays behind one collapsed fold with its count.
+    const fold = await screen.findByRole('button', { name: /2 条远期提醒/ })
+    expect(screen.queryByTestId('alert-group')).toBeNull()
+    // The near band's labeled section and the urgent row render openly.
+    expect(screen.getByRole('heading', { name: '近期关注' })).toBeTruthy()
+    expect(screen.getByText('逾期 3 天')).toBeTruthy()
+    fireEvent.click(fold)
+    // The two far scans of one certificate fold into one group whose header
+    // carries the day range, not one row per scan day.
+    const group = screen.getByTestId('alert-group')
+    expect(group.textContent).toContain('×2')
+    expect(group.textContent).toContain('72~73 天后到期')
+  })
+
   // NOTE: the button→act wiring is NOT jsdom-click-tested here — antd-mobile's
   // button click never reaches the handler under this environment and spins
   // the worker. The live four-step smoke (demos/acceptance-w6/w6-r2-01: real

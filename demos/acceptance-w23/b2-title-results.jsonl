@@ -1,0 +1,2 @@
+{"at":"2026-10-08T16:23:38.867Z","sid":"session-d3354f7d-3571-4fe7-9449-cbd1765ffcbe","preset":"enterprise-data-assistant","input":"帮我查一下最近30天的采购订单","verdict":"LLM","title":"查询最近30天采购订单"}
+{"at":"2026-10-08T16:23:49.026Z","sid":"session-ae2b633e-5845-432e-995d-e3b3e520d264","preset":"business-advisor","input":"糯米粉的库存还剩多少？库存上有什么风险吗","verdict":"LLM","title":"糯米粉库存及风险查询"}

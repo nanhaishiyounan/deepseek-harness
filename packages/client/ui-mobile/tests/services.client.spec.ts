@@ -126,6 +126,22 @@ describe('mobile sessions service', () => {
     ])
   })
 
+  it('drops system-trust mode presets from the roster unless they are the default (W23-B2)', async () => {
+    // The user-trust row rides an id the roster-name cache tests below never
+    // read, so this case cannot leak a cached display name into them.
+    stubGateway({
+      'agentPreset.list': {
+        presets: [
+          { id: 'colleague-x', name: '业务同事', trust: 'user', isDefault: false },
+          { id: 'standard', name: '标准模式', trust: 'system', isDefault: false },
+          { id: 'minimal', name: '极简模式', trust: 'system', isDefault: true },
+        ],
+      },
+    })
+    const roster = await listAiEmployees()
+    expect(roster.map(row => row.id)).toEqual(['colleague-x', 'minimal'])
+  })
+
   it('lists sessions newest-first', async () => {
     stubGateway({
       'session.list': {

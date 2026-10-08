@@ -1393,7 +1393,11 @@ describe('mobile chat view durable states', () => {
     await waitFor(() => { expect(screen.getByText('采购专线')).toBeTruthy() })
     // The header names the colleague in people language, never the preset id.
     expect(screen.getByText('AI 同事 · 处理中')).toBeTruthy()
-    await waitFor(() => { expect(screen.getByText('查询业务记录')).toBeTruthy() })
+    // Two settled tool rows fold into the W23-B2 cluster; the labels live
+    // behind its expand.
+    await waitFor(() => { expect(screen.getByRole('button', { name: /已完成 2 步查询/ })).toBeTruthy() })
+    fireEvent.click(screen.getByRole('button', { name: /已完成 2 步查询/ }))
+    expect(screen.getByText('查询业务记录')).toBeTruthy()
     expect(screen.getByText('读取业务行')).toBeTruthy()
   })
 
@@ -1878,7 +1882,7 @@ describe('mobile chat view (v3 fences)', () => {
       'nocobase.listMeta': { collections: [] },
     })
     render(<ChatView sessionId="session-12" />)
-    const notice = await screen.findByText('结构化消息（格式异常，已折叠）')
+    const notice = await screen.findByText('这条消息未能按卡片正常显示，点开可查看原文')
     // The malformed fence never renders as narrative: the bubble carries only
     // the prose, and the original JSON stays behind the collapsed details.
     expect(screen.getByText('我先出个草稿。')).toBeTruthy()
@@ -2245,7 +2249,7 @@ describe('mobile chat view (report actions)', () => {
     })
     render(<ChatView sessionId="session-12" />)
     await screen.findByTestId('report-card')
-    expect(screen.queryByText('格式异常，已折叠')).toBeNull()
+    expect(screen.queryByText(/未能按卡片正常显示/)).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: '创建处理任务' }))
     await waitFor(() => { expect(screen.getByRole('heading', { name: '创建处理任务' })).toBeTruthy() })
     expect(screen.getByLabelText<HTMLInputElement>('任务标题').value).toBe(Array.from(longText).slice(0, 32).join(''))

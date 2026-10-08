@@ -205,8 +205,8 @@ describe('mobile assistant present_card tool source (seeded session → cards wi
     // folds to the collapsed notice: no card face, no 确认写入 of its own.
     // The notice body hides inside a closed <details>, so the cause text is
     // asserted on the raw DOM while the summary line rides the aria tree.
-    expect(body).toContain('结构化消息（格式异常，已折叠）')
-    expect(await page.content()).toContain('未通过校验')
+    expect(body).toContain('这条消息未能按卡片正常显示，点开可查看原文')
+    expect(await page.content()).toContain('没能正常显示')
     expect(body.includes('采购单草稿（缺品名）')).toBe(false)
     // Exactly one interactive draft card remains — the corrected revision.
     const cards = page.locator('[data-testid="draft-card-v3"]')

@@ -49,7 +49,11 @@
         targetWords: 5
         targetCjkCharacters: 10
         maxInputBytes: 4096
-        maxOutputTokens: 64
+        # Always-thinking models (MiniMax-M3 thinks inline before the title
+        # line) spend 60-150 output tokens on reasoning alone; a 64-token cap
+        # hit finish_reason=length mid-thought on every call (W23-B2), so the
+        # ceiling clears reasoning plus the one-line title.
+        maxOutputTokens: 512
         timeoutMs: 60000
 
     - id: user-questions

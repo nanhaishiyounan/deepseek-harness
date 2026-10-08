@@ -160,6 +160,48 @@
   margin-left: auto;
 }
 
+/* The urgency band's section title (W23-B2 P1-11): a quiet caption header. */
+.bandTitle {
+  margin: 4px 2px -2px;
+  font-size: var(--dshm-fs-caption);
+  font-weight: 600;
+  color: var(--dshm-ink-sub);
+}
+
+/* The group header's day range (W23-B2 P1-11): same-entity scan-day spans. */
+.groupRange {
+  flex: none;
+  font-size: var(--dshm-fs-caption);
+  font-weight: 600;
+  color: var(--dshm-ink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* The far band's collapsed fold (W23-B2 P1-11): the quiet strip under 近期. */
+.farFold {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: var(--dshm-touch-sm);
+  padding: 8px 14px;
+  border-radius: var(--dshm-r-ctl);
+  background: var(--dshm-card2);
+  color: var(--dshm-ink-sub);
+  font-size: var(--dshm-fs-caption);
+  text-align: left;
+}
+
+.farFold:active {
+  opacity: 0.75;
+}
+
+.farFoldText {
+  flex: 1;
+  min-width: 0;
+}
+
 /* The deduped notice's fold count (W23-B1): a muted suffix on the title. */
 .noticeCount {
   font-size: var(--dshm-fs-caption);

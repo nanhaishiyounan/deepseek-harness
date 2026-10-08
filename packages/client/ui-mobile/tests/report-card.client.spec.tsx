@@ -116,19 +116,20 @@ describe('stampCharOf', () => {
 })
 
 describe('orderedActionsOf', () => {
-  it('puts create-task last as the primary and keeps at most two secondaries', () => {
+  it('puts create-task last as the primary and renders the protocol ceiling of three secondaries (W23-B2)', () => {
     const actions: ReportAction[] = [
       { kind: 'create-task', label: '创建', title: 't' },
       { kind: 'view', label: 'v1', route: '#/work' },
       { kind: 'view', label: 'v2', route: '#/tasks' },
       { kind: 'view', label: 'v3', route: '#/files' },
+      { kind: 'send', label: 's4', text: '看看明细' },
     ]
     const { row, primaryIndex } = orderedActionsOf(actions)
-    expect(row.map(action => action.label)).toEqual(['v1', 'v2', '创建'])
-    expect(primaryIndex).toBe(2)
+    expect(row.map(action => action.label)).toEqual(['v1', 'v2', 'v3', '创建'])
+    expect(primaryIndex).toBe(3)
   })
 
-  it('keeps the first action primary without a create-task', () => {
+  it('keeps the first action primary without a create-task and renders all four', () => {
     const actions: ReportAction[] = [
       { kind: 'view', label: 'v1', route: '#/work' },
       { kind: 'view', label: 'v2', route: '#/tasks' },
@@ -136,7 +137,7 @@ describe('orderedActionsOf', () => {
       { kind: 'view', label: 'v4', route: '#/chats' },
     ]
     const { row, primaryIndex } = orderedActionsOf(actions)
-    expect(row.map(action => action.label)).toEqual(['v1', 'v2', 'v3'])
+    expect(row.map(action => action.label)).toEqual(['v1', 'v2', 'v3', 'v4'])
     expect(primaryIndex).toBe(0)
   })
 })

@@ -5,7 +5,8 @@
  * out as the muted three-column grid (tone colors the value), rows as the
  * severity-dot entries, the table as the compact ticket table, and the
  * actions as the primary + secondary button row (create-task owns the last
- * primary slot; at most three buttons render). An absent `onAction` renders
+ * primary slot; the protocol's four-action ceiling renders in full,
+ * wrapping two-by-two on narrow cards). An absent `onAction` renders
  * the card read-only (the FilesView/WorkDetailView previews) — the protocol
  * itself never shows: fences, field names, and payload keys stay invisible.
  */
@@ -79,17 +80,19 @@ export function stampCharOf(title: string): string {
 
 /**
  * Order the actions into the render row: create-task (when present) is the
- * sole primary and sits last (thumb reach); at most three buttons render.
+ * sole primary and sits last (thumb reach); the protocol's four-action
+ * ceiling renders in full (W23-B2 P2-1 — a fourth button used to drop
+ * silently; the row wraps two-by-two on narrow cards).
  * @param actions - the payload's action buttons.
  * @returns the ordered actions plus which one is primary.
  */
 export function orderedActionsOf(actions: ReadonlyArray<ReportAction>): { row: readonly ReportAction[]; primaryIndex: number } {
   const createTask = actions.find(action => action.kind === 'create-task')
   if (createTask !== undefined) {
-    const others = actions.filter(action => action.kind !== 'create-task').slice(0, 2)
+    const others = actions.filter(action => action.kind !== 'create-task').slice(0, 3)
     return { row: [...others, createTask], primaryIndex: others.length }
   }
-  return { row: actions.slice(0, 3), primaryIndex: 0 }
+  return { row: actions.slice(0, 4), primaryIndex: 0 }
 }
 
 /**

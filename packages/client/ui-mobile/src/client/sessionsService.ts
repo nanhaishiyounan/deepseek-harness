@@ -31,13 +31,18 @@ export interface AiEmployee {
 }
 
 /**
- * Read the deployment's preset roster as AI-colleague rows.
+ * Read the deployment's preset roster as AI-colleague rows. The harness's
+ * shipped system-trust mode presets (标准/PTC/极简/创造 — the desktop
+ * composer's interaction modes) are not colleagues: they leave the roster
+ * unless they are the deployment default, whose row must stay reachable
+ * (W23-B2 P2-8).
  * @returns the selectable, unbroken presets with display metadata.
  */
 export async function listAiEmployees(): Promise<AiEmployee[]> {
   const value = await rpc('agentPreset.list', {})
   const rows = value.presets
     .filter((entry: AgentPresetEntry) => entry.broken === undefined)
+    .filter((entry: AgentPresetEntry) => entry.trust !== 'system' || entry.isDefault)
     .map((entry: AgentPresetEntry) => ({
       id: entry.id,
       name: entry.name ?? entry.id,

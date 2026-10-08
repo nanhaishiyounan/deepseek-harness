@@ -7,7 +7,7 @@
  */
 
 import type { JSX } from 'react'
-import { SpinLoading } from 'antd-mobile'
+import { Button, SpinLoading } from 'antd-mobile'
 import { Check, X } from 'lucide-react'
 import type { NocobaseFieldView } from '@deepseek-ai/dsh-host-apiproxy/api'
 import { Avatar } from '../../ui.tsx'
@@ -17,6 +17,7 @@ import { mergeCardValues } from '../../systemFields.ts'
 import type { DerivedCardState } from '../../cardState.ts'
 import type { ChatItem } from '../../fold.ts'
 import type { ApprovalResultPayload, FormDraftPayload, ReportAction } from '../../protocol.ts'
+import { copyCode } from '../RichContent.tsx'
 import { DraftCard, ReceiptCard, RejectedCard, ReviewCard, type CollectionFieldMeta, type FieldMetas } from '../../forms/task-cards.tsx'
 import { DraftCard as DraftCardV3 } from '../../forms/v3/DraftCard.tsx'
 import { ReceiptCard as ReceiptCardV3 } from '../../forms/v3/ReceiptCard.tsx'
@@ -198,9 +199,22 @@ export function FlowItem(props: FlowItemProps): JSX.Element | null {
       <>
         {separator}
         {aiRow(
-          <details className={css.degradedNotice}>
-            <summary>结构化消息（格式异常，已折叠）</summary>
+          <details className={css.degradedNotice} data-testid="degraded-notice">
+            {/* W23-B2 P1-7: people-language summary; the raw text (a rejected
+                report's CSV can hide here) stays one tap away with its copy
+                entry, so the content is never lost to the fold. */}
+            <summary>这条消息未能按卡片正常显示，点开可查看原文</summary>
             <pre className={css.degradedNoticeBody}>{item.text}</pre>
+            <Button
+              type="button"
+              size="mini"
+              fill="none"
+              className={css.degradedCopy}
+              aria-label="复制原文"
+              onClick={() => { copyCode(item.text) }}
+            >
+              复制原文
+            </Button>
           </details>,
         )}
       </>

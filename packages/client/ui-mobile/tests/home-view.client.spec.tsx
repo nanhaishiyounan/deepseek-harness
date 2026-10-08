@@ -112,13 +112,15 @@ describe('HomeView', () => {
     expect(location.hash).toBe('#/work')
   })
 
-  it('counts the pending statuses in the sub line', () => {
+  it('counts the pending statuses in the sub line (the ledger cards\' own vocabulary)', () => {
     createWorkItem({ title: '甲', owner: '业务员' })
     createWorkItem({ title: '乙', owner: '业务员' })
     stubGateway(emptyRoutes)
     render(<HomeView identityName="业务员" />)
-    // Two todo items: the sub line counts todo+review.
-    expect(screen.getByText(/今天有 2 件事等你/)).toBeTruthy()
+    // Two todo items: the hero quotes the cards' word (待处理 N 项), never a
+    // third summed figure (W23-B2 P1-9).
+    expect(screen.getByText(/今天：待处理 2 项/)).toBeTruthy()
+    expect(screen.queryByText(/件事等你/)).toBeNull()
   })
 
   it('runs the quick-task chips: the preset direct and the route chips', async () => {

@@ -39,6 +39,7 @@ import { useApprovalReadback } from './chat/useApprovalReadback.ts'
 import { useDemoTyping } from './chat/useDemoTyping.ts'
 import { useDraftValues } from './chat/useDraftValues.ts'
 import { FlowItem, renderKeyOf } from './chat/FlowItem.tsx'
+import { clusterFlowUnits, ToolClusterRow } from './chat/ToolClusterRow.tsx'
 import { QuickPanel } from './chat/QuickPanel.tsx'
 import { composeWithAttachments, useAttachments, DOC_ACCEPT, IMAGE_ACCEPT } from './chat/attachments.ts'
 import { useVoiceInput } from './chat/useVoiceInput.ts'
@@ -107,6 +108,9 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
 
   const folded = useMemo(() => foldHistory(history.value ?? []), [history.value])
   const cardStates = useMemo(() => deriveCardStates(folded.items), [folded.items])
+  // W23-B2 P1-10: consecutive settled tool rows fold into one expandable
+  // summary line before rendering; running rows stay row-by-row.
+  const flowUnits = useMemo(() => clusterFlowUnits(folded.items), [folded.items])
   // Tighten the poll while a turn runs (进行时状态 comes from the durable log).
   useEffect(() => {
     setPollInterval(folded.running ? 800 : 5000)
@@ -440,34 +444,42 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
             网络恢复后将自动发送 {String(sessionOutbox.length)} 条待发消息
           </div>
         )}
-        {folded.items.map((item, index) => (
-          <FlowItem
-            key={renderKeyOf(item)}
-            item={item}
-            previous={folded.items[index - 1]}
-            preset={preset}
-            name={stampName}
-            cardStates={cardStates}
-            reopened={reopened}
-            draftValues={draftValues}
-            systemValues={systemValues}
-            meta={meta.value}
-            sending={sending}
-            approvalExternalStates={approvalExternalStates}
-            onDraftEdit={onDraftEdit}
-            onSubmitReview={onSubmitReview}
-            onConfirm={onConfirm}
-            onReject={onReject}
-            onConfirmV3={onConfirmV3}
-            onRejectV3={onRejectV3}
-            onRedraft={onRedraft}
-            onSend={(text) => { void send(text) }}
-            onFill={fillDraft}
-            onFreeText={() => { inputRef.current?.nativeElement?.focus() }}
-            onReportAction={onReportAction}
-            localPending={localPending}
-          />
-        ))}
+        {flowUnits.map(({ unit, index }) => unit.kind === 'tool-cluster'
+          ? (
+            <ToolClusterRow
+              key={unit.key}
+              cluster={unit}
+              previous={folded.items[index - 1]}
+            />
+          )
+          : (
+            <FlowItem
+              key={renderKeyOf(unit)}
+              item={unit}
+              previous={folded.items[index - 1]}
+              preset={preset}
+              name={stampName}
+              cardStates={cardStates}
+              reopened={reopened}
+              draftValues={draftValues}
+              systemValues={systemValues}
+              meta={meta.value}
+              sending={sending}
+              approvalExternalStates={approvalExternalStates}
+              onDraftEdit={onDraftEdit}
+              onSubmitReview={onSubmitReview}
+              onConfirm={onConfirm}
+              onReject={onReject}
+              onConfirmV3={onConfirmV3}
+              onRejectV3={onRejectV3}
+              onRedraft={onRedraft}
+              onSend={(text) => { void send(text) }}
+              onFill={fillDraft}
+              onFreeText={() => { inputRef.current?.nativeElement?.focus() }}
+              onReportAction={onReportAction}
+              localPending={localPending}
+            />
+          ))}
         {folded.running && <RunningRow text="AI 同事正在处理…" />}
         {typingCell.typing && !folded.running && (
           <div className={css.typingRow} role="status" aria-label="正在处理">

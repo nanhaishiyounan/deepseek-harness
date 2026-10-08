@@ -201,8 +201,17 @@ export function HomeView({ identityName, active = true }: HomeViewProps): JSX.El
   }, [active])
 
   const stats = useMemo(() => todayStats(store.items, Date.now()), [store.items])
-  const pendingCount = stats.todo + stats.review
   const now = new Date()
+  // The hero's work counts quote the ledger cards' own vocabulary and zero
+  // counts drop out (W23-B2 P1-9): 「N 件事」summed todo+review and read as a
+  // third, conflicting figure beside the cards' 0 待处理.
+  const heroWorkParts = useMemo(() => {
+    const parts: string[] = []
+    if (stats.todo > 0) parts.push(`待处理 ${String(stats.todo)} 项`)
+    if (stats.review > 0) parts.push(`待确认 ${String(stats.review)} 项`)
+    if (stats.doing > 0) parts.push(`进行中 ${String(stats.doing)} 项`)
+    return parts
+  }, [stats])
   const termPhrase = solarTermPhraseOf(now)
 
   // The three most recent chats, work sessions excluded (02 §9).
@@ -257,8 +266,8 @@ export function HomeView({ identityName, active = true }: HomeViewProps): JSX.El
             {headDateOf(now)}
             {alertCount !== undefined && alertCount > 0
               ? <b> · {String(Math.min(alertCount, 99))} 项预警待看</b>
-              : pendingCount > 0
-                ? ` · 今天有 ${String(pendingCount)} 件事等你`
+              : heroWorkParts.length > 0
+                ? ` · 今天：${heroWorkParts.join(' · ')}`
                 : ' · 今天没有待办，随时找 AI 同事聊聊'}
           </p>
         </div>

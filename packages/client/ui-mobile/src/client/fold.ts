@@ -450,8 +450,8 @@ function foldPresentCard(
       seq,
       time,
       // Cause-neutral: isError also covers timeouts and internal tool
-      // failures, not only payload validation.
-      text: '这张卡片未通过校验已被系统退回，不可交互；请以后续修正后的卡片为准',
+      // failures, not only payload validation (W23-B2 P1-7 wording).
+      text: '这张卡片没能正常显示，已折叠；请以后续修正后的卡片为准',
     })
     return
   }
@@ -472,7 +472,7 @@ function foldPresentCard(
       kind: 'degraded',
       seq,
       time,
-      text: 'present_card 载荷未通过校验，已折叠；如需该内容请让助手重新呈现',
+      text: '这张卡片没能正常生成，已折叠；如需该内容请让助手重新呈现',
     })
     return
   }

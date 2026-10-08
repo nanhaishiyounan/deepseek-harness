@@ -3,8 +3,8 @@
  * live from wfl_alerts over the gateway's realtime nocobase forward (the
  * gateway's row scope carries the routed-user cut server-side since W6-R2).
  * Segmented counts by rule type, the red/yellow severity tiers on every row
- * (critical rows carry the red rail), pull-to-refresh plus a 30s poll, and
- * the read failure leaves the error card plus a client_error trace (never a
+ * (critical rows carry the red rail), pull-to-refresh plus a 30s poll, and the
+ * read failure leaves the error card plus a client_error trace (never a
  * silent dash). W6-R2 C-1: every row carries its own actions — 认领 for a
  * routed user, 关闭 for the claimant — through nocobase.alertAct → the
  * engine's single write entrance; the engine's (from_state, action,
@@ -12,12 +12,16 @@
  * 403 with its fact, never a silent no-op). W8-B2: adjacent still-open rows
  * of the same rule + title fold into one collapsible group card (the count
  * badge and the newest raised time on the header; claimed/closed rows never
- * join a group), and every row carries its raised timestamp.
+ * join a group), and every row carries its raised timestamp. W23-B2: the
+ * list splits into urgency sections — 需尽快处理 (critical / ≤7 days /
+ * overdue), 近期关注 (≤30 days), and the far band (>30 days) collapsed
+ * behind one 「远期提醒」 fold; a group whose rows span scan-day snapshots
+ * carries the day range on its header instead of one row per day.
  */
 
 import { useCallback, useEffect, useMemo, useState, type JSX } from 'react'
 import { Button, PullToRefresh, Toast } from 'antd-mobile'
-import { BellRing, ChevronDown } from 'lucide-react'
+import { BellRing, ChevronDown, Clock } from 'lucide-react'
 import { loadIdentity } from '../auth.ts'
 import { EmptyState, SkelCard } from '../ui.tsx'
 import { PageNav } from '../PageNav.tsx'
@@ -57,6 +61,38 @@ function daysText(row: AlertRow): string | undefined {
   return `${String(row.daysLeft)} 天后到期`
 }
 
+/**
+ * One row's urgency band (W23-B2 P1-11): critical severity, an overdue date,
+ * or ≤7 days out reads as 需尽快处理; >30 days lands in the collapsed far
+ * band; everything else is 近期关注.
+ * @param row - the routed alert row.
+ * @returns the band the row renders under.
+ */
+function urgencyOf(row: AlertRow): 'urgent' | 'near' | 'far' {
+  if (row.severity === 'critical') return 'urgent'
+  if (row.daysLeft === undefined) return 'near'
+  if (row.daysLeft <= 7) return 'urgent'
+  if (row.daysLeft > 30) return 'far'
+  return 'near'
+}
+
+/**
+ * The day range of one group's rows: same-entity scans landing on different
+ * days collapse to one header line (「72~73 天后到期」) instead of one row
+ * per snapshot day. Mixed or overdue members keep no range (each row's own
+ * days cell stays the truth).
+ * @param rows - the group's rows.
+ * @returns the range label, or undefined when not a clean all-positive span.
+ */
+function daysRangeOf(rows: readonly AlertRow[]): string | undefined {
+  const days = rows.map(row => row.daysLeft).filter((value): value is number => value !== undefined)
+  if (days.length !== rows.length || days.length === 0) return undefined
+  if (days.some(value => value <= 0)) return undefined
+  const min = Math.min(...days)
+  const max = Math.max(...days)
+  return min === max ? `${String(min)} 天后到期` : `${String(min)}~${String(max)} 天后到期`
+}
+
 /** One in-flight row action (the button disables and shows the acting word). */
 type Pending = { readonly id: number; readonly verb: string }
 
@@ -68,9 +104,12 @@ interface AlertEntry {
 }
 
 /**
- * Group the read's rows (W8-B2): adjacent open-and-unclaimed rows sharing
- * ruleType + title gather into one run (the group card); every other row
- * stays its own single-row run. The wire order (newest first) is preserved.
+ * Group the read's rows (W8-B2, W23-B2): adjacent open-and-unclaimed rows
+ * sharing a rule type and either the same title (one finding across
+ * entities) or the same non-empty entity code (one entity across scan days —
+ * the 72/73-day certificate snapshots) gather into one run (the group card);
+ * every other row stays its own single-row run. The wire order (newest
+ * first) is preserved.
  * @param rows - the routed rows as read.
  * @returns the ordered runs.
  */
@@ -81,7 +120,9 @@ function groupAlerts(rows: readonly AlertRow[]): AlertEntry[] {
     const last = entries[entries.length - 1]
     const head = last?.rows[0]
     if (foldable && last !== undefined && head !== undefined
-      && head.ruleType === row.ruleType && head.title === row.title) {
+      && head.ruleType === row.ruleType
+      && (head.title === row.title
+        || (head.entityCode !== '' && head.entityCode === row.entityCode))) {
       last.rows.push(row)
       continue
     }
@@ -95,8 +136,10 @@ export function AlertsView(): JSX.Element {
   const identity = loadIdentity()
   const [read, setRead] = useState<AlertsRead | undefined>(undefined)
   const [pending, setPending] = useState<Pending | undefined>(undefined)
-  /** The group headers the user opened (W8-B2 local memory, keyed rule+title). */
+  /** The group headers the user opened (W8-B2 local memory, keyed section+rule+title). */
   const [openGroups, setOpenGroups] = useState<ReadonlySet<string>>(new Set())
+  /** The far band's fold (W23-B2 P1-11): collapsed until opened. */
+  const [farOpen, setFarOpen] = useState(false)
   // The alert-center in-app notices (recall orders' owner notifications,
   // W6-R3): a separate read that degrades on its own — a notices failure
   // never blanks the alerts list.
@@ -165,6 +208,76 @@ export function AlertsView(): JSX.Element {
     return read.rows.filter(row => row.severity === 'critical').length
   }, [read])
 
+  // The urgency bands (W23-B2 P1-11): the wire order holds inside each band.
+  const bands = useMemo(() => {
+    if (read === undefined || 'error' in read) return { urgent: [], near: [], far: [] } as const
+    const urgent: AlertRow[] = []
+    const near: AlertRow[] = []
+    const far: AlertRow[] = []
+    for (const row of read.rows) {
+      const band = urgencyOf(row)
+      if (band === 'urgent') urgent.push(row)
+      else if (band === 'near') near.push(row)
+      else far.push(row)
+    }
+    return { urgent, near, far } as const
+  }, [read])
+
+  /** One band's grouped rows: group cards where adjacent same-rule titles fold. */
+  const renderBand = (band: 'urgent' | 'near' | 'far', rows: readonly AlertRow[]): readonly JSX.Element[] => {
+    return groupAlerts(rows).flatMap((entry) => {
+      const head = entry.rows[0]
+      if (head === undefined || !entry.foldable || entry.rows.length < 2) {
+        return entry.rows.map(row => <AlertRowCard key={row.id} row={row} {...rowSink} />)
+      }
+      const groupKey = `${band}:${head.ruleType}:${head.entityCode !== '' ? head.entityCode : head.title}`
+      const expanded = openGroups.has(groupKey)
+      const newest = groupTimeOf(entry.rows)
+      const range = daysRangeOf(entry.rows)
+      return (
+        <article key={groupKey} className={css.alertGroup} data-testid="alert-group">
+          <button
+            type="button"
+            className={css.groupHead}
+            aria-expanded={expanded}
+            aria-label={`${RULE_LABELS[head.ruleType] ?? head.ruleType}预警 共${String(entry.rows.length)}条`}
+            onClick={() => {
+              setOpenGroups((current) => {
+                const next = new Set(current)
+                if (next.has(groupKey)) next.delete(groupKey)
+                else next.add(groupKey)
+                return next
+              })
+            }}
+          >
+            <span className={css.sevTag} data-severity={head.severity}>
+              {severityMeta(head).label}
+            </span>
+            <span className={css.groupTitle}>
+              {RULE_LABELS[head.ruleType] ?? head.ruleType}预警
+            </span>
+            <span className={css.groupCount}>×{String(entry.rows.length)}</span>
+            {range !== undefined && <span className={css.groupRange}>{range}</span>}
+            {newest !== undefined && (
+              <span className={css.groupTime}>最新 {relativeTimeOf(newest)}</span>
+            )}
+            <ChevronDown
+              size={16}
+              strokeWidth={1.8}
+              aria-hidden="true"
+              className={expanded ? `${css.groupChevron} ${css.groupChevronOpen}` : css.groupChevron}
+            />
+          </button>
+          {expanded && (
+            <div className={css.groupBody}>
+              {entry.rows.map(row => <AlertRowCard key={row.id} row={row} {...rowSink} />)}
+            </div>
+          )}
+        </article>
+      )
+    })
+  }
+
   const me = identity?.username ?? ''
   const rowSink = { me, pending, act }
   return (
@@ -216,60 +329,47 @@ export function AlertsView(): JSX.Element {
             <EmptyState
               icon={<BellRing size={22} strokeWidth={1.8} />}
               title="当前没有路由给你的预警"
-              description="效期/资质/账期/质量四路规则的扫描结果会出现在这里"
+              description="效期、资质、账期、质量四类预警会出现在这里"
             />
           )}
-          {read !== undefined && !('error' in read) && groupAlerts(read.rows).map((entry) => {
-            const head = entry.rows[0]
-            if (head === undefined || !entry.foldable || entry.rows.length < 2) {
-              return entry.rows.map(row => <AlertRowCard key={row.id} row={row} {...rowSink} />)
-            }
-            const groupKey = `${head.ruleType}:${head.title}`
-            const expanded = openGroups.has(groupKey)
-            const newest = groupTimeOf(entry.rows)
-            return (
-              <article key={groupKey} className={css.alertGroup} data-testid="alert-group">
-                <button
-                  type="button"
-                  className={css.groupHead}
-                  aria-expanded={expanded}
-                  aria-label={`${RULE_LABELS[head.ruleType] ?? head.ruleType}预警 共${String(entry.rows.length)}条`}
-                  onClick={() => {
-                    setOpenGroups((current) => {
-                      const next = new Set(current)
-                      if (next.has(groupKey)) next.delete(groupKey)
-                      else next.add(groupKey)
-                      return next
-                    })
-                  }}
-                >
-                  <span className={css.sevTag} data-severity={head.severity}>
-                    {severityMeta(head).label}
-                  </span>
-                  <span className={css.groupTitle}>
-                    {RULE_LABELS[head.ruleType] ?? head.ruleType}预警
-                  </span>
-                  <span className={css.groupCount}>×{String(entry.rows.length)}</span>
-                  {newest !== undefined && (
-                    <span className={css.groupTime}>最新 {relativeTimeOf(newest)}</span>
-                  )}
-                  <ChevronDown
-                    size={16}
-                    strokeWidth={1.8}
-                    aria-hidden="true"
-                    className={expanded ? `${css.groupChevron} ${css.groupChevronOpen}` : css.groupChevron}
-                  />
-                </button>
-                {expanded && (
-                  <div className={css.groupBody}>
-                    {entry.rows.map(row => <AlertRowCard key={row.id} row={row} {...rowSink} />)}
-                  </div>
-                )}
-              </article>
-            )
-          })}
           {read !== undefined && !('error' in read) && read.rows.length > 0 && (
-            <p className={css.footNote}>行内「认领」把预警认到本人名下，「关闭」仅认领人可用；引擎按路由责任人白名单与状态流校验，越权或越态操作会被拒绝并提示原因</p>
+            <>
+              {bands.urgent.length > 0 && (
+                <section aria-label="需尽快处理">
+                  <h2 className={css.bandTitle}>需尽快处理</h2>
+                  {renderBand('urgent', bands.urgent)}
+                </section>
+              )}
+              {bands.near.length > 0 && (
+                <section aria-label="近期关注">
+                  <h2 className={css.bandTitle}>近期关注</h2>
+                  {renderBand('near', bands.near)}
+                </section>
+              )}
+              {bands.far.length > 0 && (
+                <section aria-label="远期提醒">
+                  <button
+                    type="button"
+                    className={css.farFold}
+                    aria-expanded={farOpen}
+                    onClick={() => { setFarOpen(open => !open) }}
+                  >
+                    <Clock size={15} strokeWidth={1.8} aria-hidden="true" />
+                    <span className={css.farFoldText}>
+                      {String(bands.far.length)} 条远期提醒（30 天后到期）
+                    </span>
+                    <ChevronDown
+                      size={15}
+                      strokeWidth={1.8}
+                      aria-hidden="true"
+                      className={farOpen ? `${css.groupChevron} ${css.groupChevronOpen}` : css.groupChevron}
+                    />
+                  </button>
+                  {farOpen && renderBand('far', bands.far)}
+                </section>
+              )}
+              <p className={css.footNote}>「认领」后由你负责跟进，处理完点「关闭」归档；他人名下的预警不可代为操作</p>
+            </>
           )}
           {notices === 'error' && (
             <p className={css.footNote}>召回通知读取失败（alert-center 渠道）——预警列表不受影响</p>

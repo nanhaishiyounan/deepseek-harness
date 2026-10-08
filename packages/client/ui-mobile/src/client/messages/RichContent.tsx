@@ -34,7 +34,7 @@ function imagesOf(html: string): string[] {
 }
 
 /** Copy one snippet: the async clipboard API, the execCommand fallback, a toast either way. */
-function copyCode(code: string): void {
+export function copyCode(code: string): void {
   const done = (): void => { Toast.show({ content: '已复制' }) }
   const fallback = (): void => {
     const area = document.createElement('textarea')

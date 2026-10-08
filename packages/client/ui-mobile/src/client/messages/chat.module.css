@@ -281,10 +281,74 @@
   color: var(--dshm-ink-sub);
 }
 
+/* The degraded notice's copy entry (W23-B2 P1-7): the raw text (a rejected
+    report's CSV) stays one tap from the clipboard. */
+.degradedCopy {
+  margin-top: 6px;
+  color: var(--dshm-link);
+  font-size: var(--dshm-fs-caption);
+}
+
 .toolLabel {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* ---- The folded tool-run cluster (W23-B2 P1-10): the summary line rides
+        the tool-row material; the expanded body interleaves the settled rows
+        with the wedged narration. ---- */
+
+.toolCluster {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-left: 41px;
+  max-width: calc(100% - 41px);
+}
+
+.toolClusterHead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 4px 10px 4px 4px;
+  border-radius: var(--dshm-r-seal);
+  background: var(--dshm-card2);
+  font-size: var(--dshm-fs-caption);
+  line-height: 16px;
+  color: var(--dshm-ink-sub);
+  text-align: left;
+}
+
+.toolClusterHead:active {
+  opacity: 0.75;
+}
+
+.toolClusterLabel {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.toolClusterBody {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  width: 100%;
+  padding: 4px 0 2px 4px;
+}
+
+.toolClusterNote {
+  margin: 0;
+  max-width: 100%;
+  font-size: var(--dshm-fs-caption);
+  line-height: 17px;
+  color: var(--dshm-ink-sub);
+  overflow-wrap: anywhere;
 }
 
 /* X20 (W10 pool, settled W11-B2): consecutive tool rows are one status group,

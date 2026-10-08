@@ -420,7 +420,7 @@ describe('foldHistory (present_card tool calls)', () => {
     expect(folded.items).toHaveLength(1)
     const notice = folded.items[0]
     if (notice?.kind !== 'degraded') throw new Error('expected degraded notice')
-    expect(notice.text).toContain('present_card')
+    expect(notice.text).toContain('没能正常生成')
     // The over-limit payload never leaks its raw JSON into the surface.
     expect(folded.items.some(item => item.kind === 'report')).toBe(false)
   })
@@ -510,7 +510,7 @@ describe('foldHistory (present_card tool calls)', () => {
       expect(folded.items.map(item => item.kind)).toEqual(['degraded', 'task-card'])
       const notice = folded.items[0]
       if (notice?.kind !== 'degraded') throw new Error('expected the rejected card to degrade')
-      expect(notice.text).toContain('未通过校验')
+      expect(notice.text).toContain('没能正常显示')
       expect(folded.degradedCards).toBe(1)
     })
 

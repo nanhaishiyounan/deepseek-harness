@@ -46,10 +46,12 @@
 
 .heroTitle {
   margin: 0;
-  font-size: var(--dshm-fs-display);
-  line-height: 1.25;
+  /* W23-B2 P1-12: one grade down from display — the greeting stopped
+     shouting over the ledger cards below. */
+  font-size: var(--dshm-fs-title);
+  line-height: 1.3;
   font-weight: 800;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.3px;
   color: var(--dshm-ink);
   overflow-wrap: anywhere;
 }
@@ -260,19 +262,21 @@
         ride the paper capsule (.dshm-seal-chip with its vermilion dot). ---- */
 
 .quickRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  /* W23-B2 P1-12: one shared four-column grid — the CTA and the capsules
+     share the same track widths instead of hugging their own labels. */
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.quickChipCta,
+.quickChip {
+  justify-content: center;
+  min-width: 0;
 }
 
 .quickChipCta {
-  flex: none;
-  padding: 0 20px;
-}
-
-.quickChip {
-  flex: 1 1 auto;
-  justify-content: center;
+  padding-inline: 6px;
 }
 
 /* ---- Colleagues' avatar rail: the stamps sit straight on the paper (no card
