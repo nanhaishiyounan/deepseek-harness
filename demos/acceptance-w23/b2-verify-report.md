@@ -5,7 +5,7 @@
 - 账号：buyer/Buyer#2026 + admin/Admin#2026
 - 证据：本目录 `b2-*`（7 张截图 + 4 个探针/结果 JSON + 5 个可复跑脚本）
 
-> **W23-R3 更正（2026-10-09）**：本报告与 B2 commit message 声称「b2 活体证据 17 文件」，实际本目录 `b2-*` 文件为 19 个（7 截图 + 4 探针 JSON/脚本组 b2-live/b2-live2 + 3 个 b2-title 文件 + 4 个 b2-zero-metrics 文件 + 1 报告）；且 `b2-08-buyer-hero-line.png` 与 `b2-01-home-hero-grid.png` 为同一帧（sha256 均 8c44276f…，两脚本先后截同一 home 视口所致）。独立重拍帧见 `r3/r3-b2-08-retake-buyer-hero-line.png`（sha256 3340b0db…，hero 行「10月9日 周五 · 3 项预警待看」）。P1-9 的断言依据（hero 行文案）在两帧中一致，结论不受影响。
+> **W23-R3 更正（2026-10-09）**：本报告与 B2 commit message 声称「b2 活体证据 17 文件」，实际本目录 `b2-*` 文件为 19 个（7 截图 + 4 探针 JSON/脚本组 b2-live/b2-live2 + 3 个 b2-title 文件 + 4 个 b2-zero-metrics 文件 + 1 报告）；且 `b2-08-buyer-hero-line.png` 与 `b2-01-home-hero-grid.png` 为同一帧（W23-R4 更正：原文标 sha256 的 8c44276f… 实为 SHA-1 摘要，实测 sha256 均 ea42ec63…，两脚本先后截同一 home 视口所致）。独立重拍帧见 `r3/r3-b2-08-retake-buyer-hero-line.png`（W23-R4 更正：原文记 sha256 3340b0db… 无对应算法，实测 sha256 80299dc5…，hero 行「10月9日 周五 · 3 项预警待看」）。P1-9 的断言依据（hero 行文案）在两帧中一致，结论不受影响。
 
 ## 逐条处置表
 

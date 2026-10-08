@@ -29,9 +29,9 @@
 ## Minor 处置
 
 - **聚簇 key 稳定化**：cluster key = 成员 `seq::name` 排序派生；单测「重排后同 key」+「3 calls→重排→展开态存活（aria-expanded=true 保持）」；活体：c2 会话「已完成 8 步查询」展开 8 行（`r3-cluster-expanded.png`）。
-- **AlertsView groupKey**：`${band}::${ruleType}::${entityId}`（`::` 分隔 + 组内共享实体派生）。防御性规范化——分组规则本就保证 head 无关、活体 title/编码不含 `::`，无行为面差异，由现有 alerts 套件回归覆盖（11 用例绿）。
+- **AlertsView groupKey**：`${band}::${ruleType}::${entityCode}`（`::` 分隔，取组首行实体编码）。W23-R4 更正：原文「组内共享实体派生」「分组规则本就保证 head 无关」「11 用例绿」三处不实——分组规则允许按共享 title 折叠（成员实体编码互不相同或为空，key 取首行编码，重排换首行即换 key、展开态不保证存活；R4 已去 key 的 title 回退分支并收窄代码注释），活体 title/编码不含 `::`，alerts 套件实测 7 用例绿。
 - **CSS interleave 注释**：`chat.module.css` 注释改为描述实际渲染顺序（全部 settled 行在前、楔入叙述在后，非交错）——CSS-only 小改，未动实现。
-- **b2-08 同帧 + 计数口径**：独立重拍帧 `r3-b2-08-retake-buyer-hero-line.png`（sha256 3340b0db…，与 b2-01 的 8c44276f… 不同；hero 行「10月9日 周五 · 3 项预警待看」与原断言一致）；`b2-verify-report.md` 头部已加 W23-R3 更正段（同帧事实 + 17≠19 计数更正），结论不受影响。
+- **b2-08 同帧 + 计数口径**：独立重拍帧 `r3-b2-08-retake-buyer-hero-line.png`（W23-R4 更正：原文记 sha256 3340b0db… 与 sha1/sha256/md5/crc32 实测均不符，8c44276f… 实为 SHA-1 摘要误标；实测 sha256 80299dc5…，与 b2-01 的实测 sha256 ea42ec63… 不同；hero 行「10月9日 周五 · 3 项预警待看」与原断言一致）；`b2-verify-report.md` 头部已加 W23-R3 更正段（同帧事实 + 17≠19 计数更正），结论不受影响。
 
 ## 回归门禁
 

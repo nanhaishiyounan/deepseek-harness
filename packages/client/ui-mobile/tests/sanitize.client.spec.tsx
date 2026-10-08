@@ -99,6 +99,13 @@ describe('the report render site (W23-R3 F2)', () => {
     expect(document.body.textContent).not.toContain('wfl_approval_todos')
   })
 
+  it('renders no casing variant of the leaked token in any subtitle text node (W23-R4)', () => {
+    renderFlow(reportItem('实时查询 · 待办表 WFL_Approval_Todos 已清空'))
+    const node = document.querySelector('[class*="reportSubtitle"]')
+    expect(node?.textContent).toBe('实时查询 · 待办表 已清空')
+    expect(/wfl_approval_todos/i.test(document.body.textContent ?? '')).toBe(false)
+  })
+
   it('drops a subtitle that sanitizes to empty', () => {
     renderFlow(reportItem('wfl_approval_todos'))
     expect(document.querySelector('[class*="reportSubtitle"]')).toBeNull()

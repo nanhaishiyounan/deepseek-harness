@@ -230,11 +230,12 @@ export function AlertsView(): JSX.Element {
       if (head === undefined || !entry.foldable || entry.rows.length < 2) {
         return entry.rows.map(row => <AlertRowCard key={row.id} row={row} {...rowSink} />)
       }
-      // W23-R3: the key derives from the band, the rule source, and the group's
-      // stable entity id (its one shared non-empty entity code, else the one
-      // shared title) with :: separators, so a re-ordered read re-derives the
-      // same key and the opened group survives the refresh.
-      const groupKey = `${band}::${head.ruleType}::${head.entityCode !== '' ? head.entityCode : head.title}`
+      // The group key derives from the band, the rule source, and the group
+      // head's entity code, joined with ::. The code is the stable identity
+      // only for a group folded on its shared code: a title-folded group keys
+      // on whichever member leads the read, so a re-read that reorders the
+      // members re-keys it and the opened state resets.
+      const groupKey = `${band}::${head.ruleType}::${head.entityCode}`
       const expanded = openGroups.has(groupKey)
       const newest = groupTimeOf(entry.rows)
       const range = daysRangeOf(entry.rows)

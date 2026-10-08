@@ -16,6 +16,7 @@ import { FileClock, Star } from 'lucide-react'
 import { goBackOr, navigate } from '../router.ts'
 import { EmptyState } from '../ui.tsx'
 import { PageNav } from '../PageNav.tsx'
+import { sanitizeBody, sanitizeSubtitle } from '../sanitize.ts'
 import type { ReportPayload } from '../protocol.ts'
 import { fileProjections, subscribeWork, updateWorkItem, workOf, workSnapshot, type FileCardRow } from '../workStore.ts'
 import { ReportCard } from '../messages/ReportCard.tsx'
@@ -54,85 +55,93 @@ export function FilesView(): JSX.Element {
     else navigate(`#/work/${row.id}`)
   }
 
-  const renderRow = (row: RenderRow, star: boolean, section: string): JSX.Element => (
-    <div key={`${section}:${row.id}`} className={css.fileRow} data-testid="file-row">
-      <div className={css.fileTop}>
-        <button
-          type="button"
-          className={css.fileTopMain}
-          aria-label={`打开 ${row.title}`}
-          onClick={() => { openSource(row) }}
-        >
-          <Tag
-            className={css.typeBadge as string}
-            style={{ '--background-color': 'var(--dshm-brand-soft)', '--text-color': 'var(--dshm-on-soft)', '--border-color': 'transparent' }}
-            aria-hidden="true"
+  const renderRow = (row: RenderRow, star: boolean, section: string): JSX.Element => {
+    // The files render site rides the same render-face sanitizers the chat
+    // report branch uses (W23-R4): a persona miss in any casing never reaches
+    // a file row's title or subtitle; a fully-stripped subtitle renders as
+    // absent (the blank-as-omitted equivalence).
+    const title = sanitizeBody(row.title)
+    const subtitle = row.subtitle === undefined ? undefined : sanitizeSubtitle(row.subtitle)
+    return (
+      <div key={`${section}:${row.id}`} className={css.fileRow} data-testid="file-row">
+        <div className={css.fileTop}>
+          <button
+            type="button"
+            className={css.fileTopMain}
+            aria-label={`打开 ${title}`}
+            onClick={() => { openSource(row) }}
           >
-            报
-          </Tag>
-          {/* oxlint-disable-next-line typescript/no-unnecessary-condition -- the origin union widens with future file sources. */}
-          {row.origin === 'ai' && (
             <Tag
-              className={css.originBadge as string}
+              className={css.typeBadge as string}
               style={{ '--background-color': 'var(--dshm-brand-soft)', '--text-color': 'var(--dshm-on-soft)', '--border-color': 'transparent' }}
               aria-hidden="true"
             >
-              AI
+              报
             </Tag>
-          )}
-          <span className={css.fileName}>{row.title}</span>
-          {row.demo && (
-            <Tag
-              className={css.demoTag as string}
-              style={{ '--background-color': 'transparent', '--text-color': 'var(--dshm-ink-sub)', '--border-color': 'var(--dshm-line)' }}
+            {/* oxlint-disable-next-line typescript/no-unnecessary-condition -- the origin union widens with future file sources. */}
+            {row.origin === 'ai' && (
+              <Tag
+                className={css.originBadge as string}
+                style={{ '--background-color': 'var(--dshm-brand-soft)', '--text-color': 'var(--dshm-on-soft)', '--border-color': 'transparent' }}
+                aria-hidden="true"
+              >
+                AI
+              </Tag>
+            )}
+            <span className={css.fileName}>{title}</span>
+            {row.demo && (
+              <Tag
+                className={css.demoTag as string}
+                style={{ '--background-color': 'transparent', '--text-color': 'var(--dshm-ink-sub)', '--border-color': 'var(--dshm-line)' }}
+              >
+                示例
+              </Tag>
+            )}
+          </button>
+          {star && (
+            <span
+              role="button"
+              tabIndex={0}
+              aria-label={row.pinned ? '取消收藏' : '收藏'}
+              className={`${css.star} ${row.pinned ? css.starActive : ''}`}
+              onClick={() => { togglePin(row, !row.pinned) }}
+              onKeyDown={(event) => { if (event.key === 'Enter') togglePin(row, !row.pinned) }}
             >
-              示例
-            </Tag>
+              <Star size={20} fill={row.pinned ? 'currentColor' : 'none'} aria-hidden="true" />
+            </span>
           )}
-        </button>
-        {star && (
-          <span
-            role="button"
-            tabIndex={0}
-            aria-label={row.pinned ? '取消收藏' : '收藏'}
-            className={`${css.star} ${row.pinned ? css.starActive : ''}`}
-            onClick={() => { togglePin(row, !row.pinned) }}
-            onKeyDown={(event) => { if (event.key === 'Enter') togglePin(row, !row.pinned) }}
-          >
-            <Star size={20} fill={row.pinned ? 'currentColor' : 'none'} aria-hidden="true" />
-          </span>
+        </div>
+        <span className={css.fileMeta}>
+          {subtitle !== undefined && subtitle !== '' && <span>{subtitle}</span>}
+          <span>{new Date(row.createdAt).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })}</span>
+          {row.sourceSessionId !== undefined && (
+            <Button type="button" color="primary" fill="none" size="mini" className={css.fileMetaLink} onClick={() => { openSource(row) }}>
+              去源对话
+            </Button>
+          )}
+        </span>
+        {row.artifact !== undefined && (
+          <>
+            <Button
+              type="button"
+              color="primary"
+              fill="none"
+              size="mini"
+              className={css.fileMetaLink}
+              onClick={() => { setPreviewId(current => current === `${section}:${row.id}` ? undefined : `${section}:${row.id}`) }}
+            >
+              {previewId === `${section}:${row.id}` ? '收起报告' : '查看报告'}
+            </Button>
+            {previewId === `${section}:${row.id}` && (
+              <div className={css.preview}>
+                <ReportCard payload={row.artifact} />
+              </div>
+            )}
+          </>
         )}
       </div>
-      <span className={css.fileMeta}>
-        {row.subtitle !== undefined && <span>{row.subtitle}</span>}
-        <span>{new Date(row.createdAt).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })}</span>
-        {row.sourceSessionId !== undefined && (
-          <Button type="button" color="primary" fill="none" size="mini" className={css.fileMetaLink} onClick={() => { openSource(row) }}>
-            去源对话
-          </Button>
-        )}
-      </span>
-      {row.artifact !== undefined && (
-        <>
-          <Button
-            type="button"
-            color="primary"
-            fill="none"
-            size="mini"
-            className={css.fileMetaLink}
-            onClick={() => { setPreviewId(current => current === `${section}:${row.id}` ? undefined : `${section}:${row.id}`) }}
-          >
-            {previewId === `${section}:${row.id}` ? '收起报告' : '查看报告'}
-          </Button>
-          {previewId === `${section}:${row.id}` && (
-            <div className={css.preview}>
-              <ReportCard payload={row.artifact} />
-            </div>
-          )}
-        </>
-      )}
-    </div>
-  )
+    )
+  }
 
   return (
     <div className={css.page}>
