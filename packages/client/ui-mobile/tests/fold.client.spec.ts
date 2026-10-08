@@ -420,8 +420,11 @@ describe('foldHistory (present_card tool calls)', () => {
     expect(folded.items).toHaveLength(1)
     const notice = folded.items[0]
     if (notice?.kind !== 'degraded') throw new Error('expected degraded notice')
-    expect(notice.text).toContain('没能正常生成')
-    // The over-limit payload never leaks its raw JSON into the surface.
+    // W23-R3 F1: the raw argument string is the copyable source — the exact
+    // wire payload 复制原文 hands back, never the people-language fallback.
+    expect(notice.text.startsWith('{"payload":')).toBe(true)
+    expect(notice.text).toContain('"type":"report"')
+    // The over-limit payload never renders as the report card itself.
     expect(folded.items.some(item => item.kind === 'report')).toBe(false)
   })
 
@@ -433,6 +436,9 @@ describe('foldHistory (present_card tool calls)', () => {
     ])
     expect(folded.degradedCards).toBe(3)
     expect(folded.items.every(item => item.kind === 'degraded')).toBe(true)
+    // W23-R3 F1: each malformed argument string stays reachable verbatim.
+    const texts = folded.items.map(item => item.kind === 'degraded' ? item.text : '')
+    expect(texts).toEqual(['not json', '{}', '{"payload":"ask_choice"}'])
   })
 
   it('degrades a present_card submit_receipt without a matching nb_create landing', () => {
@@ -510,8 +516,32 @@ describe('foldHistory (present_card tool calls)', () => {
       expect(folded.items.map(item => item.kind)).toEqual(['degraded', 'task-card'])
       const notice = folded.items[0]
       if (notice?.kind !== 'degraded') throw new Error('expected the rejected card to degrade')
-      expect(notice.text).toContain('没能正常显示')
+      // W23-R3 F1: the rejected card's original argument string is the
+      // copyable source; the fallback wording only covers an absent source.
+      expect(notice.text.startsWith('{"payload":')).toBe(true)
+      expect(notice.text).toContain('form_draft')
       expect(folded.degradedCards).toBe(1)
+    })
+
+    it('keeps the rejected payload verbatim for 复制原文 (W23-R3 F1)', () => {
+      const folded = foldHistory([
+        event('tool/call', presentCardRawCall('pcf1', '面粉 100 单价 10'), 1),
+        event('tool/result', { message: { role: 'user', content: [{ type: 'tool-result', toolCallId: 'pcf1', isError: true, content: [{ type: 'text', text: 'ToolArgsError: payload校验未通过' }] }] } }, 2),
+      ])
+      const notice = folded.items[0]
+      if (notice?.kind !== 'degraded') throw new Error('expected the rejected card to degrade')
+      expect(notice.text).toBe('面粉 100 单价 10')
+    })
+
+    it('falls back to the people-language line only when the wire carried no usable text (W23-R3 F1)', () => {
+      const folded = foldHistory([
+        event('tool/call', { callId: 'pcf2', name: 'present_card' }, 1),
+        event('tool/result', { message: { role: 'user', content: [{ type: 'tool-result', toolCallId: 'pcf2', isError: true, content: [{ type: 'text', text: 'ToolArgsError' }] }] } }, 2),
+        event('tool/call', presentCardRawCall('pcf3', '   '), 3),
+      ])
+      const texts = folded.items.map(item => item.kind === 'degraded' ? item.text : '')
+      expect(texts[0]).toContain('没能正常显示')
+      expect(texts[1]).toContain('没能正常生成')
     })
 
     it('keeps rendering the card while the result has not landed yet (running turn)', () => {

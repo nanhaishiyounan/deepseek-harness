@@ -296,8 +296,9 @@
 }
 
 /* ---- The folded tool-run cluster (W23-B2 P1-10): the summary line rides
-        the tool-row material; the expanded body interleaves the settled rows
-        with the wedged narration. ---- */
+        the tool-row material; the expanded body lists all settled rows
+        first, then the wedged narration blocks below them (render order,
+        not visual interleaving). ---- */
 
 .toolCluster {
   display: flex;

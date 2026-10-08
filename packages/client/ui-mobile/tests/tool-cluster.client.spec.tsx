@@ -17,6 +17,10 @@ afterEach(cleanup)
 const tool = (seq: number, state: ChatToolRow['state'] = 'done'): ChatToolRow =>
   ({ kind: 'tool', seq, time: 1000, name: 'nb_list', label: '查询业务记录', state })
 
+/** One protocol-marked tool row (an ask_/form_ fence name) at a seq. */
+const protocolTool = (seq: number, state: ChatToolRow['state'] = 'error'): ChatToolRow =>
+  ({ kind: 'tool', seq, time: 1000, name: 'ask_field', label: '补充信息…', state, protocol: true })
+
 /** One assistant text row. */
 const text = (seq: number, body: string): ChatTextMessage =>
   ({ kind: 'text', seq, time: 1000, role: 'assistant', text: body })
@@ -66,6 +70,49 @@ describe('clusterFlowUnits (W23-B2)', () => {
     const items: readonly ChatItem[] = [tool(1), tool(2), text(3, '答案')]
     const entries = clusterFlowUnits(items)
     expect(entries.map(entry => entry.index)).toEqual([0, 2])
+  })
+
+  it('never clusters a protocol-marked row, even a failed one (W23-R3 F3)', () => {
+    const items: readonly ChatItem[] = [
+      tool(1),
+      tool(2),
+      protocolTool(3, 'error'),
+      protocolTool(4, 'error'),
+    ]
+    const units = clusterFlowUnits(items).map(entry => entry.unit)
+    // The two protocol rows pass through as their own neutral status lines;
+    // only the two plain tools form the cluster.
+    expect(units.map(unit => unit.kind)).toEqual(['tool-cluster', 'tool', 'tool'])
+  })
+})
+
+describe('cluster key stability (W23-R3)', () => {
+  it('derives the same key for a re-ordered run of the same three calls', () => {
+    const before = clusterFlowUnits([tool(2), tool(3), tool(4)])
+    const after = clusterFlowUnits([tool(3), tool(2), tool(4)])
+    if (before[0]?.unit.kind !== 'tool-cluster' || after[0]?.unit.kind !== 'tool-cluster') {
+      throw new Error('expected clusters')
+    }
+    expect(after[0].unit.key).toBe(before[0].unit.key)
+    expect(before[0].unit.key).toBe('cluster:2::nb_list|3::nb_list|4::nb_list')
+  })
+
+  it('keeps the expanded cluster alive across a re-ordered re-fold (3 calls)', () => {
+    const ClusterHarness = ({ rows }: { rows: readonly ChatItem[] }) => (
+      <>
+        {clusterFlowUnits(rows).map(({ unit }) => unit.kind === 'tool-cluster'
+          ? <ToolClusterRow key={unit.key} cluster={unit} previous={userText(1, '问')} />
+          : null)}
+      </>
+    )
+    const { rerender } = render(<ClusterHarness rows={[tool(2), tool(3), tool(4)]} />)
+    fireEvent.click(screen.getByRole('button', { name: /已完成 3 步查询/ }))
+    expect(screen.getAllByText('查询业务记录').length).toBe(3)
+    // The re-ordered fold re-derives the same key, so React reuses the
+    // component and the user's expanded state survives.
+    rerender(<ClusterHarness rows={[tool(4), tool(2), tool(3)]} />)
+    expect(screen.getAllByText('查询业务记录').length).toBe(3)
+    expect(screen.getByRole('button', { name: /已完成 3 步查询/ }).getAttribute('aria-expanded')).toBe('true')
   })
 })
 

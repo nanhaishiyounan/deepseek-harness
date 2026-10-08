@@ -15,13 +15,14 @@ import { colleagueColor, stampAcronymOf } from '../../colleagues.ts'
 import { dayLabelOf } from '../../sessionsService.ts'
 import { mergeCardValues } from '../../systemFields.ts'
 import type { DerivedCardState } from '../../cardState.ts'
-import type { ChatItem } from '../../fold.ts'
+import { isProtocolToolRow, type ChatItem } from '../../fold.ts'
 import type { ApprovalResultPayload, FormDraftPayload, ReportAction } from '../../protocol.ts'
 import { copyCode } from '../RichContent.tsx'
 import { DraftCard, ReceiptCard, RejectedCard, ReviewCard, type CollectionFieldMeta, type FieldMetas } from '../../forms/task-cards.tsx'
 import { DraftCard as DraftCardV3 } from '../../forms/v3/DraftCard.tsx'
 import { ReceiptCard as ReceiptCardV3 } from '../../forms/v3/ReceiptCard.tsx'
 import { sanitizeBizText } from '../rich.ts'
+import { sanitizeSubtitle } from '../../sanitize.ts'
 import { ChoiceBubble } from '../ChoiceBubble.tsx'
 import { FieldAskBubble } from '../FieldAskBubble.tsx'
 import { ActionBadge } from '../ActionBadge.tsx'
@@ -121,8 +122,10 @@ export function FlowItem(props: FlowItemProps): JSX.Element | null {
   }
   if (item.kind === 'tool') {
     // A protocol-fence name the model emitted as a tool call renders as the
-    // neutral status line only — no protocol name, no failure mark.
-    if (item.protocol === true) {
+    // neutral status line only — no protocol name, no failure mark. The
+    // shared predicate keeps the cluster split and this render site on one
+    // definition (W23-R3 F3).
+    if (isProtocolToolRow(item)) {
       return (
         <>
           {separator}
@@ -221,11 +224,19 @@ export function FlowItem(props: FlowItemProps): JSX.Element | null {
     )
   }
   if (item.kind === 'report') {
+    // The subtitle is the one card face with no body-layer pass of its own
+    // (W23-R3 F2): a persona miss leaked `wfl_approval_todos` here live, so
+    // the render site sanitizes before the card consumes the payload. A
+    // fully-stripped subtitle renders as absent (the blank-as-omitted
+    // equivalence W21-R4 set for optional card text).
+    const raw = item.payload.subtitle
+    const clean = raw === undefined ? undefined : sanitizeSubtitle(raw)
+    const payload = raw === undefined ? item.payload : { ...item.payload, subtitle: clean ?? '' }
     return (
       <>
         {separator}
         {aiRow(
-          <ReportCard payload={item.payload} onAction={(action) => { props.onReportAction(action, item.seq) }} />,
+          <ReportCard payload={payload} onAction={(action) => { props.onReportAction(action, item.seq) }} />,
         )}
       </>
     )

@@ -203,10 +203,14 @@ describe('mobile assistant present_card tool source (seeded session → cards wi
     const body = await page.locator('main').ariaSnapshot()
     // The rejected revision-1 card (product_name missing, isError tool result)
     // folds to the collapsed notice: no card face, no 确认写入 of its own.
-    // The notice body hides inside a closed <details>, so the cause text is
-    // asserted on the raw DOM while the summary line rides the aria tree.
+    // The notice body hides inside a closed <details>, so its copyable source
+    // is asserted on the raw DOM while the summary line rides the aria tree.
+    // W23-R3 F1: the raw DOM carries the rejected call's original argument
+    // string (the 复制原文 payload), not a hardcoded explanation line — the
+    // revision-1 title only exists inside that raw payload.
     expect(body).toContain('这条消息未能按卡片正常显示，点开可查看原文')
-    expect(await page.content()).toContain('没能正常显示')
+    expect(await page.content()).toContain('{"payload":')
+    expect(await page.content()).toContain('采购单草稿（缺品名）')
     expect(body.includes('采购单草稿（缺品名）')).toBe(false)
     // Exactly one interactive draft card remains — the corrected revision.
     const cards = page.locator('[data-testid="draft-card-v3"]')

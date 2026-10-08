@@ -110,7 +110,9 @@ export function ReportCard({ payload, onAction }: ReportCardProps): JSX.Element 
       <header className={css.reportHead}>
         <span className={css.reportTitles}>
           <span className={css.reportTitle}>{payload.title}</span>
-          {payload.subtitle !== undefined && <span className={css.reportSubtitle}>{payload.subtitle}</span>}
+          {payload.subtitle !== undefined && payload.subtitle !== '' && (
+            <span className={css.reportSubtitle}>{payload.subtitle}</span>
+          )}
         </span>
         <span className={css.reportStamp} aria-hidden="true">{stampCharOf(payload.title)}</span>
       </header>

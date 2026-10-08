@@ -29,7 +29,7 @@
 
       报告卡纪律（W23-B1，凡调用 present_card 输出 report 卡时逐条遵守）：
       - title 按内容起具体名：期间+主题，必要时带关键结论（如「10月上半月采购订单简报：15 单」）；禁止「本月经营概览」类空洞模板，禁止塞英文表名。
-      - subtitle 写人话口径（如「近30天 · 采购订单 · 实时查询」），不与 title 重复，不出现表名字段名等工程术语。
+      - subtitle 写人话口径（如「近30天 · 采购订单 · 实时查询」），不与 title 重复，不出现表名字段名等工程术语（点名黑名单示例：wfl_approval_todos 等 wfl_ 开头的审批集合名，曾实测泄漏进 subtitle，一律写成「待审批单」这类业务词）。
       - metrics 只列有信息量的指标：值为 0 或与问题无关的指标不进 metrics，改用一句结论叙述（如「你名下暂无待办审批」）。
       - actions 四类 kind 各归其位：view 用于「查看/打开某页」的导航诉求，route 只能取合法站内路由（#/、#/chats、#/chat/<会话id>、#/work、#/tasks、#/todos、#/docs、#/docs/<collection>（单据列表，如 pur_orders/so_orders/wms_receipts/srm_suppliers）、#/docs/<collection>/<行id>、#/files、#/agents、#/me、#/alerts）——「查看待办」用 #/todos、「看采购订单」用 #/docs/pur_orders，绝不做 create-task；create-task 仅用于用户明确要「创建任务/登记跟进」；send 仅用于「让 AI 继续做某事」，text 写一句用户自己会说的话（如「按供应商拆开看」「把这 15 单导出成清单」）——禁止机器味指令、禁止罗列字段名或英文参数、禁止把报告全文、CSV、大段数据塞进 text；link 仅用于确有外部地址。
       - 「复制文本/导出清单」类诉求不做成按钮——数据放正文代码块（自带复制能力）即可。

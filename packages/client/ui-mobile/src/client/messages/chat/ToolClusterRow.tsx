@@ -6,12 +6,14 @@
  * 换个思路 asides) joins the expanded body, out of the bubble lane; the
  * turn's leading and trailing text (before the first call / after the last)
  * never enter a cluster. A running tool row breaks the run — live progress
- * stays visible row by row.
+ * stays visible row by row — and a protocol-marked row never joins a run
+ * (W23-R3 F3: it renders as the neutral status line, failure or not, so its
+ * error state must not read as a query that ran and failed).
  */
 
 import { useState, type JSX } from 'react'
 import { Check, ChevronDown, X } from 'lucide-react'
-import type { ChatItem, ChatTextMessage, ChatToolRow } from '../../fold.ts'
+import { isProtocolToolRow, type ChatItem, ChatTextMessage, ChatToolRow } from '../../fold.ts'
 import { dayLabelOf } from '../../sessionsService.ts'
 import { sanitizeBizText } from '../rich.ts'
 import css from '../chat.module.css'
@@ -25,7 +27,9 @@ export interface ToolClusterUnit {
   readonly notes: readonly ChatTextMessage[]
   /** The folded items' index of the run's first tool (the previous-item seam). */
   readonly firstIndex: number
-  /** The stable render key (the first tool's kind:seq). */
+  /** The stable render key: the member set's `seq::name` pairs, sorted, so a
+   * re-ordered fold (a new event landing mid-run) re-derives the same key and
+   * React keeps the expanded component alive (W23-R3). */
   readonly key: string
 }
 
@@ -33,7 +37,7 @@ export interface ToolClusterUnit {
 export type FlowUnit = ChatItem | ToolClusterUnit
 
 const isSettledTool = (item: ChatItem): item is ChatToolRow =>
-  item.kind === 'tool' && item.state !== 'running'
+  item.kind === 'tool' && item.state !== 'running' && !isProtocolToolRow(item)
 
 const isAssistantText = (item: ChatItem): item is ChatTextMessage =>
   item.kind === 'text' && item.role === 'assistant'
@@ -89,9 +93,14 @@ export function clusterFlowUnits(items: readonly ChatItem[]): readonly {
       cursor = firstIndex + 1
       continue
     }
-    const head = tools[0] as ChatToolRow
     units.push({
-      unit: { kind: 'tool-cluster', tools, notes, firstIndex, key: `cluster:${String(head.seq)}` },
+      unit: {
+        kind: 'tool-cluster',
+        tools,
+        notes,
+        firstIndex,
+        key: `cluster:${tools.map(tool => `${String(tool.seq)}::${tool.name}`).sort().join('|')}`,
+      },
       index: firstIndex,
     })
   }

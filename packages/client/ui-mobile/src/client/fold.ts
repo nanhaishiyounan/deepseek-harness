@@ -172,6 +172,18 @@ export interface FoldedTurn {
 }
 
 /**
+ * Whether one folded item is a protocol-fence name the model emitted as a tool
+ * call: the row renders as the neutral status line, never the protocol name
+ * and never the failure mark. Shared by the renderer (FlowItem) and the tool
+ * cluster split so both consume one definition (W23-R3 F3).
+ * @param item - the folded item.
+ * @returns whether the item is a protocol-marked tool row.
+ */
+export function isProtocolToolRow(item: ChatItem): item is ChatToolRow & { readonly protocol: true } {
+  return item.kind === 'tool' && item.protocol === true
+}
+
+/**
  * The neutral status-line labels for protocol-fence names arriving as tool
  * calls (a contract violation the surface still renders people-language).
  */
@@ -384,6 +396,23 @@ function appendPayloadItem(
   }
 }
 
+/** The collapsed notice's copy source when the original text is truly absent. */
+const DEGRADED_SOURCE_FALLBACK = '（原文未能取回）'
+
+/**
+ * The copyable source of one collapsed notice (W23-R3 F1): the raw text the
+ * card or fence actually carried stays one tap away behind 复制原文, so a
+ * rejected present_card's original payload is never lost to the fold. The
+ * hardcoded fallback only covers a genuinely absent source (a non-string or
+ * blank wire value).
+ * @param raw - the wire's raw text (a fence match or a tool call's argument string).
+ * @param fallback - the people-language line shown when no raw text exists.
+ * @returns the notice's copyable text.
+ */
+function buildCopyableText(raw: unknown, fallback: string): string {
+  return typeof raw === 'string' && raw.trim() !== '' ? raw : fallback
+}
+
 /** Fold one assistant message's text through the v3 splitter into items. */
 function foldAssistantText(
   text: string, seq: number, time: number, items: ChatItem[], degradedOut: { count: number }, verification: ReceiptVerification,
@@ -409,7 +438,7 @@ function foldAssistantText(
       return
     }
     if (segment.kind === 'degraded') {
-      items.push({ kind: 'degraded', seq: itemSeq, time, text: segment.text })
+      items.push({ kind: 'degraded', seq: itemSeq, time, text: buildCopyableText(segment.text, DEGRADED_SOURCE_FALLBACK) })
       return
     }
     appendPayloadItem(segment.payload, itemSeq, time, items, degradedOut, verification)
@@ -450,8 +479,10 @@ function foldPresentCard(
       seq,
       time,
       // Cause-neutral: isError also covers timeouts and internal tool
-      // failures, not only payload validation (W23-B2 P1-7 wording).
-      text: '这张卡片没能正常显示，已折叠；请以后续修正后的卡片为准',
+      // failures, not only payload validation (W23-B2 P1-7 wording). The raw
+      // argument string stays the copyable source (W23-R3 F1): the fallback
+      // line only shows when the wire carried no usable text.
+      text: buildCopyableText(rawArguments, '这张卡片没能正常显示，已折叠；请以后续修正后的卡片为准'),
     })
     return
   }
@@ -472,7 +503,10 @@ function foldPresentCard(
       kind: 'degraded',
       seq,
       time,
-      text: '这张卡片没能正常生成，已折叠；如需该内容请让助手重新呈现',
+      // The malformed argument string itself is the copyable source
+      // (W23-R3 F1); the fallback line only shows when the wire carried no
+      // usable text at all.
+      text: buildCopyableText(rawArguments, '这张卡片没能正常生成，已折叠；如需该内容请让助手重新呈现'),
     })
     return
   }
