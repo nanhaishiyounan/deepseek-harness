@@ -446,6 +446,83 @@ describe('foldHistory (present_card tool calls)', () => {
     expect(notice.text).toContain('回执未经落库核实')
   })
 
+  describe('render-side deterministic widget rewrite (W22-R2)', () => {
+    it('folds a model-declared text quantity into the number-widget task card (tool/call channel)', () => {
+      const folded = foldHistory([
+        event('tool/call', presentCardCall('pcr1', 'form-draft.widget-coercion.valid'), 1),
+      ])
+      const card = folded.items[0]
+      if (card?.kind !== 'task-card' || card.payload === undefined) throw new Error('expected v3 draft card')
+      const widgets = Object.fromEntries(card.payload.fields.map(field => [field.name, field.widget]))
+      expect(widgets).toEqual({
+        supplier_id: 'relation',
+        product_name: 'text',
+        quantity: 'number',
+        unit_price: 'number',
+        amount: 'number',
+        need_date: 'date',
+        currency: 'text',
+        code: 'text',
+      })
+    })
+
+    it('applies the same classification to a legacy ```dsh fence (fence channel parity)', () => {
+      const raw = readFileSync(`${FIXTURES_DIR}/form-draft.widget-coercion.valid.json`, 'utf8').replace(/\s+/g, '')
+      const folded = foldHistory([
+        event('assistant/message', { message: { content: [{ type: 'text', text: `先看下这张草稿\n\`\`\`dsh\n${raw}\n\`\`\`\n如需调整请直接说` }] } }, 0),
+      ])
+      const card = folded.items.find(item => item.kind === 'task-card')
+      if (card?.kind !== 'task-card' || card.payload === undefined) throw new Error('expected v3 draft card')
+      const quantity = card.payload.fields.find(field => field.name === 'quantity')
+      expect(quantity?.widget).toBe('number')
+      const unitPrice = card.payload.fields.find(field => field.name === 'unit_price')
+      expect(unitPrice?.widget).toBe('number')
+    })
+
+    it('keeps a note-family declared text even when the label quotes a money word', () => {
+      const folded = foldHistory([
+        event('tool/call', presentCardRawCall('pcr2', JSON.stringify({
+          payload: {
+            v: 3,
+            type: 'form_draft',
+            draftId: 'd_note',
+            revision: 1,
+            form: { collection: 'pur_orders', label: '采购单' },
+            title: '带备注的采购单',
+            fields: [{ name: 'customer_note', label: '客户备注（含单价上限说明）', value: '按合同', tier: 'required', widget: 'text' }],
+          },
+        })), 1),
+      ])
+      const card = folded.items[0]
+      if (card?.kind !== 'task-card' || card.payload === undefined) throw new Error('expected v3 draft card')
+      expect(card.payload.fields[0]?.widget).toBe('text')
+    })
+  })
+
+  describe('rejected present_card calls fold to the collapsed notice (W22-R2)', () => {
+    it('never renders the interactive card when the tool/result landed isError', () => {
+      const folded = foldHistory([
+        event('tool/call', presentCardCall('pcx1', 'form-draft.widget-coercion.valid'), 1),
+        event('tool/result', { message: { role: 'user', content: [{ type: 'tool-result', toolCallId: 'pcx1', isError: true, content: [{ type: 'text', text: 'ToolArgsError: payload.fields缺少必答字段' }] }] } }, 2),
+        event('tool/call', presentCardCall('pcx2', 'form-draft.valid'), 3),
+        event('tool/result', { message: { role: 'user', content: [{ type: 'tool-result', toolCallId: 'pcx2', isError: false, content: [{ type: 'text', text: '卡片已呈现' }] }] } }, 4),
+      ])
+      expect(folded.items.map(item => item.kind)).toEqual(['degraded', 'task-card'])
+      const notice = folded.items[0]
+      if (notice?.kind !== 'degraded') throw new Error('expected the rejected card to degrade')
+      expect(notice.text).toContain('参数校验未通过')
+      expect(folded.degradedFences).toBe(1)
+    })
+
+    it('keeps rendering the card while the result has not landed yet (running turn)', () => {
+      const folded = foldHistory([
+        event('tool/call', presentCardCall('pcx3', 'form-draft.widget-coercion.valid'), 1),
+      ])
+      expect(folded.items.map(item => item.kind)).toEqual(['task-card'])
+      expect(folded.degradedFences).toBe(0)
+    })
+  })
+
   it('renders a present_card submit_receipt against its landed nb_create', () => {
     const folded = foldHistory([
       event('tool/call', { callId: 'c9', name: 'nb_create', arguments: '{"collection":"pur_orders"}' }, 0),

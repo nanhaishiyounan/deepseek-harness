@@ -13,6 +13,7 @@
  */
 
 import { parseConfirmPush, splitDraftMessage, type ConfirmPush, type FormDraft } from './form-draft.ts'
+import { applyDeterministicWidgets } from './widget.ts'
 import {
   answerTextOf,
   parseDshPayloadObject,
@@ -331,32 +332,38 @@ const CREATE_LINE = /^已在 (\S+) 创建第 (\d+) 行：/u
 function appendPayloadItem(
   payload: DshPayload, seq: number, time: number, items: ChatItem[], degradedOut: { count: number }, verification: ReceiptVerification,
 ): void {
-  if (payload.type === 'submit_receipt'
-    && !verification.landedCreates.has(`${payload.form.collection}:${payload.rowId}`)) {
+  // W22-R2: the render-side deterministic widget rewrite — both payload
+  // channels (present_card tool calls and legacy ```dsh fences) ride this
+  // shared mapping, so a model-declared `text` on `quantity` renders the
+  // number keypad whichever route carried the card. The log keeps the
+  // declaration; only the rendered control follows the classification.
+  const classified = applyDeterministicWidgets(payload)
+  if (classified.type === 'submit_receipt'
+    && !verification.landedCreates.has(`${classified.form.collection}:${classified.rowId}`)) {
     degradedOut.count += 1
     items.push({
       kind: 'degraded',
       seq,
       time,
-      text: `回执未经落库核实（没有对应的写入结果落库 ${payload.form.collection} 第 ${payload.rowId} 行），该回执不可信，请以单据页为准`,
+      text: `回执未经落库核实（没有对应的写入结果落库 ${classified.form.collection} 第 ${classified.rowId} 行），该回执不可信，请以单据页为准`,
     })
     return
   }
-  switch (payload.type) {
+  switch (classified.type) {
     case 'ask_choice':
-      items.push({ kind: 'ask', seq, time, payload })
+      items.push({ kind: 'ask', seq, time, payload: classified })
       break
     case 'ask_field':
-      items.push({ kind: 'field-ask', seq, time, payload })
+      items.push({ kind: 'field-ask', seq, time, payload: classified })
       break
     case 'form_draft':
-      items.push({ kind: 'task-card', seq, time, draft: legacyDraftOf(payload), payload })
+      items.push({ kind: 'task-card', seq, time, draft: legacyDraftOf(classified), payload: classified })
       break
     case 'submit_receipt':
-      items.push({ kind: 'receipt', seq, time, payload })
+      items.push({ kind: 'receipt', seq, time, payload: classified })
       break
     case 'report':
-      items.push({ kind: 'report', seq, time, payload })
+      items.push({ kind: 'report', seq, time, payload: classified })
       break
     case 'form_confirm':
     case 'reject_flow':
@@ -368,11 +375,11 @@ function appendPayloadItem(
       break
     case 'approval_pending':
     case 'approval_result':
-      items.push({ kind: 'approval', seq, time, payload })
+      items.push({ kind: 'approval', seq, time, payload: classified })
       break
     case 'plan_suggest':
     case 'plan_result':
-      items.push({ kind: 'plan', seq, time, payload })
+      items.push({ kind: 'plan', seq, time, payload: classified })
       break
   }
 }
@@ -415,17 +422,37 @@ function foldAssistantText(
  * route. The raw arguments string parses and validates against the same
  * payload validators the fence path rides; a violation folds to the collapsed
  * notice instead of a tool row (the card IS the tool's presentation, so no
- * neutral row ever appears and the tool/result finds no row to flip).
+ * neutral row ever appears and the tool/result finds no row to flip). A call
+ * whose tool/result landed `isError` (W22-R2) never renders the interactive
+ * card either — the rejected payload folds to the collapsed notice so a stale
+ * card cannot be confirmed against a corrected retry.
  * @param rawArguments - the call's raw argument string.
  * @param seq - the call event's seq.
  * @param time - the call event's time.
+ * @param rejected - whether the call's tool/result landed as an error.
  * @param items - the fold's item sink, in order.
  * @param degradedOut - the degraded-count accumulator.
  * @param verification - the receipt verification ledger for this window.
  */
 function foldPresentCard(
-  rawArguments: unknown, seq: number, time: number, items: ChatItem[], degradedOut: { count: number }, verification: ReceiptVerification,
+  rawArguments: unknown,
+  seq: number,
+  time: number,
+  rejected: boolean,
+  items: ChatItem[],
+  degradedOut: { count: number },
+  verification: ReceiptVerification,
 ): void {
+  if (rejected) {
+    degradedOut.count += 1
+    items.push({
+      kind: 'degraded',
+      seq,
+      time,
+      text: '这张卡片因参数校验未通过已被系统退回，不可交互；请以后续修正后的卡片为准',
+    })
+    return
+  }
   let payload: DshPayload | undefined
   if (typeof rawArguments === 'string') {
     try {
@@ -560,6 +587,10 @@ export function foldHistory(events: readonly FoldEvent[]): FoldedTurn {
   const nbCreateCalls = new Set<string>()
   const landedCreates = new Set<string>()
   const verification: ReceiptVerification = { landedCreates }
+  // Rejected present_card calls (W22-R2): a tool/result with `isError` marks
+  // the card's payload as bounced; the fold is a full replay, so collecting
+  // the failed callIds up front lets each call know its outcome.
+  const rejectedPresentCards = rejectedPresentCardIds(sorted)
 
   for (const event of sorted) {
     switch (event.type) {
@@ -593,7 +624,11 @@ export function foldHistory(events: readonly FoldEvent[]): FoldedTurn {
         if (name === PRESENT_CARD_TOOL) {
           // The structured-card channel renders its payload, never a tool row;
           // its callId stays unregistered so the tool/result stays inert.
-          foldPresentCard(data.arguments, event.seq, event.time, items, degraded, verification)
+          foldPresentCard(
+            data.arguments, event.seq, event.time,
+            typeof data.callId === 'string' && rejectedPresentCards.has(data.callId),
+            items, degraded, verification,
+          )
           break
         }
         const protocolLabel = protocolToolLabel(name)
@@ -635,6 +670,25 @@ export function foldHistory(events: readonly FoldEvent[]): FoldedTurn {
   deriveAnswered(items)
   const running = sawAnyTurn && openTurns.size > 0
   return { items, running, kgQueries, degradedFences: degraded.count }
+}
+
+/**
+ * Collect the callIds whose `present_card` tool/result landed `isError`
+ * (W22-R2): the fold replays a whole window at once, so one pre-pass pairs
+ * each rejected result with its originating call before any item renders.
+ * Only present_card callIds are consulted at the call sites, so the set may
+ * conservatively hold other tools' failed ids without effect.
+ * @param events - the seq-sorted events of one history window.
+ * @returns the failed tool/result callIds.
+ */
+function rejectedPresentCardIds(events: readonly FoldEvent[]): ReadonlySet<string> {
+  const rejected = new Set<string>()
+  for (const event of events) {
+    if (event.type !== 'tool/result') continue
+    const { callId, failed } = resultCallOf(event.data)
+    if (callId !== undefined && failed === true) rejected.add(callId)
+  }
+  return rejected
 }
 
 /** Record one KG walk descriptor from a tool call's raw arguments string. */

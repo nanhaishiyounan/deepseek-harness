@@ -6119,6 +6119,10 @@ importers:
         version: link:../user-questions
 
   packages/interaction/tool-present-card:
+    dependencies:
+      '@deepseek-ai/schemastery':
+        specifier: link:../../../vendor/schemastery
+        version: link:../../../vendor/schemastery
     devDependencies:
       '@deepseek-ai/cordis':
         specifier: workspace:^

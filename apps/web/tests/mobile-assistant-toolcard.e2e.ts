@@ -25,6 +25,8 @@ const OVERLAY = fileURLToPath(new URL('./mobile.overlay.yml', import.meta.url))
 const GOLDEN_DIR = fileURLToPath(new URL('./snapshots/mobile-assistant-toolcard', import.meta.url))
 const SEED_PATH = fileURLToPath(new URL('./snapshots/mobile-assistant-toolcard/session.jsonl', import.meta.url))
 const SEED_ID = 'mobile-assistant-toolcard-seed'
+const W22R2_SEED_PATH = fileURLToPath(new URL('./snapshots/mobile-assistant-toolcard-w22r2/session.jsonl', import.meta.url))
+const W22R2_SEED_ID = 'mobile-assistant-toolcard-w22r2-seed'
 
 describe('mobile assistant present_card tool source (seeded session → cards without fences)', () => {
   let scaffold: WebScaffold
@@ -35,6 +37,7 @@ describe('mobile assistant present_card tool source (seeded session → cards wi
   beforeAll(async () => {
     scaffold = await launchWebScaffold({ extraOverlayPath: OVERLAY })
     await seedSession(scaffold, await readFile(SEED_PATH, 'utf8'), SEED_ID)
+    await seedSession(scaffold, await readFile(W22R2_SEED_PATH, 'utf8'), W22R2_SEED_ID)
     browser = await chromium.launch()
   }, 180_000)
 
@@ -71,7 +74,7 @@ describe('mobile assistant present_card tool source (seeded session → cards wi
    * the shell back to the login gate. The chat rendering under test rides
    * session.* only; those calls keep hitting the real scaffold gateway.
    */
-  async function openChat(): Promise<void> {
+  async function openChat(sessionId: string = SEED_ID): Promise<void> {
     await page.addInitScript(() => {
       localStorage.setItem('dsh-mobile-auth', JSON.stringify({
         username: 'buyer', nickname: '采购员·蔡俊', token: 'e2e-toolcard-token', loggedAt: Date.now(),
@@ -89,7 +92,7 @@ describe('mobile assistant present_card tool source (seeded session → cards wi
       const clientId = (route.request().postDataJSON() as { payload?: { clientId?: string } }).payload?.clientId ?? ''
       await fulfillOk(route, { clientId, user: 'buyer' })
     })
-    await page.goto(`${scaffold.baseUrl}/mobile#/chat/${SEED_ID}`, { waitUntil: 'load' })
+    await page.goto(`${scaffold.baseUrl}/mobile#/chat/${sessionId}`, { waitUntil: 'load' })
     try {
       await page.locator('main').waitFor({ timeout: 20_000 })
     } catch (error) {
@@ -172,5 +175,43 @@ describe('mobile assistant present_card tool source (seeded session → cards wi
     const aria = await page.locator('main').ariaSnapshot()
     const normalized = aria.replaceAll(SEED_ID, '{{sessionId}}')
     await compareOrRefreshGolden(join(GOLDEN_DIR, 'chat.expected.md'), normalized, mode)
+  })
+
+  it('renders the deterministic widget rewrite: text-declared quantity rolls the decimal keypad, text-declared date rolls the DatePicker (W22-R2 P4 probes)', async () => {
+    await openChat(W22R2_SEED_ID)
+    try {
+      await page.locator('[data-testid="draft-card-v3"]').waitFor({ timeout: 20_000 })
+    } catch (error) {
+      throw new Error(`W22R2 chat body: ${await page.locator('main').innerText()}`, { cause: error })
+    }
+    const card = page.locator('[data-testid="draft-card-v3"]')
+    // The model declared quantity/need_date as text and the system's contract
+    // rejected the first (product_name-less) card; the corrected card still
+    // carries the text declarations, and the render fold classifies them.
+    await expect.poll(async () => card.locator('input[inputmode="decimal"]').count(), { timeout: 10_000 }).toBeGreaterThanOrEqual(1)
+    await expect.poll(async () => card.locator('[data-testid="date-trigger"]').count(), { timeout: 10_000 }).toBeGreaterThanOrEqual(1)
+    // The note-family field keeps its declared text: its label quotes 单价 in
+    // prose, and the derived row never gains a numeric control.
+    const body = await page.locator('main').ariaSnapshot()
+    expect(body).toContain('按合同')
+    expect(tripwire.pageErrors).toEqual([])
+  })
+
+  it('collapses the rejected present_card card instead of rendering an interactive draft (W22-R2 P0-2 probe)', async () => {
+    await openChat(W22R2_SEED_ID)
+    await page.locator('[data-testid="draft-card-v3"]').waitFor({ timeout: 20_000 })
+    const body = await page.locator('main').ariaSnapshot()
+    // The rejected revision-1 card (product_name missing, isError tool result)
+    // folds to the collapsed notice: no card face, no 确认写入 of its own.
+    // The notice body hides inside a closed <details>, so the cause text is
+    // asserted on the raw DOM while the summary line rides the aria tree.
+    expect(body).toContain('结构化消息（格式异常，已折叠）')
+    expect(await page.content()).toContain('参数校验未通过')
+    expect(body.includes('采购单草稿（缺品名）')).toBe(false)
+    // Exactly one interactive draft card remains — the corrected revision.
+    const cards = page.locator('[data-testid="draft-card-v3"]')
+    expect(await cards.count()).toBe(1)
+    expect(await cards.first().getByText('确认写入').count()).toBeGreaterThanOrEqual(1)
+    expect(tripwire.pageErrors).toEqual([])
   })
 })

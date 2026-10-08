@@ -83,7 +83,12 @@ import { enforceFormContract, type Config } from './form-contract.ts'
 import { applyDeterministicWidgets } from './widget.ts'
 
 export { enforceFormContract } from './form-contract.ts'
-export type { Config, FormCollectionSpec, FormCollections, RequiredFieldGroup } from './form-contract.ts'
+// The value export wires cordis config validation (`plugin.Config` on the
+// module namespace): defaults apply and structural violations surface at
+// load. The schemastery object resolver is not strict — unknown top-level
+// keys merge silently — so `apply` separately rejects them below.
+export { Config } from './form-contract.ts'
+export type { FormCollectionSpec, FormCollections, RequiredFieldGroup } from './form-contract.ts'
 export { applyDeterministicWidgets, inferWidgetKind } from './widget.ts'
 export type { WidgetKind } from './widget.ts'
 
@@ -973,7 +978,31 @@ function collectBoundViolations(payload: PresentCardPayload): string[] {
   return violations
 }
 
+/** The config's whole key set; a key outside it is a mistyped `formCollections`. */
+const CONFIG_KEYS: readonly string[] = ['formCollections']
+
+/**
+ * Reject unknown top-level config keys at startup (W22-R2): the schemastery
+ * object resolver merges unknown keys silently, so a mistyped
+ * `formcollectionss:` would read as "no contract configured" and the
+ * whitelist plus the required-field floor would skip enforcement without a
+ * word. Misconfiguration fails loud.
+ * @param config - the plugin config cordis resolved.
+ * @throws Error naming the unknown key when one is present.
+ */
+function assertKnownConfigKeys(config: Config): void {
+  for (const key of Object.keys(config)) {
+    if (!CONFIG_KEYS.includes(key)) {
+      throw new Error(
+        `tool-present-card: unknown config key "${key}" (legal keys: ${CONFIG_KEYS.join('/')})`
+          + '——疑似 formCollections 拼写错误，静默跳过会使白名单与必答下限失效',
+      )
+    }
+  }
+}
+
 export function apply(ctx: Context, config: Config = {}): void {
+  assertKnownConfigKeys(config)
   ctx.tools.register(defineTool({
     name: 'present_card',
     description,

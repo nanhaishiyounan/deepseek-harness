@@ -1,0 +1,2141 @@
+[
+ {
+  "sid": "session-1f81f7fd-d292-48d2-8080-fa0385520910",
+  "run": 1,
+  "outcome": "form_draft",
+  "rounds": 1,
+  "draft": {
+   "v": 3,
+   "type": "form_draft",
+   "draftId": "d_20261008_1",
+   "revision": 1,
+   "form": {
+    "collection": "pur_orders",
+    "label": "采购单"
+   },
+   "title": "采购单草稿",
+   "fields": [
+    {
+     "name": "supplier_id",
+     "label": "供应商",
+     "value": "2",
+     "tier": "required",
+     "widget": "relation",
+     "rationale": "山东鲁丰食品配料有限公司（优选，可下单）"
+    },
+    {
+     "name": "product_name",
+     "label": "品名",
+     "value": "食品级柠檬酸",
+     "tier": "required",
+     "widget": "text",
+     "rationale": "落库后写入明细行"
+    },
+    {
+     "name": "quantity",
+     "label": "数量",
+     "value": "200",
+     "tier": "required",
+     "widget": "number",
+     "rationale": "用户口述"
+    },
+    {
+     "name": "unit_price",
+     "label": "单价",
+     "value": "25",
+     "tier": "required",
+     "widget": "number",
+     "rationale": "用户口述"
+    },
+    {
+     "name": "need_date",
+     "label": "需求日期",
+     "value": "2026-10-15",
+     "tier": "required",
+     "widget": "date",
+     "rationale": "用户指定"
+    },
+    {
+     "name": "remark",
+     "label": "备注",
+     "value": "常规订单",
+     "tier": "required",
+     "widget": "text",
+     "rationale": "用户口述（仅在草稿/叙述中保留，主表无备注列）"
+    },
+    {
+     "name": "amount",
+     "label": "合计金额",
+     "value": "5000",
+     "tier": "derived",
+     "widget": "number",
+     "rationale": "数量200×单价25"
+    },
+    {
+     "name": "currency",
+     "label": "币种",
+     "value": "CNY",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "默认人民币"
+    },
+    {
+     "name": "doc_status",
+     "label": "单据状态",
+     "value": "draft",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "新建默认草稿"
+    },
+    {
+     "name": "receiving_status",
+     "label": "收货状态",
+     "value": "none",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "未收货"
+    },
+    {
+     "name": "invoice_status",
+     "label": "发票状态",
+     "value": "no_invoice",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "未开票"
+    },
+    {
+     "name": "code",
+     "label": "单号",
+     "value": "",
+     "tier": "system",
+     "widget": "text",
+     "rationale": "落库后服务端分配"
+    }
+   ]
+  },
+  "rejectedCards": [
+   "form_draft"
+  ],
+  "secs": 24,
+  "render": {
+   "fields": [
+    {
+     "label": "供应商",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "品名",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "数量",
+     "inputMode": "decimal",
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "单价",
+     "inputMode": "decimal",
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "需求日期",
+     "inputMode": null,
+     "isDateTrigger": true,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "备注",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "合计金额",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "币种",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "单据状态",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "收货状态",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "发票状态",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    }
+   ],
+   "noticeCount": 1,
+   "noticeText": "结构化消息（格式异常，已折叠）这张卡片因参数校验未通过已被系统退回，不可交互；请以后续修正后的卡片为准",
+   "confirmButtons": 1
+  }
+ },
+ {
+  "sid": "session-6a05b7b3-da8d-4289-bc39-dbc4a8293a8f",
+  "run": 2,
+  "outcome": "form_draft",
+  "rounds": 1,
+  "draft": {
+   "v": 3,
+   "type": "form_draft",
+   "draftId": "d_20261008_1",
+   "revision": 1,
+   "form": {
+    "collection": "pur_orders",
+    "label": "采购单"
+   },
+   "title": "采购单草稿",
+   "fields": [
+    {
+     "name": "supplier",
+     "label": "供应商",
+     "value": "2",
+     "tier": "required",
+     "widget": "relation",
+     "rationale": "按名称解析为山东鲁丰食品配料有限公司（id=2，preferred 优选状态，可下单）"
+    },
+    {
+     "name": "product_name",
+     "label": "品名",
+     "value": "47",
+     "tier": "required",
+     "widget": "relation",
+     "rationale": "按名称解析为食品级柠檬酸（id=47）"
+    },
+    {
+     "name": "quantity",
+     "label": "数量",
+     "value": "200",
+     "tier": "required",
+     "widget": "number",
+     "rationale": "用户口述，200 箱；明细行落库"
+    },
+    {
+     "name": "unit_price",
+     "label": "单价（元）",
+     "value": "25",
+     "tier": "derived",
+     "widget": "number",
+     "rationale": "用户口述，25 元/箱；明细行落库"
+    },
+    {
+     "name": "amount",
+     "label": "合计金额",
+     "value": "5000",
+     "tier": "derived",
+     "widget": "number",
+     "rationale": "200 × 25 = 5000"
+    },
+    {
+     "name": "currency",
+     "label": "币种",
+     "value": "CNY",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "默认人民币"
+    },
+    {
+     "name": "need_date",
+     "label": "需求日期",
+     "value": "2026-10-15",
+     "tier": "required",
+     "widget": "date",
+     "rationale": "用户指定 2026-10-15"
+    },
+    {
+     "name": "compare_note",
+     "label": "备注",
+     "value": "常规订单",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "用户口述，常规订单说明"
+    },
+    {
+     "name": "doc_status",
+     "label": "单据状态",
+     "value": "draft",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "新建默认草稿"
+    },
+    {
+     "name": "receiving_status",
+     "label": "收货状态",
+     "value": "none",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "新建未收货"
+    },
+    {
+     "name": "invoice_status",
+     "label": "发票状态",
+     "value": "no_invoice",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "新建未开票"
+    },
+    {
+     "name": "code",
+     "label": "单号",
+     "value": "",
+     "tier": "system",
+     "widget": "text",
+     "rationale": "落库后由服务端分配"
+    }
+   ]
+  },
+  "rejectedCards": [],
+  "secs": 42,
+  "render": {
+   "fields": [
+    {
+     "label": "供应商",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "品名",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "数量",
+     "inputMode": "decimal",
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "需求日期",
+     "inputMode": null,
+     "isDateTrigger": true,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "单价（元）",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "合计金额",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "币种",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "备注",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "单据状态",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "收货状态",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "发票状态",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    }
+   ],
+   "noticeCount": 0,
+   "noticeText": "",
+   "confirmButtons": 1
+  }
+ },
+ {
+  "sid": "session-6f003c4d-39cc-4dd3-ad7d-35680aa5fcdb",
+  "run": 3,
+  "outcome": "form_draft",
+  "rounds": 1,
+  "draft": {
+   "v": 3,
+   "type": "form_draft",
+   "draftId": "d_20261008_1",
+   "revision": 1,
+   "form": {
+    "collection": "pur_orders",
+    "label": "采购单"
+   },
+   "title": "采购单草稿",
+   "fields": [
+    {
+     "name": "supplier_id",
+     "label": "供应商",
+     "value": "2",
+     "tier": "required",
+     "widget": "relation",
+     "rationale": "已按名称查到 山东鲁丰食品配料有限公司（SUP-002，优选供方，可下单）"
+    },
+    {
+     "name": "product_name",
+     "label": "品名",
+     "value": "食品级柠檬酸",
+     "tier": "required",
+     "widget": "text",
+     "rationale": "用户口述，明细行落库"
+    },
+    {
+     "name": "quantity",
+     "label": "数量",
+     "value": "200",
+     "tier": "required",
+     "widget": "number",
+     "rationale": "用户口述 200 箱"
+    },
+    {
+     "name": "unit_price",
+     "label": "单价",
+     "value": "25",
+     "tier": "required",
+     "widget": "number",
+     "rationale": "用户口述 25 元，明细行落库"
+    },
+    {
+     "name": "need_date",
+     "label": "需求日期",
+     "value": "2026-10-15",
+     "tier": "required",
+     "widget": "date",
+     "rationale": "用户指定 2026-10-15"
+    },
+    {
+     "name": "remark",
+     "label": "备注",
+     "value": "常规订单",
+     "tier": "required",
+     "widget": "text",
+     "rationale": "用户口述常规订单"
+    },
+    {
+     "name": "amount",
+     "label": "合计金额",
+     "value": "5000",
+     "tier": "derived",
+     "widget": "number",
+     "rationale": "数量 200 × 单价 25 = 5000"
+    },
+    {
+     "name": "currency",
+     "label": "币种",
+     "value": "CNY",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "默认人民币"
+    },
+    {
+     "name": "doc_status",
+     "label": "单据状态",
+     "value": "draft",
+     "tier": "system",
+     "widget": "text",
+     "rationale": "落库后默认草稿"
+    },
+    {
+     "name": "receiving_status",
+     "label": "收货状态",
+     "value": "none",
+     "tier": "system",
+     "widget": "text",
+     "rationale": "默认未收货"
+    },
+    {
+     "name": "invoice_status",
+     "label": "发票状态",
+     "value": "no_invoice",
+     "tier": "system",
+     "widget": "text",
+     "rationale": "默认未开票"
+    },
+    {
+     "name": "code",
+     "label": "单号",
+     "value": "",
+     "tier": "system",
+     "widget": "text",
+     "rationale": "落库后由服务端生成"
+    }
+   ]
+  },
+  "rejectedCards": [
+   "form_draft",
+   "form_draft"
+  ],
+  "secs": 39,
+  "render": {
+   "fields": [
+    {
+     "label": "供应商",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "品名",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "数量",
+     "inputMode": "decimal",
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "单价",
+     "inputMode": "decimal",
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "需求日期",
+     "inputMode": null,
+     "isDateTrigger": true,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "备注",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "合计金额",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "币种",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    }
+   ],
+   "noticeCount": 2,
+   "noticeText": "结构化消息（格式异常，已折叠）这张卡片因参数校验未通过已被系统退回，不可交互；请以后续修正后的卡片为准\n结构化消息（格式异常，已折叠）这张卡片因参数校验未通过已被系统退回，不可交互；请以后续修正后的卡片为准",
+   "confirmButtons": 1
+  }
+ },
+ {
+  "sid": "session-08a0f307-f215-4b3f-88f9-66fbac381a00",
+  "run": 4,
+  "outcome": "form_draft",
+  "rounds": 1,
+  "draft": {
+   "v": 3,
+   "type": "form_draft",
+   "draftId": "d_20261008_1",
+   "revision": 1,
+   "form": {
+    "collection": "pur_orders",
+    "label": "采购单"
+   },
+   "title": "采购单草稿",
+   "fields": [
+    {
+     "name": "supplier_id",
+     "label": "供应商",
+     "value": "2",
+     "tier": "required",
+     "widget": "relation",
+     "rationale": "山东鲁丰食品配料有限公司（SUP-002 · 优选）"
+    },
+    {
+     "name": "need_date",
+     "label": "需求日期",
+     "value": "2026-10-15",
+     "tier": "required",
+     "widget": "date",
+     "rationale": "用户指定"
+    },
+    {
+     "name": "product_id",
+     "label": "品名",
+     "value": "47",
+     "tier": "required",
+     "widget": "relation",
+     "rationale": "食品级柠檬酸（FC-CA-001）·落库后写入订单明细"
+    },
+    {
+     "name": "qty",
+     "label": "数量（箱）",
+     "value": "200",
+     "tier": "required",
+     "widget": "number",
+     "rationale": "用户指定·落库后写入订单明细"
+    },
+    {
+     "name": "unit_price",
+     "label": "单价（元/箱）",
+     "value": "25",
+     "tier": "derived",
+     "widget": "number",
+     "rationale": "用户指定·落库后写入订单明细"
+    },
+    {
+     "name": "amount",
+     "label": "合计金额",
+     "value": "5000",
+     "tier": "derived",
+     "widget": "number",
+     "rationale": "200 箱 × 25 元 = 5000 元"
+    },
+    {
+     "name": "compare_note",
+     "label": "备注",
+     "value": "常规订单",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "用户备注"
+    },
+    {
+     "name": "currency",
+     "label": "币种",
+     "value": "CNY",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "默认人民币"
+    },
+    {
+     "name": "code",
+     "label": "单号",
+     "value": "",
+     "tier": "system",
+     "widget": "text",
+     "rationale": "落库后由服务端生成（PO-2026-XXXX）"
+    }
+   ]
+  },
+  "rejectedCards": [
+   "form_draft"
+  ],
+  "secs": 109,
+  "render": {
+   "fields": [
+    {
+     "label": "供应商",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "需求日期",
+     "inputMode": null,
+     "isDateTrigger": true,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "品名",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "数量（箱）",
+     "inputMode": "decimal",
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "单价（元/箱）",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "合计金额",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "备注",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "币种",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    }
+   ],
+   "noticeCount": 1,
+   "noticeText": "结构化消息（格式异常，已折叠）这张卡片因参数校验未通过已被系统退回，不可交互；请以后续修正后的卡片为准",
+   "confirmButtons": 1
+  }
+ },
+ {
+  "sid": "session-3a0e15c2-bd39-4e42-b33f-b4411494ad3c",
+  "run": 5,
+  "outcome": "form_draft",
+  "rounds": 1,
+  "draft": {
+   "v": 3,
+   "type": "form_draft",
+   "draftId": "d_20261008_1",
+   "revision": 1,
+   "form": {
+    "collection": "pur_orders",
+    "label": "采购单"
+   },
+   "title": "采购单草稿",
+   "fields": [
+    {
+     "name": "supplier_id",
+     "label": "供应商",
+     "value": "2",
+     "tier": "required",
+     "widget": "relation",
+     "rationale": "按名称解析到 srm_suppliers#2（山东鲁丰食品配料有限公司，状态=优选）"
+    },
+    {
+     "name": "product_name",
+     "label": "品名",
+     "value": "食品级柠檬酸",
+     "tier": "required",
+     "widget": "text",
+     "rationale": "用户指定；将随明细行落库到 pur_order_lines"
+    },
+    {
+     "name": "quantity",
+     "label": "数量",
+     "value": "200",
+     "tier": "required",
+     "widget": "number",
+     "rationale": "用户指定；将随明细行落库到 pur_order_lines"
+    },
+    {
+     "name": "unit_price",
+     "label": "单价",
+     "value": "25",
+     "tier": "required",
+     "widget": "number",
+     "rationale": "用户指定；将随明细行落库到 pur_order_lines"
+    },
+    {
+     "name": "need_date",
+     "label": "需求日期",
+     "value": "2026-10-15",
+     "tier": "required",
+     "widget": "date",
+     "rationale": "用户指定"
+    },
+    {
+     "name": "note",
+     "label": "备注",
+     "value": "常规订单",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "用户备注，主表无此列，仅作显示"
+    },
+    {
+     "name": "amount",
+     "label": "合计金额",
+     "value": "5000",
+     "tier": "derived",
+     "widget": "number",
+     "rationale": "数量 200 × 单价 25 = 5000"
+    },
+    {
+     "name": "currency",
+     "label": "币种",
+     "value": "CNY",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "默认人民币"
+    },
+    {
+     "name": "doc_status",
+     "label": "单据状态",
+     "value": "draft",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "登记即送审，初始草稿"
+    },
+    {
+     "name": "receiving_status",
+     "label": "收货状态",
+     "value": "none",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "未收货"
+    },
+    {
+     "name": "invoice_status",
+     "label": "发票状态",
+     "value": "no_invoice",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "未开票"
+    },
+    {
+     "name": "code",
+     "label": "单号",
+     "value": "",
+     "tier": "system",
+     "widget": "text",
+     "rationale": "落库后由服务端按 PO-YYYY-NNNN 递增分配"
+    }
+   ]
+  },
+  "rejectedCards": [
+   "form_draft"
+  ],
+  "secs": 39,
+  "render": {
+   "fields": [
+    {
+     "label": "供应商",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "品名",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "数量",
+     "inputMode": "decimal",
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "单价",
+     "inputMode": "decimal",
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "需求日期",
+     "inputMode": null,
+     "isDateTrigger": true,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "备注",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "合计金额",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "币种",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "单据状态",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "收货状态",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "发票状态",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    }
+   ],
+   "noticeCount": 1,
+   "noticeText": "结构化消息（格式异常，已折叠）这张卡片因参数校验未通过已被系统退回，不可交互；请以后续修正后的卡片为准",
+   "confirmButtons": 1
+  }
+ },
+ {
+  "sid": "session-dde17c87-cb11-42a5-ad69-922def376f55",
+  "run": 6,
+  "outcome": "form_draft",
+  "rounds": 1,
+  "draft": {
+   "v": 3,
+   "type": "form_draft",
+   "draftId": "d_20261008_1",
+   "revision": 1,
+   "form": {
+    "collection": "pur_orders",
+    "label": "采购单"
+   },
+   "title": "采购单草稿",
+   "fields": [
+    {
+     "name": "supplier_id",
+     "label": "供应商",
+     "value": "2",
+     "tier": "required",
+     "widget": "relation",
+     "rationale": "按名称查得山东鲁丰食品配料有限公司，状态优选，可下单"
+    },
+    {
+     "name": "product_name",
+     "label": "品名",
+     "value": "食品级柠檬酸",
+     "tier": "required",
+     "widget": "text",
+     "rationale": "物料编号 FC-CA-001（仅记草稿与明细）"
+    },
+    {
+     "name": "quantity",
+     "label": "数量",
+     "value": "200",
+     "tier": "required",
+     "widget": "number",
+     "rationale": "用户口述，单位箱"
+    },
+    {
+     "name": "unit_price",
+     "label": "单价",
+     "value": "25",
+     "tier": "required",
+     "widget": "number",
+     "rationale": "用户口述，单位元"
+    },
+    {
+     "name": "amount",
+     "label": "合计金额",
+     "value": "5000",
+     "tier": "derived",
+     "widget": "number",
+     "rationale": "200 × 25 = 5000"
+    },
+    {
+     "name": "currency",
+     "label": "币种",
+     "value": "CNY",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "默认人民币"
+    },
+    {
+     "name": "need_date",
+     "label": "需求日期",
+     "value": "2026-10-15",
+     "tier": "required",
+     "widget": "date",
+     "rationale": "用户口述"
+    },
+    {
+     "name": "note",
+     "label": "备注",
+     "value": "常规订单",
+     "tier": "required",
+     "widget": "text",
+     "rationale": "用户口述"
+    },
+    {
+     "name": "doc_status",
+     "label": "审批状态",
+     "value": "draft",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "登记即送审"
+    },
+    {
+     "name": "receiving_status",
+     "label": "收货状态",
+     "value": "none",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "未收货"
+    },
+    {
+     "name": "invoice_status",
+     "label": "发票状态",
+     "value": "no_invoice",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "未开票"
+    },
+    {
+     "name": "code",
+     "label": "单号",
+     "value": "",
+     "tier": "system",
+     "widget": "text",
+     "rationale": "落库后由服务端生成"
+    }
+   ]
+  },
+  "rejectedCards": [
+   "form_draft"
+  ],
+  "secs": 24,
+  "render": {
+   "fields": [
+    {
+     "label": "供应商",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "品名",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "数量",
+     "inputMode": "decimal",
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "单价",
+     "inputMode": "decimal",
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "需求日期",
+     "inputMode": null,
+     "isDateTrigger": true,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "备注",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "合计金额",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "币种",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "审批状态",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "收货状态",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "发票状态",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    }
+   ],
+   "noticeCount": 1,
+   "noticeText": "结构化消息（格式异常，已折叠）这张卡片因参数校验未通过已被系统退回，不可交互；请以后续修正后的卡片为准",
+   "confirmButtons": 1
+  }
+ },
+ {
+  "sid": "session-1d190dbb-989d-4455-a3c3-92f03abee981",
+  "run": 7,
+  "outcome": "form_draft",
+  "rounds": 1,
+  "draft": {
+   "v": 3,
+   "type": "form_draft",
+   "draftId": "d_20261008_1",
+   "revision": 1,
+   "form": {
+    "collection": "pur_orders",
+    "label": "采购单"
+   },
+   "title": "采购单草稿",
+   "fields": [
+    {
+     "name": "supplier_id",
+     "label": "供应商",
+     "value": "2",
+     "tier": "required",
+     "widget": "relation",
+     "rationale": "山东鲁丰食品配料有限公司（优选·SUP-002）"
+    },
+    {
+     "name": "product_id",
+     "label": "品名",
+     "value": "47",
+     "tier": "required",
+     "widget": "relation",
+     "rationale": "食品级柠檬酸（FC-CA-001）"
+    },
+    {
+     "name": "quantity",
+     "label": "数量",
+     "value": "200",
+     "tier": "required",
+     "widget": "number"
+    },
+    {
+     "name": "unit_price",
+     "label": "单价",
+     "value": "25",
+     "tier": "required",
+     "widget": "number"
+    },
+    {
+     "name": "need_date",
+     "label": "需求日期",
+     "value": "2026-10-15",
+     "tier": "required",
+     "widget": "date"
+    },
+    {
+     "name": "note",
+     "label": "备注",
+     "value": "常规订单",
+     "tier": "required",
+     "widget": "text",
+     "rationale": "采购单主表无备注列，备注随回执留存"
+    },
+    {
+     "name": "amount",
+     "label": "合计金额",
+     "value": "5000",
+     "tier": "derived",
+     "widget": "number",
+     "rationale": "数量200×单价25"
+    },
+    {
+     "name": "code",
+     "label": "单号",
+     "value": "",
+     "tier": "system",
+     "widget": "text",
+     "rationale": "落库后生成"
+    }
+   ]
+  },
+  "rejectedCards": [
+   "form_draft"
+  ],
+  "secs": 30,
+  "render": {
+   "fields": [
+    {
+     "label": "供应商",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "品名",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "数量",
+     "inputMode": "decimal",
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "单价",
+     "inputMode": "decimal",
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "需求日期",
+     "inputMode": null,
+     "isDateTrigger": true,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "备注",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "合计金额",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    }
+   ],
+   "noticeCount": 1,
+   "noticeText": "结构化消息（格式异常，已折叠）这张卡片因参数校验未通过已被系统退回，不可交互；请以后续修正后的卡片为准",
+   "confirmButtons": 1
+  }
+ },
+ {
+  "sid": "session-ff3d6d9f-ef6c-4df4-ba3f-68050cd62938",
+  "run": 8,
+  "outcome": "form_draft",
+  "rounds": 1,
+  "draft": {
+   "v": 3,
+   "type": "form_draft",
+   "draftId": "d_20261008_1",
+   "revision": 1,
+   "form": {
+    "collection": "pur_orders",
+    "label": "采购单"
+   },
+   "title": "采购单草稿",
+   "fields": [
+    {
+     "name": "supplier_id",
+     "label": "供应商",
+     "value": "2",
+     "tier": "required",
+     "widget": "relation",
+     "rationale": "按名称解析到山东鲁丰食品配料有限公司（优选，可下单）"
+    },
+    {
+     "name": "need_date",
+     "label": "需求日期",
+     "value": "2026-10-15",
+     "tier": "required",
+     "widget": "date",
+     "rationale": "用户指定"
+    },
+    {
+     "name": "product_name",
+     "label": "品名",
+     "value": "食品级柠檬酸",
+     "tier": "required",
+     "widget": "text",
+     "rationale": "明细行（pur_order_lines）使用，物料 id=47"
+    },
+    {
+     "name": "quantity",
+     "label": "数量",
+     "value": "200",
+     "tier": "required",
+     "widget": "number",
+     "rationale": "用户指定，写入明细行（箱）"
+    },
+    {
+     "name": "unit_price",
+     "label": "单价",
+     "value": "25",
+     "tier": "required",
+     "widget": "number",
+     "rationale": "用户指定，写入明细行（元）"
+    },
+    {
+     "name": "amount",
+     "label": "合计金额",
+     "value": "5000",
+     "tier": "derived",
+     "widget": "number",
+     "rationale": "数量 200 × 单价 25 = 5000 元"
+    },
+    {
+     "name": "currency",
+     "label": "币种",
+     "value": "CNY",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "默认人民币"
+    },
+    {
+     "name": "doc_status",
+     "label": "单据状态",
+     "value": "draft",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "新建单据默认草稿"
+    },
+    {
+     "name": "receiving_status",
+     "label": "收货状态",
+     "value": "none",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "未收货"
+    },
+    {
+     "name": "invoice_status",
+     "label": "发票状态",
+     "value": "no_invoice",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "未开票"
+    },
+    {
+     "name": "note",
+     "label": "备注",
+     "value": "常规订单",
+     "tier": "required",
+     "widget": "text",
+     "rationale": "用户指定；备注仅在草稿与叙述保留（采购单主表不含备注列，明细行不写备注）"
+    },
+    {
+     "name": "code",
+     "label": "单号",
+     "value": "",
+     "tier": "system",
+     "widget": "text",
+     "rationale": "落库后由服务端按 PO-YYYY-NNNN 递增生成"
+    }
+   ]
+  },
+  "rejectedCards": [
+   "form_draft",
+   "form_draft"
+  ],
+  "secs": 33,
+  "render": {
+   "fields": [
+    {
+     "label": "供应商",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "需求日期",
+     "inputMode": null,
+     "isDateTrigger": true,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "品名",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "数量",
+     "inputMode": "decimal",
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "单价",
+     "inputMode": "decimal",
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "备注",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "合计金额",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "币种",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "单据状态",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "收货状态",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "发票状态",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    }
+   ],
+   "noticeCount": 2,
+   "noticeText": "结构化消息（格式异常，已折叠）这张卡片因参数校验未通过已被系统退回，不可交互；请以后续修正后的卡片为准\n结构化消息（格式异常，已折叠）这张卡片因参数校验未通过已被系统退回，不可交互；请以后续修正后的卡片为准",
+   "confirmButtons": 1
+  }
+ },
+ {
+  "sid": "session-b1f255fc-54a3-4237-9c46-8029505057ad",
+  "run": 9,
+  "outcome": "form_draft",
+  "rounds": 1,
+  "draft": {
+   "v": 3,
+   "type": "form_draft",
+   "draftId": "d_20261008_1",
+   "revision": 1,
+   "form": {
+    "collection": "pur_orders",
+    "label": "采购单"
+   },
+   "title": "采购单草稿",
+   "fields": [
+    {
+     "name": "supplier_id",
+     "label": "供应商",
+     "value": "2",
+     "tier": "required",
+     "widget": "relation",
+     "rationale": "按名称解析到 id=2，状态为优选可下单"
+    },
+    {
+     "name": "product_id",
+     "label": "品名",
+     "value": "47",
+     "tier": "required",
+     "widget": "relation",
+     "rationale": "按品名解析到 id=47（食品级柠檬酸）"
+    },
+    {
+     "name": "quantity",
+     "label": "数量",
+     "value": "200",
+     "tier": "required",
+     "widget": "number",
+     "rationale": "用户口述 200 箱"
+    },
+    {
+     "name": "unit_price",
+     "label": "单价",
+     "value": "25",
+     "tier": "required",
+     "widget": "number",
+     "rationale": "用户口述 25 元"
+    },
+    {
+     "name": "need_date",
+     "label": "需求日期",
+     "value": "2026-10-15",
+     "tier": "required",
+     "widget": "date",
+     "rationale": "用户口述"
+    },
+    {
+     "name": "amount",
+     "label": "合计金额",
+     "value": "5000",
+     "tier": "derived",
+     "widget": "number",
+     "rationale": "数量 200 × 单价 25 = 5000"
+    },
+    {
+     "name": "currency",
+     "label": "币种",
+     "value": "CNY",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "人民币"
+    },
+    {
+     "name": "code",
+     "label": "单号",
+     "value": "",
+     "tier": "system",
+     "widget": "text",
+     "rationale": "落库后生成"
+    }
+   ]
+  },
+  "rejectedCards": [],
+  "secs": 39,
+  "render": {
+   "fields": [
+    {
+     "label": "供应商",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "品名",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "数量",
+     "inputMode": "decimal",
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "单价",
+     "inputMode": "decimal",
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "需求日期",
+     "inputMode": null,
+     "isDateTrigger": true,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "合计金额",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "币种",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    }
+   ],
+   "noticeCount": 0,
+   "noticeText": "",
+   "confirmButtons": 1
+  }
+ },
+ {
+  "sid": "session-3e9fedac-90d0-414a-a503-a78d4d65c0f3",
+  "run": 10,
+  "outcome": "form_draft",
+  "rounds": 1,
+  "draft": {
+   "v": 3,
+   "type": "form_draft",
+   "draftId": "d_20261008_1",
+   "revision": 1,
+   "form": {
+    "collection": "pur_orders",
+    "label": "采购单"
+   },
+   "title": "采购单草稿",
+   "fields": [
+    {
+     "name": "supplier_id",
+     "label": "供应商",
+     "value": "2",
+     "tier": "required",
+     "widget": "relation",
+     "rationale": "山东鲁丰食品配料有限公司（id=2，优选·可下单）"
+    },
+    {
+     "name": "product_id",
+     "label": "品名",
+     "value": "47",
+     "tier": "required",
+     "widget": "relation",
+     "rationale": "食品级柠檬酸（id=47）"
+    },
+    {
+     "name": "quantity",
+     "label": "数量",
+     "value": "200",
+     "tier": "required",
+     "widget": "number",
+     "rationale": "你提供的采购数量（箱）"
+    },
+    {
+     "name": "unit_price",
+     "label": "单价",
+     "value": "25",
+     "tier": "required",
+     "widget": "number",
+     "rationale": "你提供的单价（元/箱）"
+    },
+    {
+     "name": "amount",
+     "label": "合计金额",
+     "value": "5000",
+     "tier": "derived",
+     "widget": "number",
+     "rationale": "200 × 25 = 5000"
+    },
+    {
+     "name": "currency",
+     "label": "币种",
+     "value": "CNY",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "默认人民币"
+    },
+    {
+     "name": "need_date",
+     "label": "需求日期",
+     "value": "2026-10-15",
+     "tier": "required",
+     "widget": "date"
+    },
+    {
+     "name": "doc_status",
+     "label": "单据状态",
+     "value": "draft",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "新建默认草稿"
+    },
+    {
+     "name": "receiving_status",
+     "label": "收货状态",
+     "value": "none",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "新建默认未收货"
+    },
+    {
+     "name": "invoice_status",
+     "label": "发票状态",
+     "value": "no_invoice",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "新建默认未开票"
+    },
+    {
+     "name": "code",
+     "label": "单号",
+     "value": "",
+     "tier": "system",
+     "widget": "text",
+     "rationale": "落库后由服务端分配"
+    }
+   ]
+  },
+  "rejectedCards": [
+   "form_draft",
+   "form_draft"
+  ],
+  "secs": 24,
+  "render": {
+   "fields": [
+    {
+     "label": "供应商",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "品名",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "数量",
+     "inputMode": "decimal",
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "单价",
+     "inputMode": "decimal",
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "需求日期",
+     "inputMode": null,
+     "isDateTrigger": true,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "合计金额",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "币种",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "单据状态",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "收货状态",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "发票状态",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    }
+   ],
+   "noticeCount": 2,
+   "noticeText": "结构化消息（格式异常，已折叠）这张卡片因参数校验未通过已被系统退回，不可交互；请以后续修正后的卡片为准\n结构化消息（格式异常，已折叠）这张卡片因参数校验未通过已被系统退回，不可交互；请以后续修正后的卡片为准",
+   "confirmButtons": 1
+  }
+ },
+ {
+  "sid": "session-cd005eeb-29fd-4b43-a9af-6c1a98fed2e8",
+  "run": 1,
+  "outcome": "form_draft",
+  "rounds": 1,
+  "draft": {
+   "v": 3,
+   "type": "form_draft",
+   "draftId": "d_20261008_1",
+   "revision": 1,
+   "form": {
+    "collection": "pur_orders",
+    "label": "采购单"
+   },
+   "title": "采购单草稿",
+   "fields": [
+    {
+     "name": "supplier_id",
+     "label": "供应商",
+     "value": "2",
+     "tier": "required",
+     "widget": "relation",
+     "rationale": "已按「山东鲁丰食品配料有限公司」解析，lifecycle_status=preferred 可下单"
+    },
+    {
+     "name": "product_id",
+     "label": "品名",
+     "value": "47",
+     "tier": "required",
+     "widget": "relation",
+     "rationale": "已按「食品级柠檬酸」解析到 hub_inv_products id=47；单价 25 元对得上"
+    },
+    {
+     "name": "quantity",
+     "label": "数量",
+     "value": "200",
+     "tier": "required",
+     "widget": "number",
+     "rationale": "系统按字段名固定 number 控件"
+    },
+    {
+     "name": "unit_price",
+     "label": "单价",
+     "value": "25",
+     "tier": "required",
+     "widget": "number",
+     "rationale": "明细走 pur_order_lines"
+    },
+    {
+     "name": "need_date",
+     "label": "需求日期",
+     "value": "2026-10-15",
+     "tier": "required",
+     "widget": "date",
+     "rationale": "用户指定；系统按字段名固定 date 控件"
+    },
+    {
+     "name": "amount",
+     "label": "合计金额",
+     "value": "5000",
+     "tier": "derived",
+     "widget": "number",
+     "rationale": "200×25=5000"
+    },
+    {
+     "name": "code",
+     "label": "单号",
+     "value": "",
+     "tier": "system",
+     "widget": "text",
+     "rationale": "落库后由服务端分配"
+    }
+   ]
+  },
+  "rejectedCards": [
+   "form_draft",
+   "form_draft"
+  ],
+  "secs": 160,
+  "render": {
+   "fields": [
+    {
+     "label": "供应商",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "品名",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "数量",
+     "inputMode": "decimal",
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "单价",
+     "inputMode": "decimal",
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "需求日期",
+     "inputMode": null,
+     "isDateTrigger": true,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "合计金额",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    }
+   ],
+   "noticeCount": 2,
+   "noticeText": "结构化消息（格式异常，已折叠）这张卡片因参数校验未通过已被系统退回，不可交互；请以后续修正后的卡片为准\n结构化消息（格式异常，已折叠）这张卡片因参数校验未通过已被系统退回，不可交互；请以后续修正后的卡片为准",
+   "confirmButtons": 1
+  }
+ },
+ {
+  "sid": "session-4994dd7b-9493-444a-a406-6cdb237c11cc",
+  "run": 2,
+  "outcome": "form_draft",
+  "rounds": 1,
+  "draft": {
+   "v": 3,
+   "type": "form_draft",
+   "draftId": "d_20261008_1",
+   "revision": 1,
+   "form": {
+    "collection": "pur_orders",
+    "label": "采购单"
+   },
+   "title": "采购单草稿",
+   "fields": [
+    {
+     "name": "supplier_id",
+     "label": "供应商",
+     "value": "2",
+     "tier": "required",
+     "widget": "relation",
+     "rationale": "按名称解析 山东鲁丰食品配料有限公司 → id=2（优选·SUP-002）"
+    },
+    {
+     "name": "product_name",
+     "label": "品名",
+     "value": "食品级柠檬酸",
+     "tier": "required",
+     "widget": "text",
+     "rationale": "按品名解析 hub_inv_products → id=47（明细行落库用）"
+    },
+    {
+     "name": "quantity",
+     "label": "数量",
+     "value": "200",
+     "tier": "required",
+     "widget": "text",
+     "rationale": "用户口述 200 箱；接口联调声明 text，系统按字段名改写为 number"
+    },
+    {
+     "name": "need_date",
+     "label": "需求日期",
+     "value": "2026-10-15",
+     "tier": "required",
+     "widget": "text",
+     "rationale": "用户口述 2026-10-15；接口联调声明 text，系统按字段名改写为 date"
+    },
+    {
+     "name": "unit_price",
+     "label": "单价",
+     "value": "25",
+     "tier": "derived",
+     "widget": "number",
+     "rationale": "用户口述 25 元/箱（明细行落库用）"
+    },
+    {
+     "name": "amount",
+     "label": "合计金额",
+     "value": "5000",
+     "tier": "derived",
+     "widget": "number",
+     "rationale": "数量 200 × 单价 25 = 5000"
+    },
+    {
+     "name": "currency",
+     "label": "币种",
+     "value": "CNY",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "默认人民币"
+    },
+    {
+     "name": "doc_status",
+     "label": "单据状态",
+     "value": "draft",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "新登记默认草稿，登记即送审"
+    },
+    {
+     "name": "receiving_status",
+     "label": "收货进度",
+     "value": "none",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "未开始收货"
+    },
+    {
+     "name": "invoice_status",
+     "label": "发票进度",
+     "value": "no_invoice",
+     "tier": "derived",
+     "widget": "text",
+     "rationale": "未开票"
+    },
+    {
+     "name": "code",
+     "label": "单号",
+     "value": "",
+     "tier": "system",
+     "widget": "text",
+     "rationale": "落库后由服务端分配（PO-YYYY-NNNN）"
+    }
+   ]
+  },
+  "rejectedCards": [],
+  "secs": 115,
+  "render": {
+   "fields": [
+    {
+     "label": "供应商",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "品名",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "数量",
+     "inputMode": "decimal",
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "需求日期",
+     "inputMode": null,
+     "isDateTrigger": true,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "单价",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "合计金额",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "币种",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "单据状态",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "收货进度",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    },
+    {
+     "label": "发票进度",
+     "inputMode": null,
+     "isDateTrigger": false,
+     "isSelectTrigger": false,
+     "isRelation": false
+    }
+   ],
+   "noticeCount": 0,
+   "noticeText": "",
+   "confirmButtons": 1
+  }
+ }
+]

@@ -65,3 +65,7 @@ Prompt（故意缺数量）：`帮我登记一张采购单：向 山东鲁丰食
 | [Critical] 必答字段集不稳定（3/10 整缺） | run4/6/9 品名+数量+单价缺 | 10/10 必答全在卡 | formCollections requiredFields fail-closed |
 | [Important] collection 漂移 1/10 | run1 hub_inv_products 自造 sku | 0/10 | 17 表白名单整卡拒 |
 | [Important] select↔text 漂移 | runB receipt_type 交替 | 带 options 时强制 select；无 options 时诚实降级（教学补强） | resolver options→select + persona |
+
+## 归因修正（W22-R2 补记）
+
+本文件上面表格里的「数量/单价 widget 命中 10/10」归因一栏写「widget resolver 字段名/label 确定性 rewrite」——W22-R1 验证（FAIL 80）的 P4 旁路探针证实该归因不成立：服务端 rewrite 后的载荷从不离开服务端（session log 与模型上下文保持原始声明，execute 结果只有 `{presented: true}`），客户端渲染直接跟随模型声明，resolver 对渲染是死码。10/10 的真实归因是 **persona 教学 + 模型声明恰好命中**，无渲染层保障。W22-R2 把分类规则镜像进客户端渲染折叠层（双通道同口径）后，该读数的机制归因才成立：persona 教学推动声明正确，渲染层确定性分类兜底纠偏——见 `.agents/notes/implemented/feature/2026-10-08-w22-r1-deterministic-widget-form-contract.md` 的 W22-R2 修正节与 `w22-r2-summary.md`。

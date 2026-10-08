@@ -846,4 +846,60 @@ describe('present_card tool', () => {
       expect(text).not.toContain('matched')
     })
   })
+
+  describe('deterministic widget refinement (W22-R2)', () => {
+    /** Resolve one single-field form_draft's widget, failing the test outside the branch. */
+    function widgetOf(field: { name: string; label: string }): string | undefined {
+      const resolved = resolvePresentCardPayload({
+        v: 3,
+        type: 'form_draft',
+        draftId: 'd_refine',
+        revision: 1,
+        form: { collection: 't_any', label: '任意表' },
+        title: '精化表',
+        fields: [{ ...field, value: '1', tier: 'required', widget: 'text' }],
+      })
+      if (!('payload' in resolved) || resolved.payload.type !== 'form_draft') throw new Error('must resolve')
+      return resolved.payload.fields[0]?.widget
+    }
+
+    it('pins the declared text on note-family names whose labels quote money words (customer_note 反例)', () => {
+      expect(widgetOf({ name: 'customer_note', label: '客户备注（含单价上限说明）' })).toBe('text')
+      expect(widgetOf({ name: 'note', label: '备注（含单价）' })).toBe('text')
+      expect(widgetOf({ name: 'po_remark', label: '备注：单价历史' })).toBe('text')
+      expect(widgetOf({ name: 'insp_comment', label: '检验备注' })).toBe('text')
+    })
+
+    it('keeps the compound-head label hits that motivated the fragments (no over-tightening)', () => {
+      expect(widgetOf({ name: 'qty_boxes', label: '入库数量（箱）' })).toBe('number')
+      expect(widgetOf({ name: 'total_all', label: '合计金额' })).toBe('number')
+      expect(widgetOf({ name: 'eta', label: '交期' })).toBe('date')
+      expect(widgetOf({ name: 'due', label: '需求日期' })).toBe('date')
+    })
+
+    it('treats connector-glued tokens as prose, not head words', () => {
+      expect(widgetOf({ name: 'misc', label: '备注（含单价）' })).toBe('text')
+      expect(widgetOf({ name: 'misc2', label: '说明：见单价表' })).toBe('text')
+    })
+  })
+
+  describe('config fail-loud (W22-R2)', () => {
+    it('rejects a mistyped top-level config key at startup instead of silently skipping the contract', async () => {
+      const ctx = new Context()
+      await ctx.plugin(SystemPrompt)
+      await ctx.plugin(ToolRuntime)
+      await expect(
+        ctx.plugin(toolPresentCard, { formcollectionss: {} } as never),
+      ).rejects.toThrow(/unknown config key "formcollectionss"/u)
+    })
+
+    it('mounts cleanly with the legal key and with no config at all', async () => {
+      for (const config of [{ formCollections: {} }, undefined]) {
+        const ctx = new Context()
+        await ctx.plugin(SystemPrompt)
+        await ctx.plugin(ToolRuntime)
+        await expect(ctx.plugin(toolPresentCard, config)).resolves.toBeTypeOf('object')
+      }
+    })
+  })
 })
