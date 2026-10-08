@@ -205,7 +205,9 @@ export function DraftCard(props: DraftCardProps): JSX.Element {
  * shows), select fields pick from the payload's own options, date fields
  * roll the DatePicker, and number/text fields stay the boxed input. A
  * select without options degrades to the boxed input, and a locked card
- * rests select and date fields on the read-only value line.
+ * rests select and date fields on the read-only value line. A declared
+ * relation the meta read could not key with a numeric value rests on the
+ * opaque 引用 #N face (W22-R4), the same face as the derived tier.
  * @param props - the field, its payload context, edits, metadata, busy gate.
  * @returns the control element.
  */
@@ -221,9 +223,15 @@ function EditableValue(
 ): JSX.Element {
   const { field, payload, values, meta, disabled, onEdit } = props
   const value = values[field.name] ?? ''
-  if (field.widget === 'relation' && !disabled) {
+  if (field.widget === 'relation') {
     const spec = fieldControlOf(payload.form.collection, field.name, metaFieldOf(meta, field.name))
-    if (spec.kind === 'relation') {
+    // A declared relation the meta read could not key (double miss) with a
+    // numeric value rests on the same opaque 引用 #N face as the derived
+    // tier — a bare editable `47` reads like a quantity or amount.
+    if ((spec.kind !== 'relation' || spec.target === undefined) && /^\d+$/.test(value)) {
+      return <span className={css.fieldStatic} data-testid="relation-static">引用 #{value}</span>
+    }
+    if (spec.kind === 'relation' && !disabled) {
       return (
         <RelationSelect
           target={spec.target}

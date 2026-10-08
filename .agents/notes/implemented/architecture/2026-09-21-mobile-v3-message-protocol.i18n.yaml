@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-09-21-mobile-v3-message-protocol.md
-2026-09-21-mobile-v3-message-protocol.md: 45f8d738ebf192010a29ffc5a17e191e4187f567
-2026-09-21-mobile-v3-message-protocol.zh.md: 6a24af48b2668a66ff9f5688efe9cf0db7cb0e21
+2026-09-21-mobile-v3-message-protocol.md: ac1d66a6048588993d38fe2fb4a15e5c9df85230
+2026-09-21-mobile-v3-message-protocol.zh.md: ed09c33ed7a868eba8e42f41a7bef311718d007a

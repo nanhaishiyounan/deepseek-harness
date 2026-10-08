@@ -383,8 +383,8 @@ describe('ReceiptCard v3', () => {
     await waitFor(() => { expect(screen.getByRole('button', { name: '供应商' }).textContent).toContain('宏发食品') })
     // The derived relation rides the resolved face (a non-numeric value stays the raw text).
     expect(screen.getByText('C-9')).toBeTruthy()
-    // A relation field with no metadata falls back to the bare input (the
-    // enclosing field-row label names the antd Input's element).
+    // A relation field with no metadata rests its numeric value on the
+    // opaque 引用 #N face (W22-R4), not a bare editable input.
     const bare = render(
       <DraftCard
         payload={{ ...payload, fields: [{ name: 'owner_id', label: '经办人', value: '7', tier: 'required', widget: 'relation' }] }}
@@ -392,7 +392,7 @@ describe('ReceiptCard v3', () => {
         onEdit={() => {}} onConfirm={() => {}} onReject={() => {}} onRedraft={() => {}} disabled={false}
       />,
     )
-    expect((bare.container.querySelector('label .adm-input-element') as HTMLInputElement).value).toBe('7')
+    expect(bare.getByText('引用 #7')).toBeTruthy()
     bare.unmount()
     // Opening the picker and confirming routes the picked id as the edit.
     fireEvent.click(screen.getByRole('button', { name: '供应商' }))
@@ -438,6 +438,25 @@ describe('ReceiptCard v3', () => {
     // the bare number: it reads as the opaque row reference.
     expect(screen.getByText('引用 #48')).toBeTruthy()
     vi.unstubAllGlobals()
+  })
+
+  it('rests a double-missed required relation on the opaque reference face (W22-R4)', () => {
+    // The meta table keys neither `customer_id` nor the stripped `customer`
+    // spelling: the required tier's edit row shows the same 引用 #N face as
+    // the derived tier instead of a bare editable input with the raw id.
+    const meta = new Map<string, CollectionFieldMeta>([['hub_po_purchase_orders', new Map<string, NocobaseFieldView>([
+      ['supplier', { name: 'supplier', type: 'belongsTo', target: 'hub_po_suppliers' }],
+    ])]])
+    render(
+      <DraftCard
+        payload={{ ...DRAFT, fields: [{ name: 'customer_id', label: '客户', value: '48', tier: 'required', widget: 'relation' }] }}
+        values={{ customer_id: '48' }} phase="draft"
+        meta={meta.get('hub_po_purchase_orders')}
+        onEdit={() => {}} onConfirm={() => {}} onReject={() => {}} onRedraft={() => {}} disabled={false}
+      />,
+    )
+    expect(screen.getByText('引用 #48')).toBeTruthy()
+    expect(document.querySelector('input')).toBeNull()
   })
 
   it('ignores rich taps that did not land on an image', () => {

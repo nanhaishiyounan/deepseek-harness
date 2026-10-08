@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/bug-fix/2026-09-21-mobile-v3-closeout-fixes.md
-2026-09-21-mobile-v3-closeout-fixes.md: 14b93e382bdf948bf14a9e7ff2d6433f9d954257
-2026-09-21-mobile-v3-closeout-fixes.zh.md: a82a9b3d371e166c27a1ba4128701553481c6300
+2026-09-21-mobile-v3-closeout-fixes.md: 2becc4fcbf9b8c89cd0731df06d60dce7fb71e3d
+2026-09-21-mobile-v3-closeout-fixes.zh.md: 95e9b7c3ba5d1344faea95ec48200074dc305837

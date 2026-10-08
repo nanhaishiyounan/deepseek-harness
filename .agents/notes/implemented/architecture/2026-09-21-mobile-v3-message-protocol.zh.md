@@ -10,7 +10,7 @@ Status: implemented
 
 ## 决策
 
-**七型消息、一种围栏。** `protocol.ts` 拥有 wire 词表：结构化载荷一律走 ` ```dsh ` 围栏，携带 `v:3` + `type`（ask_choice / ask_field / form_draft / form_confirm / reject_flow / submit_receipt）；第七型 `welcome` 刻意不上 wire——它是 preset 元数据，空会话时客户端本地渲染（静态文案、不耗模型回合、标题生成不消费）。模型输出容忍：坏围栏或未知 type 降级为普通叙述文本并计入 `FoldedTurn.degradedFences`，可选展示提示（mode/variant/allowFreeText、hint、单位、理由、建议）缺失时取默认值而非拒收；只有必填成员的结构性违规才拒收。
+**七型消息、一种围栏。** `protocol.ts` 拥有 wire 词表：结构化载荷一律走 ` ```dsh ` 围栏，携带 `v:3` + `type`（ask_choice / ask_field / form_draft / form_confirm / reject_flow / submit_receipt）；第七型 `welcome` 刻意不上 wire——它是 preset 元数据，空会话时客户端本地渲染（静态文案、不耗模型回合、标题生成不消费）。模型输出容忍：坏围栏或未知 type 降级为普通叙述文本并计入 `FoldedTurn.degradedCards`，可选展示提示（mode/variant/allowFreeText、hint、单位、理由、建议）缺失时取默认值而非拒收；只有必填成员的结构性违规才拒收。
 
 **围栏永不进气泡。** `fold.ts` 按原文顺序把 assistant 消息切成叙述段与结构化 item（`ChatItem` 新增 `ask`/`field-ask`/`action`/`receipt`）；v2 的 ` ```json ` 草稿围栏为历史会话保留解析、已识别围栏从气泡剥离。点选作答 = 发一条普通 user 文本（`option.send ?? option.label`）；fold 纯重放派生已答态（选项组置灰、所选项高亮、选择回执胶囊）——自由打字同样作答，只是无高亮。用户动作用 `确认写入`/`驳回` + 围栏上 wire；v2 前缀消息折进同一 `action` item，旧协议文本不再污染气泡。
 

@@ -35,7 +35,7 @@ Structural constraints live in the schema; count bounds the schema DSL cannot ex
 
 ### Rollback runbook (W22)
 
-Rolling back the W22 determinism stack reverts two commits together: R1 (`bed1a834a3`, the widget resolver + form contract) left `form-contract.ts` importing a package whose `@deepseek-ai/schemastery` dependency declaration only R2 (`b092a00b31`) landed, so R1 alone does not build — `git revert b092a00b31 bed1a834a3` in that order.
+Rolling back the W22 determinism stack reverts two commits together: R1 (`bed1a834a3`, the widget resolver + form contract) left `form-contract.ts` importing a package whose `@deepseek-ai/schemastery` dependency declaration only R2 (`b092a00b31`) landed, so R1 alone does not build — `git revert b092a00b31 bed1a834a3` in that order. That spelling leaves the intermediate revert as its own commit (R2 reverted while R1's undeclared import still stands — a bisect red point); the single-commit variant `git revert --no-commit b092a00b31 bed1a834a3 && git commit -m "Revert W22-R1+R2 (bed1a834a3, b092a00b31)"` stages both reverts and lands one commit, so the tree never records the half-reverted state.
 
 A successful call invokes `exec.concludeTurn()` and returns `{ presented: true }` with a fixed receipt text: the card is the turn's final artifact, the user's pick or confirmation arrives as the next ordinary user message, and the model is told never to answer on the user's behalf. Fire-and-forget: the tool never waits for user input — the legacy fence UX is preserved byte-for-byte.
 

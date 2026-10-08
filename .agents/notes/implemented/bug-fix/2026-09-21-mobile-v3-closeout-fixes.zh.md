@@ -14,7 +14,7 @@ Status: implemented
 
 ## Decision
 
-**降级围栏折叠，绝不倾倒。** [`splitMessage`](../../../../packages/client/ui-mobile/src/client/protocol.ts) 对校验失败的围栏输出独立的 `degraded` 段类型（携带围栏原文），不再折入叙述；[`foldHistory`](../../../../packages/client/ui-mobile/src/client/fold.ts) 将其投影为 `degraded` 聊天项，由 ChatView 渲染为折叠的 `<details>` 摘要行（「结构化消息（格式异常，已折叠）」），展开可见原文。凡含 `dsh` 围栏（无论合法或降级）的消息一律走 v3 路径，全部畸形的围栏不再落入 v2 叙述拆分；v2 的 ```` ```json ```` 草稿路径不受影响。`degradedFences` 计数与已答态语义（降级通知与任何 assistant 项一样使挂起提问失效）保留；降级通知同样推进 `contextChipsOf`，与文本/卡片/回执一致。
+**降级围栏折叠，绝不倾倒。** [`splitMessage`](../../../../packages/client/ui-mobile/src/client/protocol.ts) 对校验失败的围栏输出独立的 `degraded` 段类型（携带围栏原文），不再折入叙述；[`foldHistory`](../../../../packages/client/ui-mobile/src/client/fold.ts) 将其投影为 `degraded` 聊天项，由 ChatView 渲染为折叠的 `<details>` 摘要行（「结构化消息（格式异常，已折叠）」），展开可见原文。凡含 `dsh` 围栏（无论合法或降级）的消息一律走 v3 路径，全部畸形的围栏不再落入 v2 叙述拆分；v2 的 ```` ```json ```` 草稿路径不受影响。`degradedCards` 计数与已答态语义（降级通知与任何 assistant 项一样使挂起提问失效）保留；降级通知同样推进 `contextChipsOf`，与文本/卡片/回执一致。
 
 **主循环注册 `{{today}}` 提示词变量。** `dsh-agent-loop` 在 `provider`/`model`/`cwd` 旁注册 `today`，每次组装求值为宿主进程本地日历日期（`YYYY-MM-DD`）——跨午夜的会话在下一步渲染新日期。移动端智能填表助手 persona 开篇声明「今天的日期是 {{today}}」，并要求一切「日期=今天」推导取该值。[README.md](../../../../packages/core/system-prompt/README.zh.md) 与其中文版在随附变量清单中加入 `{{today}}`。
 

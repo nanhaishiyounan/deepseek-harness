@@ -25,10 +25,6 @@ P3 确定性矩阵捕获了一个失败族：模型在 id/value/数量类叶子�
 
 结构约束进 schema；schema DSL 表达不了的条数上限（无 `minItems`/`maxItems`）在 `execute` 里手工校验：ask_choice options ≥1；form_draft fields ≥1、revision ≥1、`value: null` 仅允许 `required` 层字段；submit_receipt 与 approval_pending summary ≥1；report metrics 1–6、rows ≤8、table ≤5 列 ≤10 行且每行宽度=列数、actions ≤4。违规抛 `ToolArgsError`，错误信息带参数路径，模型据此在同一回合内修正重试。
 
-### 回滚 runbook（W22）
-
-回滚 W22 确定性栈须两 commit 连带 revert：R1（`bed1a834a3`，widget 判定器 + 表单契约）留下的 `form-contract.ts` 引用了一个只有 R2（`b092a00b31`）才补上 `@deepseek-ai/schemastery` 依赖声明的包，单 revert R1 无法构建——按 `git revert b092a00b31 bed1a834a3` 的顺序连带回滚。
-
 ### actions 宽容（W21-R8）
 
 一次供应链实活会话连续 4 次折叠同一 actions 嵌套错误、最终靠删按钮才出卡。原始捕获显示两种写法：包装键（`{"view":{"label":…,"route":…}}`——旧参数描述的紧凑联合记法正是这么读的）与缺 `kind` 判别字段的扁平对象；4 次错误一字不差、只列四个 kind 值，模型始终学不到「扁平判别字段」这一合法形态。修复（客户端解析器镜像同步）：resolve 解包包装键；`kind` 缺失且恰好一个分支的其余必填字段齐备时补上判别值（显式非法 `kind` 绝不被覆盖；`{label,route,title}` 这类歧义签名仍拒绝）；单个 actions 对象提升为单元素数组；判别失败错误追加四枚具体 JSON 骨架（`{"kind":"view","label":"…","route":"…"}/…`）让一轮重试命中；参数描述改为扁平形状+可照抄示例。persona few-shot 补 view 形态与「kind 是同级字段、不是包装键」规则。
@@ -36,6 +32,10 @@ P3 确定性矩阵捕获了一个失败族：模型在 id/value/数量类叶子�
 ### 确定性 widget 与表单契约（W22-R1）
 
 W22 验证的十连复读抓到模型在机械可判定事实上掷骰子：`widget` 命中率仅 50%（`quantity` 声明成 `text`）、pur_orders 必答字段集 3/10 次整缺（品名/数量/单价不上卡）、一次漂移到未注册集合（`hub_inv_products`）。三项机制收回这些决策面。其一，widget 判定器：结构校验通过后，`form_draft` 字段与 `ask_field` 字段过 `src/widget.ts` 的字段名/label 分类（`quantity`/`qty`/`unit_price`/`amount` 等数量金额族 → `number`，`need_date`/`received_at` 等日期族 → `date`，非空 `options` → `select`；note 族字段名与 备注/说明 label 词先于金额/日期片段钉住声明——W22-R2）。session log 与模型上下文保持模型声明（模型可见⟺logged），渲染控件跟随分类结果——移动端客户端在渲染折叠层镜像同一条规则（`dsh-client-ui-mobile` 的 `src/client/widget.ts`；purity 门禁禁止跨插件值导入，规则表以镜像对交付、共享 fixtures 双端钉死）。其二，可选的 `formCollections` 配置（`src/form-contract.ts`）：键即集合白名单（未注册的 `form.collection` 整卡拒绝并列出合法候选），每集合的 `requiredFields` 声明字段下限——字段必须出现在卡上让用户可改，值可以预填或留 null；每组列出同义列名（`quantity`/`qty`）与错误引用的业务名。顶层配置键拼错在启动即报错（否则 `formCollections` 拼错会被读成「未配置」而静默跳过约束）。两条报错路径都返回模型一轮可修正的中文字段路径错误；配置为空或不配置则不做任何约束，通用部署保持无契约行为。
+
+### 回滚 runbook（W22）
+
+回滚 W22 确定性栈须两 commit 连带 revert：R1（`bed1a834a3`，widget 判定器 + 表单契约）留下的 `form-contract.ts` 引用了一个只有 R2（`b092a00b31`）才补上 `@deepseek-ai/schemastery` 依赖声明的包，单 revert R1 无法构建——按 `git revert b092a00b31 bed1a834a3` 的顺序连带回滚。该写法会把中间态 revert 落成独立提交（R2 已回滚而 R1 的未声明引用仍在——bisect 红点）；单提交变体 `git revert --no-commit b092a00b31 bed1a834a3 && git commit -m "Revert W22-R1+R2 (bed1a834a3, b092a00b31)"` 把两条 revert 一并暂存、落一个提交，树里不记录半回滚态。
 
 成功调用执行 `exec.concludeTurn()` 并返回 `{ presented: true }` 与固定回执文案：卡片即回合收尾物，用户的点选或确认作为下一条普通用户消息到达，且明确禁止模型替用户作答。Fire-and-forget：工具从不等待用户输入——与既有围栏 UX 逐位等价。
 

@@ -40,3 +40,7 @@ W22-R1 验证（FAIL 80）用活体探针证实了旁路：被要求声明 `quan
 - **被拒卡折叠**（FAIL 80 第二根因）：折叠层预扫描 `tool/result` 事件，结果带 `isError` 的 `present_card` 调用折叠为 degraded 通知而非可交互卡——被退回的草稿不能再对着修正版确认。
 - **Config fail-loud**：入口值导出 `Config`（cordis 校验并落默认值），`apply` 对顶层未知配置键启动即报错——schemastery 的 object resolver 对未知键静默 merge，`formCollections` 拼错会被读成「未配置」而无声跳过白名单与必答下限。
 - R1 的十连 10/10 读数因此归因于 persona 教学 + 渲染层分类对模型声明的双保险——不归功于服务端改写，它自身从未触及任何渲染控件。
+
+## W22-R3/R4 跟进：relation 元数据回退与不透明「引用 #N」面
+
+上线探针抓到模型声明 `supplier_id` 而 NocoBase 元数据表按关联列 `supplier` 建键：直查 miss，`fieldControlOf` 把声明的 relation 降级成文本，预填 id 渲染成裸的可编辑 `47`、读起来像数量。两项机制收口。其一，[`metaFieldOf`](../../../../packages/client/ui-mobile/src/client/fieldControls.ts) 以 `_id` 剥离拼写重试一次，元数据按关联列建键时声明的 relation 仍解析出目标集合。其二，声明的 relation 两次读取都 miss 且值为纯数字时落在只读「引用 #N」面而非裸数字——W22-R3 起 derived 层、W22-R4 起 required 层编辑行，两面同一条件；非数字值保持原文，空值保持可编辑。

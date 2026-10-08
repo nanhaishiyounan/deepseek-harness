@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-10-08-w22-r1-deterministic-widget-form-contract.md
-2026-10-08-w22-r1-deterministic-widget-form-contract.md: 56b67796858f827a56c025ebf0cd41e4599c11f3
-2026-10-08-w22-r1-deterministic-widget-form-contract.zh.md: 15933414fe46a2546f1c5033d1f50052e1c7b6b9
+2026-10-08-w22-r1-deterministic-widget-form-contract.md: b675a88ef81e65e4f1e112398ddf1c477033a937
+2026-10-08-w22-r1-deterministic-widget-form-contract.zh.md: 0c6db6a459d7d3e222330ac688a908c90bf41465
