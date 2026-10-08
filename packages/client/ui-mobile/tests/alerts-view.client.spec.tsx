@@ -174,6 +174,124 @@ describe('alerts view', () => {
     expect(group.textContent).toContain('72~73 天后到期')
   })
 
+  it('keys two empty-code title folds of one band+rule apart: no expansion cross-talk (W23-R5)', async () => {
+    signInAs('keeper')
+    const row = (id: number, title: string): Record<string, unknown> => ({
+      id,
+      rule_type: 'expiry',
+      severity: 'warning',
+      title,
+      entity_code: '',
+      status: 'open',
+      owner: null,
+      notify_users: ['keeper'],
+      detail: { days_left: 12 },
+    })
+    stubGateway({
+      'nocobase.list': { count: 4, page: 1, page_size: 200, rows: [
+        row(51, '一批次 12 天后到期'),
+        row(52, '一批次 12 天后到期'),
+        row(53, '二批次 12 天后到期'),
+        row(54, '二批次 12 天后到期'),
+      ] },
+    })
+    render(<AlertsView />)
+    // Two same-band, same-rule groups whose heads carry an empty entity
+    // code both render as group cards; the pre-R5 key `near::expiry::` was
+    // shared, so React rendered duplicate keys and one toggle drove both.
+    const groups = await screen.findAllByTestId('alert-group')
+    expect(groups).toHaveLength(2)
+    fireEvent.click(groups[0]?.querySelector('button[aria-expanded]') as HTMLButtonElement)
+    // Only the clicked group opens; the other stays collapsed with no rows.
+    expect(groups[0]?.querySelector('button[aria-expanded]')?.getAttribute('aria-expanded')).toBe('true')
+    expect(groups[1]?.querySelector('button[aria-expanded]')?.getAttribute('aria-expanded')).toBe('false')
+    expect(groups[0]?.querySelectorAll('[data-testid="alert-row"]')).toHaveLength(2)
+    expect(groups[1]?.querySelectorAll('[data-testid="alert-row"]')).toHaveLength(0)
+  })
+
+  it('keys two same-title empty-code groups an intervening other-rule row splits apart (W23-R5)', async () => {
+    signInAs('keeper')
+    const expiry = (id: number): Record<string, unknown> => ({
+      id,
+      rule_type: 'expiry',
+      severity: 'warning',
+      title: '同题批次 12 天后到期',
+      entity_code: '',
+      status: 'open',
+      owner: null,
+      notify_users: ['keeper'],
+      detail: { days_left: 12 },
+    })
+    stubGateway({
+      'nocobase.list': { count: 5, page: 1, page_size: 200, rows: [
+        expiry(61),
+        expiry(62),
+        { id: 63, rule_type: 'cert_due', severity: 'warning', title: '证照 CERT-Z 20 天后到期', entity_code: '', status: 'open', owner: null, notify_users: ['keeper'], detail: { days_left: 20 } },
+        expiry(64),
+        expiry(65),
+      ] },
+    })
+    render(<AlertsView />)
+    // The intervening cert_due row breaks the fold chain: two same-title
+    // groups plus one plain row. A title-only fallback segment would key
+    // them alike again; the head row id keeps them apart.
+    const groups = await screen.findAllByTestId('alert-group')
+    expect(groups).toHaveLength(2)
+    expect(screen.getAllByTestId('alert-row')).toHaveLength(1)
+    fireEvent.click(groups[1]?.querySelector('button[aria-expanded]') as HTMLButtonElement)
+    expect(groups[0]?.querySelector('button[aria-expanded]')?.getAttribute('aria-expanded')).toBe('false')
+    expect(groups[1]?.querySelectorAll('[data-testid="alert-row"]')).toHaveLength(2)
+  })
+
+  it('renders an empty-code single open row as a plain row: the group card needs two members', async () => {
+    signInAs('keeper')
+    stubGateway({
+      'nocobase.list': { count: 1, page: 1, page_size: 200, rows: [
+        { id: 71, rule_type: 'expiry', severity: 'warning', title: '孤立批次 12 天后到期', entity_code: '', status: 'open', owner: null, notify_users: ['keeper'], detail: { days_left: 12 } },
+      ] },
+    })
+    render(<AlertsView />)
+    expect(await screen.findAllByTestId('alert-row')).toHaveLength(1)
+    expect(screen.queryByTestId('alert-group')).toBeNull()
+  })
+
+  it('resets a title fold expansion when a re-read re-orders its members (W23-R5 semantics lock)', async () => {
+    signInAs('keeper')
+    const foldRow = (id: number): Record<string, unknown> => ({
+      id,
+      rule_type: 'expiry',
+      severity: 'warning',
+      title: '同题到期批次',
+      entity_code: '',
+      status: 'open',
+      owner: null,
+      notify_users: ['keeper'],
+      detail: { days_left: 12 },
+    })
+    let rows = [foldRow(81), foldRow(82)]
+    stubGateway({
+      'nocobase.list': () => ({ count: rows.length, page: 1, page_size: 200, rows }),
+    })
+    vi.useFakeTimers()
+    try {
+      render(<AlertsView />)
+      await vi.advanceTimersByTimeAsync(0)
+      const group = screen.getByTestId('alert-group')
+      fireEvent.click(group.querySelector('button[aria-expanded]') as HTMLButtonElement)
+      expect(group.querySelectorAll('[data-testid="alert-row"]')).toHaveLength(2)
+      // The next poll re-orders the members: the head row changes, the
+      // title-fold key follows the head, and the opened state resets —
+      // the locked contract for groups not folded on a shared code.
+      rows = [rows[1]!, rows[0]!]
+      await vi.advanceTimersByTimeAsync(30_000)
+      const reRead = screen.getByTestId('alert-group')
+      expect(reRead.querySelector('button[aria-expanded]')?.getAttribute('aria-expanded')).toBe('false')
+      expect(reRead.querySelectorAll('[data-testid="alert-row"]')).toHaveLength(0)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
   // NOTE: the button→act wiring is NOT jsdom-click-tested here — antd-mobile's
   // button click never reaches the handler under this environment and spins
   // the worker. The live four-step smoke (demos/acceptance-w6/w6-r2-01: real

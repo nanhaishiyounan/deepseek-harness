@@ -136,7 +136,7 @@ export function AlertsView(): JSX.Element {
   const identity = loadIdentity()
   const [read, setRead] = useState<AlertsRead | undefined>(undefined)
   const [pending, setPending] = useState<Pending | undefined>(undefined)
-  /** The group headers the user opened (W8-B2 local memory, keyed section+rule+title). */
+  /** The group headers the user opened (W8-B2 local memory, keyed band+rule+identity segment). */
   const [openGroups, setOpenGroups] = useState<ReadonlySet<string>>(new Set())
   /** The far band's fold (W23-B2 P1-11): collapsed until opened. */
   const [farOpen, setFarOpen] = useState(false)
@@ -231,11 +231,15 @@ export function AlertsView(): JSX.Element {
         return entry.rows.map(row => <AlertRowCard key={row.id} row={row} {...rowSink} />)
       }
       // The group key derives from the band, the rule source, and the group
-      // head's entity code, joined with ::. The code is the stable identity
-      // only for a group folded on its shared code: a title-folded group keys
-      // on whichever member leads the read, so a re-read that reorders the
-      // members re-keys it and the opened state resets.
-      const groupKey = `${band}::${head.ruleType}::${head.entityCode}`
+      // head's identity segment, joined with ::. A non-empty entity code is
+      // the stable identity of a group folded on its shared code. A head
+      // with an empty code (a title fold) contributes its title plus row id:
+      // an empty segment keys every same-band, same-rule title fold alike
+      // (duplicate React keys, cross-talked expansion), and the id keeps two
+      // same-title groups an intervening row split apart keyed apart. The
+      // title-fold segment rides the head row, so a re-read that reorders
+      // the members re-keys the group and the opened state resets.
+      const groupKey = `${band}::${head.ruleType}::${head.entityCode !== '' ? head.entityCode : `t::${head.title}::${String(head.id)}`}`
       const expanded = openGroups.has(groupKey)
       const newest = groupTimeOf(entry.rows)
       const range = daysRangeOf(entry.rows)

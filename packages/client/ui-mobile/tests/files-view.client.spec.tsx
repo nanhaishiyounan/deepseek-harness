@@ -138,6 +138,26 @@ describe('FilesView', () => {
     expect(screen.getAllByText('实时查询 · 待办表 已清空').length).toBeGreaterThan(0)
   })
 
+  it('sanitizes the inline preview: opening 查看报告 leaks no casing variant into the DOM (W23-R5)', () => {
+    const item = createWorkItem({ title: '待办概览', owner: '业务员' })
+    updateWorkItem(item.id, {
+      artifact: {
+        v: 3, type: 'report', id: 'r_files_preview_leak', title: 'WFL_Approval_Todos 待办概览',
+        subtitle: '实时查询 · 待办表 WFL_Approval_Todos 已清空',
+        metrics: [{ label: '指标', value: '1', kind: 'count' }],
+      },
+    })
+    render(<FilesView />)
+    // The R4 assertion never opened the preview, so the raw ReportCard the
+    // artifact fed never rendered and its leak stayed unobserved; this case
+    // opens it and holds the same whole-DOM variant guarantee.
+    fireEvent.click(screen.getAllByRole('button', { name: '查看报告' })[0] as HTMLButtonElement)
+    expect(screen.getByTestId('report-card')).toBeTruthy()
+    expect(/wfl_approval_todos/i.test(document.body.textContent ?? '')).toBe(false)
+    expect(screen.getAllByText('待办概览').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('实时查询 · 待办表 已清空').length).toBeGreaterThan(0)
+  })
+
   it('carries the demo tag on a seeded artifact row', () => {
     createWorkItem({ title: '演示报告', owner: '林小满', demo: true })
     const item = workSnapshot().items[0]

@@ -22,7 +22,7 @@ import { DraftCard, ReceiptCard, RejectedCard, ReviewCard, type CollectionFieldM
 import { DraftCard as DraftCardV3 } from '../../forms/v3/DraftCard.tsx'
 import { ReceiptCard as ReceiptCardV3 } from '../../forms/v3/ReceiptCard.tsx'
 import { sanitizeBizText } from '../rich.ts'
-import { sanitizeSubtitle } from '../../sanitize.ts'
+import { sanitizeReportPayload } from '../../sanitize.ts'
 import { ChoiceBubble } from '../ChoiceBubble.tsx'
 import { FieldAskBubble } from '../FieldAskBubble.tsx'
 import { ActionBadge } from '../ActionBadge.tsx'
@@ -224,19 +224,16 @@ export function FlowItem(props: FlowItemProps): JSX.Element | null {
     )
   }
   if (item.kind === 'report') {
-    // The subtitle is the one card face with no body-layer pass of its own
-    // (W23-R3 F2): a persona miss leaked `wfl_approval_todos` here live, so
-    // the render site sanitizes before the card consumes the payload. A
-    // fully-stripped subtitle renders as absent (the blank-as-omitted
-    // equivalence W21-R4 set for optional card text).
-    const raw = item.payload.subtitle
-    const clean = raw === undefined ? undefined : sanitizeSubtitle(raw)
-    const payload = raw === undefined ? item.payload : { ...item.payload, subtitle: clean ?? '' }
+    // The title and subtitle are the two card faces with no pass of their
+    // own (W23-R3 F2, W23-R5): a persona miss leaked `wfl_approval_todos`
+    // into a live subtitle, so the render site sanitizes before the card
+    // consumes the payload. A fully-stripped subtitle renders as absent
+    // (the blank-as-omitted equivalence W21-R4 set for optional card text).
     return (
       <>
         {separator}
         {aiRow(
-          <ReportCard payload={payload} onAction={(action) => { props.onReportAction(action, item.seq) }} />,
+          <ReportCard payload={sanitizeReportPayload(item.payload)} onAction={(action) => { props.onReportAction(action, item.seq) }} />,
         )}
       </>
     )

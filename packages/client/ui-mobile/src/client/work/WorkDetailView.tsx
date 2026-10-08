@@ -19,6 +19,7 @@ import { PageNav } from '../PageNav.tsx'
 import { messageOf } from '../hooks.ts'
 import { goBackOr, navigate } from '../router.ts'
 import { currentRunMode } from '../runMode.ts'
+import { sanitizeReportPayload } from '../sanitize.ts'
 import { createSession, promptSession } from '../sessionsService.ts'
 import {
   registerExecSession, subscribeWork, transitionWorkItem, updateWorkItem, workOf, workSnapshot, type WorkItem,
@@ -289,7 +290,10 @@ export function WorkDetailView({ workId }: WorkDetailViewProps): JSX.Element {
                 >
                   {artifactOpen ? '收起报告' : '查看完整报告 ›'}
                 </Button>
-                {artifactOpen && <ReportCard payload={item.artifact} />}
+                {/* The preview rides the same sanitized payload view the chat
+                    report branch hands the card (W23-R5): the stored artifact
+                    keeps its wire bytes; only the preview's view cleans. */}
+                {artifactOpen && <ReportCard payload={sanitizeReportPayload(item.artifact)} />}
               </>
             )}
           </section>

@@ -413,6 +413,28 @@ describe('WorkDetailView', () => {
     }
   })
 
+  it('sanitizes the artifact preview: expanding 查看完整报告 leaks no casing variant into the DOM (W23-R5)', async () => {
+    stubGateway(routes)
+    const item = createWorkItem({ title: '待办概览', owner: '业务员' })
+    transitionWorkItem(item.id, 'doing')
+    transitionWorkItem(item.id, 'review')
+    updateWorkItem(item.id, {
+      result: { summary: '已生成报告', finishedAt: Date.now() },
+      artifact: {
+        v: 3, type: 'report', id: 'r_detail_preview_leak', title: 'WFL_Approval_Todos 待办概览',
+        subtitle: '实时查询 · 待办表 WFL_Approval_Todos 已清空',
+        metrics: [{ label: '指标', value: '1', kind: 'count' }],
+      },
+    })
+    render(<WorkDetailView workId={item.id} />)
+    fireEvent.click(screen.getByRole('button', { name: '查看完整报告 ›' }))
+    await waitFor(() => { expect(screen.getByTestId('report-card')).toBeTruthy() })
+    expect(/wfl_approval_todos/i.test(document.body.textContent ?? '')).toBe(false)
+    // The ticket head and the preview card both carry the sanitized title.
+    expect(screen.getAllByText('待办概览').length).toBeGreaterThan(1)
+    expect(screen.getByText('实时查询 · 待办表 已清空')).toBeTruthy()
+  })
+
   it('expands the artifact report inline from the result card', async () => {
     stubGateway(routes)
     const item = createWorkItem({ title: '带报告任务', owner: '业务员' })

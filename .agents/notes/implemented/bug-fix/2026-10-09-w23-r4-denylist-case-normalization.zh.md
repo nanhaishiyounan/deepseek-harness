@@ -14,7 +14,7 @@ W23-R3 验证唯一 fail 维度 production-simulation 的根因族：R3 黑名�
 - **边界断言**：新增 `sanitize-edge.client.spec.ts` 锁四项边界行为——>10KB 干净正文逐字通过、任意大小写变体被剥、更长 token（`wfl_approval_todos_inner`）整剥无部分残留、代码 fence 标记经两层管道完好（成功态协议载荷保持可渲染）——外加导出黑名单契约。既有渲染面 spec 补 DOM 级大小写断言（全 body 文本的 `/wfl_approval_todos/i`）。
 - **FilesView 接线**：`renderRow` 走聊天 report 分支同款渲染面清洗——行标题（含 `打开 …` aria-label）用 `sanitizeBody`，行副题用 `sanitizeSubtitle` 并遵循空串等同省略（剥空的副题不渲染）。
 - **AlertsView 键**：分组键只由 `band::ruleType::head.entityCode` 派生——title 回退分支移除，与 R3 报告声称的派生一致。注释改述真实契约：实体编码只为「按共享编码折叠的组」提供稳定身份；按 title 折叠的组以当下领头的成员为键，重排换首行即换键、展开态重置。
-- **证据更正**：`r3-verify-report.md` 与 `b2-verify-report.md` 补实测 sha256——所标 "sha256 8c44276f…" 实为 SHA-1 摘要，"3340b0db…" 与任何证据文件的 sha1/sha256/md5/crc32 均不符（不可复现的记录值）；alerts 套件计数 11 更正为实测 7；R3 行的 head 无关声明按上述契约改述。
+- **证据更正**：`r3-verify-report.md` 与 `b2-verify-report.md` 补实测摘要——所标 "sha256 8c44276f…" 实为 b2-01/b2-08 同帧的 SHA-1（该帧 sha256：ea42ec63…）；"3340b0db…" 实为重拍帧的 SHA-1，其 sha256 为 f5584a1b52be…；R4 所写「实测 sha256 80299dc5…」与任何算法对任何证据文件的摘要均不符（不可复现的记录值，R5 已改）；alerts 套件计数 11 更正为实测 7；R3 行的 head 无关声明按上述契约改述。
 
 ## 后果
 

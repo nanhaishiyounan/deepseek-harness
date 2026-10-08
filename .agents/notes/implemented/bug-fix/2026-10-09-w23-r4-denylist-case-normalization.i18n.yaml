@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/bug-fix/2026-10-09-w23-r4-denylist-case-normalization.md
-2026-10-09-w23-r4-denylist-case-normalization.md: ace70a8a84de83a263e8df9e46bc105a31a9a86d
-2026-10-09-w23-r4-denylist-case-normalization.zh.md: 977168f3ea6cb813b9af3467a7bfcd88752bd561
+2026-10-09-w23-r4-denylist-case-normalization.md: 8cb4971d5d49d778e1b773d5f8403b0c76eae8e9
+2026-10-09-w23-r4-denylist-case-normalization.zh.md: ec7a4ca3163d18ab79d30f78863aa6388cd67e99

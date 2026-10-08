@@ -16,7 +16,7 @@ import { FileClock, Star } from 'lucide-react'
 import { goBackOr, navigate } from '../router.ts'
 import { EmptyState } from '../ui.tsx'
 import { PageNav } from '../PageNav.tsx'
-import { sanitizeBody, sanitizeSubtitle } from '../sanitize.ts'
+import { sanitizeBody, sanitizeReportPayload, sanitizeSubtitle } from '../sanitize.ts'
 import type { ReportPayload } from '../protocol.ts'
 import { fileProjections, subscribeWork, updateWorkItem, workOf, workSnapshot, type FileCardRow } from '../workStore.ts'
 import { ReportCard } from '../messages/ReportCard.tsx'
@@ -134,7 +134,10 @@ export function FilesView(): JSX.Element {
             </Button>
             {previewId === `${section}:${row.id}` && (
               <div className={css.preview}>
-                <ReportCard payload={row.artifact} />
+                {/* The preview rides the same sanitized payload view the chat
+                    report branch hands the card (W23-R5): the stored artifact
+                    keeps its wire bytes; only the preview's view cleans. */}
+                <ReportCard payload={sanitizeReportPayload(row.artifact)} />
               </div>
             )}
           </>

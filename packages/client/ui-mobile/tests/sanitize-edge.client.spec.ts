@@ -43,7 +43,35 @@ describe('sanitize edge (W23-R4)', () => {
     expect(sanitizeSubtitle(fenced)).toBe(fenced)
   })
 
+  it('strips the order action tokens the body narratives leaked (W23-R5)', () => {
+    expect(sanitizeBody('已为你 order_create · 待复核 order_status')).toBe('已为你 · 待复核')
+    expect(sanitizeBody('重试 ORDER_STATUS 后关闭')).toBe('重试 后关闭')
+  })
+
+  it('is idempotent: sanitizing its own output changes nothing (W23-R5)', () => {
+    const samples = [
+      'suggestions from pur_orders',
+      '待办表 wfl_approval_todos 已清空 · suggestions',
+      'Here are our Suggestions for next quarter',
+      '实时查询 · 待办表 WFL_Approval_Todos 已清空',
+      '已为你 order_create · 待复核 order_status',
+      '```\ndsh\n```',
+    ]
+    for (const text of samples) {
+      expect(sanitizeBody(sanitizeBody(text))).toBe(sanitizeBody(text))
+      expect(sanitizeSubtitle(sanitizeSubtitle(text))).toBe(sanitizeSubtitle(text))
+    }
+  })
+
+  it('strips the contextual field name when the mapping pass introduces the CJK context (W23-R5)', () => {
+    // The raw string carries no CJK and no denylist family, so the R4
+    // verdict over the raw text kept `suggestions` on the first pass and
+    // stripped it on the second; the verdict over the mapped text agrees
+    // with itself on every pass.
+    expect(sanitizeBody('suggestions from pur_orders')).toBe('from 采购订单')
+  })
+
   it('exports the closed denylist both passes share, with the contextual field name a member', () => {
-    expect(PROTOCOL_BLACKLIST).toEqual(['wfl_[a-z0-9_]+', 'ask_[a-z_]+', 'suggestions'])
+    expect(PROTOCOL_BLACKLIST).toEqual(['wfl_[a-z0-9_]+', 'ask_[a-z_]+', 'order_create', 'order_status', 'suggestions'])
   })
 })

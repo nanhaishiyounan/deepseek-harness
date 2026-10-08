@@ -11,27 +11,32 @@
  */
 
 import { sanitizeBizText } from './messages/rich.ts'
+import type { ReportPayload } from './protocol.ts'
 
 /**
- * The protocol token families that strip in every context (W23-R4): no
- * legitimate people-language word can begin with these prefixes, in any
- * casing.
+ * The one denylist member that strips only inside a protocol context:
+ * `suggestions` doubles as a plain English word, so it goes only when the
+ * surrounding text is a CJK narrative or carries another stripped family —
+ * English body prose keeps the word.
  */
-const PREFIX_FAMILIES: readonly string[] = [
-  'wfl_[a-z0-9_]+',
-  'ask_[a-z_]+',
-]
+const CONTEXTUAL_FIELD = 'suggestions'
 
 /**
  * The closed protocol-token denylist both display layers share (W23-R3 F2,
- * case-normalized W23-R4): the wfl workflow-table family, the ask_* fence
- * family, and the suggestions field name. `suggestions` doubles as a plain
- * English word, so it strips only inside a protocol context — a CJK
- * narrative, or a string that also carries a stripped token family — and
- * English body prose keeps the word. Extend by appending a family here
- * (word-boundary matched, case-insensitive).
+ * case-normalized W23-R4): the always-stripped families — `wfl_*`, `ask_*`,
+ * and the exact `order_create` / `order_status` protocol action names
+ * (W23-R5) — plus the contextual field name. Every runtime matcher (the
+ * always-strip pass, the protocol-context probe) derives from this exported
+ * list, so appending a family here takes effect in both layers at once; an
+ * append reaching only a private array would silently strip nothing.
  */
-export const PROTOCOL_BLACKLIST: readonly string[] = [...PREFIX_FAMILIES, 'suggestions']
+export const PROTOCOL_BLACKLIST: readonly string[] = [
+  'wfl_[a-z0-9_]+',
+  'ask_[a-z_]+',
+  'order_create',
+  'order_status',
+  CONTEXTUAL_FIELD,
+]
 
 /**
  * The tool and protocol names only the subtitle layer strips (W23-R3 F2): a
@@ -52,13 +57,16 @@ const SUBTITLE_BLACKLIST: readonly string[] = [
   'present_card',
 ]
 
+/** The exported denylist minus the contextual field name: what strips in every context. */
+const ALWAYS_DENYLIST: readonly string[] = PROTOCOL_BLACKLIST.filter(family => family !== CONTEXTUAL_FIELD)
+
 /** A word-boundary, case-insensitive matcher over token-family fragments. */
 const familyMatcher = (families: readonly string[]): RegExp =>
   new RegExp(`\\b(?:${families.join('|')})\\b`, 'gi')
 
-const ALWAYS_TOKENS = familyMatcher(PREFIX_FAMILIES)
+const ALWAYS_TOKENS = familyMatcher(ALWAYS_DENYLIST)
 const SUBTITLE_TOKENS = familyMatcher(SUBTITLE_BLACKLIST)
-const SUGGESTIONS_TOKEN = familyMatcher(['suggestions'])
+const SUGGESTIONS_TOKEN = familyMatcher([CONTEXTUAL_FIELD])
 
 /**
  * A protocol context for the `suggestions` field name (W23-R4): a CJK
@@ -67,7 +75,7 @@ const SUGGESTIONS_TOKEN = familyMatcher(['suggestions'])
  * calls and miss earlier tokens.
  */
 const CONTEXT_PROBE = new RegExp(
-  `\\b(?:${[...PREFIX_FAMILIES, ...SUBTITLE_BLACKLIST].join('|')})\\b`,
+  `\\b(?:${[...ALWAYS_DENYLIST, ...SUBTITLE_BLACKLIST].join('|')})\\b`,
   'i',
 )
 
@@ -86,13 +94,16 @@ function collapse(text: string): string {
  * plus the closed protocol-token denylist, so a model narrative that leaks
  * `wfl_approval_todos` in any casing renders without the protocol token.
  * The contextual field name strips only inside a protocol context (see
- * {@link PROTOCOL_BLACKLIST}).
+ * {@link PROTOCOL_BLACKLIST}); the context verdict reads the mapped text, so
+ * a mapping that introduces CJK (`pur_orders` → 采购订单) yields the same
+ * verdict on every pass and the sanitizer is idempotent over its own output.
  * @param text - the model-authored display string.
  * @returns the people-language rendering with protocol tokens stripped.
  */
 export function sanitizeBody(text: string): string {
-  const stripped = sanitizeBizText(text).replace(ALWAYS_TOKENS, '')
-  const contextual = HAS_CJK.test(text) || CONTEXT_PROBE.test(text)
+  const mapped = sanitizeBizText(text)
+  const stripped = mapped.replace(ALWAYS_TOKENS, '')
+  const contextual = HAS_CJK.test(mapped) || CONTEXT_PROBE.test(mapped)
   return collapse(contextual ? stripped.replace(SUGGESTIONS_TOKEN, '') : stripped)
 }
 
@@ -105,4 +116,22 @@ export function sanitizeBody(text: string): string {
  */
 export function sanitizeSubtitle(text: string): string {
   return collapse(sanitizeBody(text).replace(SUBTITLE_TOKENS, ''))
+}
+
+/**
+ * The payload copy every `ReportCard` render site hands the card (W23-R5):
+ * the card renders `title` and `subtitle` straight from the payload, and a
+ * stored artifact carries them as the wire wrote them, so the chat report
+ * branch, the files preview, and the work-detail result preview all pass
+ * this sanitized view — the stored artifact itself keeps its verbatim bytes
+ * (the copy path and the durable log never see the sanitized text).
+ * @param payload - the stored report artifact.
+ * @returns the payload copy with a sanitized title and subtitle; a fully-stripped subtitle renders as absent.
+ */
+export function sanitizeReportPayload(payload: ReportPayload): ReportPayload {
+  return {
+    ...payload,
+    title: sanitizeBody(payload.title),
+    ...(payload.subtitle !== undefined ? { subtitle: sanitizeSubtitle(payload.subtitle) } : {}),
+  }
 }

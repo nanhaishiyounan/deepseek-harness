@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/bug-fix/2026-10-09-w23-r5-preview-wiring-group-keys-idempotent-sanitize.md
+2026-10-09-w23-r5-preview-wiring-group-keys-idempotent-sanitize.md: 614297ef67369d91f36df4edce0549a71d6c3a35
+2026-10-09-w23-r5-preview-wiring-group-keys-idempotent-sanitize.zh.md: b9e9861aa1057c200284ae65f49cad6713e15e33
