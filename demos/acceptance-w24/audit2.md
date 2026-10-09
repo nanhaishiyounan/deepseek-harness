@@ -56,3 +56,8 @@
 - **计数更正**：超范围如实记录为 ×5（O1–O5）——W24 原文计 ×4 漏数了 O5。
 - **悬空引用更正**：原文「详见 w24-report.md 汇报」——该文件从未存在（W24 汇报走会话汇报未落盘），引用改为 W24 Agent Note（`.agents/notes/implemented/feature/2026-10-09-w24-jargon-to-people-language-table-columns-and-chats-layout.md`）与本目录探针。
 - **未读点表述更正（真话债）**：主修项 3 原记「未读点重锚到时间右侧固定偏移 `--right: -8px; --top: 2px`」——该重锚**从未在活体生效**。W24 的选择器写成后代形式且用点分双 class（`.timeBadge :global(.adm-badge.fixed)`），而 antd-mobile Badge 经 `withNativeProps` 把 `className` 合并到携带**连字符单 class** `adm-badge-fixed` 的同一元素上——后代选择器永不命中同元素、点分双 class 也永不匹配连字符单 class，双重死亡。实测：`r1-unread-dot-before-probe.json`（W24 dist，8 个未读点 computedStyle top/right 全 `0px`/`0px`）。W24-R1 改复合选择器 `.timeBadge:global(.adm-badge-fixed)` 后，`r1-unread-dot-after-probe.json`（同探针脚本、R1 dist）8/8 全 `top: 2px`、`right: -8px`——偏移首次真实落位。
+
+## W24-R4 注记（终末微批：R3 验证 PASS_WITH_DEBT88 清偿）
+
+- **截图去重**：`r3-bullet-enum-after-375.png` 与 `r3-bullet-enum-table-375.png` SHA256 相同（`5368b984…`，同帧零信息），删除 after、保留 table-375 作为 B 段唯一截图证据；`r3-bullet-enum-probe.mjs` 同步移除该次尾拍。
+- **探针去 flaky 重跑**（R4 dist `mobile-BA9tZ11B.js`）：固定 2500/2000ms 盲等改为条件等待（气泡内容/列表项 waitForSelector，10s 超时容错空会话）；B 段另加种植前后页面宽度稳定轮询（两次采样一致才读数——元素出现不等于布局稳定，一次未加轮询的重跑在 B 段读到瞬时 386px，稳定后 375px）。重跑证据 `r3-bullet-enum-probe.json`：20 会话 bullet 枚举词零残留、零页面级横向溢出；B 段 `bubbleMinWidth 0px` / `bubbleClientWidth 298` / `pageScrollWidth 375` / `wrapScrollsInternally true`（784→268）。

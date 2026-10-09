@@ -318,15 +318,18 @@ const LIFECYCLE_TERMS: Readonly<Record<string, string>> = Object.fromEntries(
  * Word terms that double as plain English words (`frozen goods`, `qualified
  * partner`, `the preferred supplier list`, `we are reviewing the order` in
  * English body prose): they map only when the token rides against a
- * Han-carrying segment of the leaf, when the nearest neighboring segment is
- * itself a lifecycle state word (an enum run), or when the whole display
- * leaf is a bare enum face — nothing but state words, bullet markers, and
- * numeric ordinals, so no prose surrounds the word to protect (a metric
- * value, action label, or bullet list of states) — otherwise English prose
- * keeps the word (W24-R1 for `frozen`/`qualified`, W24-R2 for the five
- * everyday-word states `potential`/`reviewing`/`preferred`/`rejected`/
- * `eliminated` mirroring the `suggestions` context rule in sanitize.ts,
- * W24-R3 for the hyphen/asterisk boundary and the bare enum face).
+ * Han-carrying segment of the leaf, when the token's own line is a bullet
+ * enum line and the nearest neighboring segment is another lifecycle state
+ * word (an enum run), or when the whole display leaf is a bare enum face —
+ * nothing but state words, bullet markers, and numeric ordinals, so no
+ * prose surrounds the word to protect (a metric value, action label, or
+ * bullet list of states) — otherwise English prose keeps the word (W24-R1
+ * for `frozen`/`qualified`, W24-R2 for the five everyday-word states
+ * `potential`/`reviewing`/`preferred`/`rejected`/`eliminated` mirroring the
+ * `suggestions` context rule in sanitize.ts, W24-R3 for the hyphen/asterisk
+ * boundary and the bare enum face, W24-R4 fencing the enum-run neighbor to
+ * bullet enum lines so adjacent state words in English prose — `the frozen
+ * qualified partner` — no longer vouch for each other).
  */
 const CONTEXTUAL_WORD_TERMS: Readonly<Record<string, string>> = {
   frozen: LIFECYCLE_TERMS.frozen ?? 'frozen',
@@ -340,11 +343,12 @@ const CONTEXTUAL_WORD_TERMS: Readonly<Record<string, string>> = {
 
 /**
  * One segment boundary: whitespace, CJK/Latin punctuation, and the ASCII
- * hyphen and asterisk (the W24-R2 segment gate, widened W24-R3): a markdown
- * bullet marker must split segments, or an enum word between two bullet
- * dashes probes two hyphen-only neighbors and loses its mapping.
+ * hyphen, asterisk, and plus (the W24-R2 segment gate, widened W24-R3 and
+ * W24-R4): a markdown bullet marker — `-`, `*`, or `+` — must split
+ * segments, or an enum word between two bullet markers probes two
+ * marker-only neighbors and loses its mapping.
  */
-const SEGMENT_BOUNDARY = /[\s，。、；：！？·,.!?;:（）()[\]【】「」『』…—–\-*]/
+const SEGMENT_BOUNDARY = /[\s，。、；：！？·,.!?;:（）()[\]【】「」『』…—–\-*+]/
 
 /** The lowercase lifecycle-state words: a segment holding one marks an enum run (W24-R3). */
 const LIFECYCLE_WORD_SET: ReadonlySet<string> = new Set(SUPPLIER_LIFECYCLE_STATES)
@@ -359,6 +363,20 @@ const LIFECYCLE_WORD_SET: ReadonlySet<string> = new Set(SUPPLIER_LIFECYCLE_STATE
 const isBareEnumFace = (text: string): boolean =>
   text.toLowerCase().split(SEGMENT_BOUNDARY)
     .every(segment => segment === '' || LIFECYCLE_WORD_SET.has(segment) || /^\d+$/.test(segment))
+
+/**
+ * Whether one display line is a markdown bullet line holding nothing but
+ * lifecycle state words, bullet markers, and numeric ordinals (W24-R4):
+ * the enum-run environment a neighboring state word propagates through.
+ * A state-word pair inside English prose (`the frozen qualified partner`)
+ * rides a prose line, not a bullet enum line, so neither word opens the
+ * gate for the other.
+ * @param line - the display line the probed token rides in.
+ */
+const isBulletEnumLine = (line: string): boolean => {
+  const trimmed = line.trim()
+  return /^(?:[-*+]|\d+[.)、])\s/.test(trimmed) && isBareEnumFace(trimmed)
+}
 
 /**
  * The trailing segment run of a prefix: boundary chars at the end drop, then
@@ -390,13 +408,17 @@ const headSegment = (text: string): string => {
 }
 
 /**
- * Whether one neighboring segment carries Han narrative or is itself a
- * lifecycle state word — the token rides against a Han segment, or sits in
- * an enum run where the neighboring slot holds another state (W24-R3).
+ * Whether one neighboring segment carries Han narrative — or, only inside
+ * the run of a bullet enum line, is itself a lifecycle state word: the
+ * token rides against a Han segment, or sits in an enum run where the
+ * neighboring slot holds another state (W24-R3 opened, W24-R4 fenced to
+ * bullet enum lines so adjacent state words in English prose no longer
+ * vouch for each other).
  * @param segment - one nearest complete segment.
+ * @param enumRun - whether the probed token's own line is a bullet enum line.
  */
-const gateSegment = (segment: string): boolean =>
-  HAS_CJK.test(segment) || LIFECYCLE_WORD_SET.has(segment.toLowerCase())
+const gateSegment = (segment: string, enumRun: boolean): boolean =>
+  HAS_CJK.test(segment) || (enumRun && LIFECYCLE_WORD_SET.has(segment.toLowerCase()))
 
 /**
  * The contextual state word of one token (above): undefined keeps the token.
@@ -407,7 +429,9 @@ const gateSegment = (segment: string): boolean =>
  * two openings: a neighboring segment that is itself a lifecycle state word
  * (the token sits inside an enum run, so a bullet list maps through), and
  * the bare-enum-face leaf (the W24-R1 lone-word exception generalized to
- * bullet markers and numeric ordinals).
+ * bullet markers and numeric ordinals). W24-R4 fences the enum-run opening
+ * to tokens whose own line is a bullet enum line, so adjacent state words
+ * in English prose (`the frozen qualified partner`) keep their words.
  * @param whole - the entire display string the token rides in.
  * @param token - the lowercased token.
  * @param offset - the token's start index within the whole string.
@@ -417,8 +441,11 @@ const contextualStateWord = (whole: string, token: string, offset: number): stri
   const word = CONTEXTUAL_WORD_TERMS[token]
   if (word === undefined) return undefined
   if (isBareEnumFace(whole)) return word
-  return gateSegment(tailSegment(whole.slice(0, offset)))
-    || gateSegment(headSegment(whole.slice(offset + token.length)))
+  const lineStart = whole.lastIndexOf('\n', offset - 1) + 1
+  const lineEnd = whole.indexOf('\n', offset)
+  const enumRun = isBulletEnumLine(whole.slice(lineStart, lineEnd === -1 ? whole.length : lineEnd))
+  return gateSegment(tailSegment(whole.slice(0, offset)), enumRun)
+    || gateSegment(headSegment(whole.slice(offset + token.length)), enumRun)
     ? word
     : undefined
 }
@@ -529,9 +556,11 @@ const STREAK_BARE = buildCiRegex('\\bstreak\\s*[≥>]=?\\s*(\\d+)\\b(?:\\s*[·�
  * phrase inside a mixed leaf (`frozen goods 已冻结`) keeps its English half
  * verbatim. W24-R3 splits segments at the ASCII hyphen and asterisk and
  * opens the gate to enum runs and bare enum faces, so a markdown bullet
- * list of states maps through while English prose keeps its words. The
- * persona bans these leaks — this is the guarantee the user never sees one
- * anyway.
+ * list of states maps through while English prose keeps its words. W24-R4
+ * adds the plus marker to the boundary set and fences the enum-run
+ * neighbor to bullet enum lines, so adjacent state words in English prose
+ * (`the frozen qualified partner`) keep their words. The persona bans
+ * these leaks — this is the guarantee the user never sees one anyway.
  * @param text - the model-authored display string.
  * @returns the people-language rendering.
  */

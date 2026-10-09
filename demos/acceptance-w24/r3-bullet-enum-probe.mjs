@@ -12,6 +12,10 @@
 // of the rebuilt bundle: the node is synthetic, but the class names, the
 // stylesheet, and the layout engine are the live page's own — the R2
 // computedStyle-probe precedent.
+// W24-R4 de-flake: the fixed 2500/2000ms blind waits became conditional
+// waits (bubble content, list items, or the 10s timeout for genuinely empty
+// sessions), and the trailing after-375 screenshot is gone — it captured
+// the same frame as table-375 (identical SHA256, zero information).
 // Usage: node demos/acceptance-w24/r3-bullet-enum-probe.mjs
 import { writeFileSync } from 'node:fs'
 import { chromium } from '../../apps/web/node_modules/playwright/index.mjs'
@@ -46,7 +50,10 @@ for (const [index, title] of titles.entries()) {
     rows[i]?.click()
   }, index)
   await page.waitForFunction(() => location.hash.startsWith('#/chat/'), { timeout: 15_000 })
-  await page.waitForTimeout(2500)
+  // Conditional wait: rendered bubble content or any bullet/list item means
+  // the messages are in the DOM; a session with neither is empty and the
+  // timeout-tolerated pass-through keeps the probe reading it as such.
+  await page.waitForSelector('[class*="assistantBubble"] [class*="richText"], li', { timeout: 10_000 }).catch(() => {})
   const probe = await page.evaluate(states => {
     const scroll = document.scrollingElement ?? document.documentElement
     const bulletItems = [...document.querySelectorAll('li')].map(li => (li.textContent ?? '').trim())
@@ -86,7 +93,22 @@ for (const [index, title] of storyRows.entries()) {
     rows[i]?.click()
   }, index)
   await page.waitForFunction(() => location.hash.startsWith('#/chat/'), { timeout: 15_000 })
-  await page.waitForTimeout(2000)
+  // Conditional wait for the bubble the planted table targets (the planted
+  // check itself reads the same selector; the wait removes the race).
+  await page.waitForSelector('[class*="assistantBubble"]', { timeout: 10_000 }).catch(() => {})
+  // The bubble appearing is not the layout settling: the message stream can
+  // still be mid-render, and a plant at that moment reads a transient page
+  // extent (one R4 run saw 386px before settling to 375px). Poll until the
+  // page's scroll extent stops changing before planting and again — the
+  // plant is itself a layout change — before measuring.
+  const settleExtent = key => page.waitForFunction(k => {
+    const scroll = document.scrollingElement ?? document.documentElement
+    const width = String(scroll.scrollWidth)
+    if (scroll.dataset[k] === width) return true
+    scroll.dataset[k] = width
+    return false
+  }, key, { timeout: 5_000, polling: 150 }).catch(() => {})
+  await settleExtent('probeSettlePre')
   const planted = await page.evaluate(() => {
     const bubble = document.querySelector('[class*="assistantBubble"]')
     const rich = bubble?.querySelector('[class*="richText"]')
@@ -121,11 +143,11 @@ for (const [index, title] of storyRows.entries()) {
       wrapClientWidth: wrap?.clientWidth ?? -1,
     }
   })
+  await settleExtent('probeSettlePost')
   await page.screenshot({ path: `${OUT}/r3-bullet-enum-table-375.png`, fullPage: false })
   break
 }
 
-await page.screenshot({ path: `${OUT}/r3-bullet-enum-after-375.png`, fullPage: false })
 const summary = {
   ts: new Date().toISOString(),
   bundleSrc,

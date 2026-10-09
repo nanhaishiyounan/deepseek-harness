@@ -238,6 +238,17 @@ describe('sanitizeBizText', () => {
     expect(sanitizeBizText('- frozen - potential')).toBe(`- ${w('frozen')} - ${w('potential')}`)
   })
 
+  it('keeps adjacent state words in English prose verbatim (W24-R4)', () => {
+    expect(sanitizeBizText('the frozen qualified partner is reserved')).toBe('the frozen qualified partner is reserved')
+    expect(sanitizeBizText('The preferred frozen batches')).toBe('The preferred frozen batches')
+  })
+
+  it('maps the plus-bullet enum variant like the dash (W24-R4)', () => {
+    const w = (state: string): string => SUPPLIER_STATE_WORDS[state] ?? state
+    expect(sanitizeBizText('+ qualified - restricted')).toBe(`+ ${w('qualified')} - ${w('restricted')}`)
+    expect(sanitizeBizText('+ frozen\n+ potential')).toBe(`+ ${w('frozen')}\n+ ${w('potential')}`)
+  })
+
   it('still maps the gated states inside a CJK narrative (W24-R2 no-regression)', () => {
     expect(sanitizeBizText('该供方 potential 已停用')).toBe('该供方 潜在 已停用')
     expect(sanitizeBizText('名单中 preferred 三家优先')).toBe('名单中 优选 三家优先')
