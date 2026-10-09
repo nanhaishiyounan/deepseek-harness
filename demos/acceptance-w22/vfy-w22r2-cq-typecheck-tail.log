@@ -1,4 +1,0 @@
-✔ [@deepseek-ai/dsh-tool-view-actions] Build complete in 50406ms
-
-> @deepseek-ai/dsh-root@1.0.0 typecheck:contracts-ready
-> tsc -b tsconfig.client.json
