@@ -215,6 +215,29 @@ describe('sanitizeBizText', () => {
     expect(sanitizeBizText('we are reviewing the order')).toBe('we are reviewing the order')
   })
 
+  it('maps every state in a bare enum face of bullets and asterisks (W24-R3)', () => {
+    const w = (state: string): string => SUPPLIER_STATE_WORDS[state] ?? state
+    expect(sanitizeBizText('- qualified - restricted - preferred')).toBe(`- ${w('qualified')} - ${w('restricted')} - ${w('preferred')}`)
+    expect(sanitizeBizText('- qualified\n- preferred\n- reviewing')).toBe(`- ${w('qualified')}\n- ${w('preferred')}\n- ${w('reviewing')}`)
+    expect(sanitizeBizText('**qualified**')).toBe(`**${w('qualified')}**`)
+    expect(sanitizeBizText('1. qualified')).toBe(`1. ${w('qualified')}`)
+  })
+
+  it('maps bullet-list states after a Chinese lead-in line (W24-R3 live shape)', () => {
+    const w = (state: string): string => SUPPLIER_STATE_WORDS[state] ?? state
+    const lead = '合计 30 家，去重后的原始枚举值共 6 个：'
+    const source = `${lead}\n- qualified\n- preferred\n- restricted\n- frozen\n- potential\n- reviewing`
+    expect(sanitizeBizText(source)).toBe(
+      `${lead}\n- ${w('qualified')}\n- ${w('preferred')}\n- ${w('restricted')}\n- ${w('frozen')}\n- ${w('potential')}\n- ${w('reviewing')}`,
+    )
+  })
+
+  it('maps a gated state whose nearest segment is another state word (W24-R3)', () => {
+    const w = (state: string): string => SUPPLIER_STATE_WORDS[state] ?? state
+    // No Han neighbor anywhere: the enum-run neighbor carries the mapping.
+    expect(sanitizeBizText('- frozen - potential')).toBe(`- ${w('frozen')} - ${w('potential')}`)
+  })
+
   it('still maps the gated states inside a CJK narrative (W24-R2 no-regression)', () => {
     expect(sanitizeBizText('该供方 potential 已停用')).toBe('该供方 潜在 已停用')
     expect(sanitizeBizText('名单中 preferred 三家优先')).toBe('名单中 优选 三家优先')

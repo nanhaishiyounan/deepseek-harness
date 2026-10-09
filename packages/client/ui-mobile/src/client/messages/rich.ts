@@ -318,12 +318,15 @@ const LIFECYCLE_TERMS: Readonly<Record<string, string>> = Object.fromEntries(
  * Word terms that double as plain English words (`frozen goods`, `qualified
  * partner`, `the preferred supplier list`, `we are reviewing the order` in
  * English body prose): they map only when the token rides against a
- * Han-carrying segment of the leaf, or when the whole display leaf is
- * nothing but the enum value (a metric value or action label carries no
- * prose around the word to protect) — otherwise English prose keeps the
- * word (W24-R1 for `frozen`/`qualified`, W24-R2 for the five everyday-word
- * states `potential`/`reviewing`/`preferred`/`rejected`/`eliminated`,
- * mirroring the `suggestions` context rule in sanitize.ts).
+ * Han-carrying segment of the leaf, when the nearest neighboring segment is
+ * itself a lifecycle state word (an enum run), or when the whole display
+ * leaf is a bare enum face — nothing but state words, bullet markers, and
+ * numeric ordinals, so no prose surrounds the word to protect (a metric
+ * value, action label, or bullet list of states) — otherwise English prose
+ * keeps the word (W24-R1 for `frozen`/`qualified`, W24-R2 for the five
+ * everyday-word states `potential`/`reviewing`/`preferred`/`rejected`/
+ * `eliminated` mirroring the `suggestions` context rule in sanitize.ts,
+ * W24-R3 for the hyphen/asterisk boundary and the bare enum face).
  */
 const CONTEXTUAL_WORD_TERMS: Readonly<Record<string, string>> = {
   frozen: LIFECYCLE_TERMS.frozen ?? 'frozen',
@@ -335,8 +338,27 @@ const CONTEXTUAL_WORD_TERMS: Readonly<Record<string, string>> = {
   eliminated: LIFECYCLE_TERMS.eliminated ?? 'eliminated',
 }
 
-/** One segment boundary: whitespace or CJK/Latin punctuation (the W24-R2 segment gate). */
-const SEGMENT_BOUNDARY = /[\s，。、；：！？·,.!?;:（）()[\]【】「」『』…—–]/
+/**
+ * One segment boundary: whitespace, CJK/Latin punctuation, and the ASCII
+ * hyphen and asterisk (the W24-R2 segment gate, widened W24-R3): a markdown
+ * bullet marker must split segments, or an enum word between two bullet
+ * dashes probes two hyphen-only neighbors and loses its mapping.
+ */
+const SEGMENT_BOUNDARY = /[\s，。、；：！？·,.!?;:（）()[\]【】「」『』…—–\-*]/
+
+/** The lowercase lifecycle-state words: a segment holding one marks an enum run (W24-R3). */
+const LIFECYCLE_WORD_SET: ReadonlySet<string> = new Set(SUPPLIER_LIFECYCLE_STATES)
+
+/**
+ * Whether every segment of the display leaf is a lifecycle state word, a
+ * numeric bullet ordinal, or boundary residue (W24-R3): a bare enum face —
+ * a lone state word, `- qualified - restricted - preferred`, or a markdown
+ * bullet list of states — carries no prose to protect, so the gated words
+ * map directly like a bare-leaf enum value.
+ */
+const isBareEnumFace = (text: string): boolean =>
+  text.toLowerCase().split(SEGMENT_BOUNDARY)
+    .every(segment => segment === '' || LIFECYCLE_WORD_SET.has(segment) || /^\d+$/.test(segment))
 
 /**
  * The trailing segment run of a prefix: boundary chars at the end drop, then
@@ -368,11 +390,24 @@ const headSegment = (text: string): string => {
 }
 
 /**
+ * Whether one neighboring segment carries Han narrative or is itself a
+ * lifecycle state word — the token rides against a Han segment, or sits in
+ * an enum run where the neighboring slot holds another state (W24-R3).
+ * @param segment - one nearest complete segment.
+ */
+const gateSegment = (segment: string): boolean =>
+  HAS_CJK.test(segment) || LIFECYCLE_WORD_SET.has(segment.toLowerCase())
+
+/**
  * The contextual state word of one token (above): undefined keeps the token.
  * The W24-R2 segment gate probes the two segments nearest the token — a
  * token glued to Han text shares its segment, and a lone token between
  * segments reads the neighbors — so `该供方 potential 已停用` maps 潜在
- * while `frozen goods 已冻结` keeps its English half verbatim.
+ * while `frozen goods 已冻结` keeps its English half verbatim. W24-R3 adds
+ * two openings: a neighboring segment that is itself a lifecycle state word
+ * (the token sits inside an enum run, so a bullet list maps through), and
+ * the bare-enum-face leaf (the W24-R1 lone-word exception generalized to
+ * bullet markers and numeric ordinals).
  * @param whole - the entire display string the token rides in.
  * @param token - the lowercased token.
  * @param offset - the token's start index within the whole string.
@@ -381,9 +416,9 @@ const headSegment = (text: string): string => {
 const contextualStateWord = (whole: string, token: string, offset: number): string | undefined => {
   const word = CONTEXTUAL_WORD_TERMS[token]
   if (word === undefined) return undefined
-  if (whole.trim().toLowerCase() === token) return word
-  return HAS_CJK.test(tailSegment(whole.slice(0, offset)))
-    || HAS_CJK.test(headSegment(whole.slice(offset + token.length)))
+  if (isBareEnumFace(whole)) return word
+  return gateSegment(tailSegment(whole.slice(0, offset)))
+    || gateSegment(headSegment(whole.slice(offset + token.length)))
     ? word
     : undefined
 }
@@ -492,8 +527,11 @@ const STREAK_BARE = buildCiRegex('\\bstreak\\s*[≥>]=?\\s*(\\d+)\\b(?:\\s*[·�
  * five everyday-word states and probes it at segment granularity: a token
  * maps only when the segment beside it carries Han text, so an English
  * phrase inside a mixed leaf (`frozen goods 已冻结`) keeps its English half
- * verbatim. The persona bans these leaks — this is the guarantee the user
- * never sees one anyway.
+ * verbatim. W24-R3 splits segments at the ASCII hyphen and asterisk and
+ * opens the gate to enum runs and bare enum faces, so a markdown bullet
+ * list of states maps through while English prose keeps its words. The
+ * persona bans these leaks — this is the guarantee the user never sees one
+ * anyway.
  * @param text - the model-authored display string.
  * @returns the people-language rendering.
  */

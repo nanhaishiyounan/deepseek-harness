@@ -1,0 +1,248 @@
+{
+  "summary": {
+    "ts": "2026-10-09T08:07:02.737Z",
+    "bundleSrc": "/assets/mobile-DmktTKa7.js",
+    "sessionsOpened": 20,
+    "sessionsWithUntranslatedStateBullets": 0,
+    "sessionsWithPageOverflowX": 0,
+    "bulletEvidence": [
+      {
+        "session": "供应链数据里有什么值得关注",
+        "text": "某供应商 9 号 来料通过率仅 30%，7 批不合格建议启动黑名单评估或现场审核"
+      },
+      {
+        "session": "供应链数据里有什么值得关注",
+        "text": "某供应商 4 号 通过率 37.5%，5 批不合格要求整改并提高抽检比例"
+      },
+      {
+        "session": "供应链数据里有什么值得关注",
+        "text": "黑名单供应商仍在线丹东禾丰果蔬专业合作社，监管风险 D，理由：农残抽检不合格且整改无效"
+      },
+      {
+        "session": "供应链数据里有什么值得关注",
+        "text": "冰淇淋批次 MOON-260318-01 已过期expiry 2026-09-14，状态 冻结"
+      },
+      {
+        "session": "供应链数据里有什么值得关注",
+        "text": "受限供应商江南乳业 SUP-003：连续 4 季下滑 91→77→74→70，已在整改。"
+      },
+      {
+        "session": "供应链数据里有什么值得关注",
+        "text": "质量风险供应商 9 不合格率 70%（7/10）、供应商 4 不合格 62.5%（5/8）、供应商 2 不合格 50%；来源"
+      }
+    ],
+    "widthFloor": {
+      "session": "查供应商编号13鲜丰的准入状",
+      "bubbleMinWidth": "0px",
+      "bubbleMaxWidth": "300px",
+      "bubbleClientWidth": 298,
+      "pageOverflowX": false,
+      "pageScrollWidth": 375,
+      "wrapScrollsInternally": true,
+      "wrapScrollWidth": 784,
+      "wrapClientWidth": 268
+    }
+  },
+  "results": [
+    {
+      "title": "查供应商编号13鲜丰的准入状",
+      "pageOverflowX": false,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "untranslatedStateBullets": [],
+      "translatedBulletSamples": [],
+      "tableWraps": []
+    },
+    {
+      "title": "查一下糯米粉的库存给我一张",
+      "pageOverflowX": false,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "untranslatedStateBullets": [],
+      "translatedBulletSamples": [],
+      "tableWraps": []
+    },
+    {
+      "title": "供应链数据里有什么值得关注",
+      "pageOverflowX": false,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "untranslatedStateBullets": [],
+      "translatedBulletSamples": [
+        "某供应商 9 号 来料通过率仅 30%，7 批不合格建议启动黑名单评估或现场审核",
+        "某供应商 4 号 通过率 37.5%，5 批不合格要求整改并提高抽检比例"
+      ],
+      "tableWraps": []
+    },
+    {
+      "title": "供应链数据里有什么值得关注",
+      "pageOverflowX": false,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "untranslatedStateBullets": [],
+      "translatedBulletSamples": [],
+      "tableWraps": []
+    },
+    {
+      "title": "供应链数据里有什么值得关注",
+      "pageOverflowX": false,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "untranslatedStateBullets": [],
+      "translatedBulletSamples": [
+        "黑名单供应商仍在线丹东禾丰果蔬专业合作社，监管风险 D，理由：农残抽检不合格且整改无效",
+        "冰淇淋批次 MOON-260318-01 已过期expiry 2026-09-14，状态 冻结"
+      ],
+      "tableWraps": []
+    },
+    {
+      "title": "供应链数据里有什么值得关注",
+      "pageOverflowX": false,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "untranslatedStateBullets": [],
+      "translatedBulletSamples": [
+        "受限供应商江南乳业 SUP-003：连续 4 季下滑 91→77→74→70，已在整改。"
+      ],
+      "tableWraps": []
+    },
+    {
+      "title": "供应链数据里有什么值得关注",
+      "pageOverflowX": false,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "untranslatedStateBullets": [],
+      "translatedBulletSamples": [
+        "质量风险供应商 9 不合格率 70%（7/10）、供应商 4 不合格 62.5%（5/8）、供应商 2 不合格 50%；来源"
+      ],
+      "tableWraps": []
+    },
+    {
+      "title": "供应链数据里有什么值得关注",
+      "pageOverflowX": false,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "untranslatedStateBullets": [],
+      "translatedBulletSamples": [],
+      "tableWraps": []
+    },
+    {
+      "title": "向鲜丰采购面粉，数量100，单",
+      "pageOverflowX": false,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "untranslatedStateBullets": [],
+      "translatedBulletSamples": [],
+      "tableWraps": []
+    },
+    {
+      "title": "查一下糯米粉还有多少库存",
+      "pageOverflowX": false,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "untranslatedStateBullets": [],
+      "translatedBulletSamples": [],
+      "tableWraps": []
+    },
+    {
+      "title": "查一下糯米粉还有多少库存",
+      "pageOverflowX": false,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "untranslatedStateBullets": [],
+      "translatedBulletSamples": [],
+      "tableWraps": []
+    },
+    {
+      "title": "查一下糯米粉还有多少库存",
+      "pageOverflowX": false,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "untranslatedStateBullets": [],
+      "translatedBulletSamples": [],
+      "tableWraps": []
+    },
+    {
+      "title": "向鲜丰采购面粉，数量100，单",
+      "pageOverflowX": false,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "untranslatedStateBullets": [],
+      "translatedBulletSamples": [],
+      "tableWraps": []
+    },
+    {
+      "title": "新会话",
+      "pageOverflowX": false,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "untranslatedStateBullets": [],
+      "translatedBulletSamples": [],
+      "tableWraps": []
+    },
+    {
+      "title": "帮我登记一张采购单：供应商",
+      "pageOverflowX": false,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "untranslatedStateBullets": [],
+      "translatedBulletSamples": [],
+      "tableWraps": []
+    },
+    {
+      "title": "出一张糯米粉库存报表：表格",
+      "pageOverflowX": false,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "untranslatedStateBullets": [],
+      "translatedBulletSamples": [],
+      "tableWraps": []
+    },
+    {
+      "title": "统计糯米粉两个库位的现有数",
+      "pageOverflowX": false,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "untranslatedStateBullets": [],
+      "translatedBulletSamples": [],
+      "tableWraps": []
+    },
+    {
+      "title": "查供应商编号13鲜丰的联系人",
+      "pageOverflowX": false,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "untranslatedStateBullets": [],
+      "translatedBulletSamples": [],
+      "tableWraps": []
+    },
+    {
+      "title": "查一下糯米粉的库存报表：表",
+      "pageOverflowX": false,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "untranslatedStateBullets": [],
+      "translatedBulletSamples": [],
+      "tableWraps": []
+    },
+    {
+      "title": "向【供应商】采购【面粉】，",
+      "pageOverflowX": false,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "untranslatedStateBullets": [],
+      "translatedBulletSamples": [],
+      "tableWraps": []
+    }
+  ],
+  "widthFloor": {
+    "bubbleMinWidth": "0px",
+    "bubbleMaxWidth": "300px",
+    "bubbleClientWidth": 298,
+    "pageOverflowX": false,
+    "pageScrollWidth": 375,
+    "wrapScrollsInternally": true,
+    "wrapScrollWidth": 784,
+    "wrapClientWidth": 268
+  }
+}

@@ -11,6 +11,7 @@ import { cleanup, fireEvent, render } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 import type { ChatItem } from '../src/client/fold.ts'
 import { FlowItem } from '../src/client/messages/chat/FlowItem.tsx'
+import { RichContent } from '../src/client/messages/RichContent.tsx'
 import { sanitizeBody, sanitizeReportPayload, sanitizeSubtitle } from '../src/client/sanitize.ts'
 import type { ReportAction, ReportPayload } from '../src/client/protocol.ts'
 import { SUPPLIER_LIFECYCLE_STATES } from '../src/client/fieldControls.ts'
@@ -309,5 +310,21 @@ describe('the report render site (W23-R3 F2)', () => {
   it('keeps a clean subtitle verbatim', () => {
     renderFlow(reportItem('近30天 · 实时查询'))
     expect(document.querySelector('[class*="reportSubtitle"]')?.textContent).toBe('近30天 · 实时查询')
+  })
+})
+
+describe('the narrative bullet enum face in the DOM (W24-R3)', () => {
+  it('renders a bullet list of states fully translated with no English residue', () => {
+    const states = ['qualified', 'preferred', 'restricted', 'frozen', 'potential', 'reviewing']
+    render(<RichContent text={`供应商状态枚举如下：\n${states.map(state => `- ${state}`).join('\n')}`} />)
+    const items = [...document.querySelectorAll('li')].map(li => (li.textContent ?? '').trim())
+    expect(items).toEqual(states.map(state => SUPPLIER_STATE_WORDS[state]))
+    expect(/qualified|preferred|restricted|frozen|potential|reviewing/.test(document.body.textContent ?? '')).toBe(false)
+  })
+
+  it('keeps the English prose sentence verbatim in the narrative DOM (W24-R3)', () => {
+    render(<RichContent text={'The preferred supplier list is attached'} />)
+    expect(document.body.textContent).toContain('The preferred supplier list is attached')
+    expect(document.body.textContent).not.toContain('优选')
   })
 })

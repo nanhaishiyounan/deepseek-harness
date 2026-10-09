@@ -162,12 +162,18 @@
 
 /* The AI bubble (§五 气泡·AI): the paper plate's seal face rides the global
     .dshm-bubble-paper-ai hook (border/notch/max-width/plate); the local class
-    keeps only the chat-grade text metrics. */
+    keeps only the chat-grade text metrics. W24-R3 adds min-width: 0 — the
+    bubble is a flex item of the assistant row, and a wide md table (its
+    min-width: max-content) raises the item's automatic minimum above the
+    300px max-width, so the bubble overflows the row and the whole page
+    scrolls horizontally; zeroing the floor restores the width cap and leaves
+    the table to scroll inside its own .md-table-wrap. */
 .assistantBubble {
   padding: 12px 15px;
   font-size: var(--dshm-fs-body);
   line-height: 1.62;
   overflow-wrap: anywhere;
+  min-width: 0;
 }
 
 /* The user bubble (§五 气泡·user): the persimmon label face rides the global
