@@ -414,6 +414,20 @@ describe('mobile chats tab', () => {
     expect(css).toContain('.timeBadge:global(.adm-badge-fixed)')
     expect(css).not.toContain('.timeBadge :global(')
     expect(css).not.toContain('.adm-badge.fixed')
+    // W24-R2: the offset value itself runs through jsdom's style engine —
+    // the module's compound rule is rewritten onto the hashed class (the
+    // same one the badge element carries) and injected as a plain <style>
+    // element, so the computed custom properties prove the selector matches
+    // the real badge DOM at the new -4px anchor.
+    const hashClass = (dot?.className.match(/_timeBadge_\S+/) ?? [''])[0]
+    const rule = /\.timeBadge:global\(\.adm-badge-fixed\)\s*\{[^}]*\}/.exec(css)?.[0] ?? ''
+    const style = document.createElement('style')
+    style.textContent = rule.replace('.timeBadge:global(.adm-badge-fixed)', `.${hashClass}.adm-badge-fixed`)
+    document.head.appendChild(style)
+    const computed = getComputedStyle(dot as Element)
+    expect(computed.getPropertyValue('--right')).toBe('-4px')
+    expect(computed.getPropertyValue('--top')).toBe('2px')
+    style.remove()
   })
 
   it('shows the poll failure card when the session list read fails', async () => {

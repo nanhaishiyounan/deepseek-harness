@@ -145,6 +145,57 @@ describe('sanitizeReportPayload object-graph traversal (W24-R1)', () => {
   })
 })
 
+describe('the English-prose face (W24-R2)', () => {
+  it('round-trips the three guarded English sentences through every display leaf kind', () => {
+    const sentences = [
+      'The preferred supplier list is attached',
+      'The potential risk is high',
+      'we are reviewing the order',
+    ]
+    for (const sentence of sentences) {
+      const payload: ReportPayload = {
+        v: 3,
+        type: 'report',
+        id: 'r-en-roundtrip',
+        title: '供应商年报',
+        subtitle: sentence,
+        metrics: [{ label: sentence, value: '1', kind: 'count' }],
+        rows: [{ label: sentence, hint: sentence, level: 'high' }],
+      }
+      const clean = sanitizeReportPayload(payload)
+      expect(clean.subtitle).toBe(sentence)
+      expect(clean.metrics[0]?.label).toBe(sentence)
+      expect(clean.rows?.[0]?.label).toBe(sentence)
+      expect(clean.rows?.[0]?.hint).toBe(sentence)
+    }
+  })
+
+  it('keeps the English card face clean: protocol tokens strip, enum words never gain Chinese mid-word (jargon-scan English fixture)', () => {
+    const payload: ReportPayload = {
+      v: 3,
+      type: 'report',
+      id: 'r-en-jargon',
+      title: 'Supplier status review',
+      subtitle: 'wfl_approval_todos cleared · the preferred supplier list is attached',
+      metrics: [{ label: 'we are reviewing the order', value: 'potential', kind: 'count' }],
+      rows: [{ label: 'The potential risk is high', hint: 'rejected lots recorded', level: 'high' }],
+    }
+    const clean = sanitizeReportPayload(payload)
+    // The protocol token strips whole; no casing residue survives anywhere.
+    expect(clean.subtitle).toBe('cleared · the preferred supplier list is attached')
+    expect(/wfl_approval_todos/i.test(JSON.stringify(clean))).toBe(false)
+    // The English prose leaves keep their enum words verbatim and gain no
+    // Han characters mid-word; the bare-leaf enum value still maps whole.
+    expect(clean.metrics[0]?.label).toBe('we are reviewing the order')
+    expect(clean.rows?.[0]?.label).toBe('The potential risk is high')
+    expect(clean.rows?.[0]?.hint).toBe('rejected lots recorded')
+    expect(clean.metrics[0]?.value).toBe('潜在')
+    expect(/[\u4e00-\u9fff]/.test(clean.subtitle ?? '')).toBe(false)
+    expect(/[\u4e00-\u9fff]/.test(clean.metrics[0]?.label ?? '')).toBe(false)
+    expect(/[\u4e00-\u9fff]/.test(clean.rows?.[0]?.label ?? '')).toBe(false)
+  })
+})
+
 describe('the report render site (W23-R3 F2)', () => {
   const reportItem = (subtitle: string, title = '待办概览'): ChatItem => ({
     kind: 'report',
@@ -226,6 +277,12 @@ describe('the report render site (W23-R3 F2)', () => {
     const node = document.querySelector('[class*="reportSubtitle"]')
     expect(node?.textContent).toBe('实时查询 · 待办表 已清空')
     expect(document.body.textContent).not.toContain('wfl_approval_todos')
+  })
+
+  it('renders a mixed leaf with its English half verbatim and its CJK half intact (W24-R2)', () => {
+    renderFlow(reportItem('frozen goods 已冻结'))
+    const node = document.querySelector('[class*="reportSubtitle"]')
+    expect(node?.textContent).toBe('frozen goods 已冻结')
   })
 
   it('renders no casing variant of the leaked token in any subtitle text node (W23-R4)', () => {

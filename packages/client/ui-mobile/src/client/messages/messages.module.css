@@ -159,9 +159,12 @@
    `adm-badge-fixed` as ONE hyphenated class), so the W24 form was doubly
    dead: a descendant selector cannot hit the same element, and its dotted
    two-class spelling assumes a separate `fixed` class that never exists.
-   The live before-probe measured the offset never applying (top/right 0/0). */
+   The live before-probe measured the offset never applying (top/right 0/0).
+   W24-R2: -8px read as the dot drifting off the time text's box on the
+   375px audit; -4px keeps the overlap legible against the right-aligned
+   column. */
 .timeBadge:global(.adm-badge-fixed) {
-  --right: -8px;
+  --right: -4px;
   --top: 2px;
 }
 

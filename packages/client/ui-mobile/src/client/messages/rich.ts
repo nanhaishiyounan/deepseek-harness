@@ -316,27 +316,76 @@ const LIFECYCLE_TERMS: Readonly<Record<string, string>> = Object.fromEntries(
 
 /**
  * Word terms that double as plain English words (`frozen goods`, `qualified
- * partner` in English body prose): they map only inside a CJK narrative, or
- * when the whole display leaf is nothing but the enum value (a metric value
- * or action label carries no prose around the word to protect) — otherwise
- * English prose keeps the word (W24-R1, mirroring the `suggestions`
- * context rule in sanitize.ts).
+ * partner`, `the preferred supplier list`, `we are reviewing the order` in
+ * English body prose): they map only when the token rides against a
+ * Han-carrying segment of the leaf, or when the whole display leaf is
+ * nothing but the enum value (a metric value or action label carries no
+ * prose around the word to protect) — otherwise English prose keeps the
+ * word (W24-R1 for `frozen`/`qualified`, W24-R2 for the five everyday-word
+ * states `potential`/`reviewing`/`preferred`/`rejected`/`eliminated`,
+ * mirroring the `suggestions` context rule in sanitize.ts).
  */
 const CONTEXTUAL_WORD_TERMS: Readonly<Record<string, string>> = {
   frozen: LIFECYCLE_TERMS.frozen ?? 'frozen',
   qualified: LIFECYCLE_TERMS.qualified ?? 'qualified',
+  potential: LIFECYCLE_TERMS.potential ?? 'potential',
+  reviewing: LIFECYCLE_TERMS.reviewing ?? 'reviewing',
+  preferred: LIFECYCLE_TERMS.preferred ?? 'preferred',
+  rejected: LIFECYCLE_TERMS.rejected ?? 'rejected',
+  eliminated: LIFECYCLE_TERMS.eliminated ?? 'eliminated',
+}
+
+/** One segment boundary: whitespace or CJK/Latin punctuation (the W24-R2 segment gate). */
+const SEGMENT_BOUNDARY = /[\s，。、；：！？·,.!?;:（）()[\]【】「」『』…—–]/
+
+/**
+ * The trailing segment run of a prefix: boundary chars at the end drop, then
+ * the run up to the next boundary (the segment that touches the probe's
+ * right edge from the left).
+ * @param text - the text left of the probed token.
+ * @returns the nearest complete segment ending at the probe.
+ */
+const tailSegment = (text: string): string => {
+  let end = text.length - 1
+  while (end >= 0 && SEGMENT_BOUNDARY.test(text.charAt(end))) end -= 1
+  let start = end
+  while (start >= 0 && !SEGMENT_BOUNDARY.test(text.charAt(start))) start -= 1
+  return text.slice(start + 1, end + 1)
+}
+
+/**
+ * The leading segment run of a suffix: boundary chars at the start drop,
+ * then the run up to the next boundary.
+ * @param text - the text right of the probed token.
+ * @returns the nearest complete segment starting at the probe.
+ */
+const headSegment = (text: string): string => {
+  let start = 0
+  while (start < text.length && SEGMENT_BOUNDARY.test(text.charAt(start))) start += 1
+  let end = start
+  while (end < text.length && !SEGMENT_BOUNDARY.test(text.charAt(end))) end += 1
+  return text.slice(start, end)
 }
 
 /**
  * The contextual state word of one token (above): undefined keeps the token.
+ * The W24-R2 segment gate probes the two segments nearest the token — a
+ * token glued to Han text shares its segment, and a lone token between
+ * segments reads the neighbors — so `该供方 potential 已停用` maps 潜在
+ * while `frozen goods 已冻结` keeps its English half verbatim.
  * @param whole - the entire display string the token rides in.
  * @param token - the lowercased token.
+ * @param offset - the token's start index within the whole string.
  * @returns the people word, or undefined when the context does not hold.
  */
-const contextualStateWord = (whole: string, token: string): string | undefined => {
+const contextualStateWord = (whole: string, token: string, offset: number): string | undefined => {
   const word = CONTEXTUAL_WORD_TERMS[token]
   if (word === undefined) return undefined
-  return HAS_CJK.test(whole) || whole.trim().toLowerCase() === token ? word : undefined
+  if (whole.trim().toLowerCase() === token) return word
+  return HAS_CJK.test(tailSegment(whole.slice(0, offset)))
+    || HAS_CJK.test(headSegment(whole.slice(offset + token.length)))
+    ? word
+    : undefined
 }
 
 /**
@@ -344,9 +393,12 @@ const contextualStateWord = (whole: string, token: string): string | undefined =
  * in any casing (`ATP`, `atp`) and the supplier lifecycle's bare enum values
  * map onto their business words. W24-R1 derives the lifecycle family from
  * the field-control value domain over the catalog's zh words — `qualified`
- * renders as 合格 on every surface (no render-side synonym), and the two
+ * renders as 合格 on every surface (no render-side synonym), and the
  * dictionary-word states (`frozen`, `qualified`) sit in
- * {@link CONTEXTUAL_WORD_TERMS} behind the CJK gate instead.
+ * {@link CONTEXTUAL_WORD_TERMS} behind the CJK gate instead. W24-R2 moves
+ * the five everyday-word states (`potential`, `reviewing`, `preferred`,
+ * `rejected`, `eliminated`) behind the same gate, leaving only `restricted`
+ * here — a word English body prose never carries.
  */
 const WORD_TERMS_CI: Readonly<Record<string, string>> = {
   atp: '可用库存',
@@ -436,16 +488,20 @@ const STREAK_BARE = buildCiRegex('\\bstreak\\s*[≥>]=?\\s*(\\d+)\\b(?:\\s*[·�
  * bare enum values map onto the catalog's zh words (derived from the
  * field-control value domain), `receiving=none` reads 尚未收货, and the two
  * dictionary-word states (`frozen`, `qualified`) map only inside a CJK
- * narrative so English prose keeps its words. The persona bans these leaks —
- * this is the guarantee the user never sees one anyway.
+ * narrative so English prose keeps its words. W24-R2 widens that gate to the
+ * five everyday-word states and probes it at segment granularity: a token
+ * maps only when the segment beside it carries Han text, so an English
+ * phrase inside a mixed leaf (`frozen goods 已冻结`) keeps its English half
+ * verbatim. The persona bans these leaks — this is the guarantee the user
+ * never sees one anyway.
  * @param text - the model-authored display string.
  * @returns the people-language rendering.
  */
 export function sanitizeBizText(text: string): string {
   const mapped = text
-    .replace(/[A-Za-z0-9]+/g, (match) => {
+    .replace(/[A-Za-z0-9]+/g, (match, offset: number) => {
       const lower = match.toLowerCase()
-      return WORD_TERMS[match] ?? WORD_TERMS_CI[lower] ?? contextualStateWord(text, lower) ?? match
+      return WORD_TERMS[match] ?? WORD_TERMS_CI[lower] ?? contextualStateWord(text, lower, offset) ?? match
     })
     // The receiving pair rides ahead of the snake pass: a future
     // `receiving_status` term must not rewrite the field half and shadow the

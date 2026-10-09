@@ -208,4 +208,20 @@ describe('sanitizeBizText', () => {
   it('keeps the dictionary-word states in English prose untouched (W24-R1)', () => {
     expect(sanitizeBizText('The frozen goods arrived; qualified partner list attached')).toBe('The frozen goods arrived; qualified partner list attached')
   })
+
+  it('keeps the five everyday-word states in English prose untouched (W24-R2)', () => {
+    expect(sanitizeBizText('The preferred supplier list is attached')).toBe('The preferred supplier list is attached')
+    expect(sanitizeBizText('The potential risk is high')).toBe('The potential risk is high')
+    expect(sanitizeBizText('we are reviewing the order')).toBe('we are reviewing the order')
+  })
+
+  it('still maps the gated states inside a CJK narrative (W24-R2 no-regression)', () => {
+    expect(sanitizeBizText('该供方 potential 已停用')).toBe('该供方 潜在 已停用')
+    expect(sanitizeBizText('名单中 preferred 三家优先')).toBe('名单中 优选 三家优先')
+  })
+
+  it('keeps the English half of a mixed leaf verbatim at segment granularity (W24-R2)', () => {
+    expect(sanitizeBizText('frozen goods 已冻结')).toBe('frozen goods 已冻结')
+    expect(sanitizeBizText('rejected items 已退回')).toBe('rejected items 已退回')
+  })
 })
