@@ -9,6 +9,8 @@
  * No React imports.
  */
 
+import { SUPPLIER_LIFECYCLE_STATES } from './fieldControls.ts'
+
 /** One browsable collection entry (label + the list's default sort field). */
 export interface DocCollectionEntry {
   readonly collection: string
@@ -122,6 +124,18 @@ const APPROVAL_WORDS: Readonly<Record<string, string>> = {
   reviewing: '准入评审中', qualified: '合格', potential: '潜在',
   preferred: '优选', restricted: '受限', frozen: '冻结', eliminated: '已淘汰',
 }
+
+/**
+ * The supplier lifecycle states' zh projection (W24-R1): derived over
+ * {@link SUPPLIER_LIFECYCLE_STATES} from the shared approval vocabulary, so
+ * the display-side word table and this catalog can never fork a state's
+ * people word (`qualified` is 合格 on every surface, never a render-side
+ * synonym). A state the vocabulary misses projects onto itself, which the
+ * word table's full-domain test rejects.
+ */
+export const SUPPLIER_STATE_WORDS: Readonly<Record<string, string>> = Object.fromEntries(
+  SUPPLIER_LIFECYCLE_STATES.map(state => [state, APPROVAL_WORDS[state] ?? state]),
+)
 
 /** The posting vocabulary's zh projection (draft here means awaiting the posting engine). */
 const POSTING_WORDS: Readonly<Record<string, string>> = {

@@ -7,12 +7,14 @@
  * leak) never reaches a subtitle text node.
  */
 
-import { cleanup, render } from '@testing-library/react'
+import { cleanup, fireEvent, render } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 import type { ChatItem } from '../src/client/fold.ts'
 import { FlowItem } from '../src/client/messages/chat/FlowItem.tsx'
 import { sanitizeBody, sanitizeReportPayload, sanitizeSubtitle } from '../src/client/sanitize.ts'
-import type { ReportPayload } from '../src/client/protocol.ts'
+import type { ReportAction, ReportPayload } from '../src/client/protocol.ts'
+import { SUPPLIER_LIFECYCLE_STATES } from '../src/client/fieldControls.ts'
+import { SUPPLIER_STATE_WORDS } from '../src/client/docsCatalog.ts'
 
 afterEach(cleanup)
 
@@ -87,6 +89,62 @@ describe('sanitizeReportPayload (W24 all-faces)', () => {
   })
 })
 
+describe('sanitizeReportPayload object-graph traversal (W24-R1)', () => {
+  it('sanitizes the faces the per-key enumeration missed: metric values and action text faces', () => {
+    const payload: ReportPayload = {
+      v: 3,
+      type: 'report',
+      id: 'r-2',
+      title: '采购订单状态',
+      subtitle: '收货进度 receiving=none',
+      metrics: [
+        { label: '收货进度', value: 'receiving=none', kind: 'count' },
+        { label: '供应商状态', value: 'potential', kind: 'count' },
+      ],
+      actions: [
+        { kind: 'view', label: 'WFL_Approval_Todos查看明细', route: '/pur_orders/12' },
+        { kind: 'send', label: '通知', text: 'supplier 4 已对账' },
+      ],
+    }
+    const clean = sanitizeReportPayload(payload)
+    expect(clean.subtitle).toBe('收货进度 尚未收货')
+    expect(clean.metrics[0]?.value).toBe('尚未收货')
+    expect(clean.metrics[1]?.value).toBe('潜在')
+    expect(clean.actions?.[0]?.label).toBe('查看明细')
+    const send = clean.actions?.[1]
+    expect(send?.kind === 'send' ? send.text : '').toBe('某供应商 4 号 已对账')
+    const view = clean.actions?.[0]
+    expect(view?.kind).toBe('view')
+    if (view?.kind === 'view') expect(view.route).toBe('/pur_orders/12')
+    // The verbatim identity set rides through untouched.
+    expect(clean.id).toBe('r-2')
+    expect(clean.type).toBe('report')
+    // The stored artifact keeps its verbatim bytes.
+    expect(payload.metrics[0]?.value).toBe('receiving=none')
+    expect(payload.actions?.[0]?.label).toBe('WFL_Approval_Todos查看明细')
+  })
+
+  it('covers the lifecycle value domain through the traversal: no raw enum or snake residue survives', () => {
+    const payload: ReportPayload = {
+      v: 3,
+      type: 'report',
+      id: 'r-states',
+      title: '供应商状态盘点',
+      metrics: SUPPLIER_LIFECYCLE_STATES.map((state, index) =>
+        ({ label: `状态${String(index + 1)}`, value: state, kind: 'count' as const })),
+      rows: [{ label: 'lifecycle_status 明细', hint: 'receiving_status=none', level: 'high' }],
+    }
+    const clean = sanitizeReportPayload(payload)
+    for (const [index, state] of SUPPLIER_LIFECYCLE_STATES.entries()) {
+      const rendered = clean.metrics[index]?.value ?? ''
+      expect(rendered).toBe(SUPPLIER_STATE_WORDS[state])
+      expect(rendered).not.toMatch(/[a-z_]/)
+    }
+    expect(clean.rows?.[0]?.label).toBe('生命周期状态 明细')
+    expect(clean.rows?.[0]?.hint).toBe('尚未收货')
+  })
+})
+
 describe('the report render site (W23-R3 F2)', () => {
   const reportItem = (subtitle: string, title = '待办概览'): ChatItem => ({
     kind: 'report',
@@ -102,7 +160,7 @@ describe('the report render site (W23-R3 F2)', () => {
     },
   })
 
-  const renderFlow = (item: ChatItem): void => {
+  const renderFlow = (item: ChatItem, onReportAction: (action: ReportAction, seq: number) => void = () => {}): void => {
     render(
       <FlowItem
         item={item}
@@ -126,11 +184,42 @@ describe('the report render site (W23-R3 F2)', () => {
         onSend={() => {}}
         onFill={() => {}}
         onFreeText={() => {}}
-        onReportAction={() => {}}
+        onReportAction={onReportAction}
         localPending={new Map()}
       />,
     )
   }
+
+  it('renders metrics values and action labels sanitized in the DOM, with the dispatch route verbatim (W24-R1)', () => {
+    const dispatched: ReportAction[] = []
+    const item: ChatItem = {
+      kind: 'report',
+      seq: 2,
+      time: 1000,
+      payload: {
+        v: 3,
+        type: 'report',
+        id: 'r_dom',
+        title: '采购订单状态',
+        metrics: [
+          { label: '供应商状态', value: 'potential', kind: 'count' },
+          { label: '收货进度', value: 'receiving=none', kind: 'count' },
+        ],
+        actions: [{ kind: 'view', label: 'WFL_Approval_Todos查看明细', route: '/pur_orders/12' }],
+      },
+    }
+    renderFlow(item, (action) => { dispatched.push(action) })
+    const values = [...document.querySelectorAll('[class*="metricMiniValue"]')].map(node => node.textContent)
+    expect(values).toEqual(['潜在', '尚未收货'])
+    const button = document.querySelector('[class*="reportActions"] button')
+    expect(button?.textContent).toBe('查看明细')
+    expect(/wfl_approval_todos/i.test(document.body.textContent ?? '')).toBe(false)
+    expect(/receiving=none/i.test(document.body.textContent ?? '')).toBe(false)
+    fireEvent.click(button as HTMLElement)
+    expect(dispatched.length).toBe(1)
+    expect(dispatched[0]?.kind).toBe('view')
+    if (dispatched[0]?.kind === 'view') expect(dispatched[0].route).toBe('/pur_orders/12')
+  })
 
   it('renders the sanitized subtitle: the protocol token never appears in the DOM text', () => {
     renderFlow(reportItem('实时查询 · 待办表 wfl_approval_todos 已清空'))

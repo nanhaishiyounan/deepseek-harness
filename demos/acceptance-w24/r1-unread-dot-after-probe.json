@@ -1,0 +1,156 @@
+{
+  "summary": {
+    "mode": "after",
+    "bundleSrc": "/assets/mobile-XWprfrDK.js",
+    "ts": "2026-10-09T03:35:57.578Z",
+    "dotCount": 8,
+    "offsetApplied": [
+      {
+        "top": "2px",
+        "right": "-8px"
+      },
+      {
+        "top": "2px",
+        "right": "-8px"
+      },
+      {
+        "top": "2px",
+        "right": "-8px"
+      },
+      {
+        "top": "2px",
+        "right": "-8px"
+      },
+      {
+        "top": "2px",
+        "right": "-8px"
+      },
+      {
+        "top": "2px",
+        "right": "-8px"
+      },
+      {
+        "top": "2px",
+        "right": "-8px"
+      },
+      {
+        "top": "2px",
+        "right": "-8px"
+      }
+    ]
+  },
+  "probe": [
+    {
+      "cls": "adm-badge adm-badge-fixed adm-badge-dot _timeBadge_13kp5_146",
+      "timeText": "10:20",
+      "position": "absolute",
+      "top": "2px",
+      "right": "-8px",
+      "left": "27.5938px",
+      "rect": {
+        "x": 364,
+        "y": 186,
+        "w": 10,
+        "h": 10
+      }
+    },
+    {
+      "cls": "adm-badge adm-badge-fixed adm-badge-dot _timeBadge_13kp5_146",
+      "timeText": "07:22",
+      "position": "absolute",
+      "top": "2px",
+      "right": "-8px",
+      "left": "29.3438px",
+      "rect": {
+        "x": 364,
+        "y": 254,
+        "w": 10,
+        "h": 10
+      }
+    },
+    {
+      "cls": "adm-badge adm-badge-fixed adm-badge-dot _timeBadge_13kp5_146",
+      "timeText": "04:34",
+      "position": "absolute",
+      "top": "2px",
+      "right": "-8px",
+      "left": "29.9688px",
+      "rect": {
+        "x": 364,
+        "y": 322,
+        "w": 10,
+        "h": 10
+      }
+    },
+    {
+      "cls": "adm-badge adm-badge-fixed adm-badge-dot _timeBadge_13kp5_146",
+      "timeText": "03:51",
+      "position": "absolute",
+      "top": "2px",
+      "right": "-8px",
+      "left": "27.5938px",
+      "rect": {
+        "x": 364,
+        "y": 390,
+        "w": 10,
+        "h": 10
+      }
+    },
+    {
+      "cls": "adm-badge adm-badge-fixed adm-badge-dot _timeBadge_13kp5_146",
+      "timeText": "02:17",
+      "position": "absolute",
+      "top": "2px",
+      "right": "-8px",
+      "left": "26.9531px",
+      "rect": {
+        "x": 364,
+        "y": 458,
+        "w": 10,
+        "h": 10
+      }
+    },
+    {
+      "cls": "adm-badge adm-badge-fixed adm-badge-dot _timeBadge_13kp5_146",
+      "timeText": "01:26",
+      "position": "absolute",
+      "top": "2px",
+      "right": "-8px",
+      "left": "27.5938px",
+      "rect": {
+        "x": 364,
+        "y": 526,
+        "w": 10,
+        "h": 10
+      }
+    },
+    {
+      "cls": "adm-badge adm-badge-fixed adm-badge-dot _timeBadge_13kp5_146",
+      "timeText": "01:21",
+      "position": "absolute",
+      "top": "2px",
+      "right": "-8px",
+      "left": "25.2031px",
+      "rect": {
+        "x": 364,
+        "y": 594,
+        "w": 10,
+        "h": 10
+      }
+    },
+    {
+      "cls": "adm-badge adm-badge-fixed adm-badge-dot _timeBadge_13kp5_146",
+      "timeText": "00:41",
+      "position": "absolute",
+      "top": "2px",
+      "right": "-8px",
+      "left": "27.5938px",
+      "rect": {
+        "x": 364,
+        "y": 662,
+        "w": 10,
+        "h": 10
+      }
+    }
+  ]
+}

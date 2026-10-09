@@ -4,16 +4,16 @@
 - 网关：http://127.0.0.1:3080/mobile（W24 修复构建重启后）
 - 账号：buyer/Buyer#2026（375px，light + dark）
 - 方法：11 路由 × light/dark 全页截图 + DOM probe（`w24-pages-probe.json`：headings/cards/空态文本/横向溢出/行高分布）；VLM 初筛 5 张关键页（home/chats/tasks-dark/alerts/docs），**VLM 候选一律 DOM 几何复核为仲裁**（本轮 VLM 噪声率高，见驳回区）
-- 统计：**P1 ×1（已修）、P2 ×1（已修）、驳回 ×4（DOM 核别不成立）、超范围如实记录 ×4**
+- 统计：**P1 ×1（已修）、P2 ×1（已修）、驳回 ×4（DOM 核别不成立）、超范围如实记录 ×5（O1–O5，W24-R1 更正计数）**
 - 证据：`w24-pg-*-light/dark.png`（22 张）、`w24-audit-verify.json`（DOM 复核）、`w24-before-probe.json` / `w24-after-probe.json`（用户三点主修项前后探针）
 
-## 用户三点主修项状态（详见 w24-report.md 汇报）
+## 用户三点主修项状态（W24 Agent Note 记决策；W24-R1 更正见文末）
 
 | # | 反馈 | 状态 | before/after 证据 |
 |---|---|---|---|
 | 1 | 文案代号人话化（supplier 4/product 1/d≥Re） | 已修（渲染全字段兜底 + persona 三 preset 纪律） | `before-1a/1b` → `after-1a/1b`；`w24-after-probe.json` jargonProbe 六项全 false |
 | 2 | 会话 md 表格横向挤压 | 已修（reportTable auto+max-content；md 表格 wrap 滚动容器） | 列宽 56px 均分 → ≥68px 且可滚动；md 5 列 thMin=76px scrollable |
-| 3 | 消息 tab 列表错位换行 | 已修（预览两行 clamp、未读点重锚、底栏 wrap） | `before-2` → `after-2`；长预览 38px 两行截断、时间右缘对齐 |
+| 3 | 消息 tab 列表错位换行 | 已修（预览两行 clamp、底栏 wrap；未读点 W24 从未生效——W24-R1 真修，见文末） | `before-2` → `after-2`；长预览 38px 两行截断、时间右缘对齐 |
 
 ## 新发现（成立）
 
@@ -50,3 +50,9 @@
 ## 回归口径
 
 11 路由 overflowX 全 false（修复后横向滚动只发生在表格 wrap 容器内部，页面级无横向溢出）。
+
+## W24-R1 更正（验证 FAIL83 清偿，真话债）
+
+- **计数更正**：超范围如实记录为 ×5（O1–O5）——W24 原文计 ×4 漏数了 O5。
+- **悬空引用更正**：原文「详见 w24-report.md 汇报」——该文件从未存在（W24 汇报走会话汇报未落盘），引用改为 W24 Agent Note（`.agents/notes/implemented/feature/2026-10-09-w24-jargon-to-people-language-table-columns-and-chats-layout.md`）与本目录探针。
+- **未读点表述更正（真话债）**：主修项 3 原记「未读点重锚到时间右侧固定偏移 `--right: -8px; --top: 2px`」——该重锚**从未在活体生效**。W24 的选择器写成后代形式且用点分双 class（`.timeBadge :global(.adm-badge.fixed)`），而 antd-mobile Badge 经 `withNativeProps` 把 `className` 合并到携带**连字符单 class** `adm-badge-fixed` 的同一元素上——后代选择器永不命中同元素、点分双 class 也永不匹配连字符单 class，双重死亡。实测：`r1-unread-dot-before-probe.json`（W24 dist，8 个未读点 computedStyle top/right 全 `0px`/`0px`）。W24-R1 改复合选择器 `.timeBadge:global(.adm-badge-fixed)` 后，`r1-unread-dot-after-probe.json`（同探针脚本、R1 dist）8/8 全 `top: 2px`、`right: -8px`——偏移首次真实落位。

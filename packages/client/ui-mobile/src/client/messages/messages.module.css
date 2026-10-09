@@ -153,8 +153,14 @@
 
 /* W24: the unread dot anchors at a fixed offset off the time text's right
    edge (it used to sit -3px over the text's top-right corner, which read as
-   a floating misaligned speck against the right-aligned time column). */
-.timeBadge :global(.adm-badge.fixed) {
+   a floating misaligned speck against the right-aligned time column).
+   W24-R1: the selector is compound over the hyphenated class — antd-mobile
+   merges `className` onto the badge element itself (the div that carries
+   `adm-badge-fixed` as ONE hyphenated class), so the W24 form was doubly
+   dead: a descendant selector cannot hit the same element, and its dotted
+   two-class spelling assumes a separate `fixed` class that never exists.
+   The live before-probe measured the offset never applying (top/right 0/0). */
+.timeBadge:global(.adm-badge-fixed) {
   --right: -8px;
   --top: 2px;
 }

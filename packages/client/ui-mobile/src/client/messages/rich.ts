@@ -9,6 +9,8 @@
 
 import MarkdownIt from 'markdown-it'
 import DOMPurify from 'dompurify'
+import { SUPPLIER_LIFECYCLE_STATES } from '../fieldControls.ts'
+import { SUPPLIER_STATE_WORDS } from '../docsCatalog.ts'
 
 /** The shared renderer: no raw HTML in, single newlines break, no linkify. */
 const md = new MarkdownIt({ html: false, breaks: true, linkify: false })
@@ -304,19 +306,60 @@ const BIZ_TERMS: Readonly<Record<string, string>> = {
 /** Underscore-free identifiers that still map (`qty`). */
 const WORD_TERMS: Readonly<Record<string, string>> = { qty: '数量' }
 
+/** The supplier-lifecycle enum family derived over the field-control value
+ * domain (W24-R1's single source): every state maps onto the catalog's zh
+ * projection, so a state added there can never silently miss its
+ * people-language word here. */
+const LIFECYCLE_TERMS: Readonly<Record<string, string>> = Object.fromEntries(
+  SUPPLIER_LIFECYCLE_STATES.map(state => [state, SUPPLIER_STATE_WORDS[state] ?? state]),
+)
+
+/**
+ * Word terms that double as plain English words (`frozen goods`, `qualified
+ * partner` in English body prose): they map only inside a CJK narrative, or
+ * when the whole display leaf is nothing but the enum value (a metric value
+ * or action label carries no prose around the word to protect) — otherwise
+ * English prose keeps the word (W24-R1, mirroring the `suggestions`
+ * context rule in sanitize.ts).
+ */
+const CONTEXTUAL_WORD_TERMS: Readonly<Record<string, string>> = {
+  frozen: LIFECYCLE_TERMS.frozen ?? 'frozen',
+  qualified: LIFECYCLE_TERMS.qualified ?? 'qualified',
+}
+
+/**
+ * The contextual state word of one token (above): undefined keeps the token.
+ * @param whole - the entire display string the token rides in.
+ * @param token - the lowercased token.
+ * @returns the people word, or undefined when the context does not hold.
+ */
+const contextualStateWord = (whole: string, token: string): string | undefined => {
+  const word = CONTEXTUAL_WORD_TERMS[token]
+  if (word === undefined) return undefined
+  return HAS_CJK.test(whole) || whole.trim().toLowerCase() === token ? word : undefined
+}
+
 /**
  * Case-insensitive word terms (W24): all-caps abbreviations a narrative leaks
- * in any casing (`ATP`, `atp`) and bare lifecycle enum values (`qualified`)
- * map onto their business words.
+ * in any casing (`ATP`, `atp`) and the supplier lifecycle's bare enum values
+ * map onto their business words. W24-R1 derives the lifecycle family from
+ * the field-control value domain over the catalog's zh words — `qualified`
+ * renders as 合格 on every surface (no render-side synonym), and the two
+ * dictionary-word states (`frozen`, `qualified`) sit in
+ * {@link CONTEXTUAL_WORD_TERMS} behind the CJK gate instead.
  */
 const WORD_TERMS_CI: Readonly<Record<string, string>> = {
   atp: '可用库存',
   rop: '再订货点',
-  qualified: '档案合格',
-  frozen: '已冻结',
-  restricted: '受限',
-  probation: '观察期',
+  ...Object.fromEntries(
+    SUPPLIER_LIFECYCLE_STATES
+      .filter(state => !(state in CONTEXTUAL_WORD_TERMS))
+      .map(state => [state, LIFECYCLE_TERMS[state] ?? state]),
+  ),
 }
+
+/** Whether the string carries Han-script narrative (the context gates' probe). */
+export const HAS_CJK = /\p{Script=Han}/u
 
 /** A snake_case identifier (`hub_po_items`, `supplier_id`). */
 const SNAKE_ID = /[A-Za-z][A-Za-z0-9]*(?:_[A-Za-z0-9]+)+/g
@@ -327,19 +370,32 @@ const LEFTOVER_SNAKE = /[A-Za-z][A-Za-z0-9]*(?:_[A-Za-z0-9]+)+/
 /** One balanced full- or half-width parenthesized group. */
 const PAREN_GROUP = /（[^（）()]*）|\([^（）()]*\)/g
 
+/**
+ * Build a case-insensitive leak matcher (W24-R1): every leak-family pattern
+ * goes through this factory so the `i` flag cannot drift per-family — the
+ * W24 AQL and streak matchers shipped lowercase-blind, and `D≥RE` or an
+ * all-lowercase `aql抽样` passed through untouched.
+ * @param source - the pattern source.
+ * @param flags - flags beyond the forced `i` (defaults to `g`).
+ * @returns the compiled matcher.
+ */
+const buildCiRegex = (source: string, flags = 'g'): RegExp =>
+  new RegExp(source, flags.includes('i') ? flags : `${flags}i`)
+
 /** A bare row-id reference a model label may carry (`id 7`, `（id 7）`). */
-const ID_REF = /[(（]\s*id\s*[:：]?\s*\d+\s*[)）]|\bid\s+\d+/gi
+const ID_REF = buildCiRegex('[(（]\\s*id\\s*[:：]?\\s*\\d+\\s*[)）]|\\bid\\s+\\d+')
 
 /**
  * A bare entity-type-plus-id reference (W24): `supplier 4`, `product1`,
- * `Customer #8` — the wire label a lazy narrative quotes instead of the
- * entity's name. Each maps onto the people-language fallback (「某供应商 4
- * 号」); the persona's name discipline owns the primary path (write the real
- * name), this is the render-side guarantee.
+ * `Customer #8`, and the plural slips (`suppliers 4`, W24-R1) — the wire
+ * label a lazy narrative quotes instead of the entity's name. Each maps onto
+ * the people-language fallback (「某供应商 4 号」); the persona's name
+ * discipline owns the primary path (write the real name), this is the
+ * render-side guarantee.
  */
-const ENTITY_REF = /\b(supplier|product|customer|material)\s*#?\s*(\d+)\b/gi
+const ENTITY_REF = buildCiRegex('\\b(suppliers?|products?|customers?|materials?)\\s*#?\\s*(\\d+)\\b')
 
-/** The people-language noun of one entity-reference root (above). */
+/** The people-language noun of one entity-reference root (a plural slip folds onto the singular noun). */
 const ENTITY_NOUN: Readonly<Record<string, string>> = {
   supplier: '某供应商',
   product: '某物料',
@@ -347,19 +403,26 @@ const ENTITY_NOUN: Readonly<Record<string, string>> = {
   customer: '某客户',
 }
 
-/** The full AQL rejection phrase maps whole onto its people sentence (W24). */
-const AQL_REJECT_PHRASE = /AQL\s*抽样\s*[，,]?\s*d\s*[≥>]=?\s*Re\s*拒收/g
+/** The full AQL rejection phrase maps whole onto its people sentence, in any casing (W24, W24-R1 CI factory). */
+const AQL_REJECT_PHRASE = buildCiRegex('AQL\\s*抽样\\s*[，,]?\\s*d\\s*[≥>]=?\\s*Re\\s*拒收')
 
-/** The bare sampling verdict notations (`d≥Re`, `d<=Ac`) in any spacing (W24). */
-const AQL_REJECT_NOTATION = /\bd\s*[≥>]=?\s*Re\b/g
-const AQL_ACCEPT_NOTATION = /\bd\s*[≤<]=?\s*Ac\b/g
+/** The bare sampling verdict notations (`d≥Re`, `d<=Ac`) in any spacing or casing (W24, W24-R1). */
+const AQL_REJECT_NOTATION = buildCiRegex('\\bd\\s*[≥>]=?\\s*Re\\b')
+const AQL_ACCEPT_NOTATION = buildCiRegex('\\bd\\s*[≤<]=?\\s*Ac\\b')
+
+/** The receiving-state pair a narrative leaks (`receiving=none`,
+ * `receiving_status=none` in any casing) maps whole onto its people words
+ * (W24-R1; the persona presets already ban the pair — this is the
+ * render-side guarantee). */
+const RECEIVING_NONE_PHRASE = buildCiRegex('\\breceiving(?:_status)?\\s*=\\s*none\\b')
 
 /** The full streak word after a Chinese noun folds into one clause (W24):
- * `连续拒收 streak≥3` → `连续拒收 3 次及以上`. */
-const STREAK_PHRASE = /([一-龥]{2,6})\s*streak\s*[≥>]=?\s*(\d+)/g
+ * `连续拒收 streak≥3` → `连续拒收 3 次及以上`; a trailing `·次`/`次` unit
+ * token (W24-R1) is consumed with the match so it cannot survive the fold. */
+const STREAK_PHRASE = buildCiRegex('([一-龥]{2,6})\\s*streak\\s*[≥>]=?\\s*(\\d+)\\b(?:\\s*[·•]?\\s*次)?')
 
 /** A bare streak comparison a label may still carry (`streak≥3`, W24). */
-const STREAK_BARE = /\bstreak\s*[≥>]=?\s*(\d+)\b/gi
+const STREAK_BARE = buildCiRegex('\\bstreak\\s*[≥>]=?\\s*(\\d+)\\b(?:\\s*[·•]?\\s*次)?')
 /**
  * Display-side sanitization of one narrative or ask string (03 §4.5): known
  * collection and field identifiers become their business terms; an
@@ -367,15 +430,27 @@ const STREAK_BARE = /\bstreak\s*[≥>]=?\s*(\d+)\b/gi
  * out; a parenthesized group still carrying a leftover identifier drops out
  * whole. W24: entity-id references (`supplier 4`) resolve to the
  * people-language fallback noun, the AQL verdict notation renders as its
- * people sentence, and streak comparisons fold into a Chinese clause. The
- * persona bans these leaks — this is the guarantee the user never sees one
- * anyway.
+ * people sentence, and streak comparisons fold into a Chinese clause.
+ * W24-R1: every leak matcher is case-insensitive through the CI factory
+ * (`D≥RE`, `aql抽样` render the same sentence), the supplier lifecycle's
+ * bare enum values map onto the catalog's zh words (derived from the
+ * field-control value domain), `receiving=none` reads 尚未收货, and the two
+ * dictionary-word states (`frozen`, `qualified`) map only inside a CJK
+ * narrative so English prose keeps its words. The persona bans these leaks —
+ * this is the guarantee the user never sees one anyway.
  * @param text - the model-authored display string.
  * @returns the people-language rendering.
  */
 export function sanitizeBizText(text: string): string {
   const mapped = text
-    .replace(/[A-Za-z0-9]+/g, match => WORD_TERMS[match] ?? WORD_TERMS_CI[match.toLowerCase()] ?? match)
+    .replace(/[A-Za-z0-9]+/g, (match) => {
+      const lower = match.toLowerCase()
+      return WORD_TERMS[match] ?? WORD_TERMS_CI[lower] ?? contextualStateWord(text, lower) ?? match
+    })
+    // The receiving pair rides ahead of the snake pass: a future
+    // `receiving_status` term must not rewrite the field half and shadow the
+    // pair's people words.
+    .replace(RECEIVING_NONE_PHRASE, '尚未收货')
     .replace(SNAKE_ID, match => BIZ_TERMS[match] ?? match)
     .replace(/\bhub_[A-Za-z0-9_]+/g, '业务记录')
     .replace(AQL_REJECT_PHRASE, '按抽检标准判定拒收（不合格数达到拒收线）')
@@ -383,7 +458,10 @@ export function sanitizeBizText(text: string): string {
     .replace(AQL_ACCEPT_NOTATION, '不合格数未超接收线')
     .replace(STREAK_PHRASE, (_whole, noun: string, count: string) => `${noun} ${count} 次及以上`)
     .replace(STREAK_BARE, (_whole, count: string) => `已连续 ${count} 次`)
-    .replace(ENTITY_REF, (whole, root: string, id: string) => ENTITY_NOUN[root.toLowerCase()] === undefined ? whole : `${ENTITY_NOUN[root.toLowerCase()] as string} ${id} 号`)
+    .replace(ENTITY_REF, (whole, root: string, id: string) => {
+      const noun = ENTITY_NOUN[root.toLowerCase().replace(/s$/, '')]
+      return noun === undefined ? whole : `${noun} ${id} 号`
+    })
     .replace(ID_REF, '')
   const cleaned = mapped.replace(PAREN_GROUP, group => (LEFTOVER_SNAKE.test(group) ? '' : group))
   return cleaned.replace(/ {2,}/g, ' ').trim()

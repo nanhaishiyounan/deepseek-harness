@@ -31,6 +31,11 @@ describe('sanitize edge (W23-R4)', () => {
     expect(sanitizeBody('here are our suggestions for next quarter')).toBe('here are our suggestions for next quarter')
   })
 
+  it('keeps the dictionary-word supplier states in English body prose (CJK context only, W24-R1)', () => {
+    expect(sanitizeBody('The frozen goods arrived and the qualified partner list is attached'))
+      .toBe('The frozen goods arrived and the qualified partner list is attached')
+  })
+
   it('strips a longer token whole: no partial residue survives', () => {
     expect(sanitizeBody('待办 wfl_approval_todos_inner 已处理')).toBe('待办 已处理')
     expect(sanitizeBody('待办 WFL_APPROVAL_TODOS_INNER 已处理')).toBe('待办 已处理')

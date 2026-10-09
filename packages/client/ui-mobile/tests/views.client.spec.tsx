@@ -10,6 +10,9 @@
  * standalone entry's mount/unmount cycle.
  */
 
+import { readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { Toast } from 'antd-mobile'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -382,6 +385,35 @@ describe('mobile chats tab', () => {
     expect(location.hash).toBe('#/chat/s2')
     // Opening marked the session read: the unread dot disappears on remount.
     expect(localStorage.getItem('dsh-mobile-read')).toContain('s2')
+  })
+
+  it('lands the unread-dot offset on the badge element itself via the compound selector (W24-R1)', async () => {
+    stubGateway({
+      'agentPreset.list': { presets: [] },
+      'session.list': { items: [{ sessionId: 'unread-1', updatedAt: Date.now() }] },
+    })
+    render(<MessagesView />)
+    await waitFor(() => { expect(screen.getAllByLabelText('有新消息').length).toBeGreaterThan(0) })
+    // antd-mobile merges `className` onto the badge element (the same div
+    // that carries `adm-badge fixed dot`), so the hashed `timeBadge` class
+    // must sit on that same div — the W24 descendant selector never matched
+    // and the offset never applied on a live page.
+    const dot = document.querySelector('[aria-label="有新消息"]')
+    expect(dot?.className).toContain('adm-badge-fixed')
+    expect(dot?.className).toContain('adm-badge-dot')
+    expect(/timeBadge_/.test(dot?.className ?? '')).toBe(true)
+    // The CSS module carries the compound selector over the hyphenated class,
+    // not the dead forms (jsdom does not apply CSS Modules, so the guard
+    // reads the source): the W24 descendant form never hit the same element,
+    // and `.adm-badge.fixed` assumes a separate `fixed` class antd never
+    // renders (`adm-badge-fixed` is one hyphenated class).
+    const css = readFileSync(
+      join(dirname(fileURLToPath(import.meta.url)), '../src/client/messages/messages.module.css'),
+      'utf8',
+    )
+    expect(css).toContain('.timeBadge:global(.adm-badge-fixed)')
+    expect(css).not.toContain('.timeBadge :global(')
+    expect(css).not.toContain('.adm-badge.fixed')
   })
 
   it('shows the poll failure card when the session list read fails', async () => {

@@ -10,7 +10,7 @@
  * `NB_LIST`).
  */
 
-import { sanitizeBizText } from './messages/rich.ts'
+import { HAS_CJK, sanitizeBizText } from './messages/rich.ts'
 import type { ReportPayload } from './protocol.ts'
 
 /**
@@ -79,9 +79,6 @@ const CONTEXT_PROBE = new RegExp(
   'i',
 )
 
-/** Whether the string carries Han-script narrative. */
-const HAS_CJK = /\p{Script=Han}/u
-
 /** Collapse the whitespace a stripped token leaves behind: doubled spaces
  * squash to one and a space before sentence punctuation folds into the mark
  * (the · separator keeps both of its spaces). */
@@ -119,36 +116,53 @@ export function sanitizeSubtitle(text: string): string {
 }
 
 /**
+ * The closed set of payload keys whose string leaves the dispatch executor
+ * consumes verbatim (W24-R1): the version/type/id identity, the layout and
+ * union-discriminant kinds (`tone`, `level`, `kind`), and the navigation
+ * targets (`route`, `url`). The display traversal never rewrites them — a
+ * route like `/pur_orders/12` is a program path, not display text.
+ */
+const VERBATIM_KEYS: ReadonlySet<string> = new Set(['v', 'type', 'id', 'tone', 'level', 'kind', 'route', 'url'])
+
+/**
+ * Rewrite one payload subtree's display string leaves (W24-R1): a string
+ * leaf under a verbatim key rides through, every other string takes the
+ * subtitle pass (the strictest closed strip — the card's own design keeps
+ * tool and protocol names off every face, so the one-line/multi-line tier
+ * split no longer exists), arrays and plain objects rebuild leaf-by-leaf,
+ * and every non-string value rides through unchanged. The walk preserves
+ * structure exactly — only string leaves change — so the result keeps the
+ * input's TypeScript type.
+ * @param node - one payload subtree.
+ * @param key - the subtree's own object key when the parent carried one.
+ * @returns the subtree with sanitized display leaves.
+ */
+function sanitizeLeaves(node: unknown, key: string | undefined): unknown {
+  if (typeof node === 'string') {
+    return key !== undefined && VERBATIM_KEYS.has(key) ? node : sanitizeSubtitle(node)
+  }
+  if (Array.isArray(node)) return node.map(entry => sanitizeLeaves(entry, key))
+  if (typeof node === 'object' && node !== null) {
+    return Object.fromEntries(
+      Object.entries(node).map(([childKey, value]) => [childKey, sanitizeLeaves(value, childKey)]),
+    )
+  }
+  return node
+}
+
+/**
  * The payload copy every `ReportCard` render site hands the card (W23-R5,
- * W24 all-faces): the card renders `title`, `subtitle`, the metrics labels,
- * the rows' label/hint, and the table's column heads and cells straight
- * from the payload, and a stored artifact carries them as the wire wrote
- * them, so every render site passes this sanitized view — the stored
- * artifact itself keeps its verbatim bytes (the copy path and the durable
- * log never see the sanitized text). One-line faces (subtitle, hint, column
- * heads) take the stricter subtitle pass; multi-line faces take the body
- * pass.
+ * W24 all-faces, W24-R1 object-graph traversal): the walk rewrites every
+ * display string leaf of the payload — `title`, `subtitle`, the metrics'
+ * labels and values, the rows' label/hint, the table's column heads and
+ * cells, the actions' labels and text faces, and any display string a later
+ * payload revision adds — so a field the per-key enumeration missed (the
+ * W24 verification's `metrics.value` / `actions.label` findings) can never
+ * reach the card raw again. The stored artifact keeps its verbatim bytes —
+ * the copy path and the durable log never see the sanitized text.
  * @param payload - the stored report artifact.
- * @returns the payload copy with every user-visible face sanitized; a fully-stripped subtitle renders as absent.
+ * @returns the payload copy with every display leaf sanitized; a fully-stripped subtitle renders as absent.
  */
 export function sanitizeReportPayload(payload: ReportPayload): ReportPayload {
-  return {
-    ...payload,
-    title: sanitizeBody(payload.title),
-    ...(payload.subtitle !== undefined ? { subtitle: sanitizeSubtitle(payload.subtitle) } : {}),
-    metrics: payload.metrics.map(metric => ({ ...metric, label: sanitizeBody(metric.label) })),
-    ...(payload.rows !== undefined
-      ? { rows: payload.rows.map(row => ({
-        ...row,
-        label: sanitizeBody(row.label),
-        ...(row.hint !== undefined ? { hint: sanitizeSubtitle(row.hint) } : {}),
-      })) }
-      : {}),
-    ...(payload.table !== undefined
-      ? { table: {
-        columns: payload.table.columns.map(column => ({ ...column, label: sanitizeSubtitle(column.label) })),
-        rows: payload.table.rows.map(cells => cells.map(sanitizeBody)),
-      } }
-      : {}),
-  }
+  return sanitizeLeaves(payload, undefined) as ReportPayload
 }

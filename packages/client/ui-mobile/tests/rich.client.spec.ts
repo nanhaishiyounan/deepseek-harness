@@ -3,6 +3,8 @@
 
 import { describe, expect, it } from 'vitest'
 import { parseMetricLine, renderMarkdown, sanitizeBizText, splitCodeBlocks, splitRichBlocks } from '../src/client/messages/rich.ts'
+import { SUPPLIER_LIFECYCLE_STATES } from '../src/client/fieldControls.ts'
+import { SUPPLIER_STATE_WORDS } from '../src/client/docsCatalog.ts'
 
 describe('renderMarkdown', () => {
   it('renders paragraphs, bold, and single-newline breaks', () => {
@@ -163,7 +165,47 @@ describe('sanitizeBizText', () => {
   })
 
   it('maps bare lifecycle enum values onto their business words (W24)', () => {
-    expect(sanitizeBizText('某供应商 12 号 · qualified · 合格判定全部积压')).toBe('某供应商 12 号 · 档案合格 · 合格判定全部积压')
-    expect(sanitizeBizText('该供方 frozen 已停用')).toBe('该供方 已冻结 已停用')
+    expect(sanitizeBizText('某供应商 12 号 · qualified · 合格判定全部积压')).toBe('某供应商 12 号 · 合格 · 合格判定全部积压')
+    expect(sanitizeBizText('该供方 frozen 已停用')).toBe('该供方 冻结 已停用')
+  })
+
+  it('derives every lifecycle word from the field-control value domain (W24-R1)', () => {
+    // `qualified` is 合格 on every surface: the catalog projection the word
+    // table reuses, and the parse vocabulary's reverse word.
+    expect(SUPPLIER_STATE_WORDS.qualified).toBe('合格')
+    for (const state of SUPPLIER_LIFECYCLE_STATES) {
+      const word = SUPPLIER_STATE_WORDS[state]
+      expect(word).toBeDefined()
+      expect(word).not.toBe(state)
+      expect(sanitizeBizText(`该供方 ${state} 已停用`)).toBe(`该供方 ${word ?? ''} 已停用`)
+    }
+  })
+
+  it('renders the AQL verdict sentence for every casing variant (W24-R1 CI factory)', () => {
+    const phrase = '按抽检标准判定拒收（不合格数达到拒收线）'
+    expect(sanitizeBizText('AQL 抽样 d≥Re 拒收')).toBe(phrase)
+    expect(sanitizeBizText('AQL抽样，D≥RE拒收')).toBe(phrase)
+    expect(sanitizeBizText('aql抽样 d>=Re拒收')).toBe(phrase)
+    expect(sanitizeBizText('D>=RE')).toBe('不合格数达到拒收线')
+    expect(sanitizeBizText('d<=ac 建议接收')).toBe('不合格数未超接收线 建议接收')
+  })
+
+  it('maps the receiving-state pair onto its people words (W24-R1)', () => {
+    expect(sanitizeBizText('收货进度 receiving=none')).toBe('收货进度 尚未收货')
+    expect(sanitizeBizText('RECEIVING_STATUS=NONE 已登记')).toBe('尚未收货 已登记')
+  })
+
+  it('resolves plural entity slips onto the same fallback nouns (W24-R1)', () => {
+    expect(sanitizeBizText('东港丰泽 suppliers 4 与 products 8')).toBe('东港丰泽 某供应商 4 号 与 某物料 8 号')
+    expect(sanitizeBizText('materials12 已核对')).toBe('某物料 12 号 已核对')
+  })
+
+  it('consumes a trailing unit token with the streak fold (W24-R1)', () => {
+    expect(sanitizeBizText('连续拒收 streak≥3·次')).toBe('连续拒收 3 次及以上')
+    expect(sanitizeBizText('味之源 streak≥5 次')).toBe('味之源 5 次及以上')
+  })
+
+  it('keeps the dictionary-word states in English prose untouched (W24-R1)', () => {
+    expect(sanitizeBizText('The frozen goods arrived; qualified partner list attached')).toBe('The frozen goods arrived; qualified partner list attached')
   })
 })

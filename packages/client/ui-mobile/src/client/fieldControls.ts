@@ -26,6 +26,17 @@ export interface FieldControlSpec {
 }
 
 /**
+ * The SRM supplier lifecycle's closed value domain (h4's LIFECYCLE options;
+ * the admission flow transitions among the first four). Exported because the
+ * display-side word table derives its lifecycle entries from this list
+ * (W24-R1): a state added here cannot silently miss its people-language
+ * mapping on the render side.
+ */
+export const SUPPLIER_LIFECYCLE_STATES: readonly string[] = [
+  'potential', 'reviewing', 'qualified', 'preferred', 'restricted', 'frozen', 'rejected', 'eliminated',
+]
+
+/**
  * Enum vocabularies the schema read does not project (select-field options),
  * measured from the deployed business tables.
  */
@@ -37,9 +48,7 @@ const KNOWN_ENUMS: Readonly<Record<string, Readonly<Record<string, readonly stri
     status: ['待审核', 'active', 'inactive'],
   },
   srm_suppliers: {
-    // The SRM eight-state lifecycle (h4's LIFECYCLE options; the admission
-    // flow transitions among the first four).
-    lifecycle_status: ['potential', 'reviewing', 'qualified', 'preferred', 'restricted', 'frozen', 'rejected', 'eliminated'],
+    lifecycle_status: SUPPLIER_LIFECYCLE_STATES,
   },
   srm_capas: {
     status: ['initiated', 'verifying', 'replied', 'closed'],
