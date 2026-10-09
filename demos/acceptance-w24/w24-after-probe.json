@@ -1,0 +1,450 @@
+{
+  "jargonProbe": {
+    "hasSupplierId": false,
+    "hasProductId": false,
+    "hasAqlNotation": false,
+    "hasStreak": false,
+    "hasRejectStreak": false,
+    "hasAtpBare": false,
+    "hasFallbackNoun": true,
+    "hasPeopleVerdict": true
+  },
+  "tableProbe": [
+    {
+      "cols": 5,
+      "head": [
+        {
+          "label": "原料（漯河市场）",
+          "w": 116
+        },
+        {
+          "label": "单位",
+          "w": 69
+        },
+        {
+          "label": "一年前价",
+          "w": 68
+        },
+        {
+          "label": "当前价（10 月）",
+          "w": 108
+        },
+        {
+          "label": "12 个月涨跌",
+          "w": 84
+        }
+      ],
+      "wrapOverflowX": "auto",
+      "tableLayout": "auto",
+      "tableScrollW": 445,
+      "wrapClientW": 319,
+      "scrollable": true
+    },
+    {
+      "cols": 5,
+      "head": [
+        {
+          "label": "供应商",
+          "w": 146
+        },
+        {
+          "label": "不合格率",
+          "w": 68
+        },
+        {
+          "label": "失败/通过/让步/待检",
+          "w": 134
+        },
+        {
+          "label": "生命周期（监管/审核）",
+          "w": 146
+        },
+        {
+          "label": "连续拒收",
+          "w": 68
+        }
+      ],
+      "wrapOverflowX": "auto",
+      "tableLayout": "auto",
+      "tableScrollW": 562,
+      "wrapClientW": 319,
+      "scrollable": true
+    },
+    {
+      "cols": 5,
+      "head": [
+        {
+          "label": "供应商",
+          "w": 146
+        },
+        {
+          "label": "近 90 天失败/总数",
+          "w": 120
+        },
+        {
+          "label": "不合格率",
+          "w": 68
+        },
+        {
+          "label": "首次→最近失败",
+          "w": 108
+        },
+        {
+          "label": "连续拒收",
+          "w": 68
+        }
+      ],
+      "wrapOverflowX": "auto",
+      "tableLayout": "auto",
+      "tableScrollW": 510,
+      "wrapClientW": 319,
+      "scrollable": true
+    }
+  ],
+  "mdProbe": {
+    "wrapOverflowX": "auto",
+    "tableMinWidth": "max-content",
+    "thWidths": [
+      118,
+      137,
+      76,
+      118,
+      76
+    ],
+    "thMin": 76,
+    "tableScrollW": 525,
+    "wrapClientW": 268,
+    "scrollable": true,
+    "colsFit": true
+  },
+  "chatsProbe": [
+    {
+      "title": "供应链数据关注要点",
+      "titleRect": {
+        "x": 70,
+        "y": 191,
+        "w": 153,
+        "h": 21
+      },
+      "timeRect": {
+        "x": 330,
+        "y": 194,
+        "w": 31,
+        "h": 17
+      },
+      "summaryRect": {
+        "x": 70,
+        "y": 217,
+        "w": 154,
+        "h": 19
+      },
+      "summaryH": 19,
+      "summaryClamp": "2",
+      "summaryLines": 1,
+      "summaryScrollOverflow": false,
+      "tags": [],
+      "rowH": 68
+    },
+    {
+      "title": "生成本月经营月报",
+      "titleRect": {
+        "x": 70,
+        "y": 259,
+        "w": 136,
+        "h": 21
+      },
+      "timeRect": {
+        "x": 329,
+        "y": 262,
+        "w": 32,
+        "h": 17
+      },
+      "summaryRect": {
+        "x": 70,
+        "y": 285,
+        "w": 140,
+        "h": 19
+      },
+      "summaryH": 19,
+      "summaryClamp": "2",
+      "summaryLines": 1,
+      "summaryScrollOverflow": false,
+      "tags": [
+        "参谋"
+      ],
+      "rowH": 68
+    },
+    {
+      "title": "查看我最近30天的采购订单",
+      "titleRect": {
+        "x": 70,
+        "y": 327,
+        "w": 207,
+        "h": 21
+      },
+      "timeRect": {
+        "x": 331,
+        "y": 330,
+        "w": 30,
+        "h": 17
+      },
+      "summaryRect": {
+        "x": 70,
+        "y": 353,
+        "w": 154,
+        "h": 19
+      },
+      "summaryH": 19,
+      "summaryClamp": "2",
+      "summaryLines": 1,
+      "summaryScrollOverflow": false,
+      "tags": [],
+      "rowH": 68
+    },
+    {
+      "title": "验证VFYHO探针品类查询",
+      "titleRect": {
+        "x": 70,
+        "y": 395,
+        "w": 195,
+        "h": 21
+      },
+      "timeRect": {
+        "x": 332,
+        "y": 398,
+        "w": 29,
+        "h": 17
+      },
+      "summaryRect": {
+        "x": 70,
+        "y": 421,
+        "w": 154,
+        "h": 19
+      },
+      "summaryH": 19,
+      "summaryClamp": "2",
+      "summaryLines": 1,
+      "summaryScrollOverflow": false,
+      "tags": [],
+      "rowH": 68
+    },
+    {
+      "title": "30天采购订单报告卡片",
+      "titleRect": {
+        "x": 70,
+        "y": 463,
+        "w": 173,
+        "h": 21
+      },
+      "timeRect": {
+        "x": 331,
+        "y": 466,
+        "w": 30,
+        "h": 17
+      },
+      "summaryRect": {
+        "x": 70,
+        "y": 489,
+        "w": 154,
+        "h": 19
+      },
+      "summaryH": 19,
+      "summaryClamp": "2",
+      "summaryLines": 1,
+      "summaryScrollOverflow": false,
+      "tags": [],
+      "rowH": 68
+    },
+    {
+      "title": "导出最近30天采购订单",
+      "titleRect": {
+        "x": 70,
+        "y": 531,
+        "w": 173,
+        "h": 21
+      },
+      "timeRect": {
+        "x": 334,
+        "y": 534,
+        "w": 27,
+        "h": 17
+      },
+      "summaryRect": {
+        "x": 70,
+        "y": 557,
+        "w": 154,
+        "h": 19
+      },
+      "summaryH": 19,
+      "summaryClamp": "2",
+      "summaryLines": 1,
+      "summaryScrollOverflow": false,
+      "tags": [],
+      "rowH": 68
+    },
+    {
+      "title": "查看我的待办事项",
+      "titleRect": {
+        "x": 70,
+        "y": 599,
+        "w": 136,
+        "h": 21
+      },
+      "timeRect": {
+        "x": 331,
+        "y": 602,
+        "w": 30,
+        "h": 17
+      },
+      "summaryRect": {
+        "x": 70,
+        "y": 625,
+        "w": 154,
+        "h": 19
+      },
+      "summaryH": 19,
+      "summaryClamp": "2",
+      "summaryLines": 1,
+      "summaryScrollOverflow": false,
+      "tags": [],
+      "rowH": 68
+    },
+    {
+      "title": "查询待审批单子",
+      "titleRect": {
+        "x": 70,
+        "y": 667,
+        "w": 119,
+        "h": 21
+      },
+      "timeRect": {
+        "x": 329,
+        "y": 670,
+        "w": 32,
+        "h": 17
+      },
+      "summaryRect": {
+        "x": 70,
+        "y": 693,
+        "w": 154,
+        "h": 19
+      },
+      "summaryH": 19,
+      "summaryClamp": "2",
+      "summaryLines": 1,
+      "summaryScrollOverflow": false,
+      "tags": [],
+      "rowH": 68
+    },
+    {
+      "title": "新会话",
+      "titleRect": {
+        "x": 70,
+        "y": 735,
+        "w": 51,
+        "h": 21
+      },
+      "timeRect": {
+        "x": 330,
+        "y": 738,
+        "w": 31,
+        "h": 17
+      },
+      "summaryRect": {
+        "x": 70,
+        "y": 761,
+        "w": 154,
+        "h": 19
+      },
+      "summaryH": 19,
+      "summaryClamp": "2",
+      "summaryLines": 1,
+      "summaryScrollOverflow": false,
+      "tags": [],
+      "rowH": 68
+    },
+    {
+      "title": "导出30天采购订单清单",
+      "titleRect": {
+        "x": 70,
+        "y": 803,
+        "w": 173,
+        "h": 21
+      },
+      "timeRect": {
+        "x": 329,
+        "y": 806,
+        "w": 32,
+        "h": 17
+      },
+      "summaryRect": {
+        "x": 70,
+        "y": 829,
+        "w": 154,
+        "h": 19
+      },
+      "summaryH": 19,
+      "summaryClamp": "2",
+      "summaryLines": 1,
+      "summaryScrollOverflow": false,
+      "tags": [],
+      "rowH": 68
+    },
+    {
+      "title": "查询待审批单子",
+      "titleRect": {
+        "x": 70,
+        "y": 871,
+        "w": 119,
+        "h": 21
+      },
+      "timeRect": {
+        "x": 329,
+        "y": 874,
+        "w": 32,
+        "h": 17
+      },
+      "summaryRect": {
+        "x": 70,
+        "y": 897,
+        "w": 154,
+        "h": 19
+      },
+      "summaryH": 19,
+      "summaryClamp": "2",
+      "summaryLines": 1,
+      "summaryScrollOverflow": false,
+      "tags": [],
+      "rowH": 68
+    },
+    {
+      "title": "糯米粉库存及风险查询",
+      "titleRect": {
+        "x": 70,
+        "y": 939,
+        "w": 170,
+        "h": 21
+      },
+      "timeRect": {
+        "x": 329,
+        "y": 942,
+        "w": 32,
+        "h": 17
+      },
+      "summaryRect": {
+        "x": 70,
+        "y": 965,
+        "w": 140,
+        "h": 19
+      },
+      "summaryH": 19,
+      "summaryClamp": "2",
+      "summaryLines": 1,
+      "summaryScrollOverflow": false,
+      "tags": [
+        "参谋"
+      ],
+      "rowH": 68
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "homeProbe": {
+    "registerLabel": {
+      "text": "登记一条单据",
+      "w": 78,
+      "h": 63,
+      "lines": 3,
+      "whiteSpace": "normal",
+      "fontSize": "14px"
+    },
+    "colleagueLabels": [
+      {
+        "text": "合规",
+        "w": 42,
+        "h": 42,
+        "lines": 2,
+        "whiteSpace": "normal",
+        "fontSize": "16px"
+      },
+      {
+        "text": "合规",
+        "w": 42,
+        "h": 42,
+        "lines": 2,
+        "whiteSpace": "normal",
+        "fontSize": "15px"
+      },
+      {
+        "text": "AI 食安合规官",
+        "w": 68,
+        "h": 30,
+        "lines": 2,
+        "whiteSpace": "normal",
+        "fontSize": "12px"
+      }
+    ],
+    "badgeOverlap": {
+      "found": true,
+      "overlapsText": true
+    }
+  },
+  "tasksProbe": {
+    "subtitle": {
+      "color": "rgb(61, 43, 31)",
+      "fontSize": "16px",
+      "h": 812
+    },
+    "canvasColor": "#fbf5eb",
+    "bodyBg": "rgb(233, 223, 204)"
+  },
+  "tasksDark": {
+    "subColor": "rgb(242, 227, 211)",
+    "inkSub": "#c3ab93",
+    "canvas": "#191310"
+  }
+}

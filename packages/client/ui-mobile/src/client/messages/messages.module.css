@@ -151,9 +151,12 @@
   color: var(--dshm-ink-sub);
 }
 
+/* W24: the unread dot anchors at a fixed offset off the time text's right
+   edge (it used to sit -3px over the text's top-right corner, which read as
+   a floating misaligned speck against the right-aligned time column). */
 .timeBadge :global(.adm-badge.fixed) {
-  --right: -4px;
-  --top: -3px;
+  --right: -8px;
+  --top: 2px;
 }
 
 .sessionBottom {
@@ -182,14 +185,20 @@
   font-size: var(--dshm-fs-body);
   line-height: 19px;
   color: var(--dshm-ink-sub);
+  /* W24: the preview clamps to two lines (a live tail projection carries
+     real sentence content) and never wraps past it or pushes the badges
+     out of line; the side tags stay vertically centered against the
+     two-line block. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .identityCard {
   flex: none;
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   gap: 8px;
   padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
@@ -646,14 +655,24 @@
 }
 
 /* Two-column ticket tables: label column slate, value column ink (03 §4.5);
-   wider tables scroll horizontally inside the bubble. */
-.richText :global(table) {
+   wider tables scroll horizontally inside the bubble. W24: the scroll
+   container is the wrap div the markdown renderer puts around every table
+   (`overflow-x` on the table itself never scrolls — a table is not a block
+   scroll box), and every column carries a min-width floor plus a no-wrap
+   head, so a 4+-column table at 375px scrolls instead of squeezing each
+   column to a character-wide sliver. */
+.richText :global(.md-table-wrap) {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   margin: 6px 0;
+}
+
+.richText :global(.md-table-wrap table) {
   width: 100%;
+  min-width: max-content;
   border-collapse: collapse;
   font-size: var(--dshm-fs-body);
   line-height: 32px;
-  overflow-x: auto;
 }
 
 .richText :global(th) {
@@ -662,13 +681,16 @@
   background: var(--dshm-card2);
   color: var(--dshm-ink-sub);
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .richText :global(td) {
   padding: 0 10px;
   border-bottom: 1px solid var(--dshm-stroke-soft);
-  /* Long batch/location codes break anywhere instead of colliding across
-     the fixed columns of a narrow in-bubble table. */
+  /* W24 column floor: keeps each column readable so a multi-column table
+     scrolls in the wrap instead of collapsing columns together. Long
+     batch/location codes still break anywhere. */
+  min-width: 4.5em;
   overflow-wrap: anywhere;
 }
 
@@ -975,8 +997,15 @@
   color: var(--dshm-ink-sub);
 }
 
-/* The compact ticket table (the design's .tbl): fixed layout, th 12/sub,
-    the tabular digits, the hairline row rules. */
+/* The compact ticket table (the design's .tbl): auto layout, th 12/sub, the
+    tabular digits, the hairline row rules. W24: `table-layout: fixed`
+    ignored the cells' no-wrap width, so a five-column table squeezed every
+    column to an equal ~56px sliver and the cells collided across columns.
+    Auto layout sizes each column to its head/cell content; `min-width:
+    max-content` lets a wide table run past the card and scroll in the wrap
+    (the W24 acceptance: scrollable, never squeezed), while a narrow table
+    still fills the card (`width: 100%`). The first column keeps wrap on so
+    a long entity name folds to two lines instead of stretching the table. */
 .reportTableWrap {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
@@ -984,8 +1013,9 @@
 
 .reportTable {
   width: 100%;
+  min-width: max-content;
   border-collapse: collapse;
-  table-layout: fixed;
+  table-layout: auto;
   font-size: var(--dshm-fs-body);
   line-height: 20px;
 }
@@ -1008,6 +1038,14 @@
   font-weight: 500;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+
+/* The first column (entity names, dates) folds instead of stretching the
+    scroll run: wrap on with a content-based minimum keeps the column
+    readable at two lines. */
+.reportTable td:first-child {
+  white-space: normal;
+  min-width: 5.5em;
 }
 
 .reportTableFirst {

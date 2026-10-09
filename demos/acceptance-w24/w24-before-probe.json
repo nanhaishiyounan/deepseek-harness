@@ -1,0 +1,426 @@
+{
+  "jargon": [
+    {
+      "index": 0,
+      "text": "供应链数据关注清单：2 单紧急补货 + 4 家风险供应商 + 漯河棕榈油 12 个月涨 4.4% 近 12 个月 · 采购订单 / 原材料价 / 质检 / 供应商档案 / 补货建议 险 2 个 待处理紧急补货 1 家 已冻结供应商 3 家 限制/复审中供应商 2 家 高不合格率供应商（>50%） +4.4% 漯河棕榈油 12 个月涨跌 漳州蜜果不合格率 64% supplier 9 · 11 批次 7 失败 · 复审中 · 监管风险 C 味之源 reject_streak=5 supplier 4 · 9 批次 5 失败 · 连续 5 次拒收 · 建议暂停下单 丹东禾丰果蔬已冻结 supplier 6 · 农残抽检不合格且整改无效 · 黑名单原因已登记 product 11 当前 ATP=0 远低于再订货点 180 · 建议补 720 · 存在断供风险 product 9 一个月内连续 3"
+    },
+    {
+      "index": 1,
+      "text": "供应商质检不合格率排行：8 家 · 漳州蜜果 70% 居首 累计至当前 · 检验结果分维度 · 含待检积压 供 3 家 极高风险（≥50%） 3 家 已冻结/限制/复审中 19 单 待检积压 84 单 累计检验批次 70.0% 漳州蜜果不合格率 东港丰泽 12 单全部待检 supplier 12 · qualified · 合格判定全部积压，建议排查质检资源 味之源 reject_streak=5 supplier 4 · 5 失败 / 3 通过 / 1 让步接收 · 连续 5 次拒收 顺发冷链 reject_streak=3 supplier 8 · 总体不合格率 13.3% 但连续 3 次拒收 · 趋势需关注 珠海鲜丰 3 单待检 supplier 1 · 评级 A · 不合格率 25% · 需加快 IQC 流转 供应商 不合格率 失败/通过/让步/待检 生命周期（监管/审核） 连续拒"
+    },
+    {
+      "index": 2,
+      "text": "供应商质检风险排行（近 90 天）：19 单失败 · 味之源连续 5 次拒收居首 2026-07 至今 · 检验结果 + 时间 + 连续拒收 险 19 单 近 90 天累计失败 3 家 极高风险供应商（≥50%） 2 家 连续拒收 streak≥3 19 单 待检积压 5 次 味之源连续拒收 味之源 9/26-28 连续 5 次失败 supplier 4 · 物料 product 1 与 product 8 各涉及 · AQL 抽样 d≥Re 拒收 漳州蜜果 9/27 单日 11 批次 7 失败 supplier 9 · 当日一次性集中进货检测 · 建议追溯当日收货计划 东港丰泽 12 单入库全待检 supplier 12 · 全部为 product 8 · 检验资源可能被占满 顺发冷链 9/27 30 批次 4 失败 supplier 8 · 合格率 86.7% · 但 reject_s"
+    }
+  ],
+  "tableProbe": [
+    {
+      "cols": 5,
+      "head": [
+        {
+          "label": "原料（漯河市场）",
+          "w": 56
+        },
+        {
+          "label": "单位",
+          "w": 56
+        },
+        {
+          "label": "一年前价",
+          "w": 56
+        },
+        {
+          "label": "当前价（10 月）",
+          "w": 56
+        },
+        {
+          "label": "12 个月涨跌",
+          "w": 56
+        }
+      ],
+      "wrapTag": "DIV",
+      "wrapOverflowX": "auto",
+      "tableScrollW": 296,
+      "tableClientW": 278,
+      "cardW": 310
+    },
+    {
+      "cols": 5,
+      "head": [
+        {
+          "label": "供应商",
+          "w": 56
+        },
+        {
+          "label": "不合格率",
+          "w": 56
+        },
+        {
+          "label": "失败/通过/让步/待检",
+          "w": 56
+        },
+        {
+          "label": "生命周期（监管/审核）",
+          "w": 56
+        },
+        {
+          "label": "连续拒收",
+          "w": 56
+        }
+      ],
+      "wrapTag": "DIV",
+      "wrapOverflowX": "auto",
+      "tableScrollW": 303,
+      "tableClientW": 278,
+      "cardW": 310
+    },
+    {
+      "cols": 5,
+      "head": [
+        {
+          "label": "供应商",
+          "w": 56
+        },
+        {
+          "label": "近 90 天失败/总数",
+          "w": 56
+        },
+        {
+          "label": "不合格率",
+          "w": 56
+        },
+        {
+          "label": "首次→最近失败",
+          "w": 56
+        },
+        {
+          "label": "连续拒收",
+          "w": 56
+        }
+      ],
+      "wrapTag": "DIV",
+      "wrapOverflowX": "auto",
+      "tableScrollW": 280,
+      "tableClientW": 278,
+      "cardW": 310
+    }
+  ],
+  "chatsProbe": [
+    {
+      "title": "供应链数据关注要点",
+      "titleRect": {
+        "x": 70,
+        "y": 191,
+        "w": 153,
+        "h": 21
+      },
+      "titleScrollW": 153,
+      "timeRect": {
+        "x": 330,
+        "y": 194,
+        "w": 31,
+        "h": 17
+      },
+      "summary": "企业数据问答与统计建议",
+      "summaryRect": {
+        "x": 70,
+        "y": 217,
+        "w": 154,
+        "h": 19
+      },
+      "summaryScrollW": 154,
+      "tags": [],
+      "rowH": 68
+    },
+    {
+      "title": "生成本月经营月报",
+      "titleRect": {
+        "x": 70,
+        "y": 259,
+        "w": 136,
+        "h": 21
+      },
+      "titleScrollW": 136,
+      "timeRect": {
+        "x": 329,
+        "y": 262,
+        "w": 32,
+        "h": 17
+      },
+      "summary": "经营洞察问答（只读）",
+      "summaryRect": {
+        "x": 70,
+        "y": 285,
+        "w": 140,
+        "h": 19
+      },
+      "summaryScrollW": 140,
+      "tags": [
+        "参谋"
+      ],
+      "rowH": 68
+    },
+    {
+      "title": "查看我最近30天的采购订单",
+      "titleRect": {
+        "x": 70,
+        "y": 327,
+        "w": 207,
+        "h": 21
+      },
+      "titleScrollW": 207,
+      "timeRect": {
+        "x": 331,
+        "y": 330,
+        "w": 30,
+        "h": 17
+      },
+      "summary": "企业数据问答与统计建议",
+      "summaryRect": {
+        "x": 70,
+        "y": 353,
+        "w": 154,
+        "h": 19
+      },
+      "summaryScrollW": 154,
+      "tags": [],
+      "rowH": 68
+    },
+    {
+      "title": "验证VFYHO探针品类查询",
+      "titleRect": {
+        "x": 70,
+        "y": 395,
+        "w": 195,
+        "h": 21
+      },
+      "titleScrollW": 195,
+      "timeRect": {
+        "x": 332,
+        "y": 398,
+        "w": 29,
+        "h": 17
+      },
+      "summary": "企业数据问答与统计建议",
+      "summaryRect": {
+        "x": 70,
+        "y": 421,
+        "w": 154,
+        "h": 19
+      },
+      "summaryScrollW": 154,
+      "tags": [],
+      "rowH": 68
+    },
+    {
+      "title": "30天采购订单报告卡片",
+      "titleRect": {
+        "x": 70,
+        "y": 463,
+        "w": 173,
+        "h": 21
+      },
+      "titleScrollW": 173,
+      "timeRect": {
+        "x": 331,
+        "y": 466,
+        "w": 30,
+        "h": 17
+      },
+      "summary": "企业数据问答与统计建议",
+      "summaryRect": {
+        "x": 70,
+        "y": 489,
+        "w": 154,
+        "h": 19
+      },
+      "summaryScrollW": 154,
+      "tags": [],
+      "rowH": 68
+    },
+    {
+      "title": "导出最近30天采购订单",
+      "titleRect": {
+        "x": 70,
+        "y": 531,
+        "w": 173,
+        "h": 21
+      },
+      "titleScrollW": 173,
+      "timeRect": {
+        "x": 334,
+        "y": 534,
+        "w": 27,
+        "h": 17
+      },
+      "summary": "企业数据问答与统计建议",
+      "summaryRect": {
+        "x": 70,
+        "y": 557,
+        "w": 154,
+        "h": 19
+      },
+      "summaryScrollW": 154,
+      "tags": [],
+      "rowH": 68
+    },
+    {
+      "title": "查看我的待办事项",
+      "titleRect": {
+        "x": 70,
+        "y": 599,
+        "w": 136,
+        "h": 21
+      },
+      "titleScrollW": 136,
+      "timeRect": {
+        "x": 331,
+        "y": 602,
+        "w": 30,
+        "h": 17
+      },
+      "summary": "企业数据问答与统计建议",
+      "summaryRect": {
+        "x": 70,
+        "y": 625,
+        "w": 154,
+        "h": 19
+      },
+      "summaryScrollW": 154,
+      "tags": [],
+      "rowH": 68
+    },
+    {
+      "title": "查询待审批单子",
+      "titleRect": {
+        "x": 70,
+        "y": 667,
+        "w": 119,
+        "h": 21
+      },
+      "titleScrollW": 119,
+      "timeRect": {
+        "x": 329,
+        "y": 670,
+        "w": 32,
+        "h": 17
+      },
+      "summary": "企业数据问答与统计建议",
+      "summaryRect": {
+        "x": 70,
+        "y": 693,
+        "w": 154,
+        "h": 19
+      },
+      "summaryScrollW": 154,
+      "tags": [],
+      "rowH": 68
+    },
+    {
+      "title": "新会话",
+      "titleRect": {
+        "x": 70,
+        "y": 735,
+        "w": 51,
+        "h": 21
+      },
+      "titleScrollW": 51,
+      "timeRect": {
+        "x": 330,
+        "y": 738,
+        "w": 31,
+        "h": 17
+      },
+      "summary": "企业数据问答与统计建议",
+      "summaryRect": {
+        "x": 70,
+        "y": 761,
+        "w": 154,
+        "h": 19
+      },
+      "summaryScrollW": 154,
+      "tags": [],
+      "rowH": 68
+    },
+    {
+      "title": "导出30天采购订单清单",
+      "titleRect": {
+        "x": 70,
+        "y": 803,
+        "w": 173,
+        "h": 21
+      },
+      "titleScrollW": 173,
+      "timeRect": {
+        "x": 329,
+        "y": 806,
+        "w": 32,
+        "h": 17
+      },
+      "summary": "企业数据问答与统计建议",
+      "summaryRect": {
+        "x": 70,
+        "y": 829,
+        "w": 154,
+        "h": 19
+      },
+      "summaryScrollW": 154,
+      "tags": [],
+      "rowH": 68
+    },
+    {
+      "title": "查询待审批单子",
+      "titleRect": {
+        "x": 70,
+        "y": 871,
+        "w": 119,
+        "h": 21
+      },
+      "titleScrollW": 119,
+      "timeRect": {
+        "x": 329,
+        "y": 874,
+        "w": 32,
+        "h": 17
+      },
+      "summary": "企业数据问答与统计建议",
+      "summaryRect": {
+        "x": 70,
+        "y": 897,
+        "w": 154,
+        "h": 19
+      },
+      "summaryScrollW": 154,
+      "tags": [],
+      "rowH": 68
+    },
+    {
+      "title": "糯米粉库存及风险查询",
+      "titleRect": {
+        "x": 70,
+        "y": 939,
+        "w": 170,
+        "h": 21
+      },
+      "titleScrollW": 170,
+      "timeRect": {
+        "x": 329,
+        "y": 942,
+        "w": 32,
+        "h": 17
+      },
+      "summary": "经营洞察问答（只读）",
+      "summaryRect": {
+        "x": 70,
+        "y": 965,
+        "w": 140,
+        "h": 19
+      },
+      "summaryScrollW": 140,
+      "tags": [
+        "参谋"
+      ],
+      "rowH": 68
+    }
+  ]
+}

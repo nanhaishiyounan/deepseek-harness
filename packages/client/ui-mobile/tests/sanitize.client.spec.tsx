@@ -11,7 +11,8 @@ import { cleanup, render } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 import type { ChatItem } from '../src/client/fold.ts'
 import { FlowItem } from '../src/client/messages/chat/FlowItem.tsx'
-import { sanitizeBody, sanitizeSubtitle } from '../src/client/sanitize.ts'
+import { sanitizeBody, sanitizeReportPayload, sanitizeSubtitle } from '../src/client/sanitize.ts'
+import type { ReportPayload } from '../src/client/protocol.ts'
 
 afterEach(cleanup)
 
@@ -32,6 +33,45 @@ describe('sanitizeBody (W23-R3 F2)', () => {
 describe('sanitizeSubtitle (W23-R3 F2)', () => {
   it('strips the live-leaked subtitle shape to people language', () => {
     expect(sanitizeSubtitle('实时查询 · 待办表 wfl_approval_todos 已清空')).toBe('实时查询 · 待办表 已清空')
+  })
+
+  it('renders the W24 entity/AQL fallbacks on the report faces (W24)', () => {
+    expect(sanitizeSubtitle('supplier 4 · 物料 product 1 与 product 8 各涉及 · AQL 抽样 d≥Re 拒收')).toBe('某供应商 4 号 · 物料 某物料 1 号 与 某物料 8 号 各涉及 · 按抽检标准判定拒收（不合格数达到拒收线）')
+  })
+})
+
+describe('sanitizeReportPayload (W24 all-faces)', () => {
+  const payload: ReportPayload = {
+    v: 3,
+    type: 'report',
+    id: 'r-1',
+    title: '供应商质检风险排行',
+    subtitle: 'supplier 4 · 连续拒收 streak≥3',
+    metrics: [{ label: '连续拒收 streak≥3', value: '2', kind: 'count' }],
+    rows: [
+      { label: '味之源 reject_streak=5', hint: 'supplier 4 · AQL 抽样 d≥Re 拒收', level: 'high' },
+    ],
+    table: {
+      columns: [{ label: '供应商' }, { label: '可用库存 product 11' }],
+      rows: [['味之源调味食品', 'product 11 ATP=0']],
+    },
+  }
+
+  it('sanitizes every user-visible face of the card, not just title/subtitle', () => {
+    const clean = sanitizeReportPayload(payload)
+    expect(clean.title).toBe('供应商质检风险排行')
+    expect(clean.subtitle).toBe('某供应商 4 号 · 连续拒收 3 次及以上')
+    expect(clean.metrics[0]?.label).toBe('连续拒收 3 次及以上')
+    expect(clean.rows?.[0]?.label).toBe('味之源 连续拒收批数=5')
+    expect(clean.rows?.[0]?.hint).toBe('某供应商 4 号 · 按抽检标准判定拒收（不合格数达到拒收线）')
+    expect(clean.table?.columns[1]?.label).toBe('可用库存 某物料 11 号')
+    expect(clean.table?.rows[0]?.[1]).toBe('某物料 11 号 可用库存=0')
+  })
+
+  it('never mutates the stored artifact (the copy path keeps verbatim bytes)', () => {
+    sanitizeReportPayload(payload)
+    expect(payload.subtitle).toBe('supplier 4 · 连续拒收 streak≥3')
+    expect(payload.rows?.[0]?.hint).toBe('supplier 4 · AQL 抽样 d≥Re 拒收')
   })
 
   it('strips tool names the subtitle pass adds on top of the body pass', () => {

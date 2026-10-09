@@ -19,6 +19,12 @@ describe('renderMarkdown', () => {
     expect(table).toContain('<table>')
   })
 
+  it('wraps every table in its scroll container (W24)', () => {
+    const table = renderMarkdown('| 字段 | 值 |\n| --- | --- |\n| 单号 | PO-1 |')
+    expect(table).toContain('<div class="md-table-wrap"><table>')
+    expect(table.trim().endsWith('</table></div>')).toBe(true)
+  })
+
   it('strips script payloads through the sanitizer', () => {
     const dirty = renderMarkdown('<script>alert(1)</script>正文')
     expect(dirty).not.toContain('<script')
@@ -135,5 +141,29 @@ describe('sanitizeBizText', () => {
   it('keeps people-language text untouched', () => {
     expect(sanitizeBizText('好的，登记一张采购单。')).toBe('好的，登记一张采购单。')
     expect(sanitizeBizText('合计 ¥16,000（含税）')).toBe('合计 ¥16,000（含税）')
+  })
+
+  it('resolves bare entity-id references onto the fallback noun (W24)', () => {
+    expect(sanitizeBizText('味之源 9/26-28 连续 5 次失败：supplier 4 · 物料 product 1 与 product 8 各涉及')).toBe('味之源 9/26-28 连续 5 次失败：某供应商 4 号 · 物料 某物料 1 号 与 某物料 8 号 各涉及')
+    expect(sanitizeBizText('东港丰泽 supplier12 · 全部为 product 8')).toBe('东港丰泽 某供应商 12 号 · 全部为 某物料 8 号')
+    expect(sanitizeBizText('Customer #8 已对账')).toBe('某客户 8 号 已对账')
+  })
+
+  it('renders the AQL verdict notation as its people sentence (W24)', () => {
+    expect(sanitizeBizText('AQL 抽样 d≥Re 拒收')).toBe('按抽检标准判定拒收（不合格数达到拒收线）')
+    expect(sanitizeBizText('d≥Re 不通过')).toBe('不合格数达到拒收线 不通过')
+    expect(sanitizeBizText('d<=Ac 建议接收')).toBe('不合格数未超接收线 建议接收')
+  })
+
+  it('folds streak comparisons and maps all-caps abbreviations (W24)', () => {
+    expect(sanitizeBizText('连续拒收 streak≥3')).toBe('连续拒收 3 次及以上')
+    expect(sanitizeBizText('味之源 reject_streak=5')).toBe('味之源 连续拒收批数=5')
+    expect(sanitizeBizText('product 11 当前 ATP=0')).toBe('某物料 11 号 当前 可用库存=0')
+    expect(sanitizeBizText('ROP 120 偏低')).toBe('再订货点 120 偏低')
+  })
+
+  it('maps bare lifecycle enum values onto their business words (W24)', () => {
+    expect(sanitizeBizText('某供应商 12 号 · qualified · 合格判定全部积压')).toBe('某供应商 12 号 · 档案合格 · 合格判定全部积压')
+    expect(sanitizeBizText('该供方 frozen 已停用')).toBe('该供方 已冻结 已停用')
   })
 })

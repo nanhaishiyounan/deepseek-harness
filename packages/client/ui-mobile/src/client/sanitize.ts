@@ -119,19 +119,36 @@ export function sanitizeSubtitle(text: string): string {
 }
 
 /**
- * The payload copy every `ReportCard` render site hands the card (W23-R5):
- * the card renders `title` and `subtitle` straight from the payload, and a
- * stored artifact carries them as the wire wrote them, so the chat report
- * branch, the files preview, and the work-detail result preview all pass
- * this sanitized view — the stored artifact itself keeps its verbatim bytes
- * (the copy path and the durable log never see the sanitized text).
+ * The payload copy every `ReportCard` render site hands the card (W23-R5,
+ * W24 all-faces): the card renders `title`, `subtitle`, the metrics labels,
+ * the rows' label/hint, and the table's column heads and cells straight
+ * from the payload, and a stored artifact carries them as the wire wrote
+ * them, so every render site passes this sanitized view — the stored
+ * artifact itself keeps its verbatim bytes (the copy path and the durable
+ * log never see the sanitized text). One-line faces (subtitle, hint, column
+ * heads) take the stricter subtitle pass; multi-line faces take the body
+ * pass.
  * @param payload - the stored report artifact.
- * @returns the payload copy with a sanitized title and subtitle; a fully-stripped subtitle renders as absent.
+ * @returns the payload copy with every user-visible face sanitized; a fully-stripped subtitle renders as absent.
  */
 export function sanitizeReportPayload(payload: ReportPayload): ReportPayload {
   return {
     ...payload,
     title: sanitizeBody(payload.title),
     ...(payload.subtitle !== undefined ? { subtitle: sanitizeSubtitle(payload.subtitle) } : {}),
+    metrics: payload.metrics.map(metric => ({ ...metric, label: sanitizeBody(metric.label) })),
+    ...(payload.rows !== undefined
+      ? { rows: payload.rows.map(row => ({
+        ...row,
+        label: sanitizeBody(row.label),
+        ...(row.hint !== undefined ? { hint: sanitizeSubtitle(row.hint) } : {}),
+      })) }
+      : {}),
+    ...(payload.table !== undefined
+      ? { table: {
+        columns: payload.table.columns.map(column => ({ ...column, label: sanitizeSubtitle(column.label) })),
+        rows: payload.table.rows.map(cells => cells.map(sanitizeBody)),
+      } }
+      : {}),
   }
 }

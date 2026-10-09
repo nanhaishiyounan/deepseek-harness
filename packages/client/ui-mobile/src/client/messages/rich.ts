@@ -27,12 +27,18 @@ md.renderer.rules.image = (tokens, index, options, _env, self) => {
 }
 
 /**
- * Render one narrative block to sanitized HTML.
+ * Render one narrative block to sanitized HTML. Every table leaves wrapped
+ * in its own scroll container (W24): the CSS module addresses the wrap by
+ * the global `md-table-wrap` class, so a multi-column table scrolls inside
+ * the bubble instead of squeezing its columns to the bubble width. The
+ * wrapper is appended after DOMPurify — it is our own trusted element, and
+ * the sanitize pass never needs to see it.
  * @param text - the people-language text block.
  * @returns DOMPurify-clean HTML (paragraphs, lists, tables, strong…).
  */
 export function renderMarkdown(text: string): string {
-  return DOMPurify.sanitize(md.render(text))
+  const clean = DOMPurify.sanitize(md.render(text))
+  return clean.replace(/<table>/g, '<div class="md-table-wrap"><table>').replace(/<\/table>/g, '</table></div>')
 }
 
 /** One promoted numeric conclusion: the value in the ticket face plus its label. */
@@ -298,6 +304,20 @@ const BIZ_TERMS: Readonly<Record<string, string>> = {
 /** Underscore-free identifiers that still map (`qty`). */
 const WORD_TERMS: Readonly<Record<string, string>> = { qty: '数量' }
 
+/**
+ * Case-insensitive word terms (W24): all-caps abbreviations a narrative leaks
+ * in any casing (`ATP`, `atp`) and bare lifecycle enum values (`qualified`)
+ * map onto their business words.
+ */
+const WORD_TERMS_CI: Readonly<Record<string, string>> = {
+  atp: '可用库存',
+  rop: '再订货点',
+  qualified: '档案合格',
+  frozen: '已冻结',
+  restricted: '受限',
+  probation: '观察期',
+}
+
 /** A snake_case identifier (`hub_po_items`, `supplier_id`). */
 const SNAKE_ID = /[A-Za-z][A-Za-z0-9]*(?:_[A-Za-z0-9]+)+/g
 
@@ -309,21 +329,61 @@ const PAREN_GROUP = /（[^（）()]*）|\([^（）()]*\)/g
 
 /** A bare row-id reference a model label may carry (`id 7`, `（id 7）`). */
 const ID_REF = /[(（]\s*id\s*[:：]?\s*\d+\s*[)）]|\bid\s+\d+/gi
+
+/**
+ * A bare entity-type-plus-id reference (W24): `supplier 4`, `product1`,
+ * `Customer #8` — the wire label a lazy narrative quotes instead of the
+ * entity's name. Each maps onto the people-language fallback (「某供应商 4
+ * 号」); the persona's name discipline owns the primary path (write the real
+ * name), this is the render-side guarantee.
+ */
+const ENTITY_REF = /\b(supplier|product|customer|material)\s*#?\s*(\d+)\b/gi
+
+/** The people-language noun of one entity-reference root (above). */
+const ENTITY_NOUN: Readonly<Record<string, string>> = {
+  supplier: '某供应商',
+  product: '某物料',
+  material: '某物料',
+  customer: '某客户',
+}
+
+/** The full AQL rejection phrase maps whole onto its people sentence (W24). */
+const AQL_REJECT_PHRASE = /AQL\s*抽样\s*[，,]?\s*d\s*[≥>]=?\s*Re\s*拒收/g
+
+/** The bare sampling verdict notations (`d≥Re`, `d<=Ac`) in any spacing (W24). */
+const AQL_REJECT_NOTATION = /\bd\s*[≥>]=?\s*Re\b/g
+const AQL_ACCEPT_NOTATION = /\bd\s*[≤<]=?\s*Ac\b/g
+
+/** The full streak word after a Chinese noun folds into one clause (W24):
+ * `连续拒收 streak≥3` → `连续拒收 3 次及以上`. */
+const STREAK_PHRASE = /([一-龥]{2,6})\s*streak\s*[≥>]=?\s*(\d+)/g
+
+/** A bare streak comparison a label may still carry (`streak≥3`, W24). */
+const STREAK_BARE = /\bstreak\s*[≥>]=?\s*(\d+)\b/gi
 /**
  * Display-side sanitization of one narrative or ask string (03 §4.5): known
  * collection and field identifiers become their business terms; an
  * unmappable `hub_` name degrades to 业务记录; a bare row-id reference drops
  * out; a parenthesized group still carrying a leftover identifier drops out
- * whole. The persona bans these leaks — this is the guarantee the user never
- * sees one anyway.
+ * whole. W24: entity-id references (`supplier 4`) resolve to the
+ * people-language fallback noun, the AQL verdict notation renders as its
+ * people sentence, and streak comparisons fold into a Chinese clause. The
+ * persona bans these leaks — this is the guarantee the user never sees one
+ * anyway.
  * @param text - the model-authored display string.
  * @returns the people-language rendering.
  */
 export function sanitizeBizText(text: string): string {
   const mapped = text
-    .replace(/[A-Za-z0-9]+/g, match => WORD_TERMS[match] ?? match)
+    .replace(/[A-Za-z0-9]+/g, match => WORD_TERMS[match] ?? WORD_TERMS_CI[match.toLowerCase()] ?? match)
     .replace(SNAKE_ID, match => BIZ_TERMS[match] ?? match)
     .replace(/\bhub_[A-Za-z0-9_]+/g, '业务记录')
+    .replace(AQL_REJECT_PHRASE, '按抽检标准判定拒收（不合格数达到拒收线）')
+    .replace(AQL_REJECT_NOTATION, '不合格数达到拒收线')
+    .replace(AQL_ACCEPT_NOTATION, '不合格数未超接收线')
+    .replace(STREAK_PHRASE, (_whole, noun: string, count: string) => `${noun} ${count} 次及以上`)
+    .replace(STREAK_BARE, (_whole, count: string) => `已连续 ${count} 次`)
+    .replace(ENTITY_REF, (whole, root: string, id: string) => ENTITY_NOUN[root.toLowerCase()] === undefined ? whole : `${ENTITY_NOUN[root.toLowerCase()] as string} ${id} 号`)
     .replace(ID_REF, '')
   const cleaned = mapped.replace(PAREN_GROUP, group => (LEFTOVER_SNAKE.test(group) ? '' : group))
   return cleaned.replace(/ {2,}/g, ' ').trim()

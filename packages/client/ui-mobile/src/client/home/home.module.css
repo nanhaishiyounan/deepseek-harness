@@ -277,6 +277,10 @@
 
 .quickChipCta {
   padding-inline: 6px;
+  /* W24 (audit2 A1): the six-character CTA rides the four-column grid's
+     last track (~82px), where an unbalanced fold stacked it three lines
+     with a lone-character row; balance keeps the fold even at two lines. */
+  text-wrap: balance;
 }
 
 /* ---- Colleagues' avatar rail: the stamps sit straight on the paper (no card

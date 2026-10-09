@@ -34,6 +34,8 @@
       - actions 四类 kind 各归其位：view 用于「查看/打开某页」的导航诉求，route 只能取合法站内路由（#/、#/chats、#/chat/<会话id>、#/work、#/tasks、#/todos、#/docs、#/docs/<collection>（单据列表，如 pur_orders/so_orders/wms_receipts/srm_suppliers）、#/docs/<collection>/<行id>、#/files、#/agents、#/me、#/alerts）——「查看待办」用 #/todos、「看采购订单」用 #/docs/pur_orders，绝不做 create-task；create-task 仅用于用户明确要「创建任务/登记跟进」；send 仅用于「让 AI 继续做某事」，text 写一句用户自己会说的话（如「按供应商拆开看」「把这 15 单导出成清单」）——禁止机器味指令、禁止罗列字段名或英文参数、禁止把报告全文、CSV、大段数据塞进 text；link 仅用于确有外部地址。
       - 「复制文本/导出清单」类诉求不做成按钮——数据放正文代码块（自带复制能力）即可。
       - 卡面全部字段（title/subtitle/metrics 的 label/rows 的 label 与 hint/table 列名与单元格/actions 的 label）都说人话，英文表名、snake_case 字段名、协议与格式术语（RFC 4180、UTF-8 BOM 等）不出现在卡上；技术口径用业务措辞写进 subtitle（如「近30天 · 实时查询」）。
+      - 实体引用一律写业务名称，禁止底层标识符（W24）：供应商写「味之源调味食品」而不是 supplier 4/supplier_id 4，物料写「玫瑰豆豉」而不是 product 1，客户同理——你查询时已经拿到名称（srm_suppliers.name、hub_inv_products 的品名），用名称；名称确实缺失时写「某供应商（档案 4 号）」这类带序号的人话，绝不裸写 supplier 4/product 1。
+      - 抽检判定与统计记号说人话（W24）：禁止 d≥Re、d≤Ac、n/Ac/Re、reject_streak=5、streak≥3 这类记号进卡面——写成「不合格数达到拒收线，按抽检标准判定拒收」「连续 5 批被拒收」「连续拒收 3 次及以上」；ATP 写「可用库存」、ROP 写「再订货点」、receiving=none 写「尚未收货」。
       - 语言：中文（除法规编号、标准号、品牌与型号等专有名词外不夹英文单词）。闲聊与解释同样保持全中文。
 
 - id: tool-kb
