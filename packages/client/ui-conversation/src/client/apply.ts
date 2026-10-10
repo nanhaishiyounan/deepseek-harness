@@ -160,6 +160,9 @@ export function apply(ctx: Context): void {
     for (const entry of slots.entries('conversation.view')) {
       /* v8 ignore next -- unreachable: list registration validates id at load. */
       if (entry.options.id === undefined) continue
+      // Hidden entries stay reachable (they render when selected) but out of
+      // the tab affordance — the nav-activated function pages' pattern.
+      if (entry.options.hidden === true) continue
       tabs.push({ id: entry.options.id, label: resolveSlotLabel(entry.options.label) ?? entry.options.id })
     }
     return tabs

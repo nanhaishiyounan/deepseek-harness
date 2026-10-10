@@ -35,6 +35,7 @@ function scriptedApi(overrides: {
   lakehouse?: Partial<ApiProxy['lakehouse']>
   kg?: Partial<ApiProxy['kg']>
   nocobase?: Partial<ApiProxy['nocobase']>
+  carbon?: Partial<ApiProxy['carbon']>
   downloads?: Partial<ApiProxy['downloads']>
   respond?: ApiProxy['respond']
 } = {}): ApiProxy {
@@ -100,6 +101,14 @@ function scriptedApi(overrides: {
       mobileWorkSave: err,
       mobileWorkDelete: err,
       ...overrides.nocobase,
+    },
+    carbon: {
+      listMeta: err,
+      list: err,
+      get: err,
+      create: err,
+      update: err,
+      ...overrides.carbon,
     },
     sessions: {
       list: r => ok(r, { items: [] }),

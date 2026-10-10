@@ -196,6 +196,10 @@ export function SidebarRoot({
         })}
       </div>
 
+      {/* The main-nav menu block sits between the browsing region and the
+          foot in both sidebar widths; absent when no ui-nav composes. */}
+      {renderSlot('sidebar.nav.host', { wide })}
+
       {/* Footer actions stack above Settings in both sidebar widths. */}
       <div className={css.footArea}>
         <div className={css.footerActions}>

@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-09",
+  "topic": "W24 前置研究 R2b：知识库/RAG + 图数据库与本体 + 图谱可视化开源选型（L4 深度调研）",
+  "depth": "Exhaustive",
+  "parentInitiative": "deepseek-harness W24 五源统一架构（湖仓+知识库+业务系统carbon+本体+图谱）",
+  "sourceCount": 17,
+  "subtaskBranches": 17,
+  "queries": [
+    "WeKnora 腾讯 开源",
+    "WeKnora tencent GitHub RAG",
+    "RAGFlow DeepDoc GraphRAG 部署",
+    "Dify knowledge base external knowledge API",
+    "MaxKB FastGPT QAnything 许可证",
+    "LightRAG REST API 存储抽象",
+    "haystack 2 pipeline REST Hayhooks",
+    "LlamaIndexTS deprecated",
+    "Neo4j Community GPLv3 vector index",
+    "Apache AGE pgvector typescript",
+    "NebulaGraph nebula-js 5.0 开源",
+    "Memgraph BSL license bolt neo4j driver",
+    "GraphDB free version limits",
+    "Oxigraph server javascript",
+    "OWL RL SHACL SKOS JSON-LD property graph",
+    "LLM ontology generation schema induction",
+    "force-graph sigma.js cytoscape 性能",
+    "Obsidian local graph d3-force juggl",
+    "microsoft graphrag BYOG neo4j apoc jdbc"
+  ],
+  "clonedRepos": [
+    {
+      "name": "WeKnora",
+      "url": "https://github.com/Tencent/WeKnora",
+      "version": "v0.8.2",
+      "sizeMB": 112,
+      "keyFindings": "官方 dsh 插件 @wxg-prc-cpg/dsh-weknora；ParadeDB 默认检索；Neo4j GraphRAG 可选 profile；11 种检索引擎抽象；MIT+第三方例外"
+    }
+  ],
+  "assets": {
+    "images": [],
+    "attachments": [],
+    "totalSizeMB": 112
+  },
+  "triangulation": {
+    "claimsTotal": 96,
+    "claimsMultiSourced": 78,
+    "contradictionsFound": 10,
+    "contradictionsResolved": 7
+  },
+  "sections": [
+    "00-执行摘要与选型总览",
+    "01-WeKnora深度解剖",
+    "02-知识库对照系与库嵌入路线",
+    "03-图数据库选型",
+    "04-本体建模与LLM自动本体生成",
+    "05-图谱可视化Obsidian范式与选型",
+    "06-五源互通参考架构",
+    "07-W24整合方案草案",
+    "08-方法论证据质量与矛盾清单"
+  ]
+}

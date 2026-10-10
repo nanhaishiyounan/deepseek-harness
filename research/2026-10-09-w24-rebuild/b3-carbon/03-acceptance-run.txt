@@ -1,0 +1,9 @@
+[j1] cb_list tool row visible: true
+[j1] customers answer names present: true
+[j1] rpc carbon calls: 200 carbon.listMeta
+[j2] draft preview rendered with the new item fields
+[j2] cb_create receipt visible: true
+[j2] rpc carbon calls:
+[j3] business page catalog tables visible: true
+[j3] carbon rpc during business page: 200 carbon.list
+[j3] nocobase requests observed: 0

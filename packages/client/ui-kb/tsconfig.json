@@ -42,6 +42,9 @@
       "path": "../ui-primitives"
     },
     {
+      "path": "../ui-nav"
+    },
+    {
       "path": "../ui-slots"
     },
     {

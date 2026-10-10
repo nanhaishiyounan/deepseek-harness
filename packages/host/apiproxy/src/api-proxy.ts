@@ -77,6 +77,7 @@ import { kgCorefEdgeId, kgCorefPairKey, kgRelationId } from '@deepseek-ai/dsh-kb
 import type { KgOntologyChangeOp } from '@deepseek-ai/dsh-kb-graph'
 import { compileNbFilter, NocoBaseClient, parseNbFilterCondition, sessionActingUserOf, setSessionActingUser, unwrapNbTitle } from '@deepseek-ai/dsh-connector-nocobase'
 import type { ActingUser, NbFilterCondition, NocoBaseCollectionMeta, NocoBaseListResult } from '@deepseek-ai/dsh-connector-nocobase'
+import type { CarbonService } from '@deepseek-ai/dsh-connector-carbon'
 import type { AssembleContext } from '@deepseek-ai/dsh-system-prompt'
 // Type-only: merges the `agent` assembly-context field the acting-user
 // section's text provider reads.
@@ -528,6 +529,29 @@ function nocobaseUnavailable(): RpcError {
 /** Fold one NocoBase client failure onto the wire error vocabulary. */
 function nocobaseRequestError(error: unknown): RpcError {
   return { code: 'nocobase-request-failed', message: error instanceof Error ? error.message : String(error), details: {} }
+}
+
+/** The carbon domain's not-composed refusal. */
+function carbonNotComposed(): RpcError {
+  return {
+    code: 'carbon-not-composed',
+    message: 'this deployment has not enabled the carbon domain; set the api-gateway config carbonEnabled: true to expose business reads',
+    details: {},
+  }
+}
+
+/** The carbon domain's no-credentials refusal. */
+function carbonUnavailable(): RpcError {
+  return {
+    code: 'carbon-unavailable',
+    message: 'the carbon capability resolves no credentials (CARBON_URL/CARBON_ANON_KEY/CARBON_EMAIL/CARBON_PASSWORD); the carbon domain is unavailable',
+    details: {},
+  }
+}
+
+/** Fold one carbon capability failure onto the wire error vocabulary. */
+function carbonRequestError(error: unknown): RpcError {
+  return { code: 'carbon-request-failed', message: error instanceof Error ? error.message : String(error), details: {} }
 }
 
 /**
@@ -1007,6 +1031,21 @@ export interface ApiProxyDefaults {
    * confirmation flow, same stance as `ordersEnabled`.
    */
   nocobaseWriteEnabled?: boolean
+  /**
+  * Whether the carbon domain's methods (`carbon.listMeta`, `carbon.list`,
+  * `carbon.get`, `carbon.create`, `carbon.update`) answer. Absent means
+  * refused: business reads run against the deployment's carbon stack under
+  * a service account, so the unauthenticated gateway needs an explicit
+  * per-deployment opt-in.
+  */
+  carbonEnabled?: boolean
+  /**
+  * Whether the carbon domain's write methods (`carbon.create`,
+  * `carbon.update`) answer. Absent means refused: every record change
+  * routes through the agent's cb_* confirmation flow, same stance as
+  * `nocobaseWriteEnabled`.
+  */
+  carbonWriteEnabled?: boolean
   /**
    * Per-username collection whitelists enforced server-side on
    * `nocobase.list/get/update` for signed-in callers (the docs deep-link
@@ -1571,6 +1610,19 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
       if (client === undefined) return { refusal: nocobaseUnavailable() }
       return { client }
     })()
+  /** The carbon domain's shared gate: enabled opt-in plus the composed `ctx.carbon` service. */
+  const carbonGates = (): { carbon: CarbonService } | { refusal: RpcError } => {
+    if (defaults.carbonEnabled !== true) return { refusal: carbonNotComposed() }
+    const carbon = ctx.get('carbon')
+    if (carbon === undefined || !carbon.available()) return { refusal: carbonUnavailable() }
+    return { carbon }
+  }
+  /** The shared refusal the carbon write methods answer with unless the deployment opted in. */
+  const carbonWriteRefusal = (): RpcError => ({
+    code: 'carbon-write-disabled',
+    message: 'the carbon wire surface is read-only; set the api-gateway config carbonWriteEnabled: true to allow single-table writes',
+    details: {},
+  })
   /** The kb workbench's tenant binding; unbound constructions refuse loudly on every kb method. */
   const kbTenant = (): string | undefined => defaults.kbTenant
   /** The shared refusal every kb method answers with when no tenant is bound. */
@@ -4448,6 +4500,95 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
         const nickname = typeof user.nickname === 'string' && user.nickname !== '' ? user.nickname : user.username
         const token = issueBusinessSession({ username: user.username, nickname })
         return ok(request, { username: user.username, nickname, token })
+      },
+    },
+
+    carbon: {
+      // The carbon business-system surface over the `ctx.carbon` capability
+      // service (connector-carbon provides it). A deployment that has not
+      // opted in through `carbonEnabled` keeps a working gateway, and every
+      // method fails with the same structured refusal. Writes ride the
+      // connector's write-tier gating and tenant injection; the composite
+      // posting server-functions stay on the carbon UI.
+      async listMeta(request) {
+        const gates = carbonGates()
+        if ('refusal' in gates) return err(request, gates.refusal)
+        const catalog = gates.carbon.catalog()
+        return ok(request, {
+          tables: catalog.tables.map(entry => ({
+            table: entry.table,
+            label: entry.label,
+            module: entry.module,
+            risk: entry.risk,
+            id_column: entry.idColumn,
+            key_columns: [...entry.keyColumns],
+          })),
+        })
+      },
+
+      async list(request, signal) {
+        const gates = carbonGates()
+        if ('refusal' in gates) return err(request, gates.refusal)
+        const { table, filter, order, limit, offset } = request.payload
+        if (typeof table !== 'string' || table === '') {
+          return err(request, { code: 'carbon-request-failed', message: 'carbon.list: table is required', details: {} })
+        }
+        try {
+          const result = await gates.carbon.list(table, {
+            ...filter === undefined ? {} : { filter: [...filter] },
+            ...order === undefined ? {} : { order: [...order] },
+            ...limit === undefined ? {} : { limit },
+            ...offset === undefined ? {} : { offset },
+          }, signal)
+          return ok(request, { count: result.count, offset: offset ?? 0, limit: limit ?? result.rows.length, rows: result.rows })
+        } catch (error: unknown) {
+          return err(request, carbonRequestError(error))
+        }
+      },
+
+      async get(request, signal) {
+        const gates = carbonGates()
+        if ('refusal' in gates) return err(request, gates.refusal)
+        const { table, id } = request.payload
+        try {
+          const row = await gates.carbon.get(table, id, signal)
+          if (row === undefined) {
+            return err(request, { code: 'carbon-row-missing', message: `carbon.get: ${table} row ${id} does not exist`, details: { table, id } })
+          }
+          return ok(request, { table, row })
+        } catch (error: unknown) {
+          return err(request, carbonRequestError(error))
+        }
+      },
+
+      async create(request, signal) {
+        const gates = carbonGates()
+        if ('refusal' in gates) return err(request, gates.refusal)
+        if (defaults.carbonWriteEnabled !== true) {
+          return err(request, carbonWriteRefusal())
+        }
+        const { table, values } = request.payload
+        try {
+          const row = await gates.carbon.create(table, values, signal)
+          return ok(request, { table, row })
+        } catch (error: unknown) {
+          return err(request, carbonRequestError(error))
+        }
+      },
+
+      async update(request, signal) {
+        const gates = carbonGates()
+        if ('refusal' in gates) return err(request, gates.refusal)
+        if (defaults.carbonWriteEnabled !== true) {
+          return err(request, carbonWriteRefusal())
+        }
+        const { table, id, values } = request.payload
+        try {
+          const row = await gates.carbon.update(table, id, values, signal)
+          return ok(request, { table, row })
+        } catch (error: unknown) {
+          return err(request, carbonRequestError(error))
+        }
       },
     },
 

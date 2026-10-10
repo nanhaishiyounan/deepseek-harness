@@ -283,6 +283,14 @@ export class FakeApiClient implements IApiClient {
     history: payload => this.record('kg.history', payload, Promise.resolve(ok({ nodes: [], edges: [], truncated: false, as_of: payload.as_of }))),
   }
 
+  readonly carbon: IApiClient['carbon'] = {
+    listMeta: payload => this.record('carbon.listMeta', payload, Promise.resolve(ok({ tables: [] }))),
+    list: payload => this.record('carbon.list', payload, Promise.resolve(ok({ count: 0, offset: 0, limit: 20, rows: [] }))),
+    get: payload => this.record('carbon.get', payload, Promise.reject(new Error('fake: no carbon row'))),
+    create: payload => this.record('carbon.create', payload, Promise.resolve(ok({ table: payload.table, row: {} }))),
+    update: payload => this.record('carbon.update', payload, Promise.resolve(ok({ table: payload.table, row: {} }))),
+  }
+
   readonly nocobase: IApiClient['nocobase'] = {
     update: payload => this.record('nocobase.update', payload, Promise.resolve(ok({ collection: payload.collection, row: { id: payload.id } }))),
     listMeta: payload => this.record('nocobase.listMeta', payload, Promise.resolve(ok({ collections: [] }))),

@@ -20,13 +20,16 @@ import { bindStoreHook, GLOBAL_KIT, SESSION_KIT, sessionListState } from './busi
 const t = ((key: string) => zh[key as keyof typeof zh] ?? key) as never
 
 const ROSTER = { status: 'ready' as const, value: [{ name: 'orders', title: '订单', fields: [] }] }
-const ROWS = { status: 'ready' as const, value: { count: 1, page: 1, page_size: 20, rows: [{ id: 1, orderNo: 'SO-1' }] } }
+const ROWS = { status: 'ready' as const, value: { count: 1, page: 1, page_size: 20, rows: [{ id: 'row_1', orderNo: 'SO-1' }] } }
 
 afterEach(cleanup)
 
+/** Nav-state store stub for the entry mounts. */
+const navStore = createSnapshotStore({ screen: undefined })
+
 describe('presentation null arms', () => {
   it('skips null and undefined cells and keeps numeric ids', () => {
-    expect(entityPreviewOf({ id: 3, note: null, memo: undefined, keep: 'x' }, 3)).toEqual([['keep', 'x']])
+    expect(entityPreviewOf({ id: 'row_3', note: null, memo: undefined, keep: 'x' }, 3)).toEqual([['keep', 'x']])
   })
 })
 
@@ -40,9 +43,10 @@ describe('BizEntry mount refresh', () => {
         {...GLOBAL_KIT}
         wide
         useSessions={bindStoreHook(sessions) as never}
+        useNavState={bindStoreHook(navStore) as never}
         useBusiness={bindStoreHook(store) as never}
         refresh={refresh}
-        requestBusinessView={vi.fn()}
+        activate={vi.fn()}
         t={t}
       />,
     )
@@ -109,10 +113,11 @@ describe('apply-side loadMore guards', () => {
     await ctx.plugin(SlotRegistry).await()
     const listFn = vi.fn(list)
     ctx.provide('connection', {
-      api: { nocobase: {
-        listMeta: vi.fn(async () => ({ result: { ok: true, value: { collections: [] } } })),
+      api: { carbon: {
+        listMeta: vi.fn(async () => ({ result: { ok: true, value: { tables: [] } } })),
         list: listFn,
         get: vi.fn(),
+        create: vi.fn(),
       } },
     } as never)
     const locale = new LocaleRuntime(ctx)

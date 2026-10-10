@@ -128,6 +128,16 @@ export interface RpcErrorDetailsMap {
   'nocobase-request-failed': {}
   /** A nocobase.get named a row the backend does not have (the v2 wire answers `{data: null}`). */
   'nocobase-row-missing': { collection: string; id: number }
+  /** A carbon-domain call ran in a deployment that did not opt in through `carbonEnabled`. */
+  'carbon-not-composed': {}
+  /** A carbon-domain call found no composed carbon capability with credentials. */
+  'carbon-unavailable': {}
+  /** A carbon-domain call the carbon stack refused (HTTP error, RLS violation, tier refusal); the message is the service's text. */
+  'carbon-request-failed': {}
+  /** A carbon-domain write ran in a deployment that did not opt in through `carbonWriteEnabled`. */
+  'carbon-write-disabled': {}
+  /** A carbon.get named a row the catalog table does not have. */
+  'carbon-row-missing': { table: string; id: string }
   /** A nocobase.signIn the backend's basic authenticator refused (wrong credentials or a profile without a username). */
   'nocobase-signin-rejected': {}
   /** A nocobase.alertAct the alert engine's transition table / routed-user whitelist refused; the message is the engine's refusal fact. */

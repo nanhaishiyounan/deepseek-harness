@@ -1,0 +1,9 @@
+carbon-carbon-main-kong-1	Up 26 minutes (healthy)	8001/tcp, 8443-8444/tcp, 0.0.0.0:54321->8000/tcp, [::]:54321->8000/tcp
+carbon-carbon-main-storage-1	Up 26 minutes	5000/tcp
+carbon-carbon-main-realtime-1	Up 26 minutes
+carbon-carbon-main-gotrue-1	Up 26 minutes
+carbon-carbon-main-postgrest-1	Up 26 minutes	3000/tcp
+carbon-carbon-main-postgres-1	Up 26 minutes (healthy)	0.0.0.0:51538->5432/tcp, [::]:51538->5432/tcp
+carbon-carbon-main-inbucket-1	Up 26 minutes (healthy)	1100/tcp, 2500/tcp, 0.0.0.0:51541->9000/tcp, [::]:51541->9000/tcp
+carbon-carbon-main-inngest-1	Up 26 minutes	0.0.0.0:51542->8288/tcp, [::]:51542->8288/tcp
+carbon-redis	Up 26 minutes (healthy)	0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp

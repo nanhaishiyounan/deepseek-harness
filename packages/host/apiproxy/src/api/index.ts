@@ -16,6 +16,7 @@ import type { SettingsApi } from './settings.ts'
 import type { CredentialsApi } from './credentials.ts'
 import type { LlmApi } from './llm.ts'
 import type { KbApi } from './kb.ts'
+import type { CarbonApi } from './carbon.ts'
 import type { NocobaseApi } from './nocobase.ts'
 import type { DataApi } from './data.ts'
 import type { OrdersApi } from './orders.ts'
@@ -41,6 +42,7 @@ export interface ApiProxy {
   llm: LlmApi
   kb: KbApi
   nocobase: NocobaseApi
+  carbon: CarbonApi
   data: DataApi
   orders: OrdersApi
   assets: AssetsApi
@@ -78,6 +80,9 @@ export type { SettingsApi, SettingsNamespaceView, SettingsPathOpView, SettingsSe
 export type { CredentialsApi, CredentialView } from './credentials.ts'
 export type { ConfigurableProviderView, DiscoveredModelView, LlmApi } from './llm.ts'
 export type { KbApi, KbHitView, KbIngestView, KbSearchView, KbStatsView, KbUploadView } from './kb.ts'
+export type {
+  CarbonApi, CarbonFilterConditionView, CarbonRowPageView, CarbonRowView, CarbonTableMetaView,
+} from './carbon.ts'
 export type {
   NocobaseApi, NocobaseCollectionMetaView, NocobaseFieldView, NocobaseFilterConditionView,
   NocobaseRowPageView, NocobaseRowView,

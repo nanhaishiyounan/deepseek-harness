@@ -69,6 +69,7 @@
     "@deepseek-ai/dsh-client-ui-jobs": "workspace:^",
     "@deepseek-ai/dsh-client-ui-kb": "workspace:^",
     "@deepseek-ai/dsh-client-ui-lakehouse": "workspace:^",
+    "@deepseek-ai/dsh-connector-carbon": "workspace:^",
     "@deepseek-ai/dsh-lakehouse-engine": "workspace:^",
     "@deepseek-ai/dsh-lakehouse-sync": "workspace:^",
     "@deepseek-ai/dsh-client-ui-kg": "workspace:^",

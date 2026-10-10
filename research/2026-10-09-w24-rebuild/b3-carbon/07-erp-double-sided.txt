@@ -1,0 +1,4 @@
+[erp] minted link: http://localhost:54321/verify?token=afba11a7fb646a83f1813aa885693ba49d9222ce7748…
+[erp] after verify url: http://localhost:3000/login?redirectTo=%2F#
+[erp] post-login url: http://localhost:3000/login?redirectTo=%2F#
+[erp] same-session PostgREST read: 200 []

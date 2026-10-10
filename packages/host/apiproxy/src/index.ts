@@ -71,6 +71,13 @@ export interface Config {
    */
   nocobaseEnabled?: boolean
   /**
+   * Whether the carbon domain's methods (`carbon.listMeta/list/get/create/
+   * update`) answer. Absent means refused: business reads run against the
+   * deployment's carbon stack under a service account, so the
+   * unauthenticated gateway needs an explicit per-deployment opt-in.
+   */
+  carbonEnabled?: boolean
+  /**
    * NocoBase server origin for the domain; omitted = the
    * `NOCOBASE_BASE_URL` environment variable.
    */
@@ -101,6 +108,12 @@ export interface Config {
    * confirmation flow.
    */
   nocobaseWriteEnabled?: boolean
+  /**
+   * Whether the carbon domain's write methods (`carbon.create`,
+   * `carbon.update`) answer. Absent means refused: every record change
+   * routes through the agent's cb_* confirmation flow.
+   */
+  carbonWriteEnabled?: boolean
   /**
    * Per-username collection whitelists enforced server-side on
    * `nocobase.list/get/update` for signed-in callers (the docs deep-link
@@ -199,6 +212,8 @@ export class ApiProxyService extends Service implements ApiProxy {
     ordersEnabled: z.boolean(),
     nocobaseEnabled: z.boolean(),
     nocobaseWriteEnabled: z.boolean(),
+    carbonEnabled: z.boolean(),
+    carbonWriteEnabled: z.boolean(),
     nocobaseCollectionScopes: z.dict(z.array(z.string())),
     nocobaseWflWriteScopes: z.dict(z.array(z.string())),
     alertEngineUrl: z.string(),
@@ -228,6 +243,7 @@ export class ApiProxyService extends Service implements ApiProxy {
   readonly data: ApiProxy['data']
   readonly orders: ApiProxy['orders']
   readonly nocobase: ApiProxy['nocobase']
+  readonly carbon: ApiProxy['carbon']
   readonly assets: ApiProxy['assets']
   readonly lakehouse: ApiProxy['lakehouse']
   readonly connectors: ApiProxy['connectors']
@@ -252,6 +268,8 @@ export class ApiProxyService extends Service implements ApiProxy {
       ...config.ordersEnabled === undefined ? {} : { ordersEnabled: config.ordersEnabled },
       ...config.nocobaseEnabled === undefined ? {} : { nocobaseEnabled: config.nocobaseEnabled },
       ...config.nocobaseWriteEnabled === undefined ? {} : { nocobaseWriteEnabled: config.nocobaseWriteEnabled },
+      ...config.carbonEnabled === undefined ? {} : { carbonEnabled: config.carbonEnabled },
+      ...config.carbonWriteEnabled === undefined ? {} : { carbonWriteEnabled: config.carbonWriteEnabled },
       ...config.nocobaseCollectionScopes === undefined ? {} : { nocobaseCollectionScopes: config.nocobaseCollectionScopes },
       ...config.nocobaseWflWriteScopes === undefined ? {} : { nocobaseWflWriteScopes: config.nocobaseWflWriteScopes },
       ...config.alertEngineUrl === undefined ? {} : { alertEngineUrl: config.alertEngineUrl },
@@ -284,6 +302,7 @@ export class ApiProxyService extends Service implements ApiProxy {
     this.data = api.data
     this.orders = api.orders
     this.nocobase = api.nocobase
+    this.carbon = api.carbon
     this.assets = api.assets
     this.lakehouse = api.lakehouse
     this.connectors = api.connectors

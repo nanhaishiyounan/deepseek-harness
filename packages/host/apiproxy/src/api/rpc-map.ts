@@ -11,6 +11,7 @@ import type { AgentPresetsApi } from './agent-presets.ts'
 import type { SkillsApi } from './skills.ts'
 import type { GoalsApi } from './goals.ts'
 import type { KbApi } from './kb.ts'
+import type { CarbonApi } from './carbon.ts'
 import type { NocobaseApi } from './nocobase.ts'
 import type { DataApi } from './data.ts'
 import type { OrdersApi } from './orders.ts'
@@ -110,6 +111,11 @@ export interface RpcMethodMap {
   'nocobase.signIn': NocobaseApi['signIn']
   'nocobase.mobileWorkSave': NocobaseApi['mobileWorkSave']
   'nocobase.mobileWorkDelete': NocobaseApi['mobileWorkDelete']
+  'carbon.listMeta': CarbonApi['listMeta']
+  'carbon.list': CarbonApi['list']
+  'carbon.get': CarbonApi['get']
+  'carbon.create': CarbonApi['create']
+  'carbon.update': CarbonApi['update']
   'goal.create': GoalsApi['create']
   'goal.edit': GoalsApi['edit']
   'goal.pause': GoalsApi['pause']

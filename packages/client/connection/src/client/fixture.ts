@@ -1750,6 +1750,9 @@ function createFixtureWorld(options: FixtureOptions): FixtureWorld {
   function err<P, T>(request: RpcRequest<P>, error: Extract<RpcResult<T>, { ok: false }>['error']): Promise<RpcResponse<T>> {
     return Promise.resolve({ rpcId: request.rpcId, result: { ok: false, error } })
   }
+  /** Shared carbon-domain refusal for the fixture's non-catalog methods. */
+  const carbonRefuse = <P, T>(request: RpcRequest<P>): Promise<RpcResponse<T>> =>
+    err(request, { code: 'carbon-not-composed', message: 'the fixture composes no carbon capability', details: {} })
 
   const summaryOf = (id: SessionId): SessionSummary | undefined => sessions.find(s => s.sessionId === id)
   /** Shared session guard for sessionId-addressed catalog routes: the error
@@ -3124,6 +3127,23 @@ function createFixtureWorld(options: FixtureOptions): FixtureWorld {
       describeImage: request => err(request, { code: 'data-vision-disabled', message: 'the demo fixture refuses vision calls', details: {} }),
       extractText: request => err(request, { code: 'data-vision-disabled', message: 'the demo fixture refuses text extraction', details: {} }),
     },
+    carbon: {
+      // The carbon domain's deterministic fixture: the catalog the
+      // business page's navigator renders; every other method keeps the
+      // structured not-composed refusal (nothing exercises writes here).
+      listMeta: request => ok(request, {
+        tables: [
+          { table: 'item', label: '物料', module: 'master', risk: 'write', id_column: 'id', key_columns: ['id', 'readableId', 'name'] },
+          { table: 'customer', label: '客户', module: 'master', risk: 'write', id_column: 'id', key_columns: ['id', 'readableId', 'name'] },
+          { table: 'salesOrder', label: '销售订单', module: 'sales', risk: 'write', id_column: 'id', key_columns: ['id', 'salesOrderId', 'status'] },
+        ],
+      }),
+      list: carbonRefuse,
+      get: carbonRefuse,
+      create: carbonRefuse,
+      update: carbonRefuse,
+    },
+
     nocobase: {
       // The business page's deterministic fixture: three collections (the
       // grouped navigator's order/supplier/expert buckets) with two rows
@@ -3627,6 +3647,11 @@ export class FixtureApiClient extends AbstractApiClient {
       case 'llm.providers': return this.api.llm.providers(request)
       case 'llm.models': return this.api.llm.models(request)
       case 'llm.discoverModels': return this.api.llm.discoverModels(request, signal)
+      case 'carbon.listMeta': return this.api.carbon.listMeta(request, signal)
+      case 'carbon.list': return this.api.carbon.list(request, signal)
+      case 'carbon.get': return this.api.carbon.get(request, signal)
+      case 'carbon.create': return this.api.carbon.create(request, signal)
+      case 'carbon.update': return this.api.carbon.update(request, signal)
       case 'nocobase.listMeta': return this.api.nocobase.listMeta(request, signal)
       case 'nocobase.list': return this.api.nocobase.list(request, signal)
       case 'nocobase.get': return this.api.nocobase.get(request, signal)

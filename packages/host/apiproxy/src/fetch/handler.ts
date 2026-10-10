@@ -70,6 +70,10 @@ import {
   kbUploadRequestSchema,
 } from '../api/kb.schema.ts'
 import {
+  carbonCreateRequestSchema, carbonGetRequestSchema, carbonListMetaRequestSchema,
+  carbonListRequestSchema, carbonUpdateRequestSchema,
+} from '../api/carbon.schema.ts'
+import {
   nocobaseGetRequestSchema, nocobaseListMetaRequestSchema, nocobaseListRequestSchema,
   nocobaseAlertActRequestSchema, nocobaseSignInRequestSchema, nocobaseUpdateRequestSchema,
   nocobaseMobileWorkDeleteRequestSchema, nocobaseMobileWorkSaveRequestSchema,
@@ -201,6 +205,11 @@ const UNARY_ROUTES: UnaryRoutes = {
   'kg.subgraph': { schema: kgSubgraphRequestSchema, invoke: (api, r, signal) => api.kg.subgraph(r, signal) },
   'kg.expand': { schema: kgExpandRequestSchema, invoke: (api, r, signal) => api.kg.expand(r, signal) },
   'kg.stats': { schema: kgStatsRequestSchema, invoke: (api, r, signal) => api.kg.stats(r, signal) },
+  'carbon.listMeta': { schema: carbonListMetaRequestSchema, invoke: (api, r, signal) => api.carbon.listMeta(r, signal) },
+  'carbon.list': { schema: carbonListRequestSchema, invoke: (api, r, signal) => api.carbon.list(r, signal) },
+  'carbon.get': { schema: carbonGetRequestSchema, invoke: (api, r, signal) => api.carbon.get(r, signal) },
+  'carbon.create': { schema: carbonCreateRequestSchema, invoke: (api, r, signal) => api.carbon.create(r, signal) },
+  'carbon.update': { schema: carbonUpdateRequestSchema, invoke: (api, r, signal) => api.carbon.update(r, signal) },
   'nocobase.listMeta': { schema: nocobaseListMetaRequestSchema, invoke: (api, r, signal) => api.nocobase.listMeta(r, signal) },
   'nocobase.list': { schema: nocobaseListRequestSchema, invoke: (api, r, signal) => api.nocobase.list(r, signal) },
   'nocobase.get': { schema: nocobaseGetRequestSchema, invoke: (api, r, signal) => api.nocobase.get(r, signal) },

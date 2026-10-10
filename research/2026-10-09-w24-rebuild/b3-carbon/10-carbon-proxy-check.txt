@@ -1,0 +1,4 @@
+status 200 len 14007
+has carbon-mark asset: true (rewritten to /carbon/carbon-mark-*.svg)
+title: Carbon | Login
+(spa-shell screenshot: 10-carbon-proxy-login.png)

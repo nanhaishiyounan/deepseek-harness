@@ -86,18 +86,19 @@
     persona: |
       You are kb-agent, a food-industry knowledge assistant powered by the
       {{model}} model. Answer enterprise questions by routing to the right
-      data surface: business records (customers, orders, experts, business
-      tables) through nb_collections to learn the schema, then nb_list and
-      nb_get to read rows — service rows carry expertId ids, so surface the
-      person behind a service (e.g. 张红喜) with one more nb_list on experts
-      filtering id in [expertId]; document passages and prose facts through
+      data surface: carbon business records (物料/客户/供应商/销售订单/采购
+      订单/生产工单/库存) through cb_collections to learn the catalog, then
+      cb_list and cb_get to read rows — rows referencing other tables by id
+      (salesOrder.customerId is a customer id) resolve the target with one
+      more cb_list on the target table filtering id in [ids]; record changes
+      (create/update) only after presenting the draft or field-by-field
+      before→after diff and getting the user's explicit go-ahead, then land
+      them through cb_create/cb_update and hand back the receipt; document
+      passages and prose facts through
       kb_search with [n] citations (document name and heading path); numbers,
       statistics, aggregates, and record lists through lakehouse_list_tables
       first, then lakehouse_query SQL over the lakehouse tables (reference
-      them exactly as listed), naming the source table in the answer; experts,
-      external datasets, and serviceable
-      offerings through connector_discover (preview with connector_fetch,
-      land data with connector_transfer, then answer from the landing);
+      them exactly as listed), naming the source table in the answer;
       entity-relation questions (谁给谁供货、谁下过哪些订单、合规与关联
       关系) through kg_schema first when unsure what the graph holds, then
       kg_subgraph with the entity names as seeds, citing the graph relations
@@ -109,25 +110,15 @@
       with only KG, freight-rate, or document facts is incomplete. Before
       the final answer you MUST: (1) map the disruption with kg_subgraph,
       seeding with the affected warehouse/region/route names to surface the
-      flows and alternatives; (2) call nb_list on expert_services for the
-      matching services; (3) resolve each service's expertId to a person
-      with one more nb_list on experts (filter id in [expertId]); then name
-      the expert(s), their service, price, and deliverable in the answer
-      alongside the reroute facts.
-
-      When the user wants an expert to produce a solution, walk the ordering
-      journey: connector_discover surfaces the expert card with orderable
-      services (deliverable + pricing) — restate the matching service and its
-      price and get the user's explicit go-ahead first. Then order_create
-      places the order and generates the proposal PDF in one call; hand the
-      returned order number and the PDF's workspace path to the user.
-      order_status reports progress or the recent orders later.
+      flows and alternatives; (2) pull the countermeasures and expert
+      know-how from kb_search (应急/替代供应/合规 keywords); then name the
+      sourced mitigations in the answer alongside the reroute facts.
 
       When the user wants to change business records, walk the confirmed
-      in-conversation change flow: nb_get the current row (or draft the new
-      one from nb_collections fields), present the full preview — for
+      in-conversation change flow: cb_get the current row (or draft the new
+      one from cb_collections' catalog), present the full preview — for
       updates, the field-by-field before→after diff — and get the user's
-      explicit go-ahead BEFORE calling nb_create or nb_update. Ask to fill
+      explicit go-ahead BEFORE calling cb_create or cb_update. Ask to fill
       missing slots instead of inventing business values; change only the
       fields the user named. Hand back the receipt (the landing id, or the
       before→after diff) as the confirmation.
@@ -184,7 +175,7 @@
     # lakehouse catalog and connector discovery land data-asset nodes, and the
     # corpus documents run closed-set MiniMax extraction with alignment onto
     # the canonical NocoBase rows. Manual runs only (scripts/kg-build.mts);
-    # credentials resolve from the same NOCOBASE_* chain as tool-nocobase.
+    # credentials resolve from the NOCOBASE_* chain (B5 mapping-breadth source; the B3 chat surface is carbon).
     - id: kg-build
       name: '@deepseek-ai/dsh-kg-build'
       config:
@@ -246,12 +237,11 @@
       name: '@deepseek-ai/dsh-tool-lakehouse'
 
     # The connector seam: the file-set provider exposes one drop-in directory
-    # as datasets (routed by the shared data router at transfer time), and the
-    # NocoBase provider speaks to a business backend over REST when
-    # NOCOBASE_BASE_URL/NOCOBASE_API_KEY resolve (absent credentials degrade
-    # it to unavailable — discovery keeps working through the other
-    # providers). The tool rows give the model connector_discover, _fetch,
-    # and _transfer on the same tenant binding as the kb and lakehouse tools.
+    # as datasets (routed by the shared data router at transfer time), and
+    # connector-carbon registers the ctx.carbon capability service (the
+    # cb_* tools and the gateway's carbon domain ride it). The tool rows
+    # give the model connector_discover, _fetch, and _transfer on the same
+    # tenant binding as the kb and lakehouse tools.
     - id: connector
       name: '@deepseek-ai/dsh-connector'
 
@@ -260,28 +250,24 @@
       config:
         root: examples/kb-agent/workspace/data/connector-files
 
-    - id: connector-nocobase
-      name: '@deepseek-ai/dsh-connector-nocobase'
+    - id: connector-carbon
+      name: '@deepseek-ai/dsh-connector-carbon'
 
     - id: tool-connector
       name: '@deepseek-ai/dsh-tool-connector'
       config:
         tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"
-        # order_create runs the whole deliverable pipeline in one tool call,
-        # so its budget must clear expert-orders' draftTimeoutMs (120000
-        # below) plus the NocoBase reads/writes, kb retrieval, PDF rendering,
-        # and attachment upload; the 60000 seam default times out mid-draft.
-        orderCreateTimeoutMs: 180000
 
-    # The NocoBase business tools: nb_collections/nb_list/nb_get read the
-    # business schema and rows, nb_create/nb_update land confirmed record
-    # changes (the persona drives the in-conversation preview → go-ahead →
-    # receipt flow; the tools themselves carry no UI confirmation state).
-    # Credentials resolve from NOCOBASE_BASE_URL/NOCOBASE_API_KEY the same
-    # way connector-nocobase's do; without them every tool fails with the
+    # The carbon business tools: cb_collections/cb_list/cb_get read the
+    # carbon catalog and rows, cb_create/cb_update land confirmed record
+    # changes on write-tier tables (the persona drives the in-conversation
+    # preview → go-ahead → receipt flow; the tools themselves carry no UI
+    # confirmation state). Credentials resolve from
+    # CARBON_URL/CARBON_ANON_KEY/CARBON_EMAIL/CARBON_PASSWORD the same way
+    # connector-carbon's do; without them every tool fails with the
     # structured no-credentials refusal instead of failing the composition.
-    - id: tool-nocobase
-      name: '@deepseek-ai/dsh-tool-nocobase'
+    - id: tool-carbon
+      name: '@deepseek-ai/dsh-tool-carbon'
 
     # The deterministic card channel for the mobile form assistant: every
     # structured card (ask_choice / ask_field / form_draft / submit_receipt /
@@ -351,23 +337,6 @@
     - id: tool-view-actions
       name: '@deepseek-ai/dsh-tool-view-actions'
 
-    # The order lifecycle over the same NocoBase source the connector reads:
-    # order_create places an expert-service order and runs the deliverable
-    # pipeline (kb-referenced MiniMax-M3 drafting, or the named template when
-    # no draft key resolves, expert-pdf typesetting, real PDF landing under
-    # workspace/deliverables) and order_status reports it.
-    - id: expert-orders
-      name: '@deepseek-ai/dsh-expert-orders'
-      config:
-        tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"
-        deliverablesDir: examples/kb-agent/workspace/deliverables
-        # The production composition drafts through the live MiniMax-M3
-        # stream: the 4096 seam default truncates the DraftSpec JSON
-        # mid-flight, so the budget rides the config (same 16384/120000 the
-        # demo and nocobase-track e2e compositions pin).
-        draftMaxTokens: 16384
-        draftTimeoutMs: 120000
-
 # The web workbench rides the same tenant binding as the tools and the
 # presets (one env, one source of truth) and opts into kb writes: this
 # deployment is single-tenant behind disk-level access control. Patched, not
@@ -384,63 +353,12 @@
     # description (MiniMax vision, the key the embeddings provider already
     # resolves) that the mobile draft quotes as plain text.
     visionDescribeEnabled: true
-    # The expert-service order surface: placing and fulfilling orders from
-    # the workbench (single-tenant deployment behind disk-level access
-    # control, same stance as kbWriteEnabled).
-    ordersEnabled: true
-    # The business-read surface (nocobase.listMeta/list/get) for the coming
-    # business-management pages; reads only — record writes stay on the
-    # agent's nb_* tools with the in-conversation confirmation contract.
-    nocobaseEnabled: true
-    # The business page's inline-edit fast path over the same service account
-    # (whitelisted low-risk fields only; high-risk changes stay on the
-    # agent's nb_update confirmation flow). Requires a live signIn session
-    # token; the audit actor derives from it server-side.
-    nocobaseWriteEnabled: true
-    # W6-R2: the alert engine's base URL for nocobase.alertAct (the mobile
-    # alerts page's claim/close rows forward here — the engine's transition
-    # table + routed-user whitelist stay the single decision point, the
-    # gateway only carries the session-derived identity).
-    alertEngineUrl: !!js "process.env.W6_ALERT_ENGINE_URL ?? 'http://127.0.0.1:13110'"
-    # W6-R2: wfl_ engine tables are write-refused on the gateway by default
-    # (their state machines own the transitions). This table stays EMPTY on
-    # purpose: no business case needs a direct wfl_ column write, and the
-    # alert state machine rides nocobase.alertAct only. W8-B3 adds the same
-    # pattern's second instance: wfl_mobile_work (the mobile work
-    # projection) writes ride the dedicated nocobase.mobileWorkSave/Delete
-    # entrances with server-enforced account ownership, not a row here.
-    # Set per-user entries here solely when a future batch documents the
-    # need for a raw column write.
-    nocobaseWflWriteScopes: {}
-    # The signed-in role collection scopes enforced server-side on
-    # nocobase.list/get/update (the mobile docs deep-link guard's second
-    # layer; mirrors ui-mobile docsCatalog's role table — one deployment,
-    # one shared whitelist). Accounts absent here have no configured scope.
-    nocobaseCollectionScopes:
-      buyer: [pur_orders, pur_requests, srm_suppliers]
-      finance: [pur_orders, so_orders, srm_suppliers]
-      keeper: [wms_receipts, wms_transfers, wms_reservations, hub_inv_products, wms_lots]
-      qc_inspector: [qm_inspections, qm_nc_dispositions, wms_receipts, wms_lots]
-      planner: [mfg_orders, pur_requests, hub_inv_products]
-      shop_lead: [mfg_orders, mfg_job_reports, mfg_completions]
-      sales_rep: [so_orders, hub_inv_products]
-      # wfl_alerts rides no row here: its read face is row-scoped by the
-      # gateway itself (notify_users/owner; admin all), not this table.
-      admin:
-        - pur_orders
-        - pur_requests
-        - so_orders
-        - mfg_orders
-        - wms_receipts
-        - wms_transfers
-        - wms_reservations
-        - mfg_job_reports
-        - mfg_completions
-        - qm_inspections
-        - qm_nc_dispositions
-        - srm_suppliers
-        - hub_inv_products
-        - wms_lots
+    # The carbon business surface (carbon.listMeta/list/get + the write
+    # tier) for the business-management pages; reads and write-tier
+    # single-table changes over the session-account — the composite posting
+    # documents stay on the carbon ERP UI.
+    carbonEnabled: true
+    carbonWriteEnabled: true
     # The data-asset market surface (assets.list/detail/stats): connector
     # discovery projects the catalog; orders.create backs the confirm card.
     assetsEnabled: true
@@ -459,7 +377,7 @@
     kgTenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"
 
 # The web workbench serves the business page's embed entry same-origin: the
-# /nocobase prefix proxies the live NocoBase with framing guards stripped.
+# /carbon prefix proxies the live carbon ERP with framing guards stripped.
 # Patched, not inserted: the web-app bundle already mounts the webserver row.
 # A patch's config replaces the row's whole config object (no key merge), so
 # host and port ride along with the bundle's own fallback expressions.
@@ -467,7 +385,7 @@
   config:
     host: !!js "ctx.webStartup.host ?? '127.0.0.1'"
     port: !!js "ctx.webStartup.port ?? 3080"
-    nocobaseProxyOrigin: !!js "process.env.NOCOBASE_BASE_URL ?? 'http://127.0.0.1:13000'"
+    carbonProxyOrigin: !!js "process.env.CARBON_ERP_URL ?? 'http://127.0.0.1:3000'"
 
 # The mobile client rides the same web process: mobileEnabled serves the
 # built dist/mobile.html at /mobile (same origin, same /api gateway, same

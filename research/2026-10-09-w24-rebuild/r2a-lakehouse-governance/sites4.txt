@@ -1,0 +1,176 @@
+F_PYPAIMON
+PyPaimon | Apache Paimon
+Skip to main content Apache Paimon 2.2-SNAPSHOT master (2.2-SNAPSHOT) 2.0 (stable) 1.4 1.3 1.2 1.1 GitHub Project Home Concepts Append Table Primary-Key Table Multimodal Table Engine Flink Engine Spark PyPaimon & AI Getting Started Python API Multimodal & AI Compute & Training Tools & Storage Ecosystem CDC Ingestion Maintenance Program API Migration Iceberg Compatibility Project Learn Paimon PyPaimon & AI On this page PyPaimon
+PyPaimon is the Python implementation of Apache Paimon. It connects to catalogs,
+reads and writes lakehouse tables, and makes text, vectors, images, and video
+available to Python data and training workflows. The core Python API does not
+require a JDK.
+Start with Installation , then run the Quick Start
+to create a local table, commit a batch, and read it back.
+Choose an API ​
+You want to… Start here What you control Work with ordinary Paimon tables Python API Catalogs, schemas, predicates, scan splits, and explicit commits Build a text, vector, or media application Multimodal API Table operations, payload reads, search, and row IDs through a compact interface Process data across workers Ray Data or Daft Distributed reads, transforms, and writes Feed a training loop PyTorch Iterable reads, frame decoding, and contiguous windows Query or inspect a table interactively SQL or CLI SQL results, table metadata, tags, and branches
+The multimodal API wraps the same catalog and table implementation. It creates
+data-evolution tables without primary keys and supplies defaults for row tracking,
+deletion vectors, and BLOB descriptors. Use the Python API when you need to work
+with other table types or control scan and commit steps directly.
+Learn by task ​
+Task Guides Connect and define data Catalogs and tables , data types Read and write batches Batch writes , batch reads Follow new data Streaming reads and consumers Retain a dataset version Tags , branches and rollback Store and update media BLOB storage , BLOB object API , data evolution , video frames Match new data to existing rows Upsert and merge , Ray joins Backfill derived features Ray row IDs and backfills Retrieve candidates Vector and full-text search , row IDs Import robot data HDF5 and ROSBag , LeRobot , RoboMIND AgileX Compare training storage RoboMIND ACT benchmark Configure storage access FUSE , PyJindoSDK Inspect metadata System tables , CLI query and inspect
+Environment Settings ​
+See Installation for virtual environments and package installation.
+Build From Source ​
+See Install from source to use this checkout.
+Optional Dependencies ​
+See Optional dependencies for file formats,
+compute frameworks, dataset importers, and their Python version requirements. Edit this page Previous Consumers, Views, and Functions Next Installation Choose an API Learn by task Environment Settings Build From Source Optional Dependencies Documentation Getting Started Concepts Community GitHub Mailing List Copyright © 2026 The Apache Software Foundation. Apache Paimon, Paimon, and the Paimon logo are trademarks of the Apache Software Foundation.
+G_PAIMON_ICEBERG
+404 Not Found
+Not Found
+The requested URL was not found on this server.
+H_PAIMON_SPARK
+Quick Start | Apache Paimon
+Skip to main content Apache Paimon 2.2-SNAPSHOT master (2.2-SNAPSHOT) 2.0 (stable) 1.4 1.3 1.2 1.1 GitHub Project Home Concepts Append Table Primary-Key Table Multimodal Table Engine Flink Engine Spark Quick Start Setup and Configuration Tables and Schemas Reading and Writing Streaming Operations PyPaimon & AI Ecosystem CDC Ingestion Maintenance Program API Migration Iceberg Compatibility Project Learn Paimon Engine Spark Quick Start On this page Quick Start
+Run a local Spark SQL session, create a primary key table, and read an update back.
+The examples use Spark 3.5 with Scala 2.12. Choose the matching connector for another version in
+Installation .
+Preparation ​
+Install Spark and download the matching Paimon JAR from Installation .
+The connector's Spark minor version and Scala binary version must match your Spark distribution.
+Setup ​
+Start a local session with the connector, catalog, and SQL extensions configured together:
+spark-sql --master 'local[2]' \ --jars /path/to/paimon-spark-3.5_2.12-2.2-SNAPSHOT.jar \ --conf spark.sql.catalog.paimon = org.apache.paimon.spark.SparkCatalog \ --conf spark.sql.catalog.paimon.warehouse = file:/tmp/paimon \ --conf spark.sql.extensions = org.apache.paimon.spark.extensions.PaimonSparkSessionExtensions
+Replace the JAR path with your downloaded file. The local warehouse is for this single-machine
+example; a cluster needs storage accessible to the driver and every executor. See
+Catalogs for Hive, JDBC, REST, and SparkGenericCatalog setup.
+Select the catalog and database:
+USE paimon . default ;
+Use a fully qualified name such as spark_catalog.default.other_table to access a table in
+Spark's built-in catalog while paimon is selected.
+Create Table ​
+CREATE TABLE my_table ( k INT , v STRING ) TBLPROPERTIES ( 'primary-key' = 'k' , 'bucket' = '1' ) ;
+A primary key table merges records with the same key. Without the primary-key property,
+Paimon creates an append table. See Create Tables, Views, and Tags for partitioned
+and external tables.
+Insert Table ​
+INSERT INTO my_table VALUES ( 1 , 'Hi' ) , ( 2 , 'Hello' ) ; INSERT INTO my_table VALUES ( 1 , 'Hello Paimon' ) ;
+The second write updates key 1 under the default deduplicate merge engine.
+Query Table ​
+SELECT * FROM my_table ORDER BY k ; -- 1 Hello Paimon -- 2 Hello
+Next Steps ​
+Task Guide Read and write from Scala DataFrame API Filter data or query an older snapshot SQL Queries Overwrite partitions, update, or merge rows SQL Writes Consume or produce streaming data Structured Streaming Tune the connector or table options Configuration
+Spark Type Conversion ​
+The mapping table and timestamp, variant, and geospatial compatibility notes are in
+Data Types . Edit this page Previous Spark Next Installation Preparation Setup Create Table Insert Table Query Table Next Steps Spark Type Conversion Documentation Getting Started Concepts Community GitHub Mailing List Copyright © 2026 The Apache Software Foundation. Apache Paimon, Paimon, and the Paimon logo are trademarks of the Apache Software Foundation.
+I_HUDI_README
+
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+# Apache Hudi
+
+Apache Hudi is an open data lakehouse platform, built on a high-performance open table format
+to ingest, index, store, serve, transform and manage your data across multiple cloud data environments.
+
+<img src="https://hudi.apache.org/assets/images/hudi-logo-medium.png" alt="Hudi logo" height="80px" align="right" />
+
+<https://hudi.apache.org/>
+
+[![Build](https://github.com/apache/hudi/actions/workflows/bot.yml/badge.svg)](https://github.com/apache/hudi/actions/workflows/bot.yml)
+[![Test](https://dev.azure.com/apachehudi/hudi-oss-ci/_apis/build/status/apachehudi-ci.hudi-mirror?branchName=master)](https://dev.azure.com/apachehudi/hudi-oss-ci/_build/latest?definitionId=5&branchName=master)
+[![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.apache.hudi/hudi/badge.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.apache.hudi%22)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/apache/hudi)
+[![Join on Slack](https://img.shields.io/badge/slack-%23hudi-72eff8?logo=slack&color=48c628&label=Join%20on%20Slack)](https://join.slack.com/t/apache-hudi/shared_invite/zt-33fabmxb7-Q7QSUtNOHYCwUdYM8LbauA)
+[![Twitter Follow](https://img.shields.io/twitter/follow/ApacheHudi)](https://twitter.com/apachehudi)
+[![Follow Linkedin](https://img.shields.io/badge/apache%E2%80%93hudi-0077B5?style=for-the-badge&logo=linkedin&logoColor=white&label=Follow)](https://www.linkedin.com/company/apache-hudi/?viewAsMember=true)
+
+## Features
+
+Hudi stores all data and metadata on cloud storage in open formats, providing the following features across different aspects.
+
+### Ingestion
+
+* Built-in ingestion tools for Apache Spark/Apache Flink users.
+* Supports half-dozen file formats, database change logs and streaming data systems.
+* Connect sink for Apache Kafka, to bring external data sources.
+
+### Storage
+
+* Optimized storage format, supporting row & columnar data.
+* Timeline metadata to track history of changes
+* Automatically manages file sizes, layout using statistics
+* Savepoints for data versioning and recovery
+* Schema tracking and evolution.
+
+### Indexing
+
+* Scalable indexing subsystem to speed up snapshot queries, maintained automatically by writes.
+* Tracks file listings, column-level and partition-level statistics to help plan queries efficiently.
+* Record-level indexing mechanisms built on row-oriented file formats and bloom filters.
+* Logical partitioning on tables, using expression indexes to decouple from physical partitioning on storage.
+
+### Writing
+
+* Atomically commit data with rollback/restore support.
+* Fast upsert/delete support leveraging record-level indexes.
+* Snapshot isolation between writer & queries.
+* Optimistic concurrency control to implement relational data model, with Read-Modify-Write style consistent writes.
+* Non-blocking concurrency control, to implement streaming data model, with support for out-of-order, late data handling.
+
+### Queries
+
+Hudi supports different types of queries, on top of a single table.
+
+* **Snapshot Query** - Provides a view of the table, as of the latest committed state, accelerated with indexes as applicable.
+* **Incremental Query** - Provides latest value of records inserted/updated, since a given point in time of the table. Can be used to "diff" table states between two points in time.
+* **Change-Data-Capture Query** - Provides a change stream with records inserted or updated or deleted since a point in time or between two points in time. Provides both before and after images for each change record.
+* **Time-Travel Query** - Provides a view of the table, as of a given point in time.
+* **Read Optimized Query** - Provides excellent snapshot query performance via purely columnar storage (e.g. [Parquet](https://parquet.apache.org/)), when used with a compaction policy to provide a transaction boundary.
+
+### Table Management
+
+* Automatic, hands-free table services runtime integrated into Spark/Flink writers or operated independently.
+* Configurable scheduling strategies with built-in failure handling, for all table services.
+J_HUDI_CN
+404 Not Found
+Not Found
+The requested URL was not found on this server.
+K_DELTA_KERNEL_DOCS
+Delta Kernel | Delta Lake
+Skip to content Delta Lake Search Ctrl K Cancel GitHub Select theme Dark Light Auto Introduction Apache Spark connector Quick Start Table batch reads and writes Table streaming reads and writes Table deletes, updates, and merges Change data feed Table utility commands Constraints How does Delta Lake manage feature compatibility? Delta default column values Delta column mapping Use liquid clustering for Delta tables What are deletion vectors? Use catalog-managed tables Drop Delta table features Use row tracking for Delta tables Delta Connect (aka Spark Connect Support in Delta) Storage configuration Delta type widening Universal Format (UniForm) Read Delta Sharing Tables Concurrency control Migration guide Best practices Frequently asked questions (FAQ) Optimizations Trino connector Starburst connector Presto connector AWS Redshift Spectrum connector Snowflake connector Google BigQuery connector Apache Flink connector Other connectors Delta Kernel Delta Standalone (deprecated) Delta Lake APIs Releases Delta Lake resources Delta Table Properties Reference Contribute GitHub Select theme Dark Light Auto On this page Overview Kernel Java What is Delta Kernel? Set up Delta Kernel for your project Read a Delta table in a single process Step 1: Full scan on a Delta table Step 2: Improve scan performance with file skipping Create a Delta table Create a table and insert data into it Blind append into an existing Delta table Idempotent Blind Appends to a Delta Table Checkpointing a Delta table Build a Delta connector for a distributed processing engine Step 0: Validate the prerequisites Step 1: Set up Delta Kernel in your connector project Step 2: Build your own Engine Step 3: Build read support in your connector Step 4: Build append support in your connector Migration guide Migration from Delta Lake version 3.1.0 to 3.2.0 Kernel Rust More Information On this page Overview Kernel Java What is Delta Kernel? Set up Delta Kernel for your project Read a Delta table in a single process Step 1: Full scan on a Delta table Step 2: Improve scan performance with file skipping Create a Delta table Create a table and insert data into it Blind append into an existing Delta table Idempotent Blind Appends to a Delta Table Checkpointing a Delta table Build a Delta connector for a distributed processing engine Step 0: Validate the prerequisites Step 1: Set up Delta Kernel in your connector project Step 2: Build your own Engine Step 3: Build read support in your connector Step 4: Build append support in your connector Migration guide Migration from Delta Lake version 3.1.0 to 3.2.0 Kernel Rust More Information Delta Kernel The Delta Kernel project is a set of libraries ( Java and Rust ) for building Delta connectors that can read from and write into Delta tables without the need to understand the Delta protocol details .
+You can use this library to do the following:
+Read data from small Delta tables in a single thread in a single process.
+Read data from large Delta tables using multiple threads in a single process.
+Build a complex connector for a distributed processing engine and read very large Delta tables.
+Insert data into a Delta table either from a single process or a complex distributed engine.
+Here is an example of a simple table scan with a filter:
+Java Engine myEngine = DefaultEngine . create () ; // define a engine (more details below) Table myTable = Table . forPath ( " /delta/table/path " ) ; // define what table to scan Snapshot mySnapshot = myTable . getLatestSnapshot ( myEngine ) ; // define which version of table to scan Scan myScan = mySnapshot . getScanBuilder ( myEngine ) // specify the scan details . withFilters ( myEngine, scanFilter ) . build () ; CloseableIterator < ColumnarBatch > physicalData = // read the Parquet data files .. read from Parquet data files ... Scan . transformPhysicalData ( ... ) // returns the table data physicalData = // read the Parquet data files .. read from Parquet data files ...Scan.transformPhysicalData(...) // returns the table data">
+A complete version of the above example program and more examples of reading from and writing into a Delta table are available here .
+Notice that there are two sets of public APIs to build connectors.
+Table APIs - Interfaces like Table and Snapshot that allow you to read (and soon write to) Delta tables
+Engine APIs - The Engine interface allows you to plug in connector-specific optimizations to compute-intensive components in the Kernel. For example, Delta Kernel provides a default Parquet file reader via the DefaultEngine , but you may choose to replace that default with a custom Engine implementation that has a faster Parquet reader for your connector/processing engine.
+Kernel Java Section titled “Kernel Java”
+What is Delta Kernel? Section titled “What is Delta Kernel?”
+Delta Kernel is a library for operating on Delta tables. Specifically, it provides simple and narrow APIs for reading and writing to Delta tables without the need to understand the Delta protocol details. You can use this library to do the following:
+Read and write Delta tables from your applications.
+Build a connector for a distributed engine like Apache Spark™ , Apache Flink , or Trino for reading or writing massive Delta tables.
+Set up Delta Kernel for your project Section titled “Set up Delta Kernel for your project”
+You need to io.delta:delta-kernel-api and io.delta:delta-kernel-defaults dependencies. Following is an example Maven pom file dependency list.
+The delta-kernel-api module contains the core of the Kernel that abstracts out the Delta protocol to enable reading and writing into Delta tables. It makes use of the Engine interface that is being passed to the Kernel API by the connector for heavy-lift operations such as reading/writing Parquet or JSON files, evaluating expressions or file system operations such as listing contents of the Delta Log directory, etc. Kernel supplies a default implementation of Engine in module delta-kernel-defaults . The connectors can implement their own version of Engine to make use of their native implementation of functionalities the Engine provides. For example: the connector can make use of their Parquet reader instead of using the reader from the DefaultEngine . More details on this later .
+< dependencies > < dependency > < groupId > io.delta </ groupId > < artifactId > delta-kernel-api </ artifactId > < version > ${delta-kernel.version} </ version > </ dependency >
+< dependency > < groupId > io.delta </ groupId > < artifactId > delta-kernel-defaults </ artifactId > < version > ${delta-kernel.version} </ version > </ dependency > </ dependencies >   io.delta  delta-kernel-api  ${delta-kernel.version}    io.delta  delta-kernel-defaults  ${delta-kernel.version}   ">
+If your connector is not using the DefaultEngine provided by the Kernel, the dependency delta-kernel-defaults from the above list can be skipped.
+Read a Delta table in a single process Section titled “R

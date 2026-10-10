@@ -1,0 +1,22 @@
+/* Nav menu block inside the sidebar's host seat. The sidebar owns the column
+   chrome (rail geometry, hairline under the block); this block only spaces
+   the rows and clamps its own height so a growing menu scrolls instead of
+   starving the session browser below. Colors ride the --dsw-alias-* /
+   --dsw-specific-* semantic tokens (docs/web-styling.md). */
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 0;
+  max-height: 40vh;
+  overflow-y: auto;
+  /* The menu scrolls on the sidebar's elevated surface: the l2 pair. */
+  --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2);
+  --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2);
+}
+
+.rail {
+  max-height: none;
+  overflow-y: visible;
+}

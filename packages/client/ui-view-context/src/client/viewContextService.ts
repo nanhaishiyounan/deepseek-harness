@@ -14,6 +14,8 @@
 
 import { Service, type Context } from '@deepseek-ai/cordis'
 import type { ConnectionHandle } from '@deepseek-ai/dsh-client-connection/client'
+import type { HostObservable } from '@deepseek-ai/dsh-client-ui-slots'
+import { createSnapshotStore } from '@deepseek-ai/dsh-client-runtime/client'
 import type { PendingWait, SessionId, SnapshotStore } from '@deepseek-ai/dsh-client-runtime/client'
 import type { ViewActionArgs } from '@deepseek-ai/dsh-view-actions/types'
 import type { ViewSnapshot } from '@deepseek-ai/dsh-view-context/types'
@@ -48,6 +50,17 @@ export interface ViewActionsEntry {
 interface ActiveView {
   readonly sessionId: SessionId
   readonly view: string
+}
+
+/**
+ * The navigation state the main-nav rows bind: the resolved active screen.
+ * The view stays `undefined` until the conversation body reports one, so a
+ * freshly opened session marks no row active.
+ */
+export interface NavState {
+  readonly screen?: { readonly view?: string; readonly sessionId?: string } | undefined
+  /** Whether a live view switch is published (a header is mounted to receive activations). */
+  readonly switchable?: boolean | undefined
 }
 
 /** `ctx.viewContext`: provider registry, action whitelist, switch capture, and the two loops. */
@@ -192,15 +205,26 @@ export class ViewContextService extends Service {
   /**
    * Publish the current screen from the session body's own view resolution
    * (`reportActiveView` on the conversation.session slot contract); schedules
-   * a report so the host cache follows tab switches.
+   * a report so the host cache follows tab switches and moves the nav
+   * projection onto the same screen.
    *
    * @param sessionId - the session whose body resolved the view.
    * @param view - the resolved conversation view id.
    */
   reportActiveView(sessionId: SessionId, view: string): void {
     this.active = { sessionId, view }
+    this.navStore.set({ screen: { view } })
     this.notify()
   }
+
+  /** The navigation state the main-nav rows bind (the active screen projection). */
+  readonly navState: HostObservable<NavState> = {
+    getSnapshot: () => this.navStore.getSnapshot(),
+    subscribe: listener => this.navStore.subscribe(listener),
+  }
+
+  /** The nav projection's backing store. */
+  private readonly navStore = createSnapshotStore<NavState>({})
 
   /** Schedule a debounced report of the active view's current state. */
   notify(): void {

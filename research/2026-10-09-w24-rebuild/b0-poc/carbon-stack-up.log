@@ -1,0 +1,50 @@
+┌  Carbon · dev up
+│
+●  portless disabled (CARBON_PORTLESS=0) — using localhost URLs
+│
+●  worktree: carbon-main  (project carbon-carbon-main)
+│
+●  pnpm install skipped (lockfile in sync)
+│
+◇  skills + rules linked
+[?25l│
+◇  localhost mode, redis db 0
+[?25h[?25l│
+◒  Render .env.local & sync symlinks...
+[1G[J◇  env files synced
+[?25h[?25l│
+◒  Boot shared redis...
+[1G[J◇  shared redis on :6379 (index 0)
+[?25h│
+●  docker images already present — skipping compose pull
+[?25l│
+◒  Boot docker compose stack...
+[1G[J◇  containers up
+[?25h[?25l│
+◒  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ waiting for storage.buckets...
+[1G[J◐  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ waiting for auth / realtime
+schemas...
+[1G[J◇  all services responding
+[?25h[?25l│
+◒  Apply database migrations...
+[1G[J◇  migrations applied
+[?25h[?25l│
+◇  config row upserted
+[?25h[?25l│
+◒  Regenerate types & swagger...
+[1G[J◇  types + swagger refreshed
+[?25h[?25l│
+◒  Sync RLS policies with the authz manifest...
+[1G[J◇  changed 0 helper(s), changed 66 table(s)
+[?25h[?25l│
+◒  Seed smoke-test user (test@carbon.ms)...
+[1G[J◇  user created
+[?25h│ ┌─Carbon dev — carbon-main───────────────────────────────────────────────────┐
+│ │  API       ]8;;http://localhost:54321\http://localhost:54321]8;;\                                          │
+│ │  Studio    not started — crbn reload studio                                │
+│ │  Mail      ]8;;http://localhost:51541\http://localhost:51541]8;;\                                          │
+│ │  Inngest   ]8;;http://localhost:51542\http://localhost:51542]8;;\                                          │
+│ │  Postgres  postgresql://postgres:postgres@localhost:51538/postgres         │
+│ └────────────────────────────────────────────────────────────────────────────┘
+│
+└  services up (run `crbn down` to stop)

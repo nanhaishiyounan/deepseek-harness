@@ -1,0 +1,16 @@
+# obsidianmd/obsidian-help @ master — graph view research target files
+# source of truth: tree.json (git/trees/master?recursive=1, truncated=false)
+# repo: pushed_at=2026-10-08T21:29:01Z
+#
+# NOTE: no standalone "Local graph" / "Graph filters" / "Graph groups" pages exist
+# in en/ — Local graph, Filters, Groups are sections inside en/Plugins/Graph view.md.
+# en/Obsidian Web Clipper/Filters.md exists but is clipper-scoped, excluded.
+
+en/Plugins/Graph view.md
+en/Plugins/Backlinks.md
+en/Plugins/Outgoing links.md
+en/Plugins/Page preview.md
+en/Plugins/Core plugins.md
+en/Linking notes and files/Internal links.md
+en/Linking notes and files/Aliases.md
+en/Getting started/Link notes.md

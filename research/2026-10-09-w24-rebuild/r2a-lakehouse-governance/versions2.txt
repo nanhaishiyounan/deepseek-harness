@@ -1,0 +1,29 @@
+== ducklake releases.atom
+NO_REL
+== paimon dlcdn
+== iceberg dlcdn
+href="apache-iceberg-1.12.0/"
+href="apache-iceberg-1.8.1/"
+href="apache-iceberg-1.9.0/"
+href="apache-iceberg-1.9.1/"
+href="apache-iceberg-1.9.2/"
+== hudi dlcdn
+href="1.0.2/"
+href="1.1.0/"
+href="1.1.1/"
+href="1.2.0/"
+href="1.2.1/"
+== pypi pyiceberg
+latest: 0.12.0
+  0.12.0 2026-09-01
+  0.12.0rc2 2026-08-24
+  0.12.0rc1 2026-08-05
+  0.11.1 2026-03-03
+  0.11.1rc2 2026-02-26
+== pypi deltalake
+latest: 1.6.6
+  1.6.6 2026-09-24
+  1.6.5 2026-09-21
+  1.6.4 2026-09-18
+  1.6.3 2026-08-21
+  1.6.2 2026-07-08

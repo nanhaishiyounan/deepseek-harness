@@ -1,0 +1,2 @@
+$ node --import tsx/esm apps/cli/src/bin.ts web --patch examples/kb-agent/cordis.patch.yml --no-open
+dsh web: http://127.0.0.1:3080

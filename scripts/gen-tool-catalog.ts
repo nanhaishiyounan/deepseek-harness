@@ -35,9 +35,6 @@ import * as WebFetchLocal from '@deepseek-ai/dsh-web-fetch-http'
 import KbRuntime from '@deepseek-ai/dsh-kb'
 import * as KbSqlite from '@deepseek-ai/dsh-kb-sqlite'
 import * as ToolKb from '@deepseek-ai/dsh-tool-kb'
-import LakehouseRuntime from '@deepseek-ai/dsh-lakehouse'
-import type { EngineTableRef, LakehouseQueryResult, QueryProvider } from '@deepseek-ai/dsh-lakehouse'
-import * as LakehouseSqliteCatalog from '@deepseek-ai/dsh-lakehouse-sqlite-catalog'
 import * as LakehouseEngine from '@deepseek-ai/dsh-lakehouse-engine'
 import * as ToolLakehouse from '@deepseek-ai/dsh-tool-lakehouse'
 import ConnectorRuntime from '@deepseek-ai/dsh-connector'
@@ -202,21 +199,6 @@ export interface ToolPackage {
  * `packages/`). Ordered by package name (the render order); the completeness
  * guard proves it is exhaustive against the on-disk glob.
  */
-/** Catalog-only engine stand-in: satisfies provider selection so the tools register for schema collection; queries never run here. */
-class CatalogEngineStub implements QueryProvider {
-  readonly id = 'catalog-stub'
-
-  available(): boolean {
-    return true
-  }
-
-  async writeParquet(): Promise<void> {}
-
-  query(_tenantId: string, _sql: string, _tables: readonly EngineTableRef[]): Promise<LakehouseQueryResult> {
-    throw new Error('the catalog stub engine never executes queries')
-  }
-}
-
 /** A catalog-harvest stub: an empty provider keeps the connector seam usable without upstreams. */
 class CatalogConnectorStub implements ConnectorProvider {
   readonly id = 'catalog-stub'

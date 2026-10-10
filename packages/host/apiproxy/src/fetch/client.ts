@@ -73,6 +73,13 @@ import {
   nocobaseSignInValueSchema,
   nocobaseUpdateValueSchema,
 } from '../api/nocobase.schema.ts'
+import {
+  carbonCreateValueSchema,
+  carbonGetValueSchema,
+  carbonListMetaValueSchema,
+  carbonListValueSchema,
+  carbonUpdateValueSchema,
+} from '../api/carbon.schema.ts'
 import { dataDescribeImageValueSchema, dataExtractTextValueSchema, dataUploadValueSchema } from '../api/data.schema.ts'
 import { orderValueSchema, ordersListValueSchema } from '../api/orders.schema.ts'
 import { assetDetailValueSchema, assetsListValueSchema, assetsStatsValueSchema } from '../api/assets.schema.ts'
@@ -248,6 +255,13 @@ export interface IApiClient {
     mobileWorkDelete(payload: RequestPayload<'nocobase.mobileWorkDelete'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'nocobase.mobileWorkDelete'>>>
     signIn(payload: RequestPayload<'nocobase.signIn'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'nocobase.signIn'>>>
   }
+  carbon: {
+    listMeta(payload: RequestPayload<'carbon.listMeta'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'carbon.listMeta'>>>
+    list(payload: RequestPayload<'carbon.list'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'carbon.list'>>>
+    get(payload: RequestPayload<'carbon.get'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'carbon.get'>>>
+    create(payload: RequestPayload<'carbon.create'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'carbon.create'>>>
+    update(payload: RequestPayload<'carbon.update'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'carbon.update'>>>
+  }
   /** client-response passthrough (rpcId is a backfill of the server-request's id — never minted here). */
   respond(message: ClientResponse, signal?: AbortSignal): Promise<RpcReceipt>
 }
@@ -346,6 +360,11 @@ const UNARY_VALUE_SCHEMAS: { [K in keyof RpcMethodMap]: z.ZodType<Wire<ResponseV
   'kb.ingest': kbIngestValueSchema,
   'kb.ingestUrl': kbIngestValueSchema,
   'kb.upload': kbUploadValueSchema,
+  'carbon.listMeta': carbonListMetaValueSchema,
+  'carbon.list': carbonListValueSchema,
+  'carbon.get': carbonGetValueSchema,
+  'carbon.create': carbonCreateValueSchema,
+  'carbon.update': carbonUpdateValueSchema,
   'nocobase.listMeta': nocobaseListMetaValueSchema,
   'nocobase.list': nocobaseListValueSchema,
   'nocobase.get': nocobaseGetValueSchema,
@@ -707,6 +726,17 @@ export abstract class AbstractApiClient implements IApiClient {
     mobileWorkSave: (payload, signal) => this.callUnary('nocobase.mobileWorkSave', payload, signal, 'caller-signal-only'),
     mobileWorkDelete: (payload, signal) => this.callUnary('nocobase.mobileWorkDelete', payload, signal, 'caller-signal-only'),
     signIn: (payload, signal) => this.callUnary('nocobase.signIn', payload, signal, 'caller-signal-only'),
+  }
+
+  readonly carbon: IApiClient['carbon'] = {
+    // Business reads and single-table writes run against the deployment's
+    // carbon stack; the caller's signal alone bounds them (a big page must
+    // not die at the transport default).
+    listMeta: (payload, signal) => this.callUnary('carbon.listMeta', payload, signal, 'caller-signal-only'),
+    list: (payload, signal) => this.callUnary('carbon.list', payload, signal, 'caller-signal-only'),
+    get: (payload, signal) => this.callUnary('carbon.get', payload, signal, 'caller-signal-only'),
+    create: (payload, signal) => this.callUnary('carbon.create', payload, signal, 'caller-signal-only'),
+    update: (payload, signal) => this.callUnary('carbon.update', payload, signal, 'caller-signal-only'),
   }
 
   readonly events: IApiClient['events'] = {

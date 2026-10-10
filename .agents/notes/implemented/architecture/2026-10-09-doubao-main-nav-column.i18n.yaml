@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-10-09-doubao-main-nav-column.md
+2026-10-09-doubao-main-nav-column.md: eb44dd751d491e628ec900c26e21b2f22ce40f70
+2026-10-09-doubao-main-nav-column.zh.md: af0a241ccb57202695b98678f96e853082dc83f2

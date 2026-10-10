@@ -1,0 +1,10 @@
+# satellite 种子入库行数实录（宿主 psql 直连 :51538，2026-10-10 05:44 本地）
+# 说明：crbn up 的 ensureSmokeTestUser 以默认数据集（satellite）完成完整播种；
+# 显式 --dataset satellite 重灌撞上游 wipe×新CHECK 快照期 bug（见 carbon-seed-satellite.log），不影响数据完备性。
+item=39
+customer=4
+salesOrder=24
+purchaseOrder=18
+job=21
+supplier=11
+user=2

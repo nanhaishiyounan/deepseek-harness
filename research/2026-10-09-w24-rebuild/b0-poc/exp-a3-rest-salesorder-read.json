@@ -1,0 +1,3 @@
+[{"salesOrderId":"SO000001","status":"In Progress","orderDate":"2025-12-11","customerId":"cust_31rwesGP1AjXbZufAEnZqo"},
+ {"salesOrderId":"SO000002","status":"Confirmed","orderDate":"2026-01-27","customerId":"cust_6GJ4M5jLDfss9Wu2aqFRjT"},
+ {"salesOrderId":"SO000003","status":"Needs Approval","orderDate":"2026-10-07","customerId":"cust_31rwesGP1AjXbZufAEnZqo"}]

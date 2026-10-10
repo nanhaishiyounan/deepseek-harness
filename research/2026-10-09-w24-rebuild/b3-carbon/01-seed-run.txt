@@ -1,0 +1,25 @@
+[before] item=39 customer=4 supplier=11 salesOrder=24 purchaseOrder=18 job=21 itemStockQuantities=20
+[item] item_K8wT4zrcpFau6e1MAmo9CF 巴氏杀菌乳原料粉（食品级）
+[item] item_R33LtzJwCWjoqWGYGt2apx 即食燕麦片（食品级）
+[item] item_Y33DPoZszzF4T68KenpoVY 即食燕麦牛奶粥（成品）
+[item] item_M54ZZRdke85i8R5yHbydXg 复合调味料包装袋（食品接触级）
+[customer] cust_VWdq2zV4pqqbH1WiQFVZgD 鲜时连锁便利（华东）
+[customer] cust_TJf7es8AowJeYcJ2Q4kih4 宏图商超供应链有限公司
+[supplier] sup_PUYE4tgVe3bEJEvofFPSNr 北方乳业原料厂
+[supplier] sup_SewoSvTkQVPgyE2MdgRVCK 安泰食品包装材料有限公司
+[salesOrder] so_KE73prjaUX98PPFAJr41n6 W24B3-SO-0001 → customer cust_VWdq2zV4pqqbH1WiQFVZgD
+[salesOrder] so_SvLH8WMcvmcqayW5j1KksC W24B3-SO-0002 → customer cust_TJf7es8AowJeYcJ2Q4kih4
+[purchaseOrder] po_PXePWMSjTvPa7g19XhnkMN W24B3-PO-0001 → supplier sup_PUYE4tgVe3bEJEvofFPSNr
+[purchaseOrder] po_YAwnGcPRFCwBuYLdx8Nc3v W24B3-PO-0002 → supplier sup_SewoSvTkQVPgyE2MdgRVCK
+[job] job_TEFtvicT7dToTekxuZ3tPa W24B3-JOB-0001 → item item_Y33DPoZszzF4T68KenpoVY
+[inventory] itemStockQuantities direct insert → CARBON_RLS_VIOLATION HTTP 403: carbon RLS rejected POST /rest/v1/itemStockQuantities: new row violates row-level security policy for table "itemStockQuantities"
+[rls-negative] forged companyId insert → CARBON_RLS_VIOLATION HTTP 403 body.code=42501: carbon RLS rejected POST /rest/v1/customer: new row violates row-level security policy for table "customer"
+[after] item=43 customer=6 supplier=13 salesOrder=26 purchaseOrder=20 job=22 itemStockQuantities=20
+[reconcile] item: before=39 after=43 delta=4 expected=4 ✓
+[reconcile] customer: before=4 after=6 delta=2 expected=2 ✓
+[reconcile] supplier: before=11 after=13 delta=2 expected=2 ✓
+[reconcile] salesOrder: before=24 after=26 delta=2 expected=2 ✓
+[reconcile] purchaseOrder: before=18 after=20 delta=2 expected=2 ✓
+[reconcile] job: before=21 after=22 delta=1 expected=1 ✓
+[reconcile] itemStockQuantities: before=20 after=20 delta=0 expected=0 ✓
+[verdict] OK

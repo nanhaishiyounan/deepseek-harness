@@ -47,29 +47,32 @@ function mountView(state: BizClientState, rows?: NonNullable<BizClientState['row
 
 afterEach(cleanup)
 
+/** Nav-state store stub for the entry mounts. */
+const navStore = createSnapshotStore({ screen: undefined })
+
 describe('BizEntry branch matrix', () => {
-  it('refreshes instead of switching when no session exists', () => {
+  it('rides the seat activation channel (the nav row owns the no-session fallback)', () => {
     const store = createSnapshotStore<BizClientState>({
       collections: { status: 'ready', value: ROSTER.value },
       selected: undefined, rows: undefined,
     })
     const noSessions = createSnapshotStore({ ...sessionListState({ id: 's1', blank: false }), current: undefined })
     const refresh = vi.fn()
-    const requestBusinessView = vi.fn()
+    const activate = vi.fn()
     render(
       <BizEntry
         {...GLOBAL_KIT}
         wide
         useSessions={bindStoreHook(noSessions) as never}
+        useNavState={bindStoreHook(navStore) as never}
         useBusiness={bindStoreHook(store) as never}
         refresh={refresh}
-        requestBusinessView={requestBusinessView}
+        activate={activate}
         t={t}
       />,
     )
-    fireEvent.click(screen.getByRole('button', { name: zh['entry.collectionsBadge'] }))
-    expect(refresh).toHaveBeenCalled()
-    expect(requestBusinessView).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: zh['view.business'] }))
+    expect(activate).toHaveBeenCalledWith('business')
   })
 
   it('shows the ? badge on a failed roster and the label-only row while loading', () => {
@@ -83,9 +86,10 @@ describe('BizEntry branch matrix', () => {
         {...GLOBAL_KIT}
         wide
         useSessions={bindStoreHook(sessions) as never}
+        useNavState={bindStoreHook(navStore) as never}
         useBusiness={bindStoreHook(errorStore) as never}
         refresh={vi.fn()}
-        requestBusinessView={vi.fn()}
+        activate={vi.fn()}
         t={t}
       />,
     )
@@ -99,9 +103,10 @@ describe('BizEntry branch matrix', () => {
         {...GLOBAL_KIT}
         wide
         useSessions={bindStoreHook(sessions) as never}
+        useNavState={bindStoreHook(navStore) as never}
         useBusiness={bindStoreHook(loadingStore) as never}
         refresh={vi.fn()}
-        requestBusinessView={vi.fn()}
+        activate={vi.fn()}
         t={t}
       />,
     )
@@ -139,7 +144,7 @@ describe('BizView remaining interactions', () => {
   it('hands the per-record ask to the conversation', () => {
     const { setDraft } = mountView(
       { collections: ROSTER, selected: 'orders', rows: undefined },
-      { status: 'ready', value: { count: 1, page: 1, page_size: 20, rows: [{ id: 9, orderNo: 'SO-9', status: 'pending' }] } },
+      { status: 'ready', value: { count: 1, page: 1, page_size: 20, rows: [{ id: 'row_9', orderNo: 'SO-9', status: 'pending' }] } },
     )
     fireEvent.click(screen.getAllByRole('button', { name: zh['cards.ask'] })[0]!)
     expect(setDraft).toHaveBeenCalledWith(expect.stringContaining('SO-9'))
@@ -148,7 +153,7 @@ describe('BizView remaining interactions', () => {
   it('offers load-more mid-page and the end marker on the last page', () => {
     const first = mountView(
       { collections: ROSTER, selected: 'orders', rows: undefined },
-      { status: 'ready', value: { count: 40, page: 1, page_size: 20, rows: [{ id: 1, name: 'a' }] } },
+      { status: 'ready', value: { count: 40, page: 1, page_size: 20, rows: [{ id: 'row_1', name: 'a' }] } },
     )
     fireEvent.click(screen.getByRole('button', { name: zh['table.showAsTable'] }))
     fireEvent.click(screen.getByRole('button', { name: zh['table.more'] }))
@@ -156,7 +161,7 @@ describe('BizView remaining interactions', () => {
     cleanup()
     mountView(
       { collections: ROSTER, selected: 'orders', rows: undefined },
-      { status: 'ready', value: { count: 1, page: 1, page_size: 20, rows: [{ id: 1, name: 'a' }] } },
+      { status: 'ready', value: { count: 1, page: 1, page_size: 20, rows: [{ id: 'row_1', name: 'a' }] } },
     )
     fireEvent.click(screen.getByRole('button', { name: zh['table.showAsTable'] }))
     expect(screen.getByText(zh['table.end'])).toBeTruthy()

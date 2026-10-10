@@ -24,20 +24,20 @@ beforeEach(() => { localStorage.setItem('dsh-biz-recent-collections', '[]') })
 afterEach(() => { vi.unstubAllGlobals() })
 
 describe('domain grouping', () => {
-  it('maps every domain keyword to its bucket and falls through to other', () => {
-    expect(domainOf(row('vendors', '供应商大表'))).toBe('srm')
-    expect(domainOf(row('srmSuppliers'))).toBe('srm')
-    expect(domainOf(row('customers', '客户'))).toBe('crm')
-    expect(domainOf(row('experts', '专家库'))).toBe('crm')
-    expect(domainOf(row('warehouseStock', '库存'))).toBe('wms')
-    expect(domainOf(row('batches', '批次'))).toBe('wms')
-    expect(domainOf(row('salesOrders', '订单'))).toBe('orders')
-    expect(domainOf(row('ticketQueue', '工单'))).toBe('helpdesk')
-    expect(domainOf(row('inspections', '巡检'))).toBe('helpdesk')
-    expect(domainOf(row('expenseInvoices', '发票'))).toBe('finance')
-    expect(domainOf(row('taxRefunds', '退税'))).toBe('finance')
-    expect(domainOf(row('recipes', '配方'))).toBe('food')
-    expect(domainOf(row('complianceDocs', '合规'))).toBe('food')
+  it('maps every domain keyword to its bucket, honors the catalog module, and falls through to other', () => {
+    expect(domainOf(row('vendors', '供应商大表'))).toBe('purchasing')
+    expect(domainOf(row('srmSuppliers'))).toBe('purchasing')
+    expect(domainOf(row('customers', '客户'))).toBe('master')
+    expect(domainOf(row('experts', '专家库'))).toBe('other')
+    expect(domainOf(row('warehouseStock', '库存'))).toBe('inventory')
+    expect(domainOf(row('batches', '批次'))).toBe('other')
+    expect(domainOf(row('salesOrders', '订单'))).toBe('sales')
+    expect(domainOf(row('ticketQueue', '工单'))).toBe('production')
+    expect(domainOf(row('nonConformance', '不合格品'))).toBe('quality')
+    expect(domainOf(row('expenseInvoices', '发票'))).toBe('other')
+    expect(domainOf(row('taxRefunds', '退税'))).toBe('other')
+    // The catalog's module field wins over any keyword guess.
+    expect(domainOf({ name: 'anything', module: 'quality', fields: [] })).toBe('quality')
     // No matcher hits: the trailing 'other' bucket.
     expect(domainOf(row('internalNotes', '随手记'))).toBe('other')
   })
@@ -52,12 +52,12 @@ describe('domain grouping', () => {
   })
 
   it('groups into ordered buckets with the frecency rail, and empties on a miss', () => {
-    noteCollectionUsed('orders')
-    const buckets = groupRoster([row('orders', '订单'), row('customers', '客户'), row('rawData')], '')
-    expect(buckets.map(bucket => bucket.domain)).toEqual(['frequent', 'crm', 'orders', 'other'])
+    noteCollectionUsed('salesOrders')
+    const buckets = groupRoster([row('salesOrders', '订单'), row('customers', '客户'), row('rawData')], '')
+    expect(buckets.map(bucket => bucket.domain)).toEqual(['frequent', 'master', 'sales', 'other'])
     // The frecency rail repeats the used entry on top of its own domain bucket.
-    expect(buckets[0]?.entries).toEqual([row('orders', '订单')])
-    expect(groupRoster([row('orders', '订单')], '没有任何命中')).toEqual([])
+    expect(buckets[0]?.entries).toEqual([row('salesOrders', '订单')])
+    expect(groupRoster([row('salesOrders', '订单')], '没有任何命中')).toEqual([])
   })
 })
 

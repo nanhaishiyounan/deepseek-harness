@@ -1,0 +1,84 @@
+/* The nav's mobile-preview menu row (a copy of the canonical nav-item spec
+   ui-nav ships for its chat row). Colors ride the --dsw-alias-* /
+   --dsw-specific-* semantic tokens (docs/web-styling.md). */
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  min-width: 0;
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  cursor: pointer;
+  color: var(--dsw-alias-label-primary);
+  font: var(--dsw-font-s-14);
+  transition:
+    background-color var(--ds-transition-duration-fast) var(--ds-ease-in-out),
+    color var(--ds-transition-duration-fast) var(--ds-ease-in-out);
+}
+
+.item:hover {
+  background: var(--dsw-specific-sidebar-nav-item-hover);
+}
+
+.item:active {
+  background: var(--dsw-specific-sidebar-nav-item-active);
+}
+
+/* The active row: soft fill plus the brand accent bar on the leading edge
+   (Fiori-style active indication; not color alone — aria-current rides too). */
+.item[data-active] {
+  position: relative;
+  background: var(--dsw-specific-sidebar-nav-item-active);
+}
+
+/* Leading accent bar: a rounded brand-color pillar on the row's left edge
+   (Fiori-style active indication; aria-current rides as the non-visual twin). */
+.item[data-active]::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7px;
+  bottom: 7px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--dsw-specific-sidebar-nav-item-active-accent);
+}
+
+.item[data-active]:hover {
+  background: var(--dsw-specific-sidebar-nav-item-active);
+}
+
+.item:focus-visible {
+  outline: 2px solid var(--dsw-alias-state-business-primary);
+  outline-offset: 1px;
+}
+
+.glyph {
+  flex: none;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.item[data-active] .glyph {
+  color: var(--dsw-alias-label-primary);
+}
+
+.label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: start;
+}
+
+/* Rail variant: a centered square icon button inside the 56px rail. */
+.rail {
+  justify-content: center;
+  width: 36px;
+  padding: 0;
+}

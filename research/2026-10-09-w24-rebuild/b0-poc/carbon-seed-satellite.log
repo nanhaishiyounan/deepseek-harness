@@ -1,0 +1,39 @@
+
+> @carbon/database@0.0.0 db:seed:dev /Users/mac/Downloads/carbon-main/packages/database
+> tsx src/seed-dev.ts -- --email test@carbon.ms --dataset satellite
+
+
+Seeding development environment for: test@carbon.ms (satellite)
+
+Wiping existing business data...
+
+Error seeding development environment:
+error: new row for relation "customerContractInvoiceLine" violates check constraint "customerContractInvoiceLine_parent_check"
+    at /Users/mac/Downloads/carbon-main/node_modules/.pnpm/pg@8.20.0/node_modules/pg/lib/client.js:631:17
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async nullNullableReferences (/Users/mac/Downloads/carbon-main/packages/database/src/datasets/wipe.ts:218:5)
+    at async wipeCompanyBusinessData (/Users/mac/Downloads/carbon-main/packages/database/src/datasets/wipe.ts:446:3)
+    at async applyDatasetTiers (/Users/mac/Downloads/carbon-main/packages/database/src/datasets/index.ts:134:5)
+    at async applyDataset (/Users/mac/Downloads/carbon-main/packages/database/src/datasets/index.ts:86:5)
+    at async main (/Users/mac/Downloads/carbon-main/packages/database/src/seed-dev.ts:81:5) {
+  length: 543,
+  severity: 'ERROR',
+  code: '23514',
+  detail: 'Failing row contains (conil_F6ja8nym7KFY15jSfhZiA9, db4lv4dd40h042piovug, con_QmJ5V5hBnJfKu7UNxDXKVK, null, conl_2bn9SRuWvhmsFTUf8eLXTE, 2026-08-10, 2026-09-08, 1, 48000, 48000, f, null, null, null, 3816555c-a2c2-4fca-8d8e-77cc33b77edb, 2026-10-09 21:41:39.352505+00, null, null).',
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: 'public',
+  table: 'customerContractInvoiceLine',
+  column: undefined,
+  dataType: undefined,
+  constraint: 'customerContractInvoiceLine_parent_check',
+  file: 'execMain.c',
+  line: '2022',
+  routine: 'ExecConstraints'
+}
+/Users/mac/Downloads/carbon-main/packages/database:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @carbon/database@0.0.0 db:seed:dev: `tsx src/seed-dev.ts -- --email test@carbon.ms --dataset satellite`
+Exit status 1

@@ -1,0 +1,187 @@
+T_HUDI_DOCS_IDX
+Index of /docs
+Index of /docs
+Name Last modified Size Description
+Parent Directory   -
+0.14.0/ 2025-12-17 02:51 -
+0.14.1/ 2025-12-17 02:51 -
+0.14.2/ 2026-06-08 11:18 -
+0.15.0/ 2025-12-17 02:51 -
+0.15.1/ 2026-05-28 06:39 -
+1.0.0/ 2025-12-17 02:51 -
+1.0.1/ 2025-12-17 02:51 -
+1.0.2/ 2025-12-17 02:51 -
+1.1.1/ 2026-05-29 08:31 -
+1.2.0/ 2026-09-25 01:55 -
+azure_hoodie.html/ 2025-12-17 02:51 -
+azure_hoodie/ 2026-10-01 06:16 -
+basic_configurations.html/ 2025-12-17 02:51 -
+basic_configurations/ 2026-10-01 06:16 -
+bos_hoodie.html/ 2025-12-17 02:51 -
+bos_hoodie/ 2026-10-01 06:16 -
+catalog_polaris.html/ 2025-12-17 02:51 -
+catalog_polaris/ 2026-10-01 06:16 -
+cleaning.html/ 2025-12-17 02:51 -
+cleaning/ 2026-10-01 06:16 -
+cli.html/ 2025-12-17 02:51 -
+cli/ 2026-10-01 06:16 -
+cloud.html/ 2025-12-17 02:51 -
+cloud/ 2026-10-01 06:16 -
+clustering.html/ 2025-12-17 02:51 -
+clustering/ 2026-10-01 06:16 -
+compaction.html/ 2025-12-17 02:51 -
+compaction/ 2026-10-01 06:16 -
+comparison.html/ 2025-12-17 02:51 -
+comparison/ 2026-10-01 06:16 -
+concepts.html/ 2025-12-17 02:51 -
+concepts/ 2026-10-01 06:16 -
+concurrency_control.html/ 2025-12-17 02:51 -
+concurrency_control/ 2026-10-01 06:16 -
+configurations.html/ 2025-12-17 02:51 -
+configurations/ 2026-10-01 06:16 -
+contribute/ 2025-12-10 19:53 -
+cos_hoodie.html/ 2025-12-17 02:51 -
+cos_hoodie/ 2026-10-01 06:16 -
+deployment.html/ 2025-12-17 02:51 -
+deployment/ 2026-10-01 06:16 -
+disaster_recovery.html/ 2025-12-17 02:51 -
+disaster_recovery/ 2026-10-01 06:16 -
+docker_demo.html/ 2025-12-17 02:51 -
+docker_demo/ 2026-10-01 06:16 -
+encryption.html/ 2025-12-17 02:51 -
+encryption/ 2026-10-01 06:16 -
+file_sizing.html/ 2025-12-17 02:51 -
+file_sizing/ 2026-10-01 06:16 -
+flink-quick-start-guide.html/ 2025-12-17 02:51 -
+flink-quick-start-guide/ 2026-10-01 06:16 -
+flink_tuning.html/ 2025-12-17 02:51 -
+flink_tuning/ 2026-10-01 06:16 -
+gcp_bigquery.html/ 2025-12-17 02:51 -
+gcp_bigquery/ 2026-10-01 06:16 -
+gcs_hoodie.html/ 2025-12-17 02:51 -
+gcs_hoodie/ 2026-10-01 06:16 -
+goosefs_hoodie.html/ 2026-08-19 10:56 -
+goosefs_hoodie/ 2026-10-01 06:16 -
+hoodie_streaming_ingestion.html/ 2025-12-17 02:51 -
+hoodie_streaming_ingestion/ 2026-10-01 06:16 -
+hudi_stack.html/ 2025-12-17 02:51 -
+hudi_stack/ 2026-10-01 06:16 -
+ibm_cos_hoodie.html/ 2025-12-17 02:51 -
+ibm_cos_hoodie/ 2026-10-01 06:16 -
+indexes.html/ 2025-12-17 02:51 -
+indexes/ 2026-10-01 06:16 -
+ingestion_flink.html/ 2025-12-17 02:51 -
+ingestion_flink/ 2026-10-01 06:16 -
+ingestion_kafka_connect.html/ 2025-12-17 02:51 -
+ingestion_kafka_connect/ 2026-10-01 06:16 -
+jfs_hoodie.html/ 2025-12-17 02:51 -
+jfs_hoodie/ 2026-10-01 06:16 -
+key_generation.html/ 2025-12-17 02:51 -
+key_generation/ 2026-10-01 06:16 -
+ks3_hoodie.html/ 2025-12-17 02:51 -
+ks3_hoodie/ 2026-10-01 06:16 -
+markers.html/ 2025-12-17 02:51 -
+markers/ 2026-10-01 06:16 -
+metadata.html/ 2025-12-17 02:51 -
+metadata/ 2026-10-01 06:16 -
+metadata_indexing.html/ 2025-12-17 02:51 -
+metadata_indexing/ 2026-10-01 06:16 -
+metrics.html/ 2025-12-17 02:51 -
+metrics/ 2026-10-01 06:16 -
+migration_guide.html/ 2025-12-17 02:51 -
+migration_guide/ 2026-10-01 06:16 -
+next/ 2026-08-19 10:56 -
+notebooks.html/ 2025-12-17 02:51 -
+notebooks/ 2026-10-01 06:16 -
+oci_hoodie.html/ 2025-12-17 02:51 -
+oci_hoodie/ 2026-10-01 06:16 -
+oss_hoodie.html/ 2025-12-17 02:51 -
+oss_hoodie/ 2026-10-01 06:16 -
+overview.html/ 2025-12-17 02:51 -
+overview/ 2026-10-01 06:16 -
+performance.html/ 2025-12-17 02:51 -
+performance/ 2026-10-01 06:16 -
+platform_services_post_commit_callback.html/ 2025-12-17 02:51 -
+platform_services_post_commit_callback/ 2026-10-01 06:16 -
+precommit_validator.html/ 2025-12-17 02:51 -
+precommit_validator/ 2026-10-01 06:16 -
+procedures.html/ 2025-12-17 02:51 -
+procedures/ 2026-10-01 06:16 -
+python-rust-quick-start-guide.html/ 2025-12-17 02:51 -
+python-rust-quick-start-guide/ 2026-10-01 06:16 -
+querying_data.html/ 2025-12-17 02:51 -
+querying_data/ 2026-10-01 06:16 -
+quick-start-guide.html/ 2025-12-17 02:51 -
+quick-start-guide/ 2026-10-01 06:16 -
+reading_tables_batch_reads.html/ 2025-12-17 02:51 -
+reading_tables_batch_reads/ 2026-10-01 06:16 -
+reading_tables_streaming_reads.html/ 2025-12-17 02:51 -
+reading_tables_streaming_reads/ 2026-10-01 06:16 -
+record_merger.html/ 2025-12-17 02:51 -
+record_merger/ 2026-10-01 06:16 -
+releases/ 2026-06-08 07:21 -
+rollbacks.html/ 2025-12-17 02:51 -
+rollbacks/ 2026-10-01 06:16 -
+s3_hoodie.html/ 2025-12-17 02:51 -
+s3_hoodie/ 2026-10-01 06:16 -
+schema_evolution.html/ 2025-12-17 02:51 -
+schema_evolution/ 2026-10-01 06:16 -
+snapshot_exporter.html/ 2025-12-17 02:51 -
+snapshot_exporter/ 2026-10-01 06:16 -
+sql_ddl.html/ 2025-12-17 02:51 -
+sql_ddl/ 2026-10-01 06:16 -
+sql_dml.html/ 2025-12-17 02:51 -
+sql_dml/ 2026-10-01 06:16 -
+sql_queries.html/ 2025-12-17 02:51 -
+sql_queries/ 2026-10-01 06:16 -
+storage_layouts.html/ 2025-12-17 02:51 -
+storage_layouts/ 2026-10-01 06:16 -
+structure.html/ 2025-12-17 02:51 -
+structure/ 2026-10-01 06:16 -
+syncing_aws_glue_data_catalog.html/ 2025-12-17 02:51 -
+syncing_aws_glue_data
+U_PAIMON_MIG
+Migration | Apache Paimon
+Skip to main content Apache Paimon 2.2-SNAPSHOT master (2.2-SNAPSHOT) 2.0 (stable) 1.4 1.3 1.2 1.1 GitHub Project Home Concepts Append Table Primary-Key Table Multimodal Table Engine Flink Engine Spark PyPaimon & AI Ecosystem CDC Ingestion Maintenance Program API Migration Migrate from Hive Clone to Paimon Expose Tags as Hive Partitions Iceberg Compatibility Project Learn Paimon Migration On this page Migration
+Choose a migration path based on whether you need to replace a Hive table, keep a separate
+copy, or expose historical Paimon data to existing Hive queries.
+Choose a Guide ​
+Goal Guide Effect on the source Result Convert a Hive table or database to Paimon Migrate from Hive Moves data files; removes the original Hive table by default Paimon append tables in a Hive catalog Copy tables while keeping the source available Clone to Paimon Keeps source tables and data Separate Paimon tables; Hive sources become append tables Query daily views of an updating Paimon table using Hive partition filters Expose Tags as Hive Partitions Keeps the Paimon table and its write path Hive partition values that select tags or preview snapshots
+Migration and clone import existing data. Tag-to-partition changes how Hive reads a Paimon
+table; it does not migrate Hive files or physically repartition the Paimon table.
+Before Moving Data ​
+Choose the target table model. Hive migration and Hive clone create
+append tables . If the target needs primary-key updates or a different
+schema or partition layout, plan a data rewrite into a table with that model.
+Prepare the runtime and catalogs. Configure access to the Hive metastore and storage.
+Use the engine setup and connector requirements linked from each guide.
+Define the validation scope. Record source schemas, partitions, row counts, and key
+aggregates before the operation. For a consistent comparison, keep source data stable
+while it is being moved or copied.
+Plan the switch. In-place migration is not atomic and requires a backup. Clone lets
+you validate a separate target before switching readers and writers.
+Related Guides ​
+Flink Procedures and
+Spark Migration Procedures : engine-specific arguments.
+COPY INTO : import files with Spark SQL.
+Manage Tags : create and retain historical views.
+Hive : install the connector used to query Paimon from Hive.
+Edit this page Previous Local Cache Next Migrate from Hive Choose a Guide Before Moving Data Related Guides Documentation Getting Started Concepts Community GitHub Mailing List Copyright © 2026 The Apache Software Foundation. Apache Paimon, Paimon, and the Paimon logo are trademarks of the Apache Software Foundation.
+V_BING1
+【电机连接板】_电机连接板品牌/图片/价格_电机连接板批发 ... | https://s.1688.com/kq/-B5E7BBFAC1ACBDD3B0E5.html
+电机连接板-电机连接板厂家、品牌、图片、热帖-阿里巴巴 | https://www.1688.com/zhuti/-B5E7BBFAC1ACBDD3B0E5.html
+电机连接板 - Top 50件电机连接板 - 2026年2月更新 - Taobao | https://www.taobao.com/list/product/%E7%94%B5%E6%9C%BA%E8%BF%9E%E6%8E%A5%E6%9D%BF.htm
+电机转接板 - Top 50件电机转接板 - 2026年10月更新 - 淘宝 ... | https://www.taobao.com/list/product/%E7%94%B5%E6%9C%BA%E8%BD%AC%E6%8E%A5%E6%9D%BF.htm
+电机连接板价格-最新电机连接板价格、批发报价、价格大全 ... | https://www.1688.com/jiage/-B5E7BBFAC1ACBDD3B0E5.html
+电机转接板-电机转接板促销价格、电机转接板品牌 - 淘宝 | https://mobile-phone.taobao.com/chanpin/6f77ad2509bb56f16ecfb607f25248da.html
+CCM 电机连接笼W4045-60直线滑台滑轨电机转接板步进 ... | https://vn.world.taobao.com/item/610780298204.htm
+AZB-60 连接板(安装板)｜手动滑台元件｜高明铁 GMT | https://www.gmtglobalinc.com/zh-CN/%E9%80%A3%E6%8E%A5%E6%9D%BF/AZB-60
+W_BING2
+Apache Iceberg - Apache Iceberg™ | https://iceberg.apache.org/
+Iceberg - Wikipedia | https://en.wikipedia.org/wiki/Iceberg
+Apache Iceberg 解析，一文了解Iceberg定义、应用及未来发展 | https://zhuanlan.zhihu.com/p/32985088890
+数据湖 | 还不知道什么是Iceberg？一篇文章带你走进Iceberg ... | https://blog.csdn.net/weixin_44056920/article/details/118388759
+ICEBERG: Fashion Brand Streetwear Since 1974 | Official Site | https://www.iceberg.com/us/
+简介 - Apache Iceberg™ - Iceberg 格式 | https://iceberg.org.cn/docs/latest/
+ICEBERG（英语单词）_百度百科 | https://baike.baidu.com/item/ICEBERG/63276873
+冰山 - 维基百科，自由的百科全书 | https://zh.wikipedia.org/wiki/%E5%86%B0%E5%B1%B1

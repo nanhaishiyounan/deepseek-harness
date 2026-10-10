@@ -1,0 +1,359 @@
+#####REST-SPEC-ART#####
+REST Catalog Spec
+REST Catalog API Specification 🔗
+Iceberg defines a REST-based Catalog API for managing table metadata and performing catalog operations. You can find the OpenAPI specification here:
+REST Catalog OpenAPI YAML .
+You can also explore the API interactively using the Swagger UI .
+REST Catalog Protocol 🔗
+As the Iceberg project grew to support more languages and engines, pluggable catalogs started to cause some practical problems. Catalogs needed to be implemented in multiple languages and it proved difficult for commercial offerings to support many different catalogs and clients.
+To solve compatibility problems and pave a path for new features, the community created the REST catalog protocol, a common API (using the OpenAPI spec) for interacting with any Iceberg catalog. This is analogous to Hive's thrift protocol for HMS.
+The REST protocol is important for several reasons:
+Language and Engine Compatibility : New languages and engines can support any catalog with just one client implementation.
+Improved Reliability : It uses change-based commits to enable server-side deconfliction and retries — fewer failures!
+Simplified Metadata Management : Metadata version upgrades are easier because root metadata is written by the catalog service.
+Advanced Features : It enables new features such as lazy snapshot loading, multi-table commits, and caching.
+Security : The protocol supports secure table sharing using credential vending or remote signing.
+You can use the REST catalog protocol with any built-in catalog using translation in the CatalogHandlers class, or using the community maintained iceberg-rest-fixture docker image.
+#####JDBC#####
+Iceberg JDBC Integration 🔗
+JDBC Catalog 🔗
+Iceberg supports using a table in a relational database to manage Iceberg tables through JDBC.
+The database that JDBC connects to must support atomic transaction to allow the JDBC catalog implementation to
+properly support atomic Iceberg table commits and read serializable isolation.
+Configurations 🔗
+Because each database and database service provider might require different configurations,
+the JDBC catalog allows arbitrary configurations through:
+Property
+Default
+Description
+uri
+the JDBC connection string
+jdbc.<property_key>
+any key value pairs to configure the JDBC connection
+Examples 🔗
+Spark 🔗
+You can start a Spark session with a MySQL JDBC connection using the following configurations:
+spark-sql --packages org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.12.0 \
+--conf spark.sql.catalog.my_catalog = org.apache.iceberg.spark.SparkCatalog \
+--conf spark.sql.catalog.my_catalog.warehouse = s3://my-bucket/my/key/prefix \
+--conf spark.sql.catalog.my_catalog.type = jdbc \
+--conf spark.sql.catalog.my_catalog.uri = jdbc:mysql://test.1234567890.us-west-2.rds.amazonaws.com:3306/default \
+--conf spark.sql.catalog.my_catalog.jdbc.verifyServerCertificate = true \
+--conf spark.sql.catalog.my_catalog.jdbc.useSSL = true \
+--conf spark.sql.catalog.my_catalog.jdbc.user = admin \
+--conf spark.sql.catalog.my_catalog.jdbc.password = pass
+Java API 🔗
+Class . forName ( "com.mysql.cj.jdbc.Driver" ); // ensure JDBC driver is at runtime classpath
+Map < String , String > properties = new HashMap <> ();
+properties . put ( CatalogProperties . CATALOG_IMPL , JdbcCatalog . class . getName ());
+properties . put ( CatalogProperties . URI , "jdbc:mysql://localhost:3306/test" );
+properties . put ( JdbcCatalog . PROPERTY_PREFIX + "user" , "admin" );
+properties . put ( JdbcCatalog . PROPERTY_PREFIX + "password" , "pass" );
+properties . put ( CatalogProperties . WAREHOUSE_LOCATION , "s3://warehouse/path" );
+Configuration hadoopConf = new Configuration (); // configs if you use HadoopFileIO
+JdbcCatalog catalog = CatalogUtil . buildIcebergCatalog ( "test_jdbc_catalog" , properties , hadoopConf );
+#####HADOOP#####
+404 Not Found
+Not Found
+The requested URL was not found on this server.
+#####MAINT#####
+Maintenance 🔗
+Info
+Maintenance operations require the Table instance. Please refer to the Java API quickstart page to learn how to load an existing table.
+Recommended Maintenance 🔗
+Expire Snapshots 🔗
+Each write to an Iceberg table creates a new snapshot , or version, of a table. Snapshots can be used for time-travel queries, or the table can be rolled back to any valid snapshot.
+Snapshots accumulate until they are expired by the expireSnapshots operation. Regularly expiring snapshots is recommended to delete data files that are no longer needed, and to keep the size of table metadata small.
+This example expires snapshots that are older than 1 day:
+Table table = ...
+long tsToExpire = System . currentTimeMillis () - ( 1000 * 60 * 60 * 24 ); // 1 day
+table . expireSnapshots ()
+. expireOlderThan ( tsToExpire )
+. commit ();
+See the ExpireSnapshots Javadoc to see more configuration options.
+There is also a Spark action that can run table expiration in parallel for large tables:
+Table table = ...
+SparkActions
+. get ()
+. expireSnapshots ( table )
+. expireOlderThan ( tsToExpire )
+. execute ();
+Expiring old snapshots removes them from metadata, so they are no longer available for time travel queries.
+Info
+Data files are not deleted until they are no longer referenced by a snapshot that may be used for time travel or rollback.
+Regularly expiring snapshots deletes unused data files.
+Remove old metadata files 🔗
+Iceberg keeps track of table metadata using JSON files. Each change to a table produces a new metadata file to provide atomicity.
+Old metadata files are kept for history by default. Tables with frequent commits, like those written by streaming jobs, may need to regularly clean metadata files.
+Each metadata file tracks the older metadata files in the metadata-log field. The number of metadata files being tracked is defined by write.metadata.previous-versions-max .
+To automatically delete older metadata files, set write.metadata.delete-after-commit.enabled=true in table properties. This will keep some metadata files as tracked (up to write.metadata.previous-versions-max ), and will delete the oldest metadata file every time a new one is created.
+Note that this will only delete metadata files that are tracked in the metadata log and will not delete orphaned metadata files.
+Untracked metadata files are also deleted as part of orphan file deletion .
+Property
+Default
+Description
+write.metadata.delete-after-commit.enabled
+false
+Controls whether to delete the oldest tracked version metadata files after each table commit
+write.metadata.previous-versions-max
+100
+The max number of previous version metadata files to track
+Examples:
+With write.metadata.delete-after-commit.enabled=false and write.metadata.previous-versions-max=10 , after 100 commits, one will have 10 tracked metadata files and 90 orphaned metadata files. These 90 orphaned metadata files cannot be deleted by setting write.metadata.delete-after-commit.enabled=true because they are already untracked. They can only be cleaned with an orphan file deletion procedure.
+With write.metadata.delete-after-commit.enabled=true and write.metadata.previous-versions-max=20 , after 21 commits, one will have 20 tracked metadata files, with the oldest metadata file being deleted by the writer after committing. With each additional commit, the oldest metadata file will be deleted.
+See table write properties for more details.
+Delete orphan files 🔗
+In Spark and other distributed processing engines, task or job failures can leave files that are not referenced by table metadata, and in some cases normal snapshot expiration may not be able to determine a file is no longer needed and delete it.
+To clean up these "orphan" files under a table location, use the deleteOrphanFiles action.
+Table table = ...
+SparkActions
+. get ()
+. deleteOrphanFiles ( table )
+. execute ();
+See the DeleteOrphanFiles Javadoc to see more configuration options.
+This action may take a long time to finish if you have lots of files in data and metadata directories. It is recommended to execute this periodically, but you may not need to execute this often.
+Info
+It is dangerous to remove orphan files with a retention interval shorter than the time expected for any write to complete because it
+might corrupt the table if in-progress files are considered orphaned and are deleted. The default interval is 3 days.
+Info
+Iceberg uses the string representations of paths when determining which files need to be removed. On some file systems,
+the path can change over time, but it still represents the same file. For example, if you change authorities for an HDFS cluster,
+none of the old path urls used during creation will match those that appear in a current listing. This will lead to data loss when
+RemoveOrphanFiles is run . Please be sure the entries in your MetadataTables match those listed by the Hadoop
+FileSystem API to avoid unintentional deletion.
+Optional Maintenance 🔗
+Some tables require additional maintenance. For example, streaming queries may produce small data files that should be compacted into larger files . And some tables can benefit from rewriting manifest files to make locating data for queries much faster.
+Compact data files 🔗
+Iceberg tracks each data file in a table. More data files leads to more metadata stored in manifest files, and small data files causes an unnecessary amount of metadata and less efficient queries from file open costs.
+Iceberg can compact data files in parallel using Spark with the rewriteDataFiles action. This will combine small files into larger files to reduce metadata overhead and runtime file open cost.
+Table table = ...
+SparkActions
+. get ()
+. rewriteDataFiles ( table )
+. filter ( Expressions . equal ( "date" , "2020-08-18" ))
+. option ( "target-file-size-bytes" , Long . toString ( 500 * 1024 * 1024 )) // 500 MB
+. execute ();
+The files metadata table is useful for inspecting data file sizes and determining when to compact partitions.
+See the RewriteDataFiles Javadoc to see more configuration options.
+Rewrite manifests 🔗
+Iceberg uses metadata in its manifest list and manifest files to speed up query planning and to prune unnecessary data files. The metadata tree functions as an index over a table's data.
+Manifests in the metadata tree are automatically compacted in the order they are added, which makes queries faster when the write pattern aligns with read filters. For example, writing hourly-partitioned data as it arrives is aligned with time range query filters.
+When a table's write pattern doesn't align with the query pattern, metadata can be rewritten to re-group data files into manifests using rewriteManifests or the rewriteManifests action (for parallel rewrites using Spark).
+This example rewrites small manifests and groups data files by the first partition field.
+Table table = ...
+SparkActions
+. get ()
+. rewriteManifests ( table )
+. rewriteIf ( file -> file . length () < 10 * 1024 * 1024 ) // 10 MB
+. execute ();
+See the RewriteManifests Javadoc to see more configuration options.
+Rewrite position delete files 🔗
+Iceberg can rewrite position delete files, which serves two purposes:
+Minor compaction: Compact small position delete files into larger ones. This reduces the size of metadata stored in manifest files and the overhead of opening small delete files.
+Filter dangling records: When a position delete file is selected for rewriting, discard records that reference data files that are no longer live.
+Table table = ...
+SparkActions
+. get ()
+. rewritePositionDeletes ( table )
+. execute ();
+Only position delete files selected for rewriting are affected. For metadata-only removal of whole delete files identified as dangling, see removeDanglingDeleteFiles .
+See the RewritePositionDeleteFiles Javadoc to see more configuration options. In Spark SQL, this action is also available as the rewrite_position_delete_files procedure .
+Remove dangling delete files 🔗
+A delete file is dangling if its deletes no longer apply to any live dat
+#####PYICE-CFG#####
+Configuration ¶
+Setting Configuration Values ¶
+There are three ways to pass in configuration:
+Using the .pyiceberg.yaml configuration file (Recommended)
+Through environment variables
+By passing in credentials through the CLI or the Python API
+The configuration file can be stored in either the directory specified by the PYICEBERG_HOME environment variable, the home directory, or current working directory (in this order).
+To change the path searched for the .pyiceberg.yaml , you can overwrite the PYICEBERG_HOME environment variable.
+Another option is through environment variables:
+export PYICEBERG_CATALOG__DEFAULT__URI = thrift://localhost:9083
+export PYICEBERG_CATALOG__DEFAULT__S3__ACCESS_KEY_ID = username
+export PYICEBERG_CATALOG__DEFAULT__S3__SECRET_ACCESS_KEY = password
+The environment variable picked up by Iceberg starts with PYICEBERG_ and then follows the yaml structure below, where a double underscore __ represents a nested field, and the underscore _ is converted into a dash - .
+For example, PYICEBERG_CATALOG__DEFAULT__S3__ACCESS_KEY_ID , sets s3.access-key-id on the default catalog.
+Manifest Caching ¶
+PyIceberg caches ManifestFile objects locally and uses an LRU policy to bound the cache size. By default, up to 128
+distinct manifest files are retained.
+You can tune the manifest-cache-size configuration in .pyiceberg.yaml :
+manifest-cache-size : 256
+Permitted values: any non-negative integer. Set the value to 0 to disable manifest caching entirely.
+You can also set it with the PYICEBERG_MANIFEST_CACHE_SIZE environment variable:
+export PYICEBERG_MANIFEST_CACHE_SIZE = 256
+The memory used by this cache depends on the size and number of distinct manifests your workload touches. Lower the value
+if you want a tighter memory bound, or call clear_manifest_cache() to proactively release cached manifest metadata in
+long-lived processes.
+Tables ¶
+Iceberg tables support table properties to configure table behavior.
+Write options ¶
+Key
+Options
+Default
+Description
+write.parquet.compression-codec
+{uncompressed,zstd,gzip,snappy}
+zstd
+Sets the Parquet compression coddec.
+write.parquet.compression-level
+Integer
+null
+Parquet compression level for the codec. If not set, it is up to PyIceberg
+write.parquet.row-group-limit
+Number of rows
+1048576
+The upper bound of the number of entries within a single row group
+write.parquet.page-size-bytes
+Size in bytes
+1MB
+Set a target threshold for the approximate encoded size of data pages within a column chunk
+write.parquet.page-row-limit
+Number of rows
+20000
+Set a target threshold for the maximum number of rows within a column chunk
+write.parquet.dict-size-bytes
+Size in bytes
+2MB
+Set the dictionary page size limit per row group
+write.metadata.previous-versions-max
+Integer
+100
+The max number of previous version metadata files to keep before deleting after commit.
+write.metadata.delete-after-commit.enabled
+Boolean
+False
+Whether to automatically delete old tracked metadata files after each table commit. It will retain a number of the most recent metadata files, which can be set using property write.metadata.previous-versions-max .
+write.object-storage.enabled
+Boolean
+False
+Enables the ObjectStoreLocationProvider that adds a hash component to file paths.
+write.object-storage.partitioned-paths
+Boolean
+True
+Controls whether partition values are included in file paths when object storage is enabled
+write.py-location-provider.impl
+String of form module.ClassName
+null
+Optional, custom LocationProvider implementation
+write.data.path
+String pointing to location
+{metadata.location}/data
+Sets the location under which data is written.
+write.metadata.path
+String pointing to location
+{metadata.location}/metadata
+Sets the location under which metadata is written.
+Table behavior options ¶
+Key
+Options
+Default
+Description
+commit.manifest.target-size-bytes
+Size in bytes
+8388608 (8MB)
+Target size when merging manifest files
+commit.manifest.min-count-to-merge
+Number of manifests
+100
+Minimum number of manifests to accumulate before merging
+commit.manifest-merge.enabled
+Boolean
+False
+Controls whether to automatically merge manifests on writes
+Fast append
+Unlike Java implementation, PyIceberg default to the fast append and thus commit.manifest-merge.enabled is set to False by default.
+Commit retry options ¶
+When a concurrent commit is detected, PyIceberg automatically retries the operation with exponential backoff. If the retry detects a real data conflict (e.g. concurrent deletes on the same partition), it raises ValidationException instead of retrying.
+Key
+Options
+Default
+Description
+commit.retry.num-retries
+Integer
+4
+Maximum number of retry attempts after a commit conflict
+commit.retry.min-wait-ms
+Integer (ms)
+100
+Minimum wait time before the first retry
+commit.retry.max-wait-ms
+Integer (ms)
+60000
+Maximum wait time between retries (caps exponential backoff)
+commit.retry.total-timeout-ms
+Integer (ms)
+1800000
+Total time allowed for all retry attempts before giving up
+Isolation level options ¶
+These properties control conflict detection behavior during concurrent writes.
+Key
+Options
+Default
+Description
+write.delete.isolation-level
+{serializable,snapshot}
+serializable
+Isolation level for delete operations. Under serializable , concurrent appends to affected partitions cause ValidationException . Under snapshot , only conflicting deletes are rejected.
+write.update.isolation-level
+{serializable,snapshot}
+serializable
+Isolation level for overwrite operations. Same semantics as write.delete.isolation-level .
+FileIO ¶
+Iceberg works with the concept of a FileIO which is a pluggable module for reading, writing, and deleting files. By default, PyIceberg will try to initialize the FileIO that's suitable for the scheme ( s3:// , gs:// , etc.) and will use the first one that's installed.
+s3 , s3a , s3n : PyArrowFileIO , FsspecFileIO
+gs : PyArrowFileIO
+file : PyArrowFileIO
+hdfs : PyArrowFileIO
+abfs , abfss : FsspecFileIO
+oss : PyArrowFileIO
+hf : FsspecFileIO
+You can also set the FileIO explicitly:
+Key
+Example
+Description
+py-io-impl
+pyiceberg.io.fsspec.FsspecFileIO
+Sets the FileIO explicitly to an implementation, and will fail explicitly if it can't be loaded
+For the FileIO there are several configuration options available:
+S3 ¶
+Key
+Example
+Description
+s3.endpoint
+https://10.0.19.25/
+Configure an alternative endpoint of the S3 service for the FileIO to access. This could be used to use S3FileIO with any s3-compatible object storage service that has a different endpoint, or access a private S3 endpoint in a virtual private cloud.
+s3.access-key-id
+admin
+Configure the static access key id used to access the FileIO.
+s3.secret-access-key
+password
+Configure the static secret access key used to access the FileIO.
+s3.session-token
+AQoDYXdzEJr...
+Configure the static session token used to access the FileIO.
+s3.profile-name
+default
+Configure the AWS profile used to access the S3 FileIO (only supported by FsspecFileIO currently).
+s3.role-session-name
+session
+An optional identifier for the assumed role session.
+s3.role-arn
+arn:aws:...
+AWS Role ARN. If provided instead of access_key and secret_key, temporary credentials will be fetched by assuming this role.
+s3.signer
+bearer
+Configure the signature version of the FileIO.
+s3.signer.uri
+http://my.signer:8080/s3
+Configure the remote signing uri if it differs from the catalog uri. Remote signing is only implemented for FsspecFileIO . The final request is sent to <s3.signer.uri>/<s3.signer.endpoint> .
+s3.signer.endpoint
+v1/main/s3-sign
+Configure the remote signing endpoint. Remote signing is only implemented for FsspecFileIO . The final request is sent to <s3.signer.uri>/<s3.signer.endpoint> . (default : v1/aws/s3/sign).
+s3.region
+us-west-2
+Configure the default region used to initialize an S3FileSystem . PyArrowFileIO attempts to automatically tries to resolve the region if this isn't set (only supported for AWS S3 Buckets).
+s3.resolve-region
+False
+Only supported for PyArrowFileIO , when enabled, it will always try to resolve the

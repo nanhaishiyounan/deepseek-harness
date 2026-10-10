@@ -13,9 +13,9 @@
 
 import type { BizCollectionRow } from './bizTypes.ts'
 
-/** Domain group ids, in navigator order. */
+/** Domain group ids, in navigator order: the carbon modules (the catalog's own grouping) plus the frecency rail. */
 export const BIZ_DOMAINS = [
-  'frequent', 'crm', 'srm', 'wms', 'orders', 'helpdesk', 'finance', 'food', 'other',
+  'frequent', 'master', 'sales', 'purchasing', 'inventory', 'production', 'quality', 'other',
 ] as const
 
 /** One domain group id. */
@@ -30,27 +30,24 @@ const FRECENT_KEY = 'dsh-biz-recent-collections'
 /** The in-memory frecency fallback when localStorage is unavailable. */
 let frecentMemory: string[] = []
 
-/** Domain matchers: first hit wins, checked over `name title`. */
-const DOMAIN_MATCHERS: ReadonlyArray<readonly [Exclude<BizDomain, 'frequent' | 'other'>, RegExp]> = [
-  ['srm', /供应商|供应|suppl|vendor|procure|采购|srm/iu],
-  ['crm', /客户|customer|clue|线索|商机|机会|contact|联系人|专家|expert|crm/iu],
-  ['wms', /库存|仓库|warehouse|wms|batch|批次|stock|物料|material/iu],
-  ['orders', /订单|order/iu],
-  ['helpdesk', /工单|服务单|helpdesk|ticket|巡检|inspection|维护/iu],
-  ['finance', /费用|报销|发票|invoice|expense|finance|付款|payment|退税|tax/iu],
-  ['food', /食品|配方|recipe|菜品|口味|检测|质检|合规|compliance|追溯|trace/iu],
-]
+/** The catalog's module ids (the domain groups the carbon roster names directly). */
+const MODULE_DOMAINS: ReadonlySet<string> = new Set(['master', 'sales', 'purchasing', 'inventory', 'production', 'quality'])
 
 /**
- * The domain group one collection belongs to.
+ * The domain group one table belongs to: the catalog's own module field when
+ * present (the carbon roster), the keyword fallback otherwise.
  * @param entry - the collection roster row.
- * @returns the domain id ('other' when no matcher hits).
+ * @returns the domain id ('other' when neither names a module).
  */
 export function domainOf(entry: BizCollectionRow): BizDomain {
+  if (entry.module !== undefined && MODULE_DOMAINS.has(entry.module)) return entry.module as BizDomain
   const text = `${entry.name} ${entry.title ?? ''}`
-  for (const [domain, pattern] of DOMAIN_MATCHERS) {
-    if (pattern.test(text)) return domain
-  }
+  if (/订单|order|shipment|发货/iu.test(text)) return 'sales'
+  if (/供应商|供应|suppl|vendor|采购|procure|receipt|收货/iu.test(text)) return 'purchasing'
+  if (/库存|仓库|warehouse|stock|物料|item/iu.test(text)) return 'inventory'
+  if (/生产|工单|job|production/iu.test(text)) return 'production'
+  if (/质量|质检|不合格|nonconformance|quality/iu.test(text)) return 'quality'
+  if (/客户|customer|主数据|master/iu.test(text)) return 'master'
   return 'other'
 }
 

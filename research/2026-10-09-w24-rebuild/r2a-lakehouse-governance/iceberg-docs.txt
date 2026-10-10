@@ -1,0 +1,1165 @@
+#####REST-SPEC#####
+REST Catalog Spec - Apache Iceberg™
+Skip to content
+Apache Iceberg™
+Apache Iceberg™
+Initializing search
+Home
+Quickstart
+Docs
+Releases
+Project
+Community
+Blog
+Specification
+Apache Iceberg™
+Home
+Quickstart
+Quickstart
+Spark
+Flink
+Hive
+Docs
+Docs
+Java
+Java
+Latest (1.12.0)
+Latest (1.12.0)
+Introduction
+Concepts
+Concepts
+Tables
+Tables
+Branching and Tagging
+Configuration
+Encryption
+Evolution
+Maintenance
+Metrics Reporting
+Partitioning
+Performance
+Reliability
+Schemas
+Views
+Views
+Configuration
+Catalogs
+Catalogs
+REST Catalog Protocol
+API
+API
+Quickstart
+API
+File I/O
+Javadoc
+Integrations
+Integrations
+Apache Spark
+Apache Spark
+Getting Started
+Configuration
+DDL
+Procedures
+Queries
+Structured Streaming
+Writes
+Apache Flink
+Apache Flink
+Getting Started
+Flink Connector
+Flink DDL
+Flink Queries
+Flink Writes
+Flink TableMaintenance
+Flink Configuration
+Kafka Connect
+Apache Hive
+Migration
+Migration
+Overview
+Hive Migration
+Delta Lake Migration
+Catalogs
+Catalogs
+Catalog properties
+REST Compatible Catalog
+AWS Glue
+AWS DynamoDB
+HadoopCatalog
+HiveCatalog
+JDBC
+Java Custom Catalog
+Nessie
+Storage
+Storage
+AWS S3
+Dell ECS
+Nightly
+Nightly
+Introduction
+Concepts
+Concepts
+Tables
+Tables
+Branching and Tagging
+Configuration
+Encryption
+Evolution
+Maintenance
+Metrics Reporting
+Partitioning
+Performance
+Reliability
+Schemas
+Views
+Views
+Configuration
+Catalogs
+Catalogs
+REST Catalog Protocol
+API
+API
+Quickstart
+API
+File I/O
+Javadoc
+Integrations
+Integrations
+Apache Spark
+Apache Spark
+Getting Started
+Configuration
+DDL
+Procedures
+Queries
+Structured Streaming
+Writes
+Apache Flink
+Apache Flink
+Getting Started
+Flink Connector
+Flink DDL
+Flink Queries
+Flink Writes
+Flink TableMaintenance
+Flink Configuration
+Kafka Connect
+Apache Hive
+Migration
+Migration
+Overview
+Hive Migration
+Delta Lake Migration
+Catalogs
+Catalogs
+Catalog properties
+REST Compatible Catalog
+AWS Glue
+AWS DynamoDB
+HadoopCatalog
+HiveCatalog
+JDBC
+Java Custom Catalog
+Nessie
+Storage
+Storage
+AWS S3
+Dell ECS
+Previous
+Previous
+1.11.0
+1.11.0
+Introduction
+Concepts
+Concepts
+Tables
+Tables
+Branching and Tagging
+Configuration
+Encryption
+Evolution
+Maintenance
+Metrics Reporting
+Partitioning
+Performance
+Reliability
+Schemas
+Views
+Views
+Configuration
+API
+API
+Quickstart
+API
+File I/O
+Javadoc
+Integrations
+Integrations
+Apache Spark
+Apache Spark
+Getting Started
+Configuration
+DDL
+Procedures
+Queries
+Structured Streaming
+Writes
+Apache Flink
+Apache Flink
+Getting Started
+Flink Connector
+Flink DDL
+Flink Queries
+Flink Writes
+Flink TableMaintenance
+Flink Configuration
+Kafka Connect
+Apache Hive
+Migration
+Migration
+Overview
+Hive Migration
+Delta Lake Migration
+Catalogs
+Catalogs
+Catalog properties
+AWS Glue
+AWS DynamoDB
+HadoopCatalog
+HiveCatalog
+JDBC
+Java Custom Catalog
+Nessie
+Storage
+Storage
+AWS S3
+Dell ECS
+1.10.2
+1.10.2
+Introduction
+Concepts
+Concepts
+Tables
+Tables
+Branching and Tagging
+Configuration
+Evolution
+Maintenance
+Metrics Reporting
+Partitioning
+Performance
+Reliability
+Schemas
+Views
+Views
+Configuration
+API
+API
+Quickstart
+API
+Javadoc
+Integrations
+Integrations
+Apache Spark
+Apache Spark
+Getting Started
+Configuration
+DDL
+Procedures
+Queries
+Structured Streaming
+Writes
+Apache Flink
+Apache Flink
+Flink Getting Started
+Flink Connector
+Flink DDL
+Flink Queries
+Flink Writes
+Flink TableMaintenance
+Flink Configuration
+Kafka Connect
+Apache Hive
+Third-party
+Third-party
+Apache Amoro
+Amazon Athena
+Amazon Data Firehose
+Amazon EMR
+Amazon Redshift
+Apache Doris
+Apache Druid
+BladePipe
+ClickHouse
+Daft
+Databend
+Dremio
+DuckDB
+Estuary
+Firebolt
+Google BigQuery
+Impala
+Memiiso Debezium
+OLake
+Presto
+Redpanda
+RisingWave
+Snowflake
+Starrocks
+Tinybird
+Trino
+Catalogs
+Catalogs
+AWS Glue
+AWS DynamoDB
+Java Custom Catalog
+JDBC
+Nessie
+Storage
+Storage
+AWS S3
+Dell ECS
+1.10.1
+1.10.1
+Introduction
+Concepts
+Concepts
+Tables
+Tables
+Branching and Tagging
+Configuration
+Evolution
+Maintenance
+Metrics Reporting
+Partitioning
+Performance
+Reliability
+Schemas
+Views
+Views
+Configuration
+API
+API
+Quickstart
+API
+Javadoc
+Integrations
+Integrations
+Apache Spark
+Apache Spark
+Getting Started
+Configuration
+DDL
+Procedures
+Queries
+Structured Streaming
+Writes
+Apache Flink
+Apache Flink
+Flink Getting Started
+Flink Connector
+Flink DDL
+Flink Queries
+Flink Writes
+Flink TableMaintenance
+Flink Configuration
+Kafka Connect
+Apache Hive
+Third-party
+Third-party
+Apache Amoro
+Amazon Athena
+Amazon Data Firehose
+Amazon EMR
+Amazon Redshift
+Apache Doris
+Apache Druid
+BladePipe
+ClickHouse
+Daft
+Databend
+Dremio
+DuckDB
+Estuary
+Firebolt
+Google BigQuery
+Impala
+Memiiso Debezium
+OLake
+Presto
+Redpanda
+RisingWave
+Snowflake
+Starrocks
+Tinybird
+Trino
+Catalogs
+Catalogs
+AWS Glue
+AWS DynamoDB
+Java Custom Catalog
+JDBC
+Nessie
+Storage
+Storage
+AWS S3
+Dell ECS
+1.10.0
+1.10.0
+Introduction
+Concepts
+Concepts
+Tables
+Tables
+Branching and Tagging
+Configuration
+Evolution
+Maintenance
+Metrics Reporting
+Partitioning
+Performance
+Reliability
+Schemas
+Views
+Views
+Configuration
+API
+API
+Quickstart
+API
+Javadoc
+Integrations
+Integrations
+Apache Spark
+Apache Spark
+Getting Started
+Configuration
+DDL
+Procedures
+Queries
+Structured Streaming
+Writes
+Apache Flink
+Apache Flink
+Flink Getting Started
+Flink Connector
+Flink DDL
+Flink Queries
+Flink Writes
+Flink TableMaintenance
+Flink Configuration
+Kafka Connect
+Apache Hive
+Third-party
+Third-party
+Apache Amoro
+Amazon Athena
+Amazon Data Firehose
+Amazon EMR
+Amazon Redshift
+Apache Doris
+Apache Druid
+BladePipe
+ClickHouse
+Daft
+Databend
+Dremio
+DuckDB
+Estuary
+Firebolt
+Google BigQuery
+Impala
+Memiiso Debezium
+OLake
+Presto
+Redpanda
+RisingWave
+Snowflake
+Starrocks
+Tinybird
+Trino
+Catalogs
+Catalogs
+AWS Glue
+AWS DynamoDB
+Java Custom Catalog
+JDBC
+Nessie
+Storage
+Storage
+AWS S3
+Dell ECS
+1.9.2
+1.9.2
+Introduction
+Tables
+Tables
+Branching and Tagging
+Configuration
+Evolution
+Maintenance
+Metrics Reporting
+Partitioning
+Performance
+Reliability
+Schemas
+Views
+Views
+Configuration
+Spark
+Spark
+Getting Started
+Configuration
+DDL
+Procedures
+Queries
+Structured Streaming
+Writes
+Flink
+Flink
+Flink Getting Started
+Flink Connector
+Flink DDL
+Flink Queries
+Flink Writes
+Flink Actions
+Flink Configuration
+Hive
+Trino
+Daft
+Estuary
+RisingWave
+ClickHouse
+Presto
+Dremio
+Starrocks
+Amoro
+Amazon Athena
+Amazon EMR
+Amazon Data Firehose
+Amazon Redshift
+Google BigQuery
+Snowflake
+Impala
+Doris
+Druid
+Kafka Connect
+Integrations
+Integrations
+AWS
+Dell
+JDBC
+Nessie
+API
+API
+Java Quickstart
+Java API
+Java Custom Catalog
+Javadoc
+PyIceberg
+IcebergRust
+IcebergGo
+1.9.1
+1.9.1
+Introduction
+Tables
+Tables
+Branching and Tagging
+Configuration
+Evolution
+Maintenance
+Metrics Reporting
+Partitioning
+Performance
+Reliability
+Schemas
+Views
+Views
+Configuration
+Spark
+Spark
+Getting Started
+
+#####DOCS-INDEX#####
+Introduction - Apache Iceberg™
+Skip to content
+Apache Iceberg™
+Apache Iceberg™
+Initializing search
+Home
+Quickstart
+Docs
+Releases
+Project
+Community
+Blog
+Specification
+Apache Iceberg™
+Home
+Quickstart
+Quickstart
+Spark
+Flink
+Hive
+Docs
+Docs
+Java
+Java
+Latest (1.12.0)
+Latest (1.12.0)
+Introduction
+Introduction
+Table of contents
+User experience
+Reliability and performance
+Open standard
+Concepts
+Concepts
+Tables
+Tables
+Branching and Tagging
+Configuration
+Encryption
+Evolution
+Maintenance
+Metrics Reporting
+Partitioning
+Performance
+Reliability
+Schemas
+Views
+Views
+Configuration
+Catalogs
+Catalogs
+REST Catalog Protocol
+API
+API
+Quickstart
+API
+File I/O
+Javadoc
+Integrations
+Integrations
+Apache Spark
+Apache Spark
+Getting Started
+Configuration
+DDL
+Procedures
+Queries
+Structured Streaming
+Writes
+Apache Flink
+Apache Flink
+Getting Started
+Flink Connector
+Flink DDL
+Flink Queries
+Flink Writes
+Flink TableMaintenance
+Flink Configuration
+Kafka Connect
+Apache Hive
+Migration
+Migration
+Overview
+Hive Migration
+Delta Lake Migration
+Catalogs
+Catalogs
+Catalog properties
+REST Compatible Catalog
+AWS Glue
+AWS DynamoDB
+HadoopCatalog
+HiveCatalog
+JDBC
+Java Custom Catalog
+Nessie
+Storage
+Storage
+AWS S3
+Dell ECS
+Nightly
+Nightly
+Introduction
+Concepts
+Concepts
+Tables
+Tables
+Branching and Tagging
+Configuration
+Encryption
+Evolution
+Maintenance
+Metrics Reporting
+Partitioning
+Performance
+Reliability
+Schemas
+Views
+Views
+Configuration
+Catalogs
+Catalogs
+REST Catalog Protocol
+API
+API
+Quickstart
+API
+File I/O
+Javadoc
+Integrations
+Integrations
+Apache Spark
+Apache Spark
+Getting Started
+Configuration
+DDL
+Procedures
+Queries
+Structured Streaming
+Writes
+Apache Flink
+Apache Flink
+Getting Started
+Flink Connector
+Flink DDL
+Flink Queries
+Flink Writes
+Flink TableMaintenance
+Flink Configuration
+Kafka Connect
+Apache Hive
+Migration
+Migration
+Overview
+Hive Migration
+Delta Lake Migration
+Catalogs
+Catalogs
+Catalog properties
+REST Compatible Catalog
+AWS Glue
+AWS DynamoDB
+HadoopCatalog
+HiveCatalog
+JDBC
+Java Custom Catalog
+Nessie
+Storage
+Storage
+AWS S3
+Dell ECS
+Previous
+Previous
+1.11.0
+1.11.0
+Introduction
+Concepts
+Concepts
+Tables
+Tables
+Branching and Tagging
+Configuration
+Encryption
+Evolution
+Maintenance
+Metrics Reporting
+Partitioning
+Performance
+Reliability
+Schemas
+Views
+Views
+Configuration
+API
+API
+Quickstart
+API
+File I/O
+Javadoc
+Integrations
+Integrations
+Apache Spark
+Apache Spark
+Getting Started
+Configuration
+DDL
+Procedures
+Queries
+Structured Streaming
+Writes
+Apache Flink
+Apache Flink
+Getting Started
+Flink Connector
+Flink DDL
+Flink Queries
+Flink Writes
+Flink TableMaintenance
+Flink Configuration
+Kafka Connect
+Apache Hive
+Migration
+Migration
+Overview
+Hive Migration
+Delta Lake Migration
+Catalogs
+Catalogs
+Catalog properties
+AWS Glue
+AWS DynamoDB
+HadoopCatalog
+HiveCatalog
+JDBC
+Java Custom Catalog
+Nessie
+Storage
+Storage
+AWS S3
+Dell ECS
+1.10.2
+1.10.2
+Introduction
+Concepts
+Concepts
+Tables
+Tables
+Branching and Tagging
+Configuration
+Evolution
+Maintenance
+Metrics Reporting
+Partitioning
+Performance
+Reliability
+Schemas
+Views
+Views
+Configuration
+API
+API
+Quickstart
+API
+Javadoc
+Integrations
+Integrations
+Apache Spark
+Apache Spark
+Getting Started
+Configuration
+DDL
+Procedures
+Queries
+Structured Streaming
+Writes
+Apache Flink
+Apache Flink
+Flink Getting Started
+Flink Connector
+Flink DDL
+Flink Queries
+Flink Writes
+Flink TableMaintenance
+Flink Configuration
+Kafka Connect
+Apache Hive
+Third-party
+Third-party
+Apache Amoro
+Amazon Athena
+Amazon Data Firehose
+Amazon EMR
+Amazon Redshift
+Apache Doris
+Apache Druid
+BladePipe
+ClickHouse
+Daft
+Databend
+Dremio
+DuckDB
+Estuary
+Firebolt
+Google BigQuery
+Impala
+Memiiso Debezium
+OLake
+Presto
+Redpanda
+RisingWave
+Snowflake
+Starrocks
+Tinybird
+Trino
+Catalogs
+Catalogs
+AWS Glue
+AWS DynamoDB
+Java Custom Catalog
+JDBC
+Nessie
+Storage
+Storage
+AWS S3
+Dell ECS
+1.10.1
+1.10.1
+Introduction
+Concepts
+Concepts
+Tables
+Tables
+Branching and Tagging
+Configuration
+Evolution
+Maintenance
+Metrics Reporting
+Partitioning
+Performance
+Reliability
+Schemas
+Views
+Views
+Configuration
+API
+API
+Quickstart
+API
+Javadoc
+Integrations
+Integrations
+Apache Spark
+Apache Spark
+Getting Started
+Configuration
+DDL
+Procedures
+Queries
+Structured Streaming
+Writes
+Apache Flink
+Apache Flink
+Flink Getting Started
+Flink Connector
+Flink DDL
+Flink Queries
+Flink Writes
+Flink TableMaintenance
+Flink Configuration
+Kafka Connect
+Apache Hive
+Third-party
+Third-party
+Apache Amoro
+Amazon Athena
+Amazon Data Firehose
+Amazon EMR
+Amazon Redshift
+Apache Doris
+Apache Druid
+BladePipe
+ClickHouse
+Daft
+Databend
+Dremio
+DuckDB
+Estuary
+Firebolt
+Google BigQuery
+Impala
+Memiiso Debezium
+OLake
+Presto
+Redpanda
+RisingWave
+Snowflake
+Starrocks
+Tinybird
+Trino
+Catalogs
+Catalogs
+AWS Glue
+AWS DynamoDB
+Java Custom Catalog
+JDBC
+Nessie
+Storage
+Storage
+AWS S3
+Dell ECS
+1.10.0
+1.10.0
+Introduction
+Concepts
+Concepts
+Tables
+Tables
+Branching and Tagging
+Configuration
+Evolution
+Maintenance
+Metrics Reporting
+Partitioning
+Performance
+Reliability
+Schemas
+Views
+Views
+Configuration
+API
+API
+Quickstart
+API
+Javadoc
+Integrations
+Integrations
+Apache Spark
+Apache Spark
+Getting Started
+Configuration
+DDL
+Procedures
+Queries
+Structured Streaming
+Writes
+Apache Flink
+Apache Flink
+Flink Getting Started
+Flink Connector
+Flink DDL
+Flink Queries
+Flink Writes
+Flink TableMaintenance
+Flink Configuration
+Kafka Connect
+Apache Hive
+Third-party
+Third-party
+Apache Amoro
+Amazon Athena
+Amazon Data Firehose
+Amazon EMR
+Amazon Redshift
+Apache Doris
+Apache Druid
+BladePipe
+ClickHouse
+Daft
+Databend
+Dremio
+DuckDB
+Estuary
+Firebolt
+Google BigQuery
+Impala
+Memiiso Debezium
+OLake
+Presto
+Redpanda
+RisingWave
+Snowflake
+Starrocks
+Tinybird
+Trino
+Catalogs
+Catalogs
+AWS Glue
+AWS DynamoDB
+Java Custom Catalog
+JDBC
+Nessie
+Storage
+Storage
+AWS S3
+Dell ECS
+1.9.2
+1.9.2
+Introduction
+Tables
+Tables
+Branching and Tagging
+Configuration
+Evolution
+Maintenance
+Metrics Reporting
+Partitioning
+Performance
+Reliability
+Schemas
+Views
+Views
+Configuration
+Spark
+Spark
+Getting Started
+Configuration
+DDL
+Procedures
+Queries
+Structured Streaming
+Writes
+Flink
+Flink
+Flink Getting Started
+Flink Connector
+Flink DDL
+Flink Queries
+Flink Writes
+Flink Actions
+Flink Configuration
+Hive
+Trino
+Daft
+Estuary
+RisingWave
+ClickHouse
+Presto
+Dremio
+Starrocks
+Amoro
+Amazon Athena
+Amazon EMR
+Amazon Data Firehose
+Amazon Redshift
+Google BigQuery
+Snowflake
+Impala
+Doris
+Druid
+Kafka Connect
+Integrations
+Integrations
+AWS
+Dell
+JDBC
+Nessie
+API
+API
+Java Quickstart
+Java API
+Java Custom Catalog
+Javadoc
+PyIceberg
+IcebergRust
+IcebergGo
+1.9.1
+1.9.1
+Introduction
+Tables
+Tables
+Branching and Tagging
+Configuration
+Evolution
+Maintenance
+Metrics Reporting
+Partitioning
+P
+
+#####JDBC-CATALOG#####
+404 Not Found
+Not Found
+The requested URL was not found on this server.

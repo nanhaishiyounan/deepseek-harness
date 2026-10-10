@@ -27,6 +27,9 @@
       "path": "../../expert/expert-orders"
     },
     {
+      "path": "../../connector/connector-carbon"
+    },
+    {
       "path": "../../connector/connector-nocobase"
     },
     {

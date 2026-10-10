@@ -36,9 +36,9 @@ export interface BizViewInjected {
     /** Shared client-session snapshot bound by the renderer as useBusiness. */
     business: SnapshotStore<BizClientState>
   }
-  /** Load or reload the collection roster. */
+  /** Load or reload the table roster. */
   refresh: () => void
-  /** Load the selected collection's rows (first page). */
+  /** Load the selected table's rows (first page). */
   loadRows: (collection: string) => void
   /** Load one more row page (the hasNext pattern; a no-op without a cursor). */
   loadMore: (collection: string, page: number) => void
@@ -46,10 +46,11 @@ export interface BizViewInjected {
   requestView: (view: string) => void
   /**
    * Patch one row's whitelisted low-risk fields inline (the gateway's
-   * `nocobase.update`); rejects with the structured refusal when the
-   * deployment has not opted in through `nocobaseWriteEnabled`.
+   * `carbon.update`, write-tier tables only); rejects with the structured
+   * refusal when the deployment has not opted in through
+   * `carbonWriteEnabled`.
    */
-  updateRow: (collection: string, id: number, values: Record<string, string | number | null>) => Promise<Record<string, unknown>>
+  updateRow: (collection: string, id: string, values: Record<string, string | number | null>) => Promise<Record<string, unknown>>
 }
 
 /** Full component props: the view-seat runtime share plus the inject face and locale seat. */
@@ -58,23 +59,15 @@ export type BizViewProps =
     & PropsLocale<'business'>
     & InjectFace<BizViewInjected>
 
-/**
- * NocoBase admin-plane collections the object switcher hides: listMeta does
- * not flag them (they carry no `hidden` marker), but they are the permission
- * and account tables, not business objects (02-design §3.4 "过滤 hidden/系统表").
- */
-const ADMIN_COLLECTIONS: ReadonlySet<string> = new Set(['users', 'roles', 'apiKeys', 'workflows', 'flow_nodes', 'attachments'])
-
-/** One navigator bucket's display label (locale copy). */
+/** One navigator bucket's display label (locale copy): the carbon modules plus the frecency rail. */
 const DOMAIN_LABEL_KEYS: Record<BizDomain, BusinessKey> = {
   frequent: 'nav.frequent',
-  crm: 'nav.crm',
-  srm: 'nav.srm',
-  wms: 'nav.wms',
-  orders: 'nav.orders',
-  helpdesk: 'nav.helpdesk',
-  finance: 'nav.finance',
-  food: 'nav.food',
+  master: 'nav.master',
+  sales: 'nav.sales',
+  purchasing: 'nav.purchasing',
+  inventory: 'nav.inventory',
+  production: 'nav.production',
+  quality: 'nav.quality',
   other: 'nav.other',
 }
 
@@ -100,7 +93,7 @@ export function BizView(
 
   const collections = state.collections
   const roster: readonly BizCollectionRow[] = collections?.status === 'ready'
-    ? collections.value.filter(entry => entry.hidden !== true && !ADMIN_COLLECTIONS.has(entry.name))
+    ? collections.value
     : []
   // Opening the tab should land on real data, not a placeholder option: pick
   // the first business object the moment the roster arrives.
@@ -300,11 +293,11 @@ export function BizView(
       )}
 
       <section className={css.embedZone}>
-        <a className={css.embedCard} href="/nocobase/" target="_blank" rel="noopener noreferrer">
+        <a className={css.embedCard} href="/carbon/" target="_blank" rel="noopener noreferrer">
           <span className={css.zoneTitle}>{t('embed.title')}</span>
           <p className={css.embedHint}>{t('embed.openHint')}</p>
           <span className={css.embedCardMeta}>
-            <code className={css.embedUrl}>/nocobase/</code>
+            <code className={css.embedUrl}>/carbon/</code>
             <span className={css.embedOpen}>{t('embed.open')}</span>
           </span>
         </a>
@@ -334,7 +327,8 @@ function EntityCard({ row, collection, selectedLabel, orderLike, askInPlace, upd
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | undefined>(undefined)
   const status = orderLike ? orderStatusCell(row) : undefined
-  const rowId = typeof row.id === 'number' ? row.id : undefined
+  // carbon keys rows by prefixed string ids (item_…/so_…/cust_…).
+  const rowId = typeof row.id === 'string' && row.id.length > 0 ? row.id : undefined
 
   /** One field's inline-edit cell text: primitives render, objects read blank. */
   const cellTextOf = (field: string): string => {

@@ -18,6 +18,9 @@
       "path": "../runtime"
     },
     {
+      "path": "../ui-nav"
+    },
+    {
       "path": "../ui-conversation"
     },
     {

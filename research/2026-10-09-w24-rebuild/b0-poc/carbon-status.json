@@ -1,0 +1,148 @@
+{
+  "slug": "carbon-main",
+  "project": "carbon-carbon-main",
+  "ports": {
+    "PORT_DB": 51538,
+    "PORT_API": 51539,
+    "PORT_STUDIO": 51540,
+    "PORT_INBUCKET": 51541,
+    "PORT_INNGEST": 51542,
+    "PORT_ERP": 51543,
+    "PORT_MES": 51544,
+    "PORT_ASSEMBLER": 51545,
+    "PORT_EMAIL": 51546
+  },
+  "redisDb": 0,
+  "containers": [
+    {
+      "Service": "gotrue",
+      "Name": "carbon-carbon-main-gotrue-1",
+      "State": "running",
+      "Status": "Up 26 minutes",
+      "Health": "",
+      "Publishers": []
+    },
+    {
+      "Service": "inbucket",
+      "Name": "carbon-carbon-main-inbucket-1",
+      "State": "running",
+      "Status": "Up 26 minutes (healthy)",
+      "Health": "healthy",
+      "Publishers": [
+        {
+          "PublishedPort": 0,
+          "TargetPort": 1100
+        },
+        {
+          "PublishedPort": 0,
+          "TargetPort": 2500
+        },
+        {
+          "PublishedPort": 51541,
+          "TargetPort": 9000
+        },
+        {
+          "PublishedPort": 51541,
+          "TargetPort": 9000
+        }
+      ]
+    },
+    {
+      "Service": "inngest",
+      "Name": "carbon-carbon-main-inngest-1",
+      "State": "running",
+      "Status": "Up 26 minutes",
+      "Health": "",
+      "Publishers": [
+        {
+          "PublishedPort": 51542,
+          "TargetPort": 8288
+        },
+        {
+          "PublishedPort": 51542,
+          "TargetPort": 8288
+        }
+      ]
+    },
+    {
+      "Service": "kong",
+      "Name": "carbon-carbon-main-kong-1",
+      "State": "running",
+      "Status": "Up 26 minutes (healthy)",
+      "Health": "healthy",
+      "Publishers": [
+        {
+          "PublishedPort": 54321,
+          "TargetPort": 8000
+        },
+        {
+          "PublishedPort": 54321,
+          "TargetPort": 8000
+        },
+        {
+          "PublishedPort": 0,
+          "TargetPort": 8001
+        },
+        {
+          "PublishedPort": 0,
+          "TargetPort": 8443
+        },
+        {
+          "PublishedPort": 0,
+          "TargetPort": 8444
+        }
+      ]
+    },
+    {
+      "Service": "postgres",
+      "Name": "carbon-carbon-main-postgres-1",
+      "State": "running",
+      "Status": "Up 26 minutes (healthy)",
+      "Health": "healthy",
+      "Publishers": [
+        {
+          "PublishedPort": 51538,
+          "TargetPort": 5432
+        },
+        {
+          "PublishedPort": 51538,
+          "TargetPort": 5432
+        }
+      ]
+    },
+    {
+      "Service": "postgrest",
+      "Name": "carbon-carbon-main-postgrest-1",
+      "State": "running",
+      "Status": "Up 26 minutes",
+      "Health": "",
+      "Publishers": [
+        {
+          "PublishedPort": 0,
+          "TargetPort": 3000
+        }
+      ]
+    },
+    {
+      "Service": "realtime",
+      "Name": "carbon-carbon-main-realtime-1",
+      "State": "running",
+      "Status": "Up 26 minutes",
+      "Health": "",
+      "Publishers": []
+    },
+    {
+      "Service": "storage",
+      "Name": "carbon-carbon-main-storage-1",
+      "State": "running",
+      "Status": "Up 26 minutes",
+      "Health": "",
+      "Publishers": [
+        {
+          "PublishedPort": 0,
+          "TargetPort": 5000
+        }
+      ]
+    }
+  ]
+}

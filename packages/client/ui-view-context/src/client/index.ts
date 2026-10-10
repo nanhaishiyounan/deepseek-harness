@@ -25,7 +25,7 @@ import { ViewToolRow } from './ViewToolRow.tsx'
 import { en, zh, type ViewContextKey } from './locales.ts'
 
 export { ViewContextService } from './viewContextService.ts'
-export type { ViewActionExecutor, ViewActionsEntry, ViewProviderEntry } from './viewContextService.ts'
+export type { NavState, ViewActionExecutor, ViewActionsEntry, ViewProviderEntry } from './viewContextService.ts'
 export type { ViewSwitchCaptureInjected, ViewSwitchCaptureProps } from './ViewSwitchCapture.tsx'
 export type { ViewToolRowProps } from './ViewToolRow.tsx'
 export { viewToolRowModel, type ViewToolRowModel, type ViewToolRowState } from './viewToolModel.ts'

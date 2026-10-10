@@ -40,6 +40,12 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
      */
     'sidebar.settings': { kind: 'single'; scope: 'root'; owner: SidebarSettingsOwnerProps }
     /**
+     * The sidebar's main-nav menu block: the ui-nav plugin's NavRoot mounts
+     * here and declares the `sidebar.nav` rows. Owner share mirrors the
+     * footer actions (the column display state).
+     */
+    'sidebar.nav.host': { kind: 'single'; scope: 'root'; owner: SidebarFooterActionOwnerProps }
+    /**
      * Optional actions beside Settings at the sidebar foot. Declared by this
      * package's 'sidebar' entry; each action receives only the column state.
      */
@@ -112,6 +118,7 @@ export type SidebarRootComponentProps =
     | 'sidebar.brand.mark'
     | 'sidebar.brand.name'
     | 'sidebar.workspaces'
+    | 'sidebar.nav.host'
     | 'sidebar.settings'
     | 'sidebar.footer.action'
   >

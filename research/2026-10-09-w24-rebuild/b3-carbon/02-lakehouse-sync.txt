@@ -1,0 +1,8 @@
+[legacy] legacy_nocobase tables still present: 138
+[round1] item:replace+43 customer:replace+6 supplier:replace+14 salesOrder:replace+26 purchaseOrder:replace+20 job:watermark+0 receipt:replace+6 itemStockQuantities:replace+20
+[round2-zero-duplicate] item:replace+43 customer:replace+6 supplier:replace+14 salesOrder:replace+26 purchaseOrder:replace+20 job:watermark+0 receipt:replace+6 itemStockQuantities:replace+20
+[round3-source] created supplier sup_PbiVKLyL7udMsyovYRkgY6
+[round3-increment] item:replace+43 customer:replace+6 supplier:replace+15 salesOrder:replace+26 purchaseOrder:replace+20 job:watermark+0 receipt:replace+6 itemStockQuantities:replace+20
+[round3] lake.synced_carbon.supplier 14 → 15 (delta=1); fresh row visible: YES
+[lake] item=43 customer=6 supplier=15 salesOrder=26 purchaseOrder=20 job=22 receipt=6 itemStockQuantities=20
+[verdict] SYNC OK — carbon→lakehouse two-round no-duplicate + one-round increment exact

@@ -36,6 +36,11 @@ declare module '@deepseek-ai/cordis' {
 }
 
 import {
+  createCarbonProxyHandler,
+  createCarbonWsUpgradeHandler,
+  CARBON_PROXY_PREFIX,
+} from './carbon-proxy.ts'
+import {
   createNocobasePortalHandler,
   createNocobaseProxyHandler,
   createNocobaseWsUpgradeHandler,
@@ -79,6 +84,14 @@ export interface Config {
    * must not proxy a business backend by default.
    */
   nocobaseProxyOrigin?: string
+  /**
+   * Carbon ERP origin (scheme + host + port) the `/carbon` prefix proxies
+   * to, same-origin, so the business page's external entry can open the
+   * carbon UI in a new browser window on the gateway's domain. Absent means
+   * no proxy route — the unauthenticated gateway must not proxy a business
+   * backend by default.
+   */
+  carbonProxyOrigin?: string
 }
 
 /**
@@ -93,6 +106,7 @@ export class WebServer extends Service {
     host: z.union([z.const('127.0.0.1'), z.const('0.0.0.0')]).required(),
     port: z.natural().max(65535).required(),
     nocobaseProxyOrigin: z.string(),
+    carbonProxyOrigin: z.string(),
   })
 
   private readonly exact = new Map<string, WebRoute>()
@@ -138,6 +152,29 @@ export class WebServer extends Service {
           }
         },
         'webServer.nocobaseProxy',
+      )
+    }
+    // The carbon ERP proxy rides the same pattern: one prefix route plus the
+    // vite HMR upgrade path, both owned by one effect.
+    const carbonOrigin = config.carbonProxyOrigin
+    if (carbonOrigin !== undefined) {
+      ctx.effect(
+        () => {
+          const disposeHttp = this.register({
+            kind: 'prefix',
+            path: CARBON_PROXY_PREFIX,
+            handler: createCarbonProxyHandler(carbonOrigin),
+          })
+          const disposeUpgrade = this.registerUpgrade({
+            path: CARBON_PROXY_PREFIX,
+            handler: createCarbonWsUpgradeHandler(carbonOrigin),
+          })
+          return () => {
+            disposeUpgrade()
+            disposeHttp()
+          }
+        },
+        'webServer.carbonProxy',
       )
     }
   }

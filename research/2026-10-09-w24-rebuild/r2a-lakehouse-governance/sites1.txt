@@ -1,0 +1,176 @@
+#####DELTA-BLOG#####
+Sharing Integrations Learn Getting Started Blogs Tutorials Videos Case Studies Roadmap Community Docs Search ctrl K Delta Lake Blogs
+RSS Feed
+Latest Post
+Advancing the Open Lakehouse with Apache Spark, the Delta Kernel, and the new UC Delta APIs
+By Scott Haines , Timothy Wang Delta Lake 4.4.0 advances the catalog-managed vision: Apache Spark 4.2 by default, identity and generated columns in DDL, UC metric views, and Delta Flink on the UC Delta API. Introducing the UC Delta API
+By Robert Pack The UC Delta API is a versioned, intent-based, atomic REST surface for the Delta ecosystem, shipped in open source Unity Catalog 0.5 — run it locally today with Spark and DuckDB. Strengthening Catalog-Managed Delta Tables with the Unity Catalog Delta APIs
+By Alex Jiang Delta 4.3 builds on catalog-managed tables with Unity Catalog Delta API integration, streaming advances, and UniForm support—letting Spark, DuckDB, and Flink share the same tables. Integrating the Rust Delta Kernel into ClickHouse
+By Melvyn Peignon , Kseniia Sumarokova , Raul Marin Integrating the Rust Delta Kernel into ClickHouse provides a maintained, consistent interface between the table format and query engine, exposing more features while cutting integration complexity. Delta Grows Up: Writes, Unity Catalog and Time Travel
+By Ben Fleis DuckDB's Delta and Unity Catalog extensions shed their experimental tags — now with writes, Unity Catalog and time travel support. Delta 4.2.0 Released
+By Scott Haines , Zheng Hu , Alex Jiang The Delta Kernel continues to drive the future of Delta Lake. With the 4.2 release, we've further eliminated engine inconsistencies and feature fragmentation by embedding the kernel where it matters most - right in the heart of our engine connectors. The kernel ensures strict transactional consistency and peak performance regardless of which engine reads or writes your data. Along that line, this release includes a brand new experimental Apache Flink connector built on the Delta Kernel aimed at providing expanded support for catalog-managed tables. This new connector supports reading and writing catalog-managed tables via Flink SQL... Delta Lake 4.1.0 Released
+By Zheng Hu , Scott Haines We’re excited to announce the release of Delta Lake 4.1.0. This release introduces significant new features, performance improvements, and critical platform upgrades, including full support for Apache Spark 4.1.0 and enhanced storage management in Unity Catalog. The next evolution of Delta - Catalog-Managed Tables
+By Benjamin Mathew , Scott Sandre , Scott Haines This article explains how to enable catalog-managed commits, a Delta table feature that shifts transaction coordination from the filesystem to Unity Catalog, making the catalog the single source of truth for table state. Delta Lake 4.0.1 Release
+By Robert Pack , Timothy Wang We're excited to announce the release of Delta Lake 4.0.1. This release brings important bug fixes and improvements to Delta Lake 4.0, with a focus on Unity Catalog integration, authentication, and compatibility. Delta Lake 4.0
+By Carly Akerly , Robert Pack We’re thrilled to announce the release of Delta Lake 4.0, a milestone release packed with powerful new features, performance optimizations, and foundational enhancements for the future of open data lakehouses. With new catalog integration, enhanced support for semi-structured data, smarter change tracking, and improved performance, this release delivers practical solutions to everyday data challenges. Delta Kernel: A Game-Changer for Customer-Facing Analytics
+By Sida Shen , Wenbo Yang How Delta kernel enables StarRocks to run customer-facing analytics directly on open table formats Working with Apache Sedona
+By Avril Aysha Learn how to use Apache Sedona with Delta Lake Delta Lake 3.3
+By Allison Portis , Susan Pierce Announcing Delta Lake 3.3 on Apache Spark 3.5, with features that improve the performance and interoperability of Delta Lake. Page 1 of 10 Delta Lake Sharing Integrations Roadmap Blogs Learn Getting Started Blogs Tutorials Videos Case Studies Community Community Getting Help Contributing to Delta Social Channels StackOverflow GitHub Twitter Slack LinkedIn
+Copyright © 2026 Delta Lake, a series of LF Projects,
+LLC. For web site terms of use, trademark policy and other project polcies
+please see
+https://lfprojects.org
+.
+#####DELTA-RS#####
+Redirecting
+Redirecting to latest/ ...
+#####HUDI-REL#####
+
+#####PAIMON#####
+Apache Paimon™
+#####DUCKLAKE#####
+Search Shortcut cmd + k | ctrl + k
+DuckLake is a lakehouse format built on SQL
+DuckLake delivers advanced data lake features without traditional lakehouse complexity by using Parquet files and a SQL database
+DuckLake v1.0 is out
+Read the docs
+Deployed in production
+PostgreSQL
+SQLite
+DuckDB, in-process
+DuckDB + Quack (beta)
+Client
+Multiple clients
+Works locally or in the cloud
+No vendor lock-in
+DuckLake
+Catalog:
+The catalog is served by an ACID-compliant SQL database
+Storage: Parquet files
+Parquet files can be stored on local disk or in object storage
+DuckLake’s key features
+SQL as a lakehouse format
+DuckLake stores all metadata in a SQL database – PostgreSQL, MySQL, SQLite or DuckDB. No custom catalog server required.
+Choose a catalog
+Data lake operations
+DuckLake supports snapshots, time travel queries, schema evolution and partitioning.
+Snapshots
+You can have as many snapshots as you want without expensive compaction steps.
+Using snapshots
+ACID transactions
+DuckLake allows concurrent access with ACID transactional guarantees over multi-table operations.
+How transactions work
+Open Parquet storage
+Your data lives in plain Parquet files on local disk or object storage. The Parquet files are compatible with Iceberg.
+Storage options
+Fast queries
+DuckLake uses statistics for filter pushdown, enabling fast queries even on large datasets.
+In conversation: DuckLake v1.0
+Listen to Mark Raasveldt and Pedro Holanda discuss the road that led to the DuckLake specification and explain the features of DuckLake v1.0.
+Create your first DuckLake
+DuckDB provides first-class support for DuckLake and can use PostgreSQL, SQLite or DuckDB as the catalog database.
+Documentation
+Live demo
+DuckDB
+SQLite
+PostgreSQL
+INSTALL ducklake ;
+ATTACH 'ducklake:metadata.ducklake'
+AS my_ducklake
+( DATA_PATH 'data/' );
+USE my_ducklake ;
+INSTALL ducklake ;
+ATTACH 'ducklake:metadata.ducklake'
+AS my_ducklake
+( DATA_PATH 'data/' );
+USE my_ducklake ;
+INSTALL ducklake ;
+INSTALL postgres ;
+ATTACH 'ducklake:postgres:dbname=ducklake_catalog host=your_postgres_host'
+AS my_ducklake ( DATA_PATH 'data/' );
+USE my_ducklake ;
+INSTALL ducklake ;
+INSTALL sqlite ;
+ATTACH 'ducklake:sqlite:metadata.sqlite'
+AS my_ducklake ( DATA_PATH 'data/' );
+USE my_ducklake ;
+Frequently asked questions
+Do you have any questions about DuckLake? We got you covered.
+Why should I use DuckLake?
+DuckLake provides a lightweight one-stop solution if you need a data lake and catalog.
+If you use DuckLake from DuckDB, it can unlock a “multiplayer DuckDB” experience with multiple DuckDB instances reading and writing the same dataset –
+a concurrency model not supported by vanilla DuckDB .
+What is “DuckLake”?
+“DuckLake” can refer to a number of things:
+The DuckLake format that uses a catalog database and a Parquet storage to store data.
+A DuckLake instance storing a dataset with the DuckLake lakehouse format.
+The ducklake DuckDB extension , which supports reading/writing datasets using the DuckLake format.
+Is DuckLake production-ready?
+Yes! We published DuckLake v1.0 in April 2026, which is a production-ready release with guaranteed backward-compatibility.
+What is the license of DuckLake?
+The DuckLake specification and the ducklake DuckDB extension are released under the MIT license.
+More FAQs
+#####XTABLE#####
+Apache XTable™ (Incubating)
+Home
+Docs
+Community
+Blogs
+Downloads
+Home
+Docs
+Community
+Blogs
+Downloads
+GitHub
+LinkedIn
+Twitter
+Seamlessly interoperate cross-table between Apache Hudi, Delta Lake, and Apache Iceberg
+Try it on GitHub
+Learn More
+Apache XTable™ is incubating in the Apache Software Foundation and was recently renamed from OneTable
+Omni-Directional Interoperability
+What is Apache XTable™?
+Apache XTable™ provides cross-table omni-directional interop between lakehouse table formats
+Apache XTable™ is NOT a new or separate format, Apache XTable™ provides abstractions and tools for the translation of lakehouse table format metadata
+Apache XTable™ is formerly known as OneTable
+Choose your source format
+Choose your destination format(s)
+Apache XTable™ will translate the Metadata layers
+Why build Apache XTable™?
+Choosing a table format is a costly evaluation
+Each project has rich features that may fit different use-cases
+Some vendors use a table format as a point of lock-in
+Your data should be UNIVERSAL
+Let's build together
+Apache XTable™ is a community driven open source project. Come join us on Github and find easy ways to contribute.
+Try it on GitHub
+FAQs
+Got questions? We've got answers.
+How does it work?
+Apache XTable™ reads the existing metadata of your table and writes out metadata for one or more other table formats by leveraging the existing APIs provided by each table format project. The metadata will be persisted under a directory in the base path of your table (_delta_log for Delta, metadata for Iceberg, and .hoodie for Hudi). This allows your existing data to be read as though it was written using Delta, Hudi, or Iceberg. For example, a Spark reader can use spark.read.format(“delta | hudi | iceberg>”).load(“path/to/data”).
+How is Apache XTable™ different from Delta Lake Uniform?
+Apache XTable™ provides abstraction interfaces that allow omni-directional interoperability across Delta, Hudi, Iceberg, and any other future lakehouse table formats such as Apache Paimon. Apache XTable™ is a standalone github project that provides a neutral space for all the lakehouse table formats to constructively collaborate together. Delta Lake Uniform is a one-directional conversion from Delta Lake to Apache Hudi or Apache Iceberg. Uniform is also governed inside the Delta Lake repo.
+When should I consider Apache XTable™?
+Apache XTable™ can be used to easily switch between any of the table formats or even benefit from more than one simultaneously. Some organizations use Apache XTable™ today because they have a diverse ecosystem of tools with polarized vendor support of table formats. Some users want lightning fast ingestion or indexing from Hudi and photon query accelerations of Delta Lake inside of Databricks. Some users want managed table services from Hudi, but also want write operations from Trino to Iceberg. Regardless of which combination of formats you need, Apache XTable™ ensures you can benefit from all 3 projects.
+Does Apache XTable™ work in every cloud?
+Yes, anywhere that Delta, Iceberg, or Hudi work, Apache XTable™ works.
+What are the current limitations?
+1. Hudi and Iceberg MoR tables not supported 2. Delta Delete Vectors are not supported 3. Synchronized transaction timestamps With Apache XTable™ you pick one primary format and one or more secondary formats. The write operations with the primary format work as normal. Apache XTable™ than translates the metadata from the primary format to the secondaries. When committing the metadata of the secondary formats, the timestamp of the commit will not be the exact same timestamp as shown in the primary.
+How can I contribute?
+Come check out the project on Github and add a little star. There are some low hanging fruit features, bugs, and documentation that can be added. Reach out directly to any of the contributors on Github to ask for help.
+How can I learn more?
+Follow Apache XTable™ (Incubating) community channels on Linkedin and Twitter. Subscribe to the mailing list by sending an email to (dev-subscribe@xtable.apache.org). Follow the project on Github or reachout directly to any of the Github contributors to learn more.
+Docs
+GitHub
+LinkedIn
+Twitter
+Apache Software Foundation
+License
+Events
+Sponsorship
+Thanks
+Security
+Privacy
+Apache XTable™ is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Apache Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.
+Copyright © 2026 Apache XTable™, XTable, Apache, the Apache feather logo and the Apache XTable™ project logo are either registered trademarks or trademarks of The Apache Software Foundation in the United States and other countries.

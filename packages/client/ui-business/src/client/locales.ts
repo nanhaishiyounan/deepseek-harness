@@ -42,13 +42,12 @@ export type BusinessKey =
   | 'nav.searchPlaceholder'
   | 'nav.noHits'
   | 'nav.frequent'
-  | 'nav.crm'
-  | 'nav.srm'
-  | 'nav.wms'
-  | 'nav.orders'
-  | 'nav.helpdesk'
-  | 'nav.finance'
-  | 'nav.food'
+  | 'nav.master'
+  | 'nav.purchasing'
+  | 'nav.inventory'
+  | 'nav.sales'
+  | 'nav.production'
+  | 'nav.quality'
   | 'nav.other'
   | 'ask.sent'
   | 'ask.viewAnswer'
@@ -86,9 +85,9 @@ export const zh: Record<BusinessKey, string> = {
   'table.showAsCards': '卡片视图',
   'table.more': '加载更多',
   'table.end': '已全部加载',
-  'embed.title': '高级配置（业务后台）',
+  'embed.title': '高级配置（carbon ERP）',
   'embed.open': '在新窗口打开业务后台',
-  'embed.openHint': '低频管理辅助：页面编辑器与角色权限细配在业务后台完成，日常读写走对话；将在新浏览器窗口打开（同源入口，无需额外地址），打开后需登录（初始管理员账号见 QUICKSTART「NocoBase 业务后台」）',
+  'embed.openHint': '低频管理辅助：页面编辑器与角色权限细配在carbon ERP 完成（过账类操作与其管理面），日常读写走对话；将在新浏览器窗口打开（同源入口，无需额外地址），打开后需登录（carbon ERP 账号 test@carbon.ms）',
   'error.unavailable': '业务管理页暂不可用',
   'error.retry': '重试',
   'nav.placeholder': '选择业务对象',
@@ -96,13 +95,12 @@ export const zh: Record<BusinessKey, string> = {
   'nav.searchPlaceholder': '搜索对象（名称或标题）…',
   'nav.noHits': '没有匹配的业务对象',
   'nav.frequent': '常用',
-  'nav.crm': '客户与专家（CRM）',
-  'nav.srm': '供应商（SRM）',
-  'nav.wms': '仓储与批次（WMS）',
-  'nav.orders': '订单',
-  'nav.helpdesk': '工单与巡检',
-  'nav.finance': '费用与发票',
-  'nav.food': '食品业务',
+  'nav.master': '主数据',
+  'nav.purchasing': '采购',
+  'nav.inventory': '库存',
+  'nav.sales': '销售',
+  'nav.production': '生产',
+  'nav.quality': '质量',
   'nav.other': '其他',
   'ask.sent': '问题已填入对话草稿，',
   'ask.viewAnswer': '去对话查看回答 →',
@@ -151,13 +149,12 @@ export const en: Record<BusinessKey, string> = {
   'nav.searchPlaceholder': 'Search objects (name or title)…',
   'nav.noHits': 'No matching business objects',
   'nav.frequent': 'Frequent',
-  'nav.crm': 'Customers & experts (CRM)',
-  'nav.srm': 'Suppliers (SRM)',
-  'nav.wms': 'Warehouse & batches (WMS)',
-  'nav.orders': 'Orders',
-  'nav.helpdesk': 'Tickets & inspection',
-  'nav.finance': 'Expense & invoices',
-  'nav.food': 'Food operations',
+  'nav.master': 'Master data',
+  'nav.purchasing': 'Purchasing',
+  'nav.inventory': 'Inventory',
+  'nav.sales': 'Sales',
+  'nav.production': 'Production',
+  'nav.quality': 'Quality',
   'nav.other': 'Other',
   'ask.sent': 'Question staged in the chat draft — ',
   'ask.viewAnswer': 'open the answer →',

@@ -1,0 +1,4 @@
+DELETE|DELETE|{public}
+INSERT|INSERT|{public}
+SELECT|SELECT|{public}
+UPDATE|UPDATE|{public}

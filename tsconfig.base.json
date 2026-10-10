@@ -190,6 +190,8 @@
       "@deepseek-ai/dsh-host-plugin-inventory": ["./packages/host/plugin-inventory/src"],
       "@deepseek-ai/dsh-host-plugin-inventory/types": ["./packages/host/plugin-inventory/src/types.ts"],
       "@deepseek-ai/dsh-client-ui-kb": ["./packages/client/ui-kb/src"],
+      "@deepseek-ai/dsh-client-ui-nav": ["./packages/client/ui-nav/src"],
+      "@deepseek-ai/dsh-client-ui-lakehouse": ["./packages/client/ui-lakehouse/src"],
       "@deepseek-ai/dsh-client-ui-assets": ["./packages/client/ui-assets/src"],
       "@deepseek-ai/dsh-client-ui-connectors": ["./packages/client/ui-connectors/src"],
       "@deepseek-ai/dsh-client-ui-kg": ["./packages/client/ui-kg/src"],

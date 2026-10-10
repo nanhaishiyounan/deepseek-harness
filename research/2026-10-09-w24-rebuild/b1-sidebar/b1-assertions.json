@@ -1,0 +1,82 @@
+[
+  {
+    "kind": "nav-block-present",
+    "fact": true
+  },
+  {
+    "kind": "nav-items",
+    "fact": [
+      "对话",
+      "知识库\n48",
+      "场景",
+      "数据资产",
+      "连接器\n2",
+      "图谱\n52",
+      "业务管理",
+      "移动端预览"
+    ]
+  },
+  {
+    "kind": "frame-tracks",
+    "fact": "280px minmax(0px, 1fr) 0px"
+  },
+  {
+    "kind": "nav-inside-sidebar",
+    "fact": true
+  },
+  {
+    "kind": "dark-attribute-applied",
+    "fact": true
+  },
+  {
+    "kind": "rail-tracks",
+    "fact": "56px minmax(0px, 1fr) 0px"
+  },
+  {
+    "kind": "tab-ring-after-chat-open",
+    "fact": [
+      "对话",
+      "轨迹"
+    ]
+  },
+  {
+    "kind": "nav-active-chat",
+    "fact": "page"
+  },
+  {
+    "kind": "nav-active-kb",
+    "fact": "page"
+  },
+  {
+    "kind": "nav-active-scenarios",
+    "fact": "page"
+  },
+  {
+    "kind": "nav-active-market",
+    "fact": "page"
+  },
+  {
+    "kind": "nav-active-connectors",
+    "fact": "page"
+  },
+  {
+    "kind": "nav-active-kg",
+    "fact": "page"
+  },
+  {
+    "kind": "nav-active-business",
+    "fact": "page"
+  },
+  {
+    "kind": "nav-active-mobile-preview",
+    "fact": "page"
+  },
+  {
+    "kind": "narrow-sidebar-collapsed-attr",
+    "fact": true
+  },
+  {
+    "kind": "narrow-tracks",
+    "fact": "56px minmax(0px, 1fr) 0px"
+  }
+]

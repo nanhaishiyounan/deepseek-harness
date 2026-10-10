@@ -143,6 +143,8 @@
     "@deepseek-ai/dsh-web-fetch-http": "workspace:*",
     "@deepseek-ai/dsh-workflow-worker-thread": "workspace:*",
     "pdf-lib": "^1.17.1",
-    "unpdf": "^1.2.0"
+    "unpdf": "^1.2.0",
+    "@deepseek-ai/dsh-connector-carbon": "workspace:*",
+    "@deepseek-ai/dsh-tool-carbon": "workspace:*"
   }
 }

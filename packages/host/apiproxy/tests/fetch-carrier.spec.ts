@@ -70,6 +70,13 @@ function fakeApi(overrides: Partial<{ muxFrames: MuxFrame[]; hostFrames: HostFra
       mobileWorkSave: kbRefuse,
       mobileWorkDelete: kbRefuse,
     },
+    carbon: {
+      listMeta: kbRefuse,
+      list: kbRefuse,
+      get: kbRefuse,
+      create: kbRefuse,
+      update: kbRefuse,
+    },
     sessions: {
       async list(request) {
         if (overrides.crashOn === 'session.list') throw new Error('impl crashed')

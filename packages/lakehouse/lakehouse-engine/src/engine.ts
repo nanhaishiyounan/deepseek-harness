@@ -453,9 +453,10 @@ export class LakehouseEngineService extends Service {
     assertIdentifier(table)
     assertSourceRef(source)
     throwIfAborted(signal)
+    const projection = await this.sourceProjection(source, signal)
     await this.execInternal(
       `CREATE OR REPLACE TABLE ${LAKE_ALIAS}.${quoteIdentifier(schema)}.${quoteIdentifier(table)} AS `
-      + `SELECT * FROM ${quoteIdentifier(source.catalog)}.${quoteIdentifier(source.schema)}.${quoteIdentifier(source.table)}`,
+      + `SELECT ${projection} FROM ${quoteIdentifier(source.catalog)}.${quoteIdentifier(source.schema)}.${quoteIdentifier(source.table)}`,
       signal,
     )
   }
@@ -499,14 +500,50 @@ export class LakehouseEngineService extends Service {
         'SELECT count(*) FROM duckdb_tables() '
       + `WHERE database_name = '${LAKE_ALIAS}' AND schema_name = ${quoteString(schema)} AND table_name = ${quoteString(table)}`,
         1, this.options.queryTimeoutMs, signal)
+      const projection = await this.sourceProjection(source, signal)
       if (Number(exists.rows[0]?.[0] ?? 0) === 0) {
-        await connection.run(`CREATE TABLE ${target} AS SELECT * FROM ${origin}${bound}`)
+        await connection.run(`CREATE TABLE ${target} AS SELECT ${projection} FROM ${origin}${bound}`)
         return Number(counted.rows[0]?.[0] ?? 0)
       }
-      await connection.run(`INSERT INTO ${target} SELECT * FROM ${origin}${bound}`)
+      await connection.run(`INSERT INTO ${target} SELECT ${projection} FROM ${origin}${bound}`)
       return Number(counted.rows[0]?.[0] ?? 0)
     } catch (error: unknown) {
       throw this.toEngineError(error)
+    } finally {
+      connection.disconnectSync()
+    }
+  }
+
+  /**
+   * The SELECT projection for one source table: every column by name, with
+   * the attached catalog's ENUM-typed columns cast to VARCHAR — DuckLake has
+   * no ENUM storage, and the postgres attach surfaces PG enums as DuckDB
+   * enums (the carbon schema carries many; NocoBase carried none).
+   * @param source - the attached source table reference.
+   * @param signal - cancellation signal.
+   * @returns the comma-joined projection expression.
+   */
+  private async sourceProjection(source: SourceTableRef, signal?: AbortSignal): Promise<string> {
+    const connection = await this.connect()
+    try {
+      const enums = await this.runCapped(connection,
+        'SELECT column_name FROM ' + quoteIdentifier(source.catalog) + '.information_schema.columns '
+        + 'WHERE table_schema = ' + quoteString(source.schema) + ' AND table_name = ' + quoteString(source.table) + ' '
+        + "AND data_type = 'USER-DEFINED'",
+        10_000, this.options.queryTimeoutMs, signal)
+      const enumColumns = new Set(enums.rows.map(row => String(row[0])))
+      if (enumColumns.size === 0) return '*'
+      const listed = await this.runCapped(connection,
+        'SELECT column_name FROM ' + quoteIdentifier(source.catalog) + '.information_schema.columns '
+        + 'WHERE table_schema = ' + quoteString(source.schema) + ' AND table_name = ' + quoteString(source.table) + ' '
+        + 'ORDER BY ordinal_position',
+        10_000, this.options.queryTimeoutMs, signal)
+      return listed.rows
+        .map((row) => {
+          const name = String(row[0])
+          return enumColumns.has(name) ? 'CAST(' + quoteIdentifier(name) + ' AS VARCHAR) AS ' + quoteIdentifier(name) : quoteIdentifier(name)
+        })
+        .join(', ')
     } finally {
       connection.disconnectSync()
     }
@@ -599,7 +636,10 @@ export class LakehouseEngineService extends Service {
    * @param signal - cancellation signal.
    * @returns the columns and full JSON-scalar row set.
    */
-  async readInternal(sql: string, signal?: AbortSignal): Promise<{ columns: LakehouseColumnDesc[]; rows: (null | boolean | number | string)[][] }> {
+  async readInternal(
+    sql: string,
+    signal?: AbortSignal,
+  ): Promise<{ columns: LakehouseColumnDesc[]; rows: (null | boolean | number | string)[][] }> {
     throwIfAborted(signal)
     const connection = await this.connect()
     try {

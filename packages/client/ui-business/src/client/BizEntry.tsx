@@ -1,34 +1,36 @@
 /**
- * The sidebar's business-page entry: a ledger glyph with the collection-count
+ * The main nav's business menu row: a ledger glyph with the table-count
  * badge (wide row shows the label too; the collapsed rail shows the icon
- * alone). The click dispatches on the session state — any session, blank
- * included, asks the view bridge to switch to the business tab, while no
- * session at all just refreshes the caches.
+ * alone). The click rides the seat's shared activation channel; the active
+ * mark follows the resolved navigation screen.
  * @module @deepseek-ai/dsh-client-ui-business/client/BizEntry
  */
 
 import { useEffect } from 'react'
 import type { JSX } from 'react'
 import type { SnapshotStore } from '@deepseek-ai/dsh-client-runtime/client'
+import { Tooltip } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
+import clsx from 'clsx'
 import type { BizClientState } from './bizStore.ts'
 import css from './entry.module.css'
 
-/** Registration-side business face for the sidebar entry. */
+/** The conversation view id this row activates. */
+const BUSINESS_VIEW = 'business'
+
+/** Registration-side business face for the nav menu row. */
 export interface BizEntryInjected {
   hooks: {
     /** Shared client-session snapshot bound by the renderer as useBusiness. */
     business: SnapshotStore<BizClientState>
   }
-  /** Load or reload the collection roster. */
+  /** Load or reload the table roster. */
   refresh: () => void
-  /** Best-effort switch to the business view tab. */
-  requestBusinessView: () => void
 }
 
-/** Full component props: the footer-action owner share plus the inject face and locale seat. */
+/** Full component props: the sidebar.nav owner share plus the inject face and locale seat. */
 export type BizEntryProps =
-  PropsRuntime<'sidebar.footer.action'>
+  PropsRuntime<'sidebar.nav'>
   & PropsLocale<'business'>
   & InjectFace<BizEntryInjected>
 
@@ -44,17 +46,13 @@ function LedgerGlyph(): JSX.Element {
 }
 
 /**
- * Render the sidebar entry.
- * @param props - the sidebar column state, the shared store hook, and the actions.
- * @returns the entry row (icon + label + badge, or the rail icon).
+ * Render the nav menu row.
+ * @param props - the nav column state, the shared store hook, and the seat's activation machinery.
+ * @returns the menu row (icon + label + badge, or the rail icon).
  */
-export function BizEntry(
-  { wide, useSessions, useBusiness, refresh, requestBusinessView, t }: BizEntryProps,
-): JSX.Element {
+export function BizEntry({ wide, useNavState, activate, useBusiness, refresh, t }: BizEntryProps): JSX.Element {
   const state = useBusiness(snapshot => snapshot)
-  // No session at all leaves the page unreachable through a view ring; every
-  // session — blank or active — owns its ring.
-  const noSession = useSessions(snapshot => snapshot.current === undefined)
+  const active = useNavState(nav => nav.screen?.view === BUSINESS_VIEW)
 
   useEffect(() => {
     if (state.collections === undefined) refresh()
@@ -65,21 +63,22 @@ export function BizEntry(
     ? undefined
     : collections.status === 'error'
       ? '?'
-      : String(collections.value.filter(entry => entry.hidden !== true).length)
+      : String(collections.value.length)
 
   return (
-    <button
-      type="button"
-      className={css.entry}
-      aria-label={t('entry.collectionsBadge')}
-      onClick={() => {
-        if (noSession) refresh()
-        else requestBusinessView()
-      }}
-    >
-      <LedgerGlyph />
-      {wide && <span className={css.label}>{t('entry.label')}</span>}
-      {badge !== undefined && <span className={css.badge}>{badge}</span>}
-    </button>
+    <Tooltip label={t('view.business')} delayMs={500} disabled={wide}>
+      <button
+        type="button"
+        className={clsx(css.entry, !wide && css.rail)}
+        data-active={active || undefined}
+        aria-current={active ? 'page' : undefined}
+        aria-label={t('view.business')}
+        onClick={() => { activate(BUSINESS_VIEW) }}
+      >
+        <LedgerGlyph />
+        {wide && <span className={css.label}>{t('entry.label')}</span>}
+        {badge !== undefined && <span className={css.badge}>{badge}</span>}
+      </button>
+    </Tooltip>
   )
 }

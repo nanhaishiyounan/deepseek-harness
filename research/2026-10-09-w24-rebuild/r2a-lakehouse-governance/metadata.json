@@ -1,0 +1,42 @@
+{
+  "date": "2026-10-09",
+  "topic": "R2a 湖仓 + 数据治理开源选型 L4 深度调研（W24 轮前置研究）",
+  "depth": "Exhaustive",
+  "sourceCount": 62,
+  "queries": [
+    "open source lakehouse stack 2026 Iceberg Delta Hudi comparison",
+    "Apache Iceberg DuckDB single machine local lakehouse",
+    "Apache Gravitino vs Polaris vs Nessie catalog 2026",
+    "OpenMetadata vs DataHub 2026 comparison",
+    "Flink CDC vs Debezium vs SeaTunnel PostgreSQL 2026",
+    "lakehouse LLM agent text-to-SQL Iceberg",
+    "湖仓一体 开源选型 单机"
+  ],
+  "clonedRepos": [
+    {
+      "name": "iceberg-python",
+      "url": "https://github.com/apache/iceberg-python",
+      "commit": "main@2026-10-09",
+      "sizeMB": 3.1,
+      "keyFindings": "SqlCatalog 双表 schema + 写 API 全集（append/upsert/overwrite/delete）+ maintenance 仅 expire_snapshots；pyarrow≥18 为 extra 而非核心依赖"
+    },
+    {
+      "name": "vanna",
+      "url": "https://github.com/vanna-ai/vanna",
+      "commit": "main@2026-10-09",
+      "sizeMB": 5.8,
+      "keyFindings": "legacy/base/base.py 三段式 prompt 模板 + sqlparse SELECT 白名单 + 内容寻址训练数据 id；2.x 已重写为 Agent 架构，经典 RAG 在 legacy/"
+    }
+  ],
+  "assets": {
+    "images": [],
+    "attachments": [],
+    "totalSizeMB": 8.9
+  },
+  "triangulation": {
+    "claimsTotal": 96,
+    "claimsMultiSourced": 81,
+    "contradictionsFound": 26,
+    "contradictionsResolved": 26
+  }
+}

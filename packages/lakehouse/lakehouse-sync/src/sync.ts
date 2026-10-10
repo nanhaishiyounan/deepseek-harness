@@ -201,7 +201,14 @@ export class LakehouseSyncService extends Service {
   /** Sync one table: probe the watermark candidates, then append or replace. */
   private async syncOne(table: string, signal?: AbortSignal): Promise<SyncTableResult> {
     const source: SourceTableRef = { catalog: SRC_ALIAS, schema: this.source.schema, table }
-    const watermarkColumn = await this.probeWatermarkColumn(this.source.schema, table)
+    let watermarkColumn = await this.probeWatermarkColumn(this.source.schema, table)
+    if (watermarkColumn !== undefined) {
+      // A cursor column whose values are all NULL carries no change signal
+      // (carbon maintains updatedAt only through its application layer, so
+      // rows written over PostgREST stay NULL) — fall back to replace mode.
+      const head = await this.engine.readSourceWatermark(source, watermarkColumn, signal)
+      if (head === null) watermarkColumn = undefined
+    }
     if (watermarkColumn === undefined) {
       await this.engine.replaceTableFromSource(this.source.targetSchema, table, source, signal)
       const outcome = await this.engine.query(

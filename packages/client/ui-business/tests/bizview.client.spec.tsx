@@ -28,7 +28,7 @@ const ROSTER_READY: NonNullable<BizClientState['collections']> = {
   value: [
     { name: 'orders', title: '订单', fields: [] },
     { name: 'customers', title: '客户', fields: [] },
-    { name: 'auditLogs', title: '审计', hidden: true, fields: [] },
+    { name: 'auditLogs', title: '审计', fields: [] },
   ],
 }
 
@@ -43,7 +43,7 @@ const WIDE_ROSTER: NonNullable<BizClientState['collections']> = {
     { name: 'customers', title: '客户', fields: [] },
     { name: 'suppliers', title: '供应商', fields: [] },
     { name: 'rawData', fields: [] },
-    { name: 'auditLogs', title: '审计', hidden: true, fields: [] },
+    { name: 'auditLogs', title: '审计', fields: [] },
   ],
 }
 
@@ -54,8 +54,8 @@ const ROWS_READY: NonNullable<BizClientState['rows']> = {
     page: 1,
     page_size: 20,
     rows: [
-      { id: 9, orderNo: 'SO-009', status: 'pending', amount: 1200 },
-      { id: 12, orderNo: 'SO-012', status: 'shipped', amount: 800 },
+      { id: 'row_9', orderNo: 'SO-009', status: 'pending', amount: 1200 },
+      { id: 'row_12', orderNo: 'SO-012', status: 'shipped', amount: 800 },
     ],
   },
 }
@@ -91,19 +91,22 @@ function mount(state: BizClientState, updateRow: BizViewInjected['updateRow'] = 
 }
 
 afterEach(cleanup)
+
+/** Nav-state store stub for the entry mounts. */
+const navStore = createSnapshotStore({ screen: undefined })
 // The frecency log persists across specs; reset it so bucket contents stay
 // per-test.
 afterEach(() => { localStorage.removeItem('dsh-biz-recent-collections') })
 
 describe('presentation helpers', () => {
   it('prefers title-ish fields for the card label, then the id', () => {
-    expect(entityLabelOf({ id: 3, orderNo: 'SO-3', status: 'x' }, '订单')).toBe('SO-3')
+    expect(entityLabelOf({ id: 'row_3', orderNo: 'SO-3', status: 'x' }, '订单')).toBe('SO-3')
     expect(entityLabelOf({ id: 5 }, '客户')).toBe('5')
     expect(entityLabelOf({}, '客户')).toBe('客户…')
   })
 
   it('cuts the preview to scalars, skipping hidden and object cells', () => {
-    const pairs = entityPreviewOf({ id: 1, name: '宏发', amount: 30, tags: ['a'], createdAt: 'x', note: '' }, 3)
+    const pairs = entityPreviewOf({ id: 'row_1', name: '宏发', amount: 30, tags: ['a'], createdAt: 'x', note: '' }, 3)
     expect(pairs).toEqual([['name', '宏发'], ['amount', '30']])
   })
 })
@@ -170,7 +173,7 @@ describe('BizView cards and handoffs', () => {
     mountReady()
     expect(document.querySelector('iframe')).toBeNull()
     const link = screen.getByRole('link', { name: new RegExp(zh['embed.open'], 'u') })
-    expect(link.getAttribute('href')).toBe('/nocobase/')
+    expect(link.getAttribute('href')).toBe('/carbon/')
     expect(link.getAttribute('target')).toBe('_blank')
     expect(link.getAttribute('rel')).toContain('noopener')
     expect(link.getAttribute('rel')).toContain('noreferrer')
@@ -200,19 +203,20 @@ describe('BizEntry', () => {
       <BizEntry
         {...GLOBAL_KIT}
         wide
-        useSessions={bindStoreHook(sessions) as never}
+        useSessions={bindStoreHook(sessions ?? sessions) as never}
+        useNavState={bindStoreHook(navStore) as never}
         useBusiness={bindStoreHook(store) as never}
         refresh={refresh}
-        requestBusinessView={requestBusinessView}
+        activate={requestBusinessView}
         t={t}
       />,
     )
-    // The ready roster means no reload on mount; the hidden collection stays
-    // out of the badge.
+    // The ready roster means no reload on mount; the badge counts every
+    // catalog table (the carbon roster carries no hidden rows).
     expect(refresh).not.toHaveBeenCalled()
-    expect(screen.getByText('2')).toBeTruthy()
-    fireEvent.click(screen.getByRole('button', { name: zh['entry.collectionsBadge'] }))
-    expect(requestBusinessView).toHaveBeenCalled()
+    expect(screen.getByText('3')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: zh['view.business'] }))
+    expect(requestBusinessView).toHaveBeenCalledWith('business')
   })
 })
 
@@ -281,8 +285,8 @@ describe('BizView supplier 360', () => {
             id: 1, name: '宏发', 许可证: isoIn(30), 资质证书: isoIn(-10),
             审核记录: '该供应商已通过二〇二六年度食品安全管理体系全程复审与现场核查',
           },
-          { id: 2, name: '远大', 证书编号: distantAt, 许可证号: 'XK-2026' },
-          { id: 3, name: '无证行', contact: '—' },
+          { id: 'row_2', name: '远大', 证书编号: distantAt, 许可证号: 'XK-2026' },
+          { id: 'row_3', name: '无证行', contact: '—' },
         ],
       },
     })
@@ -316,7 +320,7 @@ describe('BizView supplier 360', () => {
     expect(screen.queryByTestId('biz-supplier-360')).toBeNull()
     mountSuppliers({
       status: 'ready',
-      value: { count: 1, page: 1, page_size: 20, rows: [{ id: 1, name: '宏发', contact: '—' }] },
+      value: { count: 1, page: 1, page_size: 20, rows: [{ id: 'row_1', name: '宏发', contact: '—' }] },
     })
     expect(screen.queryByTestId('biz-supplier-360')).toBeNull()
   })
@@ -338,7 +342,7 @@ describe('BizView rows and table', () => {
     const { loadMore } = mount({
       collections: WIDE_ROSTER,
       selected: 'orders',
-      rows: { status: 'ready', value: { count: 30, page: 1, page_size: 20, rows: [{ id: 9, orderNo: 'SO-009' }] } },
+      rows: { status: 'ready', value: { count: 30, page: 1, page_size: 20, rows: [{ id: 'row_9', orderNo: 'SO-009' }] } },
     })
     fireEvent.click(screen.getByRole('button', { name: zh['table.showAsTable'] }))
     fireEvent.click(screen.getByRole('button', { name: zh['table.more'] }))
@@ -349,7 +353,7 @@ describe('BizView rows and table', () => {
     mount({
       collections: WIDE_ROSTER,
       selected: 'customers',
-      rows: { status: 'ready', value: { count: 1, page: 1, page_size: 20, rows: [{ id: 3, name: '华南食品', remark: '重点' }] } },
+      rows: { status: 'ready', value: { count: 1, page: 1, page_size: 20, rows: [{ id: 'row_3', name: '华南食品', remark: '重点' }] } },
     })
     expect(screen.queryAllByTestId('biz-order-status')).toHaveLength(0)
     // The inline-edit cell renders its text without the badge row; the value
@@ -365,8 +369,8 @@ describe('BizView inline edit', () => {
     value: {
       count: 2, page: 1, page_size: 20,
       rows: [
-        { id: 9, orderNo: 'SO-009', remark: null, 数量: 12, 备注文本: '加急' },
-        { id: 6, orderNo: 'SO-006', qty: true, note: Symbol('meta'), date: '2026-01-01' },
+        { id: 'row_9', orderNo: 'SO-009', remark: null, 数量: 12, 备注文本: '加急' },
+        { id: 'row_6', orderNo: 'SO-006', qty: true, note: Symbol('meta'), date: '2026-01-01' },
       ],
     },
   }
@@ -387,12 +391,12 @@ describe('BizView inline edit', () => {
 
   it('edits a string field through the save button and reloads the page', async () => {
     const { updateRow, loadRows } = mount({ collections: WIDE_ROSTER, selected: 'orders', rows: INLINE_ROWS })
-    fireEvent.click(screen.getAllByTestId('biz-inline-edit')[0]!)
+    fireEvent.click(screen.getAllByTestId('biz-inline-edit').at(0) as HTMLElement)
     const input = screen.getByLabelText('remark')
     expect((input as HTMLInputElement).value).toBe('')
     fireEvent.change(input, { target: { value: '电话确认过' } })
     fireEvent.click(screen.getByRole('button', { name: zh['inline.save'] }))
-    await waitFor(() => { expect(updateRow).toHaveBeenCalledWith('orders', 9, { remark: '电话确认过' }) })
+    await waitFor(() => { expect(updateRow).toHaveBeenCalledWith('orders', 'row_9', { remark: '电话确认过' }) })
     // A committed edit closes the editor and re-reads the collection.
     await waitFor(() => { expect(loadRows).toHaveBeenCalledWith('orders') })
     expect(screen.queryByLabelText('remark')).toBeNull()
@@ -406,22 +410,22 @@ describe('BizView inline edit', () => {
     let input = screen.getByLabelText('数量')
     fireEvent.change(input, { target: { value: '40' } })
     fireEvent.keyDown(input, { key: 'Enter' })
-    await waitFor(() => { expect(updateRow).toHaveBeenCalledWith('orders', 9, { 数量: 40 }) })
+    await waitFor(() => { expect(updateRow).toHaveBeenCalledWith('orders', 'row_9', { 数量: 40 }) })
     await waitFor(() => { expect(screen.queryByLabelText('数量')).toBeNull() })
     // A non-numeric draft keeps its raw string instead of a NaN.
     fireEvent.click(screen.getAllByTestId('biz-inline-edit')[1]!)
     input = screen.getByLabelText('数量')
     fireEvent.change(input, { target: { value: '许多' } })
     fireEvent.keyDown(input, { key: 'Enter' })
-    await waitFor(() => { expect(updateRow).toHaveBeenCalledWith('orders', 9, { 数量: '许多' }) })
+    await waitFor(() => { expect(updateRow).toHaveBeenCalledWith('orders', 'row_9', { 数量: '许多' }) })
   })
 
   it('cancels an edit through Escape and the cancel button', () => {
     mount({ collections: WIDE_ROSTER, selected: 'orders', rows: INLINE_ROWS })
-    fireEvent.click(screen.getAllByTestId('biz-inline-edit')[0]!)
+    fireEvent.click(screen.getAllByTestId('biz-inline-edit').at(0) as HTMLElement)
     fireEvent.keyDown(screen.getByLabelText('remark'), { key: 'Escape' })
     expect(screen.queryByLabelText('remark')).toBeNull()
-    fireEvent.click(screen.getAllByTestId('biz-inline-edit')[0]!)
+    fireEvent.click(screen.getAllByTestId('biz-inline-edit').at(0) as HTMLElement)
     fireEvent.click(screen.getByRole('button', { name: zh['inline.cancel'] }))
     expect(screen.queryByLabelText('remark')).toBeNull()
   })
@@ -432,7 +436,7 @@ describe('BizView inline edit', () => {
       release = () => { resolve({}) }
     }))
     mount({ collections: WIDE_ROSTER, selected: 'orders', rows: INLINE_ROWS }, gated)
-    fireEvent.click(screen.getAllByTestId('biz-inline-edit')[0]!)
+    fireEvent.click(screen.getAllByTestId('biz-inline-edit').at(0) as HTMLElement)
     const input = screen.getByLabelText('remark')
     fireEvent.change(input, { target: { value: 'a' } })
     fireEvent.keyDown(input, { key: 'Enter' })
@@ -445,18 +449,18 @@ describe('BizView inline edit', () => {
     // A refusal surfaces its message; reopening the editor clears it.
     cleanup()
     mount({ collections: WIDE_ROSTER, selected: 'orders', rows: INLINE_ROWS }, vi.fn(() => Promise.reject(new Error('nb_update refused'))))
-    fireEvent.click(screen.getAllByTestId('biz-inline-edit')[0]!)
+    fireEvent.click(screen.getAllByTestId('biz-inline-edit').at(0) as HTMLElement)
     fireEvent.change(screen.getByLabelText('remark'), { target: { value: 'b' } })
     fireEvent.click(screen.getByRole('button', { name: zh['inline.save'] }))
     await waitFor(() => { expect(screen.getByRole('alert').textContent).toBe('nb_update refused') })
-    fireEvent.click(screen.getAllByTestId('biz-inline-edit')[0]!)
+    fireEvent.click(screen.getAllByTestId('biz-inline-edit').at(0) as HTMLElement)
     expect(screen.queryByRole('alert')).toBeNull()
 
     // A non-Error refusal stringifies.
     cleanup()
     // oxlint-disable-next-line typescript/prefer-promise-reject-errors -- the non-Error refusal is the stringify case under test.
     mount({ collections: WIDE_ROSTER, selected: 'orders', rows: INLINE_ROWS }, vi.fn(() => Promise.reject('plain refusal')))
-    fireEvent.click(screen.getAllByTestId('biz-inline-edit')[0]!)
+    fireEvent.click(screen.getAllByTestId('biz-inline-edit').at(0) as HTMLElement)
     fireEvent.change(screen.getByLabelText('remark'), { target: { value: 'c' } })
     fireEvent.click(screen.getByRole('button', { name: zh['inline.save'] }))
     await waitFor(() => { expect(screen.getByRole('alert').textContent).toBe('plain refusal') })

@@ -52,6 +52,7 @@
     "@deepseek-ai/dsh-brand": "workspace:^",
     "@deepseek-ai/dsh-commands": "workspace:^",
     "@deepseek-ai/dsh-connector": "workspace:^",
+    "@deepseek-ai/dsh-connector-carbon": "workspace:^",
     "@deepseek-ai/dsh-connector-nocobase": "workspace:^",
     "@deepseek-ai/dsh-credentials": "workspace:^",
     "@deepseek-ai/dsh-expert-orders": "workspace:^",
