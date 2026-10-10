@@ -19,7 +19,7 @@ function fakeApi(overrides: Partial<{ muxFrames: MuxFrame[]; hostFrames: HostFra
     ({ rpcId: request.rpcId, result: { ok: false, error: { code: 'internal', message: 'kb stub', details: {} } } })
   return {
     data: { upload: kbRefuse, describeImage: kbRefuse, extractText: kbRefuse },
-    lakehouse: { overview: kbRefuse },
+    lakehouse: { overview: kbRefuse, tables: kbRefuse, query: kbRefuse, schema: kbRefuse },
     orders: {
       create: kbRefuse,
       get: kbRefuse,

@@ -7,7 +7,8 @@
  */
 
 import { globSync, readFileSync, writeFileSync } from 'node:fs'
-import { basename, resolve } from 'node:path'
+import { basename, join, resolve } from 'node:path'
+import { tmpdir } from 'node:os'
 import { Context } from '@deepseek-ai/cordis'
 import type { ToolSchema } from '@deepseek-ai/dsh-llm'
 import AgentRegistry from '@deepseek-ai/dsh-agent'
@@ -37,6 +38,7 @@ import * as ToolKb from '@deepseek-ai/dsh-tool-kb'
 import LakehouseRuntime from '@deepseek-ai/dsh-lakehouse'
 import type { EngineTableRef, LakehouseQueryResult, QueryProvider } from '@deepseek-ai/dsh-lakehouse'
 import * as LakehouseSqliteCatalog from '@deepseek-ai/dsh-lakehouse-sqlite-catalog'
+import * as LakehouseEngine from '@deepseek-ai/dsh-lakehouse-engine'
 import * as ToolLakehouse from '@deepseek-ai/dsh-tool-lakehouse'
 import ConnectorRuntime from '@deepseek-ai/dsh-connector'
 import type { ConnectorDatasetRef, ConnectorProvider } from '@deepseek-ai/dsh-connector'
@@ -253,16 +255,16 @@ const TOOL_PACKAGES: ToolPackage[] = [
     pkg: '@deepseek-ai/dsh-tool-lakehouse',
     dir: 'tool-lakehouse',
     source: 'packages/lakehouse/tool-lakehouse/src/index.ts',
-    requires: ['ctx.tools', 'ctx.lakehouse', 'ctx.systemPrompt'],
+    requires: ['ctx.tools', 'ctx.lakehouseEngine', 'ctx.systemPrompt'],
     writes: ['tool/call', 'tool/result'],
     async mount(ctx) {
-      await ctx.plugin(LakehouseRuntime)
-      await ctx.plugin(LakehouseSqliteCatalog, { path: ':memory:' })
-      ctx.lakehouse.registerQueryProvider(new CatalogEngineStub())
-      await ctx.plugin(ToolLakehouse, { tenant: 'catalog' })
+      await ctx.plugin(LakehouseEngine, {
+        catalog: { kind: 'ducklake', catalogPath: join(tmpdir(), `dsh-tool-catalog-lake-${String(Date.now())}.ducklake`) },
+      })
+      await ctx.plugin(ToolLakehouse)
     },
     note:
-      'lakehouse_tables and lakehouse_query stay visible without a usable engine and fail with a structured error at execution time (the catalog listing keeps answering); both run under the deployment-bound tenant (the model never supplies one), query results are capped rows with a truncation marker, and the rendered text carries the source-table attribution line.',
+      'lakehouse_list_tables, lakehouse_query, and lakehouse_schema stay visible without a usable engine and fail with a structured error at execution time; query results are capped rows with a truncation marker, the read-only statement guard rejects writes and multi-statement text before DuckDB, and the rendered text carries the source-table attribution line.',
   },
   {
     pkg: '@deepseek-ai/dsh-tool-connector',

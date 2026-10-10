@@ -1,0 +1,84 @@
+/* The nav's lakehouse menu row (a copy of the canonical nav-item spec
+   ui-nav ships for its chat row). Colors ride the --dsw-alias-* /
+   --dsw-specific-* semantic tokens (docs/web-styling.md). */
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  min-width: 0;
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  cursor: pointer;
+  color: var(--dsw-alias-label-primary);
+  font: var(--dsw-font-s-14);
+  transition:
+    background-color var(--ds-transition-duration-fast) var(--ds-ease-in-out),
+    color var(--ds-transition-duration-fast) var(--ds-ease-in-out);
+}
+
+.item:hover {
+  background: var(--dsw-specific-sidebar-nav-item-hover);
+}
+
+.item:active {
+  background: var(--dsw-specific-sidebar-nav-item-active);
+}
+
+/* The active row: soft fill plus the brand accent bar on the leading edge. */
+.item[data-active] {
+  position: relative;
+  background: var(--dsw-specific-sidebar-nav-item-active);
+}
+
+.item[data-active]::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7px;
+  bottom: 7px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--dsw-specific-sidebar-nav-item-active-accent);
+}
+
+.item[data-active]:hover {
+  background: var(--dsw-specific-sidebar-nav-item-active);
+}
+
+.item:focus-visible {
+  outline: 2px solid var(--dsw-alias-state-business-primary);
+  outline-offset: 1px;
+}
+
+/* The collapsed rail shows the icon alone, centered. */
+.rail {
+  justify-content: center;
+  padding: 0;
+}
+
+.label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+/* The table-count badge. */
+.badge {
+  flex: none;
+  min-width: 18px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: var(--dsw-alias-fill-secondary);
+  color: var(--dsw-alias-label-secondary);
+  font: var(--dsw-font-s-12);
+  text-align: center;
+}

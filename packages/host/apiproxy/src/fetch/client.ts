@@ -76,7 +76,9 @@ import {
 import { dataDescribeImageValueSchema, dataExtractTextValueSchema, dataUploadValueSchema } from '../api/data.schema.ts'
 import { orderValueSchema, ordersListValueSchema } from '../api/orders.schema.ts'
 import { assetDetailValueSchema, assetsListValueSchema, assetsStatsValueSchema } from '../api/assets.schema.ts'
-import { lakehouseOverviewValueSchema } from '../api/lakehouse.schema.ts'
+import {
+  lakehouseOverviewValueSchema, lakehouseTablesValueSchema, lakehouseQueryValueSchema, lakehouseSchemaValueSchema,
+} from '../api/lakehouse.schema.ts'
 import {
   connectorsConnectionsValueSchema, connectorsListValueSchema, connectorsTransfersValueSchema,
 } from '../api/connectors.schema.ts'
@@ -204,6 +206,9 @@ export interface IApiClient {
   }
   lakehouse: {
     overview(payload: RequestPayload<'lakehouse.overview'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'lakehouse.overview'>>>
+    tables(payload: RequestPayload<'lakehouse.tables'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'lakehouse.tables'>>>
+    query(payload: RequestPayload<'lakehouse.query'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'lakehouse.query'>>>
+    schema(payload: RequestPayload<'lakehouse.schema'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'lakehouse.schema'>>>
   }
   connectors: {
     list(payload: RequestPayload<'connectors.list'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'connectors.list'>>>
@@ -316,6 +321,9 @@ const UNARY_VALUE_SCHEMAS: { [K in keyof RpcMethodMap]: z.ZodType<Wire<ResponseV
   'assets.detail': assetDetailValueSchema,
   'assets.stats': assetsStatsValueSchema,
   'lakehouse.overview': lakehouseOverviewValueSchema,
+  'lakehouse.tables': lakehouseTablesValueSchema,
+  'lakehouse.query': lakehouseQueryValueSchema,
+  'lakehouse.schema': lakehouseSchemaValueSchema,
   'connectors.list': connectorsListValueSchema,
   'connectors.connections': connectorsConnectionsValueSchema,
   'connectors.transfers': connectorsTransfersValueSchema,
@@ -649,6 +657,10 @@ export abstract class AbstractApiClient implements IApiClient {
   readonly lakehouse: IApiClient['lakehouse'] = {
     // The overview evaluates the seed's KPI SQL; the caller's signal alone bounds it.
     overview: (payload, signal) => this.callUnary('lakehouse.overview', payload, signal, 'caller-signal-only'),
+    // Catalog reads and queries ride the engine; the caller's signal alone bounds them.
+    tables: (payload, signal) => this.callUnary('lakehouse.tables', payload, signal, 'caller-signal-only'),
+    query: (payload, signal) => this.callUnary('lakehouse.query', payload, signal, 'caller-signal-only'),
+    schema: (payload, signal) => this.callUnary('lakehouse.schema', payload, signal, 'caller-signal-only'),
   }
 
   readonly connectors: IApiClient['connectors'] = {

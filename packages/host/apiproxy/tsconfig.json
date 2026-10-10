@@ -21,6 +21,9 @@
       "path": "../../lakehouse/lakehouse"
     },
     {
+      "path": "../../lakehouse/lakehouse-engine"
+    },
+    {
       "path": "../../expert/expert-orders"
     },
     {

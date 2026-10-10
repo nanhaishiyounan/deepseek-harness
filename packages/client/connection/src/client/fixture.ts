@@ -3314,6 +3314,35 @@ function createFixtureWorld(options: FixtureOptions): FixtureWorld {
           { id: 'price-rises', label: '原料涨价项', value: 7, trend: -2 },
         ],
       }),
+      // The lakehouse workbench's deterministic fixtures: one legacy table
+      // plus one synced table, one schema card, and one query result (the
+      // assembled snapshot pins the catalog row; the live gateway evaluates
+      // against the DuckLake engine instead).
+      tables: request => ok(request, {
+        tables: [
+          { ref: 'lake.legacy_nocobase.so_orders', schema: 'legacy_nocobase', table: 'so_orders', row_count: 13 },
+          { ref: 'lake.synced_nocobase.wfl_mobile_work', schema: 'synced_nocobase', table: 'wfl_mobile_work', row_count: 18 },
+        ],
+      }),
+      query: request => ok(request, {
+        sql: request.payload.sql,
+        columns: [
+          { name: 'month', type: 'VARCHAR' },
+          { name: 'orders', type: 'BIGINT' },
+        ],
+        rows: [['2026-08', 8], ['2026-09', 5]],
+        row_count: 2,
+        truncated: false,
+      }),
+      schema: request => ok(request, {
+        ref: `lake.${request.payload.schema}.${request.payload.table}`,
+        columns: [
+          { name: 'id', type: 'BIGINT' },
+          { name: 'code', type: 'VARCHAR' },
+        ],
+        row_count: 13,
+        sample_rows: [[1, 'SO-2026-001']],
+      }),
     },
 
     connectors: {
@@ -3619,6 +3648,9 @@ export class FixtureApiClient extends AbstractApiClient {
       case 'assets.detail': return this.api.assets.detail(request, signal)
       case 'assets.stats': return this.api.assets.stats(request, signal)
       case 'lakehouse.overview': return this.api.lakehouse.overview(request, signal)
+      case 'lakehouse.tables': return this.api.lakehouse.tables(request, signal)
+      case 'lakehouse.query': return this.api.lakehouse.query(request, signal)
+      case 'lakehouse.schema': return this.api.lakehouse.schema(request, signal)
       case 'connectors.list': return this.api.connectors.list(request, signal)
       case 'connectors.connections': return this.api.connectors.connections(request, signal)
       case 'connectors.transfers': return this.api.connectors.transfers(request, signal)

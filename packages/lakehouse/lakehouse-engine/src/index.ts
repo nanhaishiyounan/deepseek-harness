@@ -1,0 +1,102 @@
+/**
+ * Service Definition and DuckDB provider for the lakehouse engine capability
+ * (`ctx.lakehouseEngine`): an in-process DuckDB instance with the configured
+ * table catalog attached. Consumers are the tool suite (`tool-lakehouse`),
+ * the sync pipeline (`lakehouse-sync`), and the gateway's lakehouse domain.
+ * @module @deepseek-ai/dsh-lakehouse-engine
+ */
+
+import type { Context } from '@deepseek-ai/cordis'
+import z from '@deepseek-ai/schemastery'
+import { DEFAULT_MAX_ROWS, DEFAULT_QUERY_TIMEOUT_MS, LakehouseEngineService } from './engine.ts'
+import type { LakehouseCatalogConfig } from './catalog.ts'
+
+export { LAKE_ALIAS, quoteIdentifier, quoteString, resolveCatalogAttach } from './catalog.ts'
+export type { CatalogAttach, DuckLakeCatalogConfig, LakehouseCatalogConfig } from './catalog.ts'
+export {
+  assertNonBlank, assertReadOnlySql, readOnlyVerdict, SqlGuardError,
+} from './sql-guard.ts'
+export type { SqlGuardCode, SqlGuardVerdict } from './sql-guard.ts'
+export {
+  DEFAULT_MAX_ROWS, DEFAULT_QUERY_TIMEOUT_MS, LakehouseEngineError, LakehouseEngineService,
+} from './engine.ts'
+export type {
+  LakehouseColumnDesc, LakehouseEngineDeps, LakehouseEngineErrorCode, LakehouseEngineOptions,
+  LakehouseQueryOutcome, LakehouseTableSummary, QueryOptions, SourceTableRef,
+} from './engine.ts'
+
+declare module '@deepseek-ai/cordis' {
+  interface Context {
+    lakehouseEngine: LakehouseEngineService
+  }
+}
+
+/** Default catalog file, workspace-relative. */
+const DEFAULT_CATALOG_PATH = 'workspace/lakehouse/ducklake/catalog.ducklake'
+
+/** Plugin configuration (the catalog `kind` validates at load: only `ducklake` exists at Tier 0). */
+export interface Config {
+  /** The attached table catalog; `kind: 'ducklake'` is the Tier 0 member. */
+  readonly catalog?: { readonly kind: string; readonly catalogPath: string; readonly dataPath?: string }
+  /** DuckDB memory limit in MB; omitted = DuckDB's own default. */
+  readonly memoryLimitMb?: number
+  /** DuckDB worker-thread count; omitted = DuckDB's own default. */
+  readonly threads?: number
+  /** Read-query row cap; defaults to 200. */
+  readonly maxRows?: number
+  /** Read-query time budget in ms; defaults to 30000. */
+  readonly queryTimeoutMs?: number
+  /** Try `INSTALL` when an extension `LOAD` fails; defaults to true. */
+  readonly extensionAutoinstall?: boolean
+}
+
+export const Config: z<Config> = z.object({
+  catalog: z.object({
+    kind: z.string().default('ducklake'),
+    catalogPath: z.string().default(DEFAULT_CATALOG_PATH),
+    dataPath: z.string(),
+  }),
+  memoryLimitMb: z.number().step(1).min(1),
+  threads: z.number().step(1).min(1),
+  maxRows: z.number().step(1).min(1).default(DEFAULT_MAX_ROWS),
+  queryTimeoutMs: z.number().step(1).min(1).default(DEFAULT_QUERY_TIMEOUT_MS),
+  extensionAutoinstall: z.boolean().default(true),
+})
+
+/**
+ * Register the engine service and open it. A missing native module degrades
+ * to an unavailable engine (one operator warning; every surface method then
+ * fails loud with `LAKEHOUSE_ENGINE_UNAVAILABLE`). A catalog attach failure
+ * on a working instance is a configuration error and fails composition.
+ * @param ctx - context whose `lakehouseEngine` service this registers.
+ * @param config - validated plugin configuration.
+ */
+export async function apply(ctx: Context, config: Config): Promise<void> {
+  // schemastery (Config) has already filled every defaulted field.
+  if (config.catalog !== undefined && config.catalog.kind !== 'ducklake') {
+    throw new Error(`lakehouse-engine: unsupported catalog kind "${config.catalog.kind}" (Tier 0 ships ducklake only)`)
+  }
+  const catalog: LakehouseCatalogConfig = config.catalog === undefined
+    ? { kind: 'ducklake', catalogPath: DEFAULT_CATALOG_PATH }
+    : {
+      kind: 'ducklake',
+      catalogPath: config.catalog.catalogPath,
+      ...(config.catalog.dataPath === undefined ? {} : { dataPath: config.catalog.dataPath }),
+    }
+  const service = new LakehouseEngineService(ctx, {
+    catalog,
+    ...(config.memoryLimitMb === undefined ? {} : { memoryLimitMb: config.memoryLimitMb }),
+    ...(config.threads === undefined ? {} : { threads: config.threads }),
+    ...(config.maxRows === undefined ? {} : { maxRows: config.maxRows }),
+    ...(config.queryTimeoutMs === undefined ? {} : { queryTimeoutMs: config.queryTimeoutMs }),
+    ...(config.extensionAutoinstall === undefined ? {} : { extensionAutoinstall: config.extensionAutoinstall }),
+  })
+  ctx.effect(() => () => {
+    service.close()
+  }, 'lakehouse-engine.dispose')
+  await service.open()
+  /* v8 ignore next 3 -- only reachable on hosts whose native module failed to load. */
+  if (!service.available() && service.openFailure() !== undefined) {
+    ctx.logger.warn(`lakehouse-engine: ${service.openFailure()}`)
+  }
+}

@@ -1,0 +1,9 @@
+[1] version: v1.5.5
+[2] LOAD postgres: OK
+[2] LOAD ducklake: OK
+[3] PG ATTACH orders count: 76
+[3b] PG ATTACH so_orders count: 13
+[3c] WRITE to READ_ONLY attach rejected: Error: Invalid Input Error: Cannot execute statement of type "INSERT" on database "srcpg" which is attached in read-only
+[4] DuckLake write+read count: 3
+[5] DuckLake reattach persisted count: 3
+[done]

@@ -1,6 +1,6 @@
 {
   "name": "@deepseek-ai/dsh-tool-lakehouse",
-  "description": "Model-facing lakehouse_tables and lakehouse_query tools over the lakehouse seam",
+  "description": "Model-facing lakehouse_list_tables, lakehouse_query, and lakehouse_schema tools over the lakehouse engine",
   "version": "0.1.1-rc.2",
   "publishConfig": {
     "access": "public"
@@ -35,7 +35,7 @@
   "peerDependencies": {
     "@deepseek-ai/cordis": "workspace:^",
     "@deepseek-ai/dsh-invariants": "workspace:^",
-    "@deepseek-ai/dsh-lakehouse": "workspace:^",
+    "@deepseek-ai/dsh-lakehouse-engine": "workspace:^",
     "@deepseek-ai/dsh-system-prompt": "workspace:^",
     "@deepseek-ai/dsh-tools": "workspace:^"
   },
@@ -45,7 +45,7 @@
   "devDependencies": {
     "@deepseek-ai/cordis": "workspace:^",
     "@deepseek-ai/dsh-invariants": "workspace:^",
-    "@deepseek-ai/dsh-lakehouse": "workspace:^",
+    "@deepseek-ai/dsh-lakehouse-engine": "workspace:^",
     "@deepseek-ai/dsh-system-prompt": "workspace:^",
     "@deepseek-ai/dsh-tools": "workspace:^",
     "typescript": "^6.0.3"

@@ -1,23 +1,22 @@
 /**
- * The model-facing `lakehouse_query` tool: one SQL statement over the bound
- * tenant's registered lakehouse tables, with column metadata, the row set
- * (cut to the seam's `maxRows`), the truncation marker, and the source-table
- * attribution line. Execution goes through `ctx.lakehouse.query` — the
- * engine only ever sees this tenant's tables, so cross-tenant references
- * fail as unknown tables.
+ * The model-facing `lakehouse_query` tool: one read-only SQL statement over
+ * the lakehouse catalog (`lake.<schema>.<table>` references). The engine's
+ * statement-shape guard rejects anything that is not a single read statement
+ * before it reaches DuckDB; the row and time budgets bound the result. The
+ * rendered output keeps the markdown result table, the truncation note, and
+ * the `Data source: lakehouse table(s) …` attribution line the conversation
+ * source-trail parses.
  * @module @deepseek-ai/dsh-tool-lakehouse/query
  */
 
 import type { Context } from '@deepseek-ai/cordis'
 import { defineTool } from '@deepseek-ai/dsh-tools'
 import type { GenericCallView, GenericResultView, ToolResult } from '@deepseek-ai/dsh-tools'
-import type { LakehouseQueryResult } from '@deepseek-ai/dsh-lakehouse'
+import type { LakehouseQueryOutcome, LakehouseTableSummary } from '@deepseek-ai/dsh-lakehouse-engine'
 
 /** Model-facing `lakehouse_query` arguments. */
 export interface LakehouseQueryArgs {
   sql: string
-  /** Always rejected at parse time: the tenant is the deployment-side binding, never model input. */
-  tenant?: string
 }
 
 /** Validated `lakehouse_query` input. */
@@ -26,15 +25,11 @@ export interface LakehouseQueryInput {
 }
 
 /**
- * Validate the arguments the schema DSL cannot constrain: non-blank SQL and
- * no model-supplied `tenant`.
+ * Validate the arguments the schema DSL cannot constrain: non-blank SQL.
  * @param args - the schema-validated `lakehouse_query` arguments.
  * @returns the validated query input.
  */
 export function parseQueryArgs(args: LakehouseQueryArgs): LakehouseQueryInput {
-  if (args.tenant !== undefined) {
-    throw new Error('lakehouse_query: the tenant is bound by the deployment; a tenant argument is not accepted')
-  }
   const sql = args.sql.trim()
   if (sql.length === 0) throw new Error('lakehouse_query: sql must be a non-empty string')
   return { sql }
@@ -43,7 +38,7 @@ export function parseQueryArgs(args: LakehouseQueryArgs): LakehouseQueryInput {
 /** The canonical `lakehouse_query` output value. */
 export interface LakehouseQueryToolValue {
   sql: string
-  /** Registered tables whose names appear in the SQL (the attribution line). */
+  /** Lakehouse tables (`<schema>.<table>`) whose references appear in the SQL. */
   tables_used: string[]
   columns: Array<{ name: string; type: string }>
   /** Result cells: the JSON-scalar vocabulary the engine normalizes to. */
@@ -52,37 +47,40 @@ export interface LakehouseQueryToolValue {
   truncated: boolean
 }
 
-/**
- * Project a seam query outcome into the canonical tool value, attributing the
- * statement to the registered tables it names.
- * @param input - the validated query input.
- * @param result - the seam's query outcome.
- * @param registeredTables - the tenant's registered table names, for attribution.
- * @returns the canonical tool value.
- */
-export function queryValueFromResult(
-  input: LakehouseQueryInput,
-  result: LakehouseQueryResult,
-  registeredTables: readonly string[],
-): LakehouseQueryToolValue {
-  return {
-    sql: input.sql,
-    tables_used: registeredTables.filter(name => sqlMentionsTable(input.sql, name)),
-    columns: result.columns.map(column => ({ name: column.name, type: column.sqlType })),
-    rows: result.rows.map(row => [...row] as (null | boolean | number | string)[]),
-    row_count: result.rows.length,
-    truncated: result.truncated,
-  }
-}
-
 /** Escape one name for a word-boundary regex (identifiers are plain, but stay safe). */
 function escapeRegExp(text: string): string {
   return text.replaceAll(/[.*+?^${}()|[\]\\]/gu, '\\$&')
 }
 
-/** True when the SQL text references the table name as a standalone word (quoted identifiers included). */
-function sqlMentionsTable(sql: string, tableName: string): boolean {
-  return new RegExp(`(?<![A-Za-z0-9_])${escapeRegExp(tableName)}(?![A-Za-z0-9_])`, 'iu').test(sql)
+/** True when the SQL text references `schema.table` (with or without the `lake.` prefix) as standalone words. */
+function sqlMentionsTable(sql: string, schema: string, table: string): boolean {
+  const qualified = `${escapeRegExp(schema)}.${escapeRegExp(table)}`
+  return new RegExp(`(?<![A-Za-z0-9_])(?:lake\\.)?${qualified}(?![A-Za-z0-9_])`, 'iu').test(sql)
+}
+
+/**
+ * Project an engine query outcome into the canonical tool value, attributing
+ * the statement to the lakehouse tables it references.
+ * @param input - the validated query input.
+ * @param outcome - the engine's query outcome.
+ * @param tables - the lakehouse listing, for attribution.
+ * @returns the canonical tool value.
+ */
+export function queryValueFromOutcome(
+  input: LakehouseQueryInput,
+  outcome: LakehouseQueryOutcome,
+  tables: readonly LakehouseTableSummary[],
+): LakehouseQueryToolValue {
+  return {
+    sql: input.sql,
+    tables_used: tables
+      .filter(summary => sqlMentionsTable(input.sql, summary.schema, summary.table))
+      .map(summary => `${summary.schema}.${summary.table}`),
+    columns: outcome.columns.map(column => ({ name: column.name, type: column.sqlType })),
+    rows: outcome.rows.map(row => [...row] as (null | boolean | number | string)[]),
+    row_count: outcome.rowCount,
+    truncated: outcome.truncated,
+  }
 }
 
 /** Render one cell for the markdown table (nulls stay explicit, pipes escape). */
@@ -92,10 +90,10 @@ function cellText(value: null | boolean | number | string): string {
 }
 
 /**
- * Format a query outcome as the model-facing text: the markdown result table,
- * the truncation note, the source-table attribution line, and the standing
- * answer guidance.
- * @param value - the tool's canonical output value.
+ * Format a query outcome as the model-facing text: the markdown result
+ * table, the truncation note, the source-table attribution line, and the
+ * standing answer guidance.
+ * @param value - the canonical output value.
  * @returns the rendered result table with attribution.
  */
 export function formatQueryOutput(value: LakehouseQueryToolValue): string {
@@ -108,7 +106,7 @@ export function formatQueryOutput(value: LakehouseQueryToolValue): string {
     parts.push('(0 rows returned)')
   }
   if (value.truncated) {
-    parts.push(`(Result truncated at ${value.row_count} rows by the row cap; refine the query — aggregate or filter — for exact totals.)`)
+    parts.push(`(Result truncated at ${String(value.row_count)} rows by the row cap; refine the query — aggregate or filter — for exact totals.)`)
   }
   if (value.tables_used.length === 0) {
     parts.push('Data source: lakehouse (no registered table named by the statement)')
@@ -174,33 +172,31 @@ export function presentQueryResult(args: LakehouseQueryArgs, result: ToolResult)
     title: sql.length > 0 ? queryTitle(sql) : 'lakehouse_query',
     content: [{
       type: 'text',
-      text: `${meta.rows} row${meta.rows === 1 ? '' : 's'}${meta.truncated ? ' (truncated)' : ''} from ${meta.tablesUsed.length === 0 ? 'lakehouse' : meta.tablesUsed.join(', ')}`,
+      text: `${String(meta.rows)} row${meta.rows === 1 ? '' : 's'}${meta.truncated ? ' (truncated)' : ''} from ${meta.tablesUsed.length === 0 ? 'lakehouse' : meta.tablesUsed.join(', ')}`,
     }],
   }
 }
 
 /**
- * Register the `lakehouse_query` tool and its system-prompt guidance, scoped
- * to the deployment's bound tenant.
+ * Register the `lakehouse_query` tool and its system-prompt guidance.
  * @param ctx - context whose `tools` and `systemPrompt` registries receive the registrations.
- * @param tenant - the deployment-side tenant binding; every query runs within it.
  * @param timeoutMs - cooperative tool-call budget attached as `ToolDefinition.timeoutMs`.
  */
-export function applyLakehouseQueryTool(ctx: Context, tenant: string, timeoutMs: number): void {
+export function applyLakehouseQueryTool(ctx: Context, timeoutMs: number): void {
   ctx.systemPrompt.section({
     name: 'tool:lakehouse_query',
     order: 112,
-    text: 'Use the lakehouse_query tool to run one read SQL statement (SELECT) over the tenant\'s registered lakehouse tables when a question needs numbers, statistics, aggregates, or record lists. Call lakehouse_tables first to see the exact columns and types. Results are capped rows plus a truncation marker; the output names the source tables — mention them in your answer. For document passages and prose facts, use kb_search instead.',
+    text: 'Use the lakehouse_query tool to run one read SQL statement (SELECT) over the lakehouse tables when a question needs numbers, statistics, aggregates, or record lists. Reference tables exactly as lakehouse_list_tables lists them (lake.<schema>.<table>). Only single read statements are accepted — writes and data-definition statements are rejected. Results are capped rows plus a truncation marker; the output names the source tables — mention them in your answer. For document passages and prose facts, use kb_search instead.',
   })
 
   ctx.tools.register(defineTool({
     name: 'lakehouse_query',
-    description: 'Run one read SQL statement (SELECT) over the registered lakehouse tables. Returns the result columns, the row set, a truncation marker, and the source-table attribution. List tables with lakehouse_tables first.',
+    description: 'Run one read SQL statement (SELECT) over the lakehouse tables. Returns the result columns, the row set, a truncation marker, and the source-table attribution. List tables and their reference form with lakehouse_list_tables first; only single read statements are accepted.',
     parameters: {
       sql: {
         type: 'string',
         required: true,
-        description: 'One single-statement read SQL query (SELECT ...).',
+        description: 'One single-statement read SQL query (SELECT ...), referencing tables as lake.<schema>.<table>.',
       },
     },
     output: {
@@ -234,13 +230,13 @@ export function applyLakehouseQueryTool(ctx: Context, tenant: string, timeoutMs:
       },
     },
     timeoutMs,
-    // Read-only SQL over the tenant's tables; safe to overlap with other reads.
+    // Read-only SQL under the engine's statement guard; safe to overlap with other reads.
     isConcurrencySafe: () => true,
     async execute(args, exec) {
       const input = parseQueryArgs(args)
-      const registered = await ctx.lakehouse.listTables(tenant, exec.signal)
-      const result = await ctx.lakehouse.query(tenant, input.sql, exec.signal)
-      return queryValueFromResult(input, result, registered.map(table => table.tableName))
+      const tables = await ctx.lakehouseEngine.listTables(exec.signal)
+      const outcome = await ctx.lakehouseEngine.query(input.sql, undefined, exec.signal)
+      return queryValueFromOutcome(input, outcome, tables)
     },
     presentCall: presentQueryCall,
     presentResult: presentQueryResult,

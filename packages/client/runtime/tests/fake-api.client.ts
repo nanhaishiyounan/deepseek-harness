@@ -308,6 +308,9 @@ export class FakeApiClient implements IApiClient {
 
   readonly lakehouse: IApiClient['lakehouse'] = {
     overview: payload => this.record('lakehouse.overview', payload, Promise.resolve(ok({ generated_at: '', kpis: [] }))),
+    tables: payload => this.record('lakehouse.tables', payload, Promise.resolve(ok({ tables: [] }))),
+    query: payload => this.record('lakehouse.query', payload, Promise.resolve(ok({ sql: payload.sql, columns: [], rows: [], row_count: 0, truncated: false }))),
+    schema: payload => this.record('lakehouse.schema', payload, Promise.resolve(ok({ ref: `lake.${payload.schema}.${payload.table}`, columns: [], row_count: 0, sample_rows: [] }))),
   }
 
   readonly connectors: IApiClient['connectors'] = {

@@ -1,0 +1,79 @@
+DSH Local Build
+新会话
+对话
+知识库
+48
+场景
+数据资产
+177
+连接器
+2
+湖仓
+139
+图谱
+52
+业务管理
+136
+移动端预览
+工作区
+deepseek-harness
+查询销售订单行表统计
+刚刚
+宏发食品近三个月的出口额趋
+22天
+请用 order_create 工具下一个专
+22天
+有几台叉车
+27天
+中亚方向食品出海有哪些风险
+1个月
+展开其余 31 个会话
+未分组
+设置
+查询销售订单行表统计
+AI 食安合规官
+48
+Session log
+对话
+轨迹
+帮我查一下湖仓：legacy_nocobase 里销售订单行表 so_order_lines 一共有多少行，数量字段 qty 的总和是多少？请用 lakehouse 工具查询。
+17:40
+上下文注入
+@deepseek-ai/dsh-system-prompt
+上下文注入
+view-context
+
+I'll look up the table and run the aggregate query.
+
+Tool call
+lakehouse_list_tables · {}
+Think
+Let me check the schema for so_order_lines and run the aggregate.
+Tool call
+lakehouse_schema · legacy_nocobase
+数仓查询
+1 行 · 数据表 legacy_nocobase.so_order_lines
+
+查询结果（数据源：湖仓表 lake.legacy_nocobase.so_order_lines）
+
+指标	结果
+行数	12 行
+qty 合计	34,670
+
+补充说明：
+
+表结构为 id、order_id、qty、unit_price、qty_shipped、product_id，qty 为整数型，无空值导致合计偏差的迹象（合计与 12 行逐行累加一致）。
+该 12 行合计与 lakehouse_list_tables 中显示的 12 行一致，无截断风险。
+
+如果你还需要按订单（order_id）或按产品（product_id）拆分的数量分布，或者要把已发货数量 qty_shipped 与 qty 对比看履约缺口，我可以继续查。
+
+本答案来自
+数仓 legacy_nocobase.so_order_lines
+17:40 · 用时 6秒 · 首 token 1.1秒 · 204 tok/s
+AI 食安合规官
+Workspace Write
+DeepSeek-V4-Flash
+High
+1 轮 · 3 步| LLM 3.9s · 工具调用 2.7s| 首 token 平均 0.7s · 204 tok/s| 缓存命中 63%| 输入 29.9K tok · 输出 355 tok
+详情
+点击消息流中的工具行查看详情

@@ -51,6 +51,8 @@ import { DataRouterError, resolveDataRoute } from '@deepseek-ai/dsh-lakehouse/da
 import type { DataRoute } from '@deepseek-ai/dsh-lakehouse/data-router'
 // Type-only: resolves `ctx.get('lakehouse')` to the seam's runtime type.
 import type {} from '@deepseek-ai/dsh-lakehouse'
+// Type-only: resolves `ctx.get('lakehouseEngine')` to the engine service type.
+import type {} from '@deepseek-ai/dsh-lakehouse-engine'
 import { parseCsvTabular, parseJsonTabular, parseXlsxTabular, tableNameFromFilename } from '@deepseek-ai/dsh-lakehouse/tabular'
 import type { XlsxWorkbookLike } from '@deepseek-ai/dsh-lakehouse/tabular'
 import type { DataDescribeImageView, DataExtractTextView, DataUploadView } from './api/data.ts'
@@ -1704,6 +1706,18 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
   const lakehouseNotComposed = (): RpcError => ({
     code: 'lakehouse-not-composed',
     message: 'this deployment composes no lakehouse seam; add the dsh-lakehouse seam, a catalog store, and a query engine to evaluate overview KPIs',
+    details: {},
+  })
+  /** The refusal the lakehouse-engine domain answers with when no engine is composed. */
+  const lakehouseEngineNotComposed = (): RpcError => ({
+    code: 'lakehouse-engine-not-composed',
+    message: 'this deployment composes no lakehouse engine; add the dsh-lakehouse-engine plugin (DuckDB + DuckLake) to browse and query the lakehouse',
+    details: {},
+  })
+  /** The refusal a rejected lakehouse read answers with (guard, timeout, or engine failure). */
+  const lakehouseReadRejected = (error: unknown): RpcError => ({
+    code: 'lakehouse-read-rejected',
+    message: error instanceof Error ? error.message : String(error),
     details: {},
   })
   /** The refusal `lakehouse.overview` answers with when the seed file cannot be read or parsed. */
@@ -5102,6 +5116,65 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
           }
         }))
         return ok(request, { generated_at: new Date().toISOString(), kpis })
+      },
+
+      async tables(request, signal) {
+        void request
+        const engine = ctx.get('lakehouseEngine')
+        if (engine === undefined || !engine.available()) return err(request, lakehouseEngineNotComposed())
+        try {
+          const summaries = await engine.listTables(signal)
+          return ok(request, {
+            tables: summaries.map(summary => ({
+              ref: `lake.${summary.schema}.${summary.table}`,
+              schema: summary.schema,
+              table: summary.table,
+              row_count: summary.rowCount,
+            })),
+          })
+        } catch (error: unknown) {
+          return err(request, lakehouseReadRejected(error))
+        }
+      },
+
+      async query(request, signal) {
+        const engine = ctx.get('lakehouseEngine')
+        if (engine === undefined || !engine.available()) return err(request, lakehouseEngineNotComposed())
+        try {
+          const outcome = await engine.query(request.payload.sql, undefined, signal)
+          return ok(request, {
+            sql: request.payload.sql,
+            columns: outcome.columns.map(column => ({ name: column.name, type: column.sqlType })),
+            rows: outcome.rows.map(row => [...row]),
+            row_count: outcome.rowCount,
+            truncated: outcome.truncated,
+          })
+        } catch (error: unknown) {
+          return err(request, lakehouseReadRejected(error))
+        }
+      },
+
+      async schema(request, signal) {
+        const engine = ctx.get('lakehouseEngine')
+        if (engine === undefined || !engine.available()) return err(request, lakehouseEngineNotComposed())
+        const identifier = /^[A-Za-z_][A-Za-z0-9_]*$/u
+        const { schema, table } = request.payload
+        if (!identifier.test(schema) || !identifier.test(table)) {
+          return err(request, lakehouseReadRejected(new Error('schema and table must be plain SQL identifiers')))
+        }
+        try {
+          const columns = await engine.describeTable(schema, table, signal)
+          const counted = await engine.query(`SELECT count(*) FROM lake.${schema}.${table}`, undefined, signal)
+          const sample = await engine.sampleRows(schema, table, 5, signal)
+          return ok(request, {
+            ref: `lake.${schema}.${table}`,
+            columns: columns.map(column => ({ name: column.name, type: column.sqlType })),
+            row_count: Number(counted.rows[0]?.[0] ?? 0),
+            sample_rows: sample.rows.map(row => [...row]),
+          })
+        } catch (error: unknown) {
+          return err(request, lakehouseReadRejected(error))
+        }
       },
     },
 

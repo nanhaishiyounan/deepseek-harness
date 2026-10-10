@@ -1,0 +1,26 @@
+# W24-B2 acceptance run — 2026-10-10T09:04:31.671Z
+# engine: DuckDB v1.5.6
+
+[ingest] schema=legacy_nocobase tables=138
+[ingest] parquet=128 schema-only=10
+[reconcile] expected tables=138
+[reconcile] missing=0 mismatch=0 extra=0 → ALL OK
+
+[list] lakehouse tables=138 legacy_nocobase=138 legacyRows=9270
+
+[query] so_order_lines count=12 sum(qty)=34670
+[query] so_orders count=13
+[schema] so_order_lines columns=id:INTEGER, order_id:INTEGER, qty:INTEGER, unit_price:DOUBLE, qty_shipped:INTEGER, product_id:INTEGER
+
+[defense] INSERT rejected: the statement is not read-only (starts with "INSERT INTO lake.legacy_nocobase.so_orde"); only SELECT, WITH … SELECT, PRAGMA, and DESCRIBE are accepted
+[defense] UPDATE rejected: the statement is not read-only (starts with "UPDATE lake.legacy_nocobase.so_orders SE"); only SELECT, WITH … SELECT, PRAGMA, and DESCRIBE are accepted
+[defense] DELETE rejected: the statement is not read-only (starts with "DELETE FROM lake.legacy_nocobase.so_orde"); only SELECT, WITH … SELECT, PRAGMA, and DESCRIBE are accepted
+[defense] DROP rejected: the statement is not read-only (starts with "DROP TABLE lake.legacy_nocobase.so_order"); only SELECT, WITH … SELECT, PRAGMA, and DESCRIBE are accepted
+[defense] ATTACH rejected: the statement is not read-only (starts with "ATTACH 'ducklake:/tmp/evil.ducklake' AS "); only SELECT, WITH … SELECT, PRAGMA, and DESCRIBE are accepted
+[defense] multi-statement rejected: multiple SQL statements are not allowed; submit exactly one read statement
+[defense] after the volley, so_orders rows still=13 → DEFENSE OK
+
+[sync#1] table=wfl_mobile_work mode=watermark appended=1605 watermark=1791523967309
+[sync#2] table=wfl_mobile_work mode=watermark appended=0 watermark=1791523967309
+[sync] counts: round1=1605 round2=1605 → NO DUPLICATES OK
+[list] final lakehouse tables=139 (legacy 138 + synced 1)

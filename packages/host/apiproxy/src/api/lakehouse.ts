@@ -35,11 +35,58 @@ export interface LakehouseOverviewView {
   readonly kpis: readonly LakehouseKpiView[]
 }
 
-/** Lakehouse overview methods; every call fails loud when unconfigured. */
+/** One lakehouse table in the `lakehouse.tables` listing. */
+export interface LakehouseTableEntry {
+  /** The schema-qualified reference form queries use (`lake.<schema>.<table>`). */
+  readonly ref: string
+  readonly schema: string
+  readonly table: string
+  readonly row_count: number
+}
+
+/** The `lakehouse.tables` read's value. */
+export interface LakehouseTablesView {
+  readonly tables: readonly LakehouseTableEntry[]
+}
+
+/** One column in a query result or schema description. */
+export interface LakehouseColumnView {
+  readonly name: string
+  readonly type: string
+}
+
+/** The `lakehouse.query` read's value. */
+export interface LakehouseQueryView {
+  readonly sql: string
+  readonly columns: readonly LakehouseColumnView[]
+  /** JSON-scalar result cells. */
+  readonly rows: (null | boolean | number | string)[][]
+  readonly row_count: number
+  readonly truncated: boolean
+}
+
+/** The `lakehouse.schema` read's value. */
+export interface LakehouseSchemaView {
+  readonly ref: string
+  readonly columns: readonly LakehouseColumnView[]
+  readonly row_count: number
+  readonly sample_rows: (null | boolean | number | string)[][]
+}
+
+/** Lakehouse domain methods; every call fails loud when unconfigured. */
 export interface LakehouseApi {
   /**
    * Evaluate the configured KPI definitions against the lakehouse seam and
    * return the band's chips.
    */
   overview(request: RpcRequest<Record<string, never>>, signal?: AbortSignal): Promise<RpcResponse<LakehouseOverviewView>>
+  /** List every lakehouse table with its live row count. */
+  tables(request: RpcRequest<Record<string, never>>, signal?: AbortSignal): Promise<RpcResponse<LakehouseTablesView>>
+  /**
+   * Run one read-only SQL statement over the lakehouse catalog; the engine's
+   * statement guard rejects writes and multi-statement text.
+   */
+  query(request: RpcRequest<{ sql: string }>, signal?: AbortSignal): Promise<RpcResponse<LakehouseQueryView>>
+  /** Read one table's columns, row count, and sample rows. */
+  schema(request: RpcRequest<{ schema: string; table: string }>, signal?: AbortSignal): Promise<RpcResponse<LakehouseSchemaView>>
 }

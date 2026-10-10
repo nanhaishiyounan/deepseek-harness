@@ -1,0 +1,60 @@
+[
+  {
+    "kind": "session-created",
+    "fact": {
+      "sessionId": "session-e89f24df-ac64-405d-8787-825e15130dd9"
+    }
+  },
+  {
+    "kind": "model-catalog-raw",
+    "fact": "{\"current\":{\"provider\":\"minimax\",\"model\":\"MiniMax-M3\"},\"routable\":true,\"groups\":[{\"id\":\"minimax\",\"name\":\"MiniMax\",\"models\":[{\"id\":\"MiniMax-M3\",\"name\":\"MiniMax-M3\"}]},{\"id\":\"deepseek-official\",\"name\":\"DeepSeek\",\"models\":[{\"id\":\"deepseek-v4-flash\",\"name\":\"DeepSeek-V4-Flash\",\"reasoning\":{\"efforts\":[{\"id\":\"off\",\"name\":\"Off\"},{\"id\":\"low\",\"name\":\"Low\"},{\"id\":\"high\",\"name\":\"High\"},{\"id\":\"max\",\"name\":\"Max\"}],\"defaultEffort\":\"high\"}},{\"id\":\"deepseek-v4-pro\",\"name\":\"DeepSeek-V4-Pro\",\"reasoning\":{\"efforts\":[{\"id\":\"off\",\"name\":\"Off\"},{\"id\":\"low\",\"name\":\"Low\"},{\"id\":\"high\",\"name\":\"High\"},{\"id\":\"max\",\"name\""
+  },
+  {
+    "kind": "model-picked",
+    "fact": {
+      "provider": "deepseek-official",
+      "model": "deepseek-v4-flash"
+    }
+  },
+  {
+    "kind": "model-selected",
+    "fact": "2026-10-10T09:40:09.185Z"
+  },
+  {
+    "kind": "send-enabled-before-click",
+    "fact": true
+  },
+  {
+    "kind": "prompt-sent",
+    "fact": "2026-10-10T09:40:12.151Z"
+  },
+  {
+    "kind": "llm-tool-chain-visible",
+    "fact": true
+  },
+  {
+    "kind": "llm-answer-mentions-rows-12",
+    "fact": true
+  },
+  {
+    "kind": "llm-answer-mentions-total-34670",
+    "fact": false
+  },
+  {
+    "kind": "transcript-written",
+    "fact": "/Users/mac/Documents/github/deepseek-harness/research/2026-10-09-w24-rebuild/b2-lakehouse/11-llm-session-transcript.txt"
+  },
+  {
+    "kind": "tool-lines",
+    "fact": [
+      "帮我查一下湖仓：legacy_nocobase 里销售订单行表 so_order_lines 一共有多少行，数量字段 qty 的总和是多少？请用 lakehouse 工具查询。",
+      "lakehouse_list_tables · {}",
+      "Let me check the schema for so_order_lines and run the aggregate.",
+      "lakehouse_schema · legacy_nocobase",
+      "1 行 · 数据表 legacy_nocobase.so_order_lines",
+      "查询结果（数据源：湖仓表 lake.legacy_nocobase.so_order_lines）",
+      "该 12 行合计与 lakehouse_list_tables 中显示的 12 行一致，无截断风险。",
+      "数仓 legacy_nocobase.so_order_lines"
+    ]
+  }
+]

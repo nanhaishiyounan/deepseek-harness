@@ -1,0 +1,8 @@
+[before] lakehouse wfl_mobile_work rows=1605
+[before] persisted watermark=1791523967309
+[source] inserted one PG row id=999000001
+[sync#3] mode=watermark appended=1 watermark=1791623275431
+[after] lakehouse wfl_mobile_work rows=1606 (delta=1)
+[after] the inserted row visible in the lakehouse: YES
+[source] the PG proof row was removed (lakehouse history stays append-only)
+[verdict] INCREMENT OK — one source row became exactly one lakehouse row

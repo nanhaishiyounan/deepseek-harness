@@ -204,6 +204,10 @@ export interface RpcErrorDetailsMap {
   'lakehouse-not-composed': {}
   /** The configured overview seed file could not be read or parsed; details carry the path. */
   'lakehouse-overview-seed-invalid': { path: string }
+  /** A lakehouse-engine domain call found the deployment composing no lakehouse engine. */
+  'lakehouse-engine-not-composed': {}
+  /** A lakehouse-engine read was rejected (statement guard, timeout, or engine failure); the message is the cause's text. */
+  'lakehouse-read-rejected': {}
   /** A nocobase.update call ran in a deployment that did not opt in through `nocobaseWriteEnabled`. */
   'nocobase-write-disabled': {}
   'internal': {}

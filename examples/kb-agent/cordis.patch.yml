@@ -92,9 +92,10 @@
       person behind a service (e.g. 张红喜) with one more nb_list on experts
       filtering id in [expertId]; document passages and prose facts through
       kb_search with [n] citations (document name and heading path); numbers,
-      statistics, aggregates, and record lists through lakehouse_tables
-      first, then lakehouse_query SQL over the uploaded tables, naming the
-      source table in the answer; experts, external datasets, and serviceable
+      statistics, aggregates, and record lists through lakehouse_list_tables
+      first, then lakehouse_query SQL over the lakehouse tables (reference
+      them exactly as listed), naming the source table in the answer; experts,
+      external datasets, and serviceable
       offerings through connector_discover (preview with connector_fetch,
       land data with connector_transfer, then answer from the landing);
       entity-relation questions (谁给谁供货、谁下过哪些订单、合规与关联
@@ -220,9 +221,12 @@
           # judge; negative verdicts persist as reject tombstones.
           v2: true
 
-    # The lakehouse seam: tables live as Parquet under the example workspace
-    # with a SQLite catalog, queried by the DuckDB engine. The tool rows give
-    # the model lakehouse_tables/lakehouse_query on the same tenant binding.
+    # The lakehouse upload seam: uploaded tabular data still lives as Parquet
+    # under the example workspace with a SQLite catalog. The lakehouse engine
+    # (DuckDB + DuckLake) carries the W24 lakehouse — the B0 legacy export
+    # (138 business tables) and the watermark-synced business tables — and the
+    # tool rows give the model lakehouse_list_tables/lakehouse_query/
+    # lakehouse_schema over it.
     - id: lakehouse
       name: '@deepseek-ai/dsh-lakehouse'
       config:
@@ -236,10 +240,10 @@
     - id: lakehouse-duckdb
       name: '@deepseek-ai/dsh-lakehouse-duckdb'
 
+    # (The lakehouse engine + sync rows live in the dsh-web-app bundle patch;
+    # this example patch only carries the tool row.)
     - id: tool-lakehouse
       name: '@deepseek-ai/dsh-tool-lakehouse'
-      config:
-        tenant: !!js "process.env.DSH_KB_TENANT ?? 'demo-food-co'"
 
     # The connector seam: the file-set provider exposes one drop-in directory
     # as datasets (routed by the shared data router at transfer time), and the

@@ -45,7 +45,7 @@ function scriptedApi(overrides: {
     Promise.resolve({ rpcId: r.rpcId, result: { ok: false, error: { code: 'kb-not-composed' as never, message: 'stub', details: {} } } })
   return {
     data: { upload: kbRefuse, describeImage: kbRefuse, extractText: kbRefuse, ...overrides.data },
-    lakehouse: { overview: err, ...overrides.lakehouse },
+    lakehouse: { overview: err, tables: err, query: err, schema: err, ...overrides.lakehouse },
     orders: {
       create: err,
       get: err,

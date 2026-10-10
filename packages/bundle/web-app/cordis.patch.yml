@@ -196,6 +196,13 @@
     - id: ui-renderer
       name: '@deepseek-ai/dsh-client-ui-renderer'
 
+    # Doubao-style main navigation: occupies the nav column and declares the
+    # sidebar.nav menu seat the function pages below contribute their rows
+    # into (kb / scenarios / market / connectors / kg / business /
+    # mobile-preview), plus the chat row.
+    - id: ui-nav
+      name: '@deepseek-ai/dsh-client-ui-nav'
+
     - id: ui-sidebar
       name: '@deepseek-ai/dsh-client-ui-sidebar'
 
@@ -225,6 +232,13 @@
     # connectorsEnabled.
     - id: ui-connectors
       name: '@deepseek-ai/dsh-client-ui-connectors'
+
+    # Lakehouse workbench: sidebar entry + the `lakehouse` conversation view
+    # (table catalog with live row counts, schema cards, read-only SQL editor
+    # with result table). Data rides the gateway's lakehouse domain over the
+    # lakehouse engine (DuckDB + DuckLake).
+    - id: ui-lakehouse
+      name: '@deepseek-ai/dsh-client-ui-lakehouse'
 
     # Knowledge-graph page: sidebar entry + the `kg` conversation view tab
     # (phrase-box walks, sigma canvas, type legend, details panel). Data
@@ -349,6 +363,30 @@
 
     - id: ui-trajectory
       name: '@deepseek-ai/dsh-client-ui-trajectory'
+
+# ── the W24 lakehouse (five-source data plane) ───────────────────────────────
+#
+# The lakehouse engine: one in-process DuckDB with the DuckLake catalog
+# attached (Tier 0). The tool suite (tool-lakehouse, mounted by agent
+# presets) and the gateway's lakehouse domain both ride it; the sync
+# pipeline attaches the business PostgreSQL source read-only and lands
+# watermark-incremental tables into the same catalog.
+
+- insert:
+    - id: lakehouse-engine
+      name: '@deepseek-ai/dsh-lakehouse-engine'
+      config:
+        catalog:
+          kind: ducklake
+          catalogPath: workspace/lakehouse/ducklake/catalog.ducklake
+          dataPath: workspace/lakehouse/ducklake/files
+
+    - id: lakehouse-sync
+      name: '@deepseek-ai/dsh-lakehouse-sync'
+      config:
+        dsn: !!js "process.env.DSH_LAKEHOUSE_SYNC_DSN ?? 'dbname=nocobase host=127.0.0.1 port=5432 user=nocobase'"
+        tables: []
+        scheduleIntervalMs: 0
 
 # ── the agent plane moves behind agent presets ─────────────────────────────
 #

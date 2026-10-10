@@ -1,0 +1,15 @@
+import { chromium } from '../../../apps/web/node_modules/playwright/index.mjs'
+const browser = await chromium.launch()
+const page = await browser.newPage({ viewport: { width: 1600, height: 1000 } })
+await page.goto('http://127.0.0.1:3080', { waitUntil: 'domcontentloaded' })
+await page.waitForTimeout(2200)
+const composer = page.getByPlaceholder('问一个问题，或描述你的任务')
+await composer.fill('/model')
+await page.waitForTimeout(1400)
+const dump = await page.evaluate(() => {
+  const nodes = [...document.querySelectorAll('[role="option"], [role="menuitem"], [data-option], li[class*=option], [class*=option]')].filter(el => el.offsetParent !== null)
+  return nodes.slice(0, 20).map(el => ({ role: el.getAttribute('role'), text: (el.textContent ?? '').slice(0, 50).replace(/\n/g, '|') }))
+})
+console.log('OPTIONS:', JSON.stringify(dump, null, 1))
+await page.screenshot({ path: 'research/2026-10-09-w24-rebuild/b2-lakehouse/.b2-probe-model4.png' })
+await browser.close()

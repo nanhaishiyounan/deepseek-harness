@@ -79,7 +79,9 @@ import { ordersCreateRequestSchema, ordersListRequestSchema, ordersOrderIdReques
 import {
   assetsDetailRequestSchema, assetsListRequestSchema, assetsStatsRequestSchema,
 } from '../api/assets.schema.ts'
-import { lakehouseOverviewRequestSchema } from '../api/lakehouse.schema.ts'
+import {
+  lakehouseOverviewRequestSchema, lakehouseTablesRequestSchema, lakehouseQueryRequestSchema, lakehouseSchemaRequestSchema,
+} from '../api/lakehouse.schema.ts'
 import {
   connectorsConnectionsRequestSchema, connectorsListRequestSchema, connectorsTransfersRequestSchema,
 } from '../api/connectors.schema.ts'
@@ -179,6 +181,9 @@ const UNARY_ROUTES: UnaryRoutes = {
   'assets.detail': { schema: assetsDetailRequestSchema, invoke: (api, r, signal) => api.assets.detail(r, signal) },
   'assets.stats': { schema: assetsStatsRequestSchema, invoke: (api, r, signal) => api.assets.stats(r, signal) },
   'lakehouse.overview': { schema: lakehouseOverviewRequestSchema, invoke: (api, r, signal) => api.lakehouse.overview(r, signal) },
+  'lakehouse.tables': { schema: lakehouseTablesRequestSchema, invoke: (api, r, signal) => api.lakehouse.tables(r, signal) },
+  'lakehouse.query': { schema: lakehouseQueryRequestSchema, invoke: (api, r, signal) => api.lakehouse.query(r, signal) },
+  'lakehouse.schema': { schema: lakehouseSchemaRequestSchema, invoke: (api, r, signal) => api.lakehouse.schema(r, signal) },
   'connectors.list': { schema: connectorsListRequestSchema, invoke: (api, r, signal) => api.connectors.list(r, signal) },
   'connectors.connections': { schema: connectorsConnectionsRequestSchema, invoke: (api, r, signal) => api.connectors.connections(r, signal) },
   'connectors.transfers': { schema: connectorsTransfersRequestSchema, invoke: (api, r, signal) => api.connectors.transfers(r, signal) },
