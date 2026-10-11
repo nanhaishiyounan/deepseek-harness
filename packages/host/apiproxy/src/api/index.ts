@@ -24,6 +24,7 @@ import type { AssetsApi } from './assets.ts'
 import type { LakehouseApi } from './lakehouse.ts'
 import type { ConnectorsApi } from './connectors.ts'
 import type { KgApi } from './kg.ts'
+import type { GovernanceApi } from './governance.ts'
 import type { DownloadsApi } from './downloads.ts'
 import type { ClientResponse, RpcReceipt } from './rpc.ts'
 
@@ -49,6 +50,7 @@ export interface ApiProxy {
   lakehouse: LakehouseApi
   connectors: ConnectorsApi
   kg: KgApi
+  governance: GovernanceApi
   /** Host-only download surfaces (GET, no wire envelope); absent from IApiClient. */
   downloads: DownloadsApi
   /**
@@ -105,6 +107,10 @@ export type {
   KgApi, KgEdgeView, KgNodeHitView, KgNodeTypeView, KgRelationView,
   KgSubgraphNodeView, KgSubgraphView,
 } from './kg.ts'
+export type {
+  GovernanceApi, GovernanceAssetView, GovernanceEdgeView, GovernanceEventView,
+  GovernanceEvaluationView, GovernanceOutcomeView, GovernanceRuleView, GovernanceWebhookView,
+} from './governance.ts'
 export type { DownloadsApi } from './downloads.ts'
 export type { ApprovalResponsePayload } from './approvals.ts'
 

@@ -68,6 +68,8 @@ import type {
   ConnectorConnectionView, ConnectorProviderWireView, ConnectorTransferWireView,
 } from './api/connectors.ts'
 import type { KgApi, KgEdgeView, KgNodeHitView, KgNodeTypeView, KgRelationView, KgSubgraphNodeView } from './api/kg.ts'
+import type { GovernanceRuleView } from './api/governance.ts'
+import type {} from '@deepseek-ai/dsh-governance'
 // Type-only: resolves `ctx.get('kbGraph')` to the seam's runtime type.
 import type {} from '@deepseek-ai/dsh-kb-graph'
 // Type-only: resolves `ctx.get('neo4jGraph')` to the graph store's service type.
@@ -1768,6 +1770,18 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
     message: 'this deployment composes no lakehouse engine; add the dsh-lakehouse-engine plugin (DuckDB + DuckLake) to browse and query the lakehouse',
     details: {},
   })
+  /** The refusal every governance method answers with when no governance engine is composed. */
+  const governanceNotComposed = (): RpcError => ({
+    code: 'governance-not-composed',
+    message: 'this deployment composes no governance engine; add the dsh-governance-engine plugin to expose the governance panel',
+    details: {},
+  })
+  /** The refusal a rejected governance write/evaluate answers with. */
+  const governanceRejected = (error: unknown): RpcError => ({
+    code: 'governance-rejected',
+    message: error instanceof Error ? error.message : String(error),
+    details: {},
+  })
   /** The refusal a rejected lakehouse read answers with (guard, timeout, or engine failure). */
   const lakehouseReadRejected = (error: unknown): RpcError => ({
     code: 'lakehouse-read-rejected',
@@ -1928,6 +1942,48 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
       }))
   }
   /** Project one lakehouse transfer entry onto the wire timeline row. */
+  /** Engine-side quality-rule shape (mirrors dsh-governance's QualityRule; the engine service is fetched dynamically). */
+  interface EngineRule {
+    id: string
+    name: string
+    kind: 'row_count_threshold' | 'null_rate' | 'uniqueness' | 'freshness' | 'custom_sql'
+    table: string
+    column?: string
+    threshold?: number
+    sql?: string
+    enabled: boolean
+  }
+
+  /** Engine inventory asset -> wire view (camelCase -> snake_case). */
+  const assetWireOf = (asset: { source: string; qualifiedName: string; name: string; count?: number; detail?: string }) => ({
+    source: asset.source,
+    qualified_name: asset.qualifiedName,
+    name: asset.name,
+    ...asset.count === undefined ? {} : { count: asset.count },
+    ...asset.detail === undefined ? {} : { detail: asset.detail },
+  })
+
+  /** Engine quality rule -> wire view (camelCase -> snake_case). */
+  const ruleWireOf = (rule: EngineRule): GovernanceRuleView => ({
+    id: rule.id,
+    name: rule.name,
+    kind: rule.kind,
+    table: rule.table,
+    ...rule.column === undefined ? {} : { column: rule.column },
+    ...rule.threshold === undefined ? {} : { threshold: rule.threshold },
+    ...rule.sql === undefined ? {} : { sql: rule.sql },
+    enabled: rule.enabled,
+  })
+
+  /** Wire rule -> engine quality rule (snake_case -> camelCase). */
+  const ruleEngineOf = (rule: GovernanceRuleView): EngineRule => {
+    const engine: EngineRule = { id: rule.id, name: rule.name, kind: rule.kind, table: rule.table, enabled: rule.enabled }
+    if (rule.column !== undefined) engine.column = rule.column
+    if (rule.threshold !== undefined) engine.threshold = rule.threshold
+    if (rule.sql !== undefined) engine.sql = rule.sql
+    return engine
+  }
+
   const transferWireViewOf = (entry: LakehouseTransferEntry): ConnectorTransferWireView => ({
     transfer_id: entry.transferId,
     source: entry.source,
@@ -5359,6 +5415,142 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
           return ok(request, { transfers: (await transferEntries(50, signal)).map(transferWireViewOf) })
         } catch (error: unknown) {
           return err(request, connectorsTransfersRejected(error))
+        }
+      },
+    },
+
+    governance: {
+      // The governance panel's surface over the optional governance seam
+      // (ctx.governance): inventory/search, lineage edges, quality rules,
+      // alert events, and the webhook test. The seam is deliberately NOT in
+      // the inject list: a deployment without it keeps a working gateway and
+      // every method answers the structured refusal.
+      async inventory(request) {
+        void request
+        const governance = ctx.get('governance')
+        if (governance === undefined) return err(request, governanceNotComposed())
+        try {
+          const assets = await governance.inventory()
+          return ok(request, { assets: assets.map(assetWireOf) })
+        } catch (error: unknown) {
+          return err(request, governanceRejected(error))
+        }
+      },
+
+      async search(request) {
+        const governance = ctx.get('governance')
+        if (governance === undefined) return err(request, governanceNotComposed())
+        try {
+          const assets = await governance.search(request.payload.query)
+          return ok(request, { assets: assets.map(assetWireOf) })
+        } catch (error: unknown) {
+          return err(request, governanceRejected(error))
+        }
+      },
+
+      async lineage(request) {
+        void request
+        const governance = ctx.get('governance')
+        if (governance === undefined) return err(request, governanceNotComposed())
+        try {
+          const edges = await governance.lineage()
+          return ok(request, {
+            edges: edges.map(edge => ({
+              source: edge.source,
+              target: edge.target,
+              transform: edge.transform,
+              recorded_at: edge.recordedAt,
+            })),
+          })
+        } catch (error: unknown) {
+          return err(request, governanceRejected(error))
+        }
+      },
+
+      async rules(request) {
+        void request
+        const governance = ctx.get('governance')
+        if (governance === undefined) return err(request, governanceNotComposed())
+        try {
+          const rules = await governance.rules()
+          return ok(request, { rules: rules.map(ruleWireOf) })
+        } catch (error: unknown) {
+          return err(request, governanceRejected(error))
+        }
+      },
+
+      async ruleUpsert(request) {
+        const governance = ctx.get('governance')
+        if (governance === undefined) return err(request, governanceNotComposed())
+        try {
+          await governance.upsertRule(ruleEngineOf(request.payload.rule))
+          return ok(request, {})
+        } catch (error: unknown) {
+          return err(request, governanceRejected(error))
+        }
+      },
+
+      async ruleDelete(request) {
+        const governance = ctx.get('governance')
+        if (governance === undefined) return err(request, governanceNotComposed())
+        try {
+          await governance.deleteRule(request.payload.id)
+          return ok(request, {})
+        } catch (error: unknown) {
+          return err(request, governanceRejected(error))
+        }
+      },
+
+      async evaluate(request) {
+        void request
+        const governance = ctx.get('governance')
+        if (governance === undefined) return err(request, governanceNotComposed())
+        try {
+          const evaluation = await governance.evaluate()
+          return ok(request, {
+            evaluated_at: evaluation.evaluatedAt,
+            outcomes: evaluation.outcomes.map(outcome => ({
+              rule: ruleWireOf(outcome.rule),
+              status: outcome.status,
+              measured: outcome.measured,
+              ...outcome.error === undefined ? {} : { error: outcome.error },
+            })),
+            failed: evaluation.failed,
+          })
+        } catch (error: unknown) {
+          return err(request, governanceRejected(error))
+        }
+      },
+
+      async events(request) {
+        void request
+        const governance = ctx.get('governance')
+        if (governance === undefined) return err(request, governanceNotComposed())
+        try {
+          const events = await governance.events()
+          return ok(request, {
+            events: events.map(event => ({
+              id: event.id,
+              at: event.at,
+              kind: event.kind,
+              level: event.level,
+              title: event.title,
+              ...event.detail === undefined ? {} : { detail: event.detail },
+            })),
+          })
+        } catch (error: unknown) {
+          return err(request, governanceRejected(error))
+        }
+      },
+
+      async webhookTest(request) {
+        void request
+        const governance = ctx.get('governance')
+        if (governance === undefined) return err(request, governanceNotComposed())
+        try {
+          return ok(request, await governance.testWebhook())
+        } catch (error: unknown) {
+          return err(request, governanceRejected(error))
         }
       },
     },

@@ -3364,6 +3364,32 @@ function createFixtureWorld(options: FixtureOptions): FixtureWorld {
         sample_rows: [[1, 'SO-2026-001']],
       }),
     },
+    governance: {
+      inventory: request => ok(request, {
+        assets: [
+          { source: 'lakehouse', qualified_name: 'lake.carbon.customers', name: 'customers', count: 32, detail: 'schema carbon' },
+          { source: 'kb', qualified_name: 'kb.食品安全知识库', name: '食品安全知识库', count: 46 },
+          { source: 'graph', qualified_name: 'graph.Supplier', name: 'Supplier', count: 63 },
+        ],
+      }),
+      search: request => ok(request, { assets: [] }),
+      lineage: request => ok(request, {
+        edges: [
+          { source: 'business.carbon.customers', target: 'lake.carbon.customers', transform: 'lakehouse-sync watermark append', recorded_at: '2026-10-11T00:00:00.000Z' },
+          { source: 'lake.carbon.customers', target: 'graph.Customer', transform: 'B5 deterministic ETL', recorded_at: '2026-10-11T00:00:00.000Z' },
+        ],
+      }),
+      rules: request => ok(request, {
+        rules: [
+          { id: 'customers-min', name: '客户数下限', kind: 'row_count_threshold', table: 'lake.carbon.customers', enabled: true, threshold: 10 },
+        ],
+      }),
+      ruleUpsert: request => ok(request, {}),
+      ruleDelete: request => ok(request, {}),
+      evaluate: request => ok(request, { evaluated_at: '2026-10-11T00:00:00.000Z', outcomes: [{ rule: { id: 'customers-min', name: '客户数下限', kind: 'row_count_threshold', table: 'lake.carbon.customers', enabled: true, threshold: 10 }, status: 'pass', measured: 32 }], failed: 0 }),
+      events: request => ok(request, { events: [] }),
+      webhookTest: request => ok(request, { delivered: false, status: 'webhook disabled (config.webhookUrl unset); event recorded locally' }),
+    },
 
     connectors: {
       list: request => err(request, {
@@ -3681,6 +3707,15 @@ export class FixtureApiClient extends AbstractApiClient {
       case 'lakehouse.tables': return this.api.lakehouse.tables(request, signal)
       case 'lakehouse.query': return this.api.lakehouse.query(request, signal)
       case 'lakehouse.schema': return this.api.lakehouse.schema(request, signal)
+      case 'governance.inventory': return this.api.governance.inventory(request, signal)
+      case 'governance.search': return this.api.governance.search(request, signal)
+      case 'governance.lineage': return this.api.governance.lineage(request, signal)
+      case 'governance.rules': return this.api.governance.rules(request, signal)
+      case 'governance.ruleUpsert': return this.api.governance.ruleUpsert(request, signal)
+      case 'governance.ruleDelete': return this.api.governance.ruleDelete(request, signal)
+      case 'governance.evaluate': return this.api.governance.evaluate(request, signal)
+      case 'governance.events': return this.api.governance.events(request, signal)
+      case 'governance.webhookTest': return this.api.governance.webhookTest(request, signal)
       case 'connectors.list': return this.api.connectors.list(request, signal)
       case 'connectors.connections': return this.api.connectors.connections(request, signal)
       case 'connectors.transfers': return this.api.connectors.transfers(request, signal)

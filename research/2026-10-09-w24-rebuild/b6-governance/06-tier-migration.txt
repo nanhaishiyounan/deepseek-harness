@@ -1,0 +1,4 @@
+tier0 (DuckLake): created lake.food.suppliers_tier0, rows = [[1,"青岛海产供应","华东"],[2,"广州糖业","华南"],[3,"呼和浩特乳源","华北"]]
+tier1 (Iceberg REST): migrated ice.food.suppliers_tier0_mv3ka4d8, rows = [[1,"青岛海产供应","华东"],[2,"广州糖业","华南"],[3,"呼和浩特乳源","华北"]]
+cross-tier reconciliation: tier0 rows = 3, tier1 rows = 3
+TIER MIGRATION PASS: same data live in Tier 0 (DuckLake) and Tier 1 (Iceberg REST), reconciled in one process

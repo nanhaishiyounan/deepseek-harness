@@ -306,6 +306,18 @@ export class FakeApiClient implements IApiClient {
     stats: payload => this.record('assets.stats', payload, Promise.resolve(ok({ products: 0, providers: 0, monthly_orders: 0, featured: [] }))),
   }
 
+  readonly governance: IApiClient['governance'] = {
+    inventory: payload => this.record('governance.inventory', payload, Promise.resolve(ok({ assets: [] }))),
+    search: payload => this.record('governance.search', payload, Promise.resolve(ok({ assets: [] }))),
+    lineage: payload => this.record('governance.lineage', payload, Promise.resolve(ok({ edges: [] }))),
+    rules: payload => this.record('governance.rules', payload, Promise.resolve(ok({ rules: [] }))),
+    ruleUpsert: payload => this.record('governance.ruleUpsert', payload, Promise.resolve(ok({}))),
+    ruleDelete: payload => this.record('governance.ruleDelete', payload, Promise.resolve(ok({}))),
+    evaluate: payload => this.record('governance.evaluate', payload, Promise.resolve(ok({ evaluated_at: '', outcomes: [], failed: 0 }))),
+    events: payload => this.record('governance.events', payload, Promise.resolve(ok({ events: [] }))),
+    webhookTest: payload => this.record('governance.webhookTest', payload, Promise.resolve(ok({ delivered: false, status: 'off' }))),
+  }
+
   readonly lakehouse: IApiClient['lakehouse'] = {
     overview: payload => this.record('lakehouse.overview', payload, Promise.resolve(ok({ generated_at: '', kpis: [] }))),
     tables: payload => this.record('lakehouse.tables', payload, Promise.resolve(ok({ tables: [] }))),

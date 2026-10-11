@@ -1,0 +1,9 @@
+== gravitino http://localhost:8090
+create metalake dsh -> 200 {"code":0,"metalake":{"name":"dsh","comment":"dsh five-source catalog hub (W24-B6)","audit":{"creator":"anonymous","crea
+create catalog lakehouse (lakehouse-iceberg) -> 200 ok
+create catalog kb-corpus (fileset) -> 200 ok
+create catalog carbon-business (jdbc-postgresql) -> 200 ok
+create catalog ontology-graph (model) -> 200 ok
+== metalake dsh catalogs: undefined
+== iceberg-rest /v1/config?warehouse=lakehouse -> 200
+{"defaults":{"s3.path-style-access":"true","s3.endpoint":"http://dsh-seaweedfs:8333","io-impl":"org.apache.iceberg.aws.s3.S3FileIO","prefix":"lakehouse"},"overrides":{},"endpoints":["GET /v1/{prefix}/

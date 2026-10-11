@@ -248,6 +248,7 @@ export class ApiProxyService extends Service implements ApiProxy {
   readonly lakehouse: ApiProxy['lakehouse']
   readonly connectors: ApiProxy['connectors']
   readonly kg: ApiProxy['kg']
+  readonly governance: ApiProxy['governance']
   readonly kb: ApiProxy['kb']
   readonly events: ApiProxy['events']
   readonly downloads: ApiProxy['downloads']
@@ -307,6 +308,7 @@ export class ApiProxyService extends Service implements ApiProxy {
     this.lakehouse = api.lakehouse
     this.connectors = api.connectors
     this.kg = api.kg
+    this.governance = api.governance
     this.kb = api.kb
     this.events = api.events
     this.downloads = api.downloads

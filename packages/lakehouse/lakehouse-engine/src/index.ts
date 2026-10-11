@@ -11,8 +11,10 @@ import z from '@deepseek-ai/schemastery'
 import { DEFAULT_MAX_ROWS, DEFAULT_QUERY_TIMEOUT_MS, LakehouseEngineService } from './engine.ts'
 import type { LakehouseCatalogConfig } from './catalog.ts'
 
-export { LAKE_ALIAS, quoteIdentifier, quoteString, resolveCatalogAttach } from './catalog.ts'
-export type { CatalogAttach, DuckLakeCatalogConfig, LakehouseCatalogConfig } from './catalog.ts'
+export { DEFAULT_S3_REGION, LAKE_ALIAS, quoteIdentifier, quoteString, resolveCatalogAttach } from './catalog.ts'
+export type {
+  CatalogAttach, DuckLakeCatalogConfig, IcebergRestCatalogConfig, IcebergS3Config, LakehouseCatalogConfig,
+} from './catalog.ts'
 export {
   assertNonBlank, assertReadOnlySql, readOnlyVerdict, SqlGuardError,
 } from './sql-guard.ts'
@@ -34,10 +36,31 @@ declare module '@deepseek-ai/cordis' {
 /** Default catalog file, workspace-relative. */
 const DEFAULT_CATALOG_PATH = 'workspace/lakehouse/ducklake/catalog.ducklake'
 
-/** Plugin configuration (the catalog `kind` validates at load: only `ducklake` exists at Tier 0). */
+/**
+ * Plugin configuration. The catalog `kind` discriminates at load: `ducklake`
+ * (Tier 0) takes catalogPath/dataPath; `iceberg-rest` (Tier 1) takes
+ * restUri/warehouse/s3.
+ */
 export interface Config {
-  /** The attached table catalog; `kind: 'ducklake'` is the Tier 0 member. */
-  readonly catalog?: { readonly kind: string; readonly catalogPath: string; readonly dataPath?: string }
+  /**
+   * The attached table catalog. Tier 0: `kind: 'ducklake'` with catalogPath
+   * and optional dataPath. Tier 1: `kind: 'iceberg-rest'` with restUri,
+   * warehouse, and the s3 data-plane credentials.
+   */
+  readonly catalog?: {
+    readonly kind: string
+    readonly catalogPath?: string
+    readonly dataPath?: string
+    readonly restUri?: string
+    readonly warehouse?: string
+    readonly s3?: {
+      readonly endpoint: string
+      readonly accessKeyId: string
+      readonly secretAccessKey: string
+      readonly region?: string
+      readonly pathStyle?: boolean
+    }
+  }
   /** DuckDB memory limit in MB; omitted = DuckDB's own default. */
   readonly memoryLimitMb?: number
   /** DuckDB worker-thread count; omitted = DuckDB's own default. */
@@ -55,6 +78,15 @@ export const Config: z<Config> = z.object({
     kind: z.string().default('ducklake'),
     catalogPath: z.string().default(DEFAULT_CATALOG_PATH),
     dataPath: z.string(),
+    restUri: z.string(),
+    warehouse: z.string(),
+    s3: z.object({
+      endpoint: z.string(),
+      accessKeyId: z.string(),
+      secretAccessKey: z.string(),
+      region: z.string(),
+      pathStyle: z.boolean(),
+    }),
   }),
   memoryLimitMb: z.number().step(1).min(1),
   threads: z.number().step(1).min(1),
@@ -73,16 +105,34 @@ export const Config: z<Config> = z.object({
  */
 export async function apply(ctx: Context, config: Config): Promise<void> {
   // schemastery (Config) has already filled every defaulted field.
-  if (config.catalog !== undefined && config.catalog.kind !== 'ducklake') {
-    throw new Error(`lakehouse-engine: unsupported catalog kind "${config.catalog.kind}" (Tier 0 ships ducklake only)`)
-  }
-  const catalog: LakehouseCatalogConfig = config.catalog === undefined
-    ? { kind: 'ducklake', catalogPath: DEFAULT_CATALOG_PATH }
-    : {
-      kind: 'ducklake',
-      catalogPath: config.catalog.catalogPath,
-      ...(config.catalog.dataPath === undefined ? {} : { dataPath: config.catalog.dataPath }),
+  let catalog: LakehouseCatalogConfig
+  if (config.catalog === undefined || config.catalog.kind === 'ducklake') {
+    catalog = config.catalog === undefined
+      ? { kind: 'ducklake', catalogPath: DEFAULT_CATALOG_PATH }
+      : {
+        kind: 'ducklake',
+        catalogPath: config.catalog.catalogPath ?? DEFAULT_CATALOG_PATH,
+        ...(config.catalog.dataPath === undefined ? {} : { dataPath: config.catalog.dataPath }),
+      }
+  } else if (config.catalog.kind === 'iceberg-rest') {
+    if (config.catalog.restUri === undefined || config.catalog.warehouse === undefined || config.catalog.s3 === undefined) {
+      throw new Error('lakehouse-engine: iceberg-rest requires restUri, warehouse, and s3 credentials')
     }
+    catalog = {
+      kind: 'iceberg-rest',
+      restUri: config.catalog.restUri,
+      warehouse: config.catalog.warehouse,
+      s3: {
+        endpoint: config.catalog.s3.endpoint,
+        accessKeyId: config.catalog.s3.accessKeyId,
+        secretAccessKey: config.catalog.s3.secretAccessKey,
+        ...(config.catalog.s3.region === undefined ? {} : { region: config.catalog.s3.region }),
+        ...(config.catalog.s3.pathStyle === undefined ? {} : { pathStyle: config.catalog.s3.pathStyle }),
+      },
+    }
+  } else {
+    throw new Error(`lakehouse-engine: unsupported catalog kind "${config.catalog.kind}" (ducklake | iceberg-rest)`)
+  }
   const service = new LakehouseEngineService(ctx, {
     catalog,
     ...(config.memoryLimitMb === undefined ? {} : { memoryLimitMb: config.memoryLimitMb }),

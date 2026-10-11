@@ -20,6 +20,11 @@ function fakeApi(overrides: Partial<{ muxFrames: MuxFrame[]; hostFrames: HostFra
   return {
     data: { upload: kbRefuse, describeImage: kbRefuse, extractText: kbRefuse },
     lakehouse: { overview: kbRefuse, tables: kbRefuse, query: kbRefuse, schema: kbRefuse },
+    governance: {
+      inventory: kbRefuse, search: kbRefuse, lineage: kbRefuse, rules: kbRefuse,
+      ruleUpsert: kbRefuse, ruleDelete: kbRefuse, evaluate: kbRefuse, events: kbRefuse,
+      webhookTest: kbRefuse,
+    },
     orders: {
       create: kbRefuse,
       get: kbRefuse,

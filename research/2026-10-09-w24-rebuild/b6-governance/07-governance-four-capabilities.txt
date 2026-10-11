@@ -1,0 +1,9 @@
+inventory: 252 assets by source: [["legacy",139],["lakehouse",9],["graph",53],["ontology",3],["kb",48]]
+search 'customer': 4 hits across [legacy, lakehouse, graph]
+  samples: ["legacy:lake.legacy_nocobase.crm_customers","legacy:lake.legacy_nocobase.hub_md_customer_categories","lakehouse:lake.synced_carbon.customer","graph:graph.Customer"]
+lineage: recorded 17 edges, store holds 17
+quality carbon-rows: pass (measured=6)
+quality deliberate-fail: fail (measured=6)
+quality legacy-nonempty: pass (measured=8)
+alerts: 17 events, 9 critical from the failed rule
+webhook: delivered=false status="webhook disabled (config.webhookUrl unset); event recorded locally"

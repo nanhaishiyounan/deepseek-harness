@@ -87,6 +87,11 @@ import {
   lakehouseOverviewRequestSchema, lakehouseTablesRequestSchema, lakehouseQueryRequestSchema, lakehouseSchemaRequestSchema,
 } from '../api/lakehouse.schema.ts'
 import {
+  governanceInventoryRequestSchema, governanceSearchRequestSchema, governanceLineageRequestSchema, governanceRulesRequestSchema,
+  governanceRuleUpsertRequestSchema, governanceRuleDeleteRequestSchema, governanceEvaluateRequestSchema, governanceEventsRequestSchema,
+  governanceWebhookTestRequestSchema,
+} from '../api/governance.schema.ts'
+import {
   connectorsConnectionsRequestSchema, connectorsListRequestSchema, connectorsTransfersRequestSchema,
 } from '../api/connectors.schema.ts'
 import {
@@ -187,6 +192,15 @@ const UNARY_ROUTES: UnaryRoutes = {
   'assets.stats': { schema: assetsStatsRequestSchema, invoke: (api, r, signal) => api.assets.stats(r, signal) },
   'lakehouse.overview': { schema: lakehouseOverviewRequestSchema, invoke: (api, r, signal) => api.lakehouse.overview(r, signal) },
   'lakehouse.tables': { schema: lakehouseTablesRequestSchema, invoke: (api, r, signal) => api.lakehouse.tables(r, signal) },
+  'governance.inventory': { schema: governanceInventoryRequestSchema, invoke: (api, r, signal) => api.governance.inventory(r, signal) },
+  'governance.search': { schema: governanceSearchRequestSchema, invoke: (api, r, signal) => api.governance.search(r, signal) },
+  'governance.lineage': { schema: governanceLineageRequestSchema, invoke: (api, r, signal) => api.governance.lineage(r, signal) },
+  'governance.rules': { schema: governanceRulesRequestSchema, invoke: (api, r, signal) => api.governance.rules(r, signal) },
+  'governance.ruleUpsert': { schema: governanceRuleUpsertRequestSchema, invoke: (api, r, signal) => api.governance.ruleUpsert(r, signal) },
+  'governance.ruleDelete': { schema: governanceRuleDeleteRequestSchema, invoke: (api, r, signal) => api.governance.ruleDelete(r, signal) },
+  'governance.evaluate': { schema: governanceEvaluateRequestSchema, invoke: (api, r, signal) => api.governance.evaluate(r, signal) },
+  'governance.events': { schema: governanceEventsRequestSchema, invoke: (api, r, signal) => api.governance.events(r, signal) },
+  'governance.webhookTest': { schema: governanceWebhookTestRequestSchema, invoke: (api, r, signal) => api.governance.webhookTest(r, signal) },
   'lakehouse.query': { schema: lakehouseQueryRequestSchema, invoke: (api, r, signal) => api.lakehouse.query(r, signal) },
   'lakehouse.schema': { schema: lakehouseSchemaRequestSchema, invoke: (api, r, signal) => api.lakehouse.schema(r, signal) },
   'connectors.list': { schema: connectorsListRequestSchema, invoke: (api, r, signal) => api.connectors.list(r, signal) },

@@ -47,6 +47,10 @@ function scriptedApi(overrides: {
   return {
     data: { upload: kbRefuse, describeImage: kbRefuse, extractText: kbRefuse, ...overrides.data },
     lakehouse: { overview: err, tables: err, query: err, schema: err, ...overrides.lakehouse },
+    governance: {
+      inventory: err, search: err, lineage: err, rules: err, ruleUpsert: err,
+      ruleDelete: err, evaluate: err, events: err, webhookTest: err,
+    },
     orders: {
       create: err,
       get: err,

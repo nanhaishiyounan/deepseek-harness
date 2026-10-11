@@ -87,6 +87,11 @@ import {
   lakehouseOverviewValueSchema, lakehouseTablesValueSchema, lakehouseQueryValueSchema, lakehouseSchemaValueSchema,
 } from '../api/lakehouse.schema.ts'
 import {
+  governanceInventoryValueSchema, governanceSearchValueSchema, governanceLineageValueSchema, governanceRulesValueSchema,
+  governanceRuleUpsertValueSchema, governanceRuleDeleteValueSchema, governanceEvaluateValueSchema, governanceEventsValueSchema,
+  governanceWebhookTestValueSchema,
+} from '../api/governance.schema.ts'
+import {
   connectorsConnectionsValueSchema, connectorsListValueSchema, connectorsTransfersValueSchema,
 } from '../api/connectors.schema.ts'
 import {
@@ -217,6 +222,17 @@ export interface IApiClient {
     query(payload: RequestPayload<'lakehouse.query'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'lakehouse.query'>>>
     schema(payload: RequestPayload<'lakehouse.schema'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'lakehouse.schema'>>>
   }
+  governance: {
+    inventory(payload: RequestPayload<'governance.inventory'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'governance.inventory'>>>
+    search(payload: RequestPayload<'governance.search'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'governance.search'>>>
+    lineage(payload: RequestPayload<'governance.lineage'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'governance.lineage'>>>
+    rules(payload: RequestPayload<'governance.rules'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'governance.rules'>>>
+    ruleUpsert(payload: RequestPayload<'governance.ruleUpsert'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'governance.ruleUpsert'>>>
+    ruleDelete(payload: RequestPayload<'governance.ruleDelete'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'governance.ruleDelete'>>>
+    evaluate(payload: RequestPayload<'governance.evaluate'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'governance.evaluate'>>>
+    events(payload: RequestPayload<'governance.events'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'governance.events'>>>
+    webhookTest(payload: RequestPayload<'governance.webhookTest'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'governance.webhookTest'>>>
+  }
   connectors: {
     list(payload: RequestPayload<'connectors.list'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'connectors.list'>>>
     connections(payload: RequestPayload<'connectors.connections'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'connectors.connections'>>>
@@ -337,6 +353,15 @@ const UNARY_VALUE_SCHEMAS: { [K in keyof RpcMethodMap]: z.ZodType<Wire<ResponseV
   'assets.stats': assetsStatsValueSchema,
   'lakehouse.overview': lakehouseOverviewValueSchema,
   'lakehouse.tables': lakehouseTablesValueSchema,
+  'governance.inventory': governanceInventoryValueSchema,
+  'governance.search': governanceSearchValueSchema,
+  'governance.lineage': governanceLineageValueSchema,
+  'governance.rules': governanceRulesValueSchema,
+  'governance.ruleUpsert': governanceRuleUpsertValueSchema,
+  'governance.ruleDelete': governanceRuleDeleteValueSchema,
+  'governance.evaluate': governanceEvaluateValueSchema,
+  'governance.events': governanceEventsValueSchema,
+  'governance.webhookTest': governanceWebhookTestValueSchema,
   'lakehouse.query': lakehouseQueryValueSchema,
   'lakehouse.schema': lakehouseSchemaValueSchema,
   'connectors.list': connectorsListValueSchema,
@@ -682,6 +707,19 @@ export abstract class AbstractApiClient implements IApiClient {
     tables: (payload, signal) => this.callUnary('lakehouse.tables', payload, signal, 'caller-signal-only'),
     query: (payload, signal) => this.callUnary('lakehouse.query', payload, signal, 'caller-signal-only'),
     schema: (payload, signal) => this.callUnary('lakehouse.schema', payload, signal, 'caller-signal-only'),
+  }
+
+  readonly governance: IApiClient['governance'] = {
+    // Governance reads are live-source collections; the caller's signal alone bounds them.
+    inventory: (payload, signal) => this.callUnary('governance.inventory', payload, signal, 'caller-signal-only'),
+    search: (payload, signal) => this.callUnary('governance.search', payload, signal, 'caller-signal-only'),
+    lineage: (payload, signal) => this.callUnary('governance.lineage', payload, signal, 'caller-signal-only'),
+    rules: (payload, signal) => this.callUnary('governance.rules', payload, signal, 'caller-signal-only'),
+    ruleUpsert: (payload, signal) => this.callUnary('governance.ruleUpsert', payload, signal, 'caller-signal-only'),
+    ruleDelete: (payload, signal) => this.callUnary('governance.ruleDelete', payload, signal, 'caller-signal-only'),
+    evaluate: (payload, signal) => this.callUnary('governance.evaluate', payload, signal, 'caller-signal-only'),
+    events: (payload, signal) => this.callUnary('governance.events', payload, signal, 'caller-signal-only'),
+    webhookTest: (payload, signal) => this.callUnary('governance.webhookTest', payload, signal, 'caller-signal-only'),
   }
 
   readonly connectors: IApiClient['connectors'] = {

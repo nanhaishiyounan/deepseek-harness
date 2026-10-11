@@ -240,6 +240,12 @@
     - id: ui-lakehouse
       name: '@deepseek-ai/dsh-client-ui-lakehouse'
 
+    # Governance panel: sidebar entry + the `governance` conversation view
+    # (four tabs — catalog/lineage/quality/alerts). Data rides the gateway's
+    # governance domain over the governance engine.
+    - id: ui-governance
+      name: '@deepseek-ai/dsh-client-ui-governance'
+
     # Knowledge-graph page: sidebar entry + the `kg` conversation view tab
     # (phrase-box walks, sigma canvas, type legend, details panel). Data
     # rides the gateway's kg domain; deployments opt in through kgEnabled.
@@ -380,6 +386,20 @@
           kind: ducklake
           catalogPath: workspace/lakehouse/ducklake/catalog.ducklake
           dataPath: workspace/lakehouse/ducklake/files
+
+    # ── the W24 governance engine (B6 four capabilities) ───────────────────
+    # SQLite-backed lineage edges, quality rules, and alert events; live
+    # five-source inventory collectors (lakehouse engine, Neo4j, WeKnora,
+    # Gravitino business catalog); lakehouse-backed rule evaluation; optional
+    # webhook delivery (webhookUrl empty = off, the default).
+    - id: governance-engine
+      name: '@deepseek-ai/dsh-governance-engine'
+      config:
+        path: workspace/governance/governance.sqlite
+        gravitinoUrl: !!js "process.env.GRAVITINO_URL ?? 'http://localhost:8090'"
+        metalake: dsh
+        weknoraUrl: !!js "process.env.WEKNORA_BASE_URL ?? 'http://localhost:18081'"
+        weknoraApiKey: !!js "process.env.WEKNORA_API_KEY ?? ''"
 
     - id: lakehouse-sync
       name: '@deepseek-ai/dsh-lakehouse-sync'

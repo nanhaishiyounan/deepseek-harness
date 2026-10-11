@@ -1,0 +1,14 @@
+{
+  "identities": [
+    {
+      "name": "dsh-lakehouse",
+      "credentials": [
+        {
+          "accessKey": "dshlake",
+          "secretKey": "dshlake-secret"
+        }
+      ],
+      "actions": ["Admin", "Read", "Write", "List", "Tagging"]
+    }
+  ]
+}

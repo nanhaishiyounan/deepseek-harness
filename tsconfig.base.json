@@ -89,6 +89,8 @@
       "@deepseek-ai/dsh-settings/types": ["./packages/settings/settings/src/types.ts"],
       "@deepseek-ai/dsh-api-remotes/types": ["./packages/api/remotes/src/types.ts"],
       "@deepseek-ai/dsh-api-remotes/invariant": ["./packages/api/remotes/src/invariant.ts"],
+      "@deepseek-ai/dsh-governance": ["./packages/governance/governance/src/index.ts"],
+      "@deepseek-ai/dsh-governance-engine": ["./packages/governance/governance-engine/src/index.ts"],
       "@deepseek-ai/dsh-lakehouse/data-router": ["./packages/lakehouse/lakehouse/src/data-router.ts"],
       "@deepseek-ai/dsh-lakehouse/tabular": ["./packages/lakehouse/lakehouse/src/tabular.ts"],
       "@deepseek-ai/dsh-connector/types": ["./packages/connector/connector/src/types.ts"],

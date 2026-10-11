@@ -1,6 +1,7 @@
 /**
  * The lakehouse engine service (`ctx.lakehouseEngine`): one in-process DuckDB
- * instance with the configured table catalog attached (DuckLake at Tier 0).
+ * instance with the configured table catalog attached (DuckLake at Tier 0,
+ * Iceberg REST over Gravitino at Tier 1).
  * The model-facing surface — {@link LakehouseEngineService.query},
  * {@link LakehouseEngineService.listTables},
  * {@link LakehouseEngineService.describeTable},
@@ -208,10 +209,19 @@ export class LakehouseEngineService extends Service {
     try {
       const connection = await instance.connect()
       try {
-        const catalogPath = resolve(this.options.catalog.catalogPath)
-        const dataPath = resolve(this.options.catalog.dataPath ?? dirname(this.options.catalog.catalogPath))
-        await mkdir(dirname(catalogPath), { recursive: true })
-        await mkdir(dataPath, { recursive: true })
+        // DuckLake resolves and creates its on-disk paths; the Iceberg REST
+        // member has no local files, so path resolution is Tier 0 only (the
+        // resolved values still flow into resolveCatalogAttach unchanged).
+        const catalogPath = this.options.catalog.kind === 'ducklake'
+          ? resolve(this.options.catalog.catalogPath)
+          : '(remote)'
+        const dataPath = this.options.catalog.kind === 'ducklake'
+          ? resolve(this.options.catalog.dataPath ?? dirname(this.options.catalog.catalogPath))
+          : '(remote)'
+        if (this.options.catalog.kind === 'ducklake') {
+          await mkdir(dirname(catalogPath), { recursive: true })
+          await mkdir(dataPath, { recursive: true })
+        }
         const attach = resolveCatalogAttach(this.options.catalog, catalogPath, dataPath)
         for (const load of attach.extensionLoads) {
           try {
@@ -223,6 +233,7 @@ export class LakehouseEngineService extends Service {
             await connection.run(load)
           }
         }
+        for (const statement of attach.preAttachSql) await connection.run(statement)
         await connection.run(attach.attachSql)
       } finally {
         connection.disconnectSync()

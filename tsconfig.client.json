@@ -69,6 +69,7 @@
     { "path": "./packages/client/ui-assets" },
     { "path": "./packages/client/ui-connectors" },
     { "path": "./packages/client/ui-lakehouse" },
+    { "path": "./packages/client/ui-governance" },
     { "path": "./packages/client/ui-kg" },
     { "path": "./packages/client/ui-business" },
     { "path": "./packages/client/ui-brand-official" },

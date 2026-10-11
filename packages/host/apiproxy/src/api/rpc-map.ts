@@ -19,6 +19,7 @@ import type { AssetsApi } from './assets.ts'
 import type { LakehouseApi } from './lakehouse.ts'
 import type { ConnectorsApi } from './connectors.ts'
 import type { KgApi } from './kg.ts'
+import type { GovernanceApi } from './governance.ts'
 import type { SettingsApi } from './settings.ts'
 import type { CredentialsApi } from './credentials.ts'
 import type { LlmApi } from './llm.ts'
@@ -81,6 +82,15 @@ export interface RpcMethodMap {
   'lakehouse.tables': LakehouseApi['tables']
   'lakehouse.query': LakehouseApi['query']
   'lakehouse.schema': LakehouseApi['schema']
+  'governance.inventory': GovernanceApi['inventory']
+  'governance.search': GovernanceApi['search']
+  'governance.lineage': GovernanceApi['lineage']
+  'governance.rules': GovernanceApi['rules']
+  'governance.ruleUpsert': GovernanceApi['ruleUpsert']
+  'governance.ruleDelete': GovernanceApi['ruleDelete']
+  'governance.evaluate': GovernanceApi['evaluate']
+  'governance.events': GovernanceApi['events']
+  'governance.webhookTest': GovernanceApi['webhookTest']
   'connectors.list': ConnectorsApi['list']
   'connectors.connections': ConnectorsApi['connections']
   'connectors.transfers': ConnectorsApi['transfers']

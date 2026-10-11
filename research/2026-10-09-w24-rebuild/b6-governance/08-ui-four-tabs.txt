@@ -1,0 +1,35 @@
+# W24-B6 治理面板 UI 实跑证据（dsh web :3080，DOM 逐 tab 提取）
+
+主导航：对话 | 湖仓 | 数据治理 | 业务管理 —— 「数据治理」席位挂载成功（B1 sidebar.nav 模式，order 12.6）
+会话 tab 环：「数据治理」tab 可切换；面板四 tab：目录/血缘/质量/告警
+
+## 目录 tab（跨源搜索 'customer'，4 命中跨 3 源）
+legacy | lake.legacy_nocobase.crm_customers · schema legacy_nocobase | 21
+legacy | lake.legacy_nocobase.hub_md_customer_categories · schema legacy_nocobase | 4
+lakehouse | lake.synced_carbon.customer · schema synced_carbon | 6
+graph | graph.Customer · kg-graph registry node type | —
+
+完整 inventory：252 资产（legacy 140 表带真实行数 / lakehouse 9 / graph 53 node types 含 FoodOn xref / ontology 3 revisions / kb 48 文档）
+
+## 血缘 tab（17 边，carbon→湖仓→图谱全链 + kb chunks）
+business.carbon.customer → lake.synced_carbon.customer | lakehouse-sync watermark 增量同步 (B3)
+（item/itemStockQuantities/job/purchaseOrder/receipt/salesOrder/supplier 同构 8 边）
+kb.食品安全知识库 → kb.chunks | WeKnora 语料切分
+lake.synced_carbon.customer → graph.<labels> | B5 确定性 ETL 入图 (kg-mappings)
+（其余 synced_carbon 7 表 → graph 同构 7 边）
+
+## 质量 tab（3 条规则，UI 内点击「运行评估」实跑）
+carbon 同步表行数下限 | row_count_threshold | lake.synced_carbon.customer | 阈值 1 | 实测 6 | 通过
+故意违规: 不可能达到的行数下限 | row_count_threshold | lake.synced_carbon.customer | 阈值 1000000 | 实测 6 | 未通过
+legacy 导出非空 | row_count_threshold | lake.legacy_nocobase.alert_rules | 阈值 1 | 实测 8 | 通过
+
+## 告警 tab（critical 事件流 + webhook 默认关证明）
+2026-10-11T15:31:35Z | critical | 质量规则未通过: 故意违规: 不可能达到的行数下限 · rule=deliberate-fail table=lake.synced_carbon.customer measured=6
+2026-10-11T15:23:49Z | info | webhook 通道默认关闭（本地事件已记录）
+（级别筛选器：全部/critical/warning/info；「测试 Webhook」按钮）
+
+## RPC 面（浏览器→网关，全部 200）
+POST /api/governance.inventory [200]
+POST /api/governance.lineage [200]
+POST /api/governance.rules [200]
+POST /api/governance.evaluate [200]（修复惰性引擎解析后 outcomes 渲染 通过/未通过/通过）

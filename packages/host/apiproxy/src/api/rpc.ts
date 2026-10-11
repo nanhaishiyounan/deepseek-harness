@@ -220,6 +220,10 @@ export interface RpcErrorDetailsMap {
   'lakehouse-engine-not-composed': {}
   /** A lakehouse-engine read was rejected (statement guard, timeout, or engine failure); the message is the cause's text. */
   'lakehouse-read-rejected': {}
+  /** A governance-domain call found the deployment composing no governance engine. */
+  'governance-not-composed': {}
+  /** A governance write or evaluate was rejected (invalid rule, engine failure). */
+  'governance-rejected': {}
   /** A nocobase.update call ran in a deployment that did not opt in through `nocobaseWriteEnabled`. */
   'nocobase-write-disabled': {}
   'internal': {}

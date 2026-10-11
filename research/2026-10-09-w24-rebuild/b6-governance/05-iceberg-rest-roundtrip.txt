@@ -1,0 +1,54 @@
+duckdb OK   SELECT count(*) FROM ice.food.materials -> [["3"]]
+duckdb OK   SELECT * FROM ice.food.materials ORDER BY id -> [[1,"海苔片",{"width":10,"scale":2,"value":"1250"}],[2,"白砂糖",{"width":10,"scale":2,"value":"680"}],[3,"乳粉",{"width":10,"scale":2,"value":"4800"}]]
+duckdb OK   SELECT id, name FROM ice.food.materials -> [[1,"海苔片"],[2,"白砂糖"],[3,"乳粉"]]
+
+== S3 objects (filer list, JSON API)
+{
+    "Version": "30GB 4.48 530be3e37",
+    "Path": "/buckets/lakehouse/food/materials",
+    "Entries": [
+        {
+            "FullPath": "/buckets/lakehouse/food/materials/data",
+            "Mtime": "2026-10-11T08:13:34.1603585Z",
+            "Crtime": "2026-10-11T08:13:34Z",
+            "Ctime": "0001-01-01T00:00:00Z",
+            "Atime": "2026-10-11T08:13:34.1603585Z",
+            "Mode": 2147484153,
+            "Uid": 1000,
+            "Gid": 1000,
+            "Mime": "",
+            "TtlSec": 0,
+            "UserName": "",
+            "GroupNames": null,
+            "SymlinkTarget": "",
+            "Md5": null,
+            "FileSize": 0,
+            "Rdev": 0,
+            "Inode": 467984126448788110,
+            "Extended": null,
+            "HardLinkId": null,
+            "HardLinkCounter": 0,
+            "Content": null,
+            "Remote": null,
+            "Quota": 0,
+            "WORMEnforcedAtTsNs": 0
+        },
+
+== iceberg REST load table metadata
+== parquet data files on S3
+/buckets/lakehouse/food/materials/data/01a12a06-3947-7de4-82df-f46c217408a2.parquet 530 bytes
+/buckets/lakehouse/food/materials/data/01a12a06-56fd-7bb5-872a-b79fb5155303.parquet 530 bytes
+/buckets/lakehouse/food/materials/data/01a12a06-73b1-712d-81dd-e8575e6efb96.parquet 530 bytes
+
+== iceberg REST loadTable
+location: s3://lakehouse/food/materials
+snapshots: 1
+== parquet data files on S3
+/buckets/lakehouse/food/materials/data/01a12a06-3947-7de4-82df-f46c217408a2.parquet 530 bytes
+/buckets/lakehouse/food/materials/data/01a12a06-56fd-7bb5-872a-b79fb5155303.parquet 530 bytes
+/buckets/lakehouse/food/materials/data/01a12a06-73b1-712d-81dd-e8575e6efb96.parquet 530 bytes
+
+== iceberg REST loadTable
+location: s3://lakehouse/food/materials
+snapshots: 1
+schema fields: ['id', 'name', 'price']

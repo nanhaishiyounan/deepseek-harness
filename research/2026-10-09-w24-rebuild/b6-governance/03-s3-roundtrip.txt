@@ -1,0 +1,3 @@
+PUT /lakehouse -> 200
+PUT /lakehouse/probe.json -> 200
+GET /lakehouse/probe.json -> 200 {"probe":"w24-b6"}
