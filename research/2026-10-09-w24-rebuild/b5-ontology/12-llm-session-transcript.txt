@@ -1,0 +1,23 @@
+W24-B5 LLM 会话实跑转录（MiniMax-M3，dsh web :3080，会话「沙特食品Halal认证流程」第2轮）
+提问：NovaSat Networks 这个客户的销售订单关联了哪些物料？请用 kg_graph_query 工具查询 Neo4j 图谱回答，列出订单号和物料名。
+
+工具链（13 步，真实 Neo4j 往返）：
+1. kg_ontology {} → 版本链 v1..v3(llm-induction) + 头部 census
+2. kg_graph_query（模型自拟 Cypher，一次类型不匹配错误 → 工具错误结构化回显）
+3. kg_schema {}
+4. kg_graph_query: MATCH (c:Customer) WHERE c.name='NovaSat Networks' RETURN c.name, c.gid LIMIT 5
+5. kg_graph_query: MATCH (c:Customer {name:'NovaSat Networks'})-[:places]->(o:Order)-[:includes]->(oi:OrderItem) … → 0 行（本体引导的关系名与实际不符，模型自我纠偏）
+6. kg_graph_query: MATCH (c:Customer {name:'NovaSat Networks'})-[r]->(n) … → 探边
+7. kg_graph_query: MATCH (oi:OrderItem) … → 探属性
+8. kg_graph_query: MATCH (c {name:'NovaSat Networks'})-[r]-(n) … → 双向探邻域
+9. kg_graph_query: MATCH (o:Order) RETURN count(o) → 0（Order 标签不存在）
+10. kg_graph_query: MATCH (oi:OrderItem) RETURN count(oi) → 0
+11. kg_graph_query: MATCH (so:__Entity {name:'SO000004'})-[r]->(n) WHERE type(r)<>'orderedBy' … → 发现 orderedItem → Item
+12. kg_graph_query: MATCH (c:__Entity {name:'NovaSat Networks'})<-[:orderedBy]-(so:__Entity)-[:orderedItem]->(it:__Entity) RETURN so.name, it.name ORDER BY so.name → 11 行全量
+13. present_card（report 卡：7 订单 / 11 关联 / 9 去重物料 + 表格；首版 11 行表格被校验拒绝（>10 行），模型按订单汇总重排后通过）
+
+最终答案（模型原文摘要）：NovaSat Networks 通过 orderedBy 挂 7 个销售订单（SO000004/008/010/011/015/019/022），每个订单经 orderedItem 链到物料：
+SO000004 Structural Frame Assembly / SO000008 Propulsion Module / SO000010 Solar Array Wing / SO000011 S-Band Transponder 2W / SO000015 Titanium Propellant Tank 4L / SO000019 Solenoid Valve Low-Pressure / SO000022 ADCS Electronics Board、EPS Control PCB Assembly、Patch Antenna S-Band、Solar Array Wing、Structural Frame Assembly
+模型并主动标注：物料为航天电子件（satellite 种子数据集），非食品 SKU——数据口径如实披露。
+
+截图：12-llm-session-novasat.png（工具链 + report 卡）

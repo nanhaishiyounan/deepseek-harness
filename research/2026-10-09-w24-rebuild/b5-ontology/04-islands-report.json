@@ -1,0 +1,123 @@
+{
+  "baseline": {
+    "nodes": 1139,
+    "edges": 794,
+    "islands": 436,
+    "largestComponent": 489
+  },
+  "after": {
+    "nodes": 1358,
+    "edges": 1179,
+    "islands": 375,
+    "largestComponent": 581
+  },
+  "computed": {
+    "nodes": 1358,
+    "edges": 1181,
+    "islands": 375,
+    "largestComponent": 581
+  },
+  "businessNodes": 134,
+  "businessEdges": 164,
+  "bridges": 223,
+  "reconciliation": [
+    {
+      "kind": "nodes",
+      "key": "item",
+      "source": 43,
+      "planned": 43,
+      "ok": true
+    },
+    {
+      "kind": "nodes",
+      "key": "customer",
+      "source": 6,
+      "planned": 6,
+      "ok": true
+    },
+    {
+      "kind": "nodes",
+      "key": "supplier",
+      "source": 15,
+      "planned": 15,
+      "ok": true
+    },
+    {
+      "kind": "nodes",
+      "key": "salesOrder",
+      "source": 26,
+      "planned": 26,
+      "ok": true
+    },
+    {
+      "kind": "nodes",
+      "key": "purchaseOrder",
+      "source": 20,
+      "planned": 20,
+      "ok": true
+    },
+    {
+      "kind": "nodes",
+      "key": "job",
+      "source": 22,
+      "planned": 22,
+      "ok": true
+    },
+    {
+      "kind": "nodes",
+      "key": "location",
+      "source": 2,
+      "planned": 2,
+      "ok": true
+    },
+    {
+      "kind": "edges",
+      "key": "salesOrder.orderedBy",
+      "source": 26,
+      "planned": 26,
+      "ok": true
+    },
+    {
+      "kind": "edges",
+      "key": "purchaseOrder.orderedFrom",
+      "source": 20,
+      "planned": 20,
+      "ok": true
+    },
+    {
+      "kind": "edges",
+      "key": "job.fulfillsOrder",
+      "source": 19,
+      "planned": 19,
+      "ok": true
+    },
+    {
+      "kind": "edges",
+      "key": "job.producesItem",
+      "source": 22,
+      "planned": 22,
+      "ok": true
+    },
+    {
+      "kind": "edges",
+      "key": "salesOrderLines.orderedItem",
+      "source": 36,
+      "planned": 36,
+      "ok": true
+    },
+    {
+      "kind": "edges",
+      "key": "purchaseOrderLines.purchasedItem",
+      "source": 21,
+      "planned": 21,
+      "ok": true
+    },
+    {
+      "kind": "edges",
+      "key": "itemStockQuantities.stockedIn",
+      "source": 20,
+      "planned": 20,
+      "ok": true
+    }
+  ]
+}

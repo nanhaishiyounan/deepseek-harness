@@ -1,0 +1,8 @@
+=== degradation probe (app stopped) — fallback with notice ===
+mode: hybrid | notice: WeKnora is unreachable; results come from the local fallback store | hits: 8
+top: workspace/data/export-compliance/2026-08-eac-certification-g
+
+=== no-fallback direct client — fail loud ===
+/Users/mac/Documents/github/deepseek-harness/packages/kb/kb-weknora/src/client.ts:129
+      throw new WeknoraApiError(
+WeknoraApiError: GET /knowledge-bases failed before a response arrived (fetch failed)

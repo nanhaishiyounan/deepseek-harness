@@ -3384,6 +3384,11 @@ function createFixtureWorld(options: FixtureOptions): FixtureWorld {
     },
 
     kg: {
+      graphPage: request => err(request, {
+        code: 'kg-graph-store-not-composed',
+        message: 'this deployment composes no available Neo4j graph store; add dsh-graph-neo4j (url/user/passwordEnv) to expose the graph page',
+        details: {},
+      }),
       ontologyEdit: request => err(request, {
         code: 'kg-not-composed',
         message: 'this deployment has not enabled the kg domain; set the api-gateway config kgEnabled: true to expose the graph page reads',
@@ -3679,6 +3684,7 @@ export class FixtureApiClient extends AbstractApiClient {
       case 'connectors.list': return this.api.connectors.list(request, signal)
       case 'connectors.connections': return this.api.connectors.connections(request, signal)
       case 'connectors.transfers': return this.api.connectors.transfers(request, signal)
+      case 'kg.graphPage': return this.api.kg.graphPage(request, signal)
       case 'kg.mappings': return this.api.kg.mappings(request, signal)
       case 'kg.schema': return this.api.kg.schema(request, signal)
       case 'kg.query': return this.api.kg.query(request, signal)

@@ -14,6 +14,12 @@ import { createKgClientStore } from '../src/client/kgStore.ts'
 import type { KgEpisodeRow, KgNodeTypeRow, KgReviewEntryRow } from '../src/client/kgTypes.ts'
 import { zh } from '../src/client/locales.ts'
 import type { KgKey } from '../src/client/locales.ts'
+// The Obsidian canvas statically imports react-force-graph-2d (the
+// single-artifact client contract); jsdom cannot run its canvas measurement,
+// so every spec that renders the kg page stubs the module.
+vi.mock('react-force-graph-2d', () => ({
+  default: () => null,
+}))
 
 /** The zh dictionary as the surfaces' t (params rendered the runtime way). */
 const t = ((key: KgKey, params?: Record<string, string | number>) => {

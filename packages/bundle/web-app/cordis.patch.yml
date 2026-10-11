@@ -388,6 +388,17 @@
         tables: []
         scheduleIntervalMs: 0
 
+    # ── the W24 graph store (five-source ④⑤: Neo4j + ontology) ────────────
+    # The Neo4j engine: one bolt connection over the credentials env chain.
+    # The kg domain's graphPage reads and the kg_graph_query/kg_ontology
+    # tools ride it; the password comes from DSH_NEO4J_PASSWORD.
+    - id: graph-neo4j
+      name: '@deepseek-ai/dsh-graph-neo4j'
+      config:
+        url: !!js "process.env.DSH_NEO4J_URL ?? 'bolt://localhost:7687'"
+        user: !!js "process.env.DSH_NEO4J_USER ?? 'neo4j'"
+        passwordEnv: DSH_NEO4J_PASSWORD
+
 # ── the agent plane moves behind agent presets ─────────────────────────────
 #
 # Every row below composes what ONE agent contributes to the host registries:

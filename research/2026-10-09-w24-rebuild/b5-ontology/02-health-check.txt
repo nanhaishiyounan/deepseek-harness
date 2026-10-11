@@ -1,0 +1,1 @@
+{"results":[{"columns":["ok","today"],"data":[{"row":[1,"2026-10-10"],"meta":[null,{"type":"date"}]}]}],"errors":[],"lastBookmarks":["FB:kcwQDYeE8Qd2Tdq7VAQ3XnD3yQOQ"]}

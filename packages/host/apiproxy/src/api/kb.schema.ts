@@ -50,6 +50,7 @@ export const kbSearchRequestSchema = z.object({
 export const kbSearchValueSchema = z.object({
   mode: z.enum(['hybrid', 'text']),
   embed_model: z.string().optional(),
+  notice: z.string().optional(),
   results: z.array(kbHitSchema),
 }) as unknown as z.ZodType<Wire<KbSearchView>>
 

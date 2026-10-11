@@ -5,6 +5,7 @@
 
 import { z } from 'zod'
 import type { Wire } from './rpc.schema.ts'
+import type { ResponseValue } from './rpc-map.ts'
 import type { RequestPayload } from './index.ts'
 
 /** Where a registered entry came from (mirrors the registry vocabulary). */
@@ -60,6 +61,71 @@ export const kgEdgeViewSchema = z.object({
   fact: z.string().optional(),
   asserted_by: z.enum(['nocobase', 'lakehouse', 'connector', 'kb', 'kg-align', 'ai-edit']),
 })
+
+/** kg.graphPage request payload (discriminated by mode). */
+export const kgGraphPageRequestSchema = z.discriminatedUnion('mode', [
+  z.object({ mode: z.literal('global'), limit: z.number().int().min(1).max(4800).optional() }),
+  z.object({ mode: z.literal('local'), node_id: z.string().min(1), hops: z.number().int().min(1).max(3).optional(), limit: z.number().int().min(1).max(1200).optional() }),
+  z.object({ mode: z.literal('search'), query: z.string().min(1), k: z.number().int().min(1).max(50).optional() }),
+  z.object({ mode: z.literal('node'), node_id: z.string().min(1) }),
+]) as unknown as z.ZodType<Wire<RequestPayload<'kg.graphPage'>>>
+
+const graphNodeView = z.object({
+  id: z.string().min(1),
+  type: z.string(),
+  name: z.string(),
+  props: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])),
+  degree: z.number().int().min(0),
+})
+const graphEdgeView = z.object({
+  id: z.string().min(1),
+  relation: z.string().min(1),
+  source: z.string().min(1),
+  target: z.string().min(1),
+})
+const graphRelationView = z.object({
+  relation: z.string().min(1),
+  direction: z.enum(['out', 'in']),
+  other_id: z.string().min(1),
+  other_name: z.string(),
+  other_type: z.string(),
+})
+
+/** kg.graphPage response value. */
+export const kgGraphPageValueSchema = z.discriminatedUnion('mode', [
+  z.object({
+    mode: z.literal('global'),
+    nodes: z.array(graphNodeView),
+    edges: z.array(graphEdgeView),
+    truncated: z.boolean(),
+    stats: z.object({
+      nodes: z.number().int().min(0),
+      edges: z.number().int().min(0),
+      islands: z.number().int().min(0),
+      largest_component: z.number().int().min(0),
+    }),
+  }),
+  z.object({
+    mode: z.literal('local'),
+    nodes: z.array(graphNodeView),
+    edges: z.array(graphEdgeView),
+    truncated: z.boolean(),
+    seed: z.string().min(1),
+    hops: z.number().int().min(1).max(3),
+  }),
+  z.object({
+    mode: z.literal('search'),
+    hits: z.array(z.object({
+      id: z.string().min(1), type: z.string(), name: z.string(), degree: z.number().int().min(0),
+    })),
+  }),
+  z.object({
+    mode: z.literal('node'),
+    node: graphNodeView,
+    out_relations: z.array(graphRelationView),
+    in_relations: z.array(graphRelationView),
+  }),
+]) as unknown as z.ZodType<Wire<ResponseValue<'kg.graphPage'>>>
 
 /** kg.schema request payload (empty). */
 export const kgSchemaRequestSchema = z.object({}) as unknown as z.ZodType<Wire<RequestPayload<'kg.schema'>>>

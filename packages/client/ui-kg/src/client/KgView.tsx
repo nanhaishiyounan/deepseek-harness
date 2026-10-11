@@ -24,6 +24,8 @@ import type {
 } from './kgTypes.ts'
 import { communityColorOf, nodeColorOf, parseKgPhrase, semanticColorOf, semanticRootOf } from './presentation.ts'
 import { KgGraphCanvas } from './KgGraphCanvas.tsx'
+import { KgObsidianCanvas } from './KgObsidianCanvas.tsx'
+import type { KgObsidianCalls } from './KgObsidianCanvas.tsx'
 import { OntoTree } from './OntoTree.tsx'
 import { ChangeFeed } from './ChangeFeed.tsx'
 import css from './kg.module.css'
@@ -34,6 +36,8 @@ export interface KgViewInjected {
     /** Shared client-session snapshot bound by the renderer as useKg. */
     kg: SnapshotStore<KgClientState>
   }
+  /** The Obsidian canvas's graphPage bindings (the Neo4j store's face). */
+  graphCalls: KgObsidianCalls
   /** Load or reload the legend + counters. */
   refresh: () => void
   /** Load the default canvas view once per client session (stats-gated walk). */
@@ -95,7 +99,7 @@ interface KgLocalInput {
  */
 export function KgView(
   {
-    inputActions, useKg, refresh, ensureDefaultView, walk, expandNode, searchSeeds, selectNode,
+    inputActions, useKg, graphCalls, refresh, ensureDefaultView, walk, expandNode, searchSeeds, selectNode,
     loadPanel, queryPhrase, toggleTypeFilter, clearTypeFilter,
     loadFeed, loadCommunities, rollbackEpisode, decideReview, applyOntoEdit, replayAt, leaveReplay,
     setColorMode,
@@ -285,6 +289,14 @@ export function KgView(
             </button>
           ))}
         </div>
+      )}
+
+      {mode === 'graph' && (
+        <KgObsidianCanvas calls={graphCalls} t={t} />
+      )}
+
+      {mode === 'graph' && (
+        <h3 className={css.obsidianLegacyTitle}>{t('obsidian.legacyPane')}</h3>
       )}
 
       {mode === 'graph' && state.history?.status === 'ready' && (

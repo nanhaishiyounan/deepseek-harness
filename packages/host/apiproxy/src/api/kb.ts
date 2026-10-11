@@ -46,6 +46,8 @@ export interface KbStatsView {
 export interface KbSearchView {
   readonly mode: 'hybrid' | 'text'
   readonly embed_model?: string
+  /** Store-level runtime annotation (for example the weknora fallback notice); absent when no store annotated. */
+  readonly notice?: string
   readonly results: readonly KbHitView[]
 }
 

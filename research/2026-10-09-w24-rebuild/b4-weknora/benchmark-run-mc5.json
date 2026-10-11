@@ -1,0 +1,333 @@
+{
+  "summary": {
+    "total": 20,
+    "match_count": 10,
+    "hit_at_1": 16,
+    "hit_at_3": 18,
+    "hit_at_1_rate": 0.8,
+    "hit_at_3_rate": 0.9,
+    "ran_at": "2026-10-10T22:20:48.347Z"
+  },
+  "rows": [
+    {
+      "query": "2026 年上半年调味品行业零售规模是多少",
+      "gold": "business-ops/2026-08-market-insight-condiment.md",
+      "rank": 1,
+      "hit": true,
+      "top_sources": [
+        "business-ops/2026-08-market-insight-condiment.md",
+        "system-guide/hongfa-food.md",
+        "business-ops/2026-08-20-supplier-visit-hongfa.md"
+      ],
+      "top_scores": [
+        0.0162,
+        0.0156,
+        0.0153
+      ]
+    },
+    {
+      "query": "复合调味料的同比增速是多少",
+      "gold": "business-ops/2026-08-market-insight-condiment.md",
+      "rank": 1,
+      "hit": true,
+      "top_sources": [
+        "business-ops/2026-08-market-insight-condiment.md",
+        "system-guide/hongfa-food.md",
+        "business-ops/2026-08-20-supplier-visit-hongfa.md"
+      ],
+      "top_scores": [
+        0.0161,
+        0.0155,
+        0.0154
+      ]
+    },
+    {
+      "query": "酱油高端化率提升到多少",
+      "gold": "business-ops/2026-08-market-insight-condiment.md",
+      "rank": 1,
+      "hit": true,
+      "top_sources": [
+        "business-ops/2026-08-market-insight-condiment.md",
+        "system-guide/hongfa-food.md",
+        "business-ops/2026-08-20-supplier-visit-hongfa.md"
+      ],
+      "top_scores": [
+        0.0155,
+        0.0154,
+        0.0151
+      ]
+    },
+    {
+      "query": "出口退税的单证备案要求有哪些",
+      "gold": "business-ops/2026-08-export-rebate-essentials.md",
+      "rank": 1,
+      "hit": true,
+      "top_sources": [
+        "business-ops/2026-08-export-rebate-essentials.md",
+        "business-ops/2026-08-tir-road-export.md",
+        "business-ops/2026-08-cross-border-settlement-rub-kzt.md"
+      ],
+      "top_scores": [
+        0.0164,
+        0.0153,
+        0.0152
+      ]
+    },
+    {
+      "query": "冷链运输断链后如何判定与处置",
+      "gold": "business-ops/2026-08-cold-chain-validation.md",
+      "rank": 1,
+      "hit": true,
+      "top_sources": [
+        "business-ops/2026-08-cold-chain-validation.md",
+        "business-ops/2026-08-tir-road-export.md",
+        "business-ops/2026-08-export-risk-overview.md"
+      ],
+      "top_scores": [
+        0.0164,
+        0.0151,
+        0.0145
+      ]
+    },
+    {
+      "query": "中俄班列走廊运输的时效与成本怎么样",
+      "gold": "business-ops/2026-08-china-russia-rail-corridor.md",
+      "rank": 1,
+      "hit": true,
+      "top_sources": [
+        "business-ops/2026-08-china-russia-rail-corridor.md",
+        "business-ops/2026-08-central-asia-transit.md",
+        "business-ops/2026-08-tir-road-transport.md"
+      ],
+      "top_scores": [
+        0.0163,
+        0.0155,
+        0.0155
+      ]
+    },
+    {
+      "query": "大豆酱油酿造工艺的主要工序是什么",
+      "gold": "business-ops/2026-08-process-soy-sauce.md",
+      "rank": 5,
+      "hit": true,
+      "top_sources": [
+        "business-ops/2026-08-20-supplier-visit-hongfa.md",
+        "food-compliance/gb2760-excerpt.md",
+        "business-ops/2026-08-market-insight-condiment.md"
+      ],
+      "top_scores": [
+        0.0164,
+        0.0152,
+        0.015
+      ]
+    },
+    {
+      "query": "中信保短期出口信用保险承保哪些风险",
+      "gold": "business-ops/2026-08-sinosure-short-term-cover.md",
+      "rank": 1,
+      "hit": true,
+      "top_sources": [
+        "business-ops/2026-08-sinosure-short-term-cover.md",
+        "business-ops/2026-08-russia-warehouse-emergency.md",
+        "business-ops/2026-08-cargo-insurance-claims.md"
+      ],
+      "top_scores": [
+        0.0164,
+        0.0156,
+        0.0153
+      ]
+    },
+    {
+      "query": "GB 14881 对食品生产通用卫生规范的核心要求是什么",
+      "gold": "food-compliance/gb14881-excerpt.md",
+      "rank": 1,
+      "hit": true,
+      "top_sources": [
+        "food-compliance/gb14881-excerpt.md",
+        "food-compliance/gb2760-excerpt.md",
+        "business-ops/2026-08-20-supplier-visit-hongfa.md"
+      ],
+      "top_scores": [
+        0.0164,
+        0.0152,
+        0.0126
+      ]
+    },
+    {
+      "query": "GB 2760 食品添加剂使用标准适用于哪些企业",
+      "gold": "food-compliance/gb2760-excerpt.md",
+      "rank": 1,
+      "hit": true,
+      "top_sources": [
+        "food-compliance/gb2760-excerpt.md",
+        "food-compliance/gb14881-excerpt.md",
+        "business-ops/2026-08-20-supplier-visit-hongfa.md"
+      ],
+      "top_scores": [
+        0.0162,
+        0.0149,
+        0.0148
+      ]
+    },
+    {
+      "query": "HACCP 七个原理的落地顺序是什么",
+      "gold": "food-compliance/2026-08-haccp-implementation.md",
+      "rank": 1,
+      "hit": true,
+      "top_sources": [
+        "food-compliance/2026-08-haccp-implementation.md",
+        "food-compliance/gb14881-excerpt.md",
+        "food-compliance/gb2760-excerpt.md"
+      ],
+      "top_scores": [
+        0.0149,
+        0.0127,
+        0.0124
+      ]
+    },
+    {
+      "query": "HACCP 关键控制点超过多少个说明前提方案失守",
+      "gold": "food-compliance/2026-08-haccp-implementation.md",
+      "rank": 1,
+      "hit": true,
+      "top_sources": [
+        "food-compliance/2026-08-haccp-implementation.md",
+        "food-compliance/gb14881-excerpt.md",
+        "business-ops/2026-08-cold-chain-validation.md"
+      ],
+      "top_scores": [
+        0.0162,
+        0.0141,
+        0.0127
+      ]
+    },
+    {
+      "query": "低酸性罐头的 F0 值要求是多少",
+      "gold": "food-compliance/2026-08-retort-f0-validation.md",
+      "rank": 1,
+      "hit": true,
+      "top_sources": [
+        "food-compliance/2026-08-retort-f0-validation.md",
+        "business-ops/2026-08-process-sterilization.md",
+        "food-compliance/2026-08-haccp-implementation.md"
+      ],
+      "top_scores": [
+        0.0164,
+        0.0153,
+        0.0138
+      ]
+    },
+    {
+      "query": "农残控制的三层防线是什么",
+      "gold": "food-compliance/2026-08-pesticide-residue-control.md",
+      "rank": 2,
+      "hit": true,
+      "top_sources": [
+        "food-compliance/gb14881-excerpt.md",
+        "food-compliance/2026-08-pesticide-residue-control.md",
+        "food-compliance/2026-08-haccp-implementation.md"
+      ],
+      "top_scores": [
+        0.0139,
+        0.0137,
+        0.0137
+      ]
+    },
+    {
+      "query": "CIP 清洗验证的合格判定标准是什么",
+      "gold": "food-compliance/2026-08-cip-cleaning-validation.md",
+      "rank": 2,
+      "hit": true,
+      "top_sources": [
+        "food-compliance/2026-08-audit-checklist.md",
+        "food-compliance/2026-08-cip-cleaning-validation.md",
+        "food-compliance/2026-08-haccp-implementation.md"
+      ],
+      "top_scores": [
+        0.0159,
+        0.0154,
+        0.0149
+      ]
+    },
+    {
+      "query": "出口沙特需要的 halal 认证流程是什么",
+      "gold": "food-compliance/2026-08-halal-ksa-gcc.md",
+      "rank": 1,
+      "hit": true,
+      "top_sources": [
+        "food-compliance/2026-08-halal-ksa-gcc.md",
+        "business-ops/2026-08-central-asia-customs.md",
+        "food-compliance/2026-08-kosher-north-america.md"
+      ],
+      "top_scores": [
+        0.0161,
+        0.0158,
+        0.0138
+      ]
+    },
+    {
+      "query": "DeepSeek Harness 的包结构遵循什么架构原则",
+      "gold": "system-guide/architecture.zh.md",
+      "rank": 1,
+      "hit": true,
+      "top_sources": [
+        "system-guide/architecture.zh.md",
+        "system-guide/glossary.zh.md",
+        "system-guide/cordis-primer.zh.md"
+      ],
+      "top_scores": [
+        0.016,
+        0.0156,
+        0.015
+      ]
+    },
+    {
+      "query": "仓库的测试策略对快照测试有什么要求",
+      "gold": "system-guide/testing.zh.md",
+      "rank": 1,
+      "hit": true,
+      "top_sources": [
+        "system-guide/testing.zh.md",
+        "system-guide/testing.zh.md",
+        "system-guide/testing.zh.md"
+      ],
+      "top_scores": [
+        0.0164,
+        0.0155,
+        0.0153
+      ]
+    },
+    {
+      "query": "Cordis 的 waterfall 监听器为什么必须调用 next",
+      "gold": "system-guide/cordis-primer.zh.md",
+      "rank": 1,
+      "hit": true,
+      "top_sources": [
+        "system-guide/cordis-primer.zh.md",
+        "system-guide/glossary.zh.md",
+        "system-guide/architecture.zh.md"
+      ],
+      "top_scores": [
+        0.0164,
+        0.0151,
+        0.0137
+      ]
+    },
+    {
+      "query": "配置目录 config-catalog 覆盖哪些可配置项",
+      "gold": "system-guide/config-catalog.zh.md",
+      "rank": null,
+      "hit": false,
+      "top_sources": [
+        "system-guide/architecture.zh.md",
+        "system-guide/api-gateway.zh.md",
+        "system-guide/config-catalog.zh.md#2"
+      ],
+      "top_scores": [
+        0.0162,
+        0.0154,
+        0.0124
+      ]
+    }
+  ]
+}

@@ -38,6 +38,7 @@ function fakeApi(overrides: Partial<{ muxFrames: MuxFrame[]; hostFrames: HostFra
       transfers: kbRefuse,
     },
     kg: {
+      graphPage: kbRefuse,
       mappings: kbRefuse,
       schema: kbRefuse,
       query: kbRefuse,

@@ -68,6 +68,7 @@ function scriptedApi(overrides: {
       ...overrides.connectors,
     },
     kg: {
+      graphPage: err,
       mappings: err,
       schema: err,
       query: err,

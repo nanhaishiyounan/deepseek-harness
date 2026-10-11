@@ -15,7 +15,13 @@ import { KgEntry } from '../src/client/KgEntry.tsx'
 import type {} from '../src/client/index.ts'
 import { zh } from '../src/client/locales.ts'
 import { nodeColorOf, parseKgPhrase } from '../src/client/presentation.ts'
-import { bindStoreHook, GLOBAL_KIT, SESSION_KIT, sessionListState } from './kg-fixture.client.ts'
+import { bindStoreHook, GLOBAL_KIT, SESSION_KIT, sessionListState, obsidianStubCalls } from './kg-fixture.client.ts'
+// The Obsidian canvas statically imports react-force-graph-2d (the
+// single-artifact client contract); jsdom cannot run its canvas measurement,
+// so every spec that renders the kg page stubs the module.
+vi.mock('react-force-graph-2d', () => ({
+  default: () => null,
+}))
 
 // sigma's module top level reads WebGL enum constants off the globals, which
 // jsdom does not define; vi.hoisted runs ahead of every import, so the stub
@@ -105,6 +111,7 @@ function mount(state: KgClientState) {
       {...SESSION_KIT}
       inputActions={{ setDraft } as never}
       useKg={bindStoreHook(store) as never}
+      graphCalls={obsidianStubCalls as never}
       {...actions}
       t={t}
     />,
@@ -229,6 +236,7 @@ describe('KgView canvas and interactions', () => {
         {...SESSION_KIT}
         inputActions={{ setDraft: vi.fn() } as never}
         useKg={bindStoreHook(store) as never}
+        graphCalls={obsidianStubCalls as never}
         refresh={vi.fn()} ensureDefaultView={vi.fn()} walk={walk} expandNode={vi.fn()} searchSeeds={vi.fn()}
         loadPanel={vi.fn()} queryPhrase={queryPhrase} selectNode={vi.fn()} toggleTypeFilter={vi.fn()}
         clearTypeFilter={vi.fn()}
@@ -267,6 +275,7 @@ describe('KgView canvas and interactions', () => {
         {...SESSION_KIT}
         inputActions={{ setDraft: vi.fn() } as never}
         useKg={bindStoreHook(store) as never}
+        graphCalls={obsidianStubCalls as never}
         refresh={vi.fn()} ensureDefaultView={vi.fn()} walk={vi.fn()} expandNode={vi.fn()} searchSeeds={vi.fn()}
         loadPanel={vi.fn()}
         queryPhrase={vi.fn().mockRejectedValue(new Error('kg.query: no template matches'))}
@@ -409,6 +418,7 @@ function renderLive(state: KgClientState) {
       {...SESSION_KIT}
       inputActions={{ setDraft } as never}
       useKg={useKg}
+      graphCalls={obsidianStubCalls as never}
       {...actions}
       t={t}
     />
@@ -581,6 +591,7 @@ describe('KgView graph-mode tails', () => {
         {...SESSION_KIT}
         inputActions={{ setDraft } as never}
         useKg={bindStoreHook(store) as never}
+        graphCalls={obsidianStubCalls as never}
         refresh={vi.fn()} ensureDefaultView={vi.fn()} walk={vi.fn()} expandNode={vi.fn()} searchSeeds={vi.fn()}
         loadPanel={vi.fn()} queryPhrase={vi.fn().mockRejectedValue(new Error('offline'))} selectNode={vi.fn()}
         toggleTypeFilter={vi.fn()} clearTypeFilter={vi.fn()} loadFeed={vi.fn()} loadCommunities={vi.fn()}

@@ -495,3 +495,15 @@
     padding: 0 16px;
   }
 }
+
+/* Degraded-retrieval notice: the store served the query from its fallback
+   (for example the weknora sidecar being down); informational, not an error. */
+.degradedNotice {
+  margin: 8px 0 0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--dsw-alias-surface-raised);
+  border-left: 3px solid var(--dsw-alias-accent);
+  font: var(--dsw-font-xs-13);
+  color: var(--dsw-alias-label-secondary);
+}

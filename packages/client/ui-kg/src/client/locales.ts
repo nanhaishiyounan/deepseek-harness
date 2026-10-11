@@ -117,6 +117,22 @@ export type KgKey =
   | 'feed.rollbackDone'
   | 'error.unavailable'
   | 'error.retry'
+  | 'obsidian.searchPlaceholder'
+  | 'obsidian.search'
+  | 'obsidian.backToGlobal'
+  | 'obsidian.refresh'
+  | 'obsidian.hops'
+  | 'obsidian.noHits'
+  | 'obsidian.degree'
+  | 'obsidian.loading'
+  | 'obsidian.degraded'
+  | 'obsidian.truncated'
+  | 'obsidian.statsGlobal'
+  | 'obsidian.statsLocal'
+  | 'obsidian.outRelations'
+  | 'obsidian.inRelations'
+  | 'obsidian.noRelations'
+  | 'obsidian.legacyPane'
 
 /** Chinese copy (the graph page's primary language). */
 export const zh: Record<KgKey, string> = {
@@ -228,6 +244,22 @@ export const zh: Record<KgKey, string> = {
   'feed.replay': '回放此时刻',
   'feed.empty': '暂无 episode 记录（构建或编辑后出现）',
   'feed.rollbackDone': '已回滚：{retired} 条边失效、{restored} 条恢复',
+  'obsidian.searchPlaceholder': '搜索实体（名称或 gid）…',
+  'obsidian.search': '定位',
+  'obsidian.backToGlobal': '← 全局图',
+  'obsidian.refresh': '刷新',
+  'obsidian.hops': '跳数',
+  'obsidian.noHits': '没有匹配的节点',
+  'obsidian.degree': '{count} 条关联',
+  'obsidian.loading': '图谱加载中…',
+  'obsidian.degraded': '力导向渲染器加载失败（网络或浏览器不支持）',
+  'obsidian.truncated': '（已按上限截断；用搜索定位后进入局部图）',
+  'obsidian.statsGlobal': '全局：{nodes} 节点 / {edges} 边 / {islands} 孤岛 · 最大连通分量 {largest}',
+  'obsidian.statsLocal': '局部图：{seed}（{hops} 跳）· {nodes} 节点 / {edges} 边',
+  'obsidian.outRelations': '出边（指向谁）',
+  'obsidian.inRelations': '入边（被谁指向）',
+  'obsidian.noRelations': '（无）',
+  'obsidian.legacyPane': '语料子图（sqlite 账本 · 原画布）',
   'error.unavailable': '图谱页暂不可用',
   'error.retry': '重试',
 }
@@ -342,6 +374,22 @@ export const en: Record<KgKey, string> = {
   'feed.replay': 'Replay at this instant',
   'feed.empty': 'No episodes yet (appear after a build or edit)',
   'feed.rollbackDone': 'Rolled back: {retired} edges retired, {restored} restored',
+  'obsidian.searchPlaceholder': 'Locate an entity (name or gid)…',
+  'obsidian.search': 'Locate',
+  'obsidian.backToGlobal': '← Global graph',
+  'obsidian.refresh': 'Refresh',
+  'obsidian.hops': 'Hops',
+  'obsidian.noHits': 'No matching nodes',
+  'obsidian.degree': '{count} links',
+  'obsidian.loading': 'Loading the graph…',
+  'obsidian.degraded': 'The force-graph renderer failed to load',
+  'obsidian.truncated': '(capped; locate through search to enter the local graph)',
+  'obsidian.statsGlobal': 'Global: {nodes} nodes / {edges} edges / {islands} islands · largest component {largest}',
+  'obsidian.statsLocal': 'Local graph: {seed} ({hops} hops) · {nodes} nodes / {edges} edges',
+  'obsidian.outRelations': 'Outgoing (points to)',
+  'obsidian.inRelations': 'Incoming (pointed at by)',
+  'obsidian.noRelations': '(none)',
+  'obsidian.legacyPane': 'Corpus subgraph (sqlite ledger · legacy canvas)',
   'error.unavailable': 'The graph page is unavailable',
   'error.retry': 'Retry',
 }

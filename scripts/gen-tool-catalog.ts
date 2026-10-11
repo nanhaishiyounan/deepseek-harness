@@ -37,6 +37,13 @@ import * as KbSqlite from '@deepseek-ai/dsh-kb-sqlite'
 import * as ToolKb from '@deepseek-ai/dsh-tool-kb'
 import * as LakehouseEngine from '@deepseek-ai/dsh-lakehouse-engine'
 import * as ToolLakehouse from '@deepseek-ai/dsh-tool-lakehouse'
+// Source-plane relative imports (the examples-script pattern): these three
+// carry no root-manifest entry, so package-name resolution from scripts/ is
+// not guaranteed while their sources always are.
+import * as ToolCarbon from '../packages/connector/tool-carbon/src/index.ts'
+import * as ConnectorCarbon from '../packages/connector/connector-carbon/src/index.ts'
+import * as GraphNeo4j from '../packages/graph/graph-neo4j/src/index.ts'
+import * as ToolGraph from '../packages/graph/tool-graph/src/index.ts'
 import ConnectorRuntime from '@deepseek-ai/dsh-connector'
 import type { ConnectorDatasetRef, ConnectorProvider } from '@deepseek-ai/dsh-connector'
 import * as ToolConnector from '@deepseek-ai/dsh-tool-connector'
@@ -247,6 +254,38 @@ const TOOL_PACKAGES: ToolPackage[] = [
     },
     note:
       'lakehouse_list_tables, lakehouse_query, and lakehouse_schema stay visible without a usable engine and fail with a structured error at execution time; query results are capped rows with a truncation marker, the read-only statement guard rejects writes and multi-statement text before DuckDB, and the rendered text carries the source-table attribution line.',
+  },
+  {
+    pkg: '@deepseek-ai/dsh-tool-carbon',
+    dir: 'tool-carbon',
+    source: 'packages/connector/tool-carbon/src/index.ts',
+    requires: ['ctx.tools', 'ctx.carbon', 'ctx.systemPrompt'],
+    writes: ['tool/call', 'tool/result'],
+    async mount(ctx) {
+      // No credentials in the catalog harness: the tools register in the
+      // documented degraded mode; the schema surface is what the catalog
+      // harvests.
+      await ctx.plugin(ConnectorCarbon, {})
+      await ctx.plugin(ToolCarbon, {})
+    },
+    note:
+      'cb_collections, cb_list, cb_get, cb_create, and cb_update speak to the carbon business system under the deployment session credentials (the model never supplies companyId — attempts are rejected); the table catalog carries read/write/destructive risk labels, write tools demand the presented preview and the user go-ahead, and receipts echo the landing id or the field-by-field diff.',
+  },
+  {
+    pkg: '@deepseek-ai/dsh-tool-graph',
+    dir: 'tool-graph',
+    source: 'packages/graph/tool-graph/src/index.ts',
+    requires: ['ctx.tools', 'ctx.neo4jGraph', 'ctx.systemPrompt'],
+    writes: ['tool/call', 'tool/result'],
+    async mount(ctx) {
+      // No password in the catalog harness: the store registers in the
+      // documented degraded mode; the schema surface is what the catalog
+      // harvests.
+      await ctx.plugin(GraphNeo4j, { url: 'bolt://127.0.0.1:1', user: 'catalog', passwordEnv: 'DSH_TOOL_CATALOG_UNSET' })
+      await ctx.plugin(ToolGraph, {})
+    },
+    note:
+      'kg_graph_query runs one read-only Cypher statement over the Neo4j graph (the statement-shape guard rejects writes, procedures, and multi-statement text before the driver; results are capped rows with a truncation marker and the Neo4j source attribution); kg_ontology reads the append-only ontology version chain plus the head document census for traversal planning.',
   },
   {
     pkg: '@deepseek-ai/dsh-tool-connector',

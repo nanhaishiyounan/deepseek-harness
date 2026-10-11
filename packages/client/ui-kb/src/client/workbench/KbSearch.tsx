@@ -95,6 +95,12 @@ export function KbSearch({ search, noteSearched, refresh, setDraft, requestChatV
         />
       )}
 
+      {result?.value.notice !== undefined && (
+        <div className={css.degradedNotice} role="status">
+          {t('search.degraded').replace('{notice}', result.value.notice)}
+        </div>
+      )}
+
       {busy && result === undefined && (
         <div aria-busy="true">
           <PageSkeleton variant="list" rows={3} />

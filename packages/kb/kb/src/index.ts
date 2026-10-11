@@ -396,7 +396,8 @@ export class KbRuntime extends Service {
           return storedHit === undefined ? [] : [{ ...storedHit, score: entry.score }]
         })
         .slice(0, cap)
-      return { mode: 'text' as const, results }
+      const notice = results[0]?.notice
+      return notice === undefined ? { mode: 'text' as const, results } : { mode: 'text' as const, results, notice }
     }
     if (embed !== undefined) {
       const vectors = await embed.embed([request.query], signal).then(
@@ -435,7 +436,9 @@ export class KbRuntime extends Service {
             searches: 1, ingestedDocuments: 0, ingestedChunks: 0, embedTexts: 1, embedTokens: 0,
           }, signal)
         }
-        return { mode: 'hybrid', embedModel: `${embed.id}:${embed.modelId}`, results }
+        const notice = results[0]?.notice
+        const hybrid = { mode: 'hybrid' as const, embedModel: `${embed.id}:${embed.modelId}`, results }
+        return notice === undefined ? hybrid : { ...hybrid, notice }
       }
     }
     const degradedResult = degraded()

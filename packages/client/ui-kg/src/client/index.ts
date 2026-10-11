@@ -27,6 +27,7 @@ import { createKgViewBridge } from './kgBridge.ts'
 import { KgEntry } from './KgEntry.tsx'
 import { KgHeaderButton } from './KgHeaderButton.tsx'
 import { KgView } from './KgView.tsx'
+import type { KgObsidianCalls } from './KgObsidianCanvas.tsx'
 import { en, zh } from './locales.ts'
 import type { KgKey } from './locales.ts'
 
@@ -229,6 +230,75 @@ export function apply(ctx: ClientContext): void {
     })
   }
 
+  /** One graphPage node row on the wire. */
+  interface GraphPageNodeWire {
+    readonly id: string
+    readonly type: string
+    readonly name: string
+    readonly props: Readonly<Record<string, string | number | boolean>>
+    readonly degree: number
+  }
+
+  /** One graphPage edge row on the wire. */
+  interface GraphPageEdgeWire {
+    readonly id: string
+    readonly relation: string
+    readonly source: string
+    readonly target: string
+  }
+
+  /** The kg.graphPage wire value (the four mode payloads). */
+  type KgGraphPageWire =
+  | {
+    readonly mode: 'global'
+    readonly nodes: readonly GraphPageNodeWire[]
+    readonly edges: readonly GraphPageEdgeWire[]
+    readonly truncated: boolean
+    readonly stats: { readonly nodes: number; readonly edges: number; readonly islands: number; readonly largest_component: number }
+  }
+  | {
+    readonly mode: 'local'
+    readonly nodes: readonly GraphPageNodeWire[]
+    readonly edges: readonly GraphPageEdgeWire[]
+    readonly truncated: boolean
+  }
+  | { readonly mode: 'search'; readonly hits: readonly { readonly id: string; readonly type: string; readonly name: string; readonly degree: number }[] }
+  | {
+    readonly mode: 'node'
+    readonly node: GraphPageNodeWire
+    readonly out_relations: readonly { readonly relation: string; readonly direction: 'out' | 'in'; readonly other_id: string; readonly other_name: string; readonly other_type: string }[]
+    readonly in_relations: readonly { readonly relation: string; readonly direction: 'out' | 'in'; readonly other_id: string; readonly other_name: string; readonly other_type: string }[]
+  }
+
+  /** The Obsidian canvas's graphPage bindings (the Neo4j store's face). */
+  const graphCalls: KgObsidianCalls = {
+    async global(limit) {
+      const value = unwrap<KgGraphPageWire>(
+        await api.kg.graphPage({ mode: 'global', ...(limit === undefined ? {} : { limit }) }))
+      if (value.mode !== 'global') throw new Error(`kg.graphPage: expected global, got ${value.mode}`)
+      return value
+    },
+    async local(nodeId, hops) {
+      const value = unwrap<KgGraphPageWire>(
+        await api.kg.graphPage({ mode: 'local', node_id: nodeId, hops }))
+      if (value.mode !== 'local') throw new Error(`kg.graphPage: expected local, got ${value.mode}`)
+      return value
+    },
+    async search(query, k) {
+      const value = unwrap<KgGraphPageWire>(
+        await api.kg.graphPage({ mode: 'search', query, ...(k === undefined ? {} : { k }) }))
+      if (value.mode !== 'search') throw new Error(`kg.graphPage: expected search, got ${value.mode}`)
+      return value.hits
+    },
+    async node(nodeId) {
+      const value = unwrap<KgGraphPageWire>(
+        await api.kg.graphPage({ mode: 'node', node_id: nodeId }))
+      if (value.mode !== 'node') throw new Error(`kg.graphPage: expected node, got ${value.mode}`)
+      const { node, out_relations: outRelations, in_relations: inRelations } = value
+      return { ...node, out_relations: outRelations, in_relations: inRelations }
+    },
+  }
+
   /** Resolve an entity name to seed hits. */
   const searchSeeds = (query: string): void => {
     store.beginSearch()
@@ -323,6 +393,7 @@ export function apply(ctx: ClientContext): void {
     label: () => bound('view.kg'),
     inject: () => ({
       hooks: { kg: store.store },
+      graphCalls,
       refresh,
       ensureDefaultView,
       walk,

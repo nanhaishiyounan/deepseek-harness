@@ -70,6 +70,8 @@ import type {
 import type { KgApi, KgEdgeView, KgNodeHitView, KgNodeTypeView, KgRelationView, KgSubgraphNodeView } from './api/kg.ts'
 // Type-only: resolves `ctx.get('kbGraph')` to the seam's runtime type.
 import type {} from '@deepseek-ai/dsh-kb-graph'
+// Type-only: resolves `ctx.get('neo4jGraph')` to the graph store's service type.
+import type { Neo4jGraphService } from '@deepseek-ai/dsh-graph-neo4j'
 import type {
   KbGraphRuntime, KgEdge, KgNodeHit, KgNodeType, KgNodeTypeId, KgRelation, KgSubgraph, KgSubgraphNode,
 } from '@deepseek-ai/dsh-kb-graph'
@@ -4649,6 +4651,7 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
         return ok(request, {
           mode: result.mode,
           ...result.embedModel === undefined ? {} : { embed_model: result.embedModel },
+          ...result.notice === undefined ? {} : { notice: result.notice },
           results: result.results.map(hitView),
         })
       },
@@ -5382,6 +5385,63 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
           relations: gates.graph.listRelations().map(kgRelationViewOf),
           revisions,
         })
+      },
+
+      async graphPage(request) {
+        // The Neo4j store is optional like the web service: a deployment
+        // without it gets the structured refusal instead of a broken page.
+        const store = ctx.get('neo4jGraph') as Neo4jGraphService | undefined
+        if (store === undefined || !store.available()) {
+          return err(request, {
+            code: 'kg-graph-store-not-composed',
+            message: 'this deployment composes no available Neo4j graph store; add dsh-graph-neo4j (url/user/passwordEnv) to expose the graph page',
+            details: {},
+          })
+        }
+        try {
+          const payload = request.payload
+          if (payload.mode === 'global') {
+            const [page, stats] = await Promise.all([store.graphGlobal(payload.limit), store.graphStats()])
+            return ok(request, {
+              mode: 'global',
+              nodes: page.nodes, edges: page.edges, truncated: page.truncated,
+              stats: {
+                nodes: stats.nodes, edges: stats.edges, islands: stats.islands,
+                largest_component: stats.largestComponent,
+              },
+            })
+          }
+          if (payload.mode === 'local') {
+            const page = await store.graphLocal(payload.node_id, payload.hops ?? 1, payload.limit)
+            return ok(request, { mode: 'local', ...page, seed: payload.node_id, hops: payload.hops ?? 1 })
+          }
+          if (payload.mode === 'search') {
+            const hits = await store.graphSearch(payload.query, payload.k ?? 10)
+            return ok(request, { mode: 'search', hits })
+          }
+          const detail = await store.nodeDetail(payload.node_id)
+          if (detail === undefined) {
+            return err(request, {
+              code: 'kg-node-not-found',
+              message: `kg.graphPage: no graph node with id ${payload.node_id}`,
+              details: { node_id: payload.node_id },
+            })
+          }
+          return ok(request, {
+            mode: 'node',
+            node: detail.node,
+            out_relations: detail.outRelations.map(relation => ({
+              relation: relation.relation, direction: relation.direction, other_id: relation.otherId,
+              other_name: relation.otherName, other_type: relation.otherType,
+            })),
+            in_relations: detail.inRelations.map(relation => ({
+              relation: relation.relation, direction: relation.direction, other_id: relation.otherId,
+              other_name: relation.otherName, other_type: relation.otherType,
+            })),
+          })
+        } catch (error: unknown) {
+          return err(request, kgReadFailed(error))
+        }
       },
 
       async mappings(request) {

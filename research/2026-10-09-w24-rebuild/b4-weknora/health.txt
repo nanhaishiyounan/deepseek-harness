@@ -1,0 +1,12 @@
+=== docker compose ps ===
+WeKnora-app	Up 26 seconds (healthy)	0.0.0.0:18081->8080/tcp, [::]:18081->8080/tcp
+WeKnora-docreader	Up 44 seconds (healthy)	50051/tcp
+WeKnora-frontend	Up 14 seconds	0.0.0.0:18080->80/tcp, [::]:18080->80/tcp
+WeKnora-postgres	Up 45 seconds (healthy)	5432/tcp
+WeKnora-redis	Up 45 seconds	6379/tcp
+
+=== GET /health ===
+HTTP 200 in 0.039827s
+{"status":"ok"}
+=== frontend ===
+HTTP 200

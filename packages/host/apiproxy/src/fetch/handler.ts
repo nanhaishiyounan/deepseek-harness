@@ -90,7 +90,8 @@ import {
   connectorsConnectionsRequestSchema, connectorsListRequestSchema, connectorsTransfersRequestSchema,
 } from '../api/connectors.schema.ts'
 import {
-  kgCommunitiesRequestSchema, kgEpisodesRequestSchema, kgExpandRequestSchema, kgHistoryRequestSchema, kgMappingsRequestSchema,
+  kgCommunitiesRequestSchema, kgEpisodesRequestSchema, kgExpandRequestSchema, kgGraphPageRequestSchema,
+  kgHistoryRequestSchema, kgMappingsRequestSchema,
   kgOntologyEditRequestSchema, kgQueryRequestSchema, kgReviewDecideRequestSchema, kgReviewQueueRequestSchema, kgRollbackRequestSchema,
   kgSchemaRequestSchema, kgSearchRequestSchema, kgStatsRequestSchema, kgSubgraphRequestSchema,
 } from '../api/kg.schema.ts'
@@ -192,6 +193,7 @@ const UNARY_ROUTES: UnaryRoutes = {
   'connectors.connections': { schema: connectorsConnectionsRequestSchema, invoke: (api, r, signal) => api.connectors.connections(r, signal) },
   'connectors.transfers': { schema: connectorsTransfersRequestSchema, invoke: (api, r, signal) => api.connectors.transfers(r, signal) },
   'kg.mappings': { schema: kgMappingsRequestSchema, invoke: (api, r, signal) => api.kg.mappings(r, signal) },
+  'kg.graphPage': { schema: kgGraphPageRequestSchema, invoke: (api, r, signal) => api.kg.graphPage(r, signal) },
   'kg.schema': { schema: kgSchemaRequestSchema, invoke: (api, r, signal) => api.kg.schema(r, signal) },
   'kg.query': { schema: kgQueryRequestSchema, invoke: (api, r, signal) => api.kg.query(r, signal) },
   'kg.episodes': { schema: kgEpisodesRequestSchema, invoke: (api, r, signal) => api.kg.episodes(r, signal) },

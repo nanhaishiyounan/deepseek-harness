@@ -876,3 +876,275 @@
   display: inline-flex;
   gap: 4px;
 }
+
+/* ── Obsidian force-graph canvas (the Neo4j-backed primary pane) ────────── */
+
+.obsidianColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.obsidianToolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.obsidianSearch {
+  flex: 1 1 240px;
+  min-width: 200px;
+  padding: 6px 10px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 8px;
+  background: var(--dsw-specific-input-major);
+  color: var(--dsw-alias-label-primary);
+  font: var(--dsw-font-s-14);
+}
+
+.obsidianSearch:focus-visible {
+  outline: 2px solid var(--dsw-alias-state-business-primary);
+  outline-offset: 1px;
+}
+
+.obsidianButton {
+  padding: 6px 12px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 8px;
+  background: var(--dsw-specific-input-major);
+  color: var(--dsw-alias-label-primary);
+  font: var(--dsw-font-s-14);
+  cursor: pointer;
+}
+
+.obsidianButton:hover {
+  border-color: var(--dsw-alias-state-business-primary);
+}
+
+.obsidianHops {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--dsw-alias-label-secondary);
+  font: var(--dsw-font-xs-13);
+}
+
+.obsidianHops select {
+  padding: 4px 6px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 6px;
+  background: var(--dsw-specific-input-major);
+  color: var(--dsw-alias-label-primary);
+}
+
+.obsidianHits {
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 8px;
+  background: var(--dsw-specific-module-platform);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.obsidianHit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--dsw-alias-label-primary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.obsidianHit:hover {
+  background: var(--dsw-alias-fill-minor);
+}
+
+.obsidianHitEmpty {
+  padding: 6px 8px;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.obsidianHitType {
+  flex: none;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--dsw-alias-fill-minor);
+  color: var(--dsw-alias-label-secondary);
+  font: var(--dsw-font-xxs-12);
+}
+
+.obsidianHitName {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.obsidianHitDegree {
+  flex: none;
+  color: var(--dsw-alias-label-tertiary);
+  font: var(--dsw-font-xxs-12);
+}
+
+.obsidianGraphRow {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.obsidianCanvasWrap {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 420px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 10px;
+  background: var(--dsw-specific-module-platform);
+  overflow: hidden;
+}
+
+.obsidianLoading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.obsidianHoverCard {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 3;
+  max-width: 280px;
+  padding: 10px 12px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 10px;
+  background: var(--dsw-specific-module-elevated);
+  box-shadow: var(--dsw-shadow-m);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.obsidianHoverCard dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 8px;
+  font: var(--dsw-font-xxs-12);
+}
+
+.obsidianHoverCard dt {
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.obsidianHoverCard dd {
+  margin: 0;
+  color: var(--dsw-alias-label-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.obsidianHoverType {
+  align-self: flex-start;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--dsw-alias-fill-minor);
+  color: var(--dsw-alias-label-secondary);
+  font: var(--dsw-font-xxs-12);
+}
+
+.obsidianPanel {
+  flex: 0 0 300px;
+  max-height: 480px;
+  overflow-y: auto;
+  padding: 10px 12px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 10px;
+  background: var(--dsw-specific-module-platform);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.obsidianPanel header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.obsidianPanel h4 {
+  margin: 8px 0 2px;
+  color: var(--dsw-alias-label-secondary);
+  font: var(--dsw-font-xs-13);
+}
+
+.obsidianPanel ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.obsidianPanel li button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--dsw-alias-label-primary);
+  font: var(--dsw-font-xs-13);
+  text-align: left;
+  cursor: pointer;
+}
+
+.obsidianPanel li button:hover {
+  background: var(--dsw-alias-fill-minor);
+}
+
+.obsidianPanelClose {
+  margin-left: auto;
+  border: 0;
+  background: transparent;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.obsidianRelationName {
+  flex: none;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--dsw-alias-fill-minor);
+  color: var(--dsw-alias-label-secondary);
+  font: var(--dsw-font-xxs-12);
+}
+
+.obsidianStats {
+  color: var(--dsw-alias-label-tertiary);
+  font: var(--dsw-font-xs-13);
+}
+
+.obsidianLegacyTitle {
+  margin: 14px 0 0;
+  color: var(--dsw-alias-label-tertiary);
+  font: var(--dsw-font-xs-13);
+}

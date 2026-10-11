@@ -1,0 +1,51 @@
+[corpus] 5 documents: 2026-08-haccp-implementation.md(809字), gb2760-excerpt.md(1216字), 2026-08-process-soy-sauce.md(1088字), 2026-08-supply-sugar.md(998字), 2026-08-supply-packaging.md(1038字)
+[induction] LLM round-trips=5 repairs=0 notes=0
+[induction] draft: 39 classes / 104 props / 33 relations
+[gate] conforms=true violations=0
+[store] ontology version 3 stored (id=food-mfg-b5-mv36jmgj); classes=39 relations=33
+[store] version chain: v3(llm-induction) → v2(llm-induction) → v1(llm-induction)
+[registry] class additive refused: node type "additive" is already registered
+[registry] class standard refused: node type "standard" is already registered
+[registry] class compoundAdditive refused: node type "compoundAdditive" extends unregistered "foodAdditive"; register the parent first
+[registry] class product refused: node type "product" is already registered
+[registry] class risk refused: node type "risk" is already registered
+[registry] class company refused: node type "company" is already registered
+[registry] relation prerequisiteFor refused: relation "prerequisiteFor" constrains an unregistered endpoint (prerequisiteProgram → ccp)
+[registry] relation containsCCP refused: relation "containsCCP" constrains an unregistered endpoint (productionLine → ccp)
+[registry] relation hasCriticalLimit refused: relation "hasCriticalLimit" constrains an unregistered endpoint (ccp → criticalLimit)
+[registry] relation usesAdditive refused: relation "usesAdditive" constrains an unregistered endpoint (ccp → additive)
+[registry] relation monitoredBy refused: relation "monitoredBy" constrains an unregistered endpoint (ccp → monitoringProcedure)
+[registry] relation correctedBy refused: relation "correctedBy" constrains an unregistered endpoint (ccp → correctiveAction)
+[registry] relation verifiedBy refused: relation "verifiedBy" constrains an unregistered endpoint (ccp → verification)
+[registry] relation calibrates refused: relation "calibrates" constrains an unregistered endpoint (verification → measuringInstrument)
+[registry] relation recordedBy refused: relation "recordedBy" constrains an unregistered endpoint (ccp → record)
+[registry] relation standardSpecifiesAdditive refused: relation "standardSpecifiesAdditive" constrains an unregistered endpoint (foodSafetyStandard → foodAdditive)
+[registry] relation additiveBelongsToCategory refused: relation "additiveBelongsToCategory" constrains an unregistered endpoint (foodAdditive → additiveCategory)
+[registry] relation additiveApplicableToProductCategory refused: relation "additiveApplicableToProductCategory" constrains an unregistered endpoint (foodAdditive → productCategory)
+[registry] relation enterpriseUsesAdditive refused: relation "enterpriseUsesAdditive" constrains an unregistered endpoint (enterprise → foodAdditive)
+[registry] relation enterpriseMaintainsLedger refused: relation "enterpriseMaintainsLedger" constrains an unregistered endpoint (enterprise → additiveLedger)
+[registry] relation labelDeclaresAdditive refused: relation "labelDeclaresAdditive" constrains an unregistered endpoint (foodLabel → foodAdditive)
+[registry] relation productCategoryHasLimitPerAdditive refused: relation "productCategoryHasLimitPerAdditive" constrains an unregistered endpoint (productCategory → foodAdditive)
+[registry] relation producedBy refused: relation "producedBy" constrains an unregistered endpoint (product → processStep)
+[registry] relation consumesRawMaterial refused: relation "consumesRawMaterial" constrains an unregistered endpoint (processStep → rawMaterial)
+[registry] relation usesEquipment refused: relation "usesEquipment" constrains an unregistered endpoint (processStep → equipment)
+[registry] relation hasQualityMetric refused: relation "hasQualityMetric" constrains an unregistered endpoint (processStep → qualityMetric)
+[registry] relation mayEncounter refused: relation "mayEncounter" constrains an unregistered endpoint (processStep → processAbnormality)
+[registry] relation hasImprovement refused: relation "hasImprovement" constrains an unregistered endpoint (processStep → processImprovement)
+[registry] relation supplies refused: relation "supplies" is already registered
+[registry] relation hasQualitySpec refused: relation "hasQualitySpec" constrains an unregistered endpoint (supplier → qualitySpec)
+[registry] relation appliesTo refused: relation "appliesTo" constrains an unregistered endpoint (procurementPolicy → rawMaterial)
+[registry] relation hasRisk refused: relation "hasRisk" constrains an unregistered endpoint (rawMaterial → risk)
+[registry] relation evaluates refused: relation "evaluates" constrains an unregistered endpoint (supplierEvaluation → company)
+[registry] relation evaluatesMaterial refused: relation "evaluatesMaterial" constrains an unregistered endpoint (supplierEvaluation → packagingMaterial)
+[registry] relation usesMaterial refused: relation "usesMaterial" constrains an unregistered endpoint (salesChannel → packagingMaterial)
+[registry] relation hasCostScheme refused: relation "hasCostScheme" constrains an unregistered endpoint (packagingMaterial → packagingCostScheme)
+[registry] relation classifiedAs refused: relation "classifiedAs" constrains an unregistered endpoint (company → supplierTier)
+[registry] relation imposedOn refused: relation "imposedOn" constrains an unregistered endpoint (complianceRequirement → company)
+[registry] registered 34 draft entries (status=draft: writable, not model-visible)
+[negative-gate] conforms=false violations=4
+[negative-gate] GATE_UNKNOWN_PARENT product (extends): parent class "ghostParent" is not declared in this draft
+[negative-gate] GATE_BAD_NATURAL_KEY company (naturalKey): naturalKey "notAProp" is not one of the class's declared properties
+[negative-gate] GATE_UNKNOWN_DOMAIN produces (constraints[0].domain): domain class "ghostDomain" is not declared in this draft
+[negative-gate] GATE_BAD_CARDINALITY produces (constraints[0].cardinality): cardinality bounds are not sane (min=5, max=2)
+[manual] KGCL op set refused (append-only ledger already carries the class): node type "shelfLifePolicy" is already registered

@@ -1,0 +1,1553 @@
+{
+  "draft": {
+    "name": "food-mfg-b5",
+    "classes": [
+      {
+        "id": "haccpPrinciple",
+        "label": "HACCP原理",
+        "description": "HACCP体系七大落地原理",
+        "props": [
+          {
+            "key": "name",
+            "datatype": "string",
+            "required": true,
+            "enumValues": [
+              "危害分析",
+              "CCP确定",
+              "关键限值",
+              "监控程序",
+              "纠偏行动",
+              "验证程序",
+              "记录保持"
+            ]
+          },
+          {
+            "key": "sequence",
+            "datatype": "number",
+            "required": true
+          },
+          {
+            "key": "description",
+            "datatype": "string"
+          }
+        ],
+        "naturalKey": "name",
+        "evidence": "七原理落地顺序：危害分析 → CCP 确定 → 关键限值 → 监控程序 → 纠偏行动 → 验证程序 → 记录保持"
+      },
+      {
+        "id": "prerequisiteProgram",
+        "label": "前提方案",
+        "description": "支撑HACCP体系的基础程序",
+        "props": [
+          {
+            "key": "name",
+            "datatype": "string",
+            "required": true,
+            "enumValues": [
+              "GMP",
+              "SSOP"
+            ]
+          },
+          {
+            "key": "description",
+            "datatype": "string"
+          }
+        ],
+        "naturalKey": "name",
+        "evidence": "前提方案（GMP/SSOP）不扎实时 CCP 会越设越多"
+      },
+      {
+        "id": "productionLine",
+        "label": "产线",
+        "description": "食品生产产线或工艺线",
+        "props": [
+          {
+            "key": "name",
+            "datatype": "string",
+            "required": true
+          },
+          {
+            "key": "category",
+            "datatype": "string",
+            "enumValues": [
+              "调味品产线"
+            ]
+          }
+        ],
+        "naturalKey": "name",
+        "evidence": "调味品产线典型 CCP"
+      },
+      {
+        "id": "ccp",
+        "label": "关键控制点",
+        "description": "HACCP关键控制点（CCP）",
+        "props": [
+          {
+            "key": "name",
+            "datatype": "string",
+            "required": true,
+            "enumValues": [
+              "配料称量复核",
+              "杀菌",
+              "金属探测"
+            ]
+          },
+          {
+            "key": "description",
+            "datatype": "string"
+          }
+        ],
+        "naturalKey": "name",
+        "evidence": "调味品产线典型 CCP：1. 配料称量复核；2. 杀菌；3. 金属探测"
+      },
+      {
+        "id": "criticalLimit",
+        "label": "关键限值",
+        "description": "关键控制点对应的关键限值",
+        "props": [
+          {
+            "key": "parameter",
+            "datatype": "string",
+            "required": true
+          },
+          {
+            "key": "value",
+            "datatype": "string",
+            "required": true
+          },
+          {
+            "key": "unit",
+            "datatype": "string"
+          }
+        ],
+        "naturalKey": "parameter",
+        "evidence": "杀菌：中心温度与时间的连续记录；金属探测：Fe φ2.0 / Non-Fe φ2.5 / SUS φ3.0 mm 起步"
+      },
+      {
+        "id": "additive",
+        "label": "食品添加剂",
+        "description": "生产中使用的食品添加剂",
+        "props": [
+          {
+            "key": "name",
+            "datatype": "string",
+            "required": true
+          }
+        ],
+        "naturalKey": "name",
+        "evidence": "配料称量复核：添加剂双人复核，按 GB 2760 折算限量"
+      },
+      {
+        "id": "standard",
+        "label": "国家标准",
+        "description": "国家强制性食品标准（GB）",
+        "props": [
+          {
+            "key": "code",
+            "datatype": "string",
+            "required": true,
+            "pattern": "^GB\\s?\\d+(\\.\\d+)?(-\\d+)?$"
+          }
+        ],
+        "naturalKey": "code",
+        "evidence": "配料称量复核：添加剂双人复核，按 GB 2760 折算限量"
+      },
+      {
+        "id": "monitoringProcedure",
+        "label": "监控程序",
+        "description": "CCP关键限值的持续监控程序",
+        "props": [
+          {
+            "key": "name",
+            "datatype": "string",
+            "required": true
+          },
+          {
+            "key": "frequency",
+            "datatype": "string",
+            "required": true
+          },
+          {
+            "key": "method",
+            "datatype": "string"
+          }
+        ],
+        "naturalKey": "name",
+        "evidence": "金属探测：Fe φ2.0 / Non-Fe φ2.5 / SUS φ3.0 mm 起步，开工/收工/每 2 小时验证；监控频次要能捕获偏离"
+      },
+      {
+        "id": "correctiveAction",
+        "label": "纠偏行动",
+        "description": "CCP发生偏离时采取的纠偏行动",
+        "props": [
+          {
+            "key": "name",
+            "datatype": "string",
+            "required": true
+          },
+          {
+            "key": "isolationAssessment",
+            "datatype": "boolean",
+            "required": true
+          },
+          {
+            "key": "rootCause",
+            "datatype": "boolean",
+            "required": true
+          },
+          {
+            "key": "preventionOfRecurrence",
+            "datatype": "boolean",
+            "required": true
+          }
+        ],
+        "naturalKey": "name",
+        "evidence": "纠偏必须含「隔离评估+原因+防止再发」三件套"
+      },
+      {
+        "id": "verification",
+        "label": "验证活动",
+        "description": "HACCP体系验证活动",
+        "props": [
+          {
+            "key": "name",
+            "datatype": "string",
+            "required": true,
+            "enumValues": [
+              "关键限值校准",
+              "年度验证"
+            ]
+          },
+          {
+            "key": "scope",
+            "datatype": "string"
+          }
+        ],
+        "naturalKey": "name",
+        "evidence": "关键限值校准（温度计、金属探测器测试块）按计划执行并留档；年度验证含成品检验数据回顾与体系内部审核"
+      },
+      {
+        "id": "measuringInstrument",
+        "label": "测量器具",
+        "description": "用于关键限值校准的测量或测试器具",
+        "props": [
+          {
+            "key": "name",
+            "datatype": "string",
+            "required": true,
+            "enumValues": [
+              "温度计",
+              "金属探测器测试块"
+            ]
+          },
+          {
+            "key": "instrumentType",
+            "datatype": "string"
+          }
+        ],
+        "naturalKey": "name",
+        "evidence": "关键限值校准（温度计、金属探测器测试块）按计划执行并留档"
+      },
+      {
+        "id": "record",
+        "label": "HACCP记录",
+        "description": "HACCP体系运行产生的记录",
+        "props": [
+          {
+            "key": "name",
+            "datatype": "string",
+            "required": true
+          },
+          {
+            "key": "signOnSite",
+            "datatype": "boolean",
+            "required": true
+          }
+        ],
+        "naturalKey": "name",
+        "evidence": "CCP 记录当场签署，事后补签是审核一票否决项"
+      },
+      {
+        "id": "foodSafetyStandard",
+        "label": "食品安全国家标准",
+        "description": "规定食品添加剂使用原则、允许品种、使用范围与最大使用量的国家标准",
+        "props": [
+          {
+            "key": "code",
+            "datatype": "string",
+            "required": true
+          },
+          {
+            "key": "title",
+            "datatype": "string",
+            "required": true
+          }
+        ],
+        "naturalKey": "code",
+        "evidence": "GB 2760《食品安全国家标准 食品添加剂使用标准》要点摘录"
+      },
+      {
+        "id": "additiveCategory",
+        "label": "食品添加剂类别",
+        "description": "按功能划分的添加剂类别，如防腐剂、甜味剂、增味剂",
+        "props": [
+          {
+            "key": "name",
+            "datatype": "string",
+            "required": true
+          },
+          {
+            "key": "usagePrinciple",
+            "datatype": "string",
+            "enumValues": [
+              "按最大使用量限定",
+              "按生产需要适量使用"
+            ]
+          }
+        ],
+        "naturalKey": "name",
+        "evidence": "防腐剂（如苯甲酸及其钠盐、山梨酸及其钾盐）... 甜味剂（如三氯蔗糖、阿斯巴甜）... 增味剂（谷氨酸钠、呈味核苷酸二钠）"
+      },
+      {
+        "id": "foodAdditive",
+        "label": "食品添加剂",
+        "description": "GB 2760 允许使用的具体添加剂品种及其使用范围与限量",
+        "props": [
+          {
+            "key": "name",
+            "datatype": "string",
+            "required": true
+          },
+          {
+            "key": "maxUsageLevel",
+            "datatype": "string"
+          },
+          {
+            "key": "usageScope",
+            "datatype": "string"
+          }
+        ],
+        "naturalKey": "name",
+        "evidence": "GB 2760 规定食品添加剂的使用原则、允许使用的品种、使用范围与最大使用量（或残留量）"
+      },
+      {
+        "id": "compoundAdditive",
+        "label": "复配添加剂",
+        "description": "由多种添加剂组分配制而成的复合添加剂",
+        "extends": "foodAdditive",
+        "props": [
+          {
+            "key": "name",
+            "datatype": "string",
+            "required": true
+          },
+          {
+            "key": "componentContents",
+            "datatype": "json"
+          }
+        ],
+        "naturalKey": "name",
+        "evidence": "使用复配添加剂的企业应向供应商索取各组分含量"
+      },
+      {
+        "id": "productCategory",
+        "label": "食品产品类别",
+        "description": "标准所区分的食品产品类别，不同类别的添加剂限量不可互相套用",
+        "props": [
+          {
+            "key": "name",
+            "datatype": "string",
+            "required": true
+          }
+        ],
+        "naturalKey": "name",
+        "evidence": "复合调味料与酱油分属不同类别，限量不可互相套用"
+      },
+      {
+        "id": "enterprise",
+        "label": "食品生产企业",
+        "description": "使用食品添加剂的调味品、饮料、烘焙等食品生产企业",
+        "props": [
+          {
+            "key": "name",
+            "datatype": "string",
+            "required": true
+          },
+          {
+            "key": "industryType",
+            "datatype": "string",
+            "enumValues": [
+              "调味品",
+              "饮料",
+              "烘焙"
+            ]
+          }
+        ],
+        "naturalKey": "name",
+        "evidence": "适用对象：调味品、饮料、烘焙等食品生产企业"
+      },
+      {
+        "id": "additiveLedger",
+        "label": "添加剂台账",
+        "description": "企业对添加剂采购、领用、使用环节的台账记录",
+        "props": [
+          {
+            "key": "ledgerType",
+            "datatype": "string",
+            "required": true,
+            "enumValues": [
+              "采购",
+              "领用",
+              "使用"
+            ]
+          },
+          {
+            "key": "batchNo",
+            "datatype": "string"
+          }
+        ],
+        "evidence": "企业应建立添加剂采购、领用、使用台账，做到批次可追溯"
+      },
+      {
+        "id": "foodLabel",
+        "label": "食品标签配料表",
+        "description": "成品标签上的配料表，需逐一标示所用添加剂",
+        "props": [
+          {
+            "key": "declarationForm",
+            "datatype": "string",
+            "enumValues": [
+              "类别名称",
+              "具体名称"
+            ]
+          }
+        ],
+        "evidence": "使用 GB 2760 允许的添加剂须在成品标签配料表中逐一标示（可按类别名称或具体名称，按标准与标签通则执行）"
+      },
+      {
+        "id": "product",
+        "label": "产品",
+        "description": "酱油酿造成品",
+        "props": [
+          {
+            "key": "name",
+            "datatype": "string",
+            "required": true
+          },
+          {
+            "key": "processType",
+            "datatype": "string",
+            "enumValues": [
+              "高盐稀态",
+              "低盐固态"
+            ]
+          }
+        ],
+        "naturalKey": "name",
+        "evidence": "高盐稀态酿造...与低盐固态工艺相比，风味物质更丰富但周期长"
+      },
+      {
+        "id": "rawMaterial",
+        "label": "物料",
+        "description": "酱油酿造用原辅料",
+        "props": [
+          {
+            "key": "name",
+            "datatype": "string",
+            "required": true
+          },
+          {
+            "key": "targetMoisture",
+            "datatype": "string"
+          },
+          {
+            "key": "category",
+            "datatype": "string",
+            "required": true,
+            "enumValues": [
+              "糖",
+              "蛋白",
+              "盐",
+              "包材"
+            ]
+          },
+          {
+            "key": "avgPrice",
+            "datatype": "number"
+          },
+          {
+            "key": "priceUnit",
+            "datatype": "string"
+          },
+          {
+            "key": "yoyChangePercent",
+            "datatype": "number"
+          },
+          {
+            "key": "safetyStockDays",
+            "datatype": "number"
+          },
+          {
+            "key": "inventoryTurnoverDays",
+            "datatype": "number"
+          }
+        ],
+        "naturalKey": "name",
+        "evidence": "豆粕蒸煮、小麦焙炒、盐水浓度18-19°Bé"
+      },
+      {
+        "id": "processStep",
+        "label": "工序",
+        "description": "酱油高盐稀态酿造工序节点",
+        "props": [
+          {
+            "key": "name",
+            "datatype": "string",
+            "required": true
+          },
+          {
+            "key": "equipment",
+            "datatype": "string"
+          },
+          {
+            "key": "condition",
+            "datatype": "string"
+          },
+          {
+            "key": "duration",
+            "datatype": "string"
+          }
+        ],
+        "naturalKey": "name",
+        "evidence": "豆粕蒸煮→小麦焙炒→制曲→高盐稀态发酵→压榨→灭菌→沉淀过滤→成品"
+      },
+      {
+        "id": "equipment",
+        "label": "设备",
+        "description": "工艺生产装置",
+        "props": [
+          {
+            "key": "name",
+            "datatype": "string",
+            "required": true
+          },
+          {
+            "key": "specification",
+            "datatype": "string"
+          }
+        ],
+        "naturalKey": "name",
+        "evidence": "旋转蒸煮锅、板式换热器、发酵池、连续压榨机"
+      },
+      {
+        "id": "qualityMetric",
+        "label": "质量指标",
+        "description": "工序与成品质量检测指标",
+        "props": [
+          {
+            "key": "name",
+            "datatype": "string",
+            "required": true
+          },
+          {
+            "key": "targetValue",
+            "datatype": "string"
+          },
+          {
+            "key": "unit",
+            "datatype": "string"
+          }
+        ],
+        "naturalKey": "name",
+        "evidence": "N溶性≥85%、成曲蛋白酶活力≥1,200 U/g、全氮≥1.6 g/100mL、菌落总数≤3×10⁴ CFU/mL"
+      },
+      {
+        "id": "processAbnormality",
+        "label": "工艺异常",
+        "description": "常见工艺异常与处置方法",
+        "props": [
+          {
+            "key": "name",
+            "datatype": "string",
+            "required": true
+          },
+          {
+            "key": "cause",
+            "datatype": "string"
+          },
+          {
+            "key": "handling",
+            "datatype": "string"
+          }
+        ],
+        "naturalKey": "name",
+        "evidence": "成曲蛋白酶活力不足、发酵产酸过快、沉淀浑浊"
+      },
+      {
+        "id": "processImprovement",
+        "label": "工艺改进",
+        "description": "工艺改进方向与改造评估项",
+        "props": [
+          {
+            "key": "name",
+            "datatype": "string",
+            "required": true
+          },
+          {
+            "key": "target",
+            "datatype": "string"
+          }
+        ],
+        "naturalKey": "name",
+        "evidence": "尝试低温一段发酵+酵母后熟工艺缩短周期至5个月；压榨工序增加连续压榨机改造评估"
+      },
+      {
+        "id": "supplier",
+        "label": "供应商",
+        "description": "大宗原料的供应商实体",
+        "props": [
+          {
+            "key": "name",
+            "datatype": "string",
+            "required": true
+          },
+          {
+            "key": "type",
+            "datatype": "string",
+            "enumValues": [
+              "一级糖贸易商",
+              "产区集采",
+              "进口原糖加工",
+              "井矿盐"
+            ]
+          },
+          {
+            "key": "region",
+            "datatype": "string"
+          },
+          {
+            "key": "supplyShareRatio",
+            "datatype": "number"
+          },
+          {
+            "key": "deliveryPunctualityRate",
+            "datatype": "number"
+          },
+          {
+            "key": "status",
+            "datatype": "string",
+            "enumValues": [
+              "主供应商",
+              "观察名单",
+              "备选"
+            ]
+          },
+          {
+            "key": "freightCostPerTon",
+            "datatype": "number"
+          }
+        ],
+        "naturalKey": "name",
+        "evidence": "甲糖贸（供货占比 45%）：质量稳定，ICUMSA 色值 ≤ 80，交货准时率 97%。乙糖贸（供货占比 15%）：价格低 1.5% 但交货准时率 88%，列入观察名单。主供应商为华南两家一级糖贸易商，到厂运费 85 元/吨。"
+      },
+      {
+        "id": "qualitySpec",
+        "label": "质量规格",
+        "description": "供应商所具备的质量与交付规格指标",
+        "props": [
+          {
+            "key": "metricName",
+            "datatype": "string",
+            "required": true
+          },
+          {
+            "key": "threshold",
+            "datatype": "string",
+            "required": true
+          }
+        ],
+        "naturalKey": "metricName",
+        "evidence": "ICUMSA 色值 ≤ 80；交货准时率 97%。"
+      },
+      {
+        "id": "procurementPolicy",
+        "label": "采购策略",
+        "description": "针对特定原料的采购组合与启备策略",
+        "props": [
+          {
+            "key": "frameworkLockRatio",
+            "datatype": "number"
+          },
+          {
+            "key": "spotPurchaseRatio",
+            "datatype": "number"
+          },
+          {
+            "key": "priceTriggerThreshold",
+            "datatype": "number"
+          },
+          {
+            "key": "alternativeCostPremium",
+            "datatype": "number"
+          }
+        ],
+        "naturalKey": "frameworkLockRatio",
+        "evidence": "当前策略：季度框架协议锁量 60%，现货补购 40%。备选：进口原糖加工渠道，关税后成本高 4.2%，仅在国产糖价突破 7,000 元/吨时启用。"
+      },
+      {
+        "id": "risk",
+        "label": "风险点",
+        "description": "原料供应链中的风险因素",
+        "props": [
+          {
+            "key": "description",
+            "datatype": "string",
+            "required": true
+          },
+          {
+            "key": "impactScope",
+            "datatype": "string"
+          },
+          {
+            "key": "historicalImpact",
+            "datatype": "string"
+          }
+        ],
+        "naturalKey": "description",
+        "evidence": "台风季华南运力紧张（历史上 9 月运费上浮 10-15%）；糖价与原油联动增强。"
+      },
+      {
+        "id": "company",
+        "label": "企业",
+        "description": "包括采购方与包材供应商在内的食品企业主体",
+        "props": [
+          {
+            "key": "name",
+            "datatype": "string",
+            "required": true
+          },
+          {
+            "key": "role",
+            "datatype": "string",
+            "enumValues": [
+              "buyer",
+              "supplier"
+            ]
+          }
+        ],
+        "naturalKey": "name",
+        "evidence": "走访绿源配料的两家包材供应商：宏达塑业（PET 瓶坯）与金晟印铁（金属罐）"
+      },
+      {
+        "id": "packagingMaterial",
+        "label": "包装材料",
+        "description": "食品成品所使用的包材类型",
+        "props": [
+          {
+            "key": "name",
+            "datatype": "string",
+            "required": true
+          },
+          {
+            "key": "category",
+            "datatype": "string",
+            "required": true,
+            "enumValues": [
+              "PET",
+              "metal"
+            ]
+          },
+          {
+            "key": "unitPrice",
+            "datatype": "number"
+          }
+        ],
+        "naturalKey": "name",
+        "evidence": "宏达塑业（PET 瓶坯）与金晟印铁（金属罐）"
+      },
+      {
+        "id": "supplierEvaluation",
+        "label": "供应商走访评估",
+        "description": "对某供应商某次走访的产能、质量、价格、交期等综合评估",
+        "props": [
+          {
+            "key": "annualCapacity",
+            "datatype": "string"
+          },
+          {
+            "key": "utilizationRate",
+            "datatype": "number"
+          },
+          {
+            "key": "wallThicknessCpk",
+            "datatype": "number"
+          },
+          {
+            "key": "acetaldehydeResiduePpm",
+            "datatype": "number"
+          },
+          {
+            "key": "weldPassRate",
+            "datatype": "number"
+          },
+          {
+            "key": "leadTimeStandardDays",
+            "datatype": "number"
+          },
+          {
+            "key": "leadTimeCustomDays",
+            "datatype": "number"
+          },
+          {
+            "key": "annualCostReductionPct",
+            "datatype": "number"
+          }
+        ],
+        "evidence": "产能：瓶坯 2.4 亿只/年，利用率 76%；质量：瓶坯壁厚 CPK 1.42，乙醛残留 ≤ 3 ppm；交期：标准品 7 天，定制 21 天"
+      },
+      {
+        "id": "packagingCostScheme",
+        "label": "包装成本方案",
+        "description": "按包装形式计算的单瓶包材成本方案",
+        "props": [
+          {
+            "key": "schemeName",
+            "datatype": "string",
+            "required": true
+          },
+          {
+            "key": "costPerBottle",
+            "datatype": "number",
+            "required": true
+          }
+        ],
+        "naturalKey": "schemeName",
+        "evidence": "PET 方案单瓶包材成本 0.38 元，金属罐方案 1.21 元"
+      },
+      {
+        "id": "salesChannel",
+        "label": "销售渠道",
+        "description": "成品销售的目标渠道及其主力包材",
+        "props": [
+          {
+            "key": "name",
+            "datatype": "string",
+            "required": true
+          },
+          {
+            "key": "primaryMaterial",
+            "datatype": "string"
+          }
+        ],
+        "naturalKey": "name",
+        "evidence": "即饮渠道维持 PET 主力；礼品装维持金属罐"
+      },
+      {
+        "id": "supplierTier",
+        "label": "供应商分级",
+        "description": "供应商在采购体系中的等级分类",
+        "props": [
+          {
+            "key": "level",
+            "datatype": "string",
+            "required": true,
+            "enumValues": [
+              "一级",
+              "二级"
+            ]
+          }
+        ],
+        "naturalKey": "level",
+        "evidence": "宏达塑业列为一级供应商，金晟印铁保持二级"
+      },
+      {
+        "id": "complianceRequirement",
+        "label": "合规要求",
+        "description": "对包材供应商提出的合规及资质类要求",
+        "props": [
+          {
+            "key": "standardCode",
+            "datatype": "string"
+          },
+          {
+            "key": "description",
+            "datatype": "string",
+            "required": true
+          }
+        ],
+        "naturalKey": "description",
+        "evidence": "要求宏达塑业提供食品接触材料合规声明（GB 4806 系列）与最新型式检验报告；金晟印铁内涂料供应商变更需提前报备"
+      },
+      {
+        "id": "supplyRisk",
+        "label": "供应风险",
+        "description": "包材供应中的风险点及应对要求",
+        "props": [
+          {
+            "key": "description",
+            "datatype": "string",
+            "required": true
+          },
+          {
+            "key": "leadTimeAdvanceDays",
+            "datatype": "number"
+          }
+        ],
+        "evidence": "旺季（8-10 月）需提前 45 天下单，否则排产排队"
+      }
+    ],
+    "relations": [
+      {
+        "id": "prerequisiteFor",
+        "label": "支撑",
+        "description": "前提方案为CCP体系提供基础",
+        "constraints": [
+          {
+            "domain": "prerequisiteProgram",
+            "range": "ccp",
+            "cardinality": {
+              "min": 0,
+              "max": 5
+            }
+          }
+        ],
+        "kind": "object",
+        "evidence": "前提方案（GMP/SSOP）不扎实时 CCP 会越设越多"
+      },
+      {
+        "id": "containsCCP",
+        "label": "包含CCP",
+        "description": "产线所包含的关键控制点",
+        "constraints": [
+          {
+            "domain": "productionLine",
+            "range": "ccp",
+            "cardinality": {
+              "min": 0,
+              "max": 6
+            }
+          }
+        ],
+        "kind": "object",
+        "evidence": "调味品产线典型 CCP；超过 6 个通常说明前提方案失守"
+      },
+      {
+        "id": "hasCriticalLimit",
+        "label": "具有关键限值",
+        "description": "CCP所对应的关键限值",
+        "constraints": [
+          {
+            "domain": "ccp",
+            "range": "criticalLimit",
+            "cardinality": {
+              "min": 1,
+              "max": 5
+            }
+          }
+        ],
+        "kind": "object",
+        "evidence": "杀菌：中心温度与时间的连续记录；金属探测：Fe φ2.0 / Non-Fe φ2.5 / SUS φ3.0 mm 起步"
+      },
+      {
+        "id": "usesAdditive",
+        "label": "使用添加剂",
+        "description": "CCP所使用的食品添加剂",
+        "constraints": [
+          {
+            "domain": "ccp",
+            "range": "additive",
+            "cardinality": {
+              "min": 0,
+              "max": 5
+            }
+          }
+        ],
+        "kind": "object",
+        "evidence": "配料称量复核：添加剂双人复核"
+      },
+      {
+        "id": "governedBy",
+        "label": "受标准约束",
+        "description": "添加剂受国家标准的限量约束",
+        "constraints": [
+          {
+            "domain": "additive",
+            "range": "standard",
+            "cardinality": {
+              "min": 1,
+              "max": 5
+            }
+          }
+        ],
+        "kind": "object",
+        "evidence": "添加剂双人复核，按 GB 2760 折算限量"
+      },
+      {
+        "id": "monitoredBy",
+        "label": "被监控",
+        "description": "CCP被监控程序持续监控",
+        "constraints": [
+          {
+            "domain": "ccp",
+            "range": "monitoringProcedure",
+            "cardinality": {
+              "min": 1,
+              "max": 1
+            }
+          }
+        ],
+        "kind": "object",
+        "evidence": "监控频次要能捕获偏离"
+      },
+      {
+        "id": "correctedBy",
+        "label": "有纠偏行动",
+        "description": "CCP偏离时所执行的纠偏行动",
+        "constraints": [
+          {
+            "domain": "ccp",
+            "range": "correctiveAction",
+            "cardinality": {
+              "min": 1,
+              "max": 1
+            }
+          }
+        ],
+        "kind": "object",
+        "evidence": "纠偏必须含「隔离评估+原因+防止再发」三件套"
+      },
+      {
+        "id": "verifiedBy",
+        "label": "被验证",
+        "description": "CCP与关键限值被验证活动覆盖",
+        "constraints": [
+          {
+            "domain": "ccp",
+            "range": "verification",
+            "cardinality": {
+              "min": 1,
+              "max": 5
+            }
+          }
+        ],
+        "kind": "object",
+        "evidence": "关键限值校准（温度计、金属探测器测试块）按计划执行并留档"
+      },
+      {
+        "id": "calibrates",
+        "label": "校准",
+        "description": "验证活动对测量器具进行校准",
+        "constraints": [
+          {
+            "domain": "verification",
+            "range": "measuringInstrument",
+            "cardinality": {
+              "min": 1,
+              "max": 5
+            }
+          }
+        ],
+        "kind": "object",
+        "evidence": "关键限值校准（温度计、金属探测器测试块）按计划执行并留档"
+      },
+      {
+        "id": "recordedBy",
+        "label": "产生记录",
+        "description": "CCP执行过程中产生的记录",
+        "constraints": [
+          {
+            "domain": "ccp",
+            "range": "record",
+            "cardinality": {
+              "min": 1,
+              "max": 5
+            }
+          }
+        ],
+        "kind": "object",
+        "evidence": "CCP 记录当场签署，事后补签是审核一票否决项"
+      },
+      {
+        "id": "standardSpecifiesAdditive",
+        "label": "标准规定添加剂",
+        "description": "GB 2760 规定允许使用的添加剂品种、使用范围与最大使用量",
+        "constraints": [
+          {
+            "domain": "foodSafetyStandard",
+            "range": "foodAdditive",
+            "cardinality": {
+              "min": 0,
+              "max": 9999
+            }
+          }
+        ],
+        "kind": "object",
+        "evidence": "GB 2760 规定食品添加剂的使用原则、允许使用的品种、使用范围与最大使用量（或残留量）"
+      },
+      {
+        "id": "additiveBelongsToCategory",
+        "label": "添加剂归入类别",
+        "description": "具体添加剂按功能归入相应添加剂类别",
+        "constraints": [
+          {
+            "domain": "foodAdditive",
+            "range": "additiveCategory",
+            "cardinality": {
+              "min": 1,
+              "max": 1
+            }
+          }
+        ],
+        "kind": "object",
+        "evidence": "防腐剂（如苯甲酸及其钠盐、山梨酸及其钾盐）... 甜味剂（如三氯蔗糖、阿斯巴甜）... 增味剂（谷氨酸钠、呈味核苷酸二钠）"
+      },
+      {
+        "id": "additiveApplicableToProductCategory",
+        "label": "添加剂适用产品类别",
+        "description": "添加剂允许使用的食品产品类别及其在该类别中的限量",
+        "constraints": [
+          {
+            "domain": "foodAdditive",
+            "range": "productCategory",
+            "cardinality": {
+              "min": 0,
+              "max": 9999
+            }
+          }
+        ],
+        "kind": "object",
+        "evidence": "防腐剂（如苯甲酸及其钠盐、山梨酸及其钾盐）在酱油中的最大使用量以标准正文表格为准"
+      },
+      {
+        "id": "enterpriseUsesAdditive",
+        "label": "企业使用添加剂",
+        "description": "食品生产企业在其产品中使用标准允许的添加剂",
+        "constraints": [
+          {
+            "domain": "enterprise",
+            "range": "foodAdditive",
+            "cardinality": {
+              "min": 0,
+              "max": 9999
+            }
+          }
+        ],
+        "kind": "object",
+        "evidence": "适用对象：调味品、饮料、烘焙等食品生产企业；GB 2760 规定... 凡在中华人民共和国境内生产的预包装与散装食品，其添加剂使用均应符合本标准"
+      },
+      {
+        "id": "enterpriseMaintainsLedger",
+        "label": "企业维护台账",
+        "description": "企业建立采购、领用、使用三类添加剂台账，做到批次可追溯",
+        "constraints": [
+          {
+            "domain": "enterprise",
+            "range": "additiveLedger",
+            "cardinality": {
+              "min": 1,
+              "max": 3
+            }
+          }
+        ],
+        "kind": "object",
+        "evidence": "企业应建立添加剂采购、领用、使用台账，做到批次可追溯"
+      },
+      {
+        "id": "labelDeclaresAdditive",
+        "label": "标签标示添加剂",
+        "description": "成品标签配料表中逐一标示所用添加剂",
+        "constraints": [
+          {
+            "domain": "foodLabel",
+            "range": "foodAdditive",
+            "cardinality": {
+              "min": 0,
+              "max": 9999
+            }
+          }
+        ],
+        "kind": "object",
+        "evidence": "使用 GB 2760 允许的添加剂须在成品标签配料表中逐一标示"
+      },
+      {
+        "id": "productCategoryHasLimitPerAdditive",
+        "label": "产品类别设添加剂限量",
+        "description": "不同食品产品类别对应不同添加剂限量，限量不可互相套用",
+        "constraints": [
+          {
+            "domain": "productCategory",
+            "range": "foodAdditive",
+            "cardinality": {
+              "min": 0,
+              "max": 9999
+            }
+          }
+        ],
+        "kind": "object",
+        "evidence": "复合调味料与酱油分属不同类别，限量不可互相套用"
+      },
+      {
+        "id": "producedBy",
+        "label": "由工序产出",
+        "description": "产品由若干工序产出",
+        "constraints": [
+          {
+            "domain": "product",
+            "range": "processStep",
+            "cardinality": {
+              "min": 1,
+              "max": 10
+            }
+          }
+        ],
+        "kind": "object",
+        "evidence": "…压榨→灭菌→沉淀过滤→成品"
+      },
+      {
+        "id": "consumesRawMaterial",
+        "label": "消耗物料",
+        "description": "工序消耗原辅料",
+        "constraints": [
+          {
+            "domain": "processStep",
+            "range": "rawMaterial",
+            "cardinality": {
+              "min": 0,
+              "max": 5
+            }
+          }
+        ],
+        "kind": "object",
+        "evidence": "豆粕蒸煮、小麦焙炒、盐水浓度18-19°Bé"
+      },
+      {
+        "id": "usesEquipment",
+        "label": "使用设备",
+        "description": "工序使用生产设备",
+        "constraints": [
+          {
+            "domain": "processStep",
+            "range": "equipment",
+            "cardinality": {
+              "min": 0,
+              "max": 3
+            }
+          }
+        ],
+        "kind": "object",
+        "evidence": "旋转蒸煮锅0.15MPa、板式换热器85℃维持30秒、发酵池品温"
+      },
+      {
+        "id": "hasQualityMetric",
+        "label": "关联质量指标",
+        "description": "工序或成品关联质量检测指标",
+        "constraints": [
+          {
+            "domain": "processStep",
+            "range": "qualityMetric",
+            "cardinality": {
+              "min": 0,
+              "max": 5
+            }
+          },
+          {
+            "domain": "product",
+            "range": "qualityMetric",
+            "cardinality": {
+              "min": 0,
+              "max": 5
+            }
+          }
+        ],
+        "kind": "object",
+        "evidence": "蛋白质变性度N溶性≥85%、成曲蛋白酶活力≥1,200 U/g、灭菌后菌落总数≤3×10⁴CFU/mL"
+      },
+      {
+        "id": "mayEncounter",
+        "label": "可能出现异常",
+        "description": "工序可能出现的工艺异常及处置",
+        "constraints": [
+          {
+            "domain": "processStep",
+            "range": "processAbnormality",
+            "cardinality": {
+              "min": 0,
+              "max": 5
+            }
+          }
+        ],
+        "kind": "object",
+        "evidence": "成曲蛋白酶活力不足、发酵产酸过快、沉淀浑浊"
+      },
+      {
+        "id": "hasImprovement",
+        "label": "工艺改进方向",
+        "description": "工序关联的改进方向与改造评估项",
+        "constraints": [
+          {
+            "domain": "processStep",
+            "range": "processImprovement",
+            "cardinality": {
+              "min": 0,
+              "max": 3
+            }
+          }
+        ],
+        "kind": "object",
+        "evidence": "尝试低温一段发酵+酵母后熟工艺缩短周期至5个月；压榨工序增加连续压榨机改造评估"
+      },
+      {
+        "id": "supplies",
+        "label": "供货",
+        "description": "供应商向采购方提供某类大宗原料",
+        "constraints": [
+          {
+            "domain": "supplier",
+            "range": "rawMaterial",
+            "cardinality": {
+              "min": 1,
+              "max": 5
+            }
+          },
+          {
+            "domain": "company",
+            "range": "packagingMaterial",
+            "cardinality": {
+              "min": 1,
+              "max": 5
+            }
+          }
+        ],
+        "kind": "object",
+        "evidence": "甲糖贸、乙糖贸为白糖主供应商；豆粕华北产区集采；食盐定点井矿盐，双供应商并行。"
+      },
+      {
+        "id": "hasQualitySpec",
+        "label": "具备质量规格",
+        "description": "供应商所声明或实测的质量与交付指标",
+        "constraints": [
+          {
+            "domain": "supplier",
+            "range": "qualitySpec",
+            "cardinality": {
+              "min": 0,
+              "max": 10
+            }
+          }
+        ],
+        "kind": "object",
+        "evidence": "甲糖贸：质量稳定，ICUMSA 色值 ≤ 80，交货准时率 97%。"
+      },
+      {
+        "id": "appliesTo",
+        "label": "适用于",
+        "description": "采购策略所施行的目标原料",
+        "constraints": [
+          {
+            "domain": "procurementPolicy",
+            "range": "rawMaterial",
+            "cardinality": {
+              "min": 1,
+              "max": 1
+            }
+          }
+        ],
+        "kind": "object",
+        "evidence": "当前策略：季度框架协议锁量 60%，现货补购 40%（针对白糖）。"
+      },
+      {
+        "id": "hasRisk",
+        "label": "存在风险",
+        "description": "原料采购所面对的供应链风险",
+        "constraints": [
+          {
+            "domain": "rawMaterial",
+            "range": "risk",
+            "cardinality": {
+              "min": 0,
+              "max": 5
+            }
+          },
+          {
+            "domain": "supplierEvaluation",
+            "range": "supplyRisk",
+            "cardinality": {
+              "min": 0,
+              "max": 5
+            }
+          }
+        ],
+        "kind": "object",
+        "evidence": "台风季华南运力紧张（历史上 9 月运费上浮 10-15%）；糖价与原油联动增强。"
+      },
+      {
+        "id": "evaluates",
+        "label": "走访评估",
+        "description": "供应商走访评估针对某供应商",
+        "constraints": [
+          {
+            "domain": "supplierEvaluation",
+            "range": "company",
+            "cardinality": {
+              "min": 1,
+              "max": 1
+            }
+          }
+        ],
+        "kind": "object",
+        "evidence": "走访绿源配料的两家包材供应商：宏达塑业与金晟印铁"
+      },
+      {
+        "id": "evaluatesMaterial",
+        "label": "评估材料",
+        "description": "供应商走访评估针对某包装材料",
+        "constraints": [
+          {
+            "domain": "supplierEvaluation",
+            "range": "packagingMaterial",
+            "cardinality": {
+              "min": 1,
+              "max": 3
+            }
+          }
+        ],
+        "kind": "object",
+        "evidence": "宏达塑业（PET 瓶坯）与金晟印铁（金属罐）"
+      },
+      {
+        "id": "usesMaterial",
+        "label": "使用包材",
+        "description": "销售渠道使用某包装材料作为主力包材",
+        "constraints": [
+          {
+            "domain": "salesChannel",
+            "range": "packagingMaterial",
+            "cardinality": {
+              "min": 1,
+              "max": 3
+            }
+          }
+        ],
+        "kind": "object",
+        "evidence": "即饮渠道维持 PET 主力；礼品装维持金属罐"
+      },
+      {
+        "id": "hasCostScheme",
+        "label": "有成本方案",
+        "description": "包装材料关联其包装成本方案",
+        "constraints": [
+          {
+            "domain": "packagingMaterial",
+            "range": "packagingCostScheme",
+            "cardinality": {
+              "min": 0,
+              "max": 3
+            }
+          }
+        ],
+        "kind": "object",
+        "evidence": "PET 方案单瓶包材成本 0.38 元，金属罐方案 1.21 元"
+      },
+      {
+        "id": "classifiedAs",
+        "label": "定为等级",
+        "description": "供应商被采购方归入某一等级",
+        "constraints": [
+          {
+            "domain": "company",
+            "range": "supplierTier",
+            "cardinality": {
+              "min": 0,
+              "max": 1
+            }
+          }
+        ],
+        "kind": "object",
+        "evidence": "宏达塑业列为一级供应商，金晟印铁保持二级"
+      },
+      {
+        "id": "imposedOn",
+        "label": "施加于",
+        "description": "合规要求针对某供应商提出",
+        "constraints": [
+          {
+            "domain": "complianceRequirement",
+            "range": "company",
+            "cardinality": {
+              "min": 1,
+              "max": 5
+            }
+          }
+        ],
+        "kind": "object",
+        "evidence": "要求宏达塑业提供食品接触材料合规声明（GB 4806 系列）与最新型式检验报告"
+      }
+    ],
+    "corpus": [
+      {
+        "doc": "2026-08-haccp-implementation.md",
+        "chars": 809
+      },
+      {
+        "doc": "gb2760-excerpt.md",
+        "chars": 1216
+      },
+      {
+        "doc": "2026-08-process-soy-sauce.md",
+        "chars": 1088
+      },
+      {
+        "doc": "2026-08-supply-sugar.md",
+        "chars": 998
+      },
+      {
+        "doc": "2026-08-supply-packaging.md",
+        "chars": 1038
+      }
+    ],
+    "inducedAt": "2026-10-11T02:04:14.303Z"
+  },
+  "report": {
+    "conforms": true,
+    "violations": []
+  },
+  "repairs": 0,
+  "notes": [],
+  "transcript": [
+    {
+      "doc": "2026-08-haccp-implementation.md",
+      "chunk": 0,
+      "kind": "extract",
+      "user": "【文档：2026-08-haccp-implementation.md（第1段）】\n# 2026-08-haccp-implementation\n\n## 七原理落地顺序\n\n危害分析 → CCP 确定 → 关键限值 → 监控程序 → 纠偏行动 → 验证程序 → 记录保持。前提方案（GMP/SSOP）不扎实时 CCP 会越设越多，超过 6 个通常说明前提方案失守。\n\n## 调味品产线典型 CCP\n\n危害分析 → CCP 确定 → 关键限值 → 监控程序 → 纠偏行动 → 验证程序 → 记录保持。前提方案（GMP/SSOP）不扎实时 CCP 会越设越多，超过 6 个通常说明前提方案失守。\n\n1. 配料称量复核：添加剂双人复核，按 GB 2760 折算限量；\n2. 杀菌：中心温度与时间的连续记录；\n3. 金属探测：Fe φ2.0 / Non-Fe φ2.5 / SUS φ3.0 mm 起步，开工/",
+      "raw": "{\"classes\":[{\"id\":\"haccpPrinciple\",\"label\":\"HACCP原理\",\"description\":\"HACCP体系七大落地原理\",\"props\":[{\"key\":\"name\",\"datatype\":\"string\",\"required\":true,\"enumValues\":[\"危害分析\",\"CCP确定\",\"关键限值\",\"监控程序\",\"纠偏行动\",\"验证程序\",\"记录保持\"]},{\"key\":\"sequence\",\"datatype\":\"number\",\"required\":true},{\"key\":\"description\",\"datatype\":\"string\",\"required\":false}],\"naturalKey\":\"name\",\"evidence\":\"七原理落地顺序：危害分析 → CCP 确定 → 关键限值 → 监控程序 → 纠偏行动 → 验证程序 → 记录保持\"},{\"id\":\"prerequisiteProgram\",\"label\":\"前提方案\",\"description\":\"支撑HACCP体系的基础程序\",\"props\":[{\"key\":\"name\",\"datatype\":\"string\",\"required\":true,\"enumValues\":[\"GMP\",\"SSOP\"]},{\"key\":\"description\",\"datatype\":\"string\",\"required\":false}],\"naturalKey\":\"name\",\"evidence\":\"前提方案（GMP/SSOP）不扎实时 CCP 会越设越多\"},{\"id\":\"productionLine\",\"label\":\"产线\",\"description\":\"食品生产产线或工艺线\",\"props\":[{\"key\":\"name\",\"datatype\":\"string\",\"required\":true},{\"key\":\"category\",\"datatype\":\"string\",\"required\":false,\"enumValues\":[\"调味品产线\"]}],\"naturalKey\":\"name\",\"evidence\":\"调味品产线典型 CCP\"},{\"id\":\"ccp\",\"label\":\"关键控制点\",\"description\":\"HACCP关键控制点（CCP）\",\"props\":[{\"key\":\"name\",\"datatype\":\"string\",\"required\":true,\"enumValues\":[\"配料称量复核\",\"杀菌\",\"金属探测\"]},{\"key\":\"description\",\"datatype\":\"string\",\"required\":false}],\"naturalKey\":\"name\",\"evidence\":\"调味品产线典型 CCP：1. 配料称量复核；2. 杀菌；3. 金属探测\"},{\"id\":\"criticalLimit\",\"label\":\"关键限值\",\"description\":\"关键控制点对应的关键限值\",\"props\":[{\"key\":\"parameter\",\"datatype\":\"string\",\"required\":true},{\"key\":\"value\",\"datatype\":\"string\",\"required\":true},{\"key\":\"unit\",\"datatype\":\"string\",\"required\":false}],\"naturalKey\":\"parameter\",\"evidence\":\"杀菌：中心温度与时间的连续记录；金属探测：Fe φ2.0 / Non-Fe φ2.5 / SUS φ3.0 mm 起步\"},{\"id\":\"additive\",\"label\":\"食品添加剂\",\"description\":\"生产中使用的食品添加剂\",\"props\":[{\"key\":\"name\",\"datatype\":\"string\",\"required\":true}],\"naturalKey\":\"name\",\"evidence\":\"配料称量复核：添加剂双人复核，按 GB 2760 折算限量\"},{\"id\":\"standard\",\"label\":\"国家标准\",\"description\":\"国家强制性食品标准（GB）\",\"props\":[{\"key\":\"code\",\"datatype\":\"string\",\"required\":true,\"pattern\":\"^GB\\\\s?\\\\d+(\\\\.\\\\d+)?(-\\\\d+)?$\"}],\"naturalKey\":\"code\",\"evidence\":\"配料称量复核：添加剂双人复核，按 GB 2760 折算限量\"},{\"id\":\"monitoringProcedure\",\"label\":\"监控程序\",\"description\":\"CCP关键限值的持续监控程序\",\"props\":[{\"key\":\"name\",\"datatype\":\"string\",\"required\":true},{\"key\":\"frequency\",\"datatype\":\"string\",\"required\":true},{\"key\":\"method\",\"datatype\":\"string\",\"required\":false}],\"naturalKey\":\"name\",\"evidence\":\"金属探测：Fe φ2.0 / Non-Fe φ2.5 / SUS φ3.0 mm 起步，开工/收工/每 2 小时验证；监控频次要能捕获偏离\"},{\"id\":\"correctiveAction\",\"label\":\"纠偏行动\",\"description\":\"CCP发生偏离时采取的纠偏行动\",\"props\":[{\"key\":\"name\",\"datatype\":\"string\",\"required\":true},{\"key\":\"isolationAssessment\",\"datatype\":\"boolean\",\"required\":true},{\"key\":\"rootCause\",\"datatype\":\"boolean\",\"required\":true},{\"key\":\"preventionOfRecurrence\",\"datatype\":\"boolean\",\"required\":true}],\"naturalKey\":\"name\",\"evidence\":\"纠偏必须含「隔离评估+原因+防止再发」三件套\"},{\"id\":\"verification\",\"label\":\"验证活动\",\"description\":\"HACCP体系验证活动\",\"props\":[{\"key\":\"name\",\"datatype\":\"string\",\"required\":true,\"enumValues\":[\"关键限值校准\",\"年度验证\"]},{\"key\":\"scope\",\"datatype\":\"string\",\"required\":false}],\"naturalKey\":\"name\",\"evidence\":\"关键限值校准（温度计、金属探测器测试块）按计划执行并留档；年度验证含成品检验数据回顾与体系内部审核\"},{\"id\":\"measuringInstrument\",\"label\":\"测量器具\",\"description\":\"用于关键限值校准的测量或测试器具\",\"props\":[{\"key\":\"name\",\"datatype\":\"string\",\"required\":true,\"enumValues\":[\"温度计\",\"金属探测器测试块\"]},{\"key\":\"instrumentType\",\"datatype\":\"string\",\"required\":false}],\"naturalKey\":\"name\",\"evidence\":\"关键限值校准（温度计、金属探测器测试块）按计划执行并留档\"},{\"id\":\"record\",\"label\":\"HACCP记录\",\"description\":\"HACCP体系运行产生的记录\",\"props\":[{\"key\":\"name\",\"datatype\":\"string\",\"required\":true},{\"key\":\"signOnSite\",\"datatype\":\"boolean\",\"required\":true}],\"naturalKey\":\"name\",\"evidence\":\"CCP 记录当场签署，事后补签是审核一票否决项\"}],\"relations\":[{\"id\":\"prerequisiteFor\",\"label\":\"支撑\",\"description\":\"前提方案为CCP体系提供基础\",\"constraints\":[{\"domain\":\"prerequisiteProgram\",\"range\":\"ccp\",\"cardinality\":{\"min\":0,\"max\":5}}],\"kind\":\"object\",\"evidence\":\"前提方案（GMP/SSOP）不扎实时 CCP 会越设越多\"},{\"id\":\"containsCCP\",\"label\":\"包含CCP\",\"description\":\"产线所包含的关键控制点\",\"constraints\":[{\"domain\":\"productionLine\",\"range\":\"ccp\",\"cardinality\":{\"min\":0,\"max\":6}}],\"kind\":\"object\",\"evidence\":\"调味品产线典型 CCP；超过 6 个通常说明前提方案失守\"},{\"id\":\"hasCriticalLimit\",\"label\":\"具有关键限值\",\"description\":\"CCP所对应的关键限值\",\"constraints\":[{\"domain\":\"ccp\",\"range\":\"criticalLimit\",\"cardinality\":{\"min\":1,\"max\":5}}],\"kind\":\"object\",\"evidence\":\"杀菌：中心温度与时间的连续记录；金属探测：Fe φ2.0 / Non-Fe φ2.5 / SUS φ3.0 mm 起步\"},{\"id\":\"usesAdditive\",\"label\":\"使用添加剂\",\"description\":\"CCP所使用的食品添加剂\",\"constraints\":[{\"domain\":\"ccp\",\"range\":\"additive\",\"cardinality\":{\"min\":0,\"max\":5}}],\"kind\":\"object\",\"evidence\":\"配料称量复核：添加剂双人复核\"},{\"id\":\"governedBy\",\"label\":\"受标准约束\",\"description\":\"添加剂受国家标准的限量约束\",\"constraints\":[{\"domain\":\"additive\",\"range\":\"standard\",\"cardinality\":{\"min\":1,\"max\":5}}],\"kind\":\"object\",\"evidence\":\"添加剂双人复核，按 GB 2760 折算限量\"},{\"id\":\"monitoredBy\",\"label\":\"被监控\",\"description\":\"CCP被监控程序持续监控\",\"constraints\":[{\"domain\":\"ccp\",\"range\":\"monitoringProcedure\",\"cardinality\":{\"min\":1,\"max\":1}}],\"kind\":\"object\",\"evidence\":\"监控频次要能捕获偏离\"},{\"id\":\"correctedBy\",\"label\":\"有纠偏行动\",\"description\":\"CCP偏离时所执行的纠偏行动\",\"constraints\":[{\"domain\":\"ccp\",\"range\":\"correctiveAction\",\"cardinality\":{\"min\":1,\"max\":1}}],\"kind\":\"object\",\"evidence\":\"纠偏必须含「隔离评估+原因+防止再发」三件套\"},{\"id\":\"verifiedBy\",\"label\":\"被验证\",\"description\":\"CCP与关键限值被验证活动覆盖\",\"constraints\":[{\"domain\":\"ccp\",\"range\":\"verification\",\"cardinality\":{\"min\":1,\"max\":5}}],\"kind\":\"object\",\"evidence\":\"关键限值校准（温度计、金属探测器测试块）按计划执行并留档\"},{\"id\":\"calibrates\",\"label\":\"校准\",\"description\":\"验证活动对测量器具进行校准\",\"constraints\":[{\"domain\":\"verification\",\"range\":\"measuringInstrument\",\"cardinality\":{\"min\":1,\"max\":5}}],\"kind\":\"object\",\"evidence\":\"关键限值校准（温度计、金属探测器测试块）按计划执行并留档\"},{\"id\":\"recordedBy\",\"label\":\"产生记录\",\"description\":\"CCP执行过程中产生的记录\",\"constraints\":[{\"domain\":\"ccp\",\"range\":\"record\",\"cardinality\":{\"min\":1,\"max\":5}}],\"kind\":\"object\",\"evidence\":\"CCP 记录当场签署，事后补签是审核一票否决项\"}]}"
+    },
+    {
+      "doc": "gb2760-excerpt.md",
+      "chunk": 0,
+      "kind": "extract",
+      "user": "【文档：gb2760-excerpt.md（第1段）】\n# gb2760-excerpt\n\n## GB 2760《食品安全国家标准 食品添加剂使用标准》要点摘录\n\n- 文档性质：国家标准要点转述（供知识库检索的教学性摘录，非官方文本）\n- 归集日期：2026-08-25\n- 适用对象：调味品、饮料、烘焙等食品生产企业\n\n## 一、标准定位\n\n- 文档性质：国家标准要点转述（供知识库检索的教学性摘录，非官方文本）\n- 归集日期：2026-08-25\n- 适用对象：调味品、饮料、烘焙等食品生产企业\n\nGB 2760 规定食品添加剂的使用原则、允许使用的品种、使用范围与最大使用量（或残留量）。凡在中华人民共和国境内生产的预包装与散装食品，其添加剂使用均应符合本标准。\n\n## 二、使用基本原则\n\nGB 2760 规定食品添加剂的使用原则、允许使用的品种、使用范围与最大使用量（或残留量）。凡在中华人",
+      "raw": "{\"classes\":[{\"id\":\"foodSafetyStandard\",\"label\":\"食品安全国家标准\",\"description\":\"规定食品添加剂使用原则、允许品种、使用范围与最大使用量的国家标准\",\"props\":[{\"key\":\"code\",\"datatype\":\"string\",\"required\":true},{\"key\":\"title\",\"datatype\":\"string\",\"required\":true}],\"naturalKey\":\"code\",\"evidence\":\"GB 2760《食品安全国家标准 食品添加剂使用标准》要点摘录\"},{\"id\":\"additiveCategory\",\"label\":\"食品添加剂类别\",\"description\":\"按功能划分的添加剂类别，如防腐剂、甜味剂、增味剂\",\"props\":[{\"key\":\"name\",\"datatype\":\"string\",\"required\":true},{\"key\":\"usagePrinciple\",\"datatype\":\"string\",\"required\":false,\"enumValues\":[\"按最大使用量限定\",\"按生产需要适量使用\"]}],\"naturalKey\":\"name\",\"evidence\":\"防腐剂（如苯甲酸及其钠盐、山梨酸及其钾盐）... 甜味剂（如三氯蔗糖、阿斯巴甜）... 增味剂（谷氨酸钠、呈味核苷酸二钠）\"},{\"id\":\"foodAdditive\",\"label\":\"食品添加剂\",\"description\":\"GB 2760 允许使用的具体添加剂品种及其使用范围与限量\",\"props\":[{\"key\":\"name\",\"datatype\":\"string\",\"required\":true},{\"key\":\"maxUsageLevel\",\"datatype\":\"string\",\"required\":false},{\"key\":\"usageScope\",\"datatype\":\"string\",\"required\":false}],\"naturalKey\":\"name\",\"evidence\":\"GB 2760 规定食品添加剂的使用原则、允许使用的品种、使用范围与最大使用量（或残留量）\"},{\"id\":\"compoundAdditive\",\"label\":\"复配添加剂\",\"description\":\"由多种添加剂组分配制而成的复合添加剂\",\"props\":[{\"key\":\"name\",\"datatype\":\"string\",\"required\":true},{\"key\":\"componentContents\",\"datatype\":\"json\",\"required\":false}],\"naturalKey\":\"name\",\"evidence\":\"使用复配添加剂的企业应向供应商索取各组分含量\",\"extends\":\"foodAdditive\"},{\"id\":\"productCategory\",\"label\":\"食品产品类别\",\"description\":\"标准所区分的食品产品类别，不同类别的添加剂限量不可互相套用\",\"props\":[{\"key\":\"name\",\"datatype\":\"string\",\"required\":true}],\"naturalKey\":\"name\",\"evidence\":\"复合调味料与酱油分属不同类别，限量不可互相套用\"},{\"id\":\"enterprise\",\"label\":\"食品生产企业\",\"description\":\"使用食品添加剂的调味品、饮料、烘焙等食品生产企业\",\"props\":[{\"key\":\"name\",\"datatype\":\"string\",\"required\":true},{\"key\":\"industryType\",\"datatype\":\"string\",\"required\":false,\"enumValues\":[\"调味品\",\"饮料\",\"烘焙\"]}],\"naturalKey\":\"name\",\"evidence\":\"适用对象：调味品、饮料、烘焙等食品生产企业\"},{\"id\":\"additiveLedger\",\"label\":\"添加剂台账\",\"description\":\"企业对添加剂采购、领用、使用环节的台账记录\",\"props\":[{\"key\":\"ledgerType\",\"datatype\":\"string\",\"required\":true,\"enumValues\":[\"采购\",\"领用\",\"使用\"]},{\"key\":\"batchNo\",\"datatype\":\"string\",\"required\":false}],\"evidence\":\"企业应建立添加剂采购、领用、使用台账，做到批次可追溯\"},{\"id\":\"foodLabel\",\"label\":\"食品标签配料表\",\"description\":\"成品标签上的配料表，需逐一标示所用添加剂\",\"props\":[{\"key\":\"declarationForm\",\"datatype\":\"string\",\"required\":false,\"enumValues\":[\"类别名称\",\"具体名称\"]}],\"evidence\":\"使用 GB 2760 允许的添加剂须在成品标签配料表中逐一标示（可按类别名称或具体名称，按标准与标签通则执行）\"}],\"relations\":[{\"id\":\"standardSpecifiesAdditive\",\"label\":\"标准规定添加剂\",\"description\":\"GB 2760 规定允许使用的添加剂品种、使用范围与最大使用量\",\"constraints\":[{\"domain\":\"foodSafetyStandard\",\"range\":\"foodAdditive\",\"cardinality\":{\"min\":0,\"max\":9999}}],\"kind\":\"object\",\"evidence\":\"GB 2760 规定食品添加剂的使用原则、允许使用的品种、使用范围与最大使用量（或残留量）\"},{\"id\":\"additiveBelongsToCategory\",\"label\":\"添加剂归入类别\",\"description\":\"具体添加剂按功能归入相应添加剂类别\",\"constraints\":[{\"domain\":\"foodAdditive\",\"range\":\"additiveCategory\",\"cardinality\":{\"min\":1,\"max\":1}}],\"kind\":\"object\",\"evidence\":\"防腐剂（如苯甲酸及其钠盐、山梨酸及其钾盐）... 甜味剂（如三氯蔗糖、阿斯巴甜）... 增味剂（谷氨酸钠、呈味核苷酸二钠）\"},{\"id\":\"additiveApplicableToProductCategory\",\"label\":\"添加剂适用产品类别\",\"description\":\"添加剂允许使用的食品产品类别及其在该类别中的限量\",\"constraints\":[{\"domain\":\"foodAdditive\",\"range\":\"productCategory\",\"cardinality\":{\"min\":0,\"max\":9999}}],\"kind\":\"object\",\"evidence\":\"防腐剂（如苯甲酸及其钠盐、山梨酸及其钾盐）在酱油中的最大使用量以标准正文表格为准\"},{\"id\":\"enterpriseUsesAdditive\",\"label\":\"企业使用添加剂\",\"description\":\"食品生产企业在其产品中使用标准允许的添加剂\",\"constraints\":[{\"domain\":\"enterprise\",\"range\":\"foodAdditive\",\"cardinality\":{\"min\":0,\"max\":9999}}],\"kind\":\"object\",\"evidence\":\"适用对象：调味品、饮料、烘焙等食品生产企业；GB 2760 规定... 凡在中华人民共和国境内生产的预包装与散装食品，其添加剂使用均应符合本标准\"},{\"id\":\"enterpriseMaintainsLedger\",\"label\":\"企业维护台账\",\"description\":\"企业建立采购、领用、使用三类添加剂台账，做到批次可追溯\",\"constraints\":[{\"domain\":\"enterprise\",\"range\":\"additiveLedger\",\"cardinality\":{\"min\":1,\"max\":3}}],\"kind\":\"object\",\"evidence\":\"企业应建立添加剂采购、领用、使用台账，做到批次可追溯\"},{\"id\":\"labelDeclaresAdditive\",\"label\":\"标签标示添加剂\",\"description\":\"成品标签配料表中逐一标示所用添加剂\",\"constraints\":[{\"domain\":\"foodLabel\",\"range\":\"foodAdditive\",\"cardinality\":{\"min\":0,\"max\":9999}}],\"kind\":\"object\",\"evidence\":\"使用 GB 2760 允许的添加剂须在成品标签配料表中逐一标示\"},{\"id\":\"productCategoryHasLimitPerAdditive\",\"label\":\"产品类别设添加剂限量\",\"description\":\"不同食品产品类别对应不同添加剂限量，限量不可互相套用\",\"constraints\":[{\"domain\":\"productCategory\",\"range\":\"foodAdditive\",\"cardinality\":{\"min\":0,\"max\":9999}}],\"kind\":\"object\",\"evidence\":\"复合调味料与酱油分属不同类别，限量不可互相套用\"}]}"
+    },
+    {
+      "doc": "2026-08-process-soy-sauce.md",
+      "chunk": 0,
+      "kind": "extract",
+      "user": "【文档：2026-08-process-soy-sauce.md（第1段）】\n# 2026-08-process-soy-sauce\n\n## 酱油高盐稀态酿造工艺规程（工艺纪要）\n\n> 脱敏示例语料：工艺参数为演示用途虚构，结构对齐真实工艺规程。\n\n## 一、工艺路线总览\n\n> 脱敏示例语料：工艺参数为演示用途虚构，结构对齐真实工艺规程。\n\n高盐稀态酿造：豆粕蒸煮 → 小麦焙炒 → 制曲 → 高盐稀态发酵（常温 6 个月）→ 压榨 → 灭菌 → 沉淀过滤 → 成品。与低盐固态工艺相比，风味物质更丰富但周期长。\n\n## 二、关键工序参数\n\n高盐稀态酿造：豆粕蒸煮 → 小麦焙炒 → 制曲 → 高盐稀态发酵（常温 6 个月）→ 压榨 → 灭菌 → 沉淀过滤 → 成品。与低盐固态工艺相比，风味物质更丰富但周期长。\n\n- 蒸煮：旋转蒸煮锅 0.15 MPa，维持 8 分钟，蛋白质变性度目标 N溶性 ",
+      "raw": "{\"classes\":[{\"id\":\"product\",\"label\":\"产品\",\"description\":\"酱油酿造成品\",\"props\":[{\"key\":\"name\",\"datatype\":\"string\",\"required\":true},{\"key\":\"processType\",\"datatype\":\"string\",\"required\":false,\"enumValues\":[\"高盐稀态\",\"低盐固态\"]}],\"naturalKey\":\"name\",\"evidence\":\"高盐稀态酿造...与低盐固态工艺相比，风味物质更丰富但周期长\"},{\"id\":\"rawMaterial\",\"label\":\"物料\",\"description\":\"酱油酿造用原辅料\",\"props\":[{\"key\":\"name\",\"datatype\":\"string\",\"required\":true},{\"key\":\"targetMoisture\",\"datatype\":\"string\",\"required\":false}],\"naturalKey\":\"name\",\"evidence\":\"豆粕蒸煮、小麦焙炒、盐水浓度18-19°Bé\"},{\"id\":\"processStep\",\"label\":\"工序\",\"description\":\"酱油高盐稀态酿造工序节点\",\"props\":[{\"key\":\"name\",\"datatype\":\"string\",\"required\":true},{\"key\":\"equipment\",\"datatype\":\"string\",\"required\":false},{\"key\":\"condition\",\"datatype\":\"string\",\"required\":false},{\"key\":\"duration\",\"datatype\":\"string\",\"required\":false}],\"naturalKey\":\"name\",\"evidence\":\"豆粕蒸煮→小麦焙炒→制曲→高盐稀态发酵→压榨→灭菌→沉淀过滤→成品\"},{\"id\":\"equipment\",\"label\":\"设备\",\"description\":\"工艺生产装置\",\"props\":[{\"key\":\"name\",\"datatype\":\"string\",\"required\":true},{\"key\":\"specification\",\"datatype\":\"string\",\"required\":false}],\"naturalKey\":\"name\",\"evidence\":\"旋转蒸煮锅、板式换热器、发酵池、连续压榨机\"},{\"id\":\"qualityMetric\",\"label\":\"质量指标\",\"description\":\"工序与成品质量检测指标\",\"props\":[{\"key\":\"name\",\"datatype\":\"string\",\"required\":true},{\"key\":\"targetValue\",\"datatype\":\"string\",\"required\":false},{\"key\":\"unit\",\"datatype\":\"string\",\"required\":false}],\"naturalKey\":\"name\",\"evidence\":\"N溶性≥85%、成曲蛋白酶活力≥1,200 U/g、全氮≥1.6 g/100mL、菌落总数≤3×10⁴ CFU/mL\"},{\"id\":\"processAbnormality\",\"label\":\"工艺异常\",\"description\":\"常见工艺异常与处置方法\",\"props\":[{\"key\":\"name\",\"datatype\":\"string\",\"required\":true},{\"key\":\"cause\",\"datatype\":\"string\",\"required\":false},{\"key\":\"handling\",\"datatype\":\"string\",\"required\":false}],\"naturalKey\":\"name\",\"evidence\":\"成曲蛋白酶活力不足、发酵产酸过快、沉淀浑浊\"},{\"id\":\"processImprovement\",\"label\":\"工艺改进\",\"description\":\"工艺改进方向与改造评估项\",\"props\":[{\"key\":\"name\",\"datatype\":\"string\",\"required\":true},{\"key\":\"target\",\"datatype\":\"string\",\"required\":false}],\"naturalKey\":\"name\",\"evidence\":\"尝试低温一段发酵+酵母后熟工艺缩短周期至5个月；压榨工序增加连续压榨机改造评估\"}],\"relations\":[{\"id\":\"producedBy\",\"label\":\"由工序产出\",\"description\":\"产品由若干工序产出\",\"constraints\":[{\"domain\":\"product\",\"range\":\"processStep\",\"cardinality\":{\"min\":1,\"max\":10}}],\"kind\":\"object\",\"evidence\":\"…压榨→灭菌→沉淀过滤→成品\"},{\"id\":\"consumesRawMaterial\",\"label\":\"消耗物料\",\"description\":\"工序消耗原辅料\",\"constraints\":[{\"domain\":\"processStep\",\"range\":\"rawMaterial\",\"cardinality\":{\"min\":0,\"max\":5}}],\"kind\":\"object\",\"evidence\":\"豆粕蒸煮、小麦焙炒、盐水浓度18-19°Bé\"},{\"id\":\"usesEquipment\",\"label\":\"使用设备\",\"description\":\"工序使用生产设备\",\"constraints\":[{\"domain\":\"processStep\",\"range\":\"equipment\",\"cardinality\":{\"min\":0,\"max\":3}}],\"kind\":\"object\",\"evidence\":\"旋转蒸煮锅0.15MPa、板式换热器85℃维持30秒、发酵池品温\"},{\"id\":\"hasQualityMetric\",\"label\":\"关联质量指标\",\"description\":\"工序或成品关联质量检测指标\",\"constraints\":[{\"domain\":\"processStep\",\"range\":\"qualityMetric\",\"cardinality\":{\"min\":0,\"max\":5}},{\"domain\":\"product\",\"range\":\"qualityMetric\",\"cardinality\":{\"min\":0,\"max\":5}}],\"kind\":\"object\",\"evidence\":\"蛋白质变性度N溶性≥85%、成曲蛋白酶活力≥1,200 U/g、灭菌后菌落总数≤3×10⁴CFU/mL\"},{\"id\":\"mayEncounter\",\"label\":\"可能出现异常\",\"description\":\"工序可能出现的工艺异常及处置\",\"constraints\":[{\"domain\":\"processStep\",\"range\":\"processAbnormality\",\"cardinality\":{\"min\":0,\"max\":5}}],\"kind\":\"object\",\"evidence\":\"成曲蛋白酶活力不足、发酵产酸过快、沉淀浑浊\"},{\"id\":\"hasImprovement\",\"label\":\"工艺改进方向\",\"description\":\"工序关联的改进方向与改造评估项\",\"constraints\":[{\"domain\":\"processStep\",\"range\":\"processImprovement\",\"cardinality\":{\"min\":0,\"max\":3}}],\"kind\":\"object\",\"evidence\":\"尝试低温一段发酵+酵母后熟工艺缩短周期至5个月；压榨工序增加连续压榨机改造评估\"}]}"
+    },
+    {
+      "doc": "2026-08-supply-sugar.md",
+      "chunk": 0,
+      "kind": "extract",
+      "user": "【文档：2026-08-supply-sugar.md（第1段）】\n# 2026-08-supply-sugar\n\n## 白糖与大宗原料供应链采购纪要（2026 年 8 月）\n\n> 脱敏示例语料：供应商与价格为演示用途虚构，结构对齐真实采购纪要。\n\n## 一、白糖采购策略\n\n> 脱敏示例语料：供应商与价格为演示用途虚构，结构对齐真实采购纪要。\n\n上半年白糖均价 6,420 元/吨（同比 +7.3%）。当前策略：季度框架协议锁量 60%，现货补购 40%。主供应商为华南两家一级糖贸易商，到厂运费 85 元/吨。\n\n## 二、供应商评估\n\n上半年白糖均价 6,420 元/吨（同比 +7.3%）。当前策略：季度框架协议锁量 60%，现货补购 40%。主供应商为华南两家一级糖贸易商，到厂运费 85 元/吨。\n\n- 甲糖贸（供货占比 45%）：质量稳定，ICUMSA 色值 ≤ 80，交货准时率 97",
+      "raw": "{\"classes\":[{\"id\":\"supplier\",\"label\":\"供应商\",\"description\":\"大宗原料的供应商实体\",\"props\":[{\"key\":\"name\",\"datatype\":\"string\",\"required\":true},{\"key\":\"type\",\"datatype\":\"string\",\"required\":false,\"enumValues\":[\"一级糖贸易商\",\"产区集采\",\"进口原糖加工\",\"井矿盐\"]},{\"key\":\"region\",\"datatype\":\"string\",\"required\":false},{\"key\":\"supplyShareRatio\",\"datatype\":\"number\",\"required\":false},{\"key\":\"deliveryPunctualityRate\",\"datatype\":\"number\",\"required\":false},{\"key\":\"status\",\"datatype\":\"string\",\"required\":false,\"enumValues\":[\"主供应商\",\"观察名单\",\"备选\"]},{\"key\":\"freightCostPerTon\",\"datatype\":\"number\",\"required\":false}],\"naturalKey\":\"name\",\"evidence\":\"甲糖贸（供货占比 45%）：质量稳定，ICUMSA 色值 ≤ 80，交货准时率 97%。乙糖贸（供货占比 15%）：价格低 1.5% 但交货准时率 88%，列入观察名单。主供应商为华南两家一级糖贸易商，到厂运费 85 元/吨。\"},{\"id\":\"rawMaterial\",\"label\":\"大宗原料\",\"description\":\"采购的食品及包材类原料\",\"props\":[{\"key\":\"name\",\"datatype\":\"string\",\"required\":true},{\"key\":\"category\",\"datatype\":\"string\",\"required\":true,\"enumValues\":[\"糖\",\"蛋白\",\"盐\",\"包材\"]},{\"key\":\"avgPrice\",\"datatype\":\"number\",\"required\":false},{\"key\":\"priceUnit\",\"datatype\":\"string\",\"required\":false},{\"key\":\"yoyChangePercent\",\"datatype\":\"number\",\"required\":false},{\"key\":\"safetyStockDays\",\"datatype\":\"number\",\"required\":false},{\"key\":\"inventoryTurnoverDays\",\"datatype\":\"number\",\"required\":false}],\"naturalKey\":\"name\",\"evidence\":\"白糖均价 6,420 元/吨（同比 +7.3%）。豆粕：华北产区集采，均价 4,850 元/吨，库存周转 18 天。安全库存：白糖 25 天、豆粕 15 天、包材 30 天。\"},{\"id\":\"qualitySpec\",\"label\":\"质量规格\",\"description\":\"供应商所具备的质量与交付规格指标\",\"props\":[{\"key\":\"metricName\",\"datatype\":\"string\",\"required\":true},{\"key\":\"threshold\",\"datatype\":\"string\",\"required\":true}],\"naturalKey\":\"metricName\",\"evidence\":\"ICUMSA 色值 ≤ 80；交货准时率 97%。\"},{\"id\":\"procurementPolicy\",\"label\":\"采购策略\",\"description\":\"针对特定原料的采购组合与启备策略\",\"props\":[{\"key\":\"frameworkLockRatio\",\"datatype\":\"number\",\"required\":false},{\"key\":\"spotPurchaseRatio\",\"datatype\":\"number\",\"required\":false},{\"key\":\"priceTriggerThreshold\",\"datatype\":\"number\",\"required\":false},{\"key\":\"alternativeCostPremium\",\"datatype\":\"number\",\"required\":false}],\"naturalKey\":\"frameworkLockRatio\",\"evidence\":\"当前策略：季度框架协议锁量 60%，现货补购 40%。备选：进口原糖加工渠道，关税后成本高 4.2%，仅在国产糖价突破 7,000 元/吨时启用。\"},{\"id\":\"risk\",\"label\":\"风险点\",\"description\":\"原料供应链中的风险因素\",\"props\":[{\"key\":\"description\",\"datatype\":\"string\",\"required\":true},{\"key\":\"impactScope\",\"datatype\":\"string\",\"required\":false},{\"key\":\"historicalImpact\",\"datatype\":\"string\",\"required\":false}],\"naturalKey\":\"description\",\"evidence\":\"台风季华南运力紧张（历史上 9 月运费上浮 10-15%）；糖价与原油联动增强。\"}],\"relations\":[{\"id\":\"supplies\",\"label\":\"供货\",\"description\":\"供应商向采购方提供某类大宗原料\",\"constraints\":[{\"domain\":\"supplier\",\"range\":\"rawMaterial\",\"cardinality\":{\"min\":1,\"max\":5}}],\"kind\":\"object\",\"evidence\":\"甲糖贸、乙糖贸为白糖主供应商；豆粕华北产区集采；食盐定点井矿盐，双供应商并行。\"},{\"id\":\"hasQualitySpec\",\"label\":\"具备质量规格\",\"description\":\"供应商所声明或实测的质量与交付指标\",\"constraints\":[{\"domain\":\"supplier\",\"range\":\"qualitySpec\",\"cardinality\":{\"min\":0,\"max\":10}}],\"kind\":\"object\",\"evidence\":\"甲糖贸：质量稳定，ICUMSA 色值 ≤ 80，交货准时率 97%。\"},{\"id\":\"appliesTo\",\"label\":\"适用于\",\"description\":\"采购策略所施行的目标原料\",\"constraints\":[{\"domain\":\"procurementPolicy\",\"range\":\"rawMaterial\",\"cardinality\":{\"min\":1,\"max\":1}}],\"kind\":\"object\",\"evidence\":\"当前策略：季度框架协议锁量 60%，现货补购 40%（针对白糖）。\"},{\"id\":\"hasRisk\",\"label\":\"存在风险\",\"description\":\"原料采购所面对的供应链风险\",\"constraints\":[{\"domain\":\"rawMaterial\",\"range\":\"risk\",\"cardinality\":{\"min\":0,\"max\":5}}],\"kind\":\"object\",\"evidence\":\"台风季华南运力紧张（历史上 9 月运费上浮 10-15%）；糖价与原油联动增强。\"}]}"
+    },
+    {
+      "doc": "2026-08-supply-packaging.md",
+      "chunk": 0,
+      "kind": "extract",
+      "user": "【文档：2026-08-supply-packaging.md（第1段）】\n# 2026-08-supply-packaging\n\n## 包装材料供应商走访纪要（绿源配料）\n\n> 脱敏示例语料：供应商信息为演示用途虚构，结构对齐真实走访纪要。\n\n## 一、走访对象与背景\n\n> 脱敏示例语料：供应商信息为演示用途虚构，结构对齐真实走访纪要。\n\n走访绿源配料的两家包材供应商：宏达塑业（PET 瓶坯）与金晟印铁（金属罐）。目的：评估 2027 年包材降价空间与供应稳定性。\n\n## 二、宏达塑业评估\n\n走访绿源配料的两家包材供应商：宏达塑业（PET 瓶坯）与金晟印铁（金属罐）。目的：评估 2027 年包材降价空间与供应稳定性。\n\n- 产能：瓶坯 2.4 亿只/年，利用率 76%，可承接增量订单。\n- 质量：瓶坯壁厚 CPK 1.42，乙醛残留 ≤ 3 ppm，近 12 个月无批次退货。\n- 价格：",
+      "raw": "{\"classes\":[{\"id\":\"company\",\"label\":\"企业\",\"description\":\"包括采购方与包材供应商在内的食品企业主体\",\"props\":[{\"key\":\"name\",\"datatype\":\"string\",\"required\":true},{\"key\":\"role\",\"datatype\":\"string\",\"required\":false,\"enumValues\":[\"buyer\",\"supplier\"]}],\"naturalKey\":\"name\",\"evidence\":\"走访绿源配料的两家包材供应商：宏达塑业（PET 瓶坯）与金晟印铁（金属罐）\"},{\"id\":\"packagingMaterial\",\"label\":\"包装材料\",\"description\":\"食品成品所使用的包材类型\",\"props\":[{\"key\":\"name\",\"datatype\":\"string\",\"required\":true},{\"key\":\"category\",\"datatype\":\"string\",\"required\":true,\"enumValues\":[\"PET\",\"metal\"]},{\"key\":\"unitPrice\",\"datatype\":\"number\",\"required\":false}],\"naturalKey\":\"name\",\"evidence\":\"宏达塑业（PET 瓶坯）与金晟印铁（金属罐）\"},{\"id\":\"supplierEvaluation\",\"label\":\"供应商走访评估\",\"description\":\"对某供应商某次走访的产能、质量、价格、交期等综合评估\",\"props\":[{\"key\":\"annualCapacity\",\"datatype\":\"string\",\"required\":false},{\"key\":\"utilizationRate\",\"datatype\":\"number\",\"required\":false},{\"key\":\"wallThicknessCpk\",\"datatype\":\"number\",\"required\":false},{\"key\":\"acetaldehydeResiduePpm\",\"datatype\":\"number\",\"required\":false},{\"key\":\"weldPassRate\",\"datatype\":\"number\",\"required\":false},{\"key\":\"leadTimeStandardDays\",\"datatype\":\"number\",\"required\":false},{\"key\":\"leadTimeCustomDays\",\"datatype\":\"number\",\"required\":false},{\"key\":\"annualCostReductionPct\",\"datatype\":\"number\",\"required\":false}],\"evidence\":\"产能：瓶坯 2.4 亿只/年，利用率 76%；质量：瓶坯壁厚 CPK 1.42，乙醛残留 ≤ 3 ppm；交期：标准品 7 天，定制 21 天\"},{\"id\":\"packagingCostScheme\",\"label\":\"包装成本方案\",\"description\":\"按包装形式计算的单瓶包材成本方案\",\"props\":[{\"key\":\"schemeName\",\"datatype\":\"string\",\"required\":true},{\"key\":\"costPerBottle\",\"datatype\":\"number\",\"required\":true}],\"naturalKey\":\"schemeName\",\"evidence\":\"PET 方案单瓶包材成本 0.38 元，金属罐方案 1.21 元\"},{\"id\":\"salesChannel\",\"label\":\"销售渠道\",\"description\":\"成品销售的目标渠道及其主力包材\",\"props\":[{\"key\":\"name\",\"datatype\":\"string\",\"required\":true},{\"key\":\"primaryMaterial\",\"datatype\":\"string\",\"required\":false}],\"naturalKey\":\"name\",\"evidence\":\"即饮渠道维持 PET 主力；礼品装维持金属罐\"},{\"id\":\"supplierTier\",\"label\":\"供应商分级\",\"description\":\"供应商在采购体系中的等级分类\",\"props\":[{\"key\":\"level\",\"datatype\":\"string\",\"required\":true,\"enumValues\":[\"一级\",\"二级\"]}],\"naturalKey\":\"level\",\"evidence\":\"宏达塑业列为一级供应商，金晟印铁保持二级\"},{\"id\":\"complianceRequirement\",\"label\":\"合规要求\",\"description\":\"对包材供应商提出的合规及资质类要求\",\"props\":[{\"key\":\"standardCode\",\"datatype\":\"string\",\"required\":false},{\"key\":\"description\",\"datatype\":\"string\",\"required\":true}],\"naturalKey\":\"description\",\"evidence\":\"要求宏达塑业提供食品接触材料合规声明（GB 4806 系列）与最新型式检验报告；金晟印铁内涂料供应商变更需提前报备\"},{\"id\":\"supplyRisk\",\"label\":\"供应风险\",\"description\":\"包材供应中的风险点及应对要求\",\"props\":[{\"key\":\"description\",\"datatype\":\"string\",\"required\":true},{\"key\":\"leadTimeAdvanceDays\",\"datatype\":\"number\",\"required\":false}],\"evidence\":\"旺季（8-10 月）需提前 45 天下单，否则排产排队\"}],\"relations\":[{\"id\":\"evaluates\",\"label\":\"走访评估\",\"description\":\"供应商走访评估针对某供应商\",\"constraints\":[{\"domain\":\"supplierEvaluation\",\"range\":\"company\",\"cardinality\":{\"min\":1,\"max\":1}}],\"kind\":\"object\",\"evidence\":\"走访绿源配料的两家包材供应商：宏达塑业与金晟印铁\"},{\"id\":\"evaluatesMaterial\",\"label\":\"评估材料\",\"description\":\"供应商走访评估针对某包装材料\",\"constraints\":[{\"domain\":\"supplierEvaluation\",\"range\":\"packagingMaterial\",\"cardinality\":{\"min\":1,\"max\":3}}],\"kind\":\"object\",\"evidence\":\"宏达塑业（PET 瓶坯）与金晟印铁（金属罐）\"},{\"id\":\"supplies\",\"label\":\"供应\",\"description\":\"供应商提供某种包装材料\",\"constraints\":[{\"domain\":\"company\",\"range\":\"packagingMaterial\",\"cardinality\":{\"min\":1,\"max\":5}}],\"kind\":\"object\",\"evidence\":\"宏达塑业（PET 瓶坯）与金晟印铁（金属罐）\"},{\"id\":\"usesMaterial\",\"label\":\"使用包材\",\"description\":\"销售渠道使用某包装材料作为主力包材\",\"constraints\":[{\"domain\":\"salesChannel\",\"range\":\"packagingMaterial\",\"cardinality\":{\"min\":1,\"max\":3}}],\"kind\":\"object\",\"evidence\":\"即饮渠道维持 PET 主力；礼品装维持金属罐\"},{\"id\":\"hasCostScheme\",\"label\":\"有成本方案\",\"description\":\"包装材料关联其包装成本方案\",\"constraints\":[{\"domain\":\"packagingMaterial\",\"range\":\"packagingCostScheme\",\"cardinality\":{\"min\":0,\"max\":3}}],\"kind\":\"object\",\"evidence\":\"PET 方案单瓶包材成本 0.38 元，金属罐方案 1.21 元\"},{\"id\":\"classifiedAs\",\"label\":\"定为等级\",\"description\":\"供应商被采购方归入某一等级\",\"constraints\":[{\"domain\":\"company\",\"range\":\"supplierTier\",\"cardinality\":{\"min\":0,\"max\":1}}],\"kind\":\"object\",\"evidence\":\"宏达塑业列为一级供应商，金晟印铁保持二级\"},{\"id\":\"imposedOn\",\"label\":\"施加于\",\"description\":\"合规要求针对某供应商提出\",\"constraints\":[{\"domain\":\"complianceRequirement\",\"range\":\"company\",\"cardinality\":{\"min\":1,\"max\":5}}],\"kind\":\"object\",\"evidence\":\"要求宏达塑业提供食品接触材料合规声明（GB 4806 系列）与最新型式检验报告\"},{\"id\":\"hasRisk\",\"label\":\"存在供应风险\",\"description\":\"供应商走访评估关联其供应风险描述\",\"constraints\":[{\"domain\":\"supplierEvaluation\",\"range\":\"supplyRisk\",\"cardinality\":{\"min\":0,\"max\":5}}],\"kind\":\"object\",\"evidence\":\"风险：旺季（8-10 月）需提前 45 天下单，否则排产排队\"}]}"
+    }
+  ]
+}

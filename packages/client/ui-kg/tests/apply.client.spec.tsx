@@ -13,6 +13,12 @@ import { SlotRegistry } from '@deepseek-ai/dsh-client-runtime/client'
 import { LocaleRuntime } from '@deepseek-ai/dsh-client-locale/client'
 import { apply, inject } from '../src/client/index.ts'
 import type { KgNodeTypeRow } from '../src/client/kgTypes.ts'
+// The Obsidian canvas statically imports react-force-graph-2d (the
+// single-artifact client contract); jsdom cannot run its canvas measurement,
+// so every spec that renders the kg page stubs the module.
+vi.mock('react-force-graph-2d', () => ({
+  default: () => null,
+}))
 
 // sigma's module top level reads WebGL enum constants off the globals, which
 // jsdom does not define; vi.hoisted runs ahead of every import, so the stub

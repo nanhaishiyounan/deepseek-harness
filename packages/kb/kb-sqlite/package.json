@@ -27,6 +27,7 @@
   },
   "files": [
     "lib/index.js",
+    "lib/open.js",
     "lib/invariant.js",
     "resources/sql/**/*.sql",
     "lib/types/**/*.d.ts"

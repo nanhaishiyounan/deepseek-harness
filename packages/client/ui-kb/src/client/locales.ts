@@ -124,6 +124,7 @@ export type KbKey =
   | 'error.unavailable'
   | 'error.searchFailed'
   | 'error.retry'
+  | 'search.degraded'
 
 /** Chinese copy (the workbench's primary language). */
 export const zh: Record<KbKey, string> = {
@@ -244,6 +245,7 @@ export const zh: Record<KbKey, string> = {
   'error.unavailable': '知识库服务不可用，请联系管理员',
   'error.searchFailed': '检索失败，请稍后重试',
   'error.retry': '重试',
+  'search.degraded': '降级检索：{notice}',
 }
 
 /** English mirror. */
@@ -365,4 +367,5 @@ export const en: Record<KbKey, string> = {
   'error.unavailable': 'Knowledge base unavailable; contact your admin',
   'error.searchFailed': 'Search failed; try again shortly',
   'error.retry': 'Retry',
+  'search.degraded': 'Degraded retrieval: {notice}',
 }

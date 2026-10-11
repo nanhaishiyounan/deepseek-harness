@@ -141,6 +141,60 @@ export interface KgQualityView {
 }
 
 /** Graph-page methods. */
+/** One Neo4j graph node as the graph-page surface projects it. */
+export interface KgGraphNeo4jNodeView {
+  readonly id: string
+  readonly type: string
+  readonly name: string
+  readonly props: Readonly<Record<string, string | number | boolean>>
+  readonly degree: number
+}
+
+/** One Neo4j graph edge as the graph-page surface projects it. */
+export interface KgGraphNeo4jEdgeView {
+  readonly id: string
+  readonly relation: string
+  readonly source: string
+  readonly target: string
+}
+
+/** One incident relation in the node-detail payload. */
+export interface KgGraphNeo4jRelationView {
+  readonly relation: string
+  readonly direction: 'out' | 'in'
+  readonly other_id: string
+  readonly other_name: string
+  readonly other_type: string
+}
+
+/** The `kg.graphPage` payload: one discriminated page read over Neo4j. */
+export type KgGraphPageValue =
+  | {
+    readonly mode: 'global'
+    readonly nodes: readonly KgGraphNeo4jNodeView[]
+    readonly edges: readonly KgGraphNeo4jEdgeView[]
+    readonly truncated: boolean
+    readonly stats: { readonly nodes: number; readonly edges: number; readonly islands: number; readonly largest_component: number }
+  }
+  | {
+    readonly mode: 'local'
+    readonly nodes: readonly KgGraphNeo4jNodeView[]
+    readonly edges: readonly KgGraphNeo4jEdgeView[]
+    readonly truncated: boolean
+    readonly seed: string
+    readonly hops: number
+  }
+  | {
+    readonly mode: 'search'
+    readonly hits: readonly { readonly id: string; readonly type: string; readonly name: string; readonly degree: number }[]
+  }
+  | {
+    readonly mode: 'node'
+    readonly node: KgGraphNeo4jNodeView
+    readonly out_relations: readonly KgGraphNeo4jRelationView[]
+    readonly in_relations: readonly KgGraphNeo4jRelationView[]
+  }
+
 export interface KgApi {
   /** Read the ontology registry (legend and type-filter source). */
   schema(
@@ -153,6 +207,33 @@ export interface KgApi {
     /** Newest registry-change audit rows (newest first). */
     revisions?: readonly { readonly id: number; readonly summary: string; readonly created_at: string }[]
   }>>
+
+  /**
+   * Read one page of the Neo4j-backed graph (the Obsidian canvas's data
+   * face): global (capped whole graph + island stats), local (one seed's
+   * k-hop neighborhood), search (name/gid substring), and node (properties
+   * plus both incident-relation lists). Read-only; the store's statement
+   * guard backs every query.
+   */
+  graphPage(
+    request: RpcRequest<{
+      readonly mode: 'global'
+      readonly limit?: number
+    } | {
+      readonly mode: 'local'
+      readonly node_id: string
+      readonly hops?: number
+      readonly limit?: number
+    } | {
+      readonly mode: 'search'
+      readonly query: string
+      readonly k?: number
+    } | {
+      readonly mode: 'node'
+      readonly node_id: string
+    }>,
+    signal?: AbortSignal,
+  ): Promise<RpcResponse<KgGraphPageValue>>
 
   /**
    * Read the kg-build mappings file state (the rule panel's source): the

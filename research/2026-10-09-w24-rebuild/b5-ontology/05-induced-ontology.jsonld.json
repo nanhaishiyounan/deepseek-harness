@@ -1,0 +1,3526 @@
+{
+  "@context": {
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "owl": "http://www.w3.org/2002/07/owl#",
+    "sh": "http://www.w3.org/ns/shacl#",
+    "skos": "http://www.w3.org/2004/02/skos/core#",
+    "dcterms": "http://purl.org/dc/terms/"
+  },
+  "@graph": [
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5",
+      "@type": "owl:Ontology",
+      "rdfs:label": "food-mfg-b5",
+      "dcterms:created": "2026-10-11T02:04:14.303Z"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_additive",
+      "@type": "rdfs:Class",
+      "rdfs:label": "食品添加剂",
+      "rdfs:comment": "生产中使用的食品添加剂",
+      "https://dsh.local/terms/naturalKey": "name",
+      "dcterms:source": "配料称量复核：添加剂双人复核，按 GB 2760 折算限量"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_additiveCategory",
+      "@type": "rdfs:Class",
+      "rdfs:label": "食品添加剂类别",
+      "rdfs:comment": "按功能划分的添加剂类别，如防腐剂、甜味剂、增味剂",
+      "https://dsh.local/terms/naturalKey": "name",
+      "dcterms:source": "防腐剂（如苯甲酸及其钠盐、山梨酸及其钾盐）... 甜味剂（如三氯蔗糖、阿斯巴甜）... 增味剂（谷氨酸钠、呈味核苷酸二钠）"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_additiveLedger",
+      "@type": "rdfs:Class",
+      "rdfs:label": "添加剂台账",
+      "rdfs:comment": "企业对添加剂采购、领用、使用环节的台账记录",
+      "dcterms:source": "企业应建立添加剂采购、领用、使用台账，做到批次可追溯"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_ccp",
+      "@type": "rdfs:Class",
+      "rdfs:label": "关键控制点",
+      "rdfs:comment": "HACCP关键控制点（CCP）",
+      "https://dsh.local/terms/naturalKey": "name",
+      "dcterms:source": "调味品产线典型 CCP：1. 配料称量复核；2. 杀菌；3. 金属探测"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_company",
+      "@type": "rdfs:Class",
+      "rdfs:label": "企业",
+      "rdfs:comment": "包括采购方与包材供应商在内的食品企业主体",
+      "https://dsh.local/terms/naturalKey": "name",
+      "dcterms:source": "走访绿源配料的两家包材供应商：宏达塑业（PET 瓶坯）与金晟印铁（金属罐）"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_complianceRequirement",
+      "@type": "rdfs:Class",
+      "rdfs:label": "合规要求",
+      "rdfs:comment": "对包材供应商提出的合规及资质类要求",
+      "https://dsh.local/terms/naturalKey": "description",
+      "dcterms:source": "要求宏达塑业提供食品接触材料合规声明（GB 4806 系列）与最新型式检验报告；金晟印铁内涂料供应商变更需提前报备"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_compoundAdditive",
+      "@type": "rdfs:Class",
+      "rdfs:label": "复配添加剂",
+      "rdfs:comment": "由多种添加剂组分配制而成的复合添加剂",
+      "rdfs:subClassOf": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_foodAdditive"
+      },
+      "https://dsh.local/terms/naturalKey": "name",
+      "dcterms:source": "使用复配添加剂的企业应向供应商索取各组分含量"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_correctiveAction",
+      "@type": "rdfs:Class",
+      "rdfs:label": "纠偏行动",
+      "rdfs:comment": "CCP发生偏离时采取的纠偏行动",
+      "https://dsh.local/terms/naturalKey": "name",
+      "dcterms:source": "纠偏必须含「隔离评估+原因+防止再发」三件套"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_criticalLimit",
+      "@type": "rdfs:Class",
+      "rdfs:label": "关键限值",
+      "rdfs:comment": "关键控制点对应的关键限值",
+      "https://dsh.local/terms/naturalKey": "parameter",
+      "dcterms:source": "杀菌：中心温度与时间的连续记录；金属探测：Fe φ2.0 / Non-Fe φ2.5 / SUS φ3.0 mm 起步"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_enterprise",
+      "@type": "rdfs:Class",
+      "rdfs:label": "食品生产企业",
+      "rdfs:comment": "使用食品添加剂的调味品、饮料、烘焙等食品生产企业",
+      "https://dsh.local/terms/naturalKey": "name",
+      "dcterms:source": "适用对象：调味品、饮料、烘焙等食品生产企业"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_equipment",
+      "@type": "rdfs:Class",
+      "rdfs:label": "设备",
+      "rdfs:comment": "工艺生产装置",
+      "https://dsh.local/terms/naturalKey": "name",
+      "dcterms:source": "旋转蒸煮锅、板式换热器、发酵池、连续压榨机"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_foodAdditive",
+      "@type": "rdfs:Class",
+      "rdfs:label": "食品添加剂",
+      "rdfs:comment": "GB 2760 允许使用的具体添加剂品种及其使用范围与限量",
+      "https://dsh.local/terms/naturalKey": "name",
+      "dcterms:source": "GB 2760 规定食品添加剂的使用原则、允许使用的品种、使用范围与最大使用量（或残留量）"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_foodLabel",
+      "@type": "rdfs:Class",
+      "rdfs:label": "食品标签配料表",
+      "rdfs:comment": "成品标签上的配料表，需逐一标示所用添加剂",
+      "dcterms:source": "使用 GB 2760 允许的添加剂须在成品标签配料表中逐一标示（可按类别名称或具体名称，按标准与标签通则执行）"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_foodSafetyStandard",
+      "@type": "rdfs:Class",
+      "rdfs:label": "食品安全国家标准",
+      "rdfs:comment": "规定食品添加剂使用原则、允许品种、使用范围与最大使用量的国家标准",
+      "https://dsh.local/terms/naturalKey": "code",
+      "dcterms:source": "GB 2760《食品安全国家标准 食品添加剂使用标准》要点摘录"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_haccpPrinciple",
+      "@type": "rdfs:Class",
+      "rdfs:label": "HACCP原理",
+      "rdfs:comment": "HACCP体系七大落地原理",
+      "https://dsh.local/terms/naturalKey": "name",
+      "dcterms:source": "七原理落地顺序：危害分析 → CCP 确定 → 关键限值 → 监控程序 → 纠偏行动 → 验证程序 → 记录保持"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_measuringInstrument",
+      "@type": "rdfs:Class",
+      "rdfs:label": "测量器具",
+      "rdfs:comment": "用于关键限值校准的测量或测试器具",
+      "https://dsh.local/terms/naturalKey": "name",
+      "dcterms:source": "关键限值校准（温度计、金属探测器测试块）按计划执行并留档"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_monitoringProcedure",
+      "@type": "rdfs:Class",
+      "rdfs:label": "监控程序",
+      "rdfs:comment": "CCP关键限值的持续监控程序",
+      "https://dsh.local/terms/naturalKey": "name",
+      "dcterms:source": "金属探测：Fe φ2.0 / Non-Fe φ2.5 / SUS φ3.0 mm 起步，开工/收工/每 2 小时验证；监控频次要能捕获偏离"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_packagingCostScheme",
+      "@type": "rdfs:Class",
+      "rdfs:label": "包装成本方案",
+      "rdfs:comment": "按包装形式计算的单瓶包材成本方案",
+      "https://dsh.local/terms/naturalKey": "schemeName",
+      "dcterms:source": "PET 方案单瓶包材成本 0.38 元，金属罐方案 1.21 元"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_packagingMaterial",
+      "@type": "rdfs:Class",
+      "rdfs:label": "包装材料",
+      "rdfs:comment": "食品成品所使用的包材类型",
+      "https://dsh.local/terms/naturalKey": "name",
+      "dcterms:source": "宏达塑业（PET 瓶坯）与金晟印铁（金属罐）"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_prerequisiteProgram",
+      "@type": "rdfs:Class",
+      "rdfs:label": "前提方案",
+      "rdfs:comment": "支撑HACCP体系的基础程序",
+      "https://dsh.local/terms/naturalKey": "name",
+      "dcterms:source": "前提方案（GMP/SSOP）不扎实时 CCP 会越设越多"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_processAbnormality",
+      "@type": "rdfs:Class",
+      "rdfs:label": "工艺异常",
+      "rdfs:comment": "常见工艺异常与处置方法",
+      "https://dsh.local/terms/naturalKey": "name",
+      "dcterms:source": "成曲蛋白酶活力不足、发酵产酸过快、沉淀浑浊"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_processImprovement",
+      "@type": "rdfs:Class",
+      "rdfs:label": "工艺改进",
+      "rdfs:comment": "工艺改进方向与改造评估项",
+      "https://dsh.local/terms/naturalKey": "name",
+      "dcterms:source": "尝试低温一段发酵+酵母后熟工艺缩短周期至5个月；压榨工序增加连续压榨机改造评估"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_processStep",
+      "@type": "rdfs:Class",
+      "rdfs:label": "工序",
+      "rdfs:comment": "酱油高盐稀态酿造工序节点",
+      "https://dsh.local/terms/naturalKey": "name",
+      "dcterms:source": "豆粕蒸煮→小麦焙炒→制曲→高盐稀态发酵→压榨→灭菌→沉淀过滤→成品"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_procurementPolicy",
+      "@type": "rdfs:Class",
+      "rdfs:label": "采购策略",
+      "rdfs:comment": "针对特定原料的采购组合与启备策略",
+      "https://dsh.local/terms/naturalKey": "frameworkLockRatio",
+      "dcterms:source": "当前策略：季度框架协议锁量 60%，现货补购 40%。备选：进口原糖加工渠道，关税后成本高 4.2%，仅在国产糖价突破 7,000 元/吨时启用。"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_product",
+      "@type": "rdfs:Class",
+      "rdfs:label": "产品",
+      "rdfs:comment": "酱油酿造成品",
+      "https://dsh.local/terms/naturalKey": "name",
+      "dcterms:source": "高盐稀态酿造...与低盐固态工艺相比，风味物质更丰富但周期长"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_productCategory",
+      "@type": "rdfs:Class",
+      "rdfs:label": "食品产品类别",
+      "rdfs:comment": "标准所区分的食品产品类别，不同类别的添加剂限量不可互相套用",
+      "https://dsh.local/terms/naturalKey": "name",
+      "dcterms:source": "复合调味料与酱油分属不同类别，限量不可互相套用"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_productionLine",
+      "@type": "rdfs:Class",
+      "rdfs:label": "产线",
+      "rdfs:comment": "食品生产产线或工艺线",
+      "https://dsh.local/terms/naturalKey": "name",
+      "dcterms:source": "调味品产线典型 CCP"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_qualityMetric",
+      "@type": "rdfs:Class",
+      "rdfs:label": "质量指标",
+      "rdfs:comment": "工序与成品质量检测指标",
+      "https://dsh.local/terms/naturalKey": "name",
+      "dcterms:source": "N溶性≥85%、成曲蛋白酶活力≥1,200 U/g、全氮≥1.6 g/100mL、菌落总数≤3×10⁴ CFU/mL"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_qualitySpec",
+      "@type": "rdfs:Class",
+      "rdfs:label": "质量规格",
+      "rdfs:comment": "供应商所具备的质量与交付规格指标",
+      "https://dsh.local/terms/naturalKey": "metricName",
+      "dcterms:source": "ICUMSA 色值 ≤ 80；交货准时率 97%。"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_rawMaterial",
+      "@type": "rdfs:Class",
+      "rdfs:label": "物料",
+      "rdfs:comment": "酱油酿造用原辅料",
+      "https://dsh.local/terms/naturalKey": "name",
+      "dcterms:source": "豆粕蒸煮、小麦焙炒、盐水浓度18-19°Bé"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_record",
+      "@type": "rdfs:Class",
+      "rdfs:label": "HACCP记录",
+      "rdfs:comment": "HACCP体系运行产生的记录",
+      "https://dsh.local/terms/naturalKey": "name",
+      "dcterms:source": "CCP 记录当场签署，事后补签是审核一票否决项"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_risk",
+      "@type": "rdfs:Class",
+      "rdfs:label": "风险点",
+      "rdfs:comment": "原料供应链中的风险因素",
+      "https://dsh.local/terms/naturalKey": "description",
+      "dcterms:source": "台风季华南运力紧张（历史上 9 月运费上浮 10-15%）；糖价与原油联动增强。"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_salesChannel",
+      "@type": "rdfs:Class",
+      "rdfs:label": "销售渠道",
+      "rdfs:comment": "成品销售的目标渠道及其主力包材",
+      "https://dsh.local/terms/naturalKey": "name",
+      "dcterms:source": "即饮渠道维持 PET 主力；礼品装维持金属罐"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_standard",
+      "@type": "rdfs:Class",
+      "rdfs:label": "国家标准",
+      "rdfs:comment": "国家强制性食品标准（GB）",
+      "https://dsh.local/terms/naturalKey": "code",
+      "dcterms:source": "配料称量复核：添加剂双人复核，按 GB 2760 折算限量"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_supplier",
+      "@type": "rdfs:Class",
+      "rdfs:label": "供应商",
+      "rdfs:comment": "大宗原料的供应商实体",
+      "https://dsh.local/terms/naturalKey": "name",
+      "dcterms:source": "甲糖贸（供货占比 45%）：质量稳定，ICUMSA 色值 ≤ 80，交货准时率 97%。乙糖贸（供货占比 15%）：价格低 1.5% 但交货准时率 88%，列入观察名单。主供应商为华南两家一级糖贸易商，到厂运费 85 元/吨。"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_supplierEvaluation",
+      "@type": "rdfs:Class",
+      "rdfs:label": "供应商走访评估",
+      "rdfs:comment": "对某供应商某次走访的产能、质量、价格、交期等综合评估",
+      "dcterms:source": "产能：瓶坯 2.4 亿只/年，利用率 76%；质量：瓶坯壁厚 CPK 1.42，乙醛残留 ≤ 3 ppm；交期：标准品 7 天，定制 21 天"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_supplierTier",
+      "@type": "rdfs:Class",
+      "rdfs:label": "供应商分级",
+      "rdfs:comment": "供应商在采购体系中的等级分类",
+      "https://dsh.local/terms/naturalKey": "level",
+      "dcterms:source": "宏达塑业列为一级供应商，金晟印铁保持二级"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_supplyRisk",
+      "@type": "rdfs:Class",
+      "rdfs:label": "供应风险",
+      "rdfs:comment": "包材供应中的风险点及应对要求",
+      "dcterms:source": "旺季（8-10 月）需提前 45 天下单，否则排产排队"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Class_verification",
+      "@type": "rdfs:Class",
+      "rdfs:label": "验证活动",
+      "rdfs:comment": "HACCP体系验证活动",
+      "https://dsh.local/terms/naturalKey": "name",
+      "dcterms:source": "关键限值校准（温度计、金属探测器测试块）按计划执行并留档；年度验证含成品检验数据回顾与体系内部审核"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_additiveCategory_name",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "name",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_additiveCategory"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_additiveCategory_usagePrinciple",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "usagePrinciple",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_additiveCategory"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_additiveLedger_batchNo",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "batchNo",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_additiveLedger"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_additiveLedger_ledgerType",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "ledgerType",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_additiveLedger"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_additive_name",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "name",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_additive"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_ccp_description",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "description",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_ccp"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_ccp_name",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "name",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_ccp"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_company_name",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "name",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_company"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_company_role",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "role",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_company"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_complianceRequirement_description",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "description",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_complianceRequirement"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_complianceRequirement_standardCode",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "standardCode",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_complianceRequirement"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_compoundAdditive_componentContents",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "componentContents",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_compoundAdditive"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#anyType"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_compoundAdditive_name",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "name",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_compoundAdditive"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_correctiveAction_isolationAssessment",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "isolationAssessment",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_correctiveAction"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#boolean"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_correctiveAction_name",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "name",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_correctiveAction"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_correctiveAction_preventionOfRecurrence",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "preventionOfRecurrence",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_correctiveAction"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#boolean"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_correctiveAction_rootCause",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "rootCause",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_correctiveAction"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#boolean"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_criticalLimit_parameter",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "parameter",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_criticalLimit"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_criticalLimit_unit",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "unit",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_criticalLimit"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_criticalLimit_value",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "value",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_criticalLimit"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_enterprise_industryType",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "industryType",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_enterprise"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_enterprise_name",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "name",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_enterprise"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_equipment_name",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "name",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_equipment"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_equipment_specification",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "specification",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_equipment"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_foodAdditive_maxUsageLevel",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "maxUsageLevel",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_foodAdditive"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_foodAdditive_name",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "name",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_foodAdditive"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_foodAdditive_usageScope",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "usageScope",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_foodAdditive"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_foodLabel_declarationForm",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "declarationForm",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_foodLabel"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_foodSafetyStandard_code",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "code",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_foodSafetyStandard"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_foodSafetyStandard_title",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "title",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_foodSafetyStandard"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_haccpPrinciple_description",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "description",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_haccpPrinciple"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_haccpPrinciple_name",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "name",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_haccpPrinciple"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_haccpPrinciple_sequence",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "sequence",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_haccpPrinciple"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#double"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_measuringInstrument_instrumentType",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "instrumentType",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_measuringInstrument"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_measuringInstrument_name",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "name",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_measuringInstrument"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_monitoringProcedure_frequency",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "frequency",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_monitoringProcedure"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_monitoringProcedure_method",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "method",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_monitoringProcedure"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_monitoringProcedure_name",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "name",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_monitoringProcedure"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_packagingCostScheme_costPerBottle",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "costPerBottle",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_packagingCostScheme"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#double"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_packagingCostScheme_schemeName",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "schemeName",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_packagingCostScheme"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_packagingMaterial_category",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "category",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_packagingMaterial"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_packagingMaterial_name",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "name",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_packagingMaterial"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_packagingMaterial_unitPrice",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "unitPrice",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_packagingMaterial"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#double"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_prerequisiteProgram_description",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "description",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_prerequisiteProgram"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_prerequisiteProgram_name",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "name",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_prerequisiteProgram"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_processAbnormality_cause",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "cause",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_processAbnormality"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_processAbnormality_handling",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "handling",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_processAbnormality"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_processAbnormality_name",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "name",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_processAbnormality"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_processImprovement_name",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "name",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_processImprovement"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_processImprovement_target",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "target",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_processImprovement"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_processStep_condition",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "condition",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_processStep"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_processStep_duration",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "duration",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_processStep"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_processStep_equipment",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "equipment",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_processStep"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_processStep_name",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "name",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_processStep"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_procurementPolicy_alternativeCostPremium",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "alternativeCostPremium",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_procurementPolicy"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#double"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_procurementPolicy_frameworkLockRatio",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "frameworkLockRatio",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_procurementPolicy"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#double"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_procurementPolicy_priceTriggerThreshold",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "priceTriggerThreshold",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_procurementPolicy"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#double"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_procurementPolicy_spotPurchaseRatio",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "spotPurchaseRatio",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_procurementPolicy"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#double"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_productCategory_name",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "name",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_productCategory"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_product_name",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "name",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_product"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_product_processType",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "processType",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_product"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_productionLine_category",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "category",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_productionLine"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_productionLine_name",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "name",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_productionLine"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_qualityMetric_name",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "name",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_qualityMetric"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_qualityMetric_targetValue",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "targetValue",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_qualityMetric"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_qualityMetric_unit",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "unit",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_qualityMetric"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_qualitySpec_metricName",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "metricName",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_qualitySpec"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_qualitySpec_threshold",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "threshold",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_qualitySpec"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_rawMaterial_avgPrice",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "avgPrice",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_rawMaterial"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#double"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_rawMaterial_category",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "category",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_rawMaterial"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_rawMaterial_inventoryTurnoverDays",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "inventoryTurnoverDays",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_rawMaterial"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#double"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_rawMaterial_name",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "name",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_rawMaterial"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_rawMaterial_priceUnit",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "priceUnit",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_rawMaterial"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_rawMaterial_safetyStockDays",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "safetyStockDays",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_rawMaterial"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#double"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_rawMaterial_targetMoisture",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "targetMoisture",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_rawMaterial"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_rawMaterial_yoyChangePercent",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "yoyChangePercent",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_rawMaterial"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#double"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_record_name",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "name",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_record"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_record_signOnSite",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "signOnSite",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_record"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#boolean"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_risk_description",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "description",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_risk"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_risk_historicalImpact",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "historicalImpact",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_risk"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_risk_impactScope",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "impactScope",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_risk"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_salesChannel_name",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "name",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_salesChannel"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_salesChannel_primaryMaterial",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "primaryMaterial",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_salesChannel"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_standard_code",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "code",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_standard"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplierEvaluation_acetaldehydeResiduePpm",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "acetaldehydeResiduePpm",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_supplierEvaluation"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#double"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplierEvaluation_annualCapacity",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "annualCapacity",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_supplierEvaluation"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplierEvaluation_annualCostReductionPct",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "annualCostReductionPct",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_supplierEvaluation"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#double"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplierEvaluation_leadTimeCustomDays",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "leadTimeCustomDays",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_supplierEvaluation"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#double"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplierEvaluation_leadTimeStandardDays",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "leadTimeStandardDays",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_supplierEvaluation"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#double"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplierEvaluation_utilizationRate",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "utilizationRate",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_supplierEvaluation"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#double"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplierEvaluation_wallThicknessCpk",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "wallThicknessCpk",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_supplierEvaluation"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#double"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplierEvaluation_weldPassRate",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "weldPassRate",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_supplierEvaluation"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#double"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplierTier_level",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "level",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_supplierTier"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplier_deliveryPunctualityRate",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "deliveryPunctualityRate",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_supplier"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#double"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplier_freightCostPerTon",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "freightCostPerTon",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_supplier"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#double"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplier_name",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "name",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_supplier"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplier_region",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "region",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_supplier"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplier_status",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "status",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_supplier"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplier_supplyShareRatio",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "supplyShareRatio",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_supplier"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#double"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplier_type",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "type",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_supplier"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplyRisk_description",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "description",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_supplyRisk"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplyRisk_leadTimeAdvanceDays",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "leadTimeAdvanceDays",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_supplyRisk"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#double"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_verification_name",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "name",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_verification"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_verification_scope",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": "scope",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_verification"
+      },
+      "sh:datatype": {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Relation_additiveApplicableToProductCategory",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "添加剂适用产品类别",
+      "https://dsh.local/terms/kind": "object",
+      "rdfs:comment": "添加剂允许使用的食品产品类别及其在该类别中的限量",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_foodAdditive"
+      },
+      "rdfs:range": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_productCategory"
+      },
+      "dcterms:source": "防腐剂（如苯甲酸及其钠盐、山梨酸及其钾盐）在酱油中的最大使用量以标准正文表格为准"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Relation_additiveBelongsToCategory",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "添加剂归入类别",
+      "https://dsh.local/terms/kind": "object",
+      "rdfs:comment": "具体添加剂按功能归入相应添加剂类别",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_foodAdditive"
+      },
+      "rdfs:range": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_additiveCategory"
+      },
+      "dcterms:source": "防腐剂（如苯甲酸及其钠盐、山梨酸及其钾盐）... 甜味剂（如三氯蔗糖、阿斯巴甜）... 增味剂（谷氨酸钠、呈味核苷酸二钠）"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Relation_appliesTo",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "适用于",
+      "https://dsh.local/terms/kind": "object",
+      "rdfs:comment": "采购策略所施行的目标原料",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_procurementPolicy"
+      },
+      "rdfs:range": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_rawMaterial"
+      },
+      "dcterms:source": "当前策略：季度框架协议锁量 60%，现货补购 40%（针对白糖）。"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Relation_calibrates",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "校准",
+      "https://dsh.local/terms/kind": "object",
+      "rdfs:comment": "验证活动对测量器具进行校准",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_verification"
+      },
+      "rdfs:range": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_measuringInstrument"
+      },
+      "dcterms:source": "关键限值校准（温度计、金属探测器测试块）按计划执行并留档"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Relation_classifiedAs",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "定为等级",
+      "https://dsh.local/terms/kind": "object",
+      "rdfs:comment": "供应商被采购方归入某一等级",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_company"
+      },
+      "rdfs:range": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_supplierTier"
+      },
+      "dcterms:source": "宏达塑业列为一级供应商，金晟印铁保持二级"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Relation_consumesRawMaterial",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "消耗物料",
+      "https://dsh.local/terms/kind": "object",
+      "rdfs:comment": "工序消耗原辅料",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_processStep"
+      },
+      "rdfs:range": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_rawMaterial"
+      },
+      "dcterms:source": "豆粕蒸煮、小麦焙炒、盐水浓度18-19°Bé"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Relation_containsCCP",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "包含CCP",
+      "https://dsh.local/terms/kind": "object",
+      "rdfs:comment": "产线所包含的关键控制点",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_productionLine"
+      },
+      "rdfs:range": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_ccp"
+      },
+      "dcterms:source": "调味品产线典型 CCP；超过 6 个通常说明前提方案失守"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Relation_correctedBy",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "有纠偏行动",
+      "https://dsh.local/terms/kind": "object",
+      "rdfs:comment": "CCP偏离时所执行的纠偏行动",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_ccp"
+      },
+      "rdfs:range": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_correctiveAction"
+      },
+      "dcterms:source": "纠偏必须含「隔离评估+原因+防止再发」三件套"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Relation_enterpriseMaintainsLedger",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "企业维护台账",
+      "https://dsh.local/terms/kind": "object",
+      "rdfs:comment": "企业建立采购、领用、使用三类添加剂台账，做到批次可追溯",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_enterprise"
+      },
+      "rdfs:range": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_additiveLedger"
+      },
+      "dcterms:source": "企业应建立添加剂采购、领用、使用台账，做到批次可追溯"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Relation_enterpriseUsesAdditive",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "企业使用添加剂",
+      "https://dsh.local/terms/kind": "object",
+      "rdfs:comment": "食品生产企业在其产品中使用标准允许的添加剂",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_enterprise"
+      },
+      "rdfs:range": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_foodAdditive"
+      },
+      "dcterms:source": "适用对象：调味品、饮料、烘焙等食品生产企业；GB 2760 规定... 凡在中华人民共和国境内生产的预包装与散装食品，其添加剂使用均应符合本标准"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Relation_evaluates",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "走访评估",
+      "https://dsh.local/terms/kind": "object",
+      "rdfs:comment": "供应商走访评估针对某供应商",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_supplierEvaluation"
+      },
+      "rdfs:range": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_company"
+      },
+      "dcterms:source": "走访绿源配料的两家包材供应商：宏达塑业与金晟印铁"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Relation_evaluatesMaterial",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "评估材料",
+      "https://dsh.local/terms/kind": "object",
+      "rdfs:comment": "供应商走访评估针对某包装材料",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_supplierEvaluation"
+      },
+      "rdfs:range": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_packagingMaterial"
+      },
+      "dcterms:source": "宏达塑业（PET 瓶坯）与金晟印铁（金属罐）"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Relation_governedBy",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "受标准约束",
+      "https://dsh.local/terms/kind": "object",
+      "rdfs:comment": "添加剂受国家标准的限量约束",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_additive"
+      },
+      "rdfs:range": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_standard"
+      },
+      "dcterms:source": "添加剂双人复核，按 GB 2760 折算限量"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Relation_hasCostScheme",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "有成本方案",
+      "https://dsh.local/terms/kind": "object",
+      "rdfs:comment": "包装材料关联其包装成本方案",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_packagingMaterial"
+      },
+      "rdfs:range": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_packagingCostScheme"
+      },
+      "dcterms:source": "PET 方案单瓶包材成本 0.38 元，金属罐方案 1.21 元"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Relation_hasCriticalLimit",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "具有关键限值",
+      "https://dsh.local/terms/kind": "object",
+      "rdfs:comment": "CCP所对应的关键限值",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_ccp"
+      },
+      "rdfs:range": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_criticalLimit"
+      },
+      "dcterms:source": "杀菌：中心温度与时间的连续记录；金属探测：Fe φ2.0 / Non-Fe φ2.5 / SUS φ3.0 mm 起步"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Relation_hasImprovement",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "工艺改进方向",
+      "https://dsh.local/terms/kind": "object",
+      "rdfs:comment": "工序关联的改进方向与改造评估项",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_processStep"
+      },
+      "rdfs:range": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_processImprovement"
+      },
+      "dcterms:source": "尝试低温一段发酵+酵母后熟工艺缩短周期至5个月；压榨工序增加连续压榨机改造评估"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Relation_hasQualityMetric",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "关联质量指标",
+      "https://dsh.local/terms/kind": "object",
+      "rdfs:comment": "工序或成品关联质量检测指标",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_processStep"
+      },
+      "rdfs:range": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_qualityMetric"
+      },
+      "https://dsh.local/terms/constraints": [
+        {
+          "domain": "processStep",
+          "range": "qualityMetric",
+          "cardinality": {
+            "min": 0,
+            "max": 5
+          }
+        },
+        {
+          "domain": "product",
+          "range": "qualityMetric",
+          "cardinality": {
+            "min": 0,
+            "max": 5
+          }
+        }
+      ],
+      "dcterms:source": "蛋白质变性度N溶性≥85%、成曲蛋白酶活力≥1,200 U/g、灭菌后菌落总数≤3×10⁴CFU/mL"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Relation_hasQualitySpec",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "具备质量规格",
+      "https://dsh.local/terms/kind": "object",
+      "rdfs:comment": "供应商所声明或实测的质量与交付指标",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_supplier"
+      },
+      "rdfs:range": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_qualitySpec"
+      },
+      "dcterms:source": "甲糖贸：质量稳定，ICUMSA 色值 ≤ 80，交货准时率 97%。"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Relation_hasRisk",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "存在风险",
+      "https://dsh.local/terms/kind": "object",
+      "rdfs:comment": "原料采购所面对的供应链风险",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_rawMaterial"
+      },
+      "rdfs:range": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_risk"
+      },
+      "https://dsh.local/terms/constraints": [
+        {
+          "domain": "rawMaterial",
+          "range": "risk",
+          "cardinality": {
+            "min": 0,
+            "max": 5
+          }
+        },
+        {
+          "domain": "supplierEvaluation",
+          "range": "supplyRisk",
+          "cardinality": {
+            "min": 0,
+            "max": 5
+          }
+        }
+      ],
+      "dcterms:source": "台风季华南运力紧张（历史上 9 月运费上浮 10-15%）；糖价与原油联动增强。"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Relation_imposedOn",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "施加于",
+      "https://dsh.local/terms/kind": "object",
+      "rdfs:comment": "合规要求针对某供应商提出",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_complianceRequirement"
+      },
+      "rdfs:range": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_company"
+      },
+      "dcterms:source": "要求宏达塑业提供食品接触材料合规声明（GB 4806 系列）与最新型式检验报告"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Relation_labelDeclaresAdditive",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "标签标示添加剂",
+      "https://dsh.local/terms/kind": "object",
+      "rdfs:comment": "成品标签配料表中逐一标示所用添加剂",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_foodLabel"
+      },
+      "rdfs:range": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_foodAdditive"
+      },
+      "dcterms:source": "使用 GB 2760 允许的添加剂须在成品标签配料表中逐一标示"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Relation_mayEncounter",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "可能出现异常",
+      "https://dsh.local/terms/kind": "object",
+      "rdfs:comment": "工序可能出现的工艺异常及处置",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_processStep"
+      },
+      "rdfs:range": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_processAbnormality"
+      },
+      "dcterms:source": "成曲蛋白酶活力不足、发酵产酸过快、沉淀浑浊"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Relation_monitoredBy",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "被监控",
+      "https://dsh.local/terms/kind": "object",
+      "rdfs:comment": "CCP被监控程序持续监控",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_ccp"
+      },
+      "rdfs:range": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_monitoringProcedure"
+      },
+      "dcterms:source": "监控频次要能捕获偏离"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Relation_prerequisiteFor",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "支撑",
+      "https://dsh.local/terms/kind": "object",
+      "rdfs:comment": "前提方案为CCP体系提供基础",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_prerequisiteProgram"
+      },
+      "rdfs:range": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_ccp"
+      },
+      "dcterms:source": "前提方案（GMP/SSOP）不扎实时 CCP 会越设越多"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Relation_producedBy",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "由工序产出",
+      "https://dsh.local/terms/kind": "object",
+      "rdfs:comment": "产品由若干工序产出",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_product"
+      },
+      "rdfs:range": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_processStep"
+      },
+      "dcterms:source": "…压榨→灭菌→沉淀过滤→成品"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Relation_productCategoryHasLimitPerAdditive",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "产品类别设添加剂限量",
+      "https://dsh.local/terms/kind": "object",
+      "rdfs:comment": "不同食品产品类别对应不同添加剂限量，限量不可互相套用",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_productCategory"
+      },
+      "rdfs:range": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_foodAdditive"
+      },
+      "dcterms:source": "复合调味料与酱油分属不同类别，限量不可互相套用"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Relation_recordedBy",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "产生记录",
+      "https://dsh.local/terms/kind": "object",
+      "rdfs:comment": "CCP执行过程中产生的记录",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_ccp"
+      },
+      "rdfs:range": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_record"
+      },
+      "dcterms:source": "CCP 记录当场签署，事后补签是审核一票否决项"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Relation_standardSpecifiesAdditive",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "标准规定添加剂",
+      "https://dsh.local/terms/kind": "object",
+      "rdfs:comment": "GB 2760 规定允许使用的添加剂品种、使用范围与最大使用量",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_foodSafetyStandard"
+      },
+      "rdfs:range": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_foodAdditive"
+      },
+      "dcterms:source": "GB 2760 规定食品添加剂的使用原则、允许使用的品种、使用范围与最大使用量（或残留量）"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Relation_supplies",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "供货",
+      "https://dsh.local/terms/kind": "object",
+      "rdfs:comment": "供应商向采购方提供某类大宗原料",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_supplier"
+      },
+      "rdfs:range": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_rawMaterial"
+      },
+      "https://dsh.local/terms/constraints": [
+        {
+          "domain": "supplier",
+          "range": "rawMaterial",
+          "cardinality": {
+            "min": 1,
+            "max": 5
+          }
+        },
+        {
+          "domain": "company",
+          "range": "packagingMaterial",
+          "cardinality": {
+            "min": 1,
+            "max": 5
+          }
+        }
+      ],
+      "dcterms:source": "甲糖贸、乙糖贸为白糖主供应商；豆粕华北产区集采；食盐定点井矿盐，双供应商并行。"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Relation_usesAdditive",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "使用添加剂",
+      "https://dsh.local/terms/kind": "object",
+      "rdfs:comment": "CCP所使用的食品添加剂",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_ccp"
+      },
+      "rdfs:range": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_additive"
+      },
+      "dcterms:source": "配料称量复核：添加剂双人复核"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Relation_usesEquipment",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "使用设备",
+      "https://dsh.local/terms/kind": "object",
+      "rdfs:comment": "工序使用生产设备",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_processStep"
+      },
+      "rdfs:range": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_equipment"
+      },
+      "dcterms:source": "旋转蒸煮锅0.15MPa、板式换热器85℃维持30秒、发酵池品温"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Relation_usesMaterial",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "使用包材",
+      "https://dsh.local/terms/kind": "object",
+      "rdfs:comment": "销售渠道使用某包装材料作为主力包材",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_salesChannel"
+      },
+      "rdfs:range": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_packagingMaterial"
+      },
+      "dcterms:source": "即饮渠道维持 PET 主力；礼品装维持金属罐"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Relation_verifiedBy",
+      "@type": "owl:ObjectProperty",
+      "rdfs:label": "被验证",
+      "https://dsh.local/terms/kind": "object",
+      "rdfs:comment": "CCP与关键限值被验证活动覆盖",
+      "rdfs:domain": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_ccp"
+      },
+      "rdfs:range": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_verification"
+      },
+      "dcterms:source": "关键限值校准（温度计、金属探测器测试块）按计划执行并留档"
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_additive",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_additive"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_additive_name",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_additive_name"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_additiveCategory",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_additiveCategory"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_additiveCategory_name",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_additiveCategory_name"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_additiveCategory_usagePrinciple",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_additiveCategory_usagePrinciple"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:in": {
+            "@list": [
+              "按最大使用量限定",
+              "按生产需要适量使用"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_additiveLedger",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_additiveLedger"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_additiveLedger_ledgerType",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_additiveLedger_ledgerType"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1,
+          "sh:in": {
+            "@list": [
+              "采购",
+              "领用",
+              "使用"
+            ]
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_additiveLedger_batchNo",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_additiveLedger_batchNo"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          }
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_ccp",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_ccp"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_ccp_name",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_ccp_name"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1,
+          "sh:in": {
+            "@list": [
+              "配料称量复核",
+              "杀菌",
+              "金属探测"
+            ]
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_ccp_description",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_ccp_description"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          }
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_company",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_company"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_company_name",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_company_name"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_company_role",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_company_role"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:in": {
+            "@list": [
+              "buyer",
+              "supplier"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_complianceRequirement",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_complianceRequirement"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_complianceRequirement_standardCode",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_complianceRequirement_standardCode"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_complianceRequirement_description",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_complianceRequirement_description"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_compoundAdditive",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_compoundAdditive"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_compoundAdditive_name",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_compoundAdditive_name"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_compoundAdditive_componentContents",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_compoundAdditive_componentContents"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#anyType"
+          }
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_correctiveAction",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_correctiveAction"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_correctiveAction_name",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_correctiveAction_name"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_correctiveAction_isolationAssessment",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_correctiveAction_isolationAssessment"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#boolean"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_correctiveAction_rootCause",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_correctiveAction_rootCause"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#boolean"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_correctiveAction_preventionOfRecurrence",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_correctiveAction_preventionOfRecurrence"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#boolean"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_criticalLimit",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_criticalLimit"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_criticalLimit_parameter",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_criticalLimit_parameter"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_criticalLimit_value",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_criticalLimit_value"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_criticalLimit_unit",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_criticalLimit_unit"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          }
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_enterprise",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_enterprise"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_enterprise_name",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_enterprise_name"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_enterprise_industryType",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_enterprise_industryType"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:in": {
+            "@list": [
+              "调味品",
+              "饮料",
+              "烘焙"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_equipment",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_equipment"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_equipment_name",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_equipment_name"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_equipment_specification",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_equipment_specification"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          }
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_foodAdditive",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_foodAdditive"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_foodAdditive_name",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_foodAdditive_name"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_foodAdditive_maxUsageLevel",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_foodAdditive_maxUsageLevel"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_foodAdditive_usageScope",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_foodAdditive_usageScope"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          }
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_foodLabel",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_foodLabel"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_foodLabel_declarationForm",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_foodLabel_declarationForm"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:in": {
+            "@list": [
+              "类别名称",
+              "具体名称"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_foodSafetyStandard",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_foodSafetyStandard"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_foodSafetyStandard_code",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_foodSafetyStandard_code"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_foodSafetyStandard_title",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_foodSafetyStandard_title"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_haccpPrinciple",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_haccpPrinciple"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_haccpPrinciple_name",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_haccpPrinciple_name"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1,
+          "sh:in": {
+            "@list": [
+              "危害分析",
+              "CCP确定",
+              "关键限值",
+              "监控程序",
+              "纠偏行动",
+              "验证程序",
+              "记录保持"
+            ]
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_haccpPrinciple_sequence",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_haccpPrinciple_sequence"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#double"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_haccpPrinciple_description",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_haccpPrinciple_description"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          }
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_measuringInstrument",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_measuringInstrument"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_measuringInstrument_name",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_measuringInstrument_name"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1,
+          "sh:in": {
+            "@list": [
+              "温度计",
+              "金属探测器测试块"
+            ]
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_measuringInstrument_instrumentType",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_measuringInstrument_instrumentType"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          }
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_monitoringProcedure",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_monitoringProcedure"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_monitoringProcedure_name",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_monitoringProcedure_name"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_monitoringProcedure_frequency",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_monitoringProcedure_frequency"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_monitoringProcedure_method",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_monitoringProcedure_method"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          }
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_packagingCostScheme",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_packagingCostScheme"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_packagingCostScheme_schemeName",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_packagingCostScheme_schemeName"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_packagingCostScheme_costPerBottle",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_packagingCostScheme_costPerBottle"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#double"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_packagingMaterial",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_packagingMaterial"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_packagingMaterial_name",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_packagingMaterial_name"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_packagingMaterial_category",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_packagingMaterial_category"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1,
+          "sh:in": {
+            "@list": [
+              "PET",
+              "metal"
+            ]
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_packagingMaterial_unitPrice",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_packagingMaterial_unitPrice"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#double"
+          }
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_prerequisiteProgram",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_prerequisiteProgram"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_prerequisiteProgram_name",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_prerequisiteProgram_name"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1,
+          "sh:in": {
+            "@list": [
+              "GMP",
+              "SSOP"
+            ]
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_prerequisiteProgram_description",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_prerequisiteProgram_description"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          }
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_processAbnormality",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_processAbnormality"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_processAbnormality_name",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_processAbnormality_name"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_processAbnormality_cause",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_processAbnormality_cause"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_processAbnormality_handling",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_processAbnormality_handling"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          }
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_processImprovement",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_processImprovement"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_processImprovement_name",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_processImprovement_name"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_processImprovement_target",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_processImprovement_target"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          }
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_processStep",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_processStep"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_processStep_name",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_processStep_name"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_processStep_equipment",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_processStep_equipment"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_processStep_condition",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_processStep_condition"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_processStep_duration",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_processStep_duration"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          }
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_procurementPolicy",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_procurementPolicy"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_procurementPolicy_frameworkLockRatio",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_procurementPolicy_frameworkLockRatio"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#double"
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_procurementPolicy_spotPurchaseRatio",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_procurementPolicy_spotPurchaseRatio"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#double"
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_procurementPolicy_priceTriggerThreshold",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_procurementPolicy_priceTriggerThreshold"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#double"
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_procurementPolicy_alternativeCostPremium",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_procurementPolicy_alternativeCostPremium"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#double"
+          }
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_product",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_product"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_product_name",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_product_name"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_product_processType",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_product_processType"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:in": {
+            "@list": [
+              "高盐稀态",
+              "低盐固态"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_productCategory",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_productCategory"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_productCategory_name",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_productCategory_name"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_productionLine",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_productionLine"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_productionLine_name",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_productionLine_name"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_productionLine_category",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_productionLine_category"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:in": {
+            "@list": [
+              "调味品产线"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_qualityMetric",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_qualityMetric"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_qualityMetric_name",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_qualityMetric_name"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_qualityMetric_targetValue",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_qualityMetric_targetValue"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_qualityMetric_unit",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_qualityMetric_unit"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          }
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_qualitySpec",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_qualitySpec"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_qualitySpec_metricName",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_qualitySpec_metricName"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_qualitySpec_threshold",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_qualitySpec_threshold"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_rawMaterial",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_rawMaterial"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_rawMaterial_name",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_rawMaterial_name"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_rawMaterial_targetMoisture",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_rawMaterial_targetMoisture"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_rawMaterial_category",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_rawMaterial_category"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1,
+          "sh:in": {
+            "@list": [
+              "糖",
+              "蛋白",
+              "盐",
+              "包材"
+            ]
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_rawMaterial_avgPrice",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_rawMaterial_avgPrice"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#double"
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_rawMaterial_priceUnit",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_rawMaterial_priceUnit"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_rawMaterial_yoyChangePercent",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_rawMaterial_yoyChangePercent"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#double"
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_rawMaterial_safetyStockDays",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_rawMaterial_safetyStockDays"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#double"
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_rawMaterial_inventoryTurnoverDays",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_rawMaterial_inventoryTurnoverDays"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#double"
+          }
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_record",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_record"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_record_name",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_record_name"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_record_signOnSite",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_record_signOnSite"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#boolean"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_risk",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_risk"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_risk_description",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_risk_description"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_risk_impactScope",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_risk_impactScope"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_risk_historicalImpact",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_risk_historicalImpact"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          }
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_salesChannel",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_salesChannel"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_salesChannel_name",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_salesChannel_name"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_salesChannel_primaryMaterial",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_salesChannel_primaryMaterial"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          }
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_standard",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_standard"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_standard_code",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_standard_code"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1,
+          "sh:pattern": "^GB\\s?\\d+(\\.\\d+)?(-\\d+)?$"
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_supplier",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_supplier"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_supplier_name",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplier_name"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_supplier_type",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplier_type"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:in": {
+            "@list": [
+              "一级糖贸易商",
+              "产区集采",
+              "进口原糖加工",
+              "井矿盐"
+            ]
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_supplier_region",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplier_region"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_supplier_supplyShareRatio",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplier_supplyShareRatio"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#double"
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_supplier_deliveryPunctualityRate",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplier_deliveryPunctualityRate"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#double"
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_supplier_status",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplier_status"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:in": {
+            "@list": [
+              "主供应商",
+              "观察名单",
+              "备选"
+            ]
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_supplier_freightCostPerTon",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplier_freightCostPerTon"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#double"
+          }
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_supplierEvaluation",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_supplierEvaluation"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_supplierEvaluation_annualCapacity",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplierEvaluation_annualCapacity"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_supplierEvaluation_utilizationRate",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplierEvaluation_utilizationRate"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#double"
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_supplierEvaluation_wallThicknessCpk",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplierEvaluation_wallThicknessCpk"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#double"
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_supplierEvaluation_acetaldehydeResiduePpm",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplierEvaluation_acetaldehydeResiduePpm"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#double"
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_supplierEvaluation_weldPassRate",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplierEvaluation_weldPassRate"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#double"
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_supplierEvaluation_leadTimeStandardDays",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplierEvaluation_leadTimeStandardDays"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#double"
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_supplierEvaluation_leadTimeCustomDays",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplierEvaluation_leadTimeCustomDays"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#double"
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_supplierEvaluation_annualCostReductionPct",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplierEvaluation_annualCostReductionPct"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#double"
+          }
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_supplierTier",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_supplierTier"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_supplierTier_level",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplierTier_level"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1,
+          "sh:in": {
+            "@list": [
+              "一级",
+              "二级"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_supplyRisk",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_supplyRisk"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_supplyRisk_description",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplyRisk_description"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_supplyRisk_leadTimeAdvanceDays",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_supplyRisk_leadTimeAdvanceDays"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#double"
+          }
+        }
+      ]
+    },
+    {
+      "@id": "https://dsh.local/ontology/food-mfg-b5#Shape_verification",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": {
+        "@id": "https://dsh.local/ontology/food-mfg-b5#Class_verification"
+      },
+      "sh:closed": true,
+      "sh:property": [
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_verification_name",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_verification_name"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          },
+          "sh:minCount": 1,
+          "sh:maxCount": 1,
+          "sh:in": {
+            "@list": [
+              "关键限值校准",
+              "年度验证"
+            ]
+          }
+        },
+        {
+          "@id": "https://dsh.local/ontology/food-mfg-b5#PropShape_verification_scope",
+          "sh:path": {
+            "@id": "https://dsh.local/ontology/food-mfg-b5#Prop_verification_scope"
+          },
+          "sh:datatype": {
+            "@id": "http://www.w3.org/2001/XMLSchema#string"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -69,6 +69,7 @@ export interface KbSearchToolValue {
   query: string
   mode: 'hybrid' | 'text'
   embed_model?: string
+  notice?: string
   results: Array<{
     chunk_id: number
     doc_id: number
@@ -98,6 +99,7 @@ export function searchValueFromResult(input: KbSearchInput, result: KbSearchResu
     query: input.query,
     mode: result.mode,
     ...result.embedModel === undefined ? {} : { embed_model: result.embedModel },
+    ...result.notice === undefined ? {} : { notice: result.notice },
     results: result.results.map(hit => ({
       chunk_id: hit.chunkId,
       doc_id: hit.docId,
@@ -135,6 +137,9 @@ export function formatSearchOutput(value: KbSearchToolValue): string {
     parts.push('(text-only mode: no embed provider is available; results come from full-text search alone)')
   } else if (value.embed_model !== undefined) {
     parts.push(`(hybrid mode via ${value.embed_model})`)
+  }
+  if (value.notice !== undefined) {
+    parts.push(`(degraded retrieval: ${value.notice})`)
   }
   if (value.results.length === 0) {
     parts.push('No results found. Try different terms, or ingest more documents with kb_ingest first.')

@@ -2,9 +2,15 @@
 // merge (identity-keeping node union, endpoint-consistent edge union, the
 // sticky truncated flag), selection, and the type-filter whitelist.
 
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { createKgClientStore } from '../src/client/kgStore.ts'
 import type { KgEdgeRow, KgSubgraphNodeRow } from '../src/client/kgTypes.ts'
+// The Obsidian canvas statically imports react-force-graph-2d (the
+// single-artifact client contract); jsdom cannot run its canvas measurement,
+// so every spec that renders the kg page stubs the module.
+vi.mock('react-force-graph-2d', () => ({
+  default: () => null,
+}))
 
 const NODE_A: KgSubgraphNodeRow = { id: 'nocobase:customers:1', type: 'Customer', name: '宏发食品', depth: 0 }
 const NODE_B: KgSubgraphNodeRow = { id: 'nocobase:orders:9', type: 'Order', name: 'SO-009', depth: 1 }

@@ -320,6 +320,15 @@ export class FakeApiClient implements IApiClient {
   }
 
   readonly kg: IApiClient['kg'] = {
+    graphPage: payload => this.record('kg.graphPage', payload, Promise.resolve(ok(
+      (payload as { mode: string }).mode === 'global'
+        ? { mode: 'global', nodes: [], edges: [], truncated: false, stats: { nodes: 0, edges: 0, islands: 0, largest_component: 0 } }
+        : (payload as { mode: string }).mode === 'search'
+          ? { mode: 'search', hits: [] }
+          : (payload as { mode: string }).mode === 'node'
+            ? { mode: 'node', node: { id: 'fixture', type: 'Item', name: 'fixture', props: {}, degree: 0 }, out_relations: [], in_relations: [] }
+            : { mode: 'local', nodes: [], edges: [], truncated: false, seed: 'fixture', hops: 1 },
+    ))),
     mappings: payload => this.record('kg.mappings', payload, Promise.resolve(ok({ file: 'fixture', version: 1, rules: { skipHiddenCollections: true, emptyFkNoEdge: true, derivesTitle: true }, collections: [] }))),
     schema: payload => this.record('kg.schema', payload, Promise.resolve(ok({ ontology_version: '0.0.0-fixture', node_types: [], relations: [] }))),
     query: payload => this.record('kg.query', payload, Promise.resolve(ok({ nodes: [], edges: [], truncated: false, seeds_resolved: [], template: 'fixture', hops: 1, restated: payload.phrase }))),

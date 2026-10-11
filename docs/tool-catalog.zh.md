@@ -21,6 +21,8 @@
 | --- | --- | --- | --- | --- | --- |
 | `@deepseek-ai/dsh-tool-kb` | `kb_ingest`, `kb_ingest_url`, `kb_search`, `kb_stats`, `kg_query`, `kg_schema`, `kg_subgraph` | `ctx.tools`、`ctx.kb`、`ctx.fs`、`ctx.systemPrompt` | `tool/call`、`tool/result` | - | kb_search、kb_ingest、kb_ingest_url 与 kb_stats 在无可用 store 时保持可见并在执行时以结构化错误失败；四者都在部署绑定租户下运行（模型从不提供租户），检索结果带编号引用，降级 text-only 模式在每次检索结果中可观测。 |
 | `@deepseek-ai/dsh-tool-lakehouse` | `lakehouse_query`, `lakehouse_tables` | `ctx.tools`, `ctx.lakehouse`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | lakehouse_tables 与 lakehouse_query 在无可用引擎时保持可见并在执行时以结构化错误失败（表清单仍可应答）；两者都运行在部署侧绑定租户下（模型永不提供租户），查询结果是带截断标记的封顶行集，渲染文本携带来源表溯源行。 |
+| `@deepseek-ai/dsh-tool-carbon` | `cb_collections`, `cb_create`, `cb_get`, `cb_list`, `cb_update` | `ctx.tools`, `ctx.carbon`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | cb_collections、cb_list、cb_get、cb_create 与 cb_update 以部署会话凭据访问 carbon 业务系统（模型永不提供 companyId——提供即拒收）；表目录带读/写/破坏性风险分级，写工具要求先呈现预览并取得用户放行，回执回显落地 id 或逐字段 diff。 |
+| `@deepseek-ai/dsh-tool-graph` | `kg_graph_query`, `kg_ontology` | `ctx.tools`, `ctx.neo4jGraph`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | kg_graph_query 在 Neo4j 图谱上执行单条只读 Cypher（语句形状闸门在进 driver 前拒绝写、过程与多语句文本；结果是带截断标记的封顶行集并附 Neo4j 来源署名）；kg_ontology 读取只增不改的本体版本链与头部文档 census，用于遍历规划。 |
 | `@deepseek-ai/dsh-tool-connector` | `assets_browse`, `connector_discover`, `connector_fetch`, `connector_transfer`, `order_create`, `order_status` | `ctx.tools`, `ctx.connector`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | connector_discover、connector_fetch 与 connector_transfer 都运行在部署侧绑定租户下（模型永不提供租户）；发现以携带 provider 与 dataset id 的分组清单作答，预览有上限（8 行 / 400 字符），传输渲染落地回执——含 catalog 传输记录 id 与下一步指引（对命名表用 lakehouse_query，或带引用的 kb_search）；assets_browse 只读浏览资产目录（list/detail/stats）。 |
 | `@deepseek-ai/dsh-tool-nocobase` | `nb_approve`, `nb_collections`, `nb_create`, `nb_get`, `nb_list`, `nb_update` | `ctx.tools`、`ctx.systemPrompt` | `tool/call`、`tool/result` | - | nb_collections、nb_list、nb_get、nb_create 与 nb_update 以服务账号对话部署的 NocoBase（模型永不提供租户）；筛选词汇为封闭集（eq/in/gt/lt 加单一 and/or 连接），写工具承载确认式变更契约——系统提示指引要求先呈现预览 / 改前→改后对比并取得用户明确同意才运行 nb_create/nb_update，其回执复述落地 id 或逐字段 diff；nb_approve 驱动通用审批引擎（提交/同意/驳回/作废），回执回显状态转移、锚点对、轮次与是否生效。 |
 | `@deepseek-ai/dsh-tool-ask-user` | `ask_user_question` | `ctx.tools`、`ctx.userQuestions` | `tool/call`、`tool/result after a UI/provider answers the question` | - | ask_user_question 会暂停工具调用，直到当前 UI 提供方返回人类答案。 |
@@ -249,9 +251,22 @@ kb_search, kb_ingest, kb_ingest_url, and kb_stats stay visible without a usable 
 
 ## `@deepseek-ai/dsh-tool-lakehouse`
 
+### `lakehouse_list_tables`
+
+列出湖仓的全部表及其 schema 与实时行数。每条的 `ref` 即 lakehouse_query 语句里的精确引用形式。
+
+```json
+{
+  "type": "object",
+  "properties": {}
+}
+```
+
+Source: [`packages/lakehouse/tool-lakehouse/src/index.ts`](../packages/lakehouse/tool-lakehouse/src/index.ts)
+
 ### `lakehouse_query`
 
-Run one read SQL statement (SELECT) over the registered lakehouse tables. Returns the result columns, the row set, a truncation marker, and the source-table attribution. List tables with lakehouse_tables first.
+执行一条只读 SQL 语句（SELECT），返回结果列、行集与截断标记。仅接受单条读语句。
 
 ```json
 {
@@ -259,7 +274,7 @@ Run one read SQL statement (SELECT) over the registered lakehouse tables. Return
   "properties": {
     "sql": {
       "type": "string",
-      "description": "One single-statement read SQL query (SELECT ...)."
+      "description": "One single-statement read SQL query (SELECT ...), referencing tables as lake.<schema>.<table>."
     }
   },
   "required": [
@@ -270,9 +285,54 @@ Run one read SQL statement (SELECT) over the registered lakehouse tables. Return
 
 Source: [`packages/lakehouse/tool-lakehouse/src/index.ts`](../packages/lakehouse/tool-lakehouse/src/index.ts)
 
-### `lakehouse_tables`
+### `lakehouse_schema`
 
-List the registered lakehouse tables with their column schemas (name and SQL type per column), row counts, and formats. Pass table to narrow to one table. Use before writing lakehouse_query SQL.
+描述一张湖仓表：列名、SQL 类型与样本行。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "schema": {
+      "type": "string",
+      "description": "The table's schema name from the listing (a plain identifier)."
+    },
+    "table": {
+      "type": "string",
+      "description": "The table name (a plain identifier)."
+    }
+  },
+  "required": [
+    "schema",
+    "table"
+  ]
+}
+```
+
+Source: [`packages/lakehouse/tool-lakehouse/src/index.ts`](../packages/lakehouse/tool-lakehouse/src/index.ts)
+
+lakehouse_list_tables、lakehouse_query 与 lakehouse_schema 在无可用引擎时保持可见并在执行时以结构化错误失败（表清单仍可应答）；查询结果是带截断标记的封顶行集，渲染文本携带来源表溯源行。
+
+<a id="deepseek-aidsh-tool-carbon"></a>
+
+## `@deepseek-ai/dsh-tool-carbon`
+
+### `cb_collections`
+
+List the carbon business system's tables (物料/客户/供应商/销售订单/采购订单/库存/生产工单/不合格品…) with module, risk tier, and key columns — the catalog needed to read or change business records.
+
+```json
+{
+  "type": "object",
+  "properties": {}
+}
+```
+
+Source: [`packages/connector/tool-carbon/src/index.ts`](../packages/connector/tool-carbon/src/index.ts)
+
+### `cb_create`
+
+Create one row in a write-tier carbon business table (item/customer/supplier/salesOrder/purchaseOrder/job). The tenant is injected server-side; the created row is returned as the receipt.
 
 ```json
 {
@@ -280,15 +340,188 @@ List the registered lakehouse tables with their column schemas (name and SQL typ
   "properties": {
     "table": {
       "type": "string",
-      "description": "One table name to describe; omit to list every registered table."
+      "description": "Write-tier table name from cb_collections."
+    },
+    "values": {
+      "description": "The row's column values (never companyId — the deployment injects it)."
     }
-  }
+  },
+  "required": [
+    "table",
+    "values"
+  ]
 }
 ```
 
-Source: [`packages/lakehouse/tool-lakehouse/src/index.ts`](../packages/lakehouse/tool-lakehouse/src/index.ts)
+Source: [`packages/connector/tool-carbon/src/index.ts`](../packages/connector/tool-carbon/src/index.ts)
 
-lakehouse_tables 与 lakehouse_query 在无可用引擎时保持可见并在执行时以结构化错误失败（表清单仍可应答）；两者都运行在部署侧绑定租户下（模型永不提供租户），查询结果是带截断标记的封顶行集，渲染文本携带来源表溯源行。
+### `cb_get`
+
+Read one carbon business row by table and id. Returns the row's full columns.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "table": {
+      "type": "string",
+      "description": "Table name from cb_collections."
+    },
+    "id": {
+      "type": "string",
+      "description": "The row id (or itemId for the stock quantity table)."
+    }
+  },
+  "required": [
+    "table",
+    "id"
+  ]
+}
+```
+
+Source: [`packages/connector/tool-carbon/src/index.ts`](../packages/connector/tool-carbon/src/index.ts)
+
+### `cb_list`
+
+Query rows of one carbon business table with restricted filters (eq/neq/gt/lt/gte/lte/like/ilike/in/is), ordering, and limit/offset paging. Returns the total count and the rows.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "table": {
+      "type": "string",
+      "description": "Table name from cb_collections (for example salesOrder)."
+    },
+    "filter": {
+      "type": "array",
+      "description": "Conditions: {field, op, value}; scalars for the comparison ops, a non-empty array for in, null/true/false for is, * wildcard patterns for like/ilike.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "op": {
+            "type": "string",
+            "enum": [
+              "eq",
+              "neq",
+              "gt",
+              "lt",
+              "gte",
+              "lte",
+              "like",
+              "ilike",
+              "in",
+              "is"
+            ]
+          },
+          "value": {}
+        },
+        "required": [
+          "field",
+          "op",
+          "value"
+        ]
+      }
+    },
+    "order": {
+      "type": "array",
+      "description": "Sort keys; a `.desc` suffix marks descending (for example [\"createdAt.desc\"]).",
+      "items": {
+        "type": "string"
+      }
+    },
+    "limit": {
+      "type": "number",
+      "description": "Rows to return, 1-100; defaults to 20."
+    },
+    "offset": {
+      "type": "number",
+      "description": "Row offset for paging; defaults to 0."
+    }
+  },
+  "required": [
+    "table"
+  ]
+}
+```
+
+Source: [`packages/connector/tool-carbon/src/index.ts`](../packages/connector/tool-carbon/src/index.ts)
+
+### `cb_update`
+
+Update named columns of one row in a write-tier carbon business table. Returns the updated row and the before→after diff as the receipt.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "table": {
+      "type": "string",
+      "description": "Write-tier table name from cb_collections."
+    },
+    "id": {
+      "type": "string",
+      "description": "The row id."
+    },
+    "values": {
+      "description": "The columns to change (never companyId)."
+    }
+  },
+  "required": [
+    "table",
+    "id",
+    "values"
+  ]
+}
+```
+
+Source: [`packages/connector/tool-carbon/src/index.ts`](../packages/connector/tool-carbon/src/index.ts)
+
+cb_collections, cb_list, cb_get, cb_create, and cb_update speak to the carbon business system under the deployment session credentials (the model never supplies companyId — attempts are rejected); the table catalog carries read/write/destructive risk labels, write tools demand the presented preview and the user go-ahead, and receipts echo the landing id or the field-by-field diff.
+
+<a id="deepseek-aidsh-tool-graph"></a>
+
+## `@deepseek-ai/dsh-tool-graph`
+
+### `kg_graph_query`
+
+Run one read-only Cypher statement over the Neo4j graph. Returns the result columns, the row set, and a truncation marker. Only single read statements are accepted (MATCH/OPTIONAL MATCH/WITH/UNWIND … RETURN).
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "cypher": {
+      "type": "string",
+      "description": "One single-statement read Cypher query (MATCH ... RETURN ...)."
+    }
+  },
+  "required": [
+    "cypher"
+  ]
+}
+```
+
+Source: [`packages/graph/tool-graph/src/index.ts`](../packages/graph/tool-graph/src/index.ts)
+
+### `kg_ontology`
+
+Read the Neo4j-stored ontology version chain plus the head document's class/relation census. No arguments.
+
+```json
+{
+  "type": "object",
+  "properties": {}
+}
+```
+
+Source: [`packages/graph/tool-graph/src/index.ts`](../packages/graph/tool-graph/src/index.ts)
+
+kg_graph_query runs one read-only Cypher statement over the Neo4j graph (the statement-shape guard rejects writes, procedures, and multi-statement text before the driver; results are capped rows with a truncation marker and the Neo4j source attribution); kg_ontology reads the append-only ontology version chain plus the head document census for traversal planning.
 
 <a id="deepseek-aidsh-tool-connector"></a>
 
@@ -784,7 +1017,7 @@ ask_user_question 会暂停工具调用，直到当前 UI 提供方返回人类�
   "type": "object",
   "properties": {
     "payload": {
-      "description": "九类卡片载荷对象（v 恒为3，按 type 判别九选一），也可传整个载荷的 JSON 字符串（自动解析）。id/value/数量类叶子可直接传数字（自动转字符串）；可选的普通字段传 null 等同省略。各类型必填字段与枚举（? 为可选）：ask_choice{id,mode(single/multi),variant(cards/chips/buttons),question,options[≥1]{label,value,hint?,send?},allowFreeText}；ask_field{id,question,field{name,label,widget(text/number/date/select/relation),unit?,suggestions{label,value,hint?}}}；form_draft{draftId,revision(≥1整数),form{collection,label},title,fields[≥1]{name,label,value(null 仅 tier=required),tier(required/derived/system),widget(同 ask_field),rationale?,edited?,options?{label,value}}}；submit_receipt{draftId,form,rowId,summary[≥1]{label,value,kind(money/date/id/count/text)}}；report{id,title,subtitle?,metrics[1-6]{label,value,kind(count/money/percent/text),tone?(positive/warning/danger)},rows?[≤8]{label,hint?,level(high/medium/low)},table?{columns[1-5]{label,kind?(text/money/percent/count)},rows[≤10 且每行=列数]},actions?[≤4]按钮数组，每枚是扁平对象，判别字段 kind 与其余字段同级，形如 {\"kind\":\"view\",\"label\":\"查看采购订单\",\"route\":\"#/work\"}；kind 四选一：view(需 label,route)/create-task(需 label,title，可附 suggestion)/send(需 label,text)/link(需 label,url)}；approval_pending{id,doc{collection,label,docId,title},summary[≥1]{label,value,kind(同 submit_receipt)},applicant?,node?,attempt?}；approval_result{approvalId,doc(结构同上),action(approve/reject),state(draft/pending/pending_level2/approved/rejected/void/potential/reviewing/qualified),by,comment?,at?}；plan_suggest{id,suggestionId,planType(MO/PR),product,qty,suggestDate?,driverSo?,needDate?}；plan_result{planId,suggestionId,planType,product,outcome(converted/dismissed),docCode?,state?,by?}"
+      "description": "九类卡片载荷对象（v 恒为3，按 type 判别九选一），也可传整个载荷的 JSON 字符串（自动解析）。id/value/数量类叶子可直接传数字（自动转字符串）；可选的普通字段传 null 等同省略。各类型必填字段与枚举（? 为可选）：ask_choice{id,mode(single/multi),variant(cards/chips/buttons),question,options[≥1]{label,value,hint?,send?},allowFreeText}；ask_field{id,question,field{name,label,widget(text/number/date/select/relation),unit?,suggestions{label,value,hint?}}}；form_draft{draftId,revision(≥1整数),form{collection,label},title,fields[≥1]{name,label,value(null 仅 tier=required),tier(required/derived/system),widget(同 ask_field),rationale?,edited?,options?{label,value}}}；submit_receipt{draftId,form,rowId,summary[≥1]{label,value,kind(money/date/id/count/text)}}；report{id,title,subtitle?,metrics[1-6]{label,value,kind(count/money/percent/text),tone?(positive/warning/danger)},rows?[≤8]{label,hint?,level(high/medium/low)},table?{columns[1-5]{label,kind?(text/money/percent/count)},rows[≤10 且每行=列数]},actions?[≤4]按钮数组，每枚是扁平对象，判别字段 kind 与其余字段同级，形如 {\"kind\":\"view\",\"label\":\"查看采购订单\",\"route\":\"#/docs/pur_orders\"}；kind 四选一：view(需 label,route；route 只能取合法站内路由：#/、#/chats、#/chat/<会话id>、#/work、#/tasks、#/todos、#/docs、#/docs/<collection>（单据列表，如 pur_orders）、#/docs/<collection>/<行id>、#/files、#/agents、#/me、#/alerts，可带查询参数；查看/导航类意图必须用 view 而非 create-task)/create-task(需 label,title，可附 suggestion；仅用于「创建任务/登记」诉求)/send(需 label,text；text 是一句简短明确指令，禁止把报告全文或大段数据塞进 text)/link(需 label,url)}；approval_pending{id,doc{collection,label,docId,title},summary[≥1]{label,value,kind(同 submit_receipt)},applicant?,node?,attempt?}；approval_result{approvalId,doc(结构同上),action(approve/reject),state(draft/pending/pending_level2/approved/rejected/void/potential/reviewing/qualified),by,comment?,at?}；plan_suggest{id,suggestionId,planType(MO/PR),product,qty,suggestDate?,driverSo?,needDate?}；plan_result{planId,suggestionId,planType,product,outcome(converted/dismissed),docCode?,state?,by?}"
     }
   },
   "required": [

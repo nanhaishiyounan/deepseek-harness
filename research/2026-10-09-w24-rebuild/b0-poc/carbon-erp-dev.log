@@ -3859,3 +3859,966 @@ The "onboarding-draft" cookie is not signed, but session cookies should be signe
   [2mbody {"accessToken":"[REDACTED]","refreshToken":"[REDACTED]"}[0m
 [2m[00:09:00.233][0m [36mDEBUG[0m [2m(93217)[0m: [2m[http][0m [1m[32mGET[0m [32m200[0m /login [2m20.4 ms[0m
 [2m[00:09:17.903][0m [36mDEBUG[0m [2m(93217)[0m: [2m[http][0m [1m[32mGET[0m [32m200[0m /login [2m16.7 ms[0m
+[2m2026-10-10 20:51:41.103 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode { event: [32m'redis.degraded'[39m, cause: [32m'write EPIPE'[39m }
+[2m2026-10-10 20:51:52.364 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode { event: [32m'redis.degraded'[39m, cause: [32m''[39m }
+[2m2026-10-10 20:52:02.689 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode { event: [32m'redis.degraded'[39m, cause: [32m''[39m }
+[2m2026-10-10 20:52:16.006 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode { event: [32m'redis.degraded'[39m, cause: [32m''[39m }
+[2m2026-10-10 20:52:28.051 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode { event: [32m'redis.degraded'[39m, cause: [32m''[39m }
+[2m2026-10-10 20:52:41.876 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode { event: [32m'redis.degraded'[39m, cause: [32m''[39m }
+[2m2026-10-10 20:52:51.900 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode { event: [32m'redis.degraded'[39m, cause: [32m''[39m }
+[2m2026-10-10 20:53:01.914 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode { event: [32m'redis.degraded'[39m, cause: [32m''[39m }
+[2m2026-10-10 20:53:11.933 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode { event: [32m'redis.degraded'[39m, cause: [32m''[39m }
+[2m2026-10-10 20:53:21.950 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode { event: [32m'redis.degraded'[39m, cause: [32m''[39m }
+[2m2026-10-10 20:53:31.967 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode { event: [32m'redis.degraded'[39m, cause: [32m''[39m }
+[2m2026-10-10 20:53:41.984 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode { event: [32m'redis.degraded'[39m, cause: [32m''[39m }
+[2m2026-10-10 20:53:52.173 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode { event: [32m'redis.degraded'[39m, cause: [32m''[39m }
+[2m2026-10-10 20:54:02.198 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode { event: [32m'redis.degraded'[39m, cause: [32m''[39m }
+[2m2026-10-10 20:54:12.210 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode { event: [32m'redis.degraded'[39m, cause: [32m''[39m }
+[2m2026-10-10 20:54:22.225 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode { event: [32m'redis.degraded'[39m, cause: [32m''[39m }
+[2m2026-10-10 20:54:32.254 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode { event: [32m'redis.degraded'[39m, cause: [32m''[39m }
+[2m2026-10-10 20:54:42.259 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode { event: [32m'redis.degraded'[39m, cause: [32m''[39m }
+[2m2026-10-10 20:54:52.267 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode { event: [32m'redis.degraded'[39m, cause: [32m''[39m }
+[2m2026-10-10 20:55:02.278 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode { event: [32m'redis.degraded'[39m, cause: [32m''[39m }
+[2m2026-10-10 20:55:12.547 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode { event: [32m'redis.degraded'[39m, cause: [32m''[39m }
+[2m2026-10-10 20:55:22.560 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode { event: [32m'redis.degraded'[39m, cause: [32m''[39m }
+[2m2026-10-10 20:55:32.578 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode { event: [32m'redis.degraded'[39m, cause: [32m''[39m }
+[2m2026-10-10 20:55:42.595 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode { event: [32m'redis.degraded'[39m, cause: [32m''[39m }
+[2m2026-10-10 20:55:52.615 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode { event: [32m'redis.degraded'[39m, cause: [32m''[39m }
+[2m2026-10-10 20:56:02.641 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode { event: [32m'redis.degraded'[39m, cause: [32m''[39m }
+[2m2026-10-10 20:56:12.654 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode { event: [32m'redis.degraded'[39m, cause: [32m''[39m }
+[2m2026-10-10 20:56:22.668 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode { event: [32m'redis.degraded'[39m, cause: [32m''[39m }
+[2m2026-10-10 20:56:32.685 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode { event: [32m'redis.degraded'[39m, cause: [32m''[39m }
+[2m2026-10-10 20:56:42.703 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode { event: [32m'redis.degraded'[39m, cause: [32m''[39m }
+[2m2026-10-10 20:56:52.715 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode { event: [32m'redis.degraded'[39m, cause: [32m''[39m }
+[2m2026-10-10 20:57:02.743 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 20:57:12.757 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 20:57:22.768 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 20:57:32.779 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 20:57:42.792 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 20:57:52.807 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 20:58:02.944 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 20:58:12.961 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 20:58:22.970 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 20:58:32.981 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 20:58:42.991 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 20:58:53.006 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 20:59:03.019 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 20:59:13.031 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 20:59:23.042 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 20:59:33.054 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 20:59:43.068 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 20:59:53.080 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:00:03.094 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:00:13.108 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:00:23.121 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:00:33.135 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:00:43.145 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:00:53.155 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:01:03.167 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:01:13.184 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:01:23.195 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:01:33.212 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:01:43.233 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:01:53.253 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:02:03.267 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:02:13.277 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:02:23.290 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:02:33.298 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:02:43.311 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:02:53.322 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:03:03.336 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:03:13.349 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:03:23.359 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:03:33.496 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:03:43.506 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:03:53.516 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:04:03.531 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:04:13.540 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:04:23.553 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:04:33.564 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:04:43.574 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:04:53.584 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:05:03.597 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:05:13.611 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:05:23.622 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:05:33.639 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:05:43.652 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:05:53.663 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:06:03.675 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:06:13.686 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:06:23.744 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:06:33.758 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:06:43.771 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:06:53.784 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:07:03.976 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:07:13.990 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:07:23.998 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:07:34.010 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:07:44.020 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:07:54.034 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:08:04.105 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:08:14.115 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:08:24.124 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:08:34.164 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:08:44.176 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:08:54.187 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:09:04.201 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:09:14.211 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:09:24.223 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:09:34.441 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:09:44.453 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:09:54.467 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:10:04.482 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:10:14.491 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:10:24.501 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:10:34.512 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:10:44.524 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:10:54.532 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:11:04.543 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:11:14.557 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:11:24.568 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:11:34.613 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:11:44.650 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:11:54.663 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:12:04.674 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:12:14.688 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:12:24.700 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:12:34.715 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:12:44.725 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:12:54.737 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:13:04.749 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:13:14.760 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:13:24.770 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:13:34.804 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:13:44.814 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:13:54.823 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:14:04.848 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:14:14.856 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:14:24.872 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:14:34.883 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:14:44.919 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:14:54.930 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:15:04.947 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:15:14.956 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:15:24.969 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:15:34.982 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:15:44.994 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:15:55.006 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:16:05.018 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:16:15.033 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:16:25.047 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:16:35.059 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:16:45.069 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:16:55.107 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:17:05.118 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:17:15.127 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:17:25.138 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:17:35.148 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:17:45.159 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:17:55.174 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:18:05.186 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:18:15.199 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:18:25.212 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:18:35.221 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:18:45.232 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:18:55.245 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:19:05.253 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:19:15.262 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:19:25.273 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:19:35.285 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:19:45.297 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:19:55.311 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:20:05.343 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:20:15.355 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:20:25.367 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:20:35.376 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:20:45.387 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:20:55.397 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:21:05.406 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:21:15.414 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:21:25.422 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:21:35.431 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:21:45.449 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:21:55.458 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:22:05.469 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:22:15.480 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:22:25.492 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:22:35.504 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:22:45.513 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:22:55.564 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:23:05.575 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:23:15.586 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:23:25.603 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:23:35.615 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:23:45.625 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:23:55.635 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:24:05.645 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:24:15.655 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:24:25.668 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:24:35.679 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:24:45.689 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:24:55.701 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:25:05.713 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:25:15.740 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:25:25.753 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:25:35.766 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:25:45.778 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:25:55.811 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:26:05.822 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:26:15.835 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:26:25.856 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:26:35.867 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:26:45.880 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:26:55.914 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:27:05.926 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:27:15.935 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:27:25.970 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:27:35.987 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:27:46.001 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:27:56.014 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:28:06.020 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:28:16.033 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:28:26.045 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:28:36.055 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:28:46.067 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:28:56.078 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:29:06.087 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:29:16.100 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:29:26.134 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:29:36.146 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:29:46.157 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:29:56.190 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:30:06.202 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:30:16.212 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:30:26.223 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:30:36.235 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:30:46.247 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:30:56.258 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:31:06.269 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:31:16.278 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:31:26.295 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:31:36.342 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:31:46.356 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:31:56.364 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:32:06.376 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:32:16.387 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:32:26.398 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:32:36.411 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:32:46.428 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:32:56.439 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:33:06.450 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:33:21.236 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:33:31.243 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:33:41.265 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:33:51.278 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:34:01.284 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:34:11.294 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:34:21.302 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:34:31.309 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:34:41.320 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:34:51.330 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:35:01.337 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:35:11.349 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:35:21.360 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:35:31.371 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:35:41.382 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}
+[2m2026-10-10 21:35:51.390 +00[0m [1m[31mERR[0m [2mcarbon·kv:[0m Redis is unavailable, running in degraded mode {
+  event: [32m'redis.degraded'[39m,
+  cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
+}

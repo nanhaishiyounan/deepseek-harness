@@ -1,0 +1,73 @@
+{
+  "tenant": "demo-food-co",
+  "categories": {
+    "business-ops": 29,
+    "food-compliance": 15,
+    "system-guide": 13
+  },
+  "files": {
+    "business-ops": [
+      "2026-08-20-supplier-visit-hongfa.md (docId=239185906, submittedChunks=6)",
+      "2026-08-27-project-kickoff.md (docId=834756578, submittedChunks=6)",
+      "2026-08-backup-warehouse-network.md (docId=4030543858, submittedChunks=5)",
+      "2026-08-cargo-insurance-claims.md (docId=2721402426, submittedChunks=5)",
+      "2026-08-central-asia-customs.md (docId=2887860194, submittedChunks=5)",
+      "2026-08-central-asia-transit.md (docId=240738577, submittedChunks=5)",
+      "2026-08-china-russia-rail-corridor.md (docId=2652127929, submittedChunks=5)",
+      "2026-08-cold-chain-validation.md (docId=1902067910, submittedChunks=5)",
+      "2026-08-cost-formula.md (docId=2335692620, submittedChunks=7)",
+      "2026-08-cross-border-settlement-rub-kzt.md (docId=2081678670, submittedChunks=5)",
+      "2026-08-data-asset-accounting-primer.md (docId=3950713184, submittedChunks=5)",
+      "2026-08-export-rebate-essentials.md (docId=1098339051, submittedChunks=5)",
+      "2026-08-export-risk-overview.md (docId=703411956, submittedChunks=4)",
+      "2026-08-live-commerce-food.md (docId=3004565944, submittedChunks=5)",
+      "2026-08-market-insight-condiment.md (docId=2315772791, submittedChunks=6)",
+      "2026-08-market-insight-snack.md (docId=3578029775, submittedChunks=6)",
+      "2026-08-ocean-rerouting.md (docId=86956337, submittedChunks=5)",
+      "2026-08-overseas-warehouse-ops.md (docId=3462380818, submittedChunks=5)",
+      "2026-08-ozon-wb-playbook.md (docId=2659994386, submittedChunks=6)",
+      "2026-08-process-soy-sauce.md (docId=187872459, submittedChunks=6)",
+      "2026-08-process-sterilization.md (docId=1532581497, submittedChunks=6)",
+      "2026-08-reefer-ocean-basics.md (docId=1429405838, submittedChunks=5)",
+      "2026-08-russia-warehouse-emergency.md (docId=1269232452, submittedChunks=5)",
+      "2026-08-sinosure-short-term-cover.md (docId=4080335534, submittedChunks=5)",
+      "2026-08-supply-chain-finance-instruments.md (docId=576215180, submittedChunks=5)",
+      "2026-08-supply-packaging.md (docId=3251972037, submittedChunks=6)",
+      "2026-08-supply-sugar.md (docId=3140708830, submittedChunks=6)",
+      "2026-08-tir-road-export.md (docId=3686309918, submittedChunks=5)",
+      "2026-08-tir-road-transport.md (docId=1593893517, submittedChunks=5)"
+    ],
+    "food-compliance": [
+      "2026-08-audit-checklist.md (docId=2217220971, submittedChunks=8)",
+      "2026-08-cim-cmr-force-majeure-excerpt.md (docId=253437878, submittedChunks=5)",
+      "2026-08-cip-cleaning-validation.md (docId=2931216912, submittedChunks=4)",
+      "2026-08-contract-force-majeure-clause.md (docId=1859014264, submittedChunks=6)",
+      "2026-08-eac-certification-guide.md (docId=2360176526, submittedChunks=5)",
+      "2026-08-haccp-implementation.md (docId=2050727198, submittedChunks=5)",
+      "2026-08-halal-ksa-gcc.md (docId=4001123077, submittedChunks=5)",
+      "2026-08-kosher-north-america.md (docId=1884874057, submittedChunks=5)",
+      "2026-08-origin-rcep-usage.md (docId=2860205906, submittedChunks=5)",
+      "2026-08-pest-control-program.md (docId=1510926065, submittedChunks=5)",
+      "2026-08-pesticide-residue-control.md (docId=341965510, submittedChunks=5)",
+      "2026-08-retort-f0-validation.md (docId=1575093744, submittedChunks=5)",
+      "2026-08-sea-registration-vn-id-th.md (docId=3783605174, submittedChunks=4)",
+      "gb14881-excerpt.md (docId=3947001225, submittedChunks=7)",
+      "gb2760-excerpt.md (docId=1228324036, submittedChunks=6)"
+    ],
+    "system-guide": [
+      "api-gateway.zh.md (docId=2882011619, submittedChunks=13)",
+      "architecture.zh.md (docId=3920531562, submittedChunks=12)",
+      "config-catalog.zh.md (docId=3210554954, submittedChunks=173)",
+      "cordis-primer.zh.md (docId=4057767557, submittedChunks=6)",
+      "development.zh.md (docId=1408261466, submittedChunks=16)",
+      "glossary.zh.md (docId=2114834217, submittedChunks=8)",
+      "hongfa-food.md (docId=1148603323, submittedChunks=7)",
+      "lvyuan-ingredients.md (docId=2122780041, submittedChunks=6)",
+      "persistence-catalog.zh.md (docId=1352888689, submittedChunks=79)",
+      "report.md (docId=2744364385, submittedChunks=111)",
+      "testing.zh.md (docId=2299457398, submittedChunks=11)",
+      "tool-catalog.md (docId=2633897460, submittedChunks=113)",
+      "web-styling.zh.md (docId=1781175975, submittedChunks=4)"
+    ]
+  }
+}

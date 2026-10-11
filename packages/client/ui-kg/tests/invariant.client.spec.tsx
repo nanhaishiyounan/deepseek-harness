@@ -15,6 +15,12 @@ import { KgHeaderButton } from '../src/client/KgHeaderButton.tsx'
 import { createKgViewBridge } from '../src/client/kgBridge.ts'
 import { zh } from '../src/client/locales.ts'
 import { SESSION_KIT } from './kg-fixture.client.ts'
+// The Obsidian canvas statically imports react-force-graph-2d (the
+// single-artifact client contract); jsdom cannot run its canvas measurement,
+// so every spec that renders the kg page stubs the module.
+vi.mock('react-force-graph-2d', () => ({
+  default: () => null,
+}))
 
 const t = ((key: string) => zh[key as keyof typeof zh] ?? key) as never
 

@@ -18,3 +18,16 @@ Each configured table syncs one of two ways, probed per run:
 ## Configuration
 
 All `Config` fields (cordis.yml): `dsn` (defaults to the nocobase PostgreSQL source; carbon lands in B3), `sourceSchema`, `targetSchema` (`synced_nocobase`), `tables`, `watermarkCandidates`, `scheduleIntervalMs` (0 disables the schedule), and `legacyIngest` (enabled / parquetDir / targetSchema `legacy_nocobase` / sourceDsn / prefixes / standaloneTables — the B0 business-table set by default). A startup ingest failure fails composition; a scheduled run failure logs and keeps the service ready for the next tick.
+
+## Model Experience
+
+Indirectly, through the lakehouse tool suite registrations: synced rows reach the model only through later reads; this package owns no prompt, schema, or tool of its own.
+
+#### KV Cache effect
+
+Independent of the model request stream: results reach a later request as tool results, so this package neither appends to nor invalidates any reusable request prefix.
+
+
+## Known Limitations and Deferred Work
+
+- Deferred: true CDC (delete propagation) beyond watermark append; SeaTunnel Zeta line remains the reference.

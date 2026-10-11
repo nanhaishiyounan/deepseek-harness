@@ -133,6 +133,13 @@ export interface KbSearchHit {
    * not score). One meaning in both modes — the threshold's score basis.
    */
   readonly score?: number
+  /**
+   * Runtime provenance annotation from the store that produced the hit — for
+   * example a fallback store reporting the primary store was unreachable.
+   * Consumers may surface it; the seam hoists the first hit's notice onto the
+   * search result.
+   */
+  readonly notice?: string
 }
 
 /** Store-level counts; the seam adds embed-availability facts for `kb_stats`. */
@@ -319,4 +326,9 @@ export interface KbSearchResult {
   /** Embed identity used for the query vector, in hybrid mode. */
   readonly embedModel?: string
   readonly results: readonly KbSearchHit[]
+  /**
+   * Store-level runtime annotation hoisted from the first hit (see
+   * {@link KbSearchHit.notice}); absent when no store annotated its hits.
+   */
+  readonly notice?: string
 }

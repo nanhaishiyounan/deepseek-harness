@@ -90,7 +90,7 @@ import {
   connectorsConnectionsValueSchema, connectorsListValueSchema, connectorsTransfersValueSchema,
 } from '../api/connectors.schema.ts'
 import {
-  kgCommunitiesValueSchema, kgExpandValueSchema, kgHistoryValueSchema, kgMappingsValueSchema, kgEpisodesValueSchema,
+  kgCommunitiesValueSchema, kgExpandValueSchema, kgHistoryValueSchema, kgGraphPageValueSchema, kgMappingsValueSchema, kgEpisodesValueSchema,
   kgOntologyEditValueSchema, kgQueryValueSchema, kgReviewDecideValueSchema, kgReviewQueueValueSchema, kgRollbackValueSchema,
   kgSchemaValueSchema, kgSearchValueSchema, kgStatsValueSchema, kgSubgraphValueSchema,
 } from '../api/kg.schema.ts'
@@ -224,6 +224,7 @@ export interface IApiClient {
   }
   kg: {
     mappings(payload: RequestPayload<'kg.mappings'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kg.mappings'>>>
+    graphPage(payload: RequestPayload<'kg.graphPage'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kg.graphPage'>>>
     schema(payload: RequestPayload<'kg.schema'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kg.schema'>>>
     query(payload: RequestPayload<'kg.query'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kg.query'>>>
     episodes(payload: RequestPayload<'kg.episodes'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kg.episodes'>>>
@@ -342,6 +343,7 @@ const UNARY_VALUE_SCHEMAS: { [K in keyof RpcMethodMap]: z.ZodType<Wire<ResponseV
   'connectors.connections': connectorsConnectionsValueSchema,
   'connectors.transfers': connectorsTransfersValueSchema,
   'kg.mappings': kgMappingsValueSchema,
+  'kg.graphPage': kgGraphPageValueSchema,
   'kg.query': kgQueryValueSchema,
   'kg.episodes': kgEpisodesValueSchema,
   'kg.rollback': kgRollbackValueSchema,
@@ -700,6 +702,7 @@ export abstract class AbstractApiClient implements IApiClient {
     // Graph reads follow the caller's signal alone: a wide k-hop walk must
     // not die at the transport default.
     mappings: (payload, signal) => this.callUnary('kg.mappings', payload, signal, 'caller-signal-only'),
+    graphPage: (payload, signal) => this.callUnary('kg.graphPage', payload, signal, 'caller-signal-only'),
     schema: (payload, signal) => this.callUnary('kg.schema', payload, signal, 'caller-signal-only'),
     query: (payload, signal) => this.callUnary('kg.query', payload, signal, 'caller-signal-only'),
     episodes: (payload, signal) => this.callUnary('kg.episodes', payload, signal, 'caller-signal-only'),

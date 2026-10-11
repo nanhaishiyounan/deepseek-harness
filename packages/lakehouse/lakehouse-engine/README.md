@@ -21,3 +21,16 @@ The catalog attachment is a discriminated config (`kind: 'ducklake'` today); Tie
 ## Configuration
 
 Every deployment-varying choice is a validated `Config` field (cordis.yml): `catalog.catalogPath` / `catalog.dataPath` (defaults `workspace/lakehouse/ducklake/…`), `memoryLimitMb`, `threads`, `maxRows` (200), `queryTimeoutMs` (30000), and `extensionAutoinstall` (true). DuckDB pins at 1.5.6 (`@duckdb/node-api` 1.5.6-r.1); the DuckLake/postgres community extensions load with an `INSTALL` retry when missing.
+
+## Model Experience
+
+Indirectly, through the lakehouse tool suite registrations: query outcomes and their guard rejections surface only through the tools; this package owns no prompt, schema, or tool of its own.
+
+#### KV Cache effect
+
+Independent of the model request stream: results reach a later request as tool results, so this package neither appends to nor invalidates any reusable request prefix.
+
+
+## Known Limitations and Deferred Work
+
+- Deferred: Gravitino/MinIO Tier1 attach (B6) and the write-side sync expansion beyond the watermark append.

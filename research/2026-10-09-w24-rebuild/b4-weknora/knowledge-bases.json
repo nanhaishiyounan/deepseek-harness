@@ -1,0 +1,254 @@
+{
+    "data": [
+        {
+            "asr_config": {
+                "enabled": false,
+                "language": "",
+                "model_id": ""
+            },
+            "auto_tag_config": null,
+            "capabilities": {
+                "faq": false,
+                "graph": false,
+                "keyword": true,
+                "vector": true,
+                "wiki": false
+            },
+            "chunk_count": 0,
+            "chunking_config": {
+                "chunk_overlap": 0,
+                "chunk_size": 0,
+                "separators": null
+            },
+            "created_at": "2026-10-11T05:37:08.646338+08:00",
+            "creator_id": "",
+            "deleted_at": null,
+            "description": "",
+            "embedding_model_id": "builtin-embedding-minimax",
+            "extract_config": {
+                "enabled": false
+            },
+            "faq_config": null,
+            "id": "2b6f1555-d18a-44ca-a3eb-ec54863ed87d",
+            "image_processing_config": {
+                "model_id": ""
+            },
+            "indexing_strategy": {
+                "graph_enabled": false,
+                "keyword_enabled": true,
+                "vector_enabled": true,
+                "wiki_enabled": false
+            },
+            "is_pinned": false,
+            "is_processing": false,
+            "is_temporary": false,
+            "knowledge_count": 15,
+            "name": "demo-food-co/system-guide",
+            "pinned_at": null,
+            "processing_count": 0,
+            "profile_config": null,
+            "question_generation_config": {
+                "enabled": false,
+                "question_count": 0
+            },
+            "share_count": 0,
+            "storage_backend_id": "d7eaba89-41ab-4ae7-b26d-9a14e14f1963",
+            "storage_config": {
+                "app_id": "",
+                "bucket_name": "",
+                "path_prefix": "",
+                "provider": "",
+                "region": "",
+                "secret_id": "",
+                "secret_key": ""
+            },
+            "storage_provider_config": {
+                "provider": "local"
+            },
+            "summary_model_id": "builtin-llm-deepseek",
+            "tenant_id": 10001,
+            "type": "document",
+            "updated_at": "2026-10-11T06:18:17.800655+08:00",
+            "vector_store_engine_type": "postgres",
+            "vector_store_name": "System default",
+            "vector_store_source": "env",
+            "vector_store_status": "available",
+            "vlm_config": {
+                "api_key": "",
+                "base_url": "",
+                "enabled": false,
+                "interface_type": "",
+                "model_id": "",
+                "model_name": ""
+            },
+            "wiki_config": null
+        },
+        {
+            "asr_config": {
+                "enabled": false,
+                "language": "",
+                "model_id": ""
+            },
+            "auto_tag_config": null,
+            "capabilities": {
+                "faq": false,
+                "graph": false,
+                "keyword": true,
+                "vector": true,
+                "wiki": false
+            },
+            "chunk_count": 0,
+            "chunking_config": {
+                "chunk_overlap": 0,
+                "chunk_size": 0,
+                "separators": null
+            },
+            "created_at": "2026-10-11T05:37:08.222714+08:00",
+            "creator_id": "",
+            "deleted_at": null,
+            "description": "",
+            "embedding_model_id": "builtin-embedding-minimax",
+            "extract_config": {
+                "enabled": false
+            },
+            "faq_config": null,
+            "id": "5660c6c1-6900-4cd6-90d9-9430e5c9fc31",
+            "image_processing_config": {
+                "model_id": ""
+            },
+            "indexing_strategy": {
+                "graph_enabled": false,
+                "keyword_enabled": true,
+                "vector_enabled": true,
+                "wiki_enabled": false
+            },
+            "is_pinned": false,
+            "is_processing": false,
+            "is_temporary": false,
+            "knowledge_count": 15,
+            "name": "demo-food-co/food-compliance",
+            "pinned_at": null,
+            "processing_count": 0,
+            "profile_config": null,
+            "question_generation_config": {
+                "enabled": false,
+                "question_count": 0
+            },
+            "share_count": 0,
+            "storage_backend_id": "d7eaba89-41ab-4ae7-b26d-9a14e14f1963",
+            "storage_config": {
+                "app_id": "",
+                "bucket_name": "",
+                "path_prefix": "",
+                "provider": "",
+                "region": "",
+                "secret_id": "",
+                "secret_key": ""
+            },
+            "storage_provider_config": {
+                "provider": "local"
+            },
+            "summary_model_id": "builtin-llm-deepseek",
+            "tenant_id": 10001,
+            "type": "document",
+            "updated_at": "2026-10-11T06:18:17.844014+08:00",
+            "vector_store_engine_type": "postgres",
+            "vector_store_name": "System default",
+            "vector_store_source": "env",
+            "vector_store_status": "available",
+            "vlm_config": {
+                "api_key": "",
+                "base_url": "",
+                "enabled": false,
+                "interface_type": "",
+                "model_id": "",
+                "model_name": ""
+            },
+            "wiki_config": null
+        },
+        {
+            "asr_config": {
+                "enabled": false,
+                "language": "",
+                "model_id": ""
+            },
+            "auto_tag_config": null,
+            "capabilities": {
+                "faq": false,
+                "graph": false,
+                "keyword": true,
+                "vector": true,
+                "wiki": false
+            },
+            "chunk_count": 0,
+            "chunking_config": {
+                "chunk_overlap": 0,
+                "chunk_size": 0,
+                "separators": null
+            },
+            "created_at": "2026-10-11T05:37:07.340908+08:00",
+            "creator_id": "",
+            "deleted_at": null,
+            "description": "",
+            "embedding_model_id": "builtin-embedding-minimax",
+            "extract_config": {
+                "enabled": false
+            },
+            "faq_config": null,
+            "id": "5e984bf9-55a9-4aa5-a368-cdeb33baddbc",
+            "image_processing_config": {
+                "model_id": ""
+            },
+            "indexing_strategy": {
+                "graph_enabled": false,
+                "keyword_enabled": true,
+                "vector_enabled": true,
+                "wiki_enabled": false
+            },
+            "is_pinned": false,
+            "is_processing": false,
+            "is_temporary": false,
+            "knowledge_count": 29,
+            "name": "demo-food-co/business-ops",
+            "pinned_at": null,
+            "processing_count": 0,
+            "profile_config": null,
+            "question_generation_config": {
+                "enabled": false,
+                "question_count": 0
+            },
+            "share_count": 0,
+            "storage_backend_id": "d7eaba89-41ab-4ae7-b26d-9a14e14f1963",
+            "storage_config": {
+                "app_id": "",
+                "bucket_name": "",
+                "path_prefix": "",
+                "provider": "",
+                "region": "",
+                "secret_id": "",
+                "secret_key": ""
+            },
+            "storage_provider_config": {
+                "provider": "local"
+            },
+            "summary_model_id": "builtin-llm-deepseek",
+            "tenant_id": 10001,
+            "type": "document",
+            "updated_at": "2026-10-11T06:18:17.880724+08:00",
+            "vector_store_engine_type": "postgres",
+            "vector_store_name": "System default",
+            "vector_store_source": "env",
+            "vector_store_status": "available",
+            "vlm_config": {
+                "api_key": "",
+                "base_url": "",
+                "enabled": false,
+                "interface_type": "",
+                "model_id": "",
+                "model_name": ""
+            },
+            "wiki_config": null
+        }
+    ],
+    "success": true
+}

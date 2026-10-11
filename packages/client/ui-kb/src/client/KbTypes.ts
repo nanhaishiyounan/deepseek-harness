@@ -33,6 +33,7 @@ export interface KbHitState {
 /** The `kb.search` value (mirrored from the wire contract). */
 export interface KbSearchState {
   readonly mode: 'hybrid' | 'text'
+  readonly notice?: string
   readonly results: readonly KbHitState[]
 }
 

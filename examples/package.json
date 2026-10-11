@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.1",
   "type": "module",
-  "description": "Workspace umbrella for runnable demos and example-owned test compositions: declares their cordis.yml packages so plain Node resolves real exports\u2192lib. Not a build target.",
+  "description": "Workspace umbrella for runnable demos and example-owned test compositions: declares their cordis.yml packages so plain Node resolves real exports→lib. Not a build target.",
   "dependencies": {
     "@deepseek-ai/cordis-plugin-hmr": "workspace:*",
     "@deepseek-ai/cordis-plugin-include": "workspace:*",
@@ -27,6 +27,7 @@
     "@deepseek-ai/dsh-compaction-basic": "workspace:*",
     "@deepseek-ai/dsh-compaction-tool-result-pruner": "workspace:*",
     "@deepseek-ai/dsh-connector": "workspace:*",
+    "@deepseek-ai/dsh-connector-carbon": "workspace:*",
     "@deepseek-ai/dsh-connector-file": "workspace:*",
     "@deepseek-ai/dsh-connector-nocobase": "workspace:*",
     "@deepseek-ai/dsh-cordis-host-runner": "workspace:*",
@@ -52,6 +53,10 @@
     "@deepseek-ai/dsh-kb-graph": "workspace:*",
     "@deepseek-ai/dsh-kb-graph-sqlite": "workspace:*",
     "@deepseek-ai/dsh-kb-sqlite": "workspace:*",
+    "@deepseek-ai/dsh-kb-weknora": "workspace:*",
+    "@deepseek-ai/dsh-graph-neo4j": "workspace:*",
+    "@deepseek-ai/dsh-ontology-induction": "workspace:*",
+    "@deepseek-ai/dsh-tool-graph": "workspace:*",
     "@deepseek-ai/dsh-kg-build": "workspace:*",
     "@deepseek-ai/dsh-lakehouse": "workspace:*",
     "@deepseek-ai/dsh-lakehouse-duckdb": "workspace:*",
@@ -109,6 +114,7 @@
     "@deepseek-ai/dsh-tool-bash": "workspace:*",
     "@deepseek-ai/dsh-tool-bash-persistent": "workspace:*",
     "@deepseek-ai/dsh-tool-call-timeout-policy": "workspace:*",
+    "@deepseek-ai/dsh-tool-carbon": "workspace:*",
     "@deepseek-ai/dsh-tool-connector": "workspace:*",
     "@deepseek-ai/dsh-tool-cordis": "workspace:*",
     "@deepseek-ai/dsh-tool-fs": "workspace:*",
@@ -119,9 +125,9 @@
     "@deepseek-ai/dsh-tool-lakehouse": "workspace:*",
     "@deepseek-ai/dsh-tool-lsp": "workspace:*",
     "@deepseek-ai/dsh-tool-nocobase": "workspace:*",
+    "@deepseek-ai/dsh-tool-present-card": "workspace:*",
     "@deepseek-ai/dsh-tool-pwsh": "workspace:*",
     "@deepseek-ai/dsh-tool-pwsh-persistent": "workspace:*",
-    "@deepseek-ai/dsh-tool-present-card": "workspace:*",
     "@deepseek-ai/dsh-tool-ralph": "workspace:*",
     "@deepseek-ai/dsh-tool-session-query": "workspace:*",
     "@deepseek-ai/dsh-tool-skill": "workspace:*",
@@ -143,8 +149,6 @@
     "@deepseek-ai/dsh-web-fetch-http": "workspace:*",
     "@deepseek-ai/dsh-workflow-worker-thread": "workspace:*",
     "pdf-lib": "^1.17.1",
-    "unpdf": "^1.2.0",
-    "@deepseek-ai/dsh-connector-carbon": "workspace:*",
-    "@deepseek-ai/dsh-tool-carbon": "workspace:*"
+    "unpdf": "^1.2.0"
   }
 }

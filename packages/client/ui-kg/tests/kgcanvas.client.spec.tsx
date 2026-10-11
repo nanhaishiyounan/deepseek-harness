@@ -17,7 +17,13 @@ import { KgView } from '../src/client/KgView.tsx'
 import type { KgClientState } from '../src/client/kgStore.ts'
 import { communityColorOf } from '../src/client/presentation.ts'
 import { zh } from '../src/client/locales.ts'
-import { bindStoreHook, GLOBAL_KIT, SESSION_KIT, sessionListState } from './kg-fixture.client.ts'
+import { bindStoreHook, GLOBAL_KIT, SESSION_KIT, sessionListState, obsidianStubCalls } from './kg-fixture.client.ts'
+// The Obsidian canvas statically imports react-force-graph-2d (the
+// single-artifact client contract); jsdom cannot run its canvas measurement,
+// so every spec that renders the kg page stubs the module.
+vi.mock('react-force-graph-2d', () => ({
+  default: () => null,
+}))
 
 const t = ((key: string, params?: Record<string, string | number>) => {
   const template = zh[key as keyof typeof zh]
@@ -359,6 +365,7 @@ describe('KgGraphCanvas renderer stack (mocked sigma)', () => {
         {...SESSION_KIT}
         inputActions={{ setDraft: vi.fn() } as never}
         useKg={bindStoreHook(store) as never}
+        graphCalls={obsidianStubCalls as never}
         refresh={vi.fn()} ensureDefaultView={vi.fn()} walk={vi.fn()} expandNode={vi.fn()} searchSeeds={vi.fn()}
         loadPanel={vi.fn()} queryPhrase={vi.fn().mockRejectedValue(new Error('offline'))} selectNode={vi.fn()}
         toggleTypeFilter={vi.fn()} clearTypeFilter={vi.fn()} loadFeed={vi.fn()} loadCommunities={vi.fn()}

@@ -1,0 +1,35 @@
+[neo4j] available=true health={"ok":true}
+[neo4j] cleared existing graph for a reproducible run
+[lake] item: 344 rows from lakehouse parquet → 43 distinct ids (synced_carbon)
+[lake] customer: 6 rows via READ_ONLY postgres attach → 6 distinct ids
+[lake] supplier: 111 rows from lakehouse parquet → 15 distinct ids (synced_carbon)
+[lake] salesOrder: 208 rows from lakehouse parquet → 26 distinct ids (synced_carbon)
+[lake] purchaseOrder: 160 rows from lakehouse parquet → 20 distinct ids (synced_carbon)
+[lake] salesOrderLines: 36 rows via READ_ONLY postgres attach → 36 distinct ids
+[lake] purchaseOrderLines: 21 rows via READ_ONLY postgres attach → 21 distinct ids
+[lake] job: 22 rows from lakehouse parquet → 22 distinct ids (synced_carbon)
+[lake] itemStockQuantities: 160 rows from lakehouse parquet → 20 distinct ids (synced_carbon)
+[lake] location: 2 synthesized rows (distinct locationId)
+[kg] corpus graph: 1139 nodes / 794 live edges
+[islands] baseline (corpus graph only): {"nodes":1139,"edges":794,"islands":436,"largestComponent":489}
+[reconcile] nodes item: source=43 planned=43 ok=true
+[reconcile] nodes customer: source=6 planned=6 ok=true
+[reconcile] nodes supplier: source=15 planned=15 ok=true
+[reconcile] nodes salesOrder: source=26 planned=26 ok=true
+[reconcile] nodes purchaseOrder: source=20 planned=20 ok=true
+[reconcile] nodes job: source=22 planned=22 ok=true
+[reconcile] nodes location: source=2 planned=2 ok=true
+[reconcile] edges salesOrder.orderedBy: source=26 planned=26 ok=true
+[reconcile] edges purchaseOrder.orderedFrom: source=20 planned=20 ok=true
+[reconcile] edges job.fulfillsOrder: source=19 planned=19 ok=true
+[reconcile] edges job.producesItem: source=22 planned=22 ok=true
+[reconcile] edges salesOrderLines.orderedItem: source=36 planned=36 ok=true
+[reconcile] edges purchaseOrderLines.purchasedItem: source=21 planned=21 ok=true
+[reconcile] edges itemStockQuantities.stockedIn: source=20 planned=20 ok=true
+[reconcile] overall ok=true
+[etl] business graph written: 134 nodes / 164 edges
+[bridge] legacy experts: 33 + services: 52; name bridges total: 223
+[landed] orderedItem: planned=36 landed=34 (dropped endpoints: 2)
+[islands] after (unified graph): {"nodes":1358,"edges":1179,"islands":375,"largestComponent":581}
+[islands] computed cross-check: {"nodes":1358,"edges":1181,"islands":375,"largestComponent":581}
+[probe] customer→order→item paths: 5 sample=[{"customer":"NovaSat Networks","so":"SO000015","item":"Titanium Propellant Tank 4L"},{"customer":"NovaSat Networks","so":"SO000019","item":"Solenoid Valve Low-Pressure"}]

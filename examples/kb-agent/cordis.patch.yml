@@ -130,12 +130,28 @@
     - id: kb
       name: '@deepseek-ai/dsh-kb'
       config:
+        # B4 dual-provider routing: WeKnora serves retrieval by default; set
+        # DSH_KB_STORE=sqlite to pin the local store instead.
+        storeProvider: !!js "process.env.DSH_KB_STORE ?? 'weknora'"
         # Relevance threshold from the 2026-09-02 calibration (Agent Note):
         # deep-rank pruning semantics — 0.015 keeps every top-5 single-path
         # gold hit (their scores stay >= 1/66) while trimming fused ranks
         # past ~60; the dual-path-confirmation alternative (0.017) would cut
         # the 28% single-path recall and is deliberately not taken.
         minRelevanceScore: 0.015
+
+    # The WeKnora store provider (B4 primary retrieval): the v0.8.2 sidecar
+    # behind WEKNORA_BASE_URL serves hybrid retrieval with rerank; on a
+    # transport outage the embedded sqlite fallback (the same file kb-sqlite
+    # opens below) serves with a degraded-retrieval notice, and rejected
+    # requests (bad key, out-of-scope KB) fail loud either way.
+    - id: kb-weknora
+      name: '@deepseek-ai/dsh-kb-weknora'
+      config:
+        baseUrl: !!js "process.env.WEKNORA_BASE_URL ?? 'http://localhost:18081'"
+        apiKey: !!js "process.env.WEKNORA_API_KEY ?? ''"
+        allowFallback: true
+        fallbackPath: examples/kb-agent/workspace/kb.sqlite
 
     - id: web-fetch-http
       name: '@deepseek-ai/dsh-web-fetch-http'
@@ -235,6 +251,13 @@
     # this example patch only carries the tool row.)
     - id: tool-lakehouse
       name: '@deepseek-ai/dsh-tool-lakehouse'
+
+    # The graph tool row: kg_graph_query runs guarded read-only Cypher over
+    # the unified graph; kg_ontology reads the append-only ontology version
+    # chain. The graph-neo4j store itself rides the dsh-web-app bundle patch
+    # (credentials: DSH_NEO4J_URL / DSH_NEO4J_USER / DSH_NEO4J_PASSWORD).
+    - id: tool-graph
+      name: '@deepseek-ai/dsh-tool-graph'
 
     # The connector seam: the file-set provider exposes one drop-in directory
     # as datasets (routed by the shared data router at transfer time), and

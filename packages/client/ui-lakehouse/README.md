@@ -6,4 +6,13 @@ The lakehouse workbench surface: a sidebar nav row (order 12.5, between connecto
 
 ## Model Experience
 
-The workbench shares the lakehouse's model-facing vocabulary: tables list as `lake.<schema>.<table>` reference forms, the SQL editor accepts exactly what `lakehouse_query` accepts (single read statements), and rejected writes render the same reason text the model sees.
+None, as this client page renders model-independent reads only; every prompt, schema, and tool surface lives in server packages.
+
+#### KV Cache effect
+
+Independent of the model request stream: client page reads never enter a request, so this package neither appends to nor invalidates any reusable request prefix.
+
+
+## Known Limitations and Deferred Work
+
+- Deferred: deeper lineage and quality surfaces ride the B6 catalog governance batch; the panel currently reads the lake snapshot per request.

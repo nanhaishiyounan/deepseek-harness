@@ -15,6 +15,9 @@
       "path": "../../kb/kb"
     },
     {
+      "path": "../../graph/graph-neo4j"
+    },
+    {
       "path": "../../kb/tool-kb"
     },
     {

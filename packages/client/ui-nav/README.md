@@ -25,9 +25,14 @@ Register into `sidebar.nav` (list, root scope): `{ id, order, label }` plus your
 
 ## Model Experience
 
-The nav changes how a person reaches function pages, not what the model sees: view-context projections (`viewStateReport`), view actions, and deep links (kg seeds) are untouched. A row click resolves to the same `setView` the header tabs used.
+None, as this client page renders model-independent reads only; every prompt, schema, and tool surface lives in server packages.
 
-## Known Limitations
+#### KV Cache effect
+
+Independent of the model request stream: client page reads never enter a request, so this package neither appends to nor invalidates any reusable request prefix.
+
+
+## Known Limitations and Deferred Work
 
 - Activation is best-effort: with no workspace at all, opening the blank session is impossible and the row click lands on the chat hero (parity with the retired footer-action entries).
 - Rows own their icon/label/badge and their own copy of the canonical nav-item CSS; the shell owns only column chrome and ordering.
