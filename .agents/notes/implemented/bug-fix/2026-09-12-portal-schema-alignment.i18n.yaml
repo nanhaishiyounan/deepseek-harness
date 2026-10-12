@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/bug-fix/2026-09-12-portal-schema-alignment.md
-2026-09-12-portal-schema-alignment.md: 966d5f2f513447a18f10475d138dc1f75c430ce4
-2026-09-12-portal-schema-alignment.zh.md: 80f988f9191b5f72ad4cecb03420f0482606d92b
+2026-09-12-portal-schema-alignment.md: 870953871130490936aea6c0cd53b7ade7a82313
+2026-09-12-portal-schema-alignment.zh.md: af7d0f07339fd7766f24a8bf9e22188060050193

@@ -1,7 +1,7 @@
 /**
  * The business page's client-session state: the cached collection roster
- * (`nocobase.listMeta`), the selected collection, and its cached first row
- * page (`nocobase.list`). Conversation-first by design: edits and creates
+ * (`carbon.listMeta`), the selected collection, and its cached first row
+ * page (`carbon.list`). Conversation-first by design: edits and creates
  * never touch this store — they hand off to the conversation and the nb_*
  * tools land the change; the page's retry re-reads.
  * @module @deepseek-ai/dsh-client-ui-business/client/bizStore

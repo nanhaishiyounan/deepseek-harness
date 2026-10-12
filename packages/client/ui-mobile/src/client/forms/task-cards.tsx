@@ -6,28 +6,26 @@
  * the phase the card-state derivation replays from the durable log.
  */
 
-import { useEffect, useMemo, useState, type JSX } from 'react'
-import type { NocobaseFieldView } from '@deepseek-ai/dsh-host-apiproxy/api'
+import { useMemo, useState, type JSX } from 'react'
+import type { FieldMetaView } from '../fieldControls.ts'
 import { Button, Dialog, Steps } from 'antd-mobile'
 import { CheckCircle2, CircleX, FilePenLine } from 'lucide-react'
 import { portalContainer } from '../portal.ts'
 import type { FormDraft, PushReceipt } from '../form-draft.ts'
-import { fieldControlOf, type FieldControlSpec } from '../fieldControls.ts'
-import { rpc } from '../rpc.ts'
+import { fieldControlOf } from '../fieldControls.ts'
 import { Badge } from '../ui.tsx'
-import { useRelationLabel } from './relation-label.ts'
 import { FieldWidget } from './FieldWidget.tsx'
 import css from './task-cards.module.css'
 
 /** One collection's field map (name → schema field). */
-export type CollectionFieldMeta = ReadonlyMap<string, NocobaseFieldView>
+export type CollectionFieldMeta = ReadonlyMap<string, FieldMetaView>
 /** Every collection's field map (collection → fields). */
 export type FieldMetas = ReadonlyMap<string, CollectionFieldMeta>
 
 /** Draft-card props: the AI draft, the meta, the edits, and the review handoff. */
 export interface DraftCardProps {
   readonly draft: FormDraft
-  readonly meta: CollectionFieldMeta
+  readonly meta?: CollectionFieldMeta
   readonly values: Readonly<Record<string, string>>
   readonly onEdit: (name: string, value: string) => void
   readonly onSubmitReview: () => void
@@ -42,7 +40,7 @@ export interface DraftCardProps {
  */
 export function DraftCard({ draft, meta, values, onEdit, onSubmitReview, disabled }: DraftCardProps): JSX.Element {
   const specs = useMemo(
-    () => Object.keys(draft.fields).map(name => fieldControlOf(draft.collection, name, meta.get(name))),
+    () => Object.keys(draft.fields).map(name => fieldControlOf(draft.collection, name, meta?.get(name))),
     [draft, meta],
   )
   return (
@@ -85,7 +83,7 @@ export function DraftCard({ draft, meta, values, onEdit, onSubmitReview, disable
 /** Review-card props: the draft, final values, and the confirm/reject sinks. */
 export interface ReviewCardProps {
   readonly draft: FormDraft
-  readonly meta: CollectionFieldMeta
+  readonly meta?: CollectionFieldMeta
   readonly confirmedFields: Readonly<Record<string, string>>
   readonly onConfirm: () => void
   readonly onReject: () => void
@@ -107,13 +105,13 @@ export function ReviewCard(
       name,
       value,
       original: draft.fields[name],
-      spec: fieldControlOf(draft.collection, name, meta.get(name)),
+      spec: fieldControlOf(draft.collection, name, meta?.get(name)),
     }))
   }, [draft, meta, confirmedFields])
   return (
     <section className={css.card} data-testid="review-card" aria-label="提交确认卡">
       <header className={css.header}>
-        <CardTitle className={css.title} draft={draft} meta={meta} values={confirmedFields} />
+        <CardTitle className={css.title} draft={draft} values={confirmedFields} />
         <Badge tone="warning">待人工审核</Badge>
       </header>
       <p className={css.collection}>确认后写入业务表 {draft.collection}</p>
@@ -124,11 +122,11 @@ export function ReviewCard(
             <span className={css.diffValues}>
               {row.original !== undefined && row.original !== row.value && (
                 <del className={css.diffOld}>
-                  <RelationLabelValue spec={row.spec} value={row.original} />
+                  {row.original}
                 </del>
               )}
               <span className={row.original !== undefined && row.original !== row.value ? css.diffNew : css.diffSame}>
-                <RelationLabelValue spec={row.spec} value={row.value} />
+                {row.value}
               </span>
             </span>
           </div>
@@ -212,7 +210,7 @@ export function RejectedCard({ draft, onRedraft, disabled }: RejectedCardProps):
 /** Receipt-card props: the draft, the meta, the confirmed finals, and the receipt. */
 export interface ReceiptCardProps {
   readonly draft: FormDraft
-  readonly meta: CollectionFieldMeta
+  readonly meta?: CollectionFieldMeta
   /** Final field values the confirm-push locked in (the landed row's sources). */
   readonly finalFields: Readonly<Record<string, string>>
   readonly receipt: PushReceipt
@@ -225,14 +223,13 @@ export interface ReceiptCardProps {
  * @param props - the draft, the meta, the confirmed finals, and the parsed push receipt.
  * @returns the receipt card.
  */
-export function ReceiptCard({ draft, meta, finalFields, receipt }: ReceiptCardProps): JSX.Element {
-  const row = useReceiptRow(receipt)
+export function ReceiptCard({ draft, finalFields, receipt }: ReceiptCardProps): JSX.Element {
   return (
     <section className={css.card} data-testid="receipt-card" aria-label="落库回执卡">
       <header className={css.header}>
         <span className={css.titleRow}>
           <CheckCircle2 size={14} aria-hidden="true" className={css.successIcon} />
-          <CardTitle className={css.title} draft={draft} meta={meta} values={finalFields} suffix=" · 已落库" />
+          <CardTitle className={css.title} draft={draft} values={finalFields} suffix=" · 已落库" />
         </span>
         <Badge tone="success">已提交</Badge>
       </header>
@@ -246,87 +243,14 @@ export function ReceiptCard({ draft, meta, finalFields, receipt }: ReceiptCardPr
       <p className={css.collection}>
         业务表 {receipt.collection} · 行 id={String(receipt.rowId)}
       </p>
-      <div className={css.receiptBody} data-testid="receipt-row">
-        {row === undefined
-          ? <span className={css.receiptHint}>正在实查业务表行…</span>
-          : <pre className={css.receiptPre}>{JSON.stringify(row, null, 2)}</pre>}
-      </div>
+      <p className={css.receiptHint}>该单据随 NocoBase 业务系统退役，此处保留历史回执。</p>
     </section>
   )
-}
-
-/** Read the landing row back from the business surface (实查). */
-function useReceiptRow(receipt: PushReceipt): unknown {
-  const [row, setRow] = useState<unknown>(undefined)
-  useEffect(() => {
-    const alive = { current: true }
-    void (async () => {
-      try {
-        const page = await rpc('nocobase.list', {
-          collection: receipt.collection,
-          filter: [{ field: 'id', op: 'eq', value: receipt.rowId }],
-          page: 1,
-          page_size: 1,
-        })
-        if (alive.current && page.rows.length > 0) setRow(page.rows[0])
-      } catch {
-        // The receipt text still renders; the row read-back is verification.
-      }
-    })()
-    return () => { alive.current = false }
-  }, [receipt])
-  return row
-}
-
-/** The title's relation-name group: the trailing full-width paren group（…）. */
-const TITLE_NAME_GROUP = /^(.*)（[^（）]*）$/
-
-/**
- * Map the title's relation-name group to the resolved label. A resolved
- * non-empty label rewrites the group; every unresolved state (read in
- * flight, missed, empty, or degraded to the raw id) shows the `#id`
- * placeholder — the title never keeps the AI-prefilled name the card could
- * not verify.
- * @param title - the draft's static title text.
- * @param label - the relation value's resolved target-row label (undefined while unresolved, the raw id after degradation).
- * @param rawId - the relation slot's current raw value (undefined, empty, or non-numeric when there is no id to stand in).
- * @returns the title with the relation-name group mapped to the label or the raw-id placeholder.
- */
-function titleWithRelationName(title: string, label: string | undefined, rawId: string | undefined): string {
-  if (rawId === undefined || rawId === '' || !Number.isFinite(Number(rawId))) return title
-  if (!TITLE_NAME_GROUP.test(title)) return title
-  const open = title.lastIndexOf('（')
-  const degraded = String(Number(rawId))
-  const resolved = label !== undefined && label !== '' && label !== degraded ? label : `#${rawId}`
-  return `${title.slice(0, open)}（${resolved}）`
-}
-
-/**
- * The draft's title relation-name slot: the first relation field (draft field
- * order) with the value the card holds, falling back to the draft's prefilled
- * value when the card's map does not carry the field.
- * @param draft - the card's draft (field order and prefill fallback).
- * @param meta - the collection's schema fields.
- * @param values - the field values the card holds (the confirmed finals).
- * @returns the relation field's spec and value, or undefined when the draft has no relation field.
- */
-function relationNameSlot(
-  draft: FormDraft,
-  meta: CollectionFieldMeta,
-  values: Readonly<Record<string, string>>,
-): { readonly spec: FieldControlSpec; readonly value: string } | undefined {
-  for (const [name, prefill] of Object.entries(draft.fields)) {
-    const spec = fieldControlOf(draft.collection, name, meta.get(name))
-    if (spec.kind !== 'relation') continue
-    return { spec, value: values[name] ?? prefill }
-  }
-  return undefined
 }
 
 /** Card-title props: the draft, the meta, the card's field values, the span class, and the suffix. */
 interface CardTitleProps {
   readonly draft: FormDraft
-  readonly meta: CollectionFieldMeta
   readonly values: Readonly<Record<string, string>>
   /** The title span's css-modules class (undefined when the stylesheet key misses). */
   readonly className: string | undefined
@@ -341,20 +265,9 @@ interface CardTitleProps {
  * against the landed row. Resolution rides the shared relation-label read
  * (one retry, then the raw id); drafts without a numeric relation slot keep
  * the title verbatim.
- * @param props - the draft, the meta, the card's field values (the confirmed finals), the title span's class, and the trailing suffix.
+ * @param props - the draft and the title span's class.
  * @returns the title span with the relation-name group mapped.
  */
-function CardTitle({ draft, meta, values, className, suffix }: CardTitleProps): JSX.Element {
-  const slot = useMemo(() => relationNameSlot(draft, meta, values), [draft, meta, values])
-  const label = useRelationLabel(slot?.spec, slot?.value)
-  return <span className={className}>{titleWithRelationName(draft.title, label, slot?.value)}{suffix}</span>
-}
-
-/** A relation value rendered as its target-row label (raw id while unresolved or degraded). */
-function RelationLabelValue(
-  { spec, value }: { readonly spec: { readonly kind: string; readonly target: string | undefined }; readonly value: string },
-): JSX.Element {
-  const label = useRelationLabel(spec, value)
-  if (spec.kind !== 'relation') return <>{value}</>
-  return <>{label ?? value}</>
+function CardTitle({ draft, className, suffix }: CardTitleProps): JSX.Element {
+  return <span className={className}>{draft.title}{suffix}</span>
 }

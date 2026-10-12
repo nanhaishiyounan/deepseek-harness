@@ -124,7 +124,7 @@ export async function collectInventory(deps: CollectorDeps): Promise<readonly Go
       return rows.map(row => ({
         source: 'ontology' as const,
         qualifiedName: `ontology.revision-${String(row.id)}`,
-        name: String(row.summary ?? `revision ${String(row.id)}`),
+        name: typeof row.summary === 'string' ? row.summary : `revision ${String(row.id)}`,
         detail: `kg-graph registry revision ${String(row.id)}`,
       }))
     } finally {
@@ -164,7 +164,7 @@ export async function collectInventory(deps: CollectorDeps): Promise<readonly Go
       qualifiedName: `kb.${String(kb.name)}`,
       name: String(kb.name),
       ...(kb.doc_count === undefined ? {} : { count: Number(kb.doc_count) }),
-      ...(kb.chunk_num === undefined ? {} : { detail: `chunks ${String(kb.chunk_num)}` }),
+      ...(typeof kb.chunk_num === 'number' ? { detail: `chunks ${kb.chunk_num}` } : {}),
     }))
   }))
 
@@ -178,7 +178,7 @@ export async function collectInventory(deps: CollectorDeps): Promise<readonly Go
     const body = await response.json() as { schemas?: { name?: unknown }[] }
     const tables: GovernanceAsset[] = []
     for (const schema of body.schemas ?? []) {
-      const name = String(schema.name ?? '')
+      const name = typeof schema.name === 'string' ? schema.name : ''
       const tableResponse = await fetch(`${deps.gravitinoUrl}/api/metalakes/${deps.metalake}/catalogs/carbon-business/schemas/${name}/tables`, {
         headers: { Accept: 'application/json' },
         signal: AbortSignal.timeout(6000),

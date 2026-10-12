@@ -17,7 +17,7 @@ export const inject = ['invariants']
 /**
  * No runtime invariant: a pure-consumer plugin registering presentation
  * entries into host-declared slots plus its locale dictionaries — its inject
- * face is stateless RPC wrappers over the nocobase read domain; it emits no
+ * face is stateless RPC wrappers over the carbon read domain; it emits no
  * cordis events and owns no cross-plugin mutable state.
  */
 const install: InvariantInstaller = () => {}

@@ -4,9 +4,9 @@
  * rail), the in-page ask bar (a conversation draft hand-off with an inline
  * hop-link, never a forced view jump), the conversation-first entity card
  * stream with per-record inline edits on the low-risk field whitelist
- * (备注/数量/日期 over `nocobase.update`; higher-risk changes keep the
+ * (备注/数量/日期 over `carbon.update`; higher-risk changes keep the
  * nb_update confirmation flow), the SRM supplier-360 zone and the order
- * status badges, the auxiliary table view, and the NocoBase external entry.
+ * status badges, the auxiliary table view, and the carbon external entry.
  * @module @deepseek-ai/dsh-client-ui-business/client/BizView
  */
 

@@ -25,13 +25,6 @@ function fakeApi(overrides: Partial<{ muxFrames: MuxFrame[]; hostFrames: HostFra
       ruleUpsert: kbRefuse, ruleDelete: kbRefuse, evaluate: kbRefuse, events: kbRefuse,
       webhookTest: kbRefuse,
     },
-    orders: {
-      create: kbRefuse,
-      get: kbRefuse,
-      list: kbRefuse,
-      fulfill: kbRefuse,
-      async download() { return new Response('stub', { status: 500 }) },
-    },
     assets: {
       list: kbRefuse,
       detail: kbRefuse,
@@ -44,7 +37,6 @@ function fakeApi(overrides: Partial<{ muxFrames: MuxFrame[]; hostFrames: HostFra
     },
     kg: {
       graphPage: kbRefuse,
-      mappings: kbRefuse,
       schema: kbRefuse,
       query: kbRefuse,
       search: kbRefuse,
@@ -65,16 +57,6 @@ function fakeApi(overrides: Partial<{ muxFrames: MuxFrame[]; hostFrames: HostFra
       ingest: kbRefuse,
       ingestUrl: kbRefuse,
       upload: kbRefuse,
-    },
-    nocobase: {
-      listMeta: kbRefuse,
-      list: kbRefuse,
-      get: kbRefuse,
-      update: kbRefuse,
-      alertAct: kbRefuse,
-      signIn: kbRefuse,
-      mobileWorkSave: kbRefuse,
-      mobileWorkDelete: kbRefuse,
     },
     carbon: {
       listMeta: kbRefuse,

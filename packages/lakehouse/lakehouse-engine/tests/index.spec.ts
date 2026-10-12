@@ -51,7 +51,7 @@ describe('lakehouse-engine plugin', () => {
       expect(ctx.lakehouseEngine.available()).toBe(true)
       const outcome = await ctx.lakehouseEngine.query('SELECT 41 + 1 AS answer')
       expect(outcome.rows).toEqual([[42]])
-      expect(outcome.columns).toEqual([{ name: 'answer', sqlType: expect.any(String) }])
+      expect(outcome.columns).toEqual([{ name: 'answer', sqlType: expect.any(String) as unknown }])
     } finally {
       await ctx.fiber.dispose()
       await rm(root, { recursive: true, force: true })

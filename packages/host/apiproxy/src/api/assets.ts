@@ -1,12 +1,11 @@
 /**
  * assets domain contract: the data-asset market surface over the host's
  * optional `ctx.connector` capability. Discovery summaries (datasets plus
- * expert services) project into product-card views; ordering stays on the
- * orders domain (`orders.create` with the service dataset id) — this domain
- * is read-only. Like orders, the seam is deliberately NOT in the gateway's
- * inject list: a deployment without the connector capability keeps a working
- * gateway, and every method fails with the structured `assets-not-composed`
- * error until `assetsEnabled` opts the domain in.
+ * expert services) project into product-card views; this domain is
+ * read-only. The seam is deliberately NOT in the gateway's inject list: a
+ * deployment without the connector capability keeps a working gateway, and
+ * every method fails with the structured `assets-not-composed` error until
+ * `assetsEnabled` opts the domain in.
  */
 
 import type { RpcRequest, RpcResponse } from './rpc.ts'
@@ -38,7 +37,7 @@ export interface AssetView {
   readonly deliverable?: string
   /** One-line service summary, present on service entries. */
   readonly summary?: string
-  /** Ordering id for `orders.create`, present on orderable service entries. */
+  /** Service identity, present on service entries. */
   readonly service_id?: string
   /** Affiliation line, present on expert-profile entries. */
   readonly expert_org?: string
@@ -59,8 +58,6 @@ export interface AssetsStatsView {
   readonly products: number
   /** Registered providers. */
   readonly providers: number
-  /** Orders placed in the current calendar month (0 when no orders seam is composed). */
-  readonly monthly_orders: number
   /** Featured cards from the seed file; empty without one. */
   readonly featured: readonly AssetFeaturedView[]
 }

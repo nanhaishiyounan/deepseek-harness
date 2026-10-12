@@ -51,6 +51,11 @@ function mountShell({ collapsed = false, width = 300 }: { collapsed?: boolean; w
           footerActionOwner = owner
           return <div data-testid="footer-action-seat" data-wide={owner.wide} />
         }
+        // The nav menu slot takes the wide flag but no expand request; it is a
+        // distinct seat so only sidebar.workspaces renders as the region.
+        if (key === 'sidebar.nav.host') {
+          return <div data-testid="nav-host-seat" data-wide={owner.wide} />
+        }
         regionOwner = owner as SidebarSectionOwnerProps
         return <div data-testid="region" data-wide={owner.wide} />
       }) as SidebarRootComponentProps['renderSlot']}

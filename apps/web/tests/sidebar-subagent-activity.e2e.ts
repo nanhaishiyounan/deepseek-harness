@@ -85,7 +85,8 @@ describe('web e2e: sidebar subagent activity', () => {
       'sidebar subagent activity staged adapter',
     )
     const cwd = join(scaffold.workspaceCwd, 'workspace')
-    await mkdir(cwd)
+    // recursive: the scaffold may have pre-created the workspace directory.
+    await mkdir(cwd, { recursive: true })
     parentHandle = await scaffold.ctx.agents.create({
       sessionId: SessionId('sidebar-activity-owner'),
       meta: { cwd },

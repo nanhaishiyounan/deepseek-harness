@@ -76,8 +76,8 @@ describe('NavRoot menu block', () => {
 })
 
 describe('ChatNavItem', () => {
-  const activeState: NavState = { screen: { sessionId: 's1' as never, view: 'chat' }, switchable: true }
-  const otherState: NavState = { screen: { sessionId: 's1' as never, view: 'kb' }, switchable: true }
+  const activeState: NavState = { screen: { sessionId: 's1', view: 'chat' }, switchable: true }
+  const otherState: NavState = { screen: { sessionId: 's1', view: 'kb' }, switchable: true }
   const unresolvedState: NavState = { screen: undefined, switchable: false }
 
   function mountItem(props: { wide: boolean; state: NavState }) {

@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-09-26-b3-procurement-full-loop.md
-2026-09-26-b3-procurement-full-loop.md: f39650f17cbb3d701fb72fa1a3f267e1ef55590c
-2026-09-26-b3-procurement-full-loop.zh.md: 780f43f2e617d64639d844333ff7e6af26f767cf
+2026-09-26-b3-procurement-full-loop.md: 5bd69eecbf39fdd5df2acb02a97ca2acfdfd8825
+2026-09-26-b3-procurement-full-loop.zh.md: d759464ef0f0bb1ac7254ba578f7429e68be518d

@@ -33,6 +33,75 @@ Source: [`packages/connector/connector/src/index.ts`](../../packages/connector/c
 
 Generated from source by `scripts/gen-cordis-catalog.ts` (verified fresh by `pnpm run verify-cordis-catalog` in doc-sync; regenerate with `pnpm run gen-cordis-catalog`) — the language sides differ only in locale-specific paired document paths. Signature blocks use a `ts cordis-catalog` fence and keep the original source JSDoc; dispatch modes are defined in the [primer](../cordis-primer.md#dispatch-modes), and the framework-inherited `ctx` API lives in [cordis-api/inherited.md](../cordis-api/inherited.md).
 
+<a id="ctxcarbon--carbonservice"></a>
+
+### `ctx.carbon` — `CarbonService`
+
+The carbon capability surface (`ctx.carbon`): the catalog projection plus the table CRUD over the live session client. The service stays registered without credentials; every data method then throws the structured no-credentials refusal (the documented degraded mode).
+
+```ts cordis-catalog
+/**
+ * The credential-backed usability check.
+ * @returns true when a credential-backed client composed; `false` in the degraded mode.
+ */
+available(): boolean
+
+/**
+ * The live session (authenticating on demand).
+ * @param signal - caller cancellation.
+ * @returns the ensured GoTrue session; refused in the degraded mode.
+ */
+async session(signal?: AbortSignal): Promise<CarbonSession>
+
+/**
+ * The business-table catalog projection.
+ * @returns the module groups (navigation order) and the full table metadata roster.
+ */
+catalog(): { modules: readonly { id: string; label: string }[]; tables: readonly CarbonTableMeta[] }
+
+/**
+ * Query one catalog table's rows.
+ * @param table - the camelCase table name (must be on the catalog).
+ * @param options - filters, ordering, paging.
+ * @param signal - caller cancellation.
+ * @returns the matched row count and the page of rows.
+ */
+async list( table: string, options: CarbonListOptions = {}, signal?: AbortSignal, ): Promise<{ count: number; rows: Record<string, unknown>[] }>
+
+/**
+ * Read one catalog row by its key column value (the composite-key stock
+ * table addresses by `itemId`; every other table by its prefixed `id`).
+ * @param table - the camelCase table name (must be on the catalog).
+ * @param id - the row key (`item_WgSb…`, or an itemId for the stock table).
+ * @param signal - caller cancellation.
+ * @returns the row, or undefined when no row matches the key.
+ */
+async get(table: string, id: string, signal?: AbortSignal): Promise<Record<string, unknown> | undefined>
+
+/**
+ * Insert one row into a `write`-risk catalog table (read-tier tables
+ * refuse: postings like stock movements belong to composite
+ * server-functions with no Data API surface).
+ * @param table - the camelCase table name (must be on the catalog at write risk).
+ * @param values - the row's column values (companyId injected when absent).
+ * @param signal - caller cancellation.
+ * @returns the inserted row as the server stored it.
+ */
+async create(table: string, values: Record<string, unknown>, signal?: AbortSignal): Promise<Record<string, unknown>>
+
+/**
+ * Patch one row of a `write`-risk catalog table.
+ * @param table - the camelCase table name (must be on the catalog at write risk).
+ * @param id - the row id.
+ * @param values - the columns to change.
+ * @param signal - caller cancellation.
+ * @returns the patched row as the server stored it.
+ */
+async update(table: string, id: string, values: Record<string, unknown>, signal?: AbortSignal): Promise<Record<string, unknown>>
+```
+
+Source: [`packages/connector/connector-carbon/src/index.ts`](../../packages/connector/connector-carbon/src/index.ts)
+
 <a id="ctxconnector--connectorruntime"></a>
 
 ### `ctx.connector` — `ConnectorRuntime`
@@ -99,59 +168,4 @@ async transfer(request: ConnectorTransferRequest, signal?: AbortSignal): Promise
 ```
 
 Source: [`packages/connector/connector/src/index.ts`](../../packages/connector/connector/src/index.ts)
-
-<a id="ctxorders--ordersruntime"></a>
-
-### `ctx.orders` — `OrdersRuntime`
-
-The orders service: order lifecycle plus the deliverable pipeline, bound to one NocoBase source of truth. Registered as `ctx.orders`.
-
-```ts cordis-catalog
-/**
- * Resolve the ordered service, snapshot identity and pricing, and land a
- * `pending` order at the source of truth.
- * @param request - the ordered service, brief, and optional client name.
- * @param signal - caller cancellation.
- * @returns the stored pending order.
- */
-async create(request: OrderCreateRequest, signal?: AbortSignal): Promise<OrderRecord>
-
-/**
- * Read one order by its primary key.
- * @param orderId - the NocoBase orders row id.
- * @param signal - caller cancellation.
- * @returns the stored order, or `undefined` when the source has no such row.
- */
-async get(orderId: number | string, signal?: AbortSignal): Promise<OrderRecord | undefined>
-
-/**
- * List orders (newest rows last, source order, one page).
- * @param signal - caller cancellation.
- * @returns every stored order row on the page.
- */
-async list(signal?: AbortSignal): Promise<readonly OrderRecord[]>
-
-/**
- * Run the deliverable pipeline for one order: transition to `generating`,
- * retrieve kb references, draft the proposal (model stream or the named
- * template fallback), typeset it through expert-pdf, land the PDF under
- * the configured deliverables directory, and write `delivered` with the
- * path back at the source. A failure writes `failed` with the cause and
- * rethrows; a `failed` order may be fulfilled again (retry).
- * @param orderId - the NocoBase orders row id.
- * @param signal - caller cancellation.
- * @returns the stored order in `delivered` status.
- */
-async fulfill(orderId: number | string, signal?: AbortSignal): Promise<OrderRecord>
-
-/**
- * Read one delivered order's PDF deliverable.
- * @param orderId - the NocoBase orders row id.
- * @param signal - caller cancellation.
- * @returns the landed file's path and bytes.
- */
-async readDeliverable(orderId: number | string, signal?: AbortSignal): Promise<OrderDeliverableFile>
-```
-
-Source: [`packages/expert/expert-orders/src/index.ts`](../../packages/expert/expert-orders/src/index.ts)
 <!-- END GENERATED cordis-surface -->

@@ -29,10 +29,9 @@ export interface ApprovalCardProps {
   readonly externalState?: ApprovalResultPayload['state'] | undefined
 }
 
-/** The one state's view row; the closed union always hits a row, the literal fallback keeps the type string-tight. */
+/** The one state's view row; the closed Record covers every state of the union. */
 function stateViewOf(state: ApprovalResultPayload['state']): { seal: string; label: string; chip: string } {
-  const view = APPROVAL_STATE_VIEW[state]
-  return view !== undefined ? view : { seal: '草', label: '草稿', chip: chipOf(css.approvalChipDraft) }
+  return APPROVAL_STATE_VIEW[state]
 }
 
 /** Narrow one CSS-module class name to a string (the modules' index signature is optional-typed). */

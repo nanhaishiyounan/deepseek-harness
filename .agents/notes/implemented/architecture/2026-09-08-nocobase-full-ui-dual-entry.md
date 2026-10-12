@@ -18,7 +18,7 @@ With the artifacts in place, :13000 serves the full UI and `/api/*` from one por
 
 A new `build` step: idempotence marker is both `dist/client/index.html` and `dist/client/v/index.html` existing (legacy shell + modern client); `NOCOBASE_FORCE_BUILD=1` rebuilds anyway. The `all` chain becomes install → build → start → init → verify; `verify` asserts the full UI (`GET /` 200 html containing `__nocobase_public_path__` — not the 404 shell); `start` warns toward build when the artifacts are missing (REST still works; no failure). Measured full build ~23 min (per-package dts + tsup + two rsbuild passes; the client stage alone 1290s).
 
-### Three iframe-proxy fixes (packages/host/webserver/src/nocobase-proxy.ts)
+### Three iframe-proxy fixes (`nocobase-proxy.ts`, removed in the B7 retirement)
 
 - `rewriteNocobaseHtml`: buffer and rewrite the HTML entry — `(href|src)="/x"` gains the `/nocobase` prefix (protocol-relative `//` untouched), and `__webpack_public_path__`/`__nocobase_public_path__`/`__nocobase_api_base_url__`/`__nocobase_ws_path__` re-root, so in-frame fetches, lazy chunks, and API calls all ride the proxy; content-length is recomputed.
 - `rewriteNocobasePluginManifest`: a structural rewrite applied only to the JSON response of `/api/pm:listEnabled` (`data[].url`/`clientV2Url` prefixed when root-absolute); anything else passes through untouched — the module loader's URLs come from that one manifest, and no other surface emits root paths (the HTML is rewritten; the API base is re-rooted).

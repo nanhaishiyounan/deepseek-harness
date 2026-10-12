@@ -18,3 +18,15 @@
 ## 配置
 
 全部 `Config` 字段（cordis.yml）：`dsn`（默认 nocobase PostgreSQL 源；B3 换 carbon）、`sourceSchema`、`targetSchema`（`synced_nocobase`）、`tables`、`watermarkCandidates`、`scheduleIntervalMs`（0 关闭调度）、`legacyIngest`（enabled / parquetDir / targetSchema `legacy_nocobase` / sourceDsn / prefixes / standaloneTables —— 默认 B0 业务表集）。启动入湖失败按配置错误处理（fails loud）；调度轮失败仅记日志，服务保持下一轮就绪。
+
+## 模型体验
+
+间接：经湖仓工具套注册；同步的行仅经后续读取到达模型，本包不拥有任何 prompt、schema 或工具。
+
+#### KV Cache 影响
+
+独立于模型请求流：结果以工具结果到达后续请求，本包既不追加也不失效任何可复用请求前缀。
+
+## 已知限制与遗留工作
+
+- 遗留：水位 append 之外的真 CDC（删除传播）；SeaTunnel Zeta 线仍是参照。

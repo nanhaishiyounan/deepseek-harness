@@ -186,10 +186,10 @@ export function applyCbCollectionsTool(ctx: Context, carbon: CarbonService, time
     },
     timeoutMs,
     isConcurrencySafe: () => true,
-    async execute() {
+    execute() {
       if (!carbon.available()) throw new Error(CarbonService.NO_CREDENTIALS)
       const catalog = carbon.catalog()
-      return {
+      return Promise.resolve({
         collections: catalog.tables.map(entry => ({
           table: entry.table,
           label: entry.label,
@@ -198,7 +198,7 @@ export function applyCbCollectionsTool(ctx: Context, carbon: CarbonService, time
           id_column: entry.idColumn,
           key_columns: [...entry.keyColumns],
         })),
-      }
+      })
     },
     presentCall: () => readCallCard('cb_collections', ''),
     presentResult: (_args, result: ToolResult): GenericResultView | undefined => {
@@ -280,14 +280,14 @@ export function applyCbListTool(ctx: Context, carbon: CarbonService, timeoutMs: 
     isConcurrencySafe: () => true,
     async execute(args, exec) {
       if (!carbon.available()) throw new Error(CarbonService.NO_CREDENTIALS)
-      const meta = carbonTableOf(String(args.table))
-      if (meta === undefined) throw new Error(`cb_list: table ${String(args.table)} is not on the business catalog (see cb_collections)`)
+      const meta = carbonTableOf(args.table)
+      if (meta === undefined) throw new Error(`cb_list: table ${args.table} is not on the business catalog (see cb_collections)`)
       const filter = parseFilter(args.filter as CbFilterInput[] | undefined)
-      const limit = args.limit === undefined ? CB_LIST_DEFAULT_LIMIT : Number(args.limit)
+      const limit = args.limit === undefined ? CB_LIST_DEFAULT_LIMIT : args.limit
       if (!Number.isInteger(limit) || limit < 1 || limit > CB_LIST_MAX_LIMIT) throw new Error(`cb_list: limit must be an integer 1-${CB_LIST_MAX_LIMIT}`)
-      const offset = args.offset === undefined ? 0 : Number(args.offset)
+      const offset = args.offset === undefined ? 0 : args.offset
       if (!Number.isInteger(offset) || offset < 0) throw new Error('cb_list: offset must be a non-negative integer')
-      const order = args.order === undefined ? undefined : (args.order as string[]).map(String)
+      const order = args.order === undefined ? undefined : args.order.map(String)
       const result = await carbon.list(meta.table, {
         filter,
         ...order === undefined ? {} : { order },
@@ -303,7 +303,7 @@ export function applyCbListTool(ctx: Context, carbon: CarbonService, timeoutMs: 
         rows: result.rows.map(jsonRow),
       }
     },
-    presentCall: args => readCallCard('cb_list', String(args.table ?? '')),
+    presentCall: args => readCallCard('cb_list', args.table),
     presentResult: (_args, result: ToolResult): GenericResultView | undefined => {
       if (result.isError) return undefined
       const meta = result.meta as { table?: unknown; count?: unknown }
@@ -351,15 +351,15 @@ export function applyCbGetTool(ctx: Context, carbon: CarbonService, timeoutMs: n
     isConcurrencySafe: () => true,
     async execute(args, exec) {
       if (!carbon.available()) throw new Error(CarbonService.NO_CREDENTIALS)
-      const table = String(args.table)
+      const table = args.table
       const meta = carbonTableOf(table)
       if (meta === undefined) throw new Error(`cb_get: table ${table} is not on the business catalog (see cb_collections)`)
-      const id = String(args.id)
+      const id = args.id
       if (id.length === 0) throw new Error('cb_get: id must be a non-empty string')
       const row = await carbon.get(table, id, exec.signal)
       return { table, row: row === undefined ? null : jsonRow(row) }
     },
-    presentCall: args => readCallCard('cb_get', `${String(args.table ?? '')}#${String(args.id ?? '')}`),
+    presentCall: args => readCallCard('cb_get', `${args.table}#${args.id}`),
     presentResult: (_args, result: ToolResult): GenericResultView | undefined => {
       if (result.isError) return undefined
       const meta = result.meta as { table?: unknown }
@@ -399,14 +399,14 @@ export function applyCbCreateTool(ctx: Context, carbon: CarbonService, timeoutMs
           row: { type: 'object', required: true, additionalProperties: true },
         },
       },
-      render: (_args, value) => [{ type: 'text', text: `已创建 ${String((value as CbCreateToolValue).table)}：${JSON.stringify((value as CbCreateToolValue).row)}` }],
+      render: (_args, value) => [{ type: 'text', text: `已创建 ${(value as CbCreateToolValue).table}：${JSON.stringify((value as CbCreateToolValue).row)}` }],
       presentationMeta: (_args, value) => ({ table: (value as CbCreateToolValue).table }),
     },
     timeoutMs,
     isConcurrencySafe: () => false,
     async execute(args, exec) {
       if (!carbon.available()) throw new Error(CarbonService.NO_CREDENTIALS)
-      const table = String(args.table)
+      const table = args.table
       const meta = carbonTableOf(table)
       if (meta === undefined) throw new Error(`cb_create: table ${table} is not on the business catalog (see cb_collections)`)
       if (meta.risk !== 'write') throw new Error(`cb_create: table ${table}（${meta.label}）是只读层——过账类单据走 carbon 的过账工作流，不在工具写面上`)
@@ -416,7 +416,7 @@ export function applyCbCreateTool(ctx: Context, carbon: CarbonService, timeoutMs
       const row = await carbon.create(table, values, exec.signal)
       return { table, row: jsonRow(row) }
     },
-    presentCall: args => writeCallCard('cb_create', `${String(args.table ?? '')} ${JSON.stringify(args.values ?? {})}`),
+    presentCall: args => writeCallCard('cb_create', `${args.table} ${JSON.stringify(args.values ?? {})}`),
     presentResult: (_args, result: ToolResult): GenericResultView | undefined => {
       if (result.isError) return undefined
       const meta = result.meta as { table?: unknown }
@@ -473,7 +473,7 @@ export function applyCbUpdateTool(ctx: Context, carbon: CarbonService, timeoutMs
       },
       render: (_args, value) => {
         const projected = value as CbUpdateToolValue
-        const lines = projected.changes.map(change => `- ${change.field}: ${JSON.stringify(change.before) ?? 'null'} → ${JSON.stringify(change.after) ?? 'null'}`)
+        const lines = projected.changes.map(change => `- ${change.field}: ${JSON.stringify(change.before)} → ${JSON.stringify(change.after)}`)
         return [{ type: 'text', text: [`已更新 ${projected.table} ${projected.id}：`, ...lines].join('\n') }]
       },
       presentationMeta: (_args, value) => {
@@ -485,11 +485,11 @@ export function applyCbUpdateTool(ctx: Context, carbon: CarbonService, timeoutMs
     isConcurrencySafe: () => false,
     async execute(args, exec) {
       if (!carbon.available()) throw new Error(CarbonService.NO_CREDENTIALS)
-      const table = String(args.table)
+      const table = args.table
       const meta = carbonTableOf(table)
       if (meta === undefined) throw new Error(`cb_update: table ${table} is not on the business catalog (see cb_collections)`)
       if (meta.risk !== 'write') throw new Error(`cb_update: table ${table}（${meta.label}）是只读层——过账类单据走 carbon 的过账工作流，不在工具写面上`)
-      const id = String(args.id)
+      const id = args.id
       if (id.length === 0) throw new Error('cb_update: id must be a non-empty string')
       if (args.values === null || typeof args.values !== 'object' || Array.isArray(args.values)) throw new Error('cb_update: values must be an object of column values')
       const values = { ...(args.values as Record<string, unknown>) }
@@ -505,7 +505,7 @@ export function applyCbUpdateTool(ctx: Context, carbon: CarbonService, timeoutMs
       }))
       return { table, id, row: jsonRow(row), changes }
     },
-    presentCall: args => writeCallCard('cb_update', `${String(args.table ?? '')}#${String(args.id ?? '')} ${JSON.stringify(args.values ?? {})}`),
+    presentCall: args => writeCallCard('cb_update', `${args.table}#${args.id} ${JSON.stringify(args.values ?? {})}`),
     presentResult: (_args, result: ToolResult): GenericResultView | undefined => {
       if (result.isError) return undefined
       const meta = result.meta as { table?: unknown; fields?: unknown }

@@ -4,13 +4,12 @@
 - customs-export.csv → lakehouse table customs_export (6 rows, replaced=false)
 - visit-note.md → kb document 1 (1 chunks, embedded=false)
 
-## lakehouse_tables
-customs_export — 6 rows, parquet (updated <ts>)
-  region TEXT
-  month TEXT
-  amount_t DOUBLE
+## lakehouse_list_tables
+| table | rows |
+| --- | --- |
+| lake.uploads.customs_export | 6 |
 
-Write lakehouse_query SQL against these tables; quote identifiers with double quotes when a column name needs it.
+Query these tables with lakehouse_query (SELECT only), referencing them exactly as listed. Use lakehouse_schema for one table's columns and sample rows.
 
 ## lakehouse_query
 | region | total_amount |
@@ -19,7 +18,7 @@ Write lakehouse_query SQL against these tables; quote identifiers with double qu
 | 中亚 | 218.75 |
 | 欧盟 | 790.5 |
 
-Data source: lakehouse table customs_export
+Data source: lakehouse table uploads.customs_export
 
 Answer from the rows above; name the source table(s) in your answer.
 

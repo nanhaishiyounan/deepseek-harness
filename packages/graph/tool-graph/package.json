@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-tool-graph",
   "description": "Model-facing graph tool suite over `ctx.neo4jGraph`: `kg_graph_query` (one read-only Cypher statement under the statement-shape guard) and `kg_ontology` (the append-only ontology version chain)",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "publishConfig": {
     "access": "public"
   },

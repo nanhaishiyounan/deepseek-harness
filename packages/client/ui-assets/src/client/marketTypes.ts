@@ -1,6 +1,6 @@
 /**
  * Wire-contract mirrors the market surfaces render: the `assets.list` /
- * `assets.stats` rows and the `orders.create` receipt as the gateway returns
+ * `assets.stats` rows as the gateway returns
  * them. Snake_case on purpose — these are the wire's own field names.
  * @module @deepseek-ai/dsh-client-ui-assets/client/marketTypes
  */
@@ -36,30 +36,5 @@ export interface MarketFeaturedRow {
 export interface MarketStatsRow {
   readonly products: number
   readonly providers: number
-  readonly monthly_orders: number
   readonly featured: readonly MarketFeaturedRow[]
-}
-
-/** Order lifecycle statuses the receipt badge renders (the orders wire set). */
-export type MarketOrderStatus = 'pending' | 'generating' | 'delivered' | 'failed'
-
-/** One placed-order receipt row (`orders.create` value). */
-export interface MarketOrderReceipt {
-  readonly id: number
-  readonly order_no: string
-  readonly service_name: string
-  readonly status: MarketOrderStatus
-  readonly created_at: string
-}
-
-/** One order row as the `orders.list` wire projects it (the rendered subset). */
-export interface MarketOrderRow {
-  readonly id: number
-  readonly order_no: string
-  readonly service_name: string
-  readonly price?: string
-  readonly status: MarketOrderStatus
-  readonly error?: string
-  readonly generated_at?: string
-  readonly created_at: string
 }

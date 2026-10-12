@@ -203,7 +203,6 @@ describe('market and connector pages over the real seams (keyless)', () => {
       '## assets.stats',
       `- products: ${stats.result.value.products}`,
       `- providers: ${stats.result.value.providers}`,
-      `- monthly_orders: ${stats.result.value.monthly_orders}`,
       ...stats.result.value.featured.map(card => `- featured: ${card.title} | ${card.blurb} | ${card.tags.join(',')}`),
       '## connectors.list',
       ...providers.result.value.providers.map(provider => `- ${provider.id} · available=${provider.available} · ${provider.capabilities.join('+')}`),

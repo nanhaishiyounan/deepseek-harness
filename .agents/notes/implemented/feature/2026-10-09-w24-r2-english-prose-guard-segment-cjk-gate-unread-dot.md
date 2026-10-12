@@ -2,6 +2,8 @@
 
 Status: implemented
 
+English | [中文](2026-10-09-w24-r2-english-prose-guard-segment-cjk-gate-unread-dot.zh.md)
+
 ## Problem
 
 W24-R1 验证遗留唯一 BLOCKING：`potential`/`reviewing`/`preferred`/`rejected`/`eliminated` 五个供应商生命周期词仍留在无门的 `WORD_TERMS_CI`——它们都是英文日常词，英文散文叶（`The preferred supplier list is attached`）会被整体替换成人话词（`优选`），W24-R1 只给 `frozen`/`qualified` 上了 CJK 门，没覆盖这五个。附带三条 ADVISORY：jargon 断言面缺英文 fixture、CJK 门整叶粒度在混排叶（`frozen goods 已冻结`）上误伤英文半、未读点 `--right: -8px` 在 375px 审读里偏移过远。

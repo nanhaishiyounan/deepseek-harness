@@ -1,6 +1,6 @@
 # dsh-connector-carbon
 
-[English](README.md) | 中文
+English | [中文](README.zh.md)
 
 Carbon connector capability (`ctx.carbon`): the HTTP provider over the carbon community Data API (session cookie + PostgREST/kong), with credentials resolved from `CARBON_URL`/`CARBON_ANON_KEY`/`CARBON_EMAIL`/`CARBON_PASSWORD`.
 

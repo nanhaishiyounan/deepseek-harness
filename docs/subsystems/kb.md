@@ -93,6 +93,13 @@ interface KbSearchHit {
    * not score). One meaning in both modes — the threshold's score basis.
    */
   readonly score?: number
+  /**
+   * Runtime provenance annotation from the store that produced the hit — for
+   * example a fallback store reporting the primary store was unreachable.
+   * Consumers may surface it; the seam hoists the first hit's notice onto the
+   * search result.
+   */
+  readonly notice?: string
 }
 ```
 
@@ -107,6 +114,11 @@ interface KbSearchResult {
   /** Embed identity used for the query vector, in hybrid mode. */
   readonly embedModel?: string
   readonly results: readonly KbSearchHit[]
+  /**
+   * Store-level runtime annotation hoisted from the first hit (see
+   * {@link KbSearchHit.notice}); absent when no store annotated its hits.
+   */
+  readonly notice?: string
 }
 ```
 
@@ -682,56 +694,127 @@ async listCorefRejects(): Promise<ReadonlySet<string>>
 
 Source: [`packages/kb/kb-graph/src/index.ts`](../../packages/kb/kb-graph/src/index.ts)
 
-<a id="ctxkgbuild--kgbuildruntime"></a>
+<a id="ctxneo4jgraph--neo4jgraphservice"></a>
 
-### `ctx.kgBuild` — `KgBuildRuntime`
+### `ctx.neo4jGraph` — `Neo4jGraphService`
 
-The pipeline service. One instance per context; `run()` executes one full pipeline pass (structured sources, then extraction) and resolves with the per-scope report. Fails loud on a missing seam: every enabled source requires its service at run time.
+The Neo4j graph store service. One instance per context; the driver opens lazily-resilient at `open()` and every method fails loud with `NEO4J_DRIVER_UNAVAILABLE` while a missing password or unreachable server keeps the service degraded (one operator warning at composition).
 
 ```ts cordis-catalog
-/**
- * Execute one full pipeline pass: registry mapping + structured ingestion,
- * then corpus extraction, alignment, and watermark persistence.
- * @param options - cooperative cancellation.
- * @returns the per-scope run report.
+/** True when the driver is live.
+ * @returns driver liveness.
  */
-async run(options: RunOptions = {}): Promise<KgBuildRunReport>
+available(): boolean
+
+/** The read-only query row cap (the truncation marker's threshold).
+ * @returns the configured row cap.
+ */
+rowCap(): number
+
+/** The recorded open failure (the degraded-mode operator warning's text).
+ * @returns the failure text, or undefined after a healthy open.
+ */
+openFailure(): string | undefined
 
 /**
- * The newest persisted build-run ledger row (the report evidence that
- * outlives the process).
- * @returns the row, or undefined before the first persisted run.
+ * Open the driver and verify connectivity. A missing password or an
+ * unreachable server records the failure instead of throwing: the
+ * composition stays up and every method fails loud on use.
  */
-async latestRun(): Promise<KgBuildRunRecord | undefined>
+async open(): Promise<void>
+
+/** Close the driver (idempotent). */
+close(): void
 
 /**
- * One incremental pass: snapshot the five source systems' watermark rows,
- * run the pipeline, and diff the snapshots — the per-scope evidence that
- * only changed scopes reprocessed (unchanged scopes fingerprint-skip inside
- * run(); this wraps the run with the before/after diff the incremental
- * acceptance reads).
- * @param options - cooperative cancellation.
- * @returns the run report plus the changed-scope list.
+ * Run one guarded read-only Cypher statement and collect rows.
+ * @param cypher - the statement text (guard-refused statements throw).
+ * @param params - the statement parameters.
+ * @returns the collected rows (capped at the configured max).
+ * @throws {@link GraphNeo4jError} `NEO4J_DRIVER_UNAVAILABLE` when degraded,
+ * `NEO4J_QUERY_FAILED` on driver errors.
  */
-async runIncremental(options: RunOptions = {}): Promise<KgIncrementalReport>
+async runReadOnly(cypher: string, params?: Readonly<Record<string, unknown>>): Promise<readonly Record<string, unknown>[]>
 
 /**
- * The live quality readout: structural counters straight from the store,
- * plus the persisted metrics' coverage document.
- * @returns the quality report.
+ * Run one write statement (the ETL and ontology-store face; never
+ * model-facing).
+ * @param cypher - the write statement.
+ * @param params - the statement parameters.
+ * @returns the affected counters.
+ * @throws {@link GraphNeo4jError} on the same two codes as reads.
  */
-async qualityReport(): Promise<KgQualityReadout>
+async runWrite(cypher: string, params: Readonly<Record<string, unknown>>): Promise<{ readonly applied: number }>
+
+/** Health probe: connectivity plus a one-row round trip.
+ * @returns the probe outcome.
+ */
+async health(): Promise<{ readonly ok: boolean; readonly server?: string }>
 
 /**
- * The mappings read-out: the loaded file's shape plus the last run's
- * per-collection outcome (the graph tab's rule panel and the apiproxy
- * `kg.mappings` read this).
- * @returns the mappings readout.
+ * Read the global graph (capped at the configured node cap).
+ * @param limit - an explicit cap override.
+ * @returns nodes and edges with computed degrees.
  */
-async mappings(): Promise<KgMappingsReadout>
+async graphGlobal( limit?: number, ): Promise<{ readonly nodes: readonly GraphNodeView[]; readonly edges: readonly GraphEdgeView[]; readonly truncated: boolean }>
+
+/**
+ * Read one node's k-hop neighborhood (the Local Graph query).
+ * @param gid - the seed node's gid.
+ * @param hops - the walk depth (1..3, clamped).
+ * @param limit - the node cap.
+ * @returns the neighborhood's nodes, edges, and truncation flag.
+ */
+async graphLocal( gid: string, hops: number, limit?: number, ): Promise<{ readonly nodes: readonly GraphNodeView[]; readonly edges: readonly GraphEdgeView[]; readonly truncated: boolean }>
+
+/**
+ * Search nodes by name/gid substring (the graph page's locate box).
+ * @param query - the substring.
+ * @param k - the result cap.
+ * @returns the name/gid substring hits.
+ */
+async graphSearch(query: string, k: number = 10): Promise<readonly GraphNodeHit[]>
+
+/**
+ * Read one node's detail: properties plus both incident-relation lists
+ * (the relations/backlink panel's data).
+ * @param gid - the node's gid.
+ * @returns the node with both relation lists, or undefined when absent.
+ */
+async nodeDetail(gid: string): Promise<GraphNodeDetail | undefined>
+
+/**
+ * Whole-graph stats with the island metric (union-find in TS over the
+ * live edge list — the GDS-free connected-component count).
+ * @returns the whole-graph counters.
+ */
+async graphStats(): Promise<GraphStatsView>
+
+/**
+ * Append one ontology version to the version chain (never overwrites:
+ * the previous head loses its `head` flag and gains a `PREV` link from
+ * the new head).
+ * @param doc - the serialized JSON-LD document.
+ * @param meta - the version's identity (id/version/name/source).
+ * @returns the stored version row (with the minted version number).
+ */
+async storeOntologyVersion(doc: OntologyJsonLdDocument, meta: Pick<OntologyVersionMeta, 'id' | 'name' | 'source'>): Promise<OntologyVersionMeta>
+
+/**
+ * List the ontology version chain (newest first).
+ * @returns the chain rows, newest first.
+ */
+async listOntologyVersions(): Promise<readonly OntologyVersionMeta[]>
+
+/**
+ * Fetch one stored ontology document by version id.
+ * @param id - the version id.
+ * @returns the stored JSON-LD document, or undefined when absent.
+ */
+async getOntologyVersion(id: string): Promise<OntologyJsonLdDocument | undefined>
 ```
 
-Source: [`packages/kb/kg-build/src/index.ts`](../../packages/kb/kg-build/src/index.ts)
+Source: [`packages/graph/graph-neo4j/src/index.ts`](../../packages/graph/graph-neo4j/src/index.ts)
 <!-- END GENERATED cordis-surface -->
 
 ## Trusted data space linkage

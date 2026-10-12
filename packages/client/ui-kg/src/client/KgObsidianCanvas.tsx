@@ -105,8 +105,8 @@ export function KgObsidianCanvas({ calls, t }: KgObsidianCanvasProps): JSX.Eleme
     })
     observer.observe(element)
     setSize({ width: element.clientWidth, height: element.clientHeight })
-    return () => observer.disconnect()
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- load once per mount; calls are stable entry bindings
+    return () => { observer.disconnect() }
+    // load once per mount; calls are stable entry bindings
   }, [])
 
   /** Load the global capped graph with stats. */
@@ -251,8 +251,9 @@ export function KgObsidianCanvas({ calls, t }: KgObsidianCanvasProps): JSX.Eleme
                 },
                 nodeLabel: (node: KgObsidianNode) => node.name,
                 linkColor: () => palette().edge,
-                nodeCanvasObject: (node: KgObsidianNode, ctx: CanvasRenderingContext2D, globalScale: number) =>
-                  drawNode(node, ctx, globalScale, hoveredNeighbors?.has(node.id) ?? false, view.mode === 'local' && view.seed.id === node.id),
+                nodeCanvasObject: (node: KgObsidianNode, ctx: CanvasRenderingContext2D, globalScale: number) => {
+                  drawNode(node, ctx, globalScale, hoveredNeighbors?.has(node.id) ?? false, view.mode === 'local' && view.seed.id === node.id)
+                },
               })}
           {hover !== undefined
             ? (

@@ -48,7 +48,7 @@ export interface KgViewInjected {
   expandNode: (nodeId: string) => void
   /** Resolve an entity name to seed hits. */
   searchSeeds: (query: string) => void
-  /** Load or reload the quality panel (stats extension + mappings). */
+  /** Load or reload the quality panel (stats counters). */
   loadPanel: () => void
   /** Compile one phrase server-side and land the walked canvas; resolves with the restatement. */
   queryPhrase: (phrase: string) => Promise<string>
@@ -364,15 +364,6 @@ export function KgView(
                 )}
                 <span className={css.traceHint}>{t('phrase.traceExamples')}</span>
               </div>
-              <span
-                className={css.freshness}
-                data-testid="kg-freshness"
-                title={t('kg.freshnessUnknown')}
-              >
-                {state.panel?.status === 'ready' && state.panel.value.quality.last_run_at !== undefined
-                  ? t('kg.freshness', { time: state.panel.value.quality.last_run_at.slice(0, 19).replace('T', ' ') })
-                  : t('kg.freshnessUnknown')}
-              </span>
               <div className={css.searchBox}>
                 <input
                   className={css.searchInput}
@@ -541,47 +532,7 @@ export function KgView(
                           <dt>{t('quality.conflicts')}</dt>
                           <dd>{String(state.panel.value.quality.conflicts)}</dd>
                         </div>
-                        {state.panel.value.quality.coverage !== undefined && (
-                          <div className={css.qualityRow}>
-                            <dt>{t('quality.coverage')}</dt>
-                            <dd>
-                              {`${String(state.panel.value.quality.coverage.numerator)}/${String(state.panel.value.quality.coverage.denominator)}（${String(Math.round(state.panel.value.quality.coverage.ratio * 100))}%）`}
-                            </dd>
-                          </div>
-                        )}
-                        {state.panel.value.quality.last_run_at !== undefined && (
-                          <div className={css.qualityRow}>
-                            <dt>{t('quality.lastRun')}</dt>
-                            <dd>{state.panel.value.quality.last_run_at.slice(0, 19).replace('T', ' ')}</dd>
-                          </div>
-                        )}
                       </dl>
-                      {state.panel.value.mappings !== undefined && (
-                        <>
-                          <h4 className={css.qualitySubTitle}>{t('quality.mappingsTitle')}</h4>
-                          <ul className={css.mappingList} data-testid="kg-mapping-list">
-                            {state.panel.value.mappings.collections.map((collection) => {
-                              /* v8 ignore start -- the mapping rows render only inside the
-                                 panel-ready branch above; this recheck narrows the closure's
-                                 panel type. */
-                              const run = state.panel?.status === 'ready'
-                                ? state.panel.value.mappings?.lastRun?.collections.find(entry => entry.scope === collection.name)
-                                : undefined
-                              /* v8 ignore stop */
-                              return (
-                                <li key={collection.name} className={css.mappingRow}>
-                                  <span className={css.mappingName}>{collection.name}</span>
-                                  <span className={css.mappingMeta}>
-                                    {run === undefined
-                                      ? t('quality.mappingPending')
-                                      : `${t('quality.mappingNodes')} ${String(run.nodesUpserted)} · ${t('quality.mappingEdges')} ${String(run.edgesUpserted)}`}
-                                  </span>
-                                </li>
-                              )
-                            })}
-                          </ul>
-                        </>
-                      )}
                     </>
                   )}
                 </section>

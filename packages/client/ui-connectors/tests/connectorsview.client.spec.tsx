@@ -29,7 +29,7 @@ const READY: ConnectorClientState = {
     status: 'ready',
     value: [
       { id: 'connector-file', available: true, capabilities: ['discover', 'fetch'] },
-      { id: 'connector-nocobase', available: false, capabilities: ['discover', 'fetch'] },
+      { id: 'connector-experts', available: false, capabilities: ['discover', 'fetch'] },
     ],
   },
   connections: {

@@ -1,0 +1,217 @@
+DSH Local Build
+4ab1d44
+新会话
+工作区
+deepseek-harness
+NovaSat订单五源合规风险评估
+1分钟
+NovaSat合规风险评估
+1小时
+NovaSat五源合规风险评估
+2小时
+NovaSat五源合规风险检查
+2小时
+NovaSat五源合规风险评估
+2小时
+展开其余 40 个会话
+未分组
+对话
+湖仓
+147
+数据治理
+业务管理
+11
+知识库
+59
+数据资产
+3
+连接器
+1
+图谱
+53
+设置
+NovaSat订单五源合规风险评估
+AI 食安合规官
+59
+Session log
+对话
+知识库
+场景
+数据资产
+连接器
+湖仓
+数据治理
+图谱
+业务管理
+轨迹
+移动端预览
+对客户 NovaSat 做一次五源合规风险检查，严格按以下五步依次使用对应数据源的工具完成：
+第1步【业务系统】先用 cb_collections 查看 carbon 业务表目录，再用 cb_list 查询 customer 或 salesOrder 表，找出客户 NovaSat 的记录与订单。
+第2步【知识库】用 kb_search 检索食品原料收货检验/入库验收的 HACCP 或食品安全合规要求。
+第3步【湖仓】用 lakehouse_list_tables 与 lakehouse_query 对湖仓中 NovaSat 相关订单物料做数量与金额汇总（可先 lakehouse_schema 看列）。
+第4步【图谱】用 kg_graph_query（或 kg_subgraph）查 NovaSat 在图谱中的一跳邻域实体。
+第5步【本体】用 kg_ontology 给出物料/订单域的本体 schema 摘要（类、属性、关系）。
+最后综合五源信息给出 NovaSat 订单的合规风险评估结论。
+00:20
+上下文注入
+@deepseek-ai/dsh-system-prompt
+上下文注入
+view-context
+Think
+The user is asking me to do a five-source compliance risk check on a customer called "NovaSat". I need to follow the five steps strictly using the corresponding data source tools. Let me think about this carefully:
+
+我将严格按照五步流程对客户 NovaSat 进行合规风险检查。先并行启动各步骤的初始数据探查（步骤1查表目录、步骤2检索知识库、步骤3列湖仓表、步骤5读本体），它们彼此独立。
+
+Tool call
+cb_collections · {}
+知识库检索
+食品原料 收货检验 入库验收 HACCP 食品安全国家标准 合规要求 · 6 条来源
+Tool call
+lakehouse_list_tables · {}
+Tool call
+kg_ontology · {}
+Think
+Good. Now I have:
+
+四份并行探查已返回。继续推进：步骤1查 customer/salesOrder 找 NovaSat；步骤3查看 salesOrder 类湖仓表 schema 以便后续汇总；步骤4查图谱一跳邻域；步骤2再用更精准关键词复查 HACCP 关键控制点。
+
+失败
+Tool call
+Error: carbon auth unreachable (password): fetch failed
+失败
+Tool call
+Error: carbon auth unreachable (password): fetch failed
+Tool call
+lakehouse_schema · legacy_nocobase
+Tool call
+lakehouse_schema · legacy_nocobase
+Tool call
+lakehouse_schema · synced_carbon
+失败
+Tool call
+Error: kg_subgraph: no graph entity matches any seed (NovaSat); try kg_schema to browse types or a more exact name
+知识库检索
+原料验收 合格证明 检验记录 不合格 投料 GB 14881 HACCP 关键控制点 · 4 条来源
+Think
+Important findings:
+
+碳业务系统（cb_list）不可达：「carbon auth unreachable」——这条工具链我无法完成步骤1的核心读取。改用湖仓与图谱中其他相关表交叉验证 NovaSat 是否存在。同时排查 crm_customers 与 synced_carbon.customer。
+
+Tool call
+lakehouse_schema · legacy_nocobase
+Tool call
+lakehouse_schema · synced_carbon
+数仓查询
+Error: the lakehouse engine operation failed: Error: Binder Error: Referenced column "code" not found in FROM clause!
+数仓查询
+1 行 · 数据表 synced_carbon.customer
+Tool call
+kg_graph_query · MATCH (n) WHERE toLower(coalesce(n.name, '')) CONTAINS 'novasat' OR toLower(coalesce(n.name, '')) CONTAINS 'nova' RETURN n LIMIT 20
+Think
+Excellent! Found NovaSat Networks:
+
+确认客户存在：NovaSat Networks（cust_WkaTXnx4H9LkHPz8A12DFw / CUS000002，USD）。继续汇总其订单、订单行数据并扩展图谱邻域，同时复检 crm_customers。
+
+数仓查询
+0 行 · 数据表 legacy_nocobase.crm_customers
+数仓查询
+7 行 · 数据表 synced_carbon.salesOrder
+数仓查询
+0 行 · 数据表 legacy_nocobase.crm_customers, legacy_nocobase.so_orders
+数仓查询
+0 行 · 数据表 legacy_nocobase.crm_customers, legacy_nocobase.so_order_lines, legacy_nocobase.so_orders
+失败
+Tool call
+Error: kg_subgraph: no graph entity matches any seed (NovaSat Networks); try kg_schema to browse types or a more exact name
+Think
+Important findings:
+
+继续：步骤3完成对 synced_carbon.salesOrder 中 NovaSat 7 条订单的查询；legacy 体系下 crm_customers 不含此客户（说明该客户仅在 carbon 业务系统中存在）。尝试用 gid/别名走图谱一跳、查 deal 与 product 关联、汇总金额与物料。
+
+数仓查询
+1 行 · 数据表 synced_carbon.salesOrder
+数仓查询
+0 行 · 数据表 legacy_nocobase.so_orders
+Tool call
+lakehouse_schema · legacy_nocobase
+Tool call
+lakehouse_schema · legacy_nocobase
+失败
+Tool call
+Error: kg_subgraph: no graph entity matches any seed (lake.carbon:customer:cust_WkaTXnx4H9LkHPz8A12DFw); try kg_schema to browse types or a more exact name
+Tool call
+kg_graph_query · MATCH (c:Customer {name: 'NovaSat Networks'})-[r]-(m) RETURN c.name AS customer, type(r) AS relation, labels(m) AS other_labels, m.name AS other_name, m.gid AS other_gid LIMIT 50
+Think
+Important observations:
+
+发现关键线索：NovaSat Networks 网站为 novasat.com（卫星/航天类公司），且图谱只回返 orderedBy 关系（订单），未见食品类原料关联。继续探查订单行的物料类型、查看是否有产品/合规关系，以及 2 跳邻域。
+
+失败
+Tool call
+Error: the read-only Cypher failed: Variable `m` not defined (line 1, column 136 (offset: 135))
+Tool call
+kg_graph_query · MATCH (c:Customer {name:'NovaSat Networks'})-[r1]-(so:SalesOrder)-[r2]-(p) WHERE p:Product OR p:Item OR p:Material RETURN DISTINCT type(r2) AS relation, labels(p) AS labels, p.name AS name, p.gid AS gid LIMIT 50
+Tool call
+lakehouse_schema · legacy_nocobase
+Tool call
+lakehouse_schema · legacy_nocobase
+Tool call
+lakehouse_schema · legacy_nocobase
+Tool call
+lakehouse_schema · legacy_nocobase
+Think
+Critical finding! The 2-hop query (Customer → SalesOrder → Item) returned 9 items:
+
+发现关键事实：NovaSat 的 7 张订单经图谱 2 跳回返的物料全部是航空航天零部件（钛合金推进剂罐、S 频段转发器、太阳翼、姿控电子板等），属于航天工业。再扫一次 2-3 跳看 NovaSat 是否与合规/原料/添加剂等节点存在关联，并汇总订单总金额。
+
+Tool call
+kg_graph_query · MATCH (c:Customer {name:'NovaSat Networks'})-[:orderedBy]-(so:SalesOrder)-[r2]-(p)-[r3]-(x) WHERE x:ComplianceRequirement OR x:HACCPPrinciple OR x:FoodAdditive OR x:RawMaterial OR x:Standard OR x:Regulation OR x:CCP RETURN DISTINCT x.name AS name, labels(x) AS labels, x.gid AS gid LIMIT 30
+Tool call
+kg_graph_query · MATCH (c:Customer {name:'NovaSat Networks'})-[*2..3]-(x) WHERE x:Standard OR x:ComplianceRequirement OR x:HACCPPrinciple OR x:CCP RETURN DISTINCT labels(x) AS labels, x.name AS name LIMIT 30
+失败
+Tool call
+Error: kg_query: no graph entity matches any seed (NovaSat Networks); try a more exact name, or kg_schema + kg_subgraph
+数仓查询
+Error: the lakehouse engine operation failed: Error: Binder Error: Referenced column "type" not found in FROM clause!
+Think
+OK, the type/active columns aren't in hub_inv_products. But the schema confirms:
+
+确认无食品合规节点关联 NovaSat。补查 synced_carbon.item 中 NovaSat 订单涉及的物料明细，准备出综合结论。
+
+Tool call
+lakehouse_schema · synced_carbon
+数仓查询
+9 行 · 数据表 synced_carbon.item
+Think
+All evidence now in. Let me synthesize:
+
+五源检查全部跑完。先给出一句话小结，再用结构化卡片呈现合规风险评估报告。
+
+NovaSat Networks（CUS000002，USD）经五源交叉验证是航天/卫星行业客户，其 7 张订单的物料全部为卫星零部件，与食品合规体系完全无关；唯一需要处置的是 carbon 业务系统 cb_list 鉴权失败导致步骤1无法直读。
+
+失败
+Tool call
+Error: invalid arguments: payload.table.columns[1].kind 应为 "text"/"money"/"percent"/"count" 之一（收到字符串 "date"）
+Think
+I need to fix the column kind - it should be text notdate.
+
+修正表格列类型后重新提交。
+
+本答案来自
+文档 ×6
+数仓 synced_carbon.customer
+数仓 legacy_nocobase.crm_customers
+数仓 synced_carbon.salesOrder
+数仓 legacy_nocobase.so_orders
+数仓 legacy_nocobase.so_order_lines
+数仓 synced_carbon.item
+仅可从已完成轮次的最后一条消息分支
+00:21 · 用时 1分28秒 · 首 token 1.2秒 · 193 tok/s
+Tool call
+present_card · {"v":3,"type":"report","id":"report-novasat-compliance","title":"NovaSat Networks 五源合规风险检查","subtitle":"客户：CUS000002 ｜ currencyCode：USD ｜ website：novasat.com","metrics":[{"label":"销售订单总数","value":7,"kind":"count"},{"label":"已完成订单","value":4,"kind":"count"},{"label":"涉及物料数","value":9,"kind":"count"},{"label":"食品合规触点","value":0,"kind":"count"},{"label":"币种","value":"USD（单一）","kind":"text"},{"label":"食品合规风险等级","value":"N/A（行业不匹配）","kind":"text","tone":"warning"}],"rows":[{"label":"行业不匹配——航天 vs 食品框架","hint":"GB 2760 / GB 14881 / HACCP 本体 food-mfg-b5 全部围绕食品添加剂与关键控制点，无法覆盖航天零部件","level":"high"},{"label":"cb_list 鉴权不可达","hint":"carbon auth unreachable：步骤 1 需改走湖仓镜像，待运维修复","level":"high"},{"label":"订单状态流转正常","hint":"Confirmed / Closed / Invoiced / To Ship and Invoice / To Invoice / In Progress，无异常中断","level":"low"},{"label":"物料类型单一","hint":"9 个物料均为 _templates/aerospace_satellite/ 模板下的航天 Part，无食品/添加剂/原料类","level":"medium"},{"label":"图谱无食品合规关联","hint":"2-3 跳内未命中 ComplianceRequirement / HACCPPrinciple / FoodAdditive / RawMaterial / Standard / CCP","level":"low"}],"table":{"columns":[{"label":"订单号","kind":"text"},{"label":"订单日期","kind":"text"},{"label":"状态","kind":"text"},{"label":"数据来源","kind":"text"}],"rows":[["SO000004","2026-03-03","Confirmed","synced_carbon.salesOrder"],["SO000008","2025-07-10","Closed","synced_carbon.salesOrder"],["SO000010","2026-09-29","To Ship and Invoice","synced_carbon.salesOrder"],["SO000011","2026-09-09","To Invoice","synced_carbon.salesOrder"],["SO000015","2026-08-10","Invoiced","synced_carbon.salesOrder"],["SO000019","2026-07-31","Closed","synced_carbon.salesOrder"],["SO000022","2026-09-07","In Progress","synced_carbon.salesOrder"]]},"actions":[{"kind":"view","label":"查看客户记录","route":"#/docs/customer"},{"kind":"view","label":"查看销售订单","route":"#/docs/salesOrder"},{"kind":"create-task","label":"登记 carbon 鉴权修复任务","title":"修复 carbon 业务系统 cb_list 鉴权不可达问题"},{"kind":"send","label":"转交航天合规复评","text":"请航天/出口管制合规专员对 NovaSat 7 张订单做行业专项评估（ITAR/EAR、锂电池与推进剂储运、危包编号）"}]}
+AI 食安合规官
+Workspace Write
+MiniMax-M3
+1 轮 · 10 步| LLM 56.5s · 工具调用 1m21s| 首 token 平均 0.8s · 193 tok/s| 缓存命中 85%| 输入 240K tok · 输出 9.4K tok
+详情
+点击消息流中的工具行查看详情

@@ -21,10 +21,10 @@
       "path": "../../attachment/attachment"
     },
     {
-      "path": "../../connector/connector-carbon"
+      "path": "../../connector/connector"
     },
     {
-      "path": "../../connector/connector-nocobase"
+      "path": "../../connector/connector-carbon"
     },
     {
       "path": "../../context/view-context"
@@ -43,9 +43,6 @@
     },
     {
       "path": "../../credentials/credentials"
-    },
-    {
-      "path": "../../expert/expert-orders"
     },
     {
       "path": "../../extensions/cordis-host-runner"

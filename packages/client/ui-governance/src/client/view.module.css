@@ -17,13 +17,13 @@
 .title {
   margin: 0;
   color: var(--dsw-alias-label-primary);
-  font: var(--dsw-font-m-16-bold);
+  font: var(--dsw-font-base-strong-16);
 }
 
 .tagline {
   margin: 4px 0 0;
   color: var(--dsw-alias-label-secondary);
-  font: var(--dsw-font-s-13);
+  font: var(--dsw-font-xs-13);
 }
 
 .columns {
@@ -45,29 +45,29 @@
   gap: 8px;
   padding: 16px;
   border-radius: 12px;
-  background: var(--dsw-alias-fill-primary);
-  border: 1px solid var(--dsw-alias-line-secondary);
+  background: var(--dsw-alias-bg-layer-1);
+  border: 1px solid var(--dsw-alias-border-l1);
 }
 
 .cardTitle {
   margin: 0;
   color: var(--dsw-alias-label-primary);
-  font: var(--dsw-font-s-14-bold);
+  font: var(--dsw-font-s-strong-14);
 }
 
 .hint {
   margin: 0;
   color: var(--dsw-alias-label-secondary);
-  font: var(--dsw-font-s-12);
+  font: var(--dsw-font-xxs-12);
 }
 
 .error {
   margin: 0;
   padding: 8px 10px;
   border-radius: 8px;
-  background: var(--dsw-alias-state-danger-subtle);
-  color: var(--dsw-alias-state-danger-text);
-  font: var(--dsw-font-s-12);
+  background: var(--dsw-alias-state-error-tertiary);
+  color: var(--dsw-alias-state-error-primary);
+  font: var(--dsw-font-xxs-12);
   word-break: break-all;
 }
 
@@ -89,7 +89,7 @@
   gap: 8px;
   margin: 0 0 4px;
   color: var(--dsw-alias-label-primary);
-  font: var(--dsw-font-s-13-bold);
+  font: var(--dsw-font-xs-strong-13);
 }
 
 .tableList {
@@ -113,12 +113,12 @@
   background: none;
   cursor: pointer;
   color: var(--dsw-alias-label-primary);
-  font: var(--dsw-font-s-13);
+  font: var(--dsw-font-xs-13);
   text-align: left;
 }
 
 .tableRow:hover {
-  background: var(--dsw-alias-fill-secondary);
+  background: var(--dsw-alias-interactive-bg-hover);
 }
 
 .tableName {
@@ -132,7 +132,7 @@
 .count {
   flex: none;
   color: var(--dsw-alias-label-secondary);
-  font: var(--dsw-font-s-12);
+  font: var(--dsw-font-xxs-12);
   font-variant-numeric: tabular-nums;
 }
 
@@ -140,11 +140,11 @@
   width: 100%;
   padding: 10px;
   border-radius: 8px;
-  border: 1px solid var(--dsw-alias-line-secondary);
-  background: var(--dsw-alias-fill-primary);
+  border: 1px solid var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-layer-1);
   color: var(--dsw-alias-label-primary);
-  font: var(--dsw-font-s-13);
-  font-family: var(--dsw-font-family-mono, monospace);
+  font: var(--dsw-font-xs-13);
+  font-family: var(--dsw-font-markdown-code-font-family);
   resize: vertical;
 }
 
@@ -163,8 +163,8 @@
   border: none;
   border-radius: 8px;
   background: var(--dsw-alias-state-business-primary);
-  color: var(--dsw-alias-state-business-primary-text);
-  font: var(--dsw-font-s-13);
+  color: var(--dsw-alias-label-primary-inverted);
+  font: var(--dsw-font-xs-13);
   cursor: pointer;
 }
 
@@ -174,36 +174,36 @@
 }
 
 .ghost {
-  background: var(--dsw-alias-fill-secondary);
+  background: var(--dsw-alias-state-business-tertiary);
   color: var(--dsw-alias-label-primary);
 }
 
 .tableScroll {
   overflow-x: auto;
-  border: 1px solid var(--dsw-alias-line-secondary);
+  border: 1px solid var(--dsw-alias-border-l2);
   border-radius: 8px;
 }
 
 .table {
   border-collapse: collapse;
   width: 100%;
-  font: var(--dsw-font-s-12);
+  font: var(--dsw-font-xxs-12);
 }
 
 .table th {
   position: sticky;
   top: 0;
   padding: 6px 10px;
-  background: var(--dsw-alias-fill-secondary);
+  background: var(--dsw-alias-interactive-bg-hover);
   color: var(--dsw-alias-label-secondary);
-  font: var(--dsw-font-s-12-bold);
+  font: var(--dsw-font-xxs-strong-12);
   text-align: left;
   white-space: nowrap;
 }
 
 .table td {
   padding: 5px 10px;
-  border-top: 1px solid var(--dsw-alias-line-secondary);
+  border-top: 1px solid var(--dsw-alias-border-l1);
   color: var(--dsw-alias-label-primary);
   white-space: nowrap;
   max-width: 320px;
@@ -215,7 +215,7 @@
 .tabButton {
   border: none;
   background: transparent;
-  color: var(--dsh-fg-muted, #64748b);
+  color: var(--dsw-alias-label-secondary);
   padding: 6px 14px;
   border-radius: 8px;
   cursor: pointer;
@@ -223,12 +223,12 @@
 }
 
 .tabButton:hover {
-  background: var(--dsh-bg-hover, rgba(30, 78, 140, 0.06));
+  background: var(--dsw-alias-interactive-bg-hover);
 }
 
 .tabActive {
-  background: var(--dsh-accent-soft, rgba(30, 78, 140, 0.12));
-  color: var(--dsh-accent, #1E4E8C);
+  background: var(--dsw-alias-interactive-bg-hover-accent);
+  color: var(--dsw-alias-state-business-primary);
   font-weight: 600;
 }
 
@@ -237,8 +237,8 @@
   padding: 1px 8px;
   border-radius: 999px;
   font-size: 11px;
-  background: var(--dsh-bg-hover, rgba(30, 78, 140, 0.08));
-  color: var(--dsh-fg-muted, #64748b);
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-secondary);
 }
 
 .passTag {
@@ -271,7 +271,7 @@
 .runButton {
   border: none;
   border-radius: 8px;
-  background: var(--dsh-accent, #1E4E8C);
+  background: var(--dsw-alias-state-business-primary);
   color: #fff;
   padding: 6px 16px;
   font-size: 13px;

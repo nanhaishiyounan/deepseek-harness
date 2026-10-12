@@ -502,8 +502,8 @@
   margin: 8px 0 0;
   padding: 8px 12px;
   border-radius: 8px;
-  background: var(--dsw-alias-surface-raised);
-  border-left: 3px solid var(--dsw-alias-accent);
+  background: var(--dsw-alias-bg-overlay);
+  border-left: 3px solid var(--dsw-alias-brand-primary);
   font: var(--dsw-font-xs-13);
   color: var(--dsw-alias-label-secondary);
 }

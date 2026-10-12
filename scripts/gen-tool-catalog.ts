@@ -47,7 +47,6 @@ import * as ToolGraph from '../packages/graph/tool-graph/src/index.ts'
 import ConnectorRuntime from '@deepseek-ai/dsh-connector'
 import type { ConnectorDatasetRef, ConnectorProvider } from '@deepseek-ai/dsh-connector'
 import * as ToolConnector from '@deepseek-ai/dsh-tool-connector'
-import * as ToolNocoBase from '@deepseek-ai/dsh-tool-nocobase'
 import ViewActionService from '@deepseek-ai/dsh-view-actions'
 import * as ViewContext from '@deepseek-ai/dsh-view-context'
 import * as ToolViewActions from '@deepseek-ai/dsh-tool-view-actions'
@@ -301,21 +300,6 @@ const TOOL_PACKAGES: ToolPackage[] = [
     },
     note:
       'connector_discover, connector_fetch, and connector_transfer run under the deployment-bound tenant (the model never supplies one); discovery answers with a grouped listing carrying provider and dataset ids, previews are capped (8 rows / 400 characters), and transfers render the landing receipt with the catalog transfer-record id and the next-step guidance (lakehouse_query over the named table, or kb_search with citations).',
-  },
-  {
-    pkg: '@deepseek-ai/dsh-tool-nocobase',
-    dir: 'tool-nocobase',
-    source: 'packages/connector/tool-nocobase/src/index.ts',
-    requires: ['ctx.tools', 'ctx.systemPrompt'],
-    writes: ['tool/call', 'tool/result'],
-    async mount(ctx) {
-      // No credentials in the catalog harness: the tools register in the
-      // documented degraded mode (each call would refuse with the structured
-      // no-credentials error); the schema surface is what the catalog harvests.
-      await ctx.plugin(ToolNocoBase, {})
-    },
-    note:
-      'nb_collections, nb_list, nb_get, nb_create, and nb_update speak to the deployment\'s NocoBase under a service account (the model never supplies a tenant); the filter vocabulary is closed (eq/in/gt/lt joined by one and/or), and the write tools carry the confirmed-change contract — the system-prompt guidance demands the presented preview / before→after diff and the user\'s explicit go-ahead before nb_create/nb_update run, and their receipts echo the landing id or the field-by-field diff.',
   },
   {
     pkg: '@deepseek-ai/dsh-tool-ask-user',

@@ -12,9 +12,7 @@ import type { SkillsApi } from './skills.ts'
 import type { GoalsApi } from './goals.ts'
 import type { KbApi } from './kb.ts'
 import type { CarbonApi } from './carbon.ts'
-import type { NocobaseApi } from './nocobase.ts'
 import type { DataApi } from './data.ts'
-import type { OrdersApi } from './orders.ts'
 import type { AssetsApi } from './assets.ts'
 import type { LakehouseApi } from './lakehouse.ts'
 import type { ConnectorsApi } from './connectors.ts'
@@ -71,10 +69,6 @@ export interface RpcMethodMap {
   'data.upload': DataApi['upload']
   'data.describeImage': DataApi['describeImage']
   'data.extractText': DataApi['extractText']
-  'orders.create': OrdersApi['create']
-  'orders.get': OrdersApi['get']
-  'orders.list': OrdersApi['list']
-  'orders.fulfill': OrdersApi['fulfill']
   'assets.list': AssetsApi['list']
   'assets.detail': AssetsApi['detail']
   'assets.stats': AssetsApi['stats']
@@ -94,7 +88,6 @@ export interface RpcMethodMap {
   'connectors.list': ConnectorsApi['list']
   'connectors.connections': ConnectorsApi['connections']
   'connectors.transfers': ConnectorsApi['transfers']
-  'kg.mappings': KgApi['mappings']
   'kg.graphPage': KgApi['graphPage']
   'kg.schema': KgApi['schema']
   'kg.query': KgApi['query']
@@ -114,14 +107,6 @@ export interface RpcMethodMap {
   'kb.ingest': KbApi['ingest']
   'kb.ingestUrl': KbApi['ingestUrl']
   'kb.upload': KbApi['upload']
-  'nocobase.listMeta': NocobaseApi['listMeta']
-  'nocobase.list': NocobaseApi['list']
-  'nocobase.get': NocobaseApi['get']
-  'nocobase.update': NocobaseApi['update']
-  'nocobase.alertAct': NocobaseApi['alertAct']
-  'nocobase.signIn': NocobaseApi['signIn']
-  'nocobase.mobileWorkSave': NocobaseApi['mobileWorkSave']
-  'nocobase.mobileWorkDelete': NocobaseApi['mobileWorkDelete']
   'carbon.listMeta': CarbonApi['listMeta']
   'carbon.list': CarbonApi['list']
   'carbon.get': CarbonApi['get']

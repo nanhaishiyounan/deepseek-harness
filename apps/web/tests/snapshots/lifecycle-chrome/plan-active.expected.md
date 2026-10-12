@@ -17,6 +17,15 @@
     - img
     - text: workspace
   - treeitem "New Session" [selected]
+- navigation "Main navigation":
+  - button "Chat"
+  - button "Lakehouse":
+    - img
+    - text: Lakehouse 0
+  - button "Governance":
+    - img
+    - text: Governance
+  - button "Business": Business ?
 - button "Knowledge-base documents":
   - img
   - text: Knowledge base ?
@@ -27,7 +36,6 @@
   - img
   - text: Connectors ?
 - button "graph entity count": Graph ?
-- button "business-object count": Business ?
 - button "Settings":
   - img
   - text: Settings
@@ -54,6 +62,8 @@
     - tab "Scenarios"
     - tab "Data assets"
     - tab "Connectors"
+    - tab "Lakehouse"
+    - tab "Governance"
     - tab "Graph"
     - tab "Business"
     - tab "Trajectory"

@@ -35,21 +35,21 @@ const SUMMARIES: readonly ConnectorDatasetSummary[] = [
     id: 'experts/1',
     title: '张红喜 · 食品出海关税专家',
     kind: 'expert-profile',
-    manifest: { providerId: 'connector-nocobase', description: '漯河市电子商务协会会长', updatedAt: '2026-09-01T00:00:00.000Z' },
+    manifest: { providerId: 'connector-experts', description: '漯河市电子商务协会会长', updatedAt: '2026-09-01T00:00:00.000Z' },
     expert: { org: '漯河市电子商务协会（会长）', domains: ['食品出海', '中亚五国', '俄罗斯'] },
   },
   {
     id: 'expert_services/1',
     title: '中亚货运动线方案',
     kind: 'service',
-    manifest: { providerId: 'connector-nocobase' },
+    manifest: { providerId: 'connector-experts' },
     service: { serviceId: 'expert_services/1', name: '中亚货运动线方案', deliverable: 'PDF 方案', price: '¥8,800/份', summary: '中亚五国货运路线与清关建议' },
   },
   {
     id: 'expert_services/2',
     title: '食品出海合规咨询',
     kind: 'service',
-    manifest: { providerId: 'connector-nocobase' },
+    manifest: { providerId: 'connector-experts' },
     service: { serviceId: 'expert_services/2', name: '食品出海合规咨询', deliverable: 'PDF 方案', price: '¥12,000/份' },
   },
   {
@@ -125,25 +125,6 @@ class MemoryCatalog implements CatalogStore {
   }
 }
 
-/** The orders seam stub: one order this month, one last month. */
-function ordersStub() {
-  const now = new Date()
-  const thisMonth = new Date(now.getFullYear(), now.getMonth(), 2).toISOString()
-  const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 2).toISOString()
-  return {
-    async create() { throw new Error('not exercised') },
-    async get() { throw new Error('not exercised') },
-    async list() {
-      return [
-        { id: 1, orderNo: 'ORD-1', serviceId: 'expert_services/1', serviceName: '中亚货运动线方案', brief: '', status: 'pending' as const, createdAt: thisMonth },
-        { id: 2, orderNo: 'ORD-2', serviceId: 'expert_services/2', serviceName: '食品出海合规咨询', brief: '', status: 'delivered' as const, createdAt: lastMonth },
-      ]
-    },
-    async fulfill() { throw new Error('not exercised') },
-    async readDeliverable() { throw new Error('not exercised') },
-  }
-}
-
 const roots: string[] = []
 
 afterEach(() => {
@@ -156,7 +137,6 @@ async function harness(defaults: {
   seedFile?: 'valid' | 'broken'
   mountConnector?: boolean
   mountLakehouse?: boolean
-  mountOrders?: boolean
 }) {
   const cwd = mkdtempSync(join(tmpdir(), 'dsh-market-domain-'))
   roots.push(cwd)
@@ -169,15 +149,12 @@ async function harness(defaults: {
   if (defaults.mountConnector !== false) {
     await ctx.plugin(ConnectorRuntime, {})
     ctx.connector.registerProvider(new ScriptedProvider('connector-file'))
-    ctx.connector.registerProvider(new ScriptedProvider('connector-nocobase'))
+    ctx.connector.registerProvider(new ScriptedProvider('connector-experts'))
   }
   const catalog = new MemoryCatalog()
   if (defaults.mountLakehouse !== false) {
     await ctx.plugin(LakehouseRuntime, { dataRoot: join(cwd, 'lakehouse') })
     ctx.lakehouse.registerCatalogStore(catalog)
-  }
-  if (defaults.mountOrders !== false) {
-    ctx.provide('orders', ordersStub() as never)
   }
   let seedPath: string | undefined
   if (defaults.seedFile !== undefined) {
@@ -207,7 +184,7 @@ describe('assets domain', () => {
     expect(response.result.value.assets).toHaveLength(4)
     const service = response.result.value.assets.find(asset => asset.dataset_id === 'expert_services/1')
     expect(service).toMatchObject({
-      provider_id: 'connector-nocobase',
+      provider_id: 'connector-experts',
       title: '中亚货运动线方案',
       kind: 'service',
       service_name: '中亚货运动线方案',
@@ -236,12 +213,12 @@ describe('assets domain', () => {
     expect(missing.result).toMatchObject({ ok: false, error: { code: 'assets-asset-missing' } })
   })
 
-  it('counts products, providers, and this-month orders; serves the featured rail from the seed', async () => {
+  it('counts products and providers; serves the featured rail from the seed', async () => {
     const { api } = await harness({ assetsEnabled: true, seedFile: 'valid' })
     const response = await api.assets.stats(request({}))
     expect(response.result.ok).toBe(true)
     if (!response.result.ok) return
-    expect(response.result.value).toMatchObject({ products: 4, providers: 2, monthly_orders: 1 })
+    expect(response.result.value).toMatchObject({ products: 4, providers: 2 })
     expect(response.result.value.featured).toEqual([
       { title: '中亚市场准入指南', blurb: '五国准入法规与认证要点', tags: ['出海', '合规'] },
     ])
@@ -275,13 +252,13 @@ describe('connectors domain', () => {
     const offline = ctx.connector
     // The scripted providers both start available; flip one for the refusal copy.
     const providers = offline.describeProviders()
-    expect(providers.map(provider => provider.id)).toEqual(['connector-file', 'connector-nocobase'])
+    expect(providers.map(provider => provider.id)).toEqual(['connector-experts', 'connector-file'])
     const response = await api.connectors.list(request({}))
     expect(response.result.ok).toBe(true)
     if (response.result.ok) {
       expect(response.result.value.providers).toEqual([
+        { id: 'connector-experts', available: true, capabilities: ['discover', 'fetch'] },
         { id: 'connector-file', available: true, capabilities: ['discover', 'fetch'] },
-        { id: 'connector-nocobase', available: true, capabilities: ['discover', 'fetch'] },
       ])
     }
   })
@@ -290,13 +267,13 @@ describe('connectors domain', () => {
     const { api, catalog } = await harness({ connectorsEnabled: true })
     await catalog.recordTransfer({ source: 'connector-file', destination: 'lakehouse', datasetId: 'orders.csv', rows: 12, transferredAt: '2026-09-04T00:00:00.000Z' })
     await catalog.recordTransfer({ source: 'connector-file', destination: 'kb', datasetId: 'notes.md', rows: 1, transferredAt: '2026-09-05T00:00:00.000Z' })
-    await catalog.recordTransfer({ source: 'connector-nocobase', destination: 'lakehouse', datasetId: 'customs_export', rows: 800, transferredAt: '2026-09-06T00:00:00.000Z' })
+    await catalog.recordTransfer({ source: 'connector-experts', destination: 'lakehouse', datasetId: 'customs_export', rows: 800, transferredAt: '2026-09-06T00:00:00.000Z' })
 
     const connections = await api.connectors.connections(request({}))
     expect(connections.result.ok).toBe(true)
     if (connections.result.ok) {
       expect(connections.result.value.connections).toEqual([
-        { provider_id: 'connector-nocobase', transfers: 1, rows: 800, last_transfer_at: '2026-09-06T00:00:00.000Z' },
+        { provider_id: 'connector-experts', transfers: 1, rows: 800, last_transfer_at: '2026-09-06T00:00:00.000Z' },
         { provider_id: 'connector-file', transfers: 2, rows: 13, last_transfer_at: '2026-09-05T00:00:00.000Z' },
       ])
     }
@@ -305,7 +282,7 @@ describe('connectors domain', () => {
     expect(timeline.result.ok).toBe(true)
     if (timeline.result.ok) {
       expect(timeline.result.value.transfers.map(entry => entry.transfer_id)).toEqual([3, 2, 1])
-      expect(timeline.result.value.transfers[0]).toMatchObject({ source: 'connector-nocobase', destination: 'lakehouse', dataset_id: 'customs_export', rows: 800 })
+      expect(timeline.result.value.transfers[0]).toMatchObject({ source: 'connector-experts', destination: 'lakehouse', dataset_id: 'customs_export', rows: 800 })
     }
   })
 

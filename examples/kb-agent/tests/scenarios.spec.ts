@@ -43,10 +43,12 @@ import * as ToolViewActions from '@deepseek-ai/dsh-tool-view-actions'
 import LakehouseRuntime from '@deepseek-ai/dsh-lakehouse'
 import * as LakehouseSqliteCatalog from '@deepseek-ai/dsh-lakehouse-sqlite-catalog'
 import * as LakehouseDuckDb from '@deepseek-ai/dsh-lakehouse-duckdb'
+import * as LakehouseEngine from '@deepseek-ai/dsh-lakehouse-engine'
+import * as ToolCarbon from '@deepseek-ai/dsh-tool-carbon'
 import * as ToolLakehouse from '@deepseek-ai/dsh-tool-lakehouse'
 import ConnectorRuntime from '@deepseek-ai/dsh-connector'
+import * as ConnectorCarbon from '@deepseek-ai/dsh-connector-carbon'
 import * as ToolConnector from '@deepseek-ai/dsh-tool-connector'
-import * as ToolNocoBase from '@deepseek-ai/dsh-tool-nocobase'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const exampleRoot = join(here, '..')
@@ -93,6 +95,8 @@ async function ensureRoot(): Promise<string> {
 async function boot(presetRoot: string): Promise<Context> {
   const rootDir = await ensureRoot()
   process.env.KB_TEST_DB = join(rootDir, 'kb.sqlite')
+  process.env.LH_TEST_ROOT = join(rootDir, 'lakehouse')
+  process.env.LH_TEST_DB = join(rootDir, 'catalog.sqlite')
   process.env.KB_TEST_PRESET_ROOT = presetRoot
   const context = new Context()
   ctx = context
@@ -124,10 +128,12 @@ async function boot(presetRoot: string): Promise<Context> {
     ['@deepseek-ai/dsh-lakehouse', LakehouseRuntime],
     ['@deepseek-ai/dsh-lakehouse-sqlite-catalog', LakehouseSqliteCatalog],
     ['@deepseek-ai/dsh-lakehouse-duckdb', LakehouseDuckDb],
+    ['@deepseek-ai/dsh-lakehouse-engine', LakehouseEngine],
     ['@deepseek-ai/dsh-tool-lakehouse', ToolLakehouse],
     ['@deepseek-ai/dsh-connector', ConnectorRuntime],
+    ['@deepseek-ai/dsh-connector-carbon', ConnectorCarbon],
     ['@deepseek-ai/dsh-tool-connector', ToolConnector],
-    ['@deepseek-ai/dsh-tool-nocobase', ToolNocoBase],
+    ['@deepseek-ai/dsh-tool-carbon', ToolCarbon],
   ])
   context.loader.internal = {
     version: 'v2',
@@ -206,11 +212,11 @@ describe('kb-agent scenario set (keyless, text-only degraded mode)', () => {
       out.push(`- preset: ${meta.name}`)
 
       // Five-domain composition (J2): every scenario yml must carry the
-      // lakehouse, connector, and NocoBase rows beside tool-kb — the focused
+      // lakehouse, connector, and carbon rows beside tool-kb — the focused
       // persona stays, the data plane rides along. kg_query and assets_browse
       // come from the tool-kb/tool-connector rows themselves.
       const composition = await readFile(join(scenariosRoot, slug, 'agent.cordis.yml'), 'utf8')
-      for (const row of ['dsh-tool-kb', 'dsh-tool-lakehouse', 'dsh-tool-connector', 'dsh-tool-nocobase', 'dsh-tool-view-actions']) {
+      for (const row of ['dsh-tool-kb', 'dsh-tool-lakehouse', 'dsh-tool-connector', 'dsh-tool-carbon', 'dsh-tool-view-actions']) {
         expect(composition, `${slug} mounts ${row}`).toContain(row)
       }
       expect(composition, `${slug} persona keeps the data-plane boundary`).toContain('数据面使用边界')
@@ -228,14 +234,13 @@ describe('kb-agent scenario set (keyless, text-only degraded mode)', () => {
       const agent: Agent = handle.agent
       const names = context.tools.schemas(agent).map(schema => schema.name).sort()
       // The full five-domain surface: kb/kg (tool-kb row, kg_query included),
-      // lakehouse, connector (assets_browse + orders included), NocoBase.
+      // lakehouse, connector (assets_browse + orders included), carbon.
       expect(names, `${slug} tool surface`).toEqual([
         'assets_browse', 'connector_discover', 'connector_fetch', 'connector_transfer',
         'kb_ingest', 'kb_ingest_url', 'kb_search', 'kb_stats',
         'kg_query', 'kg_schema', 'kg_subgraph',
-        'lakehouse_query', 'lakehouse_tables',
-        'nb_approve', 'nb_collections', 'nb_create', 'nb_get', 'nb_list', 'nb_update',
-        'order_create', 'order_status',
+        'lakehouse_list_tables', 'lakehouse_query', 'lakehouse_schema',
+        'cb_collections', 'cb_create', 'cb_get', 'cb_list', 'cb_update',
         'switch_view', 'view_apply', 'view_state_get',
       ].sort())
       out.push(`- tools: ${String(names.length)} tools (five-domain)`)

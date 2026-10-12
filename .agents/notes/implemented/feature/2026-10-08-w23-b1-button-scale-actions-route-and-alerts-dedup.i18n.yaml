@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-10-08-w23-b1-button-scale-actions-route-and-alerts-dedup.md
+2026-10-08-w23-b1-button-scale-actions-route-and-alerts-dedup.md: 9f169929756a23847b0caf7d6f221097a5ec2e86
+2026-10-08-w23-b1-button-scale-actions-route-and-alerts-dedup.zh.md: 9872df30593fe0bbd7b476081f254d63b2c3f3cb

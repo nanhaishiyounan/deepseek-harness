@@ -93,7 +93,10 @@ export interface GovernanceClientStore {
   failEvaluate(message: string): void
 }
 
-/** Create one shared store (the plugin registers it once per session). */
+/**
+ * Create one shared store (the plugin registers it once per session).
+ * @returns the shared governance client store.
+ */
 export function createGovernanceClientStore(): GovernanceClientStore {
   const store = createSnapshotStore<GovernanceClientState>({
     assets: undefined,

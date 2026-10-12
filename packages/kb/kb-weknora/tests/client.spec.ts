@@ -28,15 +28,15 @@ function fakeFetch(routes: Route[]): { fetch: typeof fetch; calls: Recorded[] } 
     if ((init.signal as AbortSignal | undefined)?.aborted === true) {
       throw new DOMException('The operation was aborted', 'AbortError')
     }
-    const url = String(input)
-    const method = String(init.method ?? 'GET')
+    const url = input instanceof Request ? input.url : String(input)
+    const method = init.method ?? 'GET'
     calls.push({ url, init })
     const route = routes.find(entry => entry.match(url, method))
     if (route === undefined) return new Response('{"success":true,"data":[]}', { status: 200 })
     const payload = typeof route.data === 'function' ? route.data(url) : route.data ?? []
     return new Response(JSON.stringify({ success: true, data: payload }), { status: route.status ?? 200 })
   }
-  return { fetch: stub as unknown as typeof fetch, calls }
+  return { fetch: stub, calls }
 }
 
 describe('WeknoraClient', () => {
@@ -64,7 +64,7 @@ describe('WeknoraClient', () => {
   it('parses null and scalar envelopes into the empty-record fallback', async () => {
     for (const body of ['null', '5', '"text"']) {
       const raw = async (): Promise<Response> => new Response(body, { status: 200 })
-      const client = new WeknoraClient({ baseUrl: 'http://host', apiKey: 'key-1', fetch: raw as unknown as typeof fetch })
+      const client = new WeknoraClient({ baseUrl: 'http://host', apiKey: 'key-1', fetch: raw })
       await expect(client.createKnowledgeBase('demo/x')).rejects.toBeInstanceOf(WeknoraApiError)
       await expect(client.createManualKnowledge('kb-1', 't', 'c')).rejects.toBeInstanceOf(WeknoraApiError)
     }
@@ -72,7 +72,7 @@ describe('WeknoraClient', () => {
 
   it('parses an envelope whose data member is a scalar into the record fallback', async () => {
     const raw = async (): Promise<Response> => new Response(JSON.stringify({ success: true, data: 'flat' }), { status: 200 })
-    const client = new WeknoraClient({ baseUrl: 'http://host', apiKey: 'key-1', fetch: raw as unknown as typeof fetch })
+    const client = new WeknoraClient({ baseUrl: 'http://host', apiKey: 'key-1', fetch: raw })
     await expect(client.createManualKnowledge('kb-1', 't', 'c')).rejects.toBeInstanceOf(WeknoraApiError)
   })
 
@@ -94,9 +94,9 @@ describe('WeknoraClient', () => {
   it('aborts through the per-request timeout', async () => {
     const stub = (_input: string | URL | Request, init: RequestInit = {}): Promise<Response> =>
       new Promise<Response>((_resolve, reject) => {
-        init.signal?.addEventListener('abort', () => reject(new DOMException('The operation was aborted', 'AbortError')), { once: true })
+        init.signal?.addEventListener('abort', () => { reject(new DOMException('The operation was aborted', 'AbortError')) }, { once: true })
       })
-    const client = new WeknoraClient({ baseUrl: 'http://host', apiKey: 'key-1', fetch: stub as unknown as typeof fetch, timeoutMs: 10 })
+    const client = new WeknoraClient({ baseUrl: 'http://host', apiKey: 'key-1', fetch: stub, timeoutMs: 10 })
     const error = await client.listKnowledgeBases().then(() => undefined, (cause: unknown) => cause)
     expect(error).toBeInstanceOf(WeknoraApiError)
     expect((error as WeknoraApiError).status).toBeUndefined()
@@ -112,7 +112,7 @@ describe('WeknoraClient', () => {
       }
       return new Response('{"success":true,"data":[]}', { status: 200 })
     }
-    const client = new WeknoraClient({ baseUrl: 'http://host', apiKey: 'key-1', fetch: stub as unknown as typeof fetch })
+    const client = new WeknoraClient({ baseUrl: 'http://host', apiKey: 'key-1', fetch: stub })
     const controller = new AbortController()
     const pending = client.listKnowledgeBases(controller.signal)
     controller.abort(new Error('mid-flight cancellation'))
@@ -140,7 +140,7 @@ describe('WeknoraClient', () => {
 
   it('healthy() answers true on 2xx and false on transport failure', async () => {
     const up = fakeFetch([{ match: url => url.endsWith('/health'), status: 200 }])
-    const down: typeof fetch = (async () => { throw new TypeError('fetch failed') }) as unknown as typeof fetch
+    const down: typeof fetch = async () => { throw new TypeError('fetch failed') }
     expect(await new WeknoraClient({ baseUrl: 'http://host', fetch: up.fetch }).healthy()).toBe(true)
     expect(await new WeknoraClient({ baseUrl: 'http://host', fetch: down }).healthy()).toBe(false)
   })
@@ -150,7 +150,7 @@ describe('WeknoraClient', () => {
     const client = new WeknoraClient({ baseUrl: 'http://host', apiKey: 'key-1', fetch })
     await expect(client.createKnowledgeBase('t/c')).resolves.toEqual({ id: 'kb-9', name: 't/c' })
     expect(String(calls[0]?.init.method)).toBe('POST')
-    expect(String(calls[0]?.init.body)).toBe('{"name":"t/c"}')
+    expect(calls[0]?.init.body).toBe('{"name":"t/c"}')
   })
 
   it('fails loud when the create response carries no id', async () => {
@@ -210,7 +210,7 @@ describe('WeknoraClient', () => {
     const { fetch, calls } = fakeFetch([{ match: url => url.includes('/knowledge/manual'), data: { id: 'kn-1' } }])
     const client = new WeknoraClient({ baseUrl: 'http://host', apiKey: 'key-1', fetch })
     await expect(client.createManualKnowledge('kb-1', '[report] a/b.md', 'body')).resolves.toBe('kn-1')
-    expect(String(calls[0]?.init.body)).toBe('{"title":"[report] a/b.md","content":"body","status":"publish"}')
+    expect(calls[0]?.init.body).toBe('{"title":"[report] a/b.md","content":"body","status":"publish"}')
   })
 
   it('deletes knowledge by id', async () => {
@@ -225,7 +225,7 @@ describe('WeknoraClient', () => {
     const client = new WeknoraClient({ baseUrl: 'http://host', apiKey: 'key-1', fetch })
     const hits = await client.knowledgeSearch('q', ['kb-1', 'kb-2'], 5)
     expect(hits).toEqual([{ id: 'c1', knowledge_id: 'kn-1' }])
-    expect(String(calls[0]?.init.body)).toBe('{"query":"q","knowledge_base_ids":["kb-1","kb-2"],"match_count":5}')
+    expect(calls[0]?.init.body).toBe('{"query":"q","knowledge_base_ids":["kb-1","kb-2"],"match_count":5}')
   })
 
   it('rejects an already-aborted caller signal before any request work', async () => {
@@ -262,19 +262,19 @@ describe('WeknoraClient', () => {
 
   it('parses a bare-array envelope with no success wrapper', async () => {
     const raw = async (): Promise<Response> => new Response(JSON.stringify([{ id: 'c1' }]), { status: 200 })
-    const client = new WeknoraClient({ baseUrl: 'http://host', apiKey: 'key-1', fetch: raw as unknown as typeof fetch })
+    const client = new WeknoraClient({ baseUrl: 'http://host', apiKey: 'key-1', fetch: raw })
     await expect(client.knowledgeSearch('q', ['kb-1'], 3)).resolves.toEqual([{ id: 'c1' }])
   })
 
   it('parses an envelope whose data is not an array into no hits', async () => {
     const raw = async (): Promise<Response> => new Response(JSON.stringify({ success: true, data: { note: 'object' } }), { status: 200 })
-    const client = new WeknoraClient({ baseUrl: 'http://host', apiKey: 'key-1', fetch: raw as unknown as typeof fetch })
+    const client = new WeknoraClient({ baseUrl: 'http://host', apiKey: 'key-1', fetch: raw })
     await expect(client.knowledgeSearch('q', ['kb-1'], 3)).resolves.toEqual([])
   })
 
   it('parses an empty response body as an empty envelope', async () => {
     const raw = async (): Promise<Response> => new Response('', { status: 200 })
-    const client = new WeknoraClient({ baseUrl: 'http://host', apiKey: 'key-1', fetch: raw as unknown as typeof fetch })
+    const client = new WeknoraClient({ baseUrl: 'http://host', apiKey: 'key-1', fetch: raw })
     await expect(client.listKnowledgeBases()).resolves.toEqual([])
   })
 
@@ -282,6 +282,6 @@ describe('WeknoraClient', () => {
     const { fetch, calls } = fakeFetch([{ match: url => url.includes('/hybrid-search'), data: [] }])
     const client = new WeknoraClient({ baseUrl: 'http://host', apiKey: 'key-1', fetch })
     await client.hybridSearch('kb-1', 'q', new Float32Array([0.5, -0.5]), 4)
-    expect(String(calls[0]?.init.body)).toBe('{"query_text":"q","query_embedding":[0.5,-0.5],"top_k":4}')
+    expect(calls[0]?.init.body).toBe('{"query_text":"q","query_embedding":[0.5,-0.5],"top_k":4}')
   })
 })

@@ -20,7 +20,6 @@ import { messageOf, useAsync } from '../hooks.ts'
 import { colleagueColor, colleagueNameOf, colleagueOf, stampAcronymOf } from '../colleagues.ts'
 import { navigate } from '../router.ts'
 import { createSession, listAiEmployees, listSessions, relativeTimeOf, subtitleOf, titleOf } from '../sessionsService.ts'
-import { listMyAlerts } from '../ledgerService.ts'
 import { readWatermarkOf } from '../draftStore.ts'
 import { isWorkSession, subscribeWork, todayStats, workSnapshot } from '../workStore.ts'
 import { cachedProjectionOf, loadProjection } from '../messages/projection.ts'
@@ -149,19 +148,14 @@ interface QuickChip {
  * on the same screen and left the set. */
 const QUICK_CHIPS: readonly QuickChip[] = [
   {
-    label: '我的待办',
+    label: '看工作台',
     variant: 'neutral',
-    run: () => { navigate('#/todos') },
+    run: () => { navigate('#/work') },
   },
   {
-    label: '我的预警',
+    label: '找 AI 同事',
     variant: 'neutral',
-    run: () => { navigate('#/alerts') },
-  },
-  {
-    label: '看单据',
-    variant: 'neutral',
-    run: () => { navigate('#/docs') },
+    run: () => { navigate('#/agents') },
   },
   {
     label: '登记一条单据',
@@ -188,17 +182,6 @@ export function HomeView({ identityName, active = true }: HomeViewProps): JSX.El
   const sessions = useAsync(listSessions, active)
   /** The projection texts keyed by session id (tail reads). */
   const [projections, setProjections] = useState<ReadonlyMap<string, string>>(new Map())
-  /** The routed-alert count for the「我的预警」chip badge (undefined = not loaded / unreadable — no badge shown). */
-  const [alertCount, setAlertCount] = useState<number | undefined>(undefined)
-
-  useEffect(() => {
-    if (!active) return
-    let alive = true
-    listMyAlerts()
-      .then((rows) => { if (alive) setAlertCount(rows.length) })
-      .catch(() => { if (alive) setAlertCount(undefined) })
-    return () => { alive = false }
-  }, [active])
 
   const stats = useMemo(() => todayStats(store.items, Date.now()), [store.items])
   const now = new Date()
@@ -264,11 +247,9 @@ export function HomeView({ identityName, active = true }: HomeViewProps): JSX.El
           </h1>
           <p className={css.heroDate}>
             {headDateOf(now)}
-            {alertCount !== undefined && alertCount > 0
-              ? <b> · {String(Math.min(alertCount, 99))} 项预警待看</b>
-              : heroWorkParts.length > 0
-                ? ` · 今天：${heroWorkParts.join(' · ')}`
-                : ' · 今天没有待办，随时找 AI 同事聊聊'}
+            {heroWorkParts.length > 0
+              ? ` · 今天：${heroWorkParts.join(' · ')}`
+              : ' · 今天没有待办，随时找 AI 同事聊聊'}
           </p>
         </div>
         <span className={css.heroSeal} aria-label="今日酱印" title="鲜酿">
@@ -321,11 +302,7 @@ export function HomeView({ identityName, active = true }: HomeViewProps): JSX.El
               {chip.label}
             </button>
           )
-          // W6-R2: the alert chip carries its routed count; an unreadable or
-          // empty alert set keeps the plain chip (no badge noise).
-          return chip.label === '我的预警' && alertCount !== undefined && alertCount > 0
-            ? <Badge key={chip.label} color="var(--dshm-danger)" content={String(Math.min(alertCount, 99))} className={css.alertBadge as string}>{chipButton}</Badge>
-            : chipButton
+          return chipButton
         })}
       </div>
 

@@ -38,37 +38,40 @@ pnpm dsh web
 
 ### Local startup
 
-The commands above cover the harness itself; the full example stack — the kb-agent composition (a food-industry knowledge-base agent) on the DSH Web workbench, plus a NocoBase business backend and local PostgreSQL — starts in three steps from the repository root.
+The commands above cover the harness itself; the full example stack — the kb-agent composition (a food-industry knowledge agent) on the DSH Web workbench over its five LLM data sources (lakehouse, carbon business system, WeKnora knowledge base, ontology registry, Neo4j graph) — starts in three steps from the repository root.
 
 | Component | Address | Role |
 |---|---|---|
-| DSH Web workbench (kb-agent composition) | http://127.0.0.1:3080 | Chat, knowledge base, data assets, connectors, graph, business pages |
-| NocoBase business system (full UI) | http://127.0.0.1:13000 | Order source of truth and a standalone business admin: sign in to manage collections, the approval workflow, and system settings (initial admin admin@nocobase.com / admin123) |
-| PostgreSQL 17 | localhost:5432 | NocoBase database, started idempotently by the setup script |
+| DSH Web workbench (kb-agent composition) | http://127.0.0.1:3080 | Chat, knowledge base, lakehouse, connectors, graph, business, governance pages |
+| carbon ERP dev stack | http://127.0.0.1:3000 | Business source of truth (ERP/MES/QMS); PostgREST Data API on :54321, PostgreSQL on :51538 |
+| WeKnora sidecar | http://127.0.0.1:18080 (UI), :18081 (API) | Knowledge-base retrieval (RAG); corpus lives under `workspace/weknora/` |
+| Neo4j 5.26 | http://127.0.0.1:7474, bolt :7687 | Graph store for kg queries and ontology materialization |
+| Gravitino + SeaweedFS | http://127.0.0.1:8090, S3 :9000 (console :9001) | Catalog hub + object storage (lakehouse Tier1 iceberg) |
 
-1. Install dependencies and put `MINIMAX_API_KEY` in the repository-root `.env` (shared by chat and embeddings; retrieval still works without a key):
+1. Install dependencies and put `MINIMAX_API_KEY` in the repository-root `.env` (chat and embeddings; retrieval still works without a key):
 
 ```sh
 pnpm install
 ```
 
-2. Start NocoBase. The first run installs dependencies inside `platform/nocobase` (yarn, ~15 min), builds the full-UI client artifacts (~20 min once; the artifacts persist, so later starts are seconds), idempotently starts local PostgreSQL, initializes the five collections with seed data and the approval workflow, and writes `NOCOBASE_BASE_URL`/`NOCOBASE_API_KEY` into `.env`. `http://127.0.0.1:13000` is the complete business system: open it in a browser, sign in, and manage data, workflows, and settings — a second entry point alongside the DSH workbench (whose Business page embeds the same backend under "Advanced configuration"):
+2. Start the five sidecars (each is idempotent; full commands, credentials, and health checks live in the manual):
 
 ```sh
-node --import tsx/esm examples/kb-agent/scripts/setup-nocobase.mts
-```
-
-For daily use, `start` boots the existing installation and `verify` re-checks it (asserts the full UI plus collections, seed, workflow, and the API key; `--env-file=.env` lets the API-key probe read the credential):
-
-```sh
-node --import tsx/esm examples/kb-agent/scripts/setup-nocobase.mts start
-node --env-file=.env --import tsx/esm examples/kb-agent/scripts/setup-nocobase.mts verify
+colima start                                                        # docker runtime
+(cd /Users/mac/Downloads/carbon-main && bash packages/dev/bin/crbn up --no-portless) # carbon dev stack (:3000, :54321, :51538)
+bash workspace/weknora/up.sh up                                     # WeKnora (:18080/:18081, embed-proxy :18082)
+docker start dsh-neo4j                                              # Neo4j (:7474/:7687)
+(cd workspace/governance && docker compose up -d)                   # Gravitino (:8090) + SeaweedFS (:9000/:9001)
 ```
 
 3. Start the DSH Web workbench:
 
 ```sh
-DSH_HOME=examples/kb-agent/.dsh pnpm dsh web --patch examples/kb-agent/cordis.patch.yml
+env CARBON_URL=http://127.0.0.1:54321 CARBON_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE1ODE4OTUsImV4cCI6MjEwNjk0MTg5NX0.42nhGia5GsXBtJiW9aP12HCVwOoBmqwiZ3QZ060OU5o CARBON_EMAIL=test@carbon.ms CARBON_PASSWORD=password \
+  DSH_NEO4J_URL=neo4j://localhost:7687 DSH_NEO4J_USER=neo4j DSH_NEO4J_PASSWORD=neo4j-b5-graph \
+  DSH_HOME=examples/kb-agent/.dsh pnpm dsh web --patch examples/kb-agent/cordis.patch.yml
+# carbon/Neo4j credentials ride the launching environment (DSH_* keys must not go in .env);
+# without them cb_*/kg_* answer with structured refusals while kb/lakehouse/MiniMax work from .env
 ```
 
 The command prints `dsh web: http://127.0.0.1:3080` and opens the browser; append `--no-open` (`dsh web --patch <file> --no-open`) to skip opening. Launcher flags such as `--patch` come before the web app's own flags — from the first argument the launcher does not know, everything passes verbatim to the web app. The workbench is unauthenticated — keep it on localhost. Server-side source changes (`packages/**/src`) take effect only after restarting this process; client artifacts are re-read per request.

@@ -285,12 +285,6 @@ export class FakeApiClient implements IApiClient {
     extractText: payload => this.record('data.extractText', payload, Promise.resolve(ok({ text: 'fixture', truncated: false }))),
   }
 
-  readonly orders: IApiClient['orders'] = {
-    create: payload => this.record('orders.create', payload, Promise.resolve(ok({ id: 0, order_no: 'ORD-00000000-0000', service_id: payload.service_id, service_name: '', brief: payload.brief, status: 'pending', created_at: '' }))),
-    get: payload => this.record('orders.get', payload, Promise.resolve(ok({ id: payload.order_id, order_no: 'ORD-00000000-0000', service_id: '', service_name: '', brief: '', status: 'pending', created_at: '' }))),
-    list: payload => this.record('orders.list', payload, Promise.resolve(ok({ orders: [] }))),
-    fulfill: payload => this.record('orders.fulfill', payload, Promise.resolve(ok({ id: payload.order_id, order_no: 'ORD-00000000-0000', service_id: '', service_name: '', brief: '', status: 'delivered', created_at: '' }))),
-  }
 
   readonly kb: IApiClient['kb'] = {
     stats: payload => this.record('kb.stats', payload, Promise.resolve(ok({ documents: 0, chunks: 0, embedded_chunks: 0, embed_available: false, usage: { searches: 0, ingested_documents: 0, ingested_chunks: 0, embed_texts: 0, embed_tokens: 0 } }))),
@@ -303,7 +297,7 @@ export class FakeApiClient implements IApiClient {
   readonly assets: IApiClient['assets'] = {
     list: payload => this.record('assets.list', payload, Promise.resolve(ok({ assets: [] }))),
     detail: payload => this.record('assets.detail', payload, Promise.resolve(ok({ provider_id: payload.provider_id, dataset_id: payload.dataset_id, title: '', kind: 'tabular' }))),
-    stats: payload => this.record('assets.stats', payload, Promise.resolve(ok({ products: 0, providers: 0, monthly_orders: 0, featured: [] }))),
+    stats: payload => this.record('assets.stats', payload, Promise.resolve(ok({ products: 0, providers: 0, featured: [] }))),
   }
 
   readonly governance: IApiClient['governance'] = {
@@ -341,7 +335,6 @@ export class FakeApiClient implements IApiClient {
             ? { mode: 'node', node: { id: 'fixture', type: 'Item', name: 'fixture', props: {}, degree: 0 }, out_relations: [], in_relations: [] }
             : { mode: 'local', nodes: [], edges: [], truncated: false, seed: 'fixture', hops: 1 },
     ))),
-    mappings: payload => this.record('kg.mappings', payload, Promise.resolve(ok({ file: 'fixture', version: 1, rules: { skipHiddenCollections: true, emptyFkNoEdge: true, derivesTitle: true }, collections: [] }))),
     schema: payload => this.record('kg.schema', payload, Promise.resolve(ok({ ontology_version: '0.0.0-fixture', node_types: [], relations: [] }))),
     query: payload => this.record('kg.query', payload, Promise.resolve(ok({ nodes: [], edges: [], truncated: false, seeds_resolved: [], template: 'fixture', hops: 1, restated: payload.phrase }))),
     search: payload => this.record('kg.search', payload, Promise.resolve(ok({ nodes: [] }))),
@@ -365,16 +358,6 @@ export class FakeApiClient implements IApiClient {
     update: payload => this.record('carbon.update', payload, Promise.resolve(ok({ table: payload.table, row: {} }))),
   }
 
-  readonly nocobase: IApiClient['nocobase'] = {
-    update: payload => this.record('nocobase.update', payload, Promise.resolve(ok({ collection: payload.collection, row: { id: payload.id } }))),
-    listMeta: payload => this.record('nocobase.listMeta', payload, Promise.resolve(ok({ collections: [] }))),
-    list: payload => this.record('nocobase.list', payload, Promise.resolve(ok({ count: 0, page: 1, page_size: 20, rows: [] }))),
-    get: payload => this.record('nocobase.get', payload, Promise.resolve(ok({ collection: payload.collection, row: {} }))),
-    alertAct: payload => this.record('nocobase.alertAct', payload, Promise.resolve(ok({ id: payload.id, action: payload.action, user: 'fixture' }))),
-    signIn: payload => this.record('nocobase.signIn', payload, Promise.reject(new Error('用户名/邮箱或密码有误，请重新输入'))),
-    mobileWorkSave: payload => this.record('nocobase.mobileWorkSave', payload, Promise.resolve(ok({ clientId: payload.clientId, user: 'fixture' }))),
-    mobileWorkDelete: payload => this.record('nocobase.mobileWorkDelete', payload, Promise.resolve(ok({ clientId: payload.clientId, user: 'fixture' }))),
-  }
 
   /** When true, streams never fire onOpen (misbehaving-carrier material for the handshake timeout guard). */
   suppressStreamOpen = false

@@ -194,8 +194,6 @@ export const kgCommunitiesRequestSchema = z.object({}) as unknown as z.ZodType<W
 export const kgHistoryRequestSchema = z.object({
   as_of: z.string().min(1),
 }) as unknown as z.ZodType<Wire<RequestPayload<'kg.history'>>>
-/** kg.mappings request payload (empty). */
-export const kgMappingsRequestSchema = z.object({}) as unknown as z.ZodType<Wire<RequestPayload<'kg.mappings'>>>
 /** kg.query request payload. */
 export const kgQueryRequestSchema = z.object({
   phrase: z.string().min(1),
@@ -211,34 +209,6 @@ export const kgSchemaValueSchema = z.object({
     summary: z.string(),
     created_at: z.string(),
   })),
-})
-
-/** kg.mappings response value. */
-export const kgMappingsValueSchema = z.object({
-  file: z.string(),
-  version: z.number().int(),
-  rules: z.object({
-    skipHiddenCollections: z.boolean(),
-    emptyFkNoEdge: z.boolean(),
-    derivesTitle: z.boolean(),
-  }),
-  collections: z.array(z.object({
-    name: z.string(),
-    anchor: z.string().optional(),
-    titleField: z.string().optional(),
-    fkLinkCount: z.number().int().min(0),
-  })),
-  lastRun: z.object({
-    finishedAt: z.string(),
-    ruleHits: z.record(z.string(), z.number()),
-    collections: z.array(z.object({
-      scope: z.string(),
-      nodesUpserted: z.number().int().min(0),
-      edgesUpserted: z.number().int().min(0),
-      skipped: z.boolean(),
-      skippedRelationFields: z.array(z.string()),
-    })),
-  }).optional(),
 })
 
 /** kg.search response value. */
@@ -349,10 +319,4 @@ export const kgStatsValueSchema = z.object({
   ontology_version: z.string(),
   islands: z.number().int().min(0),
   conflicts: z.number().int().min(0),
-  coverage: z.object({
-    numerator: z.number().int().min(0),
-    denominator: z.number().int().min(0),
-    ratio: z.number(),
-  }).optional(),
-  last_run_at: z.string().optional(),
 })

@@ -1,6 +1,6 @@
 /**
  * The market's client-session state: one cached `assets.stats` snapshot, one
- * cached `assets.list` catalog, and one cached `orders.list` order set shared
+ * cached `assets.list` catalog shared
  * by the sidebar entry and the market view tab (both registrations close over
  * the one instance created in apply). Nothing here persists; a refresh
  * reloads the caches. The view-local state (selected asset, confirm-card
@@ -10,7 +10,7 @@
  */
 
 import { createSnapshotStore, type SnapshotStore } from '@deepseek-ai/dsh-client-runtime/client'
-import type { MarketAssetRow, MarketOrderRow, MarketStatsRow } from './marketTypes.ts'
+import type { MarketAssetRow, MarketStatsRow } from './marketTypes.ts'
 
 /** One discriminated load state per cache. */
 export type MarketCache<T> =
@@ -25,7 +25,6 @@ export interface MarketClientState {
   /** The catalog; `undefined` before the first load starts. */
   readonly catalog: MarketCache<readonly MarketAssetRow[]> | undefined
   /** The order rows; `undefined` before the first load starts. */
-  readonly orders: MarketCache<readonly MarketOrderRow[]> | undefined
   /** AI-driven asset selection (view_apply select_asset); absent when idle. */
   readonly selectedAssetId?: string | undefined
   /** AI-driven category filter (view_apply filter_category); absent shows all. */
@@ -36,7 +35,6 @@ export interface MarketClientState {
 const INITIAL: MarketClientState = {
   stats: undefined,
   catalog: undefined,
-  orders: undefined,
   selectedAssetId: undefined,
   categoryFilter: undefined,
 }
@@ -57,12 +55,6 @@ export interface MarketClientStore {
   setCatalog(assets: readonly MarketAssetRow[]): void
   /** Record a failed catalog load. */
   failCatalog(message: string): void
-  /** Record an orders load start. */
-  beginOrders(): void
-  /** Record a successful orders load. */
-  setOrders(rows: readonly MarketOrderRow[]): void
-  /** Record a failed orders load. */
-  failOrders(message: string): void
   /** Select one catalog asset by dataset id (view_apply select_asset). */
   selectAsset(id: string | undefined): void
   /** Replace the category filter (view_apply filter_category; undefined clears). */
@@ -97,15 +89,6 @@ export function createMarketClientStore(): MarketClientStore {
     },
     failCatalog(message): void {
       patch({ catalog: { status: 'error', error: message } })
-    },
-    beginOrders(): void {
-      patch({ orders: { status: 'loading' } })
-    },
-    setOrders(rows): void {
-      patch({ orders: { status: 'ready', value: rows } })
-    },
-    failOrders(message): void {
-      patch({ orders: { status: 'error', error: message } })
     },
     selectAsset(id): void {
       patch({ selectedAssetId: id })

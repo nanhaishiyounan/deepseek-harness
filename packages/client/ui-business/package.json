@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-client-ui-business",
-  "description": "Business-management page: sidebar entry and the business conversation view tab (collection switcher over nocobase.listMeta, conversation-first entity card stream, auxiliary table view, NocoBase embed entry)",
-  "version": "0.1.1-rc.2",
+  "description": "Business-management page: sidebar entry and the business conversation view tab (collection switcher over carbon.listMeta, conversation-first entity card stream, auxiliary table view, carbon embed entry)",
+  "version": "1.0.0",
   "publishConfig": {
     "access": "public"
   },
@@ -60,6 +60,7 @@
     "@deepseek-ai/dsh-client-ui-conversation": "workspace:^",
     "@deepseek-ai/dsh-client-ui-nav": "workspace:^",
     "@deepseek-ai/dsh-client-ui-sidebar": "workspace:^",
+    "@deepseek-ai/dsh-client-ui-view-context": "workspace:^",
     "@deepseek-ai/dsh-invariants": "workspace:^"
   },
   "devDependencies": {

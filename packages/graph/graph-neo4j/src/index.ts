@@ -134,6 +134,13 @@ function projectProps(raw: Record<string, unknown>): Record<string, GraphPropVal
   return props
 }
 
+/** Render one query cell as text; nullish and non-scalar cells become ''. */
+function cellText(value: unknown): string {
+  if (typeof value === 'string') return value
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value)
+  return ''
+}
+
 /**
  * The Neo4j graph store service. One instance per context; the driver opens
  * lazily-resilient at `open()` and every method fails loud with
@@ -183,7 +190,7 @@ export class Neo4jGraphService extends Service {
     }
     try {
       const driver = neo4j.driver(this.options.url, neo4j.auth.basic(this.options.user, this.options.password))
-      await driver.verifyConnectivity()
+      await driver.getServerInfo()
       this.driver = driver
     } catch (error) {
       this.openFailureText = `neo4j-graph: cannot reach ${this.options.url}: ${error instanceof Error ? error.message : String(error)}`
@@ -366,15 +373,15 @@ export class Neo4jGraphService extends Service {
    * @param k - the result cap.
    * @returns the name/gid substring hits.
    */
-  async graphSearch(query: string, k = 10): Promise<readonly GraphNodeHit[]> {
+  async graphSearch(query: string, k: number = 10): Promise<readonly GraphNodeHit[]> {
     const rows = await this.runReadOnly(
       'MATCH (n:__Entity) WHERE n.name CONTAINS $q OR n.gid CONTAINS $q RETURN n.gid AS gid, n.nodeType AS nodeType, n.name AS name, COUNT { (n)--() } AS degree ORDER BY degree DESC, gid LIMIT $k',
       { q: query, k: neo4j.int(k) },
     )
     return rows.map(row => ({
-      id: String(row['gid']),
-      type: String(row['nodeType'] ?? ''),
-      name: String(row['name'] ?? ''),
+      id: cellText(row['gid']),
+      type: cellText(row['nodeType']),
+      name: cellText(row['name']),
       degree: Number(row['degree'] ?? 0),
     }))
   }
@@ -400,11 +407,11 @@ export class Neo4jGraphService extends Service {
       { gid, cap: neo4j.int(100) },
     )
     const relationOf = (row: Record<string, unknown>, direction: 'out' | 'in'): GraphNodeRelation => ({
-      relation: String(row['relation']),
+      relation: cellText(row['relation']),
       direction,
-      otherId: String(row['otherId']),
-      otherName: String(row['otherName'] ?? ''),
-      otherType: String(row['otherType'] ?? ''),
+      otherId: cellText(row['otherId']),
+      otherName: cellText(row['otherName']),
+      otherType: cellText(row['otherType']),
     })
     const nodeRow = nodeRows[0]
     if (nodeRow === undefined) return undefined
@@ -453,7 +460,8 @@ export class Neo4jGraphService extends Service {
           'MATCH (p:__OntologyVersion) RETURN max(p.version) AS maxVersion, collect(CASE WHEN p.head THEN p.id END) AS headIds',
         )
         const next = Number(head.records[0]?.get('maxVersion') ?? 0) + 1
-        const headIds = (head.records[0]?.get('headIds') ?? []).map((value: unknown) => String(value))
+        const headIdsCell: unknown = head.records[0]?.get('headIds')
+        const headIds = (Array.isArray(headIdsCell) ? headIdsCell : []).map(value => cellText(value))
         await tx.run(
           [
             'CREATE (v:__OntologyVersion {id: $id, version: $version, name: $name, source: $source, jsonld: $jsonld, createdAt: $createdAt, head: true})',
@@ -487,12 +495,12 @@ export class Neo4jGraphService extends Service {
       'MATCH (v:__OntologyVersion) OPTIONAL MATCH (v)-[:PREV]->(p:__OntologyVersion) RETURN v.id AS id, v.version AS version, v.name AS name, v.source AS source, v.createdAt AS createdAt, p.id AS prev ORDER BY version DESC',
     )
     return rows.map(row => ({
-      id: String(row['id']),
+      id: cellText(row['id']),
       version: Number(row['version'] ?? 0),
-      name: String(row['name'] ?? ''),
-      source: String(row['source'] ?? ''),
-      createdAt: String(row['createdAt'] ?? ''),
-      ...(row['prev'] === null || row['prev'] === undefined ? {} : { prev: String(row['prev']) }),
+      name: cellText(row['name']),
+      source: cellText(row['source']),
+      createdAt: cellText(row['createdAt']),
+      ...(row['prev'] === null || row['prev'] === undefined ? {} : { prev: cellText(row['prev']) }),
     }))
   }
 
@@ -512,9 +520,9 @@ export class Neo4jGraphService extends Service {
   private nodeViewOf(row: Record<string, unknown>): GraphNodeView {
     const propsRaw = row['props']
     return {
-      id: String(row['gid']),
-      type: String(row['nodeType'] ?? ''),
-      name: String(row['name'] ?? ''),
+      id: cellText(row['gid']),
+      type: cellText(row['nodeType']),
+      name: cellText(row['name']),
       props: propsRaw !== null && typeof propsRaw === 'object' ? projectProps(propsRaw as Record<string, unknown>) : {},
       degree: Number(row['degree'] ?? 0),
     }

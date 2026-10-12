@@ -35,4 +35,4 @@ Every structured card in the mobile form assistant (ask_choice / ask_field / for
 ## Verification
 
 - `pnpm vitest run packages/interaction/tool-present-card` (payload validation + concludeTurn), `pnpm vitest run packages/client/ui-mobile` (mirror fixtures), `pnpm run test:web -- mobile-assistant` (legacy fence golden, untouched) and `-- mobile-assistant-toolcard` (tool-source golden).
-- Live determinism matrix + replay legs + GIF: [demos/acceptance-w21/](../../../../demos/acceptance-w21/) (p3-matrix-runs.jsonl, p3-replay-results.json, p3-s1-disambiguation.gif).
+- Live determinism matrix + replay legs + GIF: `demos/acceptance-w21/` (p3-matrix-runs.jsonl, p3-replay-results.json, p3-s1-disambiguation.gif).

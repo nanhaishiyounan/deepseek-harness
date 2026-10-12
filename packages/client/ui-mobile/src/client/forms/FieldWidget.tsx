@@ -11,7 +11,6 @@ import { DatePicker, Input, Picker, Stepper, Switch, TextArea } from 'antd-mobil
 import type { FieldControlSpec } from '../fieldControls.ts'
 import { portalContainer } from '../portal.ts'
 import { formatDateText, parseDateText } from './dateText.ts'
-import { RelationSelect } from './RelationSelect.tsx'
 import css from './field-widget.module.css'
 
 /** One editable field row's props. */
@@ -99,21 +98,6 @@ export function FieldWidget({ spec, value, locked, onChange }: FieldWidgetProps)
               </span>
             )}
           </Picker>
-        </div>
-      )
-    case 'relation':
-      return (
-        <div className={css.row}>
-          <span className={css.label}>{spec.label}</span>
-          <RelationSelect
-            target={spec.target}
-            value={value}
-            placeholder="请选择"
-            ariaLabel={spec.label}
-            triggerClassName={css.pickerValue}
-            testId="relation-value"
-            onChange={onChange}
-          />
         </div>
       )
     case 'textarea':

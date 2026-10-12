@@ -17,9 +17,7 @@ import type { CredentialsApi } from './credentials.ts'
 import type { LlmApi } from './llm.ts'
 import type { KbApi } from './kb.ts'
 import type { CarbonApi } from './carbon.ts'
-import type { NocobaseApi } from './nocobase.ts'
 import type { DataApi } from './data.ts'
-import type { OrdersApi } from './orders.ts'
 import type { AssetsApi } from './assets.ts'
 import type { LakehouseApi } from './lakehouse.ts'
 import type { ConnectorsApi } from './connectors.ts'
@@ -42,10 +40,8 @@ export interface ApiProxy {
   credentials: CredentialsApi
   llm: LlmApi
   kb: KbApi
-  nocobase: NocobaseApi
   carbon: CarbonApi
   data: DataApi
-  orders: OrdersApi
   assets: AssetsApi
   lakehouse: LakehouseApi
   connectors: ConnectorsApi
@@ -86,13 +82,8 @@ export type {
   CarbonApi, CarbonFilterConditionView, CarbonRowPageView, CarbonRowView, CarbonTableMetaView,
 } from './carbon.ts'
 export type {
-  NocobaseApi, NocobaseCollectionMetaView, NocobaseFieldView, NocobaseFilterConditionView,
-  NocobaseRowPageView, NocobaseRowView,
-} from './nocobase.ts'
-export type {
   DataApi, DataDescribeImageView, DataExtractTextView, DataKbUploadView, DataLakehouseUploadView, DataUploadView,
 } from './data.ts'
-export type { OrderStatusView, OrderView, OrdersApi } from './orders.ts'
 export type {
   AssetFeaturedView, AssetKindView, AssetView, AssetsApi, AssetsStatsView,
 } from './assets.ts'

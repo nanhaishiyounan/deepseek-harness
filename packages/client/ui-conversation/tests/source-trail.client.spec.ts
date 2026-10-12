@@ -109,7 +109,6 @@ describe('sourceTrailOf', () => {
     ])
     expect(trail.kb).toHaveLength(2)
     expect(trail.lakehouse).toEqual([{ table: 'import_export_monthly', sql: 'SELECT 1 FROM import_export_monthly' }])
-    expect(trail.nocobase).toEqual([{ collection: 'experts' }])
     expect(trail.kg).toEqual([{ seeds: ['宏发食品'], systems: ['nocobase', 'kb'] }])
     expect(hasSources(trail)).toBe(true)
   })

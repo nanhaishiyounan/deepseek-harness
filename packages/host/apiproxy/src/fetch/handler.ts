@@ -73,13 +73,7 @@ import {
   carbonCreateRequestSchema, carbonGetRequestSchema, carbonListMetaRequestSchema,
   carbonListRequestSchema, carbonUpdateRequestSchema,
 } from '../api/carbon.schema.ts'
-import {
-  nocobaseGetRequestSchema, nocobaseListMetaRequestSchema, nocobaseListRequestSchema,
-  nocobaseAlertActRequestSchema, nocobaseSignInRequestSchema, nocobaseUpdateRequestSchema,
-  nocobaseMobileWorkDeleteRequestSchema, nocobaseMobileWorkSaveRequestSchema,
-} from '../api/nocobase.schema.ts'
 import { dataDescribeImageRequestSchema, dataExtractTextRequestSchema, dataUploadRequestSchema } from '../api/data.schema.ts'
-import { ordersCreateRequestSchema, ordersListRequestSchema, ordersOrderIdRequestSchema } from '../api/orders.schema.ts'
 import {
   assetsDetailRequestSchema, assetsListRequestSchema, assetsStatsRequestSchema,
 } from '../api/assets.schema.ts'
@@ -96,7 +90,7 @@ import {
 } from '../api/connectors.schema.ts'
 import {
   kgCommunitiesRequestSchema, kgEpisodesRequestSchema, kgExpandRequestSchema, kgGraphPageRequestSchema,
-  kgHistoryRequestSchema, kgMappingsRequestSchema,
+  kgHistoryRequestSchema,
   kgOntologyEditRequestSchema, kgQueryRequestSchema, kgReviewDecideRequestSchema, kgReviewQueueRequestSchema, kgRollbackRequestSchema,
   kgSchemaRequestSchema, kgSearchRequestSchema, kgStatsRequestSchema, kgSubgraphRequestSchema,
 } from '../api/kg.schema.ts'
@@ -183,10 +177,6 @@ const UNARY_ROUTES: UnaryRoutes = {
   'data.upload': { schema: dataUploadRequestSchema, invoke: (api, r, signal) => api.data.upload(r, signal) },
   'data.describeImage': { schema: dataDescribeImageRequestSchema, invoke: (api, r, signal) => api.data.describeImage(r, signal) },
   'data.extractText': { schema: dataExtractTextRequestSchema, invoke: (api, r, signal) => api.data.extractText(r, signal) },
-  'orders.create': { schema: ordersCreateRequestSchema, invoke: (api, r, signal) => api.orders.create(r, signal) },
-  'orders.get': { schema: ordersOrderIdRequestSchema, invoke: (api, r, signal) => api.orders.get(r, signal) },
-  'orders.list': { schema: ordersListRequestSchema, invoke: (api, r, signal) => api.orders.list(r, signal) },
-  'orders.fulfill': { schema: ordersOrderIdRequestSchema, invoke: (api, r, signal) => api.orders.fulfill(r, signal) },
   'assets.list': { schema: assetsListRequestSchema, invoke: (api, r, signal) => api.assets.list(r, signal) },
   'assets.detail': { schema: assetsDetailRequestSchema, invoke: (api, r, signal) => api.assets.detail(r, signal) },
   'assets.stats': { schema: assetsStatsRequestSchema, invoke: (api, r, signal) => api.assets.stats(r, signal) },
@@ -206,7 +196,6 @@ const UNARY_ROUTES: UnaryRoutes = {
   'connectors.list': { schema: connectorsListRequestSchema, invoke: (api, r, signal) => api.connectors.list(r, signal) },
   'connectors.connections': { schema: connectorsConnectionsRequestSchema, invoke: (api, r, signal) => api.connectors.connections(r, signal) },
   'connectors.transfers': { schema: connectorsTransfersRequestSchema, invoke: (api, r, signal) => api.connectors.transfers(r, signal) },
-  'kg.mappings': { schema: kgMappingsRequestSchema, invoke: (api, r, signal) => api.kg.mappings(r, signal) },
   'kg.graphPage': { schema: kgGraphPageRequestSchema, invoke: (api, r, signal) => api.kg.graphPage(r, signal) },
   'kg.schema': { schema: kgSchemaRequestSchema, invoke: (api, r, signal) => api.kg.schema(r, signal) },
   'kg.query': { schema: kgQueryRequestSchema, invoke: (api, r, signal) => api.kg.query(r, signal) },
@@ -226,14 +215,6 @@ const UNARY_ROUTES: UnaryRoutes = {
   'carbon.get': { schema: carbonGetRequestSchema, invoke: (api, r, signal) => api.carbon.get(r, signal) },
   'carbon.create': { schema: carbonCreateRequestSchema, invoke: (api, r, signal) => api.carbon.create(r, signal) },
   'carbon.update': { schema: carbonUpdateRequestSchema, invoke: (api, r, signal) => api.carbon.update(r, signal) },
-  'nocobase.listMeta': { schema: nocobaseListMetaRequestSchema, invoke: (api, r, signal) => api.nocobase.listMeta(r, signal) },
-  'nocobase.list': { schema: nocobaseListRequestSchema, invoke: (api, r, signal) => api.nocobase.list(r, signal) },
-  'nocobase.get': { schema: nocobaseGetRequestSchema, invoke: (api, r, signal) => api.nocobase.get(r, signal) },
-  'nocobase.update': { schema: nocobaseUpdateRequestSchema, invoke: (api, r, signal) => api.nocobase.update(r, signal) },
-  'nocobase.alertAct': { schema: nocobaseAlertActRequestSchema, invoke: (api, r, signal) => api.nocobase.alertAct(r, signal) },
-  'nocobase.signIn': { schema: nocobaseSignInRequestSchema, invoke: (api, r, signal) => api.nocobase.signIn(r, signal) },
-  'nocobase.mobileWorkSave': { schema: nocobaseMobileWorkSaveRequestSchema, invoke: (api, r, signal) => api.nocobase.mobileWorkSave(r, signal) },
-  'nocobase.mobileWorkDelete': { schema: nocobaseMobileWorkDeleteRequestSchema, invoke: (api, r, signal) => api.nocobase.mobileWorkDelete(r, signal) },
   'kb.stats': { schema: kbStatsRequestSchema, invoke: (api, r) => api.kb.stats(r) },
   'kb.search': { schema: kbSearchRequestSchema, invoke: (api, r, signal) => api.kb.search(r, signal) },
   'kb.ingest': { schema: kbIngestRequestSchema, invoke: (api, r, signal) => api.kb.ingest(r, signal) },
@@ -355,19 +336,6 @@ export function toFetchHandler(api: ApiProxy): { fetch: typeof fetch } {
       }
       if (path === '/api/events.host' && req.method === 'GET') {
         return sseResponse(api.events.host({ rpcId: RpcId(randomUUID()), payload: {} }, req.signal))
-      }
-      if (path === '/api/orders.download' && (req.method === 'GET' || req.method === 'HEAD')) {
-        const rawOrderId = Number(url.searchParams.get('orderId'))
-        if (!Number.isInteger(rawOrderId) || rawOrderId < 1) {
-          return new Response('missing or invalid orderId query parameter', { status: 400 })
-        }
-        const response = await api.orders.download(
-          url.searchParams.get('inline') === '1' ? { orderId: rawOrderId, inline: true } : { orderId: rawOrderId },
-          req.signal,
-        )
-        if (req.method === 'GET') return response
-        await response.body?.cancel()
-        return new Response(null, { status: response.status, headers: response.headers })
       }
       if (path === '/api/session.export' && (req.method === 'GET' || req.method === 'HEAD')) {
         // Query params are a different boundary from the POST envelope, but

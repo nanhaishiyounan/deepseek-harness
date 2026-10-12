@@ -8,7 +8,7 @@
 
 /** One AI-prefilled form draft: the task card's whole data. */
 export interface FormDraft {
-  /** Target NocoBase collection (the nb_create destination). */
+  /** Target business collection (the draft's landing table). */
   readonly collection: string
   /** Human title of the card (the business object being registered). */
   readonly title: string

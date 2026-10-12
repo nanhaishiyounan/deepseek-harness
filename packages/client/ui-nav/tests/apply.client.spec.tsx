@@ -48,7 +48,7 @@ describe('ui-nav apply', () => {
     expect(b.slots.entries('sidebar.nav')[0]!.locale).toBe('nav')
 
     // Activation: the immediate switch rides view-context and never opens a session.
-    const seat = navSpec.inject as SidebarNavSlotInject
+    const seat = navSpec.inject
     seat.activate('kb')
     expect(b.switchView).toHaveBeenCalledWith('kb')
     expect(b.workspaces.startSession).not.toHaveBeenCalled()

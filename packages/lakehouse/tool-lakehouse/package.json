@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-tool-lakehouse",
   "description": "Model-facing lakehouse_list_tables, lakehouse_query, and lakehouse_schema tools over the lakehouse engine",
-  "version": "0.1.1-rc.2",
+  "version": "1.0.0",
   "publishConfig": {
     "access": "public"
   },
@@ -28,7 +28,6 @@
   "files": [
     "lib/index.js",
     "lib/invariant.js",
-    "lib/types/**/*.js",
     "lib/types/**/*.d.ts"
   ],
   "license": "MIT",

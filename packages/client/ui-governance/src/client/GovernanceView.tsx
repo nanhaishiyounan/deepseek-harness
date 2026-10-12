@@ -110,7 +110,7 @@ export function GovernanceView({
             type="search"
             placeholder={t('catalog.search')}
             value={state.searchQuery}
-            onChange={event => setSearch(event.target.value)}
+            onChange={(event) => { setSearch(event.target.value) }}
           />
           {state.assets?.status === 'loading' && <p className={css.hint}>…</p>}
           {state.assets?.status === 'error' && <p className={css.error}>{state.assets.message}</p>}
@@ -177,7 +177,11 @@ export function GovernanceView({
       {tab === 'alerts' && (
         <section className={css.card}>
           <button type="button" className={css.runButton} onClick={testWebhook}>{t('alerts.webhookTest')}</button>
-          <select className={css.sqlInput} value={levelFilter} onChange={event => setLevelFilter(event.target.value as typeof levelFilter)}>
+          <select
+            className={css.sqlInput}
+            value={levelFilter}
+            onChange={(event) => { setLevelFilter(event.target.value as typeof levelFilter) }}
+          >
             <option value="all">全部级别</option>
             <option value="critical">critical</option>
             <option value="warning">warning</option>

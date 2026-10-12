@@ -145,10 +145,18 @@
   gap: 36px;
   margin-top: 4px;
   padding-left: 8px;
+  /* Narrow viewports: the ring scrolls inside its own strip instead of
+     overflowing the column. The column root clips (overflow: hidden) but is
+     still programmatically scrollable, so an overflowing ring made the
+     browser's focus scroll shift the whole column — input card included —
+     out of the viewport whenever a clipped tab gained focus. */
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 /* figma .Tab 34:11442: 13/16 text (figma wt510, rendered 500), gap 8 to the 2px bar. */
 .tab {
+  flex: none;
   position: relative;
   padding: 0 0 11px;
   border: none;

@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-09-12-portal-deeplink-gateway-fallback.md
-2026-09-12-portal-deeplink-gateway-fallback.md: bbc4c59189d88b14dbb5d7403e86506798c7981b
-2026-09-12-portal-deeplink-gateway-fallback.zh.md: ef189fa3ecb5f2d6a938bbcfc2e4da8fa21a024b
+2026-09-12-portal-deeplink-gateway-fallback.md: 52b7ddce57013a404a85f10e28200d8f45b4fd78
+2026-09-12-portal-deeplink-gateway-fallback.zh.md: ebdeb9ed1f724aa036e779f834214bdaf2c1c714

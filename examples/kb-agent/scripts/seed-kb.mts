@@ -1,6 +1,6 @@
 /**
- * Ingest the corpus directories the versioned kb-corpus.yml manifests (the
- * single source of truth seed-kb, setup-dsh-data, and the kg-build corpus leg
+ * Ingest the corpus directories the versioned kb-corpus.json manifests (the
+ * single source of truth seed-kb and the corpus-manifest spec
  * share) into the kb-agent knowledge base with real MiniMax embo-01
  * embeddings — the same kb.ingest seam the workbench upload channel rides.
  * Idempotent by construction: the store keys documents on (tenantId,
@@ -21,10 +21,10 @@ import * as LlmMiniMax from '@deepseek-ai/dsh-llm-minimax'
 import KbRuntime from '@deepseek-ai/dsh-kb'
 import * as KbSqlite from '@deepseek-ai/dsh-kb-sqlite'
 import * as KbEmbedMiniMax from '@deepseek-ai/dsh-kb-embed-minimax'
-import { loadCorpusManifest } from '@deepseek-ai/dsh-kg-build'
+import { loadCorpusManifest } from './corpus-manifest.ts'
 
 /** The corpus manifest: every directory the KB and the KG corpus leg share. */
-const MANIFEST = loadCorpusManifest(fileURLToPath(new URL('../kb-corpus.yml', import.meta.url)))
+const MANIFEST = loadCorpusManifest(fileURLToPath(new URL('../kb-corpus.json', import.meta.url)))
 
 /** The manifest's dirs as workspace-relative roots (the sourcePath prefix every corpus consumer uses). */
 const CORPUS_DIRS: ReadonlyArray<{ dir: string; kind: string }> = MANIFEST.dirs

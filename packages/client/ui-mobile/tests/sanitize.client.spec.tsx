@@ -15,7 +15,7 @@ import { RichContent } from '../src/client/messages/RichContent.tsx'
 import { sanitizeBody, sanitizeReportPayload, sanitizeSubtitle } from '../src/client/sanitize.ts'
 import type { ReportAction, ReportPayload } from '../src/client/protocol.ts'
 import { SUPPLIER_LIFECYCLE_STATES } from '../src/client/fieldControls.ts'
-import { SUPPLIER_STATE_WORDS } from '../src/client/docsCatalog.ts'
+import { SUPPLIER_STATE_WORDS } from '../src/client/fieldControls.ts'
 
 afterEach(cleanup)
 
@@ -222,10 +222,7 @@ describe('the report render site (W23-R3 F2)', () => {
         cardStates={new Map()}
         reopened={new Set()}
         draftValues={new Map()}
-        systemValues={new Map()}
-        meta={undefined}
         sending={false}
-        approvalExternalStates={new Map()}
         onDraftEdit={() => () => {}}
         onSubmitReview={() => () => {}}
         onConfirm={() => () => {}}

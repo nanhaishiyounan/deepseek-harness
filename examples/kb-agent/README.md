@@ -34,7 +34,7 @@ DSH_HOME=examples/kb-agent/.dsh pnpm dsh --profile headless --patch examples/kb-
   "用 kb_ingest 逐篇入库这六篇文档：examples/kb-agent/workspace/data/meetings/2026-08-20-supplier-visit-hongfa.md 与 examples/kb-agent/workspace/data/meetings/2026-08-27-project-kickoff.md（doc_kind 取 meeting）、examples/kb-agent/workspace/data/profiles/hongfa-food.md 与 examples/kb-agent/workspace/data/profiles/lvyuan-ingredients.md（doc_kind 取 profile）、examples/kb-agent/workspace/data/regulations/gb2760-excerpt.md 与 examples/kb-agent/workspace/data/regulations/gb14881-excerpt.md（doc_kind 取 regulation），完成后用 kb_stats 报告覆盖情况"
 ```
 
-Ingest is overwrite-shaped per source path, so re-running the command replaces the same six documents instead of duplicating them. The full batch corpus lives in the versioned `kb-corpus.yml` manifest (14 directories under `workspace/data/`, 46 documents): `scripts/seed-kb.mts` ingests it into the KB with real MiniMax embeddings, and the kg-build corpus leg reads the same manifest through `corpus.manifestFile`, so the KB document set and the KG extraction scan cannot drift apart (the manifest deliberately excludes non-corpus drop-ins like `connector-files/`).
+Ingest is overwrite-shaped per source path, so re-running the command replaces the same six documents instead of duplicating them. The full batch corpus lives in the versioned `kb-corpus.json` manifest (14 directories under `workspace/data/`, 46 documents): `scripts/seed-kb.mts` ingests it into the KB with real MiniMax embeddings, and every graph-maintenance path reads the same manifest, so tooling that scans the corpus cannot drift apart from the KB document set (the manifest deliberately excludes non-corpus drop-ins like `connector-files/`).
 
 ## Ask a grounded question
 
@@ -81,14 +81,6 @@ DSH_HOME=examples/kb-agent/.dsh pnpm dsh --profile headless --patch examples/kb-
 ```
 
 Expect the same cited answer shape, with `mode: 'text'` and `embed_available: false` observable in the `kb_search`/`kb_stats` results the model reports, while MiniMax-M3 still answers on `MINIMAX_API_KEY`.
-
-## Expert-service orders (NocoBase business backend)
-
-The composition also mounts the connector seam and the orders domain: `connector_discover` surfaces the 张红喜 expert dataset (expert card + orderable services) and `order_create` places an order and generates the proposal PDF. The single source of truth for orders is an external NocoBase 2.x backend: `scripts/setup-nocobase.mts` brings it up end to end — install, start, collections, dataset seeding, API key issuance, and the approval workflow (manual approval → approve calls back into DSH to produce the deliverable / reject writes the failure) — writing credentials into the repository root `.env`; without them the related tests self-skip. Full steps and the real-track e2e live in the NocoBase section of [QUICKSTART.zh.md](QUICKSTART.zh.md) (Chinese). Delivered PDFs hang off the order row's attachment field through `attachments:upload`; the local `workspace/deliverables/` copy is only a cache.
-
-## One-command demo of the three user journeys
-
-`scripts/demo-full-journey.mts` chains the three customer motions (upload auto-routing csv→lakehouse / md→kb, the export-risk question with President Zhang's expert card, and order → approval → PDF delivery) into one real end-to-end run: with-key + with-NocoBase, tracks whose preconditions are missing self-skip with an explanation, each scenario asserts and appends its transcript under `demos/`. Command and preconditions live in the demo section of [QUICKSTART.zh.md](QUICKSTART.zh.md) (Chinese).
 
 ## FAQ
 

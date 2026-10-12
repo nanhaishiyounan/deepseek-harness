@@ -146,7 +146,7 @@ describe('kg domain reads', () => {
     expect(search.result.value.nodes.map(node => node.name)).toEqual(['宏发食品'])
   })
 
-  it('counts the store and the registry in stats, with the quality tail', async () => {
+  it('counts the store and the registry in stats, with the structural quality counters', async () => {
     const api = await boot({ kgEnabled: true, kgTenant: 't1' })
     const stats = await api.kg.stats(request({}))
     if (!stats.result.ok) throw new Error('stats refused')
@@ -154,12 +154,9 @@ describe('kg domain reads', () => {
     expect(stats.result.value.entities).toBe(3)
     expect(stats.result.value.node_types).toBeGreaterThan(0)
     expect(stats.result.value.ontology_version).toMatch(/^\d+\.\d+\.\d+$/u)
-    // The seeded chain (宏发→酱油→山梨酸钾) has no islands and no conflicts;
-    // no pipeline is composed, so the coverage tail stays absent.
+    // The seeded chain (宏发→酱油→山梨酸钾) has no islands and no conflicts.
     expect(stats.result.value.islands).toBe(0)
     expect(stats.result.value.conflicts).toBe(0)
-    expect(stats.result.value.coverage).toBeUndefined()
-    expect(stats.result.value.last_run_at).toBeUndefined()
   })
 
   it('compiles and walks a templated phrase through kg.query', async () => {

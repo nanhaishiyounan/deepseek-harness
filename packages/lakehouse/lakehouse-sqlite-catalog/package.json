@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-lakehouse-sqlite-catalog",
   "description": "SQLite catalog provider for the lakehouse seam: table registry, transfer records, and usage counters in one node:sqlite database",
-  "version": "0.1.1-rc.2",
+  "version": "1.0.0",
   "publishConfig": {
     "access": "public"
   },

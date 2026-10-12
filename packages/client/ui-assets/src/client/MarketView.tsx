@@ -1,10 +1,10 @@
 /**
  * The market view tab: the section portal (hero + counters + featured rail +
- * tag cloud), the catalog (search + kind chips + asset cards), the asset
- * detail panel with the ask/cite/order action bar, and the order journey —
- * confirm card → `orders.create` → receipt with the status badge. Registered
- * as the `market` entry of the conversation view ring; the ask/cite actions
- * fill the composer draft and ask the bridge to switch back to the chat tab.
+ * tag cloud), the catalog (search + kind chips + asset cards), and the asset
+ * detail panel with the ask/cite action bar (the order journey retired with
+ * the orders seam). Registered as the `market` entry of the conversation
+ * view ring; the ask/cite actions fill the composer draft and ask the bridge
+ * to switch back to the chat tab.
  * @module @deepseek-ai/dsh-client-ui-assets/client/MarketView
  */
 
@@ -16,9 +16,7 @@ import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-cli
 // Type-only: pulls the ui-conversation SlotMap merge (the view seat).
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type { MarketClientState } from './marketStore.ts'
-import type { MarketAssetKind, MarketAssetRow, MarketOrderReceipt } from './marketTypes.ts'
-import { OrderConfirmCard } from './OrderConfirmCard.tsx'
-import { OrdersSection } from './OrdersSection.tsx'
+import type { MarketAssetKind, MarketAssetRow } from './marketTypes.ts'
 import { MARKET_KIND_FILTERS, filterCatalog, providerLabelOf } from './presentation.ts'
 import css from './market.module.css'
 
@@ -33,10 +31,6 @@ export interface MarketViewInjected {
   }
   /** Load or reload both shared caches (stats + catalog). */
   refresh: () => void
-  /** Load or reload the orders cache (the 「我的订单」 section). */
-  refreshOrders: () => void
-  /** Place one order; rejects with the failure message. */
-  placeOrder: (asset: MarketAssetRow, brief: string) => Promise<MarketOrderReceipt>
   /** Best-effort view switch through the header bridge. */
   requestView: (view: string) => void
 }
@@ -47,26 +41,17 @@ export type MarketViewProps =
   & PropsLocale<'market'>
   & InjectFace<MarketViewInjected>
 
-/** The local order-journey flow state (presentation, not session data). */
-type OrderFlow =
-  | { readonly stage: 'idle' }
-  | { readonly stage: 'confirming'; readonly asset: MarketAssetRow; readonly brief: string }
-  | { readonly stage: 'receipt'; readonly receipt: MarketOrderReceipt }
-
 /**
  * Render the market view tab.
  * @param props - the standard view kit plus the market's inject face.
  * @returns the market column.
  */
-export function MarketView({ inputActions, useMarket, refresh, refreshOrders, placeOrder, requestView, t }: MarketViewProps): JSX.Element {
+export function MarketView({ inputActions, useMarket, refresh, requestView, t }: MarketViewProps): JSX.Element {
   const state = useMarket(snapshot => snapshot)
   const [query, setQuery] = useState('')
   const [kind, setKind] = useState<MarketAssetKind | 'all'>('all')
   const [visibleCount, setVisibleCount] = useState(CATALOG_PAGE_SIZE)
   const [selected, setSelected] = useState<MarketAssetRow | undefined>(undefined)
-  const [flow, setFlow] = useState<OrderFlow>({ stage: 'idle' })
-  const [submitting, setSubmitting] = useState(false)
-  const [flowError, setFlowError] = useState<string | undefined>(undefined)
 
   useEffect(() => {
     if (state.stats === undefined) refresh()
@@ -80,19 +65,6 @@ export function MarketView({ inputActions, useMarket, refresh, refreshOrders, pl
   const askAbout = (asset: MarketAssetRow): void => {
     inputActions.setDraft(t('ask.prefix', { title: asset.title }))
     requestView('chat')
-  }
-
-  const confirmOrder = async (asset: MarketAssetRow, brief: string): Promise<void> => {
-    setSubmitting(true)
-    setFlowError(undefined)
-    try {
-      const receipt = await placeOrder(asset, brief)
-      setFlow({ stage: 'receipt', receipt })
-    } catch (error: unknown) {
-      setFlowError(error instanceof Error ? error.message : String(error))
-    } finally {
-      setSubmitting(false)
-    }
   }
 
   const stats = state.stats
@@ -118,7 +90,7 @@ export function MarketView({ inputActions, useMarket, refresh, refreshOrders, pl
         meta={stats === undefined ? undefined : stats.status === 'ready'
           ? (
             <span>
-              {t('hero.products')} {stats.value.products} · {t('hero.providers')} {stats.value.providers} · {t('hero.monthlyOrders')} {stats.value.monthly_orders}
+              {t('hero.products')} {stats.value.products} · {t('hero.providers')} {stats.value.providers}
             </span>
           )
           : <PageSkeleton variant="list" rows={1} />}
@@ -139,25 +111,6 @@ export function MarketView({ inputActions, useMarket, refresh, refreshOrders, pl
         )}
       </PageHero>
 
-      {flow.stage === 'receipt' && (
-        <section className={css.receipt} aria-label={t('order.receiptTitle')}>
-          <h3 className={css.cardTitle}>{t('order.receiptTitle')}</h3>
-          <p className={css.detailLine}>
-            <span className={css.detailLabel}>{t('order.receiptOrderNo')}</span>
-            {flow.receipt.order_no}
-            <span className={css.statusBadge} data-status={flow.receipt.status}>{t(`order.status.${flow.receipt.status}`)}</span>
-          </p>
-          <Button variant="ghost" size="sm" onClick={() => {
-            inputActions.setDraft(t('ask.prefix', { title: flow.receipt.service_name }))
-            requestView('chat')
-          }}>{t('order.receiptAskProgress')}</Button>
-          <Button variant="ghost" size="sm" onClick={() => {
-            document.getElementById('market-orders')?.scrollIntoView({ behavior: 'smooth' })
-          }}>{t('order.receiptViewOrder')}</Button>
-        </section>
-      )}
-
-      <OrdersSection orders={state.orders} refreshOrders={refreshOrders} t={t} />
 
       {catalog === undefined || catalog.status === 'loading' ? (
         <PageSkeleton variant="grid" />
@@ -209,29 +162,10 @@ export function MarketView({ inputActions, useMarket, refresh, refreshOrders, pl
             <p className={css.tagRow}>{selected.domains.map(domain => <span key={domain} className={css.tag}>{domain}</span>)}</p>
           )}
 
-          {flow.stage === 'idle' && (
-            <div className={css.actionBar}>
-              <Button variant="ghost" size="sm" onClick={() => { askAbout(selected) }}>{t('detail.ask')}</Button>
-              <Button variant="ghost" size="sm" onClick={() => { askAbout(selected) }}>{t('detail.cite')}</Button>
-              {selected.service_id !== undefined && (
-                <Button variant="primary" size="sm" onClick={() => {
-                  setFlow({ stage: 'confirming', asset: selected, brief: t('ask.prefix', { title: selected.title }) })
-                }}>{t('detail.order')}</Button>
-              )}
-            </div>
-          )}
-          {flow.stage === 'confirming' && (
-            <OrderConfirmCard
-              t={t}
-              asset={flow.asset}
-              brief={flow.brief}
-              onBriefChange={(brief) => { setFlow({ stage: 'confirming', asset: flow.asset, brief }) }}
-              onConfirm={() => { void confirmOrder(flow.asset, flow.brief) }}
-              onCancel={() => { setFlow({ stage: 'idle' }); setFlowError(undefined) }}
-              submitting={submitting}
-              {...flowError === undefined ? {} : { error: flowError }}
-            />
-          )}
+          <div className={css.actionBar}>
+            <Button variant="ghost" size="sm" onClick={() => { askAbout(selected) }}>{t('detail.ask')}</Button>
+            <Button variant="ghost" size="sm" onClick={() => { askAbout(selected) }}>{t('detail.cite')}</Button>
+          </div>
         </section>
       ) : catalog.value.length === 0 ? (
         <EmptyState title={t('catalog.empty')} hint={t('catalog.emptyHint')} />
@@ -265,10 +199,9 @@ export function MarketView({ inputActions, useMarket, refresh, refreshOrders, pl
           })}</p>
           <div className={css.grid}>
             {filtered.slice(0, visibleCount).map(asset => (
-              <button key={`${asset.provider_id}/${asset.dataset_id}`} type="button" className={css.assetCard} onClick={() => { setSelected(asset); setFlow({ stage: 'idle' }) }}>
+              <button key={`${asset.provider_id}/${asset.dataset_id}`} type="button" className={css.assetCard} onClick={() => { setSelected(asset) }}>
                 <p className={css.assetTitleRow}>
                   <span className={css.assetTitle}>{asset.title}</span>
-                  {asset.service_id !== undefined && <span className={css.orderableBadge}>{t('card.orderable')}</span>}
                 </p>
                 <p className={css.assetKind}>{t(`catalog.kind.${asset.kind}`)}{asset.price !== undefined ? ` · ${asset.price}` : ''}</p>
                 {asset.description !== undefined && <p className={css.assetBlurb}>{asset.description}</p>}

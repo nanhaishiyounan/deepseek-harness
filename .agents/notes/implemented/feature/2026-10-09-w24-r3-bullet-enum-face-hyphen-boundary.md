@@ -2,6 +2,8 @@
 
 Status: implemented
 
+English | [中文](2026-10-09-w24-r3-bullet-enum-face-hyphen-boundary.zh.md)
+
 ## Problem
 
 W24-R2 验证遗留唯一本批引入 Important + 用户两条运行反馈：①markdown bullet 列表的供应商生命周期枚举词分裂——`- qualified` 类孤立枚举词的左右最近句段各是 `-`（ASCII 连字符不在 `SEGMENT_BOUNDARY`，整个连字符自成一个段），两侧无 Han，W24-R2 句段门判 false，`restricted` 无条件映射而五个上门词保英文，同屏五英一中（活体 `vfy-w24r2-enum-list-split-375.png`：「供应商质检与冷链要求」会话底部 6 个 bullet，5 英文 + 1 中文「受限」）；②W24 md 表格 wrap 修复的副作用：`table { min-width: max-content }` 抬高了 AI 气泡（assistant 行的 flex item）的 `min-width: auto` 自动下限，顶破 `.dshm-bubble-paper-ai` 的 `max-width: min(80vw, 300px)`，溢出传播到页面级——用户看到「整个会话页面水平滚动了」（对话页面不该页面级横向滚动）。另：`r1-unread-dot-after-probe.json` 仍是 R1 dist 的 `-8px` 值（R2 已改 `-4px` 并在 `vfy-w24r2-unread-probe.json` 另存副本，但原文件未刷新入库）。

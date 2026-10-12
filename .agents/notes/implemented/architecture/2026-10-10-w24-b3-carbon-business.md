@@ -2,7 +2,9 @@
 
 Status: implemented
 
-日期：2026-10-10 ｜ 批次：W24-B3（业务系统，五源②） ｜ 证据目录：[research/2026-10-09-w24-rebuild/b3-carbon/](../../../../../research/2026-10-09-w24-rebuild/b3-carbon/README.md)
+English | [中文](2026-10-10-w24-b3-carbon-business.zh.md)
+
+日期：2026-10-10 ｜ 批次：W24-B3（业务系统，五源②） ｜ 证据目录：[research/2026-10-09-w24-rebuild/b3-carbon/](../../../../research/2026-10-09-w24-rebuild/b3-carbon/README.md)
 
 ## Problem
 

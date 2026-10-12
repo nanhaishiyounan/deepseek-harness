@@ -16,13 +16,10 @@
 import { useRef, useState, type JSX } from 'react'
 import { Button, Collapse, DatePicker, Input, Picker } from 'antd-mobile'
 import type { CardPhase } from '../../cardState.ts'
-import type { NocobaseFieldView } from '@deepseek-ai/dsh-host-apiproxy/api'
-import { fieldControlOf, metaFieldOf } from '../../fieldControls.ts'
+import type { FieldMetaView } from '../../fieldControls.ts'
 import type { FormDraftPayload, FormField } from '../../protocol.ts'
 import { portalContainer } from '../../portal.ts'
 import { formatDateText, parseDateText } from '../dateText.ts'
-import { useRelationLabel } from '../relation-label.ts'
-import { RelationSelect } from '../RelationSelect.tsx'
 import css from './v3.module.css'
 import { PhaseStamp } from './PhaseStamp.tsx'
 
@@ -33,7 +30,7 @@ export interface DraftCardProps {
   readonly values: Readonly<Record<string, string>>
   readonly phase: CardPhase
   /** The collection's field metadata (relation targets); absent fields fall back to text. */
-  readonly meta?: ReadonlyMap<string, NocobaseFieldView> | undefined
+  readonly meta?: ReadonlyMap<string, FieldMetaView> | undefined
   readonly onEdit: (name: string, value: string) => void
   readonly onConfirm: () => void
   readonly onReject: () => void
@@ -157,7 +154,7 @@ export function DraftCard(props: DraftCardProps): JSX.Element {
                   <span
                     className={`${css.derivedValue}${field.edited === true ? ` ${css.fieldValueEdited}` : ''}`}
                   >
-                    <DerivedFace field={field} value={values[field.name] ?? field.value ?? ''} payload={payload} meta={props.meta} />
+                    <DerivedFace field={field} value={values[field.name] ?? field.value ?? ''} />
                   </span>
                   {field.rationale !== undefined && <span className={css.rationale}>{field.rationale}</span>}
                 </span>
@@ -216,32 +213,19 @@ function EditableValue(
     readonly field: FormField
     readonly payload: FormDraftPayload
     readonly values: Readonly<Record<string, string>>
-    readonly meta: ReadonlyMap<string, NocobaseFieldView> | undefined
+    readonly meta: ReadonlyMap<string, FieldMetaView> | undefined
     readonly disabled: boolean
     readonly onEdit: (name: string, value: string) => void
   },
 ): JSX.Element {
-  const { field, payload, values, meta, disabled, onEdit } = props
+  const { field, values, disabled, onEdit } = props
   const value = values[field.name] ?? ''
   if (field.widget === 'relation') {
-    const spec = fieldControlOf(payload.form.collection, field.name, metaFieldOf(meta, field.name))
-    // A declared relation the meta read could not key (double miss) with a
-    // numeric value rests on the same opaque 引用 #N face as the derived
-    // tier — a bare editable `47` reads like a quantity or amount.
-    if ((spec.kind !== 'relation' || spec.target === undefined) && /^\d+$/.test(value)) {
+    // Relation picking rode the retired NocoBase read; relation fields rest
+    // on the opaque 引用 #N face for numeric values and the boxed input
+    // otherwise — a bare editable `47` reads like a quantity or amount.
+    if (/^\d+$/.test(value)) {
       return <span className={css.fieldStatic} data-testid="relation-static">引用 #{value}</span>
-    }
-    if (spec.kind === 'relation' && !disabled) {
-      return (
-        <RelationSelect
-          target={spec.target}
-          value={value}
-          placeholder="请选择"
-          ariaLabel={field.label}
-          triggerClassName={css.fieldPicker}
-          onChange={(next) => { onEdit(field.name, next) }}
-        />
-      )
     }
   }
   if (field.widget === 'select') {
@@ -352,35 +336,13 @@ function DerivedFace(
   props: {
     readonly field: FormField
     readonly value: string
-    readonly payload: FormDraftPayload
-    readonly meta: ReadonlyMap<string, NocobaseFieldView> | undefined
   },
 ): JSX.Element {
-  const { field, value, payload, meta } = props
-  const spec = field.widget === 'relation'
-    ? fieldControlOf(payload.form.collection, field.name, metaFieldOf(meta, field.name))
-    : undefined
-  return <DerivedFaceResolved kind={spec?.kind} target={spec?.target} value={value} declaredRelation={field.widget === 'relation'} />
-}
-
-/** The name-resolved arm of the derived face (hook isolation per row). */
-function DerivedFaceResolved(
-  props: {
-    readonly kind: string | undefined
-    readonly target: string | undefined
-    readonly value: string
-    readonly declaredRelation: boolean
-  },
-): JSX.Element {
-  const resolved = useRelationLabel(
-    props.kind === 'relation' ? { kind: props.kind, target: props.target } : undefined,
-    props.value,
-  )
-  // A declared relation the meta read could not key resolves no target row:
-  // a numeric value shows as the opaque reference `引用 #47` instead of a
-  // bare number that reads like a quantity or amount.
-  if (props.declaredRelation && (props.kind !== 'relation' || props.target === undefined) && /^\d+$/.test(props.value)) {
-    return <>引用 #{props.value}</>
+  const { field, value } = props
+  // Relation picking rode the retired NocoBase read; a numeric relation
+  // value rests on the opaque reference face, everything else renders raw.
+  if (field.widget === 'relation' && /^\d+$/.test(value)) {
+    return <>引用 #{value}</>
   }
-  return <>{resolved ?? props.value}</>
+  return <>{value}</>
 }

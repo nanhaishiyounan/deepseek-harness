@@ -57,12 +57,12 @@ describe('v8 ignore budget verdicts', () => {
       'packages/demo/pkg-1/node_modules/x/index.ts': '/* v8 ignore next */\nexport const a = 1\n',
       'packages/demo/pkg-1/lib/index.ts': '/* v8 ignore next */\n',
       'vendor/cordis/src/index.ts': '/* v8 ignore next */\n',
-      'platform/nocobase/src/a.ts': '/* v8 ignore next */\n',
+      'research/x/sources/a.ts': '/* v8 ignore next */\n',
     } })
     const inventory = countV8IgnoreMarkers(root)
     expect(inventory.total).toBe(1)
     expect([...inventory.byFile.keys()]).toEqual(['packages/demo/pkg-1/src/index.ts'])
-    for (const excluded of ['packages/demo/pkg-1/node_modules/x/index.ts', 'packages/demo/pkg-1/lib/index.ts', 'vendor/cordis/src/index.ts', 'platform/nocobase/src/a.ts']) {
+    for (const excluded of ['packages/demo/pkg-1/node_modules/x/index.ts', 'packages/demo/pkg-1/lib/index.ts', 'vendor/cordis/src/index.ts', 'research/x/sources/a.ts']) {
       expect(isExcludedMarkerPath(excluded)).toBe(true)
     }
     expect(MARKER_GLOBS.length).toBeGreaterThan(0)

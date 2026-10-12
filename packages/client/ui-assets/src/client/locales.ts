@@ -1,8 +1,7 @@
 /**
  * The market's copy, Chinese-first with an English mirror. Business language
- * only: data assets, providers, deals, delivery, approval — never connector,
- * dataset id, or provider id (the detail panel's source line shows the
- * human-facing provider label).
+ * only: data assets and providers — never connector, dataset id, or provider
+ * id (the detail panel's source line shows the human-facing provider label).
  * @module @deepseek-ai/dsh-client-ui-assets/client/locales
  */
 
@@ -15,7 +14,6 @@ export type MarketKey =
   | 'hero.tagline'
   | 'hero.products'
   | 'hero.providers'
-  | 'hero.monthlyOrders'
   | 'hero.featured'
   | 'catalog.title'
   | 'catalog.searchPlaceholder'
@@ -30,7 +28,6 @@ export type MarketKey =
   | 'catalog.more'
   | 'catalog.empty'
   | 'catalog.emptyHint'
-  | 'card.orderable'
   | 'detail.source'
   | 'detail.updated'
   | 'detail.price'
@@ -40,32 +37,7 @@ export type MarketKey =
   | 'detail.domains'
   | 'detail.ask'
   | 'detail.cite'
-  | 'detail.order'
   | 'detail.back'
-  | 'order.title'
-  | 'order.briefLabel'
-  | 'order.briefPlaceholder'
-  | 'order.confirm'
-  | 'order.cancel'
-  | 'order.submitting'
-  | 'order.termsNote'
-  | 'order.receiptTitle'
-  | 'order.receiptOrderNo'
-  | 'order.receiptAskProgress'
-  | 'order.receiptViewOrder'
-  | 'order.status.pending'
-  | 'order.status.generating'
-  | 'order.status.delivered'
-  | 'order.status.failed'
-  | 'orders.title'
-  | 'orders.refresh'
-  | 'orders.close'
-  | 'orders.empty'
-  | 'orders.emptyHint'
-  | 'orders.viewDeliverable'
-  | 'orders.download'
-  | 'orders.previewTitle'
-  | 'orders.openExternal'
   | 'error.unavailable'
   | 'error.retry'
   | 'ask.prefix'
@@ -76,10 +48,9 @@ export const zh: Record<MarketKey, string> = {
   'entry.label': '数据资产',
   'entry.productsBadge': '数据资产数',
   'hero.title': '数据资产市场',
-  'hero.tagline': '公共数据与专家服务，可查看、可下单、可交付',
+  'hero.tagline': '公共数据与专家服务，可查看、可引用、可提问',
   'hero.products': '数据产品',
   'hero.providers': '供方',
-  'hero.monthlyOrders': '本月成交',
   'hero.featured': '典型产品',
   'catalog.title': '资产目录',
   'catalog.searchPlaceholder': '搜索资产，如：中亚 合规 出海',
@@ -94,7 +65,6 @@ export const zh: Record<MarketKey, string> = {
   'catalog.more': '展开更多（还有 {count} 项）',
   'catalog.empty': '市场上还没有资产',
   'catalog.emptyHint': '把数据集接入连接器，或让专家发布可服务项后，这里会自动上架',
-  'card.orderable': '可下单',
   'detail.source': '来源',
   'detail.updated': '更新于',
   'detail.price': '价格',
@@ -104,32 +74,7 @@ export const zh: Record<MarketKey, string> = {
   'detail.domains': '领域',
   'detail.ask': '问数',
   'detail.cite': '引用并提问',
-  'detail.order': '下单',
   'detail.back': '返回目录',
-  'order.title': '确认下单',
-  'order.briefLabel': '需求简述',
-  'order.briefPlaceholder': '一句话说明你要解决的问题（可修改）',
-  'order.confirm': '确认下单',
-  'order.cancel': '取消',
-  'order.submitting': '正在下单…',
-  'order.termsNote': '下单后进入审批流程，通过后自动生成并交付；金额与条款以下单快照为准',
-  'order.receiptTitle': '下单成功',
-  'order.receiptOrderNo': '订单号',
-  'order.receiptAskProgress': '去对话跟踪进度',
-  'order.receiptViewOrder': '查看订单',
-  'order.status.pending': '待审批',
-  'order.status.generating': '生成中',
-  'order.status.delivered': '已交付',
-  'order.status.failed': '已失败',
-  'orders.title': '我的订单',
-  'orders.refresh': '刷新',
-  'orders.close': '关闭',
-  'orders.empty': '还没有订单',
-  'orders.emptyHint': '在资产目录选择可下单的专家服务，或在对话中让助手下单',
-  'orders.viewDeliverable': '查看方案',
-  'orders.download': '下载 PDF',
-  'orders.previewTitle': '方案预览',
-  'orders.openExternal': '新窗口打开',
   'error.unavailable': '市场暂不可用',
   'error.retry': '重试',
   'ask.prefix': '关于「{title}」：',
@@ -141,10 +86,9 @@ export const en: Record<MarketKey, string> = {
   'entry.label': 'Data assets',
   'entry.productsBadge': 'data-asset count',
   'hero.title': 'Data asset market',
-  'hero.tagline': 'Public data and expert services — browse, order, get delivery',
+  'hero.tagline': 'Public data and expert services — browse, cite, ask',
   'hero.products': 'products',
   'hero.providers': 'providers',
-  'hero.monthlyOrders': 'deals this month',
   'hero.featured': 'Featured',
   'catalog.title': 'Catalog',
   'catalog.searchPlaceholder': 'Search assets, e.g. central-asia compliance export',
@@ -159,7 +103,6 @@ export const en: Record<MarketKey, string> = {
   'catalog.more': 'Show more ({count} left)',
   'catalog.empty': 'No assets on the market yet',
   'catalog.emptyHint': 'Connect datasets through connectors, or let experts publish services — they list here automatically',
-  'card.orderable': 'Orderable',
   'detail.source': 'Source',
   'detail.updated': 'Updated',
   'detail.price': 'Price',
@@ -169,32 +112,7 @@ export const en: Record<MarketKey, string> = {
   'detail.domains': 'Domains',
   'detail.ask': 'Ask',
   'detail.cite': 'Cite & ask',
-  'detail.order': 'Order',
   'detail.back': 'Back to catalog',
-  'order.title': 'Confirm order',
-  'order.briefLabel': 'Your need',
-  'order.briefPlaceholder': 'One line on the problem to solve (editable)',
-  'order.confirm': 'Place order',
-  'order.cancel': 'Cancel',
-  'order.submitting': 'Placing…',
-  'order.termsNote': 'The order enters approval; after it passes, delivery generates automatically. Pricing and terms follow the order snapshot.',
-  'order.receiptTitle': 'Order placed',
-  'order.receiptOrderNo': 'Order no.',
-  'order.receiptAskProgress': 'Track progress in chat',
-  'order.receiptViewOrder': 'View order',
-  'order.status.pending': 'Pending approval',
-  'order.status.generating': 'Generating',
-  'order.status.delivered': 'Delivered',
-  'order.status.failed': 'Failed',
-  'orders.title': 'My orders',
-  'orders.refresh': 'Refresh',
-  'orders.close': 'Close',
-  'orders.empty': 'No orders yet',
-  'orders.emptyHint': 'Pick an orderable expert service in the catalog, or ask the assistant to order in chat',
-  'orders.viewDeliverable': 'View deliverable',
-  'orders.download': 'Download PDF',
-  'orders.previewTitle': 'Deliverable preview',
-  'orders.openExternal': 'Open in new window',
   'error.unavailable': 'The market is unavailable',
   'error.retry': 'Retry',
   'ask.prefix': 'About “{title}”: ',

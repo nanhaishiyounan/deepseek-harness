@@ -12,7 +12,7 @@
  * @returns the business-facing label.
  */
 export function providerLabelOf(providerId: string): string {
-  if (providerId === 'connector-nocobase') return 'NocoBase 业务后台'
+  if (providerId === 'connector-experts') return '专家数据源'
   if (providerId === 'connector-file') return '文件投递目录'
   return providerId
 }

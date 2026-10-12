@@ -28,9 +28,9 @@ Status: implemented
 
 ## Evidence
 
-- 引擎脚本 [`nocobase-w3-procurement.mts`](../../../../examples/kb-agent/scripts/nocobase-w3-procurement.mts)（9 集合 + flow×4 + 卡口×6 + 种子 + 采购管理 7 页 + `--demo-chain`）与 [`nocobase-h5-wms.mts`](../../../../examples/kb-agent/scripts/nocobase-h5-wms.mts)（待检区种子/postReceipt 分流/releaseReceipt/`--iqc`）。
+- 引擎脚本 ``nocobase-w3-procurement.mts``（9 集合 + flow×4 + 卡口×6 + 种子 + 采购管理 7 页 + `--demo-chain`）与 ``nocobase-h5-wms.mts``（待检区种子/postReceipt 分流/releaseReceipt/`--iqc`）。
 - demo-chain 全绿含卡口负例×3 与容差正反例：`research/2026-09-25-w-round/b3-chain-log.txt`；psql 九段只读断言：`b3-psql.txt`；双端截图：`b3-admin-{compare,po-triaxis,invoice-match,pr-converted}.png` + `b3-mobile-{po-status,receipt-draft,receipt-done}.png`。
-- 规则真源改动：[`approval-rules.ts`](../../../../packages/connector/tool-nocobase/src/approval-rules.ts)（nextStateOf 语义 + gateNotInSetMessage）、[`write.ts`](../../../../packages/connector/tool-nocobase/src/write.ts) 与 [`approval-engine.mts`](../../../../examples/kb-agent/scripts/approval-engine.mts)（amount_field 两侧同步）。
+- 规则真源改动：``approval-rules.ts``（nextStateOf 语义 + gateNotInSetMessage）、``write.ts`` 与 ``approval-engine.mts``（amount_field 两侧同步）。
 
 ## Alternatives considered
 

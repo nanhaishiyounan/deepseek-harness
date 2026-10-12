@@ -1,6 +1,0 @@
-{
-    "unique violation": "{{field}} moet uniek zijn",
-    "notNull violation": "notNull schending",
-    "Validation error": "{{field}} validatiefout",
-    "notNull Violation": "{{field}} mag niet leeg zijn"
-}

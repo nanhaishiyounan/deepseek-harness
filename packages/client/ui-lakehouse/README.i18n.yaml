@@ -1,2 +1,6 @@
-en: README.md
-zh: README.zh.md
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/client/ui-lakehouse/README.md
+README.md: ad4b474cacd846c0784360d8caaa32e36ffb4cd8
+README.zh.md: 59801866b880bb5aae055d46b50fd88e0238e1d3

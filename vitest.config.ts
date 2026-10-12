@@ -274,20 +274,14 @@ export default defineConfig({
         'packages/session/session-projection/src/index.ts',
         // M1/M2/M3 domain surfaces outside the M4 touch area whose remaining
         // per-file gaps stay on the debt ledger (D10) until behavior-test
-        // batches land: connector trio, expert pair, market/assets and
-        // connector client views, agent-preset selector, the request-context
-        // view seam, and two test-support helpers whose lanes run through
-        // snapshot/e2e assembly rather than unit instrumentation.
+        // batches land: connector-file and tool-connector views, expert-pdf
+        // render, market/assets and connector client views, agent-preset
+        // selector, the request-context view seam, and two test-support
+        // helpers whose lanes run through snapshot/e2e assembly rather than
+        // unit instrumentation.
         'packages/connector/connector-file/src/provider.ts',
-        'packages/connector/connector-nocobase/src/client.ts',
-        'packages/connector/connector-nocobase/src/provider.ts',
         'packages/connector/tool-connector/src/assets.ts',
         'packages/connector/tool-connector/src/order.ts',
-        'packages/connector/tool-nocobase/src/index.ts',
-        'packages/connector/tool-nocobase/src/read.ts',
-        'packages/connector/tool-nocobase/src/write.ts',
-        'packages/expert/expert-orders/src/draft.ts',
-        'packages/expert/expert-orders/src/index.ts',
         'packages/expert/expert-pdf/src/render.ts',
         'packages/client/ui-assets/src/client/index.ts',
         'packages/client/ui-assets/src/client/marketStore.ts',

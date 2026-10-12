@@ -62,12 +62,20 @@ export const LAKE_ALIAS = 'lake'
 /** Default S3 region when the config omits one (the vended-credential signer needs any valid region). */
 export const DEFAULT_S3_REGION = 'us-east-1'
 
-/** Quote one SQL identifier (double quotes; embedded quotes doubled). */
+/**
+ * Quote one SQL identifier (double quotes; embedded quotes doubled).
+ * @param name - the raw identifier.
+ * @returns the quoted identifier.
+ */
 export function quoteIdentifier(name: string): string {
   return `"${name.replaceAll('"', '""')}"`
 }
 
-/** Quote one SQL string literal (single quotes; embedded quotes doubled). */
+/**
+ * Quote one SQL string literal (single quotes; embedded quotes doubled).
+ * @param text - the raw literal text.
+ * @returns the quoted literal.
+ */
 export function quoteString(text: string): string {
   return `'${text.replaceAll("'", "''")}'`
 }

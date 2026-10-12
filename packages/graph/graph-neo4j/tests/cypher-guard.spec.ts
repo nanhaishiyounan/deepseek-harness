@@ -42,7 +42,7 @@ describe('readOnlyCypherVerdict', () => {
   })
 
   it('assertReadOnlyCypher throws the structured error on refusal', () => {
-    expect(() => assertReadOnlyCypher('MATCH (n) DELETE n')).toThrowError(CypherGuardError)
+    expect(() => { assertReadOnlyCypher('MATCH (n) DELETE n') }).toThrow(CypherGuardError)
     try {
       assertReadOnlyCypher('MERGE (n) RETURN n')
       expect.unreachable('the guard must throw')

@@ -2,7 +2,7 @@
 
 English | [中文](README.zh.md)
 
-Connector capability seam (`ctx.connector`): the provider registry, dataset discovery and fetch routing, and the five-step transfer orchestration that lands external datasets in this deployment — pull → classify (the lakehouse seam's shared data router for file bytes, kind-driven otherwise) → route → deliver (kb ingest or lakehouse load) → confirm (a catalog transfer record). The seam owns no provider: file sets, NocoBase, and later upstreams register themselves.
+Connector capability seam (`ctx.connector`): the provider registry, dataset discovery and fetch routing, and the five-step transfer orchestration that lands external datasets in this deployment — pull → classify (the lakehouse seam's shared data router for file bytes, kind-driven otherwise) → route → deliver (kb ingest or lakehouse load) → confirm (a catalog transfer record). The seam owns no provider: file sets and later upstreams register themselves.
 
 ## Service contract
 
@@ -27,7 +27,7 @@ Connector capability seam (`ctx.connector`): the provider registry, dataset disc
 
 ## Configuration (schemastery)
 
-None — the seam has no tunables. Providers register themselves with their own configs (`dsh-connector-file`, `dsh-connector-nocobase`); the tool consumer (`dsh-tool-connector`) owns the tenant binding.
+None — the seam has no tunables. Providers register themselves with their own configs (`dsh-connector-file`); the tool consumer (`dsh-tool-connector`) owns the tenant binding.
 
 ## Model Experience
 

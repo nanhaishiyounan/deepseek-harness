@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-ontology-induction",
   "description": "LLM schema-induction pipeline (the automatic ontology path): corpus chunking, OntoGPT-style structured-output prompts, candidate merging, the SHACL-shaped ontology gate with a bounded repair loop, and deterministic JSON-LD serialization — the model emits JSON, code serializes RDF",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "publishConfig": {
     "access": "public"
   },

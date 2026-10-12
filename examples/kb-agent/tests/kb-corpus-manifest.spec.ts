@@ -1,5 +1,5 @@
 /**
- * The example's corpus-manifest data assertions: kb-corpus.yml is the single
+ * The example's corpus-manifest data assertions: kb-corpus.json is the single
  * source of truth for corpus directories, so every manifest directory must
  * exist on disk with at least one ingestible document, and every disk
  * directory holding markdown must be either a manifest entry or the one
@@ -13,17 +13,17 @@ import { join } from 'node:path'
 import { dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
-import { loadCorpusManifest } from '@deepseek-ai/dsh-kg-build'
+import { loadCorpusManifest } from '../scripts/corpus-manifest.ts'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const exampleRoot = join(here, '..')
-const manifestPath = join(exampleRoot, 'kb-corpus.yml')
+const manifestPath = join(exampleRoot, 'kb-corpus.json')
 const dataRoot = join(exampleRoot, 'workspace/data')
 
 /** The one disk directory under workspace/data that carries .md files but is deliberately not corpus. */
 const NON_CORPUS_DIRS = ['connector-files'] as const
 
-describe('kb-corpus.yml single source of truth', () => {
+describe('kb-corpus.json single source of truth', () => {
   it('loads and names at least the five seeded batch-5 directories plus export-risk', () => {
     const manifest = loadCorpusManifest(manifestPath)
     const dirs = manifest.dirs.map(entry => entry.dir)
@@ -52,7 +52,7 @@ describe('kb-corpus.yml single source of truth', () => {
       const docs = readdirSync(join(dataRoot, name.name)).filter(file => file.endsWith('.md'))
       if (docs.length === 0) continue
       if (NON_CORPUS_DIRS.includes(name.name as (typeof NON_CORPUS_DIRS)[number])) continue
-      expect(listed, `${name.name} holds markdown but is absent from kb-corpus.yml`).toContain(name.name)
+      expect(listed, `${name.name} holds markdown but is absent from kb-corpus.json`).toContain(name.name)
     }
   })
 })

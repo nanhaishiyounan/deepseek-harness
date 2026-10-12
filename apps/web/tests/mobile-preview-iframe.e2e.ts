@@ -1,9 +1,9 @@
 /**
  * PC mobile-preview e2e (keyless): the conversation view ring's 移动端预览
  * tab mounts the phone bezel with the same-origin /mobile iframe, and the
- * embedded page is fully interactive — the scenario logs into the mobile
- * client INSIDE the iframe and lands on its home tab (the v5 default
- * landing). Same seeded session the aria lane uses; zero model calls.
+ * embedded page is fully interactive — identity-free direct entry (NocoBase
+ * 退役后无登录门) lands it straight on the home tab. Same seeded session the
+ * aria lane uses; zero model calls.
  * Run: pnpm run test:web -- mobile-preview-iframe
  */
 
@@ -68,17 +68,17 @@ describe('PC mobile-preview view (iframe over /mobile)', () => {
   it('embeds the interactive mobile page in the phone bezel', async () => {
     await page.getByRole('tab', { name: /移动端预览|Mobile preview/ }).click()
     const frame = page.frameLocator('iframe[title*="mobile preview" i], iframe[title="移动端预览"]')
-    // Complete a full mobile flow INSIDE the iframe: login → home landing.
-    await frame.getByPlaceholder('6 位验证码').fill('123456')
-    await frame.getByRole('button', { name: /登录/ }).click()
+    // Identity-free direct entry INSIDE the iframe: the home landing renders
+    // with no verification-code gate in the bezel.
     await frame.getByLabel('今日台账').waitFor({ timeout: 20_000 })
+    expect(await frame.getByPlaceholder('6 位验证码').count()).toBe(0)
     expect(tripwire.pageErrors).toEqual([])
   })
 
   it('keeps the preview view golden stable (aria snapshot of the bezel)', async () => {
     await page.getByRole('tab', { name: /移动端预览|Mobile preview/ }).click()
     const frame = page.frameLocator('iframe[title*="mobile preview" i], iframe[title="移动端预览"]')
-    await frame.getByPlaceholder('6 位验证码').waitFor({ timeout: 20_000 })
+    await frame.getByLabel('今日台账').waitFor({ timeout: 20_000 })
     const mode = webSnapshotMode()
     const aria = (await page.locator('body').ariaSnapshot())
       .replaceAll(SEED_ID, '{{sessionId}}')

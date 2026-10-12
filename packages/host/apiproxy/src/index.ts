@@ -56,21 +56,6 @@ export interface Config {
   /** Vision endpoint base URL; defaults to `https://api.minimaxi.com/v1`. */
   visionBaseUrl?: string
   /**
-   * Whether the orders domain's write methods (`orders.create`,
-   * `orders.fulfill`) answer. Absent means refused: an order is a real
-   * transaction against a priced expert service, so the unauthenticated
-   * gateway needs an explicit per-deployment opt-in; reads (get/list) and
-   * the deliverable download stay open.
-   */
-  ordersEnabled?: boolean
-  /**
-   * Whether the nocobase domain's read methods (`nocobase.listMeta`,
-   * `nocobase.list`, `nocobase.get`) answer. Absent means refused: business
-   * reads run against the deployment's NocoBase under a service account, so
-   * the unauthenticated gateway needs an explicit per-deployment opt-in.
-   */
-  nocobaseEnabled?: boolean
-  /**
    * Whether the carbon domain's methods (`carbon.listMeta/list/get/create/
    * update`) answer. Absent means refused: business reads run against the
    * deployment's carbon stack under a service account, so the
@@ -78,12 +63,10 @@ export interface Config {
    */
   carbonEnabled?: boolean
   /**
-   * NocoBase server origin for the domain; omitted = the
-   * `NOCOBASE_BASE_URL` environment variable.
-   */
-  nocobaseBaseUrl?: string
-  /** Credential reference (environment-variable name) the API token resolves through; defaults to `NOCOBASE_API_KEY`. */
-  nocobaseApiKeyEnv?: string
+    * Whether the carbon domain's write methods (`carbon.create`, `carbon.update`)
+    * answer. Absent means refused: single-table writes stay read-only.
+    */
+  carbonWriteEnabled?: boolean
   /**
    * Whether the data-asset market domain (`assets.list/detail/stats`) answers;
    * absent means refused (the unauthenticated gateway opts in per deployment).
@@ -103,40 +86,9 @@ export interface Config {
    */
   connectorsEnabled?: boolean
   /**
-   * Whether the business page's inline record write (`nocobase.update`) answers;
-   * absent means every record change routes through the agent's nb_update
-   * confirmation flow.
-   */
-  nocobaseWriteEnabled?: boolean
-  /**
-   * Whether the carbon domain's write methods (`carbon.create`,
-   * `carbon.update`) answer. Absent means refused: every record change
-   * routes through the agent's cb_* confirmation flow.
-   */
-  carbonWriteEnabled?: boolean
-  /**
-   * Per-username collection whitelists enforced server-side on
-   * `nocobase.list/get/update` for signed-in callers (the docs deep-link
-   * guard's server layer). A username absent from the table has no
-   * configured scope; anonymous calls stay open.
-   */
-  nocobaseCollectionScopes?: Readonly<Record<string, readonly string[]>> | undefined
-  /**
-   * Per-username wfl_ collection whitelists for `nocobase.update` (engine
-   * tables default to write-refused — their state machines own the
-   * transitions; the alert flow rides `nocobase.alertAct`).
-   */
-  nocobaseWflWriteScopes?: Readonly<Record<string, readonly string[]>> | undefined
-  /**
-   * The alert engine's base URL `nocobase.alertAct` forwards to
-   * (`POST /alerts/act`); omitted = the `W6_ALERT_ENGINE_URL` environment
-   * variable, both absent = the method refuses `alert-engine-unconfigured`.
-   */
-  alertEngineUrl?: string | undefined
-  /**
-   * Whether the graph-page domain (`kg.schema/search/subgraph/expand/stats`)
-   * answers; absent means refused, same stance as `assetsEnabled`.
-   */
+    * Whether the graph-page domain (`kg.schema/search/subgraph/expand/stats`)
+    * answers; absent means refused, same stance as `assetsEnabled`.
+    */
   kgEnabled?: boolean
   /**
    * The tenant the kg domain operates on — the deployment-side binding for
@@ -209,16 +161,8 @@ export class ApiProxyService extends Service implements ApiProxy {
     visionDescribeEnabled: z.boolean(),
     visionApiKeyEnv: z.string().role('credential-ref'),
     visionBaseUrl: z.string(),
-    ordersEnabled: z.boolean(),
-    nocobaseEnabled: z.boolean(),
-    nocobaseWriteEnabled: z.boolean(),
     carbonEnabled: z.boolean(),
     carbonWriteEnabled: z.boolean(),
-    nocobaseCollectionScopes: z.dict(z.array(z.string())),
-    nocobaseWflWriteScopes: z.dict(z.array(z.string())),
-    alertEngineUrl: z.string(),
-    nocobaseBaseUrl: z.string(),
-    nocobaseApiKeyEnv: z.string().role('credential-ref'),
     assetsEnabled: z.boolean(),
     assetsSeedPath: z.string(),
     lakehouseOverviewPath: z.string(),
@@ -226,9 +170,7 @@ export class ApiProxyService extends Service implements ApiProxy {
     kgEnabled: z.boolean(),
     kgTenant: z.string(),
     viewActionTimeoutMs: z.number().step(1).min(1000),
-    // The dict row widens differently from Config's optional readonly map
-    // under exactOptionalPropertyTypes; the parse contract is the object row.
-  }) as unknown as z<Config>
+  })
 
   readonly sessions: ApiProxy['sessions']
   readonly subagents: ApiProxy['subagents']
@@ -241,8 +183,6 @@ export class ApiProxyService extends Service implements ApiProxy {
   readonly credentials: ApiProxy['credentials']
   readonly llm: ApiProxy['llm']
   readonly data: ApiProxy['data']
-  readonly orders: ApiProxy['orders']
-  readonly nocobase: ApiProxy['nocobase']
   readonly carbon: ApiProxy['carbon']
   readonly assets: ApiProxy['assets']
   readonly lakehouse: ApiProxy['lakehouse']
@@ -266,16 +206,8 @@ export class ApiProxyService extends Service implements ApiProxy {
       ...config.visionDescribeEnabled === undefined ? {} : { visionDescribeEnabled: config.visionDescribeEnabled },
       ...config.visionApiKeyEnv === undefined ? {} : { visionApiKeyEnv: config.visionApiKeyEnv },
       ...config.visionBaseUrl === undefined ? {} : { visionBaseUrl: config.visionBaseUrl },
-      ...config.ordersEnabled === undefined ? {} : { ordersEnabled: config.ordersEnabled },
-      ...config.nocobaseEnabled === undefined ? {} : { nocobaseEnabled: config.nocobaseEnabled },
-      ...config.nocobaseWriteEnabled === undefined ? {} : { nocobaseWriteEnabled: config.nocobaseWriteEnabled },
       ...config.carbonEnabled === undefined ? {} : { carbonEnabled: config.carbonEnabled },
       ...config.carbonWriteEnabled === undefined ? {} : { carbonWriteEnabled: config.carbonWriteEnabled },
-      ...config.nocobaseCollectionScopes === undefined ? {} : { nocobaseCollectionScopes: config.nocobaseCollectionScopes },
-      ...config.nocobaseWflWriteScopes === undefined ? {} : { nocobaseWflWriteScopes: config.nocobaseWflWriteScopes },
-      ...config.alertEngineUrl === undefined ? {} : { alertEngineUrl: config.alertEngineUrl },
-      ...config.nocobaseBaseUrl === undefined ? {} : { nocobaseBaseUrl: config.nocobaseBaseUrl },
-      ...config.nocobaseApiKeyEnv === undefined ? {} : { nocobaseApiKeyEnv: config.nocobaseApiKeyEnv },
       ...config.assetsEnabled === undefined ? {} : { assetsEnabled: config.assetsEnabled },
       ...config.assetsSeedPath === undefined ? {} : { assetsSeedPath: config.assetsSeedPath },
       ...config.lakehouseOverviewPath === undefined ? {} : { lakehouseOverviewPath: config.lakehouseOverviewPath },
@@ -301,8 +233,6 @@ export class ApiProxyService extends Service implements ApiProxy {
     this.credentials = api.credentials
     this.llm = api.llm
     this.data = api.data
-    this.orders = api.orders
-    this.nocobase = api.nocobase
     this.carbon = api.carbon
     this.assets = api.assets
     this.lakehouse = api.lakehouse

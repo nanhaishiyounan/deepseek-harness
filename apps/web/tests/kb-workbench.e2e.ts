@@ -32,8 +32,11 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, onTes
 import {
   CallId, createAssistantMessage, createToolResultMessage, createUserMessage,
 } from '@deepseek-ai/dsh-llm'
+import ConnectorRuntime from '@deepseek-ai/dsh-connector'
+import * as CarbonRuntime from '@deepseek-ai/dsh-connector-carbon'
 import KbRuntime from '@deepseek-ai/dsh-kb'
 import * as KbSqlite from '@deepseek-ai/dsh-kb-sqlite'
+import * as ViewContextRuntime from '@deepseek-ai/dsh-view-context'
 import { SESSION_FORMAT_VERSION, Session, SessionId } from '@deepseek-ai/dsh-session'
 import { launchWebScaffold, seedSession, watchConsole, type WebScaffold } from './scaffold.ts'
 import { ZH_BROWSER_LOCALE, connectFreshWorkspaceZh, saveFailureShot } from './support.ts'
@@ -212,6 +215,15 @@ describe('kb workbench (text-only degraded mode, Chinese UI)', () => {
     // in-process exactly as an overlay row would (seam + store, no embed).
     await scaffold.ctx.plugin(KbRuntime)
     await scaffold.ctx.plugin(KbSqlite, { path: ':memory:' })
+    // The cold-chain scenario's cross-domain rows (J2) wait on the connector,
+    // carbon, and view-state seams, which the shipped web-app composition
+    // does not carry (viewActions itself is already in the graph); mount the
+    // providers in-process so the featured card's preset selection mounts the
+    // whole scenario (carbon degrades to its no-credentials refusal without a
+    // backend, which never blocks the composition).
+    await scaffold.ctx.plugin(ConnectorRuntime)
+    await scaffold.ctx.plugin(CarbonRuntime)
+    await scaffold.ctx.plugin(ViewContextRuntime)
     await mkdir(join(scaffold.workspaceCwd, 'workspace/data/regulations'), { recursive: true })
     await mkdir(join(scaffold.workspaceCwd, 'workspace/data/suppliers'), { recursive: true })
     await copyFile(CORPUS, join(scaffold.workspaceCwd, CORPUS_PATH))
@@ -411,7 +423,7 @@ describe('kb workbench (text-only degraded mode, Chinese UI)', () => {
     // The dock portal is retired: the blank chat hero carries no scenario
     // portal, no usage chips, no sample questions (the user's core ask —
     // every other surface stays clear of KB chrome).
-    expect(await page.locator('[class*="scenarioCard"]').count()).toBe(0)
+    expect(await page.locator('[class*="scenarioCardWrap"]').count()).toBe(0)
     expect(await page.getByText('30 个场景 · 分类浏览').count()).toBe(0)
     expect(await page.getByText('最近检索').count()).toBe(0)
     // The scenarios tab owns the portal now: header, chips, samples, catalog.
@@ -432,9 +444,11 @@ describe('kb workbench (text-only degraded mode, Chinese UI)', () => {
     await page.getByText('AI 食安服务主管').waitFor()
     // IA assertion: the default viewport renders at most ten scenario cards —
     // exactly the featured six in the DOM (every category folded), and none
-    // of the rendered cards clipped outside the viewport box.
-    expect(await page.locator('[class*="scenarioCard"]').count()).toBe(6)
-    const visibleCards = await page.evaluate(() => Array.from(document.querySelectorAll('[class*="scenarioCard"]'))
+    // of the rendered cards clipped outside the viewport box. The count rides
+    // the per-card wrapper: the card button's own class is a substring of it,
+    // so matching the button class alone would double-count.
+    expect(await page.locator('[class*="scenarioCardWrap"]').count()).toBe(6)
+    const visibleCards = await page.evaluate(() => Array.from(document.querySelectorAll('[class*="scenarioCardWrap"]'))
       .filter((card) => {
         const rect = card.getBoundingClientRect()
         return rect.width > 0 && rect.height > 0
@@ -465,23 +479,23 @@ describe('kb workbench (text-only degraded mode, Chinese UI)', () => {
     const search = page.getByRole('searchbox', { name: '搜索场景' })
     await search.waitFor({ timeout: 15_000 })
     // The default view folds everything but the featured six.
-    expect(await page.locator('[class*="scenarioCard"]').count()).toBe(6)
+    expect(await page.locator('[class*="scenarioCardWrap"]').count()).toBe(6)
     // A keyword filters the whole catalog: 0 < visible < 30, with the
     // hit-count summary naming both numbers.
     await search.fill('食安')
     await page.getByText('匹配 4 / 30 个场景').waitFor({ timeout: 15_000 })
-    await expect.poll(() => page.locator('[class*="scenarioCard"]').count()).toBe(4)
+    await expect.poll(() => page.locator('[class*="scenarioCardWrap"]').count()).toBe(4)
     await page.getByText('AI 食安服务主管').waitFor()
     // A keyword the featured market lead does not carry drops it from view.
     expect(await page.getByText('AI 营销洞察主管').count()).toBe(0)
     // A miss renders the empty state with zero cards.
     await search.fill('不存在的关键词')
     await page.getByText('没有匹配的场景 — 换个关键词试试').waitFor({ timeout: 15_000 })
-    expect(await page.locator('[class*="scenarioCard"]').count()).toBe(0)
+    expect(await page.locator('[class*="scenarioCardWrap"]').count()).toBe(0)
     // Clearing the query restores the featured row plus the folded browse
     // (all thirty scenarios stay reachable).
     await search.fill('')
-    expect(await page.locator('[class*="scenarioCard"]').count()).toBe(6)
+    expect(await page.locator('[class*="scenarioCardWrap"]').count()).toBe(6)
     await page.getByText('精选场景').waitFor()
   }, 120_000)
 
@@ -496,7 +510,7 @@ describe('kb workbench (text-only degraded mode, Chinese UI)', () => {
     await row.click()
     await expect.poll(() => row.getAttribute('aria-expanded')).toBe('true')
     // Featured six plus the bucket's four cards, still within the cap.
-    await expect.poll(() => page.locator('[class*="scenarioCard"]').count()).toBe(10)
+    await expect.poll(() => page.locator('[class*="scenarioCardWrap"]').count()).toBe(10)
     await page.getByRole('button', { name: /AI 标签合规审查员/ }).click()
     await page.getByText('示例问题：营养标签 修约规则').waitFor({ timeout: 15_000 })
     await page.getByRole('button', { name: '开始会话' }).click()
@@ -516,7 +530,7 @@ describe('kb workbench (text-only degraded mode, Chinese UI)', () => {
     // While the workbench owns the column, no scenario portal renders either
     // (the retired dock seat used to leak it here).
     expect(await page.getByText('30 个场景 · 分类浏览').count()).toBe(0)
-    expect(await page.locator('[class*="scenarioCard"]').count()).toBe(0)
+    expect(await page.locator('[class*="scenarioCardWrap"]').count()).toBe(0)
     // One real search over the gateway face.
     await page.getByPlaceholder('检索知识库，如：山梨酸 酱油 限量').fill('山梨酸')
     await page.getByRole('button', { name: '检索', exact: true }).click()

@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-graph-neo4j",
   "description": "Neo4j graph store capability: a bolt-connected storage service for the knowledge graph (ontology versions stored as append-only JSON-LD documents, a read-only Cypher guard for model-facing queries, the business lakehouse-to-graph ETL manifest, and the pure LLM schema-induction pipeline)",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "publishConfig": {
     "access": "public"
   },
@@ -22,17 +22,12 @@
       "types": "./lib/types/invariant.d.ts",
       "default": "./lib/invariant.js"
     },
-    "./cypher-guard": {
-      "types": "./lib/types/cypher-guard.d.ts",
-      "default": "./lib/cypher-guard.js"
-    },
     "./src/*": "./src/*",
     "./package.json": "./package.json"
   },
   "files": [
     "lib/index.js",
     "lib/invariant.js",
-    "lib/cypher-guard.js",
     "lib/types/**/*.d.ts"
   ],
   "license": "MIT",

@@ -1,0 +1,1726 @@
+
+  x @stylistic(indent): Expected indentation of 2 spaces but found 3.
+    ,-[packages/host/apiproxy/src/index.ts:64:1]
+ 63 |    */
+ 64 |    carbonEnabled?: boolean
+    : ^^^
+ 65 |    /**
+    `----
+
+  x @stylistic(indent): Expected indentation of 2 spaces but found 3.
+    ,-[packages/host/apiproxy/src/index.ts:65:1]
+ 64 |    carbonEnabled?: boolean
+ 65 |    /**
+    : ^^^
+ 66 |    * Whether the carbon domain's write methods (`carbon.create`, `carbon.update`)
+    `----
+
+  x @stylistic(indent): Expected indentation of 2 spaces but found 3.
+    ,-[packages/host/apiproxy/src/index.ts:69:1]
+ 68 |    */
+ 69 |    carbonWriteEnabled?: boolean
+    : ^^^
+ 70 |    /**
+    `----
+
+  x @stylistic(indent): Expected indentation of 2 spaces but found 3.
+    ,-[packages/host/apiproxy/src/index.ts:70:1]
+ 69 |    carbonWriteEnabled?: boolean
+ 70 |    /**
+    : ^^^
+ 71 |    * Whether the data-asset market domain (`assets.list/detail/stats`) answers;
+    `----
+
+  x @stylistic(indent): Expected indentation of 2 spaces but found 3.
+    ,-[packages/host/apiproxy/src/index.ts:87:1]
+ 86 |    */
+ 87 |    connectorsEnabled?: boolean
+    : ^^^
+ 88 |    /**
+    `----
+
+  x @stylistic(indent): Expected indentation of 2 spaces but found 3.
+    ,-[packages/host/apiproxy/src/index.ts:88:1]
+ 87 |    connectorsEnabled?: boolean
+ 88 |    /**
+    : ^^^
+ 89 |     * Whether the graph-page domain (`kg.schema/search/subgraph/expand/stats`)
+    `----
+
+  x @stylistic(max-len): This line has a length of 141. Maximum allowed is 140.
+    ,-[packages/lakehouse/tool-lakehouse/tests/tool-lakehouse.spec.ts:42:1]
+ 41 | /** Invoke one registered tool through the tools runtime, like a model round. */
+ 42 | async function call(ctx: Context, name: string, args: Record<string, unknown>): Promise<{ isError: boolean; value: unknown; text: string }> {
+    : ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 43 |   const result = await ctx.tools.execute({ signal, callId: CallId(`call-${String(++counter)}`), name, arguments: args as never })
+    `----
+
+  x typescript(no-redundant-type-constituents): 'unknown' overrides all other types in this union type.
+     ,-[packages/interaction/tool-present-card/src/index.ts:631:93]
+ 630 |  */
+ 631 | function unwrapSingleKeyDiscriminant(branches: readonly ValueSchemaSpec[], value: unknown): unknown | undefined {
+     :                                                                                             ^^^^^^^
+ 632 |   if (typeof value !== 'object' || value === null || Array.isArray(value)) return undefined
+     `----
+
+  x typescript(no-redundant-type-constituents): 'unknown' overrides all other types in this union type.
+     ,-[packages/interaction/tool-present-card/src/index.ts:658:90]
+ 657 |  */
+ 658 | function inferMissingDiscriminant(branches: readonly ValueSchemaSpec[], value: unknown): unknown | undefined {
+     :                                                                                          ^^^^^^^
+ 659 |   if (typeof value !== 'object' || value === null || Array.isArray(value)) return undefined
+     `----
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since it does not change the type of the expression.
+    ,-[packages/connector/tool-carbon/src/index.ts:73:29]
+ 72 | export async function apply(ctx: Context, config: Config): Promise<void> {
+ 73 |   const carbon = ctx.carbon as CarbonService
+    :                  ^^^^^|^^^^ ^^^^^^^^|^^^^^^^^
+    :                       |             `-- Casting it to 'CarbonService' is unnecessary
+    :                       `-- This expression already has the type 'CarbonService'
+ 74 |   const read = config.readTimeoutMs ?? DEFAULT_READ_TIMEOUT_MS
+    `----
+
+  x typescript(require-await): Function has no 'await' expression.
+    ,-[packages/connector/tool-carbon/src/index.ts:72:1]
+ 71 |  */
+ 72 | export async function apply(ctx: Context, config: Config): Promise<void> {
+    : ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 73 |   const carbon = ctx.carbon as CarbonService
+    `----
+
+  x typescript(require-await): Function has no 'await' expression.
+     ,-[packages/connector/tool-carbon/src/tools.ts:189:5]
+ 188 |     isConcurrencySafe: () => true,
+ 189 |     async execute() {
+     :     ^^^^^^^^^^^^^
+ 190 |       if (!carbon.available()) throw new Error(CarbonService.NO_CREDENTIALS)
+     `----
+
+  x typescript(no-unnecessary-type-conversion): This type conversion does not change the type or value of the expression.
+     ,-[packages/connector/tool-carbon/src/tools.ts:283:34]
+ 282 |       if (!carbon.available()) throw new Error(CarbonService.NO_CREDENTIALS)
+ 283 |       const meta = carbonTableOf(String(args.table))
+     :                                  ^^^^^^ ^^^^^|^^^^
+     :                                     |        `-- This expression already has type 'string'.
+ 284 |       if (meta === undefined) throw new Error(`cb_list: table ${String(args.table)} is not on the business catalog (see cb_collections)`)
+     `----
+
+  x typescript(no-unnecessary-type-conversion): This type conversion does not change the type or value of the expression.
+     ,-[packages/connector/tool-carbon/src/tools.ts:284:65]
+ 283 |       const meta = carbonTableOf(String(args.table))
+ 284 |       if (meta === undefined) throw new Error(`cb_list: table ${String(args.table)} is not on the business catalog (see cb_collections)`)
+     :                                                                 ^^^^^^ ^^^^^|^^^^
+     :                                                                    |        `-- This expression already has type 'string'.
+ 285 |       const filter = parseFilter(args.filter as CbFilterInput[] | undefined)
+     `----
+
+  x typescript(no-unnecessary-type-conversion): This type conversion does not change the type or value of the expression.
+     ,-[packages/connector/tool-carbon/src/tools.ts:286:72]
+ 285 |       const filter = parseFilter(args.filter as CbFilterInput[] | undefined)
+ 286 |       const limit = args.limit === undefined ? CB_LIST_DEFAULT_LIMIT : Number(args.limit)
+     :                                                                        ^^^^^^ ^^^^^|^^^^
+     :                                                                           |        `-- This expression already has type 'number'.
+ 287 |       if (!Number.isInteger(limit) || limit < 1 || limit > CB_LIST_MAX_LIMIT) throw new Error(`cb_list: limit must be an integer 1-${CB_LIST_MAX_LIMIT}`)
+     `----
+
+  x typescript(no-unnecessary-type-conversion): This type conversion does not change the type or value of the expression.
+     ,-[packages/connector/tool-carbon/src/tools.ts:288:54]
+ 287 |       if (!Number.isInteger(limit) || limit < 1 || limit > CB_LIST_MAX_LIMIT) throw new Error(`cb_list: limit must be an integer 1-${CB_LIST_MAX_LIMIT}`)
+ 288 |       const offset = args.offset === undefined ? 0 : Number(args.offset)
+     :                                                      ^^^^^^ ^^^^^|^^^^^
+     :                                                         |        `-- This expression already has type 'number'.
+ 289 |       if (!Number.isInteger(offset) || offset < 0) throw new Error('cb_list: offset must be a non-negative integer')
+     `----
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since it does not change the type of the expression.
+     ,-[packages/connector/tool-carbon/src/tools.ts:290:72]
+ 289 |       if (!Number.isInteger(offset) || offset < 0) throw new Error('cb_list: offset must be a non-negative integer')
+ 290 |       const order = args.order === undefined ? undefined : (args.order as string[]).map(String)
+     :                                                             ^^^^^|^^^^ ^^^^^|^^^^^^
+     :                                                                  |          `-- Casting it to 'string[]' is unnecessary
+     :                                                                  `-- This expression already has the type 'string[]'
+ 291 |       const result = await carbon.list(meta.table, {
+     `----
+
+  x typescript(no-unnecessary-type-conversion): This type conversion does not change the type or value of the expression.
+     ,-[packages/connector/tool-carbon/src/tools.ts:306:50]
+ 305 |     },
+ 306 |     presentCall: args => readCallCard('cb_list', String(args.table ?? '')),
+     :                                                  ^^^^^^ ^^^^^^^^|^^^^^^^
+     :                                                     |           `-- This expression already has type 'string'.
+ 307 |     presentResult: (_args, result: ToolResult): GenericResultView | undefined => {
+     `----
+
+  x typescript(no-unnecessary-condition): Unnecessary optional chain on a non-nullish value.
+     ,-[packages/connector/tool-carbon/src/tools.ts:306:57]
+ 305 |     },
+ 306 |     presentCall: args => readCallCard('cb_list', String(args.table ?? '')),
+     :                                                         ^^^^^|^^^^^
+     :                                                              `-- Type: string
+ 307 |     presentResult: (_args, result: ToolResult): GenericResultView | undefined => {
+     `----
+
+  x typescript(no-unnecessary-type-conversion): This type conversion does not change the type or value of the expression.
+     ,-[packages/connector/tool-carbon/src/tools.ts:354:21]
+ 353 |       if (!carbon.available()) throw new Error(CarbonService.NO_CREDENTIALS)
+ 354 |       const table = String(args.table)
+     :                     ^^^^^^ ^^^^^|^^^^
+     :                        |        `-- This expression already has type 'string'.
+ 355 |       const meta = carbonTableOf(table)
+     `----
+
+  x typescript(no-unnecessary-type-conversion): This type conversion does not change the type or value of the expression.
+     ,-[packages/connector/tool-carbon/src/tools.ts:357:18]
+ 356 |       if (meta === undefined) throw new Error(`cb_get: table ${table} is not on the business catalog (see cb_collections)`)
+ 357 |       const id = String(args.id)
+     :                  ^^^^^^ ^^^|^^^
+     :                     |      `-- This expression already has type 'string'.
+ 358 |       if (id.length === 0) throw new Error('cb_get: id must be a non-empty string')
+     `----
+
+  x typescript(no-unnecessary-type-conversion): This type conversion does not change the type or value of the expression.
+     ,-[packages/connector/tool-carbon/src/tools.ts:362:52]
+ 361 |     },
+ 362 |     presentCall: args => readCallCard('cb_get', `${String(args.table ?? '')}#${String(args.id ?? '')}`),
+     :                                                    ^^^^^^ ^^^^^^^^|^^^^^^^
+     :                                                       |           `-- This expression already has type 'string'.
+ 363 |     presentResult: (_args, result: ToolResult): GenericResultView | undefined => {
+     `----
+
+  x typescript(no-unnecessary-condition): Unnecessary optional chain on a non-nullish value.
+     ,-[packages/connector/tool-carbon/src/tools.ts:362:59]
+ 361 |     },
+ 362 |     presentCall: args => readCallCard('cb_get', `${String(args.table ?? '')}#${String(args.id ?? '')}`),
+     :                                                           ^^^^^|^^^^^
+     :                                                                `-- Type: string
+ 363 |     presentResult: (_args, result: ToolResult): GenericResultView | undefined => {
+     `----
+
+  x typescript(no-unnecessary-type-conversion): This type conversion does not change the type or value of the expression.
+     ,-[packages/connector/tool-carbon/src/tools.ts:362:80]
+ 361 |     },
+ 362 |     presentCall: args => readCallCard('cb_get', `${String(args.table ?? '')}#${String(args.id ?? '')}`),
+     :                                                                                ^^^^^^ ^^^^^^|^^^^^^
+     :                                                                                   |         `-- This expression already has type 'string'.
+ 363 |     presentResult: (_args, result: ToolResult): GenericResultView | undefined => {
+     `----
+
+  x typescript(no-unnecessary-condition): Unnecessary optional chain on a non-nullish value.
+     ,-[packages/connector/tool-carbon/src/tools.ts:362:87]
+ 361 |     },
+ 362 |     presentCall: args => readCallCard('cb_get', `${String(args.table ?? '')}#${String(args.id ?? '')}`),
+     :                                                                                       ^^^|^^^^
+     :                                                                                          `-- Type: string
+ 363 |     presentResult: (_args, result: ToolResult): GenericResultView | undefined => {
+     `----
+
+  x typescript(no-unnecessary-type-conversion): This type conversion does not change the type or value of the expression.
+     ,-[packages/connector/tool-carbon/src/tools.ts:402:69]
+ 401 |       },
+ 402 |       render: (_args, value) => [{ type: 'text', text: `已创建 ${String((value as CbCreateToolValue).table)}：${JSON.stringify((value as CbCreateToolValue).row)}` }],
+     :                                                                  ^^^^^^ ^^^^^^^^^^^^^^^^^|^^^^^^^^^^^^^^^^
+     :                                                                     |                    `-- This expression already has type 'string'.
+ 403 |       presentationMeta: (_args, value) => ({ table: (value as CbCreateToolValue).table }),
+     `----
+
+  x typescript(no-unnecessary-type-conversion): This type conversion does not change the type or value of the expression.
+     ,-[packages/connector/tool-carbon/src/tools.ts:409:21]
+ 408 |       if (!carbon.available()) throw new Error(CarbonService.NO_CREDENTIALS)
+ 409 |       const table = String(args.table)
+     :                     ^^^^^^ ^^^^^|^^^^
+     :                        |        `-- This expression already has type 'string'.
+ 410 |       const meta = carbonTableOf(table)
+     `----
+
+  x typescript(no-unnecessary-type-conversion): This type conversion does not change the type or value of the expression.
+     ,-[packages/connector/tool-carbon/src/tools.ts:419:56]
+ 418 |     },
+ 419 |     presentCall: args => writeCallCard('cb_create', `${String(args.table ?? '')} ${JSON.stringify(args.values ?? {})}`),
+     :                                                        ^^^^^^ ^^^^^^^^|^^^^^^^
+     :                                                           |           `-- This expression already has type 'string'.
+ 420 |     presentResult: (_args, result: ToolResult): GenericResultView | undefined => {
+     `----
+
+  x typescript(no-unnecessary-condition): Unnecessary optional chain on a non-nullish value.
+     ,-[packages/connector/tool-carbon/src/tools.ts:419:63]
+ 418 |     },
+ 419 |     presentCall: args => writeCallCard('cb_create', `${String(args.table ?? '')} ${JSON.stringify(args.values ?? {})}`),
+     :                                                               ^^^^^|^^^^^
+     :                                                                    `-- Type: string
+ 420 |     presentResult: (_args, result: ToolResult): GenericResultView | undefined => {
+     `----
+
+  x typescript(no-unnecessary-condition): Unnecessary optional chain on a non-nullish value.
+     ,-[packages/connector/tool-carbon/src/tools.ts:476:77]
+ 475 |         const projected = value as CbUpdateToolValue
+ 476 |         const lines = projected.changes.map(change => `- ${change.field}: ${JSON.stringify(change.before) ?? 'null'} → ${JSON.stringify(change.after) ?? 'null'}`)
+     :                                                                             ^^^^^^^^^^^^^^|^^^^^^^^^^^^^^^
+     :                                                                                           `-- Type: string
+ 477 |         return [{ type: 'text', text: [`已更新 ${projected.table} ${projected.id}：`, ...lines].join('\n') }]
+     `----
+
+  x typescript(no-unnecessary-condition): Unnecessary optional chain on a non-nullish value.
+     ,-[packages/connector/tool-carbon/src/tools.ts:476:124]
+ 475 |         const projected = value as CbUpdateToolValue
+ 476 |         const lines = projected.changes.map(change => `- ${change.field}: ${JSON.stringify(change.before) ?? 'null'} → ${JSON.stringify(change.after) ?? 'null'}`)
+     :                                                                                                                          ^^^^^^^^^^^^^^|^^^^^^^^^^^^^^
+     :                                                                                                                                        `-- Type: string
+ 477 |         return [{ type: 'text', text: [`已更新 ${projected.table} ${projected.id}：`, ...lines].join('\n') }]
+     `----
+
+  x typescript(no-unnecessary-type-conversion): This type conversion does not change the type or value of the expression.
+     ,-[packages/connector/tool-carbon/src/tools.ts:488:21]
+ 487 |       if (!carbon.available()) throw new Error(CarbonService.NO_CREDENTIALS)
+ 488 |       const table = String(args.table)
+     :                     ^^^^^^ ^^^^^|^^^^
+     :                        |        `-- This expression already has type 'string'.
+ 489 |       const meta = carbonTableOf(table)
+     `----
+
+  x typescript(no-unnecessary-type-conversion): This type conversion does not change the type or value of the expression.
+     ,-[packages/connector/tool-carbon/src/tools.ts:492:18]
+ 491 |       if (meta.risk !== 'write') throw new Error(`cb_update: table ${table}（${meta.label}）是只读层——过账类单据走 carbon 的过账工作流，不在工具写面上`)
+ 492 |       const id = String(args.id)
+     :                  ^^^^^^ ^^^|^^^
+     :                     |      `-- This expression already has type 'string'.
+ 493 |       if (id.length === 0) throw new Error('cb_update: id must be a non-empty string')
+     `----
+
+  x typescript(no-unnecessary-type-conversion): This type conversion does not change the type or value of the expression.
+     ,-[packages/connector/tool-carbon/src/tools.ts:508:56]
+ 507 |     },
+ 508 |     presentCall: args => writeCallCard('cb_update', `${String(args.table ?? '')}#${String(args.id ?? '')} ${JSON.stringify(args.values ?? {})}`),
+     :                                                        ^^^^^^ ^^^^^^^^|^^^^^^^
+     :                                                           |           `-- This expression already has type 'string'.
+ 509 |     presentResult: (_args, result: ToolResult): GenericResultView | undefined => {
+     `----
+
+  x typescript(no-unnecessary-condition): Unnecessary optional chain on a non-nullish value.
+     ,-[packages/connector/tool-carbon/src/tools.ts:508:63]
+ 507 |     },
+ 508 |     presentCall: args => writeCallCard('cb_update', `${String(args.table ?? '')}#${String(args.id ?? '')} ${JSON.stringify(args.values ?? {})}`),
+     :                                                               ^^^^^|^^^^^
+     :                                                                    `-- Type: string
+ 509 |     presentResult: (_args, result: ToolResult): GenericResultView | undefined => {
+     `----
+
+  x typescript(no-unnecessary-type-conversion): This type conversion does not change the type or value of the expression.
+     ,-[packages/connector/tool-carbon/src/tools.ts:508:84]
+ 507 |     },
+ 508 |     presentCall: args => writeCallCard('cb_update', `${String(args.table ?? '')}#${String(args.id ?? '')} ${JSON.stringify(args.values ?? {})}`),
+     :                                                                                    ^^^^^^ ^^^^^^|^^^^^^
+     :                                                                                       |         `-- This expression already has type 'string'.
+ 509 |     presentResult: (_args, result: ToolResult): GenericResultView | undefined => {
+     `----
+
+  x typescript(no-unnecessary-condition): Unnecessary optional chain on a non-nullish value.
+     ,-[packages/connector/tool-carbon/src/tools.ts:508:91]
+ 507 |     },
+ 508 |     presentCall: args => writeCallCard('cb_update', `${String(args.table ?? '')}#${String(args.id ?? '')} ${JSON.stringify(args.values ?? {})}`),
+     :                                                                                           ^^^|^^^^
+     :                                                                                              `-- Type: string
+ 509 |     presentResult: (_args, result: ToolResult): GenericResultView | undefined => {
+     `----
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since it does not change the type of the expression.
+    ,-[packages/connector/connector-carbon/tests/client.spec.ts:41:6]
+ 27 |       const served: Served[] = []
+ 28 | ,->   const fetchImpl = (async (input: RequestInfo | URL, init?: RequestInit) => {
+ 29 | |       const url = String(input)
+ 30 | |       const headers: Record<string, string> = {}
+ 31 | |       for (const [name, value] of Object.entries(init?.headers ?? {})) headers[name] = String(value)
+ 32 | |       const call: Served = { method: init?.method ?? 'GET', url, headers, body: init?.body === undefined ? undefined : JSON.parse(String(init.body)) }
+ 33 | |       served.push(call)
+ 34 | |       const route = routes.find(route => route.match(call))
+ 35 | |       if (route === undefined) return new Response('no scripted route', { status: 599 })
+ 36 | |       const answer = route.respond()
+ 37 | |       return new Response(answer.body === undefined ? null : JSON.stringify(answer.body), {
+ 38 | |         status: answer.status,
+ 39 | |         headers: { 'content-type': 'application/json', ...answer.headers },
+ 40 | |       })
+ 41 | |->   }) as typeof fetch
+    : `---     ^^^^^^^|^^^^^^^^
+    : `---            `-- Casting it to '{ (input: URL | RequestInfo, init?: RequestInit | undefined): Promise<Response>; (input: string | Request | URL, init?: RequestInit | undefined): Promise<...>; }' is unnecessary
+    : `---- This expression already has the type '(input: URL | RequestInfo, init?: RequestInit | undefined) => Promise<Response>'
+ 42 |       return { fetch: fetchImpl, served }
+    `----
+
+  x typescript(no-base-to-string): 'input' may use Object's default stringification format ('[object Object]') when stringified.
+    ,-[packages/connector/connector-carbon/tests/client.spec.ts:29:24]
+ 28 |   const fetchImpl = (async (input: RequestInfo | URL, init?: RequestInit) => {
+ 29 |     const url = String(input)
+    :                        ^^^^^
+ 30 |     const headers: Record<string, string> = {}
+    `----
+  help: Consider picking a property (e.g. `user.name`), using a formatter (or `JSON.stringify`), or implementing a custom `toString()`/`toLocaleString()` on the type.
+
+  x typescript(no-base-to-string): 'init.body' may use Object's default stringification format ('[object Object]') when stringified.
+    ,-[packages/connector/connector-carbon/tests/client.spec.ts:32:136]
+ 31 |     for (const [name, value] of Object.entries(init?.headers ?? {})) headers[name] = String(value)
+ 32 |     const call: Served = { method: init?.method ?? 'GET', url, headers, body: init?.body === undefined ? undefined : JSON.parse(String(init.body)) }
+    :                                                                                                                                        ^^^^^^^^^
+ 33 |     served.push(call)
+    `----
+  help: Consider picking a property (e.g. `user.name`), using a formatter (or `JSON.stringify`), or implementing a custom `toString()`/`toLocaleString()` on the type.
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since it does not change the type of the expression.
+    ,-[packages/connector/tool-carbon/tests/tool-carbon.spec.ts:52:6]
+ 38 |       const served: Served[] = []
+ 39 | ,->   const fetchImpl = (async (input: RequestInfo | URL, init?: RequestInit) => {
+ 40 | |       const url = String(input)
+ 41 | |       const headers: Record<string, string> = {}
+ 42 | |       for (const [name, value] of Object.entries(init?.headers ?? {})) headers[name] = String(value)
+ 43 | |       const call: Served = { method: init?.method ?? 'GET', url, headers, body: init?.body === undefined ? undefined : JSON.parse(String(init.body)) }
+ 44 | |       served.push(call)
+ 45 | |       const route = routes.find(route => route.match(call))
+ 46 | |       if (route === undefined) return new Response('no scripted route', { status: 599 })
+ 47 | |       const answer = route.respond()
+ 48 | |       return new Response(answer.body === undefined ? null : JSON.stringify(answer.body), {
+ 49 | |         status: answer.status,
+ 50 | |         headers: { 'content-type': 'application/json', ...answer.headers },
+ 51 | |       })
+ 52 | |->   }) as typeof fetch
+    : `---     ^^^^^^^|^^^^^^^^
+    : `---            `-- Casting it to '{ (input: URL | RequestInfo, init?: RequestInit | undefined): Promise<Response>; (input: string | Request | URL, init?: RequestInit | undefined): Promise<...>; }' is unnecessary
+    : `---- This expression already has the type '(input: URL | RequestInfo, init?: RequestInit | undefined) => Promise<Response>'
+ 53 |       return { fetch: fetchImpl, served }
+    `----
+
+  x typescript(no-base-to-string): 'input' may use Object's default stringification format ('[object Object]') when stringified.
+    ,-[packages/connector/tool-carbon/tests/tool-carbon.spec.ts:40:24]
+ 39 |   const fetchImpl = (async (input: RequestInfo | URL, init?: RequestInit) => {
+ 40 |     const url = String(input)
+    :                        ^^^^^
+ 41 |     const headers: Record<string, string> = {}
+    `----
+  help: Consider picking a property (e.g. `user.name`), using a formatter (or `JSON.stringify`), or implementing a custom `toString()`/`toLocaleString()` on the type.
+
+  x typescript(no-base-to-string): 'init.body' may use Object's default stringification format ('[object Object]') when stringified.
+    ,-[packages/connector/tool-carbon/tests/tool-carbon.spec.ts:43:136]
+ 42 |     for (const [name, value] of Object.entries(init?.headers ?? {})) headers[name] = String(value)
+ 43 |     const call: Served = { method: init?.method ?? 'GET', url, headers, body: init?.body === undefined ? undefined : JSON.parse(String(init.body)) }
+    :                                                                                                                                        ^^^^^^^^^
+ 44 |     served.push(call)
+    `----
+  help: Consider picking a property (e.g. `user.name`), using a formatter (or `JSON.stringify`), or implementing a custom `toString()`/`toLocaleString()` on the type.
+
+  x typescript(no-confusing-void-expression): Returning a void expression from an arrow function shorthand is forbidden.
+    ,-[packages/graph/graph-neo4j/tests/cypher-guard.spec.ts:45:18]
+ 44 |   it('assertReadOnlyCypher throws the structured error on refusal', () => {
+ 45 |     expect(() => assertReadOnlyCypher('MATCH (n) DELETE n')).toThrowError(CypherGuardError)
+    :                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 46 |     try {
+    `----
+  help: Add braces to the arrow function.
+
+  x typescript(no-deprecated): `toThrowError` is deprecated. Use `toThrow` instead
+    ,-[packages/graph/graph-neo4j/tests/cypher-guard.spec.ts:45:62]
+ 44 |   it('assertReadOnlyCypher throws the structured error on refusal', () => {
+ 45 |     expect(() => assertReadOnlyCypher('MATCH (n) DELETE n')).toThrowError(CypherGuardError)
+    :                                                              ^^^^^^^^^^^^
+ 46 |     try {
+    `----
+
+  x typescript(no-deprecated): `toThrowError` is deprecated. Use `toThrow` instead
+   ,-[packages/graph/tool-graph/tests/tools.spec.ts:7:58]
+ 6 |   it('rejects blank Cypher and defaults params', () => {
+ 7 |     expect(() => parseGraphQueryArgs({ cypher: '   ' })).toThrowError('non-empty string')
+   :                                                          ^^^^^^^^^^^^
+ 8 |     expect(parseGraphQueryArgs({ cypher: ' MATCH (n) RETURN n ' })).toEqual({ cypher: 'MATCH (n) RETURN n' })
+   `----
+
+  x typescript(no-base-to-string): 'input' may use Object's default stringification format ('[object Object]') when stringified.
+    ,-[packages/kb/kb-weknora/tests/client.spec.ts:31:24]
+ 30 |     }
+ 31 |     const url = String(input)
+    :                        ^^^^^
+ 32 |     const method = String(init.method ?? 'GET')
+    `----
+  help: Consider picking a property (e.g. `user.name`), using a formatter (or `JSON.stringify`), or implementing a custom `toString()`/`toLocaleString()` on the type.
+
+  x typescript(no-unnecessary-type-conversion): This type conversion does not change the type or value of the expression.
+    ,-[packages/kb/kb-weknora/tests/client.spec.ts:32:20]
+ 31 |     const url = String(input)
+ 32 |     const method = String(init.method ?? 'GET')
+    :                    ^^^^^^ ^^^^^^^^^^|^^^^^^^^^
+    :                       |             `-- This expression already has type 'string'.
+ 33 |     calls.push({ url, init })
+    `----
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since it does not change the type of the expression.
+    ,-[packages/kb/kb-weknora/tests/client.spec.ts:39:18]
+ 38 |   }
+ 39 |   return { fetch: stub as unknown as typeof fetch, calls }
+    :                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 40 | }
+    `----
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since the receiver accepts the original type of the expression.
+    ,-[packages/kb/kb-weknora/tests/client.spec.ts:67:89]
+ 66 |       const raw = async (): Promise<Response> => new Response(body, { status: 200 })
+ 67 |       const client = new WeknoraClient({ baseUrl: 'http://host', apiKey: 'key-1', fetch: raw as unknown as typeof fetch })
+    :                                                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 68 |       await expect(client.createKnowledgeBase('demo/x')).rejects.toBeInstanceOf(WeknoraApiError)
+    `----
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since the receiver accepts the original type of the expression.
+    ,-[packages/kb/kb-weknora/tests/client.spec.ts:75:87]
+ 74 |     const raw = async (): Promise<Response> => new Response(JSON.stringify({ success: true, data: 'flat' }), { status: 200 })
+ 75 |     const client = new WeknoraClient({ baseUrl: 'http://host', apiKey: 'key-1', fetch: raw as unknown as typeof fetch })
+    :                                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 76 |     await expect(client.createManualKnowledge('kb-1', 't', 'c')).rejects.toBeInstanceOf(WeknoraApiError)
+    `----
+
+  x typescript(no-confusing-void-expression): Returning a void expression from an arrow function shorthand is forbidden.
+    ,-[packages/kb/kb-weknora/tests/client.spec.ts:97:54]
+ 96 |       new Promise<Response>((_resolve, reject) => {
+ 97 |         init.signal?.addEventListener('abort', () => reject(new DOMException('The operation was aborted', 'AbortError')), { once: true })
+    :                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 98 |       })
+    `----
+  help: Add braces to the arrow function.
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since it does not change the type of the expression.
+     ,-[packages/kb/kb-weknora/tests/client.spec.ts:99:87]
+  98 |       })
+  99 |     const client = new WeknoraClient({ baseUrl: 'http://host', apiKey: 'key-1', fetch: stub as unknown as typeof fetch, timeoutMs: 10 })
+     :                                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 100 |     const error = await client.listKnowledgeBases().then(() => undefined, (cause: unknown) => cause)
+     `----
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since it does not change the type of the expression.
+     ,-[packages/kb/kb-weknora/tests/client.spec.ts:115:87]
+ 114 |     }
+ 115 |     const client = new WeknoraClient({ baseUrl: 'http://host', apiKey: 'key-1', fetch: stub as unknown as typeof fetch })
+     :                                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 116 |     const controller = new AbortController()
+     `----
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since the receiver accepts the original type of the expression.
+    ,-[packages/kb/kb-weknora/tests/store.spec.ts:10:56]
+  9 |   constructor() {
+ 10 |     super({ baseUrl: 'http://dead', apiKey: 'k', fetch: (async () => { throw new TypeError('down') }) as unknown as typeof fetch })
+    :                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 11 |   }
+    `----
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since the receiver accepts the original type of the expression.
+     ,-[packages/kb/kb-weknora/tests/client.spec.ts:143:31]
+ 142 |     const up = fakeFetch([{ match: url => url.endsWith('/health'), status: 200 }])
+ 143 |     const down: typeof fetch = (async () => { throw new TypeError('fetch failed') }) as unknown as typeof fetch
+     :                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 144 |     expect(await new WeknoraClient({ baseUrl: 'http://host', fetch: up.fetch }).healthy()).toBe(true)
+     `----
+
+  x typescript(no-base-to-string): 'calls[0]?.init.body' may use Object's default stringification format ('[object Object]') when stringified.
+     ,-[packages/kb/kb-weknora/tests/client.spec.ts:153:19]
+ 152 |     expect(String(calls[0]?.init.method)).toBe('POST')
+ 153 |     expect(String(calls[0]?.init.body)).toBe('{"name":"t/c"}')
+     :                   ^^^^^^^^^^^^^^^^^^^
+ 154 |   })
+     `----
+  help: Consider picking a property (e.g. `user.name`), using a formatter (or `JSON.stringify`), or implementing a custom `toString()`/`toLocaleString()` on the type.
+
+  x typescript(no-unsafe-assignment): Unsafe assignment of an any value.
+     ,-[packages/kb/kb-weknora/tests/store.spec.ts:100:30]
+  99 |     expect(deleted).toEqual(['old'])
+ 100 |     expect(result).toEqual({ docId: expect.any(Number), chunks: 2, embedded: true })
+     :                              ^^^^^^^^^^^^^^^^^^^^^^^^^
+ 101 |     expect(client.createManualKnowledge).toHaveBeenCalledWith('kb-1', '[regulation] food-safety/gb7718.md', 'a\n\nb', undefined)
+     `----
+
+  x typescript(unbound-method): Avoid referencing unbound methods which may cause unintentional scoping of `this`.
+     ,-[packages/kb/kb-weknora/tests/store.spec.ts:101:12]
+ 100 |     expect(result).toEqual({ docId: expect.any(Number), chunks: 2, embedded: true })
+ 101 |     expect(client.createManualKnowledge).toHaveBeenCalledWith('kb-1', '[regulation] food-safety/gb7718.md', 'a\n\nb', undefined)
+     :            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^|
+     :                          |             `-- This reference may be unbound and lose `this` context
+ 102 |   })
+     `----
+  help: If your function does not access `this`, you can annotate it with `this: void`, or consider using an arrow function instead.
+
+  x typescript(unbound-method): Avoid referencing unbound methods which may cause unintentional scoping of `this`.
+     ,-[packages/kb/kb-weknora/tests/store.spec.ts:114:12]
+ 113 |     await store.putDocument(documentInput(), chunks('x'))
+ 114 |     expect(client.createKnowledgeBase).toHaveBeenCalledWith('demo/food-safety', undefined)
+     :            ^^^^^^^^^^^^^^^^^^^^^^^^^^|
+     :                         |            `-- This reference may be unbound and lose `this` context
+ 115 |   })
+     `----
+  help: If your function does not access `this`, you can annotate it with `this: void`, or consider using an arrow function instead.
+
+  x typescript(unbound-method): Avoid referencing unbound methods which may cause unintentional scoping of `this`.
+     ,-[packages/kb/kb-weknora/tests/store.spec.ts:127:12]
+ 126 |     await store.putDocument(documentInput({ sourcePath: 'readme.md', docKind: 'other' }), chunks('x'))
+ 127 |     expect(client.createManualKnowledge).toHaveBeenCalledWith('kb-g', '[other] readme.md', 'x', undefined)
+     :            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^|
+     :                          |             `-- This reference may be unbound and lose `this` context
+ 128 |   })
+     `----
+  help: If your function does not access `this`, you can annotate it with `this: void`, or consider using an arrow function instead.
+
+  x typescript(no-base-to-string): 'calls[0]?.init.body' may use Object's default stringification format ('[object Object]') when stringified.
+     ,-[packages/kb/kb-weknora/tests/client.spec.ts:213:19]
+ 212 |     await expect(client.createManualKnowledge('kb-1', '[report] a/b.md', 'body')).resolves.toBe('kn-1')
+ 213 |     expect(String(calls[0]?.init.body)).toBe('{"title":"[report] a/b.md","content":"body","status":"publish"}')
+     :                   ^^^^^^^^^^^^^^^^^^^
+ 214 |   })
+     `----
+  help: Consider picking a property (e.g. `user.name`), using a formatter (or `JSON.stringify`), or implementing a custom `toString()`/`toLocaleString()` on the type.
+
+  x typescript(no-base-to-string): 'calls[0]?.init.body' may use Object's default stringification format ('[object Object]') when stringified.
+     ,-[packages/kb/kb-weknora/tests/client.spec.ts:228:19]
+ 227 |     expect(hits).toEqual([{ id: 'c1', knowledge_id: 'kn-1' }])
+ 228 |     expect(String(calls[0]?.init.body)).toBe('{"query":"q","knowledge_base_ids":["kb-1","kb-2"],"match_count":5}')
+     :                   ^^^^^^^^^^^^^^^^^^^
+ 229 |   })
+     `----
+  help: Consider picking a property (e.g. `user.name`), using a formatter (or `JSON.stringify`), or implementing a custom `toString()`/`toLocaleString()` on the type.
+
+  x typescript(unbound-method): Avoid referencing unbound methods which may cause unintentional scoping of `this`.
+     ,-[packages/kb/kb-weknora/tests/store.spec.ts:168:12]
+ 167 |     const hits = await store.textSearch('保质期', 'demo', 8, undefined)
+ 168 |     expect(client.knowledgeSearch).toHaveBeenCalledWith('保质期', ['kb-1', 'kb-2'], 32, undefined)
+     :            ^^^^^^^^^^^^^^^^^^^^^^|
+     :                       |          `-- This reference may be unbound and lose `this` context
+ 169 |     expect(hits[0]).toMatchObject({
+     `----
+  help: If your function does not access `this`, you can annotate it with `this: void`, or consider using an arrow function instead.
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since the receiver accepts the original type of the expression.
+     ,-[packages/kb/kb-weknora/tests/client.spec.ts:265:87]
+ 264 |     const raw = async (): Promise<Response> => new Response(JSON.stringify([{ id: 'c1' }]), { status: 200 })
+ 265 |     const client = new WeknoraClient({ baseUrl: 'http://host', apiKey: 'key-1', fetch: raw as unknown as typeof fetch })
+     :                                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 266 |     await expect(client.knowledgeSearch('q', ['kb-1'], 3)).resolves.toEqual([{ id: 'c1' }])
+     `----
+
+  x typescript(unbound-method): Avoid referencing unbound methods which may cause unintentional scoping of `this`.
+     ,-[packages/kb/kb-weknora/tests/store.spec.ts:201:12]
+ 200 |     await expect(store.textSearch('q', 'demo', 8, undefined)).resolves.toEqual([])
+ 201 |     expect(client.knowledgeSearch).not.toHaveBeenCalled()
+     :            ^^^^^^^^^^^^^^^^^^^^^^|
+     :                       |          `-- This reference may be unbound and lose `this` context
+ 202 |   })
+     `----
+  help: If your function does not access `this`, you can annotate it with `this: void`, or consider using an arrow function instead.
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since the receiver accepts the original type of the expression.
+     ,-[packages/kb/kb-weknora/tests/client.spec.ts:271:87]
+ 270 |     const raw = async (): Promise<Response> => new Response(JSON.stringify({ success: true, data: { note: 'object' } }), { status: 200 })
+ 271 |     const client = new WeknoraClient({ baseUrl: 'http://host', apiKey: 'key-1', fetch: raw as unknown as typeof fetch })
+     :                                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 272 |     await expect(client.knowledgeSearch('q', ['kb-1'], 3)).resolves.toEqual([])
+     `----
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since the receiver accepts the original type of the expression.
+     ,-[packages/kb/kb-weknora/tests/client.spec.ts:277:87]
+ 276 |     const raw = async (): Promise<Response> => new Response('', { status: 200 })
+ 277 |     const client = new WeknoraClient({ baseUrl: 'http://host', apiKey: 'key-1', fetch: raw as unknown as typeof fetch })
+     :                                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 278 |     await expect(client.listKnowledgeBases()).resolves.toEqual([])
+     `----
+
+  x typescript(no-base-to-string): 'calls[0]?.init.body' may use Object's default stringification format ('[object Object]') when stringified.
+     ,-[packages/kb/kb-weknora/tests/client.spec.ts:285:19]
+ 284 |     await client.hybridSearch('kb-1', 'q', new Float32Array([0.5, -0.5]), 4)
+ 285 |     expect(String(calls[0]?.init.body)).toBe('{"query_text":"q","query_embedding":[0.5,-0.5],"top_k":4}')
+     :                   ^^^^^^^^^^^^^^^^^^^
+ 286 |   })
+     `----
+  help: Consider picking a property (e.g. `user.name`), using a formatter (or `JSON.stringify`), or implementing a custom `toString()`/`toLocaleString()` on the type.
+
+  x typescript(unbound-method): Avoid referencing unbound methods which may cause unintentional scoping of `this`.
+     ,-[packages/kb/kb-weknora/tests/store.spec.ts:340:12]
+ 339 |     await store.putDocument(documentInput({ sourcePath: '/edge.md' }), chunks('x'))
+ 340 |     expect(client.createManualKnowledge).toHaveBeenCalledWith('kb-g', '[regulation] /edge.md', 'x', undefined)
+     :            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^|
+     :                          |             `-- This reference may be unbound and lose `this` context
+ 341 |     const search = {
+     `----
+  help: If your function does not access `this`, you can annotate it with `this: void`, or consider using an arrow function instead.
+
+  x typescript(unbound-method): Avoid referencing unbound methods which may cause unintentional scoping of `this`.
+     ,-[packages/kb/kb-weknora/tests/store.spec.ts:356:12]
+ 355 |     await expect(store.vectorSearch(new Float32Array(1), 'demo', 8, undefined)).resolves.toEqual([])
+ 356 |     expect(client.hybridSearch).not.toHaveBeenCalled()
+     :            ^^^^^^^^^^^^^^^^^^^|
+     :                     |         `-- This reference may be unbound and lose `this` context
+ 357 |   })
+     `----
+  help: If your function does not access `this`, you can annotate it with `this: void`, or consider using an arrow function instead.
+
+  x typescript(no-confusing-void-expression): Returning a void expression from an arrow function shorthand is forbidden.
+     ,-[packages/kb/kb-weknora/tests/store.spec.ts:438:18]
+ 437 |     const store = new WeknoraKbStore({ baseUrl: 'http://h', apiKey: 'k', fallbackStore: bare })
+ 438 |     expect(() => store.close()).not.toThrow()
+     :                  ^^^^^^^^^^^^^
+ 439 |   })
+     `----
+  help: Add braces to the arrow function.
+
+  x typescript(no-confusing-void-expression): Returning a void expression from an arrow function shorthand is forbidden.
+    ,-[packages/lakehouse/lakehouse-engine/tests/sql-guard.spec.ts:17:18]
+ 16 |     expect(readOnlyVerdict(sql)).toEqual({ allowed: true, code: undefined })
+ 17 |     expect(() => assertReadOnlySql(sql)).not.toThrow()
+    :                  ^^^^^^^^^^^^^^^^^^^^^^
+ 18 |   })
+    `----
+  help: Add braces to the arrow function.
+
+  x typescript(no-unsafe-assignment): Unsafe assignment of an any value.
+    ,-[packages/lakehouse/lakehouse-engine/tests/index.spec.ts:54:58]
+ 53 |       expect(outcome.rows).toEqual([[42]])
+ 54 |       expect(outcome.columns).toEqual([{ name: 'answer', sqlType: expect.any(String) }])
+    :                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 55 |     } finally {
+    `----
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since the receiver accepts the original type of the expression.
+    ,-[packages/lakehouse/tool-lakehouse/tests/tool-lakehouse.spec.ts:43:113]
+ 42 | async function call(ctx: Context, name: string, args: Record<string, unknown>): Promise<{ isError: boolean; value: unknown; text: string }> {
+ 43 |   const result = await ctx.tools.execute({ signal, callId: CallId(`call-${String(++counter)}`), name, arguments: args as never })
+    :                                                                                                                 ^^^^^^^^^^^^^^
+ 44 |   const text = result.content.find(block => block.type === 'text')
+    `----
+
+  x typescript(no-base-to-string): 'row.summary ?? `revision ${String(row.id)}`' will use Object's default stringification format ('[object Object]') when stringified.
+     ,-[packages/governance/governance-engine/src/collectors.ts:127:22]
+ 126 |         qualifiedName: `ontology.revision-${String(row.id)}`,
+ 127 |         name: String(row.summary ?? `revision ${String(row.id)}`),
+     :                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 128 |         detail: `kg-graph registry revision ${String(row.id)}`,
+     `----
+  help: Consider picking a property (e.g. `user.name`), using a formatter (or `JSON.stringify`), or implementing a custom `toString()`/`toLocaleString()` on the type.
+
+  x typescript(require-await): Function has no 'await' expression.
+     ,-[packages/governance/governance-engine/src/index.ts:107:3]
+ 106 |   /** All recorded lineage edges. */
+ 107 |   async lineage(): Promise<readonly LineageEdge[]> {
+     :   ^^^^^^^^^^^^^
+ 108 |     return readEdges(this.db)
+     `----
+
+  x typescript(require-await): Function has no 'await' expression.
+     ,-[packages/governance/governance-engine/src/index.ts:112:3]
+ 111 |   /** Record lineage edges (idempotent by source+target+transform). */
+ 112 |   async recordEdges(edges: readonly LineageEdge[]): Promise<void> {
+     :   ^^^^^^^^^^^^^^^^^
+ 113 |     writeEdges(this.db, edges)
+     `----
+
+  x typescript(require-await): Function has no 'await' expression.
+     ,-[packages/governance/governance-engine/src/index.ts:117:3]
+ 116 |   /** All configured quality rules. */
+ 117 |   async rules(): Promise<readonly QualityRule[]> {
+     :   ^^^^^^^^^^^
+ 118 |     return readRules(this.db)
+     `----
+
+  x typescript(require-await): Function has no 'await' expression.
+     ,-[packages/governance/governance-engine/src/index.ts:122:3]
+ 121 |   /** Insert or replace one quality rule. */
+ 122 |   async upsertRule(rule: QualityRule): Promise<void> {
+     :   ^^^^^^^^^^^^^^^^
+ 123 |     const problem = validateRule(rule)
+     `----
+
+  x typescript(require-await): Function has no 'await' expression.
+     ,-[packages/governance/governance-engine/src/index.ts:129:3]
+ 128 |   /** Remove one quality rule by id. */
+ 129 |   async deleteRule(id: string): Promise<void> {
+     :   ^^^^^^^^^^^^^^^^
+ 130 |     removeRule(this.db, id)
+     `----
+
+  x typescript(require-await): Function has no 'await' expression.
+     ,-[packages/governance/governance-engine/src/index.ts:157:3]
+ 156 |   /** Recorded alert events, newest first. */
+ 157 |   async events(): Promise<readonly AlertEvent[]> {
+     :   ^^^^^^^^^^^^
+ 158 |     return readEvents(this.db)
+     `----
+
+  x typescript(no-base-to-string): 'kb.chunk_num' may use Object's default stringification format ('[object Object]') when stringified.
+     ,-[packages/governance/governance-engine/src/collectors.ts:167:72]
+ 166 |       ...(kb.doc_count === undefined ? {} : { count: Number(kb.doc_count) }),
+ 167 |       ...(kb.chunk_num === undefined ? {} : { detail: `chunks ${String(kb.chunk_num)}` }),
+     :                                                                        ^^^^^^^^^^^^
+ 168 |     }))
+     `----
+  help: Consider picking a property (e.g. `user.name`), using a formatter (or `JSON.stringify`), or implementing a custom `toString()`/`toLocaleString()` on the type.
+
+  x typescript(no-base-to-string): 'schema.name ?? ''' will use Object's default stringification format ('[object Object]') when stringified.
+     ,-[packages/governance/governance-engine/src/collectors.ts:181:27]
+ 180 |     for (const schema of body.schemas ?? []) {
+ 181 |       const name = String(schema.name ?? '')
+     :                           ^^^^^^^^^^^^^^^^^
+ 182 |       const tableResponse = await fetch(`${deps.gravitinoUrl}/api/metalakes/${deps.metalake}/catalogs/carbon-business/schemas/${name}/tables`, {
+     `----
+  help: Consider picking a property (e.g. `user.name`), using a formatter (or `JSON.stringify`), or implementing a custom `toString()`/`toLocaleString()` on the type.
+
+  x typescript(no-base-to-string): 'value' will use Object's default stringification format ('[object Object]') when stringified.
+     ,-[packages/lakehouse/lakehouse-engine/src/engine.ts:129:17]
+ 128 |   if (typeof value === 'boolean' || typeof value === 'number' || typeof value === 'string') return value
+ 129 |   return String(value)
+     :                 ^^^^^
+ 130 | }
+     `----
+  help: Consider picking a property (e.g. `user.name`), using a formatter (or `JSON.stringify`), or implementing a custom `toString()`/`toLocaleString()` on the type.
+
+  x typescript(restrict-plus-operands): Invalid operand of type 'string | undefined' for a '+' operation.
+    ,-[packages/lakehouse/lakehouse-engine/src/sql-guard.ts:86:14]
+ 85 |     } else {
+ 86 |       out += char
+    :              ^^^^
+ 87 |       index += 1
+    `----
+  help: Operands must each be a number or string.
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since it does not change the type of the expression.
+     ,-[packages/lakehouse/lakehouse-engine/src/engine.ts:721:71]
+ 720 |     const columns = reader.columnNames().map((name, index) => ({ name, sqlType: String(reader.columnType(index)) }))
+ 721 |     const rows = reader.getRowsJS().map(row => row.map(normalizeCell) as (null | boolean | number | string)[])
+     :                                                ^^^^^^^^^^^|^^^^^^^^^^ ^^^^^^^^^^^^^^^^^^^|^^^^^^^^^^^^^^^^^^^^
+     :                                                           |                              `-- Casting it to '(string | number | boolean | null)[]' is unnecessary
+     :                                                           `-- This expression already has the type '(string | number | boolean | null)[]'
+ 722 |     return { columns, rows }
+     `----
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since it does not change the type of the expression.
+     ,-[packages/lakehouse/tool-lakehouse/src/list-tables.ts:165:85]
+ 164 |       },
+ 165 |       render: (_args, value) => [{ type: 'text', text: formatListTablesOutput(value as LakehouseListTablesToolValue) }],
+     :                                                                               ^^|^^ ^^^^^^^^^^^^^^^|^^^^^^^^^^^^^^^^
+     :                                                                                 |                  `-- Casting it to 'LakehouseListTablesToolValue' is unnecessary
+     :                                                                                 `-- This expression already has the type '{ tables: { ref: string; row_count: number; schema: string; table: string; }[]; }'
+ 166 |       presentationMeta: (_args, value) => {
+     `----
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since it does not change the type of the expression.
+     ,-[packages/lakehouse/tool-lakehouse/src/list-tables.ts:167:33]
+ 166 |       presentationMeta: (_args, value) => {
+ 167 |         const projected = value as LakehouseListTablesToolValue
+     :                           ^^|^^ ^^^^^^^^^^^^^^^|^^^^^^^^^^^^^^^^
+     :                             |                  `-- Casting it to 'LakehouseListTablesToolValue' is unnecessary
+     :                             `-- This expression already has the type '{ tables: { ref: string; row_count: number; schema: string; table: string; }[]; }'
+ 168 |         return {
+     `----
+
+  x typescript(restrict-plus-operands): Invalid operand of type 'string | undefined' for a '+' operation.
+    ,-[packages/graph/graph-neo4j/src/cypher-guard.ts:86:14]
+ 85 |     } else {
+ 86 |       out += char
+    :              ^^^^
+ 87 |       index += 1
+    `----
+  help: Operands must each be a number or string.
+
+  x typescript(no-deprecated): `verifyConnectivity` is deprecated. This return of this method will change in 6.0.0 to not async return the  and
+  | async return  instead. If you need to use the server info, use  instead.
+     ,-[packages/graph/graph-neo4j/src/index.ts:186:20]
+ 185 |       const driver = neo4j.driver(this.options.url, neo4j.auth.basic(this.options.user, this.options.password))
+ 186 |       await driver.verifyConnectivity()
+     :                    ^^^^^^^^^^^^^^^^^^
+ 187 |       this.driver = driver
+     `----
+
+  x typescript(no-base-to-string): 'row['nodeType'] ?? ''' will use Object's default stringification format ('[object Object]') when stringified.
+     ,-[packages/graph/graph-neo4j/src/index.ts:376:20]
+ 375 |       id: String(row['gid']),
+ 376 |       type: String(row['nodeType'] ?? ''),
+     :                    ^^^^^^^^^^^^^^^^^^^^^
+ 377 |       name: String(row['name'] ?? ''),
+     `----
+  help: Consider picking a property (e.g. `user.name`), using a formatter (or `JSON.stringify`), or implementing a custom `toString()`/`toLocaleString()` on the type.
+
+  x typescript(no-base-to-string): 'row['name'] ?? ''' will use Object's default stringification format ('[object Object]') when stringified.
+     ,-[packages/graph/graph-neo4j/src/index.ts:377:20]
+ 376 |       type: String(row['nodeType'] ?? ''),
+ 377 |       name: String(row['name'] ?? ''),
+     :                    ^^^^^^^^^^^^^^^^^
+ 378 |       degree: Number(row['degree'] ?? 0),
+     `----
+  help: Consider picking a property (e.g. `user.name`), using a formatter (or `JSON.stringify`), or implementing a custom `toString()`/`toLocaleString()` on the type.
+
+  x typescript(no-base-to-string): 'row['otherName'] ?? ''' will use Object's default stringification format ('[object Object]') when stringified.
+     ,-[packages/graph/graph-neo4j/src/index.ts:406:25]
+ 405 |       otherId: String(row['otherId']),
+ 406 |       otherName: String(row['otherName'] ?? ''),
+     :                         ^^^^^^^^^^^^^^^^^^^^^^
+ 407 |       otherType: String(row['otherType'] ?? ''),
+     `----
+  help: Consider picking a property (e.g. `user.name`), using a formatter (or `JSON.stringify`), or implementing a custom `toString()`/`toLocaleString()` on the type.
+
+  x typescript(no-base-to-string): 'row['otherType'] ?? ''' will use Object's default stringification format ('[object Object]') when stringified.
+     ,-[packages/graph/graph-neo4j/src/index.ts:407:25]
+ 406 |       otherName: String(row['otherName'] ?? ''),
+ 407 |       otherType: String(row['otherType'] ?? ''),
+     :                         ^^^^^^^^^^^^^^^^^^^^^^
+ 408 |     })
+     `----
+  help: Consider picking a property (e.g. `user.name`), using a formatter (or `JSON.stringify`), or implementing a custom `toString()`/`toLocaleString()` on the type.
+
+  x typescript(no-unsafe-assignment): Unsafe assignment of an any value.
+     ,-[packages/graph/graph-neo4j/src/index.ts:456:15]
+ 455 |         const next = Number(head.records[0]?.get('maxVersion') ?? 0) + 1
+ 456 |         const headIds = (head.records[0]?.get('headIds') ?? []).map((value: unknown) => String(value))
+     :               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 457 |         await tx.run(
+     `----
+
+  x typescript(no-unsafe-call): Unsafe call of a(n) `any` typed value.
+     ,-[packages/graph/graph-neo4j/src/index.ts:456:25]
+ 455 |         const next = Number(head.records[0]?.get('maxVersion') ?? 0) + 1
+ 456 |         const headIds = (head.records[0]?.get('headIds') ?? []).map((value: unknown) => String(value))
+     :                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 457 |         await tx.run(
+     `----
+
+  x typescript(no-unsafe-member-access): Unsafe member access .map on an `any` value.
+     ,-[packages/graph/graph-neo4j/src/index.ts:456:65]
+ 455 |         const next = Number(head.records[0]?.get('maxVersion') ?? 0) + 1
+ 456 |         const headIds = (head.records[0]?.get('headIds') ?? []).map((value: unknown) => String(value))
+     :                                                                 ^^^
+ 457 |         await tx.run(
+     `----
+
+  x typescript(no-unsafe-assignment): Unsafe assignment of an any value.
+     ,-[packages/graph/graph-neo4j/src/index.ts:466:130]
+ 465 |           ].join('\n'),
+ 466 |           { id: meta.id, version: neo4j.int(next), name: meta.name, source: meta.source, jsonld: JSON.stringify(doc), createdAt, headIds },
+     :                                                                                                                                  ^^^^^^^
+ 467 |         )
+     `----
+
+  x typescript(no-base-to-string): 'row['name'] ?? ''' will use Object's default stringification format ('[object Object]') when stringified.
+     ,-[packages/graph/graph-neo4j/src/index.ts:492:20]
+ 491 |       version: Number(row['version'] ?? 0),
+ 492 |       name: String(row['name'] ?? ''),
+     :                    ^^^^^^^^^^^^^^^^^
+ 493 |       source: String(row['source'] ?? ''),
+     `----
+  help: Consider picking a property (e.g. `user.name`), using a formatter (or `JSON.stringify`), or implementing a custom `toString()`/`toLocaleString()` on the type.
+
+  x typescript(no-base-to-string): 'row['source'] ?? ''' will use Object's default stringification format ('[object Object]') when stringified.
+     ,-[packages/graph/graph-neo4j/src/index.ts:493:22]
+ 492 |       name: String(row['name'] ?? ''),
+ 493 |       source: String(row['source'] ?? ''),
+     :                      ^^^^^^^^^^^^^^^^^^^
+ 494 |       createdAt: String(row['createdAt'] ?? ''),
+     `----
+  help: Consider picking a property (e.g. `user.name`), using a formatter (or `JSON.stringify`), or implementing a custom `toString()`/`toLocaleString()` on the type.
+
+  x typescript(no-base-to-string): 'row['createdAt'] ?? ''' will use Object's default stringification format ('[object Object]') when stringified.
+     ,-[packages/graph/graph-neo4j/src/index.ts:494:25]
+ 493 |       source: String(row['source'] ?? ''),
+ 494 |       createdAt: String(row['createdAt'] ?? ''),
+     :                         ^^^^^^^^^^^^^^^^^^^^^^
+ 495 |       ...(row['prev'] === null || row['prev'] === undefined ? {} : { prev: String(row['prev']) }),
+     `----
+  help: Consider picking a property (e.g. `user.name`), using a formatter (or `JSON.stringify`), or implementing a custom `toString()`/`toLocaleString()` on the type.
+
+  x typescript(no-base-to-string): 'row['prev']' will use Object's default stringification format ('[object Object]') when stringified.
+     ,-[packages/graph/graph-neo4j/src/index.ts:495:83]
+ 494 |       createdAt: String(row['createdAt'] ?? ''),
+ 495 |       ...(row['prev'] === null || row['prev'] === undefined ? {} : { prev: String(row['prev']) }),
+     :                                                                                   ^^^^^^^^^^^
+ 496 |     }))
+     `----
+  help: Consider picking a property (e.g. `user.name`), using a formatter (or `JSON.stringify`), or implementing a custom `toString()`/`toLocaleString()` on the type.
+
+  x typescript(no-base-to-string): 'row['nodeType'] ?? ''' will use Object's default stringification format ('[object Object]') when stringified.
+     ,-[packages/graph/graph-neo4j/src/index.ts:516:20]
+ 515 |       id: String(row['gid']),
+ 516 |       type: String(row['nodeType'] ?? ''),
+     :                    ^^^^^^^^^^^^^^^^^^^^^
+ 517 |       name: String(row['name'] ?? ''),
+     `----
+  help: Consider picking a property (e.g. `user.name`), using a formatter (or `JSON.stringify`), or implementing a custom `toString()`/`toLocaleString()` on the type.
+
+  x typescript(no-base-to-string): 'row['name'] ?? ''' will use Object's default stringification format ('[object Object]') when stringified.
+     ,-[packages/graph/graph-neo4j/src/index.ts:517:20]
+ 516 |       type: String(row['nodeType'] ?? ''),
+ 517 |       name: String(row['name'] ?? ''),
+     :                    ^^^^^^^^^^^^^^^^^
+ 518 |       props: propsRaw !== null && typeof propsRaw === 'object' ? projectProps(propsRaw as Record<string, unknown>) : {},
+     `----
+  help: Consider picking a property (e.g. `user.name`), using a formatter (or `JSON.stringify`), or implementing a custom `toString()`/`toLocaleString()` on the type.
+
+  x typescript(no-confusing-void-expression): Returning a void expression from an arrow function shorthand is forbidden.
+    ,-[packages/kb/kb-weknora/src/client.ts:71:34]
+ 70 |   const controller = new AbortController()
+ 71 |   const timer = setTimeout(() => controller.abort(new DOMException('WeKnora request timed out', 'TimeoutError')), timeoutMs)
+    :                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 72 |   const forward = (): void => controller.abort(signal?.reason)
+    `----
+  help: Add braces to the arrow function.
+
+  x typescript(no-confusing-void-expression): Returning a void expression from an arrow function shorthand is forbidden.
+    ,-[packages/kb/kb-weknora/src/client.ts:72:31]
+ 71 |   const timer = setTimeout(() => controller.abort(new DOMException('WeKnora request timed out', 'TimeoutError')), timeoutMs)
+ 72 |   const forward = (): void => controller.abort(signal?.reason)
+    :                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 73 |   if (signal !== undefined) {
+    `----
+  help: Add braces to the arrow function.
+
+  x typescript(no-misused-spread): Using the spread operator on a string can mishandle special characters, because it produces Unicode code points, which will break complex characters (like emojis) into multiple parts.
+     ,-[packages/kb/kb-weknora/src/store.ts:236:45]
+ 235 |       const SEGMENT = 190_000
+ 236 |       const segments = [...Array(Math.ceil([...content].length / SEGMENT)).keys()]
+     :                                             ^^^^^^^^^^
+ 237 |       let firstKnowledgeId = ''
+     `----
+  help: Consider using `Intl.Segmenter` for locale-aware string decomposition. Otherwise, if you don't need to preserve emojis or other non-ASCII characters, disable this lint rule on this line or configure the 'allow' rule option.
+
+  x typescript(no-misused-spread): Using the spread operator on a string can mishandle special characters, because it produces Unicode code points, which will break complex characters (like emojis) into multiple parts.
+     ,-[packages/kb/kb-weknora/src/store.ts:239:33]
+ 238 |       for (const index of segments) {
+ 239 |         const segmentContent = [...content].slice(index * SEGMENT, (index + 1) * SEGMENT).join('')
+     :                                 ^^^^^^^^^^
+ 240 |         const segmentTitle = index === 0 ? title : `${title}#${index + 1}`
+     `----
+  help: Consider using `Intl.Segmenter` for locale-aware string decomposition. Otherwise, if you don't need to preserve emojis or other non-ASCII characters, disable this lint rule on this line or configure the 'allow' rule option.
+
+  x typescript(no-base-to-string): 'hit.knowledge_id ?? ''' will use Object's default stringification format ('[object Object]') when stringified.
+     ,-[packages/kb/kb-weknora/src/store.ts:292:70]
+ 291 |     const decoded = decodeTitle(rawTitle)
+ 292 |     const chunkUid = typeof hit.id === 'string' ? hit.id : `${String(hit.knowledge_id ?? '')}:${String(hit.chunk_index ?? 0)}`
+     :                                                                      ^^^^^^^^^^^^^^^^^^^^^^
+ 293 |     const knowledgeId = typeof hit.knowledge_id === 'string' ? hit.knowledge_id : chunkUid
+     `----
+  help: Consider picking a property (e.g. `user.name`), using a formatter (or `JSON.stringify`), or implementing a custom `toString()`/`toLocaleString()` on the type.
+
+  x typescript(no-base-to-string): 'hit.chunk_index ?? 0' will use Object's default stringification format ('[object Object]') when stringified.
+     ,-[packages/kb/kb-weknora/src/store.ts:292:104]
+ 291 |     const decoded = decodeTitle(rawTitle)
+ 292 |     const chunkUid = typeof hit.id === 'string' ? hit.id : `${String(hit.knowledge_id ?? '')}:${String(hit.chunk_index ?? 0)}`
+     :                                                                                                        ^^^^^^^^^^^^^^^^^^^^
+ 293 |     const knowledgeId = typeof hit.knowledge_id === 'string' ? hit.knowledge_id : chunkUid
+     `----
+  help: Consider picking a property (e.g. `user.name`), using a formatter (or `JSON.stringify`), or implementing a custom `toString()`/`toLocaleString()` on the type.
+
+  x typescript(require-await): Function has no 'await' expression.
+     ,-[packages/kb/kb-weknora/src/store.ts:436:3]
+ 435 |    */
+ 436 |   async usage(_tenantId: string, _signal?: AbortSignal): Promise<KbUsage> {
+     :   ^^^^^^^^^^^
+ 437 |     return { searches: 0, ingestedDocuments: 0, ingestedChunks: 0, embedTexts: 0, embedTokens: 0 }
+     `----
+
+  x typescript(no-unnecessary-condition): Unnecessary optional chain on a non-nullish value.
+    ,-[packages/client/ui-mobile/src/client/uid.ts:19:17]
+ 18 |   const api = globalThis.crypto
+ 19 |   if (typeof api?.randomUUID === 'function') return api.randomUUID()
+    :              ^|^^^
+    :               `-- Type: Crypto
+ 20 |   const bytes = new Uint8Array(FALLBACK_BYTES)
+    `----
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since the receiver accepts the original type of the expression.
+     ,-[packages/client/ui-mobile/src/client/ui.tsx:149:24]
+ 148 |             size="small"
+ 149 |             className={css.emptyAction as string}
+     :                        ^^^^^^^^^^^^^^^^^^^^^^^^^
+ 150 |             onClick={action.onClick}
+     `----
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since it does not change the type of the expression.
+     ,-[packages/client/ui-mobile/src/client/ui.tsx:214:77]
+ 213 |     <div className={css.skelThread} aria-hidden="true">
+ 214 |       <Skeleton animated className={`${css.skelBubble} ${css.skelBubbleAi}` as string} />
+     :                                     ^^^^^^^^^^^^^^^^^^^|^^^^^^^^^^^^^^^^^^^ ^^^^|^^^^^
+     :                                                        |                        `-- Casting it to 'string' is unnecessary
+     :                                                        `-- This expression already has the type 'string'
+ 215 |       <Skeleton animated className={`${css.skelBubble} ${css.skelBubbleAi} ${css.skelBubbleWide}` as string} />
+     `----
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since it does not change the type of the expression.
+     ,-[packages/client/ui-mobile/src/client/ui.tsx:215:99]
+ 214 |       <Skeleton animated className={`${css.skelBubble} ${css.skelBubbleAi}` as string} />
+ 215 |       <Skeleton animated className={`${css.skelBubble} ${css.skelBubbleAi} ${css.skelBubbleWide}` as string} />
+     :                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^|^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ^^^^|^^^^^
+     :                                                                   |                                   `-- Casting it to 'string' is unnecessary
+     :                                                                   `-- This expression already has the type 'string'
+ 216 |       <Skeleton animated className={`${css.skelBubble} ${css.skelBubbleUser}` as string} />
+     `----
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since it does not change the type of the expression.
+     ,-[packages/client/ui-mobile/src/client/ui.tsx:216:79]
+ 215 |       <Skeleton animated className={`${css.skelBubble} ${css.skelBubbleAi} ${css.skelBubbleWide}` as string} />
+ 216 |       <Skeleton animated className={`${css.skelBubble} ${css.skelBubbleUser}` as string} />
+     :                                     ^^^^^^^^^^^^^^^^^^^^|^^^^^^^^^^^^^^^^^^^^ ^^^^|^^^^^
+     :                                                         |                         `-- Casting it to 'string' is unnecessary
+     :                                                         `-- This expression already has the type 'string'
+ 217 |     </div>
+     `----
+
+  x typescript(no-unnecessary-condition): This condition will always return the same value since the types have no overlap.
+    ,-[packages/client/ui-mobile/src/client/messages/ApprovalCard.tsx:35:15]
+ 34 |   const view = APPROVAL_STATE_VIEW[state]
+ 35 |   return view !== undefined ? view : { seal: '草', label: '草稿', chip: chipOf(css.approvalChipDraft) }
+    :         ^^|^^ ^^^^^^^^|^^^^
+    :           |    |      `-- Type: undefined
+    :           `-- Type: { seal: string; label: string; chip: string; }
+ 36 | }
+    `----
+
+  x typescript(no-unnecessary-condition): Unnecessary optional chain on a non-nullish value.
+     ,-[packages/client/ui-mobile/src/client/messages/ChatView.tsx:204:36]
+ 203 |       // flag (W11-R2).
+ 204 |       clientMsgId = newClientMsgId(loadIdentity()?.username ?? '', trimmed)
+     :                                    ^^^^^^^^^^^^|^^^^^^^^^^^^
+     :                                                `-- Type: string
+ 205 |       await promptSession(sessionId, trimmed, clientMsgId)
+     `----
+
+  x typescript(no-unnecessary-condition): Unnecessary optional chain on a non-nullish value.
+     ,-[packages/client/ui-mobile/src/client/messages/ChatView.tsx:204:50]
+ 203 |       // flag (W11-R2).
+ 204 |       clientMsgId = newClientMsgId(loadIdentity()?.username ?? '', trimmed)
+     :                                    ^^^^^^^|^^^^^^^^
+     :                                           `-- Type: MobileIdentity
+ 205 |       await promptSession(sessionId, trimmed, clientMsgId)
+     `----
+
+  x typescript(no-unnecessary-condition): Unnecessary optional chain on a non-nullish value.
+     ,-[packages/client/ui-mobile/src/client/messages/ChatView.tsx:223:73]
+ 222 |         // dispatched under the failed build.
+ 223 |         enqueueOutbox(sessionId, trimmed, clientMsgId ?? newClientMsgId(loadIdentity()?.username ?? '', trimmed))
+     :                                                                         ^^^^^^^^^^^^|^^^^^^^^^^^^
+     :                                                                                     `-- Type: string
+ 224 |         finalizeSend()
+     `----
+
+  x typescript(no-unnecessary-condition): Unnecessary optional chain on a non-nullish value.
+     ,-[packages/client/ui-mobile/src/client/messages/ChatView.tsx:223:87]
+ 222 |         // dispatched under the failed build.
+ 223 |         enqueueOutbox(sessionId, trimmed, clientMsgId ?? newClientMsgId(loadIdentity()?.username ?? '', trimmed))
+     :                                                                         ^^^^^^^|^^^^^^^^
+     :                                                                                `-- Type: MobileIdentity
+ 224 |         finalizeSend()
+     `----
+
+  x typescript(no-unnecessary-condition): Unnecessary conditional, value is always falsy.
+     ,-[packages/client/ui-mobile/src/client/profile/ProfileView.tsx:105:13]
+ 104 |         }
+ 105 |         if (!alive) return
+     :             ^^^^^^|
+     :                |  `-- Type: true
+ 106 |         setMonthlyCount(receipts.length)
+     `----
+
+  x typescript(no-unnecessary-condition): Unnecessary conditional, value is always truthy.
+     ,-[packages/client/ui-mobile/src/client/profile/ProfileView.tsx:110:13]
+ 109 |         logClientError('ledger.recent', reason)
+ 110 |         if (alive) setRecent([])
+     :             ^^|^^^
+     :               `-- Type: true
+ 111 |       }
+     `----
+
+  x typescript(no-unnecessary-condition): Unnecessary optional chain on a non-nullish value.
+     ,-[packages/client/ui-mobile/src/client/messages/ChatView.tsx:563:23]
+ 562 |         onClose={() => { setTaskForm(current => ({ ...current, open: false })) }}
+ 563 |         identityName={loadIdentity()?.nickname ?? '我'}
+     :                       ^^^^^^^^^^^^|^^^^^^^^^^^^
+     :                                   `-- Type: string
+ 564 |         prefill={taskForm.prefill}
+     `----
+
+  x typescript(no-unnecessary-condition): Unnecessary optional chain on a non-nullish value.
+     ,-[packages/client/ui-mobile/src/client/messages/ChatView.tsx:563:37]
+ 562 |         onClose={() => { setTaskForm(current => ({ ...current, open: false })) }}
+ 563 |         identityName={loadIdentity()?.nickname ?? '我'}
+     :                       ^^^^^^^|^^^^^^^^
+     :                              `-- Type: MobileIdentity
+ 564 |         prefill={taskForm.prefill}
+     `----
+
+  x typescript(no-unnecessary-condition): Unnecessary conditional, value is always truthy.
+    ,-[packages/client/ui-mobile/src/client/shell/MobileShell.tsx:68:11]
+ 67 |     void (async () => {
+ 68 |       if (alive) seedDemoData()
+    :           ^^|^^^
+    :             `-- Type: true
+ 69 |     })()
+    `----
+
+  x typescript(require-await): Function has no 'await' expression.
+    ,-[packages/client/ui-mobile/src/client/shell/MobileShell.tsx:67:19]
+ 66 |     let alive = true
+ 67 |     void (async () => {
+    :                   ^^^
+ 68 |       if (alive) seedDemoData()
+    `----
+
+  x typescript(no-confusing-void-expression): Returning a void expression from an arrow function shorthand is forbidden.
+     ,-[packages/client/ui-governance/src/client/index.ts:114:34]
+ 113 |       })))
+ 114 |     }).catch((error: unknown) => store.failAssets(messageOf(error)))
+     :                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 115 |   }
+     `----
+  help: Add braces to the arrow function.
+
+  x typescript(no-confusing-void-expression): Returning a void expression from an arrow function shorthand is forbidden.
+     ,-[packages/client/ui-governance/src/client/index.ts:126:34]
+ 125 |       })))
+ 126 |     }).catch((error: unknown) => store.failEdges(messageOf(error)))
+     :                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 127 |   }
+     `----
+  help: Add braces to the arrow function.
+
+  x typescript(no-confusing-void-expression): Returning a void expression from an arrow function shorthand is forbidden.
+     ,-[packages/client/ui-governance/src/client/index.ts:139:34]
+ 138 |       })))
+ 139 |     }).catch((error: unknown) => store.failRules(messageOf(error)))
+     :                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 140 |   }
+     `----
+  help: Add braces to the arrow function.
+
+  x typescript(no-confusing-void-expression): Returning a void expression from an arrow function shorthand is forbidden.
+     ,-[packages/client/ui-governance/src/client/index.ts:151:34]
+ 150 |       })))
+ 151 |     }).catch((error: unknown) => store.failEvents(messageOf(error)))
+     :                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 152 |   }
+     `----
+  help: Add braces to the arrow function.
+
+  x typescript(no-confusing-void-expression): Returning a void expression from an arrow function shorthand is forbidden.
+     ,-[packages/client/ui-governance/src/client/index.ts:167:34]
+ 166 |       refreshEvents()
+ 167 |     }).catch((error: unknown) => store.failEvaluate(messageOf(error)))
+     :                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 168 |   }
+     `----
+  help: Add braces to the arrow function.
+
+  x typescript(no-confusing-void-expression): Returning a void expression from an arrow function shorthand is forbidden.
+     ,-[packages/client/ui-governance/src/client/index.ts:172:52]
+ 171 |   const testWebhook = (): void => {
+ 172 |     void api.governance.webhookTest({}).then(() => refreshEvents()).catch(() => refreshEvents())
+     :                                                    ^^^^^^^^^^^^^^^
+ 173 |   }
+     `----
+  help: Add braces to the arrow function.
+
+  x typescript(no-confusing-void-expression): Returning a void expression from an arrow function shorthand is forbidden.
+     ,-[packages/client/ui-governance/src/client/index.ts:172:81]
+ 171 |   const testWebhook = (): void => {
+ 172 |     void api.governance.webhookTest({}).then(() => refreshEvents()).catch(() => refreshEvents())
+     :                                                                                 ^^^^^^^^^^^^^^^
+ 173 |   }
+     `----
+  help: Add braces to the arrow function.
+
+  x typescript(no-confusing-void-expression): Returning a void expression from an arrow function shorthand is forbidden.
+     ,-[packages/client/ui-governance/src/client/GovernanceView.tsx:113:32]
+ 112 |             value={state.searchQuery}
+ 113 |             onChange={event => setSearch(event.target.value)}
+     :                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 114 |           />
+     `----
+  help: Add braces to the arrow function.
+
+  x typescript(no-confusing-void-expression): Returning a void expression from an arrow function shorthand is forbidden.
+     ,-[packages/client/ui-governance/src/client/GovernanceView.tsx:180:83]
+ 179 |           <button type="button" className={css.runButton} onClick={testWebhook}>{t('alerts.webhookTest')}</button>
+ 180 |           <select className={css.sqlInput} value={levelFilter} onChange={event => setLevelFilter(event.target.value as typeof levelFilter)}>
+     :                                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 181 |             <option value="all">全部级别</option>
+     `----
+  help: Add braces to the arrow function.
+
+  x typescript(unbound-method): Avoid referencing unbound methods which may cause unintentional scoping of `this`.
+    ,-[packages/client/ui-mobile/tests/uid.client.spec.ts:32:12]
+ 31 |     dropRandomUUID()
+ 32 |     expect(globalThis.crypto.randomUUID).toBeUndefined()
+    :            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^|
+    :                          |             `-- This reference may be unbound and lose `this` context
+ 33 |     const first = uid()
+    `----
+  help: If your function does not access `this`, you can annotate it with `this: void`, or consider using an arrow function instead.
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since the receiver accepts the original type of the expression.
+     ,-[packages/client/ui-kg/tests/kgview.client.spec.tsx:391:19]
+ 390 |       useKg={useKg}
+ 391 |       graphCalls={obsidianStubCalls as never}
+     :                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 392 |       {...actions}
+     `----
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since it does not change the type of the expression.
+    ,-[packages/client/ui-mobile/tests/composer.client.spec.tsx:57:60]
+ 56 |     mountComposer({ attachments: [attachment()] })
+ 57 |     expect((screen.getByRole('button', { name: '发送' }) as HTMLButtonElement).disabled).toBe(false)
+    :             ^^^^^^^^^^^^^^^^^^^^^^|^^^^^^^^^^^^^^^^^^^^^ ^^^^^^^^^^|^^^^^^^^^^
+    :                                   |                                `-- Casting it to 'HTMLButtonElement' is unnecessary
+    :                                   `-- This expression already has the type 'HTMLButtonElement'
+ 58 |   })
+    `----
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since it does not change the type of the expression.
+    ,-[packages/client/ui-mobile/tests/composer.client.spec.tsx:62:60]
+ 61 |     mountComposer()
+ 62 |     expect((screen.getByRole('button', { name: '发送' }) as HTMLButtonElement).disabled).toBe(true)
+    :             ^^^^^^^^^^^^^^^^^^^^^^|^^^^^^^^^^^^^^^^^^^^^ ^^^^^^^^^^|^^^^^^^^^^
+    :                                   |                                `-- Casting it to 'HTMLButtonElement' is unnecessary
+    :                                   `-- This expression already has the type 'HTMLButtonElement'
+ 63 |   })
+    `----
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since it does not change the type of the expression.
+    ,-[packages/client/ui-mobile/tests/composer.client.spec.tsx:67:60]
+ 66 |     mountComposer({ attachments: [attachment({ status: 'uploading', quote: undefined })] })
+ 67 |     expect((screen.getByRole('button', { name: '发送' }) as HTMLButtonElement).disabled).toBe(true)
+    :             ^^^^^^^^^^^^^^^^^^^^^^|^^^^^^^^^^^^^^^^^^^^^ ^^^^^^^^^^|^^^^^^^^^^
+    :                                   |                                `-- Casting it to 'HTMLButtonElement' is unnecessary
+    :                                   `-- This expression already has the type 'HTMLButtonElement'
+ 68 |   })
+    `----
+
+  x typescript(no-unsafe-assignment): Unsafe array destructuring of an any array value.
+     ,-[packages/client/ui-mobile/tests/v3-components.client.spec.tsx:516:11]
+ 515 |     await waitFor(() => { expect(onEdit).toHaveBeenCalledTimes(1) })
+ 516 |     const [, picked] = onEdit.mock.calls[0] ?? []
+     :           ^^^^^^^^^^
+ 517 |     expect(picked).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+     `----
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since it does not change the type of the expression.
+    ,-[packages/client/ui-nav/tests/apply.client.spec.tsx:51:33]
+ 50 |     // Activation: the immediate switch rides view-context and never opens a session.
+ 51 |     const seat = navSpec.inject as SidebarNavSlotInject
+    :                  ^^^^^^^|^^^^^^ ^^^^^^^^^^^|^^^^^^^^^^^^
+    :                         |                  `-- Casting it to 'SidebarNavSlotInject' is unnecessary
+    :                         `-- This expression already has the type 'SidebarNavSlotInject'
+ 52 |     seat.activate('kb')
+    `----
+
+  x typescript(no-deprecated): `execCommand` is deprecated. [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/execCommand)
+      ,-[packages/client/ui-mobile/tests/views.client.spec.tsx:1090:14]
+ 1089 |     // execCommand is the legacy copy lane under test (the production source keeps the same waiver).
+ 1090 |     document.execCommand = exec
+      :              ^^^^^^^^^^^
+ 1091 |     try {
+      `----
+
+  x typescript(no-deprecated): `execCommand` is deprecated. [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/execCommand)
+      ,-[packages/client/ui-mobile/tests/views.client.spec.tsx:1101:74]
+ 1100 |     } finally {
+ 1101 |       delete (document as Partial<Document> & { execCommand?: unknown }).execCommand
+      :                                                                          ^^^^^^^^^^^
+ 1102 |     }
+      `----
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since the receiver accepts the original type of the expression.
+    ,-[packages/client/ui-nav/tests/nav.client.spec.tsx:79:55]
+ 78 | describe('ChatNavItem', () => {
+ 79 |   const activeState: NavState = { screen: { sessionId: 's1' as never, view: 'chat' }, switchable: true }
+    :                                                       ^^^^^^^^^^^^^^
+ 80 |   const otherState: NavState = { screen: { sessionId: 's1' as never, view: 'kb' }, switchable: true }
+    `----
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since the receiver accepts the original type of the expression.
+    ,-[packages/client/ui-nav/tests/nav.client.spec.tsx:80:54]
+ 79 |   const activeState: NavState = { screen: { sessionId: 's1' as never, view: 'chat' }, switchable: true }
+ 80 |   const otherState: NavState = { screen: { sessionId: 's1' as never, view: 'kb' }, switchable: true }
+    :                                                      ^^^^^^^^^^^^^^
+ 81 |   const unresolvedState: NavState = { screen: undefined, switchable: false }
+    `----
+
+  x typescript(no-base-to-string): '(content[0] as Record<string, unknown>)['text'] ?? ''' will use Object's default stringification format ('[object Object]') when stringified.
+      ,-[packages/client/ui-mobile/tests/views.client.spec.tsx:2328:18]
+ 2327 |       return Array.isArray(content) && typeof content[0] === 'object' && content[0] !== null
+ 2328 |         ? String((content[0] as Record<string, unknown>)['text'] ?? '')
+      :                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 2329 |         : ''
+      `----
+  help: Consider picking a property (e.g. `user.name`), using a formatter (or `JSON.stringify`), or implementing a custom `toString()`/`toLocaleString()` on the type.
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since it does not change the type of the expression.
+      ,-[packages/client/ui-mobile/tests/views.client.spec.tsx:2373:62]
+ 2372 |       fireEvent.change(box, { target: { value: '再问一句' } })
+ 2373 |       expect((screen.getByRole('button', { name: '发送' }) as HTMLButtonElement).disabled).toBe(false)
+      :               ^^^^^^^^^^^^^^^^^^^^^^|^^^^^^^^^^^^^^^^^^^^^ ^^^^^^^^^^|^^^^^^^^^^
+      :                                     |                                `-- Casting it to 'HTMLButtonElement' is unnecessary
+      :                                     `-- This expression already has the type 'HTMLButtonElement'
+ 2374 |       fireEvent.click(screen.getByRole('button', { name: '发送' }))
+      `----
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since it does not change the type of the expression.
+      ,-[packages/client/ui-mobile/tests/views.client.spec.tsx:2405:62]
+ 2404 |       fireEvent.change(box, { target: { value: '恢复后这条' } })
+ 2405 |       expect((screen.getByRole('button', { name: '发送' }) as HTMLButtonElement).disabled).toBe(false)
+      :               ^^^^^^^^^^^^^^^^^^^^^^|^^^^^^^^^^^^^^^^^^^^^ ^^^^^^^^^^|^^^^^^^^^^
+      :                                     |                                `-- Casting it to 'HTMLButtonElement' is unnecessary
+      :                                     `-- This expression already has the type 'HTMLButtonElement'
+ 2406 |     } finally {
+      `----
+
+  x typescript(no-deprecated): `ZodIssueCode` is deprecated.
+     ,-[packages/host/apiproxy/src/api/sessions.schema.ts:151:15]
+ 150 |     ctx.addIssue({
+ 151 |       code: z.ZodIssueCode.custom,
+     :               ^^^^^^^^^^^^
+ 152 |       path: ['afterSeq'],
+     `----
+
+  x typescript(require-await): Function has no 'await' expression.
+      ,-[packages/host/apiproxy/src/api-proxy.ts:3774:7]
+ 3773 |       // posting server-functions stay on the carbon UI.
+ 3774 |       async listMeta(request) {
+      :       ^^^^^^^^^^^^^^
+ 3775 |         const gates = carbonGates()
+      `----
+
+  x typescript(no-base-to-string): 'body.base_resp?.status_msg ?? ''' will use Object's default stringification format ('[object Object]') when stringified.
+      ,-[packages/host/apiproxy/src/api-proxy.ts:4236:142]
+ 4235 |           if (!response.ok || body.base_resp?.status_code !== 0 || typeof body.content !== 'string' || body.content.length === 0) {
+ 4236 |             throw new Error(`vision endpoint answered ${String(response.status)} status_code=${String(body.base_resp?.status_code)} ${String(body.base_resp?.status_msg ?? '')}`.trim())
+      :                                                                                                                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 4237 |           }
+      `----
+  help: Consider picking a property (e.g. `user.name`), using a formatter (or `JSON.stringify`), or implementing a custom `toString()`/`toLocaleString()` on the type.
+
+  x typescript(require-await): Function has no 'await' expression.
+      ,-[packages/host/apiproxy/src/api-proxy.ts:4490:7]
+ 4489 |     connectors: {
+ 4490 |       async list(request) {
+      :       ^^^^^^^^^^
+ 4491 |         void request
+      `----
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since it does not change the type of the expression.
+      ,-[packages/host/apiproxy/src/api-proxy.ts:4686:45]
+ 4685 |         // without it gets the structured refusal instead of a broken page.
+ 4686 |         const store = ctx.get('neo4jGraph') as Neo4jGraphService | undefined
+      :                       ^^^^^^^^^^|^^^^^^^^^^ ^^^^^^^^^^^^^^^^|^^^^^^^^^^^^^^^^
+      :                                 |                           `-- Casting it to 'Neo4jGraphService | undefined' is unnecessary
+      :                                 `-- This expression already has the type 'Neo4jGraphService | undefined'
+ 4687 |         if (store === undefined || !store.available()) {
+      `----
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since the receiver accepts the original type of the expression.
+     ,-[packages/host/apiproxy/src/index.ts:153:29]
+ 152 |
+ 153 | ,->   static Config: z<Config> = z.object({
+ 154 | |       nativeOpen: z.boolean(),
+ 155 | |       sessionExportCompressionLevel: z.number().step(1).min(0).max(9)
+ 156 | |         .default(DEFAULT_SESSION_LOG_COMPRESSION_LEVEL) as z<SessionLogCompressionLevel>,
+ 157 | |       coldBlankProbeMaxBytes: z.natural().default(DEFAULT_COLD_BLANK_PROBE_MAX_BYTES),
+ 158 | |       kbTenant: z.string().required(),
+ 159 | |       kbWriteEnabled: z.boolean(),
+ 160 | |       dataUploadEnabled: z.boolean(),
+ 161 | |       visionDescribeEnabled: z.boolean(),
+ 162 | |       visionApiKeyEnv: z.string().role('credential-ref'),
+ 163 | |       visionBaseUrl: z.string(),
+ 164 | |       carbonEnabled: z.boolean(),
+ 165 | |       carbonWriteEnabled: z.boolean(),
+ 166 | |       assetsEnabled: z.boolean(),
+ 167 | |       assetsSeedPath: z.string(),
+ 168 | |       lakehouseOverviewPath: z.string(),
+ 169 | |       connectorsEnabled: z.boolean(),
+ 170 | |       kgEnabled: z.boolean(),
+ 171 | |       kgTenant: z.string(),
+ 172 | |       viewActionTimeoutMs: z.number().step(1).min(1000),
+ 173 | |       // The dict row widens differently from Config's optional readonly map
+ 174 | |       // under exactOptionalPropertyTypes; the parse contract is the object row.
+ 175 | `->   }) as unknown as z<Config>
+ 176 |
+     `----
+
+  x typescript(no-unnecessary-type-conversion): This type conversion does not change the type or value of the expression.
+     ,-[packages/kb/ontology-induction/src/jsonld.ts:239:66]
+ 238 |       const datatypeEntry = datatypeIri !== null && typeof datatypeIri === 'object' && '@id' in datatypeIri
+ 239 |         ? Object.entries(DATATYPE_IRI).find(([, iri]) => iri === String((datatypeIri as { '@id': string })['@id']))
+     :                                                                  ^^^^^^ ^^^^^^^^^^^^^^^^^^^^|^^^^^^^^^^^^^^^^^^^^
+     :                                                                     |                       `-- This expression already has type 'string'.
+ 240 |         : undefined
+     `----
+
+  x typescript(no-unnecessary-type-conversion): This type conversion does not change the type or value of the expression.
+     ,-[packages/kb/ontology-induction/src/jsonld.ts:255:26]
+ 254 |             if (path !== null && typeof path === 'object' && '@id' in path) {
+ 255 |               order.push(String((path as { '@id': string })['@id']))
+     :                          ^^^^^^ ^^^^^^^^^^^^^^^^^|^^^^^^^^^^^^^^^^
+     :                             |                    `-- This expression already has type 'string'.
+ 256 |             }
+     `----
+
+  x typescript(no-unnecessary-type-conversion): This type conversion does not change the type or value of the expression.
+     ,-[packages/kb/ontology-induction/src/jsonld.ts:259:30]
+ 258 |         }
+ 259 |         propOrderOfClass.set(String((target as { '@id': string })['@id']), order)
+     :                              ^^^^^^ ^^^^^^^^^^^^^^^^^^|^^^^^^^^^^^^^^^^^
+     :                                 |                     `-- This expression already has type 'string'.
+ 260 |       }
+     `----
+
+  x typescript(no-unnecessary-type-conversion): This type conversion does not change the type or value of the expression.
+     ,-[packages/kb/ontology-induction/src/jsonld.ts:286:34]
+ 285 |         ...(subClassOf !== null && typeof subClassOf === 'object' && '@id' in subClassOf
+ 286 |           ? { extends: localName(String((subClassOf as { '@id': string })['@id'])).replace(/^Class_/, '') }
+     :                                  ^^^^^^ ^^^^^^^^^^^^^^^^^^^^|^^^^^^^^^^^^^^^^^^^
+     :                                     |                       `-- This expression already has type 'string'.
+ 287 |           : {}),
+     `----
+
+  x typescript(no-unnecessary-template-expression): Template literal expression is unnecessary and can be simplified.
+     ,-[packages/kb/ontology-induction/src/jsonld.ts:288:30]
+ 287 |           : {}),
+ 288 |         props: propsOfClass(`${classIri(name, id)}`),
+     :                              ^^^^^^^^^^^^^^^^^^^^^
+ 289 |         ...(typeof node['https://dsh.local/terms/naturalKey'] === 'string'
+     `----
+
+  x typescript(no-unnecessary-type-conversion): This type conversion does not change the type or value of the expression.
+     ,-[packages/kb/ontology-induction/src/jsonld.ts:313:29]
+ 312 |         constraints.push({
+ 313 |           domain: localName(String((firstDomain as { '@id': string })['@id'])).replace(/^Class_/, ''),
+     :                             ^^^^^^ ^^^^^^^^^^^^^^^^^^^^|^^^^^^^^^^^^^^^^^^^^
+     :                                |                       `-- This expression already has type 'string'.
+ 314 |           range: localName(String((firstRange as { '@id': string })['@id'])).replace(/^Class_/, ''),
+     `----
+
+  x typescript(no-unnecessary-type-conversion): This type conversion does not change the type or value of the expression.
+     ,-[packages/kb/ontology-induction/src/jsonld.ts:314:28]
+ 313 |           domain: localName(String((firstDomain as { '@id': string })['@id'])).replace(/^Class_/, ''),
+ 314 |           range: localName(String((firstRange as { '@id': string })['@id'])).replace(/^Class_/, ''),
+     :                            ^^^^^^ ^^^^^^^^^^^^^^^^^^^^|^^^^^^^^^^^^^^^^^^^
+     :                               |                       `-- This expression already has type 'string'.
+ 315 |         })
+     `----
+
+  x typescript(no-unnecessary-condition): Unnecessary optional chain on a non-nullish value.
+     ,-[packages/graph/tool-graph/src/graph-query.ts:147:19]
+ 146 | export function presentGraphQueryCall(args: GraphQueryArgs): GenericCallView {
+ 147 |   const cypher = (args.cypher ?? '').trim()
+     :                   ^^^^^|^^^^^^
+     :                        `-- Type: string
+ 148 |   return { card: 'generic', title: cypher.length > 0 ? queryTitle(cypher) : 'kg_graph_query', kind: 'search', rawInput: cypher }
+     `----
+
+  x typescript(no-unnecessary-condition): Unnecessary optional chain on a non-nullish value.
+     ,-[packages/graph/tool-graph/src/graph-query.ts:161:19]
+ 160 |   if (meta === undefined) return undefined
+ 161 |   const cypher = (args.cypher ?? '').trim()
+     :                   ^^^^^|^^^^^^
+     :                        `-- Type: string
+ 162 |   return {
+     `----
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since it does not change the type of the expression.
+     ,-[packages/graph/tool-graph/src/ontology.ts:189:83]
+ 188 |       },
+ 189 |       render: (_args, value) => [{ type: 'text', text: formatOntologyOutput(value as OntologyToolValue) }],
+     :                                                                             ^^|^^ ^^^^^^^^^^|^^^^^^^^^^
+     :                                                                               |             `-- Casting it to 'OntologyToolValue' is unnecessary
+     :                                                                               `-- This expression already has the type '{ head?: { class_count: number; classes: string[]; relation_count: number; relations: string[]; }; versions: { created_at: string; id: string; name: string; prev?: string; source: string; version: number; }[]; }'
+ 190 |       presentationMeta: (_args, value) => {
+     `----
+
+  x typescript(no-unnecessary-type-assertion): This assertion is unnecessary since it does not change the type of the expression.
+     ,-[packages/graph/tool-graph/src/ontology.ts:191:33]
+ 190 |       presentationMeta: (_args, value) => {
+ 191 |         const projected = value as OntologyToolValue
+     :                           ^^|^^ ^^^^^^^^^^|^^^^^^^^^^
+     :                             |             `-- Casting it to 'OntologyToolValue' is unnecessary
+     :                             `-- This expression already has the type '{ head?: { class_count: number; classes: string[]; relation_count: number; relations: string[]; }; versions: { created_at: string; id: string; name: string; prev?: string; source: string; version: number; }[]; }'
+ 192 |         return { versions: projected.versions.length }
+     `----
+
+  x typescript(no-confusing-void-expression): Returning a void expression from an arrow function shorthand is forbidden.
+     ,-[packages/client/ui-kg/src/client/KgObsidianCanvas.tsx:108:18]
+ 107 |     setSize({ width: element.clientWidth, height: element.clientHeight })
+ 108 |     return () => observer.disconnect()
+     :                  ^^^^^^^^^^^^^^^^^^^^^
+ 109 |     // eslint-disable-next-line react-hooks/exhaustive-deps -- load once per mount; calls are stable entry bindings
+     `----
+  help: Add braces to the arrow function.
+
+  x typescript(no-confusing-void-expression): Returning a void expression from an arrow function shorthand is forbidden.
+     ,-[packages/client/ui-kg/src/client/KgObsidianCanvas.tsx:255:19]
+ 254 |                 nodeCanvasObject: (node: KgObsidianNode, ctx: CanvasRenderingContext2D, globalScale: number) =>
+ 255 |                   drawNode(node, ctx, globalScale, hoveredNeighbors?.has(node.id) ?? false, view.mode === 'local' && view.seed.id === node.id),
+     :                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 256 |               })}
+     `----
+  help: Add braces to the arrow function.
+
+  x typescript(no-unnecessary-type-arguments): This is the default value for this type parameter, so it can be omitted.
+     ,-[packages/connector/connector-carbon/src/index.ts:135:52]
+ 134 |     const meta = requireTable(table)
+ 135 |     const result = await this.requireClient().list<Record<string, unknown>>(table, {
+     :                                                    ^^^^^^^^^^^^^^^^^^^^^^^
+ 136 |       ...options,
+     `----
+
+  x typescript(no-unnecessary-type-arguments): This is the default value for this type parameter, so it can be omitted.
+     ,-[packages/connector/connector-carbon/src/index.ts:152:57]
+ 151 |     const client = this.requireClient()
+ 152 |     if (meta.idColumn === 'id') return await client.get<Record<string, unknown>>(table, id, signal)
+     :                                                         ^^^^^^^^^^^^^^^^^^^^^^^
+ 153 |     const result = await client.list<Record<string, unknown>>(table, { filter: [{ field: meta.idColumn, op: 'eq', value: id }], limit: 1 }, signal)
+     `----
+
+  x typescript(no-unnecessary-type-arguments): This is the default value for this type parameter, so it can be omitted.
+     ,-[packages/connector/connector-carbon/src/index.ts:153:38]
+ 152 |     if (meta.idColumn === 'id') return await client.get<Record<string, unknown>>(table, id, signal)
+ 153 |     const result = await client.list<Record<string, unknown>>(table, { filter: [{ field: meta.idColumn, op: 'eq', value: id }], limit: 1 }, signal)
+     :                                      ^^^^^^^^^^^^^^^^^^^^^^^
+ 154 |     return result.rows[0]
+     `----
+
+  x typescript(no-unnecessary-type-arguments): This is the default value for this type parameter, so it can be omitted.
+     ,-[packages/connector/connector-carbon/src/index.ts:170:46]
+ 169 |     }
+ 170 |     return await this.requireClient().create<Record<string, unknown>>(table, values, signal)
+     :                                              ^^^^^^^^^^^^^^^^^^^^^^^
+ 171 |   }
+     `----
+
+  x typescript(no-unnecessary-type-arguments): This is the default value for this type parameter, so it can be omitted.
+     ,-[packages/connector/connector-carbon/src/index.ts:185:46]
+ 184 |     }
+ 185 |     return await this.requireClient().update<Record<string, unknown>>(table, id, values, signal)
+     :                                              ^^^^^^^^^^^^^^^^^^^^^^^
+ 186 |   }
+     `----
+
+  x typescript(no-unsafe-assignment): Unsafe assignment of an error typed value.
+    ,-[apps/web/tests/mobile-assistant-toolcard.e2e.ts:24:7]
+ 23 |
+ 24 | const OVERLAY = fileURLToPath(new URL('./mobile.overlay.yml', import.meta.url))
+    :       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 25 | const GOLDEN_DIR = fileURLToPath(new URL('./snapshots/mobile-assistant-toolcard', import.meta.url))
+    `----
+
+  x typescript(no-unsafe-call): Unsafe call of a(n) `error` type typed value.
+    ,-[apps/web/tests/mobile-assistant-toolcard.e2e.ts:24:17]
+ 23 |
+ 24 | const OVERLAY = fileURLToPath(new URL('./mobile.overlay.yml', import.meta.url))
+    :                 ^^^^^^^^^^^^^
+ 25 | const GOLDEN_DIR = fileURLToPath(new URL('./snapshots/mobile-assistant-toolcard', import.meta.url))
+    `----
+
+  x typescript(no-unsafe-assignment): Unsafe assignment of an error typed value.
+    ,-[apps/web/tests/mobile-assistant-toolcard.e2e.ts:25:7]
+ 24 | const OVERLAY = fileURLToPath(new URL('./mobile.overlay.yml', import.meta.url))
+ 25 | const GOLDEN_DIR = fileURLToPath(new URL('./snapshots/mobile-assistant-toolcard', import.meta.url))
+    :       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 26 | const SEED_PATH = fileURLToPath(new URL('./snapshots/mobile-assistant-toolcard/session.jsonl', import.meta.url))
+    `----
+
+  x typescript(no-unsafe-call): Unsafe call of a(n) `error` type typed value.
+    ,-[apps/web/tests/mobile-assistant-toolcard.e2e.ts:25:20]
+ 24 | const OVERLAY = fileURLToPath(new URL('./mobile.overlay.yml', import.meta.url))
+ 25 | const GOLDEN_DIR = fileURLToPath(new URL('./snapshots/mobile-assistant-toolcard', import.meta.url))
+    :                    ^^^^^^^^^^^^^
+ 26 | const SEED_PATH = fileURLToPath(new URL('./snapshots/mobile-assistant-toolcard/session.jsonl', import.meta.url))
+    `----
+
+  x typescript(no-unsafe-assignment): Unsafe assignment of an error typed value.
+    ,-[apps/web/tests/mobile-assistant-toolcard.e2e.ts:26:7]
+ 25 | const GOLDEN_DIR = fileURLToPath(new URL('./snapshots/mobile-assistant-toolcard', import.meta.url))
+ 26 | const SEED_PATH = fileURLToPath(new URL('./snapshots/mobile-assistant-toolcard/session.jsonl', import.meta.url))
+    :       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 27 | const SEED_ID = 'mobile-assistant-toolcard-seed'
+    `----
+
+  x typescript(no-unsafe-call): Unsafe call of a(n) `error` type typed value.
+    ,-[apps/web/tests/mobile-assistant-toolcard.e2e.ts:26:19]
+ 25 | const GOLDEN_DIR = fileURLToPath(new URL('./snapshots/mobile-assistant-toolcard', import.meta.url))
+ 26 | const SEED_PATH = fileURLToPath(new URL('./snapshots/mobile-assistant-toolcard/session.jsonl', import.meta.url))
+    :                   ^^^^^^^^^^^^^
+ 27 | const SEED_ID = 'mobile-assistant-toolcard-seed'
+    `----
+
+  x typescript(no-unsafe-assignment): Unsafe assignment of an error typed value.
+    ,-[apps/web/tests/mobile-assistant-toolcard.e2e.ts:28:7]
+ 27 | const SEED_ID = 'mobile-assistant-toolcard-seed'
+ 28 | const W22R2_SEED_PATH = fileURLToPath(new URL('./snapshots/mobile-assistant-toolcard-w22r2/session.jsonl', import.meta.url))
+    :       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 29 | const W22R2_SEED_ID = 'mobile-assistant-toolcard-w22r2-seed'
+    `----
+
+  x typescript(no-unsafe-call): Unsafe call of a(n) `error` type typed value.
+    ,-[apps/web/tests/mobile-assistant-toolcard.e2e.ts:28:25]
+ 27 | const SEED_ID = 'mobile-assistant-toolcard-seed'
+ 28 | const W22R2_SEED_PATH = fileURLToPath(new URL('./snapshots/mobile-assistant-toolcard-w22r2/session.jsonl', import.meta.url))
+    :                         ^^^^^^^^^^^^^
+ 29 | const W22R2_SEED_ID = 'mobile-assistant-toolcard-w22r2-seed'
+    `----
+
+  x typescript(no-unsafe-assignment): Unsafe assignment of an error typed value.
+    ,-[apps/web/tests/mobile-assistant-toolcard.e2e.ts:38:42]
+ 37 |   beforeAll(async () => {
+ 38 |     scaffold = await launchWebScaffold({ extraOverlayPath: OVERLAY })
+    :                                          ^^^^^^^^^^^^^^^^^^^^^^^^^
+ 39 |     await seedSession(scaffold, await readFile(SEED_PATH, 'utf8'), SEED_ID)
+    `----
+
+  x typescript(no-unsafe-argument): Unsafe argument of type error typed assigned to a parameter of type string.
+    ,-[apps/web/tests/mobile-assistant-toolcard.e2e.ts:39:33]
+ 38 |     scaffold = await launchWebScaffold({ extraOverlayPath: OVERLAY })
+ 39 |     await seedSession(scaffold, await readFile(SEED_PATH, 'utf8'), SEED_ID)
+    :                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 40 |     await seedSession(scaffold, await readFile(W22R2_SEED_PATH, 'utf8'), W22R2_SEED_ID)
+    `----
+
+  x typescript(no-unsafe-call): Unsafe call of a(n) `error` type typed value.
+    ,-[apps/web/tests/mobile-assistant-toolcard.e2e.ts:39:39]
+ 38 |     scaffold = await launchWebScaffold({ extraOverlayPath: OVERLAY })
+ 39 |     await seedSession(scaffold, await readFile(SEED_PATH, 'utf8'), SEED_ID)
+    :                                       ^^^^^^^^
+ 40 |     await seedSession(scaffold, await readFile(W22R2_SEED_PATH, 'utf8'), W22R2_SEED_ID)
+    `----
+
+  x typescript(no-unsafe-argument): Unsafe argument of type error typed assigned to a parameter of type string.
+    ,-[apps/web/tests/mobile-assistant-toolcard.e2e.ts:40:33]
+ 39 |     await seedSession(scaffold, await readFile(SEED_PATH, 'utf8'), SEED_ID)
+ 40 |     await seedSession(scaffold, await readFile(W22R2_SEED_PATH, 'utf8'), W22R2_SEED_ID)
+    :                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 41 |     browser = await chromium.launch()
+    `----
+
+  x typescript(no-unsafe-call): Unsafe call of a(n) `error` type typed value.
+    ,-[apps/web/tests/mobile-assistant-toolcard.e2e.ts:40:39]
+ 39 |     await seedSession(scaffold, await readFile(SEED_PATH, 'utf8'), SEED_ID)
+ 40 |     await seedSession(scaffold, await readFile(W22R2_SEED_PATH, 'utf8'), W22R2_SEED_ID)
+    :                                       ^^^^^^^^
+ 41 |     browser = await chromium.launch()
+    `----
+
+  x typescript(no-unsafe-argument): Unsafe argument of type error typed assigned to a parameter of type string.
+     ,-[apps/web/tests/mobile-assistant-toolcard.e2e.ts:147:34]
+ 146 |     const normalized = aria.replaceAll(SEED_ID, '{{sessionId}}')
+ 147 |     await compareOrRefreshGolden(join(GOLDEN_DIR, 'chat.expected.md'), normalized, mode)
+     :                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 148 |   })
+     `----
+
+  x typescript(no-unsafe-call): Unsafe call of a(n) `error` type typed value.
+     ,-[apps/web/tests/mobile-assistant-toolcard.e2e.ts:147:34]
+ 146 |     const normalized = aria.replaceAll(SEED_ID, '{{sessionId}}')
+ 147 |     await compareOrRefreshGolden(join(GOLDEN_DIR, 'chat.expected.md'), normalized, mode)
+     :                                  ^^^^
+ 148 |   })
+     `----
+
+  ! Unused eslint-disable directive (no problems were reported).
+     ,-[packages/client/ui-kg/src/client/KgObsidianCanvas.tsx:109:5]
+ 108 |     return () => observer.disconnect()
+ 109 |     // eslint-disable-next-line react-hooks/exhaustive-deps -- load once per mount; calls are stable entry bindings
+     :     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 110 |   }, [])
+     `----
+
+Found 1 warning and 190 errors.
+Finished in 93.2s on 3239 files with 89 rules using 12 threads.

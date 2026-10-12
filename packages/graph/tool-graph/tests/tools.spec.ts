@@ -4,7 +4,7 @@ import { formatOntologyOutput, ontologyValueFromVersions } from '../src/ontology
 
 describe('parseGraphQueryArgs', () => {
   it('rejects blank Cypher and defaults params', () => {
-    expect(() => parseGraphQueryArgs({ cypher: '   ' })).toThrowError('non-empty string')
+    expect(() => { parseGraphQueryArgs({ cypher: '   ' }) }).toThrow('non-empty string')
     expect(parseGraphQueryArgs({ cypher: ' MATCH (n) RETURN n ' })).toEqual({ cypher: 'MATCH (n) RETURN n' })
   })
 })

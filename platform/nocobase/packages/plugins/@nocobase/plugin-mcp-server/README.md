@@ -1,1 +1,0 @@
-# @nocobase/plugin-mcp-server

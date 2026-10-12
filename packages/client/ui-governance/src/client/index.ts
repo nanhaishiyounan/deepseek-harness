@@ -111,7 +111,7 @@ export function apply(ctx: ClientContext): void {
         count: row.count,
         detail: row.detail,
       })))
-    }).catch((error: unknown) => store.failAssets(messageOf(error)))
+    }).catch((error: unknown) => { store.failAssets(messageOf(error)) })
   }
 
   /** Load or reload the lineage edges. */
@@ -123,7 +123,7 @@ export function apply(ctx: ClientContext): void {
       store.setEdges(value.edges.map(row => ({
         source: row.source, target: row.target, transform: row.transform, recordedAt: row.recorded_at,
       })))
-    }).catch((error: unknown) => store.failEdges(messageOf(error)))
+    }).catch((error: unknown) => { store.failEdges(messageOf(error)) })
   }
 
   /** Load or reload the quality rules. */
@@ -136,7 +136,7 @@ export function apply(ctx: ClientContext): void {
         id: row.id, name: row.name, kind: row.kind, table: row.table,
         column: row.column, threshold: row.threshold, sql: row.sql, enabled: row.enabled,
       })))
-    }).catch((error: unknown) => store.failRules(messageOf(error)))
+    }).catch((error: unknown) => { store.failRules(messageOf(error)) })
   }
 
   /** Load or reload the alert events. */
@@ -148,7 +148,7 @@ export function apply(ctx: ClientContext): void {
       store.setEvents(value.events.map(row => ({
         id: row.id, at: row.at, kind: row.kind, level: row.level, title: row.title, detail: row.detail,
       })))
-    }).catch((error: unknown) => store.failEvents(messageOf(error)))
+    }).catch((error: unknown) => { store.failEvents(messageOf(error)) })
   }
 
   /** Run the quality evaluation; failures land in the panel, events reload. */
@@ -164,12 +164,12 @@ export function apply(ctx: ClientContext): void {
         ruleId: row.rule.id, ruleName: row.rule.name, status: row.status, measured: row.measured, error: row.error,
       })), value.evaluated_at)
       refreshEvents()
-    }).catch((error: unknown) => store.failEvaluate(messageOf(error)))
+    }).catch((error: unknown) => { store.failEvaluate(messageOf(error)) })
   }
 
   /** Fire the webhook test event, then reload the events list. */
   const testWebhook = (): void => {
-    void api.governance.webhookTest({}).then(() => refreshEvents()).catch(() => refreshEvents())
+    void api.governance.webhookTest({}).then(() => { refreshEvents() }).catch(() => { refreshEvents() })
   }
 
   /** Update the catalog search query (the view's input box). */

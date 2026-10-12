@@ -2,7 +2,9 @@
 
 Status: implemented
 
-日期：2026-10-10 ｜ 批次：W24-B2（湖仓，五源①） ｜ 证据目录：[research/2026-10-09-w24-rebuild/b2-lakehouse/](../../../../../research/2026-10-09-w24-rebuild/b2-lakehouse/README.md)
+English | [中文](2026-10-10-w24-b2-lakehouse-duckdb-ducklake.zh.md)
+
+日期：2026-10-10 ｜ 批次：W24-B2（湖仓，五源①） ｜ 证据目录：[research/2026-10-09-w24-rebuild/b2-lakehouse/](../../../../research/2026-10-09-w24-rebuild/b2-lakehouse/README.md)
 
 ## Problem
 

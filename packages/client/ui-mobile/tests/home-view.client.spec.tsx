@@ -126,23 +126,20 @@ describe('HomeView', () => {
   it('runs the quick-task chips: the preset direct and the route chips', async () => {
     stubGateway(emptyRoutes)
     render(<HomeView identityName="业务员" />)
-    // W8-B2: the set folded 7→4 — the register direct (the one primary) plus
-    // one route chip per ledger/alert/doc surface; the Tab/directory
-    // duplicates (查看工作 / 找 AI 同事 / 问经营) left the set.
+    // Post-NocoBase: the register direct (the one primary) plus the two Tab
+    // shortcuts; the retired ledger/alert/doc chips left the set.
     fireEvent.click(screen.getByRole('button', { name: '登记一条单据' }))
     await waitFor(() => { expect(location.hash).toBe('#/chat/new:mobile-form-assistant') })
     location.hash = ''
-    fireEvent.click(screen.getByRole('button', { name: '我的待办' }))
-    expect(location.hash).toBe('#/todos')
+    fireEvent.click(screen.getByRole('button', { name: '看工作台' }))
+    expect(location.hash).toBe('#/work')
     location.hash = ''
-    fireEvent.click(screen.getByRole('button', { name: '我的预警' }))
-    expect(location.hash).toBe('#/alerts')
-    location.hash = ''
-    fireEvent.click(screen.getByRole('button', { name: '看单据' }))
-    expect(location.hash).toBe('#/docs')
+    fireEvent.click(screen.getByRole('button', { name: '找 AI 同事' }))
+    expect(location.hash).toBe('#/agents')
     expect(screen.queryByRole('button', { name: '问经营' })).toBeNull()
-    expect(screen.queryByRole('button', { name: '查看工作' })).toBeNull()
-    expect(screen.queryByRole('button', { name: '找 AI 同事' })).toBeNull()
+    expect(screen.queryByRole('button', { name: '我的待办' })).toBeNull()
+    expect(screen.queryByRole('button', { name: '我的预警' })).toBeNull()
+    expect(screen.queryByRole('button', { name: '看单据' })).toBeNull()
   })
 
   it('starts a chat from a colleague card and routes to the whole roster', async () => {

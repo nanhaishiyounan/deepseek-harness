@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-client-ui-nav",
   "description": "Doubao-style main navigation column: occupies the layout's nav column, declares the sidebar.nav menu seat every function page contributes its row into, and carries the chat menu item plus the nav activation channel over view-context",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "publishConfig": {
     "access": "public"
   },

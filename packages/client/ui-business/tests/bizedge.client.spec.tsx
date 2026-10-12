@@ -155,10 +155,10 @@ describe('apply-side loadMore guards', () => {
   })
 
   it('lands a failed page load in the rows error state (the catch arm)', async () => {
-    const { ctx, revoke, viewFace } = await bench(async () => ({ result: { ok: false, error: { message: 'nocobase-request-failed' } } }))
+    const { ctx, revoke, viewFace } = await bench(async () => ({ result: { ok: false, error: { message: 'carbon-request-failed' } } }))
     ;(viewFace.loadRows as (collection: string) => void)('orders')
     const store = (viewFace.hooks as { business: { getSnapshot(): { rows?: { status: string; error?: string } } } }).business
-    await vi.waitFor(() => { expect(store.getSnapshot().rows).toEqual({ status: 'error', error: 'nocobase-request-failed' }) })
+    await vi.waitFor(() => { expect(store.getSnapshot().rows).toEqual({ status: 'error', error: 'carbon-request-failed' }) })
     revoke()
     void ctx.fiber.dispose()
   })

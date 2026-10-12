@@ -24,7 +24,7 @@ Status: implemented
 
 - `packages/connector/connector-nocobase/src/filter.ts` 的 `NbFilterOp` + `OPERATOR_KEYS`（词汇表源头）；
 - `packages/connector/tool-nocobase/src/read.ts` 的 `nb_list` schema enum、工具 description、filter description 与 system-prompt 段，均写明「for fuzzy matching use includes (substring match), never like」；
-- `packages/host/apiproxy/src/api/nocobase.ts` 与 `nocobase.schema.ts` 的 wire view 类型与 zod enum，RPC 域接受它所编译的同一词汇表。
+- `nocobase.ts`（nocobase API 源文件，B7 退役删除） 与 `nocobase.schema.ts` 的 wire view 类型与 zod enum，RPC 域接受它所编译的同一词汇表。
 
 ### kg_query 的 miss 消息列全支持句式
 

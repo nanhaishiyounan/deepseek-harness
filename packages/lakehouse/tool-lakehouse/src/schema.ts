@@ -63,6 +63,7 @@ function cellText(value: null | boolean | number | string): string {
  * @param input - the validated schema input.
  * @param columns - the engine's column description.
  * @param sample - the engine's sample-row read.
+ * @param rowCount - the row count reported alongside the sample.
  * @returns the canonical tool value.
  */
 export function schemaValueFromParts(

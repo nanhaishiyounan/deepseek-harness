@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write docs/subsystems/lakehouse.md
-lakehouse.md: b886ccac841aa9dbb515aaadb3a26d3c3619ac3c
-lakehouse.zh.md: 79cf5d3f8bc5c015e8d134c0066db7e0203cc5d7
+lakehouse.md: 1e0acbc72c4d19a495ba91848738bdb52dc26f6c
+lakehouse.zh.md: 640ec655bea601b97b53246b5c65cb423625db2f

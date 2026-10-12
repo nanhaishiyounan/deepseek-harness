@@ -144,7 +144,7 @@ function queryTitle(cypher: string): string {
  * @returns the generic card view.
  */
 export function presentGraphQueryCall(args: GraphQueryArgs): GenericCallView {
-  const cypher = (args.cypher ?? '').trim()
+  const cypher = args.cypher.trim()
   return { card: 'generic', title: cypher.length > 0 ? queryTitle(cypher) : 'kg_graph_query', kind: 'search', rawInput: cypher }
 }
 
@@ -158,7 +158,7 @@ export function presentGraphQueryResult(args: GraphQueryArgs, result: ToolResult
   if (result.isError) return undefined
   const meta = graphQueryMetaFromResult(result.meta)
   if (meta === undefined) return undefined
-  const cypher = (args.cypher ?? '').trim()
+  const cypher = args.cypher.trim()
   return {
     card: 'generic',
     title: cypher.length > 0 ? queryTitle(cypher) : 'kg_graph_query',

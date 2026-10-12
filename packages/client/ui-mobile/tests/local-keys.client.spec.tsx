@@ -59,7 +59,7 @@ describe('sweepSessionKeys (the shared prefix source)', () => {
   })
 })
 
-describe('the App logout path', () => {
+describe('the App local-reset path', () => {
   /** The gateway stub the shell needs to mount. */
   function stubShellGateway(): void {
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
@@ -72,17 +72,15 @@ describe('the App logout path', () => {
           ? { items: [] }
           : method === 'session.history'
             ? { events: [] }
-            : method === 'nocobase.listMeta'
-              ? { collections: [] }
-              : {}
+            : {}
       return new Response(JSON.stringify({ rpcId: body.rpcId, result: { ok: true, value } }), { status: 200 })
     })
     vi.stubGlobal('fetch', fetchMock)
   }
 
-  it('drops the seeded session keys on logout and keeps the unrelated ones', async () => {
+  it('drops the seeded session keys on reset and keeps the unrelated ones', async () => {
     stubShellGateway()
-    localStorage.setItem('dsh-mobile-auth', JSON.stringify({ username: 'buyer', nickname: '采购员·蔡俊', token: 'tok-v', loggedAt: 1 }))
+    localStorage.setItem('dsh-mobile-auth', JSON.stringify({ username: 'buyer', nickname: '采购员·蔡俊', loggedAt: 1 }))
     localStorage.setItem('dsh-mobile-draft-s9-1', '{}')
     localStorage.setItem('dsh-mobile-attachments-s9', '{}')
     localStorage.setItem('dsh-mobile-theme', 'dark')
@@ -90,12 +88,12 @@ describe('the App logout path', () => {
     expect(screen.getAllByText(/今日台账|待处理/).length).toBeGreaterThan(0)
     location.hash = '#/me'
     fireEvent(window, new HashChangeEvent('hashchange'))
-    await waitFor(() => screen.getByRole('button', { name: /退出登录/ }))
-    fireEvent.click(screen.getByRole('button', { name: /退出登录/ }))
-    // Logout confirms first; the dialog's destructive button performs it.
-    await waitFor(() => screen.getByRole('button', { name: '退出' }))
+    await waitFor(() => screen.getByRole('button', { name: /重置本地数据/ }))
+    fireEvent.click(screen.getByRole('button', { name: /重置本地数据/ }))
+    // The reset confirms first; the dialog's destructive button performs it.
+    await waitFor(() => screen.getByRole('button', { name: '重置' }))
     const info = vi.spyOn(console, 'info').mockImplementation(() => {})
-    fireEvent.click(screen.getByRole('button', { name: '退出' }))
+    fireEvent.click(screen.getByRole('button', { name: '重置' }))
     await waitFor(() => {
       expect(localStorage.getItem('dsh-mobile-draft-s9-1')).toBeNull()
       expect(localStorage.getItem('dsh-mobile-attachments-s9')).toBeNull()
@@ -111,6 +109,6 @@ describe('the App logout path', () => {
     expect(trace.keys).toContain('dsh-mobile-attachments-s9')
     expect(localStorage.getItem('dsh-mobile-auth')).toBeNull()
     expect(localStorage.getItem('dsh-mobile-theme')).toBe('dark')
-    await waitFor(() => { expect(screen.getByText('食链通 · AI 员工')).toBeTruthy() })
+    await waitFor(() => { expect(screen.getByText('移动访客')).toBeTruthy() })
   })
 })

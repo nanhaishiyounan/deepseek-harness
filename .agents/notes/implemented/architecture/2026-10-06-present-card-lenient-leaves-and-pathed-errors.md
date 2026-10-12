@@ -36,4 +36,4 @@ Two mechanical traps are part of the record:
 ## Verification
 
 - `pnpm vitest run packages/interaction/tool-present-card` (46 tests: coerced/valid/invalid/payload-string/Chinese-pathed diagnostics), `pnpm vitest run packages/client/ui-mobile` (809 tests incl. the mirror cases), `pnpm run test:web -- mobile-assistant-toolcard` (4/4: golden extended with the numeric-leaf approval and stringified plan cards — new entries only).
-- Live re-verification matrix under [demos/acceptance-w21/](../../../../demos/acceptance-w21/) (`w21-r1-*` evidence).
+- Live re-verification matrix under `demos/acceptance-w21/` (`w21-r1-*` evidence).

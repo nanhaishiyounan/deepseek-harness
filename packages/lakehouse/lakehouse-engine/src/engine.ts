@@ -32,6 +32,7 @@ export type LakehouseEngineErrorCode =
 
 /** Structured engine error. */
 export class LakehouseEngineError extends Error {
+  /** The structured error code carried to structured rejections. */
   readonly code: LakehouseEngineErrorCode
 
   /**
@@ -126,7 +127,7 @@ function normalizeCell(value: unknown): null | boolean | number | string {
   }
   if (value instanceof Date) return value.toISOString()
   if (typeof value === 'boolean' || typeof value === 'number' || typeof value === 'string') return value
-  return String(value)
+  return JSON.stringify(value)
 }
 
 function throwIfAborted(signal: AbortSignal | undefined): void {
@@ -167,12 +168,18 @@ export class LakehouseEngineService extends Service {
     this.importDuckDb = deps.importDuckDb ?? (async () => await import('@duckdb/node-api'))
   }
 
-  /** True when the DuckDB instance is live and the catalog is attached. */
+  /**
+   * True when the DuckDB instance is live and the catalog is attached.
+   * @returns the liveness check over the instance handle and disposal flag.
+   */
   available(): boolean {
     return this.instance !== undefined && !this.disposed
   }
 
-  /** The recorded native-module or open failure, for diagnostics. */
+  /**
+   * The recorded native-module or open failure, for diagnostics.
+   * @returns the failure message, or undefined when open succeeded or never ran.
+   */
   openFailure(): string | undefined {
     return this.loadFailure
   }
@@ -292,6 +299,7 @@ export class LakehouseEngineService extends Service {
    * List every lakehouse table with its live row count, ordered by schema
    * then table. System schemas stay hidden.
    * @param signal - cancellation signal.
+   * @returns one summary per visible table with its live row count.
    */
   async listTables(signal?: AbortSignal): Promise<readonly LakehouseTableSummary[]> {
     throwIfAborted(signal)
@@ -324,6 +332,7 @@ export class LakehouseEngineService extends Service {
    * @param schema - the table's schema inside the lakehouse catalog.
    * @param table - the table name.
    * @param signal - cancellation signal.
+   * @returns the ordered column descriptors.
    */
   async describeTable(schema: string, table: string, signal?: AbortSignal): Promise<readonly LakehouseColumnDesc[]> {
     assertIdentifier(schema)
@@ -349,6 +358,7 @@ export class LakehouseEngineService extends Service {
    * @param table - the table name.
    * @param limit - the sample size, cut to the configured row cap.
    * @param signal - cancellation signal.
+   * @returns the sample rows as one query outcome.
    */
   async sampleRows(schema: string, table: string, limit: number, signal?: AbortSignal): Promise<LakehouseQueryOutcome> {
     assertIdentifier(schema)
@@ -439,7 +449,11 @@ export class LakehouseEngineService extends Service {
     }
   }
 
-  /** Drop one attached source alias; a missing alias is a no-op. */
+  /**
+   * Drop one attached source alias; a missing alias is a no-op.
+   * @param alias - the attached source alias.
+   * @param signal - caller cancellation.
+   */
   async detach(alias: string, signal?: AbortSignal): Promise<void> {
     assertIdentifier(alias)
     throwIfAborted(signal)
@@ -718,7 +732,7 @@ export class LakehouseEngineService extends Service {
       : sql
     const reader = await this.withTimeout(connection, async () => await connection.runAndReadAll(wrapped), timeoutMs)
     const columns = reader.columnNames().map((name, index) => ({ name, sqlType: String(reader.columnType(index)) }))
-    const rows = reader.getRowsJS().map(row => row.map(normalizeCell) as (null | boolean | number | string)[])
+    const rows = reader.getRowsJS().map(row => row.map(normalizeCell))
     return { columns, rows }
   }
 

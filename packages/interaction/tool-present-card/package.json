@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-tool-present-card",
   "description": "Model-facing present_card tool: deterministic structured cards for mobile over tool calls",
-  "version": "0.1.1-rc.2",
+  "version": "1.0.0",
   "publishConfig": {
     "access": "public"
   },

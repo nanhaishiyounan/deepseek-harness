@@ -64,16 +64,6 @@ import {
 import { llmDiscoverModelsValueSchema, llmModelsValueSchema, llmProvidersValueSchema } from '../api/llm.schema.ts'
 import { kbIngestValueSchema, kbSearchValueSchema, kbStatsValueSchema, kbUploadValueSchema } from '../api/kb.schema.ts'
 import {
-  nocobaseAlertActValueSchema,
-  nocobaseGetValueSchema,
-  nocobaseListMetaValueSchema,
-  nocobaseListValueSchema,
-  nocobaseMobileWorkDeleteValueSchema,
-  nocobaseMobileWorkSaveValueSchema,
-  nocobaseSignInValueSchema,
-  nocobaseUpdateValueSchema,
-} from '../api/nocobase.schema.ts'
-import {
   carbonCreateValueSchema,
   carbonGetValueSchema,
   carbonListMetaValueSchema,
@@ -81,7 +71,6 @@ import {
   carbonUpdateValueSchema,
 } from '../api/carbon.schema.ts'
 import { dataDescribeImageValueSchema, dataExtractTextValueSchema, dataUploadValueSchema } from '../api/data.schema.ts'
-import { orderValueSchema, ordersListValueSchema } from '../api/orders.schema.ts'
 import { assetDetailValueSchema, assetsListValueSchema, assetsStatsValueSchema } from '../api/assets.schema.ts'
 import {
   lakehouseOverviewValueSchema, lakehouseTablesValueSchema, lakehouseQueryValueSchema, lakehouseSchemaValueSchema,
@@ -95,7 +84,7 @@ import {
   connectorsConnectionsValueSchema, connectorsListValueSchema, connectorsTransfersValueSchema,
 } from '../api/connectors.schema.ts'
 import {
-  kgCommunitiesValueSchema, kgExpandValueSchema, kgHistoryValueSchema, kgGraphPageValueSchema, kgMappingsValueSchema, kgEpisodesValueSchema,
+  kgCommunitiesValueSchema, kgExpandValueSchema, kgHistoryValueSchema, kgGraphPageValueSchema, kgEpisodesValueSchema,
   kgOntologyEditValueSchema, kgQueryValueSchema, kgReviewDecideValueSchema, kgReviewQueueValueSchema, kgRollbackValueSchema,
   kgSchemaValueSchema, kgSearchValueSchema, kgStatsValueSchema, kgSubgraphValueSchema,
 } from '../api/kg.schema.ts'
@@ -205,12 +194,6 @@ export interface IApiClient {
     describeImage(payload: RequestPayload<'data.describeImage'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'data.describeImage'>>>
     extractText(payload: RequestPayload<'data.extractText'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'data.extractText'>>>
   }
-  orders: {
-    create(payload: RequestPayload<'orders.create'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'orders.create'>>>
-    get(payload: RequestPayload<'orders.get'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'orders.get'>>>
-    list(payload: RequestPayload<'orders.list'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'orders.list'>>>
-    fulfill(payload: RequestPayload<'orders.fulfill'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'orders.fulfill'>>>
-  }
   assets: {
     list(payload: RequestPayload<'assets.list'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'assets.list'>>>
     detail(payload: RequestPayload<'assets.detail'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'assets.detail'>>>
@@ -239,7 +222,6 @@ export interface IApiClient {
     transfers(payload: RequestPayload<'connectors.transfers'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'connectors.transfers'>>>
   }
   kg: {
-    mappings(payload: RequestPayload<'kg.mappings'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kg.mappings'>>>
     graphPage(payload: RequestPayload<'kg.graphPage'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kg.graphPage'>>>
     schema(payload: RequestPayload<'kg.schema'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kg.schema'>>>
     query(payload: RequestPayload<'kg.query'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kg.query'>>>
@@ -261,16 +243,6 @@ export interface IApiClient {
     ingest(payload: RequestPayload<'kb.ingest'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kb.ingest'>>>
     ingestUrl(payload: RequestPayload<'kb.ingestUrl'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kb.ingestUrl'>>>
     upload(payload: RequestPayload<'kb.upload'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'kb.upload'>>>
-  }
-  nocobase: {
-    listMeta(payload: RequestPayload<'nocobase.listMeta'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'nocobase.listMeta'>>>
-    list(payload: RequestPayload<'nocobase.list'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'nocobase.list'>>>
-    get(payload: RequestPayload<'nocobase.get'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'nocobase.get'>>>
-    update(payload: RequestPayload<'nocobase.update'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'nocobase.update'>>>
-    alertAct(payload: RequestPayload<'nocobase.alertAct'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'nocobase.alertAct'>>>
-    mobileWorkSave(payload: RequestPayload<'nocobase.mobileWorkSave'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'nocobase.mobileWorkSave'>>>
-    mobileWorkDelete(payload: RequestPayload<'nocobase.mobileWorkDelete'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'nocobase.mobileWorkDelete'>>>
-    signIn(payload: RequestPayload<'nocobase.signIn'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'nocobase.signIn'>>>
   }
   carbon: {
     listMeta(payload: RequestPayload<'carbon.listMeta'>, signal?: AbortSignal): Promise<RpcResponse<ResponseValue<'carbon.listMeta'>>>
@@ -344,10 +316,6 @@ const UNARY_VALUE_SCHEMAS: { [K in keyof RpcMethodMap]: z.ZodType<Wire<ResponseV
   'data.upload': dataUploadValueSchema,
   'data.describeImage': dataDescribeImageValueSchema,
   'data.extractText': dataExtractTextValueSchema,
-  'orders.create': orderValueSchema,
-  'orders.get': orderValueSchema,
-  'orders.list': ordersListValueSchema,
-  'orders.fulfill': orderValueSchema,
   'assets.list': assetsListValueSchema,
   'assets.detail': assetDetailValueSchema,
   'assets.stats': assetsStatsValueSchema,
@@ -367,7 +335,6 @@ const UNARY_VALUE_SCHEMAS: { [K in keyof RpcMethodMap]: z.ZodType<Wire<ResponseV
   'connectors.list': connectorsListValueSchema,
   'connectors.connections': connectorsConnectionsValueSchema,
   'connectors.transfers': connectorsTransfersValueSchema,
-  'kg.mappings': kgMappingsValueSchema,
   'kg.graphPage': kgGraphPageValueSchema,
   'kg.query': kgQueryValueSchema,
   'kg.episodes': kgEpisodesValueSchema,
@@ -392,14 +359,6 @@ const UNARY_VALUE_SCHEMAS: { [K in keyof RpcMethodMap]: z.ZodType<Wire<ResponseV
   'carbon.get': carbonGetValueSchema,
   'carbon.create': carbonCreateValueSchema,
   'carbon.update': carbonUpdateValueSchema,
-  'nocobase.listMeta': nocobaseListMetaValueSchema,
-  'nocobase.list': nocobaseListValueSchema,
-  'nocobase.get': nocobaseGetValueSchema,
-  'nocobase.update': nocobaseUpdateValueSchema,
-  'nocobase.alertAct': nocobaseAlertActValueSchema,
-  'nocobase.signIn': nocobaseSignInValueSchema,
-  'nocobase.mobileWorkSave': nocobaseMobileWorkSaveValueSchema,
-  'nocobase.mobileWorkDelete': nocobaseMobileWorkDeleteValueSchema,
 }
 
 /** Default timeout for bounded unary calls (rpc-compare 2026-07-19: a hung host must not leave callers pending forever). */
@@ -685,14 +644,6 @@ export abstract class AbstractApiClient implements IApiClient {
     extractText: (payload, signal) => this.callUnary('data.extractText', payload, signal, 'caller-signal-only'),
   }
 
-  readonly orders: IApiClient['orders'] = {
-    create: (payload, signal) => this.callUnary('orders.create', payload, signal),
-    get: (payload, signal) => this.callUnary('orders.get', payload, signal),
-    list: (payload, signal) => this.callUnary('orders.list', payload, signal),
-    // Fulfillment runs the whole drafting pipeline; only the caller's signal bounds it.
-    fulfill: (payload, signal) => this.callUnary('orders.fulfill', payload, signal, 'caller-signal-only'),
-  }
-
   readonly assets: IApiClient['assets'] = {
     // Discovery fans out across providers; the caller's signal alone bounds it.
     list: (payload, signal) => this.callUnary('assets.list', payload, signal, 'caller-signal-only'),
@@ -739,7 +690,6 @@ export abstract class AbstractApiClient implements IApiClient {
   readonly kg: IApiClient['kg'] = {
     // Graph reads follow the caller's signal alone: a wide k-hop walk must
     // not die at the transport default.
-    mappings: (payload, signal) => this.callUnary('kg.mappings', payload, signal, 'caller-signal-only'),
     graphPage: (payload, signal) => this.callUnary('kg.graphPage', payload, signal, 'caller-signal-only'),
     schema: (payload, signal) => this.callUnary('kg.schema', payload, signal, 'caller-signal-only'),
     query: (payload, signal) => this.callUnary('kg.query', payload, signal, 'caller-signal-only'),
@@ -754,19 +704,6 @@ export abstract class AbstractApiClient implements IApiClient {
     subgraph: (payload, signal) => this.callUnary('kg.subgraph', payload, signal, 'caller-signal-only'),
     expand: (payload, signal) => this.callUnary('kg.expand', payload, signal, 'caller-signal-only'),
     stats: (payload, signal) => this.callUnary('kg.stats', payload, signal, 'caller-signal-only'),
-  }
-
-  readonly nocobase: IApiClient['nocobase'] = {
-    // Business reads run against the deployment's NocoBase; the caller's
-    // signal alone bounds them (a big page must not die at the transport default).
-    listMeta: (payload, signal) => this.callUnary('nocobase.listMeta', payload, signal, 'caller-signal-only'),
-    list: (payload, signal) => this.callUnary('nocobase.list', payload, signal, 'caller-signal-only'),
-    get: (payload, signal) => this.callUnary('nocobase.get', payload, signal, 'caller-signal-only'),
-    update: (payload, signal) => this.callUnary('nocobase.update', payload, signal, 'caller-signal-only'),
-    alertAct: (payload, signal) => this.callUnary('nocobase.alertAct', payload, signal, 'caller-signal-only'),
-    mobileWorkSave: (payload, signal) => this.callUnary('nocobase.mobileWorkSave', payload, signal, 'caller-signal-only'),
-    mobileWorkDelete: (payload, signal) => this.callUnary('nocobase.mobileWorkDelete', payload, signal, 'caller-signal-only'),
-    signIn: (payload, signal) => this.callUnary('nocobase.signIn', payload, signal, 'caller-signal-only'),
   }
 
   readonly carbon: IApiClient['carbon'] = {

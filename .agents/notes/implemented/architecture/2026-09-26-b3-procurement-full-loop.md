@@ -28,9 +28,9 @@ The procurement domain was an island: `hub_po_purchase_orders` carried only four
 
 ## Evidence
 
-- Engine scripts [`nocobase-w3-procurement.mts`](../../../../examples/kb-agent/scripts/nocobase-w3-procurement.mts) (9 collections + flow×4 + gate×6 + seeds + the seven 采购管理 pages + `--demo-chain`) and [`nocobase-h5-wms.mts`](../../../../examples/kb-agent/scripts/nocobase-h5-wms.mts) (quarantine-zone seed / postReceipt split / releaseReceipt / `--iqc`).
+- Engine scripts ``nocobase-w3-procurement.mts`` (9 collections + flow×4 + gate×6 + seeds + the seven 采购管理 pages + `--demo-chain`) and ``nocobase-h5-wms.mts`` (quarantine-zone seed / postReceipt split / releaseReceipt / `--iqc`).
 - demo-chain green with gate negatives ×3 and both tolerance cases: `research/2026-09-25-w-round/b3-chain-log.txt`; nine psql read-only sections: `b3-psql.txt`; dual-end screenshots: `b3-admin-{compare,po-triaxis,invoice-match,pr-converted}.png` + `b3-mobile-{po-status,receipt-draft,receipt-done}.png`.
-- Rules-source changes: [`approval-rules.ts`](../../../../packages/connector/tool-nocobase/src/approval-rules.ts) (nextStateOf semantics + gateNotInSetMessage), [`write.ts`](../../../../packages/connector/tool-nocobase/src/write.ts) and [`approval-engine.mts`](../../../../examples/kb-agent/scripts/approval-engine.mts) (amount_field synced on both sides).
+- Rules-source changes: ``approval-rules.ts`` (nextStateOf semantics + gateNotInSetMessage), ``write.ts`` and ``approval-engine.mts`` (amount_field synced on both sides).
 
 ## Alternatives considered
 

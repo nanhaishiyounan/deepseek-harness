@@ -83,7 +83,7 @@ function stripLiteralsAndComments(cypher: string): string {
       out += char === "'" ? "' '" : char === '"' ? '" "' : '` `'
       index = closed ? cursor + 1 : cypher.length
     } else {
-      out += char
+      out += char ?? ''
       index += 1
     }
   }

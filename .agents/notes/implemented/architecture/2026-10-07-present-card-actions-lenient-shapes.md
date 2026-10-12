@@ -33,4 +33,4 @@ A discriminant failure now appends the four concrete JSON skeletons (`{"kind":"v
 ## Verification
 
 - `pnpm vitest run packages/interaction/tool-present-card` and `pnpm vitest run packages/client/ui-mobile` (both mirror specs over the shared fixture corpus); `pnpm run test:web apps/web/tests/mobile-assistant-toolcard.e2e.ts`; `pnpm run typecheck`.
-- Live matrix ledger and screenshots: [demos/acceptance-w21/](../../../../demos/acceptance-w21/) (w21-r8-diagnosis.md, w21-r8-matrix-runs.jsonl, w21-r8-matrix-summary.json).
+- Live matrix ledger and screenshots: `demos/acceptance-w21/` (w21-r8-diagnosis.md, w21-r8-matrix-runs.jsonl, w21-r8-matrix-summary.json).

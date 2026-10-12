@@ -621,12 +621,16 @@ export function exactEditState(text: string, find: string, replace: string, expe
   return hits === expect && landed === 0 ? 'pending' : 'invalid'
 }
 
+// git ls-files output scales with repository state (bulk deletions and vendor
+// syncs move it past the spawnSync default), so capture it with a fixed bound.
+const MAX_GIT_OUTPUT_BYTES = 64 * 1024 * 1024
+
 function main(): void {
   const args = process.argv.slice(2)
   const mode = args.includes('--apply') ? 'apply' : args.includes('--check') ? 'check' : 'dry'
   const reverse = args.includes('--reverse')
   const all = patterns(reverse)
-  const files = execFileSync('git', ['ls-files', '-z'], { cwd: root, encoding: 'utf8' })
+  const files = execFileSync('git', ['ls-files', '-z'], { cwd: root, encoding: 'utf8', maxBuffer: MAX_GIT_OUTPUT_BYTES })
     .split('\0')
     .filter(file => file !== '' && !excluded(file))
 

@@ -1,8 +1,8 @@
 /**
  * The per-turn answer-source trail: under a turn's closing assistant message,
  * one chip row aggregating where the answer's facts came from — kb document
- * citations, lakehouse tables (with the executed SQL), NocoBase collections,
- * and knowledge-graph seeds (with their provenance systems). A chip expands
+ * citations, lakehouse tables (with the executed SQL), and knowledge-graph
+ * seeds (with their provenance systems). A chip expands
  * its bucket inline; kb items open the source document through the Host, the
  * kg bucket offers the「查看图谱证据」view jump. Pure presentation of the
  * frozen turn slice via {@link sourceTrailOf}; a turn with no extractable
@@ -46,7 +46,7 @@ export interface SourceTrailProps {
 }
 
 /** One chip bucket's identity. */
-type Bucket = 'kb' | 'lakehouse' | 'nocobase' | 'kg'
+type Bucket = 'kb' | 'lakehouse' | 'kg'
 
 /**
  * Collect the turn's tool-call roots off the location index. The selector
@@ -102,13 +102,6 @@ export function SourceTrail({ turn, useSession, openFile, requestView, t }: Sour
   for (const table of model.lakehouse) {
     chips.push({ bucket: 'lakehouse', label: `${t('sourceTrail.lakehouse')} ${table.table}` })
   }
-  if (model.nocobase.length === 1) {
-    const only = model.nocobase[0]
-    /* v8 ignore next -- the length guard above guarantees presence. */
-    chips.push({ bucket: 'nocobase', label: `${t('sourceTrail.nocobase')} ${only?.collection ?? ''}` })
-  } else if (model.nocobase.length > 1) {
-    chips.push({ bucket: 'nocobase', label: `${t('sourceTrail.nocobase')} ×${String(model.nocobase.length)}` })
-  }
   for (const read of model.kg) {
     const lead = read.seeds[0] ?? ''
     chips.push({ bucket: 'kg', label: lead === '' ? t('sourceTrail.kg') : `${t('sourceTrail.kg')} ${lead}` })
@@ -157,15 +150,6 @@ export function SourceTrail({ turn, useSession, openFile, requestView, t }: Sour
             <li key={item.table} className={css.detailRow}>
               <span className={css.detailLabel}>{item.table}</span>
               {item.sql.length > 0 && <pre className={css.sql}>{item.sql}</pre>}
-            </li>
-          ))}
-        </ul>
-      )}
-      {open === 'nocobase' && (
-        <ul className={css.detail} data-testid="source-trail-nocobase">
-          {model.nocobase.map(item => (
-            <li key={item.collection} className={css.detailRow}>
-              <span className={css.detailLabel}>{item.collection}</span>
             </li>
           ))}
         </ul>

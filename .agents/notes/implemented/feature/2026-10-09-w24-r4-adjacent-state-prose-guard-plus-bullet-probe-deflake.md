@@ -2,6 +2,8 @@
 
 Status: implemented
 
+English | [中文](2026-10-09-w24-r4-adjacent-state-prose-guard-plus-bullet-probe-deflake.zh.md)
+
 ## Problem
 
 W24-R3 验证（PASS_WITH_DEBT88）留下唯一本批引入 Important + 两条 Minor：①枚举 run 开口过宽——`gateSegment` 对「最近邻段本身是生命周期状态词」无条件开门，英文散文中两个状态词相邻就互相担保：`the frozen qualified partner is reserved` 里 `frozen` 的右邻段 `qualified` 与 `qualified` 的左邻段 `frozen` 互为状态词，全句被序列传播翻译（R3 只测了「英文散文 + 非状态词邻居」与「纯 bullet 枚举面」两侧，漏了中间态）；②markdown 无序列表的 `+` 标记不在 `SEGMENT_BOUNDARY`，`+ qualified` 类加号 bullet 枚举得不到裸枚举面判定；③`r3-bullet-enum-probe.mjs` 两处固定 `waitForTimeout`（2500/2000ms）盲等是 R3 活体证据的 flaky 面，且尾拍 `r3-bullet-enum-after-375.png` 与 `r3-bullet-enum-table-375.png` SHA256 相同（同帧零信息）。

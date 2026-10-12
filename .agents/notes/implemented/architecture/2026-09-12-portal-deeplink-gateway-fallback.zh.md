@@ -10,7 +10,7 @@ Status: implemented
 
 ## 决策
 
-在唯一自有层修复：DSH webserver 代理（`packages/host/webserver/src/nocobase-proxy.ts`）。
+在唯一自有层修复：DSH webserver 代理（`nocobase-proxy.ts`，B7 退役删除）。
 
 - `NOCOBASE_PORTAL_PREFIXES`（`/nocobase/dist/crm`、`/nocobase/dist/hub`）是唯一接线点；`WebServer` constructor 把它们注册为前缀路由、排在普通 `/nocobase` 路由之前（最长前缀匹配胜出），新增 portal 只加一条。
 - `createNocobaseProxyHandler` 增加 `spaFallbackIndex` 选项；`createNocobasePortalHandler(origin, portal)` 把它设为 `/dist/<portal>/`。上游对导航请求——`Accept` 含 `text/html` 的 GET/HEAD——回答 404 时，代理改为取 portal 入口，并经同一 `rewriteNocobaseHtml` 管线服务（`NOCOBASE_PORTAL_BASE` 重定根让 SPA router 拿到正确 basename）。资产与 API 请求保持 404；非 GET 保持 404。

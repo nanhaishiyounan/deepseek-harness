@@ -60,11 +60,17 @@ export interface Config {
   readonly scheduleIntervalMs?: number
   /** Legacy B0 Parquet ingest, run once at startup when enabled. */
   readonly legacyIngest?: {
+    /** Run the one-shot ingest at startup; defaults false. */
     readonly enabled?: boolean
+    /** Directory of B0 `<table>.parquet` exports to scan. */
     readonly parquetDir?: string
+    /** Lakehouse schema the legacy tables land in. */
     readonly targetSchema?: string
+    /** DSN for schema-only table DDL of tables without an export file. */
     readonly sourceDsn?: string
+    /** Source schema prefixes kept from table names when projecting. */
     readonly prefixes?: string[]
+    /** Tables without an export file that still get schema-only empty tables. */
     readonly standaloneTables?: string[]
   }
 }

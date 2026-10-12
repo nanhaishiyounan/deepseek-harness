@@ -36,4 +36,4 @@ persona 两句过时表述（「数字会整卡被拒」「payload 必须是对�
 ## 验证
 
 - `pnpm vitest run packages/interaction/tool-present-card`（66 测试：13 条枚举越位全覆盖表、经 `ctx.tools.execute` 的 seq289 复刻断言路径化文本且无 `matched`、双端 widget 缺省拒绝、null 集合规范化）、`pnpm vitest run packages/client/ui-mobile`（815 测试含镜像语料）、e2e `mobile-assistant-toolcard` 4/4。
-- [demos/acceptance-w21/](../../../../demos/acceptance-w21/) 下的活体复验（`w21-r2-*` 证据）：num ×3 强化诱导、枚举越位活体 ×1。
+- `demos/acceptance-w21/` 下的活体复验（`w21-r2-*` 证据）：num ×3 强化诱导、枚举越位活体 ×1。

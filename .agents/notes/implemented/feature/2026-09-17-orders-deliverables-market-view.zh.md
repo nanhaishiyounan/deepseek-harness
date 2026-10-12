@@ -29,7 +29,7 @@ Status: implemented
 
 ## 验证
 
-- `packages/host/apiproxy/tests/orders-domain.spec.ts`：inline/attachment disposition、共享的 `nosniff`/`no-store` 头、经 `toFetchHandler` 的 GET/HEAD 载体路由。
-- `packages/client/ui-assets/tests/orderssection.client.spec.tsx`：状态矩阵、按状态的行内操作、fake-timer 轮询节律（5s 计拍、终态停、卸载停）、模态 iframe 与 footer 链接；`marketview.client.spec.tsx`：receipt→区块滚动入口；`apply.client.spec.tsx`：view face 的 `refreshOrders` 与下单后刷新。
+- `orders-domain.spec.ts`（orders 域测试，B7 退役删除）：inline/attachment disposition、共享的 `nosniff`/`no-store` 头、经 `toFetchHandler` 的 GET/HEAD 载体路由。
+- `orderssection.client.spec.tsx`（orders 面测试，B7 退役删除）：状态矩阵、按状态的行内操作、fake-timer 轮询节律（5s 计拍、终态停、卸载停）、模态 iframe 与 footer 链接；`marketview.client.spec.tsx`：receipt→区块滚动入口；`apply.client.spec.tsx`：view face 的 `refreshOrders` 与下单后刷新。
 - `apps/web/tests/market-pages.e2e.ts`（真实组合上的 keyless Chromium）：`MemoryOrdersService` 以真实计时器推进 `pending → generating → delivered` 并返回最小 PDF 字节；journey 断言区块列表、轮询到达已交付、inline 响应头、模态、附件下载的 `%PDF` 字节与手动刷新。
-- `packages/connector/tool-connector/tests/tool-connector.spec.ts`：执行后的 `order_create` meta 携带 `order_id`/`deliverable_path`，`orderCreateMetaFromResult` 可回放仅有三字段的前投影 meta。`packages/client/ui-kb/tests/ordertoolrow.client.spec.tsx`：当前 meta 下入口渲染并调 `requestView('market')`，旧回放与错误行不渲染。`apps/web/tests/order-tool-row.snapshot.ts`（keyless、built bundles）：fixture 历史会话的两条 `order_create` turn pin 两种回放形态，点击入口后 market 视图挂载并出现 `#market-orders` 锚点。
+- `packages/connector/tool-connector/tests/tool-connector.spec.ts`：执行后的 `order_create` meta 携带 `order_id`/`deliverable_path`，`orderCreateMetaFromResult` 可回放仅有三字段的前投影 meta。`ordertoolrow.client.spec.tsx`（orders 入口测试，B7 退役删除）：当前 meta 下入口渲染并调 `requestView('market')`，旧回放与错误行不渲染。`apps/web/tests/order-tool-row.snapshot.ts`（keyless、built bundles）：fixture 历史会话的两条 `order_create` turn pin 两种回放形态，点击入口后 market 视图挂载并出现 `#market-orders` 锚点。

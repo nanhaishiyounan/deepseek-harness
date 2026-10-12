@@ -39,7 +39,6 @@ import { KbSettingsSection } from './KbSettingsSection.tsx'
 import { KbHeroHeadline } from './hero/KbHeroHeadline.tsx'
 import { KbToolRow } from './toolviews/KbToolRow.tsx'
 import { ConnectorToolRow } from './toolviews/ConnectorToolRow.tsx'
-import { OrderToolRow } from './toolviews/OrderToolRow.tsx'
 import { KbWorkbench } from './workbench/KbWorkbench.tsx'
 import { ScenarioView } from './scenarios/ScenarioView.tsx'
 import { en, zh } from './locales.ts'
@@ -54,9 +53,6 @@ export type {
 export type { KbSettingsSectionInjected, KbSettingsSectionProps } from './KbSettingsSection.tsx'
 export type { KbToolRowProps } from './toolviews/KbToolRow.tsx'
 export type { ConnectorToolRowProps } from './toolviews/ConnectorToolRow.tsx'
-export type { OrderToolRowProps, OrderToolViewInjected } from './toolviews/OrderToolRow.tsx'
-export { orderRowModel } from './toolviews/order-tool-model.ts'
-export type { OrderRowModel } from './toolviews/order-tool-model.ts'
 export type {
   KbCitation, KbIngestRowModel, KbSearchRowModel, KbStatsRowModel,
   KbToolRowState, KbUsageFigures,
@@ -222,17 +218,6 @@ export function apply(ctx: ClientContext): void {
       requestView: (view: string) => { bridge.request(view) },
       loadOverview: () => api.lakehouse.overview({}).then(response =>
         unwrap<{ readonly generated_at: string; readonly kpis: readonly import('@deepseek-ai/dsh-client-connection/client').LakehouseKpiView[] }>(response).kpis),
-      loadDeliverables: () => api.orders.list({}).then((response) => {
-        const value = unwrap<{ readonly orders: readonly {
-          readonly order_no: string
-          readonly service_name: string
-          readonly generated_at?: string
-        }[] }>(response)
-        return value.orders
-          .filter(order => order.generated_at !== undefined)
-          .slice(0, 5)
-          .map(order => ({ orderNo: order.order_no, serviceName: order.service_name, generatedAt: order.generated_at }))
-      }),
     }),
   }, ScenarioView))
 
@@ -310,18 +295,6 @@ export function apply(ctx: ClientContext): void {
     yield ctx.slots.register({ name: 'tool.call.toolview', key: 'kb_ingest_url', locale: NS }, KbToolRow)
     yield ctx.slots.register({ name: 'tool.call.toolview', key: 'kb_stats', locale: NS }, KbToolRow)
     yield ctx.slots.register({ name: 'tool.call.toolview', key: 'connector_discover', locale: NS }, ConnectorToolRow)
-    yield ctx.slots.register({
-      name: 'tool.call.toolview',
-      key: 'order_create',
-      locale: NS,
-      inject: () => ({ requestView: (view: string) => { bridge.request(view) } }),
-    }, OrderToolRow)
-    yield ctx.slots.register({
-      name: 'tool.call.toolview',
-      key: 'order_status',
-      locale: NS,
-      inject: () => ({ requestView: (view: string) => { bridge.request(view) } }),
-    }, OrderToolRow)
   })
 
   ctx.slots.inject('settings.section', () => ctx.slots.register({

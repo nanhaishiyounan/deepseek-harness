@@ -2,6 +2,8 @@
 
 Status: implemented
 
+English | [中文](2026-10-09-w24-jargon-to-people-language-table-columns-and-chats-layout.zh.md)
+
 ## Problem
 
 用户以会话「供应链数据关注要点」的报告卡实例点名：rows hint 直接写 `supplier 4 · 物料 product 1 与 product 8 各涉及 · AQL 抽样 d≥Re 拒收`，metrics label 出现 `连续拒收 streak≥3`、`味之源 reject_streak=5`、`product 11 当前 ATP=0`——底层标识符与统计记号直达用户。同时点名会话内 md 表格 5 列在 375px 全部挤压、chats 会话列表行错位换行，并要求全页视觉走查。durable 会话日志复核确认 `receiving_status=none` 推导语法以模型叙述与工具 JSON 两种形态直达显示面（session-f6f67643 等 20+ 个 session，zstdcat 实存）。

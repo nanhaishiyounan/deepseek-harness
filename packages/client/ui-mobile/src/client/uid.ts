@@ -16,7 +16,7 @@ const FALLBACK_BYTES = 16
  */
 export function uid(): string {
   const api = globalThis.crypto
-  if (typeof api?.randomUUID === 'function') return api.randomUUID()
+  if (typeof api.randomUUID === 'function') return api.randomUUID()
   const bytes = new Uint8Array(FALLBACK_BYTES)
   api.getRandomValues(bytes)
   let hex = ''

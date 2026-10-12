@@ -9,6 +9,8 @@
 | [`lakehouse/`](lakehouse/README.zh.md) | 能力缝：provider 注册表与 load/query 编排；`./data-router` 子导出对上传分类 | `ctx.lakehouse` |
 | [`lakehouse-sqlite-catalog/`](lakehouse-sqlite-catalog/README.zh.md) | 基于 `node:sqlite` 的 catalog provider | 注册 `ctx.lakehouse` |
 | [`lakehouse-duckdb/`](lakehouse-duckdb/README.zh.md) | 基于 `@duckdb/node-api` 的查询引擎（原生模块缺失时降级） | 注册 `ctx.lakehouse` |
-| [`tool-lakehouse/`](tool-lakehouse/README.zh.md) | 模型可见的 `lakehouse_tables`/`lakehouse_query` 工具 | 消费 `ctx.lakehouse` |
+| [`lakehouse-engine/`](lakehouse-engine/README.zh.md) | W24 湖仓引擎：单 DuckDB 实例挂 DuckLake catalog（Tier 0）、只读语句守卫、结构化写面 | `ctx.lakehouseEngine` |
+| [`lakehouse-sync/`](lakehouse-sync/README.zh.md) | W24 同步管线：只读 PostgreSQL attach 的水位增量同步，加幂等的 B0 legacy-Parquet 摄取 | `ctx.lakehouseSync` |
+| [`tool-lakehouse/`](tool-lakehouse/README.zh.md) | 引擎之上的模型可见 `lakehouse_list_tables`/`lakehouse_query`/`lakehouse_schema` 工具 | 消费 `ctx.lakehouseEngine` |
 
 能力缝保持经典三角色：Service Definition 拥有选择与编排，provider 注册 catalog/引擎实现，工具套件是纯 Consumer。上传经 apiproxy `data` 域抵达 load 路径——该域与连接器传输管道共用同一 `./data-router` 判别器。

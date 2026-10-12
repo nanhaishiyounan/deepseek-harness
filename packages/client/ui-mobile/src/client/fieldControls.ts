@@ -1,16 +1,24 @@
 /**
- * Draft-card field controls: the mapping from a NocoBase collection field
- * (nocobase.listMeta's projection) to the antd-mobile edit widget the draft
- * card mounts — text→Input, enum→Picker, date→DatePicker, bool→Switch,
- * number→Stepper, relation→Picker over the target table's rows. The enum
- * vocabularies the wire does not carry ride a local table measured from the
- * business schema; unknown fields fall back to plain text.
+ * Draft-card field controls: the mapping from a business collection field
+ * (the historical NocoBase listMeta projection, kept as a local value shape
+ * for rendering already-logged cards) to the antd-mobile edit widget the
+ * draft card mounts — text→Input, enum→Picker, date→DatePicker, bool→Switch,
+ * number→Stepper. The enum vocabularies the wire does not carry ride a local
+ * table measured from the business schema; unknown fields fall back to plain
+ * text.
  */
 
-import type { NocobaseFieldView } from '@deepseek-ai/dsh-host-apiproxy/api'
+/** One business field's metadata as a historical draft card carries it. */
+export interface FieldMetaView {
+  readonly name: string
+  readonly type: string
+  readonly title?: string
+  /** Relation target collection (relation fields only). */
+  readonly target?: string
+}
 
 /** The widget kinds a draft field can render as. */
-export type FieldControlKind = 'text' | 'textarea' | 'number' | 'date' | 'bool' | 'enum' | 'relation'
+export type FieldControlKind = 'text' | 'textarea' | 'number' | 'date' | 'bool' | 'enum'
 
 /** One draft field's resolved widget spec. */
 export interface FieldControlSpec {
@@ -21,8 +29,6 @@ export interface FieldControlSpec {
   readonly label: string
   /** Enum options (enum only; empty when the vocabulary is unknown). */
   readonly options: readonly string[]
-  /** Relation target collection (relation only). */
-  readonly target: string | undefined
 }
 
 /**
@@ -35,6 +41,12 @@ export interface FieldControlSpec {
 export const SUPPLIER_LIFECYCLE_STATES: readonly string[] = [
   'potential', 'reviewing', 'qualified', 'preferred', 'restricted', 'frozen', 'rejected', 'eliminated',
 ]
+
+/** The lifecycle states' shared people words (W24-R1, derived over the closed domain). */
+export const SUPPLIER_STATE_WORDS: Readonly<Record<string, string>> = {
+  potential: '潜在', reviewing: '准入评审中', qualified: '合格', preferred: '优选',
+  restricted: '受限', frozen: '冻结', rejected: '已驳回', eliminated: '已淘汰',
+}
 
 /**
  * Enum vocabularies the schema read does not project (select-field options),
@@ -61,7 +73,7 @@ const KNOWN_ENUMS: Readonly<Record<string, Readonly<Record<string, readonly stri
  * @param name - the draft's field name.
  * @returns the meta title when present, else the raw name.
  */
-export function fieldLabelOf(field: NocobaseFieldView | undefined, name: string): string {
+export function fieldLabelOf(field: FieldMetaView | undefined, name: string): string {
   return field?.title !== undefined && field.title !== '' ? field.title : name
 }
 
@@ -75,9 +87,9 @@ export function fieldLabelOf(field: NocobaseFieldView | undefined, name: string)
  * @returns the schema field under the raw name, the stripped one, or undefined.
  */
 export function metaFieldOf(
-  meta: ReadonlyMap<string, NocobaseFieldView> | undefined,
+  meta: ReadonlyMap<string, FieldMetaView> | undefined,
   name: string,
-): NocobaseFieldView | undefined {
+): FieldMetaView | undefined {
   const direct = meta?.get(name)
   if (direct !== undefined) return direct
   return name.endsWith('_id') ? meta?.get(name.slice(0, -3)) : undefined
@@ -87,38 +99,23 @@ export function metaFieldOf(
  * Resolve one draft field's widget spec.
  * @param collection - the draft's target collection.
  * @param name - the field name.
- * @param field - the schema field when listMeta carried one.
+ * @param field - the schema field when the card's meta carried one.
  * @returns the widget spec the draft card renders.
  */
 export function fieldControlOf(
   collection: string,
   name: string,
-  field: NocobaseFieldView | undefined,
+  field: FieldMetaView | undefined,
 ): FieldControlSpec {
   const base = { name, label: fieldLabelOf(field, name) }
   const type = field?.type
-  if (type === 'boolean') return { ...base, kind: 'bool', options: [], target: undefined }
+  if (type === 'boolean') return { ...base, kind: 'bool', options: [] }
   if (type === 'integer' || type === 'float' || type === 'bigInt' || type === 'double') {
-    return { ...base, kind: 'number', options: [], target: undefined }
+    return { ...base, kind: 'number', options: [] }
   }
-  if (type === 'dateOnly' || type === 'date') return { ...base, kind: 'date', options: [], target: undefined }
-  if (type === 'text' || type === 'textarea') return { ...base, kind: 'textarea', options: [], target: undefined }
-  if (type === 'belongsTo') {
-    // The owner column resolves against users; picking a user is not a
-    // business decision, so it stays read-only text on the card.
-    if (field?.target === 'users') return { ...base, kind: 'text', options: [], target: undefined }
-    return { ...base, kind: 'relation', options: [], target: field?.target }
-  }
+  if (type === 'dateOnly' || type === 'date') return { ...base, kind: 'date', options: [] }
+  if (type === 'text' || type === 'textarea') return { ...base, kind: 'textarea', options: [] }
   const options = KNOWN_ENUMS[collection]?.[name]
-  if (options !== undefined) return { ...base, kind: 'enum', options, target: undefined }
-  return { ...base, kind: 'text', options: [], target: undefined }
-}
-
-/**
- * The candidate display column of a relation target's rows (Picker labels).
- * @param target - the relation target collection name.
- * @returns the column to label options with.
- */
-export function relationLabelColumn(target: string): string {
-  return target === 'users' ? 'nickname' : 'name'
+  if (options !== undefined) return { ...base, kind: 'enum', options }
+  return { ...base, kind: 'text', options: [] }
 }

@@ -36,4 +36,4 @@ The persona's two stale sentences (「数字会整卡被拒」「payload 必须�
 ## Verification
 
 - `pnpm vitest run packages/interaction/tool-present-card` (66 tests: a 13-entry enum out-of-range table over every enum leaf, the seq289 replica through `ctx.tools.execute` asserting the pathed text and no `matched`, widget-missing rejections on both mirrors, null-collection normalization), `pnpm vitest run packages/client/ui-mobile` (815 tests incl. the mirror corpus), e2e `mobile-assistant-toolcard` 4/4.
-- Live re-verification under [demos/acceptance-w21/](../../../../demos/acceptance-w21/) (`w21-r2-*` evidence): num ×3 strengthened inductions, an enum-out-of-range live leg.
+- Live re-verification under `demos/acceptance-w21/` (`w21-r2-*` evidence): num ×3 strengthened inductions, an enum-out-of-range live leg.

@@ -3,8 +3,8 @@
  * expert deliverables. `renderPdf(spec)` typesets one DraftSpec (cover, body
  * sections with wrapped CJK paragraphs and reference lines, disclaimer, page
  * chrome) into PDF bytes with a subset-embedded Noto Sans SC. No LLM, no
- * filesystem writes, no plugin services: the drafting pipeline that owns
- * those concerns lives in `@deepseek-ai/dsh-expert-orders`.
+ * filesystem writes, no plugin services: callers own the drafting pipeline
+ * that produces the spec.
  * @module @deepseek-ai/dsh-expert-pdf
  */
 

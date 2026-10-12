@@ -18,10 +18,9 @@ pre-commit:
       glob: '*.{ts,tsx,mts,cts,mjs}'
       exclude:
         - 'vendor/*/src/**'
-        # Upstream snapshots are neither lint targets (see .oxlintrc.staged.json
-        # ignorePatterns) nor passable as one argv list: their staged file
-        # counts alone exceed the OS argument-length limit.
-        - 'platform/**'
+        # The research source snapshots are upstream copies: not lint targets and
+        # not passable as one argv list (staged counts exceed the OS
+        # argument-length limit).
         - 'research/**'
       run: node_modules/.bin/tsx scripts/run-oxlint.ts --config .oxlintrc.staged.json --fix --no-error-on-unmatched-pattern {staged_files}
       stage_fixed: true
@@ -37,10 +36,9 @@ pre-commit:
       run: node_modules/.bin/tsx scripts/gen-third-party-notices.ts && git add THIRD_PARTY_NOTICES.md
 
     - name: whitespace (staged)
-      # platform/nocobase and the research source snapshots are upstream copies
-      # kept byte-verbatim; their trailing whitespace is upstream's, not this
-      # repo's style debt.
-      run: git diff --cached --check -- . ':(exclude)platform/nocobase/**' ':(exclude)research/**/sources/**'
+      # The research source snapshots are upstream copies kept byte-verbatim;
+      # their trailing whitespace is upstream's, not this repo's style debt.
+      run: git diff --cached --check -- . ':(exclude)research/**/sources/**'
 
     - name: vendor manifest guard
       run: scripts/check-vendor-manifest.sh

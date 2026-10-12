@@ -1,2 +1,9 @@
-- list "Background jobs":
-  - listitem: "bash sleep 45 signal: SIGTERM {{duration}}"
+- navigation "Main navigation":
+  - button "Chat"
+  - button "Lakehouse":
+    - img
+    - text: Lakehouse 0
+  - button "Governance":
+    - img
+    - text: Governance
+  - button "Business": Business ?

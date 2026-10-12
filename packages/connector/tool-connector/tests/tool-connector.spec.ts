@@ -224,25 +224,6 @@ interface Mount {
 
 let counter = 0
 
-/** One executed tool call's model-facing projection. */
-interface ExecuteResult {
-  isError: boolean
-  value: unknown
-  text: string
-  meta?: unknown
-}
-
-type Execute = (name: string, args: unknown) => Promise<ExecuteResult>
-
-/** Execute one tool through a context's registry (shared by every mount). */
-function executeOn(ctx: Context): Execute {
-  return async (name, args) => {
-    const result = await ctx.tools.execute({ signal, callId: CallId(`call-${++counter}`), name, arguments: args })
-    const text = result.content.find(block => block.type === 'text')
-    return { isError: result.isError, value: result.value, text: text?.type === 'text' ? text.text : '', meta: result.meta }
-  }
-}
-
 async function mount(...providers: ConnectorProvider[]): Promise<Mount> {
   const ctx = new Context()
   contexts.push(ctx)
@@ -617,7 +598,7 @@ describe('pure projections', () => {
     await ctx.plugin(ToolRuntime)
     await ctx.plugin(ConnectorRuntime)
     ctx.connector.registerProvider(alphaProvider())
-    await ctx.plugin(ToolConnector, { tenant: 'bound-tenant', discover: false, fetch: false, transfer: false, orders: false, assets: false })
+    await ctx.plugin(ToolConnector, { tenant: 'bound-tenant', discover: false, fetch: false, transfer: false, assets: false })
     expect(ctx.tools.schemas().map(schema => schema.name)).toEqual([])
   })
 
@@ -780,171 +761,5 @@ describe('pure projections', () => {
     expect(ToolConnector.presentFetchResult({ dataset_id: 'x' }, { isError: false, content: [], meta: { kind: 'tabular', label: 'p/x' } })).toBeDefined()
     expect(ToolConnector.presentTransferResult({ dataset_id: 'x' }, { isError: false, content: [], meta: { destination: 'lakehouse', rows: 2, landing: 'table t' } })).toBeDefined()
     void ok
-  })
-})
-
-/** A scripted orders seam recording every forwarded call. */
-/** One scripted order row the orders stub serves. */
-interface OrderRow {
-  id: number
-  orderNo: string
-  serviceId: string
-  serviceName: string
-  price?: string
-  brief: string
-  status: string
-  deliverablePath?: string
-  note?: string
-  createdAt: string
-}
-
-function ordersStub() {
-  const calls: string[] = []
-  const rows = new Map<number, OrderRow>()
-  const orders = {
-    async create(request: { serviceId: string; brief: string; clientName?: string }, signal?: AbortSignal) {
-      void signal
-      calls.push(`create:${request.serviceId}`)
-      const id = rows.size + 1
-      const row = {
-        id,
-        orderNo: `ORD-20260905-000${id}`,
-        serviceId: request.serviceId,
-        serviceName: '海外仓风险应对咨询',
-        price: '¥6,800/份',
-        brief: request.brief,
-        status: 'pending',
-        createdAt: '2026-09-05T08:00:00.000Z',
-      }
-      rows.set(id, row)
-      return row
-    },
-    async get(orderId: number, signal?: AbortSignal) {
-      void signal
-      calls.push(`get:${orderId}`)
-      return rows.get(orderId)
-    },
-    async list(signal?: AbortSignal) {
-      void signal
-      calls.push('list')
-      return [...rows.values()]
-    },
-    async fulfill(orderId: number, signal?: AbortSignal) {
-      void signal
-      calls.push(`fulfill:${orderId}`)
-      const row = rows.get(orderId)
-      if (row === undefined) throw new Error(`no order ${orderId} exists at the orders source of truth`)
-      const fulfilled = { ...row, status: 'delivered', deliverablePath: `workspace/deliverables/${row.orderNo}.pdf` }
-      rows.set(orderId, fulfilled)
-      return fulfilled
-    },
-    async readDeliverable(orderId: number, signal?: AbortSignal) {
-      void signal
-      calls.push(`deliverable:${orderId}`)
-      const row = rows.get(orderId)
-      if (row?.deliverablePath === undefined) throw new Error('no deliverable')
-      return { path: row.deliverablePath, bytes: new Uint8Array([0x25, 0x50, 0x44, 0x46]) }
-    },
-  }
-  return { orders, calls }
-}
-
-describe('order tools', () => {
-  /** Mount the suite with a scripted orders seam (no connector providers needed). */
-  async function mountOrders(): Promise<{ execute: Execute; calls: string[] }> {
-    const ctx = new Context()
-    contexts.push(ctx)
-    await ctx.plugin(SystemPrompt)
-    await ctx.plugin(ToolRuntime)
-    // tool-connector's inject list names the connector seam; mount the empty
-    // runtime so the plugin loads (the order tools never touch it).
-    await ctx.plugin(ConnectorRuntime)
-    const stub = ordersStub()
-    ctx.provide('orders', stub.orders as never)
-    await ctx.plugin(ToolConnector, { tenant: 'bound-tenant' })
-    return { execute: executeOn(ctx), calls: stub.calls }
-  }
-
-  it('order_create places the order, fulfills it, and receipts the deliverable path', async () => {
-    const { execute, calls } = await mountOrders()
-    const result = await execute('order_create', { service_id: 'expert_services/2', brief: '海外仓应急方案。', client_name: '漯河宏发食品有限公司' })
-    expect(result.isError).toBe(false)
-    expect(result.value).toMatchObject({
-      order_id: 1,
-      order_no: 'ORD-20260905-0001',
-      service_name: '海外仓风险应对咨询',
-      status: 'delivered',
-      deliverable_path: 'workspace/deliverables/ORD-20260905-0001.pdf',
-    })
-    expect(result.text).toContain('订单已创建并完成生成：ORD-20260905-0001')
-    expect(result.text).toContain('workspace/deliverables/ORD-20260905-0001.pdf')
-    expect(calls).toEqual(['create:expert_services/2', 'fulfill:1'])
-    expect(result.meta).toEqual({
-      order_id: 1,
-      order_no: 'ORD-20260905-0001',
-      status: 'delivered',
-      service_name: '海外仓风险应对咨询',
-      deliverable_path: 'workspace/deliverables/ORD-20260905-0001.pdf',
-    })
-  })
-
-  it('orderCreateMetaFromResult replays older metas without order_id and drops malformed late fields', () => {
-    // A pre-projection log carries the three identity fields only; the view
-    // keeps rendering the receipt and simply omits the jump entry.
-    expect(ToolConnector.orderCreateMetaFromResult({ order_no: 'ORD-20260905-0001', status: 'delivered', service_name: '海外仓风险应对咨询' }))
-      .toEqual({ order_no: 'ORD-20260905-0001', status: 'delivered', service_name: '海外仓风险应对咨询' })
-    // Non-positive-integer / non-string late fields are ignored, not fatal.
-    expect(ToolConnector.orderCreateMetaFromResult({ order_id: 0, order_no: 'ORD-1', status: 'delivered', service_name: 's', deliverable_path: '' }))
-      .toEqual({ order_no: 'ORD-1', status: 'delivered', service_name: 's' })
-    expect(ToolConnector.orderCreateMetaFromResult({ order_id: 'x', order_no: 'ORD-1', status: 'delivered', service_name: 's' })?.order_id)
-      .toBeUndefined()
-    // The strict identity fields still gate the whole projection.
-    expect(ToolConnector.orderCreateMetaFromResult({ order_id: 3, order_no: '', status: 'delivered', service_name: 's' })).toBeUndefined()
-  })
-
-  it('order_create rejects a model-supplied tenant and blank fields', async () => {
-    const { execute } = await mountOrders()
-    const tenant = await execute('order_create', { service_id: 'expert_services/2', brief: 'b', tenant: 'x' })
-    expect(tenant.isError).toBe(true)
-    expect(tenant.text).toContain('tenant')
-    const blank = await execute('order_create', { service_id: '  ', brief: 'b' })
-    expect(blank.isError).toBe(true)
-    expect(blank.text).toContain('service_id')
-  })
-
-  it('order_status reads one order and lists the recent ones', async () => {
-    const { execute, calls } = await mountOrders()
-    await execute('order_create', { service_id: 'expert_services/1', brief: '中亚货运动线。' })
-    const single = await execute('order_status', { order_id: 1 })
-    expect(single.isError).toBe(false)
-    expect(single.text).toContain('ORD-20260905-0001')
-    expect(single.text).toContain('已交付')
-    const all = await execute('order_status', {})
-    expect((all.value as { orders: unknown[] }).orders).toHaveLength(1)
-    expect(all.meta).toEqual({ orders: 1, delivered: 1 })
-    expect(calls).toEqual(['create:expert_services/1', 'fulfill:1', 'get:1', 'list'])
-  })
-
-  it('order_status names an unknown order id', async () => {
-    const { execute } = await mountOrders()
-    const missing = await execute('order_status', { order_id: 99 })
-    expect(missing.isError).toBe(true)
-    expect(missing.text).toContain('no order 99')
-  })
-
-  it('both order tools fail structured when no orders capability is composed', async () => {
-    const ctx = new Context()
-    contexts.push(ctx)
-    await ctx.plugin(SystemPrompt)
-    await ctx.plugin(ToolRuntime)
-    await ctx.plugin(ConnectorRuntime)
-    await ctx.plugin(ToolConnector, { tenant: 'bound-tenant' })
-    const execute = executeOn(ctx)
-    const create = await execute('order_create', { service_id: 'expert_services/2', brief: 'b' })
-    expect(create.isError).toBe(true)
-    expect(create.text).toContain('no orders capability')
-    const status = await execute('order_status', {})
-    expect(status.isError).toBe(true)
-    expect(status.text).toContain('no orders capability')
   })
 })

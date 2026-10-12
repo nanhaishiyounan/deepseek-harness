@@ -81,8 +81,8 @@ describe('kg workbench P2 (ontology tree, change feed, review, coloring, replay)
     // The gray-zone review pair family: doc entities vs business rows.
     await graph.upsertNode({ id: 'kb:doc#大豆', tenantId: TENANT, type: kgNodeTypeId('ingredient'), naturalKey: '大豆', name: '大豆', createdAt: seeded, updatedAt: seeded })
     await graph.upsertNode({ id: 'kb:doc#酱油', tenantId: TENANT, type: kgNodeTypeId('ingredient'), naturalKey: '酱油', name: '酱油', createdAt: seeded, updatedAt: seeded })
-    await graph.upsertNode({ id: 'nocobase:materials:7', tenantId: TENANT, type: kgNodeTypeId('ingredient'), naturalKey: '非转基因大豆原料', name: '非转基因大豆原料', createdAt: seeded, updatedAt: seeded })
-    await graph.upsertNode({ id: 'nocobase:materials:8', tenantId: TENANT, type: kgNodeTypeId('ingredient'), naturalKey: '酿造酱油半成品', name: '酿造酱油半成品', createdAt: seeded, updatedAt: seeded })
+    await graph.upsertNode({ id: 'seed:materials:7', tenantId: TENANT, type: kgNodeTypeId('ingredient'), naturalKey: '非转基因大豆原料', name: '非转基因大豆原料', createdAt: seeded, updatedAt: seeded })
+    await graph.upsertNode({ id: 'seed:materials:8', tenantId: TENANT, type: kgNodeTypeId('ingredient'), naturalKey: '酿造酱油半成品', name: '酿造酱油半成品', createdAt: seeded, updatedAt: seeded })
     await graph.putEpisode({
       uuid: 'ingest:cross-source',
       tenantId: TENANT,
@@ -93,8 +93,8 @@ describe('kg workbench P2 (ontology tree, change feed, review, coloring, replay)
       createdAt: seeded,
       metadata: {
         review: [
-          { docId: 'kb:doc#大豆', rowId: 'nocobase:materials:7', docName: '大豆', rowName: '非转基因大豆原料', verdict: { same: true, confidence: 0.72, reason: '名称包含，语义相近' } },
-          { docId: 'kb:doc#酱油', rowId: 'nocobase:materials:8', docName: '酱油', rowName: '酿造酱油半成品', verdict: { same: true, confidence: 0.66, reason: '工艺上下游，同一物' } },
+          { docId: 'kb:doc#大豆', rowId: 'seed:materials:7', docName: '大豆', rowName: '非转基因大豆原料', verdict: { same: true, confidence: 0.72, reason: '名称包含，语义相近' } },
+          { docId: 'kb:doc#酱油', rowId: 'seed:materials:8', docName: '酱油', rowName: '酿造酱油半成品', verdict: { same: true, confidence: 0.66, reason: '工艺上下游，同一物' } },
         ],
       },
     })
@@ -289,7 +289,7 @@ describe('kg workbench P2 (ontology tree, change feed, review, coloring, replay)
     expect(walk.result.ok).toBe(true)
     if (walk.result.ok) {
       const merged = walk.result.value.edges.some((edge: { source: string; target: string }) =>
-        edge.source === 'kb:doc#大豆' && edge.target === 'nocobase:materials:7')
+        edge.source === 'kb:doc#大豆' && edge.target === 'seed:materials:7')
       expect(merged).toBe(true)
     }
   })

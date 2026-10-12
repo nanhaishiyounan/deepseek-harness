@@ -3,6 +3,9 @@
   "exclude": [
     "duplicates"
   ],
+  "ignore": [
+    "**/lib/**"
+  ],
   "ignoreBinaries": [
     "bwrap",
     "icacls",
@@ -92,9 +95,6 @@
       "project": [
         "src/**/*.ts",
         "tests/**/*.ts"
-      ],
-      "ignoreDependencies": [
-        "zod"
       ]
     },
     "packages/host/directory-picker-native": {
@@ -198,6 +198,90 @@
         "src/**/*.tsx",
         "tests/**/*.ts",
         "tests/**/*.tsx"
+      ]
+    },
+    "packages/client/ui-nav": {
+      "entry": [
+        "tests/**/*.spec.tsx"
+      ],
+      "project": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "tests/**/*.tsx"
+      ]
+    },
+    "packages/client/ui-mobile-preview": {
+      "entry": [
+        "tests/**/*.spec.tsx"
+      ],
+      "project": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "tests/**/*.tsx"
+      ],
+      "ignoreDependencies": [
+        "react-dom"
+      ]
+    },
+    "packages/client/ui-connectors": {
+      "entry": [
+        "tests/**/*.spec.tsx"
+      ],
+      "project": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "tests/**/*.ts",
+        "tests/**/*.tsx"
+      ]
+    },
+    "packages/client/ui-assets": {
+      "entry": [
+        "tests/**/*.spec.tsx"
+      ],
+      "project": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "tests/**/*.ts",
+        "tests/**/*.tsx"
+      ]
+    },
+    "packages/client/ui-kg": {
+      "entry": [
+        "tests/**/*.spec.ts",
+        "tests/**/*.spec.tsx"
+      ],
+      "project": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "tests/**/*.ts",
+        "tests/**/*.tsx"
+      ]
+    },
+    "packages/client/ui-governance": {
+      "project": [
+        "src/**/*.ts",
+        "src/**/*.tsx"
+      ]
+    },
+    "packages/client/ui-lakehouse": {
+      "project": [
+        "src/**/*.ts",
+        "src/**/*.tsx"
+      ]
+    },
+    "packages/interaction/tool-view-actions": {
+      "project": [
+        "src/**/*.ts"
+      ]
+    },
+    "packages/governance/governance": {
+      "project": [
+        "src/**/*.ts"
+      ]
+    },
+    "packages/governance/governance-engine": {
+      "project": [
+        "src/**/*.ts"
       ]
     },
     "website": {
@@ -436,16 +520,6 @@
         "tests/**/*.ts"
       ]
     },
-    "packages/context/file-reference": {
-      "ignoreDependencies": [
-        "zod"
-      ]
-    },
-    "packages/context/session-reference": {
-      "ignoreDependencies": [
-        "zod"
-      ]
-    },
     "packages/session/session-checkpoint-policy": {
       "entry": [
         "tests/**/*.spec.ts",
@@ -533,9 +607,6 @@
       "project": [
         "src/**/*.ts",
         "tests/**/*.ts"
-      ],
-      "ignoreDependencies": [
-        "zod"
       ]
     },
     "packages/examples/jsonrpc-demo": {
@@ -631,6 +702,7 @@
         "tests/**/*.perf.ts",
         "tests/**/*.snapshot.ts",
         "tests/support.ts",
+        "src/mobile.ts",
         "src/node-module-stub.ts"
       ],
       "project": [
@@ -671,6 +743,11 @@
       ]
     },
     "packages/bundle/base": {
+      "ignoreDependencies": [
+        "@deepseek-ai/.+"
+      ]
+    },
+    "packages/util/home": {
       "ignoreDependencies": [
         "@deepseek-ai/.+"
       ]

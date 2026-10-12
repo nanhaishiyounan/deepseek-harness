@@ -77,8 +77,8 @@
   min-width: 18px;
   padding: 1px 5px;
   border-radius: 999px;
-  background: var(--dsw-alias-fill-secondary);
+  background: var(--dsw-alias-interactive-bg-hover);
   color: var(--dsw-alias-label-secondary);
-  font: var(--dsw-font-s-12);
+  font: var(--dsw-font-xxs-12);
   text-align: center;
 }

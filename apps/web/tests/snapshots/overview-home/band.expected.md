@@ -4,7 +4,7 @@
 原料涨价项7▼2%
 
 ## rail
-deliverables: empty
+deliverables: rows
 
 ## pinned
 AI Marketing Insight Lead

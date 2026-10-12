@@ -1,6 +1,0 @@
-{
-  "Validation error": "{{field}} 字段规则验证失败",
-  "notNull Violation": "{{field}} cannot be null",
-  "notNull violation": "{{field}} 字段不能为空",
-  "unique violation": "{{field}} 字段值已存在"
-}

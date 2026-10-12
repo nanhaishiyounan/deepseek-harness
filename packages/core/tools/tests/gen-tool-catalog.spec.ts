@@ -26,15 +26,16 @@ describe('gen-tool-catalog collectToolCatalog', () => {
     const catalog = await collectToolCatalog()
     const names = catalog.flatMap(entry => entry.schemas.map(s => s.name)).sort()
     expect(names).toEqual([
-      'ask_user_question', 'assets_browse', 'bash', 'bash', 'connector_discover', 'connector_fetch', 'connector_transfer',
+      'ask_user_question', 'assets_browse', 'bash', 'bash', 'cb_collections', 'cb_create', 'cb_get', 'cb_list', 'cb_update',
+      'connector_discover', 'connector_fetch', 'connector_transfer',
       'cordis_define', 'cordis_inspect_list',
       'cordis_inspect_query', 'cordis_inspect_self', 'cordis_run', 'cordis_stop',
       'cordis_undefine', 'create_goal', 'edit', 'exit_plan_mode', 'followup_task', 'get_goal', 'glob', 'grep',
       'interrupt_agent', 'interrupt_agent', 'job_kill', 'job_list', 'job_output',
       'kb_ingest', 'kb_ingest_url', 'kb_search', 'kb_stats',
-      'kg_query', 'kg_schema', 'kg_subgraph',
+      'kg_graph_query', 'kg_ontology', 'kg_query', 'kg_schema', 'kg_subgraph',
       'lakehouse_list_tables', 'lakehouse_query', 'lakehouse_schema',
-      'list_agents', 'list_agents', 'lsp', 'nb_approve', 'nb_collections', 'nb_create', 'nb_get', 'nb_list', 'nb_update', 'order_create', 'order_status', 'present_card', 'pwsh', 'pwsh', 'ralph',
+      'list_agents', 'list_agents', 'lsp', 'present_card', 'pwsh', 'pwsh', 'ralph',
       'read', 'read_image', 'report', 'run_code', 'schedule_create', 'schedule_delete',
       'schedule_list', 'send_message', 'send_message', 'session_event_read', 'session_event_search',
       'session_event_trace', 'session_search', 'session_trace', 'skill', 'spawn_teammate',

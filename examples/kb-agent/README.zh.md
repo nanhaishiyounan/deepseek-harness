@@ -34,7 +34,7 @@ DSH_HOME=examples/kb-agent/.dsh pnpm dsh --profile headless --patch examples/kb-
   "用 kb_ingest 逐篇入库这六篇文档：examples/kb-agent/workspace/data/meetings/2026-08-20-supplier-visit-hongfa.md 与 examples/kb-agent/workspace/data/meetings/2026-08-27-project-kickoff.md（doc_kind 取 meeting）、examples/kb-agent/workspace/data/profiles/hongfa-food.md 与 examples/kb-agent/workspace/data/profiles/lvyuan-ingredients.md（doc_kind 取 profile）、examples/kb-agent/workspace/data/regulations/gb2760-excerpt.md 与 examples/kb-agent/workspace/data/regulations/gb14881-excerpt.md（doc_kind 取 regulation），完成后用 kb_stats 报告覆盖情况"
 ```
 
-入库按来源路径覆盖写入，重跑这条命令是替换同六篇文档，不会翻倍。完整批量语料登记在版本化的 `kb-corpus.yml` 清单（`workspace/data/` 下 14 个目录、46 篇文档）：`scripts/seed-kb.mts` 以真实 MiniMax 向量把它灌入 KB，kg-build 语料腿经 `corpus.manifestFile` 读同一份清单，KB 文档集与 KG 抽取扫描因此不会漂移（清单刻意排除 `connector-files/` 等非语料投递目录）。
+入库按来源路径覆盖写入，重跑这条命令是替换同六篇文档，不会翻倍。完整批量语料登记在版本化的 `kb-corpus.json` 清单（`workspace/data/` 下 14 个目录、46 篇文档）：`scripts/seed-kb.mts` 以真实 MiniMax 向量把它灌入 KB，图谱维护路径读同一份清单，语料扫描与 KB 文档集因此不会漂移（清单刻意排除 `connector-files/` 等非语料投递目录）。
 
 ## 提一个有依据的问题
 
@@ -81,14 +81,6 @@ DSH_HOME=examples/kb-agent/.dsh pnpm dsh --profile headless --patch examples/kb-
 ```
 
 预期回答形态不变，模型汇报的 `kb_search`/`kb_stats` 结果里可观测 `mode: 'text'` 与 `embed_available: false`，而 MiniMax-M3 仍用 `MINIMAX_API_KEY` 应答。
-
-## 专家服务订单（NocoBase 业务后台）
-
-组合同时挂载连接器缝与订单域：`connector_discover` 发现张会长专家数据集（专家卡 + 可下单服务），`order_create` 落单并生成方案 PDF。订单的单一事实源是外部 NocoBase 2.x 业务后台：`scripts/setup-nocobase.mts` 一条命令完成安装、启动、collections 创建、数据集播种、API key 签发与审批 workflow 配置（manual 审批 → 通过回调 DSH 生成交付物 / 驳回回写失败），凭据写入仓库根 `.env` 后组合即走真实后台；未配置时相关测试自跳过。完整步骤与真实轨道 e2e 见 [QUICKSTART.zh.md](QUICKSTART.zh.md) 的「NocoBase 业务后台」节。交付 PDF 经 `attachments:upload` 挂回订单行附件字段，本地 `workspace/deliverables/` 仅是缓存副本。
-
-## 三条用户动线一串演示
-
-`scripts/demo-full-journey.mts` 把三条用户核心动线（上传自动路由 csv→湖仓 / md→知识库、出海风险问答 + 张会长专家卡、下单 → 审批 → PDF 交付）串成一次真实端到端：with-key + with-NC，缺前置的轨道自跳过并说明原因，逐场景断言并把实录写进 `demos/`。命令与前置见 [QUICKSTART.zh.md](QUICKSTART.zh.md) 的「三条用户动线一串演示」节。
 
 ## 常见问题
 

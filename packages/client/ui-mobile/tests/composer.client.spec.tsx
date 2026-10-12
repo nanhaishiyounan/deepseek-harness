@@ -54,17 +54,17 @@ afterEach(() => {
 describe('composer send gate (canSend single source, W11-R1)', () => {
   it('arms the send stamp for a ready attachment with an empty draft', () => {
     mountComposer({ attachments: [attachment()] })
-    expect((screen.getByRole('button', { name: '发送' }) as HTMLButtonElement).disabled).toBe(false)
+    expect(screen.getByRole<HTMLButtonElement>('button', { name: '发送' }).disabled).toBe(false)
   })
 
   it('keeps the send stamp disabled with an empty draft and no attachment', () => {
     mountComposer()
-    expect((screen.getByRole('button', { name: '发送' }) as HTMLButtonElement).disabled).toBe(true)
+    expect(screen.getByRole<HTMLButtonElement>('button', { name: '发送' }).disabled).toBe(true)
   })
 
   it('keeps the send stamp disabled while the only attachment is still uploading', () => {
     mountComposer({ attachments: [attachment({ status: 'uploading', quote: undefined })] })
-    expect((screen.getByRole('button', { name: '发送' }) as HTMLButtonElement).disabled).toBe(true)
+    expect(screen.getByRole<HTMLButtonElement>('button', { name: '发送' }).disabled).toBe(true)
   })
 
   it('Enter sends the ready-attachment draft through the same flag', () => {

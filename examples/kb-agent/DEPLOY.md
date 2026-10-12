@@ -28,7 +28,6 @@ MINIMAX_API_KEY=sk-...
 # Optional overrides:
 # DSH_KB_TENANT=my-company        # tenant binding for tools/presets/workbench (default demo-food-co)
 # MINIMAX_BASE_URL=https://api.minimaxi.com/v1
-# W3_TERMINAL_BASE=http://lan-host:13110  # origin for the three operator-terminal page iframes (default http://127.0.0.1:13110; re-run w4-heal-b3.mts --iframe after changing it)
 ```
 
 `DSH_KB_TENANT` is the single source of truth for the tenant: `cordis.patch.yml` reads it for `tool-kb`'s `tenant`, the preset rows, and the api-gateway's `kbTenant` (all three fall back to `demo-food-co` when unset). One deployment = one tenant; a second company gets a second deployment with its own data directory.
@@ -73,19 +72,6 @@ WantedBy=multi-user.target
 ```
 
 One-shot tasks (the headless profile takes the task from argv) map naturally to `systemd-run --unit=kb-task-…` or a timer unit; long-running surfaces (the web workbench, `dsh web` with the same patches) use the same unit shape with the web bin. Verify after `systemctl enable --now kb-agent`: `journalctl -u kb-agent -f` shows the fail-loud boot diagnostics.
-
-### Nightly jobs (manufacturing chain, optional, W2-B7)
-
-The approval engine's `--serve` mode can run the nightly chain in-process — ROP scan-reorder → MRP close → (month-end) the monthly ledger snapshot → KPI materialization, with the quarterly supplier scorecard recomputed idempotently on every day of a quarter-start month — instead of an external cron curling the four verbs. Off by default: without the env the server behaves exactly as before, and the manual curl routes stay forever.
-
-```ini
-# Append to the [Service] section (or three lines in the .env behind EnvironmentFile)
-Environment=W1_NIGHTLY_ENABLED=true      # default false; strictly true/false, anything else fails at boot
-Environment=W1_NIGHTLY_AT=02:30          # HH:MM, default 02:30; a malformed value fails at boot
-Environment=W1_NIGHTLY_TZ=Asia/Shanghai  # default (matches the KPI Shanghai day boundary)
-```
-
-A failed leg logs and the next leg still runs (legs never block each other); `POST :13110/run-nightly` triggers one manual pass at any time (it never marks the day); the in-process marker dedupes per day, and a restart may replay the same day — every leg is idempotent. Pick one scheduler — the built-in timer or your cron curling the four verbs — never both. The macOS launchd/cron demo path lives in the QUICKSTART manufacturing-chain section.
 
 ## 6. Upgrades
 

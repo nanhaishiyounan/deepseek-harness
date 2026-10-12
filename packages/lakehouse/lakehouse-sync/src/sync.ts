@@ -117,7 +117,10 @@ export class LakehouseSyncService extends Service {
     this.legacy = legacy
   }
 
-  /** The most recent completed run, for status surfaces. */
+  /**
+   * The most recent completed run, for status surfaces.
+   * @returns the last run's result, or undefined before the first completion.
+   */
   lastRun(): SyncRunResult | undefined {
     return this.last
   }

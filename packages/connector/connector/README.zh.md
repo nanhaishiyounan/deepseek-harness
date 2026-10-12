@@ -2,7 +2,7 @@
 
 [English](README.md) | 中文
 
-连接器能力缝（`ctx.connector`）：Provider 注册表、数据集发现与拉取路由，以及把外部数据集落进本部署的五步传输编排——pull → classify（文件字节走湖仓缝的共享数据路由器，其余按数据集类型）→ route → deliver（kb ingest 或湖仓 load）→ confirm（catalog 传输记录）。缝本身不内置任何 Provider：文件集、NocoBase 以及后续上游自行注册。
+连接器能力缝（`ctx.connector`）：Provider 注册表、数据集发现与拉取路由，以及把外部数据集落进本部署的五步传输编排——pull → classify（文件字节走湖仓缝的共享数据路由器，其余按数据集类型）→ route → deliver（kb ingest 或湖仓 load）→ confirm（catalog 传输记录）。缝本身不内置任何 Provider：文件集以及后续上游自行注册。
 
 ## 服务契约
 
@@ -27,7 +27,7 @@
 
 ## 配置（schemastery）
 
-无——本缝没有可调参数。Provider 各自携带配置注册（`dsh-connector-file`、`dsh-connector-nocobase`）；租户绑定归工具消费方 `dsh-tool-connector` 所有。
+无——本缝没有可调参数。Provider 各自携带配置注册（`dsh-connector-file`）；租户绑定归工具消费方 `dsh-tool-connector` 所有。
 
 ## Model Experience
 

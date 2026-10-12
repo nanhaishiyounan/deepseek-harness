@@ -29,12 +29,10 @@ function scriptedApi(overrides: {
   credentials?: Partial<ApiProxy['credentials']>
   llm?: Partial<ApiProxy['llm']>
   data?: Partial<ApiProxy['data']>
-  orders?: Partial<ApiProxy['orders']>
   assets?: Partial<ApiProxy['assets']>
   connectors?: Partial<ApiProxy['connectors']>
   lakehouse?: Partial<ApiProxy['lakehouse']>
   kg?: Partial<ApiProxy['kg']>
-  nocobase?: Partial<ApiProxy['nocobase']>
   carbon?: Partial<ApiProxy['carbon']>
   downloads?: Partial<ApiProxy['downloads']>
   respond?: ApiProxy['respond']
@@ -51,14 +49,6 @@ function scriptedApi(overrides: {
       inventory: err, search: err, lineage: err, rules: err, ruleUpsert: err,
       ruleDelete: err, evaluate: err, events: err, webhookTest: err,
     },
-    orders: {
-      create: err,
-      get: err,
-      list: err,
-      fulfill: err,
-      async download() { return new Response('stub', { status: 500 }) },
-      ...overrides.orders,
-    },
     assets: {
       list: err,
       detail: err,
@@ -73,7 +63,6 @@ function scriptedApi(overrides: {
     },
     kg: {
       graphPage: err,
-      mappings: err,
       schema: err,
       query: err,
       search: err,
@@ -95,17 +84,6 @@ function scriptedApi(overrides: {
       ingest: kbRefuse,
       ingestUrl: kbRefuse,
       upload: kbRefuse,
-    },
-    nocobase: {
-      listMeta: err,
-      list: err,
-      get: err,
-      update: err,
-      alertAct: err,
-      signIn: err,
-      mobileWorkSave: err,
-      mobileWorkDelete: err,
-      ...overrides.nocobase,
     },
     carbon: {
       listMeta: err,
@@ -919,10 +897,6 @@ describe('M1/M2/M3 domain routes over the fetch wire', () => {
   }
 
   const CASES: readonly WireCase[] = [
-    { method: 'orders.create', payload: { service_id: 'srv-1', brief: '两个月的动线评估' } },
-    { method: 'orders.get', payload: { order_id: 7 } },
-    { method: 'orders.list', payload: {} },
-    { method: 'orders.fulfill', payload: { order_id: 7 } },
     { method: 'assets.list', payload: { query: '豆腐' } },
     { method: 'assets.detail', payload: { provider_id: 'p1', dataset_id: 'd1' } },
     { method: 'assets.stats', payload: {} },
@@ -930,7 +904,6 @@ describe('M1/M2/M3 domain routes over the fetch wire', () => {
     { method: 'connectors.list', payload: {} },
     { method: 'connectors.connections', payload: {} },
     { method: 'connectors.transfers', payload: {} },
-    { method: 'kg.mappings', payload: {} },
     { method: 'kg.schema', payload: {} },
     { method: 'kg.query', payload: { phrase: '宏发食品的供应商' } },
     { method: 'kg.episodes', payload: { limit: 5 } },
@@ -944,10 +917,6 @@ describe('M1/M2/M3 domain routes over the fetch wire', () => {
     { method: 'kg.subgraph', payload: { seeds: ['宏发食品'], hops: 1 } },
     { method: 'kg.expand', payload: { node_id: 'n:1', limit: 10 } },
     { method: 'kg.stats', payload: {} },
-    { method: 'nocobase.listMeta', payload: {} },
-    { method: 'nocobase.list', payload: { collection: 'experts' } },
-    { method: 'nocobase.get', payload: { collection: 'experts', id: 1 } },
-    { method: 'nocobase.update', payload: { collection: 'experts', id: 1, values: { name: '张三' } } },
   ]
 
   /** POST one wire envelope through the raw fetch handler. */
@@ -981,29 +950,10 @@ describe('M1/M2/M3 domain routes over the fetch wire', () => {
     expect(seen).toEqual(CASES.map(wireCase => ({ method: wireCase.method, payload: wireCase.payload })))
   })
 
-  it('serves orders.download and session.export as no-envelope GET routes with HEAD variants', async () => {
-    const downloads: { orderId?: number; inline?: boolean }[] = []
+  it('serves session.export as a no-envelope GET route with HEAD variants', async () => {
     const handler = toFetchHandler(scriptedApi({
-      orders: {
-        download: async (payload) => {
-          downloads.push(payload)
-          return new Response('PDF', { status: 200, headers: { 'content-type': 'application/pdf' } })
-        },
-      },
       downloads: { sessionLog: async () => new Response('log', { status: 200, headers: { 'content-type': 'text/plain' } }) },
     }))
-    const pdf = await handler.fetch(new Request('http://host/api/orders.download?orderId=5'))
-    expect(pdf.status).toBe(200)
-    expect(await pdf.text()).toBe('PDF')
-    const inline = await handler.fetch(new Request('http://host/api/orders.download?orderId=6&inline=1'))
-    expect(inline.status).toBe(200)
-    const head = await handler.fetch(new Request('http://host/api/orders.download?orderId=7', { method: 'HEAD' }))
-    expect(head.status).toBe(200)
-    expect(head.headers.get('content-type')).toBe('application/pdf')
-    expect(head.body).toBeNull()
-    expect(downloads).toEqual([{ orderId: 5 }, { orderId: 6, inline: true }, { orderId: 7 }])
-    const badId = await handler.fetch(new Request('http://host/api/orders.download?orderId=abc'))
-    expect(badId.status).toBe(400)
     const log = await handler.fetch(new Request('http://host/api/session.export?sessionId=s1'))
     expect(log.status).toBe(200)
     expect(await log.text()).toBe('log')
@@ -1027,21 +977,14 @@ describe('M1/M2/M3 domain routes over the fetch wire', () => {
 
   it('wraps every M1/M2/M3 domain method through the in-process client', async () => {
     const NOW = '2026-09-19T00:00:00.000Z'
-    const order = { id: 1, order_no: 'ORD-1', service_id: 'srv-1', service_name: '动线评估', brief: '评估', status: 'delivered' as const, created_at: NOW }
     const asset = { provider_id: 'p1', dataset_id: 'd1', title: '湖仓表', kind: 'tabular' as const }
     const edge = { id: 'e:1', relation: 'produces', source: 'n:1', target: 'n:2', asserted_by: 'kb' as const }
     const node = { id: 'n:1', type: 'company', name: '宏发食品', depth: 0 }
     const api = scriptedApi({
-      orders: {
-        create: r => ok(r, order),
-        get: r => ok(r, order),
-        list: r => ok(r, { orders: [order] }),
-        fulfill: r => ok(r, order),
-      },
       assets: {
         list: r => ok(r, { assets: [asset] }),
         detail: r => ok(r, asset),
-        stats: r => ok(r, { products: 1, providers: 1, monthly_orders: 0, featured: [{ title: '精选', blurb: '说明', tags: ['tabular'] }] }),
+        stats: r => ok(r, { products: 1, providers: 1, featured: [{ title: '精选', blurb: '说明', tags: ['tabular'] }] }),
       },
       connectors: {
         list: r => ok(r, { providers: [{ id: 'c1', available: true, capabilities: ['discover' as const] }] }),
@@ -1050,12 +993,6 @@ describe('M1/M2/M3 domain routes over the fetch wire', () => {
       },
       lakehouse: { overview: r => ok(r, { generated_at: NOW, kpis: [{ id: 'tables', label: '表数', value: 3 }] }) },
       kg: {
-        mappings: r => ok(r, {
-          file: 'kg-mappings.yml', version: 1,
-          rules: { skipHiddenCollections: true, emptyFkNoEdge: true, derivesTitle: true },
-          collections: [{ name: 'experts', fkLinkCount: 0 }],
-          lastRun: { finishedAt: NOW, ruleHits: { R12: 1 }, collections: [{ scope: 'experts', nodesUpserted: 1, edgesUpserted: 0, skipped: false, skippedRelationFields: [] }] },
-        }),
         schema: r => ok(r, {
           ontology_version: '1.2.0',
           node_types: [{ id: 'company', label: '企业', layer: 'domain' as const, prop_keys: [], status: 'active' as const, source: 'builtin-ontology' as const }],
@@ -1075,14 +1012,7 @@ describe('M1/M2/M3 domain routes over the fetch wire', () => {
         expand: r => ok(r, { nodes: [node], edges: [edge], truncated: false }),
         stats: r => ok(r, {
           triples: 1, entities: 2, node_types: 3, relations: 4, ontology_version: '1.2.0', islands: 0, conflicts: 0,
-          coverage: { numerator: 1, denominator: 2, ratio: 0.5 }, last_run_at: NOW,
         }),
-      },
-      nocobase: {
-        listMeta: r => ok(r, { collections: [{ name: 'experts', fields: [] }] }),
-        list: r => ok(r, { count: 1, page: 1, page_size: 50, rows: [{ id: 1 }] }),
-        get: r => ok(r, { collection: 'experts', row: { id: 1 } }),
-        update: r => ok(r, { collection: 'experts', row: { id: 1, name: '张三' } }),
       },
     })
     const wire = client(api)
@@ -1092,10 +1022,6 @@ describe('M1/M2/M3 domain routes over the fetch wire', () => {
       if (!response.result.ok) throw new Error(`wire rejected: ${response.result.error.message}`)
       return response.result.value
     }
-    expect(await expectOk(wire.orders.create({ service_id: 'srv-1', brief: '评估' }))).toMatchObject({ order_no: 'ORD-1' })
-    expect(await expectOk(wire.orders.get({ order_id: 1 }))).toMatchObject({ status: 'delivered' })
-    expect(await expectOk(wire.orders.list({}))).toMatchObject({ orders: [{ id: 1 }] })
-    expect(await expectOk(wire.orders.fulfill({ order_id: 1 }))).toMatchObject({ id: 1 })
     expect(await expectOk(wire.assets.list({ query: '湖仓' }))).toMatchObject({ assets: [{ dataset_id: 'd1' }] })
     expect(await expectOk(wire.assets.detail({ provider_id: 'p1', dataset_id: 'd1' }))).toMatchObject({ kind: 'tabular' })
     expect(await expectOk(wire.assets.stats({}))).toMatchObject({ products: 1 })
@@ -1103,7 +1029,6 @@ describe('M1/M2/M3 domain routes over the fetch wire', () => {
     expect(await expectOk(wire.connectors.connections({}))).toMatchObject({ connections: [{ provider_id: 'c1' }] })
     expect(await expectOk(wire.connectors.transfers({}))).toMatchObject({ transfers: [{ transfer_id: 1 }] })
     expect(await expectOk(wire.lakehouse.overview({}))).toMatchObject({ kpis: [{ id: 'tables' }] })
-    expect(await expectOk(wire.kg.mappings({}))).toMatchObject({ file: 'kg-mappings.yml' })
     expect(await expectOk(wire.kg.schema({}))).toMatchObject({ ontology_version: '1.2.0' })
     expect(await expectOk(wire.kg.query({ phrase: '宏发食品的供应商' }))).toMatchObject({ template: 'supplies' })
     expect(await expectOk(wire.kg.episodes({ limit: 5 }))).toMatchObject({ episodes: [{ uuid: 'ep-1' }] })
@@ -1117,10 +1042,6 @@ describe('M1/M2/M3 domain routes over the fetch wire', () => {
     expect(await expectOk(wire.kg.subgraph({ seeds: ['宏发食品'], hops: 1 }))).toMatchObject({ seeds_resolved: ['n:1'] })
     expect(await expectOk(wire.kg.expand({ node_id: 'n:1', limit: 10 }))).toMatchObject({ truncated: false })
     expect(await expectOk(wire.kg.stats({}))).toMatchObject({ entities: 2 })
-    expect(await expectOk(wire.nocobase.listMeta({}))).toMatchObject({ collections: [{ name: 'experts' }] })
-    expect(await expectOk(wire.nocobase.list({ collection: 'experts' }))).toMatchObject({ count: 1 })
-    expect(await expectOk(wire.nocobase.get({ collection: 'experts', id: 1 }))).toMatchObject({ row: { id: 1 } })
-    expect(await expectOk(wire.nocobase.update({ collection: 'experts', id: 1, values: { name: '张三' } }))).toMatchObject({ row: { name: '张三' } })
     expect(await expectOk(wire.sessions.viewStateReport({ sessionId: sid('s-tab'), view: 'kg-workbench', snapshot: {}, actions: {} }))).toEqual({ accepted: true })
   })
 

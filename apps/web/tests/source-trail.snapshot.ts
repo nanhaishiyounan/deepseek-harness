@@ -24,18 +24,18 @@ describe('assembled answer-source trail', () => {
     const tree = await screen.findByRole('tree', { name: 'Sessions' }, { timeout: 30_000 })
     fireEvent.click(await within(tree).findByText('Fixture 历史会话'))
 
-    // Turns 77-78 each carry a trail; the first is turn 77's kb row.
+    // Turns 72-73 each carry a trail; the first is turn 72's kb row.
     const trails = await screen.findAllByTestId('source-trail', {}, { timeout: 30_000 })
-    const trail77 = trails[0]
-    if (trail77 === undefined) throw new Error('the source trails missing')
+    const trail72 = trails[0]
+    if (trail72 === undefined) throw new Error('the source trails missing')
     const chips = await waitFor(() => {
-      const found = [...trail77.querySelectorAll('[data-source-kind]')]
+      const found = [...trail72.querySelectorAll('[data-source-kind]')]
       expect(found.length).toBeGreaterThanOrEqual(1)
       return found
     }, { timeout: 30_000 })
     const chipShape = chips.map(chip => `${chip.getAttribute('data-source-kind')}=${chip.textContent?.trim()}`).join('\n')
 
-    fireEvent.click(trail77.querySelector('[data-source-kind="kb"]')!)
+    fireEvent.click(trail72.querySelector('[data-source-kind="kb"]')!)
     const kbDetail = await screen.findByTestId('source-trail-kb')
     const kbShape = [...kbDetail.querySelectorAll('li')].map(row => row.textContent?.trim() ?? '').join('\n')
     const openActions = [...kbDetail.querySelectorAll('button')].map(button => button.textContent?.trim() ?? '').join(',')
@@ -47,7 +47,7 @@ describe('assembled answer-source trail', () => {
     }
     await expect(chipsGolden).toMatchFileSnapshot(CHIPS_EXPECTED)
 
-    // Turn 78's tail: the lakehouse chip carries the source table by name.
+    // Turn 73's tail: the lakehouse chip carries the source table by name.
     await waitFor(() => {
       if (document.querySelectorAll('[data-testid="source-trail"]').length < 2) {
         throw new Error('both source trails missing')

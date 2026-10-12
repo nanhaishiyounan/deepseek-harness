@@ -21,3 +21,15 @@
 ## 配置
 
 所有随部署变化的选项都是校验过的 `Config` 字段（cordis.yml）：`catalog.catalogPath` / `catalog.dataPath`（默认 `workspace/lakehouse/ducklake/…`）、`memoryLimitMb`、`threads`、`maxRows`（200）、`queryTimeoutMs`（30000）、`extensionAutoinstall`（true）。DuckDB 锁定 1.5.6（`@duckdb/node-api` 1.5.6-r.1）；DuckLake/postgres 社区扩展缺失时以 `INSTALL` 重试加载。
+
+## 模型体验
+
+间接：经湖仓工具套注册；查询结果与其守卫拒绝仅经工具浮现，本包不拥有任何 prompt、schema 或工具。
+
+#### KV Cache 影响
+
+独立于模型请求流：结果以工具结果到达后续请求，本包既不追加也不失效任何可复用请求前缀。
+
+## 已知限制与遗留工作
+
+- 遗留：Gravitino/MinIO Tier1 挂接（B6）与超出水位 append 的写侧同步扩展。

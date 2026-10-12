@@ -16,7 +16,7 @@ import { fileURLToPath } from 'node:url'
 import { join } from 'node:path'
 import { describe, beforeAll, beforeEach, afterEach, afterAll, expect, it } from 'vitest'
 import { chromium } from 'playwright'
-import type { Browser, Page, Route } from 'playwright'
+import type { Browser, Page } from 'playwright'
 import { launchWebScaffold, seedSession, watchConsole, webSnapshotMode, compareOrRefreshGolden } from './scaffold.ts'
 import type { WebScaffold } from './scaffold.ts'
 import { ZH_BROWSER_LOCALE } from './support.ts'
@@ -56,42 +56,12 @@ describe('mobile assistant present_card tool source (seeded session → cards wi
   }, 120_000)
 
   /**
-   * Answer one intercepted gateway call with a minimal ok value, echoing the
-   * wire rpcId the mobile rpc() caller requires.
-   */
-  async function fulfillOk(route: Route, value: unknown): Promise<void> {
-    const rpcId = (route.request().postDataJSON() as { rpcId?: string }).rpcId ?? ''
-    await route.fulfill({ contentType: 'application/json', body: JSON.stringify({ rpcId, result: { ok: true, value } }) })
-  }
-
-  /**
-   * Open the seeded tool-card chat as an already-signed-in user. The login
-   * handshake (nocobase.signIn) needs a real NocoBase this keyless scaffold
-   * does not compose, so the page identity is preset through the same
-   * localStorage slot a prior sign-in persists, and the identity-gated
-   * nocobase reads are stubbed at the network layer — the preset token is not
-   * a gateway-issued session, and its `nocobase-unauthorized` would bounce
-   * the shell back to the login gate. The chat rendering under test rides
-   * session.* only; those calls keep hitting the real scaffold gateway.
+   * Open the seeded tool-card chat. The mobile page is identity-free direct
+   * entry (NocoBase 退役后免身份直进): the local identity defaults to the
+   * visitor nickname and nothing gates the chat. The rendering under test
+   * rides session.* only; those calls keep hitting the real scaffold gateway.
    */
   async function openChat(sessionId: string = SEED_ID): Promise<void> {
-    await page.addInitScript(() => {
-      localStorage.setItem('dsh-mobile-auth', JSON.stringify({
-        username: 'buyer', nickname: '采购员·蔡俊', token: 'e2e-toolcard-token', loggedAt: Date.now(),
-      }))
-    })
-    await page.route('**/api/nocobase.list', async (route) => { await fulfillOk(route, { rows: [], total: 0 }) })
-    await page.route('**/api/nocobase.get', async (route) => { await fulfillOk(route, { row: null }) })
-    await page.route('**/api/nocobase.update', async (route) => { await fulfillOk(route, { row: null }) })
-    await page.route('**/api/nocobase.alertAct', async (route) => { await fulfillOk(route, {}) })
-    await page.route('**/api/nocobase.mobileWorkSave', async (route) => {
-      const clientId = (route.request().postDataJSON() as { payload?: { clientId?: string } }).payload?.clientId ?? ''
-      await fulfillOk(route, { clientId, user: 'buyer' })
-    })
-    await page.route('**/api/nocobase.mobileWorkDelete', async (route) => {
-      const clientId = (route.request().postDataJSON() as { payload?: { clientId?: string } }).payload?.clientId ?? ''
-      await fulfillOk(route, { clientId, user: 'buyer' })
-    })
     await page.goto(`${scaffold.baseUrl}/mobile#/chat/${sessionId}`, { waitUntil: 'load' })
     try {
       await page.locator('main').waitFor({ timeout: 20_000 })

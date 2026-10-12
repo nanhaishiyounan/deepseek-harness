@@ -52,11 +52,11 @@ function settled(options: {
 const DISCOVER_OUTPUT = [
   '## Experts',
   '### 张红喜 — 漯河市电子商务协会（会长）',
-  '- dataset id `experts/1` (expert-profile) — provider `connector-nocobase`',
+  '- dataset id `experts/1` (expert-profile) — provider `connector-experts`',
   '- 可服务项（可下单）:',
   '  - 海外仓风险应对咨询（PDF 方案，¥6,800/份） — dataset id `expert_services/2`',
   '',
-  'Providers answering: connector-nocobase.',
+  'Providers answering: connector-experts.',
 ].join('\n')
 
 function mount(block: ToolCallBlock): void {
@@ -70,10 +70,10 @@ describe('connectorDiscoverRowModel', () => {
     const model = connectorDiscoverRowModel(settled({
       argsRaw: '{"query":"海外仓"}',
       content: [{ type: 'text', text: DISCOVER_OUTPUT }],
-      meta: { datasets: 2, providers: ['connector-nocobase'], experts: [{ name: '张红喜', org: '漯河市电子商务协会（会长）' }] },
+      meta: { datasets: 2, providers: ['connector-experts'], experts: [{ name: '张红喜', org: '漯河市电子商务协会（会长）' }] },
     }))
     expect(model).toMatchObject({
-      state: 'ok', query: '海外仓', datasets: 2, providers: ['connector-nocobase'],
+      state: 'ok', query: '海外仓', datasets: 2, providers: ['connector-experts'],
       experts: ['张红喜（漯河市电子商务协会（会长））'], errorSummary: null,
     })
   })
@@ -126,16 +126,16 @@ describe('ConnectorToolRow', () => {
     mount(settled({
       argsRaw: '{"query":"海外仓"}',
       content: [{ type: 'text', text: DISCOVER_OUTPUT }],
-      meta: { datasets: 2, providers: ['connector-nocobase'], experts: [{ name: '张红喜', org: '漯河市电子商务协会（会长）' }] },
+      meta: { datasets: 2, providers: ['connector-experts'], experts: [{ name: '张红喜', org: '漯河市电子商务协会（会长）' }] },
     }))
-    expect(screen.getByText('2 个数据集 · connector-nocobase · 张红喜（漯河市电子商务协会（会长））')).toBeTruthy()
+    expect(screen.getByText('2 个数据集 · connector-experts · 张红喜（漯河市电子商务协会（会长））')).toBeTruthy()
   })
 
   it('expands to the raw listing with the expert card text', () => {
     mount(settled({
       argsRaw: '{"query":"海外仓"}',
       content: [{ type: 'text', text: DISCOVER_OUTPUT }],
-      meta: { datasets: 2, providers: ['connector-nocobase'] },
+      meta: { datasets: 2, providers: ['connector-experts'] },
     }))
     fireEvent.click(screen.getByRole('button'))
     expect(screen.getByText(/### 张红喜 — 漯河市电子商务协会（会长）/u)).toBeTruthy()

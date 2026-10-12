@@ -44,10 +44,12 @@ import * as ToolViewActions from '@deepseek-ai/dsh-tool-view-actions'
 import LakehouseRuntime from '@deepseek-ai/dsh-lakehouse'
 import * as LakehouseSqliteCatalog from '@deepseek-ai/dsh-lakehouse-sqlite-catalog'
 import * as LakehouseDuckDb from '@deepseek-ai/dsh-lakehouse-duckdb'
+import * as LakehouseEngine from '@deepseek-ai/dsh-lakehouse-engine'
+import * as ToolCarbon from '@deepseek-ai/dsh-tool-carbon'
 import * as ToolLakehouse from '@deepseek-ai/dsh-tool-lakehouse'
 import ConnectorRuntime from '@deepseek-ai/dsh-connector'
+import * as ConnectorCarbon from '@deepseek-ai/dsh-connector-carbon'
 import * as ToolConnector from '@deepseek-ai/dsh-tool-connector'
-import * as ToolNocoBase from '@deepseek-ai/dsh-tool-nocobase'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const exampleRoot = join(here, '..')
@@ -96,6 +98,8 @@ afterEach(async () => {
 async function boot(): Promise<Context> {
   root = await mkdtemp(join(tmpdir(), 'kb-agent-presets-'))
   process.env.KB_TEST_DB = join(root, 'kb.sqlite')
+  process.env.LH_TEST_ROOT = join(root, 'lakehouse')
+  process.env.LH_TEST_DB = join(root, 'catalog.sqlite')
   const context = new Context()
   ctx = context
   context.baseUrl = pathToFileURL(root).href + '/'
@@ -126,10 +130,12 @@ async function boot(): Promise<Context> {
     ['@deepseek-ai/dsh-lakehouse', LakehouseRuntime],
     ['@deepseek-ai/dsh-lakehouse-sqlite-catalog', LakehouseSqliteCatalog],
     ['@deepseek-ai/dsh-lakehouse-duckdb', LakehouseDuckDb],
+    ['@deepseek-ai/dsh-lakehouse-engine', LakehouseEngine],
     ['@deepseek-ai/dsh-tool-lakehouse', ToolLakehouse],
     ['@deepseek-ai/dsh-connector', ConnectorRuntime],
+    ['@deepseek-ai/dsh-connector-carbon', ConnectorCarbon],
     ['@deepseek-ai/dsh-tool-connector', ToolConnector],
-    ['@deepseek-ai/dsh-tool-nocobase', ToolNocoBase],
+    ['@deepseek-ai/dsh-tool-carbon', ToolCarbon],
   ])
   context.loader.internal = {
     version: 'v2',
@@ -211,14 +217,14 @@ describe('kb-agent role presets (keyless, text-only degraded mode)', () => {
       const names = toolNames(agent)
       out.push(`- tools: ${names.join(', ')}`)
       // The compliance officer stays kb+kg; the data assistant adds the
-      // lakehouse, connector, and NocoBase business suites (its persona
+      // lakehouse, connector, and carbon business suites (its persona
       // routes all five surfaces, kg_query and assets_browse included). The
       // v1 graph tools stay off by default (kg_schema/kg_subgraph/kg_query
       // are the graph surface).
       const kbTools = ['kb_ingest', 'kb_ingest_url', 'kb_search', 'kb_stats', 'kg_query', 'kg_schema', 'kg_subgraph']
       const viewTools = ['switch_view', 'view_apply', 'view_state_get']
       const expectedTools = preset.id === 'enterprise-data-assistant'
-        ? [...kbTools, ...viewTools, 'assets_browse', 'lakehouse_query', 'lakehouse_tables', 'connector_discover', 'connector_fetch', 'connector_transfer', 'order_create', 'order_status', 'nb_collections', 'nb_list', 'nb_get', 'nb_create', 'nb_update', 'nb_approve'].sort()
+        ? [...kbTools, ...viewTools, 'assets_browse', 'lakehouse_list_tables', 'lakehouse_query', 'lakehouse_schema', 'connector_discover', 'connector_fetch', 'connector_transfer', 'cb_collections', 'cb_list', 'cb_get', 'cb_create', 'cb_update'].sort()
         : [...kbTools, ...viewTools]
       expect(names).toEqual(expectedTools)
 

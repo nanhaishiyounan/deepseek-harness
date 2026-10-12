@@ -13,7 +13,6 @@ describe('parseRoute', () => {
     expect(parseRoute('#/tasks').name).toBe('tasks')
     expect(parseRoute('#/files').name).toBe('files')
     expect(parseRoute('#/agents').name).toBe('agents')
-    expect(parseRoute('#/login').name).toBe('login')
   })
 
   it('lands the default route on home for the empty hash and unknown heads', () => {
@@ -60,7 +59,8 @@ describe('parseRoute', () => {
     expect(parseRoute('#/chats').name).toBe('chats')
     expect(parseRoute('#/chat/abc').name).toBe('chat')
     expect(parseRoute('#/me').name).toBe('me')
-    expect(parseRoute('#/login').name).toBe('login')
+    // The retired login head falls back to home.
+    expect(parseRoute('#/login').name).toBe('home')
   })
 })
 

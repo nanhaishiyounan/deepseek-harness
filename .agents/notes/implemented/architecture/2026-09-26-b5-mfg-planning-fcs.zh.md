@@ -30,11 +30,11 @@ Status: implemented
 
 ## Evidence
 
-- 排产引擎 [`mfg-schedule.mts`](../../../../examples/kb-agent/scripts/mfg-schedule.mts)：纯函数 planForward/planBackward + --preview/--apply/--void/--release/--latest-start + --selftest 四断言（超载告警/替代 WC 切换/不跨天/后推负向）全绿。
-- 域脚本 [`nocobase-w5-mfg.mts`](../../../../examples/kb-agent/scripts/nocobase-w5-mfg.mts)：7 集合 + 8 组件物料 + 2 工作中心 + 9 节假日 + 3 BOM（retired v1/active v2/active 水饺）+ 2 种子 MO + flow/gate + 5 页（生产制造组）+ --demo-chain（卡口负例×3：retired BOM 建单拒/draft apply 拒/重复 apply 冻结拒；MO-1 单轮审批、MO-2 两级加签；冲突排队 9-26 vs 9-28；void→重排；后推负向）全绿幂等。
+- 排产引擎 ``mfg-schedule.mts``：纯函数 planForward/planBackward + --preview/--apply/--void/--release/--latest-start + --selftest 四断言（超载告警/替代 WC 切换/不跨天/后推负向）全绿。
+- 域脚本 ``nocobase-w5-mfg.mts``：7 集合 + 8 组件物料 + 2 工作中心 + 9 节假日 + 3 BOM（retired v1/active v2/active 水饺）+ 2 种子 MO + flow/gate + 5 页（生产制造组）+ --demo-chain（卡口负例×3：retired BOM 建单拒/draft apply 拒/重复 apply 冻结拒；MO-1 单轮审批、MO-2 两级加签；冲突排队 9-26 vs 9-28；void→重排；后推负向）全绿幂等。
 - psql 只读断言 [`b5-psql.txt`](../../../../research/2026-09-25-w-round/b5-psql.txt)：BOM 版本生效/审批全序列（submit/approve/pending_level2）/released_at 回写/reservation_state=none/排产同工序同日/两单 WC-ASSY 顺延对比/gate 行/flow extras（amount_field=estimated_cost）。
 - 双端取证 `research/2026-09-25-w-round/b5-*.png`：admin 5 页（BOM 管理/BOM 工序/工作中心/生产订单/排产看板）+ mobile 真实 LLM 三段（MO 状态查询——排产结果报告卡 3 工序表 + 齐套提示；建 MO 草稿卡——BOM 推导/金额阈值话术；确认落库回执 №3）。preview JSON 原件 `b5-schedule.json`；链路日志 `b5-chain-log.txt`。
-- [`setup-nocobase.mts`](../../../../examples/kb-agent/scripts/setup-nocobase.mts)：all 链插入 w5（w3 后、n18 前）+ verify B5 断言块（7 集合/5 页/组/flow/gate/retired 版本行/种子 floor）+ n18ai- 上限 56→62（w5 六个 Add-new 表单）。
+- ``setup-nocobase.mts``：all 链插入 w5（w3 后、n18 前）+ verify B5 断言块（7 集合/5 页/组/flow/gate/retired 版本行/种子 floor）+ n18ai- 上限 56→62（w5 六个 Add-new 表单）。
 - mobile 侧：[`formRegistry.ts`](../../../../packages/client/ui-mobile/src/client/formRegistry.ts)（12 表单）、[`rich.ts`](../../../../packages/client/ui-mobile/src/client/messages/rich.ts)（mfg_* 标签 22 条）、preset [`agent.cordis.yml`](../../../../examples/kb-agent/agent-presets/mobile-form-assistant/agent.cordis.yml)（+.dsh 拷贝同步）；`pnpm vitest run packages/client/ui-mobile` 623 全绿（form-registry spec 10→12）。
 
 ## Alternatives considered

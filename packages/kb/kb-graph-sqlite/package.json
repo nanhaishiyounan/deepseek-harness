@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-kb-graph-sqlite",
   "description": "SQLite store provider for the knowledge-graph seam: tenant-isolated entity-relation triples with neighbor, two-hop path, and entity search queries",
-  "version": "0.1.1-rc.2",
+  "version": "1.0.0",
   "publishConfig": {
     "access": "public"
   },

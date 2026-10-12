@@ -1,0 +1,69 @@
+[22:17:42] === 0. 现状盘点（colima / 容器 / 端口）===
+time="2026-10-12T22:17:43+08:00" level=info msg="colima is running using macOS Virtualization.Framework"
+time="2026-10-12T22:17:43+08:00" level=info msg="arch: x86_64"
+time="2026-10-12T22:17:43+08:00" level=info msg="runtime: docker"
+time="2026-10-12T22:17:43+08:00" level=info msg="mountType: virtiofs"
+time="2026-10-12T22:17:43+08:00" level=info msg="docker socket: unix:///Users/mac/.colima/default/docker.sock"
+time="2026-10-12T22:17:43+08:00" level=info msg="containerd socket: unix:///Users/mac/.colima/default/containerd.sock"
+dsh-gravitino	Up 26 minutes (healthy)
+dsh-seaweedfs	Up 26 minutes (healthy)
+dsh-neo4j	Up 27 minutes
+WeKnora-app	Up 27 minutes (healthy)
+WeKnora-docreader	Up 27 minutes (healthy)
+WeKnora-frontend	Up 27 minutes
+WeKnora-postgres	Up 27 minutes (healthy)
+WeKnora-redis	Up 27 minutes
+carbon-carbon-main-kong-1	Up 23 minutes (healthy)
+carbon-carbon-main-postgres-1	Up 27 minutes (healthy)
+carbon-carbon-main-storage-1	Up 23 minutes
+carbon-carbon-main-gotrue-1	Up 23 minutes
+carbon-carbon-main-realtime-1	Up 23 minutes
+carbon-carbon-main-postgrest-1	Up 27 minutes
+carbon-carbon-main-inngest-1	Up 20 minutes
+carbon-carbon-main-inbucket-1	Up 20 minutes (healthy)
+carbon-redis	Up 27 minutes (healthy)
+[22:17:43] === 1. colima start（幂等）===
+time="2026-10-12T22:17:44+08:00" level=warning msg="already running, ignoring"
+[22:17:44] === 2. WeKnora up（幂等 compose up -d）===
+ Container WeKnora-app Running
+ Container WeKnora-postgres Running
+ Container WeKnora-docreader Running
+ Container WeKnora-frontend Running
+ Container WeKnora-redis Running
+ Container WeKnora-docreader Waiting
+ Container WeKnora-postgres Waiting
+ Container WeKnora-docreader Healthy
+ Container WeKnora-postgres Healthy
+ Container WeKnora-app Waiting
+ Container WeKnora-app Healthy
+frontend: http://localhost:18080  api: http://localhost:18081  health: http://localhost:18081/health
+[22:17:46] --- WeKnora health ---
+200
+[22:17:46] === 3. Neo4j start（幂等）===
+dsh-neo4j
+200
+[22:17:50] === 4. Gravitino + SeaweedFS compose up（幂等）===
+ Container dsh-gravitino Running
+ Container dsh-seaweedfs Running
+gravitino:200
+seaweed:200
+[22:17:53] === 5. carbon dev 栈（已在跑则幂等确认；未跑需人工 cd /Users/mac/Downloads/carbon-main && pnpm crbn up --no-portless）===
+carbon-erp:302
+postgrest:404
+[22:17:53] === 6. dsh web 启动（后台）===
+[22:17:56] web :3080 READY (code 200, attempt 1)
+web:200
+[22:17:56] === 7. 终态端口表 ===
+COMMAND NAME
+node localhost:3000
+node localhost:3080
+ssh *:18080
+ssh *:18081
+ssh *:51538
+ssh *:54321
+ssh *:7474
+ssh *:7687
+ssh *:8090
+ssh *:9000
+ssh *:9001
+[22:17:57] === COLDSTART DRILL DONE ===

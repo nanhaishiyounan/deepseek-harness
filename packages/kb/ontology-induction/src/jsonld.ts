@@ -236,7 +236,7 @@ export function parseOntologyJsonLd(doc: OntologyJsonLdDocument): OntologyDraft 
       const id = localName(node['@id'])
       const datatypeIri = node['sh:datatype']
       const datatypeEntry = datatypeIri !== null && typeof datatypeIri === 'object' && '@id' in datatypeIri
-        ? Object.entries(DATATYPE_IRI).find(([, iri]) => iri === String((datatypeIri as { '@id': string })['@id']))
+        ? Object.entries(DATATYPE_IRI).find(([, iri]) => iri === (datatypeIri as { '@id': string })['@id'])
         : undefined
       propsById.set(node['@id'], {
         key: typeof node['rdfs:label'] === 'string' ? node['rdfs:label'] : id,
@@ -252,11 +252,11 @@ export function parseOntologyJsonLd(doc: OntologyJsonLdDocument): OntologyDraft 
           if (shape !== null && typeof shape === 'object') {
             const path = (shape as Record<string, unknown>)['sh:path']
             if (path !== null && typeof path === 'object' && '@id' in path) {
-              order.push(String((path as { '@id': string })['@id']))
+              order.push((path as { '@id': string })['@id'])
             }
           }
         }
-        propOrderOfClass.set(String((target as { '@id': string })['@id']), order)
+        propOrderOfClass.set((target as { '@id': string })['@id'], order)
       }
     }
   }
@@ -283,9 +283,9 @@ export function parseOntologyJsonLd(doc: OntologyJsonLdDocument): OntologyDraft 
         label: typeof node['rdfs:label'] === 'string' ? node['rdfs:label'] : id,
         ...(typeof node['rdfs:comment'] === 'string' ? { description: node['rdfs:comment'] } : {}),
         ...(subClassOf !== null && typeof subClassOf === 'object' && '@id' in subClassOf
-          ? { extends: localName(String((subClassOf as { '@id': string })['@id'])).replace(/^Class_/, '') }
+          ? { extends: localName((subClassOf as { '@id': string })['@id']).replace(/^Class_/, '') }
           : {}),
-        props: propsOfClass(`${classIri(name, id)}`),
+        props: propsOfClass(classIri(name, id)),
         ...(typeof node['https://dsh.local/terms/naturalKey'] === 'string'
           ? { naturalKey: node['https://dsh.local/terms/naturalKey'] }
           : {}),
@@ -310,8 +310,8 @@ export function parseOntologyJsonLd(doc: OntologyJsonLdDocument): OntologyDraft 
       } else if (firstDomain !== null && typeof firstDomain === 'object' && '@id' in firstDomain
         && firstRange !== null && typeof firstRange === 'object' && '@id' in firstRange) {
         constraints.push({
-          domain: localName(String((firstDomain as { '@id': string })['@id'])).replace(/^Class_/, ''),
-          range: localName(String((firstRange as { '@id': string })['@id'])).replace(/^Class_/, ''),
+          domain: localName((firstDomain as { '@id': string })['@id']).replace(/^Class_/, ''),
+          range: localName((firstRange as { '@id': string })['@id']).replace(/^Class_/, ''),
         })
       }
       relations.push({

@@ -36,11 +36,11 @@ type ScriptedRoute = {
 /** Scripted-response fetch factory. */
 function scripted(routes: ScriptedRoute[]): { fetch: typeof fetch; served: Served[] } {
   const served: Served[] = []
-  const fetchImpl = (async (input: RequestInfo | URL, init?: RequestInit) => {
-    const url = String(input)
+  const fetchImpl = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = input instanceof Request ? input.url : String(input)
     const headers: Record<string, string> = {}
     for (const [name, value] of Object.entries(init?.headers ?? {})) headers[name] = String(value)
-    const call: Served = { method: init?.method ?? 'GET', url, headers, body: init?.body === undefined ? undefined : JSON.parse(String(init.body)) }
+    const call: Served = { method: init?.method ?? 'GET', url, headers, body: typeof init?.body === 'string' ? JSON.parse(init.body) : undefined }
     served.push(call)
     const route = routes.find(route => route.match(call))
     if (route === undefined) return new Response('no scripted route', { status: 599 })
@@ -49,7 +49,7 @@ function scripted(routes: ScriptedRoute[]): { fetch: typeof fetch; served: Serve
       status: answer.status,
       headers: { 'content-type': 'application/json', ...answer.headers },
     })
-  }) as typeof fetch
+  }
   return { fetch: fetchImpl, served }
 }
 

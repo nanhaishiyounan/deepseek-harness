@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-governance",
   "description": "Governance capability Service Definition: cross-source asset inventory, lineage edges, quality rules, and alert events over the five W24 sources",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "publishConfig": {
     "access": "public"
   },
@@ -36,10 +36,10 @@
     "@deepseek-ai/dsh-invariants": "workspace:^"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:*",
-    "@deepseek-ai/dsh-invariants": "workspace:*",
+    "@deepseek-ai/cordis": "workspace:^",
     "@deepseek-ai/cordis-plugin-include": "workspace:^",
     "@deepseek-ai/cordis-plugin-loader": "workspace:^",
+    "@deepseek-ai/dsh-invariants": "workspace:^",
     "typescript": "^6.0.3"
   }
 }

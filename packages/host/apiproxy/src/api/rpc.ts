@@ -120,14 +120,6 @@ export interface RpcErrorDetailsMap {
   'kb-web-unavailable': {}
   /** A kb workbench ingest failed (unreadable source, parser, or seam refusal); the message is the cause's text. */
   'kb-ingest-failed': { path?: string; url?: string }
-  /** A nocobase-domain call ran in a deployment that did not opt in through `nocobaseEnabled`. */
-  'nocobase-not-composed': {}
-  /** A nocobase-domain call resolved no service-account credentials (base url or API key missing). */
-  'nocobase-unavailable': {}
-  /** A nocobase-domain call the backend refused (HTTP error, unknown collection); the message is the client's text. */
-  'nocobase-request-failed': {}
-  /** A nocobase.get named a row the backend does not have (the v2 wire answers `{data: null}`). */
-  'nocobase-row-missing': { collection: string; id: number }
   /** A carbon-domain call ran in a deployment that did not opt in through `carbonEnabled`. */
   'carbon-not-composed': {}
   /** A carbon-domain call found no composed carbon capability with credentials. */
@@ -138,16 +130,6 @@ export interface RpcErrorDetailsMap {
   'carbon-write-disabled': {}
   /** A carbon.get named a row the catalog table does not have. */
   'carbon-row-missing': { table: string; id: string }
-  /** A nocobase.signIn the backend's basic authenticator refused (wrong credentials or a profile without a username). */
-  'nocobase-signin-rejected': {}
-  /** A nocobase.alertAct the alert engine's transition table / routed-user whitelist refused; the message is the engine's refusal fact. */
-  'nocobase-alert-refused': { id: number; action: string }
-  /** A nocobase.alertAct in a deployment that configured no alert engine base URL (alertEngineUrl / W6_ALERT_ENGINE_URL). */
-  'alert-engine-unconfigured': {}
-  /** A nocobase write (update) arrived with no sign-in session token, or one the gateway no longer honors. */
-  'nocobase-unauthorized': {}
-  /** A signed-in user's collection scope excludes the named collection (the role whitelist's server-side leg). */
-  'nocobase-collection-forbidden': { collection: string; username: string }
   /** An assets-domain call ran in a deployment that did not opt in through `assetsEnabled`. */
   'assets-not-composed': {}
   /** An assets-domain call found the deployment composing no connector capability. */
@@ -180,12 +162,6 @@ export interface RpcErrorDetailsMap {
   'connectors-connector-missing': {}
   /** A connectors-domain delivery read failed at the lakehouse seam; the message is the cause's text. */
   'connectors-transfers-rejected': {}
-  /** An orders-domain call ran in a deployment that composes no orders capability (the expert-orders seam). */
-  'orders-not-composed': {}
-  /** An orders write (create/fulfill) ran in a deployment that did not opt in through `ordersEnabled`. */
-  'orders-write-disabled': {}
-  /** An orders call was refused by the seam (missing source, unknown order, illegal transition, pipeline failure). */
-  'orders-rejected': {}
   /** A unified data upload ran in a deployment that did not opt into data writes (`dataUploadEnabled`). */
   'data-write-disabled': {}
   /** A unified data upload could not classify the file (no whitelisted extension or mime type). */
@@ -224,8 +200,6 @@ export interface RpcErrorDetailsMap {
   'governance-not-composed': {}
   /** A governance write or evaluate was rejected (invalid rule, engine failure). */
   'governance-rejected': {}
-  /** A nocobase.update call ran in a deployment that did not opt in through `nocobaseWriteEnabled`. */
-  'nocobase-write-disabled': {}
   'internal': {}
 }
 

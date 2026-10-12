@@ -548,39 +548,52 @@ function buildAlphaLog(): SessionEvent[] {
   toolTurn(70, 'web_search', '{"queries":["deepseek harness architecture"]}', 'Search results for deepseek harness architecture.')
   toolTurn(71, 'web_fetch', '{"url":"https://www.deepseek.com/blog/harness-architecture"}', '# Harness architecture\n\nEverything is a plugin.')
 
-  // Turns 72-73: the order_create toolview's two replay shapes. Turn 72
-  // carries the full current meta (order_id + deliverable_path, delivered) —
-  // the row renders its「查看订单」entry beside the receipt; turn 73 replays
-  // the pre-projection meta (the three identity fields only) — the receipt
-  // renders, the entry does not. Ordered before the todo turn for the same
-  // standing-plan reason the bash turn is.
-  const orderTurn = (turn: number, meta: Record<string, unknown>): void => {
-    const callId = `fx-call-${turn}`
-    const args = JSON.stringify({ service_id: 'expert_services/2', brief: '海外仓风险应对咨询。', client_name: '漯河宏发食品有限公司' })
-    const receipt = '订单已创建并完成生成：ORD-20260905-0001\n- 服务：海外仓风险应对咨询\n- 状态：已交付\n- 方案 PDF：workspace/deliverables/ORD-20260905-0001.pdf'
+  // Turns 72-73: the answer-source trail and the lakehouse chart surfaces —
+  // each a one-call turn in the canonical withTool shape (call at step 0,
+  // closing text at step 1), so the closing turn-tail renders the aggregated
+  // source chips and the lakehouse row renders its chart stack. Ordered
+  // BEFORE the todo turn for the same standing-plan reason the bash turn is:
+  // the standing plan retires at the next turn/start, so a turn appended
+  // after the todo turn would empty the dock's plan strip.
+  const KB_TEXT = [
+    '检索完成（hybrid，5 命中）。',
+    '[1] export-risk/hongfa-chukou.md — 出口台账 — doc — c2',
+    '  宏发食品 2026 年出口记录。',
+    '[2] regulations/gb-2760.md — 限量标准 — doc — c5',
+    '  防腐剂限量条款。',
+  ].join('\n')
+  const LAKEHOUSE_TEXT = [
+    '| month | total |',
+    '| --- | --- |',
+    '| 2026-06 | 96 |',
+    '| 2026-07 | 104 |',
+    '| 2026-08 | 118 |',
+    '',
+    'Data source: lakehouse table import_export_monthly',
+    'Answer from the rows above; name the source table(s) in your answer.',
+  ].join('\n')
+  const sourceTurn = (turn: number, name: string, args: string, resultText: string, answer: string): void => {
+    const callId = `fx-src-${turn}`
     push({ type: 'turn/start', data: { turn } })
-    push({ type: 'user/message', surfaceOp: 'append', data: userMessage(text(`问题 ${turn}：order_create 样本。`)) })
+    push({ type: 'user/message', surfaceOp: 'append', data: userMessage(text(`问题 ${turn}：${name} 样本。`)) })
     push({ type: 'step/start', data: { turn, step: 0 } })
     push({
       type: 'assistant/message', surfaceOp: 'append',
-      data: { turn, step: 0, message: assistantMessage([{ type: 'tool-call', id: callId, name: 'order_create', arguments: args } as ContentBlock]) },
+      data: { turn, step: 0, message: assistantMessage([{ type: 'tool-call', id: callId, name, arguments: args } as ContentBlock]) },
     })
-    push({ type: 'tool/call', data: { turn, step: 0, callId, name: 'order_create', arguments: args } })
-    push({
-      type: 'tool/result', surfaceOp: 'append',
-      data: { turn, step: 0, message: toolResultMessage(callId, text(receipt), false), meta },
-    })
+    push({ type: 'tool/call', data: { turn, step: 0, callId, name, arguments: args } })
+    push({ type: 'tool/result', surfaceOp: 'append', data: { turn, step: 0, message: toolResultMessage(callId, text(resultText), false) } })
     push({ type: 'step/end', data: { turn, step: 0 } })
+    push({ type: 'step/start', data: { turn, step: 1 } })
+    push({
+      type: 'assistant/message', surfaceOp: 'append',
+      data: { turn, step: 1, message: assistantMessage(text(answer)) },
+    })
+    push({ type: 'step/end', data: { turn, step: 1 } })
     push({ type: 'turn/end', data: { turn, reason: { kind: 'completed' } } })
   }
-  orderTurn(72, {
-    order_id: 1,
-    order_no: 'ORD-20260905-0001',
-    status: 'delivered',
-    service_name: '海外仓风险应对咨询',
-    deliverable_path: 'workspace/deliverables/ORD-20260905-0001.pdf',
-  })
-  orderTurn(73, { order_no: 'ORD-20260905-0001', status: 'delivered', service_name: '海外仓风险应对咨询' })
+  sourceTurn(72, 'kb_search', '{"query":"宏发食品 出口"}', KB_TEXT, '回答 72：宏发食品 2026 年出口记录与限量标准条款如上，来源见下方标签。')
+  sourceTurn(73, 'lakehouse_query', '{"sql":"SELECT month, ROUND(SUM(export_value_10kusd),0) AS total FROM import_export_monthly WHERE month >= \'2026-06\' GROUP BY month ORDER BY month"}', LAKEHOUSE_TEXT, '回答 73：宏发食品近三个月出口额 96→104→118 万美元，环比回升。')
 
   // Turn 74: max-tokens sample — the provider ends the turn at its output cap
   // mid-sentence, so the chat flow must render the turn-max-tokens notice
@@ -629,50 +642,6 @@ function buildAlphaLog(): SessionEvent[] {
   const callIndex = events.length - 4
   const callTime = events[callIndex]?.time as number
   events.splice(callIndex + 1, 0, { type: 'todo/write', time: callTime + 400, data: { todos: fixtureTodos } })
-
-  // Turns 77-78: the answer-source trail and the lakehouse chart surfaces —
-  // each a one-call turn in the canonical withTool shape (call at step 0,
-  // closing text at step 1), so the closing turn-tail renders the aggregated
-  // source chips and the lakehouse row renders its chart stack.
-  const KB_TEXT = [
-    '检索完成（hybrid，5 命中）。',
-    '[1] export-risk/hongfa-chukou.md — 出口台账 — doc — c2',
-    '  宏发食品 2026 年出口记录。',
-    '[2] regulations/gb-2760.md — 限量标准 — doc — c5',
-    '  防腐剂限量条款。',
-  ].join('\n')
-  const LAKEHOUSE_TEXT = [
-    '| month | total |',
-    '| --- | --- |',
-    '| 2026-06 | 96 |',
-    '| 2026-07 | 104 |',
-    '| 2026-08 | 118 |',
-    '',
-    'Data source: lakehouse table import_export_monthly',
-    'Answer from the rows above; name the source table(s) in your answer.',
-  ].join('\n')
-  const sourceTurn = (turn: number, name: string, args: string, resultText: string, answer: string): void => {
-    const callId = `fx-src-${turn}`
-    push({ type: 'turn/start', data: { turn } })
-    push({ type: 'user/message', surfaceOp: 'append', data: userMessage(text(`问题 ${turn}：${name} 样本。`)) })
-    push({ type: 'step/start', data: { turn, step: 0 } })
-    push({
-      type: 'assistant/message', surfaceOp: 'append',
-      data: { turn, step: 0, message: assistantMessage([{ type: 'tool-call', id: callId, name, arguments: args } as ContentBlock]) },
-    })
-    push({ type: 'tool/call', data: { turn, step: 0, callId, name, arguments: args } })
-    push({ type: 'tool/result', surfaceOp: 'append', data: { turn, step: 0, message: toolResultMessage(callId, text(resultText), false) } })
-    push({ type: 'step/end', data: { turn, step: 0 } })
-    push({ type: 'step/start', data: { turn, step: 1 } })
-    push({
-      type: 'assistant/message', surfaceOp: 'append',
-      data: { turn, step: 1, message: assistantMessage(text(answer)) },
-    })
-    push({ type: 'step/end', data: { turn, step: 1 } })
-    push({ type: 'turn/end', data: { turn, reason: { kind: 'completed' } } })
-  }
-  sourceTurn(77, 'kb_search', '{"query":"宏发食品 出口"}', KB_TEXT, '回答 77：宏发食品 2026 年出口记录与限量标准条款如上，来源见下方标签。')
-  sourceTurn(78, 'lakehouse_query', '{"sql":"SELECT month, ROUND(SUM(export_value_10kusd),0) AS total FROM import_export_monthly WHERE month >= \'2026-06\' GROUP BY month ORDER BY month"}', LAKEHOUSE_TEXT, '回答 78：宏发食品近三个月出口额 96→104→118 万美元，环比回升。')
 
   events.forEach((e, i) => { e.seq = i })
   return events as unknown as SessionEvent[]
@@ -3144,103 +3113,6 @@ function createFixtureWorld(options: FixtureOptions): FixtureWorld {
       update: carbonRefuse,
     },
 
-    nocobase: {
-      // The business page's deterministic fixture: three collections (the
-      // grouped navigator's order/supplier/expert buckets) with two rows
-      // each. Reads answer inline so the assembled snapshots can drive the
-      // navigator and the inline-edit refusal; `get` keeps the structured
-      // not-composed refusal (nothing reads it through the fixture).
-      listMeta: request => ok(request, {
-        collections: [
-          {
-            name: 'orders',
-            title: '订单',
-            fields: [
-              { name: 'order_no', type: 'string' },
-              { name: 'status', type: 'string' },
-              { name: 'note', type: 'text' },
-            ],
-          },
-          {
-            name: 'suppliers',
-            title: '供应商',
-            fields: [
-              { name: 'name', type: 'string' },
-              { name: 'license_expiry', type: 'date' },
-              { name: 'remark', type: 'text' },
-            ],
-          },
-          {
-            name: 'experts',
-            title: '专家',
-            fields: [{ name: 'name', type: 'string' }],
-          },
-        ],
-      }),
-      list: (request) => {
-        const collection = (request.payload as { collection?: unknown }).collection
-        const rowsFor = (name: unknown): Array<Record<string, unknown>> => {
-          if (name === 'orders') {
-            return [
-              { id: 1, order_no: 'SO-101', status: 'pending', note: '待确认交期' },
-              { id: 2, order_no: 'SO-102', status: 'delivered', note: '已发货' },
-            ]
-          }
-          if (name === 'suppliers') {
-            return [
-              { id: 1, name: '宏达塑业', license_expiry: '2026-11-01', remark: '包材主力' },
-              { id: 2, name: '金晟印铁', license_expiry: '2027-03-15', remark: '罐体' },
-            ]
-          }
-          return [
-            { id: 1, name: '张红喜' },
-            { id: 2, name: '李工' },
-          ]
-        }
-        const rows = rowsFor(collection)
-        return ok(request, { count: rows.length, page: 1, page_size: 20, rows })
-      },
-      get: request => err(request, {
-        code: 'nocobase-not-composed',
-        message: 'this deployment has not enabled the nocobase domain; set the api-gateway config nocobaseEnabled: true to expose business reads',
-        details: {},
-      }),
-      // The inline-edit fast path's structured refusal: the fixture composes
-      // no NocoBase and keeps record writes off the wire surface.
-      update: request => err(request, {
-        code: 'nocobase-write-disabled',
-        message: 'this deployment has not enabled the inline record write; set the api-gateway config nocobaseWriteEnabled: true to expose nocobase.update',
-        details: {},
-      }),
-      // The alert-act channel's structured refusal: the fixture composes no
-      // alert engine, so the row action keeps its unconfigured refusal.
-      alertAct: request => err(request, {
-        code: 'alert-engine-unconfigured',
-        message: 'the demo fixture composes no alert engine; the mobile row actions run against the live gateway',
-        details: {},
-      }),
-      // The fixture signs nobody in: the mobile login's real channel is the
-      // live gateway, and the demo fixture keeps the structured refusal.
-      signIn: request => err(request, {
-        code: 'nocobase-not-composed',
-        message: 'this deployment has not enabled the nocobase domain; set the api-gateway config nocobaseEnabled: true to expose business reads',
-        details: {},
-      }),
-      // The mobile work projection's write entrances keep the same posture:
-      // the fixture composes no nocobase backend, so the offline degrade the
-      // mobile store already carries answers locally.
-      mobileWorkSave: request => err(request, {
-        code: 'nocobase-not-composed',
-        message: 'this deployment has not enabled the nocobase domain; the mobile work store stays local',
-        details: {},
-      }),
-      mobileWorkDelete: request => err(request, {
-        code: 'nocobase-not-composed',
-        message: 'this deployment has not enabled the nocobase domain; the mobile work store stays local',
-        details: {},
-      }),
-    },
-
     kb: {
       // The fixture answers every kb method with the structured
       // not-composed refusal: the browser fixture composes no knowledge
@@ -3272,37 +3144,8 @@ function createFixtureWorld(options: FixtureOptions): FixtureWorld {
       }),
     },
 
-    orders: {
-      // Same refusal discipline as kb: the browser fixture composes no
-      // expert-orders seam, so every method answers the structured
-      // not-composed error the surfaces render.
-      create: request => err(request, {
-        code: 'orders-not-composed',
-        message: 'this deployment composes no orders capability; add the dsh-expert-orders seam and a NocoBase source of truth',
-        details: {},
-      }),
-      get: request => err(request, {
-        code: 'orders-not-composed',
-        message: 'this deployment composes no orders capability; add the dsh-expert-orders seam and a NocoBase source of truth',
-        details: {},
-      }),
-      list: request => err(request, {
-        code: 'orders-not-composed',
-        message: 'this deployment composes no orders capability; add the dsh-expert-orders seam and a NocoBase source of truth',
-        details: {},
-      }),
-      fulfill: request => err(request, {
-        code: 'orders-not-composed',
-        message: 'this deployment composes no orders capability; add the dsh-expert-orders seam and a NocoBase source of truth',
-        details: {},
-      }),
-      // Satisfies the ApiProxy contract type only: the deliverable download
-      // rides the native download manager like session.export below.
-      download: () => Promise.resolve(new Response('fixture mode does not serve order deliverables', { status: 404 })),
-    },
-
     assets: {
-      // Same refusal discipline as orders: the browser fixture composes no
+      // Same refusal discipline: the browser fixture composes no
       // connector seam, so every method answers the structured not-composed
       // error the market surfaces render inline.
       list: request => err(request, {
@@ -3340,8 +3183,8 @@ function createFixtureWorld(options: FixtureOptions): FixtureWorld {
       // against the DuckLake engine instead).
       tables: request => ok(request, {
         tables: [
-          { ref: 'lake.legacy_nocobase.so_orders', schema: 'legacy_nocobase', table: 'so_orders', row_count: 13 },
-          { ref: 'lake.synced_nocobase.wfl_mobile_work', schema: 'synced_nocobase', table: 'wfl_mobile_work', row_count: 18 },
+          { ref: 'lake.legacy_erp.so_orders', schema: 'legacy_erp', table: 'so_orders', row_count: 13 },
+          { ref: 'lake.synced_mobile.wfl_mobile_work', schema: 'synced_mobile', table: 'wfl_mobile_work', row_count: 18 },
         ],
       }),
       query: request => ok(request, {
@@ -3446,11 +3289,6 @@ function createFixtureWorld(options: FixtureOptions): FixtureWorld {
         details: {},
       }),
       rollback: request => err(request, {
-        code: 'kg-not-composed',
-        message: 'this deployment has not enabled the kg domain; set the api-gateway config kgEnabled: true to expose the graph page reads',
-        details: {},
-      }),
-      mappings: request => err(request, {
         code: 'kg-not-composed',
         message: 'this deployment has not enabled the kg domain; set the api-gateway config kgEnabled: true to expose the graph page reads',
         details: {},
@@ -3683,14 +3521,6 @@ export class FixtureApiClient extends AbstractApiClient {
       case 'carbon.get': return this.api.carbon.get(request, signal)
       case 'carbon.create': return this.api.carbon.create(request, signal)
       case 'carbon.update': return this.api.carbon.update(request, signal)
-      case 'nocobase.listMeta': return this.api.nocobase.listMeta(request, signal)
-      case 'nocobase.list': return this.api.nocobase.list(request, signal)
-      case 'nocobase.get': return this.api.nocobase.get(request, signal)
-      case 'nocobase.update': return this.api.nocobase.update(request, signal)
-      case 'nocobase.alertAct': return this.api.nocobase.alertAct(request, signal)
-      case 'nocobase.signIn': return this.api.nocobase.signIn(request, signal)
-      case 'nocobase.mobileWorkSave': return this.api.nocobase.mobileWorkSave(request, signal)
-      case 'nocobase.mobileWorkDelete': return this.api.nocobase.mobileWorkDelete(request, signal)
       case 'kb.stats': return this.api.kb.stats(request)
       case 'kb.search': return this.api.kb.search(request, signal)
       case 'kb.ingest': return this.api.kb.ingest(request, signal)
@@ -3698,8 +3528,6 @@ export class FixtureApiClient extends AbstractApiClient {
       case 'data.upload': return this.api.data.upload(request, signal)
       case 'data.describeImage': return this.api.data.describeImage(request, signal)
       case 'data.extractText': return this.api.data.extractText(request, signal)
-      case 'orders.create': return this.api.orders.create(request, signal)
-      case 'orders.get': return this.api.orders.get(request, signal)
       case 'assets.list': return this.api.assets.list(request, signal)
       case 'assets.detail': return this.api.assets.detail(request, signal)
       case 'assets.stats': return this.api.assets.stats(request, signal)
@@ -3720,7 +3548,6 @@ export class FixtureApiClient extends AbstractApiClient {
       case 'connectors.connections': return this.api.connectors.connections(request, signal)
       case 'connectors.transfers': return this.api.connectors.transfers(request, signal)
       case 'kg.graphPage': return this.api.kg.graphPage(request, signal)
-      case 'kg.mappings': return this.api.kg.mappings(request, signal)
       case 'kg.schema': return this.api.kg.schema(request, signal)
       case 'kg.query': return this.api.kg.query(request, signal)
       case 'kg.search': return this.api.kg.search(request, signal)
@@ -3734,8 +3561,6 @@ export class FixtureApiClient extends AbstractApiClient {
       case 'kg.communities': return this.api.kg.communities(request, signal)
       case 'kg.history': return this.api.kg.history(request, signal)
       case 'kg.stats': return this.api.kg.stats(request, signal)
-      case 'orders.list': return this.api.orders.list(request, signal)
-      case 'orders.fulfill': return this.api.orders.fulfill(request, signal)
       case 'kb.upload': return this.api.kb.upload(request, signal)
     }
   }

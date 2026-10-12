@@ -355,25 +355,17 @@ export interface SessionsApi {
    * Sends text and temporary image bytes to an ordinary session Agent after durable host admission.
    * Browser callers attach their current IANA zone;
    * the Host validates, canonicalizes, and records it on that exact user message. Omission remains
-   * valid for non-browser callers. A signed-in caller attaches its gateway
-   * session token (`authToken`, issued by `nocobase.signIn`): the Host derives
-   * the acting user from the token server-side — the audit identity the nb_*
-   * tools stamp and gate on, rendered into every step's system prompt by the
-   * gateway's acting-user section, while the durable user message itself
-   * stays verbatim (a hand-typed identity line changes nothing). A
-   * presented-but-invalid token fails with `nocobase-unauthorized`.
-   * `clientMsgId` is the caller's idempotency key: a second prompt carrying
-   * an already-accepted id on the same session answers `accepted` without
-   * enqueueing again (the offline outbox's retry double-send window).
-   * Session-backed subagents reject with `agent-busy` and use
-   * `subagent.prompt`.
+   * valid for non-browser callers. `clientMsgId` is the caller's idempotency
+   * key: a second prompt carrying an already-accepted id on the same session
+   * answers `accepted` without enqueueing again (the offline outbox's retry
+   * double-send window). Session-backed subagents reject with `agent-busy`
+   * and use `subagent.prompt`.
    */
   prompt(request: RpcRequest<{
     sessionId: SessionId
     mode: 'queue' | 'steer'
     content: PromptContentPart[]
     clientTimeZone?: string
-    authToken?: string
     clientMsgId?: string
   }>): Promise<RpcResponse<{ accepted: true; command?: { kind: 'success'; text?: string } }>>
 

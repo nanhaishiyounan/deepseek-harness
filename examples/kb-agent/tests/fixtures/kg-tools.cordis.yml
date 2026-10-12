@@ -1,11 +1,8 @@
-# Test-only composition for the kg-tools keyless snapshot: the full
-# knowledge-graph stack (seam, sqlite v2 store, kg-build pipeline, tool-kb's
-# kg_* rows) over an in-spec mock NocoBase server. The fake llm provider
-# (closed-set extraction determinism) is mounted directly by the spec, not by
-# a loader row: it has no workspace package, and a bare name here must resolve
-# from examples/package.json. Paths and endpoints pin through the environment.
-# The snapshot locks the model-facing kg tool surface and the pipeline's
-# deterministic report.
+# Test-only composition for the kg-tools keyless snapshot: the
+# knowledge-graph stack (seam, sqlite v2 store, tool-kb's kg_* rows). Seed
+# rows are written directly through the graph seam by the spec, so the
+# snapshot locks the model-facing kg tool surface without any extraction
+# pipeline. Paths pin through the environment.
 
 - id: system-prompt
   name: '@deepseek-ai/dsh-system-prompt'
@@ -41,19 +38,3 @@
   name: '@deepseek-ai/dsh-kb-graph-sqlite'
   config:
     path: !!js "process.env.KG_TEST_ROOT + '/kg-graph.sqlite'"
-
-- id: kg-build
-  name: '@deepseek-ai/dsh-kg-build'
-  config:
-    tenant: demo-food-co
-    nocobase:
-      baseUrl: !!js "process.env.KG_TEST_NC_URL ?? ''"
-      apiKeyEnv: KG_TEST_NC_TOKEN
-      mappingsFile: !!js "process.env.KG_TEST_MAPPINGS ?? ''"
-    corpus:
-      root: !!js "process.env.KG_TEST_CORPUS ?? '.'"
-      extensions: ['.md']
-      maxDocuments: 5
-      maxChunksPerDocument: 2
-    lakehouse: false
-    connector: false

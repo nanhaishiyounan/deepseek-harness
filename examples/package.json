@@ -29,13 +29,11 @@
     "@deepseek-ai/dsh-connector": "workspace:*",
     "@deepseek-ai/dsh-connector-carbon": "workspace:*",
     "@deepseek-ai/dsh-connector-file": "workspace:*",
-    "@deepseek-ai/dsh-connector-nocobase": "workspace:*",
     "@deepseek-ai/dsh-cordis-host-runner": "workspace:*",
     "@deepseek-ai/dsh-credentials-local": "workspace:*",
     "@deepseek-ai/dsh-e2b": "workspace:*",
     "@deepseek-ai/dsh-experimental-agent-team": "workspace:*",
     "@deepseek-ai/dsh-experimental-tool-agent-team": "workspace:*",
-    "@deepseek-ai/dsh-expert-orders": "workspace:*",
     "@deepseek-ai/dsh-expert-pdf": "workspace:*",
     "@deepseek-ai/dsh-fs-e2b": "workspace:*",
     "@deepseek-ai/dsh-fs-local": "workspace:*",
@@ -57,9 +55,9 @@
     "@deepseek-ai/dsh-graph-neo4j": "workspace:*",
     "@deepseek-ai/dsh-ontology-induction": "workspace:*",
     "@deepseek-ai/dsh-tool-graph": "workspace:*",
-    "@deepseek-ai/dsh-kg-build": "workspace:*",
     "@deepseek-ai/dsh-lakehouse": "workspace:*",
     "@deepseek-ai/dsh-lakehouse-duckdb": "workspace:*",
+    "@deepseek-ai/dsh-lakehouse-engine": "workspace:*",
     "@deepseek-ai/dsh-lakehouse-sqlite-catalog": "workspace:*",
     "@deepseek-ai/dsh-llm": "workspace:*",
     "@deepseek-ai/dsh-llm-deepseek": "workspace:*",
@@ -124,7 +122,6 @@
     "@deepseek-ai/dsh-tool-kb": "workspace:*",
     "@deepseek-ai/dsh-tool-lakehouse": "workspace:*",
     "@deepseek-ai/dsh-tool-lsp": "workspace:*",
-    "@deepseek-ai/dsh-tool-nocobase": "workspace:*",
     "@deepseek-ai/dsh-tool-present-card": "workspace:*",
     "@deepseek-ai/dsh-tool-pwsh": "workspace:*",
     "@deepseek-ai/dsh-tool-pwsh-persistent": "workspace:*",
@@ -147,8 +144,6 @@
     "@deepseek-ai/dsh-view-context": "workspace:*",
     "@deepseek-ai/dsh-web": "workspace:*",
     "@deepseek-ai/dsh-web-fetch-http": "workspace:*",
-    "@deepseek-ai/dsh-workflow-worker-thread": "workspace:*",
-    "pdf-lib": "^1.17.1",
-    "unpdf": "^1.2.0"
+    "@deepseek-ai/dsh-workflow-worker-thread": "workspace:*"
   }
 }

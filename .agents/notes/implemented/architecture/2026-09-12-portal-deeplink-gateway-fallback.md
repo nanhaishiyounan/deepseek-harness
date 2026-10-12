@@ -10,7 +10,7 @@ Opening or refreshing a portal deep link (`http://…:3080/nocobase/dist/hub/pro
 
 ## Decision
 
-Fix it at the only layer we own: the DSH webserver proxy (`packages/host/webserver/src/nocobase-proxy.ts`).
+Fix it at the only layer we own: the DSH webserver proxy (`nocobase-proxy.ts`（B7 退役删除）).
 
 - `NOCOBASE_PORTAL_PREFIXES` (`/nocobase/dist/crm`, `/nocobase/dist/hub`) is the single wiring point; the `WebServer` constructor registers each as a prefix route ahead of the plain `/nocobase` route (longest-prefix match wins), so adding a portal is one entry.
 - `createNocobaseProxyHandler` grows an `spaFallbackIndex` option; `createNocobasePortalHandler(origin, portal)` sets it to `/dist/<portal>/`. When the upstream answers 404 to a navigation request — GET/HEAD whose `Accept` includes `text/html` — the proxy fetches the portal entry instead and serves it through the same `rewriteNocobaseHtml` pipeline (the `NOCOBASE_PORTAL_BASE` re-root gives the SPA router its correct basename). Asset and API requests keep their 404; non-GET keeps its 404.

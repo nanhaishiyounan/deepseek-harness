@@ -6,7 +6,7 @@ English | [中文](2026-09-27-w2b2-mps-master-schedule.zh.md)
 
 ## Problem
 
-The W-round MRP close ([mrp-run.mts](../../../../examples/kb-agent/scripts/mrp-run.mts)) fed only approved-not-shipped SO lines into `gross0` — no forecast layer, no planning buckets, and a hard-wired 60-day JIT window (99 leftover #7). W2-B2 ([02-b2-mps.md](../../../../plans/2026-09-27-w2-evolution/02-b2-mps.md)) adds the MPS layer: `mps_plans` (a 3–6 monthly-period container) + `mps_plan_items` (item × period rows), merges demand as max(SO open, forecast) (ERPNext v16), switches the close's demand source for covered items from the SO direct feed to the merged plan rows, and makes the window overridable — with the hard constraint that a close with no approved plan rows stays byte-identical to the W-round output.
+The W-round MRP close (`mrp-run.mts`) fed only approved-not-shipped SO lines into `gross0` — no forecast layer, no planning buckets, and a hard-wired 60-day JIT window (99 leftover #7). W2-B2 ([02-b2-mps.md](../../../../plans/2026-09-27-w2-evolution/02-b2-mps.md)) adds the MPS layer: `mps_plans` (a 3–6 monthly-period container) + `mps_plan_items` (item × period rows), merges demand as max(SO open, forecast) (ERPNext v16), switches the close's demand source for covered items from the SO direct feed to the merged plan rows, and makes the window overridable — with the hard constraint that a close with no approved plan rows stays byte-identical to the W-round output.
 
 ## Decision
 

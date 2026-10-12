@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-09-27-w2b2-mps-master-schedule.md
-2026-09-27-w2b2-mps-master-schedule.md: 690f8b3ef023cd6d76ad4b6567ae9f966667e005
-2026-09-27-w2b2-mps-master-schedule.zh.md: 653e3c68e47655eafb835d7ba03c870704ba25b5
+2026-09-27-w2b2-mps-master-schedule.md: 04743ab9370ed9b5a126cce755fe52641000c84d
+2026-09-27-w2b2-mps-master-schedule.zh.md: 3869241ff70092b7113da889ffef2b6ce367f5ec

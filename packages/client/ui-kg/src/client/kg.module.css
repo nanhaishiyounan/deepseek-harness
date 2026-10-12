@@ -944,7 +944,7 @@
   list-style: none;
   border: 1px solid var(--dsw-alias-border-l1);
   border-radius: 8px;
-  background: var(--dsw-specific-module-platform);
+  background: var(--dsw-alias-bg-module-platform);
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -967,7 +967,7 @@
 }
 
 .obsidianHit:hover {
-  background: var(--dsw-alias-fill-minor);
+  background: var(--dsw-alias-interactive-bg-hover);
 }
 
 .obsidianHitEmpty {
@@ -979,7 +979,7 @@
   flex: none;
   padding: 1px 6px;
   border-radius: 999px;
-  background: var(--dsw-alias-fill-minor);
+  background: var(--dsw-alias-interactive-bg-hover);
   color: var(--dsw-alias-label-secondary);
   font: var(--dsw-font-xxs-12);
 }
@@ -1009,7 +1009,7 @@
   min-height: 420px;
   border: 1px solid var(--dsw-alias-border-l1);
   border-radius: 10px;
-  background: var(--dsw-specific-module-platform);
+  background: var(--dsw-alias-bg-module-platform);
   overflow: hidden;
 }
 
@@ -1030,8 +1030,8 @@
   padding: 10px 12px;
   border: 1px solid var(--dsw-alias-border-l1);
   border-radius: 10px;
-  background: var(--dsw-specific-module-elevated);
-  box-shadow: var(--dsw-shadow-m);
+  background: var(--dsw-alias-bg-overlay);
+  box-shadow: var(--dsw-shadow-lv2);
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -1062,7 +1062,7 @@
   align-self: flex-start;
   padding: 1px 6px;
   border-radius: 999px;
-  background: var(--dsw-alias-fill-minor);
+  background: var(--dsw-alias-interactive-bg-hover);
   color: var(--dsw-alias-label-secondary);
   font: var(--dsw-font-xxs-12);
 }
@@ -1074,7 +1074,7 @@
   padding: 10px 12px;
   border: 1px solid var(--dsw-alias-border-l1);
   border-radius: 10px;
-  background: var(--dsw-specific-module-platform);
+  background: var(--dsw-alias-bg-module-platform);
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -1117,7 +1117,7 @@
 }
 
 .obsidianPanel li button:hover {
-  background: var(--dsw-alias-fill-minor);
+  background: var(--dsw-alias-interactive-bg-hover);
 }
 
 .obsidianPanelClose {
@@ -1133,7 +1133,7 @@
   flex: none;
   padding: 1px 6px;
   border-radius: 999px;
-  background: var(--dsw-alias-fill-minor);
+  background: var(--dsw-alias-interactive-bg-hover);
   color: var(--dsw-alias-label-secondary);
   font: var(--dsw-font-xxs-12);
 }

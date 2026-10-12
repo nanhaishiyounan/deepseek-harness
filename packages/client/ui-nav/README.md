@@ -1,5 +1,7 @@
 # @deepseek-ai/dsh-client-ui-nav
 
+English | [中文](README.zh.md)
+
 Doubao-style main navigation column for the dsh web client. The plugin occupies the layout-owned `nav` column with a shell that declares the `sidebar.nav` menu seat; every function page (kb workbench, scenario portal, market, connectors, kg, business, mobile preview, …) contributes its own menu row into that seat, so the nav is fully plugin-composed — remove a page plugin and its row disappears with it.
 
 ## Composition

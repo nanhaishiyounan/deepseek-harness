@@ -3,10 +3,9 @@
  * seam's registry and property-graph v2 store — the ontology legend
  * (`kg.schema`), name→node seed resolution (`kg.search`), k-hop neighborhoods
  * (`kg.subgraph`), one-hop visualization expansion (`kg.expand`), and the size
- * counters (`kg.stats`). Read-only; graph writes belong to the kg-build
- * pipeline. Every method fails with the structured `kg-not-composed` error
- * when no knowledge-graph seam is composed or `kgEnabled` has not opted the
- * domain in.
+ * counters (`kg.stats`). Read-only. Every method fails with the structured
+ * `kg-not-composed` error when no knowledge-graph seam is composed or
+ * `kgEnabled` has not opted the domain in.
  */
 
 import type { RpcRequest, RpcResponse } from './rpc.ts'
@@ -28,6 +27,10 @@ export interface KgNodeTypeView {
   readonly foodon_id?: string
   /** Source-ontology synonym set. */
   readonly synonyms?: readonly string[]
+  /**
+   * Registry source. `nocobase-derived` is legacy: historical types derived
+   * from the retired NocoBase backend still carry it in stored data.
+   */
   readonly source: 'builtin-ontology' | 'builtin-food' | 'foodon-imported' | 'nocobase-derived' | 'agent-defined'
   /**
    * Draft types accept writes but stay out of model-facing enumerations;
@@ -62,6 +65,10 @@ export interface KgRelationView {
   /** Legal (domain → range) endpoint pairs; empty means unrestricted. */
   readonly constraints: readonly { readonly domain: string; readonly range: string }[]
   readonly kind: 'object' | 'hierarchical'
+  /**
+   * Registry source. `nocobase-derived` is legacy: historical relations
+   * derived from the retired NocoBase backend still carry it in stored data.
+   */
   readonly source: 'builtin-ontology' | 'builtin-food' | 'foodon-imported' | 'nocobase-derived' | 'agent-defined'
 }
 
@@ -90,32 +97,12 @@ export interface KgEdgeView {
   readonly target: string
   /** Relation description text, when the build recorded one. */
   readonly fact?: string
-  /** Which source system asserted the fact. */
+  /**
+   * Which source system asserted the fact. `nocobase` is legacy: historical
+   * triples asserted by the retired NocoBase backend still carry it in stored
+   * data (kg-graph.sqlite / Neo4j).
+   */
   readonly asserted_by: 'nocobase' | 'lakehouse' | 'connector' | 'kb' | 'kg-align' | 'ai-edit'
-}
-
-/** The `kg.mappings` response value: the pipeline's mappings readout. */
-export interface KgMappingsWireValue {
-  readonly file: string
-  readonly version: number
-  readonly rules: { readonly skipHiddenCollections: boolean; readonly emptyFkNoEdge: boolean; readonly derivesTitle: boolean }
-  readonly collections: readonly {
-    readonly name: string
-    readonly anchor?: string
-    readonly titleField?: string
-    readonly fkLinkCount: number
-  }[]
-  readonly lastRun?: {
-    readonly finishedAt: string
-    readonly ruleHits: Readonly<Record<string, number>>
-    readonly collections: readonly {
-      readonly scope: string
-      readonly nodesUpserted: number
-      readonly edgesUpserted: number
-      readonly skipped: boolean
-      readonly skippedRelationFields: readonly string[]
-    }[]
-  }
 }
 
 /** Shared subgraph result projection. */
@@ -123,21 +110,6 @@ export interface KgSubgraphView {
   readonly nodes: readonly KgSubgraphNodeView[]
   readonly edges: readonly KgEdgeView[]
   readonly truncated: boolean
-}
-
-/** The quality panel's coverage document (self-stating caliber). */
-export interface KgCoverageView {
-  readonly numerator: number
-  readonly denominator: number
-  readonly ratio: number
-}
-
-/** The `kg.stats` quality extension: structural counters plus the last run's coverage. */
-export interface KgQualityView {
-  readonly islands: number
-  readonly conflicts: number
-  readonly coverage?: KgCoverageView
-  readonly last_run_at?: string
 }
 
 /** Graph-page methods. */
@@ -195,6 +167,7 @@ export type KgGraphPageValue =
     readonly in_relations: readonly KgGraphNeo4jRelationView[]
   }
 
+/** The kg graph-domain RPC surface the gateway exposes to clients. */
 export interface KgApi {
   /** Read the ontology registry (legend and type-filter source). */
   schema(
@@ -234,15 +207,6 @@ export interface KgApi {
     }>,
     signal?: AbortSignal,
   ): Promise<RpcResponse<KgGraphPageValue>>
-
-  /**
-   * Read the kg-build mappings file state (the rule panel's source): the
-   * loaded collection whitelist plus the last run's per-collection outcome.
-   */
-  mappings(
-    request: RpcRequest<Record<string, never>>,
-    signal?: AbortSignal,
-  ): Promise<RpcResponse<KgMappingsWireValue>>
 
   /**
    * Compile one natural-language phrase into a subgraph walk and execute it
@@ -402,7 +366,7 @@ export interface KgApi {
     signal?: AbortSignal,
   ): Promise<RpcResponse<KgSubgraphView & { as_of: string }>>
 
-  /** Count stored triples and distinct entities, plus the quality readout. */
+  /** Count stored triples and distinct entities, plus the structural quality counters. */
   stats(
     request: RpcRequest<Record<string, never>>,
     signal?: AbortSignal,
@@ -414,7 +378,5 @@ export interface KgApi {
     ontology_version: string
     islands: number
     conflicts: number
-    coverage?: KgCoverageView
-    last_run_at?: string
   }>>
 }

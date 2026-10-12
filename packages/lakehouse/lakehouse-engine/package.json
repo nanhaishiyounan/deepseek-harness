@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-lakehouse-engine",
   "description": "Lakehouse engine service: an in-process DuckDB instance with a DuckLake table catalog (Tier 0), read-only SQL enforcement for model-facing surfaces, and a structured write surface for the sync pipeline",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "publishConfig": {
     "access": "public"
   },
@@ -22,17 +22,12 @@
       "types": "./lib/types/invariant.d.ts",
       "default": "./lib/invariant.js"
     },
-    "./sql-guard": {
-      "types": "./lib/types/sql-guard.d.ts",
-      "default": "./lib/sql-guard.js"
-    },
     "./src/*": "./src/*",
     "./package.json": "./package.json"
   },
   "files": [
     "lib/index.js",
     "lib/invariant.js",
-    "lib/sql-guard.js",
     "lib/types/**/*.d.ts"
   ],
   "license": "MIT",

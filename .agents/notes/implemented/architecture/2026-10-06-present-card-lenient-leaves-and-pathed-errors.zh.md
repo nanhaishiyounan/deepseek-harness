@@ -36,4 +36,4 @@ W21-P3 确定性矩阵留下一个失败族：MiniMax-M3 在 id/value/数量类�
 ## 验证
 
 - `pnpm vitest run packages/interaction/tool-present-card`（46 测：coerce/合法/非法/payload 字符串/中文路径化诊断）、`pnpm vitest run packages/client/ui-mobile`（809 测含镜像用例）、`pnpm run test:web -- mobile-assistant-toolcard`（4/4：golden 扩入数字叶子审批卡与字符串化计划卡——仅新增条目）。
-- 活体复验矩阵见 [demos/acceptance-w21/](../../../../demos/acceptance-w21/)（`w21-r1-*` 证据）。
+- 活体复验矩阵见 `demos/acceptance-w21/`（`w21-r1-*` 证据）。

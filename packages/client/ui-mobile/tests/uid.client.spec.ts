@@ -29,7 +29,7 @@ describe('uid — the secure-context fallback', () => {
 
   it('falls back to a 16-byte hex string when randomUUID is undefined (LAN HTTP)', () => {
     dropRandomUUID()
-    expect(globalThis.crypto.randomUUID).toBeUndefined()
+    expect(globalThis.crypto['randomUUID']).toBeUndefined()
     const first = uid()
     expect(first).toMatch(/^[0-9a-f]{32}$/)
     expect(uid()).not.toBe(first)

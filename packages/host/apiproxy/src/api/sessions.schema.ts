@@ -148,7 +148,7 @@ export const sessionHistoryRequestSchema = z.object({
 }).superRefine((payload, ctx) => {
   if (payload.beforeSeq !== undefined && payload.afterSeq !== undefined) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: 'custom',
       path: ['afterSeq'],
       message: 'afterSeq and beforeSeq are exclusive: pick the forward cursor read or the backward page read, not both',
     })
@@ -303,9 +303,6 @@ export const sessionPromptRequestSchema = z.object({
   // dispatch a real model call over no content.
   content: z.array(promptContentPartSchema).min(1),
   clientTimeZone: z.string().optional(),
-  // The nocobase.signIn session token the acting user derives from (identity
-  // is derived server-side from the token, never client-narrated).
-  authToken: z.string().min(1).optional(),
   // Caller idempotency key: a repeat of an already-accepted id on the same
   // session answers accepted without enqueueing again.
   clientMsgId: z.string().min(1).max(120).optional(),

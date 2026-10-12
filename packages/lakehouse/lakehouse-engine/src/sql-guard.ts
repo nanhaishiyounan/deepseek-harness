@@ -17,6 +17,7 @@ export type SqlGuardCode =
 
 /** Structured rejection raised by {@link assertReadOnlySql}. */
 export class SqlGuardError extends Error {
+  /** The structured rejection code carried to the caller. */
   readonly code: SqlGuardCode
 
   /**
@@ -83,7 +84,7 @@ function stripLiteralsAndComments(sql: string): string {
       out += char === "'" ? "' '" : '" "'
       index = closed ? cursor + 1 : sql.length
     } else {
-      out += char
+      out += char ?? ''
       index += 1
     }
   }

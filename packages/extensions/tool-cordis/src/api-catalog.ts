@@ -502,6 +502,60 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
     ],
   },
   {
+    key: 'carbon',
+    summary: 'The carbon capability surface (`ctx.carbon`): the catalog projection plus the table CRUD over the live session client.',
+    description: 'The carbon capability surface (`ctx.carbon`): the catalog projection plus the table CRUD over the live session client. The service stays registered without credentials; every data method then throws the structured no-credentials refusal (the documented degraded mode).',
+    methods: [
+      {
+        signature: 'readonly client: CarbonClient | undefined',
+        description: 'The Carbon client once a session is established, or undefined when degraded.',
+        parameters: [],
+      },
+      {
+        signature: 'available(): boolean',
+        description: 'The credential-backed usability check.',
+        parameters: [],
+        returns: 'true when a credential-backed client composed; `false` in the degraded mode.',
+      },
+      {
+        signature: 'async session(signal?: AbortSignal): Promise<CarbonSession>',
+        description: 'The live session (authenticating on demand).',
+        parameters: [{ name: 'signal', description: 'caller cancellation.' }],
+        returns: 'the ensured GoTrue session; refused in the degraded mode.',
+      },
+      {
+        signature: 'catalog(): { modules: readonly { id: string; label: string }[]; tables: readonly CarbonTableMeta[] }',
+        description: 'The business-table catalog projection.',
+        parameters: [],
+        returns: 'the module groups (navigation order) and the full table metadata roster.',
+      },
+      {
+        signature: 'async list( table: string, options: CarbonListOptions = {}, signal?: AbortSignal, ): Promise<{ count: number; rows: Record<string, unknown>[] }>',
+        description: 'Query one catalog table\'s rows.',
+        parameters: [{ name: 'table', description: 'the camelCase table name (must be on the catalog).' }, { name: 'options', description: 'filters, ordering, paging.' }, { name: 'signal', description: 'caller cancellation.' }],
+        returns: 'the matched row count and the page of rows.',
+      },
+      {
+        signature: 'async get(table: string, id: string, signal?: AbortSignal): Promise<Record<string, unknown> | undefined>',
+        description: 'Read one catalog row by its key column value (the composite-key stock table addresses by `itemId`; every other table by its prefixed `id`).',
+        parameters: [{ name: 'table', description: 'the camelCase table name (must be on the catalog).' }, { name: 'id', description: 'the row key (`item_WgSb…`, or an itemId for the stock table).' }, { name: 'signal', description: 'caller cancellation.' }],
+        returns: 'the row, or undefined when no row matches the key.',
+      },
+      {
+        signature: 'async create(table: string, values: Record<string, unknown>, signal?: AbortSignal): Promise<Record<string, unknown>>',
+        description: 'Insert one row into a `write`-risk catalog table (read-tier tables refuse: postings like stock movements belong to composite server-functions with no Data API surface).',
+        parameters: [{ name: 'table', description: 'the camelCase table name (must be on the catalog at write risk).' }, { name: 'values', description: 'the row\'s column values (companyId injected when absent).' }, { name: 'signal', description: 'caller cancellation.' }],
+        returns: 'the inserted row as the server stored it.',
+      },
+      {
+        signature: 'async update(table: string, id: string, values: Record<string, unknown>, signal?: AbortSignal): Promise<Record<string, unknown>>',
+        description: 'Patch one row of a `write`-risk catalog table.',
+        parameters: [{ name: 'table', description: 'the camelCase table name (must be on the catalog at write risk).' }, { name: 'id', description: 'the row id.' }, { name: 'values', description: 'the columns to change.' }, { name: 'signal', description: 'caller cancellation.' }],
+        returns: 'the patched row as the server stored it.',
+      },
+    ],
+  },
+  {
     key: 'clientModules',
     summary: 'The web plugin table service: incremental `dsh.client` scan + wire composition + bundle route + index injection rows.',
     description: 'The web plugin table service: incremental `dsh.client` scan + wire composition + bundle route + index injection rows. Construction runs the activation scan synchronously — a malformed declaration or missing bundle among the already-loaded entries aggregates into one loud throw (FAILED fiber; the boot activation audit reports it).',
@@ -1372,43 +1426,6 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
     ],
   },
   {
-    key: 'kgBuild',
-    summary: 'The pipeline service.',
-    description: 'The pipeline service. One instance per context; `run()` executes one full pipeline pass (structured sources, then extraction) and resolves with the per-scope report. Fails loud on a missing seam: every enabled source requires its service at run time.',
-    methods: [
-      {
-        signature: 'async run(options: RunOptions = {}): Promise<KgBuildRunReport>',
-        description: 'Execute one full pipeline pass: registry mapping + structured ingestion, then corpus extraction, alignment, and watermark persistence.',
-        parameters: [{ name: 'options', description: 'cooperative cancellation.' }],
-        returns: 'the per-scope run report.',
-      },
-      {
-        signature: 'async latestRun(): Promise<KgBuildRunRecord | undefined>',
-        description: 'The newest persisted build-run ledger row (the report evidence that outlives the process).',
-        parameters: [],
-        returns: 'the row, or undefined before the first persisted run.',
-      },
-      {
-        signature: 'async runIncremental(options: RunOptions = {}): Promise<KgIncrementalReport>',
-        description: 'One incremental pass: snapshot the five source systems\' watermark rows, run the pipeline, and diff the snapshots — the per-scope evidence that only changed scopes reprocessed (unchanged scopes fingerprint-skip inside run(); this wraps the run with the before/after diff the incremental acceptance reads).',
-        parameters: [{ name: 'options', description: 'cooperative cancellation.' }],
-        returns: 'the run report plus the changed-scope list.',
-      },
-      {
-        signature: 'async qualityReport(): Promise<KgQualityReadout>',
-        description: 'The live quality readout: structural counters straight from the store, plus the persisted metrics\' coverage document.',
-        parameters: [],
-        returns: 'the quality report.',
-      },
-      {
-        signature: 'async mappings(): Promise<KgMappingsReadout>',
-        description: 'The mappings read-out: the loaded file\'s shape plus the last run\'s per-collection outcome (the graph tab\'s rule panel and the apiproxy `kg.mappings` read this).',
-        parameters: [],
-        returns: 'the mappings readout.',
-      },
-    ],
-  },
-  {
     key: 'lakehouse',
     summary: 'The lakehouse service.',
     description: 'The lakehouse service. Registered as `ctx.lakehouse` (one instance per context).\n\nCatalog selection (resolved at execution time, never order-dependent):\n\n- A configured id that is registered and `available()` → that catalog.\n- A configured id not registered → `LAKEHOUSE_CATALOG_CONFIGURED_MISSING`.\n- A configured id registered but unavailable → `LAKEHOUSE_CATALOG_CONFIGURED_UNAVAILABLE`.\n- No id configured, exactly one registered usable catalog → that catalog.\n- No id configured, multiple usable catalogs → `LAKEHOUSE_CATALOG_AMBIGUOUS`.\n- No id configured, no usable catalog → `LAKEHOUSE_CATALOG_UNAVAILABLE`.\n\nEngine selection mirrors those five branches with `LAKEHOUSE_ENGINE_*` codes. The engine has no degraded substitution: with no usable engine the catalog surface (`listTables`, `stats`, `usage`) keeps working while `load` and `query` fail loud with `LAKEHOUSE_ENGINE_UNAVAILABLE`.',
@@ -1472,6 +1489,148 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         description: 'Read the stored transfer trail through the resolved catalog, newest first — the delivery-tracking read behind the connector page\'s timeline.',
         parameters: [{ name: 'limit', description: 'maximum number of records to return.' }, { name: 'signal', description: 'cancellation signal.' }],
         returns: 'the most recent transfer entries.',
+      },
+    ],
+  },
+  {
+    key: 'lakehouseEngine',
+    summary: 'The lakehouse engine service.',
+    description: 'The lakehouse engine service. One instance per context; the DuckDB native module loads in LakehouseEngineService.open, never at module top level, so a missing binding degrades to `available() === false` (every surface method then fails loud with `LAKEHOUSE_ENGINE_UNAVAILABLE`) instead of breaking composition load.',
+    methods: [
+      {
+        signature: 'available(): boolean',
+        description: 'True when the DuckDB instance is live and the catalog is attached.',
+        parameters: [],
+        returns: 'the liveness check over the instance handle and disposal flag.',
+      },
+      {
+        signature: 'openFailure(): string | undefined',
+        description: 'The recorded native-module or open failure, for diagnostics.',
+        parameters: [],
+        returns: 'the failure message, or undefined when open succeeded or never ran.',
+      },
+      {
+        signature: 'async open(): Promise<void>',
+        description: 'Load the native module, create the `:memory:` instance, and attach the configured catalog. Idempotent and concurrency-safe: concurrent callers share one open. A missing native module leaves the engine unavailable (degraded mode); a catalog attach failure on a working instance is a configuration error and fails loud.',
+        parameters: [],
+      },
+      {
+        signature: 'close(): void',
+        description: 'Close the shared instance; idempotent. Pending connections close with it.',
+        parameters: [],
+      },
+      {
+        signature: 'async query(sql: string, overrides?: Partial<QueryOptions>, signal?: AbortSignal): Promise<LakehouseQueryOutcome>',
+        description: 'Run one read-only SQL statement over the attached lakehouse catalog. The SQL guard rejects anything that is not a single read statement; the row cap and time budget bound the result; references use `lake.<schema>.<table>`.',
+        parameters: [{ name: 'sql', description: 'the statement text.' }, { name: 'overrides', description: 'per-call row/time budget overrides (never above the configured caps).' }, { name: 'signal', description: 'cancellation signal checked before and during execution.' }],
+        returns: 'the columns, JSON-scalar rows cut to the row cap, and the truncation flag.',
+      },
+      {
+        signature: 'async listTables(signal?: AbortSignal): Promise<readonly LakehouseTableSummary[]>',
+        description: 'List every lakehouse table with its live row count, ordered by schema then table. System schemas stay hidden.',
+        parameters: [{ name: 'signal', description: 'cancellation signal.' }],
+        returns: 'one summary per visible table with its live row count.',
+      },
+      {
+        signature: 'async describeTable(schema: string, table: string, signal?: AbortSignal): Promise<readonly LakehouseColumnDesc[]>',
+        description: 'Describe one lakehouse table: ordered column names and DuckDB types.',
+        parameters: [{ name: 'schema', description: 'the table\'s schema inside the lakehouse catalog.' }, { name: 'table', description: 'the table name.' }, { name: 'signal', description: 'cancellation signal.' }],
+        returns: 'the ordered column descriptors.',
+      },
+      {
+        signature: 'async sampleRows(schema: string, table: string, limit: number, signal?: AbortSignal): Promise<LakehouseQueryOutcome>',
+        description: 'Read up to `limit` sample rows from one lakehouse table, in stable storage order.',
+        parameters: [{ name: 'schema', description: 'the table\'s schema inside the lakehouse catalog.' }, { name: 'table', description: 'the table name.' }, { name: 'limit', description: 'the sample size, cut to the configured row cap.' }, { name: 'signal', description: 'cancellation signal.' }],
+        returns: 'the sample rows as one query outcome.',
+      },
+      {
+        signature: 'async createSchema(schema: string, signal?: AbortSignal): Promise<void>',
+        description: 'Create a schema inside the lakehouse catalog when absent.',
+        parameters: [{ name: 'schema', description: 'the schema name (a validated identifier).' }, { name: 'signal', description: 'cancellation signal.' }],
+      },
+      {
+        signature: 'async ingestParquet(schema: string, table: string, parquetPath: string, signal?: AbortSignal): Promise<void>',
+        description: 'Replace one lakehouse table with the contents of a Parquet file (the legacy ingest path). Same-table re-runs replace, so the operation is idempotent.',
+        parameters: [{ name: 'schema', description: 'target schema inside the lakehouse catalog.' }, { name: 'table', description: 'target table name.' }, { name: 'parquetPath', description: 'the Parquet file to read (workspace-relative or absolute).' }, { name: 'signal', description: 'cancellation signal.' }],
+      },
+      {
+        signature: 'async createSchemaOnlyTable(schema: string, table: string, columns: readonly LakehouseColumnDesc[], signal?: AbortSignal): Promise<void>',
+        description: 'Create one schema-only (zero-row) table from explicit column definitions — the legacy path for source tables that export no data file.',
+        parameters: [{ name: 'schema', description: 'target schema inside the lakehouse catalog.' }, { name: 'table', description: 'target table name.' }, { name: 'columns', description: 'ordered name/type pairs.' }, { name: 'signal', description: 'cancellation signal.' }],
+      },
+      {
+        signature: 'async attachPostgres(alias: string, dsn: string, signal?: AbortSignal): Promise<void>',
+        description: 'Attach a PostgreSQL database read-only under one alias, for the sync pipeline\'s source reads. The attach is `READ_ONLY`, so no statement on this alias can mutate the source.',
+        parameters: [{ name: 'alias', description: 'the attach alias (a validated identifier).' }, { name: 'dsn', description: 'the libpq connection string.' }, { name: 'signal', description: 'cancellation signal.' }],
+      },
+      {
+        signature: 'async detach(alias: string, signal?: AbortSignal): Promise<void>',
+        description: 'Drop one attached source alias; a missing alias is a no-op.',
+        parameters: [{ name: 'alias', description: 'the attached source alias.' }, { name: 'signal', description: 'caller cancellation.' }],
+      },
+      {
+        signature: 'async replaceTableFromSource(schema: string, table: string, source: SourceTableRef, signal?: AbortSignal): Promise<void>',
+        description: 'Replace one lakehouse table with the full current contents of one attached source table (the full-replace sync mode).',
+        parameters: [{ name: 'schema', description: 'target schema inside the lakehouse catalog.' }, { name: 'table', description: 'target table name.' }, { name: 'source', description: 'the structured source reference.' }, { name: 'signal', description: 'cancellation signal.' }],
+      },
+      {
+        signature: 'async appendIncremental( schema: string, table: string, source: SourceTableRef, watermarkColumn: string, fromValue: string | null, signal?: AbortSignal, ): Promise<number>',
+        description: 'Append the source rows whose watermark column exceeds `fromValue` into one lakehouse table, returning the appended row count. The comparison is type-implicit: the literal is parsed as the column\'s type.',
+        parameters: [{ name: 'schema', description: 'target schema inside the lakehouse catalog.' }, { name: 'table', description: 'target table name.' }, { name: 'source', description: 'the structured source reference.' }, { name: 'watermarkColumn', description: 'the source column holding the change cursor.' }, { name: 'fromValue', description: 'the exclusive lower bound (the persisted watermark).' }, { name: 'signal', description: 'cancellation signal.' }],
+        returns: 'the number of appended rows.',
+      },
+      {
+        signature: 'async readSourceWatermark(source: SourceTableRef, watermarkColumn: string, signal?: AbortSignal): Promise<string | null>',
+        description: 'Read the maximum value of one source table\'s watermark column (the next watermark to persist after a sync pass).',
+        parameters: [{ name: 'source', description: 'the structured source reference.' }, { name: 'watermarkColumn', description: 'the source column holding the change cursor.' }, { name: 'signal', description: 'cancellation signal.' }],
+        returns: 'the maximum value in its DuckDB text form, or null on an empty source.',
+      },
+      {
+        signature: 'async readState(key: string, signal?: AbortSignal): Promise<string | null>',
+        description: 'Read one persisted sync-state value from the lakehouse-internal state table, creating the table on first use.',
+        parameters: [{ name: 'key', description: 'the state key (the sync pipeline namespaces its own keys).' }, { name: 'signal', description: 'cancellation signal.' }],
+        returns: 'the stored value, or null when the key has no entry.',
+      },
+      {
+        signature: 'async writeState(key: string, value: string, signal?: AbortSignal): Promise<void>',
+        description: 'Persist one sync-state value (upsert by key).',
+        parameters: [{ name: 'key', description: 'the state key.' }, { name: 'value', description: 'the value to persist.' }, { name: 'signal', description: 'cancellation signal.' }],
+      },
+      {
+        signature: 'async readInternal( sql: string, signal?: AbortSignal, ): Promise<{ columns: LakehouseColumnDesc[]; rows: (null | boolean | number | string)[][] }>',
+        description: 'Run one engine-internal read (metadata listings, column probing). The statement is constructed exclusively by this package and the sync pipeline — never from model or UI input — so the read-only row cap does not apply; the internal safety cap stays at 100000 rows.',
+        parameters: [{ name: 'sql', description: 'the statement text.' }, { name: 'signal', description: 'cancellation signal.' }],
+        returns: 'the columns and full JSON-scalar row set.',
+      },
+      {
+        signature: 'async execInternal(sql: string, signal?: AbortSignal): Promise<void>',
+        description: 'Run one engine-internal maintenance statement. These statements are constructed exclusively by this package and the sync pipeline — never from model or UI input — so no read-only guard applies.',
+        parameters: [{ name: 'sql', description: 'the statement text.' }, { name: 'signal', description: 'cancellation signal.' }],
+      },
+    ],
+  },
+  {
+    key: 'lakehouseSync',
+    summary: 'The sync service.',
+    description: 'The sync service. One instance per context; every method opens by attaching the source read-only and detaches it at the end, so runs never leave attach state behind.',
+    methods: [
+      {
+        signature: 'lastRun(): SyncRunResult | undefined',
+        description: 'The most recent completed run, for status surfaces.',
+        parameters: [],
+        returns: 'the last run\'s result, or undefined before the first completion.',
+      },
+      {
+        signature: 'async ingestLegacy(signal?: AbortSignal): Promise<LegacyIngestResult>',
+        description: 'Land the legacy B0 export into the lakehouse: every Parquet file becomes a table (same-table re-runs replace — idempotent), and every business table without an export file becomes a schema-only table from the source\'s column metadata, so the resulting table set matches the B0 reconciliation exactly.',
+        parameters: [{ name: 'signal', description: 'cancellation signal.' }],
+        returns: 'the ingest outcome with per-table row counts.',
+      },
+      {
+        signature: 'async runOnce(signal?: AbortSignal): Promise<SyncRunResult>',
+        description: 'Sync every configured table once. Watermark tables append the source rows beyond the persisted cursor and advance it to the source\'s current maximum; replace tables land the full current contents.',
+        parameters: [{ name: 'signal', description: 'cancellation signal.' }],
+        returns: 'the run outcome with per-table modes and watermark movement.',
       },
     ],
   },
@@ -1599,39 +1758,105 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
     ],
   },
   {
-    key: 'orders',
-    summary: 'The orders service: order lifecycle plus the deliverable pipeline, bound to one NocoBase source of truth.',
-    description: 'The orders service: order lifecycle plus the deliverable pipeline, bound to one NocoBase source of truth. Registered as `ctx.orders`.',
+    key: 'neo4jGraph',
+    summary: 'The Neo4j graph store service.',
+    description: 'The Neo4j graph store service. One instance per context; the driver opens lazily-resilient at `open()` and every method fails loud with `NEO4J_DRIVER_UNAVAILABLE` while a missing password or unreachable server keeps the service degraded (one operator warning at composition).',
     methods: [
       {
-        signature: 'async create(request: OrderCreateRequest, signal?: AbortSignal): Promise<OrderRecord>',
-        description: 'Resolve the ordered service, snapshot identity and pricing, and land a `pending` order at the source of truth.',
-        parameters: [{ name: 'request', description: 'the ordered service, brief, and optional client name.' }, { name: 'signal', description: 'caller cancellation.' }],
-        returns: 'the stored pending order.',
+        signature: 'available(): boolean',
+        description: 'True when the driver is live.',
+        parameters: [],
+        returns: 'driver liveness.',
       },
       {
-        signature: 'async get(orderId: number | string, signal?: AbortSignal): Promise<OrderRecord | undefined>',
-        description: 'Read one order by its primary key.',
-        parameters: [{ name: 'orderId', description: 'the NocoBase orders row id.' }, { name: 'signal', description: 'caller cancellation.' }],
-        returns: 'the stored order, or `undefined` when the source has no such row.',
+        signature: 'rowCap(): number',
+        description: 'The read-only query row cap (the truncation marker\'s threshold).',
+        parameters: [],
+        returns: 'the configured row cap.',
       },
       {
-        signature: 'async list(signal?: AbortSignal): Promise<readonly OrderRecord[]>',
-        description: 'List orders (newest rows last, source order, one page).',
-        parameters: [{ name: 'signal', description: 'caller cancellation.' }],
-        returns: 'every stored order row on the page.',
+        signature: 'openFailure(): string | undefined',
+        description: 'The recorded open failure (the degraded-mode operator warning\'s text).',
+        parameters: [],
+        returns: 'the failure text, or undefined after a healthy open.',
       },
       {
-        signature: 'async fulfill(orderId: number | string, signal?: AbortSignal): Promise<OrderRecord>',
-        description: 'Run the deliverable pipeline for one order: transition to `generating`, retrieve kb references, draft the proposal (model stream or the named template fallback), typeset it through expert-pdf, land the PDF under the configured deliverables directory, and write `delivered` with the path back at the source. A failure writes `failed` with the cause and rethrows; a `failed` order may be fulfilled again (retry).',
-        parameters: [{ name: 'orderId', description: 'the NocoBase orders row id.' }, { name: 'signal', description: 'caller cancellation.' }],
-        returns: 'the stored order in `delivered` status.',
+        signature: 'async open(): Promise<void>',
+        description: 'Open the driver and verify connectivity. A missing password or an unreachable server records the failure instead of throwing: the composition stays up and every method fails loud on use.',
+        parameters: [],
       },
       {
-        signature: 'async readDeliverable(orderId: number | string, signal?: AbortSignal): Promise<OrderDeliverableFile>',
-        description: 'Read one delivered order\'s PDF deliverable.',
-        parameters: [{ name: 'orderId', description: 'the NocoBase orders row id.' }, { name: 'signal', description: 'caller cancellation.' }],
-        returns: 'the landed file\'s path and bytes.',
+        signature: 'close(): void',
+        description: 'Close the driver (idempotent).',
+        parameters: [],
+      },
+      {
+        signature: 'async runReadOnly(cypher: string, params?: Readonly<Record<string, unknown>>): Promise<readonly Record<string, unknown>[]>',
+        description: 'Run one guarded read-only Cypher statement and collect rows.',
+        parameters: [{ name: 'cypher', description: 'the statement text (guard-refused statements throw).' }, { name: 'params', description: 'the statement parameters.' }],
+        returns: 'the collected rows (capped at the configured max).',
+        throws: ['{@link GraphNeo4jError} `NEO4J_DRIVER_UNAVAILABLE` when degraded, `NEO4J_QUERY_FAILED` on driver errors.'],
+      },
+      {
+        signature: 'async runWrite(cypher: string, params: Readonly<Record<string, unknown>>): Promise<{ readonly applied: number }>',
+        description: 'Run one write statement (the ETL and ontology-store face; never model-facing).',
+        parameters: [{ name: 'cypher', description: 'the write statement.' }, { name: 'params', description: 'the statement parameters.' }],
+        returns: 'the affected counters.',
+        throws: ['{@link GraphNeo4jError} on the same two codes as reads.'],
+      },
+      {
+        signature: 'async health(): Promise<{ readonly ok: boolean; readonly server?: string }>',
+        description: 'Health probe: connectivity plus a one-row round trip.',
+        parameters: [],
+        returns: 'the probe outcome.',
+      },
+      {
+        signature: 'async graphGlobal( limit?: number, ): Promise<{ readonly nodes: readonly GraphNodeView[]; readonly edges: readonly GraphEdgeView[]; readonly truncated: boolean }>',
+        description: 'Read the global graph (capped at the configured node cap).',
+        parameters: [{ name: 'limit', description: 'an explicit cap override.' }],
+        returns: 'nodes and edges with computed degrees.',
+      },
+      {
+        signature: 'async graphLocal( gid: string, hops: number, limit?: number, ): Promise<{ readonly nodes: readonly GraphNodeView[]; readonly edges: readonly GraphEdgeView[]; readonly truncated: boolean }>',
+        description: 'Read one node\'s k-hop neighborhood (the Local Graph query).',
+        parameters: [{ name: 'gid', description: 'the seed node\'s gid.' }, { name: 'hops', description: 'the walk depth (1..3, clamped).' }, { name: 'limit', description: 'the node cap.' }],
+        returns: 'the neighborhood\'s nodes, edges, and truncation flag.',
+      },
+      {
+        signature: 'async graphSearch(query: string, k: number = 10): Promise<readonly GraphNodeHit[]>',
+        description: 'Search nodes by name/gid substring (the graph page\'s locate box).',
+        parameters: [{ name: 'query', description: 'the substring.' }, { name: 'k', description: 'the result cap.' }],
+        returns: 'the name/gid substring hits.',
+      },
+      {
+        signature: 'async nodeDetail(gid: string): Promise<GraphNodeDetail | undefined>',
+        description: 'Read one node\'s detail: properties plus both incident-relation lists (the relations/backlink panel\'s data).',
+        parameters: [{ name: 'gid', description: 'the node\'s gid.' }],
+        returns: 'the node with both relation lists, or undefined when absent.',
+      },
+      {
+        signature: 'async graphStats(): Promise<GraphStatsView>',
+        description: 'Whole-graph stats with the island metric (union-find in TS over the live edge list — the GDS-free connected-component count).',
+        parameters: [],
+        returns: 'the whole-graph counters.',
+      },
+      {
+        signature: 'async storeOntologyVersion(doc: OntologyJsonLdDocument, meta: Pick<OntologyVersionMeta, \'id\' | \'name\' | \'source\'>): Promise<OntologyVersionMeta>',
+        description: 'Append one ontology version to the version chain (never overwrites: the previous head loses its `head` flag and gains a `PREV` link from the new head).',
+        parameters: [{ name: 'doc', description: 'the serialized JSON-LD document.' }, { name: 'meta', description: 'the version\'s identity (id/version/name/source).' }],
+        returns: 'the stored version row (with the minted version number).',
+      },
+      {
+        signature: 'async listOntologyVersions(): Promise<readonly OntologyVersionMeta[]>',
+        description: 'List the ontology version chain (newest first).',
+        parameters: [],
+        returns: 'the chain rows, newest first.',
+      },
+      {
+        signature: 'async getOntologyVersion(id: string): Promise<OntologyJsonLdDocument | undefined>',
+        description: 'Fetch one stored ontology document by version id.',
+        parameters: [{ name: 'id', description: 'the version id.' }],
+        returns: 'the stored JSON-LD document, or undefined when absent.',
       },
     ],
   },
@@ -3629,6 +3854,42 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface CancelOptions {\n    keepInbox?: boolean | undefined;\n}',
   },
   {
+    name: 'CarbonClient',
+    declaration: 'export class CarbonClient {\n    constructor(options: CarbonClientOptions);\n    async authenticate(signal?: AbortSignal): Promise<CarbonSession>;\n    async ensureSession(signal?: AbortSignal): Promise<CarbonSession>;\n    async list<Row = Record<string, unknown>>(table: string, options: CarbonListOptions = {}, signal?: AbortSignal): Promise<CarbonListResult<Row>>;\n    async get<Row = Record<string, unknown>>(table: string, id: string, signal?: AbortSignal): Promise<Row | undefined>;\n    async create<Row = Record<string, unknown>>(table: string, values: Record<string, unknown>, signal?: AbortSignal): Promise<Row>;\n    async update<Row = Record<string, unknown>>(table: string, id: string, values: Record<string, unknown>, signal?: AbortSignal): Promise<Row>;\n    async resolveCompanyId(signal?: AbortSignal): Promise<string>;\n    pinCompanyId(companyId: string): void;\n}',
+  },
+  {
+    name: 'CarbonClientOptions',
+    declaration: 'export interface CarbonClientOptions {\n    readonly baseUrl: string;\n    readonly anonKey: string;\n    readonly email: string;\n    readonly password: string;\n    readonly timeoutMs?: number;\n    readonly refreshSkewMs?: number;\n    readonly fetch?: typeof fetch;\n}',
+  },
+  {
+    name: 'CarbonFilterCondition',
+    declaration: 'export interface CarbonFilterCondition {\n    readonly field: string;\n    readonly op: \'eq\' | \'neq\' | \'gt\' | \'lt\' | \'gte\' | \'lte\' | \'like\' | \'ilike\' | \'in\' | \'is\';\n    readonly value: string | number | boolean | null | readonly (string | number | boolean)[];\n}',
+  },
+  {
+    name: 'CarbonListOptions',
+    declaration: 'export interface CarbonListOptions {\n    readonly filter?: readonly CarbonFilterCondition[];\n    readonly order?: readonly string[];\n    readonly limit?: number;\n    readonly offset?: number;\n    readonly select?: readonly string[];\n}',
+  },
+  {
+    name: 'CarbonListResult',
+    declaration: 'export interface CarbonListResult<Row> {\n    readonly count: number;\n    readonly rows: Row[];\n}',
+  },
+  {
+    name: 'CarbonModuleId',
+    declaration: 'export type CarbonModuleId = \'master\' | \'sales\' | \'purchasing\' | \'inventory\' | \'production\' | \'quality\';',
+  },
+  {
+    name: 'CarbonSession',
+    declaration: 'export interface CarbonSession {\n    readonly accessToken: string;\n    readonly refreshToken: string;\n    readonly expiresAtMs: number;\n    readonly userId: string;\n    readonly email: string;\n}',
+  },
+  {
+    name: 'CarbonTableMeta',
+    declaration: 'export interface CarbonTableMeta {\n    readonly table: string;\n    readonly label: string;\n    readonly module: CarbonModuleId;\n    readonly risk: CarbonTableRisk;\n    readonly order: readonly string[];\n    readonly labelColumn: string;\n    readonly idColumn: string;\n    readonly keyColumns: readonly string[];\n}',
+  },
+  {
+    name: 'CarbonTableRisk',
+    declaration: 'export type CarbonTableRisk = \'read\' | \'write\';',
+  },
+  {
     name: 'CatalogStore',
     declaration: 'export interface CatalogStore {\n    readonly id: string;\n    available(): boolean;\n    registerTable(table: LakehouseTable, signal?: AbortSignal): Promise<{\n        replaced: boolean;\n    }>;\n    listTables(tenantId: string, signal?: AbortSignal): Promise<readonly LakehouseTable[]>;\n    describeTable(tenantId: string, tableName: string, signal?: AbortSignal): Promise<LakehouseTable | undefined>;\n    dropTable(tenantId: string, tableName: string, signal?: AbortSignal): Promise<boolean>;\n    recordTransfer(record: LakehouseTransferRecord, signal?: AbortSignal): Promise<{\n        transferId: number;\n    }>;\n    listTransfers(limit: number, signal?: AbortSignal): Promise<readonly LakehouseTransferEntry[]>;\n    recordUsage(tenantId: string, delta: LakehouseUsageDelta, signal?: AbortSignal): Promise<void>;\n    usage(tenantId: string, signal?: AbortSignal): Promise<LakehouseUsage>;\n}',
   },
@@ -3671,10 +3932,6 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'CollectedOutput',
     declaration: 'export interface CollectedOutput {\n    text: string;\n    truncated: boolean;\n    spillPath?: string;\n}',
-  },
-  {
-    name: 'CollectionRunReport',
-    declaration: 'export interface CollectionRunReport {\n    readonly scope: string;\n    readonly rows: number;\n    readonly nodesUpserted: number;\n    readonly edgesUpserted: number;\n    readonly newRows: number;\n    readonly tombstoned: number;\n    readonly skipped: boolean;\n    readonly watermark: string;\n    readonly contentHash: string;\n    readonly skippedRelationFields: readonly string[];\n}',
   },
   {
     name: 'CommandDefinition',
@@ -3865,10 +4122,6 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export type CordisInspectRequestId = Branded<\'CordisInspectRequestId\'>;',
   },
   {
-    name: 'CorpusReport',
-    declaration: 'export interface CorpusReport {\n    readonly documents: number;\n    readonly chunks: number;\n    readonly extractionCalls: number;\n    readonly extractedEntities: number;\n    readonly extractedRelations: number;\n    readonly degradedEntities: number;\n    readonly droppedRelations: number;\n    readonly mergedEntities: number;\n    readonly tombstonedEdges: number;\n    readonly tombstonedScopes: number;\n    readonly quarantinedEntities: number;\n    readonly quarantinedRelations: number;\n    readonly shaclRounds: number;\n}',
-  },
-  {
     name: 'CreateAgentOptions',
     declaration: 'export interface CreateAgentOptions {\n    readonly sessionId: SessionId;\n    readonly meta?: {\n        readonly cwd?: string;\n        readonly parentSession?: SessionId;\n        readonly seedLength?: number;\n        readonly origin?: \'subagent\';\n        readonly delegationDepth?: number;\n        readonly agentPreset?: string;\n    };\n    readonly seed?: readonly SessionEvent[];\n    readonly agentOptions?: AgentOptions;\n    readonly signal?: AbortSignal;\n    readonly setup?: AgentSetup;\n}',
   },
@@ -3911,10 +4164,6 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'CredentialRef',
     declaration: 'export type CredentialRef = Branded<\'CredentialRef\'>;',
-  },
-  {
-    name: 'CrossSourceAlignReport',
-    declaration: 'export interface CrossSourceAlignReport {\n    readonly docCandidates: number;\n    readonly nocobaseNodes: number;\n    readonly edgesCreated: number;\n    readonly tombstonedEdges: number;\n    readonly judgedPairs: number;\n    readonly rejectedPairs: number;\n    readonly reviewQueue: number;\n    readonly clusters: number;\n}',
   },
   {
     name: 'DiffCallView',
@@ -4153,6 +4402,34 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface GrantRecord {\n    readonly kind: \'grant\';\n    readonly payload: unknown;\n}',
   },
   {
+    name: 'GraphEdgeView',
+    declaration: 'export interface GraphEdgeView {\n    readonly id: string;\n    readonly relation: string;\n    readonly source: string;\n    readonly target: string;\n}',
+  },
+  {
+    name: 'GraphNodeDetail',
+    declaration: 'export interface GraphNodeDetail {\n    readonly node: GraphNodeView;\n    readonly outRelations: readonly GraphNodeRelation[];\n    readonly inRelations: readonly GraphNodeRelation[];\n}',
+  },
+  {
+    name: 'GraphNodeHit',
+    declaration: 'export interface GraphNodeHit {\n    readonly id: string;\n    readonly type: string;\n    readonly name: string;\n    readonly degree: number;\n}',
+  },
+  {
+    name: 'GraphNodeRelation',
+    declaration: 'export interface GraphNodeRelation {\n    readonly relation: string;\n    readonly direction: \'out\' | \'in\';\n    readonly otherId: string;\n    readonly otherName: string;\n    readonly otherType: string;\n}',
+  },
+  {
+    name: 'GraphNodeView',
+    declaration: 'export interface GraphNodeView {\n    readonly id: string;\n    readonly type: string;\n    readonly name: string;\n    readonly props: Readonly<Record<string, GraphPropValue>>;\n    readonly degree: number;\n}',
+  },
+  {
+    name: 'GraphPropValue',
+    declaration: 'export type GraphPropValue = string | number | boolean;',
+  },
+  {
+    name: 'GraphStatsView',
+    declaration: 'export interface GraphStatsView {\n    readonly nodes: number;\n    readonly edges: number;\n    readonly islands: number;\n    readonly largestComponent: number;\n}',
+  },
+  {
     name: 'GraphStore',
     declaration: 'export interface GraphStore {\n    readonly id: string;\n    available(): boolean;\n    putTriples(tenantId: string, triples: readonly KbGraphTriple[], signal?: AbortSignal): Promise<number>;\n    neighbors(tenantId: string, entity: KbGraphEntity, signal?: AbortSignal): Promise<KbGraphStoredTriple[]>;\n    twoHopPaths(tenantId: string, entity: KbGraphEntity, target: KbGraphEntity, signal?: AbortSignal): Promise<KbGraphStoredTriple[]>;\n    searchEntities(tenantId: string, query: string, type: KgNodeTypeId | undefined, k: number, signal?: AbortSignal): Promise<KbGraphEntity[]>;\n    stats(tenantId: string | undefined, signal?: AbortSignal): Promise<{\n        triples: number;\n        entities: number;\n    }>;\n    close(): void;\n}',
   },
@@ -4330,7 +4607,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'KbSearchHit',
-    declaration: 'export interface KbSearchHit {\n    readonly chunkId: number;\n    readonly docId: number;\n    readonly tenantId: string;\n    readonly sourcePath: string;\n    readonly title?: string;\n    readonly docKind: KbDocKind;\n    readonly collectedAt?: string;\n    readonly headingPath?: string;\n    readonly chunkIdx: number;\n    readonly content: string;\n    readonly provenance?: KbProvenance;\n    readonly score?: number;\n}',
+    declaration: 'export interface KbSearchHit {\n    readonly chunkId: number;\n    readonly docId: number;\n    readonly tenantId: string;\n    readonly sourcePath: string;\n    readonly title?: string;\n    readonly docKind: KbDocKind;\n    readonly collectedAt?: string;\n    readonly headingPath?: string;\n    readonly chunkIdx: number;\n    readonly content: string;\n    readonly provenance?: KbProvenance;\n    readonly score?: number;\n    readonly notice?: string;\n}',
   },
   {
     name: 'KbSearchRequest',
@@ -4338,7 +4615,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'KbSearchResult',
-    declaration: 'export interface KbSearchResult {\n    readonly mode: \'hybrid\' | \'text\';\n    readonly embedModel?: string;\n    readonly results: readonly KbSearchHit[];\n}',
+    declaration: 'export interface KbSearchResult {\n    readonly mode: \'hybrid\' | \'text\';\n    readonly embedModel?: string;\n    readonly results: readonly KbSearchHit[];\n    readonly notice?: string;\n}',
   },
   {
     name: 'KbStats',
@@ -4363,18 +4640,6 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'KgBuildRunInput',
     declaration: 'export interface KgBuildRunInput {\n    readonly tenantId: string;\n    readonly startedAt: string;\n    readonly finishedAt: string;\n    readonly report: unknown;\n    readonly metrics: unknown;\n    readonly createdAt: string;\n}',
-  },
-  {
-    name: 'KgBuildRunMetrics',
-    declaration: 'export interface KgBuildRunMetrics {\n    readonly nodes: number;\n    readonly edges: number;\n    readonly islands: number;\n    readonly conflicts: number;\n    readonly nodeCoverage: {\n        readonly numerator: number;\n        readonly denominator: number;\n        readonly ratio: number;\n    };\n    readonly degraded: number;\n    readonly droppedRelations: number;\n    readonly mergedEntities: number;\n    readonly tombstonedEdges: number;\n    readonly computedAt: string;\n}',
-  },
-  {
-    name: 'KgBuildRunRecord',
-    declaration: 'export interface KgBuildRunRecord {\n    readonly id: number;\n    readonly tenant: string;\n    readonly startedAt: string;\n    readonly finishedAt: string;\n    readonly report: KgBuildRunReport;\n    readonly metrics: KgBuildRunMetrics;\n}',
-  },
-  {
-    name: 'KgBuildRunReport',
-    declaration: 'export interface KgBuildRunReport {\n    readonly collections: readonly CollectionRunReport[];\n    readonly lakehouse?: SimpleSourceReport;\n    readonly connector?: SimpleSourceReport;\n    readonly corpus?: CorpusReport;\n    readonly crossSourceAlign?: CrossSourceAlignReport;\n    readonly persistedTypes: number;\n    readonly persistedRelations: number;\n    readonly ruleHits: Readonly<Record<string, number>>;\n    readonly ontologyRevision?: number;\n    readonly buildRunId?: number;\n    readonly metrics?: KgBuildRunMetrics;\n    readonly startedAt: string;\n    readonly finishedAt: string;\n    readonly foodonTypes?: number;\n}',
   },
   {
     name: 'KgBuildRunRow',
@@ -4403,30 +4668,6 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'KgEpisodeSource',
     declaration: 'export type KgEpisodeSource = \'ingest\' | \'ai-edit\' | \'human-edit\' | \'rollback\';',
-  },
-  {
-    name: 'KgIncrementalReport',
-    declaration: 'export interface KgIncrementalReport {\n    readonly report: KgBuildRunReport;\n    readonly changedScopes: readonly KgIncrementalScopeChange[];\n}',
-  },
-  {
-    name: 'KgIncrementalScopeChange',
-    declaration: 'export interface KgIncrementalScopeChange {\n    readonly sourceSystem: string;\n    readonly scope: string;\n    readonly previousRunAt?: string;\n    readonly lastRunAt: string;\n    readonly updated: boolean;\n}',
-  },
-  {
-    name: 'KgMappingCollection',
-    declaration: 'export interface KgMappingCollection {\n    readonly name: string;\n    readonly anchor?: string;\n    readonly titleField?: string;\n    readonly fkLinks?: readonly KgMappingFkLink[];\n}',
-  },
-  {
-    name: 'KgMappingFkLink',
-    declaration: 'export interface KgMappingFkLink {\n    readonly field: string;\n    readonly target: string;\n    readonly relation: string;\n    readonly style?: \'plain-id\' | \'collection-address\';\n}',
-  },
-  {
-    name: 'KgMappingsFile',
-    declaration: 'export interface KgMappingsFile {\n    readonly version: number;\n    readonly sources: readonly {\n        system: \'nocobase\';\n        collections: readonly KgMappingCollection[];\n    }[];\n    readonly rules: {\n        skipHiddenCollections: boolean;\n        emptyFkNoEdge: boolean;\n        derivesTitle: boolean;\n    };\n}',
-  },
-  {
-    name: 'KgMappingsReadout',
-    declaration: 'export interface KgMappingsReadout {\n    readonly file: string;\n    readonly version: number;\n    readonly rules: KgMappingsFile[\'rules\'];\n    readonly collections: readonly {\n        name: string;\n        anchor?: string;\n        titleField?: string;\n        fkLinkCount: number;\n    }[];\n    readonly lastRun?: {\n        finishedAt: string;\n        ruleHits: Readonly<Record<string, number>>;\n        collections: readonly {\n            scope: string;\n            nodesUpserted: number;\n            edgesUpserted: number;\n            skipped: boolean;\n            skippedRelationFields: readonly string[];\n        }[];\n    };\n}',
   },
   {
     name: 'KgNode',
@@ -4485,10 +4726,6 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface KgProvenance {\n    readonly sourceSystem: \'nocobase\' | \'lakehouse\' | \'connector\' | \'kb\' | \'kg-align\' | \'ai-edit\';\n    readonly sourceId: string;\n    readonly extractedAt: string;\n}',
   },
   {
-    name: 'KgQualityReadout',
-    declaration: 'export interface KgQualityReadout {\n    readonly nodes: number;\n    readonly edges: number;\n    readonly islands: number;\n    readonly conflicts: number;\n    readonly coverage?: {\n        readonly numerator: number;\n        readonly denominator: number;\n        readonly ratio: number;\n    };\n    readonly lastRunAt?: string;\n}',
-  },
-  {
     name: 'KgRelation',
     declaration: 'export interface KgRelation {\n    readonly id: KgRelationId;\n    readonly label: string;\n    readonly description?: string;\n    readonly constraints: readonly KgRelationConstraint[];\n    readonly kind: \'object\' | \'hierarchical\';\n    readonly inverseOf?: KgRelationId;\n    readonly foodonPropUri?: string;\n    readonly synonyms?: readonly string[];\n    readonly source: KgOntologySource;\n}',
   },
@@ -4545,6 +4782,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface LakehouseColumn {\n    readonly name: string;\n    readonly sqlType: string;\n}',
   },
   {
+    name: 'LakehouseColumnDesc',
+    declaration: 'export interface LakehouseColumnDesc {\n    readonly name: string;\n    readonly sqlType: string;\n}',
+  },
+  {
     name: 'LakehouseFormat',
     declaration: 'export type LakehouseFormat = \'parquet\' | \'csv\';',
   },
@@ -4559,6 +4800,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'LakehouseProvenance',
     declaration: 'export interface LakehouseProvenance {\n    readonly provider: string;\n    readonly scope?: LakehouseScope;\n    readonly collectedSource?: string;\n}',
+  },
+  {
+    name: 'LakehouseQueryOutcome',
+    declaration: 'export interface LakehouseQueryOutcome {\n    readonly columns: readonly LakehouseColumnDesc[];\n    readonly rows: (null | boolean | number | string)[][];\n    readonly rowCount: number;\n    readonly truncated: boolean;\n}',
   },
   {
     name: 'LakehouseQueryResult',
@@ -4577,6 +4822,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface LakehouseTable {\n    readonly tenantId: string;\n    readonly tableName: string;\n    readonly columns: readonly LakehouseColumn[];\n    readonly format: LakehouseFormat;\n    readonly location: string;\n    readonly rowCount: number;\n    readonly provenance?: LakehouseProvenance;\n    readonly createdAt: string;\n    readonly updatedAt: string;\n}',
   },
   {
+    name: 'LakehouseTableSummary',
+    declaration: 'export interface LakehouseTableSummary {\n    readonly schema: string;\n    readonly table: string;\n    readonly rowCount: number;\n}',
+  },
+  {
     name: 'LakehouseTransferEntry',
     declaration: 'export interface LakehouseTransferEntry extends LakehouseTransferRecord {\n    readonly transferId: number;\n}',
   },
@@ -4591,6 +4840,14 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'LakehouseUsageDelta',
     declaration: 'export interface LakehouseUsageDelta {\n    readonly loadedTables?: number;\n    readonly lakehouseQueries?: number;\n}',
+  },
+  {
+    name: 'LegacyIngestResult',
+    declaration: 'export interface LegacyIngestResult {\n    readonly schema: string;\n    readonly tables: readonly LegacyIngestTableResult[];\n}',
+  },
+  {
+    name: 'LegacyIngestTableResult',
+    declaration: 'export interface LegacyIngestTableResult {\n    readonly table: string;\n    readonly source: \'parquet\' | \'schema-only\';\n    readonly rowCount: number;\n}',
   },
   {
     name: 'LlmAdapter',
@@ -4805,20 +5062,8 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface OneShotSubagentDescriptorData extends SubagentDescriptorBase {\n    readonly mode: \'one-shot\';\n    readonly label?: string;\n}',
   },
   {
-    name: 'OrderCreateRequest',
-    declaration: 'export interface OrderCreateRequest {\n    readonly serviceId: string;\n    readonly brief: string;\n    readonly clientName?: string;\n}',
-  },
-  {
-    name: 'OrderDeliverableFile',
-    declaration: 'export interface OrderDeliverableFile {\n    readonly path: string;\n    readonly bytes: Uint8Array;\n}',
-  },
-  {
-    name: 'OrderRecord',
-    declaration: 'export interface OrderRecord {\n    readonly id: number;\n    readonly orderNo: string;\n    readonly serviceId: string;\n    readonly serviceName: string;\n    readonly price?: string;\n    readonly brief: string;\n    readonly clientName?: string;\n    readonly expertName?: string;\n    readonly expertOrg?: string;\n    readonly status: OrderStatus;\n    readonly error?: string;\n    readonly deliverablePath?: string;\n    readonly deliverableUrl?: string;\n    readonly deliverable?: readonly number[];\n    readonly generatedAt?: string;\n    readonly note?: string;\n    readonly createdAt: string;\n}',
-  },
-  {
-    name: 'OrderStatus',
-    declaration: 'export type OrderStatus = \'pending\' | \'generating\' | \'delivered\' | \'failed\';',
+    name: 'OntologyVersionMeta',
+    declaration: 'export interface OntologyVersionMeta {\n    readonly id: string;\n    readonly version: number;\n    readonly name: string;\n    readonly source: string;\n    readonly createdAt: string;\n    readonly prev?: string;\n}',
   },
   {
     name: 'PermissionSelect',
@@ -4907,6 +5152,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'PruneResult',
     declaration: 'export interface PruneResult {\n    readonly pruned: readonly PrunedEntry[];\n    readonly charsRemoved: number;\n}',
+  },
+  {
+    name: 'QueryOptions',
+    declaration: 'export interface QueryOptions {\n    readonly maxRows: number;\n    readonly timeoutMs: number;\n}',
   },
   {
     name: 'QueryProvider',
@@ -5389,10 +5638,6 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface ShellSandboxInfo {\n    mode: SandboxMode;\n    denied: boolean;\n    enforcement?: SandboxEnforcement;\n    runnerFailed?: boolean;\n}',
   },
   {
-    name: 'SimpleSourceReport',
-    declaration: 'export interface SimpleSourceReport {\n    readonly scope: string;\n    readonly items: number;\n    readonly nodesUpserted: number;\n    readonly edgesUpserted: number;\n    readonly skipped: boolean;\n    readonly contentHash: string;\n}',
-  },
-  {
     name: 'SkillCandidate',
     declaration: 'export interface SkillCandidate extends SkillSummary {\n    readonly rank: number;\n    readonly locator: unknown;\n    readonly path?: string;\n    readonly metadata?: Readonly<Record<string, unknown>>;\n}',
   },
@@ -5443,6 +5688,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'SkillViewOptions',
     declaration: 'export interface SkillViewOptions extends SkillLookupOptions {\n    readonly scope?: ScopeKey | undefined;\n}',
+  },
+  {
+    name: 'SourceTableRef',
+    declaration: 'export interface SourceTableRef {\n    readonly catalog: string;\n    readonly schema: string;\n    readonly table: string;\n}',
   },
   {
     name: 'SpawnTeammateRequest',
@@ -5619,6 +5868,14 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'SurfaceOp',
     declaration: 'export type SurfaceOp = \'append\' | {\n    op: \'replace\';\n    start: number;\n    end: number;\n};',
+  },
+  {
+    name: 'SyncRunResult',
+    declaration: 'export interface SyncRunResult {\n    readonly startedAt: string;\n    readonly finishedAt: string;\n    readonly tables: readonly SyncTableResult[];\n}',
+  },
+  {
+    name: 'SyncTableResult',
+    declaration: 'export interface SyncTableResult {\n    readonly table: string;\n    readonly mode: \'watermark\' | \'replace\';\n    readonly appended: number;\n    readonly watermark: string | null;\n}',
   },
   {
     name: 'SystemPrompt',

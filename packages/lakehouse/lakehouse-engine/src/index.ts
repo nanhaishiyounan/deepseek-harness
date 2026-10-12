@@ -48,16 +48,27 @@ export interface Config {
    * warehouse, and the s3 data-plane credentials.
    */
   readonly catalog?: {
+    /** Catalog member kind: `'ducklake'` (Tier 0) or `'iceberg-rest'` (Tier 1). */
     readonly kind: string
+    /** Tier 0 DuckLake catalog file path (SQLite). */
     readonly catalogPath?: string
+    /** Tier 0 data-directory root for Parquet files; defaults beside the catalog. */
     readonly dataPath?: string
+    /** Tier 1 Iceberg REST catalog URI (Gravitino). */
     readonly restUri?: string
+    /** Tier 1 warehouse identifier. */
     readonly warehouse?: string
+    /** Tier 1 S3 data-plane credentials. */
     readonly s3?: {
+      /** S3 endpoint the Iceberg catalog vends. */
       readonly endpoint: string
+      /** S3 access key id. */
       readonly accessKeyId: string
+      /** S3 secret access key. */
       readonly secretAccessKey: string
+      /** S3 region; rides the catalog's `s3-region` vended config. */
       readonly region?: string
+      /** Force path-style addressing (self-hosted stores); defaults true where vended. */
       readonly pathStyle?: boolean
     }
   }

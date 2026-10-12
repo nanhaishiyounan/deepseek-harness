@@ -162,12 +162,11 @@ export function applyLakehouseListTablesTool(ctx: Context, timeoutMs: number): v
           },
         },
       },
-      render: (_args, value) => [{ type: 'text', text: formatListTablesOutput(value as LakehouseListTablesToolValue) }],
+      render: (_args, value) => [{ type: 'text', text: formatListTablesOutput(value) }],
       presentationMeta: (_args, value) => {
-        const projected = value as LakehouseListTablesToolValue
         return {
-          tables: projected.tables.length,
-          totalRows: projected.tables.reduce((sum, entry) => sum + entry.row_count, 0),
+          tables: value.tables.length,
+          totalRows: value.tables.reduce((sum, entry) => sum + entry.row_count, 0),
         }
       },
     },

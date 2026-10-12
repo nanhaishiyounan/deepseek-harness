@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "dirs": [
+    {
+      "dir": "trade-finance",
+      "kind": "report"
+    },
+    {
+      "dir": "export-compliance",
+      "kind": "regulation"
+    },
+    {
+      "dir": "quality",
+      "kind": "report"
+    },
+    {
+      "dir": "ecommerce",
+      "kind": "report"
+    },
+    {
+      "dir": "cold-chain",
+      "kind": "report"
+    },
+    {
+      "dir": "export-risk",
+      "kind": "report"
+    },
+    {
+      "dir": "market",
+      "kind": "report"
+    },
+    {
+      "dir": "meetings",
+      "kind": "meeting"
+    },
+    {
+      "dir": "process",
+      "kind": "report"
+    },
+    {
+      "dir": "profiles",
+      "kind": "profile"
+    },
+    {
+      "dir": "regulations",
+      "kind": "regulation"
+    },
+    {
+      "dir": "supply",
+      "kind": "report"
+    },
+    {
+      "dir": "cost",
+      "kind": "report"
+    },
+    {
+      "dir": "food-safety",
+      "kind": "regulation"
+    }
+  ]
+}

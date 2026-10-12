@@ -28,7 +28,6 @@ MINIMAX_API_KEY=sk-...
 # 可选覆盖：
 # DSH_KB_TENANT=my-company        # 工具/预设/工作台的租户绑定（默认 demo-food-co）
 # MINIMAX_BASE_URL=https://api.minimaxi.com/v1
-# W3_TERMINAL_BASE=http://内网主机:13110  # 三个操作者终端页 iframe 的引擎服务源（默认 http://127.0.0.1:13110；改后重跑 w4-heal-b3.mts --iframe 生效）
 ```
 
 `DSH_KB_TENANT` 是租户的单一事实源：`cordis.patch.yml` 用它读取 `tool-kb` 的 `tenant`、预设行与 api-gateway 的 `kbTenant`（三处未设置时都回落 `demo-food-co`）。一个部署 = 一个租户；第二家企业起第二个部署、独立数据目录。
@@ -74,19 +73,6 @@ WantedBy=multi-user.target
 
 headless profile 从 argv 取任务，单次任务天然映射到 `systemd-run --unit=kb-task-…` 或 timer 单元；常驻面（Web 工作台，同一组 patch 的 `dsh web`）用同样单元形态换 web 入口。`systemctl enable --now kb-agent` 后用 `journalctl -u kb-agent -f` 验证：fail-loud 的启动诊断会直接打出。
 
-### 夜间任务（制造业链路，可选，W2-B7）
-
-审批引擎 `approval-engine.mts --serve` 可内置夜间链（ROP 补货扫描 → MRP 日结 →〔月末〕月度收发存快照 → KPI 物化；季初月每日幂等重算追加供应商绩效计分），替代外部 cron 逐动词 curl。默认关闭——不带 env 启动时与外部 cron 形态完全一致（零漂移），四动词手动 curl 路径永久保留：
-
-```ini
-# 追加到 [Service] 段（.env 里写三行 EnvironmentFile 亦可）
-Environment=W1_NIGHTLY_ENABLED=true   # 默认 false；仅接受 true/false，非法值启动即拒
-Environment=W1_NIGHTLY_AT=02:30       # HH:MM，默认 02:30；非法值启动即拒
-Environment=W1_NIGHTLY_TZ=Asia/Shanghai  # 默认沪时区（与 KPI 沪日界一致）
-```
-
-要点：任一腿失败记日志后继续下一腿（互不阻断）；`POST :13110/run-nightly` 随时手动触发一次（不占当日去重标记）；进程内标记按天去重，重启可能同日补跑一次——各腿均幂等。内置定时器与外部 cron 二选一，勿双跑。macOS 开发环境的 launchd/cron 演示路径见 QUICKSTART「制造业全链闭环」一节。
-
 ## 6. 升级
 
 停服务 → `git fetch && git checkout <tag>` → `pnpm install && pnpm run build` → 起服务。schema 所有权 fail-loud：异版本知识库文件在启动时被拒，报错信息含盘上版本号——恢复对应备份，不要手改文件。
@@ -105,5 +91,4 @@ v2 备份不会因为升级而重新可读：v3 构建同样拒绝它（schema �
 - `kb.ingest` 读取传入的任意路径：写方法开启后，能到达网关的攻击者可把主机上任何可读文件入库（任意文件读链）。网关只留 localhost 或放在带鉴权的反向代理之后。
 - `.env` 与 SQLite 文件承载租户语料：磁盘级访问控制（专用用户 + 仅属主权限）就是边界。
 - `kb_ingest_url` 默认拒绝私网地址（`allowPrivateNetworks` 默认 false）——对互联网暴露的部署保持默认。
-- `W3_TERMINAL_TOKEN` 未设置时，车间终端/审批设计器的窄端点以 lenient-demo 档裸奔（本机演示默认；`approval-engine --serve` 启动日志与响应标记都会明示）。生产部署必须设置：设后全部终端端点与 `/designer`、`/flow-graph`、`/flow-graph/publish` 改为 strict 档——缺 token/错 token 一律 401（header `x-terminal-token`、query `?token=`，或首次经 URL 注入后由 localStorage 复用）。令牌同为 iframe 宿主页（W3 终端、W5 审批流配置中心）的鉴权通道；`W3_TERMINAL_BASE` 指向引擎服务地址，缺省 `http://127.0.0.1:13110`。
 - 本组合 disable 了 base bundle 的 shell/editor/web 工具行（见 `cordis.patch.yml`）：部署内所有 agent 只从知识库作答。重新启用是明确的组合变更，按变更评审。

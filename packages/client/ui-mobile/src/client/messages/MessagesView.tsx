@@ -286,7 +286,7 @@ export function MessagesView(): JSX.Element {
       </section>
 
       <footer className={css.identityCard}>
-        <span>NocoBase 业务系统 · AI 员工入口</span>
+        <span>DeepSeek Harness 移动端 · AI 同事工作台</span>
         <span>与 PC 工作台共享会话 / 业务表</span>
       </footer>
 

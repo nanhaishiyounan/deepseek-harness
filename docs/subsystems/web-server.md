@@ -29,20 +29,20 @@ Match order is fixed: exact table first, then longest matching prefix, then the 
 ## Config
 
 ```ts type-equiv
-/** Gateway config: the listen address (and the optional NocoBase proxy). */
+/** Gateway config: the listen address (and the optional carbon proxy). */
 interface Config {
   /** Listen host; the two supported values are loopback and all-interfaces. */
   host: '127.0.0.1' | '0.0.0.0'
   /** Listen port; zero requests an OS-assigned port. */
   port: number
   /**
-   * NocoBase origin (scheme + host + port) the `/nocobase` prefix proxies
+   * Carbon ERP origin (scheme + host + port) the `/carbon` prefix proxies
    * to, same-origin, so the business page's external entry can open the
-   * admin UI in a new browser window on the gateway's domain (login state
-   * included). Absent means no proxy route — the unauthenticated gateway
-   * must not proxy a business backend by default.
+   * carbon UI in a new browser window on the gateway's domain. Absent means
+   * no proxy route — the unauthenticated gateway must not proxy a business
+   * backend by default.
    */
-  nocobaseProxyOrigin?: string
+  carbonProxyOrigin?: string
 }
 ```
 

@@ -2,7 +2,7 @@
 
 [English](README.md) | 中文
 
-专家交付物的纯函数中文 PDF 排版库（`@deepseek-ai/dsh-expert-pdf`）：`renderPdf(spec)` 把一份 `DraftSpec` 排版为 PDF 字节——封面页（标题、客户、专家署名、日期、订单号）、正文页按序排布每个章节（标题、自动换行的中英混排段落、参考来源行）、结尾免责声明，以及页面版式（正文页的订单号页眉与"第 x 页/共 y 页"页脚）——字体为子集嵌入的 Noto Sans SC。无 LLM、无文件写入、无插件服务：持有这些职责的起草管线在 `@deepseek-ai/dsh-expert-orders`。
+专家交付物的纯函数中文 PDF 排版库（`@deepseek-ai/dsh-expert-pdf`）：`renderPdf(spec)` 把一份 `DraftSpec` 排版为 PDF 字节——封面页（标题、客户、专家署名、日期、订单号）、正文页按序排布每个章节（标题、自动换行的中英混排段落、参考来源行）、结尾免责声明，以及页面版式（正文页的订单号页眉与"第 x 页/共 y 页"页脚）——字体为子集嵌入的 Noto Sans SC。无 LLM、无文件写入、无插件服务：产出 spec 的起草管线归调用方所有。
 
 ## 排版
 
@@ -11,7 +11,7 @@
 
 ## Model Experience
 
-间接生效：经 `@deepseek-ai/dsh-expert-orders`——起草模型的严格 JSON 输出成为本库排版的 `DraftSpec`。本包自身不注册任何提示词、schema 或工具。
+间接生效：经调用方管线——起草模型的严格 JSON 输出成为本库排版的 `DraftSpec`。本包自身不注册任何提示词、schema 或工具。
 
 #### KV Cache effect
 

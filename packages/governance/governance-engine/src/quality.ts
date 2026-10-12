@@ -17,7 +17,11 @@ export interface QualityQueryEngine {
   query(sql: string): Promise<{ rows: (null | boolean | number | string)[][] }>
 }
 
-/** Validate one rule's fields for its kind before storage or evaluation. */
+/**
+ * Validate one rule's fields for its kind before storage or evaluation.
+ * @param rule - the candidate rule.
+ * @returns the rejection reason, or undefined when valid.
+ */
 export function validateRule(rule: QualityRule): string | undefined {
   const parts = rule.table.split('.')
   if (parts.length !== 3 || parts.some(part => !IDENTIFIER.test(part))) {
@@ -42,7 +46,11 @@ export function validateRule(rule: QualityRule): string | undefined {
   }
 }
 
-/** Compile one rule into its verdict SQL (first cell of the first row). */
+/**
+ * Compile one rule into its verdict SQL (first cell of the first row).
+ * @param rule - the rule to compile.
+ * @returns the verdict SQL.
+ */
 export function ruleSql(rule: QualityRule): string {
   const table = rule.table
   switch (rule.kind) {

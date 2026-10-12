@@ -33,7 +33,6 @@ function mount(state: KbClientState, options: {
   refresh?: () => void
   language?: () => 'zh' | 'en'
   loadOverview?: () => Promise<readonly { id: string; label: string; value: number }[]>
-  loadDeliverables?: () => Promise<readonly { orderNo: string; serviceName: string | undefined; generatedAt: string | undefined }[]>
 } = {}) {
   const store = createSnapshotStore<KbClientState>(state)
   const refresh = options.refresh ?? vi.fn()
@@ -52,7 +51,6 @@ function mount(state: KbClientState, options: {
       loadOverview={options.loadOverview ?? (vi.fn(async () => {
         throw new Error('fixture: overview unconfigured')
       }) as never)}
-      loadDeliverables={options.loadDeliverables ?? (vi.fn(async () => []) as never)}
       t={t}
     />,
   )
@@ -274,16 +272,12 @@ describe('ScenarioView overview home', () => {
       { id: 'dest-count', label: '出口目的地', value: 12 },
       { id: 'price-rises', label: '原料涨价项', value: 7, trend: -2, error: undefined },
     ] as never)
-    const loadDeliverables = vi.fn(async () => [
-      { orderNo: 'ORD-20260917-2c5c436b', serviceName: '海外仓风险应对咨询', generatedAt: '2026-09-17T08:00:00.000Z' },
-    ] as never)
-    mount({ stats: { status: 'ready', usage: READY_USAGE }, records: [] }, { loadOverview, loadDeliverables })
+    mount({ stats: { status: 'ready', usage: READY_USAGE }, records: [] }, { loadOverview })
 
     const band = await screen.findByTestId('overview-band')
     expect(band.textContent).toContain('本月出口额')
     expect(band.textContent).toContain('4,318')
     expect(band.textContent).toContain('▲4.6%')
-    expect(band.textContent).toContain('ORD-20260917-2c5c436b')
     expect(loadOverview).toHaveBeenCalledTimes(1)
 
     // Pin the first featured card: the pinned rail appears above the catalog.
@@ -325,61 +319,40 @@ describe('KbOverviewBand loads', () => {
 
   it('ignores tier settlements that land after unmount', async () => {
     const overview = deferred<readonly object[]>()
-    const deliverables = deferred<readonly object[]>()
     render(
       <KbOverviewBand
         loadOverview={() => overview.promise as never}
-        loadDeliverables={() => deliverables.promise as never}
         t={t}
       />,
     )
-    // Unmount first: the resolves below must stop at the alive guard.
+    // Unmount first: the resolve below must stop at the alive guard.
     cleanup()
     overview.resolve([])
-    deliverables.resolve([])
-    // The reject arm shares the same guard: an orders-less deployment that
+    // The reject arm shares the same guard: a refusing deployment that
     // answers after the tab switch never touches unmounted state either.
     const rejected = deferred<readonly object[]>()
     render(
       <KbOverviewBand
         loadOverview={() => rejected.promise as never}
-        loadDeliverables={() => rejected.promise as never}
         t={t}
       />,
     )
     cleanup()
     rejected.reject(new Error('late'))
-    await Promise.allSettled([overview.promise, deliverables.promise, rejected.promise])
+    await Promise.allSettled([overview.promise, rejected.promise])
   })
 
-  it('renders the per-KPI error line and a bare deliverable row', async () => {
+  it('renders the per-KPI error line', async () => {
     render(
       <KbOverviewBand
         loadOverview={vi.fn(async () => [
           { id: 'no-seed', label: '本月出口额', value: 0, error: 'seed not configured' },
-        ] as never)}
-        loadDeliverables={vi.fn(async () => [
-          { orderNo: 'ORD-BARE', serviceName: undefined, generatedAt: undefined },
         ] as never)}
         t={t}
       />,
     )
     const band = await screen.findByTestId('overview-band')
     await waitFor(() => { expect(band.textContent).toContain(zh['overview.kpiError']) })
-    expect(band.textContent).toContain('ORD-BARE')
-    expect(band.textContent).not.toContain(' · ')
-  })
-
-  it('renders the empty rail when the deliverables read rejects', async () => {
-    render(
-      <KbOverviewBand
-        loadOverview={vi.fn(async () => [] as never)}
-        loadDeliverables={vi.fn(async () => { throw new Error('no orders seam') })}
-        t={t}
-      />,
-    )
-    const band = await screen.findByTestId('overview-band')
-    await waitFor(() => { expect(band.textContent).toContain(zh['overview.deliverablesEmpty']) })
   })
 })
 

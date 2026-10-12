@@ -6,6 +6,7 @@ const zh = {
   'menu.chat.badge': '对话',
 } as const
 
+/** English locale rows for the nav surface. */
 const en = {
   'menu.region': 'Main navigation',
   'menu.chat': 'Chat',

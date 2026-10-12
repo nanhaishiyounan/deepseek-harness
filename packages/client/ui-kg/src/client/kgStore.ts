@@ -2,14 +2,14 @@
  * The graph page's client-session state: the cached ontology legend
  * (`kg.schema`), the canvas graph (one `kg.subgraph` walk or `kg.expand`
  * patch at a time), the seed-search hits, and the quality-panel counters
- * (`kg.stats` extension + `kg.mappings`). Shared by the sidebar entry, the
+ * (`kg.stats`). Shared by the sidebar entry, the
  * view tab, and the tool-row handoff; nothing persists.
  * @module @deepseek-ai/dsh-client-ui-kg/client/kgStore
  */
 
 import { createSnapshotStore, type SnapshotStore } from '@deepseek-ai/dsh-client-runtime/client'
 import type {
-  KgCanvasGraph, KgCommunitiesRow, KgEpisodeRow, KgHistoryRow, KgMappingsRow, KgNodeHitRow,
+  KgCanvasGraph, KgCommunitiesRow, KgEpisodeRow, KgHistoryRow, KgNodeHitRow,
   KgNodeTypeRow, KgQualityRow, KgRelationRow, KgReviewEntryRow,
 } from './kgTypes.ts'
 
@@ -34,8 +34,8 @@ export interface KgClientState {
   readonly canvas: KgCache<KgCanvasGraph & { readonly seeds: readonly string[] }> | undefined
   /** The latest seed search; `undefined` until the user searches. */
   readonly search: KgCache<readonly KgNodeHitRow[]> | undefined
-  /** The quality panel's counters (`kg.stats` extension + `kg.mappings`); `undefined` before the first load. */
-  readonly panel: KgCache<{ quality: KgQualityRow; stats: { triples: number; entities: number }; mappings?: KgMappingsRow }> | undefined
+  /** The quality panel's counters (`kg.stats`); `undefined` before the first load. */
+  readonly panel: KgCache<{ quality: KgQualityRow; stats: { triples: number; entities: number } }> | undefined
   /** The selected node id (details panel); absent when nothing is selected. */
   readonly selected: string | undefined
   /** Type-filter whitelist; `undefined` renders every type. */
@@ -90,8 +90,8 @@ export interface KgClientStore {
   failSearch(message: string): void
   /** Record a quality-panel load start. */
   beginPanel(): void
-  /** Record a successful quality-panel load (stats plus an optional mappings readout). */
-  setPanel(quality: KgQualityRow, stats: { triples: number; entities: number }, mappings?: KgMappingsRow): void
+  /** Record a successful quality-panel load. */
+  setPanel(quality: KgQualityRow, stats: { triples: number; entities: number }): void
   /** Record a failed quality-panel load. */
   failPanel(message: string): void
   /** Select one node (details panel) or clear the selection. */
@@ -194,8 +194,8 @@ export function createKgClientStore(): KgClientStore {
     beginPanel(): void {
       patch({ panel: { status: 'loading' } })
     },
-    setPanel(quality, stats, mappings): void {
-      patch({ panel: { status: 'ready', value: { quality, stats, ...(mappings === undefined ? {} : { mappings }) } } })
+    setPanel(quality, stats): void {
+      patch({ panel: { status: 'ready', value: { quality, stats } } })
     },
     failPanel(message): void {
       patch({ panel: { status: 'error', error: message } })

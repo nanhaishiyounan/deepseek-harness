@@ -118,8 +118,6 @@ export interface KgEdgeRow {
 export interface KgQualityRow {
   readonly islands: number
   readonly conflicts: number
-  readonly coverage?: { readonly numerator: number; readonly denominator: number; readonly ratio: number }
-  readonly last_run_at?: string
 }
 
 /** One collection mapping row from `kg.mappings`. */
@@ -130,24 +128,6 @@ export interface KgMappingRow {
   readonly fkLinkCount: number
 }
 
-/** The `kg.mappings` wire value the panel renders. */
-export interface KgMappingsRow {
-  readonly file: string
-  readonly version: number
-  readonly rules: { readonly skipHiddenCollections: boolean; readonly emptyFkNoEdge: boolean; readonly derivesTitle: boolean }
-  readonly collections: readonly KgMappingRow[]
-  readonly lastRun?: {
-    readonly finishedAt: string
-    readonly ruleHits: Readonly<Record<string, number>>
-    readonly collections: readonly {
-      readonly scope: string
-      readonly nodesUpserted: number
-      readonly edgesUpserted: number
-      readonly skipped: boolean
-      readonly skippedRelationFields: readonly string[]
-    }[]
-  }
-}
 
 /** The `kg.query` response (a walked canvas plus the compiled plan). */
 export interface KgQueryWire {

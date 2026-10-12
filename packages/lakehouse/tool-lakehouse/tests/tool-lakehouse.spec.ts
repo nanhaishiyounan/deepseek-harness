@@ -39,8 +39,12 @@ async function setup(root: string, toolConfig?: Parameters<typeof ToolLakehouse.
 }
 
 /** Invoke one registered tool through the tools runtime, like a model round. */
-async function call(ctx: Context, name: string, args: Record<string, unknown>): Promise<{ isError: boolean; value: unknown; text: string }> {
-  const result = await ctx.tools.execute({ signal, callId: CallId(`call-${String(++counter)}`), name, arguments: args as never })
+async function call(
+  ctx: Context,
+  name: string,
+  args: Record<string, unknown>,
+): Promise<{ isError: boolean; value: unknown; text: string }> {
+  const result = await ctx.tools.execute({ signal, callId: CallId(`call-${String(++counter)}`), name, arguments: args })
   const text = result.content.find(block => block.type === 'text')
   return { isError: result.isError, value: result.value, text: text?.type === 'text' ? text.text : '' }
 }

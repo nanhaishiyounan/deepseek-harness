@@ -7,7 +7,7 @@ import { FALLBACK_NOTICE, WeknoraKbStore } from '../src/store.ts'
 /** Transport-failing client stand-in: every call rejects without a status. */
 class DeadClient extends WeknoraClient {
   constructor() {
-    super({ baseUrl: 'http://dead', apiKey: 'k', fetch: (async () => { throw new TypeError('down') }) as unknown as typeof fetch })
+    super({ baseUrl: 'http://dead', apiKey: 'k', fetch: async () => { throw new TypeError('down') } })
   }
 }
 
@@ -87,44 +87,47 @@ describe('WeknoraKbStore', () => {
 
   it('stores a document into the tenant/category KB, deleting the prior entry', async () => {
     const deleted: string[] = []
-    const client = {
+    const clientMock = {
       listKnowledgeBases: vi.fn(async () => [{ id: 'kb-1', name: 'demo/food-safety' }]),
       createKnowledgeBase: vi.fn(),
       listDocuments: vi.fn(async () => [{ id: 'old', title: '[regulation] food-safety/gb7718.md' }, { id: 'other', title: '[report] quality/x.md' }]),
       deleteKnowledge: vi.fn(async (id: string) => { deleted.push(id) }),
       createManualKnowledge: vi.fn(async () => 'new'),
-    } as unknown as WeknoraClient
+    }
+    const client = clientMock as unknown as WeknoraClient
     const store = withClient(new WeknoraKbStore({ baseUrl: 'http://h', apiKey: 'k' }), client)
     const result = await store.putDocument(documentInput(), chunks('a', 'b'))
     expect(deleted).toEqual(['old'])
-    expect(result).toEqual({ docId: expect.any(Number), chunks: 2, embedded: true })
-    expect(client.createManualKnowledge).toHaveBeenCalledWith('kb-1', '[regulation] food-safety/gb7718.md', 'a\n\nb', undefined)
+    expect(result).toEqual({ docId: expect.any(Number) as unknown, chunks: 2, embedded: true })
+    expect(clientMock.createManualKnowledge).toHaveBeenCalledWith('kb-1', '[regulation] food-safety/gb7718.md', 'a\n\nb', undefined)
   })
 
   it('creates the category knowledge base when missing', async () => {
-    const client = {
+    const clientMock = {
       listKnowledgeBases: vi.fn(async () => []),
       createKnowledgeBase: vi.fn(async () => ({ id: 'kb-2', name: 'demo/food-safety' })),
       listDocuments: vi.fn(async () => []),
       deleteKnowledge: vi.fn(),
       createManualKnowledge: vi.fn(async () => 'n1'),
-    } as unknown as WeknoraClient
+    }
+    const client = clientMock as unknown as WeknoraClient
     const store = withClient(new WeknoraKbStore({ baseUrl: 'http://h', apiKey: 'k' }), client)
     await store.putDocument(documentInput(), chunks('x'))
-    expect(client.createKnowledgeBase).toHaveBeenCalledWith('demo/food-safety', undefined)
+    expect(clientMock.createKnowledgeBase).toHaveBeenCalledWith('demo/food-safety', undefined)
   })
 
   it('routes a pathless source into the general category', async () => {
-    const client = {
+    const clientMock = {
       listKnowledgeBases: vi.fn(async () => [{ id: 'kb-g', name: 'demo/general' }]),
       createKnowledgeBase: vi.fn(),
       listDocuments: vi.fn(async () => []),
       deleteKnowledge: vi.fn(),
       createManualKnowledge: vi.fn(async () => 'n2'),
-    } as unknown as WeknoraClient
+    }
+    const client = clientMock as unknown as WeknoraClient
     const store = withClient(new WeknoraKbStore({ baseUrl: 'http://h', apiKey: 'k' }), client)
     await store.putDocument(documentInput({ sourcePath: 'readme.md', docKind: 'other' }), chunks('x'))
-    expect(client.createManualKnowledge).toHaveBeenCalledWith('kb-g', '[other] readme.md', 'x', undefined)
+    expect(clientMock.createManualKnowledge).toHaveBeenCalledWith('kb-g', '[other] readme.md', 'x', undefined)
   })
 
   it('deletes by decoded source path and reports misses as false', async () => {
@@ -143,7 +146,7 @@ describe('WeknoraKbStore', () => {
   })
 
   it('projects retrieval hits with decoded identity and stable numeric ids', async () => {
-    const client = {
+    const clientMock = {
       listKnowledgeBases: vi.fn(async () => [
         { id: 'kb-1', name: 'demo/food-safety' },
         { id: 'kb-2', name: 'demo/quality' },
@@ -162,10 +165,11 @@ describe('WeknoraKbStore', () => {
         knowledge_filename: 'foreign.pdf',
         content: 'f',
       }]),
-    } as unknown as WeknoraClient
+    }
+    const client = clientMock as unknown as WeknoraClient
     const store = withClient(new WeknoraKbStore({ baseUrl: 'http://h', apiKey: 'k' }), client)
     const hits = await store.textSearch('保质期', 'demo', 8, undefined)
-    expect(client.knowledgeSearch).toHaveBeenCalledWith('保质期', ['kb-1', 'kb-2'], 32, undefined)
+    expect(clientMock.knowledgeSearch).toHaveBeenCalledWith('保质期', ['kb-1', 'kb-2'], 32, undefined)
     expect(hits[0]).toMatchObject({
       sourcePath: 'food-safety/gb7718.md',
       title: 'gb7718.md',
@@ -192,13 +196,14 @@ describe('WeknoraKbStore', () => {
   })
 
   it('returns no hits when the tenant owns no knowledge bases', async () => {
-    const client = {
+    const clientMock = {
       listKnowledgeBases: vi.fn(async () => [{ id: 'kb-9', name: 'elsewhere/x' }]),
       knowledgeSearch: vi.fn(),
-    } as unknown as WeknoraClient
+    }
+    const client = clientMock as unknown as WeknoraClient
     const store = withClient(new WeknoraKbStore({ baseUrl: 'http://h', apiKey: 'k' }), client)
     await expect(store.textSearch('q', 'demo', 8, undefined)).resolves.toEqual([])
-    expect(client.knowledgeSearch).not.toHaveBeenCalled()
+    expect(clientMock.knowledgeSearch).not.toHaveBeenCalled()
   })
 
   it('rejects untenanted searches and stats with a loud error', async () => {
@@ -328,16 +333,17 @@ describe('WeknoraKbStore', () => {
   })
 
   it('routes a leading-slash source into the general category and drops empty basenames', async () => {
-    const client = {
+    const clientMock = {
       listKnowledgeBases: vi.fn(async () => [{ id: 'kb-g', name: 'demo/general' }]),
       createKnowledgeBase: vi.fn(),
       listDocuments: vi.fn(async () => []),
       deleteKnowledge: vi.fn(),
       createManualKnowledge: vi.fn(async () => 'n3'),
-    } as unknown as WeknoraClient
+    }
+    const client = clientMock as unknown as WeknoraClient
     const store = withClient(new WeknoraKbStore({ baseUrl: 'http://h', apiKey: 'k' }), client)
     await store.putDocument(documentInput({ sourcePath: '/edge.md' }), chunks('x'))
-    expect(client.createManualKnowledge).toHaveBeenCalledWith('kb-g', '[regulation] /edge.md', 'x', undefined)
+    expect(clientMock.createManualKnowledge).toHaveBeenCalledWith('kb-g', '[regulation] /edge.md', 'x', undefined)
     const search = {
       listKnowledgeBases: vi.fn(async () => [{ id: 'kb-1', name: 'demo/a' }]),
       knowledgeSearch: vi.fn(async () => [{ id: 'c', knowledge_id: 'k', knowledge_title: '[report] trailing/', content: 'x' }]),
@@ -347,13 +353,14 @@ describe('WeknoraKbStore', () => {
   })
 
   it('returns no vector hits when the tenant owns no knowledge bases', async () => {
-    const client = {
+    const clientMock = {
       listKnowledgeBases: vi.fn(async () => [{ id: 'kb-9', name: 'elsewhere/x' }]),
       hybridSearch: vi.fn(),
-    } as unknown as WeknoraClient
+    }
+    const client = clientMock as unknown as WeknoraClient
     const store = withClient(new WeknoraKbStore({ baseUrl: 'http://h', apiKey: 'k' }), client)
     await expect(store.vectorSearch(new Float32Array(1), 'demo', 8, undefined)).resolves.toEqual([])
-    expect(client.hybridSearch).not.toHaveBeenCalled()
+    expect(clientMock.hybridSearch).not.toHaveBeenCalled()
   })
 
   it('applies the doc-kind filter on the vector path too', async () => {
@@ -435,6 +442,6 @@ describe('WeknoraKbStore', () => {
       usage: async () => ({ searches: 0, ingestedDocuments: 0, ingestedChunks: 0, embedTexts: 0, embedTokens: 0 }),
     }
     const store = new WeknoraKbStore({ baseUrl: 'http://h', apiKey: 'k', fallbackStore: bare })
-    expect(() => store.close()).not.toThrow()
+    expect(() => { store.close() }).not.toThrow()
   })
 })

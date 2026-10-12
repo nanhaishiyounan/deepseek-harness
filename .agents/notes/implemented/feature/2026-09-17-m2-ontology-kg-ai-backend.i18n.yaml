@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-09-17-m2-ontology-kg-ai-backend.md
-2026-09-17-m2-ontology-kg-ai-backend.md: 27c78773eef6907397ac6cc45097052742df949c
-2026-09-17-m2-ontology-kg-ai-backend.zh.md: a70a48bea3f058d6d414390873f98e29830e782f
+2026-09-17-m2-ontology-kg-ai-backend.md: a5a41a6356e15aae052eca677be32f3dcf7000dc
+2026-09-17-m2-ontology-kg-ai-backend.zh.md: e47f74306ea3a87119d3f3fda8da243c2466b7b1

@@ -144,22 +144,29 @@ describe('kg graph page (in-memory seeded store, Chinese UI)', () => {
     await page.setViewportSize({ width: 1280, height: 800 })
     const mid = await viewport.boundingBox()
     expect(mid!.height).toBeGreaterThanOrEqual(360)
-    // Wheel over the canvas is sigma's zoom: the view's own .page scroller
-    // and the session-level scroll body both stay put.
-    const box = (await viewport.boundingBox())!
     const kgPage = page.getByTestId('kg-page')
+    const legend = page.getByText('类型图例')
+    // B5's tall Obsidian canvas holds the whole first screen at this mid
+    // viewport, so both the graph canvas and the side legend start below the
+    // fold — and a wheel at an out-of-viewport coordinate never reaches any
+    // scroller. Center the legend first so both zones are real wheel targets.
+    await legend.evaluate((el) => { el.scrollIntoView({ block: 'center' }) })
+    const box = (await viewport.boundingBox())!
+    // Wheel over the canvas is zoom only: the view's own .page scroller and
+    // the session-level scroll body both hold their positions.
+    const rest = await kgPage.evaluate(el => el.scrollTop)
+    expect(rest).toBeGreaterThan(0)
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
     await page.mouse.wheel(0, -240)
     await page.waitForTimeout(300)
-    expect(await kgPage.evaluate(el => el.scrollTop)).toBe(0)
+    expect(await kgPage.evaluate(el => el.scrollTop)).toBe(rest)
     expect(await page.locator('[data-conversation-scroll]').evaluate(el => el.scrollTop)).toBe(0)
     // Wheel over the side panel (outside the canvas) scrolls .page, and the
     // session-level scroll body still never moves.
-    const legend = page.getByText('类型图例')
     const legendBox = (await legend.boundingBox())!
     await page.mouse.move(legendBox.x + legendBox.width / 2, legendBox.y + 20)
-    await page.mouse.wheel(0, 240)
-    await expect.poll(() => kgPage.evaluate(el => el.scrollTop), { timeout: 10_000 }).toBeGreaterThan(0)
+    await page.mouse.wheel(0, -240)
+    await expect.poll(() => kgPage.evaluate(el => el.scrollTop), { timeout: 10_000 }).toBeLessThan(rest)
     expect(await page.locator('[data-conversation-scroll]').evaluate(el => el.scrollTop)).toBe(0)
   })
 

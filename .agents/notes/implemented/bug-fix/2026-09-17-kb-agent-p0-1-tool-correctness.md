@@ -24,7 +24,7 @@ The restricted vocabulary grows from four operators to five: `includes` maps to 
 
 - `NbFilterOp` + `OPERATOR_KEYS` in `packages/connector/connector-nocobase/src/filter.ts` (the vocabulary source);
 - the `nb_list` schema enum plus tool description, filter description, and system-prompt section in `packages/connector/tool-nocobase/src/read.ts`, each stating「for fuzzy matching use includes (substring match), never like」;
-- the wire view type and zod enum in `packages/host/apiproxy/src/api/nocobase.ts` and `nocobase.schema.ts`, so the RPC domain accepts the same vocabulary it compiles.
+- the wire view type and zod enum in `nocobase.ts`（nocobase API 源文件，B7 退役删除） and `nocobase.schema.ts`, so the RPC domain accepts the same vocabulary it compiles.
 
 ### kg_query's miss message names every supported shape
 

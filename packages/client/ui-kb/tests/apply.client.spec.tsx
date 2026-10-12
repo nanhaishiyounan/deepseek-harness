@@ -1,3 +1,4 @@
+
 // @vitest-environment jsdom
 import { Context } from '@deepseek-ai/cordis'
 import { describe, expect, it, vi } from 'vitest'
@@ -15,10 +16,6 @@ const STATS_VALUE = {
 /** One ok rpc envelope. */
 const ok = <T,>(value: T): { result: { ok: true; value: T } } => ({ result: { ok: true, value } })
 
-/** One refused rpc envelope. */
-const fail = (message: string): { result: { ok: false; error: { message: string } } } => ({
-  result: { ok: false, error: { message } },
-})
 
 /** Boot the client plugin over the slot/locale runtimes and a scripted api face. */
 async function bench() {
@@ -134,9 +131,9 @@ describe('ui-kb apply', () => {
     expect(slots.entries('conversation.session.header.actions').map(entry => entry.options.id)).toContain('kb')
     // The headline seat is single-kind: the entry registers without an id.
     expect(slots.entries('conversation.hero.headline')).toHaveLength(1)
-    // The knowledge-base, connector, and order tool names' keyed holes share row components.
+    // The knowledge-base and connector tool names' keyed holes share row components.
     expect(slots.entries('tool.call.toolview').map(entry => entry.options.key).sort())
-      .toEqual(['connector_discover', 'kb_ingest', 'kb_ingest_url', 'kb_search', 'kb_stats', 'order_create', 'order_status'])
+      .toEqual(['connector_discover', 'kb_ingest', 'kb_ingest_url', 'kb_search', 'kb_stats'])
     // The settings section carries a nav label resolved through zh.
     const sectionEntry = slots.entries('settings.section').find(entry => entry.options.id === 'kb')
     expect(sectionEntry?.options.label).toEqual(expect.any(Function))
@@ -374,79 +371,6 @@ describe('ui-kb apply', () => {
     const scenariosFace = (slots.entries('conversation.view').find(candidate => candidate.options.id === 'scenarios')
       ?.inject as () => { selectScenario: (sessionId: string, scenarioId: string) => Promise<void> })()
     await expect(scenariosFace.selectScenario('s1', 'market-insight')).rejects.toThrow('preset locked')
-    await ctx.fiber.dispose()
-  })
-
-  it('carries overview KPIs and the capped delivered-order rail through the scenarios face', async () => {
-    const { ctx, slots } = await scriptedWorld({
-      lakehouseOverview: vi.fn(async () => ok({
-        generated_at: '2026-09-19T00:00:00.000Z',
-        kpis: [{ id: 'kpi', label: '本月出口额', value: 4318, unit: '万美元' }],
-      })),
-      ordersList: vi.fn(async () => ok({
-        orders: [
-          { order_no: 'ORD-1', service_name: '海外仓风险应对咨询', generated_at: '2026-09-17T08:00:00.000Z' },
-          { order_no: 'ORD-2', service_name: undefined, generated_at: '2026-09-16T08:00:00.000Z' },
-          { order_no: 'ORD-3', service_name: '工艺参数复核', generated_at: undefined },
-          ...Array.from({ length: 5 }, (_, index) => ({
-            order_no: `ORD-${index + 10}`,
-            service_name: '批量',
-            generated_at: `2026-09-1${index}T08:00:00.000Z`,
-          })),
-        ],
-      })),
-    })
-    const scenariosFace = (slots.entries('conversation.view').find(candidate => candidate.options.id === 'scenarios')
-      ?.inject as () => {
-      loadOverview: () => Promise<readonly { id: string }[]>
-      loadDeliverables: () => Promise<readonly { orderNo: string; serviceName: string | undefined; generatedAt: string | undefined }[]>
-    })()
-    await expect(scenariosFace.loadOverview()).resolves.toEqual([
-      { id: 'kpi', label: '本月出口额', value: 4318, unit: '万美元' },
-    ])
-    // Only delivered orders ride the rail, newest-known first, capped at five.
-    await expect(scenariosFace.loadDeliverables()).resolves.toEqual([
-      { orderNo: 'ORD-1', serviceName: '海外仓风险应对咨询', generatedAt: '2026-09-17T08:00:00.000Z' },
-      { orderNo: 'ORD-2', serviceName: undefined, generatedAt: '2026-09-16T08:00:00.000Z' },
-      { orderNo: 'ORD-10', serviceName: '批量', generatedAt: '2026-09-10T08:00:00.000Z' },
-      { orderNo: 'ORD-11', serviceName: '批量', generatedAt: '2026-09-11T08:00:00.000Z' },
-      { orderNo: 'ORD-12', serviceName: '批量', generatedAt: '2026-09-12T08:00:00.000Z' },
-    ])
-    await ctx.fiber.dispose()
-  })
-
-  it('surfaces refused overview and deliverables reads through the scenarios face', async () => {
-    const { ctx, slots } = await scriptedWorld({
-      lakehouseOverview: vi.fn(async () => fail('lakehouse not composed')),
-      ordersList: vi.fn(async () => fail('orders not composed')),
-    })
-    const scenariosFace = (slots.entries('conversation.view').find(candidate => candidate.options.id === 'scenarios')
-      ?.inject as () => {
-      loadOverview: () => Promise<never>
-      loadDeliverables: () => Promise<never>
-    })()
-    await expect(scenariosFace.loadOverview()).rejects.toThrow('lakehouse not composed')
-    await expect(scenariosFace.loadDeliverables()).rejects.toThrow('orders not composed')
-    await ctx.fiber.dispose()
-  })
-
-  it('routes the order toolview requests through the shared view bridge', async () => {
-    const { ctx, slots } = await scriptedWorld({})
-    const seen: string[] = []
-    const headerFace = (slots.entries('conversation.session.header.actions').find(candidate => candidate.options.id === 'kb')
-      ?.inject as () => { publishViewSwitch: (setView: (view: string) => void) => () => void })()
-    headerFace.publishViewSwitch((view: string) => { seen.push(view) })
-    for (const key of ['order_create', 'order_status']) {
-      const entry = slots.entries('tool.call.toolview').find(candidate => candidate.options.key === key)
-      const face = (entry?.inject as () => { requestView: (view: string) => void })()
-      face.requestView('orders')
-    }
-    expect(seen).toEqual(['orders', 'orders'])
-    // The scenarios tab's own request view rides the same bridge.
-    const scenariosFace = (slots.entries('conversation.view').find(candidate => candidate.options.id === 'scenarios')
-      ?.inject as () => { requestView: (view: string) => void })()
-    scenariosFace.requestView('chat')
-    expect(seen).toEqual(['orders', 'orders', 'chat'])
     await ctx.fiber.dispose()
   })
 

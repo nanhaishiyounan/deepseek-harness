@@ -26,6 +26,8 @@
     - tab "Scenarios"
     - tab "Data assets"
     - tab "Connectors"
+    - tab "Lakehouse"
+    - tab "Governance"
     - tab "Graph"
     - tab "Business"
     - tab "Trajectory"

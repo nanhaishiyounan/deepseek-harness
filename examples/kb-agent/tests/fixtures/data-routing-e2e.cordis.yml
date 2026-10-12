@@ -54,6 +54,14 @@
 - id: lakehouse-duckdb
   name: '@deepseek-ai/dsh-lakehouse-duckdb'
 
+- id: lakehouse-engine
+  name: '@deepseek-ai/dsh-lakehouse-engine'
+  config:
+    catalog:
+      kind: ducklake
+      catalogPath: !!js "process.env.LH_TEST_ROOT + '/catalog.ducklake'"
+      dataPath: !!js "process.env.LH_TEST_ROOT + '/files'"
+
 - id: tool-lakehouse
   name: '@deepseek-ai/dsh-tool-lakehouse'
   config:

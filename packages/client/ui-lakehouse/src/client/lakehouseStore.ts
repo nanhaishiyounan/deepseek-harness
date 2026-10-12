@@ -63,7 +63,10 @@ export interface LakehouseClientStore {
   failQuery(message: string): void
 }
 
-/** Create one shared store (the plugin registers it once per session). */
+/**
+ * Create one shared store (the plugin registers it once per session).
+ * @returns the shared lakehouse client store.
+ */
 export function createLakehouseClientStore(): LakehouseClientStore {
   const store = createSnapshotStore<LakehouseClientState>({
     tables: undefined,

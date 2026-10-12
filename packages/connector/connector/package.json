@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-connector",
   "description": "Connector capability seam: provider registry, dataset discovery/fetch, and the five-step transfer orchestration into the kb and lakehouse seams",
-  "version": "0.1.1-rc.2",
+  "version": "1.0.0",
   "publishConfig": {
     "access": "public"
   },

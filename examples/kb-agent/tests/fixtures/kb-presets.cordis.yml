@@ -69,8 +69,19 @@
 - id: lakehouse-duckdb
   name: '@deepseek-ai/dsh-lakehouse-duckdb'
 
+- id: lakehouse-engine
+  name: '@deepseek-ai/dsh-lakehouse-engine'
+  config:
+    catalog:
+      kind: ducklake
+      catalogPath: !!js "process.env.LH_TEST_ROOT + '/catalog.ducklake'"
+      dataPath: !!js "process.env.LH_TEST_ROOT + '/files'"
+
 - id: connector
   name: '@deepseek-ai/dsh-connector'
+
+- id: connector-carbon
+  name: '@deepseek-ai/dsh-connector-carbon'
 
 # The view-tools services the preset tool row resolves outward to (the
 # keyless bench has no gateway; tools fail loud with NO_PROVIDER at execute;

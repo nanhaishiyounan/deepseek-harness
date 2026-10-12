@@ -70,18 +70,6 @@ const SUBGRAPH = {
 }
 
 const STATS_FULL = { triples: 12, entities: 3, islands: 2, conflicts: 1 }
-const MAPPINGS = {
-  file: 'kg-mappings.yml',
-  version: 1,
-  rules: { skipHiddenCollections: true, emptyFkNoEdge: true, derivesTitle: true },
-  collections: [{ name: 'experts', fkLinkCount: 0 }],
-  lastRun: {
-    finishedAt: '2026-09-15T03:00:00.000Z',
-    ruleHits: { R01: 5 },
-    collections: [{ scope: 'experts', nodesUpserted: 12, edgesUpserted: 4, skipped: false, skippedRelationFields: [] }],
-  },
-}
-
 /** One scripted kg api face; every method defaults to a success envelope. */
 function kgFace(overrides: {
   schema?: () => Promise<unknown>
@@ -97,7 +85,6 @@ function kgFace(overrides: {
   ontologyEdit?: () => Promise<unknown>
   history?: () => Promise<unknown>
   query?: () => Promise<unknown>
-  mappings?: () => Promise<unknown>
 } = {}) {
   return {
     schema: vi.fn(overrides.schema ?? (async () => ok({ node_types: TYPES, relations: [] }))),
@@ -131,7 +118,6 @@ function kgFace(overrides: {
       hops: 2,
       restated: '「宏发食品」周边两跳关系',
     }))),
-    mappings: vi.fn(overrides.mappings ?? (async () => ok(MAPPINGS))),
   }
 }
 
@@ -459,63 +445,16 @@ describe('ui-kg apply service fan-out', () => {
     void ctx.fiber.dispose()
   })
 
-  it('loadPanel joins stats with the mappings readout and reports counters alone without it', async () => {
-    const { ctx, revoke, viewFace, storeOf, stats, mappings } = await bench()
+  it('loadPanel reports the structural counters from the stats read', async () => {
+    const { ctx, revoke, viewFace, storeOf, stats } = await bench()
     const face = viewFace()
     ;(face.loadPanel as () => void)()
     const store = storeOf(face)
     await vi.waitFor(() => { expect(store.getSnapshot().panel?.status).toBe('ready') })
     expect(stats).toHaveBeenCalledWith({})
-    expect(mappings).toHaveBeenCalledWith({})
-    expect(store.getSnapshot().panel?.value).toMatchObject({ mappings: { file: 'kg-mappings.yml' } })
-
-    // A deployment without the pipeline answers the mappings readout with a
-    // refusal envelope; the panel keeps the counters alone. A transport
-    // rejection on the same read rides the catch arm to the same result.
-    const bare = await bench({ mappings: async () => fail('mappings-not-composed') })
-    const bareFace = bare.viewFace()
-    ;(bareFace.loadPanel as () => void)()
-    const bareStore = bare.storeOf(bareFace)
-    await vi.waitFor(() => { expect(bareStore.getSnapshot().panel?.status).toBe('ready') })
-    expect(bareStore.getSnapshot().panel?.value?.mappings).toBeUndefined()
-
-    const unreachable = await bench({ mappings: () => Promise.reject(new Error('transport-down')) })
-    const unreachableFace = unreachable.viewFace()
-    ;(unreachableFace.loadPanel as () => void)()
-    const unreachableStore = unreachable.storeOf(unreachableFace)
-    await vi.waitFor(() => { expect(unreachableStore.getSnapshot().panel?.status).toBe('ready') })
-    expect(unreachableStore.getSnapshot().panel?.value?.mappings).toBeUndefined()
+    expect(store.getSnapshot().panel?.value).toMatchObject({ quality: { islands: 2, conflicts: 1 } })
     revoke()
     void ctx.fiber.dispose()
-    void bare.ctx.fiber.dispose()
-    void unreachable.ctx.fiber.dispose()
-  })
-
-  it('loadPanel carries optional coverage and last_run_at only when stats answers them', async () => {
-    const lean = await bench({
-      stats: async () => ok({ triples: 4, entities: 2, islands: 0, conflicts: 0 }),
-    })
-    const leanFace = lean.viewFace()
-    ;(leanFace.loadPanel as () => void)()
-    const leanStore = lean.storeOf(leanFace)
-    await vi.waitFor(() => { expect(leanStore.getSnapshot().panel?.status).toBe('ready') })
-    // The full bench answers coverage + last_run_at; both rides land.
-    const full = await bench({
-      stats: async () => ok({ ...STATS_FULL, coverage: { numerator: 42, denominator: 50, ratio: 0.84 }, last_run_at: '2026-09-15T03:00:00.000Z' }),
-    })
-    const fullFace = full.viewFace()
-    ;(fullFace.loadPanel as () => void)()
-    const fullStore = full.storeOf(fullFace)
-    await vi.waitFor(() => {
-      expect(fullStore.getSnapshot().panel?.status).toBe('ready')
-      expect(fullStore.getSnapshot().panel?.value?.quality)
-        .toMatchObject({ coverage: { numerator: 42 }, last_run_at: '2026-09-15T03:00:00.000Z' })
-    })
-    const leanQuality = leanStore.getSnapshot().panel?.value?.quality
-    expect(leanQuality?.coverage).toBeUndefined()
-    expect(leanQuality?.last_run_at).toBeUndefined()
-    void lean.ctx.fiber.dispose()
-    void full.ctx.fiber.dispose()
   })
 
   it('loadPanel re-entrancy is guarded and a stats refusal fails the panel', async () => {

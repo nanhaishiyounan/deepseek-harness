@@ -45,7 +45,7 @@ export function apply(ctx: Context): void {
     id: 'trajectory',
     // After the kb(10) and market/connectors/kg/business(11-14) seats: the
     // trajectory is a per-session lens, not a business page, so it closes the
-    // ring (plans/nocobase-native-integration/02-design.md §1.1).
+    // ring.
     order: 15,
     locale: NS,
     label: () => t('view.trajectory'),

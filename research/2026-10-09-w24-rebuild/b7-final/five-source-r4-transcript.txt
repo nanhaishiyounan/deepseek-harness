@@ -1,0 +1,151 @@
+DSH Local Build
+4ab1d44
+新会话
+工作区
+deepseek-harness
+NovaSat五源合规风险评估
+刚刚
+NovaSat五源合规风险检查
+3分钟
+NovaSat五源合规风险评估
+21分钟
+NovaSat订单五源合规风险评估
+42分钟
+查询碳系统客户数量及前三个客户名
+1天
+展开其余 38 个会话
+未分组
+对话
+湖仓
+147
+数据治理
+业务管理
+?
+知识库
+59
+数据资产
+3
+连接器
+1
+图谱
+53
+设置
+NovaSat五源合规风险评估
+AI 食安合规官
+59
+Session log
+对话
+知识库
+场景
+数据资产
+连接器
+湖仓
+数据治理
+图谱
+业务管理
+轨迹
+移动端预览
+对客户 NovaSat 做一次五源合规风险检查，严格按以下五步依次使用对应数据源的工具完成：
+第1步【业务系统】先用 cb_collections 查看 carbon 业务表目录，再用 cb_list 查询 customer 或 salesOrder 表，找出客户 NovaSat 的记录与订单。
+第2步【知识库】用 kb_search 检索食品原料收货检验/入库验收的 HACCP 或食品安全合规要求。
+第3步【湖仓】用 lakehouse_list_tables 与 lakehouse_query 对湖仓中 NovaSat 相关订单物料做数量与金额汇总（可先 lakehouse_schema 看列）。
+第4步【图谱】用 kg_graph_query（或 kg_subgraph）查 NovaSat 在图谱中的一跳邻域实体。
+第5步【本体】用 kg_ontology 给出物料/订单域的本体 schema 摘要（类、属性、关系）。
+最后综合五源信息给出 NovaSat 订单的合规风险评估结论。
+22:10
+上下文注入
+@deepseek-ai/dsh-system-prompt
+上下文注入
+view-context
+Think
+用户要求对客户 NovaSat 做一次五源合规风险检查,严格按五步依次进行:
+
+我严格按五步顺序执行 NovaSat 五源合规风险检查。先并行发起第一步（业务系统目录、第二步知识库检索、第三步湖仓目录）这三个互不依赖的探查。
+
+失败
+Tool call
+Error: carbon: this deployment resolves no carbon credentials (CARBON_URL/CARBON_ANON_KEY/CARBON_EMAIL/CARBON_PASSWORD); the carbon capability is unavailable
+知识库检索
+食品原料 收货检验 入库验收 HACCP 食品安全 合规要求 · 5 条来源
+Tool call
+lakehouse_list_tables · {}
+Think
+关键发现:
+
+第一步业务系统返回失败(部署无 carbon 凭据),我会在评估结论中如实标注。湖仓里找到 lake.synced_carbon.customer / salesOrder 等候选表。继续推进第3步湖仓 schema、第4步图谱邻域、第5步本体。
+
+Tool call
+lakehouse_schema · synced_carbon
+Tool call
+lakehouse_schema · synced_carbon
+失败
+Tool call
+Error: kg_subgraph: no graph entity matches any seed (NovaSat); try kg_schema to browse types or a more exact name
+失败
+Tool call
+Error: neo4j-graph: the password env is not set; the graph store is unavailable
+Think
+重要发现:
+
+图谱服务完全不可用(neo4j-graph 密码未配置),第4、5步都将失败。我现在并行推进湖仓查询 NovaSat 的订单与物料汇总,并对图谱换名再试一次以确认。
+
+数仓查询
+7 行 · 数据表 synced_carbon.salesOrder
+Tool call
+lakehouse_schema · synced_carbon
+失败
+Tool call
+Error: kg_subgraph: no graph entity matches any seed (NovaSat Networks); try kg_schema to browse types or a more exact name
+Think
+关键发现:
+
+关键发现:NovaSat 实际是航空航天/卫星硬件客户(从物料表 BAT-LIION-48V、RW-010、ST-050 等可见),非食品行业。继续获取订单全部字段(含金额)以及统计。
+
+数仓查询
+29 行 · 数据表 lakehouse
+数仓查询
+4 行 · 数据表 lakehouse
+数仓查询
+51 行 · 数据表 lakehouse
+Think
+关键确认:
+
+synced_carbon.salesOrder 只有订单头(无金额/数量列)。我做订单状态汇总,并查 legacy_nocobase 的订单行项,看能否补齐金额。
+
+数仓查询
+6 行 · 数据表 synced_carbon.salesOrder
+Tool call
+lakehouse_schema · legacy_nocobase
+Tool call
+lakehouse_schema · legacy_nocobase
+Think
+重要结论:
+
+NovaSat 实质上是航空航天/卫星硬件客户(物料表中 BAT-LIION-48V、RW-010、ST-050 等均为卫星零部件),不在 GB 2760 / GB 14881 / HACCP 食品原料收货检验的适用范围内,这是评估结论的关键反差点。下面以报告卡片输出五源合规风险评估。
+
+失败
+Tool call
+Error: invalid arguments: payload 应为九类卡片载荷对象或其 JSON 字符串，收到的字符串无法解析为 JSON（前32字：{
+Think
+JSON 解析失败,可能是因为我的 JSON 字符串中有嵌套的"rows"误把 actions 块截断。我重新组织 JSON,保持结构正确。让我检查:`rows` 数组结束是 `]`,后面接 `,` 然后 `"actions": [...]`。但我的 actions 在数组里用的是紧凑格式 `{"kind": "view", ...}`。问题可能是转义不当。
+
+JSON 解析失败,我重新生成结构紧凑的卡片载荷。
+
+本答案来自
+文档 ×5
+数仓 synced_carbon.salesOrder
+仅可从已完成轮次的最后一条消息分支
+22:11 · 用时 59秒 · 首 token 0.7秒 · 171 tok/s
+失败
+Tool call
+Error: invalid arguments: payload.v 缺失（必填字段）
+Think
+缺少 `v` 字段。卡片载荷需要 v: 3。让我加上。
+Tool call
+present_card · {"v":3,"type":"report","id":"novasat-five-source-compliance-2026-10","title":"NovaSat 五源合规风险评估报告","subtitle":"客户 NovaSat Networks(USD,卫星硬件)·五源数据联动审查","metrics":[{"label":"源可用性","value":"3/5","kind":"count","tone":"warning"},{"label":"销售订单数","value":"7","kind":"count","tone":"positive"},{"label":"未结订单","value":"4","kind":"count","tone":"warning"},{"label":"业务适配度","value":"不适用","kind":"text","tone":"danger"}],"rows":[{"label":"业务系统 cb_collections","hint":"失败:carbon 凭据未配置,无法读 ERP 行项金额;湖仓 synced_carbon.salesOrder 已代偿出订单头","level":"high"},{"label":"知识库 kb_search","hint":"命中 5 条 [1]-[5];[3] lvyuan-ingredients、[5] hongfa-food 明确 HACCP/GB 14881/GB 2760 收货检验要求,但均针对食品行业","level":"low"},{"label":"湖仓汇总","hint":"7 单 USD;Closed 2、To Ship and Invoice 1、To Invoice 1、Invoiced 1、In Progress 1、Confirmed 1;跨度 2025-07-10 至 2026-09-29;taxPercent=0","level":"medium"},{"label":"图谱 kg_subgraph/ontology","hint":"失败:Neo4j 密码未配置;seed 'NovaSat' 与 'NovaSat Networks' 均无匹配节点","level":"high"},{"label":"合规口径错配","hint":"物料 100% 为航空航天/卫星零件(BAT-LIION-48V、PCB-BARE-REV3、RW-010、ST-050、TXRX-SBAND),与食品 GB 2760/GB 14881 适用范围不直接相关,直接套用会得出错误结论","level":"high"}],"table":{"columns":[{"label":"销售订单","kind":"text"},{"label":"状态","kind":"text"},{"label":"订单日","kind":"text"},{"label":"币种","kind":"text"},{"label":"金额可得","kind":"text"}],"rows":[["SO000010","To Ship and Invoice","2026-09-29","USD","否(订单头无金额)"],["SO000011","To Invoice","2026-09-09","USD","否"],["SO000022","In Progress","2026-09-07","USD","否"],["SO000015","Invoiced","2026-08-10","USD","否"],["SO000019","Closed","2026-07-31","USD","否"],["SO000004","Confirmed","2026-03-03","USD","否(超 7 个月未推进)"],["SO000008","Closed","2025-07-10","USD","否"]]},"actions":[{"kind":"view","label":"查看 NovaSat 客户","route":"#/docs/synced_carbon/cust_WkaTXnx4H9LkHPz8A12DFw"},{"kind":"create-task","label":"登记订单尾段异常","title":"审计 NovaSat SO000004(2026-03-03 起 Confirmed 超 7 个月未推进)"},{"kind":"link","label":"出口管制/UN38.3 参考","url":"https://www.bis.doc.gov/index.php/licensing"}]}
+AI 食安合规官
+Workspace Write
+MiniMax-M3
+1 轮 · 8 步| LLM 42.7s · 工具调用 39.1s| 首 token 平均 0.7s · 171 tok/s| 缓存命中 88%| 输入 146K tok · 输出 6.3K tok
+详情
+点击消息流中的工具行查看详情

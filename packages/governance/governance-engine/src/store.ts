@@ -100,7 +100,11 @@ export async function openStore(path: string): Promise<DatabaseSync> {
   return db
 }
 
-/** All recorded lineage edges, ordered by source then target. */
+/**
+ * All recorded lineage edges, ordered by source then target.
+ * @param db - the store handle.
+ * @returns every recorded edge.
+ */
 export function readEdges(db: DatabaseSync): LineageEdge[] {
   return (db.prepare('SELECT source, target, transform, recorded_at FROM lineage_edges ORDER BY source, target').all() as Record<string, unknown>[])
     .map(row => ({ source: text(row.source), target: text(row.target), transform: text(row.transform), recordedAt: text(row.recorded_at) }))
@@ -116,7 +120,11 @@ export function writeEdges(db: DatabaseSync, edges: readonly LineageEdge[]): voi
   for (const edge of edges) upsert.run(edge.source, edge.target, edge.transform, edge.recordedAt)
 }
 
-/** All quality rules in id order. */
+/**
+ * All quality rules in id order.
+ * @param db - the store handle.
+ * @returns every stored rule.
+ */
 export function readRules(db: DatabaseSync): QualityRule[] {
   return (db.prepare('SELECT * FROM quality_rules ORDER BY id').all() as Record<string, unknown>[]).map(ruleOf)
 }
@@ -140,7 +148,12 @@ export function removeRule(db: DatabaseSync, id: string): void {
   db.prepare('DELETE FROM quality_rules WHERE id = ?').run(id)
 }
 
-/** All alert events, newest first. */
+/**
+ * All alert events, newest first.
+ * @param db - the store handle.
+ * @param limit - the maximum number of events returned.
+ * @returns the newest events.
+ */
 export function readEvents(db: DatabaseSync, limit = 200): AlertEvent[] {
   return (db.prepare('SELECT * FROM alert_events ORDER BY at DESC, id DESC LIMIT ?').all(limit) as Record<string, unknown>[]).map(eventOf)
 }

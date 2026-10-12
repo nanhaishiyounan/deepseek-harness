@@ -28,11 +28,11 @@ WMS 引擎在 B3 之后仍留三个缺口：① REST 旁路无拦截（admin 角
 
 ## Evidence
 
-- 引擎 [`nocobase-h5-wms.mts`](../../../../examples/kb-agent/scripts/nocobase-h5-wms.mts)：两集合/六列/两虚拟库位种子、postTransfer/reserve/releaseReservation/consumeReservation/printAtp/postAdjust/scanReorder/postCountAdjust/genCount/assertLedgerBalanced/rebalanceLedger、workflow request 腿重建、`ensureBypassGuard`、`--demo-chain`。
+- 引擎 ``nocobase-h5-wms.mts``：两集合/六列/两虚拟库位种子、postTransfer/reserve/releaseReservation/consumeReservation/printAtp/postAdjust/scanReorder/postCountAdjust/genCount/assertLedgerBalanced/rebalanceLedger、workflow request 腿重建、`ensureBypassGuard`、`--demo-chain`。
 - demo-chain 全绿（移库 ±对/待检禁移负例/预留两段式/超额拒绝/ROP 建议行/盘点回写/对账平衡/403 守卫）：`research/2026-09-25-w-round/b4-psql.txt`（七组只读断言，对账 0 漂移）+ `b4-psql.sh`。
 - 真 workflow 审批链端到端（manual submit 202 → request 回调 :13110 → 引擎回写 +3 → done）：serve 日志含「CNT-B4-WF-908301 adjusted」。
 - 双端截图：`b4-admin-{reservations,reorder,countplan,counts-done}.png` + `b4-mobile-{inventory,reorder,transfer,transfer-receipt}.png`（mobile 三场景真实 LLM：库存查询报告卡 1,915/60/1,815、补货预警卡建议补 480、移库草稿→确认→TRF-20260926-001 落库回执→引擎过账 ±MOVE 对）。
-- [`approval-engine.mts`](../../../../examples/kb-agent/scripts/approval-engine.mts) `--serve` 新增 `/post-count-adjust`、`/scan-reorder`；[`setup-nocobase.mts`](../../../../examples/kb-agent/scripts/setup-nocobase.mts) verify B4 断言块（集合/3 页/列/虚拟区/request 节点/守卫行/对账门禁）。
+- ``approval-engine.mts`` `--serve` 新增 `/post-count-adjust`、`/scan-reorder`；``setup-nocobase.mts`` verify B4 断言块（集合/3 页/列/虚拟区/request 节点/守卫行/对账门禁）。
 
 ## Alternatives considered
 

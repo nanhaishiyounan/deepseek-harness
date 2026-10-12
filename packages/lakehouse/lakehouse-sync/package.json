@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-lakehouse-sync",
   "description": "Lakehouse sync pipeline: scheduled watermark-incremental sync from a read-only PostgreSQL attach into the DuckLake catalog, plus the idempotent legacy-Parquet ingest that lands the B0 export as the permanent lakehouse history",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "publishConfig": {
     "access": "public"
   },

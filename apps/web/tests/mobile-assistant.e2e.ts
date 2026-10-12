@@ -123,11 +123,9 @@ describe('mobile v3+v5 assistant (seeded sessions → fork pick + draft + confir
     await scaffold.close()
   }, 120_000)
 
-  /** Open one seeded chat through the demo login gate. */
+  /** Open one seeded chat — identity-free direct entry (no login gate). */
   async function openChat(sessionId: string): Promise<void> {
     await page.goto(`${scaffold.baseUrl}/mobile#/chat/${sessionId}`, { waitUntil: 'load' })
-    await page.getByPlaceholder('6 位验证码').fill('123456')
-    await page.getByRole('button', { name: '登录', exact: true }).click()
     try {
       await page.locator('main').waitFor({ timeout: 20_000 })
     } catch (error) {
@@ -177,11 +175,14 @@ describe('mobile v3+v5 assistant (seeded sessions → fork pick + draft + confir
     expect(body.includes('"rows"')).toBe(false)
     expect(body.includes('"subtitle"')).toBe(false)
     // The landed card hides behind its receipt; the action badge and the
-    // metric card carry the landing anchor (E1/C3).
+    // metric card carry the landing anchor (E1/C3). The receipt's landing
+    // line states the business label, the row number, and the money metric;
+    // innerText splits each segment onto its own line, so the anchors are
+    // asserted per segment (W24's receipt copy).
     expect(body).toContain('你确认了这张采购单')
-    expect(body).toContain('已登记 · 采购单')
-    expect(body).toContain('¥6,400')
+    expect(body).toContain('采购单已登记')
     expect(body).toContain('1042')
+    expect(body).toContain('¥6,400')
     // The v5 report card carries its business-language surface only: title,
     // metric cells, severity rows, and the action buttons (04 §7.3 #6).
     expect(body).toContain('项目风险')
@@ -250,11 +251,16 @@ describe('mobile v3+v5 assistant (seeded sessions → fork pick + draft + confir
     await openChat(BLANK_SEED_ID)
     await page.getByTestId('welcome-card').waitFor({ timeout: 15_000 })
     // The welcome card carries the identity, capabilities, and starters (01 ⑤A2).
+    // The capability line projects the live form registry (B7 grew it to the
+    // full OTC/manufacturing chain), and the starters ride three registry
+    // picks rather than the retired hand-written pair.
     const card = await page.getByTestId('welcome-card').innerText()
     expect(card).toContain('我是智能填表助手')
-    expect(card).toContain('说一句话就能登记：采购单、供应商登记、质检记录、入库单、出库单、回款记录')
+    expect(card).toContain('说一句话就能登记：采购单、请购单、收货单、供应商登记、质检登记、入库单、出库单、回款记录、移库申请、预留登记、BOM 登记、生产订单、领料登记、报工登记、完工登记、销售订单、预测登记')
+    expect(card).toContain('表单类型我来判断，拿不准会先问你')
     expect(card).toContain('登记一条采购单')
-    expect(card).toContain('登记一条出库单')
+    expect(card).toContain('登记一条请购单')
+    expect(card).toContain('登记一条质检登记')
     // The composer waits empty; no user bubble exists (A1).
     const main = await page.locator('main').innerText()
     expect(main.includes('帮我登记一下')).toBe(false)

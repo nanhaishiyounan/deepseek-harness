@@ -1,6 +1,6 @@
 # dsh-tool-carbon
 
-[English](README.md) | 中文
+English | [中文](README.zh.md)
 
 Model-facing carbon tool suite (`cb_collections`/`cb_list`/`cb_get` reads, `cb_create`/`cb_update` confirmed writes with risk labels from the carbon manifest) over the `ctx.carbon` connector capability.
 

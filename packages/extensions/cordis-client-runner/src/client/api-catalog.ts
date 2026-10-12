@@ -647,7 +647,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'PendingPayloads',
-    declaration: 'export interface PendingPayloads {\n    approval: Omit<Extract<MuxFrame, {\n        type: \'approval/requested\';\n    }>, \'type\' | \'sessionId\'>;\n    question: Omit<Extract<MuxFrame, {\n        type: \'question/requested\';\n    }>, \'type\' | \'sessionId\'>;\n}',
+    declaration: 'export interface PendingPayloads {\n    approval: Omit<Extract<MuxFrame, {\n        type: \'approval/requested\';\n    }>, \'type\' | \'sessionId\'>;\n    question: Omit<Extract<MuxFrame, {\n        type: \'question/requested\';\n    }>, \'type\' | \'sessionId\'>;\n    viewAction: Omit<Extract<MuxFrame, {\n        type: \'view-action/requested\';\n    }>, \'type\' | \'sessionId\'>;\n}',
   },
   {
     name: 'PendingWait',
@@ -787,7 +787,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'StoredEntry',
-    declaration: 'export interface StoredEntry {\n    component: unknown;\n    options: {\n        key?: string;\n        id?: string;\n        order?: number;\n        label?: SlotLabel;\n        priority?: number;\n    };\n    select?: ((owner: never) => unknown) | undefined;\n    inject?: ((...args: never[]) => Record<string, unknown>) | undefined;\n    children?: Readonly<Record<string, SlotSpec<SlotEntryDef>>> | undefined;\n    store?: StoreDecl | undefined;\n    locale?: string | undefined;\n    registrant?: string | undefined;\n}',
+    declaration: 'export interface StoredEntry {\n    component: unknown;\n    options: {\n        key?: string;\n        id?: string;\n        order?: number;\n        label?: SlotLabel;\n        hidden?: boolean;\n        priority?: number;\n    };\n    select?: ((owner: never) => unknown) | undefined;\n    inject?: ((...args: never[]) => Record<string, unknown>) | undefined;\n    children?: Readonly<Record<string, SlotSpec<SlotEntryDef>>> | undefined;\n    store?: StoreDecl | undefined;\n    locale?: string | undefined;\n    registrant?: string | undefined;\n}',
   },
   {
     name: 'StoreFactory',

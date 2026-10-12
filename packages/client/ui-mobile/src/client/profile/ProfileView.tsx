@@ -1,17 +1,17 @@
 /**
- * The me tab (v6「我的」, the design's page-me over the v5 ledger): the
- * identity card (the 54px gradient avatar over the user gradient), the ledger
- * metrics (本月登记 counts this month's submit-receipt fences; 待审核 counts
- * the locally marked review sessions), the recent receipts strip, the
+ * The me tab (v6「我的」): the identity card (the 54px gradient avatar over
+ * the user gradient), the local ledger metrics (本月登记 counts this
+ * month's submit-receipt fences folded from the durable session logs; 待审核
+ * counts the locally marked review sessions), the recent receipts strip, the
  * workspace card, quick-start shortcuts, and the settings in the design's
  * set-group cards (偏好 / 数据与关于) — the dark switch flips data-theme
  * immediately and persists; the run-mode switch, the local notification
  * toggle, and the demo-data cleanup keep their behavior. The footer rides
- * the dashed disclaimer note. Logout confirms first in its own destructive
- * block.
+ * the dashed disclaimer note. The local reset confirms first in its own
+ * destructive block.
  */
 
-import { useEffect, useMemo, useState, useSyncExternalStore, type JSX } from 'react'
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type JSX } from 'react'
 import { Button, Dialog, List, Switch, Toast } from 'antd-mobile'
 import { Bell, Bot, Database, Info, LogOut, Moon, Trash2 } from 'lucide-react'
 import { portalContainer } from '../portal.ts'
@@ -22,7 +22,6 @@ import { createSession } from '../sessionsService.ts'
 import { currentRunMode, setRunMode, type RunMode } from '../runMode.ts'
 import { clearDemoData } from '../demoSeed.ts'
 import { logClientError } from '../hooks.ts'
-import { myMonthlyRegistrations } from '../ledgerService.ts'
 import { subscribeWork, todayStats, workSnapshot } from '../workStore.ts'
 import { pendingReviewSessions } from '../draftStore.ts'
 import { listSessions, readHistory } from '../sessionsService.ts'
@@ -30,12 +29,12 @@ import { foldHistory, type FoldEvent } from '../fold.ts'
 import type { SubmitReceiptPayload } from '../protocol.ts'
 import css from './profile.module.css'
 
-/** Profile props: the identity, the theme pair, and the logout action. */
+/** Profile props: the identity, the theme pair, and the local reset action. */
 export interface ProfileViewProps {
   readonly identity: MobileIdentity
   readonly dark: boolean
   readonly onDarkChange: (dark: boolean) => void
-  readonly onLogout: () => void
+  readonly onReset: () => void
 }
 
 /** One recent receipt strip row. */
@@ -63,7 +62,7 @@ const SHORTCUTS: ReadonlyArray<{ readonly label: string; readonly preset: string
 ]
 
 /** The me tab. */
-export function ProfileView({ identity, dark, onDarkChange, onLogout }: ProfileViewProps): JSX.Element {
+export function ProfileView({ identity, dark, onDarkChange, onReset }: ProfileViewProps): JSX.Element {
   const [monthlyCount, setMonthlyCount] = useState<number | undefined | 'error'>(undefined)
   const [recent, setRecent] = useState<readonly ReceiptStripRow[] | undefined>(undefined)
   const [starting, setStarting] = useState(false)
@@ -74,6 +73,8 @@ export function ProfileView({ identity, dark, onDarkChange, onLogout }: ProfileV
   /** The resolved run mode (live=true); the explicit switch is synchronous. */
   const [liveMode, setLiveMode] = useState(false)
   const [notify, setNotify] = useState(false)
+  /** Ledger-read liveness flag: flips false on cleanup so a late answer never lands. */
+  const ledgerAlive = useRef(true)
 
   useEffect(() => {
     let alive = true
@@ -81,50 +82,37 @@ export function ProfileView({ identity, dark, onDarkChange, onLogout }: ProfileV
     return () => { alive = false }
   }, [])
 
-  // 本月登记 (W6-B1 G3): the server projection — the month's wfl submit
-  // records by the signed-in user (myMonthlyRegistrations), reconciling with
-  // NocoBase across devices and surviving a cleared local store. The recent
-  // receipts strip keeps folding the durable session log (the strip links
-  // back into chats). The two reads settle independently (W6-R1 allSettled):
-  // a failed server projection no longer takes the local receipts strip down
-  // with it, and each failed leg leaves its own error trace.
+  // 近期登记 counts the submit-receipt fences folded from the durable
+  // session logs (the retired server projection is gone with the NocoBase
+  // wire); the recent receipts strip links back into chats. A failed history
+  // read degrades to the empty strip with its own trace.
   useEffect(() => {
-    let alive = true
+    ledgerAlive.current = true
     void (async () => {
-      const [countLeg, receiptsLeg] = await Promise.allSettled([
-        myMonthlyRegistrations(identity.username),
-        listSessions().then(async (sessions) => {
-          const rows = sessions
-            .filter(row => row.agentPreset === 'mobile-form-assistant' || row.agentPreset === undefined)
-            .slice(0, 10)
-          const windowOf = async (row: { sessionId: string }): Promise<readonly [string, readonly FoldEvent[]]> =>
-            [row.sessionId, await readHistory(row.sessionId).catch(() => [])]
-          const windows = await Promise.all(rows.map(windowOf))
-          const receipts: ReceiptStripRow[] = []
-          for (const [sessionId, events] of windows) {
-            for (const item of foldHistory(events).items) {
-              if (item.kind !== 'receipt') continue
-              receipts.push({ sessionId, payload: item.payload })
-            }
+      try {
+        const sessions = await listSessions()
+        const rows = sessions
+          .filter(row => row.agentPreset === 'mobile-form-assistant' || row.agentPreset === undefined)
+          .slice(0, 10)
+        const windowOf = async (row: { sessionId: string }): Promise<readonly [string, readonly FoldEvent[]]> =>
+          [row.sessionId, await readHistory(row.sessionId).catch(() => [])]
+        const windows = await Promise.all(rows.map(windowOf))
+        const receipts: ReceiptStripRow[] = []
+        for (const [sessionId, events] of windows) {
+          for (const item of foldHistory(events).items) {
+            if (item.kind !== 'receipt') continue
+            receipts.push({ sessionId, payload: item.payload })
           }
-          return receipts.slice(0, 3)
-        }),
-      ])
-      if (!alive) return
-      if (countLeg.status === 'fulfilled') {
-        setMonthlyCount(countLeg.value)
-      } else {
-        logClientError('ledger.monthly', countLeg.reason)
-        setMonthlyCount('error')
-      }
-      if (receiptsLeg.status === 'fulfilled') {
-        setRecent(receiptsLeg.value)
-      } else {
-        logClientError('ledger.recent', receiptsLeg.reason)
-        setRecent([])
+        }
+        if (!ledgerAlive.current) return
+        setMonthlyCount(receipts.length)
+        setRecent(receipts.slice(0, 3))
+      } catch (reason) {
+        logClientError('ledger.recent', reason)
+        if (ledgerAlive.current) setRecent([])
       }
     })()
-    return () => { alive = false }
+    return () => { ledgerAlive.current = false }
   }, [identity.username])
 
   const startShortcut = async (preset: string): Promise<void> => {
@@ -142,16 +130,16 @@ export function ProfileView({ identity, dark, onDarkChange, onLogout }: ProfileV
     setStarting(false)
   }
 
-  const confirmLogout = (): void => {
+  const confirmReset = (): void => {
     void Dialog.confirm({
-      title: '退出登录',
+      title: '重置本地数据',
       // The sweep (W11-R2) clears drafts, parked outbox messages, and
-      // attachment strips on logout — the dialog names all three families.
-      content: '退出后需重新输入账号密码登录；会话与业务数据保留在服务端；本地草稿、待发消息与附件将被清除。',
-      confirmText: '退出',
+      // attachment strips on reset — the dialog names all three families.
+      content: '将清除本地草稿、待发消息与附件，并把昵称重置为「移动访客」；会话记录保留在服务端。',
+      confirmText: '重置',
       cancelText: '取消',
       getContainer: portalContainer,
-      onConfirm: onLogout,
+      onConfirm: onReset,
     })
   }
 
@@ -165,13 +153,13 @@ export function ProfileView({ identity, dark, onDarkChange, onLogout }: ProfileV
         <Avatar background="var(--dshm-brand)" acronym="我" size={54} className={css.userAva as string} />
         <div className={css.userMain}>
           <span className={css.userName}>{identity.nickname}</span>
-          <span className={css.userMeta}>{identity.username} · 真实账号 · NocoBase 账号体系</span>
+          <span className={css.userMeta}>本地身份 · 免登录直入</span>
         </div>
       </section>
 
       <section className={css.metrics} aria-label="本月台账">
         <div className={css.metricRow}>
-          <span className={css.metricLabel}>本月登记</span>
+          <span className={css.metricLabel}>近期登记</span>
           <span className={css.metricValue}>{monthlyCount === undefined ? '…' : monthlyCount === 'error' ? '读取失败' : `${String(monthlyCount)} 条`}</span>
         </div>
         <div className={css.metricDivider} aria-hidden="true" />
@@ -331,13 +319,13 @@ export function ProfileView({ identity, dark, onDarkChange, onLogout }: ProfileV
           '--text-color': 'var(--dshm-danger)',
           '--border-color': 'transparent',
         }}
-        onClick={confirmLogout}
+        onClick={confirmReset}
       >
         <LogOut size={16} aria-hidden="true" />
-        退出登录
+        重置本地数据
       </Button>
 
-      <footer className={css.disclaimerNote}>DeepSeek Harness 移动端 · NocoBase 业务系统的 AI 员工入口</footer>
+      <footer className={css.disclaimerNote}>DeepSeek Harness 移动端 · AI 同事工作台</footer>
     </div>
   )
 }

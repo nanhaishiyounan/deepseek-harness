@@ -2,6 +2,8 @@
 
 Status: implemented
 
+English | [中文](2026-10-08-w23-b1-button-scale-actions-route-and-alerts-dedup.zh.md)
+
 ## Problem
 
 W23-B0 审计（26 条，`demos/acceptance-w23/audit.md` P0×5 + 用户点名三项）定位三个用户点名根因与两条数据断链：① `tokens.css` 把 antd-mobile 字号刻度映射到展示字阶（`--adm-font-size-10:44px`、`-7:20px`、`-9=display`），large 按钮 44px/44px、small 卡片按钮 20px/40px；② 报告卡 actions 的 view route 由模型自由生成（`#/work/business/pur_orders` 死路由）、「查看待办」做成 create-task、「复制 CSV」做成 send 全文重发；③ 报告标题模板化（persona 示例直接教「本月经营概览」）、0 值指标堆叠、files 页 9 条重复 demo 报告、会话标题 fallback 中文按 UTF-8 字节截断截半词；④ 预警页 50 条通知仅 21 唯一（每扫描日一行堆叠）。

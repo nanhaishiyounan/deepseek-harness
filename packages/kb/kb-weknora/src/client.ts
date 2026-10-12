@@ -68,8 +68,8 @@ export type WeknoraSearchHit = Record<string, unknown>
 /** Combine the caller's signal with the per-request timeout into one signal. */
 function withTimeout(signal: AbortSignal | undefined, timeoutMs: number): { signal: AbortSignal; done: () => void } {
   const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(new DOMException('WeKnora request timed out', 'TimeoutError')), timeoutMs)
-  const forward = (): void => controller.abort(signal?.reason)
+  const timer = setTimeout(() => { controller.abort(new DOMException('WeKnora request timed out', 'TimeoutError')) }, timeoutMs)
+  const forward = (): void => { controller.abort(signal?.reason) }
   if (signal !== undefined) {
     if (signal.aborted) forward()
     else signal.addEventListener('abort', forward, { once: true })

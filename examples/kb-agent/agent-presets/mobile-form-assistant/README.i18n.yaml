@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write examples/kb-agent/agent-presets/mobile-form-assistant/README.md
-README.md: 1aa93bdc98f951277cd7d2404b9bcd4820875e3b
-README.zh.md: 2a876bd6f3680881d9b8818e866e7df588a3b163
+README.md: 1db9109fd040a46dca91c5f88a237a191aa62d64
+README.zh.md: b346f48b3e33080bccb03caa26e3fd276654a9d5

@@ -43,10 +43,13 @@ export type {
 export { CARBON_MODULES, CARBON_TABLES, carbonTableOf } from './catalog.ts'
 export type { CarbonModuleId, CarbonTableMeta, CarbonTableRisk } from './catalog.ts'
 
-/** Environment variables the gateway url and credentials fall back to when config omits them. */
+/** Environment variable the gateway url falls back to when config omits it. */
 export const CARBON_URL_ENV = 'CARBON_URL'
+/** Environment variable the GoTrue anon key resolves through when config omits it. */
 export const CARBON_ANON_KEY_ENV = 'CARBON_ANON_KEY'
+/** Environment variable the service-account email resolves through when config omits it. */
 export const CARBON_EMAIL_ENV = 'CARBON_EMAIL'
+/** Environment variable the service-account password resolves through when config omits it. */
 export const CARBON_PASSWORD_ENV = 'CARBON_PASSWORD'
 
 /** Plugin configuration. */
@@ -92,6 +95,7 @@ export const Config: z<Config> = z.object({
  * no-credentials refusal (the documented degraded mode).
  */
 export class CarbonService extends Service {
+  /** The Carbon client once a session is established, or undefined when degraded. */
   readonly client: CarbonClient | undefined
 
   /**
@@ -105,17 +109,27 @@ export class CarbonService extends Service {
     if (client !== undefined && companyId !== undefined) client.pinCompanyId(companyId)
   }
 
-  /** The credential-backed usability check; `false` in the degraded mode. */
+  /**
+   * The credential-backed usability check.
+   * @returns true when a credential-backed client composed; `false` in the degraded mode.
+   */
   available(): boolean {
     return this.client !== undefined
   }
 
-  /** The live session (authenticating on demand); refused in the degraded mode. */
+  /**
+   * The live session (authenticating on demand).
+   * @param signal - caller cancellation.
+   * @returns the ensured GoTrue session; refused in the degraded mode.
+   */
   async session(signal?: AbortSignal): Promise<CarbonSession> {
     return await this.requireClient().ensureSession(signal)
   }
 
-  /** The business-table catalog projection (module groups in navigation order). */
+  /**
+   * The business-table catalog projection.
+   * @returns the module groups (navigation order) and the full table metadata roster.
+   */
   catalog(): { modules: readonly { id: string; label: string }[]; tables: readonly CarbonTableMeta[] } {
     return { modules: CARBON_MODULES, tables: CARBON_TABLES }
   }
@@ -125,6 +139,7 @@ export class CarbonService extends Service {
    * @param table - the camelCase table name (must be on the catalog).
    * @param options - filters, ordering, paging.
    * @param signal - caller cancellation.
+   * @returns the matched row count and the page of rows.
    */
   async list(
     table: string,
@@ -132,7 +147,7 @@ export class CarbonService extends Service {
     signal?: AbortSignal,
   ): Promise<{ count: number; rows: Record<string, unknown>[] }> {
     const meta = requireTable(table)
-    const result = await this.requireClient().list<Record<string, unknown>>(table, {
+    const result = await this.requireClient().list(table, {
       ...options,
       order: options.order ?? [...meta.order],
     }, signal)
@@ -145,12 +160,13 @@ export class CarbonService extends Service {
    * @param table - the camelCase table name (must be on the catalog).
    * @param id - the row key (`item_WgSb…`, or an itemId for the stock table).
    * @param signal - caller cancellation.
+   * @returns the row, or undefined when no row matches the key.
    */
   async get(table: string, id: string, signal?: AbortSignal): Promise<Record<string, unknown> | undefined> {
     const meta = requireTable(table)
     const client = this.requireClient()
-    if (meta.idColumn === 'id') return await client.get<Record<string, unknown>>(table, id, signal)
-    const result = await client.list<Record<string, unknown>>(table, { filter: [{ field: meta.idColumn, op: 'eq', value: id }], limit: 1 }, signal)
+    if (meta.idColumn === 'id') return await client.get(table, id, signal)
+    const result = await client.list(table, { filter: [{ field: meta.idColumn, op: 'eq', value: id }], limit: 1 }, signal)
     return result.rows[0]
   }
 
@@ -161,13 +177,14 @@ export class CarbonService extends Service {
    * @param table - the camelCase table name (must be on the catalog at write risk).
    * @param values - the row's column values (companyId injected when absent).
    * @param signal - caller cancellation.
+   * @returns the inserted row as the server stored it.
    */
   async create(table: string, values: Record<string, unknown>, signal?: AbortSignal): Promise<Record<string, unknown>> {
     const meta = requireTable(table)
     if (meta.risk !== 'write') {
       throw new Error(`carbon: table ${table} is read-tier (${meta.label}); writes stay on the carbon UI or the composite posting API`)
     }
-    return await this.requireClient().create<Record<string, unknown>>(table, values, signal)
+    return await this.requireClient().create(table, values, signal)
   }
 
   /**
@@ -176,13 +193,14 @@ export class CarbonService extends Service {
    * @param id - the row id.
    * @param values - the columns to change.
    * @param signal - caller cancellation.
+   * @returns the patched row as the server stored it.
    */
   async update(table: string, id: string, values: Record<string, unknown>, signal?: AbortSignal): Promise<Record<string, unknown>> {
     const meta = requireTable(table)
     if (meta.risk !== 'write') {
       throw new Error(`carbon: table ${table} is read-tier (${meta.label}); writes stay on the carbon UI or the composite posting API`)
     }
-    return await this.requireClient().update<Record<string, unknown>>(table, id, values, signal)
+    return await this.requireClient().update(table, id, values, signal)
   }
 
   /** The structured no-credentials refusal text. */

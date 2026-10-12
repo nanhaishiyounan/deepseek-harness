@@ -42,13 +42,15 @@ pnpm dsh web
 
 ### 本地启动
 
-上面的命令面向 harness 本体；整套示例组合——kb-agent（食品产业知识库 agent）跑在 DSH Web 工作台上，配套 NocoBase 业务后台与本地 PostgreSQL——按下述三步在仓库根目录启动。
+上面的命令面向 harness 本体；整套示例组合——kb-agent（食品产业知识 agent）跑在 DSH Web 工作台上，背后是五个 LLM 数据源（湖仓、carbon 业务系统、WeKnora 知识库、本体 registry、Neo4j 图谱）——按下述三步在仓库根目录启动。
 
 | 组件 | 地址 | 职责 |
 |---|---|---|
-| DSH Web 工作台（kb-agent 组合） | http://127.0.0.1:3080 | 对话、知识库、数据资产、连接器、图谱、业务管理 |
-| NocoBase 业务系统（完整 UI） | http://127.0.0.1:13000 | 订单单一事实源，也是可独立使用的业务后台：登录后管理 collections、审批 workflow 与系统设置（初始管理员 admin@nocobase.com / admin123） |
-| PostgreSQL 17 | localhost:5432 | NocoBase 的数据库，由 setup 脚本幂等拉起 |
+| DSH Web 工作台（kb-agent 组合） | http://127.0.0.1:3080 | 对话、知识库、湖仓、连接器、图谱、业务、治理页面 |
+| carbon ERP dev 栈 | http://127.0.0.1:3000 | 业务单一事实源（ERP/MES/QMS）；PostgREST Data API :54321、PostgreSQL :51538 |
+| WeKnora sidecar | <http://127.0.0.1:18080>（UI）、:18081（API） | 知识库检索（RAG）；语料在 `workspace/weknora/` |
+| Neo4j 5.26 | <http://127.0.0.1:7474>、bolt :7687 | 图谱存储（kg 查询与本体物化） |
+| Gravitino + SeaweedFS | <http://127.0.0.1:8090>、S3 :9000（控制台 :9001） | 元数据 catalog 枢纽 + 对象存储（湖仓 Tier1 iceberg） |
 
 1. 安装依赖，并在仓库根目录的 `.env` 写入 `MINIMAX_API_KEY`（对话与向量化共用；无 key 时检索仍可用）：
 
@@ -56,23 +58,24 @@ pnpm dsh web
 pnpm install
 ```
 
-2. 启动 NocoBase。首次执行会在 `platform/nocobase` 内安装依赖（yarn，约 15 分钟）、构建完整 UI 客户端产物（首次约 20 分钟，产物保留、之后启动秒级）、幂等拉起本机 PostgreSQL、初始化五个 collections（含种子数据与审批 workflow），并把 `NOCOBASE_BASE_URL`/`NOCOBASE_API_KEY` 写入 `.env`。`http://127.0.0.1:13000` 即完整业务系统：浏览器打开登录后可管理数据、workflow 与设置，与 DSH 工作台（业务管理页的「高级配置」内嵌同一后台）互为双入口：
+2. 启动五个 sidecar（各自幂等；完整命令、凭据与健康检查见手册）：
 
 ```sh
-node --import tsx/esm examples/kb-agent/scripts/setup-nocobase.mts
-```
-
-日常用 `start` 启动既有安装，用 `verify` 复核（断言完整 UI 可达 + collections + 种子 + workflow + API key；`--env-file=.env` 让 API-key 检查读到凭据）：
-
-```sh
-node --import tsx/esm examples/kb-agent/scripts/setup-nocobase.mts start
-node --env-file=.env --import tsx/esm examples/kb-agent/scripts/setup-nocobase.mts verify
+colima start                                                        # docker runtime
+(cd /Users/mac/Downloads/carbon-main && bash packages/dev/bin/crbn up --no-portless) # carbon dev stack (:3000, :54321, :51538)
+bash workspace/weknora/up.sh up                                     # WeKnora (:18080/:18081, embed-proxy :18082)
+docker start dsh-neo4j                                              # Neo4j (:7474/:7687)
+(cd workspace/governance && docker compose up -d)                   # Gravitino (:8090) + SeaweedFS (:9000/:9001)
 ```
 
 3. 启动 DSH Web 工作台：
 
 ```sh
-DSH_HOME=examples/kb-agent/.dsh pnpm dsh web --patch examples/kb-agent/cordis.patch.yml
+env CARBON_URL=http://127.0.0.1:54321 CARBON_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE1ODE4OTUsImV4cCI6MjEwNjk0MTg5NX0.42nhGia5GsXBtJiW9aP12HCVwOoBmqwiZ3QZ060OU5o CARBON_EMAIL=test@carbon.ms CARBON_PASSWORD=password \
+  DSH_NEO4J_URL=neo4j://localhost:7687 DSH_NEO4J_USER=neo4j DSH_NEO4J_PASSWORD=neo4j-b5-graph \
+  DSH_HOME=examples/kb-agent/.dsh pnpm dsh web --patch examples/kb-agent/cordis.patch.yml
+# carbon/Neo4j credentials ride the launching environment (DSH_* keys must not go in .env);
+# without them cb_*/kg_* answer with structured refusals while kb/lakehouse/MiniMax work from .env
 ```
 
 该命令输出 `dsh web: http://127.0.0.1:3080` 并自动打开浏览器；追加 `--no-open` 跳过打开（完整写法：`dsh web --patch <file> --no-open`）。注意 flag 顺序：`--patch` 等 dsh 启动器 flag 必须写在 web 应用自己的 flag（如 `--no-open`）之前——从第一个启动器不认识的参数起，其余参数原样交给 web 应用。工作台无鉴权，只在本机使用。服务端源码改动（`packages/**/src`）需重启该进程才生效；客户端产物按请求从磁盘重读。

@@ -60,6 +60,5 @@ export const assetsStatsRequestSchema = z.object({}) as unknown as z.ZodType<Wir
 export const assetsStatsValueSchema = z.object({
   products: z.number().int().min(0),
   providers: z.number().int().min(0),
-  monthly_orders: z.number().int().min(0),
   featured: z.array(assetFeaturedSchema),
 })

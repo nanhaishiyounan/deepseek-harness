@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-lakehouse-duckdb",
   "description": "DuckDB query provider for the lakehouse seam: in-process OLAP over Parquet files, with load-time availability probing and clean degradation",
-  "version": "0.1.1-rc.2",
+  "version": "1.0.0",
   "publishConfig": {
     "access": "public"
   },

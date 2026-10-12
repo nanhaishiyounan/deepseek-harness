@@ -1,16 +1,14 @@
 // @vitest-environment jsdom
 // The market view tab: the four-state matrix (loading skeletons, ready
 // catalog, empty guidance, error retry), the featured rail and counters, the
-// search + kind-chip filtering, the asset detail panel with the ask/cite
-// conversation handoff, and the order journey — confirm card (read-only
-// pairs + the single editable brief slot) → placing → receipt with the
-// status badge, plus the failure strip and the not-orderable degradation.
+// search + kind-chip filtering, and the asset detail panel with the ask/cite
+// conversation handoff (the order journey retired with the orders seam).
 
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-runtime/client'
 import type { MarketClientState } from '../src/client/marketStore.ts'
-import type { MarketAssetRow, MarketOrderReceipt } from '../src/client/marketTypes.ts'
+import type { MarketAssetRow } from '../src/client/marketTypes.ts'
 import { MarketView } from '../src/client/MarketView.tsx'
 import { MarketEntry } from '../src/client/MarketEntry.tsx'
 // Type-only: pulls the LocaleNamespaceMap merge so PropsLocale<'market'> resolves.
@@ -30,7 +28,7 @@ const translate = (key: string, params?: Record<string, string | number>): strin
 const t = translate as never
 
 const SERVICE: MarketAssetRow = {
-  provider_id: 'connector-nocobase',
+  provider_id: 'connector-experts',
   dataset_id: 'expert_services/1',
   title: '中亚货运动线方案',
   kind: 'service',
@@ -42,7 +40,7 @@ const SERVICE: MarketAssetRow = {
 }
 
 const EXPERT: MarketAssetRow = {
-  provider_id: 'connector-nocobase',
+  provider_id: 'connector-experts',
   dataset_id: 'experts/1',
   title: '张红喜 · 食品出海关税专家',
   kind: 'expert-profile',
@@ -67,29 +65,15 @@ const READY: MarketClientState = {
     value: {
       products: 3,
       providers: 2,
-      monthly_orders: 1,
       featured: [{ title: '中亚市场准入指南', blurb: '五国准入法规与认证要点', tags: ['出海', '合规'] }],
     },
   },
   catalog: { status: 'ready', value: CATALOG },
-  orders: { status: 'ready', value: [] },
 }
 
-const RECEIPT: MarketOrderReceipt = {
-  id: 7,
-  order_no: 'ORD-20260906-0007',
-  service_name: '中亚货运动线方案',
-  status: 'pending',
-  created_at: '2026-09-06T00:00:00.000Z',
-}
-
-function mount(state: MarketClientState, overrides: {
-  placeOrder?: (asset: MarketAssetRow, brief: string) => Promise<MarketOrderReceipt>
-} = {}) {
+function mount(state: MarketClientState) {
   const store = createSnapshotStore<MarketClientState>(state)
   const refresh = vi.fn()
-  const refreshOrders = vi.fn()
-  const placeOrder = overrides.placeOrder ?? vi.fn(async () => RECEIPT)
   const requestView = vi.fn()
   const setDraft = vi.fn()
   const view = render(
@@ -98,20 +82,18 @@ function mount(state: MarketClientState, overrides: {
       inputActions={{ setDraft } as never}
       useMarket={bindStoreHook(store) as never}
       refresh={refresh}
-      refreshOrders={refreshOrders}
-      placeOrder={placeOrder}
       requestView={requestView}
       t={t}
     />,
   )
-  return { view, refresh, refreshOrders, placeOrder, requestView, setDraft }
+  return { view, refresh, requestView, setDraft }
 }
 
 afterEach(cleanup)
 
 describe('MarketView state matrix', () => {
   it('renders skeletons while the first load is in flight and loads on mount', () => {
-    const { refresh } = mount({ stats: undefined, catalog: undefined, orders: undefined })
+    const { refresh } = mount({ stats: undefined, catalog: undefined })
     expect(refresh).toHaveBeenCalled()
     // The hero copy renders without counters; the catalog zone shows its skeleton.
     expect(screen.getByText(zh['hero.title'])).toBeTruthy()
@@ -120,7 +102,7 @@ describe('MarketView state matrix', () => {
 
   it('renders counters, the featured rail, and the catalog when ready', () => {
     mount(READY)
-    expect(screen.getByText(/数据产品 3 · 供方 2 · 本月成交 1/u)).toBeTruthy()
+    expect(screen.getByText(/数据产品 3 · 供方 2/u)).toBeTruthy()
     expect(screen.getByText('中亚市场准入指南')).toBeTruthy()
     expect(screen.getByText('出海')).toBeTruthy()
     expect(screen.getByText(SERVICE.title)).toBeTruthy()
@@ -133,7 +115,6 @@ describe('MarketView state matrix', () => {
     mount({
       stats: READY.stats,
       catalog: { status: 'ready', value: [] },
-      orders: undefined,
     })
     expect(screen.getByText(zh['catalog.empty'])).toBeTruthy()
     expect(screen.getByText(zh['catalog.emptyHint'])).toBeTruthy()
@@ -143,7 +124,6 @@ describe('MarketView state matrix', () => {
     const { refresh } = mount({
       stats: { status: 'error', error: 'assets-not-composed' },
       catalog: { status: 'error', error: 'assets-not-composed' },
-      orders: undefined,
     })
     expect(screen.getAllByText(/assets-not-composed/u).length).toBeGreaterThan(0)
     fireEvent.click(screen.getAllByRole('button', { name: zh['error.retry'] })[0]!)
@@ -169,12 +149,12 @@ describe('MarketView catalog filtering', () => {
     expect(filterCatalog(CATALOG, '货运动线', 'all').map(row => row.dataset_id)).toEqual(['expert_services/1'])
     expect(filterCatalog(CATALOG, '', 'tabular').map(row => row.dataset_id)).toEqual(['orders.csv'])
     expect(filterCatalog(CATALOG, '', 'all')).toHaveLength(3)
-    expect(providerLabelOf('connector-nocobase')).toBe('NocoBase 业务后台')
+    expect(providerLabelOf('connector-experts')).toBe('专家数据源')
     expect(providerLabelOf('partner-feed')).toBe('partner-feed')
   })
 })
 
-describe('MarketView detail panel and order journey', () => {
+describe('MarketView detail panel', () => {
   function openService(): ReturnType<typeof mount> {
     const mounted = mount(READY)
     fireEvent.click(screen.getByRole('button', { name: new RegExp(SERVICE.title) }))
@@ -189,58 +169,6 @@ describe('MarketView detail panel and order journey', () => {
     fireEvent.click(screen.getByRole('button', { name: zh['detail.ask'] }))
     expect(setDraft).toHaveBeenCalledWith(translate('ask.prefix', { title: SERVICE.title }))
     expect(requestView).toHaveBeenCalledWith('chat')
-  })
-
-  it('walks the confirm card: read-only pairs, single editable brief slot, place, receipt', async () => {
-    const { placeOrder } = openService()
-    fireEvent.click(screen.getByRole('button', { name: zh['detail.order'] }))
-    // The confirm card shows the read-only snapshot and the terms note.
-    expect(screen.getByText(zh['order.termsNote'])).toBeTruthy()
-    // The detail pair and the card pair both carry the price.
-    expect(screen.getAllByText(SERVICE.price!).length).toBe(2)
-    // The brief slot is the only editable field.
-    fireEvent.change(screen.getByPlaceholderText(zh['order.briefPlaceholder']), { target: { value: '我们走铁路，重点看清关' } })
-    fireEvent.click(screen.getByRole('button', { name: zh['order.confirm'] }))
-    await waitFor(() => { expect(screen.getByText(RECEIPT.order_no)).toBeTruthy() })
-    expect(placeOrder).toHaveBeenCalledWith(SERVICE, '我们走铁路，重点看清关')
-    expect(screen.getByText(zh['order.status.pending'])).toBeTruthy()
-  })
-
-  it('scrolls from the receipt to the orders section through the view-order entry', async () => {
-    const scrollIntoView = vi.fn()
-    // oxlint-disable-next-line typescript/unbound-method -- saving the prototype slot for restoration; never invoked.
-    const original = Element.prototype.scrollIntoView
-    Element.prototype.scrollIntoView = scrollIntoView
-    try {
-      openService()
-      fireEvent.click(screen.getByRole('button', { name: zh['detail.order'] }))
-      fireEvent.click(screen.getByRole('button', { name: zh['order.confirm'] }))
-      await waitFor(() => { expect(screen.getByText(RECEIPT.order_no)).toBeTruthy() })
-      // The orders section anchor exists once the receipt lands.
-      expect(document.getElementById('market-orders')).toBeTruthy()
-      fireEvent.click(screen.getByRole('button', { name: zh['order.receiptViewOrder'] }))
-      expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth' })
-    } finally {
-      Element.prototype.scrollIntoView = original
-    }
-  })
-
-  it('surfaces a placement failure inside the card and keeps the snapshot editable', async () => {
-    const mounted = mount(READY, {
-      placeOrder: vi.fn(async () => { throw new Error('orders-not-composed') }),
-    })
-    fireEvent.click(screen.getByRole('button', { name: new RegExp(SERVICE.title) }))
-    fireEvent.click(screen.getByRole('button', { name: zh['detail.order'] }))
-    fireEvent.click(screen.getByRole('button', { name: zh['order.confirm'] }))
-    await waitFor(() => { expect(screen.getByRole('alert').textContent).toContain('orders-not-composed') })
-    expect(mounted.requestView).not.toHaveBeenCalled()
-  })
-
-  it('hides the order action on non-service assets', () => {
-    mount(READY)
-    fireEvent.click(screen.getByRole('button', { name: new RegExp(TABLE.title) }))
-    expect(screen.queryByRole('button', { name: zh['detail.order'] })).toBeNull()
-    expect(screen.getByText(providerLabelOf(TABLE.provider_id))).toBeTruthy()
   })
 })
 
@@ -265,7 +193,7 @@ describe('MarketEntry', () => {
   }
 
   it('loads on mount, badges the product count, and switches views on click', () => {
-    const idle = mountEntry({ stats: undefined, catalog: undefined, orders: undefined })
+    const idle = mountEntry({ stats: undefined, catalog: undefined })
     expect(idle.refresh).toHaveBeenCalled()
     expect(screen.queryByText('3')).toBeNull()
     cleanup()
@@ -281,7 +209,6 @@ describe('MarketEntry', () => {
     const failing: MarketClientState = {
       stats: { status: 'error', error: 'x' },
       catalog: { status: 'error', error: 'x' },
-      orders: undefined,
     }
     mountEntry(failing)
     expect(screen.getByText('?')).toBeTruthy()

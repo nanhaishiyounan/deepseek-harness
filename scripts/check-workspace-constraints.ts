@@ -147,6 +147,7 @@ const packageFileExtras: Readonly<Record<string, readonly string[]>> = {
   // The glob covers whichever sheets a package emits; sourcemaps stay
   // unpublished, as everywhere else in the repository.
   '@deepseek-ai/dsh-client-ui-primitives': ['lib/**/*.css'],
+  '@deepseek-ai/dsh-client-ui-mobile': ['lib/**/*.css'],
   '@deepseek-ai/dsh-client-web': ['lib/**/*.css'],
   '@deepseek-ai/dsh-client-ui-theme': ['lib/styles'],
   // The typesetting library ships its bundled CJK face (SIL OFL 1.1, license
@@ -164,6 +165,8 @@ const packageFileExtras: Readonly<Record<string, readonly string[]>> = {
   // SQLite loads every statement from immutable package resources at runtime.
   '@deepseek-ai/dsh-session-persistence-sqlite': ['resources/sql/**/*.sql'],
   '@deepseek-ai/dsh-kb-sqlite': ['resources/sql/**/*.sql'],
+  '@deepseek-ai/dsh-kb-graph-sqlite': ['resources/sql/**/*.sql'],
+  '@deepseek-ai/dsh-lakehouse-sqlite-catalog': ['resources/sql/**/*.sql'],
   '@deepseek-ai/dsh-skill-badge': ['assets'],
   '@deepseek-ai/dsh-subprocess-local': ['scripts/ensure-spawn-helper.mjs'],
 }

@@ -1,8 +1,0 @@
-{
-  "Export settings": "Export settings",
-  "Export warning": "You can export up to {{limit}} rows of data at a time, any excess will be ignored.",
-  "False": "False",
-  "Start export": "Start export",
-  "True": "True",
-  "another export action is running, please try again later.": "another export action is running, please try again later."
-}

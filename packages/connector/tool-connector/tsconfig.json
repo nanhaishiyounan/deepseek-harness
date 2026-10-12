@@ -21,9 +21,6 @@
       "path": "../connector"
     },
     {
-      "path": "../../expert/expert-orders"
-    },
-    {
       "path": "../../core/system-prompt"
     },
     {

@@ -2,8 +2,8 @@ workspace/kb.sqlite
 workspace/kb.sqlite-*
 workspace/kb.sqlite.v1-backup
 workspace/kb.sqlite.v1-backup-*
-# kg-graph / lakehouse-catalog sqlite are runtime state from kg build and
-# lakehouse seeding; the * glob covers the -shm/-wal sidecars.
+# kg-graph / lakehouse-catalog sqlite are runtime state from the graph
+# tooling and lakehouse seeding; the * glob covers the -shm/-wal sidecars.
 workspace/kg-graph.sqlite*
 workspace/lakehouse-catalog.sqlite*
 .sessions/
@@ -49,7 +49,3 @@ eval/calibration-*.json
 # repo instead of the run's temp root; the staging now lives under mkdtemp,
 # and this rule is the backstop if a future edit regresses that landing spot.
 scenarios-staged/
-# scripts/fixtures/n21/ holds probe files regenerated on every nocobase-n21
-# attachment-probe run (pdf/docx patched copies, xlsx/md/png generators) —
-# runtime artifacts, never committed.
-scripts/fixtures/

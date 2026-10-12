@@ -35,6 +35,7 @@ import * as ToolKb from '@deepseek-ai/dsh-tool-kb'
 import LakehouseRuntime from '@deepseek-ai/dsh-lakehouse'
 import * as LakehouseSqliteCatalog from '@deepseek-ai/dsh-lakehouse-sqlite-catalog'
 import * as LakehouseDuckDb from '@deepseek-ai/dsh-lakehouse-duckdb'
+import * as LakehouseEngine from '@deepseek-ai/dsh-lakehouse-engine'
 import * as ToolLakehouse from '@deepseek-ai/dsh-tool-lakehouse'
 import { createApiProxy } from '@deepseek-ai/dsh-host-apiproxy'
 import type { ApiProxy } from '@deepseek-ai/dsh-host-apiproxy'
@@ -99,6 +100,7 @@ async function boot(): Promise<Context> {
     ['@deepseek-ai/dsh-lakehouse', LakehouseRuntime],
     ['@deepseek-ai/dsh-lakehouse-sqlite-catalog', LakehouseSqliteCatalog],
     ['@deepseek-ai/dsh-lakehouse-duckdb', LakehouseDuckDb],
+    ['@deepseek-ai/dsh-lakehouse-engine', LakehouseEngine],
     ['@deepseek-ai/dsh-tool-lakehouse', ToolLakehouse],
   ])
   context.loader.internal = {
@@ -159,12 +161,20 @@ describe.skipIf(apiKey === undefined)('kb-agent data routing (with key, real upl
     if (mdReceipt.destination !== 'kb') return
     expect(mdReceipt.document.embedded).toBe(true)
 
+    // The upload lands as Parquet under the seam's data root; the engine's
+    // ingest step copies it into the DuckLake catalog so the lakehouse_* tool
+    // rows can query it (the same hand-off the sync pipeline performs).
+    const engine = context.get('lakehouseEngine')
+    if (engine === undefined) throw new Error('lakehouseEngine did not compose')
+    await engine.createSchema('uploads')
+    await engine.ingestParquet('uploads', 'customs_export', join(root!, 'lakehouse', 'demo-food-co', 'customs_export.parquet'))
+
     // The lakehouse tools answer over the uploaded table.
-    const tables = await callText('lakehouse_tables', {})
+    const tables = await callText('lakehouse_list_tables', {})
     expect(tables.text).toContain('customs_export')
-    const query = await callText('lakehouse_query', { sql: 'SELECT region, SUM(amount_t) AS total FROM customs_export WHERE month = \'2026-07\' GROUP BY region ORDER BY region' })
+    const query = await callText('lakehouse_query', { sql: 'SELECT region, SUM(amount_t) AS total FROM lake.uploads.customs_export WHERE month = \'2026-07\' GROUP BY region ORDER BY region' })
     expect(query.text).toContain('中亚')
-    expect(query.text).toContain('Data source: lakehouse table customs_export')
+    expect(query.text).toContain('Data source: lakehouse table uploads.customs_export')
 
     // One real grounded answer: the query result rides in the user turn.
     const question = '2026年7月中亚方向的出口额是多少？数据来自哪张表？'

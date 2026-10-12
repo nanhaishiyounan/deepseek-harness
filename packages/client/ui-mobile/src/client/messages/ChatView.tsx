@@ -34,8 +34,6 @@ import { WelcomeCard } from './WelcomeCard.tsx'
 import { NewChatSheet } from './NewChatSheet.tsx'
 import { TaskFormModal, type TaskPrefill } from '../work/TaskFormModal.tsx'
 import { contextChipsOf } from './chat/chips.ts'
-import { readCollectionMeta } from './chat/meta.ts'
-import { useApprovalReadback } from './chat/useApprovalReadback.ts'
 import { useDemoTyping } from './chat/useDemoTyping.ts'
 import { useDraftValues } from './chat/useDraftValues.ts'
 import { FlowItem, renderKeyOf } from './chat/FlowItem.tsx'
@@ -133,7 +131,6 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
   /** The quick panel's commands: the colleague's own starters (the welcome card's source, capped at six). */
   const quickCommands = useMemo(() => welcome.starters.slice(0, 6), [welcome])
 
-  const meta = useAsync(readCollectionMeta)
   const [draft, setDraft] = useState('')
   /** Timestamp of the last assist-input fill (drives the box's data-fill flash). */
   const [filledAt, setFilledAt] = useState(0)
@@ -164,9 +161,7 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
   // tag — never the session title, so the header and turn seals match the
   // roster page's stamps for every session of one preset.
   const stampName = colleagueNameOf(preset, rosterRow)
-  const { draftValues, systemValues, onEdit: onDraftEdit } = useDraftValues(folded.items, cardStates, sessionId)
-  // W6-B1 G2: the pending approval cards' live document read-back.
-  const approvalExternalStates = useApprovalReadback(folded.items, folded.running)
+  const { draftValues, onEdit: onDraftEdit } = useDraftValues(folded.items, sessionId)
   // The outbox strip: queued sends for this session surface under the flow
   // (G5 degradation notice); recovery clears it automatically.
   const outbox = useSyncExternalStore(subscribeOutbox, outboxSnapshot)
@@ -206,7 +201,7 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
       // key builds inside the try: any failure here falls to the same
       // catch/finally, so the composer never deadlocks on a stuck sending
       // flag (W11-R2).
-      clientMsgId = newClientMsgId(loadIdentity()?.username ?? '', trimmed)
+      clientMsgId = newClientMsgId(loadIdentity().username, trimmed)
       await promptSession(sessionId, trimmed, clientMsgId)
       finalizeSend()
       setPollInterval(800)
@@ -225,7 +220,7 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
         // A key build that itself died (the pre-uid LAN HTTP face) parked
         // nothing — a fresh key is safe there because no attempt was ever
         // dispatched under the failed build.
-        enqueueOutbox(sessionId, trimmed, clientMsgId ?? newClientMsgId(loadIdentity()?.username ?? '', trimmed))
+        enqueueOutbox(sessionId, trimmed, clientMsgId ?? newClientMsgId(loadIdentity().username, trimmed))
         finalizeSend()
         setError('网络不可用，消息已存入待发队列，恢复后自动发送')
         return
@@ -462,10 +457,7 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
               cardStates={cardStates}
               reopened={reopened}
               draftValues={draftValues}
-              systemValues={systemValues}
-              meta={meta.value}
               sending={sending}
-              approvalExternalStates={approvalExternalStates}
               onDraftEdit={onDraftEdit}
               onSubmitReview={onSubmitReview}
               onConfirm={onConfirm}
@@ -568,7 +560,7 @@ export function ChatView({ sessionId }: ChatViewProps): JSX.Element {
       <TaskFormModal
         visible={taskForm.open}
         onClose={() => { setTaskForm(current => ({ ...current, open: false })) }}
-        identityName={loadIdentity()?.nickname ?? '我'}
+        identityName={loadIdentity().nickname}
         prefill={taskForm.prefill}
         sourceSessionId={sessionId}
         sourceAnchor={taskForm.anchor}

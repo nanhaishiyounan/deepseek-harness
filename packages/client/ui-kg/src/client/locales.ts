@@ -29,8 +29,6 @@ export type KgKey =
   | 'phrase.restate.suppliers'
   | 'phrase.restate.customers'
   | 'phrase.restate.made-from'
-  | 'kg.freshness'
-  | 'kg.freshnessUnknown'
   | 'phrase.traceExamples'
   | 'canvas.title'
   | 'canvas.loading'
@@ -62,12 +60,6 @@ export type KgKey =
   | 'quality.edges'
   | 'quality.islands'
   | 'quality.conflicts'
-  | 'quality.coverage'
-  | 'quality.lastRun'
-  | 'quality.mappingsTitle'
-  | 'quality.mappingPending'
-  | 'quality.mappingNodes'
-  | 'quality.mappingEdges'
   | 'stats.counters'
   | 'build.unbuiltTitle'
   | 'build.unbuiltHint'
@@ -158,8 +150,6 @@ export const zh: Record<KgKey, string> = {
   'phrase.restate.suppliers': '「{entity}」的供应商（两跳）',
   'phrase.restate.customers': '「{entity}」的客户（两跳）',
   'phrase.restate.made-from': '「{entity}」使用的原料',
-  'kg.freshness': '数据截至 {time}',
-  'kg.freshnessUnknown': '数据时点未知（未运行过构建）',
   'phrase.traceExamples': '追溯：酱油的原料来自哪些供应商 · 20260911批次流向哪些客户 · 宏发食品的供应商',
   'canvas.title': '关系画布',
   'canvas.loading': '子图绘制中…',
@@ -186,17 +176,11 @@ export const zh: Record<KgKey, string> = {
   'details.ask': '问此实体',
   'details.expand': '展开邻居',
   'details.selectHint': '点击画布节点查看详情',
-  'quality.title': '质量与映射',
+  'quality.title': '图质量',
   'quality.nodes': '节点',
   'quality.edges': '边',
   'quality.islands': '孤岛节点',
   'quality.conflicts': '冲突事实',
-  'quality.coverage': '节点覆盖',
-  'quality.lastRun': '上次构建',
-  'quality.mappingsTitle': '映射清单',
-  'quality.mappingPending': '尚未构建',
-  'quality.mappingNodes': '节点',
-  'quality.mappingEdges': '边',
   'stats.counters': '实体',
   'build.unbuiltTitle': '图谱还未构建',
   'build.unbuiltHint': '运行 kg-build 管线（业务表结构化映射 + 文档实体抽取）后，这里会呈现企业实体关系',
@@ -288,8 +272,6 @@ export const en: Record<KgKey, string> = {
   'phrase.restate.suppliers': 'suppliers of "{entity}" (2 hops)',
   'phrase.restate.customers': 'customers of "{entity}" (2 hops)',
   'phrase.restate.made-from': 'inputs used by "{entity}"',
-  'kg.freshness': 'Data as of {time}',
-  'kg.freshnessUnknown': 'Data freshness unknown (no build run)',
   'phrase.traceExamples': 'Trace: input suppliers of 酱油 · customer flow of batch 20260911 · suppliers of 宏发食品',
   'canvas.title': 'Relation canvas',
   'canvas.loading': 'Drawing the subgraph…',
@@ -316,17 +298,11 @@ export const en: Record<KgKey, string> = {
   'details.ask': 'Ask about this',
   'details.expand': 'Expand neighbors',
   'details.selectHint': 'Click a canvas node to inspect it',
-  'quality.title': 'Quality & mappings',
+  'quality.title': 'Graph quality',
   'quality.nodes': 'Nodes',
   'quality.edges': 'Edges',
   'quality.islands': 'Islands',
   'quality.conflicts': 'Conflicts',
-  'quality.coverage': 'Coverage',
-  'quality.lastRun': 'Last build',
-  'quality.mappingsTitle': 'Mapped collections',
-  'quality.mappingPending': 'not built yet',
-  'quality.mappingNodes': 'nodes',
-  'quality.mappingEdges': 'edges',
   'stats.counters': 'entities',
   'build.unbuiltTitle': 'The graph is not built yet',
   'build.unbuiltHint': 'Run the kg-build pipeline (structured business-table mapping + document extraction) and company relations appear here',

@@ -27,7 +27,7 @@ import type { KbClientState } from '../kbStore.ts'
 import {
   KB_SCENARIOS, featuredScenarios, filterScenarios, scenariosByCategory, type KbScenario, type KbScenarioCategory,
 } from '../hero/scenarios.ts'
-import { KbOverviewBand, type OverviewDeliverable } from '../hero/KbOverviewBand.tsx'
+import { KbOverviewBand } from '../hero/KbOverviewBand.tsx'
 import { pinnedScenarios, setScenarioPinned } from '../hero/pinnedScenarios.ts'
 import { clearRecentSearches, recentSearches } from '../recentSearches.ts'
 import css from './scenarios.module.css'
@@ -49,7 +49,6 @@ export interface ScenarioViewInjected {
   /** Evaluate the overview-home KPI seed (the gateway's lakehouse.overview). */
   loadOverview: () => Promise<readonly LakehouseKpiView[]>
   /** List the latest delivered orders for the overview rail. */
-  loadDeliverables: () => Promise<readonly OverviewDeliverable[]>
 }
 
 /** Full component props: the view-seat runtime share plus the inject face and locale seat. */
@@ -64,7 +63,7 @@ export type ScenarioViewProps =
  * @returns the scenarios column.
  */
 export function ScenarioView({
-  sessionId, inputActions, useKb, refresh, selectScenario, language, requestView, loadOverview, loadDeliverables, t,
+  sessionId, inputActions, useKb, refresh, selectScenario, language, requestView, loadOverview, t,
 }: ScenarioViewProps): JSX.Element {
   const state = useKb(snapshot => snapshot)
   const [pending, setPending] = useState<KbScenario | undefined>(undefined)
@@ -156,7 +155,7 @@ export function ScenarioView({
         </div>
       )}
 
-      <KbOverviewBand loadOverview={loadOverview} loadDeliverables={loadDeliverables} t={t} />
+      <KbOverviewBand loadOverview={loadOverview} t={t} />
 
       <section className={css.pinnedZone} aria-label={t('overview.pinned')}>
         <span className={css.zoneLabel}>{t('overview.pinned')}</span>

@@ -28,11 +28,11 @@ After B3 the WMS engine still had three gaps: ① no REST bypass interception (t
 
 ## Evidence
 
-- Engine [`nocobase-h5-wms.mts`](../../../../examples/kb-agent/scripts/nocobase-h5-wms.mts): two collections / six columns / two virtual-zone seeds, postTransfer, reserve, releaseReservation, consumeReservation, printAtp, postAdjust, scanReorder, postCountAdjust, genCount, assertLedgerBalanced, rebalanceLedger, the workflow request-leg rebuild, `ensureBypassGuard`, `--demo-chain`.
+- Engine ``nocobase-h5-wms.mts``: two collections / six columns / two virtual-zone seeds, postTransfer, reserve, releaseReservation, consumeReservation, printAtp, postAdjust, scanReorder, postCountAdjust, genCount, assertLedgerBalanced, rebalanceLedger, the workflow request-leg rebuild, `ensureBypassGuard`, `--demo-chain`.
 - Demo chain green (± pair / hold-refusal negative / two-phase reservation / over-reserve refusal / ROP suggestion / count write-back / balanced ledger / 403 guard): `research/2026-09-25-w-round/b4-psql.txt` (seven read-only sections, zero ledger drift) + `b4-psql.sh`.
 - The real approval chain end-to-end (manual submit 202 → request callback on :13110 → engine write-back +3 → done): the serve log carries「CNT-B4-WF-908301 adjusted」.
 - Dual-end screenshots: `b4-admin-{reservations,reorder,countplan,counts-done}.png` + `b4-mobile-{inventory,reorder,transfer,transfer-receipt}.png` (mobile real-LLM scenes: inventory card 1,915/60/1,815, reorder card suggesting 480, transfer draft → confirm → TRF-20260926-001 receipt → engine ±MOVE posting).
-- [`approval-engine.mts`](../../../../examples/kb-agent/scripts/approval-engine.mts) `--serve` adds `/post-count-adjust` and `/scan-reorder`; [`setup-nocobase.mts`](../../../../examples/kb-agent/scripts/setup-nocobase.mts) verify grows the B4 block (collections / 3 pages / columns / virtual zones / request node / guard rows / ledger gate).
+- ``approval-engine.mts`` `--serve` adds `/post-count-adjust` and `/scan-reorder`; ``setup-nocobase.mts`` verify grows the B4 block (collections / 3 pages / columns / virtual zones / request node / guard rows / ledger gate).
 
 ## Alternatives considered
 

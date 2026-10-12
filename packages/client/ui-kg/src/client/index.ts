@@ -19,8 +19,8 @@ import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type {} from '@deepseek-ai/dsh-client-ui-view-context/client'
 import type { ConnectionHandle } from '@deepseek-ai/dsh-client-connection/client'
 import type {
-  KgCommunitiesRow, KgEdgeRow, KgEpisodeRow, KgMappingsRow, KgNodeHitRow, KgOntologyEditResultRow,
-  KgOntologyOpRow, KgQueryWire, KgQualityRow, KgReviewEntryRow, KgRollbackResultRow, KgSubgraphNodeRow,
+  KgCommunitiesRow, KgEdgeRow, KgEpisodeRow, KgNodeHitRow, KgOntologyEditResultRow,
+  KgOntologyOpRow, KgQueryWire, KgReviewEntryRow, KgRollbackResultRow, KgSubgraphNodeRow,
 } from './kgTypes.ts'
 import { createKgClientStore } from './kgStore.ts'
 import { createKgViewBridge } from './kgBridge.ts'
@@ -309,40 +309,18 @@ export function apply(ctx: ClientContext): void {
     })
   }
 
-  /** Load the quality panel: the stats extension plus the mappings readout. */
+  /** Load the quality panel: the stats counters. */
   const loadPanel = (): void => {
     if (store.store.getSnapshot().panel?.status === 'loading') return
     store.beginPanel()
-    Promise.all([
-      api.kg.stats({}),
-      api.kg.mappings({}).catch(() => undefined),
-    ]).then(([statsResponse, mappingsResponse]) => {
+    api.kg.stats({}).then((statsResponse) => {
       const stats = unwrap<{
         triples: number
         entities: number
         islands: number
         conflicts: number
-        coverage?: { numerator: number; denominator: number; ratio: number }
-        last_run_at?: string
       }>(statsResponse)
-      const quality: KgQualityRow = {
-        islands: stats.islands,
-        conflicts: stats.conflicts,
-        ...stats.coverage === undefined ? {} : { coverage: stats.coverage },
-        ...stats.last_run_at === undefined ? {} : { last_run_at: stats.last_run_at },
-      }
-      // The mappings readout is optional in the panel: a deployment without
-      // the pipeline shows the counters alone (the catch above swallows only
-      // the mappings refusal, naming it here).
-      let mappings: KgMappingsRow | undefined
-      if (mappingsResponse !== undefined) {
-        try {
-          mappings = unwrap<KgMappingsRow>(mappingsResponse)
-        } catch {
-          mappings = undefined
-        }
-      }
-      store.setPanel(quality, { triples: stats.triples, entities: stats.entities }, mappings)
+      store.setPanel({ islands: stats.islands, conflicts: stats.conflicts }, { triples: stats.triples, entities: stats.entities })
     }).catch((error: unknown) => {
       store.failPanel(messageOf(error))
     })

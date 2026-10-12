@@ -1,6 +1,6 @@
 - banner:
   - navigation "Session hierarchy":
-    - button "/user-invoke-demo and confirm the fixtur" [disabled]
+    - button "/user-invoke-demo and confirm the…" [disabled]
   - img
   - text: Standard mode
   - button "Knowledge base":
@@ -21,6 +21,8 @@
     - tab "Scenarios"
     - tab "Data assets"
     - tab "Connectors"
+    - tab "Lakehouse"
+    - tab "Governance"
     - tab "Graph"
     - tab "Business"
     - tab "Trajectory"

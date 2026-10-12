@@ -25,7 +25,6 @@ export function isExcludedMarkerPath(path: string): boolean {
   return path.includes('/node_modules/')
     || path.includes('/lib/')
     || path.startsWith('vendor/')
-    || path.startsWith('platform/')
     || path.startsWith('research/')
 }
 

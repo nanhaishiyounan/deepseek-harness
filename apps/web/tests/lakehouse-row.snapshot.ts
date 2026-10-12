@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 // Assembled lakehouse_query toolview snapshot: the built bundles over the
-// keyless fixture transport, turn 77's query row expanded — the number-card
+// keyless fixture transport, turn 72's query row expanded — the number-card
 // strip, the temporal line chart, the table toggle fallback, the CSV export
 // entry, and the executed-SQL disclosure.
 import { mkdirSync, writeFileSync } from 'node:fs'

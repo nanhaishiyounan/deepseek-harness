@@ -6,4 +6,12 @@
 
 ## Model Experience
 
-工作台与湖仓的模型可见词汇一致：表以 `lake.<schema>.<table>` 引用形式列出，SQL 编辑器接受的正是 `lakehouse_query` 接受的（单条只读语句），被拒的写语句渲染模型看到的同一段拒绝原因。
+None, as this client page renders model-independent reads only; every prompt, schema, and tool surface lives in server packages.
+
+#### KV Cache effect
+
+独立于模型请求流：客户端页读取从不进入请求，本包既不追加也不失效任何可复用请求前缀。
+
+## 已知限制与遗留工作
+
+- 遗留：更深的血缘与质量界面随 B6 目录治理批而来；面板当前每次请求读取湖快照。

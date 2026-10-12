@@ -77,7 +77,7 @@ describe('BizEntry branch matrix', () => {
 
   it('shows the ? badge on a failed roster and the label-only row while loading', () => {
     const errorStore = createSnapshotStore<BizClientState>({
-      collections: { status: 'error', error: 'nocobase-not-composed' },
+      collections: { status: 'error', error: 'carbon-not-composed' },
       selected: undefined, rows: undefined,
     })
     const sessions = createSnapshotStore(sessionListState({ id: 's1', blank: false }))
@@ -170,7 +170,7 @@ describe('BizView remaining interactions', () => {
   it('retries a failed row load through the strip', () => {
     const { loadRows } = mountView(
       { collections: ROSTER, selected: 'orders', rows: undefined },
-      { status: 'error', error: 'nocobase-request-failed' },
+      { status: 'error', error: 'carbon-request-failed' },
     )
     fireEvent.click(screen.getByRole('button', { name: zh['error.retry'] }))
     expect(loadRows).toHaveBeenCalledWith('orders')

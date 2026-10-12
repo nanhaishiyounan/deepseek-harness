@@ -18,7 +18,7 @@ Status: implemented
 
 新增 `build` 步骤：幂等标记是 `dist/client/index.html` 与 `dist/client/v/index.html` 同时存在（legacy shell + modern client），`NOCOBASE_FORCE_BUILD=1` 强制重建；`all` 链变 install → build → start → init → verify；`verify` 断言完整 UI（`GET /` 200 html 且含 `__nocobase_public_path__`——非 404 空壳）；`start` 在产物缺失时输出指向 build 的 warning（REST 仍可用，不失败）。实测全量 build 约 23 分钟（逐包 dts + tsup + 两套 rsbuild，client 阶段 1290s）。
 
-### iframe 反代三件修复（packages/host/webserver/src/nocobase-proxy.ts）
+### iframe 反代三件修复（`nocobase-proxy.ts`，B7 退役删除）
 
 - `rewriteNocobaseHtml`：HTML 入口缓冲后重写——`(href|src)="/x"` 加 `/nocobase` 前缀（协议相对 `//` 不动），`__webpack_public_path__`/`__nocobase_public_path__`/`__nocobase_api_base_url__`/`__nocobase_ws_path__` 重定根，使帧内 fetch、懒加载 chunk 与 API 调用全部走反代；content-length 重算。
 - `rewriteNocobasePluginManifest`：仅对 `/api/pm:listEnabled` 的 JSON 响应做结构化重写（`data[].url`/`clientV2Url` 以 `/` 开头时加前缀）；非清单形态原样通过——模块加载器的 URL 来自这一份清单，别处（HTML 已重写、API 相对基址已重定根）不再出现根路径引用。

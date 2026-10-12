@@ -1,11 +1,9 @@
 /**
  * Data-asset market surface plugin, browser half: the sidebar first-class
  * entry and the `market` conversation view tab (section portal with the
- * featured rail, the searchable catalog, the asset detail panel, the order
- * journey — confirm card → `orders.create` → receipt with the status badge —
- * and the 「我的订单」 section polling `orders.list` until every row is
- * terminal). All data rides the connection's `api.assets` face (plus
- * `api.orders` for placement and listing); a deployment without the market
+ * featured rail, the searchable catalog, and the asset detail panel; the
+ * order journey retired with the NocoBase-backed orders seam). All data
+ * rides the connection's `api.assets` face; a deployment without the market
  * domain shows the structured refusal inline.
  */
 import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
@@ -20,7 +18,7 @@ import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 // Type-only: pulls the view-context service Context merge (ctx.viewContext).
 import type {} from '@deepseek-ai/dsh-client-ui-view-context/client'
 import type { ConnectionHandle } from '@deepseek-ai/dsh-client-connection/client'
-import type { MarketAssetRow, MarketOrderReceipt, MarketOrderRow, MarketStatsRow } from './marketTypes.ts'
+import type { MarketAssetRow, MarketStatsRow } from './marketTypes.ts'
 import { createMarketClientStore } from './marketStore.ts'
 import { createMarketViewBridge } from './marketBridge.ts'
 import { MarketEntry } from './MarketEntry.tsx'
@@ -32,14 +30,11 @@ import type { MarketKey } from './locales.ts'
 export type { MarketEntryInjected, MarketEntryProps } from './MarketEntry.tsx'
 export type { MarketHeaderButtonInjected, MarketHeaderButtonProps } from './MarketHeaderButton.tsx'
 export type { MarketViewInjected, MarketViewProps } from './MarketView.tsx'
-export type { OrderConfirmCardProps } from './OrderConfirmCard.tsx'
 export type { MarketCache, MarketClientState, MarketClientStore } from './marketStore.ts'
 export type { MarketViewBridge } from './marketBridge.ts'
 export type {
-  MarketAssetKind, MarketAssetRow, MarketFeaturedRow, MarketOrderReceipt, MarketOrderRow, MarketOrderStatus, MarketStatsRow,
+  MarketAssetKind, MarketAssetRow, MarketFeaturedRow, MarketStatsRow,
 } from './marketTypes.ts'
-export type { OrdersSectionProps } from './OrdersSection.tsx'
-export type { OrderDeliverableModalProps } from './OrderDeliverableModal.tsx'
 export { MARKET_KIND_FILTERS, filterCatalog, providerLabelOf } from './presentation.ts'
 export type { MarketKey } from './locales.ts'
 
@@ -100,18 +95,6 @@ export function apply(ctx: ClientContext): void {
     }
   }
 
-  /** Load or reload the orders cache (a no-op while one is in flight). */
-  const refreshOrders = (): void => {
-    if (store.store.getSnapshot().orders?.status !== 'loading') {
-      store.beginOrders()
-      api.orders.list({}).then((response) => {
-        store.setOrders(unwrap<{ orders: readonly MarketOrderRow[] }>(response).orders)
-      }).catch((error: unknown) => {
-        store.failOrders(messageOf(error))
-      })
-    }
-  }
-
   ctx.slots.inject('sidebar.footer.action', () => ctx.slots.register({
     name: 'sidebar.footer.action',
     id: 'market',
@@ -133,18 +116,7 @@ export function apply(ctx: ClientContext): void {
     inject: () => ({
       hooks: { market: store.store },
       refresh,
-      refreshOrders,
       requestView: (view: string) => { bridge.request(view) },
-      placeOrder: (asset: MarketAssetRow, brief: string) => {
-        const serviceId = asset.service_id
-        if (serviceId === undefined) return Promise.reject(new Error('this asset is not orderable'))
-        return api.orders.create({ service_id: serviceId, brief }).then((response) => {
-          const receipt = unwrap<MarketOrderReceipt>(response)
-          refresh()
-          refreshOrders()
-          return receipt
-        })
-      },
     }),
   }, MarketView))
 

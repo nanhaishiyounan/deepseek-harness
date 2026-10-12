@@ -2,7 +2,7 @@
 
 English | [中文](README.zh.md)
 
-Pure-function Chinese-capable PDF layout for expert deliverables (`@deepseek-ai/dsh-expert-pdf`): `renderPdf(spec)` typesets one `DraftSpec` — cover page (title, client, expert byline, date, order number), body pages running each section (heading, wrapped CJK/latin paragraphs, reference lines), the closing disclaimer, and page chrome (order-number header, page-x-of-y footer on body pages) — into PDF bytes with a subset-embedded Noto Sans SC. No LLM, no filesystem writes, no plugin services: the drafting pipeline that owns those concerns lives in `@deepseek-ai/dsh-expert-orders`.
+Pure-function Chinese-capable PDF layout for expert deliverables (`@deepseek-ai/dsh-expert-pdf`): `renderPdf(spec)` typesets one `DraftSpec` — cover page (title, client, expert byline, date, order number), body pages running each section (heading, wrapped CJK/latin paragraphs, reference lines), the closing disclaimer, and page chrome (order-number header, page-x-of-y footer on body pages) — into PDF bytes with a subset-embedded Noto Sans SC. No LLM, no filesystem writes, no plugin services: callers own the drafting pipeline that produces the spec.
 
 ## Typography
 
@@ -11,7 +11,7 @@ Pure-function Chinese-capable PDF layout for expert deliverables (`@deepseek-ai/
 
 ## Model Experience
 
-Indirectly, through `@deepseek-ai/dsh-expert-orders`: the drafting model's strict-JSON output becomes the `DraftSpec` this library typesets. This package registers no prompt, schema, or tool of its own.
+Indirectly, through the calling pipeline: a drafting model's strict-JSON output becomes the `DraftSpec` this library typesets. This package registers no prompt, schema, or tool of its own.
 
 #### KV Cache effect
 

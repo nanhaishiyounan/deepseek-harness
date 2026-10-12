@@ -40,15 +40,6 @@ import {
   createCarbonWsUpgradeHandler,
   CARBON_PROXY_PREFIX,
 } from './carbon-proxy.ts'
-import {
-  createNocobasePortalHandler,
-  createNocobaseProxyHandler,
-  createNocobaseWsUpgradeHandler,
-  NOCOBASE_PORTAL_PREFIXES,
-  NOCOBASE_PROXY_PREFIX,
-  NOCOBASE_WS_PATH,
-  type NocobasePortalName,
-} from './nocobase-proxy.ts'
 
 /** Route match kind: 'exact' matches the pathname verbatim; 'prefix' p matches p and p/<anything>. */
 export type WebRouteKind = 'exact' | 'prefix'
@@ -70,20 +61,12 @@ export interface WebUpgradeRoute {
   handler: (req: IncomingMessage, socket: Duplex, head: Buffer) => void | Promise<void>
 }
 
-/** Gateway config: the listen address (and the optional NocoBase proxy). */
+/** Gateway config: the listen address (and the optional carbon proxy). */
 export interface Config {
   /** Listen host; the two supported values are loopback and all-interfaces. */
   host: '127.0.0.1' | '0.0.0.0'
   /** Listen port; zero requests an OS-assigned port. */
   port: number
-  /**
-   * NocoBase origin (scheme + host + port) the `/nocobase` prefix proxies
-   * to, same-origin, so the business page's external entry can open the
-   * admin UI in a new browser window on the gateway's domain (login state
-   * included). Absent means no proxy route — the unauthenticated gateway
-   * must not proxy a business backend by default.
-   */
-  nocobaseProxyOrigin?: string
   /**
    * Carbon ERP origin (scheme + host + port) the `/carbon` prefix proxies
    * to, same-origin, so the business page's external entry can open the
@@ -105,7 +88,6 @@ export class WebServer extends Service {
   static Config: z<Config> = z.object({
     host: z.union([z.const('127.0.0.1'), z.const('0.0.0.0')]).required(),
     port: z.natural().max(65535).required(),
-    nocobaseProxyOrigin: z.string(),
     carbonProxyOrigin: z.string(),
   })
 
@@ -120,42 +102,8 @@ export class WebServer extends Service {
 
   constructor(ctx: Context, private config: Config) {
     super(ctx, 'webServer')
-    // A local const keeps the undefined-narrowing inside the effect closure
-    // (property-access narrowing does not survive into closures).
-    const proxyOrigin = config.nocobaseProxyOrigin
-    if (proxyOrigin !== undefined) {
-      ctx.effect(
-        () => {
-          // Portal deep-link routes first: longest prefix wins over the plain
-          // /nocobase route, so /nocobase/dist/hub/<route> reaches the SPA
-          // fallback handler instead of the bare proxy.
-          const disposePortals = Object.entries(NOCOBASE_PORTAL_PREFIXES).map(([portal, prefix]) =>
-            this.register({
-              kind: 'prefix',
-              path: prefix,
-              handler: createNocobasePortalHandler(proxyOrigin, portal as NocobasePortalName),
-            }),
-          )
-          const disposeHttp = this.register({
-            kind: 'prefix',
-            path: NOCOBASE_PROXY_PREFIX,
-            handler: createNocobaseProxyHandler(proxyOrigin),
-          })
-          const disposeUpgrade = this.registerUpgrade({
-            path: NOCOBASE_WS_PATH,
-            handler: createNocobaseWsUpgradeHandler(proxyOrigin),
-          })
-          return () => {
-            disposeUpgrade()
-            disposeHttp()
-            for (const dispose of disposePortals.reverse()) dispose()
-          }
-        },
-        'webServer.nocobaseProxy',
-      )
-    }
-    // The carbon ERP proxy rides the same pattern: one prefix route plus the
-    // vite HMR upgrade path, both owned by one effect.
+    // The carbon ERP proxy rides one prefix route plus the vite HMR upgrade
+    // path, both owned by one effect.
     const carbonOrigin = config.carbonProxyOrigin
     if (carbonOrigin !== undefined) {
       ctx.effect(

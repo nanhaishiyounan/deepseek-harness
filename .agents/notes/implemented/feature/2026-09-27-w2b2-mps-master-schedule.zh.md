@@ -6,7 +6,7 @@ Status: implemented
 
 ## 问题
 
-W 轮 MRP 日结（[mrp-run.mts](../../../../examples/kb-agent/scripts/mrp-run.mts)）只把 approved 未发货 SO 行喂进 `gross0`——无预测层、无计划时段、JIT 窗硬编码 60 天（99 遗留 #7）。W2-B2（[02-b2-mps.md](../../../../plans/2026-09-27-w2-evolution/02-b2-mps.md)）补上 MPS 层：`mps_plans`（3–6 个按月时段的展望容器）+ `mps_plan_items`（item × 期行），按 max(SO 未交, 预测) 合并需求（ERPNext v16 同款），把日结中 covered item 的需求源从「SO 直纳」切为合并计划行，并让窗口可配——硬约束是：无 approved 计划行时日结输出与 W 轮逐字节一致。
+W 轮 MRP 日结（`mrp-run.mts`）只把 approved 未发货 SO 行喂进 `gross0`——无预测层、无计划时段、JIT 窗硬编码 60 天（99 遗留 #7）。W2-B2（[02-b2-mps.md](../../../../plans/2026-09-27-w2-evolution/02-b2-mps.md)）补上 MPS 层：`mps_plans`（3–6 个按月时段的展望容器）+ `mps_plan_items`（item × 期行），按 max(SO 未交, 预测) 合并需求（ERPNext v16 同款），把日结中 covered item 的需求源从「SO 直纳」切为合并计划行，并让窗口可配——硬约束是：无 approved 计划行时日结输出与 W 轮逐字节一致。
 
 ## 决策
 

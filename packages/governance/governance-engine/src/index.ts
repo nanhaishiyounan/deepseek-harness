@@ -105,21 +105,25 @@ export class GovernanceEngineService extends Service implements
 
   /** All recorded lineage edges. */
   async lineage(): Promise<readonly LineageEdge[]> {
+    await Promise.resolve()
     return readEdges(this.db)
   }
 
   /** Record lineage edges (idempotent by source+target+transform). */
   async recordEdges(edges: readonly LineageEdge[]): Promise<void> {
+    await Promise.resolve()
     writeEdges(this.db, edges)
   }
 
   /** All configured quality rules. */
   async rules(): Promise<readonly QualityRule[]> {
+    await Promise.resolve()
     return readRules(this.db)
   }
 
   /** Insert or replace one quality rule. */
   async upsertRule(rule: QualityRule): Promise<void> {
+    await Promise.resolve()
     const problem = validateRule(rule)
     if (problem !== undefined) throw new Error(`governance rule "${rule.id}" invalid: ${problem}`)
     writeRule(this.db, rule)
@@ -127,6 +131,7 @@ export class GovernanceEngineService extends Service implements
 
   /** Remove one quality rule by id. */
   async deleteRule(id: string): Promise<void> {
+    await Promise.resolve()
     removeRule(this.db, id)
   }
 
@@ -155,6 +160,7 @@ export class GovernanceEngineService extends Service implements
 
   /** Recorded alert events, newest first. */
   async events(): Promise<readonly AlertEvent[]> {
+    await Promise.resolve()
     return readEvents(this.db)
   }
 

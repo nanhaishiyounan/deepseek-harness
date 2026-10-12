@@ -146,7 +146,7 @@ export function EmptyState({ icon, title, description, action, variant = 'page' 
             color="primary"
             fill="solid"
             size="small"
-            className={css.emptyAction as string}
+            className={css.emptyAction}
             onClick={action.onClick}
           >
             {action.label}
@@ -211,9 +211,9 @@ export function SkelCard(): JSX.Element {
 export function SkelThread(): JSX.Element {
   return (
     <div className={css.skelThread} aria-hidden="true">
-      <Skeleton animated className={`${css.skelBubble} ${css.skelBubbleAi}` as string} />
-      <Skeleton animated className={`${css.skelBubble} ${css.skelBubbleAi} ${css.skelBubbleWide}` as string} />
-      <Skeleton animated className={`${css.skelBubble} ${css.skelBubbleUser}` as string} />
+      <Skeleton animated className={`${css.skelBubble} ${css.skelBubbleAi}`} />
+      <Skeleton animated className={`${css.skelBubble} ${css.skelBubbleAi} ${css.skelBubbleWide}`} />
+      <Skeleton animated className={`${css.skelBubble} ${css.skelBubbleUser}`} />
     </div>
   )
 }

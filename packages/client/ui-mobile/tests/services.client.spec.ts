@@ -354,15 +354,15 @@ describe('mobile async hooks', () => {
 describe('mobile auth non-object branch and routes', () => {
   it('rejects a stored identity that parses to a non-object', () => {
     localStorage.setItem('dsh-mobile-auth', '42')
-    expect(loadIdentity()).toBeUndefined()
+    expect(loadIdentity().username).toBe('visitor')
     localStorage.setItem('dsh-mobile-auth', 'null')
-    expect(loadIdentity()).toBeUndefined()
-    saveIdentity({ username: 'buyer', nickname: '采购员·蔡俊', token: 'tok-svc', loggedAt: 1 })
+    expect(loadIdentity().username).toBe('visitor')
+    saveIdentity({ username: 'buyer', nickname: '采购员·蔡俊', loggedAt: 1 })
     expect(loadIdentity()?.nickname).toBe('采购员·蔡俊')
   })
 
-  it('parses the login route and reads the default route query as absent', () => {
-    expect(parseRoute('#/login').name).toBe('login')
+  it('folds the retired login route home and reads the default route query as absent', () => {
+    expect(parseRoute('#/login').name).toBe('home')
     expect(parseRoute('#/login?next=/data').query.get('next')).toBe('/data')
     const fallback = parseRoute('#/nowhere')
     expect(fallback.name).toBe('home')

@@ -313,7 +313,7 @@ describe('KgView canvas and interactions', () => {
     expect(clearTypeFilter).toHaveBeenCalled()
   })
 
-  it('renders the quality panel with counters, coverage, and the mapping list', () => {
+  it('renders the quality panel with the structural counters', () => {
     mount({
       legend: LEGEND_READY,
       canvas: undefined,
@@ -324,31 +324,15 @@ describe('KgView canvas and interactions', () => {
           quality: {
             islands: 3,
             conflicts: 1,
-            coverage: { numerator: 42, denominator: 50, ratio: 0.84 },
-            last_run_at: '2026-09-15T03:00:00.000Z',
           },
           stats: { triples: 120, entities: 80 },
-          mappings: {
-            file: 'kg-mappings.yml',
-            version: 1,
-            rules: { skipHiddenCollections: true, emptyFkNoEdge: true, derivesTitle: true },
-            collections: [{ name: 'experts', fkLinkCount: 0 }],
-            lastRun: {
-              finishedAt: '2026-09-15T03:00:00.000Z',
-              ruleHits: { R01: 5 },
-              collections: [{ scope: 'experts', nodesUpserted: 12, edgesUpserted: 4, skipped: false, skippedRelationFields: [] }],
-            },
-          },
         },
       },
       selected: undefined, typeFilter: undefined,
       episodes: undefined, review: undefined, communities: undefined, history: undefined, colorMode: 'semantic',
     })
     expect(screen.getByTestId('kg-quality-islands').textContent).toBe('3')
-    expect(screen.getByText('42/50（84%）')).toBeTruthy()
-    const mappingRow = screen.getByTestId('kg-mapping-list')
-    expect(mappingRow.textContent).toContain('experts')
-    expect(mappingRow.textContent).toContain('12')
+    expect(screen.getByText('1')).toBeTruthy()
   })
 
   it('shows the details panel for the selected node with its degree', async () => {
@@ -386,20 +370,6 @@ const EPISODES_READY: NonNullable<KgClientState['episodes']> = {
   }],
 }
 
-const PANEL_READY_MAPPINGS_PENDING: NonNullable<KgClientState['panel']> = {
-  status: 'ready',
-  value: {
-    quality: { islands: 1, conflicts: 0 },
-    stats: { triples: 10, entities: 6 },
-    mappings: {
-      file: 'kg-mappings.yml',
-      version: 1,
-      rules: { skipHiddenCollections: true, emptyFkNoEdge: true, derivesTitle: true },
-      collections: [{ name: 'experts', fkLinkCount: 0 }],
-      lastRun: { finishedAt: '2026-09-15T03:00:00.000Z', ruleHits: {}, collections: [] },
-    },
-  },
-}
 
 /** Mount over a mutable store the test updates between renders. */
 function renderLive(state: KgClientState) {
@@ -418,7 +388,7 @@ function renderLive(state: KgClientState) {
       {...SESSION_KIT}
       inputActions={{ setDraft } as never}
       useKg={useKg}
-      graphCalls={obsidianStubCalls as never}
+      graphCalls={obsidianStubCalls}
       {...actions}
       t={t}
     />
@@ -728,22 +698,13 @@ describe('KgView graph-mode tails', () => {
     expect(toggleTypeFilter).toHaveBeenCalledWith('Order')
   })
 
-  it('the quality panel reports its refusal and a mapping scope without a run stays pending', () => {
+  it('the quality panel reports its refusal', () => {
     mount({
       legend: LEGEND_READY, canvas: undefined, search: undefined,
       panel: { status: 'error', error: 'stats-down' }, selected: undefined, typeFilter: undefined,
       episodes: undefined, review: undefined, communities: undefined, history: undefined, colorMode: 'semantic',
     })
     expect(screen.getAllByText(zh['error.unavailable']).length).toBeGreaterThan(0)
-
-    mount({
-      legend: LEGEND_READY, canvas: undefined, search: undefined,
-      panel: PANEL_READY_MAPPINGS_PENDING, selected: undefined, typeFilter: undefined,
-      episodes: undefined, review: undefined, communities: undefined, history: undefined, colorMode: 'semantic',
-    })
-    const mappingList = screen.getByTestId('kg-mapping-list')
-    expect(mappingList.textContent).toContain('experts')
-    expect(mappingList.textContent).toContain(zh['quality.mappingPending'])
   })
 
   it('the details panel asks the conversation about the entity and shows the natural key', () => {

@@ -33,4 +33,4 @@ Status: implemented
 ## 验证
 
 - `pnpm vitest run packages/interaction/tool-present-card` 与 `pnpm vitest run packages/client/ui-mobile`（共享 fixture 语料的双镜像 spec）；`pnpm run test:web apps/web/tests/mobile-assistant-toolcard.e2e.ts`；`pnpm run typecheck`。
-- 实活矩阵台账与截图：[demos/acceptance-w21/](../../../../demos/acceptance-w21/)（w21-r8-diagnosis.md、w21-r8-matrix-runs.jsonl、w21-r8-matrix-summary.json）。
+- 实活矩阵台账与截图：`demos/acceptance-w21/`（w21-r8-diagnosis.md、w21-r8-matrix-runs.jsonl、w21-r8-matrix-summary.json）。

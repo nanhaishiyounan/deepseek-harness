@@ -1,0 +1,81 @@
+(node:50800) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+/Users/mac/Documents/github/deepseek-harness/packages/boot/app-boot/src/index.ts:800
+    throw new Error(`${binName}: ${stage}: ${detail}${stack}`, { cause })
+          ^
+
+
+Error: dsh: plugin tree failed to load: failed to apply loader entry include (cordis:include): loader entries failed to apply
+AggregateError: loader entries failed to apply
+    at EntryGroup.update (/Users/mac/Documents/github/deepseek-harness/vendor/loader/src/config/group.ts:80:38)
+    at async Include._apply (/Users/mac/Documents/github/deepseek-harness/vendor/include/src/index.ts:317:5)
+    at boot (/Users/mac/Documents/github/deepseek-harness/packages/boot/app-boot/src/index.ts:800:11)
+    at async runProfile (/Users/mac/Documents/github/deepseek-harness/apps/cli/src/profile-boot.ts:266:15)
+    at async <anonymous> (/Users/mac/Documents/github/deepseek-harness/apps/cli/src/bin.ts:32:5) {
+  [cause]: Error: failed to apply loader entry include (cordis:include): loader entries failed to apply
+      at updateError (/Users/mac/Documents/github/deepseek-harness/vendor/loader/src/config/entry.ts:26:10)
+      at Entry._init (/Users/mac/Documents/github/deepseek-harness/vendor/loader/src/config/entry.ts:287:13)
+      at async Entry.init (/Users/mac/Documents/github/deepseek-harness/vendor/loader/src/config/entry.ts:261:7)
+      at async Entry.update (/Users/mac/Documents/github/deepseek-harness/vendor/loader/src/config/entry.ts:172:41)
+      at async EntryGroup.create (/Users/mac/Documents/github/deepseek-harness/vendor/loader/src/config/group.ts:30:7)
+      at async Proxy.create (/Users/mac/Documents/github/deepseek-harness/vendor/loader/src/config/tree.ts:99:16)
+      at async mountRootInclude (/Users/mac/Documents/github/deepseek-harness/packages/boot/app-boot/src/index.ts:523:21)
+      at async boot (/Users/mac/Documents/github/deepseek-harness/packages/boot/app-boot/src/index.ts:774:5)
+      at async runProfile (/Users/mac/Documents/github/deepseek-harness/apps/cli/src/profile-boot.ts:266:15)
+      at async <anonymous> (/Users/mac/Documents/github/deepseek-harness/apps/cli/src/bin.ts:32:5) {
+    [cause]: AggregateError: loader entries failed to apply
+        at EntryGroup.update (/Users/mac/Documents/github/deepseek-harness/vendor/loader/src/config/group.ts:80:38)
+        at async Include._apply (/Users/mac/Documents/github/deepseek-harness/vendor/include/src/index.ts:317:5) {
+      [errors]: [
+        Error: failed to apply loader entry webserver (@deepseek-ai/dsh-host-webserver): listen EADDRINUSE: address already in use 127.0.0.1:3080
+            at updateError (/Users/mac/Documents/github/deepseek-harness/vendor/loader/src/config/entry.ts:26:10)
+            at Entry._init (/Users/mac/Documents/github/deepseek-harness/vendor/loader/src/config/entry.ts:287:13)
+            at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+            at async Entry.init (/Users/mac/Documents/github/deepseek-harness/vendor/loader/src/config/entry.ts:261:7)
+            at async Entry.update (/Users/mac/Documents/github/deepseek-harness/vendor/loader/src/config/entry.ts:172:41)
+            at async EntryGroup.create (/Users/mac/Documents/github/deepseek-harness/vendor/loader/src/config/group.ts:30:7)
+            at async Promise.allSettled (index 95)
+            at async EntryGroup.update (/Users/mac/Documents/github/deepseek-harness/vendor/loader/src/config/group.ts:71:24)
+            at async Include._apply (/Users/mac/Documents/github/deepseek-harness/vendor/include/src/index.ts:317:5) {
+          [cause]: Error: listen EADDRINUSE: address already in use 127.0.0.1:3080
+              at Server.setupListenHandle [as _listen2] (node:net:1940:16)
+              at listenInCluster (node:net:1997:12)
+              at node:net:2206:7
+              at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+            code: 'EADDRINUSE',
+            errno: -48,
+            syscall: 'listen',
+            address: '127.0.0.1',
+            port: 3080
+          }
+        },
+        Error: failed to apply loader entry lakehouse-engine (@deepseek-ai/dsh-lakehouse-engine): attaching the lakehouse catalog failed: Error: IO Error: Failed to attach DuckLake MetaData "__ducklake_metadata_lake" at path + "/Users/mac/Documents/github/deepseek-harness/workspace/lakehouse/ducklake/catalog.ducklake"Could not set lock on file "/Users/mac/Documents/github/deepseek-harness/workspace/lakehouse/ducklake/catalog.ducklake": Conflicting lock is held in /Users/mac/.nvm/versions/node/v22.19.0/bin/node (PID 43036) by user mac. See also https://duckdb.org/docs/stable/connect/concurrency
+            at updateError (/Users/mac/Documents/github/deepseek-harness/vendor/loader/src/config/entry.ts:26:10)
+            at Entry._init (/Users/mac/Documents/github/deepseek-harness/vendor/loader/src/config/entry.ts:287:13)
+            at async Entry.init (/Users/mac/Documents/github/deepseek-harness/vendor/loader/src/config/entry.ts:261:7)
+            at async Entry.update (/Users/mac/Documents/github/deepseek-harness/vendor/loader/src/config/entry.ts:172:41)
+            at async EntryGroup.create (/Users/mac/Documents/github/deepseek-harness/vendor/loader/src/config/group.ts:30:7)
+            at async Promise.allSettled (index 145)
+            at async EntryGroup.update (/Users/mac/Documents/github/deepseek-harness/vendor/loader/src/config/group.ts:71:24)
+            at async Include._apply (/Users/mac/Documents/github/deepseek-harness/vendor/include/src/index.ts:317:5) {
+          [cause]: LakehouseEngineError: attaching the lakehouse catalog failed: Error: IO Error: Failed to attach DuckLake MetaData "__ducklake_metadata_lake" at path + "/Users/mac/Documents/github/deepseek-harness/workspace/lakehouse/ducklake/catalog.ducklake"Could not set lock on file "/Users/mac/Documents/github/deepseek-harness/workspace/lakehouse/ducklake/catalog.ducklake": Conflicting lock is held in /Users/mac/.nvm/versions/node/v22.19.0/bin/node (PID 43036) by user mac. See also https://duckdb.org/docs/stable/connect/concurrency
+              at LakehouseEngineService.doOpen (/Users/mac/Documents/github/deepseek-harness/packages/lakehouse/lakehouse-engine/src/engine.ts:251:13)
+              at async LakehouseEngineService.open (/Users/mac/Documents/github/deepseek-harness/packages/lakehouse/lakehouse-engine/src/engine.ts:198:7)
+              at async Object.apply (/Users/mac/Documents/github/deepseek-harness/packages/lakehouse/lakehouse-engine/src/index.ts:158:3)
+              at async Fiber._reload (/Users/mac/Documents/github/deepseek-harness/vendor/cordis/src/fiber.ts:656:9)
+              at async Fiber.await (/Users/mac/Documents/github/deepseek-harness/vendor/cordis/src/fiber.ts:706:7)
+              at async Entry._start (/Users/mac/Documents/github/deepseek-harness/vendor/loader/src/config/entry.ts:297:7)
+              at async Entry._init (/Users/mac/Documents/github/deepseek-harness/vendor/loader/src/config/entry.ts:285:7)
+              at async Entry.init (/Users/mac/Documents/github/deepseek-harness/vendor/loader/src/config/entry.ts:261:7)
+              at async Entry.update (/Users/mac/Documents/github/deepseek-harness/vendor/loader/src/config/entry.ts:172:41)
+              at async EntryGroup.create (/Users/mac/Documents/github/deepseek-harness/vendor/loader/src/config/group.ts:30:7) {
+            code: 'LAKEHOUSE_ENGINE_UNAVAILABLE',
+            [cause]: [Error: IO Error: Failed to attach DuckLake MetaData "__ducklake_metadata_lake" at path + "/Users/mac/Documents/github/deepseek-harness/workspace/lakehouse/ducklake/catalog.ducklake"Could not set lock on file "/Users/mac/Documents/github/deepseek-harness/workspace/lakehouse/ducklake/catalog.ducklake": Conflicting lock is held in /Users/mac/.nvm/versions/node/v22.19.0/bin/node (PID 43036) by user mac. See also https://duckdb.org/docs/stable/connect/concurrency]
+          }
+        }
+      ]
+    }
+  }
+}
+
+Node.js v22.19.0

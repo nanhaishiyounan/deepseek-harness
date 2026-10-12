@@ -9,16 +9,15 @@
 import type { JSX } from 'react'
 import { Button, SpinLoading } from 'antd-mobile'
 import { Check, X } from 'lucide-react'
-import type { NocobaseFieldView } from '@deepseek-ai/dsh-host-apiproxy/api'
 import { Avatar } from '../../ui.tsx'
 import { colleagueColor, stampAcronymOf } from '../../colleagues.ts'
 import { dayLabelOf } from '../../sessionsService.ts'
 import { mergeCardValues } from '../../systemFields.ts'
 import type { DerivedCardState } from '../../cardState.ts'
 import { isProtocolToolRow, type ChatItem } from '../../fold.ts'
-import type { ApprovalResultPayload, FormDraftPayload, ReportAction } from '../../protocol.ts'
+import type { FormDraftPayload, ReportAction } from '../../protocol.ts'
 import { copyCode } from '../RichContent.tsx'
-import { DraftCard, ReceiptCard, RejectedCard, ReviewCard, type CollectionFieldMeta, type FieldMetas } from '../../forms/task-cards.tsx'
+import { DraftCard, ReceiptCard, RejectedCard, ReviewCard } from '../../forms/task-cards.tsx'
 import { DraftCard as DraftCardV3 } from '../../forms/v3/DraftCard.tsx'
 import { ReceiptCard as ReceiptCardV3 } from '../../forms/v3/ReceiptCard.tsx'
 import { sanitizeBizText } from '../rich.ts'
@@ -44,12 +43,7 @@ export interface FlowItemProps {
   readonly cardStates: ReadonlyMap<number, DerivedCardState>
   readonly reopened: ReadonlySet<number>
   readonly draftValues: ReadonlyMap<number, Record<string, string>>
-  /** Generated system numbers keyed by draft id (the v3 cards' blank system fields). */
-  readonly systemValues: ReadonlyMap<string, Record<string, string>>
-  readonly meta: FieldMetas | undefined
   readonly sending: boolean
-  /** Live doc_status read-backs keyed `collection:docId` (G2 他端已处理). */
-  readonly approvalExternalStates: ReadonlyMap<string, ApprovalResultPayload['state']>
   readonly onDraftEdit: (seq: number) => (name: string, value: string) => void
   readonly onSubmitReview: (seq: number) => () => void
   readonly onConfirm: (seq: number, fields: Record<string, string>, collection: string) => () => void
@@ -239,14 +233,11 @@ export function FlowItem(props: FlowItemProps): JSX.Element | null {
     )
   }
   if (item.kind === 'approval') {
-    const external = item.payload.type === 'approval_pending'
-      ? props.approvalExternalStates.get(`${item.payload.doc.collection}:${item.payload.doc.docId}`)
-      : undefined
     return (
       <>
         {separator}
         {aiRow(
-          <ApprovalCard payload={item.payload} onSend={props.onSend} disabled={props.sending} externalState={external} />,
+          <ApprovalCard payload={item.payload} onSend={props.onSend} disabled={props.sending} />,
         )}
       </>
     )
@@ -276,7 +267,6 @@ export function FlowItem(props: FlowItemProps): JSX.Element | null {
     const values = mergeCardValues(
       item.payload,
       props.draftValues.get(item.seq) ?? {},
-      props.systemValues.get(item.payload.draftId) ?? {},
     )
     return (
       <>
@@ -287,7 +277,6 @@ export function FlowItem(props: FlowItemProps): JSX.Element | null {
             payload={item.payload}
             values={values}
             phase={phase}
-            meta={props.meta?.get(item.payload.form.collection)}
             onEdit={props.onDraftEdit(item.seq)}
             onConfirm={props.onConfirmV3(item.seq, item.payload, values)}
             onReject={props.onRejectV3(item.seq, item.payload.draftId)}
@@ -298,14 +287,12 @@ export function FlowItem(props: FlowItemProps): JSX.Element | null {
       </>
     )
   }
-  const meta: CollectionFieldMeta = props.meta?.get(item.draft.collection) ?? new Map<string, NocobaseFieldView>()
   const values = props.draftValues.get(item.seq) ?? { ...item.draft.fields }
   const card = (() => {
     if (props.reopened.has(item.seq)) {
       return (
         <DraftCard
           draft={item.draft}
-          meta={meta}
           values={values}
           onEdit={props.onDraftEdit(item.seq)}
           onSubmitReview={props.onSubmitReview(item.seq)}
@@ -316,14 +303,13 @@ export function FlowItem(props: FlowItemProps): JSX.Element | null {
     if (state.phase === 'submitted' && state.receipt !== undefined) {
       /* v8 ignore next -- a submitted card always carries its confirmedFields. */
       const finals = state.confirmedFields ?? item.draft.fields
-      return <ReceiptCard draft={item.draft} meta={meta} finalFields={finals} receipt={state.receipt} />
+      return <ReceiptCard draft={item.draft} finalFields={finals} receipt={state.receipt} />
     }
     if (state.phase === 'pending') {
       const finals = { ...item.draft.fields, ...state.confirmedFields }
       return (
         <ReviewCard
           draft={item.draft}
-          meta={meta}
           confirmedFields={finals}
           onConfirm={props.onConfirm(item.seq, finals, item.draft.collection)}
           onReject={props.onReject(item.seq)}
@@ -336,7 +322,6 @@ export function FlowItem(props: FlowItemProps): JSX.Element | null {
       return (
         <ReviewCard
           draft={item.draft}
-          meta={meta}
           confirmedFields={locked}
           onConfirm={props.onConfirm(item.seq, locked, item.draft.collection)}
           onReject={props.onReject(item.seq)}
@@ -350,7 +335,6 @@ export function FlowItem(props: FlowItemProps): JSX.Element | null {
     return (
       <DraftCard
         draft={item.draft}
-        meta={meta}
         values={values}
         onEdit={props.onDraftEdit(item.seq)}
         onSubmitReview={props.onSubmitReview(item.seq)}

@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-tool-connector",
   "description": "Model-facing connector_discover, connector_fetch, and connector_transfer tools over the connector seam",
-  "version": "0.1.1-rc.2",
+  "version": "1.0.0",
   "publishConfig": {
     "access": "public"
   },
@@ -34,7 +34,6 @@
   "peerDependencies": {
     "@deepseek-ai/cordis": "workspace:^",
     "@deepseek-ai/dsh-connector": "workspace:^",
-    "@deepseek-ai/dsh-expert-orders": "workspace:^",
     "@deepseek-ai/dsh-invariants": "workspace:^",
     "@deepseek-ai/dsh-llm": "workspace:^",
     "@deepseek-ai/dsh-system-prompt": "workspace:^",
@@ -46,7 +45,6 @@
   "devDependencies": {
     "@deepseek-ai/cordis": "workspace:^",
     "@deepseek-ai/dsh-connector": "workspace:^",
-    "@deepseek-ai/dsh-expert-orders": "workspace:^",
     "@deepseek-ai/dsh-invariants": "workspace:^",
     "@deepseek-ai/dsh-llm": "workspace:^",
     "@deepseek-ai/dsh-system-prompt": "workspace:^",

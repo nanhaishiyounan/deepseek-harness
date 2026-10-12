@@ -32,6 +32,7 @@ import * as ToolKb from '@deepseek-ai/dsh-tool-kb'
 import LakehouseRuntime from '@deepseek-ai/dsh-lakehouse'
 import * as LakehouseSqliteCatalog from '@deepseek-ai/dsh-lakehouse-sqlite-catalog'
 import * as LakehouseDuckDb from '@deepseek-ai/dsh-lakehouse-duckdb'
+import * as LakehouseEngine from '@deepseek-ai/dsh-lakehouse-engine'
 import * as ToolLakehouse from '@deepseek-ai/dsh-tool-lakehouse'
 import { createApiProxy } from '@deepseek-ai/dsh-host-apiproxy'
 import type { ApiProxy } from '@deepseek-ai/dsh-host-apiproxy'
@@ -109,6 +110,7 @@ async function boot(): Promise<Context> {
     ['@deepseek-ai/dsh-lakehouse', LakehouseRuntime],
     ['@deepseek-ai/dsh-lakehouse-sqlite-catalog', LakehouseSqliteCatalog],
     ['@deepseek-ai/dsh-lakehouse-duckdb', LakehouseDuckDb],
+    ['@deepseek-ai/dsh-lakehouse-engine', LakehouseEngine],
     ['@deepseek-ai/dsh-tool-lakehouse', ToolLakehouse],
   ])
   context.loader.internal = {
@@ -170,13 +172,20 @@ describe('kb-agent data routing (keyless)', () => {
     out.push(`- ${await uploadLine('visit-note.md', new TextEncoder().encode(VISIT_NOTE), 'text/markdown')}`)
     out.push('')
 
-    out.push('## lakehouse_tables')
-    // The registration timestamp is wall-clock; pin it so the snapshot is stable.
-    out.push((await callText('lakehouse_tables', {})).replace(/\(updated [^)]+\)/u, '(updated <ts>)'))
+    // The upload lands as Parquet under the seam's data root; the engine's
+    // ingest step (what the sync pipeline does for business tables) copies it
+    // into the DuckLake catalog, so the lakehouse_* tool rows can query it.
+    const engine = ctx!.get('lakehouseEngine')
+    if (engine === undefined) throw new Error('lakehouseEngine did not compose')
+    await engine.createSchema('uploads')
+    await engine.ingestParquet('uploads', 'customs_export', join(root!, 'lakehouse', 'demo-food-co', 'customs_export.parquet'))
+
+    out.push('## lakehouse_list_tables')
+    out.push(await callText('lakehouse_list_tables', {}))
     out.push('')
 
     out.push('## lakehouse_query')
-    out.push(await callText('lakehouse_query', { sql: 'SELECT region, SUM(amount_t) AS total_amount FROM customs_export GROUP BY region ORDER BY region' }))
+    out.push(await callText('lakehouse_query', { sql: 'SELECT region, SUM(amount_t) AS total_amount FROM lake.uploads.customs_export GROUP BY region ORDER BY region' }))
     out.push('')
 
     out.push('## kb_search')

@@ -1,5 +1,7 @@
 # Test-only composition for the data-routing keyless snapshot: the lakehouse
-# seam with its sqlite catalog and the DuckDB engine, the kb seam with its
+# upload seam with its sqlite catalog and DuckDB landing (uploads land as
+# Parquet here), the lakehouse engine (DuckDB + DuckLake catalog — the
+# queryable truth the lakehouse_* tool rows read), the kb seam with its
 # sqlite store, and both tool suites — everything path-pinned to
 # test-provided locations through the environment, so runs never touch the
 # example's own workspace.
@@ -40,6 +42,14 @@
 
 - id: lakehouse-duckdb
   name: '@deepseek-ai/dsh-lakehouse-duckdb'
+
+- id: lakehouse-engine
+  name: '@deepseek-ai/dsh-lakehouse-engine'
+  config:
+    catalog:
+      kind: ducklake
+      catalogPath: !!js "process.env.LH_TEST_ROOT + '/catalog.ducklake'"
+      dataPath: !!js "process.env.LH_TEST_ROOT + '/files'"
 
 - id: tool-lakehouse
   name: '@deepseek-ai/dsh-tool-lakehouse'

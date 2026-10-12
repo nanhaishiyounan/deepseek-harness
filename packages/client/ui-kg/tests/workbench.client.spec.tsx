@@ -469,23 +469,13 @@ describe('kgStore workbench caches', () => {
     expect(store.store.getSnapshot().history?.status).toBe('error')
   })
 
-  it('tracks the panel, search, review, and communities lifecycles with an optional mappings readout', () => {
+  it('tracks the panel, search, review, and communities lifecycles', () => {
     const store = createKgClientStore()
     store.beginPanel()
     expect(store.store.getSnapshot().panel).toEqual({ status: 'loading' })
     store.setPanel({ islands: 1, conflicts: 0 }, { triples: 2, entities: 1 })
     const barePanel = store.store.getSnapshot().panel
     expect(barePanel?.status).toBe('ready')
-    expect(barePanel?.status === 'ready' ? 'mappings' in barePanel.value : false).toBe(false)
-    const mappings = {
-      file: 'kg-mappings.yml',
-      version: 1,
-      rules: { skipHiddenCollections: true, emptyFkNoEdge: true, derivesTitle: true },
-      collections: [{ name: 'experts', fkLinkCount: 0 }],
-    }
-    store.setPanel({ islands: 1, conflicts: 0 }, { triples: 2, entities: 1 }, mappings)
-    const panel = store.store.getSnapshot().panel
-    expect(panel?.status === 'ready' ? panel.value.mappings : undefined).toEqual(mappings)
     store.failPanel('x')
     expect(store.store.getSnapshot().panel).toEqual({ status: 'error', error: 'x' })
 

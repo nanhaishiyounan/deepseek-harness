@@ -4822,3 +4822,6 @@ The "onboarding-draft" cookie is not signed, but session cookies should be signe
   event: [32m'redis.degraded'[39m,
   cause: [32m'connect ECONNREFUSED 127.0.0.1:6379'[39m
 }
+/Users/mac/Downloads/carbon-main/apps/erp:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  erp@ dev:app: `react-router dev`
+Exit status 143

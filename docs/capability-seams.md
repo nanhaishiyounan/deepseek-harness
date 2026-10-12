@@ -26,16 +26,22 @@ flowchart LR
   pkg_lakehouse_sqlite_catalog["lakehouse-sqlite-catalog"]
   pkg_lakehouse_duckdb["lakehouse-duckdb"]
   pkg_tool_lakehouse["tool-lakehouse"]
+  pkg_lakehouse_engine["lakehouse-engine"]
+  svc_lakehouseEngine["ctx.lakehouseEngine<br/>Lakehouse engine"]
+  pkg_lakehouse_sync["lakehouse-sync"]
+  pkg_host_apiproxy["host-apiproxy"]
+  pkg_governance_engine["governance-engine"]
+  svc_lakehouseSync["ctx.lakehouseSync<br/>Lakehouse sync pipeline"]
   pkg_connector["connector"]
   svc_connector["ctx.connector<br/>Connector seam"]
   pkg_connector_file["connector-file"]
-  pkg_connector_nocobase["connector-nocobase"]
   pkg_tool_connector["tool-connector"]
-  pkg_kg_build["kg-build"]
-  svc_kgBuild["ctx.kgBuild<br/>KG build pipeline"]
-  pkg_expert_orders["expert-orders"]
-  svc_orders["ctx.orders<br/>Expert orders"]
-  pkg_host_apiproxy["host-apiproxy"]
+  pkg_connector_carbon["connector-carbon"]
+  svc_carbon["ctx.carbon<br/>Carbon business-data session"]
+  pkg_tool_carbon["tool-carbon"]
+  pkg_graph_neo4j["graph-neo4j"]
+  svc_neo4jGraph["ctx.neo4jGraph<br/>Neo4j graph store"]
+  pkg_tool_graph["tool-graph"]
   pkg_llm["llm"]
   svc_llm["ctx.llm<br/>LLM adapter registry"]
   pkg_llm_deepseek["llm-deepseek"]
@@ -251,8 +257,8 @@ flowchart LR
   pkg_compaction_basic --> svc_compaction
   pkg_compaction_tool_result_pruner --> svc_toolResultPruner
   pkg_connector --> svc_connector
+  pkg_connector_carbon --> svc_carbon
   pkg_connector_file --> svc_connector
-  pkg_connector_nocobase --> svc_connector
   pkg_cordis_host_runner --> svc_cordisInspect
   pkg_cordis_host_runner --> svc_dynamicCordisRunner
   pkg_credentials --> svc_credentials
@@ -261,7 +267,6 @@ flowchart LR
   pkg_directory_picker_browse --> svc_directoryPicker
   pkg_directory_picker_native --> svc_directoryPicker
   pkg_e2b --> svc_e2b
-  pkg_expert_orders --> svc_orders
   pkg_file_reference --> svc_fileReferences
   pkg_file_reference_local --> svc_fileReferences
   pkg_fs --> svc_fs
@@ -269,6 +274,7 @@ flowchart LR
   pkg_fs_local --> svc_fs
   pkg_fs_sandbox --> svc_fs
   pkg_goal --> svc_goals
+  pkg_graph_neo4j --> svc_neo4jGraph
   pkg_invariants --> svc_invariants
   pkg_jobs --> svc_jobs
   pkg_jobs_local --> svc_jobs
@@ -278,10 +284,11 @@ flowchart LR
   pkg_kb_graph --> svc_kbGraph
   pkg_kb_graph_sqlite --> svc_kbGraph
   pkg_kb_sqlite --> svc_kb
-  pkg_kg_build --> svc_kgBuild
   pkg_lakehouse --> svc_lakehouse
   pkg_lakehouse_duckdb --> svc_lakehouse
+  pkg_lakehouse_engine --> svc_lakehouseEngine
   pkg_lakehouse_sqlite_catalog --> svc_lakehouse
+  pkg_lakehouse_sync --> svc_lakehouseSync
   pkg_llm --> svc_llm
   pkg_llm_deepseek --> svc_llm
   pkg_llm_minimax --> svc_llm
@@ -365,6 +372,8 @@ flowchart LR
   svc_attachments --> pkg_host_runtime
   svc_attachments --> pkg_llm_pi_ai
   svc_authorization --> pkg_llm_pi_ai
+  svc_carbon --> pkg_host_apiproxy
+  svc_carbon --> pkg_tool_carbon
   svc_clientModules --> pkg_hmr
   svc_codeRuntime --> pkg_tools
   svc_compaction --> pkg_compaction_basic
@@ -389,11 +398,15 @@ flowchart LR
   svc_kb --> pkg_tool_kb
   svc_kbGraph --> pkg_tool_kb
   svc_lakehouse --> pkg_tool_lakehouse
+  svc_lakehouseEngine --> pkg_governance_engine
+  svc_lakehouseEngine --> pkg_host_apiproxy
+  svc_lakehouseEngine --> pkg_lakehouse_sync
+  svc_lakehouseEngine --> pkg_tool_lakehouse
   svc_llm --> pkg_agent_loop
   svc_llm --> pkg_compaction_basic
   svc_lsp --> pkg_tool_lsp
-  svc_orders --> pkg_host_apiproxy
-  svc_orders --> pkg_tool_connector
+  svc_neo4jGraph --> pkg_host_apiproxy
+  svc_neo4jGraph --> pkg_tool_graph
   svc_sandbox --> pkg_bash_sandbox
   svc_sandbox --> pkg_terminal_bash
   svc_sandboxPolicy --> pkg_bash_sandbox
@@ -484,9 +497,11 @@ flowchart LR
 | `ctx.kb` | `seam` | [`kb`](../packages/kb/kb) | [`kb-sqlite`](../packages/kb/kb-sqlite), [`kb-embed-minimax`](../packages/kb/kb-embed-minimax), [`kb-embed-dashscope`](../packages/kb/kb-embed-dashscope) | [`tool-kb`](../packages/kb/tool-kb) | - | Store and embed providers register implementations; the ingest/search orchestration fuses full-text and vector rankings and degrades to text-only when no embed provider is usable. |
 | `ctx.kbGraph` | `seam` | [`kb-graph`](../packages/kb/kb-graph) | [`kb-graph-sqlite`](../packages/kb/kb-graph-sqlite) | [`tool-kb`](../packages/kb/tool-kb) | - | A sibling of the kb seam for entity-relation triples: the graph store registers implementations, and the kb tool suite queries neighbors/two-hop paths/entities under the tenant isolation model. |
 | `ctx.lakehouse` | `seam` | [`lakehouse`](../packages/lakehouse/lakehouse) | [`lakehouse-sqlite-catalog`](../packages/lakehouse/lakehouse-sqlite-catalog), [`lakehouse-duckdb`](../packages/lakehouse/lakehouse-duckdb) | [`tool-lakehouse`](../packages/lakehouse/tool-lakehouse) | - | The catalog and engine providers register implementations; loads write Parquet under the data root and queries run DuckDB SQL over the tenant-visible table set, failing loud with no usable engine. |
-| `ctx.connector` | `seam` | [`connector`](../packages/connector/connector) | [`connector-file`](../packages/connector/connector-file), [`connector-nocobase`](../packages/connector/connector-nocobase) | [`tool-connector`](../packages/connector/tool-connector) | - | Connector providers register implementations; discovery fans across usable providers, and the five-step transfer lands datasets into the kb or the lakehouse through the shared data router with a catalog transfer record as the confirm trail. |
-| `ctx.kgBuild` | `core` | [`kg-build`](../packages/kb/kg-build) | - | - | - | The graph-writing pipeline consumer: deterministic R01–R13 mapping over NocoBase collections, lakehouse catalog tables, and connector datasets, plus closed-set corpus extraction — every run idempotent per source-run fingerprint. |
-| `ctx.orders` | `core` | [`expert-orders`](../packages/expert/expert-orders) | - | [`tool-connector`](../packages/connector/tool-connector), [`host-apiproxy`](../packages/host/apiproxy) | - | Single functional service over the NocoBase orders source of truth: creation snapshots the priced service, fulfillment runs the drafting-and-typesetting pipeline to a landed PDF deliverable, and every state transition writes the source row first. |
+| `ctx.lakehouseEngine` | `seam` | [`lakehouse-engine`](../packages/lakehouse/lakehouse-engine) | - | [`tool-lakehouse`](../packages/lakehouse/tool-lakehouse), [`lakehouse-sync`](../packages/lakehouse/lakehouse-sync), [`host-apiproxy`](../packages/host/apiproxy), [`governance-engine`](../packages/governance/governance-engine) | - | One in-process DuckDB instance with the configured catalog attached (Tier 0 DuckLake, Tier 1 Iceberg REST); the read guard and row/time caps own the model-facing query surface. |
+| `ctx.lakehouseSync` | `core` | [`lakehouse-sync`](../packages/lakehouse/lakehouse-sync) | - | - | - | Watermark-incremental sync from a read-only PostgreSQL attach plus the idempotent B0 legacy-Parquet ingest; schedule runs stay silent-failure so the next round stays ready. |
+| `ctx.connector` | `seam` | [`connector`](../packages/connector/connector) | [`connector-file`](../packages/connector/connector-file) | [`tool-connector`](../packages/connector/tool-connector) | - | Connector providers register implementations; discovery fans across usable providers, and the five-step transfer lands datasets into the kb or the lakehouse through the shared data router with a catalog transfer record as the confirm trail. |
+| `ctx.carbon` | `seam` | [`connector-carbon`](../packages/connector/connector-carbon) | - | [`tool-carbon`](../packages/connector/tool-carbon), [`host-apiproxy`](../packages/host/apiproxy) | - | Self-registering Service over the carbon community Data API: the GoTrue session ladder (password/refresh/password) plus tenant resolution from employee.id; RLS violations surface structured. |
+| `ctx.neo4jGraph` | `seam` | [`graph-neo4j`](../packages/graph/graph-neo4j) | - | [`tool-graph`](../packages/graph/tool-graph), [`host-apiproxy`](../packages/host/apiproxy) | - | Bolt-backed store with the read-only Cypher gate and the append-only ontology version chain; the kg tools and the gateway graph page read walks and ontology through it. |
 | `ctx.llm` | `seam` | [`llm`](../packages/llm/llm) | [`llm-deepseek`](../packages/llm/llm-deepseek), [`llm-minimax`](../packages/llm/llm-minimax), [`llm-pi-ai`](../packages/llm/llm-pi-ai), [`llm-replay`](../packages/test-support/llm-replay) | [`agent-loop`](../packages/core/agent-loop), [`compaction-basic`](../packages/compaction/compaction-basic) | - | Adapters register provider implementations; the loop and compaction call the provider-neutral stream service. |
 | `ctx.tokenMeter` | `core` | [`token-meter`](../packages/llm/token-meter) | - | [`compaction-basic`](../packages/compaction/compaction-basic) | - | Owns isolated per-session replay folds; pressure consumers share immutable revisioned measurements. |
 | `ctx.toolResultPruner` | `core` | [`compaction-tool-result-pruner`](../packages/compaction/compaction-tool-result-pruner) | - | [`compaction-basic`](../packages/compaction/compaction-basic) | - | Rewrites oversized current tool results through replayable single-node surface replacements before summary compaction. |

@@ -259,8 +259,8 @@
       name: '@deepseek-ai/dsh-client-ui-mobile-preview'
 
     # Business-management page: sidebar entry + the `business` conversation
-    # view tab (collection switcher, entity card stream, table view, NocoBase
-    # embed entry). Data rides the gateway's nocobase domain (listMeta/list).
+    # view tab (collection switcher, entity card stream, table view, carbon
+    # ERP embed entry). Data rides the gateway's carbon domain (listMeta/list).
     - id: ui-business
       name: '@deepseek-ai/dsh-client-ui-business'
 
@@ -404,7 +404,7 @@
     - id: lakehouse-sync
       name: '@deepseek-ai/dsh-lakehouse-sync'
       config:
-        dsn: !!js "process.env.DSH_LAKEHOUSE_SYNC_DSN ?? 'dbname=nocobase host=127.0.0.1 port=5432 user=nocobase'"
+        dsn: !!js "process.env.DSH_LAKEHOUSE_SYNC_DSN ?? 'dbname=postgres host=127.0.0.1 port=51538 user=supabase_admin password=postgres'"
         tables: []
         scheduleIntervalMs: 0
 

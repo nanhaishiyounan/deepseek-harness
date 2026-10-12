@@ -14,7 +14,7 @@ describe('readOnlyVerdict acceptance', () => {
     ['SELECT 1 -- trailing comment'],
   ])('accepts %s', (sql) => {
     expect(readOnlyVerdict(sql)).toEqual({ allowed: true, code: undefined })
-    expect(() => assertReadOnlySql(sql)).not.toThrow()
+    expect(() => { assertReadOnlySql(sql) }).not.toThrow()
   })
 })
 

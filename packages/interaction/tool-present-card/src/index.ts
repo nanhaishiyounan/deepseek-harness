@@ -628,7 +628,7 @@ function selectByConstDiscriminant(branches: readonly ValueSchemaSpec[], value: 
  * @returns the flattened candidate, or undefined when the value is not that
  * spelling.
  */
-function unwrapSingleKeyDiscriminant(branches: readonly ValueSchemaSpec[], value: unknown): unknown | undefined {
+function unwrapSingleKeyDiscriminant(branches: readonly ValueSchemaSpec[], value: unknown): unknown {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return undefined
   const record = value as Record<string, unknown>
   const keys = Object.keys(record)
@@ -655,7 +655,7 @@ function unwrapSingleKeyDiscriminant(branches: readonly ValueSchemaSpec[], value
  * @returns the candidate with the discriminant filled, or undefined when
  * zero or several branches match.
  */
-function inferMissingDiscriminant(branches: readonly ValueSchemaSpec[], value: unknown): unknown | undefined {
+function inferMissingDiscriminant(branches: readonly ValueSchemaSpec[], value: unknown): unknown {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return undefined
   const record = value as Record<string, unknown>
   const discriminants: { branch: ObjectValueSchemaSpec; discriminant: ConstDiscriminant }[] = []

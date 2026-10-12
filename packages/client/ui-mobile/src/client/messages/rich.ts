@@ -9,8 +9,7 @@
 
 import MarkdownIt from 'markdown-it'
 import DOMPurify from 'dompurify'
-import { SUPPLIER_LIFECYCLE_STATES } from '../fieldControls.ts'
-import { SUPPLIER_STATE_WORDS } from '../docsCatalog.ts'
+import { SUPPLIER_LIFECYCLE_STATES, SUPPLIER_STATE_WORDS } from '../fieldControls.ts'
 
 /** The shared renderer: no raw HTML in, single newlines break, no linkify. */
 const md = new MarkdownIt({ html: false, breaks: true, linkify: false })

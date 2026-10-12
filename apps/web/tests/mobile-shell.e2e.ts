@@ -1,12 +1,12 @@
 /**
  * Mobile-shell e2e (keyless): the /mobile entry — the mobile client's own
- * surface — boots, gates on the demo login, and walks the v6 four-tab shell
- * (消息/同事/工作台/我的) at the 390×844 viewport: the tab bar shows on the
- * four whitelisted pages and hides on every full-screen layer or secondary
- * route (chats, chat, work detail, tasks, files). The all-chats list is a
- * full-screen layer with the PageNav back header (v6 IA). The legacy v1/v2
- * tab hashes fold onto their landings. Assertions use the lane's waitFor/poll
- * vocabulary (the web config carries no web-first matchers).
+ * surface — boots straight into the v6 four-tab shell (identity-free direct
+ * entry, NocoBase 退役后无登录门) at the 390×844 viewport: the tab bar shows
+ * on the four whitelisted pages and hides on every full-screen layer or
+ * secondary route (chats, chat, work detail, tasks, files). The all-chats
+ * list is a full-screen layer with the PageNav back header (v6 IA). The
+ * legacy v1/v2 tab hashes fold onto their landings. Assertions use the lane's
+ * waitFor/poll vocabulary (the web config carries no web-first matchers).
  * Run: pnpm run test:web -- mobile-shell
  */
 
@@ -23,14 +23,7 @@ const OVERLAY = new URL('./mobile.overlay.yml', import.meta.url).pathname
 const SEED_FIXTURE = fileURLToPath(new URL('./snapshots/navigation-panes/seed.jsonl', import.meta.url))
 const SEED_ID = 'mobile-shell-seed'
 
-/** Log in through the demo card and wait for the home landing. */
-async function login(page: Page): Promise<void> {
-  await page.getByPlaceholder('6 位验证码').fill('123456')
-  await page.getByRole('button', { name: '登录', exact: true }).click()
-  await page.getByLabel('今日台账').waitFor({ timeout: 20_000 })
-}
-
-describe('mobile v6 shell (login + four tabs, 390×844)', () => {
+describe('mobile v6 shell (identity-free direct entry + four tabs, 390×844)', () => {
   let scaffold: WebScaffold
   let browser: Browser
   let page: Page
@@ -47,7 +40,9 @@ describe('mobile v6 shell (login + four tabs, 390×844)', () => {
     page = await browser.newPage({ viewport: { width: 390, height: 844 }, locale: ZH_BROWSER_LOCALE })
     tripwire = watchConsole(page)
     await page.goto(`${scaffold.baseUrl}/mobile`, { waitUntil: 'load' })
-    await page.getByText('食链通 · AI 员工').waitFor({ timeout: 20_000 })
+    // Identity-free direct entry: no login gate stands between /mobile and
+    // the home landing.
+    await page.getByLabel('今日台账').waitFor({ timeout: 20_000 })
   }, 60_000)
 
   afterEach(async () => {
@@ -59,15 +54,15 @@ describe('mobile v6 shell (login + four tabs, 390×844)', () => {
     await scaffold.close()
   }, 120_000)
 
-  it('serves the mobile page at /mobile with the demo login card', async () => {
+  it('serves the mobile page at /mobile with identity-free direct entry', async () => {
     expect(page.url()).toContain('/mobile')
-    expect(await page.getByText('演示环境 · 数据仅限内测').first().textContent()).toBeTruthy()
-    await page.getByRole('button', { name: '获取', exact: true }).click()
-    await page.getByRole('button', { name: /^\d+s$/ }).waitFor({ timeout: 5_000 })
+    // The retired demo login card must not come back: no verification-code
+    // input and no login button anywhere on the direct-entry landing.
+    expect(await page.getByPlaceholder('6 位验证码').count()).toBe(0)
+    expect(await page.getByRole('button', { name: '登录', exact: true }).count()).toBe(0)
   })
 
-  it('logs in through the demo code onto the four-tab home shell', async () => {
-    await login(page)
+  it('lands the four-tab home shell without any login step', async () => {
     const nav = page.getByRole('navigation', { name: '底部导航' })
     await nav.waitFor()
     // The v6 tab set: 消息 / 同事 / 工作台 / 我的.
@@ -82,7 +77,6 @@ describe('mobile v6 shell (login + four tabs, 390×844)', () => {
   })
 
   it('keeps the tab bar on the four whitelisted pages', async () => {
-    await login(page)
     const nav = page.getByRole('navigation', { name: '底部导航' })
     // 同事 lands on the agents directory.
     await nav.getByText('同事', { exact: true }).click()
@@ -104,7 +98,6 @@ describe('mobile v6 shell (login + four tabs, 390×844)', () => {
   })
 
   it('hides the tab bar on the chats/chat layers and the secondary routes', async () => {
-    await login(page)
     const nav = page.getByRole('navigation', { name: '底部导航' })
     await nav.waitFor()
     // The all-chats layer: the PageNav back header renders over the list and
@@ -125,18 +118,19 @@ describe('mobile v6 shell (login + four tabs, 390×844)', () => {
     await page.getByLabel('文件').waitFor({ timeout: 10_000 })
     await expect.poll(async () => await nav.count(), { timeout: 10_000 }).toBe(0)
     // The work tab shows the bar; opening one work item hides it (the
-    // first-run demo seed supplies the doing list's cards).
+    // first-run demo seed supplies the doing list's cards). The status
+    // capsule tab is pinned by its antd class: the page's stat cards carry
+    // the same bare 进行中 text, so a text match alone is ambiguous.
     await page.evaluate(() => { location.hash = '#/work' })
     await page.getByRole('heading', { name: '工作' }).waitFor({ timeout: 10_000 })
     await nav.waitFor()
-    await page.getByText(/^进行中/).click()
+    await page.locator('.adm-capsule-tabs-tab').filter({ hasText: '进行中' }).click()
     await page.getByLabel('打开 供应商资质到期提醒').click()
     await page.getByLabel('工作票头').waitFor({ timeout: 10_000 })
     await expect.poll(async () => await nav.count(), { timeout: 10_000 }).toBe(0)
   })
 
   it('walks the new-chat sheet from the chats layer and the me tab', async () => {
-    await login(page)
     await page.evaluate(() => { location.hash = '#/chats' })
     await page.getByRole('heading', { name: '消息' }).waitFor({ timeout: 10_000 })
     await page.getByRole('button', { name: '新建会话' }).click()
@@ -152,12 +146,13 @@ describe('mobile v6 shell (login + four tabs, 390×844)', () => {
     await page.getByRole('navigation', { name: '底部导航' }).getByText('我的', { exact: true }).click()
     await page.getByRole('heading', { name: '我的' }).waitFor({ timeout: 10_000 })
     await page.getByRole('switch', { name: '深色模式' }).waitFor()
-    await page.getByText('本月登记').first().waitFor()
+    // The profile metrics band (its aria seat) with the local 近期登记 counter.
+    await page.getByLabel('本月台账').waitFor({ timeout: 10_000 })
+    await page.getByText('近期登记').first().waitFor()
     expect(tripwire.pageErrors).toEqual([])
   })
 
   it('redirects the v1/v2 tab hashes onto the v6 landings', async () => {
-    await login(page)
     await page.evaluate(() => { location.hash = '#/workbench' })
     await page.getByRole('heading', { name: '工作' }).waitFor({ timeout: 10_000 })
     await page.evaluate(() => { location.hash = '#/contacts' })

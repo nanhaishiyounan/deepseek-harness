@@ -1,0 +1,884 @@
+{
+  "question": "对客户 NovaSat 做一次五源合规风险检查，严格按以下五步依次使用对应数据源的工具完成：\n第1步【业务系统】先用 cb_collections 查看 carbon 业务表目录，再用 cb_list 查询 customer 或 salesOrder 表，找出客户 NovaSat 的记录与订单。\n第2步【知识库】用 kb_search 检索食品原料收货检验/入库验收的 HACCP 或食品安全合规要求。\n第3步【湖仓】用 lakehouse_list_tables 与 lakehouse_query 对湖仓中 NovaSat 相关订单物料做数量与金额汇总（可先 lakehouse_schema 看列）。\n第4步【图谱】用 kg_graph_query（或 kg_subgraph）查 NovaSat 在图谱中的一跳邻域实体。\n第5步【本体】用 kg_ontology 给出物料/订单域的本体 schema 摘要（类、属性、关系）。\n最后综合五源信息给出 NovaSat 订单的合规风险评估结论。",
+  "model": "MiniMax-M3",
+  "provider": "minimax",
+  "seenTools": [
+    "kb_search",
+    "cb_list",
+    "cb_collections",
+    "lakehouse_list_tables",
+    "lakehouse_query",
+    "lakehouse_schema",
+    "kg_graph_query",
+    "kg_ontology",
+    "kg_subgraph"
+  ],
+  "hits": {
+    "kb": true,
+    "carbon": true,
+    "lakehouse": true,
+    "graph": true,
+    "ontology": true
+  },
+  "facts": [
+    {
+      "kind": "session-created",
+      "fact": {
+        "sessionId": "session-4a2c0ddf-3f68-4552-ab15-8cc2e60c6ada"
+      }
+    },
+    {
+      "kind": "model-picked",
+      "fact": {
+        "provider": "minimax",
+        "model": "MiniMax-M3"
+      }
+    },
+    {
+      "kind": "model-selected",
+      "fact": "2026-10-12T13:49:47.149Z"
+    },
+    {
+      "kind": "prompt-sent",
+      "fact": "2026-10-12T13:49:50.204Z"
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:50:35.219Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:50:50.441Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:51:05.618Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:51:20.824Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:51:35.983Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:51:51.119Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:52:06.257Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:52:21.419Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:52:36.604Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:52:51.810Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:53:07.258Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:53:22.604Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:53:37.750Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:53:53.007Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:54:08.181Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:54:23.396Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:54:38.584Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:54:53.752Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:55:08.965Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:55:24.101Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:55:39.289Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:55:54.492Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:56:09.647Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:56:24.828Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:56:39.987Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:56:55.172Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:57:10.353Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:57:25.515Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:57:40.687Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:57:55.917Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:58:11.265Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:58:26.456Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:58:41.783Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:58:57.097Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:59:12.344Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:59:27.559Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:59:42.854Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T13:59:58.110Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T14:00:13.335Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T14:00:28.523Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T14:00:43.860Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T14:00:59.115Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T14:01:14.334Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T14:01:29.558Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T14:01:44.763Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "poll",
+      "fact": {
+        "t": "2026-10-12T14:01:59.921Z",
+        "tools": [
+          "kb_search",
+          "cb_list",
+          "cb_collections",
+          "lakehouse_list_tables",
+          "lakehouse_query",
+          "lakehouse_schema",
+          "kg_graph_query",
+          "kg_ontology",
+          "kg_subgraph"
+        ],
+        "sendingDisabled": true
+      }
+    },
+    {
+      "kind": "five-source-hits",
+      "fact": {
+        "kb": true,
+        "carbon": true,
+        "lakehouse": true,
+        "graph": true,
+        "ontology": true
+      }
+    }
+  ]
+}

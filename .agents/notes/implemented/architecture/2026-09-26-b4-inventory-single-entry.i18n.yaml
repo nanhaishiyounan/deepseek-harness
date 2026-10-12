@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-09-26-b4-inventory-single-entry.md
-2026-09-26-b4-inventory-single-entry.md: 0ffcf32a59de2fc7b88827c22256a5e4cf3d1955
-2026-09-26-b4-inventory-single-entry.zh.md: 5cb3eed47a3816459ae840ff8967a021d198a32e
+2026-09-26-b4-inventory-single-entry.md: e25e897e31425bbfeb0f607f1271b84c8ede73dc
+2026-09-26-b4-inventory-single-entry.zh.md: ca9c09aaee7e92cf495b54202800c3fc9ae85722

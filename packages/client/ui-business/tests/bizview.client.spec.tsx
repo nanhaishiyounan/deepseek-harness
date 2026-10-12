@@ -124,8 +124,8 @@ describe('BizView state matrix', () => {
   })
 
   it('shows the error strip with a retry on a failed roster load', () => {
-    const { refresh } = mount({ collections: { status: 'error', error: 'nocobase-not-composed' }, selected: undefined, rows: undefined })
-    expect(screen.getByText(/nocobase-not-composed/u)).toBeTruthy()
+    const { refresh } = mount({ collections: { status: 'error', error: 'carbon-not-composed' }, selected: undefined, rows: undefined })
+    expect(screen.getByText(/carbon-not-composed/u)).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: zh['error.retry'] }))
     expect(refresh).toHaveBeenCalled()
   })

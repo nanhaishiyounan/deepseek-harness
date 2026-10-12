@@ -1,8 +1,8 @@
 /**
  * Pure derivation of one turn's answer-source trail: the settled tool calls
  * the turn's closing answer rests on, reduced to per-surface source lists
- * (kb document citations, lakehouse tables, NocoBase collections, knowledge-
- * graph seeds with their provenance systems). Extraction reads the frozen
+ * (kb document citations, lakehouse tables, knowledge-graph seeds with
+ * their provenance systems). Extraction reads the frozen
  * call slice only — the model-facing result texts and the raw argument JSON
  * — and each extractor degrades to nothing on a miss, so a newer host that
  * rewords a result line simply drops that source instead of breaking the
@@ -32,11 +32,6 @@ export interface LakehouseSourceItem {
   readonly sql: string
 }
 
-/** One NocoBase collection a `nb_list`/`nb_get` call read. */
-export interface NocobaseSourceItem {
-  readonly collection: string
-}
-
 /** One knowledge-graph read (kg_subgraph or kg_query). */
 export interface KgSourceItem {
   /** Seeds the walk started from (kg_query contributes its phrase). */
@@ -49,13 +44,12 @@ export interface KgSourceItem {
 export interface SourceTrailModel {
   readonly kb: readonly KbSourceItem[]
   readonly lakehouse: readonly LakehouseSourceItem[]
-  readonly nocobase: readonly NocobaseSourceItem[]
   readonly kg: readonly KgSourceItem[]
 }
 
 /** The empty trail (every extractor missed; the card does not render). */
 export const EMPTY_SOURCE_TRAIL: SourceTrailModel = {
-  kb: [], lakehouse: [], nocobase: [], kg: [],
+  kb: [], lakehouse: [], kg: [],
 }
 
 const CITATION_LINE = /^\[(\d+)\] (.+)$/u
@@ -177,7 +171,6 @@ export function extractKgSource(
 export function sourceTrailOf(blocks: readonly ToolCallBlock[]): SourceTrailModel {
   const kb = new Map<string, KbSourceItem>()
   const lakehouse = new Map<string, LakehouseSourceItem>()
-  const nocobase = new Set<string>()
   const kg: KgSourceItem[] = []
   for (const block of blocks) {
     if (!('kind' in block) || block.isError) continue
@@ -195,12 +188,6 @@ export function sourceTrailOf(blocks: readonly ToolCallBlock[]): SourceTrailMode
           if (!lakehouse.has(item.table)) lakehouse.set(item.table, item)
         }
         break
-      case 'nb_list':
-      case 'nb_get': {
-        const collection = argsOf(block)?.collection
-        if (typeof collection === 'string' && collection.length > 0) nocobase.add(collection)
-        break
-      }
       case 'kg_subgraph':
       case 'kg_query': {
         const item = extractKgSource(text, argsOf(block))
@@ -214,7 +201,6 @@ export function sourceTrailOf(blocks: readonly ToolCallBlock[]): SourceTrailMode
   return {
     kb: [...kb.values()],
     lakehouse: [...lakehouse.values()],
-    nocobase: [...nocobase].map(collection => ({ collection })),
     kg,
   }
 }
@@ -225,5 +211,5 @@ export function sourceTrailOf(blocks: readonly ToolCallBlock[]): SourceTrailMode
  * @returns true when at least one bucket is non-empty.
  */
 export function hasSources(model: SourceTrailModel): boolean {
-  return model.kb.length > 0 || model.lakehouse.length > 0 || model.nocobase.length > 0 || model.kg.length > 0
+  return model.kb.length > 0 || model.lakehouse.length > 0 || model.kg.length > 0
 }

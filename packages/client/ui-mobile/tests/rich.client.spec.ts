@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vitest'
 import { parseMetricLine, renderMarkdown, sanitizeBizText, splitCodeBlocks, splitRichBlocks } from '../src/client/messages/rich.ts'
 import { SUPPLIER_LIFECYCLE_STATES } from '../src/client/fieldControls.ts'
-import { SUPPLIER_STATE_WORDS } from '../src/client/docsCatalog.ts'
+import { SUPPLIER_STATE_WORDS } from '../src/client/fieldControls.ts'
 
 describe('renderMarkdown', () => {
   it('renders paragraphs, bold, and single-newline breaks', () => {

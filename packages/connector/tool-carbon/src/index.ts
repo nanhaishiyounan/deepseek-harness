@@ -3,13 +3,12 @@
  * the `ctx.carbon` capability service (connector-carbon provides it; this
  * plugin is the seam's tool Consumer). The rows stay registered when the
  * service is absent or degraded and fail with the structured refusal at
- * execution time — the documented degraded mode shared with tool-nocobase.
+ * execution time — the suite's documented degraded mode.
  * @module @deepseek-ai/dsh-tool-carbon
  */
 
 import type { Context } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
-import { CarbonService } from '@deepseek-ai/dsh-connector-carbon'
 import {
   applyCbCollectionsTool,
   applyCbCreateTool,
@@ -69,8 +68,8 @@ export const Config: z<Config> = z.object({
  * @param ctx - context whose registries receive the registrations.
  * @param config - validated plugin configuration.
  */
-export async function apply(ctx: Context, config: Config): Promise<void> {
-  const carbon = ctx.carbon as CarbonService
+export function apply(ctx: Context, config: Config): void {
+  const carbon = ctx.carbon
   const read = config.readTimeoutMs ?? DEFAULT_READ_TIMEOUT_MS
   const write = config.writeTimeoutMs ?? DEFAULT_WRITE_TIMEOUT_MS
   applyCbCollectionsTool(ctx, carbon, read)

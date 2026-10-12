@@ -3,7 +3,6 @@
 
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { NocobaseFieldView } from '@deepseek-ai/dsh-host-apiproxy/api'
 
 afterEach(cleanup)
 import { ChoiceBubble } from '../src/client/messages/ChoiceBubble.tsx'
@@ -16,7 +15,6 @@ import { DraftCard } from '../src/client/forms/v3/DraftCard.tsx'
 import { ReceiptCard } from '../src/client/forms/v3/ReceiptCard.tsx'
 import type { ChatAsk, ChatFieldAsk } from '../src/client/fold.ts'
 import type { FormDraftPayload, SubmitReceiptPayload } from '../src/client/protocol.ts'
-import type { CollectionFieldMeta } from '../src/client/forms/task-cards.tsx'
 
 /** One ask item helper. */
 function askOf(overrides: Partial<ChatAsk['payload']> = {}, answered?: ChatAsk['answered']): ChatAsk {
@@ -349,21 +347,7 @@ describe('ReceiptCard v3', () => {
     expect(screen.getAllByText('IN-2026-0042').length).toBeGreaterThan(1)
   })
 
-  it('renders relation fields as the picker trigger on the edit row and the derived face on the derived tier', async () => {
-    // The gateway stub carries the suppliers' option page for the picker and the label reads.
-    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
-      const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
-      const body = JSON.parse((init?.body ?? '{}') as string) as { rpcId?: string }
-      const method = url.replace('/api/', '')
-      const value = method === 'nocobase.list' ? { rows: [{ id: 42, name: '宏发食品' }] } : {}
-      return new Response(JSON.stringify({ rpcId: body.rpcId, result: { ok: true, value } }), { status: 200 })
-    })
-    vi.stubGlobal('fetch', fetchMock)
-    const meta = new Map<string, CollectionFieldMeta>([['hub_po_purchase_orders', new Map<string, NocobaseFieldView>([
-      ['supplier_id', { name: 'supplier_id', type: 'belongsTo', target: 'hub_po_suppliers' }],
-      ['customer_id', { name: 'customer_id', type: 'belongsTo', target: 'crm_customers' }],
-    ])]])
-    const onEdit = vi.fn()
+  it('rests relation fields on the opaque reference face for numeric ids and the raw text otherwise', () => {
     const payload: FormDraftPayload = {
       ...DRAFT,
       fields: [
@@ -374,84 +358,22 @@ describe('ReceiptCard v3', () => {
     render(
       <DraftCard
         payload={payload} values={{ supplier_id: '42', customer_id: 'C-9' }} phase="draft"
-        meta={meta.get('hub_po_purchase_orders')}
-        onEdit={onEdit} onConfirm={() => {}} onReject={() => {}} onRedraft={() => {}} disabled={false}
+        onEdit={() => {}} onConfirm={() => {}} onReject={() => {}} onRedraft={() => {}} disabled={false}
       />,
     )
-    // The required relation renders the picker trigger (not a bare input); the
-    // prefilled id resolves its target-row label over the stubbed read.
-    await waitFor(() => { expect(screen.getByRole('button', { name: '供应商' }).textContent).toContain('宏发食品') })
-    // The derived relation rides the resolved face (a non-numeric value stays the raw text).
+    // Relation picking is retired with the wire: the numeric id rests on the
+    // opaque 引用 #N face and the non-numeric value stays the raw text.
+    expect(screen.getByText('引用 #42')).toBeTruthy()
     expect(screen.getByText('C-9')).toBeTruthy()
-    // A relation field with no metadata rests its numeric value on the
-    // opaque 引用 #N face (W22-R4), not a bare editable input.
-    const bare = render(
-      <DraftCard
-        payload={{ ...payload, fields: [{ name: 'owner_id', label: '经办人', value: '7', tier: 'required', widget: 'relation' }] }}
-        values={{ owner_id: '7' }} phase="draft"
-        onEdit={() => {}} onConfirm={() => {}} onReject={() => {}} onRedraft={() => {}} disabled={false}
-      />,
-    )
-    expect(bare.getByText('引用 #7')).toBeTruthy()
-    bare.unmount()
-    // Opening the picker and confirming routes the picked id as the edit.
-    fireEvent.click(screen.getByRole('button', { name: '供应商' }))
-    await waitFor(() => { expect(document.querySelector('.adm-picker')).toBeTruthy() })
-    await new Promise((resolve) => { setTimeout(resolve, 30) })
-    fireEvent.click(screen.getByText('确定'))
-    await waitFor(() => { expect(onEdit).toHaveBeenCalledWith('supplier_id', '42') })
   })
 
-  it('strips a _id suffix against the meta keys and shows an opaque reference when the meta misses', async () => {
-    // The meta table keys the association column `supplier` while the model
-    // declared `supplier_id` (the W22-R2 verification's scenario D): the
-    // stripped retry still resolves both the picker and the derived face.
-    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
-      const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
-      const body = JSON.parse((init?.body ?? '{}') as string) as { rpcId?: string }
-      const method = url.replace('/api/', '')
-      const value = method === 'nocobase.list' ? { rows: [{ id: 47, name: '鲁丰配料' }] } : {}
-      return new Response(JSON.stringify({ rpcId: body.rpcId, result: { ok: true, value } }), { status: 200 })
-    })
-    vi.stubGlobal('fetch', fetchMock)
-    const meta = new Map<string, CollectionFieldMeta>([['hub_po_purchase_orders', new Map<string, NocobaseFieldView>([
-      ['supplier', { name: 'supplier', type: 'belongsTo', target: 'hub_po_suppliers' }],
-    ])]])
-    const payload: FormDraftPayload = {
-      ...DRAFT,
-      fields: [
-        { name: 'supplier_id', label: '供应商', value: '47', tier: 'required', widget: 'relation' },
-        { name: 'customer_id', label: '客户', value: '48', tier: 'derived', widget: 'relation' },
-      ],
-    }
-    render(
-      <DraftCard
-        payload={payload} values={{ supplier_id: '47', customer_id: '48' }} phase="draft"
-        meta={meta.get('hub_po_purchase_orders')}
-        onEdit={() => {}} onConfirm={() => {}} onReject={() => {}} onRedraft={() => {}} disabled={false}
-      />,
-    )
-    // The edit row resolves through the stripped key: the picker trigger
-    // shows the target-row label, not a bare input with the raw id.
-    await waitFor(() => { expect(screen.getByRole('button', { name: '供应商' }).textContent).toContain('鲁丰配料') })
-    // The derived relation whose meta key no stripping recovers never shows
-    // the bare number: it reads as the opaque row reference.
-    expect(screen.getByText('引用 #48')).toBeTruthy()
-    vi.unstubAllGlobals()
-  })
-
-  it('rests a double-missed required relation on the opaque reference face (W22-R4)', () => {
-    // The meta table keys neither `customer_id` nor the stripped `customer`
-    // spelling: the required tier's edit row shows the same 引用 #N face as
-    // the derived tier instead of a bare editable input with the raw id.
-    const meta = new Map<string, CollectionFieldMeta>([['hub_po_purchase_orders', new Map<string, NocobaseFieldView>([
-      ['supplier', { name: 'supplier', type: 'belongsTo', target: 'hub_po_suppliers' }],
-    ])]])
+  it('rests a required relation on the opaque reference face (W22-R4)', () => {
+    // Relation picking is retired: the required tier's edit row shows the
+    // 引用 #N face instead of a bare editable input with the raw id.
     render(
       <DraftCard
         payload={{ ...DRAFT, fields: [{ name: 'customer_id', label: '客户', value: '48', tier: 'required', widget: 'relation' }] }}
         values={{ customer_id: '48' }} phase="draft"
-        meta={meta.get('hub_po_purchase_orders')}
         onEdit={() => {}} onConfirm={() => {}} onReject={() => {}} onRedraft={() => {}} disabled={false}
       />,
     )
@@ -580,7 +502,7 @@ describe('DraftCard v3 widget controls (W22-B2)', () => {
   })
 
   it('rolls the date picker from the trigger and feeds the YYYY-MM-DD pick', async () => {
-    const onEdit = vi.fn()
+    const onEdit = vi.fn((_name: string, _value: string) => {})
     render(
       <DraftCard payload={WIDGETS} values={{}} phase="draft" onEdit={onEdit} onConfirm={() => {}} onReject={() => {}} onRedraft={() => {}} disabled={false} />,
     )

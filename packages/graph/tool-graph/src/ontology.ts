@@ -186,10 +186,9 @@ export function applyOntologyTool(ctx: Context, timeoutMs: number): void {
           },
         },
       },
-      render: (_args, value) => [{ type: 'text', text: formatOntologyOutput(value as OntologyToolValue) }],
+      render: (_args, value) => [{ type: 'text', text: formatOntologyOutput(value) }],
       presentationMeta: (_args, value) => {
-        const projected = value as OntologyToolValue
-        return { versions: projected.versions.length }
+        return { versions: value.versions.length }
       },
     },
     timeoutMs,

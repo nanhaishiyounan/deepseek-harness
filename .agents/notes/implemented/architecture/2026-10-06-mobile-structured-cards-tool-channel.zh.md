@@ -35,4 +35,4 @@ Status: implemented
 ## Verification
 
 - `pnpm vitest run packages/interaction/tool-present-card`（载荷校验 + concludeTurn）、`pnpm vitest run packages/client/ui-mobile`（镜像 fixtures）、`pnpm run test:web -- mobile-assistant`（旧围栏 golden，一字未动）与 `-- mobile-assistant-toolcard`（工具源 golden）。
-- 活体确定性矩阵 + 回放腿 + GIF：[demos/acceptance-w21/](../../../../demos/acceptance-w21/)（p3-matrix-runs.jsonl、p3-replay-results.json、p3-s1-disambiguation.gif）。
+- 活体确定性矩阵 + 回放腿 + GIF：`demos/acceptance-w21/`（p3-matrix-runs.jsonl、p3-replay-results.json、p3-s1-disambiguation.gif）。

@@ -101,6 +101,13 @@ function basenameOf(path: string): string | undefined {
   return base === '' ? undefined : base
 }
 
+/** Split text into single Unicode code points (surrogate pairs kept whole). */
+function codePoints(content: string): string[] {
+  const points: string[] = []
+  for (const point of content) points.push(point)
+  return points
+}
+
 /**
  * The WeKnora kb store. See the module doc for the tenant/category mapping,
  * the title identity encoding, and the fallback contract.
@@ -233,10 +240,10 @@ export class WeknoraKbStore implements KbStore {
       // WeKnora's manual endpoint caps one entry at 200k characters; longer
       // documents split into `path#N` segments (decodeTitle strips the suffix).
       const SEGMENT = 190_000
-      const segments = [...Array(Math.ceil([...content].length / SEGMENT)).keys()]
+      const segments = [...Array(Math.ceil(codePoints(content).length / SEGMENT)).keys()]
       let firstKnowledgeId = ''
       for (const index of segments) {
-        const segmentContent = [...content].slice(index * SEGMENT, (index + 1) * SEGMENT).join('')
+        const segmentContent = codePoints(content).slice(index * SEGMENT, (index + 1) * SEGMENT).join('')
         const segmentTitle = index === 0 ? title : `${title}#${index + 1}`
         const knowledgeId = await this.client.createManualKnowledge(kbId, segmentTitle, segmentContent, signal)
         if (index === 0) firstKnowledgeId = knowledgeId
@@ -289,7 +296,9 @@ export class WeknoraKbStore implements KbStore {
         ? hit.knowledge_filename
         : ''
     const decoded = decodeTitle(rawTitle)
-    const chunkUid = typeof hit.id === 'string' ? hit.id : `${String(hit.knowledge_id ?? '')}:${String(hit.chunk_index ?? 0)}`
+    const knowledgeIdText = typeof hit.knowledge_id === 'string' ? hit.knowledge_id : ''
+    const chunkIdxText = typeof hit.chunk_index === 'number' ? hit.chunk_index : 0
+    const chunkUid = typeof hit.id === 'string' ? hit.id : `${knowledgeIdText}:${chunkIdxText}`
     const knowledgeId = typeof hit.knowledge_id === 'string' ? hit.knowledge_id : chunkUid
     const breadcrumb = typeof hit.breadcrumb === 'string' && hit.breadcrumb !== '' ? hit.breadcrumb : undefined
     const score = typeof hit.score === 'number' && Number.isFinite(hit.score) ? hit.score : undefined
@@ -434,6 +443,7 @@ export class WeknoraKbStore implements KbStore {
    * @returns all-zero counters.
    */
   async usage(_tenantId: string, _signal?: AbortSignal): Promise<KbUsage> {
+    await Promise.resolve()
     return { searches: 0, ingestedDocuments: 0, ingestedChunks: 0, embedTexts: 0, embedTokens: 0 }
   }
 
