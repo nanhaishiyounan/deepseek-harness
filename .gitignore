@@ -60,3 +60,8 @@ research/**/sources/*
 # ignoring them only stops the untracked listing in git status.
 research/*/raw/
 plans/
+
+# tsc/tsdown build outputs (lib/), rebuilt by pnpm run build; not tracked.
+packages/**/lib/
+apps/**/lib/
+vendor/**/lib/
