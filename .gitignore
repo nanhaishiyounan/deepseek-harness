@@ -39,7 +39,7 @@ apps/web/dist/
 worktrees/
 .agents/worktrees/
 .typert-*/
-.map
+*.map
 
 # Local verification screenshots and the root KB runtime workspace data.
 # Anchored: subpackage workspaces (examples/kb-agent/workspace) carry their
