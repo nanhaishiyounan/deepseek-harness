@@ -1,0 +1,359 @@
+[
+ {
+  "seq": 114,
+  "name": "cb_collections",
+  "args": "{}",
+  "ok": true,
+  "resultHead": "共 11 张业务表：\n- item（物料｜可读可写｜主键列 id｜关键列 id, readableId, name, type, active, createdAt）\n- customer（客户｜可读可写｜主键列 id｜关键列 id, re"
+ },
+ {
+  "seq": 115,
+  "name": "kb_search",
+  "args": "{\"query\":\"食品原料收货检验 入库验收 HACCP 食品安全合规\",\"doc_kind\":\"regulation\",\"max_results\":6}",
+  "ok": true,
+  "resultHead": "(hybrid mode via minimax:embo-01)\n\n[1] food-compliance/gb14881-excerpt.md — regulation — chunk 0\n  - 文档性质：国家标准要点转述（供知识库检"
+ },
+ {
+  "seq": 116,
+  "name": "lakehouse_list_tables",
+  "args": "{}",
+  "ok": true,
+  "resultHead": "| table | rows |\n| --- | --- |\n| lake.legacy_nocobase.alert_rules | 8 |\n| lake.legacy_nocobase.aps_whatif_runs | 16 |\n| "
+ },
+ {
+  "seq": 117,
+  "name": "kg_ontology",
+  "args": "{}",
+  "ok": true,
+  "resultHead": "| version | name | source | created_at | prev |\n| --- | --- | --- | --- | --- |\n| 3 | food-mfg-b5 | llm-induction | 2026"
+ },
+ {
+  "seq": 118,
+  "name": "kg_subgraph",
+  "args": "{\"seeds\":[\"NovaSat\"],\"hops\":1,\"max_nodes\":60}",
+  "ok": false,
+  "resultHead": "Error: kg_subgraph: no graph entity matches any seed (NovaSat); try kg_schema to browse types or a more exact name"
+ },
+ {
+  "seq": 257,
+  "name": "cb_list",
+  "args": "{\"table\":\"customer\",\"filter\":[{\"field\":\"name\",\"op\":\"ilike\",\"value\":\"*NovaSat*\"}]}",
+  "ok": true,
+  "resultHead": "customer（共 1 行，返回 1 行）\n- {\"id\":\"cust_WkaTXnx4H9LkHPz8A12DFw\",\"readableId\":\"CUS000002\",\"name\":\"NovaSat Networks\",\"created"
+ },
+ {
+  "seq": 258,
+  "name": "cb_list",
+  "args": "{\"table\":\"salesOrder\",\"filter\":[{\"field\":\"customerId\",\"op\":\"in\",\"value\":[\"*\"]}],\"limit\":100}",
+  "ok": true,
+  "resultHead": "salesOrder（共 0 行，返回 0 行）\n没有匹配的行。"
+ },
+ {
+  "seq": 259,
+  "name": "kg_graph_query",
+  "args": "{\"cypher\":\"MATCH (n)-[r]-(m) WHERE toLower(coalesce(n.name, n.gid, '')) CONTAINS 'novasat' OR toLower(coalesce(m.name, m.gid, '')) CONTAINS ",
+  "ok": true,
+  "resultHead": "| n_gid | n_name | n_labels | rel | m_gid | m_name | m_labels |\n| --- | --- | --- | --- | --- | --- | --- |\n| lake.carbo"
+ },
+ {
+  "seq": 260,
+  "name": "lakehouse_schema",
+  "args": "{\"schema\":\"synced_carbon\",\"table\":\"salesOrder\"}",
+  "ok": true,
+  "resultHead": "| column | type |\n| --- | --- |\n| id | VARCHAR |\n| customerContactId | VARCHAR |\n| customerReference | VARCHAR |\n| assig"
+ },
+ {
+  "seq": 261,
+  "name": "lakehouse_schema",
+  "args": "{\"schema\":\"legacy_nocobase\",\"table\":\"so_orders\"}",
+  "ok": true,
+  "resultHead": "| column | type |\n| --- | --- |\n| id | INTEGER |\n| code | VARCHAR |\n| need_date | VARCHAR |\n| amount | INTEGER |\n| appro"
+ },
+ {
+  "seq": 262,
+  "name": "lakehouse_schema",
+  "args": "{\"schema\":\"legacy_nocobase\",\"table\":\"so_order_lines\"}",
+  "ok": true,
+  "resultHead": "| column | type |\n| --- | --- |\n| id | INTEGER |\n| order_id | INTEGER |\n| qty | INTEGER |\n| unit_price | DOUBLE |\n| qty_"
+ },
+ {
+  "seq": 263,
+  "name": "lakehouse_schema",
+  "args": "{\"schema\":\"legacy_nocobase\",\"table\":\"orders\"}",
+  "ok": true,
+  "resultHead": "| column | type |\n| --- | --- |\n| id | INTEGER |\n| orderNo | VARCHAR |\n| serviceId | VARCHAR |\n| serviceName | VARCHAR |"
+ },
+ {
+  "seq": 584,
+  "name": "cb_list",
+  "args": "{\"table\":\"salesOrder\",\"filter\":[{\"field\":\"customerId\",\"op\":\"eq\",\"value\":\"cust_WkaTXnx4H9LkHPz8A12DFw\"}],\"limit\":100}",
+  "ok": true,
+  "resultHead": "salesOrder（共 7 行，返回 7 行）\n- {\"id\":\"so_RYZvBKWuHFxEUafW5PG5cm\",\"salesOrderId\":\"SO000004\",\"status\":\"Confirmed\",\"customerId\""
+ },
+ {
+  "seq": 585,
+  "name": "cb_list",
+  "args": "{\"table\":\"shipment\",\"filter\":[{\"field\":\"customerId\",\"op\":\"eq\",\"value\":\"cust_WkaTXnx4H9LkHPz8A12DFw\"}],\"limit\":100}",
+  "ok": true,
+  "resultHead": "shipment（共 1 行，返回 1 行）\n- {\"id\":\"sh_HFqvqKxMbt8iBJv6zo5fu2\",\"shipmentId\":\"SHP000002\",\"status\":\"Posted\",\"customerId\":\"cust"
+ },
+ {
+  "seq": 586,
+  "name": "lakehouse_query",
+  "args": "{\"sql\":\"SELECT salesOrderId, status, orderDate, currencyCode, exchangeRate, customerId, customerLocationId, opportunityId, locationId FROM l",
+  "ok": true,
+  "resultHead": "| salesOrderId | status | orderDate | currencyCode | exchangeRate | customerId | customerLocationId | opportunityId | lo"
+ },
+ {
+  "seq": 587,
+  "name": "lakehouse_query",
+  "args": "{\"sql\":\"SELECT * FROM lake.legacy_nocobase.crm_customers WHERE name ILIKE '%NovaSat%' OR name ILIKE '%novasat%'\"}",
+  "ok": true,
+  "resultHead": "| id | name | industry | country | company_name | level | type | status |\n| --- | --- | --- | --- | --- | --- | --- | --"
+ },
+ {
+  "seq": 588,
+  "name": "kg_graph_query",
+  "args": "{\"cypher\":\"MATCH (so:SalesOrder) WHERE so.name IN ['SO000004','SO000008','SO000010','SO000011','SO000015','SO000019','SO000022'] OPTIONAL MA",
+  "ok": true,
+  "resultHead": "| so_name | rel | m_gid | m_name | m_labels |\n| --- | --- | --- | --- | --- |\n| SO000004 | orderedItem | lake.carbon:ite"
+ },
+ {
+  "seq": 867,
+  "name": "lakehouse_schema",
+  "args": "{\"schema\":\"synced_carbon\",\"table\":\"item\"}",
+  "ok": true,
+  "resultHead": "| column | type |\n| --- | --- |\n| id | VARCHAR |\n| active | BOOLEAN |\n| companyId | VARCHAR |\n| createdBy | VARCHAR |\n| "
+ },
+ {
+  "seq": 868,
+  "name": "lakehouse_schema",
+  "args": "{\"schema\":\"synced_carbon\",\"table\":\"job\"}",
+  "ok": true,
+  "resultHead": "| column | type |\n| --- | --- |\n| id | VARCHAR |\n| quantity | DOUBLE |\n| scrapQuantity | DOUBLE |\n| quantityComplete | D"
+ },
+ {
+  "seq": 869,
+  "name": "lakehouse_schema",
+  "args": "{\"schema\":\"legacy_nocobase\",\"table\":\"crm_invoices\"}",
+  "ok": true,
+  "resultHead": "| column | type |\n| --- | --- |\n| id | INTEGER |\n| invoice_no | VARCHAR |\n| amount | INTEGER |\n| issued_at | VARCHAR |\n|"
+ },
+ {
+  "seq": 870,
+  "name": "cb_get",
+  "args": "{\"table\":\"item\",\"id\":\"item_D155fZ5dzMoeJ5GLSJC72K\"}",
+  "ok": true,
+  "resultHead": "item: {\"id\":\"item_D155fZ5dzMoeJ5GLSJC72K\",\"readableId\":\"BUS-STR-001\",\"name\":\"Structural Frame Assembly\",\"description\":nu"
+ },
+ {
+  "seq": 871,
+  "name": "cb_get",
+  "args": "{\"table\":\"item\",\"id\":\"item_GjDBfRrvSfW9h3xzGQeQ47\"}",
+  "ok": true,
+  "resultHead": "item: {\"id\":\"item_GjDBfRrvSfW9h3xzGQeQ47\",\"readableId\":\"PROP-001\",\"name\":\"Propulsion Module\",\"description\":null,\"type\":\""
+ },
+ {
+  "seq": 872,
+  "name": "cb_get",
+  "args": "{\"table\":\"item\",\"id\":\"item_6rj58PK8NfS4G7YPHGbdSc\"}",
+  "ok": true,
+  "resultHead": "item: {\"id\":\"item_6rj58PK8NfS4G7YPHGbdSc\",\"readableId\":\"SAW-001\",\"name\":\"Solar Array Wing\",\"description\":null,\"type\":\"Pa"
+ },
+ {
+  "seq": 873,
+  "name": "cb_get",
+  "args": "{\"table\":\"item\",\"id\":\"item_8HiTuYqjaib8se7dECrWNA\"}",
+  "ok": true,
+  "resultHead": "item: {\"id\":\"item_8HiTuYqjaib8se7dECrWNA\",\"readableId\":\"TXRX-SBAND\",\"name\":\"S-Band Transponder 2W\",\"description\":null,\"t"
+ },
+ {
+  "seq": 874,
+  "name": "cb_get",
+  "args": "{\"table\":\"item\",\"id\":\"item_G6wJKGuhKxoYRFig69A9bL\"}",
+  "ok": true,
+  "resultHead": "item: {\"id\":\"item_G6wJKGuhKxoYRFig69A9bL\",\"readableId\":\"TANK-TI-4L\",\"name\":\"Titanium Propellant Tank 4L\",\"description\":n"
+ },
+ {
+  "seq": 875,
+  "name": "cb_get",
+  "args": "{\"table\":\"item\",\"id\":\"item_STbtVjUii9ZVX3bhR5x7Se\"}",
+  "ok": true,
+  "resultHead": "item: {\"id\":\"item_STbtVjUii9ZVX3bhR5x7Se\",\"readableId\":\"VLV-SOLENOID-LP\",\"name\":\"Solenoid Valve Low-Pressure\",\"descripti"
+ },
+ {
+  "seq": 876,
+  "name": "cb_get",
+  "args": "{\"table\":\"item\",\"id\":\"item_6cS8vM3NE7ghv6meYWWbDv\"}",
+  "ok": true,
+  "resultHead": "item: {\"id\":\"item_6cS8vM3NE7ghv6meYWWbDv\",\"readableId\":\"PCB-ADCS-R1\",\"name\":\"ADCS Electronics Board\",\"description\":null,"
+ },
+ {
+  "seq": 878,
+  "name": "cb_get",
+  "args": "{\"table\":\"item\",\"id\":\"item_Pq1nUxQSV8X2SkMeKgqNd3\"}",
+  "ok": true,
+  "resultHead": "item: {\"id\":\"item_Pq1nUxQSV8X2SkMeKgqNd3\",\"readableId\":\"ANT-PATCH-01\",\"name\":\"Patch Antenna S-Band\",\"description\":null,\""
+ },
+ {
+  "seq": 880,
+  "name": "cb_get",
+  "args": "{\"table\":\"item\",\"id\":\"item_TgYH5pELWh9og3oSu76AfY\"}",
+  "ok": true,
+  "resultHead": "item: {\"id\":\"item_TgYH5pELWh9og3oSu76AfY\",\"readableId\":\"PCB-EPS-R1\",\"name\":\"EPS Control PCB Assembly\",\"description\":null"
+ },
+ {
+  "seq": 881,
+  "name": "cb_list",
+  "args": "{\"table\":\"nonConformance\",\"limit\":50}",
+  "ok": true,
+  "resultHead": "nonConformance（共 5 行，返回 5 行）\n- {\"id\":\"nc_McsJqLk9HqYUnAbWP8dpXt\",\"nonConformanceId\":\"NCR000001\",\"name\":\"EPS wiring harne"
+ },
+ {
+  "seq": 882,
+  "name": "lakehouse_query",
+  "args": "{\"sql\":\"SELECT deal_id, customer_id, stage, amount, currency, created_at FROM lake.legacy_nocobase.crm_deals WHERE customer_id IN (SELECT id",
+  "ok": false,
+  "resultHead": "Error: the lakehouse engine operation failed: Error: Binder Error: Referenced column \"deal_id\" not found in FROM clause!"
+ },
+ {
+  "seq": 1176,
+  "name": "lakehouse_query",
+  "args": "{\"sql\":\"SELECT i.name AS item_name, i.readableId, i.unitOfMeasureCode, COUNT(*) AS job_count, SUM(j.productionQuantity) AS total_qty, SUM(j.",
+  "ok": true,
+  "resultHead": "| item_name | readableId | unitOfMeasureCode | job_count | total_qty | required_qty | scrap | completed | shipped | samp"
+ },
+ {
+  "seq": 1177,
+  "name": "lakehouse_query",
+  "args": "{\"sql\":\"SELECT salesOrderId, status, COUNT(*) AS job_count, SUM(quantity) AS required_qty, SUM(productionQuantity) AS planned_qty, SUM(quant",
+  "ok": true,
+  "resultHead": "| salesOrderId | status | job_count | required_qty | planned_qty | completed_qty | scrap_qty | shipped_qty |\n| --- | ---"
+ },
+ {
+  "seq": 1178,
+  "name": "kg_graph_query",
+  "args": "{\"cypher\":\"MATCH (so:SalesOrder)-[:orderedItem]->(i:Item) WHERE so.name IN ['SO000004','SO000008','SO000010','SO000011','SO000015','SO000019",
+  "ok": true,
+  "resultHead": "| item | rel | related | labels |\n| --- | --- | --- | --- |\n| Structural Frame Assembly | NULL | NULL | NULL |\n| Propuls"
+ },
+ {
+  "seq": 2589,
+  "name": "kb_search",
+  "args": "{\"query\":\"食品原料 入库验收 合格证明 查验 检验记录 HACCP 关键控制点\",\"doc_kind\":\"regulation\",\"max_results\":6}",
+  "ok": true,
+  "resultHead": "(hybrid mode via minimax:embo-01)\n\n[1] food-compliance/gb14881-excerpt.md — regulation — chunk 0\n  - 文档性质：国家标准要点转述（供知识库检"
+ },
+ {
+  "seq": 2590,
+  "name": "kb_search",
+  "args": "{\"query\":\"原料验收 感官检验 微生物 农残 检测报告 合格证明 不合格处置\",\"doc_kind\":\"regulation\",\"max_results\":6}",
+  "ok": false,
+  "resultHead": "Error: weknora vector search failed: POST /knowledge-bases/5660c6c1-6900-4cd6-90d9-9430e5c9fc31/hybrid-search returned H"
+ },
+ {
+  "seq": 2591,
+  "name": "kb_search",
+  "args": "{\"query\":\"食品添加剂 进货验收 索证索票 供货商资质 台账 GB 2760\",\"doc_kind\":\"regulation\",\"max_results\":6}",
+  "ok": false,
+  "resultHead": "Error: weknora vector search failed: POST /knowledge-bases/5660c6c1-6900-4cd6-90d9-9430e5c9fc31/hybrid-search returned H"
+ },
+ {
+  "seq": 3791,
+  "name": "lakehouse_schema",
+  "args": "{\"schema\":\"synced_carbon\",\"table\":\"customer\"}",
+  "ok": true,
+  "resultHead": "| column | type |\n| --- | --- |\n| id | VARCHAR |\n| createdAt | TIMESTAMP WITH TIME ZONE |\n| createdBy | VARCHAR |\n| upda"
+ },
+ {
+  "seq": 3792,
+  "name": "lakehouse_schema",
+  "args": "{\"schema\":\"legacy_nocobase\",\"table\":\"crm_customers\"}",
+  "ok": true,
+  "resultHead": "| column | type |\n| --- | --- |\n| id | INTEGER |\n| name | VARCHAR |\n| industry | VARCHAR |\n| country | VARCHAR |\n| compa"
+ },
+ {
+  "seq": 3793,
+  "name": "lakehouse_schema",
+  "args": "{\"schema\":\"legacy_nocobase\",\"table\":\"crm_deals\"}",
+  "ok": true,
+  "resultHead": "| column | type |\n| --- | --- |\n| id | INTEGER |\n| name | VARCHAR |\n| deadline | VARCHAR |\n| amount | INTEGER |\n| owner "
+ },
+ {
+  "seq": 3794,
+  "name": "lakehouse_schema",
+  "args": "{\"schema\":\"legacy_nocobase\",\"table\":\"crm_quotes\"}",
+  "ok": true,
+  "resultHead": "| column | type |\n| --- | --- |\n| id | INTEGER |\n| quote_no | VARCHAR |\n| valid_until | VARCHAR |\n| total_amount | INTEG"
+ },
+ {
+  "seq": 3795,
+  "name": "lakehouse_schema",
+  "args": "{\"schema\":\"legacy_nocobase\",\"table\":\"crm_activities\"}",
+  "ok": true,
+  "resultHead": "| column | type |\n| --- | --- |\n| id | INTEGER |\n| type | VARCHAR |\n| title | VARCHAR |\n| due_at | VARCHAR |\n| status | "
+ },
+ {
+  "seq": 3796,
+  "name": "lakehouse_schema",
+  "args": "{\"schema\":\"legacy_nocobase\",\"table\":\"hub_sales_deals\"}",
+  "ok": true,
+  "resultHead": "| column | type |\n| --- | --- |\n| id | INTEGER |\n| createdAt | VARCHAR |\n| title | VARCHAR |\n| stage | VARCHAR |\n| amoun"
+ },
+ {
+  "seq": 3797,
+  "name": "lakehouse_schema",
+  "args": "{\"schema\":\"legacy_nocobase\",\"table\":\"hub_sales_accounts\"}",
+  "ok": true,
+  "resultHead": "| column | type |\n| --- | --- |\n| id | INTEGER |\n| createdAt | VARCHAR |\n| name | VARCHAR |\n| industry | VARCHAR |\n| web"
+ },
+ {
+  "seq": 4219,
+  "name": "lakehouse_query",
+  "args": "{\"sql\":\"SELECT id, name, industry, country, level, type, status FROM lake.legacy_nocobase.crm_customers ORDER BY id\"}",
+  "ok": true,
+  "resultHead": "| id | name | industry | country | level | type | status |\n| --- | --- | --- | --- | --- | --- | --- |\n| 1 | 漯河宏发食品有限公司 "
+ },
+ {
+  "seq": 4220,
+  "name": "lakehouse_query",
+  "args": "{\"sql\":\"SELECT id, code, need_date, amount, customer_id, doc_status, shipping_status FROM lake.legacy_nocobase.so_orders ORDER BY id\"}",
+  "ok": true,
+  "resultHead": "| id | code | need_date | amount | customer_id | doc_status | shipping_status |\n| --- | --- | --- | --- | --- | --- | --"
+ },
+ {
+  "seq": 4221,
+  "name": "lakehouse_query",
+  "args": "{\"sql\":\"SELECT i.name AS item_name, i.readableId, i.unitOfMeasureCode, SUM(j.quantity) AS total_required, SUM(j.productionQuantity) AS total",
+  "ok": true,
+  "resultHead": "| item_name | readableId | unitOfMeasureCode | total_required | total_planned | total_completed | total_scrap | total_sh"
+ },
+ {
+  "seq": 4222,
+  "name": "lakehouse_query",
+  "args": "{\"sql\":\"SELECT so.salesOrderId, so.status AS order_status, so.orderDate, so.currencyCode, COUNT(DISTINCT j.itemId) AS item_kinds, COUNT(j.id",
+  "ok": true,
+  "resultHead": "| salesOrderId | order_status | orderDate | currencyCode | item_kinds | job_count | total_required | total_planned | tot"
+ },
+ {
+  "seq": 4223,
+  "name": "lakehouse_query",
+  "args": "{\"sql\":\"SELECT DATE_TRUNC('month', so.orderDate) AS order_month, COUNT(DISTINCT so.id) AS order_count, SUM(j.quantity) AS total_required, SU",
+  "ok": true,
+  "resultHead": "| order_month | order_count | total_required | total_completed | total_shipped |\n| --- | --- | --- | --- | --- |\n| 2025-"
+ },
+ {
+  "seq": 5221,
+  "name": "kg_graph_query",
+  "args": "{\"cypher\":\"MATCH (n:Customer {name: 'NovaSat Networks'})-[r]-(m) RETURN n.name AS customer_name, n.gid AS n_gid, type(r) AS relationship, m.",
+  "ok": true,
+  "resultHead": "| customer_name | n_gid | relationship | neighbor_gid | neighbor_name | neighbor_labels |\n| --- | --- | --- | --- | --- "
+ },
+ {
+  "seq": 5222,
+  "name": "kg_subgraph",
+  "args": "{\"seeds\":[\"NovaSat Networks\"],\"hops\":1,\"max_nodes\":100}",
+  "ok": false,
+  "resultHead": "Error: kg_subgraph: no graph entity matches any seed (NovaSat Networks); try kg_schema to browse types or a more exact n"
+ }
+]
