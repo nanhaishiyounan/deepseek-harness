@@ -14,7 +14,7 @@ import { DatabaseSync } from 'node:sqlite'
 import { Context } from '@deepseek-ai/cordis'
 import LlmRuntime from '@deepseek-ai/dsh-llm'
 import * as LlmMiniMax from '@deepseek-ai/dsh-llm-minimax'
-import KbGraphRuntime from '@deepseek-ai/dsh-kb-graph'
+import KbGraphRuntime, { ONTOLOGY_VERSION } from '@deepseek-ai/dsh-kb-graph'
 import * as KbGraphSqlite from '@deepseek-ai/dsh-kb-graph-sqlite'
 import ConnectorRuntime from '@deepseek-ai/dsh-connector'
 import * as ConnectorFile from '@deepseek-ai/dsh-connector-file'
@@ -92,7 +92,7 @@ try {
   check('full build ingested every collection', first.collections.length === 5 && first.collections.every(entry => entry.rows > 0))
 
   // ①b Versioned ontology and the mappings readout.
-  check('ontologyVersion is 1.1.0', graph.ontologyVersion() === '1.1.0', graph.ontologyVersion())
+  check(`ontologyVersion is ${ONTOLOGY_VERSION}`, graph.ontologyVersion() === ONTOLOGY_VERSION, graph.ontologyVersion())
   const readout = await build.mappings()
   check('mappings readout carries 5 collections', readout.collections.length === 5 && readout.version === 1, `${String(readout.collections.length)} collections, v${String(readout.version)}`)
 

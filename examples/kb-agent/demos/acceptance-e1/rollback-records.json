@@ -5,7 +5,7 @@
     "icon": "ContainerOutlined",
     "sort": 1,
     "schemaUid": "dspbkroytnp",
-    "destroyedId": 386401650999296
+    "destroyedId": 391875309010944
   },
   {
     "title": "里程碑",
@@ -13,7 +13,7 @@
     "icon": "FlagOutlined",
     "sort": 6,
     "schemaUid": "rbm53gqk979",
-    "destroyedId": 386401650999298
+    "destroyedId": 391875309010946
   },
   {
     "title": "任务列表",
@@ -21,6 +21,6 @@
     "icon": "OrderedListOutlined",
     "sort": 3,
     "schemaUid": "o3n7a0tcssz",
-    "destroyedId": 386401650999297
+    "destroyedId": 391875309010945
   }
 ]

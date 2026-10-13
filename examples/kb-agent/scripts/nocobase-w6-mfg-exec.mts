@@ -260,9 +260,7 @@ async function ensureMfgColumns(token: string): Promise<void> {
  * batch note). Idempotent by fieldPath.
  */
 async function ensureW2b6PageIncrements(token: string): Promise<void> {
-  const catalog = await call(token, 'GET', '/api/flowModels:list?pageSize=6000') as { data?: Array<Record<string, any>> }
-  const rows = catalog?.data ?? []
-  if (rows.length === 6000) throw new Error('flowModels:list is truncated at 6000; raise the page size before the w2b6 increments')
+  const rows = await listFlowModels(token, 'the w2b6 increments')
   const tables = rows.filter(row => row.use === 'TableBlockModel'
     && row.stepParams?.resourceSettings?.init?.collectionName === 'mfg_orders')
   let added = 0
@@ -320,8 +318,7 @@ async function ensureW2b6PageIncrements(token: string): Promise<void> {
  * with them; data rows and movements stay untouched.
  */
 async function rollbackW2b6(token: string): Promise<void> {
-  const catalog = await call(token, 'GET', '/api/flowModels:list?pageSize=6000') as { data?: Array<Record<string, any>> }
-  const rows = catalog?.data ?? []
+  const rows = await listFlowModels(token, 'the w2b6 rollback')
   let destroyed = 0
   for (const row of rows.filter(item => String(item.uid ?? '').startsWith(W2B6_PREFIX))) {
     await call(token, 'POST', `/api/flowModels:destroy?filterByTk=${encodeURIComponent(String(row.uid))}`)
